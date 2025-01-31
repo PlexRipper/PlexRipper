@@ -34,8 +34,8 @@ public class GetPlexServerByIdEndpoint : BaseEndpoint<GetPlexServerByIdEndpointR
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexServerDTO>))
-                .Produces(StatusCodes.Status404NotFound, typeof(ResultDTO))
-                .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
+                .Produces(StatusCodes.Status404NotFound, typeof(BaseResultDTO))
+                .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))
         );
     }
 

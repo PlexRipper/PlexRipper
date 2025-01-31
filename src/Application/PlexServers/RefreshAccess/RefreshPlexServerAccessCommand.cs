@@ -10,7 +10,7 @@ namespace PlexRipper.Application;
 /// Retrieve the latest accessible <see cref="PlexServer">PlexServers</see> for this <see cref="PlexAccount"/> from the PlexAPI and stores it in the Database.
 /// </summary>
 /// <param name="PlexAccountId">The id of the <see cref="PlexAccount"/> to check.</param>
-public record RefreshPlexServerAccessCommand(int PlexAccountId) : IRequest<Result>;
+public record RefreshPlexServerAccessCommand(int PlexAccountId) : IRequest<Result<PlexServerAccessRapport>>;
 
 public class RefreshPlexServerAccessCommandValidator : AbstractValidator<RefreshPlexServerAccessCommand>
 {
@@ -20,7 +20,8 @@ public class RefreshPlexServerAccessCommandValidator : AbstractValidator<Refresh
     }
 }
 
-public class RefreshPlexServerAccessCommandHandler : IRequestHandler<RefreshPlexServerAccessCommand, Result>
+public class RefreshPlexServerAccessCommandHandler
+    : IRequestHandler<RefreshPlexServerAccessCommand, Result<PlexServerAccessRapport>>
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
@@ -43,7 +44,10 @@ public class RefreshPlexServerAccessCommandHandler : IRequestHandler<RefreshPlex
         _signalRService = signalRService;
     }
 
-    public async Task<Result> Handle(RefreshPlexServerAccessCommand command, CancellationToken cancellationToken)
+    public async Task<Result<PlexServerAccessRapport>> Handle(
+        RefreshPlexServerAccessCommand command,
+        CancellationToken cancellationToken
+    )
     {
         var plexAccountId = command.PlexAccountId;
 
@@ -104,6 +108,6 @@ public class RefreshPlexServerAccessCommandHandler : IRequestHandler<RefreshPlex
             plexAccountDisplayName
         );
 
-        return Result.Ok();
+        return plexAccountTokensResult;
     }
 }

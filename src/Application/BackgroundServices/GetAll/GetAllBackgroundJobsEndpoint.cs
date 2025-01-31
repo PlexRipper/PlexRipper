@@ -20,7 +20,7 @@ public class GetAllBackgroundJobsEndpoint : BaseEndpointWithoutRequest<List<JobS
         Get(EndpointPath);
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<JobStatusUpdateDTO>>))
-                .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
+                .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))
         );
     }
 

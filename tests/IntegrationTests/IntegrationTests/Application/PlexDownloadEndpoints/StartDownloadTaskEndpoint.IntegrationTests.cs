@@ -55,9 +55,11 @@ public class StartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
         var client = container.GetApiClient();
         await client.SignIn();
 
-        var testResult = await client.GETAsync<StartDownloadTaskEndpoint, StartDownloadTaskEndpointRequest, ResultDTO>(
-            new StartDownloadTaskEndpointRequest(downloadTask.Id)
-        );
+        var testResult = await client.GETAsync<
+            StartDownloadTaskEndpoint,
+            StartDownloadTaskEndpointRequest,
+            BaseResultDTO
+        >(new StartDownloadTaskEndpointRequest(downloadTask.Id));
         testResult.Response.IsSuccessStatusCode.ShouldBeTrue();
 
         await container.SchedulerService.AwaitScheduler();

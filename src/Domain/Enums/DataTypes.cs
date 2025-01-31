@@ -1,10 +1,12 @@
 ﻿using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
 namespace PlexRipper.Domain;
 
 /// <summary>
 /// Used to define the type of data being sent.
 /// </summary>
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum DataType
 {
     [EnumMember(Value = nameof(PlexAccount))]

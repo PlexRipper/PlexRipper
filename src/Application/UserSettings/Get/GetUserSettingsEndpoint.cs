@@ -22,7 +22,7 @@ public class GetUserSettingsEndpoint : BaseEndpointWithoutRequest<SettingsModelD
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<SettingsModelDTO>))
-                .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
+                .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))
         );
     }
 

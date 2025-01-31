@@ -43,8 +43,7 @@ export const useAccountStore = defineStore('AccountStore', () => {
 		},
 		reSyncAccount(accountId: number) {
 			return plexAccountApi.refreshPlexAccountAccessEndpoint(accountId).pipe(
-				switchMap(() => actions.refreshAccounts()),
-				switchMap(() => serverStore.refreshPlexServers()),
+				tap(() =>	forkJoin([actions.refreshAccounts(), serverStore.refreshPlexServers(), libraryStore.refreshLibraries()])),
 			);
 		},
 		/**

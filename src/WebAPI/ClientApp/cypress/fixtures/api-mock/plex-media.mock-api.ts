@@ -1,7 +1,6 @@
 import type { BasePageSetupResult } from '@fixtures';
 import type { MockConfig } from '@mock';
 import {
-	generatePlexLibrariesFromPlexServers,
 	generatePlexMedia,
 	generatePlexMediaSlims,
 	generateResultDTO,
@@ -15,8 +14,6 @@ export function setupMockPlexMediaEndpoints(
 	this: BasePageSetupResult,
 	config: MockConfig,
 ): BasePageSetupResult {
-	this.plexLibraries = generatePlexLibrariesFromPlexServers({ plexServers: this.plexServers, config });
-
 	// Generate library media page data
 	for (const library of this.plexLibraries) {
 		const mediaList = generatePlexMediaSlims({

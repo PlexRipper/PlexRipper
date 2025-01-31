@@ -14,8 +14,7 @@
 								v-for="{ plexServer, downloads } in downloadStore.getServersWithDownloads"
 								:key="plexServer.id"
 								:download-rows="downloads"
-								:plex-server="plexServer"
-								@action="commandSwitch($event)" />
+								:plex-server="plexServer" />
 						</q-list>
 					</QCol>
 				</QRow>
@@ -34,20 +33,7 @@
 </template>
 
 <script setup lang="ts">
-import type { DownloadProgressDTO } from '@dto';
-import { useDownloadStore, useDialogStore } from '@store';
+import { useDownloadStore } from '@store';
 
-const dialogStore = useDialogStore();
 const downloadStore = useDownloadStore();
-
-function commandSwitch({ action, item }: { action: string; item: DownloadProgressDTO }) {
-	const ids: string[] = [item.id];
-
-	if (action === 'details') {
-		dialogStore.openDownloadTaskDetailsDialog(item.id);
-		return;
-	}
-
-	downloadStore.executeDownloadCommand(action, ids);
-}
 </script>

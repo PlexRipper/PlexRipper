@@ -310,6 +310,22 @@
                 "symbol": "Zawiera znak specjalny",
                 "length": "Dłuższy niż {count} znaków"
             }
+        },
+        "q-connection-icon": {
+            "tooltip": {
+                "local-connection": "Połączenie lokalne",
+                "public-connection": "Połączenie publiczne",
+                "plex-connection": "Połączenie przekaźnika Plex"
+            }
+        },
+        "refresh-account-access-dialog": {
+            "access": {
+                "granted": "Dostęp został niedawno przyznany!",
+                "revoked": "Dostęp został utracony!",
+                "updated": "Dostęp został zaktualizowany!",
+                "unknown": "Stan dostępu jest nieznany, ponieważ nie można nawiązać połączenia z serwerem Plex"
+            },
+            "offline-server-message": "Nie można pobrać listy dostępu do biblioteki z tego serwera, ponieważ jest on offline. Spróbuj ponownie, gdy serwer będzie online."
         }
     },
     "confirmation": {
@@ -373,10 +389,6 @@
         "name-version": "PlexRipper - V{version}",
         "units": {
             "per-second": "/s"
-        },
-        "tooltip": {
-            "local-connection": "Połączenie lokalne",
-            "public-connection": "Połączenie publiczne"
         },
         "error": {
             "unknown": "\"Nieznane\"",
@@ -756,7 +768,8 @@
                     "directory-browser": "Okno przeglądarki katalogów",
                     "verification-dialog": "Dialog weryfikacji 2FA",
                     "discord-invite": "Zaproszenie na Discord",
-                    "sync-server-media-dialog": "Okno dialogowe Synchronizuj serwer multimediów"
+                    "sync-server-media-dialog": "Okno dialogowe Synchronizuj serwer multimediów",
+                    "refresh-plex-account-access-dialog": "Odśwież okno dialogowe dostępu do konta Plex"
                 },
                 "header": "Moduły dialogowe debugowania",
                 "account-dialog-header": "Okno dialogowe konta",

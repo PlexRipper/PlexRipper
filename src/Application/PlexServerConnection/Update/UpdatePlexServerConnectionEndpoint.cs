@@ -55,9 +55,9 @@ public class UpdatePlexServerConnectionEndpoint
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexServerConnectionDTO>))
-                .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))
-                .Produces(StatusCodes.Status404NotFound, typeof(ResultDTO))
-                .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
+                .Produces(StatusCodes.Status400BadRequest, typeof(BaseResultDTO))
+                .Produces(StatusCodes.Status404NotFound, typeof(BaseResultDTO))
+                .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))
         );
     }
 
@@ -69,7 +69,7 @@ public class UpdatePlexServerConnectionEndpoint
             Protocol = req.Protocol.ToLower(),
             Address = req.Address,
             Port = req.Port,
-            Uri = req.Url,
+            Url = req.Url,
             Local = req.Address.IsLocalUrl(),
             Relay = req.Address.Contains("plex.direct"),
             IPv4 = req.Address.IsIpv4(),

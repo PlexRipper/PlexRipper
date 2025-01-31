@@ -1,3 +1,4 @@
+using Application.Contracts;
 using Data.Contracts;
 using FluentValidation;
 using Logging.Interface;
@@ -7,7 +8,7 @@ using PlexApi.Contracts;
 namespace PlexRipper.Application;
 
 public record AddOrUpdatePlexAccountServersCommand(int PlexAccountId, List<ServerAccessTokenDTO> ServerAccessTokens)
-    : IRequest<Result>;
+    : IRequest<Result<PlexServerAccessRapport>>;
 
 public class AddOrUpdatePlexAccountServersCommandValidator : AbstractValidator<AddOrUpdatePlexAccountServersCommand>
 {
@@ -17,7 +18,8 @@ public class AddOrUpdatePlexAccountServersCommandValidator : AbstractValidator<A
     }
 }
 
-public class AddOrUpdatePlexAccountServersCommandHandler : IRequestHandler<AddOrUpdatePlexAccountServersCommand, Result>
+public class AddOrUpdatePlexAccountServersCommandHandler
+    : IRequestHandler<AddOrUpdatePlexAccountServersCommand, Result<PlexServerAccessRapport>>
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
@@ -28,7 +30,10 @@ public class AddOrUpdatePlexAccountServersCommandHandler : IRequestHandler<AddOr
         _dbContext = dbContext;
     }
 
-    public async Task<Result> Handle(AddOrUpdatePlexAccountServersCommand command, CancellationToken cancellationToken)
+    public async Task<Result<PlexServerAccessRapport>> Handle(
+        AddOrUpdatePlexAccountServersCommand command,
+        CancellationToken cancellationToken
+    )
     {
         var plexAccountId = command.PlexAccountId;
         var serverAccessTokens = command.ServerAccessTokens;
@@ -48,6 +53,8 @@ public class AddOrUpdatePlexAccountServersCommandHandler : IRequestHandler<AddOr
         var plexAccount = await _dbContext.PlexAccounts.GetAsync(plexAccountId, cancellationToken);
         if (plexAccount is null)
             return ResultExtensions.EntityNotFound(nameof(PlexAccount), plexAccountId);
+
+        var rapport = new PlexServerAccessRapport(plexAccount.DisplayName);
 
         // Add or update the PlexAccount and PlexServer relationships
         _log.InformationLine("Adding or updating the PlexAccount association with PlexServers now");
@@ -98,6 +105,8 @@ public class AddOrUpdatePlexAccountServersCommandHandler : IRequestHandler<AddOr
                         IsServerOwned = serverAccessToken.IsServerOwned,
                     }
                 );
+
+                rapport.AddGranted(plexServer.Id, plexServer.Name);
             }
             else
             {
@@ -110,6 +119,8 @@ public class AddOrUpdatePlexAccountServersCommandHandler : IRequestHandler<AddOr
                 plexAccountServer.AuthToken = serverAccessToken.AccessToken;
                 plexAccountServer.AuthTokenCreationDate = DateTime.UtcNow;
                 plexAccountServer.IsServerOwned = serverAccessToken.IsServerOwned;
+
+                rapport.AddUpdated(plexServer.Id, plexServer.Name);
             }
         }
 
@@ -144,6 +155,12 @@ public class AddOrUpdatePlexAccountServersCommandHandler : IRequestHandler<AddOr
             await _dbContext
                 .PlexAccountServers.Where(x => removalIds.Contains(x.PlexServerId) && x.PlexAccountId == plexAccountId)
                 .ExecuteDeleteAsync(cancellationToken);
+
+            foreach (var plexServerId in removalIds)
+            {
+                var plexServerName = await _dbContext.GetPlexServerNameById(plexServerId, CancellationToken.None);
+                rapport.AddRevoked(plexServerId, plexServerName);
+            }
         }
         else
         {
@@ -153,6 +170,6 @@ public class AddOrUpdatePlexAccountServersCommandHandler : IRequestHandler<AddOr
             );
         }
 
-        return Result.Ok();
+        return Result.Ok(rapport);
     }
 }

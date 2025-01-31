@@ -6,7 +6,7 @@ import {
 	generatePlexAccount,
 	generatePlexLibrariesFromPlexServers,
 	generatePlexServers,
-	generateResultDTO,
+	generateResultDTO, Seed,
 } from '@mock';
 import { useAccountStore, useServerStore } from '@store';
 
@@ -29,8 +29,10 @@ describe('AccountService.createPlexAccount()', () => {
 			plexServerCount: 3,
 			plexMovieLibraryCount: 3,
 		};
+		const seed = new Seed(config.seed!);
+
 		const plexServers = generatePlexServers({ config });
-		const plexLibraries = generatePlexLibrariesFromPlexServers({ plexServers, config });
+		const plexLibraries = generatePlexLibrariesFromPlexServers({ seed, plexServers, config });
 		const plexAccount = generatePlexAccount({ id: 1, plexServers, plexLibraries, config });
 
 		mock.onGet(PlexServerPaths.getAllPlexServersEndpoint())

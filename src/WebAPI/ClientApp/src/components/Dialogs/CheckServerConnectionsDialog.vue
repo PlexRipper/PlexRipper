@@ -37,7 +37,7 @@
 										class="q-mr-sm" />
 									<QConnectionIcon
 										v-else
-										:local="node?.local ?? false" />
+										:type="node.connectionType" />
 									<!-- Plex Server Connection Url	-->
 									<span
 										:class="[
@@ -118,13 +118,14 @@
 <script setup lang="ts">
 import { useSubscription } from '@vueuse/rxjs';
 import { get, set } from '@vueuse/core';
-import { JobStatus, type ServerConnectionCheckStatusProgressDTO } from '@dto';
+import { JobStatus } from '@dto';
+import type { ServerConnectionCheckStatusProgressDTO, PlexConnectionTypes } from '@dto';
 import { DialogType } from '@enums';
 import { clamp } from 'lodash-es';
 import {
 	useBackgroundJobsStore,
-	useI18n,
 	useDialogStore,
+	useI18n,
 	useServerConnectionStore,
 	useServerStore,
 	useSignalrStore,
@@ -190,6 +191,7 @@ const plexServerNodes = computed((): IPlexServerNode[] => {
 				completed: progress.completed,
 				connectionSuccessful: progress.connectionSuccessful,
 				progress,
+				connectionType: connection.type,
 				children: [],
 			};
 		});
@@ -280,6 +282,7 @@ interface IPlexServerNode {
 	progress?: ServerConnectionCheckStatusProgressDTO;
 	noConnections?: boolean;
 	local?: boolean;
+	connectionType?: PlexConnectionTypes;
 	children: IPlexServerNode[];
 }
 </script>

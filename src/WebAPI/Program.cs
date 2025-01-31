@@ -78,6 +78,8 @@ public class Program
     {
         _log.FatalLine("PlexRipper failed to start!");
 
+        result.LogFatal();
+
         System.Environment.Exit(1);
     }
 }

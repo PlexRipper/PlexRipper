@@ -14,15 +14,15 @@
 					:label="button.name"
 					:disabled="button.disableOnNoSelected && !downloadStore.hasSelected"
 					:width="verticalButtonWidth"
-					@click="downloadStore.executeBatchDownloadCommand(button.value)" />
+					@click="onDownloadAction(button.value)" />
 			</QCol>
 		</QRow>
 	</q-toolbar>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
 import { useDownloadStore } from '@store';
+import { DownloadActions } from '@dto';
 
 const downloadStore = useDownloadStore();
 
@@ -31,7 +31,7 @@ const verticalButtonWidth = ref(120);
 const buttons = computed<
 	{
 		name: string;
-		value: string;
+		value: DownloadActions;
 		icon: string;
 		disableOnNoSelected: boolean;
 	}[]
@@ -39,7 +39,7 @@ const buttons = computed<
 	return [
 		{
 			name: 'Clear Completed',
-			value: 'clear',
+			value: DownloadActions.Clear,
 			icon: 'mdi-notification-clear-all',
 			disableOnNoSelected: true,
 		},
@@ -69,12 +69,16 @@ const buttons = computed<
 		// },
 		{
 			name: 'Delete',
-			value: 'delete',
+			value: DownloadActions.Delete,
 			icon: 'mdi-delete',
 			disableOnNoSelected: true,
 		},
 	];
 });
+
+function onDownloadAction(action: DownloadActions) {
+	useSubscription(downloadStore.executeBatchDownloadCommand(action).subscribe());
+}
 </script>
 
 <style lang="scss">

@@ -1,6 +1,6 @@
 import { randIp, randPort } from '@ngneat/falso';
 import { times } from 'lodash-es';
-import type { PlexServerConnectionDTO, PlexServerDTO, PlexServerStatusDTO } from '@dto';
+import { PlexConnectionTypes, type PlexServerConnectionDTO, type PlexServerDTO, type PlexServerStatusDTO } from '@dto';
 import { checkConfig, incrementSeed, type MockConfig } from '~/mock-data';
 
 let plexServerConnectionIdIndex = 1;
@@ -25,16 +25,15 @@ export function generatePlexServerConnection({
 		address: host,
 		port,
 		url: `${scheme}://${host}:${port}`,
-		uri: `${scheme}://${host}:${port}`,
 		isPlexTvConnection: false,
 		iPv4: true,
 		iPv6: false,
 		local: false,
 		isCustom: false,
 		relay: false,
-		serverStatusList: [],
 		latestConnectionStatus: {} as PlexServerStatusDTO,
 		plexServerId,
+		type: PlexConnectionTypes.Public,
 		...partialData,
 	};
 }

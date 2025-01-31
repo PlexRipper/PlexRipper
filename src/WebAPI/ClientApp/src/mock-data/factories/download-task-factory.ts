@@ -59,7 +59,6 @@ export function generateDownloadTask({
 		mediaType: Convert.toPlexMediaType(type),
 		status: DownloadStatus.Queued,
 		timeRemaining: 0,
-		actions: ['details'],
 		destinationDirectory: randDirectoryPath(),
 		downloadDirectory: randDirectoryPath(),
 		downloadTaskType: type,

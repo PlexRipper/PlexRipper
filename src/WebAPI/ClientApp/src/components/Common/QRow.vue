@@ -17,6 +17,7 @@ interface QRowProps {
 	reverse?: boolean;
 	column?: boolean;
 	fullHeight?: boolean;
+	fullWidth?: boolean;
 }
 
 const props = withDefaults(defineProps<QRowProps>(), {
@@ -27,10 +28,11 @@ const props = withDefaults(defineProps<QRowProps>(), {
 	noWrap: false,
 	reverse: false,
 	column: false,
+	fullWidth: true,
 });
 
 const classes = computed(() => {
-	const classList: string[] = ['row full-width'];
+	const classList: string[] = ['row'];
 
 	if (props.column) {
 		classList.push('column');
@@ -60,6 +62,10 @@ const classes = computed(() => {
 
 	if (props.fullHeight) {
 		classList.push('full-height');
+	}
+
+	if (props.fullWidth) {
+		classList.push('full-width');
 	}
 
 	return classList;

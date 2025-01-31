@@ -1,6 +1,6 @@
 <template>
 	<q-list
-		v-if="settingsStore.debugMode"
+		v-if="settingsStore.debugMode || forceShow"
 		bordered
 		class="rounded-borders">
 		<q-expansion-item
@@ -30,11 +30,13 @@ withDefaults(
 		title?: string;
 		height?: number;
 		expanded?: boolean;
+		forceShow?: boolean;
 	}>(),
 	{
 		title: 'Print',
 		height: 500,
 		expanded: false,
+		forceShow: false,
 	},
 );
 </script>

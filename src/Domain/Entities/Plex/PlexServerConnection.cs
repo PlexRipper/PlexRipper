@@ -20,11 +20,14 @@ public class PlexServerConnection : BaseEntity
     public required int Port { get; init; }
 
     [Column(Order = 4)]
-    public required string Uri { get; init; }
+    public required string Url { get; init; }
 
     [Column(Order = 5)]
     public required bool Local { get; init; }
 
+    /// <summary>
+    /// Gets whether this connection is relayed through Plex servers?
+    /// </summary>
     [Column(Order = 6)]
     public required bool Relay { get; init; }
 
@@ -55,32 +58,27 @@ public class PlexServerConnection : BaseEntity
     #region Helpers
 
     [NotMapped]
-    public string Url
-    {
-        get
-        {
-            var urlBuilder = new UriBuilder(Protocol, Address) { Port = Port };
-            return urlBuilder.ToString().TrimEnd('/');
-        }
-    }
-
-    [NotMapped]
     public PlexServerStatus? LatestConnectionStatus => PlexServerStatus.FirstOrDefault();
 
     [NotMapped]
     public bool IsOnline => LatestConnectionStatus?.IsSuccessful ?? false;
 
     [NotMapped]
-    public bool IsPlexTvConnection => Uri.Contains(".plex.direct");
-
-    public string GetThumbUrl(string thumbPath)
-    {
-        var uri = new Uri(Url + thumbPath);
-        return $"{uri.Scheme}://{uri.Host}:{uri.Port}/photo/:/transcode?url={uri.AbsolutePath}";
-    }
+    public bool IsPlexTvConnection => Url.Contains(".plex.direct");
 
     public string GetDownloadUrl(string fileLocationUrl, string token) =>
         $"{Url}{fileLocationUrl}?X-Plex-Token={token}";
+
+    public PlexConnectionTypes Type
+    {
+        get
+        {
+            if (Local)
+                return PlexConnectionTypes.Local;
+
+            return IsPlexTvConnection ? PlexConnectionTypes.PlexRelay : PlexConnectionTypes.Public;
+        }
+    }
 
     #endregion
 
@@ -95,7 +93,7 @@ public class PlexServerConnection : BaseEntity
     #region Equality
 
     /// <inheritdoc/>
-    public override int GetHashCode() => HashCode.Combine(Protocol, Address, Port, Uri, Local, Relay, IPv4, IPv6);
+    public override int GetHashCode() => HashCode.Combine(Protocol, Address, Port, Url, Local, Relay, IPv4, IPv6);
 
     /// <inheritdoc/>
     public override bool Equals(object? obj)
@@ -113,7 +111,7 @@ public class PlexServerConnection : BaseEntity
         Protocol == other.Protocol
         && Address == other.Address
         && Port == other.Port
-        && Uri == other.Uri
+        && Url == other.Url
         && Local == other.Local
         && Relay == other.Relay
         && IPv6 == other.IPv6;

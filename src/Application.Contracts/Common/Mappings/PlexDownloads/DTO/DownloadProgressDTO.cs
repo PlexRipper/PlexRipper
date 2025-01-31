@@ -28,7 +28,5 @@ public record DownloadProgressDTO
 
     public required long TimeRemaining { get; set; }
 
-    public required List<string> Actions { get; set; }
-
     public required List<DownloadProgressDTO> Children { get; set; }
 }

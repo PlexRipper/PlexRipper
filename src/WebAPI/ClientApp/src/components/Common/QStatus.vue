@@ -4,12 +4,16 @@
 	</q-tooltip>
 	<span
 		v-if="pulse"
+		v-bind="$attrs"
 		class="status-indicator"
 		:[status]="true"
-		pulse />
+		pulse
+		data-cy="status-indicator-online" />
 	<span
 		v-else
+		v-bind="$attrs"
 		class="status-indicator"
+		data-cy="status-indicator-offline"
 		:[status]="true" />
 </template>
 
@@ -25,9 +29,3 @@ const pulse = computed(() => {
 	return props.value;
 });
 </script>
-
-<style lang="scss">
-.status-indicator {
-	margin-bottom: 2px;
-}
-</style>

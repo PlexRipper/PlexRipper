@@ -27,7 +27,7 @@ public class SyncPlexMoviesCommandHandler_UnitTests : BaseUnitTest<SyncPlexMovie
         var movies = FakeData.GetPlexMovies(seed).Generate(50);
         SetIds(library, movies);
 
-        library.Movies = movies;
+        library.Movies.AddRange(movies);
 
         // Act
         var request = new SyncPlexMoviesCommand(movies);
@@ -63,7 +63,7 @@ public class SyncPlexMoviesCommandHandler_UnitTests : BaseUnitTest<SyncPlexMovie
         var movies = moviesDb.GetRange(0, 30);
         SetIds(library, movies);
 
-        library.Movies = movies;
+        library.Movies.AddRange(movies);
 
         // Act
         var request = new SyncPlexMoviesCommand(movies);
@@ -115,7 +115,7 @@ public class SyncPlexMoviesCommandHandler_UnitTests : BaseUnitTest<SyncPlexMovie
 
         SetIds(library, newMovies);
 
-        library.Movies = newMovies;
+        library.Movies.AddRange(newMovies);
 
         // Act
         var request = new SyncPlexMoviesCommand(newMovies);

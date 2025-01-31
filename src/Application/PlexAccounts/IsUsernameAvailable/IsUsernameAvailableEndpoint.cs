@@ -42,7 +42,7 @@ public class IsUsernameAvailableEndpoint : BaseEndpoint<IsUsernameAvailableEndpo
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<bool>))
-                .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
+                .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))
         );
     }
 

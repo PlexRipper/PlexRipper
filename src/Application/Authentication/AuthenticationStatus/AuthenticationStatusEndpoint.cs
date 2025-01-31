@@ -14,7 +14,7 @@ public class AuthenticationStatusEndpoint : BaseEndpointWithoutRequest<UserClaim
         Description(x =>
         {
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<UserClaimsDTO>));
-            x.Produces(StatusCodes.Status401Unauthorized, typeof(ResultDTO));
+            x.Produces(StatusCodes.Status401Unauthorized, typeof(BaseResultDTO));
             x.Produces(StatusCodes.Status500InternalServerError);
         });
     }

@@ -23,7 +23,7 @@ public class SetNotificationVisibilityEndpointRequestValidator : Validator<SetNo
     }
 }
 
-public class SetNotificationVisibilityEndpoint : BaseEndpoint<SetNotificationVisibilityEndpointRequest, ResultDTO>
+public class SetNotificationVisibilityEndpoint : BaseEndpoint<SetNotificationVisibilityEndpointRequest, BaseResultDTO>
 {
     private readonly IPlexRipperDbContext _dbContext;
 
@@ -39,8 +39,8 @@ public class SetNotificationVisibilityEndpoint : BaseEndpoint<SetNotificationVis
         Patch(EndpointPath);
 
         Description(x =>
-            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO))
-                .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
+            x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))
+                .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))
         );
     }
 

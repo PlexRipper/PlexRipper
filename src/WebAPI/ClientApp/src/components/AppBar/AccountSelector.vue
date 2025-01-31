@@ -3,6 +3,7 @@
 		icon="mdi-account"
 		flat
 		rounded
+		data-cy="account-selector-btn"
 		style="padding: 0.5rem">
 		<q-menu>
 			<q-list>
@@ -34,6 +35,7 @@
 								icon="mdi-refresh"
 								:loading="loading[0] || loading[index]"
 								:disabled="isLoading"
+								:data-cy="`refresh-account-${account.id}-btn`"
 								@click.stop="runReSyncAccount(account.id)" />
 						</q-item-section>
 					</q-item>
@@ -63,12 +65,14 @@
 import { get } from '@vueuse/core';
 import { useSettingsStore, useAccountStore, useAuthenticationStore } from '@store';
 import { useI18n } from 'vue-i18n';
+import { tap } from 'rxjs/operators';
 import { useSubscription } from '#imports';
 
 const { t } = useI18n();
 const settingsStore = useSettingsStore();
 const accountStore = useAccountStore();
 const authStore = useAuthenticationStore();
+const dialogStore = useDialogStore();
 
 const loading = ref<Record<number, boolean>>({ 0: false });
 const isLoading = computed(() => Object.values(get(loading)).some((x) => x));
@@ -100,8 +104,9 @@ function updateActiveAccountId(accountId: number): void {
 
 function runReSyncAccount(accountId = 0): void {
 	get(loading)[accountId] = true;
+
 	useSubscription(
-		accountStore.reSyncAccount(accountId).subscribe(() => {
+		accountStore.reSyncAccount(accountId).pipe(tap((data) => dialogStore.openRefreshPlexAccountAccessDialog(data.value ?? []))).subscribe(() => {
 			get(loading)[accountId] = false;
 		}),
 	);

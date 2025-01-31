@@ -1,4 +1,4 @@
-export default interface IPTreeTableSelectionKeys {
+export interface IPTreeTableSelectionKeys {
 	[key: string]: {
 		checked: boolean;
 		partialChecked: boolean;

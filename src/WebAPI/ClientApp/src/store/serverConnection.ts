@@ -14,7 +14,7 @@ import { plexServerApi, plexServerConnectionApi } from '@api';
 import { DataType } from '@dto';
 import { sortPlexServerConnections } from '@composables/common';
 import { useServerStore, useSignalrStore } from '@store';
-import { cloneDeep } from 'lodash-es';
+import { assign, cloneDeep } from 'lodash-es';
 
 interface IServerConnectionStoreState {
 	serverConnections: PlexServerConnectionDTO[];
@@ -54,19 +54,15 @@ export const useServerConnectionStore = defineStore('ServerConnection', () => {
 		},
 		checkServerConnection(plexServerConnectionId: number): Observable<PlexServerStatusDTO | null> {
 			return plexServerConnectionApi.checkConnectionStatusByIdEndpoint(plexServerConnectionId).pipe(
-				map((serverStatus) => {
-					if (serverStatus.isSuccess && serverStatus.value) {
+				map((res) => {
+					if (res.isSuccess && res.value) {
 						const index = state.serverConnections.findIndex((x) => x.id === plexServerConnectionId);
 						if (index === -1) {
-							return serverStatus.value;
+							return res.value;
 						}
-						state.serverConnections.splice(index, 1, {
-							...state.serverConnections[index],
-							serverStatusList: [serverStatus.value, ...state.serverConnections[index].serverStatusList],
-							latestConnectionStatus: serverStatus.value,
-						});
+						assign(state.serverConnections[index].latestConnectionStatus, res.value);
 					}
-					return serverStatus?.value ?? null;
+					return res?.value ?? null;
 				}),
 			);
 		},

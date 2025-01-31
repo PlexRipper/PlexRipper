@@ -1,3 +1,4 @@
+using Application.Contracts;
 using Data.Contracts;
 using FluentValidation;
 using Logging.Interface;
@@ -6,12 +7,13 @@ using PlexApi.Contracts;
 namespace PlexRipper.Application;
 
 /// <summary>
-/// Retrieve the accessible <see cref="PlexLibrary">PlexLibraries</see> for this <see cref="PlexServer"/> which the <see cref="PlexAccount"/> has access to and update the database.
+/// Retrieve the accessible <see cref="PlexLibrary">PlexLibraries</see> for this <see cref="PlexServer"/> which the <see cref="PlexAccount"/> has access to and update the database. The <see cref="PlexServer"/> in question will need to be online.
 /// </summary>
 /// <param name="PlexAccountId">The id of the <see cref="PlexAccount"/> to retrieve the accessible <see cref="PlexLibrary">Plex Libraries</see> for.</param>
 /// <param name="PlexServerId">The id of the <see cref="PlexServer"/> to retrieve <see cref="PlexLibrary">Plex Libraries</see> for.</param>
 ///  <returns>If successful.</returns>
-public record RefreshLibraryAccessCommand(int PlexAccountId, int PlexServerId = 0) : IRequest<Result>;
+public record RefreshLibraryAccessCommand(int PlexAccountId, int PlexServerId = 0)
+    : IRequest<Result<PlexLibraryAccessRefreshResponse>>;
 
 public class RefreshLibraryAccessValidator : AbstractValidator<RefreshLibraryAccessCommand>
 {
@@ -22,7 +24,8 @@ public class RefreshLibraryAccessValidator : AbstractValidator<RefreshLibraryAcc
     }
 }
 
-public class RefreshLibraryAccessHandler : IRequestHandler<RefreshLibraryAccessCommand, Result>
+public class RefreshLibraryAccessHandler
+    : IRequestHandler<RefreshLibraryAccessCommand, Result<PlexLibraryAccessRefreshResponse>>
 {
     private readonly ILog _log;
     private readonly IMediator _mediator;
@@ -42,48 +45,75 @@ public class RefreshLibraryAccessHandler : IRequestHandler<RefreshLibraryAccessC
         _plexServiceApi = plexServiceApi;
     }
 
-    public async Task<Result> Handle(RefreshLibraryAccessCommand command, CancellationToken cancellationToken)
+    public async Task<Result<PlexLibraryAccessRefreshResponse>> Handle(
+        RefreshLibraryAccessCommand command,
+        CancellationToken cancellationToken
+    )
     {
         var plexAccountId = command.PlexAccountId;
         var plexServerId = command.PlexServerId;
 
         var plexLibraries = new List<PlexLibrary>();
+        var plexServers = new List<PlexServer>();
 
+        // Determine the Plex servers to refresh the Plex libraries for
         if (plexServerId == 0)
         {
-            var result = await _dbContext.GetAccessiblePlexServers(plexAccountId, cancellationToken);
+            var result = await _dbContext.GetAccessiblePlexServers(plexAccountId, CancellationToken.None);
             if (result.IsFailed)
                 return result.ToResult();
 
-            var plexServers = result.Value;
-            if (!plexServers.Any())
-            {
-                var plexAccountName = await _dbContext.GetPlexAccountDisplayName(plexAccountId, cancellationToken);
-                _log.Warning("No accessible Plex servers found for PlexAccount {PlexAccountName}", plexAccountName);
-                return Result.Ok();
-            }
-
-            var libraryResults = await Task.WhenAll(
-                plexServers.Select(x => RefreshLibrary(x.Id, plexAccountId, cancellationToken))
-            );
-
-            if (libraryResults.All(x => x.IsFailed))
-                return Result.Merge(libraryResults).ToResult();
-
-            plexLibraries = libraryResults.Where(x => x.IsSuccess).SelectMany(x => x.Value).ToList();
+            plexServers = result.Value;
         }
         else
         {
-            var libraryResults = await RefreshLibrary(plexServerId, plexAccountId, cancellationToken);
-            if (libraryResults.IsFailed)
-                return libraryResults.ToResult();
-
-            plexLibraries.AddRange(libraryResults.Value);
+            var plexServer = await _dbContext.PlexServers.GetAsync(plexServerId, CancellationToken.None);
+            if (plexServer is not null)
+            {
+                plexServers.Add(plexServer);
+            }
         }
 
-        return await _mediator.Send(
-            new AddOrUpdatePlexLibrariesCommand(plexAccountId, plexLibraries),
+        if (!plexServers.Any())
+        {
+            var plexAccountName = await _dbContext.GetPlexAccountDisplayName(plexAccountId, cancellationToken);
+            _log.Warning("No accessible Plex servers found for PlexAccount {PlexAccountName}", plexAccountName);
+            return Result.Ok(new PlexLibraryAccessRefreshResponse() { Reports = [], OfflineServers = [] });
+        }
+
+        // Refresh Plex libraries
+        var failedServers = new List<int>();
+
+        var libraryResults = await Task.WhenAll(
+            plexServers.Select(async server =>
+            {
+                var refreshResult = await RefreshLibrary(server.Id, plexAccountId, cancellationToken);
+                if (refreshResult.ToResult().Has504GatewayTimeoutError())
+                {
+                    failedServers.Add(server.Id);
+                }
+
+                return refreshResult;
+            })
+        );
+
+        if (libraryResults.All(x => x.IsFailed))
+            return Result.Merge(libraryResults).ToResult();
+
+        plexLibraries = libraryResults.Where(x => x.IsSuccess).SelectMany(x => x.Value).ToList();
+
+        var updateResult = await _mediator.Send(
+            new AddOrUpdatePlexLibrariesCommand { PlexAccountId = plexAccountId, PlexLibraries = plexLibraries },
             cancellationToken
+        );
+
+        if (updateResult.IsFailed)
+        {
+            return updateResult.ToResult();
+        }
+
+        return Result.Ok(
+            new PlexLibraryAccessRefreshResponse { Reports = updateResult.Value, OfflineServers = failedServers }
         );
     }
 
@@ -109,6 +139,7 @@ public class RefreshLibraryAccessHandler : IRequestHandler<RefreshLibraryAccessC
                 plexAccountId,
                 cancellationToken
             );
+
             if (libraries.IsFailed)
             {
                 _log.Here()

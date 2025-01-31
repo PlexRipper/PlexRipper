@@ -21,7 +21,7 @@ public static class PlexLibraryMapper
             Uuid = plexLibrary.Uuid,
             MediaSize = plexLibrary.MediaSize,
             DefaultDestination = plexLibrary.DefaultDestination?.ToDTO() ?? null,
-            DefaultDestinationId = plexLibrary.DefaultDestinationId ?? 0,
+            DefaultDestinationId = plexLibrary.DefaultDestinationId ?? plexLibrary.Type.ToDefaultDestinationFolderId(),
             PlexServerId = plexLibrary.PlexServerId,
             Count = plexLibrary.MediaCount,
             SeasonCount = plexLibrary.SeasonCount,

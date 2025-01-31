@@ -63,7 +63,7 @@ public class CreateDownloadTasksEndpointIntegrationTests : BaseIntegrationTests
         var testResult = await client.POSTAsync<
             CreateDownloadTasksEndpoint,
             CreateDownloadTasksEndpointRequest,
-            ResultDTO
+            BaseResultDTO
         >(new CreateDownloadTasksEndpointRequest { Request = new CreateDownloadTasksRequest(dtoList) });
         testResult.Response.IsSuccessStatusCode.ShouldBeTrue(
             $"Response status code was {testResult.Response.StatusCode}"

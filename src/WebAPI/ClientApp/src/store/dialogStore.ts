@@ -2,7 +2,12 @@ import { acceptHMRUpdate, defineStore } from 'pinia';
 import { type Observable, of, Subject } from 'rxjs';
 import { DialogType } from '@enums';
 import type { IAccountDialog, IAlert, IConnectionDialog, IDialogState, IHelp, ISetupResult } from '@interfaces';
-import type { CheckAllConnectionStatusUpdateDTO, DownloadMediaDTO, FolderPathDTO } from '@dto';
+import type {
+	CheckAllConnectionStatusUpdateDTO,
+	DownloadMediaDTO,
+	FolderPathDTO,
+	RefreshPlexAccountAccessRapportDTO,
+} from '@dto';
 import { cloneDeep } from 'lodash-es';
 
 interface IDialogStoreState {
@@ -46,6 +51,9 @@ export const useDialogStore = defineStore('DialogStore', () => {
 		},
 		openAddConnectionDialog(data: IConnectionDialog): void {
 			state.dialogUpdate.next({ name: DialogType.AddConnectionDialog, state: true, data });
+		},
+		openRefreshPlexAccountAccessDialog(data: RefreshPlexAccountAccessRapportDTO[]): void {
+			state.dialogUpdate.next({ name: DialogType.RefreshAccountAccessDialog, state: true, data });
 		},
 		openHelpInfoDialog(data: IHelp): void {
 			state.dialogUpdate.next({ name: DialogType.HelpInfoDialog, state: true, data });

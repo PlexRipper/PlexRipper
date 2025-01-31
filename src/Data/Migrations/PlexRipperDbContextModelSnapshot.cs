@@ -1272,7 +1272,7 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(6);
 
-                    b.Property<string>("Uri")
+                    b.Property<string>("Url")
                         .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(4);

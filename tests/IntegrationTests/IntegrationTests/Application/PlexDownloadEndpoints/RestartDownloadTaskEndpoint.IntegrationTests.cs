@@ -47,7 +47,7 @@ public class RestartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
         var testResult = await client.GETAsync<
             RestartDownloadTaskEndpoint,
             RestartDownloadTaskEndpointRequest,
-            ResultDTO
+            BaseResultDTO
         >(new RestartDownloadTaskEndpointRequest(downloadTask.Id));
         testResult.Response.IsSuccessStatusCode.ShouldBeTrue(await testResult.Response.Content.ReadAsStringAsync());
 

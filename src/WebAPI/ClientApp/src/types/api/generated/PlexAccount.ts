@@ -13,9 +13,10 @@ import type { RequestParams } from "./http-client";
 import { ContentType } from "./http-client";
 
 import type {
+  BaseResultDTO,
   GeneratePlexTokenResponse,
   PlexAccountDTO,
-  ResultDTO,
+  RefreshPlexAccountAccessRapportDTO,
   ValidatePlexAccountResponse,
 } from "./data-contracts";
 
@@ -34,7 +35,7 @@ export class PlexAccount {
    */
   createPlexAccountEndpoint = (data: PlexAccountDTO, params: RequestParams = {}) =>
     from(
-      Axios.request<ResultDTO>({
+      Axios.request<BaseResultDTO>({
         url: `/api/PlexAccount`,
         method: "POST",
         data: data,
@@ -43,7 +44,7 @@ export class PlexAccount {
         format: "json",
         ...params,
       }),
-    ).pipe(apiCheckPipe<ResultDTO>);
+    ).pipe(apiCheckPipe<BaseResultDTO>);
 
   /**
    * No description
@@ -99,14 +100,14 @@ export class PlexAccount {
    */
   deletePlexAccountByIdEndpoint = (plexAccountId: number, params: RequestParams = {}) =>
     from(
-      Axios.request<ResultDTO>({
+      Axios.request<BaseResultDTO>({
         url: `/api/PlexAccount/${plexAccountId}`,
         method: "DELETE",
         secure: true,
         format: "json",
         ...params,
       }),
-    ).pipe(apiCheckPipe<ResultDTO>);
+    ).pipe(apiCheckPipe<BaseResultDTO>);
 
   /**
    * No description
@@ -185,14 +186,14 @@ export class PlexAccount {
    */
   refreshPlexAccountAccessEndpoint = (plexAccountId: number, params: RequestParams = {}) =>
     from(
-      Axios.request<ResultDTO>({
+      Axios.request<RefreshPlexAccountAccessRapportDTO[]>({
         url: `/api/PlexAccount/refresh/${plexAccountId}`,
         method: "GET",
         secure: true,
         format: "json",
         ...params,
       }),
-    ).pipe(apiCheckPipe<ResultDTO>);
+    ).pipe(apiCheckPipe<RefreshPlexAccountAccessRapportDTO[]>);
 
   /**
    * No description

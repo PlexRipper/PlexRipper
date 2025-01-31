@@ -36,7 +36,7 @@ public class GetDownloadTaskLogsByDownloadTaskIdEndpoint
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<DownloadWorkerLogDTO>>))
-                .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
+                .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))
         );
     }
 

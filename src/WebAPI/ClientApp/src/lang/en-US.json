@@ -310,6 +310,22 @@
                 "symbol": "Has a special character",
                 "length": "Longer than {count} characters"
             }
+        },
+        "q-connection-icon": {
+            "tooltip": {
+                "local-connection": "Local Connection",
+                "public-connection": "Public Connection",
+                "plex-connection": "Plex Relay Connection"
+            }
+        },
+        "refresh-account-access-dialog": {
+            "access": {
+                "granted": "Access has been newly granted!",
+                "revoked": "Access has been lost!",
+                "updated": "Access has been updated!",
+                "unknown": "Access state is unknown because the Plex server could not be reached"
+            },
+            "offline-server-message": "Could not retrieve the library access list from this server because it is offline, try again when the server is back online."
         }
     },
     "confirmation": {
@@ -373,10 +389,6 @@
         "name-version": "PlexRipper - V{version}",
         "units": {
             "per-second": "/s"
-        },
-        "tooltip": {
-            "local-connection": "Local Connection",
-            "public-connection": "Public Connection"
         },
         "error": {
             "unknown": "\"Unknown\"",
@@ -756,7 +768,8 @@
                     "directory-browser": "Directory Browser Dialog",
                     "verification-dialog": "2FA Verification Dialog",
                     "discord-invite": "Discord Invite",
-                    "sync-server-media-dialog": "Sync Server Media Dialog"
+                    "sync-server-media-dialog": "Sync Server Media Dialog",
+                    "refresh-plex-account-access-dialog": "Refresh Plex Account Access Dialog"
                 },
                 "header": "Debug Dialog Modals",
                 "account-dialog-header": "Account Dialog",

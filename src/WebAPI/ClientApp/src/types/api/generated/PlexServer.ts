@@ -11,7 +11,7 @@
 
 import type { RequestParams } from "./http-client";
 
-import type { PlexServerDTO, ResultDTO } from "./data-contracts";
+import type { BaseResultDTO, PlexServerDTO } from "./data-contracts";
 
 import { apiCheckPipe } from "@api/base";
 import Axios from "axios";
@@ -32,14 +32,14 @@ export class PlexServer {
     params: RequestParams = {},
   ) =>
     from(
-      Axios.request<ResultDTO>({
+      Axios.request<BaseResultDTO>({
         url: `/api/PlexServer/${plexServerId}/preferred-connection/${plexServerConnectionId}`,
         method: "GET",
         secure: true,
         format: "json",
         ...params,
       }),
-    ).pipe(apiCheckPipe<ResultDTO>);
+    ).pipe(apiCheckPipe<BaseResultDTO>);
 
   /**
    * No description
@@ -87,14 +87,14 @@ export class PlexServer {
    */
   queueInspectPlexServerJobEndpoint = (plexServerId: number, params: RequestParams = {}) =>
     from(
-      Axios.request<ResultDTO>({
+      Axios.request<BaseResultDTO>({
         url: `/api/PlexServer/${plexServerId}/inspect`,
         method: "GET",
         secure: true,
         format: "json",
         ...params,
       }),
-    ).pipe(apiCheckPipe<ResultDTO>);
+    ).pipe(apiCheckPipe<BaseResultDTO>);
 
   /**
    * No description
@@ -129,7 +129,7 @@ export class PlexServer {
     params: RequestParams = {},
   ) =>
     from(
-      Axios.request<ResultDTO>({
+      Axios.request<BaseResultDTO>({
         url: `/api/PlexServer/${plexServerId}/set-server-alias`,
         method: "GET",
         params: query,
@@ -137,7 +137,7 @@ export class PlexServer {
         format: "json",
         ...params,
       }),
-    ).pipe(apiCheckPipe<ResultDTO>);
+    ).pipe(apiCheckPipe<BaseResultDTO>);
 
   /**
    * No description
@@ -154,7 +154,7 @@ export class PlexServer {
     params: RequestParams = {},
   ) =>
     from(
-      Axios.request<ResultDTO>({
+      Axios.request<BaseResultDTO>({
         url: `/api/PlexServer/${plexServerId}/set-server-hidden`,
         method: "GET",
         params: query,
@@ -162,7 +162,7 @@ export class PlexServer {
         format: "json",
         ...params,
       }),
-    ).pipe(apiCheckPipe<ResultDTO>);
+    ).pipe(apiCheckPipe<BaseResultDTO>);
 
   /**
    * No description
@@ -180,7 +180,7 @@ export class PlexServer {
     params: RequestParams = {},
   ) =>
     from(
-      Axios.request<ResultDTO>({
+      Axios.request<BaseResultDTO>({
         url: `/api/PlexServer/${plexServerId}/sync`,
         method: "GET",
         params: query,
@@ -188,7 +188,7 @@ export class PlexServer {
         format: "json",
         ...params,
       }),
-    ).pipe(apiCheckPipe<ResultDTO>);
+    ).pipe(apiCheckPipe<BaseResultDTO>);
 }
 
 export class PlexServerPaths {

@@ -95,11 +95,10 @@ public class CreateAccountIntegrationTests : BaseIntegrationTests
 
         var resultDTO = response.Result;
         resultDTO.IsSuccess.ShouldBeTrue();
-        var result = resultDTO.ToResultModel();
         await container.SchedulerService.AwaitScheduler();
 
         // Assert
-        result.IsSuccess.ShouldBeTrue();
+        resultDTO.IsSuccess.ShouldBeTrue();
         container.DbContext.PlexAccounts.ToList().Count.ShouldBe(1);
 
         // Ensure account has been created

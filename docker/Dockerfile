@@ -5,7 +5,8 @@ ARG TARGETPLATFORM=linux/amd64
 ARG BUILDPLATFORM=linux/amd64
 
 # Stage 1 - Build the Nuxt front-end
-FROM --platform=$BUILDPLATFORM oven/bun:alpine AS client-build
+# TODO: bun 1.2.1 breaks build so its pinned to this for now
+FROM --platform=$BUILDPLATFORM oven/bun:1.1.45-alpine AS client-build
 
 ARG PORT
 

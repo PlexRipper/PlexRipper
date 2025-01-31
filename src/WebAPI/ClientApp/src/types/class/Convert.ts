@@ -65,7 +65,7 @@ export const Convert = {
 				return 'yellow';
 			case NotificationLevel.Error:
 			case NotificationLevel.Fatal:
-				return 'primary';
+				return 'negative';
 			default:
 				return 'mdi-help-circle-outline';
 		}

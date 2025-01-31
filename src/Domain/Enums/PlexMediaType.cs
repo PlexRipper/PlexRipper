@@ -8,39 +8,39 @@ public enum PlexMediaType
 {
     // NOTE: Make sure the indexes are correct, 1,2,3,4,5 etc and that there is no skip in between
     // Otherwise the Typescript DTO translator in the front-end starts messing up
-    [EnumMember(Value = "None")]
+    [EnumMember(Value = nameof(None))]
     None = 0,
 
-    [EnumMember(Value = "Movie")]
+    [EnumMember(Value = nameof(Movie))]
     Movie = 1,
 
-    [EnumMember(Value = "TvShow")]
+    [EnumMember(Value = nameof(TvShow))]
     TvShow = 2,
 
-    [EnumMember(Value = "Season")]
+    [EnumMember(Value = nameof(Season))]
     Season = 3,
 
-    [EnumMember(Value = "Episode")]
+    [EnumMember(Value = nameof(Episode))]
     Episode = 4,
 
-    [EnumMember(Value = "Music")]
+    [EnumMember(Value = nameof(Music))]
     Music = 5,
 
-    [EnumMember(Value = "Album")]
+    [EnumMember(Value = nameof(Album))]
     Album = 6,
 
-    [EnumMember(Value = "Song")]
+    [EnumMember(Value = nameof(Song))]
     Song = 7,
 
-    [EnumMember(Value = "Photos")]
+    [EnumMember(Value = nameof(Photos))]
     Photos = 8,
 
-    [EnumMember(Value = "OtherVideos")]
+    [EnumMember(Value = nameof(OtherVideos))]
     OtherVideos = 9,
 
-    [EnumMember(Value = "Games")]
+    [EnumMember(Value = nameof(Games))]
     Games = 10,
 
-    [EnumMember(Value = "Unknown")]
+    [EnumMember(Value = nameof(Unknown))]
     Unknown = 11,
 }

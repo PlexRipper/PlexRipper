@@ -1,10 +1,11 @@
-using System.Text.Json;
 using Application.Contracts;
 using LukeHagar.PlexAPI.SDK;
 using LukeHagar.PlexAPI.SDK.Models.Errors;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
+using Newtonsoft.Json;
 using PlexApi.Contracts;
 using ILog = Logging.Interface.ILog;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 using Type = LukeHagar.PlexAPI.SDK.Models.Requests.Type;
 
 namespace PlexRipper.PlexApi;
@@ -44,6 +45,10 @@ public class PlexApiWrapper
         catch (SDKException e)
         {
             return e.RawResponse.FromSdkExceptionToResult<T>();
+        }
+        catch (JsonSerializationException e)
+        {
+            return Result.Fail(new ExceptionalError(e)).LogError();
         }
         catch (Exception e)
         {
@@ -300,9 +305,6 @@ public class PlexApiWrapper
                 PlexServerId = connection.PlexServerId,
                 DefaultDestination = null,
                 DefaultDestinationId = null,
-                Movies = [],
-                TvShows = [],
-                PlexAccountLibraries = [],
             })
             .ToList();
 

@@ -75,7 +75,7 @@ public class RefreshLibraryMediaCommand_UnitTests : BaseUnitTest<RefreshLibraryM
         var rawSeasonData = FakeData.GetPlexTvShowSeason(seed).Generate(100);
         var rawEpisodesData = FakeData.GetPlexTvShowEpisode(seed).Generate(1000);
 
-        updatedPlexLibrary.TvShows = rawTvShowData;
+        updatedPlexLibrary.TvShows.AddRange(rawTvShowData);
 
         // Set keys
         var seasonIndex = 0;
@@ -209,7 +209,7 @@ public class RefreshLibraryMediaCommand_UnitTests : BaseUnitTest<RefreshLibraryM
         plexLibrary.ShouldNotBeNull();
 
         var mockPlexLibrary = FakeData.GetPlexLibrary(seed, libraryType: type).Generate();
-        return new PlexLibrary
+        var newLibrary = new PlexLibrary
         {
             Id = plexLibrary.Id,
             Type = type,
@@ -224,9 +224,11 @@ public class RefreshLibraryMediaCommand_UnitTests : BaseUnitTest<RefreshLibraryM
             PlexServerId = plexLibrary.PlexServerId,
             DefaultDestination = mockPlexLibrary.DefaultDestination,
             DefaultDestinationId = mockPlexLibrary.DefaultDestinationId,
-            Movies = mockPlexLibrary.Movies,
-            TvShows = mockPlexLibrary.TvShows,
-            PlexAccountLibraries = mockPlexLibrary.PlexAccountLibraries,
         };
+        newLibrary.Movies.AddRange(mockPlexLibrary.Movies);
+        newLibrary.TvShows.AddRange(mockPlexLibrary.TvShows);
+        newLibrary.PlexAccountLibraries.AddRange(mockPlexLibrary.PlexAccountLibraries);
+
+        return newLibrary;
     }
 }

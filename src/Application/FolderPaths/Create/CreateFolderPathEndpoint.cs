@@ -40,8 +40,8 @@ public class CreateFolderPathEndpoint : BaseEndpoint<CreateFolderPathEndpointReq
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<FolderPathDTO>))
-                .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))
-                .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
+                .Produces(StatusCodes.Status400BadRequest, typeof(BaseResultDTO))
+                .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))
         );
     }
 

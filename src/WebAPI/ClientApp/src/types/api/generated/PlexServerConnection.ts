@@ -13,10 +13,10 @@ import type { RequestParams } from "./http-client";
 import { ContentType } from "./http-client";
 
 import type {
+  BaseResultDTO,
   CreatePlexServerConnectionEndpointRequest,
   PlexServerConnectionDTO,
   PlexServerStatusDTO,
-  ResultDTO,
   ServerIdentityDTO,
   UpdatePlexServerConnectionEndpointRequest,
   ValidatePlexServerConnectionEndpointRequest,
@@ -131,14 +131,14 @@ export class PlexServerConnection {
    */
   deletePlexServerConnectionById = (plexServerConnectionId: number, params: RequestParams = {}) =>
     from(
-      Axios.request<ResultDTO>({
+      Axios.request<BaseResultDTO>({
         url: `/api/PlexServerConnection/${plexServerConnectionId}`,
         method: "DELETE",
         secure: true,
         format: "json",
         ...params,
       }),
-    ).pipe(apiCheckPipe<ResultDTO>);
+    ).pipe(apiCheckPipe<BaseResultDTO>);
 
   /**
    * No description

@@ -32,7 +32,6 @@ public static class DownloadTaskGenericToDTOMapper
             PlexLibraryId = downloadTask.PlexLibraryId,
             ParentId = downloadTask.ParentId,
             Children = downloadTask.Children.Select(x => x.ToDTO(downloadUrl)).ToList(),
-            Actions = DownloadTaskActions.Convert(downloadTask.DownloadStatus),
         };
 
     public static DownloadWorkerLogDTO ToDTO(this DownloadWorkerLog downloadTask) =>
@@ -96,7 +95,6 @@ public static class DownloadTaskGenericToDTOMapper
                     TimeRemaining = downloadTask.TimeRemaining,
                     DownloadSpeed = downloadTask.Speed,
                     Children = downloadTask.Children.ToDownloadProgressDto(),
-                    Actions = DownloadTaskActions.Convert(downloadTask.DownloadStatus),
                 }
             );
 

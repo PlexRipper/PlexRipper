@@ -77,10 +77,10 @@ public class AppUserLoginEndpoint : BaseEndpoint<AppUserLoginEndpointRequest>
 
         Description(x =>
         {
-            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO));
-            x.Produces(StatusCodes.Status401Unauthorized, typeof(ResultDTO));
-            x.Produces(StatusCodes.Status403Forbidden, typeof(ResultDTO));
-            x.Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO));
+            x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO));
+            x.Produces(StatusCodes.Status401Unauthorized, typeof(BaseResultDTO));
+            x.Produces(StatusCodes.Status403Forbidden, typeof(BaseResultDTO));
+            x.Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO));
         });
     }
 

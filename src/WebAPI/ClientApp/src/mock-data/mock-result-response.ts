@@ -1,29 +1,22 @@
-import type { MockConfig } from '@mock';
 import type { ResultDTO } from '@interfaces';
-import { checkConfig } from '@mock/mock-base';
+import type { BaseResultDTO } from '@dto';
 
-export function generateResultDTO<T>(value: T, config: Partial<MockConfig> = {}): ResultDTO<T> {
-	checkConfig(config);
-
+export function generateResultDTO<T>(value: T): ResultDTO<T> {
 	return {
-		value,
-		errors: [],
+		value: value,
 		isSuccess: true,
-		isFailed: false,
-		reasons: [],
+		statusCode: 200,
+		errors: [],
 		successes: [],
-		statusCode: 0,
 	};
 }
 
-export function generateFailedResultDTO(partial: Partial<ResultDTO> = {}): ResultDTO {
+export function generateFailedResultDTO(partial: Partial<BaseResultDTO> = {}): BaseResultDTO {
 	return {
-		errors: [],
 		isSuccess: false,
-		isFailed: true,
-		reasons: [],
-		successes: [],
 		statusCode: 0,
+		errors: [],
+		successes: [],
 		...partial,
 	};
 }

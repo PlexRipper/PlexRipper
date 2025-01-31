@@ -30,7 +30,7 @@
 				:header-selected="downloadStore.getHeaderSelection(plexServer.id)"
 				:selected="downloadStore.getSelectedDownloadTasks(plexServer.id)"
 				:max-selection-count="downloadStore.getDownloadSelection(plexServer.id)?.maxSelectionCount"
-				@action="tableAction($event)"
+				@action="onTableAction($event)"
 				@all-selected="downloadStore.setAllSelectedDownloadTasks(plexServer.id, $event)"
 				@selected="downloadStore.updateSelectedDownloadTasks(plexServer.id, $event)" />
 		</template>
@@ -38,16 +38,26 @@
 </template>
 
 <script setup lang="ts">
+import { get, set } from '@vueuse/core';
 import type { DownloadProgressDTO, PlexServerDTO } from '@dto';
+import { DownloadActions } from '@dto';
 import type { IDownloadTableNode, ISelection } from '@interfaces';
 import type { QTreeViewTableHeader } from '@props';
-import { useDownloadStore, useServerConnectionStore, useServerStore, useI18n } from '#imports';
+import { flatMapDeep } from 'lodash-es';
+import { useDownloadStore, useServerConnectionStore, useDialogStore, useServerStore } from '@store';
+import { useI18n } from '#imports';
 
 const serverStore = useServerStore();
 const downloadStore = useDownloadStore();
+const dialogStore = useDialogStore();
 const serverConnectionStore = useServerConnectionStore();
 
 const { t } = useI18n();
+
+const loadingIds = ref<{
+	id: string;
+	action: DownloadActions;
+}[]>([]);
 
 const props = defineProps<{
 	loading?: boolean;
@@ -55,15 +65,31 @@ const props = defineProps<{
 	downloadRows: DownloadProgressDTO[];
 }>();
 
-const emit = defineEmits<{
-	(e: 'action', payload: { action: string; item: DownloadProgressDTO }): void;
+defineEmits<{
 	(e: 'selected', payload: ISelection): void;
 }>();
 
 const nodes = computed((): IDownloadTableNode[] => {
-	// TODO: Move this to the back-end to increase performance
+	// TODO: Move property mapping to back-end to increase performance
 	return mapToTreeNodes(downloadStore.getDownloadsByServerId(props.plexServer.id));
 });
+
+function mapToTreeNodes(value: DownloadProgressDTO[]): IDownloadTableNode[] {
+	return value?.map((node) => {
+		return {
+			...node,
+			key: node.id,
+			label: node.title,
+			children: mapToTreeNodes(node.children),
+			actions: toDownloadActions(node.status).map((action) => ({
+				type: action,
+				// show loading icon on action and disable the rest
+				loading: get(loadingIds).some((y) => node.id === y.id && action === y.action),
+				disabled: get(loadingIds).some((y) => node.id === y.id && action !== y.action),
+			})),
+		};
+	}) ?? [];
+}
 
 const getDownloadTableColumns: QTreeViewTableHeader[] = [
 	{
@@ -122,24 +148,25 @@ const getDownloadTableColumns: QTreeViewTableHeader[] = [
 	},
 ];
 
-function mapToTreeNodes(value: DownloadProgressDTO[]): IDownloadTableNode[] {
-	if (!value) {
-		return [];
+function onTableAction({ action, data }: { action: DownloadActions; data: IDownloadTableNode }) {
+	const ids: string[] = [data.id];
+
+	if (action === DownloadActions.Details) {
+		dialogStore.openDownloadTaskDetailsDialog(data.id);
+	} else {
+		const newIds = getAllIds([data]);
+		get(loadingIds).push(...newIds.map((id) => ({ id, action })));
+
+		useSubscription(downloadStore.executeDownloadCommand(action, ids).subscribe(() => {
+			set(loadingIds, get(loadingIds).filter((x) => !newIds.includes(x.id)));
+		}));
 	}
-	return value.map((x) => {
-		return {
-			...x,
-			key: x.id,
-			label: x.title,
-			children: mapToTreeNodes(x.children),
-		};
-	});
 }
 
-function tableAction(payload: { action: string; data: IDownloadTableNode }) {
-	emit('action', {
-		action: payload.action,
-		item: payload.data as unknown as DownloadProgressDTO,
-	});
+function getAllIds(nodes: IDownloadTableNode[]): string[] {
+	return flatMapDeep(nodes, (node) => [
+		node.id, // Assuming `key` holds the ID in TreeNode
+		...getAllIds(node.children || []),
+	]);
 }
 </script>

@@ -1,5 +1,5 @@
 import type { BasePageSetupResult } from '@fixtures';
-import type { MockConfig } from '@mock';
+import { type MockConfig, Seed } from '@mock';
 import { generatePlexLibrariesFromPlexServers, generateResultDTO } from '@mock';
 import { PlexLibraryPaths } from '@api/api-paths';
 import { headers } from '@fixtures';
@@ -8,7 +8,8 @@ export function setupMockPlexLibrariesEndpoints(
 	this: BasePageSetupResult,
 	config: MockConfig,
 ): BasePageSetupResult {
-	this.plexLibraries = generatePlexLibrariesFromPlexServers({ plexServers: this.plexServers, config });
+	this.plexLibraries = generatePlexLibrariesFromPlexServers({ seed: new Seed(config.seed),
+		plexServers: this.plexServers, config });
 
 	if (config.override.plexLibraries) {
 		this.plexLibraries = config.override.plexLibraries(this.plexLibraries);

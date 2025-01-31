@@ -32,7 +32,7 @@ public class GetAllPlexServersEndpoint : BaseEndpointWithoutRequest<List<PlexSer
         });
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<PlexServerDTO>>))
-                .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
+                .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))
         );
     }
 

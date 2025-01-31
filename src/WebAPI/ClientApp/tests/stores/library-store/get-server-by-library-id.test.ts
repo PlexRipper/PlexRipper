@@ -1,7 +1,7 @@
 import { describe, beforeAll, beforeEach, test, expect } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { baseSetup, baseVars, getAxiosMock, subscribeSpyTo } from '@services-test-base';
-import { generatePlexLibrariesFromPlexServers, generatePlexServers, generateResultDTO } from '@mock';
+import { generatePlexLibrariesFromPlexServers, generatePlexServers, generateResultDTO, Seed } from '@mock';
 import { useServerStore, useLibraryStore } from '@store';
 import { PlexLibraryPaths, PlexServerPaths } from '@api/api-paths';
 
@@ -24,10 +24,12 @@ describe('LibraryStore.getServerByLibraryId()', () => {
 			plexServerCount: 3,
 			plexMovieLibraryCount: 5,
 		};
+		const seed = new Seed(config.seed!);
+
 		const serverStore = useServerStore();
 		const libraryStore = useLibraryStore();
 		const servers = generatePlexServers({ config });
-		const libraries = generatePlexLibrariesFromPlexServers({ plexServers: servers, config });
+		const libraries = generatePlexLibrariesFromPlexServers({ seed, plexServers: servers, config });
 
 		mock.onGet(PlexServerPaths.getAllPlexServersEndpoint()).reply(200, generateResultDTO(servers));
 		mock.onGet(PlexLibraryPaths.getAllPlexLibrariesEndpoint()).reply(200, generateResultDTO(libraries));

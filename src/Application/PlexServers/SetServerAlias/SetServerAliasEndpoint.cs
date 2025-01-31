@@ -41,9 +41,9 @@ public class SetServerAlias : BaseEndpoint<SetServerAliasRequest>
         Get(EndpointPath);
 
         Description(x =>
-            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO))
-                .Produces(StatusCodes.Status404NotFound, typeof(ResultDTO))
-                .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
+            x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))
+                .Produces(StatusCodes.Status404NotFound, typeof(BaseResultDTO))
+                .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))
         );
     }
 

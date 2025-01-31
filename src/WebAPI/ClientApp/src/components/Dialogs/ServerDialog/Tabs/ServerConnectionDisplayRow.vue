@@ -13,7 +13,7 @@
 		<q-item-section
 			avatar
 			tag="label">
-			<QConnectionIcon :local="connection.local" />
+			<QConnectionIcon :type="connection.type" />
 		</q-item-section>
 		<!-- Connection Status -->
 		<q-item-section side>

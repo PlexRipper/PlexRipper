@@ -75,7 +75,6 @@ export function generateDownloadProgressBase({
 		status: DownloadStatus.Queued,
 		timeRemaining: 0,
 		title: randMovie(),
-		actions: ['details'],
 		children: [],
 	};
 }

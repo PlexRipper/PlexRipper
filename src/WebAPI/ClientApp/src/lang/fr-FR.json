@@ -310,6 +310,22 @@
                 "symbol": "Contient un caractère spécial",
                 "length": "Plus de {count} caractères"
             }
+        },
+        "q-connection-icon": {
+            "tooltip": {
+                "local-connection": "Connexion locale",
+                "public-connection": "Connexion publique",
+                "plex-connection": "Connexion relais Plex"
+            }
+        },
+        "refresh-account-access-dialog": {
+            "access": {
+                "granted": "L'accès a été récemment accordé!",
+                "revoked": "L'accès a été perdu !",
+                "updated": "L'accès a été mis à jour !",
+                "unknown": "L'état d'accès est inconnu car le serveur Plex n'a pas pu être atteint"
+            },
+            "offline-server-message": "Impossible de récupérer la liste d'accès à la bibliothèque à partir de ce serveur car il est hors ligne, réessayez lorsque le serveur sera de nouveau en ligne."
         }
     },
     "confirmation": {
@@ -373,10 +389,6 @@
         "name-version": "PlexRipper - V{version}",
         "units": {
             "per-second": "/s"
-        },
-        "tooltip": {
-            "local-connection": "Connexion locale",
-            "public-connection": "Connexion publique"
         },
         "error": {
             "unknown": "\"Inconnu\"",
@@ -756,7 +768,8 @@
                     "directory-browser": "Boîte de dialogue Navigateur de répertoire",
                     "verification-dialog": "Boîte de dialogue de vérification 2FA",
                     "discord-invite": "Invitation Discord",
-                    "sync-server-media-dialog": "Boîte de dialogue Synchroniser les médias du serveur"
+                    "sync-server-media-dialog": "Boîte de dialogue Synchroniser les médias du serveur",
+                    "refresh-plex-account-access-dialog": "Actualiser la boîte de dialogue d'accès au compte Plex"
                 },
                 "header": "Modaux de dialogue de débogage",
                 "account-dialog-header": "Dialogue de compte",

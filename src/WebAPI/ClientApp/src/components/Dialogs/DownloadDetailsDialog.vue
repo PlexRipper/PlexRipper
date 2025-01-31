@@ -166,7 +166,7 @@
 
 <script lang="ts" setup>
 import { set, get } from '@vueuse/core';
-import type { DownloadTaskDTO, DownloadWorkerLogDTO, ReasonDTO } from '@dto';
+import type { DownloadTaskDTO, DownloadWorkerLogDTO, ErrorDTO } from '@dto';
 import { downloadApi } from '@api';
 import Convert from '@class/Convert';
 import { DialogType } from '@enums';
@@ -182,7 +182,7 @@ const downloadTask = ref<DownloadTaskDTO>();
 const logs = ref<DownloadWorkerLogDTO[]>([]);
 const logRefreshTimer = useIntervalFn(() => refreshLogs(), 1000);
 
-const errors = ref<ReasonDTO[]>([]);
+const errors = ref<ErrorDTO[]>([]);
 
 function onOpen(event: string) {
 	set(loading, true);
@@ -192,7 +192,7 @@ function onOpen(event: string) {
 		if (data.isSuccess && data.value) {
 			set(downloadTask, data.value);
 		} else {
-			set(errors, data?.reasons ?? []);
+			set(errors, data?.errors ?? []);
 		}
 		set(loading, false);
 	}));
@@ -213,7 +213,7 @@ function refreshLogs() {
 			if (data.isSuccess && data.value) {
 				set(logs, [...data.value]);
 			} else {
-				set(errors, data?.reasons ?? []);
+				set(errors, data?.errors ?? []);
 			}
 			set(logsLoading, true);
 			logRefreshTimer.resume();

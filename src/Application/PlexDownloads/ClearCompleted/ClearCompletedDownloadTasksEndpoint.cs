@@ -10,7 +10,7 @@ namespace PlexRipper.Application;
 /// Will clear any completed <see cref="DownloadTaskGeneric"/> from the database.
 /// </summary>
 /// <returns>Is successful.</returns>
-public class ClearCompletedDownloadTasksEndpoint : BaseEndpoint<List<Guid>, ResultDTO<int>>
+public class ClearCompletedDownloadTasksEndpoint : BaseEndpoint<List<Guid>, ResultDTO<CountResponseDTO>>
 {
     private readonly IPlexRipperDbContext _dbContext;
 
@@ -26,7 +26,7 @@ public class ClearCompletedDownloadTasksEndpoint : BaseEndpoint<List<Guid>, Resu
         Verbs(Http.POST);
         Post(EndpointPath);
 
-        Description(x => x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<int>)));
+        Description(x => x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<CountResponseDTO>)));
     }
 
     public override async Task HandleAsync(List<Guid> downloadTaskIds, CancellationToken ct)
@@ -39,7 +39,7 @@ public class ClearCompletedDownloadTasksEndpoint : BaseEndpoint<List<Guid>, Resu
         else
             totalRowsDeleted = await ClearAllCompleted(ct);
 
-        await SendFluentResult(Result.Ok(totalRowsDeleted), x => Result.Ok(x).ToResultDTO(), ct);
+        await SendFluentResult(Result.Ok(new CountResponseDTO(totalRowsDeleted)), ct);
     }
 
     private async Task<int> ClearByGuids(List<Guid> downloadTaskIds, CancellationToken ct)

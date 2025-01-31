@@ -15,13 +15,12 @@ public static class PlexServerConnectionMapper
             Relay = source.Relay,
             IPv4 = source.IPv4,
             IPv6 = source.IPv6,
-            Uri = source.Uri,
-            PlexServerId = source.PlexServerId,
             Url = source.Url,
+            PlexServerId = source.PlexServerId,
             IsCustom = source.IsCustom,
             IsPlexTvConnection = source.IsPlexTvConnection,
-            ServerStatusList = source.PlexServerStatus.ToDTO(),
             LatestConnectionStatus = source.LatestConnectionStatus?.ToDTO(),
+            Type = source.Type,
         };
 
     public static List<PlexServerConnectionDTO> ToDTO(this List<PlexServerConnection> source) =>

@@ -1,17 +1,31 @@
 <template>
-	<q-icon
-		:name="local ? 'mdi-lan-connect' : 'mdi-earth'"
-		style="font-size: 2em">
-		<q-tooltip
-			anchor="top middle"
-			self="center middle">
-			<QText :value="local ? $t('general.tooltip.local-connection') : $t('general.tooltip.public-connection') " />
-		</q-tooltip>
-	</q-icon>
+	<QIconTooltip
+		:value="String(type)"
+		:options="options" />
 </template>
 
 <script setup lang="ts">
+import { PlexConnectionTypes } from '@dto';
+import type { QIconTooltipData } from '@interfaces';
+
+const { t } = useI18n();
 defineProps<{
-	local: boolean;
+	type?: PlexConnectionTypes;
 }>();
+
+const options = computed((): QIconTooltipData[] => {
+	return [{
+		value: PlexConnectionTypes.Local,
+		icon: 'mdi-lan-connect',
+		tooltip: t('components.q-connection-icon.tooltip.local-connection'),
+	}, {
+		value: PlexConnectionTypes.Public,
+		icon: 'mdi-earth',
+		tooltip: t('components.q-connection-icon.tooltip.public-connection'),
+	}, {
+		value: PlexConnectionTypes.PlexRelay,
+		icon: 'mdi-plex',
+		tooltip: t('components.q-connection-icon.tooltip.plex-connection'),
+	}];
+});
 </script>

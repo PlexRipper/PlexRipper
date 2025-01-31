@@ -27,7 +27,7 @@ public class SetPreferredPlexServerConnectionEndpointRequestValidator
 }
 
 public class SetPreferredPlexServerConnectionEndpoint
-    : BaseEndpoint<SetPreferredPlexServerConnectionEndpointRequest, ResultDTO>
+    : BaseEndpoint<SetPreferredPlexServerConnectionEndpointRequest, BaseResultDTO>
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
@@ -46,10 +46,10 @@ public class SetPreferredPlexServerConnectionEndpoint
         Get(EndpointPath);
 
         Description(x =>
-            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO))
-                .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))
-                .Produces(StatusCodes.Status404NotFound, typeof(ResultDTO))
-                .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
+            x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))
+                .Produces(StatusCodes.Status400BadRequest, typeof(BaseResultDTO))
+                .Produces(StatusCodes.Status404NotFound, typeof(BaseResultDTO))
+                .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))
         );
     }
 

@@ -310,6 +310,22 @@
                 "symbol": "Enthält ein Sonderzeichen",
                 "length": "Länger als {count} Zeichen"
             }
+        },
+        "q-connection-icon": {
+            "tooltip": {
+                "local-connection": "Lokale Verbindung",
+                "public-connection": "Öffentliche Verbindung",
+                "plex-connection": "Plex-Relay-Verbindung"
+            }
+        },
+        "refresh-account-access-dialog": {
+            "access": {
+                "granted": "Der Zugang wurde neu gewährt!",
+                "revoked": "Der Zugang ist verloren gegangen!",
+                "updated": "Der Zugang wurde aktualisiert!",
+                "unknown": "Der Zugriffsstatus ist unbekannt, da der Plex-Server nicht erreicht werden konnte."
+            },
+            "offline-server-message": "Die Bibliothekszugriffsliste konnte nicht von diesem Server abgerufen werden, da sie offline ist. Versuchen Sie es erneut, wenn der Server wieder online ist."
         }
     },
     "confirmation": {
@@ -373,10 +389,6 @@
         "name-version": "PlexRipper - V{version}",
         "units": {
             "per-second": "/s"
-        },
-        "tooltip": {
-            "local-connection": "Lokale Verbindung",
-            "public-connection": "Öffentliche Verbindung"
         },
         "error": {
             "unknown": "\"Unbekannt\"",
@@ -756,7 +768,8 @@
                     "directory-browser": "Dialogfeld „Verzeichnisbrowser“.",
                     "verification-dialog": "2FA-Verifizierungsdialog",
                     "discord-invite": "Discord-Einladung",
-                    "sync-server-media-dialog": "Dialogfeld „Servermedien synchronisieren“"
+                    "sync-server-media-dialog": "Dialogfeld „Servermedien synchronisieren“",
+                    "refresh-plex-account-access-dialog": "Dialogfeld „Plex-Kontozugriff aktualisieren“"
                 },
                 "header": "Debug-Dialogmodalitäten",
                 "account-dialog-header": "Dialogfeld „Konto“",

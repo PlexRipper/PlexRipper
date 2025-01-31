@@ -21,7 +21,7 @@ public class GetAllDownloadTasksEndpoint : BaseEndpointWithoutRequest<List<Serve
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<ServerDownloadProgressDTO>>))
-                .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
+                .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))
         );
     }
 

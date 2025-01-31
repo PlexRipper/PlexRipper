@@ -39,7 +39,14 @@ public record PlexLibraryAccessRapport(string _plexAccountName, int PlexServerId
         var sb = new StringBuilder();
         sb.AppendLine($"Plex Library Access Rapport for account: {_plexAccountName} on server: {_plexServerName}");
 
-        foreach (var state in Enum.GetValues<PlexAccessState>())
+        foreach (
+            var state in new List<PlexAccessState>
+            {
+                PlexAccessState.Granted,
+                PlexAccessState.Revoked,
+                PlexAccessState.Updated,
+            }
+        )
         {
             sb.AppendLine($"{state} Access:");
             var stateResults = Data.FindAll(x => x.State == state);

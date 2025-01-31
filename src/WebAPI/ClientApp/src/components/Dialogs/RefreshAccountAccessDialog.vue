@@ -5,7 +5,6 @@
 		:cy="DialogType.RefreshAccountAccessDialog"
 		:type="[] as RefreshPlexAccountAccessRapportDTO[]"
 		@opened="onOpened"
-
 		@closed="onClosed">
 		<template #title>
 			<QText
@@ -51,32 +50,29 @@
 								justify="between"
 								class="q-mr-lg"
 								align="center">
-								<!-- Server Header Prepend -->
-								<template v-if="node.isServer">
-									<QCol cols="auto">
+								<QCol cols="auto">
+									<QIconTooltip
+										:value="node.state"
+										:options="options" />
+									<!-- Server Header Prepend -->
+									<template v-if="node.isServer">
 										<!--	Row Icon -->
 										<q-icon
+											class="q-mx-sm"
 											name="mdi-server"
 											size="28px" />
-									</QCol>
-									<QCol
-										cols="auto"
-										class="q-mx-sm">
+
 										<QStatus
+											class="q-mr-sm"
 											:value="!node.isServerOffline" />
-									</QCol>
-								</template>
-								<!-- Library Header  Prepend -->
-								<template v-else-if="node.isLibrary">
-									<QCol cols="auto">
-										<QIconTooltip
-											:value="node.state"
-											:options="options" />
+									</template>
+									<!-- Library Header  Prepend -->
+									<template v-else-if="node.isLibrary">
 										<QMediaTypeIcon
 											class="q-mx-sm"
 											:media-type="node.libraryType" />
-									</QCol>
-								</template>
+									</template>
+								</QCol>
 								<!-- Row Title -->
 								<QCol>
 									<QText

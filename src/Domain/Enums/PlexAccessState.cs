@@ -6,12 +6,15 @@ namespace PlexRipper.Domain;
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum PlexAccessState
 {
+    [EnumMember(Value = nameof(Unknown))]
+    Unknown = 0,
+
     [EnumMember(Value = nameof(Revoked))]
-    Revoked = 0,
+    Revoked = 1,
 
     [EnumMember(Value = nameof(Updated))]
-    Updated = 1,
+    Updated = 2,
 
     [EnumMember(Value = nameof(Granted))]
-    Granted = 2,
+    Granted = 3,
 }

@@ -86,7 +86,9 @@ public class RefreshPlexAccountAccessEndpoint
                             IsServerOffline = libraryAccessRapport.OfflineServers.Contains(x.PlexServerId),
                             PlexServerId = x.PlexServerId,
                             PlexServerName = x.PlexServerName,
-                            State = x.State,
+                            State = libraryAccessRapport.OfflineServers.Contains(x.PlexServerId)
+                                ? PlexAccessState.Unknown
+                                : x.State,
                             LibraryAccess =
                                 libraryAccessRapport
                                     .Reports.Find(y => y.PlexServerId == x.PlexServerId)

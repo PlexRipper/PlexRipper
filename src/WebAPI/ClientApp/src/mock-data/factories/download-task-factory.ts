@@ -4,7 +4,6 @@ import type { MockConfig } from '@mock';
 import { DownloadStatus, type DownloadTaskDTO, DownloadTaskType } from '@dto';
 import { checkConfig, incrementSeed } from '@mock/mock-base';
 import Convert from '@class/Convert';
-import { toDownloadActions } from '@composables';
 
 export function generateDownloadTasks({
 	plexServerId,

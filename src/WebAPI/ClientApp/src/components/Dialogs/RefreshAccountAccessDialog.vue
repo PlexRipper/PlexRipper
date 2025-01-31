@@ -92,9 +92,9 @@
 								:full-width="false"
 								class="q-ml-lg">
 								<QCol>
-									<QText :cy="`access-dialog-server-offline-text-${node.plexServerId}`">
-										Could not retrieve the library access list from this server because it is offline, try again when the server is back online.
-									</QText>
+									<QText
+										:cy="`access-dialog-server-offline-text-${node.plexServerId}`"
+										:value="$t('components.refresh-account-access-dialog.offline-server-message')" />
 								</QCol>
 							</QRow>
 						</template>

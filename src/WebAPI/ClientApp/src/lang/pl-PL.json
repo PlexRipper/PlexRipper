@@ -324,7 +324,8 @@
                 "revoked": "Dostęp został utracony!",
                 "updated": "Dostęp został zaktualizowany!",
                 "unknown": "Stan dostępu jest nieznany, ponieważ nie można nawiązać połączenia z serwerem Plex"
-            }
+            },
+            "offline-server-message": "Nie można pobrać listy dostępu do biblioteki z tego serwera, ponieważ jest on offline. Spróbuj ponownie, gdy serwer będzie online."
         }
     },
     "confirmation": {

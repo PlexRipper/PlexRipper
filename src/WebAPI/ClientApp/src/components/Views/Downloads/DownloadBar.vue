@@ -21,7 +21,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
 import { useDownloadStore } from '@store';
 import { DownloadActions } from '@dto';
 

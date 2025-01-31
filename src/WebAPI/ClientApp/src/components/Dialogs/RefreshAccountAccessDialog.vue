@@ -124,7 +124,7 @@ import type {	PlexLibraryAccessRapportDTO,
 import { DialogType } from '@enums';
 import type { QIconTooltipData } from '@interfaces';
 import { sortBy } from 'lodash-es';
-import { useLibraryStore } from '#imports';
+import { useLibraryStore } from '@store';
 
 const { t } = useI18n();
 const libraryStore = useLibraryStore();

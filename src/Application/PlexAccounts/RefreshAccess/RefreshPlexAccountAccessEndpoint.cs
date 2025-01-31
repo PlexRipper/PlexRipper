@@ -70,6 +70,7 @@ public class RefreshPlexAccountAccessEndpoint
         {
             var serverAccessRapportResult = await _mediator.Send(new RefreshPlexServerAccessCommand(plexAccountId), ct);
             var libraryAccessRapportResult = await _mediator.Send(new RefreshLibraryAccessCommand(plexAccountId), ct);
+            var plexAccountName = await _dbContext.GetPlexAccountDisplayName(plexAccountId, CancellationToken.None);
 
             var serverAccessRapport = serverAccessRapportResult.Value;
             var libraryAccessRapport = libraryAccessRapportResult.Value;
@@ -78,17 +79,20 @@ public class RefreshPlexAccountAccessEndpoint
                 new RefreshPlexAccountAccessRapportDTO
                 {
                     PlexAccountId = plexAccountId,
+                    PlexAccountName = plexAccountName,
                     Access = serverAccessRapport
                         .Data.Select(x => new PlexServerAccessRapportDTO
                         {
                             IsServerOffline = libraryAccessRapport.OfflineServers.Contains(x.PlexServerId),
                             PlexServerId = x.PlexServerId,
+                            PlexServerName = x.PlexServerName,
                             State = x.State,
                             LibraryAccess =
                                 libraryAccessRapport
                                     .Reports.Find(y => y.PlexServerId == x.PlexServerId)
                                     ?.Data.Select(y => new PlexLibraryAccessRapportDTO
                                     {
+                                        PlexLibraryName = y.PlexLibraryName,
                                         PlexServerId = y.PlexServerId,
                                         State = y.State,
                                         PlexLibraryId = y.PlexLibraryId,

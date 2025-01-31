@@ -8,5 +8,7 @@ public record PlexLibraryAccessRapportDTO()
 
     public required int PlexLibraryId { get; set; }
 
+    public required string PlexLibraryName { get; set; }
+
     public required PlexAccessState State { get; set; }
 }

@@ -47,7 +47,8 @@ public static partial class DbContextExtensions
                     plexServer.Id,
                     plexServer.Name
                 )
-                .ToResult();
+                .ToResult()
+                .Add504GatewayTimeoutError();
         }
 
         var successPlexServerConnections = plexServerConnections.Where(x => x.IsOnline).ToList();

@@ -13,7 +13,7 @@ namespace PlexRipper.Application;
 /// <param name="PlexServerId">The id of the <see cref="PlexServer"/> to retrieve <see cref="PlexLibrary">Plex Libraries</see> for.</param>
 ///  <returns>If successful.</returns>
 public record RefreshLibraryAccessCommand(int PlexAccountId, int PlexServerId = 0)
-    : IRequest<Result<List<PlexLibraryAccessCrudRapport>>>;
+    : IRequest<Result<PlexLibraryAccessRefreshResponse>>;
 
 public class RefreshLibraryAccessValidator : AbstractValidator<RefreshLibraryAccessCommand>
 {
@@ -25,7 +25,7 @@ public class RefreshLibraryAccessValidator : AbstractValidator<RefreshLibraryAcc
 }
 
 public class RefreshLibraryAccessHandler
-    : IRequestHandler<RefreshLibraryAccessCommand, Result<List<PlexLibraryAccessCrudRapport>>>
+    : IRequestHandler<RefreshLibraryAccessCommand, Result<PlexLibraryAccessRefreshResponse>>
 {
     private readonly ILog _log;
     private readonly IMediator _mediator;
@@ -45,7 +45,7 @@ public class RefreshLibraryAccessHandler
         _plexServiceApi = plexServiceApi;
     }
 
-    public async Task<Result<List<PlexLibraryAccessCrudRapport>>> Handle(
+    public async Task<Result<PlexLibraryAccessRefreshResponse>> Handle(
         RefreshLibraryAccessCommand command,
         CancellationToken cancellationToken
     )
@@ -54,42 +54,66 @@ public class RefreshLibraryAccessHandler
         var plexServerId = command.PlexServerId;
 
         var plexLibraries = new List<PlexLibrary>();
+        var plexServers = new List<PlexServer>();
 
+        // Determine the Plex servers to refresh the Plex libraries for
         if (plexServerId == 0)
         {
-            var result = await _dbContext.GetAccessiblePlexServers(plexAccountId, cancellationToken);
+            var result = await _dbContext.GetAccessiblePlexServers(plexAccountId, CancellationToken.None);
             if (result.IsFailed)
                 return result.ToResult();
 
-            var plexServers = result.Value;
-            if (!plexServers.Any())
-            {
-                var plexAccountName = await _dbContext.GetPlexAccountDisplayName(plexAccountId, cancellationToken);
-                _log.Warning("No accessible Plex servers found for PlexAccount {PlexAccountName}", plexAccountName);
-                return Result.Ok(new List<PlexLibraryAccessCrudRapport>());
-            }
-
-            var libraryResults = await Task.WhenAll(
-                plexServers.Select(x => RefreshLibrary(x.Id, plexAccountId, cancellationToken))
-            );
-
-            if (libraryResults.All(x => x.IsFailed))
-                return Result.Merge(libraryResults).ToResult();
-
-            plexLibraries = libraryResults.Where(x => x.IsSuccess).SelectMany(x => x.Value).ToList();
+            plexServers = result.Value;
         }
         else
         {
-            var libraryResults = await RefreshLibrary(plexServerId, plexAccountId, cancellationToken);
-            if (libraryResults.IsFailed)
-                return libraryResults.ToResult();
-
-            plexLibraries.AddRange(libraryResults.Value);
+            var plexServer = await _dbContext.PlexServers.GetAsync(plexServerId, CancellationToken.None);
+            if (plexServer is not null)
+            {
+                plexServers.Add(plexServer);
+            }
         }
 
-        return await _mediator.Send(
+        if (!plexServers.Any())
+        {
+            var plexAccountName = await _dbContext.GetPlexAccountDisplayName(plexAccountId, cancellationToken);
+            _log.Warning("No accessible Plex servers found for PlexAccount {PlexAccountName}", plexAccountName);
+            return Result.Ok(new PlexLibraryAccessRefreshResponse() { Reports = [], OfflineServers = [] });
+        }
+
+        // Refresh Plex libraries
+        var failedServers = new List<int>();
+
+        var libraryResults = await Task.WhenAll(
+            plexServers.Select(async server =>
+            {
+                var refreshResult = await RefreshLibrary(server.Id, plexAccountId, cancellationToken);
+                if (refreshResult.ToResult().Has504GatewayTimeoutError())
+                {
+                    failedServers.Add(server.Id);
+                }
+
+                return refreshResult;
+            })
+        );
+
+        if (libraryResults.All(x => x.IsFailed))
+            return Result.Merge(libraryResults).ToResult();
+
+        plexLibraries = libraryResults.Where(x => x.IsSuccess).SelectMany(x => x.Value).ToList();
+
+        var updateResult = await _mediator.Send(
             new AddOrUpdatePlexLibrariesCommand { PlexAccountId = plexAccountId, PlexLibraries = plexLibraries },
             cancellationToken
+        );
+
+        if (updateResult.IsFailed)
+        {
+            return updateResult.ToResult();
+        }
+
+        return Result.Ok(
+            new PlexLibraryAccessRefreshResponse { Reports = updateResult.Value, OfflineServers = failedServers }
         );
     }
 
@@ -115,6 +139,7 @@ public class RefreshLibraryAccessHandler
                 plexAccountId,
                 cancellationToken
             );
+
             if (libraries.IsFailed)
             {
                 _log.Here()

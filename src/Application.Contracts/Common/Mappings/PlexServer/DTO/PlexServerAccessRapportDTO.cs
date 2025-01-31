@@ -1,10 +1,14 @@
-namespace PlexRipper.Application;
+using PlexRipper.Domain;
 
-public record PlexServerAccessRapportDTO
+namespace Application.Contracts;
+
+public record PlexServerAccessRapportDTO()
 {
-    public required List<int> Created { get; init; } = [];
+    public required int PlexServerId { get; set; }
 
-    public required List<int> Updated { get; init; } = [];
+    public required PlexAccessState State { get; set; }
 
-    public required List<int> Deleted { get; init; } = [];
+    public required bool IsServerOffline { get; set; }
+
+    public required List<PlexLibraryAccessRapportDTO> LibraryAccess { get; set; }
 }

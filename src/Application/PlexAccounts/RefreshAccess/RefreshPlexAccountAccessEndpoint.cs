@@ -79,13 +79,14 @@ public class RefreshPlexAccountAccessEndpoint
                 {
                     PlexAccountId = plexAccountId,
                     Access = serverAccessRapport
-                        .Data.Select(x => new global::Application.Contracts.PlexServerAccessRapportDTO
+                        .Data.Select(x => new PlexServerAccessRapportDTO
                         {
+                            IsServerOffline = libraryAccessRapport.OfflineServers.Contains(x.PlexServerId),
                             PlexServerId = x.PlexServerId,
                             State = x.State,
                             LibraryAccess =
                                 libraryAccessRapport
-                                    .Find(y => y.PlexServerId == x.PlexServerId)
+                                    .Reports.Find(y => y.PlexServerId == x.PlexServerId)
                                     ?.Data.Select(y => new PlexLibraryAccessRapportDTO
                                     {
                                         PlexServerId = y.PlexServerId,

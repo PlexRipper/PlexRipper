@@ -41,7 +41,8 @@ public class RefreshLibraryAccessCommandUnitTests : BaseUnitTest<RefreshLibraryA
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        result.Value.ShouldBeEmpty();
+        var reports = result.Value.Reports;
+        reports.ShouldNotBeEmpty();
     }
 
     [Fact]
@@ -84,7 +85,8 @@ public class RefreshLibraryAccessCommandUnitTests : BaseUnitTest<RefreshLibraryA
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        result.Value.ShouldNotBeEmpty();
-        result.Value.First().GetGranted.Count.ShouldBe(5);
+        var reports = result.Value.Reports;
+        reports.ShouldNotBeEmpty();
+        reports.First().GetGranted.Count.ShouldBe(5);
     }
 }

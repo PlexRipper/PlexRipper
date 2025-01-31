@@ -42,7 +42,7 @@ public record PlexServerAccessRapport(string _plexAccountName)
             }
             else
             {
-                x.Append("No Changes");
+                x.Append(" - No Changes");
             }
         }
 

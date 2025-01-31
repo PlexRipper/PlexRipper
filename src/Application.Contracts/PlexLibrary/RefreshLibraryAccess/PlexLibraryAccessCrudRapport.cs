@@ -52,7 +52,7 @@ public record PlexLibraryAccessCrudRapport(string _plexAccountName, int PlexServ
             }
             else
             {
-                sb.AppendLine("No Changes");
+                sb.AppendLine(" - No Changes");
             }
         }
 

@@ -44,11 +44,13 @@
 						:nodes="plexAccount.servers"
 						:node-key="'id' as keyof IAccessNode"
 						dense
+						:data-cy="`refresh-account-access-tree-${plexAccount.plexAccountId}`"
 						default-expand-all>
 						<template #default-header="{ node }: { node: IAccessNode }">
 							<QRow
 								justify="between"
 								class="q-mr-lg"
+								:cy="`access-row-${node.id}`"
 								align="center">
 								<QCol cols="auto">
 									<QIconTooltip
@@ -80,11 +82,7 @@
 										class="q-ml-sm q-mt-auto"
 										:value="node.name"
 										size="body2"
-										:cy="
-											node.isServer
-												? 'refresh-account-access-dialog-server-title'
-												: 'refresh-account-access-dialog-library-title'
-										" />
+										:cy="`access-dialog-title-${node.id}`" />
 								</QCol>
 							</QRow>
 						</template>
@@ -94,7 +92,7 @@
 								:full-width="false"
 								class="q-ml-lg">
 								<QCol>
-									<QText>
+									<QText :cy="`access-dialog-server-offline-text-${node.plexServerId}`">
 										Could not retrieve the library access list from this server because it is offline, try again when the server is back online.
 									</QText>
 								</QCol>
@@ -135,6 +133,21 @@ const refreshRapports = ref<RefreshPlexAccountAccessRapportDTO[]>([]);
 const expanded = ref<number[]>([]);
 const tab = ref(0);
 
+function sortState(x) {
+	switch (x.state) {
+		case PlexAccessState.Granted:
+			return 0;
+		case PlexAccessState.Revoked:
+			return 1;
+		case PlexAccessState.Updated:
+			return 2;
+		case PlexAccessState.Unknown:
+			return 3;
+		default:
+			return 10;
+	}
+}
+
 const plexAccessNodes = computed((): IPlexAccountAccessRapportNode[] => {
 	return get(refreshRapports).map((rapport) => {
 		const servers = rapport.access.map((x): IAccessNode => ({
@@ -162,24 +175,13 @@ const plexAccessNodes = computed((): IPlexAccountAccessRapportNode[] => {
 				};
 			}),
 			// Sort first by state and then by title
-			(x) => {
-				switch (x.state) {
-					case PlexAccessState.Granted:
-						return 0;
-					case PlexAccessState.Revoked:
-						return 1;
-					case PlexAccessState.Updated:
-						return 2;
-					default:
-						return 10;
-				}
-			}, (x) => x.name.toLowerCase()),
+			(x) => sortState(x), (x) => x.name.toLowerCase()),
 		}));
 
 		return {
 			plexAccountId: rapport.plexAccountId,
 			plexAccountName: rapport.plexAccountName,
-			servers: sortBy(servers, (x) => !x.isServerOffline, (x) => x.name.toLowerCase()),
+			servers: sortBy(servers, (x) => !x.isServerOffline, (x) => sortState(x), (x) => x.name.toLowerCase()),
 		};
 	});
 });
@@ -202,6 +204,12 @@ const options = computed((): QIconTooltipData[] =>
 		icon: 'mdi-timeline-check-outline',
 		tooltip: t('components.refresh-account-access-dialog.access.updated'),
 		color: 'grey',
+	},
+	{
+		value: PlexAccessState.Unknown,
+		icon: 'mdi-timeline-question-outline',
+		tooltip: t('components.refresh-account-access-dialog.access.unknown'),
+		color: 'warning',
 	},
 	]);
 

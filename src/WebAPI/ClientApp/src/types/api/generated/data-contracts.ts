@@ -446,6 +446,7 @@ export enum NotificationLevel {
 }
 
 export enum PlexAccessState {
+  Unknown = "Unknown",
   Revoked = "Revoked",
   Updated = "Updated",
   Granted = "Granted",

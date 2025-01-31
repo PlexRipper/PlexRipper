@@ -322,7 +322,8 @@
             "access": {
                 "granted": "Dostęp został niedawno przyznany!",
                 "revoked": "Dostęp został utracony!",
-                "updated": "Dostęp został zaktualizowany!"
+                "updated": "Dostęp został zaktualizowany!",
+                "unknown": "Stan dostępu jest nieznany, ponieważ nie można nawiązać połączenia z serwerem Plex"
             }
         }
     },

@@ -1,18 +1,20 @@
 <template>
+	<q-tooltip>
+		{{ value ? $t('components.q-status.server-connectable') : $t('components.q-status.server-unconnectable') }}
+	</q-tooltip>
 	<span
 		v-if="pulse"
 		v-bind="$attrs"
 		class="status-indicator"
 		:[status]="true"
-		pulse />
+		pulse
+		data-cy="status-indicator-online" />
 	<span
 		v-else
 		v-bind="$attrs"
 		class="status-indicator"
+		data-cy="status-indicator-offline"
 		:[status]="true" />
-	<q-tooltip>
-		{{ value ? $t('components.q-status.server-connectable') : $t('components.q-status.server-unconnectable') }}
-	</q-tooltip>
 </template>
 
 <script setup lang="ts">

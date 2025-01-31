@@ -766,7 +766,8 @@
                     "directory-browser": "Directory Browser Dialog",
                     "verification-dialog": "2FA Verification Dialog",
                     "discord-invite": "Discord Invite",
-                    "sync-server-media-dialog": "Sync Server Media Dialog"
+                    "sync-server-media-dialog": "Sync Server Media Dialog",
+                    "refresh-plex-account-access-dialog": "Refresh Plex Account Access Dialog"
                 },
                 "header": "Debug Dialog Modals",
                 "account-dialog-header": "Account Dialog",

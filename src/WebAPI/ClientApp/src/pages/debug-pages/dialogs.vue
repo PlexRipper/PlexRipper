@@ -92,6 +92,16 @@
 						<DirectoryBrowser />
 					</q-td>
 				</q-tr>
+
+				<q-tr>
+					<q-td>
+						<DebugButton
+							data-cy="refresh-plex-account-access-dialog"
+							:label="$t('pages.debug.dialogs.buttons.refresh-plex-account-access-dialog')"
+							@click="dialogStore.openRefreshPlexAccountAccessDialog([])" />
+						<DirectoryBrowser />
+					</q-td>
+				</q-tr>
 			</q-markup-table>
 		</QSection>
 		<!-- Account Dialogs -->

@@ -766,7 +766,8 @@
                     "directory-browser": "Okno przeglądarki katalogów",
                     "verification-dialog": "Dialog weryfikacji 2FA",
                     "discord-invite": "Zaproszenie na Discord",
-                    "sync-server-media-dialog": "Okno dialogowe Synchronizuj serwer multimediów"
+                    "sync-server-media-dialog": "Okno dialogowe Synchronizuj serwer multimediów",
+                    "refresh-plex-account-access-dialog": "Odśwież okno dialogowe dostępu do konta Plex"
                 },
                 "header": "Moduły dialogowe debugowania",
                 "account-dialog-header": "Okno dialogowe konta",

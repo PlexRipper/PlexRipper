@@ -25,9 +25,3 @@ const pulse = computed(() => {
 	return props.value;
 });
 </script>
-
-<style lang="scss">
-.status-indicator {
-	margin-bottom: 2px;
-}
-</style>

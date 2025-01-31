@@ -766,7 +766,8 @@
                     "directory-browser": "Boîte de dialogue Navigateur de répertoire",
                     "verification-dialog": "Boîte de dialogue de vérification 2FA",
                     "discord-invite": "Invitation Discord",
-                    "sync-server-media-dialog": "Boîte de dialogue Synchroniser les médias du serveur"
+                    "sync-server-media-dialog": "Boîte de dialogue Synchroniser les médias du serveur",
+                    "refresh-plex-account-access-dialog": "Actualiser la boîte de dialogue d'accès au compte Plex"
                 },
                 "header": "Modaux de dialogue de débogage",
                 "account-dialog-header": "Dialogue de compte",

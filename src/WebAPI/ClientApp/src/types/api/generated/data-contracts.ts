@@ -680,6 +680,7 @@ export enum PlexMediaType {
 }
 
 export interface PlexServerAccessRapportDTO {
+  isServerOffline: boolean;
   libraryAccess: PlexLibraryAccessRapportDTO[];
   /** @format int32 */
   plexServerId: number;

@@ -766,7 +766,8 @@
                     "directory-browser": "Dialogfeld „Verzeichnisbrowser“.",
                     "verification-dialog": "2FA-Verifizierungsdialog",
                     "discord-invite": "Discord-Einladung",
-                    "sync-server-media-dialog": "Dialogfeld „Servermedien synchronisieren“"
+                    "sync-server-media-dialog": "Dialogfeld „Servermedien synchronisieren“",
+                    "refresh-plex-account-access-dialog": "Dialogfeld „Plex-Kontozugriff aktualisieren“"
                 },
                 "header": "Debug-Dialogmodalitäten",
                 "account-dialog-header": "Dialogfeld „Konto“",

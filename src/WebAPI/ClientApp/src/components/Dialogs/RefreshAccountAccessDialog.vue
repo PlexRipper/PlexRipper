@@ -43,45 +43,65 @@
 					<q-tree
 						v-model:expanded="expanded"
 						:nodes="plexAccount.servers"
-						:node-key="'id' as keyof IServerAccessNode"
-						:children-key="'libraries' as keyof IServerAccessNode"
+						:node-key="'id' as keyof IAccessNode"
+						:children-key="'libraries' as keyof IAccessNode"
+						dense
 						default-expand-all>
-						<template #default-header="{ node }: { node: ILibraryAccessNode }">
+						<template #default-header="{ node }: { node: IAccessNode }">
 							<QRow
 								justify="between"
 								class="q-mr-lg"
-								align="center"
-								gutter="sm">
-								<QCol
-									v-if="node.nodeType === 'library'"
-									cols="auto">
-									<QIconTooltip
-										:value="node.state"
-										:options="options" />
-								</QCol>
-								<QCol cols="auto">
-									<!--	Row Icon -->
-									<q-icon
-										v-if="node.nodeType === 'server'"
-										name="mdi-server"
-										size="28px"
-										class="q-mr-sm" />
-									<QMediaTypeIcon
-										v-else
-										:media-type="node.libraryType" />
-								</QCol>
+								align="center">
+								<!-- Server Header Prepend -->
+								<template v-if="node.isServer">
+									<QCol cols="auto">
+										<!--	Row Icon -->
+										<q-icon
+											name="mdi-server"
+											size="28px" />
+									</QCol>
+									<QCol
+										cols="auto"
+										class="q-mx-sm">
+										<QStatus
+											:value="!node.isServerOffline" />
+									</QCol>
+								</template>
+								<!-- Library Header  Prepend -->
+								<template v-else-if="node.isLibrary">
+									<QCol cols="auto">
+										<QIconTooltip
+											:value="node.state"
+											:options="options" />
+										<QMediaTypeIcon
+											class="q-mx-sm"
+											:media-type="node.libraryType" />
+									</QCol>
+								</template>
+								<!-- Row Title -->
 								<QCol>
-									<div :class="{ 'text-weight-bold': true }">
-										<!-- Row Title	-->
-										<QText
-											class="q-ml-sm"
-											:value="node.name"
-											:cy="
-												node.nodeType === 'server'
-													? 'refresh-account-access-dialog-server-title'
-													: 'refresh-account-access-dialog-library-title'
-											" />
-									</div>
+									<QText
+										:bold="node.isServer? 'bold' : 'regular'"
+										class="q-ml-sm q-mt-auto"
+										:value="node.name"
+										size="body2"
+										:cy="
+											node.isServer
+												? 'refresh-account-access-dialog-server-title'
+												: 'refresh-account-access-dialog-library-title'
+										" />
+								</QCol>
+							</QRow>
+						</template>
+						<template #default-body="{ node }: { node: IAccessNode }">
+							<QRow
+								v-if="node.isServer && node.isServerOffline"
+								:full-width="false"
+								class="q-ml-lg">
+								<QCol>
+									<QText>
+										Could not retrieve the library access list from this server because it is offline, try again when the server is back online.
+									</QText>
 								</QCol>
 							</QRow>
 						</template>
@@ -104,13 +124,10 @@
 
 <script setup lang="ts">
 import { get, set } from '@vueuse/core';
-import {
-	PlexAccessState,
-	type PlexLibraryAccessRapportDTO,
-	type PlexMediaType,
-	type PlexServerAccessRapportDTO,
-	type RefreshPlexAccountAccessRapportDTO,
-} from '@dto';
+import type {	PlexLibraryAccessRapportDTO,
+	PlexServerAccessRapportDTO,
+	RefreshPlexAccountAccessRapportDTO } from '@dto';
+import {	PlexAccessState,	PlexMediaType } from '@dto';
 import { DialogType } from '@enums';
 import type { QIconTooltipData } from '@interfaces';
 import { sortBy } from 'lodash-es';
@@ -133,44 +150,53 @@ const plexAccessNodes = computed((): IPlexAccountAccessRapportNode[] => {
 			throw new Error(`Could not find account with id ${rapport.plexAccountId}`);
 		}
 
+		const servers = rapport.access.map((x): IAccessNode => ({
+			id: x.plexServerId,
+			plexServerId: x.plexServerId,
+			state: x.state,
+			isServerOffline: x.isServerOffline,
+			name: serverStore.getServerName(x.plexServerId),
+			isServer: true,
+			isLibrary: false,
+			libraryType: PlexMediaType.None,
+			plexLibraryId: 0,
+			libraries: sortBy(x.libraryAccess.map((y): IAccessNode => {
+				const library = libraryStore.getLibrary(y.plexLibraryId);
+				if (!library) {
+					throw new Error(`Could not find library with id ${rapport.plexAccountId}`);
+				}
+				return {
+					id: library.id,
+					libraryType: library.type,
+					name: library.title,
+					plexLibraryId: library.id,
+					plexServerId: library.plexServerId,
+					state: y.state,
+					isServer: false,
+					isLibrary: true,
+					libraries: [],
+					isServerOffline: false,
+				};
+			}),
+			// Sort first by state and then by title
+			(x) => {
+				switch (x.state) {
+					case PlexAccessState.Granted:
+						return 0;
+					case PlexAccessState.Revoked:
+						return 1;
+					case PlexAccessState.Updated:
+						return 2;
+					default:
+						return 10;
+				}
+			}, (x) => x.name.toLowerCase()),
+		}));
+
 		return {
 			plexAccountId: account.id,
 			plexAccountName: account.displayName,
-			servers: rapport.access.map((x) => ({
-				id: x.plexServerId,
-				plexServerId: x.plexServerId,
-				state: x.state,
-				name: serverStore.getServerName(x.plexServerId),
-				nodeType: 'server',
-				libraries: sortBy(x.libraryAccess.map((y) => {
-					const library = libraryStore.getLibrary(y.plexLibraryId);
-					if (!library) {
-						throw new Error(`Could not find library with id ${rapport.plexAccountId}`);
-					}
-					return {
-						id: library.id,
-						libraryType: library.type,
-						name: library.title,
-						plexLibraryId: library.id,
-						plexServerId: library.plexServerId,
-						state: y.state,
-						nodeType: 'library',
-					};
-				}),
-				// Sort first by state and then by title
-				(x) => {
-					switch (x.state) {
-						case PlexAccessState.Granted:
-							return 0;
-						case PlexAccessState.Revoked:
-							return 1;
-						case PlexAccessState.Updated:
-							return 2;
-						default:
-							return 10;
-					}
-				}, (x) => x.name.toLowerCase()),
-			})),
+			servers: sortBy(servers, (x) => x.isServerOffline),
 		};
 	});
 });
@@ -180,15 +206,21 @@ const options = computed((): QIconTooltipData[] =>
 		value: PlexAccessState.Granted,
 		icon: 'mdi-timeline-plus-outline',
 		tooltip: t('components.refresh-account-access-dialog.access.granted'),
-	}, {
-		value: PlexAccessState.Updated,
-		icon: 'mdi-timeline-check-outline',
-		tooltip: t('components.refresh-account-access-dialog.access.updated'),
-	}, {
+		color: 'positive',
+	},
+	{
 		value: PlexAccessState.Revoked,
 		icon: 'mdi-timeline-alert-outline',
 		tooltip: t('components.refresh-account-access-dialog.access.revoked'),
-	}]);
+		color: 'negative',
+	},
+	{
+		value: PlexAccessState.Updated,
+		icon: 'mdi-timeline-check-outline',
+		tooltip: t('components.refresh-account-access-dialog.access.updated'),
+		color: 'grey',
+	},
+	]);
 
 function onOpened(data: RefreshPlexAccountAccessRapportDTO[]) {
 	if (data && data.length > 0) {
@@ -201,23 +233,18 @@ function onClosed() {
 	set(refreshRapports, []);
 }
 
-interface IServerAccessNode extends Omit<PlexServerAccessRapportDTO, 'libraryAccess'> {
+interface IAccessNode extends PlexLibraryAccessRapportDTO, Omit<PlexServerAccessRapportDTO, 'libraryAccess'> {
 	id: number;
 	name: string;
-	nodeType: 'library' | 'server';
-	libraries: ILibraryAccessNode[];
-}
-
-interface ILibraryAccessNode extends PlexLibraryAccessRapportDTO {
-	id: number;
-	name: string;
-	nodeType: 'library' | 'server';
+	isServer: boolean;
+	isLibrary: boolean;
+	libraries: IAccessNode[];
 	libraryType: PlexMediaType;
 }
 
 interface IPlexAccountAccessRapportNode {
 	plexAccountId: number;
 	plexAccountName: string;
-	servers: IServerAccessNode[];
+	servers: IAccessNode[];
 }
 </script>

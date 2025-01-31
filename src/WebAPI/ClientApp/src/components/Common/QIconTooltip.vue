@@ -1,6 +1,7 @@
 <template>
 	<q-icon
 		:name="data.icon"
+		:color="data.color"
 		style="font-size: 2em">
 		<q-tooltip
 			anchor="top middle"
@@ -29,6 +30,7 @@ const data = computed((): QIconTooltipData => {
 			tooltip: t('general.commands.unknown'),
 			icon: 'mdi-unknown',
 			value: '',
+			color: 'primary',
 		};
 	}
 	return result;

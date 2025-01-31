@@ -67,7 +67,7 @@ public class RefreshLibraryAccessCommandUnitTests : BaseUnitTest<RefreshLibraryA
             .ReturnsAsync(Result.Ok(plexLibraries))
             .Verifiable(Times.Once);
 
-        var rapport = new PlexLibraryAccessCrudRapport("Piet", 1, plexServer.Name);
+        var rapport = new PlexLibraryAccessRapport("Piet", 1, plexServer.Name);
 
         rapport.AddGranted(1, plexLibraries.Find(x => x.Id == 1)?.Name ?? string.Empty);
         rapport.AddGranted(2, plexLibraries.Find(x => x.Id == 2)?.Name ?? string.Empty);
@@ -76,7 +76,7 @@ public class RefreshLibraryAccessCommandUnitTests : BaseUnitTest<RefreshLibraryA
         rapport.AddGranted(5, plexLibraries.Find(x => x.Id == 5)?.Name ?? string.Empty);
 
         mock.SetupMediator(It.IsAny<AddOrUpdatePlexLibrariesCommand>)
-            .ReturnsAsync(Result.Ok(new List<PlexLibraryAccessCrudRapport> { rapport }))
+            .ReturnsAsync(Result.Ok(new List<PlexLibraryAccessRapport> { rapport }))
             .Verifiable(Times.Once);
 
         // Act

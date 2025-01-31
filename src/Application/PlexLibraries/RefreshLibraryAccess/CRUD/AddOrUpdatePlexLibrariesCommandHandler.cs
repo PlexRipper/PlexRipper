@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application;
 
-public record AddOrUpdatePlexLibrariesCommand : IRequest<Result<List<PlexLibraryAccessCrudRapport>>>
+public record AddOrUpdatePlexLibrariesCommand : IRequest<Result<List<PlexLibraryAccessRapport>>>
 {
     public required int PlexAccountId { get; init; }
 
@@ -30,11 +30,11 @@ public class AddOrUpdatePlexLibrariesValidator : AbstractValidator<AddOrUpdatePl
 }
 
 public class AddOrUpdatePlexLibrariesCommandHandler
-    : IRequestHandler<AddOrUpdatePlexLibrariesCommand, Result<List<PlexLibraryAccessCrudRapport>>>
+    : IRequestHandler<AddOrUpdatePlexLibrariesCommand, Result<List<PlexLibraryAccessRapport>>>
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
-    private readonly List<PlexLibraryAccessCrudRapport> _list = [];
+    private readonly List<PlexLibraryAccessRapport> _list = [];
 
     public AddOrUpdatePlexLibrariesCommandHandler(ILog log, IPlexRipperDbContext dbContext)
     {
@@ -42,7 +42,7 @@ public class AddOrUpdatePlexLibrariesCommandHandler
         _dbContext = dbContext;
     }
 
-    public async Task<Result<List<PlexLibraryAccessCrudRapport>>> Handle(
+    public async Task<Result<List<PlexLibraryAccessRapport>>> Handle(
         AddOrUpdatePlexLibrariesCommand command,
         CancellationToken cancellationToken
     )
@@ -209,7 +209,7 @@ public class AddOrUpdatePlexLibrariesCommandHandler
         return Result.Ok(_list);
     }
 
-    private PlexLibraryAccessCrudRapport FindOrCreate(int plexServerId, string plexAccountName, string plexServerName)
+    private PlexLibraryAccessRapport FindOrCreate(int plexServerId, string plexAccountName, string plexServerName)
     {
         var x = _list.Find(x => x.PlexServerId == plexServerId);
         if (x is not null)
@@ -217,7 +217,7 @@ public class AddOrUpdatePlexLibrariesCommandHandler
             return x;
         }
 
-        _list.Add(new PlexLibraryAccessCrudRapport(plexAccountName, plexServerId, plexServerName));
+        _list.Add(new PlexLibraryAccessRapport(plexAccountName, plexServerId, plexServerName));
         return _list.Last();
     }
 }

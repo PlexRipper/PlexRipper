@@ -4,7 +4,7 @@ using PlexRipper.Domain;
 
 namespace Application.Contracts;
 
-public record PlexLibraryAccessCrudRapport(string _plexAccountName, int PlexServerId, string _plexServerName)
+public record PlexLibraryAccessRapport(string _plexAccountName, int PlexServerId, string _plexServerName)
 {
     private readonly string _plexAccountName = _plexAccountName;
     private readonly string _plexServerName = _plexServerName;

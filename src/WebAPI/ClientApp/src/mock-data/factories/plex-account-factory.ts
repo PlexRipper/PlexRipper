@@ -1,4 +1,5 @@
 import {
+	rand,
 	randBoolean,
 	randCompanyName,
 	randEmail,
@@ -10,7 +11,14 @@ import {
 } from '@ngneat/falso';
 import { times } from 'lodash-es';
 import type { MockConfig } from '@mock';
-import type { PlexAccountDTO, PlexLibraryDTO, PlexServerDTO } from '@dto';
+import {
+	PlexAccessState,
+	type PlexAccountDTO, type PlexLibraryAccessRapportDTO,
+	type PlexLibraryDTO,
+	type PlexServerAccessRapportDTO,
+	type PlexServerDTO,
+	type RefreshPlexAccountAccessRapportDTO,
+} from '@dto';
 import { checkConfig, incrementSeed } from '@mock/mock-base';
 
 let plexAccountIdIndex = 1;
@@ -74,4 +82,28 @@ export function generatePlexAccounts({
 	return times(validConfig.plexAccountCount, () =>
 		generatePlexAccount({ id: plexAccountIdIndex++, plexServers, plexLibraries, partialData, config }),
 	);
+}
+
+export function generateRefreshPlexAccountAccessRapportDTO({ plexAccounts, plexServers, plexLibraries }: { plexAccounts: PlexAccountDTO[]; plexServers: PlexServerDTO[]; plexLibraries: PlexLibraryDTO[] }) {
+	return plexAccounts.map((account): RefreshPlexAccountAccessRapportDTO => ({
+		plexAccountId: account.id,
+		plexAccountName: account.displayName,
+		access: plexServers.map((server): PlexServerAccessRapportDTO => {
+			const isServerOffline = randBoolean();
+			return ({
+				plexServerId: server.id,
+				isServerOffline,
+				plexServerName: server.name,
+				state: isServerOffline ? PlexAccessState.Unknown : rand([PlexAccessState.Granted, PlexAccessState.Updated, PlexAccessState.Revoked]),
+				libraryAccess: isServerOffline
+					? []
+					: plexLibraries.filter((library) => library.plexServerId == server.id).map((library): PlexLibraryAccessRapportDTO => ({
+							plexLibraryName: library.title,
+							plexLibraryId: library.id,
+							plexServerId: library.plexServerId,
+							state: rand([PlexAccessState.Granted, PlexAccessState.Updated, PlexAccessState.Revoked]),
+						})),
+			});
+		}),
+	}));
 }

@@ -33,8 +33,8 @@
 							<q-btn
 								flat
 								icon="mdi-refresh"
-								:loading="loading[0] || loading[index]"
-								:disabled="isLoading"
+								:loading="accountStore.accessSyncLoading"
+								:disabled="accountStore.accessSyncLoading"
 								:data-cy="`refresh-account-${account.id}-btn`"
 								@click.stop="runReSyncAccount(account.id)" />
 						</q-item-section>
@@ -74,15 +74,12 @@ const accountStore = useAccountStore();
 const authStore = useAuthenticationStore();
 const dialogStore = useDialogStore();
 
-const loading = ref<Record<number, boolean>>({ 0: false });
-const isLoading = computed(() => Object.values(get(loading)).some((x) => x));
-
 const accountsDisplay = computed(() => {
 	return [
 		{
 			id: 0,
 			displayName: t('components.account-selector.all-accounts'),
-			loading: get(loading)[0],
+			loading: accountStore.accessSyncLoading,
 			username: '',
 		},
 		...accountStore.accounts
@@ -91,7 +88,7 @@ const accountsDisplay = computed(() => {
 				return {
 					id: x.id,
 					displayName: x.displayName,
-					loading: get(loading)[x.id] ?? false,
+					loading: accountStore.accessSyncLoading,
 					username: x.username,
 				};
 			}),
@@ -103,12 +100,8 @@ function updateActiveAccountId(accountId: number): void {
 }
 
 function runReSyncAccount(accountId = 0): void {
-	get(loading)[accountId] = true;
-
 	useSubscription(
-		accountStore.reSyncAccount(accountId).pipe(tap((data) => dialogStore.openRefreshPlexAccountAccessDialog(data.value ?? []))).subscribe(() => {
-			get(loading)[accountId] = false;
-		}),
+		accountStore.reSyncAccount(accountId).pipe(tap((data) => dialogStore.openRefreshPlexAccountAccessDialog(data.value ?? []))).subscribe(),
 	);
 }
 

@@ -1,13 +1,7 @@
 import { PlexAccountPaths } from '@api-urls';
-import { generateResultDTO } from '@mock';
-import { rand, randBoolean } from '@ngneat/falso';
+import { generateRefreshPlexAccountAccessRapportDTO, generateResultDTO } from '@mock';
 
-import {
-	PlexAccessState,
-	type PlexLibraryAccessRapportDTO,
-	type PlexServerAccessRapportDTO,
-	type RefreshPlexAccountAccessRapportDTO,
-} from '@dto';
+import { DialogType } from '@enums';
 
 describe('Refresh Account Access Dialog', () => {
 	beforeEach(() => {
@@ -23,27 +17,9 @@ describe('Refresh Account Access Dialog', () => {
 
 	it('Should navigate the plex account refresh dialog tabs when multiple account access are refreshed', () => {
 		cy.getPageData().then(({ plexAccounts, plexServers, plexLibraries }) => {
-			const data = plexAccounts.map((account): RefreshPlexAccountAccessRapportDTO => ({
-				plexAccountId: account.id,
-				plexAccountName: account.displayName,
-				access: plexServers.map((server): PlexServerAccessRapportDTO => {
-					const isServerOffline = randBoolean();
-					return ({
-						plexServerId: server.id,
-						isServerOffline,
-						plexServerName: server.name,
-						state: isServerOffline ? PlexAccessState.Unknown : rand([PlexAccessState.Granted, PlexAccessState.Updated, PlexAccessState.Revoked]),
-						libraryAccess: isServerOffline
-							? []
-							: plexLibraries.filter((library) => library.plexServerId == server.id).map((library): PlexLibraryAccessRapportDTO => ({
-									plexLibraryName: library.title,
-									plexLibraryId: library.id,
-									plexServerId: library.plexServerId,
-									state: rand([PlexAccessState.Granted, PlexAccessState.Updated, PlexAccessState.Revoked]),
-								})),
-					});
-				}),
-			}));
+			const data = generateRefreshPlexAccountAccessRapportDTO({
+				plexAccounts, plexLibraries, plexServers,
+			});
 
 			cy.getCy('account-selector-btn').click();
 
@@ -55,6 +31,8 @@ describe('Refresh Account Access Dialog', () => {
 				});
 
 				cy.getCy(`refresh-account-${plexAccountId}-btn`).click();
+
+				cy.getCy(DialogType.RefreshAccountAccessDialog).should('be.visible');
 
 				function verifyTab(plexAccountId: number) {
 					const rapport = data.find((x) => x.plexAccountId == plexAccountId)!;

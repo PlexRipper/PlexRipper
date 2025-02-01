@@ -150,7 +150,7 @@
             }
         },
         "server-drawer": {
-            "no-libraries": "No libraries available",
+            "no-libraries": "No libraries found, click to refresh access.",
             "no-servers": {
                 "description": "Make sure that you have a Plex account registered in the settings and have selected an account with accessible plex servers in the top right account selector.",
                 "header": "There are no servers available!"

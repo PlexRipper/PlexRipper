@@ -37,13 +37,10 @@
 				<q-item-section
 					v-if="item && item.type === 'badge'"
 					side>
-					<q-chip
+					<QGlowChip
 						v-if="item.count && item.count > 0"
-						color="red"
-						text-color="white"
-						size="md">
-						{{ item.count }}
-					</q-chip>
+						color="primary"
+						:value="item.count" />
 				</q-item-section>
 			</q-item>
 		</template>

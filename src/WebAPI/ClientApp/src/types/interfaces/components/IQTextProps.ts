@@ -1,3 +1,5 @@
+import type { NamedColor } from 'quasar';
+
 export interface IQTextProps {
 	value?: string | number | null;
 	size?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'subtitle1' | 'subtitle2' | 'body1' | 'body2' | 'caption' | 'overline';
@@ -6,4 +8,5 @@ export interface IQTextProps {
 	align?: 'left' | 'center' | 'right';
 	cy?: string;
 	fullWidth?: boolean;
+	textColor?: NamedColor;
 }

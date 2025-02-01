@@ -10,7 +10,8 @@
 		<QCol :text-align="align">
 			<span
 				:class="spanClasses"
-				:data-cy="cy">
+				:data-cy="cy"
+				:style="styles">
 				<slot name="default">
 					{{ value }}
 				</slot>
@@ -26,6 +27,7 @@
 
 <script lang="ts" setup>
 import type { IQTextProps } from '@interfaces';
+import { getCssVar } from 'quasar';
 
 const props = withDefaults(defineProps<IQTextProps>(), {
 	value: '',
@@ -35,6 +37,7 @@ const props = withDefaults(defineProps<IQTextProps>(), {
 	bold: 'regular',
 	cy: '',
 	fullWidth: false,
+	textColor: '',
 });
 
 const divClasses = computed(() => ({
@@ -55,4 +58,8 @@ const spanClasses = computed(() => {
 		[`full-width`]: props.fullWidth,
 	});
 });
+
+const styles = computed((): Record<string, string> => ({
+	color: getCssVar(props.textColor) ?? '',
+}));
 </script>

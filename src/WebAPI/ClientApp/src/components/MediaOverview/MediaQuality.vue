@@ -2,13 +2,12 @@
 	<div
 		v-if="qualities.length"
 		class="media-quality-container">
-		<q-chip
+		<QGlowChip
 			v-for="(quality, j) in qualities"
 			:key="j"
 			:color="getQualityColor(quality.quality)"
-			size="md">
-			{{ quality.displayQuality }}
-		</q-chip>
+			size="md"
+			:value="quality.displayQuality" />
 	</div>
 </template>
 
@@ -35,8 +34,8 @@ const getQualityColor = (quality: string): string => {
 		case '4k':
 			return 'red darken-4';
 		default:
-			Log.debug('Missing quality color option', quality);
-			return 'black';
+			Log.error('Missing quality color option', quality);
+			return 'blue-grey';
 	}
 };
 </script>

@@ -1,5 +1,41 @@
 PlexRipper Changelog
 
+# [0.30.0](https://github.com/PlexRipper/PlexRipper/compare/v0.29.1...v0.30.0) (2025-02-01)
+
+
+### Bug Fixes
+
+* **WebAPI:** Fixed an issue where user data on PlexLibraries was overwritten when refreshing Plex library access ([21c00fc](https://github.com/PlexRipper/PlexRipper/commit/21c00fc5722ba9b788e0765482e30baa6059e91c))
+* **Web-UI:** fixed background jobs active in the front-end not resumed when refreshing the page ([3b8a113](https://github.com/PlexRipper/PlexRipper/commit/3b8a113afd4307a6bab712aab09cdfbccbf2781c))
+* **Web-UI:** fixed cypress boot process by using es-module import ([4bf512e](https://github.com/PlexRipper/PlexRipper/commit/4bf512e34257bcef8508a532ad6aafc965f0c65c))
+* **WebAPI:** Fixed incorrect available space calculation when using a root path "/" ([5ffe479](https://github.com/PlexRipper/PlexRipper/commit/5ffe47945c02222b7c463d75e0a83e7b6209eff7))
+* **WebAPI:** Fixed missing restart button on downloadtasks that are in an move or merge error state ([4b40878](https://github.com/PlexRipper/PlexRipper/commit/4b408781774faedcaf07dec9b059146152d82b01))
+* **WebAPI:** Fixed multiple download tasks merging/moving files, in most cases this will just make it slower for all so now this is limited to 1 ([6ba3cfb](https://github.com/PlexRipper/PlexRipper/commit/6ba3cfbb7d7641c790cd970ad8db401f2c897a80))
+* **WebAPI:** fixed percentage miscalculation when PlexRipper is syncing the media ([af5da57](https://github.com/PlexRipper/PlexRipper/commit/af5da5713726985bfa0e0035b63bf240bcefa373))
+* **WebAPI:** Fixed the default destinations not being shown in the PlexServer settings dialog ([cb55c0b](https://github.com/PlexRipper/PlexRipper/commit/cb55c0b6fd8f29285ea4da309b14662da410ebc4))
+* **Web-UI:** Fixed the sync media server background job not updating correctly in the front-end ([37f22f1](https://github.com/PlexRipper/PlexRipper/commit/37f22f1241241c4bda043c55b5cb8f67bf154af8))
+
+
+### Features
+
+* **Web-UI:** A plex access report is now shown when refreshing a Plex account access in the account menu ([dbf9d80](https://github.com/PlexRipper/PlexRipper/commit/dbf9d80712568b075683b21ae8600d7a0d67907f))
+* **WebAPI:** Add property whether a server is offline and therefore could not determine the plex libraries ([e92fb3a](https://github.com/PlexRipper/PlexRipper/commit/e92fb3a62ef19da77cf48dd11430eadb676b784e))
+* **Web-UI:** Added a click option under server when there are no libraries to refresh access more easiliy for new users ([8734864](https://github.com/PlexRipper/PlexRipper/commit/873486460e247447aaf4e520f050eb61916f6ed1))
+* **Web-UI:** Added a Plex Account Access Report which will show when refreshing the PlexAccount access: Account menu in top bar => refresh account ([2d76444](https://github.com/PlexRipper/PlexRipper/commit/2d7644485f0a29545c86d98e1a35e941b52c87d5))
+* **WebAPI:** Added endpoint for server and library access refresh ([e176bf1](https://github.com/PlexRipper/PlexRipper/commit/e176bf1a35e60d7fa0598066d393f7f0fffa3adf))
+* **Web-UI:** Display when a server connection is through Plex as a relay in the server settings ([6293e8e](https://github.com/PlexRipper/PlexRipper/commit/6293e8e5fb5d1fa9f0c9dc01fde5e3bd4d357ab0))
+* **Web-UI:** Hovering over a tv show poster will show how many seasons and episodes there are ([3c6c5e1](https://github.com/PlexRipper/PlexRipper/commit/3c6c5e1fe43a86f588673a88671deec7a85c4b5f))
+* **Web-UI:** Improved the look of all badges, such as the little number on top of the notification button and background activity toggle ([fe3454a](https://github.com/PlexRipper/PlexRipper/commit/fe3454a664b5bd5cab1eb444e494563e6e927f30))
+* **Web-UI:** Improved the look of all chips, such as the quality circles on movie posters by making them glow ([6e63aeb](https://github.com/PlexRipper/PlexRipper/commit/6e63aebf6a88ae62683343deb9b1eabbf34915fa))
+* **WebAPI:** PlexRipper Docker images will now contain meta information based on the Opencontainers.image-spec ([b5ac1aa](https://github.com/PlexRipper/PlexRipper/commit/b5ac1aaaa5b8c2a1bd8fdb861b68f5daffcde0f7))
+* **Web-UI:** Pressing the Download action will now show a loading icon and disable other actions to make it dummy proof and prevent multiple commands ([9f2323e](https://github.com/PlexRipper/PlexRipper/commit/9f2323eb5657fec74b34afdae9af2f30638e94ba))
+
+
+### Performance Improvements
+
+* **WebAPI:** Do not send the download actions with every download update, this will be determined by the front-end ([35c70c4](https://github.com/PlexRipper/PlexRipper/commit/35c70c4f9fceacb4959356c0709c0a0652f18acc))
+* **WebAPI:** Removed unused properties from the ResultDTO response class ([a3df362](https://github.com/PlexRipper/PlexRipper/commit/a3df36247e1131267c72f1e96831d9d3bea0a40d))
+
 ## [0.29.1](https://github.com/PlexRipper/PlexRipper/compare/v0.29.0...v0.29.1) (2025-01-19)
 
 

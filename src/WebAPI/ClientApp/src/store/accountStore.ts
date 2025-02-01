@@ -12,10 +12,12 @@ import { cloneDeep } from 'lodash-es';
 
 interface IAccountStoreState {
 	accounts: PlexAccountDTO[];
+	accessSyncLoading: boolean;
 }
 
 export const useAccountStore = defineStore('AccountStore', () => {
 	const defaultState = {
+		accessSyncLoading: false,
 		accounts: [],
 	};
 
@@ -42,8 +44,10 @@ export const useAccountStore = defineStore('AccountStore', () => {
 			);
 		},
 		reSyncAccount(accountId: number) {
+			state.accessSyncLoading = true;
 			return plexAccountApi.refreshPlexAccountAccessEndpoint(accountId).pipe(
 				tap(() =>	forkJoin([actions.refreshAccounts(), serverStore.refreshPlexServers(), libraryStore.refreshLibraries()])),
+				tap(() => state.accessSyncLoading = false),
 			);
 		},
 		/**

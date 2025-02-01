@@ -14,7 +14,9 @@
 				</q-item-section>
 
 				<q-item-section>
-					<div class="server-name">
+					<div
+						class="server-name"
+						:data-cy="`server-drawer-item-${server.id}`">
 						<q-icon
 							v-if="server.owned"
 							name="mdi-home"
@@ -51,8 +53,23 @@
 			</q-list>
 			<!-- No libraries available -->
 			<template v-else>
-				<q-item>
+				<q-item
+					v-if="!accountStore.accessSyncLoading"
+					:data-cy="`server-drawer-item-${server.id}-no-libraries`"
+					clickable
+					@click="runReSyncAccount">
 					<q-item-section>{{ t('components.server-drawer.no-libraries') }}</q-item-section>
+				</q-item>
+				<q-item
+					v-else
+					:data-cy="`server-drawer-item-${server.id}-refresh-loading`">
+					<QRow justify="center">
+						<QCol cols="auto">
+							<QSpinnerDots
+								color="primary"
+								size="40px" />
+						</QCol>
+					</QRow>
 				</q-item>
 			</template>
 		</q-expansion-item>
@@ -77,14 +94,17 @@ import Log from 'consola';
 import { type LibraryProgress, type PlexLibraryDTO, PlexMediaType } from '@dto';
 import { useSubscription } from '@vueuse/rxjs';
 import { get, set } from '@vueuse/core';
+import { tap } from 'rxjs/operators';
 import {
 	useLibraryStore,
 	useServerStore,
 	useSignalrStore,
 	useDialogStore,
 	useServerConnectionStore,
-	useI18n,
-} from '#imports';
+	useAccountStore,
+} from '@store';
+import QRow from '@components/Common/QRow.vue';
+import { useI18n } from '#imports';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -93,6 +113,7 @@ const libraryStore = useLibraryStore();
 const dialogStore = useDialogStore();
 const serverConnectionStore = useServerConnectionStore();
 const signalRStore = useSignalrStore();
+const accountStore = useAccountStore();
 
 const libraryProgress = ref<LibraryProgress[]>([]);
 
@@ -122,6 +143,13 @@ function openMediaPage(library: PlexLibraryDTO): void {
 			Log.error(library.type + ' was neither a movie, tvshow or music library');
 			router.push(`/unknown/${library.id}`);
 	}
+}
+
+function runReSyncAccount(): void {
+	useSubscription(
+		accountStore.reSyncAccount(0).pipe(tap((data) => dialogStore.openRefreshPlexAccountAccessDialog(data.value ?? []))).subscribe(() => {
+		}),
+	);
 }
 
 onMounted(() => {

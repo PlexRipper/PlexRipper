@@ -150,7 +150,7 @@
             }
         },
         "server-drawer": {
-            "no-libraries": "Keine Mediatheken verfügbar",
+            "no-libraries": "Keine Bibliotheken gefunden. Klicken Sie hier, um den Zugriff zu aktualisieren.",
             "no-servers": {
                 "description": "Stellen Sie sicher, dass ihr Plex Konto registriert ist und das Sie einen Account ausgewählt haben, der verfügbare Server hat. Auswahl in der Kontoauswahl oben rechts.",
                 "header": "Keine Server verfügbar!"
@@ -326,6 +326,10 @@
                 "unknown": "Der Zugriffsstatus ist unbekannt, da der Plex-Server nicht erreicht werden konnte."
             },
             "offline-server-message": "Die Bibliothekszugriffsliste konnte nicht von diesem Server abgerufen werden, da sie offline ist. Versuchen Sie es erneut, wenn der Server wieder online ist."
+        },
+        "media-poster-image-content": {
+            "episode-count": "Keine Episoden | 1 Episode | {count} Episoden",
+            "seasons-count": "Keine Staffeln | 1 Staffel | {count} Staffeln"
         }
     },
     "confirmation": {

@@ -10,31 +10,23 @@
 		</q-card-section>
 		<q-card-section>
 			<!-- Validation Chip -->
-			<q-chip
+			<QGlowChip
 				v-if="account?.isValidated"
-				color="green"
-				text-color="white">
-				{{ t('general.commands.validated') }}
-			</q-chip>
-			<q-chip
+				color="positive"
+				:value="$t('general.commands.validated')" />
+			<QGlowChip
 				v-else
-				color="red"
-				text-color="white">
-				{{ t('general.commands.not-validated') }}
-			</q-chip>
+				color="negative"
+				:value="$t('general.commands.not-validated')" />
 			<!-- IsEnabled Chip -->
-			<q-chip
+			<QGlowChip
 				v-if="account?.isEnabled"
-				color="green"
-				text-color="white">
-				{{ t('general.commands.enabled') }}
-			</q-chip>
-			<q-chip
+				color="positive"
+				:value="$t('general.commands.enabled')" />
+			<QGlowChip
 				v-else
-				color="red"
-				text-color="white">
-				{{ t('general.commands.disabled') }}
-			</q-chip>
+				color="negative"
+				:value="$t('general.commands.disabled')" />
 		</q-card-section>
 	</q-card>
 	<!-- Add new account -->

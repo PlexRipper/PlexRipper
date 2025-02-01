@@ -33,6 +33,10 @@ public partial class BaseUnitTest : IDisposable
             {
                 SetDefaultFileSystemDirectories();
                 _fileSystemSetup.Invoke(builder);
+
+                builder.Register(ctx => ctx.Resolve<IFileSystem>().Path).As<IPath>().SingleInstance();
+                builder.Register(ctx => ctx.Resolve<IFileSystem>().File).As<IFile>().SingleInstance();
+                builder.Register(ctx => ctx.Resolve<IFileSystem>().Directory).As<IDirectory>().SingleInstance();
             }
 
             if (_httpClientSetup is not null)
@@ -81,10 +85,6 @@ public partial class BaseUnitTest : IDisposable
 
         builder.RegisterType<Log>().As<ILog>().SingleInstance();
         builder.RegisterGeneric(typeof(Log<>)).As(typeof(ILog<>)).InstancePerDependency();
-
-        builder.Register(ctx => ctx.Resolve<IFileSystem>().Path).As<IPath>().SingleInstance();
-        builder.Register(ctx => ctx.Resolve<IFileSystem>().File).As<IFile>().SingleInstance();
-        builder.Register(ctx => ctx.Resolve<IFileSystem>().Directory).As<IDirectory>().SingleInstance();
     }
 
     protected void SetupHttpClient(Action<Mock<HttpMessageHandler>>? action = null)

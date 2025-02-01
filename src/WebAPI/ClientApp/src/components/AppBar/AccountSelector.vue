@@ -62,7 +62,6 @@
 </template>
 
 <script setup lang="ts">
-import { get } from '@vueuse/core';
 import { useSettingsStore, useAccountStore, useAuthenticationStore } from '@store';
 import { useI18n } from 'vue-i18n';
 import { tap } from 'rxjs/operators';

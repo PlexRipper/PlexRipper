@@ -1,7 +1,5 @@
 using System.IO.Abstractions;
-using System.IO.Abstractions.TestingHelpers;
 using Microsoft.EntityFrameworkCore;
-using MockFileSystem = System.IO.Abstractions.TestingHelpers.MockFileSystem;
 
 namespace PlexRipper.Application.UnitTests;
 

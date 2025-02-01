@@ -1,11 +1,9 @@
 using System.IO.Abstractions;
-using System.IO.Abstractions.TestingHelpers;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using Application.Contracts;
 using ByteSizeLib;
 using Data.Contracts;
-using FileSystem.Contracts;
 using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application.UnitTests;

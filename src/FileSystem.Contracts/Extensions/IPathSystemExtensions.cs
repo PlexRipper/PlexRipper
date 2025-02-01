@@ -3,7 +3,7 @@ using FluentResults;
 
 namespace FileSystem.Contracts;
 
-public static class IFileSystemExtensions
+public static class IPathExtensions
 {
     public static Result<long> GetAvailableSpaceByDirectory(this IPath path, string directory)
     {

@@ -113,8 +113,10 @@ COPY --from=client-build /tmp/ClientApp/.output/public /app/wwwroot
 COPY docker/etc/ /etc/
 
 ## Set version label
-LABEL company="PlexRipper"
-LABEL maintainer="plexripper@protonmail.com"
+LABEL company="PlexRipper" \
+    maintainer="plexripper@protonmail.com" \
+    org.opencontainers.image.authors="PlexRipper" \
+    org.opencontainers.image.vendor="PlexRipper"
 
 EXPOSE ${PORT}
 VOLUME /Config /Downloads /Movies /TvShows

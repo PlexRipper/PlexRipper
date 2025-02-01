@@ -5,17 +5,16 @@
 		flat
 		icon="mdi-bell"
 		@click="toggleNotificationDrawer">
-		<q-badge
+		<QGlowBadge
 			v-if="notificationsStore.getVisibleNotifications.length > 0"
-			color="green"
-			floating
-			transparent
-			:label="notificationsStore.getVisibleNotifications.length" />
+			color="positive"
+			:value="notificationsStore.getVisibleNotifications.length" />
 	</q-btn>
 </template>
 
 <script setup lang="ts">
 import { useNotificationsStore } from '@store';
+import QGlowBadge from '@components/Common/QGlowBadge.vue';
 
 const notificationsStore = useNotificationsStore();
 

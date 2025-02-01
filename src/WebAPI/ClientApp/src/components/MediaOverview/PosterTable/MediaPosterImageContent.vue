@@ -22,6 +22,18 @@
 				align="center"
 				:size="allMediaMode ? 'subtitle1' : 'h5'" />
 			<QText
+				v-if="mediaItem.type === PlexMediaType.TvShow"
+				:value="$t('components.media-poster-image-content.seasons-count', { count: mediaItem.childCount }) "
+				bold="bold"
+				align="center"
+				size="subtitle1" />
+			<QText
+				v-if="mediaItem.type === PlexMediaType.TvShow"
+				:value="$t('components.media-poster-image-content.episode-count', { count: mediaItem.grandChildCount }) "
+				bold="bold"
+				align="center"
+				size="subtitle1" />
+			<QText
 				v-if="allMediaMode"
 				align="center"
 				:size="allMediaMode ? 'subtitle2' : 'h6'"

@@ -326,6 +326,10 @@
                 "unknown": "L'état d'accès est inconnu car le serveur Plex n'a pas pu être atteint"
             },
             "offline-server-message": "Impossible de récupérer la liste d'accès à la bibliothèque à partir de ce serveur car il est hors ligne, réessayez lorsque le serveur sera de nouveau en ligne."
+        },
+        "media-poster-image-content": {
+            "episode-count": "Aucun épisode | 1 épisode | {count} épisodes",
+            "seasons-count": "Aucune saison | 1 saison | {count} saisons"
         }
     },
     "confirmation": {

@@ -326,6 +326,10 @@
                 "unknown": "Access state is unknown because the Plex server could not be reached"
             },
             "offline-server-message": "Could not retrieve the library access list from this server because it is offline, try again when the server is back online."
+        },
+        "media-poster-image-content": {
+            "episode-count": "No Episodes | 1 Episode | {count} Episodes",
+            "seasons-count": "No Seasons | 1 Season | {count} Seasons"
         }
     },
     "confirmation": {

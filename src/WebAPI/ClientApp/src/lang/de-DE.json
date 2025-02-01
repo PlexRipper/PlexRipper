@@ -326,6 +326,10 @@
                 "unknown": "Der Zugriffsstatus ist unbekannt, da der Plex-Server nicht erreicht werden konnte."
             },
             "offline-server-message": "Die Bibliothekszugriffsliste konnte nicht von diesem Server abgerufen werden, da sie offline ist. Versuchen Sie es erneut, wenn der Server wieder online ist."
+        },
+        "media-poster-image-content": {
+            "episode-count": "Keine Episoden | 1 Episode | {count} Episoden",
+            "seasons-count": "Keine Staffeln | 1 Staffel | {count} Staffeln"
         }
     },
     "confirmation": {

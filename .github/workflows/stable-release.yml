@@ -76,6 +76,15 @@ jobs:
                     username: ${{ secrets.DOCKER_USERNAME }}
                     password: ${{ secrets.DOCKER_PASSWORD }}
 
+            -   name: Docker meta
+                id: meta
+                uses: docker/metadata-action@v5
+                with:
+                    images: |
+                        name=plexripper/plexripper
+                    tags: |
+                        type=semver,pattern={{version}},value=${{ env.VERSION_NO_V }}
+
             -   name: Build and push
                 uses: docker/build-push-action@v6
                 env:
@@ -84,7 +93,8 @@ jobs:
                 with:
                     platforms: linux/amd64,linux/arm64/v8,linux/arm/v7
                     push: true
-                    tags: plexripper/plexripper:latest,plexripper/plexripper:${{ env.VERSION_NO_V }}
+                    tags: ${{ steps.meta.outputs.tags }}
+                    labels: ${{ steps.meta.outputs.labels }}
                     build-args: |
                         VERSION=${{ env.VERSION_NO_V }}
                         INFORMATIONAL_VERSION=${{ env.VERSION_NO_V }}

@@ -150,7 +150,7 @@
             }
         },
         "server-drawer": {
-            "no-libraries": "Brak dostępnych bibliotek",
+            "no-libraries": "Nie znaleziono bibliotek. Kliknij, aby odświeżyć dostęp.",
             "no-servers": {
                 "description": "Upewnij się, że masz zarejestrowane konto Plex w ustawieniach i wybrałeś konto z dostępnymi serwerami Plex w prawym górnym rogu selektora kont.",
                 "header": "Nie ma dostępnych serwerów!"

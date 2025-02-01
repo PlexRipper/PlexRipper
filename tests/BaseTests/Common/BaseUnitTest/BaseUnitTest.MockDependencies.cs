@@ -21,6 +21,8 @@ public partial class BaseUnitTest : IDisposable
     private readonly MockFileSystem _fileSystem = new();
     protected AutoMock mock { get; set; }
 
+    protected long DefaultAvailableSpace = (long)ByteSize.FromGigaBytes(1000).Bytes;
+
     private void Build()
     {
         mock = AutoMock.GetStrict(builder =>
@@ -111,7 +113,7 @@ public partial class BaseUnitTest : IDisposable
             {
                 IsReady = true,
                 DriveType = DriveType.Fixed,
-                AvailableFreeSpace = (long)ByteSize.FromGigaBytes(1000).Bytes,
+                AvailableFreeSpace = DefaultAvailableSpace,
             }
         );
         _fileSystem.AddDirectory(PathProvider.ConfigDirectory);

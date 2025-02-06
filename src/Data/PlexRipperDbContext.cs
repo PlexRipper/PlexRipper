@@ -33,6 +33,16 @@ public sealed class PlexRipperDbContext : DbContext, IPlexRipperDbContext, IPlex
 
     public DbSet<PlexLibrary> PlexLibraries { get; set; }
 
+    #region PlexMedia
+
+    public DbSet<PlexRole> PlexRoles { get; set; }
+
+    public DbSet<PlexGenre> PlexGenres { get; set; }
+
+    public DbSet<PlexCountry> PlexCountry { get; set; }
+
+    #endregion
+
     #region PlexMovie
 
     public DbSet<PlexMovie> PlexMovies { get; set; }

@@ -119,6 +119,12 @@ public class PlexLibrary : BaseEntity
 
     public List<PlexAccountLibrary> PlexAccountLibraries { get; private set; } = [];
 
+    public List<PlexRole> Roles { get; set; } = [];
+
+    public List<PlexGenre> Genres { get; set; } = [];
+
+    public List<PlexCountry> Countries { get; set; } = [];
+
     #endregion
 
     #region Helpers

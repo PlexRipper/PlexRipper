@@ -8,6 +8,8 @@ public class PlexRole : BaseEntity
 
     public required string ThumbnailUrl { get; set; }
 
+    public List<PlexLibrary> PlexLibraries { get; set; } = [];
+
     public List<PlexMovie> PlexMovieRoles { get; set; } = [];
 
     public List<PlexTvShow> PlexTvShowRoles { get; set; } = [];

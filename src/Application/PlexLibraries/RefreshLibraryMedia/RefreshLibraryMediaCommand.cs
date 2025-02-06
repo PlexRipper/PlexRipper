@@ -93,6 +93,11 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
 
         var mediaMetaData = await _plexServiceApi.GetLibraryMediaMetadata(newPlexLibrary, cancellationToken);
 
+        var mediaMetaDataSync = await _mediator.Send(
+            new SyncPlexLibraryMediaMetaDataCommand(mediaMetaData.Value, newPlexLibrary.Id),
+            cancellationToken
+        );
+
         switch (newPlexLibrary.Type)
         {
             case PlexMediaType.Movie:

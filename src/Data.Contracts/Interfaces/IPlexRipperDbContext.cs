@@ -41,6 +41,12 @@ public interface IPlexRipperDbContext : IDisposable
 
     public DbSet<DownloadTaskTvShowEpisodeFile> DownloadTaskTvShowEpisodeFile { get; }
 
+    public DbSet<PlexRole> PlexRoles { get; set; }
+
+    public DbSet<PlexGenre> PlexGenres { get; set; }
+
+    public DbSet<PlexCountry> PlexCountries { get; set; }
+
     public EntityEntry Entry(object entity);
 
     public int SaveChanges();

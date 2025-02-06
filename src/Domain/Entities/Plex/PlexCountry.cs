@@ -6,6 +6,8 @@ public class PlexCountry : BaseEntity
 
     public required int PlexKey { get; set; }
 
+    public List<PlexLibrary> PlexLibraries { get; set; } = [];
+
     public List<PlexMovie> PlexMovieCountries { get; set; } = [];
 
     public List<PlexTvShow> PlexTvShowCountries { get; set; } = [];

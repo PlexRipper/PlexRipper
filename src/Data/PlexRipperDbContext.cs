@@ -39,7 +39,7 @@ public sealed class PlexRipperDbContext : DbContext, IPlexRipperDbContext, IPlex
 
     public DbSet<PlexGenre> PlexGenres { get; set; }
 
-    public DbSet<PlexCountry> PlexCountry { get; set; }
+    public DbSet<PlexCountry> PlexCountries { get; set; }
 
     #endregion
 

@@ -8,6 +8,8 @@ public class PlexGenre : BaseEntity
 
     public required int PlexKey { get; set; }
 
+    public List<PlexLibrary> PlexLibraries { get; set; } = [];
+
     public List<PlexMovie> PlexMovieGenres { get; set; } = [];
 
     public List<PlexTvShow> PlexTvShowGenres { get; set; } = [];

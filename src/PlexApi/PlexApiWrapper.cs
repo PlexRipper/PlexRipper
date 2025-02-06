@@ -328,7 +328,7 @@ public class PlexApiWrapper
         string libraryKey,
         int startIndex,
         int batchSize,
-        Type? type = null
+        PlexMediaType type
     )
     {
         if (!int.TryParse(libraryKey, out var libraryKeyInt))
@@ -344,20 +344,11 @@ public class PlexApiWrapper
             }
         );
 
-        GetLibraryItemsQueryParamType? apiType = type switch
-        {
-            Type.Movie => GetLibraryItemsQueryParamType.Movie,
-            Type.TvShow => GetLibraryItemsQueryParamType.TvShow,
-            Type.Season => GetLibraryItemsQueryParamType.Season,
-            Type.Episode => GetLibraryItemsQueryParamType.Episode,
-            _ => null,
-        };
-
         var response = await ToResponse(
             client.Library.GetLibraryItemsAsync(
                 new GetLibraryItemsRequest()
                 {
-                    Type = apiType,
+                    Type = type.ToApiTypeEnum<GetLibraryItemsQueryParamType>(),
                     SectionKey = libraryKeyInt,
                     Tag = Tag.All,
                     IncludeMeta = GetLibraryItemsQueryParamIncludeMeta.Disable,
@@ -376,6 +367,72 @@ public class PlexApiWrapper
         return value is null
             ? ResultExtensions.IsNull(nameof(response.Value.Object.MediaContainer)).LogError()
             : Result.Ok(value);
+    }
+
+    public async Task<Result<GetCountriesLibraryResponse>> GetLibraryCountries(
+        PlexServerConnection connection,
+        string authToken,
+        int libraryKey,
+        PlexMediaType type
+    )
+    {
+        var client = CreateClient(
+            authToken,
+            new PlexApiClientOptions
+            {
+                ConnectionUrl = connection.Url,
+                Timeout = 120, // Requesting all countries can take a while
+                RetryCount = 0,
+            }
+        );
+
+        return await ToResponse(
+            client.Library.GetCountriesLibraryAsync(libraryKey, type.ToApiTypeEnum<GetCountriesLibraryQueryParamType>())
+        );
+    }
+
+    public async Task<Result<GetGenresLibraryResponse>> GetLibraryGenres(
+        PlexServerConnection connection,
+        string authToken,
+        int libraryKey,
+        PlexMediaType type
+    )
+    {
+        var client = CreateClient(
+            authToken,
+            new PlexApiClientOptions
+            {
+                ConnectionUrl = connection.Url,
+                Timeout = 120, // Requesting all genres can take a while
+                RetryCount = 0,
+            }
+        );
+
+        return await ToResponse(
+            client.Library.GetGenresLibraryAsync(libraryKey, type.ToApiTypeEnum<GetGenresLibraryQueryParamType>())
+        );
+    }
+
+    public async Task<Result<GetActorsLibraryResponse>> GetLibraryActors(
+        PlexServerConnection connection,
+        string authToken,
+        int libraryKey,
+        PlexMediaType type
+    )
+    {
+        var client = CreateClient(
+            authToken,
+            new PlexApiClientOptions
+            {
+                ConnectionUrl = connection.Url,
+                Timeout = 120, // Requesting all actors can take a while
+                RetryCount = 0,
+            }
+        );
+
+        return await ToResponse(
+            client.Library.GetActorsLibraryAsync(libraryKey, type.ToApiTypeEnum<GetActorsLibraryQueryParamType>())
+        );
     }
 
     /// <summary>

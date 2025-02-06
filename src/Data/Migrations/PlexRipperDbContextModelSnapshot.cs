@@ -954,7 +954,7 @@ namespace PlexRipper.Data.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("PlexId")
+                    b.Property<int>("PlexKey")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
@@ -969,12 +969,12 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(0);
 
-                    b.Property<int>("Key")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Title")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("PlexKey")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -1208,16 +1208,8 @@ namespace PlexRipper.Data.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("PlexId")
+                    b.Property<int>("PlexKey")
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("TagKey")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
 
                     b.Property<string>("ThumbnailUrl")
                         .IsRequired()

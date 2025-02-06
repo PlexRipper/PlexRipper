@@ -87,4 +87,9 @@ public interface IPlexApiService
     Task<Result<PlexAccount>> ValidatePlexToken(PlexAccount plexAccount);
 
     Task<Result<ServerIdentityDTO>> ValidatePlexConnection(string plexServerConnection);
+
+    Task<Result<LibraryMetadata>> GetLibraryMediaMetadata(
+        PlexLibrary plexLibrary,
+        CancellationToken cancellationToken = default
+    );
 }

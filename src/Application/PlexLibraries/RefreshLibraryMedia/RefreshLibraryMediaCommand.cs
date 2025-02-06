@@ -91,6 +91,8 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
         // Get the default folder path id for the destination
         newPlexLibrary.DefaultDestinationId = newPlexLibrary.Type.ToDefaultDestinationFolderId();
 
+        var mediaMetaData = await _plexServiceApi.GetLibraryMediaMetadata(newPlexLibrary, cancellationToken);
+
         switch (newPlexLibrary.Type)
         {
             case PlexMediaType.Movie:

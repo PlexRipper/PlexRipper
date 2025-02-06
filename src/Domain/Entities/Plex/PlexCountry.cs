@@ -2,9 +2,9 @@ namespace PlexRipper.Domain;
 
 public class PlexCountry : BaseEntity
 {
-    public string Name { get; set; }
+    public required string Name { get; set; }
 
-    public int PlexId { get; set; }
+    public required int PlexKey { get; set; }
 
     public List<PlexMovie> PlexMovieCountries { get; set; } = [];
 

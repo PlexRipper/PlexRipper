@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PlexRipper.Data;
 
@@ -10,9 +11,11 @@ using PlexRipper.Data;
 namespace PlexRipper.Data.Migrations
 {
     [DbContext(typeof(PlexRipperDbContext))]
-    partial class PlexRipperDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250206145138_AddRolesGenersToPlexLibrary")]
+    partial class AddRolesGenersToPlexLibrary
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -464,13 +467,13 @@ namespace PlexRipper.Data.Migrations
 
             modelBuilder.Entity("PlexLibraryCountries", b =>
                 {
-                    b.Property<int>("CountriesId")
+                    b.Property<int>("CountryId")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("PlexLibrariesId")
                         .HasColumnType("INTEGER");
 
-                    b.HasKey("CountriesId", "PlexLibrariesId");
+                    b.HasKey("CountryId", "PlexLibrariesId");
 
                     b.HasIndex("PlexLibrariesId");
 
@@ -1004,9 +1007,7 @@ namespace PlexRipper.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PlexKey");
-
-                    b.ToTable("PlexCountries");
+                    b.ToTable("PlexCountry");
                 });
 
             modelBuilder.Entity("PlexRipper.Domain.PlexGenre", b =>
@@ -1024,8 +1025,6 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("PlexKey");
 
                     b.ToTable("PlexGenres");
                 });
@@ -1161,6 +1160,10 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(19);
 
+                    b.Property<bool>("HasBanner")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(20);
+
                     b.Property<bool>("HasTheme")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(21);
@@ -1261,8 +1264,6 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("PlexKey");
 
                     b.ToTable("PlexRoles");
                 });
@@ -1532,6 +1533,10 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(19);
 
+                    b.Property<bool>("HasBanner")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(20);
+
                     b.Property<bool>("HasTheme")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(21);
@@ -1662,6 +1667,10 @@ namespace PlexRipper.Data.Migrations
                     b.Property<bool>("HasArt")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(19);
+
+                    b.Property<bool>("HasBanner")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(20);
 
                     b.Property<bool>("HasTheme")
                         .HasColumnType("INTEGER")
@@ -1809,6 +1818,10 @@ namespace PlexRipper.Data.Migrations
                     b.Property<bool>("HasArt")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(19);
+
+                    b.Property<bool>("HasBanner")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(20);
 
                     b.Property<bool>("HasTheme")
                         .HasColumnType("INTEGER")
@@ -2137,7 +2150,7 @@ namespace PlexRipper.Data.Migrations
                 {
                     b.HasOne("PlexRipper.Domain.PlexCountry", null)
                         .WithMany()
-                        .HasForeignKey("CountriesId")
+                        .HasForeignKey("CountryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

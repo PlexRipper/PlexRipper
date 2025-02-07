@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PlexRipper.Data;
 
@@ -10,9 +11,11 @@ using PlexRipper.Data;
 namespace PlexRipper.Data.Migrations
 {
     [DbContext(typeof(PlexRipperDbContext))]
-    partial class PlexRipperDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250206170036_NameChangeLibrary")]
+    partial class NameChangeLibrary
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1161,6 +1164,10 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(19);
 
+                    b.Property<bool>("HasBanner")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(20);
+
                     b.Property<bool>("HasTheme")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(21);
@@ -1532,6 +1539,10 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(19);
 
+                    b.Property<bool>("HasBanner")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(20);
+
                     b.Property<bool>("HasTheme")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(21);
@@ -1662,6 +1673,10 @@ namespace PlexRipper.Data.Migrations
                     b.Property<bool>("HasArt")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(19);
+
+                    b.Property<bool>("HasBanner")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(20);
 
                     b.Property<bool>("HasTheme")
                         .HasColumnType("INTEGER")
@@ -1809,6 +1824,10 @@ namespace PlexRipper.Data.Migrations
                     b.Property<bool>("HasArt")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(19);
+
+                    b.Property<bool>("HasBanner")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(20);
 
                     b.Property<bool>("HasTheme")
                         .HasColumnType("INTEGER")

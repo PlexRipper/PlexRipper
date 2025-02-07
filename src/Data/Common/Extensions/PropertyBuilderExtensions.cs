@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace PlexRipper.Data.Common;
@@ -18,6 +19,19 @@ public static class PropertyBuilderExtensions
         propertyBuilder.HasConversion(
             v => JsonSerializer.Serialize(v, DefaultJsonSerializerOptions.ConfigStandard),
             v => JsonSerializer.Deserialize<T>(v, DefaultJsonSerializerOptions.ConfigStandard)!
+        );
+        return propertyBuilder;
+    }
+
+    public static PropertyBuilder<List<T>> ListValueComparer<T>(this PropertyBuilder<List<T>> propertyBuilder)
+        where T : class
+    {
+        propertyBuilder.Metadata.SetValueComparer(
+            new ValueComparer<List<T>>(
+                (c1, c2) => c1 != null && c2 != null && c1.SequenceEqual(c2),
+                c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                c => c.ToList()
+            )
         );
         return propertyBuilder;
     }

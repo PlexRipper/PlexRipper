@@ -137,7 +137,7 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
             var pendingMigrations = _plexRipperDbContextDatabase.GetPendingMigrations();
             if (!_plexRipperDbContextDatabase.IsInMemory() && pendingMigrations.Any())
             {
-                _log.InformationLine("Attempting to migrate database");
+                _log.InformationLine("Attempting to migrate database, this might take a while");
                 _plexRipperDbContextDatabase.Migrate();
                 _log.InformationLine("Database migration successful!");
             }

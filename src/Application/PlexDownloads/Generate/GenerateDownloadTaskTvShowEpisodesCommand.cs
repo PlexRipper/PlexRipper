@@ -130,7 +130,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
                     }
 
                     // TODO: Quality Selector needs to be implemented here
-                    var episodeData = tvShowEpisode.MediaData.First();
+                    var episodeData = tvShowEpisode.MetaDataList.First();
 
                     // Map movieData to DownloadTaskMovieFile and add to movieDownloadTask
                     var downloadFiles = episodeData.MapToDownloadTask(tvShowEpisode, request);

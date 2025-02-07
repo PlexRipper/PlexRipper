@@ -15,24 +15,42 @@ public static class PropertyBuilderExtensions
     public static PropertyBuilder<T> HasJsonValueConversion<T>(this PropertyBuilder<T> propertyBuilder)
         where T : class
     {
-        // TODO:Could add JsonSchema Source Generators here to speed things up
-        propertyBuilder.HasConversion(
-            v => JsonSerializer.Serialize(v, DefaultJsonSerializerOptions.ConfigStandard),
-            v => JsonSerializer.Deserialize<T>(v, DefaultJsonSerializerOptions.ConfigStandard)!
-        );
+        try
+        {
+            // TODO:Could add JsonSchema Source Generators here to speed things up
+            propertyBuilder.HasConversion(
+                v => JsonSerializer.Serialize(v, DefaultJsonSerializerOptions.ConfigStandard),
+                v => JsonSerializer.Deserialize<T>(v, DefaultJsonSerializerOptions.ConfigStandard)!
+            );
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+
         return propertyBuilder;
     }
 
     public static PropertyBuilder<List<T>> ListValueComparer<T>(this PropertyBuilder<List<T>> propertyBuilder)
         where T : class
     {
-        propertyBuilder.Metadata.SetValueComparer(
-            new ValueComparer<List<T>>(
-                (c1, c2) => c1 != null && c2 != null && c1.SequenceEqual(c2),
-                c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
-                c => c.ToList()
-            )
-        );
+        try
+        {
+            propertyBuilder.Metadata.SetValueComparer(
+                new ValueComparer<List<T>>(
+                    (c1, c2) => c1 != null && c2 != null && c1.SequenceEqual(c2),
+                    c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                    c => c.ToList()
+                )
+            );
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+
         return propertyBuilder;
     }
 }

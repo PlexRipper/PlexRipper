@@ -161,13 +161,13 @@ public sealed class PlexRipperDbContext : DbContext, IPlexRipperDbContext, IPlex
 
         // NOTE: This has been added to PlexRipperDbContext.OnModelCreating
         // Based on: https://stackoverflow.com/a/63992731/8205497
-        builder.Entity<PlexMovie>().Property(x => x.MediaData).HasJsonValueConversion().ListValueComparer();
+        builder.Entity<PlexMovie>().Property(x => x.MediaData).HasJsonValueConversion();
 
-        builder.Entity<PlexTvShow>().Property(x => x.MediaData).HasJsonValueConversion().ListValueComparer();
+        builder.Entity<PlexTvShow>().Property(x => x.MediaData).HasJsonValueConversion();
 
-        builder.Entity<PlexTvShowSeason>().Property(x => x.MediaData).HasJsonValueConversion().ListValueComparer();
+        builder.Entity<PlexTvShowSeason>().Property(x => x.MediaData).HasJsonValueConversion();
 
-        builder.Entity<PlexTvShowEpisode>().Property(x => x.MediaData).HasJsonValueConversion().ListValueComparer();
+        builder.Entity<PlexTvShowEpisode>().Property(x => x.MediaData).HasJsonValueConversion();
 
         builder = PlexRipperDBContextSeed.SeedDatabase(builder);
 

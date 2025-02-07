@@ -1,5 +1,10 @@
 namespace PlexRipper.Domain;
 
+public record MediaDataContainer(List<LibraryMediaItemMediaDTO> MediaData)
+{
+    public List<LibraryMediaItemMediaDTO> MediaData { get; set; } = MediaData;
+}
+
 public record LibraryMediaItemDTO
 {
     public required string RatingKey { get; set; }

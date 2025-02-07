@@ -37,7 +37,7 @@ public static class PlexMetaDataMapper
             ChildCount = source.ChildCount,
             AddedAt = source.AddedAt,
             UpdatedAt = source.UpdatedAt,
-            MediaData = source.Media,
+            MediaData = new MediaDataContainer(source.Media),
 
             Type = PlexMediaType.None,
             Key = int.Parse(source.RatingKey),

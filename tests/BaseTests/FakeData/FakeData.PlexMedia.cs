@@ -51,7 +51,7 @@ public static partial class FakeData
             .RuleFor(x => x.Guid_IMDB, f => "imdb://tt" + f.Random.Int(10000, 99999))
             .RuleFor(x => x.Guid_TMDB, f => "tmdb://" + f.Random.Int(10000, 99999))
             .RuleFor(x => x.Guid_TVDB, f => "tvdb://" + f.Random.Int(10000, 99999))
-            .RuleFor(x => x.MediaData, _ => GetPlexMediaData(seed, options).Generate(1));
+            .RuleFor(x => x.MediaData, _ => new MediaDataContainer(GetPlexMediaData(seed, options).Generate(1)));
     }
 
     public static Faker<LibraryMediaItemMediaDTO> GetPlexMediaData(Seed seed, Action<FakeDataConfig>? options = null)
@@ -110,7 +110,7 @@ public static partial class FakeData
                     movie.FullTitle = $"{movie.Title} ({movie.Year})";
 
                     // TODO:Need quality selector in the case of multiple quality media
-                    movie.MediaSize = movie.MediaData.First().Parts.Sum(x => x.Size);
+                    movie.MediaSize = movie.MetaDataList.First().Parts.Sum(x => x.Size);
                 }
             );
     }
@@ -199,12 +199,12 @@ public static partial class FakeData
             .FinishWith(
                 (_, tvShowEpisode) =>
                 {
-                    foreach (var mediaData in tvShowEpisode.MediaData)
+                    foreach (var mediaData in tvShowEpisode.MetaDataList)
                     foreach (var mediaDataPart in mediaData.Parts)
                         mediaDataPart.File = $"{tvShowEpisode.Title}";
 
                     tvShowEpisode.MediaSize = tvShowEpisode
-                        .MediaData.SelectMany(x => x.Parts.Select(y => y.Size))
+                        .MetaDataList.SelectMany(x => x.Parts.Select(y => y.Size))
                         .Sum();
                 }
             );

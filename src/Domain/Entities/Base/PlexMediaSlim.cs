@@ -79,7 +79,10 @@ public class PlexMediaSlim : BaseEntity
     [Column(Order = 21)]
     public required bool HasTheme { get; init; }
 
-    public required List<LibraryMediaItemMediaDTO> MediaData { get; init; }
+    public required MediaDataContainer MediaData { get; init; }
+
+    [NotMapped]
+    public List<LibraryMediaItemMediaDTO> MetaDataList => MediaData.MediaData;
 
     public required int PlexLibraryId { get; set; }
 
@@ -93,8 +96,8 @@ public class PlexMediaSlim : BaseEntity
     {
         get
         {
-            return MediaData
-                .Select(x => new PlexMediaQuality(x.VideoResolution))
+            return MetaDataList
+                .Select(y => new PlexMediaQuality(y.VideoResolution))
                 .Reverse() // This sorts from lowest to highest quality
                 .TakeLast(1) // TODO:remove this when quality selector for downloading is implemented
                 .ToList();

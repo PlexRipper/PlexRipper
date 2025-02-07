@@ -1,11 +1,12 @@
 using System.Text.RegularExpressions;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
+using PlexApi.Contracts;
 
 namespace PlexRipper.PlexApi;
 
 public static class PlexMediaMapper
 {
-    public static PlexMovie ToPlexMovie(this PlexMedia source, GetLibraryItemsMetadata originalSource) =>
+    public static PlexMovie ToPlexMovie(this PlexMedia source, LibraryMediaItemDTO originalSource) =>
         new()
         {
             Id = source.Id,
@@ -22,7 +23,6 @@ public static class PlexMediaMapper
             UpdatedAt = source.UpdatedAt,
             HasThumb = source.HasThumb,
             HasArt = source.HasArt,
-            HasBanner = source.HasBanner,
             HasTheme = source.HasTheme,
             MediaData = source.MediaData,
             PlexLibraryId = source.PlexLibraryId,
@@ -41,9 +41,22 @@ public static class PlexMediaMapper
             Guid_IMDB = source.Guid_IMDB,
             Guid_TMDB = source.Guid_TMDB,
             Guid_TVDB = source.Guid_TVDB,
+            Country =
+                originalSource.Country?.Select(x => new PlexCountry { Name = x.Tag ?? "", PlexKey = 0 }).ToList() ?? [],
+            Roles =
+                originalSource
+                    .Role?.Select(x => new PlexRole
+                    {
+                        Name = x.Tag ?? "",
+                        PlexKey = 0,
+                        ThumbnailUrl = "",
+                    })
+                    .ToList() ?? [],
+            Genres =
+                originalSource.Genre?.Select(x => new PlexGenre() { Name = x.Tag ?? "", PlexKey = 0 }).ToList() ?? [],
         };
 
-    public static PlexTvShow ToPlexTvShow(this PlexMedia source, GetLibraryItemsMetadata originalSource) =>
+    public static PlexTvShow ToPlexTvShow(this PlexMedia source, LibraryMediaItemDTO originalSource) =>
         new()
         {
             Id = source.Id,
@@ -61,7 +74,6 @@ public static class PlexMediaMapper
             UpdatedAt = source.UpdatedAt,
             HasThumb = source.HasThumb,
             HasArt = source.HasArt,
-            HasBanner = source.HasBanner,
             HasTheme = source.HasTheme,
             MediaData = source.MediaData,
             PlexLibraryId = source.PlexLibraryId,
@@ -80,9 +92,22 @@ public static class PlexMediaMapper
             Guid_IMDB = source.Guid_IMDB,
             Guid_TMDB = source.Guid_TMDB,
             Guid_TVDB = source.Guid_TVDB,
+            Country =
+                originalSource.Country?.Select(x => new PlexCountry { Name = x.Tag ?? "", PlexKey = 0 }).ToList() ?? [],
+            Roles =
+                originalSource
+                    .Role?.Select(x => new PlexRole
+                    {
+                        Name = x.Tag ?? "",
+                        PlexKey = 0,
+                        ThumbnailUrl = "",
+                    })
+                    .ToList() ?? [],
+            Genres =
+                originalSource.Genre?.Select(x => new PlexGenre() { Name = x.Tag ?? "", PlexKey = 0 }).ToList() ?? [],
         };
 
-    public static PlexTvShowSeason ToPlexTvShowSeason(this PlexMedia source, GetLibraryItemsMetadata originalSource) =>
+    public static PlexTvShowSeason ToPlexTvShowSeason(this PlexMedia source, LibraryMediaItemDTO originalSource) =>
         new()
         {
             Id = source.Id,
@@ -99,7 +124,6 @@ public static class PlexMediaMapper
             UpdatedAt = source.UpdatedAt,
             HasThumb = source.HasThumb,
             HasArt = source.HasArt,
-            HasBanner = source.HasBanner,
             HasTheme = source.HasTheme,
             MediaData = source.MediaData,
             PlexLibraryId = source.PlexLibraryId,
@@ -122,10 +146,7 @@ public static class PlexMediaMapper
             ParentGuid = originalSource.ParentGuid,
         };
 
-    public static PlexTvShowEpisode ToPlexTvShowEpisode(
-        this PlexMedia source,
-        GetLibraryItemsMetadata originalSource
-    ) =>
+    public static PlexTvShowEpisode ToPlexTvShowEpisode(this PlexMedia source, LibraryMediaItemDTO originalSource) =>
         new()
         {
             Id = source.Id,
@@ -142,7 +163,6 @@ public static class PlexMediaMapper
             UpdatedAt = source.UpdatedAt,
             HasThumb = source.HasThumb,
             HasArt = source.HasArt,
-            HasBanner = source.HasBanner,
             HasTheme = source.HasTheme,
             MediaData = source.MediaData,
             PlexLibraryId = source.PlexLibraryId,
@@ -169,7 +189,7 @@ public static class PlexMediaMapper
     /// The PlexAPI is sometimes missing the ParentKey, this method will attempt to get the ParentKey from the ParentGuid.
     /// </summary>
     /// <param name="originalSource"> The original source to get the ParentKey from.</param>
-    private static int GetParentKey(this GetLibraryItemsMetadata originalSource)
+    private static int GetParentKey(this LibraryMediaItemDTO originalSource)
     {
         var parentKey = originalSource.ParentRatingKey != null ? int.Parse(originalSource.ParentRatingKey) : -1;
         if (parentKey == -1 && originalSource.ParentGuid != null && originalSource.ParentGuid.Contains("local"))

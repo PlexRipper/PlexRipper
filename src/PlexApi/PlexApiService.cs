@@ -56,7 +56,12 @@ public class PlexApiService : IPlexApiService
         updatedPlexLibrary.Id = plexLibrary.Id;
         updatedPlexLibrary.PlexServerId = plexLibrary.PlexServerId;
 
-        var mediaListResult = await SyncMedia(plexLibrary, action: action, cancellationToken: cancellationToken);
+        var mediaListResult = await SyncMedia(
+            plexLibrary,
+            plexLibrary.Type,
+            action: action,
+            cancellationToken: cancellationToken
+        );
 
         if (mediaListResult.IsFailed)
             return mediaListResult.ToResult();
@@ -89,7 +94,7 @@ public class PlexApiService : IPlexApiService
     {
         var mediaListResult = await SyncMedia(
             plexLibrary,
-            Type.Season,
+            PlexMediaType.Season,
             action: action,
             cancellationToken: cancellationToken
         );
@@ -109,7 +114,7 @@ public class PlexApiService : IPlexApiService
     {
         var mediaListResult = await SyncMedia(
             plexLibrary,
-            Type.Episode,
+            PlexMediaType.Episode,
             action: action,
             cancellationToken: cancellationToken
         );
@@ -303,9 +308,9 @@ public class PlexApiService : IPlexApiService
         return Result.Fail($"PlexAccount with Id: {plexAccount.Id} contained an empty AuthToken!").LogError();
     }
 
-    private async Task<Result<List<GetLibraryItemsMetadata>>> SyncMedia(
+    private async Task<Result<List<LibraryMediaItemDTO>>> SyncMedia(
         PlexLibrary plexLibrary,
-        Type? plexType = null,
+        PlexMediaType plexType,
         int batchSize = 1000,
         Action<MediaSyncProgress>? action = null,
         CancellationToken cancellationToken = default
@@ -325,7 +330,7 @@ public class PlexApiService : IPlexApiService
 
         var plexServerConnection = plexServerConnectionResult.Value;
 
-        var mediaList = new List<GetLibraryItemsMetadata>();
+        var mediaList = new List<LibraryMediaItemDTO>();
 
         var index = 0;
 
@@ -340,7 +345,7 @@ public class PlexApiService : IPlexApiService
                 plexLibrary.Key,
                 index,
                 batchSize,
-                plexLibrary.Type
+                plexType
             );
 
             if (result.IsFailed)
@@ -359,7 +364,7 @@ public class PlexApiService : IPlexApiService
                     "The library with name: {PlexLibraryName} contains no media to retrieve",
                     plexLibrary.Name
                 );
-                return Result.Ok(new List<GetLibraryItemsMetadata>());
+                return Result.Ok(new List<LibraryMediaItemDTO>());
             }
 
             if (mediaContainer.Metadata is null)
@@ -368,7 +373,16 @@ public class PlexApiService : IPlexApiService
                 break;
             }
 
-            mediaList.AddRange(mediaContainer.Metadata);
+            // Request detailed metadata for each item
+            var ratingKeys = mediaContainer.Metadata.Select(x => long.Parse(x.RatingKey)).ToList();
+
+            var detailMedia = await _plexApiWrapper.GetMediaMetadata(
+                plexServerConnection,
+                tokenResult.Value,
+                ratingKeys
+            );
+
+            mediaList.AddRange(detailMedia.Value.Select(x => x.ToMediaItemDTO()));
 
             // Estimate remaining time
             var elapsedTime = DateTime.UtcNow - startTime;

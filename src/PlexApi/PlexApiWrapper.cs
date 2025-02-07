@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Application.Contracts;
 using LukeHagar.PlexAPI.SDK;
 using LukeHagar.PlexAPI.SDK.Models.Errors;
@@ -367,6 +368,51 @@ public class PlexApiWrapper
         return value is null
             ? ResultExtensions.IsNull(nameof(response.Value.Object.MediaContainer)).LogError()
             : Result.Ok(value);
+    }
+
+    public async Task<Result<List<GetMediaMetaDataMetadata>>> GetMediaMetadata(
+        PlexServerConnection connection,
+        string authToken,
+        List<long> ratingKey
+    )
+    {
+        var client = CreateClient(
+            authToken,
+            new PlexApiClientOptions
+            {
+                ConnectionUrl = connection.Url,
+                Timeout = 120, // Requesting all metadata can take a while
+                RetryCount = 0,
+            }
+        );
+
+        BlockingCollection<GetMediaMetaDataMetadata> results = [];
+        var maxParallelism = 10;
+        using var semaphore = new SemaphoreSlim(maxParallelism, maxParallelism);
+        var tasks = ratingKey.Select(async x =>
+        {
+            // Wait for an available slot.
+            await semaphore.WaitAsync();
+
+            try
+            {
+                var response = await ToResponse(
+                    client.Library.GetMediaMetaDataAsync(new GetMediaMetaDataRequest() { RatingKey = x })
+                );
+                foreach (var item in response.Value?.Object?.MediaContainer?.Metadata ?? [])
+                    results.Add(item);
+            }
+            finally
+            {
+                // Release the semaphore so another request can be started.
+                semaphore.Release();
+            }
+        });
+
+        // Wait until all tasks have completed.
+        await Task.WhenAll(tasks);
+
+        return Result.Ok(results.ToList());
     }
 
     public async Task<Result<GetCountriesLibraryResponse>> GetLibraryCountries(

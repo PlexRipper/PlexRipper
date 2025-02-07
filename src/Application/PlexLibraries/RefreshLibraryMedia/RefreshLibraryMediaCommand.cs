@@ -193,6 +193,14 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
             // Phase 5 of 5: Database has been successfully updated with new library data.
             SendProgress(5, 1);
         }
+        else
+        {
+            _log.Warning(
+                "No TV shows were found for library {PlexLibraryName} with id: {PlexLibraryId}",
+                plexLibrary.Title,
+                plexLibrary.Id
+            );
+        }
 
         // Mark the library as synced
         plexLibrary.SyncedAt = DateTime.UtcNow;
@@ -227,6 +235,14 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
                 SendProgress(_totalProgressSteps, 1);
                 return createResult.ToResult().LogError();
             }
+        }
+        else
+        {
+            _log.Warning(
+                "No Movies were found for library {PlexLibraryName} with id: {PlexLibraryId}",
+                plexLibrary.Title,
+                plexLibrary.Id
+            );
         }
 
         // Phase 2 of 3: PlexLibrary media data was parsed successfully.

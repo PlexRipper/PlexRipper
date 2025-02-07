@@ -108,6 +108,9 @@ public class SyncPlexTvShowsCommandHandler : IRequestHandler<SyncPlexTvShowsComm
             await _dbContext.BulkInsertAsync(plexTvShows, _config, cancellationToken);
             _report.CreatedTvShows = plexTvShows.Count;
 
+            // Sync metadata such as Countries, Roles and Genre
+            await SyncMediaMetaData(plexLibraryId, plexTvShows);
+
             // Set the foreign keys (PlexTvShowId) in PlexSeason based on the inserted PlexTvShows
             var plexSeasons = plexTvShows
                 .SelectMany(tvShow =>
@@ -154,6 +157,88 @@ public class SyncPlexTvShowsCommandHandler : IRequestHandler<SyncPlexTvShowsComm
         {
             return Result.Fail(new ExceptionalError(e)).LogError();
         }
+    }
+
+    private async Task SyncMediaMetaData(int plexLibraryId, List<PlexTvShow> plexTvShows)
+    {
+        var countryDict = await _dbContext
+            .PlexCountries.Where(x => x.PlexLibraries.Any(y => y.Id == plexLibraryId))
+            .ToDictionaryAsync(x => x.Name, x => x);
+
+        var genreDict = await _dbContext
+            .PlexGenres.Where(x => x.PlexLibraries.Any(y => y.Id == plexLibraryId))
+            .ToDictionaryAsync(x => x.Name, x => x);
+
+        var roleDict = await _dbContext
+            .PlexRoles.Where(x => x.PlexLibraries.Any(y => y.Id == plexLibraryId))
+            .ToDictionaryAsync(x => x.Name, x => x);
+
+        foreach (var plexTvShow in plexTvShows)
+        {
+            _dbContext.PlexTvShows.Attach(plexTvShow);
+
+            if (plexTvShow.Country.Any())
+            {
+                for (var i = plexTvShow.Country.Count - 1; i >= 0; i--)
+                {
+                    var country = plexTvShow.Country[i];
+                    if (countryDict.TryGetValue(country.Name, out var matchedCountry))
+                        plexTvShow.Country[i] = matchedCountry;
+                    else
+                    {
+                        _log.Here()
+                            .Warning(
+                                "Could not find Country: {CountryName} to add into tv-show: {PlexTvShowName}",
+                                country.Name,
+                                plexTvShow.Title
+                            );
+                        plexTvShow.Country.RemoveAt(i);
+                    }
+                }
+            }
+
+            if (plexTvShow.Genres.Any())
+            {
+                for (var i = plexTvShow.Genres.Count - 1; i >= 0; i--)
+                {
+                    var genre = plexTvShow.Genres[i];
+                    if (genreDict.TryGetValue(genre.Name, out var matchedGenre))
+                        plexTvShow.Genres[i] = matchedGenre;
+                    else
+                    {
+                        _log.Here()
+                            .Warning(
+                                "Could not find Genre: {GenreName} to add into tv-show: {PlexTvShowName}",
+                                genre.Name,
+                                plexTvShow.Title
+                            );
+                        plexTvShow.Genres.RemoveAt(i);
+                    }
+                }
+            }
+
+            if (plexTvShow.Roles.Any())
+            {
+                for (var i = plexTvShow.Roles.Count - 1; i >= 0; i--)
+                {
+                    var roles = plexTvShow.Roles[i];
+                    if (roleDict.TryGetValue(roles.Name, out var matchedRole))
+                        plexTvShow.Roles[i] = matchedRole;
+                    else
+                    {
+                        _log.Here()
+                            .Warning(
+                                "Could not find Role: {RoleName} to add into tv-show: {PlexTvShowName}",
+                                roles.Name,
+                                plexTvShow.Title
+                            );
+                        plexTvShow.Roles.RemoveAt(i);
+                    }
+                }
+            }
+        }
+
+        await _dbContext.SaveChangesAsync();
     }
 
     private async Task RemoveMedia(int plexLibraryId, CancellationToken cancellationToken)

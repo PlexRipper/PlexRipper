@@ -108,7 +108,7 @@ public static partial class StringExtensions
     /// </summary>
     /// <param name="title"></param>
     /// <returns></returns>
-    public static string ToSortTitle(this string title)
+    public static string ToSortTitle(this string? title)
     {
         if (string.IsNullOrWhiteSpace(title))
             return string.Empty;

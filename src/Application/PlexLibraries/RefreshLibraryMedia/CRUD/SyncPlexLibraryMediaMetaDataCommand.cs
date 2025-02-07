@@ -151,7 +151,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : IRequestHandler<SyncPl
 
         if (libraryDb.Genres.Any())
         {
-            for (var i = libraryDb.Roles.Count - 1; i >= 0; i--)
+            for (var i = libraryDb.Genres.Count - 1; i >= 0; i--)
             {
                 // Already exists
                 if (roleKeys.Contains(libraryDb.Genres[i].PlexKey))
@@ -167,7 +167,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : IRequestHandler<SyncPl
             }
         }
 
-        // Add Roles
+        // Add Genres
         var currentKeys = libraryDb.Genres.Select(x => x.PlexKey).ToList();
         var genresToAdd = genresDb.Where(x => !currentKeys.Contains(x.PlexKey)).ToList();
         libraryDb.Genres.AddRange(genresToAdd);
@@ -219,7 +219,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : IRequestHandler<SyncPl
             }
         }
 
-        // Add Roles
+        // Add Countries
         var currentKeys = libraryDb.Countries.Select(x => x.PlexKey).ToList();
         var countriesToAdd = countriesDb.Where(x => !currentKeys.Contains(x.PlexKey)).ToList();
         libraryDb.Countries.AddRange(countriesToAdd);

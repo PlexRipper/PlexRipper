@@ -6,10 +6,9 @@ public static class PlexMediaDataDTOMapper
 {
     #region MediaData
 
-    public static PlexMediaDataDTO ToDTO(this PlexMediaData source) =>
+    public static PlexMediaDataDTO ToDTO(this LibraryMediaItemMediaDTO source) =>
         new()
         {
-            MediaFormat = source.MediaFormat,
             Duration = source.Duration,
             VideoResolution = source.VideoResolution,
             Width = source.Width,
@@ -22,10 +21,10 @@ public static class PlexMediaDataDTOMapper
             AudioProfile = source.AudioProfile,
             AudioCodec = source.AudioCodec,
             AudioChannels = source.AudioChannels,
-            Parts = source.Parts.ConvertAll(ToDTO),
+            Parts = source.Parts,
         };
 
-    public static List<PlexMediaDataDTO> ToDTO(this List<PlexMediaData> source) => source.ConvertAll(ToDTO);
+    public static List<PlexMediaDataDTO> ToDTO(this List<LibraryMediaItemMediaDTO> source) => source.ConvertAll(ToDTO);
 
     #endregion
 
@@ -45,10 +44,10 @@ public static class PlexMediaDataDTOMapper
 
     #region PlexMediaDataPart
 
-    public static PlexMediaDataPartDTO ToDTO(this PlexMediaDataPart source) =>
+    public static PlexMediaDataPartDTO ToDTO(this LibraryMediaItemPartDTO source) =>
         new()
         {
-            ObfuscatedFilePath = source.ObfuscatedFilePath,
+            ObfuscatedFilePath = source.Key,
             Duration = source.Duration,
             File = source.File.GetFileName(),
             Size = source.Size,
@@ -56,7 +55,8 @@ public static class PlexMediaDataDTOMapper
             VideoProfile = source.VideoProfile,
         };
 
-    public static List<PlexMediaDataPartDTO> ToDTO(this List<PlexMediaDataPart> source) => source.ConvertAll(ToDTO);
+    public static List<PlexMediaDataPartDTO> ToDTO(this List<LibraryMediaItemPartDTO> source) =>
+        source.ConvertAll(ToDTO);
 
     #endregion
 }

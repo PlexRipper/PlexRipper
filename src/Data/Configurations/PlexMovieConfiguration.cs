@@ -9,10 +9,28 @@ public class PlexMovieConfiguration : IEntityTypeConfiguration<PlexMovie>
     {
         builder.HasIndex(x => x.SortIndex);
 
-        builder.HasMany(x => x.Roles).WithMany(x => x.PlexMovieRoles).UsingEntity("PlexMovieRoles");
+        builder
+            .HasMany(x => x.Roles)
+            .WithMany(x => x.PlexMovieRoles)
+            .UsingEntity<PlexMovieRoles>(
+                l => l.HasOne<PlexRole>().WithMany().HasForeignKey(e => e.RolesId),
+                r => r.HasOne<PlexMovie>().WithMany().HasForeignKey(e => e.PlexMovieId)
+            );
 
-        builder.HasMany(x => x.Genres).WithMany(x => x.PlexMovieGenres).UsingEntity("PlexMovieGenres");
+        builder
+            .HasMany(x => x.Genres)
+            .WithMany(x => x.PlexMovieGenres)
+            .UsingEntity<PlexMovieGenres>(
+                l => l.HasOne<PlexGenre>().WithMany().HasForeignKey(e => e.GenresId),
+                r => r.HasOne<PlexMovie>().WithMany().HasForeignKey(e => e.PlexMovieId)
+            );
 
-        builder.HasMany(x => x.Country).WithMany(x => x.PlexMovieCountries).UsingEntity("PlexMovieCountries");
+        builder
+            .HasMany(x => x.Country)
+            .WithMany(x => x.PlexMovieCountries)
+            .UsingEntity<PlexMovieCountries>(
+                l => l.HasOne<PlexCountry>().WithMany().HasForeignKey(e => e.CountryId),
+                r => r.HasOne<PlexMovie>().WithMany().HasForeignKey(e => e.PlexMovieId)
+            );
     }
 }

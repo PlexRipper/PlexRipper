@@ -31,26 +31,4 @@ public static class PropertyBuilderExtensions
 
         return propertyBuilder;
     }
-
-    public static PropertyBuilder<List<T>> ListValueComparer<T>(this PropertyBuilder<List<T>> propertyBuilder)
-        where T : class
-    {
-        try
-        {
-            propertyBuilder.Metadata.SetValueComparer(
-                new ValueComparer<List<T>>(
-                    (c1, c2) => c1 != null && c2 != null && c1.SequenceEqual(c2),
-                    c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
-                    c => c.ToList()
-                )
-            );
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            throw;
-        }
-
-        return propertyBuilder;
-    }
 }

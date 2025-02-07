@@ -6,7 +6,7 @@ public class PlexGenre : BaseEntity
 
     // public PlexGenreType Type { get; set; }
 
-    public required int PlexKey { get; set; }
+    public required long PlexKey { get; set; }
 
     public List<PlexLibrary> PlexLibraries { get; set; } = [];
 

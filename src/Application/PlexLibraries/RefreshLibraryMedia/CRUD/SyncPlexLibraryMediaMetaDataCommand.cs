@@ -1,6 +1,4 @@
-using System.Diagnostics;
 using Data.Contracts;
-using EFCore.BulkExtensions;
 using FluentValidation;
 using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
@@ -25,15 +23,6 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : IRequestHandler<SyncPl
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
 
-    private readonly BulkConfig? _config =
-        new()
-        {
-            BatchSize = 500,
-            SetOutputIdentity = true,
-            PreserveInsertOrder = true,
-            CalculateStats = true,
-        };
-
     public SyncPlexLibraryMediaMetaDataCommandHandler(ILog log, IPlexRipperDbContext dbContext)
     {
         _log = log;
@@ -51,19 +40,16 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : IRequestHandler<SyncPl
 
             var libraryDb = await _dbContext
                 .PlexLibraries.Where(x => x.Id == libraryId)
-                .Include(x => x.Roles)
-                .Include(x => x.Genres)
-                .Include(x => x.Countries)
                 .FirstOrDefaultAsync(cancellationToken);
 
             if (libraryDb is null)
                 return ResultExtensions.EntityNotFound(nameof(PlexLibrary), libraryId);
 
-            await SyncRoles(roles, libraryDb);
+            await SyncRoles(roles, libraryId);
 
-            await SyncGenres(genres, libraryDb);
+            await SyncGenres(genres, libraryId);
 
-            await SyncCountries(countries, libraryDb);
+            await SyncCountries(countries, libraryId);
 
             return Result.Ok();
         }
@@ -73,7 +59,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : IRequestHandler<SyncPl
         }
     }
 
-    private async Task<Result> SyncRoles(List<PlexRole> roles, PlexLibrary library)
+    private async Task<Result> SyncRoles(List<PlexRole> roles, int libraryId)
     {
         foreach (var plexRole in roles)
             _dbContext.PlexRoles.AddIfNotExists(plexRole, x => x.PlexKey == plexRole.PlexKey);
@@ -81,13 +67,13 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : IRequestHandler<SyncPl
         await _dbContext.SaveChangesAsync();
 
         var libraryDb = await _dbContext
-            .PlexLibraries.Where(x => x.Id == library.Id)
+            .PlexLibraries.Where(x => x.Id == libraryId)
             .Include(x => x.Roles)
             .AsTracking()
             .FirstOrDefaultAsync();
 
         if (libraryDb is null)
-            return ResultExtensions.EntityNotFound(nameof(PlexLibrary), library.Id);
+            return ResultExtensions.EntityNotFound(nameof(PlexLibrary), libraryId);
 
         var roleKeys = roles.Select(x => x.PlexKey).ToHashSet();
 
@@ -125,7 +111,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : IRequestHandler<SyncPl
         return Result.Ok();
     }
 
-    private async Task<Result> SyncGenres(List<PlexGenre> roles, PlexLibrary library)
+    private async Task<Result> SyncGenres(List<PlexGenre> roles, int libraryId)
     {
         foreach (var plexRole in roles)
             _dbContext.PlexGenres.AddIfNotExists(plexRole, x => x.PlexKey == plexRole.PlexKey);
@@ -133,13 +119,13 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : IRequestHandler<SyncPl
         await _dbContext.SaveChangesAsync();
 
         var libraryDb = await _dbContext
-            .PlexLibraries.Where(x => x.Id == library.Id)
+            .PlexLibraries.Where(x => x.Id == libraryId)
             .Include(x => x.Genres)
             .AsTracking()
             .FirstOrDefaultAsync();
 
         if (libraryDb is null)
-            return ResultExtensions.EntityNotFound(nameof(PlexLibrary), library.Id);
+            return ResultExtensions.EntityNotFound(nameof(PlexLibrary), libraryId);
 
         var roleKeys = roles.Select(x => x.PlexKey).ToHashSet();
 
@@ -177,7 +163,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : IRequestHandler<SyncPl
         return Result.Ok();
     }
 
-    private async Task<Result> SyncCountries(List<PlexCountry> countries, PlexLibrary library)
+    private async Task<Result> SyncCountries(List<PlexCountry> countries, int libraryId)
     {
         foreach (var plexRole in countries)
             _dbContext.PlexCountries.AddIfNotExists(plexRole, x => x.PlexKey == plexRole.PlexKey);
@@ -185,13 +171,13 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : IRequestHandler<SyncPl
         await _dbContext.SaveChangesAsync();
 
         var libraryDb = await _dbContext
-            .PlexLibraries.Where(x => x.Id == library.Id)
+            .PlexLibraries.Where(x => x.Id == libraryId)
             .Include(x => x.Countries)
             .AsTracking()
             .FirstOrDefaultAsync();
 
         if (libraryDb is null)
-            return ResultExtensions.EntityNotFound(nameof(PlexLibrary), library.Id);
+            return ResultExtensions.EntityNotFound(nameof(PlexLibrary), libraryId);
 
         var countryKeys = countries.Select(x => x.PlexKey).ToHashSet();
 

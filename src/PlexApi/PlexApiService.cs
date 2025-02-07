@@ -34,7 +34,7 @@ public class PlexApiService : IPlexApiService
     }
 
     /// <inheritdoc />
-    public async Task<Result<PlexLibrary>> GetLibraryMediaAsync(
+    public async Task<Result<LibraryMetadata>> GetLibraryMediaAsync(
         PlexLibrary plexLibrary,
         Action<MediaSyncProgress>? action = null,
         CancellationToken cancellationToken = default
@@ -67,7 +67,7 @@ public class PlexApiService : IPlexApiService
             return mediaListResult.ToResult();
 
         // Pre sort the media list
-        var mediaList = mediaListResult.Value.OrderByNatural(x => x.Title.ToSortTitle()).ToList();
+        var mediaList = mediaListResult.Value.OrderByNatural(x => x.TitleSort).ToList();
 
         // Determine how to map based on the Library type.
         switch (updatedPlexLibrary.Type)
@@ -82,7 +82,15 @@ public class PlexApiService : IPlexApiService
                 return Result.Fail($"Unknown PlexLibrary type: {updatedPlexLibrary.Type}").LogError();
         }
 
-        return Result.Ok(updatedPlexLibrary);
+        return Result.Ok(
+            new LibraryMetadata
+            {
+                Library = updatedPlexLibrary,
+                Countries = mediaList.ToUniquePlexCountry(),
+                Genres = mediaList.ToUniquePlexGenre(),
+                Roles = mediaList.ToUniquePlexRole(),
+            }
+        );
     }
 
     /// <inheritdoc />
@@ -511,6 +519,8 @@ public class PlexApiService : IPlexApiService
                         Name = x.Title,
                         PlexKey = int.Parse(x.Key),
                         ThumbnailUrl = x.Thumb,
+                        TagKey = string.Empty,
+                        Role = string.Empty,
                     })
                     .ToList() ?? [];
         }

@@ -50,7 +50,8 @@ public static class MediaContainerMappers
                     })
                     .ToList() ?? [],
             Studio = data.Studio ?? string.Empty,
-            ContentRating = data.ContentRating,
+            ContentRating = data.ContentRating ?? string.Empty,
+
             // Duration is in milliseconds and we want seconds
             Duration = data.Duration / 1000,
             Thumb = data.Thumb,
@@ -102,9 +103,9 @@ public static class MediaContainerMappers
     public static LibraryMediaItemPartDTO ToItemPartDTO(this GetMediaMetaDataPart part) =>
         new()
         {
+            Id = part.Id,
             Accessible = part.Accessible,
             Exists = part.Exists,
-            Id = part.Id,
             Key = part.Key,
             Indexes = part.Indexes,
             Duration = part.Duration,
@@ -113,7 +114,7 @@ public static class MediaContainerMappers
             Container = part.Container,
             VideoProfile = part.VideoProfile,
             AudioProfile = part.AudioProfile ?? string.Empty,
-            Stream = part.Stream.Select(x => x.ToItemStreamDTO()).ToList(),
+            Stream = part.Stream?.Select(x => x.ToItemStreamDTO()).ToList() ?? [],
         };
 
     public static LibraryMediaItemStreamDTO ToItemStreamDTO(this GetMediaMetaDataStream source) =>

@@ -41,7 +41,7 @@ public interface IPlexApiService
     /// <param name="action"> Progress action callback to notify of connection attempt progress.</param>
     /// <param name="cancellationToken"> The <see cref="CancellationToken"/> to use.</param>
     /// <returns></returns>
-    Task<Result<PlexLibrary>> GetLibraryMediaAsync(
+    Task<Result<LibraryMetadata>> GetLibraryMediaAsync(
         PlexLibrary plexLibrary,
         Action<MediaSyncProgress>? action = null,
         CancellationToken cancellationToken = default

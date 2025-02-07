@@ -35,7 +35,7 @@ public class RefreshLibraryMediaCommand_UnitTests : BaseUnitTest<RefreshLibraryM
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok(updatedPlexLibrary));
+            .ReturnsAsync(Result.Ok(new LibraryMetadata() { Library = updatedPlexLibrary }));
         mock.Mock<ISignalRService>()
             .Setup(x => x.SendLibraryProgressUpdateAsync(It.IsAny<LibraryProgress>()))
             .Returns(Task.CompletedTask);
@@ -108,7 +108,7 @@ public class RefreshLibraryMediaCommand_UnitTests : BaseUnitTest<RefreshLibraryM
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok(updatedPlexLibrary));
+            .ReturnsAsync(Result.Ok(new LibraryMetadata() { Library = updatedPlexLibrary }));
 
         mock.Mock<IPlexApiService>()
             .Setup(x =>

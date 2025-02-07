@@ -78,23 +78,23 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
         };
 
         // Phase 1:  Retrieve overview of all media belonging to this PlexLibrary
-        var newPlexLibraryResult = await _plexServiceApi.GetLibraryMediaAsync(
+        var libraryMetaDataResult = await _plexServiceApi.GetLibraryMediaAsync(
             plexLibrary,
             progress => SendProgress(1, progress.Percentage, progress.TimeRemaining),
             cancellationToken
         );
-        if (newPlexLibraryResult.IsFailed)
-            return newPlexLibraryResult;
 
-        var newPlexLibrary = newPlexLibraryResult.Value;
+        if (libraryMetaDataResult.IsFailed)
+            return libraryMetaDataResult.ToResult();
+
+        var newPlexLibrary = libraryMetaDataResult.Value.Library;
 
         // Get the default folder path id for the destination
         newPlexLibrary.DefaultDestinationId = newPlexLibrary.Type.ToDefaultDestinationFolderId();
 
-        var mediaMetaData = await _plexServiceApi.GetLibraryMediaMetadata(newPlexLibrary, cancellationToken);
-
-        var mediaMetaDataSync = await _mediator.Send(
-            new SyncPlexLibraryMediaMetaDataCommand(mediaMetaData.Value, newPlexLibrary.Id),
+        // Sync the metadata such as Country, Roles and Genres of the library media
+        await _mediator.Send(
+            new SyncPlexLibraryMediaMetaDataCommand(libraryMetaDataResult.Value, newPlexLibrary.Id),
             cancellationToken
         );
 

@@ -1,6 +1,4 @@
 using System.Text.RegularExpressions;
-using LukeHagar.PlexAPI.SDK.Models.Requests;
-using PlexApi.Contracts;
 
 namespace PlexRipper.PlexApi;
 
@@ -41,19 +39,9 @@ public static class PlexMediaMapper
             Guid_IMDB = source.Guid_IMDB,
             Guid_TMDB = source.Guid_TMDB,
             Guid_TVDB = source.Guid_TVDB,
-            Country =
-                originalSource.Country?.Select(x => new PlexCountry { Name = x.Tag ?? "", PlexKey = 0 }).ToList() ?? [],
-            Roles =
-                originalSource
-                    .Role?.Select(x => new PlexRole
-                    {
-                        Name = x.Tag ?? "",
-                        PlexKey = 0,
-                        ThumbnailUrl = "",
-                    })
-                    .ToList() ?? [],
-            Genres =
-                originalSource.Genre?.Select(x => new PlexGenre() { Name = x.Tag ?? "", PlexKey = 0 }).ToList() ?? [],
+            Country = originalSource.Country.ToPlexCountry(),
+            Roles = originalSource.Role.ToPlexRole(),
+            Genres = originalSource.Genre.ToPlexGenre(),
         };
 
     public static PlexTvShow ToPlexTvShow(this PlexMedia source, LibraryMediaItemDTO originalSource) =>
@@ -92,19 +80,9 @@ public static class PlexMediaMapper
             Guid_IMDB = source.Guid_IMDB,
             Guid_TMDB = source.Guid_TMDB,
             Guid_TVDB = source.Guid_TVDB,
-            Country =
-                originalSource.Country?.Select(x => new PlexCountry { Name = x.Tag ?? "", PlexKey = 0 }).ToList() ?? [],
-            Roles =
-                originalSource
-                    .Role?.Select(x => new PlexRole
-                    {
-                        Name = x.Tag ?? "",
-                        PlexKey = 0,
-                        ThumbnailUrl = "",
-                    })
-                    .ToList() ?? [],
-            Genres =
-                originalSource.Genre?.Select(x => new PlexGenre() { Name = x.Tag ?? "", PlexKey = 0 }).ToList() ?? [],
+            Country = originalSource.Country.ToPlexCountry(),
+            Roles = originalSource.Role.ToPlexRole(),
+            Genres = originalSource.Genre.ToPlexGenre(),
         };
 
     public static PlexTvShowSeason ToPlexTvShowSeason(this PlexMedia source, LibraryMediaItemDTO originalSource) =>

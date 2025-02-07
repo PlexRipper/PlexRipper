@@ -9,7 +9,7 @@ public class PlexMovie : PlexMedia
 
     public List<PlexGenre> Genres { get; set; } = [];
 
-    public List<PlexCountry> Country { get; set; } = [];
+    public List<PlexCountry> Countries { get; set; } = [];
 
     [NotMapped]
     public override PlexMediaType Type => PlexMediaType.Movie;

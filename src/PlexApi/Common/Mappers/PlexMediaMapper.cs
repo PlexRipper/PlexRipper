@@ -39,7 +39,7 @@ public static class PlexMediaMapper
             Guid_IMDB = source.Guid_IMDB,
             Guid_TMDB = source.Guid_TMDB,
             Guid_TVDB = source.Guid_TVDB,
-            Country = originalSource.Country.ToPlexCountry(),
+            Countries = originalSource.Country.ToPlexCountry(),
             Roles = originalSource.Role.ToPlexRole(),
             Genres = originalSource.Genre.ToPlexGenre(),
         };

@@ -8,6 +8,8 @@ namespace Data.Contracts;
 
 public interface IPlexRipperDbContext : IDisposable
 {
+    public string DatabaseName { get; }
+
     public DbSet<PlexAccount> PlexAccounts { get; }
     public DbSet<DownloadWorkerTask> DownloadWorkerTasks { get; }
     public DbSet<DownloadWorkerLog> DownloadWorkerTasksLogs { get; }
@@ -27,8 +29,6 @@ public interface IPlexRipperDbContext : IDisposable
     public DbSet<PlexAccountServer> PlexAccountServers { get; }
     public DbSet<PlexAccountLibrary> PlexAccountLibraries { get; }
 
-    public string DatabaseName { get; }
-
     public DbSet<DownloadTaskMovie> DownloadTaskMovie { get; }
 
     public DbSet<DownloadTaskMovieFile> DownloadTaskMovieFile { get; }
@@ -46,6 +46,18 @@ public interface IPlexRipperDbContext : IDisposable
     public DbSet<PlexGenre> PlexGenres { get; set; }
 
     public DbSet<PlexCountry> PlexCountries { get; set; }
+
+    public DbSet<PlexMovieRoles> PlexMovieRoles { get; set; }
+
+    public DbSet<PlexMovieCountries> PlexMovieCountries { get; set; }
+
+    public DbSet<PlexMovieGenres> PlexMovieGenres { get; set; }
+
+    public DbSet<PlexTvShowRoles> PlexTvShowRoles { get; set; }
+
+    public DbSet<PlexTvShowGenres> PlexTvShowGenres { get; set; }
+
+    public DbSet<PlexTvShowCountries> PlexTvShowCountries { get; set; }
 
     public EntityEntry Entry(object entity);
 

@@ -93,6 +93,18 @@ public sealed class PlexRipperDbContext : DbContext, IPlexRipperDbContext, IPlex
 
     public DbSet<PlexAccountLibrary> PlexAccountLibraries { get; set; }
 
+    public DbSet<PlexMovieRoles> PlexMovieRoles { get; set; }
+
+    public DbSet<PlexMovieCountries> PlexMovieCountries { get; set; }
+
+    public DbSet<PlexMovieGenres> PlexMovieGenres { get; set; }
+
+    public DbSet<PlexTvShowRoles> PlexTvShowRoles { get; set; }
+
+    public DbSet<PlexTvShowGenres> PlexTvShowGenres { get; set; }
+
+    public DbSet<PlexTvShowCountries> PlexTvShowCountries { get; set; }
+
     #endregion
 
     public string DatabaseName { get; }

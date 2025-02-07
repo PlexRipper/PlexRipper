@@ -1205,6 +1205,10 @@ namespace PlexRipper.Data.Migrations
 
                     b.Property<int>("PlexMovieId")
                         .HasColumnType("INTEGER")
+                        .HasColumnOrder(3);
+
+                    b.Property<int>("PlexLibraryId")
+                        .HasColumnType("INTEGER")
                         .HasColumnOrder(2);
 
                     b.HasKey("CountryId", "PlexMovieId");
@@ -1222,6 +1226,10 @@ namespace PlexRipper.Data.Migrations
 
                     b.Property<int>("PlexMovieId")
                         .HasColumnType("INTEGER")
+                        .HasColumnOrder(3);
+
+                    b.Property<int>("PlexLibraryId")
+                        .HasColumnType("INTEGER")
                         .HasColumnOrder(2);
 
                     b.HasKey("GenresId", "PlexMovieId");
@@ -1235,11 +1243,15 @@ namespace PlexRipper.Data.Migrations
                 {
                     b.Property<int>("PlexMovieId")
                         .HasColumnType("INTEGER")
-                        .HasColumnOrder(2);
+                        .HasColumnOrder(3);
 
                     b.Property<int>("RolesId")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(1);
+
+                    b.Property<int>("PlexLibraryId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(2);
 
                     b.HasKey("PlexMovieId", "RolesId");
 

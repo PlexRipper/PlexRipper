@@ -71,7 +71,7 @@ public class SyncPlexMoviesCommandHandler : IRequestHandler<SyncPlexMoviesComman
                 .FirstOrDefault();
 
             _log.Debug(
-                "Starting syncing of tv shows in library: {PlexLibraryName} with id:  {PlexLibraryId} by first removing all media and then reinserting it",
+                "Starting syncing of movies in library: {PlexLibraryName} with id: {PlexLibraryId} by first removing all media and then reinserting it",
                 plexLibraryName,
                 plexLibraryId
             );
@@ -85,6 +85,15 @@ public class SyncPlexMoviesCommandHandler : IRequestHandler<SyncPlexMoviesComman
 
             await _dbContext.BulkInsertAsync(plexMovies, _config, cancellationToken);
             _report.CreatedMovies = plexMovies.Count;
+
+            _log.Debug(
+                "Successfully inserted {PlexMoviesCount} movies in library: {PlexLibraryName} with id: {PlexLibraryId}",
+                plexMovies.Count,
+                plexLibraryName,
+                plexLibraryId
+            );
+
+            await SyncMovieMetaData(plexMovies, plexLibraryId, plexLibraryName);
 
             stopWatch.Stop();
 
@@ -105,10 +114,91 @@ public class SyncPlexMoviesCommandHandler : IRequestHandler<SyncPlexMoviesComman
         }
     }
 
+    private async Task SyncMovieMetaData(List<PlexMovie> plexMovies, int libraryId, string libraryName)
+    {
+        _log.Debug("Starting syncing of movie metadata for library with id: {LibraryId}", libraryId);
+
+        var roleDict = await _dbContext
+            .PlexLibraries.Where(x => x.Id == libraryId)
+            .Include(x => x.Roles)
+            .SelectMany(x => x.Roles)
+            .Take(1)
+            .ToDictionaryAsync(x => x.PlexKey, x => x.Id);
+
+        // These are always small dictionaries so no need to worry about performance
+        var genreDict = await _dbContext.PlexGenres.ToDictionaryAsync(x => x.PlexKey, x => x.Id);
+        var countryDict = await _dbContext.PlexCountries.ToDictionaryAsync(x => x.PlexKey, x => x.Id);
+
+        var plexMovieRoles = new List<PlexMovieRoles>();
+        var plexMovieGenres = new List<PlexMovieGenres>();
+        var plexMovieCountries = new List<PlexMovieCountries>();
+
+        foreach (var plexMovie in plexMovies)
+        {
+            foreach (var plexRole in plexMovie.Roles)
+            {
+                if (roleDict.TryGetValue(plexRole.PlexKey, out var roleId))
+                {
+                    plexMovieRoles.Add(new PlexMovieRoles(roleId, libraryId, plexMovie.Id));
+                    continue;
+                }
+
+                _log.Here()
+                    .Warning(
+                        "{PlexRole} with key {PlexKey} and name: {PlexRole} not found for library {LibraryName}",
+                        nameof(PlexRole),
+                        plexRole.PlexKey,
+                        plexRole.Name,
+                        libraryName
+                    );
+            }
+
+            foreach (var plexGenre in plexMovie.Genres)
+            {
+                if (genreDict.TryGetValue(plexGenre.PlexKey, out var genreId))
+                {
+                    plexMovieGenres.Add(new PlexMovieGenres(genreId, libraryId, plexMovie.Id));
+                    continue;
+                }
+
+                _log.Here()
+                    .Warning(
+                        "{PlexGenre} with key {PlexKey} and name: {PlexGenre} not found for library {LibraryName}",
+                        nameof(PlexGenre),
+                        plexGenre.PlexKey,
+                        plexGenre.Name,
+                        libraryName
+                    );
+            }
+
+            foreach (var plexCountry in plexMovie.Countries)
+            {
+                if (countryDict.TryGetValue(plexCountry.PlexKey, out var countryId))
+                {
+                    plexMovieCountries.Add(new PlexMovieCountries(countryId, libraryId, plexMovie.Id));
+                    continue;
+                }
+
+                _log.Here()
+                    .Warning(
+                        "{PlexCountry} with key {PlexKey} and name: {PlexCountry} not found for library {LibraryName}",
+                        nameof(PlexCountry),
+                        plexCountry.PlexKey,
+                        plexCountry.Name,
+                        libraryName
+                    );
+            }
+        }
+
+        await _dbContext.BulkInsertAsync(plexMovieCountries, _config, CancellationToken.None);
+        await _dbContext.BulkInsertAsync(plexMovieGenres, _config, CancellationToken.None);
+        await _dbContext.BulkInsertAsync(plexMovieRoles, _config, CancellationToken.None);
+    }
+
     private async Task RemoveMedia(int plexLibraryId, CancellationToken cancellationToken)
     {
         _report.DeletedMovies = await _dbContext
-            .PlexMovies.Where(e => e.PlexLibraryId == plexLibraryId)
+            .PlexMovies.Where(x => x.PlexLibraryId == plexLibraryId)
             .ExecuteDeleteAsync(cancellationToken);
     }
 }

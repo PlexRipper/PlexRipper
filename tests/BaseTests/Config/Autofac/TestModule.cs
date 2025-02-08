@@ -64,7 +64,7 @@ public class TestModule : Module
             builder
                 .Register(_ =>
                 {
-                    var handler = new Mock<HttpMessageHandler>();
+                    var handler = new Mock<HttpMessageHandler>(MockBehavior.Loose);
                     Config.HttpClientOptions.Invoke(handler);
                     var client = new HttpClient(handler.Object);
                     client.DefaultRequestHeaders.Add("User-Agent", "MockHttpClient");

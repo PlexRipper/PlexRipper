@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text;
 using System.Text.Json;
 using Bogus;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
@@ -57,7 +58,21 @@ public partial class FakePlexApiData
             .RuleFor(x => x.StatusCode, _ => (int)statusCode)
             .RuleFor(x => x.ContentType, _ => ContentType.ApplicationJson)
             .RuleFor(x => x.PlexDevices, _ => GetServerResource(seed, options).Generate(config.PlexServerAccessCount))
-            .RuleFor(x => x.RawResponse, (_, res) => GetHttpResponseMessage(statusCode, res.PlexDevices, request))
+            .RuleFor(
+                x => x.RawResponse,
+                (_, res) =>
+                {
+                    switch ((HttpStatusCode)res.StatusCode)
+                    {
+                        case HttpStatusCode.OK:
+                            return GetHttpResponseMessage(statusCode, res.PlexDevices, request);
+                        case HttpStatusCode.Unauthorized:
+                            return GetPlexUnauthorizedResponseMessage(request);
+                        default:
+                            throw new ArgumentOutOfRangeException(nameof(statusCode), statusCode, null);
+                    }
+                }
+            )
             .Generate();
     }
 
@@ -126,6 +141,20 @@ public partial class FakePlexApiData
             ReasonPhrase = statusCode.ToString(),
             RequestMessage = request,
             StatusCode = statusCode,
+            Version = new Version(1, 1),
+        };
+    }
+
+    public static HttpResponseMessage GetPlexUnauthorizedResponseMessage(HttpRequestMessage? request)
+    {
+        var html401 = "<html><head><title>Unauthorized</title></head><body><h1>401 Unauthorized</h1></body></html>";
+
+        return new HttpResponseMessage
+        {
+            Content = new StringContent(html401, Encoding.UTF8, "text/html"),
+            ReasonPhrase = "Unauthorized",
+            RequestMessage = request,
+            StatusCode = HttpStatusCode.Unauthorized,
             Version = new Version(1, 1),
         };
     }

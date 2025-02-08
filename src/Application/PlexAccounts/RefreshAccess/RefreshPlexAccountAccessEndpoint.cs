@@ -24,14 +24,22 @@ public class RefreshPlexAccountAccessEndpoint
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
     private readonly IMediator _mediator;
+    private readonly ISignalRService _signalRService;
+    private List<RefreshPlexAccountAccessRapportDTO> _list = new();
 
     public override string EndpointPath => ApiRoutes.PlexAccountController + "/refresh/{PlexAccountId}";
 
-    public RefreshPlexAccountAccessEndpoint(ILog log, IPlexRipperDbContext dbContext, IMediator mediator)
+    public RefreshPlexAccountAccessEndpoint(
+        ILog log,
+        IPlexRipperDbContext dbContext,
+        IMediator mediator,
+        ISignalRService signalRService
+    )
     {
         _log = log;
         _dbContext = dbContext;
         _mediator = mediator;
+        _signalRService = signalRService;
     }
 
     public override void Configure()
@@ -46,7 +54,6 @@ public class RefreshPlexAccountAccessEndpoint
 
     public override async Task HandleAsync(RefreshPlexAccountAccessEndpointRequest req, CancellationToken ct)
     {
-        var list = new List<RefreshPlexAccountAccessRapportDTO>();
         var plexAccountIds = new List<int>();
         if (req.PlexAccountId > 0)
         {
@@ -68,44 +75,21 @@ public class RefreshPlexAccountAccessEndpoint
         // Execute
         foreach (var plexAccountId in plexAccountIds)
         {
-            var serverAccessRapportResult = await _mediator.Send(new RefreshPlexServerAccessCommand(plexAccountId), ct);
-            var libraryAccessRapportResult = await _mediator.Send(new RefreshLibraryAccessCommand(plexAccountId), ct);
-            var plexAccountName = await _dbContext.GetPlexAccountDisplayName(plexAccountId, CancellationToken.None);
+            var serverAccessResult = await _mediator.Send(new RefreshPlexServerAccessCommand(plexAccountId), ct);
 
-            var serverAccessRapport = serverAccessRapportResult.Value;
-            var libraryAccessRapport = libraryAccessRapportResult.Value;
+            if (serverAccessResult.IsFailed)
+            {
+                serverAccessResult.LogError();
+                continue;
+            }
 
-            list.Add(
-                new RefreshPlexAccountAccessRapportDTO
-                {
-                    PlexAccountId = plexAccountId,
-                    PlexAccountName = plexAccountName,
-                    Access = serverAccessRapport
-                        .Data.Select(x => new PlexServerAccessRapportDTO
-                        {
-                            IsServerOffline = libraryAccessRapport.OfflineServers.Contains(x.PlexServerId),
-                            PlexServerId = x.PlexServerId,
-                            PlexServerName = x.PlexServerName,
-                            State = libraryAccessRapport.OfflineServers.Contains(x.PlexServerId)
-                                ? PlexAccessState.Unknown
-                                : x.State,
-                            LibraryAccess =
-                                libraryAccessRapport
-                                    .Reports.Find(y => y.PlexServerId == x.PlexServerId)
-                                    ?.Data.Select(y => new PlexLibraryAccessRapportDTO
-                                    {
-                                        PlexLibraryName = y.PlexLibraryName,
-                                        PlexServerId = y.PlexServerId,
-                                        State = y.State,
-                                        PlexLibraryId = y.PlexLibraryId,
-                                    })
-                                    .ToList() ?? [],
-                        })
-                        .ToList(),
-                }
-            );
+            _list.Add(serverAccessResult.Value);
         }
 
-        await SendFluentResult(Result.Ok(list), ct);
+        // Send notifications to the client to refresh the PlexServerConnection data
+        await _signalRService.SendRefreshNotificationAsync(
+            [DataType.PlexAccount, DataType.PlexServer, DataType.PlexServerConnection]
+        );
+        await SendFluentResult(Result.Ok(_list), ct);
     }
 }

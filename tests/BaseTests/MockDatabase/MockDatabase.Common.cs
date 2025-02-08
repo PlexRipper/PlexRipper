@@ -105,47 +105,57 @@ public static partial class MockDatabase
         return context;
     }
 
-    private static async Task<PlexRipperDbContext> AddPlexAccount(this PlexRipperDbContext context, Seed seed)
+    private static async Task<PlexRipperDbContext> AddPlexAccount(
+        this PlexRipperDbContext context,
+        Seed seed,
+        Action<FakeDataConfig>? options
+    )
     {
+        var config = FakeDataConfig.FromOptions(options);
+
         var plexServers = context.PlexServers.Include(x => x.PlexLibraries).ToList();
 
-        var plexAccount = FakeData.GetPlexAccount(seed).Generate();
-
-        await context.PlexAccounts.AddAsync(plexAccount);
-        await context.SaveChangesAsync();
-
-        _log.Here()
-            .Debug(
-                "Added 1 {NameOfPlexAccount}: {PlexAccountTitle} to PlexRipperDbContext: {DatabaseName}",
-                nameof(PlexAccount),
-                plexAccount.Title,
-                context.DatabaseName
-            );
-
-        var plexAccountServer = plexServers.Select(x => new PlexAccountServer
+        for (var i = 0; i < config.PlexAccountCount; i++)
         {
-            AuthTokenCreationDate = DateTime.UtcNow,
-            PlexServerId = x.Id,
-            PlexAccountId = plexAccount.Id,
-            AuthToken = "FAKE_AUTH_TOKEN",
-            IsServerOwned = true,
-        });
+            var plexAccount = FakeData.GetPlexAccount(seed).Generate();
 
-        // Add account -> server relation
-        context.PlexAccountServers.AddRange(plexAccountServer);
-        await context.SaveChangesAsync();
+            await context.PlexAccounts.AddAsync(plexAccount);
+            await context.SaveChangesAsync();
 
-        // Add account -> library relation
-        var plexAccountLibraries = plexServers
-            .SelectMany(x => x.PlexLibraries)
-            .Select(x => new PlexAccountLibrary
+            _log.Here()
+                .Debug(
+                    "Added 1 {NameOfPlexAccount}: {PlexAccountTitle} to PlexRipperDbContext: {DatabaseName}",
+                    nameof(PlexAccount),
+                    plexAccount.Title,
+                    context.DatabaseName
+                );
+
+            var plexAccountServer = plexServers.Select(x => new PlexAccountServer
             {
+                AuthTokenCreationDate = DateTime.UtcNow,
+                PlexServerId = x.Id,
                 PlexAccountId = plexAccount.Id,
-                PlexServerId = x.PlexServerId,
-                PlexLibraryId = x.Id,
-                IsLibraryOwned = true,
+                AuthToken = "FAKE_AUTH_TOKEN",
+                IsServerOwned = true,
             });
-        context.PlexAccountLibraries.AddRange(plexAccountLibraries);
+
+            // Add account -> server relation
+            context.PlexAccountServers.AddRange(plexAccountServer);
+            await context.SaveChangesAsync();
+
+            // Add account -> library relation
+            var plexAccountLibraries = plexServers
+                .SelectMany(x => x.PlexLibraries)
+                .Select(x => new PlexAccountLibrary
+                {
+                    PlexAccountId = plexAccount.Id,
+                    PlexServerId = x.PlexServerId,
+                    PlexLibraryId = x.Id,
+                    IsLibraryOwned = true,
+                });
+            context.PlexAccountLibraries.AddRange(plexAccountLibraries);
+        }
+
         await context.SaveChangesAsync();
 
         return context;
@@ -276,7 +286,7 @@ public static partial class MockDatabase
             plexRipperContext = await plexRipperContext.AddPlexLibraries(seed, options);
 
         if (config.PlexAccountCount > 0)
-            plexRipperContext = await plexRipperContext.AddPlexAccount(seed);
+            plexRipperContext = await plexRipperContext.AddPlexAccount(seed, options);
 
         if (config.MovieCount > 0)
             plexRipperContext = await plexRipperContext.AddPlexMovies(seed, options);

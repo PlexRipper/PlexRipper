@@ -8,6 +8,9 @@ public class FakeDataConfig : BaseConfig<FakeDataConfig>
 
     public int PlexLibraryCount { get; set; } = 0;
 
+    /// <summary>
+    /// The number of PlexAccounts to create which will have access to every PlexServer and PlexLibrary by default.
+    /// </summary>
     public int PlexAccountCount { get; set; } = 0;
 
     public int MovieCount { get; set; } = 0;

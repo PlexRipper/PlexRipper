@@ -32,7 +32,7 @@ public static class HttpClientExtensions
         {
             // In case of unauthorized
             case HttpStatusCode.Unauthorized:
-                return Result.Fail("Unauthorized").Add401UnauthorizedError().WithErrors(errors ?? []);
+                return Result.Fail("Unauthorized").AddPlex401UnauthorizedError().WithErrors(errors ?? []);
 
             // In case of timeout
             case HttpStatusCode.RequestTimeout:

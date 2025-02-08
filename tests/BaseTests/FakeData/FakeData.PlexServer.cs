@@ -73,6 +73,9 @@ public static partial class FakeData
             .RuleFor(x => x.EpisodeCount, _ => 0)
             .RuleFor(x => x.Movies, _ => [])
             .RuleFor(x => x.TvShows, _ => [])
+            .RuleFor(x => x.Roles, _ => [])
+            .RuleFor(x => x.Genres, _ => [])
+            .RuleFor(x => x.Countries, _ => [])
             .RuleFor(x => x.PlexAccountLibraries, _ => []);
     }
 

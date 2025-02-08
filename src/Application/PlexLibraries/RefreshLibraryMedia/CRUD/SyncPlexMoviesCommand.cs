@@ -114,19 +114,19 @@ public class SyncPlexMoviesCommandHandler : IRequestHandler<SyncPlexMoviesComman
         }
     }
 
-    private async Task SyncMovieMetaData(List<PlexMovie> plexMovies, int libraryId, string libraryName)
+    private async Task SyncMovieMetaData(List<PlexMovie> plexMovies, int plexLibraryId, string libraryName)
     {
-        _log.Debug("Starting syncing of movie metadata for library with id: {LibraryId}", libraryId);
+        _log.Debug("Starting syncing of movie metadata for library with id: {LibraryId}", plexLibraryId);
 
         var roleDict = await _dbContext
-            .PlexLibraries.Where(x => x.Id == libraryId)
+            .PlexLibraries.Where(x => x.Id == plexLibraryId)
             .Include(x => x.Roles)
             .SelectMany(x => x.Roles)
             .ToDictionaryAsync(x => x.Name, x => x.Id);
 
         // These are always small dictionaries so no need to worry about performance
-        var genreDict = await _dbContext.PlexGenres.ToDictionaryAsync(x => x.PlexKey, x => x.Id);
-        var countryDict = await _dbContext.PlexCountries.ToDictionaryAsync(x => x.PlexKey, x => x.Id);
+        var genreDict = await _dbContext.PlexGenres.ToDictionaryAsync(x => x.Name, x => x.Id);
+        var countryDict = await _dbContext.PlexCountries.ToDictionaryAsync(x => x.Name, x => x.Id);
 
         var plexMovieRoles = new List<PlexMovieRoles>();
         var plexMovieGenres = new List<PlexMovieGenres>();
@@ -138,7 +138,7 @@ public class SyncPlexMoviesCommandHandler : IRequestHandler<SyncPlexMoviesComman
             {
                 if (roleDict.TryGetValue(plexRole.Name, out var roleId))
                 {
-                    plexMovieRoles.Add(new PlexMovieRoles(roleId, libraryId, plexMovie.Id));
+                    plexMovieRoles.Add(new PlexMovieRoles(roleId, plexLibraryId, plexMovie.Id));
                     continue;
                 }
 
@@ -154,17 +154,16 @@ public class SyncPlexMoviesCommandHandler : IRequestHandler<SyncPlexMoviesComman
 
             foreach (var plexGenre in plexMovie.Genres)
             {
-                if (genreDict.TryGetValue(plexGenre.PlexKey, out var genreId))
+                if (genreDict.TryGetValue(plexGenre.Name, out var genreId))
                 {
-                    plexMovieGenres.Add(new PlexMovieGenres(genreId, libraryId, plexMovie.Id));
+                    plexMovieGenres.Add(new PlexMovieGenres(genreId, plexLibraryId, plexMovie.Id));
                     continue;
                 }
 
                 _log.Here()
                     .Warning(
-                        "{PlexGenre} with key {PlexKey} and name: {PlexGenre} not found for library {LibraryName}",
+                        "{PlexGenre} with name: {PlexGenre} was not found for library {LibraryName}",
                         nameof(PlexGenre),
-                        plexGenre.PlexKey,
                         plexGenre.Name,
                         libraryName
                     );
@@ -172,17 +171,16 @@ public class SyncPlexMoviesCommandHandler : IRequestHandler<SyncPlexMoviesComman
 
             foreach (var plexCountry in plexMovie.Countries)
             {
-                if (countryDict.TryGetValue(plexCountry.PlexKey, out var countryId))
+                if (countryDict.TryGetValue(plexCountry.Name, out var countryId))
                 {
-                    plexMovieCountries.Add(new PlexMovieCountries(countryId, libraryId, plexMovie.Id));
+                    plexMovieCountries.Add(new PlexMovieCountries(countryId, plexLibraryId, plexMovie.Id));
                     continue;
                 }
 
                 _log.Here()
                     .Warning(
-                        "{PlexCountry} with key {PlexKey} and name: {PlexCountry} not found for library {LibraryName}",
+                        "{PlexCountry} with name: {PlexCountry} was not found for library {LibraryName}",
                         nameof(PlexCountry),
-                        plexCountry.PlexKey,
                         plexCountry.Name,
                         libraryName
                     );
@@ -192,6 +190,12 @@ public class SyncPlexMoviesCommandHandler : IRequestHandler<SyncPlexMoviesComman
         await _dbContext.BulkInsertAsync(plexMovieCountries, _config, CancellationToken.None);
         await _dbContext.BulkInsertAsync(plexMovieGenres, _config, CancellationToken.None);
         await _dbContext.BulkInsertAsync(plexMovieRoles, _config, CancellationToken.None);
+
+        _log.Debug(
+            "Finished syncing of Movie metadata for library {LibraryName} with id: {LibraryId}",
+            libraryName,
+            plexLibraryId
+        );
     }
 
     private async Task RemoveMedia(int plexLibraryId, CancellationToken cancellationToken)

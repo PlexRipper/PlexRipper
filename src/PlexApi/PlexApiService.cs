@@ -37,7 +37,7 @@ public class PlexApiService : IPlexApiService
     }
 
     /// <inheritdoc />
-    public async Task<Result<PlexLibrary>> GetLibraryMediaAsync(
+    public async Task<Result<LibraryMetadata>> GetLibraryMediaAsync(
         PlexLibrary plexLibrary,
         Action<MediaSyncProgress>? action = null,
         CancellationToken cancellationToken = default
@@ -88,7 +88,15 @@ public class PlexApiService : IPlexApiService
                 return Result.Fail($"Unknown PlexLibrary type: {updatedPlexLibrary.Type}").LogError();
         }
 
-        return Result.Ok(updatedPlexLibrary);
+        return Result.Ok(
+            new LibraryMetadata
+            {
+                Library = updatedPlexLibrary,
+                Countries = mediaList.ToUniquePlexCountry(),
+                Genres = mediaList.ToUniquePlexGenre(),
+                Roles = mediaList.ToUniquePlexRole(),
+            }
+        );
     }
 
     /// <inheritdoc />

@@ -26,7 +26,7 @@ public class PlexTvShowConfiguration : IEntityTypeConfiguration<PlexTvShow>
             );
 
         builder
-            .HasMany(x => x.Country)
+            .HasMany(x => x.Countries)
             .WithMany(x => x.PlexTvShowCountries)
             .UsingEntity<PlexTvShowCountries>(
                 l => l.HasOne<PlexCountry>().WithMany().HasForeignKey(e => e.CountryId),

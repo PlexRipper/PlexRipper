@@ -12,5 +12,5 @@ public class PlexTvShow : PlexMedia
 
     public List<PlexGenre> Genres { get; set; } = [];
 
-    public List<PlexCountry> Country { get; set; } = [];
+    public List<PlexCountry> Countries { get; set; } = [];
 }

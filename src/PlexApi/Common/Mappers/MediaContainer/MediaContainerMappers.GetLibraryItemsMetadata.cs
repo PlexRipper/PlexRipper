@@ -22,7 +22,7 @@ public static partial class MediaContainerMappers
             Genre = data.Genre?.Select(x => x.ToDTO()).ToList() ?? [],
             Country = data.Country?.Select(x => x.ToDTO()).ToList() ?? [],
             Role = data.Role?.Select(x => x.ToDTO()).ToList() ?? [],
-            Studio = data.Studio,
+            Studio = data.Studio ?? string.Empty,
             ContentRating = data.ContentRating ?? string.Empty,
 
             // Duration is in milliseconds and we want seconds
@@ -45,32 +45,11 @@ public static partial class MediaContainerMappers
         };
     }
 
-    public static LibraryMediaItemGenreDTO ToDTO(this GetAllMediaLibraryGenre x) =>
-        new()
-        {
-            Id = -1,
-            Filter = string.Empty,
-            Tag = x.Tag,
-        };
+    public static LibraryMediaItemGenreDTO ToDTO(this GetAllMediaLibraryGenre x) => new() { Tag = x.Tag };
 
-    public static MetaDataCountryDTO ToDTO(this GetAllMediaLibraryCountry x) =>
-        new()
-        {
-            Id = -1,
-            Filter = string.Empty,
-            Tag = x.Tag,
-        };
+    public static MetaDataCountryDTO ToDTO(this GetAllMediaLibraryCountry x) => new() { Tag = x.Tag };
 
-    public static LibraryMediaItemRoleDTO ToDTO(this GetAllMediaLibraryRole x) =>
-        new()
-        {
-            Id = -1,
-            Filter = string.Empty,
-            Tag = x.Tag,
-            TagKey = string.Empty,
-            Role = string.Empty,
-            Thumb = string.Empty,
-        };
+    public static LibraryMediaItemRoleDTO ToDTO(this GetAllMediaLibraryRole x) => new() { Tag = x.Tag };
 
     public static LibraryMediaItemMediaDTO ToItemMediaDTO(this GetAllMediaLibraryMedia media) =>
         new()

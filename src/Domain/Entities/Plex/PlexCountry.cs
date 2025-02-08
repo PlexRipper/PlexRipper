@@ -4,7 +4,7 @@ public class PlexCountry : BaseEntity
 {
     public required string Name { get; set; }
 
-    public required int PlexKey { get; set; }
+    public int PlexKey { get; set; }
 
     public List<PlexLibrary> PlexLibraries { get; set; } = [];
 

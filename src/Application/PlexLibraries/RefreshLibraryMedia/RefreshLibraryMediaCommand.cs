@@ -77,20 +77,23 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
             _ => _totalProgressSteps,
         };
 
-        // Phase 1.1: Retrieve overview of all media belonging to this PlexLibrary
-        var syncLibraryMediaTask = SyncLibraryMedia(plexLibrary, cancellationToken);
+        // Phase 1: Retrieve overview of all media belonging to this PlexLibrary
+        var syncLibraryMediaResult = await _plexServiceApi.GetLibraryMediaAsync(
+            plexLibrary,
+            progress => SendProgress(1, progress.Percentage, progress.TimeRemaining),
+            cancellationToken
+        );
 
-        // Phase 1.2: Sync the metadata such as Country, Roles and Genres of the library media
-        var syncLibraryMetadataTask = SyncLibraryMetadata(plexLibrary, cancellationToken);
-
-        await Task.WhenAll(syncLibraryMediaTask, syncLibraryMetadataTask);
-
-        var syncLibraryMediaResult = await syncLibraryMediaTask;
+        // Phase 2: Sync the metadata such as Country, Roles and Genres for the library
+        await _mediator.Send(
+            new SyncPlexLibraryMediaMetaDataCommand(syncLibraryMediaResult.Value, plexLibrary.Id),
+            cancellationToken
+        );
 
         if (syncLibraryMediaResult.IsFailed)
             return syncLibraryMediaResult.ToResult().LogError();
 
-        var newPlexLibrary = syncLibraryMediaResult.Value;
+        var newPlexLibrary = syncLibraryMediaResult.Value.Library;
 
         switch (newPlexLibrary.Type)
         {
@@ -269,30 +272,6 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
         SendProgress(_totalProgressSteps, 1);
 
         return Result.Ok(plexLibrary);
-    }
-
-    private async Task<Result<PlexLibrary>> SyncLibraryMedia(
-        PlexLibrary plexLibrary,
-        CancellationToken cancellationToken
-    )
-    {
-        return await _plexServiceApi.GetLibraryMediaAsync(
-            plexLibrary,
-            progress => SendProgress(1, progress.Percentage, progress.TimeRemaining),
-            cancellationToken
-        );
-    }
-
-    private async Task<Result> SyncLibraryMetadata(PlexLibrary plexLibrary, CancellationToken cancellationToken)
-    {
-        var metaDataResult = await _plexServiceApi.GetLibraryMediaMetadata(plexLibrary, cancellationToken);
-        if (metaDataResult.IsFailed)
-            return metaDataResult.ToResult().LogError();
-
-        return await _mediator.Send(
-            new SyncPlexLibraryMediaMetaDataCommand(metaDataResult.Value, plexLibrary.Id),
-            cancellationToken
-        );
     }
 
     private void SendProgress(int step, decimal percentage, TimeSpan timeRemaining = default)

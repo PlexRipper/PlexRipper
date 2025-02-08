@@ -65,7 +65,7 @@ public record LibraryMediaItemDTO
 
     public required List<LibraryMediaItemGenreDTO> Genre { get; set; } = [];
 
-    public required List<MetaDataCountryDTO>? Country { get; set; } = [];
+    public required List<MetaDataCountryDTO> Country { get; set; } = [];
 
     public required List<LibraryMediaItemRoleDTO> Role { get; set; } = [];
 }
@@ -98,35 +98,17 @@ public record MetaDataGuidsDTO
 
 public record MetaDataCountryDTO
 {
-    public required int Id { get; set; }
-
-    public required string Filter { get; set; }
-
     public required string Tag { get; set; }
 }
 
 public record LibraryMediaItemGenreDTO
 {
-    public required long Id { get; set; }
-
-    public required string Filter { get; set; }
-
     public required string Tag { get; set; }
 }
 
 public record LibraryMediaItemRoleDTO
 {
-    public required long Id { get; set; }
-
-    public required string Filter { get; set; }
-
     public required string Tag { get; set; }
-
-    public required string TagKey { get; set; }
-
-    public required string Role { get; set; }
-
-    public required string Thumb { get; set; }
 }
 
 public class LibraryMediaItemMediaDTO

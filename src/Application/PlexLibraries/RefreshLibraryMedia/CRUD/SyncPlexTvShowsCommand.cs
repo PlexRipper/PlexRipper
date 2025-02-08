@@ -161,84 +161,87 @@ public class SyncPlexTvShowsCommandHandler : IRequestHandler<SyncPlexTvShowsComm
 
     private async Task SyncMediaMetaData(int plexLibraryId, List<PlexTvShow> plexTvShows)
     {
-        var countryDict = await _dbContext
-            .PlexCountries.Where(x => x.PlexLibraries.Any(y => y.Id == plexLibraryId))
-            .ToDictionaryAsync(x => x.Name, x => x);
+        var plexLibraryName = await _dbContext.GetPlexLibraryNameById(plexLibraryId);
+        _log.Debug(
+            "Starting syncing of TvShow metadata for library {LibraryName} with id: {LibraryId}",
+            plexLibraryName,
+            plexLibraryId
+        );
 
-        var genreDict = await _dbContext
-            .PlexGenres.Where(x => x.PlexLibraries.Any(y => y.Id == plexLibraryId))
-            .ToDictionaryAsync(x => x.Name, x => x);
+        // These are always small dictionaries so no need to worry about performance
+        var genreDict = await _dbContext.PlexGenres.ToDictionaryAsync(x => x.Name, x => x.Id);
+        var countryDict = await _dbContext.PlexCountries.ToDictionaryAsync(x => x.Name, x => x.Id);
 
         var roleDict = await _dbContext
-            .PlexRoles.Where(x => x.PlexLibraries.Any(y => y.Id == plexLibraryId))
-            .ToDictionaryAsync(x => x.Name, x => x);
+            .PlexLibraries.Where(x => x.Id == plexLibraryId)
+            .Include(x => x.Roles)
+            .SelectMany(x => x.Roles)
+            .ToDictionaryAsync(x => x.Name, x => x.Id);
+
+        var plexTvShowRoles = new List<PlexTvShowRoles>();
+        var plexTvShowGenres = new List<PlexTvShowGenres>();
+        var plexTvShowCountries = new List<PlexTvShowCountries>();
 
         foreach (var plexTvShow in plexTvShows)
         {
-            _dbContext.PlexTvShows.Attach(plexTvShow);
-
-            if (plexTvShow.Country.Any())
+            foreach (var plexRole in plexTvShow.Roles)
             {
-                for (var i = plexTvShow.Country.Count - 1; i >= 0; i--)
+                if (roleDict.TryGetValue(plexRole.Name, out var roleId))
                 {
-                    var country = plexTvShow.Country[i];
-                    if (countryDict.TryGetValue(country.Name, out var matchedCountry))
-                        plexTvShow.Country[i] = matchedCountry;
-                    else
-                    {
-                        _log.Here()
-                            .Warning(
-                                "Could not find Country: {CountryName} to add into tv-show: {PlexTvShowName}",
-                                country.Name,
-                                plexTvShow.Title
-                            );
-                        plexTvShow.Country.RemoveAt(i);
-                    }
+                    plexTvShowRoles.Add(new PlexTvShowRoles(roleId, plexLibraryId, plexTvShow.Id));
+                    continue;
                 }
+
+                _log.Here()
+                    .Warning(
+                        "PlexRole with key {PlexKey} and name: {PlexRole} not found for library {LibraryName}",
+                        plexRole.Name,
+                        plexLibraryName
+                    );
             }
 
-            if (plexTvShow.Genres.Any())
+            foreach (var plexGenre in plexTvShow.Genres)
             {
-                for (var i = plexTvShow.Genres.Count - 1; i >= 0; i--)
+                if (genreDict.TryGetValue(plexGenre.Name, out var genreId))
                 {
-                    var genre = plexTvShow.Genres[i];
-                    if (genreDict.TryGetValue(genre.Name, out var matchedGenre))
-                        plexTvShow.Genres[i] = matchedGenre;
-                    else
-                    {
-                        _log.Here()
-                            .Warning(
-                                "Could not find Genre: {GenreName} to add into tv-show: {PlexTvShowName}",
-                                genre.Name,
-                                plexTvShow.Title
-                            );
-                        plexTvShow.Genres.RemoveAt(i);
-                    }
+                    plexTvShowGenres.Add(new PlexTvShowGenres(genreId, plexLibraryId, plexTvShow.Id));
+                    continue;
                 }
+
+                _log.Here()
+                    .Warning(
+                        "PlexGenre with name: {PlexGenre} was not found for library {LibraryName}",
+                        plexGenre.Name,
+                        plexLibraryName
+                    );
             }
 
-            if (plexTvShow.Roles.Any())
+            foreach (var plexCountry in plexTvShow.Countries)
             {
-                for (var i = plexTvShow.Roles.Count - 1; i >= 0; i--)
+                if (countryDict.TryGetValue(plexCountry.Name, out var countryId))
                 {
-                    var roles = plexTvShow.Roles[i];
-                    if (roleDict.TryGetValue(roles.Name, out var matchedRole))
-                        plexTvShow.Roles[i] = matchedRole;
-                    else
-                    {
-                        _log.Here()
-                            .Warning(
-                                "Could not find Role: {RoleName} to add into tv-show: {PlexTvShowName}",
-                                roles.Name,
-                                plexTvShow.Title
-                            );
-                        plexTvShow.Roles.RemoveAt(i);
-                    }
+                    plexTvShowCountries.Add(new PlexTvShowCountries(countryId, plexLibraryId, plexTvShow.Id));
+                    continue;
                 }
+
+                _log.Here()
+                    .Warning(
+                        "PlexCountry with name: {PlexCountry} was not found for library {LibraryName}",
+                        plexCountry.Name,
+                        plexLibraryName
+                    );
             }
         }
 
-        await _dbContext.SaveChangesAsync();
+        await _dbContext.BulkInsertAsync(plexTvShowCountries, _config, CancellationToken.None);
+        await _dbContext.BulkInsertAsync(plexTvShowGenres, _config, CancellationToken.None);
+        await _dbContext.BulkInsertAsync(plexTvShowRoles, _config, CancellationToken.None);
+
+        _log.Debug(
+            "Finished syncing of TvShow metadata for library {LibraryName} with id: {LibraryId}",
+            plexLibraryName,
+            plexLibraryId
+        );
     }
 
     private async Task RemoveMedia(int plexLibraryId, CancellationToken cancellationToken)

@@ -111,10 +111,10 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : IRequestHandler<SyncPl
         return Result.Ok();
     }
 
-    private async Task<Result> SyncGenres(List<PlexGenre> roles, int libraryId)
+    private async Task<Result> SyncGenres(List<PlexGenre> genres, int libraryId)
     {
-        foreach (var plexRole in roles)
-            _dbContext.PlexGenres.AddIfNotExists(plexRole, x => x.PlexKey == plexRole.PlexKey);
+        foreach (var genre in genres)
+            _dbContext.PlexGenres.AddIfNotExists(genre, x => x.Name == genre.Name);
 
         await _dbContext.SaveChangesAsync();
 
@@ -127,10 +127,10 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : IRequestHandler<SyncPl
         if (libraryDb is null)
             return ResultExtensions.EntityNotFound(nameof(PlexLibrary), libraryId);
 
-        var roleKeys = roles.Select(x => x.PlexKey).ToHashSet();
+        var roleKeys = genres.Select(x => x.Name).ToHashSet();
 
         var genresDb = await _dbContext
-            .PlexGenres.Where(x => roleKeys.Contains(x.PlexKey))
+            .PlexGenres.Where(x => roleKeys.Contains(x.Name))
             .AsTracking()
             .Take(roleKeys.Count)
             .ToListAsync();
@@ -140,13 +140,13 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : IRequestHandler<SyncPl
             for (var i = libraryDb.Genres.Count - 1; i >= 0; i--)
             {
                 // Already exists
-                if (roleKeys.Contains(libraryDb.Genres[i].PlexKey))
+                if (roleKeys.Contains(libraryDb.Genres[i].Name))
                 {
                     continue;
                 }
 
                 // Delete
-                if (!roleKeys.Contains(libraryDb.Genres[i].PlexKey))
+                if (!roleKeys.Contains(libraryDb.Genres[i].Name))
                 {
                     libraryDb.Genres.RemoveAt(i);
                 }
@@ -154,8 +154,8 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : IRequestHandler<SyncPl
         }
 
         // Add Genres
-        var currentKeys = libraryDb.Genres.Select(x => x.PlexKey).ToList();
-        var genresToAdd = genresDb.Where(x => !currentKeys.Contains(x.PlexKey)).ToList();
+        var currentNames = libraryDb.Genres.Select(x => x.Name).ToList();
+        var genresToAdd = genresDb.Where(x => !currentNames.Contains(x.Name)).ToList();
         libraryDb.Genres.AddRange(genresToAdd);
 
         await _dbContext.SaveChangesAsync();
@@ -166,7 +166,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : IRequestHandler<SyncPl
     private async Task<Result> SyncCountries(List<PlexCountry> countries, int libraryId)
     {
         foreach (var plexRole in countries)
-            _dbContext.PlexCountries.AddIfNotExists(plexRole, x => x.PlexKey == plexRole.PlexKey);
+            _dbContext.PlexCountries.AddIfNotExists(plexRole, x => x.Name == plexRole.Name);
 
         await _dbContext.SaveChangesAsync();
 
@@ -179,12 +179,12 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : IRequestHandler<SyncPl
         if (libraryDb is null)
             return ResultExtensions.EntityNotFound(nameof(PlexLibrary), libraryId);
 
-        var countryKeys = countries.Select(x => x.PlexKey).ToHashSet();
+        var countryNames = countries.Select(x => x.Name).ToHashSet();
 
         var countriesDb = await _dbContext
-            .PlexCountries.Where(x => countryKeys.Contains(x.PlexKey))
+            .PlexCountries.Where(x => countryNames.Contains(x.Name))
             .AsTracking()
-            .Take(countryKeys.Count)
+            .Take(countryNames.Count)
             .ToListAsync();
 
         if (libraryDb.Countries.Any())
@@ -192,13 +192,13 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : IRequestHandler<SyncPl
             for (var i = libraryDb.Countries.Count - 1; i >= 0; i--)
             {
                 // Already exists
-                if (countryKeys.Contains(libraryDb.Countries[i].PlexKey))
+                if (countryNames.Contains(libraryDb.Countries[i].Name))
                 {
                     continue;
                 }
 
                 // Delete
-                if (!countryKeys.Contains(libraryDb.Countries[i].PlexKey))
+                if (!countryNames.Contains(libraryDb.Countries[i].Name))
                 {
                     libraryDb.Countries.RemoveAt(i);
                 }
@@ -206,8 +206,8 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : IRequestHandler<SyncPl
         }
 
         // Add Countries
-        var currentKeys = libraryDb.Countries.Select(x => x.PlexKey).ToList();
-        var countriesToAdd = countriesDb.Where(x => !currentKeys.Contains(x.PlexKey)).ToList();
+        var currentNames = libraryDb.Countries.Select(x => x.Name).ToList();
+        var countriesToAdd = countriesDb.Where(x => !currentNames.Contains(x.Name)).ToList();
         libraryDb.Countries.AddRange(countriesToAdd);
 
         await _dbContext.SaveChangesAsync();

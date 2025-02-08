@@ -323,7 +323,7 @@ public class PlexApiWrapper
     /// <param name="batchSize"></param>
     /// <param name="type"></param>
     /// <returns></returns>
-    public async Task<Result<GetLibraryItemsMediaContainer>> GetMetadataForLibraryAsync(
+    public async Task<Result<GetAllMediaLibraryMediaContainer>> GetMetadataForLibraryAsync(
         PlexServerConnection connection,
         string authToken,
         string libraryKey,
@@ -346,14 +346,13 @@ public class PlexApiWrapper
         );
 
         var response = await ToResponse(
-            client.Library.GetLibraryItemsAsync(
-                new GetLibraryItemsRequest()
+            client.Library.GetAllMediaLibraryAsync(
+                new()
                 {
-                    Type = type.ToApiTypeEnum<GetLibraryItemsQueryParamType>(),
+                    Type = type.ToApiTypeEnum<GetAllMediaLibraryQueryParamType>(),
                     SectionKey = libraryKeyInt,
-                    Tag = Tag.All,
-                    IncludeMeta = GetLibraryItemsQueryParamIncludeMeta.Disable,
-                    IncludeGuids = IncludeGuids.Enable,
+                    IncludeMeta = GetAllMediaLibraryQueryParamIncludeMeta.Disable,
+                    IncludeGuids = QueryParamIncludeGuids.Enable,
                     XPlexContainerStart = startIndex,
                     XPlexContainerSize = batchSize,
                 }
@@ -373,7 +372,8 @@ public class PlexApiWrapper
     public async Task<Result<List<GetMediaMetaDataMetadata>>> GetMediaMetadata(
         PlexServerConnection connection,
         string authToken,
-        List<long> ratingKey
+        List<long> ratingKeys,
+        Action<ApiCallProgress>? action = null
     )
     {
         var client = CreateClient(
@@ -386,10 +386,19 @@ public class PlexApiWrapper
             }
         );
 
+        var completedCount = 0;
+        var total = ratingKeys.Count;
+
+        void SendProgress()
+        {
+            completedCount++;
+            action?.Invoke(new ApiCallProgress { Received = completedCount, Total = total });
+        }
+
         BlockingCollection<GetMediaMetaDataMetadata> results = [];
-        var maxParallelism = 10;
+        var maxParallelism = 50;
         using var semaphore = new SemaphoreSlim(maxParallelism, maxParallelism);
-        var tasks = ratingKey.Select(async x =>
+        var tasks = ratingKeys.Select(async x =>
         {
             // Wait for an available slot.
             await semaphore.WaitAsync();
@@ -399,8 +408,11 @@ public class PlexApiWrapper
                 var response = await ToResponse(
                     client.Library.GetMediaMetaDataAsync(new GetMediaMetaDataRequest() { RatingKey = x })
                 );
+
                 foreach (var item in response.Value?.Object?.MediaContainer?.Metadata ?? [])
                     results.Add(item);
+
+                SendProgress();
             }
             finally
             {

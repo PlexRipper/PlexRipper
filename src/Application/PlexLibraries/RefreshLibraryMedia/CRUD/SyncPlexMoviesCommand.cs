@@ -122,7 +122,7 @@ public class SyncPlexMoviesCommandHandler : IRequestHandler<SyncPlexMoviesComman
             .PlexLibraries.Where(x => x.Id == libraryId)
             .Include(x => x.Roles)
             .SelectMany(x => x.Roles)
-            .ToDictionaryAsync(x => x.PlexKey, x => x.Id);
+            .ToDictionaryAsync(x => x.Name, x => x.Id);
 
         // These are always small dictionaries so no need to worry about performance
         var genreDict = await _dbContext.PlexGenres.ToDictionaryAsync(x => x.PlexKey, x => x.Id);
@@ -136,7 +136,7 @@ public class SyncPlexMoviesCommandHandler : IRequestHandler<SyncPlexMoviesComman
         {
             foreach (var plexRole in plexMovie.Roles)
             {
-                if (roleDict.TryGetValue(plexRole.PlexKey, out var roleId))
+                if (roleDict.TryGetValue(plexRole.Name, out var roleId))
                 {
                     plexMovieRoles.Add(new PlexMovieRoles(roleId, libraryId, plexMovie.Id));
                     continue;
@@ -146,7 +146,7 @@ public class SyncPlexMoviesCommandHandler : IRequestHandler<SyncPlexMoviesComman
                     .Warning(
                         "{PlexRole} with key {PlexKey} and name: {PlexRole} not found for library {LibraryName}",
                         nameof(PlexRole),
-                        plexRole.PlexKey,
+                        plexRole.Name,
                         plexRole.Name,
                         libraryName
                     );

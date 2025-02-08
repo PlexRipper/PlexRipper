@@ -2,15 +2,7 @@ namespace PlexRipper.Domain;
 
 public static class LibraryMediaItemMappers
 {
-    public static PlexRole ToPlexRole(this LibraryMediaItemRoleDTO role) =>
-        new()
-        {
-            TagKey = role.TagKey,
-            Role = role.Role,
-            PlexKey = role.Id,
-            Name = role.Tag,
-            ThumbnailUrl = role.Thumb,
-        };
+    public static PlexRole ToPlexRole(this LibraryMediaItemRoleDTO role) => new() { Name = role.Tag };
 
     public static List<PlexRole> ToPlexRole(this List<LibraryMediaItemRoleDTO>? countryList) =>
         countryList?.Select(x => x.ToPlexRole()).ToList() ?? [];

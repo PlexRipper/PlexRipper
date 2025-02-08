@@ -7,6 +7,6 @@ public class PlexRoleConfiguration : IEntityTypeConfiguration<PlexRole>
 {
     public void Configure(EntityTypeBuilder<PlexRole> builder)
     {
-        builder.HasIndex(x => x.PlexKey);
+        builder.HasIndex(x => x.Name).IsUnique();
     }
 }

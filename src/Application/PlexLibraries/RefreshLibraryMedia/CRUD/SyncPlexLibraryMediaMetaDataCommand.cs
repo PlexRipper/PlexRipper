@@ -62,7 +62,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : IRequestHandler<SyncPl
     private async Task<Result> SyncRoles(List<PlexRole> roles, int libraryId)
     {
         foreach (var plexRole in roles)
-            _dbContext.PlexRoles.AddIfNotExists(plexRole, x => x.PlexKey == plexRole.PlexKey);
+            _dbContext.PlexRoles.AddIfNotExists(plexRole, x => x.Name == plexRole.Name);
 
         await _dbContext.SaveChangesAsync();
 
@@ -75,10 +75,10 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : IRequestHandler<SyncPl
         if (libraryDb is null)
             return ResultExtensions.EntityNotFound(nameof(PlexLibrary), libraryId);
 
-        var roleKeys = roles.Select(x => x.PlexKey).ToHashSet();
+        var roleKeys = roles.Select(x => x.Name).ToHashSet();
 
         var rolesDb = await _dbContext
-            .PlexRoles.Where(x => roleKeys.Contains(x.PlexKey))
+            .PlexRoles.Where(x => roleKeys.Contains(x.Name))
             .AsTracking()
             .Take(roleKeys.Count)
             .ToListAsync();
@@ -88,13 +88,13 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : IRequestHandler<SyncPl
             for (var i = libraryDb.Roles.Count - 1; i >= 0; i--)
             {
                 // Already exists
-                if (roleKeys.Contains(libraryDb.Roles[i].PlexKey))
+                if (roleKeys.Contains(libraryDb.Roles[i].Name))
                 {
                     continue;
                 }
 
                 // Delete
-                if (!roleKeys.Contains(libraryDb.Roles[i].PlexKey))
+                if (!roleKeys.Contains(libraryDb.Roles[i].Name))
                 {
                     libraryDb.Roles.RemoveAt(i);
                 }
@@ -102,8 +102,8 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : IRequestHandler<SyncPl
         }
 
         // Add Roles
-        var currentKeys = libraryDb.Roles.Select(x => x.PlexKey).ToList();
-        var rolesToAdd = rolesDb.Where(x => !currentKeys.Contains(x.PlexKey)).ToList();
+        var currentKeys = libraryDb.Roles.Select(x => x.Name).ToList();
+        var rolesToAdd = rolesDb.Where(x => !currentKeys.Contains(x.Name)).ToList();
         libraryDb.Roles.AddRange(rolesToAdd);
 
         await _dbContext.SaveChangesAsync();

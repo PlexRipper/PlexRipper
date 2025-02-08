@@ -3,83 +3,76 @@ using PlexApi.Contracts;
 
 namespace PlexRipper.PlexApi;
 
-public static class MediaContainerMappers
+public static partial class MediaContainerMappers
 {
-    public static LibraryMediaItemDTO ToMediaItemDTO(this GetMediaMetaDataMetadata data)
+    public static LibraryMediaItemDTO ToMediaItemDTO(this GetAllMediaLibraryMetadata data)
     {
         return new LibraryMediaItemDTO
         {
             RatingKey = data.RatingKey,
             Key = data.Key,
-            LibrarySectionID = data.LibrarySectionID,
-            LibrarySectionTitle = data.LibrarySectionTitle,
-            LibrarySectionKey = data.LibrarySectionKey,
-            Type = data.Type.ToPlexMediaTypeFromPlexApi(),
+            Type = data.Type.ToString().ToPlexMediaTypeFromPlexApi(),
             Title = data.Title,
             Summary = data.Summary,
             Year = data.Year,
             TitleSort = data.Title.ToSortTitle(),
             OriginalTitle = data.OriginalTitle ?? string.Empty,
-            ChildCount = data.ChildCount ?? 0,
+            ChildCount = data.ChildCount,
             Media = data.Media?.Select(x => x.ToItemMediaDTO()).ToList() ?? [],
-            Genre =
-                data.Genre?.Select(x => new LibraryMediaItemGenreDTO
-                    {
-                        Id = x.Id,
-                        Filter = x.Filter,
-                        Tag = x.Tag,
-                    })
-                    .ToList() ?? [],
-            Country =
-                data.Country?.Select(x => new MetaDataCountryDTO
-                    {
-                        Id = x.Id,
-                        Filter = x.Filter,
-                        Tag = x.Tag,
-                    })
-                    .ToList() ?? [],
-            Role =
-                data.Role?.Select(x => new LibraryMediaItemRoleDTO
-                    {
-                        Id = x.Id,
-                        Filter = x.Filter,
-                        Tag = x.Tag,
-                        TagKey = x.TagKey,
-                        Role = x.Role ?? string.Empty,
-                        Thumb = x.Thumb ?? string.Empty,
-                    })
-                    .ToList() ?? [],
-            Studio = data.Studio ?? string.Empty,
-            ContentRating = data.ContentRating ?? string.Empty,
+            Genre = data.Genre?.Select(x => x.ToDTO()).ToList() ?? [],
+            Country = data.Country?.Select(x => x.ToDTO()).ToList() ?? [],
+            Role = data.Role?.Select(x => x.ToDTO()).ToList() ?? [],
+            Studio = data.Studio,
+            ContentRating = data.ContentRating,
 
             // Duration is in milliseconds and we want seconds
             Duration = data.Duration / 1000,
             Thumb = data.Thumb,
             Art = data.Art,
-            Theme = data.Theme ?? string.Empty,
+            Theme = data.Theme,
             Guid = data.Guid,
             AddedAt = DateTimeExtensions.FromUnixTime(data.AddedAt),
-            UpdatedAt = DateTimeExtensions.FromUnixTime(data.UpdatedAt),
+            UpdatedAt = DateTimeExtensions.FromUnixTime(data.UpdatedAt ?? 0),
             OriginallyAvailableAt = data.OriginallyAvailableAt.ToString(),
-            Ratings = data
-                .Ratings.Select(x => new MetaDataRatingsDTO()
-                {
-                    Image = x.Image,
-                    Type = x.Type,
-                    Value = x.Value,
-                })
-                .ToList(),
-            Guids = data.Guids.Select(x => new MetaDataGuidsDTO { Id = x.Id }).ToList(),
+            Ratings = [],
+            Guids = data.Guids?.Select(x => new MetaDataGuidsDTO { Id = x.Id }).ToList() ?? [],
             GrandparentTitle = data.GrandparentTitle ?? string.Empty,
             ParentTitle = data.ParentTitle ?? string.Empty,
             ParentGuid = data.ParentGuid ?? string.Empty,
             ParentRatingKey = data.ParentRatingKey ?? string.Empty,
             AudienceRating = data.AudienceRating,
-            Rating = data.Rating ?? 0,
+            Rating = data.Rating,
         };
     }
 
-    public static LibraryMediaItemMediaDTO ToItemMediaDTO(this GetMediaMetaDataMedia media) =>
+    public static LibraryMediaItemGenreDTO ToDTO(this GetAllMediaLibraryGenre x) =>
+        new()
+        {
+            Id = -1,
+            Filter = string.Empty,
+            Tag = x.Tag,
+        };
+
+    public static MetaDataCountryDTO ToDTO(this GetAllMediaLibraryCountry x) =>
+        new()
+        {
+            Id = -1,
+            Filter = string.Empty,
+            Tag = x.Tag,
+        };
+
+    public static LibraryMediaItemRoleDTO ToDTO(this GetAllMediaLibraryRole x) =>
+        new()
+        {
+            Id = -1,
+            Filter = string.Empty,
+            Tag = x.Tag,
+            TagKey = string.Empty,
+            Role = string.Empty,
+            Thumb = string.Empty,
+        };
+
+    public static LibraryMediaItemMediaDTO ToItemMediaDTO(this GetAllMediaLibraryMedia media) =>
         new()
         {
             Id = media.Id,
@@ -100,7 +93,7 @@ public static class MediaContainerMappers
             Parts = media.Part.Select(x => x.ToItemPartDTO()).ToList(),
         };
 
-    public static LibraryMediaItemPartDTO ToItemPartDTO(this GetMediaMetaDataPart part) =>
+    public static LibraryMediaItemPartDTO ToItemPartDTO(this GetAllMediaLibraryPart part) =>
         new()
         {
             Id = part.Id,
@@ -117,7 +110,7 @@ public static class MediaContainerMappers
             Stream = part.Stream?.Select(x => x.ToItemStreamDTO()).ToList() ?? [],
         };
 
-    public static LibraryMediaItemStreamDTO ToItemStreamDTO(this GetMediaMetaDataStream source) =>
+    public static LibraryMediaItemStreamDTO ToItemStreamDTO(this GetAllMediaLibraryStream source) =>
         new()
         {
             Id = source.Id,

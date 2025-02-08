@@ -122,7 +122,6 @@ public class SyncPlexMoviesCommandHandler : IRequestHandler<SyncPlexMoviesComman
             .PlexLibraries.Where(x => x.Id == libraryId)
             .Include(x => x.Roles)
             .SelectMany(x => x.Roles)
-            .Take(1)
             .ToDictionaryAsync(x => x.PlexKey, x => x.Id);
 
         // These are always small dictionaries so no need to worry about performance

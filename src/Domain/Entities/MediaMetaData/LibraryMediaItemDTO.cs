@@ -11,12 +11,6 @@ public record LibraryMediaItemDTO
 
     public required string Key { get; set; }
 
-    public required long LibrarySectionID { get; set; }
-
-    public required string LibrarySectionTitle { get; set; }
-
-    public required string LibrarySectionKey { get; set; }
-
     public required PlexMediaType Type { get; set; }
 
     public required string Title { get; set; }

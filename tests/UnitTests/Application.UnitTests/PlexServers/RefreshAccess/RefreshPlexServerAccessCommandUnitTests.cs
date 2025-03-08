@@ -1,3 +1,4 @@
+using Application.Contracts;
 using Microsoft.EntityFrameworkCore;
 using PlexApi.Contracts;
 
@@ -67,7 +68,11 @@ public class RefreshPlexServerAccessCommandUnitTests : BaseUnitTest<RefreshPlexS
             .ReturnsAsync(Result.Ok(list));
 
         mock.SetupMediator(It.IsAny<AddOrUpdatePlexServersCommand>).ReturnsAsync(Result.Ok());
-        mock.SetupMediator(It.IsAny<AddOrUpdatePlexAccountServersCommand>).ReturnsAsync(Result.Ok());
+        mock.SetupMediator(It.IsAny<AddOrUpdatePlexAccountServersCommand>)
+            .ReturnsAsync(Result.Ok(new PlexServerAccessRapport(plexAccount.DisplayName)));
+        mock.SetupMediator(It.IsAny<RefreshLibraryAccessCommand>)
+            .ReturnsAsync(Result.Ok(new PlexLibraryAccessRefreshResponse { OfflineServers = [], Reports = [] }));
+
         mock.SendRefreshNotification();
 
         // Act

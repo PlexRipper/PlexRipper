@@ -76,8 +76,8 @@ public static partial class MediaContainerMappers
             VideoFrameRate = media.VideoFrameRate ?? string.Empty,
             VideoProfile = media.VideoProfile ?? string.Empty,
             AudioProfile = media.AudioProfile ?? string.Empty,
-            HasVoiceActivity = media.HasVoiceActivity,
-            Parts = media.Part.Select(x => x.ToItemPartDTO()).ToList(),
+            HasVoiceActivity = media.HasVoiceActivity ?? false,
+            Parts = media.Part?.Select(x => x.ToItemPartDTO()).ToList() ?? [],
         };
 
     public static LibraryMediaItemPartDTO ToItemPartDTO(this GetMediaMetaDataPart part) =>

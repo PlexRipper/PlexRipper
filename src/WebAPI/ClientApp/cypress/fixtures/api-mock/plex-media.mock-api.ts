@@ -45,6 +45,11 @@ export function setupMockPlexMediaEndpoints(
 		cy.intercept(
 			'GET',
 			PlexLibraryPaths.getPlexLibraryMediaEndpoint(library.id, {
+				countryId: 0,
+				filterOfflineMedia: false,
+				filterOwnedMedia: false,
+				genreId: 0,
+				roleId: 0,
 				page: 0,
 				size: 0,
 			}),

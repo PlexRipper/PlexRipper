@@ -207,9 +207,6 @@
             "sub-header": "Das Token: {authToken} gehört zum Plex-Konto:",
             "title": "Validierung des Plex.tv-Authentifizierungstokens"
         },
-        "search-bar": {
-            "no-results": "Keine Ergebnisse gefunden mit {query}"
-        },
         "downloads-table": {
             "columns": {
                 "actions": "Aktionen",

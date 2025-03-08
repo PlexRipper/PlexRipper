@@ -207,9 +207,6 @@
             "sub-header": "Le jeton : {authToken} appartient au compte Plex :",
             "title": "Validation du jeton d'authentification Plex.tv"
         },
-        "search-bar": {
-            "no-results": "Aucun résultat trouvé avec {query}"
-        },
         "downloads-table": {
             "columns": {
                 "actions": "Actions",

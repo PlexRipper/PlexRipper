@@ -207,9 +207,6 @@
             "sub-header": "The token: {authToken} belongs to the Plex account:",
             "title": "Plex.tv Authentication Token Validation"
         },
-        "search-bar": {
-            "no-results": "No Results found with {query}"
-        },
         "downloads-table": {
             "columns": {
                 "actions": "Actions",

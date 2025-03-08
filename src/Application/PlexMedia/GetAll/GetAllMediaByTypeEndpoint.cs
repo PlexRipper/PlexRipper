@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace PlexRipper.Application;
 
-public record GetAllMediaByTypeRequest
+public record GetAllMediaByTypeRequest : PlexMediaFilterQueryRequest
 {
     /// <summary>
     /// NOTE: This constructor is needed to make the query param optional in the front-end typescript-api generation.
@@ -19,30 +19,13 @@ public record GetAllMediaByTypeRequest
         bool filterOfflineMedia,
         bool filterOwnedMedia
     )
+        : base(page: page, size: size, filterOfflineMedia: filterOfflineMedia, filterOwnedMedia: filterOwnedMedia)
     {
         MediaType = mediaType;
-        Page = page;
-        Size = size;
-        FilterOfflineMedia = filterOfflineMedia;
-        FilterOwnedMedia = filterOwnedMedia;
     }
 
     [QueryParam, BindFrom("mediaType")]
     public PlexMediaType MediaType { get; init; }
-
-    [QueryParam, BindFrom("page")]
-    [DefaultValue(0)]
-    public int Page { get; init; }
-
-    [QueryParam, BindFrom("size")]
-    [DefaultValue(0)]
-    public int Size { get; init; }
-
-    [QueryParam, BindFrom("filterOfflineMedia")]
-    public bool FilterOfflineMedia { get; init; }
-
-    [QueryParam, BindFrom("filterOwnedMedia")]
-    public bool FilterOwnedMedia { get; init; }
 }
 
 public class GetAllMediaByTypeRequestValidator : Validator<GetAllMediaByTypeRequest>
@@ -86,12 +69,18 @@ public class GetAllMediaByTypeEndpoint : BaseEndpoint<GetAllMediaByTypeRequest, 
         var skip = req.Page * req.Size;
 
         var mediaListResult = await _dbContext.GetMediaByType(
-            mediaType: req.MediaType,
-            skip: skip,
-            take: take,
-            plexLibraryId: 0,
-            filterOfflineMedia: req.FilterOfflineMedia,
-            filterOwnedMedia: req.FilterOwnedMedia,
+            new MediaQueryFilter
+            {
+                MediaType = req.MediaType,
+                Skip = skip,
+                Take = take,
+                PlexLibraryId = 0,
+                FilterOfflineMedia = req.FilterOfflineMedia,
+                FilterOwnedMedia = req.FilterOwnedMedia,
+                CountryId = req.CountryId,
+                RoleId = req.RoleId,
+                GenreId = req.GenreId,
+            },
             ct: ct
         );
 

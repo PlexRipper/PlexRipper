@@ -35,7 +35,7 @@ public class GetMediaDetailByIdEndpointRequestValidator : Validator<GetMediaDeta
     public GetMediaDetailByIdEndpointRequestValidator()
     {
         RuleFor(x => x.PlexMediaId).GreaterThan(0);
-        RuleFor(x => x.Type).Must(x => x == PlexMediaType.Movie || x == PlexMediaType.TvShow);
+        RuleFor(x => x.Type).Must(x => x is PlexMediaType.Movie or PlexMediaType.TvShow);
     }
 }
 

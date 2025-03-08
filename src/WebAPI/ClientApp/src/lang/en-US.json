@@ -330,6 +330,14 @@
         "media-poster-image-content": {
             "episode-count": "No Episodes | 1 Episode | {count} Episodes",
             "seasons-count": "No Seasons | 1 Season | {count} Seasons"
+        },
+        "media-filter-menu": {
+            "all": "All",
+            "meta-data": {
+                "country": "Country",
+                "genre": "Genre",
+                "roles": "Roles"
+            }
         }
     },
     "confirmation": {

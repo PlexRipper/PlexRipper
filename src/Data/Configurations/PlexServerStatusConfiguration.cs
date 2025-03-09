@@ -13,12 +13,6 @@ public class PlexServerStatusConfiguration : IEntityTypeConfiguration<PlexServer
             .HasForeignKey(x => x.PlexServerId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder
-            .HasOne(x => x.PlexServerConnection)
-            .WithMany(x => x.PlexServerStatus)
-            .HasForeignKey(x => x.PlexServerConnectionId)
-            .OnDelete(DeleteBehavior.Cascade);
-
         builder.HasIndex(e => e.PlexServerConnectionId).IsUnique();
     }
 }

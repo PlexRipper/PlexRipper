@@ -254,7 +254,7 @@ public class PlexApiService : IPlexApiService
                             Url = y.Uri,
                             PlexServer = null,
                             PlexServerId = 0,
-                            PlexServerStatus = [],
+                            LatestConnectionStatus = null,
                             IsCustom = false,
                         })
                         .ToList(),

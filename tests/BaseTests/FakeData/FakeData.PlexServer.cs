@@ -112,7 +112,7 @@ public static partial class FakeData
             .RuleFor(x => x.IPv6, _ => false)
             .RuleFor(x => x.IsCustom, _ => isCustom)
             .RuleFor(x => x.Url, (_, x) => $"{x.Protocol}://{x.Address}:{x.Port}")
-            .RuleFor(x => x.PlexServerStatus, [])
+            .RuleFor(x => x.LatestConnectionStatus, _ => null)
             .RuleFor(x => x.PlexServer, _ => null)
             .RuleFor(x => x.PlexServerId, _ => plexServerId);
     }

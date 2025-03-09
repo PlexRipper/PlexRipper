@@ -29,27 +29,39 @@ public static partial class MockDatabase
     {
         var config = FakeDataConfig.FromOptions(options);
 
-        var fakeServerGenerator = FakeData.GetPlexServer(seed, options);
-        var plexServers = new List<PlexServer>();
-
         // Generate fake servers
         for (var i = 0; i < config.PlexServerCount; i++)
-            plexServers.Add(fakeServerGenerator.Generate());
+        {
+            var plexServer = FakeData.GetPlexServer(seed, options).Generate();
+            context.PlexServers.Add(plexServer);
+        }
 
-        context.PlexServers.AddRange(plexServers);
         await context.SaveChangesAsync();
+        var plexServers = await context.PlexServers.ToListAsync();
+
+        // Add Connection to each server
+        foreach (var plexServer in plexServers)
+        {
+            for (var i = 0; i < config.PlexServerConnectionPerServerCount; i++)
+            {
+                var connection = FakeData.GetPlexServerConnections(seed, plexServerId: plexServer.Id).Generate();
+                context.PlexServerConnections.Add(connection);
+            }
+        }
+
+        await context.SaveChangesAsync();
+        var plexConnections = await context.PlexServerConnections.ToListAsync();
 
         // Add status to each connection
-        var plexConnections = plexServers.SelectMany(x => x.PlexServerConnections).ToList();
-
         foreach (var connection in plexConnections)
         {
-            var status = FakeData.GetPlexServerStatus(seed).Generate();
-            status.PlexServerConnectionId = connection.Id;
-            status.PlexServerId = connection.PlexServerId;
-
-            await context.PlexServerStatuses.Upsert(status).On(x => new { x.PlexServerConnectionId }).RunAsync();
+            var status = FakeData
+                .GetPlexServerStatus(seed, plexServerId: connection.PlexServerId, plexServerConnectionId: connection.Id)
+                .Generate();
+            context.PlexServerStatuses.Add(status);
         }
+
+        await context.SaveChangesAsync();
 
         _log.Here()
             .Debug(

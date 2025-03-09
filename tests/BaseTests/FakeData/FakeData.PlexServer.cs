@@ -39,10 +39,7 @@ public static partial class FakeData
             .RuleFor(x => x.DnsRebindingProtection, f => f.Random.Bool())
             .RuleFor(x => x.NatLoopbackSupported, f => f.Random.Bool())
             .RuleFor(x => x.PreferredConnectionId, _ => 0)
-            .RuleFor(
-                x => x.PlexServerConnections,
-                _ => GetPlexServerConnections(seed).Generate(config.PlexServerConnectionPerServerCount)
-            )
+            .RuleFor(x => x.PlexServerConnections, _ => [])
             .RuleFor(x => x.PlexLibraries, _ => [])
             .RuleFor(x => x.ServerStatus, _ => [])
             .RuleFor(x => x.PlexAccountServers, _ => []);
@@ -95,10 +92,13 @@ public static partial class FakeData
 
     public static Faker<PlexServerConnection> GetPlexServerConnections(
         Seed seed,
+        Action<FakeDataConfig>? options = null,
         bool isCustom = false,
         int plexServerId = 0
     )
     {
+        var config = FakeDataConfig.FromOptions(options);
+
         return new Faker<PlexServerConnection>()
             .StrictMode(true)
             .UseSeed(seed.Next())
@@ -112,7 +112,7 @@ public static partial class FakeData
             .RuleFor(x => x.IPv6, _ => false)
             .RuleFor(x => x.IsCustom, _ => isCustom)
             .RuleFor(x => x.Url, (_, x) => $"{x.Protocol}://{x.Address}:{x.Port}")
-            .RuleFor(x => x.PlexServerStatus, _ => [])
+            .RuleFor(x => x.PlexServerStatus, [])
             .RuleFor(x => x.PlexServer, _ => null)
             .RuleFor(x => x.PlexServerId, _ => plexServerId);
     }

@@ -145,7 +145,7 @@ public class ValidatePlexAccountEndpoint : BaseEndpoint<ValidatePlexAccountEndpo
         }
 
         // We can't directly return a 401 Unauthorized status code, as it will cause the client to log out.
-        if (validateResult.Has401UnauthorizedError())
+        if (validateResult.HasPlex401UnauthorizedError())
         {
             var response = new ValidatePlexAccountResponse
             {

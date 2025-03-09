@@ -10,9 +10,9 @@
       },
       "LukeHagar.PlexAPI.SDK": {
         "type": "Direct",
-        "requested": "[0.13.5, )",
-        "resolved": "0.13.5",
-        "contentHash": "2epydh4PcZaZDn0XWA0gkVwn74zb3O+GL6CeSvDawb32tEnnuBC9Dlb8hMHaRb+IMPRzkkA4Vs4mORjaQImgTw==",
+        "requested": "[0.14.2, )",
+        "resolved": "0.14.2",
+        "contentHash": "pqabTIdjssXPwO1qcDqylBNGz6UO6Nj2EtT3N4DRFIJDcfg0Ak36KRgBokLKhrKrhPLmZ+v8GHoQoHaJ7jcVsg==",
         "dependencies": {
           "newtonsoft.json": "13.0.3",
           "nodatime": "3.1.9"

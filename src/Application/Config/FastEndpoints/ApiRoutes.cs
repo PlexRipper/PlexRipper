@@ -1,8 +1,13 @@
-﻿namespace PlexRipper.Application;
+﻿﻿namespace PlexRipper.Application;
 
 public static class ApiRoutes
 {
     public static string Base => "/api";
+
+    // Torznab API endpoints
+    public static string TorznabController => "/torznab";
+    public static string TorznabSearchEndpoint => TorznabController;
+    public static string TorznabDownloadEndpoint => Base + "/" + "download";
 
     public static string DownloadController => Base + "/" + "Download";
 

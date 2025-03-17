@@ -60,6 +60,12 @@ public class UserSettings : IUserSettings
         get => _serverSettings;
         init => _serverSettings = value;
     }
+    
+    public TorznabSettingsModule TorznabSettings
+    {
+        get => _torznabSettings;
+        init => _torznabSettings = value;
+    }
 
     private readonly Subject<UserSettings> _settingsUpdated = new();
 
@@ -72,6 +78,7 @@ public class UserSettings : IUserSettings
     private DebugSettingsModule _debugSettings = DebugSettingsModule.Create();
     private PlexServerSettingsModule _serverSettings = PlexServerSettingsModule.Create();
     private AuthenticationModule _authenticationSettings = AuthenticationModule.Create();
+    private TorznabSettingsModule _torznabSettings = TorznabSettingsModule.Create();
 
     /// <summary>
     /// The <see cref="UserSettings"/> class is a wrapper class for the individual Settings.
@@ -89,7 +96,8 @@ public class UserSettings : IUserSettings
                 DebugSettings.HasChanged.Select(_ => 1),
                 LanguageSettings.HasChanged.Select(_ => 1),
                 ServerSettings.HasChanged.Select(_ => 1),
-                AuthenticationSettings.HasChanged.Select(_ => 1)
+                AuthenticationSettings.HasChanged.Select(_ => 1),
+                TorznabSettings.HasChanged.Select(_ => 1)
             )
             .Throttle(TimeSpan.FromMilliseconds(500))
             .Subscribe(_ => _settingsUpdated.OnNext(this));
@@ -109,6 +117,7 @@ public class UserSettings : IUserSettings
         _debugSettings = DebugSettingsModule.Create();
         _serverSettings = PlexServerSettingsModule.Create();
         _authenticationSettings = AuthenticationModule.Create();
+        _torznabSettings = TorznabSettingsModule.Create();
     }
 
     public UserSettings UpdateSettings(ISettingsModel sourceSettings)
@@ -122,6 +131,11 @@ public class UserSettings : IUserSettings
         _languageSettings.Update(sourceSettings.LanguageSettings);
         _serverSettings.Update(sourceSettings.ServerSettings);
         _authenticationSettings.Update(sourceSettings.AuthenticationSettings);
+        
+        if (sourceSettings.TorznabSettings != null)
+        {
+            _torznabSettings.Update(sourceSettings.TorznabSettings);
+        }
 
         return this;
     }

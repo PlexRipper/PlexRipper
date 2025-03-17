@@ -58,13 +58,17 @@ public class TorznabSearchRequestValidator : Validator<TorznabSearchRequest>
 public class TorznabSearchEndpoint : Endpoint<TorznabSearchRequest>
 {
     private readonly IPlexRipperDbContext _dbContext;
+    private readonly TorznabSettingsModule _torznabSettings;
     
     // Configure the API path for Torznab endpoint
     public override string Route => ApiRoutes.TorznabSearchEndpoint;
     
-    public TorznabSearchEndpoint(IPlexRipperDbContext dbContext)
+    public TorznabSearchEndpoint(
+        IPlexRipperDbContext dbContext,
+        TorznabSettingsModule torznabSettings)
     {
         _dbContext = dbContext;
+        _torznabSettings = torznabSettings;
     }
     
     public override void Configure()
@@ -112,6 +116,10 @@ public class TorznabSearchEndpoint : Endpoint<TorznabSearchRequest>
             // Use the existing search functionality to find media
             var searchQuery = req.Query?.ToSearchTitle() ?? string.Empty;
             
+            // Get server filtering settings
+            var includedServerIds = _torznabSettings.GetIncludedServerIds();
+            var searchAllServers = _torznabSettings.GetDTO().SearchAllServers;
+            
             // Search for TV Shows and Movies based on the request type
             var tvShowResults = new List<PlexMediaSlimDTO>();
             var movieResults = new List<PlexMediaSlimDTO>();
@@ -119,8 +127,18 @@ public class TorznabSearchEndpoint : Endpoint<TorznabSearchRequest>
             // Only search for TV shows if not a movie-only search
             if (req.Type != "movie")
             {
-                tvShowResults = await _dbContext
-                    .PlexTvShows.Where(p => p.SearchTitle.Contains(searchQuery))
+                var tvShowQuery = _dbContext.PlexTvShows.AsQueryable();
+                
+                // Apply server filtering if not searching all servers
+                if (!searchAllServers && includedServerIds.Any())
+                {
+                    tvShowQuery = tvShowQuery.Where(p => includedServerIds.Contains(p.PlexServerId));
+                }
+                
+                // Apply search query filter
+                tvShowQuery = tvShowQuery.Where(p => p.SearchTitle.Contains(searchQuery));
+                
+                tvShowResults = await tvShowQuery
                     .ProjectToMediaSlim()
                     .ToListAsync(ct);
             }
@@ -128,8 +146,18 @@ public class TorznabSearchEndpoint : Endpoint<TorznabSearchRequest>
             // Only search for movies if not a TV-only search
             if (req.Type != "tvsearch")
             {
-                movieResults = await _dbContext
-                    .PlexMovies.Where(p => p.SearchTitle.Contains(searchQuery))
+                var movieQuery = _dbContext.PlexMovies.AsQueryable();
+                
+                // Apply server filtering if not searching all servers
+                if (!searchAllServers && includedServerIds.Any())
+                {
+                    movieQuery = movieQuery.Where(p => includedServerIds.Contains(p.PlexServerId));
+                }
+                
+                // Apply search query filter
+                movieQuery = movieQuery.Where(p => p.SearchTitle.Contains(searchQuery));
+                
+                movieResults = await movieQuery
                     .ProjectToMediaSlim()
                     .ToListAsync(ct);
             }
@@ -310,8 +338,7 @@ public class TorznabSearchEndpoint : Endpoint<TorznabSearchRequest>
     
     private bool IsValidApiKey(string? apiKey)
     {
-        // For initial implementation, accept any key
-        // TODO: Implement actual API key validation using app settings
-        return true;
+        // Use the settings module to validate the API key
+        return _torznabSettings.IsValidApiKey(apiKey);
     }
 }

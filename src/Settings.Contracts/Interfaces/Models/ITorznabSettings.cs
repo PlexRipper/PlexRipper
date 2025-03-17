@@ -13,4 +13,15 @@ public interface ITorznabSettings
     string DownloadDirectory { get; set; }
     
     bool AutoStart { get; set; }
+    
+    /// <summary>
+    /// List of Plex server IDs to include in searches. 
+    /// If empty, all available servers will be searched.
+    /// </summary>
+    List<int> IncludedServerIds { get; set; }
+    
+    /// <summary>
+    /// Whether to search across all available Plex servers
+    /// </summary>
+    bool SearchAllServers { get; set; }
 }

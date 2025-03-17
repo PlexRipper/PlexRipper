@@ -20,7 +20,9 @@ public class TorznabSettingsModule : BaseSettingsModule<ITorznabSettings, Torzna
             RequireApiKey = true,
             MaxResults = 100,
             DownloadDirectory = string.Empty,
-            AutoStart = true
+            AutoStart = true,
+            IncludedServerIds = new List<int>(),
+            SearchAllServers = true
         };
     }
 
@@ -147,5 +149,81 @@ public class TorznabSettingsModule : BaseSettingsModule<ITorznabSettings, Torzna
         var dto = GetDTO();
         dto.AutoStart = autoStart;
         return await UserSettings.Update(dto);
+    }
+    
+    /// <summary>
+    /// Set whether to search across all available Plex servers
+    /// </summary>
+    /// <param name="searchAllServers">True to search all servers, false to use IncludedServerIds</param>
+    /// <returns>Result of the operation</returns>
+    public async Task<Result> SetSearchAllServers(bool searchAllServers)
+    {
+        var dto = GetDTO();
+        dto.SearchAllServers = searchAllServers;
+        return await UserSettings.Update(dto);
+    }
+    
+    /// <summary>
+    /// Set the list of server IDs to include in searches
+    /// </summary>
+    /// <param name="serverIds">List of server IDs to include</param>
+    /// <returns>Result of the operation</returns>
+    public async Task<Result> SetIncludedServerIds(List<int> serverIds)
+    {
+        var dto = GetDTO();
+        dto.IncludedServerIds = serverIds;
+        return await UserSettings.Update(dto);
+    }
+    
+    /// <summary>
+    /// Add a server ID to the list of included servers
+    /// </summary>
+    /// <param name="serverId">Server ID to add</param>
+    /// <returns>Result of the operation</returns>
+    public async Task<Result> AddIncludedServerId(int serverId)
+    {
+        var dto = GetDTO();
+        if (!dto.IncludedServerIds.Contains(serverId))
+        {
+            dto.IncludedServerIds.Add(serverId);
+            return await UserSettings.Update(dto);
+        }
+        return Result.Ok();
+    }
+    
+    /// <summary>
+    /// Remove a server ID from the list of included servers
+    /// </summary>
+    /// <param name="serverId">Server ID to remove</param>
+    /// <returns>Result of the operation</returns>
+    public async Task<Result> RemoveIncludedServerId(int serverId)
+    {
+        var dto = GetDTO();
+        if (dto.IncludedServerIds.Contains(serverId))
+        {
+            dto.IncludedServerIds.Remove(serverId);
+            return await UserSettings.Update(dto);
+        }
+        return Result.Ok();
+    }
+    
+    /// <summary>
+    /// Get the list of server IDs to include in searches
+    /// </summary>
+    /// <returns>List of server IDs</returns>
+    public List<int> GetIncludedServerIds()
+    {
+        return GetDTO().IncludedServerIds;
+    }
+    
+    /// <summary>
+    /// Check if a server ID is included in searches
+    /// </summary>
+    /// <param name="serverId">Server ID to check</param>
+    /// <returns>True if the server is included in searches</returns>
+    public bool IsServerIncluded(int serverId)
+    {
+        var dto = GetDTO();
+        return dto.SearchAllServers || dto.IncludedServerIds.Contains(serverId);
     }
 }

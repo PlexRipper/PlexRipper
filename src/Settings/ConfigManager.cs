@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions;
+﻿﻿using System.IO.Abstractions;
 using Environment;
 using Logging.Interface;
 using Settings.Contracts;
@@ -145,6 +145,13 @@ public class ConfigManager : IConfigManager
     }
 
     public virtual bool ConfigFileExists() => _file.Exists(_pathProvider.ConfigFileLocation);
+    
+    public virtual string GetDataFolderLocation()
+    {
+        // Use the ConfigDirectory as the data folder location
+        // This is a reasonable assumption since configuration data is typically stored here
+        return _pathProvider.ConfigDirectory;
+    }
 
     #endregion
 

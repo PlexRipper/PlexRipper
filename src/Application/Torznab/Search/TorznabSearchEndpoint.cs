@@ -1,10 +1,12 @@
 using Application.Contracts;
 using Data.Contracts;
 using FastEndpoints;
+using Settings.Contracts;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using System.Xml.Linq;
+using PlexRipper.Domain;
 
 namespace PlexRipper.Application.Torznab;
 
@@ -13,25 +15,25 @@ namespace PlexRipper.Application.Torznab;
 /// </summary>
 public record TorznabSearchRequest
 {
-    [QueryParam(BindFrom = "apikey")]
+    [QueryParam, BindFrom("apikey")]
     public string? ApiKey { get; init; }
     
-    [QueryParam(BindFrom = "q")]
+    [QueryParam, BindFrom("q")]
     public string? Query { get; init; }
     
-    [QueryParam(BindFrom = "t")]
+    [QueryParam, BindFrom("t")]
     public string? Type { get; init; } // search, tvsearch, movie
     
-    [QueryParam(BindFrom = "cat")]
+    [QueryParam, BindFrom("cat")]
     public string? Categories { get; init; }
     
-    [QueryParam(BindFrom = "limit")]
+    [QueryParam, BindFrom("limit")]
     public int? Limit { get; init; }
     
-    [QueryParam(BindFrom = "offset")]
+    [QueryParam, BindFrom("offset")]
     public int? Offset { get; init; }
     
-    [QueryParam(BindFrom = "extended")]
+    [QueryParam, BindFrom("extended")]
     public int? Extended { get; init; }
 }
 
@@ -60,8 +62,15 @@ public class TorznabSearchEndpoint : Endpoint<TorznabSearchRequest>
     private readonly IPlexRipperDbContext _dbContext;
     private readonly TorznabSettingsModule _torznabSettings;
     
-    // Configure the API path for Torznab endpoint
-    public override string Route => ApiRoutes.TorznabSearchEndpoint;
+    public override void Configure()
+    {
+        Get(ApiRoutes.TorznabSearchEndpoint);
+        AllowAnonymous(); // Torznab clients will use API key for auth
+        Description(b => b
+            .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status401Unauthorized));
+    }
     
     public TorznabSearchEndpoint(
         IPlexRipperDbContext dbContext,
@@ -69,16 +78,6 @@ public class TorznabSearchEndpoint : Endpoint<TorznabSearchRequest>
     {
         _dbContext = dbContext;
         _torznabSettings = torznabSettings;
-    }
-    
-    public override void Configure()
-    {
-        Get(Route);
-        AllowAnonymous(); // Torznab clients will use API key for auth
-        Description(x => x
-            .Produces(StatusCodes.Status200OK, "application/xml")
-            .Produces(StatusCodes.Status400BadRequest, "application/xml")
-            .Produces(StatusCodes.Status401Unauthorized, "application/xml"));
     }
     
     public override async Task HandleAsync(TorznabSearchRequest req, CancellationToken ct)
@@ -117,12 +116,12 @@ public class TorznabSearchEndpoint : Endpoint<TorznabSearchRequest>
             var searchQuery = req.Query?.ToSearchTitle() ?? string.Empty;
             
             // Get server filtering settings
-            var includedServerIds = _torznabSettings.GetIncludedServerIds();
-            var searchAllServers = _torznabSettings.GetDTO().SearchAllServers;
+            var includedServerIds = _torznabSettings.IncludedServerIds;
+            var searchAllServers = _torznabSettings.SearchAllServers;
             
             // Search for TV Shows and Movies based on the request type
-            var tvShowResults = new List<PlexMediaSlimDTO>();
-            var movieResults = new List<PlexMediaSlimDTO>();
+            var tvShowResults = new List<PlexMediaSlim>();
+            var movieResults = new List<PlexMediaSlim>();
             
             // Only search for TV shows if not a movie-only search
             if (req.Type != "movie")
@@ -163,7 +162,7 @@ public class TorznabSearchEndpoint : Endpoint<TorznabSearchRequest>
             }
             
             // Combine results
-            var results = new List<PlexMediaSlimDTO>();
+            var results = new List<PlexMediaSlim>();
             results.AddRange(tvShowResults);
             results.AddRange(movieResults);
             
@@ -182,7 +181,7 @@ public class TorznabSearchEndpoint : Endpoint<TorznabSearchRequest>
             var torznabResults = ConvertToTorznabXml(results);
             
             // Send response
-            await SendStringAsync(torznabResults, "application/xml", cancellation: ct);
+            await SendStringAsync(torznabResults, contentType: "application/xml", cancellation: ct);
         }
         catch (Exception ex)
         {
@@ -237,10 +236,10 @@ public class TorznabSearchEndpoint : Endpoint<TorznabSearchRequest>
             new XDeclaration("1.0", "UTF-8", "yes"),
             caps);
         
-        await SendStringAsync(xml.ToString(), "application/xml", cancellation: ct);
+        await SendStringAsync(xml.ToString(), contentType: "application/xml", cancellation: ct);
     }
     
-    private string ConvertToTorznabXml(List<PlexMediaSlimDTO> results)
+    private string ConvertToTorznabXml(List<PlexMediaSlim> results)
     {
         // Create RSS XML document
         var rss = new XElement("rss",
@@ -269,7 +268,7 @@ public class TorznabSearchEndpoint : Endpoint<TorznabSearchRequest>
             item.Add(new XElement("comments", $"PlexRipper media ID: {result.Id}"));
             
             // Media type specific attributes
-            bool isMovie = result.MediaType == PlexMediaType.Movie;
+            bool isMovie = result.Type == PlexMediaType.Movie;
             
             // Category
             var categoryId = isMovie ? "2010" : "5030"; // Movies or TV HD
@@ -285,7 +284,6 @@ public class TorznabSearchEndpoint : Endpoint<TorznabSearchRequest>
             item.Add(new XElement("torznab:attr", new XAttribute("name", "size"), new XAttribute("value", estimatedSize)));
             
             // Quality info
-            string quality = "HD"; // Most Plex content is HD
             item.Add(new XElement("torznab:attr", new XAttribute("name", "resolution"), new XAttribute("value", "1080p")));
             
             // Link to download - this will need to be mapped to a real endpoint that triggers the download
@@ -293,10 +291,11 @@ public class TorznabSearchEndpoint : Endpoint<TorznabSearchRequest>
             item.Add(new XElement("link", downloadUrl));
             
             // Publication date 
-            DateTime pubDate = result.DateAdded ?? DateTime.UtcNow;
+            // AddedAt is required in PlexMediaSlim so no need for null check
+            DateTime pubDate = result.AddedAt;
             item.Add(new XElement("pubDate", pubDate.ToString("r")));
             
-            // Additional info if available (would need to be retrieved from full PlexMedia object)
+            // Additional info if available
             if (result.Year > 0)
             {
                 item.Add(new XElement("torznab:attr", new XAttribute("name", "year"), new XAttribute("value", result.Year)));
@@ -320,7 +319,7 @@ public class TorznabSearchEndpoint : Endpoint<TorznabSearchRequest>
             new XDeclaration("1.0", "UTF-8", "yes"),
             error);
         
-        await SendStringAsync(xml.ToString(), "application/xml", StatusCodes.Status400BadRequest, ct);
+        await SendStringAsync(xml.ToString(), 400, "application/xml", ct);
     }
     
     private async Task SendUnauthorizedResponse(CancellationToken ct)
@@ -333,7 +332,7 @@ public class TorznabSearchEndpoint : Endpoint<TorznabSearchRequest>
             new XDeclaration("1.0", "UTF-8", "yes"),
             error);
         
-        await SendStringAsync(xml.ToString(), "application/xml", StatusCodes.Status401Unauthorized, ct);
+        await SendStringAsync(xml.ToString(), 401, "application/xml", ct);
     }
     
     private bool IsValidApiKey(string? apiKey)

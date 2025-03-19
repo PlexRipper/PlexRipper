@@ -42,6 +42,7 @@
  - Works anywhere Docker runs — PCs, servers, and beyond!
  - Connect multiple accounts to organize and download content effortlessly!
  - Scalable, multi-threaded, and resilient download manager to handle huge libraries!
+ - Torznab API integration for Sonarr/Radarr compatibility - use as an indexer for your automation!
  - Packed with quality of life features and more!
 
 ## What is PlexRipper?

@@ -60,7 +60,7 @@ public class UserSettings : IUserSettings
         get => _serverSettings;
         init => _serverSettings = value;
     }
-    
+
     public TorznabSettingsModule TorznabSettings
     {
         get => _torznabSettings;
@@ -131,7 +131,7 @@ public class UserSettings : IUserSettings
         _languageSettings.Update(sourceSettings.LanguageSettings);
         _serverSettings.Update(sourceSettings.ServerSettings);
         _authenticationSettings.Update(sourceSettings.AuthenticationSettings);
-        
+
         if (sourceSettings.TorznabSettings != null)
         {
             _torznabSettings.Update(sourceSettings.TorznabSettings);

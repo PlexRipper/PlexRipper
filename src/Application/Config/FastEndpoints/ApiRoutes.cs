@@ -1,5 +1,4 @@
-﻿﻿namespace PlexRipper.Application;
-
+﻿﻿﻿namespace PlexRipper.Application;
 public static class ApiRoutes
 {
     public static string Base => "/api";

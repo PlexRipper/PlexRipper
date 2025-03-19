@@ -1,35 +1,99 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
+using Environment;
+using FluentResults;
 using Logging.Interface;
 
 namespace Settings.Contracts;
 
-public class TorznabSettingsModule : BaseSettingsModule<ITorznabSettings, TorznabSettingsDTO>
+public record TorznabSettingsModule : BaseSettingsModule<TorznabSettingsModule>, ITorznabSettings
 {
-    public TorznabSettingsModule(
-        IUserSettings userSettings,
-        ILog log,
-        IConfigManager configManager) : base(userSettings, log, configManager)
+    private bool _enabled = false;
+    private string _apiKey = string.Empty;
+    private bool _requireApiKey = true;
+    private int _maxResults = 100;
+    private string _downloadDirectory = string.Empty;
+    private bool _autoStart = true;
+    private List<int> _includedServerIds = new();
+    private bool _searchAllServers = true;
+
+    // Default constructor needed for serialization
+    public TorznabSettingsModule()
     {
+        _apiKey = Guid.NewGuid().ToString("N").Substring(0, 16); // Generate a random API key
     }
 
-    private TorznabSettingsDTO CreateDefaultDTO()
-    {
-        return new TorznabSettingsDTO
+    public static TorznabSettingsModule Create() =>
+        new()
         {
             Enabled = false,
-            ApiKey = Guid.NewGuid().ToString("N").Substring(0, 16), // Generate a random API key
+            ApiKey = Guid.NewGuid().ToString("N").Substring(0, 16),
             RequireApiKey = true,
             MaxResults = 100,
             DownloadDirectory = string.Empty,
             AutoStart = true,
             IncludedServerIds = new List<int>(),
-            SearchAllServers = true
+            SearchAllServers = true,
         };
+
+    // Property implementations from ITorznabSettings
+    public bool Enabled 
+    { 
+        get => _enabled; 
+        set => SetProperty(ref _enabled, value); 
+    }
+    
+    public string ApiKey 
+    { 
+        get => _apiKey; 
+        set => SetProperty(ref _apiKey, value); 
+    }
+    
+    public bool RequireApiKey 
+    { 
+        get => _requireApiKey; 
+        set => SetProperty(ref _requireApiKey, value); 
+    }
+    
+    public int MaxResults 
+    { 
+        get => _maxResults; 
+        set => SetProperty(ref _maxResults, Math.Max(1, Math.Min(1000, value))); 
+    }
+    
+    public string DownloadDirectory 
+    { 
+        get => _downloadDirectory; 
+        set => SetProperty(ref _downloadDirectory, value); 
+    }
+    
+    public bool AutoStart 
+    { 
+        get => _autoStart; 
+        set => SetProperty(ref _autoStart, value); 
+    }
+    
+    public List<int> IncludedServerIds 
+    { 
+        get => _includedServerIds; 
+        set => SetProperty(ref _includedServerIds, value); 
+    }
+    
+    public bool SearchAllServers 
+    { 
+        get => _searchAllServers; 
+        set => SetProperty(ref _searchAllServers, value); 
     }
 
-    public override TorznabSettingsDTO GetDTO()
+    private readonly IPathProvider? _pathProvider;
+    
+    // Constructor with optional IPathProvider dependency
+    public TorznabSettingsModule(IPathProvider? pathProvider = null)
     {
-        var dto = UserSettings.TorznabSettings;
-        return dto ?? CreateDefaultDTO();
+        _pathProvider = pathProvider;
+        _apiKey = Guid.NewGuid().ToString("N").Substring(0, 16); // Generate a random API key
     }
 
     /// <summary>
@@ -40,7 +104,7 @@ public class TorznabSettingsModule : BaseSettingsModule<ITorznabSettings, Torzna
     public bool IsValidApiKey(string? apiKey)
     {
         // If API key is not required, always return true
-        if (!GetDTO().RequireApiKey)
+        if (!RequireApiKey)
         {
             return true;
         }
@@ -52,168 +116,48 @@ public class TorznabSettingsModule : BaseSettingsModule<ITorznabSettings, Torzna
         }
 
         // Compare the provided API key with the stored one
-        return apiKey == GetDTO().ApiKey;
+        return apiKey == ApiKey;
     }
 
     /// <summary>
     /// Get the download directory path for Torznab downloads
     /// </summary>
     /// <returns>The download directory path</returns>
-    public string GetDownloadDirectory()
+    public string GetEffectiveDownloadDirectory()
     {
-        var directory = GetDTO().DownloadDirectory;
-        if (string.IsNullOrWhiteSpace(directory))
+        if (string.IsNullOrWhiteSpace(DownloadDirectory) && _pathProvider != null)
         {
             // Fallback to default download directory
-            return Path.Combine(ConfigManager.GetDataFolderLocation(), "TorznabDownloads");
+            return Path.Combine(_pathProvider.ConfigDirectory, "TorznabDownloads");
         }
-        return directory;
-    }
-    
-    /// <summary>
-    /// Checks if the Torznab API integration is enabled
-    /// </summary>
-    /// <returns>True if enabled, false otherwise</returns>
-    public bool IsEnabled()
-    {
-        return GetDTO().Enabled;
-    }
-    
-    /// <summary>
-    /// Enable or disable the Torznab API integration
-    /// </summary>
-    /// <param name="enabled">True to enable, false to disable</param>
-    /// <returns>Result of the operation</returns>
-    public async Task<Result> SetEnabled(bool enabled)
-    {
-        var dto = GetDTO();
-        dto.Enabled = enabled;
-        return await UserSettings.Update(dto);
-    }
-    
-    /// <summary>
-    /// Set a new API key for the Torznab API integration
-    /// </summary>
-    /// <param name="apiKey">The new API key</param>
-    /// <returns>Result of the operation</returns>
-    public async Task<Result> SetApiKey(string apiKey)
-    {
-        var dto = GetDTO();
-        dto.ApiKey = apiKey;
-        return await UserSettings.Update(dto);
-    }
-    
-    /// <summary>
-    /// Set whether the API key is required for Torznab API requests
-    /// </summary>
-    /// <param name="required">True if required, false otherwise</param>
-    /// <returns>Result of the operation</returns>
-    public async Task<Result> SetRequireApiKey(bool required)
-    {
-        var dto = GetDTO();
-        dto.RequireApiKey = required;
-        return await UserSettings.Update(dto);
-    }
-    
-    /// <summary>
-    /// Set the maximum number of results to return for Torznab API requests
-    /// </summary>
-    /// <param name="maxResults">The maximum number of results</param>
-    /// <returns>Result of the operation</returns>
-    public async Task<Result> SetMaxResults(int maxResults)
-    {
-        var dto = GetDTO();
-        dto.MaxResults = Math.Max(1, Math.Min(1000, maxResults)); // Clamp between 1 and 1000
-        return await UserSettings.Update(dto);
-    }
-    
-    /// <summary>
-    /// Set the download directory for Torznab downloads
-    /// </summary>
-    /// <param name="directory">The download directory path</param>
-    /// <returns>Result of the operation</returns>
-    public async Task<Result> SetDownloadDirectory(string directory)
-    {
-        var dto = GetDTO();
-        dto.DownloadDirectory = directory;
-        return await UserSettings.Update(dto);
-    }
-    
-    /// <summary>
-    /// Set whether downloads should be automatically started
-    /// </summary>
-    /// <param name="autoStart">True to auto-start downloads, false otherwise</param>
-    /// <returns>Result of the operation</returns>
-    public async Task<Result> SetAutoStart(bool autoStart)
-    {
-        var dto = GetDTO();
-        dto.AutoStart = autoStart;
-        return await UserSettings.Update(dto);
-    }
-    
-    /// <summary>
-    /// Set whether to search across all available Plex servers
-    /// </summary>
-    /// <param name="searchAllServers">True to search all servers, false to use IncludedServerIds</param>
-    /// <returns>Result of the operation</returns>
-    public async Task<Result> SetSearchAllServers(bool searchAllServers)
-    {
-        var dto = GetDTO();
-        dto.SearchAllServers = searchAllServers;
-        return await UserSettings.Update(dto);
-    }
-    
-    /// <summary>
-    /// Set the list of server IDs to include in searches
-    /// </summary>
-    /// <param name="serverIds">List of server IDs to include</param>
-    /// <returns>Result of the operation</returns>
-    public async Task<Result> SetIncludedServerIds(List<int> serverIds)
-    {
-        var dto = GetDTO();
-        dto.IncludedServerIds = serverIds;
-        return await UserSettings.Update(dto);
+        return DownloadDirectory;
     }
     
     /// <summary>
     /// Add a server ID to the list of included servers
     /// </summary>
     /// <param name="serverId">Server ID to add</param>
-    /// <returns>Result of the operation</returns>
-    public async Task<Result> AddIncludedServerId(int serverId)
+    public void AddIncludedServerId(int serverId)
     {
-        var dto = GetDTO();
-        if (!dto.IncludedServerIds.Contains(serverId))
+        if (!IncludedServerIds.Contains(serverId))
         {
-            dto.IncludedServerIds.Add(serverId);
-            return await UserSettings.Update(dto);
+            var newList = new List<int>(IncludedServerIds) { serverId };
+            IncludedServerIds = newList;
         }
-        return Result.Ok();
     }
     
     /// <summary>
     /// Remove a server ID from the list of included servers
     /// </summary>
     /// <param name="serverId">Server ID to remove</param>
-    /// <returns>Result of the operation</returns>
-    public async Task<Result> RemoveIncludedServerId(int serverId)
+    public void RemoveIncludedServerId(int serverId)
     {
-        var dto = GetDTO();
-        if (dto.IncludedServerIds.Contains(serverId))
+        if (IncludedServerIds.Contains(serverId))
         {
-            dto.IncludedServerIds.Remove(serverId);
-            return await UserSettings.Update(dto);
+            var newList = new List<int>(IncludedServerIds);
+            newList.Remove(serverId);
+            IncludedServerIds = newList;
         }
-        return Result.Ok();
-    }
-    
-    /// <summary>
-    /// Get the list of server IDs to include in searches
-    /// </summary>
-    /// <returns>List of server IDs</returns>
-    public List<int> GetIncludedServerIds()
-    {
-        return GetDTO().IncludedServerIds;
     }
     
     /// <summary>
@@ -223,7 +167,6 @@ public class TorznabSettingsModule : BaseSettingsModule<ITorznabSettings, Torzna
     /// <returns>True if the server is included in searches</returns>
     public bool IsServerIncluded(int serverId)
     {
-        var dto = GetDTO();
-        return dto.SearchAllServers || dto.IncludedServerIds.Contains(serverId);
+        return SearchAllServers || IncludedServerIds.Contains(serverId);
     }
 }

@@ -3,6 +3,7 @@ using FastEndpoints;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Settings.Contracts;
 
 namespace PlexRipper.Application.Torznab;
 
@@ -11,13 +12,13 @@ namespace PlexRipper.Application.Torznab;
 /// </summary>
 public record TorznabDownloadRequest
 {
-    [QueryParam(BindFrom = "apikey")]
+    [QueryParam, BindFrom("apikey")]
     public string? ApiKey { get; init; }
-    
-    [QueryParam(BindFrom = "id")]
+
+    [QueryParam, BindFrom("id")]
     public int MediaId { get; init; }
     
-    [QueryParam(BindFrom = "type")]
+    [QueryParam, BindFrom("type")]
     public string? MediaType { get; init; }
 }
 
@@ -36,23 +37,22 @@ public class TorznabDownloadRequestValidator : Validator<TorznabDownloadRequest>
 public class TorznabDownloadEndpoint : Endpoint<TorznabDownloadRequest>
 {
     private readonly IMediator _mediator;
-    
-    // Configure the API path for Torznab download endpoint
-    public override string Route => ApiRoutes.TorznabDownloadEndpoint;
-    
-    public TorznabDownloadEndpoint(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
+    private readonly TorznabSettingsModule _torznabSettings;
     
     public override void Configure()
     {
-        Get(Route);
+        Get(ApiRoutes.TorznabDownloadEndpoint);
         AllowAnonymous(); // Torznab clients will use API key for auth
-        Description(x => x
-            .Produces(StatusCodes.Status200OK, "application/xml")
-            .Produces(StatusCodes.Status400BadRequest, "application/xml")
-            .Produces(StatusCodes.Status401Unauthorized, "application/xml"));
+        Description(b => b
+            .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status401Unauthorized));
+    }
+    
+    public TorznabDownloadEndpoint(IMediator mediator, TorznabSettingsModule torznabSettings)
+    {
+        _mediator = mediator;
+        _torznabSettings = torznabSettings;
     }
     
     public override async Task HandleAsync(TorznabDownloadRequest req, CancellationToken ct)
@@ -71,7 +71,9 @@ public class TorznabDownloadEndpoint : Endpoint<TorznabDownloadRequest>
             {
                 MediaIds = new List<int> { req.MediaId },
                 // Based on the media type, set the appropriate type
-                Type = DetermineMediaType(req.MediaType)
+                Type = DetermineMediaType(req.MediaType),
+                PlexServerId = 1, // Default to first server
+                PlexLibraryId = 1 // Default to first library
             };
             
             // Determine the correct command based on the media type
@@ -120,7 +122,7 @@ public class TorznabDownloadEndpoint : Endpoint<TorznabDownloadRequest>
   </file>
 </nzb>";
             
-            await SendStringAsync(successResponse, "application/xml", cancellation: ct);
+            await SendStringAsync(successResponse, contentType: "application/xml", cancellation: ct);
         }
         catch (Exception ex)
         {
@@ -149,7 +151,7 @@ public class TorznabDownloadEndpoint : Endpoint<TorznabDownloadRequest>
         var errorResponse = $@"<?xml version=""1.0"" encoding=""UTF-8""?>
 <error code=""100"" description=""{message}"" />";
         
-        await SendStringAsync(errorResponse, "application/xml", StatusCodes.Status400BadRequest, ct);
+        await SendStringAsync(errorResponse, 400, "application/xml", ct);
     }
     
     private async Task SendUnauthorizedResponse(CancellationToken ct)
@@ -157,13 +159,12 @@ public class TorznabDownloadEndpoint : Endpoint<TorznabDownloadRequest>
         var errorResponse = $@"<?xml version=""1.0"" encoding=""UTF-8""?>
 <error code=""101"" description=""Invalid API Key"" />";
         
-        await SendStringAsync(errorResponse, "application/xml", StatusCodes.Status401Unauthorized, ct);
+        await SendStringAsync(errorResponse, 401, "application/xml", ct);
     }
     
     private bool IsValidApiKey(string? apiKey)
     {
-        // For initial implementation, accept any key
-        // TODO: Implement actual API key validation using app settings
-        return true;
+        // Use the settings module to validate the API key
+        return _torznabSettings.IsValidApiKey(apiKey);
     }
 }

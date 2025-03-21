@@ -1,4 +1,4 @@
-﻿﻿﻿using FluentResults;
+﻿﻿using FluentResults;
 using PlexRipper.Domain;
 
 namespace Settings.Contracts;

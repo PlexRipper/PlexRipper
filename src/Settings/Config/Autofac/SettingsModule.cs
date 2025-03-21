@@ -29,7 +29,7 @@ public class SettingsModule : Module
         builder.Register(c => c.Resolve<IUserSettings>().LanguageSettings).As<ILanguageSettings>().SingleInstance();
         builder.Register(c => c.Resolve<IUserSettings>().DebugSettings).As<IDebugSettings>().SingleInstance();
         builder.Register(c => c.Resolve<IUserSettings>().ServerSettings).As<IServerSettingsModule>().SingleInstance();
-        
+
         // Register TorznabSettingsModule for dependency injection
         builder
             .Register(c => c.Resolve<IUserSettings>().TorznabSettings)

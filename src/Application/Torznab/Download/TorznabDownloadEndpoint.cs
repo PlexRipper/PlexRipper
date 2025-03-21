@@ -43,10 +43,10 @@ public class TorznabDownloadEndpoint : Endpoint<TorznabDownloadRequest>
     {
         Get(ApiRoutes.TorznabDownloadEndpoint);
         AllowAnonymous(); // Torznab clients will use API key for auth
-        Description(b => b
-            .Produces(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status400BadRequest)
-            .Produces(StatusCodes.Status401Unauthorized));
+        Description(b => 
+            b.Produces(StatusCodes.Status200OK)
+             .Produces(StatusCodes.Status400BadRequest)
+             .Produces(StatusCodes.Status401Unauthorized));
     }
 
     public TorznabDownloadEndpoint(IMediator mediator, TorznabSettingsModule torznabSettings)

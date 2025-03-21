@@ -66,10 +66,10 @@ public class TorznabSearchEndpoint : Endpoint<TorznabSearchRequest>
     {
         Get(ApiRoutes.TorznabSearchEndpoint);
         AllowAnonymous(); // Torznab clients will use API key for auth
-        Description(b => b
-            .Produces(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status400BadRequest)
-            .Produces(StatusCodes.Status401Unauthorized));
+        Description(b => 
+            b.Produces(StatusCodes.Status200OK)
+             .Produces(StatusCodes.Status400BadRequest)
+             .Produces(StatusCodes.Status401Unauthorized));
     }
 
     public TorznabSearchEndpoint(
@@ -291,8 +291,8 @@ public class TorznabSearchEndpoint : Endpoint<TorznabSearchRequest>
             item.Add(new XElement("link", downloadUrl));
 
             // Publication date
-            // AddedAt is required in PlexMediaSlim so no need for null check
-            DateTime pubDate = result.AddedAt ?? DateTime.UtcNow;
+            // Use AddedAt or fallback to UtcNow if it's the default value
+            DateTime pubDate = result.AddedAt == default ? DateTime.UtcNow : result.AddedAt;
             item.Add(new XElement("pubDate", pubDate.ToString("r")));
 
             // Additional info if available

@@ -15,7 +15,7 @@ public interface ITorznabSettings
     bool AutoStart { get; set; }
 
     /// <summary>
-    /// List of Plex server IDs to include in searches. 
+    /// List of Plex server IDs to include in searches.
     /// If empty, all available servers will be searched.
     /// </summary>
     List<int> IncludedServerIds { get; set; }

@@ -4,8 +4,8 @@ services:
         container_name: PlexRipper
         image: plexripper/plexripper:latest
         build:
-            context: .
-            dockerfile: ./Dockerfile
+            context: ..
+            dockerfile: ./docker/Dockerfile
         ports:
             # Web UI & Web API
             - '7000:7000'
@@ -18,7 +18,7 @@ services:
             # - LOG_LEVEL=DEBUG # Set the logging level in the docker logging
         volumes:
             # The paths /mnt/TURBO/PlexRipperDockerCache/ are examples, and you will need valid paths on your device with write permission.
-            - /mnt/TURBO/PlexRipperDockerCache/Config:/Config
-            - /mnt/TURBO/PlexRipperDockerCache/Downloads:/Downloads
-            - /mnt/TURBO/PlexRipperDockerCache/Movies:/Movies
-            - /mnt/TURBO/PlexRipperDockerCache/TvShows:/TvShows
+            - /home/mfoust/PlexRipperDockerCache/Config:/Config
+            - /home/mfoust/data/downloads:/Downloads
+            - /home/mfoust/data/downloads:/Movies
+            - /home/mfoust/data/downloads:/TvShows

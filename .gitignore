@@ -163,3 +163,6 @@ fabric.properties
 
 # Plex API SDK Manally added
 /plexcsharp/
+
+# Documentation
+TORZNAB_BUGFIX_DOCUMENTATION.md

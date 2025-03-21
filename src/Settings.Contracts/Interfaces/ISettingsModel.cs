@@ -19,6 +19,6 @@ public interface ISettingsModel
     PlexServerSettingsModule ServerSettings { get; init; }
 
     DebugSettingsModule DebugSettings { get; init; }
-    
+
     TorznabSettingsModule TorznabSettings { get; init; }
 }

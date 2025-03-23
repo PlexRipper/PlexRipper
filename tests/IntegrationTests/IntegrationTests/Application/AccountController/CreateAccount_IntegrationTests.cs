@@ -27,8 +27,9 @@ public class CreateAccountIntegrationTests : BaseIntegrationTests
             {
                 config.DatabaseOptions = x =>
                 {
-                    x.PlexServerCount = 1;
-                    x.PlexLibraryCount = libraryCount;
+                    // Start from an empty database
+                    x.PlexServerCount = 0;
+                    x.PlexLibraryCount = 0;
                 };
                 config.HttpClientOptions = x =>
                 {

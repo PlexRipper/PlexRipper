@@ -45,11 +45,10 @@ public static partial class MockDatabase
         // Add Connection to each server
         foreach (var plexServer in plexServers)
         {
-            for (var i = 0; i < config.PlexServerConnectionPerServerCount; i++)
-            {
-                var connection = FakeData.GetPlexServerConnections(seed, plexServerId: plexServer.Id).Generate();
-                context.PlexServerConnections.Add(connection);
-            }
+            var connections = FakeData
+                .GetPlexServerConnections(seed, plexServerId: plexServer.Id)
+                .Generate(config.PlexServerConnectionPerServerCount);
+            context.PlexServerConnections.AddRange(connections);
         }
 
         await context.SaveChangesAsync();

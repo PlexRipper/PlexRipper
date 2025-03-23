@@ -83,13 +83,57 @@ public class RefreshPlexAccountAccessEndpoint
                 continue;
             }
 
-            _list.Add(serverAccessResult.Value);
+            // Update library access
+            var libraryAccessResult = await _mediator.Send(
+                new RefreshLibraryAccessCommand(plexAccountId),
+                CancellationToken.None
+            );
+
+            if (libraryAccessResult.IsFailed)
+            {
+                libraryAccessResult.LogError();
+                continue;
+            }
+
+            var serverAccessRapport = serverAccessResult.Value;
+            var libraryAccessRapport = libraryAccessResult.Value;
+
+            _list.Add(
+                new RefreshPlexAccountAccessRapportDTO(
+                    serverAccessRapport.PlexAccountId,
+                    serverAccessRapport.PlexAccountName
+                )
+                {
+                    Access = serverAccessResult
+                        .Value.Access.Select(x => new PlexServerAccessRapportDTO()
+                        {
+                            State = x.State,
+                            PlexServerId = x.PlexServerId,
+                            PlexServerName = x.PlexServerName,
+                            IsServerOffline = libraryAccessRapport.OfflineServers.Contains(x.PlexServerId),
+                            LibraryAccess =
+                                libraryAccessRapport
+                                    .Reports.Find(y => y.PlexServerId == x.PlexServerId)
+                                    ?.Data.Select(y => new PlexLibraryAccessRapportDTO
+                                    {
+                                        PlexLibraryName = y.PlexLibraryName,
+                                        PlexServerId = y.PlexServerId,
+                                        State = y.State,
+                                        PlexLibraryId = y.PlexLibraryId,
+                                    })
+                                    .ToList() ?? [],
+                        })
+                        .ToList(),
+                }
+            );
         }
 
         // Send notifications to the client to refresh the PlexServerConnection data
         await _signalRService.SendRefreshNotificationAsync(
-            [DataType.PlexAccount, DataType.PlexServer, DataType.PlexServerConnection]
+            [DataType.PlexAccount, DataType.PlexServer, DataType.PlexServerConnection],
+            CancellationToken.None
         );
+
         await SendFluentResult(Result.Ok(_list), ct);
     }
 }

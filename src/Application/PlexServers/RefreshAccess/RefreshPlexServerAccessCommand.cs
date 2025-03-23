@@ -11,7 +11,7 @@ namespace PlexRipper.Application;
 /// Retrieve the latest accessible <see cref="PlexServer">PlexServers</see> for this <see cref="PlexAccount"/> from the PlexAPI and stores it in the Database.
 /// </summary>
 /// <param name="PlexAccountId">The id of the <see cref="PlexAccount"/> to check.</param>
-public record RefreshPlexServerAccessCommand(int PlexAccountId) : IRequest<Result<RefreshPlexAccountAccessRapportDTO>>;
+public record RefreshPlexServerAccessCommand(int PlexAccountId) : IRequest<Result<RefreshPlexServerAccessRapport>>;
 
 public class RefreshPlexServerAccessCommandValidator : AbstractValidator<RefreshPlexServerAccessCommand>
 {
@@ -22,7 +22,7 @@ public class RefreshPlexServerAccessCommandValidator : AbstractValidator<Refresh
 }
 
 public class RefreshPlexServerAccessCommandHandler
-    : IRequestHandler<RefreshPlexServerAccessCommand, Result<RefreshPlexAccountAccessRapportDTO>>
+    : IRequestHandler<RefreshPlexServerAccessCommand, Result<RefreshPlexServerAccessRapport>>
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
@@ -42,7 +42,7 @@ public class RefreshPlexServerAccessCommandHandler
         _plexServiceApi = plexServiceApi;
     }
 
-    public async Task<Result<RefreshPlexAccountAccessRapportDTO>> Handle(
+    public async Task<Result<RefreshPlexServerAccessRapport>> Handle(
         RefreshPlexServerAccessCommand command,
         CancellationToken cancellationToken
     )
@@ -51,9 +51,7 @@ public class RefreshPlexServerAccessCommandHandler
 
         var plexAccountName = await _dbContext.GetPlexAccountDisplayName(plexAccountId, cancellationToken);
 
-        var rapport = new RefreshPlexAccountAccessRapportDTO(plexAccountId, plexAccountName);
-
-        _log.Debug("Refreshing Plex servers for PlexAccount: {PlexAccountName}", plexAccountName);
+        _log.Debug("Refreshing Plex servers access for PlexAccount: {PlexAccountName}", plexAccountName);
 
         var result = await _plexServiceApi.GetAccessiblePlexServersAsync(plexAccountId);
 
@@ -69,10 +67,8 @@ public class RefreshPlexServerAccessCommandHandler
                 plexAccountName
             );
 
-            await RemovePlexAccess(rapport, plexAccountId);
-
             _log.Error("{PlexAccountName} token has been invalidated and has lost Plex Server access", plexAccountName);
-            return Result.Ok(rapport);
+            return await RemovePlexAccess(plexAccountId);
         }
 
         if (result.IsFailed)
@@ -81,10 +77,7 @@ public class RefreshPlexServerAccessCommandHandler
         if (!result.Value.Any())
         {
             _log.Warning("No Plex servers found for PlexAccount: {plexAccountName}", plexAccountName);
-
-            await RemovePlexAccess(rapport, plexAccountId);
-
-            return Result.Ok(rapport);
+            return await RemovePlexAccess(plexAccountId);
         }
 
         var serverList = result.Value.Select(x => x.PlexServer).ToList();
@@ -96,69 +89,44 @@ public class RefreshPlexServerAccessCommandHandler
             return updateResult.LogError();
 
         // Add or update the PlexAccount and PlexServer relationships
-        var plexAccountTokensResult = await _mediator.Send(
+        var plexServerAccountAccessRapport = await _mediator.Send(
             new AddOrUpdatePlexAccountServersCommand(plexAccountId, serverAccessTokens),
             cancellationToken
         );
 
-        if (plexAccountTokensResult.IsFailed)
-            return plexAccountTokensResult.LogError();
-
-        // Update library access
-        var libraryAccessResult = await _mediator.Send(
-            new RefreshLibraryAccessCommand(plexAccountId),
-            CancellationToken.None
-        );
-
-        if (libraryAccessResult.IsFailed)
-            return libraryAccessResult.LogError();
-
-        UpdateRapport(rapport, plexAccountTokensResult.Value, libraryAccessResult.Value);
+        if (plexServerAccountAccessRapport.IsFailed)
+            return plexServerAccountAccessRapport.LogError();
 
         _log.Information(
             "Successfully refreshed accessible Plex servers for account {PlexAccountDisplayName}",
             plexAccountName
         );
 
-        return Result.Ok(rapport);
+        return plexServerAccountAccessRapport;
     }
 
-    private async Task RemovePlexAccess(RefreshPlexAccountAccessRapportDTO rapport, int plexAccountId)
+    /// <summary>
+    ///  Remove all PlexServerAccess and LibraryAccess for the given PlexAccount
+    /// </summary>
+    /// <param name="plexAccountId"></param>
+    private async Task<Result<RefreshPlexServerAccessRapport>> RemovePlexAccess(int plexAccountId)
     {
         var plexServers = await _dbContext
             .PlexAccountServers.Include(x => x.PlexServer)
             .Where(x => x.PlexAccountId == plexAccountId)
-            .Select(x => new { PlexServerId = x.PlexServerId, Name = x.PlexServer.Name! })
+            .Select(x => new { x.PlexServerId, x.PlexServer!.Name })
             .ToListAsync();
+
+        var plexAccountName = await _dbContext.GetPlexAccountDisplayName(plexAccountId, CancellationToken.None);
+        var rapport = new RefreshPlexServerAccessRapport(plexAccountId, plexAccountName);
 
         if (!plexServers.Any())
-            return;
-
-        var plexLibraries = await _dbContext
-            .PlexAccountLibraries.Include(x => x.PlexLibrary)
-            .Where(x => x.PlexAccountId == plexAccountId)
-            .ToListAsync();
+            return Result.Ok(rapport);
 
         foreach (var plexServer in plexServers)
         {
             rapport.Access.Add(
-                new PlexServerAccessRapportDTO
-                {
-                    PlexServerId = plexServer.PlexServerId,
-                    PlexServerName = plexServer.Name,
-                    State = PlexAccessState.Revoked,
-                    IsServerOffline = false,
-                    LibraryAccess = plexLibraries
-                        .FindAll(library => library.PlexServerId == plexServer.PlexServerId)
-                        .Select(x => new PlexLibraryAccessRapportDTO
-                        {
-                            PlexServerId = x.PlexServerId,
-                            PlexLibraryId = x.PlexLibraryId,
-                            PlexLibraryName = x.PlexLibrary?.Name ?? "Unknown",
-                            State = PlexAccessState.Revoked,
-                        })
-                        .ToList(),
-                }
+                new RefreshPlexServerAccessRapportRow(PlexAccessState.Revoked, plexServer.PlexServerId, plexServer.Name)
             );
         }
 
@@ -169,37 +137,7 @@ public class RefreshPlexServerAccessCommandHandler
         await _dbContext
             .PlexAccountLibraries.Where(x => x.PlexAccountId == plexAccountId)
             .ExecuteDeleteAsync(CancellationToken.None);
-    }
 
-    private void UpdateRapport(
-        RefreshPlexAccountAccessRapportDTO rapport,
-        PlexServerAccessRapport serverAccessRapport,
-        PlexLibraryAccessRefreshResponse libraryAccessRapport
-    )
-    {
-        rapport.Access.AddRange(
-            serverAccessRapport
-                .Data.Select(x => new PlexServerAccessRapportDTO
-                {
-                    IsServerOffline = libraryAccessRapport.OfflineServers.Contains(x.PlexServerId),
-                    PlexServerId = x.PlexServerId,
-                    PlexServerName = x.PlexServerName,
-                    State = libraryAccessRapport.OfflineServers.Contains(x.PlexServerId)
-                        ? PlexAccessState.Unknown
-                        : x.State,
-                    LibraryAccess =
-                        libraryAccessRapport
-                            .Reports.Find(y => y.PlexServerId == x.PlexServerId)
-                            ?.Data.Select(y => new PlexLibraryAccessRapportDTO
-                            {
-                                PlexLibraryName = y.PlexLibraryName,
-                                PlexServerId = y.PlexServerId,
-                                State = y.State,
-                                PlexLibraryId = y.PlexLibraryId,
-                            })
-                            .ToList() ?? [],
-                })
-                .ToList()
-        );
+        return Result.Ok(rapport);
     }
 }

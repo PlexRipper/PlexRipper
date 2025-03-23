@@ -8,7 +8,7 @@ using PlexApi.Contracts;
 namespace PlexRipper.Application;
 
 public record AddOrUpdatePlexAccountServersCommand(int PlexAccountId, List<ServerAccessTokenDTO> ServerAccessTokens)
-    : IRequest<Result<PlexServerAccessRapport>>;
+    : IRequest<Result<RefreshPlexServerAccessRapport>>;
 
 public class AddOrUpdatePlexAccountServersCommandValidator : AbstractValidator<AddOrUpdatePlexAccountServersCommand>
 {
@@ -19,7 +19,7 @@ public class AddOrUpdatePlexAccountServersCommandValidator : AbstractValidator<A
 }
 
 public class AddOrUpdatePlexAccountServersCommandHandler
-    : IRequestHandler<AddOrUpdatePlexAccountServersCommand, Result<PlexServerAccessRapport>>
+    : IRequestHandler<AddOrUpdatePlexAccountServersCommand, Result<RefreshPlexServerAccessRapport>>
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
@@ -30,7 +30,7 @@ public class AddOrUpdatePlexAccountServersCommandHandler
         _dbContext = dbContext;
     }
 
-    public async Task<Result<PlexServerAccessRapport>> Handle(
+    public async Task<Result<RefreshPlexServerAccessRapport>> Handle(
         AddOrUpdatePlexAccountServersCommand command,
         CancellationToken cancellationToken
     )
@@ -54,7 +54,7 @@ public class AddOrUpdatePlexAccountServersCommandHandler
         if (plexAccount is null)
             return ResultExtensions.EntityNotFound(nameof(PlexAccount), plexAccountId);
 
-        var rapport = new PlexServerAccessRapport(plexAccount.DisplayName);
+        var rapport = new RefreshPlexServerAccessRapport(plexAccount.Id, plexAccount.DisplayName);
 
         // Add or update the PlexAccount and PlexServer relationships
         _log.InformationLine("Adding or updating the PlexAccount association with PlexServers now");

@@ -69,7 +69,7 @@ public class RefreshPlexServerAccessCommandUnitTests : BaseUnitTest<RefreshPlexS
 
         mock.SetupMediator(It.IsAny<AddOrUpdatePlexServersCommand>).ReturnsAsync(Result.Ok());
         mock.SetupMediator(It.IsAny<AddOrUpdatePlexAccountServersCommand>)
-            .ReturnsAsync(Result.Ok(new PlexServerAccessRapport(plexAccount.DisplayName)));
+            .ReturnsAsync(Result.Ok(new RefreshPlexServerAccessRapport(plexAccount.Id, plexAccount.DisplayName)));
         mock.SetupMediator(It.IsAny<RefreshLibraryAccessCommand>)
             .ReturnsAsync(Result.Ok(new PlexLibraryAccessRefreshResponse { OfflineServers = [], Reports = [] }));
 

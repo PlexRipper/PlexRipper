@@ -78,7 +78,7 @@ public static partial class FakeData
             .RuleFor(x => x.HasVoiceActivity, f => f.Random.Bool())
             .RuleFor(
                 x => x.Parts,
-                _ => GetPlexMediaPart(seed, options).GenerateBetween(1, config.IncludeMultiPartMovies ? 2 : 1)
+                _ => GetPlexMediaPart(seed, options).Generate(config.IncludeMultiPartMovies ? 2 : 1)
             );
     }
 

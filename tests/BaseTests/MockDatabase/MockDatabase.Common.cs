@@ -29,6 +29,9 @@ public static partial class MockDatabase
     {
         var config = FakeDataConfig.FromOptions(options);
 
+        if (!config.ShouldHavePlexServer)
+            return context;
+
         // Generate fake servers
         for (var i = 0; i < config.PlexServerCount; i++)
         {
@@ -80,10 +83,13 @@ public static partial class MockDatabase
         Action<FakeDataConfig>? options = null
     )
     {
+        var config = FakeDataConfig.FromOptions(options);
+
+        if (!config.ShouldHavePlexLibrary)
+            return context;
+
         var plexServers = await context.PlexServers.ToListAsync();
         plexServers.ShouldNotBeEmpty();
-
-        var config = FakeDataConfig.FromOptions(options);
 
         var plexLibrariesToDb = new List<PlexLibrary>();
 

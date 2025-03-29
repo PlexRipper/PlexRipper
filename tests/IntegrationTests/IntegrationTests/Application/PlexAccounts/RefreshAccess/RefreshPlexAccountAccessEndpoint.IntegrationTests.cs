@@ -31,7 +31,7 @@ public class RefreshPlexAccountAccessEndpointIntegrationTestsIntegrationTests : 
                     x.PlexServerCount = plexServerCount;
                     x.PlexLibraryCount = plexLibraryCount;
                 };
-                config.HttpClientOptions = x =>
+                config.HttpClientOptions = (x, _) =>
                 {
                     x.SetupRequest(x => x.RequestUri!.AbsoluteUri.Contains("plex.tv/api/v2/resources"))
                         .ReturnsAsync(

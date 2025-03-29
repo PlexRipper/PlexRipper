@@ -79,6 +79,7 @@ public partial class FakePlexApiData
     public static GetAllLibrariesResponse GetAllLibrariesResponse(
         HttpStatusCode statusCode,
         Seed seed,
+        GetAllLibrariesResponseBody? responseBody = null,
         HttpRequestMessage? request = null,
         Action<PlexApiDataConfig>? options = null
     )
@@ -90,7 +91,28 @@ public partial class FakePlexApiData
             .UseSeed(seed.Next())
             .RuleFor(x => x.StatusCode, _ => (int)statusCode)
             .RuleFor(x => x.ContentType, _ => ContentType.ApplicationJson)
-            .RuleFor(x => x.Object, _ => GetAllLibrariesResponseBody(seed, options))
+            .RuleFor(x => x.Object, _ => responseBody ?? GetAllLibrariesResponseBody(seed, options))
+            .RuleFor(x => x.RawResponse, (_, res) => GetHttpResponseMessage(statusCode, res.Object, request))
+            .Generate();
+    }
+
+    public static GetLibraryItemsResponse GetLibraryMediaItemsResponse(
+        HttpStatusCode statusCode,
+        Seed seed,
+        GetAllLibrariesDirectory library,
+        GetLibraryItemsResponseBody? responseBody = null,
+        HttpRequestMessage? request = null,
+        Action<PlexApiDataConfig>? options = null
+    )
+    {
+        var config = PlexApiDataConfig.FromOptions(options);
+
+        return new Faker<GetLibraryItemsResponse>()
+            .StrictMode(true)
+            .UseSeed(seed.Next())
+            .RuleFor(x => x.StatusCode, _ => (int)statusCode)
+            .RuleFor(x => x.ContentType, _ => ContentType.ApplicationJson)
+            .RuleFor(x => x.Object, _ => responseBody ?? GetPlexLibrarySectionAllResponse(seed, library, options))
             .RuleFor(x => x.RawResponse, (_, res) => GetHttpResponseMessage(statusCode, res.Object, request))
             .Generate();
     }
@@ -124,25 +146,6 @@ public partial class FakePlexApiData
             .RuleFor(x => x.Object, _ => body)
             .RuleFor(x => x.RawResponse, (_, res) => GetHttpResponseMessage(statusCode, res.Object, request))
             .Generate();
-    }
-
-    public static HttpResponseMessage GetHttpResponseMessage<T>(
-        HttpStatusCode statusCode,
-        T data,
-        HttpRequestMessage? request
-    )
-        where T : class?
-    {
-        var json = JsonSerializer.Serialize(data, DefaultJsonSerializerOptions.PlexApiSerialization);
-
-        return new HttpResponseMessage
-        {
-            Content = json.ToStringContent(),
-            ReasonPhrase = statusCode.ToString(),
-            RequestMessage = request,
-            StatusCode = statusCode,
-            Version = new Version(1, 1),
-        };
     }
 
     public static HttpResponseMessage GetPlexUnauthorizedResponseMessage(HttpRequestMessage? request)

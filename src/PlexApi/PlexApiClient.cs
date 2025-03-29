@@ -187,6 +187,11 @@ public class PlexApiClient : IPlexApiClient
             SendProgressUpdate(_options.Action, response, _options.RetryCount, _options.RetryCount);
         }
 
+        if (_log.IsLogLevelEnabled(LogEventLevel.Verbose))
+        {
+            _log.Here().Verbose("Response: {Response}", await response.Content.ReadAsFormattedJsonAsync());
+        }
+
         return response;
     }
 

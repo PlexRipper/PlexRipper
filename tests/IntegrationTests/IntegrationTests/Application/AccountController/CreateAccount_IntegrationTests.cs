@@ -4,6 +4,7 @@ using Data.Contracts;
 using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 using Moq.Contrib.HttpClient;
+using PlexApi.Contracts;
 using PlexRipper.Application;
 
 namespace IntegrationTests.AccountController;
@@ -30,14 +31,14 @@ public class CreateAccountIntegrationTests : BaseIntegrationTests
                     // Start from an empty database
                     x.PlexServerCount = 0;
                     x.PlexLibraryCount = 0;
+                    x.PlexServerConnectionPerServerCount = 1;
                 };
-                config.HttpClientOptions = x =>
+                config.HttpClientOptions = (x, dbContext) =>
                 {
                     var response1 = FakePlexApiData.GetServerResourcesResponse(
                         HttpStatusCode.OK,
                         new Seed(939),
-                        null,
-                        y => y.PlexServerAccessCount = serverCount
+                        options: y => y.PlexServerAccessCount = serverCount
                     );
 
                     x.SetupRequest(
@@ -66,17 +67,46 @@ public class CreateAccountIntegrationTests : BaseIntegrationTests
                                     .RawResponse
                         );
 
-                    response1.PlexDevices.ShouldNotBeNull();
+                    var connections = dbContext.PlexServerConnections.ToList();
 
-                    foreach (var connection in response1.PlexDevices.SelectMany(device => device.Connections))
+                    var seeds = Seed.Generate(connections.Count).ToList();
+
+                    for (var i = 0; i < connections.Count; i++)
                     {
-                        x.SetupIdentityRequest(seed, connection.Uri);
+                        var connection = connections[i];
+                        var responseSeed = seeds[i];
+                        x.SetupIdentityRequest(seed, connection.Url);
 
-                        x.SetupRequest(connection.Uri + "library/sections")
+                        var mediaData = FakePlexApiData.GetAllLibrariesResponseBody(seed);
+                        x.SetupRequest(connection.Url + "library/sections")
                             .ReturnsAsync(
                                 (HttpRequestMessage req, CancellationToken _) =>
-                                    FakePlexApiData.GetAllLibrariesResponse(HttpStatusCode.OK, seed, req).RawResponse
+                                    FakePlexApiData
+                                        .GetAllLibrariesResponse(
+                                            HttpStatusCode.OK,
+                                            responseSeed,
+                                            mediaData,
+                                            request: req
+                                        )
+                                        .RawResponse
                             );
+
+                        // Get all media
+                        foreach (var dir in mediaData.MediaContainer.Directory)
+                        {
+                            x.SetupRequest(connection.Url + $"library/sections/{dir.Key}/all")
+                                .ReturnsAsync(
+                                    (HttpRequestMessage req, CancellationToken _) =>
+                                        FakePlexApiData
+                                            .GetLibraryMediaItemsResponse(
+                                                HttpStatusCode.OK,
+                                                responseSeed,
+                                                dir,
+                                                request: req
+                                            )
+                                            .RawResponse
+                                );
+                        }
                     }
                 };
             }
@@ -120,7 +150,7 @@ public class CreateAccountIntegrationTests : BaseIntegrationTests
         plexAccountDb.PlexAccountLibraries.Count.ShouldBe(libraryCount);
 
         // Ensure PlexServer has been created
-        container.DbContext.PlexServers.ToList().Count.ShouldBe(2);
+        container.DbContext.PlexServers.ToList().Count.ShouldBe(serverCount);
         var plexServersDb = container
             .DbContext.PlexServers.Include(x => x.PlexLibraries)
             .IncludeLibrariesWithMedia()
@@ -131,20 +161,21 @@ public class CreateAccountIntegrationTests : BaseIntegrationTests
 
         // Ensure all jobs have sent notifications
         // TODO: Keeps breaking due to the order of the jobs being executed
-        // var jobStatusUpdateList = Container.MockSignalRService.JobStatusUpdateList.ToList();
-        // jobStatusUpdateList.Count.ShouldBe(8);
+        var jobStatusUpdateList = container.MockSignalRService.JobStatusUpdateList.ToList();
+        jobStatusUpdateList.Count.ShouldBe(8);
 
-        // jobStatusUpdateList[0].JobType.ShouldBe(JobTypes.InspectPlexServerJob);
-        // jobStatusUpdateList[0].Status.ShouldBe(JobStatus.Started);
+        jobStatusUpdateList[0].JobType.ShouldBe(JobTypes.InspectPlexServerJob);
+        jobStatusUpdateList[0].Status.ShouldBe(JobStatus.Started);
+        jobStatusUpdateList[1].JobType.ShouldBe(JobTypes.InspectPlexServerJob);
+        jobStatusUpdateList[1].Status.ShouldBe(JobStatus.Completed);
+        jobStatusUpdateList[2].JobType.ShouldBe(JobTypes.SyncServerMediaJob);
+        jobStatusUpdateList[2].Status.ShouldBe(JobStatus.Started);
+        jobStatusUpdateList[3].JobType.ShouldBe(JobTypes.SyncServerMediaJob);
+        jobStatusUpdateList[3].Status.ShouldBe(JobStatus.Completed);
+
         // jobStatusUpdateList[1].JobType.ShouldBe(JobTypes.CheckAllConnectionsStatusByPlexServerJob);
         // jobStatusUpdateList[1].Status.ShouldBe(JobStatus.Started);
         // jobStatusUpdateList[2].JobType.ShouldBe(JobTypes.CheckAllConnectionsStatusByPlexServerJob);
         // jobStatusUpdateList[2].Status.ShouldBe(JobStatus.Completed);
-        // jobStatusUpdateList[3].JobType.ShouldBe(JobTypes.InspectPlexServerJob);
-        // jobStatusUpdateList[3].Status.ShouldBe(JobStatus.Completed);
-        // jobStatusUpdateList[4].JobType.ShouldBe(JobTypes.SyncServerMediaJob);
-        // jobStatusUpdateList[4].Status.ShouldBe(JobStatus.Started);
-        // jobStatusUpdateList[5].JobType.ShouldBe(JobTypes.SyncServerMediaJob);
-        // jobStatusUpdateList[5].Status.ShouldBe(JobStatus.Completed);
     }
 }

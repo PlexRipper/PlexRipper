@@ -19,7 +19,7 @@ public class RestartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
             5594564,
             config =>
             {
-                config.HttpClientOptions = x =>
+                config.HttpClientOptions = (x, _) =>
                 {
                     x.SetupIdentityRequest(seed);
                     x.SetupDownloadFile(10);

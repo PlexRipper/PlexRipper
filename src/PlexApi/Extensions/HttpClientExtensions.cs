@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text.Json;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
 
 namespace PlexRipper.PlexApi;
@@ -51,4 +52,14 @@ public static class HttpClientExtensions
             typeof(T).GetProperty(nameof(PostUsersSignInDataResponse.RawResponse))!.GetValue(response)
             as HttpResponseMessage
         )!;
+
+    public static async Task<string> ReadAsFormattedJsonAsync(this HttpContent content)
+    {
+        if (content == null)
+            throw new ArgumentNullException(nameof(content));
+
+        var stringResponse = await content.ReadAsStringAsync();
+        using var doc = JsonDocument.Parse(stringResponse);
+        return JsonSerializer.Serialize(doc, DefaultJsonSerializerOptions.UserSettingsOptions);
+    }
 }

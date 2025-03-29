@@ -62,10 +62,11 @@ public class TestModule : Module
         if (Config.HttpClientOptions is not null)
         {
             builder
-                .Register(_ =>
+                .Register(context =>
                 {
+                    var dbContext = context.Resolve<IPlexRipperDbContext>();
                     var handler = new Mock<HttpMessageHandler>(MockBehavior.Loose);
-                    Config.HttpClientOptions.Invoke(handler);
+                    Config.HttpClientOptions.Invoke(handler, dbContext);
                     var client = new HttpClient(handler.Object);
                     client.DefaultRequestHeaders.Add("User-Agent", "MockHttpClient");
                     return client;

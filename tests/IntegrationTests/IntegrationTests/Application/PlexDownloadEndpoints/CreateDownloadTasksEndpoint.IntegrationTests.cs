@@ -31,7 +31,7 @@ public class CreateDownloadTasksEndpointIntegrationTests : BaseIntegrationTests
                     x.MovieCount = plexMovieCount;
                 };
 
-                config.HttpClientOptions = x =>
+                config.HttpClientOptions = (x, _) =>
                 {
                     x.SetupIdentityRequest(seed);
                     x.SetupDownloadFile(10);

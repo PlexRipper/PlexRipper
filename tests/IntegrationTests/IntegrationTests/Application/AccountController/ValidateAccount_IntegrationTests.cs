@@ -20,7 +20,7 @@ public class ValidateAccountIntegrationTests : BaseIntegrationTests
             seed,
             config =>
             {
-                config.HttpClientOptions = x =>
+                config.HttpClientOptions = (x, _) =>
                 {
                     x.SetupRequest(HttpMethod.Post, "https://plex.tv/api/v2/users/signin")
                         .ReturnsAsync(
@@ -60,7 +60,7 @@ public class ValidateAccountIntegrationTests : BaseIntegrationTests
         using var container = await CreateContainer(
             seed,
             config =>
-                config.HttpClientOptions = x =>
+                config.HttpClientOptions = (x, _) =>
                 {
                     x.SetupRequest(HttpMethod.Post, "https://plex.tv/api/v2/users/signin")
                         .ReturnsAsync(

@@ -46,6 +46,7 @@ public partial class FakePlexApiData
     public static GetServerResourcesResponse GetServerResourcesResponse(
         HttpStatusCode statusCode,
         Seed seed,
+        List<PlexDevice>? devices = null,
         HttpRequestMessage? request = null,
         Action<PlexApiDataConfig>? options = null
     )
@@ -57,7 +58,10 @@ public partial class FakePlexApiData
             .UseSeed(seed.Next())
             .RuleFor(x => x.StatusCode, _ => (int)statusCode)
             .RuleFor(x => x.ContentType, _ => ContentType.ApplicationJson)
-            .RuleFor(x => x.PlexDevices, _ => GetServerResource(seed, options).Generate(config.PlexServerAccessCount))
+            .RuleFor(
+                x => x.PlexDevices,
+                _ => devices ?? GetServerResource(seed, options).Generate(config.PlexServerAccessCount)
+            )
             .RuleFor(
                 x => x.RawResponse,
                 (_, res) =>

@@ -28,7 +28,7 @@ public partial class FakePlexApiData
             .Generate();
     }
 
-    private static Faker<GetAllLibrariesDirectory> GetLibrariesResponseDirectory(
+    public static Faker<GetAllLibrariesDirectory> GetLibrariesResponseDirectory(
         Seed seed,
         Action<PlexApiDataConfig>? options = null
     )
@@ -40,11 +40,11 @@ public partial class FakePlexApiData
             .UseSeed(seed.Next())
             .RuleFor(x => x.AllowSync, f => f.Random.Bool())
             .RuleFor(x => x.Art, _ => "/:/resources/movie-fanart.jpg")
-            .RuleFor(x => x.Composite, _ => "/library/sections/7/composite/9999999")
+            .RuleFor(x => x.Key, f => f.Random.Number(int.MaxValue).ToString())
+            .RuleFor(x => x.Composite, (f, x) => $"/library/sections/{x.Key}/composite/{f.Random.Number(100000)}")
             .RuleFor(x => x.Filters, f => f.Random.Bool())
             .RuleFor(x => x.Refreshing, f => f.Random.Bool())
             .RuleFor(x => x.Thumb, _ => "/:/resources/movie.png")
-            .RuleFor(x => x.Key, f => f.Random.Number(int.MaxValue).ToString())
             .RuleFor(x => x.Type, f => f.PlexApi().LibraryType)
             .RuleFor(x => x.Title, f => f.Company.CompanyName())
             .RuleFor(x => x.Agent, _ => "tv.plex.agents.movie")
@@ -61,12 +61,6 @@ public partial class FakePlexApiData
             .RuleFor(
                 x => x.Location,
                 f => [new GetAllLibrariesLocation { Id = f.Random.Number(100000), Path = f.System.DirectoryPath() }]
-            )
-            .FinishWith(
-                (f, directory) =>
-                {
-                    directory.Composite = $"/library/sections/{directory.Key}/composite/{f.Random.Number(100000)}";
-                }
             );
     }
 }

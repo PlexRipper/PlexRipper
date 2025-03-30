@@ -48,6 +48,7 @@ public class TestModule : Module
         builder.RegisterType<TestStreamTracker>().As<ITestStreamTracker>().SingleInstance();
         builder.RegisterType<MockConfigManager>().As<IConfigManager>().SingleInstance();
         builder.RegisterType<MockSignalRService>().As<ISignalRService>().SingleInstance();
+        builder.RegisterType<MockPlexApiServer>().As<IMockPlexApiServer>().SingleInstance();
 
         SetMockedDependencies(builder);
 
@@ -59,15 +60,36 @@ public class TestModule : Module
 
     private void SetMockedDependencies(ContainerBuilder builder)
     {
-        if (Config.HttpClientOptions is not null)
+        if (Config.BaseMockHttpClientOptions is not null || Config.HttpClientOptions is not null)
         {
             builder
                 .Register(context =>
                 {
-                    var dbContext = context.Resolve<IPlexRipperDbContext>();
                     var handler = new Mock<HttpMessageHandler>(MockBehavior.Loose);
-                    Config.HttpClientOptions.Invoke(handler, dbContext);
-                    var client = new HttpClient(handler.Object);
+
+                    if (Config.BaseMockHttpClientOptions is not null)
+                    {
+                        var mockPlexApiServer = context.Resolve<IMockPlexApiServer>();
+                        mockPlexApiServer.Setup(handler, Config.BaseMockHttpClientOptions);
+                    }
+
+                    // We do not invoke Config.HttpClientOptions here because it requires a per-dependency service (like dbContext)
+                    return handler;
+                })
+                .SingleInstance();
+
+            builder
+                .Register(context =>
+                {
+                    var handler = context.Resolve<Mock<HttpMessageHandler>>();
+
+                    if (Config.HttpClientOptions is not null)
+                    {
+                        var dbContext = context.Resolve<IPlexRipperDbContext>();
+                        Config.HttpClientOptions.Invoke(handler, dbContext);
+                    }
+
+                    var client = new HttpClient(handler.Object, disposeHandler: false);
                     client.DefaultRequestHeaders.Add("User-Agent", "MockHttpClient");
                     return client;
                 })

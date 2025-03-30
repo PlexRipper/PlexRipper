@@ -15,12 +15,12 @@ public partial class FakePlexApiData
     {
         var config = PlexApiDataConfig.FromOptions(options);
 
-        return new GetLibraryItemsResponseBody()
+        return new GetLibraryItemsResponseBody
         {
             MediaContainer = new Faker<GetLibraryItemsMediaContainer>()
                 .StrictMode(false)
                 .UseSeed(seed.Next())
-                .RuleFor(x => x.Size, _ => config.LibraryMetaDataCount)
+                .RuleFor(x => x.TotalSize, _ => config.LibraryMetaDataCount)
                 .RuleFor(x => x.AllowSync, f => f.Random.Bool())
                 .RuleFor(x => x.Art, _ => $"/:/resources/{library.Type}-fanart.jpg")
                 .RuleFor(x => x.Identifier, _ => "com.plexapp.plugins.library")
@@ -42,6 +42,7 @@ public partial class FakePlexApiData
                         GetLibraryMediaMetadata(seed, library.Type.ToPlexMediaType(), options)
                             .Generate(config.LibraryMetaDataCount)
                 )
+                .RuleFor(x => x.Size, (_, x) => x.Metadata?.Count ?? 0)
                 .Generate(),
         };
     }
@@ -68,8 +69,9 @@ public partial class FakePlexApiData
             .StrictMode(false)
             .UseSeed(seed.Next())
             .RuleFor(l => l.RatingKey, f => f.Random.Number(100000).ToString())
+            .RuleFor(l => l.ParentRatingKey, f => f.Random.Number(100000).ToString())
             .RuleFor(l => l.Key, _ => "")
-            .RuleFor(l => l.Guid, f => $"plex://{type.ToPlexMediaTypeString().ToLower()}/{f.Random.Guid()}")
+            .RuleFor(l => l.Guid, f => $"plex://{type.ToPlexMediaTypeString().ToLower()}/{f.Random.AlphaNumeric(24)}")
             .RuleFor(l => l.Studio, f => f.Movies().Production())
             .RuleFor(l => l.Type, _ => GetPlexMediaType())
             .RuleFor(l => l.Title, f => f.Movies().MovieTitle())
@@ -86,18 +88,28 @@ public partial class FakePlexApiData
             .RuleFor(l => l.Theme, _ => "")
             .RuleFor(l => l.Art, _ => "")
             .RuleFor(l => l.Duration, f => f.Random.Int(1))
-            .RuleFor(l => l.OriginallyAvailableAt, f => f.Date.Past(2).ToLocalDate())
+            // set to null to avoid serializing the entire LocalDate object, needs to be long
+            .RuleFor(l => l.OriginallyAvailableAt, _ => null)
             .RuleFor(l => l.AddedAt, f => f.Date.Past().ToUnixLong())
             .RuleFor(l => l.UpdatedAt, f => f.Date.Recent().ToUnixLong())
             .RuleFor(l => l.AudienceRatingImage, _ => "rottentomatoes://image.rating.upright")
             .RuleFor(l => l.Index, f => f.Random.Int(1))
             .RuleFor(l => l.LeafCount, f => f.Random.Int(1))
             .RuleFor(l => l.ViewedLeafCount, f => f.Random.Int(1))
-            .RuleFor(l => l.ChildCount, f => f.Random.Int(1))
+            .RuleFor(l => l.ChildCount, f => f.Random.Int(1, 10))
             .RuleFor(l => l.ViewCount, _ => default)
             .RuleFor(l => l.SkipCount, _ => default)
             .RuleFor(l => l.LastViewedAt, _ => default)
             .RuleFor(l => l.Media, _ => [GetPlexMedium(seed, options).Generate()])
+            .RuleFor(
+                x => x.MediaGuid,
+                f =>
+                    [
+                        new MediaGuid { Id = $"imdb://tt{f.Random.Number(1_000_000, 9_999_999)}" },
+                        new MediaGuid { Id = $"tmdb://tt{f.Random.Number(100_000, 999_999)}" },
+                        new MediaGuid { Id = $"tvdb://{f.Random.Number(10_000, 99_999)}" },
+                    ]
+            )
             .FinishWith(
                 (f, metadata) =>
                 {
@@ -136,10 +148,12 @@ public partial class FakePlexApiData
             .RuleFor(l => l.VideoResolution, f => f.Lorem.Word())
             .RuleFor(
                 l => l.OptimizedForStreaming,
-                f =>
-                    f.Random.Bool()
-                        ? GetLibraryItemsOptimizedForStreaming.Enable
-                        : GetLibraryItemsOptimizedForStreaming.Disable
+                // set to null to avoid Unable to cast object of type 'System.Int64' to type 'System.String'.
+                _ => null
+            // f =>
+            //     f.Random.Bool()
+            //         ? GetLibraryItemsOptimizedForStreaming.Enable
+            //         : GetLibraryItemsOptimizedForStreaming.Disable
             )
             .RuleFor(l => l.Has64bitOffsets, f => f.Random.Bool())
             .RuleFor(l => l.Part, _ => [GetPlexPart(seed, options).Generate()]);
@@ -157,7 +171,9 @@ public partial class FakePlexApiData
             .RuleFor(l => l.Size, f => f.Random.Int(1))
             .RuleFor(
                 l => l.HasThumbnail,
-                f => f.Random.Bool() ? GetLibraryItemsHasThumbnail.True : GetLibraryItemsHasThumbnail.False
+                // set to null to avoid Unable to cast object of type 'System.Int64' to type 'System.String'.
+                _ => null
+            //f => f.Random.Bool() ? GetLibraryItemsHasThumbnail.True : GetLibraryItemsHasThumbnail.False
             )
             .RuleFor(l => l.OptimizedForStreaming, f => f.Random.Bool())
             .RuleFor(l => l.Has64bitOffsets, f => f.Random.Bool())

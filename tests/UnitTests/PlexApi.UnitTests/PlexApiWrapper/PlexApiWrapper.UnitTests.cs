@@ -49,8 +49,7 @@ public class PlexApiWrapperUnitTests : BaseUnitTest<PlexApiWrapper>
         var response1 = FakePlexApiData.GetServerResourcesResponse(
             HttpStatusCode.OK,
             new Seed(939),
-            null,
-            config =>
+            options: config =>
             {
                 config.PlexServerAccessCount = serverCount;
             }
@@ -59,8 +58,7 @@ public class PlexApiWrapperUnitTests : BaseUnitTest<PlexApiWrapper>
         var response2 = FakePlexApiData.GetServerResourcesResponse(
             HttpStatusCode.OK,
             new Seed(939),
-            null,
-            config =>
+            options: config =>
             {
                 config.PlexServerAccessCount = serverCount;
                 config.PlexServerAccessConnectionsIncludeHttps = true;
@@ -160,8 +158,7 @@ public class PlexApiWrapperUnitTests : BaseUnitTest<PlexApiWrapper>
                             .GetServerResourcesResponse(
                                 HttpStatusCode.OK,
                                 new Seed(939),
-                                null,
-                                config =>
+                                options: config =>
                                 {
                                     config.PlexServerAccessCount = serverCount;
                                     config.PlexServerAccessConnectionsIncludeHttps = true;
@@ -193,8 +190,7 @@ public class PlexApiWrapperUnitTests : BaseUnitTest<PlexApiWrapper>
                             .GetServerResourcesResponse(
                                 HttpStatusCode.OK,
                                 new Seed(939),
-                                null,
-                                config =>
+                                options: config =>
                                 {
                                     config.PlexServerAccessCount = serverCount;
                                 }
@@ -204,8 +200,7 @@ public class PlexApiWrapperUnitTests : BaseUnitTest<PlexApiWrapper>
                             .GetServerResourcesResponse(
                                 HttpStatusCode.OK,
                                 new Seed(940),
-                                null,
-                                config =>
+                                options: config =>
                                 {
                                     config.PlexServerAccessCount = serverCount;
                                     config.PlexServerAccessConnectionsIncludeHttps = true;

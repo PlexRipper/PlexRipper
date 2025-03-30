@@ -167,10 +167,25 @@ public static class PlexMediaMapper
     /// The PlexAPI is sometimes missing the ParentKey, this method will attempt to get the ParentKey from the ParentGuid.
     /// </summary>
     /// <param name="originalSource"> The original source to get the ParentKey from.</param>
+    /// <returns>The ParentKey if found and otherwise -1.</returns>
     private static int GetParentKey(this LibraryMediaItemDTO originalSource)
     {
-        var parentKey = originalSource.ParentRatingKey != null ? int.Parse(originalSource.ParentRatingKey) : -1;
-        if (parentKey == -1 && originalSource.ParentGuid != null && originalSource.ParentGuid.Contains("local"))
+        var parentKeyString = !string.IsNullOrEmpty(originalSource.ParentRatingKey)
+            ? originalSource.ParentRatingKey
+            : "-1";
+
+        if (int.TryParse(parentKeyString, out var parentKey))
+        {
+            return parentKey;
+        }
+
+        var parentGuid = !string.IsNullOrEmpty(originalSource.ParentGuid) ? originalSource.ParentGuid : string.Empty;
+        if (string.IsNullOrEmpty(parentGuid))
+        {
+            return -1;
+        }
+
+        if (parentGuid.Contains("local"))
         {
             // Replace all non-numeric characters
             var result = Regex.Replace(originalSource.ParentGuid, "[^0-9]", "");

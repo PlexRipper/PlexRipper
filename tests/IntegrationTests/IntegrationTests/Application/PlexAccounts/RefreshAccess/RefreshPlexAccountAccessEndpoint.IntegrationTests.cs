@@ -37,7 +37,7 @@ public class RefreshPlexAccountAccessEndpointIntegrationTestsIntegrationTests : 
                         .ReturnsAsync(
                             (HttpRequestMessage req, CancellationToken _) =>
                                 FakePlexApiData
-                                    .GetServerResourcesResponse(HttpStatusCode.Unauthorized, seed, req)
+                                    .GetServerResourcesResponse(HttpStatusCode.Unauthorized, seed, request: req)
                                     .RawResponse
                         );
                 };

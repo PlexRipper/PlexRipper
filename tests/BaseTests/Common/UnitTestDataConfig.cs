@@ -16,5 +16,7 @@ public class UnitTestDataConfig : BaseConfig<UnitTestDataConfig>
 
     public Action<Mock<HttpMessageHandler>, IPlexRipperDbContext>? HttpClientOptions { get; set; }
 
+    public Action<PlexApiDataConfig>? BaseMockHttpClientOptions { get; set; }
+
     public Action<MockFileSystem, IPlexRipperDbContext>? FileSystemOptions { get; set; }
 }

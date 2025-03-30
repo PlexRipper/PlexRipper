@@ -1,7 +1,9 @@
 ﻿using System.Net;
+using System.Text;
 using Application.Contracts;
 using Moq.Contrib.HttpClient;
 using Moq.Language.Flow;
+using Newtonsoft.Json;
 
 namespace PlexRipper.BaseTests;
 
@@ -117,11 +119,37 @@ public static class MoqExtensions
             return;
         }
 
-        mock.SetupRequest(uri.TrimEnd('/') + "/identity")
+        var uriBuilder = new UriBuilder(uri) { Path = "/identity" };
+        mock.SetupRequest(HttpMethod.Get, uriBuilder.Uri)
             .ReturnsAsync(
                 (HttpRequestMessage req, CancellationToken _) =>
                     FakePlexApiData.GetPlexServerIdentityResponse(HttpStatusCode.OK, seed, req).RawResponse
             );
+    }
+
+    public static HttpResponseMessage ToJsonHttpResponse(
+        this object? responseBody,
+        HttpRequestMessage request,
+        HttpStatusCode statusCode
+    )
+    {
+        var settings = MockPlexApiJsonSerializer.GetSettings();
+        var json = JsonConvert.SerializeObject(responseBody, settings);
+        var jsonContent = new StringContent(json, Encoding.UTF8, "application/json");
+
+        return new HttpResponseMessage(statusCode) { RequestMessage = request, Content = jsonContent };
+    }
+
+    public static ISetup<HttpMessageHandler, Task<HttpResponseMessage>> SetupRequestAnyQuery(
+        this Mock<HttpMessageHandler> handler,
+        HttpMethod method,
+        Uri requestUri
+    )
+    {
+        return handler.SetupRequest(req =>
+            req.Method == method
+            && req.RequestUri?.AbsolutePath.Equals(requestUri.AbsolutePath, StringComparison.OrdinalIgnoreCase) == true
+        );
     }
 
     public static void SetupDownloadFile(this Mock<HttpMessageHandler> mock, int fileSizeInMb)

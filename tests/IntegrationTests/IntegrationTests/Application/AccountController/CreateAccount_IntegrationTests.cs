@@ -31,83 +31,14 @@ public class CreateAccountIntegrationTests : BaseIntegrationTests
                     // Start from an empty database
                     x.PlexServerCount = 0;
                     x.PlexLibraryCount = 0;
+                    x.PlexAccountCount = 0;
                     x.PlexServerConnectionPerServerCount = 1;
                 };
-                config.HttpClientOptions = (x, dbContext) =>
+                config.BaseMockHttpClientOptions = x =>
                 {
-                    var response1 = FakePlexApiData.GetServerResourcesResponse(
-                        HttpStatusCode.OK,
-                        new Seed(939),
-                        options: y => y.PlexServerAccessCount = serverCount
-                    );
-
-                    x.SetupRequest(
-                            HttpMethod.Get,
-                            "https://plex.tv/api/v2/resources?includeHttps=0&includeRelay=0&includeIPv6=0"
-                        )
-                        .ReturnsAsync(response1.RawResponse);
-
-                    x.SetupRequest(
-                            HttpMethod.Get,
-                            "https://plex.tv/api/v2/resources?includeHttps=1&includeRelay=1&includeIPv6=1"
-                        )
-                        .ReturnsAsync(
-                            (HttpRequestMessage req, CancellationToken _) =>
-                                FakePlexApiData
-                                    .GetServerResourcesResponse(
-                                        HttpStatusCode.OK,
-                                        new Seed(940),
-                                        req,
-                                        y =>
-                                        {
-                                            y.PlexServerAccessCount = serverCount;
-                                            y.PlexServerAccessConnectionsIncludeHttps = true;
-                                        }
-                                    )
-                                    .RawResponse
-                        );
-
-                    var connections = dbContext.PlexServerConnections.ToList();
-
-                    var seeds = Seed.Generate(connections.Count).ToList();
-
-                    for (var i = 0; i < connections.Count; i++)
-                    {
-                        var connection = connections[i];
-                        var responseSeed = seeds[i];
-                        x.SetupIdentityRequest(seed, connection.Url);
-
-                        var mediaData = FakePlexApiData.GetAllLibrariesResponseBody(seed);
-                        x.SetupRequest(connection.Url + "library/sections")
-                            .ReturnsAsync(
-                                (HttpRequestMessage req, CancellationToken _) =>
-                                    FakePlexApiData
-                                        .GetAllLibrariesResponse(
-                                            HttpStatusCode.OK,
-                                            responseSeed,
-                                            mediaData,
-                                            request: req
-                                        )
-                                        .RawResponse
-                            );
-
-                        // Get all media
-                        foreach (var dir in mediaData.MediaContainer.Directory)
-                        {
-                            x.SetupRequest(connection.Url + $"library/sections/{dir.Key}/all")
-                                .ReturnsAsync(
-                                    (HttpRequestMessage req, CancellationToken _) =>
-                                        FakePlexApiData
-                                            .GetLibraryMediaItemsResponse(
-                                                HttpStatusCode.OK,
-                                                responseSeed,
-                                                dir,
-                                                request: req
-                                            )
-                                            .RawResponse
-                                );
-                        }
-                    }
+                    x.PlexServerAccessCount = serverCount;
+                    x.LibraryCount = libraryCount;
+                    x.LibraryMetaDataCount = 5000;
                 };
             }
         );

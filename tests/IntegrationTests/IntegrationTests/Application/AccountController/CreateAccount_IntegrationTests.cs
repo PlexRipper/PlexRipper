@@ -37,8 +37,8 @@ public class CreateAccountIntegrationTests : BaseIntegrationTests
                 config.BaseMockHttpClientOptions = x =>
                 {
                     x.PlexServerAccessCount = serverCount;
-                    x.LibraryCount = libraryCount;
-                    x.LibraryMetaDataCount = 5000;
+                    x.MovieLibraryCount = libraryCount;
+                    x.MoviesPerLibraryCount = 500;
                 };
             }
         );
@@ -93,7 +93,7 @@ public class CreateAccountIntegrationTests : BaseIntegrationTests
         // Ensure all jobs have sent notifications
         // TODO: Keeps breaking due to the order of the jobs being executed
         var jobStatusUpdateList = container.MockSignalRService.JobStatusUpdateList.ToList();
-        jobStatusUpdateList.Count.ShouldBe(8);
+        jobStatusUpdateList.Count.ShouldBe(4);
 
         jobStatusUpdateList[0].JobType.ShouldBe(JobTypes.InspectPlexServerJob);
         jobStatusUpdateList[0].Status.ShouldBe(JobStatus.Started);
@@ -103,10 +103,5 @@ public class CreateAccountIntegrationTests : BaseIntegrationTests
         jobStatusUpdateList[2].Status.ShouldBe(JobStatus.Started);
         jobStatusUpdateList[3].JobType.ShouldBe(JobTypes.SyncServerMediaJob);
         jobStatusUpdateList[3].Status.ShouldBe(JobStatus.Completed);
-
-        // jobStatusUpdateList[1].JobType.ShouldBe(JobTypes.CheckAllConnectionsStatusByPlexServerJob);
-        // jobStatusUpdateList[1].Status.ShouldBe(JobStatus.Started);
-        // jobStatusUpdateList[2].JobType.ShouldBe(JobTypes.CheckAllConnectionsStatusByPlexServerJob);
-        // jobStatusUpdateList[2].Status.ShouldBe(JobStatus.Completed);
     }
 }

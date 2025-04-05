@@ -67,7 +67,7 @@ public class PlexApiMediaService : IPlexApiMediaService
             var totalSize = mediaContainer.TotalSize;
             index += mediaContainer.Size;
 
-            if (mediaContainer.TotalSize == 0)
+            if (mediaContainer.Size == 0 || mediaContainer.TotalSize == 0)
             {
                 _log.Warning(
                     "The library with name: {PlexLibraryName} contains no media to retrieve",

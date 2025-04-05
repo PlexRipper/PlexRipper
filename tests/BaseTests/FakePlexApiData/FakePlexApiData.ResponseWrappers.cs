@@ -83,19 +83,44 @@ public partial class FakePlexApiData
     public static GetAllLibrariesResponse GetAllLibrariesResponse(
         HttpStatusCode statusCode,
         Seed seed,
-        GetAllLibrariesResponseBody? responseBody = null,
         HttpRequestMessage? request = null,
         Action<PlexApiDataConfig>? options = null
     )
     {
         var config = PlexApiDataConfig.FromOptions(options);
 
+        var mediaContainer = new Faker<GetAllLibrariesMediaContainer>()
+            .StrictMode(true)
+            .UseSeed(seed.Next())
+            .RuleFor(x => x.AllowSync, f => f.Random.Bool())
+            .RuleFor(x => x.Title1, f => f.Company.CompanyName())
+            .RuleFor(
+                x => x.Directory,
+                (f, _) =>
+                    GetLibrariesResponseDirectory(seed, f.PlexApi().LibraryType.ToPlexMediaType())
+                        .Generate(config.LibraryCount())
+            )
+            .RuleFor(x => x.Size, (_, x) => x.Directory.Count)
+            .FinishWith(
+                (_, x) =>
+                {
+                    // Directory might take a while to generate
+                    x.Size = x.Directory.Count;
+                }
+            );
+
+        var body = new Faker<GetAllLibrariesResponseBody>()
+            .StrictMode(true)
+            .UseSeed(seed.Next())
+            .RuleFor(x => x.MediaContainer, _ => mediaContainer.Generate())
+            .Generate();
+
         return new Faker<GetAllLibrariesResponse>()
             .StrictMode(true)
             .UseSeed(seed.Next())
             .RuleFor(x => x.StatusCode, _ => (int)statusCode)
             .RuleFor(x => x.ContentType, _ => ContentType.ApplicationJson)
-            .RuleFor(x => x.Object, _ => responseBody ?? GetAllLibrariesResponseBody(seed, options))
+            .RuleFor(x => x.Object, _ => body)
             .RuleFor(x => x.RawResponse, (_, res) => GetHttpResponseMessage(statusCode, res.Object, request))
             .Generate();
     }
@@ -116,7 +141,7 @@ public partial class FakePlexApiData
             .UseSeed(seed.Next())
             .RuleFor(x => x.StatusCode, _ => (int)statusCode)
             .RuleFor(x => x.ContentType, _ => ContentType.ApplicationJson)
-            .RuleFor(x => x.Object, _ => responseBody ?? GetPlexLibrarySectionAllResponse(seed, library, options))
+            .RuleFor(x => x.Object, _ => responseBody ?? GetPlexLibrarySectionAllResponse(seed, library, 100, options))
             .RuleFor(x => x.RawResponse, (_, res) => GetHttpResponseMessage(statusCode, res.Object, request))
             .Generate();
     }

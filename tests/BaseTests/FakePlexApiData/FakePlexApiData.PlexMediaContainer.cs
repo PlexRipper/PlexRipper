@@ -1,6 +1,7 @@
 ﻿using Bogus;
 using Bogus.Hollywood;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
+using PlexApi.Contracts;
 using PlexRipper.PlexApi;
 
 namespace PlexRipper.BaseTests;
@@ -10,17 +11,38 @@ public partial class FakePlexApiData
     public static GetLibraryItemsResponseBody GetPlexLibrarySectionAllResponse(
         Seed seed,
         GetAllLibrariesDirectory library,
+        int mediaCount = 0,
         Action<PlexApiDataConfig>? options = null
     )
     {
         var config = PlexApiDataConfig.FromOptions(options);
+        var type = library.Type.ToPlexMediaTypeFromPlexApi();
 
         return new GetLibraryItemsResponseBody
         {
             MediaContainer = new Faker<GetLibraryItemsMediaContainer>()
-                .StrictMode(false)
+                .StrictMode(true)
                 .UseSeed(seed.Next())
-                .RuleFor(x => x.TotalSize, _ => config.LibraryMetaDataCount)
+                .RuleFor(
+                    x => x.TotalSize,
+                    _ =>
+                    {
+                        return type switch
+                        {
+                            PlexMediaType.Movie => config.MoviesPerLibraryCount,
+                            PlexMediaType.TvShow => config.TvShowsPerLibraryCount
+                                * config.SeasonsPerTvShowCount
+                                * config.EpisodesPerSeasonCount,
+                            _ => throw new ArgumentOutOfRangeException(),
+                        };
+                    }
+                )
+                .RuleFor(x => x.Type, _ => null)
+                .RuleFor(x => x.FieldType, _ => null)
+                .RuleFor(x => x.Offset, _ => 0)
+                .RuleFor(x => x.Content, _ => string.Empty)
+                .RuleFor(x => x.MixedParents, f => f.Random.Bool())
+                .RuleFor(x => x.Meta, _ => null)
                 .RuleFor(x => x.AllowSync, f => f.Random.Bool())
                 .RuleFor(x => x.Art, _ => $"/:/resources/{library.Type}-fanart.jpg")
                 .RuleFor(x => x.Identifier, _ => "com.plexapp.plugins.library")
@@ -36,13 +58,15 @@ public partial class FakePlexApiData
                 .RuleFor(x => x.ViewGroup, _ => library.Type)
                 .RuleFor(x => x.Nocache, f => f.Random.Bool())
                 .RuleFor(x => x.ViewMode, f => f.Random.Number(100000))
-                .RuleFor(
-                    x => x.Metadata,
-                    _ =>
-                        GetLibraryMediaMetadata(seed, library.Type.ToPlexMediaType(), options)
-                            .Generate(config.LibraryMetaDataCount)
+                .RuleFor(x => x.Metadata, _ => GetLibraryMediaMetadata(seed, type, options).Generate(mediaCount))
+                .RuleFor(x => x.Size, (_, x) => x.Metadata!.Count)
+                .FinishWith(
+                    (_, x) =>
+                    {
+                        // Directory might take a while to generate
+                        x.Size = x.Metadata!.Count;
+                    }
                 )
-                .RuleFor(x => x.Size, (_, x) => x.Metadata?.Count ?? 0)
                 .Generate(),
         };
     }
@@ -62,7 +86,7 @@ public partial class FakePlexApiData
                 PlexMediaType.TvShow => GetLibraryItemsLibraryType.TvShow,
                 PlexMediaType.Season => GetLibraryItemsLibraryType.Season,
                 PlexMediaType.Episode => GetLibraryItemsLibraryType.Episode,
-                _ => GetLibraryItemsLibraryType.Movie,
+                _ => throw new InvalidOperationException($"Invalid PlexMediaType: {type} value."),
             };
 
         return new Faker<GetLibraryItemsMetadata>()
@@ -70,28 +94,28 @@ public partial class FakePlexApiData
             .UseSeed(seed.Next())
             .RuleFor(l => l.RatingKey, f => f.Random.Number(100000).ToString())
             .RuleFor(l => l.ParentRatingKey, f => f.Random.Number(100000).ToString())
-            .RuleFor(l => l.Key, _ => "")
+            .RuleFor(l => l.Key, (_, x) => $"/library/metadata/{x.RatingKey}")
             .RuleFor(l => l.Guid, f => $"plex://{type.ToPlexMediaTypeString().ToLower()}/{f.Random.AlphaNumeric(24)}")
             .RuleFor(l => l.Studio, f => f.Movies().Production())
             .RuleFor(l => l.Type, _ => GetPlexMediaType())
             .RuleFor(l => l.Title, f => f.Movies().MovieTitle())
-            .RuleFor(l => l.TitleSort, _ => "")
+            .RuleFor(l => l.TitleSort, (_, x) => x.Title.ToLower())
             .RuleFor(l => l.ContentRating, _ => "nl/6")
             .RuleFor(l => l.Summary, f => f.Movies().MovieOverview())
             .RuleFor(l => l.Rating, f => f.Random.Double() * 10)
             .RuleFor(l => l.AudienceRating, f => f.Random.Double() * 10)
             .RuleFor(l => l.ViewOffset, f => f.Random.Int(1))
             .RuleFor(l => l.LastViewedAt, _ => 0)
-            .RuleFor(l => l.Year, f => f.Random.Int(0, 2023))
-            .RuleFor(l => l.Thumb, _ => "")
-            .RuleFor(l => l.Banner, _ => "")
-            .RuleFor(l => l.Theme, _ => "")
-            .RuleFor(l => l.Art, _ => "")
+            .RuleFor(l => l.Year, f => f.Random.Int(0, DateTime.Now.Year))
+            .RuleFor(l => l.AddedAt, f => f.Date.Past().ToUnixLong())
+            .RuleFor(l => l.UpdatedAt, f => f.Date.Recent().ToUnixLong())
+            .RuleFor(l => l.Thumb, (_, x) => $"/library/metadata/{x.RatingKey}/thumb/${x.UpdatedAt}")
+            .RuleFor(l => l.Art, (_, x) => $"/library/metadata/{x.RatingKey}/art/${x.UpdatedAt}")
+            .RuleFor(l => l.Banner, (f, x) => $"/library/metadata/{x.RatingKey}/banner/{f.Random.Int(100000, 1000000)}")
+            .RuleFor(l => l.Theme, (f, x) => $"/library/metadata/{x.RatingKey}/theme/{f.Random.Int(100000, 1000000)}")
             .RuleFor(l => l.Duration, f => f.Random.Int(1))
             // set to null to avoid serializing the entire LocalDate object, needs to be long
             .RuleFor(l => l.OriginallyAvailableAt, _ => null)
-            .RuleFor(l => l.AddedAt, f => f.Date.Past().ToUnixLong())
-            .RuleFor(l => l.UpdatedAt, f => f.Date.Recent().ToUnixLong())
             .RuleFor(l => l.AudienceRatingImage, _ => "rottentomatoes://image.rating.upright")
             .RuleFor(l => l.Index, f => f.Random.Int(1))
             .RuleFor(l => l.LeafCount, f => f.Random.Int(1))
@@ -109,19 +133,6 @@ public partial class FakePlexApiData
                         new MediaGuid { Id = $"tmdb://tt{f.Random.Number(100_000, 999_999)}" },
                         new MediaGuid { Id = $"tvdb://{f.Random.Number(10_000, 99_999)}" },
                     ]
-            )
-            .FinishWith(
-                (f, metadata) =>
-                {
-                    var metaDataKey = f.Random.Int(1);
-                    metadata.Thumb = $"/library/metadata/{metadata.Key}/thumb/{metaDataKey}";
-                    metadata.Art = $"/library/metadata/{metadata.Key}/art/{metaDataKey}";
-                    metadata.Theme = $"/library/metadata/{metadata.Key}/theme/{metaDataKey}";
-                    metadata.Banner = $"/library/metadata/{metadata.Key}/banner/{metaDataKey}";
-
-                    metadata.Key = $"/library/metadata/{metadata.Key}";
-                    metadata.TitleSort = metadata.TitleSort?.ToLower();
-                }
             );
     }
 

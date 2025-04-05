@@ -105,6 +105,42 @@ public partial class FakePlexApiData
                     ]
             );
 
+    /// <summary>
+    /// Generates a fake response for the GetLibraryItemsResponse operation
+    /// URL: /library/sections/{sectionKey}/{tag}
+    /// </summary>
+    private static readonly Faker<GetLibraryItemsMediaContainer> GetLibraryItemsMediaContainer =
+        new Faker<GetLibraryItemsMediaContainer>()
+            .StrictMode(true)
+            .RuleFor(x => x.TotalSize, _ => -1) // Generated in FinishWith
+            .RuleFor(x => x.Type, _ => null)
+            .RuleFor(x => x.FieldType, _ => null)
+            .RuleFor(x => x.Offset, _ => 0)
+            .RuleFor(x => x.Content, _ => string.Empty)
+            .RuleFor(x => x.MixedParents, f => f.Random.Bool())
+            .RuleFor(x => x.Meta, _ => null)
+            .RuleFor(x => x.AllowSync, f => f.Random.Bool())
+            .RuleFor(x => x.Art, _ => "/:/resources/unknown-fanart.jpg")
+            .RuleFor(x => x.Identifier, _ => "com.plexapp.plugins.library")
+            .RuleFor(x => x.LibrarySectionID, _ => -1)
+            .RuleFor(x => x.LibrarySectionTitle, _ => string.Empty)
+            .RuleFor(x => x.LibrarySectionUUID, _ => string.Empty)
+            .RuleFor(x => x.MediaTagPrefix, _ => "/system/bundle/media/flags/")
+            .RuleFor(x => x.MediaTagVersion, f => f.Random.Number(0, 1000000000))
+            .RuleFor(x => x.MediaTagPrefix, _ => "/system/bundle/media/flags/")
+            .RuleFor(x => x.Thumb, _ => "/:/resources/unknown.png")
+            .RuleFor(x => x.Title1, (f, x) => f.Name.FullName())
+            .RuleFor(x => x.Title2, (_, x) => $"All {x.Title1}")
+            .RuleFor(x => x.ViewGroup, _ => string.Empty)
+            .RuleFor(x => x.Nocache, f => f.Random.Bool())
+            .RuleFor(x => x.ViewMode, f => f.Random.Number(100000))
+            .RuleFor(x => x.Metadata, _ => []) // Generated in FinishWith
+            .RuleFor(x => x.Size, _ => -1); // Generated in FinishWith
+
+    /// <summary>
+    /// Generates a fake response for the GetLibraryItemsResponse operation
+    /// URL: /library/sections/{sectionKey}/{tag}
+    /// </summary>
     public static GetLibraryItemsResponseBody GetPlexLibrarySectionAllResponse(
         Seed seed,
         GetAllLibrariesDirectory library,
@@ -115,53 +151,31 @@ public partial class FakePlexApiData
         var config = PlexApiDataConfig.FromOptions(options);
         var type = library.Type.ToPlexMediaTypeFromPlexApi();
 
+        var totalSize = type switch
+        {
+            PlexMediaType.Movie => config.MoviesPerLibraryCount,
+            PlexMediaType.TvShow => config.TvShowsPerLibraryCount
+                * config.SeasonsPerTvShowCount
+                * config.EpisodesPerSeasonCount,
+            _ => throw new ArgumentOutOfRangeException(),
+        };
+
         return new GetLibraryItemsResponseBody
         {
-            MediaContainer = new Faker<GetLibraryItemsMediaContainer>()
-                .StrictMode(true)
+            MediaContainer = GetLibraryItemsMediaContainer
                 .UseSeed(seed.Next())
-                .RuleFor(
-                    x => x.TotalSize,
-                    _ =>
-                    {
-                        return type switch
-                        {
-                            PlexMediaType.Movie => config.MoviesPerLibraryCount,
-                            PlexMediaType.TvShow => config.TvShowsPerLibraryCount
-                                * config.SeasonsPerTvShowCount
-                                * config.EpisodesPerSeasonCount,
-                            _ => throw new ArgumentOutOfRangeException(),
-                        };
-                    }
-                )
-                .RuleFor(x => x.Type, _ => null)
-                .RuleFor(x => x.FieldType, _ => null)
-                .RuleFor(x => x.Offset, _ => 0)
-                .RuleFor(x => x.Content, _ => string.Empty)
-                .RuleFor(x => x.MixedParents, f => f.Random.Bool())
-                .RuleFor(x => x.Meta, _ => null)
-                .RuleFor(x => x.AllowSync, f => f.Random.Bool())
-                .RuleFor(x => x.Art, _ => $"/:/resources/{library.Type}-fanart.jpg")
-                .RuleFor(x => x.Identifier, _ => "com.plexapp.plugins.library")
-                .RuleFor(x => x.LibrarySectionID, _ => long.Parse(library.Key))
-                .RuleFor(x => x.LibrarySectionTitle, _ => library.Title)
-                .RuleFor(x => x.LibrarySectionUUID, _ => library.Uuid)
-                .RuleFor(x => x.MediaTagPrefix, _ => "/system/bundle/media/flags/")
-                .RuleFor(x => x.MediaTagVersion, f => f.Random.Number(0, 1000000000))
-                .RuleFor(x => x.MediaTagPrefix, _ => "/system/bundle/media/flags/")
-                .RuleFor(x => x.Thumb, _ => $"/:/resources/{library.Type}.png")
-                .RuleFor(x => x.Title1, _ => library.Title)
-                .RuleFor(x => x.Title2, _ => $"All {library.Title}")
-                .RuleFor(x => x.ViewGroup, _ => library.Type)
-                .RuleFor(x => x.Nocache, f => f.Random.Bool())
-                .RuleFor(x => x.ViewMode, f => f.Random.Number(100000))
-                .RuleFor(x => x.Metadata, _ => GetLibraryMediaMetadata(seed, type, options).Generate(mediaCount))
-                .RuleFor(x => x.Size, (_, x) => x.Metadata!.Count)
                 .FinishWith(
                     (_, x) =>
                     {
-                        // Directory might take a while to generate
+                        x.LibrarySectionID = long.Parse(library.Key);
+                        x.LibrarySectionTitle = library.Title;
+                        x.LibrarySectionUUID = library.Uuid;
+                        x.ViewGroup = library.Type.ToPlexMediaTypeFromPlexApi().ToString();
+                        x.Thumb = x.Thumb.Replace("unknown", x.ViewGroup);
+                        x.Art = x.Art.Replace("unknown", x.ViewGroup);
+                        x.Metadata = GetLibraryMediaMetadata(seed, type, options).Generate(mediaCount);
                         x.Size = x.Metadata!.Count;
+                        x.TotalSize = totalSize;
                     }
                 )
                 .Generate(),

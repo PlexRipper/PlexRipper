@@ -1,3 +1,5 @@
+using System.Net;
+
 namespace PlexRipper.BaseTests;
 
 public class PlexApiDataConfig : BaseConfig<PlexApiDataConfig>
@@ -21,6 +23,8 @@ public class PlexApiDataConfig : BaseConfig<PlexApiDataConfig>
     public int PlexServerAccessConnectionsCount { get; set; } = 5;
 
     public bool PlexServerAccessConnectionsIncludeHttps { get; set; } = false;
+
+    public HttpStatusCode SetServerResourcesResponse { get; set; } = HttpStatusCode.OK;
 
     public int LibraryCount(PlexMediaType type = PlexMediaType.Unknown)
     {

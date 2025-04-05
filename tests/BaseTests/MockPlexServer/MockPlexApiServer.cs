@@ -61,7 +61,7 @@ public class MockPlexApiServer : IMockPlexApiServer
     {
         for (var i = 0; i < _config.PlexServerAccessCount; i++)
         {
-            var tempSeed = new Seed(_seed.Value);
+            var tempSeed = new Seed(_seed.Next());
 
             var plexServerWithNonHttps = FakePlexApiData.GetServerResource(tempSeed).Generate();
             var plexServerWithHttps = FakePlexApiData
@@ -86,6 +86,13 @@ public class MockPlexApiServer : IMockPlexApiServer
             .ReturnsAsync(
                 (HttpRequestMessage req, CancellationToken _) =>
                 {
+                    if (_config.SetServerResourcesResponse == HttpStatusCode.Unauthorized)
+                    {
+                        return FakePlexApiData
+                            .GetPlexUnauthorizedResponseMessage(req)
+                            .ToJsonHttpResponse(req, HttpStatusCode.Unauthorized);
+                    }
+
                     var queryDict = req.ParseQueryToDictionary();
                     var includeHttps = false;
                     var includeRelay = false;

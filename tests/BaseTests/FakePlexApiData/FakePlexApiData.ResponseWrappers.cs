@@ -125,6 +125,10 @@ public partial class FakePlexApiData
             .Generate();
     }
 
+    /// <summary>
+    /// Generates a fake response for the GetLibraryItemsResponse operation
+    /// URL: /library/sections/{sectionKey}/{tag}
+    /// </summary>
     public static GetLibraryItemsResponse GetLibraryMediaItemsResponse(
         HttpStatusCode statusCode,
         Seed seed,

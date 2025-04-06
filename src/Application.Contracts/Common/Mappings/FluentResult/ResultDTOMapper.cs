@@ -33,9 +33,6 @@ public static class ResultDTOMapper
             StatusCode = 0,
         };
 
-    private static List<ReasonDTO> ToReasonDTOs(this List<IReason> reasons) =>
-        reasons.ConvertAll(x => new ReasonDTO { Message = x.Message, Metadata = x.Metadata });
-
     private static List<ErrorDTO> ToErrorDTOs(this List<IError> reasons) =>
         reasons.ConvertAll(x => new ErrorDTO
         {

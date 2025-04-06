@@ -50,7 +50,8 @@ public partial class BaseUnitTest
     /// <exception cref="InvalidOperationException"></exception>
     protected static void UpdateInitProperty<T>(T obj, string propertyName, object newValue)
     {
-        var property = obj.GetType()
+        var property = obj
+            ?.GetType()
             .GetProperty(propertyName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
         if (property == null || !property.CanWrite)
         {

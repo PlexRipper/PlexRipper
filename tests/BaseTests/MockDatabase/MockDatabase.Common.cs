@@ -276,7 +276,7 @@ public static partial class MockDatabase
             Cache = SqliteCacheMode.Shared,
         }.ToString();
 
-    public static async Task<(PlexRipperDbContext, AuthDbContext)> Setup(
+    public static async Task Setup(
         this (PlexRipperDbContext, AuthDbContext) context,
         Seed seed,
         Action<FakeDataConfig>? options = null
@@ -318,9 +318,9 @@ public static partial class MockDatabase
             plexRipperContext = await plexRipperContext.AddDownloadTaskTvShows(seed, options);
 
         if (config.AccountHasAccessToAllLibraries)
-            await plexRipperContext.AddPlexAccountLibraries();
+            plexRipperContext = await plexRipperContext.AddPlexAccountLibraries();
 
-        return context;
+        plexRipperContext.ShouldNotBeNull();
     }
 
     #endregion

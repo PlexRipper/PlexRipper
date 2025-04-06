@@ -32,11 +32,12 @@ public class CustomContractResolver : DefaultContractResolver
         // Wrap the property's ValueProvider to intercept null assignments.
         if (property.Writable)
         {
-            property.ValueProvider = new NullSkippingValueProvider(property.ValueProvider);
+            if (property.ValueProvider != null)
+                property.ValueProvider = new NullSkippingValueProvider(property.ValueProvider);
         }
 
         // If the property type is an enum and doesn't already have a converter, assign our custom converter.
-        if (property.PropertyType.IsEnum && property.Converter == null)
+        if (property is { PropertyType.IsEnum: true, Converter: null })
         {
             property.Converter = new JsonPropertyEnumConverter();
         }
@@ -54,9 +55,9 @@ public class NullSkippingValueProvider : IValueProvider
         _innerProvider = innerProvider;
     }
 
-    public object GetValue(object target) => _innerProvider.GetValue(target);
+    public object? GetValue(object target) => _innerProvider.GetValue(target);
 
-    public void SetValue(object target, object value)
+    public void SetValue(object target, object? value)
     {
         // Only set the property if value is not null.
         if (value != null)
@@ -83,7 +84,7 @@ public class JsonPropertyEnumConverter : JsonConverter
 
         // Get the enum type and member info for the current value.
         var enumType = value.GetType();
-        var member = enumType.GetMember(value.ToString()).FirstOrDefault();
+        var member = enumType.GetMember(value.ToString()!).FirstOrDefault();
         if (member != null)
         {
             // Look for the JsonProperty attribute on the enum member.

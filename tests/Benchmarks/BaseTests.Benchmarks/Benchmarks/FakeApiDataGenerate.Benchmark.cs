@@ -6,18 +6,12 @@ namespace BaseTests.Benchmarks;
 
 public class FakeApiDataGenerateBenchmark
 {
-    private Mock<HttpMessageHandler> _handler;
-    private MockPlexApiServer _sut;
-
-    public void Setup()
-    {
-        _handler = new Mock<HttpMessageHandler>(MockBehavior.Loose);
-        _sut = new MockPlexApiServer();
-    }
-
     [Benchmark]
     public void ShouldRunTheBenchmarkOnGeneratingMockData_WhenOptionsIsConfigured()
     {
+        var handler = new Mock<HttpMessageHandler>(MockBehavior.Loose);
+        var sut = new MockPlexApiServer();
+
         Action<PlexApiDataConfig> options = x =>
         {
             x.PlexServerAccessCount = 1;
@@ -25,6 +19,6 @@ public class FakeApiDataGenerateBenchmark
             x.MoviesPerLibraryCount = 500;
         };
 
-        _sut.Setup(_handler, options);
+        sut.Setup(handler, options);
     }
 }

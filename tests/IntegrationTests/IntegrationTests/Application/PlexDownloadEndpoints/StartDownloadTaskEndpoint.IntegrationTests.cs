@@ -20,7 +20,7 @@ public class StartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
             seed,
             config =>
             {
-                config.HttpClientOptions = x =>
+                config.HttpClientOptions = (x, _) =>
                 {
                     x.SetupIdentityRequest(seed);
                     x.SetupDownloadFile(10);

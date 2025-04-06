@@ -1,8 +1,3 @@
-using Application.Contracts;
-using Data.Contracts;
-using FastEndpoints;
-using PlexRipper.Application;
-
 namespace IntegrationTests;
 
 [CollectionDefinition("Non-Parallel Tests", DisableParallelization = true)]

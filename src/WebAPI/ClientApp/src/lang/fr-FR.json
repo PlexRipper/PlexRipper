@@ -207,9 +207,6 @@
             "sub-header": "Le jeton : {authToken} appartient au compte Plex :",
             "title": "Validation du jeton d'authentification Plex.tv"
         },
-        "search-bar": {
-            "no-results": "Aucun résultat trouvé avec {query}"
-        },
         "downloads-table": {
             "columns": {
                 "actions": "Actions",
@@ -330,6 +327,14 @@
         "media-poster-image-content": {
             "episode-count": "Aucun épisode | 1 épisode | {count} épisodes",
             "seasons-count": "Aucune saison | 1 saison | {count} saisons"
+        },
+        "media-filter-menu": {
+            "all": "Tous",
+            "meta-data": {
+                "country": "Pays",
+                "genre": "Genre",
+                "roles": "Les rôles"
+            }
         }
     },
     "confirmation": {

@@ -10,8 +10,6 @@ namespace PlexRipper.Domain;
 
 public static partial class StringExtensions
 {
-    private static Random random = new();
-
     private static readonly HashSet<string> StopWords =
         new(StringComparer.OrdinalIgnoreCase)
         {
@@ -108,7 +106,7 @@ public static partial class StringExtensions
     /// </summary>
     /// <param name="title"></param>
     /// <returns></returns>
-    public static string ToSortTitle(this string title)
+    public static string ToSortTitle(this string? title)
     {
         if (string.IsNullOrWhiteSpace(title))
             return string.Empty;

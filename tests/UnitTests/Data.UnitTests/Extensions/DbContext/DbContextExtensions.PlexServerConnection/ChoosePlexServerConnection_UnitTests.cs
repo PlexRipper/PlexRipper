@@ -137,7 +137,7 @@ public class ChoosePlexServerConnection_UnitTests : BaseUnitTest
             IPv6 = plexServerConnections[2].IPv6,
             PlexServer = plexServerConnections[2].PlexServer,
             PlexServerId = plexServerConnections[2].PlexServerId,
-            PlexServerStatus = plexServerConnections[2].PlexServerStatus,
+            LatestConnectionStatus = plexServerConnections[2].LatestConnectionStatus,
             IsCustom = plexServerConnections[2].IsCustom,
         };
 
@@ -147,7 +147,7 @@ public class ChoosePlexServerConnection_UnitTests : BaseUnitTest
             var status = FakeData.GetPlexServerStatus(seed).Generate();
             status.PlexServerId = plexServer.Id;
             status.PlexServerConnectionId = plexServerConnection.Id;
-            plexServerConnection.PlexServerStatus.Add(status);
+            plexServerConnection.LatestConnectionStatus = status;
         }
 
         dbContext.PlexServerConnections.AddRange(plexServerConnections);

@@ -29,25 +29,7 @@
 				</QCol>
 				<!-- Search Bar -->
 				<QCol align-self="center">
-					<q-input
-						v-model="mediaOverviewStore.filterQuery"
-						:debounce="300"
-						outlined
-						input-style="font-size: 1.25rem"
-						rounded>
-						<template #prepend>
-							<q-icon
-								name="mdi-magnify"
-								class="q-ml-sm" />
-						</template>
-						<template #append>
-							<q-icon
-								v-if="mediaOverviewStore.filterQuery !== ''"
-								name="mdi-close"
-								class="cursor-pointer q-mr-sm"
-								@click="mediaOverviewStore.clearFilter()" />
-						</template>
-					</q-input>
+					<MediaOverviewSearchBar :library-id="libraryId" />
 				</QCol>
 			</QRow>
 		</q-toolbar-title>

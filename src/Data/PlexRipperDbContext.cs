@@ -4,11 +4,8 @@ using AppAny.Quartz.EntityFrameworkCore.Migrations.SQLite;
 using Data.Contracts;
 using EFCore.BulkExtensions;
 using Environment;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
-using Microsoft.Extensions.Logging;
-using NaturalSort.Extension;
 using PlexRipper.Data.Common;
 
 // ReSharper disable UnusedAutoPropertyAccessor.Global
@@ -32,6 +29,16 @@ public sealed class PlexRipperDbContext : DbContext, IPlexRipperDbContext, IPlex
     public DbSet<Notification> Notifications { get; set; }
 
     public DbSet<PlexLibrary> PlexLibraries { get; set; }
+
+    #region PlexMedia
+
+    public DbSet<PlexRole> PlexRoles { get; set; }
+
+    public DbSet<PlexGenre> PlexGenres { get; set; }
+
+    public DbSet<PlexCountry> PlexCountries { get; set; }
+
+    #endregion
 
     #region PlexMovie
 
@@ -82,6 +89,18 @@ public sealed class PlexRipperDbContext : DbContext, IPlexRipperDbContext, IPlex
     public DbSet<PlexAccountServer> PlexAccountServers { get; set; }
 
     public DbSet<PlexAccountLibrary> PlexAccountLibraries { get; set; }
+
+    public DbSet<PlexMovieRoles> PlexMovieRoles { get; set; }
+
+    public DbSet<PlexMovieCountries> PlexMovieCountries { get; set; }
+
+    public DbSet<PlexMovieGenres> PlexMovieGenres { get; set; }
+
+    public DbSet<PlexTvShowRoles> PlexTvShowRoles { get; set; }
+
+    public DbSet<PlexTvShowGenres> PlexTvShowGenres { get; set; }
+
+    public DbSet<PlexTvShowCountries> PlexTvShowCountries { get; set; }
 
     #endregion
 

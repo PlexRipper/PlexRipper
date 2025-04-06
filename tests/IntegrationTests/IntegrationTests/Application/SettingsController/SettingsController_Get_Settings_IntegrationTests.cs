@@ -5,7 +5,7 @@ using PlexRipper.Application;
 using PlexRipper.Settings;
 using Settings.Contracts;
 
-namespace IntegrationTests.WebAPI.SettingsController;
+namespace IntegrationTests.SettingsController;
 
 public class SettingsControllerGetSettingsIntegrationTests : BaseIntegrationTests
 {

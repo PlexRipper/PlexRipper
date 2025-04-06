@@ -40,7 +40,7 @@ describe('MediaOverviewStore.requestMedia()', () => {
 		mock.onGet(url).reply(200, generateResultDTO(movies));
 
 		// Act
-		const result = subscribeSpyTo(mediaOverviewStore.requestMedia({ mediaType: type, page: 0, size: 0 }));
+		const result = subscribeSpyTo(mediaOverviewStore.requestMedia());
 		await result.onComplete();
 
 		// Assert

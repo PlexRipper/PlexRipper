@@ -2,7 +2,7 @@ using PlexRipper.Domain;
 
 namespace Application.Contracts;
 
-public record PlexServerAccessRapportDTO()
+public record PlexServerAccessRapportDTO
 {
     public required int PlexServerId { get; set; }
 

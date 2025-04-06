@@ -1,10 +1,8 @@
 ﻿using Application.Contracts;
 using Data.Contracts;
 using Logging.Interface;
-using LukeHagar.PlexAPI.SDK.Models.Requests;
 using PlexApi.Contracts;
 using Settings.Contracts;
-using Type = LukeHagar.PlexAPI.SDK.Models.Requests.Type;
 
 namespace PlexRipper.PlexApi;
 
@@ -18,12 +16,14 @@ public class PlexApiService : IPlexApiService
 
     private readonly IPlexRipperDbContext _dbContext;
     private readonly IServerSettingsModule _serverSettingsModule;
+    private readonly IPlexApiMediaService _plexApiMediaService;
     private readonly PlexApiWrapper _plexApiWrapper;
 
     public PlexApiService(
         ILog log,
         IPlexRipperDbContext dbContext,
         IServerSettingsModule serverSettingsModule,
+        IPlexApiMediaService plexApiMediaService,
         PlexApiWrapper plexApiWrapper
     )
     {
@@ -31,10 +31,11 @@ public class PlexApiService : IPlexApiService
         _plexApiWrapper = plexApiWrapper;
         _dbContext = dbContext;
         _serverSettingsModule = serverSettingsModule;
+        _plexApiMediaService = plexApiMediaService;
     }
 
     /// <inheritdoc />
-    public async Task<Result<PlexLibrary>> GetLibraryMediaAsync(
+    public async Task<Result<LibraryMetadata>> GetLibraryMediaAsync(
         PlexLibrary plexLibrary,
         Action<MediaSyncProgress>? action = null,
         CancellationToken cancellationToken = default
@@ -56,13 +57,21 @@ public class PlexApiService : IPlexApiService
         updatedPlexLibrary.Id = plexLibrary.Id;
         updatedPlexLibrary.PlexServerId = plexLibrary.PlexServerId;
 
-        var mediaListResult = await SyncMedia(plexLibrary, action: action, cancellationToken: cancellationToken);
+        // Set the default folder path id for the destination
+        updatedPlexLibrary.DefaultDestinationId = updatedPlexLibrary.Type.ToDefaultDestinationFolderId();
+
+        var mediaListResult = await _plexApiMediaService.SyncMedia(
+            plexLibrary,
+            plexLibrary.Type,
+            action: action,
+            cancellationToken: cancellationToken
+        );
 
         if (mediaListResult.IsFailed)
             return mediaListResult.ToResult();
 
         // Pre sort the media list
-        var mediaList = mediaListResult.Value.OrderByNatural(x => x.Title.ToSortTitle()).ToList();
+        var mediaList = mediaListResult.Value.OrderByNatural(x => x.TitleSort).ToList();
 
         // Determine how to map based on the Library type.
         switch (updatedPlexLibrary.Type)
@@ -77,7 +86,15 @@ public class PlexApiService : IPlexApiService
                 return Result.Fail($"Unknown PlexLibrary type: {updatedPlexLibrary.Type}").LogError();
         }
 
-        return Result.Ok(updatedPlexLibrary);
+        return Result.Ok(
+            new LibraryMetadata
+            {
+                Library = updatedPlexLibrary,
+                Countries = mediaList.ToUniquePlexCountry(),
+                Genres = mediaList.ToUniquePlexGenre(),
+                Roles = mediaList.ToUniquePlexRole(),
+            }
+        );
     }
 
     /// <inheritdoc />
@@ -87,9 +104,9 @@ public class PlexApiService : IPlexApiService
         CancellationToken cancellationToken = default
     )
     {
-        var mediaListResult = await SyncMedia(
+        var mediaListResult = await _plexApiMediaService.SyncMedia(
             plexLibrary,
-            Type.Season,
+            PlexMediaType.Season,
             action: action,
             cancellationToken: cancellationToken
         );
@@ -107,9 +124,9 @@ public class PlexApiService : IPlexApiService
         CancellationToken cancellationToken = default
     )
     {
-        var mediaListResult = await SyncMedia(
+        var mediaListResult = await _plexApiMediaService.SyncMedia(
             plexLibrary,
-            Type.Episode,
+            PlexMediaType.Episode,
             action: action,
             cancellationToken: cancellationToken
         );
@@ -176,11 +193,7 @@ public class PlexApiService : IPlexApiService
         var result = await _plexApiWrapper.GetAccessibleServers(plexAccountToken.Value);
         if (result.IsFailed)
         {
-            _log.Warning(
-                "Failed to retrieve PlexServers for PlexAccount: {PlexAccountDisplayName}",
-                plexAccount.DisplayName
-            );
-            return result.ToResult();
+            return result.ToResult().LogError();
         }
 
         var plexServers = result
@@ -239,7 +252,7 @@ public class PlexApiService : IPlexApiService
                             Url = y.Uri,
                             PlexServer = null,
                             PlexServerId = 0,
-                            PlexServerStatus = [],
+                            LatestConnectionStatus = null,
                             IsCustom = false,
                         })
                         .ToList(),
@@ -301,122 +314,5 @@ public class PlexApiService : IPlexApiService
         }
 
         return Result.Fail($"PlexAccount with Id: {plexAccount.Id} contained an empty AuthToken!").LogError();
-    }
-
-    private async Task<Result<List<GetLibraryItemsMetadata>>> SyncMedia(
-        PlexLibrary plexLibrary,
-        Type? plexType = null,
-        int batchSize = 1000,
-        Action<MediaSyncProgress>? action = null,
-        CancellationToken cancellationToken = default
-    )
-    {
-        var tokenResult = await _dbContext.GetPlexServerTokenAsync(plexLibrary.PlexServerId, cancellationToken);
-        if (tokenResult.IsFailed)
-            return tokenResult.ToResult();
-
-        var plexServerConnectionResult = await _dbContext.ChoosePlexServerConnection(
-            plexLibrary.PlexServerId,
-            cancellationToken
-        );
-
-        if (plexServerConnectionResult.IsFailed)
-            return plexServerConnectionResult.ToResult();
-
-        var plexServerConnection = plexServerConnectionResult.Value;
-
-        var mediaList = new List<GetLibraryItemsMetadata>();
-
-        plexType ??= plexLibrary.Type switch
-        {
-            PlexMediaType.Movie => Type.Movie,
-            PlexMediaType.TvShow => Type.TvShow,
-            var _ => null,
-        };
-        var index = 0;
-
-        var startTime = DateTime.UtcNow; // Start time for estimation
-
-        while (true)
-        {
-            // Retrieve the media for this library
-            var result = await _plexApiWrapper.GetMetadataForLibraryAsync(
-                plexServerConnection,
-                tokenResult.Value,
-                plexLibrary.Key,
-                index,
-                batchSize,
-                plexType
-            );
-
-            if (result.IsFailed)
-            {
-                result.ToResult().LogError();
-                break;
-            }
-
-            var mediaContainer = result.Value;
-            var totalSize = mediaContainer.TotalSize;
-            index += mediaContainer.Size;
-
-            if (mediaContainer.TotalSize == 0)
-            {
-                _log.Warning(
-                    "The library with name: {PlexLibraryName} contains no media to retrieve",
-                    plexLibrary.Name
-                );
-                return Result.Ok(new List<GetLibraryItemsMetadata>());
-            }
-
-            if (mediaContainer.Metadata is null)
-            {
-                ResultExtensions.IsNull(nameof(mediaContainer.Metadata)).LogError();
-                break;
-            }
-
-            mediaList.AddRange(mediaContainer.Metadata);
-
-            // Estimate remaining time
-            var elapsedTime = DateTime.UtcNow - startTime;
-            var progress = (double)index / totalSize;
-            var estimatedTotalTime = elapsedTime.TotalSeconds / progress;
-            var remainingTime = TimeSpan.FromSeconds(estimatedTotalTime - elapsedTime.TotalSeconds);
-
-            // Report progress
-            action?.Invoke(
-                new MediaSyncProgress
-                {
-                    Type = plexLibrary.Type,
-                    Received = index,
-                    Total = totalSize,
-                    TimeRemaining = remainingTime,
-                }
-            );
-
-            // If the size is less than the batch size, we have reached the end
-            if (mediaContainer.Size < batchSize)
-                break;
-
-            if (index >= totalSize)
-                break;
-        }
-
-        if (!mediaList.Any())
-            return ResultExtensions.IsEmpty(nameof(mediaList));
-
-        // Set the TitleSort if it is empty
-        foreach (var metadata in mediaList)
-            metadata.TitleSort = !string.IsNullOrEmpty(metadata.TitleSort)
-                ? metadata.TitleSort
-                : metadata.Title.ToSortTitle();
-
-        _log.Here()
-            .Information(
-                "Finished getting {MediaCount} media items from library with name {PlexLibraryName}  ",
-                mediaList.Count,
-                plexLibrary.Name
-            );
-
-        return Result.Ok(mediaList);
     }
 }

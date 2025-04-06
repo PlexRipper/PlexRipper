@@ -8,9 +8,9 @@ public class PlexServerConnectionConfiguration : IEntityTypeConfiguration<PlexSe
     public void Configure(EntityTypeBuilder<PlexServerConnection> builder)
     {
         builder
-            .HasMany(x => x.PlexServerStatus)
+            .HasOne(x => x.LatestConnectionStatus)
             .WithOne(x => x.PlexServerConnection)
-            .HasForeignKey(x => x.PlexServerConnectionId)
+            .HasForeignKey<PlexServerStatus>(x => x.PlexServerConnectionId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

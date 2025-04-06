@@ -29,9 +29,6 @@ public class PlexTvShowEpisode : PlexMedia
     #region Helpers
 
     [NotMapped]
-    public List<PlexMediaData> EpisodeData => MediaData.MediaData;
-
-    [NotMapped]
     public override PlexMediaType Type => PlexMediaType.Episode;
 
     #endregion

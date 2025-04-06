@@ -1,5 +1,4 @@
 using Application.Contracts;
-using Environment;
 using FastEndpoints;
 
 namespace PlexRipper.Application;

@@ -136,7 +136,7 @@ public class ValidatePlexAccountEndpointUnitTests : BaseUnitTest
 
         mock.Mock<IPlexApiService>()
             .Setup(x => x.PlexSignInAsync(It.IsAny<PlexAccount>()))
-            .ReturnsAsync(Result.Fail(new PlexError("Unauthorized")).Add401UnauthorizedError());
+            .ReturnsAsync(Result.Fail(new PlexError("Unauthorized")).AddPlex401UnauthorizedError());
 
         // Act
         var ep = SetupEndpointUnitTest<ValidatePlexAccountEndpoint>();
@@ -174,7 +174,7 @@ public class ValidatePlexAccountEndpointUnitTests : BaseUnitTest
 
         mock.Mock<IPlexApiService>()
             .Setup(x => x.ValidatePlexToken(It.IsAny<PlexAccount>()))
-            .ReturnsAsync(Result.Fail(new PlexError("Unauthorized")).Add401UnauthorizedError());
+            .ReturnsAsync(Result.Fail(new PlexError("Unauthorized")).AddPlex401UnauthorizedError());
 
         // Act
         var ep = SetupEndpointUnitTest<ValidatePlexAccountEndpoint>();

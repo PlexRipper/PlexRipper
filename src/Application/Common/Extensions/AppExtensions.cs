@@ -25,6 +25,9 @@ public class AppExtensions
 
     public static ILog _log = LogManager.CreateLogInstance(typeof(AppExtensions));
 
+    /// <summary>
+    ///   Log the identity of the current process, including environment variables and user/group IDs.
+    /// </summary>
     public static void LogIdentity(
         [CallerMemberName] string memberName = "",
         [CallerFilePath] string sourceFilePath = "",
@@ -39,28 +42,13 @@ public class AppExtensions
         }
 
         // Retrieve PUID and PGID from environment variables
-        _log.Debug(
-            "PUID from env: {PUID} and from the system: {PUID}",
-            EnvironmentExtensions.GetPuid(),
-            getuid(),
-            memberName,
-            sourceFilePath,
-            sourceLineNumber
-        );
-        _log.Debug(
-            "PGID from env: {PGID} and from the system: {PGID}",
-            EnvironmentExtensions.GetPgid(),
-            getgid(),
-            memberName,
-            sourceFilePath,
-            sourceLineNumber
-        );
-        _log.Debug(
-            "Current system Username: {SystemPUIDName}",
-            System.Environment.UserName,
-            memberName,
-            sourceFilePath,
-            sourceLineNumber
-        );
+        _log.Here(memberName, sourceFilePath, sourceLineNumber)
+            .Debug("PUID from env: {PUID} and from the system: {PUID}", EnvironmentExtensions.GetPuid(), getuid());
+
+        _log.Here(memberName, sourceFilePath, sourceLineNumber)
+            .Debug("PGID from env: {PGID} and from the system: {PGID}", EnvironmentExtensions.GetPgid(), getgid());
+
+        _log.Here(memberName, sourceFilePath, sourceLineNumber)
+            .Debug("Current system Username: {SystemPUIDName}", System.Environment.UserName);
     }
 }

@@ -14,7 +14,7 @@ using Log = Logging.Log;
 
 namespace PlexRipper.BaseTests;
 
-public partial class BaseUnitTest : IDisposable
+public partial class BaseUnitTest
 {
     private Action<ContainerBuilder>? _fileSystemSetup;
     private Action<ContainerBuilder>? _httpClientSetup;

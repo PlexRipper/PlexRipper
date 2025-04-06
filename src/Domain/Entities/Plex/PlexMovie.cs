@@ -5,16 +5,12 @@ namespace PlexRipper.Domain;
 [Table("PlexMovie")]
 public class PlexMovie : PlexMedia
 {
-    #region Helpers
+    public List<PlexRole> Roles { get; set; } = [];
 
-    [NotMapped]
-    public List<PlexMediaDataPart> MovieParts => MovieData.SelectMany(x => x.Parts).ToList();
+    public List<PlexGenre> Genres { get; set; } = [];
 
-    [NotMapped]
-    public List<PlexMediaData> MovieData => MediaData.MediaData;
+    public List<PlexCountry> Countries { get; set; } = [];
 
     [NotMapped]
     public override PlexMediaType Type => PlexMediaType.Movie;
-
-    #endregion
 }

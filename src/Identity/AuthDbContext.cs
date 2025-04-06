@@ -7,7 +7,7 @@ using PlexRipper.Identity.Contracts;
 
 namespace PlexRipper.Identity;
 
-public class AuthDbContext : IdentityDbContext<AppUser>, IAuthDbContext, IAuthDbContextDatabase
+public sealed class AuthDbContext : IdentityDbContext<AppUser>, IAuthDbContext, IAuthDbContextDatabase
 {
     public string DatabaseName { get; } = string.Empty;
 

@@ -10,7 +10,7 @@ using Serilog.Events;
 
 namespace PlexRipper.BaseTests;
 
-public partial class BaseUnitTest : IDisposable
+public partial class BaseUnitTest
 {
     protected readonly ITestOutputHelper _output;
     protected readonly LogEventLevel _logEventLevel;
@@ -50,7 +50,8 @@ public partial class BaseUnitTest : IDisposable
     /// <exception cref="InvalidOperationException"></exception>
     protected static void UpdateInitProperty<T>(T obj, string propertyName, object newValue)
     {
-        var property = obj.GetType()
+        var property = obj
+            ?.GetType()
             .GetProperty(propertyName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
         if (property == null || !property.CanWrite)
         {

@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application;
 
-public record RefreshPlexAccountAccessEndpointRequest(int PlexAccountId);
+public record RefreshPlexAccountAccessEndpointRequest(int PlexAccountId = 0);
 
 public class RefreshPlexAccountAccessEndpointRequestValidator : Validator<RefreshPlexAccountAccessEndpointRequest>
 {
@@ -24,14 +24,22 @@ public class RefreshPlexAccountAccessEndpoint
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
     private readonly IMediator _mediator;
+    private readonly ISignalRService _signalRService;
+    private List<RefreshPlexAccountAccessRapportDTO> _list = new();
 
     public override string EndpointPath => ApiRoutes.PlexAccountController + "/refresh/{PlexAccountId}";
 
-    public RefreshPlexAccountAccessEndpoint(ILog log, IPlexRipperDbContext dbContext, IMediator mediator)
+    public RefreshPlexAccountAccessEndpoint(
+        ILog log,
+        IPlexRipperDbContext dbContext,
+        IMediator mediator,
+        ISignalRService signalRService
+    )
     {
         _log = log;
         _dbContext = dbContext;
         _mediator = mediator;
+        _signalRService = signalRService;
     }
 
     public override void Configure()
@@ -46,7 +54,6 @@ public class RefreshPlexAccountAccessEndpoint
 
     public override async Task HandleAsync(RefreshPlexAccountAccessEndpointRequest req, CancellationToken ct)
     {
-        var list = new List<RefreshPlexAccountAccessRapportDTO>();
         var plexAccountIds = new List<int>();
         if (req.PlexAccountId > 0)
         {
@@ -68,44 +75,113 @@ public class RefreshPlexAccountAccessEndpoint
         // Execute
         foreach (var plexAccountId in plexAccountIds)
         {
-            var serverAccessRapportResult = await _mediator.Send(new RefreshPlexServerAccessCommand(plexAccountId), ct);
-            var libraryAccessRapportResult = await _mediator.Send(new RefreshLibraryAccessCommand(plexAccountId), ct);
-            var plexAccountName = await _dbContext.GetPlexAccountDisplayName(plexAccountId, CancellationToken.None);
+            var serverAccessResult = await _mediator.Send(new RefreshPlexServerAccessCommand(plexAccountId), ct);
 
-            var serverAccessRapport = serverAccessRapportResult.Value;
-            var libraryAccessRapport = libraryAccessRapportResult.Value;
+            if (serverAccessResult.IsFailed)
+            {
+                serverAccessResult.LogError();
+                continue;
+            }
 
-            list.Add(
-                new RefreshPlexAccountAccessRapportDTO
+            var plexAccountName = await _dbContext.GetPlexAccountDisplayName(plexAccountId, ct);
+            var serverAccessRapport = serverAccessResult.Value;
+
+            // If the Plex API returns a 401 Unauthorized error, remove the PlexAccount and PlexServerAccess
+            if (serverAccessRapport.Access.All(x => x.State == PlexAccessState.Revoked))
+            {
+                var lostServerAccess = serverAccessRapport
+                    .Access.Where(x => x.State == PlexAccessState.Revoked)
+                    .Select(x => x.PlexServerId)
+                    .ToList();
+
+                var lostLibraryAccess = await _dbContext
+                    .PlexAccountLibraries.Include(x => x.PlexLibrary)
+                    .Include(x => x.PlexServer)
+                    .Where(x => x.PlexAccountId == plexAccountId && lostServerAccess.Contains(x.PlexServerId))
+                    .ToListAsync(cancellationToken: ct);
+
+                var libraryAccessRapport = new PlexLibraryAccessRefreshResponse
                 {
-                    PlexAccountId = plexAccountId,
-                    PlexAccountName = plexAccountName,
-                    Access = serverAccessRapport
-                        .Data.Select(x => new PlexServerAccessRapportDTO
-                        {
-                            IsServerOffline = libraryAccessRapport.OfflineServers.Contains(x.PlexServerId),
-                            PlexServerId = x.PlexServerId,
-                            PlexServerName = x.PlexServerName,
-                            State = libraryAccessRapport.OfflineServers.Contains(x.PlexServerId)
-                                ? PlexAccessState.Unknown
-                                : x.State,
-                            LibraryAccess =
-                                libraryAccessRapport
-                                    .Reports.Find(y => y.PlexServerId == x.PlexServerId)
-                                    ?.Data.Select(y => new PlexLibraryAccessRapportDTO
-                                    {
-                                        PlexLibraryName = y.PlexLibraryName,
-                                        PlexServerId = y.PlexServerId,
-                                        State = y.State,
-                                        PlexLibraryId = y.PlexLibraryId,
-                                    })
-                                    .ToList() ?? [],
-                        })
+                    Reports = lostLibraryAccess
+                        .Select(x =>
+                            new PlexLibraryAccessRapport(
+                                plexAccountName,
+                                x.PlexServerId,
+                                x.PlexServer!.Name
+                            ).AddRevoked(x.PlexLibraryId, x.PlexLibrary!.Name)
+                        )
                         .ToList(),
+                    OfflineServers = [],
+                };
+
+                _list.Add(ToDTO(serverAccessRapport, libraryAccessRapport));
+
+                // Remove LibraryAccess for the given PlexAccount
+                await _dbContext
+                    .PlexAccountLibraries.Where(x =>
+                        x.PlexAccountId == plexAccountId && lostServerAccess.Contains(x.PlexServerId)
+                    )
+                    .ExecuteDeleteAsync(cancellationToken: ct);
+            }
+            else
+            {
+                // Update library access
+                var libraryAccessResult = await _mediator.Send(
+                    new RefreshLibraryAccessCommand(plexAccountId),
+                    CancellationToken.None
+                );
+
+                if (libraryAccessResult.IsFailed)
+                {
+                    libraryAccessResult.LogError();
+                    continue;
                 }
-            );
+
+                var libraryAccessRapport = libraryAccessResult.Value;
+
+                _list.Add(ToDTO(serverAccessRapport, libraryAccessRapport));
+            }
         }
 
-        await SendFluentResult(Result.Ok(list), ct);
+        // Send notifications to the client to refresh the PlexServerConnection data
+        await _signalRService.SendRefreshNotificationAsync(
+            [DataType.PlexAccount, DataType.PlexServer, DataType.PlexServerConnection],
+            CancellationToken.None
+        );
+
+        await SendFluentResult(Result.Ok(_list), ct);
+    }
+
+    private RefreshPlexAccountAccessRapportDTO ToDTO(
+        RefreshPlexServerAccessRapport serverAccessRapport,
+        PlexLibraryAccessRefreshResponse libraryAccessRapport
+    )
+    {
+        return new RefreshPlexAccountAccessRapportDTO(
+            serverAccessRapport.PlexAccountId,
+            serverAccessRapport.PlexAccountName
+        )
+        {
+            Access = serverAccessRapport
+                .Access.Select(x => new PlexServerAccessRapportDTO()
+                {
+                    State = x.State,
+                    PlexServerId = x.PlexServerId,
+                    PlexServerName = x.PlexServerName,
+                    IsServerOffline = libraryAccessRapport.OfflineServers.Contains(x.PlexServerId),
+                    LibraryAccess = libraryAccessRapport
+                        .Reports.Where(y => y.PlexServerId == x.PlexServerId)
+                        .SelectMany(y => y.Data)
+                        .Select(y => new PlexLibraryAccessRapportDTO
+                        {
+                            PlexLibraryName = y.PlexLibraryName,
+                            PlexServerId = y.PlexServerId,
+                            State = y.State,
+                            PlexLibraryId = y.PlexLibraryId,
+                        })
+                        .ToList(),
+                })
+                .ToList(),
+        };
     }
 }

@@ -1,8 +1,5 @@
 using Application.Contracts;
 using Application.Contracts.Validators;
-using Data.Contracts;
-using FastEndpoints;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace PlexRipper.Application.UnitTests;
 

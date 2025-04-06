@@ -126,7 +126,6 @@ import {
 	useI18n,
 } from '#imports';
 
-// region SetupFields
 const { t } = useI18n();
 const settingsStore = useSettingsStore();
 const mediaOverviewStore = useMediaOverviewStore();
@@ -135,8 +134,6 @@ const libraryStore = useLibraryStore();
 const serverStore = useServerStore();
 const dialogStore = useDialogStore();
 const signalRStore = useSignalrStore();
-
-// endregion
 
 const isRefreshing = ref(false);
 
@@ -246,11 +243,7 @@ function onAction(event: IMediaOverviewBarActions) {
 function onOptionsClosed(hasChanged: boolean) {
 	if (hasChanged) {
 		useSubscription(
-			mediaOverviewStore.requestMedia({
-				mediaType: props.mediaType,
-				page: 0,
-				size: 0,
-			}).subscribe());
+			mediaOverviewStore.requestMedia().subscribe());
 	}
 }
 
@@ -265,12 +258,7 @@ onMounted(() => {
 	});
 
 	// Initial data load
-	useSubscription(
-		mediaOverviewStore.requestMedia({
-			mediaType: props.mediaType,
-			page: 0,
-			size: 0,
-		}).subscribe());
+	useSubscription(mediaOverviewStore.requestMedia().subscribe());
 
 	if (!props.allMediaMode) {
 		useSubscription(
@@ -281,12 +269,7 @@ onMounted(() => {
 						set(isRefreshing, data.isRefreshing);
 						if (data.isComplete) {
 							set(isRefreshing, false);
-							useSubscription(
-								mediaOverviewStore.requestMedia({
-									mediaType: props.mediaType,
-									page: 0,
-									size: 0,
-								}).subscribe());
+							useSubscription(mediaOverviewStore.requestMedia().subscribe());
 						}
 					}
 				}),

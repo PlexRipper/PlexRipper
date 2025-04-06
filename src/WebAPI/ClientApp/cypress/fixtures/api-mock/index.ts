@@ -11,3 +11,4 @@ export * from './plex-servers.mock-api';
 export * from './server-connections.mock-api';
 export * from './signalr.mock-api';
 export * from './settings.mock-api';
+export * from './plex-libraries-metadata.mock-api';

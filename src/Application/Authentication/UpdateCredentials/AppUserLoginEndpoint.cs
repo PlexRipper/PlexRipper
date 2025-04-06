@@ -9,7 +9,7 @@ using PlexRipper.Identity.Contracts;
 
 namespace PlexRipper.Application;
 
-public record UpdateCredentialsEndpointRequest()
+public record UpdateCredentialsEndpointRequest
 {
     /// <summary>
     ///  The username of the <see cref="AppUser"/>.

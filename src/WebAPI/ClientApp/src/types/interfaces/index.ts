@@ -13,3 +13,4 @@ export * from './IPlexAccount';
 export * from './IFolderPathGroup';
 export * from './IPTreeTableSelectionKeys';
 export * from './IDownloadsSelection';
+export * from './IMetaDataMediaFilter';

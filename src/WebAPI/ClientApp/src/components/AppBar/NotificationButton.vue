@@ -14,7 +14,6 @@
 
 <script setup lang="ts">
 import { useNotificationsStore } from '@store';
-import QGlowBadge from '@components/Common/QGlowBadge.vue';
 
 const notificationsStore = useNotificationsStore();
 

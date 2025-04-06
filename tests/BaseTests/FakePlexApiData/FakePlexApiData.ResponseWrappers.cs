@@ -1,5 +1,5 @@
 using System.Net;
-using System.Text.Json;
+using System.Text;
 using Bogus;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
 
@@ -45,6 +45,7 @@ public partial class FakePlexApiData
     public static GetServerResourcesResponse GetServerResourcesResponse(
         HttpStatusCode statusCode,
         Seed seed,
+        List<PlexDevice>? devices = null,
         HttpRequestMessage? request = null,
         Action<PlexApiDataConfig>? options = null
     )
@@ -56,8 +57,25 @@ public partial class FakePlexApiData
             .UseSeed(seed.Next())
             .RuleFor(x => x.StatusCode, _ => (int)statusCode)
             .RuleFor(x => x.ContentType, _ => ContentType.ApplicationJson)
-            .RuleFor(x => x.PlexDevices, _ => GetServerResource(seed, options).Generate(config.PlexServerAccessCount))
-            .RuleFor(x => x.RawResponse, (_, res) => GetHttpResponseMessage(statusCode, res.PlexDevices, request))
+            .RuleFor(
+                x => x.PlexDevices,
+                _ => devices ?? GetServerResource(seed, options).Generate(config.PlexServerAccessCount)
+            )
+            .RuleFor(
+                x => x.RawResponse,
+                (_, res) =>
+                {
+                    switch ((HttpStatusCode)res.StatusCode)
+                    {
+                        case HttpStatusCode.OK:
+                            return GetHttpResponseMessage(statusCode, res.PlexDevices, request);
+                        case HttpStatusCode.Unauthorized:
+                            return GetPlexUnauthorizedResponseMessage(request);
+                        default:
+                            throw new ArgumentOutOfRangeException(nameof(statusCode), statusCode, null);
+                    }
+                }
+            )
             .Generate();
     }
 
@@ -70,12 +88,63 @@ public partial class FakePlexApiData
     {
         var config = PlexApiDataConfig.FromOptions(options);
 
+        var mediaContainer = new Faker<GetAllLibrariesMediaContainer>()
+            .StrictMode(true)
+            .UseSeed(seed.Next())
+            .RuleFor(x => x.AllowSync, f => f.Random.Bool())
+            .RuleFor(x => x.Title1, f => f.Company.CompanyName())
+            .RuleFor(
+                x => x.Directory,
+                (f, _) =>
+                    GetLibrariesResponseDirectory(seed, f.PlexApi().LibraryType.ToPlexMediaType())
+                        .Generate(config.LibraryCount())
+            )
+            .RuleFor(x => x.Size, (_, x) => x.Directory.Count)
+            .FinishWith(
+                (_, x) =>
+                {
+                    // Directory might take a while to generate
+                    x.Size = x.Directory.Count;
+                }
+            );
+
+        var body = new Faker<GetAllLibrariesResponseBody>()
+            .StrictMode(true)
+            .UseSeed(seed.Next())
+            .RuleFor(x => x.MediaContainer, _ => mediaContainer.Generate())
+            .Generate();
+
         return new Faker<GetAllLibrariesResponse>()
             .StrictMode(true)
             .UseSeed(seed.Next())
             .RuleFor(x => x.StatusCode, _ => (int)statusCode)
             .RuleFor(x => x.ContentType, _ => ContentType.ApplicationJson)
-            .RuleFor(x => x.Object, _ => GetAllLibrariesResponseBody(seed, options))
+            .RuleFor(x => x.Object, _ => body)
+            .RuleFor(x => x.RawResponse, (_, res) => GetHttpResponseMessage(statusCode, res.Object, request))
+            .Generate();
+    }
+
+    /// <summary>
+    /// Generates a fake response for the GetLibraryItemsResponse operation
+    /// URL: /library/sections/{sectionKey}/{tag}
+    /// </summary>
+    public static GetLibraryItemsResponse GetLibraryMediaItemsResponse(
+        HttpStatusCode statusCode,
+        Seed seed,
+        GetAllLibrariesDirectory library,
+        GetLibraryItemsResponseBody? responseBody = null,
+        HttpRequestMessage? request = null,
+        Action<PlexApiDataConfig>? options = null
+    )
+    {
+        var config = PlexApiDataConfig.FromOptions(options);
+
+        return new Faker<GetLibraryItemsResponse>()
+            .StrictMode(true)
+            .UseSeed(seed.Next())
+            .RuleFor(x => x.StatusCode, _ => (int)statusCode)
+            .RuleFor(x => x.ContentType, _ => ContentType.ApplicationJson)
+            .RuleFor(x => x.Object, _ => responseBody ?? GetPlexLibrarySectionAllResponse(seed, library, 100, options))
             .RuleFor(x => x.RawResponse, (_, res) => GetHttpResponseMessage(statusCode, res.Object, request))
             .Generate();
     }
@@ -111,21 +180,16 @@ public partial class FakePlexApiData
             .Generate();
     }
 
-    public static HttpResponseMessage GetHttpResponseMessage<T>(
-        HttpStatusCode statusCode,
-        T data,
-        HttpRequestMessage? request
-    )
-        where T : class?
+    public static HttpResponseMessage GetPlexUnauthorizedResponseMessage(HttpRequestMessage? request)
     {
-        var json = JsonSerializer.Serialize(data, DefaultJsonSerializerOptions.PlexApiSerialization);
+        var html401 = "<html><head><title>Unauthorized</title></head><body><h1>401 Unauthorized</h1></body></html>";
 
         return new HttpResponseMessage
         {
-            Content = json.ToStringContent(),
-            ReasonPhrase = statusCode.ToString(),
+            Content = new StringContent(html401, Encoding.UTF8, "text/html"),
+            ReasonPhrase = "Unauthorized",
             RequestMessage = request,
-            StatusCode = statusCode,
+            StatusCode = HttpStatusCode.Unauthorized,
             Version = new Version(1, 1),
         };
     }

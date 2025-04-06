@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text.Json;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
 
 namespace PlexRipper.PlexApi;
@@ -32,7 +33,7 @@ public static class HttpClientExtensions
         {
             // In case of unauthorized
             case HttpStatusCode.Unauthorized:
-                return Result.Fail("Unauthorized").Add401UnauthorizedError().WithErrors(errors ?? []);
+                return Result.Fail("Unauthorized").AddPlex401UnauthorizedError().WithErrors(errors ?? []);
 
             // In case of timeout
             case HttpStatusCode.RequestTimeout:
@@ -51,4 +52,36 @@ public static class HttpClientExtensions
             typeof(T).GetProperty(nameof(PostUsersSignInDataResponse.RawResponse))!.GetValue(response)
             as HttpResponseMessage
         )!;
+
+    public static async Task<string> ReadAsFormattedJsonAsync(this HttpContent? content)
+    {
+        if (content == null)
+            return "HttpContent is null.";
+
+        // Check if the content indicates a file download via Content-Disposition header.
+        if (
+            content.Headers.ContentDisposition != null
+            && content.Headers.ContentDisposition.DispositionType.Equals(
+                "attachment",
+                StringComparison.OrdinalIgnoreCase
+            )
+        )
+        {
+            return $"Content is a file download. Filename: {content.Headers.ContentDisposition.FileName}";
+        }
+
+        try
+        {
+            var stringResponse = await content.ReadAsStringAsync();
+            if (string.IsNullOrWhiteSpace(stringResponse))
+                return "Content is empty.";
+
+            using var doc = JsonDocument.Parse(stringResponse);
+            return JsonSerializer.Serialize(doc, DefaultJsonSerializerOptions.UserSettingsOptions);
+        }
+        catch (JsonException)
+        {
+            return "Content is not valid JSON.";
+        }
+    }
 }

@@ -1,6 +1,5 @@
 <template>
 	<q-badge
-		outline
 		:color="color"
 		:style="styles"
 		:size="size"

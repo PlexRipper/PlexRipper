@@ -77,19 +77,26 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
             _ => _totalProgressSteps,
         };
 
-        // Phase 1:  Retrieve overview of all media belonging to this PlexLibrary
-        var newPlexLibraryResult = await _plexServiceApi.GetLibraryMediaAsync(
+        // Phase 1: Retrieve overview of all media belonging to this PlexLibrary
+        var syncLibraryMediaResult = await _plexServiceApi.GetLibraryMediaAsync(
             plexLibrary,
             progress => SendProgress(1, progress.Percentage, progress.TimeRemaining),
             cancellationToken
         );
-        if (newPlexLibraryResult.IsFailed)
-            return newPlexLibraryResult;
 
-        var newPlexLibrary = newPlexLibraryResult.Value;
+        if (syncLibraryMediaResult.IsFailed)
+            return syncLibraryMediaResult.ToResult().LogError();
 
-        // Get the default folder path id for the destination
-        newPlexLibrary.DefaultDestinationId = newPlexLibrary.Type.ToDefaultDestinationFolderId();
+        // Phase 2: Sync the metadata such as Country, Roles and Genres for the library
+        await _mediator.Send(
+            new SyncPlexLibraryMediaMetaDataCommand(syncLibraryMediaResult.Value, plexLibrary.Id),
+            cancellationToken
+        );
+
+        if (syncLibraryMediaResult.IsFailed)
+            return syncLibraryMediaResult.ToResult().LogError();
+
+        var newPlexLibrary = syncLibraryMediaResult.Value.Library;
 
         switch (newPlexLibrary.Type)
         {
@@ -186,6 +193,14 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
             // Phase 5 of 5: Database has been successfully updated with new library data.
             SendProgress(5, 1);
         }
+        else
+        {
+            _log.Warning(
+                "No TV shows were found for library {PlexLibraryName} with id: {PlexLibraryId}",
+                plexLibrary.Title,
+                plexLibrary.Id
+            );
+        }
 
         // Mark the library as synced
         plexLibrary.SyncedAt = DateTime.UtcNow;
@@ -221,6 +236,14 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
                 return createResult.ToResult().LogError();
             }
         }
+        else
+        {
+            _log.Warning(
+                "No Movies were found for library {PlexLibraryName} with id: {PlexLibraryId}",
+                plexLibrary.Title,
+                plexLibrary.Id
+            );
+        }
 
         // Phase 2 of 3: PlexLibrary media data was parsed successfully.
         SendProgress(2, 1);
@@ -254,7 +277,6 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
         return Result.Ok(plexLibrary);
     }
 
-    // Send progress
     private void SendProgress(int step, decimal percentage, TimeSpan timeRemaining = default)
     {
         var countStep = _baseCountProgress / _totalProgressSteps;

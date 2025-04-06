@@ -6,7 +6,6 @@ using Newtonsoft.Json;
 using PlexApi.Contracts;
 using ILog = Logging.Interface.ILog;
 using JsonSerializer = System.Text.Json.JsonSerializer;
-using Type = LukeHagar.PlexAPI.SDK.Models.Requests.Type;
 
 namespace PlexRipper.PlexApi;
 
@@ -322,13 +321,13 @@ public class PlexApiWrapper
     /// <param name="batchSize"></param>
     /// <param name="type"></param>
     /// <returns></returns>
-    public async Task<Result<GetLibraryItemsMediaContainer>> GetMetadataForLibraryAsync(
+    public async Task<Result<GetAllMediaLibraryMediaContainer>> GetMetadataForLibraryAsync(
         PlexServerConnection connection,
         string authToken,
         string libraryKey,
         int startIndex,
         int batchSize,
-        Type? type = null
+        PlexMediaType type
     )
     {
         if (!int.TryParse(libraryKey, out var libraryKeyInt))
@@ -344,24 +343,14 @@ public class PlexApiWrapper
             }
         );
 
-        GetLibraryItemsQueryParamType? apiType = type switch
-        {
-            Type.Movie => GetLibraryItemsQueryParamType.Movie,
-            Type.TvShow => GetLibraryItemsQueryParamType.TvShow,
-            Type.Season => GetLibraryItemsQueryParamType.Season,
-            Type.Episode => GetLibraryItemsQueryParamType.Episode,
-            _ => null,
-        };
-
         var response = await ToResponse(
-            client.Library.GetLibraryItemsAsync(
-                new GetLibraryItemsRequest()
+            client.Library.GetAllMediaLibraryAsync(
+                new()
                 {
-                    Type = apiType,
+                    Type = type.ToApiTypeEnum<GetAllMediaLibraryQueryParamType>(),
                     SectionKey = libraryKeyInt,
-                    Tag = Tag.All,
-                    IncludeMeta = GetLibraryItemsQueryParamIncludeMeta.Disable,
-                    IncludeGuids = IncludeGuids.Enable,
+                    IncludeMeta = GetAllMediaLibraryQueryParamIncludeMeta.Disable,
+                    IncludeGuids = QueryParamIncludeGuids.Enable,
                     XPlexContainerStart = startIndex,
                     XPlexContainerSize = batchSize,
                 }

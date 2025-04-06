@@ -97,7 +97,7 @@ public static class PlexMediaExtensions
         };
 
     public static List<DownloadTaskMovieFile> MapToDownloadTask(
-        this PlexMediaData plexMediaData,
+        this LibraryMediaItemMediaDTO plexMediaData,
         PlexMovie plexMovie,
         CreateDownloadTasksRequest request
     )
@@ -119,7 +119,7 @@ public static class PlexMediaExtensions
                 FileTransferSpeed = 0,
                 FileDataTransferred = 0,
                 FileName = part.File.GetFileName(),
-                FileLocationUrl = part.ObfuscatedFilePath,
+                FileLocationUrl = part.Key,
                 Quality = plexMediaData.VideoResolution,
                 DirectoryMeta = new DownloadTaskDirectory()
                 {
@@ -140,7 +140,7 @@ public static class PlexMediaExtensions
     }
 
     public static List<DownloadTaskTvShowEpisodeFile> MapToDownloadTask(
-        this PlexMediaData plexMediaData,
+        this LibraryMediaItemMediaDTO plexMediaData,
         PlexTvShowEpisode plexTvShowEpisode,
         CreateDownloadTasksRequest request
     )
@@ -167,7 +167,7 @@ public static class PlexMediaExtensions
                 FileTransferSpeed = 0,
                 FileDataTransferred = 0,
                 FileName = part.File.GetFileName(),
-                FileLocationUrl = part.ObfuscatedFilePath,
+                FileLocationUrl = part.Key,
                 Quality = plexMediaData.VideoResolution,
                 DirectoryMeta = new DownloadTaskDirectory()
                 {

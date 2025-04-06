@@ -72,7 +72,6 @@ export function generatePlexMedia({
 	const media: PlexMediaDTO = {
 		...generatePlexMediaSlim({ config, partialData }),
 		hasArt: false,
-		hasBanner: false,
 		hasTheme: false,
 		rating: randNumber({ min: 1, max: 10 }),
 		studio: randCompanyName(),

@@ -56,6 +56,8 @@ public static class EnvironmentExtensions
         ?? System.Environment.GetEnvironmentVariable(VersionKey)
         ?? "0.0.0";
 
+    public static bool IsDevRelease() => GetVersion().Contains("dev");
+
     public static int GetPuid() => int.Parse(System.Environment.GetEnvironmentVariable("PUID") ?? "-1");
 
     public static int GetPgid() => int.Parse(System.Environment.GetEnvironmentVariable("PGID") ?? "-1");

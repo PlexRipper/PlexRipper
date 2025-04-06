@@ -1,7 +1,7 @@
-using Application.Contracts;
 using Data.Contracts;
 using FluentValidation;
 using Logging.Interface;
+using Microsoft.EntityFrameworkCore;
 using PlexApi.Contracts;
 
 namespace PlexRipper.Application;
@@ -10,7 +10,7 @@ namespace PlexRipper.Application;
 /// Retrieve the latest accessible <see cref="PlexServer">PlexServers</see> for this <see cref="PlexAccount"/> from the PlexAPI and stores it in the Database.
 /// </summary>
 /// <param name="PlexAccountId">The id of the <see cref="PlexAccount"/> to check.</param>
-public record RefreshPlexServerAccessCommand(int PlexAccountId) : IRequest<Result<PlexServerAccessRapport>>;
+public record RefreshPlexServerAccessCommand(int PlexAccountId) : IRequest<Result<RefreshPlexServerAccessRapport>>;
 
 public class RefreshPlexServerAccessCommandValidator : AbstractValidator<RefreshPlexServerAccessCommand>
 {
@@ -21,54 +21,53 @@ public class RefreshPlexServerAccessCommandValidator : AbstractValidator<Refresh
 }
 
 public class RefreshPlexServerAccessCommandHandler
-    : IRequestHandler<RefreshPlexServerAccessCommand, Result<PlexServerAccessRapport>>
+    : IRequestHandler<RefreshPlexServerAccessCommand, Result<RefreshPlexServerAccessRapport>>
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
     private readonly IMediator _mediator;
     private readonly IPlexApiService _plexServiceApi;
-    private readonly ISignalRService _signalRService;
 
     public RefreshPlexServerAccessCommandHandler(
         ILog log,
         IPlexRipperDbContext dbContext,
         IMediator mediator,
-        IPlexApiService plexServiceApi,
-        ISignalRService signalRService
+        IPlexApiService plexServiceApi
     )
     {
         _log = log;
         _dbContext = dbContext;
         _mediator = mediator;
         _plexServiceApi = plexServiceApi;
-        _signalRService = signalRService;
     }
 
-    public async Task<Result<PlexServerAccessRapport>> Handle(
+    public async Task<Result<RefreshPlexServerAccessRapport>> Handle(
         RefreshPlexServerAccessCommand command,
         CancellationToken cancellationToken
     )
     {
         var plexAccountId = command.PlexAccountId;
 
-        var plexAccountDisplayName = await _dbContext.GetPlexAccountDisplayName(plexAccountId, cancellationToken);
+        var plexAccountName = await _dbContext.GetPlexAccountDisplayName(plexAccountId, cancellationToken);
 
-        _log.Debug("Refreshing Plex servers for PlexAccount: {PlexAccountId}", plexAccountId);
+        _log.Debug("Refreshing Plex servers access for PlexAccount: {PlexAccountName}", plexAccountName);
 
         var result = await _plexServiceApi.GetAccessiblePlexServersAsync(plexAccountId);
 
-        if (result.Has401UnauthorizedError())
+        // If the Plex API returns a 401 Unauthorized error, remove the PlexAccount and PlexServerAccess
+        if (result.HasPlex401UnauthorizedError())
         {
             _log.Warning(
                 "Plex API returned 401 Unauthorized for PlexAccount: {PlexAccountDisplayName}",
-                plexAccountDisplayName
+                plexAccountName
             );
             _log.Warning(
                 "Removing PlexServerAccess and LibraryAccess for PlexAccount: {PlexAccountDisplayName}",
-                plexAccountDisplayName
+                plexAccountName
             );
 
-            // TODO: Remove PlexServerAccess and LibraryAccess for this PlexAccount
+            _log.Error("{PlexAccountName} token has been invalidated and has lost Plex Server access", plexAccountName);
+            return await RemovePlexAccess(plexAccountId);
         }
 
         if (result.IsFailed)
@@ -76,38 +75,64 @@ public class RefreshPlexServerAccessCommandHandler
 
         if (!result.Value.Any())
         {
-            _log.Warning("No Plex servers found for PlexAccount: {plexAccountName}", plexAccountDisplayName);
-            return Result.Ok();
+            _log.Warning("No Plex servers found for PlexAccount: {plexAccountName}", plexAccountName);
+            return await RemovePlexAccess(plexAccountId);
         }
 
         var serverList = result.Value.Select(x => x.PlexServer).ToList();
         var serverAccessTokens = result.Value.Select(x => x.AccessToken).ToList();
 
         // Add PlexServers and their PlexServerConnections
-        var updateResult = await _mediator.Send(new AddOrUpdatePlexServersCommand(serverList), cancellationToken);
+        var updateResult = await _mediator.Send(new AddOrUpdatePlexServersCommand(serverList), CancellationToken.None);
         if (updateResult.IsFailed)
             return updateResult.LogError();
 
         // Add or update the PlexAccount and PlexServer relationships
-        var plexAccountTokensResult = await _mediator.Send(
+        var plexServerAccountAccessRapport = await _mediator.Send(
             new AddOrUpdatePlexAccountServersCommand(plexAccountId, serverAccessTokens),
             cancellationToken
         );
 
-        if (plexAccountTokensResult.IsFailed)
-            return plexAccountTokensResult.LogError();
-
-        // Send notifications to the client to refresh the PlexServerConnection data
-        await _signalRService.SendRefreshNotificationAsync(
-            [DataType.PlexAccount, DataType.PlexServer, DataType.PlexServerConnection],
-            cancellationToken
-        );
+        if (plexServerAccountAccessRapport.IsFailed)
+            return plexServerAccountAccessRapport.LogError();
 
         _log.Information(
             "Successfully refreshed accessible Plex servers for account {PlexAccountDisplayName}",
-            plexAccountDisplayName
+            plexAccountName
         );
 
-        return plexAccountTokensResult;
+        return plexServerAccountAccessRapport;
+    }
+
+    /// <summary>
+    ///  Remove all PlexServerAccess and LibraryAccess for the given PlexAccount
+    /// </summary>
+    /// <param name="plexAccountId"></param>
+    private async Task<Result<RefreshPlexServerAccessRapport>> RemovePlexAccess(int plexAccountId)
+    {
+        var plexServers = await _dbContext
+            .PlexAccountServers.Include(x => x.PlexServer)
+            .Where(x => x.PlexAccountId == plexAccountId)
+            .Select(x => new { x.PlexServerId, x.PlexServer!.Name })
+            .ToListAsync();
+
+        var plexAccountName = await _dbContext.GetPlexAccountDisplayName(plexAccountId, CancellationToken.None);
+        var rapport = new RefreshPlexServerAccessRapport(plexAccountId, plexAccountName);
+
+        if (!plexServers.Any())
+            return Result.Ok(rapport);
+
+        foreach (var plexServer in plexServers)
+        {
+            rapport.Access.Add(
+                new RefreshPlexServerAccessRapportRow(PlexAccessState.Revoked, plexServer.PlexServerId, plexServer.Name)
+            );
+        }
+
+        await _dbContext
+            .PlexAccountServers.Where(x => x.PlexAccountId == plexAccountId)
+            .ExecuteDeleteAsync(CancellationToken.None);
+
+        return Result.Ok(rapport);
     }
 }

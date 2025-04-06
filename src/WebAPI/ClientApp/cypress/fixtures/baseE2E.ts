@@ -29,6 +29,9 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Cypress.Chainab
 	// PlexLibraries call
 	result.setupPlexLibrariesEndpoints(validConfig);
 
+	// PlexLibraryMetaData call
+	result.setupMockPlexLibraryMetaDataEndpoints(validConfig);
+
 	// PlexAccount call
 	result.setupPlexAccountsEndpoints(validConfig);
 

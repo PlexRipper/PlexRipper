@@ -44,7 +44,7 @@ public class GenerateTokenEndpointUnitTests : BaseUnitTest
     public async Task ShouldReturnAVerificationCodeResponse_WhenThePlexAPIRespondsWithA2faResponse()
     {
         // Arrange
-        var seed = await SetupDatabase(232432, config => config.PlexAccountCount = 1);
+        await SetupDatabase(232432, config => config.PlexAccountCount = 1);
         var plexAccount = await IDbContext.PlexAccounts.FirstAsync();
 
         mock.Mock<IPlexApiService>()

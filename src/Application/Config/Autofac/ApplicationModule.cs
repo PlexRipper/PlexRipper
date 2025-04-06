@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using Application.Contracts;
+﻿using Application.Contracts;
 using Autofac;
 using FileSystem.Contracts;
 using Module = Autofac.Module;

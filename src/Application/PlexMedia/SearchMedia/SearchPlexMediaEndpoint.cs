@@ -59,27 +59,8 @@ public class SearchPlexMediaEndpoint : BaseEndpoint<SearchPlexMediaRequest, Resu
 
         var results = await Task.WhenAll(tvShowSearchResults, movieSearchResults);
 
-        var response = results.SelectMany(x => x).ToList();
-
-        // Get the Plex connection and token for the Plex Servers
-        var plexServerIds = response.Select(x => x.PlexServerId).Distinct();
-        var tokenDict = new Dictionary<int, (string, string)>();
-
-        foreach (var plexServerId in plexServerIds)
-        {
-            var tokenResult = await _dbContext.GetPlexServerTokenAsync(plexServerId, ct);
-            if (tokenResult.IsFailed)
-                continue;
-
-            var serverConnectionResult = await _dbContext.ChoosePlexServerConnection(plexServerId, ct);
-            if (serverConnectionResult.IsFailed)
-                continue;
-
-            tokenDict.Add(plexServerId, (serverConnectionResult.Value.Url, tokenResult.Value));
-        }
-
         // Set the full thumbnail url and convert to slim DTO
-        var entities = response.Select(media => media.ToSlimDTO()).ToList();
+        var entities = results.SelectMany(x => x).ToList().Select(media => media.ToSlimDTO()).ToList();
 
         await SendFluentResult(Result.Ok(entities), ct);
     }

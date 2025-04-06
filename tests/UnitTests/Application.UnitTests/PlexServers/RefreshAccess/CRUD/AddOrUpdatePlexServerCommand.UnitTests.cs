@@ -64,7 +64,7 @@ public class AddOrUpdatePlexServerCommandUnitTests : BaseUnitTest<AddOrUpdatePle
                     IPv6 = updatedConnections[i].IPv6,
                     PlexServer = updatedConnections[i].PlexServer,
                     PlexServerId = updatedConnections[i].PlexServerId,
-                    PlexServerStatus = updatedConnections[i].PlexServerStatus,
+                    LatestConnectionStatus = updatedConnections[i].LatestConnectionStatus,
                     IsCustom = updatedConnections[i].IsCustom,
                 };
 

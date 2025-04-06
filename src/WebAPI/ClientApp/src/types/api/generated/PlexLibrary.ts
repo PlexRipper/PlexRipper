@@ -11,7 +11,13 @@
 
 import type { RequestParams } from "./http-client";
 
-import type { BaseResultDTO, PlexLibraryDTO, PlexMediaStatisticsDTO } from "./data-contracts";
+import type {
+  BaseResultDTO,
+  PlexLibraryDTO,
+  PlexMediaMetadataDTO,
+  PlexMediaStatisticsDTO,
+  PlexMediaType,
+} from "./data-contracts";
 
 import { apiCheckPipe } from "@api/base";
 import Axios from "axios";
@@ -69,7 +75,26 @@ export class PlexLibrary {
        * @format int32
        * @default 0
        */
+      countryId: number;
+      /** @default false */
+      filterOfflineMedia: boolean;
+      /** @default false */
+      filterOwnedMedia: boolean;
+      /**
+       * @format int32
+       * @default 0
+       */
+      genreId: number;
+      /**
+       * @format int32
+       * @default 0
+       */
       page: number;
+      /**
+       * @format int32
+       * @default 0
+       */
+      roleId: number;
       /**
        * @format int32
        * @default 0
@@ -88,6 +113,32 @@ export class PlexLibrary {
         ...params,
       }),
     ).pipe(apiCheckPipe<PlexMediaStatisticsDTO>);
+
+  /**
+   * No description
+   * * @tags Plexlibrary
+   * @name GetLibraryMediaMetadata
+   * @request GET:/api/PlexLibrary/{PlexLibraryId}/metadata
+   * @secure
+   */
+  getLibraryMediaMetadata = (
+    plexLibraryId: number,
+    query: {
+      /** @default 0 */
+      mediaType: PlexMediaType;
+    },
+    params: RequestParams = {},
+  ) =>
+    from(
+      Axios.request<PlexMediaMetadataDTO>({
+        url: `/api/PlexLibrary/${plexLibraryId}/metadata`,
+        method: "GET",
+        params: query,
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+    ).pipe(apiCheckPipe<PlexMediaMetadataDTO>);
 
   /**
    * No description
@@ -143,7 +194,26 @@ export class PlexLibraryPaths {
        * @format int32
        * @default 0
        */
+      countryId: number;
+      /** @default false */
+      filterOfflineMedia: boolean;
+      /** @default false */
+      filterOwnedMedia: boolean;
+      /**
+       * @format int32
+       * @default 0
+       */
+      genreId: number;
+      /**
+       * @format int32
+       * @default 0
+       */
       page: number;
+      /**
+       * @format int32
+       * @default 0
+       */
+      roleId: number;
       /**
        * @format int32
        * @default 0
@@ -151,6 +221,14 @@ export class PlexLibraryPaths {
       size: number;
     },
   ) => queryString.stringifyUrl({ url: `/api/PlexLibrary/${plexLibraryId}/media`, query });
+
+  static getLibraryMediaMetadata = (
+    plexLibraryId: number,
+    query: {
+      /** @default 0 */
+      mediaType: PlexMediaType;
+    },
+  ) => queryString.stringifyUrl({ url: `/api/PlexLibrary/${plexLibraryId}/metadata`, query });
 
   static refreshLibraryMediaEndpoint = (plexLibraryId: number) =>
     queryString.stringifyUrl({ url: `/api/PlexLibrary/refresh/${plexLibraryId}` });

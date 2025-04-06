@@ -35,11 +35,12 @@ public class RefreshLibraryMediaCommand_UnitTests : BaseUnitTest<RefreshLibraryM
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok(updatedPlexLibrary));
+            .ReturnsAsync(Result.Ok(new LibraryMetadata() { Library = updatedPlexLibrary }));
         mock.Mock<ISignalRService>()
             .Setup(x => x.SendLibraryProgressUpdateAsync(It.IsAny<LibraryProgress>()))
             .Returns(Task.CompletedTask);
         mock.SetupMediator(It.IsAny<SyncPlexMoviesCommand>).ReturnsAsync(Result.Ok(new CrudMoviesReport()));
+        mock.SetupMediator(It.IsAny<SyncPlexLibraryMediaMetaDataCommand>).ReturnsAsync(Result.Ok());
 
         // Act
         var request = new RefreshLibraryMediaCommand(updatedPlexLibrary.Id);
@@ -108,7 +109,7 @@ public class RefreshLibraryMediaCommand_UnitTests : BaseUnitTest<RefreshLibraryM
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(Result.Ok(updatedPlexLibrary));
+            .ReturnsAsync(Result.Ok(new LibraryMetadata() { Library = updatedPlexLibrary }));
 
         mock.Mock<IPlexApiService>()
             .Setup(x =>
@@ -135,6 +136,7 @@ public class RefreshLibraryMediaCommand_UnitTests : BaseUnitTest<RefreshLibraryM
             .Returns(Task.CompletedTask);
 
         mock.SetupMediator(It.IsAny<SyncPlexTvShowsCommand>).ReturnsAsync(Result.Ok(new CrudTvShowsReport()));
+        mock.SetupMediator(It.IsAny<SyncPlexLibraryMediaMetaDataCommand>).ReturnsAsync(Result.Ok());
 
         // Act
         var request = new RefreshLibraryMediaCommand(updatedPlexLibrary.Id);

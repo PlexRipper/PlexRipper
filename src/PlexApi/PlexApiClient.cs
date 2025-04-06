@@ -1,6 +1,4 @@
 using System.Net;
-using System.Net.Http.Headers;
-using System.Text;
 using System.Text.Json;
 using Application.Contracts;
 using HttpClientToCurl;
@@ -185,6 +183,11 @@ public class PlexApiClient : IPlexApiClient
         {
             // Send final progress update
             SendProgressUpdate(_options.Action, response, _options.RetryCount, _options.RetryCount);
+        }
+
+        if (_log.IsLogLevelEnabled(LogEventLevel.Verbose))
+        {
+            _log.Here().Verbose("Response: {Response}", await response.Content.ReadAsFormattedJsonAsync());
         }
 
         return response;

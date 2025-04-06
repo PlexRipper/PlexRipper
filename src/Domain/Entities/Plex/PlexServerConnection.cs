@@ -51,14 +51,11 @@ public class PlexServerConnection : BaseEntity
 
     public required int PlexServerId { get; set; }
 
-    public List<PlexServerStatus> PlexServerStatus { get; init; } = [];
+    public PlexServerStatus? LatestConnectionStatus { get; set; }
 
     #endregion
 
     #region Helpers
-
-    [NotMapped]
-    public PlexServerStatus? LatestConnectionStatus => PlexServerStatus.FirstOrDefault();
 
     [NotMapped]
     public bool IsOnline => LatestConnectionStatus?.IsSuccessful ?? false;

@@ -1,9 +1,7 @@
-using System.Net;
 using Application.Contracts;
 using Data.Contracts;
 using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
-using Moq.Contrib.HttpClient;
 using PlexRipper.Application;
 
 namespace IntegrationTests.AccountController;
@@ -27,55 +25,17 @@ public class CreateAccountIntegrationTests : BaseIntegrationTests
             {
                 config.DatabaseOptions = x =>
                 {
-                    x.PlexLibraryCount = libraryCount;
+                    // Start from an empty database
+                    x.PlexServerCount = 0;
+                    x.PlexLibraryCount = 0;
+                    x.PlexAccountCount = 0;
+                    x.PlexServerConnectionPerServerCount = 1;
                 };
-                config.HttpClientOptions = x =>
+                config.BaseMockHttpClientOptions = x =>
                 {
-                    var response1 = FakePlexApiData.GetServerResourcesResponse(
-                        HttpStatusCode.OK,
-                        new Seed(939),
-                        null,
-                        y => y.PlexServerAccessCount = serverCount
-                    );
-
-                    x.SetupRequest(
-                            HttpMethod.Get,
-                            "https://plex.tv/api/v2/resources?includeHttps=0&includeRelay=0&includeIPv6=0"
-                        )
-                        .ReturnsAsync(response1.RawResponse);
-
-                    x.SetupRequest(
-                            HttpMethod.Get,
-                            "https://plex.tv/api/v2/resources?includeHttps=1&includeRelay=1&includeIPv6=1"
-                        )
-                        .ReturnsAsync(
-                            (HttpRequestMessage req, CancellationToken _) =>
-                                FakePlexApiData
-                                    .GetServerResourcesResponse(
-                                        HttpStatusCode.OK,
-                                        new Seed(940),
-                                        req,
-                                        y =>
-                                        {
-                                            y.PlexServerAccessCount = serverCount;
-                                            y.PlexServerAccessConnectionsIncludeHttps = true;
-                                        }
-                                    )
-                                    .RawResponse
-                        );
-
-                    response1.PlexDevices.ShouldNotBeNull();
-
-                    foreach (var connection in response1.PlexDevices.SelectMany(device => device.Connections))
-                    {
-                        x.SetupIdentityRequest(seed, connection.Uri);
-
-                        x.SetupRequest(connection.Uri + "library/sections")
-                            .ReturnsAsync(
-                                (HttpRequestMessage req, CancellationToken _) =>
-                                    FakePlexApiData.GetAllLibrariesResponse(HttpStatusCode.OK, seed, req).RawResponse
-                            );
-                    }
+                    x.PlexServerAccessCount = serverCount;
+                    x.MovieLibraryCount = libraryCount;
+                    x.MoviesPerLibraryCount = 500;
                 };
             }
         );
@@ -118,7 +78,7 @@ public class CreateAccountIntegrationTests : BaseIntegrationTests
         plexAccountDb.PlexAccountLibraries.Count.ShouldBe(libraryCount);
 
         // Ensure PlexServer has been created
-        container.DbContext.PlexServers.ToList().Count.ShouldBe(2);
+        container.DbContext.PlexServers.ToList().Count.ShouldBe(serverCount);
         var plexServersDb = container
             .DbContext.PlexServers.Include(x => x.PlexLibraries)
             .IncludeLibrariesWithMedia()
@@ -129,20 +89,16 @@ public class CreateAccountIntegrationTests : BaseIntegrationTests
 
         // Ensure all jobs have sent notifications
         // TODO: Keeps breaking due to the order of the jobs being executed
-        // var jobStatusUpdateList = Container.MockSignalRService.JobStatusUpdateList.ToList();
-        // jobStatusUpdateList.Count.ShouldBe(8);
+        var jobStatusUpdateList = container.MockSignalRService.JobStatusUpdateList.ToList();
+        jobStatusUpdateList.Count.ShouldBe(4);
 
-        // jobStatusUpdateList[0].JobType.ShouldBe(JobTypes.InspectPlexServerJob);
-        // jobStatusUpdateList[0].Status.ShouldBe(JobStatus.Started);
-        // jobStatusUpdateList[1].JobType.ShouldBe(JobTypes.CheckAllConnectionsStatusByPlexServerJob);
-        // jobStatusUpdateList[1].Status.ShouldBe(JobStatus.Started);
-        // jobStatusUpdateList[2].JobType.ShouldBe(JobTypes.CheckAllConnectionsStatusByPlexServerJob);
-        // jobStatusUpdateList[2].Status.ShouldBe(JobStatus.Completed);
-        // jobStatusUpdateList[3].JobType.ShouldBe(JobTypes.InspectPlexServerJob);
-        // jobStatusUpdateList[3].Status.ShouldBe(JobStatus.Completed);
-        // jobStatusUpdateList[4].JobType.ShouldBe(JobTypes.SyncServerMediaJob);
-        // jobStatusUpdateList[4].Status.ShouldBe(JobStatus.Started);
-        // jobStatusUpdateList[5].JobType.ShouldBe(JobTypes.SyncServerMediaJob);
-        // jobStatusUpdateList[5].Status.ShouldBe(JobStatus.Completed);
+        jobStatusUpdateList[0].JobType.ShouldBe(JobTypes.InspectPlexServerJob);
+        jobStatusUpdateList[0].Status.ShouldBe(JobStatus.Started);
+        jobStatusUpdateList[1].JobType.ShouldBe(JobTypes.InspectPlexServerJob);
+        jobStatusUpdateList[1].Status.ShouldBe(JobStatus.Completed);
+        jobStatusUpdateList[2].JobType.ShouldBe(JobTypes.SyncServerMediaJob);
+        jobStatusUpdateList[2].Status.ShouldBe(JobStatus.Started);
+        jobStatusUpdateList[3].JobType.ShouldBe(JobTypes.SyncServerMediaJob);
+        jobStatusUpdateList[3].Status.ShouldBe(JobStatus.Completed);
     }
 }

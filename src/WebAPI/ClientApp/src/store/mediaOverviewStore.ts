@@ -1,12 +1,18 @@
-import { cloneDeep, isEqual, orderBy } from 'lodash-es';
+import { cloneDeep, isEqual, orderBy, sortBy, isNumber } from 'lodash-es';
 import { defineStore, acceptHMRUpdate } from 'pinia';
 import { get } from '@vueuse/core';
-import { PlexMediaType, ViewMode, type PlexMediaSlimDTO, type PlexMediaStatisticsDTO } from '@dto';
+import {
+	PlexMediaType,
+	ViewMode,
+	type PlexMediaMetadataDTO,
+	type PlexMediaSlimDTO,
+	type PlexMediaStatisticsDTO,
+} from '@dto';
 import type { IMediaOverviewSort } from '@composables/event-bus';
-import type { ISelection } from '@interfaces';
+import type { IMetaDataMediaFilter, ISelection } from '@interfaces';
 import { plexLibraryApi, plexMediaApi } from '@api';
 import { map, tap } from 'rxjs/operators';
-import { iif, defer, type Observable, of } from 'rxjs';
+import { iif, defer, type Observable, of, forkJoin } from 'rxjs';
 import { useSettingsStore, useLibraryStore } from '@store';
 
 interface IMediaOverviewStoreState {
@@ -29,6 +35,8 @@ interface IMediaOverviewStoreState {
 	allSeasonCount: number;
 	allEpisodeCount: number;
 	allFileSize: number;
+	metadata: IMetaDataMediaFilter;
+	metadataList: PlexMediaMetadataDTO;
 }
 
 export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
@@ -52,6 +60,16 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 		allSeasonCount: 0,
 		allEpisodeCount: 0,
 		allFileSize: 0,
+		metadata: {
+			countryId: 0,
+			roleId: 0,
+			genreId: 0,
+		},
+		metadataList: {
+			countries: [],
+			roles: [],
+			genres: [],
+		},
 	};
 
 	const state = reactive<IMediaOverviewStoreState>(cloneDeep(defaultState));
@@ -60,34 +78,49 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 	const libraryStore = useLibraryStore();
 
 	const actions = {
-		requestMedia({ mediaType, page = 0, size = 0 }: {
-			mediaType: PlexMediaType;
-			page: number;
-			size: number;
-		}): Observable<PlexMediaStatisticsDTO | null> {
+		refreshMetaData() {
+			console.log(state.mediaType);
+			return plexLibraryApi.getLibraryMediaMetadata(state.libraryId, { mediaType: state.mediaType }).pipe(tap((result) => {
+				if (result.isSuccess && result.value) {
+					return state.metadataList = result.value;
+				}
+			}));
+		},
+		requestMedia(): Observable<PlexMediaStatisticsDTO | null> {
 			if (state.loading) {
 				return of(null);
 			}
+
+			const page = 0;
+			const size = 0;
+
 			state.loading = true;
-			return iif(
+
+			return forkJoin([iif(
 				() => state.libraryId === 0,
 				// Using defer to prevent both api calls from being executed
 				defer(() =>
 					plexMediaApi.getAllMediaByTypeEndpoint({
-						mediaType: mediaType,
+						mediaType: state.mediaType,
 						page,
 						size,
 						filterOwnedMedia: settingsStore.generalSettings.hideMediaFromOwnedServers,
 						filterOfflineMedia: settingsStore.generalSettings.hideMediaFromOfflineServers,
+						...state.metadata,
 					}),
 				),
 				defer(() =>
 					plexLibraryApi.getPlexLibraryMediaEndpoint(state.libraryId, {
 						page,
 						size,
+						filterOfflineMedia: false,
+						filterOwnedMedia: false,
+						...state.metadata,
 					}),
-				),
-			).pipe(
+				)),
+			actions.refreshMetaData(),
+			]).pipe(
+				map(([media, _]) => media),
 				map(({ isSuccess, value }): PlexMediaStatisticsDTO | null => {
 					if (isSuccess && value) {
 						return value;
@@ -95,7 +128,7 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 					return null;
 				}),
 				tap((data) => {
-					actions.setMedia(data, mediaType);
+					actions.setMedia(data, state.mediaType);
 					state.loading = false;
 				}),
 			);
@@ -124,10 +157,25 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 			}
 			state.filterQuery = '';
 		},
+		setMetaData({
+			countryId,
+			roleId,
+			genreId,
+		}: {
+			countryId?: number;
+			roleId?: number;
+			genreId?: number;
+		}) {
+			state.metadata.countryId = isNumber(countryId) ? countryId : 0;
+			state.metadata.roleId = isNumber(roleId) ? roleId : 0;
+			state.metadata.genreId = isNumber(genreId) ? genreId : 0;
+
+			actions.requestMedia().subscribe();
+		},
 		changeAllMediaOverviewType(mediaType: PlexMediaType) {
 			state.mediaType = mediaType;
 			settingsStore.displaySettings.allOverviewViewMode = mediaType;
-			actions.requestMedia({ mediaType, page: 0, size: 0 }).subscribe();
+			useSubscription(actions.requestMedia().subscribe());
 		},
 		setFirstLetterIndex() {
 			// Create scroll indexes for each letter
@@ -262,6 +310,35 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 			}
 
 			return null;
+		}),
+		getGenres: computed(() => sortBy(state.metadataList.genres, (x) => x.name)),
+		getRoles: computed(() => sortBy(state.metadataList.roles, (x) => x.name)),
+		getCountries: computed(() => sortBy(state.metadataList.countries, (x) => x.name)),
+		getFilterChips: computed(() => {
+			const result: { text: string; key: keyof IMetaDataMediaFilter }[] = [];
+
+			if (state.metadata.countryId > 0) {
+				result.push({
+					text: state.metadataList.countries.find((x) => x.id === state.metadata.countryId)?.name ?? '',
+					key: 'countryId',
+				});
+			}
+
+			if (state.metadata.roleId > 0) {
+				result.push({
+					text: state.metadataList.roles.find((x) => x.id === state.metadata.roleId)?.name ?? '',
+					key: 'roleId',
+				});
+			}
+
+			if (state.metadata.genreId > 0) {
+				result.push({
+					text: state.metadataList.genres.find((x) => x.id === state.metadata.genreId)?.name ?? '',
+					key: 'genreId',
+				});
+			}
+
+			return result;
 		}),
 	};
 

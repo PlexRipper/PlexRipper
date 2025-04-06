@@ -72,24 +72,20 @@ public static partial class DbContextExtensions
 
     public static async Task<Result<List<PlexMediaSlimDTO>>> GetMediaByType(
         this IPlexRipperDbContext dbContext,
-        PlexMediaType mediaType,
-        int skip = 0,
-        int take = 0,
-        int plexLibraryId = 0,
-        bool filterOfflineMedia = false,
-        bool filterOwnedMedia = false,
+        MediaQueryFilter filter,
         CancellationToken ct = default
     )
     {
         List<PlexMediaSlimDTO> plexMediaSlimDtos;
+        var plexLibraryId = filter.PlexLibraryId;
 
         var serverList = await dbContext
             .PlexServers.Where(x => x.IsEnabled)
-            .Select(server => new { Id = server.Id, PlexLibraryIds = server.PlexLibraries.Select(x => x.Id).ToList() })
+            .Select(server => new { server.Id, PlexLibraryIds = server.PlexLibraries.Select(x => x.Id).ToList() })
             .ToListAsync(ct);
 
         var allowedPlexLibraryIds = serverList.SelectMany(x => x.PlexLibraryIds).ToList();
-        if (filterOwnedMedia)
+        if (filter.FilterOwnedMedia)
         {
             var ownedPlexLibraries = await dbContext
                 .PlexAccountLibraries.Where(x => x.IsLibraryOwned)
@@ -99,7 +95,7 @@ public static partial class DbContextExtensions
             allowedPlexLibraryIds.RemoveAll(x => ownedPlexLibraries.Contains(x));
         }
 
-        if (filterOfflineMedia)
+        if (filter.FilterOfflineMedia)
         {
             foreach (var server in serverList)
             {
@@ -114,17 +110,30 @@ public static partial class DbContextExtensions
         if (plexLibraryId == 0 && !allowedPlexLibraryIds.Any())
             return Result.Ok(new List<PlexMediaSlimDTO>());
 
-        switch (mediaType)
+        switch (filter.MediaType)
         {
             case PlexMediaType.Movie:
             {
-                plexMediaSlimDtos = await dbContext
-                    .PlexMovies.AsNoTracking()
+                var query = dbContext.PlexMovies.AsNoTracking();
+
+                if (filter.CountryId > 0)
+                    query = query.Include(x => x.Countries);
+
+                if (filter.GenreId > 0)
+                    query = query.Include(x => x.Genres);
+
+                if (filter.RoleId > 0)
+                    query = query.Include(x => x.Roles);
+
+                plexMediaSlimDtos = await query
                     .ApplyWhere(plexLibraryId > 0, x => x.PlexLibraryId == plexLibraryId)
                     .ApplyWhere(plexLibraryId == 0, x => allowedPlexLibraryIds.Contains(x.PlexLibraryId))
+                    .ApplyWhere(filter.CountryId > 0, x => x.Countries.Any(y => y.Id == filter.CountryId))
+                    .ApplyWhere(filter.GenreId > 0, x => x.Genres.Any(y => y.Id == filter.GenreId))
+                    .ApplyWhere(filter.RoleId > 0, x => x.Roles.Any(y => y.Id == filter.RoleId))
                     .ApplyOrderBy(plexLibraryId > 0, x => x.SortIndex)
-                    .ApplySkip(skip)
-                    .ApplyTake(take)
+                    .ApplySkip(filter.Skip)
+                    .ApplyTake(filter.Take)
                     .ProjectToMediaSlimDTO()
                     .ToListAsync(ct);
 
@@ -132,20 +141,33 @@ public static partial class DbContextExtensions
             }
             case PlexMediaType.TvShow:
             {
-                plexMediaSlimDtos = await dbContext
-                    .PlexTvShows.AsNoTracking()
+                var query = dbContext.PlexTvShows.AsNoTracking();
+
+                if (filter.CountryId > 0)
+                    query = query.Include(x => x.Countries);
+
+                if (filter.GenreId > 0)
+                    query = query.Include(x => x.Genres);
+
+                if (filter.RoleId > 0)
+                    query = query.Include(x => x.Roles);
+
+                plexMediaSlimDtos = await query
                     .ApplyWhere(plexLibraryId > 0, x => x.PlexLibraryId == plexLibraryId)
                     .ApplyWhere(plexLibraryId == 0, x => allowedPlexLibraryIds.Contains(x.PlexLibraryId))
+                    .ApplyWhere(filter.CountryId > 0, x => x.Countries.Any(y => y.Id == filter.CountryId))
+                    .ApplyWhere(filter.GenreId > 0, x => x.Genres.Any(y => y.Id == filter.GenreId))
+                    .ApplyWhere(filter.RoleId > 0, x => x.Roles.Any(y => y.Id == filter.RoleId))
                     .ApplyOrderBy(plexLibraryId > 0, x => x.SortIndex)
-                    .ApplySkip(skip)
-                    .ApplyTake(take)
+                    .ApplySkip(filter.Skip)
+                    .ApplyTake(filter.Take)
                     .ProjectToMediaSlimDTO()
                     .ToListAsync(ct);
                 break;
             }
             default:
                 return Result.Fail(
-                    $"Type {mediaType} is not supported for retrieving the PlexMedia data by library id"
+                    $"Type {filter.MediaType} is not supported for retrieving the PlexMedia data by library id"
                 );
         }
 

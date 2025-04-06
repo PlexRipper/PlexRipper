@@ -55,7 +55,6 @@ import { get, set } from '@vueuse/core';
 import { JobStatus, JobTypes } from '@dto';
 import { useSubscription } from '@vueuse/rxjs';
 import { DialogType } from '@enums';
-import QGlowBadge from '@components/Common/QGlowBadge.vue';
 import { useBackgroundJobsStore, useDialogStore, useI18n } from '#imports';
 
 const size = 32;

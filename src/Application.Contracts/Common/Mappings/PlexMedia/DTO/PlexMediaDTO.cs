@@ -4,8 +4,6 @@ public class PlexMediaDTO : PlexMediaSlimDTO
 {
     public required bool HasArt { get; set; }
 
-    public required bool HasBanner { get; set; }
-
     public required bool HasTheme { get; set; }
 
     public required string Studio { get; set; }

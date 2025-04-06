@@ -28,14 +28,31 @@ export class PlexMedia {
    */
   getAllMediaByTypeEndpoint = (
     query: {
+      /**
+       * @format int32
+       * @default 0
+       */
+      countryId: number;
+      /** @default false */
       filterOfflineMedia: boolean;
+      /** @default false */
       filterOwnedMedia: boolean;
+      /**
+       * @format int32
+       * @default 0
+       */
+      genreId: number;
       mediaType: PlexMediaType;
       /**
        * @format int32
        * @default 0
        */
       page: number;
+      /**
+       * @format int32
+       * @default 0
+       */
+      roleId: number;
       /**
        * @format int32
        * @default 0
@@ -107,14 +124,31 @@ export class PlexMedia {
 
 export class PlexMediaPaths {
   static getAllMediaByTypeEndpoint = (query: {
+    /**
+     * @format int32
+     * @default 0
+     */
+    countryId: number;
+    /** @default false */
     filterOfflineMedia: boolean;
+    /** @default false */
     filterOwnedMedia: boolean;
+    /**
+     * @format int32
+     * @default 0
+     */
+    genreId: number;
     mediaType: PlexMediaType;
     /**
      * @format int32
      * @default 0
      */
     page: number;
+    /**
+     * @format int32
+     * @default 0
+     */
+    roleId: number;
     /**
      * @format int32
      * @default 0

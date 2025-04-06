@@ -22,7 +22,3 @@ Cypress.Commands.add('getPageData', () =>
 );
 
 Cypress.Commands.add('awaitSettingsUpdate', () => cy.wait('@settingsUpdate'));
-
-Cypress.Commands.add('urlBuilder', (relativeUrl: string) => {
-	return new URL(relativeUrl, `http://localhost:${Cypress.env('WEB_PORT')}`);
-});

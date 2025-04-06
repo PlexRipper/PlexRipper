@@ -24,8 +24,6 @@ declare global {
 				options?: Partial<Loggable & Timeoutable & Withinable & Shadow>
 			): Chainable<JQuery<E>>;
 
-			urlBuilder(relativeUrl: string): URL;
-
 			hubPublishJobStatusUpdate<T>(type: JobTypes, status: JobStatus, data: T): Chainable;
 
 			hubPublishCheckPlexServerConnectionsJob(

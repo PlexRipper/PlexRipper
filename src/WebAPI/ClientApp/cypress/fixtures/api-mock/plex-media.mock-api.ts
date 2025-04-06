@@ -1,4 +1,4 @@
-import type { BasePageSetupResult } from '@fixtures';
+import { type BasePageSetupResult, urlBuilder } from '@fixtures';
 import type { MockConfig } from '@mock';
 import {
 	generatePlexMedia,
@@ -42,7 +42,7 @@ export function setupMockPlexMediaEndpoints(
 		};
 
 		// Library media endpoints
-		const url = cy.urlBuilder(PlexLibraryPaths.getPlexLibraryMediaEndpoint(library.id, {
+		const url = urlBuilder(PlexLibraryPaths.getPlexLibraryMediaEndpoint(library.id, {
 			countryId: 0,
 			filterOfflineMedia: false,
 			filterOwnedMedia: false,

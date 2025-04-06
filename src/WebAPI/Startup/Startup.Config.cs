@@ -6,7 +6,12 @@ namespace PlexRipper.WebAPI;
 
 public static partial class Startup
 {
-    public static Result ConfigureConfigFile(this WebApplication app)
+    /// <summary>
+    /// Set up the PlexRipperConfig.json file.
+    /// </summary>
+    /// <param name="app"></param>
+    /// <returns></returns>
+    public static Result SetupConfigFile(this WebApplication app)
     {
         var container = app.Services.GetAutofacRoot();
 

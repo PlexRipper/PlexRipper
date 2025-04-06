@@ -10,7 +10,7 @@ using Serilog.Events;
 
 namespace PlexRipper.BaseTests;
 
-public partial class BaseUnitTest : IDisposable
+public partial class BaseUnitTest
 {
     protected readonly ITestOutputHelper _output;
     protected readonly LogEventLevel _logEventLevel;

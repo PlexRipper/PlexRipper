@@ -5,7 +5,7 @@ public static class HttpRequestMessageExtensions
     public static IDictionary<string, string> ParseQueryToDictionary(this HttpRequestMessage request)
     {
         var dict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        if (request?.RequestUri == null)
+        if (request.RequestUri == null)
             return dict;
 
         // Get the query string (e.g. "?param=value&foo=bar")

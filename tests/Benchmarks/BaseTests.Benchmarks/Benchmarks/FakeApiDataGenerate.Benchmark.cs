@@ -16,7 +16,7 @@ public class FakeApiDataGenerateBenchmark
     }
 
     [Benchmark]
-    public void Should_When()
+    public void ShouldRunTheBenchmarkOnGeneratingMockData_WhenOptionsIsConfigured()
     {
         Action<PlexApiDataConfig> options = x =>
         {

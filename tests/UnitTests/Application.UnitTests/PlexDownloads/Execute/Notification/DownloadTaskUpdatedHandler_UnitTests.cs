@@ -2,7 +2,7 @@ using Application.Contracts;
 using Data.Contracts;
 using FileSystem.Contracts;
 
-namespace PlexRipper.Application.UnitTests.Execute.Notification;
+namespace PlexRipper.Application.UnitTests;
 
 public class DownloadTaskUpdatedHandler_UnitTests : BaseUnitTest<DownloadTaskUpdatedHandler>
 {

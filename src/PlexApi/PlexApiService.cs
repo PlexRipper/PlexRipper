@@ -353,19 +353,18 @@ public class PlexApiService : IPlexApiService
             plexLibrary.Type
         );
 
-        // var actorsTask = _plexApiWrapper.GetLibraryActors(
-        //     plexServerConnection,
-        //     authToken,
-        //     libraryKeyInt,
-        //     plexLibrary.Type
-        // );
+        var actorsTask = _plexApiWrapper.GetLibraryActors(
+            plexServerConnection,
+            authToken,
+            libraryKeyInt,
+            plexLibrary.Type
+        );
 
-        await Task.WhenAll(countriesTask, genresTask);
+        await Task.WhenAll(countriesTask, genresTask, actorsTask);
 
         var countriesResult = await countriesTask;
         var genresResult = await genresTask;
-
-        // var actorsResult = await actorsTask;
+        var actorsResult = await actorsTask;
 
         var response = new LibraryMetadata();
 
@@ -393,13 +392,13 @@ public class PlexApiService : IPlexApiService
                     .ToList() ?? [];
         }
 
-        // if (actorsResult.IsSuccess)
-        // {
-        //     response.Roles =
-        //         actorsResult
-        //             .Value.Object?.MediaContainer?.Directory?.Select(x => new PlexRole { Name = x.Title })
-        //             .ToList() ?? [];
-        // }
+        if (actorsResult.IsSuccess)
+        {
+            response.Roles =
+                actorsResult
+                    .Value.Object?.MediaContainer?.Directory?.Select(x => new PlexRole { Name = x.Title })
+                    .ToList() ?? [];
+        }
 
         return Result.Ok(response);
     }

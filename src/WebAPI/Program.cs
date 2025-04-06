@@ -45,14 +45,14 @@ public class Program
 
             var app = builder.Build();
 
-            var configResult = app.ConfigureConfigFile();
+            var configResult = app.SetupConfigFile();
             if (configResult.IsFailed)
             {
                 FailedToStart(configResult);
                 return;
             }
 
-            var configureDatabase = app.ConfigureDatabase();
+            var configureDatabase = app.SetupDatabase();
             if (configureDatabase.IsFailed)
             {
                 FailedToStart(configureDatabase);

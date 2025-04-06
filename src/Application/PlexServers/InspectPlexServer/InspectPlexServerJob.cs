@@ -55,8 +55,11 @@ public class InspectPlexServerJob : IJob
                     cancellationToken
                 );
                 await _signalRService.SendRefreshNotificationAsync([DataType.PlexServerConnection], cancellationToken);
-                if (checkResult.IsSuccess)
-                    await RefreshAndSyncLibraries(plexServerId, cancellationToken);
+
+                if (checkResult.IsFailed)
+                    return checkResult.LogError();
+
+                return await RefreshAndSyncLibraries(plexServerId, cancellationToken);
             });
 
             await Task.WhenAll(serverTasks);

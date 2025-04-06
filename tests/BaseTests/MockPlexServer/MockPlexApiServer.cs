@@ -6,41 +6,41 @@ namespace PlexRipper.BaseTests;
 
 public class MockPlexApiServer : IMockPlexApiServer
 {
-    private Seed _seed;
-    private Action<PlexApiDataConfig> _options;
-    private PlexApiDataConfig _config;
+    private Seed _seed = new(1);
+    private Action<PlexApiDataConfig> _options = null!;
+    private PlexApiDataConfig _config = null!;
 
-    private List<PlexDevice> _servers = [];
-
-    /// <summary>
-    /// Key: PlexDevice.ClientIdentifier (server key)
-    /// </summary>
-    private Dictionary<string, List<Connections>> _connections = [];
+    private readonly List<PlexDevice> _servers = [];
 
     /// <summary>
     /// Key: PlexDevice.ClientIdentifier (server key)
     /// </summary>
-    private Dictionary<string, List<GetAllLibrariesDirectory>> _libraries = [];
+    private readonly Dictionary<string, List<Connections>> _connections = [];
+
+    /// <summary>
+    /// Key: PlexDevice.ClientIdentifier (server key)
+    /// </summary>
+    private readonly Dictionary<string, List<GetAllLibrariesDirectory>> _libraries = [];
 
     /// <summary>
     /// Key: GetAllLibrariesDirectory.Key (library key)
     /// </summary>
-    private Dictionary<string, List<GetLibraryItemsMetadata>> _movies = [];
+    private readonly Dictionary<string, List<GetLibraryItemsMetadata>> _movies = [];
 
     /// <summary>
     /// Key: GetAllLibrariesDirectory.Key (library key)
     /// </summary>
-    private Dictionary<string, List<GetLibraryItemsMetadata>> _tvShows = [];
+    private readonly Dictionary<string, List<GetLibraryItemsMetadata>> _tvShows = [];
 
     /// <summary>
     /// Key: GetAllLibrariesDirectory.Key (library key)
     /// </summary>
-    private Dictionary<string, List<GetLibraryItemsMetadata>> _seasons = [];
+    private readonly Dictionary<string, List<GetLibraryItemsMetadata>> _seasons = [];
 
     /// <summary>
     /// Key: GetAllLibrariesDirectory.Key (library key)
     /// </summary>
-    private Dictionary<string, List<GetLibraryItemsMetadata>> _episodes = [];
+    private readonly Dictionary<string, List<GetLibraryItemsMetadata>> _episodes = [];
 
     public void Setup(Mock<HttpMessageHandler> handler, Action<PlexApiDataConfig> options)
     {

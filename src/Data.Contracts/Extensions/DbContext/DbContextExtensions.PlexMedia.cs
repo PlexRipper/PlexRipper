@@ -81,7 +81,7 @@ public static partial class DbContextExtensions
 
         var serverList = await dbContext
             .PlexServers.Where(x => x.IsEnabled)
-            .Select(server => new { Id = server.Id, PlexLibraryIds = server.PlexLibraries.Select(x => x.Id).ToList() })
+            .Select(server => new { server.Id, PlexLibraryIds = server.PlexLibraries.Select(x => x.Id).ToList() })
             .ToListAsync(ct);
 
         var allowedPlexLibraryIds = serverList.SelectMany(x => x.PlexLibraryIds).ToList();

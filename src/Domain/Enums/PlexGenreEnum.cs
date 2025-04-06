@@ -1,6 +1,8 @@
 using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
 
+namespace PlexRipper.Domain;
+
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum PlexGenreType
 {

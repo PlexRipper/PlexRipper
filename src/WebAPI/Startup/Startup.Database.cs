@@ -6,7 +6,10 @@ namespace PlexRipper.WebAPI;
 
 public static partial class Startup
 {
-    public static Result ConfigureDatabase(this WebApplication app)
+    /// <summary>
+    /// Set up the database.
+    /// </summary>
+    public static Result SetupDatabase(this WebApplication app)
     {
         var container = app.Services.GetAutofacRoot();
 

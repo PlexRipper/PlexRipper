@@ -11,8 +11,6 @@ public partial class FakePlexApiData
         Action<PlexApiDataConfig>? options = null
     )
     {
-        var config = PlexApiDataConfig.FromOptions(options);
-
         return new Faker<PostUsersSignInDataUserPlexAccount>()
             .StrictMode(true)
             .UseSeed(seed.Next())

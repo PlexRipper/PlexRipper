@@ -318,7 +318,7 @@ public static partial class MockDatabase
             plexRipperContext = await plexRipperContext.AddDownloadTaskTvShows(seed, options);
 
         if (config.AccountHasAccessToAllLibraries)
-            plexRipperContext = await plexRipperContext.AddPlexAccountLibraries();
+            await plexRipperContext.AddPlexAccountLibraries();
 
         return context;
     }

@@ -65,10 +65,7 @@ public class SyncPlexMoviesCommandHandler : IRequestHandler<SyncPlexMoviesComman
         try
         {
             var plexLibraryId = command.PlexMovies.First().PlexLibraryId;
-            var plexLibraryName = _dbContext
-                .PlexLibraries.Where(x => x.Id == plexLibraryId)
-                .Select(x => x.Title)
-                .FirstOrDefault();
+            var plexLibraryName = await _dbContext.GetPlexLibraryNameById(plexLibraryId, cancellationToken);
 
             _log.Debug(
                 "Starting syncing of movies in library: {PlexLibraryName} with id: {PlexLibraryId} by first removing all media and then reinserting it",

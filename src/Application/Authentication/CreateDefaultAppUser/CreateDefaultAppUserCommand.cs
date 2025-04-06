@@ -8,7 +8,7 @@ using Settings.Contracts;
 
 namespace PlexRipper.Application;
 
-public record CreateDefaultAppUserCommand() : IRequest<Result>;
+public record CreateDefaultAppUserCommand : IRequest<Result>;
 
 public class CreateDefaultAppUserCommandValidator : AbstractValidator<CreateDefaultAppUserCommand>
 {

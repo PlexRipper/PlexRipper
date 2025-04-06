@@ -93,10 +93,10 @@ public static partial class DbSetExtensions
         Expression<Func<TSource, TKey>> predicate
     ) => condition ? query.OrderBy(predicate) : query;
 
-    public static EntityEntry<T> AddIfNotExists<T>(
+    public static EntityEntry<T>? AddIfNotExists<T>(
         this DbSet<T> dbSet,
         T entity,
-        Expression<Func<T, bool>> predicate = null
+        Expression<Func<T, bool>>? predicate = null
     )
         where T : class
     {

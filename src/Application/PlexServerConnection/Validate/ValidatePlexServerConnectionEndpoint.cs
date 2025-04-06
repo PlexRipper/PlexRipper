@@ -6,7 +6,7 @@ using PlexApi.Contracts;
 
 namespace PlexRipper.Application;
 
-public record ValidatePlexServerConnectionEndpointRequest()
+public record ValidatePlexServerConnectionEndpointRequest
 {
     public required string Url { get; init; }
 }

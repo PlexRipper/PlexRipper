@@ -66,7 +66,7 @@ public class DownloadWorkerStartUnitTests : BaseUnitTest<DownloadWorker>
     public async Task ShouldHaveDownloadStatusServerUnreachable_WhenPlexServerIsOfflineAndStarting()
     {
         // Arrange
-        var seed = await SetupDatabase(
+        await SetupDatabase(
             26586,
             config =>
             {

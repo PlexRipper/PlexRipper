@@ -195,6 +195,7 @@ public class SyncPlexTvShowsCommandHandler : IRequestHandler<SyncPlexTvShowsComm
                 _log.Here()
                     .Warning(
                         "PlexRole with key {PlexKey} and name: {PlexRole} not found for library {LibraryName}",
+                        plexRole.Id,
                         plexRole.Name,
                         plexLibraryName
                     );

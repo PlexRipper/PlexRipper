@@ -150,7 +150,7 @@ public class AddOrUpdatePlexServersCommandHandler
     }
 }
 
-public record PlexServerRapport()
+public record PlexServerRapport
 {
     public List<int> Created { get; } = [];
 

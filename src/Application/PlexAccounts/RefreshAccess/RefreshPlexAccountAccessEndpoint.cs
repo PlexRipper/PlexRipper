@@ -171,7 +171,7 @@ public class RefreshPlexAccountAccessEndpoint
                     IsServerOffline = libraryAccessRapport.OfflineServers.Contains(x.PlexServerId),
                     LibraryAccess = libraryAccessRapport
                         .Reports.Where(y => y.PlexServerId == x.PlexServerId)
-                        .SelectMany(x => x.Data)
+                        .SelectMany(y => y.Data)
                         .Select(y => new PlexLibraryAccessRapportDTO
                         {
                             PlexLibraryName = y.PlexLibraryName,

@@ -7,8 +7,6 @@ public static partial class FakeData
 {
     public static Faker<PlexServer> GetPlexServer(Seed seed, Action<FakeDataConfig>? options = null)
     {
-        var config = FakeDataConfig.FromOptions(options);
-
         // Note: Ensure all faker values are a lambda f => x,
         // otherwise Entity Framework will see differently generated values as the same object and mess up any database testing
         return new Faker<PlexServer>()
@@ -97,8 +95,6 @@ public static partial class FakeData
         int plexServerId = 0
     )
     {
-        var config = FakeDataConfig.FromOptions(options);
-
         return new Faker<PlexServerConnection>()
             .StrictMode(true)
             .UseSeed(seed.Next())

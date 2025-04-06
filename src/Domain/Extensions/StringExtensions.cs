@@ -10,8 +10,6 @@ namespace PlexRipper.Domain;
 
 public static partial class StringExtensions
 {
-    private static Random random = new();
-
     private static readonly HashSet<string> StopWords =
         new(StringComparer.OrdinalIgnoreCase)
         {

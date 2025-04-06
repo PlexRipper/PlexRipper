@@ -40,7 +40,7 @@ public record RefreshPlexServerAccessRapport(int PlexAccountId, string PlexAccou
         )
         {
             x.Append($"{state} Access:\n");
-            var stateResults = Access.FindAll(x => x.State == state);
+            var stateResults = Access.FindAll(y => y.State == state);
             if (stateResults.Any())
             {
                 foreach (var result in stateResults)

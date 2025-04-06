@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace PlexRipper.Application;
 
-public record CreatePlexServerConnectionEndpointRequest()
+public record CreatePlexServerConnectionEndpointRequest
 {
     public required string Url { get; init; }
 

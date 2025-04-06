@@ -129,7 +129,7 @@ public partial class FakePlexApiData
             .RuleFor(x => x.MediaTagVersion, f => f.Random.Number(0, 1000000000))
             .RuleFor(x => x.MediaTagPrefix, _ => "/system/bundle/media/flags/")
             .RuleFor(x => x.Thumb, _ => "/:/resources/unknown.png")
-            .RuleFor(x => x.Title1, (f, x) => f.Name.FullName())
+            .RuleFor(x => x.Title1, (f, _) => f.Name.FullName())
             .RuleFor(x => x.Title2, (_, x) => $"All {x.Title1}")
             .RuleFor(x => x.ViewGroup, _ => string.Empty)
             .RuleFor(x => x.Nocache, f => f.Random.Bool())
@@ -188,8 +188,6 @@ public partial class FakePlexApiData
         Action<PlexApiDataConfig>? options = null
     )
     {
-        var config = PlexApiDataConfig.FromOptions(options);
-
         GetLibraryItemsLibraryType GetPlexMediaType() =>
             type switch
             {

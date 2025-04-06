@@ -73,7 +73,7 @@ public class JsonPropertyEnumConverter : JsonConverter
     // We only implement serialization.
     public override bool CanRead => false;
 
-    public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+    public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
     {
         if (value == null)
         {
@@ -103,9 +103,11 @@ public class JsonPropertyEnumConverter : JsonConverter
         writer.WriteValue(value.ToString());
     }
 
-    public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
-    {
-        // Reading is not implemented in this converter.
-        throw new NotImplementedException("JsonPropertyEnumConverter only supports serialization.");
-    }
+    // Reading is not implemented in this converter.
+    public override object ReadJson(
+        JsonReader reader,
+        Type objectType,
+        object? existingValue,
+        JsonSerializer serializer
+    ) => throw new NotImplementedException("JsonPropertyEnumConverter only supports serialization.");
 }

@@ -4,9 +4,6 @@ namespace PlexRipper.Application;
 
 public record RefreshPlexServerAccessRapport(int PlexAccountId, string PlexAccountName)
 {
-    public readonly int PlexAccountId = PlexAccountId;
-    public readonly string PlexAccountName = PlexAccountName;
-
     public List<RefreshPlexServerAccessRapportRow> Access { get; set; } = [];
 
     public void AddGranted(int plexServerId, string plexServerName)

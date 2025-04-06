@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using Logging.Interface;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace PlexRipper.Data.Common;
@@ -8,6 +9,8 @@ namespace PlexRipper.Data.Common;
 /// </summary>
 public static class PropertyBuilderExtensions
 {
+    private static ILog _log = LogManager.CreateLogInstance(typeof(PropertyBuilderExtensions));
+
     /// <summary>
     /// Serializes field as JSON blob in database.
     /// </summary>
@@ -24,7 +27,7 @@ public static class PropertyBuilderExtensions
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            _log.Error(e);
             throw;
         }
 

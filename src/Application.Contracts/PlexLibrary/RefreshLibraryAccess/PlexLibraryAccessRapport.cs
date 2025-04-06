@@ -19,19 +19,22 @@ public record PlexLibraryAccessRapport(string _plexAccountName, int PlexServerId
 
     public List<PlexLibraryAccessRow> GetRevoked => Data.FindAll(x => x.State == PlexAccessState.Revoked);
 
-    public void AddGranted(int plexLibraryId, string plexLibraryName)
+    public PlexLibraryAccessRapport AddGranted(int plexLibraryId, string plexLibraryName)
     {
         Data.Add(new PlexLibraryAccessRow(PlexAccessState.Granted, PlexServerId, plexLibraryId, plexLibraryName));
+        return this;
     }
 
-    public void AddUpdated(int plexLibraryId, string plexLibraryName)
+    public PlexLibraryAccessRapport AddUpdated(int plexLibraryId, string plexLibraryName)
     {
         Data.Add(new PlexLibraryAccessRow(PlexAccessState.Updated, PlexServerId, plexLibraryId, plexLibraryName));
+        return this;
     }
 
-    public void AddRevoked(int plexLibraryId, string plexLibraryName)
+    public PlexLibraryAccessRapport AddRevoked(int plexLibraryId, string plexLibraryName)
     {
         Data.Add(new PlexLibraryAccessRow(PlexAccessState.Revoked, PlexServerId, plexLibraryId, plexLibraryName));
+        return this;
     }
 
     public override string ToString()

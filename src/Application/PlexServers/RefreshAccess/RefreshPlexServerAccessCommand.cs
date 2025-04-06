@@ -134,10 +134,6 @@ public class RefreshPlexServerAccessCommandHandler
             .PlexAccountServers.Where(x => x.PlexAccountId == plexAccountId)
             .ExecuteDeleteAsync(CancellationToken.None);
 
-        await _dbContext
-            .PlexAccountLibraries.Where(x => x.PlexAccountId == plexAccountId)
-            .ExecuteDeleteAsync(CancellationToken.None);
-
         return Result.Ok(rapport);
     }
 }

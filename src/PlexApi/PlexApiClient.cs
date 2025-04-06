@@ -189,7 +189,15 @@ public class PlexApiClient : IPlexApiClient
 
         if (_log.IsLogLevelEnabled(LogEventLevel.Verbose))
         {
-            _log.Here().Verbose("Response: {Response}", await response.Content.ReadAsFormattedJsonAsync());
+            var contentType = response.Content.Headers.ContentType?.MediaType;
+            if (contentType != null && contentType.Contains("json", StringComparison.OrdinalIgnoreCase))
+            {
+                _log.Here().Verbose("Response: {Response}", await response.Content.ReadAsFormattedJsonAsync());
+            }
+            else
+            {
+                _log.Here().Verbose("Response is not JSON. Content type: {ContentType}", contentType);
+            }
         }
 
         return response;

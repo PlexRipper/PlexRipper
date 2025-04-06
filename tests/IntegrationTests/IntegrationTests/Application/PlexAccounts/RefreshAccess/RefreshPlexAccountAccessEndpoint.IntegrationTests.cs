@@ -31,15 +31,12 @@ public class RefreshPlexAccountAccessEndpointIntegrationTestsIntegrationTests : 
                     x.PlexServerCount = plexServerCount;
                     x.PlexLibraryCount = plexLibraryCount;
                 };
-                config.HttpClientOptions = (x, _) =>
+                config.BaseMockHttpClientOptions = x =>
                 {
-                    x.SetupRequest(x => x.RequestUri!.AbsoluteUri.Contains("plex.tv/api/v2/resources"))
-                        .ReturnsAsync(
-                            (HttpRequestMessage req, CancellationToken _) =>
-                                FakePlexApiData
-                                    .GetServerResourcesResponse(HttpStatusCode.Unauthorized, seed, request: req)
-                                    .RawResponse
-                        );
+                    x.PlexServerAccessCount = plexServerCount;
+                    x.MovieLibraryCount = plexLibraryCount;
+                    x.MoviesPerLibraryCount = 500;
+                    x.SetServerResourcesResponse = HttpStatusCode.Unauthorized;
                 };
             }
         );
@@ -52,7 +49,7 @@ public class RefreshPlexAccountAccessEndpointIntegrationTestsIntegrationTests : 
             RefreshPlexAccountAccessEndpoint,
             RefreshPlexAccountAccessEndpointRequest,
             ResultDTO<List<RefreshPlexAccountAccessRapportDTO>>
-        >(new RefreshPlexAccountAccessEndpointRequest(0));
+        >(new RefreshPlexAccountAccessEndpointRequest());
 
         // Assert
         var result = response.Result;
@@ -76,5 +73,8 @@ public class RefreshPlexAccountAccessEndpointIntegrationTestsIntegrationTests : 
                 }
             }
         }
+
+        container.DbContext.PlexAccountServers.ToList().Count.ShouldBe(0);
+        container.DbContext.PlexAccountLibraries.ToList().Count.ShouldBe(0);
     }
 }

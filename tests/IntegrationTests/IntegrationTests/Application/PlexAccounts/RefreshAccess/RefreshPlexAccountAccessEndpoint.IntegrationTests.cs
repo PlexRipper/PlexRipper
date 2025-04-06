@@ -1,8 +1,6 @@
 using System.Net;
 using Application.Contracts;
 using FastEndpoints;
-using FluentResultExtensions;
-using Moq.Contrib.HttpClient;
 using PlexRipper.Application;
 
 namespace IntegrationTests.PlexAccounts.RefreshAccess;

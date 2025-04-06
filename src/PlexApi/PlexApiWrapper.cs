@@ -7,7 +7,6 @@ using Newtonsoft.Json;
 using PlexApi.Contracts;
 using ILog = Logging.Interface.ILog;
 using JsonSerializer = System.Text.Json.JsonSerializer;
-using Type = LukeHagar.PlexAPI.SDK.Models.Requests.Type;
 
 namespace PlexRipper.PlexApi;
 

@@ -1,7 +1,6 @@
 using System.IO.Abstractions;
 using FileSystem.Contracts;
 using FluentValidation;
-using Logging.Interface;
 
 public record CreateDownloadFileStreamCommand(string Directory, string FileName, long FileSize)
     : IRequest<Result<Stream>>;

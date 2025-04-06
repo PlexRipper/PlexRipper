@@ -1,6 +1,5 @@
 using Data.Contracts;
 using FluentValidation;
-using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
 using PlexApi.Contracts;
 
@@ -20,12 +19,10 @@ public class SyncPlexLibraryMediaMetaDataCommandValidator : AbstractValidator<Sy
 
 public class SyncPlexLibraryMediaMetaDataCommandHandler : IRequestHandler<SyncPlexLibraryMediaMetaDataCommand, Result>
 {
-    private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
 
-    public SyncPlexLibraryMediaMetaDataCommandHandler(ILog log, IPlexRipperDbContext dbContext)
+    public SyncPlexLibraryMediaMetaDataCommandHandler(IPlexRipperDbContext dbContext)
     {
-        _log = log;
         _dbContext = dbContext;
     }
 
@@ -45,11 +42,11 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : IRequestHandler<SyncPl
             if (libraryDb is null)
                 return ResultExtensions.EntityNotFound(nameof(PlexLibrary), libraryId);
 
-            await SyncRoles(roles, libraryId);
-
-            await SyncGenres(genres, libraryId);
-
-            await SyncCountries(countries, libraryId);
+            await Task.WhenAll(
+                SyncRoles(roles, libraryId),
+                SyncGenres(genres, libraryId),
+                SyncCountries(countries, libraryId)
+            );
 
             return Result.Ok();
         }

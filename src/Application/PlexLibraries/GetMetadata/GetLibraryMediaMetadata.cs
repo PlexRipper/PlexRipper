@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application;
 
-public record GetLibraryMediaMetadataRequest()
+public record GetLibraryMediaMetadataRequest
 {
     public int PlexLibraryId { get; init; }
 

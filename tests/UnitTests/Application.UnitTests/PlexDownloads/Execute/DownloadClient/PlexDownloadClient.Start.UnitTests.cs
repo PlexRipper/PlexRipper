@@ -2,7 +2,6 @@
 using Autofac;
 using ByteSizeLib;
 using Data.Contracts;
-using FileSystem.Contracts;
 using Microsoft.EntityFrameworkCore;
 using PlexApi.Contracts;
 using PlexRipper.PlexApi;

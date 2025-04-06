@@ -1,10 +1,8 @@
 ﻿using Application.Contracts;
 using Data.Contracts;
 using Logging.Interface;
-using LukeHagar.PlexAPI.SDK.Models.Requests;
 using PlexApi.Contracts;
 using Settings.Contracts;
-using Type = LukeHagar.PlexAPI.SDK.Models.Requests.Type;
 
 namespace PlexRipper.PlexApi;
 

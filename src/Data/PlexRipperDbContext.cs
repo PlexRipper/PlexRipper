@@ -4,11 +4,8 @@ using AppAny.Quartz.EntityFrameworkCore.Migrations.SQLite;
 using Data.Contracts;
 using EFCore.BulkExtensions;
 using Environment;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
-using Microsoft.Extensions.Logging;
-using NaturalSort.Extension;
 using PlexRipper.Data.Common;
 
 // ReSharper disable UnusedAutoPropertyAccessor.Global

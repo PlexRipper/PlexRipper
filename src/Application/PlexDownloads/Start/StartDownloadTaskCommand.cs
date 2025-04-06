@@ -2,7 +2,6 @@ using Application.Contracts;
 using Data.Contracts;
 using FileSystem.Contracts;
 using FluentValidation;
-using Logging.Interface;
 
 namespace PlexRipper.Application;
 
@@ -18,21 +17,18 @@ public class StartDownloadTaskCommandValidator : AbstractValidator<StartDownload
 
 public class StartDownloadTaskCommandHandler : IRequestHandler<StartDownloadTaskCommand, Result>
 {
-    private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
     private readonly IMediator _mediator;
     private readonly IDownloadTaskScheduler _downloadTaskScheduler;
     private readonly IFileMergeScheduler _fileMergeScheduler;
 
     public StartDownloadTaskCommandHandler(
-        ILog log,
         IPlexRipperDbContext dbContext,
         IMediator mediator,
         IDownloadTaskScheduler downloadTaskScheduler,
         IFileMergeScheduler fileMergeScheduler
     )
     {
-        _log = log;
         _dbContext = dbContext;
         _mediator = mediator;
         _downloadTaskScheduler = downloadTaskScheduler;

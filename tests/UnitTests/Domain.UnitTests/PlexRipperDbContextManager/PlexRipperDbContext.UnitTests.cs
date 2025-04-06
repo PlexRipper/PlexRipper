@@ -1,7 +1,6 @@
 using System.IO.Abstractions;
 using Data.Contracts;
 using Environment;
-using FileSystem.Contracts;
 using PlexRipper.Data;
 using PlexRipper.Identity.Contracts;
 

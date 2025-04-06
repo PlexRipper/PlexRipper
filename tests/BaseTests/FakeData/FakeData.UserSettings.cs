@@ -1,5 +1,4 @@
-﻿using System.Net;
-using Bogus;
+﻿using Bogus;
 using Settings.Contracts;
 
 namespace PlexRipper.BaseTests;

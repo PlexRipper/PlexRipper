@@ -53,7 +53,6 @@ public class RefreshLibraryAccessHandler
         var plexAccountId = command.PlexAccountId;
         var plexServerId = command.PlexServerId;
 
-        var plexLibraries = new List<PlexLibrary>();
         var plexServers = new List<PlexServer>();
 
         // Determine the Plex servers to refresh the Plex libraries for
@@ -100,7 +99,7 @@ public class RefreshLibraryAccessHandler
         if (libraryResults.All(x => x.IsFailed))
             return Result.Merge(libraryResults).ToResult();
 
-        plexLibraries = libraryResults.Where(x => x.IsSuccess).SelectMany(x => x.Value).ToList();
+        var plexLibraries = libraryResults.Where(x => x.IsSuccess).SelectMany(x => x.Value).ToList();
 
         var updateResult = await _mediator.Send(
             new AddOrUpdatePlexLibrariesCommand { PlexAccountId = plexAccountId, PlexLibraries = plexLibraries },

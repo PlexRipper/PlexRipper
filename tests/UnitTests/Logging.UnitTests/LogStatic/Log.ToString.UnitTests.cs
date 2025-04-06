@@ -1,10 +1,4 @@
-using Autofac.Extras.Moq;
-using Logging;
 using Logging.Interface;
-using PlexRipper.BaseTests;
-using Shouldly;
-using Xunit;
-using Xunit.Abstractions;
 
 namespace Logging.UnitTests;
 

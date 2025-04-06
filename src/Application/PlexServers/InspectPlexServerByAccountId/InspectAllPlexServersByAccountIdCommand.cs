@@ -41,12 +41,18 @@ public class InspectAllPlexServersByAccountIdCommandHandler
     )
     {
         var plexAccountId = command.PlexAccountId;
+        var plexAccountDisplayName = await _dbContext.GetPlexAccountDisplayName(plexAccountId, cancellationToken);
+
+        _log.Here()
+            .Information(
+                "Executing {MethodName} for Plex account: {PlexAccountName}",
+                nameof(InspectAllPlexServersByAccountIdCommand),
+                plexAccountDisplayName
+            );
 
         var refreshResult = await _mediator.Send(new RefreshPlexServerAccessCommand(plexAccountId), cancellationToken);
         if (refreshResult.IsFailed)
             return refreshResult.LogError();
-
-        var plexAccountDisplayName = await _dbContext.GetPlexAccountDisplayName(plexAccountId, cancellationToken);
 
         // Retrieve all accessible servers for the PlexAccount
         var plexServers = await _dbContext.GetAccessiblePlexServers(plexAccountId, cancellationToken);

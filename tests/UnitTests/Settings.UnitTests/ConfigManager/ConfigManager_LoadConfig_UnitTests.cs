@@ -1,7 +1,6 @@
 ﻿using System.IO.Abstractions;
 using Autofac;
 using Environment;
-using FileSystem.Contracts;
 using Logging.Interface;
 using PlexRipper.Settings;
 using Settings.Contracts;

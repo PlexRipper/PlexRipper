@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Application.Contracts;
 using Microsoft.AspNetCore.Http;
 

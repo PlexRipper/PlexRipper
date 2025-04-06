@@ -1,4 +1,3 @@
-using Application.Contracts;
 using Data.Contracts;
 using FluentValidation;
 using Logging.Interface;

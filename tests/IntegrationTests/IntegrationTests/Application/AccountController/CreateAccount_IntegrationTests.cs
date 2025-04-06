@@ -1,10 +1,7 @@
-using System.Net;
 using Application.Contracts;
 using Data.Contracts;
 using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
-using Moq.Contrib.HttpClient;
-using PlexApi.Contracts;
 using PlexRipper.Application;
 
 namespace IntegrationTests.AccountController;

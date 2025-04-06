@@ -1,6 +1,5 @@
 using System.Net;
 using System.Text;
-using System.Text.Json;
 using Bogus;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
 

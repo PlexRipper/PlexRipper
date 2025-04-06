@@ -1,7 +1,4 @@
-using Data.Contracts;
-using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace PlexRipper.Application.UnitTests.ClearCompleted;
 

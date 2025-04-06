@@ -23,15 +23,17 @@ public class Program
 
             LogManager.SetupLogging(EnvironmentExtensions.GetLogLevel());
 
-            var version = EnvironmentExtensions.GetVersion();
             _log.Information(
                 "Currently running {Channel} version {Version} on {CurrentOS}",
-                version.Contains("dev") ? "DEVELOPMENT" : "STABLE",
-                version,
+                EnvironmentExtensions.IsDevRelease() ? "DEVELOPMENT" : "STABLE",
+                EnvironmentExtensions.GetVersion(),
                 OsInfo.CurrentOS
             );
 
-            AppExtensions.LogIdentity();
+            if (EnvironmentExtensions.IsDevRelease())
+            {
+                AppExtensions.LogIdentity();
+            }
 
             _log.InformationLine("Initiating boot process");
 

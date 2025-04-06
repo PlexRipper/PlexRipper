@@ -1,5 +1,5 @@
 import { checkConfig, type MockConfig } from '@mock';
-import { type IBasePageSetupResult, BasePageSetupResult } from '@fixtures';
+import { type IBasePageSetupResult, BasePageSetupResult, setupMockPlexLibraryMetaDataEndpoints } from '@fixtures';
 
 export function basePageSetup(config: Partial<MockConfig> = {}): Cypress.Chainable<IBasePageSetupResult> {
 	const validConfig = checkConfig(config);
@@ -28,6 +28,9 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Cypress.Chainab
 
 	// PlexLibraries call
 	result.setupPlexLibrariesEndpoints(validConfig);
+
+	// PlexLibraryMetaData call
+	result.setupMockPlexLibraryMetaDataEndpoints(validConfig);
 
 	// PlexAccount call
 	result.setupPlexAccountsEndpoints(validConfig);

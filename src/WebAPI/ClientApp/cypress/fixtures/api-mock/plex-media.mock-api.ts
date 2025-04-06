@@ -42,17 +42,19 @@ export function setupMockPlexMediaEndpoints(
 		};
 
 		// Library media endpoints
+		const url = cy.urlBuilder(PlexLibraryPaths.getPlexLibraryMediaEndpoint(library.id, {
+			countryId: 0,
+			filterOfflineMedia: false,
+			filterOwnedMedia: false,
+			genreId: 0,
+			roleId: 0,
+			page: 0,
+			size: 0,
+		}));
+
 		cy.intercept(
 			'GET',
-			PlexLibraryPaths.getPlexLibraryMediaEndpoint(library.id, {
-				countryId: 0,
-				filterOfflineMedia: false,
-				filterOwnedMedia: false,
-				genreId: 0,
-				roleId: 0,
-				page: 0,
-				size: 0,
-			}),
+			url.pathname + '*',
 			{
 				statusCode: 200,
 				body: generateResultDTO(mediaStatisticsDTO),

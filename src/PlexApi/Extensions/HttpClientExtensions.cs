@@ -53,13 +53,35 @@ public static class HttpClientExtensions
             as HttpResponseMessage
         )!;
 
-    public static async Task<string> ReadAsFormattedJsonAsync(this HttpContent content)
+    public static async Task<string> ReadAsFormattedJsonAsync(this HttpContent? content)
     {
         if (content == null)
-            throw new ArgumentNullException(nameof(content));
+            return "HttpContent is null.";
 
-        var stringResponse = await content.ReadAsStringAsync();
-        using var doc = JsonDocument.Parse(stringResponse);
-        return JsonSerializer.Serialize(doc, DefaultJsonSerializerOptions.UserSettingsOptions);
+        // Check if the content indicates a file download via Content-Disposition header.
+        if (
+            content.Headers.ContentDisposition != null
+            && content.Headers.ContentDisposition.DispositionType.Equals(
+                "attachment",
+                StringComparison.OrdinalIgnoreCase
+            )
+        )
+        {
+            return $"Content is a file download. Filename: {content.Headers.ContentDisposition.FileName}";
+        }
+
+        try
+        {
+            var stringResponse = await content.ReadAsStringAsync();
+            if (string.IsNullOrWhiteSpace(stringResponse))
+                return "Content is empty.";
+
+            using var doc = JsonDocument.Parse(stringResponse);
+            return JsonSerializer.Serialize(doc, DefaultJsonSerializerOptions.UserSettingsOptions);
+        }
+        catch (JsonException)
+        {
+            return "Content is not valid JSON.";
+        }
     }
 }

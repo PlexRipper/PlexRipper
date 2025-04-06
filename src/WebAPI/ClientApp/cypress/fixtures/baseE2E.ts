@@ -1,5 +1,5 @@
 import { checkConfig, type MockConfig } from '@mock';
-import { type IBasePageSetupResult, BasePageSetupResult, setupMockPlexLibraryMetaDataEndpoints } from '@fixtures';
+import { type IBasePageSetupResult, BasePageSetupResult } from '@fixtures';
 
 export function basePageSetup(config: Partial<MockConfig> = {}): Cypress.Chainable<IBasePageSetupResult> {
 	const validConfig = checkConfig(config);

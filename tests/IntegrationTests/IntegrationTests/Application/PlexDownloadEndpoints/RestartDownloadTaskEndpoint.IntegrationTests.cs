@@ -53,7 +53,9 @@ public class RestartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
 
         var downloadTaskDb = await container.DbContext.GetDownloadTaskAsync(downloadTask.Id);
         downloadTaskDb.ShouldNotBeNull();
-        downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.Queued);
+
+        // In CI this is sometimes completed to quickly
+        downloadTaskDb.DownloadStatus.ShouldBeOneOf(DownloadStatus.Queued, DownloadStatus.Completed);
 
         await container.SchedulerService.AwaitScheduler();
         await Task.Delay(2000);

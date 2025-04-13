@@ -191,7 +191,7 @@ public class MockPlexApiServer : IMockPlexApiServer
             // Generate media for each library
             foreach (var library in _libraries[server.ClientIdentifier])
             {
-                var type = library.Type.ToPlexMediaType();
+                var type = library.Type.ToString().ToPlexMediaType();
                 var libraryKey = library.Key;
                 if (type == PlexMediaType.Movie)
                 {

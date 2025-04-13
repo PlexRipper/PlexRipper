@@ -18,6 +18,7 @@ public static class StringToPlexMediaTypeConverter
             "episode" => PlexMediaType.Episode,
             "music" => PlexMediaType.Music,
             "album" => PlexMediaType.Album,
+            "track" => PlexMediaType.Song,
             _ => PlexMediaType.Unknown,
         };
     }
@@ -32,6 +33,7 @@ public static class StringToPlexMediaTypeConverter
             PlexMediaType.Season => "season",
             PlexMediaType.Episode => "episode",
             PlexMediaType.Album => "album",
+            PlexMediaType.Song => "track",
             _ => "unknown",
         };
     }

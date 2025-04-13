@@ -76,12 +76,13 @@ jobs:
                 uses: ./.github/workflows/steps/dotnet-setup/
             -   run: mkdir -p results/unit
             -   name: Unit Tests
-                run: dotnet test tests/UnitTests/UnitTests.sln --no-build --verbosity normal --logger "junit;LogFilePath=results/unit/tests.xml"
-            -   name: Create Unit Test Summary
-                uses: test-summary/action@v2
-                with:
-                    paths: results/unit/**/*.xml
-                if: always()
+                run: dotnet test tests/UnitTests/UnitTests.sln --no-build --verbosity normal --logger "junit;LogFilePath=results/unit/TEST-UnitTests.xml"
+            - name: Create Unit Test Summary
+              uses: test-summary/action@v2
+              with:
+                  paths: results/unit/TEST-*.xml
+                  show: all
+              if: always()
     # Back-End Integration Tests
     Back-End-Integration-Tests:
         runs-on: ubuntu-latest
@@ -98,7 +99,8 @@ jobs:
                     success=false
                     while [ $count -lt $max_retries ]; do
                       echo "Running integration tests attempt $((count + 1)) of $max_retries"
-                      dotnet test tests/IntegrationTests/IntegrationTests.sln --no-build --verbosity normal --logger "junit;LogFilePath=results/integration/tests.xml"
+                      dotnet test tests/IntegrationTests/IntegrationTests.sln --no-build --verbosity normal --logger "junit;LogFilePath=results/integration/TEST-IntegrationTests.xml"
+
                       if [ $? -eq 0 ]; then
                         success=true
                         break
@@ -114,7 +116,8 @@ jobs:
             -   name: Create Integration Test Summary
                 uses: test-summary/action@v2
                 with:
-                    paths: results/integration/**/*.xml
+                    paths: results/integration/TEST-*.xml
+                    show: all
                 if: always()
 
     # Ensure the Docker image can be built without errors

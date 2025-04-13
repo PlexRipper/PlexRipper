@@ -593,7 +593,7 @@ export interface PlexLibraryDTO {
   /** @format int32 */
   count: number;
   /** @format date-time */
-  createdAt: string;
+  createdAt?: string | null;
   defaultDestination?: FolderPathDTO | null;
   /** @format int32 */
   defaultDestinationId: number;
@@ -608,7 +608,7 @@ export interface PlexLibraryDTO {
   /** @format int32 */
   plexServerId: number;
   /** @format date-time */
-  scannedAt: string;
+  scannedAt?: string | null;
   /** @format int32 */
   seasonCount: number;
   /** @format date-time */
@@ -616,7 +616,7 @@ export interface PlexLibraryDTO {
   title: string;
   type: PlexMediaType;
   /** @format date-time */
-  updatedAt: string;
+  updatedAt?: string | null;
   uuid: string;
 }
 

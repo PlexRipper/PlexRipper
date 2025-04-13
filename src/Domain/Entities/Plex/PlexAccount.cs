@@ -84,11 +84,18 @@ public class PlexAccount : BaseEntity
     public required bool HasPassword { get; init; }
 
     /// <summary>
-    /// The general plex authentication token used to retrieve account data such as the <see cref="PlexServer" />s the
-    /// account has access to.
+    /// The user has the option to provide their own token to authenticate with plex.tv.
+    /// This is not the same as the auto filled AuthenticationToken when provided by the username and password
     /// </summary>
     [Column(Order = 13)]
-    public required string AuthenticationToken { get; init; }
+    public required string ManualAuthenticationToken { get; init; }
+
+    /// <summary>
+    /// The general plex authentication token used to retrieve account data such as the <see cref="PlexServer" />s the
+    /// account has access to. This is filled in by the PlexAPI
+    /// </summary>
+    [Column(Order = 14)]
+    public required string AuthenticationToken { get; set; }
 
     /// <summary>
     /// If this is a main account then it will get a lower priority when downloading media which a non-main account also has access to.
@@ -119,6 +126,8 @@ public class PlexAccount : BaseEntity
     public List<PlexLibrary> PlexLibraries =>
         PlexAccountLibraries.Where(x => x.PlexLibrary != null).Select(x => x.PlexLibrary!).ToList();
 
+    public string GetAuthToken => IsAuthTokenMode ? ManualAuthenticationToken : AuthenticationToken;
+
     /// <summary>
     /// Gets or sets whether this <see cref="PlexAccount"/> is 2FA protected.
     /// </summary>
@@ -147,7 +156,7 @@ public class PlexAccount : BaseEntity
             Password = password,
             IsEnabled = false,
             IsValidated = false,
-            ValidatedAt = default,
+            ValidatedAt = null,
             PlexId = 0,
             Uuid = string.Empty,
             ClientId = string.Empty,
@@ -155,6 +164,7 @@ public class PlexAccount : BaseEntity
             Email = string.Empty,
             HasPassword = false,
             AuthenticationToken = string.Empty,
+            ManualAuthenticationToken = string.Empty,
             IsMain = false,
             PlexAccountServers = [],
             PlexAccountLibraries = [],

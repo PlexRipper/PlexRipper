@@ -25,6 +25,7 @@ public partial class FakeData
             .RuleFor(x => x.Title, f => f.Internet.UserName())
             .RuleFor(x => x.HasPassword, _ => true)
             .RuleFor(x => x.AuthenticationToken, f => f.Random.Guid().ToString())
+            .RuleFor(x => x.ManualAuthenticationToken, _ => string.Empty)
             .RuleFor(x => x.IsMain, _ => true)
             .RuleFor(x => x.Is2Fa, _ => false)
             .RuleFor(x => x.IsAuthTokenMode, _ => false)

@@ -43,12 +43,12 @@ public class ValidatePlexAccountEndpointRequestValidator : Validator<ValidatePle
         RuleFor(x => x.PlexAccount.Username)
             .NotEmpty()
             .MinimumLength(5)
-            .When(m => string.IsNullOrEmpty(m.PlexAccount.AuthenticationToken));
+            .When(m => string.IsNullOrEmpty(m.PlexAccount.ManualAuthenticationToken));
 
         RuleFor(x => x.PlexAccount.Password)
             .NotEmpty()
             .MinimumLength(5)
-            .When(m => string.IsNullOrEmpty(m.PlexAccount.AuthenticationToken));
+            .When(m => string.IsNullOrEmpty(m.PlexAccount.ManualAuthenticationToken));
     }
 }
 

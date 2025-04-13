@@ -3,7 +3,6 @@ using System.Runtime.InteropServices;
 using System.Text.Json;
 using Environment;
 using Logging.Interface;
-using Serilog.Events;
 
 namespace PlexRipper.Application;
 

@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Environment;
 using Logging.Common;
 using Logging.Enricher;

@@ -8,6 +8,8 @@ public static class EnvironmentExtensions
 
     public const string UnmaskedModeKey = "UNMASKED";
 
+    public const string LogEnvVarsKey = "LOG_ENV_VARS";
+
     public const string LogLevelKey = "LOG_LEVEL";
 
     public const string VersionKey = "VERSION";
@@ -39,6 +41,12 @@ public static class EnvironmentExtensions
     /// When set to true, the application will not mask/censor sensitive data in the logs.
     /// </summary>
     public static bool IsUnmasked() => IsTrue(System.Environment.GetEnvironmentVariable(UnmaskedModeKey));
+
+    /// <summary>
+    /// When set to true, the application will log all environment variables set on startup
+    /// </summary>
+    /// <returns></returns>
+    public static bool ShouldLogEnvVars() => IsTrue(System.Environment.GetEnvironmentVariable(LogEnvVarsKey));
 
     public static LogEventLevel GetLogLevel()
     {

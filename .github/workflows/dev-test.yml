@@ -90,7 +90,7 @@ jobs:
             -   name: Create Unit Test Summary
                 uses: test-summary/action@v2
                 with:
-                    paths: tests/**/results/unit/**/*.xml
+                    paths: results/unit/TEST-*.xml  # Relative path is safer here  
                     show: all
                 if: always()
     # Back-End Integration Tests

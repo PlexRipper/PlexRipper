@@ -80,7 +80,7 @@ jobs:
             - name: Create Unit Test Summary
               uses: test-summary/action@v2
               with:
-                  paths: results/unit/TEST-*.xml
+                  paths: tests/**/results/unit/**/*.xml
                   show: all
               if: always()
     # Back-End Integration Tests
@@ -116,7 +116,7 @@ jobs:
             -   name: Create Integration Test Summary
                 uses: test-summary/action@v2
                 with:
-                    paths: results/integration/TEST-*.xml
+                    paths: tests/**/results/integration/**/*.xml
                     show: all
                 if: always()
 

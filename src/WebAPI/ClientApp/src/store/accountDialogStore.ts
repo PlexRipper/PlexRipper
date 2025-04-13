@@ -167,6 +167,14 @@ export const useAccountDialogStore = defineStore('AccountDialogStore', () => {
 				}),
 			);
 		},
+		switchInputMode(isAuthTokenMode: boolean) {
+			state.isAuthTokenMode = isAuthTokenMode;
+			// Clear input fields
+			state.username = '';
+			state.password = '';
+			state.authenticationToken = '';
+			state.isValidated = false;
+		},
 		deleteAccount() {
 			state.deleteLoading = true;
 			return accountStore.deleteAccount(state.id).pipe(tap(() => dialogStore.closeDialog(DialogType.AccountDialog)));

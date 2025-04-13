@@ -18,7 +18,7 @@ public partial class FakePlexApiData
             .RuleFor(x => x.Filters, f => f.Random.Bool())
             .RuleFor(x => x.Refreshing, f => f.Random.Bool())
             .RuleFor(x => x.Thumb, _ => "/:/resources/movie.png")
-            .RuleFor(x => x.Type, _ => type.ToPlexMediaTypeString())
+            .RuleFor(x => x.Type, _ => type.ToApiTypeEnum<GetAllLibrariesType>())
             .RuleFor(x => x.Title, f => f.Company.CompanyName())
             .RuleFor(x => x.Agent, _ => "tv.plex.agents.movie")
             .RuleFor(x => x.Scanner, _ => "Plex Movie")
@@ -30,7 +30,7 @@ public partial class FakePlexApiData
             .RuleFor(x => x.Content, f => f.Random.Bool())
             .RuleFor(x => x.Directory, f => f.Random.Bool())
             .RuleFor(x => x.ContentChangedAt, f => (int)f.Date.Recent().ToUnixLong())
-            .RuleFor(x => x.Hidden, _ => 0)
+            .RuleFor(x => x.Hidden, _ => Hidden.Disable)
             .RuleFor(
                 x => x.Location,
                 f => [new GetAllLibrariesLocation { Id = f.Random.Number(100000), Path = f.System.DirectoryPath() }]

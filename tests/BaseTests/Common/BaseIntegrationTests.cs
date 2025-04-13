@@ -11,7 +11,7 @@ public class BaseIntegrationTests
     protected BaseIntegrationTests(ITestOutputHelper output, LogEventLevel logLevel = LogEventLevel.Verbose)
     {
         EnvironmentExtensions.SetLogLevel(logLevel);
-        EnvironmentExtensions.SetUnmaskedLogMode(true);
+        EnvironmentExtensions.EnableUnmaskedLog(true);
 
         // Ensure that the test output helper is set first
         LogConfig.SetTestOutputHelper(output);

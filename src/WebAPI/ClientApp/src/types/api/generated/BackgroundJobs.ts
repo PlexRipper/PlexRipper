@@ -26,11 +26,18 @@ export class BackgroundJobs {
    * @request GET:/api/BackgroundJobs
    * @secure
    */
-  getAllBackgroundJobsEndpoint = (params: RequestParams = {}) =>
+  getAllBackgroundJobsEndpoint = (
+    query?: {
+      /** @default false */
+      UseMockData?: boolean;
+    },
+    params: RequestParams = {},
+  ) =>
     from(
       Axios.request<JobStatusUpdateDTO[]>({
         url: `/api/BackgroundJobs`,
         method: "GET",
+        params: query,
         secure: true,
         format: "json",
         ...params,
@@ -39,5 +46,8 @@ export class BackgroundJobs {
 }
 
 export class BackgroundJobsPaths {
-  static getAllBackgroundJobsEndpoint = () => queryString.stringifyUrl({ url: `/api/BackgroundJobs` });
+  static getAllBackgroundJobsEndpoint = (query?: {
+    /** @default false */
+    UseMockData?: boolean;
+  }) => queryString.stringifyUrl({ url: `/api/BackgroundJobs`, query });
 }

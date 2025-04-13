@@ -45,6 +45,7 @@ export function generatePlexAccount({
 	const value: PlexAccountDTO = {
 		id,
 		authenticationToken: randUuid(),
+		apiAuthenticationToken: '',
 		clientId: randUuid(),
 		displayName: randFullName(),
 		email: randEmail(),

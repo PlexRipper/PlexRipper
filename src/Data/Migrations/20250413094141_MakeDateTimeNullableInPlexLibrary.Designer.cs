@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PlexRipper.Data;
 
@@ -10,9 +11,11 @@ using PlexRipper.Data;
 namespace PlexRipper.Data.Migrations
 {
     [DbContext(typeof(PlexRipperDbContext))]
-    partial class PlexRipperDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250413094141_MakeDateTimeNullableInPlexLibrary")]
+    partial class MakeDateTimeNullableInPlexLibrary
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -821,17 +824,12 @@ namespace PlexRipper.Data.Migrations
                     b.Property<string>("AuthenticationToken")
                         .IsRequired()
                         .HasColumnType("TEXT")
-                        .HasColumnOrder(14);
+                        .HasColumnOrder(13);
 
                     b.Property<string>("ClientId")
                         .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(9);
-
-                    b.Property<string>("CustomAuthenticationToken")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(13);
 
                     b.Property<string>("DisplayName")
                         .IsRequired()

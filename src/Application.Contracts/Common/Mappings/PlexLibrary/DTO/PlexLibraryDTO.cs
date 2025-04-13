@@ -12,11 +12,11 @@ public record PlexLibraryDTO
 
     public required PlexMediaType Type { get; set; }
 
-    public required DateTime UpdatedAt { get; set; }
+    public required DateTime? UpdatedAt { get; set; }
 
-    public required DateTime CreatedAt { get; set; }
+    public required DateTime? CreatedAt { get; set; }
 
-    public required DateTime ScannedAt { get; set; }
+    public required DateTime? ScannedAt { get; set; }
 
     public required DateTime? SyncedAt { get; set; }
 

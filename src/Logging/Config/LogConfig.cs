@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Environment;
 using Logging.Common;
 using Logging.Enricher;
@@ -30,7 +29,7 @@ public static class LogConfig
             .Enrich.FromLogContext();
 
         // Do not mask data when debugging
-        if (!Debugger.IsAttached || !EnvironmentExtensions.IsUnmasked())
+        if (!EnvironmentExtensions.IsUnmasked())
         {
             config.Enrich.WithSensitiveDataMasking(options =>
             {

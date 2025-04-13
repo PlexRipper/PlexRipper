@@ -95,6 +95,7 @@ public class PlexApiWrapper
             plexTvClient.Authentication.PostUsersSignInDataAsync(
                 new PostUsersSignInDataRequest()
                 {
+                    ClientID = GetClientId,
                     RequestBody = new PostUsersSignInDataRequestBody()
                     {
                         Login = plexAccount.Username,
@@ -122,6 +123,7 @@ public class PlexApiWrapper
             Email = x.UserPlexAccount!.Email,
             HasPassword = x.UserPlexAccount!.HasPassword.GetValueOrDefault(),
             AuthenticationToken = x.UserPlexAccount!.AuthToken,
+            CustomAuthenticationToken = plexAccount.CustomAuthenticationToken,
             IsMain = plexAccount.IsMain,
             PlexAccountServers = [],
             PlexAccountLibraries = [],
@@ -277,7 +279,7 @@ public class PlexApiWrapper
         if (response.IsFailed)
             return response.ToResult();
 
-        if (response.Value.Object?.MediaContainer.Directory is null)
+        if (response.Value.Object?.MediaContainer?.Directory is null)
         {
             _log.Error(
                 "Plex server: {PlexServerName} returned an empty response when libraries were requested",
@@ -292,7 +294,7 @@ public class PlexApiWrapper
             .Select(x => new PlexLibrary
             {
                 Id = 0,
-                Type = x.Type.ToPlexMediaTypeFromPlexApi(),
+                Type = x.Type.ToString().ToPlexMediaTypeFromPlexApi(),
                 Title = x.Title,
                 Key = x.Key,
                 CreatedAt = DateTimeExtensions.FromUnixTime(x.CreatedAt),
@@ -409,6 +411,7 @@ public class PlexApiWrapper
             Email = x.UserPlexAccount!.Email,
             HasPassword = x.UserPlexAccount!.HasPassword.GetValueOrDefault(),
             AuthenticationToken = x.UserPlexAccount!.AuthToken,
+            CustomAuthenticationToken = plexAccount.CustomAuthenticationToken,
             IsMain = plexAccount.IsMain,
             PlexAccountServers = [],
             PlexAccountLibraries = [],

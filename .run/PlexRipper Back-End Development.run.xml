@@ -9,9 +9,10 @@
       <env name="DOTNET_ENVIRONMENT" value="Development" />
       <env name="DOTNET_HTTP_PORTS" value="5000" />
       <env name="INFORMATIONAL_VERSION" value="0.26.9-dev-2025-12-11" />
-      <env name="LOG_LEVEL" value="VERBOSE" />
       <env name="PGID" value="1000" />
       <env name="PUID" value="1000" />
+      <env name="LOG_LEVEL" value="VERBOSE" />
+      <env name="LOG_ENV_VARS" value="false" />
       <env name="UNMASKED" value="true" />
       <env name="VERSION" value="0.26.9" />
     </envs>

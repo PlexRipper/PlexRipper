@@ -30,10 +30,7 @@ public class Program
                 OsInfo.CurrentOS
             );
 
-            if (EnvironmentExtensions.IsDevRelease())
-            {
-                AppExtensions.LogIdentity();
-            }
+            AppExtensions.LogIdentity();
 
             _log.InformationLine("Initiating boot process");
 

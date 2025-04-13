@@ -8,6 +8,8 @@ public static class EnvironmentExtensions
 
     public const string UnmaskedModeKey = "UNMASKED";
 
+    public const string LogEnvVarsKey = "LOG_ENV_VARS";
+
     public const string LogLevelKey = "LOG_LEVEL";
 
     public const string VersionKey = "VERSION";
@@ -24,7 +26,7 @@ public static class EnvironmentExtensions
     /// <param name="value"></param>
     /// <returns></returns>
     private static bool IsTrue(string? value) =>
-        value == Convert.ToString(true) || value == "1" || value == "true" || value == "TRUE";
+        value == TrueValue || value == "1" || value == "true" || value == "TRUE";
 
     public static bool IsIntegrationTestMode() =>
         System.Environment.GetEnvironmentVariable(IntegrationTestModeKey) == TrueValue;
@@ -39,6 +41,12 @@ public static class EnvironmentExtensions
     /// When set to true, the application will not mask/censor sensitive data in the logs.
     /// </summary>
     public static bool IsUnmasked() => IsTrue(System.Environment.GetEnvironmentVariable(UnmaskedModeKey));
+
+    /// <summary>
+    /// When set to true, the application will log all environment variables set on startup
+    /// </summary>
+    /// <returns></returns>
+    public static bool ShouldLogEnvVars() => IsTrue(System.Environment.GetEnvironmentVariable(LogEnvVarsKey));
 
     public static LogEventLevel GetLogLevel()
     {
@@ -75,8 +83,16 @@ public static class EnvironmentExtensions
     /// <summary>
     /// When set to true, the application will not mask/censor sensitive data in the logs.
     /// </summary>
-    public static void SetUnmaskedLogMode(bool state)
+    public static void EnableUnmaskedLog(bool state)
     {
         System.Environment.SetEnvironmentVariable(UnmaskedModeKey, state.ToString());
+    }
+
+    /// <summary>
+    /// When set to true, the application will not mask/censor sensitive data in the logs.
+    /// </summary>
+    public static void EnableLogEnvVars(bool state)
+    {
+        System.Environment.SetEnvironmentVariable(LogEnvVarsKey, state.ToString());
     }
 }

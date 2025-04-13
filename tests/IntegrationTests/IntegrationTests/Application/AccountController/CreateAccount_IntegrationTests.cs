@@ -49,8 +49,8 @@ public class CreateAccountIntegrationTests : BaseIntegrationTests
         var response = await client.POSTAsync<
             CreatePlexAccountEndpoint,
             CreatePlexAccountEndpointRequest,
-            ResultDTO<PlexAccount>
-        >(new CreatePlexAccountEndpointRequest() { PlexAccount = plexAccountDTO });
+            ResultDTO<PlexAccountDTO>
+        >(new CreatePlexAccountEndpointRequest { PlexAccount = plexAccountDTO });
         response.Response.IsSuccessStatusCode.ShouldBeTrue();
 
         var resultDTO = response.Result;

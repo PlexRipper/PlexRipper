@@ -88,7 +88,7 @@ public class PlexAccount : BaseEntity
     /// This is not the same as the auto filled AuthenticationToken when provided by the username and password
     /// </summary>
     [Column(Order = 13)]
-    public required string ManualAuthenticationToken { get; init; }
+    public required string CustomAuthenticationToken { get; init; }
 
     /// <summary>
     /// The general plex authentication token used to retrieve account data such as the <see cref="PlexServer" />s the
@@ -126,7 +126,7 @@ public class PlexAccount : BaseEntity
     public List<PlexLibrary> PlexLibraries =>
         PlexAccountLibraries.Where(x => x.PlexLibrary != null).Select(x => x.PlexLibrary!).ToList();
 
-    public string GetAuthToken => IsAuthTokenMode ? ManualAuthenticationToken : AuthenticationToken;
+    public string GetAuthToken => IsAuthTokenMode ? CustomAuthenticationToken : AuthenticationToken;
 
     /// <summary>
     /// Gets or sets whether this <see cref="PlexAccount"/> is 2FA protected.
@@ -164,7 +164,7 @@ public class PlexAccount : BaseEntity
             Email = string.Empty,
             HasPassword = false,
             AuthenticationToken = string.Empty,
-            ManualAuthenticationToken = string.Empty,
+            CustomAuthenticationToken = string.Empty,
             IsMain = false,
             PlexAccountServers = [],
             PlexAccountLibraries = [],

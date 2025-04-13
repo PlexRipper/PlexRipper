@@ -263,6 +263,11 @@
         "resolved": "2024.2.0",
         "contentHash": "GNnqCFW/163p1fOehKx0CnAqjmpPrUSqrgfHM6qca+P+RN39C9rhlfZHQpJhxmQG/dkOYe/b3Z0P8b6Kv5m1qw=="
       },
+      "JunitXml.TestLogger": {
+        "type": "Transitive",
+        "resolved": "6.1.0",
+        "contentHash": "a3ciawoHOzqcry7yS5z9DerNyF9QZi6fEZZJPILSy6Noj6+r8Ydma+cENA6wvivXDCblpXxw72wWT9QApNy/0w=="
+      },
       "LukeHagar.PlexAPI.SDK": {
         "type": "Transitive",
         "resolved": "0.14.5",
@@ -1812,6 +1817,7 @@
           "Bogus": "[35.6.1, )",
           "Bogus.Hollywood": "[35.6.1, )",
           "FastEndpoints.Testing": "[5.32.0, )",
+          "JunitXml.TestLogger": "[6.1.0, )",
           "Microsoft.AspNetCore.Mvc.Testing": "[8.0.11, )",
           "Microsoft.AspNetCore.SpaServices.Extensions": "[8.0.10, )",
           "Microsoft.NET.Test.Sdk": "[17.11.1, )",

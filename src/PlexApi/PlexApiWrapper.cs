@@ -95,6 +95,7 @@ public class PlexApiWrapper
             plexTvClient.Authentication.PostUsersSignInDataAsync(
                 new PostUsersSignInDataRequest()
                 {
+                    ClientID = GetClientId,
                     RequestBody = new PostUsersSignInDataRequestBody()
                     {
                         Login = plexAccount.Username,

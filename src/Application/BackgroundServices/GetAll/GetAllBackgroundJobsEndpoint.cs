@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Application.Contracts;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
@@ -6,8 +7,17 @@ namespace PlexRipper.Application;
 
 public record GetAllBackgroundJobsEndpointRequest
 {
+    /// <summary>
+    /// NOTE: This constructor is needed to make the query param optional in the front-end typescript-api generation.
+    /// </summary>
+    [SetsRequiredMembers]
+    public GetAllBackgroundJobsEndpointRequest(bool useMockData = false)
+    {
+        UseMockData = useMockData;
+    }
+
     [QueryParam, BindFrom("UseMockData")]
-    public bool UseMockData { get; init; } = false;
+    public required bool UseMockData { get; init; }
 }
 
 public class GetAllBackgroundJobsEndpoint : BaseEndpoint<GetAllBackgroundJobsEndpointRequest, List<JobStatusUpdateDTO>>

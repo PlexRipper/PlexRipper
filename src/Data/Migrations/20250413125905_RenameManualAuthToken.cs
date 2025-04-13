@@ -13,7 +13,8 @@ namespace PlexRipper.Data.Migrations
             migrationBuilder.RenameColumn(
                 name: "ManualAuthenticationToken",
                 table: "PlexAccounts",
-                newName: "CustomAuthenticationToken");
+                newName: "CustomAuthenticationToken"
+            );
         }
 
         /// <inheritdoc />
@@ -22,7 +23,8 @@ namespace PlexRipper.Data.Migrations
             migrationBuilder.RenameColumn(
                 name: "CustomAuthenticationToken",
                 table: "PlexAccounts",
-                newName: "ManualAuthenticationToken");
+                newName: "ManualAuthenticationToken"
+            );
         }
     }
 }

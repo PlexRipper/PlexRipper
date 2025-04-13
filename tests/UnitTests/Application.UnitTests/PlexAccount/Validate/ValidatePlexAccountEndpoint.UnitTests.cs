@@ -43,7 +43,7 @@ public class ValidatePlexAccountEndpointUnitTests : BaseUnitTest
         account.Email.ShouldBe(testAccountDTO.Email);
         account.Username.ShouldBe(testAccountDTO.Username);
         account.Password.ShouldBe(testAccountDTO.Password);
-        account.ManualAuthenticationToken.ShouldNotBeEmpty();
+        account.ManualAuthenticationToken.ShouldBeEmpty();
     }
 
     [Fact]

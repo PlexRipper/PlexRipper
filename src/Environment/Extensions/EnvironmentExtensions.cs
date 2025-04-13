@@ -26,7 +26,7 @@ public static class EnvironmentExtensions
     /// <param name="value"></param>
     /// <returns></returns>
     private static bool IsTrue(string? value) =>
-        value == Convert.ToString(true) || value == "1" || value == "true" || value == "TRUE";
+        value == TrueValue || value == "1" || value == "true" || value == "TRUE";
 
     public static bool IsIntegrationTestMode() =>
         System.Environment.GetEnvironmentVariable(IntegrationTestModeKey) == TrueValue;
@@ -83,8 +83,16 @@ public static class EnvironmentExtensions
     /// <summary>
     /// When set to true, the application will not mask/censor sensitive data in the logs.
     /// </summary>
-    public static void SetUnmaskedLogMode(bool state)
+    public static void EnableUnmaskedLog(bool state)
     {
         System.Environment.SetEnvironmentVariable(UnmaskedModeKey, state.ToString());
+    }
+
+    /// <summary>
+    /// When set to true, the application will not mask/censor sensitive data in the logs.
+    /// </summary>
+    public static void EnableLogEnvVars(bool state)
+    {
+        System.Environment.SetEnvironmentVariable(LogEnvVarsKey, state.ToString());
     }
 }

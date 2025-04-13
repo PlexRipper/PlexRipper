@@ -30,7 +30,7 @@ public partial class BaseUnitTest
         _output = output;
         _logEventLevel = logEventLevel;
 
-        EnvironmentExtensions.SetUnmaskedLogMode(true);
+        EnvironmentExtensions.EnableUnmaskedLog(true);
 
         LogManager.SetupLogging(logEventLevel);
         LogConfig.SetTestOutputHelper(output);

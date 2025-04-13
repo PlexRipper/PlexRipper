@@ -1,4 +1,4 @@
-﻿using Logging.Interface;
+﻿using Environment;
 using Serilog.Sinks.TestCorrelator;
 
 namespace Logging.UnitTests;
@@ -10,18 +10,18 @@ public class LogMasking_UnitTests : BaseUnitTest<LogMasking_UnitTests>
     public LogMasking_UnitTests(ITestOutputHelper output)
         : base(output)
     {
-        log = LogManager.CreateLogInstance<Log_UnitTests>(output);
+        EnvironmentExtensions.EnableUnmaskedLog(false);
     }
 
     #endregion
-
-    private ILog<Log_UnitTests> log;
 
     [Fact]
     public void ShouldHaveMaskedData_WhenLogPropertyIsConfiguredToBeMasked()
     {
         // Arrange
-        using (TestCorrelator.CreateContext())
+        var log = LogManager.CreateLogInstance<Log_UnitTests>(_output);
+
+        using (var context = TestCorrelator.CreateContext())
         {
             // Act
             log.Debug("Test e-mail: {Email}", "john.doe@hotmail.com");
@@ -45,7 +45,9 @@ public class LogMasking_UnitTests : BaseUnitTest<LogMasking_UnitTests>
             log.Debug("Test MachineIdentifier property: {MachineIdentifier}", "FORBIDDEN");
 
             // Assert
-            var logEvents = TestCorrelator.GetLogEventsFromCurrentContext().ToList();
+            EnvironmentExtensions.IsUnmasked().ShouldBeFalse();
+
+            var logEvents = TestCorrelator.GetLogEventsFromContextGuid(context.Guid).ToList();
             logEvents.ShouldNotBeEmpty();
 
             foreach (var logEvent in logEvents)

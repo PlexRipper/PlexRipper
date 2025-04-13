@@ -18,7 +18,7 @@ public partial class FakePlexApiData
             .RuleFor(x => x.Filters, f => f.Random.Bool())
             .RuleFor(x => x.Refreshing, f => f.Random.Bool())
             .RuleFor(x => x.Thumb, _ => "/:/resources/movie.png")
-            .RuleFor(x => x.Type, _ => type.ToApiTypeEnumFromString<GetAllLibrariesType>())
+            .RuleFor(x => x.Type, _ => type.ToApiTypeEnum<GetAllLibrariesType>())
             .RuleFor(x => x.Title, f => f.Company.CompanyName())
             .RuleFor(x => x.Agent, _ => "tv.plex.agents.movie")
             .RuleFor(x => x.Scanner, _ => "Plex Movie")

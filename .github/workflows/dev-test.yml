@@ -75,7 +75,12 @@ jobs:
             -   name: Dotnet Setup
                 uses: ./.github/workflows/steps/dotnet-setup/
             -   name: Unit Tests
-                run: dotnet test tests/UnitTests/UnitTests.sln --no-build --verbosity normal
+                run: dotnet test tests/UnitTests/UnitTests.sln --no-build --verbosity normal --logger "junit;LogFilePath=results/unit/tests.xml"
+            -   name: Create Unit Test Summary
+                uses: test-summary/action@dist
+                with:
+                    paths: results/unit/**/*.xml
+                if: always()
     # Back-End Integration Tests
     Back-End-Integration-Tests:
         runs-on: ubuntu-latest
@@ -91,7 +96,7 @@ jobs:
                     success=false
                     while [ $count -lt $max_retries ]; do
                       echo "Running integration tests attempt $((count + 1)) of $max_retries"
-                      dotnet test tests/IntegrationTests/IntegrationTests.sln --no-build --verbosity normal
+                      dotnet test tests/IntegrationTests/IntegrationTests.sln --no-build --verbosity normal --logger "junit;LogFilePath=results/integration/tests.xml"
                       if [ $? -eq 0 ]; then
                         success=true
                         break
@@ -104,6 +109,12 @@ jobs:
                       echo "Integration tests failed after $max_retries attempts"
                       exit 1
                     fi
+            -   name: Create Integration Test Summary
+                uses: test-summary/action@dist
+                with:
+                    paths: results/integration/**/*.xml
+                if: always()
+
     # Ensure the Docker image can be built without errors
     Test-Docker-Build:
         needs: [ Front-End-Type-Check, Front-End-Eslint-Check, Front-End-Unit-Tests, Front-End-Integration-Tests, Back-End-Unit-Tests, Back-End-Integration-Tests ]

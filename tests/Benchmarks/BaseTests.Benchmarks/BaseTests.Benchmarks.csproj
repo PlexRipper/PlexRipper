@@ -23,6 +23,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="JunitXml.TestLogger" Version="6.1.0" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1"/>
         <PackageReference Include="coverlet.collector" Version="6.0.0"/>
         <PackageReference Include="BenchmarkDotNet" Version="0.14.0"/>

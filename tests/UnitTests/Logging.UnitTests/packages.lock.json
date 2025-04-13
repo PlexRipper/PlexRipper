@@ -14,6 +14,12 @@
         "resolved": "0.29.2",
         "contentHash": "Pa7xUpo9Z6qWUTk+gAN1sRlEVqG/tgqK6+OvE/JXUfL3m1euNw5/RGj3bdQF/EyagSTyLDpqi0I8xRi1jzGq3A=="
       },
+      "JunitXml.TestLogger": {
+        "type": "Direct",
+        "requested": "[6.1.0, )",
+        "resolved": "6.1.0",
+        "contentHash": "a3ciawoHOzqcry7yS5z9DerNyF9QZi6fEZZJPILSy6Noj6+r8Ydma+cENA6wvivXDCblpXxw72wWT9QApNy/0w=="
+      },
       "Microsoft.NET.Test.Sdk": {
         "type": "Direct",
         "requested": "[17.11.1, )",
@@ -252,11 +258,6 @@
         "type": "Transitive",
         "resolved": "2024.2.0",
         "contentHash": "GNnqCFW/163p1fOehKx0CnAqjmpPrUSqrgfHM6qca+P+RN39C9rhlfZHQpJhxmQG/dkOYe/b3Z0P8b6Kv5m1qw=="
-      },
-      "JunitXml.TestLogger": {
-        "type": "Transitive",
-        "resolved": "6.1.0",
-        "contentHash": "a3ciawoHOzqcry7yS5z9DerNyF9QZi6fEZZJPILSy6Noj6+r8Ydma+cENA6wvivXDCblpXxw72wWT9QApNy/0w=="
       },
       "LukeHagar.PlexAPI.SDK": {
         "type": "Transitive",

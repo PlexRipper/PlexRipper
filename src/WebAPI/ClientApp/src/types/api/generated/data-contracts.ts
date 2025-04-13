@@ -538,6 +538,7 @@ export enum PlexAccessState {
 
 export interface PlexAccountDTO {
   is2Fa: boolean;
+  apiAuthenticationToken: string;
   authenticationToken: string;
   clientId: string;
   displayName: string;

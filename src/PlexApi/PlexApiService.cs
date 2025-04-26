@@ -250,9 +250,6 @@ public class PlexApiService : IPlexApiService
         return Result.Ok(plexServers);
     }
 
-    public Task<Result<PlexAccount>> PlexSignInAsync(PlexAccount plexAccount) =>
-        _plexApiWrapper.PlexSignInAsync(plexAccount);
-
     public async Task<Result<PlexAccount>> ValidatePlexToken(PlexAccount plexAccount) =>
         await _plexApiWrapper.ValidatePlexToken(plexAccount, plexAccount.GetAuthToken);
 
@@ -273,7 +270,9 @@ public class PlexApiService : IPlexApiService
             _log.InformationLine("Plex AuthToken has expired, refreshing Plex AuthToken now");
 
             // TODO:Account for 2FA
-            return await _plexApiWrapper.RefreshPlexAuthTokenAsync(plexAccount);
+            // return await _plexApiWrapper.RefreshPlexAuthTokenAsync(plexAccount);
+            await Task.CompletedTask;
+            throw new Exception("Plex AuthToken has expired and needs to be refreshed");
         }
 
         return Result.Fail($"PlexAccount with Id: {plexAccount.Id} contained an empty AuthToken!").LogError();

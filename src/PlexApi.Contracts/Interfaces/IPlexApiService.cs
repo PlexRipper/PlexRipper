@@ -7,12 +7,6 @@ namespace PlexApi.Contracts;
 public interface IPlexApiService
 {
     /// <summary>
-    ///     Returns the <see cref="PlexAccount" /> after PlexApi validation.
-    /// </summary>
-    /// <returns></returns>
-    Task<Result<PlexAccount>> PlexSignInAsync(PlexAccount plexAccount);
-
-    /// <summary>
     /// Retrieves the accessible <see cref="PlexServer">PlexServers</see> by this <see cref="PlexAccount"/> with the <see cref="PlexServerConnection">PlexServerConnections</see> from the Plex API.
     /// </summary>
     /// <param name="plexAccountId"> The <see cref="PlexAccount"/> to use.</param>

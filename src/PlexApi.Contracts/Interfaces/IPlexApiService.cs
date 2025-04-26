@@ -74,6 +74,4 @@ public interface IPlexApiService
     );
 
     Task<Result<PlexAccount>> ValidatePlexToken(PlexAccount plexAccount);
-
-    Task<Result<ServerIdentityDTO>> ValidatePlexConnection(string plexServerConnection);
 }

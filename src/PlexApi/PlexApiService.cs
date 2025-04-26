@@ -256,30 +256,6 @@ public class PlexApiService : IPlexApiService
     public async Task<Result<PlexAccount>> ValidatePlexToken(PlexAccount plexAccount) =>
         await _plexApiWrapper.ValidatePlexToken(plexAccount, plexAccount.GetAuthToken);
 
-    public async Task<Result<ServerIdentityDTO>> ValidatePlexConnection(string plexServerConnection)
-    {
-        var response = await _plexApiWrapper.ValidatePlexConnectionUrl(plexServerConnection);
-        if (response.IsFailed)
-        {
-            return response.ToResult();
-        }
-
-        var mediaContainer = response.Value.Object?.MediaContainer ?? null;
-        if (mediaContainer is null)
-        {
-            return ResultExtensions.IsNull(nameof(mediaContainer));
-        }
-
-        return Result.Ok(
-            new ServerIdentityDTO
-            {
-                Claimed = mediaContainer.Claimed ?? false,
-                MachineIdentifier = mediaContainer.MachineIdentifier ?? string.Empty,
-                Version = mediaContainer.Version ?? string.Empty,
-            }
-        );
-    }
-
     private async Task<Result<string>> GetPlexApiTokenAsync(PlexAccount? plexAccount)
     {
         if (plexAccount == null)

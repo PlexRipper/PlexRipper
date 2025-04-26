@@ -328,26 +328,6 @@ public class PlexApiWrapper
             : Result.Ok(value);
     }
 
-    /// <summary>
-    /// Used to validate the connection URL to the Plex server.
-    /// </summary>
-    /// <param name="plexConnectionUrl"></param>
-    /// <returns></returns>
-    public async Task<Result<GetServerIdentityResponse>> ValidatePlexConnectionUrl(string plexConnectionUrl)
-    {
-        var client = CreateClient(
-            string.Empty,
-            new PlexApiClientOptions
-            {
-                ConnectionUrl = plexConnectionUrl,
-                Timeout = 5,
-                RetryCount = 0,
-            }
-        );
-
-        return await ToResponse(client.Server.GetServerIdentityAsync());
-    }
-
     public async Task<Result<PlexAccount>> ValidatePlexToken(PlexAccount plexAccount, string authToken)
     {
         var client = CreateTvClient(authToken);

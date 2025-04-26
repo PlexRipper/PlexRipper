@@ -15,6 +15,9 @@ public class PlexApiClientFactory : IPlexApiClientFactory
     public IPlexAPI CreateClient(string authToken, PlexApiClientOptions options) =>
         new PlexAPI(client: _clientFactory(options), serverUrl: options.ConnectionUrl, accessToken: authToken);
 
+    public IPlexAPI CreateClient(PlexApiClientOptions options) =>
+        new PlexAPI(client: _clientFactory(options), serverUrl: options.ConnectionUrl, accessToken: string.Empty);
+
     public IPlexAPI CreateTvClient(string authToken = "", PlexApiClientOptions? options = null)
     {
         options ??= new PlexApiClientOptions { ConnectionUrl = "https://plex.tv/api/v2" };

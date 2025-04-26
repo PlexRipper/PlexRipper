@@ -1,4 +1,5 @@
-﻿using PlexApi.Contracts;
+﻿using FastEndpoints;
+using PlexApi.Contracts;
 
 namespace PlexRipper.PlexApi;
 
@@ -6,28 +7,26 @@ namespace PlexRipper.PlexApi;
 /// This service is an extra layer of abstraction to convert incoming DTO's from the PlexAPI to workable entities.
 /// This was done in order to keep all PlexApi related DTO's in the infrastructure layer.
 /// </summary>
-public class PlexApiService : IPlexApiService
+public class GetLibraryMediaCommandHandler : ICommandHandler<GetLibraryMediaCommand, Result<LibraryMetadata>>
 {
     private readonly IPlexApiMediaService _plexApiMediaService;
     private readonly ICommandDispatch _commandDispatcher;
 
-    public PlexApiService(IPlexApiMediaService plexApiMediaService, ICommandDispatch commandDispatcher)
+    public GetLibraryMediaCommandHandler(IPlexApiMediaService plexApiMediaService, ICommandDispatch commandDispatcher)
     {
         _plexApiMediaService = plexApiMediaService;
         _commandDispatcher = commandDispatcher;
     }
 
-    /// <inheritdoc />
-    public async Task<Result<LibraryMetadata>> GetLibraryMediaAsync(
-        PlexLibrary plexLibrary,
-        Action<MediaSyncProgress>? action = null,
-        CancellationToken cancellationToken = default
-    )
+    public async Task<Result<LibraryMetadata>> ExecuteAsync(GetLibraryMediaCommand command, CancellationToken ct)
     {
+        var plexLibrary = command.PlexLibrary;
+        var action = command.Action;
+
         // Retrieve an updated version of the PlexLibrary
         var plexLibraries = await _commandDispatcher.ExecuteAsync(
             new GetLibrarySectionsCommand(plexLibrary.PlexServerId),
-            cancellationToken
+            ct
         );
 
         if (plexLibraries.IsFailed)
@@ -47,7 +46,7 @@ public class PlexApiService : IPlexApiService
             plexLibrary,
             plexLibrary.Type,
             action: action,
-            cancellationToken: cancellationToken
+            cancellationToken: ct
         );
 
         if (mediaListResult.IsFailed)

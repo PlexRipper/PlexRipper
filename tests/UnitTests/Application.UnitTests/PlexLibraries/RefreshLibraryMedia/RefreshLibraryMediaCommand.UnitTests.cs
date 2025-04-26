@@ -27,15 +27,10 @@ public class RefreshLibraryMediaCommand_UnitTests : BaseUnitTest<RefreshLibraryM
 
         var updatedPlexLibrary = await GetUpdatedLibrary(seed, libraryType);
 
-        mock.Mock<IPlexApiService>()
-            .Setup(x =>
-                x.GetLibraryMediaAsync(
-                    It.IsAny<PlexLibrary>(),
-                    It.IsAny<Action<MediaSyncProgress>>(),
-                    It.IsAny<CancellationToken>()
-                )
-            )
+        mock.Mock<ICommandDispatch>()
+            .Setup(x => x.ExecuteAsync(It.IsAny<GetLibraryMediaCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok(new LibraryMetadata() { Library = updatedPlexLibrary }));
+
         mock.Mock<ISignalRService>()
             .Setup(x => x.SendLibraryProgressUpdateAsync(It.IsAny<LibraryProgress>()))
             .Returns(Task.CompletedTask);
@@ -101,14 +96,8 @@ public class RefreshLibraryMediaCommand_UnitTests : BaseUnitTest<RefreshLibraryM
                 }
             }
 
-        mock.Mock<IPlexApiService>()
-            .Setup(x =>
-                x.GetLibraryMediaAsync(
-                    It.IsAny<PlexLibrary>(),
-                    It.IsAny<Action<MediaSyncProgress>>(),
-                    It.IsAny<CancellationToken>()
-                )
-            )
+        mock.Mock<ICommandDispatch>()
+            .Setup(x => x.ExecuteAsync(It.IsAny<GetLibraryMediaCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok(new LibraryMetadata() { Library = updatedPlexLibrary }));
 
         mock.Mock<ICommandDispatch>()

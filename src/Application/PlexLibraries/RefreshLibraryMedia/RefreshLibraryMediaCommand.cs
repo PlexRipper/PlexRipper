@@ -32,7 +32,7 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
     private readonly IMediator _mediator;
     private readonly IPlexRipperDbContext _dbContext;
     private readonly ISignalRService _signalRService;
-    private readonly IPlexApiService _plexServiceApi;
+    private readonly ICommandDispatch _commandDispatch;
 
     private readonly int _baseCountProgress = 1000;
     private int _totalProgressSteps;
@@ -45,14 +45,14 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
         IMediator mediator,
         IPlexRipperDbContext dbContext,
         ISignalRService signalRService,
-        IPlexApiService plexServiceApi
+        ICommandDispatch commandDispatch
     )
     {
         _log = log;
         _mediator = mediator;
         _dbContext = dbContext;
         _signalRService = signalRService;
-        _plexServiceApi = plexServiceApi;
+        _commandDispatch = commandDispatch;
     }
 
     public async Task<Result<PlexLibrary>> Handle(
@@ -78,9 +78,11 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
         };
 
         // Phase 1: Retrieve overview of all media belonging to this PlexLibrary
-        var syncLibraryMediaResult = await _plexServiceApi.GetLibraryMediaAsync(
-            plexLibrary,
-            progress => SendProgress(1, progress.Percentage, progress.TimeRemaining),
+        var syncLibraryMediaResult = await _commandDispatch.ExecuteAsync(
+            new GetLibraryMediaCommand(
+                plexLibrary,
+                progress => SendProgress(1, progress.Percentage, progress.TimeRemaining)
+            ),
             cancellationToken
         );
 

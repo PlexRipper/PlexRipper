@@ -55,15 +55,13 @@ public class ValidatePlexAccountEndpointRequestValidator : Validator<ValidatePle
 public class ValidatePlexAccountEndpoint : BaseEndpoint<ValidatePlexAccountEndpointRequest, ValidatePlexAccountResponse>
 {
     private readonly ILog _log;
-    private readonly IPlexApiService _plexApiService;
     private readonly ICommandDispatch _commandDispatch;
 
     public override string EndpointPath => ApiRoutes.PlexAccountController + "/validate";
 
-    public ValidatePlexAccountEndpoint(ILog log, IPlexApiService plexApiService, ICommandDispatch commandDispatch)
+    public ValidatePlexAccountEndpoint(ILog log, ICommandDispatch commandDispatch)
     {
         _log = log;
-        _plexApiService = plexApiService;
         _commandDispatch = commandDispatch;
     }
 

@@ -40,8 +40,7 @@ public class RefreshPlexTvShowLibraryCommandHandler
         IMediator mediator,
         IPlexRipperDbContext dbContext,
         ISignalRService signalRService,
-        ICommandDispatch commandDispatch,
-        IPlexApiService plexServiceApi
+        ICommandDispatch commandDispatch
     )
     {
         _log = log;

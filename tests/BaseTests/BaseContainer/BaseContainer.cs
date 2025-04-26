@@ -68,8 +68,6 @@ public class BaseContainer : IDisposable
 
     public IDownloadQueue GetDownloadQueue => Resolve<IDownloadQueue>();
 
-    public IPlexApiService GetPlexApiService => Resolve<IPlexApiService>();
-
     public IMediator Mediator => Resolve<IMediator>();
 
     public IPathProvider PathProvider => Resolve<IPathProvider>();

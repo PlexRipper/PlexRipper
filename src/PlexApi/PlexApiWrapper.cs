@@ -294,7 +294,7 @@ public class PlexApiWrapper
             .Select(x => new PlexLibrary
             {
                 Id = 0,
-                Type = x.Type.ToString().ToPlexMediaTypeFromPlexApi(),
+                Type = x.Type.ToPlexMediaTypeFromPlexApi(),
                 Title = x.Title,
                 Key = x.Key,
                 CreatedAt = DateTimeExtensions.FromUnixTime(x.CreatedAt),
@@ -313,7 +313,7 @@ public class PlexApiWrapper
     }
 
     /// <summary>
-    /// Gets the all the root level media metadata contained in this Plex library. For movies its all movies, and for tv shows its all the shows without seasons and episodes.
+    /// Gets all the root level media metadata contained in this Plex library. For movies its all movies, and for tv shows its all the shows without seasons and episodes.
     /// <remarks>URL: {{SERVER_URL}}/library/sections/{{LIBRARY_KEY}}/all?X-Plex-Token={{SERVER_TOKEN}}</remarks>
     /// </summary>
     /// <param name="connection"></param>

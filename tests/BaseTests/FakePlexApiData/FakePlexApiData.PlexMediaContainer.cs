@@ -149,7 +149,7 @@ public partial class FakePlexApiData
     )
     {
         var config = PlexApiDataConfig.FromOptions(options);
-        var type = library.Type.ToString().ToPlexMediaTypeFromPlexApi();
+        var type = library.Type.ToPlexMediaTypeFromPlexApi();
 
         var totalSize = type switch
         {
@@ -170,7 +170,7 @@ public partial class FakePlexApiData
                         x.LibrarySectionID = long.Parse(library.Key);
                         x.LibrarySectionTitle = library.Title;
                         x.LibrarySectionUUID = library.Uuid;
-                        x.ViewGroup = library.Type.ToString().ToPlexMediaTypeFromPlexApi().ToString();
+                        x.ViewGroup = library.Type.Value();
                         x.Thumb = x.Thumb.Replace("unknown", x.ViewGroup);
                         x.Art = x.Art.Replace("unknown", x.ViewGroup);
                         x.Metadata = GetLibraryMediaMetadata(seed, type, options).Generate(mediaCount);

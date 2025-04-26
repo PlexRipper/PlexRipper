@@ -1,8 +1,4 @@
-﻿using Application.Contracts;
-using Data.Contracts;
-using Logging.Interface;
-using PlexApi.Contracts;
-using Settings.Contracts;
+﻿using PlexApi.Contracts;
 
 namespace PlexRipper.PlexApi;
 
@@ -12,26 +8,13 @@ namespace PlexRipper.PlexApi;
 /// </summary>
 public class PlexApiService : IPlexApiService
 {
-    private readonly ILog _log;
-
-    private readonly IPlexRipperDbContext _dbContext;
-    private readonly IServerSettingsModule _serverSettingsModule;
     private readonly IPlexApiMediaService _plexApiMediaService;
-    private readonly PlexApiWrapper _plexApiWrapper;
+    private readonly ICommandDispatch _commandDispatcher;
 
-    public PlexApiService(
-        ILog log,
-        IPlexRipperDbContext dbContext,
-        IServerSettingsModule serverSettingsModule,
-        IPlexApiMediaService plexApiMediaService,
-        PlexApiWrapper plexApiWrapper
-    )
+    public PlexApiService(IPlexApiMediaService plexApiMediaService, ICommandDispatch commandDispatcher)
     {
-        _log = log;
-        _plexApiWrapper = plexApiWrapper;
-        _dbContext = dbContext;
-        _serverSettingsModule = serverSettingsModule;
         _plexApiMediaService = plexApiMediaService;
+        _commandDispatcher = commandDispatcher;
     }
 
     /// <inheritdoc />
@@ -41,10 +24,10 @@ public class PlexApiService : IPlexApiService
         CancellationToken cancellationToken = default
     )
     {
-        // Retrieve updated version of the PlexLibrary
-        var plexLibraries = await GetLibrarySectionsAsync(
-            plexLibrary.PlexServerId,
-            cancellationToken: cancellationToken
+        // Retrieve an updated version of the PlexLibrary
+        var plexLibraries = await _commandDispatcher.ExecuteAsync(
+            new GetLibrarySectionsCommand(plexLibrary.PlexServerId),
+            cancellationToken
         );
 
         if (plexLibraries.IsFailed)
@@ -70,7 +53,7 @@ public class PlexApiService : IPlexApiService
         if (mediaListResult.IsFailed)
             return mediaListResult.ToResult();
 
-        // Pre sort the media list
+        // Pre-sort the media list
         var mediaList = mediaListResult.Value.OrderByNatural(x => x.TitleSort).ToList();
 
         // Determine how to map based on the Library type.
@@ -136,31 +119,5 @@ public class PlexApiService : IPlexApiService
 
         var mediaList = mediaListResult.Value.ToPlexTvShowEpisodes();
         return Result.Ok(mediaList);
-    }
-
-    /// <inheritdoc />
-    public async Task<Result<List<PlexLibrary>>> GetLibrarySectionsAsync(
-        int plexServerId,
-        int plexAccountId = 0,
-        CancellationToken cancellationToken = default
-    )
-    {
-        var tokenResult = await _dbContext.GetPlexServerTokenAsync(plexServerId, plexAccountId, cancellationToken);
-        if (tokenResult.IsFailed)
-            return tokenResult.ToResult();
-
-        var plexServerConnection = await _dbContext.ChoosePlexServerConnection(plexServerId, cancellationToken);
-        if (plexServerConnection.IsFailed)
-            return plexServerConnection.ToResult();
-
-        var plexServer = plexServerConnection.Value.PlexServer;
-
-        if (plexServer is null)
-            return ResultExtensions.EntityNotFound(nameof(PlexServer), plexServerId);
-
-        return await _plexApiWrapper.GetAccessibleLibraryInPlexServerAsync(
-            tokenResult.Value,
-            plexServerConnection.Value
-        );
     }
 }

@@ -80,58 +80,6 @@ public class PlexApiWrapper
     }
 
     /// <summary>
-    ///     Returns a detailed overview of the PlexLibraries in a PlexServer from the PlexAPI.
-    ///     <remarks>{{SERVER_URL}}/library/sections?X-Plex-Token={{SERVER_TOKEN}}</remarks>
-    /// </summary>
-    /// <param name="plexAuthToken"></param>
-    /// <param name="connection"></param>
-    /// <returns></returns>
-    public async Task<Result<List<PlexLibrary>>> GetAccessibleLibraryInPlexServerAsync(
-        string plexAuthToken,
-        PlexServerConnection connection
-    )
-    {
-        var client = CreateClient(plexAuthToken, new PlexApiClientOptions { ConnectionUrl = connection.Url });
-
-        var response = await ToResponse(client.Library.GetAllLibrariesAsync());
-
-        if (response.IsFailed)
-            return response.ToResult();
-
-        if (response.Value.Object?.MediaContainer?.Directory is null)
-        {
-            _log.Error(
-                "Plex server: {PlexServerName} returned an empty response when libraries were requested",
-                connection.PlexServer?.Name
-            );
-            return response.ToResult();
-        }
-
-        var directories = response.Value.Object.MediaContainer.Directory;
-
-        var mappedLibraries = directories
-            .Select(x => new PlexLibrary
-            {
-                Id = 0,
-                Type = x.Type.ToPlexMediaTypeFromPlexApi(),
-                Title = x.Title,
-                Key = x.Key,
-                CreatedAt = DateTimeExtensions.FromUnixTime(x.CreatedAt),
-                UpdatedAt = DateTimeExtensions.FromUnixTime(x.UpdatedAt),
-                ScannedAt = DateTimeExtensions.FromUnixTime(x.ScannedAt),
-                SyncedAt = null,
-                Uuid = x.Uuid,
-                PlexServer = null,
-                PlexServerId = connection.PlexServerId,
-                DefaultDestination = null,
-                DefaultDestinationId = null,
-            })
-            .ToList();
-
-        return Result.Ok(mappedLibraries);
-    }
-
-    /// <summary>
     /// Gets all the root level media metadata contained in this Plex library. For movies its all movies, and for tv shows its all the shows without seasons and episodes.
     /// <remarks>URL: {{SERVER_URL}}/library/sections/{{LIBRARY_KEY}}/all?X-Plex-Token={{SERVER_TOKEN}}</remarks>
     /// </summary>

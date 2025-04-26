@@ -7,19 +7,6 @@ namespace PlexApi.Contracts;
 public interface IPlexApiService
 {
     /// <summary>
-    /// Retrieves all accessible <see cref="PlexLibrary"/> from this <see cref="PlexServer"/> by the given <see cref="PlexAccount"/>.
-    /// </summary>
-    /// <param name="plexServerId"> The <see cref="PlexServer"/> to use.</param>
-    /// <param name="plexAccountId"> The <see cref="PlexAccount"/> to use.</param>
-    /// <param name="cancellationToken"> The <see cref="CancellationToken"/> to use.</param>
-    /// <returns>List of accessible <see cref="PlexLibrary"/>.</returns>
-    Task<Result<List<PlexLibrary>>> GetLibrarySectionsAsync(
-        int plexServerId,
-        int plexAccountId = 0,
-        CancellationToken cancellationToken = default
-    );
-
-    /// <summary>
     /// Fetches the PlexLibrary container with either Movies, Series, Music or Photos media depending on the type.
     /// Id and PlexServerId are copied over from the input parameter.
     /// </summary>

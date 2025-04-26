@@ -6,11 +6,11 @@ namespace PlexRipper.PlexApi;
 public class GetAllMediaEpisodesCommandHandler
     : ICommandHandler<GetAllMediaEpisodesCommand, Result<List<PlexTvShowEpisode>>>
 {
-    private readonly IPlexApiMediaService _plexApiMediaService;
+    private readonly ICommandDispatch _commandDispatch;
 
-    public GetAllMediaEpisodesCommandHandler(IPlexApiMediaService plexApiMediaService)
+    public GetAllMediaEpisodesCommandHandler(ICommandDispatch commandDispatch)
     {
-        _plexApiMediaService = plexApiMediaService;
+        _commandDispatch = commandDispatch;
     }
 
     public async Task<Result<List<PlexTvShowEpisode>>> ExecuteAsync(
@@ -21,11 +21,9 @@ public class GetAllMediaEpisodesCommandHandler
         var plexLibrary = command.PlexLibrary;
         var action = command.Action;
 
-        var mediaListResult = await _plexApiMediaService.SyncMedia(
-            plexLibrary,
-            PlexMediaType.Episode,
-            action: action,
-            cancellationToken: ct
+        var mediaListResult = await _commandDispatch.ExecuteAsync(
+            new GetAllMediaByTypeFromPlexApiCommand(plexLibrary, PlexMediaType.Episode, Action: action),
+            ct
         );
 
         if (mediaListResult.IsFailed)

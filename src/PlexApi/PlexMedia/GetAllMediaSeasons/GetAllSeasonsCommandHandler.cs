@@ -5,11 +5,11 @@ namespace PlexRipper.PlexApi.GetAllMediaSeasons;
 
 public class GetAllSeasonsCommandHandler : ICommandHandler<GetAllMediaSeasonsCommand, Result<List<PlexTvShowSeason>>>
 {
-    private readonly IPlexApiMediaService _plexApiMediaService;
+    private readonly ICommandDispatch _commandDispatch;
 
-    public GetAllSeasonsCommandHandler(IPlexApiMediaService plexApiMediaService)
+    public GetAllSeasonsCommandHandler(ICommandDispatch commandDispatch)
     {
-        _plexApiMediaService = plexApiMediaService;
+        _commandDispatch = commandDispatch;
     }
 
     public async Task<Result<List<PlexTvShowSeason>>> ExecuteAsync(
@@ -20,11 +20,9 @@ public class GetAllSeasonsCommandHandler : ICommandHandler<GetAllMediaSeasonsCom
         var plexLibrary = command.PlexLibrary;
         var action = command.Action;
 
-        var mediaListResult = await _plexApiMediaService.SyncMedia(
-            plexLibrary,
-            PlexMediaType.Season,
-            action: action,
-            cancellationToken: ct
+        var mediaListResult = await _commandDispatch.ExecuteAsync(
+            new GetAllMediaByTypeFromPlexApiCommand(plexLibrary, PlexMediaType.Season, Action: action),
+            ct
         );
 
         if (mediaListResult.IsFailed)

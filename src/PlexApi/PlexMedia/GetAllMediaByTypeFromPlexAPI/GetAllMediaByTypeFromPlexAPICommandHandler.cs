@@ -1,4 +1,5 @@
 using Data.Contracts;
+using FastEndpoints;
 using LukeHagar.PlexAPI.SDK;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
 using PlexApi.Contracts;
@@ -6,35 +7,46 @@ using ILog = Logging.Interface.ILog;
 
 namespace PlexRipper.PlexApi;
 
-public class PlexApiMediaService : IPlexApiMediaService
+public record GetAllMediaByTypeFromPlexApiCommand(
+    PlexLibrary PlexLibrary,
+    PlexMediaType MediaType,
+    int BatchSize = 1000,
+    Action<MediaSyncProgress>? Action = null
+) : ICommand<Result<List<LibraryMediaItemDTO>>>;
+
+public class GetAllMediaByTypeFromPlexApiCommandHandler
+    : ICommandHandler<GetAllMediaByTypeFromPlexApiCommand, Result<List<LibraryMediaItemDTO>>>
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
     private readonly IPlexApiClientFactory _plexApiClientFactory;
 
-    public PlexApiMediaService(ILog log, IPlexRipperDbContext dbContext, IPlexApiClientFactory plexApiClientFactory)
+    public GetAllMediaByTypeFromPlexApiCommandHandler(
+        ILog log,
+        IPlexRipperDbContext dbContext,
+        IPlexApiClientFactory plexApiClientFactory
+    )
     {
         _log = log;
         _dbContext = dbContext;
         _plexApiClientFactory = plexApiClientFactory;
     }
 
-    public async Task<Result<List<LibraryMediaItemDTO>>> SyncMedia(
-        PlexLibrary plexLibrary,
-        PlexMediaType plexType,
-        int batchSize = 1000,
-        Action<MediaSyncProgress>? action = null,
-        CancellationToken cancellationToken = default
+    public async Task<Result<List<LibraryMediaItemDTO>>> ExecuteAsync(
+        GetAllMediaByTypeFromPlexApiCommand command,
+        CancellationToken ct
     )
     {
-        var tokenResult = await _dbContext.GetPlexServerTokenAsync(plexLibrary.PlexServerId, cancellationToken);
+        var plexLibrary = command.PlexLibrary;
+        var mediaType = command.MediaType;
+        var batchSize = command.BatchSize;
+        var action = command.Action;
+
+        var tokenResult = await _dbContext.GetPlexServerTokenAsync(plexLibrary.PlexServerId, ct);
         if (tokenResult.IsFailed)
             return tokenResult.ToResult();
 
-        var plexServerConnectionResult = await _dbContext.ChoosePlexServerConnection(
-            plexLibrary.PlexServerId,
-            cancellationToken
-        );
+        var plexServerConnectionResult = await _dbContext.ChoosePlexServerConnection(plexLibrary.PlexServerId, ct);
 
         if (plexServerConnectionResult.IsFailed)
             return plexServerConnectionResult.ToResult();
@@ -60,7 +72,7 @@ public class PlexApiMediaService : IPlexApiMediaService
         while (true)
         {
             // Retrieve the media for this library
-            var result = await GetMetadataForLibraryAsync(client, plexLibrary.Key, index, batchSize, plexType);
+            var result = await GetMetadataForLibraryAsync(client, plexLibrary.Key, index, batchSize, mediaType);
 
             if (result.IsFailed)
             {

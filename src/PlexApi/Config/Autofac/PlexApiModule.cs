@@ -9,8 +9,6 @@ public class PlexApiModule : Module
     {
         builder.RegisterType<PlexApiClient>().As<IPlexApiClient>().InstancePerDependency();
 
-        builder.RegisterType<PlexApiMediaService>().As<IPlexApiMediaService>().InstancePerDependency();
-
         builder.RegisterType<PlexApiClientFactory>().As<IPlexApiClientFactory>().InstancePerLifetimeScope();
     }
 }

@@ -252,35 +252,4 @@ public class PlexApiWrapper
             ? ResultExtensions.IsNull(nameof(response.Value.Object.MediaContainer)).LogError()
             : Result.Ok(value);
     }
-
-    public async Task<Result<PlexAccount>> ValidatePlexToken(PlexAccount plexAccount, string authToken)
-    {
-        var client = CreateTvClient(authToken);
-
-        var response = await ToResponse(client.Authentication.GetTokenDetailsAsync());
-
-        return response.ToApiResult(x => new PlexAccount
-        {
-            Id = plexAccount.Id,
-            DisplayName = plexAccount.DisplayName,
-            Username = x.UserPlexAccount!.Username,
-            Password = plexAccount.Password,
-            IsEnabled = plexAccount.IsEnabled,
-            IsValidated = true,
-            ValidatedAt = DateTime.UtcNow,
-            PlexId = x.UserPlexAccount!.Id,
-            Uuid = x.UserPlexAccount!.Uuid,
-            ClientId = plexAccount.ClientId,
-            Title = x.UserPlexAccount!.Title,
-            Email = x.UserPlexAccount!.Email,
-            HasPassword = x.UserPlexAccount!.HasPassword.GetValueOrDefault(),
-            AuthenticationToken = x.UserPlexAccount!.AuthToken,
-            CustomAuthenticationToken = plexAccount.CustomAuthenticationToken,
-            IsMain = plexAccount.IsMain,
-            PlexAccountServers = [],
-            PlexAccountLibraries = [],
-            Is2Fa = x.UserPlexAccount!.TwoFactorEnabled.GetValueOrDefault(),
-            VerificationCode = string.Empty,
-        });
-    }
 }

@@ -66,6 +66,4 @@ public interface IPlexApiService
         Action<MediaSyncProgress>? action = null,
         CancellationToken cancellationToken = default
     );
-
-    Task<Result<PlexAccount>> ValidatePlexToken(PlexAccount plexAccount);
 }

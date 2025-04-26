@@ -250,9 +250,6 @@ public class PlexApiService : IPlexApiService
         return Result.Ok(plexServers);
     }
 
-    public async Task<Result<PlexAccount>> ValidatePlexToken(PlexAccount plexAccount) =>
-        await _plexApiWrapper.ValidatePlexToken(plexAccount, plexAccount.GetAuthToken);
-
     private async Task<Result<string>> GetPlexApiTokenAsync(PlexAccount? plexAccount)
     {
         if (plexAccount == null)

@@ -86,7 +86,8 @@ public class ValidatePlexAccountEndpoint : BaseEndpoint<ValidatePlexAccountEndpo
         Result<PlexAccount> validateResult;
         if (plexAccount.IsAuthTokenMode)
         {
-            validateResult = await _plexApiService.ValidatePlexToken(plexAccount);
+            validateResult = await _commandDispatch.ExecuteAsync(new ValidatePlexTokenCommand(plexAccount), ct);
+
             if (validateResult.IsSuccess)
             {
                 _log.Information(

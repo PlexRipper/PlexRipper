@@ -7,14 +7,6 @@ namespace PlexApi.Contracts;
 public interface IPlexApiService
 {
     /// <summary>
-    /// Retrieves the accessible <see cref="PlexServer">PlexServers</see> by this <see cref="PlexAccount"/> with the <see cref="PlexServerConnection">PlexServerConnections</see> from the Plex API.
-    /// </summary>
-    /// <param name="plexAccountId"> The <see cref="PlexAccount"/> to use.</param>
-    /// <returns>Returns the list of <see cref="PlexServer">PlexServers</see> this <see cref="PlexAccount"/> has access too
-    /// and a separate list of tokens this account has to use to communicate with the <see cref="PlexServer"/></returns>
-    public Task<Result<List<PlexServerAccessDTO>>> GetAccessiblePlexServersAsync(int plexAccountId);
-
-    /// <summary>
     /// Retrieves all accessible <see cref="PlexLibrary"/> from this <see cref="PlexServer"/> by the given <see cref="PlexAccount"/>.
     /// </summary>
     /// <param name="plexServerId"> The <see cref="PlexServer"/> to use.</param>

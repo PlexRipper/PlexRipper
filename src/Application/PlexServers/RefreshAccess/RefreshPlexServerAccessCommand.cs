@@ -26,19 +26,19 @@ public class RefreshPlexServerAccessCommandHandler
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
     private readonly IMediator _mediator;
-    private readonly IPlexApiService _plexServiceApi;
+    private readonly ICommandDispatch _commandDispatch;
 
     public RefreshPlexServerAccessCommandHandler(
         ILog log,
         IPlexRipperDbContext dbContext,
         IMediator mediator,
-        IPlexApiService plexServiceApi
+        ICommandDispatch commandDispatch
     )
     {
         _log = log;
         _dbContext = dbContext;
         _mediator = mediator;
-        _plexServiceApi = plexServiceApi;
+        _commandDispatch = commandDispatch;
     }
 
     public async Task<Result<RefreshPlexServerAccessRapport>> Handle(
@@ -52,7 +52,10 @@ public class RefreshPlexServerAccessCommandHandler
 
         _log.Debug("Refreshing Plex servers access for PlexAccount: {PlexAccountName}", plexAccountName);
 
-        var result = await _plexServiceApi.GetAccessiblePlexServersAsync(plexAccountId);
+        var result = await _commandDispatch.ExecuteAsync(
+            new GetAccessiblePlexServersCommand(plexAccountId),
+            cancellationToken
+        );
 
         // If the Plex API returns a 401 Unauthorized error, remove the PlexAccount and PlexServerAccess
         if (result.HasPlex401UnauthorizedError())

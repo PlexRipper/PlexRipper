@@ -1814,6 +1814,7 @@
         "type": "Project",
         "dependencies": {
           "ByteSize": "[2.1.2, )",
+          "FastEndpoints": "[5.32.0, )",
           "FluentResultExtensions": "[1.0.0, )",
           "FluentValidation": "[11.11.0, )",
           "JetBrains.Annotations": "[2024.2.0, )",

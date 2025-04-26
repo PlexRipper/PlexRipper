@@ -63,6 +63,26 @@
           "NetTopologySuite": "2.5.0"
         }
       },
+      "FastEndpoints": {
+        "type": "Transitive",
+        "resolved": "5.32.0",
+        "contentHash": "NduYOi+MlmpAyZ/kuMWxJDpp/SNDrQLsfDIIPBYjE84W53/oGCutjwe093Zf80qSRp0CfA9qivL+FRZkawLn8w==",
+        "dependencies": {
+          "FastEndpoints.Attributes": "5.32.0",
+          "FastEndpoints.Messaging.Core": "5.32.0",
+          "FluentValidation": "11.11.0"
+        }
+      },
+      "FastEndpoints.Attributes": {
+        "type": "Transitive",
+        "resolved": "5.32.0",
+        "contentHash": "XCo661wVHEUyHKWPhO0sU+K6UHYvPYjKn2SSnyxgDrfZK2l04k9s6Cgx7E6ramO5LAUAob5cK9Lcm1OHWzrtIQ=="
+      },
+      "FastEndpoints.Messaging.Core": {
+        "type": "Transitive",
+        "resolved": "5.32.0",
+        "contentHash": "hWXeN936xjXwxLugXZkqedODbPC5p6xjo3NxiVo8I/d+fTzVLqXhj+xmF82dkaDpZsFcpAxJ0BsX8pACAd04Gw=="
+      },
       "FluentResults": {
         "type": "Transitive",
         "resolved": "3.16.0",
@@ -1306,6 +1326,7 @@
         "type": "Project",
         "dependencies": {
           "ByteSize": "[2.1.2, )",
+          "FastEndpoints": "[5.32.0, )",
           "FluentResultExtensions": "[1.0.0, )",
           "FluentValidation": "[11.11.0, )",
           "JetBrains.Annotations": "[2024.2.0, )",

@@ -10,7 +10,7 @@ namespace PlexApi.UnitTests
             : base(output) { }
 
         [Fact]
-        public void ShouldMapAllPropertiesCorrectly_WhenApiResponseHasValues()
+        public void ShouldMapAllPropertiesCorrectly_WhenApiResponseHasMovieValues()
         {
             // Arrange
             var now = DateTimeOffset.UtcNow;
@@ -210,6 +210,141 @@ namespace PlexApi.UnitTests
             stream.Id.ShouldBe(sourceStream.Id);
             stream.Codec.ShouldBe(sourceStream.Codec);
             stream.Language.ShouldBe(sourceStream.Language);
+        }
+
+        [Fact]
+        public void ShouldMapAllPropertiesCorrectly_WhenApiResponseHasTvShowValues()
+        {
+            // Arrange
+            var now = DateTimeOffset.UtcNow;
+            var addedAtUnixTime = now.ToUnixTimeSeconds();
+            var updatedAtUnixTime = now.AddDays(1).ToUnixTimeSeconds();
+
+            var sourceData = new GetMediaMetaDataMetadata
+            {
+                RatingKey = "456",
+                Key = "/library/metadata/456",
+                Type = "show",
+                Title = "Test TV Show",
+                Summary = "Test TV show summary",
+                Year = 2020,
+                OriginalTitle = "Original Test TV Show",
+                ChildCount = 8, // Seasons count
+                Studio = "Test TV Studio",
+                ContentRating = "TV-MA",
+                Thumb = "/tv/thumb/path",
+                Art = "/tv/art/path",
+                Theme = "/tv/theme/path",
+                Guid = "plex://show/guid",
+                AddedAt = addedAtUnixTime,
+                UpdatedAt = updatedAtUnixTime,
+                OriginallyAvailableAt = LocalDate.FromDateOnly(new DateOnly(2020, 05, 15)),
+                AudienceRating = 9.1f,
+                Rating = 9.3f,
+                LeafCount = 42, // Episode count
+                ViewedLeafCount = 12, // Viewed episodes
+
+                // Collections of nested objects
+                Media = [], // TV Shows typically don't have direct media, episodes do
+                Genre = [new GetMediaMetaDataGenre { Tag = "Drama" }, new GetMediaMetaDataGenre { Tag = "Mystery" }],
+                Country = [new GetMediaMetaDataCountry { Tag = "United Kingdom" }],
+                Role =
+                [
+                    new GetMediaMetaDataRole { Tag = "Lead Actor" },
+                    new GetMediaMetaDataRole { Tag = "Supporting Actor" },
+                ],
+                Ratings =
+                [
+                    new Ratings
+                    {
+                        Image = "imdb://image/show",
+                        Type = "imdb",
+                        Value = 9.2f,
+                    },
+                    new Ratings
+                    {
+                        Image = "tmdb://image/show",
+                        Type = "tmdb",
+                        Value = 8.9f,
+                    },
+                ],
+                Guids =
+                [
+                    new GetMediaMetaDataGuids { Id = "imdb://tt7654321" },
+                    new GetMediaMetaDataGuids { Id = "tmdb://12345" },
+                ],
+            };
+
+            // Act
+            var result = sourceData.ToMediaItemDTO();
+
+            // Assert
+            result.ShouldNotBeNull();
+            result.RatingKey.ShouldBe(sourceData.RatingKey);
+            result.Key.ShouldBe(sourceData.Key);
+            result.Title.ShouldBe(sourceData.Title);
+            result.Summary.ShouldBe(sourceData.Summary);
+            result.Year.ShouldBe(sourceData.Year);
+            result.OriginalTitle.ShouldBe(sourceData.OriginalTitle);
+            result.ChildCount.ShouldBe(sourceData.ChildCount.Value);
+            result.Studio.ShouldBe(sourceData.Studio);
+            result.ContentRating.ShouldBe(sourceData.ContentRating);
+
+            // Duration is in milliseconds and we want seconds, but TV shows typically don't have duration at the show level
+            result.Duration.ShouldBe(0);
+
+            result.Thumb.ShouldBe(sourceData.Thumb);
+            result.Art.ShouldBe(sourceData.Art);
+            result.Theme.ShouldBe(sourceData.Theme);
+            result.Guid.ShouldBe(sourceData.Guid);
+
+            // DateTime conversions
+            result.AddedAt.ShouldBe(
+                DateTimeExtensions.FromUnixTime(sourceData.AddedAt),
+                tolerance: TimeSpan.FromSeconds(1)
+            );
+            result.UpdatedAt.ShouldBe(
+                DateTimeExtensions.FromUnixTime(sourceData.UpdatedAt),
+                tolerance: TimeSpan.FromSeconds(1)
+            );
+
+            // Parse the string date to NodaTime.LocalDate if not null
+            if (sourceData.OriginallyAvailableAt != null)
+            {
+                result.OriginallyAvailableAt.ShouldBe(sourceData.OriginallyAvailableAt.ToString());
+            }
+            else
+            {
+                result.OriginallyAvailableAt.ShouldBeNull();
+            }
+
+            result.AudienceRating.ShouldBe(sourceData.AudienceRating);
+            result.Rating.ShouldBe(sourceData.Rating.Value);
+
+            // Collections
+            result.Genre.Count.ShouldBe(sourceData.Genre.Count);
+            result.Genre.First().Tag.ShouldBe(sourceData.Genre.First().Tag);
+            result.Genre.Last().Tag.ShouldBe(sourceData.Genre.Last().Tag);
+
+            result.Country.Count.ShouldBe(sourceData.Country.Count);
+            result.Country.First().Tag.ShouldBe(sourceData.Country.First().Tag);
+
+            result.Role.Count.ShouldBe(sourceData.Role.Count);
+            result.Role.First().Tag.ShouldBe(sourceData.Role.First().Tag);
+            result.Role.Last().Tag.ShouldBe(sourceData.Role.Last().Tag);
+
+            result.Ratings.Count.ShouldBe(sourceData.Ratings.Count);
+            result.Ratings.First().Type.ShouldBe(sourceData.Ratings.First().Type);
+            result.Ratings.First().Value.ShouldBe(sourceData.Ratings.First().Value);
+            result.Ratings.Last().Type.ShouldBe(sourceData.Ratings.Last().Type);
+            result.Ratings.Last().Value.ShouldBe(sourceData.Ratings.Last().Value);
+
+            result.Guids.Count.ShouldBe(sourceData.Guids.Count);
+            result.Guids.First().Id.ShouldBe(sourceData.Guids.First().Id);
+            result.Guids.Last().Id.ShouldBe(sourceData.Guids.Last().Id);
+
+            // Media list should be empty for TV show at show level
+            result.Media.Count.ShouldBe(0);
         }
     }
 }

@@ -1,11 +1,66 @@
 using System.Net;
 using System.Text.Json;
+using LukeHagar.PlexAPI.SDK.Models.Errors;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
+using Newtonsoft.Json;
+using JsonException = System.Text.Json.JsonException;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace PlexRipper.PlexApi;
 
 public static class HttpClientExtensions
 {
+    /// <summary>
+    /// This will convert from SpeakEasy exceptions to the use of FluentResults
+    /// </summary>
+    /// <param name="operation"> The SpeakEasy Plex SDK endpoint method to convert the result for </param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public static async Task<Result<T>> ToResponse<T>(this Task<T> operation)
+        where T : class
+    {
+        try
+        {
+            return Result.Ok(await operation);
+        }
+        catch (SDKException e)
+        {
+            return e.RawResponse.FromSdkExceptionToResult<T>();
+        }
+        catch (JsonSerializationException e)
+        {
+            return Result.Fail(new ExceptionalError(e)).LogError();
+        }
+        catch (Exception e)
+        {
+            var errorsProperty = e.GetType().GetProperty("Errors");
+            var rawResponseProperty = e.GetType().GetProperty("RawResponse");
+
+            if (errorsProperty != null && rawResponseProperty != null)
+            {
+                var rawResponse = rawResponseProperty.GetValue(e);
+                if (rawResponse is null)
+                    return Result.Fail(new ExceptionalError(e)).LogError();
+
+                var errors = errorsProperty.GetValue(e);
+                var parsedErrors = JsonSerializer.Deserialize<List<PlexError>>(JsonSerializer.Serialize(errors));
+
+                return ((HttpResponseMessage)rawResponse).FromSdkExceptionToResult<T>(parsedErrors);
+            }
+
+            if (rawResponseProperty != null)
+            {
+                var rawResponse = rawResponseProperty.GetValue(e);
+                if (rawResponse is null)
+                    return Result.Fail(new ExceptionalError(e)).LogError();
+
+                return ((HttpResponseMessage)rawResponse).FromSdkExceptionToResult<T>();
+            }
+
+            return Result.Fail(new ExceptionalError(e)).LogError();
+        }
+    }
+
     public static Result<TResult> ToApiResult<TResponse, TResult>(
         this Result<TResponse> response,
         Func<TResponse, TResult> mapper

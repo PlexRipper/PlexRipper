@@ -154,47 +154,6 @@ public class PlexApiWrapper
         return Result.Fail("Result from RequestPlexSignInDataAsync() was null.").LogError();
     }
 
-    public async Task<Result<PlexServerStatus>> GetServerStatusAsync(
-        PlexServerConnection connection,
-        Action<PlexApiClientProgress>? action = null
-    )
-    {
-        var client = CreateClient(
-            string.Empty,
-            new PlexApiClientOptions
-            {
-                ConnectionUrl = connection.Url,
-                Action = action,
-                Timeout = 10,
-                RetryCount = 0,
-            }
-        );
-
-        var responseResult = await ToResponse(client.Server.GetServerIdentityAsync());
-
-        var statusCode = responseResult.IsSuccess
-            ? responseResult.Value.StatusCode
-            : responseResult.GetStatusCodeReason()?.GetStatusCode();
-        var statusMessage = statusCode switch
-        {
-            200 => "The Plex server is online!",
-            401 => "The Plex token has expired and needs to be refreshed.",
-            _ => "The Plex server could not be reached, most likely it's offline.",
-        };
-
-        return Result.Ok(
-            new PlexServerStatus
-            {
-                StatusCode = statusCode ?? -1,
-                StatusMessage = statusMessage,
-                LastChecked = DateTime.UtcNow,
-                IsSuccessful = responseResult.IsSuccess,
-                PlexServerId = connection.PlexServerId,
-                PlexServerConnectionId = connection.Id,
-            }
-        );
-    }
-
     /// <summary>
     ///     Retrieves all the accessible plex server based on the <see cref="PlexAccount" /> token
     ///     Including the various unique connections to each server.

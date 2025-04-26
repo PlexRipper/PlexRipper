@@ -48,17 +48,6 @@ public interface IPlexApiService
     );
 
     /// <summary>
-    /// Attempts to connect to a server by the given <see cref="PlexServerConnection"/> and returns the <see cref="PlexServerStatus"/> based on the result.
-    /// </summary>
-    /// <param name="plexServerConnectionId">The <see cref="PlexServerConnection"/> to test for. </param>
-    /// <param name="action">Progress action callback to notify of connection attempt progress.</param>
-    /// <returns>The Result is successful if the <see cref="PlexServerStatus"/> was created successfully, regardless of whether the connection was successful.</returns>
-    Task<Result<PlexServerStatus>> GetPlexServerStatusAsync(
-        int plexServerConnectionId = 0,
-        Action<PlexApiClientProgress>? action = null
-    );
-
-    /// <summary>
     /// Fetches all the <see cref="PlexTvShowSeason">Plex TvShow Seasons</see> from the Plex api with the given <see cref="PlexLibrary"/>.
     /// </summary>
     /// <param name="plexLibrary"> The <see cref="PlexLibrary"/> to fetch the seasons from.</param>

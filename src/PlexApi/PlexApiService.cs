@@ -165,19 +165,6 @@ public class PlexApiService : IPlexApiService
     }
 
     /// <inheritdoc />
-    public async Task<Result<PlexServerStatus>> GetPlexServerStatusAsync(
-        int plexServerConnectionId,
-        Action<PlexApiClientProgress>? action = null
-    )
-    {
-        var connection = await _dbContext.PlexServerConnections.GetAsync(plexServerConnectionId);
-        if (connection is null)
-            return ResultExtensions.EntityNotFound(nameof(PlexServerConnection), plexServerConnectionId);
-
-        return await _plexApiWrapper.GetServerStatusAsync(connection, action);
-    }
-
-    /// <inheritdoc />
     public async Task<Result<List<PlexServerAccessDTO>>> GetAccessiblePlexServersAsync(int plexAccountId)
     {
         var plexAccount = await _dbContext.PlexAccounts.GetAsync(plexAccountId);

@@ -16,9 +16,9 @@
       },
       "FluentValidation": {
         "type": "Direct",
-        "requested": "[11.9.0, )",
-        "resolved": "11.9.0",
-        "contentHash": "VneVlTvwYDkfHV5av3QrQ0amALgrLX6LV94wlYyEsh0B/klJBW7C8y2eAtj5tOZ3jH6CAVpr4s1ZGgew/QWyig=="
+        "requested": "[11.11.0, )",
+        "resolved": "11.11.0",
+        "contentHash": "cyIVdQBwSipxWG8MA3Rqox7iNbUNUTK5bfJi9tIdm4CAfH71Oo5ABLP4/QyrUwuakqpUEPGtE43BDddvEehuYw=="
       },
       "JetBrains.Annotations": {
         "type": "Direct",
@@ -1085,7 +1085,7 @@
         "type": "Project",
         "dependencies": {
           "FluentResults": "[3.16.0, )",
-          "FluentValidation": "[11.9.0, )",
+          "FluentValidation": "[11.11.0, )",
           "Logging": "[1.0.0, )"
         }
       },

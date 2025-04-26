@@ -1751,7 +1751,7 @@
         "type": "Project",
         "dependencies": {
           "FluentResults": "[3.16.0, )",
-          "FluentValidation": "[11.9.0, )",
+          "FluentValidation": "[11.11.0, )",
           "Logging": "[1.0.0, )"
         }
       },
@@ -1842,7 +1842,7 @@
         "dependencies": {
           "ByteSize": "[2.1.2, )",
           "FluentResultExtensions": "[1.0.0, )",
-          "FluentValidation": "[11.9.0, )",
+          "FluentValidation": "[11.11.0, )",
           "JetBrains.Annotations": "[2024.2.0, )",
           "MediatR": "[12.2.0, )",
           "NaturalSort.Extension": "[4.3.0, )",
@@ -1888,6 +1888,7 @@
         "dependencies": {
           "Autofac": "[8.0.0, )",
           "Data.Contracts": "[1.0.0, )",
+          "FastEndpoints": "[5.32.0, )",
           "HttpClientToCurl": "[2.0.6, )",
           "PlexApi.Contracts": "[1.0.0, )",
           "Polly": "[8.3.1, )",

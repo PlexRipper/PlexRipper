@@ -108,8 +108,8 @@
       },
       "FluentValidation": {
         "type": "Transitive",
-        "resolved": "11.9.0",
-        "contentHash": "VneVlTvwYDkfHV5av3QrQ0amALgrLX6LV94wlYyEsh0B/klJBW7C8y2eAtj5tOZ3jH6CAVpr4s1ZGgew/QWyig=="
+        "resolved": "11.11.0",
+        "contentHash": "cyIVdQBwSipxWG8MA3Rqox7iNbUNUTK5bfJi9tIdm4CAfH71Oo5ABLP4/QyrUwuakqpUEPGtE43BDddvEehuYw=="
       },
       "JetBrains.Annotations": {
         "type": "Transitive",
@@ -1343,7 +1343,7 @@
         "type": "Project",
         "dependencies": {
           "FluentResults": "[3.16.0, )",
-          "FluentValidation": "[11.9.0, )",
+          "FluentValidation": "[11.11.0, )",
           "Logging": "[1.0.0, )"
         }
       },
@@ -1368,7 +1368,7 @@
         "dependencies": {
           "ByteSize": "[2.1.2, )",
           "FluentResultExtensions": "[1.0.0, )",
-          "FluentValidation": "[11.9.0, )",
+          "FluentValidation": "[11.11.0, )",
           "JetBrains.Annotations": "[2024.2.0, )",
           "MediatR": "[12.2.0, )",
           "NaturalSort.Extension": "[4.3.0, )",

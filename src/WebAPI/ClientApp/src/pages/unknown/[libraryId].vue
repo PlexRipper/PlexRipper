@@ -1,8 +1,9 @@
 <template>
 	<QPage>
 		<QRow>
-			<QCol>
-				<QAlert type="error">
+			<QCol class="q-ma-md">
+				<QAlert
+					type="error">
 					<QText
 						align="center"
 						size="h4">

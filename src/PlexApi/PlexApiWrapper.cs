@@ -20,19 +20,8 @@ public class PlexApiWrapper
         _clientFactory = clientFactory;
     }
 
-    private string GetClientId => Guid.NewGuid().ToString();
-
     private IPlexAPI CreateClient(string authToken, PlexApiClientOptions options) =>
         new PlexAPI(client: _clientFactory(options), serverUrl: options.ConnectionUrl, accessToken: authToken);
-
-    private IPlexAPI CreateTvClient(string authToken = "", PlexApiClientOptions? options = null)
-    {
-        options ??= new PlexApiClientOptions { ConnectionUrl = "https://plex.tv/api/v2" };
-
-        options.ConnectionUrl = "https://plex.tv/api/v2";
-
-        return new PlexAPI(client: _clientFactory(options), serverUrl: options.ConnectionUrl, accessToken: authToken);
-    }
 
     private async Task<Result<T>> ToResponse<T>(Task<T> operation)
         where T : class

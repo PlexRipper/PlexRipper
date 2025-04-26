@@ -111,24 +111,12 @@ public class RefreshLibraryMediaCommand_UnitTests : BaseUnitTest<RefreshLibraryM
             )
             .ReturnsAsync(Result.Ok(new LibraryMetadata() { Library = updatedPlexLibrary }));
 
-        mock.Mock<IPlexApiService>()
-            .Setup(x =>
-                x.GetAllSeasonsAsync(
-                    It.IsAny<PlexLibrary>(),
-                    It.IsAny<Action<MediaSyncProgress>>(),
-                    It.IsAny<CancellationToken>()
-                )
-            )
+        mock.Mock<ICommandDispatch>()
+            .Setup(x => x.ExecuteAsync(It.IsAny<GetAllMediaSeasonsCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok(rawSeasonData));
 
-        mock.Mock<IPlexApiService>()
-            .Setup(x =>
-                x.GetAllEpisodesAsync(
-                    It.IsAny<PlexLibrary>(),
-                    It.IsAny<Action<MediaSyncProgress>>(),
-                    It.IsAny<CancellationToken>()
-                )
-            )
+        mock.Mock<ICommandDispatch>()
+            .Setup(x => x.ExecuteAsync(It.IsAny<GetAllMediaEpisodesCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok(rawEpisodesData));
 
         mock.Mock<ISignalRService>()

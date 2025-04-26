@@ -19,30 +19,4 @@ public interface IPlexApiService
         Action<MediaSyncProgress>? action = null,
         CancellationToken cancellationToken = default
     );
-
-    /// <summary>
-    /// Fetches all the <see cref="PlexTvShowSeason">Plex TvShow Seasons</see> from the Plex api with the given <see cref="PlexLibrary"/>.
-    /// </summary>
-    /// <param name="plexLibrary"> The <see cref="PlexLibrary"/> to fetch the seasons from.</param>
-    /// <param name="action"> Progress action callback to notify of connection attempt progress.</param>
-    /// <param name="cancellationToken"> The <see cref="CancellationToken"/> to use.</param>
-    /// <returns></returns>
-    Task<Result<List<PlexTvShowSeason>>> GetAllSeasonsAsync(
-        PlexLibrary plexLibrary,
-        Action<MediaSyncProgress>? action = null,
-        CancellationToken cancellationToken = default
-    );
-
-    /// <summary>
-    /// Fetches all the <see cref="PlexTvShowEpisode">Plex TvShow Episodes</see> from the Plex api with the given <see cref="PlexLibrary"/>.
-    /// </summary>
-    /// <param name="plexLibrary"> The <see cref="PlexLibrary"/> to fetch the episodes from.</param>
-    /// <param name="action"> Progress action callback to notify of connection attempt progress.</param>
-    /// <param name="cancellationToken"> The <see cref="CancellationToken"/> to use.</param>
-    /// <returns></returns>
-    Task<Result<List<PlexTvShowEpisode>>> GetAllEpisodesAsync(
-        PlexLibrary plexLibrary,
-        Action<MediaSyncProgress>? action = null,
-        CancellationToken cancellationToken = default
-    );
 }

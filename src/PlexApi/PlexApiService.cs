@@ -79,45 +79,4 @@ public class PlexApiService : IPlexApiService
             }
         );
     }
-
-    /// <inheritdoc />
-    public async Task<Result<List<PlexTvShowSeason>>> GetAllSeasonsAsync(
-        PlexLibrary plexLibrary,
-        Action<MediaSyncProgress>? action = null,
-        CancellationToken cancellationToken = default
-    )
-    {
-        var mediaListResult = await _plexApiMediaService.SyncMedia(
-            plexLibrary,
-            PlexMediaType.Season,
-            action: action,
-            cancellationToken: cancellationToken
-        );
-
-        if (mediaListResult.IsFailed)
-            return mediaListResult.ToResult();
-
-        var mediaList = mediaListResult.Value.ToPlexTvShowSeasons();
-        return Result.Ok(mediaList);
-    }
-
-    public async Task<Result<List<PlexTvShowEpisode>>> GetAllEpisodesAsync(
-        PlexLibrary plexLibrary,
-        Action<MediaSyncProgress>? action = null,
-        CancellationToken cancellationToken = default
-    )
-    {
-        var mediaListResult = await _plexApiMediaService.SyncMedia(
-            plexLibrary,
-            PlexMediaType.Episode,
-            action: action,
-            cancellationToken: cancellationToken
-        );
-
-        if (mediaListResult.IsFailed)
-            return mediaListResult.ToResult();
-
-        var mediaList = mediaListResult.Value.ToPlexTvShowEpisodes();
-        return Result.Ok(mediaList);
-    }
 }

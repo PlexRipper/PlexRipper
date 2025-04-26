@@ -1,6 +1,8 @@
 using Data.Contracts;
-using Logging.Interface;
+using LukeHagar.PlexAPI.SDK;
+using LukeHagar.PlexAPI.SDK.Models.Requests;
 using PlexApi.Contracts;
+using ILog = Logging.Interface.ILog;
 
 namespace PlexRipper.PlexApi;
 
@@ -8,13 +10,13 @@ public class PlexApiMediaService : IPlexApiMediaService
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
-    private readonly PlexApiWrapper _plexApiWrapper;
+    private readonly IPlexApiClientFactory _plexApiClientFactory;
 
-    public PlexApiMediaService(ILog log, IPlexRipperDbContext dbContext, PlexApiWrapper plexApiWrapper)
+    public PlexApiMediaService(ILog log, IPlexRipperDbContext dbContext, IPlexApiClientFactory plexApiClientFactory)
     {
         _log = log;
         _dbContext = dbContext;
-        _plexApiWrapper = plexApiWrapper;
+        _plexApiClientFactory = plexApiClientFactory;
     }
 
     public async Task<Result<List<LibraryMediaItemDTO>>> SyncMedia(
@@ -45,17 +47,20 @@ public class PlexApiMediaService : IPlexApiMediaService
 
         var startTime = DateTime.UtcNow; // Start time for estimation
 
+        var client = _plexApiClientFactory.CreateClient(
+            tokenResult.Value,
+            new PlexApiClientOptions()
+            {
+                ConnectionUrl = plexServerConnection.Url,
+                Timeout = 30,
+                RetryCount = 3,
+            }
+        );
+
         while (true)
         {
             // Retrieve the media for this library
-            var result = await _plexApiWrapper.GetMetadataForLibraryAsync(
-                plexServerConnection,
-                tokenResult.Value,
-                plexLibrary.Key,
-                index,
-                batchSize,
-                plexType
-            );
+            var result = await GetMetadataForLibraryAsync(client, plexLibrary.Key, index, batchSize, plexType);
 
             if (result.IsFailed)
             {
@@ -120,5 +125,44 @@ public class PlexApiMediaService : IPlexApiMediaService
             );
 
         return Result.Ok(mediaList);
+    }
+
+    /// <summary>
+    /// Gets all the root level media metadata contained in this Plex library. For movies, it's all movies, and for TV-shows it's all the shows without seasons and episodes.
+    /// <remarks>URL: {{SERVER_URL}}/library/sections/{{LIBRARY_KEY}}/all?X-Plex-Token={{SERVER_TOKEN}}</remarks>
+    /// </summary>
+    public async Task<Result<GetAllMediaLibraryMediaContainer>> GetMetadataForLibraryAsync(
+        IPlexAPI client,
+        string libraryKey,
+        int startIndex,
+        int batchSize,
+        PlexMediaType type
+    )
+    {
+        if (!int.TryParse(libraryKey, out var libraryKeyInt))
+            return ResultExtensions.IsInvalidId(nameof(libraryKey), libraryKey).LogError();
+
+        var response = await client
+            .Library.GetAllMediaLibraryAsync(
+                new GetAllMediaLibraryRequest
+                {
+                    Type = type.ToApiTypeEnum<GetAllMediaLibraryQueryParamType>(),
+                    SectionKey = libraryKeyInt,
+                    IncludeMeta = GetAllMediaLibraryQueryParamIncludeMeta.Disable,
+                    IncludeGuids = QueryParamIncludeGuids.Enable,
+                    XPlexContainerStart = startIndex,
+                    XPlexContainerSize = batchSize,
+                }
+            )
+            .ToResponse();
+
+        if (response.IsFailed)
+            return response.ToResult();
+
+        var value = response.Value?.Object?.MediaContainer ?? null;
+
+        return value is null
+            ? ResultExtensions.IsNull(nameof(response.Value.Object.MediaContainer)).LogError()
+            : Result.Ok(value);
     }
 }

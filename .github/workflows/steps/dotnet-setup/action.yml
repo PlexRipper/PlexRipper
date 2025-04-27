@@ -1,5 +1,9 @@
 name: 'Dotnet Setup'
 description: 'Setup .NET, restore dependencies and build'
+inputs:
+    project-path:
+        description: 'Relative path to the project or solution to build'
+        required: true
 runs:
     using: 'composite'
     steps:
@@ -11,9 +15,11 @@ runs:
                 cache-dependency-path: |
                     **/*.csproj
                     **/global.json
+
         -   name: Restore dependencies
             shell: bash
-            run: dotnet restore PlexRipper.sln --locked-mode
+            run: dotnet restore ${{ inputs.project-path }} --locked-mode
+
         -   name: Build
             shell: bash
-            run: dotnet build PlexRipper.sln --no-restore
+            run: dotnet build ${{ inputs.project-path }} --no-restore

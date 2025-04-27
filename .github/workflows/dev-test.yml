@@ -69,11 +69,24 @@ jobs:
     # Back-End Unit Tests
     Back-End-Unit-Tests:
         runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                test_project:
+                    - tests/UnitTests/Application.UnitTests/Application.UnitTests.csproj
+                    - tests/UnitTests/Domain.UnitTests/Domain.UnitTests.csproj
+                    - tests/UnitTests/FluentResultExtension.UnitTests/FluentResultExtension.UnitTests.csproj
+                    - tests/UnitTests/FileSystem.UnitTests/FileSystem.UnitTests.csproj
+                    - tests/UnitTests/Logging.UnitTests/Logging.UnitTests.csproj
+                    - tests/UnitTests/PlexApi.UnitTests/PlexApi.UnitTests.csproj
+                    - tests/UnitTests/Settings.UnitTests/Settings.UnitTests.csproj
         steps:
             -   name: Checkout Source Code
                 uses: actions/checkout@v4
             -   name: Dotnet Setup
                 uses: ./.github/workflows/steps/dotnet-setup/
+                with:
+                    project-path: ${{ matrix.test_project }}
             -   name: Unit Tests
                 run: dotnet test tests/UnitTests/UnitTests.sln --no-build --verbosity normal
     # Back-End Integration Tests

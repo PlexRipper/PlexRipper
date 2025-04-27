@@ -22,7 +22,8 @@ public class RefreshPlexMovieLibraryCommand_UnitTests : BaseUnitTest<RefreshPlex
         );
         var testLibrary = IDbContext.PlexLibraries.Include(x => x.Movies).First();
         mock.Mock<IRefreshLibraryProgressReporter>()
-            .Setup(x => x.SendProgress(It.IsAny<RefreshLibraryProgressUpdate>()));
+            .Setup(x => x.SendProgress(It.IsAny<RefreshLibraryProgressUpdate>()))
+            .Returns(Task.CompletedTask);
 
         mock.Mock<IMediator>()
             .Setup(x => x.Send(It.IsAny<SyncPlexMoviesCommand>(), It.IsAny<CancellationToken>()))
@@ -59,7 +60,9 @@ public class RefreshPlexMovieLibraryCommand_UnitTests : BaseUnitTest<RefreshPlex
         var testLibrary = IDbContext.PlexLibraries.First();
 
         mock.Mock<IRefreshLibraryProgressReporter>()
-            .Setup(x => x.SendProgress(It.IsAny<RefreshLibraryProgressUpdate>()));
+            .Setup(x => x.SendProgress(It.IsAny<RefreshLibraryProgressUpdate>()))
+            .Returns(Task.CompletedTask);
+        ;
 
         // Act
         var result = await _sut.ExecuteAsync(
@@ -97,7 +100,9 @@ public class RefreshPlexMovieLibraryCommand_UnitTests : BaseUnitTest<RefreshPlex
         }
 
         mock.Mock<IRefreshLibraryProgressReporter>()
-            .Setup(x => x.SendProgress(It.IsAny<RefreshLibraryProgressUpdate>()));
+            .Setup(x => x.SendProgress(It.IsAny<RefreshLibraryProgressUpdate>()))
+            .Returns(Task.CompletedTask);
+        ;
 
         mock.Mock<IMediator>()
             .Setup(x => x.Send(It.IsAny<SyncPlexMoviesCommand>(), It.IsAny<CancellationToken>()))
@@ -134,7 +139,8 @@ public class RefreshPlexMovieLibraryCommand_UnitTests : BaseUnitTest<RefreshPlex
         );
         var testLibrary = IDbContext.PlexLibraries.Include(x => x.Movies).First();
         mock.Mock<IRefreshLibraryProgressReporter>()
-            .Setup(x => x.SendProgress(It.IsAny<RefreshLibraryProgressUpdate>()));
+            .Setup(x => x.SendProgress(It.IsAny<RefreshLibraryProgressUpdate>()))
+            .Returns(Task.CompletedTask);
         mock.Mock<IMediator>()
             .Setup(x => x.Send(It.IsAny<SyncPlexMoviesCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Fail("Failed to sync movies"));

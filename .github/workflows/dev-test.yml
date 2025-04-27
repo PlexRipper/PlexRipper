@@ -11,42 +11,132 @@ on:
             - '.vscode/**'
             - 'README.md'
 
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
 jobs:
+    # Check if front-end has changed
+    Check-Frontend-Changes:
+        runs-on: ubuntu-latest
+        outputs:
+            should_run: ${{ steps.check_changes.outputs.should_run }}
+        steps:
+            -   uses: actions/checkout@v4
+                with:
+                    fetch-depth: 0
+            -   name: Check if front-end has changed
+                id: check_changes
+                uses: ./.github/workflows/steps/skip-if-no-frontend-change
+
+    # Check if back-end has changed
+    Check-Backend-Changes:
+        runs-on: ubuntu-latest
+        outputs:
+            should_run: ${{ steps.check_changes.outputs.should_run }}
+        steps:
+            -   uses: actions/checkout@v4
+                with:
+                    fetch-depth: 0
+            -   name: Check if back-end has changed
+                id: check_changes
+                uses: ./.github/workflows/steps/skip-if-no-backend-change
+
     # Front-End-Type-Check:
     Front-End-Type-Check:
+        needs: Check-Frontend-Changes
+        if: needs.Check-Frontend-Changes.outputs.should_run == 'true'
         runs-on: ubuntu-latest
         steps:
             -   uses: actions/checkout@v4
+            -   uses: oven-sh/setup-bun@v1
+                with:
+                    bun-version: latest
+            -   name: Cache Bun dependencies
+                uses: actions/cache@v3
+                with:
+                    path: ~/.bun/install/cache
+                    key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+                    restore-keys: ${{ runner.os }}-bun-
             -   name: Client App Install
                 uses: ./.github/workflows/steps/client-app-install/
             -   name: Run Typescript type check
                 run: bun run typecheck
                 working-directory: src/WebAPI/ClientApp/
+
     # Front-End-Unit-Tests:
     Front-End-Unit-Tests:
+        needs: Check-Frontend-Changes
+        if: needs.Check-Frontend-Changes.outputs.should_run == 'true'
         runs-on: ubuntu-latest
         steps:
             -   uses: actions/checkout@v4
+            -   uses: oven-sh/setup-bun@v1
+                with:
+                    bun-version: latest
+            -   name: Cache Bun dependencies
+                uses: actions/cache@v3
+                with:
+                    path: ~/.bun/install/cache
+                    key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+                    restore-keys: ${{ runner.os }}-bun-
             -   name: Client App Install
                 uses: ./.github/workflows/steps/client-app-install/
             -   name: Run Vitest tests
                 run: bun run test
                 working-directory: src/WebAPI/ClientApp/
+            -   name: Upload test results
+                if: always()
+                uses: actions/upload-artifact@v4
+                with:
+                    name: frontend-test-results
+                    path: src/WebAPI/ClientApp/test-results
+                    retention-days: 7
+
     Front-End-Eslint-Check:
+        needs: Check-Frontend-Changes
+        if: needs.Check-Frontend-Changes.outputs.should_run == 'true'
         runs-on: ubuntu-latest
         steps:
             -   uses: actions/checkout@v4
+            -   uses: oven-sh/setup-bun@v1
+                with:
+                    bun-version: latest
+            -   name: Cache Bun dependencies
+                uses: actions/cache@v3
+                with:
+                    path: ~/.bun/install/cache
+                    key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+                    restore-keys: ${{ runner.os }}-bun-
             -   name: Client App Install
                 uses: ./.github/workflows/steps/client-app-install/
             -   name: Run eslint check
                 run: bun run lint
                 working-directory: src/WebAPI/ClientApp/
+
     Front-End-Integration-Tests:
+        needs: Check-Frontend-Changes
+        if: needs.Check-Frontend-Changes.outputs.should_run == 'true'
         runs-on: ubuntu-latest
         steps:
             -   uses: actions/checkout@v4
+            -   uses: oven-sh/setup-bun@v1
+                with:
+                    bun-version: latest
+            -   name: Cache Bun dependencies
+                uses: actions/cache@v3
+                with:
+                    path: ~/.bun/install/cache
+                    key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+                    restore-keys: ${{ runner.os }}-bun-
             -   name: Client App Install
                 uses: ./.github/workflows/steps/client-app-install/
+            -   name: Cache Cypress binary
+                uses: actions/cache@v3
+                with:
+                    path: ~/.cache/Cypress
+                    key: ${{ runner.os }}-cypress-${{ hashFiles('**/package.json') }}
+                    restore-keys: ${{ runner.os }}-cypress-
             -   name: Run Cypress tests
                 uses: cypress-io/github-action@v6
                 with:
@@ -68,45 +158,170 @@ jobs:
 
     # Back-End Unit Tests
     Back-End-Unit-Tests:
+        needs: Check-Backend-Changes
+        if: needs.Check-Backend-Changes.outputs.should_run == 'true'
         runs-on: ubuntu-latest
+        name: Back-End-Unit-Tests (${{ matrix.project_name }})
+        strategy:
+            fail-fast: false
+            matrix:
+                include:
+                    - test_project: tests/UnitTests/Application.UnitTests/Application.UnitTests.csproj
+                      project_name: Application.UnitTests
+                    - test_project: tests/UnitTests/Data.UnitTests/Data.UnitTests.csproj
+                      project_name: Data.UnitTests
+                    - test_project: tests/UnitTests/Domain.UnitTests/Domain.UnitTests.csproj
+                      project_name: Domain.UnitTests
+                    - test_project: tests/UnitTests/FileSystem.UnitTests/FileSystem.UnitTests.csproj
+                      project_name: FileSystem.UnitTests
+                    - test_project: tests/UnitTests/FluentResultExtension.UnitTests/FluentResultExtension.UnitTests.csproj
+                      project_name: FluentResultExtension.UnitTests
+                    - test_project: tests/UnitTests/Logging.UnitTests/Logging.UnitTests.csproj
+                      project_name: Logging.UnitTests
+                    - test_project: tests/UnitTests/PlexApi.UnitTests/PlexApi.UnitTests.csproj
+                      project_name: PlexApi.UnitTests
+                    - test_project: tests/UnitTests/Settings.UnitTests/Settings.UnitTests.csproj
+                      project_name: Settings.UnitTests
+
         steps:
             -   name: Checkout Source Code
                 uses: actions/checkout@v4
+
+            -   name: Setup .NET
+                uses: actions/setup-dotnet@v3
+                with:
+                    dotnet-version: 7.0.x
+
+            -   name: Cache NuGet packages
+                uses: actions/cache@v3
+                with:
+                    path: ~/.nuget/packages
+                    key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+                    restore-keys: ${{ runner.os }}-nuget-
+
             -   name: Dotnet Setup
                 uses: ./.github/workflows/steps/dotnet-setup/
-            -   name: Unit Tests
-                run: dotnet test tests/UnitTests/UnitTests.sln --no-build --verbosity normal
+                with:
+                    project-path: ${{ matrix.test_project }}
+
+            -   name: Run Unit Tests
+                run: dotnet test ${{ matrix.test_project }} --no-build --verbosity normal --logger "trx;LogFileName=test_results.trx" --collect:"XPlat Code Coverage"
+
+            -   name: Sanitize Artifact Name
+                id: sanitize
+                run: |
+                    FILENAME=$(basename "${{ matrix.test_project }}" .csproj)
+                    echo "safe_name=$FILENAME" >> $GITHUB_OUTPUT
+
+            -   name: Upload Test Results
+                if: always()
+                uses: actions/upload-artifact@v4
+                with:
+                    name: test-results-${{ steps.sanitize.outputs.safe_name }}
+                    path: '**/TestResults/*.trx'
+                    retention-days: 7
+
+            -   name: Upload Code Coverage
+                if: always()
+                uses: actions/upload-artifact@v4
+                with:
+                    name: code-coverage-${{ steps.sanitize.outputs.safe_name }}
+                    path: '**/TestResults/**/coverage.cobertura.xml'
+                    retention-days: 7
+
+            -   name: Publish Test Report
+                if: always()
+                uses: dorny/test-reporter@v1
+                with:
+                    name: Unit Test Results - ${{ matrix.project_name }}
+                    path: '**/TestResults/*.trx'
+                    reporter: dotnet-trx
+
     # Back-End Integration Tests
     Back-End-Integration-Tests:
+        needs: Check-Backend-Changes
+        if: needs.Check-Backend-Changes.outputs.should_run == 'true'
+        runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                integration_test_project:
+                    - tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj
+                    # Add more if needed
+        steps:
+            -   name: Checkout Source Code
+                uses: actions/checkout@v4
+
+            -   name: Setup .NET
+                uses: actions/setup-dotnet@v3
+                with:
+                    dotnet-version: 7.0.x
+
+            -   name: Cache NuGet packages
+                uses: actions/cache@v3
+                with:
+                    path: ~/.nuget/packages
+                    key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+                    restore-keys: ${{ runner.os }}-nuget-
+
+            -   name: Dotnet Setup
+                uses: ./.github/workflows/steps/dotnet-setup/
+                with:
+                    project-path: ${{ matrix.integration_test_project }}
+
+            -   name: Run Integration Tests 
+                run: dotnet test ${{ matrix.integration_test_project }} --no-build --verbosity normal --logger "trx;LogFileName=integration_test_results.trx" --filter "Category!=Flaky"
+
+            -   name: Upload Integration Test Results
+                if: always()
+                uses: actions/upload-artifact@v4
+                with:
+                    name: integration-test-results
+                    path: '**/TestResults/*.trx'
+                    retention-days: 7
+
+            -   name: Publish Integration Test Report
+                if: always()
+                uses: dorny/test-reporter@v1
+                with:
+                    name: Integration Test Results
+                    path: '**/TestResults/*.trx'
+                    reporter: dotnet-trx
+
+    # Code Coverage Report
+    Code-Coverage-Report:
+        needs: Back-End-Unit-Tests
+        if: always() && needs.Back-End-Unit-Tests.result != 'skipped'
         runs-on: ubuntu-latest
         steps:
             -   name: Checkout Source Code
                 uses: actions/checkout@v4
-            -   name: Dotnet Setup
-                uses: ./.github/workflows/steps/dotnet-setup/
-            -   name: Integration Tests with retry
-                run: |
-                    max_retries=2
-                    count=0
-                    success=false
-                    while [ $count -lt $max_retries ]; do
-                      echo "Running integration tests attempt $((count + 1)) of $max_retries"
-                      dotnet test tests/IntegrationTests/IntegrationTests.sln --no-build --verbosity normal
-                      if [ $? -eq 0 ]; then
-                        success=true
-                        break
-                      fi
-                      ((count++))
-                      echo "Test failed. Retrying..."
-                    done
-                    
-                    if [ "$success" = false ]; then
-                      echo "Integration tests failed after $max_retries attempts"
-                      exit 1
-                    fi
+
+            -   name: Download Coverage Reports
+                uses: actions/download-artifact@v4
+                with:
+                    pattern: code-coverage-*
+                    merge-multiple: true
+                    path: coverage-reports
+
+            -   name: Generate Code Coverage Report
+                uses: danielpalme/ReportGenerator-GitHub-Action@5.2.0
+                with:
+                    reports: 'coverage-reports/**/coverage.cobertura.xml'
+                    targetdir: 'coveragereport'
+                    reporttypes: 'HtmlInline;Cobertura;Badges'
+
+            -   name: Upload Coverage Report
+                uses: actions/upload-artifact@v4
+                with:
+                    name: code-coverage-report
+                    path: coveragereport
+                    retention-days: 7
+
     # Ensure the Docker image can be built without errors
     Test-Docker-Build:
-        needs: [ Front-End-Type-Check, Front-End-Eslint-Check, Front-End-Unit-Tests, Front-End-Integration-Tests, Back-End-Unit-Tests, Back-End-Integration-Tests ]
+        needs: [Check-Frontend-Changes, Check-Backend-Changes, Back-End-Unit-Tests, Back-End-Integration-Tests, Front-End-Type-Check, Front-End-Unit-Tests, Front-End-Eslint-Check, Front-End-Integration-Tests]
+        if: always()
         runs-on: ubuntu-latest
         steps:
             -   name: Checkout Source Code
@@ -114,6 +329,14 @@ jobs:
 
             -   name: Set up Docker Buildx
                 uses: docker/setup-buildx-action@v3
+
+            -   name: Cache Docker layers
+                uses: actions/cache@v3
+                with:
+                    path: /tmp/.buildx-cache
+                    key: ${{ runner.os }}-buildx-${{ github.sha }}
+                    restore-keys: |
+                        ${{ runner.os }}-buildx-
 
             -   name: Build
                 uses: docker/build-push-action@v6
@@ -127,4 +350,12 @@ jobs:
                         VERSION=0.0.0
                         INFORMATIONAL_VERSION=0.0.0
                     file: docker/Dockerfile
+                    cache-from: type=local,src=/tmp/.buildx-cache
+                    cache-to: type=local,dest=/tmp/.buildx-cache-new
+
+            # Temp fix for https://github.com/docker/build-push-action/issues/252
+            - name: Move cache
+              run: |
+                rm -rf /tmp/.buildx-cache
+                mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 

@@ -1,0 +1,25 @@
+name: Skip if no backend changes
+description: Exit early if no changes in backend files
+outputs:
+  should_run:
+    description: 'Whether backend tests should run (true/false)'
+    value: ${{ steps.check_backend.outputs.should_run }}
+runs:
+    using: "composite"
+    steps:
+        -   name: Fetch git history
+            shell: bash
+            run: git fetch origin ${{ github.base_ref }}
+
+        -   name: Check for Backend Changes
+            id: check_backend
+            shell: bash
+            run: |
+                echo "Checking for changes in backend files..."
+                if git diff --name-only origin/${{ github.base_ref }} | grep -qE '^(src/(?!WebAPI/ClientApp)|tests)'; then
+                  echo "Backend changes detected."
+                  echo "should_run=true" >> $GITHUB_OUTPUT
+                else
+                  echo "No backend changes detected."
+                  echo "should_run=false" >> $GITHUB_OUTPUT
+                fi 

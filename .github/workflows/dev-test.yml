@@ -12,47 +12,72 @@ on:
             - 'README.md'
 
 jobs:
-    # Front-End-Type-Check:
-    Front-End-Type-Check:
+    # Check if front-end has changed
+    Check-Frontend-Changes:
         runs-on: ubuntu-latest
+        outputs:
+            should_run: ${{ steps.check_changes.outputs.should_run }}
         steps:
             -   uses: actions/checkout@v4
             -   name: Check if front-end has changed
+                id: check_changes
                 uses: ./.github/workflows/steps/skip-if-no-frontend-change
+
+    # Check if back-end has changed
+    Check-Backend-Changes:
+        runs-on: ubuntu-latest
+        outputs:
+            should_run: ${{ steps.check_changes.outputs.should_run }}
+        steps:
+            -   uses: actions/checkout@v4
+            -   name: Check if back-end has changed
+                id: check_changes
+                uses: ./.github/workflows/steps/skip-if-no-backend-change
+
+    # Front-End-Type-Check:
+    Front-End-Type-Check:
+        needs: Check-Frontend-Changes
+        if: needs.Check-Frontend-Changes.outputs.should_run == 'true'
+        runs-on: ubuntu-latest
+        steps:
+            -   uses: actions/checkout@v4
             -   name: Client App Install
                 uses: ./.github/workflows/steps/client-app-install/
             -   name: Run Typescript type check
                 run: bun run typecheck
                 working-directory: src/WebAPI/ClientApp/
+
     # Front-End-Unit-Tests:
     Front-End-Unit-Tests:
+        needs: Check-Frontend-Changes
+        if: needs.Check-Frontend-Changes.outputs.should_run == 'true'
         runs-on: ubuntu-latest
         steps:
             -   uses: actions/checkout@v4
-            -   name: Check if front-end has changed
-                uses: ./.github/workflows/steps/skip-if-no-frontend-change
             -   name: Client App Install
                 uses: ./.github/workflows/steps/client-app-install/
             -   name: Run Vitest tests
                 run: bun run test
                 working-directory: src/WebAPI/ClientApp/
+
     Front-End-Eslint-Check:
+        needs: Check-Frontend-Changes
+        if: needs.Check-Frontend-Changes.outputs.should_run == 'true'
         runs-on: ubuntu-latest
         steps:
             -   uses: actions/checkout@v4
-            -   name: Check if front-end has changed
-                uses: ./.github/workflows/steps/skip-if-no-frontend-change
             -   name: Client App Install
                 uses: ./.github/workflows/steps/client-app-install/
             -   name: Run eslint check
                 run: bun run lint
                 working-directory: src/WebAPI/ClientApp/
+
     Front-End-Integration-Tests:
+        needs: Check-Frontend-Changes
+        if: needs.Check-Frontend-Changes.outputs.should_run == 'true'
         runs-on: ubuntu-latest
         steps:
             -   uses: actions/checkout@v4
-            -   name: Check if front-end has changed
-                uses: ./.github/workflows/steps/skip-if-no-frontend-change
             -   name: Client App Install
                 uses: ./.github/workflows/steps/client-app-install/
             -   name: Run Cypress tests
@@ -76,6 +101,8 @@ jobs:
 
     # Back-End Unit Tests
     Back-End-Unit-Tests:
+        needs: Check-Backend-Changes
+        if: needs.Check-Backend-Changes.outputs.should_run == 'true'
         runs-on: ubuntu-latest
         name: Back-End-Unit-Tests (${{ matrix.project_name }})
         strategy:
@@ -134,6 +161,8 @@ jobs:
 
     # Back-End Integration Tests
     Back-End-Integration-Tests:
+        needs: Check-Backend-Changes
+        if: needs.Check-Backend-Changes.outputs.should_run == 'true'
         runs-on: ubuntu-latest
         strategy:
             fail-fast: false
@@ -155,7 +184,8 @@ jobs:
 
     # Ensure the Docker image can be built without errors
     Test-Docker-Build:
-        needs: [ Front-End-Type-Check, Front-End-Eslint-Check, Front-End-Unit-Tests, Front-End-Integration-Tests, Back-End-Unit-Tests, Back-End-Integration-Tests ]
+        needs: [Check-Frontend-Changes, Check-Backend-Changes, Back-End-Unit-Tests, Back-End-Integration-Tests, Front-End-Type-Check, Front-End-Unit-Tests, Front-End-Eslint-Check, Front-End-Integration-Tests]
+        if: always()
         runs-on: ubuntu-latest
         steps:
             -   name: Checkout Source Code

@@ -1,5 +1,14 @@
 PlexRipper Changelog
 
+## [0.31.1](https://github.com/PlexRipper/PlexRipper/compare/v0.31.0...v0.31.1) (2025-04-27)
+
+
+### Bug Fixes
+
+* **WebAPI:** Fixed an issue where multiple devices would show up when logging in with PlexRipper ([1057d91](https://github.com/PlexRipper/PlexRipper/commit/1057d91721c8d5b1146d8a3dd05fcbd8c286d6f9))
+* **WebAPI:** Fixed an issue where TvShow libraries were not recognized and instead shown as unknown ([06f4d6f](https://github.com/PlexRipper/PlexRipper/commit/06f4d6f460f5765dd1b3d089cf30d297a7951d64))
+* **Web-UI:** Fixed padding around error alert when the library type is unknown ([b9d66e3](https://github.com/PlexRipper/PlexRipper/commit/b9d66e34932ba20f34ef8d7a180c178c69f22723))
+
 # [0.31.0](https://github.com/PlexRipper/PlexRipper/compare/v0.30.0...v0.31.0) (2025-04-13)
 
 

@@ -6,6 +6,7 @@ using PlexRipper.Application;
 
 namespace IntegrationTests.AccountController;
 
+[CollectionDefinition("SequentialIntegrationTests", DisableParallelization = true)]
 public class CreateAccountIntegrationTests : BaseIntegrationTests
 {
     public CreateAccountIntegrationTests(ITestOutputHelper output)

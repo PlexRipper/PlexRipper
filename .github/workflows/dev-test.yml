@@ -114,7 +114,6 @@ jobs:
                     name: test-results-${{ steps.sanitize.outputs.safe_name }}
                     path: '**/TestResults/*.trx'
 
-
             -   name: Publish Test Report
                 if: always()
                 uses: dorny/test-reporter@v1
@@ -142,7 +141,7 @@ jobs:
                     project-path: ${{ matrix.integration_test_project }}
 
             -   name: Run Integration Tests
-                run: dotnet test ${{ matrix.integration_test_project }} --no-build --verbosity normal --parallel none
+                run: dotnet test ${{ matrix.integration_test_project }} --no-build --verbosity normal
 
     # Ensure the Docker image can be built without errors
     Test-Docker-Build:

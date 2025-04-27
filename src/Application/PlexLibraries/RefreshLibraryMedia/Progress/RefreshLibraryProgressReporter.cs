@@ -15,7 +15,7 @@ public record RefreshLibraryProgressUpdate
 
     public TimeSpan TimeRemaining { get; init; } = TimeSpan.Zero;
 
-    public required Action<LibraryProgress>? Action { get; init; }
+    public required Action<LibraryProgress> Action { get; init; }
 }
 
 public class RefreshLibraryProgressReporter : IRefreshLibraryProgressReporter
@@ -30,7 +30,7 @@ public class RefreshLibraryProgressReporter : IRefreshLibraryProgressReporter
         _signalRService = signalRService;
     }
 
-    public void SendProgress(RefreshLibraryProgressUpdate update)
+    public async Task SendProgress(RefreshLibraryProgressUpdate update)
     {
         var totalProgressSteps = update.PlexLibraryType switch
         {
@@ -39,7 +39,7 @@ public class RefreshLibraryProgressReporter : IRefreshLibraryProgressReporter
             _ => _totalProgressSteps,
         };
 
-        var countStep = _baseCountProgress / totalProgressSteps;
+        var countStep = (decimal)_baseCountProgress / totalProgressSteps;
         var index = countStep * update.Step + countStep * update.Percentage;
 
         var progress = new LibraryProgress
@@ -52,8 +52,8 @@ public class RefreshLibraryProgressReporter : IRefreshLibraryProgressReporter
             TotalSteps = totalProgressSteps,
         };
 
-        update.Action?.Invoke(progress);
+        update.Action.Invoke(progress);
 
-        _signalRService.SendLibraryProgressUpdateAsync(progress);
+        await _signalRService.SendLibraryProgressUpdateAsync(progress);
     }
 }

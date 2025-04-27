@@ -65,7 +65,7 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
                     _progressReporter.SendProgress(
                         new RefreshLibraryProgressUpdate
                         {
-                            PlexLibraryType = PlexMediaType.Movie,
+                            PlexLibraryType = plexLibrary.Type,
                             PlexLibraryId = plexLibrary.Id,
                             Step = 1,
                             Percentage = progress.Percentage,

@@ -2,5 +2,5 @@ namespace PlexRipper.Application;
 
 public interface IRefreshLibraryProgressReporter
 {
-    void SendProgress(RefreshLibraryProgressUpdate update);
+    Task SendProgress(RefreshLibraryProgressUpdate update);
 }

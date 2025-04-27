@@ -28,8 +28,7 @@ public static class MoqExtensions
         Func<ICommand<TResult>> request
     )
     {
-        var result = mock.Mock<ICommandExecutor>()
-            .Setup(m => m.Send(request.Invoke(), It.IsAny<CancellationToken>()));
+        var result = mock.Mock<ICommandExecutor>().Setup(m => m.Send(request.Invoke(), It.IsAny<CancellationToken>()));
 
         // This is to ensure unit tests to contain unused mock setups
         result.Verifiable(Times.AtLeastOnce);

@@ -103,8 +103,12 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
             // Estimate remaining time
             var elapsedTime = DateTime.UtcNow - startTime;
             var progress = (double)index / totalSize;
-            var estimatedTotalTime = elapsedTime.TotalSeconds / progress;
-            var remainingTime = TimeSpan.FromSeconds(estimatedTotalTime - elapsedTime.TotalSeconds);
+            var remainingTime = TimeSpan.Zero;
+            if (progress > 0)
+            {
+                var estimatedTotalTime = elapsedTime.TotalSeconds / progress;
+                remainingTime = TimeSpan.FromSeconds(estimatedTotalTime - elapsedTime.TotalSeconds);
+            }
 
             // Report progress
             action?.Invoke(

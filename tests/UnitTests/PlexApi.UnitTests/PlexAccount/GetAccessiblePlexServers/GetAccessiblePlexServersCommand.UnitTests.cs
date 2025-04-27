@@ -9,7 +9,7 @@ using PlexRipper.PlexApi;
 using PlexRipper.PlexApi.GetAccessiblePlexServers;
 using Settings.Contracts;
 
-namespace PlexApi.UnitTests.PlexAccount.GetAccessiblePlexServers;
+namespace PlexApi.UnitTests;
 
 public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexServersCommandHandler>
 {
@@ -20,8 +20,7 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
     {
         mock.Mock<IPlexApiClientFactory>()
             .Setup(x => x.CreateTvClient(It.IsAny<string>(), It.IsAny<PlexApiClientOptions?>()))
-            .Returns<string, PlexApiClientOptions?>(
-                (_, _) =>
+            .Returns<string, PlexApiClientOptions?>((_, _) =>
                 {
                     var plexApiMock = new Mock<IPlexAPI>();
                     var plexApiMockIPlex = new Mock<IPlex>();
@@ -77,8 +76,7 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
 
         mock.Mock<IPlexApiClientFactory>()
             .Setup(x => x.CreateTvClient(It.IsAny<string>(), It.IsAny<PlexApiClientOptions?>()))
-            .Returns<string, PlexApiClientOptions?>(
-                (_, _) =>
+            .Returns<string, PlexApiClientOptions?>((_, _) =>
                 {
                     var plexApiMock = new Mock<IPlexAPI>();
                     var plexApiMockIPlex = new Mock<IPlex>();
@@ -134,10 +132,7 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
         var response1 = FakePlexApiData.GetServerResourcesResponse(
             HttpStatusCode.OK,
             new Seed(939),
-            options: config =>
-            {
-                config.PlexServerAccessCount = serverCount;
-            }
+            options: config => { config.PlexServerAccessCount = serverCount; }
         );
 
         var response2 = FakePlexApiData.GetServerResourcesResponse(
@@ -301,10 +296,7 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
         var response2 = FakePlexApiData.GetServerResourcesResponse(
             HttpStatusCode.OK,
             new Seed(939),
-            options: config =>
-            {
-                config.PlexServerAccessCount = serverCount;
-            }
+            options: config => { config.PlexServerAccessCount = serverCount; }
         );
 
         SetCallMock(response1, response2);
@@ -496,10 +488,7 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
             HttpStatusCode.OK,
             new Seed(940),
             serverResource1,
-            options: config =>
-            {
-                config.PlexServerAccessConnectionsIncludeHttps = true;
-            }
+            options: config => { config.PlexServerAccessConnectionsIncludeHttps = true; }
         );
 
         var response2 = FakePlexApiData.GetServerResourcesResponse(HttpStatusCode.OK, new Seed(939), serverResource2);

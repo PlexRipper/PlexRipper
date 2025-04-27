@@ -120,7 +120,7 @@ public class RefreshPlexTvShowLibraryCommandHandler
 
             // Phase 4 of 5: PlexLibrary media data was parsed successfully.
             var tvShows = BuildTvShowTree(plexLibrary, plexLibrary.TvShows, rawSeasonData, rawEpisodesData);
-            _progressReporter.SendProgress(
+            await _progressReporter.SendProgress(
                 new RefreshLibraryProgressUpdate
                 {
                     Action = command.Action,
@@ -135,7 +135,7 @@ public class RefreshPlexTvShowLibraryCommandHandler
             var syncResult = await _mediator.Send(new SyncPlexTvShowsCommand(tvShows), cancellationToken);
             if (syncResult.IsFailed)
             {
-                _progressReporter.SendProgress(
+                await _progressReporter.SendProgress(
                     new RefreshLibraryProgressUpdate
                     {
                         Action = command.Action,
@@ -176,7 +176,7 @@ public class RefreshPlexTvShowLibraryCommandHandler
                 );
 
             // Phase 5 of 5: Database has been successfully updated with new library data.
-            _progressReporter.SendProgress(
+            await _progressReporter.SendProgress(
                 new RefreshLibraryProgressUpdate
                 {
                     Action = command.Action,
@@ -255,8 +255,7 @@ public class RefreshPlexTvShowLibraryCommandHandler
 
                 // Set library ID in each episode
                 var episodeIndex = 1;
-                episodes.ForEach(
-                    (x) =>
+                episodes.ForEach((x) =>
                     {
                         x.PlexLibraryId = plexLibrary.Id;
                         x.PlexServerId = plexLibrary.PlexServerId;

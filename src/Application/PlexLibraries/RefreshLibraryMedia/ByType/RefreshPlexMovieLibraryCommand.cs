@@ -59,7 +59,7 @@ public class RefreshPlexMovieLibraryCommandHandler
             var createResult = await _mediator.Send(new SyncPlexMoviesCommand(plexLibrary.Movies));
             if (createResult.IsFailed)
             {
-                _progressReporter.SendProgress(
+                await _progressReporter.SendProgress(
                     new RefreshLibraryProgressUpdate
                     {
                         Action = command.Action,
@@ -83,7 +83,7 @@ public class RefreshPlexMovieLibraryCommandHandler
         }
 
         // Phase 2 of 3: PlexLibrary media data was parsed successfully.
-        _progressReporter.SendProgress(
+        await _progressReporter.SendProgress(
             new RefreshLibraryProgressUpdate
             {
                 Action = command.Action,
@@ -118,7 +118,7 @@ public class RefreshPlexMovieLibraryCommandHandler
         );
 
         // Phase 3 of 3: Movies have been successfully updated in the database.
-        _progressReporter.SendProgress(
+        await _progressReporter.SendProgress(
             new RefreshLibraryProgressUpdate
             {
                 Action = command.Action,

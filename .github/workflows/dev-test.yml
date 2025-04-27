@@ -77,18 +77,28 @@ jobs:
     # Back-End Unit Tests
     Back-End-Unit-Tests:
         runs-on: ubuntu-latest
+        name: Back-End-Unit-Tests (${{ matrix.project_name }})
         strategy:
             fail-fast: false
             matrix:
-                test_project:
-                    - tests/UnitTests/Application.UnitTests/Application.UnitTests.csproj
-                    - tests/UnitTests/Data.UnitTests/Data.UnitTests.csproj
-                    - tests/UnitTests/Domain.UnitTests/Domain.UnitTests.csproj
-                    - tests/UnitTests/FileSystem.UnitTests/FileSystem.UnitTests.csproj
-                    - tests/UnitTests/FluentResultExtension.UnitTests/FluentResultExtension.UnitTests.csproj
-                    - tests/UnitTests/Logging.UnitTests/Logging.UnitTests.csproj
-                    - tests/UnitTests/PlexApi.UnitTests/PlexApi.UnitTests.csproj
-                    - tests/UnitTests/Settings.UnitTests/Settings.UnitTests.csproj
+                include:
+                    - test_project: tests/UnitTests/Application.UnitTests/Application.UnitTests.csproj
+                      project_name: Application.UnitTests
+                    - test_project: tests/UnitTests/Data.UnitTests/Data.UnitTests.csproj
+                      project_name: Data.UnitTests
+                    - test_project: tests/UnitTests/Domain.UnitTests/Domain.UnitTests.csproj
+                      project_name: Domain.UnitTests
+                    - test_project: tests/UnitTests/FileSystem.UnitTests/FileSystem.UnitTests.csproj
+                      project_name: FileSystem.UnitTests
+                    - test_project: tests/UnitTests/FluentResultExtension.UnitTests/FluentResultExtension.UnitTests.csproj
+                      project_name: FluentResultExtension.UnitTests
+                    - test_project: tests/UnitTests/Logging.UnitTests/Logging.UnitTests.csproj
+                      project_name: Logging.UnitTests
+                    - test_project: tests/UnitTests/PlexApi.UnitTests/PlexApi.UnitTests.csproj
+                      project_name: PlexApi.UnitTests
+                    - test_project: tests/UnitTests/Settings.UnitTests/Settings.UnitTests.csproj
+                      project_name: Settings.UnitTests
+
         steps:
             -   name: Checkout Source Code
                 uses: actions/checkout@v4

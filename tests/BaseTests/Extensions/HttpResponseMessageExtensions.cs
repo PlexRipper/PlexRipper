@@ -20,7 +20,7 @@ public static class HttpResponseMessageExtensions
             };
 
         result.Successes = result
-            .Successes.Select(x => new SuccessDTO()
+            .Successes.Select(x => new SuccessDTO
             {
                 Message = x.Message,
                 Metadata = x.Metadata.ToTypedResultMetaData(),
@@ -28,7 +28,7 @@ public static class HttpResponseMessageExtensions
             .ToList();
 
         result.Errors = result
-            .Errors.Select(x => new ErrorDTO()
+            .Errors.Select(x => new ErrorDTO
             {
                 Reasons = x.Reasons,
                 Message = x.Message,

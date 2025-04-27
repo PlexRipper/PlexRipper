@@ -61,7 +61,7 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
 
         var client = _plexApiClientFactory.CreateClient(
             tokenResult.Value,
-            new PlexApiClientOptions()
+            new PlexApiClientOptions
             {
                 ConnectionUrl = plexServerConnection.Url,
                 Timeout = 30,

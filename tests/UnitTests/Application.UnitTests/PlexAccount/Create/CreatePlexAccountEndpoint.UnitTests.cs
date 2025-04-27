@@ -20,7 +20,7 @@ public class CreatePlexAccountEndpointUnitTests : BaseUnitTest
         // Act
         var endPoint = SetupEndpointUnitTest<CreatePlexAccountEndpoint>();
         await endPoint.HandleAsync(
-            new CreatePlexAccountEndpointRequest() { PlexAccount = newAccount.ToDTO() },
+            new CreatePlexAccountEndpointRequest { PlexAccount = newAccount.ToDTO() },
             CancellationToken.None
         );
         var result = endPoint.Response;

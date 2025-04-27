@@ -65,7 +65,7 @@ public class RefreshPlexTvShowLibraryCommandHandler
                     plexLibrary,
                     progress =>
                         _progressReporter.SendProgress(
-                            new RefreshLibraryProgressUpdate()
+                            new RefreshLibraryProgressUpdate
                             {
                                 Action = command.Action,
                                 PlexLibraryType = PlexMediaType.TvShow,
@@ -88,7 +88,7 @@ public class RefreshPlexTvShowLibraryCommandHandler
                     plexLibrary,
                     progress =>
                         _progressReporter.SendProgress(
-                            new RefreshLibraryProgressUpdate()
+                            new RefreshLibraryProgressUpdate
                             {
                                 Action = command.Action,
                                 PlexLibraryType = PlexMediaType.TvShow,
@@ -121,7 +121,7 @@ public class RefreshPlexTvShowLibraryCommandHandler
             // Phase 4 of 5: PlexLibrary media data was parsed successfully.
             var tvShows = BuildTvShowTree(plexLibrary, plexLibrary.TvShows, rawSeasonData, rawEpisodesData);
             _progressReporter.SendProgress(
-                new RefreshLibraryProgressUpdate()
+                new RefreshLibraryProgressUpdate
                 {
                     Action = command.Action,
                     PlexLibraryType = PlexMediaType.TvShow,
@@ -136,7 +136,7 @@ public class RefreshPlexTvShowLibraryCommandHandler
             if (syncResult.IsFailed)
             {
                 _progressReporter.SendProgress(
-                    new RefreshLibraryProgressUpdate()
+                    new RefreshLibraryProgressUpdate
                     {
                         Action = command.Action,
                         PlexLibraryType = PlexMediaType.TvShow,

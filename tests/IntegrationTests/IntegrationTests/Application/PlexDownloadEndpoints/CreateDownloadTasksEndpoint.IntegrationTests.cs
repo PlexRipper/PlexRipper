@@ -45,7 +45,7 @@ public class CreateDownloadTasksEndpointIntegrationTests : BaseIntegrationTests
             $"PlexMovies count should be 10 failed with database name: {container.DbContext.DatabaseName}"
         );
 
-        var dtoList = new List<DownloadMediaDTO>()
+        var dtoList = new List<DownloadMediaDTO>
         {
             new()
             {

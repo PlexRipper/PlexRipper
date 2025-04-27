@@ -60,7 +60,7 @@ public class RefreshPlexMovieLibraryCommandHandler
             if (createResult.IsFailed)
             {
                 _progressReporter.SendProgress(
-                    new RefreshLibraryProgressUpdate()
+                    new RefreshLibraryProgressUpdate
                     {
                         Action = command.Action,
                         PlexLibraryType = PlexMediaType.Movie,
@@ -84,7 +84,7 @@ public class RefreshPlexMovieLibraryCommandHandler
 
         // Phase 2 of 3: PlexLibrary media data was parsed successfully.
         _progressReporter.SendProgress(
-            new RefreshLibraryProgressUpdate()
+            new RefreshLibraryProgressUpdate
             {
                 Action = command.Action,
                 PlexLibraryType = PlexMediaType.Movie,
@@ -119,7 +119,7 @@ public class RefreshPlexMovieLibraryCommandHandler
 
         // Phase 3 of 3: Movies have been successfully updated in the database.
         _progressReporter.SendProgress(
-            new RefreshLibraryProgressUpdate()
+            new RefreshLibraryProgressUpdate
             {
                 Action = command.Action,
                 PlexLibraryType = PlexMediaType.Movie,

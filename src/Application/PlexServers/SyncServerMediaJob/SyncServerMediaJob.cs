@@ -88,7 +88,7 @@ public class SyncServerMediaJob : IJob
             // Initialize list
             plexLibraries.ForEach(x =>
                 progressList.Add(
-                    new LibraryProgress()
+                    new LibraryProgress
                     {
                         Id = x.Id,
                         Step = 0,

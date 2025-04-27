@@ -77,7 +77,7 @@ public class RefreshLibraryAccessHandler
         {
             var plexAccountName = await _dbContext.GetPlexAccountDisplayName(plexAccountId, cancellationToken);
             _log.Warning("No accessible Plex servers found for PlexAccount {PlexAccountName}", plexAccountName);
-            return Result.Ok(new PlexLibraryAccessRefreshResponse() { Reports = [], OfflineServers = [] });
+            return Result.Ok(new PlexLibraryAccessRefreshResponse { Reports = [], OfflineServers = [] });
         }
 
         // Refresh Plex libraries

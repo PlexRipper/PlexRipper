@@ -190,7 +190,7 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
 
         mock.Mock<IServerSettingsModule>().Setup(x => x.GetIsHidden(It.IsAny<string>())).Returns(false);
 
-        var response1 = new GetServerResourcesResponse()
+        var response1 = new GetServerResourcesResponse
         {
             PlexDevices = JsonConvert.DeserializeObject<List<PlexDevice>>(PlexApiWrapperTestData.Response1),
             StatusCode = (int)HttpStatusCode.OK,
@@ -204,7 +204,7 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
             },
         };
 
-        var response2 = new GetServerResourcesResponse()
+        var response2 = new GetServerResourcesResponse
         {
             PlexDevices = JsonConvert.DeserializeObject<List<PlexDevice>>(PlexApiWrapperTestData.Response2),
             StatusCode = (int)HttpStatusCode.OK,
@@ -244,7 +244,7 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
 
         var serverCount = 2;
 
-        var response1 = new GetServerResourcesResponse()
+        var response1 = new GetServerResourcesResponse
         {
             PlexDevices = [],
             StatusCode = (int)HttpStatusCode.InternalServerError,

@@ -13,7 +13,7 @@ public class InMemoryDatabase_UnitTests : BaseUnitTest
         // Arrange
         var dbContext = MockDatabase.GetMemoryDbContext();
         var (plexRipperContext, _) = dbContext;
-        var notification = new Notification()
+        var notification = new Notification
         {
             Hidden = false,
             Level = NotificationLevel.Information,
@@ -36,7 +36,7 @@ public class InMemoryDatabase_UnitTests : BaseUnitTest
         // Arrange
         var dbContext = MockDatabase.GetMemoryDbContext();
         var (plexRipperContext, _) = dbContext;
-        var notification = new Notification()
+        var notification = new Notification
         {
             Hidden = false,
             Level = NotificationLevel.Information,

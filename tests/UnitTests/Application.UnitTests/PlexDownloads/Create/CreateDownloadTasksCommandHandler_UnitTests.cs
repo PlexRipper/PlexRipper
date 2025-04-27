@@ -17,7 +17,7 @@ public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest<CreateDo
         mock.SetupMediator(It.IsAny<GenerateDownloadTaskTvShowEpisodesCommand>).ReturnsAsync(Result.Ok());
         mock.PublishMediator(It.IsAny<CheckDownloadQueueNotification>).Returns(Task.CompletedTask);
 
-        var downloadMediaDtos = new List<DownloadMediaDTO>()
+        var downloadMediaDtos = new List<DownloadMediaDTO>
         {
             new()
             {
@@ -73,7 +73,7 @@ public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest<CreateDo
         mock.SetupMediator(It.IsAny<GenerateDownloadTaskTvShowEpisodesCommand>).ReturnsAsync(Result.Ok());
         mock.PublishMediator(It.IsAny<CheckDownloadQueueNotification>).Returns(Task.CompletedTask);
 
-        var downloadMediaDtos = new List<DownloadMediaDTO>()
+        var downloadMediaDtos = new List<DownloadMediaDTO>
         {
             new()
             {

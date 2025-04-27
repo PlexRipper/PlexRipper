@@ -135,7 +135,7 @@ public class GetFolderPathDirectoryEndpoint : BaseEndpoint<GetFolderPathDirector
                     return filesResult.ToResult();
 
                 return Result.Ok(
-                    new FileSystemResult()
+                    new FileSystemResult
                     {
                         Parent = _diskProvider.GetParent(path),
                         Directories = directoriesResult.Value,
@@ -146,7 +146,7 @@ public class GetFolderPathDirectoryEndpoint : BaseEndpoint<GetFolderPathDirector
             }
 
             return Result.Ok(
-                new FileSystemResult()
+                new FileSystemResult
                 {
                     Parent = _diskProvider.GetParent(path),
                     Directories = directoriesResult.Value,

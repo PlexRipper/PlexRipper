@@ -27,7 +27,7 @@ public class GetPlexLibraryMediaEndpoint_UnitTests : BaseUnitTest<GetPlexLibrary
             }
         );
 
-        var request = new GetPlexLibraryMediaEndpointRequest()
+        var request = new GetPlexLibraryMediaEndpointRequest
         {
             PlexLibraryId = 1,
             Page = 0,
@@ -71,7 +71,7 @@ public class GetPlexLibraryMediaEndpoint_UnitTests : BaseUnitTest<GetPlexLibrary
             }
         );
 
-        var request = new GetPlexLibraryMediaEndpointRequest()
+        var request = new GetPlexLibraryMediaEndpointRequest
         {
             PlexLibraryId = 1,
             Page = 0,

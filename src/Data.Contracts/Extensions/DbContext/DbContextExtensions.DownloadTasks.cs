@@ -41,7 +41,7 @@ public static partial class DbContextExtensions
         if (guid == Guid.Empty)
             return null;
 
-        var queries = new List<IQueryable<DownloadTaskKey>>()
+        var queries = new List<IQueryable<DownloadTaskKey>>
         {
             dbContext.DownloadTaskTvShow.ProjectToKey(),
             dbContext.DownloadTaskTvShowSeason.ProjectToKey(),

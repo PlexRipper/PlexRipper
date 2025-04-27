@@ -38,7 +38,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
         }
 
         // Act
-        var request = new AddOrUpdatePlexLibrariesCommand()
+        var request = new AddOrUpdatePlexLibrariesCommand
         {
             PlexAccountId = plexAccount.Id,
             PlexLibraries = plexLibraries,
@@ -117,7 +117,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
         var updatedTime = DateTime.Now - TimeSpan.FromHours(4);
 
         // Act
-        var request = new AddOrUpdatePlexLibrariesCommand()
+        var request = new AddOrUpdatePlexLibrariesCommand
         {
             PlexAccountId = plexAccount.Id,
             PlexLibraries = plexLibraries.ToApiLibraries(updatedTime),
@@ -195,7 +195,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
                 plexLibraries.RemoveAt(i);
 
         var updatedTime = DateTime.Now - TimeSpan.FromHours(2);
-        var request = new AddOrUpdatePlexLibrariesCommand()
+        var request = new AddOrUpdatePlexLibrariesCommand
         {
             PlexAccountId = plexAccount.Id,
             PlexLibraries = plexLibraries.ToApiLibraries(updatedTime),

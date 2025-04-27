@@ -25,10 +25,10 @@ public class PlexSignInCommandHandler : ICommandHandler<PlexSignInCommand, Resul
 
         var responseResult = await plexTvClient
             .Authentication.PostUsersSignInDataAsync(
-                new PostUsersSignInDataRequest()
+                new PostUsersSignInDataRequest
                 {
-                    ClientID = Guid.NewGuid().ToString(),
-                    RequestBody = new PostUsersSignInDataRequestBody()
+                    ClientID = plexAccount.ClientId,
+                    RequestBody = new PostUsersSignInDataRequestBody
                     {
                         Login = plexAccount.Username,
                         Password = plexAccount.Password,

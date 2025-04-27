@@ -1,0 +1,28 @@
+name: Skip if no frontend changes
+description: Exit early if no changes in frontend files
+runs:
+    using: "composite"
+    steps:
+        -   name: Fetch git history
+            shell: bash
+            run: git fetch origin ${{ github.base_ref }}
+
+        -   name: Check for Frontend Changes
+            id: check_frontend
+            shell: bash
+            run: |
+                echo "Checking for changes in src/WebAPI/ClientApp/"
+                if git diff --name-only origin/${{ github.base_ref }} | grep -q "^src/WebAPI/ClientApp/"; then
+                  echo "Frontend changes detected."
+                  echo "should_run=true" >> $GITHUB_ENV
+                else
+                  echo "No frontend changes detected."
+                  echo "should_run=false" >> $GITHUB_ENV
+                fi
+
+        -   name: Exit if No Frontend Changes
+            if: env.should_run == 'false'
+            shell: bash
+            run: |
+                echo "Skipping job because no frontend changes detected."
+                exit 0

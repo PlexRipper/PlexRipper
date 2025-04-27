@@ -16,6 +16,8 @@ jobs:
     Front-End-Type-Check:
         runs-on: ubuntu-latest
         steps:
+            -   name: Check if front-end has changed
+                uses: ./.github/workflows/steps/skip-if-no-frontend-change
             -   uses: actions/checkout@v4
             -   name: Client App Install
                 uses: ./.github/workflows/steps/client-app-install/
@@ -26,6 +28,8 @@ jobs:
     Front-End-Unit-Tests:
         runs-on: ubuntu-latest
         steps:
+            -   name: Check if front-end has changed
+                uses: ./.github/workflows/steps/skip-if-no-frontend-change
             -   uses: actions/checkout@v4
             -   name: Client App Install
                 uses: ./.github/workflows/steps/client-app-install/
@@ -35,6 +39,8 @@ jobs:
     Front-End-Eslint-Check:
         runs-on: ubuntu-latest
         steps:
+            -   name: Check if front-end has changed
+                uses: ./.github/workflows/steps/skip-if-no-frontend-change
             -   uses: actions/checkout@v4
             -   name: Client App Install
                 uses: ./.github/workflows/steps/client-app-install/
@@ -44,6 +50,8 @@ jobs:
     Front-End-Integration-Tests:
         runs-on: ubuntu-latest
         steps:
+            -   name: Check if front-end has changed
+                uses: ./.github/workflows/steps/skip-if-no-frontend-change
             -   uses: actions/checkout@v4
             -   name: Client App Install
                 uses: ./.github/workflows/steps/client-app-install/
@@ -134,7 +142,7 @@ jobs:
                     project-path: ${{ matrix.integration_test_project }}
 
             -   name: Run Integration Tests
-                run: dotnet test ${{ matrix.integration_test_project }} --no-build --verbosity normal
+                run: dotnet test ${{ matrix.integration_test_project }} --no-build --verbosity normal --parallel none
 
     # Ensure the Docker image can be built without errors
     Test-Docker-Build:

@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Text;
 using Application.Contracts;
+using FastEndpoints;
 using Moq.Contrib.HttpClient;
 using Moq.Language.Flow;
 using Newtonsoft.Json;
@@ -19,6 +20,29 @@ public static class MoqExtensions
         var result = mock.Mock<IMediator>().Setup(m => m.Send(request.Invoke(), It.IsAny<CancellationToken>()));
         if (isVerifiable)
             result.Verifiable();
+        return result;
+    }
+
+    public static ISetup<ICommandDispatch, Task<TResult>> SetupCommand<TResult>(
+        this AutoMock mock,
+        Func<ICommand<TResult>> request
+    )
+    {
+        var result = mock.Mock<ICommandDispatch>()
+            .Setup(m => m.ExecuteAsync(request.Invoke(), It.IsAny<CancellationToken>()));
+
+        // This is to ensure unit tests to contain unused mock setups
+        result.Verifiable(Times.AtLeastOnce);
+        return result;
+    }
+
+    public static ISetup<ICommandDispatch, Task<TResult>> SetupCommandOfType<TCommand, TResult>(this AutoMock mock)
+        where TCommand : class, ICommand<TResult>
+    {
+        var result = mock.Mock<ICommandDispatch>()
+            .Setup(m => m.ExecuteAsync(It.Is<TCommand>(_ => true), It.IsAny<CancellationToken>()));
+
+        result.Verifiable(Times.AtLeastOnce);
         return result;
     }
 

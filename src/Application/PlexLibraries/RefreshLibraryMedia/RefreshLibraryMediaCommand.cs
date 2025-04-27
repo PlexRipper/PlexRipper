@@ -61,30 +61,33 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
         var syncLibraryMediaResult = await _commandDispatch.ExecuteAsync(
             new GetLibraryMediaCommand(
                 plexLibrary,
-                progress => _progressReporter.SendProgress(new RefreshLibraryProgressUpdate
-                {
-                    PlexLibraryType = PlexMediaType.Movie,
-                    PlexLibraryId = plexLibrary.Id,
-                    Step = 1,
-                    Percentage = progress.Percentage,
-                    TimeRemaining = progress.TimeRemaining,
-                    Action = command.Action,
-                })
+                progress =>
+                    _progressReporter.SendProgress(
+                        new RefreshLibraryProgressUpdate
+                        {
+                            PlexLibraryType = PlexMediaType.Movie,
+                            PlexLibraryId = plexLibrary.Id,
+                            Step = 1,
+                            Percentage = progress.Percentage,
+                            TimeRemaining = progress.TimeRemaining,
+                            Action = command.Action,
+                        }
+                    )
             ),
             cancellationToken
         );
 
         if (syncLibraryMediaResult.IsFailed)
-            return syncLibraryMediaResult.ToResult().LogError();
+            return syncLibraryMediaResult.LogError();
 
         // Phase 2: Sync the metadata such as Country, Roles and Genres for the library
-        await _mediator.Send(
+        var syncPlexLibraryMediaMetaDataResult = await _mediator.Send(
             new SyncPlexLibraryMediaMetaDataCommand(syncLibraryMediaResult.Value, plexLibrary.Id),
             cancellationToken
         );
 
-        if (syncLibraryMediaResult.IsFailed)
-            return syncLibraryMediaResult.ToResult().LogError();
+        if (syncPlexLibraryMediaMetaDataResult.IsFailed)
+            return syncPlexLibraryMediaMetaDataResult.LogError();
 
         var newPlexLibrary = syncLibraryMediaResult.Value.Library;
 
@@ -93,11 +96,13 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
             case PlexMediaType.Movie:
                 return await _commandDispatch.ExecuteAsync(
                     new RefreshPlexMovieLibraryCommand(newPlexLibrary, command.Action),
-                    cancellationToken);
+                    cancellationToken
+                );
             case PlexMediaType.TvShow:
                 return await _commandDispatch.ExecuteAsync(
                     new RefreshPlexTvShowLibraryCommand(newPlexLibrary, command.Action),
-                    cancellationToken);
+                    cancellationToken
+                );
             default:
                 return Result
                     .Fail($"Library type {newPlexLibrary.Type} is currently not supported by PlexRipper")

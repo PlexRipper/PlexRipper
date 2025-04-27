@@ -63,15 +63,18 @@ public class RefreshPlexTvShowLibraryCommandHandler
             var rawSeasonDataResult = await _commandDispatch.ExecuteAsync(
                 new GetAllMediaSeasonsCommand(
                     plexLibrary,
-                    progress => _progressReporter.SendProgress(new RefreshLibraryProgressUpdate()
-                    {
-                        Action = command.Action,
-                        PlexLibraryType = PlexMediaType.TvShow,
-                        PlexLibraryId = plexLibrary.Id,
-                        Step = 2,
-                        Percentage = progress.Percentage,
-                        TimeRemaining = progress.TimeRemaining,
-                    })
+                    progress =>
+                        _progressReporter.SendProgress(
+                            new RefreshLibraryProgressUpdate()
+                            {
+                                Action = command.Action,
+                                PlexLibraryType = PlexMediaType.TvShow,
+                                PlexLibraryId = plexLibrary.Id,
+                                Step = 2,
+                                Percentage = progress.Percentage,
+                                TimeRemaining = progress.TimeRemaining,
+                            }
+                        )
                 ),
                 cancellationToken
             );
@@ -83,15 +86,18 @@ public class RefreshPlexTvShowLibraryCommandHandler
             var rawEpisodesDataResult = await _commandDispatch.ExecuteAsync(
                 new GetAllMediaEpisodesCommand(
                     plexLibrary,
-                    progress => _progressReporter.SendProgress(new RefreshLibraryProgressUpdate()
-                    {
-                        Action = command.Action,
-                        PlexLibraryType = PlexMediaType.TvShow,
-                        PlexLibraryId = plexLibrary.Id,
-                        Step = 3,
-                        Percentage = progress.Percentage,
-                        TimeRemaining = progress.TimeRemaining,
-                    })
+                    progress =>
+                        _progressReporter.SendProgress(
+                            new RefreshLibraryProgressUpdate()
+                            {
+                                Action = command.Action,
+                                PlexLibraryType = PlexMediaType.TvShow,
+                                PlexLibraryId = plexLibrary.Id,
+                                Step = 3,
+                                Percentage = progress.Percentage,
+                                TimeRemaining = progress.TimeRemaining,
+                            }
+                        )
                 ),
                 cancellationToken
             );
@@ -114,27 +120,31 @@ public class RefreshPlexTvShowLibraryCommandHandler
 
             // Phase 4 of 5: PlexLibrary media data was parsed successfully.
             var tvShows = BuildTvShowTree(plexLibrary, plexLibrary.TvShows, rawSeasonData, rawEpisodesData);
-            _progressReporter.SendProgress(new RefreshLibraryProgressUpdate()
-            {
-                Action = command.Action,
-                PlexLibraryType = PlexMediaType.TvShow,
-                PlexLibraryId = plexLibrary.Id,
-                Step = 4,
-                Percentage = 1,
-            });
+            _progressReporter.SendProgress(
+                new RefreshLibraryProgressUpdate()
+                {
+                    Action = command.Action,
+                    PlexLibraryType = PlexMediaType.TvShow,
+                    PlexLibraryId = plexLibrary.Id,
+                    Step = 4,
+                    Percentage = 1,
+                }
+            );
 
             // Update the MetaData of this library
             var syncResult = await _mediator.Send(new SyncPlexTvShowsCommand(tvShows), cancellationToken);
             if (syncResult.IsFailed)
             {
-                _progressReporter.SendProgress(new RefreshLibraryProgressUpdate()
-                {
-                    Action = command.Action,
-                    PlexLibraryType = PlexMediaType.TvShow,
-                    PlexLibraryId = plexLibrary.Id,
-                    Step = 5,
-                    Percentage = 1,
-                });
+                _progressReporter.SendProgress(
+                    new RefreshLibraryProgressUpdate()
+                    {
+                        Action = command.Action,
+                        PlexLibraryType = PlexMediaType.TvShow,
+                        PlexLibraryId = plexLibrary.Id,
+                        Step = 5,
+                        Percentage = 1,
+                    }
+                );
 
                 return syncResult.ToResult().LogError();
             }
@@ -166,14 +176,16 @@ public class RefreshPlexTvShowLibraryCommandHandler
                 );
 
             // Phase 5 of 5: Database has been successfully updated with new library data.
-            _progressReporter.SendProgress(new RefreshLibraryProgressUpdate
-            {
-                Action = command.Action,
-                PlexLibraryType = PlexMediaType.TvShow,
-                PlexLibraryId = plexLibrary.Id,
-                Step = 5,
-                Percentage = 1,
-            });
+            _progressReporter.SendProgress(
+                new RefreshLibraryProgressUpdate
+                {
+                    Action = command.Action,
+                    PlexLibraryType = PlexMediaType.TvShow,
+                    PlexLibraryId = plexLibrary.Id,
+                    Step = 5,
+                    Percentage = 1,
+                }
+            );
         }
         else
         {
@@ -243,7 +255,8 @@ public class RefreshPlexTvShowLibraryCommandHandler
 
                 // Set library ID in each episode
                 var episodeIndex = 1;
-                episodes.ForEach((x) =>
+                episodes.ForEach(
+                    (x) =>
                     {
                         x.PlexLibraryId = plexLibrary.Id;
                         x.PlexServerId = plexLibrary.PlexServerId;

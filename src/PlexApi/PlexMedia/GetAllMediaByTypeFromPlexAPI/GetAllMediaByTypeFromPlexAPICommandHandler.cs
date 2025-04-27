@@ -73,7 +73,6 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
         {
             // Retrieve the media for this library
             var result = await GetMetadataForLibraryAsync(client, plexLibrary.Key, index, batchSize, mediaType);
-
             if (result.IsFailed)
             {
                 result.ToResult().LogError();

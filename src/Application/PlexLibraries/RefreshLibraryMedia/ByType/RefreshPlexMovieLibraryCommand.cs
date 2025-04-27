@@ -18,8 +18,8 @@ public class RefreshPlexMovieLibraryCommandValidator : AbstractValidator<Refresh
     }
 }
 
-public class
-    RefreshPlexMovieLibraryCommandHandler : ICommandHandler<RefreshPlexMovieLibraryCommand, Result<PlexLibrary>>
+public class RefreshPlexMovieLibraryCommandHandler
+    : ICommandHandler<RefreshPlexMovieLibraryCommand, Result<PlexLibrary>>
 {
     private readonly ILog _log;
     private readonly IMediator _mediator;
@@ -30,7 +30,8 @@ public class
         ILog log,
         IMediator mediator,
         IPlexRipperDbContext dbContext,
-        IRefreshLibraryProgressReporter progressReporter)
+        IRefreshLibraryProgressReporter progressReporter
+    )
     {
         _log = log;
         _mediator = mediator;
@@ -40,7 +41,8 @@ public class
 
     public async Task<Result<PlexLibrary>> ExecuteAsync(
         RefreshPlexMovieLibraryCommand command,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var plexLibrary = command.PlexLibrary;
 
@@ -57,14 +59,16 @@ public class
             var createResult = await _mediator.Send(new SyncPlexMoviesCommand(plexLibrary.Movies));
             if (createResult.IsFailed)
             {
-                _progressReporter.SendProgress(new RefreshLibraryProgressUpdate()
-                {
-                    Action = command.Action,
-                    PlexLibraryType = PlexMediaType.Movie,
-                    PlexLibraryId = plexLibrary.Id,
-                    Step = 1,
-                    Percentage = 1,
-                });
+                _progressReporter.SendProgress(
+                    new RefreshLibraryProgressUpdate()
+                    {
+                        Action = command.Action,
+                        PlexLibraryType = PlexMediaType.Movie,
+                        PlexLibraryId = plexLibrary.Id,
+                        Step = 1,
+                        Percentage = 1,
+                    }
+                );
 
                 return createResult.ToResult().LogError();
             }
@@ -79,14 +83,16 @@ public class
         }
 
         // Phase 2 of 3: PlexLibrary media data was parsed successfully.
-        _progressReporter.SendProgress(new RefreshLibraryProgressUpdate()
-        {
-            Action = command.Action,
-            PlexLibraryType = PlexMediaType.Movie,
-            PlexLibraryId = plexLibrary.Id,
-            Step = 2,
-            Percentage = 1,
-        });
+        _progressReporter.SendProgress(
+            new RefreshLibraryProgressUpdate()
+            {
+                Action = command.Action,
+                PlexLibraryType = PlexMediaType.Movie,
+                PlexLibraryId = plexLibrary.Id,
+                Step = 2,
+                Percentage = 1,
+            }
+        );
 
         var mediaSize = plexLibrary.Movies.Sum(x => x.MediaSize);
         plexLibrary.SetMovieMetaData(plexLibrary.Movies.Count, mediaSize);
@@ -112,14 +118,16 @@ public class
         );
 
         // Phase 3 of 3: Movies have been successfully updated in the database.
-        _progressReporter.SendProgress(new RefreshLibraryProgressUpdate()
-        {
-            Action = command.Action,
-            PlexLibraryType = PlexMediaType.Movie,
-            PlexLibraryId = plexLibrary.Id,
-            Step = 3,
-            Percentage = 1,
-        });
+        _progressReporter.SendProgress(
+            new RefreshLibraryProgressUpdate()
+            {
+                Action = command.Action,
+                PlexLibraryType = PlexMediaType.Movie,
+                PlexLibraryId = plexLibrary.Id,
+                Step = 3,
+                Percentage = 1,
+            }
+        );
 
         return Result.Ok(plexLibrary);
     }

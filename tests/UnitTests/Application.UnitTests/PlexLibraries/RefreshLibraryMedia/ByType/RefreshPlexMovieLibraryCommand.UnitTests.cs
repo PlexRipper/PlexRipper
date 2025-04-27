@@ -1,9 +1,4 @@
-using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
-using Shouldly;
-using WebAPI.Contracts;
-using Xunit;
-using Xunit.Abstractions;
 
 namespace PlexRipper.Application.UnitTests;
 

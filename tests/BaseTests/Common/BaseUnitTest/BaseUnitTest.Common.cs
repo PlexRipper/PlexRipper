@@ -5,7 +5,6 @@ using Environment;
 using FastEndpoints;
 using Logging.Interface;
 using Microsoft.Extensions.DependencyInjection;
-using PlexApi.Contracts;
 using Serilog.Events;
 
 namespace PlexRipper.BaseTests;

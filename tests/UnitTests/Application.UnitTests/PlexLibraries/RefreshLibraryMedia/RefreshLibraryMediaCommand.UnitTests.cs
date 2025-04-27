@@ -1,8 +1,6 @@
-using Application.Contracts;
 using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 using PlexApi.Contracts;
-using WebAPI.Contracts;
 
 namespace PlexRipper.Application.UnitTests;
 

@@ -38,7 +38,7 @@ public class RefreshLibraryMediaCommand_UnitTests : BaseUnitTest<RefreshLibraryM
         mock.SetupMediator(It.IsAny<SyncPlexLibraryMediaMetaDataCommand>).ReturnsAsync(Result.Ok());
 
         // Act
-        var request = new RefreshLibraryMediaCommand(updatedPlexLibrary.Id);
+        var request = new RefreshLibraryMediaCommand(updatedPlexLibrary.Id, _ => { });
         var result = await _sut.Handle(request, CancellationToken.None);
 
         // Assert
@@ -78,6 +78,7 @@ public class RefreshLibraryMediaCommand_UnitTests : BaseUnitTest<RefreshLibraryM
         var episodeIndex = 0;
 
         foreach (var tvShow in rawTvShowData)
+
             // Assign 10 seasons to each TV show
             for (var i = 0; i < 10 && seasonIndex < rawSeasonData.Count; i++)
             {
@@ -116,7 +117,7 @@ public class RefreshLibraryMediaCommand_UnitTests : BaseUnitTest<RefreshLibraryM
         mock.SetupMediator(It.IsAny<SyncPlexLibraryMediaMetaDataCommand>).ReturnsAsync(Result.Ok());
 
         // Act
-        var request = new RefreshLibraryMediaCommand(updatedPlexLibrary.Id);
+        var request = new RefreshLibraryMediaCommand(updatedPlexLibrary.Id, _ => { });
         var result = await _sut.Handle(request, CancellationToken.None);
 
         // Assert

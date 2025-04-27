@@ -1,6 +1,6 @@
 using System.Diagnostics;
-using Application.Contracts;
 using Data.Contracts;
+using FastEndpoints;
 using FluentValidation;
 using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
@@ -9,8 +9,8 @@ using WebAPI.Contracts;
 
 namespace PlexRipper.Application;
 
-public record RefreshPlexTvShowLibraryCommand(PlexLibrary PlexLibrary, Action<LibraryProgress>? ProgressAction = null)
-    : IRequest<Result<PlexLibrary>>;
+public record RefreshPlexTvShowLibraryCommand(PlexLibrary PlexLibrary, Action<LibraryProgress> Action)
+    : ICommand<Result<PlexLibrary>>;
 
 public class RefreshPlexTvShowLibraryCommandValidator : AbstractValidator<RefreshPlexTvShowLibraryCommand>
 {
@@ -21,49 +21,35 @@ public class RefreshPlexTvShowLibraryCommandValidator : AbstractValidator<Refres
 }
 
 public class RefreshPlexTvShowLibraryCommandHandler
-    : IRequestHandler<RefreshPlexTvShowLibraryCommand, Result<PlexLibrary>>
+    : ICommandHandler<RefreshPlexTvShowLibraryCommand, Result<PlexLibrary>>
 {
     private readonly ILog _log;
     private readonly IMediator _mediator;
     private readonly IPlexRipperDbContext _dbContext;
-    private readonly ISignalRService _signalRService;
     private readonly ICommandDispatch _commandDispatch;
-
-    private readonly int _baseCountProgress = 1000;
-    private int _totalProgressSteps;
-
-    private int _plexLibraryId;
-    private Action<LibraryProgress>? _progressAction;
+    private readonly IRefreshLibraryProgressReporter _progressReporter;
 
     public RefreshPlexTvShowLibraryCommandHandler(
         ILog log,
         IMediator mediator,
         IPlexRipperDbContext dbContext,
-        ISignalRService signalRService,
-        ICommandDispatch commandDispatch
+        ICommandDispatch commandDispatch,
+        IRefreshLibraryProgressReporter progressReporter
     )
     {
         _log = log;
         _mediator = mediator;
         _dbContext = dbContext;
-        _signalRService = signalRService;
         _commandDispatch = commandDispatch;
+        _progressReporter = progressReporter;
     }
 
-    public async Task<Result<PlexLibrary>> Handle(
+    public async Task<Result<PlexLibrary>> ExecuteAsync(
         RefreshPlexTvShowLibraryCommand command,
         CancellationToken cancellationToken
     )
     {
         var plexLibrary = command.PlexLibrary;
-        _plexLibraryId = plexLibrary.Id;
-        _progressAction = command.ProgressAction;
-        _totalProgressSteps = plexLibrary.Type switch
-        {
-            PlexMediaType.TvShow => 5,
-            PlexMediaType.Movie => 3,
-            _ => _totalProgressSteps,
-        };
 
         if (plexLibrary.Type != PlexMediaType.TvShow)
             return Result.Fail("PlexLibrary is not of type TvShow").LogError();
@@ -77,7 +63,15 @@ public class RefreshPlexTvShowLibraryCommandHandler
             var rawSeasonDataResult = await _commandDispatch.ExecuteAsync(
                 new GetAllMediaSeasonsCommand(
                     plexLibrary,
-                    progress => SendProgress(2, progress.Percentage, progress.TimeRemaining)
+                    progress => _progressReporter.SendProgress(new RefreshLibraryProgressUpdate()
+                    {
+                        Action = command.Action,
+                        PlexLibraryType = PlexMediaType.TvShow,
+                        PlexLibraryId = plexLibrary.Id,
+                        Step = 2,
+                        Percentage = progress.Percentage,
+                        TimeRemaining = progress.TimeRemaining,
+                    })
                 ),
                 cancellationToken
             );
@@ -89,7 +83,15 @@ public class RefreshPlexTvShowLibraryCommandHandler
             var rawEpisodesDataResult = await _commandDispatch.ExecuteAsync(
                 new GetAllMediaEpisodesCommand(
                     plexLibrary,
-                    progress => SendProgress(3, progress.Percentage, progress.TimeRemaining)
+                    progress => _progressReporter.SendProgress(new RefreshLibraryProgressUpdate()
+                    {
+                        Action = command.Action,
+                        PlexLibraryType = PlexMediaType.TvShow,
+                        PlexLibraryId = plexLibrary.Id,
+                        Step = 3,
+                        Percentage = progress.Percentage,
+                        TimeRemaining = progress.TimeRemaining,
+                    })
                 ),
                 cancellationToken
             );
@@ -112,13 +114,28 @@ public class RefreshPlexTvShowLibraryCommandHandler
 
             // Phase 4 of 5: PlexLibrary media data was parsed successfully.
             var tvShows = BuildTvShowTree(plexLibrary, plexLibrary.TvShows, rawSeasonData, rawEpisodesData);
-            SendProgress(4, 1);
+            _progressReporter.SendProgress(new RefreshLibraryProgressUpdate()
+            {
+                Action = command.Action,
+                PlexLibraryType = PlexMediaType.TvShow,
+                PlexLibraryId = plexLibrary.Id,
+                Step = 4,
+                Percentage = 1,
+            });
 
             // Update the MetaData of this library
             var syncResult = await _mediator.Send(new SyncPlexTvShowsCommand(tvShows), cancellationToken);
             if (syncResult.IsFailed)
             {
-                SendProgress(5, 1);
+                _progressReporter.SendProgress(new RefreshLibraryProgressUpdate()
+                {
+                    Action = command.Action,
+                    PlexLibraryType = PlexMediaType.TvShow,
+                    PlexLibraryId = plexLibrary.Id,
+                    Step = 5,
+                    Percentage = 1,
+                });
+
                 return syncResult.ToResult().LogError();
             }
 
@@ -149,7 +166,14 @@ public class RefreshPlexTvShowLibraryCommandHandler
                 );
 
             // Phase 5 of 5: Database has been successfully updated with new library data.
-            SendProgress(5, 1);
+            _progressReporter.SendProgress(new RefreshLibraryProgressUpdate
+            {
+                Action = command.Action,
+                PlexLibraryType = PlexMediaType.TvShow,
+                PlexLibraryId = plexLibrary.Id,
+                Step = 5,
+                Percentage = 1,
+            });
         }
         else
         {
@@ -173,26 +197,6 @@ public class RefreshPlexTvShowLibraryCommandHandler
         );
 
         return Result.Ok(plexLibrary);
-    }
-
-    private void SendProgress(int step, decimal percentage, TimeSpan timeRemaining = default)
-    {
-        var countStep = _baseCountProgress / _totalProgressSteps;
-        var index = countStep * step + countStep * percentage;
-
-        var progress = new LibraryProgress()
-        {
-            TimeRemaining = timeRemaining,
-            Id = _plexLibraryId,
-            Step = step,
-            Received = (int)Math.Floor(index),
-            Total = _baseCountProgress,
-            TotalSteps = _totalProgressSteps,
-        };
-
-        _progressAction?.Invoke(progress);
-
-        _signalRService.SendLibraryProgressUpdateAsync(progress);
     }
 
     private List<PlexTvShow> BuildTvShowTree(
@@ -239,8 +243,7 @@ public class RefreshPlexTvShowLibraryCommandHandler
 
                 // Set library ID in each episode
                 var episodeIndex = 1;
-                episodes.ForEach(
-                    (x) =>
+                episodes.ForEach((x) =>
                     {
                         x.PlexLibraryId = plexLibrary.Id;
                         x.PlexServerId = plexLibrary.PlexServerId;

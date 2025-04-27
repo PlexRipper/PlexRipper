@@ -59,21 +59,6 @@ public class GetPlexLibraryByIdEndpoint : BaseEndpoint<GetPlexLibraryByIdEndpoin
             return;
         }
 
-        if (plexLibrary.MediaCount == 0)
-        {
-            _log.Information(
-                "PlexLibrary with id {LibraryId} has no media, forcing refresh from the PlexApi",
-                plexLibrary.Id
-            );
-
-            var refreshResult = await _mediator.Send(new RefreshLibraryMediaCommand(plexLibrary.Id), ct);
-            if (refreshResult.IsFailed)
-            {
-                await SendFluentResult(refreshResult.ToResult(), ct);
-                return;
-            }
-        }
-
         await SendFluentResult(Result.Ok(plexLibrary), x => x.ToDTO(), ct);
     }
 }

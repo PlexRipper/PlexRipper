@@ -75,7 +75,7 @@ jobs:
             -   name: Dotnet Setup
                 uses: ./.github/workflows/steps/dotnet-setup/
             -   name: Unit Tests
-                run: dotnet test tests/UnitTests/UnitTests.sln --no-build --verbosity normal  --parallel none
+                run: dotnet test tests/UnitTests/UnitTests.sln --no-build --verbosity normal
     # Back-End Integration Tests
     Back-End-Integration-Tests:
         runs-on: ubuntu-latest
@@ -91,7 +91,7 @@ jobs:
                     success=false
                     while [ $count -lt $max_retries ]; do
                       echo "Running integration tests attempt $((count + 1)) of $max_retries"
-                      dotnet test tests/IntegrationTests/IntegrationTests.sln --no-build --verbosity normal  --parallel none
+                      dotnet test tests/IntegrationTests/IntegrationTests.sln --no-build --verbosity normal
                       if [ $? -eq 0 ]; then
                         success=true
                         break

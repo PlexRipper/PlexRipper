@@ -58,11 +58,18 @@ public class CreateAccountIntegrationTests : BaseIntegrationTests
         resultDTO.IsSuccess.ShouldBeTrue();
         await container.SchedulerService.AwaitScheduler();
 
+        // Wait for a database to be in the expected state
+        await WaitForDatabaseConditionAsync(
+            () =>
+                container.DbContext.PlexAccounts.Include(x => x.PlexAccountLibraries).First().PlexAccountLibraries.Count
+                == libraryCount
+        );
+
         // Assert
         resultDTO.IsSuccess.ShouldBeTrue();
         container.DbContext.PlexAccounts.ToList().Count.ShouldBe(1);
 
-        // Ensure account has been created
+        // Ensure an account has been created
         var plexAccountDb = container
             .DbContext.PlexAccounts.Include(x => x.PlexAccountLibraries)
             .ThenInclude(x => x.PlexLibrary)

@@ -22,6 +22,21 @@ public class BaseIntegrationTests
         BogusExtensions.Setup();
     }
 
+    protected static async Task WaitForDatabaseConditionAsync(
+        Func<bool> condition,
+        int maxRetries = 10,
+        int delayMs = 500
+    )
+    {
+        for (var i = 0; i < maxRetries; i++)
+        {
+            if (condition())
+                return;
+
+            await Task.Delay(delayMs);
+        }
+    }
+
     protected Task<BaseContainer> CreateContainer(int seed, Action<UnitTestDataConfig>? options = null) =>
         CreateContainer(new Seed(seed), options);
 

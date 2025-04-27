@@ -20,7 +20,7 @@ public class GetMediaDetailByIdEndpoint_UnitTests : BaseUnitTest<GetMediaDetailB
             config =>
             {
                 config.PlexServerCount = 1;
-                config.PlexLibraryCount = 1;
+                config.PlexMovieLibraryCount = 1;
                 config.PlexAccountCount = 1;
                 config.MovieCount = movieCount;
             }
@@ -54,7 +54,7 @@ public class GetMediaDetailByIdEndpoint_UnitTests : BaseUnitTest<GetMediaDetailB
             config =>
             {
                 config.PlexServerCount = 1;
-                config.PlexLibraryCount = 1;
+                config.PlexMovieLibraryCount = 1;
                 config.PlexAccountCount = 1;
                 config.TvShowCount = 10;
                 config.TvShowSeasonCount = 3;

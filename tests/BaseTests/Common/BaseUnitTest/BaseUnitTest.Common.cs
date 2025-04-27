@@ -5,7 +5,6 @@ using Environment;
 using FastEndpoints;
 using Logging.Interface;
 using Microsoft.Extensions.DependencyInjection;
-using PlexApi.Contracts;
 using Serilog.Events;
 
 namespace PlexRipper.BaseTests;
@@ -71,7 +70,7 @@ public partial class BaseUnitTest
                 // All different dependencies that are needed for the endpoint need to be added here. And then they can be mocked in the test.
                 s.AddTransient(_ => mock.Create<ILog>());
                 s.AddTransient(_ => mock.Create<IPlexRipperDbContext>());
-                s.AddTransient(_ => mock.Create<IPlexApiService>());
+                s.AddTransient(_ => mock.Create<ICommandExecutor>());
                 s.AddSingleton(_ => mock.Create<IMediator>());
                 s.AddSingleton(_ => mock.Create<ISchedulerService>());
                 s.AddSingleton(_ => mock.Mock<ISignalRService>().Object);

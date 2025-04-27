@@ -44,9 +44,6 @@ public sealed class DiskProvider : IDiskProvider
             return parent;
         }
 
-        if (!path.Equals("/"))
-            return string.Empty;
-
         return string.Empty;
     }
 

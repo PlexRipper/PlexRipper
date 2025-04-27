@@ -27,7 +27,7 @@ public class CreateAccountIntegrationTests : BaseIntegrationTests
                 {
                     // Start from an empty database
                     x.PlexServerCount = 0;
-                    x.PlexLibraryCount = 0;
+                    x.PlexMovieLibraryCount = 0;
                     x.PlexAccountCount = 0;
                     x.PlexServerConnectionPerServerCount = 1;
                 };

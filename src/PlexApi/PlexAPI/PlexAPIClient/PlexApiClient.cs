@@ -171,7 +171,7 @@ public class PlexApiClient : IPlexApiClient
         {
             _log.Here()
                 .Error("Exception Error ({ExceptionName}) sending request to {Url}", nameof(ex.GetType), requestUri);
-            response = new HttpResponseMessage()
+            response = new HttpResponseMessage
             {
                 StatusCode = HttpStatusCode.InternalServerError,
                 Content = new StringContent(ex.Message),

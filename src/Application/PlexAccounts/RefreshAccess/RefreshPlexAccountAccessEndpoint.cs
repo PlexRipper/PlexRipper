@@ -163,7 +163,7 @@ public class RefreshPlexAccountAccessEndpoint
         )
         {
             Access = serverAccessRapport
-                .Access.Select(x => new PlexServerAccessRapportDTO()
+                .Access.Select(x => new PlexServerAccessRapportDTO
                 {
                     State = x.State,
                     PlexServerId = x.PlexServerId,

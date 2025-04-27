@@ -43,14 +43,14 @@ public class GeneratePlexTokenResponse
 public class GeneratePlexTokenEndpoint : BaseEndpoint<GeneratePlexTokenEndpointRequest, GeneratePlexTokenResponse>
 {
     private readonly IPlexRipperDbContext _dbContext;
-    private readonly IPlexApiService _plexApiService;
+    private readonly ICommandExecutor _commandExecutor;
 
     public override string EndpointPath => ApiRoutes.PlexAccountController + "/generate-token/{PlexAccountId}";
 
-    public GeneratePlexTokenEndpoint(IPlexRipperDbContext dbContext, IPlexApiService plexApiService)
+    public GeneratePlexTokenEndpoint(IPlexRipperDbContext dbContext, ICommandExecutor commandExecutor)
     {
         _dbContext = dbContext;
-        _plexApiService = plexApiService;
+        _commandExecutor = commandExecutor;
     }
 
     public override void Configure()
@@ -80,7 +80,7 @@ public class GeneratePlexTokenEndpoint : BaseEndpoint<GeneratePlexTokenEndpointR
             plexAccount.VerificationCode = req.VerificationCode;
         }
 
-        var validateResult = await _plexApiService.PlexSignInAsync(plexAccount);
+        var validateResult = await _commandExecutor.Send(new PlexSignInCommand(plexAccount), ct);
 
         if (validateResult.IsSuccess)
         {

@@ -17,7 +17,7 @@ public class DeletePlexAccountByIdEndpointUnitTests : BaseUnitTest
             {
                 config.PlexAccountCount = 1;
                 config.PlexServerCount = 5;
-                config.PlexLibraryCount = 3;
+                config.PlexMovieLibraryCount = 3;
                 config.MovieCount = 10;
                 config.TvShowCount = 10;
             }

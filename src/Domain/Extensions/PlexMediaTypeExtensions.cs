@@ -33,7 +33,6 @@ public static class PlexMediaTypeExtensions
             PlexMediaType.Photos => PathProvider.DefaultPhotosDestinationFolder,
             PlexMediaType.OtherVideos => PathProvider.DefaultOtherDestinationFolder,
             PlexMediaType.Games => PathProvider.DefaultGamesDestinationFolder,
-            PlexMediaType.Unknown => PathProvider.DefaultDownloadsDestinationFolder,
             _ => PathProvider.DefaultDownloadsDestinationFolder,
         };
     }

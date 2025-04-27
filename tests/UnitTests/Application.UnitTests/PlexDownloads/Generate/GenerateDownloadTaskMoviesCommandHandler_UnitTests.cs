@@ -21,7 +21,7 @@ public class GenerateDownloadTaskMoviesCommandHandler_UnitTests : BaseUnitTest<G
             config =>
             {
                 config.PlexServerCount = 1;
-                config.PlexLibraryCount = 1;
+                config.PlexMovieLibraryCount = 1;
                 config.MovieCount = 5;
             }
         );
@@ -71,7 +71,7 @@ public class GenerateDownloadTaskMoviesCommandHandler_UnitTests : BaseUnitTest<G
             config =>
             {
                 config.PlexServerCount = 1;
-                config.PlexLibraryCount = 1;
+                config.PlexMovieLibraryCount = 1;
                 config.MovieCount = 5;
             }
         );

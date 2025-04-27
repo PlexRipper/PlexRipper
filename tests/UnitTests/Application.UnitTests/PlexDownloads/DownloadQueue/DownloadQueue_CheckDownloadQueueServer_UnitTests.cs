@@ -57,7 +57,7 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<Applicati
             config =>
             {
                 config.PlexServerCount = 1;
-                config.PlexLibraryCount = 1;
+                config.PlexMovieLibraryCount = 1;
                 config.MovieCount = 10;
                 config.MovieDownloadTasksCount = 5;
             }
@@ -119,7 +119,7 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<Applicati
             config =>
             {
                 config.PlexServerCount = 1;
-                config.PlexLibraryCount = 1;
+                config.PlexMovieLibraryCount = 1;
                 config.MovieCount = 10;
                 config.MovieDownloadTasksCount = 5;
             }
@@ -150,7 +150,7 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<Applicati
             config =>
             {
                 config.PlexServerCount = 1;
-                config.PlexLibraryCount = 1;
+                config.PlexMovieLibraryCount = 1;
                 config.TvShowCount = 10;
                 config.TvShowDownloadTasksCount = 2;
                 config.TvShowSeasonDownloadTasksCount = 2;

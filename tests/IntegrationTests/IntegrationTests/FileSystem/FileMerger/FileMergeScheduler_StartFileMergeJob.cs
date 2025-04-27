@@ -19,7 +19,7 @@ public class FileMergeSchedulerStartFileMergeJobIntegrationTests : BaseIntegrati
                 config.DatabaseOptions = x =>
                 {
                     x.PlexServerCount = 1;
-                    x.PlexLibraryCount = 3;
+                    x.PlexMovieLibraryCount = 3;
                     x.MovieCount = 1;
                     x.MovieDownloadTasksCount = 1;
                     x.DownloadWorkerTasks = 4;

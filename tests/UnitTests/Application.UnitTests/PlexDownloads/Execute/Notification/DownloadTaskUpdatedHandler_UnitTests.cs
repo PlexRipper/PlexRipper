@@ -18,7 +18,7 @@ public class DownloadTaskUpdatedHandler_UnitTests : BaseUnitTest<DownloadTaskUpd
             config =>
             {
                 config.PlexServerCount = 1;
-                config.PlexLibraryCount = 1;
+                config.PlexMovieLibraryCount = 1;
                 config.TvShowDownloadTasksCount = 5;
                 config.TvShowSeasonDownloadTasksCount = 5;
                 config.TvShowEpisodeDownloadTasksCount = 5;

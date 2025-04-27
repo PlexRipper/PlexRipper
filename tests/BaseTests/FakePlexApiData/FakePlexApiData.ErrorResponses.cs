@@ -13,7 +13,7 @@ public partial class FakePlexApiData
     {
         var response = GetErrorResponse();
         response.Errors.Add(
-            new PlexErrorDTO()
+            new PlexErrorDTO
             {
                 Code = 1001,
                 Message = "User could not be authenticated",
@@ -27,7 +27,7 @@ public partial class FakePlexApiData
     {
         var response = GetErrorResponse();
         response.Errors.Add(
-            new PlexErrorDTO()
+            new PlexErrorDTO
             {
                 Code = PlexErrorCodes.InvalidVerificationCode,
                 Message = "Invalid verification code.",
@@ -41,7 +41,7 @@ public partial class FakePlexApiData
     {
         var response = GetErrorResponse();
         response.Errors.Add(
-            new PlexErrorDTO()
+            new PlexErrorDTO
             {
                 Code = PlexErrorCodes.EnterVerificationCode,
                 Message = "Please enter the verification code",

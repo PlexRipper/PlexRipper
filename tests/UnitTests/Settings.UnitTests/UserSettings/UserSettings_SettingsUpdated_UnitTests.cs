@@ -19,14 +19,14 @@ public class UserSettings_SettingsUpdated_UnitTests : BaseUnitTest
         var changedSettings = new UserSettings
         {
             DateTimeSettings = DateTimeSettingsModule.Create(),
-            ConfirmationSettings = new ConfirmationSettingsModule()
+            ConfirmationSettings = new ConfirmationSettingsModule
             {
                 AskDownloadEpisodeConfirmation = false,
                 AskDownloadMovieConfirmation = false,
                 AskDownloadSeasonConfirmation = false,
                 AskDownloadTvShowConfirmation = false,
             },
-            LanguageSettings = new LanguageSettingsModule() { Language = string.Empty },
+            LanguageSettings = new LanguageSettingsModule { Language = string.Empty },
             DisplaySettings = DisplaySettingsModule.Create(),
             GeneralSettings = GeneralSettingsModule.Create(),
             ServerSettings = PlexServerSettingsModule.Create(),

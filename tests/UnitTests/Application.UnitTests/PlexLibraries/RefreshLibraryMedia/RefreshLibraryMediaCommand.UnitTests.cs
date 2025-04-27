@@ -1,7 +1,6 @@
-using Application.Contracts;
+using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 using PlexApi.Contracts;
-using WebAPI.Contracts;
 
 namespace PlexRipper.Application.UnitTests;
 
@@ -10,227 +9,246 @@ public class RefreshLibraryMediaCommand_UnitTests : BaseUnitTest<RefreshLibraryM
     public RefreshLibraryMediaCommand_UnitTests(ITestOutputHelper output)
         : base(output) { }
 
-    [Theory]
-    [InlineData(PlexMediaType.Movie)]
-    [InlineData(PlexMediaType.TvShow)]
-    public async Task ShouldMarkTheLibraryAsSynced_WhenThereIsNoMediaReturned(PlexMediaType libraryType)
-    {
-        // Arrange
-        var seed = await SetupDatabase(
-            44258,
-            config =>
-            {
-                config.PlexServerCount = 1;
-                config.PlexLibraryCount = 3;
-            }
-        );
-
-        var updatedPlexLibrary = await GetUpdatedLibrary(seed, libraryType);
-
-        mock.Mock<IPlexApiService>()
-            .Setup(x =>
-                x.GetLibraryMediaAsync(
-                    It.IsAny<PlexLibrary>(),
-                    It.IsAny<Action<MediaSyncProgress>>(),
-                    It.IsAny<CancellationToken>()
-                )
-            )
-            .ReturnsAsync(Result.Ok(new LibraryMetadata() { Library = updatedPlexLibrary }));
-        mock.Mock<ISignalRService>()
-            .Setup(x => x.SendLibraryProgressUpdateAsync(It.IsAny<LibraryProgress>()))
-            .Returns(Task.CompletedTask);
-        mock.SetupMediator(It.IsAny<SyncPlexMoviesCommand>).ReturnsAsync(Result.Ok(new CrudMoviesReport()));
-        mock.SetupMediator(It.IsAny<SyncPlexLibraryMediaMetaDataCommand>).ReturnsAsync(Result.Ok());
-
-        // Act
-        var request = new RefreshLibraryMediaCommand(updatedPlexLibrary.Id);
-        var result = await _sut.Handle(request, CancellationToken.None);
-
-        // Assert
-        result.ShouldNotBeNull();
-        result.IsSuccess.ShouldBeTrue();
-
-        var libraryDb = await IDbContext
-            .PlexLibraries.Where(x => x.Key == updatedPlexLibrary.Key)
-            .FirstOrDefaultAsync();
-        libraryDb.ShouldNotBeNull();
-        libraryDb.SyncedAt.ShouldNotBeNull();
-    }
-
-    [Fact]
-    public async Task ShouldSyncTvShowLibrarySuccessfully_WhenMediaDataIsReturnedFromTheAPI()
-    {
-        // Arrange
-        var seed = await SetupDatabase(
-            31368,
-            config =>
-            {
-                config.PlexServerCount = 1;
-                config.PlexLibraryCount = 3;
-            }
-        );
-
-        var updatedPlexLibrary = await GetUpdatedLibrary(seed, PlexMediaType.TvShow);
-
-        var rawTvShowData = FakeData.GetPlexTvShows(seed).Generate(10);
-        var rawSeasonData = FakeData.GetPlexTvShowSeason(seed).Generate(100);
-        var rawEpisodesData = FakeData.GetPlexTvShowEpisode(seed).Generate(1000);
-
-        updatedPlexLibrary.TvShows.AddRange(rawTvShowData);
-
-        // Set keys
-        var seasonIndex = 0;
-        var episodeIndex = 0;
-
-        foreach (var tvShow in rawTvShowData)
-            // Assign 10 seasons to each TV show
-            for (var i = 0; i < 10 && seasonIndex < rawSeasonData.Count; i++)
-            {
-                var season = rawSeasonData[seasonIndex];
-                season.ParentKey = tvShow.Key;
-                season.ParentGuid = tvShow.Guid;
-                seasonIndex++;
-
-                // Assign 10 episodes to each season
-                for (var j = 0; j < 10 && episodeIndex < rawEpisodesData.Count; j++)
-                {
-                    var episode = rawEpisodesData[episodeIndex];
-                    episode.ParentKey = season.Key;
-                    episode.ParentGuid = season.Guid;
-                    episodeIndex++;
-                }
-            }
-
-        mock.Mock<IPlexApiService>()
-            .Setup(x =>
-                x.GetLibraryMediaAsync(
-                    It.IsAny<PlexLibrary>(),
-                    It.IsAny<Action<MediaSyncProgress>>(),
-                    It.IsAny<CancellationToken>()
-                )
-            )
-            .ReturnsAsync(Result.Ok(new LibraryMetadata() { Library = updatedPlexLibrary }));
-
-        mock.Mock<IPlexApiService>()
-            .Setup(x =>
-                x.GetAllSeasonsAsync(
-                    It.IsAny<PlexLibrary>(),
-                    It.IsAny<Action<MediaSyncProgress>>(),
-                    It.IsAny<CancellationToken>()
-                )
-            )
-            .ReturnsAsync(Result.Ok(rawSeasonData));
-
-        mock.Mock<IPlexApiService>()
-            .Setup(x =>
-                x.GetAllEpisodesAsync(
-                    It.IsAny<PlexLibrary>(),
-                    It.IsAny<Action<MediaSyncProgress>>(),
-                    It.IsAny<CancellationToken>()
-                )
-            )
-            .ReturnsAsync(Result.Ok(rawEpisodesData));
-
-        mock.Mock<ISignalRService>()
-            .Setup(x => x.SendLibraryProgressUpdateAsync(It.IsAny<LibraryProgress>()))
-            .Returns(Task.CompletedTask);
-
-        mock.SetupMediator(It.IsAny<SyncPlexTvShowsCommand>).ReturnsAsync(Result.Ok(new CrudTvShowsReport()));
-        mock.SetupMediator(It.IsAny<SyncPlexLibraryMediaMetaDataCommand>).ReturnsAsync(Result.Ok());
-
-        // Act
-        var request = new RefreshLibraryMediaCommand(updatedPlexLibrary.Id);
-        var result = await _sut.Handle(request, CancellationToken.None);
-
-        // Assert
-        result.ShouldNotBeNull();
-        result.IsSuccess.ShouldBeTrue();
-
-        var dbContext = IDbContext;
-        var libraryDb = await dbContext.PlexLibraries.Where(x => x.Key == updatedPlexLibrary.Key).FirstOrDefaultAsync();
-        libraryDb.ShouldNotBeNull();
-        libraryDb.SyncedAt.ShouldNotBeNull();
-
-        // Verify that the merge was successful
-        mock.Mock<IMediator>()
-            .Verify(
-                x =>
-                    x.Send(
-                        It.Is<SyncPlexTvShowsCommand>(command => IsValid(command.PlexTvShows)),
-                        It.IsAny<CancellationToken>()
-                    ),
-                Times.Once
-            );
-    }
-
-    private static Func<List<PlexTvShow>, bool> IsValid
-    {
-        get
-        {
-            Func<List<PlexTvShow>, bool> isValid = tvShows =>
-            {
-                tvShows.ShouldNotBeNull();
-                tvShows.Count.ShouldBe(10);
-
-                tvShows.ShouldAllBe(x => x.SortIndex > 0);
-                tvShows.ShouldAllBe(x => x.PlexLibraryId > 0);
-                tvShows.ShouldAllBe(x => x.PlexServerId > 0);
-                tvShows.ShouldAllBe(x => x.ChildCount > 0);
-                tvShows.ShouldAllBe(x => x.Year > 0);
-                tvShows.ShouldAllBe(x => x.Duration > 0);
-                tvShows.ShouldAllBe(x => x.MediaSize > 0);
-
-                var seasons = tvShows.SelectMany(x => x.Seasons).ToList();
-                seasons.Count.ShouldBe(100);
-                seasons.ShouldAllBe(x => x.SortIndex > 0);
-                seasons.ShouldAllBe(x => x.PlexLibraryId > 0);
-                seasons.ShouldAllBe(x => x.PlexServerId > 0);
-                seasons.ShouldAllBe(x => x.ChildCount > 0);
-                seasons.ShouldAllBe(x => x.Year > 0);
-                seasons.ShouldAllBe(x => x.Duration > 0);
-                seasons.ShouldAllBe(x => x.MediaSize > 0);
-
-                var episodes = seasons.SelectMany(x => x.Episodes).ToList();
-                episodes.Count.ShouldBe(1000);
-                episodes.ShouldAllBe(x => x.SortIndex > 0);
-                episodes.ShouldAllBe(x => x.PlexLibraryId > 0);
-                episodes.ShouldAllBe(x => x.PlexServerId > 0);
-                episodes.ShouldAllBe(x => x.Year > 0);
-                episodes.ShouldAllBe(x => x.Duration > 0);
-                episodes.ShouldAllBe(x => x.MediaSize > 0);
-
-                return true;
-            };
-            return isValid;
-        }
-    }
-
     private async Task<PlexLibrary> GetUpdatedLibrary(Seed seed, PlexMediaType type)
     {
         var plexLibrary = await IDbContext.PlexLibraries.Where(x => x.Type == type).FirstOrDefaultAsync();
         plexLibrary.ShouldNotBeNull();
 
-        var mockPlexLibrary = FakeData.GetPlexLibrary(seed, libraryType: type).Generate();
+        var fakeLibrary = FakeData.GetPlexLibrary(seed, type).Generate();
         var newLibrary = new PlexLibrary
         {
             Id = plexLibrary.Id,
-            Type = type,
-            Title = mockPlexLibrary.Title,
             Key = plexLibrary.Key,
-            CreatedAt = mockPlexLibrary.CreatedAt,
-            UpdatedAt = mockPlexLibrary.UpdatedAt,
-            ScannedAt = mockPlexLibrary.ScannedAt,
-            SyncedAt = null,
-            Uuid = mockPlexLibrary.Uuid,
-            PlexServer = mockPlexLibrary.PlexServer,
+            Type = type,
+            Title = fakeLibrary.Title,
             PlexServerId = plexLibrary.PlexServerId,
-            DefaultDestination = mockPlexLibrary.DefaultDestination,
-            DefaultDestinationId = mockPlexLibrary.DefaultDestinationId,
+            PlexServer = plexLibrary.PlexServer,
+            Uuid = fakeLibrary.Uuid,
+            CreatedAt = fakeLibrary.CreatedAt,
+            UpdatedAt = fakeLibrary.UpdatedAt,
+            ScannedAt = fakeLibrary.ScannedAt,
+            DefaultDestination = fakeLibrary.DefaultDestination,
+            DefaultDestinationId = fakeLibrary.DefaultDestinationId,
         };
-        newLibrary.Movies.AddRange(mockPlexLibrary.Movies);
-        newLibrary.TvShows.AddRange(mockPlexLibrary.TvShows);
-        newLibrary.PlexAccountLibraries.AddRange(mockPlexLibrary.PlexAccountLibraries);
+
+        newLibrary.Movies.AddRange(fakeLibrary.Movies);
+        newLibrary.TvShows.AddRange(fakeLibrary.TvShows);
+        newLibrary.PlexAccountLibraries.AddRange(fakeLibrary.PlexAccountLibraries);
 
         return newLibrary;
+    }
+
+    [Fact]
+    public async Task ShouldReturnFailedResult_WhenPlexLibraryNotFound()
+    {
+        // Arrange
+        await SetupDatabase(
+            1337,
+            config =>
+            {
+                config.PlexMovieLibraryCount = 0;
+            }
+        );
+
+        // Act
+        var command = new RefreshLibraryMediaCommand(PlexLibraryId: 1, Action: _ => { });
+        var result = await _sut.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        result.Has404NotFoundError().ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task ShouldReturnFailedResult_WhenSyncLibraryMediaFails()
+    {
+        // Arrange
+        await SetupDatabase(1338, config => config.PlexMovieLibraryCount = 1);
+        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync();
+        plexLibrary.ShouldNotBeNull();
+
+        mock.SetupCommand(It.IsAny<GetLibraryMediaCommand>).ReturnsAsync(Result.Fail<LibraryMetadata>("Sync failed"));
+
+        var command = new RefreshLibraryMediaCommand(plexLibrary.Id, _ => { });
+
+        // Act
+        var result = await _sut.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        result.Errors.ShouldContain(x => x.Message.Contains("Sync failed"));
+    }
+
+    [Theory]
+    [InlineData(PlexMediaType.Movie)]
+    [InlineData(PlexMediaType.TvShow)]
+    public async Task ShouldReturnOkResult_WhenLibraryIsSynced(PlexMediaType libraryType)
+    {
+        // Arrange
+        var seed = await SetupDatabase(
+            1339,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = libraryType == PlexMediaType.Movie ? 1 : 0;
+                config.PlexTvShowLibraryCount = libraryType == PlexMediaType.TvShow ? 1 : 0;
+            }
+        );
+
+        var updatedLibrary = await GetUpdatedLibrary(seed, libraryType);
+
+        mock.Mock<IRefreshLibraryProgressReporter>()
+            .Setup(x => x.SendProgress(It.IsAny<RefreshLibraryProgressUpdate>()));
+
+        mock.SetupCommand(It.IsAny<GetLibraryMediaCommand>)
+            .ReturnsAsync(
+                (ICommand<Result<LibraryMetadata>> command, CancellationToken _) =>
+                {
+                    if (command is GetLibraryMediaCommand getLibraryMediaCommand)
+                    {
+                        getLibraryMediaCommand.Action?.Invoke(
+                            new MediaSyncProgress
+                            {
+                                Type = libraryType,
+                                Received = updatedLibrary.MediaCount,
+                                Total = updatedLibrary.MediaCount,
+                                TimeRemaining = TimeSpan.Zero,
+                            }
+                        );
+                    }
+
+                    return Result.Ok(new LibraryMetadata { Library = updatedLibrary });
+                }
+            );
+
+        mock.SetupMediator(It.IsAny<SyncPlexLibraryMediaMetaDataCommand>).ReturnsAsync(Result.Ok());
+
+        switch (libraryType)
+        {
+            case PlexMediaType.Movie:
+                mock.SetupCommand(It.IsAny<RefreshPlexMovieLibraryCommand>).ReturnsAsync(Result.Ok(updatedLibrary));
+                break;
+
+            case PlexMediaType.TvShow:
+                mock.SetupCommand(It.IsAny<RefreshPlexTvShowLibraryCommand>).ReturnsAsync(Result.Ok(updatedLibrary));
+                break;
+        }
+
+        // Act
+        var command = new RefreshLibraryMediaCommand(updatedLibrary.Id, _ => { });
+        var result = await _sut.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+
+        var dbLibrary = await IDbContext.PlexLibraries.Where(x => x.Id == updatedLibrary.Id).FirstOrDefaultAsync();
+        dbLibrary.ShouldNotBeNull();
+        dbLibrary.SyncedAt.ShouldNotBeNull();
+
+        mock.Mock<IRefreshLibraryProgressReporter>()
+            .Verify(x => x.SendProgress(It.IsAny<RefreshLibraryProgressUpdate>()), Times.AtLeastOnce);
+    }
+
+    [Fact]
+    public async Task ShouldReturnFailedResult_WhenSyncLibraryMediaMetadataFails()
+    {
+        // Arrange
+        await SetupDatabase(
+            1440,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 3;
+            }
+        );
+        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync();
+        plexLibrary.ShouldNotBeNull();
+
+        mock.Mock<IRefreshLibraryProgressReporter>()
+            .Setup(x => x.SendProgress(It.IsAny<RefreshLibraryProgressUpdate>()));
+
+        mock.SetupCommand(It.IsAny<GetLibraryMediaCommand>)
+            .ReturnsAsync(Result.Ok(new LibraryMetadata { Library = plexLibrary }));
+
+        mock.SetupMediator(It.IsAny<SyncPlexLibraryMediaMetaDataCommand>)
+            .ReturnsAsync(Result.Fail("Metadata sync failed"));
+
+        // Act
+        var command = new RefreshLibraryMediaCommand(plexLibrary.Id, _ => { });
+        var result = await _sut.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        result.Errors.ShouldContain(x => x.Message.Contains("Metadata sync failed"));
+    }
+
+    [Fact]
+    public async Task ShouldReturnFailedResult_WhenMovieLibraryCommandFails()
+    {
+        // Arrange
+        var seed = await SetupDatabase(
+            1441,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 3;
+            }
+        );
+        var updatedLibrary = await GetUpdatedLibrary(seed, PlexMediaType.Movie);
+
+        mock.Mock<IRefreshLibraryProgressReporter>()
+            .Setup(x => x.SendProgress(It.IsAny<RefreshLibraryProgressUpdate>()));
+
+        mock.SetupCommand(It.IsAny<GetLibraryMediaCommand>)
+            .ReturnsAsync(Result.Ok(new LibraryMetadata { Library = updatedLibrary }));
+
+        mock.SetupMediator(It.IsAny<SyncPlexLibraryMediaMetaDataCommand>).ReturnsAsync(Result.Ok());
+
+        mock.SetupCommand(It.IsAny<RefreshPlexMovieLibraryCommand>)
+            .ReturnsAsync(Result.Fail<PlexLibrary>("Movie command failed"));
+
+        var command = new RefreshLibraryMediaCommand(updatedLibrary.Id, _ => { });
+
+        // Act
+        var result = await _sut.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        result.Errors.ShouldContain(x => x.Message.Contains("Movie command failed"));
+    }
+
+    [Fact]
+    public async Task ShouldReturnFailedResult_WhenTvShowLibraryCommandFails()
+    {
+        // Arrange
+        var seed = await SetupDatabase(
+            1442,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexTvShowLibraryCount = 3;
+            }
+        );
+        var updatedLibrary = await GetUpdatedLibrary(seed, PlexMediaType.TvShow);
+
+        mock.Mock<IRefreshLibraryProgressReporter>()
+            .Setup(x => x.SendProgress(It.IsAny<RefreshLibraryProgressUpdate>()));
+
+        mock.SetupCommand(It.IsAny<GetLibraryMediaCommand>)
+            .ReturnsAsync(Result.Ok(new LibraryMetadata { Library = updatedLibrary }));
+
+        mock.SetupMediator(It.IsAny<SyncPlexLibraryMediaMetaDataCommand>).ReturnsAsync(Result.Ok());
+
+        mock.SetupCommand(It.IsAny<RefreshPlexTvShowLibraryCommand>)
+            .ReturnsAsync(Result.Fail<PlexLibrary>("TV Show command failed"));
+
+        var command = new RefreshLibraryMediaCommand(updatedLibrary.Id, _ => { });
+
+        // Act
+        var result = await _sut.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        result.Errors.ShouldContain(x => x.Message.Contains("TV Show command failed"));
     }
 }

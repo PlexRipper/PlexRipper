@@ -121,7 +121,7 @@ public static class PlexMediaExtensions
                 FileName = part.File.GetFileName(),
                 FileLocationUrl = part.Key,
                 Quality = plexMediaData.VideoResolution,
-                DirectoryMeta = new DownloadTaskDirectory()
+                DirectoryMeta = new DownloadTaskDirectory
                 {
                     DownloadRootPath = string.Empty,
                     DestinationRootPath = request.CustomDestinationFolderPath,
@@ -169,7 +169,7 @@ public static class PlexMediaExtensions
                 FileName = part.File.GetFileName(),
                 FileLocationUrl = part.Key,
                 Quality = plexMediaData.VideoResolution,
-                DirectoryMeta = new DownloadTaskDirectory()
+                DirectoryMeta = new DownloadTaskDirectory
                 {
                     DownloadRootPath = string.Empty,
                     DestinationRootPath = request.CustomDestinationFolderPath,

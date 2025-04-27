@@ -107,7 +107,7 @@ public class TestModule : Module
             {
                 fileSystem.AddDrive(
                     "/",
-                    new MockDriveData()
+                    new MockDriveData
                     {
                         IsReady = true,
                         DriveType = DriveType.Fixed,

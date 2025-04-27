@@ -20,19 +20,19 @@ public class CheckConnectionStatusByIdCommandHandler
     : IRequestHandler<CheckConnectionStatusByIdCommand, Result<PlexServerStatus>>
 {
     private readonly ISignalRService _signalRService;
-    private readonly IPlexApiService _plexApiService;
+    private readonly ICommandExecutor _commandDispatcher;
     private readonly IPlexRipperDbContext _dbContext;
     private PlexServerConnection? _plexServerConnection;
 
     public CheckConnectionStatusByIdCommandHandler(
         IPlexRipperDbContext dbContext,
         ISignalRService signalRService,
-        IPlexApiService plexApiService
+        ICommandExecutor commandDispatcher
     )
     {
         _dbContext = dbContext;
         _signalRService = signalRService;
-        _plexApiService = plexApiService;
+        _commandDispatcher = commandDispatcher;
     }
 
     public async Task<Result<PlexServerStatus>> Handle(
@@ -55,7 +55,15 @@ public class CheckConnectionStatusByIdCommandHandler
         _plexServerConnection = plexServerConnection;
 
         // Request status
-        var serverStatusResult = await _plexApiService.GetPlexServerStatusAsync(command.PlexServerConnectionId, Action);
+        var serverStatusResult = await _commandDispatcher.Send(
+            new GetServerStatusCommand
+            {
+                PlexServerConnectionId = command.PlexServerConnectionId,
+                ProgressAction = Action,
+            },
+            cancellationToken
+        );
+
         if (serverStatusResult.IsFailed)
             return serverStatusResult.LogError();
 

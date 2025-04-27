@@ -30,19 +30,19 @@ public class RefreshLibraryAccessHandler
     private readonly ILog _log;
     private readonly IMediator _mediator;
     private readonly IPlexRipperDbContext _dbContext;
-    private readonly IPlexApiService _plexServiceApi;
+    private readonly ICommandExecutor _commandDispatcher;
 
     public RefreshLibraryAccessHandler(
         ILog log,
         IMediator mediator,
         IPlexRipperDbContext dbContext,
-        IPlexApiService plexServiceApi
+        ICommandExecutor commandDispatcher
     )
     {
         _log = log;
         _mediator = mediator;
         _dbContext = dbContext;
-        _plexServiceApi = plexServiceApi;
+        _commandDispatcher = commandDispatcher;
     }
 
     public async Task<Result<PlexLibraryAccessRefreshResponse>> Handle(
@@ -77,7 +77,7 @@ public class RefreshLibraryAccessHandler
         {
             var plexAccountName = await _dbContext.GetPlexAccountDisplayName(plexAccountId, cancellationToken);
             _log.Warning("No accessible Plex servers found for PlexAccount {PlexAccountName}", plexAccountName);
-            return Result.Ok(new PlexLibraryAccessRefreshResponse() { Reports = [], OfflineServers = [] });
+            return Result.Ok(new PlexLibraryAccessRefreshResponse { Reports = [], OfflineServers = [] });
         }
 
         // Refresh Plex libraries
@@ -133,9 +133,8 @@ public class RefreshLibraryAccessHandler
                     plexAccountName
                 );
 
-            var libraries = await _plexServiceApi.GetLibrarySectionsAsync(
-                plexServerId,
-                plexAccountId,
+            var libraries = await _commandDispatcher.Send(
+                new GetLibrarySectionsCommand(plexServerId, plexAccountId),
                 cancellationToken
             );
 

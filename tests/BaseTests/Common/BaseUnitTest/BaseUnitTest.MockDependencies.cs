@@ -109,7 +109,7 @@ public partial class BaseUnitTest
     {
         _fileSystem.AddDrive(
             "/",
-            new MockDriveData()
+            new MockDriveData
             {
                 IsReady = true,
                 DriveType = DriveType.Fixed,

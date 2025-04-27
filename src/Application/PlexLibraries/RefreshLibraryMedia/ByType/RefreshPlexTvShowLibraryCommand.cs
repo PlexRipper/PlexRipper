@@ -255,7 +255,8 @@ public class RefreshPlexTvShowLibraryCommandHandler
 
                 // Set library ID in each episode
                 var episodeIndex = 1;
-                episodes.ForEach((x) =>
+                episodes.ForEach(
+                    (x) =>
                     {
                         x.PlexLibraryId = plexLibrary.Id;
                         x.PlexServerId = plexLibrary.PlexServerId;

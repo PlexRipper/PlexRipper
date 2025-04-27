@@ -24,7 +24,8 @@ public class RefreshPlexTvShowLibraryCommand_UnitTests : BaseUnitTest<RefreshPle
         var testLibrary = IDbContext.PlexLibraries.Include(x => x.TvShows).First();
 
         mock.Mock<IRefreshLibraryProgressReporter>()
-            .Setup(x => x.SendProgress(It.IsAny<RefreshLibraryProgressUpdate>()));
+            .Setup(x => x.SendProgress(It.IsAny<RefreshLibraryProgressUpdate>()))
+            .Returns(Task.CompletedTask);
 
         var seasonsList = FakeData.GetPlexTvShowSeason(seed).Generate(6);
         var episodesList = new List<PlexTvShowEpisode>();
@@ -207,7 +208,8 @@ public class RefreshPlexTvShowLibraryCommand_UnitTests : BaseUnitTest<RefreshPle
         var testLibrary = IDbContext.PlexLibraries.Include(x => x.TvShows).First();
 
         mock.Mock<IRefreshLibraryProgressReporter>()
-            .Setup(x => x.SendProgress(It.IsAny<RefreshLibraryProgressUpdate>()));
+            .Setup(x => x.SendProgress(It.IsAny<RefreshLibraryProgressUpdate>()))
+            .Returns(Task.CompletedTask);
 
         var seasonsList = FakeData.GetPlexTvShowSeason(seed).Generate(6);
         var episodesList = new List<PlexTvShowEpisode>();

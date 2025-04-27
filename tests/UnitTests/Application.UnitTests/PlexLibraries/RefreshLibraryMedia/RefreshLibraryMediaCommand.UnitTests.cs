@@ -98,7 +98,8 @@ public class RefreshLibraryMediaCommand_UnitTests : BaseUnitTest<RefreshLibraryM
         var updatedLibrary = await GetUpdatedLibrary(seed, libraryType);
 
         mock.Mock<IRefreshLibraryProgressReporter>()
-            .Setup(x => x.SendProgress(It.IsAny<RefreshLibraryProgressUpdate>()));
+            .Setup(x => x.SendProgress(It.IsAny<RefreshLibraryProgressUpdate>()))
+            .Returns(Task.CompletedTask);
 
         mock.SetupCommand(It.IsAny<GetLibraryMediaCommand>)
             .ReturnsAsync(

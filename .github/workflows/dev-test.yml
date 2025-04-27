@@ -91,7 +91,22 @@ jobs:
                     project-path: ${{ matrix.test_project }}
 
             -   name: Run Unit Tests
-                run: dotnet test ${{ matrix.test_project }} --no-build --verbosity normal
+                run: dotnet test ${{ matrix.test_project }} --no-build --verbosity normal --logger "trx;LogFileName=test_results.trx"
+
+            -   name: Upload Test Results
+                if: always()
+                uses: actions/upload-artifact@v4
+                with:
+                    name: test-results-${{ matrix.test_project }}
+                    path: '**/TestResults/*.trx'
+
+            -   name: Publish Test Report
+                if: always()
+                uses: dorny/test-reporter@v1
+                with:
+                    name: Unit Test Results
+                    path: '**/TestResults/*.trx'
+                    reporter: dotnet-trx
 
     # Back-End Integration Tests
     Back-End-Integration-Tests:

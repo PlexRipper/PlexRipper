@@ -55,14 +55,14 @@ public class ValidatePlexAccountEndpointRequestValidator : Validator<ValidatePle
 public class ValidatePlexAccountEndpoint : BaseEndpoint<ValidatePlexAccountEndpointRequest, ValidatePlexAccountResponse>
 {
     private readonly ILog _log;
-    private readonly ICommandDispatch _commandDispatch;
+    private readonly ICommandExecutor _commandExecutor;
 
     public override string EndpointPath => ApiRoutes.PlexAccountController + "/validate";
 
-    public ValidatePlexAccountEndpoint(ILog log, ICommandDispatch commandDispatch)
+    public ValidatePlexAccountEndpoint(ILog log, ICommandExecutor commandExecutor)
     {
         _log = log;
-        _commandDispatch = commandDispatch;
+        _commandExecutor = commandExecutor;
     }
 
     public override void Configure()
@@ -84,7 +84,7 @@ public class ValidatePlexAccountEndpoint : BaseEndpoint<ValidatePlexAccountEndpo
         Result<PlexAccount> validateResult;
         if (plexAccount.IsAuthTokenMode)
         {
-            validateResult = await _commandDispatch.ExecuteAsync(new ValidatePlexTokenCommand(plexAccount), ct);
+            validateResult = await _commandExecutor.ExecuteAsync(new ValidatePlexTokenCommand(plexAccount), ct);
 
             if (validateResult.IsSuccess)
             {
@@ -111,7 +111,7 @@ public class ValidatePlexAccountEndpoint : BaseEndpoint<ValidatePlexAccountEndpo
         }
         else
         {
-            validateResult = await _commandDispatch.ExecuteAsync(new PlexSignInCommand(plexAccount), ct);
+            validateResult = await _commandExecutor.ExecuteAsync(new PlexSignInCommand(plexAccount), ct);
 
             if (validateResult.IsSuccess)
             {

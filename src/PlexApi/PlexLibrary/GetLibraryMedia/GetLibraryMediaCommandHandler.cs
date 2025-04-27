@@ -9,11 +9,11 @@ namespace PlexRipper.PlexApi;
 /// </summary>
 public class GetLibraryMediaCommandHandler : ICommandHandler<GetLibraryMediaCommand, Result<LibraryMetadata>>
 {
-    private readonly ICommandDispatch _commandDispatch;
+    private readonly ICommandExecutor _commandExecutor;
 
-    public GetLibraryMediaCommandHandler(ICommandDispatch commandDispatch)
+    public GetLibraryMediaCommandHandler(ICommandExecutor commandExecutor)
     {
-        _commandDispatch = commandDispatch;
+        _commandExecutor = commandExecutor;
     }
 
     public async Task<Result<LibraryMetadata>> ExecuteAsync(GetLibraryMediaCommand command, CancellationToken ct)
@@ -22,7 +22,7 @@ public class GetLibraryMediaCommandHandler : ICommandHandler<GetLibraryMediaComm
         var action = command.Action;
 
         // Retrieve an updated version of the PlexLibrary
-        var plexLibraries = await _commandDispatch.ExecuteAsync(
+        var plexLibraries = await _commandExecutor.ExecuteAsync(
             new GetLibrarySectionsCommand(plexLibrary.PlexServerId),
             ct
         );
@@ -40,7 +40,7 @@ public class GetLibraryMediaCommandHandler : ICommandHandler<GetLibraryMediaComm
         // Set the default folder path id for the destination
         updatedPlexLibrary.DefaultDestinationId = updatedPlexLibrary.Type.ToDefaultDestinationFolderId();
 
-        var mediaListResult = await _commandDispatch.ExecuteAsync(
+        var mediaListResult = await _commandExecutor.ExecuteAsync(
             new GetAllMediaByTypeFromPlexApiCommand(plexLibrary, plexLibrary.Type, Action: action),
             ct
         );

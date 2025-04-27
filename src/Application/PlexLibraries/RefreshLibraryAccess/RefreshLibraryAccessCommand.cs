@@ -30,13 +30,13 @@ public class RefreshLibraryAccessHandler
     private readonly ILog _log;
     private readonly IMediator _mediator;
     private readonly IPlexRipperDbContext _dbContext;
-    private readonly ICommandDispatch _commandDispatcher;
+    private readonly ICommandExecutor _commandDispatcher;
 
     public RefreshLibraryAccessHandler(
         ILog log,
         IMediator mediator,
         IPlexRipperDbContext dbContext,
-        ICommandDispatch commandDispatcher
+        ICommandExecutor commandDispatcher
     )
     {
         _log = log;

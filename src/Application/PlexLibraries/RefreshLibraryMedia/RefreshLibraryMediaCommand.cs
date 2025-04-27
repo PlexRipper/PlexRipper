@@ -28,20 +28,20 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
 {
     private readonly IMediator _mediator;
     private readonly IPlexRipperDbContext _dbContext;
-    private readonly ICommandDispatch _commandDispatch;
+    private readonly ICommandExecutor _commandExecutor;
     private readonly IRefreshLibraryProgressReporter _progressReporter;
 
     public RefreshLibraryMediaCommandHandler(
         ILog log,
         IMediator mediator,
         IPlexRipperDbContext dbContext,
-        ICommandDispatch commandDispatch,
+        ICommandExecutor commandExecutor,
         IRefreshLibraryProgressReporter progressReporter
     )
     {
         _mediator = mediator;
         _dbContext = dbContext;
-        _commandDispatch = commandDispatch;
+        _commandExecutor = commandExecutor;
         _progressReporter = progressReporter;
     }
 
@@ -58,7 +58,7 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
             return ResultExtensions.EntityNotFound(nameof(plexLibrary), command.PlexLibraryId);
 
         // Phase 1: Retrieve overview of all media belonging to this PlexLibrary
-        var syncLibraryMediaResult = await _commandDispatch.ExecuteAsync(
+        var syncLibraryMediaResult = await _commandExecutor.ExecuteAsync(
             new GetLibraryMediaCommand(
                 plexLibrary,
                 progress =>
@@ -94,12 +94,12 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
         switch (newPlexLibrary.Type)
         {
             case PlexMediaType.Movie:
-                return await _commandDispatch.ExecuteAsync(
+                return await _commandExecutor.ExecuteAsync(
                     new RefreshPlexMovieLibraryCommand(newPlexLibrary, command.Action),
                     cancellationToken
                 );
             case PlexMediaType.TvShow:
-                return await _commandDispatch.ExecuteAsync(
+                return await _commandExecutor.ExecuteAsync(
                     new RefreshPlexTvShowLibraryCommand(newPlexLibrary, command.Action),
                     cancellationToken
                 );

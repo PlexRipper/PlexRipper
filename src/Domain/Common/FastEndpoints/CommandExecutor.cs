@@ -3,11 +3,11 @@ using Logging.Interface;
 
 namespace PlexRipper.Domain;
 
-public class CommandDispatch : ICommandDispatch
+public class CommandExecutor : ICommandExecutor
 {
-    private readonly ILog<CommandDispatch> _log;
+    private readonly ILog<CommandExecutor> _log;
 
-    public CommandDispatch(ILog<CommandDispatch> log)
+    public CommandExecutor(ILog<CommandExecutor> log)
     {
         _log = log;
     }

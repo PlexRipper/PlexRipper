@@ -23,12 +23,12 @@ public static class MoqExtensions
         return result;
     }
 
-    public static ISetup<ICommandDispatch, Task<TResult>> SetupCommand<TResult>(
+    public static ISetup<ICommandExecutor, Task<TResult>> SetupCommand<TResult>(
         this AutoMock mock,
         Func<ICommand<TResult>> request
     )
     {
-        var result = mock.Mock<ICommandDispatch>()
+        var result = mock.Mock<ICommandExecutor>()
             .Setup(m => m.ExecuteAsync(request.Invoke(), It.IsAny<CancellationToken>()));
 
         // This is to ensure unit tests to contain unused mock setups
@@ -36,10 +36,10 @@ public static class MoqExtensions
         return result;
     }
 
-    public static ISetup<ICommandDispatch, Task<TResult>> SetupCommandOfType<TCommand, TResult>(this AutoMock mock)
+    public static ISetup<ICommandExecutor, Task<TResult>> SetupCommandOfType<TCommand, TResult>(this AutoMock mock)
         where TCommand : class, ICommand<TResult>
     {
-        var result = mock.Mock<ICommandDispatch>()
+        var result = mock.Mock<ICommandExecutor>()
             .Setup(m => m.ExecuteAsync(It.Is<TCommand>(_ => true), It.IsAny<CancellationToken>()));
 
         result.Verifiable(Times.AtLeastOnce);

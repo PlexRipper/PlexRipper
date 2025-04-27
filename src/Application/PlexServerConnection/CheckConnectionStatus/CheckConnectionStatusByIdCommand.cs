@@ -20,14 +20,14 @@ public class CheckConnectionStatusByIdCommandHandler
     : IRequestHandler<CheckConnectionStatusByIdCommand, Result<PlexServerStatus>>
 {
     private readonly ISignalRService _signalRService;
-    private readonly ICommandDispatch _commandDispatcher;
+    private readonly ICommandExecutor _commandDispatcher;
     private readonly IPlexRipperDbContext _dbContext;
     private PlexServerConnection? _plexServerConnection;
 
     public CheckConnectionStatusByIdCommandHandler(
         IPlexRipperDbContext dbContext,
         ISignalRService signalRService,
-        ICommandDispatch commandDispatcher
+        ICommandExecutor commandDispatcher
     )
     {
         _dbContext = dbContext;

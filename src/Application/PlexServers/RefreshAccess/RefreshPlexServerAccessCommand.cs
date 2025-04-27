@@ -26,19 +26,19 @@ public class RefreshPlexServerAccessCommandHandler
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
     private readonly IMediator _mediator;
-    private readonly ICommandDispatch _commandDispatch;
+    private readonly ICommandExecutor _commandExecutor;
 
     public RefreshPlexServerAccessCommandHandler(
         ILog log,
         IPlexRipperDbContext dbContext,
         IMediator mediator,
-        ICommandDispatch commandDispatch
+        ICommandExecutor commandExecutor
     )
     {
         _log = log;
         _dbContext = dbContext;
         _mediator = mediator;
-        _commandDispatch = commandDispatch;
+        _commandExecutor = commandExecutor;
     }
 
     public async Task<Result<RefreshPlexServerAccessRapport>> Handle(
@@ -52,7 +52,7 @@ public class RefreshPlexServerAccessCommandHandler
 
         _log.Debug("Refreshing Plex servers access for PlexAccount: {PlexAccountName}", plexAccountName);
 
-        var result = await _commandDispatch.ExecuteAsync(
+        var result = await _commandExecutor.ExecuteAsync(
             new GetAccessiblePlexServersCommand(plexAccountId),
             cancellationToken
         );

@@ -26,21 +26,21 @@ public class RefreshPlexTvShowLibraryCommandHandler
     private readonly ILog _log;
     private readonly IMediator _mediator;
     private readonly IPlexRipperDbContext _dbContext;
-    private readonly ICommandDispatch _commandDispatch;
+    private readonly ICommandExecutor _commandExecutor;
     private readonly IRefreshLibraryProgressReporter _progressReporter;
 
     public RefreshPlexTvShowLibraryCommandHandler(
         ILog log,
         IMediator mediator,
         IPlexRipperDbContext dbContext,
-        ICommandDispatch commandDispatch,
+        ICommandExecutor commandExecutor,
         IRefreshLibraryProgressReporter progressReporter
     )
     {
         _log = log;
         _mediator = mediator;
         _dbContext = dbContext;
-        _commandDispatch = commandDispatch;
+        _commandExecutor = commandExecutor;
         _progressReporter = progressReporter;
     }
 
@@ -60,7 +60,7 @@ public class RefreshPlexTvShowLibraryCommandHandler
             timer.Start();
 
             // Phase 2 of 5: Season data was retrieved successfully.
-            var rawSeasonDataResult = await _commandDispatch.ExecuteAsync(
+            var rawSeasonDataResult = await _commandExecutor.ExecuteAsync(
                 new GetAllMediaSeasonsCommand(
                     plexLibrary,
                     progress =>
@@ -83,7 +83,7 @@ public class RefreshPlexTvShowLibraryCommandHandler
                 return rawSeasonDataResult.ToResult();
 
             // Phase 3 of 5: Episode data was retrieved successfully.
-            var rawEpisodesDataResult = await _commandDispatch.ExecuteAsync(
+            var rawEpisodesDataResult = await _commandExecutor.ExecuteAsync(
                 new GetAllMediaEpisodesCommand(
                     plexLibrary,
                     progress =>

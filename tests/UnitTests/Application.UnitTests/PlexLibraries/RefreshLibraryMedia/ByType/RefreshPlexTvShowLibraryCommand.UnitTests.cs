@@ -42,11 +42,11 @@ public class RefreshPlexTvShowLibraryCommand_UnitTests : BaseUnitTest<RefreshPle
             episodesList.AddRange(episodes);
         }
 
-        mock.Mock<ICommandDispatch>()
+        mock.Mock<ICommandExecutor>()
             .Setup(x => x.ExecuteAsync(It.IsAny<GetAllMediaSeasonsCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok(seasonsList));
 
-        mock.Mock<ICommandDispatch>()
+        mock.Mock<ICommandExecutor>()
             .Setup(x => x.ExecuteAsync(It.IsAny<GetAllMediaEpisodesCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok(episodesList));
 
@@ -139,7 +139,7 @@ public class RefreshPlexTvShowLibraryCommand_UnitTests : BaseUnitTest<RefreshPle
         mock.Mock<IRefreshLibraryProgressReporter>()
             .Setup(x => x.SendProgress(It.IsAny<RefreshLibraryProgressUpdate>()));
 
-        mock.Mock<ICommandDispatch>()
+        mock.Mock<ICommandExecutor>()
             .Setup(x => x.ExecuteAsync(It.IsAny<GetAllMediaSeasonsCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Fail("Failed to get seasons"));
 
@@ -174,11 +174,11 @@ public class RefreshPlexTvShowLibraryCommand_UnitTests : BaseUnitTest<RefreshPle
 
         var seasonsList = FakeData.GetPlexTvShowSeason(seed).Generate(6);
 
-        mock.Mock<ICommandDispatch>()
+        mock.Mock<ICommandExecutor>()
             .Setup(x => x.ExecuteAsync(It.IsAny<GetAllMediaSeasonsCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok(seasonsList));
 
-        mock.Mock<ICommandDispatch>()
+        mock.Mock<ICommandExecutor>()
             .Setup(x => x.ExecuteAsync(It.IsAny<GetAllMediaEpisodesCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Fail("Failed to get episodes"));
 
@@ -225,11 +225,11 @@ public class RefreshPlexTvShowLibraryCommand_UnitTests : BaseUnitTest<RefreshPle
             episodesList.AddRange(episodes);
         }
 
-        mock.Mock<ICommandDispatch>()
+        mock.Mock<ICommandExecutor>()
             .Setup(x => x.ExecuteAsync(It.IsAny<GetAllMediaSeasonsCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok(seasonsList));
 
-        mock.Mock<ICommandDispatch>()
+        mock.Mock<ICommandExecutor>()
             .Setup(x => x.ExecuteAsync(It.IsAny<GetAllMediaEpisodesCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok(episodesList));
 

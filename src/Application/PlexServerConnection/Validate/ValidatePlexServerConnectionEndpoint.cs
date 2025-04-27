@@ -31,13 +31,13 @@ public class ValidatePlexServerConnectionEndpointRequestValidator
 public class ValidatePlexServerConnectionEndpoint
     : BaseEndpoint<ValidatePlexServerConnectionEndpointRequest, ResultDTO<ServerIdentityDTO>>
 {
-    private readonly ICommandDispatch _commandDispatch;
+    private readonly ICommandExecutor _commandExecutor;
 
     public override string EndpointPath => ApiRoutes.PlexServerConnectionController + "/validate";
 
-    public ValidatePlexServerConnectionEndpoint(ICommandDispatch commandDispatch)
+    public ValidatePlexServerConnectionEndpoint(ICommandExecutor commandExecutor)
     {
-        _commandDispatch = commandDispatch;
+        _commandExecutor = commandExecutor;
     }
 
     public override void Configure()
@@ -53,7 +53,7 @@ public class ValidatePlexServerConnectionEndpoint
 
     public override async Task HandleAsync(ValidatePlexServerConnectionEndpointRequest req, CancellationToken ct)
     {
-        var result = await _commandDispatch.ExecuteAsync(new ValidatePlexConnectionUrlCommand(req.Url), ct);
+        var result = await _commandExecutor.ExecuteAsync(new ValidatePlexConnectionUrlCommand(req.Url), ct);
         await SendFluentResult(result, ct);
     }
 }

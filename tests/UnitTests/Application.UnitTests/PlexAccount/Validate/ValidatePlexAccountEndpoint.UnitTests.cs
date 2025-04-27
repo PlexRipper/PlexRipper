@@ -19,7 +19,7 @@ public class ValidatePlexAccountEndpointUnitTests : BaseUnitTest
         var testAccountResponse = testAccountDTO.ToModel();
         UpdateInitProperty(testAccountResponse, nameof(testAccountResponse.ValidatedAt), DateTime.UtcNow);
 
-        mock.Mock<ICommandDispatch>()
+        mock.Mock<ICommandExecutor>()
             .Setup(x => x.ExecuteAsync(It.IsAny<PlexSignInCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok(testAccountResponse));
 
@@ -59,7 +59,7 @@ public class ValidatePlexAccountEndpointUnitTests : BaseUnitTest
         var testAccountResponse = testAccountDTO.ToModel();
         UpdateInitProperty(testAccountResponse, nameof(testAccountResponse.ValidatedAt), DateTime.UtcNow);
 
-        mock.Mock<ICommandDispatch>()
+        mock.Mock<ICommandExecutor>()
             .Setup(x => x.ExecuteAsync(It.IsAny<ValidatePlexTokenCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok(testAccountResponse));
 
@@ -96,7 +96,7 @@ public class ValidatePlexAccountEndpointUnitTests : BaseUnitTest
         testAccountDTO.ValidatedAt = null;
         testAccountDTO.CustomAuthenticationToken = string.Empty;
 
-        mock.Mock<ICommandDispatch>()
+        mock.Mock<ICommandExecutor>()
             .Setup(x => x.ExecuteAsync(It.IsAny<PlexSignInCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(
                 Result.Fail(new PlexError("Enter verification code") { Code = PlexErrorCodes.EnterVerificationCode })
@@ -134,7 +134,7 @@ public class ValidatePlexAccountEndpointUnitTests : BaseUnitTest
         testAccountDTO.ValidatedAt = null;
         testAccountDTO.CustomAuthenticationToken = string.Empty;
 
-        mock.Mock<ICommandDispatch>()
+        mock.Mock<ICommandExecutor>()
             .Setup(x => x.ExecuteAsync(It.IsAny<PlexSignInCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Fail(new PlexError("Unauthorized")).AddPlex401UnauthorizedError());
 
@@ -172,7 +172,7 @@ public class ValidatePlexAccountEndpointUnitTests : BaseUnitTest
         testAccountDTO.Password = string.Empty;
         testAccountDTO.CustomAuthenticationToken = "valid-token";
 
-        mock.Mock<ICommandDispatch>()
+        mock.Mock<ICommandExecutor>()
             .Setup(x => x.ExecuteAsync(It.IsAny<ValidatePlexTokenCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Fail(new PlexError("Unauthorized")).AddPlex401UnauthorizedError());
 
@@ -208,7 +208,7 @@ public class ValidatePlexAccountEndpointUnitTests : BaseUnitTest
         testAccountDTO.ValidatedAt = null;
         testAccountDTO.CustomAuthenticationToken = string.Empty;
 
-        mock.Mock<ICommandDispatch>()
+        mock.Mock<ICommandExecutor>()
             .Setup(x => x.ExecuteAsync(It.IsAny<PlexSignInCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(
                 Result

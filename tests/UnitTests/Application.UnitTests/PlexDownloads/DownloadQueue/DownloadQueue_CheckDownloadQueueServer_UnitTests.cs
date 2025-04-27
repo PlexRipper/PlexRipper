@@ -29,7 +29,10 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<Applicati
     {
         await SetupDatabase(
             78970,
-            config => { config.PlexServerCount = 1; }
+            config =>
+            {
+                config.PlexServerCount = 1;
+            }
         );
 
         // Arrange

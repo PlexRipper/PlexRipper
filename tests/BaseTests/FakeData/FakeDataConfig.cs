@@ -49,15 +49,15 @@ public class FakeDataConfig : BaseConfig<FakeDataConfig>
 
     public bool ShouldHavePlexLibrary => ShouldHaveMoviePlexLibrary || ShouldHaveTvShowPlexLibrary;
 
-    public bool ShouldHaveMoviePlexLibrary => PlexMovieLibraryCount > 0
-                                              || MovieCount > 0
-                                              || MovieDownloadTasksCount > 0;
+    public bool ShouldHaveMoviePlexLibrary =>
+        PlexMovieLibraryCount > 0 || MovieCount > 0 || MovieDownloadTasksCount > 0;
 
-    public bool ShouldHaveTvShowPlexLibrary => PlexTvShowLibraryCount > 0
-                                               || TvShowCount > 0
-                                               || TvShowSeasonCount > 0
-                                               || TvShowEpisodeCount > 0
-                                               || TvShowDownloadTasksCount > 0
-                                               || TvShowSeasonDownloadTasksCount > 0
-                                               || TvShowEpisodeDownloadTasksCount > 0;
+    public bool ShouldHaveTvShowPlexLibrary =>
+        PlexTvShowLibraryCount > 0
+        || TvShowCount > 0
+        || TvShowSeasonCount > 0
+        || TvShowEpisodeCount > 0
+        || TvShowDownloadTasksCount > 0
+        || TvShowSeasonDownloadTasksCount > 0
+        || TvShowEpisodeDownloadTasksCount > 0;
 }

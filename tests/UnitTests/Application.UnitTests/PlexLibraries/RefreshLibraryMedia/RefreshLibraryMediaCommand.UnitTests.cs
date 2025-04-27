@@ -46,7 +46,10 @@ public class RefreshLibraryMediaCommand_UnitTests : BaseUnitTest<RefreshLibraryM
         // Arrange
         await SetupDatabase(
             1337,
-            config => { config.PlexMovieLibraryCount = 0; }
+            config =>
+            {
+                config.PlexMovieLibraryCount = 0;
+            }
         );
 
         // Act
@@ -99,7 +102,8 @@ public class RefreshLibraryMediaCommand_UnitTests : BaseUnitTest<RefreshLibraryM
             .Setup(x => x.SendProgress(It.IsAny<RefreshLibraryProgressUpdate>()));
 
         mock.SetupCommand(It.IsAny<GetLibraryMediaCommand>)
-            .ReturnsAsync((ICommand<Result<LibraryMetadata>> command, CancellationToken _) =>
+            .ReturnsAsync(
+                (ICommand<Result<LibraryMetadata>> command, CancellationToken _) =>
                 {
                     if (command is GetLibraryMediaCommand getLibraryMediaCommand)
                     {

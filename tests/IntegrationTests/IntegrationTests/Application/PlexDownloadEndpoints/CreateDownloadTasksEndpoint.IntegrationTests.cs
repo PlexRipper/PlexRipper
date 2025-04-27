@@ -27,7 +27,7 @@ public class CreateDownloadTasksEndpointIntegrationTests : BaseIntegrationTests
                 {
                     x.PlexAccountCount = 1;
                     x.PlexServerCount = 1;
-                    x.PlexLibraryCount = 1;
+                    x.PlexMovieLibraryCount = 1;
                     x.MovieCount = plexMovieCount;
                 };
 

@@ -6,7 +6,8 @@ public class FakeDataConfig : BaseConfig<FakeDataConfig>
 
     public int PlexServerConnectionPerServerCount { get; set; } = 4;
 
-    public int PlexLibraryCount { get; set; } = 0;
+    public int PlexMovieLibraryCount { get; set; } = 0;
+    public int PlexTvShowLibraryCount { get; set; } = 0;
 
     /// <summary>
     /// The number of PlexAccounts to create which will have access to every PlexServer and PlexLibrary by default.
@@ -46,16 +47,17 @@ public class FakeDataConfig : BaseConfig<FakeDataConfig>
 
     public bool ShouldHavePlexServer => PlexServerCount > 0 || ShouldHavePlexLibrary;
 
-    public bool ShouldHavePlexLibrary =>
-        PlexLibraryCount > 0 || ShouldHaveMoviePlexLibrary || ShouldHaveTvShowPlexLibrary;
+    public bool ShouldHavePlexLibrary => ShouldHaveMoviePlexLibrary || ShouldHaveTvShowPlexLibrary;
 
-    public bool ShouldHaveMoviePlexLibrary => MovieCount > 0 || MovieDownloadTasksCount > 0;
+    public bool ShouldHaveMoviePlexLibrary => PlexMovieLibraryCount > 0
+                                              || MovieCount > 0
+                                              || MovieDownloadTasksCount > 0;
 
-    public bool ShouldHaveTvShowPlexLibrary =>
-        TvShowCount > 0
-        || TvShowSeasonCount > 0
-        || TvShowEpisodeCount > 0
-        || TvShowDownloadTasksCount > 0
-        || TvShowSeasonDownloadTasksCount > 0
-        || TvShowEpisodeDownloadTasksCount > 0;
+    public bool ShouldHaveTvShowPlexLibrary => PlexTvShowLibraryCount > 0
+                                               || TvShowCount > 0
+                                               || TvShowSeasonCount > 0
+                                               || TvShowEpisodeCount > 0
+                                               || TvShowDownloadTasksCount > 0
+                                               || TvShowSeasonDownloadTasksCount > 0
+                                               || TvShowEpisodeDownloadTasksCount > 0;
 }

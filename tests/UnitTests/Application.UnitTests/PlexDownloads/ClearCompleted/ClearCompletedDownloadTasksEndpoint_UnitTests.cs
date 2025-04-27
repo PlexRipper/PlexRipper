@@ -16,7 +16,7 @@ public class ClearCompletedDownloadTasksEndpoint_UnitTests : BaseUnitTest<ClearC
             config =>
             {
                 config.PlexServerCount = 1;
-                config.PlexLibraryCount = 1;
+                config.PlexMovieLibraryCount = 1;
                 config.MovieDownloadTasksCount = 10;
             }
         );
@@ -52,7 +52,7 @@ public class ClearCompletedDownloadTasksEndpoint_UnitTests : BaseUnitTest<ClearC
             config =>
             {
                 config.PlexServerCount = 1;
-                config.PlexLibraryCount = 1;
+                config.PlexMovieLibraryCount = 1;
                 config.MovieDownloadTasksCount = 10;
             }
         );

@@ -34,7 +34,7 @@ public class GetDownloadPreviewQueryHandler_UnitTests : BaseUnitTest<GetDownload
             config =>
             {
                 config.PlexServerCount = 1;
-                config.PlexLibraryCount = 1;
+                config.PlexMovieLibraryCount = 1;
                 config.TvShowCount = 5;
                 config.TvShowSeasonCount = 5;
                 config.TvShowEpisodeCount = 5;

@@ -16,7 +16,7 @@ public class PlexRipperDbContextExtensions_IncludeDownloadTasks_UnitTests : Base
             config =>
             {
                 config.PlexServerCount = 1;
-                config.PlexLibraryCount = 1;
+                config.PlexMovieLibraryCount = 1;
                 config.MovieCount = 10;
                 config.MovieDownloadTasksCount = 5;
             }
@@ -43,7 +43,7 @@ public class PlexRipperDbContextExtensions_IncludeDownloadTasks_UnitTests : Base
             config =>
             {
                 config.PlexServerCount = 1;
-                config.PlexLibraryCount = 1;
+                config.PlexMovieLibraryCount = 1;
                 config.TvShowCount = 10;
                 config.TvShowSeasonCount = 10;
                 config.TvShowEpisodeCount = 10;

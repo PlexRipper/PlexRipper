@@ -92,24 +92,16 @@ public static partial class MockDatabase
 
         var plexLibrariesToDb = new List<PlexLibrary>();
 
-        var plexLibraryCount = config.PlexLibraryCount;
-        if (config.MovieCount > 0)
-            plexLibraryCount--;
-
-        if (config.TvShowCount > 0)
-            plexLibraryCount--;
-
         foreach (var plexServer in plexServers)
         {
             var plexLibraries = new List<PlexLibrary>();
             if (config.ShouldHaveMoviePlexLibrary)
-                plexLibraries.Add(FakeData.GetPlexLibrary(seed, PlexMediaType.Movie).Generate());
+                plexLibraries.AddRange(FakeData.GetPlexLibrary(seed, PlexMediaType.Movie)
+                    .Generate(Math.Max(1, config.PlexMovieLibraryCount)));
 
             if (config.ShouldHaveTvShowPlexLibrary)
-                plexLibraries.Add(FakeData.GetPlexLibrary(seed, PlexMediaType.TvShow).Generate());
-
-            if (plexLibraryCount > 0)
-                plexLibraries.AddRange(FakeData.GetPlexLibrary(seed).Generate(plexLibraryCount));
+                plexLibraries.AddRange(FakeData.GetPlexLibrary(seed, PlexMediaType.TvShow)
+                    .Generate(Math.Max(1, config.PlexTvShowLibraryCount)));
 
             foreach (var plexLibrary in plexLibraries)
                 plexLibrary.PlexServerId = plexServer.Id;
@@ -264,6 +256,7 @@ public static partial class MockDatabase
     }
 
     public static string DatabaseConnectionString(string dbName = "") =>
+
         // https://docs.microsoft.com/en-us/dotnet/standard/data/sqlite/in-memory-databases
         new SqliteConnectionStringBuilder
         {

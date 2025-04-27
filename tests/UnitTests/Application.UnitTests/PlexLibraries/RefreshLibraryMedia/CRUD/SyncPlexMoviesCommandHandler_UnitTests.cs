@@ -17,7 +17,7 @@ public class SyncPlexMoviesCommandHandler_UnitTests : BaseUnitTest<SyncPlexMovie
             config =>
             {
                 config.PlexServerCount = 1;
-                config.PlexLibraryCount = 1;
+                config.PlexMovieLibraryCount = 1;
             }
         );
 
@@ -49,7 +49,7 @@ public class SyncPlexMoviesCommandHandler_UnitTests : BaseUnitTest<SyncPlexMovie
             config =>
             {
                 config.PlexServerCount = 1;
-                config.PlexLibraryCount = 1;
+                config.PlexMovieLibraryCount = 1;
                 config.PlexAccountCount = 1;
                 config.MovieCount = 50;
             }
@@ -87,7 +87,7 @@ public class SyncPlexMoviesCommandHandler_UnitTests : BaseUnitTest<SyncPlexMovie
             config =>
             {
                 config.PlexServerCount = 1;
-                config.PlexLibraryCount = 1;
+                config.PlexMovieLibraryCount = 1;
                 config.PlexAccountCount = 1;
                 config.MovieCount = 50;
             }

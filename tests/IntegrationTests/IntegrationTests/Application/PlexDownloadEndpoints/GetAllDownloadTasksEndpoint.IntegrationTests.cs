@@ -24,7 +24,7 @@ public class GetAllDownloadTasksEndpointIntegrationTests : BaseIntegrationTests
                 config.DatabaseOptions = x =>
                 {
                     x.PlexServerCount = 1;
-                    x.PlexLibraryCount = 2;
+                    x.PlexMovieLibraryCount = 2;
                     x.TvShowCount = 5;
                     x.TvShowDownloadTasksCount = tvShowDownloadTasksCount;
                     x.TvShowSeasonDownloadTasksCount = tvShowSeasonDownloadTasksCount;

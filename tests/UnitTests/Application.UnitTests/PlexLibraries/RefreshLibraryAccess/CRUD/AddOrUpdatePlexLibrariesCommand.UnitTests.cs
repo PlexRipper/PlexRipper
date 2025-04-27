@@ -85,7 +85,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             config =>
             {
                 config.PlexServerCount = serverCount;
-                config.PlexLibraryCount = libraryCount;
+                config.PlexMovieLibraryCount = libraryCount;
                 config.PlexAccountCount = 1;
             }
         );
@@ -179,7 +179,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             config =>
             {
                 config.PlexServerCount = serverCount;
-                config.PlexLibraryCount = libraryCount;
+                config.PlexMovieLibraryCount = libraryCount;
                 config.PlexAccountCount = 1;
             }
         );

@@ -19,7 +19,7 @@ public class SyncPlexTvShowsCommand_UnitTests : BaseUnitTest<SyncPlexTvShowsComm
             config =>
             {
                 config.PlexServerCount = 1;
-                config.PlexLibraryCount = 1;
+                config.PlexMovieLibraryCount = 1;
             }
         );
 
@@ -67,7 +67,7 @@ public class SyncPlexTvShowsCommand_UnitTests : BaseUnitTest<SyncPlexTvShowsComm
             config =>
             {
                 config.PlexServerCount = 1;
-                config.PlexLibraryCount = 1;
+                config.PlexMovieLibraryCount = 1;
                 config.TvShowCount = 10;
                 config.TvShowSeasonCount = 2;
                 config.TvShowEpisodeCount = 5;
@@ -110,7 +110,7 @@ public class SyncPlexTvShowsCommand_UnitTests : BaseUnitTest<SyncPlexTvShowsComm
             config =>
             {
                 config.PlexServerCount = 1;
-                config.PlexLibraryCount = 1;
+                config.PlexMovieLibraryCount = 1;
                 config.PlexAccountCount = 1;
                 config.TvShowCount = 50;
             }
@@ -145,7 +145,7 @@ public class SyncPlexTvShowsCommand_UnitTests : BaseUnitTest<SyncPlexTvShowsComm
             config =>
             {
                 config.PlexServerCount = 1;
-                config.PlexLibraryCount = 1;
+                config.PlexMovieLibraryCount = 1;
                 config.PlexAccountCount = 1;
                 config.TvShowCount = 10;
                 config.TvShowSeasonCount = 2;
@@ -184,7 +184,7 @@ public class SyncPlexTvShowsCommand_UnitTests : BaseUnitTest<SyncPlexTvShowsComm
             config =>
             {
                 config.PlexServerCount = 1;
-                config.PlexLibraryCount = 1;
+                config.PlexMovieLibraryCount = 1;
                 config.PlexAccountCount = 1;
                 config.TvShowCount = 10;
                 config.TvShowSeasonCount = 2;
@@ -221,7 +221,7 @@ public class SyncPlexTvShowsCommand_UnitTests : BaseUnitTest<SyncPlexTvShowsComm
             config =>
             {
                 config.PlexServerCount = 1;
-                config.PlexLibraryCount = 1;
+                config.PlexMovieLibraryCount = 1;
                 config.PlexAccountCount = 1;
                 config.TvShowCount = 50;
             }

@@ -46,10 +46,7 @@ public class RefreshLibraryMediaCommand_UnitTests : BaseUnitTest<RefreshLibraryM
         // Arrange
         await SetupDatabase(
             1337,
-            config =>
-            {
-                config.PlexLibraryCount = 0;
-            }
+            config => { config.PlexMovieLibraryCount = 0; }
         );
 
         // Act
@@ -65,7 +62,7 @@ public class RefreshLibraryMediaCommand_UnitTests : BaseUnitTest<RefreshLibraryM
     public async Task ShouldReturnFailedResult_WhenSyncLibraryMediaFails()
     {
         // Arrange
-        var seed = await SetupDatabase(1338, config => config.PlexLibraryCount = 1);
+        var seed = await SetupDatabase(1338, config => config.PlexMovieLibraryCount = 1);
         var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync();
         plexLibrary.ShouldNotBeNull();
 
@@ -92,7 +89,7 @@ public class RefreshLibraryMediaCommand_UnitTests : BaseUnitTest<RefreshLibraryM
             config =>
             {
                 config.PlexServerCount = 1;
-                config.PlexLibraryCount = 3;
+                config.PlexMovieLibraryCount = 3;
             }
         );
 
@@ -102,8 +99,7 @@ public class RefreshLibraryMediaCommand_UnitTests : BaseUnitTest<RefreshLibraryM
             .Setup(x => x.SendProgress(It.IsAny<RefreshLibraryProgressUpdate>()));
 
         mock.SetupCommand(It.IsAny<GetLibraryMediaCommand>)
-            .ReturnsAsync(
-                (ICommand<Result<LibraryMetadata>> command, CancellationToken _) =>
+            .ReturnsAsync((ICommand<Result<LibraryMetadata>> command, CancellationToken _) =>
                 {
                     if (command is GetLibraryMediaCommand getLibraryMediaCommand)
                     {
@@ -159,7 +155,7 @@ public class RefreshLibraryMediaCommand_UnitTests : BaseUnitTest<RefreshLibraryM
             config =>
             {
                 config.PlexServerCount = 1;
-                config.PlexLibraryCount = 3;
+                config.PlexMovieLibraryCount = 3;
             }
         );
         var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync();
@@ -192,7 +188,7 @@ public class RefreshLibraryMediaCommand_UnitTests : BaseUnitTest<RefreshLibraryM
             config =>
             {
                 config.PlexServerCount = 1;
-                config.PlexLibraryCount = 3;
+                config.PlexMovieLibraryCount = 3;
             }
         );
         var updatedLibrary = await GetUpdatedLibrary(seed, PlexMediaType.Movie);
@@ -227,7 +223,7 @@ public class RefreshLibraryMediaCommand_UnitTests : BaseUnitTest<RefreshLibraryM
             config =>
             {
                 config.PlexServerCount = 1;
-                config.PlexLibraryCount = 3;
+                config.PlexMovieLibraryCount = 3;
             }
         );
         var updatedLibrary = await GetUpdatedLibrary(seed, PlexMediaType.TvShow);

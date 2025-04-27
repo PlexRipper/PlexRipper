@@ -27,7 +27,7 @@ public class RefreshPlexAccountAccessEndpointIntegrationTestsIntegrationTests : 
                 {
                     x.PlexAccountCount = plexAccountCount;
                     x.PlexServerCount = plexServerCount;
-                    x.PlexLibraryCount = plexLibraryCount;
+                    x.PlexMovieLibraryCount = plexLibraryCount;
                 };
                 config.BaseMockHttpClientOptions = x =>
                 {

@@ -99,12 +99,12 @@ public partial class FakePlexApiData
                     GetLibrariesResponseDirectory(seed, f.PlexApi().LibraryType.ToPlexMediaType())
                         .Generate(config.LibraryCount())
             )
-            .RuleFor(x => x.Size, (_, x) => x.Directory.Count)
+            .RuleFor(x => x.Size, (_, x) => x.Directory!.Count)
             .FinishWith(
                 (_, x) =>
                 {
                     // Directory might take a while to generate
-                    x.Size = x.Directory.Count;
+                    x.Size = x.Directory!.Count;
                 }
             );
 
@@ -137,8 +137,6 @@ public partial class FakePlexApiData
         Action<PlexApiDataConfig>? options = null
     )
     {
-        var config = PlexApiDataConfig.FromOptions(options);
-
         return new Faker<GetLibraryItemsResponse>()
             .StrictMode(true)
             .UseSeed(seed.Next())

@@ -63,7 +63,7 @@ public class RefreshLibraryMediaCommand_UnitTests : BaseUnitTest<RefreshLibraryM
     public async Task ShouldReturnFailedResult_WhenSyncLibraryMediaFails()
     {
         // Arrange
-        var seed = await SetupDatabase(1338, config => config.PlexMovieLibraryCount = 1);
+        await SetupDatabase(1338, config => config.PlexMovieLibraryCount = 1);
         var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync();
         plexLibrary.ShouldNotBeNull();
 

@@ -30,16 +30,22 @@ public class MockPlexApiServer : IMockPlexApiServer
     /// <summary>
     /// Key: GetAllLibrariesDirectory.Key (library key)
     /// </summary>
+
+    // ReSharper disable once CollectionNeverQueried.Local
     private readonly Dictionary<string, List<GetLibraryItemsMetadata>> _tvShows = [];
 
     /// <summary>
     /// Key: GetAllLibrariesDirectory.Key (library key)
     /// </summary>
+
+    // ReSharper disable once CollectionNeverQueried.Local
     private readonly Dictionary<string, List<GetLibraryItemsMetadata>> _seasons = [];
 
     /// <summary>
     /// Key: GetAllLibrariesDirectory.Key (library key)
     /// </summary>
+
+    // ReSharper disable once CollectionNeverQueried.Local
     private readonly Dictionary<string, List<GetLibraryItemsMetadata>> _episodes = [];
 
     public void Setup(Mock<HttpMessageHandler> handler, Action<PlexApiDataConfig> options)
@@ -175,6 +181,7 @@ public class MockPlexApiServer : IMockPlexApiServer
                                 request: req
                             );
                             response.Object.ShouldNotBeNull();
+                            response.Object.MediaContainer.ShouldNotBeNull();
                             response.Object.MediaContainer.Directory = _libraries[server.ClientIdentifier];
 
                             return response.Object.ToJsonHttpResponse(req, HttpStatusCode.OK);

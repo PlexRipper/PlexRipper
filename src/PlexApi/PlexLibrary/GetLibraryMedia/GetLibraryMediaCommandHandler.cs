@@ -22,10 +22,7 @@ public class GetLibraryMediaCommandHandler : ICommandHandler<GetLibraryMediaComm
         var action = command.Action;
 
         // Retrieve an updated version of the PlexLibrary
-        var plexLibraries = await _commandExecutor.Send(
-            new GetLibrarySectionsCommand(plexLibrary.PlexServerId),
-            ct
-        );
+        var plexLibraries = await _commandExecutor.Send(new GetLibrarySectionsCommand(plexLibrary.PlexServerId), ct);
 
         if (plexLibraries.IsFailed)
             return plexLibraries.ToResult();

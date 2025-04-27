@@ -52,10 +52,7 @@ public class RefreshPlexServerAccessCommandHandler
 
         _log.Debug("Refreshing Plex servers access for PlexAccount: {PlexAccountName}", plexAccountName);
 
-        var result = await _commandExecutor.Send(
-            new GetAccessiblePlexServersCommand(plexAccountId),
-            cancellationToken
-        );
+        var result = await _commandExecutor.Send(new GetAccessiblePlexServersCommand(plexAccountId), cancellationToken);
 
         // If the Plex API returns a 401 Unauthorized error, remove the PlexAccount and PlexServerAccess
         if (result.HasPlex401UnauthorizedError())

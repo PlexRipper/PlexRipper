@@ -67,7 +67,7 @@ public class SyncPlexTvShowsCommand_UnitTests : BaseUnitTest<SyncPlexTvShowsComm
             config =>
             {
                 config.PlexServerCount = 1;
-                config.PlexMovieLibraryCount = 1;
+                config.PlexTvShowLibraryCount = 1;
                 config.TvShowCount = 10;
                 config.TvShowSeasonCount = 2;
                 config.TvShowEpisodeCount = 5;
@@ -220,9 +220,9 @@ public class SyncPlexTvShowsCommand_UnitTests : BaseUnitTest<SyncPlexTvShowsComm
             85746,
             config =>
             {
-                config.PlexServerCount = 1;
-                config.PlexMovieLibraryCount = 1;
                 config.PlexAccountCount = 1;
+                config.PlexServerCount = 1;
+                config.PlexTvShowLibraryCount = 1;
                 config.TvShowCount = 50;
             }
         );

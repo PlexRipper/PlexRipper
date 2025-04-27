@@ -90,7 +90,8 @@ public class RefreshLibraryMediaCommand_UnitTests : BaseUnitTest<RefreshLibraryM
             config =>
             {
                 config.PlexServerCount = 1;
-                config.PlexMovieLibraryCount = 3;
+                config.PlexMovieLibraryCount = libraryType == PlexMediaType.Movie ? 1 : 0;
+                config.PlexTvShowLibraryCount = libraryType == PlexMediaType.TvShow ? 1 : 0;
             }
         );
 
@@ -225,7 +226,7 @@ public class RefreshLibraryMediaCommand_UnitTests : BaseUnitTest<RefreshLibraryM
             config =>
             {
                 config.PlexServerCount = 1;
-                config.PlexMovieLibraryCount = 3;
+                config.PlexTvShowLibraryCount = 3;
             }
         );
         var updatedLibrary = await GetUpdatedLibrary(seed, PlexMediaType.TvShow);

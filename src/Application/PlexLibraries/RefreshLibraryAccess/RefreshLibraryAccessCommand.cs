@@ -133,7 +133,7 @@ public class RefreshLibraryAccessHandler
                     plexAccountName
                 );
 
-            var libraries = await _commandDispatcher.ExecuteAsync(
+            var libraries = await _commandDispatcher.Send(
                 new GetLibrarySectionsCommand(plexServerId, plexAccountId),
                 cancellationToken
             );

@@ -29,7 +29,7 @@ public static class MoqExtensions
     )
     {
         var result = mock.Mock<ICommandExecutor>()
-            .Setup(m => m.ExecuteAsync(request.Invoke(), It.IsAny<CancellationToken>()));
+            .Setup(m => m.Send(request.Invoke(), It.IsAny<CancellationToken>()));
 
         // This is to ensure unit tests to contain unused mock setups
         result.Verifiable(Times.AtLeastOnce);
@@ -40,7 +40,7 @@ public static class MoqExtensions
         where TCommand : class, ICommand<TResult>
     {
         var result = mock.Mock<ICommandExecutor>()
-            .Setup(m => m.ExecuteAsync(It.Is<TCommand>(_ => true), It.IsAny<CancellationToken>()));
+            .Setup(m => m.Send(It.Is<TCommand>(_ => true), It.IsAny<CancellationToken>()));
 
         result.Verifiable(Times.AtLeastOnce);
         return result;

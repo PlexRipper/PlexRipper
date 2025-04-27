@@ -84,7 +84,7 @@ public class ValidatePlexAccountEndpoint : BaseEndpoint<ValidatePlexAccountEndpo
         Result<PlexAccount> validateResult;
         if (plexAccount.IsAuthTokenMode)
         {
-            validateResult = await _commandExecutor.ExecuteAsync(new ValidatePlexTokenCommand(plexAccount), ct);
+            validateResult = await _commandExecutor.Send(new ValidatePlexTokenCommand(plexAccount), ct);
 
             if (validateResult.IsSuccess)
             {
@@ -111,7 +111,7 @@ public class ValidatePlexAccountEndpoint : BaseEndpoint<ValidatePlexAccountEndpo
         }
         else
         {
-            validateResult = await _commandExecutor.ExecuteAsync(new PlexSignInCommand(plexAccount), ct);
+            validateResult = await _commandExecutor.Send(new PlexSignInCommand(plexAccount), ct);
 
             if (validateResult.IsSuccess)
             {

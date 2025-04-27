@@ -55,7 +55,7 @@ public class CheckConnectionStatusByIdCommandHandler
         _plexServerConnection = plexServerConnection;
 
         // Request status
-        var serverStatusResult = await _commandDispatcher.ExecuteAsync(
+        var serverStatusResult = await _commandDispatcher.Send(
             new GetServerStatusCommand
             {
                 PlexServerConnectionId = command.PlexServerConnectionId,

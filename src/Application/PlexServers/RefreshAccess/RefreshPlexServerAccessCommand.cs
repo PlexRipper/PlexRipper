@@ -52,7 +52,7 @@ public class RefreshPlexServerAccessCommandHandler
 
         _log.Debug("Refreshing Plex servers access for PlexAccount: {PlexAccountName}", plexAccountName);
 
-        var result = await _commandExecutor.ExecuteAsync(
+        var result = await _commandExecutor.Send(
             new GetAccessiblePlexServersCommand(plexAccountId),
             cancellationToken
         );

@@ -12,7 +12,7 @@ public class CommandExecutor : ICommandExecutor
         _log = log;
     }
 
-    public async Task<TResult> ExecuteAsync<TResult>(ICommand<TResult> command, CancellationToken ct = default)
+    public async Task<TResult> Send<TResult>(ICommand<TResult> command, CancellationToken ct = default)
     {
         try
         {

@@ -43,11 +43,11 @@ public class RefreshPlexTvShowLibraryCommand_UnitTests : BaseUnitTest<RefreshPle
         }
 
         mock.Mock<ICommandExecutor>()
-            .Setup(x => x.ExecuteAsync(It.IsAny<GetAllMediaSeasonsCommand>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.Send(It.IsAny<GetAllMediaSeasonsCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok(seasonsList));
 
         mock.Mock<ICommandExecutor>()
-            .Setup(x => x.ExecuteAsync(It.IsAny<GetAllMediaEpisodesCommand>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.Send(It.IsAny<GetAllMediaEpisodesCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok(episodesList));
 
         mock.Mock<IMediator>()
@@ -140,7 +140,7 @@ public class RefreshPlexTvShowLibraryCommand_UnitTests : BaseUnitTest<RefreshPle
             .Setup(x => x.SendProgress(It.IsAny<RefreshLibraryProgressUpdate>()));
 
         mock.Mock<ICommandExecutor>()
-            .Setup(x => x.ExecuteAsync(It.IsAny<GetAllMediaSeasonsCommand>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.Send(It.IsAny<GetAllMediaSeasonsCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Fail("Failed to get seasons"));
 
         // Act
@@ -175,11 +175,11 @@ public class RefreshPlexTvShowLibraryCommand_UnitTests : BaseUnitTest<RefreshPle
         var seasonsList = FakeData.GetPlexTvShowSeason(seed).Generate(6);
 
         mock.Mock<ICommandExecutor>()
-            .Setup(x => x.ExecuteAsync(It.IsAny<GetAllMediaSeasonsCommand>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.Send(It.IsAny<GetAllMediaSeasonsCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok(seasonsList));
 
         mock.Mock<ICommandExecutor>()
-            .Setup(x => x.ExecuteAsync(It.IsAny<GetAllMediaEpisodesCommand>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.Send(It.IsAny<GetAllMediaEpisodesCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Fail("Failed to get episodes"));
 
         // Act
@@ -226,11 +226,11 @@ public class RefreshPlexTvShowLibraryCommand_UnitTests : BaseUnitTest<RefreshPle
         }
 
         mock.Mock<ICommandExecutor>()
-            .Setup(x => x.ExecuteAsync(It.IsAny<GetAllMediaSeasonsCommand>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.Send(It.IsAny<GetAllMediaSeasonsCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok(seasonsList));
 
         mock.Mock<ICommandExecutor>()
-            .Setup(x => x.ExecuteAsync(It.IsAny<GetAllMediaEpisodesCommand>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.Send(It.IsAny<GetAllMediaEpisodesCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok(episodesList));
 
         mock.Mock<IMediator>()

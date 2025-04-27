@@ -20,7 +20,7 @@ public class GetAllSeasonsCommandHandler : ICommandHandler<GetAllMediaSeasonsCom
         var plexLibrary = command.PlexLibrary;
         var action = command.Action;
 
-        var mediaListResult = await _commandExecutor.ExecuteAsync(
+        var mediaListResult = await _commandExecutor.Send(
             new GetAllMediaByTypeFromPlexApiCommand(plexLibrary, PlexMediaType.Season, Action: action),
             ct
         );

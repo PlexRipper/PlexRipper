@@ -18,7 +18,7 @@ public class GenerateTokenEndpointUnitTests : BaseUnitTest
         var plexAccount = await IDbContext.PlexAccounts.FirstAsync();
 
         mock.Mock<ICommandExecutor>()
-            .Setup(x => x.ExecuteAsync(It.IsAny<PlexSignInCommand>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.Send(It.IsAny<PlexSignInCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok(FakeData.GetPlexAccount(seed).Generate()));
 
         // Act
@@ -48,7 +48,7 @@ public class GenerateTokenEndpointUnitTests : BaseUnitTest
         var plexAccount = await IDbContext.PlexAccounts.FirstAsync();
 
         mock.Mock<ICommandExecutor>()
-            .Setup(x => x.ExecuteAsync(It.IsAny<PlexSignInCommand>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.Send(It.IsAny<PlexSignInCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(
                 Result.Fail(new PlexError("Enter verification code") { Code = PlexErrorCodes.EnterVerificationCode })
             );
@@ -79,7 +79,7 @@ public class GenerateTokenEndpointUnitTests : BaseUnitTest
         var plexAccount = await IDbContext.PlexAccounts.FirstAsync();
 
         mock.Mock<ICommandExecutor>()
-            .Setup(x => x.ExecuteAsync(It.IsAny<PlexSignInCommand>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.Send(It.IsAny<PlexSignInCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Fail(new PlexError("Unauthorized")).Add401UnauthorizedError());
 
         // Act
@@ -108,7 +108,7 @@ public class GenerateTokenEndpointUnitTests : BaseUnitTest
         var plexAccount = await IDbContext.PlexAccounts.FirstAsync();
 
         mock.Mock<ICommandExecutor>()
-            .Setup(x => x.ExecuteAsync(It.IsAny<PlexSignInCommand>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.Send(It.IsAny<PlexSignInCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(
                 Result
                     .Fail(new PlexError("Unauthorized"))

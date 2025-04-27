@@ -58,7 +58,7 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
             return ResultExtensions.EntityNotFound(nameof(plexLibrary), command.PlexLibraryId);
 
         // Phase 1: Retrieve overview of all media belonging to this PlexLibrary
-        var syncLibraryMediaResult = await _commandExecutor.ExecuteAsync(
+        var syncLibraryMediaResult = await _commandExecutor.Send(
             new GetLibraryMediaCommand(
                 plexLibrary,
                 progress =>
@@ -94,12 +94,12 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
         switch (newPlexLibrary.Type)
         {
             case PlexMediaType.Movie:
-                return await _commandExecutor.ExecuteAsync(
+                return await _commandExecutor.Send(
                     new RefreshPlexMovieLibraryCommand(newPlexLibrary, command.Action),
                     cancellationToken
                 );
             case PlexMediaType.TvShow:
-                return await _commandExecutor.ExecuteAsync(
+                return await _commandExecutor.Send(
                     new RefreshPlexTvShowLibraryCommand(newPlexLibrary, command.Action),
                     cancellationToken
                 );

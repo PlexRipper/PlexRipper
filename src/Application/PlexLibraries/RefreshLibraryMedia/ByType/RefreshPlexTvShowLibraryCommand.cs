@@ -60,7 +60,7 @@ public class RefreshPlexTvShowLibraryCommandHandler
             timer.Start();
 
             // Phase 2 of 5: Season data was retrieved successfully.
-            var rawSeasonDataResult = await _commandExecutor.ExecuteAsync(
+            var rawSeasonDataResult = await _commandExecutor.Send(
                 new GetAllMediaSeasonsCommand(
                     plexLibrary,
                     progress =>
@@ -83,7 +83,7 @@ public class RefreshPlexTvShowLibraryCommandHandler
                 return rawSeasonDataResult.ToResult();
 
             // Phase 3 of 5: Episode data was retrieved successfully.
-            var rawEpisodesDataResult = await _commandExecutor.ExecuteAsync(
+            var rawEpisodesDataResult = await _commandExecutor.Send(
                 new GetAllMediaEpisodesCommand(
                     plexLibrary,
                     progress =>

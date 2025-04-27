@@ -22,7 +22,7 @@ public class GetLibraryMediaCommandHandler : ICommandHandler<GetLibraryMediaComm
         var action = command.Action;
 
         // Retrieve an updated version of the PlexLibrary
-        var plexLibraries = await _commandExecutor.ExecuteAsync(
+        var plexLibraries = await _commandExecutor.Send(
             new GetLibrarySectionsCommand(plexLibrary.PlexServerId),
             ct
         );
@@ -40,7 +40,7 @@ public class GetLibraryMediaCommandHandler : ICommandHandler<GetLibraryMediaComm
         // Set the default folder path id for the destination
         updatedPlexLibrary.DefaultDestinationId = updatedPlexLibrary.Type.ToDefaultDestinationFolderId();
 
-        var mediaListResult = await _commandExecutor.ExecuteAsync(
+        var mediaListResult = await _commandExecutor.Send(
             new GetAllMediaByTypeFromPlexApiCommand(plexLibrary, plexLibrary.Type, Action: action),
             ct
         );

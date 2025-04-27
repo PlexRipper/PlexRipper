@@ -80,7 +80,7 @@ public class GeneratePlexTokenEndpoint : BaseEndpoint<GeneratePlexTokenEndpointR
             plexAccount.VerificationCode = req.VerificationCode;
         }
 
-        var validateResult = await _commandExecutor.ExecuteAsync(new PlexSignInCommand(plexAccount), ct);
+        var validateResult = await _commandExecutor.Send(new PlexSignInCommand(plexAccount), ct);
 
         if (validateResult.IsSuccess)
         {

@@ -25,7 +25,7 @@ public class RefreshPlexServerAccessCommandUnitTests : BaseUnitTest<RefreshPlexS
         plexAccount.ShouldNotBeNull();
 
         mock.Mock<ICommandExecutor>()
-            .Setup(x => x.ExecuteAsync(It.IsAny<GetAccessiblePlexServersCommand>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.Send(It.IsAny<GetAccessiblePlexServersCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<PlexServerAccessDTO>());
 
         // Act
@@ -64,7 +64,7 @@ public class RefreshPlexServerAccessCommandUnitTests : BaseUnitTest<RefreshPlexS
             .ToList();
 
         mock.Mock<ICommandExecutor>()
-            .Setup(x => x.ExecuteAsync(It.IsAny<GetAccessiblePlexServersCommand>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.Send(It.IsAny<GetAccessiblePlexServersCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok(list));
 
         mock.SetupMediator(It.IsAny<AddOrUpdatePlexServersCommand>).ReturnsAsync(Result.Ok());

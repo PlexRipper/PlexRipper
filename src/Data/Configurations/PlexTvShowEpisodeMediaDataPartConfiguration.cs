@@ -7,8 +7,6 @@ public class PlexTvShowEpisodeMediaDataPartConfiguration : IEntityTypeConfigurat
 {
     public void Configure(EntityTypeBuilder<PlexTvShowEpisodeMediaDataPart> builder)
     {
-        builder.UseTpcMappingStrategy();
-
         builder
             .HasMany(x => x.Streams)
             .WithOne(x => x.PlexTvShowEpisodeMediaDataPart)

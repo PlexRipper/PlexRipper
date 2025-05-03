@@ -7,8 +7,6 @@ public class PlexMovieMediaDataConfiguration : IEntityTypeConfiguration<PlexMovi
 {
     public void Configure(EntityTypeBuilder<PlexMovieMediaData> builder)
     {
-        builder.UseTpcMappingStrategy();
-
         builder
             .HasMany(x => x.Parts)
             .WithOne(x => x.PlexMovieMediaData)

@@ -32,5 +32,12 @@ public class PlexMovieConfiguration : IEntityTypeConfiguration<PlexMovie>
                 l => l.HasOne<PlexCountry>().WithMany().HasForeignKey(e => e.CountryId),
                 r => r.HasOne<PlexMovie>().WithMany().HasForeignKey(e => e.PlexMovieId)
             );
+
+        // Configure one-to-many relationship with MediaDataList
+        builder
+            .HasMany(x => x.MediaDataList)
+            .WithOne(x => x.PlexMovie)
+            .HasForeignKey(x => x.PlexMovieId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

@@ -1,11 +1,11 @@
 namespace PlexRipper.Domain;
 
-public abstract class BasePlexMediaData
+public abstract class BasePlexMediaData : BaseEntity
 {
     /// <summary>
     /// Unique media identifier.
     /// </summary>
-    public required long Id { get; set; }
+    public required long PlexId { get; set; }
 
     /// <summary>
     /// Duration of the media in milliseconds.
@@ -76,4 +76,16 @@ public abstract class BasePlexMediaData
     /// Indicates whether voice activity is detected.
     /// </summary>
     public required bool HasVoiceActivity { get; set; }
+
+    #region Relationships
+
+    public required int PlexLibraryId { get; set; }
+
+    public required int PlexServerId { get; set; }
+
+    public PlexLibrary? PlexLibrary { get; set; }
+
+    public PlexServer? PlexServer { get; init; }
+
+    #endregion
 }

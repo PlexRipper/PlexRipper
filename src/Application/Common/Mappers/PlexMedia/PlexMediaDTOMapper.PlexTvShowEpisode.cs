@@ -68,7 +68,7 @@ public static partial class PlexMediaDTOMapper
         {
             Accessible = source.Accessible,
             Exists = source.Exists,
-            Id = source.Id,
+            Id = source.PlexId,
             Key = source.Key,
             Indexes = source.Indexes,
             Duration = source.Duration,
@@ -86,7 +86,7 @@ public static partial class PlexMediaDTOMapper
     public static LibraryMediaItemStreamDTO ToDTO(this PlexTvShowEpisodeMediaDataStream source) =>
         new()
         {
-            Id = source.Id,
+            Id = source.PlexId,
             StreamType = source.StreamType,
             Default = source.Default,
             Codec = source.Codec,

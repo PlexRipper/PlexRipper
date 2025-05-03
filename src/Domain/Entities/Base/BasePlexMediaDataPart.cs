@@ -1,7 +1,12 @@
 namespace PlexRipper.Domain;
 
-public class BasePlexMediaDataPart
+public abstract class BasePlexMediaDataPart : BaseEntity
 {
+    /// <summary>
+    /// Unique part identifier.
+    /// </summary>
+    public required long PlexId { get; set; }
+
     /// <summary>
     /// Indicates if the part is accessible.
     /// </summary>
@@ -11,11 +16,6 @@ public class BasePlexMediaDataPart
     /// Indicates if the part exists.
     /// </summary>
     public required bool? Exists { get; set; }
-
-    /// <summary>
-    /// Unique part identifier.
-    /// </summary>
-    public required long Id { get; set; }
 
     /// <summary>
     /// Key to access this part.
@@ -50,4 +50,16 @@ public class BasePlexMediaDataPart
     public required string VideoProfile { get; set; }
 
     public required string AudioProfile { get; set; }
+
+    #region Relationships
+
+    public required int PlexLibraryId { get; set; }
+
+    public required int PlexServerId { get; set; }
+
+    public PlexLibrary? PlexLibrary { get; set; }
+
+    public PlexServer? PlexServer { get; init; }
+
+    #endregion
 }

@@ -6,6 +6,8 @@ public class PlexTvShow : BasePlexMedia
 
     public required int GrandChildCount { get; set; }
 
+    #region Relationships
+
     public List<PlexTvShowSeason> Seasons { get; set; } = [];
 
     public required List<PlexRole> Roles { get; set; } = [];
@@ -13,4 +15,6 @@ public class PlexTvShow : BasePlexMedia
     public required List<PlexGenre> Genres { get; set; } = [];
 
     public required List<PlexCountry> Countries { get; set; } = [];
+
+    #endregion
 }

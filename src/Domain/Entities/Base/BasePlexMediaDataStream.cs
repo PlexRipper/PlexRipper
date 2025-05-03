@@ -1,11 +1,11 @@
 namespace PlexRipper.Domain;
 
-public class BasePlexMediaDataStream
+public abstract class BasePlexMediaDataStream : BaseEntity
 {
     /// <summary>
     /// Unique stream identifier.
     /// </summary>
-    public required long Id { get; set; }
+    public required long PlexId { get; set; }
 
     /// <summary>
     /// Stream type (1=video, 2=audio, 3=subtitle).
@@ -231,4 +231,16 @@ public class BasePlexMediaDataStream
     /// Optional title for the stream (e.g., language variant).
     /// </summary>
     public required string? Title { get; set; }
+
+    #region Relationships
+
+    public required int PlexLibraryId { get; set; }
+
+    public required int PlexServerId { get; set; }
+
+    public PlexLibrary? PlexLibrary { get; set; }
+
+    public PlexServer? PlexServer { get; init; }
+
+    #endregion
 }

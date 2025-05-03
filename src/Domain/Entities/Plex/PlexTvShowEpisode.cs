@@ -18,6 +18,8 @@ public class PlexTvShowEpisode : BasePlexMedia
 
     public ICollection<PlexTvShowEpisodeMediaData> MediaDataList { get; set; } = [];
 
+    public ICollection<PlexTvShowEpisodeMediaDataPart> Parts { get; set; } = [];
+
     public PlexTvShow? TvShow { get; set; }
 
     public int TvShowId { get; set; }

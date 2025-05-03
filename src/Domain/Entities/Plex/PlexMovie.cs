@@ -11,7 +11,7 @@ public class PlexMovie : BasePlexMedia
 
     public required List<PlexCountry> Countries { get; set; } = [];
 
-    public ICollection<PlexMovieMediaData> MediaDataList { get; set; }
+    public ICollection<PlexMovieMediaData> MediaDataList { get; set; } = [];
 
     [NotMapped]
     public List<PlexMediaQuality> Qualities

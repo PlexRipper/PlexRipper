@@ -9,7 +9,7 @@ public static partial class FakeData
     #region Base
 
     private static Faker<T> ApplyBasePlexMedia<T>(this Faker<T> faker, Seed seed, PlexMediaType mediaType)
-        where T : PlexMedia
+        where T : BasePlexMedia
     {
         return faker
             .StrictMode(true)

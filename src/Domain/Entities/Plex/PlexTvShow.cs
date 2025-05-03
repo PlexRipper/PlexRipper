@@ -1,6 +1,6 @@
 ﻿namespace PlexRipper.Domain;
 
-public class PlexTvShow : PlexMedia
+public class PlexTvShow : BasePlexMedia
 {
     public override PlexMediaType Type => PlexMediaType.TvShow;
 

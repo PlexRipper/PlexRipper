@@ -6,7 +6,7 @@ namespace PlexRipper.Domain;
 ///     Plex stores media in 1 generic type but PlexRipper stores it by type, this is the base entity for common
 ///     properties.
 /// </summary>
-public class PlexMedia : BaseEntity
+public class BasePlexMedia : BaseEntity
 {
     #region Properties
 
@@ -89,19 +89,19 @@ public class PlexMedia : BaseEntity
     public required DateTime? OriginallyAvailableAt { get; init; }
 
     /// <summary>
-    /// Gets or sets a value indicating whether this <see cref="PlexMedia"/> has a thumbnail.
+    /// Gets or sets a value indicating whether this <see cref="BasePlexMedia"/> has a thumbnail.
     /// </summary>
     [Column(Order = 18)]
     public required bool HasThumb { get; set; }
 
     /// <summary>
-    /// Gets or sets whether this <see cref="PlexMedia"/> has art / banner.
+    /// Gets or sets whether this <see cref="BasePlexMedia"/> has art / banner.
     /// </summary>
     [Column(Order = 19)]
     public required bool HasArt { get; init; }
 
     /// <summary>
-    /// Gets or sets whether this <see cref="PlexMedia"/> has a theme.
+    /// Gets or sets whether this <see cref="BasePlexMedia"/> has a theme.
     /// </summary>
     [Column(Order = 21)]
     public required bool HasTheme { get; init; }

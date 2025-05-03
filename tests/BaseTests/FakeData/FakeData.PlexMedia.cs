@@ -1,5 +1,6 @@
 ﻿using Bogus;
 using PlexApi.Contracts;
+using PlexRipper.PlexApi;
 
 namespace PlexRipper.BaseTests;
 
@@ -46,20 +47,6 @@ public static partial class FakeData
             .RuleFor(x => x.Guid_IMDB, f => "imdb://tt" + f.Random.Int(10000, 99999))
             .RuleFor(x => x.Guid_TMDB, f => "tmdb://" + f.Random.Int(10000, 99999))
             .RuleFor(x => x.Guid_TVDB, f => "tvdb://" + f.Random.Int(10000, 99999));
-    }
-
-    private static Faker<T> ApplyBasePlexMediaData<T>(
-        this Faker<T> faker,
-        Seed seed,
-        PlexMediaType mediaType,
-        Action<FakeDataConfig>? options = null
-    )
-        where T : BasePlexMediaData
-    {
-        return faker
-            .StrictMode(true)
-            .ApplyBasePlexMedia(seed, mediaType)
-            .RuleFor(x => x.MediaData, _ => new MediaDataContainer(GetPlexMediaData(seed, options).Generate(1)));
     }
 
     public static Faker<LibraryMediaItemMediaDTO> GetPlexMediaData(Seed seed, Action<FakeDataConfig>? options = null)
@@ -116,9 +103,10 @@ public static partial class FakeData
     public static Faker<PlexMovie> GetPlexMovies(Seed seed, Action<FakeDataConfig>? options = null)
     {
         return new Faker<PlexMovie>()
-            .ApplyBasePlexMediaData(seed, PlexMediaType.Movie, options)
+            .ApplyBasePlexMedia(seed, PlexMediaType.Movie)
             .StrictMode(true)
             .UseSeed(seed.Next())
+            .RuleFor(x => x.MediaDataList, GetPlexMediaData(seed, options).Generate(1).ToMovieMediaDataList())
             .RuleFor(x => x.Roles, () => [])
             .RuleFor(x => x.Genres, () => [])
             .RuleFor(x => x.Countries, () => [])
@@ -128,7 +116,7 @@ public static partial class FakeData
                     movie.FullTitle = $"{movie.Title} ({movie.Year})";
 
                     // TODO:Need quality selector in the case of multiple quality media
-                    movie.MediaSize = movie.MetaDataList.First().Parts.Sum(x => x.Size);
+                    movie.MediaSize = movie.MediaDataList.First().Parts.Sum(x => x.Size);
                 }
             );
     }
@@ -209,7 +197,7 @@ public static partial class FakeData
         return new Faker<PlexTvShowEpisode>()
             .StrictMode(true)
             .UseSeed(seed.Next())
-            .ApplyBasePlexMediaData(seed, PlexMediaType.Episode, options)
+            .ApplyBasePlexMedia(seed, PlexMediaType.Episode)
             .RuleFor(x => x.Id, _ => 0)
             .RuleFor(x => x.ParentKey, _ => GetUniqueNumber())
             .RuleFor(x => x.TvShowId, _ => 0)
@@ -217,15 +205,16 @@ public static partial class FakeData
             .RuleFor(x => x.TvShowSeasonId, _ => 0)
             .RuleFor(x => x.TvShowSeason, _ => null)
             .RuleFor(x => x.ParentGuid, _ => string.Empty)
+            .RuleFor(x => x.MediaDataList, GetPlexMediaData(seed, options).Generate(1).ToEpisodeMediaDataList())
             .FinishWith(
                 (_, tvShowEpisode) =>
                 {
-                    foreach (var mediaData in tvShowEpisode.MetaDataList)
+                    foreach (var mediaData in tvShowEpisode.MediaDataList)
                     foreach (var mediaDataPart in mediaData.Parts)
                         mediaDataPart.File = $"{tvShowEpisode.Title}";
 
                     tvShowEpisode.MediaSize = tvShowEpisode
-                        .MetaDataList.SelectMany(x => x.Parts.Select(y => y.Size))
+                        .MediaDataList.SelectMany(x => x.Parts.Select(y => y.Size))
                         .Sum();
                 }
             );

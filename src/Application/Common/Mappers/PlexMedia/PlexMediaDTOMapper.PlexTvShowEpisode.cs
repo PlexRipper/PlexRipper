@@ -1,0 +1,62 @@
+using Application.Contracts;
+
+namespace PlexRipper.Application;
+
+public static partial class PlexMediaDTOMapper
+{
+    public static PlexMediaDTO ToDTO(this PlexTvShowEpisode source, string plexToken) =>
+        new()
+        {
+            Id = source.Id,
+            TvShowId = source.TvShowId,
+            TvShowSeasonId = source.TvShowSeasonId,
+            MediaData = source.MediaDataList.ToDTO(),
+            Title = source.Title,
+            SearchTitle = source.SearchTitle,
+            SortIndex = source.SortIndex,
+            Year = source.Year,
+            Duration = source.Duration,
+            MediaSize = source.MediaSize,
+            ChildCount = source.ChildCount,
+            GrandChildCount = 0,
+            AddedAt = source.AddedAt,
+            UpdatedAt = source.UpdatedAt,
+            PlexLibraryId = source.PlexLibraryId,
+            PlexServerId = source.PlexServerId,
+            Type = source.Type,
+            HasThumb = source.HasThumb,
+            Qualities = source.Qualities.ToDTO(),
+            Key = source.Key,
+            HasArt = source.HasArt,
+            HasTheme = source.HasTheme,
+            Studio = source.Studio,
+            Summary = source.Summary,
+            ContentRating = source.ContentRating,
+            Rating = source.Rating,
+            OriginallyAvailableAt = source.OriginallyAvailableAt,
+            Children = [],
+            MetaDataKey = source.MetaDataKey,
+            PlexToken = plexToken,
+        };
+
+    public static List<PlexMediaDataDTO> ToDTO(this ICollection<PlexTvShowEpisodeMediaData> source) =>
+        source.Select(x => x.ToDTO()).ToList();
+
+    public static PlexMediaDataDTO ToDTO(this PlexTvShowEpisodeMediaData source) =>
+        new()
+        {
+            Duration = source.Duration,
+            VideoResolution = source.VideoResolution,
+            Width = source.Width,
+            Height = source.Height,
+            Bitrate = source.Bitrate,
+            VideoCodec = source.VideoCodec,
+            VideoFrameRate = source.VideoFrameRate,
+            AspectRatio = source.AspectRatio,
+            VideoProfile = source.VideoProfile,
+            AudioProfile = source.AudioProfile,
+            AudioCodec = source.AudioCodec,
+            AudioChannels = source.AudioChannels,
+            Parts = source.Parts,
+        };
+}

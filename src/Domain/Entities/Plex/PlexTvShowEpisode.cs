@@ -16,6 +16,8 @@ public class PlexTvShowEpisode : BasePlexMediaData
 
     #region Relationships
 
+    public new ICollection<PlexTvShowEpisodeMediaData> MediaDataList { get; set; } = [];
+
     public PlexTvShow? TvShow { get; set; }
 
     public int TvShowId { get; set; }

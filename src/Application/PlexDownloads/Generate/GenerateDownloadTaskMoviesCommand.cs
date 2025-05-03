@@ -86,7 +86,7 @@ public class GenerateDownloadTaskMoviesCommandHandler : IRequestHandler<Generate
                 var movieDownloadTask = plexMovie.MapToDownloadTask();
 
                 // TODO: Takes first entry which assumes its the highest quality one
-                var movieData = plexMovie.MetaDataList.FirstOrDefault();
+                var movieData = plexMovie.MediaDataList.FirstOrDefault();
                 if (movieData is null)
                 {
                     ResultExtensions.IsNull(nameof(movieData)).LogError();

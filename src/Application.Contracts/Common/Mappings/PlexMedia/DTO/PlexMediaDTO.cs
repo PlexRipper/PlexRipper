@@ -1,6 +1,6 @@
 ﻿namespace Application.Contracts;
 
-public class PlexMediaDTO : PlexMediaSlimDTO
+public record PlexMediaDTO : PlexMediaSlimDTO
 {
     public required bool HasArt { get; set; }
 
@@ -20,7 +20,7 @@ public class PlexMediaDTO : PlexMediaSlimDTO
 
     public required int TvShowSeasonId { get; set; }
 
-    public required List<PlexMediaDataDTO> MediaData { get; set; } = new();
+    public required List<PlexMediaDataDTO> MediaData { get; set; } = [];
 
-    public required List<PlexMediaDTO> Children { get; set; } = new();
+    public required List<PlexMediaDTO> Children { get; set; } = [];
 }

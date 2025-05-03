@@ -8,9 +8,9 @@ public class PlexTvShow : PlexMedia
 
     public List<PlexTvShowSeason> Seasons { get; set; } = [];
 
-    public List<PlexRole> Roles { get; set; } = [];
+    public required List<PlexRole> Roles { get; set; } = [];
 
-    public List<PlexGenre> Genres { get; set; } = [];
+    public required List<PlexGenre> Genres { get; set; } = [];
 
-    public List<PlexCountry> Countries { get; set; } = [];
+    public required List<PlexCountry> Countries { get; set; } = [];
 }

@@ -111,7 +111,7 @@ public record LibraryMediaItemRoleDTO
     public required string Tag { get; set; }
 }
 
-public class LibraryMediaItemMediaDTO
+public record LibraryMediaItemMediaDTO
 {
     /// <summary>
     /// Unique media identifier.
@@ -194,7 +194,7 @@ public class LibraryMediaItemMediaDTO
     public required List<LibraryMediaItemPartDTO> Parts { get; set; }
 }
 
-public class LibraryMediaItemPartDTO
+public record LibraryMediaItemPartDTO
 {
     /// <summary>
     /// Indicates if the part is accessible.

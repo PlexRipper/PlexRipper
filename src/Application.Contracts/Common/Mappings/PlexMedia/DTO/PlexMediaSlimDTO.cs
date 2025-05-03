@@ -2,7 +2,7 @@ using PlexRipper.Domain;
 
 namespace Application.Contracts;
 
-public class PlexMediaSlimDTO
+public record PlexMediaSlimDTO
 {
     public required int Id { get; init; }
 

@@ -15,7 +15,7 @@ public class PlexTvShowEpisodeMediaDataPartConfiguration : IEntityTypeConfigurat
 
         builder
             .HasOne(x => x.PlexTvShowEpisode)
-            .WithMany(x => x.Parts)
+            .WithMany()
             .HasForeignKey(x => x.PlexTvShowEpisodeId)
             .OnDelete(DeleteBehavior.Cascade);
 

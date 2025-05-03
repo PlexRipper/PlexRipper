@@ -16,10 +16,6 @@ public class PlexTvShowEpisode : BasePlexMedia
 
     #region Relationships
 
-    public ICollection<PlexTvShowEpisodeMediaData> MediaDataList { get; set; } = [];
-
-    public ICollection<PlexTvShowEpisodeMediaDataPart> Parts { get; set; } = [];
-
     public PlexTvShow? TvShow { get; set; }
 
     public int TvShowId { get; set; }
@@ -27,6 +23,8 @@ public class PlexTvShowEpisode : BasePlexMedia
     public PlexTvShowSeason? TvShowSeason { get; set; }
 
     public int TvShowSeasonId { get; set; }
+
+    public ICollection<PlexTvShowEpisodeMediaData> MediaDataList { get; set; } = [];
 
     #endregion
 

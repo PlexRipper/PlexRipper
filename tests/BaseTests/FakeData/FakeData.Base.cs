@@ -1,3 +1,6 @@
+using System.Collections.Concurrent;
+using Bogus;
+
 namespace PlexRipper.BaseTests;
 
 public static partial class FakeData
@@ -5,6 +8,8 @@ public static partial class FakeData
     private static readonly Random RandomInstance = new();
 
     private static readonly HashSet<int> AlreadyGenerated = [0];
+
+    private static readonly ConcurrentDictionary<Type, object> _fakerDictionary = new();
 
     private static string DownloadFileUrl => "/library/parts/653125/119385313456/file.mp4";
 
@@ -21,5 +26,11 @@ public static partial class FakeData
 
         AlreadyGenerated.Add(value);
         return value;
+    }
+
+    private static Faker<T> GetOrCreateCachedFaker<T>(Func<Faker<T>> factory)
+        where T : class
+    {
+        return ((Faker<T>)_fakerDictionary.GetOrAdd(typeof(T), _ => factory())).Clone();
     }
 }

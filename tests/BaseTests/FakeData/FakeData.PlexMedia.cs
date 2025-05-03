@@ -49,53 +49,6 @@ public static partial class FakeData
             .RuleFor(x => x.Guid_TVDB, f => "tvdb://" + f.Random.Int(10000, 99999));
     }
 
-    public static Faker<LibraryMediaItemMediaDTO> GetPlexMediaData(Seed seed, Action<FakeDataConfig>? options = null)
-    {
-        var config = FakeDataConfig.FromOptions(options);
-
-        return new Faker<LibraryMediaItemMediaDTO>()
-            .StrictMode(true)
-            .UseSeed(seed.Next())
-            .RuleFor(x => x.Id, 0)
-            .RuleFor(x => x.Bitrate, f => f.Random.Int(1900, 2030))
-            .RuleFor(x => x.Width, f => f.Random.Int(240, 10000))
-            .RuleFor(x => x.Height, f => f.Random.Int(240, 10000))
-            .RuleFor(x => x.VideoFrameRate, _ => "24p")
-            .RuleFor(x => x.VideoProfile, _ => "high")
-            .RuleFor(x => x.AudioCodec, _ => "dca")
-            .RuleFor(x => x.AudioProfile, _ => "dts")
-            .RuleFor(x => x.AspectRatio, f => f.Random.Float(1, 2))
-            .RuleFor(x => x.VideoCodec, f => f.System.FileType())
-            .RuleFor(x => x.AudioChannels, f => f.Random.Int(2, 5))
-            .RuleFor(x => x.VideoResolution, f => f.PickRandom("sd", "720p", "1080p"))
-            .RuleFor(x => x.Duration, f => f.Random.Int(50000, 55124400))
-            .RuleFor(x => x.Container, f => f.System.FileType())
-            .RuleFor(x => x.HasVoiceActivity, f => f.Random.Bool())
-            .RuleFor(
-                x => x.Parts,
-                _ => GetPlexMediaPart(seed, options).Generate(config.IncludeMultiPartMovies ? 2 : 1)
-            );
-    }
-
-    public static Faker<LibraryMediaItemPartDTO> GetPlexMediaPart(Seed seed, Action<FakeDataConfig>? options = null)
-    {
-        return new Faker<LibraryMediaItemPartDTO>()
-            .StrictMode(true)
-            .UseSeed(seed.Next())
-            .RuleFor(x => x.Id, _ => 0)
-            .RuleFor(x => x.Exists, true)
-            .RuleFor(x => x.Accessible, f => f.Random.Bool())
-            .RuleFor(x => x.Key, _ => DownloadFileUrl)
-            .RuleFor(x => x.Duration, f => f.Random.Int(50000, 5512400))
-            .RuleFor(x => x.AudioProfile, _ => "dts")
-            .RuleFor(x => x.File, _ => "/file.mp4")
-            .RuleFor(x => x.Size, _ => 50 * 1024)
-            .RuleFor(x => x.Container, f => f.System.FileExt("video/mp4"))
-            .RuleFor(x => x.VideoProfile, f => f.Random.Words(2))
-            .RuleFor(x => x.Stream, _ => [])
-            .RuleFor(x => x.Indexes, f => f.Random.Word());
-    }
-
     #endregion
 
     #region PlexMovies
@@ -106,7 +59,7 @@ public static partial class FakeData
             .ApplyBasePlexMedia(seed, PlexMediaType.Movie)
             .StrictMode(true)
             .UseSeed(seed.Next())
-            .RuleFor(x => x.MediaDataList, GetPlexMediaData(seed, options).Generate(1).ToMovieMediaDataList())
+            .RuleFor(x => x.MediaDataList, _ => GetPlexMovieMediaData(seed).Generate(1))
             .RuleFor(x => x.Roles, () => [])
             .RuleFor(x => x.Genres, () => [])
             .RuleFor(x => x.Countries, () => [])
@@ -205,7 +158,7 @@ public static partial class FakeData
             .RuleFor(x => x.TvShowSeasonId, _ => 0)
             .RuleFor(x => x.TvShowSeason, _ => null)
             .RuleFor(x => x.ParentGuid, _ => string.Empty)
-            .RuleFor(x => x.MediaDataList, GetPlexMediaData(seed, options).Generate(1).ToEpisodeMediaDataList())
+            .RuleFor(x => x.MediaDataList, GetPlexTvShowEpisodeMediaData(seed).Generate(1))
             .FinishWith(
                 (_, tvShowEpisode) =>
                 {

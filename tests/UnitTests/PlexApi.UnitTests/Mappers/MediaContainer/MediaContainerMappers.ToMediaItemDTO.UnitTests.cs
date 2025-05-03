@@ -21,7 +21,7 @@ namespace PlexApi.UnitTests
             {
                 RatingKey = "123",
                 Key = "/library/metadata/123",
-                Type = "movie",
+                Type = GetMediaMetaDataType.Movie,
                 Title = "Test Movie",
                 Summary = "Test summary",
                 Year = 2023,
@@ -84,7 +84,7 @@ namespace PlexApi.UnitTests
                                     new GetMediaMetaDataStream
                                     {
                                         Id = 201,
-                                        StreamType = 1,
+                                        StreamType = GetMediaMetaDataStreamType.Video,
                                         Default = true,
                                         Codec = "h264",
                                         Index = 0,
@@ -123,9 +123,9 @@ namespace PlexApi.UnitTests
             result.Key.ShouldBe(sourceData.Key);
             result.Title.ShouldBe(sourceData.Title);
             result.Summary.ShouldBe(sourceData.Summary);
-            result.Year.ShouldBe(sourceData.Year);
+            result.Year.ShouldBe(sourceData.Year ?? 0);
             result.OriginalTitle.ShouldBe(sourceData.OriginalTitle);
-            result.ChildCount.ShouldBe(sourceData.ChildCount.Value);
+            result.ChildCount.ShouldBe(sourceData.ChildCount);
             result.Studio.ShouldBe(sourceData.Studio);
             result.ContentRating.ShouldBe(sourceData.ContentRating);
 
@@ -143,7 +143,7 @@ namespace PlexApi.UnitTests
                 tolerance: TimeSpan.FromSeconds(1)
             );
             result.UpdatedAt.ShouldBe(
-                DateTimeExtensions.FromUnixTime(sourceData.UpdatedAt),
+                DateTimeExtensions.FromUnixTime(sourceData.UpdatedAt ?? 0),
                 tolerance: TimeSpan.FromSeconds(1)
             );
 
@@ -162,7 +162,7 @@ namespace PlexApi.UnitTests
             result.ParentGuid.ShouldBe(sourceData.ParentGuid);
             result.ParentRatingKey.ShouldBe(sourceData.ParentRatingKey);
             result.AudienceRating.ShouldBe(sourceData.AudienceRating);
-            result.Rating.ShouldBe(sourceData.Rating.Value);
+            result.Rating.ShouldBe(sourceData.Rating);
 
             // Collections
             result.Genre.Count.ShouldBe(sourceData.Genre.Count);
@@ -224,7 +224,7 @@ namespace PlexApi.UnitTests
             {
                 RatingKey = "456",
                 Key = "/library/metadata/456",
-                Type = "show",
+                Type = GetMediaMetaDataType.TvShow,
                 Title = "Test TV Show",
                 Summary = "Test TV show summary",
                 Year = 2020,
@@ -284,9 +284,9 @@ namespace PlexApi.UnitTests
             result.Key.ShouldBe(sourceData.Key);
             result.Title.ShouldBe(sourceData.Title);
             result.Summary.ShouldBe(sourceData.Summary);
-            result.Year.ShouldBe(sourceData.Year);
+            result.Year.ShouldBe(sourceData.Year ?? 0);
             result.OriginalTitle.ShouldBe(sourceData.OriginalTitle);
-            result.ChildCount.ShouldBe(sourceData.ChildCount.Value);
+            result.ChildCount.ShouldBe(sourceData.ChildCount);
             result.Studio.ShouldBe(sourceData.Studio);
             result.ContentRating.ShouldBe(sourceData.ContentRating);
 
@@ -304,7 +304,7 @@ namespace PlexApi.UnitTests
                 tolerance: TimeSpan.FromSeconds(1)
             );
             result.UpdatedAt.ShouldBe(
-                DateTimeExtensions.FromUnixTime(sourceData.UpdatedAt),
+                DateTimeExtensions.FromUnixTime(sourceData.UpdatedAt ?? 0),
                 tolerance: TimeSpan.FromSeconds(1)
             );
 
@@ -319,7 +319,7 @@ namespace PlexApi.UnitTests
             }
 
             result.AudienceRating.ShouldBe(sourceData.AudienceRating);
-            result.Rating.ShouldBe(sourceData.Rating.Value);
+            result.Rating.ShouldBe(sourceData.Rating);
 
             // Collections
             result.Genre.Count.ShouldBe(sourceData.Genre.Count);

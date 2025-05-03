@@ -261,7 +261,7 @@ public record LibraryMediaItemStreamDTO
     /// <summary>
     /// Stream type (1=video, 2=audio, 3=subtitle).
     /// </summary>
-    public required int StreamType { get; set; }
+    public required StreamType StreamType { get; set; }
 
     /// <summary>
     /// Indicates if this stream is default.
@@ -276,7 +276,7 @@ public record LibraryMediaItemStreamDTO
     /// <summary>
     /// Index of the stream.
     /// </summary>
-    public required int Index { get; set; }
+    public required int? Index { get; set; }
 
     /// <summary>
     /// Bitrate of the stream.

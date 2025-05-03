@@ -14,10 +14,10 @@ public static partial class MediaContainerMappers
             Type = data.Type.ToPlexMediaTypeFromPlexApi(),
             Title = data.Title,
             Summary = data.Summary,
-            Year = data.Year,
+            Year = data.Year ?? 0,
             TitleSort = data.Title.ToSortTitle(),
             OriginalTitle = data.OriginalTitle ?? string.Empty,
-            ChildCount = data.ChildCount ?? 0,
+            ChildCount = data.ChildCount,
             Media = data.Media?.Select(x => x.ToItemMediaDTO()).ToList() ?? [],
             Genre = data.Genre?.Select(x => x.ToDTO()).ToList() ?? [],
             Country = data.Country?.Select(x => x.ToDTO()).ToList() ?? [],
@@ -29,11 +29,11 @@ public static partial class MediaContainerMappers
             Duration = data.Duration / 1000,
             Thumb = data.Thumb,
             Art = data.Art,
-            Theme = data.Theme ?? string.Empty,
+            Theme = data.Theme,
             Guid = data.Guid,
             AddedAt = DateTimeExtensions.FromUnixTime(data.AddedAt),
-            UpdatedAt = DateTimeExtensions.FromUnixTime(data.UpdatedAt),
-            OriginallyAvailableAt = data.OriginallyAvailableAt?.ToString() ?? string.Empty,
+            UpdatedAt = DateTimeExtensions.FromUnixTime(data.UpdatedAt ?? 0),
+            OriginallyAvailableAt = data.OriginallyAvailableAt.ToString(),
             Ratings = data.Ratings?.Select(x => x.ToDTO()).ToList() ?? [],
             Guids = data.Guids?.Select(x => new MetaDataGuidsDTO { Id = x.Id }).ToList() ?? [],
             GrandparentTitle = data.GrandparentTitle ?? string.Empty,
@@ -41,7 +41,7 @@ public static partial class MediaContainerMappers
             ParentGuid = data.ParentGuid ?? string.Empty,
             ParentRatingKey = data.ParentRatingKey ?? string.Empty,
             AudienceRating = data.AudienceRating,
-            Rating = data.Rating ?? 0,
+            Rating = (float)Math.Round(data.Rating, 2),
         };
     }
 
@@ -101,7 +101,13 @@ public static partial class MediaContainerMappers
         new()
         {
             Id = source.Id,
-            StreamType = source.StreamType,
+            StreamType = source.StreamType switch
+            {
+                GetMediaMetaDataStreamType.Video => Domain.StreamType.Video,
+                GetMediaMetaDataStreamType.Audio => Domain.StreamType.Audio,
+                GetMediaMetaDataStreamType.Subtitle => Domain.StreamType.Subtitle,
+                _ => Domain.StreamType.Unknown,
+            },
             Default = source.Default,
             Codec = source.Codec,
             Index = source.Index,

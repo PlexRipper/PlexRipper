@@ -10,21 +10,13 @@ namespace PlexRipper.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "MediaData",
-                table: "PlexTvShowSeason");
+            migrationBuilder.DropColumn(name: "MediaData", table: "PlexTvShowSeason");
 
-            migrationBuilder.DropColumn(
-                name: "MediaData",
-                table: "PlexTvShows");
+            migrationBuilder.DropColumn(name: "MediaData", table: "PlexTvShows");
 
-            migrationBuilder.DropColumn(
-                name: "MediaData",
-                table: "PlexTvShowEpisodes");
+            migrationBuilder.DropColumn(name: "MediaData", table: "PlexTvShowEpisodes");
 
-            migrationBuilder.DropColumn(
-                name: "MediaData",
-                table: "PlexMovie");
+            migrationBuilder.DropColumn(name: "MediaData", table: "PlexMovie");
 
             migrationBuilder.CreateTable(
                 name: "PlexMovieData",
@@ -48,7 +40,7 @@ namespace PlexRipper.Data.Migrations
                     HasVoiceActivity = table.Column<bool>(type: "INTEGER", nullable: false),
                     PlexLibraryId = table.Column<int>(type: "INTEGER", nullable: false),
                     PlexServerId = table.Column<int>(type: "INTEGER", nullable: false),
-                    PlexMovieId = table.Column<int>(type: "INTEGER", nullable: false)
+                    PlexMovieId = table.Column<int>(type: "INTEGER", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -58,20 +50,24 @@ namespace PlexRipper.Data.Migrations
                         column: x => x.PlexLibraryId,
                         principalTable: "PlexLibraries",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Cascade
+                    );
                     table.ForeignKey(
                         name: "FK_PlexMovieData_PlexMovie_PlexMovieId",
                         column: x => x.PlexMovieId,
                         principalTable: "PlexMovie",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Cascade
+                    );
                     table.ForeignKey(
                         name: "FK_PlexMovieData_PlexServers_PlexServerId",
                         column: x => x.PlexServerId,
                         principalTable: "PlexServers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
+                        onDelete: ReferentialAction.Cascade
+                    );
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "PlexTvShowEpisodeData",
@@ -95,7 +91,7 @@ namespace PlexRipper.Data.Migrations
                     HasVoiceActivity = table.Column<bool>(type: "INTEGER", nullable: false),
                     PlexLibraryId = table.Column<int>(type: "INTEGER", nullable: false),
                     PlexServerId = table.Column<int>(type: "INTEGER", nullable: false),
-                    PlexTvShowEpisodeId = table.Column<int>(type: "INTEGER", nullable: false)
+                    PlexTvShowEpisodeId = table.Column<int>(type: "INTEGER", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -105,20 +101,24 @@ namespace PlexRipper.Data.Migrations
                         column: x => x.PlexLibraryId,
                         principalTable: "PlexLibraries",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Cascade
+                    );
                     table.ForeignKey(
                         name: "FK_PlexTvShowEpisodeData_PlexServers_PlexServerId",
                         column: x => x.PlexServerId,
                         principalTable: "PlexServers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Cascade
+                    );
                     table.ForeignKey(
                         name: "FK_PlexTvShowEpisodeData_PlexTvShowEpisodes_PlexTvShowEpisodeId",
                         column: x => x.PlexTvShowEpisodeId,
                         principalTable: "PlexTvShowEpisodes",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
+                        onDelete: ReferentialAction.Cascade
+                    );
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "PlexMovieDataParts",
@@ -139,7 +139,7 @@ namespace PlexRipper.Data.Migrations
                     PlexLibraryId = table.Column<int>(type: "INTEGER", nullable: false),
                     PlexServerId = table.Column<int>(type: "INTEGER", nullable: false),
                     PlexMovieId = table.Column<int>(type: "INTEGER", nullable: false),
-                    PlexMovieMediaDataId = table.Column<int>(type: "INTEGER", nullable: false)
+                    PlexMovieMediaDataId = table.Column<int>(type: "INTEGER", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -149,26 +149,31 @@ namespace PlexRipper.Data.Migrations
                         column: x => x.PlexLibraryId,
                         principalTable: "PlexLibraries",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Cascade
+                    );
                     table.ForeignKey(
                         name: "FK_PlexMovieDataParts_PlexMovieData_PlexMovieMediaDataId",
                         column: x => x.PlexMovieMediaDataId,
                         principalTable: "PlexMovieData",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Cascade
+                    );
                     table.ForeignKey(
                         name: "FK_PlexMovieDataParts_PlexMovie_PlexMovieId",
                         column: x => x.PlexMovieId,
                         principalTable: "PlexMovie",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Cascade
+                    );
                     table.ForeignKey(
                         name: "FK_PlexMovieDataParts_PlexServers_PlexServerId",
                         column: x => x.PlexServerId,
                         principalTable: "PlexServers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
+                        onDelete: ReferentialAction.Cascade
+                    );
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "PlexTvShowEpisodeDataParts",
@@ -189,7 +194,7 @@ namespace PlexRipper.Data.Migrations
                     PlexLibraryId = table.Column<int>(type: "INTEGER", nullable: false),
                     PlexServerId = table.Column<int>(type: "INTEGER", nullable: false),
                     PlexTvShowEpisodeId = table.Column<int>(type: "INTEGER", nullable: false),
-                    PlexTvShowEpisodeMediaDataId = table.Column<int>(type: "INTEGER", nullable: false)
+                    PlexTvShowEpisodeMediaDataId = table.Column<int>(type: "INTEGER", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -199,26 +204,31 @@ namespace PlexRipper.Data.Migrations
                         column: x => x.PlexLibraryId,
                         principalTable: "PlexLibraries",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Cascade
+                    );
                     table.ForeignKey(
                         name: "FK_PlexTvShowEpisodeDataParts_PlexServers_PlexServerId",
                         column: x => x.PlexServerId,
                         principalTable: "PlexServers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Cascade
+                    );
                     table.ForeignKey(
                         name: "FK_PlexTvShowEpisodeDataParts_PlexTvShowEpisodeData_PlexTvShowEpisodeMediaDataId",
                         column: x => x.PlexTvShowEpisodeMediaDataId,
                         principalTable: "PlexTvShowEpisodeData",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Cascade
+                    );
                     table.ForeignKey(
                         name: "FK_PlexTvShowEpisodeDataParts_PlexTvShowEpisodes_PlexTvShowEpisodeId",
                         column: x => x.PlexTvShowEpisodeId,
                         principalTable: "PlexTvShowEpisodes",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
+                        onDelete: ReferentialAction.Cascade
+                    );
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "PlexMovieDataStreams",
@@ -275,7 +285,7 @@ namespace PlexRipper.Data.Migrations
                     PlexServerId = table.Column<int>(type: "INTEGER", nullable: false),
                     PlexMovieId = table.Column<int>(type: "INTEGER", nullable: false),
                     PlexMovieMediaDataId = table.Column<int>(type: "INTEGER", nullable: false),
-                    PlexMovieMediaDataPartId = table.Column<int>(type: "INTEGER", nullable: false)
+                    PlexMovieMediaDataPartId = table.Column<int>(type: "INTEGER", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -285,32 +295,38 @@ namespace PlexRipper.Data.Migrations
                         column: x => x.PlexLibraryId,
                         principalTable: "PlexLibraries",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Cascade
+                    );
                     table.ForeignKey(
                         name: "FK_PlexMovieDataStreams_PlexMovieDataParts_PlexMovieMediaDataPartId",
                         column: x => x.PlexMovieMediaDataPartId,
                         principalTable: "PlexMovieDataParts",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Cascade
+                    );
                     table.ForeignKey(
                         name: "FK_PlexMovieDataStreams_PlexMovieData_PlexMovieMediaDataId",
                         column: x => x.PlexMovieMediaDataId,
                         principalTable: "PlexMovieData",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Cascade
+                    );
                     table.ForeignKey(
                         name: "FK_PlexMovieDataStreams_PlexMovie_PlexMovieId",
                         column: x => x.PlexMovieId,
                         principalTable: "PlexMovie",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Cascade
+                    );
                     table.ForeignKey(
                         name: "FK_PlexMovieDataStreams_PlexServers_PlexServerId",
                         column: x => x.PlexServerId,
                         principalTable: "PlexServers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
+                        onDelete: ReferentialAction.Cascade
+                    );
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "PlexTvShowEpisodeDataStreams",
@@ -367,7 +383,7 @@ namespace PlexRipper.Data.Migrations
                     PlexServerId = table.Column<int>(type: "INTEGER", nullable: false),
                     PlexTvShowEpisodeId = table.Column<int>(type: "INTEGER", nullable: false),
                     PlexTvShowEpisodeMediaDataId = table.Column<int>(type: "INTEGER", nullable: false),
-                    PlexTvShowEpisodeMediaDataPartId = table.Column<int>(type: "INTEGER", nullable: false)
+                    PlexTvShowEpisodeMediaDataPartId = table.Column<int>(type: "INTEGER", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -377,202 +393,230 @@ namespace PlexRipper.Data.Migrations
                         column: x => x.PlexLibraryId,
                         principalTable: "PlexLibraries",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Cascade
+                    );
                     table.ForeignKey(
                         name: "FK_PlexTvShowEpisodeDataStreams_PlexServers_PlexServerId",
                         column: x => x.PlexServerId,
                         principalTable: "PlexServers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Cascade
+                    );
                     table.ForeignKey(
                         name: "FK_PlexTvShowEpisodeDataStreams_PlexTvShowEpisodeDataParts_PlexTvShowEpisodeMediaDataPartId",
                         column: x => x.PlexTvShowEpisodeMediaDataPartId,
                         principalTable: "PlexTvShowEpisodeDataParts",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Cascade
+                    );
                     table.ForeignKey(
                         name: "FK_PlexTvShowEpisodeDataStreams_PlexTvShowEpisodeData_PlexTvShowEpisodeMediaDataId",
                         column: x => x.PlexTvShowEpisodeMediaDataId,
                         principalTable: "PlexTvShowEpisodeData",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Cascade
+                    );
                     table.ForeignKey(
                         name: "FK_PlexTvShowEpisodeDataStreams_PlexTvShowEpisodes_PlexTvShowEpisodeId",
                         column: x => x.PlexTvShowEpisodeId,
                         principalTable: "PlexTvShowEpisodes",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
+                        onDelete: ReferentialAction.Cascade
+                    );
+                }
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexMovieData_PlexLibraryId",
                 table: "PlexMovieData",
-                column: "PlexLibraryId");
+                column: "PlexLibraryId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexMovieData_PlexMovieId",
                 table: "PlexMovieData",
-                column: "PlexMovieId");
+                column: "PlexMovieId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexMovieData_PlexServerId",
                 table: "PlexMovieData",
-                column: "PlexServerId");
+                column: "PlexServerId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexMovieDataParts_PlexLibraryId",
                 table: "PlexMovieDataParts",
-                column: "PlexLibraryId");
+                column: "PlexLibraryId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexMovieDataParts_PlexMovieId",
                 table: "PlexMovieDataParts",
-                column: "PlexMovieId");
+                column: "PlexMovieId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexMovieDataParts_PlexMovieMediaDataId",
                 table: "PlexMovieDataParts",
-                column: "PlexMovieMediaDataId");
+                column: "PlexMovieMediaDataId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexMovieDataParts_PlexServerId",
                 table: "PlexMovieDataParts",
-                column: "PlexServerId");
+                column: "PlexServerId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexMovieDataStreams_PlexLibraryId",
                 table: "PlexMovieDataStreams",
-                column: "PlexLibraryId");
+                column: "PlexLibraryId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexMovieDataStreams_PlexMovieId",
                 table: "PlexMovieDataStreams",
-                column: "PlexMovieId");
+                column: "PlexMovieId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexMovieDataStreams_PlexMovieMediaDataId",
                 table: "PlexMovieDataStreams",
-                column: "PlexMovieMediaDataId");
+                column: "PlexMovieMediaDataId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexMovieDataStreams_PlexMovieMediaDataPartId",
                 table: "PlexMovieDataStreams",
-                column: "PlexMovieMediaDataPartId");
+                column: "PlexMovieMediaDataPartId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexMovieDataStreams_PlexServerId",
                 table: "PlexMovieDataStreams",
-                column: "PlexServerId");
+                column: "PlexServerId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexTvShowEpisodeData_PlexLibraryId",
                 table: "PlexTvShowEpisodeData",
-                column: "PlexLibraryId");
+                column: "PlexLibraryId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexTvShowEpisodeData_PlexServerId",
                 table: "PlexTvShowEpisodeData",
-                column: "PlexServerId");
+                column: "PlexServerId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexTvShowEpisodeData_PlexTvShowEpisodeId",
                 table: "PlexTvShowEpisodeData",
-                column: "PlexTvShowEpisodeId");
+                column: "PlexTvShowEpisodeId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexTvShowEpisodeDataParts_PlexLibraryId",
                 table: "PlexTvShowEpisodeDataParts",
-                column: "PlexLibraryId");
+                column: "PlexLibraryId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexTvShowEpisodeDataParts_PlexServerId",
                 table: "PlexTvShowEpisodeDataParts",
-                column: "PlexServerId");
+                column: "PlexServerId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexTvShowEpisodeDataParts_PlexTvShowEpisodeId",
                 table: "PlexTvShowEpisodeDataParts",
-                column: "PlexTvShowEpisodeId");
+                column: "PlexTvShowEpisodeId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexTvShowEpisodeDataParts_PlexTvShowEpisodeMediaDataId",
                 table: "PlexTvShowEpisodeDataParts",
-                column: "PlexTvShowEpisodeMediaDataId");
+                column: "PlexTvShowEpisodeMediaDataId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexTvShowEpisodeDataStreams_PlexLibraryId",
                 table: "PlexTvShowEpisodeDataStreams",
-                column: "PlexLibraryId");
+                column: "PlexLibraryId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexTvShowEpisodeDataStreams_PlexServerId",
                 table: "PlexTvShowEpisodeDataStreams",
-                column: "PlexServerId");
+                column: "PlexServerId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexTvShowEpisodeDataStreams_PlexTvShowEpisodeId",
                 table: "PlexTvShowEpisodeDataStreams",
-                column: "PlexTvShowEpisodeId");
+                column: "PlexTvShowEpisodeId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexTvShowEpisodeDataStreams_PlexTvShowEpisodeMediaDataId",
                 table: "PlexTvShowEpisodeDataStreams",
-                column: "PlexTvShowEpisodeMediaDataId");
+                column: "PlexTvShowEpisodeMediaDataId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexTvShowEpisodeDataStreams_PlexTvShowEpisodeMediaDataPartId",
                 table: "PlexTvShowEpisodeDataStreams",
-                column: "PlexTvShowEpisodeMediaDataPartId");
+                column: "PlexTvShowEpisodeMediaDataPartId"
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "PlexMovieDataStreams");
+            migrationBuilder.DropTable(name: "PlexMovieDataStreams");
 
-            migrationBuilder.DropTable(
-                name: "PlexTvShowEpisodeDataStreams");
+            migrationBuilder.DropTable(name: "PlexTvShowEpisodeDataStreams");
 
-            migrationBuilder.DropTable(
-                name: "PlexMovieDataParts");
+            migrationBuilder.DropTable(name: "PlexMovieDataParts");
 
-            migrationBuilder.DropTable(
-                name: "PlexTvShowEpisodeDataParts");
+            migrationBuilder.DropTable(name: "PlexTvShowEpisodeDataParts");
 
-            migrationBuilder.DropTable(
-                name: "PlexMovieData");
+            migrationBuilder.DropTable(name: "PlexMovieData");
 
-            migrationBuilder.DropTable(
-                name: "PlexTvShowEpisodeData");
+            migrationBuilder.DropTable(name: "PlexTvShowEpisodeData");
 
             migrationBuilder.AddColumn<string>(
                 name: "MediaData",
                 table: "PlexTvShowSeason",
                 type: "TEXT",
                 nullable: false,
-                defaultValue: "");
+                defaultValue: ""
+            );
 
             migrationBuilder.AddColumn<string>(
                 name: "MediaData",
                 table: "PlexTvShows",
                 type: "TEXT",
                 nullable: false,
-                defaultValue: "");
+                defaultValue: ""
+            );
 
             migrationBuilder.AddColumn<string>(
                 name: "MediaData",
                 table: "PlexTvShowEpisodes",
                 type: "TEXT",
                 nullable: false,
-                defaultValue: "");
+                defaultValue: ""
+            );
 
             migrationBuilder.AddColumn<string>(
                 name: "MediaData",
                 table: "PlexMovie",
                 type: "TEXT",
                 nullable: false,
-                defaultValue: "");
+                defaultValue: ""
+            );
         }
     }
 }

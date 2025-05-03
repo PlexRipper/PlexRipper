@@ -202,4 +202,124 @@ public static partial class DbContextExtensions
         // If the plexLibraryId is set, we don't need to sort the list again
         return Result.Ok(plexMediaSlimDtos);
     }
+
+    /// <summary>
+    /// Bulk inserts the Plex movies and the movie media data into the database.
+    /// </summary>
+    public static async Task BulkInsertPlexMoviesAsync(
+        this IPlexRipperDbContext context,
+        List<PlexMovie> plexMovies,
+        CancellationToken ct = default
+    )
+    {
+        await context.BulkInsertAsync(plexMovies, BulkConfigPreset.Default, ct);
+
+        // Add movie media data for each movie
+        var mediaData = plexMovies
+            .SelectMany(x =>
+            {
+                x.MediaDataList.SetRelationshipIds(x.PlexServerId, x.PlexLibraryId, x.Id);
+                return x.MediaDataList;
+            })
+            .ToList();
+
+        await context.BulkInsertAsync(mediaData, BulkConfigPreset.Default, ct);
+
+        // Add movie media data parts for each media data
+        var parts = mediaData
+            .SelectMany(x =>
+            {
+                x.Parts.SetRelationshipIds(x.PlexServerId, x.PlexLibraryId, x.PlexMovieId, x.Id);
+                return x.Parts;
+            })
+            .ToList();
+        await context.BulkInsertAsync(parts, BulkConfigPreset.Default, ct);
+
+        // Add movie media data streams for each part
+        var streams = parts
+            .SelectMany(x =>
+            {
+                x.Streams.SetRelationshipIds(
+                    x.PlexServerId,
+                    x.PlexLibraryId,
+                    x.PlexMovieId,
+                    x.PlexMovieMediaDataId,
+                    x.Id
+                );
+                return x.Streams;
+            })
+            .ToList();
+        await context.BulkInsertAsync(streams, BulkConfigPreset.Default, ct);
+    }
+
+    /// <summary>
+    /// Bulk inserts the Plex tv-shows and the movie media data into the database.
+    /// </summary>
+    public static async Task BulkInsertPlexTvShowsAsync(
+        this IPlexRipperDbContext context,
+        List<PlexTvShow> plexTvShows,
+        CancellationToken ct = default
+    )
+    {
+        await context.BulkInsertAsync(plexTvShows, BulkConfigPreset.Default, ct);
+
+        // Add tv-show media data for each tv-show
+        var seasons = plexTvShows
+            .SelectMany(x =>
+            {
+                x.Seasons.SetRelationshipIds(x.PlexServerId, x.PlexLibraryId, x.Id);
+                return x.Seasons;
+            })
+            .ToList();
+
+        await context.BulkInsertAsync(seasons, BulkConfigPreset.Default, ct);
+
+        // Add tv-show media data for each tv-show
+        var episodes = seasons
+            .SelectMany(x =>
+            {
+                x.Episodes.SetRelationshipIds(x.PlexServerId, x.PlexLibraryId, x.TvShowId, x.Id);
+                return x.Episodes;
+            })
+            .ToList();
+
+        await context.BulkInsertAsync(episodes, BulkConfigPreset.Default, ct);
+
+        // Add tv-show media data for each tv-show
+        var mediaData = episodes
+            .SelectMany(x =>
+            {
+                x.MediaDataList.SetRelationshipIds(x.PlexServerId, x.PlexLibraryId, x.Id);
+                return x.MediaDataList;
+            })
+            .ToList();
+
+        await context.BulkInsertAsync(mediaData, BulkConfigPreset.Default, ct);
+
+        // Add tv-show media data parts for each media data
+        var parts = mediaData
+            .SelectMany(x =>
+            {
+                x.Parts.SetRelationshipIds(x.PlexServerId, x.PlexLibraryId, x.PlexTvShowEpisodeId, x.Id);
+                return x.Parts;
+            })
+            .ToList();
+        await context.BulkInsertAsync(parts, BulkConfigPreset.Default, ct);
+
+        // Add tv-show media data streams for each part
+        var streams = parts
+            .SelectMany(x =>
+            {
+                x.Streams.SetRelationshipIds(
+                    x.PlexServerId,
+                    x.PlexLibraryId,
+                    x.PlexTvShowEpisodeId,
+                    x.PlexTvShowEpisodeMediaDataId,
+                    x.Id
+                );
+                return x.Streams;
+            })
+            .ToList();
+        await context.BulkInsertAsync(streams, BulkConfigPreset.Default, ct);
+    }
 }

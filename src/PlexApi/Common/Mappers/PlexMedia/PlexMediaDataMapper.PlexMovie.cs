@@ -27,7 +27,6 @@ public static partial class PlexMediaDataMapper
             ChildCount = source.ChildCount,
             AddedAt = source.AddedAt,
             UpdatedAt = source.UpdatedAt,
-            MediaDataList = source.Media.ToMovieMediaDataList(),
 
             Type = PlexMediaType.None,
             Key = int.Parse(source.RatingKey),
@@ -44,6 +43,7 @@ public static partial class PlexMediaDataMapper
             Countries = source.Country.ToPlexCountry(),
             Roles = source.Role.ToPlexRole(),
             Genres = source.Genre.ToPlexGenre(),
+            MediaDataList = source.Media.ToMovieMediaDataList(),
 
             // Ignore the following
             FullTitle = string.Empty,

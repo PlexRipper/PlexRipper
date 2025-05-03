@@ -1,5 +1,5 @@
-#region
-
+using Data.Contracts;
+using EFCore.BulkExtensions;
 using Logging.Interface;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -7,8 +7,6 @@ using Microsoft.Extensions.Logging;
 using NaturalSort.Extension;
 using PlexRipper.Data;
 using PlexRipper.Identity;
-
-#endregion
 
 namespace PlexRipper.BaseTests;
 
@@ -338,20 +336,17 @@ public static partial class MockDatabase
         var plexLibraries = context.PlexLibraries.Where(x => x.Type == PlexMediaType.Movie).ToList();
         plexLibraries.ShouldNotBeNull().ShouldNotBeEmpty();
 
+        var movieList = new List<PlexMovie>();
+
+        // Add movies for each library
         foreach (var plexLibrary in plexLibraries)
         {
             var movies = FakeData.GetPlexMovies(seed, options).Generate(config.MovieCount);
-
-            foreach (var movie in movies)
-            {
-                movie.PlexLibraryId = plexLibrary.Id;
-                movie.PlexServerId = plexLibrary.PlexServerId;
-            }
-
-            context.PlexMovies.AddRange(movies);
+            movies.SetRelationshipIds(plexLibrary.PlexServerId, plexLibrary.Id);
+            movieList.AddRange(movies);
         }
 
-        await context.SaveChangesAsync();
+        await context.BulkInsertPlexMoviesAsync(movieList);
 
         _log.Here()
             .Debug(
@@ -375,35 +370,16 @@ public static partial class MockDatabase
         var plexLibraries = context.PlexLibraries.Where(x => x.Type == PlexMediaType.TvShow).ToList();
         plexLibraries.ShouldNotBeNull().ShouldNotBeEmpty();
 
+        var tvShowList = new List<PlexTvShow>();
         foreach (var plexLibrary in plexLibraries)
         {
             var tvShows = FakeData.GetPlexTvShows(seed, options).Generate(config.TvShowCount);
+            tvShows.SetRelationshipIds(plexLibrary.PlexServerId, plexLibrary.Id);
 
-            foreach (var tvShow in tvShows)
-            {
-                tvShow.PlexLibraryId = plexLibrary.Id;
-                tvShow.PlexServerId = plexLibrary.PlexServerId;
-
-                foreach (var season in tvShow.Seasons)
-                {
-                    season.TvShow = tvShow;
-                    season.PlexLibraryId = plexLibrary.Id;
-                    season.PlexServerId = plexLibrary.PlexServerId;
-
-                    foreach (var episode in season.Episodes)
-                    {
-                        episode.TvShow = tvShow;
-                        episode.TvShowSeason = season;
-                        episode.PlexLibraryId = plexLibrary.Id;
-                        episode.PlexServerId = plexLibrary.PlexServerId;
-                    }
-                }
-            }
-
-            context.PlexTvShows.AddRange(tvShows);
+            tvShowList.AddRange(tvShows);
         }
 
-        await context.SaveChangesAsync();
+        await context.BulkInsertPlexTvShowsAsync(tvShowList);
 
         _log.Here()
             .Debug(

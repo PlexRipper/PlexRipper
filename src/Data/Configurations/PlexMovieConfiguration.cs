@@ -33,7 +33,6 @@ public class PlexMovieConfiguration : IEntityTypeConfiguration<PlexMovie>
                 r => r.HasOne<PlexMovie>().WithMany().HasForeignKey(e => e.PlexMovieId)
             );
 
-        // Configure one-to-many relationship with MediaDataList
         builder
             .HasMany(x => x.MediaDataList)
             .WithOne(x => x.PlexMovie)

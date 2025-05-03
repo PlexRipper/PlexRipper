@@ -45,6 +45,10 @@ public sealed class PlexRipperDbContext : DbContext, IPlexRipperDbContext, IPlex
 
     public DbSet<PlexMovieMediaData> PlexMovieData { get; set; }
 
+    public DbSet<PlexMovieMediaDataPart> PlexMovieDataParts { get; set; }
+
+    public DbSet<PlexMovieMediaDataStream> PlexMovieDataStreams { get; set; }
+
     #endregion
 
     #region PlexTvShow
@@ -56,6 +60,10 @@ public sealed class PlexRipperDbContext : DbContext, IPlexRipperDbContext, IPlex
     public DbSet<PlexTvShowEpisode> PlexTvShowEpisodes { get; set; }
 
     public DbSet<PlexTvShowEpisodeMediaData> PlexTvShowEpisodeData { get; set; }
+
+    public DbSet<PlexTvShowEpisodeMediaDataPart> PlexTvShowEpisodeDataParts { get; set; }
+
+    public DbSet<PlexTvShowEpisodeMediaDataStream> PlexTvShowEpisodeDataStreams { get; set; }
 
     #endregion
 

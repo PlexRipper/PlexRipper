@@ -63,6 +63,13 @@ public interface IPlexRipperDbContext : IDisposable
 
     DbSet<PlexTvShowEpisodeMediaData> PlexTvShowEpisodeData { get; set; }
 
+    DbSet<PlexMovieMediaDataPart> PlexMovieDataParts { get; set; }
+
+    DbSet<PlexMovieMediaDataStream> PlexMovieDataStreams { get; set; }
+
+    DbSet<PlexTvShowEpisodeMediaDataPart> PlexTvShowEpisodeDataParts { get; set; }
+    DbSet<PlexTvShowEpisodeMediaDataStream> PlexTvShowEpisodeDataStreams { get; set; }
+
     public EntityEntry Entry(object entity);
 
     public int SaveChanges();

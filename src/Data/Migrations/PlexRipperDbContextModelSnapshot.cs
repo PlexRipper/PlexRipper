@@ -462,6 +462,51 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("QRTZ_TRIGGERS", (string)null);
                 });
 
+            modelBuilder.Entity("PlexLibraryCountries", b =>
+                {
+                    b.Property<int>("CountriesId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PlexLibrariesId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("CountriesId", "PlexLibrariesId");
+
+                    b.HasIndex("PlexLibrariesId");
+
+                    b.ToTable("PlexLibraryCountries");
+                });
+
+            modelBuilder.Entity("PlexLibraryGenres", b =>
+                {
+                    b.Property<int>("GenresId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PlexLibrariesId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("GenresId", "PlexLibrariesId");
+
+                    b.HasIndex("PlexLibrariesId");
+
+                    b.ToTable("PlexLibraryGenres");
+                });
+
+            modelBuilder.Entity("PlexLibraryRoles", b =>
+                {
+                    b.Property<int>("PlexLibrariesId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("RolesId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("PlexLibrariesId", "RolesId");
+
+                    b.HasIndex("RolesId");
+
+                    b.ToTable("PlexLibraryRoles");
+                });
+
             modelBuilder.Entity("PlexRipper.Domain.DownloadTaskBase", b =>
                 {
                     b.Property<Guid>("Id")
@@ -776,12 +821,17 @@ namespace PlexRipper.Data.Migrations
                     b.Property<string>("AuthenticationToken")
                         .IsRequired()
                         .HasColumnType("TEXT")
-                        .HasColumnOrder(13);
+                        .HasColumnOrder(14);
 
                     b.Property<string>("ClientId")
                         .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(9);
+
+                    b.Property<string>("CustomAuthenticationToken")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(13);
 
                     b.Property<string>("DisplayName")
                         .IsRequired()
@@ -898,6 +948,50 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("PlexAccountServers");
                 });
 
+            modelBuilder.Entity("PlexRipper.Domain.PlexCountry", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(0);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("PlexKey")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("PlexCountries");
+                });
+
+            modelBuilder.Entity("PlexRipper.Domain.PlexGenre", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(0);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("PlexKey")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("PlexGenres");
+                });
+
             modelBuilder.Entity("PlexRipper.Domain.PlexLibrary", b =>
                 {
                     b.Property<int>("Id")
@@ -905,7 +999,7 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(0);
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<DateTime?>("CreatedAt")
                         .HasColumnType("TEXT")
                         .HasColumnOrder(5);
 
@@ -932,7 +1026,7 @@ namespace PlexRipper.Data.Migrations
                     b.Property<int>("PlexServerId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTime>("ScannedAt")
+                    b.Property<DateTime?>("ScannedAt")
                         .HasColumnType("TEXT")
                         .HasColumnOrder(7);
 
@@ -961,7 +1055,7 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnOrder(1);
 
-                    b.Property<DateTime>("UpdatedAt")
+                    b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("TEXT")
                         .HasColumnOrder(6);
 
@@ -1028,10 +1122,6 @@ namespace PlexRipper.Data.Migrations
                     b.Property<bool>("HasArt")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(19);
-
-                    b.Property<bool>("HasBanner")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(20);
 
                     b.Property<bool>("HasTheme")
                         .HasColumnType("INTEGER")
@@ -1112,6 +1202,88 @@ namespace PlexRipper.Data.Migrations
                     b.HasIndex("SortIndex");
 
                     b.ToTable("PlexMovie");
+                });
+
+            modelBuilder.Entity("PlexRipper.Domain.PlexMovieCountries", b =>
+                {
+                    b.Property<int>("CountryId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(1);
+
+                    b.Property<int>("PlexMovieId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(3);
+
+                    b.Property<int>("PlexLibraryId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(2);
+
+                    b.HasKey("CountryId", "PlexMovieId");
+
+                    b.HasIndex("PlexMovieId");
+
+                    b.ToTable("PlexMovieCountries");
+                });
+
+            modelBuilder.Entity("PlexRipper.Domain.PlexMovieGenres", b =>
+                {
+                    b.Property<int>("GenresId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(1);
+
+                    b.Property<int>("PlexMovieId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(3);
+
+                    b.Property<int>("PlexLibraryId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(2);
+
+                    b.HasKey("GenresId", "PlexMovieId");
+
+                    b.HasIndex("PlexMovieId");
+
+                    b.ToTable("PlexMovieGenres");
+                });
+
+            modelBuilder.Entity("PlexRipper.Domain.PlexMovieRoles", b =>
+                {
+                    b.Property<int>("PlexMovieId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(3);
+
+                    b.Property<int>("RolesId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(1);
+
+                    b.Property<int>("PlexLibraryId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(2);
+
+                    b.HasKey("PlexMovieId", "RolesId");
+
+                    b.HasIndex("RolesId");
+
+                    b.ToTable("PlexMovieRoles");
+                });
+
+            modelBuilder.Entity("PlexRipper.Domain.PlexRole", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(0);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("PlexRoles");
                 });
 
             modelBuilder.Entity("PlexRipper.Domain.PlexServer", b =>
@@ -1379,10 +1551,6 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(19);
 
-                    b.Property<bool>("HasBanner")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(20);
-
                     b.Property<bool>("HasTheme")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(21);
@@ -1464,6 +1632,27 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("PlexTvShows");
                 });
 
+            modelBuilder.Entity("PlexRipper.Domain.PlexTvShowCountries", b =>
+                {
+                    b.Property<int>("CountryId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(1);
+
+                    b.Property<int>("PlexTvShowId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(3);
+
+                    b.Property<int>("PlexLibraryId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(2);
+
+                    b.HasKey("CountryId", "PlexTvShowId");
+
+                    b.HasIndex("PlexTvShowId");
+
+                    b.ToTable("PlexTvShowCountries");
+                });
+
             modelBuilder.Entity("PlexRipper.Domain.PlexTvShowEpisode", b =>
                 {
                     b.Property<int>("Id")
@@ -1513,10 +1702,6 @@ namespace PlexRipper.Data.Migrations
                     b.Property<bool>("HasArt")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(19);
-
-                    b.Property<bool>("HasBanner")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(20);
 
                     b.Property<bool>("HasTheme")
                         .HasColumnType("INTEGER")
@@ -1615,6 +1800,48 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("PlexTvShowEpisodes");
                 });
 
+            modelBuilder.Entity("PlexRipper.Domain.PlexTvShowGenres", b =>
+                {
+                    b.Property<int>("GenresId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(1);
+
+                    b.Property<int>("PlexTvShowId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(3);
+
+                    b.Property<int>("PlexLibraryId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(2);
+
+                    b.HasKey("GenresId", "PlexTvShowId");
+
+                    b.HasIndex("PlexTvShowId");
+
+                    b.ToTable("PlexTvShowGenres");
+                });
+
+            modelBuilder.Entity("PlexRipper.Domain.PlexTvShowRoles", b =>
+                {
+                    b.Property<int>("PlexTvShowId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(3);
+
+                    b.Property<int>("RolesId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(1);
+
+                    b.Property<int>("PlexLibraryId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(2);
+
+                    b.HasKey("PlexTvShowId", "RolesId");
+
+                    b.HasIndex("RolesId");
+
+                    b.ToTable("PlexTvShowRoles");
+                });
+
             modelBuilder.Entity("PlexRipper.Domain.PlexTvShowSeason", b =>
                 {
                     b.Property<int>("Id")
@@ -1664,10 +1891,6 @@ namespace PlexRipper.Data.Migrations
                     b.Property<bool>("HasArt")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(19);
-
-                    b.Property<bool>("HasBanner")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(20);
 
                     b.Property<bool>("HasTheme")
                         .HasColumnType("INTEGER")
@@ -1947,6 +2170,51 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("JobDetail");
                 });
 
+            modelBuilder.Entity("PlexLibraryCountries", b =>
+                {
+                    b.HasOne("PlexRipper.Domain.PlexCountry", null)
+                        .WithMany()
+                        .HasForeignKey("CountriesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PlexRipper.Domain.PlexLibrary", null)
+                        .WithMany()
+                        .HasForeignKey("PlexLibrariesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("PlexLibraryGenres", b =>
+                {
+                    b.HasOne("PlexRipper.Domain.PlexGenre", null)
+                        .WithMany()
+                        .HasForeignKey("GenresId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PlexRipper.Domain.PlexLibrary", null)
+                        .WithMany()
+                        .HasForeignKey("PlexLibrariesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("PlexLibraryRoles", b =>
+                {
+                    b.HasOne("PlexRipper.Domain.PlexLibrary", null)
+                        .WithMany()
+                        .HasForeignKey("PlexLibrariesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PlexRipper.Domain.PlexRole", null)
+                        .WithMany()
+                        .HasForeignKey("RolesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("PlexRipper.Domain.DownloadTaskBase", b =>
                 {
                     b.HasOne("PlexRipper.Domain.PlexLibrary", "PlexLibrary")
@@ -2079,6 +2347,51 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("PlexServer");
                 });
 
+            modelBuilder.Entity("PlexRipper.Domain.PlexMovieCountries", b =>
+                {
+                    b.HasOne("PlexRipper.Domain.PlexCountry", null)
+                        .WithMany()
+                        .HasForeignKey("CountryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PlexRipper.Domain.PlexMovie", null)
+                        .WithMany()
+                        .HasForeignKey("PlexMovieId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("PlexRipper.Domain.PlexMovieGenres", b =>
+                {
+                    b.HasOne("PlexRipper.Domain.PlexGenre", null)
+                        .WithMany()
+                        .HasForeignKey("GenresId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PlexRipper.Domain.PlexMovie", null)
+                        .WithMany()
+                        .HasForeignKey("PlexMovieId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("PlexRipper.Domain.PlexMovieRoles", b =>
+                {
+                    b.HasOne("PlexRipper.Domain.PlexMovie", null)
+                        .WithMany()
+                        .HasForeignKey("PlexMovieId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PlexRipper.Domain.PlexRole", null)
+                        .WithMany()
+                        .HasForeignKey("RolesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("PlexRipper.Domain.PlexServerConnection", b =>
                 {
                     b.HasOne("PlexRipper.Domain.PlexServer", "PlexServer")
@@ -2093,8 +2406,8 @@ namespace PlexRipper.Data.Migrations
             modelBuilder.Entity("PlexRipper.Domain.PlexServerStatus", b =>
                 {
                     b.HasOne("PlexRipper.Domain.PlexServerConnection", "PlexServerConnection")
-                        .WithMany("PlexServerStatus")
-                        .HasForeignKey("PlexServerConnectionId")
+                        .WithOne("LatestConnectionStatus")
+                        .HasForeignKey("PlexRipper.Domain.PlexServerStatus", "PlexServerConnectionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -2126,6 +2439,21 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("PlexLibrary");
 
                     b.Navigation("PlexServer");
+                });
+
+            modelBuilder.Entity("PlexRipper.Domain.PlexTvShowCountries", b =>
+                {
+                    b.HasOne("PlexRipper.Domain.PlexCountry", null)
+                        .WithMany()
+                        .HasForeignKey("CountryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PlexRipper.Domain.PlexTvShow", null)
+                        .WithMany()
+                        .HasForeignKey("PlexTvShowId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("PlexRipper.Domain.PlexTvShowEpisode", b =>
@@ -2161,6 +2489,36 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("TvShow");
 
                     b.Navigation("TvShowSeason");
+                });
+
+            modelBuilder.Entity("PlexRipper.Domain.PlexTvShowGenres", b =>
+                {
+                    b.HasOne("PlexRipper.Domain.PlexGenre", null)
+                        .WithMany()
+                        .HasForeignKey("GenresId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PlexRipper.Domain.PlexTvShow", null)
+                        .WithMany()
+                        .HasForeignKey("PlexTvShowId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("PlexRipper.Domain.PlexTvShowRoles", b =>
+                {
+                    b.HasOne("PlexRipper.Domain.PlexTvShow", null)
+                        .WithMany()
+                        .HasForeignKey("PlexTvShowId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PlexRipper.Domain.PlexRole", null)
+                        .WithMany()
+                        .HasForeignKey("RolesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("PlexRipper.Domain.PlexTvShowSeason", b =>
@@ -2289,7 +2647,7 @@ namespace PlexRipper.Data.Migrations
 
             modelBuilder.Entity("PlexRipper.Domain.PlexServerConnection", b =>
                 {
-                    b.Navigation("PlexServerStatus");
+                    b.Navigation("LatestConnectionStatus");
                 });
 
             modelBuilder.Entity("PlexRipper.Domain.PlexTvShow", b =>

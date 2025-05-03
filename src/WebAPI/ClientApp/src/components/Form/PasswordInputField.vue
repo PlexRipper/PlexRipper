@@ -1,6 +1,7 @@
 <template>
 	<q-input
 		v-model="model"
+		lazy-rules
 		:rules="disableValidation ? [(v: string): boolean | string =>
 			!!v || t('components.password-input-field.validation.password-is-required')] : getPasswordRules"
 		color="red"

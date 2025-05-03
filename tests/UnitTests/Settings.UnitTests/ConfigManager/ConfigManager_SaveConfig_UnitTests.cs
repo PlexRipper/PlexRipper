@@ -2,7 +2,6 @@
 using System.Reactive.Subjects;
 using Autofac;
 using Environment;
-using FileSystem.Contracts;
 using Logging.Interface;
 using PlexRipper.Settings;
 using Settings.Contracts;

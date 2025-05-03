@@ -1,10 +1,26 @@
-using System.Text.Json;
+using System.Diagnostics.CodeAnalysis;
 using Application.Contracts;
+using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 
 namespace PlexRipper.Application;
 
-public class GetAllBackgroundJobsEndpoint : BaseEndpointWithoutRequest<List<JobStatusUpdateDTO>>
+public record GetAllBackgroundJobsEndpointRequest
+{
+    /// <summary>
+    /// NOTE: This constructor is needed to make the query param optional in the front-end typescript-api generation.
+    /// </summary>
+    [SetsRequiredMembers]
+    public GetAllBackgroundJobsEndpointRequest(bool useMockData = false)
+    {
+        UseMockData = useMockData;
+    }
+
+    [QueryParam, BindFrom("UseMockData")]
+    public required bool UseMockData { get; init; }
+}
+
+public class GetAllBackgroundJobsEndpoint : BaseEndpoint<GetAllBackgroundJobsEndpointRequest, List<JobStatusUpdateDTO>>
 {
     private readonly ISchedulerService _schedulerService;
 
@@ -24,11 +40,18 @@ public class GetAllBackgroundJobsEndpoint : BaseEndpointWithoutRequest<List<JobS
         );
     }
 
-    public override async Task HandleAsync(CancellationToken ct)
+    public override async Task HandleAsync(GetAllBackgroundJobsEndpointRequest req, CancellationToken ct)
     {
-        var result = await _schedulerService.GetRunningJobUpdates();
+        if (req.UseMockData)
+        {
+            await SendFluentResult(Result.Ok(MockData()), ct);
+        }
+        else
+        {
+            var result = await _schedulerService.GetRunningJobUpdates();
 
-        await SendFluentResult(Result.Ok(result), x => x.ToDTO(), ct);
+            await SendFluentResult(Result.Ok(result), x => x.ToDTO(), ct);
+        }
     }
 
     private List<JobStatusUpdateDTO> MockData()

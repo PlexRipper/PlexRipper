@@ -71,7 +71,7 @@ public record LogMetaData
         var properties = boundProperties?.ToList() ?? new List<LogEventProperty>();
 
         properties.AddRange(
-            new List<LogEventProperty>()
+            new List<LogEventProperty>
             {
                 // This works when each file only has 1 class and is named the same
                 new(nameof(ClassName), new ScalarValue(ClassName)),

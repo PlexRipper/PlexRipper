@@ -73,8 +73,8 @@ public partial class FakePlexApiData
                 }
             )
             .RuleFor(x => x.Local, _ => false)
-            .RuleFor(x => x.Relay, _ => false)
-            .RuleFor(x => x.IPv6, _ => false);
+            .RuleFor(x => x.Relay, f => f.Random.Bool())
+            .RuleFor(x => x.IPv6, f => f.Random.Bool());
     }
 
     #endregion

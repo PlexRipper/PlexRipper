@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using Environment;
 using Logging.Interface;
 using Serilog.Core;
 using Serilog.Events;
@@ -40,6 +41,16 @@ public static class LogManager
         MinimumLogLevel = minimumLogLevel;
         Serilog.Log.Logger = LogConfig.GetLogger();
         _log.Information("Logging level set to {LogLevel}", MinimumLogLevel);
+
+        if (EnvironmentExtensions.IsUnmasked())
+        {
+            _log.Warning(
+                "Environment variable {UnmaskedKey} has been set to true, which means that sensitive data will be shown in the logs!",
+                EnvironmentExtensions.UnmaskedModeKey
+            );
+
+            _log.Warning("This username should be shown: {Username}", "SomeSecretUsername");
+        }
     }
 
     /// <summary>

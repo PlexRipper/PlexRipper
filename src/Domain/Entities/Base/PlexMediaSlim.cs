@@ -68,16 +68,10 @@ public class PlexMediaSlim : BaseEntity
     public required bool HasThumb { get; set; }
 
     /// <summary>
-    /// Gets or sets whether this <see cref="PlexMedia"/> has art.
+    /// Gets or sets whether this <see cref="PlexMedia"/> has art / banner.
     /// </summary>
     [Column(Order = 19)]
     public required bool HasArt { get; init; }
-
-    /// <summary>
-    /// Gets or sets whether this <see cref="PlexMedia"/> has a banner.
-    /// </summary>
-    [Column(Order = 20)]
-    public required bool HasBanner { get; init; }
 
     /// <summary>
     /// Gets or sets whether this <see cref="PlexMedia"/> has a theme.
@@ -85,7 +79,10 @@ public class PlexMediaSlim : BaseEntity
     [Column(Order = 21)]
     public required bool HasTheme { get; init; }
 
-    public required PlexMediaContainer MediaData { get; init; }
+    public required MediaDataContainer MediaData { get; init; }
+
+    [NotMapped]
+    public List<LibraryMediaItemMediaDTO> MetaDataList => MediaData.MediaData;
 
     public required int PlexLibraryId { get; set; }
 
@@ -99,12 +96,8 @@ public class PlexMediaSlim : BaseEntity
     {
         get
         {
-            return MediaData
-                .MediaData.Select(x => new PlexMediaQuality()
-                {
-                    Quality = x.VideoResolution,
-                    HashId = "NotImplementedYet",
-                })
+            return MetaDataList
+                .Select(y => new PlexMediaQuality(y.VideoResolution))
                 .Reverse() // This sorts from lowest to highest quality
                 .TakeLast(1) // TODO:remove this when quality selector for downloading is implemented
                 .ToList();
@@ -118,9 +111,6 @@ public class PlexMediaSlim : BaseEntity
 
     [NotMapped]
     public string ThumbUrl => HasThumb ? $"{MetaDataUrl}/thumb/{MetaDataKey}" : string.Empty;
-
-    [NotMapped]
-    public string BannerUrl => HasBanner ? $"{MetaDataUrl}/banner/{MetaDataKey}" : string.Empty;
 
     [NotMapped]
     public string FullBannerUrl { get; init; } = string.Empty;

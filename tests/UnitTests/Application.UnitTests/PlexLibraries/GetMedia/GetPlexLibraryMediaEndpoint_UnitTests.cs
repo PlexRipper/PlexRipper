@@ -1,8 +1,5 @@
 using Application.Contracts;
 using Application.Contracts.Validators;
-using Data.Contracts;
-using FastEndpoints;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace PlexRipper.Application.UnitTests;
 
@@ -24,13 +21,13 @@ public class GetPlexLibraryMediaEndpoint_UnitTests : BaseUnitTest<GetPlexLibrary
             {
                 config.PlexServerCount = 1;
                 config.PlexServerConnectionPerServerCount = 1;
-                config.PlexLibraryCount = 1;
+                config.PlexMovieLibraryCount = 1;
                 config.PlexAccountCount = 1;
                 config.MovieCount = movieCount;
             }
         );
 
-        var request = new GetPlexLibraryMediaEndpointRequest()
+        var request = new GetPlexLibraryMediaEndpointRequest
         {
             PlexLibraryId = 1,
             Page = 0,
@@ -66,7 +63,7 @@ public class GetPlexLibraryMediaEndpoint_UnitTests : BaseUnitTest<GetPlexLibrary
             config =>
             {
                 config.PlexServerCount = 1;
-                config.PlexLibraryCount = 1;
+                config.PlexTvShowLibraryCount = 1;
                 config.PlexAccountCount = 1;
                 config.TvShowCount = 100;
                 config.TvShowSeasonCount = 3;
@@ -74,7 +71,7 @@ public class GetPlexLibraryMediaEndpoint_UnitTests : BaseUnitTest<GetPlexLibrary
             }
         );
 
-        var request = new GetPlexLibraryMediaEndpointRequest()
+        var request = new GetPlexLibraryMediaEndpointRequest
         {
             PlexLibraryId = 1,
             Page = 0,

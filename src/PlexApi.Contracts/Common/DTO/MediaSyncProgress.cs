@@ -10,11 +10,11 @@ public record MediaSyncProgress
 
     public required int Received { get; init; }
 
+    public required TimeSpan TimeRemaining { get; init; } = TimeSpan.Zero;
+
     /// <summary>
     /// Gets the percentage of the received items compared to the total items.
     /// E.g: 0.5 = 50%
     /// </summary>
     public decimal Percentage => DataFormat.GetPercentage(Received, Total) / 100;
-
-    public required TimeSpan TimeRemaining { get; init; } = TimeSpan.Zero;
 }

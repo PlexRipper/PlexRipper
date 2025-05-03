@@ -29,21 +29,21 @@ public class PlexLibrary : BaseEntity
     /// NOTE: Value is set by the PlexApi.
     /// </summary>
     [Column(Order = 5)]
-    public required DateTime CreatedAt { get; init; }
+    public required DateTime? CreatedAt { get; init; }
 
     /// <summary>
     /// Gets or sets the last time this <see cref="PlexLibrary"/> was updated by the <see cref="PlexServer"/> owner.
     /// NOTE: Value is set by the PlexApi.
     /// </summary>
     [Column(Order = 6)]
-    public required DateTime UpdatedAt { get; set; }
+    public required DateTime? UpdatedAt { get; set; }
 
     /// <summary>
     /// Gets or sets the last time this <see cref="PlexLibrary"/> was scanned for new media by the <see cref="PlexServer"/> owner.
     /// NOTE: Value is set by the PlexApi.
     /// </summary>
     [Column(Order = 7)]
-    public required DateTime ScannedAt { get; init; }
+    public required DateTime? ScannedAt { get; init; }
 
     /// <summary>
     /// Gets or sets the DateTime this <see cref="PlexLibrary"/> had its media last synced with the PlexApi.
@@ -118,6 +118,12 @@ public class PlexLibrary : BaseEntity
     public List<PlexTvShow> TvShows { get; private set; } = [];
 
     public List<PlexAccountLibrary> PlexAccountLibraries { get; private set; } = [];
+
+    public List<PlexRole> Roles { get; set; } = [];
+
+    public List<PlexGenre> Genres { get; set; } = [];
+
+    public List<PlexCountry> Countries { get; set; } = [];
 
     #endregion
 

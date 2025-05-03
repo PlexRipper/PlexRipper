@@ -8,7 +8,6 @@ using FileSystem.Contracts;
 using Logging.Interface;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
-using PlexApi.Contracts;
 using PlexRipper.Data;
 using Settings.Contracts;
 
@@ -67,8 +66,6 @@ public class BaseContainer : IDisposable
     }
 
     public IDownloadQueue GetDownloadQueue => Resolve<IDownloadQueue>();
-
-    public IPlexApiService GetPlexApiService => Resolve<IPlexApiService>();
 
     public IMediator Mediator => Resolve<IMediator>();
 

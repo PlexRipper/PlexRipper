@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using Application.Contracts;
 using Data.Contracts;
 using FastEndpoints;
@@ -8,17 +7,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application;
 
-public class GetPlexLibraryMediaEndpointRequest
+public record GetPlexLibraryMediaEndpointRequest : PlexMediaFilterQueryRequest
 {
     public int PlexLibraryId { get; init; }
-
-    [QueryParam, BindFrom("page")]
-    [DefaultValue(0)]
-    public int Page { get; init; }
-
-    [QueryParam, BindFrom("size")]
-    [DefaultValue(0)]
-    public int Size { get; init; }
 }
 
 public class GetPlexLibraryMediaEndpointRequestValidator : Validator<GetPlexLibraryMediaEndpointRequest>
@@ -84,12 +75,18 @@ public class GetPlexLibraryMediaEndpoint : BaseEndpoint<GetPlexLibraryMediaEndpo
             plexServerConnection.ToResult().LogError();
 
         var mediaListResult = await _dbContext.GetMediaByType(
-            mediaType: plexLibrary.Type,
-            skip: skip,
-            take: take,
-            plexLibraryId: plexLibrary.Id,
-            filterOfflineMedia: false,
-            filterOwnedMedia: false,
+            new MediaQueryFilter
+            {
+                MediaType = plexLibrary.Type,
+                Skip = skip,
+                Take = take,
+                PlexLibraryId = plexLibrary.Id,
+                FilterOfflineMedia = req.FilterOfflineMedia,
+                FilterOwnedMedia = req.FilterOwnedMedia,
+                CountryId = req.CountryId,
+                RoleId = req.RoleId,
+                GenreId = req.GenreId,
+            },
             ct: ct
         );
 

@@ -56,7 +56,7 @@ public static class DownloadTaskGenericMapper
 
     public static DownloadTaskGeneric ToGeneric(this DownloadTaskMovieFile file)
     {
-        var downloadTaskGeneric = new DownloadTaskGeneric()
+        var downloadTaskGeneric = new DownloadTaskGeneric
         {
             Id = file.Id,
             MediaKey = file.Key,

@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application;
 
-public record SetNotificationVisibilityEndpointRequest()
+public record SetNotificationVisibilityEndpointRequest
 {
     public int Id { get; init; }
 

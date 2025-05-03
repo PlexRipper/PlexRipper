@@ -21,7 +21,7 @@ public class GenerateDownloadTaskMoviesCommandHandler_UnitTests : BaseUnitTest<G
             config =>
             {
                 config.PlexServerCount = 1;
-                config.PlexLibraryCount = 1;
+                config.PlexMovieLibraryCount = 1;
                 config.MovieCount = 5;
             }
         );
@@ -71,7 +71,7 @@ public class GenerateDownloadTaskMoviesCommandHandler_UnitTests : BaseUnitTest<G
             config =>
             {
                 config.PlexServerCount = 1;
-                config.PlexLibraryCount = 1;
+                config.PlexMovieLibraryCount = 1;
                 config.MovieCount = 5;
             }
         );
@@ -116,8 +116,6 @@ public class GenerateDownloadTaskMoviesCommandHandler_UnitTests : BaseUnitTest<G
             9999,
             config =>
             {
-                config.PlexServerCount = 1;
-                config.PlexLibraryCount = 1;
                 config.MovieCount = 2;
                 config.IncludeMultiPartMovies = true;
             }
@@ -142,7 +140,10 @@ public class GenerateDownloadTaskMoviesCommandHandler_UnitTests : BaseUnitTest<G
         // Assert
         result.IsSuccess.ShouldBeTrue();
 
-        var plexDownloadTaskMovies = await IDbContext.DownloadTaskMovie.IncludeAll().ToListAsync();
+        var plexDownloadTaskMovies = await IDbContext
+            .DownloadTaskMovie.IncludeAll()
+            .Include(x => x.Children)
+            .ToListAsync();
 
         plexDownloadTaskMovies.Count.ShouldBe(2);
 

@@ -90,37 +90,6 @@ public static class PlexMediaSlimDTOMapper
 
     #endregion
 
-    #region PlexSeason
-
-    public static IQueryable<PlexMediaSlimDTO> ProjectToMediaSlimDTO(this IQueryable<PlexTvShowSeason> source) =>
-        source.Select(x => ToSlimDTO(x));
-
-    private static PlexMediaSlimDTO ToSlimDTOMapper(this PlexTvShowSeason source) =>
-        new()
-        {
-            Id = source.Id,
-            Title = source.Title,
-            SearchTitle = source.SearchTitle,
-            SortIndex = source.SortIndex,
-            Year = source.Year,
-            Duration = source.Duration,
-            MediaSize = source.MediaSize,
-            ChildCount = source.ChildCount,
-            GrandChildCount = 0,
-            AddedAt = source.AddedAt,
-            UpdatedAt = source.UpdatedAt,
-            PlexLibraryId = source.PlexLibraryId,
-            PlexServerId = source.PlexServerId,
-            Type = source.Type,
-            Key = source.Key,
-            MetaDataKey = source.MetaDataKey,
-            HasThumb = source.HasThumb,
-            Qualities = source.Qualities.ToDTO(),
-            PlexToken = string.Empty,
-        };
-
-    #endregion
-
     #region PlexEpisode
 
     public static PlexMediaSlimDTO ToSlimDTO(this PlexTvShowEpisode source) =>

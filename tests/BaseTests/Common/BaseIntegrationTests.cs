@@ -11,7 +11,7 @@ public class BaseIntegrationTests
     protected BaseIntegrationTests(ITestOutputHelper output, LogEventLevel logLevel = LogEventLevel.Verbose)
     {
         EnvironmentExtensions.SetLogLevel(logLevel);
-        EnvironmentExtensions.SetUnmaskedLogMode(true);
+        EnvironmentExtensions.EnableUnmaskedLog(true);
 
         // Ensure that the test output helper is set first
         LogConfig.SetTestOutputHelper(output);
@@ -20,6 +20,21 @@ public class BaseIntegrationTests
         _log = LogManager.CreateLogInstance(typeof(BaseIntegrationTests));
 
         BogusExtensions.Setup();
+    }
+
+    protected static async Task WaitForDatabaseConditionAsync(
+        Func<bool> condition,
+        int maxRetries = 10,
+        int delayMs = 500
+    )
+    {
+        for (var i = 0; i < maxRetries; i++)
+        {
+            if (condition())
+                return;
+
+            await Task.Delay(delayMs);
+        }
     }
 
     protected Task<BaseContainer> CreateContainer(int seed, Action<UnitTestDataConfig>? options = null) =>

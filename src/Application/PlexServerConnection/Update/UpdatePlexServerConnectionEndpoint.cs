@@ -2,12 +2,11 @@ using Application.Contracts;
 using Data.Contracts;
 using FastEndpoints;
 using FluentValidation;
-using Logging.Interface;
 using Microsoft.AspNetCore.Http;
 
 namespace PlexRipper.Application;
 
-public record UpdatePlexServerConnectionEndpointRequest()
+public record UpdatePlexServerConnectionEndpointRequest
 {
     public required int Id { get; init; }
 
@@ -38,14 +37,12 @@ public class UpdatePlexServerConnectionEndpointRequestValidator : Validator<Upda
 public class UpdatePlexServerConnectionEndpoint
     : BaseEndpoint<UpdatePlexServerConnectionEndpointRequest, ResultDTO<PlexServerConnectionDTO>>
 {
-    private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.PlexServerConnectionController;
 
-    public UpdatePlexServerConnectionEndpoint(ILog log, IPlexRipperDbContext dbContext)
+    public UpdatePlexServerConnectionEndpoint(IPlexRipperDbContext dbContext)
     {
-        _log = log;
         _dbContext = dbContext;
     }
 

@@ -25,17 +25,13 @@ public class GetPlexLibraryByIdEndpointRequestValidator : Validator<GetPlexLibra
 
 public class GetPlexLibraryByIdEndpoint : BaseEndpoint<GetPlexLibraryByIdEndpointRequest, PlexLibraryDTO>
 {
-    private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
-    private readonly IMediator _mediator;
 
     public override string EndpointPath => ApiRoutes.PlexLibraryController + "/{PlexLibraryId}";
 
     public GetPlexLibraryByIdEndpoint(ILog log, IPlexRipperDbContext dbContext, IMediator mediator)
     {
-        _log = log;
         _dbContext = dbContext;
-        _mediator = mediator;
     }
 
     public override void Configure()
@@ -57,21 +53,6 @@ public class GetPlexLibraryByIdEndpoint : BaseEndpoint<GetPlexLibraryByIdEndpoin
         {
             await SendFluentResult(ResultExtensions.EntityNotFound(nameof(plexLibrary), req.PlexLibraryId), ct);
             return;
-        }
-
-        if (plexLibrary.MediaCount == 0)
-        {
-            _log.Information(
-                "PlexLibrary with id {LibraryId} has no media, forcing refresh from the PlexApi",
-                plexLibrary.Id
-            );
-
-            var refreshResult = await _mediator.Send(new RefreshLibraryMediaCommand(plexLibrary.Id), ct);
-            if (refreshResult.IsFailed)
-            {
-                await SendFluentResult(refreshResult.ToResult(), ct);
-                return;
-            }
         }
 
         await SendFluentResult(Result.Ok(plexLibrary), x => x.ToDTO(), ct);

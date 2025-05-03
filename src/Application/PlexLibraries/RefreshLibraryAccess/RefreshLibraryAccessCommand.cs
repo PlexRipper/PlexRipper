@@ -30,19 +30,19 @@ public class RefreshLibraryAccessHandler
     private readonly ILog _log;
     private readonly IMediator _mediator;
     private readonly IPlexRipperDbContext _dbContext;
-    private readonly IPlexApiService _plexServiceApi;
+    private readonly ICommandExecutor _commandDispatcher;
 
     public RefreshLibraryAccessHandler(
         ILog log,
         IMediator mediator,
         IPlexRipperDbContext dbContext,
-        IPlexApiService plexServiceApi
+        ICommandExecutor commandDispatcher
     )
     {
         _log = log;
         _mediator = mediator;
         _dbContext = dbContext;
-        _plexServiceApi = plexServiceApi;
+        _commandDispatcher = commandDispatcher;
     }
 
     public async Task<Result<PlexLibraryAccessRefreshResponse>> Handle(
@@ -53,7 +53,6 @@ public class RefreshLibraryAccessHandler
         var plexAccountId = command.PlexAccountId;
         var plexServerId = command.PlexServerId;
 
-        var plexLibraries = new List<PlexLibrary>();
         var plexServers = new List<PlexServer>();
 
         // Determine the Plex servers to refresh the Plex libraries for
@@ -78,7 +77,7 @@ public class RefreshLibraryAccessHandler
         {
             var plexAccountName = await _dbContext.GetPlexAccountDisplayName(plexAccountId, cancellationToken);
             _log.Warning("No accessible Plex servers found for PlexAccount {PlexAccountName}", plexAccountName);
-            return Result.Ok(new PlexLibraryAccessRefreshResponse() { Reports = [], OfflineServers = [] });
+            return Result.Ok(new PlexLibraryAccessRefreshResponse { Reports = [], OfflineServers = [] });
         }
 
         // Refresh Plex libraries
@@ -100,7 +99,7 @@ public class RefreshLibraryAccessHandler
         if (libraryResults.All(x => x.IsFailed))
             return Result.Merge(libraryResults).ToResult();
 
-        plexLibraries = libraryResults.Where(x => x.IsSuccess).SelectMany(x => x.Value).ToList();
+        var plexLibraries = libraryResults.Where(x => x.IsSuccess).SelectMany(x => x.Value).ToList();
 
         var updateResult = await _mediator.Send(
             new AddOrUpdatePlexLibrariesCommand { PlexAccountId = plexAccountId, PlexLibraries = plexLibraries },
@@ -134,9 +133,8 @@ public class RefreshLibraryAccessHandler
                     plexAccountName
                 );
 
-            var libraries = await _plexServiceApi.GetLibrarySectionsAsync(
-                plexServerId,
-                plexAccountId,
+            var libraries = await _commandDispatcher.Send(
+                new GetLibrarySectionsCommand(plexServerId, plexAccountId),
                 cancellationToken
             );
 

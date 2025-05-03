@@ -17,8 +17,8 @@ public class GenerateTokenEndpointUnitTests : BaseUnitTest
         var seed = await SetupDatabase(2305, config => config.PlexAccountCount = 1);
         var plexAccount = await IDbContext.PlexAccounts.FirstAsync();
 
-        mock.Mock<IPlexApiService>()
-            .Setup(x => x.PlexSignInAsync(It.IsAny<PlexAccount>()))
+        mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<PlexSignInCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok(FakeData.GetPlexAccount(seed).Generate()));
 
         // Act
@@ -44,11 +44,11 @@ public class GenerateTokenEndpointUnitTests : BaseUnitTest
     public async Task ShouldReturnAVerificationCodeResponse_WhenThePlexAPIRespondsWithA2faResponse()
     {
         // Arrange
-        var seed = await SetupDatabase(232432, config => config.PlexAccountCount = 1);
+        await SetupDatabase(232432, config => config.PlexAccountCount = 1);
         var plexAccount = await IDbContext.PlexAccounts.FirstAsync();
 
-        mock.Mock<IPlexApiService>()
-            .Setup(x => x.PlexSignInAsync(It.IsAny<PlexAccount>()))
+        mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<PlexSignInCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(
                 Result.Fail(new PlexError("Enter verification code") { Code = PlexErrorCodes.EnterVerificationCode })
             );
@@ -78,8 +78,8 @@ public class GenerateTokenEndpointUnitTests : BaseUnitTest
         await SetupDatabase(433222, config => config.PlexAccountCount = 1);
         var plexAccount = await IDbContext.PlexAccounts.FirstAsync();
 
-        mock.Mock<IPlexApiService>()
-            .Setup(x => x.PlexSignInAsync(It.IsAny<PlexAccount>()))
+        mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<PlexSignInCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Fail(new PlexError("Unauthorized")).Add401UnauthorizedError());
 
         // Act
@@ -107,8 +107,8 @@ public class GenerateTokenEndpointUnitTests : BaseUnitTest
         await SetupDatabase(433222, config => config.PlexAccountCount = 1);
         var plexAccount = await IDbContext.PlexAccounts.FirstAsync();
 
-        mock.Mock<IPlexApiService>()
-            .Setup(x => x.PlexSignInAsync(It.IsAny<PlexAccount>()))
+        mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<PlexSignInCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(
                 Result
                     .Fail(new PlexError("Unauthorized"))

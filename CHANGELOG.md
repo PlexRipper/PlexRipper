@@ -1,5 +1,41 @@
 PlexRipper Changelog
 
+## [0.31.1](https://github.com/PlexRipper/PlexRipper/compare/v0.31.0...v0.31.1) (2025-04-27)
+
+
+### Bug Fixes
+
+* **WebAPI:** Fixed an issue where multiple devices would show up when logging in with PlexRipper ([1057d91](https://github.com/PlexRipper/PlexRipper/commit/1057d91721c8d5b1146d8a3dd05fcbd8c286d6f9))
+* **WebAPI:** Fixed an issue where TvShow libraries were not recognized and instead shown as unknown ([06f4d6f](https://github.com/PlexRipper/PlexRipper/commit/06f4d6f460f5765dd1b3d089cf30d297a7951d64))
+* **Web-UI:** Fixed padding around error alert when the library type is unknown ([b9d66e3](https://github.com/PlexRipper/PlexRipper/commit/b9d66e34932ba20f34ef8d7a180c178c69f22723))
+
+# [0.31.0](https://github.com/PlexRipper/PlexRipper/compare/v0.30.0...v0.31.0) (2025-04-13)
+
+
+### Bug Fixes
+
+* **WebAPI:** Fixed an issue where the user could not login with username and password ([f3289c8](https://github.com/PlexRipper/PlexRipper/commit/f3289c8314144e9e978b907cf15319cb2260a0c5))
+* **WebAPI:** Fixed an issue where the user would be logged out of PlexRipper when an PlexAccount would have lost access or become unauthorized ([11cb4a5](https://github.com/PlexRipper/PlexRipper/commit/11cb4a5079a4b6983005618f1cf84c63ba313c8f))
+* **WebAPI:** fixed an migration issue due to changing the metadata object change ([cf07a65](https://github.com/PlexRipper/PlexRipper/commit/cf07a65d4a85ec1283eb9560b993854e51e3ae5e))
+* **Web-UI:** fixed Cypress Api port not being set correctly ([35bfc5c](https://github.com/PlexRipper/PlexRipper/commit/35bfc5c56e805ce3a0e725b3a874da6a03c20c74))
+* **Web-UI:** Fixed the Confirm Password for changing the PlexRipper credentials to show "Password Required" error after successfully saving ([0b4494d](https://github.com/PlexRipper/PlexRipper/commit/0b4494dd944fb3fa835b2cfdc33cd8e51434df8b))
+* **Web-UI:** Fixed the switching between username/password and token mode. The values were sometimes filled in when validating and not cleared correctly when switching ([17c06ed](https://github.com/PlexRipper/PlexRipper/commit/17c06ed18d4bc9c5e5eb3c3956c0fd7be7a6cb8a))
+* **WebAPI:** Fixed the unmasked env variable not working when running in Docker ([02a8f61](https://github.com/PlexRipper/PlexRipper/commit/02a8f618503321c1645651760fb92f08fb0460e8))
+* **WebAPI:** Separate the custom auth token from the auto filled in from the Plex API ([8bcdc39](https://github.com/PlexRipper/PlexRipper/commit/8bcdc3994bea8d8c90beb0be84d48aca429075af))
+
+
+### Features
+
+* **WebAPI:** Added a new env variable LOG_ENV_VARS to dump the env values on PlexRipper start-up ([7a1bc26](https://github.com/PlexRipper/PlexRipper/commit/7a1bc26bd50bf117ea79b7ca2b107dbafe216ec8))
+* **WebAPI:** Added endpoints to send Role, Genre and Country library metadata to the front-end ([78610ce](https://github.com/PlexRipper/PlexRipper/commit/78610ce5b26a762f5b566eedf357a76d5d642d01))
+* **Web-UI:** Media can now be filtered by Country, Role and Genre by clicking on the magnify glass icon in the searchbar ([fdb3cfe](https://github.com/PlexRipper/PlexRipper/commit/fdb3cfe25b119dd9dbb1c596b16ce343af91f597))
+
+
+### Performance Improvements
+
+* **WebAPI:** Greatly improved performance for generating mock data for the HttpClient handler ([46503ef](https://github.com/PlexRipper/PlexRipper/commit/46503ef1dcc2e190fec7b6973adf94fe204dabe3))
+* **WebAPI:** smaller improved performance for generating mock data for the HttpClient handler ([87c9ec8](https://github.com/PlexRipper/PlexRipper/commit/87c9ec88d3e63f4cd2fc781b6fe272f8469fad9b))
+
 # [0.30.0](https://github.com/PlexRipper/PlexRipper/compare/v0.29.1...v0.30.0) (2025-02-01)
 
 

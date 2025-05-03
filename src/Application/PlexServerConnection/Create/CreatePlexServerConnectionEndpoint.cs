@@ -1,5 +1,3 @@
-using System.Net;
-using System.Net.Sockets;
 using Application.Contracts;
 using Data.Contracts;
 using FastEndpoints;
@@ -8,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace PlexRipper.Application;
 
-public record CreatePlexServerConnectionEndpointRequest()
+public record CreatePlexServerConnectionEndpointRequest
 {
     public required string Url { get; init; }
 

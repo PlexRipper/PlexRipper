@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using Application.Contracts;
+﻿using Application.Contracts;
 using Autofac;
 using FileSystem.Contracts;
 using Module = Autofac.Module;
@@ -25,5 +24,10 @@ public class ApplicationModule : Module
         builder.RegisterType<AllJobListener>().As<IAllJobListener>().SingleInstance();
         builder.RegisterType<DownloadJobListener>().As<IDownloadJobListener>().SingleInstance();
         builder.RegisterType<FileMergeJobListener>().As<IFileMergeJobListener>().SingleInstance();
+
+        builder
+            .RegisterType<RefreshLibraryProgressReporter>()
+            .As<IRefreshLibraryProgressReporter>()
+            .InstancePerDependency();
     }
 }

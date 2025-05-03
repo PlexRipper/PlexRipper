@@ -64,7 +64,7 @@ public class GetFolderPathDirectoryEndpoint : BaseEndpoint<GetFolderPathDirector
 
     public override async Task HandleAsync(GetFolderPathDirectoryRequest req, CancellationToken ct)
     {
-        var path = req.Path!;
+        var path = req.Path;
 
         var result = LookupContents(path, false, true);
 
@@ -135,7 +135,7 @@ public class GetFolderPathDirectoryEndpoint : BaseEndpoint<GetFolderPathDirector
                     return filesResult.ToResult();
 
                 return Result.Ok(
-                    new FileSystemResult()
+                    new FileSystemResult
                     {
                         Parent = _diskProvider.GetParent(path),
                         Directories = directoriesResult.Value,
@@ -146,7 +146,7 @@ public class GetFolderPathDirectoryEndpoint : BaseEndpoint<GetFolderPathDirector
             }
 
             return Result.Ok(
-                new FileSystemResult()
+                new FileSystemResult
                 {
                     Parent = _diskProvider.GetParent(path),
                     Directories = directoriesResult.Value,

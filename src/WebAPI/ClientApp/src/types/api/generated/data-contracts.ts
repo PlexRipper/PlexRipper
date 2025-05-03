@@ -387,6 +387,90 @@ export interface LanguageSettingsDTO {
   language: string;
 }
 
+export interface LibraryMediaItemPartDTO {
+  accessible?: boolean | null;
+  audioProfile: string;
+  container: string;
+  /** @format int32 */
+  duration: number;
+  exists?: boolean | null;
+  file: string;
+  /** @format int64 */
+  id: number;
+  indexes?: string | null;
+  key: string;
+  /** @format int64 */
+  size: number;
+  stream: LibraryMediaItemStreamDTO[];
+  videoProfile: string;
+}
+
+export interface LibraryMediaItemStreamDTO {
+  audioChannelLayout?: string | null;
+  /** @format int32 */
+  bitDepth?: number | null;
+  /** @format int32 */
+  bitrate: number;
+  canAutoSync?: boolean | null;
+  /** @format int32 */
+  channels?: number | null;
+  chromaLocation?: string | null;
+  chromaSubsampling?: string | null;
+  codec: string;
+  /** @format int32 */
+  codedHeight?: number | null;
+  /** @format int32 */
+  codedWidth?: number | null;
+  colorPrimaries?: string | null;
+  colorRange?: string | null;
+  colorSpace?: string | null;
+  colorTrc?: string | null;
+  default?: boolean | null;
+  displayTitle: string;
+  /** @format int32 */
+  doviLevel?: number | null;
+  doviPresent?: boolean | null;
+  /** @format int32 */
+  doviProfile?: number | null;
+  doviVersion?: string | null;
+  /** @format int32 */
+  doviblCompatID?: number | null;
+  doviblPresent?: boolean | null;
+  dovielPresent?: boolean | null;
+  dovirpuPresent?: boolean | null;
+  dub?: boolean | null;
+  extendedDisplayTitle: string;
+  forced?: boolean | null;
+  /** @format float */
+  frameRate?: number | null;
+  hasScalingMatrix?: boolean | null;
+  hearingImpaired?: boolean | null;
+  /** @format int32 */
+  height?: number | null;
+  /** @format int64 */
+  id: number;
+  /** @format int32 */
+  index: number;
+  language: string;
+  languageCode: string;
+  languageTag: string;
+  /** @format int32 */
+  level?: number | null;
+  original?: boolean | null;
+  profile?: string | null;
+  /** @format int32 */
+  refFrames?: number | null;
+  /** @format int32 */
+  samplingRate?: number | null;
+  scanType?: string | null;
+  selected?: boolean | null;
+  /** @format int32 */
+  streamType: number;
+  title?: string | null;
+  /** @format int32 */
+  width?: number | null;
+}
+
 export interface LibraryProgress {
   /** @format int32 */
   id: number;
@@ -454,6 +538,7 @@ export enum PlexAccessState {
 
 export interface PlexAccountDTO {
   is2Fa: boolean;
+  apiAuthenticationToken: string;
   authenticationToken: string;
   clientId: string;
   displayName: string;
@@ -484,6 +569,18 @@ export enum PlexConnectionTypes {
   Unknown = "Unknown",
 }
 
+export interface PlexCountryDTO {
+  /** @format int32 */
+  id: number;
+  name: string;
+}
+
+export interface PlexGenreDTO {
+  /** @format int32 */
+  id: number;
+  name: string;
+}
+
 export interface PlexLibraryAccessRapportDTO {
   /** @format int32 */
   plexLibraryId: number;
@@ -497,7 +594,7 @@ export interface PlexLibraryDTO {
   /** @format int32 */
   count: number;
   /** @format date-time */
-  createdAt: string;
+  createdAt?: string | null;
   defaultDestination?: FolderPathDTO | null;
   /** @format int32 */
   defaultDestinationId: number;
@@ -512,7 +609,7 @@ export interface PlexLibraryDTO {
   /** @format int32 */
   plexServerId: number;
   /** @format date-time */
-  scannedAt: string;
+  scannedAt?: string | null;
   /** @format int32 */
   seasonCount: number;
   /** @format date-time */
@@ -520,7 +617,7 @@ export interface PlexLibraryDTO {
   title: string;
   type: PlexMediaType;
   /** @format date-time */
-  updatedAt: string;
+  updatedAt?: string | null;
   uuid: string;
 }
 
@@ -536,7 +633,6 @@ export interface PlexMediaDTO {
   /** @format int32 */
   grandChildCount: number;
   hasArt: boolean;
-  hasBanner: boolean;
   hasTheme: boolean;
   hasThumb: boolean;
   /** @format int32 */
@@ -588,8 +684,7 @@ export interface PlexMediaDataDTO {
   duration: number;
   /** @format int32 */
   height: number;
-  mediaFormat: string;
-  parts: PlexMediaDataPartDTO[];
+  parts: LibraryMediaItemPartDTO[];
   videoCodec: string;
   videoFrameRate: string;
   videoProfile: string;
@@ -598,15 +693,10 @@ export interface PlexMediaDataDTO {
   width: number;
 }
 
-export interface PlexMediaDataPartDTO {
-  container: string;
-  /** @format int32 */
-  duration: number;
-  file: string;
-  obfuscatedFilePath: string;
-  /** @format int64 */
-  size: number;
-  videoProfile: string;
+export interface PlexMediaMetadataDTO {
+  countries: PlexCountryDTO[];
+  genres: PlexGenreDTO[];
+  roles: PlexRoleDTO[];
 }
 
 export interface PlexMediaQualityDTO {
@@ -679,6 +769,12 @@ export enum PlexMediaType {
   OtherVideos = "OtherVideos",
   Games = "Games",
   Unknown = "Unknown",
+}
+
+export interface PlexRoleDTO {
+  /** @format int32 */
+  id: number;
+  name: string;
 }
 
 export interface PlexServerAccessRapportDTO {
@@ -987,6 +1083,15 @@ export interface ResultDTOOfPlexMediaDTO {
   statusCode: number;
   successes: SuccessDTO[];
   value?: PlexMediaDTO | null;
+}
+
+export interface ResultDTOOfPlexMediaMetadataDTO {
+  errors: ErrorDTO[];
+  isSuccess: boolean;
+  /** @format int32 */
+  statusCode: number;
+  successes: SuccessDTO[];
+  value?: PlexMediaMetadataDTO | null;
 }
 
 export interface ResultDTOOfPlexMediaStatisticsDTO {

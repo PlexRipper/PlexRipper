@@ -28,12 +28,12 @@ public class CreatePlexAccountEndpointRequestValidator : Validator<CreatePlexAcc
         RuleFor(x => x.PlexAccount!.Username)
             .NotEmpty()
             .MinimumLength(5)
-            .When(m => string.IsNullOrEmpty(m.PlexAccount!.AuthenticationToken));
+            .When(m => string.IsNullOrEmpty(m.PlexAccount!.CustomAuthenticationToken));
 
         RuleFor(x => x.PlexAccount!.Password)
             .NotEmpty()
             .MinimumLength(5)
-            .When(m => string.IsNullOrEmpty(m.PlexAccount!.AuthenticationToken));
+            .When(m => string.IsNullOrEmpty(m.PlexAccount!.CustomAuthenticationToken));
     }
 }
 
@@ -97,24 +97,24 @@ public class CreatePlexAccountEndpoint : BaseEndpoint<CreatePlexAccountEndpointR
         _log.Debug("Creating account with username {DisplayName}", plexAccount.DisplayName);
 
         // Generate plexAccount clientId
-        plexAccount.ClientId = StringExtensions.GeneratePassword(24);
+        plexAccount.ClientId = Guid.NewGuid().ToString();
 
         await _dbContext.PlexAccounts.AddAsync(plexAccount, ct);
         await _dbContext.SaveChangesAsync(ct);
         await _dbContext.Entry(plexAccount).GetDatabaseValuesAsync(ct);
 
-        var plexAccountDTO = await _dbContext
+        var plexAccountDb = await _dbContext
             .PlexAccounts.Include(x => x.PlexAccountServers)
             .Include(x => x.PlexAccountLibraries)
             .GetAsync(plexAccount.Id, ct);
 
-        if (plexAccountDTO is null)
+        if (plexAccountDb is null)
         {
             await SendFluentResult(ResultExtensions.EntityNotFound(nameof(PlexAccount), plexAccount.Id), ct);
             return;
         }
 
-        var result = Result.Ok(plexAccountDTO).Add201CreatedRequestSuccess("PlexAccount created successfully.");
+        var result = Result.Ok(plexAccountDb).Add201CreatedRequestSuccess("PlexAccount created successfully.");
 
         await SendFluentResult(result, model => model.ToDTO(), ct);
 

@@ -234,6 +234,24 @@ public static partial class ResultExtensions
     public static Result Create401UnauthorizedResult(string message = "") =>
         CreateErrorStatusCodeResult(HttpCodes.Status401Unauthorized, message);
 
+    #region 401 - Plex
+
+    /// <summary>
+    /// We can't use the standard 401 Unauthorized status code because it will log the frontend user out.
+    /// So we map it to 601 which is a custom status code for Plex 401 Unauthorized.
+    /// </summary>
+    public static bool HasPlex401UnauthorizedError(this Result result) =>
+        result.HasStatusCode(HttpCodes.Status601PlexAuthenticationFailed);
+
+    /// <summary>
+    /// We can't use the standard 401 Unauthorized status code because it will log the frontend user out.
+    /// So we map it to 601 which is a custom status code for Plex 401 Unauthorized.
+    /// </summary>
+    public static Result AddPlex401UnauthorizedError(this Result result, string message = "Unauthorized") =>
+        result.AddStatusCodeError(HttpCodes.Status601PlexAuthenticationFailed, message);
+
+    #endregion
+
     #endregion
 
     #region 403
@@ -361,6 +379,24 @@ public static partial class ResultExtensions
 
     public static Result<T> Add401UnauthorizedError<T>(this Result<T> result, string message = "Unauthorized") =>
         result.AddStatusCodeError(HttpCodes.Status401Unauthorized, message);
+
+    #endregion
+
+    #region 401 - Plex
+
+    /// <summary>
+    /// We can't use the standard 401 Unauthorized status code because it will log the frontend user out.
+    /// So we map it to 601 which is a custom status code for Plex 401 Unauthorized.
+    /// </summary>
+    public static bool HasPlex401UnauthorizedError<T>(this Result<T> result) =>
+        result.HasStatusCode(HttpCodes.Status601PlexAuthenticationFailed);
+
+    /// <summary>
+    /// We can't use the standard 401 Unauthorized status code because it will log the frontend user out.
+    /// So we map it to 601 which is a custom status code for Plex 401 Unauthorized.
+    /// </summary>
+    public static Result<T> AddPlex401UnauthorizedError<T>(this Result<T> result, string message = "Unauthorized") =>
+        result.AddStatusCodeError(HttpCodes.Status601PlexAuthenticationFailed, message);
 
     #endregion
 

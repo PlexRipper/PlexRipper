@@ -1,7 +1,8 @@
 using System.IO.Abstractions;
 using FileSystem.Contracts;
 using FluentValidation;
-using Logging.Interface;
+
+namespace PlexRipper.Application;
 
 public record CreateDownloadFileStreamCommand(string Directory, string FileName, long FileSize)
     : IRequest<Result<Stream>>;

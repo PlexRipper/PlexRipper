@@ -23,11 +23,10 @@ public class Program
 
             LogManager.SetupLogging(EnvironmentExtensions.GetLogLevel());
 
-            var version = EnvironmentExtensions.GetVersion();
             _log.Information(
                 "Currently running {Channel} version {Version} on {CurrentOS}",
-                version.Contains("dev") ? "DEVELOPMENT" : "STABLE",
-                version,
+                EnvironmentExtensions.IsDevRelease() ? "DEVELOPMENT" : "STABLE",
+                EnvironmentExtensions.GetVersion(),
                 OsInfo.CurrentOS
             );
 
@@ -43,14 +42,14 @@ public class Program
 
             var app = builder.Build();
 
-            var configResult = app.ConfigureConfigFile();
+            var configResult = app.SetupConfigFile();
             if (configResult.IsFailed)
             {
                 FailedToStart(configResult);
                 return;
             }
 
-            var configureDatabase = app.ConfigureDatabase();
+            var configureDatabase = app.SetupDatabase();
             if (configureDatabase.IsFailed)
             {
                 FailedToStart(configureDatabase);

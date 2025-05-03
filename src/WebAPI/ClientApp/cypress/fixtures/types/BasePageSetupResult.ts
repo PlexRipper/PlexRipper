@@ -13,6 +13,7 @@ import {
 	setupMockPlexServersEndpoints,
 	setupMockSettingsEndpoints,
 	setupMockSignalREndpoints,
+	setupMockPlexLibraryMetaDataEndpoints,
 } from '@fixtures';
 import type {
 	DownloadTaskDTO,
@@ -54,6 +55,10 @@ export class BasePageSetupResult implements IBasePageSetupResult {
 
 	setupPlexLibrariesEndpoints(config: MockConfig) {
 		return setupMockPlexLibrariesEndpoints.call(this, config);
+	}
+
+	setupMockPlexLibraryMetaDataEndpoints(config: MockConfig) {
+		return setupMockPlexLibraryMetaDataEndpoints.call(this, config);
 	}
 
 	setupPlexAccountsEndpoints(config: MockConfig) {

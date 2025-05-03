@@ -1,4 +1,4 @@
-namespace PlexRipper.BaseTests.Datasets;
+namespace PlexRipper.BaseTests;
 
 public static class PlexTvShowTitlesDataset
 {

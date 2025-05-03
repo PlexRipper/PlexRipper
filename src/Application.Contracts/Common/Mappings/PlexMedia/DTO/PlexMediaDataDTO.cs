@@ -1,9 +1,9 @@
-﻿namespace Application.Contracts;
+﻿using PlexRipper.Domain;
+
+namespace Application.Contracts;
 
 public record PlexMediaDataDTO
 {
-    public required string MediaFormat { get; init; }
-
     public required long Duration { get; init; }
 
     public required string VideoResolution { get; init; }
@@ -28,5 +28,5 @@ public record PlexMediaDataDTO
 
     public required int AudioChannels { get; init; }
 
-    public required List<PlexMediaDataPartDTO> Parts { get; init; }
+    public required List<LibraryMediaItemPartDTO> Parts { get; init; }
 }

@@ -207,9 +207,6 @@
             "sub-header": "Das Token: {authToken} gehört zum Plex-Konto:",
             "title": "Validierung des Plex.tv-Authentifizierungstokens"
         },
-        "search-bar": {
-            "no-results": "Keine Ergebnisse gefunden mit {query}"
-        },
         "downloads-table": {
             "columns": {
                 "actions": "Aktionen",
@@ -330,6 +327,14 @@
         "media-poster-image-content": {
             "episode-count": "Keine Episoden | 1 Episode | {count} Episoden",
             "seasons-count": "Keine Staffeln | 1 Staffel | {count} Staffeln"
+        },
+        "media-filter-menu": {
+            "all": "Alle",
+            "meta-data": {
+                "country": "Land",
+                "genre": "Genre",
+                "roles": "Rollen"
+            }
         }
     },
     "confirmation": {

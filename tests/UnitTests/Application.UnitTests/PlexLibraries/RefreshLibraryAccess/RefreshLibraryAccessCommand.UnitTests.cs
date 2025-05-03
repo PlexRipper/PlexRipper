@@ -62,8 +62,8 @@ public class RefreshLibraryAccessCommandUnitTests : BaseUnitTest<RefreshLibraryA
         var updatedTime = DateTime.Now - TimeSpan.FromHours(9);
         var plexLibraries = FakeData.GetPlexLibrary(seed).Generate(5).ToApiLibraries(updatedTime);
 
-        mock.Mock<IPlexApiService>()
-            .Setup(x => x.GetLibrarySectionsAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+        mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<GetLibrarySectionsCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok(plexLibraries))
             .Verifiable(Times.Once);
 

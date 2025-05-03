@@ -23,12 +23,12 @@ public class UpdatePlexAccountByIdEndpointRequestValidator : Validator<UpdatePle
         RuleFor(x => x.PlexAccountDTO!.Username)
             .NotEmpty()
             .MinimumLength(5)
-            .When(m => string.IsNullOrEmpty(m.PlexAccountDTO!.AuthenticationToken));
+            .When(m => string.IsNullOrEmpty(m.PlexAccountDTO!.CustomAuthenticationToken));
 
         RuleFor(x => x.PlexAccountDTO!.Password)
             .NotEmpty()
             .MinimumLength(5)
-            .When(m => string.IsNullOrEmpty(m.PlexAccountDTO!.AuthenticationToken));
+            .When(m => string.IsNullOrEmpty(m.PlexAccountDTO!.CustomAuthenticationToken));
     }
 }
 
@@ -69,6 +69,7 @@ public class UpdatePlexAccountByIdEndpoint : BaseEndpoint<UpdatePlexAccountByIdE
         }
 
         var updatedPlexAccount = plexAccountDTO.ToModel();
+
         _dbContext.Entry(accountInDb).CurrentValues.SetValues(updatedPlexAccount);
         await _dbContext.SaveChangesAsync(ct);
 

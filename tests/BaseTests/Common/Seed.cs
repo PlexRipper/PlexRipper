@@ -11,4 +11,13 @@ public class Seed
     }
 
     public int Next() => Value++;
+
+    public static ICollection<Seed> Generate(int count)
+    {
+        if (count <= 0)
+            return new List<Seed>();
+
+        var rnd = new Random();
+        return Enumerable.Range(1, count).Select(_ => new Seed(rnd.Next(int.MaxValue))).ToList();
+    }
 }

@@ -20,7 +20,7 @@ public class StartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
             seed,
             config =>
             {
-                config.HttpClientOptions = x =>
+                config.HttpClientOptions = (x, _) =>
                 {
                     x.SetupIdentityRequest(seed);
                     x.SetupDownloadFile(10);
@@ -30,7 +30,7 @@ public class StartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
                 {
                     x.PlexAccountCount = 1;
                     x.PlexServerCount = 1;
-                    x.PlexLibraryCount = 2;
+                    x.PlexMovieLibraryCount = 2;
                     x.MovieCount = 10;
                     x.MovieDownloadTasksCount = 1;
                     x.DownloadWorkerTasks = 4;

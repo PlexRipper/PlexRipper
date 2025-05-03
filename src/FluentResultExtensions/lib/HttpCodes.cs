@@ -133,4 +133,6 @@ public static class HttpCodes
     public const int Status510NotExtended = 510;
 
     public const int Status511NetworkAuthenticationRequired = 511;
+
+    public const int Status601PlexAuthenticationFailed = 601;
 }

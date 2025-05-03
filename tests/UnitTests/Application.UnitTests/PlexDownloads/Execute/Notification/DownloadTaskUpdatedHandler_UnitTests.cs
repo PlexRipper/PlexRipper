@@ -2,7 +2,7 @@ using Application.Contracts;
 using Data.Contracts;
 using FileSystem.Contracts;
 
-namespace PlexRipper.Application.UnitTests.Execute.Notification;
+namespace PlexRipper.Application.UnitTests;
 
 public class DownloadTaskUpdatedHandler_UnitTests : BaseUnitTest<DownloadTaskUpdatedHandler>
 {
@@ -18,7 +18,7 @@ public class DownloadTaskUpdatedHandler_UnitTests : BaseUnitTest<DownloadTaskUpd
             config =>
             {
                 config.PlexServerCount = 1;
-                config.PlexLibraryCount = 1;
+                config.PlexMovieLibraryCount = 1;
                 config.TvShowDownloadTasksCount = 5;
                 config.TvShowSeasonDownloadTasksCount = 5;
                 config.TvShowEpisodeDownloadTasksCount = 5;

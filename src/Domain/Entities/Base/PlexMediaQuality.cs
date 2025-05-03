@@ -1,7 +1,15 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace PlexRipper.Domain;
 
 public record PlexMediaQuality
 {
+    [SetsRequiredMembers]
+    public PlexMediaQuality(string quality)
+    {
+        Quality = quality;
+    }
+
     public required string Quality { get; init; }
 
     public string DisplayQuality
@@ -24,5 +32,5 @@ public record PlexMediaQuality
     }
 
     // TODO:Pre-calculate this to avoid doing it every time, used to identify the different media files
-    public required string HashId { get; init; }
+    public required string HashId { get; init; } = "NotImplementedYet";
 }

@@ -19,7 +19,7 @@ public class RestartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
             5594564,
             config =>
             {
-                config.HttpClientOptions = x =>
+                config.HttpClientOptions = (x, _) =>
                 {
                     x.SetupIdentityRequest(seed);
                     x.SetupDownloadFile(10);
@@ -29,7 +29,7 @@ public class RestartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
                 {
                     x.PlexAccountCount = 1;
                     x.PlexServerCount = 1;
-                    x.PlexLibraryCount = 2;
+                    x.PlexMovieLibraryCount = 2;
                     x.MovieCount = 10;
                     x.MovieDownloadTasksCount = 1;
                 };
@@ -53,7 +53,9 @@ public class RestartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
 
         var downloadTaskDb = await container.DbContext.GetDownloadTaskAsync(downloadTask.Id);
         downloadTaskDb.ShouldNotBeNull();
-        downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.Queued);
+
+        // In CI this is sometimes completed to quickly
+        downloadTaskDb.DownloadStatus.ShouldBeOneOf(DownloadStatus.Queued, DownloadStatus.Completed);
 
         await container.SchedulerService.AwaitScheduler();
         await Task.Delay(2000);

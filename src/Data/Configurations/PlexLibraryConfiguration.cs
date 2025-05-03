@@ -44,5 +44,11 @@ public class PlexLibraryConfiguration : IEntityTypeConfiguration<PlexLibrary>
             .OnDelete(DeleteBehavior.SetNull);
 
         builder.Property(c => c.Title).UseCollation(OrderByNaturalExtensions.CollationName);
+
+        builder.HasMany(x => x.Roles).WithMany(x => x.PlexLibraries).UsingEntity("PlexLibraryRoles");
+
+        builder.HasMany(x => x.Genres).WithMany(x => x.PlexLibraries).UsingEntity("PlexLibraryGenres");
+
+        builder.HasMany(x => x.Countries).WithMany(x => x.PlexLibraries).UsingEntity("PlexLibraryCountries");
     }
 }

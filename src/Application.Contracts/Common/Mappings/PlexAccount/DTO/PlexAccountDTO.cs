@@ -1,4 +1,6 @@
-﻿namespace Application.Contracts;
+﻿using System.Text.Json.Serialization;
+
+namespace Application.Contracts;
 
 public class PlexAccountDTO
 {
@@ -28,6 +30,14 @@ public class PlexAccountDTO
 
     public required bool HasPassword { get; set; }
 
+    /// <summary>
+    /// The user has the option to provide their own token to authenticate with plex.tv.
+    /// This is not the same as the auto filled AuthenticationToken when provided by the username and password
+    /// </summary>
+    [JsonPropertyName("authenticationToken")]
+    public required string CustomAuthenticationToken { get; set; }
+
+    [JsonPropertyName("apiAuthenticationToken")]
     public required string AuthenticationToken { get; set; }
 
     public required string ClientId { get; set; }

@@ -31,5 +31,22 @@ public static class PlexLibraryMapper
     public static List<PlexLibraryDTO> ToDTO(this List<PlexLibrary> plexLibraries) =>
         plexLibraries.Select(ToDTO).ToList();
 
+    public static PlexMediaMetadataDTO ToMetaDataDTO(this PlexLibrary plexLibrary) =>
+        new()
+        {
+            Roles = plexLibrary.Roles.ToDTO(),
+            Countries = plexLibrary.Countries.ToDTO(),
+            Genres = plexLibrary.Genres.ToDTO(),
+        };
+
+    public static List<PlexRoleDTO> ToDTO(this IEnumerable<PlexRole> roles) =>
+        roles.Select(x => new PlexRoleDTO { Id = x.Id, Name = x.Name }).ToList();
+
+    public static List<PlexCountryDTO> ToDTO(this IEnumerable<PlexCountry> countries) =>
+        countries.Select(x => new PlexCountryDTO { Id = x.Id, Name = x.Name }).ToList();
+
+    public static List<PlexGenreDTO> ToDTO(this IEnumerable<PlexGenre> genres) =>
+        genres.Select(x => new PlexGenreDTO { Id = x.Id, Name = x.Name }).ToList();
+
     #endregion
 }

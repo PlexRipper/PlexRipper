@@ -40,7 +40,7 @@ public class RefreshLibraryMediaEndpoint : BaseEndpoint<RefreshLibraryMediaEndpo
 
     public override async Task HandleAsync(RefreshLibraryMediaEndpointRequest req, CancellationToken ct)
     {
-        var result = await _mediator.Send(new RefreshLibraryMediaCommand(req.PlexLibraryId), ct);
+        var result = await _mediator.Send(new RefreshLibraryMediaCommand(req.PlexLibraryId, _ => { }), ct);
 
         await SendFluentResult(result, x => x.ToDTO(), ct);
     }

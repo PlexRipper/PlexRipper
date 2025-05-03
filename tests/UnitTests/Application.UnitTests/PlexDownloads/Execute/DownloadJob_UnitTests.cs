@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Quartz;
 using Settings.Contracts;
 
-namespace PlexRipper.Application.UnitTests.Execute;
+namespace PlexRipper.Application.UnitTests;
 
 public class DownloadJob_UnitTests : BaseUnitTest<DownloadJob>
 {

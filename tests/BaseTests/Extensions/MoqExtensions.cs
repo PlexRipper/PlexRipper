@@ -1,7 +1,10 @@
 ﻿using System.Net;
+using System.Text;
 using Application.Contracts;
+using FastEndpoints;
 using Moq.Contrib.HttpClient;
 using Moq.Language.Flow;
+using Newtonsoft.Json;
 
 namespace PlexRipper.BaseTests;
 
@@ -17,6 +20,28 @@ public static class MoqExtensions
         var result = mock.Mock<IMediator>().Setup(m => m.Send(request.Invoke(), It.IsAny<CancellationToken>()));
         if (isVerifiable)
             result.Verifiable();
+        return result;
+    }
+
+    public static ISetup<ICommandExecutor, Task<TResult>> SetupCommand<TResult>(
+        this AutoMock mock,
+        Func<ICommand<TResult>> request
+    )
+    {
+        var result = mock.Mock<ICommandExecutor>().Setup(m => m.Send(request.Invoke(), It.IsAny<CancellationToken>()));
+
+        // This is to ensure unit tests to contain unused mock setups
+        result.Verifiable(Times.AtLeastOnce);
+        return result;
+    }
+
+    public static ISetup<ICommandExecutor, Task<TResult>> SetupCommandOfType<TCommand, TResult>(this AutoMock mock)
+        where TCommand : class, ICommand<TResult>
+    {
+        var result = mock.Mock<ICommandExecutor>()
+            .Setup(m => m.Send(It.Is<TCommand>(_ => true), It.IsAny<CancellationToken>()));
+
+        result.Verifiable(Times.AtLeastOnce);
         return result;
     }
 
@@ -117,11 +142,37 @@ public static class MoqExtensions
             return;
         }
 
-        mock.SetupRequest(uri.TrimEnd('/') + "/identity")
+        var uriBuilder = new UriBuilder(uri) { Path = "/identity" };
+        mock.SetupRequest(HttpMethod.Get, uriBuilder.Uri)
             .ReturnsAsync(
                 (HttpRequestMessage req, CancellationToken _) =>
                     FakePlexApiData.GetPlexServerIdentityResponse(HttpStatusCode.OK, seed, req).RawResponse
             );
+    }
+
+    public static HttpResponseMessage ToJsonHttpResponse(
+        this object? responseBody,
+        HttpRequestMessage request,
+        HttpStatusCode statusCode
+    )
+    {
+        var settings = MockPlexApiJsonSerializer.GetSettings();
+        var json = JsonConvert.SerializeObject(responseBody, settings);
+        var jsonContent = new StringContent(json, Encoding.UTF8, "application/json");
+
+        return new HttpResponseMessage(statusCode) { RequestMessage = request, Content = jsonContent };
+    }
+
+    public static ISetup<HttpMessageHandler, Task<HttpResponseMessage>> SetupRequestAnyQuery(
+        this Mock<HttpMessageHandler> handler,
+        HttpMethod method,
+        Uri requestUri
+    )
+    {
+        return handler.SetupRequest(req =>
+            req.Method == method
+            && req.RequestUri?.AbsolutePath.Equals(requestUri.AbsolutePath, StringComparison.OrdinalIgnoreCase) == true
+        );
     }
 
     public static void SetupDownloadFile(this Mock<HttpMessageHandler> mock, int fileSizeInMb)

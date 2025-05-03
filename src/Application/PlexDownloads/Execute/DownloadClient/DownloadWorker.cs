@@ -4,13 +4,11 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using ByteSizeLib;
 using Data.Contracts;
-using FileSystem.Contracts;
 using Logging.Common;
 using Logging.Interface;
 using PlexApi.Contracts;
 using Polly;
 using Polly.Retry;
-using Timer = System.Timers.Timer;
 
 namespace PlexRipper.Application;
 

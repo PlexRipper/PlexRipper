@@ -14,6 +14,7 @@ using NSwag;
 using PlexRipper.Application;
 using PlexRipper.Identity;
 using PlexRipper.Identity.Contracts;
+using PlexRipper.PlexApi;
 
 namespace PlexRipper.WebAPI;
 
@@ -55,8 +56,14 @@ public static partial class Startup
         // Setup FastEndpoints
         services.AddFastEndpoints(options =>
         {
+            // Manually define the assemblies to scan for FastEndpoints
             options.DisableAutoDiscovery = true;
-            options.Assemblies = [Assembly.GetAssembly(typeof(BaseEndpoint<,>))!];
+            options.Assemblies =
+            [
+                // Reference the assemblies that contain the FastEndpoints or ICommand implementations
+                Assembly.GetAssembly(typeof(ApplicationModule))!,
+                Assembly.GetAssembly(typeof(PlexApiModule))!,
+            ];
         });
 
         if (!EnvironmentExtensions.IsIntegrationTestMode())

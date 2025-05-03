@@ -14,7 +14,7 @@ using Log = Logging.Log;
 
 namespace PlexRipper.BaseTests;
 
-public partial class BaseUnitTest : IDisposable
+public partial class BaseUnitTest
 {
     private Action<ContainerBuilder>? _fileSystemSetup;
     private Action<ContainerBuilder>? _httpClientSetup;
@@ -109,7 +109,7 @@ public partial class BaseUnitTest : IDisposable
     {
         _fileSystem.AddDrive(
             "/",
-            new MockDriveData()
+            new MockDriveData
             {
                 IsReady = true,
                 DriveType = DriveType.Fixed,

@@ -41,7 +41,7 @@ public static partial class DbContextExtensions
         if (guid == Guid.Empty)
             return null;
 
-        var queries = new List<IQueryable<DownloadTaskKey>>()
+        var queries = new List<IQueryable<DownloadTaskKey>>
         {
             dbContext.DownloadTaskTvShow.ProjectToKey(),
             dbContext.DownloadTaskTvShowSeason.ProjectToKey(),
@@ -92,7 +92,7 @@ public static partial class DbContextExtensions
     }
 
     /// <summary>
-    /// Retrieves a <see cref="DownloadTaskGeneric"/> from the database based on the <paramref name="id"/> and <paramref name="type"/> with all its children and related entities.
+    /// Retrieves a <see cref="DownloadTaskGeneric"/> from the database based on the <paramref name="key"/> with all its children and related entities.
     /// </summary>
     /// <param name="dbContext"> The <see cref="IPlexRipperDbContext"/> to query. </param>
     /// <param name="key"> The <see cref="DownloadTaskKey"/> to retrieve the <see cref="DownloadTaskGeneric"/> by. </param>

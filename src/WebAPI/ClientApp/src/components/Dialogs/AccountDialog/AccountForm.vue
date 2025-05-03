@@ -123,15 +123,15 @@
 import { useAccountDialogStore } from '@store';
 
 const { t } = useI18n();
+const accountDialogStore = useAccountDialogStore();
 
 const tokenTab = 'token';
 const credentialsTab = 'credentials';
 
 const tab = computed({
 	get: () => accountDialogStore.isAuthTokenMode ? tokenTab : credentialsTab,
-	set: (value: string) => accountDialogStore.$patch({ isAuthTokenMode: value === tokenTab }),
+	set: (value: string) => accountDialogStore.switchInputMode(value === tokenTab),
 });
-const accountDialogStore = useAccountDialogStore();
 
 const getDisplayNameRules = computed(() => [
 	(v: string): boolean | string => !!v || t('components.account-form.validation.display-name-required'),

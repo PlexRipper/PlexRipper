@@ -1,7 +1,4 @@
-using Data.Contracts;
-using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace PlexRipper.Application.UnitTests.ClearCompleted;
 
@@ -19,7 +16,7 @@ public class ClearCompletedDownloadTasksEndpoint_UnitTests : BaseUnitTest<ClearC
             config =>
             {
                 config.PlexServerCount = 1;
-                config.PlexLibraryCount = 1;
+                config.PlexMovieLibraryCount = 1;
                 config.MovieDownloadTasksCount = 10;
             }
         );
@@ -55,7 +52,7 @@ public class ClearCompletedDownloadTasksEndpoint_UnitTests : BaseUnitTest<ClearC
             config =>
             {
                 config.PlexServerCount = 1;
-                config.PlexLibraryCount = 1;
+                config.PlexMovieLibraryCount = 1;
                 config.MovieDownloadTasksCount = 10;
             }
         );

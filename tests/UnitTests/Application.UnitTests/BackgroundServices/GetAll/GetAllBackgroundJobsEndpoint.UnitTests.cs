@@ -19,7 +19,7 @@ public class GetAllBackgroundJobsEndpointUnitTests : BaseUnitTest<GetAllBackgrou
 
         // Act
         var rawResponse = SetupEndpointUnitTest<GetAllBackgroundJobsEndpoint>();
-        await rawResponse.HandleAsync(CancellationToken.None);
+        await rawResponse.HandleAsync(new GetAllBackgroundJobsEndpointRequest(), CancellationToken.None);
         var resultDTO = rawResponse.Response as ResultDTO<List<JobStatusUpdateDTO>>;
 
         // Assert
@@ -40,7 +40,7 @@ public class GetAllBackgroundJobsEndpointUnitTests : BaseUnitTest<GetAllBackgrou
 
         // Act
         var rawResponse = SetupEndpointUnitTest<GetAllBackgroundJobsEndpoint>();
-        await rawResponse.HandleAsync(CancellationToken.None);
+        await rawResponse.HandleAsync(new GetAllBackgroundJobsEndpointRequest(), CancellationToken.None);
         var resultDTO = rawResponse.Response as ResultDTO<List<JobStatusUpdateDTO>>;
 
         // Assert
@@ -141,7 +141,7 @@ public class GetAllBackgroundJobsEndpointUnitTests : BaseUnitTest<GetAllBackgrou
 
         // Act
         var rawResponse = SetupEndpointUnitTest<GetAllBackgroundJobsEndpoint>();
-        await rawResponse.HandleAsync(CancellationToken.None);
+        await rawResponse.HandleAsync(new GetAllBackgroundJobsEndpointRequest(), CancellationToken.None);
         var resultDTO = rawResponse.Response as ResultDTO<List<JobStatusUpdateDTO>>;
 
         // Assert

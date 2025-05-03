@@ -9,7 +9,8 @@ public static class DownloadTaskExtensions
         if (!downloadTask.Children.Any())
             return downloadTask;
 
-        downloadTask.Children.ForEach(x => x.Calculate());
+        foreach (var child in downloadTask.Children)
+            child.Calculate();
 
         downloadTask.DownloadSpeed = downloadTask.Children.Select(x => x.DownloadSpeed).Max();
         downloadTask.FileTransferSpeed = downloadTask.Children.Select(x => x.FileTransferSpeed).Max();
@@ -49,7 +50,8 @@ public static class DownloadTaskExtensions
         if (!downloadTask.Children.Any())
             return downloadTask;
 
-        downloadTask.Children.ForEach(x => x.Calculate());
+        foreach (var child in downloadTask.Children)
+            child.Calculate();
 
         downloadTask.DownloadSpeed = downloadTask.Children.Select(x => x.DownloadSpeed).Max();
         downloadTask.FileTransferSpeed = downloadTask.Children.Select(x => x.FileTransferSpeed).Max();
@@ -71,7 +73,8 @@ public static class DownloadTaskExtensions
         if (!downloadTask.Children.Any())
             return downloadTask;
 
-        downloadTask.Children.ForEach(x => x.Calculate());
+        foreach (var child in downloadTask.Children)
+            child.Calculate();
 
         downloadTask.DownloadSpeed = downloadTask.Children.Select(x => x.DownloadSpeed).Max();
         downloadTask.FileTransferSpeed = downloadTask.Children.Select(x => x.FileTransferSpeed).Max();

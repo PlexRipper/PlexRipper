@@ -5,11 +5,11 @@ namespace PlexRipper.Domain;
 [Table("PlexMovie")]
 public class PlexMovie : BasePlexMedia
 {
-    public required List<PlexRole> Roles { get; set; } = [];
+    public required ICollection<PlexRole> Roles { get; set; } = [];
 
-    public required List<PlexGenre> Genres { get; set; } = [];
+    public required ICollection<PlexGenre> Genres { get; set; } = [];
 
-    public required List<PlexCountry> Countries { get; set; } = [];
+    public required ICollection<PlexCountry> Countries { get; set; } = [];
 
     public ICollection<PlexMovieMediaData> MediaDataList { get; set; } = [];
 

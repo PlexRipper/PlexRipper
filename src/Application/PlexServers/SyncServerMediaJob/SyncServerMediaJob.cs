@@ -68,7 +68,7 @@ public class SyncServerMediaJob : IJob
 
             var plexLibraries = forceSync
                 ? plexServer.PlexLibraries
-                : plexServer.PlexLibraries.FindAll(x =>
+                : plexServer.PlexLibraries.Where(x =>
                     x.Outdated && x.Type is PlexMediaType.Movie or PlexMediaType.TvShow
                 );
 
@@ -86,18 +86,16 @@ public class SyncServerMediaJob : IJob
             var progressList = new List<LibraryProgress>();
 
             // Initialize list
-            plexLibraries.ForEach(x =>
-                progressList.Add(
-                    new LibraryProgress
-                    {
-                        Id = x.Id,
-                        Step = 0,
-                        Received = 0,
-                        Total = x.MediaCount,
-                        TotalSteps = 1,
-                        TimeRemaining = TimeSpan.Zero,
-                    }
-                )
+            progressList.AddRange(
+                plexLibraries.Select(x => new LibraryProgress
+                {
+                    Id = x.Id,
+                    Step = 0,
+                    Received = 0,
+                    Total = x.MediaCount,
+                    TotalSteps = 1,
+                    TimeRemaining = TimeSpan.Zero,
+                })
             );
 
             var progress = new Action<LibraryProgress>(libraryProgress =>
@@ -114,14 +112,14 @@ public class SyncServerMediaJob : IJob
             });
 
             // Sync movie type libraries first because it is a lot quicker than TvShows.
-            foreach (var library in plexLibraries.FindAll(x => x.Type == PlexMediaType.Movie))
+            foreach (var library in plexLibraries.Where(x => x.Type == PlexMediaType.Movie))
             {
                 var result = await _mediator.Send(new RefreshLibraryMediaCommand(library.Id, progress));
                 if (result.IsFailed)
                     results.Add(result.ToResult());
             }
 
-            foreach (var library in plexLibraries.FindAll(x => x.Type == PlexMediaType.TvShow))
+            foreach (var library in plexLibraries.Where(x => x.Type == PlexMediaType.TvShow))
             {
                 var result = await _mediator.Send(new RefreshLibraryMediaCommand(library.Id, progress));
                 if (result.IsFailed)

@@ -73,7 +73,7 @@ public abstract class DownloadTaskFileBase : DownloadTaskBase, IDownloadTaskProg
 
     #region Relationships
 
-    public required List<DownloadWorkerTask> DownloadWorkerTasks { get; set; } = [];
+    public required ICollection<DownloadWorkerTask> DownloadWorkerTasks { get; set; } = [];
 
     /// <summary>
     /// Gets or sets the destination folder path id of the <see cref="DownloadTaskFileBase"/>.

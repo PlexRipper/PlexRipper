@@ -55,7 +55,7 @@ public class AddOrUpdatePlexServerCommandUnitTests : BaseUnitTest<AddOrUpdatePle
                 {
                     Id = updatedConnections[i].Id,
                     Protocol = updatedConnections[i].Protocol,
-                    Address = updatedServer.PlexServerConnections[i].Address,
+                    Address = updatedServer.PlexServerConnections.ElementAt(i).Address,
                     Port = updatedConnections[i].Port,
                     Url = updatedConnections[i].Url,
                     Local = updatedConnections[i].Local,
@@ -88,7 +88,7 @@ public class AddOrUpdatePlexServerCommandUnitTests : BaseUnitTest<AddOrUpdatePle
 
             foreach (var plexServerConnectionDb in plexServerDb.PlexServerConnections)
             {
-                var expectedConnection = expectedServer.PlexServerConnections.Find(x =>
+                var expectedConnection = expectedServer.PlexServerConnections.FirstOrDefault(x =>
                     x.Address == plexServerConnectionDb.Address
                 );
                 expectedConnection.ShouldNotBeNull();
@@ -162,7 +162,8 @@ public class AddOrUpdatePlexServerCommandUnitTests : BaseUnitTest<AddOrUpdatePle
         plexServer.PlexServerConnections.Count.ShouldBe(5);
 
         // Update data setup
-        plexServer.PlexServerConnections.RemoveRange(0, 4);
+        foreach (var connection in plexServer.PlexServerConnections.Take(4).ToList())
+            plexServer.PlexServerConnections.Remove(connection);
 
         var newConnections = FakeData.GetPlexServerConnections(seed).Generate(5);
         plexServer.PlexServerConnections.AddRange(newConnections);
@@ -180,7 +181,9 @@ public class AddOrUpdatePlexServerCommandUnitTests : BaseUnitTest<AddOrUpdatePle
 
         foreach (var plexServerConnection in plexServersDb.PlexServerConnections)
         {
-            var expectedConnection = plexServer.PlexServerConnections.Find(x => x.Equals(plexServerConnection));
+            var expectedConnection = plexServer.PlexServerConnections.FirstOrDefault(x =>
+                x.Equals(plexServerConnection)
+            );
             expectedConnection.ShouldNotBeNull();
             plexServerConnection.Id.ShouldBe(expectedConnection.Id);
             plexServerConnection.ShouldBe(expectedConnection);
@@ -213,7 +216,8 @@ public class AddOrUpdatePlexServerCommandUnitTests : BaseUnitTest<AddOrUpdatePle
         await dbContext.SaveChangesAsync();
 
         // Update data setup
-        plexServer.PlexServerConnections.RemoveRange(0, 4);
+        foreach (var conn in plexServer.PlexServerConnections.Take(4).ToList())
+            plexServer.PlexServerConnections.Remove(conn);
 
         var newConnections = FakeData.GetPlexServerConnections(seed).Generate(5);
         plexServer.PlexServerConnections.AddRange(newConnections);

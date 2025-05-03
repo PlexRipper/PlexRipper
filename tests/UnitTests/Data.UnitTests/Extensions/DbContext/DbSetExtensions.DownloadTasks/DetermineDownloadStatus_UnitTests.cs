@@ -21,7 +21,7 @@ public class DetermineDownloadStatus_UnitTests : BaseUnitTest
         );
 
         var downloadTasks = await IDbContext.DownloadTaskMovie.Include(x => x.Children).ToListAsync();
-        var testDownloadTask = downloadTasks[0].Children[0];
+        var testDownloadTask = downloadTasks.First().Children.First();
         await IDbContext.SetDownloadStatus(testDownloadTask.ToKey(), DownloadStatus.DownloadFinished);
 
         // Act
@@ -49,7 +49,12 @@ public class DetermineDownloadStatus_UnitTests : BaseUnitTest
 
         var downloadTasks = await IDbContext.DownloadTaskTvShow.IncludeAll().ToListAsync();
 
-        var downloadTaskTvShowEpisodeFile = downloadTasks[3].Children[2].Children[3].Children[0];
+        var downloadTaskTvShowEpisodeFile = downloadTasks
+            .ElementAt(3)
+            .Children.ElementAt(2)
+            .Children.ElementAt(3)
+            .Children.ElementAt(0);
+
         await IDbContext.SetDownloadStatus(downloadTaskTvShowEpisodeFile.ToKey(), DownloadStatus.Error);
 
         // Act

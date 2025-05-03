@@ -117,7 +117,10 @@ public class SyncPlexTvShowsCommandHandler : IRequestHandler<SyncPlexTvShowsComm
                     tvShow.Seasons.Select(season =>
                     {
                         season.TvShowId = tvShow.Id;
-                        season.Episodes.ForEach(episode => episode.TvShowId = tvShow.Id);
+
+                        foreach (var episode in season.Episodes)
+                            episode.TvShowId = tvShow.Id;
+
                         return season;
                     })
                 )
@@ -131,7 +134,9 @@ public class SyncPlexTvShowsCommandHandler : IRequestHandler<SyncPlexTvShowsComm
             var plexEpisodes = plexSeasons
                 .SelectMany(season =>
                 {
-                    season.Episodes.ForEach(episode => episode.TvShowSeasonId = season.Id);
+                    foreach (var episode in season.Episodes)
+                        episode.TvShowSeasonId = season.Id;
+
                     return season.Episodes;
                 })
                 .ToList();

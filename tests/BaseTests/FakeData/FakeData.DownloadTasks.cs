@@ -155,11 +155,11 @@ public static partial class FakeData
                 (_, movie) =>
                 {
                     var movieIndex = 1;
-                    movie.Children.ForEach(movieFile =>
+                    foreach (var movieFile in movie.Children)
                     {
                         movieFile.Title = $"{movieFile.Title} {movieIndex++}";
                         movieFile.FullTitle = $"{movie.FullTitle}/{movieIndex}-{movieFile.FileName}";
-                    });
+                    }
                 }
             );
     }
@@ -204,24 +204,25 @@ public static partial class FakeData
                 (_, tvShow) =>
                 {
                     var seasonIndex = 1;
-                    tvShow.Children.ForEach(season =>
+
+                    foreach (var season in tvShow.Children)
                     {
                         season.Title = $"{season.Title} {seasonIndex++}";
                         season.FullTitle = $"{tvShow.FullTitle}/{season.Title}";
 
-                        season.Children.ForEach(episode =>
+                        foreach (var episode in season.Children)
                         {
                             episode.FullTitle = $"{season.FullTitle}/{episode.Title}";
 
                             var fileIndex = 1;
-                            episode.Children.ForEach(file =>
+                            foreach (var file in episode.Children)
                             {
                                 file.FullTitle = $"{episode.FullTitle}/{fileIndex}-{file.FileName}";
                                 file.DirectoryMeta.TvShowFolder = tvShow.Title;
                                 file.DirectoryMeta.SeasonFolder = season.Title;
-                            });
-                        });
-                    });
+                            }
+                        }
+                    }
                 }
             );
     }
@@ -258,18 +259,18 @@ public static partial class FakeData
                     season.FullTitle = season.Title;
 
                     var episodeIndex = 1;
-                    season.Children.ForEach(episode =>
+                    foreach (var episode in season.Children)
                     {
                         episode.Title = $"{episode.Title} {episodeIndex++}";
                         episode.FullTitle = $"{season.FullTitle}/{episode.Title}";
 
                         var fileIndex = 1;
-                        episode.Children.ForEach(file =>
+                        foreach (var file in episode.Children)
                         {
                             file.FullTitle = $"{episode.FullTitle}/{fileIndex}-{file.FileName}";
                             file.DirectoryMeta.SeasonFolder = season.Title;
-                        });
-                    });
+                        }
+                    }
                 }
             );
     }
@@ -292,10 +293,8 @@ public static partial class FakeData
                 (_, episode) =>
                 {
                     var fileIndex = 1;
-                    episode.Children.ForEach(file =>
-                    {
+                    foreach (var file in episode.Children)
                         file.FullTitle = $"{episode.FullTitle}/{fileIndex}-{file.FileName}";
-                    });
                 }
             );
     }

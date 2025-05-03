@@ -20,7 +20,7 @@ public class PlexTvShowSeason : BasePlexMedia
 
     public int TvShowId { get; set; }
 
-    public List<PlexTvShowEpisode> Episodes { get; set; } = [];
+    public ICollection<PlexTvShowEpisode> Episodes { get; set; } = [];
 
     #endregion
 

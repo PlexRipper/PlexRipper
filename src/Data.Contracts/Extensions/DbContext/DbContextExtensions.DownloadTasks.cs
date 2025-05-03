@@ -564,7 +564,7 @@ public static partial class DbContextExtensions
 
         return keys;
 
-        void FindDownloadableTaskKeys(List<DownloadTaskGeneric> tasks)
+        void FindDownloadableTaskKeys(ICollection<DownloadTaskGeneric> tasks)
         {
             if (!tasks.Any())
                 return;

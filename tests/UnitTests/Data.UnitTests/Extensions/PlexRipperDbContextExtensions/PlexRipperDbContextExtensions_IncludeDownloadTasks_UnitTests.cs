@@ -30,7 +30,7 @@ public class PlexRipperDbContextExtensions_IncludeDownloadTasks_UnitTests : Base
         foreach (var downloadTask in downloadTasks)
         {
             downloadTask.Children.Count.ShouldBe(1);
-            downloadTask.Children[0].ParentId.ShouldBe(downloadTask.Id);
+            downloadTask.Children.First().ParentId.ShouldBe(downloadTask.Id);
         }
     }
 

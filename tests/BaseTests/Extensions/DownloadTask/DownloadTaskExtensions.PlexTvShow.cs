@@ -4,8 +4,8 @@ namespace PlexRipper.BaseTests;
 
 public static partial class DownloadTaskExtensions
 {
-    public static List<DownloadTaskTvShow> SetDownloadStatus(
-        this List<DownloadTaskTvShow> downloadTasks,
+    public static ICollection<DownloadTaskTvShow> SetDownloadStatus(
+        this ICollection<DownloadTaskTvShow> downloadTasks,
         DownloadStatus downloadStatus
     )
     {
@@ -47,8 +47,8 @@ public static partial class DownloadTaskExtensions
         return downloadTask;
     }
 
-    public static List<DownloadTaskTvShowSeason> SetDownloadStatus(
-        this List<DownloadTaskTvShowSeason> downloadTasks,
+    public static ICollection<DownloadTaskTvShowSeason> SetDownloadStatus(
+        this ICollection<DownloadTaskTvShowSeason> downloadTasks,
         DownloadStatus downloadStatus
     )
     {
@@ -58,8 +58,8 @@ public static partial class DownloadTaskExtensions
         return downloadTasks;
     }
 
-    public static List<DownloadTaskTvShowEpisode> SetDownloadStatus(
-        this List<DownloadTaskTvShowEpisode> downloadTasks,
+    public static ICollection<DownloadTaskTvShowEpisode> SetDownloadStatus(
+        this ICollection<DownloadTaskTvShowEpisode> downloadTasks,
         DownloadStatus downloadStatus
     )
     {
@@ -74,8 +74,8 @@ public static partial class DownloadTaskExtensions
         return downloadTasks;
     }
 
-    public static List<DownloadTaskTvShowEpisodeFile> SetDownloadStatus(
-        this List<DownloadTaskTvShowEpisodeFile> downloadTasks,
+    public static ICollection<DownloadTaskTvShowEpisodeFile> SetDownloadStatus(
+        this ICollection<DownloadTaskTvShowEpisodeFile> downloadTasks,
         DownloadStatus downloadStatus
     )
     {

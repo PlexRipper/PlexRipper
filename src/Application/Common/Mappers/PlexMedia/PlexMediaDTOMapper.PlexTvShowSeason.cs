@@ -45,7 +45,7 @@ public static partial class PlexMediaDTOMapper
             ContentRating = source.ContentRating,
             Rating = source.Rating,
             OriginallyAvailableAt = source.OriginallyAvailableAt,
-            Children = source.Episodes.ConvertAll(x => x.ToDTO(plexToken)),
+            Children = source.Episodes.Select(x => x.ToDTO(plexToken)).ToList(),
             MetaDataKey = source.MetaDataKey,
             PlexToken = plexToken,
         };

@@ -102,7 +102,7 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
         tvShowDownloadTasks.SetDownloadStatus(DownloadStatus.Completed);
         var lastDownloadTask = tvShowDownloadTasks.Last();
         lastDownloadTask.SetDownloadStatus(DownloadStatus.Queued);
-        var downloadingTask = lastDownloadTask.Children[0].Children[0].Children[0];
+        var downloadingTask = lastDownloadTask.Children.First().Children.First().Children.First();
         downloadingTask.DownloadStatus = DownloadStatus.Downloading;
         await dbContext.SaveChangesAsync();
 
@@ -171,7 +171,9 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
         tvShowDownloadTasks.SetDownloadStatus(DownloadStatus.Completed);
         var lastDownloadTask = tvShowDownloadTasks.Last();
         lastDownloadTask.SetDownloadStatus(DownloadStatus.Queued);
-        var downloadingTask = lastDownloadTask.Children[0].Children[1].Children[0];
+
+        var downloadingTask = lastDownloadTask.Children.ElementAt(0).Children.ElementAt(1).Children.ElementAt(0);
+
         downloadingTask.DownloadStatus = DownloadStatus.Downloading;
         await dbContext.SaveChangesAsync();
 

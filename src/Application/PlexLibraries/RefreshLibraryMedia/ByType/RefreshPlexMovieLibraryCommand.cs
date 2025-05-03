@@ -48,15 +48,16 @@ public class RefreshPlexMovieLibraryCommandHandler
 
         if (plexLibrary.Movies.Any())
         {
-            for (var i = 0; i < plexLibrary.Movies.Count; i++)
+            var i = 0;
+            foreach (var plexMovie in plexLibrary.Movies)
             {
-                var plexMovie = plexLibrary.Movies[i];
                 plexMovie.PlexLibraryId = plexLibrary.Id;
                 plexMovie.PlexServerId = plexLibrary.PlexServerId;
                 plexMovie.SortIndex = i + 1;
+                i++;
             }
 
-            var createResult = await _mediator.Send(new SyncPlexMoviesCommand(plexLibrary.Movies));
+            var createResult = await _mediator.Send(new SyncPlexMoviesCommand(plexLibrary.Movies.ToList()));
             if (createResult.IsFailed)
             {
                 await _progressReporter.SendProgress(

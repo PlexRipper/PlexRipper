@@ -6,9 +6,9 @@ public class PlexGenre : BaseEntity
 
     public long PlexKey { get; set; }
 
-    public List<PlexLibrary> PlexLibraries { get; set; } = [];
+    public ICollection<PlexLibrary> PlexLibraries { get; set; } = [];
 
-    public List<PlexMovie> PlexMovieGenres { get; set; } = [];
+    public ICollection<PlexMovie> PlexMovieGenres { get; set; } = [];
 
-    public List<PlexTvShow> PlexTvShowGenres { get; set; } = [];
+    public ICollection<PlexTvShow> PlexTvShowGenres { get; set; } = [];
 }

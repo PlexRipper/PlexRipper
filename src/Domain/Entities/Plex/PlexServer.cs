@@ -114,16 +114,16 @@ public class PlexServer : BaseEntity
 
     #region Relationships
 
-    public required List<PlexAccountServer> PlexAccountServers { get; init; } = new();
+    public required ICollection<PlexAccountServer> PlexAccountServers { get; init; } = [];
 
-    public required List<PlexLibrary> PlexLibraries { get; init; } = new();
+    public required ICollection<PlexLibrary> PlexLibraries { get; init; } = [];
 
-    public required List<PlexServerStatus> ServerStatus { get; init; } = new();
+    public required ICollection<PlexServerStatus> ServerStatus { get; init; } = [];
 
     /// <summary>
     /// Gets or sets the different connections that can be used to communicate with the <see cref="PlexServer"/>.
     /// </summary>
-    public required List<PlexServerConnection> PlexServerConnections { get; set; } = new();
+    public required ICollection<PlexServerConnection> PlexServerConnections { get; set; } = [];
 
     #endregion
 

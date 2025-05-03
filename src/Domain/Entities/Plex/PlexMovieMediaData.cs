@@ -1,9 +1,9 @@
 namespace PlexRipper.Domain;
 
-public class PlexMovieMediaData : BasePlexMediaDataRow
+public class PlexMovieMediaData : BasePlexMediaData
 {
     /// <summary>
     /// An array of parts for this media item.
     /// </summary>
-    public required List<LibraryMediaItemPartDTO> Parts { get; set; }
+    public required ICollection<PlexMovieMediaDataPart> Parts { get; set; }
 }

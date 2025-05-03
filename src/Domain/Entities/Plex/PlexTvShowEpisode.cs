@@ -2,7 +2,7 @@
 
 namespace PlexRipper.Domain;
 
-public class PlexTvShowEpisode : BasePlexMediaData
+public class PlexTvShowEpisode : PlexMedia
 {
     /// <summary>
     /// The PlexKey of the <see cref="PlexTvShowSeason"/> this belongs too.
@@ -16,7 +16,7 @@ public class PlexTvShowEpisode : BasePlexMediaData
 
     #region Relationships
 
-    public new ICollection<PlexTvShowEpisodeMediaData> MediaDataList { get; set; } = [];
+    public ICollection<PlexTvShowEpisodeMediaData> MediaDataList { get; set; } = [];
 
     public PlexTvShow? TvShow { get; set; }
 
@@ -32,6 +32,19 @@ public class PlexTvShowEpisode : BasePlexMediaData
 
     [NotMapped]
     public override PlexMediaType Type => PlexMediaType.Episode;
+
+    [NotMapped]
+    public List<PlexMediaQuality> Qualities
+    {
+        get
+        {
+            return MediaDataList
+                .Select(y => new PlexMediaQuality(y.VideoResolution))
+                .Reverse() // This sorts from lowest to highest quality
+                .TakeLast(1) // TODO:remove this when quality selector for downloading is implemented
+                .ToList();
+        }
+    }
 
     #endregion
 }

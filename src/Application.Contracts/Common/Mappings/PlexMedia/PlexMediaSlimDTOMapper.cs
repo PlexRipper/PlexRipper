@@ -4,30 +4,6 @@ namespace Application.Contracts;
 
 public static class PlexMediaSlimDTOMapper
 {
-    public static PlexMediaSlimDTO ToSlimDTO(this BasePlexMediaData source) =>
-        new()
-        {
-            Id = source.Id,
-            Title = source.Title,
-            SortIndex = source.SortIndex,
-            Year = source.Year,
-            Duration = source.Duration,
-            MediaSize = source.MediaSize,
-            ChildCount = source.ChildCount,
-            GrandChildCount = 0,
-            AddedAt = source.AddedAt,
-            UpdatedAt = source.UpdatedAt,
-            PlexLibraryId = source.PlexLibraryId,
-            PlexServerId = source.PlexServerId,
-            Type = source.Type,
-            HasThumb = source.HasThumb,
-            Qualities = source.Qualities.ToDTO(),
-            SearchTitle = string.Empty, // TODO: Missing in PlexMediaSlim
-            Key = source.Key,
-            MetaDataKey = source.MetaDataKey,
-            PlexToken = string.Empty,
-        };
-
     #region PlexMovie
 
     public static PlexMediaSlimDTO ToSlimDTO(this PlexMovie source) =>

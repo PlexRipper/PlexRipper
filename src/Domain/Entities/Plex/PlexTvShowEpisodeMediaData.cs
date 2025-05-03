@@ -1,9 +1,9 @@
 namespace PlexRipper.Domain;
 
-public class PlexTvShowEpisodeMediaData : BasePlexMediaDataRow
+public class PlexTvShowEpisodeMediaData : BasePlexMediaData
 {
     /// <summary>
     /// An array of parts for this media item.
     /// </summary>
-    public required List<LibraryMediaItemPartDTO> Parts { get; set; }
+    public required List<PlexTvShowEpisodeMediaDataPart> Parts { get; set; }
 }

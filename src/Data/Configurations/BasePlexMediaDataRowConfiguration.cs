@@ -3,9 +3,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace PlexRipper.Data.Configurations;
 
-public class BasePlexMediaDataRowConfiguration : IEntityTypeConfiguration<BasePlexMediaDataRow>
+public class BasePlexMediaDataRowConfiguration : IEntityTypeConfiguration<BasePlexMediaData>
 {
-    public void Configure(EntityTypeBuilder<BasePlexMediaDataRow> builder)
+    public void Configure(EntityTypeBuilder<BasePlexMediaData> builder)
     {
         builder.UseTpcMappingStrategy();
     }

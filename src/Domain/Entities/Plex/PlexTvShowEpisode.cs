@@ -2,7 +2,7 @@
 
 namespace PlexRipper.Domain;
 
-public class PlexTvShowEpisode : PlexMedia
+public class PlexTvShowEpisode : BasePlexMediaData
 {
     /// <summary>
     /// The PlexKey of the <see cref="PlexTvShowSeason"/> this belongs too.

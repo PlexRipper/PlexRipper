@@ -4,19 +4,21 @@ public static class PlexMetaDataMapper
 {
     #region Single Conversions
 
-    public static PlexMovie ToPlexMovie(this LibraryMediaItemDTO source) => source.ToPlexMedia().ToPlexMovie(source);
+    public static PlexMovie ToPlexMovie(this LibraryMediaItemDTO source) =>
+        source.ToPlexMediaData().ToPlexMovie(source);
 
-    public static PlexTvShow ToPlexTvShow(this LibraryMediaItemDTO source) => source.ToPlexMedia().ToPlexTvShow(source);
+    public static PlexTvShow ToPlexTvShow(this LibraryMediaItemDTO source) =>
+        source.ToPlexMediaData().ToPlexTvShow(source);
 
     public static PlexTvShowSeason ToPlexTvShowSeason(this LibraryMediaItemDTO source) =>
-        source.ToPlexMedia().ToPlexTvShowSeason(source);
+        source.ToPlexMediaData().ToPlexTvShowSeason(source);
 
     public static PlexTvShowEpisode ToPlexTvShowEpisode(this LibraryMediaItemDTO source) =>
-        source.ToPlexMedia().ToPlexTvShowEpisode(source);
+        source.ToPlexMediaData().ToPlexTvShowEpisode(source);
 
-    public static PlexMedia ToPlexMedia(this LibraryMediaItemDTO source)
+    public static BasePlexMediaData ToPlexMediaData(this LibraryMediaItemDTO source)
     {
-        return new PlexMedia
+        return new BasePlexMediaData
         {
             Id = 0,
             Title = source.Title,

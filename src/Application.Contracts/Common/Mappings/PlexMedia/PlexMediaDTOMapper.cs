@@ -77,7 +77,7 @@ public static class PlexMediaDTOMapper
             PlexServerId = source.PlexServerId,
             Type = source.Type,
             HasThumb = source.HasThumb,
-            Qualities = source.Qualities.ToDTO(),
+            Qualities = [], // TODO Qualities for TV Shows should be determined by the nested seasons, min/max qualities
             Key = source.Key,
             HasArt = source.HasArt,
             HasTheme = source.HasTheme,
@@ -127,7 +127,7 @@ public static class PlexMediaDTOMapper
             PlexServerId = source.PlexServerId,
             Type = source.Type,
             HasThumb = source.HasThumb,
-            Qualities = source.Qualities.ToDTO(),
+            Qualities = [], // TODO Qualities for TV Shows should be determined by the nested seasons, min/max qualities
             Key = source.Key,
             HasArt = source.HasArt,
             HasTheme = source.HasTheme,

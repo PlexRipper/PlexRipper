@@ -4,7 +4,7 @@ namespace PlexRipper.PlexApi;
 
 public static class PlexMediaMapper
 {
-    public static PlexMovie ToPlexMovie(this PlexMedia source, LibraryMediaItemDTO originalSource) =>
+    public static PlexMovie ToPlexMovie(this BasePlexMediaData source, LibraryMediaItemDTO originalSource) =>
         new()
         {
             Id = source.Id,
@@ -44,7 +44,7 @@ public static class PlexMediaMapper
             Genres = originalSource.Genre.ToPlexGenre(),
         };
 
-    public static PlexTvShow ToPlexTvShow(this PlexMedia source, LibraryMediaItemDTO originalSource) =>
+    public static PlexTvShow ToPlexTvShow(this BasePlexMediaData source, LibraryMediaItemDTO originalSource) =>
         new()
         {
             Id = source.Id,
@@ -63,7 +63,6 @@ public static class PlexMediaMapper
             HasThumb = source.HasThumb,
             HasArt = source.HasArt,
             HasTheme = source.HasTheme,
-            MediaData = source.MediaData,
             PlexLibraryId = source.PlexLibraryId,
             PlexServerId = source.PlexServerId,
             FullBannerUrl = source.FullBannerUrl,
@@ -85,7 +84,10 @@ public static class PlexMediaMapper
             Genres = originalSource.Genre.ToPlexGenre(),
         };
 
-    public static PlexTvShowSeason ToPlexTvShowSeason(this PlexMedia source, LibraryMediaItemDTO originalSource) =>
+    public static PlexTvShowSeason ToPlexTvShowSeason(
+        this BasePlexMediaData source,
+        LibraryMediaItemDTO originalSource
+    ) =>
         new()
         {
             Id = source.Id,
@@ -103,7 +105,6 @@ public static class PlexMediaMapper
             HasThumb = source.HasThumb,
             HasArt = source.HasArt,
             HasTheme = source.HasTheme,
-            MediaData = source.MediaData,
             PlexLibraryId = source.PlexLibraryId,
             PlexServerId = source.PlexServerId,
             FullBannerUrl = source.FullBannerUrl,
@@ -124,7 +125,10 @@ public static class PlexMediaMapper
             ParentGuid = originalSource.ParentGuid,
         };
 
-    public static PlexTvShowEpisode ToPlexTvShowEpisode(this PlexMedia source, LibraryMediaItemDTO originalSource) =>
+    public static PlexTvShowEpisode ToPlexTvShowEpisode(
+        this BasePlexMediaData source,
+        LibraryMediaItemDTO originalSource
+    ) =>
         new()
         {
             Id = source.Id,

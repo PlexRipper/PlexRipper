@@ -3,7 +3,7 @@
 namespace PlexRipper.Domain;
 
 [Table("PlexMovie")]
-public class PlexMovie : PlexMedia
+public class PlexMovie : BasePlexMediaData
 {
     public List<PlexRole> Roles { get; set; } = [];
 

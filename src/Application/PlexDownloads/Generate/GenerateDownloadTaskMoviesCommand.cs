@@ -78,6 +78,7 @@ public class GenerateDownloadTaskMoviesCommandHandler : IRequestHandler<Generate
 
             var plexMovies = await _dbContext
                 .PlexMovies.Where(x => downloadMediaDto.MediaIds.Contains(x.Id))
+                .IncludeMediaData()
                 .ToListAsync(cancellationToken);
 
             foreach (var plexMovie in plexMovies)

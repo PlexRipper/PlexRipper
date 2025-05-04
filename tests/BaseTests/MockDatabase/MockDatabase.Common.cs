@@ -365,16 +365,11 @@ public static partial class MockDatabase
         var plexLibraries = context.PlexLibraries.Where(x => x.Type == PlexMediaType.TvShow).ToList();
         plexLibraries.ShouldNotBeNull().ShouldNotBeEmpty();
 
-        var tvShowList = new List<PlexTvShow>();
         foreach (var plexLibrary in plexLibraries)
         {
             var tvShows = FakeData.GetPlexTvShows(seed, options).Generate(config.TvShowCount);
-            tvShows.SetRelationshipIds(plexLibrary.PlexServerId, plexLibrary.Id);
-
-            tvShowList.AddRange(tvShows);
+            await context.BulkInsertPlexTvShowsAsync(tvShows, plexLibrary.PlexServerId, plexLibrary.Id);
         }
-
-        await context.BulkInsertPlexTvShowsAsync(tvShowList);
 
         _log.Here()
             .Debug(

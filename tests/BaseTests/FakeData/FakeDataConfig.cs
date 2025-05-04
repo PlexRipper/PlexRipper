@@ -41,6 +41,8 @@ public class FakeDataConfig : BaseConfig<FakeDataConfig>
 
     public bool IncludeMultiPartMovies { get; set; }
 
+    public bool IncludeMultiPartEpisodes { get; set; }
+
     public bool AccountHasAccessToAllLibraries { get; set; }
 
     public int DownloadFileSizeInMb { get; set; } = 10;

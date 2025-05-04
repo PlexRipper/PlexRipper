@@ -59,7 +59,7 @@ public static partial class FakeData
             .ApplyBasePlexMedia(seed, PlexMediaType.Movie)
             .StrictMode(true)
             .UseSeed(seed.Next())
-            .RuleFor(x => x.MediaDataList, _ => GetPlexMovieMediaData(seed).Generate(1))
+            .RuleFor(x => x.MediaDataList, _ => GetPlexMovieMediaData(seed, options).Generate(1))
             .RuleFor(x => x.Roles, () => [])
             .RuleFor(x => x.Genres, () => [])
             .RuleFor(x => x.Countries, () => [])
@@ -158,7 +158,7 @@ public static partial class FakeData
             .RuleFor(x => x.TvShowSeasonId, _ => 0)
             .RuleFor(x => x.TvShowSeason, _ => null)
             .RuleFor(x => x.ParentGuid, _ => string.Empty)
-            .RuleFor(x => x.MediaDataList, GetPlexTvShowEpisodeMediaData(seed).Generate(1))
+            .RuleFor(x => x.MediaDataList, _ => GetPlexTvShowEpisodeMediaData(seed, options).Generate(1))
             .FinishWith(
                 (_, tvShowEpisode) =>
                 {

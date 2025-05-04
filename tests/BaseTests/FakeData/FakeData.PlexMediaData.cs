@@ -29,27 +29,46 @@ public static partial class FakeData
             .RuleFor(x => x.PlexLibraryId, _ => 0)
             .RuleFor(x => x.PlexLibrary, _ => null);
 
-    public static Faker<PlexMovieMediaData> GetPlexMovieMediaData(Seed seed) =>
-        GetOrCreateCachedFaker(
+    public static Faker<PlexMovieMediaData> GetPlexMovieMediaData(Seed seed, Action<FakeDataConfig>? options = null)
+    {
+        var config = FakeDataConfig.FromOptions(options);
+
+        return GetOrCreateCachedFaker(
                 () =>
                     new Faker<PlexMovieMediaData>()
                         .StrictMode(true)
                         .ApplyBasePlexMediaData()
-                        .RuleFor(x => x.Parts, _ => GetPlexMovieMediaDataPart(seed).Generate(1))
+                        .RuleFor(
+                            x => x.Parts,
+                            _ => GetPlexMovieMediaDataPart(seed).Generate(config.IncludeMultiPartMovies ? 2 : 1)
+                        )
                         .RuleFor(x => x.PlexMovieId, _ => 0)
                         .RuleFor(x => x.PlexMovie, _ => null)
             )
             .UseSeed(seed.Next());
+    }
 
-    public static Faker<PlexTvShowEpisodeMediaData> GetPlexTvShowEpisodeMediaData(Seed seed) =>
-        GetOrCreateCachedFaker(
+    public static Faker<PlexTvShowEpisodeMediaData> GetPlexTvShowEpisodeMediaData(
+        Seed seed,
+        Action<FakeDataConfig>? options = null
+    )
+    {
+        var config = FakeDataConfig.FromOptions(options);
+
+        return GetOrCreateCachedFaker(
                 () =>
                     new Faker<PlexTvShowEpisodeMediaData>()
                         .StrictMode(true)
                         .ApplyBasePlexMediaData()
-                        .RuleFor(x => x.Parts, _ => GetPlexTvShowEpisodeMediaDataPart(seed).Generate(1))
+                        .RuleFor(
+                            x => x.Parts,
+                            _ =>
+                                GetPlexTvShowEpisodeMediaDataPart(seed)
+                                    .Generate(config.IncludeMultiPartEpisodes ? 2 : 1)
+                        )
                         .RuleFor(x => x.PlexTvShowEpisodeId, _ => 0)
                         .RuleFor(x => x.PlexTvShowEpisode, _ => null)
             )
             .UseSeed(seed.Next());
+    }
 }

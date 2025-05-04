@@ -216,7 +216,7 @@ public static partial class DbContextExtensions
     {
         try
         {
-            if (plexMovies.Any())
+            if (!plexMovies.Any())
                 return Result.Fail("No movies to insert").LogWarning();
 
             if (plexServerId == 0)
@@ -282,71 +282,108 @@ public static partial class DbContextExtensions
     /// <summary>
     /// Bulk inserts the Plex tv-shows and the movie media data into the database.
     /// </summary>
-    public static async Task BulkInsertPlexTvShowsAsync(
+    public static async Task<Result> BulkInsertPlexTvShowsAsync(
         this IPlexRipperDbContext context,
         List<PlexTvShow> plexTvShows,
+        int plexServerId,
+        int plexLibraryId,
         CancellationToken ct = default
     )
     {
-        await context.BulkInsertAsync(plexTvShows, BulkConfigPreset.Default, ct);
+        try
+        {
+            if (!plexTvShows.Any())
+                return Result.Fail("No tv-shows to insert").LogWarning();
 
-        // Add tv-show media data for each tv-show
-        var seasons = plexTvShows
-            .SelectMany(x =>
-            {
-                x.Seasons.SetRelationshipIds(x.PlexServerId, x.PlexLibraryId, x.Id);
-                return x.Seasons;
-            })
-            .ToList();
+            if (plexServerId == 0)
+                return ResultExtensions.IsZero(nameof(plexServerId));
 
-        await context.BulkInsertAsync(seasons, BulkConfigPreset.Default, ct);
+            if (plexLibraryId == 0)
+                return ResultExtensions.IsZero(nameof(plexServerId));
 
-        // Add tv-show media data for each tv-show
-        var episodes = seasons
-            .SelectMany(x =>
-            {
-                x.Episodes.SetRelationshipIds(x.PlexServerId, x.PlexLibraryId, x.TvShowId, x.Id);
-                return x.Episodes;
-            })
-            .ToList();
+            plexTvShows.SetRelationshipIds(plexServerId, plexLibraryId);
 
-        await context.BulkInsertAsync(episodes, BulkConfigPreset.Default, ct);
+            await context.BulkInsertAsync(plexTvShows, BulkConfigPreset.Default, ct);
 
-        // Add tv-show media data for each tv-show
-        var mediaData = episodes
-            .SelectMany(x =>
-            {
-                x.MediaDataList.SetRelationshipIds(x.PlexServerId, x.PlexLibraryId, x.Id);
-                return x.MediaDataList;
-            })
-            .ToList();
+            // Add tv-show media data for each tv-show
+            var seasons = plexTvShows
+                .SelectMany(tvShow =>
+                {
+                    tvShow.Seasons.SetRelationshipIds(tvShow.PlexServerId, tvShow.PlexLibraryId, tvShow.Id);
+                    return tvShow.Seasons;
+                })
+                .ToList();
 
-        await context.BulkInsertAsync(mediaData, BulkConfigPreset.Default, ct);
+            await context.BulkInsertAsync(seasons, BulkConfigPreset.Default, ct);
 
-        // Add tv-show media data parts for each media data
-        var parts = mediaData
-            .SelectMany(x =>
-            {
-                x.Parts.SetRelationshipIds(x.PlexServerId, x.PlexLibraryId, x.PlexTvShowEpisodeId, x.Id);
-                return x.Parts;
-            })
-            .ToList();
-        await context.BulkInsertAsync(parts, BulkConfigPreset.Default, ct);
+            // Add tv-show media data for each tv-show
+            var episodes = seasons
+                .SelectMany(season =>
+                {
+                    season.Episodes.SetRelationshipIds(
+                        season.PlexServerId,
+                        season.PlexLibraryId,
+                        season.TvShowId,
+                        season.Id
+                    );
+                    return season.Episodes;
+                })
+                .ToList();
 
-        // Add tv-show media data streams for each part
-        var streams = parts
-            .SelectMany(x =>
-            {
-                x.Streams.SetRelationshipIds(
-                    x.PlexServerId,
-                    x.PlexLibraryId,
-                    x.PlexTvShowEpisodeId,
-                    x.PlexTvShowEpisodeMediaDataId,
-                    x.Id
-                );
-                return x.Streams;
-            })
-            .ToList();
-        await context.BulkInsertAsync(streams, BulkConfigPreset.Default, ct);
+            await context.BulkInsertAsync(episodes, BulkConfigPreset.Default, ct);
+
+            // Add tv-show media data for each tv-show
+            var mediaData = episodes
+                .SelectMany(episode =>
+                {
+                    episode.MediaDataList.SetRelationshipIds(episode.PlexServerId, episode.PlexLibraryId, episode.Id);
+                    return episode.MediaDataList;
+                })
+                .ToList();
+
+            await context.BulkInsertAsync(mediaData, BulkConfigPreset.Default, ct);
+
+            // Add tv-show media data parts for each media data
+            var parts = mediaData
+                .SelectMany(data =>
+                {
+                    data.Parts.SetRelationshipIds(
+                        data.PlexServerId,
+                        data.PlexLibraryId,
+                        data.PlexTvShowEpisodeId,
+                        data.Id
+                    );
+                    return data.Parts;
+                })
+                .ToList();
+            await context.BulkInsertAsync(parts, BulkConfigPreset.Default, ct);
+
+            // Add tv-show media data streams for each part
+            var streams = parts
+                .SelectMany(part =>
+                {
+                    part.Streams.SetRelationshipIds(
+                        part.PlexServerId,
+                        part.PlexLibraryId,
+                        part.PlexTvShowEpisodeId,
+                        part.PlexTvShowEpisodeMediaDataId,
+                        part.Id
+                    );
+                    return part.Streams;
+                })
+                .ToList();
+            await context.BulkInsertAsync(streams, BulkConfigPreset.Default, ct);
+
+            return Result.Ok();
+        }
+        catch (Exception e)
+        {
+            _log.Error(
+                "Error while bulk inserting plex tv-shows with serverId: {PlexServerId} and libraryId: {PlexLibraryId}",
+                plexServerId,
+                plexLibraryId
+            );
+            return Result.Fail(new ExceptionalError(e)).LogError();
+        }
     }
 }

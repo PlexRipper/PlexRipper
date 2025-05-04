@@ -336,17 +336,12 @@ public static partial class MockDatabase
         var plexLibraries = context.PlexLibraries.Where(x => x.Type == PlexMediaType.Movie).ToList();
         plexLibraries.ShouldNotBeNull().ShouldNotBeEmpty();
 
-        var movieList = new List<PlexMovie>();
-
         // Add movies for each library
         foreach (var plexLibrary in plexLibraries)
         {
             var movies = FakeData.GetPlexMovies(seed, options).Generate(config.MovieCount);
-            movies.SetRelationshipIds(plexLibrary.PlexServerId, plexLibrary.Id);
-            movieList.AddRange(movies);
+            await context.BulkInsertPlexMoviesAsync(movies, plexLibrary.PlexServerId, plexLibrary.Id);
         }
-
-        await context.BulkInsertPlexMoviesAsync(movieList);
 
         _log.Here()
             .Debug(

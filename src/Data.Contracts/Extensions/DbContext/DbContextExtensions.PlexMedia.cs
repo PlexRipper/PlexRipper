@@ -206,50 +206,77 @@ public static partial class DbContextExtensions
     /// <summary>
     /// Bulk inserts the Plex movies and the movie media data into the database.
     /// </summary>
-    public static async Task BulkInsertPlexMoviesAsync(
+    public static async Task<Result> BulkInsertPlexMoviesAsync(
         this IPlexRipperDbContext context,
         List<PlexMovie> plexMovies,
+        int plexServerId,
+        int plexLibraryId,
         CancellationToken ct = default
     )
     {
-        await context.BulkInsertAsync(plexMovies, BulkConfigPreset.Default, ct);
+        try
+        {
+            if (plexMovies.Any())
+                return Result.Fail("No movies to insert").LogWarning();
 
-        // Add movie media data for each movie
-        var mediaData = plexMovies
-            .SelectMany(x =>
-            {
-                x.MediaDataList.SetRelationshipIds(x.PlexServerId, x.PlexLibraryId, x.Id);
-                return x.MediaDataList;
-            })
-            .ToList();
+            if (plexServerId == 0)
+                return ResultExtensions.IsZero(nameof(plexServerId));
 
-        await context.BulkInsertAsync(mediaData, BulkConfigPreset.Default, ct);
+            if (plexLibraryId == 0)
+                return ResultExtensions.IsZero(nameof(plexServerId));
 
-        // Add movie media data parts for each media data
-        var parts = mediaData
-            .SelectMany(x =>
-            {
-                x.Parts.SetRelationshipIds(x.PlexServerId, x.PlexLibraryId, x.PlexMovieId, x.Id);
-                return x.Parts;
-            })
-            .ToList();
-        await context.BulkInsertAsync(parts, BulkConfigPreset.Default, ct);
+            plexMovies.SetRelationshipIds(plexServerId, plexLibraryId);
 
-        // Add movie media data streams for each part
-        var streams = parts
-            .SelectMany(x =>
-            {
-                x.Streams.SetRelationshipIds(
-                    x.PlexServerId,
-                    x.PlexLibraryId,
-                    x.PlexMovieId,
-                    x.PlexMovieMediaDataId,
-                    x.Id
-                );
-                return x.Streams;
-            })
-            .ToList();
-        await context.BulkInsertAsync(streams, BulkConfigPreset.Default, ct);
+            await context.BulkInsertAsync(plexMovies, BulkConfigPreset.Default, ct);
+
+            // Add movie media data for each movie
+            var mediaData = plexMovies
+                .SelectMany(x =>
+                {
+                    x.MediaDataList.SetRelationshipIds(x.PlexServerId, x.PlexLibraryId, x.Id);
+                    return x.MediaDataList;
+                })
+                .ToList();
+
+            await context.BulkInsertAsync(mediaData, BulkConfigPreset.Default, ct);
+
+            // Add movie media data parts for each media data
+            var parts = mediaData
+                .SelectMany(x =>
+                {
+                    x.Parts.SetRelationshipIds(x.PlexServerId, x.PlexLibraryId, x.PlexMovieId, x.Id);
+                    return x.Parts;
+                })
+                .ToList();
+            await context.BulkInsertAsync(parts, BulkConfigPreset.Default, ct);
+
+            // Add movie media data streams for each part
+            var streams = parts
+                .SelectMany(x =>
+                {
+                    x.Streams.SetRelationshipIds(
+                        x.PlexServerId,
+                        x.PlexLibraryId,
+                        x.PlexMovieId,
+                        x.PlexMovieMediaDataId,
+                        x.Id
+                    );
+                    return x.Streams;
+                })
+                .ToList();
+            await context.BulkInsertAsync(streams, BulkConfigPreset.Default, ct);
+
+            return Result.Ok();
+        }
+        catch (Exception e)
+        {
+            _log.Error(
+                "Error while bulk inserting plex movies with serverId: {PlexServerId} and libraryId: {PlexLibraryId}",
+                plexServerId,
+                plexLibraryId
+            );
+            return Result.Fail(new ExceptionalError(e)).LogError();
+        }
     }
 
     /// <summary>

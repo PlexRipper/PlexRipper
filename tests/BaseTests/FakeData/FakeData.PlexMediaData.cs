@@ -24,27 +24,27 @@ public static partial class FakeData
             .RuleFor(x => x.Duration, f => f.Random.Int(50000, 55124400))
             .RuleFor(x => x.Container, f => f.System.FileType())
             .RuleFor(x => x.HasVoiceActivity, f => f.Random.Bool())
-            .RuleFor(x => x.PlexServerId, _ => 0)
-            .RuleFor(x => x.PlexServer, _ => null)
-            .RuleFor(x => x.PlexLibraryId, _ => 0)
-            .RuleFor(x => x.PlexLibrary, _ => null);
+            .Ignore(x => x.PlexServerId)
+            .Ignore(x => x.PlexServer)
+            .Ignore(x => x.PlexLibraryId)
+            .Ignore(x => x.PlexLibrary);
+
+    private static readonly Faker<PlexMovieMediaData> _plexMovieMediaData = new Faker<PlexMovieMediaData>()
+        .ApplyBasePlexMediaData()
+        .Ignore(x => x.PlexMovieId)
+        .Ignore(x => x.PlexMovie);
+
+    private static readonly Faker<PlexTvShowEpisodeMediaData> _plexTvShowEpisodeMediaData =
+        new Faker<PlexTvShowEpisodeMediaData>()
+            .ApplyBasePlexMediaData()
+            .Ignore(x => x.PlexTvShowEpisodeId)
+            .Ignore(x => x.PlexTvShowEpisode);
 
     public static Faker<PlexMovieMediaData> GetPlexMovieMediaData(Seed seed, Action<FakeDataConfig>? options = null)
     {
         var config = FakeDataConfig.FromOptions(options);
-
-        return GetOrCreateCachedFaker(
-                () =>
-                    new Faker<PlexMovieMediaData>()
-                        .StrictMode(true)
-                        .ApplyBasePlexMediaData()
-                        .RuleFor(
-                            x => x.Parts,
-                            _ => GetPlexMovieMediaDataPart(seed).Generate(config.IncludeMultiPartMovies ? 2 : 1)
-                        )
-                        .RuleFor(x => x.PlexMovieId, _ => 0)
-                        .RuleFor(x => x.PlexMovie, _ => null)
-            )
+        return _plexMovieMediaData
+            .RuleFor(x => x.Parts, _ => GetPlexMovieMediaDataPart(seed).Generate(config.IncludeMultiPartMovies ? 2 : 1))
             .UseSeed(seed.Next());
     }
 
@@ -54,20 +54,10 @@ public static partial class FakeData
     )
     {
         var config = FakeDataConfig.FromOptions(options);
-
-        return GetOrCreateCachedFaker(
-                () =>
-                    new Faker<PlexTvShowEpisodeMediaData>()
-                        .StrictMode(true)
-                        .ApplyBasePlexMediaData()
-                        .RuleFor(
-                            x => x.Parts,
-                            _ =>
-                                GetPlexTvShowEpisodeMediaDataPart(seed)
-                                    .Generate(config.IncludeMultiPartEpisodes ? 2 : 1)
-                        )
-                        .RuleFor(x => x.PlexTvShowEpisodeId, _ => 0)
-                        .RuleFor(x => x.PlexTvShowEpisode, _ => null)
+        return _plexTvShowEpisodeMediaData
+            .RuleFor(
+                x => x.Parts,
+                _ => GetPlexTvShowEpisodeMediaDataPart(seed).Generate(config.IncludeMultiPartEpisodes ? 2 : 1)
             )
             .UseSeed(seed.Next());
     }

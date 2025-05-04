@@ -1,6 +1,4 @@
-﻿using Bogus;
-using PlexApi.Contracts;
-using PlexRipper.PlexApi;
+﻿using PlexApi.Contracts;
 
 namespace PlexRipper.BaseTests;
 
@@ -8,12 +6,11 @@ public static partial class FakeData
 {
     #region Base
 
-    private static Faker<T> ApplyBasePlexMedia<T>(this Faker<T> faker, Seed seed, PlexMediaType mediaType)
+    private static Faker<T> ApplyBasePlexMedia<T>(this Faker<T> faker, PlexMediaType mediaType)
         where T : BasePlexMedia
     {
         return faker
             .StrictMode(true)
-            .UseSeed(seed.Next())
             .RuleFor(x => x.Id, _ => 0)
             .RuleFor(x => x.Key, _ => GetUniqueNumber())
             .RuleFor(x => x.Title, f => f.PlexMedia().MediaTitle(mediaType))
@@ -53,85 +50,86 @@ public static partial class FakeData
 
     #region PlexMovies
 
+    private static readonly Faker<PlexMovie> _plexMovie = new Faker<PlexMovie>()
+        .ApplyBasePlexMedia(PlexMediaType.Movie)
+        .RuleFor(x => x.Roles, () => [])
+        .RuleFor(x => x.Genres, () => [])
+        .RuleFor(x => x.Countries, () => [])
+        .FinishWith(
+            (_, movie) =>
+            {
+                movie.FullTitle = $"{movie.Title} ({movie.Year})";
+
+                // TODO:Need quality selector in the case of multiple quality media
+                movie.MediaSize = movie.MediaDataList.First().Parts.Sum(x => x.Size);
+            }
+        );
+
     public static Faker<PlexMovie> GetPlexMovies(Seed seed, Action<FakeDataConfig>? options = null)
     {
-        return new Faker<PlexMovie>()
-            .ApplyBasePlexMedia(seed, PlexMediaType.Movie)
-            .StrictMode(true)
-            .UseSeed(seed.Next())
-            .RuleFor(x => x.MediaDataList, _ => GetPlexMovieMediaData(seed, options).Generate(1))
-            .RuleFor(x => x.Roles, () => [])
-            .RuleFor(x => x.Genres, () => [])
-            .RuleFor(x => x.Countries, () => [])
-            .FinishWith(
-                (_, movie) =>
-                {
-                    movie.FullTitle = $"{movie.Title} ({movie.Year})";
-
-                    // TODO:Need quality selector in the case of multiple quality media
-                    movie.MediaSize = movie.MediaDataList.First().Parts.Sum(x => x.Size);
-                }
-            );
+        return _plexMovie
+            .RuleFor(x => x.MediaDataList, _ => [GetPlexMovieMediaData(seed, options).Generate()])
+            .UseSeed(seed.Next());
     }
 
     #endregion
 
     #region PlexTvShows
 
+    private static readonly Faker<PlexTvShow> _plexTvShow = new Faker<PlexTvShow>()
+        .ApplyBasePlexMedia(PlexMediaType.TvShow)
+        .RuleFor(x => x.Roles, () => [])
+        .RuleFor(x => x.Genres, () => [])
+        .RuleFor(x => x.Countries, () => [])
+        .FinishWith(
+            (_, tvShow) =>
+            {
+                foreach (var (season, seasonIndex) in tvShow.Seasons.Select((season, index) => (season, index)))
+                {
+                    season.Title = $"{tvShow.Title} {seasonIndex + 1:D2}";
+                    season.ParentKey = tvShow.Key;
+                    season.ParentGuid = tvShow.Guid;
+                    season.FullTitle = $"{tvShow.Title}/{season.Title}";
+
+                    foreach (
+                        var (episode, episodeIndex) in season.Episodes.Select((episode, index) => (episode, index))
+                    )
+                    {
+                        var originalTitle = episode.Title;
+                        episode.Title = $"S{seasonIndex + 1:D2}E{episodeIndex + 1:D2} - {originalTitle}";
+                        episode.ParentKey = season.Key;
+                        episode.ParentGuid = season.Guid;
+                        episode.FullTitle = $"{tvShow.Title}/{season.Title}/{episode.Title}";
+                    }
+                }
+
+                tvShow.MediaSize = tvShow.Seasons.Sum(season => season.MediaSize);
+            }
+        );
+
     public static Faker<PlexTvShow> GetPlexTvShows(Seed seed, Action<FakeDataConfig>? options = null)
     {
         var config = FakeDataConfig.FromOptions(options);
 
-        return new Faker<PlexTvShow>()
-            .StrictMode(true)
-            .UseSeed(seed.Next())
-            .ApplyBasePlexMedia(seed, PlexMediaType.TvShow)
-            .RuleFor(x => x.Roles, () => [])
-            .RuleFor(x => x.Genres, () => [])
-            .RuleFor(x => x.Countries, () => [])
+        return _plexTvShow
             .RuleFor(x => x.Seasons, _ => GetPlexTvShowSeason(seed, options).Generate(config.TvShowSeasonCount))
             .RuleFor(x => x.ChildCount, _ => config.TvShowSeasonCount)
             .RuleFor(x => x.GrandChildCount, _ => config.TvShowSeasonCount * config.TvShowEpisodeCount)
-            .FinishWith(
-                (_, tvShow) =>
-                {
-                    foreach (var (season, seasonIndex) in tvShow.Seasons.Select((season, index) => (season, index)))
-                    {
-                        season.Title = $"{tvShow.Title} {seasonIndex + 1:D2}";
-                        season.ParentKey = tvShow.Key;
-                        season.ParentGuid = tvShow.Guid;
-                        season.FullTitle = $"{tvShow.Title}/{season.Title}";
-
-                        foreach (
-                            var (episode, episodeIndex) in season.Episodes.Select((episode, index) => (episode, index))
-                        )
-                        {
-                            var originalTitle = episode.Title;
-                            episode.Title = $"S{seasonIndex + 1:D2}E{episodeIndex + 1:D2} - {originalTitle}";
-                            episode.ParentKey = season.Key;
-                            episode.ParentGuid = season.Guid;
-                            episode.FullTitle = $"{tvShow.Title}/{season.Title}/{episode.Title}";
-                        }
-                    }
-
-                    tvShow.MediaSize = tvShow.Seasons.Sum(season => season.MediaSize);
-                }
-            );
+            .UseSeed(seed.Next());
     }
+
+    private static readonly Faker<PlexTvShowSeason> _plexTvShowSeason = new Faker<PlexTvShowSeason>()
+        .ApplyBasePlexMedia(PlexMediaType.Season)
+        .RuleFor(x => x.Title, _ => "Season")
+        .RuleFor(x => x.ParentKey, _ => GetUniqueNumber())
+        .RuleFor(x => x.TvShowId, _ => 0)
+        .Ignore(x => x.TvShow)
+        .RuleFor(x => x.ParentGuid, _ => string.Empty);
 
     public static Faker<PlexTvShowSeason> GetPlexTvShowSeason(Seed seed, Action<FakeDataConfig>? options = null)
     {
         var config = FakeDataConfig.FromOptions(options);
-
-        return new Faker<PlexTvShowSeason>()
-            .StrictMode(true)
-            .UseSeed(seed.Next())
-            .ApplyBasePlexMedia(seed, PlexMediaType.Season)
-            .RuleFor(x => x.Title, _ => "Season")
-            .RuleFor(x => x.ParentKey, _ => GetUniqueNumber())
-            .RuleFor(x => x.TvShowId, _ => 0)
-            .RuleFor(x => x.TvShow, _ => null)
-            .RuleFor(x => x.ParentGuid, _ => string.Empty)
+        return _plexTvShowSeason
             .RuleFor(x => x.Episodes, _ => GetPlexTvShowEpisode(seed, options).Generate(config.TvShowEpisodeCount))
             .FinishWith(
                 (_, tvShowSeason) =>
@@ -142,36 +140,36 @@ public static partial class FakeData
                         episode.ParentGuid = tvShowSeason.Guid;
                     }
                 }
-            );
+            )
+            .UseSeed(seed.Next());
     }
 
-    public static Faker<PlexTvShowEpisode> GetPlexTvShowEpisode(Seed seed, Action<FakeDataConfig>? options = null)
-    {
-        return new Faker<PlexTvShowEpisode>()
-            .StrictMode(true)
-            .UseSeed(seed.Next())
-            .ApplyBasePlexMedia(seed, PlexMediaType.Episode)
-            .RuleFor(x => x.Id, _ => 0)
-            .RuleFor(x => x.ParentKey, _ => GetUniqueNumber())
-            .RuleFor(x => x.TvShowId, _ => 0)
-            .RuleFor(x => x.TvShow, _ => null)
-            .RuleFor(x => x.TvShowSeasonId, _ => 0)
-            .RuleFor(x => x.TvShowSeason, _ => null)
-            .RuleFor(x => x.ParentGuid, _ => string.Empty)
+    private static readonly Faker<PlexTvShowEpisode> _plexTvShowEpisode = new Faker<PlexTvShowEpisode>()
+        .ApplyBasePlexMedia(PlexMediaType.Episode)
+        .RuleFor(x => x.Id, _ => 0)
+        .RuleFor(x => x.ParentKey, _ => GetUniqueNumber())
+        .RuleFor(x => x.TvShowId, _ => 0)
+        .RuleFor(x => x.TvShow, _ => null)
+        .RuleFor(x => x.TvShowSeasonId, _ => 0)
+        .RuleFor(x => x.TvShowSeason, _ => null)
+        .RuleFor(x => x.ParentGuid, _ => string.Empty)
+        .FinishWith(
+            (_, tvShowEpisode) =>
+            {
+                foreach (var mediaData in tvShowEpisode.MediaDataList)
+                foreach (var mediaDataPart in mediaData.Parts)
+                    mediaDataPart.File = $"{tvShowEpisode.Title}";
+
+                tvShowEpisode.MediaSize = tvShowEpisode
+                    .MediaDataList.SelectMany(x => x.Parts.Select(y => y.Size))
+                    .Sum();
+            }
+        );
+
+    public static Faker<PlexTvShowEpisode> GetPlexTvShowEpisode(Seed seed, Action<FakeDataConfig>? options = null) =>
+        _plexTvShowEpisode
             .RuleFor(x => x.MediaDataList, _ => GetPlexTvShowEpisodeMediaData(seed, options).Generate(1))
-            .FinishWith(
-                (_, tvShowEpisode) =>
-                {
-                    foreach (var mediaData in tvShowEpisode.MediaDataList)
-                    foreach (var mediaDataPart in mediaData.Parts)
-                        mediaDataPart.File = $"{tvShowEpisode.Title}";
-
-                    tvShowEpisode.MediaSize = tvShowEpisode
-                        .MediaDataList.SelectMany(x => x.Parts.Select(y => y.Size))
-                        .Sum();
-                }
-            );
-    }
+            .UseSeed(seed.Next());
 
     #endregion
 }

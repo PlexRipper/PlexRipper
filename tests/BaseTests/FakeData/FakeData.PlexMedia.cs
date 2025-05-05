@@ -11,12 +11,12 @@ public static partial class FakeData
     {
         return faker
             .StrictMode(true)
-            .RuleFor(x => x.Id, _ => 0)
+            .Ignore(x => x.Id)
             .RuleFor(x => x.Key, _ => GetUniqueNumber())
             .RuleFor(x => x.Title, f => f.PlexMedia().MediaTitle(mediaType))
             .RuleFor(x => x.Year, f => f.Random.Int(1900, 2030))
             .RuleFor(x => x.FullTitle, (_, x) => $"{x.Title} ({x.Year})")
-            .RuleFor(x => x.SortIndex, _ => 0)
+            .Ignore(x => x.SortIndex)
             .RuleFor(x => x.SearchTitle, (_, x) => x.Title.ToSearchTitle())
             .RuleFor(x => x.Duration, f => f.Random.Int(1000, 3000000))
             .RuleFor(x => x.MediaSize, f => f.Random.Long(1000, 30000000))
@@ -32,11 +32,11 @@ public static partial class FakeData
             .RuleFor(x => x.AddedAt, f => f.Date.Recent(30))
             .RuleFor(x => x.UpdatedAt, f => f.Date.Recent(30))
             .RuleFor(x => x.OriginallyAvailableAt, f => f.Date.Recent(30))
-            .RuleFor(x => x.PlexServerId, _ => 0)
-            .RuleFor(x => x.PlexServer, _ => null)
-            .RuleFor(x => x.PlexLibraryId, _ => 0)
-            .RuleFor(x => x.PlexLibrary, _ => null)
-            .RuleFor(x => x.FullBannerUrl, _ => string.Empty)
+            .Ignore(x => x.PlexServerId)
+            .Ignore(x => x.PlexServer)
+            .Ignore(x => x.PlexLibraryId)
+            .Ignore(x => x.PlexLibrary)
+            .Ignore(x => x.FullBannerUrl)
             .RuleFor(
                 x => x.Guid,
                 _ => $"plex://{mediaType.ToPlexApiString()}/${Guid.NewGuid().ToString().Replace("-", "")}"
@@ -52,9 +52,9 @@ public static partial class FakeData
 
     private static readonly Faker<PlexMovie> _plexMovie = new Faker<PlexMovie>()
         .ApplyBasePlexMedia(PlexMediaType.Movie)
-        .RuleFor(x => x.Roles, () => [])
-        .RuleFor(x => x.Genres, () => [])
-        .RuleFor(x => x.Countries, () => [])
+        .Ignore(x => x.Roles)
+        .Ignore(x => x.Genres)
+        .Ignore(x => x.Countries)
         .FinishWith(
             (_, movie) =>
             {
@@ -78,9 +78,9 @@ public static partial class FakeData
 
     private static readonly Faker<PlexTvShow> _plexTvShow = new Faker<PlexTvShow>()
         .ApplyBasePlexMedia(PlexMediaType.TvShow)
-        .RuleFor(x => x.Roles, () => [])
-        .RuleFor(x => x.Genres, () => [])
-        .RuleFor(x => x.Countries, () => [])
+        .Ignore(x => x.Roles)
+        .Ignore(x => x.Genres)
+        .Ignore(x => x.Countries)
         .FinishWith(
             (_, tvShow) =>
             {
@@ -122,9 +122,9 @@ public static partial class FakeData
         .ApplyBasePlexMedia(PlexMediaType.Season)
         .RuleFor(x => x.Title, _ => "Season")
         .RuleFor(x => x.ParentKey, _ => GetUniqueNumber())
-        .RuleFor(x => x.TvShowId, _ => 0)
+        .Ignore(x => x.TvShowId)
         .Ignore(x => x.TvShow)
-        .RuleFor(x => x.ParentGuid, _ => string.Empty);
+        .Ignore(x => x.ParentGuid);
 
     public static Faker<PlexTvShowSeason> GetPlexTvShowSeason(Seed seed, Action<FakeDataConfig>? options = null)
     {
@@ -146,13 +146,13 @@ public static partial class FakeData
 
     private static readonly Faker<PlexTvShowEpisode> _plexTvShowEpisode = new Faker<PlexTvShowEpisode>()
         .ApplyBasePlexMedia(PlexMediaType.Episode)
-        .RuleFor(x => x.Id, _ => 0)
+        .Ignore(x => x.Id)
         .RuleFor(x => x.ParentKey, _ => GetUniqueNumber())
-        .RuleFor(x => x.TvShowId, _ => 0)
-        .RuleFor(x => x.TvShow, _ => null)
-        .RuleFor(x => x.TvShowSeasonId, _ => 0)
-        .RuleFor(x => x.TvShowSeason, _ => null)
-        .RuleFor(x => x.ParentGuid, _ => string.Empty)
+        .Ignore(x => x.TvShowId)
+        .Ignore(x => x.TvShow)
+        .Ignore(x => x.TvShowSeasonId)
+        .Ignore(x => x.TvShowSeason)
+        .Ignore(x => x.ParentGuid)
         .FinishWith(
             (_, tvShowEpisode) =>
             {

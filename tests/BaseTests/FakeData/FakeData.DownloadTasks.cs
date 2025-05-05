@@ -14,7 +14,7 @@ public static partial class FakeData
         return faker
             .StrictMode(true)
             .UseSeed(seed.Next())
-            .RuleFor(x => x.Id, _ => Guid.Empty)
+            .Ignore(x => x.Id)
             .RuleFor(x => x.Key, _ => GetUniqueNumber())
             .RuleFor(x => x.DownloadTaskType, downloadTaskType)
             .RuleFor(x => x.MediaType, (_, x) => x.DownloadTaskType.ToPlexMediaType())
@@ -34,10 +34,10 @@ public static partial class FakeData
             .RuleFor(x => x.FullTitle, (_, x) => x.Title)
             .RuleFor(x => x.DownloadStatus, _ => DownloadStatus.Queued)
             .RuleFor(x => x.CreatedAt, _ => DateTime.UtcNow)
-            .RuleFor(x => x.PlexServerId, _ => 0)
-            .RuleFor(x => x.PlexServer, _ => null)
-            .RuleFor(x => x.PlexLibraryId, _ => 0)
-            .RuleFor(x => x.PlexLibrary, _ => null);
+            .Ignore(x => x.PlexServerId)
+            .Ignore(x => x.PlexServer)
+            .Ignore(x => x.PlexLibraryId)
+            .Ignore(x => x.PlexLibrary);
     }
 
     private static Faker<T> ApplyDownloadTaskParentBase<T>(
@@ -55,10 +55,10 @@ public static partial class FakeData
             .UseSeed(seed.Next())
             .ApplyDownloadTaskBase(seed, downloadTaskType)
             .RuleFor(x => x.Year, f => f.Random.Int(1900, 2030))
-            .RuleFor(x => x.FileTransferSpeed, _ => 0)
-            .RuleFor(x => x.DataReceived, _ => 0)
-            .RuleFor(x => x.FileDataTransferred, _ => 0)
-            .RuleFor(x => x.DownloadSpeed, _ => 0)
+            .Ignore(x => x.FileTransferSpeed)
+            .Ignore(x => x.DataReceived)
+            .Ignore(x => x.FileDataTransferred)
+            .Ignore(x => x.DownloadSpeed)
             .RuleFor(
                 x => x.DataTotal,
                 f =>
@@ -82,7 +82,7 @@ public static partial class FakeData
             .StrictMode(true)
             .UseSeed(seed.Next())
             .ApplyDownloadTaskBase(seed, downloadTaskType)
-            .RuleFor(x => x.DataReceived, _ => 0)
+            .Ignore(x => x.DataReceived)
             .RuleFor(
                 x => x.DataTotal,
                 f =>
@@ -90,12 +90,12 @@ public static partial class FakeData
                         ? (long)ByteSize.FromMebiBytes(config.DownloadFileSizeInMb).Bytes
                         : f.Random.Long(1, 10000000)
             )
-            .RuleFor(x => x.DownloadSpeed, _ => 0)
-            .RuleFor(x => x.FileTransferSpeed, _ => 0)
-            .RuleFor(x => x.FileDataTransferred, _ => 0)
-            .RuleFor(x => x.CurrentFileTransferPathIndex, _ => 0)
-            .RuleFor(x => x.CurrentFileTransferBytesOffset, _ => 0)
-            .RuleFor(x => x.DestinationFolderPathId, _ => null)
+            .Ignore(x => x.DownloadSpeed)
+            .Ignore(x => x.FileTransferSpeed)
+            .Ignore(x => x.FileDataTransferred)
+            .Ignore(x => x.CurrentFileTransferPathIndex)
+            .Ignore(x => x.CurrentFileTransferBytesOffset)
+            .Ignore(x => x.DestinationFolderPathId)
             .RuleFor(x => x.Quality, f => f.PickRandom("sd", "720p", "1080p", "2160p"))
             .RuleFor(
                 x => x.FileName,
@@ -173,8 +173,8 @@ public static partial class FakeData
             .StrictMode(true)
             .UseSeed(seed.Next())
             .ApplyDownloadTaskFileBase(seed, DownloadTaskType.MovieData, options)
-            .RuleFor(x => x.Parent, _ => null)
-            .RuleFor(x => x.ParentId, _ => Guid.Empty);
+            .Ignore(x => x.Parent)
+            .Ignore(x => x.ParentId);
     }
 
     #endregion
@@ -238,10 +238,10 @@ public static partial class FakeData
             .UseSeed(seed.Next())
             .StrictMode(true)
             .ApplyDownloadTaskParentBase(seed, DownloadTaskType.Season, options)
-            .RuleFor(x => x.ParentId, _ => Guid.Empty)
+            .Ignore(x => x.ParentId)
             .RuleFor(x => x.Title, _ => "Season")
             .RuleFor(x => x.FullTitle, _ => "Season")
-            .RuleFor(x => x.Parent, _ => null)
+            .Ignore(x => x.Parent)
             .RuleFor(
                 x => x.Children,
                 _ =>
@@ -284,8 +284,8 @@ public static partial class FakeData
             .UseSeed(seed.Next())
             .StrictMode(true)
             .ApplyDownloadTaskParentBase(seed, DownloadTaskType.Episode, options)
-            .RuleFor(x => x.Parent, _ => null)
-            .RuleFor(x => x.ParentId, _ => Guid.Empty)
+            .Ignore(x => x.Parent)
+            .Ignore(x => x.ParentId)
             .RuleFor(x => x.Title, _ => "Episode")
             .RuleFor(x => x.FullTitle, _ => "Episode")
             .RuleFor(x => x.Children, _ => GetDownloadTaskTvShowEpisodeFile(seed, options).Generate(1))
@@ -308,8 +308,8 @@ public static partial class FakeData
             .UseSeed(seed.Next())
             .StrictMode(true)
             .ApplyDownloadTaskFileBase(seed, DownloadTaskType.EpisodeData, options)
-            .RuleFor(x => x.Parent, _ => null)
-            .RuleFor(x => x.ParentId, _ => Guid.Empty);
+            .Ignore(x => x.Parent)
+            .Ignore(x => x.ParentId);
     }
 
     #endregion

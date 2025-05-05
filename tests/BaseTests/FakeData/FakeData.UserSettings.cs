@@ -155,7 +155,7 @@ public static partial class FakeData
             .StrictMode(true)
             .UseSeed(seed.Next())
             .RuleFor(x => x.MachineIdentifier, f => f.Finance.BitcoinAddress())
-            .RuleFor(x => x.PlexServerName, _ => string.Empty)
+            .Ignore(x => x.PlexServerName)
             .RuleFor(x => x.DownloadSpeedLimit, _ => config.DownloadSpeedLimitInKib)
             .RuleFor(x => x.Hidden, _ => false);
     }

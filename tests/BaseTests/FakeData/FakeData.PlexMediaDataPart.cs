@@ -8,7 +8,7 @@ public static partial class FakeData
         where T : BasePlexMediaDataPart =>
         faker
             .StrictMode(true)
-            .RuleFor(x => x.Id, _ => 0)
+            .Ignore(x => x.Id)
             .RuleFor(x => x.PlexId, f => f.Random.Long(1))
             .RuleFor(x => x.Exists, true)
             .RuleFor(x => x.Accessible, f => f.Random.Bool())
@@ -20,24 +20,24 @@ public static partial class FakeData
             .RuleFor(x => x.Container, f => f.System.FileExt("video/mp4"))
             .RuleFor(x => x.VideoProfile, f => f.Random.Words(2))
             .RuleFor(x => x.Indexes, f => f.Random.Word())
-            .RuleFor(x => x.PlexServerId, _ => 0)
+            .Ignore(x => x.PlexServerId)
             .Ignore(x => x.PlexServer)
-            .RuleFor(x => x.PlexLibraryId, _ => 0)
+            .Ignore(x => x.PlexLibraryId)
             .Ignore(x => x.PlexLibrary);
 
     private static readonly Faker<PlexMovieMediaDataPart> _plexMovieMediaDataPart = new Faker<PlexMovieMediaDataPart>()
         .ApplyBasePlexMediaDataPart()
-        .RuleFor(x => x.PlexMovieId, _ => 0)
+        .Ignore(x => x.PlexMovieId)
         .Ignore(x => x.PlexMovie)
-        .RuleFor(x => x.PlexMovieMediaDataId, _ => 0)
+        .Ignore(x => x.PlexMovieMediaDataId)
         .Ignore(x => x.PlexMovieMediaData);
 
     private static readonly Faker<PlexTvShowEpisodeMediaDataPart> _plexTvShowEpisodeMediaDataPart =
         new Faker<PlexTvShowEpisodeMediaDataPart>()
             .ApplyBasePlexMediaDataPart()
-            .RuleFor(x => x.PlexTvShowEpisodeId, _ => 0)
+            .Ignore(x => x.PlexTvShowEpisodeId)
             .Ignore(x => x.PlexTvShowEpisode)
-            .RuleFor(x => x.PlexTvShowEpisodeMediaDataId, _ => 0)
+            .Ignore(x => x.PlexTvShowEpisodeMediaDataId)
             .Ignore(x => x.PlexTvShowEpisodeMediaData);
 
     public static Faker<PlexMovieMediaDataPart> GetPlexMovieMediaDataPart(Seed seed) =>

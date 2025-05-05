@@ -8,7 +8,7 @@ public static partial class FakeData
         where T : BasePlexMediaData =>
         faker
             .StrictMode(true)
-            .RuleFor(x => x.Id, 0)
+            .Ignore(x => x.Id)
             .RuleFor(x => x.PlexId, f => f.Random.Long(1))
             .RuleFor(x => x.Bitrate, f => f.Random.Int(1900, 2030))
             .RuleFor(x => x.Width, f => f.Random.Int(240, 10000))

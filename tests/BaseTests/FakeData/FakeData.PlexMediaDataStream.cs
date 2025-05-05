@@ -8,7 +8,7 @@ public static partial class FakeData
         where T : BasePlexMediaDataStream =>
         faker
             .StrictMode(true)
-            .RuleFor(x => x.Id, _ => 0)
+            .Ignore(x => x.Id)
             .RuleFor(x => x.PlexId, f => f.Random.Long(1))
             .RuleFor(x => x.StreamType, f => f.PickRandom<StreamType>())
             .RuleFor(x => x.Default, f => f.Random.Bool())
@@ -55,28 +55,28 @@ public static partial class FakeData
             .RuleFor(x => x.HearingImpaired, f => f.Random.Bool())
             .RuleFor(x => x.Dub, f => f.Random.Bool())
             .RuleFor(x => x.Title, f => f.Lorem.Word())
-            .RuleFor(x => x.PlexServerId, _ => 0)
+            .Ignore(x => x.PlexServerId)
             .Ignore(x => x.PlexServer)
-            .RuleFor(x => x.PlexLibraryId, _ => 0)
+            .Ignore(x => x.PlexLibraryId)
             .Ignore(x => x.PlexLibrary);
 
     private static Faker<PlexMovieMediaDataStream> _plexMovieMediaDataStream = new Faker<PlexMovieMediaDataStream>()
         .ApplyBasePlexMediaDataStream()
-        .RuleFor(x => x.PlexMovieId, _ => 0)
+        .Ignore(x => x.PlexMovieId)
         .Ignore(x => x.PlexMovie)
-        .RuleFor(x => x.PlexMovieMediaDataId, _ => 0)
+        .Ignore(x => x.PlexMovieMediaDataId)
         .Ignore(x => x.PlexMovieMediaData)
-        .RuleFor(x => x.PlexMovieMediaDataPartId, _ => 0)
+        .Ignore(x => x.PlexMovieMediaDataPartId)
         .Ignore(x => x.PlexMovieMediaDataPart);
 
     private static Faker<PlexTvShowEpisodeMediaDataStream> _plexTvShowEpisodeMediaDataStream =
         new Faker<PlexTvShowEpisodeMediaDataStream>()
             .ApplyBasePlexMediaDataStream()
-            .RuleFor(x => x.PlexTvShowEpisodeId, _ => 0)
+            .Ignore(x => x.PlexTvShowEpisodeId)
             .Ignore(x => x.PlexTvShowEpisode)
-            .RuleFor(x => x.PlexTvShowEpisodeMediaDataId, _ => 0)
+            .Ignore(x => x.PlexTvShowEpisodeMediaDataId)
             .Ignore(x => x.PlexTvShowEpisodeMediaData)
-            .RuleFor(x => x.PlexTvShowEpisodeMediaDataPartId, _ => 0)
+            .Ignore(x => x.PlexTvShowEpisodeMediaDataPartId)
             .Ignore(x => x.PlexTvShowEpisodeMediaDataPart);
 
     public static Faker<PlexMovieMediaDataStream> GetPlexMovieMediaDataStream(Seed seed) =>

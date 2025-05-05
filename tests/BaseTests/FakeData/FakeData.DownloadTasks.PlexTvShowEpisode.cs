@@ -69,6 +69,5 @@ public static partial class FakeData
                     x.DownloadWorkerTasks = x.GenerateDownloadWorkerTasks(config.DownloadWorkerTasks);
                 }
             );
-        ;
     }
 }

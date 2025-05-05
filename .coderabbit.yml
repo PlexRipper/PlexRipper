@@ -1,2 +1,7 @@
 reviews:
     review_status: false
+    exclude:
+        - obj/**                 # Exclude build artifacts
+        - bin/**                 # Exclude binaries
+        - src/**/*.Designer.cs       # Optional: Exclude auto-generated designer files
+        - src/**/Migrations/**          # Optional: Skip EF Core migrations

@@ -122,7 +122,12 @@ public class FakeDataDownloadTasksUnitTests : BaseUnitTest
     {
         // Arrange
         var seed = new Seed(67890);
-        var config = new FakeDataConfig { TvShowSeasonDownloadTasksCount = 2, TvShowEpisodeDownloadTasksCount = 3 };
+        var config = new FakeDataConfig
+        {
+            TvShowSeasonDownloadTasksCount = 2,
+            TvShowEpisodeDownloadTasksCount = 3,
+            DownloadWorkerTasks = 4,
+        };
 
         // Act
         var tvShowTask = FakeData
@@ -132,6 +137,7 @@ public class FakeDataDownloadTasksUnitTests : BaseUnitTest
                 {
                     options.TvShowSeasonDownloadTasksCount = config.TvShowSeasonDownloadTasksCount;
                     options.TvShowEpisodeDownloadTasksCount = config.TvShowEpisodeDownloadTasksCount;
+                    options.DownloadWorkerTasks = config.DownloadWorkerTasks;
                 }
             )
             .Generate();
@@ -159,6 +165,9 @@ public class FakeDataDownloadTasksUnitTests : BaseUnitTest
                     episodeFile.DirectoryMeta.ShouldNotBeNull();
                     episodeFile.DirectoryMeta.TvShowFolder.ShouldBe(tvShowTask.Title);
                     episodeFile.DirectoryMeta.SeasonFolder.ShouldBe(season.Title);
+
+                    episodeFile.DownloadWorkerTasks.ShouldNotBeNull();
+                    episodeFile.DownloadWorkerTasks.Count.ShouldBe(config.DownloadWorkerTasks);
                 }
             }
         }
@@ -169,16 +178,19 @@ public class FakeDataDownloadTasksUnitTests : BaseUnitTest
     {
         // Arrange
         var seed = new Seed(12345);
-        var configuredSizeMB = 500;
-        var config = new FakeDataConfig { DownloadFileSizeInMb = configuredSizeMB };
+        const int configuredSizeMb = 500;
+        Action<FakeDataConfig> options = options =>
+        {
+            options.DownloadFileSizeInMb = configuredSizeMb;
+        };
 
         // Act
         var movieFileTask = FakeData.GetDownloadTaskMovieFile(seed).Generate();
-        var configuredMovieFileTask = FakeData.GetDownloadTaskMovieFile(seed).Generate();
+        var configuredMovieFileTask = FakeData.GetDownloadTaskMovieFile(seed, options).Generate();
 
         // Assert
         movieFileTask.DataTotal.ShouldNotBe(configuredMovieFileTask.DataTotal);
-        var expectedBytes = ByteSize.FromMebiBytes(configuredSizeMB).Bytes;
+        var expectedBytes = ByteSize.FromMebiBytes(configuredSizeMb).Bytes;
         configuredMovieFileTask.DataTotal.ShouldBe((long)expectedBytes);
     }
 

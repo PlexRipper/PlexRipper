@@ -62,7 +62,7 @@ public partial class BaseUnitTest
             )
             .SingleInstance();
 
-        // Database context can be setup once and then retrieved by its DB name.
+        // Database context can be set up once and then retrieved by its DB name.
         builder
             .Register((_, _) => MockDatabase.GetMemoryPlexRipperDbContext(_databaseName))
             .As<PlexRipperDbContext>()

@@ -8,16 +8,15 @@ public static partial class FakeData
 {
     #region Base
 
-    private static Faker<T> ApplyDownloadTaskBase<T>(this Faker<T> faker, Seed seed, DownloadTaskType downloadTaskType)
+    private static Faker<T> ApplyDownloadTaskBase<T>(this Faker<T> faker, DownloadTaskType downloadTaskType)
         where T : DownloadTaskBase
     {
         return faker
             .StrictMode(true)
-            .UseSeed(seed.Next())
             .Ignore(x => x.Id)
+            .Ignore(x => x.MediaType)
+            .Ignore(x => x.DownloadTaskType)
             .RuleFor(x => x.Key, _ => GetUniqueNumber())
-            .RuleFor(x => x.DownloadTaskType, downloadTaskType)
-            .RuleFor(x => x.MediaType, (_, x) => x.DownloadTaskType.ToPlexMediaType())
             .RuleFor(
                 x => x.Title,
                 f =>
@@ -42,7 +41,6 @@ public static partial class FakeData
 
     private static Faker<T> ApplyDownloadTaskParentBase<T>(
         this Faker<T> faker,
-        Seed seed,
         DownloadTaskType downloadTaskType,
         Action<FakeDataConfig>? options = null
     )
@@ -51,9 +49,7 @@ public static partial class FakeData
         var config = FakeDataConfig.FromOptions(options);
 
         return faker
-            .StrictMode(true)
-            .UseSeed(seed.Next())
-            .ApplyDownloadTaskBase(seed, downloadTaskType)
+            .ApplyDownloadTaskBase(downloadTaskType)
             .RuleFor(x => x.Year, f => f.Random.Int(1900, 2030))
             .Ignore(x => x.FileTransferSpeed)
             .Ignore(x => x.DataReceived)
@@ -70,7 +66,6 @@ public static partial class FakeData
 
     private static Faker<T> ApplyDownloadTaskFileBase<T>(
         this Faker<T> faker,
-        Seed seed,
         DownloadTaskType downloadTaskType,
         Action<FakeDataConfig>? options = null
     )
@@ -79,9 +74,7 @@ public static partial class FakeData
         var config = FakeDataConfig.FromOptions(options);
 
         return faker
-            .StrictMode(true)
-            .UseSeed(seed.Next())
-            .ApplyDownloadTaskBase(seed, downloadTaskType)
+            .ApplyDownloadTaskBase(downloadTaskType)
             .Ignore(x => x.DataReceived)
             .RuleFor(
                 x => x.DataTotal,
@@ -133,62 +126,87 @@ public static partial class FakeData
 
     #region Movie
 
+    private static readonly Faker<DownloadTaskMovie> _downloadTaskMovie = new Faker<DownloadTaskMovie>()
+        .ApplyDownloadTaskParentBase(DownloadTaskType.Movie)
+        .Ignore(x => x.MediaType)
+        .Ignore(x => x.Children)
+        .FinishWith(
+            (_, movie) =>
+            {
+                var movieIndex = 1;
+                foreach (var movieFile in movie.Children)
+                {
+                    movieFile.Title = $"{movieFile.Title} {movieIndex++}";
+                    movieFile.FullTitle = $"{movie.FullTitle}/{movieIndex}-{movieFile.FileName}";
+                }
+            }
+        );
+
     public static Faker<DownloadTaskMovie> GetMovieDownloadTask(Seed seed, Action<FakeDataConfig>? options = null)
     {
         var config = FakeDataConfig.FromOptions(options);
 
-        return new Faker<DownloadTaskMovie>()
+        return _downloadTaskMovie
             .UseSeed(seed.Next())
-            .ApplyDownloadTaskParentBase(seed, DownloadTaskType.Movie, options)
-            .RuleFor(x => x.MediaType, PlexMediaType.Movie)
             .RuleFor(
                 x => x.Children,
                 _ =>
                 {
                     if (config.IncludeMultiPartMovies)
-                        return GetDownloadTaskMovieFile(seed, options).Generate(2);
+                        return GetDownloadTaskMovieFile(seed).Generate(2);
 
-                    return GetDownloadTaskMovieFile(seed, options).Generate(1);
-                }
-            )
-            .FinishWith(
-                (_, movie) =>
-                {
-                    var movieIndex = 1;
-                    foreach (var movieFile in movie.Children)
-                    {
-                        movieFile.Title = $"{movieFile.Title} {movieIndex++}";
-                        movieFile.FullTitle = $"{movie.FullTitle}/{movieIndex}-{movieFile.FileName}";
-                    }
+                    return GetDownloadTaskMovieFile(seed).Generate(1);
                 }
             );
     }
 
-    public static Faker<DownloadTaskMovieFile> GetDownloadTaskMovieFile(
-        Seed seed,
-        Action<FakeDataConfig>? options = null
-    )
-    {
-        return new Faker<DownloadTaskMovieFile>()
-            .StrictMode(true)
-            .UseSeed(seed.Next())
-            .ApplyDownloadTaskFileBase(seed, DownloadTaskType.MovieData, options)
-            .Ignore(x => x.Parent)
-            .Ignore(x => x.ParentId);
-    }
+    private static readonly Faker<DownloadTaskMovieFile> _downloadTaskMovieFile = new Faker<DownloadTaskMovieFile>()
+        .ApplyDownloadTaskFileBase(DownloadTaskType.MovieData)
+        .Ignore(x => x.Parent)
+        .Ignore(x => x.ParentId);
+
+    public static Faker<DownloadTaskMovieFile> GetDownloadTaskMovieFile(Seed seed) =>
+        _downloadTaskMovieFile.UseSeed(seed.Next());
 
     #endregion
 
     #region TvShow
 
+    private static readonly Faker<DownloadTaskTvShow> _downloadTaskTvShow = new Faker<DownloadTaskTvShow>()
+        .ApplyDownloadTaskParentBase(DownloadTaskType.TvShow)
+        .Ignore(x => x.Children)
+        .FinishWith(
+            (_, tvShow) =>
+            {
+                var seasonIndex = 1;
+
+                foreach (var season in tvShow.Children)
+                {
+                    season.Title = $"{season.Title} {seasonIndex++}";
+                    season.FullTitle = $"{tvShow.FullTitle}/{season.Title}";
+
+                    foreach (var episode in season.Children)
+                    {
+                        episode.FullTitle = $"{season.FullTitle}/{episode.Title}";
+
+                        var fileIndex = 1;
+                        foreach (var file in episode.Children)
+                        {
+                            file.FullTitle = $"{episode.FullTitle}/{fileIndex}-{file.FileName}";
+                            file.DirectoryMeta.TvShowFolder = tvShow.Title;
+                            file.DirectoryMeta.SeasonFolder = season.Title;
+                        }
+                    }
+                }
+            }
+        );
+
     public static Faker<DownloadTaskTvShow> GetDownloadTaskTvShow(Seed seed, Action<FakeDataConfig>? options = null)
     {
         var config = FakeDataConfig.FromOptions(options);
 
-        return new Faker<DownloadTaskTvShow>()
+        return _downloadTaskTvShow
             .UseSeed(seed.Next())
-            .StrictMode(true)
-            .ApplyDownloadTaskParentBase(seed, DownloadTaskType.TvShow, options)
             .RuleFor(
                 x => x.Children,
                 _ =>
@@ -199,60 +217,18 @@ public static partial class FakeData
 
                     return f.GenerateBetween(1, 5);
                 }
-            )
-            .FinishWith(
-                (_, tvShow) =>
-                {
-                    var seasonIndex = 1;
-
-                    foreach (var season in tvShow.Children)
-                    {
-                        season.Title = $"{season.Title} {seasonIndex++}";
-                        season.FullTitle = $"{tvShow.FullTitle}/{season.Title}";
-
-                        foreach (var episode in season.Children)
-                        {
-                            episode.FullTitle = $"{season.FullTitle}/{episode.Title}";
-
-                            var fileIndex = 1;
-                            foreach (var file in episode.Children)
-                            {
-                                file.FullTitle = $"{episode.FullTitle}/{fileIndex}-{file.FileName}";
-                                file.DirectoryMeta.TvShowFolder = tvShow.Title;
-                                file.DirectoryMeta.SeasonFolder = season.Title;
-                            }
-                        }
-                    }
-                }
             );
     }
 
-    public static Faker<DownloadTaskTvShowSeason> GetDownloadTaskTvShowSeason(
-        Seed seed,
-        Action<FakeDataConfig>? options = null
-    )
-    {
-        var config = FakeDataConfig.FromOptions(options);
-
-        return new Faker<DownloadTaskTvShowSeason>()
-            .UseSeed(seed.Next())
+    private static readonly Faker<DownloadTaskTvShowSeason> _downloadTaskTvShowSeason =
+        new Faker<DownloadTaskTvShowSeason>()
             .StrictMode(true)
-            .ApplyDownloadTaskParentBase(seed, DownloadTaskType.Season, options)
+            .ApplyDownloadTaskParentBase(DownloadTaskType.Season)
             .Ignore(x => x.ParentId)
             .RuleFor(x => x.Title, _ => "Season")
             .RuleFor(x => x.FullTitle, _ => "Season")
             .Ignore(x => x.Parent)
-            .RuleFor(
-                x => x.Children,
-                _ =>
-                {
-                    var f = GetDownloadTaskTvShowEpisode(seed, options);
-                    if (config.TvShowEpisodeDownloadTasksCount > 0)
-                        return f.Generate(config.TvShowEpisodeDownloadTasksCount);
-
-                    return f.GenerateBetween(5, 10);
-                }
-            )
+            .Ignore(x => x.Children)
             .FinishWith(
                 (_, season) =>
                 {
@@ -273,22 +249,37 @@ public static partial class FakeData
                     }
                 }
             );
-    }
 
-    public static Faker<DownloadTaskTvShowEpisode> GetDownloadTaskTvShowEpisode(
+    public static Faker<DownloadTaskTvShowSeason> GetDownloadTaskTvShowSeason(
         Seed seed,
         Action<FakeDataConfig>? options = null
     )
     {
-        return new Faker<DownloadTaskTvShowEpisode>()
-            .UseSeed(seed.Next())
-            .StrictMode(true)
-            .ApplyDownloadTaskParentBase(seed, DownloadTaskType.Episode, options)
+        var config = FakeDataConfig.FromOptions(options);
+
+        return _downloadTaskTvShowSeason
+            .RuleFor(
+                x => x.Children,
+                _ =>
+                {
+                    var f = GetDownloadTaskTvShowEpisode(seed, options);
+                    if (config.TvShowEpisodeDownloadTasksCount > 0)
+                        return f.Generate(config.TvShowEpisodeDownloadTasksCount);
+
+                    return f.GenerateBetween(5, 10);
+                }
+            )
+            .UseSeed(seed.Next());
+    }
+
+    private static readonly Faker<DownloadTaskTvShowEpisode> _downloadTaskTvShowEpisode =
+        new Faker<DownloadTaskTvShowEpisode>()
+            .ApplyDownloadTaskParentBase(DownloadTaskType.Episode)
             .Ignore(x => x.Parent)
             .Ignore(x => x.ParentId)
             .RuleFor(x => x.Title, _ => "Episode")
             .RuleFor(x => x.FullTitle, _ => "Episode")
-            .RuleFor(x => x.Children, _ => GetDownloadTaskTvShowEpisodeFile(seed, options).Generate(1))
+            .Ignore(x => x.Children)
             .FinishWith(
                 (_, episode) =>
                 {
@@ -297,20 +288,26 @@ public static partial class FakeData
                         file.FullTitle = $"{episode.FullTitle}/{fileIndex}-{file.FileName}";
                 }
             );
-    }
 
-    public static Faker<DownloadTaskTvShowEpisodeFile> GetDownloadTaskTvShowEpisodeFile(
+    public static Faker<DownloadTaskTvShowEpisode> GetDownloadTaskTvShowEpisode(
         Seed seed,
         Action<FakeDataConfig>? options = null
     )
     {
-        return new Faker<DownloadTaskTvShowEpisodeFile>()
+        return _downloadTaskTvShowEpisode
             .UseSeed(seed.Next())
+            .RuleFor(x => x.Children, _ => [GetDownloadTaskTvShowEpisodeFile(seed).Generate()]);
+    }
+
+    private static readonly Faker<DownloadTaskTvShowEpisodeFile> _downloadTaskTvShowEpisodeFile =
+        new Faker<DownloadTaskTvShowEpisodeFile>()
             .StrictMode(true)
-            .ApplyDownloadTaskFileBase(seed, DownloadTaskType.EpisodeData, options)
+            .ApplyDownloadTaskFileBase(DownloadTaskType.EpisodeData)
             .Ignore(x => x.Parent)
             .Ignore(x => x.ParentId);
-    }
+
+    public static Faker<DownloadTaskTvShowEpisodeFile> GetDownloadTaskTvShowEpisodeFile(Seed seed) =>
+        _downloadTaskTvShowEpisodeFile.UseSeed(seed.Next());
 
     #endregion
 }

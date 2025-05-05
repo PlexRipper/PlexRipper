@@ -14,22 +14,8 @@ public static partial class FakeData
         return faker
             .StrictMode(true)
             .Ignore(x => x.Id)
-            .Ignore(x => x.MediaType)
-            .Ignore(x => x.DownloadTaskType)
             .RuleFor(x => x.Key, _ => GetUniqueNumber())
-            .RuleFor(
-                x => x.Title,
-                f =>
-                {
-                    if (downloadTaskType == DownloadTaskType.Movie)
-                        return "Movie " + f.Random.Int(1, 10000);
-
-                    if (downloadTaskType == DownloadTaskType.TvShow)
-                        return "TvShow " + f.Random.Int(1, 10000);
-
-                    return f.Company.CompanyName();
-                }
-            )
+            .RuleFor(x => x.Title, f => f.PlexMedia().MediaTitle(downloadTaskType))
             .RuleFor(x => x.FullTitle, (_, x) => x.Title)
             .RuleFor(x => x.DownloadStatus, _ => DownloadStatus.Queued)
             .RuleFor(x => x.CreatedAt, _ => DateTime.UtcNow)
@@ -75,7 +61,6 @@ public static partial class FakeData
 
         return faker
             .ApplyDownloadTaskBase(downloadTaskType)
-            .Ignore(x => x.DataReceived)
             .RuleFor(
                 x => x.DataTotal,
                 f =>
@@ -83,6 +68,7 @@ public static partial class FakeData
                         ? (long)ByteSize.FromMebiBytes(config.DownloadFileSizeInMb).Bytes
                         : f.Random.Long(1, 10000000)
             )
+            .Ignore(x => x.DataReceived)
             .Ignore(x => x.DownloadSpeed)
             .Ignore(x => x.FileTransferSpeed)
             .Ignore(x => x.FileDataTransferred)
@@ -92,16 +78,7 @@ public static partial class FakeData
             .RuleFor(x => x.Quality, f => f.PickRandom("sd", "720p", "1080p", "2160p"))
             .RuleFor(
                 x => x.FileName,
-                (_, x) =>
-                {
-                    if (x.DownloadTaskType == DownloadTaskType.MovieData)
-                        return $"movie-{x.Title.SanitizeFolderName()}.[{x.Quality}].file.mp4";
-
-                    if (x.DownloadTaskType == DownloadTaskType.EpisodeData)
-                        return $"episode-{x.Title.SanitizeFolderName()}.[{x.Quality}].file.mp4";
-
-                    return $"{x.Title.SanitizeFolderName()}.[{x.Quality}].file.mp4";
-                }
+                (_, x) => $"{x.MediaType.ToPlexMediaTypeString()}-{x.Title.SanitizeFolderName()}.[{x.Quality}].file.mp4"
             )
             .RuleFor(x => x.FileLocationUrl, _ => DownloadFileUrl)
             .RuleFor(
@@ -128,7 +105,6 @@ public static partial class FakeData
 
     private static readonly Faker<DownloadTaskMovie> _downloadTaskMovie = new Faker<DownloadTaskMovie>()
         .ApplyDownloadTaskParentBase(DownloadTaskType.Movie)
-        .Ignore(x => x.MediaType)
         .Ignore(x => x.Children)
         .FinishWith(
             (_, movie) =>

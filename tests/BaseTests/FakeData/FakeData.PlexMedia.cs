@@ -6,16 +6,16 @@ public static partial class FakeData
 {
     #region Base
 
-    private static Faker<T> ApplyBasePlexMedia<T>(this Faker<T> faker, PlexMediaType mediaType)
+    private static Faker<T> ApplyBasePlexMedia<T>(this Faker<T> faker)
         where T : BasePlexMedia
     {
         return faker
             .StrictMode(true)
             .Ignore(x => x.Id)
             .RuleFor(x => x.Key, _ => GetUniqueNumber())
-            .RuleFor(x => x.Title, f => f.PlexMedia().MediaTitle(mediaType))
-            .RuleFor(x => x.Year, f => f.Random.Int(1900, 2030))
+            .Ignore(x => x.Title)
             .RuleFor(x => x.FullTitle, (_, x) => $"{x.Title} ({x.Year})")
+            .RuleFor(x => x.Year, f => f.Random.Int(1900, 2030))
             .Ignore(x => x.SortIndex)
             .RuleFor(x => x.SearchTitle, (_, x) => x.Title.ToSearchTitle())
             .RuleFor(x => x.Duration, f => f.Random.Int(1000, 3000000))
@@ -37,10 +37,6 @@ public static partial class FakeData
             .Ignore(x => x.PlexLibraryId)
             .Ignore(x => x.PlexLibrary)
             .Ignore(x => x.FullBannerUrl)
-            .RuleFor(
-                x => x.Guid,
-                _ => $"plex://{mediaType.ToPlexApiString()}/${Guid.NewGuid().ToString().Replace("-", "")}"
-            )
             .RuleFor(x => x.Guid_IMDB, f => "imdb://tt" + f.Random.Int(10000, 99999))
             .RuleFor(x => x.Guid_TMDB, f => "tmdb://" + f.Random.Int(10000, 99999))
             .RuleFor(x => x.Guid_TVDB, f => "tvdb://" + f.Random.Int(10000, 99999));
@@ -51,10 +47,12 @@ public static partial class FakeData
     #region PlexMovies
 
     private static readonly Faker<PlexMovie> _plexMovie = new Faker<PlexMovie>()
-        .ApplyBasePlexMedia(PlexMediaType.Movie)
+        .ApplyBasePlexMedia()
         .Ignore(x => x.Roles)
         .Ignore(x => x.Genres)
         .Ignore(x => x.Countries)
+        .RuleFor(x => x.Title, f => f.PlexMedia().MediaTitle(PlexMediaType.Movie))
+        .RuleFor(x => x.Guid, f => f.PlexMedia().Guid(PlexMediaType.Movie))
         .FinishWith(
             (_, movie) =>
             {
@@ -77,10 +75,12 @@ public static partial class FakeData
     #region PlexTvShows
 
     private static readonly Faker<PlexTvShow> _plexTvShow = new Faker<PlexTvShow>()
-        .ApplyBasePlexMedia(PlexMediaType.TvShow)
+        .ApplyBasePlexMedia()
         .Ignore(x => x.Roles)
         .Ignore(x => x.Genres)
         .Ignore(x => x.Countries)
+        .RuleFor(x => x.Title, f => f.PlexMedia().MediaTitle(PlexMediaType.TvShow))
+        .RuleFor(x => x.Guid, f => f.PlexMedia().Guid(PlexMediaType.TvShow))
         .FinishWith(
             (_, tvShow) =>
             {
@@ -119,9 +119,10 @@ public static partial class FakeData
     }
 
     private static readonly Faker<PlexTvShowSeason> _plexTvShowSeason = new Faker<PlexTvShowSeason>()
-        .ApplyBasePlexMedia(PlexMediaType.Season)
-        .RuleFor(x => x.Title, _ => "Season")
+        .ApplyBasePlexMedia()
         .RuleFor(x => x.ParentKey, _ => GetUniqueNumber())
+        .RuleFor(x => x.Title, _ => "Season")
+        .RuleFor(x => x.Guid, f => f.PlexMedia().Guid(PlexMediaType.Season))
         .Ignore(x => x.TvShowId)
         .Ignore(x => x.TvShow)
         .Ignore(x => x.ParentGuid);
@@ -145,14 +146,16 @@ public static partial class FakeData
     }
 
     private static readonly Faker<PlexTvShowEpisode> _plexTvShowEpisode = new Faker<PlexTvShowEpisode>()
-        .ApplyBasePlexMedia(PlexMediaType.Episode)
+        .ApplyBasePlexMedia()
         .Ignore(x => x.Id)
-        .RuleFor(x => x.ParentKey, _ => GetUniqueNumber())
         .Ignore(x => x.TvShowId)
         .Ignore(x => x.TvShow)
         .Ignore(x => x.TvShowSeasonId)
         .Ignore(x => x.TvShowSeason)
         .Ignore(x => x.ParentGuid)
+        .RuleFor(x => x.ParentKey, _ => GetUniqueNumber())
+        .RuleFor(x => x.Title, f => f.PlexMedia().MediaTitle(PlexMediaType.Episode))
+        .RuleFor(x => x.Guid, f => f.PlexMedia().Guid(PlexMediaType.Episode))
         .FinishWith(
             (_, tvShowEpisode) =>
             {

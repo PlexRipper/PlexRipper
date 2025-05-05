@@ -14,6 +14,9 @@ reviews:
         - "!src/**/Migrations/**"
         - "!**/Generated/**"
         - "!**/*.g.cs"
+        - "!**/*.csproj"
+        - "!**/*.DotSettings"
+        - "!**/packages.lock.json"
     auto_review:
         enabled: true
         drafts: false

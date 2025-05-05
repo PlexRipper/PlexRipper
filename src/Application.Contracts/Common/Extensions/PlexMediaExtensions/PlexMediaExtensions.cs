@@ -97,7 +97,7 @@ public static class PlexMediaExtensions
         };
 
     public static List<DownloadTaskMovieFile> MapToDownloadTask(
-        this LibraryMediaItemMediaDTO plexMediaData,
+        this PlexMovieMediaData plexMediaData,
         PlexMovie plexMovie,
         CreateDownloadTasksRequest request
     )
@@ -140,7 +140,7 @@ public static class PlexMediaExtensions
     }
 
     public static List<DownloadTaskTvShowEpisodeFile> MapToDownloadTask(
-        this LibraryMediaItemMediaDTO plexMediaData,
+        this PlexTvShowEpisodeMediaData plexMediaData,
         PlexTvShowEpisode plexTvShowEpisode,
         CreateDownloadTasksRequest request
     )

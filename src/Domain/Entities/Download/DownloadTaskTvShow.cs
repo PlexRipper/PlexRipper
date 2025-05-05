@@ -4,7 +4,7 @@ public class DownloadTaskTvShow : DownloadTaskParentBase
 {
     #region Relationships
 
-    public required List<DownloadTaskTvShowSeason> Children { get; set; } = [];
+    public required ICollection<DownloadTaskTvShowSeason> Children { get; set; } = [];
 
     #endregion
 

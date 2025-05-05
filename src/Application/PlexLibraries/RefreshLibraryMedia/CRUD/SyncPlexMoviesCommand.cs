@@ -7,7 +7,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application;
 
-public record SyncPlexMoviesCommand(List<PlexMovie> PlexMovies) : IRequest<Result<CrudMoviesReport>>;
+public record SyncPlexMoviesCommand(List<PlexMovie> PlexMovies, int PlexServerId, int PlexLibraryId)
+    : IRequest<Result<CrudMoviesReport>>;
 
 public class SyncPlexMoviesCommandValidator : AbstractValidator<SyncPlexMoviesCommand>
 {
@@ -16,13 +17,13 @@ public class SyncPlexMoviesCommandValidator : AbstractValidator<SyncPlexMoviesCo
         var stopWatch = new Stopwatch();
         stopWatch.Start();
 
+        RuleFor(x => x.PlexServerId).GreaterThan(0);
+        RuleFor(x => x.PlexLibraryId).GreaterThan(0);
         RuleFor(x => x.PlexMovies).NotNull();
         RuleForEach(x => x.PlexMovies)
             .ChildRules(tvShow =>
             {
                 tvShow.RuleFor(x => x.Key).GreaterThan(0);
-                tvShow.RuleFor(y => y.PlexLibraryId).GreaterThan(0);
-                tvShow.RuleFor(y => y.PlexServerId).GreaterThan(0);
             });
 
         stopWatch.Stop();
@@ -64,7 +65,8 @@ public class SyncPlexMoviesCommandHandler : IRequestHandler<SyncPlexMoviesComman
     {
         try
         {
-            var plexLibraryId = command.PlexMovies.First().PlexLibraryId;
+            var plexLibraryId = command.PlexLibraryId;
+            var plexServerId = command.PlexServerId;
             var plexLibraryName = await _dbContext.GetPlexLibraryNameById(plexLibraryId, cancellationToken);
 
             _log.Debug(
@@ -79,16 +81,8 @@ public class SyncPlexMoviesCommandHandler : IRequestHandler<SyncPlexMoviesComman
             await RemoveMedia(plexLibraryId, cancellationToken);
 
             var plexMovies = command.PlexMovies;
-
-            await _dbContext.BulkInsertAsync(plexMovies, _config, cancellationToken);
+            await _dbContext.BulkInsertPlexMoviesAsync(plexMovies, plexServerId, plexLibraryId, ct: cancellationToken);
             _report.CreatedMovies = plexMovies.Count;
-
-            _log.Debug(
-                "Successfully inserted {PlexMoviesCount} movies in library: {PlexLibraryName} with id: {PlexLibraryId}",
-                plexMovies.Count,
-                plexLibraryName,
-                plexLibraryId
-            );
 
             await SyncMovieMetaData(plexMovies, plexLibraryId, plexLibraryName);
 
@@ -121,7 +115,7 @@ public class SyncPlexMoviesCommandHandler : IRequestHandler<SyncPlexMoviesComman
             .SelectMany(x => x.Roles)
             .ToDictionaryAsync(x => x.Name, x => x.Id);
 
-        // These are always small dictionaries so no need to worry about performance
+        // These are always small dictionaries, so no need to worry about performance
         var genreDict = await _dbContext.PlexGenres.ToDictionaryAsync(x => x.Name, x => x.Id);
         var countryDict = await _dbContext.PlexCountries.ToDictionaryAsync(x => x.Name, x => x.Id);
 
@@ -197,6 +191,19 @@ public class SyncPlexMoviesCommandHandler : IRequestHandler<SyncPlexMoviesComman
 
     private async Task RemoveMedia(int plexLibraryId, CancellationToken cancellationToken)
     {
+        await _dbContext
+            .PlexMovieDataStreams.Where(x => x.PlexLibraryId == plexLibraryId)
+            .ExecuteDeleteAsync(cancellationToken);
+
+        await _dbContext
+            .PlexMovieDataParts.Where(x => x.PlexLibraryId == plexLibraryId)
+            .ExecuteDeleteAsync(cancellationToken);
+
+        await _dbContext
+            .PlexMovieData.Where(x => x.PlexLibraryId == plexLibraryId)
+            .ExecuteDeleteAsync(cancellationToken);
+
+        // Then remove the movies
         _report.DeletedMovies = await _dbContext
             .PlexMovies.Where(x => x.PlexLibraryId == plexLibraryId)
             .ExecuteDeleteAsync(cancellationToken);

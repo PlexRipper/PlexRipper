@@ -34,6 +34,7 @@ public class DownloadWorkerStartUnitTests : BaseUnitTest<DownloadWorker>
             .Verifiable(Times.Once);
 
         var downloadStream = new ThrottledStream(new MemoryStream(new byte[(int)ByteSize.FromMebiBytes(10).Bytes]));
+
         mock.Mock<IPlexApiClient>()
             .Setup(x =>
                 x.DownloadStreamAsync(It.IsAny<HttpRequestMessage>(), It.IsAny<int>(), It.IsAny<CancellationToken>())

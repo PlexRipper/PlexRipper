@@ -11,7 +11,7 @@ public partial class FakeData
         return new Faker<PlexAccount>()
             .StrictMode(true)
             .UseSeed(seed.Next())
-            .RuleFor(x => x.Id, _ => 0)
+            .Ignore(x => x.Id)
             .RuleFor(x => x.DisplayName, f => f.Internet.UserName())
             .RuleFor(x => x.Username, f => f.Internet.UserName())
             .RuleFor(x => x.Password, f => f.Internet.Password())
@@ -25,12 +25,12 @@ public partial class FakeData
             .RuleFor(x => x.Title, f => f.Internet.UserName())
             .RuleFor(x => x.HasPassword, _ => true)
             .RuleFor(x => x.AuthenticationToken, f => f.Random.Guid().ToString())
-            .RuleFor(x => x.CustomAuthenticationToken, _ => string.Empty)
+            .Ignore(x => x.CustomAuthenticationToken)
             .RuleFor(x => x.IsMain, _ => true)
             .RuleFor(x => x.Is2Fa, _ => false)
             .RuleFor(x => x.IsAuthTokenMode, _ => false)
-            .RuleFor(x => x.VerificationCode, _ => "")
-            .RuleFor(x => x.PlexAccountServers, _ => [])
-            .RuleFor(x => x.PlexAccountLibraries, _ => []);
+            .Ignore(x => x.VerificationCode)
+            .Ignore(x => x.PlexAccountServers)
+            .Ignore(x => x.PlexAccountLibraries);
     }
 }

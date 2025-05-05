@@ -88,7 +88,7 @@ public class SyncPlexTvShowsCommand_UnitTests : BaseUnitTest<SyncPlexTvShowsComm
         SetIds(library, newTvShows);
 
         // Act
-        var request = new SyncPlexTvShowsCommand(newTvShows);
+        var request = new SyncPlexTvShowsCommand(newTvShows.ToList());
         var result = await _sut.Handle(request, CancellationToken.None);
 
         // Assert
@@ -269,7 +269,7 @@ public class SyncPlexTvShowsCommand_UnitTests : BaseUnitTest<SyncPlexTvShowsComm
         VerifyKeys(newTvShows);
     }
 
-    private void VerifyKeys(List<PlexTvShow> newTvShows)
+    private void VerifyKeys(ICollection<PlexTvShow> newTvShows)
     {
         var plexLibraryId = newTvShows.First().PlexLibraryId;
         var dbPlexTvShows = IDbContext
@@ -287,7 +287,7 @@ public class SyncPlexTvShowsCommand_UnitTests : BaseUnitTest<SyncPlexTvShowsComm
             .ShouldBeTrue();
     }
 
-    private void SetIds(PlexLibrary library, List<PlexTvShow> newTvShows)
+    private void SetIds(PlexLibrary library, ICollection<PlexTvShow> newTvShows)
     {
         foreach (var plexTvShow in newTvShows)
         {

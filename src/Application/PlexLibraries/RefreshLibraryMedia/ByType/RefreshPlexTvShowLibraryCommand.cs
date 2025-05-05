@@ -132,7 +132,7 @@ public class RefreshPlexTvShowLibraryCommandHandler
             );
 
             // Update the MetaData of this library
-            var syncResult = await _mediator.Send(new SyncPlexTvShowsCommand(tvShows), cancellationToken);
+            var syncResult = await _mediator.Send(new SyncPlexTvShowsCommand(tvShows.ToList()), cancellationToken);
             if (syncResult.IsFailed)
             {
                 await _progressReporter.SendProgress(
@@ -211,11 +211,11 @@ public class RefreshPlexTvShowLibraryCommandHandler
         return Result.Ok(plexLibrary);
     }
 
-    private List<PlexTvShow> BuildTvShowTree(
+    private ICollection<PlexTvShow> BuildTvShowTree(
         PlexLibrary plexLibrary,
-        List<PlexTvShow> rawTvShowData,
-        List<PlexTvShowSeason> rawSeasonData,
-        List<PlexTvShowEpisode> rawEpisodesData
+        ICollection<PlexTvShow> rawTvShowData,
+        ICollection<PlexTvShowSeason> rawSeasonData,
+        ICollection<PlexTvShowEpisode> rawEpisodesData
     )
     {
         var (validSeasons, validEpisodes) = Filter(rawSeasonData, rawEpisodesData, plexLibrary);
@@ -224,9 +224,9 @@ public class RefreshPlexTvShowLibraryCommandHandler
         var seasonsByTvShowKey = validSeasons.GroupBy(x => x.ParentGuid!).ToDictionary(g => g.Key, g => g.ToList());
         var episodesBySeasonKey = validEpisodes.GroupBy(x => x.ParentGuid!).ToDictionary(g => g.Key, g => g.ToList());
 
-        for (var i = 0; i < rawTvShowData.Count; i++)
+        var i = 0;
+        foreach (var plexTvShow in rawTvShowData)
         {
-            var plexTvShow = rawTvShowData[i];
             plexTvShow.PlexLibraryId = plexLibrary.Id;
             plexTvShow.PlexServerId = plexLibrary.PlexServerId;
             plexTvShow.SortIndex = i + 1;
@@ -241,9 +241,9 @@ public class RefreshPlexTvShowLibraryCommandHandler
                 seasonsByTvShowKey.Remove(plexTvShow.Guid);
             }
 
-            for (var seasonIndex = 0; seasonIndex < plexTvShow.Seasons.Count; seasonIndex++)
+            var seasonIndex = 0;
+            foreach (var plexTvShowSeason in plexTvShow.Seasons)
             {
-                var plexTvShowSeason = plexTvShow.Seasons[seasonIndex];
                 plexTvShowSeason.SortIndex = seasonIndex + 1;
                 plexTvShowSeason.PlexLibraryId = plexLibrary.Id;
                 plexTvShowSeason.PlexServerId = plexLibrary.PlexServerId;
@@ -276,19 +276,22 @@ public class RefreshPlexTvShowLibraryCommandHandler
 
                 plexTvShowSeason.MediaSize = episodes.Sum(x => x.MediaSize);
                 plexTvShowSeason.Duration = episodes.Sum(x => x.Duration);
+                seasonIndex++;
             }
 
             plexTvShow.MediaSize = plexTvShow.Seasons.Sum(x => x.MediaSize);
             plexTvShow.Duration = plexTvShow.Seasons.Sum(x => x.Duration);
             plexTvShow.GrandChildCount = plexTvShow.Seasons.Sum(x => x.ChildCount);
+
+            i++;
         }
 
         return rawTvShowData;
     }
 
     private (List<PlexTvShowSeason> validSeasons, List<PlexTvShowEpisode> validEpisodes) Filter(
-        List<PlexTvShowSeason> rawSeasonData,
-        List<PlexTvShowEpisode> rawEpisodesData,
+        ICollection<PlexTvShowSeason> rawSeasonData,
+        ICollection<PlexTvShowEpisode> rawEpisodesData,
         PlexLibrary library
     )
     {

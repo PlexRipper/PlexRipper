@@ -1,0 +1,23 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: "en-US"
+early_access: false
+
+reviews:
+    profile: assertive
+    request_changes_workflow: false
+    high_level_summary: true
+    review_status: false
+    collapse_walkthrough: false
+    path_filters:
+        - src/**/*.cs
+        - tests/**/*.cs
+        - "!src/**/Migrations/**"
+        - "!**/Generated/**"
+        - "!**/*.g.cs"
+        - "!**/*.csproj"
+        - "!**/*.DotSettings"
+        - "!**/packages.lock.json"
+    auto_review:
+        enabled: true
+        drafts: false
+    

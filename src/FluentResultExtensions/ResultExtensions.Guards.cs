@@ -1,5 +1,6 @@
 ﻿// ReSharper disable once CheckNamespace
 // Needs to be in the same namespace as the FluentResults package
+
 namespace FluentResults;
 
 public static partial class ResultExtensions
@@ -31,6 +32,9 @@ public static partial class ResultExtensions
         Create403ForbiddenResult(
             $"The server {plexServerName} with id {entityId} is not enabled/hidden and can therefore not execute operation: {operation}"
         );
+
+    public static Result IsZero(string parameterName) =>
+        Create400BadRequestResult($"The {parameterName} parameter was 0");
 
     public static Result IsEmpty(string parameterName) =>
         Create400BadRequestResult($"The {parameterName} parameter was empty");

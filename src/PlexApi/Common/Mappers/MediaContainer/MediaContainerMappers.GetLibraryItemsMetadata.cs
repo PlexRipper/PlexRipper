@@ -94,7 +94,13 @@ public static partial class MediaContainerMappers
         new()
         {
             Id = source.Id,
-            StreamType = source.StreamType,
+            StreamType = source.StreamType switch
+            {
+                GetAllMediaLibraryStreamType.Video => Domain.StreamType.Video,
+                GetAllMediaLibraryStreamType.Audio => Domain.StreamType.Audio,
+                GetAllMediaLibraryStreamType.Subtitle => Domain.StreamType.Subtitle,
+                _ => Domain.StreamType.Unknown,
+            },
             Default = source.Default,
             Codec = source.Codec,
             Index = source.Index,

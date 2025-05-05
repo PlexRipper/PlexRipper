@@ -65,6 +65,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
 
             foreach (var downloadMediaDto in plexEpisodeList)
             {
+                // TODO optimize this query and run it outside the loop
                 await _dbContext
                     .PlexLibraries.Include(x => x.PlexServer)
                     .Include(x => x.DefaultDestination)
@@ -78,10 +79,36 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
 
                 var tvShowDownloads = new List<DownloadTaskTvShow>();
 
+                var media = plexEpisodes.Select(x => x.MediaDataList).ToList();
+                var parts = media.SelectMany(x => x).SelectMany(x => x.Parts).ToList();
+                var streams = parts.SelectMany(x => x.Streams).ToList();
+
                 foreach (var tvShowEpisode in plexEpisodes)
                 {
-                    var plexTvShow = tvShowEpisode.TvShow!;
-                    var plexSeason = tvShowEpisode.TvShowSeason!;
+                    var plexTvShow = tvShowEpisode.TvShow;
+                    var plexSeason = tvShowEpisode.TvShowSeason;
+
+                    if (plexTvShow is null)
+                    {
+                        _log.Here()
+                            .Warning(
+                                "PlexTvShow is null for episode {EpisodeKey} ({EpisodeTitle})",
+                                tvShowEpisode.Key,
+                                tvShowEpisode.Title
+                            );
+                        continue;
+                    }
+
+                    if (plexSeason is null)
+                    {
+                        _log.Here()
+                            .Warning(
+                                "PlexTvShowSeason is null for episode {EpisodeKey} ({EpisodeTitle})",
+                                tvShowEpisode.Key,
+                                tvShowEpisode.Title
+                            );
+                        continue;
+                    }
 
                     // Check if the tvShowDownloadTask has already been created this run
                     var downloadTaskTvShow = tvShowDownloads.FirstOrDefault(x => x.Key == plexTvShow.Key);
@@ -130,7 +157,17 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
                     }
 
                     // TODO: Quality Selector needs to be implemented here
-                    var episodeData = tvShowEpisode.MetaDataList.First();
+                    var episodeData = tvShowEpisode.MediaDataList.FirstOrDefault();
+                    if (episodeData is null)
+                    {
+                        _log.Here()
+                            .Warning(
+                                "No media data found for episode {EpisodeKey} ({EpisodeTitle})",
+                                tvShowEpisode.Key,
+                                tvShowEpisode.Title
+                            );
+                        continue;
+                    }
 
                     // Map movieData to DownloadTaskMovieFile and add to movieDownloadTask
                     var downloadFiles = episodeData.MapToDownloadTask(tvShowEpisode, request);

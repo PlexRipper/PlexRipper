@@ -68,7 +68,7 @@ public class ChoosePlexServerConnection_UnitTests : BaseUnitTest
             .Include(x => x.PlexServerConnections)
             .FirstOrDefaultAsync();
         plexServer.ShouldNotBeNull();
-        var preferredConnection = plexServer.PlexServerConnections[2];
+        var preferredConnection = plexServer.PlexServerConnections.ElementAt(2);
         plexServer.PreferredConnectionId = preferredConnection.Id;
 
         // Add status to all connections

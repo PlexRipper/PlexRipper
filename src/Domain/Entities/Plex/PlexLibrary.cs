@@ -113,17 +113,17 @@ public class PlexLibrary : BaseEntity
     /// </summary>
     public int? DefaultDestinationId { get; set; }
 
-    public List<PlexMovie> Movies { get; private set; } = [];
+    public ICollection<PlexMovie> Movies { get; private set; } = [];
 
-    public List<PlexTvShow> TvShows { get; private set; } = [];
+    public ICollection<PlexTvShow> TvShows { get; private set; } = [];
 
-    public List<PlexAccountLibrary> PlexAccountLibraries { get; private set; } = [];
+    public ICollection<PlexAccountLibrary> PlexAccountLibraries { get; private set; } = [];
 
-    public List<PlexRole> Roles { get; set; } = [];
+    public ICollection<PlexRole> Roles { get; set; } = [];
 
-    public List<PlexGenre> Genres { get; set; } = [];
+    public ICollection<PlexGenre> Genres { get; set; } = [];
 
-    public List<PlexCountry> Countries { get; set; } = [];
+    public ICollection<PlexCountry> Countries { get; set; } = [];
 
     #endregion
 

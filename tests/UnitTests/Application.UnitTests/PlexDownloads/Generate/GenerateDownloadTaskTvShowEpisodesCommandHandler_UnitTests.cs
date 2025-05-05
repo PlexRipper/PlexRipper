@@ -114,7 +114,7 @@ public class DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTe
         var plexTvShows = await dbContext.PlexTvShows.IncludeAll().ToListAsync();
         var plexEpisodes = plexTvShows.SelectMany(x => x.Seasons).SelectMany(x => x.Episodes).ToList();
 
-        // Create a download task for the tv show
+        // Create a download task for the TV-show
         var createdTvShowDownloadTask = plexTvShows.First().MapToDownloadTask();
         dbContext.DownloadTaskTvShow.Add(createdTvShowDownloadTask);
         await dbContext.SaveChangesAsync(CancellationToken.None);
@@ -138,6 +138,13 @@ public class DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTe
         result.IsSuccess.ShouldBeTrue(result.ToString());
         var downloadTaskTvShows = await IDbContext.DownloadTaskTvShow.IncludeAll().ToListAsync();
         downloadTaskTvShows.Count.ShouldBe(5);
+        var downloadTaskSeasons = downloadTaskTvShows.SelectMany(x => x.Children).ToList();
+        downloadTaskSeasons.Count.ShouldBe(25);
+        var downloadTaskEpisodes = downloadTaskSeasons.SelectMany(x => x.Children).ToList();
+        downloadTaskEpisodes.Count.ShouldBe(125);
+        var downloadTaskEpisodeFiles = downloadTaskEpisodes.SelectMany(x => x.Children).ToList();
+        downloadTaskEpisodeFiles.Count.ShouldBe(125);
+
         downloadTaskTvShows.FirstOrDefault(x => x.Id == createdTvShowDownloadTask.Id).ShouldNotBeNull();
     }
 }

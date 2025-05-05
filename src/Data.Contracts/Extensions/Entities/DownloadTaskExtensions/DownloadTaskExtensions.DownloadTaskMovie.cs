@@ -6,7 +6,7 @@ public static partial class DownloadTaskExtensions
     /// This will set the relationship ids for the download tasks and it's children.
     /// </summary>
     public static void SetRelationshipIds(
-        this List<DownloadTaskMovie> downloadTasks,
+        this ICollection<DownloadTaskMovie> downloadTasks,
         int plexServerId,
         int plexLibraryId
     )
@@ -31,7 +31,7 @@ public static partial class DownloadTaskExtensions
     /// This will set the relationship ids for the download tasks and it's children.
     /// </summary>
     public static void SetRelationshipIds(
-        this List<DownloadTaskTvShow> downloadTasks,
+        this ICollection<DownloadTaskTvShow> downloadTasks,
         int plexServerId,
         int plexLibraryId
     )
@@ -48,7 +48,7 @@ public static partial class DownloadTaskExtensions
     /// This will set the relationship ids for the download tasks and it's children.
     /// </summary>
     public static void SetRelationshipIds(
-        this List<DownloadTaskTvShowSeason> downloadTasks,
+        this ICollection<DownloadTaskTvShowSeason> downloadTasks,
         int plexServerId,
         int plexLibraryId
     )
@@ -65,7 +65,7 @@ public static partial class DownloadTaskExtensions
     /// This will set the relationship ids for the download tasks and it's children.
     /// </summary>
     public static void SetRelationshipIds(
-        this List<DownloadTaskTvShowEpisode> downloadTasks,
+        this ICollection<DownloadTaskTvShowEpisode> downloadTasks,
         int plexServerId,
         int plexLibraryId
     )

@@ -30,7 +30,7 @@ public class SyncPlexMoviesCommandHandler_UnitTests : BaseUnitTest<SyncPlexMovie
         library.Movies.AddRange(movies);
 
         // Act
-        var request = new SyncPlexMoviesCommand(movies);
+        var request = new SyncPlexMoviesCommand(movies, library.PlexServerId, library.Id);
         (await _validator.ValidateAsync(request)).IsValid.ShouldBeTrue();
         var result = await _sut.Handle(request, CancellationToken.None);
 
@@ -66,7 +66,7 @@ public class SyncPlexMoviesCommandHandler_UnitTests : BaseUnitTest<SyncPlexMovie
         library.Movies.AddRange(movies);
 
         // Act
-        var request = new SyncPlexMoviesCommand(movies);
+        var request = new SyncPlexMoviesCommand(movies, library.PlexServerId, library.Id);
         (await _validator.ValidateAsync(request)).IsValid.ShouldBeTrue();
         var result = await _sut.Handle(request, CancellationToken.None);
 
@@ -118,7 +118,7 @@ public class SyncPlexMoviesCommandHandler_UnitTests : BaseUnitTest<SyncPlexMovie
         library.Movies.AddRange(newMovies);
 
         // Act
-        var request = new SyncPlexMoviesCommand(newMovies);
+        var request = new SyncPlexMoviesCommand(newMovies, library.PlexServerId, library.Id);
         (await _validator.ValidateAsync(request)).IsValid.ShouldBeTrue();
         var result = await _sut.Handle(request, CancellationToken.None);
 

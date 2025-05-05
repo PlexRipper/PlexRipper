@@ -112,7 +112,7 @@ public class DownloadQueue : IDownloadQueue
     /// </summary>
     /// <param name="downloadTasks"> The list of downloadTasks to check for the next downloadable task.</param>
     /// <returns> The next downloadable <see cref="DownloadTaskGeneric"/> to be executed.</returns>
-    internal Result<DownloadTaskGeneric> GetNextDownloadTask(List<DownloadTaskGeneric> downloadTasks)
+    internal Result<DownloadTaskGeneric> GetNextDownloadTask(ICollection<DownloadTaskGeneric> downloadTasks)
     {
         List<DownloadStatus> statusCheck =
         [

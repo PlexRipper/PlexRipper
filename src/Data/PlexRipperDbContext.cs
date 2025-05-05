@@ -6,7 +6,6 @@ using EFCore.BulkExtensions;
 using Environment;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
-using PlexRipper.Data.Common;
 
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 
@@ -44,6 +43,12 @@ public sealed class PlexRipperDbContext : DbContext, IPlexRipperDbContext, IPlex
 
     public DbSet<PlexMovie> PlexMovies { get; set; }
 
+    public DbSet<PlexMovieMediaData> PlexMovieData { get; set; }
+
+    public DbSet<PlexMovieMediaDataPart> PlexMovieDataParts { get; set; }
+
+    public DbSet<PlexMovieMediaDataStream> PlexMovieDataStreams { get; set; }
+
     #endregion
 
     #region PlexTvShow
@@ -53,6 +58,12 @@ public sealed class PlexRipperDbContext : DbContext, IPlexRipperDbContext, IPlex
     public DbSet<PlexTvShowSeason> PlexTvShowSeason { get; set; }
 
     public DbSet<PlexTvShowEpisode> PlexTvShowEpisodes { get; set; }
+
+    public DbSet<PlexTvShowEpisodeMediaData> PlexTvShowEpisodeData { get; set; }
+
+    public DbSet<PlexTvShowEpisodeMediaDataPart> PlexTvShowEpisodeDataParts { get; set; }
+
+    public DbSet<PlexTvShowEpisodeMediaDataStream> PlexTvShowEpisodeDataStreams { get; set; }
 
     #endregion
 
@@ -168,16 +179,7 @@ public sealed class PlexRipperDbContext : DbContext, IPlexRipperDbContext, IPlex
 
         builder.AddQuartz(x => x.UseSqlite());
 
-        // NOTE: This has been added to PlexRipperDbContext.OnModelCreating
-        // Based on: https://stackoverflow.com/a/63992731/8205497
-        builder.Entity<PlexMovie>().Property(x => x.MediaData).HasJsonValueConversion();
-
-        builder.Entity<PlexTvShow>().Property(x => x.MediaData).HasJsonValueConversion();
-
-        builder.Entity<PlexTvShowSeason>().Property(x => x.MediaData).HasJsonValueConversion();
-
-        builder.Entity<PlexTvShowEpisode>().Property(x => x.MediaData).HasJsonValueConversion();
-
+        // TODO Make extensions methods
         builder = PlexRipperDBContextSeed.SeedDatabase(builder);
 
         base.OnModelCreating(builder);

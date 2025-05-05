@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Http;
 using NSwag;
+using NSwag.Generation.Processors.Security;
 using PlexRipper.Application;
 using PlexRipper.Identity;
 using PlexRipper.Identity.Contracts;
@@ -139,6 +140,8 @@ public static partial class Startup
                             Description = "Cookie-based authentication for the internal PlexRipper API",
                         }
                     );
+
+                    s.OperationProcessors.Add(new OperationSecurityScopeProcessor("CookieAuth"));
                 };
             });
         }

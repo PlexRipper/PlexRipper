@@ -82,20 +82,8 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : IRequestHandler<SyncPl
 
         if (libraryDb.Roles.Any())
         {
-            for (var i = libraryDb.Roles.Count - 1; i >= 0; i--)
-            {
-                // Already exists
-                if (roleKeys.Contains(libraryDb.Roles[i].Name))
-                {
-                    continue;
-                }
-
-                // Delete
-                if (!roleKeys.Contains(libraryDb.Roles[i].Name))
-                {
-                    libraryDb.Roles.RemoveAt(i);
-                }
-            }
+            foreach (var role in libraryDb.Roles.Where(r => !roleKeys.Contains(r.Name)).ToList())
+                libraryDb.Roles.Remove(role);
         }
 
         // Add Roles
@@ -134,20 +122,8 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : IRequestHandler<SyncPl
 
         if (libraryDb.Genres.Any())
         {
-            for (var i = libraryDb.Genres.Count - 1; i >= 0; i--)
-            {
-                // Already exists
-                if (roleKeys.Contains(libraryDb.Genres[i].Name))
-                {
-                    continue;
-                }
-
-                // Delete
-                if (!roleKeys.Contains(libraryDb.Genres[i].Name))
-                {
-                    libraryDb.Genres.RemoveAt(i);
-                }
-            }
+            foreach (var genre in libraryDb.Genres.Where(g => !roleKeys.Contains(g.Name)).ToList())
+                libraryDb.Genres.Remove(genre);
         }
 
         // Add Genres
@@ -186,20 +162,8 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : IRequestHandler<SyncPl
 
         if (libraryDb.Countries.Any())
         {
-            for (var i = libraryDb.Countries.Count - 1; i >= 0; i--)
-            {
-                // Already exists
-                if (countryNames.Contains(libraryDb.Countries[i].Name))
-                {
-                    continue;
-                }
-
-                // Delete
-                if (!countryNames.Contains(libraryDb.Countries[i].Name))
-                {
-                    libraryDb.Countries.RemoveAt(i);
-                }
-            }
+            foreach (var country in libraryDb.Countries.Where(c => !countryNames.Contains(c.Name)).ToList())
+                libraryDb.Countries.Remove(country);
         }
 
         // Add Countries

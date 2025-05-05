@@ -49,18 +49,18 @@ public class SearchPlexMediaEndpoint : BaseEndpoint<SearchPlexMediaRequest, Resu
         // Search for TV Shows and Movies
         var tvShowSearchResults = _dbContext
             .PlexTvShows.Where(p => p.SearchTitle.Contains(q))
-            .ProjectToMediaSlim()
+            .ProjectToMediaSlimDTO()
             .ToListAsync(ct);
 
         var movieSearchResults = _dbContext
             .PlexMovies.Where(p => p.SearchTitle.Contains(q))
-            .ProjectToMediaSlim()
+            .ProjectToMediaSlimDTO()
             .ToListAsync(ct);
 
         var results = await Task.WhenAll(tvShowSearchResults, movieSearchResults);
 
-        // Set the full thumbnail url and convert to slim DTO
-        var entities = results.SelectMany(x => x).ToList().Select(media => media.ToSlimDTO()).ToList();
+        // Flatten the results
+        var entities = results.SelectMany(x => x).ToList();
 
         await SendFluentResult(Result.Ok(entities), ct);
     }

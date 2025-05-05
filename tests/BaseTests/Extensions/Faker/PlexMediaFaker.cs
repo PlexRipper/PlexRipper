@@ -1,10 +1,12 @@
 using Bogus;
 using Bogus.Premium;
+using PlexApi.Contracts;
 
 namespace PlexRipper.BaseTests;
 
 public static class PlexMediaFaker
 {
+    // TODO make this a property when migrated to C# 14
     public static PlexMediaDataSet PlexMedia(this Faker faker)
     {
         return ContextHelper.GetOrSet(faker, () => new PlexMediaDataSet(faker));
@@ -31,4 +33,23 @@ public class PlexMediaDataSet : DataSet
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, "PlexMediaType not supported."),
         };
     }
+
+    public string MediaTitle(DownloadTaskType type)
+    {
+        var index = _faker.Random.Int(0, 1000 - 1);
+        return type switch
+        {
+            DownloadTaskType.Movie => "Movie - " + PlexMovieShowTitlesDataset.PlexMovieTitles.GetByIndex(index),
+            DownloadTaskType.MovieData => "MovieData - " + PlexMovieShowTitlesDataset.PlexMovieTitles.GetByIndex(index),
+            DownloadTaskType.TvShow => "TvShow - " + PlexTvShowTitlesDataset.PlexTVShowTitles.GetByIndex(index),
+            DownloadTaskType.Season => "Season",
+            DownloadTaskType.Episode => "Episode - " + PlexEpisodeShowTitlesDataset.PlexEpisodeTitles.GetByIndex(index),
+            DownloadTaskType.EpisodeData => "EpisodeData - "
+                + PlexEpisodeShowTitlesDataset.PlexEpisodeTitles.GetByIndex(index),
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, "PlexMediaType not supported."),
+        };
+    }
+
+    public string Guid(PlexMediaType type) =>
+        $"plex://{type.ToPlexApiString()}/${_faker.Random.Guid().ToString().Replace("-", "")}";
 }

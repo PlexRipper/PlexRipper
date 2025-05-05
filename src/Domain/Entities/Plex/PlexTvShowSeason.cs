@@ -2,7 +2,7 @@
 
 namespace PlexRipper.Domain;
 
-public class PlexTvShowSeason : PlexMedia
+public class PlexTvShowSeason : BasePlexMedia
 {
     /// <summary>
     /// The Plex key of the <see cref="PlexTvShow"/> this belongs too.
@@ -20,7 +20,7 @@ public class PlexTvShowSeason : PlexMedia
 
     public int TvShowId { get; set; }
 
-    public List<PlexTvShowEpisode> Episodes { get; set; } = [];
+    public ICollection<PlexTvShowEpisode> Episodes { get; set; } = [];
 
     #endregion
 

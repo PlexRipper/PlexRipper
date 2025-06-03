@@ -74,9 +74,8 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
         var countries = command.LibraryMetadata.PlexCountries;
 
         var libraryDb = await _dbContext
-            .PlexLibraries.AsNoTracking()
-            .Where(x => x.Id == libraryId)
-            .FirstOrDefaultAsync(ct);
+            .PlexLibraries.AsTracking()
+            .FirstOrDefaultAsync(x => x.Id == libraryId, cancellationToken: ct);
 
         if (libraryDb is null)
             return ResultExtensions.EntityNotFound(nameof(PlexLibrary), libraryId);
@@ -87,10 +86,16 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
         var syncCountriesResult = await SyncCountries(countries, libraryId, libraryName);
         var syncRolesResult = await SyncRoles(roles, libraryId, libraryName);
 
-        return Result.Merge(syncGenresResult, syncCountriesResult, syncRolesResult);
+        libraryDb.ActorsCount = syncRolesResult.ValueOrDefault;
+        libraryDb.GenresCount = syncGenresResult.ValueOrDefault;
+        libraryDb.CountriesCount = syncCountriesResult.ValueOrDefault;
+
+        await _dbContext.SaveChangesAsync(CancellationToken.None);
+
+        return Result.Merge(syncGenresResult, syncCountriesResult, syncRolesResult).ToResult();
     }
 
-    private async Task<Result> SyncRoles(Dictionary<int, PlexActor> sourceDict, int libraryId, string libraryName)
+    private async Task<Result<int>> SyncRoles(Dictionary<int, PlexActor> sourceDict, int libraryId, string libraryName)
     {
         var stopWatch = Stopwatch.StartNew();
 
@@ -133,11 +138,6 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
             e => new ExceptionalError(e)
         );
 
-        // Update the actor count in the library
-        await _dbContext
-            .PlexLibraries.Where(x => x.Id == libraryId)
-            .ExecuteUpdateAsync(set => set.SetProperty(x => x.ActorsCount, newActors.Count));
-
         stopWatch.Stop();
 
         if (insertResult.IsSuccess)
@@ -162,7 +162,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
         return insertResult.LogError();
     }
 
-    private async Task<Result> SyncGenres(Dictionary<int, PlexGenre> sourceDict, int libraryId, string libraryName)
+    private async Task<Result<int>> SyncGenres(Dictionary<int, PlexGenre> sourceDict, int libraryId, string libraryName)
     {
         var stopWatch = Stopwatch.StartNew();
 
@@ -201,11 +201,6 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
             e => new ExceptionalError(e)
         );
 
-        // Update the genres count in the library
-        await _dbContext
-            .PlexLibraries.Where(x => x.Id == libraryId)
-            .ExecuteUpdateAsync(set => set.SetProperty(x => x.GenresCount, newGenres.Count));
-
         stopWatch.Stop();
 
         if (insertResult.IsSuccess)
@@ -230,7 +225,11 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
         return insertResult.LogError();
     }
 
-    private async Task<Result> SyncCountries(Dictionary<int, PlexCountry> sourceDict, int libraryId, string libraryName)
+    private async Task<Result<int>> SyncCountries(
+        Dictionary<int, PlexCountry> sourceDict,
+        int libraryId,
+        string libraryName
+    )
     {
         var stopWatch = Stopwatch.StartNew();
 
@@ -267,11 +266,6 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
             () => _dbContext.BulkInsertAsync(newCountries, _bulkInsertConfig),
             e => new ExceptionalError(e)
         );
-
-        // Update the country count in the library
-        await _dbContext
-            .PlexLibraries.Where(x => x.Id == libraryId)
-            .ExecuteUpdateAsync(set => set.SetProperty(x => x.CountriesCount, newCountries.Count));
 
         stopWatch.Stop();
 

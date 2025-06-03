@@ -7,17 +7,22 @@ using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application;
 
-public record SyncPlexTvShowsCommand(List<PlexTvShow> PlexTvShows) : IRequest<Result<CrudTvShowsReport>>;
+public record SyncPlexTvShowsCommand(InsertMediaMetaDataCommandResponse LibraryMetadata)
+    : IRequest<Result<CrudTvShowsReport>>;
 
 public class SyncPlexTvShowsCommandValidator : AbstractValidator<SyncPlexTvShowsCommand>
 {
     public SyncPlexTvShowsCommandValidator(ILog<SyncPlexTvShowsCommandValidator> log)
     {
-        var stopWatch = new Stopwatch();
-        stopWatch.Start();
+        var stopWatch = Stopwatch.StartNew();
+        RuleFor(x => x.LibraryMetadata).NotNull();
+        RuleFor(x => x.LibraryMetadata.PlexLibrary).NotNull();
+        RuleFor(x => x.LibraryMetadata.PlexLibrary.PlexServerId).GreaterThan(0);
+        RuleFor(x => x.LibraryMetadata.PlexLibraryId).GreaterThan(0);
 
-        RuleFor(x => x.PlexTvShows).NotNull();
-        RuleForEach(x => x.PlexTvShows)
+        RuleFor(x => x.LibraryMetadata.PlexLibrary.TvShows).NotNull();
+
+        RuleForEach(x => x.LibraryMetadata.PlexLibrary.TvShows)
             .ChildRules(tvShow =>
             {
                 tvShow.RuleFor(x => x.Key).GreaterThan(0);
@@ -86,7 +91,7 @@ public class SyncPlexTvShowsCommandHandler : IRequestHandler<SyncPlexTvShowsComm
     {
         try
         {
-            var plexLibraryId = command.PlexTvShows.First().PlexLibraryId;
+            var plexLibraryId = command.LibraryMetadata.PlexLibraryId;
             var plexLibraryName = _dbContext
                 .PlexLibraries.Where(x => x.Id == plexLibraryId)
                 .Select(x => x.Title)
@@ -103,7 +108,7 @@ public class SyncPlexTvShowsCommandHandler : IRequestHandler<SyncPlexTvShowsComm
 
             await RemoveMedia(plexLibraryId, cancellationToken);
 
-            var plexTvShows = command.PlexTvShows;
+            var plexTvShows = command.LibraryMetadata.PlexLibrary.TvShows.ToList();
 
             await _dbContext.BulkInsertAsync(plexTvShows, _config, cancellationToken);
             _report.CreatedTvShows = plexTvShows.Count;

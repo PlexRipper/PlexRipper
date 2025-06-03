@@ -218,6 +218,8 @@ public class PlexRipperDbContextManagerUnitTests : BaseUnitTest<PlexRipperDbCont
         mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.CloseConnection());
         mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.EnsureDeleted()).Returns(Result.Ok(true));
         mock.Mock<IAuthDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok());
+        mock.Mock<IAuthDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(false);
+        mock.Mock<IAuthDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns([]);
         mock.Mock<IGeneralSettings>().SetupSet(x => x.FirstTimeSetup = true).Verifiable(Times.AtLeastOnce);
 
         // Act
@@ -255,6 +257,7 @@ public class PlexRipperDbContextManagerUnitTests : BaseUnitTest<PlexRipperDbCont
             .SetupSequence(x => x.Migrate())
             .Returns(Result.Fail("Auth migration failed"))
             .Returns(Result.Ok()); // Second call during database reset
+        mock.Mock<IGeneralSettings>().SetupSet(x => x.FirstTimeSetup = true).Verifiable(Times.AtLeastOnce);
 
         // Act
         var result = _sut.Setup();
@@ -288,6 +291,8 @@ public class PlexRipperDbContextManagerUnitTests : BaseUnitTest<PlexRipperDbCont
         mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.CloseConnection());
         mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.EnsureDeleted()).Returns(Result.Ok(true));
         mock.Mock<IAuthDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok());
+        mock.Mock<IAuthDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(false);
+        mock.Mock<IAuthDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns([]);
         mock.Mock<IGeneralSettings>().SetupSet(x => x.FirstTimeSetup = true).Verifiable(Times.Once);
 
         // Act

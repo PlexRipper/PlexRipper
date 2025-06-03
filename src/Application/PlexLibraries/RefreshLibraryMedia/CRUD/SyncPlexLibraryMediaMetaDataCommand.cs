@@ -68,7 +68,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : IRequestHandler<SyncPl
         stopWatch.Start();
         _log.Here().Debug("Started syncing {Count} roles for library {LibraryName}", roles.Count, libraryName);
 
-        foreach (var plexRole in roles)
+        foreach (var plexRole in roles.DistinctBy(x => x.PlexKey))
             _dbContext.PlexRoles.AddIfNotExists(plexRole, x => x.PlexKey == plexRole.PlexKey);
 
         await _dbContext.SaveChangesAsync();
@@ -120,7 +120,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : IRequestHandler<SyncPl
         stopWatch.Start();
         _log.Here().Debug("Started syncing {Count} genres for library {LibraryName}", genres.Count, libraryName);
 
-        foreach (var genre in genres)
+        foreach (var genre in genres.DistinctBy(x => x.PlexKey))
             _dbContext.PlexGenres.AddIfNotExists(genre, x => x.PlexKey == genre.PlexKey);
 
         await _dbContext.SaveChangesAsync();
@@ -173,7 +173,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : IRequestHandler<SyncPl
 
         _log.Here().Debug("Started syncing {Count} countries for library {LibraryName}", countries.Count, libraryName);
 
-        foreach (var plexRole in countries)
+        foreach (var plexRole in countries.DistinctBy(x => x.PlexKey))
             _dbContext.PlexCountries.AddIfNotExists(plexRole, x => x.PlexKey == plexRole.PlexKey);
 
         await _dbContext.SaveChangesAsync();

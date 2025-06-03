@@ -79,11 +79,11 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
         }
 
         // Retrieve the media for this library
-        var index = 0;
         var chunkSize = 100;
         var startTime = DateTime.UtcNow; // Start time for estimation
+        var progressIndex = 0;
 
-        for (var i = 0; i < totalSize; i += batchSize)
+        for (var index = 0; index < totalSize; index += batchSize)
         {
             var mediaListResult = await GetMetadataForLibraryAsync(
                 client,
@@ -99,7 +99,7 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
             }
 
             var rawMediaList = mediaListResult.Value;
-            index += rawMediaList.Count;
+            progressIndex += rawMediaList.Count;
 
             // We need to get the media details because the initial metadata we get from the library is not complete
             var ratingKeys = rawMediaList.Select(x => x.RatingKey).ToList();
@@ -109,14 +109,14 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
                 if (detailResult.IsFailed)
                 {
                     detailResult.ToResult().LogError();
-                    SendProgress(mediaType, startTime, index, totalSize, action);
+                    SendProgress(mediaType, startTime, progressIndex, totalSize, action);
                     continue;
                 }
 
                 mediaList.AddRange(detailResult.Value);
-                index += detailResult.Value.Count;
+                progressIndex += detailResult.Value.Count;
 
-                SendProgress(mediaType, startTime, index, totalSize, action);
+                SendProgress(mediaType, startTime, progressIndex, totalSize, action);
             }
         }
 

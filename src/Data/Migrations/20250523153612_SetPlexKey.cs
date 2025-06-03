@@ -10,17 +10,11 @@ namespace PlexRipper.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropIndex(
-                name: "IX_PlexRoles_Name",
-                table: "PlexRoles");
+            migrationBuilder.DropIndex(name: "IX_PlexRoles_Name", table: "PlexRoles");
 
-            migrationBuilder.DropIndex(
-                name: "IX_PlexGenres_Name",
-                table: "PlexGenres");
+            migrationBuilder.DropIndex(name: "IX_PlexGenres_Name", table: "PlexGenres");
 
-            migrationBuilder.DropIndex(
-                name: "IX_PlexCountries_Name",
-                table: "PlexCountries");
+            migrationBuilder.DropIndex(name: "IX_PlexCountries_Name", table: "PlexCountries");
 
             migrationBuilder.AlterColumn<string>(
                 name: "TagKey",
@@ -30,41 +24,39 @@ namespace PlexRipper.Data.Migrations
                 defaultValue: "",
                 oldClrType: typeof(string),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexRoles_PlexKey",
                 table: "PlexRoles",
                 column: "PlexKey",
-                unique: true);
+                unique: true
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexGenres_PlexKey",
                 table: "PlexGenres",
                 column: "PlexKey",
-                unique: true);
+                unique: true
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexCountries_PlexKey",
                 table: "PlexCountries",
                 column: "PlexKey",
-                unique: true);
+                unique: true
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropIndex(
-                name: "IX_PlexRoles_PlexKey",
-                table: "PlexRoles");
+            migrationBuilder.DropIndex(name: "IX_PlexRoles_PlexKey", table: "PlexRoles");
 
-            migrationBuilder.DropIndex(
-                name: "IX_PlexGenres_PlexKey",
-                table: "PlexGenres");
+            migrationBuilder.DropIndex(name: "IX_PlexGenres_PlexKey", table: "PlexGenres");
 
-            migrationBuilder.DropIndex(
-                name: "IX_PlexCountries_PlexKey",
-                table: "PlexCountries");
+            migrationBuilder.DropIndex(name: "IX_PlexCountries_PlexKey", table: "PlexCountries");
 
             migrationBuilder.AlterColumn<string>(
                 name: "TagKey",
@@ -72,25 +64,19 @@ namespace PlexRipper.Data.Migrations
                 type: "TEXT",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "TEXT");
+                oldType: "TEXT"
+            );
 
-            migrationBuilder.CreateIndex(
-                name: "IX_PlexRoles_Name",
-                table: "PlexRoles",
-                column: "Name",
-                unique: true);
+            migrationBuilder.CreateIndex(name: "IX_PlexRoles_Name", table: "PlexRoles", column: "Name", unique: true);
 
-            migrationBuilder.CreateIndex(
-                name: "IX_PlexGenres_Name",
-                table: "PlexGenres",
-                column: "Name",
-                unique: true);
+            migrationBuilder.CreateIndex(name: "IX_PlexGenres_Name", table: "PlexGenres", column: "Name", unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexCountries_Name",
                 table: "PlexCountries",
                 column: "Name",
-                unique: true);
+                unique: true
+            );
         }
     }
 }

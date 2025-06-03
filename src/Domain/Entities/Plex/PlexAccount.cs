@@ -159,7 +159,7 @@ public class PlexAccount : BaseEntity
             ValidatedAt = null,
             PlexId = 0,
             Uuid = string.Empty,
-            ClientId = string.Empty,
+            ClientId = Guid.NewGuid().ToString(),
             Title = string.Empty,
             Email = string.Empty,
             HasPassword = false,

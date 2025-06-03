@@ -57,7 +57,7 @@ public static class PlexAccountMapper
             HasPassword = source.HasPassword,
             AuthenticationToken = source.AuthenticationToken,
             CustomAuthenticationToken = source.CustomAuthenticationToken,
-            ClientId = source.ClientId,
+            ClientId = source.ClientId != string.Empty ? source.ClientId : Guid.NewGuid().ToString(),
             VerificationCode = source.VerificationCode,
             Is2Fa = source.Is2Fa,
         };

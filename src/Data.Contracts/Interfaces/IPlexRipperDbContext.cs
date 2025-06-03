@@ -108,7 +108,7 @@ public interface IPlexRipperDbContext : IDisposable
 
     public DbSet<PlexMovieGenres> PlexMovieGenres { get; }
 
-    public DbSet<PlexTvShowActors> PlexTvShowRoles { get; }
+    public DbSet<PlexTvShowActors> PlexTvShowActors { get; }
 
     public DbSet<PlexTvShowGenres> PlexTvShowGenres { get; }
 

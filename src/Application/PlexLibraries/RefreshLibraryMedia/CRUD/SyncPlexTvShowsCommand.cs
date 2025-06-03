@@ -97,6 +97,9 @@ public class SyncPlexTvShowsCommandHandler : IRequestHandler<SyncPlexTvShowsComm
                 .Select(x => x.Title)
                 .FirstOrDefault();
 
+            if (string.IsNullOrWhiteSpace(plexLibraryName))
+                return ResultExtensions.EntityNotFound(nameof(command.LibraryMetadata.PlexLibrary), plexLibraryId);
+
             _log.Debug(
                 "Starting syncing of tv shows in library: {PlexLibraryName} with id:  {PlexLibraryId} by first removing all media and then reinserting it",
                 plexLibraryName,
@@ -114,7 +117,13 @@ public class SyncPlexTvShowsCommandHandler : IRequestHandler<SyncPlexTvShowsComm
             _report.CreatedTvShows = plexTvShows.Count;
 
             // Sync metadata such as Countries, Roles and Genre
-            await SyncMediaMetaData(plexLibraryId, plexTvShows);
+            var genreDict = command.LibraryMetadata.PlexGenres;
+            var countryDict = command.LibraryMetadata.PlexCountries;
+            var actorDict = command.LibraryMetadata.PlexActors;
+
+            await SyncTvShowGenres(plexTvShows, genreDict, plexLibraryId, plexLibraryName, cancellationToken);
+            await SyncTvShowCountries(plexTvShows, countryDict, plexLibraryId, plexLibraryName, cancellationToken);
+            await SyncTvShowActors(plexTvShows, actorDict, plexLibraryId, plexLibraryName, cancellationToken);
 
             // Set the foreign keys (PlexTvShowId) in PlexSeason based on the inserted PlexTvShows
             var plexSeasons = plexTvShows
@@ -169,83 +178,145 @@ public class SyncPlexTvShowsCommandHandler : IRequestHandler<SyncPlexTvShowsComm
         }
     }
 
-    private async Task SyncMediaMetaData(int plexLibraryId, List<PlexTvShow> plexTvShows)
+    private async Task<Result> SyncTvShowGenres(
+        List<PlexTvShow> plexTvShows,
+        Dictionary<int, PlexGenre> genreDict,
+        int plexLibraryId,
+        string libraryName,
+        CancellationToken cancellationToken
+    )
     {
-        var stopWatch = new Stopwatch();
-        stopWatch.Start();
-
-        var plexLibraryName = await _dbContext.GetPlexLibraryNameById(plexLibraryId);
         _log.Debug(
-            "Starting syncing of TvShow metadata for library {LibraryName} with id: {LibraryId}",
-            plexLibraryName,
+            "Starting syncing of TV show genres for library: {LibraryName} with id: {LibraryId}",
+            libraryName,
             plexLibraryId
         );
+        var stopWatch = Stopwatch.StartNew();
 
-        // These are always small dictionaries, so no need to worry about performance
-        var genreDict = await _dbContext.PlexGenres.ToDictionaryAsync(x => x.Name, x => x.Id);
-        var countryDict = await _dbContext.PlexCountries.ToDictionaryAsync(x => x.Name, x => x.Id);
+        await _dbContext
+            .PlexTvShowGenres.Where(x => x.PlexLibraryId == plexLibraryId)
+            .ExecuteDeleteAsync(cancellationToken);
 
-        var roleDict = await _dbContext
-            .PlexLibraries.Where(x => x.Id == plexLibraryId)
-            .Include(x => x.Roles)
-            .SelectMany(x => x.Roles)
-            .ToDictionaryAsync(x => x.Key, x => x.Id);
+        var plexTvShowGenres = new List<PlexTvShowGenres>();
+        var keyToIdDict = genreDict.ToDictionary(kv => kv.Value.Key, kv => kv.Value.Id);
+
+        foreach (var plexTvShow in plexTvShows)
+        {
+            foreach (var plexGenre in plexTvShow.Genres)
+            {
+                if (keyToIdDict.TryGetValue(plexGenre.Key, out var genreId))
+                    plexTvShowGenres.Add(new PlexTvShowGenres(genreId, plexLibraryId, plexTvShow.Id));
+            }
+        }
+
+        var insertResult = await Result.Try(
+            () =>
+                _dbContext.BulkInsertAsync(
+                    plexTvShowGenres.DistinctBy(x => new { x.PlexTvShowId, x.GenresId }).ToList(),
+                    _config,
+                    CancellationToken.None
+                )
+        );
+
+        stopWatch.StopAndLog(
+            $"Synced {plexTvShowGenres.Count} {nameof(PlexTvShowGenres)} for library: {libraryName} with id: {plexLibraryId}"
+        );
+
+        return insertResult;
+    }
+
+    private async Task<Result> SyncTvShowCountries(
+        List<PlexTvShow> plexTvShows,
+        Dictionary<int, PlexCountry> countryDict,
+        int plexLibraryId,
+        string libraryName,
+        CancellationToken cancellationToken
+    )
+    {
+        _log.Debug(
+            "Starting syncing of TV show countries for library: {LibraryName} with id: {LibraryId}",
+            libraryName,
+            plexLibraryId
+        );
+        var stopWatch = Stopwatch.StartNew();
+
+        await _dbContext
+            .PlexTvShowCountries.Where(x => x.PlexLibraryId == plexLibraryId)
+            .ExecuteDeleteAsync(cancellationToken);
+
+        var plexTvShowCountries = new List<PlexTvShowCountries>();
+        var keyToIdDict = countryDict.ToDictionary(kv => kv.Value.Key, kv => kv.Value.Id);
+
+        foreach (var plexTvShow in plexTvShows)
+        {
+            foreach (var plexCountry in plexTvShow.Countries)
+            {
+                if (keyToIdDict.TryGetValue(plexCountry.Key, out var countryId))
+                    plexTvShowCountries.Add(new PlexTvShowCountries(countryId, plexLibraryId, plexTvShow.Id));
+            }
+        }
+
+        var insertResult = await Result.Try(
+            () =>
+                _dbContext.BulkInsertAsync(
+                    plexTvShowCountries.DistinctBy(x => new { x.PlexTvShowId, x.CountryId }).ToList(),
+                    _config,
+                    CancellationToken.None
+                )
+        );
+
+        stopWatch.StopAndLog(
+            $"Synced {plexTvShowCountries.Count} {nameof(PlexTvShowCountries)} for library: {libraryName} with id: {plexLibraryId}"
+        );
+
+        return insertResult;
+    }
+
+    private async Task<Result> SyncTvShowActors(
+        List<PlexTvShow> plexTvShows,
+        Dictionary<int, PlexActor> actorDict,
+        int plexLibraryId,
+        string libraryName,
+        CancellationToken cancellationToken
+    )
+    {
+        _log.Debug(
+            "Starting syncing of TV show actors for library: {LibraryName} with id: {LibraryId}",
+            libraryName,
+            plexLibraryId
+        );
+        var stopWatch = Stopwatch.StartNew();
+
+        await _dbContext
+            .PlexTvShowActors.Where(x => x.PlexLibraryId == plexLibraryId)
+            .ExecuteDeleteAsync(cancellationToken);
 
         var plexTvShowRoles = new List<PlexTvShowActors>();
-        var plexTvShowGenres = new List<PlexTvShowGenres>();
-        var plexTvShowCountries = new List<PlexTvShowCountries>();
+        var keyToIdDict = actorDict.ToDictionary(kv => kv.Value.Key, kv => kv.Value.Id);
 
         foreach (var plexTvShow in plexTvShows)
         {
             foreach (var plexRole in plexTvShow.Roles)
             {
-                if (roleDict.TryGetValue(plexRole.Key, out var roleId))
+                if (keyToIdDict.TryGetValue(plexRole.Key, out var roleId))
                     plexTvShowRoles.Add(new PlexTvShowActors(roleId, plexLibraryId, plexTvShow.Id));
-            }
-
-            foreach (var plexGenre in plexTvShow.Genres)
-            {
-                if (genreDict.TryGetValue(plexGenre.Key, out var genreId))
-                    plexTvShowGenres.Add(new PlexTvShowGenres(genreId, plexLibraryId, plexTvShow.Id));
-            }
-
-            foreach (var plexCountry in plexTvShow.Countries)
-            {
-                if (countryDict.TryGetValue(plexCountry.Key, out var countryId))
-                    plexTvShowCountries.Add(new PlexTvShowCountries(countryId, plexLibraryId, plexTvShow.Id));
             }
         }
 
-        await _dbContext.BulkInsertAsync(
-            plexTvShowCountries.DistinctBy(x => new { x.PlexTvShowId, x.CountryId }).ToList(),
-            _config,
-            CancellationToken.None
-        );
-        await _dbContext.BulkInsertAsync(
-            plexTvShowGenres.DistinctBy(x => new { x.PlexTvShowId, x.GenresId }).ToList(),
-            _config,
-            CancellationToken.None
-        );
-        await _dbContext.BulkInsertAsync(
-            plexTvShowRoles.DistinctBy(x => new { x.PlexTvShowId, RolesId = x.PlexActorId }).ToList(),
-            _config,
-            CancellationToken.None
+        var insertResult = await Result.Try(
+            () =>
+                _dbContext.BulkInsertAsync(
+                    plexTvShowRoles.DistinctBy(x => new { x.PlexTvShowId, RolesId = x.PlexActorId }).ToList(),
+                    _config,
+                    CancellationToken.None
+                )
         );
 
-        stopWatch.Stop();
-        _log.Debug(
-            "Finished syncing {Count} roles, {Count} genres and {Count} countries for library {LibraryName} in {ElapsedSeconds:F2} seconds",
-            plexTvShowRoles.Count,
-            plexTvShowGenres.Count,
-            plexTvShowCountries.Count,
-            plexLibraryName,
-            stopWatch.Elapsed.TotalSeconds
+        stopWatch.StopAndLog(
+            $"Synced {plexTvShowRoles.Count} {nameof(PlexTvShowActors)} for library: {libraryName} with id: {plexLibraryId}"
         );
-        _log.Debug(
-            "Finished syncing of TvShow metadata for library {LibraryName} with id: {LibraryId}",
-            plexLibraryName,
-            plexLibraryId
-        );
+
+        return insertResult;
     }
 
     private async Task RemoveMedia(int plexLibraryId, CancellationToken cancellationToken)

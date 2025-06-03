@@ -113,7 +113,7 @@ public sealed class PlexRipperDbContext : DbContext, IPlexRipperDbContext, IPlex
 
     public DbSet<PlexMovieGenres> PlexMovieGenres { get; set; }
 
-    public DbSet<PlexTvShowActors> PlexTvShowRoles { get; set; }
+    public DbSet<PlexTvShowActors> PlexTvShowActors { get; set; }
 
     public DbSet<PlexTvShowGenres> PlexTvShowGenres { get; set; }
 

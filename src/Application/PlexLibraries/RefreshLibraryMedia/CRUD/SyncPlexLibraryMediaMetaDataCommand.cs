@@ -57,9 +57,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
         {
             SetOutputIdentity = false,
             PreserveInsertOrder = true,
-
-            // Only in-memory sqlite needs this which happens during testing
-            UseTempDB = EnvironmentExtensions.IsIntegrationTestMode(),
+            UseTempDB = true,
         };
 
     public SyncPlexLibraryMediaMetaDataCommandHandler(IPlexRipperDbContext dbContext, ILog log)

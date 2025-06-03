@@ -5,6 +5,7 @@ using Environment;
 using FastEndpoints;
 using FluentValidation;
 using Logging.Interface;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using PlexApi.Contracts;
 
@@ -94,9 +95,9 @@ public class InsertMediaMetaDataCommandHandler
         var resultDict = new Dictionary<int, PlexActor>();
 
         var distinctRoles = sourceList.Where(x => !x.TagKey.IsNullOrEmpty()).DistinctBy(x => x.TagKey).ToList();
-        var plexActors = distinctRoles.ToPlexActor();
+        var newPlexActors = distinctRoles.ToPlexActor();
 
-        if (plexActors.IsNullOrEmpty())
+        if (newPlexActors.IsNullOrEmpty())
         {
             _log.Here().Debug("No {PlexActorName} to insert", nameof(PlexActor));
             return Result.Ok(resultDict);
@@ -105,17 +106,14 @@ public class InsertMediaMetaDataCommandHandler
         var result = await Result.Try(
             () =>
                 _dbContext.BulkInsertOrUpdateAsync(
-                    plexActors,
+                    newPlexActors,
                     new BulkConfig
                     {
-                        SetOutputIdentity = true,
+                        SetOutputIdentity = false,
                         UpdateByProperties = [nameof(PlexActor.Key)],
-
-                        // Only in-memory sqlite needs this which happens during testing
-                        UseTempDB = EnvironmentExtensions.IsIntegrationTestMode(),
+                        UseTempDB = true,
                     }
-                ),
-            e => new ExceptionalError(e)
+                )
         );
 
         if (result.IsFailed)
@@ -129,16 +127,10 @@ public class InsertMediaMetaDataCommandHandler
         }
 
         // Query the database to get entities with proper IDs (SQLite limitation workaround)
-        await _dbContext.BulkReadAsync(
-            plexActors,
-            new BulkConfig
-            {
-                UpdateByProperties = [nameof(PlexActor.Key)],
-                UseTempDB = EnvironmentExtensions.IsIntegrationTestMode(),
-            }
-        );
+        var genreHashSet = newPlexActors.Select(x => x.Key).ToHashSet();
+        newPlexActors = await _dbContext.PlexActors.Where(x => genreHashSet.Contains(x.Key)).ToListAsync();
 
-        resultDict = plexActors.ToPlexIdDictionary(sourceList);
+        resultDict = newPlexActors.ToPlexIdDictionary(sourceList);
 
         stopWatch.Stop();
 
@@ -162,28 +154,28 @@ public class InsertMediaMetaDataCommandHandler
         var resultDict = new Dictionary<int, PlexGenre>();
 
         // Distinct by Genre Name because PlexId is not globally unique across all Plex servers
-        var plexGenres = sourceList.Where(x => !x.Key.IsNullOrEmpty()).DistinctBy(x => x.Key).ToPlexGenre();
-        if (plexGenres.IsNullOrEmpty())
+        var newPlexGenres = sourceList.Where(x => !x.Key.IsNullOrEmpty()).DistinctBy(x => x.Key).ToPlexGenre();
+        if (newPlexGenres.IsNullOrEmpty())
         {
             _log.Here().Debug("No {NameOfPlexGenre} to insert ", nameof(PlexGenre));
             return Result.Ok(resultDict);
         }
 
-        var insertResult = await Result.Try(
-            () =>
-                _dbContext.BulkInsertOrUpdateAsync(
-                    plexGenres,
-                    new BulkConfig
-                    {
-                        SetOutputIdentity = true,
-                        UpdateByProperties = [nameof(PlexGenre.Key)],
+        var insertResult = await Result.Try(async Task () =>
+        {
+            var incomingGenreKeys = newPlexGenres.Select(x => x.Key).ToHashSet();
+            var existingGenreKeys = _dbContext
+                .PlexGenres.Where(c => incomingGenreKeys.Contains(c.Key))
+                .Select(c => c.Key)
+                .ToHashSet();
 
-                        // Only in-memory sqlite needs this which happens during testing
-                        UseTempDB = EnvironmentExtensions.IsIntegrationTestMode(),
-                    }
-                ),
-            e => new ExceptionalError(e)
-        );
+            var toInsert = newPlexGenres.Where(c => !existingGenreKeys.Contains(c.Key)).ToList();
+            if (toInsert.Any())
+            {
+                _dbContext.PlexGenres.AddRange(toInsert);
+                await _dbContext.SaveChangesAsync();
+            }
+        });
 
         if (insertResult.IsFailed)
         {
@@ -196,22 +188,16 @@ public class InsertMediaMetaDataCommandHandler
         }
 
         // Query the database to get entities with proper IDs (SQLite limitation workaround)
-        await _dbContext.BulkReadAsync(
-            plexGenres,
-            new BulkConfig
-            {
-                UpdateByProperties = [nameof(PlexGenre.Key)],
-                UseTempDB = EnvironmentExtensions.IsIntegrationTestMode(),
-            }
-        );
+        var genreHashSet = newPlexGenres.Select(x => x.Key).ToHashSet();
+        newPlexGenres = await _dbContext.PlexGenres.Where(x => genreHashSet.Contains(x.Key)).ToListAsync();
 
-        resultDict = plexGenres.ToPlexIdDictionary(sourceList);
+        resultDict = newPlexGenres.ToPlexIdDictionary(sourceList);
 
         stopWatch.Stop();
 
         _log.Debug(
             "Finished inserting {Count} {NameOfPlexGenre} in {ElapsedSeconds:F2} seconds",
-            plexGenres.Count,
+            newPlexGenres.Count,
             nameof(PlexGenre),
             stopWatch.Elapsed.TotalSeconds
         );
@@ -228,56 +214,50 @@ public class InsertMediaMetaDataCommandHandler
 
         var resultDict = new Dictionary<int, PlexCountry>();
 
-        var plexCountries = sourceList.Where(x => !x.Key.IsNullOrEmpty()).DistinctBy(x => x.Name).ToPlexCountry();
-        if (plexCountries.IsNullOrEmpty())
+        var newPlexCountries = sourceList.Where(x => !x.Key.IsNullOrEmpty()).DistinctBy(x => x.Key).ToPlexCountry();
+        if (newPlexCountries.IsNullOrEmpty())
         {
             _log.Here().Debug("No {NameOfPlexCountry} to insert", nameof(PlexCountry));
             return Result.Ok(resultDict);
         }
 
-        var result = await Result.Try(
-            () =>
-                _dbContext.BulkInsertOrUpdateAsync(
-                    plexCountries,
-                    new BulkConfig
-                    {
-                        SetOutputIdentity = true,
-                        UpdateByProperties = [nameof(PlexCountry.Key)],
+        var insertResult = await Result.Try(async Task () =>
+        {
+            var incomingCountryKeys = newPlexCountries.Select(x => x.Key).ToHashSet();
+            var existingCountryKeys = _dbContext
+                .PlexCountries.Where(c => incomingCountryKeys.Contains(c.Key))
+                .Select(c => c.Key)
+                .ToHashSet();
 
-                        // Only in-memory sqlite needs this which happens during testing
-                        UseTempDB = EnvironmentExtensions.IsIntegrationTestMode(),
-                    }
-                ),
-            e => new ExceptionalError(e)
-        );
+            var toInsert = newPlexCountries.Where(c => !existingCountryKeys.Contains(c.Key)).ToList();
+            if (toInsert.Any())
+            {
+                _dbContext.PlexCountries.AddRange(toInsert);
+                await _dbContext.SaveChangesAsync();
+            }
+        });
 
-        if (result.IsFailed)
+        if (insertResult.IsFailed)
         {
             _log.Error(
                 "Failed to insert {NameOfPlexCountry} after {ElapsedSeconds:F2} seconds",
                 nameof(PlexCountry),
                 stopWatch.Elapsed.TotalSeconds
             );
-            return result.LogError();
+            return insertResult.LogError();
         }
 
         // Query the database to get entities with proper IDs (SQLite limitation workaround)
-        await _dbContext.BulkReadAsync(
-            plexCountries,
-            new BulkConfig
-            {
-                UpdateByProperties = [nameof(PlexCountry.Key)],
-                UseTempDB = EnvironmentExtensions.IsIntegrationTestMode(),
-            }
-        );
+        var countryHashSet = newPlexCountries.Select(x => x.Key).ToHashSet();
+        newPlexCountries = await _dbContext.PlexCountries.Where(x => countryHashSet.Contains(x.Key)).ToListAsync();
 
-        resultDict = plexCountries.ToPlexIdDictionary(sourceList);
+        resultDict = newPlexCountries.ToPlexIdDictionary(sourceList);
 
         stopWatch.Stop();
 
         _log.Debug(
             "Finished inserting {Count} {NameOfPlexCountry} in {ElapsedSeconds:F2} seconds",
-            plexCountries.Count,
+            newPlexCountries.Count,
             nameof(PlexCountry),
             stopWatch.Elapsed.TotalSeconds
         );

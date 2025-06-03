@@ -3,15 +3,15 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace PlexRipper.Domain;
 
-public class PlexLibraryGenres
+public class PlexLibraryActors
 {
-    public PlexLibraryGenres() { }
+    public PlexLibraryActors() { }
 
     [SetsRequiredMembers]
-    public PlexLibraryGenres(int plexLibraryId, int plexGenreId, int plexKey)
+    public PlexLibraryActors(int libraryId, int plexActorId, int plexKey)
     {
-        PlexLibraryId = plexLibraryId;
-        PlexGenreId = plexGenreId;
+        PlexLibraryId = libraryId;
+        PlexActorId = plexActorId;
         PlexKey = plexKey;
     }
 
@@ -19,10 +19,10 @@ public class PlexLibraryGenres
     public required int PlexLibraryId { get; set; }
 
     [Column(Order = 2)]
-    public required int PlexGenreId { get; set; }
+    public required int PlexActorId { get; set; }
 
     /// <summary>
-    /// The PlexKey is the unique identifier for the genre in Plex in the context of the PlexLibrary.
+    /// The PlexKey is the unique identifier for the actor in Plex in the context of the PlexLibrary.
     /// Meaning it is not globally unique across all Plex servers.
     /// </summary>
     [Column(Order = 3)]

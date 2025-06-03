@@ -7,6 +7,6 @@ public class PlexGenreConfiguration : IEntityTypeConfiguration<PlexGenre>
 {
     public void Configure(EntityTypeBuilder<PlexGenre> builder)
     {
-        builder.HasIndex(x => x.PlexKey).IsUnique();
+        builder.HasIndex(x => x.Key).IsUnique();
     }
 }

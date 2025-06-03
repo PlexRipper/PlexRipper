@@ -2,10 +2,9 @@ namespace PlexRipper.BaseTests;
 
 public static partial class FakeData
 {
-    private static Faker<PlexGenre> _plexGenre = new Faker<PlexGenre>()
+    private static readonly Faker<PlexGenre> _plexGenre = new Faker<PlexGenre>()
         .StrictMode(true)
         .RuleFor(x => x.Id, _ => 0)
-        .RuleFor(x => x.PlexKey, _ => GetUniqueNumber())
         .RuleFor(x => x.Name, f => f.Name.FullName())
         .Ignore(x => x.PlexLibraries)
         .Ignore(x => x.PlexMovieGenres)

@@ -2,11 +2,11 @@ namespace PlexRipper.BaseTests;
 
 public static partial class FakeData
 {
-    private static Faker<PlexActor> _plexActor = new Faker<PlexActor>()
+    private static readonly Faker<PlexActor> _plexActor = new Faker<PlexActor>()
         .StrictMode(true)
         .RuleFor(x => x.Id, _ => 0)
         .RuleFor(x => x.Name, f => f.Name.FullName())
-        .RuleFor(x => x.PlexKey, f => f.Random.AlphaNumeric(24))
+        .RuleFor(x => x.Key, f => f.Random.AlphaNumeric(24))
         .RuleFor(x => x.Thumb, f => f.Image.PicsumUrl())
         .Ignore(x => x.PlexLibraries)
         .Ignore(x => x.PlexMovieRoles)

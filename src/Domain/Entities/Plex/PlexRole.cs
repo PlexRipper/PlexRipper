@@ -8,7 +8,7 @@ public class PlexRole : BaseEntity
 
     public required string? Role { get; init; }
 
-    public required string? TagKey { get; init; }
+    public required string TagKey { get; init; }
 
     public required string? Thumb { get; init; }
 

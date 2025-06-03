@@ -174,14 +174,14 @@ public class SyncPlexTvShowsCommandHandler : IRequestHandler<SyncPlexTvShowsComm
         );
 
         // These are always small dictionaries so no need to worry about performance
-        var genreDict = await _dbContext.PlexGenres.ToDictionaryAsync(x => x.Name, x => x.Id);
-        var countryDict = await _dbContext.PlexCountries.ToDictionaryAsync(x => x.Name, x => x.Id);
+        var genreDict = await _dbContext.PlexGenres.ToDictionaryAsync(x => x.PlexKey, x => x.Id);
+        var countryDict = await _dbContext.PlexCountries.ToDictionaryAsync(x => x.PlexKey, x => x.Id);
 
         var roleDict = await _dbContext
             .PlexLibraries.Where(x => x.Id == plexLibraryId)
             .Include(x => x.Roles)
             .SelectMany(x => x.Roles)
-            .ToDictionaryAsync(x => x.Name, x => x.Id);
+            .ToDictionaryAsync(x => x.TagKey, x => x.Id);
 
         var plexTvShowRoles = new List<PlexTvShowRoles>();
         var plexTvShowGenres = new List<PlexTvShowGenres>();
@@ -191,7 +191,7 @@ public class SyncPlexTvShowsCommandHandler : IRequestHandler<SyncPlexTvShowsComm
         {
             foreach (var plexRole in plexTvShow.Roles)
             {
-                if (roleDict.TryGetValue(plexRole.Name, out var roleId))
+                if (roleDict.TryGetValue(plexRole.TagKey, out var roleId))
                 {
                     plexTvShowRoles.Add(new PlexTvShowRoles(roleId, plexLibraryId, plexTvShow.Id));
                     continue;
@@ -208,7 +208,7 @@ public class SyncPlexTvShowsCommandHandler : IRequestHandler<SyncPlexTvShowsComm
 
             foreach (var plexGenre in plexTvShow.Genres)
             {
-                if (genreDict.TryGetValue(plexGenre.Name, out var genreId))
+                if (genreDict.TryGetValue(plexGenre.PlexKey, out var genreId))
                 {
                     plexTvShowGenres.Add(new PlexTvShowGenres(genreId, plexLibraryId, plexTvShow.Id));
                     continue;
@@ -224,7 +224,7 @@ public class SyncPlexTvShowsCommandHandler : IRequestHandler<SyncPlexTvShowsComm
 
             foreach (var plexCountry in plexTvShow.Countries)
             {
-                if (countryDict.TryGetValue(plexCountry.Name, out var countryId))
+                if (countryDict.TryGetValue(plexCountry.PlexKey, out var countryId))
                 {
                     plexTvShowCountries.Add(new PlexTvShowCountries(countryId, plexLibraryId, plexTvShow.Id));
                     continue;

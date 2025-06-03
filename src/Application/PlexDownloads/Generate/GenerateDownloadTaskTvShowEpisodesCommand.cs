@@ -79,10 +79,6 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
 
                 var tvShowDownloads = new List<DownloadTaskTvShow>();
 
-                var media = plexEpisodes.Select(x => x.MediaDataList).ToList();
-                var parts = media.SelectMany(x => x).SelectMany(x => x.Parts).ToList();
-                var streams = parts.SelectMany(x => x.Streams).ToList();
-
                 foreach (var tvShowEpisode in plexEpisodes)
                 {
                     var plexTvShow = tvShowEpisode.TvShow;

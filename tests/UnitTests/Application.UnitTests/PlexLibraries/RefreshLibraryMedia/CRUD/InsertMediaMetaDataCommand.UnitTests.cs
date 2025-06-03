@@ -422,7 +422,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
 
         // Only actors with TagKey should be inserted
         actorsDb.Count.ShouldBe(50);
-        actorsDb.ShouldAllBe(x => x.Key != null);
+        actorsDb.ShouldAllBe(x => x.Key != string.Empty);
     }
 
     [Fact]
@@ -698,10 +698,8 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
                 (actor, index) =>
                     actor with
                     {
-                        Name =
-                            new string('A', 250)
-                            + index.ToString() // Very long name
-                        ,
+                        // Very long name
+                        Name = new string('A', 250) + index,
                     }
             )
             .ToList();
@@ -729,7 +727,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
     public async Task ShouldReturnEmptyDictionaries_WhenAllListsAreEmpty()
     {
         // Arrange
-        var seed = await SetupDatabase(
+        await SetupDatabase(
             1223,
             config =>
             {

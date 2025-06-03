@@ -44,7 +44,7 @@ public static partial class FakeData
         return _downloadTaskTvShowSeason
             .RuleFor(
                 x => x.DataTotal,
-                (f, x) =>
+                (_, x) =>
                     config.DownloadFileSizeInMb > 0
                         ? (long)ByteSize.FromMebiBytes(config.DownloadFileSizeInMb).Bytes
                         : x.DataTotal

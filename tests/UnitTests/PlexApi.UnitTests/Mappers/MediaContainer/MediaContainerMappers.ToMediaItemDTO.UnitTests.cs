@@ -147,15 +147,8 @@ namespace PlexApi.UnitTests
                 tolerance: TimeSpan.FromSeconds(1)
             );
 
-            // Parse the string date to NodaTime.LocalDate if not null
-            if (sourceData.OriginallyAvailableAt != null)
-            {
-                result.OriginallyAvailableAt.ShouldBe(sourceData.OriginallyAvailableAt.ToString());
-            }
-            else
-            {
-                result.OriginallyAvailableAt.ShouldBeNull();
-            }
+            result.OriginallyAvailableAt.ShouldNotBeNull();
+            result.OriginallyAvailableAt.ShouldBe(sourceData.OriginallyAvailableAt.ToString());
 
             result.GrandparentTitle.ShouldBe(sourceData.GrandparentTitle);
             result.ParentTitle.ShouldBe(sourceData.ParentTitle);
@@ -309,14 +302,8 @@ namespace PlexApi.UnitTests
             );
 
             // Parse the string date to NodaTime.LocalDate if not null
-            if (sourceData.OriginallyAvailableAt != null)
-            {
-                result.OriginallyAvailableAt.ShouldBe(sourceData.OriginallyAvailableAt.ToString());
-            }
-            else
-            {
-                result.OriginallyAvailableAt.ShouldBeNull();
-            }
+            result.OriginallyAvailableAt.ShouldNotBeNull();
+            result.OriginallyAvailableAt.ShouldBe(sourceData.OriginallyAvailableAt.ToString());
 
             result.AudienceRating.ShouldBe(sourceData.AudienceRating);
             result.Rating.ShouldBe(sourceData.Rating);

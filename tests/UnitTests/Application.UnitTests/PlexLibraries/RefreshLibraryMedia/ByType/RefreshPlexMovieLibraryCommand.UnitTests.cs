@@ -119,7 +119,6 @@ public class RefreshPlexMovieLibraryCommandUnitTests : BaseUnitTest<RefreshPlexM
         mock.Mock<IRefreshLibraryProgressReporter>()
             .Setup(x => x.SendProgress(It.IsAny<RefreshLibraryProgressUpdate>()))
             .Returns(Task.CompletedTask);
-        ;
 
         mock.Mock<IMediator>()
             .Setup(x => x.Send(It.IsAny<SyncPlexMoviesCommand>(), It.IsAny<CancellationToken>()))

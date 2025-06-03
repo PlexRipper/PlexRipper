@@ -60,8 +60,7 @@ public class RefreshPlexTvShowLibraryCommandHandler
 
         if (plexLibrary.TvShows.Any())
         {
-            var timer = new Stopwatch();
-            timer.Start();
+            var stopwatch = Stopwatch.StartNew();
 
             // Phase 2 of 5: Season data was retrieved successfully.
             var rawSeasonDataResult = await _commandExecutor.Send(
@@ -113,11 +112,11 @@ public class RefreshPlexTvShowLibraryCommandHandler
             // Phase 4 of 5: PlexLibrary media data was parsed successfully.
             _log.Here()
                 .Debug(
-                    "Finished retrieving all media for library {PlexLibraryName} in {Elapsed:000} seconds",
+                    "Finished retrieving all media for library {PlexLibraryName} in {ElapsedSeconds:F2} seconds",
                     plexLibrary.Title,
-                    timer.Elapsed.TotalSeconds
+                    stopwatch.Elapsed.TotalSeconds
                 );
-            timer.Restart();
+            stopwatch.Restart();
 
             var rawSeasonData = rawSeasonDataResult.Value;
             var rawEpisodesData = rawEpisodesDataResult.Value;
@@ -177,9 +176,9 @@ public class RefreshPlexTvShowLibraryCommandHandler
 
             _log.Here()
                 .Debug(
-                    "Finished updating all media in the database for library {PlexLibraryName} in {Elapsed:0} seconds",
+                    "Finished updating all media in the database for library {PlexLibraryName} in {ElapsedSeconds:F2} seconds",
                     plexLibrary.Title,
-                    timer.Elapsed.TotalSeconds
+                    stopwatch.Elapsed.TotalSeconds
                 );
 
             // Phase 5 of 5: Database has been successfully updated with new library data.

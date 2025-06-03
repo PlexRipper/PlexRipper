@@ -94,8 +94,8 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
 
     private async Task<Result> SyncRoles(Dictionary<int, PlexActor> sourceDict, int libraryId, string libraryName)
     {
-        var stopWatch = new Stopwatch();
-        stopWatch.Start();
+        var stopWatch = Stopwatch.StartNew();
+
         _log.Here().Debug("Started syncing {Count} roles for library {LibraryName}", sourceDict.Count, libraryName);
 
         if (sourceDict.IsNullOrEmpty())
@@ -161,8 +161,8 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
 
     private async Task<Result> SyncGenres(Dictionary<int, PlexGenre> sourceDict, int libraryId, string libraryName)
     {
-        var stopWatch = new Stopwatch();
-        stopWatch.Start();
+        var stopWatch = Stopwatch.StartNew();
+
         _log.Here().Debug("Started syncing {Count} genres for library {LibraryName}", sourceDict.Count, libraryName);
 
         if (!sourceDict.Any())
@@ -224,8 +224,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
 
     private async Task<Result> SyncCountries(Dictionary<int, PlexCountry> sourceDict, int libraryId, string libraryName)
     {
-        var stopWatch = new Stopwatch();
-        stopWatch.Start();
+        var stopWatch = Stopwatch.StartNew();
 
         _log.Here().Debug("Started syncing {Count} countries for library {LibraryName}", sourceDict.Count, libraryName);
 

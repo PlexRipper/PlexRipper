@@ -108,8 +108,7 @@ public class SyncPlexTvShowsCommandHandler : IRequestHandler<SyncPlexTvShowsComm
                 plexLibraryId
             );
 
-            var stopWatch = new Stopwatch();
-            stopWatch.Start();
+            var stopWatch = Stopwatch.StartNew();
 
             await RemoveMedia(plexLibraryId, cancellationToken);
 

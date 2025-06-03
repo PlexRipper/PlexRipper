@@ -12,125 +12,133 @@ namespace PlexRipper.Data.Migrations
         {
             migrationBuilder.DropForeignKey(
                 name: "FK_PlexLibraryCountries_PlexCountries_CountriesId",
-                table: "PlexLibraryCountries");
+                table: "PlexLibraryCountries"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_PlexLibraryCountries_PlexLibraries_PlexLibrariesId",
-                table: "PlexLibraryCountries");
+                table: "PlexLibraryCountries"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_PlexLibraryGenres_PlexGenres_GenresId",
-                table: "PlexLibraryGenres");
+                table: "PlexLibraryGenres"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_PlexLibraryGenres_PlexLibraries_PlexLibrariesId",
-                table: "PlexLibraryGenres");
+                table: "PlexLibraryGenres"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_PlexLibraryRoles_PlexLibraries_PlexLibrariesId",
-                table: "PlexLibraryRoles");
+                table: "PlexLibraryRoles"
+            );
 
-            migrationBuilder.DropForeignKey(
-                name: "FK_PlexLibraryRoles_PlexRoles_RolesId",
-                table: "PlexLibraryRoles");
+            migrationBuilder.DropForeignKey(name: "FK_PlexLibraryRoles_PlexRoles_RolesId", table: "PlexLibraryRoles");
 
-            migrationBuilder.RenameColumn(
-                name: "RolesId",
-                table: "PlexLibraryRoles",
-                newName: "PlexRoleId");
+            migrationBuilder.RenameColumn(name: "RolesId", table: "PlexLibraryRoles", newName: "PlexRoleId");
 
-            migrationBuilder.RenameColumn(
-                name: "PlexLibrariesId",
-                table: "PlexLibraryRoles",
-                newName: "PlexLibraryId");
+            migrationBuilder.RenameColumn(name: "PlexLibrariesId", table: "PlexLibraryRoles", newName: "PlexLibraryId");
 
             migrationBuilder.RenameIndex(
                 name: "IX_PlexLibraryRoles_RolesId",
                 table: "PlexLibraryRoles",
-                newName: "IX_PlexLibraryRoles_PlexRoleId");
+                newName: "IX_PlexLibraryRoles_PlexRoleId"
+            );
 
             migrationBuilder.RenameColumn(
                 name: "PlexLibrariesId",
                 table: "PlexLibraryGenres",
-                newName: "PlexLibraryId");
+                newName: "PlexLibraryId"
+            );
 
-            migrationBuilder.RenameColumn(
-                name: "GenresId",
-                table: "PlexLibraryGenres",
-                newName: "PlexGenreId");
+            migrationBuilder.RenameColumn(name: "GenresId", table: "PlexLibraryGenres", newName: "PlexGenreId");
 
             migrationBuilder.RenameIndex(
                 name: "IX_PlexLibraryGenres_PlexLibrariesId",
                 table: "PlexLibraryGenres",
-                newName: "IX_PlexLibraryGenres_PlexLibraryId");
+                newName: "IX_PlexLibraryGenres_PlexLibraryId"
+            );
 
             migrationBuilder.RenameColumn(
                 name: "PlexLibrariesId",
                 table: "PlexLibraryCountries",
-                newName: "PlexLibraryId");
+                newName: "PlexLibraryId"
+            );
 
-            migrationBuilder.RenameColumn(
-                name: "CountriesId",
-                table: "PlexLibraryCountries",
-                newName: "PlexCountryId");
+            migrationBuilder.RenameColumn(name: "CountriesId", table: "PlexLibraryCountries", newName: "PlexCountryId");
 
             migrationBuilder.RenameIndex(
                 name: "IX_PlexLibraryCountries_PlexLibrariesId",
                 table: "PlexLibraryCountries",
-                newName: "IX_PlexLibraryCountries_PlexLibraryId");
+                newName: "IX_PlexLibraryCountries_PlexLibraryId"
+            );
 
-            migrationBuilder.AlterColumn<int>(
-                name: "PlexRoleId",
-                table: "PlexLibraryRoles",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER")
+            migrationBuilder
+                .AlterColumn<int>(
+                    name: "PlexRoleId",
+                    table: "PlexLibraryRoles",
+                    type: "INTEGER",
+                    nullable: false,
+                    oldClrType: typeof(int),
+                    oldType: "INTEGER"
+                )
                 .Annotation("Relational:ColumnOrder", 2);
 
-            migrationBuilder.AlterColumn<int>(
-                name: "PlexLibraryId",
-                table: "PlexLibraryRoles",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER")
+            migrationBuilder
+                .AlterColumn<int>(
+                    name: "PlexLibraryId",
+                    table: "PlexLibraryRoles",
+                    type: "INTEGER",
+                    nullable: false,
+                    oldClrType: typeof(int),
+                    oldType: "INTEGER"
+                )
                 .Annotation("Relational:ColumnOrder", 1);
 
-            migrationBuilder.AlterColumn<int>(
-                name: "PlexLibraryId",
-                table: "PlexLibraryGenres",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER")
+            migrationBuilder
+                .AlterColumn<int>(
+                    name: "PlexLibraryId",
+                    table: "PlexLibraryGenres",
+                    type: "INTEGER",
+                    nullable: false,
+                    oldClrType: typeof(int),
+                    oldType: "INTEGER"
+                )
                 .Annotation("Relational:ColumnOrder", 1);
 
-            migrationBuilder.AlterColumn<int>(
-                name: "PlexGenreId",
-                table: "PlexLibraryGenres",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER")
+            migrationBuilder
+                .AlterColumn<int>(
+                    name: "PlexGenreId",
+                    table: "PlexLibraryGenres",
+                    type: "INTEGER",
+                    nullable: false,
+                    oldClrType: typeof(int),
+                    oldType: "INTEGER"
+                )
                 .Annotation("Relational:ColumnOrder", 2);
 
-            migrationBuilder.AlterColumn<int>(
-                name: "PlexLibraryId",
-                table: "PlexLibraryCountries",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER")
+            migrationBuilder
+                .AlterColumn<int>(
+                    name: "PlexLibraryId",
+                    table: "PlexLibraryCountries",
+                    type: "INTEGER",
+                    nullable: false,
+                    oldClrType: typeof(int),
+                    oldType: "INTEGER"
+                )
                 .Annotation("Relational:ColumnOrder", 1);
 
-            migrationBuilder.AlterColumn<int>(
-                name: "PlexCountryId",
-                table: "PlexLibraryCountries",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER")
+            migrationBuilder
+                .AlterColumn<int>(
+                    name: "PlexCountryId",
+                    table: "PlexLibraryCountries",
+                    type: "INTEGER",
+                    nullable: false,
+                    oldClrType: typeof(int),
+                    oldType: "INTEGER"
+                )
                 .Annotation("Relational:ColumnOrder", 2);
 
             migrationBuilder.AddForeignKey(
@@ -139,7 +147,8 @@ namespace PlexRipper.Data.Migrations
                 column: "PlexCountryId",
                 principalTable: "PlexCountries",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_PlexLibraryCountries_PlexLibraries_PlexLibraryId",
@@ -147,7 +156,8 @@ namespace PlexRipper.Data.Migrations
                 column: "PlexLibraryId",
                 principalTable: "PlexLibraries",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_PlexLibraryGenres_PlexGenres_PlexGenreId",
@@ -155,7 +165,8 @@ namespace PlexRipper.Data.Migrations
                 column: "PlexGenreId",
                 principalTable: "PlexGenres",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_PlexLibraryGenres_PlexLibraries_PlexLibraryId",
@@ -163,7 +174,8 @@ namespace PlexRipper.Data.Migrations
                 column: "PlexLibraryId",
                 principalTable: "PlexLibraries",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_PlexLibraryRoles_PlexLibraries_PlexLibraryId",
@@ -171,7 +183,8 @@ namespace PlexRipper.Data.Migrations
                 column: "PlexLibraryId",
                 principalTable: "PlexLibraries",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_PlexLibraryRoles_PlexRoles_PlexRoleId",
@@ -179,7 +192,8 @@ namespace PlexRipper.Data.Migrations
                 column: "PlexRoleId",
                 principalTable: "PlexRoles",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
         }
 
         /// <inheritdoc />
@@ -187,125 +201,136 @@ namespace PlexRipper.Data.Migrations
         {
             migrationBuilder.DropForeignKey(
                 name: "FK_PlexLibraryCountries_PlexCountries_PlexCountryId",
-                table: "PlexLibraryCountries");
+                table: "PlexLibraryCountries"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_PlexLibraryCountries_PlexLibraries_PlexLibraryId",
-                table: "PlexLibraryCountries");
+                table: "PlexLibraryCountries"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_PlexLibraryGenres_PlexGenres_PlexGenreId",
-                table: "PlexLibraryGenres");
+                table: "PlexLibraryGenres"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_PlexLibraryGenres_PlexLibraries_PlexLibraryId",
-                table: "PlexLibraryGenres");
+                table: "PlexLibraryGenres"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_PlexLibraryRoles_PlexLibraries_PlexLibraryId",
-                table: "PlexLibraryRoles");
+                table: "PlexLibraryRoles"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_PlexLibraryRoles_PlexRoles_PlexRoleId",
-                table: "PlexLibraryRoles");
+                table: "PlexLibraryRoles"
+            );
 
-            migrationBuilder.RenameColumn(
-                name: "PlexRoleId",
-                table: "PlexLibraryRoles",
-                newName: "RolesId");
+            migrationBuilder.RenameColumn(name: "PlexRoleId", table: "PlexLibraryRoles", newName: "RolesId");
 
-            migrationBuilder.RenameColumn(
-                name: "PlexLibraryId",
-                table: "PlexLibraryRoles",
-                newName: "PlexLibrariesId");
+            migrationBuilder.RenameColumn(name: "PlexLibraryId", table: "PlexLibraryRoles", newName: "PlexLibrariesId");
 
             migrationBuilder.RenameIndex(
                 name: "IX_PlexLibraryRoles_PlexRoleId",
                 table: "PlexLibraryRoles",
-                newName: "IX_PlexLibraryRoles_RolesId");
+                newName: "IX_PlexLibraryRoles_RolesId"
+            );
 
             migrationBuilder.RenameColumn(
                 name: "PlexLibraryId",
                 table: "PlexLibraryGenres",
-                newName: "PlexLibrariesId");
+                newName: "PlexLibrariesId"
+            );
 
-            migrationBuilder.RenameColumn(
-                name: "PlexGenreId",
-                table: "PlexLibraryGenres",
-                newName: "GenresId");
+            migrationBuilder.RenameColumn(name: "PlexGenreId", table: "PlexLibraryGenres", newName: "GenresId");
 
             migrationBuilder.RenameIndex(
                 name: "IX_PlexLibraryGenres_PlexLibraryId",
                 table: "PlexLibraryGenres",
-                newName: "IX_PlexLibraryGenres_PlexLibrariesId");
+                newName: "IX_PlexLibraryGenres_PlexLibrariesId"
+            );
 
             migrationBuilder.RenameColumn(
                 name: "PlexLibraryId",
                 table: "PlexLibraryCountries",
-                newName: "PlexLibrariesId");
+                newName: "PlexLibrariesId"
+            );
 
-            migrationBuilder.RenameColumn(
-                name: "PlexCountryId",
-                table: "PlexLibraryCountries",
-                newName: "CountriesId");
+            migrationBuilder.RenameColumn(name: "PlexCountryId", table: "PlexLibraryCountries", newName: "CountriesId");
 
             migrationBuilder.RenameIndex(
                 name: "IX_PlexLibraryCountries_PlexLibraryId",
                 table: "PlexLibraryCountries",
-                newName: "IX_PlexLibraryCountries_PlexLibrariesId");
+                newName: "IX_PlexLibraryCountries_PlexLibrariesId"
+            );
 
-            migrationBuilder.AlterColumn<int>(
-                name: "RolesId",
-                table: "PlexLibraryRoles",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER")
+            migrationBuilder
+                .AlterColumn<int>(
+                    name: "RolesId",
+                    table: "PlexLibraryRoles",
+                    type: "INTEGER",
+                    nullable: false,
+                    oldClrType: typeof(int),
+                    oldType: "INTEGER"
+                )
                 .OldAnnotation("Relational:ColumnOrder", 2);
 
-            migrationBuilder.AlterColumn<int>(
-                name: "PlexLibrariesId",
-                table: "PlexLibraryRoles",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER")
+            migrationBuilder
+                .AlterColumn<int>(
+                    name: "PlexLibrariesId",
+                    table: "PlexLibraryRoles",
+                    type: "INTEGER",
+                    nullable: false,
+                    oldClrType: typeof(int),
+                    oldType: "INTEGER"
+                )
                 .OldAnnotation("Relational:ColumnOrder", 1);
 
-            migrationBuilder.AlterColumn<int>(
-                name: "PlexLibrariesId",
-                table: "PlexLibraryGenres",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER")
+            migrationBuilder
+                .AlterColumn<int>(
+                    name: "PlexLibrariesId",
+                    table: "PlexLibraryGenres",
+                    type: "INTEGER",
+                    nullable: false,
+                    oldClrType: typeof(int),
+                    oldType: "INTEGER"
+                )
                 .OldAnnotation("Relational:ColumnOrder", 1);
 
-            migrationBuilder.AlterColumn<int>(
-                name: "GenresId",
-                table: "PlexLibraryGenres",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER")
+            migrationBuilder
+                .AlterColumn<int>(
+                    name: "GenresId",
+                    table: "PlexLibraryGenres",
+                    type: "INTEGER",
+                    nullable: false,
+                    oldClrType: typeof(int),
+                    oldType: "INTEGER"
+                )
                 .OldAnnotation("Relational:ColumnOrder", 2);
 
-            migrationBuilder.AlterColumn<int>(
-                name: "PlexLibrariesId",
-                table: "PlexLibraryCountries",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER")
+            migrationBuilder
+                .AlterColumn<int>(
+                    name: "PlexLibrariesId",
+                    table: "PlexLibraryCountries",
+                    type: "INTEGER",
+                    nullable: false,
+                    oldClrType: typeof(int),
+                    oldType: "INTEGER"
+                )
                 .OldAnnotation("Relational:ColumnOrder", 1);
 
-            migrationBuilder.AlterColumn<int>(
-                name: "CountriesId",
-                table: "PlexLibraryCountries",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER")
+            migrationBuilder
+                .AlterColumn<int>(
+                    name: "CountriesId",
+                    table: "PlexLibraryCountries",
+                    type: "INTEGER",
+                    nullable: false,
+                    oldClrType: typeof(int),
+                    oldType: "INTEGER"
+                )
                 .OldAnnotation("Relational:ColumnOrder", 2);
 
             migrationBuilder.AddForeignKey(
@@ -314,7 +339,8 @@ namespace PlexRipper.Data.Migrations
                 column: "CountriesId",
                 principalTable: "PlexCountries",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_PlexLibraryCountries_PlexLibraries_PlexLibrariesId",
@@ -322,7 +348,8 @@ namespace PlexRipper.Data.Migrations
                 column: "PlexLibrariesId",
                 principalTable: "PlexLibraries",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_PlexLibraryGenres_PlexGenres_GenresId",
@@ -330,7 +357,8 @@ namespace PlexRipper.Data.Migrations
                 column: "GenresId",
                 principalTable: "PlexGenres",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_PlexLibraryGenres_PlexLibraries_PlexLibrariesId",
@@ -338,7 +366,8 @@ namespace PlexRipper.Data.Migrations
                 column: "PlexLibrariesId",
                 principalTable: "PlexLibraries",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_PlexLibraryRoles_PlexLibraries_PlexLibrariesId",
@@ -346,7 +375,8 @@ namespace PlexRipper.Data.Migrations
                 column: "PlexLibrariesId",
                 principalTable: "PlexLibraries",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_PlexLibraryRoles_PlexRoles_RolesId",
@@ -354,7 +384,8 @@ namespace PlexRipper.Data.Migrations
                 column: "RolesId",
                 principalTable: "PlexRoles",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
         }
     }
 }

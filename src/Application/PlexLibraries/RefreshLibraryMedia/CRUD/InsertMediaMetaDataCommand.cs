@@ -13,9 +13,9 @@ namespace PlexRipper.Application;
 public record InsertMediaMetaDataCommand(LibraryMetadata LibraryMetadata)
     : ICommand<Result<InsertMediaMetaDataCommandResponse>>;
 
-public class InsertMediaMetaDataValidator : Validator<InsertMediaMetaDataCommand>
+public class InsertMediaMetaDataCommandValidator : Validator<InsertMediaMetaDataCommand>
 {
-    public InsertMediaMetaDataValidator()
+    public InsertMediaMetaDataCommandValidator()
     {
         RuleFor(x => x.LibraryMetadata).NotNull();
     }
@@ -52,7 +52,7 @@ public class InsertMediaMetaDataCommandHandler
     private readonly BulkConfig? _bulkInsertKeyConfig =
         new()
         {
-            SetOutputIdentity = false,
+            SetOutputIdentity = true,
             UpdateByProperties = [nameof(PlexActor.Key)],
 
             // Only in-memory sqlite needs this which happens during testing
@@ -70,7 +70,6 @@ public class InsertMediaMetaDataCommandHandler
         CancellationToken ct
     )
     {
-        var plexLibraryId = command.LibraryMetadata.Library.Id;
         var roles = command.LibraryMetadata.Actors;
         var genres = command.LibraryMetadata.Genres;
         var countries = command.LibraryMetadata.Countries;
@@ -104,7 +103,7 @@ public class InsertMediaMetaDataCommandHandler
 
         var resultDict = new Dictionary<int, PlexActor>();
 
-        var distinctRoles = sourceList.Where(x => x.TagKey != null).DistinctBy(x => x.TagKey).ToList();
+        var distinctRoles = sourceList.Where(x => !x.TagKey.IsNullOrEmpty()).DistinctBy(x => x.TagKey).ToList();
         var plexActors = distinctRoles.ToPlexActor();
 
         if (plexActors.IsNullOrEmpty())
@@ -152,7 +151,7 @@ public class InsertMediaMetaDataCommandHandler
         var resultDict = new Dictionary<int, PlexGenre>();
 
         // Distinct by Genre Name because PlexId is not globally unique across all Plex servers
-        var plexGenres = sourceList.DistinctBy(x => x.Key).ToPlexGenre();
+        var plexGenres = sourceList.Where(x => !x.Key.IsNullOrEmpty()).DistinctBy(x => x.Key).ToPlexGenre();
         if (plexGenres.IsNullOrEmpty())
         {
             _log.Here().Debug("No {NameOfPlexGenre} to insert ", nameof(PlexGenre));
@@ -196,8 +195,7 @@ public class InsertMediaMetaDataCommandHandler
 
         var resultDict = new Dictionary<int, PlexCountry>();
 
-        // Distinct by Country Name because PlexId is not globally unique across all Plex servers
-        var plexCountries = sourceList.DistinctBy(x => x.Name).ToPlexCountry();
+        var plexCountries = sourceList.Where(x => !x.Key.IsNullOrEmpty()).DistinctBy(x => x.Name).ToPlexCountry();
         if (plexCountries.IsNullOrEmpty())
         {
             _log.Here().Debug("No {NameOfPlexCountry} to insert", nameof(PlexCountry));

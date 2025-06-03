@@ -379,4 +379,437 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         result.IsSuccess.ShouldBeFalse();
         result.Has400BadRequestError().ShouldBeTrue();
     }
+
+    [Fact]
+    public async Task ShouldFilterOutActorsWithNullTagKey_WhenActorsHaveNullKeys()
+    {
+        // Arrange
+        var seed = await SetupDatabase(
+            1223,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 1;
+            }
+        );
+
+        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync();
+        plexLibrary.ShouldNotBeNull();
+
+        // Create actors with some having null TagKey
+        var actorsWithKeys = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).Generate(50);
+        var actorsWithNullKeys = FakePlexApiData
+            .GetLibraryMediaItemActorDTO(seed)
+            .Generate(30)
+            .Select(x => x with { TagKey = null })
+            .ToList();
+
+        var allActors = actorsWithKeys.Concat(actorsWithNullKeys).ToList();
+
+        // Act
+        var command = new InsertMediaMetaDataCommand(
+            LibraryMetadata: new LibraryMetadata
+            {
+                Actors = allActors,
+                Genres = [],
+                Countries = [],
+                Library = plexLibrary,
+            }
+        );
+        var result = await TestHandlerExecuteAsync<InsertMediaMetaDataCommandResponse>(command);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        var actorsDb = await IDbContext.PlexActors.ToListAsync();
+
+        // Only actors with TagKey should be inserted
+        actorsDb.Count.ShouldBe(50);
+        actorsDb.ShouldAllBe(x => x.Key != null);
+    }
+
+    [Fact]
+    public async Task ShouldHandlePartiallyEmptyMetadata_WhenOnlySomeListsAreEmpty()
+    {
+        // Arrange
+        var seed = await SetupDatabase(
+            1223,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 1;
+            }
+        );
+
+        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync();
+        plexLibrary.ShouldNotBeNull();
+
+        var actors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).Generate(25);
+
+        // Genres and Countries are empty
+
+        // Act
+        var command = new InsertMediaMetaDataCommand(
+            LibraryMetadata: new LibraryMetadata
+            {
+                Actors = actors,
+                Genres = [],
+                Countries = [],
+                Library = plexLibrary,
+            }
+        );
+        var result = await TestHandlerExecuteAsync<InsertMediaMetaDataCommandResponse>(command);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.PlexActors.Count.ShouldBe(25);
+        result.Value.PlexGenres.ShouldBeEmpty();
+        result.Value.PlexCountries.ShouldBeEmpty();
+
+        var actorsDb = await IDbContext.PlexActors.ToListAsync();
+        var genresDb = await IDbContext.PlexGenres.ToListAsync();
+        var countriesDb = await IDbContext.PlexCountries.ToListAsync();
+
+        actorsDb.Count.ShouldBe(25);
+        genresDb.ShouldBeEmpty();
+        countriesDb.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task ShouldReturnCorrectDictionaryMappings_WhenDataIsInserted()
+    {
+        // Arrange
+        var seed = await SetupDatabase(
+            1223,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 1;
+            }
+        );
+
+        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync();
+        plexLibrary.ShouldNotBeNull();
+
+        var actors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).GenerateUnique(10, x => x.TagKey);
+        var genres = FakePlexApiData.GetLibraryMediaItemGenreDTO(seed).GenerateUnique(10, x => x.Key);
+        var countries = FakePlexApiData.GetLibraryMediaItemCountryDTO(seed).GenerateUnique(10, x => x.Key);
+
+        // Act
+        var command = new InsertMediaMetaDataCommand(
+            LibraryMetadata: new LibraryMetadata
+            {
+                Actors = actors,
+                Genres = genres,
+                Countries = countries,
+                Library = plexLibrary,
+            }
+        );
+        var result = await TestHandlerExecuteAsync<InsertMediaMetaDataCommandResponse>(command);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+
+        // Verify dictionary keys match the source PlexIds
+        foreach (var actor in actors.Where(x => x.TagKey != null))
+        {
+            result.Value.PlexActors.ShouldContainKey(actor.PlexId);
+            result.Value.PlexActors[actor.PlexId].Name.ShouldBe(actor.Name);
+        }
+
+        foreach (var genre in genres)
+        {
+            result.Value.PlexGenres.ShouldContainKey(genre.PlexId);
+            result.Value.PlexGenres[genre.PlexId].Key.ShouldBe(genre.Key);
+        }
+
+        foreach (var country in countries)
+        {
+            result.Value.PlexCountries.ShouldContainKey(country.PlexId);
+            result.Value.PlexCountries[country.PlexId].Key.ShouldBe(country.Key);
+        }
+    }
+
+    [Fact]
+    public async Task ShouldHandleSpecialCharactersInNames_WhenDataContainsUnicodeCharacters()
+    {
+        // Arrange
+        var seed = await SetupDatabase(
+            1223,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 1;
+            }
+        );
+
+        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync();
+        plexLibrary.ShouldNotBeNull();
+
+        // Create actors with special characters
+        var baseActors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).Generate(5);
+        var specialActors = baseActors
+            .Select(
+                (actor, index) =>
+                    actor with
+                    {
+                        Name = index switch
+                        {
+                            0 => "José María Aznar",
+                            1 => "André François",
+                            2 => "张三丰",
+                            3 => "محمد عبدالله",
+                            4 => "Björk Guðmundsdóttir",
+                            _ => actor.Name,
+                        },
+                    }
+            )
+            .ToList();
+
+        // Act
+        var command = new InsertMediaMetaDataCommand(
+            LibraryMetadata: new LibraryMetadata
+            {
+                Actors = specialActors,
+                Genres = [],
+                Countries = [],
+                Library = plexLibrary,
+            }
+        );
+        var result = await TestHandlerExecuteAsync<InsertMediaMetaDataCommandResponse>(command);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        var actorsDb = await IDbContext.PlexActors.ToListAsync();
+        actorsDb.Count.ShouldBe(5);
+
+        actorsDb.ShouldContain(x => x.Name == "José María Aznar");
+        actorsDb.ShouldContain(x => x.Name == "André François");
+        actorsDb.ShouldContain(x => x.Name == "张三丰");
+        actorsDb.ShouldContain(x => x.Name == "محمد عبدالله");
+        actorsDb.ShouldContain(x => x.Name == "Björk Guðmundsdóttir");
+    }
+
+    [Fact]
+    public async Task ShouldMaintainConsistency_WhenSameDataInsertedMultipleTimes()
+    {
+        // Arrange
+        var seed = await SetupDatabase(
+            1223,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 1;
+            }
+        );
+
+        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync();
+        plexLibrary.ShouldNotBeNull();
+
+        var actors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).Generate(20);
+        var genres = FakePlexApiData.GetLibraryMediaItemGenreDTO(seed).Generate(20);
+        var countries = FakePlexApiData.GetLibraryMediaItemCountryDTO(seed).Generate(20);
+
+        var command = new InsertMediaMetaDataCommand(
+            LibraryMetadata: new LibraryMetadata
+            {
+                Actors = actors,
+                Genres = genres,
+                Countries = countries,
+                Library = plexLibrary,
+            }
+        );
+
+        // Act - Insert the same data multiple times
+        var result1 = await TestHandlerExecuteAsync<InsertMediaMetaDataCommandResponse>(command);
+        var result2 = await TestHandlerExecuteAsync<InsertMediaMetaDataCommandResponse>(command);
+        var result3 = await TestHandlerExecuteAsync<InsertMediaMetaDataCommandResponse>(command);
+
+        // Assert
+        result1.IsSuccess.ShouldBeTrue();
+        result2.IsSuccess.ShouldBeTrue();
+        result3.IsSuccess.ShouldBeTrue();
+
+        var actorsDb = await IDbContext.PlexActors.ToListAsync();
+        var genresDb = await IDbContext.PlexGenres.ToListAsync();
+        var countriesDb = await IDbContext.PlexCountries.ToListAsync();
+
+        // Should not have duplicates
+        actorsDb.Count.ShouldBe(20);
+        actorsDb.Select(x => x.Key).Distinct().Count().ShouldBe(20);
+
+        genresDb.Select(x => x.Key).Distinct().Count().ShouldBe(genresDb.Count);
+        countriesDb.Select(x => x.Key).Distinct().Count().ShouldBe(countriesDb.Count);
+    }
+
+    [Fact]
+    public async Task ShouldCorrectlyMapLibraryReference_WhenLibraryIsProvided()
+    {
+        // Arrange
+        var seed = await SetupDatabase(
+            1223,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 1;
+            }
+        );
+
+        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync();
+        plexLibrary.ShouldNotBeNull();
+
+        var actors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).Generate(5);
+
+        // Act
+        var command = new InsertMediaMetaDataCommand(
+            LibraryMetadata: new LibraryMetadata
+            {
+                Actors = actors,
+                Genres = [],
+                Countries = [],
+                Library = plexLibrary,
+            }
+        );
+        var result = await TestHandlerExecuteAsync<InsertMediaMetaDataCommandResponse>(command);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.PlexLibrary.ShouldBe(plexLibrary);
+        result.Value.PlexLibraryId.ShouldBe(plexLibrary.Id);
+    }
+
+    [Fact]
+    public async Task ShouldHandleVeryLongNames_WhenDataContainsLongStrings()
+    {
+        // Arrange
+        var seed = await SetupDatabase(
+            1223,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 1;
+            }
+        );
+
+        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync();
+        plexLibrary.ShouldNotBeNull();
+
+        // Create actors with very long names
+        var baseActors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).Generate(3);
+        var longNameActors = baseActors
+            .Select(
+                (actor, index) =>
+                    actor with
+                    {
+                        Name =
+                            new string('A', 250)
+                            + index.ToString() // Very long name
+                        ,
+                    }
+            )
+            .ToList();
+
+        // Act
+        var command = new InsertMediaMetaDataCommand(
+            LibraryMetadata: new LibraryMetadata
+            {
+                Actors = longNameActors,
+                Genres = [],
+                Countries = [],
+                Library = plexLibrary,
+            }
+        );
+        var result = await TestHandlerExecuteAsync<InsertMediaMetaDataCommandResponse>(command);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        var actorsDb = await IDbContext.PlexActors.ToListAsync();
+        actorsDb.Count.ShouldBe(3);
+        actorsDb.ShouldAllBe(x => x.Name.Length >= 250);
+    }
+
+    [Fact]
+    public async Task ShouldReturnEmptyDictionaries_WhenAllListsAreEmpty()
+    {
+        // Arrange
+        var seed = await SetupDatabase(
+            1223,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 1;
+            }
+        );
+
+        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync();
+        plexLibrary.ShouldNotBeNull();
+
+        // Act
+        var command = new InsertMediaMetaDataCommand(
+            LibraryMetadata: new LibraryMetadata
+            {
+                Actors = [],
+                Genres = [],
+                Countries = [],
+                Library = plexLibrary,
+            }
+        );
+        var result = await TestHandlerExecuteAsync<InsertMediaMetaDataCommandResponse>(command);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.PlexActors.ShouldBeEmpty();
+        result.Value.PlexGenres.ShouldBeEmpty();
+        result.Value.PlexCountries.ShouldBeEmpty();
+        result.Value.PlexLibrary.ShouldBe(plexLibrary);
+    }
+
+    [Fact]
+    public async Task ShouldHandleZeroKeys_WhenDataContainsZeroValues()
+    {
+        // Arrange
+        var seed = await SetupDatabase(
+            1223,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 1;
+            }
+        );
+
+        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync();
+        plexLibrary.ShouldNotBeNull();
+
+        // Create data with zero keys
+        var baseData = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).Generate(5);
+        var actorsWithZeroKeys = baseData.Select(x => x with { TagKey = string.Empty }).ToList();
+
+        var baseGenres = FakePlexApiData.GetLibraryMediaItemGenreDTO(seed).Generate(3);
+        var genresWithZeroKeys = baseGenres.Select(x => x with { Key = string.Empty }).ToList();
+
+        var baseCountries = FakePlexApiData.GetLibraryMediaItemCountryDTO(seed).Generate(3);
+        var countriesWithZeroKeys = baseCountries.Select(x => x with { Key = string.Empty }).ToList();
+
+        // Act
+        var command = new InsertMediaMetaDataCommand(
+            LibraryMetadata: new LibraryMetadata
+            {
+                Actors = actorsWithZeroKeys,
+                Genres = genresWithZeroKeys,
+                Countries = countriesWithZeroKeys,
+                Library = plexLibrary,
+            }
+        );
+        var result = await TestHandlerExecuteAsync<InsertMediaMetaDataCommandResponse>(command);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+
+        var actorsDb = await IDbContext.PlexActors.ToListAsync();
+        var genresDb = await IDbContext.PlexGenres.ToListAsync();
+        var countriesDb = await IDbContext.PlexCountries.ToListAsync();
+
+        actorsDb.Count.ShouldBe(0);
+        genresDb.Count.ShouldBe(0);
+        countriesDb.Count.ShouldBe(0);
+    }
 }

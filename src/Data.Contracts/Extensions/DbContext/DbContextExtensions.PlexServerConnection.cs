@@ -43,7 +43,7 @@ public static partial class DbContextExtensions
         if (plexServerConnections.All(x => !x.IsOnline))
         {
             return _log.Here()
-                .Error(
+                .Warning(
                     "PlexServer with id {plexServerId} and name {PlexServerName} has no online connections available!",
                     plexServer.Id,
                     plexServer.Name

@@ -176,17 +176,17 @@ public class SyncPlexTvShowsCommandHandler : IRequestHandler<SyncPlexTvShowsComm
             plexLibraryId
         );
 
-        // These are always small dictionaries so no need to worry about performance
-        var genreDict = await _dbContext.PlexGenres.ToDictionaryAsync(x => x.PlexKey, x => x.Id);
-        var countryDict = await _dbContext.PlexCountries.ToDictionaryAsync(x => x.PlexKey, x => x.Id);
+        // These are always small dictionaries, so no need to worry about performance
+        var genreDict = await _dbContext.PlexGenres.ToDictionaryAsync(x => x.Name, x => x.Id);
+        var countryDict = await _dbContext.PlexCountries.ToDictionaryAsync(x => x.Name, x => x.Id);
 
         var roleDict = await _dbContext
             .PlexLibraries.Where(x => x.Id == plexLibraryId)
             .Include(x => x.Roles)
             .SelectMany(x => x.Roles)
-            .ToDictionaryAsync(x => x.PlexKey, x => x.Id);
+            .ToDictionaryAsync(x => x.Key, x => x.Id);
 
-        var plexTvShowRoles = new List<PlexTvShowRoles>();
+        var plexTvShowRoles = new List<PlexTvShowActors>();
         var plexTvShowGenres = new List<PlexTvShowGenres>();
         var plexTvShowCountries = new List<PlexTvShowCountries>();
 
@@ -194,19 +194,19 @@ public class SyncPlexTvShowsCommandHandler : IRequestHandler<SyncPlexTvShowsComm
         {
             foreach (var plexRole in plexTvShow.Roles)
             {
-                if (roleDict.TryGetValue(plexRole.PlexKey, out var roleId))
-                    plexTvShowRoles.Add(new PlexTvShowRoles(roleId, plexLibraryId, plexTvShow.Id));
+                if (roleDict.TryGetValue(plexRole.Key, out var roleId))
+                    plexTvShowRoles.Add(new PlexTvShowActors(roleId, plexLibraryId, plexTvShow.Id));
             }
 
             foreach (var plexGenre in plexTvShow.Genres)
             {
-                if (genreDict.TryGetValue(plexGenre.PlexKey, out var genreId))
+                if (genreDict.TryGetValue(plexGenre.Key, out var genreId))
                     plexTvShowGenres.Add(new PlexTvShowGenres(genreId, plexLibraryId, plexTvShow.Id));
             }
 
             foreach (var plexCountry in plexTvShow.Countries)
             {
-                if (countryDict.TryGetValue(plexCountry.PlexKey, out var countryId))
+                if (countryDict.TryGetValue(plexCountry.Key, out var countryId))
                     plexTvShowCountries.Add(new PlexTvShowCountries(countryId, plexLibraryId, plexTvShow.Id));
             }
         }
@@ -222,7 +222,7 @@ public class SyncPlexTvShowsCommandHandler : IRequestHandler<SyncPlexTvShowsComm
             CancellationToken.None
         );
         await _dbContext.BulkInsertAsync(
-            plexTvShowRoles.DistinctBy(x => new { x.PlexTvShowId, x.RolesId }).ToList(),
+            plexTvShowRoles.DistinctBy(x => new { x.PlexTvShowId, RolesId = x.PlexActorId }).ToList(),
             _config,
             CancellationToken.None
         );

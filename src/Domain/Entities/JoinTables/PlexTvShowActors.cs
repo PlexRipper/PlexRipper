@@ -8,12 +8,11 @@ public class PlexTvShowActors
     public PlexTvShowActors() { }
 
     [SetsRequiredMembers]
-    public PlexTvShowActors(int plexActorId, int plexLibraryId, int plexTvShowId, string roleName)
+    public PlexTvShowActors(int plexActorId, int plexLibraryId, int plexTvShowId)
     {
         PlexActorId = plexActorId;
         PlexTvShowId = plexTvShowId;
         PlexLibraryId = plexLibraryId;
-        RoleName = roleName;
     }
 
     [Column(Order = 1)]
@@ -24,7 +23,4 @@ public class PlexTvShowActors
 
     [Column(Order = 3)]
     public required int PlexTvShowId { get; init; }
-
-    [Column(Order = 4)]
-    public required string RoleName { get; init; }
 }

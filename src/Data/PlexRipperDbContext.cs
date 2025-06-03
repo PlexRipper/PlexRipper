@@ -1,3 +1,4 @@
+using System.Data;
 using System.Reflection;
 using AppAny.Quartz.EntityFrameworkCore.Migrations;
 using AppAny.Quartz.EntityFrameworkCore.Migrations.SQLite;
@@ -140,7 +141,31 @@ public sealed class PlexRipperDbContext : DbContext, IPlexRipperDbContext, IPlex
     )
         where T : class
     {
-        await DbContextBulkExtensions.BulkInsertAsync(this, entities, bulkConfig, cancellationToken: cancellationToken);
+        var conn = this.Database.GetDbConnection();
+        var openedHere = conn.State != ConnectionState.Open;
+        if (openedHere)
+        {
+            await this.Database.OpenConnectionAsync(cancellationToken);
+        }
+
+        try
+        {
+            await using var tx = await this.BeginTransactionAsync(cancellationToken);
+            await DbContextBulkExtensions.BulkInsertAsync(
+                this,
+                entities,
+                bulkConfig,
+                cancellationToken: cancellationToken
+            );
+            await tx.CommitAsync(cancellationToken);
+        }
+        finally
+        {
+            if (openedHere)
+            {
+                await this.Database.CloseConnectionAsync();
+            }
+        }
     }
 
     public async Task BulkUpdateAsync<T>(
@@ -162,14 +187,33 @@ public sealed class PlexRipperDbContext : DbContext, IPlexRipperDbContext, IPlex
     )
         where T : class
     {
-        await DbContextBulkExtensions.BulkInsertOrUpdateAsync(
-            this,
-            entities,
-            bulkConfig,
-            progress,
-            type,
-            cancellationToken: cancellationToken
-        );
+        var conn = this.Database.GetDbConnection();
+        var openedHere = conn.State != ConnectionState.Open;
+        if (openedHere)
+        {
+            await this.Database.OpenConnectionAsync(cancellationToken);
+        }
+
+        try
+        {
+            await using var tx = await this.BeginTransactionAsync(cancellationToken);
+            await DbContextBulkExtensions.BulkInsertOrUpdateAsync(
+                this,
+                entities,
+                bulkConfig,
+                progress,
+                type,
+                cancellationToken: cancellationToken
+            );
+            await tx.CommitAsync(cancellationToken);
+        }
+        finally
+        {
+            if (openedHere)
+            {
+                await this.Database.CloseConnectionAsync();
+            }
+        }
     }
 
     public Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default) =>

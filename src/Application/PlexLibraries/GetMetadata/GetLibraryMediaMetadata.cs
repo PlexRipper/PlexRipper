@@ -52,24 +52,27 @@ public class GetLibraryMediaMetadata : BaseEndpoint<GetLibraryMediaMetadataReque
     {
         if (req.PlexLibraryId > 0)
         {
-            var plexLibrary = await _dbContext
+            var mediaMetadataDTO = await _dbContext
                 .PlexLibraries.AsNoTracking()
-                .Include(x => x.Roles)
-                .Include(x => x.Countries)
-                .Include(x => x.Genres)
-                .GetAsync(req.PlexLibraryId, ct);
+                .Where(x => x.Id == req.PlexLibraryId)
+                .Select(x => new PlexMediaMetadataDTO
+                {
+                    Roles = x.Roles.ToDTO(),
+                    Countries = x.Countries.ToDTO(),
+                    Genres = x.Genres.ToDTO(),
+                    RoleCount = x.Roles.Count,
+                    CountryCount = x.Countries.Count,
+                    GenreCount = x.Genres.Count,
+                })
+                .FirstOrDefaultAsync(ct);
 
-            await _dbContext
-                .PlexCountries.Where(x => x.PlexLibraries.Any(y => y.Id == req.PlexLibraryId))
-                .ToListAsync(cancellationToken: ct);
-
-            if (plexLibrary is null)
+            if (mediaMetadataDTO is null)
             {
                 await SendFluentResult(ResultExtensions.EntityNotFound(nameof(PlexLibrary), req.PlexLibraryId), ct);
                 return;
             }
 
-            await SendFluentResult(Result.Ok(plexLibrary), x => x.ToMetaDataDTO(), ct);
+            await SendFluentResult(Result.Ok(mediaMetadataDTO), ct);
         }
         else
         {
@@ -88,12 +91,9 @@ public class GetLibraryMediaMetadata : BaseEndpoint<GetLibraryMediaMetadataReque
                 .ToListAsync(ct);
 
             var uniqueRoles = await _dbContext
-                .PlexRoles
-                .Where(r => _dbContext.PlexLibraries
-                    .Where(pl => pl.Type == req.MediaType)
-                    .SelectMany(pl => pl.Roles)
-                    .Select(role => role.Id)
-                    .Contains(r.Id))
+                .PlexRoles.Where(r =>
+                    _dbContext.PlexLibraries.Any(pl => pl.Type == req.MediaType && pl.Roles.Contains(r))
+                )
                 .Distinct()
                 .ToListAsync(ct);
 
@@ -101,6 +101,9 @@ public class GetLibraryMediaMetadata : BaseEndpoint<GetLibraryMediaMetadataReque
                 Result.Ok(
                     new PlexMediaMetadataDTO
                     {
+                        RoleCount = uniqueRoles.Count,
+                        CountryCount = uniqueCountries.Count,
+                        GenreCount = uniqueGenres.Count,
                         Roles = uniqueRoles.ToDTO(),
                         Countries = uniqueCountries.ToDTO(),
                         Genres = uniqueGenres.ToDTO(),

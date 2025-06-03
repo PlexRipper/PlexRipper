@@ -450,7 +450,7 @@ export interface LibraryMediaItemStreamDTO {
   /** @format int64 */
   id: number;
   /** @format int32 */
-  index: number;
+  index?: number | null;
   language: string;
   languageCode: string;
   languageTag: string;
@@ -464,8 +464,7 @@ export interface LibraryMediaItemStreamDTO {
   samplingRate?: number | null;
   scanType?: string | null;
   selected?: boolean | null;
-  /** @format int32 */
-  streamType: number;
+  streamType: StreamType;
   title?: string | null;
   /** @format int32 */
   width?: number | null;
@@ -790,6 +789,7 @@ export interface PlexServerConnectionDTO {
   iPv4: boolean;
   iPv6: boolean;
   address: string;
+  chosenConnection: boolean;
   /** @format int32 */
   id: number;
   isCustom: boolean;
@@ -1230,6 +1230,13 @@ export interface SettingsModelDTO {
   generalSettings: GeneralSettingsDTO;
   languageSettings: LanguageSettingsDTO;
   serverSettings: ServerSettingsDTO;
+}
+
+export enum StreamType {
+  Unknown = "Unknown",
+  Video = "Video",
+  Audio = "Audio",
+  Subtitle = "Subtitle",
 }
 
 export interface SuccessDTO {

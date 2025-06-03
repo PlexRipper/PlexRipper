@@ -31,12 +31,14 @@ export class Authentication {
    * * @tags Authentication
    * @name AuthenticationStatusEndpoint
    * @request GET:/api/Authentication/status
+   * @secure
    */
   authenticationStatusEndpoint = (params: RequestParams = {}) =>
     from(
       Axios.request<UserClaimsDTO>({
         url: `/api/Authentication/status`,
         method: "GET",
+        secure: true,
         format: "json",
         ...params,
       }),
@@ -88,6 +90,7 @@ export class Authentication {
    * @name AppUserLoginEndpoint
    * @summary User Login
    * @request POST:/api/Authentication/login
+   * @secure
    */
   appUserLoginEndpoint = (data: AppUserLoginEndpointRequest, params: RequestParams = {}) =>
     from(
@@ -95,6 +98,7 @@ export class Authentication {
         url: `/api/Authentication/login`,
         method: "POST",
         data: data,
+        secure: true,
         type: ContentType.FormData,
         format: "json",
         ...params,

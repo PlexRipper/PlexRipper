@@ -1,0 +1,38 @@
+namespace PlexRipper.BaseTests;
+
+public static partial class FakeData
+{
+    public static Faker<PlexLibrary> GetPlexLibrary(Seed seed, PlexMediaType libraryType = PlexMediaType.None)
+    {
+        return new Faker<PlexLibrary>()
+            .StrictMode(true)
+            .UseSeed(seed.Next())
+            .Ignore(x => x.Id)
+            .RuleFor(x => x.Key, _ => GetUniqueNumber().ToString())
+            .RuleFor(x => x.Title, f => f.Company.CompanyName())
+            .RuleFor(x => x.Type, f => libraryType == PlexMediaType.None ? f.PlexRipper().LibraryType : libraryType)
+            .RuleFor(x => x.PlexServerId, _ => GetUniqueNumber())
+            .Ignore(x => x.PlexServer)
+            .RuleFor(x => x.CreatedAt, f => f.Date.Past(4))
+            .RuleFor(x => x.UpdatedAt, f => f.Date.Recent())
+            .RuleFor(x => x.ScannedAt, f => f.Date.Recent())
+            .RuleFor(x => x.SyncedAt, f => f.Date.Recent())
+            .RuleFor(x => x.Uuid, _ => Guid.NewGuid().ToString())
+            .Ignore(x => x.DefaultDestination)
+            .Ignore(x => x.DefaultDestinationId)
+            .Ignore(x => x.MediaSize)
+            .Ignore(x => x.MovieCount)
+            .Ignore(x => x.TvShowCount)
+            .Ignore(x => x.SeasonCount)
+            .Ignore(x => x.EpisodeCount)
+            .Ignore(x => x.ActorsCount)
+            .Ignore(x => x.GenresCount)
+            .Ignore(x => x.CountriesCount)
+            .Ignore(x => x.Movies)
+            .Ignore(x => x.TvShows)
+            .Ignore(x => x.Actors)
+            .Ignore(x => x.Genres)
+            .Ignore(x => x.Countries)
+            .Ignore(x => x.PlexAccountLibraries);
+    }
+}

@@ -133,6 +133,11 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
             e => new ExceptionalError(e)
         );
 
+        // Update the actor count in the library
+        await _dbContext
+            .PlexLibraries.Where(x => x.Id == libraryId)
+            .ExecuteUpdateAsync(set => set.SetProperty(x => x.ActorsCount, newActors.Count));
+
         stopWatch.Stop();
 
         if (insertResult.IsSuccess)
@@ -196,6 +201,11 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
             e => new ExceptionalError(e)
         );
 
+        // Update the genres count in the library
+        await _dbContext
+            .PlexLibraries.Where(x => x.Id == libraryId)
+            .ExecuteUpdateAsync(set => set.SetProperty(x => x.GenresCount, newGenres.Count));
+
         stopWatch.Stop();
 
         if (insertResult.IsSuccess)
@@ -257,6 +267,11 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
             () => _dbContext.BulkInsertAsync(newCountries, _bulkInsertConfig),
             e => new ExceptionalError(e)
         );
+
+        // Update the country count in the library
+        await _dbContext
+            .PlexLibraries.Where(x => x.Id == libraryId)
+            .ExecuteUpdateAsync(set => set.SetProperty(x => x.CountriesCount, newCountries.Count));
 
         stopWatch.Stop();
 

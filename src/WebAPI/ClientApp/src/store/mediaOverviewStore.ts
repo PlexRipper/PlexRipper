@@ -11,7 +11,7 @@ import {
 import type { IMediaOverviewSort } from '@composables/event-bus';
 import type { IMetaDataMediaFilter, ISelection } from '@interfaces';
 import { plexLibraryApi, plexMediaApi } from '@api';
-import { map, tap } from 'rxjs/operators';
+import { map, switchMap, tap } from 'rxjs/operators';
 import { iif, defer, type Observable, of, forkJoin } from 'rxjs';
 import { useSettingsStore, useLibraryStore } from '@store';
 
@@ -66,8 +66,11 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 			genreId: 0,
 		},
 		metadataList: {
-			countries: [],
+			roleCount: 0,
+			countryCount: 0,
+			genreCount: 0,
 			roles: [],
+			countries: [],
 			genres: [],
 		},
 	};
@@ -118,7 +121,6 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 						...state.metadata,
 					}),
 				)),
-			actions.refreshMetaData(),
 			]).pipe(
 				map(([media, _]) => media),
 				map(({ isSuccess, value }): PlexMediaStatisticsDTO | null => {
@@ -131,6 +133,7 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 					actions.setMedia(data, state.mediaType);
 					state.loading = false;
 				}),
+				tap(() => actions.refreshMetaData()),
 			);
 		},
 		setMedia(data: PlexMediaStatisticsDTO | null, mediaType: PlexMediaType) {

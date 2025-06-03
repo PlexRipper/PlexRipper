@@ -10,8 +10,8 @@ namespace PlexRipper.PlexApi;
 public record GetAllMediaByTypeFromPlexApiCommand(
     PlexLibrary PlexLibrary,
     PlexMediaType MediaType,
-    int BatchSize = 1000,
-    Action<MediaSyncProgress>? Action = null
+    Action<MediaSyncProgress> Action,
+    int BatchSize = 1000
 ) : ICommand<Result<List<LibraryMediaItemDTO>>>;
 
 public class GetAllMediaByTypeFromPlexApiCommandHandler
@@ -80,6 +80,7 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
 
         // Retrieve the media for this library
         var index = 0;
+        var chunkSize = 100;
         var startTime = DateTime.UtcNow; // Start time for estimation
 
         while (true)
@@ -102,17 +103,21 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
 
             // We need to get the media details because the initial metadata we get from the library is not complete
             var ratingKeys = rawMediaList.Select(x => x.RatingKey).ToList();
-            var detailResult = await GetDetailMetadataByRatingKeysAsync(client, ratingKeys, batchSize);
-            if (detailResult.IsFailed)
+            foreach (var chunk in ratingKeys.Chunk(chunkSize))
             {
-                detailResult.ToResult().LogError();
+                var detailResult = await GetDetailMetadataByRatingKeysAsync(client, chunk);
+                if (detailResult.IsFailed)
+                {
+                    detailResult.ToResult().LogError();
+                    SendProgress(mediaType, startTime, index, totalSize, action);
+                    continue;
+                }
+
+                mediaList.AddRange(detailResult.Value);
+                index += detailResult.Value.Count;
+
                 SendProgress(mediaType, startTime, index, totalSize, action);
-                continue;
             }
-
-            mediaList.AddRange(detailResult.Value);
-
-            SendProgress(mediaType, startTime, index, totalSize, action);
 
             // If the size is less than the batch size, we have reached the end
             if (rawMediaList.Count < batchSize)
@@ -137,12 +142,12 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
         DateTime startTime,
         int index,
         int totalSize,
-        Action<MediaSyncProgress>? action = null
+        Action<MediaSyncProgress> action
     )
     {
         // Estimate remaining time
         var elapsedTime = DateTime.UtcNow - startTime;
-        var progress = (double)index / totalSize;
+        var progress = (double)index / (totalSize * 2); // Adjusted for 2x getting the same media
         var remainingTime = TimeSpan.Zero;
         if (progress > 0)
         {
@@ -151,11 +156,11 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
         }
 
         // Report progress
-        action?.Invoke(
+        action.Invoke(
             new MediaSyncProgress
             {
                 Type = plexMediaType,
-                Received = index,
+                Received = Math.Clamp(index / 2, 0, totalSize),
                 Total = totalSize,
                 TimeRemaining = remainingTime,
             }
@@ -229,41 +234,32 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
 
     public async Task<Result<List<LibraryMediaItemDTO>>> GetDetailMetadataByRatingKeysAsync(
         IPlexAPI client,
-        List<string> ratingKeys,
-        int batchSize = 50
+        string[] ratingKeys
     )
     {
-        if (ratingKeys.Count == 0)
+        if (ratingKeys.Length == 0)
             return ResultExtensions.IsEmpty(nameof(ratingKeys)).LogError();
 
-        var list = new List<LibraryMediaItemDTO>();
-        foreach (var chunk in ratingKeys.Chunk(batchSize))
+        var response = await client
+            .Library.GetMediaMetaDataAsync(new GetMediaMetaDataRequest { RatingKey = string.Join(",", ratingKeys) })
+            .ToResponse();
+
+        if (response.IsFailed)
         {
-            var response = await client
-                .Library.GetMediaMetaDataAsync(new GetMediaMetaDataRequest { RatingKey = string.Join(",", chunk) })
-                .ToResponse();
-
-            if (response.IsFailed)
-            {
-                _log.Error(
-                    "Failed to get metadata for rating keys: {RatingKeys}. Error: {Error}",
-                    string.Join(",", chunk),
-                    response.Errors
-                );
-                response.ToResult().LogError();
-                continue;
-            }
-
-            var metaDataList = response.Value.Object?.MediaContainer?.Metadata ?? [];
-            if (!metaDataList.Any())
-            {
-                ResultExtensions.IsNull(nameof(response.Value.Object.MediaContainer.Metadata)).LogError();
-                continue;
-            }
-
-            list.AddRange(metaDataList.Select(x => x.ToMediaItemDTO()));
+            _log.Error(
+                "Failed to get metadata for rating keys: {RatingKeys}. Error: {Error}",
+                string.Join(",", ratingKeys),
+                response.Errors
+            );
+            response.ToResult().LogError();
         }
 
-        return Result.Ok(list);
+        var metaDataList = response.Value.Object?.MediaContainer?.Metadata ?? [];
+        if (!metaDataList.Any())
+        {
+            ResultExtensions.IsNull(nameof(response.Value.Object.MediaContainer.Metadata)).LogError();
+        }
+
+        return Result.Ok(metaDataList.Select(x => x.ToMediaItemDTO()).ToList());
     }
 }

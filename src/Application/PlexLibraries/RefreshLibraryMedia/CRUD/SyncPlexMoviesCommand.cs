@@ -107,17 +107,17 @@ public class SyncPlexMoviesCommandHandler : IRequestHandler<SyncPlexMoviesComman
 
     private async Task SyncMovieMetaData(List<PlexMovie> plexMovies, int plexLibraryId, string libraryName)
     {
-        _log.Debug("Starting syncing of movie metadata for library with id: {LibraryId}", plexLibraryId);
+        _log.Debug("Starting syncing of movie metadata for library: {LibraryName}", libraryName);
 
         var roleDict = await _dbContext
             .PlexLibraries.Where(x => x.Id == plexLibraryId)
             .Include(x => x.Roles)
             .SelectMany(x => x.Roles)
-            .ToDictionaryAsync(x => x.Name, x => x.Id);
+            .ToDictionaryAsync(x => x.PlexKey, x => x.Id);
 
         // These are always small dictionaries, so no need to worry about performance
-        var genreDict = await _dbContext.PlexGenres.ToDictionaryAsync(x => x.Name, x => x.Id);
-        var countryDict = await _dbContext.PlexCountries.ToDictionaryAsync(x => x.Name, x => x.Id);
+        var genreDict = await _dbContext.PlexGenres.ToDictionaryAsync(x => x.PlexKey, x => x.Id);
+        var countryDict = await _dbContext.PlexCountries.ToDictionaryAsync(x => x.PlexKey, x => x.Id);
 
         var plexMovieRoles = new List<PlexMovieRoles>();
         var plexMovieGenres = new List<PlexMovieGenres>();
@@ -127,60 +127,38 @@ public class SyncPlexMoviesCommandHandler : IRequestHandler<SyncPlexMoviesComman
         {
             foreach (var plexRole in plexMovie.Roles)
             {
-                if (roleDict.TryGetValue(plexRole.Name, out var roleId))
-                {
+                if (roleDict.TryGetValue(plexRole.PlexKey, out var roleId))
                     plexMovieRoles.Add(new PlexMovieRoles(roleId, plexLibraryId, plexMovie.Id));
-                    continue;
-                }
-
-                _log.Here()
-                    .Warning(
-                        "{PlexRole} with key {PlexKey} and name: {PlexRole} not found for library {LibraryName}",
-                        nameof(PlexRole),
-                        plexRole.Name,
-                        plexRole.Name,
-                        libraryName
-                    );
             }
 
             foreach (var plexGenre in plexMovie.Genres)
             {
-                if (genreDict.TryGetValue(plexGenre.Name, out var genreId))
-                {
+                if (genreDict.TryGetValue(plexGenre.PlexKey, out var genreId))
                     plexMovieGenres.Add(new PlexMovieGenres(genreId, plexLibraryId, plexMovie.Id));
-                    continue;
-                }
-
-                _log.Here()
-                    .Warning(
-                        "{PlexGenre} with name: {PlexGenre} was not found for library {LibraryName}",
-                        nameof(PlexGenre),
-                        plexGenre.Name,
-                        libraryName
-                    );
             }
 
             foreach (var plexCountry in plexMovie.Countries)
             {
-                if (countryDict.TryGetValue(plexCountry.Name, out var countryId))
-                {
+                if (countryDict.TryGetValue(plexCountry.PlexKey, out var countryId))
                     plexMovieCountries.Add(new PlexMovieCountries(countryId, plexLibraryId, plexMovie.Id));
-                    continue;
-                }
-
-                _log.Here()
-                    .Warning(
-                        "{PlexCountry} with name: {PlexCountry} was not found for library {LibraryName}",
-                        nameof(PlexCountry),
-                        plexCountry.Name,
-                        libraryName
-                    );
             }
         }
 
-        await _dbContext.BulkInsertAsync(plexMovieCountries, _config, CancellationToken.None);
-        await _dbContext.BulkInsertAsync(plexMovieGenres, _config, CancellationToken.None);
-        await _dbContext.BulkInsertAsync(plexMovieRoles, _config, CancellationToken.None);
+        await _dbContext.BulkInsertAsync(
+            plexMovieCountries.DistinctBy(x => new { x.PlexMovieId, x.CountryId }).ToList(),
+            _config,
+            CancellationToken.None
+        );
+        await _dbContext.BulkInsertAsync(
+            plexMovieGenres.DistinctBy(x => new { x.PlexMovieId, x.GenresId }).ToList(),
+            _config,
+            CancellationToken.None
+        );
+        await _dbContext.BulkInsertAsync(
+            plexMovieRoles.DistinctBy(x => new { x.PlexMovieId, x.RolesId }).ToList(),
+            _config,
+            CancellationToken.None
+        );
 
         _log.Debug(
             "Finished syncing of Movie metadata for library {LibraryName} with id: {LibraryId}",

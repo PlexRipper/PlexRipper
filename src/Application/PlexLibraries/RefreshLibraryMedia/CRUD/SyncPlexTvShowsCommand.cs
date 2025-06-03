@@ -181,7 +181,7 @@ public class SyncPlexTvShowsCommandHandler : IRequestHandler<SyncPlexTvShowsComm
             .PlexLibraries.Where(x => x.Id == plexLibraryId)
             .Include(x => x.Roles)
             .SelectMany(x => x.Roles)
-            .ToDictionaryAsync(x => x.TagKey, x => x.Id);
+            .ToDictionaryAsync(x => x.PlexKey, x => x.Id);
 
         var plexTvShowRoles = new List<PlexTvShowRoles>();
         var plexTvShowGenres = new List<PlexTvShowGenres>();
@@ -191,7 +191,7 @@ public class SyncPlexTvShowsCommandHandler : IRequestHandler<SyncPlexTvShowsComm
         {
             foreach (var plexRole in plexTvShow.Roles)
             {
-                if (roleDict.TryGetValue(plexRole.TagKey, out var roleId))
+                if (roleDict.TryGetValue(plexRole.PlexKey, out var roleId))
                 {
                     plexTvShowRoles.Add(new PlexTvShowRoles(roleId, plexLibraryId, plexTvShow.Id));
                     continue;
@@ -199,8 +199,8 @@ public class SyncPlexTvShowsCommandHandler : IRequestHandler<SyncPlexTvShowsComm
 
                 _log.Here()
                     .Warning(
-                        "PlexRole with key {PlexKey} and name: {PlexRole} not found for library {LibraryName}",
-                        plexRole.Id,
+                        "PlexRole with key {PlexKey} and name: {PlexRoleName} not found for library {LibraryName}",
+                        plexRole.PlexKey,
                         plexRole.Name,
                         plexLibraryName
                     );
@@ -232,16 +232,29 @@ public class SyncPlexTvShowsCommandHandler : IRequestHandler<SyncPlexTvShowsComm
 
                 _log.Here()
                     .Warning(
-                        "PlexCountry with name: {PlexCountry} was not found for library {LibraryName}",
+                        "{PlexCountry} with name: {PlexCountry} was not found for library {LibraryName}",
+                        nameof(PlexCountry),
                         plexCountry.Name,
                         plexLibraryName
                     );
             }
         }
 
-        await _dbContext.BulkInsertAsync(plexTvShowCountries, _config, CancellationToken.None);
-        await _dbContext.BulkInsertAsync(plexTvShowGenres, _config, CancellationToken.None);
-        await _dbContext.BulkInsertAsync(plexTvShowRoles, _config, CancellationToken.None);
+        await _dbContext.BulkInsertAsync(
+            plexTvShowCountries.DistinctBy(x => new { x.PlexTvShowId, x.CountryId }).ToList(),
+            _config,
+            CancellationToken.None
+        );
+        await _dbContext.BulkInsertAsync(
+            plexTvShowGenres.DistinctBy(x => new { x.PlexTvShowId, x.GenresId }).ToList(),
+            _config,
+            CancellationToken.None
+        );
+        await _dbContext.BulkInsertAsync(
+            plexTvShowRoles.DistinctBy(x => new { x.PlexTvShowId, x.RolesId }).ToList(),
+            _config,
+            CancellationToken.None
+        );
 
         _log.Debug(
             "Finished syncing of TvShow metadata for library {LibraryName} with id: {LibraryId}",

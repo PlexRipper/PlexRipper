@@ -46,7 +46,7 @@ public class GetAllPlexServerConnectionsEndpoint : BaseEndpointWithoutRequest<Li
 
             if (chosenConnectionResult.IsFailed)
             {
-                chosenConnectionResult.LogError();
+                chosenConnectionResult.LogWarning();
                 continue;
             }
 

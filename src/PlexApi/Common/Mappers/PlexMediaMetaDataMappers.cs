@@ -2,18 +2,18 @@ namespace PlexRipper.PlexApi;
 
 public static class PlexMediaMetaDataMappers
 {
-    public static List<PlexCountry> ToUniquePlexCountry(this List<LibraryMediaItemDTO> list)
+    public static List<PlexCountry> ToPlexCountry(this List<LibraryMediaItemDTO> list)
     {
-        return list.SelectMany(x => x.Country).DistinctBy(x => x.Tag).Select(x => x.ToPlexCountry()).ToList();
+        return list.SelectMany(x => x.Country).Select(x => x.ToPlexCountry()).ToList();
     }
 
-    public static List<PlexGenre> ToUniquePlexGenre(this List<LibraryMediaItemDTO> list)
+    public static List<PlexGenre> ToPlexGenre(this List<LibraryMediaItemDTO> list)
     {
-        return list.SelectMany(x => x.Genre).DistinctBy(x => x.Tag).Select(x => x.ToPlexGenre()).ToList();
+        return list.SelectMany(x => x.Genre).Select(x => x.ToPlexGenre()).ToList();
     }
 
-    public static List<PlexRole> ToUniquePlexRole(this List<LibraryMediaItemDTO> list)
+    public static List<PlexRole> ToPlexRole(this List<LibraryMediaItemDTO> list)
     {
-        return list.SelectMany(x => x.Role).DistinctBy(x => x.Tag).Select(x => x.ToPlexRole()).ToList();
+        return list.SelectMany(x => x.Role).Select(x => x.ToPlexRole()).ToList();
     }
 }

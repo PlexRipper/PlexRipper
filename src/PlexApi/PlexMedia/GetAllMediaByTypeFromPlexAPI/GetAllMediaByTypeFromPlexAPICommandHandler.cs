@@ -83,7 +83,7 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
         var chunkSize = 100;
         var startTime = DateTime.UtcNow; // Start time for estimation
 
-        while (true)
+        for (var i = 0; i < totalSize; i += batchSize)
         {
             var mediaListResult = await GetMetadataForLibraryAsync(
                 client,
@@ -118,13 +118,6 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
 
                 SendProgress(mediaType, startTime, index, totalSize, action);
             }
-
-            // If the size is less than the batch size, we have reached the end
-            if (rawMediaList.Count < batchSize)
-                break;
-
-            if (index >= totalSize)
-                break;
         }
 
         _log.Here()
@@ -176,13 +169,13 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
             return ResultExtensions.IsInvalidId(nameof(libraryKey), libraryKey).LogError();
 
         var response = await client
-            .Library.GetLibraryItemsAsync(
-                new GetLibraryItemsRequest
+            .Library.GetLibrarySectionsAllAsync(
+                new GetLibrarySectionsAllRequest
                 {
                     SectionKey = libraryKeyInt,
                     XPlexContainerSize = 0,
                     XPlexContainerStart = 0,
-                    Type = type.ToApiTypeEnum<GetLibraryItemsQueryParamType>(),
+                    Type = type.ToApiTypeEnum<GetLibrarySectionsAllQueryParamType>(),
                 }
             )
             .ToResponse();
@@ -209,12 +202,12 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
             return ResultExtensions.IsInvalidId(nameof(libraryKey), libraryKey).LogError();
 
         var response = await client
-            .Library.GetAllMediaLibraryAsync(
-                new GetAllMediaLibraryRequest
+            .Library.GetLibrarySectionsAllAsync(
+                new GetLibrarySectionsAllRequest
                 {
-                    Type = type.ToApiTypeEnum<GetAllMediaLibraryQueryParamType>(),
+                    Type = type.ToApiTypeEnum<GetLibrarySectionsAllQueryParamType>(),
                     SectionKey = libraryKeyInt,
-                    IncludeMeta = GetAllMediaLibraryQueryParamIncludeMeta.Disable,
+                    IncludeMeta = GetLibrarySectionsAllQueryParamIncludeMeta.Disable,
                     IncludeGuids = QueryParamIncludeGuids.Enable,
                     XPlexContainerStart = startIndex,
                     XPlexContainerSize = batchSize,

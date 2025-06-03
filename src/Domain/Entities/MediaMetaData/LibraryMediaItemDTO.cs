@@ -65,7 +65,7 @@ public record LibraryMediaItemDTO
 
     public required List<LibraryMediaItemGenreDTO> Genre { get; set; } = [];
 
-    public required List<MetaDataCountryDTO> Country { get; set; } = [];
+    public required List<LibraryMediaItemCountryDTO> Country { get; set; } = [];
 
     public required List<LibraryMediaItemRoleDTO> Role { get; set; } = [];
 }
@@ -96,19 +96,37 @@ public record MetaDataGuidsDTO
     public required string Id { get; set; }
 }
 
-public record MetaDataCountryDTO
+public record LibraryMediaItemCountryDTO
 {
-    public required string Tag { get; set; }
+    public required int PlexId { get; init; }
+
+    public required string Tag { get; init; }
+
+    public required string Filter { get; init; }
 }
 
 public record LibraryMediaItemGenreDTO
 {
-    public required string Tag { get; set; }
+    public required int PlexId { get; init; }
+
+    public required string Tag { get; init; }
+
+    public required string Filter { get; init; }
 }
 
 public record LibraryMediaItemRoleDTO
 {
-    public required string Tag { get; set; }
+    public required int PlexId { get; init; }
+
+    public required string Tag { get; init; }
+
+    public required string? Role { get; init; }
+
+    public required string? Filter { get; init; }
+
+    public required string? TagKey { get; init; }
+
+    public required string? Thumb { get; init; }
 }
 
 public record LibraryMediaItemMediaDTO

@@ -2,9 +2,9 @@ namespace PlexRipper.Domain;
 
 public class PlexGenre : BaseEntity
 {
-    public required string Name { get; set; }
+    public required string Name { get; init; }
 
-    public long PlexKey { get; set; }
+    public required long PlexKey { get; init; }
 
     public ICollection<PlexLibrary> PlexLibraries { get; set; } = [];
 

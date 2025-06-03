@@ -2,7 +2,15 @@ namespace PlexRipper.Domain;
 
 public class PlexRole : BaseEntity
 {
-    public required string Name { get; set; }
+    public required int PlexKey { get; init; }
+
+    public required string Name { get; init; }
+
+    public required string? Role { get; init; }
+
+    public required string? TagKey { get; init; }
+
+    public required string? Thumb { get; init; }
 
     public ICollection<PlexLibrary> PlexLibraries { get; set; } = [];
 

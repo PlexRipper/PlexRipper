@@ -30,7 +30,7 @@ public partial class FakePlexApiData
             .RuleFor(x => x.Content, f => f.Random.Bool())
             .RuleFor(x => x.Directory, f => f.Random.Bool())
             .RuleFor(x => x.ContentChangedAt, f => (int)f.Date.Recent().ToUnixLong())
-            .RuleFor(x => x.Hidden, _ => Hidden.Disable)
+            .RuleFor(x => x.Hidden, _ => Hidden.ExcludeHomeScreenAndGlobalSearch)
             .RuleFor(
                 x => x.Location,
                 f => [new GetAllLibrariesLocation { Id = f.Random.Number(100000), Path = f.System.DirectoryPath() }]

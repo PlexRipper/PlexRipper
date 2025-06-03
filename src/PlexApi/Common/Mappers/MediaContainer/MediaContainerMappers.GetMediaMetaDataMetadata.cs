@@ -45,11 +45,32 @@ public static partial class MediaContainerMappers
         };
     }
 
-    public static LibraryMediaItemGenreDTO ToDTO(this GetMediaMetaDataGenre x) => new() { Tag = x.Tag };
+    public static LibraryMediaItemGenreDTO ToDTO(this GetMediaMetaDataGenre x) =>
+        new()
+        {
+            Tag = x.Tag,
+            PlexId = x.Id,
+            Filter = x.Filter,
+        };
 
-    public static MetaDataCountryDTO ToDTO(this GetMediaMetaDataCountry x) => new() { Tag = x.Tag };
+    public static LibraryMediaItemCountryDTO ToDTO(this GetMediaMetaDataCountry x) =>
+        new()
+        {
+            Tag = x.Tag,
+            PlexId = x.Id,
+            Filter = x.Filter,
+        };
 
-    public static LibraryMediaItemRoleDTO ToDTO(this GetMediaMetaDataRole x) => new() { Tag = x.Tag };
+    public static LibraryMediaItemRoleDTO ToDTO(this GetMediaMetaDataRole x) =>
+        new()
+        {
+            Tag = x.Tag,
+            PlexId = x.Id,
+            Role = x.Role,
+            Filter = x.Filter,
+            TagKey = x.TagKey,
+            Thumb = x.Thumb,
+        };
 
     public static MetaDataRatingsDTO ToDTO(this Ratings x) =>
         new()

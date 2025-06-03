@@ -166,6 +166,9 @@ public class SyncPlexTvShowsCommandHandler : IRequestHandler<SyncPlexTvShowsComm
 
     private async Task SyncMediaMetaData(int plexLibraryId, List<PlexTvShow> plexTvShows)
     {
+        var stopWatch = new Stopwatch();
+        stopWatch.Start();
+
         var plexLibraryName = await _dbContext.GetPlexLibraryNameById(plexLibraryId);
         _log.Debug(
             "Starting syncing of TvShow metadata for library {LibraryName} with id: {LibraryId}",
@@ -192,51 +195,19 @@ public class SyncPlexTvShowsCommandHandler : IRequestHandler<SyncPlexTvShowsComm
             foreach (var plexRole in plexTvShow.Roles)
             {
                 if (roleDict.TryGetValue(plexRole.PlexKey, out var roleId))
-                {
                     plexTvShowRoles.Add(new PlexTvShowRoles(roleId, plexLibraryId, plexTvShow.Id));
-                    continue;
-                }
-
-                _log.Here()
-                    .Warning(
-                        "PlexRole with key {PlexKey} and name: {PlexRoleName} not found for library {LibraryName}",
-                        plexRole.PlexKey,
-                        plexRole.Name,
-                        plexLibraryName
-                    );
             }
 
             foreach (var plexGenre in plexTvShow.Genres)
             {
                 if (genreDict.TryGetValue(plexGenre.PlexKey, out var genreId))
-                {
                     plexTvShowGenres.Add(new PlexTvShowGenres(genreId, plexLibraryId, plexTvShow.Id));
-                    continue;
-                }
-
-                _log.Here()
-                    .Warning(
-                        "PlexGenre with name: {PlexGenre} was not found for library {LibraryName}",
-                        plexGenre.Name,
-                        plexLibraryName
-                    );
             }
 
             foreach (var plexCountry in plexTvShow.Countries)
             {
                 if (countryDict.TryGetValue(plexCountry.PlexKey, out var countryId))
-                {
                     plexTvShowCountries.Add(new PlexTvShowCountries(countryId, plexLibraryId, plexTvShow.Id));
-                    continue;
-                }
-
-                _log.Here()
-                    .Warning(
-                        "{PlexCountry} with name: {PlexCountry} was not found for library {LibraryName}",
-                        nameof(PlexCountry),
-                        plexCountry.Name,
-                        plexLibraryName
-                    );
             }
         }
 
@@ -256,6 +227,15 @@ public class SyncPlexTvShowsCommandHandler : IRequestHandler<SyncPlexTvShowsComm
             CancellationToken.None
         );
 
+        stopWatch.Stop();
+        _log.Debug(
+            "Finished syncing {Count} roles, {Count} genres and {Count} countries for library {LibraryName} in {ElapsedSeconds:F2} seconds",
+            plexTvShowRoles.Count,
+            plexTvShowGenres.Count,
+            plexTvShowCountries.Count,
+            plexLibraryName,
+            stopWatch.Elapsed.TotalSeconds
+        );
         _log.Debug(
             "Finished syncing of TvShow metadata for library {LibraryName} with id: {LibraryId}",
             plexLibraryName,

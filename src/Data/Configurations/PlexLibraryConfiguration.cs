@@ -46,7 +46,7 @@ public class PlexLibraryConfiguration : IEntityTypeConfiguration<PlexLibrary>
         builder.Property(c => c.Title).UseCollation(OrderByNaturalExtensions.CollationName);
 
         builder
-            .HasMany(x => x.Roles)
+            .HasMany(x => x.Actors)
             .WithMany(x => x.PlexLibraries)
             .UsingEntity<PlexLibraryActors>(
                 l => l.HasOne<PlexActor>().WithMany().HasForeignKey(e => e.PlexActorId),

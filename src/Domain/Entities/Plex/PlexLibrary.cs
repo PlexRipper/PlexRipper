@@ -119,7 +119,7 @@ public class PlexLibrary : BaseEntity
 
     public ICollection<PlexAccountLibrary> PlexAccountLibraries { get; private set; } = [];
 
-    public ICollection<PlexActor> Roles { get; set; } = [];
+    public ICollection<PlexActor> Actors { get; set; } = [];
 
     public ICollection<PlexGenre> Genres { get; set; } = [];
 

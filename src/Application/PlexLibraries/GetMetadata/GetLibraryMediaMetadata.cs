@@ -57,10 +57,10 @@ public class GetLibraryMediaMetadata : BaseEndpoint<GetLibraryMediaMetadataReque
                 .Where(x => x.Id == req.PlexLibraryId)
                 .Select(x => new PlexMediaMetadataDTO
                 {
-                    Roles = x.Roles.ToDTO(),
+                    Roles = x.Actors.ToDTO(),
                     Countries = x.Countries.ToDTO(),
                     Genres = x.Genres.ToDTO(),
-                    RoleCount = x.Roles.Count,
+                    RoleCount = x.Actors.Count,
                     CountryCount = x.Countries.Count,
                     GenreCount = x.Genres.Count,
                 })
@@ -79,7 +79,7 @@ public class GetLibraryMediaMetadata : BaseEndpoint<GetLibraryMediaMetadataReque
             var uniqueRoles = await _dbContext
                 .PlexLibraries.AsNoTracking()
                 .Where(pl => pl.Type == req.MediaType)
-                .SelectMany(pl => pl.Roles.Select(g => g.ToDTO()))
+                .SelectMany(pl => pl.Actors.Select(g => g.ToDTO()))
                 .Distinct()
                 .ToListAsync(ct);
 

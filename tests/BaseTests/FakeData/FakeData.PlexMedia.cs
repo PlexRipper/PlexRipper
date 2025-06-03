@@ -48,7 +48,7 @@ public static partial class FakeData
 
     private static readonly Faker<PlexMovie> _plexMovie = new Faker<PlexMovie>()
         .ApplyBasePlexMedia()
-        .Ignore(x => x.Roles)
+        .Ignore(x => x.Actors)
         .Ignore(x => x.Genres)
         .Ignore(x => x.Countries)
         .RuleFor(x => x.Title, f => f.PlexMedia().MediaTitle(PlexMediaType.Movie))
@@ -76,7 +76,7 @@ public static partial class FakeData
 
     private static readonly Faker<PlexTvShow> _plexTvShow = new Faker<PlexTvShow>()
         .ApplyBasePlexMedia()
-        .Ignore(x => x.Roles)
+        .Ignore(x => x.Actors)
         .Ignore(x => x.Genres)
         .Ignore(x => x.Countries)
         .RuleFor(x => x.Title, f => f.PlexMedia().MediaTitle(PlexMediaType.TvShow))

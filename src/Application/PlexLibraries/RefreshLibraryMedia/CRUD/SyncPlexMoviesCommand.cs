@@ -142,7 +142,7 @@ public class SyncPlexMoviesCommandHandler : IRequestHandler<SyncPlexMoviesComman
 
         foreach (var movie in movies)
         {
-            foreach (var role in movie.Roles)
+            foreach (var role in movie.Actors)
             {
                 if (keyToIdDict.TryGetValue(role.Key, out var plexActorId))
                 {
@@ -183,7 +183,7 @@ public class SyncPlexMoviesCommandHandler : IRequestHandler<SyncPlexMoviesComman
 
         foreach (var movie in movies)
         {
-            foreach (var role in movie.Roles)
+            foreach (var role in movie.Actors)
             {
                 if (keyToIdDict.TryGetValue(role.Key, out var plexActorId))
                 {
@@ -225,7 +225,7 @@ public class SyncPlexMoviesCommandHandler : IRequestHandler<SyncPlexMoviesComman
 
         foreach (var movie in movies)
         {
-            foreach (var role in movie.Roles)
+            foreach (var role in movie.Actors)
             {
                 if (keyToIdDict.TryGetValue(role.Key, out var plexActorId))
                 {

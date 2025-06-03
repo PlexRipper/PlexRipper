@@ -68,7 +68,7 @@ public static partial class FakeData
             .Ignore(x => x.EpisodeCount)
             .Ignore(x => x.Movies)
             .Ignore(x => x.TvShows)
-            .Ignore(x => x.Roles)
+            .Ignore(x => x.Actors)
             .Ignore(x => x.Genres)
             .Ignore(x => x.Countries)
             .Ignore(x => x.PlexAccountLibraries);

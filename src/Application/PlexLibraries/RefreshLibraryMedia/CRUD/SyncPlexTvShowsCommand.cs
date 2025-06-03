@@ -300,7 +300,7 @@ public class SyncPlexTvShowsCommandHandler : IRequestHandler<SyncPlexTvShowsComm
 
         foreach (var plexTvShow in plexTvShows)
         {
-            foreach (var plexRole in plexTvShow.Roles)
+            foreach (var plexRole in plexTvShow.Actors)
             {
                 if (keyToIdDict.TryGetValue(plexRole.Key, out var roleId))
                     plexTvShowRoles.Add(new PlexTvShowActors(roleId, plexLibraryId, plexTvShow.Id));

@@ -10,8 +10,8 @@ public class PlexMovieConfiguration : IEntityTypeConfiguration<PlexMovie>
         builder.HasIndex(x => x.SortIndex);
 
         builder
-            .HasMany(x => x.Roles)
-            .WithMany(x => x.PlexMovieRoles)
+            .HasMany(x => x.Actors)
+            .WithMany(x => x.PlexMovieActors)
             .UsingEntity<PlexMovieActors>(
                 l => l.HasOne<PlexActor>().WithMany().HasForeignKey(e => e.PlexActorId),
                 r => r.HasOne<PlexMovie>().WithMany().HasForeignKey(e => e.PlexMovieId)

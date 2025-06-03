@@ -122,15 +122,15 @@ public static partial class DbContextExtensions
                 if (filter.GenreId > 0)
                     query = query.Include(x => x.Genres);
 
-                if (filter.RoleId > 0)
-                    query = query.Include(x => x.Roles);
+                if (filter.ActorId > 0)
+                    query = query.Include(x => x.Actors);
 
                 plexMediaSlimDtos = await query
                     .ApplyWhere(plexLibraryId > 0, x => x.PlexLibraryId == plexLibraryId)
                     .ApplyWhere(plexLibraryId == 0, x => allowedPlexLibraryIds.Contains(x.PlexLibraryId))
                     .ApplyWhere(filter.CountryId > 0, x => x.Countries.Any(y => y.Id == filter.CountryId))
                     .ApplyWhere(filter.GenreId > 0, x => x.Genres.Any(y => y.Id == filter.GenreId))
-                    .ApplyWhere(filter.RoleId > 0, x => x.Roles.Any(y => y.Id == filter.RoleId))
+                    .ApplyWhere(filter.ActorId > 0, x => x.Actors.Any(y => y.Id == filter.ActorId))
                     .ApplyOrderBy(plexLibraryId > 0, x => x.SortIndex)
                     .ApplySkip(filter.Skip)
                     .ApplyTake(filter.Take)
@@ -149,15 +149,15 @@ public static partial class DbContextExtensions
                 if (filter.GenreId > 0)
                     query = query.Include(x => x.Genres);
 
-                if (filter.RoleId > 0)
-                    query = query.Include(x => x.Roles);
+                if (filter.ActorId > 0)
+                    query = query.Include(x => x.Actors);
 
                 plexMediaSlimDtos = await query
                     .ApplyWhere(plexLibraryId > 0, x => x.PlexLibraryId == plexLibraryId)
                     .ApplyWhere(plexLibraryId == 0, x => allowedPlexLibraryIds.Contains(x.PlexLibraryId))
                     .ApplyWhere(filter.CountryId > 0, x => x.Countries.Any(y => y.Id == filter.CountryId))
                     .ApplyWhere(filter.GenreId > 0, x => x.Genres.Any(y => y.Id == filter.GenreId))
-                    .ApplyWhere(filter.RoleId > 0, x => x.Roles.Any(y => y.Id == filter.RoleId))
+                    .ApplyWhere(filter.ActorId > 0, x => x.Actors.Any(y => y.Id == filter.ActorId))
                     .ApplyOrderBy(plexLibraryId > 0, x => x.SortIndex)
                     .ApplySkip(filter.Skip)
                     .ApplyTake(filter.Take)

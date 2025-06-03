@@ -139,7 +139,7 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
     {
         try
         {
-            // Don't migrate when running in memory, this causes error:
+            // Don't migrate when running in memory, this causes an error:
             // "Relational-specific methods can only be used when the context is using a relational database provider."
             var pendingMigrations = _plexRipperDbContextDatabase.GetPendingMigrations();
             if (!_plexRipperDbContextDatabase.IsInMemory() && pendingMigrations.Any())
@@ -198,52 +198,53 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
         var dateString = DateTime.UtcNow.ToString("yy-MM-dd_hh-mm", CultureInfo.InvariantCulture);
         var dbBackUpPath = Path.Combine(_pathProvider.DatabaseBackupDirectory, dateString);
 
-        try
+        var createDirectoryResult = Result.Try(() => _directory.CreateDirectory(dbBackUpPath));
+        if (createDirectoryResult.IsFailed)
         {
-            _directory.CreateDirectory(dbBackUpPath);
+            _log.Error("Failed to create back-up directory at {DbBackUpPath}", dbBackUpPath);
+            return createDirectoryResult.LogError();
+        }
 
-            // Wait until the database is available.
-            StreamExtensions
-                .WaitForFile(_pathProvider.DatabasePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None)
-                ?.Dispose();
+        // Wait until the database is available.
+        StreamExtensions
+            .WaitForFile(_pathProvider.DatabasePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None)
+            ?.Dispose();
 
-            foreach (var databaseFilePath in _pathProvider.DatabaseFiles)
+        foreach (var databaseFilePath in _pathProvider.DatabaseFiles)
+        {
+            if (_file.Exists(databaseFilePath))
             {
-                if (_file.Exists(databaseFilePath))
-                {
-                    var destinationPath = Path.Combine(dbBackUpPath, databaseFilePath.GetFileName());
-                    try
-                    {
-                        _file.Copy(databaseFilePath, destinationPath);
-                        _log.Here()
-                            .Information(
-                                "Successfully copied \"{DatabaseFilePath}\" to back-up location\"{DestinationPath}\"",
-                                databaseFilePath,
-                                destinationPath
-                            );
-                    }
-                    catch (Exception e)
-                    {
-                        _log.Here()
-                            .Error(
-                                "Failed to copy {DatabaseFilePath} to back-up location {DestinationPath}",
-                                databaseFilePath,
-                                destinationPath
-                            );
-                        _log.Error(e);
-                    }
+                var combineResult = Result.Try(() => Path.Combine(dbBackUpPath, databaseFilePath.GetFileName()));
+                if (combineResult.IsFailed)
+                    return combineResult.LogError();
 
-                    continue;
+                var destinationPath = combineResult.Value;
+
+                var copyResult = Result.Try((() => _file.Copy(databaseFilePath, destinationPath)));
+                if (copyResult.IsFailed)
+                {
+                    _log.Here()
+                        .Error(
+                            "Failed to copy {DatabaseFilePath} to back-up location {DestinationPath}",
+                            databaseFilePath,
+                            destinationPath
+                        );
+                    return copyResult.LogError();
                 }
 
-                _log.Warning("Could not find: {DatabaseFilePath} to backup", databaseFilePath);
+                _log.Here()
+                    .Information(
+                        "Successfully copied \"{DatabaseFilePath}\" to back-up location\"{DestinationPath}\"",
+                        databaseFilePath,
+                        destinationPath
+                    );
+
+                continue;
             }
 
-            return Result.Ok();
+            _log.Warning("Could not find: {DatabaseFilePath} to backup", databaseFilePath);
         }
-        catch (Exception e)
-        {
-            return Result.Fail(new ExceptionalError(e)).LogError();
-        }
+
+        return Result.Ok();
     }
 }

@@ -4,6 +4,7 @@ using Data.Contracts;
 using Environment;
 using Logging.Interface;
 using PlexRipper.Identity.Contracts;
+using Settings.Contracts;
 
 namespace PlexRipper.Data;
 
@@ -13,6 +14,7 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
 
     private readonly IPlexRipperDbContextDatabase _plexRipperDbContextDatabase;
     private readonly IAuthDbContextDatabase _authDbContextDatabase;
+    private readonly IGeneralSettings _generalSettings;
 
     private readonly IPathProvider _pathProvider;
 
@@ -24,6 +26,7 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
         ILog<PlexRipperDbContextManager> log,
         IPlexRipperDbContextDatabase plexRipperDbContextDatabase,
         IAuthDbContextDatabase authDbContextDatabase,
+        IGeneralSettings generalSettings,
         IPathProvider pathProvider,
         IDirectory directory,
         IFile file
@@ -32,6 +35,7 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
         _log = log;
         _plexRipperDbContextDatabase = plexRipperDbContextDatabase;
         _authDbContextDatabase = authDbContextDatabase;
+        _generalSettings = generalSettings;
         _pathProvider = pathProvider;
         _directory = directory;
         _file = file;
@@ -98,6 +102,9 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
                 _log.Error("Database could not be created at {DatabasePath}", DatabasePath);
                 return createdResult.LogError();
             }
+
+            _generalSettings.FirstTimeSetup = true;
+            _log.InformationLine("First time setup has been set to true because the database has been reset");
 
             return Result.Ok();
         }

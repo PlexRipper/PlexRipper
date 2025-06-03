@@ -63,6 +63,8 @@ public class PlexServerConnection : BaseEntity
     [NotMapped]
     public bool IsPlexTvConnection => Url.Contains(".plex.direct");
 
+    public bool IsHttps => Protocol.Equals("https", StringComparison.OrdinalIgnoreCase);
+
     public string GetDownloadUrl(string fileLocationUrl, string token) =>
         $"{Url}{fileLocationUrl}?X-Plex-Token={token}";
 

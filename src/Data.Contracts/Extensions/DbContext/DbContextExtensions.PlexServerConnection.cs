@@ -20,7 +20,8 @@ public static partial class DbContextExtensions
             return ResultExtensions.IsInvalidId(nameof(PlexServer), plexServerId);
 
         var plexServer = await dbContext
-            .PlexServers.Include(x => x.PlexServerConnections)
+            .PlexServers.AsNoTracking()
+            .Include(x => x.PlexServerConnections)
             .ThenInclude(x => x.LatestConnectionStatus)
             .FirstOrDefaultAsync(x => x.Id == plexServerId, cancellationToken);
 
@@ -67,6 +68,17 @@ public static partial class DbContextExtensions
                     plexServer.Name
                 );
         }
+
+        // Find HTTPS connections first
+        _log.Here()
+            .Verbose(
+                "Attempting to find an HTTPS PlexServerConnection that is online for server {PlexServerName}",
+                plexServer.Name
+            );
+
+        var httpsConnection = successPlexServerConnections.FirstOrDefault(x => x.IsHttps);
+        if (httpsConnection is not null)
+            return Result.Ok(httpsConnection);
 
         // Find based on online local address, because that is the fastest
         _log.Here()

@@ -21,6 +21,7 @@ public static class PlexServerConnectionMapper
             IsPlexTvConnection = source.IsPlexTvConnection,
             LatestConnectionStatus = source.LatestConnectionStatus?.ToDTO(),
             Type = source.Type,
+            ChosenConnection = false,
         };
 
     public static List<PlexServerConnectionDTO> ToDTO(this List<PlexServerConnection> source) =>

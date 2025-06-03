@@ -24,6 +24,11 @@ public class PlexServerConnectionDTO
     // ReSharper disable once InconsistentNaming
     public required bool IPv6 { get; set; }
 
+    /// <summary>
+    /// Gets whether the front-end should use this connection to connect to the server, always 1 connection is chosen.
+    /// </summary>
+    public required bool ChosenConnection { get; set; }
+
     public required int PlexServerId { get; set; }
 
     public required string Url { get; set; }

@@ -245,18 +245,7 @@ public sealed class PlexRipperDbContext : DbContext, IPlexRipperDbContext, IPlex
     }
 
     /// <inheritdoc/>
-    public Result Migrate()
-    {
-        try
-        {
-            Database.Migrate();
-            return Result.Ok();
-        }
-        catch (Exception e)
-        {
-            return Result.Fail(new ExceptionalError(e));
-        }
-    }
+    public Result Migrate() => Result.Try(() => Database.Migrate(), e => new ExceptionalError(e));
 
     /// <inheritdoc/>
     public IEnumerable<string> GetPendingMigrations() => Database.GetPendingMigrations();

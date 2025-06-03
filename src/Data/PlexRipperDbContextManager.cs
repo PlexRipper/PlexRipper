@@ -47,7 +47,7 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
 
         if (_file.Exists(DatabasePath))
         {
-            // Check if database can be connected to.
+            // Check if the database can be connected to.
             if (_plexRipperDbContextDatabase.CanConnect())
             {
                 _log.InformationLine("Database was successfully connected!");
@@ -116,7 +116,7 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
             // Create the database while applying any pending migrations.
             _plexRipperDbContextDatabase.Migrate();
             _authDbContextDatabase.Migrate();
-            _log.Information("Database was successfully created at: {DatabasePath}", DatabasePath);
+            _log.Information("The new database was successfully created at: {DatabasePath}", DatabasePath);
             return Result.Ok();
         }
         catch (Exception e)
@@ -138,16 +138,34 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
             if (!_plexRipperDbContextDatabase.IsInMemory() && pendingMigrations.Any())
             {
                 _log.InformationLine("Attempting to migrate database, this might take a while");
-                _plexRipperDbContextDatabase.Migrate();
-                _log.InformationLine("Database migration successful!");
+                var migrateResult = _plexRipperDbContextDatabase.Migrate();
+                if (migrateResult.IsFailed)
+                {
+                    _log.ErrorLine("Failed to migrate the database");
+                    migrateResult.LogError();
+                    ResetDatabase();
+                }
+                else
+                {
+                    _log.InformationLine("Database migration successful!");
+                }
             }
 
             pendingMigrations = _authDbContextDatabase.GetPendingMigrations();
             if (!_authDbContextDatabase.IsInMemory() && pendingMigrations.Any())
             {
                 _log.InformationLine("Attempting to migrate Authentication tables database");
-                _authDbContextDatabase.Migrate();
-                _log.InformationLine("Authentication tables migration successful!");
+                var migrateResult = _authDbContextDatabase.Migrate();
+                if (migrateResult.IsFailed)
+                {
+                    _log.ErrorLine("Failed to migrate Authentication tables database");
+                    migrateResult.LogError();
+                    ResetDatabase();
+                }
+                else
+                {
+                    _log.InformationLine("Authentication tables migration successful!");
+                }
             }
 
             return Result.Ok();

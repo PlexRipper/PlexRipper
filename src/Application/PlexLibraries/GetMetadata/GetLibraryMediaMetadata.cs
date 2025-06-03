@@ -88,9 +88,12 @@ public class GetLibraryMediaMetadata : BaseEndpoint<GetLibraryMediaMetadataReque
                 .ToListAsync(ct);
 
             var uniqueRoles = await _dbContext
-                .PlexRoles.Where(r =>
-                    _dbContext.PlexLibraries.Any(pl => pl.Type == req.MediaType && pl.Roles.Contains(r))
-                )
+                .PlexRoles
+                .Where(r => _dbContext.PlexLibraries
+                    .Where(pl => pl.Type == req.MediaType)
+                    .SelectMany(pl => pl.Roles)
+                    .Select(role => role.Id)
+                    .Contains(r.Id))
                 .Distinct()
                 .ToListAsync(ct);
 

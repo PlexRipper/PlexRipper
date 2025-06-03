@@ -101,6 +101,12 @@ public sealed class PlexRipperDbContext : DbContext, IPlexRipperDbContext, IPlex
 
     public DbSet<PlexAccountLibrary> PlexAccountLibraries { get; set; }
 
+    public DbSet<PlexLibraryRoles> PlexLibraryRoles { get; set; }
+
+    public DbSet<PlexLibraryCountries> PlexLibraryCountries { get; set; }
+
+    public DbSet<PlexLibraryGenres> PlexLibraryGenres { get; set; }
+
     public DbSet<PlexMovieRoles> PlexMovieRoles { get; set; }
 
     public DbSet<PlexMovieCountries> PlexMovieCountries { get; set; }

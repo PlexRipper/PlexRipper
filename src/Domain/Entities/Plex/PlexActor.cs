@@ -1,6 +1,6 @@
 namespace PlexRipper.Domain;
 
-public class PlexRole : BaseEntity
+public class PlexActor : BaseEntity
 {
     public required int PlexKey { get; init; }
 

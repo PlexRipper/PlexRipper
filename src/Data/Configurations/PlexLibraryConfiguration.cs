@@ -49,7 +49,7 @@ public class PlexLibraryConfiguration : IEntityTypeConfiguration<PlexLibrary>
             .HasMany(x => x.Roles)
             .WithMany(x => x.PlexLibraries)
             .UsingEntity<PlexLibraryRoles>(
-                l => l.HasOne<PlexRole>().WithMany().HasForeignKey(e => e.PlexRoleId),
+                l => l.HasOne<PlexActor>().WithMany().HasForeignKey(e => e.PlexRoleId),
                 r => r.HasOne<PlexLibrary>().WithMany().HasForeignKey(e => e.PlexLibraryId)
             );
 

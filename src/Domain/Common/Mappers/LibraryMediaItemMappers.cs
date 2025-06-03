@@ -2,7 +2,7 @@ namespace PlexRipper.Domain;
 
 public static class LibraryMediaItemMappers
 {
-    public static PlexRole ToPlexRole(this LibraryMediaItemRoleDTO role) =>
+    public static PlexActor ToPlexRole(this LibraryMediaItemRoleDTO role) =>
         new()
         {
             Name = role.Tag,
@@ -12,7 +12,7 @@ public static class LibraryMediaItemMappers
             Thumb = role.Thumb,
         };
 
-    public static List<PlexRole> ToPlexRole(this List<LibraryMediaItemRoleDTO>? countryList) =>
+    public static List<PlexActor> ToPlexRole(this List<LibraryMediaItemRoleDTO>? countryList) =>
         countryList?.Select(x => x.ToPlexRole()).ToList() ?? [];
 
     public static PlexCountry ToPlexCountry(this LibraryMediaItemCountryDTO country) =>

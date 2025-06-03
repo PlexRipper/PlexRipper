@@ -26,7 +26,7 @@ public interface IPlexRipperDbContext : IDisposable
 
     #region PlexMedia
 
-    public DbSet<PlexRole> PlexRoles { get; }
+    public DbSet<PlexActor> PlexRoles { get; }
 
     public DbSet<PlexGenre> PlexGenres { get; }
 

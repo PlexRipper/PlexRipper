@@ -2,7 +2,7 @@ namespace PlexRipper.BaseTests;
 
 public static partial class FakeData
 {
-    private static Faker<PlexRole> _plexRole = new Faker<PlexRole>()
+    private static Faker<PlexActor> _plexRole = new Faker<PlexActor>()
         .StrictMode(true)
         .RuleFor(x => x.Id, _ => 0)
         .RuleFor(x => x.PlexKey, _ => GetUniqueNumber())
@@ -14,6 +14,6 @@ public static partial class FakeData
         .Ignore(x => x.PlexMovieRoles)
         .Ignore(x => x.PlexTvShowRoles);
 
-    public static Faker<PlexRole> GetPlexRoles(Seed seed, Action<FakeDataConfig>? options = null) =>
+    public static Faker<PlexActor> GetPlexRoles(Seed seed, Action<FakeDataConfig>? options = null) =>
         _plexRole.UseSeed(seed.Next());
 }

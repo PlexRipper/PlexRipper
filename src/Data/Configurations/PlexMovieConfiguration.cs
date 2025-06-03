@@ -13,7 +13,7 @@ public class PlexMovieConfiguration : IEntityTypeConfiguration<PlexMovie>
             .HasMany(x => x.Roles)
             .WithMany(x => x.PlexMovieRoles)
             .UsingEntity<PlexMovieRoles>(
-                l => l.HasOne<PlexRole>().WithMany().HasForeignKey(e => e.RolesId),
+                l => l.HasOne<PlexActor>().WithMany().HasForeignKey(e => e.RolesId),
                 r => r.HasOne<PlexMovie>().WithMany().HasForeignKey(e => e.PlexMovieId)
             );
 

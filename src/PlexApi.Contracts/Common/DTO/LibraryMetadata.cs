@@ -10,5 +10,5 @@ public record LibraryMetadata
 
     public List<PlexGenre> Genres { get; set; } = [];
 
-    public List<PlexRole> Roles { get; set; } = [];
+    public List<PlexActor> Roles { get; set; } = [];
 }

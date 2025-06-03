@@ -3,9 +3,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace PlexRipper.Data.Configurations;
 
-public class PlexRoleConfiguration : IEntityTypeConfiguration<PlexRole>
+public class PlexRoleConfiguration : IEntityTypeConfiguration<PlexActor>
 {
-    public void Configure(EntityTypeBuilder<PlexRole> builder)
+    public void Configure(EntityTypeBuilder<PlexActor> builder)
     {
         builder.HasIndex(x => x.PlexKey).IsUnique();
     }

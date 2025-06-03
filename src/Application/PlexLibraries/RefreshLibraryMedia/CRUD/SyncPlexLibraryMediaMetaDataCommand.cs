@@ -76,7 +76,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
         }
     }
 
-    private async Task<Result> SyncRoles(List<PlexRole> roles, int libraryId, string libraryName)
+    private async Task<Result> SyncRoles(List<PlexActor> roles, int libraryId, string libraryName)
     {
         if (!roles.Any())
         {

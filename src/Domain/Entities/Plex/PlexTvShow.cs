@@ -10,7 +10,7 @@ public class PlexTvShow : BasePlexMedia
 
     public ICollection<PlexTvShowSeason> Seasons { get; set; } = [];
 
-    public required ICollection<PlexRole> Roles { get; set; } = [];
+    public required ICollection<PlexActor> Roles { get; set; } = [];
 
     public required ICollection<PlexGenre> Genres { get; set; } = [];
 

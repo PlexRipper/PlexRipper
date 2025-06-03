@@ -12,7 +12,7 @@ public static class PlexMediaMetaDataMappers
         return list.SelectMany(x => x.Genre).Select(x => x.ToPlexGenre()).ToList();
     }
 
-    public static List<PlexRole> ToPlexRole(this List<LibraryMediaItemDTO> list)
+    public static List<PlexActor> ToPlexRole(this List<LibraryMediaItemDTO> list)
     {
         return list.SelectMany(x => x.Role).Select(x => x.ToPlexRole()).ToList();
     }

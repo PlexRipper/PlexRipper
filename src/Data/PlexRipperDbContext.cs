@@ -31,7 +31,7 @@ public sealed class PlexRipperDbContext : DbContext, IPlexRipperDbContext, IPlex
 
     #region PlexMedia
 
-    public DbSet<PlexRole> PlexRoles { get; set; }
+    public DbSet<PlexActor> PlexRoles { get; set; }
 
     public DbSet<PlexGenre> PlexGenres { get; set; }
 

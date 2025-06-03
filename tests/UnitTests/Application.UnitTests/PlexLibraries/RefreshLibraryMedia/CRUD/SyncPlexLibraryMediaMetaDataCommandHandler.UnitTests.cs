@@ -277,7 +277,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandlerUnitTests
         // Create data with duplicate PlexKeys
         var roles = FakeData.GetPlexRoles(seed).Generate(10);
         var duplicateRoles = roles
-            .Select(r => new PlexRole
+            .Select(r => new PlexActor
             {
                 Name = r.Name + "_duplicate",
                 PlexKey = r.PlexKey,
@@ -428,7 +428,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandlerUnitTests
         // Create new data with some overlapping PlexKeys but different names
         var newRoles = initialRoles
             .Take(25)
-            .Select(r => new PlexRole
+            .Select(r => new PlexActor
             {
                 PlexKey = r.PlexKey,
                 Name = r.Name + "_updated",

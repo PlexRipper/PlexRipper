@@ -4,11 +4,11 @@ namespace PlexApi.Contracts;
 
 public record LibraryMetadata
 {
-    public required PlexLibrary Library { get; set; }
+    public required PlexLibrary Library { get; init; }
 
-    public List<LibraryMediaItemCountryDTO> Countries { get; set; } = [];
+    public required IReadOnlyCollection<LibraryMediaItemCountryDTO> Countries { get; init; } = [];
 
-    public List<LibraryMediaItemGenreDTO> Genres { get; set; } = [];
+    public required IReadOnlyCollection<LibraryMediaItemGenreDTO> Genres { get; init; } = [];
 
-    public List<LibraryMediaItemRoleDTO> Roles { get; set; } = [];
+    public required IReadOnlyCollection<LibraryMediaItemRoleDTO> Actors { get; init; } = [];
 }

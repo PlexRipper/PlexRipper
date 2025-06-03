@@ -1,18 +1,21 @@
+using Bogus.Hollywood;
+
 namespace PlexRipper.BaseTests;
 
 public partial class FakePlexApiData
 {
-    private static Faker<LibraryMediaItemRoleDTO> _libraryMediaItemRoleDTO = new Faker<LibraryMediaItemRoleDTO>()
-        .StrictMode(true)
-        .RuleFor(x => x.PlexId, _ => GetUniqueNumber())
-        .RuleFor(x => x.Name, f => f.Name.FullName())
-        .RuleFor(x => x.Role, f => f.Image.PicsumUrl())
-        .RuleFor(x => x.Filter, (_, x) => $"actor={x.PlexId}")
-        .RuleFor(x => x.TagKey, f => f.Random.AlphaNumeric(24))
-        .RuleFor(x => x.Thumb, f => f.Image.PicsumUrl());
+    private static readonly Faker<LibraryMediaItemRoleDTO> _libraryMediaItemActorDTO =
+        new Faker<LibraryMediaItemRoleDTO>()
+            .StrictMode(true)
+            .RuleFor(x => x.PlexId, _ => GetUniqueNumber())
+            .RuleFor(x => x.Name, f => f.Movies().ActorName())
+            .RuleFor(x => x.Role, f => f.Movies().MovieTagline())
+            .RuleFor(x => x.Filter, (_, x) => $"actor={x.PlexId}")
+            .RuleFor(x => x.TagKey, f => f.Random.AlphaNumeric(24))
+            .RuleFor(x => x.Thumb, f => f.Image.PicsumUrl());
 
-    public static Faker<LibraryMediaItemRoleDTO> GetLibraryMediaItemRoleDTO(
+    public static Faker<LibraryMediaItemRoleDTO> GetLibraryMediaItemActorDTO(
         Seed seed,
         Action<FakeDataConfig>? options = null
-    ) => _libraryMediaItemRoleDTO.UseSeed(seed.Next());
+    ) => _libraryMediaItemActorDTO.UseSeed(seed.Next());
 }

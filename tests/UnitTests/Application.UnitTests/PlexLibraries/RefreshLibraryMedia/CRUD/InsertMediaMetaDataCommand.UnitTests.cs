@@ -302,8 +302,6 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         countriesDb.Count.ShouldBe(239); // These are deduplicated, possible number of countries
     }
 
-    // TODO create a test which checks for actors having a tagkey that is null
-
     [Fact]
     public async Task ShouldPreserveDataIntegrity_WhenUpdatingExistingItems()
     {
@@ -811,5 +809,119 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         actorsDb.Count.ShouldBe(0);
         genresDb.Count.ShouldBe(0);
         countriesDb.Count.ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task ShouldReturnValidDatabaseIds_WhenEntitiesAreInserted()
+    {
+        // Arrange
+        var seed = await SetupDatabase(
+            1223,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 1;
+            }
+        );
+
+        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync();
+        plexLibrary.ShouldNotBeNull();
+
+        var actors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).GenerateUnique(15, x => x.TagKey);
+        var genres = FakePlexApiData.GetLibraryMediaItemGenreDTO(seed).GenerateUnique(12, x => x.Key);
+        var countries = FakePlexApiData.GetLibraryMediaItemCountryDTO(seed).GenerateUnique(8, x => x.Key);
+
+        // Act
+        var command = new InsertMediaMetaDataCommand(
+            LibraryMetadata: new LibraryMetadata
+            {
+                Actors = actors,
+                Genres = genres,
+                Countries = countries,
+                Library = plexLibrary,
+            }
+        );
+        var result = await TestHandlerExecuteAsync<InsertMediaMetaDataCommandResponse>(command);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+
+        // Verify dictionary keys are valid PlexIds
+        result.Value.PlexActors.Keys.ShouldAllBe(key => key > 0, "All actor PlexIds should be positive");
+        result.Value.PlexGenres.Keys.ShouldAllBe(key => key > 0, "All genre PlexIds should be positive");
+        result.Value.PlexCountries.Keys.ShouldAllBe(key => key > 0, "All country PlexIds should be positive");
+
+        // Verify entities have valid database IDs
+        result.Value.PlexActors.Values.ShouldAllBe(actor => actor.Id > 0, "All actors should have valid database IDs");
+        result.Value.PlexGenres.Values.ShouldAllBe(genre => genre.Id > 0, "All genres should have valid database IDs");
+        result.Value.PlexCountries.Values.ShouldAllBe(
+            country => country.Id > 0,
+            "All countries should have valid database IDs"
+        );
+
+        // Verify database entities match returned entities
+        var actorsDb = await IDbContext.PlexActors.ToListAsync();
+        var genresDb = await IDbContext.PlexGenres.ToListAsync();
+        var countriesDb = await IDbContext.PlexCountries.ToListAsync();
+
+        actorsDb.Count.ShouldBe(result.Value.PlexActors.Count);
+        genresDb.Count.ShouldBe(result.Value.PlexGenres.Count);
+        countriesDb.Count.ShouldBe(result.Value.PlexCountries.Count);
+
+        // Verify each returned entity exists in the database
+        foreach (var returnedActor in result.Value.PlexActors.Values)
+        {
+            var dbActor = actorsDb.FirstOrDefault(x => x.Id == returnedActor.Id);
+            dbActor.ShouldNotBeNull($"Actor with ID {returnedActor.Id} should exist in database");
+            dbActor.Name.ShouldBe(returnedActor.Name);
+            dbActor.Key.ShouldBe(returnedActor.Key);
+        }
+
+        foreach (var returnedGenre in result.Value.PlexGenres.Values)
+        {
+            var dbGenre = genresDb.FirstOrDefault(x => x.Id == returnedGenre.Id);
+            dbGenre.ShouldNotBeNull($"Genre with ID {returnedGenre.Id} should exist in database");
+            dbGenre.Name.ShouldBe(returnedGenre.Name);
+            dbGenre.Key.ShouldBe(returnedGenre.Key);
+        }
+
+        foreach (var returnedCountry in result.Value.PlexCountries.Values)
+        {
+            var dbCountry = countriesDb.FirstOrDefault(x => x.Id == returnedCountry.Id);
+            dbCountry.ShouldNotBeNull($"Country with ID {returnedCountry.Id} should exist in database");
+            dbCountry.Name.ShouldBe(returnedCountry.Name);
+            dbCountry.Key.ShouldBe(returnedCountry.Key);
+        }
+
+        // Verify source data mapping is correct
+        foreach (var sourceActor in actors.Where(x => !string.IsNullOrEmpty(x.TagKey)))
+        {
+            result.Value.PlexActors.ShouldContainKey(
+                sourceActor.PlexId,
+                $"Response should contain actor with PlexId {sourceActor.PlexId}"
+            );
+            var responseActor = result.Value.PlexActors[sourceActor.PlexId];
+            responseActor.Name.ShouldBe(sourceActor.Name);
+        }
+
+        foreach (var sourceGenre in genres.Where(x => !string.IsNullOrEmpty(x.Key)))
+        {
+            result.Value.PlexGenres.ShouldContainKey(
+                sourceGenre.PlexId,
+                $"Response should contain genre with PlexId {sourceGenre.PlexId}"
+            );
+            var responseGenre = result.Value.PlexGenres[sourceGenre.PlexId];
+            responseGenre.Name.ShouldBe(sourceGenre.Name);
+        }
+
+        foreach (var sourceCountry in countries.Where(x => !string.IsNullOrEmpty(x.Key)))
+        {
+            result.Value.PlexCountries.ShouldContainKey(
+                sourceCountry.PlexId,
+                $"Response should contain country with PlexId {sourceCountry.PlexId}"
+            );
+            var responseCountry = result.Value.PlexCountries[sourceCountry.PlexId];
+            responseCountry.Name.ShouldBe(sourceCountry.Name);
+        }
     }
 }

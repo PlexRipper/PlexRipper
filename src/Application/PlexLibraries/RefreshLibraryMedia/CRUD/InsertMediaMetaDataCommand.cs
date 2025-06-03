@@ -49,16 +49,6 @@ public class InsertMediaMetaDataCommandHandler
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
 
-    private readonly BulkConfig? _bulkInsertKeyConfig =
-        new()
-        {
-            SetOutputIdentity = true,
-            UpdateByProperties = [nameof(PlexActor.Key)],
-
-            // Only in-memory sqlite needs this which happens during testing
-            UseTempDB = EnvironmentExtensions.IsIntegrationTestMode(),
-        };
-
     public InsertMediaMetaDataCommandHandler(IPlexRipperDbContext dbContext, ILog log)
     {
         _dbContext = dbContext;
@@ -97,8 +87,8 @@ public class InsertMediaMetaDataCommandHandler
         IReadOnlyCollection<LibraryMediaItemRoleDTO> sourceList
     )
     {
-        var stopWatch = new Stopwatch();
-        stopWatch.Start();
+        var stopWatch = Stopwatch.StartNew();
+
         _log.Here().Debug("Started inserting {Count} {NameOfPlexActor}", sourceList.Count, nameof(PlexActor));
 
         var resultDict = new Dictionary<int, PlexActor>();
@@ -113,39 +103,60 @@ public class InsertMediaMetaDataCommandHandler
         }
 
         var result = await Result.Try(
-            () => _dbContext.BulkInsertOrUpdateAsync(plexActors, _bulkInsertKeyConfig),
+            () =>
+                _dbContext.BulkInsertOrUpdateAsync(
+                    plexActors,
+                    new BulkConfig
+                    {
+                        SetOutputIdentity = true,
+                        UpdateByProperties = [nameof(PlexActor.Key)],
+
+                        // Only in-memory sqlite needs this which happens during testing
+                        UseTempDB = EnvironmentExtensions.IsIntegrationTestMode(),
+                    }
+                ),
             e => new ExceptionalError(e)
+        );
+
+        if (result.IsFailed)
+        {
+            _log.Error(
+                "Failed to insert {NameOfPlexActor} after {ElapsedSeconds:F2} seconds",
+                nameof(PlexActor),
+                stopWatch.Elapsed.TotalSeconds
+            );
+            return result.LogError();
+        }
+
+        // Query the database to get entities with proper IDs (SQLite limitation workaround)
+        await _dbContext.BulkReadAsync(
+            plexActors,
+            new BulkConfig
+            {
+                UpdateByProperties = [nameof(PlexActor.Key)],
+                UseTempDB = EnvironmentExtensions.IsIntegrationTestMode(),
+            }
         );
 
         resultDict = plexActors.ToPlexIdDictionary(sourceList);
 
         stopWatch.Stop();
 
-        if (result.IsSuccess)
-        {
-            _log.Debug(
-                "Finished inserting {Count} {NameOfPlexActor} for library {ElapsedSeconds:F2} seconds",
-                sourceList.Count,
-                nameof(PlexActor),
-                stopWatch.Elapsed.TotalSeconds
-            );
-            return Result.Ok(resultDict);
-        }
-
-        _log.Error(
-            "Failed to insert {NameOfPlexActor} after {ElapsedSeconds:F2} seconds",
+        _log.Debug(
+            "Finished inserting {Count} {NameOfPlexActor} for library {ElapsedSeconds:F2} seconds",
+            sourceList.Count,
             nameof(PlexActor),
             stopWatch.Elapsed.TotalSeconds
         );
-        return result.LogError();
+        return Result.Ok(resultDict);
     }
 
     private async Task<Result<Dictionary<int, PlexGenre>>> InsertGenres(
         IReadOnlyCollection<LibraryMediaItemGenreDTO> sourceList
     )
     {
-        var stopWatch = new Stopwatch();
-        stopWatch.Start();
+        var stopWatch = Stopwatch.StartNew();
+
         _log.Here().Debug("Started inserting {Count} {NameOfPlexGenre}", sourceList.Count, nameof(PlexGenre));
 
         var resultDict = new Dictionary<int, PlexGenre>();
@@ -159,38 +170,60 @@ public class InsertMediaMetaDataCommandHandler
         }
 
         var insertResult = await Result.Try(
-            () => _dbContext.BulkInsertOrUpdateAsync(plexGenres, _bulkInsertKeyConfig),
+            () =>
+                _dbContext.BulkInsertOrUpdateAsync(
+                    plexGenres,
+                    new BulkConfig
+                    {
+                        SetOutputIdentity = true,
+                        UpdateByProperties = [nameof(PlexGenre.Key)],
+
+                        // Only in-memory sqlite needs this which happens during testing
+                        UseTempDB = EnvironmentExtensions.IsIntegrationTestMode(),
+                    }
+                ),
             e => new ExceptionalError(e)
+        );
+
+        if (insertResult.IsFailed)
+        {
+            _log.Error(
+                "Failed to insert {NameOfPlexGenre} after {ElapsedSeconds:F2} seconds",
+                nameof(PlexGenre),
+                stopWatch.Elapsed.TotalSeconds
+            );
+            return insertResult.LogError();
+        }
+
+        // Query the database to get entities with proper IDs (SQLite limitation workaround)
+        await _dbContext.BulkReadAsync(
+            plexGenres,
+            new BulkConfig
+            {
+                UpdateByProperties = [nameof(PlexGenre.Key)],
+                UseTempDB = EnvironmentExtensions.IsIntegrationTestMode(),
+            }
         );
 
         resultDict = plexGenres.ToPlexIdDictionary(sourceList);
 
         stopWatch.Stop();
-        if (insertResult.IsSuccess)
-        {
-            _log.Debug(
-                "Finished inserting {Count} {NameOfPlexGenre} in {ElapsedSeconds:F2} seconds",
-                plexGenres.Count,
-                nameof(PlexGenre),
-                stopWatch.Elapsed.TotalSeconds
-            );
-            return Result.Ok(resultDict);
-        }
 
-        _log.Error(
-            "Failed to insert {NameOfPlexGenre} after {ElapsedSeconds:F2} seconds",
+        _log.Debug(
+            "Finished inserting {Count} {NameOfPlexGenre} in {ElapsedSeconds:F2} seconds",
+            plexGenres.Count,
             nameof(PlexGenre),
             stopWatch.Elapsed.TotalSeconds
         );
-        return insertResult.LogError();
+        return Result.Ok(resultDict);
     }
 
     private async Task<Result<Dictionary<int, PlexCountry>>> InsertCountries(
         IReadOnlyCollection<LibraryMediaItemCountryDTO> sourceList
     )
     {
-        var stopWatch = new Stopwatch();
-        stopWatch.Start();
+        var stopWatch = Stopwatch.StartNew();
+
         _log.Here().Debug("Started inserting {Count} {NameOfPlexCountry}", sourceList.Count, nameof(PlexCountry));
 
         var resultDict = new Dictionary<int, PlexCountry>();
@@ -203,30 +236,51 @@ public class InsertMediaMetaDataCommandHandler
         }
 
         var result = await Result.Try(
-            () => _dbContext.BulkInsertOrUpdateAsync(plexCountries, _bulkInsertKeyConfig),
+            () =>
+                _dbContext.BulkInsertOrUpdateAsync(
+                    plexCountries,
+                    new BulkConfig
+                    {
+                        SetOutputIdentity = true,
+                        UpdateByProperties = [nameof(PlexCountry.Key)],
+
+                        // Only in-memory sqlite needs this which happens during testing
+                        UseTempDB = EnvironmentExtensions.IsIntegrationTestMode(),
+                    }
+                ),
             e => new ExceptionalError(e)
+        );
+
+        if (result.IsFailed)
+        {
+            _log.Error(
+                "Failed to insert {NameOfPlexCountry} after {ElapsedSeconds:F2} seconds",
+                nameof(PlexCountry),
+                stopWatch.Elapsed.TotalSeconds
+            );
+            return result.LogError();
+        }
+
+        // Query the database to get entities with proper IDs (SQLite limitation workaround)
+        await _dbContext.BulkReadAsync(
+            plexCountries,
+            new BulkConfig
+            {
+                UpdateByProperties = [nameof(PlexCountry.Key)],
+                UseTempDB = EnvironmentExtensions.IsIntegrationTestMode(),
+            }
         );
 
         resultDict = plexCountries.ToPlexIdDictionary(sourceList);
 
         stopWatch.Stop();
 
-        if (result.IsSuccess)
-        {
-            _log.Debug(
-                "Finished inserting {Count} {NameOfPlexCountry} in {ElapsedSeconds:F2} seconds",
-                plexCountries.Count,
-                nameof(PlexCountry),
-                stopWatch.Elapsed.TotalSeconds
-            );
-            return Result.Ok(resultDict);
-        }
-
-        _log.Error(
-            "Failed to insert {NameOfPlexCountry} after {ElapsedSeconds:F2} seconds",
+        _log.Debug(
+            "Finished inserting {Count} {NameOfPlexCountry} in {ElapsedSeconds:F2} seconds",
+            plexCountries.Count,
             nameof(PlexCountry),
             stopWatch.Elapsed.TotalSeconds
         );
-        return result.LogError();
+        return Result.Ok(resultDict);
     }
 }

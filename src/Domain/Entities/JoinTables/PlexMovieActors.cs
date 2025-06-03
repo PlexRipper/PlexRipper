@@ -8,12 +8,11 @@ public class PlexMovieActors
     public PlexMovieActors() { }
 
     [SetsRequiredMembers]
-    public PlexMovieActors(int plexActorId, int plexLibraryId, int plexMovieId, string roleName)
+    public PlexMovieActors(int plexActorId, int plexLibraryId, int plexMovieId)
     {
         PlexActorId = plexActorId;
         PlexMovieId = plexMovieId;
         PlexLibraryId = plexLibraryId;
-        RoleName = roleName;
     }
 
     [Column(Order = 1)]
@@ -24,7 +23,4 @@ public class PlexMovieActors
 
     [Column(Order = 3)]
     public required int PlexLibraryId { get; set; }
-
-    [Column(Order = 4)]
-    public required string RoleName { get; set; }
 }

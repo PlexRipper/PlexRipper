@@ -52,10 +52,15 @@ public class RefreshPlexMovieLibraryCommandHandler
             foreach (var plexMovie in plexLibrary.Movies)
                 plexMovie.SortIndex = i++;
 
-            var createResult = await _mediator.Send(
-                new SyncPlexMoviesCommand(plexLibrary.Movies.ToList(), plexLibrary.PlexServerId, plexLibrary.Id),
-                cancellationToken
-            );
+            var insertCommand = new InsertMediaMetaDataCommandResponse
+            {
+                PlexLibrary = plexLibrary,
+                PlexActors = [],
+                PlexGenres = [],
+                PlexCountries = [], // TODO add metadata here
+            };
+
+            var createResult = await _mediator.Send(new SyncPlexMoviesCommand(insertCommand), cancellationToken);
             if (createResult.IsFailed)
             {
                 await _progressReporter.SendProgress(

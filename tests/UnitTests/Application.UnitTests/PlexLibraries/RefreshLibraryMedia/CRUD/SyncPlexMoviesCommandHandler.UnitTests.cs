@@ -1,11 +1,11 @@
 namespace PlexRipper.Application.UnitTests;
 
-public class SyncPlexMoviesCommandHandler_UnitTests : BaseUnitTest<SyncPlexMoviesCommandHandler>
+public class SyncPlexMoviesCommandHandlerUnitTests : BaseUnitTest<SyncPlexMoviesCommandHandler>
 {
     private SyncPlexMoviesCommandValidator _validator =
         new(LogManager.CreateLogInstance<SyncPlexMoviesCommandValidator>());
 
-    public SyncPlexMoviesCommandHandler_UnitTests(ITestOutputHelper output)
+    public SyncPlexMoviesCommandHandlerUnitTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]
@@ -30,7 +30,14 @@ public class SyncPlexMoviesCommandHandler_UnitTests : BaseUnitTest<SyncPlexMovie
         library.Movies.AddRange(movies);
 
         // Act
-        var request = new SyncPlexMoviesCommand(movies, library.PlexServerId, library.Id);
+        var insertCommand = new InsertMediaMetaDataCommandResponse
+        {
+            PlexLibrary = library,
+            PlexActors = [],
+            PlexGenres = [],
+            PlexCountries = [], // TODO add metadata here
+        };
+        var request = new SyncPlexMoviesCommand(insertCommand);
         (await _validator.ValidateAsync(request)).IsValid.ShouldBeTrue();
         var result = await _sut.Handle(request, CancellationToken.None);
 
@@ -66,7 +73,14 @@ public class SyncPlexMoviesCommandHandler_UnitTests : BaseUnitTest<SyncPlexMovie
         library.Movies.AddRange(movies);
 
         // Act
-        var request = new SyncPlexMoviesCommand(movies, library.PlexServerId, library.Id);
+        var insertCommand = new InsertMediaMetaDataCommandResponse
+        {
+            PlexLibrary = library,
+            PlexActors = [],
+            PlexGenres = [],
+            PlexCountries = [], // TODO add metadata here
+        };
+        var request = new SyncPlexMoviesCommand(insertCommand);
         (await _validator.ValidateAsync(request)).IsValid.ShouldBeTrue();
         var result = await _sut.Handle(request, CancellationToken.None);
 
@@ -118,7 +132,14 @@ public class SyncPlexMoviesCommandHandler_UnitTests : BaseUnitTest<SyncPlexMovie
         library.Movies.AddRange(newMovies);
 
         // Act
-        var request = new SyncPlexMoviesCommand(newMovies, library.PlexServerId, library.Id);
+        var insertCommand = new InsertMediaMetaDataCommandResponse
+        {
+            PlexLibrary = library,
+            PlexActors = [],
+            PlexGenres = [],
+            PlexCountries = [], // TODO add metadata here
+        };
+        var request = new SyncPlexMoviesCommand(insertCommand);
         (await _validator.ValidateAsync(request)).IsValid.ShouldBeTrue();
         var result = await _sut.Handle(request, CancellationToken.None);
 

@@ -7,32 +7,27 @@ using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application;
 
-public record SyncPlexMoviesCommand(List<PlexMovie> PlexMovies, int PlexServerId, int PlexLibraryId)
+public record SyncPlexMoviesCommand(InsertMediaMetaDataCommandResponse LibraryMetadata)
     : IRequest<Result<CrudMoviesReport>>;
 
 public class SyncPlexMoviesCommandValidator : AbstractValidator<SyncPlexMoviesCommand>
 {
     public SyncPlexMoviesCommandValidator(ILog<SyncPlexMoviesCommandValidator> log)
     {
-        var stopWatch = new Stopwatch();
-        stopWatch.Start();
+        var stopWatch = Stopwatch.StartNew();
+        RuleFor(x => x.LibraryMetadata).NotNull();
+        RuleFor(x => x.LibraryMetadata.PlexLibrary).NotNull();
+        RuleFor(x => x.LibraryMetadata.PlexLibrary.PlexServerId).GreaterThan(0);
+        RuleFor(x => x.LibraryMetadata.PlexLibraryId).GreaterThan(0);
 
-        RuleFor(x => x.PlexServerId).GreaterThan(0);
-        RuleFor(x => x.PlexLibraryId).GreaterThan(0);
-        RuleFor(x => x.PlexMovies).NotNull();
-        RuleForEach(x => x.PlexMovies)
-            .ChildRules(tvShow =>
+        RuleFor(x => x.LibraryMetadata.PlexLibrary.Movies).NotNull();
+        RuleForEach(x => x.LibraryMetadata.PlexLibrary.Movies)
+            .ChildRules(movie =>
             {
-                tvShow.RuleFor(x => x.Key).GreaterThan(0);
+                movie.RuleFor(x => x.Key).GreaterThan(0);
             });
 
-        stopWatch.Stop();
-        log.Here()
-            .Debug(
-                "Finished validating {ClassName} in {TotalMilliseconds} milliseconds",
-                nameof(SyncPlexMoviesCommandValidator),
-                stopWatch.Elapsed.TotalMilliseconds
-            );
+        stopWatch.StopAndLog($"Finished validating {nameof(SyncPlexMoviesCommand)}");
     }
 }
 
@@ -65,32 +60,51 @@ public class SyncPlexMoviesCommandHandler : IRequestHandler<SyncPlexMoviesComman
     {
         try
         {
-            var plexLibraryId = command.PlexLibraryId;
-            var plexServerId = command.PlexServerId;
-            var plexLibraryName = await _dbContext.GetPlexLibraryNameById(plexLibraryId, cancellationToken);
+            var plexLibraryId = command.LibraryMetadata.PlexLibraryId;
+            var plexServerId = command.LibraryMetadata.PlexLibrary.PlexServerId;
+            var libraryName = await _dbContext.GetPlexLibraryNameById(plexLibraryId, cancellationToken);
 
             _log.Debug(
                 "Starting syncing of movies in library: {PlexLibraryName} with id: {PlexLibraryId} by first removing all media and then reinserting it",
-                plexLibraryName,
+                libraryName,
                 plexLibraryId
             );
 
-            var stopWatch = new Stopwatch();
-            stopWatch.Start();
+            var stopWatch = Stopwatch.StartNew();
 
             await RemoveMedia(plexLibraryId, cancellationToken);
 
-            var plexMovies = command.PlexMovies;
+            var plexMovies = command.LibraryMetadata.PlexLibrary.Movies.ToList();
             await _dbContext.BulkInsertPlexMoviesAsync(plexMovies, plexServerId, plexLibraryId, ct: cancellationToken);
             _report.CreatedMovies = plexMovies.Count;
 
-            await SyncMovieMetaData(plexMovies, plexLibraryId, plexLibraryName);
+            await SyncMovieActors(
+                plexMovies,
+                command.LibraryMetadata.PlexActors,
+                plexLibraryId,
+                libraryName,
+                cancellationToken
+            );
+            await SyncMovieGenres(
+                plexMovies,
+                command.LibraryMetadata.PlexGenres,
+                plexLibraryId,
+                libraryName,
+                cancellationToken
+            );
+            await SyncMovieCountries(
+                plexMovies,
+                command.LibraryMetadata.PlexCountries,
+                plexLibraryId,
+                libraryName,
+                cancellationToken
+            );
 
             stopWatch.Stop();
 
             _log.Information(
                 "Finished media syncing plexLibrary: {PlexLibraryName} with id: {PlexLibraryId} in {TotalMilliseconds} milliseconds",
-                plexLibraryName,
+                libraryName,
                 plexLibraryId,
                 stopWatch.Elapsed.TotalMilliseconds
             );
@@ -105,66 +119,128 @@ public class SyncPlexMoviesCommandHandler : IRequestHandler<SyncPlexMoviesComman
         }
     }
 
-    private async Task SyncMovieMetaData(List<PlexMovie> plexMovies, int plexLibraryId, string libraryName)
+    private async Task<Result> SyncMovieActors(
+        List<PlexMovie> movies,
+        Dictionary<int, PlexActor> plexActorsDict,
+        int libraryId,
+        string libraryName,
+        CancellationToken ct
+    )
     {
-        _log.Debug("Starting syncing of movie metadata for library: {LibraryName}", libraryName);
+        _log.Debug(
+            "Starting syncing of movie actors for library: {LibraryName} with id: {LibraryId}",
+            libraryName,
+            libraryId
+        );
+        var stopWatch = Stopwatch.StartNew();
+        await _dbContext
+            .PlexMovieActors.Where(x => x.PlexLibraryId == libraryId)
+            .ExecuteDeleteAsync(cancellationToken: ct);
 
-        var roleDict = await _dbContext
-            .PlexLibraries.Where(x => x.Id == plexLibraryId)
-            .Include(x => x.Roles)
-            .SelectMany(x => x.Roles)
-            .ToDictionaryAsync(x => x.PlexKey, x => x.Id);
+        var list = new List<PlexMovieActors>();
+        var keyToIdDict = plexActorsDict.ToDictionary(kv => kv.Value.Key, kv => kv.Value.Id);
 
-        // These are always small dictionaries, so no need to worry about performance
-        var genreDict = await _dbContext.PlexGenres.ToDictionaryAsync(x => x.PlexKey, x => x.Id);
-        var countryDict = await _dbContext.PlexCountries.ToDictionaryAsync(x => x.PlexKey, x => x.Id);
-
-        var plexMovieRoles = new List<PlexMovieRoles>();
-        var plexMovieGenres = new List<PlexMovieGenres>();
-        var plexMovieCountries = new List<PlexMovieCountries>();
-
-        foreach (var plexMovie in plexMovies)
+        foreach (var movie in movies)
         {
-            foreach (var plexRole in plexMovie.Roles)
+            foreach (var role in movie.Roles)
             {
-                if (roleDict.TryGetValue(plexRole.PlexKey, out var roleId))
-                    plexMovieRoles.Add(new PlexMovieRoles(roleId, plexLibraryId, plexMovie.Id));
-            }
-
-            foreach (var plexGenre in plexMovie.Genres)
-            {
-                if (genreDict.TryGetValue(plexGenre.PlexKey, out var genreId))
-                    plexMovieGenres.Add(new PlexMovieGenres(genreId, plexLibraryId, plexMovie.Id));
-            }
-
-            foreach (var plexCountry in plexMovie.Countries)
-            {
-                if (countryDict.TryGetValue(plexCountry.PlexKey, out var countryId))
-                    plexMovieCountries.Add(new PlexMovieCountries(countryId, plexLibraryId, plexMovie.Id));
+                if (keyToIdDict.TryGetValue(role.Key, out var plexActorId))
+                {
+                    list.Add(new PlexMovieActors(plexActorId, libraryId, movie.Id));
+                }
             }
         }
 
-        await _dbContext.BulkInsertAsync(
-            plexMovieCountries.DistinctBy(x => new { x.PlexMovieId, x.CountryId }).ToList(),
-            _config,
-            CancellationToken.None
-        );
-        await _dbContext.BulkInsertAsync(
-            plexMovieGenres.DistinctBy(x => new { x.PlexMovieId, x.GenresId }).ToList(),
-            _config,
-            CancellationToken.None
-        );
-        await _dbContext.BulkInsertAsync(
-            plexMovieRoles.DistinctBy(x => new { x.PlexMovieId, x.RolesId }).ToList(),
-            _config,
-            CancellationToken.None
+        var insertResult = await Result.Try(() => _dbContext.BulkInsertAsync(list, _config, ct));
+        stopWatch.StopAndLog(
+            $"Synced {list.Count} {nameof(PlexMovieActors)} for library: {libraryName} with id: {libraryId}"
         );
 
+        return insertResult;
+    }
+
+    private async Task<Result> SyncMovieGenres(
+        List<PlexMovie> movies,
+        Dictionary<int, PlexGenre> plexGenreDict,
+        int libraryId,
+        string libraryName,
+        CancellationToken ct
+    )
+    {
         _log.Debug(
-            "Finished syncing of Movie metadata for library {LibraryName} with id: {LibraryId}",
+            "Starting syncing of movie genres for library: {LibraryName} with id: {LibraryId}",
             libraryName,
-            plexLibraryId
+            libraryId
         );
+        var stopWatch = Stopwatch.StartNew();
+
+        await _dbContext
+            .PlexMovieGenres.Where(x => x.PlexLibraryId == libraryId)
+            .ExecuteDeleteAsync(cancellationToken: ct);
+
+        var list = new List<PlexMovieGenres>();
+        var keyToIdDict = plexGenreDict.ToDictionary(kv => kv.Value.Key, kv => kv.Value.Id);
+
+        foreach (var movie in movies)
+        {
+            foreach (var role in movie.Roles)
+            {
+                if (keyToIdDict.TryGetValue(role.Key, out var plexActorId))
+                {
+                    list.Add(new PlexMovieGenres(plexActorId, libraryId, movie.Id));
+                }
+            }
+        }
+
+        var insertResult = await Result.Try(() => _dbContext.BulkInsertAsync(list, _config, ct));
+
+        stopWatch.StopAndLog(
+            $"Synced {list.Count} {nameof(PlexMovieGenres)} for library: {libraryName} with id: {libraryId}"
+        );
+
+        return insertResult;
+    }
+
+    private async Task<Result> SyncMovieCountries(
+        List<PlexMovie> movies,
+        Dictionary<int, PlexCountry> plexCountryDict,
+        int libraryId,
+        string libraryName,
+        CancellationToken ct
+    )
+    {
+        _log.Debug(
+            "Starting syncing of movie countries for library: {LibraryName} with id: {LibraryId}",
+            libraryName,
+            libraryId
+        );
+        var stopWatch = Stopwatch.StartNew();
+
+        await _dbContext
+            .PlexMovieCountries.Where(x => x.PlexLibraryId == libraryId)
+            .ExecuteDeleteAsync(cancellationToken: ct);
+
+        var list = new List<PlexMovieCountries>();
+        var keyToIdDict = plexCountryDict.ToDictionary(kv => kv.Value.Key, kv => kv.Value.Id);
+
+        foreach (var movie in movies)
+        {
+            foreach (var role in movie.Roles)
+            {
+                if (keyToIdDict.TryGetValue(role.Key, out var plexActorId))
+                {
+                    list.Add(new PlexMovieCountries(plexActorId, libraryId, movie.Id));
+                }
+            }
+        }
+
+        var insertResult = await Result.Try(() => _dbContext.BulkInsertAsync(list, _config, ct));
+
+        stopWatch.StopAndLog(
+            $"Synced {list.Count} {nameof(PlexMovieCountries)} for library: {libraryName} with id: {libraryId}"
+        );
+
+        return insertResult;
     }
 
     private async Task RemoveMedia(int plexLibraryId, CancellationToken cancellationToken)

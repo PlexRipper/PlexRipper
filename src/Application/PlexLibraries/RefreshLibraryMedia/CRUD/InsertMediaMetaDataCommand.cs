@@ -23,7 +23,9 @@ public class InsertMediaMetaDataValidator : Validator<InsertMediaMetaDataCommand
 
 public record InsertMediaMetaDataCommandResponse
 {
-    public required int PlexLibraryId { get; init; }
+    public required PlexLibrary PlexLibrary { get; init; }
+
+    public int PlexLibraryId => PlexLibrary.Id;
 
     /// <summary>
     /// The int key is the PlexId of the actor for this <see cref="PlexLibrary"/>
@@ -84,7 +86,7 @@ public class InsertMediaMetaDataCommandHandler
         return Result.Ok(
             new InsertMediaMetaDataCommandResponse
             {
-                PlexLibraryId = plexLibraryId,
+                PlexLibrary = command.LibraryMetadata.Library,
                 PlexActors = syncRolesResult.Value,
                 PlexGenres = syncGenresResult.Value,
                 PlexCountries = syncCountriesResult.Value,

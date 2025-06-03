@@ -20,11 +20,16 @@ public class SyncPlexLibraryMediaMetaDataCommandUnitTests : BaseCommandUnitTest<
             }
         );
 
+        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync();
+        plexLibrary.ShouldNotBeNull();
+
+        plexLibrary.Id = 9999; // Set to a non-existent library ID
+
         // Act
         var command = new SyncPlexLibraryMediaMetaDataCommand(
             LibraryMetadata: new InsertMediaMetaDataCommandResponse
             {
-                PlexLibraryId = 99999, // Non-existent library ID
+                PlexLibrary = plexLibrary, // Non-existent library ID
                 PlexActors = [],
                 PlexGenres = [],
                 PlexCountries = [],
@@ -82,7 +87,7 @@ public class SyncPlexLibraryMediaMetaDataCommandUnitTests : BaseCommandUnitTest<
         var command = new SyncPlexLibraryMediaMetaDataCommand(
             LibraryMetadata: new InsertMediaMetaDataCommandResponse
             {
-                PlexLibraryId = plexLibrary.Id,
+                PlexLibrary = plexLibrary,
                 PlexActors = newPlexActors.ToPlexIdDictionary(newPlexApiActors),
                 PlexGenres = [],
                 PlexCountries = [],

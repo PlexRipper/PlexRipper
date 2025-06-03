@@ -6,15 +6,18 @@ using WebAPI.Contracts;
 
 namespace PlexRipper.Application;
 
-public record RefreshPlexMovieLibraryCommand(PlexLibrary PlexLibrary, Action<LibraryProgress> Action)
-    : ICommand<Result<PlexLibrary>>;
+public record RefreshPlexMovieLibraryCommand(
+    InsertMediaMetaDataCommandResponse LibraryMetadata,
+    Action<LibraryProgress> Action
+) : ICommand<Result<PlexLibrary>>;
 
 public class RefreshPlexMovieLibraryCommandValidator : AbstractValidator<RefreshPlexMovieLibraryCommand>
 {
     public RefreshPlexMovieLibraryCommandValidator()
     {
-        RuleFor(x => x.PlexLibrary).NotNull();
-        RuleFor(x => x.PlexLibrary.Id).GreaterThan(0);
+        RuleFor(x => x.LibraryMetadata).NotNull();
+        RuleFor(x => x.LibraryMetadata.PlexLibrary).NotNull();
+        RuleFor(x => x.LibraryMetadata.PlexLibraryId).GreaterThan(0);
     }
 }
 
@@ -44,7 +47,7 @@ public class RefreshPlexMovieLibraryCommandHandler
         CancellationToken cancellationToken
     )
     {
-        var plexLibrary = command.PlexLibrary;
+        var plexLibrary = command.LibraryMetadata.PlexLibrary;
 
         if (plexLibrary.Movies.Any())
         {
@@ -52,15 +55,10 @@ public class RefreshPlexMovieLibraryCommandHandler
             foreach (var plexMovie in plexLibrary.Movies)
                 plexMovie.SortIndex = i++;
 
-            var insertCommand = new InsertMediaMetaDataCommandResponse
-            {
-                PlexLibrary = plexLibrary,
-                PlexActors = [],
-                PlexGenres = [],
-                PlexCountries = [], // TODO add metadata here
-            };
-
-            var createResult = await _mediator.Send(new SyncPlexMoviesCommand(insertCommand), cancellationToken);
+            var createResult = await _mediator.Send(
+                new SyncPlexMoviesCommand(command.LibraryMetadata),
+                cancellationToken
+            );
             if (createResult.IsFailed)
             {
                 await _progressReporter.SendProgress(

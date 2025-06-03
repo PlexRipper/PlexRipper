@@ -103,12 +103,12 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
         {
             case PlexMediaType.Movie:
                 return await _commandExecutor.Send(
-                    new RefreshPlexMovieLibraryCommand(newPlexLibrary, command.Action),
+                    new RefreshPlexMovieLibraryCommand(insertPlexLibraryMediaMetaDataResult.Value, command.Action),
                     cancellationToken
                 );
             case PlexMediaType.TvShow:
                 return await _commandExecutor.Send(
-                    new RefreshPlexTvShowLibraryCommand(newPlexLibrary, command.Action),
+                    new RefreshPlexTvShowLibraryCommand(insertPlexLibraryMediaMetaDataResult.Value, command.Action),
                     cancellationToken
                 );
             default:

@@ -2,9 +2,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application.UnitTests;
 
-public class RefreshPlexMovieLibraryCommand_UnitTests : BaseUnitTest<RefreshPlexMovieLibraryCommandHandler>
+public class RefreshPlexMovieLibraryCommandUnitTests : BaseUnitTest<RefreshPlexMovieLibraryCommandHandler>
 {
-    public RefreshPlexMovieLibraryCommand_UnitTests(ITestOutputHelper output)
+    public RefreshPlexMovieLibraryCommandUnitTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]
@@ -31,7 +31,16 @@ public class RefreshPlexMovieLibraryCommand_UnitTests : BaseUnitTest<RefreshPlex
 
         // Act
         var result = await _sut.ExecuteAsync(
-            new RefreshPlexMovieLibraryCommand(testLibrary, _ => { }),
+            new RefreshPlexMovieLibraryCommand(
+                new InsertMediaMetaDataCommandResponse
+                {
+                    PlexLibrary = testLibrary,
+                    PlexActors = [],
+                    PlexGenres = [],
+                    PlexCountries = [],
+                },
+                _ => { }
+            ),
             CancellationToken.None
         );
 
@@ -62,11 +71,19 @@ public class RefreshPlexMovieLibraryCommand_UnitTests : BaseUnitTest<RefreshPlex
         mock.Mock<IRefreshLibraryProgressReporter>()
             .Setup(x => x.SendProgress(It.IsAny<RefreshLibraryProgressUpdate>()))
             .Returns(Task.CompletedTask);
-        ;
 
         // Act
         var result = await _sut.ExecuteAsync(
-            new RefreshPlexMovieLibraryCommand(testLibrary, _ => { }),
+            new RefreshPlexMovieLibraryCommand(
+                new InsertMediaMetaDataCommandResponse
+                {
+                    PlexLibrary = testLibrary,
+                    PlexActors = [],
+                    PlexGenres = [],
+                    PlexCountries = [],
+                },
+                _ => { }
+            ),
             CancellationToken.None
         );
 
@@ -110,7 +127,16 @@ public class RefreshPlexMovieLibraryCommand_UnitTests : BaseUnitTest<RefreshPlex
 
         // Act
         var result = await _sut.ExecuteAsync(
-            new RefreshPlexMovieLibraryCommand(testLibrary, _ => { }),
+            new RefreshPlexMovieLibraryCommand(
+                new InsertMediaMetaDataCommandResponse
+                {
+                    PlexLibrary = testLibrary,
+                    PlexActors = [],
+                    PlexGenres = [],
+                    PlexCountries = [],
+                },
+                _ => { }
+            ),
             CancellationToken.None
         );
 
@@ -147,7 +173,16 @@ public class RefreshPlexMovieLibraryCommand_UnitTests : BaseUnitTest<RefreshPlex
 
         // Act
         var result = await _sut.ExecuteAsync(
-            new RefreshPlexMovieLibraryCommand(testLibrary, _ => { }),
+            new RefreshPlexMovieLibraryCommand(
+                new InsertMediaMetaDataCommandResponse
+                {
+                    PlexLibrary = testLibrary,
+                    PlexActors = [],
+                    PlexGenres = [],
+                    PlexCountries = [],
+                },
+                _ => { }
+            ),
             CancellationToken.None
         );
 

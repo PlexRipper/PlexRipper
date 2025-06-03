@@ -9,14 +9,18 @@ using WebAPI.Contracts;
 
 namespace PlexRipper.Application;
 
-public record RefreshPlexTvShowLibraryCommand(PlexLibrary PlexLibrary, Action<LibraryProgress> Action)
-    : ICommand<Result<PlexLibrary>>;
+public record RefreshPlexTvShowLibraryCommand(
+    InsertMediaMetaDataCommandResponse LibraryMetadata,
+    Action<LibraryProgress> Action
+) : ICommand<Result<PlexLibrary>>;
 
 public class RefreshPlexTvShowLibraryCommandValidator : AbstractValidator<RefreshPlexTvShowLibraryCommand>
 {
     public RefreshPlexTvShowLibraryCommandValidator()
     {
-        RuleFor(x => x.PlexLibrary.Id).GreaterThan(0);
+        RuleFor(x => x.LibraryMetadata).NotNull();
+        RuleFor(x => x.LibraryMetadata.PlexLibrary).NotNull();
+        RuleFor(x => x.LibraryMetadata.PlexLibraryId).GreaterThan(0);
     }
 }
 
@@ -49,7 +53,7 @@ public class RefreshPlexTvShowLibraryCommandHandler
         CancellationToken cancellationToken
     )
     {
-        var plexLibrary = command.PlexLibrary;
+        var plexLibrary = command.LibraryMetadata.PlexLibrary;
 
         if (plexLibrary.Type != PlexMediaType.TvShow)
             return Result.Fail("PlexLibrary is not of type TvShow").LogError();
@@ -132,7 +136,10 @@ public class RefreshPlexTvShowLibraryCommandHandler
             );
 
             // Update the MetaData of this library
-            var syncResult = await _mediator.Send(new SyncPlexTvShowsCommand(tvShows.ToList()), cancellationToken);
+            var syncResult = await _mediator.Send(
+                new SyncPlexTvShowsCommand(command.LibraryMetadata),
+                cancellationToken
+            );
             if (syncResult.IsFailed)
             {
                 await _progressReporter.SendProgress(

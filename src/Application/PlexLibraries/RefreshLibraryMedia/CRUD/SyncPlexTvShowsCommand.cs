@@ -72,10 +72,12 @@ public class SyncPlexTvShowsCommandHandler : IRequestHandler<SyncPlexTvShowsComm
     private readonly BulkConfig? _config =
         new()
         {
-            BatchSize = 500,
+            BatchSize = 1000,
             SetOutputIdentity = true,
             PreserveInsertOrder = true,
             CalculateStats = true,
+            EnableStreaming = true,
+            UseTempDB = true,
         };
 
     public SyncPlexTvShowsCommandHandler(ILog log, IPlexRipperDbContext dbContext)
@@ -121,9 +123,11 @@ public class SyncPlexTvShowsCommandHandler : IRequestHandler<SyncPlexTvShowsComm
             var countryDict = command.LibraryMetadata.PlexCountries;
             var actorDict = command.LibraryMetadata.PlexActors;
 
-            await SyncTvShowGenres(plexTvShows, genreDict, plexLibraryId, plexLibraryName, cancellationToken);
-            await SyncTvShowCountries(plexTvShows, countryDict, plexLibraryId, plexLibraryName, cancellationToken);
-            await SyncTvShowActors(plexTvShows, actorDict, plexLibraryId, plexLibraryName, cancellationToken);
+            await Task.WhenAll(
+                SyncTvShowGenres(plexTvShows, genreDict, plexLibraryId, plexLibraryName, cancellationToken),
+                SyncTvShowCountries(plexTvShows, countryDict, plexLibraryId, plexLibraryName, cancellationToken),
+                SyncTvShowActors(plexTvShows, actorDict, plexLibraryId, plexLibraryName, cancellationToken)
+            );
 
             // Set the foreign keys (PlexTvShowId) in PlexSeason based on the inserted PlexTvShows
             var plexSeasons = plexTvShows
@@ -214,7 +218,7 @@ public class SyncPlexTvShowsCommandHandler : IRequestHandler<SyncPlexTvShowsComm
                 _dbContext.BulkInsertAsync(
                     plexTvShowGenres.DistinctBy(x => new { x.PlexTvShowId, x.GenresId }).ToList(),
                     _config,
-                    CancellationToken.None
+                    cancellationToken
                 )
         );
 

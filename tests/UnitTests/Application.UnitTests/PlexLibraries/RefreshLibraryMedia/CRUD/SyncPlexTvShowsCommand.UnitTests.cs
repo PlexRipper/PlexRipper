@@ -38,9 +38,18 @@ public class SyncPlexTvShowsCommand_UnitTests : BaseUnitTest<SyncPlexTvShowsComm
             .Generate(10);
 
         SetIds(library, newTvShows);
+        library.TvShows.AddRange(newTvShows);
 
         // Act
-        var request = new SyncPlexTvShowsCommand(newTvShows);
+        var request = new SyncPlexTvShowsCommand(
+            new InsertMediaMetaDataCommandResponse
+            {
+                PlexLibrary = library,
+                PlexActors = [],
+                PlexGenres = [],
+                PlexCountries = [],
+            }
+        );
         (await _validator.ValidateAsync(request)).IsValid.ShouldBeTrue();
         var result = await _sut.Handle(request, CancellationToken.None);
 
@@ -86,9 +95,18 @@ public class SyncPlexTvShowsCommand_UnitTests : BaseUnitTest<SyncPlexTvShowsComm
 
         var newTvShows = library.TvShows;
         SetIds(library, newTvShows);
+        library.TvShows.AddRange(newTvShows);
 
         // Act
-        var request = new SyncPlexTvShowsCommand(newTvShows.ToList());
+        var request = new SyncPlexTvShowsCommand(
+            new InsertMediaMetaDataCommandResponse
+            {
+                PlexLibrary = library,
+                PlexActors = [],
+                PlexGenres = [],
+                PlexCountries = [],
+            }
+        );
         var result = await _sut.Handle(request, CancellationToken.None);
 
         // Assert
@@ -124,9 +142,18 @@ public class SyncPlexTvShowsCommand_UnitTests : BaseUnitTest<SyncPlexTvShowsComm
         var newTvShows = tvShows.GetRange(0, 30);
 
         SetIds(library, newTvShows);
+        library.TvShows.AddRange(newTvShows);
 
         // Act
-        var request = new SyncPlexTvShowsCommand(newTvShows);
+        var request = new SyncPlexTvShowsCommand(
+            new InsertMediaMetaDataCommandResponse
+            {
+                PlexLibrary = library,
+                PlexActors = [],
+                PlexGenres = [],
+                PlexCountries = [],
+            }
+        );
         (await _validator.ValidateAsync(request)).IsValid.ShouldBeTrue();
         var result = await _sut.Handle(request, CancellationToken.None);
 
@@ -161,9 +188,18 @@ public class SyncPlexTvShowsCommand_UnitTests : BaseUnitTest<SyncPlexTvShowsComm
             tvShow.Seasons.AddRange(FakeData.GetPlexTvShowSeason(seed).Generate(3));
 
         SetIds(library, newTvShows);
+        library.TvShows.AddRange(newTvShows);
 
         // Act
-        var request = new SyncPlexTvShowsCommand(newTvShows);
+        var request = new SyncPlexTvShowsCommand(
+            new InsertMediaMetaDataCommandResponse
+            {
+                PlexLibrary = library,
+                PlexActors = [],
+                PlexGenres = [],
+                PlexCountries = [],
+            }
+        );
         (await _validator.ValidateAsync(request)).IsValid.ShouldBeTrue();
         var result = await _sut.Handle(request, CancellationToken.None);
 
@@ -197,9 +233,18 @@ public class SyncPlexTvShowsCommand_UnitTests : BaseUnitTest<SyncPlexTvShowsComm
         var newTvShows = IDbContext.PlexTvShows.Include(x => x.Seasons).ThenInclude(x => x.Episodes).ToList();
 
         SetIds(library, newTvShows);
+        library.TvShows.AddRange(newTvShows);
 
         // Act
-        var request = new SyncPlexTvShowsCommand(newTvShows);
+        var request = new SyncPlexTvShowsCommand(
+            new InsertMediaMetaDataCommandResponse
+            {
+                PlexLibrary = library,
+                PlexActors = [],
+                PlexGenres = [],
+                PlexCountries = [],
+            }
+        );
 
         var result = await _sut.Handle(request, CancellationToken.None);
         (await _validator.ValidateAsync(request)).IsValid.ShouldBeTrue();
@@ -249,9 +294,18 @@ public class SyncPlexTvShowsCommand_UnitTests : BaseUnitTest<SyncPlexTvShowsComm
         }
 
         SetIds(library, newTvShows);
+        library.TvShows.AddRange(newTvShows);
 
         // Act
-        var request = new SyncPlexTvShowsCommand(newTvShows);
+        var request = new SyncPlexTvShowsCommand(
+            new InsertMediaMetaDataCommandResponse
+            {
+                PlexLibrary = library,
+                PlexActors = [],
+                PlexGenres = [],
+                PlexCountries = [],
+            }
+        );
         (await _validator.ValidateAsync(request)).IsValid.ShouldBeTrue();
         var result = await _sut.Handle(request, CancellationToken.None);
 

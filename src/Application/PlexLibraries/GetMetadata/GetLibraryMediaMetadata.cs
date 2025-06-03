@@ -76,24 +76,24 @@ public class GetLibraryMediaMetadata : BaseEndpoint<GetLibraryMediaMetadataReque
         }
         else
         {
+            var uniqueRoles = await _dbContext
+                .PlexLibraries.AsNoTracking()
+                .Where(pl => pl.Type == req.MediaType)
+                .SelectMany(pl => pl.Roles.Select(g => g.ToDTO()))
+                .Distinct()
+                .ToListAsync(ct);
+
             var uniqueCountries = await _dbContext
-                .PlexCountries.Where(c =>
-                    _dbContext.PlexLibraries.Any(pl => pl.Type == req.MediaType && pl.Countries.Contains(c))
-                )
+                .PlexLibraries.AsNoTracking()
+                .Where(pl => pl.Type == req.MediaType)
+                .SelectMany(pl => pl.Countries.Select(g => g.ToDTO()))
                 .Distinct()
                 .ToListAsync(ct);
 
             var uniqueGenres = await _dbContext
-                .PlexGenres.Where(g =>
-                    _dbContext.PlexLibraries.Any(pl => pl.Type == req.MediaType && pl.Genres.Contains(g))
-                )
-                .Distinct()
-                .ToListAsync(ct);
-
-            var uniqueRoles = await _dbContext
-                .PlexRoles.Where(r =>
-                    _dbContext.PlexLibraries.Any(pl => pl.Type == req.MediaType && pl.Roles.Contains(r))
-                )
+                .PlexLibraries.AsNoTracking()
+                .Where(pl => pl.Type == req.MediaType)
+                .SelectMany(pl => pl.Genres.Select(g => g.ToDTO()))
                 .Distinct()
                 .ToListAsync(ct);
 
@@ -101,12 +101,12 @@ public class GetLibraryMediaMetadata : BaseEndpoint<GetLibraryMediaMetadataReque
                 Result.Ok(
                     new PlexMediaMetadataDTO
                     {
+                        Roles = uniqueRoles,
+                        Countries = uniqueCountries,
+                        Genres = uniqueGenres,
                         RoleCount = uniqueRoles.Count,
                         CountryCount = uniqueCountries.Count,
                         GenreCount = uniqueGenres.Count,
-                        Roles = uniqueRoles.ToDTO(),
-                        Countries = uniqueCountries.ToDTO(),
-                        Genres = uniqueGenres.ToDTO(),
                     }
                 ),
                 ct

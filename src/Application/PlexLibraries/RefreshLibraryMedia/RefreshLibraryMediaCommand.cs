@@ -80,17 +80,25 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
         if (syncLibraryMediaResult.IsFailed)
             return syncLibraryMediaResult.LogError();
 
-        // Phase 2: Sync the metadata such as Country, Roles and Genres for the library
+        // Phase 2: Insert the media metadata into the database
+        var insertPlexLibraryMediaMetaDataResult = await _commandExecutor.Send(
+            new InsertMediaMetaDataCommand(syncLibraryMediaResult.Value),
+            cancellationToken
+        );
+        if (insertPlexLibraryMediaMetaDataResult.IsFailed)
+            return insertPlexLibraryMediaMetaDataResult.LogError();
+
+        // Phase 3: Sync the metadata such as Country, Roles and Genres for the library
         var syncPlexLibraryMediaMetaDataResult = await _commandExecutor.Send(
-            new SyncPlexLibraryMediaMetaDataCommand(syncLibraryMediaResult.Value, plexLibrary.Id),
+            new SyncPlexLibraryMediaMetaDataCommand(insertPlexLibraryMediaMetaDataResult.Value),
             cancellationToken
         );
 
         if (syncPlexLibraryMediaMetaDataResult.IsFailed)
             return syncPlexLibraryMediaMetaDataResult.LogError();
 
+        // Phase 4: Refresh the Plex library based on the media type
         var newPlexLibrary = syncLibraryMediaResult.Value.Library;
-
         switch (newPlexLibrary.Type)
         {
             case PlexMediaType.Movie:

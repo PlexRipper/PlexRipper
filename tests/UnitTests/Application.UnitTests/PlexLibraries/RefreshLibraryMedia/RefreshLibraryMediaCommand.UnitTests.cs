@@ -4,9 +4,9 @@ using PlexApi.Contracts;
 
 namespace PlexRipper.Application.UnitTests;
 
-public class RefreshLibraryMediaCommand_UnitTests : BaseUnitTest<RefreshLibraryMediaCommandHandler>
+public class RefreshLibraryMediaCommandUnitTests : BaseUnitTest<RefreshLibraryMediaCommandHandler>
 {
-    public RefreshLibraryMediaCommand_UnitTests(ITestOutputHelper output)
+    public RefreshLibraryMediaCommandUnitTests(ITestOutputHelper output)
         : base(output) { }
 
     private async Task<PlexLibrary> GetUpdatedLibrary(Seed seed, PlexMediaType type)
@@ -107,7 +107,7 @@ public class RefreshLibraryMediaCommand_UnitTests : BaseUnitTest<RefreshLibraryM
                 {
                     if (command is GetLibraryMediaCommand getLibraryMediaCommand)
                     {
-                        getLibraryMediaCommand.Action?.Invoke(
+                        getLibraryMediaCommand.Action.Invoke(
                             new MediaSyncProgress
                             {
                                 Type = libraryType,
@@ -118,7 +118,15 @@ public class RefreshLibraryMediaCommand_UnitTests : BaseUnitTest<RefreshLibraryM
                         );
                     }
 
-                    return Result.Ok(new LibraryMetadata { Library = updatedLibrary });
+                    return Result.Ok(
+                        new LibraryMetadata
+                        {
+                            Library = updatedLibrary,
+                            Countries = [],
+                            Genres = [],
+                            Actors = [],
+                        }
+                    );
                 }
             );
 
@@ -169,7 +177,17 @@ public class RefreshLibraryMediaCommand_UnitTests : BaseUnitTest<RefreshLibraryM
             .Setup(x => x.SendProgress(It.IsAny<RefreshLibraryProgressUpdate>()));
 
         mock.SetupCommand(It.IsAny<GetLibraryMediaCommand>)
-            .ReturnsAsync(Result.Ok(new LibraryMetadata { Library = plexLibrary }));
+            .ReturnsAsync(
+                Result.Ok(
+                    new LibraryMetadata
+                    {
+                        Library = plexLibrary,
+                        Countries = [],
+                        Genres = [],
+                        Actors = [],
+                    }
+                )
+            );
 
         mock.SetupCommand(It.IsAny<SyncPlexLibraryMediaMetaDataCommand>)
             .ReturnsAsync(Result.Fail("Metadata sync failed"));
@@ -201,7 +219,17 @@ public class RefreshLibraryMediaCommand_UnitTests : BaseUnitTest<RefreshLibraryM
             .Setup(x => x.SendProgress(It.IsAny<RefreshLibraryProgressUpdate>()));
 
         mock.SetupCommand(It.IsAny<GetLibraryMediaCommand>)
-            .ReturnsAsync(Result.Ok(new LibraryMetadata { Library = updatedLibrary }));
+            .ReturnsAsync(
+                Result.Ok(
+                    new LibraryMetadata
+                    {
+                        Library = updatedLibrary,
+                        Countries = [],
+                        Genres = [],
+                        Actors = [],
+                    }
+                )
+            );
 
         mock.SetupCommand(It.IsAny<SyncPlexLibraryMediaMetaDataCommand>).ReturnsAsync(Result.Ok());
 
@@ -236,7 +264,17 @@ public class RefreshLibraryMediaCommand_UnitTests : BaseUnitTest<RefreshLibraryM
             .Setup(x => x.SendProgress(It.IsAny<RefreshLibraryProgressUpdate>()));
 
         mock.SetupCommand(It.IsAny<GetLibraryMediaCommand>)
-            .ReturnsAsync(Result.Ok(new LibraryMetadata { Library = updatedLibrary }));
+            .ReturnsAsync(
+                Result.Ok(
+                    new LibraryMetadata
+                    {
+                        Library = updatedLibrary,
+                        Countries = [],
+                        Genres = [],
+                        Actors = [],
+                    }
+                )
+            );
 
         mock.SetupCommand(It.IsAny<SyncPlexLibraryMediaMetaDataCommand>).ReturnsAsync(Result.Ok());
 

@@ -23,22 +23,22 @@ public class InsertMediaMetaDataValidator : Validator<InsertMediaMetaDataCommand
 
 public record InsertMediaMetaDataCommandResponse
 {
-    public int PlexLibraryId { get; set; }
+    public required int PlexLibraryId { get; init; }
 
     /// <summary>
     /// The int key is the PlexId of the actor for this <see cref="PlexLibrary"/>
     /// </summary>
-    public Dictionary<int, PlexActor> PlexActors { get; init; } = new();
+    public required Dictionary<int, PlexActor> PlexActors { get; init; }
 
     /// <summary>
     /// The int key is the PlexId of the genre for this <see cref="PlexLibrary"/>
     /// </summary>
-    public Dictionary<int, PlexGenre> PlexGenres { get; init; } = new();
+    public required Dictionary<int, PlexGenre> PlexGenres { get; init; }
 
     /// <summary>
     /// The int key is the PlexId of the country for this <see cref="PlexLibrary"/>
     /// </summary>
-    public Dictionary<int, PlexCountry> PlexCountries { get; init; } = new();
+    public required Dictionary<int, PlexCountry> PlexCountries { get; init; }
 }
 
 public class InsertMediaMetaDataCommandHandler
@@ -116,12 +116,7 @@ public class InsertMediaMetaDataCommandHandler
             e => new ExceptionalError(e)
         );
 
-        foreach (var actor in plexActors)
-        {
-            var plexId = sourceList.FirstOrDefault(x => x.TagKey == actor.Key);
-            if (plexId != null)
-                resultDict.Add(plexId.PlexId, actor);
-        }
+        resultDict = plexActors.ToPlexIdDictionary(sourceList);
 
         stopWatch.Stop();
 
@@ -133,7 +128,7 @@ public class InsertMediaMetaDataCommandHandler
                 nameof(PlexActor),
                 stopWatch.Elapsed.TotalSeconds
             );
-            return result;
+            return Result.Ok(resultDict);
         }
 
         _log.Error(
@@ -167,12 +162,7 @@ public class InsertMediaMetaDataCommandHandler
             e => new ExceptionalError(e)
         );
 
-        foreach (var genre in plexGenres)
-        {
-            var plexId = sourceList.FirstOrDefault(x => x.Key == genre.Key);
-            if (plexId != null)
-                resultDict.Add(plexId.PlexId, genre);
-        }
+        resultDict = plexGenres.ToPlexIdDictionary(sourceList);
 
         stopWatch.Stop();
         if (insertResult.IsSuccess)
@@ -217,12 +207,7 @@ public class InsertMediaMetaDataCommandHandler
             e => new ExceptionalError(e)
         );
 
-        foreach (var country in plexCountries)
-        {
-            var plexId = sourceList.FirstOrDefault(x => x.Key == country.Key);
-            if (plexId != null)
-                resultDict.Add(plexId.PlexId, country);
-        }
+        resultDict = plexCountries.ToPlexIdDictionary(sourceList);
 
         stopWatch.Stop();
 

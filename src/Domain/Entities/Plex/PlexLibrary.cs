@@ -88,6 +88,15 @@ public class PlexLibrary : BaseEntity
     [Column(Order = 14)]
     public int EpisodeCount { get; private set; }
 
+    [Column(Order = 15)]
+    public int ActorsCount { get; set; }
+
+    [Column(Order = 16)]
+    public int GenresCount { get; set; }
+
+    [Column(Order = 17)]
+    public int CountriesCount { get; set; }
+
     #endregion
 
     #region Relationships

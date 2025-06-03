@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using Data.Contracts;
 using EFCore.BulkExtensions;
-using Environment;
 using FastEndpoints;
 using FluentValidation;
 using Logging.Interface;

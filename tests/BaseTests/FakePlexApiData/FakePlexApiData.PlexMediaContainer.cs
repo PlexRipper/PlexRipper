@@ -1,5 +1,4 @@
-﻿using Bogus;
-using Bogus.Hollywood;
+﻿using Bogus.Hollywood;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
 using PlexApi.Contracts;
 using PlexRipper.PlexApi;

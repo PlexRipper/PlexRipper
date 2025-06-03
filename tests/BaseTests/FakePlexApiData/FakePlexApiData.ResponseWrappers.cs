@@ -1,6 +1,5 @@
 using System.Net;
 using System.Text;
-using Bogus;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
 
 namespace PlexRipper.BaseTests;

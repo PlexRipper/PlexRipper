@@ -3,7 +3,6 @@ using Application.Contracts;
 using Data.Contracts;
 using Environment;
 using FastEndpoints;
-using FluentValidation;
 using Logging.Interface;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog.Events;

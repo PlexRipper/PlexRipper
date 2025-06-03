@@ -1,6 +1,4 @@
-﻿using PlexApi.Contracts;
-
-namespace PlexRipper.BaseTests;
+﻿namespace PlexRipper.BaseTests;
 
 public static partial class FakeData
 {

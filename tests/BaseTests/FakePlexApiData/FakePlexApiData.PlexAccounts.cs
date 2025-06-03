@@ -1,5 +1,4 @@
-﻿using Bogus;
-using LukeHagar.PlexAPI.SDK.Models.Requests;
+﻿using LukeHagar.PlexAPI.SDK.Models.Requests;
 using PlexRipper.PlexApi;
 
 namespace PlexRipper.BaseTests;

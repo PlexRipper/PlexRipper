@@ -120,6 +120,13 @@ public interface IPlexRipperDbContext : IDisposable
 
     #endregion Properties
 
+    public Task BulkReadAsync<T>(
+        IList<T> entities,
+        BulkConfig? bulkConfig = null,
+        CancellationToken cancellationToken = default
+    )
+        where T : class;
+
     public Task BulkInsertAsync<T>(
         IList<T> entities,
         BulkConfig? bulkConfig = null,
@@ -130,6 +137,15 @@ public interface IPlexRipperDbContext : IDisposable
     public Task BulkUpdateAsync<T>(
         IList<T> entities,
         BulkConfig? bulkConfig = null,
+        CancellationToken cancellationToken = default
+    )
+        where T : class;
+
+    public Task BulkInsertOrUpdateAsync<T>(
+        IList<T> entities,
+        BulkConfig? bulkConfig = null,
+        Action<decimal>? progress = null,
+        Type? type = null,
         CancellationToken cancellationToken = default
     )
         where T : class;

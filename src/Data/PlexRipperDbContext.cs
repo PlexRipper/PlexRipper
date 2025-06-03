@@ -123,6 +123,16 @@ public sealed class PlexRipperDbContext : DbContext, IPlexRipperDbContext, IPlex
 
     public string DatabaseName { get; }
 
+    public async Task BulkReadAsync<T>(
+        IList<T> entities,
+        BulkConfig? bulkConfig = null,
+        CancellationToken cancellationToken = default
+    )
+        where T : class
+    {
+        await DbContextBulkExtensions.BulkReadAsync(this, entities, bulkConfig, cancellationToken: cancellationToken);
+    }
+
     public async Task BulkInsertAsync<T>(
         IList<T> entities,
         BulkConfig? bulkConfig = null,
@@ -141,6 +151,25 @@ public sealed class PlexRipperDbContext : DbContext, IPlexRipperDbContext, IPlex
         where T : class
     {
         await DbContextBulkExtensions.BulkUpdateAsync(this, entities, bulkConfig, cancellationToken: cancellationToken);
+    }
+
+    public async Task BulkInsertOrUpdateAsync<T>(
+        IList<T> entities,
+        BulkConfig? bulkConfig = null,
+        Action<decimal>? progress = null,
+        Type? type = null,
+        CancellationToken cancellationToken = default
+    )
+        where T : class
+    {
+        await DbContextBulkExtensions.BulkInsertOrUpdateAsync(
+            this,
+            entities,
+            bulkConfig,
+            progress,
+            type,
+            cancellationToken: cancellationToken
+        );
     }
 
     public Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default) =>

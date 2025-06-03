@@ -4,6 +4,14 @@ namespace PlexRipper.Domain;
 
 public class PlexLibraryRoles
 {
+    public PlexLibraryRoles() { }
+
+    public PlexLibraryRoles(int plexLibraryId, int plexRoleId)
+    {
+        PlexLibraryId = plexLibraryId;
+        PlexRoleId = plexRoleId;
+    }
+
     [Column(Order = 1)]
     public int PlexLibraryId { get; set; }
 

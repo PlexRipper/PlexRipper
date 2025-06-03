@@ -7,6 +7,6 @@ public class PlexCountryConfiguration : IEntityTypeConfiguration<PlexCountry>
 {
     public void Configure(EntityTypeBuilder<PlexCountry> builder)
     {
-        builder.HasIndex(g => g.PlexKey).IsUnique();
+        builder.HasIndex(x => x.PlexKey).IsUnique();
     }
 }

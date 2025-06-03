@@ -1,4 +1,5 @@
 using ByteSizeLib;
+using Data.Contracts;
 
 namespace PlexRipper.BaseTests;
 

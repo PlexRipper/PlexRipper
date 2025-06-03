@@ -41,7 +41,7 @@ public static partial class FakeData
             .UseSeed(seed.Next())
             .RuleFor(
                 x => x.DataTotal,
-                (f, x) =>
+                (_, x) =>
                     config.DownloadFileSizeInMb > 0
                         ? (long)ByteSize.FromMebiBytes(config.DownloadFileSizeInMb).Bytes
                         : x.DataTotal

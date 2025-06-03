@@ -12,7 +12,7 @@ public record SyncPlexMoviesCommand(InsertMediaMetaDataCommandResponse LibraryMe
 
 public class SyncPlexMoviesCommandValidator : AbstractValidator<SyncPlexMoviesCommand>
 {
-    public SyncPlexMoviesCommandValidator(ILog<SyncPlexMoviesCommandValidator> log)
+    public SyncPlexMoviesCommandValidator()
     {
         var stopWatch = Stopwatch.StartNew();
         RuleFor(x => x.LibraryMetadata).NotNull();
@@ -78,21 +78,23 @@ public class SyncPlexMoviesCommandHandler : IRequestHandler<SyncPlexMoviesComman
             await _dbContext.BulkInsertPlexMoviesAsync(plexMovies, plexServerId, plexLibraryId, ct: cancellationToken);
             _report.CreatedMovies = plexMovies.Count;
 
-            await SyncMovieActors(
+            var syncActorResult = await SyncMovieActors(
                 plexMovies,
                 command.LibraryMetadata.PlexActors,
                 plexLibraryId,
                 libraryName,
                 cancellationToken
             );
-            await SyncMovieGenres(
+
+            var syncGenreResult = await SyncMovieGenres(
                 plexMovies,
                 command.LibraryMetadata.PlexGenres,
                 plexLibraryId,
                 libraryName,
                 cancellationToken
             );
-            await SyncMovieCountries(
+
+            var syncCountriesResult = await SyncMovieCountries(
                 plexMovies,
                 command.LibraryMetadata.PlexCountries,
                 plexLibraryId,
@@ -110,6 +112,13 @@ public class SyncPlexMoviesCommandHandler : IRequestHandler<SyncPlexMoviesComman
             );
 
             _log.DebugLine(_report.ToString());
+
+            var mergeResult = Result.Merge(syncActorResult, syncGenreResult, syncCountriesResult);
+            if (mergeResult.IsFailed)
+            {
+                _log.Error("Failed to sync movie actors, genres or countries: {Error}", mergeResult.Errors);
+                return mergeResult.LogError();
+            }
 
             return Result.Ok(_report);
         }

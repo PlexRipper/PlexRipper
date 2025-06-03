@@ -2,8 +2,7 @@ namespace PlexRipper.Application.UnitTests;
 
 public class SyncPlexMoviesCommandHandlerUnitTests : BaseUnitTest<SyncPlexMoviesCommandHandler>
 {
-    private SyncPlexMoviesCommandValidator _validator =
-        new(LogManager.CreateLogInstance<SyncPlexMoviesCommandValidator>());
+    private SyncPlexMoviesCommandValidator _validator = new();
 
     public SyncPlexMoviesCommandHandlerUnitTests(ITestOutputHelper output)
         : base(output) { }

@@ -68,9 +68,11 @@ public class SyncServerMediaJob : IJob
 
             var plexLibraries = forceSync
                 ? plexServer.PlexLibraries
-                : plexServer.PlexLibraries.Where(x =>
-                    x.Outdated && x.Type is PlexMediaType.Movie or PlexMediaType.TvShow
-                );
+                : plexServer
+                    .PlexLibraries.Where(x =>
+                        x is { Outdated: true, Type: PlexMediaType.Movie or PlexMediaType.TvShow }
+                    )
+                    .ToList();
 
             if (!plexLibraries.Any())
             {

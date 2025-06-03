@@ -26,20 +26,17 @@ public class RefreshLibraryMediaCommandValidator : AbstractValidator<RefreshLibr
 
 public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryMediaCommand, Result<PlexLibrary>>
 {
-    private readonly IMediator _mediator;
     private readonly IPlexRipperDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IRefreshLibraryProgressReporter _progressReporter;
 
     public RefreshLibraryMediaCommandHandler(
         ILog log,
-        IMediator mediator,
         IPlexRipperDbContext dbContext,
         ICommandExecutor commandExecutor,
         IRefreshLibraryProgressReporter progressReporter
     )
     {
-        _mediator = mediator;
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;
         _progressReporter = progressReporter;

@@ -50,6 +50,7 @@ public class StartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
         var downloadTasks = await container.DbContext.GetAllDownloadTasksByServerAsync();
         downloadTasks.Count.ShouldBe(1);
         var downloadTask = downloadTasks.First().Children.FirstOrDefault();
+        downloadTask.ShouldNotBeNull();
 
         // Act
         var client = container.GetApiClient();

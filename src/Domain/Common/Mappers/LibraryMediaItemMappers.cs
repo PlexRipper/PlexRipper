@@ -6,7 +6,7 @@ public static class LibraryMediaItemMappers
         new()
         {
             Name = role.Name,
-            Key = role.TagKey,
+            Key = role.TagKey ?? string.Empty, // If empty, then it will be discarded when adding to db
             Thumb = role.Thumb,
         };
 

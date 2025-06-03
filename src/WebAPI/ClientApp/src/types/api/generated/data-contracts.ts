@@ -694,7 +694,13 @@ export interface PlexMediaDataDTO {
 
 export interface PlexMediaMetadataDTO {
   countries: PlexCountryDTO[];
+  /** @format int32 */
+  countryCount: number;
+  /** @format int32 */
+  genreCount: number;
   genres: PlexGenreDTO[];
+  /** @format int32 */
+  roleCount: number;
   roles: PlexRoleDTO[];
 }
 

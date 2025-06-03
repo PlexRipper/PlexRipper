@@ -247,12 +247,10 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
             response.ToResult().LogError();
         }
 
-        var metaDataList = response.Value.Object?.MediaContainer?.Metadata ?? [];
-        if (!metaDataList.Any())
-        {
-            ResultExtensions.IsNull(nameof(response.Value.Object.MediaContainer.Metadata)).LogError();
-        }
+        var metaDataListResult = Result.Try((() => response.Value.Object?.MediaContainer?.Metadata ?? []));
+        if (metaDataListResult.IsFailed)
+            return metaDataListResult.LogError();
 
-        return Result.Ok(metaDataList.Select(x => x.ToMediaItemDTO()).ToList());
+        return Result.Ok(metaDataListResult.Value.Select(x => x.ToMediaItemDTO()).ToList());
     }
 }

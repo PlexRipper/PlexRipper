@@ -12,8 +12,8 @@ public class PlexTvShowConfiguration : IEntityTypeConfiguration<PlexTvShow>
         builder
             .HasMany(x => x.Roles)
             .WithMany(x => x.PlexTvShowRoles)
-            .UsingEntity<PlexTvShowRoles>(
-                l => l.HasOne<PlexActor>().WithMany().HasForeignKey(e => e.RolesId),
+            .UsingEntity<PlexTvShowActors>(
+                l => l.HasOne<PlexActor>().WithMany().HasForeignKey(e => e.PlexActorId),
                 r => r.HasOne<PlexTvShow>().WithMany().HasForeignKey(e => e.PlexTvShowId)
             );
 

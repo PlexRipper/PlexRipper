@@ -31,7 +31,7 @@ public sealed class PlexRipperDbContext : DbContext, IPlexRipperDbContext, IPlex
 
     #region PlexMedia
 
-    public DbSet<PlexActor> PlexRoles { get; set; }
+    public DbSet<PlexActor> PlexActors { get; set; }
 
     public DbSet<PlexGenre> PlexGenres { get; set; }
 
@@ -101,19 +101,19 @@ public sealed class PlexRipperDbContext : DbContext, IPlexRipperDbContext, IPlex
 
     public DbSet<PlexAccountLibrary> PlexAccountLibraries { get; set; }
 
-    public DbSet<PlexLibraryRoles> PlexLibraryRoles { get; set; }
+    public DbSet<PlexLibraryActors> PlexLibraryActors { get; set; }
 
     public DbSet<PlexLibraryCountries> PlexLibraryCountries { get; set; }
 
     public DbSet<PlexLibraryGenres> PlexLibraryGenres { get; set; }
 
-    public DbSet<PlexMovieRoles> PlexMovieRoles { get; set; }
+    public DbSet<PlexMovieActors> PlexMovieActors { get; set; }
 
     public DbSet<PlexMovieCountries> PlexMovieCountries { get; set; }
 
     public DbSet<PlexMovieGenres> PlexMovieGenres { get; set; }
 
-    public DbSet<PlexTvShowRoles> PlexTvShowRoles { get; set; }
+    public DbSet<PlexTvShowActors> PlexTvShowRoles { get; set; }
 
     public DbSet<PlexTvShowGenres> PlexTvShowGenres { get; set; }
 

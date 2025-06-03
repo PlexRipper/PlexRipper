@@ -26,7 +26,7 @@ public interface IPlexRipperDbContext : IDisposable
 
     #region PlexMedia
 
-    public DbSet<PlexActor> PlexRoles { get; }
+    public DbSet<PlexActor> PlexActors { get; }
 
     public DbSet<PlexGenre> PlexGenres { get; }
 
@@ -96,19 +96,19 @@ public interface IPlexRipperDbContext : IDisposable
 
     public DbSet<PlexAccountLibrary> PlexAccountLibraries { get; }
 
-    public DbSet<PlexLibraryRoles> PlexLibraryRoles { get; }
+    public DbSet<PlexLibraryActors> PlexLibraryActors { get; }
 
     public DbSet<PlexLibraryCountries> PlexLibraryCountries { get; }
 
     public DbSet<PlexLibraryGenres> PlexLibraryGenres { get; }
 
-    public DbSet<PlexMovieRoles> PlexMovieRoles { get; }
+    public DbSet<PlexMovieActors> PlexMovieActors { get; }
 
     public DbSet<PlexMovieCountries> PlexMovieCountries { get; }
 
     public DbSet<PlexMovieGenres> PlexMovieGenres { get; }
 
-    public DbSet<PlexTvShowRoles> PlexTvShowRoles { get; }
+    public DbSet<PlexTvShowActors> PlexTvShowRoles { get; }
 
     public DbSet<PlexTvShowGenres> PlexTvShowGenres { get; }
 

@@ -52,6 +52,7 @@ public static partial class MediaContainerMappers
             Name = x.Tag,
             PlexId = -1,
             Filter = string.Empty,
+            Key = x.Tag.ToMd5Hash(),
         };
 
     public static LibraryMediaItemCountryDTO ToDTO(this GetLibrarySectionsAllCountry x) =>
@@ -60,6 +61,7 @@ public static partial class MediaContainerMappers
             Name = x.Tag,
             PlexId = -1,
             Filter = string.Empty,
+            Key = x.Tag.ToMd5Hash(),
         };
 
     public static LibraryMediaItemRoleDTO ToDTO(this GetLibrarySectionsAllRole x) =>

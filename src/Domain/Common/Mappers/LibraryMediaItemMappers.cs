@@ -6,22 +6,22 @@ public static class LibraryMediaItemMappers
         new()
         {
             Name = role.Name,
-            PlexKey = role.TagKey,
+            Key = role.TagKey,
             Thumb = role.Thumb,
         };
 
-    public static List<PlexActor> ToPlexActor(this IEnumerable<LibraryMediaItemRoleDTO>? countryList) =>
-        countryList?.Select(x => x.ToPlexActor()).ToList() ?? [];
+    public static List<PlexActor> ToPlexActor(this IEnumerable<LibraryMediaItemRoleDTO>? source) =>
+        source?.Select(x => x.ToPlexActor()).ToList() ?? [];
 
-    public static PlexCountry ToPlexCountry(this LibraryMediaItemCountryDTO country) =>
-        new() { Name = country.Name, PlexKey = country.PlexId };
+    public static PlexCountry ToPlexCountry(this LibraryMediaItemCountryDTO source) =>
+        new() { Name = source.Name, Key = source.Key };
 
-    public static List<PlexCountry> ToPlexCountry(this IEnumerable<LibraryMediaItemCountryDTO>? countryList) =>
-        countryList?.Select(x => x.ToPlexCountry()).ToList() ?? [];
+    public static List<PlexCountry> ToPlexCountry(this IEnumerable<LibraryMediaItemCountryDTO>? source) =>
+        source?.Select(x => x.ToPlexCountry()).ToList() ?? [];
 
-    public static PlexGenre ToPlexGenre(this LibraryMediaItemGenreDTO genre) =>
-        new() { Name = genre.Name, PlexKey = genre.PlexId };
+    public static PlexGenre ToPlexGenre(this LibraryMediaItemGenreDTO source) =>
+        new() { Name = source.Name, Key = source.Key };
 
-    public static List<PlexGenre> ToPlexGenre(this IEnumerable<LibraryMediaItemGenreDTO>? genreList) =>
-        genreList?.Select(x => x.ToPlexGenre()).ToList() ?? [];
+    public static List<PlexGenre> ToPlexGenre(this IEnumerable<LibraryMediaItemGenreDTO>? source) =>
+        source?.Select(x => x.ToPlexGenre()).ToList() ?? [];
 }

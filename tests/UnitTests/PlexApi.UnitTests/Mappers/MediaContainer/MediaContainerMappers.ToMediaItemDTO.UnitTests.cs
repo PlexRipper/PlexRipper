@@ -166,13 +166,13 @@ namespace PlexApi.UnitTests
 
             // Collections
             result.Genre.Count.ShouldBe(sourceData.Genre.Count);
-            result.Genre.First().Tag.ShouldBe(sourceData.Genre.First().Tag);
+            result.Genre.First().Name.ShouldBe(sourceData.Genre.First().Tag);
 
             result.Country.Count.ShouldBe(sourceData.Country.Count);
-            result.Country.First().Tag.ShouldBe(sourceData.Country.First().Tag);
+            result.Country.First().Name.ShouldBe(sourceData.Country.First().Tag);
 
             result.Role.Count.ShouldBe(sourceData.Role.Count);
-            result.Role.First().Tag.ShouldBe(sourceData.Role.First().Tag);
+            result.Role.First().Name.ShouldBe(sourceData.Role.First().Tag);
 
             result.Ratings.Count.ShouldBe(sourceData.Ratings.Count);
             result.Ratings.First().Type.ShouldBe(sourceData.Ratings.First().Type);
@@ -323,15 +323,15 @@ namespace PlexApi.UnitTests
 
             // Collections
             result.Genre.Count.ShouldBe(sourceData.Genre.Count);
-            result.Genre.First().Tag.ShouldBe(sourceData.Genre.First().Tag);
-            result.Genre.Last().Tag.ShouldBe(sourceData.Genre.Last().Tag);
+            result.Genre.First().Name.ShouldBe(sourceData.Genre.First().Tag);
+            result.Genre.Last().Name.ShouldBe(sourceData.Genre.Last().Tag);
 
             result.Country.Count.ShouldBe(sourceData.Country.Count);
-            result.Country.First().Tag.ShouldBe(sourceData.Country.First().Tag);
+            result.Country.First().Name.ShouldBe(sourceData.Country.First().Tag);
 
             result.Role.Count.ShouldBe(sourceData.Role.Count);
-            result.Role.First().Tag.ShouldBe(sourceData.Role.First().Tag);
-            result.Role.Last().Tag.ShouldBe(sourceData.Role.Last().Tag);
+            result.Role.First().Name.ShouldBe(sourceData.Role.First().Tag);
+            result.Role.Last().Name.ShouldBe(sourceData.Role.Last().Tag);
 
             result.Ratings.Count.ShouldBe(sourceData.Ratings.Count);
             result.Ratings.First().Type.ShouldBe(sourceData.Ratings.First().Type);

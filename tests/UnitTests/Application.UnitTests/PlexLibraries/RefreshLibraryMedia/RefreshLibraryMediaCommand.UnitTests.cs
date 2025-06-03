@@ -122,7 +122,7 @@ public class RefreshLibraryMediaCommand_UnitTests : BaseUnitTest<RefreshLibraryM
                 }
             );
 
-        mock.SetupMediator(It.IsAny<SyncPlexLibraryMediaMetaDataCommand>).ReturnsAsync(Result.Ok());
+        mock.SetupCommand(It.IsAny<SyncPlexLibraryMediaMetaDataCommand>).ReturnsAsync(Result.Ok());
 
         switch (libraryType)
         {
@@ -171,7 +171,7 @@ public class RefreshLibraryMediaCommand_UnitTests : BaseUnitTest<RefreshLibraryM
         mock.SetupCommand(It.IsAny<GetLibraryMediaCommand>)
             .ReturnsAsync(Result.Ok(new LibraryMetadata { Library = plexLibrary }));
 
-        mock.SetupMediator(It.IsAny<SyncPlexLibraryMediaMetaDataCommand>)
+        mock.SetupCommand(It.IsAny<SyncPlexLibraryMediaMetaDataCommand>)
             .ReturnsAsync(Result.Fail("Metadata sync failed"));
 
         // Act
@@ -203,7 +203,7 @@ public class RefreshLibraryMediaCommand_UnitTests : BaseUnitTest<RefreshLibraryM
         mock.SetupCommand(It.IsAny<GetLibraryMediaCommand>)
             .ReturnsAsync(Result.Ok(new LibraryMetadata { Library = updatedLibrary }));
 
-        mock.SetupMediator(It.IsAny<SyncPlexLibraryMediaMetaDataCommand>).ReturnsAsync(Result.Ok());
+        mock.SetupCommand(It.IsAny<SyncPlexLibraryMediaMetaDataCommand>).ReturnsAsync(Result.Ok());
 
         mock.SetupCommand(It.IsAny<RefreshPlexMovieLibraryCommand>)
             .ReturnsAsync(Result.Fail<PlexLibrary>("Movie command failed"));
@@ -238,7 +238,7 @@ public class RefreshLibraryMediaCommand_UnitTests : BaseUnitTest<RefreshLibraryM
         mock.SetupCommand(It.IsAny<GetLibraryMediaCommand>)
             .ReturnsAsync(Result.Ok(new LibraryMetadata { Library = updatedLibrary }));
 
-        mock.SetupMediator(It.IsAny<SyncPlexLibraryMediaMetaDataCommand>).ReturnsAsync(Result.Ok());
+        mock.SetupCommand(It.IsAny<SyncPlexLibraryMediaMetaDataCommand>).ReturnsAsync(Result.Ok());
 
         mock.SetupCommand(It.IsAny<RefreshPlexTvShowLibraryCommand>)
             .ReturnsAsync(Result.Fail<PlexLibrary>("TV Show command failed"));

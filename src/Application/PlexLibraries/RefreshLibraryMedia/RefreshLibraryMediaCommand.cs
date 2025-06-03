@@ -81,7 +81,7 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
             return syncLibraryMediaResult.LogError();
 
         // Phase 2: Sync the metadata such as Country, Roles and Genres for the library
-        var syncPlexLibraryMediaMetaDataResult = await _mediator.Send(
+        var syncPlexLibraryMediaMetaDataResult = await _commandExecutor.Send(
             new SyncPlexLibraryMediaMetaDataCommand(syncLibraryMediaResult.Value, plexLibrary.Id),
             cancellationToken
         );

@@ -100,7 +100,7 @@ public record LibraryMediaItemCountryDTO
 {
     public required int PlexId { get; init; }
 
-    public required string Tag { get; init; }
+    public required string Name { get; init; }
 
     public required string Filter { get; init; }
 }
@@ -109,7 +109,7 @@ public record LibraryMediaItemGenreDTO
 {
     public required int PlexId { get; init; }
 
-    public required string Tag { get; init; }
+    public required string Name { get; init; }
 
     public required string Filter { get; init; }
 }
@@ -118,7 +118,7 @@ public record LibraryMediaItemRoleDTO
 {
     public required int PlexId { get; init; }
 
-    public required string Tag { get; init; }
+    public required string Name { get; init; }
 
     public required string? Role { get; init; }
 

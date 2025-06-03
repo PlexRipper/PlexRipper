@@ -22,6 +22,13 @@ public class PlexMediaDataSet : DataSet
         _faker = faker;
     }
 
+    public string MediaGenre()
+    {
+        var index = _faker.Random.Int(0, PlexMediaGenreDataset.Count - 1);
+
+        return PlexMediaGenreDataset.PlexMediaGenres.GetByIndex(index);
+    }
+
     public string MediaTitle(PlexMediaType type)
     {
         var index = _faker.Random.Int(0, 1000 - 1);

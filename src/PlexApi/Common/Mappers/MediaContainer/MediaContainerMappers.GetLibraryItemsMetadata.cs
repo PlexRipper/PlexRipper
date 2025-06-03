@@ -49,7 +49,7 @@ public static partial class MediaContainerMappers
     public static LibraryMediaItemGenreDTO ToDTO(this GetLibrarySectionsAllGenre x) =>
         new()
         {
-            Tag = x.Tag,
+            Name = x.Tag,
             PlexId = -1,
             Filter = string.Empty,
         };
@@ -57,7 +57,7 @@ public static partial class MediaContainerMappers
     public static LibraryMediaItemCountryDTO ToDTO(this GetLibrarySectionsAllCountry x) =>
         new()
         {
-            Tag = x.Tag,
+            Name = x.Tag,
             PlexId = -1,
             Filter = string.Empty,
         };
@@ -65,7 +65,7 @@ public static partial class MediaContainerMappers
     public static LibraryMediaItemRoleDTO ToDTO(this GetLibrarySectionsAllRole x) =>
         new()
         {
-            Tag = x.Tag,
+            Name = x.Tag,
             PlexId = -1,
             Role = null,
             Filter = null,

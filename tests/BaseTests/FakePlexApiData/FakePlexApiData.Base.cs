@@ -5,6 +5,10 @@ namespace PlexRipper.BaseTests;
 
 public static partial class FakePlexApiData
 {
+    private static int _uniqueNumber = 1;
+
+    private static int GetUniqueNumber() => Interlocked.Increment(ref _uniqueNumber);
+
     public static HttpResponseMessage GetHttpResponseMessage<T>(
         HttpStatusCode statusCode,
         T data,

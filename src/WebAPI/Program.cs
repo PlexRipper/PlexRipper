@@ -1,4 +1,5 @@
 using Environment;
+using FluentResultExtensions;
 using Logging.Interface;
 using PlexRipper.Application;
 
@@ -22,6 +23,7 @@ public class Program
             _log.InformationLine("Starting PlexRipper!");
 
             LogManager.SetupLogging(EnvironmentExtensions.GetLogLevel());
+            FluentResultConfiguration.Setup();
 
             _log.Information(
                 "Currently running {Channel} version {Version} on {CurrentOS}",

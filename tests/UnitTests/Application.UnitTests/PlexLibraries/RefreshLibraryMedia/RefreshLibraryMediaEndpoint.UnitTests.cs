@@ -1,0 +1,96 @@
+using Application.Contracts;
+
+namespace PlexRipper.Application.UnitTests;
+
+public class RefreshLibraryMediaEndpointUnitTests : BaseUnitTest<RefreshLibraryMediaEndpoint>
+{
+    public RefreshLibraryMediaEndpointUnitTests(ITestOutputHelper output)
+        : base(output) { }
+
+    [Fact]
+    public async Task ShouldReturnAPlexLibraryDTO_WhenRefreshedSuccessfully()
+    {
+        // Arrange
+        await SetupDatabase(
+            1223,
+            config =>
+            {
+                config.PlexMovieLibraryCount = 1;
+            }
+        );
+
+        var plexLibrary = IDbContext.PlexLibraries.First();
+
+        mock.SetupCommand(It.IsAny<RefreshLibraryMediaCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.Once());
+
+        // Act
+        var rawResponse = SetupEndpointUnitTest<RefreshLibraryMediaEndpoint>();
+        await rawResponse.HandleAsync(new RefreshLibraryMediaEndpointRequest(plexLibrary.Id), CancellationToken.None);
+        var resultDTO = rawResponse.Response as ResultDTO<PlexLibraryDTO>;
+
+        // Assert
+        resultDTO.ShouldNotBeNull();
+        resultDTO.IsSuccess.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task ShouldReturnError_WhenRefreshCommandFails()
+    {
+        // Arrange
+        await SetupDatabase(
+            1226,
+            config =>
+            {
+                config.PlexMovieLibraryCount = 1;
+            }
+        );
+
+        var plexLibrary = IDbContext.PlexLibraries.First();
+
+        mock.SetupCommand(It.IsAny<RefreshLibraryMediaCommand>)
+            .ReturnsAsync(Result.Fail("Failed to refresh library"))
+            .Verifiable(Times.Once());
+
+        // Act
+        var rawResponse = SetupEndpointUnitTest<RefreshLibraryMediaEndpoint>();
+        await rawResponse.HandleAsync(new RefreshLibraryMediaEndpointRequest(plexLibrary.Id), CancellationToken.None);
+        var resultDTO = rawResponse.Response as BaseResultDTO;
+
+        // Assert
+        resultDTO.ShouldNotBeNull();
+        resultDTO.IsSuccess.ShouldBeFalse();
+        resultDTO.Errors.ShouldContain(x => x.Message.Contains("Failed to refresh library"));
+    }
+
+    [Theory]
+    [InlineData(PlexMediaType.Movie)]
+    [InlineData(PlexMediaType.TvShow)]
+    public async Task ShouldHandleDifferentLibraryTypes_WhenTypeIsDifferent(PlexMediaType libraryType)
+    {
+        // Arrange
+        await SetupDatabase(
+            1227,
+            config =>
+            {
+                if (libraryType == PlexMediaType.Movie)
+                    config.PlexMovieLibraryCount = 1;
+                else
+                    config.PlexTvShowLibraryCount = 1;
+            }
+        );
+
+        var plexLibrary = IDbContext.PlexLibraries.First();
+        plexLibrary.Type.ShouldBe(libraryType);
+
+        mock.SetupCommand(It.IsAny<RefreshLibraryMediaCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.Once());
+
+        // Act
+        var rawResponse = SetupEndpointUnitTest<RefreshLibraryMediaEndpoint>();
+        await rawResponse.HandleAsync(new RefreshLibraryMediaEndpointRequest(plexLibrary.Id), CancellationToken.None);
+        var resultDTO = rawResponse.Response as ResultDTO<PlexLibraryDTO>;
+
+        // Assert
+        resultDTO.ShouldNotBeNull();
+        resultDTO.IsSuccess.ShouldBeTrue();
+    }
+}

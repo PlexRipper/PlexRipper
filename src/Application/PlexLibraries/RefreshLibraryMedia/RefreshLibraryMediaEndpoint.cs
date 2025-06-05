@@ -1,4 +1,5 @@
 using Application.Contracts;
+using Data.Contracts;
 using FastEndpoints;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
@@ -17,13 +18,15 @@ public class RefreshLibraryMediaEndpointRequestValidator : Validator<RefreshLibr
 
 public class RefreshLibraryMediaEndpoint : BaseEndpoint<RefreshLibraryMediaEndpointRequest, PlexLibraryDTO>
 {
-    private readonly IMediator _mediator;
+    private readonly IPlexRipperDbContext _dbContext;
+    private readonly ICommandExecutor _commandExecutor;
 
     public override string EndpointPath => ApiRoutes.PlexLibraryController + "/refresh/{PlexLibraryId}";
 
-    public RefreshLibraryMediaEndpoint(IMediator mediator)
+    public RefreshLibraryMediaEndpoint(IPlexRipperDbContext dbContext, ICommandExecutor commandExecutor)
     {
-        _mediator = mediator;
+        _dbContext = dbContext;
+        _commandExecutor = commandExecutor;
     }
 
     public override void Configure()
@@ -40,8 +43,21 @@ public class RefreshLibraryMediaEndpoint : BaseEndpoint<RefreshLibraryMediaEndpo
 
     public override async Task HandleAsync(RefreshLibraryMediaEndpointRequest req, CancellationToken ct)
     {
-        var result = await _mediator.Send(new RefreshLibraryMediaCommand(req.PlexLibraryId, _ => { }), ct);
+        var result = await _commandExecutor.Send(new RefreshLibraryMediaCommand(req.PlexLibraryId, _ => { }), ct);
+        if (result.IsFailed)
+        {
+            await SendFluentResult(result, ct);
+            return;
+        }
 
-        await SendFluentResult(result, x => x.ToDTO(), ct);
+        var plexLibrary = await _dbContext.PlexLibraries.GetAsync(req.PlexLibraryId, cancellationToken: ct);
+
+        if (plexLibrary is null)
+        {
+            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(PlexLibrary), req.PlexLibraryId), ct);
+            return;
+        }
+
+        await SendFluentResult(Result.Ok(plexLibrary), x => x.ToDTO(), ct);
     }
 }

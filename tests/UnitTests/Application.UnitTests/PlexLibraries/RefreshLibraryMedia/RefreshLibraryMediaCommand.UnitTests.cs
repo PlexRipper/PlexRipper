@@ -4,7 +4,7 @@ using PlexApi.Contracts;
 
 namespace PlexRipper.Application.UnitTests;
 
-public class RefreshLibraryMediaCommandUnitTests : BaseUnitTest<RefreshLibraryMediaCommandHandler>
+public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLibraryMediaCommand>
 {
     public RefreshLibraryMediaCommandUnitTests(ITestOutputHelper output)
         : base(output) { }
@@ -52,7 +52,7 @@ public class RefreshLibraryMediaCommandUnitTests : BaseUnitTest<RefreshLibraryMe
 
         // Act
         var command = new RefreshLibraryMediaCommand(PlexLibraryId: 1, Action: _ => { });
-        var result = await _sut.Handle(command, CancellationToken.None);
+        var result = await TestHandlerExecuteAsync<PlexLibrary>(command);
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -72,7 +72,7 @@ public class RefreshLibraryMediaCommandUnitTests : BaseUnitTest<RefreshLibraryMe
         var command = new RefreshLibraryMediaCommand(plexLibrary.Id, _ => { });
 
         // Act
-        var result = await _sut.Handle(command, CancellationToken.None);
+        var result = await TestHandlerExecuteAsync<PlexLibrary>(command);
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -156,7 +156,7 @@ public class RefreshLibraryMediaCommandUnitTests : BaseUnitTest<RefreshLibraryMe
 
         // Act
         var command = new RefreshLibraryMediaCommand(updatedLibrary.Id, _ => { });
-        var result = await _sut.Handle(command, CancellationToken.None);
+        var result = await TestHandlerExecuteAsync<PlexLibrary>(command);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -217,7 +217,7 @@ public class RefreshLibraryMediaCommandUnitTests : BaseUnitTest<RefreshLibraryMe
 
         // Act
         var command = new RefreshLibraryMediaCommand(plexLibrary.Id, _ => { });
-        var result = await _sut.Handle(command, CancellationToken.None);
+        var result = await TestHandlerExecuteAsync<PlexLibrary>(command);
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -274,7 +274,7 @@ public class RefreshLibraryMediaCommandUnitTests : BaseUnitTest<RefreshLibraryMe
         var command = new RefreshLibraryMediaCommand(updatedLibrary.Id, _ => { });
 
         // Act
-        var result = await _sut.Handle(command, CancellationToken.None);
+        var result = await TestHandlerExecuteAsync<PlexLibrary>(command);
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -331,7 +331,7 @@ public class RefreshLibraryMediaCommandUnitTests : BaseUnitTest<RefreshLibraryMe
         var command = new RefreshLibraryMediaCommand(updatedLibrary.Id, _ => { });
 
         // Act
-        var result = await _sut.Handle(command, CancellationToken.None);
+        var result = await TestHandlerExecuteAsync<PlexLibrary>(command);
 
         // Assert
         result.IsFailed.ShouldBeTrue();

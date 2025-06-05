@@ -121,7 +121,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
                 stopWatch.Elapsed.TotalSeconds
             );
 
-            return Result.Ok();
+            return Result.Ok(0);
         }
 
         // Drop all actors for the library
@@ -148,7 +148,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
                 libraryName,
                 stopWatch.Elapsed.TotalSeconds
             );
-            return Result.Ok();
+            return Result.Ok(newActors.Count);
         }
 
         _log.Error(
@@ -187,7 +187,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
                 libraryName,
                 stopWatch.Elapsed.TotalSeconds
             );
-            return Result.Ok();
+            return Result.Ok(0);
         }
 
         // Drop all genres for the library
@@ -211,7 +211,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
                 libraryName,
                 stopWatch.Elapsed.TotalSeconds
             );
-            return Result.Ok();
+            return Result.Ok(newGenres.Count);
         }
 
         _log.Error(
@@ -253,7 +253,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
                 libraryName,
                 stopWatch.Elapsed.TotalSeconds
             );
-            return Result.Ok();
+            return Result.Ok(0);
         }
 
         // Drop all countries for the library
@@ -277,7 +277,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
                 libraryName,
                 stopWatch.Elapsed.TotalSeconds
             );
-            return Result.Ok();
+            return Result.Ok(newCountries.Count);
         }
 
         _log.Error(

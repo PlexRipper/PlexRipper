@@ -95,6 +95,7 @@ public class SyncPlexTvShowsCommand_UnitTests : BaseUnitTest<SyncPlexTvShowsComm
 
         var newTvShows = library.TvShows.ToList();
         SetIds(library, newTvShows);
+        library.TvShows.Clear();
         library.TvShows.AddRange(newTvShows);
 
         // Act

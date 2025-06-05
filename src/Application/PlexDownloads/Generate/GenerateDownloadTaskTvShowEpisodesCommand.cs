@@ -98,6 +98,13 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
             var plexTvShow = tvShowEpisode.TvShow!;
             var plexSeason = tvShowEpisode.TvShowSeason!;
 
+            _log.Debug(
+                "Processing episode {EpisodeKey} from season {SeasonKey} of show {ShowKey}",
+                tvShowEpisode.Key,
+                plexSeason.Key,
+                plexTvShow.Key
+            );
+
             // Get or create Tv-show download tasks
             var downloadTaskTvShow = await GetOrCreateTvShowDownloadTaskAsync(plexTvShow, ct);
             if (downloadTaskTvShow is null)
@@ -116,14 +123,28 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
             var episodeDownloadTask = downloadTaskTvShowSeason.Children.FirstOrDefault(x => x.Key == tvShowEpisode.Key);
             if (episodeDownloadTask is null)
             {
+                _log.Debug("Creating new episode download task for episode {EpisodeKey}", tvShowEpisode.Key);
                 episodeDownloadTask = tvShowEpisode.MapToDownloadTask();
                 episodeDownloadTask.ParentId = downloadTaskTvShowSeason.Id;
                 downloadTaskTvShowSeason.Children.Add(episodeDownloadTask);
                 _dbContext.DownloadTaskTvShowEpisode.Add(episodeDownloadTask);
             }
+            else
+            {
+                _log.Debug(
+                    "Found existing episode download task for episode {EpisodeKey} with ID {EpisodeId}",
+                    tvShowEpisode.Key,
+                    episodeDownloadTask.Id
+                );
+            }
 
             // Process episode media data
-            return ProcessEpisodeMediaData(tvShowEpisode, episodeDownloadTask, request);
+            var processResult = ProcessEpisodeMediaData(tvShowEpisode, episodeDownloadTask, request);
+            if (processResult.IsFailed)
+            {
+                processResult.LogError();
+                continue;
+            }
         }
 
         return (await Result.Try(() => _dbContext.SaveChangesAsync(ct))).ToResult();

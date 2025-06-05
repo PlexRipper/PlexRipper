@@ -253,32 +253,43 @@ public class DownloadTaskFactoryGenerateTvShowEpisodesDownloadTasksAsyncUnitTest
                 config.TvShowCount = 1;
                 config.TvShowSeasonCount = 2;
                 config.TvShowEpisodeCount = 3;
+                config.TvShowDownloadTasksCount = 1;
+                config.TvShowSeasonDownloadTasksCount = 1;
+                config.TvShowEpisodeDownloadTasksCount = 1;
             }
         );
 
-        var plexTvShows = await IDbContext.PlexTvShows.IncludeAll().ToListAsync();
-        var plexEpisodes = plexTvShows.SelectMany(x => x.Seasons).SelectMany(x => x.Episodes).ToList();
-        plexEpisodes.Count.ShouldBe(6); // 1 show × 2 seasons × 3 episodes each
+        var dbContext = IDbContext;
+        var plexTvShow = await dbContext.PlexTvShows.IncludeAll().FirstOrDefaultAsync();
+        plexTvShow.ShouldNotBeNull();
+        var plexEpisodes = plexTvShow.Seasons.SelectMany(x => x.Episodes).ToList();
+        plexEpisodes.Count.ShouldBe(6);
 
         // Create a complete download task hierarchy for the first episode only
-        var firstEpisode = plexEpisodes.First();
-        firstEpisode.TvShowSeason.ShouldNotBeNull();
-        firstEpisode.TvShowSeason.TvShow.ShouldNotBeNull();
+        var tvShowDownloadTask = await dbContext.DownloadTaskTvShow.AsTracking().IncludeAll().FirstOrDefaultAsync();
+        tvShowDownloadTask.ShouldNotBeNull();
 
-        var tvShowDownloadTask = firstEpisode.TvShowSeason.TvShow.MapToDownloadTask();
-        IDbContext.DownloadTaskTvShow.Add(tvShowDownloadTask);
-        await IDbContext.SaveChangesAsync(CancellationToken.None);
+        // Copy tv-show key over to the download task
+        UpdateInitProperty(tvShowDownloadTask, nameof(tvShowDownloadTask.Key), plexTvShow.Key);
 
-        var seasonDownloadTask = firstEpisode.TvShowSeason.MapToDownloadTask();
-        seasonDownloadTask.ParentId = tvShowDownloadTask.Id;
-        IDbContext.DownloadTaskTvShowSeason.Add(seasonDownloadTask);
-        await IDbContext.SaveChangesAsync(CancellationToken.None);
+        // Copy season key over to the download task
+        var season = plexTvShow.Seasons.FirstOrDefault();
+        var seasonDownloadTask = tvShowDownloadTask.Children.FirstOrDefault();
+        season.ShouldNotBeNull();
+        seasonDownloadTask.ShouldNotBeNull();
 
-        var episodeDownloadTask = firstEpisode.MapToDownloadTask();
-        episodeDownloadTask.ParentId = seasonDownloadTask.Id;
-        IDbContext.DownloadTaskTvShowEpisode.Add(episodeDownloadTask);
-        await IDbContext.SaveChangesAsync(CancellationToken.None);
+        UpdateInitProperty(seasonDownloadTask, nameof(seasonDownloadTask.Key), season.Key);
 
+        // Copy episode key over to the download task
+        var episode = season.Episodes.FirstOrDefault();
+        var episodeDownloadTask = seasonDownloadTask.Children.FirstOrDefault();
+        episode.ShouldNotBeNull();
+        episodeDownloadTask.ShouldNotBeNull();
+        UpdateInitProperty(episodeDownloadTask, nameof(episodeDownloadTask.Key), episode.Key);
+
+        await dbContext.SaveChangesAsync();
+
+        // Act
         var downloadMediaDtos = new List<DownloadMediaDTO>
         {
             new()
@@ -289,25 +300,22 @@ public class DownloadTaskFactoryGenerateTvShowEpisodesDownloadTasksAsyncUnitTest
                 PlexLibraryId = 1,
             },
         };
-
-        // Act
         var command = new GenerateDownloadTaskTvShowEpisodesCommand(downloadMediaDtos);
         var result = await TestHandlerExecuteAsync(command);
 
         // Assert
         result.IsSuccess.ShouldBeTrue(result.ToString());
 
-        var downloadTaskTvShows = await IDbContext.DownloadTaskTvShow.IncludeAll().ToListAsync();
-        downloadTaskTvShows.Count.ShouldBe(1); // Should still be 1 TV show
+        dbContext = IDbContext;
+        dbContext.DownloadTaskTvShow.Count().ShouldBe(1);
+        dbContext.DownloadTaskTvShowSeason.Count().ShouldBe(2);
+        dbContext.DownloadTaskTvShowEpisode.Count().ShouldBe(6);
+        dbContext.DownloadTaskTvShowEpisodeFile.Count().ShouldBe(7);
 
-        var downloadTaskSeasons = downloadTaskTvShows.SelectMany(x => x.Children).ToList();
-        downloadTaskSeasons.Count.ShouldBe(2); // Should have both seasons
-
-        var downloadTaskEpisodes = downloadTaskSeasons.SelectMany(x => x.Children).ToList();
-        downloadTaskEpisodes.Count.ShouldBe(6); // All 6 episodes should have download tasks
+        var downloadTaskEpisodes = await dbContext.DownloadTaskTvShowEpisode.ToListAsync();
 
         // Verify the existing episode download task still exists
-        downloadTaskEpisodes.ShouldContain(x => x.Id == episodeDownloadTask.Id);
+        downloadTaskEpisodes.ShouldContain(x => x.Key == episodeDownloadTask.Key);
     }
 
     [Fact]

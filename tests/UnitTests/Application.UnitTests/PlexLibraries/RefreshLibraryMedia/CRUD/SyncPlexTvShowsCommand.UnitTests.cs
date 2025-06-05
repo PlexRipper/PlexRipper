@@ -93,7 +93,7 @@ public class SyncPlexTvShowsCommand_UnitTests : BaseUnitTest<SyncPlexTvShowsComm
         foreach (var x in library.TvShows)
             x.FullTitle = "TEST";
 
-        var newTvShows = library.TvShows;
+        var newTvShows = library.TvShows.ToList();
         SetIds(library, newTvShows);
         library.TvShows.AddRange(newTvShows);
 

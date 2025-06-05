@@ -124,14 +124,38 @@ public class ChoosePlexServerConnection_UnitTests : BaseUnitTest
         plexServer.ShouldNotBeNull();
 
         var plexServerConnections = FakeData.GetPlexServerConnections(seed).Generate(5);
+
+        // Ensure all connections use HTTP protocol (not HTTPS) and are not local
+        // so that the public address connection gets prioritized correctly
+        for (var i = 0; i < plexServerConnections.Count; i++)
+        {
+            plexServerConnections[i] = new PlexServerConnection
+            {
+                Id = plexServerConnections[i].Id,
+                Protocol = "http", // Force HTTP to avoid HTTPS priority
+                Port = plexServerConnections[i].Port,
+                Address = plexServerConnections[i].Address,
+                Url = $"http://{plexServerConnections[i].Address}:{plexServerConnections[i].Port}",
+                Local = false, // Ensure not local to avoid local priority
+                Relay = plexServerConnections[i].Relay,
+                IPv4 = plexServerConnections[i].IPv4,
+                IPv6 = plexServerConnections[i].IPv6,
+                PlexServer = plexServerConnections[i].PlexServer,
+                PlexServerId = plexServerConnections[i].PlexServerId,
+                LatestConnectionStatus = plexServerConnections[i].LatestConnectionStatus,
+                IsCustom = plexServerConnections[i].IsCustom,
+            };
+        }
+
+        // Set connection at index 2 to have the public address
         plexServerConnections[2] = new PlexServerConnection
         {
             Id = plexServerConnections[2].Id,
-            Protocol = plexServerConnections[2].Protocol,
+            Protocol = "http", // Force HTTP to avoid HTTPS priority
             Port = plexServerConnections[2].Port,
             Address = plexServer.PublicAddress,
-            Url = plexServerConnections[2].Url,
-            Local = plexServerConnections[2].Local,
+            Url = $"http://{plexServer.PublicAddress}:{plexServerConnections[2].Port}",
+            Local = false, // Ensure not local to avoid local priority
             Relay = plexServerConnections[2].Relay,
             IPv4 = plexServerConnections[2].IPv4,
             IPv6 = plexServerConnections[2].IPv6,

@@ -1,13 +1,14 @@
 using Application.Contracts;
 using Application.Contracts.Validators;
 using Data.Contracts;
+using FastEndpoints;
 using FluentValidation;
 using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application;
 
-public record GenerateDownloadTaskTvShowEpisodesCommand : IRequest<Result>
+public record GenerateDownloadTaskTvShowEpisodesCommand : ICommand<Result>
 {
     public GenerateDownloadTaskTvShowEpisodesCommand(CreateDownloadTasksRequest request)
     {
@@ -34,7 +35,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandValidator
 }
 
 public class GenerateDownloadTaskTvShowEpisodesCommandHandler
-    : IRequestHandler<GenerateDownloadTaskTvShowEpisodesCommand, Result>
+    : ICommandHandler<GenerateDownloadTaskTvShowEpisodesCommand, Result>
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
@@ -45,10 +46,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
         _dbContext = dbContext;
     }
 
-    public async Task<Result> Handle(
-        GenerateDownloadTaskTvShowEpisodesCommand command,
-        CancellationToken cancellationToken
-    )
+    public async Task<Result> ExecuteAsync(GenerateDownloadTaskTvShowEpisodesCommand command, CancellationToken ct)
     {
         try
         {
@@ -69,13 +67,13 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
                 await _dbContext
                     .PlexLibraries.Include(x => x.PlexServer)
                     .Include(x => x.DefaultDestination)
-                    .GetAsync(downloadMediaDto.PlexLibraryId, cancellationToken);
+                    .GetAsync(downloadMediaDto.PlexLibraryId, ct);
 
                 var plexEpisodes = await _dbContext
                     .PlexTvShowEpisodes.AsTracking()
                     .IncludeAll()
                     .Where(x => downloadMediaDto.MediaIds.Contains(x.Id))
-                    .ToListAsync(cancellationToken);
+                    .ToListAsync(ct);
 
                 var tvShowDownloads = new List<DownloadTaskTvShow>();
 
@@ -115,7 +113,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
                         downloadTaskTvShow = await _dbContext.GetDownloadTaskTvShowByMediaKeyQuery(
                             plexTvShow.PlexServerId,
                             plexTvShow.Key,
-                            cancellationToken
+                            ct
                         );
                         if (downloadTaskTvShow is not null)
                             tvShowDownloads.Add(downloadTaskTvShow);
@@ -172,7 +170,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
                 }
             }
 
-            await _dbContext.SaveChangesAsync(cancellationToken);
+            await _dbContext.SaveChangesAsync(ct);
             return Result.Ok();
         }
         catch (Exception ex)

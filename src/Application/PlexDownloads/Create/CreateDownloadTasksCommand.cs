@@ -34,11 +34,13 @@ public class CreateDownloadTasksCommandValidator : AbstractValidator<CreateDownl
 public class CreateDownloadTasksCommandHandler : IRequestHandler<CreateDownloadTasksCommand, Result>
 {
     private readonly IMediator _mediator;
+    private readonly ICommandExecutor _commandExecutor;
     private bool _generatedTasks;
 
-    public CreateDownloadTasksCommandHandler(IMediator mediator)
+    public CreateDownloadTasksCommandHandler(IMediator mediator, ICommandExecutor commandExecutor)
     {
         _mediator = mediator;
+        _commandExecutor = commandExecutor;
     }
 
     public async Task<Result> Handle(CreateDownloadTasksCommand command, CancellationToken cancellationToken)
@@ -69,7 +71,7 @@ public class CreateDownloadTasksCommandHandler : IRequestHandler<CreateDownloadT
 
         if (downloadMedias.Any(x => x.Type == PlexMediaType.Episode))
         {
-            var result = await _mediator.Send(
+            var result = await _commandExecutor.Send(
                 new GenerateDownloadTaskTvShowEpisodesCommand(request),
                 cancellationToken
             );

@@ -4,20 +4,17 @@ namespace PlexRipper.BaseTests;
 
 public static class PlexApiMockDataExtensions
 {
-    public static void SetParentValues(this GetLibraryItemsMetadata destination, GetLibraryItemsMetadata source)
+    public static void SetParentValues(this GetMediaMetaDataMetadata destination, GetMediaMetaDataMetadata source)
     {
         destination.ParentKey = source.Key;
         destination.ParentIndex = source.Index;
         destination.ParentGuid = source.Guid;
         destination.ParentRatingKey = source.RatingKey;
-        destination.ParentSlug = source.Slug;
-        destination.ParentStudio = source.Studio;
         destination.ParentTitle = source.Title;
-        destination.ParentYear = source.Year;
         destination.ParentThumb = source.Thumb;
     }
 
-    public static void SetGrandparentValues(this GetLibraryItemsMetadata destination, GetLibraryItemsMetadata source)
+    public static void SetGrandparentValues(this GetMediaMetaDataMetadata destination, GetMediaMetaDataMetadata source)
     {
         destination.GrandparentKey = source.Key;
         destination.GrandparentGuid = source.Guid;

@@ -54,4 +54,13 @@ public static class BogusFakerExtensions
 
         return result;
     }
+
+    public static string PickRandomFromDataset(this Faker faker, HashSet<string> dataSet)
+    {
+        if (dataSet.Count == 0)
+            throw new InvalidOperationException("The dataset is empty.");
+
+        var index = faker.Random.Int(0, dataSet.Count - 1);
+        return dataSet.ElementAt(index);
+    }
 }

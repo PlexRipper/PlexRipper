@@ -1,16 +1,23 @@
 using BenchmarkDotNet.Attributes;
 using Moq;
 using PlexRipper.BaseTests;
+using Serilog.Events;
+using Xunit.Abstractions;
 
 namespace BaseTests.Benchmarks;
 
-public class FakeApiDataGenerateBenchmark
+public class FakeApiDataGenerateBenchmark : BaseUnitTest
 {
+    protected FakeApiDataGenerateBenchmark(ITestOutputHelper output, LogEventLevel logEventLevel)
+        : base(output, logEventLevel) { }
+
     [Benchmark]
     public void ShouldRunTheBenchmarkOnGeneratingMockData_WhenOptionsIsConfigured()
     {
+        SetupDatabase(999);
+
         var handler = new Mock<HttpMessageHandler>(MockBehavior.Loose);
-        var sut = new MockPlexApiServer();
+        var sut = new MockPlexApiServer(IDbContext);
 
         Action<PlexApiDataConfig> options = x =>
         {

@@ -16,4 +16,7 @@ public static class DateTimeExtensions
     public static DateTime? ToDateTime(this LocalDate? localDate) => localDate?.AtMidnight().ToDateTimeUnspecified();
 
     public static long ToUnixLong(this DateTime dateTime) => new DateTimeOffset(dateTime).ToUnixTimeSeconds();
+
+    public static long ToUnixLong(this DateTime? dateTime) =>
+        dateTime is null ? 0 : new DateTimeOffset((DateTime)dateTime).ToUnixTimeSeconds();
 }

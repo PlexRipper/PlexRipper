@@ -32,6 +32,7 @@ public class CreateAccountIntegrationTests : BaseIntegrationTests
                     x.PlexAccountCount = 0;
                     x.PlexServerConnectionPerServerCount = 1;
                 };
+
                 config.BaseMockHttpClientOptions = x =>
                 {
                     x.PlexServerAccessCount = serverCount;

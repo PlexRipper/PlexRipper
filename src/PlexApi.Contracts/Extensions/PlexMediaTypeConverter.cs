@@ -65,6 +65,23 @@ public static class StringToPlexMediaTypeConverter
         return result;
     }
 
+    public static GetAllLibrariesType ToGetAllLibrariesType(this PlexMediaType source)
+    {
+        return source switch
+        {
+            PlexMediaType.Movie => GetAllLibrariesType.Movie,
+            PlexMediaType.TvShow => GetAllLibrariesType.TvShow,
+            PlexMediaType.Music => GetAllLibrariesType.Track,
+            PlexMediaType.Season => GetAllLibrariesType.Season,
+            PlexMediaType.Episode => GetAllLibrariesType.Episode,
+            PlexMediaType.Album => GetAllLibrariesType.Album,
+            PlexMediaType.Song => GetAllLibrariesType.Track,
+            _ => throw new NotImplementedException(
+                $"Conversion from PlexMediaType {source} to GetAllLibrariesType is not implemented."
+            ),
+        };
+    }
+
     public static string ToPlexApiString(this PlexMediaType source)
     {
         return source switch
@@ -76,7 +93,9 @@ public static class StringToPlexMediaTypeConverter
             PlexMediaType.Episode => "episode",
             PlexMediaType.Album => "album",
             PlexMediaType.Song => "track",
-            _ => "unknown",
+            _ => throw new NotImplementedException(
+                $"Conversion from PlexMediaType {source} to string is not implemented."
+            ),
         };
     }
 }

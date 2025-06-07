@@ -1,5 +1,7 @@
 ﻿using System.Net;
+using Data.Contracts;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
+using Microsoft.EntityFrameworkCore;
 using Moq.Contrib.HttpClient;
 
 namespace PlexRipper.BaseTests;
@@ -23,30 +25,37 @@ public class MockPlexApiServer : IMockPlexApiServer
     private readonly Dictionary<string, List<GetAllLibrariesDirectory>> _libraries = [];
 
     /// <summary>
-    /// Key: GetAllLibrariesDirectory.Key (library key)
+    /// Key: GetAllLibrariesDirectory.Uuid (library Uuid)
     /// </summary>
-    private readonly Dictionary<string, List<GetLibraryItemsMetadata>> _movies = [];
+    private readonly Dictionary<string, List<GetMediaMetaDataMetadata>> _movies = [];
 
     /// <summary>
-    /// Key: GetAllLibrariesDirectory.Key (library key)
+    /// Key: GetAllLibrariesDirectory.Uuid (library Uuid)
     /// </summary>
 
     // ReSharper disable once CollectionNeverQueried.Local
-    private readonly Dictionary<string, List<GetLibraryItemsMetadata>> _tvShows = [];
+    private readonly Dictionary<string, List<GetMediaMetaDataMetadata>> _tvShows = [];
 
     /// <summary>
-    /// Key: GetAllLibrariesDirectory.Key (library key)
+    /// Key: GetAllLibrariesDirectory.Uuid (library Uuid)
     /// </summary>
 
     // ReSharper disable once CollectionNeverQueried.Local
-    private readonly Dictionary<string, List<GetLibraryItemsMetadata>> _seasons = [];
+    private readonly Dictionary<string, List<GetMediaMetaDataMetadata>> _seasons = [];
 
     /// <summary>
-    /// Key: GetAllLibrariesDirectory.Key (library key)
+    /// Key: GetAllLibrariesDirectory.Uuid (library Uuid)
     /// </summary>
 
     // ReSharper disable once CollectionNeverQueried.Local
-    private readonly Dictionary<string, List<GetLibraryItemsMetadata>> _episodes = [];
+    private readonly Dictionary<string, List<GetMediaMetaDataMetadata>> _episodes = [];
+
+    private IPlexRipperDbContext _dbContext;
+
+    public MockPlexApiServer(IPlexRipperDbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
 
     public void Setup(Mock<HttpMessageHandler> handler, Action<PlexApiDataConfig> options)
     {
@@ -65,6 +74,15 @@ public class MockPlexApiServer : IMockPlexApiServer
 
     private void SetupServers(Mock<HttpMessageHandler> handler)
     {
+        var devices = new List<PlexDevice>();
+
+        // If we are generating from the database, fetch existing servers
+        if (_config.GenerateFromDatabase)
+        {
+            var plexApiDTOList = _dbContext.PlexServers.IncludeConnections().ToList().ToPlexApiDTO();
+            devices.AddRange(plexApiDTOList);
+        }
+
         for (var i = 0; i < _config.PlexServerAccessCount; i++)
         {
             var tempSeed = new Seed(_seed.Next());
@@ -82,8 +100,14 @@ public class MockPlexApiServer : IMockPlexApiServer
 
             plexServerWithNonHttps.Connections.AddRange(plexServerWithHttps.Connections);
 
-            _connections.Add(plexServerWithNonHttps.ClientIdentifier, plexServerWithNonHttps.Connections);
-            _servers.Add(plexServerWithNonHttps);
+            devices.Add(plexServerWithNonHttps);
+        }
+
+        // Add devices and connections to the internal lists
+        foreach (var device in devices)
+        {
+            _connections.Add(device.ClientIdentifier, device.Connections);
+            _servers.Add(device);
         }
 
         var uriBuilder = new UriBuilder("https://plex.tv/") { Path = "/api/v2/resources" };
@@ -144,9 +168,18 @@ public class MockPlexApiServer : IMockPlexApiServer
 
     private void SetupLibraries(Mock<HttpMessageHandler> handler)
     {
+        // If we are generating from the database, fetch existing libraries
+        if (_config.GenerateFromDatabase)
+        {
+            var plexServers = _dbContext.PlexServers.IncludeLibraries().ToList();
+
+            foreach (var plexServer in plexServers)
+                _libraries.Add(plexServer.MachineIdentifier, plexServer.PlexLibraries.ToList().ToPlexApiDTO());
+        }
+
+        var libraries = new List<GetAllLibrariesDirectory>();
         foreach (var server in _servers)
         {
-            var libraries = new List<GetAllLibrariesDirectory>();
             if (_config.MovieLibraryCount > 0)
             {
                 libraries.AddRange(
@@ -165,8 +198,12 @@ public class MockPlexApiServer : IMockPlexApiServer
                 );
             }
 
-            _libraries.Add(server.ClientIdentifier, libraries);
+            _libraries.TryAdd(server.ClientIdentifier, libraries);
+        }
 
+        // Setup libraries responses
+        foreach (var server in _servers)
+        {
             foreach (var connection in _connections[server.ClientIdentifier])
             {
                 var uriBuilder = new UriBuilder(connection.Uri) { Path = "/library/sections" };
@@ -199,11 +236,11 @@ public class MockPlexApiServer : IMockPlexApiServer
             foreach (var library in _libraries[server.ClientIdentifier])
             {
                 var type = library.Type.ToString().ToPlexMediaType();
-                var libraryKey = library.Key;
+                var libraryKey = library.Uuid;
                 if (type == PlexMediaType.Movie)
                 {
                     var movies = FakePlexApiData
-                        .GetLibraryMediaMetadata(_seed, PlexMediaType.Movie, _options)
+                        .GetMediaMetaDataMetadata(_seed, PlexMediaType.Movie, _options)
                         .Generate(_config.MoviesPerLibraryCount);
 
                     _movies.Add(libraryKey, movies);
@@ -211,7 +248,7 @@ public class MockPlexApiServer : IMockPlexApiServer
                 else if (type == PlexMediaType.TvShow)
                 {
                     var tvShows = FakePlexApiData
-                        .GetLibraryMediaMetadata(_seed, PlexMediaType.TvShow, _options)
+                        .GetMediaMetaDataMetadata(_seed, PlexMediaType.TvShow, _options)
                         .Generate(_config.TvShowsPerLibraryCount);
 
                     _tvShows.Add(libraryKey, tvShows);
@@ -219,7 +256,7 @@ public class MockPlexApiServer : IMockPlexApiServer
                     foreach (var tvShow in tvShows)
                     {
                         var seasons = FakePlexApiData
-                            .GetLibraryMediaMetadata(_seed, PlexMediaType.Season, _options)
+                            .GetMediaMetaDataMetadata(_seed, PlexMediaType.Season, _options)
                             .Generate(_config.SeasonsPerTvShowCount);
 
                         seasons.ForEach(x => x.SetParentValues(tvShow));
@@ -229,7 +266,7 @@ public class MockPlexApiServer : IMockPlexApiServer
                         foreach (var season in seasons)
                         {
                             var episodes = FakePlexApiData
-                                .GetLibraryMediaMetadata(_seed, PlexMediaType.Episode, _options)
+                                .GetMediaMetaDataMetadata(_seed, PlexMediaType.Episode, _options)
                                 .Generate(_config.EpisodesPerSeasonCount);
 
                             episodes.ForEach(x => x.SetParentValues(season));
@@ -283,12 +320,16 @@ public class MockPlexApiServer : IMockPlexApiServer
                                     responseBody.MediaContainer!.Metadata = fullList
                                         .Skip(containerStart)
                                         .Take(containerSize)
+                                        .Select(x => x.ToLibraryItemsMetadata())
                                         .ToList();
                                 }
                                 else
                                 {
                                     // No size specified: return everything from containerStart to the end
-                                    responseBody.MediaContainer!.Metadata = fullList.Skip(containerStart).ToList();
+                                    responseBody.MediaContainer!.Metadata = fullList
+                                        .Skip(containerStart)
+                                        .Select(x => x.ToLibraryItemsMetadata())
+                                        .ToList();
                                 }
 
                                 return FakePlexApiData
@@ -302,8 +343,79 @@ public class MockPlexApiServer : IMockPlexApiServer
                                     .Object.ToJsonHttpResponse(req, HttpStatusCode.OK);
                             }
                         );
+
+                    // Mock the metadata retrieval for specific items
+                    handler
+                        .SetupRequest(
+                            HttpMethod.Get,
+                            It.Is<Uri>(uri =>
+                                uri.AbsoluteUri == connection.Uri && uri.AbsolutePath.StartsWith("/library/metadata/")
+                            )
+                        )
+                        .ReturnsAsync(
+                            (HttpRequestMessage request, CancellationToken _) =>
+                            {
+                                var metadataIds = request
+                                    .RequestUri!.AbsolutePath.Split("/library/metadata/")[1]
+                                    .Split(',')
+                                    .Where(x => !string.IsNullOrWhiteSpace(x))
+                                    .Select(int.Parse)
+                                    .ToArray();
+
+                                var metadataList = metadataIds
+                                    .Select(x => GetMediaItem(x.ToString()))
+                                    .Where(x => x != null)
+                                    .ToList();
+
+                                var responseBody = FakePlexApiData.GetMediaMetaDataResponseBodyResponse(
+                                    _seed,
+                                    library,
+                                    options: _options
+                                );
+
+                                responseBody.MediaContainer!.Metadata = metadataList;
+                                responseBody.MediaContainer!.Size = metadataList.Count;
+
+                                return FakePlexApiData
+                                    .GetMediaMetaDataAsync(HttpStatusCode.OK, _seed, library, responseBody, request)
+                                    .Object.ToJsonHttpResponse(request, HttpStatusCode.OK);
+                            }
+                        );
                 }
             }
         }
+    }
+
+    private GetMediaMetaDataMetadata? GetMediaItem(string key)
+    {
+        foreach (var movie in _movies)
+        {
+            var result = movie.Value.FirstOrDefault(x => x.Key == key);
+            if (result != null)
+                return result;
+        }
+
+        foreach (var episode in _episodes)
+        {
+            var result = episode.Value.FirstOrDefault(x => x.Key == key);
+            if (result != null)
+                return result;
+        }
+
+        foreach (var tvShow in _tvShows)
+        {
+            var result = tvShow.Value.FirstOrDefault(x => x.Key == key);
+            if (result != null)
+                return result;
+        }
+
+        foreach (var season in _seasons)
+        {
+            var result = season.Value.FirstOrDefault(x => x.Key == key);
+            if (result != null)
+                return result;
+        }
+
+        return null;
     }
 }

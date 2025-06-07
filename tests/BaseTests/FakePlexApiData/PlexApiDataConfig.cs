@@ -25,6 +25,7 @@ public class PlexApiDataConfig : BaseConfig<PlexApiDataConfig>
     public bool PlexServerAccessConnectionsIncludeHttps { get; set; } = false;
 
     public HttpStatusCode SetServerResourcesResponse { get; set; } = HttpStatusCode.OK;
+    public bool GenerateFromDatabase { get; set; }
 
     public int LibraryCount(PlexMediaType type = PlexMediaType.Unknown)
     {

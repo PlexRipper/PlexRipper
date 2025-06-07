@@ -81,7 +81,7 @@ public class RefreshLibraryMediaCommandHandler : ICommandHandler<RefreshLibraryM
         if (insertPlexLibraryMediaMetaDataResult.IsFailed)
             return insertPlexLibraryMediaMetaDataResult.LogError();
 
-        // Phase 3: Sync the metadata such as Country, Roles and Genres for the library
+        // Phase 3: Sync the metadata such as Country, Actors and Genres for the library
         var syncPlexLibraryMediaMetaDataResult = await _commandExecutor.Send(
             new SyncPlexLibraryMediaMetaDataCommand(insertPlexLibraryMediaMetaDataResult.Value),
             ct

@@ -6,17 +6,15 @@ namespace PlexRipper.BaseTests;
 
 public static class MockPlexApiJsonSerializer
 {
-    public static JsonSerializerSettings GetSettings()
-    {
-        var settings = new JsonSerializerSettings
+    private static readonly JsonSerializerSettings _settings =
+        new()
         {
             NullValueHandling = NullValueHandling.Ignore,
             ContractResolver = new CustomContractResolver(),
             Converters = { new JsonPropertyEnumConverter() },
         };
 
-        return settings;
-    }
+    public static JsonSerializerSettings GetSettings() => _settings;
 }
 
 public class CustomContractResolver : DefaultContractResolver

@@ -58,43 +58,46 @@ public class PlexLibrary : BaseEntity
     [Column(Order = 9)]
     public required string Uuid { get; init; }
 
+    [Column(Order = 10)]
+    public required string Language { get; init; }
+
     /// <summary>
     /// Gets the total file size of the nested media.
     /// </summary>
-    [Column(Order = 10)]
+    [Column(Order = 11)]
     public long MediaSize { get; private set; }
 
     /// <summary>
     /// Gets the total <see cref="PlexMovie"/> count.
     /// </summary>
-    [Column(Order = 11)]
+    [Column(Order = 12)]
     public int MovieCount { get; private set; }
 
     /// <summary>
     /// Gets the total <see cref="PlexTvShow"/> count.
     /// </summary>
-    [Column(Order = 12)]
+    [Column(Order = 13)]
     public int TvShowCount { get; private set; }
 
     /// <summary>
     /// Gets the total <see cref="PlexTvShowSeason"/> count of all <see cref="PlexTvShow">PlexTvShows</see> in this library.
     /// </summary>
-    [Column(Order = 13)]
+    [Column(Order = 14)]
     public int SeasonCount { get; private set; }
 
     /// <summary>
     /// Gets the total <see cref="PlexTvShowEpisode"/> count of all <see cref="PlexTvShow">PlexTvShows</see> in this library.
     /// </summary>
-    [Column(Order = 14)]
+    [Column(Order = 15)]
     public int EpisodeCount { get; private set; }
 
-    [Column(Order = 15)]
+    [Column(Order = 16)]
     public int ActorsCount { get; set; }
 
-    [Column(Order = 16)]
+    [Column(Order = 17)]
     public int GenresCount { get; set; }
 
-    [Column(Order = 17)]
+    [Column(Order = 18)]
     public int CountriesCount { get; set; }
 
     #endregion

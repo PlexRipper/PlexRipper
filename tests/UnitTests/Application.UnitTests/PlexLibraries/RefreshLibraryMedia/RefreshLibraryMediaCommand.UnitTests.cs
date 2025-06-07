@@ -24,6 +24,7 @@ public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLi
             PlexServerId = plexLibrary.PlexServerId,
             PlexServer = plexLibrary.PlexServer,
             Uuid = fakeLibrary.Uuid,
+            Language = fakeLibrary.Language,
             CreatedAt = fakeLibrary.CreatedAt,
             UpdatedAt = fakeLibrary.UpdatedAt,
             ScannedAt = fakeLibrary.ScannedAt,

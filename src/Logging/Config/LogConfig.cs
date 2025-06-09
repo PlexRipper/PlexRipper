@@ -88,7 +88,7 @@ public static class LogConfig
     }
 
     public static readonly string Template =
-        $"{{NewLine}}{{Timestamp:HH:mm:ss}} [{{Level}}] [{{{nameof(LogMetaData.ClassName)}}}.{{{nameof(LogMetaData.MethodName)}}}:{{{nameof(LogMetaData.LineNumber)}}}] => {{Message:lj}}{{NewLine}}{{Exception}}";
+        $"{{NewLine}}{{Timestamp:HH:mm:ss}} [{{Level}}] [{{{nameof(LogMetaData.ClassName)}}}.cs:{{{nameof(LogMetaData.LineNumber)}}}.{{{nameof(LogMetaData.MethodName)}}}()] => {{Message:lj}}{{NewLine}}{{Exception}}";
 
     private static ITestOutputHelper? _testOutput;
 }

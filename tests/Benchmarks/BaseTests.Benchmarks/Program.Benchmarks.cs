@@ -2,7 +2,7 @@ using BenchmarkDotNet.Running;
 
 namespace BaseTests.Benchmarks;
 
-public class Program
+public class ProgramBenchmarks
 {
     public static void Main(string[] args)
     {

@@ -175,7 +175,7 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
                     SectionKey = libraryKeyInt,
                     XPlexContainerSize = 0,
                     XPlexContainerStart = 0,
-                    Type = type.ToApiTypeEnum<GetLibrarySectionsAllQueryParamType>(),
+                    Type = type.ToGetLibrarySectionsAllQueryParamType(),
                 }
             )
             .ToResponse();
@@ -205,7 +205,7 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
             .Library.GetLibrarySectionsAllAsync(
                 new GetLibrarySectionsAllRequest
                 {
-                    Type = type.ToApiTypeEnum<GetLibrarySectionsAllQueryParamType>(),
+                    Type = type.ToGetLibrarySectionsAllQueryParamType(),
                     SectionKey = libraryKeyInt,
                     IncludeMeta = GetLibrarySectionsAllQueryParamIncludeMeta.Disable,
                     IncludeGuids = QueryParamIncludeGuids.Enable,

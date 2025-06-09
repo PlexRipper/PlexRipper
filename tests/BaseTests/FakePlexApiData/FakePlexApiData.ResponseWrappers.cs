@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
+using PlexApi.Contracts;
 
 namespace PlexRipper.BaseTests;
 
@@ -95,7 +96,7 @@ public partial class FakePlexApiData
             .RuleFor(
                 x => x.Directory,
                 (f, _) =>
-                    GetLibrariesResponseDirectory(seed, f.PlexApi().LibraryType.ToPlexMediaType())
+                    GetLibrariesResponseDirectory(seed, f.PlexApi().LibraryType.ToPlexMediaTypeFromPlexApi())
                         .Generate(config.LibraryCount())
             )
             .RuleFor(x => x.Size, (_, x) => x.Directory!.Count)

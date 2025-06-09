@@ -139,7 +139,7 @@ public partial class FakePlexApiData
     )
     {
         var config = PlexApiDataConfig.FromOptions(options);
-        var type = library.Type.ToPlexMediaTypeFromPlexApi();
+        var type = library.Type.ToPlexMediaType();
 
         var totalSize = type switch
         {

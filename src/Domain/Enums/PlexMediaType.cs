@@ -32,6 +32,7 @@ public enum PlexMediaType
     [EnumMember(Value = nameof(Album))]
     Album = 7,
 
+    // TODO rename to track
     [EnumMember(Value = nameof(Song))]
     Song = 8,
 

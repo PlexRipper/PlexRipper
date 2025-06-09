@@ -11,7 +11,7 @@ public static partial class MediaContainerMappers
         {
             RatingKey = data.RatingKey,
             Key = data.Key,
-            Type = data.Type.ToPlexMediaTypeFromPlexApi(),
+            Type = data.Type.ToPlexMediaType(),
             Title = data.Title,
             Summary = data.Summary,
             Year = data.Year ?? 0,

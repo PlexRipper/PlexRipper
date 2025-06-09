@@ -9,36 +9,48 @@ public static class LanguageFaker
     /// <summary>
     /// Language names (English names like "English", "French")
     /// </summary>
-    public static readonly HashSet<string> LanguageNames =
-    [
-        .. CultureInfo
-            .GetCultures(CultureTypes.SpecificCultures | CultureTypes.NeutralCultures)
-            .Select(c => c.EnglishName)
-            .Where(name => !string.IsNullOrWhiteSpace(name)),
-    ];
+    public static readonly Lazy<HashSet<string>> LanguageNames =
+        new(
+            () =>
+
+                [
+                    .. CultureInfo
+                        .GetCultures(CultureTypes.SpecificCultures | CultureTypes.NeutralCultures)
+                        .Select(c => c.EnglishName)
+                        .Where(name => !string.IsNullOrWhiteSpace(name)),
+                ]
+        );
 
     /// <summary>
     /// Language tags (e.g., "en-US", "fr-FR")
     /// </summary>
-    public static readonly HashSet<string> LanguageTags =
-    [
-        .. CultureInfo
-            .GetCultures(CultureTypes.SpecificCultures | CultureTypes.NeutralCultures)
-            .Select(c => c.Name)
-            .Where(tag => !string.IsNullOrWhiteSpace(tag)),
-    ];
+    public static readonly Lazy<HashSet<string>> LanguageTags =
+        new(
+            () =>
+
+                [
+                    .. CultureInfo
+                        .GetCultures(CultureTypes.SpecificCultures | CultureTypes.NeutralCultures)
+                        .Select(c => c.Name)
+                        .Where(tag => !string.IsNullOrWhiteSpace(tag)),
+                ]
+        );
 
     //
     /// <summary>
     /// ISO language codes (e.g., "en", "fr")
     /// </summary>
-    public static readonly HashSet<string> LanguageCodes =
-    [
-        .. CultureInfo
-            .GetCultures(CultureTypes.SpecificCultures | CultureTypes.NeutralCultures)
-            .Select(c => c.TwoLetterISOLanguageName)
-            .Where(code => !string.IsNullOrWhiteSpace(code)),
-    ];
+    public static readonly Lazy<HashSet<string>> LanguageCodes =
+        new(
+            () =>
+
+                [
+                    .. CultureInfo
+                        .GetCultures(CultureTypes.SpecificCultures | CultureTypes.NeutralCultures)
+                        .Select(c => c.TwoLetterISOLanguageName)
+                        .Where(code => !string.IsNullOrWhiteSpace(code)),
+                ]
+        );
 
     public static LanguageDataSet Language(this Faker faker)
     {
@@ -55,9 +67,9 @@ public class LanguageDataSet : DataSet
         _faker = faker;
     }
 
-    public string LanguageName() => _faker.PickRandomFromDataset(LanguageFaker.LanguageNames);
+    public string LanguageName() => _faker.PickRandomFromDataset(LanguageFaker.LanguageNames.Value);
 
-    public string LanguageTag() => _faker.PickRandomFromDataset(LanguageFaker.LanguageTags);
+    public string LanguageTag() => _faker.PickRandomFromDataset(LanguageFaker.LanguageTags.Value);
 
-    public string LanguageCode() => _faker.PickRandomFromDataset(LanguageFaker.LanguageCodes);
+    public string LanguageCode() => _faker.PickRandomFromDataset(LanguageFaker.LanguageCodes.Value);
 }

@@ -12,23 +12,23 @@ public partial class FakePlexApiData
             .StrictMode(true)
             .RuleFor(x => x.AllowSync, f => f.Random.Bool())
             .RuleFor(x => x.Identifier, _ => "com.plexapp.plugins.library")
-            .RuleFor(x => x.LibrarySectionID, _ => -1)
-            .RuleFor(x => x.LibrarySectionTitle, _ => string.Empty)
-            .RuleFor(x => x.LibrarySectionUUID, _ => string.Empty)
+            .Ignore(x => x.LibrarySectionID) // Generated in FinishWith
+            .Ignore(x => x.LibrarySectionTitle) // Generated in FinishWith
+            .Ignore(x => x.LibrarySectionUUID) // Generated in FinishWith
             .RuleFor(x => x.MediaTagPrefix, _ => "/system/bundle/media/flags/")
             .RuleFor(x => x.MediaTagVersion, f => f.Random.Number(0, 1000000000))
             .RuleFor(x => x.MediaTagPrefix, _ => "/system/bundle/media/flags/")
-            .RuleFor(x => x.Metadata, _ => []) // Generated in FinishWith
-            .RuleFor(x => x.Size, _ => -1); // Generated in FinishWith
+            .Ignore(x => x.Metadata) // Generated in FinishWith
+            .Ignore(x => x.Size); // Generated in FinishWith
 
     private static readonly Faker<GetMediaMetaDataMetadata> _getMediaMetaDataMetadata =
         new Faker<GetMediaMetaDataMetadata>()
             .StrictMode(false)
-            .RuleFor(l => l.RatingKey, f => f.Random.Number(100000).ToString())
-            .RuleFor(l => l.ParentRatingKey, f => f.Random.Number(100000).ToString())
+            .RuleFor(l => l.RatingKey, _ => GetUniqueNumber().ToString())
+            .Ignore(l => l.ParentRatingKey) // Generated in FinishWith
             .RuleFor(l => l.Key, (_, x) => $"/library/metadata/{x.RatingKey}")
             .RuleFor(l => l.Type, _ => GetMediaMetaDataType.Movie) // Generated in FinishWith
-            .RuleFor(l => l.Guid, _ => string.Empty) // Generated in FinishWith
+            .Ignore(l => l.Guid) // Generated in FinishWith
             .RuleFor(l => l.Studio, f => f.Movies().Production())
             .RuleFor(l => l.Title, f => f.Movies().MovieTitle())
             .RuleFor(l => l.TitleSort, (_, x) => x.Title.ToLower())

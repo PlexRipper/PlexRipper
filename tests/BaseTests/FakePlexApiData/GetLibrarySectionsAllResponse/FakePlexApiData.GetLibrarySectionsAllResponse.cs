@@ -69,7 +69,7 @@ public partial class FakePlexApiData
                 {
                     x.Type = type.ToGetLibrarySectionsAllLibraryType();
                     x.Media = [GetLibrarySectionsAllMedia(seed, options).Generate()];
-                    x.Guid = $"plex://{type.ToPlexMediaTypeString().ToLower()}/{f.Random.AlphaNumeric(24)}";
+                    x.Guid = f.PlexMedia().Guid(type);
                 }
             );
     }

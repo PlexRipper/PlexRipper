@@ -9,7 +9,7 @@ namespace PlexRipper.BaseTests;
 
 public partial class FakePlexApiData
 {
-    private static readonly Faker<GetMediaMetaDataMediaContainer> GetMediaMetaDataMediaContainer =
+    private static readonly Faker<GetMediaMetaDataMediaContainer> _getMediaMetaDataMediaContainer =
         new Faker<GetMediaMetaDataMediaContainer>()
             .StrictMode(true)
             .RuleFor(x => x.AllowSync, f => f.Random.Bool())
@@ -36,8 +36,8 @@ public partial class FakePlexApiData
             .RuleFor(l => l.TitleSort, (_, x) => x.Title.ToLower())
             .RuleFor(l => l.ContentRating, _ => "nl/6")
             .RuleFor(l => l.Summary, f => f.Movies().MovieOverview())
-            .RuleFor(l => l.Rating, f => f.Random.Double() * 10)
-            .RuleFor(l => l.AudienceRating, f => f.Random.Double() * 10)
+            .RuleFor(l => l.Rating, f => f.Random.Float() * 10)
+            .RuleFor(l => l.AudienceRating, f => f.Random.Float() * 10)
             .RuleFor(l => l.ViewOffset, f => f.Random.Int(1))
             .RuleFor(l => l.LastViewedAt, _ => 0)
             .RuleFor(l => l.Year, f => f.Random.Int(0, DateTime.Now.Year))
@@ -80,6 +80,7 @@ public partial class FakePlexApiData
         .RuleFor(l => l.VideoCodec, f => f.Lorem.Word())
         .RuleFor(l => l.Container, f => f.Lorem.Word())
         .RuleFor(l => l.VideoFrameRate, _ => "24p")
+        .RuleFor(l => l.DisplayOffset, _ => 2)
         .RuleFor(l => l.AudioProfile, _ => "dts")
         .RuleFor(l => l.VideoProfile, _ => "high")
         .RuleFor(l => l.HasVoiceActivity, f => f.Random.Bool())
@@ -99,12 +100,14 @@ public partial class FakePlexApiData
         .RuleFor(l => l.Key, f => f.Random.Uuid().ToString())
         .RuleFor(l => l.Duration, f => f.Random.Int(1))
         .RuleFor(l => l.File, f => f.Lorem.Word())
+        .RuleFor(l => l.Accessible, _ => true)
+        .RuleFor(l => l.Exists, _ => true)
+        .RuleFor(l => l.PacketLength, _ => 40)
         .RuleFor(l => l.Size, f => f.Random.Int(1))
         .RuleFor(
             l => l.HasThumbnail,
             // set to null to avoid Unable to cast object of type 'System.Int64' to type 'System.String'.
             _ => null
-        //f => f.Random.Bool() ? GetLibraryItemsHasThumbnail.True : GetLibraryItemsHasThumbnail.False
         )
         .RuleFor(l => l.OptimizedForStreaming, _ => GetMediaMetaDataLibraryOptimizedForStreaming.CreateBoolean(true))
         .RuleFor(l => l.Has64bitOffsets, f => f.Random.Bool())
@@ -118,7 +121,7 @@ public partial class FakePlexApiData
         new Faker<GetMediaMetaDataStream>()
             .StrictMode(true)
             .RuleFor(x => x.Id, f => f.Random.Long(1))
-            .RuleFor(x => x.StreamType, f => f.PickRandom<GetMediaMetaDataStreamType>())
+            .RuleFor(x => x.StreamType, f => f.Random.Int(1, 3)) // 1: Video, 2: Audio, 3: Subtitle
             .RuleFor(x => x.Format, f => f.System.CommonFileExt())
             .RuleFor(x => x.Default, f => f.Random.Bool())
             .RuleFor(x => x.Codec, f => f.Random.Word())
@@ -203,7 +206,7 @@ public partial class FakePlexApiData
 
         return new GetMediaMetaDataResponseBody
         {
-            MediaContainer = GetMediaMetaDataMediaContainer
+            MediaContainer = _getMediaMetaDataMediaContainer
                 .UseSeed(seed.Next())
                 .FinishWith(
                     (_, x) =>

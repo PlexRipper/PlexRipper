@@ -1,8 +1,8 @@
 ﻿using System.Net;
 using Data.Contracts;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
-using Microsoft.EntityFrameworkCore;
 using Moq.Contrib.HttpClient;
+using PlexRipper.PlexApi;
 
 namespace PlexRipper.BaseTests;
 
@@ -301,10 +301,16 @@ public class MockPlexApiServer : IMockPlexApiServer
 
                                 int containerStart = 0,
                                     containerSize = 0;
+
                                 if (queryDict.TryGetValue("X-Plex-Container-Start", out var containerStartValue))
                                     containerStart = int.Parse(containerStartValue);
                                 if (queryDict.TryGetValue("X-Plex-Container-Size", out var containerSizeValue))
                                     containerSize = int.Parse(containerSizeValue);
+
+                                // Check if the type is specified in the query parameters
+                                var libraryType = PlexMediaType.Unknown;
+                                if (queryDict.TryGetValue("type", out var type))
+                                    libraryType = type.ToPlexMediaTypeFromTypeInt();
 
                                 var responseBody = FakePlexApiData.GetPlexLibrarySectionAllResponse(
                                     _seed,
@@ -312,7 +318,23 @@ public class MockPlexApiServer : IMockPlexApiServer
                                     options: _options
                                 );
 
-                                var fullList = _movies[library.Key];
+                                var fullList = libraryType switch
+                                {
+                                    PlexMediaType.Movie => _movies.TryGetValue(library.Uuid, out var list) ? list : [],
+                                    PlexMediaType.TvShow => _tvShows.TryGetValue(library.Uuid, out var list)
+                                        ? list
+                                        : [],
+                                    PlexMediaType.Season => _seasons.TryGetValue(library.Uuid, out var list)
+                                        ? list
+                                        : [],
+                                    PlexMediaType.Episode => _episodes.TryGetValue(library.Uuid, out var list)
+                                        ? list
+                                        : [],
+                                    _ => throw new ArgumentOutOfRangeException(
+                                        nameof(libraryType),
+                                        $"Unhandled library type: {libraryType}"
+                                    ),
+                                };
 
                                 // Apply slicing based on containerStart and containerSize
                                 if (containerSize > 0)
@@ -348,9 +370,7 @@ public class MockPlexApiServer : IMockPlexApiServer
                     handler
                         .SetupRequest(
                             HttpMethod.Get,
-                            It.Is<Uri>(uri =>
-                                uri.AbsoluteUri == connection.Uri && uri.AbsolutePath.StartsWith("/library/metadata/")
-                            )
+                            uri => uri.RequestUri!.AbsolutePath.StartsWith("/library/metadata/")
                         )
                         .ReturnsAsync(
                             (HttpRequestMessage request, CancellationToken _) =>
@@ -390,28 +410,28 @@ public class MockPlexApiServer : IMockPlexApiServer
     {
         foreach (var movie in _movies)
         {
-            var result = movie.Value.FirstOrDefault(x => x.Key == key);
+            var result = movie.Value.FirstOrDefault(x => x.RatingKey == key);
             if (result != null)
                 return result;
         }
 
         foreach (var episode in _episodes)
         {
-            var result = episode.Value.FirstOrDefault(x => x.Key == key);
+            var result = episode.Value.FirstOrDefault(x => x.RatingKey == key);
             if (result != null)
                 return result;
         }
 
         foreach (var tvShow in _tvShows)
         {
-            var result = tvShow.Value.FirstOrDefault(x => x.Key == key);
+            var result = tvShow.Value.FirstOrDefault(x => x.RatingKey == key);
             if (result != null)
                 return result;
         }
 
         foreach (var season in _seasons)
         {
-            var result = season.Value.FirstOrDefault(x => x.Key == key);
+            var result = season.Value.FirstOrDefault(x => x.RatingKey == key);
             if (result != null)
                 return result;
         }

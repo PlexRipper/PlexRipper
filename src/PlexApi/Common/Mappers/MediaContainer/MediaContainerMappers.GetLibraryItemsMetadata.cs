@@ -119,10 +119,10 @@ public static partial class MediaContainerMappers
             Id = source.Id,
             StreamType = source.StreamType switch
             {
-                GetLibrarySectionsAllStreamType.Video => Domain.StreamType.Video,
-                GetLibrarySectionsAllStreamType.Audio => Domain.StreamType.Audio,
-                GetLibrarySectionsAllStreamType.Subtitle => Domain.StreamType.Subtitle,
-                _ => Domain.StreamType.Unknown,
+                1 => StreamType.Video,
+                2 => StreamType.Audio,
+                3 => StreamType.Subtitle,
+                _ => StreamType.Unknown,
             },
             Default = source.Default,
             Codec = source.Codec,

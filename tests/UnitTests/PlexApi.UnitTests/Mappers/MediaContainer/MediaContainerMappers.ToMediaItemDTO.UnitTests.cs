@@ -83,8 +83,6 @@ namespace PlexApi.UnitTests
                                 [
                                     new GetMediaMetaDataStream
                                     {
-                                        Id = 201,
-                                        StreamType = GetMediaMetaDataStreamType.Video,
                                         Default = true,
                                         Codec = "h264",
                                         Index = 0,
@@ -104,7 +102,7 @@ namespace PlexApi.UnitTests
                 Role = [new GetMediaMetaDataRole { Tag = "Actor Name" }],
                 Ratings =
                 [
-                    new Ratings
+                    new GetMediaMetaDataRatings
                     {
                         Image = "imdb://image",
                         Type = "imdb",
@@ -248,13 +246,13 @@ namespace PlexApi.UnitTests
                 ],
                 Ratings =
                 [
-                    new Ratings
+                    new GetMediaMetaDataRatings
                     {
                         Image = "imdb://image/show",
                         Type = "imdb",
                         Value = 9.2f,
                     },
-                    new Ratings
+                    new GetMediaMetaDataRatings
                     {
                         Image = "tmdb://image/show",
                         Type = "tmdb",

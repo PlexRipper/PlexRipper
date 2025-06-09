@@ -15,7 +15,7 @@ public static class GetLibraryItemsMetadataMappers
             LibrarySectionID = source.LibrarySectionID,
             LibrarySectionTitle = source.LibrarySectionTitle,
             LibrarySectionKey = source.LibrarySectionKey,
-            Type = (GetLibraryItemsLibraryType)(int)source.Type,
+            Type = (GetLibraryItemsType)(int)source.Type,
             Title = source.Title,
             Slug = source.Slug,
             ContentRating = source.ContentRating,
@@ -43,8 +43,6 @@ public static class GetLibraryItemsMetadataMappers
             GrandparentSlug = source.GrandparentSlug,
             GrandparentArt = source.GrandparentArt,
             GrandparentTheme = source.GrandparentTheme,
-            ParentSlug = source.Slug,
-            MediaGuid = source.Guids?.Select(g => new MediaGuid { Id = g.Id }).ToList(),
             Media = source.Media?.Select(m => m.ToLibraryItemsMedia()).ToList(),
             Genre = source.Genre?.Select(g => new GetLibraryItemsGenre { Tag = g.Tag }).ToList(),
             Country = source.Country?.Select(c => new GetLibraryItemsCountry { Tag = c.Tag }).ToList(),
@@ -53,7 +51,6 @@ public static class GetLibraryItemsMetadataMappers
             Role = source.Role?.Select(r => r.ToLibraryItemsRole()).ToList(),
             Location = source.Location?.Select(l => new GetLibraryItemsLocation { Path = l.Path }).ToList(),
             UltraBlurColors = source.UltraBlurColors != null ? new GetLibraryItemsUltraBlurColors() : null,
-            MetaDataRating = source.Ratings?.Select(_ => new MetaDataRating()).ToList(),
             Image = source.Image?.Select(_ => new GetLibraryItemsImage()).ToList(),
             TitleSort = source.TitleSort,
             ViewCount = source.ViewCount,
@@ -72,7 +69,6 @@ public static class GetLibraryItemsMetadataMappers
             ParentTitle = source.ParentTitle,
             ParentIndex = source.ParentIndex,
             ParentThumb = source.ParentThumb,
-            ParentTheme = string.Empty,
         };
     }
 
@@ -94,7 +90,9 @@ public static class GetLibraryItemsMetadataMappers
             VideoFrameRate = source.VideoFrameRate,
             VideoProfile = source.VideoProfile,
             HasVoiceActivity = source.HasVoiceActivity,
-            OptimizedForStreaming = GetLibraryItemsOptimizedForStreaming.Enable,
+            OptimizedForStreaming = GetLibraryItemsOptimizedForStreaming.CreateBoolean(
+                source.OptimizedForStreaming?.Boolean ?? false
+            ),
             Has64bitOffsets = source.Has64bitOffsets,
             Part = source.Part?.Select(ToLibraryItemsPart).ToList() ?? [],
         };
@@ -108,38 +106,24 @@ public static class GetLibraryItemsMetadataMappers
             File = source.File ?? string.Empty,
             Size = source.Size,
             Container = source.Container ?? string.Empty,
-            Stream = source.Stream?.Select(ToLibraryItemsStream).ToList() ?? [],
-        };
+            AudioProfile = source.AudioProfile ?? string.Empty,
+            Has64bitOffsets = source.Has64bitOffsets,
+            OptimizedForStreaming = GetLibraryItemsLibraryOptimizedForStreaming.CreateBoolean(
+                source.OptimizedForStreaming?.Boolean ?? false
+            ),
+            VideoProfile = source.VideoProfile ?? string.Empty,
+            Indexes = source.Indexes,
 
-    private static GetLibraryItemsStream ToLibraryItemsStream(this GetMediaMetaDataStream source) =>
-        new()
-        {
-            Id = (int)source.Id,
-            StreamType = (int)source.StreamType,
-            Default = source.Default,
-            Codec = source.Codec,
-            Index = source.Index ?? 0,
-            Bitrate = source.Bitrate,
-            Language = source.Language,
-            LanguageTag = source.LanguageTag,
-            LanguageCode = source.LanguageCode,
-            Channels = source.Channels,
-            AudioChannelLayout = source.AudioChannelLayout,
-            SamplingRate = source.SamplingRate,
-            CanAutoSync = source.CanAutoSync,
-            HearingImpaired = source.HearingImpaired,
-            Title = source.Title,
-            Profile = source.Profile,
+            // set to null to avoid Unable to cast object of type 'System.Int64' to type 'System.String'.
+            HasThumbnail = null,
         };
 
     private static GetLibraryItemsRole ToLibraryItemsRole(this GetMediaMetaDataRole source) =>
         new()
         {
             Id = source.Id,
-            Filter = source.Filter,
             Thumb = source.Thumb,
             Tag = source.Tag,
-            TagKey = source.TagKey,
             Role = source.Role,
         };
 }

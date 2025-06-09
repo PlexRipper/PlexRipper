@@ -174,7 +174,7 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
                 {
                     SectionKey = libraryKeyInt,
                     XPlexContainerSize = 0,
-                    XPlexContainerStart = 0,
+                    XPlexContainerStart = 1,
                     Type = type.ToGetLibrarySectionsAllQueryParamType(),
                 }
             )

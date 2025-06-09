@@ -221,7 +221,6 @@ public class MockPlexApiServer : IMockPlexApiServer
                             response.Object.ShouldNotBeNull();
                             response.Object.MediaContainer.ShouldNotBeNull();
                             response.Object.MediaContainer.Directory = _libraries[server.ClientIdentifier];
-
                             return response.Object.ToJsonHttpResponse(req, HttpStatusCode.OK);
                         }
                     );
@@ -236,8 +235,9 @@ public class MockPlexApiServer : IMockPlexApiServer
             // Generate media for each library
             foreach (var library in _libraries[server.ClientIdentifier])
             {
-                var type = library.Type.ToString().ToPlexMediaTypeFromPlexApi();
+                var type = library.Type.ToPlexMediaType();
                 var libraryKey = library.Uuid;
+
                 if (type == PlexMediaType.Movie)
                 {
                     var movies = FakePlexApiData
@@ -245,15 +245,20 @@ public class MockPlexApiServer : IMockPlexApiServer
                         .Generate(_config.MoviesPerLibraryCount);
 
                     _movies.Add(libraryKey, movies);
+                    continue;
                 }
-                else if (type == PlexMediaType.TvShow)
+
+                if (type == PlexMediaType.TvShow)
                 {
+                    var tvShowList = new List<GetMediaMetaDataMetadata>();
+                    var seasonList = new List<GetMediaMetaDataMetadata>();
+                    var episodeList = new List<GetMediaMetaDataMetadata>();
+
                     var tvShows = FakePlexApiData
                         .GetMediaMetaDataMetadata(_seed, PlexMediaType.TvShow, _options)
                         .Generate(_config.TvShowsPerLibraryCount);
 
-                    _tvShows.Add(libraryKey, tvShows);
-
+                    tvShowList.AddRange(tvShows);
                     foreach (var tvShow in tvShows)
                     {
                         var seasons = FakePlexApiData
@@ -262,8 +267,7 @@ public class MockPlexApiServer : IMockPlexApiServer
 
                         seasons.ForEach(x => x.SetParentValues(tvShow));
 
-                        _seasons.Add(libraryKey, seasons);
-
+                        seasonList.AddRange(seasons);
                         foreach (var season in seasons)
                         {
                             var episodes = FakePlexApiData
@@ -272,15 +276,17 @@ public class MockPlexApiServer : IMockPlexApiServer
 
                             episodes.ForEach(x => x.SetParentValues(season));
                             episodes.ForEach(x => x.SetGrandparentValues(tvShow));
-
-                            _episodes.Add(libraryKey, episodes);
+                            episodeList.AddRange(seasons);
                         }
                     }
+
+                    _tvShows.Add(libraryKey, tvShowList);
+                    _seasons.Add(libraryKey, seasonList);
+                    _episodes.Add(libraryKey, episodeList);
+                    continue;
                 }
-                else
-                {
-                    throw new InvalidOperationException($"Unsupported library type: {library.Type}");
-                }
+
+                throw new InvalidOperationException($"Unsupported library type: {library.Type}");
             }
         }
 
@@ -313,29 +319,13 @@ public class MockPlexApiServer : IMockPlexApiServer
                                 if (queryDict.TryGetValue("type", out var type))
                                     libraryType = type.ToPlexMediaTypeFromTypeInt();
 
-                                var responseBody = FakePlexApiData.GetPlexLibrarySectionAllResponse(
+                                var responseBody = FakePlexApiData.GetLibrarySectionsAllResponseBody(
                                     _seed,
                                     library,
                                     options: _options
                                 );
 
-                                var fullList = libraryType switch
-                                {
-                                    PlexMediaType.Movie => _movies.TryGetValue(library.Uuid, out var list) ? list : [],
-                                    PlexMediaType.TvShow => _tvShows.TryGetValue(library.Uuid, out var list)
-                                        ? list
-                                        : [],
-                                    PlexMediaType.Season => _seasons.TryGetValue(library.Uuid, out var list)
-                                        ? list
-                                        : [],
-                                    PlexMediaType.Episode => _episodes.TryGetValue(library.Uuid, out var list)
-                                        ? list
-                                        : [],
-                                    _ => throw new ArgumentOutOfRangeException(
-                                        nameof(libraryType),
-                                        $"Unhandled library type: {libraryType}"
-                                    ),
-                                };
+                                var fullList = GetMediaItems(library.Uuid, libraryType);
 
                                 // Apply slicing based on containerStart and containerSize
                                 if (containerSize > 0)
@@ -355,8 +345,11 @@ public class MockPlexApiServer : IMockPlexApiServer
                                         .ToList();
                                 }
 
+                                responseBody.MediaContainer!.Size = responseBody.MediaContainer.Metadata.Count;
+                                responseBody.MediaContainer!.TotalSize = fullList.Count;
+
                                 return FakePlexApiData
-                                    .GetLibraryMediaItemsResponse(
+                                    .GetLibrarySectionsAllResponse(
                                         HttpStatusCode.OK,
                                         _seed,
                                         library,
@@ -438,5 +431,17 @@ public class MockPlexApiServer : IMockPlexApiServer
         }
 
         return null;
+    }
+
+    private ICollection<GetMediaMetaDataMetadata> GetMediaItems(string libraryUuid, PlexMediaType libraryType)
+    {
+        return libraryType switch
+        {
+            PlexMediaType.Movie => _movies.TryGetValue(libraryUuid, out var list) ? list : [],
+            PlexMediaType.TvShow => _tvShows.TryGetValue(libraryUuid, out var list) ? list : [],
+            PlexMediaType.Season => _seasons.TryGetValue(libraryUuid, out var list) ? list : [],
+            PlexMediaType.Episode => _episodes.TryGetValue(libraryUuid, out var list) ? list : [],
+            _ => throw new ArgumentOutOfRangeException(nameof(libraryType), $"Unhandled library type: {libraryType}"),
+        };
     }
 }

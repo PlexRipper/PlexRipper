@@ -2,20 +2,17 @@ using LukeHagar.PlexAPI.SDK.Models.Requests;
 
 namespace PlexRipper.BaseTests;
 
-public static class GetLibraryItemsMetadataMappers
+public static class GetLibrarySectionsAllMetadataMappers
 {
-    public static GetLibraryItemsMetadata ToLibraryItemsMetadata(this GetMediaMetaDataMetadata source)
+    public static GetLibrarySectionsAllMetadata ToLibraryItemsMetadata(this GetMediaMetaDataMetadata source)
     {
-        return new GetLibraryItemsMetadata
+        return new GetLibrarySectionsAllMetadata
         {
             RatingKey = source.RatingKey,
             Key = source.Key,
             Guid = source.Guid,
             Studio = source.Studio,
-            LibrarySectionID = source.LibrarySectionID,
-            LibrarySectionTitle = source.LibrarySectionTitle,
-            LibrarySectionKey = source.LibrarySectionKey,
-            Type = (GetLibraryItemsType)(int)source.Type,
+            Type = (GetLibrarySectionsAllLibraryType)(int)source.Type,
             Title = source.Title,
             Slug = source.Slug,
             ContentRating = source.ContentRating,
@@ -44,14 +41,13 @@ public static class GetLibraryItemsMetadataMappers
             GrandparentArt = source.GrandparentArt,
             GrandparentTheme = source.GrandparentTheme,
             Media = source.Media?.Select(m => m.ToLibraryItemsMedia()).ToList(),
-            Genre = source.Genre?.Select(g => new GetLibraryItemsGenre { Tag = g.Tag }).ToList(),
-            Country = source.Country?.Select(c => new GetLibraryItemsCountry { Tag = c.Tag }).ToList(),
-            Director = source.Director?.Select(_ => new GetLibraryItemsDirector()).ToList(),
-            Writer = source.Writer?.Select(_ => new GetLibraryItemsWriter()).ToList(),
+            Genre = source.Genre?.Select(g => new GetLibrarySectionsAllGenre { Tag = g.Tag }).ToList(),
+            Country = source.Country?.Select(c => new GetLibrarySectionsAllCountry { Tag = c.Tag }).ToList(),
+            Director = source.Director?.Select(_ => new GetLibrarySectionsAllDirector()).ToList(),
+            Writer = source.Writer?.Select(_ => new GetLibrarySectionsAllWriter()).ToList(),
             Role = source.Role?.Select(r => r.ToLibraryItemsRole()).ToList(),
-            Location = source.Location?.Select(l => new GetLibraryItemsLocation { Path = l.Path }).ToList(),
-            UltraBlurColors = source.UltraBlurColors != null ? new GetLibraryItemsUltraBlurColors() : null,
-            Image = source.Image?.Select(_ => new GetLibraryItemsImage()).ToList(),
+            UltraBlurColors = source.UltraBlurColors != null ? new GetLibrarySectionsAllUltraBlurColors() : null,
+            Image = source.Image?.Select(_ => new GetLibrarySectionsAllImage()).ToList(),
             TitleSort = source.TitleSort,
             ViewCount = source.ViewCount,
             LastViewedAt = source.LastViewedAt,
@@ -72,7 +68,7 @@ public static class GetLibraryItemsMetadataMappers
         };
     }
 
-    private static GetLibraryItemsMedia ToLibraryItemsMedia(this GetMediaMetaDataMedia source) =>
+    private static GetLibrarySectionsAllMedia ToLibraryItemsMedia(this GetMediaMetaDataMedia source) =>
         new()
         {
             Id = (int)source.Id,
@@ -90,40 +86,32 @@ public static class GetLibraryItemsMetadataMappers
             VideoFrameRate = source.VideoFrameRate,
             VideoProfile = source.VideoProfile,
             HasVoiceActivity = source.HasVoiceActivity,
-            OptimizedForStreaming = GetLibraryItemsOptimizedForStreaming.CreateBoolean(
+            OptimizedForStreaming = GetLibrarySectionsAllOptimizedForStreaming.CreateBoolean(
                 source.OptimizedForStreaming?.Boolean ?? false
             ),
             Has64bitOffsets = source.Has64bitOffsets,
             Part = source.Part?.Select(ToLibraryItemsPart).ToList() ?? [],
         };
 
-    private static GetLibraryItemsPart ToLibraryItemsPart(this GetMediaMetaDataPart source) =>
+    private static GetLibrarySectionsAllPart ToLibraryItemsPart(this GetMediaMetaDataPart source) =>
         new()
         {
             Id = (int)source.Id,
             Key = source.Key ?? string.Empty,
             Duration = source.Duration,
             File = source.File ?? string.Empty,
-            Size = source.Size,
+            Size = source.Size ?? 0,
             Container = source.Container ?? string.Empty,
             AudioProfile = source.AudioProfile ?? string.Empty,
             Has64bitOffsets = source.Has64bitOffsets,
-            OptimizedForStreaming = GetLibraryItemsLibraryOptimizedForStreaming.CreateBoolean(
+            OptimizedForStreaming = GetLibrarySectionsAllLibraryOptimizedForStreaming.CreateBoolean(
                 source.OptimizedForStreaming?.Boolean ?? false
             ),
             VideoProfile = source.VideoProfile ?? string.Empty,
             Indexes = source.Indexes,
-
-            // set to null to avoid Unable to cast object of type 'System.Int64' to type 'System.String'.
             HasThumbnail = null,
         };
 
-    private static GetLibraryItemsRole ToLibraryItemsRole(this GetMediaMetaDataRole source) =>
-        new()
-        {
-            Id = source.Id,
-            Thumb = source.Thumb,
-            Tag = source.Tag,
-            Role = source.Role,
-        };
+    private static GetLibrarySectionsAllRole ToLibraryItemsRole(this GetMediaMetaDataRole source) =>
+        new() { Tag = source.Tag };
 }

@@ -9,29 +9,26 @@ namespace PlexRipper.BaseTests;
 
 public partial class FakePlexApiData
 {
-    public static GetMediaMetaDataResponse GetMediaMetaDataAsync(
+    public static GetLibrarySectionsAllResponse GetLibrarySectionsAllResponse(
         HttpStatusCode statusCode,
         Seed seed,
         GetAllLibrariesDirectory library,
-        GetMediaMetaDataResponseBody? responseBody = null,
+        GetLibrarySectionsAllResponseBody? responseBody = null,
         HttpRequestMessage? request = null,
         Action<PlexApiDataConfig>? options = null
     )
     {
-        return new Faker<GetMediaMetaDataResponse>()
+        return new Faker<GetLibrarySectionsAllResponse>()
             .StrictMode(true)
             .UseSeed(seed.Next())
             .RuleFor(x => x.StatusCode, _ => (int)statusCode)
             .RuleFor(x => x.ContentType, _ => ContentType.ApplicationJson)
-            .RuleFor(
-                x => x.Object,
-                _ => responseBody ?? GetMediaMetaDataResponseBodyResponse(seed, library, 100, options)
-            )
+            .RuleFor(x => x.Object, _ => responseBody ?? GetLibrarySectionsAllResponseBody(seed, library, 100, options))
             .RuleFor(x => x.RawResponse, (_, res) => GetHttpResponseMessage(statusCode, res.Object, request))
             .Generate();
     }
 
-    public static GetMediaMetaDataResponseBody GetMediaMetaDataResponseBodyResponse(
+    public static GetLibrarySectionsAllResponseBody GetLibrarySectionsAllResponseBody(
         Seed seed,
         GetAllLibrariesDirectory library,
         int mediaCount = 0,
@@ -41,9 +38,9 @@ public partial class FakePlexApiData
         var config = PlexApiDataConfig.FromOptions(options);
         var type = library.Type.ToPlexMediaType();
 
-        return new GetMediaMetaDataResponseBody
+        return new GetLibrarySectionsAllResponseBody
         {
-            MediaContainer = _getMediaMetaDataMediaContainer
+            MediaContainer = _getLibrarySectionsAllMediaContainer
                 .UseSeed(seed.Next())
                 .FinishWith(
                     (_, x) =>
@@ -51,7 +48,7 @@ public partial class FakePlexApiData
                         x.LibrarySectionID = long.Parse(library.Key);
                         x.LibrarySectionTitle = library.Title;
                         x.LibrarySectionUUID = library.Uuid;
-                        x.Metadata = GetMediaMetaDataMetadata(seed, type, options).Generate(mediaCount);
+                        x.Metadata = GetLibrarySectionsAllMetadata(seed, type, options).Generate(mediaCount);
                         x.Size = x.Metadata!.Count;
                     }
                 )
@@ -59,59 +56,49 @@ public partial class FakePlexApiData
         };
     }
 
-    public static Faker<GetMediaMetaDataMetadata> GetMediaMetaDataMetadata(
+    public static Faker<GetLibrarySectionsAllMetadata> GetLibrarySectionsAllMetadata(
         Seed seed,
         PlexMediaType type,
         Action<PlexApiDataConfig>? options = null
     )
     {
-        GetMediaMetaDataType GetPlexMediaType() =>
-            type switch
-            {
-                PlexMediaType.Movie => GetMediaMetaDataType.Movie,
-                PlexMediaType.TvShow => GetMediaMetaDataType.TvShow,
-                PlexMediaType.Season => GetMediaMetaDataType.Season,
-                PlexMediaType.Episode => GetMediaMetaDataType.Episode,
-                _ => throw new InvalidOperationException($"Invalid PlexMediaType: {type} value."),
-            };
-
-        return _getMediaMetaDataMetadata
+        return _getLibrarySectionsAllMetadata
             .UseSeed(seed.Next())
             .FinishWith(
                 (f, x) =>
                 {
-                    x.Type = GetPlexMediaType();
-                    x.Media = [GetMediaMetaDataMedia(seed, options).Generate()];
+                    x.Type = type.ToGetLibrarySectionsAllLibraryType();
+                    x.Media = [GetLibrarySectionsAllMedia(seed, options).Generate()];
                     x.Guid = $"plex://{type.ToPlexMediaTypeString().ToLower()}/{f.Random.AlphaNumeric(24)}";
                 }
             );
     }
 
-    public static Faker<GetMediaMetaDataMedia> GetMediaMetaDataMedia(
+    public static Faker<GetLibrarySectionsAllMedia> GetLibrarySectionsAllMedia(
         Seed seed,
         Action<PlexApiDataConfig>? options = null
     )
     {
-        return _getMediaMetaDataMedia
+        return _getLibrarySectionsAllMedia
             .UseSeed(seed.Next())
             .FinishWith(
                 (_, x) =>
                 {
-                    x.Part = [GetMediaMetaDataPart(seed, options).Generate()];
+                    x.Part = [GetLibrarySectionsAllPart(seed, options).Generate()];
                 }
             );
     }
 
-    public static Faker<GetMediaMetaDataPart> GetMediaMetaDataPart(
+    public static Faker<GetLibrarySectionsAllPart> GetLibrarySectionsAllPart(
         Seed seed,
         Action<PlexApiDataConfig>? options = null
     ) =>
-        _getLibraryItemsPartFaker
+        _getLibrarySectionsAllPartFaker
             .UseSeed(seed.Next())
             .FinishWith(
                 (_, x) =>
                 {
-                    x.Stream = [_getMediaMetaDataStreamFaker.Generate()];
+                    x.Stream = [_getLibrarySectionsAllStreamFaker.Generate()];
                 }
             );
 }

@@ -27,6 +27,10 @@ public class SyncPlexMoviesCommandValidator : AbstractValidator<SyncPlexMoviesCo
                 movie.RuleFor(x => x.Key).GreaterThan(0);
             });
 
+        RuleFor(x => x.LibraryMetadata.PlexActors).NotNull();
+        RuleFor(x => x.LibraryMetadata.PlexGenres).NotNull();
+        RuleFor(x => x.LibraryMetadata.PlexCountries).NotNull();
+
         stopWatch.StopAndLog($"Finished validating {nameof(SyncPlexMoviesCommand)}");
     }
 }
@@ -102,6 +106,13 @@ public class SyncPlexMoviesCommandHandler : IRequestHandler<SyncPlexMoviesComman
                 cancellationToken
             );
 
+            var mergeResult = Result.Merge(syncActorResult, syncGenreResult, syncCountriesResult);
+            if (mergeResult.IsFailed)
+            {
+                _log.Error("Failed to sync movie metadata: {Error}", mergeResult.Errors);
+                return mergeResult.LogError();
+            }
+
             stopWatch.Stop();
 
             _log.Information(
@@ -113,12 +124,16 @@ public class SyncPlexMoviesCommandHandler : IRequestHandler<SyncPlexMoviesComman
 
             _log.DebugLine(_report.ToString());
 
-            var mergeResult = Result.Merge(syncActorResult, syncGenreResult, syncCountriesResult);
-            if (mergeResult.IsFailed)
-            {
-                _log.Error("Failed to sync movie actors, genres or countries: {Error}", mergeResult.Errors);
-                return mergeResult.LogError();
-            }
+            // Update meta data counts
+            await _dbContext
+                .PlexLibraries.Where(x => x.Id == plexLibraryId)
+                .ExecuteUpdateAsync(
+                    p =>
+                        p.SetProperty(x => x.ActorsCount, syncActorResult.Value)
+                            .SetProperty(x => x.GenresCount, syncGenreResult.Value)
+                            .SetProperty(x => x.CountriesCount, syncCountriesResult.Value),
+                    cancellationToken
+                );
 
             return Result.Ok(_report);
         }
@@ -128,7 +143,7 @@ public class SyncPlexMoviesCommandHandler : IRequestHandler<SyncPlexMoviesComman
         }
     }
 
-    private async Task<Result> SyncMovieActors(
+    private async Task<Result<int>> SyncMovieActors(
         List<PlexMovie> movies,
         Dictionary<int, PlexActor> plexActorsDict,
         int libraryId,
@@ -161,14 +176,20 @@ public class SyncPlexMoviesCommandHandler : IRequestHandler<SyncPlexMoviesComman
         }
 
         var insertResult = await Result.Try(() => _dbContext.BulkInsertAsync(list, _config, ct));
+        if (insertResult.IsFailed)
+        {
+            _log.Error("Failed to sync movie actors: {Error}", insertResult.Errors);
+            return insertResult;
+        }
+
         stopWatch.StopAndLog(
             $"Synced {list.Count} {nameof(PlexMovieActors)} for library: {libraryName} with id: {libraryId}"
         );
 
-        return insertResult;
+        return Result.Ok(list.Count);
     }
 
-    private async Task<Result> SyncMovieGenres(
+    private async Task<Result<int>> SyncMovieGenres(
         List<PlexMovie> movies,
         Dictionary<int, PlexGenre> plexGenreDict,
         int libraryId,
@@ -192,25 +213,30 @@ public class SyncPlexMoviesCommandHandler : IRequestHandler<SyncPlexMoviesComman
 
         foreach (var movie in movies)
         {
-            foreach (var role in movie.Actors)
+            foreach (var genre in movie.Genres)
             {
-                if (keyToIdDict.TryGetValue(role.Key, out var plexActorId))
+                if (keyToIdDict.TryGetValue(genre.Key, out var plexGenreId))
                 {
-                    list.Add(new PlexMovieGenres(plexActorId, libraryId, movie.Id));
+                    list.Add(new PlexMovieGenres(plexGenreId, libraryId, movie.Id));
                 }
             }
         }
 
         var insertResult = await Result.Try(() => _dbContext.BulkInsertAsync(list, _config, ct));
+        if (insertResult.IsFailed)
+        {
+            _log.Error("Failed to sync movie genres: {Error}", insertResult.Errors);
+            return insertResult;
+        }
 
         stopWatch.StopAndLog(
             $"Synced {list.Count} {nameof(PlexMovieGenres)} for library: {libraryName} with id: {libraryId}"
         );
 
-        return insertResult;
+        return Result.Ok(list.Count);
     }
 
-    private async Task<Result> SyncMovieCountries(
+    private async Task<Result<int>> SyncMovieCountries(
         List<PlexMovie> movies,
         Dictionary<int, PlexCountry> plexCountryDict,
         int libraryId,
@@ -234,22 +260,27 @@ public class SyncPlexMoviesCommandHandler : IRequestHandler<SyncPlexMoviesComman
 
         foreach (var movie in movies)
         {
-            foreach (var role in movie.Actors)
+            foreach (var country in movie.Countries)
             {
-                if (keyToIdDict.TryGetValue(role.Key, out var plexActorId))
+                if (keyToIdDict.TryGetValue(country.Key, out var plexCountryId))
                 {
-                    list.Add(new PlexMovieCountries(plexActorId, libraryId, movie.Id));
+                    list.Add(new PlexMovieCountries(plexCountryId, libraryId, movie.Id));
                 }
             }
         }
 
         var insertResult = await Result.Try(() => _dbContext.BulkInsertAsync(list, _config, ct));
+        if (insertResult.IsFailed)
+        {
+            _log.Error("Failed to sync movie countries: {Error}", insertResult.Errors);
+            return insertResult;
+        }
 
         stopWatch.StopAndLog(
             $"Synced {list.Count} {nameof(PlexMovieCountries)} for library: {libraryName} with id: {libraryId}"
         );
 
-        return insertResult;
+        return Result.Ok(list.Count);
     }
 
     private async Task RemoveMedia(int plexLibraryId, CancellationToken cancellationToken)

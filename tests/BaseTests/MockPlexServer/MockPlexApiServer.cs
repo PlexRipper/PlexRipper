@@ -276,7 +276,7 @@ public class MockPlexApiServer : IMockPlexApiServer
 
                             episodes.ForEach(x => x.SetParentValues(season));
                             episodes.ForEach(x => x.SetGrandparentValues(tvShow));
-                            episodeList.AddRange(seasons);
+                            episodeList.AddRange(episodes);
                         }
                     }
 
@@ -309,10 +309,17 @@ public class MockPlexApiServer : IMockPlexApiServer
                                 int containerStart = 0,
                                     containerSize = 0;
 
-                                if (queryDict.TryGetValue("X-Plex-Container-Start", out var containerStartValue))
-                                    containerStart = int.Parse(containerStartValue);
-                                if (queryDict.TryGetValue("X-Plex-Container-Size", out var containerSizeValue))
-                                    containerSize = int.Parse(containerSizeValue);
+                                if (
+                                    queryDict.TryGetValue("X-Plex-Container-Start", out var containerStartValue)
+                                    && int.TryParse(containerStartValue, out var start)
+                                )
+                                    containerStart = start;
+
+                                if (
+                                    queryDict.TryGetValue("X-Plex-Container-Size", out var containerSizeValue)
+                                    && int.TryParse(containerSizeValue, out var size)
+                                )
+                                    containerSize = size;
 
                                 // Check if the type is specified in the query parameters
                                 var libraryType = PlexMediaType.Unknown;

@@ -65,22 +65,12 @@ public partial class FakePlexApiData
         Action<PlexApiDataConfig>? options = null
     )
     {
-        GetMediaMetaDataType GetPlexMediaType() =>
-            type switch
-            {
-                PlexMediaType.Movie => GetMediaMetaDataType.Movie,
-                PlexMediaType.TvShow => GetMediaMetaDataType.TvShow,
-                PlexMediaType.Season => GetMediaMetaDataType.Season,
-                PlexMediaType.Episode => GetMediaMetaDataType.Episode,
-                _ => throw new InvalidOperationException($"Invalid PlexMediaType: {type} value."),
-            };
-
         return _getMediaMetaDataMetadata
             .UseSeed(seed.Next())
             .FinishWith(
                 (f, x) =>
                 {
-                    x.Type = GetPlexMediaType();
+                    x.Type = type.ToGetMediaMetaDataType();
                     x.Media = [GetMediaMetaDataMedia(seed, options).Generate()];
                     x.Guid = $"plex://{type.ToPlexMediaTypeString().ToLower()}/{f.Random.AlphaNumeric(24)}";
                 }

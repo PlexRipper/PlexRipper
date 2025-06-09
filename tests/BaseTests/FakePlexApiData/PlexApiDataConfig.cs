@@ -20,6 +20,12 @@ public class PlexApiDataConfig : BaseConfig<PlexApiDataConfig>
 
     public int PlexServerAccessCount { get; set; } = 5;
 
+    public int RolePerMediaItemCount { get; set; } = 5;
+
+    public int CountriesPerMediaItemCount { get; set; } = 2;
+
+    public int GenrePerMediaItemCount { get; set; } = 2;
+
     public int PlexServerAccessConnectionsCount { get; set; } = 5;
 
     public bool PlexServerAccessConnectionsIncludeHttps { get; set; } = false;

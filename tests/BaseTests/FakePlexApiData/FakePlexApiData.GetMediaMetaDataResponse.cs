@@ -65,8 +65,21 @@ public partial class FakePlexApiData
         Action<PlexApiDataConfig>? options = null
     )
     {
+        var config = PlexApiDataConfig.FromOptions(options);
         return _getMediaMetaDataMetadata
             .UseSeed(seed.Next())
+            .RuleFor(
+                l => l.Role,
+                _ => _getMediaMetaDataRole.GenerateUnique(config.RolePerMediaItemCount, x => x.TagKey)
+            )
+            .RuleFor(
+                l => l.Genre,
+                _ => _getMediaMetaDataGenre.GenerateUnique(config.GenrePerMediaItemCount, x => x.Tag)
+            )
+            .RuleFor(
+                l => l.Country,
+                _ => _getMediaMetaDataCountry.GenerateUnique(config.CountriesPerMediaItemCount, x => x.Tag)
+            )
             .FinishWith(
                 (f, x) =>
                 {

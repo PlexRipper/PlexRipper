@@ -54,10 +54,10 @@ public partial class FakePlexApiData
             .RuleFor(l => l.ViewCount, _ => default)
             .RuleFor(l => l.SkipCount, _ => default)
             .RuleFor(l => l.LastViewedAt, _ => default)
-            .RuleFor(l => l.Media, _ => []) // Generated in FinishWith
-            .RuleFor(l => l.Role, _ => _getMediaMetaDataRole!.Generate(5))
-            .RuleFor(l => l.Genre, _ => _getMediaMetaDataGenre!.Generate(2))
-            .RuleFor(l => l.Country, _ => _getMediaMetaDataCountry!.Generate(2))
+            .Ignore(l => l.Media) // Generated in FinishWith
+            .Ignore(l => l.Role) // Generated in FinishWith
+            .Ignore(l => l.Genre) // Generated in FinishWith
+            .Ignore(l => l.Country) // Generated in FinishWith
             .RuleFor(
                 x => x.Guids,
                 f =>

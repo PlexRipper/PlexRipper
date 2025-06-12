@@ -212,14 +212,13 @@ public class SyncPlexTvShowsCommandHandler : IRequestHandler<SyncPlexTvShowsComm
             }
         }
 
+        var distinctGenres = plexTvShowGenres.DistinctBy(x => new { x.PlexTvShowId, x.GenresId }).ToList();
         var insertResult = await Result.Try(
-            () =>
-                _dbContext.BulkInsertAsync(
-                    plexTvShowGenres.DistinctBy(x => new { x.PlexTvShowId, x.GenresId }).ToList(),
-                    _config,
-                    cancellationToken
-                )
+            () => _dbContext.BulkInsertAsync(distinctGenres, _config, cancellationToken)
         );
+        await _dbContext
+            .PlexLibraries.Where(x => x.Id == plexLibraryId)
+            .ExecuteUpdateAsync(p => p.SetProperty(x => x.GenresCount, distinctGenres.Count), cancellationToken);
 
         stopWatch.StopAndLog(
             $"Synced {plexTvShowGenres.Count} {nameof(PlexTvShowGenres)} for library: {libraryName} with id: {plexLibraryId}"
@@ -259,14 +258,15 @@ public class SyncPlexTvShowsCommandHandler : IRequestHandler<SyncPlexTvShowsComm
             }
         }
 
+        var distinctCountries = plexTvShowCountries.DistinctBy(x => new { x.PlexTvShowId, x.CountryId }).ToList();
+
         var insertResult = await Result.Try(
-            () =>
-                _dbContext.BulkInsertAsync(
-                    plexTvShowCountries.DistinctBy(x => new { x.PlexTvShowId, x.CountryId }).ToList(),
-                    _config,
-                    CancellationToken.None
-                )
+            () => _dbContext.BulkInsertAsync(distinctCountries, _config, CancellationToken.None)
         );
+
+        await _dbContext
+            .PlexLibraries.Where(x => x.Id == plexLibraryId)
+            .ExecuteUpdateAsync(p => p.SetProperty(x => x.CountriesCount, distinctCountries.Count), cancellationToken);
 
         stopWatch.StopAndLog(
             $"Synced {plexTvShowCountries.Count} {nameof(PlexTvShowCountries)} for library: {libraryName} with id: {plexLibraryId}"
@@ -299,21 +299,20 @@ public class SyncPlexTvShowsCommandHandler : IRequestHandler<SyncPlexTvShowsComm
 
         foreach (var plexTvShow in plexTvShows)
         {
-            foreach (var plexRole in plexTvShow.Actors)
+            foreach (var actor in plexTvShow.Actors)
             {
-                if (keyToIdDict.TryGetValue(plexRole.Key, out var roleId))
-                    plexTvShowRoles.Add(new PlexTvShowActors(roleId, plexLibraryId, plexTvShow.Id));
+                if (keyToIdDict.TryGetValue(actor.Key, out var plexActorId))
+                    plexTvShowRoles.Add(new PlexTvShowActors(plexActorId, plexLibraryId, plexTvShow.Id));
             }
         }
 
+        var distinctActors = plexTvShowRoles.DistinctBy(x => new { x.PlexTvShowId, RolesId = x.PlexActorId }).ToList();
         var insertResult = await Result.Try(
-            () =>
-                _dbContext.BulkInsertAsync(
-                    plexTvShowRoles.DistinctBy(x => new { x.PlexTvShowId, RolesId = x.PlexActorId }).ToList(),
-                    _config,
-                    CancellationToken.None
-                )
+            () => _dbContext.BulkInsertAsync(distinctActors, _config, cancellationToken)
         );
+        await _dbContext
+            .PlexLibraries.Where(x => x.Id == plexLibraryId)
+            .ExecuteUpdateAsync(p => p.SetProperty(x => x.ActorsCount, distinctActors.Count), cancellationToken);
 
         stopWatch.StopAndLog(
             $"Synced {plexTvShowRoles.Count} {nameof(PlexTvShowActors)} for library: {libraryName} with id: {plexLibraryId}"

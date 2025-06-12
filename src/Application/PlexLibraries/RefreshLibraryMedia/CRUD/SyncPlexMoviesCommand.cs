@@ -166,9 +166,9 @@ public class SyncPlexMoviesCommandHandler : IRequestHandler<SyncPlexMoviesComman
 
         foreach (var movie in movies)
         {
-            foreach (var role in movie.Actors)
+            foreach (var actor in movie.Actors)
             {
-                if (keyToIdDict.TryGetValue(role.Key, out var plexActorId))
+                if (keyToIdDict.TryGetValue(actor.Key, out var plexActorId))
                 {
                     list.Add(new PlexMovieActors(plexActorId, libraryId, movie.Id));
                 }

@@ -120,6 +120,7 @@ public class RefreshLibraryMediaEndpointIntegrationTests : BaseIntegrationTests
         const int roleCount = 5;
         const int genreCount = 2;
         const int countryCount = 2;
+        const int totalEpisodeCount = tvShowCount * seasonCount * episodeCount;
 
         using var container = await CreateContainer(
             seed,
@@ -179,9 +180,7 @@ public class RefreshLibraryMediaEndpointIntegrationTests : BaseIntegrationTests
         refreshedLibrary.ShouldNotBeNull();
         refreshedLibrary.TvShows.Count.ShouldBe(tvShowCount);
         refreshedLibrary.TvShows.Sum(x => x.Seasons.Count).ShouldBe(tvShowCount * seasonCount);
-        refreshedLibrary
-            .TvShows.Sum(x => x.Seasons.Sum(s => s.Episodes.Count))
-            .ShouldBe(tvShowCount * seasonCount * episodeCount);
+        refreshedLibrary.TvShows.Sum(x => x.Seasons.Sum(s => s.Episodes.Count)).ShouldBe(totalEpisodeCount);
         refreshedLibrary.SyncedAt.ShouldNotBeNull();
         refreshedLibrary.ActorsCount.ShouldBeGreaterThan(0);
         refreshedLibrary.GenresCount.ShouldBeGreaterThan(0);
@@ -198,26 +197,26 @@ public class RefreshLibraryMediaEndpointIntegrationTests : BaseIntegrationTests
 
         // Verify the library was refreshed
         var movieActorCount = await dbContext.PlexTvShowActors.CountAsync();
-        movieActorCount.ShouldBe(roleCount * episodeCount);
+        movieActorCount.ShouldBe(roleCount * tvShowCount);
 
         var genreTvShowCount = await dbContext.PlexTvShowGenres.CountAsync();
-        genreTvShowCount.ShouldBe(genreCount * episodeCount);
+        genreTvShowCount.ShouldBe(genreCount * tvShowCount);
 
         var countryTvShowCount = await dbContext.PlexTvShowCountries.CountAsync();
-        countryTvShowCount.ShouldBe(countryCount * episodeCount);
+        countryTvShowCount.ShouldBe(countryCount * tvShowCount);
 
         // Verify media data
         var episodes = await dbContext.PlexTvShowEpisodes.IncludeMediaData().ToListAsync();
         episodes.ShouldNotBeEmpty();
-        episodes.Count.ShouldBe(episodeCount);
+        episodes.Count.ShouldBe(totalEpisodeCount);
 
         var mediaList = episodes.SelectMany(x => x.MediaDataList).ToList();
-        mediaList.Count.ShouldBeGreaterThanOrEqualTo(episodeCount);
+        mediaList.Count.ShouldBeGreaterThanOrEqualTo(totalEpisodeCount);
 
         var parts = mediaList.SelectMany(x => x.Parts).ToList();
-        parts.Count.ShouldBeGreaterThanOrEqualTo(episodeCount);
+        parts.Count.ShouldBeGreaterThanOrEqualTo(totalEpisodeCount);
 
         var streams = parts.SelectMany(x => x.Streams).ToList();
-        streams.Count.ShouldBeGreaterThanOrEqualTo(episodeCount);
+        streams.Count.ShouldBeGreaterThanOrEqualTo(totalEpisodeCount);
     }
 }

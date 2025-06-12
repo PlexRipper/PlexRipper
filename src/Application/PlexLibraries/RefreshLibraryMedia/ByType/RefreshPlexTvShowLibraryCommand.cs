@@ -155,8 +155,10 @@ public class RefreshPlexTvShowLibraryCommandHandler
                 return syncResult.ToResult().LogError();
             }
 
+            // Refresh the PlexLibrary from the database to ensure we have the latest data
+            plexLibrary = await _dbContext.PlexLibraries.GetAsync(plexLibrary.Id, cancellationToken);
             var mediaSize = tvShows.Sum(x => x.MediaSize);
-            plexLibrary.SetTvShowMetaData(
+            plexLibrary!.SetTvShowMetaData(
                 plexLibrary.TvShows.Count,
                 rawSeasonData.Count,
                 rawEpisodesData.Count,

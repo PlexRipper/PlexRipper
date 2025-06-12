@@ -96,7 +96,9 @@ public class RefreshPlexMovieLibraryCommandHandler
             }
         );
 
-        var mediaSize = plexLibrary.Movies.Sum(x => x.MediaSize);
+        // Refresh the PlexLibrary from the database to ensure we have the latest data
+        plexLibrary = await _dbContext.PlexLibraries.GetAsync(plexLibrary.Id, cancellationToken);
+        var mediaSize = plexLibrary!.Movies.Sum(x => x.MediaSize);
         plexLibrary.SetMovieMetaData(plexLibrary.Movies.Count, mediaSize);
 
         if (plexLibrary.Movies.Any() && mediaSize == 0)

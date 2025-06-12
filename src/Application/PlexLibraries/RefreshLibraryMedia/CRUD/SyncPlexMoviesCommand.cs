@@ -42,14 +42,7 @@ public class SyncPlexMoviesCommandHandler : IRequestHandler<SyncPlexMoviesComman
 
     private readonly CrudMoviesReport _report = new();
 
-    private readonly BulkConfig? _config =
-        new()
-        {
-            BatchSize = 500,
-            SetOutputIdentity = true,
-            PreserveInsertOrder = true,
-            CalculateStats = true,
-        };
+    private readonly BulkConfig? _config = new() { BatchSize = 500, SetOutputIdentity = true };
 
     public SyncPlexMoviesCommandHandler(ILog log, IPlexRipperDbContext dbContext)
     {
@@ -82,6 +75,10 @@ public class SyncPlexMoviesCommandHandler : IRequestHandler<SyncPlexMoviesComman
             await _dbContext.BulkInsertPlexMoviesAsync(plexMovies, plexServerId, plexLibraryId, ct: cancellationToken);
             _report.CreatedMovies = plexMovies.Count;
 
+            var plexLibrary = await _dbContext
+                .PlexLibraries.AsTracking()
+                .FirstOrDefaultAsync(x => x.Id == plexLibraryId, cancellationToken);
+
             var syncActorResult = await SyncMovieActors(
                 plexMovies,
                 command.LibraryMetadata.PlexActors,
@@ -89,6 +86,9 @@ public class SyncPlexMoviesCommandHandler : IRequestHandler<SyncPlexMoviesComman
                 libraryName,
                 cancellationToken
             );
+
+            if (syncActorResult.IsSuccess)
+                plexLibrary!.ActorsCount = syncActorResult.Value;
 
             var syncGenreResult = await SyncMovieGenres(
                 plexMovies,
@@ -98,6 +98,9 @@ public class SyncPlexMoviesCommandHandler : IRequestHandler<SyncPlexMoviesComman
                 cancellationToken
             );
 
+            if (syncGenreResult.IsSuccess)
+                plexLibrary!.GenresCount = syncGenreResult.Value;
+
             var syncCountriesResult = await SyncMovieCountries(
                 plexMovies,
                 command.LibraryMetadata.PlexCountries,
@@ -105,6 +108,11 @@ public class SyncPlexMoviesCommandHandler : IRequestHandler<SyncPlexMoviesComman
                 libraryName,
                 cancellationToken
             );
+
+            if (syncCountriesResult.IsSuccess)
+                plexLibrary!.CountriesCount = syncCountriesResult.Value;
+
+            await _dbContext.SaveChangesAsync(cancellationToken);
 
             var mergeResult = Result.Merge(syncActorResult, syncGenreResult, syncCountriesResult);
             if (mergeResult.IsFailed)
@@ -123,17 +131,6 @@ public class SyncPlexMoviesCommandHandler : IRequestHandler<SyncPlexMoviesComman
             );
 
             _log.DebugLine(_report.ToString());
-
-            // Update meta data counts
-            await _dbContext
-                .PlexLibraries.Where(x => x.Id == plexLibraryId)
-                .ExecuteUpdateAsync(
-                    p =>
-                        p.SetProperty(x => x.ActorsCount, syncActorResult.Value)
-                            .SetProperty(x => x.GenresCount, syncGenreResult.Value)
-                            .SetProperty(x => x.CountriesCount, syncCountriesResult.Value),
-                    cancellationToken
-                );
 
             return Result.Ok(_report);
         }

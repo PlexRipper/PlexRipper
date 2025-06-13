@@ -11,7 +11,7 @@ import {
 import type { IMediaOverviewSort } from '@composables/event-bus';
 import type { IMetaDataMediaFilter, ISelection } from '@interfaces';
 import { plexLibraryApi, plexMediaApi } from '@api';
-import { map, switchMap, tap } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 import { iif, defer, type Observable, of, forkJoin } from 'rxjs';
 import { useSettingsStore, useLibraryStore } from '@store';
 
@@ -122,7 +122,7 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 					}),
 				)),
 			]).pipe(
-				map(([media, _]) => media),
+				map(([media]) => media),
 				map(({ isSuccess, value }): PlexMediaStatisticsDTO | null => {
 					if (isSuccess && value) {
 						return value;

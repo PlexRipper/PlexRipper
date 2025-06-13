@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 namespace PlexRipper.Application;
 
 public record SyncPlexTvShowsCommand(InsertMediaMetaDataCommandResponse LibraryMetadata)
-    : IRequest<Result<CrudTvShowsReport>>;
+    : IRequest<Result<BulkInsertTvShowsRapport>>;
 
 public class SyncPlexTvShowsCommandValidator : AbstractValidator<SyncPlexTvShowsCommand>
 {
@@ -62,12 +62,10 @@ public class SyncPlexTvShowsCommandValidator : AbstractValidator<SyncPlexTvShows
     }
 }
 
-public class SyncPlexTvShowsCommandHandler : IRequestHandler<SyncPlexTvShowsCommand, Result<CrudTvShowsReport>>
+public class SyncPlexTvShowsCommandHandler : IRequestHandler<SyncPlexTvShowsCommand, Result<BulkInsertTvShowsRapport>>
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
-
-    private readonly CrudTvShowsReport _report = new();
 
     private readonly BulkConfig? _config =
         new()
@@ -86,7 +84,7 @@ public class SyncPlexTvShowsCommandHandler : IRequestHandler<SyncPlexTvShowsComm
         _dbContext = dbContext;
     }
 
-    public async Task<Result<CrudTvShowsReport>> Handle(
+    public async Task<Result<BulkInsertTvShowsRapport>> Handle(
         SyncPlexTvShowsCommand command,
         CancellationToken cancellationToken
     )
@@ -94,10 +92,11 @@ public class SyncPlexTvShowsCommandHandler : IRequestHandler<SyncPlexTvShowsComm
         try
         {
             var plexLibraryId = command.LibraryMetadata.PlexLibraryId;
-            var plexLibraryName = _dbContext
-                .PlexLibraries.Where(x => x.Id == plexLibraryId)
-                .Select(x => x.Title)
-                .FirstOrDefault();
+            var plexLibraryName = await _dbContext.GetPlexLibraryNameById(
+                plexLibraryId,
+                cancellationToken: cancellationToken
+            );
+            var plexServerId = await _dbContext.GetPlexServerIdFromPlexLibraryId(plexLibraryId);
 
             if (string.IsNullOrWhiteSpace(plexLibraryName))
                 return ResultExtensions.EntityNotFound(nameof(command.LibraryMetadata.PlexLibrary), plexLibraryId);
@@ -110,12 +109,24 @@ public class SyncPlexTvShowsCommandHandler : IRequestHandler<SyncPlexTvShowsComm
 
             var stopWatch = Stopwatch.StartNew();
 
-            await RemoveMedia(plexLibraryId, cancellationToken);
+            var removeRapport = await RemoveMedia(plexLibraryId, cancellationToken);
 
             var plexTvShows = command.LibraryMetadata.PlexLibrary.TvShows.ToList();
 
-            await _dbContext.BulkInsertAsync(plexTvShows, _config, cancellationToken);
-            _report.CreatedTvShows = plexTvShows.Count;
+            var bulkInsertRapportResult = await _dbContext.BulkInsertPlexTvShowsAsync(
+                plexTvShows,
+                plexServerId,
+                plexLibraryId,
+                cancellationToken
+            );
+
+            if (bulkInsertRapportResult.IsFailed)
+                return bulkInsertRapportResult;
+
+            // Map the removed media counts to the bulk insert rapport
+            bulkInsertRapportResult.Value.DeletedTvShows = removeRapport.DeletedTvShows;
+            bulkInsertRapportResult.Value.DeletedSeasons = removeRapport.DeletedSeasons;
+            bulkInsertRapportResult.Value.DeletedEpisodes = removeRapport.DeletedEpisodes;
 
             // Sync metadata such as Countries, Roles and Genre
             var genreDict = command.LibraryMetadata.PlexGenres;
@@ -128,40 +139,6 @@ public class SyncPlexTvShowsCommandHandler : IRequestHandler<SyncPlexTvShowsComm
                 SyncTvShowActors(plexTvShows, actorDict, plexLibraryId, plexLibraryName, cancellationToken)
             );
 
-            // Set the foreign keys (PlexTvShowId) in PlexSeason based on the inserted PlexTvShows
-            var plexSeasons = plexTvShows
-                .SelectMany(tvShow =>
-                    tvShow.Seasons.Select(season =>
-                    {
-                        season.TvShowId = tvShow.Id;
-
-                        foreach (var episode in season.Episodes)
-                            episode.TvShowId = tvShow.Id;
-
-                        return season;
-                    })
-                )
-                .ToList();
-
-            // Bulk insert PlexSeasons
-            await _dbContext.BulkInsertAsync(plexSeasons, _config, cancellationToken);
-            _report.CreatedSeasons = plexSeasons.Count;
-
-            // Set the foreign keys (PlexSeasonId) in PlexEpisodes based on the inserted PlexSeasons
-            var plexEpisodes = plexSeasons
-                .SelectMany(season =>
-                {
-                    foreach (var episode in season.Episodes)
-                        episode.TvShowSeasonId = season.Id;
-
-                    return season.Episodes;
-                })
-                .ToList();
-
-            // Bulk insert PlexEpisodes
-            await _dbContext.BulkInsertAsync(plexEpisodes, _config, cancellationToken);
-            _report.CreatedEpisodes = plexEpisodes.Count;
-
             stopWatch.Stop();
 
             _log.Information(
@@ -171,9 +148,9 @@ public class SyncPlexTvShowsCommandHandler : IRequestHandler<SyncPlexTvShowsComm
                 stopWatch.Elapsed.TotalMilliseconds
             );
 
-            _log.DebugLine(_report.ToString());
+            _log.DebugLine(bulkInsertRapportResult.Value.ToString());
 
-            return Result.Ok(_report);
+            return bulkInsertRapportResult;
         }
         catch (Exception e)
         {
@@ -321,51 +298,31 @@ public class SyncPlexTvShowsCommandHandler : IRequestHandler<SyncPlexTvShowsComm
         return insertResult;
     }
 
-    private async Task RemoveMedia(int plexLibraryId, CancellationToken cancellationToken)
+    private async Task<BulkInsertTvShowsRapport> RemoveMedia(int plexLibraryId, CancellationToken cancellationToken)
     {
-        _report.DeletedEpisodes = await _dbContext
-            .PlexTvShowEpisodes.Where(e => e.PlexLibraryId == plexLibraryId)
+        await _dbContext
+            .PlexTvShowEpisodeDataStreams.Where(e => e.PlexLibraryId == plexLibraryId)
             .ExecuteDeleteAsync(cancellationToken);
 
-        _report.DeletedSeasons = await _dbContext
-            .PlexTvShowSeason.Where(s => s.PlexLibraryId == plexLibraryId)
+        await _dbContext
+            .PlexTvShowEpisodeDataParts.Where(e => e.PlexLibraryId == plexLibraryId)
             .ExecuteDeleteAsync(cancellationToken);
 
-        _report.DeletedTvShows = await _dbContext
-            .PlexTvShows.Where(tv => tv.PlexLibraryId == plexLibraryId)
+        await _dbContext
+            .PlexTvShowEpisodeData.Where(e => e.PlexLibraryId == plexLibraryId)
             .ExecuteDeleteAsync(cancellationToken);
+
+        return new BulkInsertTvShowsRapport
+        {
+            DeletedEpisodes = await _dbContext
+                .PlexTvShowEpisodes.Where(e => e.PlexLibraryId == plexLibraryId)
+                .ExecuteDeleteAsync(cancellationToken),
+            DeletedSeasons = await _dbContext
+                .PlexTvShowSeason.Where(s => s.PlexLibraryId == plexLibraryId)
+                .ExecuteDeleteAsync(cancellationToken),
+            DeletedTvShows = await _dbContext
+                .PlexTvShows.Where(tv => tv.PlexLibraryId == plexLibraryId)
+                .ExecuteDeleteAsync(cancellationToken),
+        };
     }
-}
-
-public record CrudTvShowsReport
-{
-    public int CreatedTvShows { get; set; }
-
-    public int UpdatedTvShows { get; set; }
-
-    public int DeletedTvShows { get; set; }
-
-    public int CreatedSeasons { get; set; }
-
-    public int UpdatedSeasons { get; set; }
-
-    public int DeletedSeasons { get; set; }
-
-    public int CreatedEpisodes { get; set; }
-
-    public int UpdatedEpisodes { get; set; }
-
-    public int DeletedEpisodes { get; set; }
-
-    public override string ToString() =>
-        $@"
-        CreatedTvShows: {CreatedTvShows}
-        UpdatedTvShows: {UpdatedTvShows}
-        DeletedTvShows: {DeletedTvShows}
-        CreatedSeasons: {CreatedSeasons}
-        UpdatedSeasons: {UpdatedSeasons}
-        DeletedSeasons: {DeletedSeasons}
-        CreatedEpisodes: {CreatedEpisodes}
-        UpdatedEpisodes: {UpdatedEpisodes}
-        DeletedEpisodes: {DeletedEpisodes}";
 }

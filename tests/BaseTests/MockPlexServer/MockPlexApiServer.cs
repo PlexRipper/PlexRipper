@@ -107,8 +107,10 @@ public class MockPlexApiServer : IMockPlexApiServer
         // Add devices and connections to the internal lists
         foreach (var device in devices)
         {
-            _connections.Add(device.ClientIdentifier, device.Connections);
-            _servers.Add(device);
+            _connections.TryAdd(device.ClientIdentifier, device.Connections);
+
+            if (_servers.All(s => s.ClientIdentifier != device.ClientIdentifier))
+                _servers.Add(device);
         }
 
         var uriBuilder = new UriBuilder("https://plex.tv/") { Path = "/api/v2/resources" };
@@ -175,7 +177,7 @@ public class MockPlexApiServer : IMockPlexApiServer
             var plexServers = _dbContext.PlexServers.IncludeLibraries().ToList();
 
             foreach (var plexServer in plexServers)
-                _libraries.Add(plexServer.MachineIdentifier, plexServer.PlexLibraries.ToList().ToPlexApiDTO());
+                _libraries.TryAdd(plexServer.MachineIdentifier, plexServer.PlexLibraries.ToList().ToPlexApiDTO());
         }
 
         var libraries = new List<GetAllLibrariesDirectory>();
@@ -244,7 +246,7 @@ public class MockPlexApiServer : IMockPlexApiServer
                         .GetMediaMetaDataMetadata(_seed, PlexMediaType.Movie, _options)
                         .Generate(_config.MoviesPerLibraryCount);
 
-                    _movies.Add(libraryKey, movies);
+                    _movies.TryAdd(libraryKey, movies);
                     continue;
                 }
 
@@ -280,9 +282,9 @@ public class MockPlexApiServer : IMockPlexApiServer
                         }
                     }
 
-                    _tvShows.Add(libraryKey, tvShowList);
-                    _seasons.Add(libraryKey, seasonList);
-                    _episodes.Add(libraryKey, episodeList);
+                    _tvShows.TryAdd(libraryKey, tvShowList);
+                    _seasons.TryAdd(libraryKey, seasonList);
+                    _episodes.TryAdd(libraryKey, episodeList);
                     continue;
                 }
 

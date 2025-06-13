@@ -9,7 +9,7 @@ namespace PlexRipper.Application;
 public class SyncServerMediaJob : IJob
 {
     private readonly ILog _log;
-    private readonly IMediator _mediator;
+    private readonly ICommandExecutor _commandExecutor;
     private readonly IPlexRipperDbContext _dbContext;
     private readonly ISignalRService _signalRService;
 
@@ -20,13 +20,13 @@ public class SyncServerMediaJob : IJob
 
     public SyncServerMediaJob(
         ILog log,
-        IMediator mediator,
+        ICommandExecutor commandExecutor,
         IPlexRipperDbContext dbContext,
         ISignalRService signalRService
     )
     {
         _log = log;
-        _mediator = mediator;
+        _commandExecutor = commandExecutor;
         _dbContext = dbContext;
         _signalRService = signalRService;
     }
@@ -68,9 +68,11 @@ public class SyncServerMediaJob : IJob
 
             var plexLibraries = forceSync
                 ? plexServer.PlexLibraries
-                : plexServer.PlexLibraries.Where(x =>
-                    x.Outdated && x.Type is PlexMediaType.Movie or PlexMediaType.TvShow
-                );
+                : plexServer
+                    .PlexLibraries.Where(x =>
+                        x is { Outdated: true, Type: PlexMediaType.Movie or PlexMediaType.TvShow }
+                    )
+                    .ToList();
 
             if (!plexLibraries.Any())
             {
@@ -114,14 +116,14 @@ public class SyncServerMediaJob : IJob
             // Sync movie type libraries first because it is a lot quicker than TvShows.
             foreach (var library in plexLibraries.Where(x => x.Type == PlexMediaType.Movie))
             {
-                var result = await _mediator.Send(new RefreshLibraryMediaCommand(library.Id, progress));
+                var result = await _commandExecutor.Send(new RefreshLibraryMediaCommand(library.Id, progress));
                 if (result.IsFailed)
                     results.Add(result.ToResult());
             }
 
             foreach (var library in plexLibraries.Where(x => x.Type == PlexMediaType.TvShow))
             {
-                var result = await _mediator.Send(new RefreshLibraryMediaCommand(library.Id, progress));
+                var result = await _commandExecutor.Send(new RefreshLibraryMediaCommand(library.Id, progress));
                 if (result.IsFailed)
                     results.Add(result.ToResult());
             }

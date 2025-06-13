@@ -65,9 +65,9 @@ public class GetLibraryMediaCommandHandler : ICommandHandler<GetLibraryMediaComm
             new LibraryMetadata
             {
                 Library = updatedPlexLibrary,
-                Countries = mediaList.ToUniquePlexCountry(),
-                Genres = mediaList.ToUniquePlexGenre(),
-                Roles = mediaList.ToUniquePlexRole(),
+                Countries = mediaList.SelectMany(x => x.Country).ToList(),
+                Genres = mediaList.SelectMany(x => x.Genre).ToList(),
+                Actors = mediaList.SelectMany(x => x.Role).ToList(),
             }
         );
     }

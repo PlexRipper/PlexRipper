@@ -9,14 +9,18 @@ using WebAPI.Contracts;
 
 namespace PlexRipper.Application;
 
-public record RefreshPlexTvShowLibraryCommand(PlexLibrary PlexLibrary, Action<LibraryProgress> Action)
-    : ICommand<Result<PlexLibrary>>;
+public record RefreshPlexTvShowLibraryCommand(
+    InsertMediaMetaDataCommandResponse LibraryMetadata,
+    Action<LibraryProgress> Action
+) : ICommand<Result<PlexLibrary>>;
 
 public class RefreshPlexTvShowLibraryCommandValidator : AbstractValidator<RefreshPlexTvShowLibraryCommand>
 {
     public RefreshPlexTvShowLibraryCommandValidator()
     {
-        RuleFor(x => x.PlexLibrary.Id).GreaterThan(0);
+        RuleFor(x => x.LibraryMetadata).NotNull();
+        RuleFor(x => x.LibraryMetadata.PlexLibrary).NotNull();
+        RuleFor(x => x.LibraryMetadata.PlexLibraryId).GreaterThan(0);
     }
 }
 
@@ -49,15 +53,14 @@ public class RefreshPlexTvShowLibraryCommandHandler
         CancellationToken cancellationToken
     )
     {
-        var plexLibrary = command.PlexLibrary;
+        var plexLibrary = command.LibraryMetadata.PlexLibrary;
 
         if (plexLibrary.Type != PlexMediaType.TvShow)
             return Result.Fail("PlexLibrary is not of type TvShow").LogError();
 
         if (plexLibrary.TvShows.Any())
         {
-            var timer = new Stopwatch();
-            timer.Start();
+            var stopwatch = Stopwatch.StartNew();
 
             // Phase 2 of 5: Season data was retrieved successfully.
             var rawSeasonDataResult = await _commandExecutor.Send(
@@ -109,11 +112,11 @@ public class RefreshPlexTvShowLibraryCommandHandler
             // Phase 4 of 5: PlexLibrary media data was parsed successfully.
             _log.Here()
                 .Debug(
-                    "Finished retrieving all media for library {PlexLibraryName} in {Elapsed:000} seconds",
+                    "Finished retrieving all media for library {PlexLibraryName} in {ElapsedSeconds:F2} seconds",
                     plexLibrary.Title,
-                    timer.Elapsed.TotalSeconds
+                    stopwatch.Elapsed.TotalSeconds
                 );
-            timer.Restart();
+            stopwatch.Restart();
 
             var rawSeasonData = rawSeasonDataResult.Value;
             var rawEpisodesData = rawEpisodesDataResult.Value;
@@ -132,7 +135,10 @@ public class RefreshPlexTvShowLibraryCommandHandler
             );
 
             // Update the MetaData of this library
-            var syncResult = await _mediator.Send(new SyncPlexTvShowsCommand(tvShows.ToList()), cancellationToken);
+            var syncResult = await _mediator.Send(
+                new SyncPlexTvShowsCommand(command.LibraryMetadata),
+                cancellationToken
+            );
             if (syncResult.IsFailed)
             {
                 await _progressReporter.SendProgress(
@@ -149,8 +155,10 @@ public class RefreshPlexTvShowLibraryCommandHandler
                 return syncResult.ToResult().LogError();
             }
 
+            // Refresh the PlexLibrary from the database to ensure we have the latest data
+            plexLibrary = await _dbContext.PlexLibraries.GetAsync(plexLibrary.Id, cancellationToken);
             var mediaSize = tvShows.Sum(x => x.MediaSize);
-            plexLibrary.SetTvShowMetaData(
+            plexLibrary!.SetTvShowMetaData(
                 plexLibrary.TvShows.Count,
                 rawSeasonData.Count,
                 rawEpisodesData.Count,
@@ -170,9 +178,9 @@ public class RefreshPlexTvShowLibraryCommandHandler
 
             _log.Here()
                 .Debug(
-                    "Finished updating all media in the database for library {PlexLibraryName} in {Elapsed:0} seconds",
+                    "Finished updating all media in the database for library {PlexLibraryName} in {ElapsedSeconds:F2} seconds",
                     plexLibrary.Title,
-                    timer.Elapsed.TotalSeconds
+                    stopwatch.Elapsed.TotalSeconds
                 );
 
             // Phase 5 of 5: Database has been successfully updated with new library data.

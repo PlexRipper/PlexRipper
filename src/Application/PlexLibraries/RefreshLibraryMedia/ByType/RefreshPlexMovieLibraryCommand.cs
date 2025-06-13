@@ -6,15 +6,18 @@ using WebAPI.Contracts;
 
 namespace PlexRipper.Application;
 
-public record RefreshPlexMovieLibraryCommand(PlexLibrary PlexLibrary, Action<LibraryProgress> Action)
-    : ICommand<Result<PlexLibrary>>;
+public record RefreshPlexMovieLibraryCommand(
+    InsertMediaMetaDataCommandResponse LibraryMetadata,
+    Action<LibraryProgress> Action
+) : ICommand<Result<PlexLibrary>>;
 
 public class RefreshPlexMovieLibraryCommandValidator : AbstractValidator<RefreshPlexMovieLibraryCommand>
 {
     public RefreshPlexMovieLibraryCommandValidator()
     {
-        RuleFor(x => x.PlexLibrary).NotNull();
-        RuleFor(x => x.PlexLibrary.Id).GreaterThan(0);
+        RuleFor(x => x.LibraryMetadata).NotNull();
+        RuleFor(x => x.LibraryMetadata.PlexLibrary).NotNull();
+        RuleFor(x => x.LibraryMetadata.PlexLibraryId).GreaterThan(0);
     }
 }
 
@@ -44,7 +47,7 @@ public class RefreshPlexMovieLibraryCommandHandler
         CancellationToken cancellationToken
     )
     {
-        var plexLibrary = command.PlexLibrary;
+        var plexLibrary = command.LibraryMetadata.PlexLibrary;
 
         if (plexLibrary.Movies.Any())
         {
@@ -53,7 +56,7 @@ public class RefreshPlexMovieLibraryCommandHandler
                 plexMovie.SortIndex = i++;
 
             var createResult = await _mediator.Send(
-                new SyncPlexMoviesCommand(plexLibrary.Movies.ToList(), plexLibrary.PlexServerId, plexLibrary.Id),
+                new SyncPlexMoviesCommand(command.LibraryMetadata),
                 cancellationToken
             );
             if (createResult.IsFailed)
@@ -93,7 +96,9 @@ public class RefreshPlexMovieLibraryCommandHandler
             }
         );
 
-        var mediaSize = plexLibrary.Movies.Sum(x => x.MediaSize);
+        // Refresh the PlexLibrary from the database to ensure we have the latest data
+        plexLibrary = await _dbContext.PlexLibraries.GetAsync(plexLibrary.Id, cancellationToken);
+        var mediaSize = plexLibrary!.Movies.Sum(x => x.MediaSize);
         plexLibrary.SetMovieMetaData(plexLibrary.Movies.Count, mediaSize);
 
         if (plexLibrary.Movies.Any() && mediaSize == 0)

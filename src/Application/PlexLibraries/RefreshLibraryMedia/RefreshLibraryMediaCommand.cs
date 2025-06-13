@@ -1,6 +1,6 @@
 ﻿using Data.Contracts;
+using FastEndpoints;
 using FluentValidation;
-using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
 using PlexApi.Contracts;
 using WebAPI.Contracts;
@@ -14,7 +14,7 @@ namespace PlexRipper.Application;
 /// <param name="Action">The action to call for a progress update.</param>
 /// <returns>Returns the PlexLibrary with the containing media.</returns>
 public record RefreshLibraryMediaCommand(int PlexLibraryId, Action<LibraryProgress> Action)
-    : IRequest<Result<PlexLibrary>>;
+    : ICommand<Result<PlexLibrary>>;
 
 public class RefreshLibraryMediaCommandValidator : AbstractValidator<RefreshLibraryMediaCommand>
 {
@@ -24,35 +24,28 @@ public class RefreshLibraryMediaCommandValidator : AbstractValidator<RefreshLibr
     }
 }
 
-public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryMediaCommand, Result<PlexLibrary>>
+public class RefreshLibraryMediaCommandHandler : ICommandHandler<RefreshLibraryMediaCommand, Result<PlexLibrary>>
 {
-    private readonly IMediator _mediator;
     private readonly IPlexRipperDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IRefreshLibraryProgressReporter _progressReporter;
 
     public RefreshLibraryMediaCommandHandler(
-        ILog log,
-        IMediator mediator,
         IPlexRipperDbContext dbContext,
         ICommandExecutor commandExecutor,
         IRefreshLibraryProgressReporter progressReporter
     )
     {
-        _mediator = mediator;
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;
         _progressReporter = progressReporter;
     }
 
-    public async Task<Result<PlexLibrary>> Handle(
-        RefreshLibraryMediaCommand command,
-        CancellationToken cancellationToken
-    )
+    public async Task<Result<PlexLibrary>> ExecuteAsync(RefreshLibraryMediaCommand command, CancellationToken ct)
     {
         var plexLibrary = await _dbContext
             .PlexLibraries.Include(x => x.PlexServer)
-            .FirstOrDefaultAsync(x => x.Id == command.PlexLibraryId, cancellationToken);
+            .FirstOrDefaultAsync(x => x.Id == command.PlexLibraryId, ct);
 
         if (plexLibrary is null)
             return ResultExtensions.EntityNotFound(nameof(plexLibrary), command.PlexLibraryId);
@@ -74,34 +67,42 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
                         }
                     )
             ),
-            cancellationToken
+            ct
         );
 
         if (syncLibraryMediaResult.IsFailed)
             return syncLibraryMediaResult.LogError();
 
-        // Phase 2: Sync the metadata such as Country, Roles and Genres for the library
-        var syncPlexLibraryMediaMetaDataResult = await _mediator.Send(
-            new SyncPlexLibraryMediaMetaDataCommand(syncLibraryMediaResult.Value, plexLibrary.Id),
-            cancellationToken
+        // Phase 2: Insert the media metadata into the database
+        var insertPlexLibraryMediaMetaDataResult = await _commandExecutor.Send(
+            new InsertMediaMetaDataCommand(syncLibraryMediaResult.Value),
+            ct
+        );
+        if (insertPlexLibraryMediaMetaDataResult.IsFailed)
+            return insertPlexLibraryMediaMetaDataResult.LogError();
+
+        // Phase 3: Sync the metadata such as Country, Actors and Genres for the library
+        var syncPlexLibraryMediaMetaDataResult = await _commandExecutor.Send(
+            new SyncPlexLibraryMediaMetaDataCommand(insertPlexLibraryMediaMetaDataResult.Value),
+            ct
         );
 
         if (syncPlexLibraryMediaMetaDataResult.IsFailed)
             return syncPlexLibraryMediaMetaDataResult.LogError();
 
+        // Phase 4: Refresh the Plex library based on the media type
         var newPlexLibrary = syncLibraryMediaResult.Value.Library;
-
         switch (newPlexLibrary.Type)
         {
             case PlexMediaType.Movie:
                 return await _commandExecutor.Send(
-                    new RefreshPlexMovieLibraryCommand(newPlexLibrary, command.Action),
-                    cancellationToken
+                    new RefreshPlexMovieLibraryCommand(insertPlexLibraryMediaMetaDataResult.Value, command.Action),
+                    ct
                 );
             case PlexMediaType.TvShow:
                 return await _commandExecutor.Send(
-                    new RefreshPlexTvShowLibraryCommand(newPlexLibrary, command.Action),
-                    cancellationToken
+                    new RefreshPlexTvShowLibraryCommand(insertPlexLibraryMediaMetaDataResult.Value, command.Action),
+                    ct
                 );
             default:
                 return Result

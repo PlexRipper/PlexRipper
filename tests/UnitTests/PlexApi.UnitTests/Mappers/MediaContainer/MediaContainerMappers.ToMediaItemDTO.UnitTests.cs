@@ -83,8 +83,6 @@ namespace PlexApi.UnitTests
                                 [
                                     new GetMediaMetaDataStream
                                     {
-                                        Id = 201,
-                                        StreamType = GetMediaMetaDataStreamType.Video,
                                         Default = true,
                                         Codec = "h264",
                                         Index = 0,
@@ -104,7 +102,7 @@ namespace PlexApi.UnitTests
                 Role = [new GetMediaMetaDataRole { Tag = "Actor Name" }],
                 Ratings =
                 [
-                    new Ratings
+                    new GetMediaMetaDataRatings
                     {
                         Image = "imdb://image",
                         Type = "imdb",
@@ -147,15 +145,8 @@ namespace PlexApi.UnitTests
                 tolerance: TimeSpan.FromSeconds(1)
             );
 
-            // Parse the string date to NodaTime.LocalDate if not null
-            if (sourceData.OriginallyAvailableAt != null)
-            {
-                result.OriginallyAvailableAt.ShouldBe(sourceData.OriginallyAvailableAt.ToString());
-            }
-            else
-            {
-                result.OriginallyAvailableAt.ShouldBeNull();
-            }
+            result.OriginallyAvailableAt.ShouldNotBeNull();
+            result.OriginallyAvailableAt.ShouldBe(sourceData.OriginallyAvailableAt.ToString());
 
             result.GrandparentTitle.ShouldBe(sourceData.GrandparentTitle);
             result.ParentTitle.ShouldBe(sourceData.ParentTitle);
@@ -166,13 +157,13 @@ namespace PlexApi.UnitTests
 
             // Collections
             result.Genre.Count.ShouldBe(sourceData.Genre.Count);
-            result.Genre.First().Tag.ShouldBe(sourceData.Genre.First().Tag);
+            result.Genre.First().Name.ShouldBe(sourceData.Genre.First().Tag);
 
             result.Country.Count.ShouldBe(sourceData.Country.Count);
-            result.Country.First().Tag.ShouldBe(sourceData.Country.First().Tag);
+            result.Country.First().Name.ShouldBe(sourceData.Country.First().Tag);
 
             result.Role.Count.ShouldBe(sourceData.Role.Count);
-            result.Role.First().Tag.ShouldBe(sourceData.Role.First().Tag);
+            result.Role.First().Name.ShouldBe(sourceData.Role.First().Tag);
 
             result.Ratings.Count.ShouldBe(sourceData.Ratings.Count);
             result.Ratings.First().Type.ShouldBe(sourceData.Ratings.First().Type);
@@ -255,13 +246,13 @@ namespace PlexApi.UnitTests
                 ],
                 Ratings =
                 [
-                    new Ratings
+                    new GetMediaMetaDataRatings
                     {
                         Image = "imdb://image/show",
                         Type = "imdb",
                         Value = 9.2f,
                     },
-                    new Ratings
+                    new GetMediaMetaDataRatings
                     {
                         Image = "tmdb://image/show",
                         Type = "tmdb",
@@ -309,29 +300,23 @@ namespace PlexApi.UnitTests
             );
 
             // Parse the string date to NodaTime.LocalDate if not null
-            if (sourceData.OriginallyAvailableAt != null)
-            {
-                result.OriginallyAvailableAt.ShouldBe(sourceData.OriginallyAvailableAt.ToString());
-            }
-            else
-            {
-                result.OriginallyAvailableAt.ShouldBeNull();
-            }
+            result.OriginallyAvailableAt.ShouldNotBeNull();
+            result.OriginallyAvailableAt.ShouldBe(sourceData.OriginallyAvailableAt.ToString());
 
             result.AudienceRating.ShouldBe(sourceData.AudienceRating);
             result.Rating.ShouldBe(sourceData.Rating);
 
             // Collections
             result.Genre.Count.ShouldBe(sourceData.Genre.Count);
-            result.Genre.First().Tag.ShouldBe(sourceData.Genre.First().Tag);
-            result.Genre.Last().Tag.ShouldBe(sourceData.Genre.Last().Tag);
+            result.Genre.First().Name.ShouldBe(sourceData.Genre.First().Tag);
+            result.Genre.Last().Name.ShouldBe(sourceData.Genre.Last().Tag);
 
             result.Country.Count.ShouldBe(sourceData.Country.Count);
-            result.Country.First().Tag.ShouldBe(sourceData.Country.First().Tag);
+            result.Country.First().Name.ShouldBe(sourceData.Country.First().Tag);
 
             result.Role.Count.ShouldBe(sourceData.Role.Count);
-            result.Role.First().Tag.ShouldBe(sourceData.Role.First().Tag);
-            result.Role.Last().Tag.ShouldBe(sourceData.Role.Last().Tag);
+            result.Role.First().Name.ShouldBe(sourceData.Role.First().Tag);
+            result.Role.Last().Name.ShouldBe(sourceData.Role.Last().Tag);
 
             result.Ratings.Count.ShouldBe(sourceData.Ratings.Count);
             result.Ratings.First().Type.ShouldBe(sourceData.Ratings.First().Type);

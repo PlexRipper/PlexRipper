@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using Environment;
@@ -254,4 +255,26 @@ public static partial class StringExtensions
     }
 
     public static string ToListString<T>(this List<T> list) => !list.Any() ? "[ - ]" : $"[{string.Join(", ", list)}]";
+
+    /// <summary>
+    /// Returns the lowercase hexadecimal MD5 hash of the input string.
+    /// Always the same for the same input.
+    /// </summary>
+    public static string ToMd5Hash(this string? input)
+    {
+        if (input is null)
+            throw new ArgumentNullException(nameof(input));
+
+        // Normalize: trim and lowercase so “Foo” and “foo” yield the same hash
+        var normalized = input.Trim().ToLowerInvariant();
+        using var md5 = MD5.Create();
+        var bytes = Encoding.UTF8.GetBytes(normalized);
+        var hash = md5.ComputeHash(bytes);
+
+        var sb = new StringBuilder(hash.Length * 2);
+        foreach (var b in hash)
+            sb.Append(b.ToString("x2")); // lowercase hex
+
+        return sb.ToString();
+    }
 }

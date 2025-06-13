@@ -16,6 +16,9 @@ public class UnitTestDataConfig : BaseConfig<UnitTestDataConfig>
 
     public Action<Mock<HttpMessageHandler>, IPlexRipperDbContext>? HttpClientOptions { get; set; }
 
+    /// <summary>
+    /// Set the mock option to create a mock PlexApi Server with the given configuration.
+    /// </summary>
     public Action<PlexApiDataConfig>? BaseMockHttpClientOptions { get; set; }
 
     public Action<MockFileSystem, IPlexRipperDbContext>? FileSystemOptions { get; set; }

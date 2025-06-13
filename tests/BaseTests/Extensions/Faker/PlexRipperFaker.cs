@@ -1,4 +1,3 @@
-using Bogus;
 using Bogus.Premium;
 
 namespace PlexRipper.BaseTests;

@@ -28,10 +28,35 @@ public class GetAllPlexServerConnectionsEndpoint : BaseEndpointWithoutRequest<Li
 
     public override async Task HandleAsync(CancellationToken ct)
     {
-        var plexServerConnections = await _dbContext
-            .PlexServerConnections.Include(x => x.LatestConnectionStatus)
+        var plexServers = await _dbContext
+            .PlexServers.Include(x => x.PlexServerConnections)
+            .ThenInclude(x => x.LatestConnectionStatus)
+            .Where(x => x.IsEnabled)
             .ToListAsync(ct);
 
-        await SendFluentResult(Result.Ok(plexServerConnections), x => x.ToDTO(), ct);
+        // Decide for the frontend which connection to use
+        var chosenHash = new HashSet<int>();
+
+        foreach (var plexServer in plexServers)
+        {
+            var chosenConnectionResult = await _dbContext.ChoosePlexServerConnection(
+                plexServer.Id,
+                cancellationToken: ct
+            );
+
+            if (chosenConnectionResult.IsFailed)
+            {
+                chosenConnectionResult.LogWarning();
+                continue;
+            }
+
+            chosenHash.Add(chosenConnectionResult.Value.Id);
+        }
+
+        var plexServerConnections = plexServers.SelectMany(x => x.PlexServerConnections).ToList().ToDTO();
+        foreach (var connection in plexServerConnections)
+            connection.ChosenConnection = chosenHash.Contains(connection.Id);
+
+        await SendFluentResult(Result.Ok(plexServerConnections), x => x, ct);
     }
 }

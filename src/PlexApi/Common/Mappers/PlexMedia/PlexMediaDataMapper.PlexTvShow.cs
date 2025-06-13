@@ -44,7 +44,7 @@ public static partial class PlexMediaDataMapper
             HasTheme = !string.IsNullOrEmpty(source.Theme),
 
             Countries = source.Country.ToPlexCountry(),
-            Roles = source.Role.ToPlexRole(),
+            Actors = source.Role.ToPlexActor(),
             Genres = source.Genre.ToPlexGenre(),
 
             // Ignore the following

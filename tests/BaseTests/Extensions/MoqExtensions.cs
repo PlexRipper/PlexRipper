@@ -156,8 +156,7 @@ public static class MoqExtensions
         HttpStatusCode statusCode
     )
     {
-        var settings = MockPlexApiJsonSerializer.GetSettings();
-        var json = JsonConvert.SerializeObject(responseBody, settings);
+        var json = JsonConvert.SerializeObject(responseBody, MockPlexApiJsonSerializer.Settings);
         var jsonContent = new StringContent(json, Encoding.UTF8, "application/json");
 
         return new HttpResponseMessage(statusCode) { RequestMessage = request, Content = jsonContent };

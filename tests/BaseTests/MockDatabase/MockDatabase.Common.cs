@@ -1,5 +1,4 @@
 using Data.Contracts;
-using EFCore.BulkExtensions;
 using Logging.Interface;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;

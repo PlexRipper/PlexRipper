@@ -9,6 +9,7 @@
 					:src="imageUrl"
 					fit="fill"
 					no-spinner
+					crossorigin="anonymous"
 					class="media-poster--image"
 					:alt="mediaItem.title">
 					<template #default>

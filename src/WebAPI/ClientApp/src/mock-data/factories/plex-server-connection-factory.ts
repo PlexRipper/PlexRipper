@@ -21,6 +21,7 @@ export function generatePlexServerConnection({
 
 	return {
 		id,
+		chosenConnection: false,
 		protocol: scheme,
 		address: host,
 		port,

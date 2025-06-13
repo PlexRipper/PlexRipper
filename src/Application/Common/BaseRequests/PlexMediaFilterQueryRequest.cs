@@ -12,7 +12,7 @@ public abstract record PlexMediaFilterQueryRequest
         int page = 0,
         int size = 0,
         int countryId = 0,
-        int roleId = 0,
+        int actorId = 0,
         int genreId = 0,
         bool filterOfflineMedia = false,
         bool filterOwnedMedia = false
@@ -21,7 +21,7 @@ public abstract record PlexMediaFilterQueryRequest
         Page = page;
         Size = size;
         CountryId = countryId;
-        RoleId = roleId;
+        ActorId = actorId;
         GenreId = genreId;
         FilterOfflineMedia = filterOfflineMedia;
         FilterOwnedMedia = filterOwnedMedia;
@@ -45,7 +45,7 @@ public abstract record PlexMediaFilterQueryRequest
 
     [QueryParam, BindFrom("roleId")]
     [DefaultValue(0)]
-    public int RoleId { get; init; }
+    public int ActorId { get; init; }
 
     [QueryParam, BindFrom("filterOfflineMedia")]
     [DefaultValue(false)]

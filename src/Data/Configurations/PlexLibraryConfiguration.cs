@@ -45,10 +45,28 @@ public class PlexLibraryConfiguration : IEntityTypeConfiguration<PlexLibrary>
 
         builder.Property(c => c.Title).UseCollation(OrderByNaturalExtensions.CollationName);
 
-        builder.HasMany(x => x.Roles).WithMany(x => x.PlexLibraries).UsingEntity("PlexLibraryRoles");
+        builder
+            .HasMany(x => x.Actors)
+            .WithMany(x => x.PlexLibraries)
+            .UsingEntity<PlexLibraryActors>(
+                l => l.HasOne<PlexActor>().WithMany().HasForeignKey(e => e.PlexActorId),
+                r => r.HasOne<PlexLibrary>().WithMany().HasForeignKey(e => e.PlexLibraryId)
+            );
 
-        builder.HasMany(x => x.Genres).WithMany(x => x.PlexLibraries).UsingEntity("PlexLibraryGenres");
+        builder
+            .HasMany(x => x.Genres)
+            .WithMany(x => x.PlexLibraries)
+            .UsingEntity<PlexLibraryGenres>(
+                l => l.HasOne<PlexGenre>().WithMany().HasForeignKey(e => e.PlexGenreId),
+                r => r.HasOne<PlexLibrary>().WithMany().HasForeignKey(e => e.PlexLibraryId)
+            );
 
-        builder.HasMany(x => x.Countries).WithMany(x => x.PlexLibraries).UsingEntity("PlexLibraryCountries");
+        builder
+            .HasMany(x => x.Countries)
+            .WithMany(x => x.PlexLibraries)
+            .UsingEntity<PlexLibraryCountries>(
+                l => l.HasOne<PlexCountry>().WithMany().HasForeignKey(e => e.PlexCountryId),
+                r => r.HasOne<PlexLibrary>().WithMany().HasForeignKey(e => e.PlexLibraryId)
+            );
     }
 }

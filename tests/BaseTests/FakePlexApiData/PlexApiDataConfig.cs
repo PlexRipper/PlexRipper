@@ -20,11 +20,18 @@ public class PlexApiDataConfig : BaseConfig<PlexApiDataConfig>
 
     public int PlexServerAccessCount { get; set; } = 5;
 
+    public int RolePerMediaItemCount { get; set; } = 5;
+
+    public int CountriesPerMediaItemCount { get; set; } = 2;
+
+    public int GenrePerMediaItemCount { get; set; } = 2;
+
     public int PlexServerAccessConnectionsCount { get; set; } = 5;
 
     public bool PlexServerAccessConnectionsIncludeHttps { get; set; } = false;
 
     public HttpStatusCode SetServerResourcesResponse { get; set; } = HttpStatusCode.OK;
+    public bool GenerateFromDatabase { get; set; }
 
     public int LibraryCount(PlexMediaType type = PlexMediaType.Unknown)
     {

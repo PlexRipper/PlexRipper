@@ -2,7 +2,7 @@ using PlexRipper.Domain;
 
 namespace Data.Contracts;
 
-public static class DownloadTaskExtensions
+public static partial class DownloadTaskExtensions
 {
     public static IDownloadTaskProgress Calculate(this DownloadTaskGeneric downloadTask)
     {

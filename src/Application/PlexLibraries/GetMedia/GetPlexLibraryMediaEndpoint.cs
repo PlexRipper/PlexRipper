@@ -84,7 +84,7 @@ public class GetPlexLibraryMediaEndpoint : BaseEndpoint<GetPlexLibraryMediaEndpo
                 FilterOfflineMedia = req.FilterOfflineMedia,
                 FilterOwnedMedia = req.FilterOwnedMedia,
                 CountryId = req.CountryId,
-                RoleId = req.RoleId,
+                ActorId = req.ActorId,
                 GenreId = req.GenreId,
             },
             ct: ct

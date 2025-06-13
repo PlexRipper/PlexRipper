@@ -1,6 +1,4 @@
-﻿using Bogus;
-
-namespace PlexRipper.BaseTests;
+﻿namespace PlexRipper.BaseTests;
 
 public partial class FakeData
 {

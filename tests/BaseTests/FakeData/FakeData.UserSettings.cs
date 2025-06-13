@@ -1,5 +1,4 @@
-﻿using Bogus;
-using Settings.Contracts;
+﻿using Settings.Contracts;
 
 namespace PlexRipper.BaseTests;
 

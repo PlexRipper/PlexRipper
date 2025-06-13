@@ -122,15 +122,15 @@ public static partial class DbContextExtensions
                 if (filter.GenreId > 0)
                     query = query.Include(x => x.Genres);
 
-                if (filter.RoleId > 0)
-                    query = query.Include(x => x.Roles);
+                if (filter.ActorId > 0)
+                    query = query.Include(x => x.Actors);
 
                 plexMediaSlimDtos = await query
                     .ApplyWhere(plexLibraryId > 0, x => x.PlexLibraryId == plexLibraryId)
                     .ApplyWhere(plexLibraryId == 0, x => allowedPlexLibraryIds.Contains(x.PlexLibraryId))
                     .ApplyWhere(filter.CountryId > 0, x => x.Countries.Any(y => y.Id == filter.CountryId))
                     .ApplyWhere(filter.GenreId > 0, x => x.Genres.Any(y => y.Id == filter.GenreId))
-                    .ApplyWhere(filter.RoleId > 0, x => x.Roles.Any(y => y.Id == filter.RoleId))
+                    .ApplyWhere(filter.ActorId > 0, x => x.Actors.Any(y => y.Id == filter.ActorId))
                     .ApplyOrderBy(plexLibraryId > 0, x => x.SortIndex)
                     .ApplySkip(filter.Skip)
                     .ApplyTake(filter.Take)
@@ -149,15 +149,15 @@ public static partial class DbContextExtensions
                 if (filter.GenreId > 0)
                     query = query.Include(x => x.Genres);
 
-                if (filter.RoleId > 0)
-                    query = query.Include(x => x.Roles);
+                if (filter.ActorId > 0)
+                    query = query.Include(x => x.Actors);
 
                 plexMediaSlimDtos = await query
                     .ApplyWhere(plexLibraryId > 0, x => x.PlexLibraryId == plexLibraryId)
                     .ApplyWhere(plexLibraryId == 0, x => allowedPlexLibraryIds.Contains(x.PlexLibraryId))
                     .ApplyWhere(filter.CountryId > 0, x => x.Countries.Any(y => y.Id == filter.CountryId))
                     .ApplyWhere(filter.GenreId > 0, x => x.Genres.Any(y => y.Id == filter.GenreId))
-                    .ApplyWhere(filter.RoleId > 0, x => x.Roles.Any(y => y.Id == filter.RoleId))
+                    .ApplyWhere(filter.ActorId > 0, x => x.Actors.Any(y => y.Id == filter.ActorId))
                     .ApplyOrderBy(plexLibraryId > 0, x => x.SortIndex)
                     .ApplySkip(filter.Skip)
                     .ApplyTake(filter.Take)
@@ -282,7 +282,7 @@ public static partial class DbContextExtensions
     /// <summary>
     /// Bulk inserts the Plex tv-shows and the movie media data into the database.
     /// </summary>
-    public static async Task<Result> BulkInsertPlexTvShowsAsync(
+    public static async Task<Result<BulkInsertTvShowsRapport>> BulkInsertPlexTvShowsAsync(
         this IPlexRipperDbContext context,
         List<PlexTvShow> plexTvShows,
         int plexServerId,
@@ -301,9 +301,12 @@ public static partial class DbContextExtensions
             if (plexLibraryId == 0)
                 return ResultExtensions.IsZero(nameof(plexServerId));
 
+            var rapport = new BulkInsertTvShowsRapport();
+
             plexTvShows.SetRelationshipIds(plexServerId, plexLibraryId);
 
             await context.BulkInsertAsync(plexTvShows, BulkConfigPreset.Default, ct);
+            rapport.CreatedTvShows = plexTvShows.Count;
 
             // Add tv-show media data for each tv-show
             var seasons = plexTvShows
@@ -315,6 +318,7 @@ public static partial class DbContextExtensions
                 .ToList();
 
             await context.BulkInsertAsync(seasons, BulkConfigPreset.Default, ct);
+            rapport.CreatedSeasons = seasons.Count;
 
             // Add tv-show media data for each tv-show
             var episodes = seasons
@@ -331,6 +335,7 @@ public static partial class DbContextExtensions
                 .ToList();
 
             await context.BulkInsertAsync(episodes, BulkConfigPreset.Default, ct);
+            rapport.CreatedEpisodes = episodes.Count;
 
             // Add tv-show media data for each tv-show
             var mediaData = episodes
@@ -374,7 +379,7 @@ public static partial class DbContextExtensions
                 .ToList();
             await context.BulkInsertAsync(streams, BulkConfigPreset.Default, ct);
 
-            return Result.Ok();
+            return Result.Ok(rapport);
         }
         catch (Exception e)
         {

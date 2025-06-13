@@ -4,21 +4,21 @@ namespace Data.Contracts;
 
 public record MediaQueryFilter
 {
-    public required PlexMediaType MediaType { get; set; }
+    public required PlexMediaType MediaType { get; init; }
 
-    public required int PlexLibraryId { get; set; }
+    public required int PlexLibraryId { get; init; }
 
-    public required int Skip { get; set; }
+    public required int Skip { get; init; }
 
-    public required int Take { get; set; }
+    public required int Take { get; init; }
 
-    public required bool FilterOfflineMedia { get; set; }
+    public required bool FilterOfflineMedia { get; init; }
 
-    public required bool FilterOwnedMedia { get; set; }
+    public required bool FilterOwnedMedia { get; init; }
 
-    public required int CountryId { get; set; }
+    public required int CountryId { get; init; }
 
-    public required int RoleId { get; set; }
+    public required int ActorId { get; init; }
 
-    public required int GenreId { get; set; }
+    public required int GenreId { get; init; }
 }

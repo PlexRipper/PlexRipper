@@ -1,5 +1,4 @@
-﻿using Bogus;
-using Bogus.Hollywood;
+﻿using Bogus.Hollywood;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
 using PlexApi.Contracts;
 using PlexRipper.PlexApi;
@@ -21,22 +20,24 @@ public partial class FakePlexApiData
             _ => null
         //f => f.Random.Bool() ? GetLibraryItemsHasThumbnail.True : GetLibraryItemsHasThumbnail.False
         )
-        .RuleFor(l => l.OptimizedForStreaming, f => f.Random.Bool())
+        .RuleFor(
+            l => l.OptimizedForStreaming,
+            f => GetLibraryItemsLibraryOptimizedForStreaming.CreateBoolean(f.Random.Bool())
+        )
         .RuleFor(l => l.Has64bitOffsets, f => f.Random.Bool())
         .RuleFor(l => l.AudioProfile, _ => "dts")
         .RuleFor(l => l.Container, _ => "mkv")
         .RuleFor(l => l.Indexes, _ => "sd")
-        .RuleFor(l => l.VideoProfile, _ => "high")
-        .RuleFor(l => l.Stream, _ => []);
+        .RuleFor(l => l.VideoProfile, _ => "high");
 
-    private static readonly Faker<GetLibraryItemsMedia> GetLibraryItemsMedia = new Faker<GetLibraryItemsMedia>()
+    private static readonly Faker<GetLibraryItemsMedia> _getLibraryItemsMedia = new Faker<GetLibraryItemsMedia>()
         .StrictMode(true)
         .RuleFor(l => l.Id, f => f.Random.Number(100000))
         .RuleFor(l => l.Duration, f => f.Random.Int(1))
         .RuleFor(l => l.Bitrate, f => f.Random.Int(1))
         .RuleFor(l => l.Width, f => f.Random.Int(1))
         .RuleFor(l => l.Height, f => f.Random.Int(1))
-        .RuleFor(l => l.AspectRatio, f => f.Random.Double())
+        .RuleFor(l => l.AspectRatio, f => f.Random.Float())
         .RuleFor(l => l.AudioChannels, f => f.Random.Int(1))
         .RuleFor(l => l.AudioCodec, f => f.Lorem.Word())
         .RuleFor(l => l.VideoCodec, f => f.Lorem.Word())
@@ -65,7 +66,7 @@ public partial class FakePlexApiData
             .RuleFor(l => l.RatingKey, f => f.Random.Number(100000).ToString())
             .RuleFor(l => l.ParentRatingKey, f => f.Random.Number(100000).ToString())
             .RuleFor(l => l.Key, (_, x) => $"/library/metadata/{x.RatingKey}")
-            .RuleFor(l => l.Type, _ => GetLibraryItemsLibraryType.Movie) // Generated in FinishWith
+            .RuleFor(l => l.Type, _ => GetLibraryItemsType.Movie) // Generated in FinishWith
             .RuleFor(l => l.Guid, _ => string.Empty) // Generated in FinishWith
             .RuleFor(l => l.Studio, f => f.Movies().Production())
             .RuleFor(l => l.Title, f => f.Movies().MovieTitle())
@@ -94,27 +95,16 @@ public partial class FakePlexApiData
             .RuleFor(l => l.ViewCount, _ => default)
             .RuleFor(l => l.SkipCount, _ => default)
             .RuleFor(l => l.LastViewedAt, _ => default)
-            .RuleFor(l => l.Media, _ => []) // Generated in FinishWith
-            .RuleFor(
-                x => x.MediaGuid,
-                f =>
-                    [
-                        new MediaGuid { Id = $"imdb://tt{f.Random.Number(1_000_000, 9_999_999)}" },
-                        new MediaGuid { Id = $"tmdb://tt{f.Random.Number(100_000, 999_999)}" },
-                        new MediaGuid { Id = $"tvdb://{f.Random.Number(10_000, 99_999)}" },
-                    ]
-            );
+            .RuleFor(l => l.Media, _ => []); // Generated in FinishWith
 
     /// <summary>
     /// Generates a fake response for the GetLibraryItemsResponse operation
     /// URL: /library/sections/{sectionKey}/{tag}
     /// </summary>
-    private static readonly Faker<GetLibraryItemsMediaContainer> GetLibraryItemsMediaContainer =
+    private static readonly Faker<GetLibraryItemsMediaContainer> _getLibraryItemsMediaContainer =
         new Faker<GetLibraryItemsMediaContainer>()
             .StrictMode(true)
             .RuleFor(x => x.TotalSize, _ => -1) // Generated in FinishWith
-            .RuleFor(x => x.Type, _ => null)
-            .RuleFor(x => x.FieldType, _ => null)
             .RuleFor(x => x.Offset, _ => 0)
             .RuleFor(x => x.Content, _ => string.Empty)
             .RuleFor(x => x.MixedParents, f => f.Random.Bool())
@@ -133,7 +123,7 @@ public partial class FakePlexApiData
             .RuleFor(x => x.Title2, (_, x) => $"All {x.Title1}")
             .RuleFor(x => x.ViewGroup, _ => string.Empty)
             .RuleFor(x => x.Nocache, f => f.Random.Bool())
-            .RuleFor(x => x.ViewMode, f => f.Random.Number(100000))
+            .RuleFor(x => x.ViewMode, f => f.Random.Number(100000).ToString())
             .RuleFor(x => x.Metadata, _ => []) // Generated in FinishWith
             .RuleFor(x => x.Size, _ => -1); // Generated in FinishWith
 
@@ -149,7 +139,7 @@ public partial class FakePlexApiData
     )
     {
         var config = PlexApiDataConfig.FromOptions(options);
-        var type = library.Type.ToPlexMediaTypeFromPlexApi();
+        var type = library.Type.ToPlexMediaType();
 
         var totalSize = type switch
         {
@@ -162,7 +152,7 @@ public partial class FakePlexApiData
 
         return new GetLibraryItemsResponseBody
         {
-            MediaContainer = GetLibraryItemsMediaContainer
+            MediaContainer = _getLibraryItemsMediaContainer
                 .UseSeed(seed.Next())
                 .FinishWith(
                     (_, x) =>
@@ -188,13 +178,13 @@ public partial class FakePlexApiData
         Action<PlexApiDataConfig>? options = null
     )
     {
-        GetLibraryItemsLibraryType GetPlexMediaType() =>
+        GetLibraryItemsType GetPlexMediaType() =>
             type switch
             {
-                PlexMediaType.Movie => GetLibraryItemsLibraryType.Movie,
-                PlexMediaType.TvShow => GetLibraryItemsLibraryType.TvShow,
-                PlexMediaType.Season => GetLibraryItemsLibraryType.Season,
-                PlexMediaType.Episode => GetLibraryItemsLibraryType.Episode,
+                PlexMediaType.Movie => GetLibraryItemsType.Movie,
+                PlexMediaType.TvShow => GetLibraryItemsType.TvShow,
+                PlexMediaType.Season => GetLibraryItemsType.Season,
+                PlexMediaType.Episode => GetLibraryItemsType.Episode,
                 _ => throw new InvalidOperationException($"Invalid PlexMediaType: {type} value."),
             };
 
@@ -205,14 +195,14 @@ public partial class FakePlexApiData
                 {
                     x.Type = GetPlexMediaType();
                     x.Media = [GetPlexMedium(seed, options).Generate()];
-                    x.Guid = $"plex://{type.ToPlexMediaTypeString().ToLower()}/{f.Random.AlphaNumeric(24)}";
+                    x.Guid = f.PlexMedia().Guid(type);
                 }
             );
     }
 
     public static Faker<GetLibraryItemsMedia> GetPlexMedium(Seed seed, Action<PlexApiDataConfig>? options = null)
     {
-        return GetLibraryItemsMedia
+        return _getLibraryItemsMedia
             .UseSeed(seed.Next())
             .FinishWith(
                 (_, x) =>

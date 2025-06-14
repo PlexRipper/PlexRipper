@@ -18,11 +18,11 @@ public static class HttpRequestMessageExtensions
             query = query.Substring(1);
 
         // Split the query string by '&'
-        var pairs = query.Split(['&'], StringSplitOptions.RemoveEmptyEntries);
+        var pairs = query.Split(new[] { '&' }, StringSplitOptions.RemoveEmptyEntries);
         foreach (var pair in pairs)
         {
             // Split each pair by '='. Use a count of 2 so that values containing '=' are preserved.
-            var parts = pair.Split(['='], 2);
+            var parts = pair.Split(new[] { '=' }, 2);
             if (parts.Length >= 1)
             {
                 // Decode key and value

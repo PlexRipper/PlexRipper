@@ -172,18 +172,20 @@ public static class EnumExtensions
     {
         return value switch
         {
-            PlexMediaType.None => "None",
-            PlexMediaType.Movie => "Movie",
-            PlexMediaType.TvShow => "TvShow",
-            PlexMediaType.Season => "Season",
-            PlexMediaType.Episode => "Episode",
-            PlexMediaType.Music => "Music",
-            PlexMediaType.Album => "Album",
-            PlexMediaType.Song => "Song",
-            PlexMediaType.Photos => "Photos",
-            PlexMediaType.OtherVideos => "OtherVideos",
-            PlexMediaType.Games => "Games",
-            PlexMediaType.Unknown => "Unknown",
+            PlexMediaType.None => nameof(PlexMediaType.None),
+            PlexMediaType.Movie => nameof(PlexMediaType.Movie),
+            PlexMediaType.TvShow => nameof(PlexMediaType.TvShow),
+            PlexMediaType.Season => nameof(PlexMediaType.Season),
+            PlexMediaType.Episode => nameof(PlexMediaType.Episode),
+            PlexMediaType.Music => nameof(PlexMediaType.Music),
+            PlexMediaType.Artist => nameof(PlexMediaType.Artist),
+            PlexMediaType.Album => nameof(PlexMediaType.Album),
+            PlexMediaType.Song => nameof(PlexMediaType.Song),
+            PlexMediaType.PhotoAlbum => nameof(PlexMediaType.PhotoAlbum),
+            PlexMediaType.Photos => nameof(PlexMediaType.Photos),
+            PlexMediaType.OtherVideos => nameof(PlexMediaType.OtherVideos),
+            PlexMediaType.Games => nameof(PlexMediaType.Games),
+            PlexMediaType.Unknown => nameof(PlexMediaType.Unknown),
             _ => DefaultException(),
         };
 

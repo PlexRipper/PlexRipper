@@ -113,6 +113,9 @@ public static class HttpClientExtensions
         if (content == null)
             return "HttpContent is null.";
 
+        var contentType = content.Headers.ContentType?.MediaType;
+        var contentLength = content.Headers.ContentLength;
+        
         // Check if the content indicates a file download via Content-Disposition header.
         if (
             content.Headers.ContentDisposition != null
@@ -123,6 +126,22 @@ public static class HttpClientExtensions
         )
         {
             return $"Content is a file download. Filename: {content.Headers.ContentDisposition.FileName}";
+        }
+
+        // Only process JSON content types
+        if (contentType?.Contains("json", StringComparison.OrdinalIgnoreCase) != true)
+        {
+            var sizeInfo = contentLength.HasValue ? $"{contentLength.Value:N0} bytes" : "unknown size";
+            return $"Non-JSON content ({contentType ?? "unknown"}, {sizeInfo}) - not formatting as JSON.";
+        }
+
+        // Check content length to avoid buffer overflow for large JSON responses
+        const long maxReadContentSize = 1024 * 1024; // 1MB limit for reading JSON content as string
+        
+        if (contentLength.HasValue && contentLength.Value > maxReadContentSize)
+        {
+            var sizeInfo = $"{contentLength.Value:N0} bytes";
+            return $"Large JSON content ({sizeInfo}) - not reading to avoid buffer overflow.";
         }
 
         try

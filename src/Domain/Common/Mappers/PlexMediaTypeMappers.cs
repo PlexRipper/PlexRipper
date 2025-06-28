@@ -1,0 +1,123 @@
+using Logging.Interface;
+
+namespace PlexRipper.Domain;
+
+public static class PlexMediaTypeMappers
+{
+    private static readonly ILog _log = LogManager.CreateLogInstance(typeof(PlexMediaTypeMappers));
+
+    /// <summary>
+    /// Converts string to <see cref="PlexMediaType"/> by a fast method.
+    /// </summary>
+    /// <param name="value">The string representation of <see cref="PlexMediaType"/>.</param>
+    /// <returns>The converted enum of type <see cref="PlexMediaType"/>.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">Throws exception if value is not found.</exception>
+    public static PlexMediaType ToPlexMediaType(this string value)
+    {
+        return value switch
+        {
+            nameof(PlexMediaType.None) => PlexMediaType.None,
+            nameof(PlexMediaType.Movie) => PlexMediaType.Movie,
+            "movie" => PlexMediaType.Movie,
+            nameof(PlexMediaType.TvShow) => PlexMediaType.TvShow,
+            "show" => PlexMediaType.TvShow,
+            nameof(PlexMediaType.Season) => PlexMediaType.Season,
+            "season" => PlexMediaType.Season,
+            nameof(PlexMediaType.Episode) => PlexMediaType.Episode,
+            "episode" => PlexMediaType.Episode,
+            nameof(PlexMediaType.Music) => PlexMediaType.Music,
+            nameof(PlexMediaType.Artist) => PlexMediaType.Artist,
+            "artist" => PlexMediaType.Artist,
+            nameof(PlexMediaType.Album) => PlexMediaType.Album,
+            "album" => PlexMediaType.Album,
+            nameof(PlexMediaType.Song) => PlexMediaType.Song,
+            "track" => PlexMediaType.Song,
+            nameof(PlexMediaType.PhotoAlbum) => PlexMediaType.PhotoAlbum,
+            "photoalbum" => PlexMediaType.PhotoAlbum,
+            nameof(PlexMediaType.Photos) => PlexMediaType.Photos,
+            "photo" => PlexMediaType.Photos,
+            nameof(PlexMediaType.OtherVideos) => PlexMediaType.OtherVideos,
+            nameof(PlexMediaType.Games) => PlexMediaType.Games,
+            nameof(PlexMediaType.Unknown) => PlexMediaType.Unknown,
+            _ => DefaultException(),
+        };
+
+        PlexMediaType DefaultException()
+        {
+            var logResult = _log.Here()
+                .Error(
+                    "Failed to convert string \"{Value}\" to type {NameOfPlexMediaType}",
+                    value,
+                    nameof(PlexMediaType)
+                );
+            throw new NotImplementedException(logResult.ToString());
+        }
+    }
+
+    /// <summary>
+    /// Converts <see cref="PlexMediaType"/> to string by a fast method.
+    /// </summary>
+    /// <param name="source">The enum of type <see cref="PlexMediaType"/>.</param>
+    /// <returns>The string value of the <see cref="PlexMediaType"/> property.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">Throws exception if value is not found.</exception>
+    public static string ToPlexMediaTypeString(this PlexMediaType source)
+    {
+        return source switch
+        {
+            PlexMediaType.None => nameof(PlexMediaType.None),
+            PlexMediaType.Movie => nameof(PlexMediaType.Movie),
+            PlexMediaType.TvShow => nameof(PlexMediaType.TvShow),
+            PlexMediaType.Season => nameof(PlexMediaType.Season),
+            PlexMediaType.Episode => nameof(PlexMediaType.Episode),
+            PlexMediaType.Music => nameof(PlexMediaType.Music),
+            PlexMediaType.Artist => nameof(PlexMediaType.Artist),
+            PlexMediaType.Album => nameof(PlexMediaType.Album),
+            PlexMediaType.Song => nameof(PlexMediaType.Song),
+            PlexMediaType.PhotoAlbum => nameof(PlexMediaType.PhotoAlbum),
+            PlexMediaType.Photos => nameof(PlexMediaType.Photos),
+            PlexMediaType.OtherVideos => nameof(PlexMediaType.OtherVideos),
+            PlexMediaType.Games => nameof(PlexMediaType.Games),
+            PlexMediaType.Unknown => nameof(PlexMediaType.Unknown),
+            _ => DefaultException(),
+        };
+
+        string DefaultException()
+        {
+            var logResult = _log.Here()
+                .Error(
+                    "Failed to convert value \"{Value}\" to type {NameOfPlexMediaType}",
+                    source,
+                    nameof(PlexMediaType)
+                );
+            throw new NotImplementedException(logResult.ToString());
+        }
+    }
+
+    public static string ToPlexApiString(this PlexMediaType source)
+    {
+        return source switch
+        {
+            PlexMediaType.Movie => "movie",
+            PlexMediaType.TvShow => "show",
+            PlexMediaType.Season => "season",
+            PlexMediaType.Episode => "episode",
+            PlexMediaType.Artist => "artist",
+            PlexMediaType.Album => "album",
+            PlexMediaType.Song => "track",
+            PlexMediaType.PhotoAlbum => "photoalbum",
+            PlexMediaType.Photos => "photo",
+            _ => DefaultException(),
+        };
+
+        string DefaultException()
+        {
+            var logResult = _log.Here()
+                .Error(
+                    "Failed to convert value \"{Value}\" to type {NameOfPlexMediaType}",
+                    source,
+                    nameof(PlexMediaType)
+                );
+            throw new NotImplementedException(logResult.ToString());
+        }
+    }
+}

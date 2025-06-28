@@ -96,7 +96,7 @@ public partial class FakePlexApiData
             .RuleFor(
                 x => x.Directory,
                 (f, _) =>
-                    GetLibrariesResponseDirectory(seed, f.PlexApi().LibraryType.ToPlexMediaTypeFromPlexApi())
+                    GetLibrariesResponseDirectory(seed, f.PlexApi().LibraryType.ToPlexMediaType())
                         .Generate(config.LibraryCount())
             )
             .RuleFor(x => x.Size, (_, x) => x.Directory!.Count)

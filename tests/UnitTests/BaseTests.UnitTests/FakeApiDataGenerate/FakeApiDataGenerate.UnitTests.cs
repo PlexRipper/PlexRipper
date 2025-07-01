@@ -4,8 +4,6 @@ namespace BaseTests.UnitTests;
 
 public class FakeApiDataGenerateUnitTests : BaseUnitTest<MockPlexApiServer>
 {
-    private Stopwatch _stopwatch = new Stopwatch();
-
     public FakeApiDataGenerateUnitTests(ITestOutputHelper output)
         : base(output) { }
 
@@ -22,12 +20,12 @@ public class FakeApiDataGenerateUnitTests : BaseUnitTest<MockPlexApiServer>
         var handler = new Mock<HttpMessageHandler>(MockBehavior.Loose);
 
         // Act
-        _stopwatch.Start();
+        var stopWatch = Stopwatch.StartNew();
         _sut.Setup(handler, options);
-        _stopwatch.Stop();
+        stopWatch.Stop();
 
         // Assert
-        var elapsed = _stopwatch.Elapsed;
+        var elapsed = stopWatch.Elapsed;
         _output.WriteLine($"Elapsed time: {elapsed}");
         elapsed.ShouldBeLessThan(TimeSpan.FromSeconds(5));
     }

@@ -16,8 +16,8 @@ public static partial class DownloadTaskExtensions
         return downloadTask;
     }
 
-    public static List<DownloadTaskMovie> SetDownloadStatus(
-        this List<DownloadTaskMovie> downloadTasks,
+    public static ICollection<DownloadTaskMovie> SetDownloadStatus(
+        this ICollection<DownloadTaskMovie> downloadTasks,
         DownloadStatus downloadStatus
     )
     {
@@ -33,8 +33,8 @@ public static partial class DownloadTaskExtensions
         return downloadTasks;
     }
 
-    public static List<DownloadTaskMovieFile> SetDownloadStatus(
-        this List<DownloadTaskMovieFile> downloadTasks,
+    public static ICollection<DownloadTaskMovieFile> SetDownloadStatus(
+        this ICollection<DownloadTaskMovieFile> downloadTasks,
         DownloadStatus downloadStatus
     )
     {

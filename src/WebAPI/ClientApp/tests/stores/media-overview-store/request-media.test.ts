@@ -7,7 +7,7 @@ import {
 	generateResultDTO,
 } from '@mock';
 import { useMediaOverviewStore } from '@store';
-import { PlexMediaType } from '@dto';
+import { type PlexMediaStatisticsDTO, PlexMediaType } from '@dto';
 
 describe('MediaOverviewStore.requestMedia()', () => {
 	let { mock } = baseVars();
@@ -36,8 +36,18 @@ describe('MediaOverviewStore.requestMedia()', () => {
 			},
 		}));
 
-		const url = new RegExp(`/api/PlexMedia/*`);
+		let url = new RegExp(`/api/PlexMedia/*`);
 		mock.onGet(url).reply(200, generateResultDTO(movies));
+		url = new RegExp(`/api/PlexLibrary/0/metadata`);
+		mock.onGet(url).reply(200, generateResultDTO({
+			episodeCount: 0,
+			mediaCount: 0,
+			mediaSize: 0,
+			movieCount: 0,
+			seasonCount: 0,
+			tvShowCount: 0,
+			mediaList: [],
+		} as PlexMediaStatisticsDTO));
 
 		// Act
 		const result = subscribeSpyTo(mediaOverviewStore.requestMedia());

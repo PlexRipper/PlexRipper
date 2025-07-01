@@ -6,6 +6,6 @@ public class FastEndpointsModule : Module
 {
     protected override void Load(ContainerBuilder builder)
     {
-        builder.RegisterType<CommandExecutor>().As<ICommandExecutor>().SingleInstance();
+        builder.RegisterType<CommandExecutor>().As<ICommandExecutor>().InstancePerLifetimeScope();
     }
 }

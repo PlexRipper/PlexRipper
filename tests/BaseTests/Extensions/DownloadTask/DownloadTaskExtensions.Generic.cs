@@ -9,13 +9,13 @@ public static partial class DownloadTaskExtensions
     {
         downloadTask.DownloadStatus = downloadStatus;
         if (downloadTask.Children.Any())
-            downloadTask.Children = downloadTask.Children.SetDownloadStatus(downloadStatus);
+            downloadTask.Children = downloadTask.Children.SetDownloadStatus(downloadStatus).ToList();
 
         return downloadTask;
     }
 
-    public static List<DownloadTaskGeneric> SetDownloadStatus(
-        this List<DownloadTaskGeneric> downloadTasks,
+    public static ICollection<DownloadTaskGeneric> SetDownloadStatus(
+        this ICollection<DownloadTaskGeneric> downloadTasks,
         DownloadStatus downloadStatus
     )
     {
@@ -23,7 +23,7 @@ public static partial class DownloadTaskExtensions
         {
             downloadTask.DownloadStatus = downloadStatus;
             if (downloadTask.Children.Any())
-                downloadTask.Children = downloadTask.Children.SetDownloadStatus(downloadStatus);
+                downloadTask.Children = downloadTask.Children.SetDownloadStatus(downloadStatus).ToList();
         }
 
         return downloadTasks;

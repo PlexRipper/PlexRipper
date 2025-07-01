@@ -4,30 +4,6 @@ namespace Application.Contracts;
 
 public static class PlexMediaSlimDTOMapper
 {
-    public static PlexMediaSlimDTO ToSlimDTO(this PlexMediaSlim source) =>
-        new()
-        {
-            Id = source.Id,
-            Title = source.Title,
-            SortIndex = source.SortIndex,
-            Year = source.Year,
-            Duration = source.Duration,
-            MediaSize = source.MediaSize,
-            ChildCount = source.ChildCount,
-            GrandChildCount = 0,
-            AddedAt = source.AddedAt,
-            UpdatedAt = source.UpdatedAt,
-            PlexLibraryId = source.PlexLibraryId,
-            PlexServerId = source.PlexServerId,
-            Type = source.Type,
-            HasThumb = source.HasThumb,
-            Qualities = source.Qualities.ToDTO(),
-            SearchTitle = string.Empty, // TODO: Missing in PlexMediaSlim
-            Key = source.Key,
-            MetaDataKey = source.MetaDataKey,
-            PlexToken = string.Empty,
-        };
-
     #region PlexMovie
 
     public static PlexMediaSlimDTO ToSlimDTO(this PlexMovie source) =>
@@ -64,7 +40,7 @@ public static class PlexMediaSlimDTOMapper
     public static IQueryable<PlexMediaSlimDTO> ProjectToMediaSlimDTO(this IQueryable<PlexTvShow> source) =>
         source.Select(x => ToSlimDTOMapper(x));
 
-    private static PlexMediaSlimDTO ToSlimDTOMapper(this PlexTvShow source) =>
+    public static PlexMediaSlimDTO ToSlimDTOMapper(this PlexTvShow source) =>
         new()
         {
             Id = source.Id,
@@ -84,7 +60,7 @@ public static class PlexMediaSlimDTOMapper
             Key = source.Key,
             MetaDataKey = source.MetaDataKey,
             HasThumb = source.HasThumb,
-            Qualities = source.Qualities.ToDTO(),
+            Qualities = [], // TODO Qualities for TV Shows should be determined by the nested seasons, min/max qualities
             PlexToken = string.Empty,
         };
 

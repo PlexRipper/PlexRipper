@@ -65,7 +65,7 @@ public record LibraryMediaItemDTO
 
     public required List<LibraryMediaItemGenreDTO> Genre { get; set; } = [];
 
-    public required List<MetaDataCountryDTO> Country { get; set; } = [];
+    public required List<LibraryMediaItemCountryDTO> Country { get; set; } = [];
 
     public required List<LibraryMediaItemRoleDTO> Role { get; set; } = [];
 }
@@ -96,22 +96,54 @@ public record MetaDataGuidsDTO
     public required string Id { get; set; }
 }
 
-public record MetaDataCountryDTO
+public record LibraryMediaItemCountryDTO
 {
-    public required string Tag { get; set; }
+    public required int PlexId { get; init; }
+
+    public required string Name { get; init; }
+
+    public required string Filter { get; init; }
+
+    /// <summary>
+    /// A md5 hash of the name, used as a unique key.
+    /// </summary>
+    public required string Key { get; init; }
 }
 
 public record LibraryMediaItemGenreDTO
 {
-    public required string Tag { get; set; }
+    public required int PlexId { get; init; }
+
+    public required string Name { get; init; }
+
+    public required string Filter { get; init; }
+
+    /// <summary>
+    /// A md5 hash of the name, used as a unique key.
+    /// </summary>
+    public required string Key { get; init; }
 }
 
 public record LibraryMediaItemRoleDTO
 {
-    public required string Tag { get; set; }
+    public required int PlexId { get; init; }
+
+    public required string Name { get; init; }
+
+    public required string? Role { get; init; }
+
+    public required string? Filter { get; init; }
+
+    /// <summary>
+    /// Gets the unique identifier for the actor in Plex, this is globally unique across Plex Servers and is created by Plex itself.
+    /// <example>5d776824103a2d001f563a7e</example>
+    /// </summary>
+    public required string? TagKey { get; init; }
+
+    public required string? Thumb { get; init; }
 }
 
-public class LibraryMediaItemMediaDTO
+public record LibraryMediaItemMediaDTO
 {
     /// <summary>
     /// Unique media identifier.
@@ -194,7 +226,7 @@ public class LibraryMediaItemMediaDTO
     public required List<LibraryMediaItemPartDTO> Parts { get; set; }
 }
 
-public class LibraryMediaItemPartDTO
+public record LibraryMediaItemPartDTO
 {
     /// <summary>
     /// Indicates if the part is accessible.
@@ -261,7 +293,7 @@ public record LibraryMediaItemStreamDTO
     /// <summary>
     /// Stream type (1=video, 2=audio, 3=subtitle).
     /// </summary>
-    public required int StreamType { get; set; }
+    public required StreamType StreamType { get; set; }
 
     /// <summary>
     /// Indicates if this stream is default.
@@ -276,7 +308,7 @@ public record LibraryMediaItemStreamDTO
     /// <summary>
     /// Index of the stream.
     /// </summary>
-    public required int Index { get; set; }
+    public required int? Index { get; set; }
 
     /// <summary>
     /// Bitrate of the stream.

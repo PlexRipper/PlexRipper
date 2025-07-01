@@ -9,6 +9,7 @@ public static partial class DbSetExtensions
         plexTvShowEpisodes
             .IncludePlexServer()
             .IncludePlexLibrary()
+            .IncludeMediaData()
             .Include($"{nameof(PlexTvShowEpisode.TvShowSeason)}.{nameof(PlexTvShowSeason.PlexServer)}")
             .Include($"{nameof(PlexTvShowEpisode.TvShowSeason)}.{nameof(PlexTvShowSeason.PlexLibrary)}")
             .Include($"{nameof(PlexTvShowEpisode.TvShow)}.{nameof(PlexTvShow.PlexServer)}")
@@ -21,4 +22,8 @@ public static partial class DbSetExtensions
     public static IQueryable<PlexTvShowEpisode> IncludePlexServer(
         this IQueryable<PlexTvShowEpisode> plexTvShowEpisode
     ) => plexTvShowEpisode.Include(x => x.PlexServer).ThenInclude(x => x!.PlexServerConnections);
+
+    public static IQueryable<PlexTvShowEpisode> IncludeMediaData(
+        this IQueryable<PlexTvShowEpisode> plexTvShowEpisode
+    ) => plexTvShowEpisode.Include(x => x.MediaDataList).ThenInclude(x => x.Parts).ThenInclude(x => x.Streams);
 }

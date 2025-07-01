@@ -554,17 +554,16 @@ public static partial class DbContextExtensions
         CancellationToken cancellationToken = default
     )
     {
+        var keys = new List<DownloadTaskKey>();
         var downloadTask = await dbContext.GetDownloadTaskAsync(key, cancellationToken);
         if (downloadTask is null)
-            return new List<DownloadTaskKey>();
-
-        var keys = new List<DownloadTaskKey>();
+            return keys;
 
         FindDownloadableTaskKeys([downloadTask]);
 
         return keys;
 
-        void FindDownloadableTaskKeys(List<DownloadTaskGeneric> tasks)
+        void FindDownloadableTaskKeys(ICollection<DownloadTaskGeneric> tasks)
         {
             if (!tasks.Any())
                 return;

@@ -22,6 +22,32 @@ export class Debug {
   /**
    * No description
    * * @tags Debug
+   * @name GetAllSubtitlesEndpoint
+   * @request GET:/api/Debug/get-all-subtitles
+   * @secure
+   */
+  getAllSubtitlesEndpoint = (
+    query: {
+      /** @format int32 */
+      count?: number | null;
+      type: PlexMediaType;
+    },
+    params: RequestParams = {},
+  ) =>
+    from(
+      Axios.request<String[]>({
+        url: `/api/Debug/get-all-subtitles`,
+        method: "GET",
+        params: query,
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+    ).pipe(apiCheckPipe<String[]>);
+
+  /**
+   * No description
+   * * @tags Debug
    * @name GetAllUniqueMediaTitlesEndpoint
    * @request GET:/api/Debug/unique-media-titles
    * @secure
@@ -47,6 +73,12 @@ export class Debug {
 }
 
 export class DebugPaths {
+  static getAllSubtitlesEndpoint = (query: {
+    /** @format int32 */
+    count?: number | null;
+    type: PlexMediaType;
+  }) => queryString.stringifyUrl({ url: `/api/Debug/get-all-subtitles`, query });
+
   static getAllUniqueMediaTitlesEndpoint = (query: {
     /** @format int32 */
     count: number;

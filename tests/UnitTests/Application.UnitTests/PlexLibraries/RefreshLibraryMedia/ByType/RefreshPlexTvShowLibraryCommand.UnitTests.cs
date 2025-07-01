@@ -1,3 +1,4 @@
+using Data.Contracts;
 using Microsoft.EntityFrameworkCore;
 using PlexApi.Contracts;
 
@@ -53,11 +54,20 @@ public class RefreshPlexTvShowLibraryCommand_UnitTests : BaseUnitTest<RefreshPle
 
         mock.Mock<IMediator>()
             .Setup(x => x.Send(It.IsAny<SyncPlexTvShowsCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Ok(new CrudTvShowsReport()));
+            .ReturnsAsync(Result.Ok(new BulkInsertTvShowsRapport()));
 
         // Act
         var result = await _sut.ExecuteAsync(
-            new RefreshPlexTvShowLibraryCommand(testLibrary, _ => { }),
+            new RefreshPlexTvShowLibraryCommand(
+                new InsertMediaMetaDataCommandResponse
+                {
+                    PlexLibrary = testLibrary,
+                    PlexActors = [],
+                    PlexGenres = [],
+                    PlexCountries = [],
+                },
+                _ => { }
+            ),
             CancellationToken.None
         );
 
@@ -87,7 +97,16 @@ public class RefreshPlexTvShowLibraryCommand_UnitTests : BaseUnitTest<RefreshPle
 
         // Act
         var result = await _sut.ExecuteAsync(
-            new RefreshPlexTvShowLibraryCommand(testLibrary, _ => { }),
+            new RefreshPlexTvShowLibraryCommand(
+                new InsertMediaMetaDataCommandResponse
+                {
+                    PlexLibrary = testLibrary,
+                    PlexActors = [],
+                    PlexGenres = [],
+                    PlexCountries = [],
+                },
+                _ => { }
+            ),
             CancellationToken.None
         );
 
@@ -113,7 +132,16 @@ public class RefreshPlexTvShowLibraryCommand_UnitTests : BaseUnitTest<RefreshPle
 
         // Act
         var result = await _sut.ExecuteAsync(
-            new RefreshPlexTvShowLibraryCommand(testLibrary, _ => { }),
+            new RefreshPlexTvShowLibraryCommand(
+                new InsertMediaMetaDataCommandResponse
+                {
+                    PlexLibrary = testLibrary,
+                    PlexActors = [],
+                    PlexGenres = [],
+                    PlexCountries = [],
+                },
+                _ => { }
+            ),
             CancellationToken.None
         );
 
@@ -146,7 +174,16 @@ public class RefreshPlexTvShowLibraryCommand_UnitTests : BaseUnitTest<RefreshPle
 
         // Act
         var result = await _sut.ExecuteAsync(
-            new RefreshPlexTvShowLibraryCommand(testLibrary, _ => { }),
+            new RefreshPlexTvShowLibraryCommand(
+                new InsertMediaMetaDataCommandResponse
+                {
+                    PlexLibrary = testLibrary,
+                    PlexActors = [],
+                    PlexGenres = [],
+                    PlexCountries = [],
+                },
+                _ => { }
+            ),
             CancellationToken.None
         );
 
@@ -185,7 +222,16 @@ public class RefreshPlexTvShowLibraryCommand_UnitTests : BaseUnitTest<RefreshPle
 
         // Act
         var result = await _sut.ExecuteAsync(
-            new RefreshPlexTvShowLibraryCommand(testLibrary, _ => { }),
+            new RefreshPlexTvShowLibraryCommand(
+                new InsertMediaMetaDataCommandResponse
+                {
+                    PlexLibrary = testLibrary,
+                    PlexActors = [],
+                    PlexGenres = [],
+                    PlexCountries = [],
+                },
+                _ => { }
+            ),
             CancellationToken.None
         );
 
@@ -241,7 +287,16 @@ public class RefreshPlexTvShowLibraryCommand_UnitTests : BaseUnitTest<RefreshPle
 
         // Act
         var result = await _sut.ExecuteAsync(
-            new RefreshPlexTvShowLibraryCommand(testLibrary, _ => { }),
+            new RefreshPlexTvShowLibraryCommand(
+                new InsertMediaMetaDataCommandResponse
+                {
+                    PlexLibrary = testLibrary,
+                    PlexActors = [],
+                    PlexGenres = [],
+                    PlexCountries = [],
+                },
+                _ => { }
+            ),
             CancellationToken.None
         );
 

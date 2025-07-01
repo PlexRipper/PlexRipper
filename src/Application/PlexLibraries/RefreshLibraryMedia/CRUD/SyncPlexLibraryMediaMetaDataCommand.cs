@@ -1,214 +1,292 @@
+using System.Diagnostics;
 using Data.Contracts;
+using EFCore.BulkExtensions;
+using FastEndpoints;
 using FluentValidation;
+using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
-using PlexApi.Contracts;
+using Microsoft.IdentityModel.Tokens;
 
 namespace PlexRipper.Application;
 
-public record SyncPlexLibraryMediaMetaDataCommand(LibraryMetadata LibraryMetadata, int PlexLibraryId)
-    : IRequest<Result>;
+public record SyncPlexLibraryMediaMetaDataCommand(InsertMediaMetaDataCommandResponse LibraryMetadata)
+    : ICommand<Result>;
 
-public class SyncPlexLibraryMediaMetaDataCommandValidator : AbstractValidator<SyncPlexLibraryMediaMetaDataCommand>
+public class SyncPlexLibraryMediaMetaDataCommandValidator : Validator<SyncPlexLibraryMediaMetaDataCommand>
 {
     public SyncPlexLibraryMediaMetaDataCommandValidator()
     {
         RuleFor(x => x.LibraryMetadata).NotNull();
-        RuleFor(x => x.PlexLibraryId).GreaterThan(0);
+        RuleFor(x => x.LibraryMetadata.PlexLibraryId).GreaterThan(0);
+        RuleFor(x => x.LibraryMetadata.PlexActors).NotNull();
+        RuleForEach(x => x.LibraryMetadata.PlexActors)
+            .ChildRules(y =>
+            {
+                y.RuleFor(z => z.Value.Id).GreaterThan(0);
+                y.RuleFor(z => z.Value.Key).NotEmpty();
+            });
+
+        RuleFor(x => x.LibraryMetadata.PlexGenres).NotNull();
+        RuleForEach(x => x.LibraryMetadata.PlexGenres)
+            .ChildRules(y =>
+            {
+                y.RuleFor(z => z.Value.Id).GreaterThan(0);
+                y.RuleFor(z => z.Value.Name).NotEmpty();
+                y.RuleFor(z => z.Value.Key).NotEmpty();
+            });
+
+        RuleFor(x => x.LibraryMetadata.PlexCountries).NotNull();
+        RuleForEach(x => x.LibraryMetadata.PlexCountries)
+            .ChildRules(y =>
+            {
+                y.RuleFor(z => z.Value.Id).GreaterThan(0);
+                y.RuleFor(z => z.Value.Name).NotEmpty();
+                y.RuleFor(z => z.Value.Key).NotEmpty();
+            });
     }
 }
 
-public class SyncPlexLibraryMediaMetaDataCommandHandler : IRequestHandler<SyncPlexLibraryMediaMetaDataCommand, Result>
+public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPlexLibraryMediaMetaDataCommand, Result>
 {
     private readonly IPlexRipperDbContext _dbContext;
+    private readonly ILog _log;
 
-    public SyncPlexLibraryMediaMetaDataCommandHandler(IPlexRipperDbContext dbContext)
+    private readonly BulkConfig? _bulkInsertConfig =
+        new()
+        {
+            SetOutputIdentity = false,
+            PreserveInsertOrder = true,
+            UseTempDB = true,
+        };
+
+    public SyncPlexLibraryMediaMetaDataCommandHandler(IPlexRipperDbContext dbContext, ILog log)
     {
         _dbContext = dbContext;
+        _log = log;
     }
 
-    public async Task<Result> Handle(SyncPlexLibraryMediaMetaDataCommand command, CancellationToken cancellationToken)
+    public async Task<Result> ExecuteAsync(SyncPlexLibraryMediaMetaDataCommand command, CancellationToken ct)
     {
-        try
+        var libraryId = command.LibraryMetadata.PlexLibraryId;
+        var roles = command.LibraryMetadata.PlexActors;
+        var genres = command.LibraryMetadata.PlexGenres;
+        var countries = command.LibraryMetadata.PlexCountries;
+
+        var libraryDb = await _dbContext
+            .PlexLibraries.AsTracking()
+            .FirstOrDefaultAsync(x => x.Id == libraryId, cancellationToken: ct);
+
+        if (libraryDb is null)
+            return ResultExtensions.EntityNotFound(nameof(PlexLibrary), libraryId);
+
+        var libraryName = await _dbContext.GetPlexLibraryNameById(libraryId, CancellationToken.None);
+
+        var syncGenresResult = await SyncGenres(genres, libraryId, libraryName);
+        var syncCountriesResult = await SyncCountries(countries, libraryId, libraryName);
+        var syncRolesResult = await SyncRoles(roles, libraryId, libraryName);
+
+        libraryDb.ActorsCount = syncRolesResult.ValueOrDefault;
+        libraryDb.GenresCount = syncGenresResult.ValueOrDefault;
+        libraryDb.CountriesCount = syncCountriesResult.ValueOrDefault;
+
+        await _dbContext.SaveChangesAsync(CancellationToken.None);
+
+        return Result.Merge(syncGenresResult, syncCountriesResult, syncRolesResult).ToResult();
+    }
+
+    private async Task<Result<int>> SyncRoles(Dictionary<int, PlexActor> sourceDict, int libraryId, string libraryName)
+    {
+        var stopWatch = Stopwatch.StartNew();
+
+        _log.Here().Debug("Started syncing {Count} roles for library {LibraryName}", sourceDict.Count, libraryName);
+
+        if (sourceDict.IsNullOrEmpty())
         {
-            var libraryId = command.PlexLibraryId;
-            var roles = command.LibraryMetadata.Roles;
-            var genres = command.LibraryMetadata.Genres;
-            var countries = command.LibraryMetadata.Countries;
+            _log.Here()
+                .Warning(
+                    "No {NameOfPlexActor} relations were given to be inserted for library {LibraryName} with {libraryId}, all current {NameOfPlexActor} relations will be dropped",
+                    nameof(PlexActor),
+                    libraryName,
+                    libraryId,
+                    nameof(PlexActor)
+                );
 
-            var libraryDb = await _dbContext
-                .PlexLibraries.Where(x => x.Id == libraryId)
-                .FirstOrDefaultAsync(cancellationToken);
+            await _dbContext.PlexLibraryActors.Where(x => x.PlexLibraryId == libraryId).ExecuteDeleteAsync();
+            stopWatch.Stop();
 
-            if (libraryDb is null)
-                return ResultExtensions.EntityNotFound(nameof(PlexLibrary), libraryId);
-
-            await Task.WhenAll(
-                SyncRoles(roles, libraryId),
-                SyncGenres(genres, libraryId),
-                SyncCountries(countries, libraryId)
+            _log.Debug(
+                "Finished dropping all {NameOfPlexActor} relations for library {LibraryName} in {ElapsedSeconds:F2} seconds",
+                nameof(PlexActor),
+                libraryName,
+                stopWatch.Elapsed.TotalSeconds
             );
 
-            return Result.Ok();
+            return Result.Ok(0);
         }
-        catch (Exception e)
+
+        // Drop all actors for the library
+        await _dbContext.PlexLibraryActors.Where(x => x.PlexLibraryId == libraryId).ExecuteDeleteAsync();
+
+        // Reinsert genres for the library
+        var newActors = sourceDict
+            .Select(x => new PlexLibraryActors(libraryId: libraryId, plexActorId: x.Value.Id, plexKey: x.Key))
+            .ToList();
+
+        var insertResult = await Result.Try(
+            () => _dbContext.BulkInsertAsync(newActors, _bulkInsertConfig),
+            e => new ExceptionalError(e)
+        );
+
+        stopWatch.Stop();
+
+        if (insertResult.IsSuccess)
         {
-            return Result.Fail(new ExceptionalError(e)).LogError();
+            _log.Debug(
+                "Finished creating {Count} {NameOfPlexActor} relations for library {LibraryName} in {ElapsedSeconds:F2} seconds",
+                newActors.Count,
+                nameof(PlexActor),
+                libraryName,
+                stopWatch.Elapsed.TotalSeconds
+            );
+            return Result.Ok(newActors.Count);
         }
+
+        _log.Error(
+            "Failed creating {Count} {NameOfPlexActor} relations for library {LibraryName} after {ElapsedSeconds:F2} seconds",
+            newActors.Count,
+            libraryName,
+            nameof(PlexActor),
+            stopWatch.Elapsed.TotalSeconds
+        );
+        return insertResult.LogError();
     }
 
-    private async Task<Result> SyncRoles(List<PlexRole> roles, int libraryId)
+    private async Task<Result<int>> SyncGenres(Dictionary<int, PlexGenre> sourceDict, int libraryId, string libraryName)
     {
-        foreach (var plexRole in roles)
-            _dbContext.PlexRoles.AddIfNotExists(plexRole, x => x.Name == plexRole.Name);
+        var stopWatch = Stopwatch.StartNew();
 
-        await _dbContext.SaveChangesAsync();
+        _log.Here().Debug("Started syncing {Count} genres for library {LibraryName}", sourceDict.Count, libraryName);
 
-        var libraryDb = await _dbContext
-            .PlexLibraries.Where(x => x.Id == libraryId)
-            .Include(x => x.Roles)
-            .AsTracking()
-            .FirstOrDefaultAsync();
-
-        if (libraryDb is null)
-            return ResultExtensions.EntityNotFound(nameof(PlexLibrary), libraryId);
-
-        var roleKeys = roles.Select(x => x.Name).ToHashSet();
-
-        var rolesDb = await _dbContext
-            .PlexRoles.Where(x => roleKeys.Contains(x.Name))
-            .AsTracking()
-            .Take(roleKeys.Count)
-            .ToListAsync();
-
-        if (libraryDb.Roles.Any())
+        if (!sourceDict.Any())
         {
-            for (var i = libraryDb.Roles.Count - 1; i >= 0; i--)
-            {
-                // Already exists
-                if (roleKeys.Contains(libraryDb.Roles[i].Name))
-                {
-                    continue;
-                }
+            _log.Here()
+                .Warning(
+                    "No {NameOfPlexGenre} relations were given to be inserted for library {LibraryName} with {libraryId}, all current {NameOfPlexGenre} relations will be dropped",
+                    nameof(PlexGenre),
+                    libraryName,
+                    libraryId,
+                    nameof(PlexGenre)
+                );
+            await _dbContext.PlexLibraryGenres.Where(x => x.PlexLibraryId == libraryId).ExecuteDeleteAsync();
 
-                // Delete
-                if (!roleKeys.Contains(libraryDb.Roles[i].Name))
-                {
-                    libraryDb.Roles.RemoveAt(i);
-                }
-            }
+            stopWatch.Stop();
+
+            _log.Debug(
+                "Finished dropping all {NameOfPlexGenre} relations for library {LibraryName} in {ElapsedSeconds:F2} seconds",
+                nameof(PlexGenre),
+                libraryName,
+                stopWatch.Elapsed.TotalSeconds
+            );
+            return Result.Ok(0);
         }
 
-        // Add Roles
-        var currentKeys = libraryDb.Roles.Select(x => x.Name).ToList();
-        var rolesToAdd = rolesDb.Where(x => !currentKeys.Contains(x.Name)).ToList();
-        libraryDb.Roles.AddRange(rolesToAdd);
+        // Drop all genres for the library
+        await _dbContext.PlexLibraryGenres.Where(x => x.PlexLibraryId == libraryId).ExecuteDeleteAsync();
 
-        await _dbContext.SaveChangesAsync();
+        // Reinsert genres for the library
+        var newGenres = sourceDict.Select(x => new PlexLibraryGenres(libraryId, x.Value.Id, x.Key)).ToList();
+        var insertResult = await Result.Try(
+            () => _dbContext.BulkInsertAsync(newGenres, _bulkInsertConfig),
+            e => new ExceptionalError(e)
+        );
 
-        return Result.Ok();
+        stopWatch.Stop();
+
+        if (insertResult.IsSuccess)
+        {
+            _log.Debug(
+                "Finished creating {Count} {NameOfPlexGenre} relations for library {LibraryName} in {ElapsedSeconds:F2} seconds",
+                newGenres.Count,
+                nameof(PlexGenre),
+                libraryName,
+                stopWatch.Elapsed.TotalSeconds
+            );
+            return Result.Ok(newGenres.Count);
+        }
+
+        _log.Error(
+            "Failed creating {Count} {NameOfPlexGenre} relations for library {LibraryName} after {ElapsedSeconds:F2} seconds",
+            newGenres.Count,
+            libraryName,
+            nameof(PlexGenre),
+            stopWatch.Elapsed.TotalSeconds
+        );
+        return insertResult.LogError();
     }
 
-    private async Task<Result> SyncGenres(List<PlexGenre> genres, int libraryId)
+    private async Task<Result<int>> SyncCountries(
+        Dictionary<int, PlexCountry> sourceDict,
+        int libraryId,
+        string libraryName
+    )
     {
-        foreach (var genre in genres)
-            _dbContext.PlexGenres.AddIfNotExists(genre, x => x.Name == genre.Name);
+        var stopWatch = Stopwatch.StartNew();
 
-        await _dbContext.SaveChangesAsync();
+        _log.Here().Debug("Started syncing {Count} countries for library {LibraryName}", sourceDict.Count, libraryName);
 
-        var libraryDb = await _dbContext
-            .PlexLibraries.Where(x => x.Id == libraryId)
-            .Include(x => x.Genres)
-            .AsTracking()
-            .FirstOrDefaultAsync();
-
-        if (libraryDb is null)
-            return ResultExtensions.EntityNotFound(nameof(PlexLibrary), libraryId);
-
-        var roleKeys = genres.Select(x => x.Name).ToHashSet();
-
-        var genresDb = await _dbContext
-            .PlexGenres.Where(x => roleKeys.Contains(x.Name))
-            .AsTracking()
-            .Take(roleKeys.Count)
-            .ToListAsync();
-
-        if (libraryDb.Genres.Any())
+        if (!sourceDict.Any())
         {
-            for (var i = libraryDb.Genres.Count - 1; i >= 0; i--)
-            {
-                // Already exists
-                if (roleKeys.Contains(libraryDb.Genres[i].Name))
-                {
-                    continue;
-                }
+            _log.Here()
+                .Warning(
+                    "No {NameOfPlexCountry} relations were given to be inserted for library {LibraryName} with {libraryId}, all current {NameOfPlexCountry} relations will be dropped",
+                    nameof(PlexCountry),
+                    libraryName,
+                    libraryId,
+                    nameof(PlexCountry)
+                );
+            await _dbContext.PlexLibraryCountries.Where(x => x.PlexLibraryId == libraryId).ExecuteDeleteAsync();
+            stopWatch.Stop();
 
-                // Delete
-                if (!roleKeys.Contains(libraryDb.Genres[i].Name))
-                {
-                    libraryDb.Genres.RemoveAt(i);
-                }
-            }
+            _log.Debug(
+                "Finished dropping all {NameOfPlexCountry} relations for library {LibraryName} in {ElapsedSeconds:F2} seconds",
+                nameof(PlexCountry),
+                libraryName,
+                stopWatch.Elapsed.TotalSeconds
+            );
+            return Result.Ok(0);
         }
 
-        // Add Genres
-        var currentNames = libraryDb.Genres.Select(x => x.Name).ToList();
-        var genresToAdd = genresDb.Where(x => !currentNames.Contains(x.Name)).ToList();
-        libraryDb.Genres.AddRange(genresToAdd);
+        // Drop all countries for the library
+        await _dbContext.PlexLibraryCountries.Where(x => x.PlexLibraryId == libraryId).ExecuteDeleteAsync();
 
-        await _dbContext.SaveChangesAsync();
+        // Reinsert countries for the library
+        var newCountries = sourceDict.Select(x => new PlexLibraryCountries(libraryId, x.Value.Id, x.Key)).ToList();
+        var insertResult = await Result.Try(
+            () => _dbContext.BulkInsertAsync(newCountries, _bulkInsertConfig),
+            e => new ExceptionalError(e)
+        );
 
-        return Result.Ok();
-    }
+        stopWatch.Stop();
 
-    private async Task<Result> SyncCountries(List<PlexCountry> countries, int libraryId)
-    {
-        foreach (var plexRole in countries)
-            _dbContext.PlexCountries.AddIfNotExists(plexRole, x => x.Name == plexRole.Name);
-
-        await _dbContext.SaveChangesAsync();
-
-        var libraryDb = await _dbContext
-            .PlexLibraries.Where(x => x.Id == libraryId)
-            .Include(x => x.Countries)
-            .AsTracking()
-            .FirstOrDefaultAsync();
-
-        if (libraryDb is null)
-            return ResultExtensions.EntityNotFound(nameof(PlexLibrary), libraryId);
-
-        var countryNames = countries.Select(x => x.Name).ToHashSet();
-
-        var countriesDb = await _dbContext
-            .PlexCountries.Where(x => countryNames.Contains(x.Name))
-            .AsTracking()
-            .Take(countryNames.Count)
-            .ToListAsync();
-
-        if (libraryDb.Countries.Any())
+        if (insertResult.IsSuccess)
         {
-            for (var i = libraryDb.Countries.Count - 1; i >= 0; i--)
-            {
-                // Already exists
-                if (countryNames.Contains(libraryDb.Countries[i].Name))
-                {
-                    continue;
-                }
-
-                // Delete
-                if (!countryNames.Contains(libraryDb.Countries[i].Name))
-                {
-                    libraryDb.Countries.RemoveAt(i);
-                }
-            }
+            _log.Debug(
+                "Finished creating {Count} {NameOfPlexCountry} relations for library {LibraryName} in {ElapsedSeconds:F2} seconds",
+                newCountries.Count,
+                nameof(PlexCountry),
+                libraryName,
+                stopWatch.Elapsed.TotalSeconds
+            );
+            return Result.Ok(newCountries.Count);
         }
 
-        // Add Countries
-        var currentNames = libraryDb.Countries.Select(x => x.Name).ToList();
-        var countriesToAdd = countriesDb.Where(x => !currentNames.Contains(x.Name)).ToList();
-        libraryDb.Countries.AddRange(countriesToAdd);
-
-        await _dbContext.SaveChangesAsync();
-
-        return Result.Ok();
+        _log.Error(
+            "Failed creating {Count} {NameOfPlexCountry} relations for library {LibraryName} after {ElapsedSeconds:F2} seconds",
+            newCountries.Count,
+            libraryName,
+            nameof(PlexCountry),
+            stopWatch.Elapsed.TotalSeconds
+        );
+        return insertResult.LogError();
     }
 }

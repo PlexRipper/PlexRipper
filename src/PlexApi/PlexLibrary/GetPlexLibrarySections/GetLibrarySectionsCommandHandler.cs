@@ -65,7 +65,7 @@ public class GetLibrarySectionsCommandHandler : ICommandHandler<GetLibrarySectio
             .Select(x => new PlexLibrary
             {
                 Id = 0,
-                Type = x.Type.ToPlexMediaTypeFromPlexApi(),
+                Type = x.Type.ToPlexMediaType(),
                 Title = x.Title,
                 Key = x.Key,
                 CreatedAt = DateTimeExtensions.FromUnixTime(x.CreatedAt),
@@ -77,6 +77,7 @@ public class GetLibrarySectionsCommandHandler : ICommandHandler<GetLibrarySectio
                 PlexServerId = plexServerId,
                 DefaultDestination = null,
                 DefaultDestinationId = null,
+                Language = x.Language,
             })
             .ToList();
 

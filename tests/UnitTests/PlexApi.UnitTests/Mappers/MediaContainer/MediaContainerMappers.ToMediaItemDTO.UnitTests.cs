@@ -21,7 +21,7 @@ namespace PlexApi.UnitTests
             {
                 RatingKey = "123",
                 Key = "/library/metadata/123",
-                Type = "movie",
+                Type = GetMediaMetaDataType.Movie,
                 Title = "Test Movie",
                 Summary = "Test summary",
                 Year = 2023,
@@ -83,8 +83,6 @@ namespace PlexApi.UnitTests
                                 [
                                     new GetMediaMetaDataStream
                                     {
-                                        Id = 201,
-                                        StreamType = 1,
                                         Default = true,
                                         Codec = "h264",
                                         Index = 0,
@@ -104,7 +102,7 @@ namespace PlexApi.UnitTests
                 Role = [new GetMediaMetaDataRole { Tag = "Actor Name" }],
                 Ratings =
                 [
-                    new Ratings
+                    new GetMediaMetaDataRatings
                     {
                         Image = "imdb://image",
                         Type = "imdb",
@@ -123,9 +121,9 @@ namespace PlexApi.UnitTests
             result.Key.ShouldBe(sourceData.Key);
             result.Title.ShouldBe(sourceData.Title);
             result.Summary.ShouldBe(sourceData.Summary);
-            result.Year.ShouldBe(sourceData.Year);
+            result.Year.ShouldBe(sourceData.Year ?? 0);
             result.OriginalTitle.ShouldBe(sourceData.OriginalTitle);
-            result.ChildCount.ShouldBe(sourceData.ChildCount.Value);
+            result.ChildCount.ShouldBe(sourceData.ChildCount);
             result.Studio.ShouldBe(sourceData.Studio);
             result.ContentRating.ShouldBe(sourceData.ContentRating);
 
@@ -143,36 +141,29 @@ namespace PlexApi.UnitTests
                 tolerance: TimeSpan.FromSeconds(1)
             );
             result.UpdatedAt.ShouldBe(
-                DateTimeExtensions.FromUnixTime(sourceData.UpdatedAt),
+                DateTimeExtensions.FromUnixTime(sourceData.UpdatedAt ?? 0),
                 tolerance: TimeSpan.FromSeconds(1)
             );
 
-            // Parse the string date to NodaTime.LocalDate if not null
-            if (sourceData.OriginallyAvailableAt != null)
-            {
-                result.OriginallyAvailableAt.ShouldBe(sourceData.OriginallyAvailableAt.ToString());
-            }
-            else
-            {
-                result.OriginallyAvailableAt.ShouldBeNull();
-            }
+            result.OriginallyAvailableAt.ShouldNotBeNull();
+            result.OriginallyAvailableAt.ShouldBe(sourceData.OriginallyAvailableAt.ToString());
 
             result.GrandparentTitle.ShouldBe(sourceData.GrandparentTitle);
             result.ParentTitle.ShouldBe(sourceData.ParentTitle);
             result.ParentGuid.ShouldBe(sourceData.ParentGuid);
             result.ParentRatingKey.ShouldBe(sourceData.ParentRatingKey);
             result.AudienceRating.ShouldBe(sourceData.AudienceRating);
-            result.Rating.ShouldBe(sourceData.Rating.Value);
+            result.Rating.ShouldBe(sourceData.Rating);
 
             // Collections
             result.Genre.Count.ShouldBe(sourceData.Genre.Count);
-            result.Genre.First().Tag.ShouldBe(sourceData.Genre.First().Tag);
+            result.Genre.First().Name.ShouldBe(sourceData.Genre.First().Tag);
 
             result.Country.Count.ShouldBe(sourceData.Country.Count);
-            result.Country.First().Tag.ShouldBe(sourceData.Country.First().Tag);
+            result.Country.First().Name.ShouldBe(sourceData.Country.First().Tag);
 
             result.Role.Count.ShouldBe(sourceData.Role.Count);
-            result.Role.First().Tag.ShouldBe(sourceData.Role.First().Tag);
+            result.Role.First().Name.ShouldBe(sourceData.Role.First().Tag);
 
             result.Ratings.Count.ShouldBe(sourceData.Ratings.Count);
             result.Ratings.First().Type.ShouldBe(sourceData.Ratings.First().Type);
@@ -224,7 +215,7 @@ namespace PlexApi.UnitTests
             {
                 RatingKey = "456",
                 Key = "/library/metadata/456",
-                Type = "show",
+                Type = GetMediaMetaDataType.TvShow,
                 Title = "Test TV Show",
                 Summary = "Test TV show summary",
                 Year = 2020,
@@ -255,13 +246,13 @@ namespace PlexApi.UnitTests
                 ],
                 Ratings =
                 [
-                    new Ratings
+                    new GetMediaMetaDataRatings
                     {
                         Image = "imdb://image/show",
                         Type = "imdb",
                         Value = 9.2f,
                     },
-                    new Ratings
+                    new GetMediaMetaDataRatings
                     {
                         Image = "tmdb://image/show",
                         Type = "tmdb",
@@ -284,9 +275,9 @@ namespace PlexApi.UnitTests
             result.Key.ShouldBe(sourceData.Key);
             result.Title.ShouldBe(sourceData.Title);
             result.Summary.ShouldBe(sourceData.Summary);
-            result.Year.ShouldBe(sourceData.Year);
+            result.Year.ShouldBe(sourceData.Year ?? 0);
             result.OriginalTitle.ShouldBe(sourceData.OriginalTitle);
-            result.ChildCount.ShouldBe(sourceData.ChildCount.Value);
+            result.ChildCount.ShouldBe(sourceData.ChildCount);
             result.Studio.ShouldBe(sourceData.Studio);
             result.ContentRating.ShouldBe(sourceData.ContentRating);
 
@@ -304,34 +295,28 @@ namespace PlexApi.UnitTests
                 tolerance: TimeSpan.FromSeconds(1)
             );
             result.UpdatedAt.ShouldBe(
-                DateTimeExtensions.FromUnixTime(sourceData.UpdatedAt),
+                DateTimeExtensions.FromUnixTime(sourceData.UpdatedAt ?? 0),
                 tolerance: TimeSpan.FromSeconds(1)
             );
 
             // Parse the string date to NodaTime.LocalDate if not null
-            if (sourceData.OriginallyAvailableAt != null)
-            {
-                result.OriginallyAvailableAt.ShouldBe(sourceData.OriginallyAvailableAt.ToString());
-            }
-            else
-            {
-                result.OriginallyAvailableAt.ShouldBeNull();
-            }
+            result.OriginallyAvailableAt.ShouldNotBeNull();
+            result.OriginallyAvailableAt.ShouldBe(sourceData.OriginallyAvailableAt.ToString());
 
             result.AudienceRating.ShouldBe(sourceData.AudienceRating);
-            result.Rating.ShouldBe(sourceData.Rating.Value);
+            result.Rating.ShouldBe(sourceData.Rating);
 
             // Collections
             result.Genre.Count.ShouldBe(sourceData.Genre.Count);
-            result.Genre.First().Tag.ShouldBe(sourceData.Genre.First().Tag);
-            result.Genre.Last().Tag.ShouldBe(sourceData.Genre.Last().Tag);
+            result.Genre.First().Name.ShouldBe(sourceData.Genre.First().Tag);
+            result.Genre.Last().Name.ShouldBe(sourceData.Genre.Last().Tag);
 
             result.Country.Count.ShouldBe(sourceData.Country.Count);
-            result.Country.First().Tag.ShouldBe(sourceData.Country.First().Tag);
+            result.Country.First().Name.ShouldBe(sourceData.Country.First().Tag);
 
             result.Role.Count.ShouldBe(sourceData.Role.Count);
-            result.Role.First().Tag.ShouldBe(sourceData.Role.First().Tag);
-            result.Role.Last().Tag.ShouldBe(sourceData.Role.Last().Tag);
+            result.Role.First().Name.ShouldBe(sourceData.Role.First().Tag);
+            result.Role.Last().Name.ShouldBe(sourceData.Role.Last().Tag);
 
             result.Ratings.Count.ShouldBe(sourceData.Ratings.Count);
             result.Ratings.First().Type.ShouldBe(sourceData.Ratings.First().Type);

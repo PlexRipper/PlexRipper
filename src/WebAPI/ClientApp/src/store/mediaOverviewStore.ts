@@ -66,8 +66,11 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 			genreId: 0,
 		},
 		metadataList: {
-			countries: [],
+			roleCount: 0,
+			countryCount: 0,
+			genreCount: 0,
 			roles: [],
+			countries: [],
 			genres: [],
 		},
 	};
@@ -118,9 +121,8 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 						...state.metadata,
 					}),
 				)),
-			actions.refreshMetaData(),
 			]).pipe(
-				map(([media, _]) => media),
+				map(([media]) => media),
 				map(({ isSuccess, value }): PlexMediaStatisticsDTO | null => {
 					if (isSuccess && value) {
 						return value;
@@ -131,6 +133,7 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 					actions.setMedia(data, state.mediaType);
 					state.loading = false;
 				}),
+				tap(() => actions.refreshMetaData()),
 			);
 		},
 		setMedia(data: PlexMediaStatisticsDTO | null, mediaType: PlexMediaType) {

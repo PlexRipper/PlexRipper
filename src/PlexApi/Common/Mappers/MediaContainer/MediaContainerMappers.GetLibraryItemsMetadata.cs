@@ -5,13 +5,13 @@ namespace PlexRipper.PlexApi;
 
 public static partial class MediaContainerMappers
 {
-    public static LibraryMediaItemDTO ToMediaItemDTO(this GetAllMediaLibraryMetadata data)
+    public static LibraryMediaItemDTO ToMediaItemDTO(this GetLibrarySectionsAllMetadata data)
     {
         return new LibraryMediaItemDTO
         {
             RatingKey = data.RatingKey,
             Key = data.Key,
-            Type = data.Type.ToPlexMediaTypeFromPlexApi(),
+            Type = data.Type.ToPlexMediaType(),
             Title = data.Title,
             Summary = data.Summary,
             Year = data.Year ?? 0,
@@ -46,13 +46,36 @@ public static partial class MediaContainerMappers
         };
     }
 
-    public static LibraryMediaItemGenreDTO ToDTO(this GetAllMediaLibraryGenre x) => new() { Tag = x.Tag };
+    public static LibraryMediaItemGenreDTO ToDTO(this GetLibrarySectionsAllGenre x) =>
+        new()
+        {
+            Name = x.Tag,
+            PlexId = -1,
+            Filter = string.Empty,
+            Key = x.Tag.ToMd5Hash(),
+        };
 
-    public static MetaDataCountryDTO ToDTO(this GetAllMediaLibraryCountry x) => new() { Tag = x.Tag };
+    public static LibraryMediaItemCountryDTO ToDTO(this GetLibrarySectionsAllCountry x) =>
+        new()
+        {
+            Name = x.Tag,
+            PlexId = -1,
+            Filter = string.Empty,
+            Key = x.Tag.ToMd5Hash(),
+        };
 
-    public static LibraryMediaItemRoleDTO ToDTO(this GetAllMediaLibraryRole x) => new() { Tag = x.Tag };
+    public static LibraryMediaItemRoleDTO ToDTO(this GetLibrarySectionsAllRole x) =>
+        new()
+        {
+            Name = x.Tag,
+            PlexId = -1,
+            Role = null,
+            Filter = null,
+            TagKey = null,
+            Thumb = null,
+        };
 
-    public static LibraryMediaItemMediaDTO ToItemMediaDTO(this GetAllMediaLibraryMedia media) =>
+    public static LibraryMediaItemMediaDTO ToItemMediaDTO(this GetLibrarySectionsAllMedia media) =>
         new()
         {
             Id = media.Id,
@@ -73,7 +96,7 @@ public static partial class MediaContainerMappers
             Parts = media.Part?.Select(x => x.ToItemPartDTO()).ToList() ?? [],
         };
 
-    public static LibraryMediaItemPartDTO ToItemPartDTO(this GetAllMediaLibraryPart part) =>
+    public static LibraryMediaItemPartDTO ToItemPartDTO(this GetLibrarySectionsAllPart part) =>
         new()
         {
             Id = part.Id,
@@ -90,11 +113,17 @@ public static partial class MediaContainerMappers
             Stream = part.Stream?.Select(x => x.ToItemStreamDTO()).ToList() ?? [],
         };
 
-    public static LibraryMediaItemStreamDTO ToItemStreamDTO(this GetAllMediaLibraryStream source) =>
+    public static LibraryMediaItemStreamDTO ToItemStreamDTO(this GetLibrarySectionsAllStream source) =>
         new()
         {
             Id = source.Id,
-            StreamType = source.StreamType,
+            StreamType = source.StreamType switch
+            {
+                1 => StreamType.Video,
+                2 => StreamType.Audio,
+                3 => StreamType.Subtitle,
+                _ => StreamType.Unknown,
+            },
             Default = source.Default,
             Codec = source.Codec,
             Index = source.Index,

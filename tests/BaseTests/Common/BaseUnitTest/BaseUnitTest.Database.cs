@@ -63,7 +63,7 @@ public partial class BaseUnitTest : IDisposable
     /// <param name="options"> The options to use for the fake data setup.</param>
     protected async Task<Seed> SetupDatabase(Seed seed, Action<FakeDataConfig>? options = null)
     {
-        // Database context can be setup once and then retrieved by its DB name.
+        // Database context can be set up once and then retrieved by its DB name.
         _databaseName = MockDatabase.GetMemoryDatabaseName();
         await MockDatabase.GetMemoryDbContext(_databaseName).Setup(seed, options);
         IsDatabaseSetup = true;

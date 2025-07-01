@@ -27,15 +27,7 @@ public class ValidationPipeline<TRequest, TResponse> : IPipelineBehavior<TReques
         var fluentValidationResult = await _compositeValidator.ValidateAsync(request, cancellationToken);
 
         if (!fluentValidationResult.IsValid)
-        {
-            var result = new TResponse();
-            var error = ResultExtensions.Create400BadRequestResult("Fluent Validation Pipeline Failed.").Errors.First();
-            foreach (var reason in fluentValidationResult.Errors)
-                error.Reasons.Add(new Error(reason.ErrorMessage));
-
-            result.Reasons.Add(error);
-            return result;
-        }
+            return fluentValidationResult.ToResult<TResponse>();
 
         // Encapsulate all handlers with this try/catch block as not to do this in every handler itself.
         try

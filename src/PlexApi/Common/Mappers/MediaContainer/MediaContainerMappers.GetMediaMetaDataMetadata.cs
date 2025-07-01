@@ -11,13 +11,13 @@ public static partial class MediaContainerMappers
         {
             RatingKey = data.RatingKey,
             Key = data.Key,
-            Type = data.Type.ToPlexMediaTypeFromPlexApi(),
+            Type = data.Type.ToPlexMediaType(),
             Title = data.Title,
             Summary = data.Summary,
-            Year = data.Year,
+            Year = data.Year ?? 0,
             TitleSort = data.Title.ToSortTitle(),
             OriginalTitle = data.OriginalTitle ?? string.Empty,
-            ChildCount = data.ChildCount ?? 0,
+            ChildCount = data.ChildCount,
             Media = data.Media?.Select(x => x.ToItemMediaDTO()).ToList() ?? [],
             Genre = data.Genre?.Select(x => x.ToDTO()).ToList() ?? [],
             Country = data.Country?.Select(x => x.ToDTO()).ToList() ?? [],
@@ -29,11 +29,11 @@ public static partial class MediaContainerMappers
             Duration = data.Duration / 1000,
             Thumb = data.Thumb,
             Art = data.Art,
-            Theme = data.Theme ?? string.Empty,
+            Theme = data.Theme,
             Guid = data.Guid,
             AddedAt = DateTimeExtensions.FromUnixTime(data.AddedAt),
-            UpdatedAt = DateTimeExtensions.FromUnixTime(data.UpdatedAt),
-            OriginallyAvailableAt = data.OriginallyAvailableAt?.ToString() ?? string.Empty,
+            UpdatedAt = DateTimeExtensions.FromUnixTime(data.UpdatedAt ?? 0),
+            OriginallyAvailableAt = data.OriginallyAvailableAt.ToString(),
             Ratings = data.Ratings?.Select(x => x.ToDTO()).ToList() ?? [],
             Guids = data.Guids?.Select(x => new MetaDataGuidsDTO { Id = x.Id }).ToList() ?? [],
             GrandparentTitle = data.GrandparentTitle ?? string.Empty,
@@ -41,17 +41,40 @@ public static partial class MediaContainerMappers
             ParentGuid = data.ParentGuid ?? string.Empty,
             ParentRatingKey = data.ParentRatingKey ?? string.Empty,
             AudienceRating = data.AudienceRating,
-            Rating = data.Rating ?? 0,
+            Rating = (float)Math.Round(data.Rating, 2),
         };
     }
 
-    public static LibraryMediaItemGenreDTO ToDTO(this GetMediaMetaDataGenre x) => new() { Tag = x.Tag };
+    public static LibraryMediaItemGenreDTO ToDTO(this GetMediaMetaDataGenre x) =>
+        new()
+        {
+            Name = x.Tag,
+            PlexId = x.Id,
+            Filter = x.Filter,
+            Key = x.Tag.ToMd5Hash(),
+        };
 
-    public static MetaDataCountryDTO ToDTO(this GetMediaMetaDataCountry x) => new() { Tag = x.Tag };
+    public static LibraryMediaItemCountryDTO ToDTO(this GetMediaMetaDataCountry x) =>
+        new()
+        {
+            Name = x.Tag,
+            PlexId = x.Id,
+            Filter = x.Filter,
+            Key = x.Tag.ToMd5Hash(),
+        };
 
-    public static LibraryMediaItemRoleDTO ToDTO(this GetMediaMetaDataRole x) => new() { Tag = x.Tag };
+    public static LibraryMediaItemRoleDTO ToDTO(this GetMediaMetaDataRole x) =>
+        new()
+        {
+            Name = x.Tag,
+            PlexId = x.Id,
+            Role = x.Role,
+            Filter = x.Filter,
+            TagKey = x.TagKey,
+            Thumb = x.Thumb,
+        };
 
-    public static MetaDataRatingsDTO ToDTO(this Ratings x) =>
+    public static MetaDataRatingsDTO ToDTO(this GetMediaMetaDataRatings x) =>
         new()
         {
             Image = x.Image,
@@ -86,11 +109,11 @@ public static partial class MediaContainerMappers
             Id = part.Id,
             Accessible = part.Accessible,
             Exists = part.Exists,
-            Key = part.Key,
+            Key = part.Key ?? string.Empty,
             Indexes = part.Indexes,
             Duration = part.Duration ?? 0,
-            File = part.File,
-            Size = part.Size,
+            File = part.File ?? string.Empty,
+            Size = part.Size ?? 0,
             Container = part.Container ?? string.Empty,
             VideoProfile = part.VideoProfile ?? string.Empty,
             AudioProfile = part.AudioProfile ?? string.Empty,
@@ -101,9 +124,15 @@ public static partial class MediaContainerMappers
         new()
         {
             Id = source.Id,
-            StreamType = source.StreamType,
+            StreamType = source.StreamType switch
+            {
+                1 => StreamType.Video,
+                2 => StreamType.Audio,
+                3 => StreamType.Subtitle,
+                _ => StreamType.Unknown,
+            },
             Default = source.Default,
-            Codec = source.Codec,
+            Codec = source.Codec ?? string.Empty,
             Index = source.Index,
             Bitrate = source.Bitrate ?? 0,
             Language = source.Language ?? string.Empty,
@@ -135,8 +164,8 @@ public static partial class MediaContainerMappers
             ScanType = source.ScanType,
             RefFrames = source.RefFrames,
             Width = source.Width,
-            DisplayTitle = source.DisplayTitle,
-            ExtendedDisplayTitle = source.ExtendedDisplayTitle,
+            DisplayTitle = source.DisplayTitle ?? string.Empty,
+            ExtendedDisplayTitle = source.ExtendedDisplayTitle ?? string.Empty,
             Selected = source.Selected,
             Forced = source.Forced,
             Channels = source.Channels,

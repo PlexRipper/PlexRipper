@@ -462,51 +462,6 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("QRTZ_TRIGGERS", (string)null);
                 });
 
-            modelBuilder.Entity("PlexLibraryCountries", b =>
-                {
-                    b.Property<int>("CountriesId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("PlexLibrariesId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("CountriesId", "PlexLibrariesId");
-
-                    b.HasIndex("PlexLibrariesId");
-
-                    b.ToTable("PlexLibraryCountries");
-                });
-
-            modelBuilder.Entity("PlexLibraryGenres", b =>
-                {
-                    b.Property<int>("GenresId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("PlexLibrariesId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("GenresId", "PlexLibrariesId");
-
-                    b.HasIndex("PlexLibrariesId");
-
-                    b.ToTable("PlexLibraryGenres");
-                });
-
-            modelBuilder.Entity("PlexLibraryRoles", b =>
-                {
-                    b.Property<int>("PlexLibrariesId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("RolesId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("PlexLibrariesId", "RolesId");
-
-                    b.HasIndex("RolesId");
-
-                    b.ToTable("PlexLibraryRoles");
-                });
-
             modelBuilder.Entity("PlexRipper.Domain.DownloadTaskBase", b =>
                 {
                     b.Property<Guid>("Id")
@@ -948,6 +903,32 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("PlexAccountServers");
                 });
 
+            modelBuilder.Entity("PlexRipper.Domain.PlexActor", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(0);
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Thumb")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Key")
+                        .IsUnique();
+
+                    b.ToTable("PlexActors");
+                });
+
             modelBuilder.Entity("PlexRipper.Domain.PlexCountry", b =>
                 {
                     b.Property<int>("Id")
@@ -955,16 +936,17 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(0);
 
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("PlexKey")
-                        .HasColumnType("INTEGER");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
+                    b.HasIndex("Key")
                         .IsUnique();
 
                     b.ToTable("PlexCountries");
@@ -977,16 +959,17 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(0);
 
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<long>("PlexKey")
-                        .HasColumnType("INTEGER");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
+                    b.HasIndex("Key")
                         .IsUnique();
 
                     b.ToTable("PlexGenres");
@@ -999,6 +982,14 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(0);
 
+                    b.Property<int>("ActorsCount")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(16);
+
+                    b.Property<int>("CountriesCount")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(18);
+
                     b.Property<DateTime?>("CreatedAt")
                         .HasColumnType("TEXT")
                         .HasColumnOrder(5);
@@ -1008,20 +999,29 @@ namespace PlexRipper.Data.Migrations
 
                     b.Property<int>("EpisodeCount")
                         .HasColumnType("INTEGER")
-                        .HasColumnOrder(14);
+                        .HasColumnOrder(15);
+
+                    b.Property<int>("GenresCount")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(17);
 
                     b.Property<string>("Key")
                         .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(3);
 
+                    b.Property<string>("Language")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(10);
+
                     b.Property<long>("MediaSize")
                         .HasColumnType("INTEGER")
-                        .HasColumnOrder(10);
+                        .HasColumnOrder(11);
 
                     b.Property<int>("MovieCount")
                         .HasColumnType("INTEGER")
-                        .HasColumnOrder(11);
+                        .HasColumnOrder(12);
 
                     b.Property<int>("PlexServerId")
                         .HasColumnType("INTEGER");
@@ -1032,7 +1032,7 @@ namespace PlexRipper.Data.Migrations
 
                     b.Property<int>("SeasonCount")
                         .HasColumnType("INTEGER")
-                        .HasColumnOrder(13);
+                        .HasColumnOrder(14);
 
                     b.Property<DateTime?>("SyncedAt")
                         .HasColumnType("TEXT")
@@ -1046,7 +1046,7 @@ namespace PlexRipper.Data.Migrations
 
                     b.Property<int>("TvShowCount")
                         .HasColumnType("INTEGER")
-                        .HasColumnOrder(12);
+                        .HasColumnOrder(13);
 
                     b.Property<string>("Type")
                         .IsRequired()
@@ -1071,6 +1071,69 @@ namespace PlexRipper.Data.Migrations
                     b.HasIndex("PlexServerId");
 
                     b.ToTable("PlexLibraries");
+                });
+
+            modelBuilder.Entity("PlexRipper.Domain.PlexLibraryActors", b =>
+                {
+                    b.Property<int>("PlexActorId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(2);
+
+                    b.Property<int>("PlexLibraryId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(1);
+
+                    b.Property<int>("PlexKey")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(3);
+
+                    b.HasKey("PlexActorId", "PlexLibraryId");
+
+                    b.HasIndex("PlexLibraryId");
+
+                    b.ToTable("PlexLibraryActors");
+                });
+
+            modelBuilder.Entity("PlexRipper.Domain.PlexLibraryCountries", b =>
+                {
+                    b.Property<int>("PlexCountryId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(2);
+
+                    b.Property<int>("PlexLibraryId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(1);
+
+                    b.Property<int>("PlexKey")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(3);
+
+                    b.HasKey("PlexCountryId", "PlexLibraryId");
+
+                    b.HasIndex("PlexLibraryId");
+
+                    b.ToTable("PlexLibraryCountries");
+                });
+
+            modelBuilder.Entity("PlexRipper.Domain.PlexLibraryGenres", b =>
+                {
+                    b.Property<int>("PlexGenreId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(2);
+
+                    b.Property<int>("PlexLibraryId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(1);
+
+                    b.Property<int>("PlexKey")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(3);
+
+                    b.HasKey("PlexGenreId", "PlexLibraryId");
+
+                    b.HasIndex("PlexLibraryId");
+
+                    b.ToTable("PlexLibraryGenres");
                 });
 
             modelBuilder.Entity("PlexRipper.Domain.PlexMovie", b =>
@@ -1134,10 +1197,6 @@ namespace PlexRipper.Data.Migrations
                     b.Property<int>("Key")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(1);
-
-                    b.Property<string>("MediaData")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
 
                     b.Property<long>("MediaSize")
                         .HasColumnType("INTEGER")
@@ -1204,6 +1263,27 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("PlexMovie");
                 });
 
+            modelBuilder.Entity("PlexRipper.Domain.PlexMovieActors", b =>
+                {
+                    b.Property<int>("PlexActorId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(1);
+
+                    b.Property<int>("PlexMovieId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(2);
+
+                    b.Property<int>("PlexLibraryId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(3);
+
+                    b.HasKey("PlexActorId", "PlexMovieId");
+
+                    b.HasIndex("PlexMovieId");
+
+                    b.ToTable("PlexMovieActors");
+                });
+
             modelBuilder.Entity("PlexRipper.Domain.PlexMovieCountries", b =>
                 {
                     b.Property<int>("CountryId")
@@ -1246,44 +1326,334 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("PlexMovieGenres");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexMovieRoles", b =>
-                {
-                    b.Property<int>("PlexMovieId")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(3);
-
-                    b.Property<int>("RolesId")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(1);
-
-                    b.Property<int>("PlexLibraryId")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(2);
-
-                    b.HasKey("PlexMovieId", "RolesId");
-
-                    b.HasIndex("RolesId");
-
-                    b.ToTable("PlexMovieRoles");
-                });
-
-            modelBuilder.Entity("PlexRipper.Domain.PlexRole", b =>
+            modelBuilder.Entity("PlexRipper.Domain.PlexMovieMediaData", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(0);
 
-                    b.Property<string>("Name")
+                    b.Property<float>("AspectRatio")
+                        .HasColumnType("REAL");
+
+                    b.Property<int>("AudioChannels")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("AudioCodec")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("AudioProfile")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Bitrate")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Container")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Duration")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("HasVoiceActivity")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Height")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("PlexId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PlexLibraryId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PlexMovieId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PlexServerId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("VideoCodec")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("VideoFrameRate")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("VideoProfile")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("VideoResolution")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Width")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlexLibraryId");
+
+                    b.HasIndex("PlexMovieId");
+
+                    b.HasIndex("PlexServerId");
+
+                    b.ToTable("PlexMovieData");
+                });
+
+            modelBuilder.Entity("PlexRipper.Domain.PlexMovieMediaDataPart", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(0);
+
+                    b.Property<bool?>("Accessible")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("AudioProfile")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Container")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Duration")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool?>("Exists")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("File")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Indexes")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("PlexId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PlexLibraryId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PlexMovieId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PlexMovieMediaDataId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PlexServerId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("Size")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("VideoProfile")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
-                        .IsUnique();
+                    b.HasIndex("PlexLibraryId");
 
-                    b.ToTable("PlexRoles");
+                    b.HasIndex("PlexMovieId");
+
+                    b.HasIndex("PlexMovieMediaDataId");
+
+                    b.HasIndex("PlexServerId");
+
+                    b.ToTable("PlexMovieDataParts");
+                });
+
+            modelBuilder.Entity("PlexRipper.Domain.PlexMovieMediaDataStream", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(0);
+
+                    b.Property<string>("AudioChannelLayout")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("BitDepth")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Bitrate")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool?>("CanAutoSync")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("Channels")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ChromaLocation")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ChromaSubsampling")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Codec")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("CodedHeight")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("CodedWidth")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ColorPrimaries")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ColorRange")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ColorSpace")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ColorTrc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("DOVIBLCompatID")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool?>("DOVIBLPresent")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool?>("DOVIELPresent")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("DOVILevel")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool?>("DOVIPresent")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("DOVIProfile")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool?>("DOVIRPUPresent")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("DOVIVersion")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool?>("Default")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("DisplayTitle")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool?>("Dub")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ExtendedDisplayTitle")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool?>("Forced")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<float?>("FrameRate")
+                        .HasColumnType("REAL");
+
+                    b.Property<bool?>("HasScalingMatrix")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool?>("HearingImpaired")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("Height")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("Index")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Language")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("LanguageCode")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("LanguageTag")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("Level")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool?>("Original")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("PlexId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PlexLibraryId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PlexMovieId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PlexMovieMediaDataId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PlexMovieMediaDataPartId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PlexServerId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Profile")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("RefFrames")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("SamplingRate")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ScanType")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool?>("Selected")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("StreamType")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("Width")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlexLibraryId");
+
+                    b.HasIndex("PlexMovieId");
+
+                    b.HasIndex("PlexMovieMediaDataId");
+
+                    b.HasIndex("PlexMovieMediaDataPartId");
+
+                    b.HasIndex("PlexServerId");
+
+                    b.ToTable("PlexMovieDataStreams");
                 });
 
             modelBuilder.Entity("PlexRipper.Domain.PlexServer", b =>
@@ -1563,10 +1933,6 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(1);
 
-                    b.Property<string>("MediaData")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.Property<long>("MediaSize")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(7);
@@ -1630,6 +1996,27 @@ namespace PlexRipper.Data.Migrations
                     b.HasIndex("SortIndex");
 
                     b.ToTable("PlexTvShows");
+                });
+
+            modelBuilder.Entity("PlexRipper.Domain.PlexTvShowActors", b =>
+                {
+                    b.Property<int>("PlexActorId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(1);
+
+                    b.Property<int>("PlexTvShowId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(3);
+
+                    b.Property<int>("PlexLibraryId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(2);
+
+                    b.HasKey("PlexActorId", "PlexTvShowId");
+
+                    b.HasIndex("PlexTvShowId");
+
+                    b.ToTable("PlexTvShowActors");
                 });
 
             modelBuilder.Entity("PlexRipper.Domain.PlexTvShowCountries", b =>
@@ -1715,10 +2102,6 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(1);
 
-                    b.Property<string>("MediaData")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.Property<long>("MediaSize")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(7);
@@ -1800,6 +2183,336 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("PlexTvShowEpisodes");
                 });
 
+            modelBuilder.Entity("PlexRipper.Domain.PlexTvShowEpisodeMediaData", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(0);
+
+                    b.Property<float>("AspectRatio")
+                        .HasColumnType("REAL");
+
+                    b.Property<int>("AudioChannels")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("AudioCodec")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("AudioProfile")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Bitrate")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Container")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Duration")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("HasVoiceActivity")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Height")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("PlexId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PlexLibraryId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PlexServerId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PlexTvShowEpisodeId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("VideoCodec")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("VideoFrameRate")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("VideoProfile")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("VideoResolution")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Width")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlexLibraryId");
+
+                    b.HasIndex("PlexServerId");
+
+                    b.HasIndex("PlexTvShowEpisodeId");
+
+                    b.ToTable("PlexTvShowEpisodeData");
+                });
+
+            modelBuilder.Entity("PlexRipper.Domain.PlexTvShowEpisodeMediaDataPart", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(0);
+
+                    b.Property<bool?>("Accessible")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("AudioProfile")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Container")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Duration")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool?>("Exists")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("File")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Indexes")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("PlexId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PlexLibraryId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PlexServerId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PlexTvShowEpisodeId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PlexTvShowEpisodeMediaDataId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("Size")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("VideoProfile")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlexLibraryId");
+
+                    b.HasIndex("PlexServerId");
+
+                    b.HasIndex("PlexTvShowEpisodeId");
+
+                    b.HasIndex("PlexTvShowEpisodeMediaDataId");
+
+                    b.ToTable("PlexTvShowEpisodeDataParts");
+                });
+
+            modelBuilder.Entity("PlexRipper.Domain.PlexTvShowEpisodeMediaDataStream", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(0);
+
+                    b.Property<string>("AudioChannelLayout")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("BitDepth")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Bitrate")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool?>("CanAutoSync")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("Channels")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ChromaLocation")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ChromaSubsampling")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Codec")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("CodedHeight")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("CodedWidth")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ColorPrimaries")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ColorRange")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ColorSpace")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ColorTrc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("DOVIBLCompatID")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool?>("DOVIBLPresent")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool?>("DOVIELPresent")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("DOVILevel")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool?>("DOVIPresent")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("DOVIProfile")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool?>("DOVIRPUPresent")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("DOVIVersion")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool?>("Default")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("DisplayTitle")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool?>("Dub")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ExtendedDisplayTitle")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool?>("Forced")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<float?>("FrameRate")
+                        .HasColumnType("REAL");
+
+                    b.Property<bool?>("HasScalingMatrix")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool?>("HearingImpaired")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("Height")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("Index")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Language")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("LanguageCode")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("LanguageTag")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("Level")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool?>("Original")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("PlexId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PlexLibraryId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PlexServerId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PlexTvShowEpisodeId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PlexTvShowEpisodeMediaDataId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PlexTvShowEpisodeMediaDataPartId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Profile")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("RefFrames")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("SamplingRate")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ScanType")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool?>("Selected")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("StreamType")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("Width")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlexLibraryId");
+
+                    b.HasIndex("PlexServerId");
+
+                    b.HasIndex("PlexTvShowEpisodeId");
+
+                    b.HasIndex("PlexTvShowEpisodeMediaDataId");
+
+                    b.HasIndex("PlexTvShowEpisodeMediaDataPartId");
+
+                    b.ToTable("PlexTvShowEpisodeDataStreams");
+                });
+
             modelBuilder.Entity("PlexRipper.Domain.PlexTvShowGenres", b =>
                 {
                     b.Property<int>("GenresId")
@@ -1819,27 +2532,6 @@ namespace PlexRipper.Data.Migrations
                     b.HasIndex("PlexTvShowId");
 
                     b.ToTable("PlexTvShowGenres");
-                });
-
-            modelBuilder.Entity("PlexRipper.Domain.PlexTvShowRoles", b =>
-                {
-                    b.Property<int>("PlexTvShowId")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(3);
-
-                    b.Property<int>("RolesId")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(1);
-
-                    b.Property<int>("PlexLibraryId")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(2);
-
-                    b.HasKey("PlexTvShowId", "RolesId");
-
-                    b.HasIndex("RolesId");
-
-                    b.ToTable("PlexTvShowRoles");
                 });
 
             modelBuilder.Entity("PlexRipper.Domain.PlexTvShowSeason", b =>
@@ -1903,10 +2595,6 @@ namespace PlexRipper.Data.Migrations
                     b.Property<int>("Key")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(1);
-
-                    b.Property<string>("MediaData")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
 
                     b.Property<long>("MediaSize")
                         .HasColumnType("INTEGER")
@@ -2170,51 +2858,6 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("JobDetail");
                 });
 
-            modelBuilder.Entity("PlexLibraryCountries", b =>
-                {
-                    b.HasOne("PlexRipper.Domain.PlexCountry", null)
-                        .WithMany()
-                        .HasForeignKey("CountriesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("PlexRipper.Domain.PlexLibrary", null)
-                        .WithMany()
-                        .HasForeignKey("PlexLibrariesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("PlexLibraryGenres", b =>
-                {
-                    b.HasOne("PlexRipper.Domain.PlexGenre", null)
-                        .WithMany()
-                        .HasForeignKey("GenresId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("PlexRipper.Domain.PlexLibrary", null)
-                        .WithMany()
-                        .HasForeignKey("PlexLibrariesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("PlexLibraryRoles", b =>
-                {
-                    b.HasOne("PlexRipper.Domain.PlexLibrary", null)
-                        .WithMany()
-                        .HasForeignKey("PlexLibrariesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("PlexRipper.Domain.PlexRole", null)
-                        .WithMany()
-                        .HasForeignKey("RolesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("PlexRipper.Domain.DownloadTaskBase", b =>
                 {
                     b.HasOne("PlexRipper.Domain.PlexLibrary", "PlexLibrary")
@@ -2328,6 +2971,51 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("PlexServer");
                 });
 
+            modelBuilder.Entity("PlexRipper.Domain.PlexLibraryActors", b =>
+                {
+                    b.HasOne("PlexRipper.Domain.PlexActor", null)
+                        .WithMany()
+                        .HasForeignKey("PlexActorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PlexRipper.Domain.PlexLibrary", null)
+                        .WithMany()
+                        .HasForeignKey("PlexLibraryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("PlexRipper.Domain.PlexLibraryCountries", b =>
+                {
+                    b.HasOne("PlexRipper.Domain.PlexCountry", null)
+                        .WithMany()
+                        .HasForeignKey("PlexCountryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PlexRipper.Domain.PlexLibrary", null)
+                        .WithMany()
+                        .HasForeignKey("PlexLibraryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("PlexRipper.Domain.PlexLibraryGenres", b =>
+                {
+                    b.HasOne("PlexRipper.Domain.PlexGenre", null)
+                        .WithMany()
+                        .HasForeignKey("PlexGenreId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PlexRipper.Domain.PlexLibrary", null)
+                        .WithMany()
+                        .HasForeignKey("PlexLibraryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("PlexRipper.Domain.PlexMovie", b =>
                 {
                     b.HasOne("PlexRipper.Domain.PlexLibrary", "PlexLibrary")
@@ -2345,6 +3033,21 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("PlexLibrary");
 
                     b.Navigation("PlexServer");
+                });
+
+            modelBuilder.Entity("PlexRipper.Domain.PlexMovieActors", b =>
+                {
+                    b.HasOne("PlexRipper.Domain.PlexActor", null)
+                        .WithMany()
+                        .HasForeignKey("PlexActorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PlexRipper.Domain.PlexMovie", null)
+                        .WithMany()
+                        .HasForeignKey("PlexMovieId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("PlexRipper.Domain.PlexMovieCountries", b =>
@@ -2377,19 +3080,109 @@ namespace PlexRipper.Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexMovieRoles", b =>
+            modelBuilder.Entity("PlexRipper.Domain.PlexMovieMediaData", b =>
                 {
-                    b.HasOne("PlexRipper.Domain.PlexMovie", null)
+                    b.HasOne("PlexRipper.Domain.PlexLibrary", "PlexLibrary")
+                        .WithMany()
+                        .HasForeignKey("PlexLibraryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PlexRipper.Domain.PlexMovie", "PlexMovie")
+                        .WithMany("MediaDataList")
+                        .HasForeignKey("PlexMovieId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PlexRipper.Domain.PlexServer", "PlexServer")
+                        .WithMany()
+                        .HasForeignKey("PlexServerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PlexLibrary");
+
+                    b.Navigation("PlexMovie");
+
+                    b.Navigation("PlexServer");
+                });
+
+            modelBuilder.Entity("PlexRipper.Domain.PlexMovieMediaDataPart", b =>
+                {
+                    b.HasOne("PlexRipper.Domain.PlexLibrary", "PlexLibrary")
+                        .WithMany()
+                        .HasForeignKey("PlexLibraryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PlexRipper.Domain.PlexMovie", "PlexMovie")
                         .WithMany()
                         .HasForeignKey("PlexMovieId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlexRipper.Domain.PlexRole", null)
-                        .WithMany()
-                        .HasForeignKey("RolesId")
+                    b.HasOne("PlexRipper.Domain.PlexMovieMediaData", "PlexMovieMediaData")
+                        .WithMany("Parts")
+                        .HasForeignKey("PlexMovieMediaDataId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("PlexRipper.Domain.PlexServer", "PlexServer")
+                        .WithMany()
+                        .HasForeignKey("PlexServerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PlexLibrary");
+
+                    b.Navigation("PlexMovie");
+
+                    b.Navigation("PlexMovieMediaData");
+
+                    b.Navigation("PlexServer");
+                });
+
+            modelBuilder.Entity("PlexRipper.Domain.PlexMovieMediaDataStream", b =>
+                {
+                    b.HasOne("PlexRipper.Domain.PlexLibrary", "PlexLibrary")
+                        .WithMany()
+                        .HasForeignKey("PlexLibraryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PlexRipper.Domain.PlexMovie", "PlexMovie")
+                        .WithMany()
+                        .HasForeignKey("PlexMovieId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PlexRipper.Domain.PlexMovieMediaData", "PlexMovieMediaData")
+                        .WithMany()
+                        .HasForeignKey("PlexMovieMediaDataId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PlexRipper.Domain.PlexMovieMediaDataPart", "PlexMovieMediaDataPart")
+                        .WithMany("Streams")
+                        .HasForeignKey("PlexMovieMediaDataPartId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PlexRipper.Domain.PlexServer", "PlexServer")
+                        .WithMany()
+                        .HasForeignKey("PlexServerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PlexLibrary");
+
+                    b.Navigation("PlexMovie");
+
+                    b.Navigation("PlexMovieMediaData");
+
+                    b.Navigation("PlexMovieMediaDataPart");
+
+                    b.Navigation("PlexServer");
                 });
 
             modelBuilder.Entity("PlexRipper.Domain.PlexServerConnection", b =>
@@ -2439,6 +3232,21 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("PlexLibrary");
 
                     b.Navigation("PlexServer");
+                });
+
+            modelBuilder.Entity("PlexRipper.Domain.PlexTvShowActors", b =>
+                {
+                    b.HasOne("PlexRipper.Domain.PlexActor", null)
+                        .WithMany()
+                        .HasForeignKey("PlexActorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PlexRipper.Domain.PlexTvShow", null)
+                        .WithMany()
+                        .HasForeignKey("PlexTvShowId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("PlexRipper.Domain.PlexTvShowCountries", b =>
@@ -2491,6 +3299,111 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("TvShowSeason");
                 });
 
+            modelBuilder.Entity("PlexRipper.Domain.PlexTvShowEpisodeMediaData", b =>
+                {
+                    b.HasOne("PlexRipper.Domain.PlexLibrary", "PlexLibrary")
+                        .WithMany()
+                        .HasForeignKey("PlexLibraryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PlexRipper.Domain.PlexServer", "PlexServer")
+                        .WithMany()
+                        .HasForeignKey("PlexServerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PlexRipper.Domain.PlexTvShowEpisode", "PlexTvShowEpisode")
+                        .WithMany("MediaDataList")
+                        .HasForeignKey("PlexTvShowEpisodeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PlexLibrary");
+
+                    b.Navigation("PlexServer");
+
+                    b.Navigation("PlexTvShowEpisode");
+                });
+
+            modelBuilder.Entity("PlexRipper.Domain.PlexTvShowEpisodeMediaDataPart", b =>
+                {
+                    b.HasOne("PlexRipper.Domain.PlexLibrary", "PlexLibrary")
+                        .WithMany()
+                        .HasForeignKey("PlexLibraryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PlexRipper.Domain.PlexServer", "PlexServer")
+                        .WithMany()
+                        .HasForeignKey("PlexServerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PlexRipper.Domain.PlexTvShowEpisode", "PlexTvShowEpisode")
+                        .WithMany()
+                        .HasForeignKey("PlexTvShowEpisodeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PlexRipper.Domain.PlexTvShowEpisodeMediaData", "PlexTvShowEpisodeMediaData")
+                        .WithMany("Parts")
+                        .HasForeignKey("PlexTvShowEpisodeMediaDataId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PlexLibrary");
+
+                    b.Navigation("PlexServer");
+
+                    b.Navigation("PlexTvShowEpisode");
+
+                    b.Navigation("PlexTvShowEpisodeMediaData");
+                });
+
+            modelBuilder.Entity("PlexRipper.Domain.PlexTvShowEpisodeMediaDataStream", b =>
+                {
+                    b.HasOne("PlexRipper.Domain.PlexLibrary", "PlexLibrary")
+                        .WithMany()
+                        .HasForeignKey("PlexLibraryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PlexRipper.Domain.PlexServer", "PlexServer")
+                        .WithMany()
+                        .HasForeignKey("PlexServerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PlexRipper.Domain.PlexTvShowEpisode", "PlexTvShowEpisode")
+                        .WithMany()
+                        .HasForeignKey("PlexTvShowEpisodeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PlexRipper.Domain.PlexTvShowEpisodeMediaData", "PlexTvShowEpisodeMediaData")
+                        .WithMany()
+                        .HasForeignKey("PlexTvShowEpisodeMediaDataId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PlexRipper.Domain.PlexTvShowEpisodeMediaDataPart", "PlexTvShowEpisodeMediaDataPart")
+                        .WithMany("Streams")
+                        .HasForeignKey("PlexTvShowEpisodeMediaDataPartId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PlexLibrary");
+
+                    b.Navigation("PlexServer");
+
+                    b.Navigation("PlexTvShowEpisode");
+
+                    b.Navigation("PlexTvShowEpisodeMediaData");
+
+                    b.Navigation("PlexTvShowEpisodeMediaDataPart");
+                });
+
             modelBuilder.Entity("PlexRipper.Domain.PlexTvShowGenres", b =>
                 {
                     b.HasOne("PlexRipper.Domain.PlexGenre", null)
@@ -2502,21 +3415,6 @@ namespace PlexRipper.Data.Migrations
                     b.HasOne("PlexRipper.Domain.PlexTvShow", null)
                         .WithMany()
                         .HasForeignKey("PlexTvShowId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("PlexRipper.Domain.PlexTvShowRoles", b =>
-                {
-                    b.HasOne("PlexRipper.Domain.PlexTvShow", null)
-                        .WithMany()
-                        .HasForeignKey("PlexTvShowId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("PlexRipper.Domain.PlexRole", null)
-                        .WithMany()
-                        .HasForeignKey("RolesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -2634,6 +3532,21 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("TvShows");
                 });
 
+            modelBuilder.Entity("PlexRipper.Domain.PlexMovie", b =>
+                {
+                    b.Navigation("MediaDataList");
+                });
+
+            modelBuilder.Entity("PlexRipper.Domain.PlexMovieMediaData", b =>
+                {
+                    b.Navigation("Parts");
+                });
+
+            modelBuilder.Entity("PlexRipper.Domain.PlexMovieMediaDataPart", b =>
+                {
+                    b.Navigation("Streams");
+                });
+
             modelBuilder.Entity("PlexRipper.Domain.PlexServer", b =>
                 {
                     b.Navigation("PlexAccountServers");
@@ -2653,6 +3566,21 @@ namespace PlexRipper.Data.Migrations
             modelBuilder.Entity("PlexRipper.Domain.PlexTvShow", b =>
                 {
                     b.Navigation("Seasons");
+                });
+
+            modelBuilder.Entity("PlexRipper.Domain.PlexTvShowEpisode", b =>
+                {
+                    b.Navigation("MediaDataList");
+                });
+
+            modelBuilder.Entity("PlexRipper.Domain.PlexTvShowEpisodeMediaData", b =>
+                {
+                    b.Navigation("Parts");
+                });
+
+            modelBuilder.Entity("PlexRipper.Domain.PlexTvShowEpisodeMediaDataPart", b =>
+                {
+                    b.Navigation("Streams");
                 });
 
             modelBuilder.Entity("PlexRipper.Domain.PlexTvShowSeason", b =>

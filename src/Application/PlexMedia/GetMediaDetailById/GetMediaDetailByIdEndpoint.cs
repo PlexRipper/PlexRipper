@@ -22,7 +22,7 @@ public class GetMediaDetailByIdEndpointRequest
         Type = type;
     }
 
-    /// <summary>The id of the <see cref="PlexMedia"/>.</summary>
+    /// <summary>The id of the <see cref="BasePlexMedia"/>.</summary>
     public required int PlexMediaId { get; init; }
 
     /// <summary> The <see cref="PlexMediaType">Type</see> of the PlexMedia.</summary>

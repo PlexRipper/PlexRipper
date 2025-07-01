@@ -2,13 +2,16 @@ namespace PlexRipper.Domain;
 
 public class PlexGenre : BaseEntity
 {
-    public required string Name { get; set; }
+    public required string Name { get; init; }
 
-    public long PlexKey { get; set; }
+    /// <summary>
+    /// A md5 hash of the name.
+    /// </summary>
+    public required string Key { get; init; }
 
-    public List<PlexLibrary> PlexLibraries { get; set; } = [];
+    public ICollection<PlexLibrary> PlexLibraries { get; set; } = [];
 
-    public List<PlexMovie> PlexMovieGenres { get; set; } = [];
+    public ICollection<PlexMovie> PlexMovieGenres { get; set; } = [];
 
-    public List<PlexTvShow> PlexTvShowGenres { get; set; } = [];
+    public ICollection<PlexTvShow> PlexTvShowGenres { get; set; } = [];
 }

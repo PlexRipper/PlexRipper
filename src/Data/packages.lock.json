@@ -1732,6 +1732,12 @@
           "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "[8.0.10, )"
         }
       },
+      "settings.contracts": {
+        "type": "Project",
+        "dependencies": {
+          "PlexRipper.Domain": "[1.0.0, )"
+        }
+      },
       "webapi.contracts": {
         "type": "Project",
         "dependencies": {

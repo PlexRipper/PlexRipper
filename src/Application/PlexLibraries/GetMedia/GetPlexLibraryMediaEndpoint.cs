@@ -69,7 +69,7 @@ public class GetPlexLibraryMediaEndpoint : BaseEndpoint<GetPlexLibraryMediaEndpo
 
         var plexServerId = plexLibrary.PlexServerId;
 
-        // Do continue, even if the connection is invalid, worst case is that the thumbnail will not work
+        // Do continue, even if the connection is invalid, the worst case is that the thumbnail will not work
         var plexServerConnection = await _dbContext.ChoosePlexServerConnection(plexServerId, ct);
         if (plexServerConnection.IsFailed)
             plexServerConnection.ToResult().LogError();
@@ -84,7 +84,7 @@ public class GetPlexLibraryMediaEndpoint : BaseEndpoint<GetPlexLibraryMediaEndpo
                 FilterOfflineMedia = req.FilterOfflineMedia,
                 FilterOwnedMedia = req.FilterOwnedMedia,
                 CountryId = req.CountryId,
-                RoleId = req.RoleId,
+                ActorId = req.ActorId,
                 GenreId = req.GenreId,
             },
             ct: ct

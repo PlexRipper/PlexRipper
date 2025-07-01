@@ -52,7 +52,7 @@ public class FolderPath : BaseEntity
     /// <summary>
     /// Gets or sets the <see cref="PlexLibraries"/> that use this <see cref="FolderPath"/> as a download destination folder.
     /// </summary>
-    public List<PlexLibrary> PlexLibraries { get; init; } = new();
+    public ICollection<PlexLibrary> PlexLibraries { get; init; } = [];
 
     #endregion
 

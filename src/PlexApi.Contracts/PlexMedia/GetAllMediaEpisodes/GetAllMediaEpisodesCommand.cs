@@ -10,5 +10,5 @@ namespace PlexApi.Contracts;
 /// <param name="PlexLibrary"> The <see cref="PlexLibrary"/> to fetch the episodes from.</param>
 /// <param name="Action"> Progress action callback to notify of connection attempt progress.</param>
 /// <returns></returns>
-public record GetAllMediaEpisodesCommand(PlexLibrary PlexLibrary, Action<MediaSyncProgress>? Action = null)
+public record GetAllMediaEpisodesCommand(PlexLibrary PlexLibrary, Action<MediaSyncProgress> Action)
     : ICommand<Result<List<PlexTvShowEpisode>>>;

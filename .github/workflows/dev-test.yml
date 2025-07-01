@@ -16,8 +16,17 @@ concurrency:
     cancel-in-progress: true
 
 jobs:
+    # Check if PR is in draft
+    Check-PR-Status:
+        runs-on: ubuntu-latest
+        if: github.event_name != 'workflow_dispatch' && !github.event.pull_request.draft
+        steps:
+            - run: echo "PR is not in draft, proceeding with tests"
+
     # Check if front-end has changed
     Check-Frontend-Changes:
+        needs: [Check-PR-Status]
+        if: always() && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
         runs-on: ubuntu-latest
         outputs:
             should_run: ${{ steps.check_changes.outputs.should_run }}
@@ -31,6 +40,8 @@ jobs:
 
     # Check if back-end has changed
     Check-Backend-Changes:
+        needs: [Check-PR-Status]
+        if: always() && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
         runs-on: ubuntu-latest
         outputs:
             should_run: ${{ steps.check_changes.outputs.should_run }}
@@ -44,8 +55,8 @@ jobs:
 
     # Front-End-Type-Check:
     Front-End-Type-Check:
-        needs: Check-Frontend-Changes
-        if: needs.Check-Frontend-Changes.outputs.should_run == 'true'
+        needs: [Check-Frontend-Changes, Check-PR-Status]
+        if: needs.Check-Frontend-Changes.outputs.should_run == 'true' && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
         runs-on: ubuntu-latest
         steps:
             -   uses: actions/checkout@v4
@@ -66,8 +77,8 @@ jobs:
 
     # Front-End-Unit-Tests:
     Front-End-Unit-Tests:
-        needs: Check-Frontend-Changes
-        if: needs.Check-Frontend-Changes.outputs.should_run == 'true'
+        needs: [Check-Frontend-Changes, Check-PR-Status]
+        if: needs.Check-Frontend-Changes.outputs.should_run == 'true' && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
         runs-on: ubuntu-latest
         steps:
             -   uses: actions/checkout@v4
@@ -94,8 +105,8 @@ jobs:
                     retention-days: 7
 
     Front-End-Eslint-Check:
-        needs: Check-Frontend-Changes
-        if: needs.Check-Frontend-Changes.outputs.should_run == 'true'
+        needs: [Check-Frontend-Changes, Check-PR-Status]
+        if: needs.Check-Frontend-Changes.outputs.should_run == 'true' && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
         runs-on: ubuntu-latest
         steps:
             -   uses: actions/checkout@v4
@@ -115,8 +126,8 @@ jobs:
                 working-directory: src/WebAPI/ClientApp/
 
     Front-End-Integration-Tests:
-        needs: Check-Frontend-Changes
-        if: needs.Check-Frontend-Changes.outputs.should_run == 'true'
+        needs: [Check-Frontend-Changes, Check-PR-Status]
+        if: needs.Check-Frontend-Changes.outputs.should_run == 'true' && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
         runs-on: ubuntu-latest
         steps:
             -   uses: actions/checkout@v4
@@ -158,8 +169,8 @@ jobs:
 
     # Back-End Unit Tests
     Back-End-Unit-Tests:
-        needs: Check-Backend-Changes
-        if: needs.Check-Backend-Changes.outputs.should_run == 'true'
+        needs: [Check-Backend-Changes, Check-PR-Status]
+        if: needs.Check-Backend-Changes.outputs.should_run == 'true' && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
         runs-on: ubuntu-latest
         name: Back-End-Unit-Tests (${{ matrix.project_name }})
         strategy:
@@ -239,8 +250,8 @@ jobs:
 
     # Back-End Integration Tests
     Back-End-Integration-Tests:
-        needs: Check-Backend-Changes
-        if: needs.Check-Backend-Changes.outputs.should_run == 'true'
+        needs: [Check-Backend-Changes, Check-PR-Status]
+        if: needs.Check-Backend-Changes.outputs.should_run == 'true' && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
         runs-on: ubuntu-latest
         strategy:
             fail-fast: false
@@ -290,8 +301,8 @@ jobs:
 
     # Code Coverage Report
     Code-Coverage-Report:
-        needs: Back-End-Unit-Tests
-        if: always() && needs.Back-End-Unit-Tests.result != 'skipped'
+        needs: [Back-End-Unit-Tests, Check-PR-Status]
+        if: always() && needs.Back-End-Unit-Tests.result != 'skipped' && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
         runs-on: ubuntu-latest
         steps:
             -   name: Checkout Source Code
@@ -320,8 +331,8 @@ jobs:
 
     # Ensure the Docker image can be built without errors
     Test-Docker-Build:
-        needs: [Check-Frontend-Changes, Check-Backend-Changes, Back-End-Unit-Tests, Back-End-Integration-Tests, Front-End-Type-Check, Front-End-Unit-Tests, Front-End-Eslint-Check, Front-End-Integration-Tests]
-        if: always()
+        needs: [Check-Frontend-Changes, Check-Backend-Changes, Back-End-Unit-Tests, Back-End-Integration-Tests, Front-End-Type-Check, Front-End-Unit-Tests, Front-End-Eslint-Check, Front-End-Integration-Tests, Check-PR-Status]
+        if: always() && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
         runs-on: ubuntu-latest
         steps:
             -   name: Checkout Source Code

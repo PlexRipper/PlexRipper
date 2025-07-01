@@ -114,6 +114,7 @@ public class CreateDirectoryFromFilePathUnitTests : BaseUnitTest<CleanUpDownload
             .DownloadTaskTvShowEpisodeFile.Include(x => x.DownloadWorkerTasks)
             .FirstOrDefaultAsync();
         downloadTask.ShouldNotBeNull();
+        downloadTask.DownloadWorkerTasks.ShouldNotBeEmpty();
 
         var downloadWorkerTaskIds = downloadTask.DownloadWorkerTasks.Select(x => x.Id).ToList();
         await dbContext

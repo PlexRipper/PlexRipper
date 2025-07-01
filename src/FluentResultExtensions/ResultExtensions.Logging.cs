@@ -74,8 +74,19 @@ public static partial class ResultExtensions
         return result;
     }
 
+    public static void LogResultBase(
+        this ResultBase result,
+        LogEventLevel logLevel,
+        string memberName = "",
+        string sourceFilePath = "",
+        int sourceLineNumber = 0
+    )
+    {
+        LogReasons(result, logLevel, memberName, sourceFilePath, sourceLineNumber);
+    }
+
     private static void LogReasons(
-        this Result result,
+        this ResultBase result,
         LogEventLevel logLevel,
         string memberName = "",
         string sourceFilePath = "",

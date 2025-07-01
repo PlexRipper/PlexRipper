@@ -14,7 +14,9 @@ public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest<CreateDo
         mock.SetupMediator(It.IsAny<GenerateDownloadTaskMoviesCommand>).ReturnsAsync(Result.Ok());
         mock.SetupMediator(It.IsAny<GenerateDownloadTaskTvShowsCommand>).ReturnsAsync(Result.Ok());
         mock.SetupMediator(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>).ReturnsAsync(Result.Ok());
-        mock.SetupMediator(It.IsAny<GenerateDownloadTaskTvShowEpisodesCommand>).ReturnsAsync(Result.Ok());
+        mock.SetupCommand(It.IsAny<GenerateDownloadTaskTvShowEpisodesCommand>)
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once);
         mock.PublishMediator(It.IsAny<CheckDownloadQueueNotification>).Returns(Task.CompletedTask);
 
         var downloadMediaDtos = new List<DownloadMediaDTO>
@@ -59,7 +61,6 @@ public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest<CreateDo
         mock.VerifyMediator(It.IsAny<GenerateDownloadTaskMoviesCommand>, Times.Once);
         mock.VerifyMediator(It.IsAny<GenerateDownloadTaskTvShowsCommand>, Times.Once);
         mock.VerifyMediator(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>, Times.Once);
-        mock.VerifyMediator(It.IsAny<GenerateDownloadTaskTvShowEpisodesCommand>, Times.Once);
         mock.VerifyNotification(It.IsAny<CheckDownloadQueueNotification>, Times.Once);
     }
 
@@ -70,7 +71,9 @@ public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest<CreateDo
         mock.SetupMediator(It.IsAny<GenerateDownloadTaskMoviesCommand>).ReturnsAsync(Result.Ok());
         mock.SetupMediator(It.IsAny<GenerateDownloadTaskTvShowsCommand>).ReturnsAsync(Result.Ok());
         mock.SetupMediator(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>).ReturnsAsync(Result.Ok());
-        mock.SetupMediator(It.IsAny<GenerateDownloadTaskTvShowEpisodesCommand>).ReturnsAsync(Result.Ok());
+        mock.SetupCommand(It.IsAny<GenerateDownloadTaskTvShowEpisodesCommand>)
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Never);
         mock.PublishMediator(It.IsAny<CheckDownloadQueueNotification>).Returns(Task.CompletedTask);
 
         var downloadMediaDtos = new List<DownloadMediaDTO>
@@ -101,7 +104,6 @@ public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest<CreateDo
         mock.VerifyMediator(It.IsAny<GenerateDownloadTaskMoviesCommand>, Times.Once);
         mock.VerifyMediator(It.IsAny<GenerateDownloadTaskTvShowsCommand>, Times.Once);
         mock.VerifyMediator(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>, Times.Never);
-        mock.VerifyMediator(It.IsAny<GenerateDownloadTaskTvShowEpisodesCommand>, Times.Never);
         mock.VerifyNotification(It.IsAny<CheckDownloadQueueNotification>, Times.Once);
     }
 
@@ -112,7 +114,9 @@ public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest<CreateDo
         mock.SetupMediator(It.IsAny<GenerateDownloadTaskMoviesCommand>).ReturnsAsync(Result.Ok());
         mock.SetupMediator(It.IsAny<GenerateDownloadTaskTvShowsCommand>).ReturnsAsync(Result.Ok());
         mock.SetupMediator(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>).ReturnsAsync(Result.Ok());
-        mock.SetupMediator(It.IsAny<GenerateDownloadTaskTvShowEpisodesCommand>).ReturnsAsync(Result.Ok());
+        mock.SetupCommand(It.IsAny<GenerateDownloadTaskTvShowEpisodesCommand>)
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Never);
         mock.PublishMediator(It.IsAny<CheckDownloadQueueNotification>).Returns(Task.CompletedTask);
 
         // Act
@@ -125,7 +129,6 @@ public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest<CreateDo
         mock.VerifyMediator(It.IsAny<GenerateDownloadTaskMoviesCommand>, Times.Never);
         mock.VerifyMediator(It.IsAny<GenerateDownloadTaskTvShowsCommand>, Times.Never);
         mock.VerifyMediator(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>, Times.Never);
-        mock.VerifyMediator(It.IsAny<GenerateDownloadTaskTvShowEpisodesCommand>, Times.Never);
         mock.VerifyNotification(It.IsAny<CheckDownloadQueueNotification>, Times.Never);
     }
 }

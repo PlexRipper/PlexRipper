@@ -75,7 +75,7 @@ public static class DownloadTaskGenericToDTOMapper
         return serverDownloads;
     }
 
-    public static List<DownloadProgressDTO> ToDownloadProgressDto(this List<DownloadTaskGeneric>? downloadTasks)
+    public static List<DownloadProgressDTO> ToDownloadProgressDto(this ICollection<DownloadTaskGeneric>? downloadTasks)
     {
         var result = new List<DownloadProgressDTO>();
         if (downloadTasks is null || !downloadTasks.Any())

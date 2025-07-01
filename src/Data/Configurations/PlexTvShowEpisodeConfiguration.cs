@@ -8,5 +8,12 @@ public class PlexTvShowEpisodeConfiguration : IEntityTypeConfiguration<PlexTvSho
     public void Configure(EntityTypeBuilder<PlexTvShowEpisode> builder)
     {
         builder.HasIndex(x => x.SortIndex);
+
+        // Configure one-to-many relationship with MediaDataList
+        builder
+            .HasMany(x => x.MediaDataList)
+            .WithOne(x => x.PlexTvShowEpisode)
+            .HasForeignKey(x => x.PlexTvShowEpisodeId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

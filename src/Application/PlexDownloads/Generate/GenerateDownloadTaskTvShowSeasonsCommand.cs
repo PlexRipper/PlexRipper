@@ -88,7 +88,7 @@ public class GenerateDownloadTaskTvShowSeasonsCommandHandler
                 }
 
                 // Check if the SeasonDownloadTask has already been created
-                var downloadTaskTvShowSeason = downloadTaskTvShow.Children.Find(x =>
+                var downloadTaskTvShowSeason = downloadTaskTvShow.Children.FirstOrDefault(x =>
                     x.PlexServerId == plexServer.Id && x.Key == season.Key
                 );
                 if (downloadTaskTvShowSeason is null)

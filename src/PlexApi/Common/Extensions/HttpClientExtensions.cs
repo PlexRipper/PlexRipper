@@ -115,7 +115,7 @@ public static class HttpClientExtensions
 
         var contentType = content.Headers.ContentType?.MediaType;
         var contentLength = content.Headers.ContentLength;
-        
+
         // Check if the content indicates a file download via Content-Disposition header.
         if (
             content.Headers.ContentDisposition != null
@@ -137,7 +137,7 @@ public static class HttpClientExtensions
 
         // Check content length to avoid buffer overflow for large JSON responses
         const long maxReadContentSize = 1024 * 1024; // 1MB limit for reading JSON content as string
-        
+
         if (contentLength.HasValue && contentLength.Value > maxReadContentSize)
         {
             var sizeInfo = $"{contentLength.Value:N0} bytes";

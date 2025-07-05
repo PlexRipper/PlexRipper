@@ -105,20 +105,23 @@ public class BaseContainer : IDisposable
             DbContext.DatabaseName
         );
 
-        try
-        {
-            // Ensure the database is deleted
-            PlexRipperDbContext.Database.EnsureDeleted();
-        }
-        catch (Exception ex)
-        {
-            _log.Here()
-                .Error(
-                    "Failed to delete database: {DatabaseName}, Error: {ExceptionMessage}",
-                    DatabaseName,
-                    ex.Message
-                );
-        }
+        // Wait for any pending async operations to complete before disposing
+        // This prevents ObjectDisposedException when FastEndpoints command handlers
+        // are still executing in background threads during parallel test execution
+        Task.Delay(TimeSpan.FromSeconds(1)).Wait();
+
+        Result.Try(
+            () => PlexRipperDbContext.Database.EnsureDeleted(),
+            ex =>
+                _log.Here()
+                    .Error(
+                        "Failed to delete database: {DatabaseName}, Error: {ExceptionMessage}",
+                        DatabaseName,
+                        ex.Message
+                    )
+                    .ToResult()
+                    .Errors.First()
+        );
 
         _factory.Dispose();
 

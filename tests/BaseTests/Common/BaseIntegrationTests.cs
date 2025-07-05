@@ -8,7 +8,7 @@ public class BaseIntegrationTests
 {
     private readonly ILog _log;
 
-    protected BaseIntegrationTests(ITestOutputHelper output, LogEventLevel logLevel = LogEventLevel.Verbose)
+    protected BaseIntegrationTests(ITestOutputHelper output, LogEventLevel logLevel = LogEventLevel.Debug)
     {
         EnvironmentExtensions.SetLogLevel(logLevel);
         EnvironmentExtensions.EnableUnmaskedLog(true);

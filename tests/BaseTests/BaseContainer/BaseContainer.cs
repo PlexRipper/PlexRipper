@@ -100,32 +100,42 @@ public class BaseContainer : IDisposable
 
     public void Dispose()
     {
-        _log.Warning(
-            "Integration Test with DatabaseName: \"{DatabaseName}\" has ended, Disposing!",
-            DbContext.DatabaseName
-        );
+        var dbName = DatabaseName;
+        _log.Warning("Integration Test with DatabaseName: \"{DatabaseName}\" has ended, Disposing!", dbName);
 
         // Wait for any pending async operations to complete before disposing
         // This prevents ObjectDisposedException when FastEndpoints command handlers
         // are still executing in background threads during parallel test execution
-        Task.Delay(TimeSpan.FromSeconds(1)).Wait();
+        _log.Information("Waiting for async operations to complete before disposing container {DatabaseName}", dbName);
 
-        Result.Try(
-            () => PlexRipperDbContext.Database.EnsureDeleted(),
-            ex =>
-                _log.Here()
-                    .Error(
-                        "Failed to delete database: {DatabaseName}, Error: {ExceptionMessage}",
-                        DatabaseName,
-                        ex.Message
-                    )
-                    .ToResult()
-                    .Errors.First()
-        );
+        try
+        {
+            // Use a more robust delay mechanism
+            var delay = Task.Delay(TimeSpan.FromSeconds(3));
+            delay.Wait();
+            _log.Information("Async operations wait completed for container {DatabaseName}", dbName);
+        }
+        catch (Exception ex)
+        {
+            _log.Error("Error during async operations wait: {Error}", ex.Message);
+        }
 
+        try
+        {
+            // Ensure the database is deleted
+            PlexRipperDbContext.Database.EnsureDeleted();
+        }
+        catch (Exception ex)
+        {
+            _log.Here()
+                .Error("Failed to delete database: {DatabaseName}, Error: {ExceptionMessage}", dbName, ex.Message);
+        }
+
+        _log.Information("Disposing factory for container {DatabaseName}", dbName);
         _factory.Dispose();
 
         // Dispose of the lifetime scope as the last step
+        _log.Information("Disposing lifetime scope for container {DatabaseName}", dbName);
         _lifeTimeScope.Dispose();
 
         _log.FatalLine("Container disposed");

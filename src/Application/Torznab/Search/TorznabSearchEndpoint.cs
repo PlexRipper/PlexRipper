@@ -12,11 +12,13 @@ public class TorznabSearchEndpoint : BaseEndpoint<TorznabSearchRequest, string>
 {
     private readonly IUserSettings _userSettings;
     private readonly IPlexRipperDbContext _dbContext;
+    private readonly ITorznabAuthenticationService _torznabAuth;
 
-    public TorznabSearchEndpoint(IUserSettings userSettings, IPlexRipperDbContext dbContext)
+    public TorznabSearchEndpoint(IUserSettings userSettings, IPlexRipperDbContext dbContext, ITorznabAuthenticationService torznabAuth)
     {
         _userSettings = userSettings;
         _dbContext = dbContext;
+        _torznabAuth = torznabAuth;
     }
 
     public override void Configure()
@@ -46,9 +48,9 @@ public class TorznabSearchEndpoint : BaseEndpoint<TorznabSearchRequest, string>
         }
 
         // Validate API key for search requests
-        if (_userSettings.TorznabSettings.IsEnabled)
+        if (_torznabAuth.IsEnabled)
         {
-            if (string.IsNullOrEmpty(req.ApiKey) || req.ApiKey != _userSettings.TorznabSettings.ApiKey)
+            if (!_torznabAuth.ValidateApiKey(req.ApiKey))
             {
                 await SendUnauthorizedAsync(ct);
                 return string.Empty;

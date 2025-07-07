@@ -1,4 +1,6 @@
 using Settings.Contracts;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace PlexRipper.Application;
 
@@ -25,7 +27,13 @@ public class TorznabAuthenticationService : ITorznabAuthenticationService
         if (!IsEnabled) return false;
         if (string.IsNullOrEmpty(apiKey)) return false;
         
-        return apiKey == _userSettings.TorznabSettings.ApiKey;
+        var storedKey = _userSettings.TorznabSettings.ApiKey;
+        if (string.IsNullOrEmpty(storedKey)) return false;
+        
+        // Use constant-time comparison to prevent timing attacks
+        return CryptographicOperations.FixedTimeEquals(
+            Encoding.UTF8.GetBytes(apiKey), 
+            Encoding.UTF8.GetBytes(storedKey));
     }
 
     public string GenerateNewApiKey()

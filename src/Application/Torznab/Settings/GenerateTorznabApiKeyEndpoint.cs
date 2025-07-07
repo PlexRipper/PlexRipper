@@ -2,7 +2,7 @@ using Application.Contracts;
 
 namespace PlexRipper.Application;
 
-public class GenerateTorznabApiKeyEndpoint : BaseEndpoint<EmptyRequest, GenerateTorznabApiKeyResponse>
+public class GenerateTorznabApiKeyEndpoint : BaseEndpointWithoutRequest<GenerateTorznabApiKeyResponse>
 {
     private readonly ITorznabAuthenticationService _torznabAuth;
 
@@ -22,14 +22,16 @@ public class GenerateTorznabApiKeyEndpoint : BaseEndpoint<EmptyRequest, Generate
         });
     }
 
-    public override async Task<GenerateTorznabApiKeyResponse> ExecuteAsync(EmptyRequest req, CancellationToken ct)
+    public override async Task HandleAsync(CancellationToken ct)
     {
         var newApiKey = _torznabAuth.GenerateNewApiKey();
         
-        return new GenerateTorznabApiKeyResponse
+        var response = new GenerateTorznabApiKeyResponse
         {
             ApiKey = newApiKey
         };
+        
+        await SendOkAsync(response, ct);
     }
 }
 

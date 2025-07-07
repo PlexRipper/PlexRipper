@@ -3,7 +3,7 @@ using Settings.Contracts;
 
 namespace PlexRipper.Application;
 
-public class GetTorznabSettingsEndpoint : BaseEndpoint<EmptyRequest, TorznabSettingsDTO>
+public class GetTorznabSettingsEndpoint : BaseEndpointWithoutRequest<TorznabSettingsDTO>
 {
     private readonly IUserSettings _userSettings;
 
@@ -15,7 +15,7 @@ public class GetTorznabSettingsEndpoint : BaseEndpoint<EmptyRequest, TorznabSett
     public override void Configure()
     {
         Get("/api/settings/torznab");
-        Roles("Admin", "User");
+        Roles("Admin");
         Summary(s =>
         {
             s.Summary = "Get Torznab settings";
@@ -23,8 +23,8 @@ public class GetTorznabSettingsEndpoint : BaseEndpoint<EmptyRequest, TorznabSett
         });
     }
 
-    public override async Task<TorznabSettingsDTO> ExecuteAsync(EmptyRequest req, CancellationToken ct)
+    public override async Task HandleAsync(CancellationToken ct)
     {
-        return _userSettings.TorznabSettings.ToDTO();
+        await SendOkAsync(_userSettings.TorznabSettings.ToDTO(), ct);
     }
 }

@@ -46,6 +46,17 @@ export const useSettingsStore = defineStore('SettingsStore', () => {
 		serverSettings: {
 			data: [],
 		},
+		torznabSettings: {
+			isEnabled: false,
+			apiKey: null,
+			maxResultsPerRequest: 100,
+			enabledServerIds: [],
+			enableWebhookNotifications: false,
+			webhookUrl: null,
+			logSearchRequests: false,
+			autoCreateDownloadTasks: true,
+			searchTimeoutSeconds: 30,
+		},
 	};
 
 	const state = reactive<SettingsModelDTO>(cloneDeep(defaultState));
@@ -104,6 +115,9 @@ export const useSettingsStore = defineStore('SettingsStore', () => {
 			state.downloadManagerSettings = settings.downloadManagerSettings;
 			state.languageSettings = settings.languageSettings;
 			state.serverSettings = settings.serverSettings;
+			if (settings.torznabSettings) {
+				state.torznabSettings = settings.torznabSettings;
+			}
 		},
 
 		updateDownloadLimit(machineIdentifier: string, downloadLimit: number) {

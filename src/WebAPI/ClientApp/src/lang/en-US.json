@@ -610,6 +610,53 @@
                         "text": "The animated background can cause performance issues in the browser. This toggle can be disable the animation and show just a static background.",
                         "title": "Disable the background animation"
                     }
+                },
+                "torznab-settings": {
+                    "enable-torznab": {
+                        "label": "Enable Torznab API",
+                        "text": "Enables the Torznab API that allows PlexRipper to function as an indexer for ARR applications like Sonarr and Radarr. When enabled, these applications can search for and download content from your Plex servers.",
+                        "title": "Enable Torznab API Integration"
+                    },
+                    "api-key": {
+                        "label": "API Key",
+                        "text": "The API key used to authenticate requests to the Torznab API. This key should be configured in your ARR applications.",
+                        "title": "Torznab API Key"
+                    },
+                    "torznab-url": {
+                        "label": "Torznab URL",
+                        "text": "The URL to use when configuring PlexRipper as an indexer in your ARR applications. Copy this URL and use it in Sonarr/Radarr settings.",
+                        "title": "Torznab API URL"
+                    },
+                    "max-results": {
+                        "label": "Max Results Per Request",
+                        "text": "The maximum number of search results to return per request. Lower values reduce server load but may limit search results.",
+                        "title": "Maximum Results Per Request"
+                    },
+                    "search-timeout": {
+                        "label": "Search Timeout",
+                        "text": "The maximum time in seconds to wait for search results before timing out. Increase if searches are timing out prematurely.",
+                        "title": "Search Timeout in Seconds"
+                    },
+                    "auto-create-downloads": {
+                        "label": "Auto Create Downloads",
+                        "text": "When enabled, download tasks are automatically created when ARR applications request content. When disabled, ARR apps receive download URLs for manual handling.",
+                        "title": "Automatically Create Download Tasks"
+                    },
+                    "enable-webhooks": {
+                        "label": "Enable Webhook Notifications",
+                        "text": "Enables webhook notifications to inform ARR applications about download progress and completion status.",
+                        "title": "Enable Webhook Notifications"
+                    },
+                    "webhook-url": {
+                        "label": "Webhook URL",
+                        "text": "The URL where webhook notifications will be sent. Configure this in your ARR application to receive download status updates.",
+                        "title": "Webhook Notification URL"
+                    },
+                    "arr-integration": {
+                        "label": "ARR Integration Setup",
+                        "text": "Instructions for configuring PlexRipper as an indexer in your ARR applications. Use the provided URL and API key in your Sonarr/Radarr indexer settings.",
+                        "title": "ARR Application Integration"
+                    }
                 }
             }
         },
@@ -669,6 +716,13 @@
                 },
                 "debug": {
                     "header": "Debug Settings"
+                },
+                "torznab-settings": {
+                    "header": "Torznab API",
+                    "generate-key": "Generate",
+                    "api-key-generated": "New API key generated successfully",
+                    "api-key-generation-failed": "Failed to generate new API key",
+                    "arr-setup-instructions": "Configure in Sonarr/Radarr as a Torznab indexer:"
                 },
                 "setup": {
                     "header": "PlexRipper Setup"
@@ -832,5 +886,10 @@
             "save-button": "SaveButton",
             "warning-button": "WarningButton"
         }
+    },
+    "common": {
+        "copy": "Copy",
+        "copied-to-clipboard": "Copied to clipboard",
+        "copy-failed": "Failed to copy to clipboard"
     }
 }

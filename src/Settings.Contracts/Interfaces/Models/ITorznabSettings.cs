@@ -4,7 +4,7 @@ public interface ITorznabSettings
 {
     bool IsEnabled { get; set; }
     
-    string ApiKey { get; set; }
+    string? ApiKey { get; set; }
     
     int MaxResultsPerRequest { get; set; }
     
@@ -12,7 +12,7 @@ public interface ITorznabSettings
     
     bool EnableWebhookNotifications { get; set; }
     
-    string WebhookUrl { get; set; }
+    string? WebhookUrl { get; set; }
     
     bool LogSearchRequests { get; set; }
     

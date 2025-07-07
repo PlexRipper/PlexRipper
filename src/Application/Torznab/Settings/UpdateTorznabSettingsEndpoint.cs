@@ -17,7 +17,7 @@ public class UpdateTorznabSettingsEndpoint : BaseEndpoint<TorznabSettingsDTO, To
     public override void Configure()
     {
         Put("/api/settings/torznab");
-        Roles("Admin", "User");
+        Roles("Admin");
         Summary(s =>
         {
             s.Summary = "Update Torznab settings";

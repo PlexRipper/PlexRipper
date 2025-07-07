@@ -91,7 +91,8 @@ public class TorznabWebhookService : ITorznabWebhookService
             var json = System.Text.Json.JsonSerializer.Serialize(payload);
             var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync(webhookUrl, content, cancellationToken);
+            using var response = await _httpClient.PostAsync(webhookUrl, content, cancellationToken)
+                                                  .ConfigureAwait(false);
             
             if (response.IsSuccessStatusCode)
             {

@@ -12,12 +12,14 @@ public class TorznabDownloadEndpoint : BaseEndpoint<TorznabDownloadRequest, stri
     private readonly IUserSettings _userSettings;
     private readonly IPlexRipperDbContext _dbContext;
     private readonly IMediator _mediator;
+    private readonly ITorznabAuthenticationService _torznabAuth;
 
-    public TorznabDownloadEndpoint(IUserSettings userSettings, IPlexRipperDbContext dbContext, IMediator mediator)
+    public TorznabDownloadEndpoint(IUserSettings userSettings, IPlexRipperDbContext dbContext, IMediator mediator, ITorznabAuthenticationService torznabAuth)
     {
         _userSettings = userSettings;
         _dbContext = dbContext;
         _mediator = mediator;
+        _torznabAuth = torznabAuth;
     }
 
     public override void Configure()
@@ -34,9 +36,9 @@ public class TorznabDownloadEndpoint : BaseEndpoint<TorznabDownloadRequest, stri
     public override async Task<string> ExecuteAsync(TorznabDownloadRequest req, CancellationToken ct)
     {
         // Validate API key if Torznab is enabled
-        if (_userSettings.TorznabSettings.IsEnabled)
+        if (_torznabAuth.IsEnabled)
         {
-            if (string.IsNullOrEmpty(req.ApiKey) || req.ApiKey != _userSettings.TorznabSettings.ApiKey)
+            if (!_torznabAuth.ValidateApiKey(req.ApiKey))
             {
                 await SendUnauthorizedAsync(ct);
                 return string.Empty;
@@ -151,6 +153,6 @@ public class TorznabDownloadEndpoint : BaseEndpoint<TorznabDownloadRequest, stri
 
 public class TorznabDownloadRequest
 {
-    public string Id { get; set; } = "";
+    public required string Id { get; init; }
     public string? ApiKey { get; set; }
 }

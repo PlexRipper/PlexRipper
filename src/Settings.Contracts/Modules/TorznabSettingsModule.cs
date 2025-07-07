@@ -3,11 +3,11 @@ namespace Settings.Contracts;
 public record TorznabSettingsModule : BaseSettingsModule<TorznabSettingsModule>, ITorznabSettings
 {
     private bool _isEnabled = false;
-    private string _apiKey = string.Empty;
+    private string? _apiKey = null;
     private int _maxResultsPerRequest = 100;
     private List<int> _enabledServerIds = new();
     private bool _enableWebhookNotifications = false;
-    private string _webhookUrl = string.Empty;
+    private string? _webhookUrl = null;
     private bool _logSearchRequests = false;
     private bool _autoCreateDownloadTasks = true;
     private int _searchTimeoutSeconds = 30;
@@ -20,7 +20,7 @@ public record TorznabSettingsModule : BaseSettingsModule<TorznabSettingsModule>,
             MaxResultsPerRequest = 100,
             EnabledServerIds = new List<int>(),
             EnableWebhookNotifications = false,
-            WebhookUrl = string.Empty,
+            WebhookUrl = null,
             LogSearchRequests = false,
             AutoCreateDownloadTasks = true,
             SearchTimeoutSeconds = 30,
@@ -32,7 +32,7 @@ public record TorznabSettingsModule : BaseSettingsModule<TorznabSettingsModule>,
         set => SetProperty(ref _isEnabled, value);
     }
 
-    public required string ApiKey
+    public required string? ApiKey
     {
         get => _apiKey;
         set => SetProperty(ref _apiKey, value);
@@ -56,7 +56,7 @@ public record TorznabSettingsModule : BaseSettingsModule<TorznabSettingsModule>,
         set => SetProperty(ref _enableWebhookNotifications, value);
     }
 
-    public required string WebhookUrl
+    public required string? WebhookUrl
     {
         get => _webhookUrl;
         set => SetProperty(ref _webhookUrl, value);

@@ -154,7 +154,18 @@
 					<p class="q-mb-sm">{{ $t('pages.settings.advanced.torznab-settings.arr-setup-instructions') }}</p>
 					<ul class="q-pl-md">
 						<li><strong>URL:</strong> {{ torznabUrl }}</li>
-						<li><strong>API Key:</strong> {{ settingsStore.torznabSettings.apiKey }}</li>
+						<li>
+							<strong>API Key:</strong> 
+							<span class="q-ml-sm">{{ showApiKeyInInstructions ? settingsStore.torznabSettings.apiKey : '••••••••••••••••' }}</span>
+							<q-btn
+								:icon="showApiKeyInInstructions ? 'visibility_off' : 'visibility'"
+								flat
+								dense
+								size="sm"
+								class="q-ml-xs"
+								@click="showApiKeyInInstructions = !showApiKeyInInstructions"
+								:title="showApiKeyInInstructions ? 'Hide API key' : 'Show API key'" />
+						</li>
 						<li><strong>Categories:</strong> Movies (2000), TV (5000)</li>
 					</ul>
 				</div>
@@ -168,12 +179,15 @@ import { computed, ref } from 'vue';
 import { useSettingsStore } from '@store';
 import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
+import { from } from 'rxjs';
+import Axios from 'axios';
 
 const settingsStore = useSettingsStore();
 const $q = useQuasar();
 const { t } = useI18n();
 
 const showApiKey = ref(false);
+const showApiKeyInInstructions = ref(false);
 const generatingKey = ref(false);
 
 const torznabUrl = computed(() => {
@@ -184,15 +198,26 @@ const torznabUrl = computed(() => {
 const generateNewApiKey = async () => {
 	generatingKey.value = true;
 	try {
-		// TODO: Call API to generate new key
-		// const response = await torznabApi.generateApiKey();
-		// settingsStore.torznabSettings.apiKey = response.apiKey;
+		const response = await from(
+			Axios.request<{ apiKey: string }>({
+				url: '/api/settings/torznab/generate-key',
+				method: 'POST',
+				secure: true,
+				format: 'json',
+			})
+		).toPromise();
 		
-		$q.notify({
-			type: 'positive',
-			message: t('pages.settings.advanced.torznab-settings.api-key-generated'),
-		});
+		if (response?.data?.apiKey) {
+			settingsStore.torznabSettings.apiKey = response.data.apiKey;
+			$q.notify({
+				type: 'positive',
+				message: t('pages.settings.advanced.torznab-settings.api-key-generated'),
+			});
+		} else {
+			throw new Error('Invalid response from server');
+		}
 	} catch (error) {
+		console.error('Failed to generate API key:', error);
 		$q.notify({
 			type: 'negative',
 			message: t('pages.settings.advanced.torznab-settings.api-key-generation-failed'),

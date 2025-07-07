@@ -17,6 +17,7 @@ public static class SettingsModelToDTOMapper
             LanguageSettings = dto.LanguageSettings.ToModel(),
             DebugSettings = dto.DebugSettings.ToModel(),
             ServerSettings = dto.ServerSettings.ToModel(),
+            TorznabSettings = dto.TorznabSettings.ToModel(),
         };
 
     public static GeneralSettingsModule ToModel(this GeneralSettingsDTO dto) =>
@@ -73,6 +74,20 @@ public static class SettingsModelToDTOMapper
             MaskLibraryNames = dto.MaskLibraryNames,
         };
 
+    public static TorznabSettingsModule ToModel(this TorznabSettingsDTO dto) =>
+        new()
+        {
+            IsEnabled = dto.IsEnabled,
+            ApiKey = dto.ApiKey,
+            MaxResultsPerRequest = dto.MaxResultsPerRequest,
+            EnabledServerIds = dto.EnabledServerIds,
+            EnableWebhookNotifications = dto.EnableWebhookNotifications,
+            WebhookUrl = dto.WebhookUrl,
+            LogSearchRequests = dto.LogSearchRequests,
+            AutoCreateDownloadTasks = dto.AutoCreateDownloadTasks,
+            SearchTimeoutSeconds = dto.SearchTimeoutSeconds,
+        };
+
     #endregion
 
     #region ToDTO
@@ -88,6 +103,7 @@ public static class SettingsModelToDTOMapper
             DownloadManagerSettings = model.DownloadManagerSettings.ToDTO(),
             LanguageSettings = model.LanguageSettings.ToDTO(),
             ServerSettings = model.ServerSettings.ToDTO(),
+            TorznabSettings = model.TorznabSettings.ToDTO(),
         };
 
     public static GeneralSettingsDTO ToDTO(this GeneralSettingsModule module) =>
@@ -143,6 +159,20 @@ public static class SettingsModelToDTOMapper
             DebugModeEnabled = module.DebugModeEnabled,
             MaskServerNames = module.MaskServerNames,
             MaskLibraryNames = module.MaskLibraryNames,
+        };
+
+    public static TorznabSettingsDTO ToDTO(this TorznabSettingsModule module) =>
+        new()
+        {
+            IsEnabled = module.IsEnabled,
+            ApiKey = module.ApiKey,
+            MaxResultsPerRequest = module.MaxResultsPerRequest,
+            EnabledServerIds = module.EnabledServerIds,
+            EnableWebhookNotifications = module.EnableWebhookNotifications,
+            WebhookUrl = module.WebhookUrl,
+            LogSearchRequests = module.LogSearchRequests,
+            AutoCreateDownloadTasks = module.AutoCreateDownloadTasks,
+            SearchTimeoutSeconds = module.SearchTimeoutSeconds,
         };
 
     #endregion

@@ -25,5 +25,9 @@ public class ApplicationModule : Module
         builder.RegisterType<AllJobListener>().As<IAllJobListener>().SingleInstance();
         builder.RegisterType<DownloadJobListener>().As<IDownloadJobListener>().SingleInstance();
         builder.RegisterType<FileMergeJobListener>().As<IFileMergeJobListener>().SingleInstance();
+
+        // Torznab services
+        builder.RegisterType<TorznabAuthenticationService>().As<ITorznabAuthenticationService>().SingleInstance();
+        builder.RegisterType<TorznabWebhookService>().As<ITorznabWebhookService>().SingleInstance();
     }
 }

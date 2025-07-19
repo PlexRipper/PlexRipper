@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-
-namespace PlexRipper.Domain;
+﻿namespace PlexRipper.Domain;
 
 [Table("PlexMovie")]
 public class PlexMovie : BasePlexMedia
@@ -19,7 +17,7 @@ public class PlexMovie : BasePlexMedia
         get
         {
             return MediaDataList
-                .Select(y => new PlexMediaQuality(y.VideoResolution))
+                .Select(y => new PlexMediaQuality(y.Quality))
                 .Reverse() // This sorts from lowest to highest quality
                 .TakeLast(1) // TODO:remove this when quality selector for downloading is implemented
                 .ToList();

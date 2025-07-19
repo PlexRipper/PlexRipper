@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations.Schema;
-
 namespace PlexRipper.Domain;
 
 public class DownloadTaskMovie : DownloadTaskParentBase

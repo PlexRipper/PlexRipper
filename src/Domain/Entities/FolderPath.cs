@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-
-// ReSharper disable CollectionNeverUpdated.Global
+﻿// ReSharper disable CollectionNeverUpdated.Global
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 namespace PlexRipper.Domain;
 

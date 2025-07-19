@@ -11,7 +11,7 @@ import type {
 } from '@dto';
 import type { ISetupResult } from '@interfaces';
 import { plexServerApi, plexServerConnectionApi } from '@api';
-import { DataType } from '@dto';
+import { RefreshDataType } from '@dto';
 import { sortPlexServerConnections } from '@composables/common';
 import { useServerStore, useSignalrStore } from '@store';
 import { assign, cloneDeep } from 'lodash-es';
@@ -34,7 +34,7 @@ export const useServerConnectionStore = defineStore('ServerConnection', () => {
 		setup(): Observable<ISetupResult> {
 			// Listen for refresh notifications
 			signalRStore
-				.getRefreshNotification(DataType.PlexServerConnection)
+				.getRefreshNotification(RefreshDataType.PlexServerConnection)
 				.pipe(switchMap(() => actions.refreshPlexServerConnections()))
 				.subscribe();
 

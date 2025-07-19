@@ -5,7 +5,7 @@ import { switchMap, tap, map } from 'rxjs/operators';
 import type { PlexServerDTO } from '@dto';
 import type { ISetupResult } from '@interfaces';
 import { plexServerApi } from '@api';
-import { DataType } from '@dto';
+import { RefreshDataType } from '@dto';
 import { cloneDeep, orderBy } from 'lodash-es';
 import { useAccountStore, useServerConnectionStore, useSettingsStore, useSignalrStore } from '@store';
 
@@ -29,7 +29,7 @@ export const useServerStore = defineStore('ServerStore', () => {
 	const actions = {
 		setup(): Observable<ISetupResult> {
 			// Listen for refresh notifications
-			signalRStore.getRefreshNotification(DataType.PlexServer).pipe(switchMap(() => actions.refreshPlexServers())).subscribe();
+			signalRStore.getRefreshNotification(RefreshDataType.PlexServer).pipe(switchMap(() => actions.refreshPlexServers())).subscribe();
 
 			return actions.refreshPlexServers().pipe(switchMap(() => of({ name: 'useServerStore', isSuccess: true })));
 		},

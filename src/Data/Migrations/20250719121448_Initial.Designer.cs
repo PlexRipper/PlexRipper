@@ -11,8 +11,8 @@ using PlexRipper.Data;
 namespace PlexRipper.Data.Migrations
 {
     [DbContext(typeof(PlexRipperDbContext))]
-    [Migration("20250607113919_AddLanguageToLibrary")]
-    partial class AddLanguageToLibrary
+    [Migration("20250719121448_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -921,6 +921,10 @@ namespace PlexRipper.Data.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("PlexKey")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Thumb")
                         .HasColumnType("TEXT");
 
@@ -1086,10 +1090,6 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(1);
 
-                    b.Property<int>("PlexKey")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(3);
-
                     b.HasKey("PlexActorId", "PlexLibraryId");
 
                     b.HasIndex("PlexLibraryId");
@@ -1107,10 +1107,6 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(1);
 
-                    b.Property<int>("PlexKey")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(3);
-
                     b.HasKey("PlexCountryId", "PlexLibraryId");
 
                     b.HasIndex("PlexLibraryId");
@@ -1127,10 +1123,6 @@ namespace PlexRipper.Data.Migrations
                     b.Property<int>("PlexLibraryId")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(1);
-
-                    b.Property<int>("PlexKey")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(3);
 
                     b.HasKey("PlexGenreId", "PlexLibraryId");
 

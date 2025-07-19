@@ -918,6 +918,10 @@ namespace PlexRipper.Data.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("PlexKey")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Thumb")
                         .HasColumnType("TEXT");
 

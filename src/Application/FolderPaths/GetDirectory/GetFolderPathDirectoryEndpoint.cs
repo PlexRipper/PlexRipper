@@ -83,16 +83,52 @@ public class GetFolderPathDirectoryEndpoint : BaseEndpoint<GetFolderPathDirector
         {
             Directories = _diskProvider
                 .GetAllMounts()
-                .Select(d => new FileSystemModel
+                .Select(d =>
                 {
-                    Type = FileSystemEntityType.Drive,
-                    Name = _diskProvider.GetVolumeName(d),
-                    Path = d.RootDirectory.FullName,
-                    LastModified = d.RootDirectory.LastWriteTimeUtc,
-                    Extension = string.Empty,
-                    Size = d.TotalSize,
-                    HasReadPermission = d.CanRead(),
-                    HasWritePermission = d.CanWrite(),
+                    try
+                    {
+                        return new FileSystemModel
+                        {
+                            Type = FileSystemEntityType.Drive,
+                            Name = _diskProvider.GetVolumeName(d),
+                            Path = d.RootDirectory.FullName,
+                            LastModified = d.RootDirectory.LastWriteTimeUtc,
+                            Extension = string.Empty,
+                            Size = d.TotalSize,
+                            HasReadPermission = d.CanRead(),
+                            HasWritePermission = d.CanWrite(),
+                        };
+                    }
+                    catch (IOException ex) when (ex.Message.Contains("Stale file handle"))
+                    {
+                        _log.Warning("Stale file handle detected for drive {DriveName}, skipping", d.Name);
+                        return new FileSystemModel
+                        {
+                            Type = FileSystemEntityType.Drive,
+                            Name = _diskProvider.GetVolumeName(d),
+                            Path = d.Name, // Fallback to drive name only
+                            LastModified = null, // Use null for unavailable timestamp
+                            Extension = string.Empty,
+                            Size = 0, // Use 0 as a fallback for unavailable size
+                            HasReadPermission = false, // Assume no read permission for stale drives
+                            HasWritePermission = false, // Assume no write permission for stale drives
+                        };
+                    }
+                    catch (Exception ex)
+                    {
+                        _log.Warning(ex, "Error accessing drive information for {DriveName}, skipping", d.Name);
+                        return new FileSystemModel
+                        {
+                            Type = FileSystemEntityType.Drive,
+                            Name = _diskProvider.GetVolumeName(d),
+                            Path = d.Name, // Fallback to drive name only
+                            LastModified = null, // Use null for unavailable timestamp
+                            Extension = string.Empty,
+                            Size = 0, // Use 0 as a fallback for unavailable size
+                            HasReadPermission = false, // Assume no read permission for problematic drives
+                            HasWritePermission = false, // Assume no write permission for problematic drives
+                        };
+                    }
                 })
                 .ToList(),
             Files = [],
@@ -100,7 +136,7 @@ public class GetFolderPathDirectoryEndpoint : BaseEndpoint<GetFolderPathDirector
             Current = null,
         };
 
-        // If path is invalid return root file system
+        // If a path is invalid return root file system
         if (string.IsNullOrWhiteSpace(query))
             return Result.Ok(defaultResult);
 

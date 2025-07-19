@@ -12,15 +12,18 @@
 				:percentage="libraryProgress?.percentage ?? -1"
 				:text="refreshingText"
 				circular-mode
+				:indeterminate="libraryProgress?.percentage == 0"
 				class="q-my-lg" />
-			<QText
-				:value="$t('components.media-overview.steps-remaining', {
-					index: libraryProgress?.step,
-					total: libraryProgress?.totalSteps,
-				})"
-				align="center" />
-			<QCountdown
-				:value="libraryProgress?.timeRemaining ?? ''" />
+			<template v-if="libraryProgress?.percentage != 0">
+				<QText
+					:value="$t('components.media-overview.steps-remaining', {
+						index: libraryProgress?.step,
+						total: libraryProgress?.totalSteps,
+					})"
+					align="center" />
+				<QCountdown
+					:value="libraryProgress?.timeRemaining ?? ''" />
+			</template>
 		</QCol>
 	</QRow>
 	<template v-else>

@@ -35,39 +35,42 @@
 					</q-item-section>
 				</q-item>
 				<q-separator />
+				<QScroll
+					:fit="false"
+					:height="'300px'">
+					<!-- Show Genres Sub-Menu -->
+					<template v-if="menuIndex === MediaMetaDataTypes.Genres">
+						<q-item
+							v-for="genre in mediaOverviewStore.getGenres"
+							:key="genre.id"
+							clickable
+							@click="mediaOverviewStore.setMetaData({ genreId: genre.id })">
+							<q-item-section>{{ genre.name }}</q-item-section>
+						</q-item>
+					</template>
 
-				<!-- Show Genres Sub-Menu -->
-				<template v-if="menuIndex === MediaMetaDataTypes.Genres">
-					<q-item
-						v-for="genre in mediaOverviewStore.getGenres"
-						:key="genre.id"
-						clickable
-						@click="mediaOverviewStore.setMetaData({ genreId: genre.id })">
-						<q-item-section>{{ genre.name }}</q-item-section>
-					</q-item>
-				</template>
+					<!-- Show Countries Sub-Menu -->
+					<template v-if="menuIndex === MediaMetaDataTypes.Country">
+						<q-item
+							v-for="country in mediaOverviewStore.getCountries"
+							:key="country.id"
+							clickable
+							@click="mediaOverviewStore.setMetaData({ countryId: country.id })">
+							<q-item-section>{{ country.name }}</q-item-section>
+						</q-item>
+					</template>
 
-				<!-- Show Countries Sub-Menu -->
-				<template v-if="menuIndex === MediaMetaDataTypes.Country">
-					<q-item
-						v-for="country in mediaOverviewStore.getCountries"
-						:key="country.id"
-						clickable
-						@click="mediaOverviewStore.setMetaData({ countryId: country.id })">
-						<q-item-section>{{ country.name }}</q-item-section>
-					</q-item>
-				</template>
-
-				<!-- Show Roles Sub-Menu -->
-				<template v-if="menuIndex === MediaMetaDataTypes.Roles">
-					<q-item
-						v-for="role in mediaOverviewStore.getRoles"
-						:key="role.id"
-						clickable
-						@click="mediaOverviewStore.setMetaData({ roleId: role.id })">
-						<q-item-section>{{ role.name }}</q-item-section>
-					</q-item>
-				</template>
+					<!-- Show Roles Sub-Menu -->
+					<template v-if="menuIndex === MediaMetaDataTypes.Roles">
+						<q-item
+							v-for="role in mediaOverviewStore.getRoles"
+							:key="role.id"
+							clickable
+							@click="mediaOverviewStore.setMetaData({ roleId: role.id })">
+							<q-item-section>{{ role.name }}</q-item-section>
+						</q-item>
+					</template>
+				</QScroll>
 			</template>
 		</q-list>
 	</q-menu>

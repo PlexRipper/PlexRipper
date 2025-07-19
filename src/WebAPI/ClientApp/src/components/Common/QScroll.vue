@@ -1,6 +1,7 @@
 <template>
 	<q-scroll-area
-		class="fit"
+		:style="{ 'height': props.fit ? 'none' : props.height, 'max-width': props.fit ? 'none' : props.width }"
+		:class="[props.fit ? 'fit' : '']"
 		:thumb-style="thumbStyle"
 		:bar-style="barStyle">
 		<slot />
@@ -9,6 +10,16 @@
 
 <script setup lang="ts">
 import type { VueStyleObjectProp } from 'quasar';
+
+const props = withDefaults(defineProps<{
+	fit?: boolean;
+	height?: string | number;
+	width?: string | number;
+}>(), {
+	fit: true,
+	height: '400px',
+	width: '300px',
+});
 
 const thumbStyle: VueStyleObjectProp = {
 	right: '4px',

@@ -7,7 +7,7 @@ namespace PlexRipper.Domain;
 /// Used to define the type of data being sent.
 /// </summary>
 [JsonConverter(typeof(JsonStringEnumConverter))]
-public enum DataType
+public enum RefreshDataType
 {
     [EnumMember(Value = nameof(PlexAccount))]
     PlexAccount = 0,

@@ -84,7 +84,12 @@ public class DeletePlexAccountByIdEndpoint : BaseEndpoint<DeletePlexAccountByIdR
         );
 
         await _signalRService.SendRefreshNotificationAsync(
-            [DataType.PlexAccount, DataType.PlexServer, DataType.PlexServerConnection, DataType.PlexLibrary],
+            [
+                RefreshDataType.PlexAccount,
+                RefreshDataType.PlexServer,
+                RefreshDataType.PlexServerConnection,
+                RefreshDataType.PlexLibrary,
+            ],
             ct
         );
 

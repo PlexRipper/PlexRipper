@@ -82,7 +82,7 @@ public class CheckAllConnectionsStatusByPlexServerHandler
         var tasksResult = await Task.WhenAll(connectionTasks);
         var combinedResults = Result.Merge(tasksResult);
 
-        await _signalRService.SendRefreshNotificationAsync([DataType.PlexServerConnection], cancellationToken);
+        await _signalRService.SendRefreshNotificationAsync([RefreshDataType.PlexServerConnection], cancellationToken);
 
         // Compare previous and current online status
         var currentOnlineStatus = tasksResult.Any(statusResult => statusResult.ValueOrDefault?.IsSuccessful != null);

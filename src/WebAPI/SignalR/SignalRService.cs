@@ -73,14 +73,17 @@ public class SignalRService : ISignalRService
     }
 
     /// <inheritdoc/>
-    public async Task SendRefreshNotificationAsync(DataType dataType, CancellationToken cancellationToken = default)
+    public async Task SendRefreshNotificationAsync(
+        RefreshDataType dataType,
+        CancellationToken cancellationToken = default
+    )
     {
         await _notificationHub.Clients.All.RefreshNotification(dataType, cancellationToken);
     }
 
     /// <inheritdoc/>
     public async Task SendRefreshNotificationAsync(
-        List<DataType> dataTypes,
+        List<RefreshDataType> dataTypes,
         CancellationToken cancellationToken = default
     )
     {

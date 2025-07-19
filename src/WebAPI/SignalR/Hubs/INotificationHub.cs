@@ -21,5 +21,5 @@ public interface INotificationHub
     /// <param name="dataType"></param>
     /// <param name="cancellationToken"> The <see cref="CancellationToken"/> to use.</param>
     /// <returns></returns>
-    Task RefreshNotification(DataType dataType, CancellationToken cancellationToken = default);
+    Task RefreshNotification(RefreshDataType dataType, CancellationToken cancellationToken = default);
 }

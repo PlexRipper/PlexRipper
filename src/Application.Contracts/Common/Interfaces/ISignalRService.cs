@@ -56,16 +56,16 @@ public interface ISignalRService
     /// <summary>
     ///  Sends a refresh notification to the front-end.
     /// </summary>
-    /// <param name="dataType"></param>
+    /// <param name="refreshDataType"></param>
     /// <param name="cancellationToken"> The <see cref="CancellationToken"/> to use.</param>
     /// <returns></returns>
-    Task SendRefreshNotificationAsync(DataType dataType, CancellationToken cancellationToken = default);
+    Task SendRefreshNotificationAsync(RefreshDataType refreshDataType, CancellationToken cancellationToken = default);
 
     /// <summary>
     ///  Sends a refresh data notification to the front-end.
     /// </summary>
-    /// <param name="dataType"> The <see cref="DataType"/> to send.</param>
+    /// <param name="dataType"> The <see cref="RefreshDataType"/> to send.</param>
     /// <param name="cancellationToken"> The <see cref="CancellationToken"/> to use.</param>
     /// <returns></returns>
-    Task SendRefreshNotificationAsync(List<DataType> dataType, CancellationToken cancellationToken = default);
+    Task SendRefreshNotificationAsync(List<RefreshDataType> dataType, CancellationToken cancellationToken = default);
 }

@@ -46,8 +46,8 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         actorsDb.Count.ShouldBe(actors.Count);
         foreach (var actor in actors)
             actorsDb.ShouldContain(
-                x => x.Name == actor.Name && x.Key == actor.TagKey,
-                $"Actor {actor.Name} with key {actor.TagKey} not found in database"
+                x => x.Name == actor.Name && x.Key == actor.Key,
+                $"Actor {actor.Name} with key {actor.Key} not found in database"
             );
 
         var genresDb = await IDbContext.PlexGenres.ToListAsync();
@@ -112,7 +112,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         var actorsDb = await IDbContext.PlexActors.ToListAsync();
         actorsDb.Count.ShouldBe(initialActors.Count + newActors.Count);
         foreach (var actor in newActors)
-            actorsDb.ShouldContain(x => x.Name == actor.Name && x.Key == actor.TagKey);
+            actorsDb.ShouldContain(x => x.Name == actor.Name && x.Key == actor.Key);
 
         var genresDb = await IDbContext.PlexGenres.ToListAsync();
         genresDb.Count.ShouldBe(newGenres.Count);
@@ -347,7 +347,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         // Verify that existing items were updated
         foreach (var actor in newActors.Take(25))
         {
-            var dbActor = actorsDb.FirstOrDefault(x => x.Key == actor.TagKey);
+            var dbActor = actorsDb.FirstOrDefault(x => x.Key == actor.Key);
             dbActor.ShouldNotBeNull();
             dbActor.Name.ShouldBe(actor.Name);
         }
@@ -510,20 +510,20 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         // Verify dictionary keys match the source PlexIds
         foreach (var actor in actors.Where(x => x.TagKey != null))
         {
-            result.Value.PlexActors.ShouldContainKey(actor.PlexId);
-            result.Value.PlexActors[actor.PlexId].Name.ShouldBe(actor.Name);
+            result.Value.PlexActors.ShouldContainKey(actor.Key);
+            result.Value.PlexActors[actor.Key].Name.ShouldBe(actor.Name);
         }
 
         foreach (var genre in genres)
         {
-            result.Value.PlexGenres.ShouldContainKey(genre.PlexId);
-            result.Value.PlexGenres[genre.PlexId].Key.ShouldBe(genre.Key);
+            result.Value.PlexGenres.ShouldContainKey(genre.Key);
+            result.Value.PlexGenres[genre.Key].Key.ShouldBe(genre.Key);
         }
 
         foreach (var country in countries)
         {
-            result.Value.PlexCountries.ShouldContainKey(country.PlexId);
-            result.Value.PlexCountries[country.PlexId].Key.ShouldBe(country.Key);
+            result.Value.PlexCountries.ShouldContainKey(country.Key);
+            result.Value.PlexCountries[country.Key].Key.ShouldBe(country.Key);
         }
     }
 
@@ -845,9 +845,18 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         result.IsSuccess.ShouldBeTrue();
 
         // Verify dictionary keys are valid PlexIds
-        result.Value.PlexActors.Keys.ShouldAllBe(key => key > 0, "All actor PlexIds should be positive");
-        result.Value.PlexGenres.Keys.ShouldAllBe(key => key > 0, "All genre PlexIds should be positive");
-        result.Value.PlexCountries.Keys.ShouldAllBe(key => key > 0, "All country PlexIds should be positive");
+        result.Value.PlexActors.Keys.ShouldAllBe(
+            key => !string.IsNullOrEmpty(key),
+            "All actor PlexIds should be positive"
+        );
+        result.Value.PlexGenres.Keys.ShouldAllBe(
+            key => !string.IsNullOrEmpty(key),
+            "All genre PlexIds should be positive"
+        );
+        result.Value.PlexCountries.Keys.ShouldAllBe(
+            key => !string.IsNullOrEmpty(key),
+            "All country PlexIds should be positive"
+        );
 
         // Verify entities have valid database IDs
         result.Value.PlexActors.Values.ShouldAllBe(actor => actor.Id > 0, "All actors should have valid database IDs");
@@ -895,30 +904,30 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         foreach (var sourceActor in actors.Where(x => !string.IsNullOrEmpty(x.TagKey)))
         {
             result.Value.PlexActors.ShouldContainKey(
-                sourceActor.PlexId,
-                $"Response should contain actor with PlexId {sourceActor.PlexId}"
+                sourceActor.Key,
+                $"Response should contain actor with PlexId {sourceActor.Key}"
             );
-            var responseActor = result.Value.PlexActors[sourceActor.PlexId];
+            var responseActor = result.Value.PlexActors[sourceActor.Key];
             responseActor.Name.ShouldBe(sourceActor.Name);
         }
 
         foreach (var sourceGenre in genres.Where(x => !string.IsNullOrEmpty(x.Key)))
         {
             result.Value.PlexGenres.ShouldContainKey(
-                sourceGenre.PlexId,
-                $"Response should contain genre with PlexId {sourceGenre.PlexId}"
+                sourceGenre.Key,
+                $"Response should contain genre with PlexId {sourceGenre.Key}"
             );
-            var responseGenre = result.Value.PlexGenres[sourceGenre.PlexId];
+            var responseGenre = result.Value.PlexGenres[sourceGenre.Key];
             responseGenre.Name.ShouldBe(sourceGenre.Name);
         }
 
         foreach (var sourceCountry in countries.Where(x => !string.IsNullOrEmpty(x.Key)))
         {
             result.Value.PlexCountries.ShouldContainKey(
-                sourceCountry.PlexId,
-                $"Response should contain country with PlexId {sourceCountry.PlexId}"
+                sourceCountry.Key,
+                $"Response should contain country with PlexId {sourceCountry.Key}"
             );
-            var responseCountry = result.Value.PlexCountries[sourceCountry.PlexId];
+            var responseCountry = result.Value.PlexCountries[sourceCountry.Key];
             responseCountry.Name.ShouldBe(sourceCountry.Name);
         }
     }

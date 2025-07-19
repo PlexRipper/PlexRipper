@@ -58,16 +58,7 @@ public class RefreshPlexTvShowLibraryCommand_UnitTests : BaseUnitTest<RefreshPle
 
         // Act
         var result = await _sut.ExecuteAsync(
-            new RefreshPlexTvShowLibraryCommand(
-                new InsertMediaMetaDataCommandResponse
-                {
-                    PlexLibrary = testLibrary,
-                    PlexActors = [],
-                    PlexGenres = [],
-                    PlexCountries = [],
-                },
-                _ => { }
-            ),
+            new RefreshPlexTvShowLibraryCommand(new InsertMediaMetaDataCommandResponse(testLibrary), _ => { }),
             CancellationToken.None
         );
 
@@ -97,16 +88,7 @@ public class RefreshPlexTvShowLibraryCommand_UnitTests : BaseUnitTest<RefreshPle
 
         // Act
         var result = await _sut.ExecuteAsync(
-            new RefreshPlexTvShowLibraryCommand(
-                new InsertMediaMetaDataCommandResponse
-                {
-                    PlexLibrary = testLibrary,
-                    PlexActors = [],
-                    PlexGenres = [],
-                    PlexCountries = [],
-                },
-                _ => { }
-            ),
+            new RefreshPlexTvShowLibraryCommand(new InsertMediaMetaDataCommandResponse(testLibrary), _ => { }),
             CancellationToken.None
         );
 
@@ -132,16 +114,7 @@ public class RefreshPlexTvShowLibraryCommand_UnitTests : BaseUnitTest<RefreshPle
 
         // Act
         var result = await _sut.ExecuteAsync(
-            new RefreshPlexTvShowLibraryCommand(
-                new InsertMediaMetaDataCommandResponse
-                {
-                    PlexLibrary = testLibrary,
-                    PlexActors = [],
-                    PlexGenres = [],
-                    PlexCountries = [],
-                },
-                _ => { }
-            ),
+            new RefreshPlexTvShowLibraryCommand(new InsertMediaMetaDataCommandResponse(testLibrary), _ => { }),
             CancellationToken.None
         );
 
@@ -174,16 +147,7 @@ public class RefreshPlexTvShowLibraryCommand_UnitTests : BaseUnitTest<RefreshPle
 
         // Act
         var result = await _sut.ExecuteAsync(
-            new RefreshPlexTvShowLibraryCommand(
-                new InsertMediaMetaDataCommandResponse
-                {
-                    PlexLibrary = testLibrary,
-                    PlexActors = [],
-                    PlexGenres = [],
-                    PlexCountries = [],
-                },
-                _ => { }
-            ),
+            new RefreshPlexTvShowLibraryCommand(new InsertMediaMetaDataCommandResponse(testLibrary), _ => { }),
             CancellationToken.None
         );
 
@@ -222,16 +186,7 @@ public class RefreshPlexTvShowLibraryCommand_UnitTests : BaseUnitTest<RefreshPle
 
         // Act
         var result = await _sut.ExecuteAsync(
-            new RefreshPlexTvShowLibraryCommand(
-                new InsertMediaMetaDataCommandResponse
-                {
-                    PlexLibrary = testLibrary,
-                    PlexActors = [],
-                    PlexGenres = [],
-                    PlexCountries = [],
-                },
-                _ => { }
-            ),
+            new RefreshPlexTvShowLibraryCommand(new InsertMediaMetaDataCommandResponse(testLibrary), _ => { }),
             CancellationToken.None
         );
 
@@ -287,16 +242,7 @@ public class RefreshPlexTvShowLibraryCommand_UnitTests : BaseUnitTest<RefreshPle
 
         // Act
         var result = await _sut.ExecuteAsync(
-            new RefreshPlexTvShowLibraryCommand(
-                new InsertMediaMetaDataCommandResponse
-                {
-                    PlexLibrary = testLibrary,
-                    PlexActors = [],
-                    PlexGenres = [],
-                    PlexCountries = [],
-                },
-                _ => { }
-            ),
+            new RefreshPlexTvShowLibraryCommand(new InsertMediaMetaDataCommandResponse(testLibrary), _ => { }),
             CancellationToken.None
         );
 

@@ -27,13 +27,7 @@ public class SyncPlexLibraryMediaMetaDataCommandUnitTests : BaseCommandUnitTest<
 
         // Act
         var command = new SyncPlexLibraryMediaMetaDataCommand(
-            LibraryMetadata: new InsertMediaMetaDataCommandResponse
-            {
-                PlexLibrary = plexLibrary, // Non-existent library ID
-                PlexActors = [],
-                PlexGenres = [],
-                PlexCountries = [],
-            }
+            LibraryMetadata: new InsertMediaMetaDataCommandResponse(plexLibrary)
         );
 
         var result = await TestHandlerExecuteAsync(command);
@@ -67,11 +61,11 @@ public class SyncPlexLibraryMediaMetaDataCommandUnitTests : BaseCommandUnitTest<
         await dbContext.PlexActors.AddRangeAsync(plexActors);
         await dbContext.SaveChangesAsync();
 
-        var plexActorDict = plexActors.ToPlexIdDictionary(mediaItemActorRoles);
+        var plexActorDict = plexActors.ToHashKeyDictionary(mediaItemActorRoles);
 
         // Create initial PlexLibraryRoles
         var initialPlexLibraryActors = plexActorDict
-            .Select(x => new PlexLibraryActors(plexLibrary.Id, x.Value.Id, x.Key))
+            .Select(x => new PlexLibraryActors(plexLibrary.Id, x.Value.Id))
             .ToList();
         dbContext = IDbContext;
         await dbContext.PlexLibraryActors.AddRangeAsync(initialPlexLibraryActors);
@@ -85,12 +79,9 @@ public class SyncPlexLibraryMediaMetaDataCommandUnitTests : BaseCommandUnitTest<
 
         // Act
         var command = new SyncPlexLibraryMediaMetaDataCommand(
-            LibraryMetadata: new InsertMediaMetaDataCommandResponse
+            LibraryMetadata: new InsertMediaMetaDataCommandResponse(plexLibrary)
             {
-                PlexLibrary = plexLibrary,
-                PlexActors = newPlexActors.ToPlexIdDictionary(newPlexApiActors),
-                PlexGenres = [],
-                PlexCountries = [],
+                PlexActors = newPlexActors.ToHashKeyDictionary(newPlexApiActors),
             }
         );
         var result = await TestHandlerExecuteAsync(command);
@@ -106,7 +97,7 @@ public class SyncPlexLibraryMediaMetaDataCommandUnitTests : BaseCommandUnitTest<
         libraryRolesList.Count.ShouldBe(newPlexApiActors.Count);
         foreach (var role in newPlexApiActors)
         {
-            var roleDb = await dbContext.PlexActors.FirstOrDefaultAsync(x => x.Key == role.TagKey);
+            var roleDb = await dbContext.PlexActors.FirstOrDefaultAsync(x => x.Key == role.Key);
             roleDb.ShouldNotBeNull();
             libraryRolesList.ShouldContain(x => x.PlexActorId == roleDb.Id);
         }
@@ -154,12 +145,11 @@ public class SyncPlexLibraryMediaMetaDataCommandUnitTests : BaseCommandUnitTest<
 
         // Act
         var command = new SyncPlexLibraryMediaMetaDataCommand(
-            LibraryMetadata: new InsertMediaMetaDataCommandResponse
+            LibraryMetadata: new InsertMediaMetaDataCommandResponse(plexLibrary)
             {
-                PlexLibrary = plexLibrary,
-                PlexActors = plexActors.ToPlexIdDictionary(actorRoles),
-                PlexGenres = plexGenres.ToPlexIdDictionary(genreItems),
-                PlexCountries = plexCountries.ToPlexIdDictionary(countryItems),
+                PlexActors = plexActors.ToHashKeyDictionary(actorRoles),
+                PlexGenres = plexGenres.ToHashKeyDictionary(genreItems),
+                PlexCountries = plexCountries.ToHashKeyDictionary(countryItems),
             }
         );
         var result = await TestHandlerExecuteAsync(command);
@@ -167,7 +157,7 @@ public class SyncPlexLibraryMediaMetaDataCommandUnitTests : BaseCommandUnitTest<
         // Assert
         result.IsSuccess.ShouldBeTrue();
 
-        // Refresh the library from database to get updated counts
+        // Refresh the library from the database to get updated counts
         dbContext = IDbContext;
         var updatedLibrary = await dbContext.PlexLibraries.FirstOrDefaultAsync(x => x.Id == plexLibrary.Id);
         updatedLibrary.ShouldNotBeNull();
@@ -214,8 +204,8 @@ public class SyncPlexLibraryMediaMetaDataCommandUnitTests : BaseCommandUnitTest<
 
         // Create initial relationship data
         var initialPlexLibraryActors = plexActors
-            .ToPlexIdDictionary(actorRoles)
-            .Select((x) => new PlexLibraryActors(plexLibrary.Id, x.Value.Id, x.Key))
+            .ToHashKeyDictionary(actorRoles)
+            .Select((x) => new PlexLibraryActors(plexLibrary.Id, x.Value.Id))
             .ToList();
         await dbContext.PlexLibraryActors.AddRangeAsync(initialPlexLibraryActors);
         await dbContext.SaveChangesAsync();
@@ -231,13 +221,7 @@ public class SyncPlexLibraryMediaMetaDataCommandUnitTests : BaseCommandUnitTest<
 
         // Act - sync with empty metadata
         var command = new SyncPlexLibraryMediaMetaDataCommand(
-            LibraryMetadata: new InsertMediaMetaDataCommandResponse
-            {
-                PlexLibrary = plexLibrary,
-                PlexActors = new Dictionary<int, PlexActor>(),
-                PlexGenres = new Dictionary<int, PlexGenre>(),
-                PlexCountries = new Dictionary<int, PlexCountry>(),
-            }
+            LibraryMetadata: new InsertMediaMetaDataCommandResponse(plexLibrary)
         );
         var result = await TestHandlerExecuteAsync(command);
 

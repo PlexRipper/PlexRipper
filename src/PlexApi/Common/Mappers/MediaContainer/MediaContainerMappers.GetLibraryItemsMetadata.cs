@@ -73,6 +73,7 @@ public static partial class MediaContainerMappers
             Filter = null,
             TagKey = null,
             Thumb = null,
+            Key = x.Tag.ToMd5Hash(),
         };
 
     public static LibraryMediaItemMediaDTO ToItemMediaDTO(this GetLibrarySectionsAllMedia media) =>

@@ -29,11 +29,8 @@ public class SyncPlexMoviesCommandHandlerUnitTests : BaseUnitTest<SyncPlexMovies
         library.Movies.AddRange(movies);
 
         // Act
-        var insertCommand = new InsertMediaMetaDataCommandResponse
+        var insertCommand = new InsertMediaMetaDataCommandResponse(library)
         {
-            PlexLibrary = library,
-            PlexActors = [],
-            PlexGenres = [],
             PlexCountries = [], // TODO add metadata here
         };
         var request = new SyncPlexMoviesCommand(insertCommand);
@@ -72,11 +69,8 @@ public class SyncPlexMoviesCommandHandlerUnitTests : BaseUnitTest<SyncPlexMovies
         library.Movies.AddRange(movies);
 
         // Act
-        var insertCommand = new InsertMediaMetaDataCommandResponse
+        var insertCommand = new InsertMediaMetaDataCommandResponse(library)
         {
-            PlexLibrary = library,
-            PlexActors = [],
-            PlexGenres = [],
             PlexCountries = [], // TODO add metadata here
         };
         var request = new SyncPlexMoviesCommand(insertCommand);
@@ -131,11 +125,8 @@ public class SyncPlexMoviesCommandHandlerUnitTests : BaseUnitTest<SyncPlexMovies
         library.Movies.AddRange(newMovies);
 
         // Act
-        var insertCommand = new InsertMediaMetaDataCommandResponse
+        var insertCommand = new InsertMediaMetaDataCommandResponse(library)
         {
-            PlexLibrary = library,
-            PlexActors = [],
-            PlexGenres = [],
             PlexCountries = [], // TODO add metadata here
         };
         var request = new SyncPlexMoviesCommand(insertCommand);

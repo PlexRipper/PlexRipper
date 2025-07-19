@@ -94,7 +94,11 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
         return Result.Merge(syncGenresResult, syncCountriesResult, syncRolesResult).ToResult();
     }
 
-    private async Task<Result<int>> SyncRoles(Dictionary<int, PlexActor> sourceDict, int libraryId, string libraryName)
+    private async Task<Result<int>> SyncRoles(
+        Dictionary<string, PlexActor> sourceDict,
+        int libraryId,
+        string libraryName
+    )
     {
         var stopWatch = Stopwatch.StartNew();
 
@@ -129,7 +133,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
 
         // Reinsert genres for the library
         var newActors = sourceDict
-            .Select(x => new PlexLibraryActors(libraryId: libraryId, plexActorId: x.Value.Id, plexKey: x.Key))
+            .Select(x => new PlexLibraryActors(libraryId: libraryId, plexActorId: x.Value.Id))
             .ToList();
 
         var insertResult = await Result.Try(
@@ -161,7 +165,11 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
         return insertResult.LogError();
     }
 
-    private async Task<Result<int>> SyncGenres(Dictionary<int, PlexGenre> sourceDict, int libraryId, string libraryName)
+    private async Task<Result<int>> SyncGenres(
+        Dictionary<string, PlexGenre> sourceDict,
+        int libraryId,
+        string libraryName
+    )
     {
         var stopWatch = Stopwatch.StartNew();
 
@@ -194,7 +202,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
         await _dbContext.PlexLibraryGenres.Where(x => x.PlexLibraryId == libraryId).ExecuteDeleteAsync();
 
         // Reinsert genres for the library
-        var newGenres = sourceDict.Select(x => new PlexLibraryGenres(libraryId, x.Value.Id, x.Key)).ToList();
+        var newGenres = sourceDict.Select(x => new PlexLibraryGenres(libraryId, x.Value.Id)).ToList();
         var insertResult = await Result.Try(
             () => _dbContext.BulkInsertAsync(newGenres, _bulkInsertConfig),
             e => new ExceptionalError(e)
@@ -225,7 +233,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
     }
 
     private async Task<Result<int>> SyncCountries(
-        Dictionary<int, PlexCountry> sourceDict,
+        Dictionary<string, PlexCountry> sourceDict,
         int libraryId,
         string libraryName
     )
@@ -260,7 +268,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
         await _dbContext.PlexLibraryCountries.Where(x => x.PlexLibraryId == libraryId).ExecuteDeleteAsync();
 
         // Reinsert countries for the library
-        var newCountries = sourceDict.Select(x => new PlexLibraryCountries(libraryId, x.Value.Id, x.Key)).ToList();
+        var newCountries = sourceDict.Select(x => new PlexLibraryCountries(libraryId, x.Value.Id)).ToList();
         var insertResult = await Result.Try(
             () => _dbContext.BulkInsertAsync(newCountries, _bulkInsertConfig),
             e => new ExceptionalError(e)

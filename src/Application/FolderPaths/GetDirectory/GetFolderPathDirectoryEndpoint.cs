@@ -102,10 +102,11 @@ public class GetFolderPathDirectoryEndpoint : BaseEndpoint<GetFolderPathDirector
                     catch (IOException ex) when (ex.Message.Contains("Stale file handle"))
                     {
                         _log.Warning("Stale file handle detected for drive {DriveName}, skipping", d.Name);
+
                         return new FileSystemModel
                         {
                             Type = FileSystemEntityType.Drive,
-                            Name = _diskProvider.GetVolumeName(d),
+                            Name = d.Name,
                             Path = d.Name, // Fallback to drive name only
                             LastModified = null, // Use null for unavailable timestamp
                             Extension = string.Empty,
@@ -117,10 +118,11 @@ public class GetFolderPathDirectoryEndpoint : BaseEndpoint<GetFolderPathDirector
                     catch (Exception ex)
                     {
                         _log.Warning(ex, "Error accessing drive information for {DriveName}, skipping", d.Name);
+
                         return new FileSystemModel
                         {
                             Type = FileSystemEntityType.Drive,
-                            Name = _diskProvider.GetVolumeName(d),
+                            Name = d.Name,
                             Path = d.Name, // Fallback to drive name only
                             LastModified = null, // Use null for unavailable timestamp
                             Extension = string.Empty,

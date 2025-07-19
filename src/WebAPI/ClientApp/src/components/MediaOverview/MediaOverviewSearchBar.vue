@@ -17,7 +17,7 @@
 				:key="index"
 				removable
 				outline
-				@remove="mediaOverviewStore.setMetaData({ [chip.key]: 0 })">
+				@remove="unsetMetaData(chip.key)">
 				{{ chip.text }}
 			</q-chip>
 			<q-icon
@@ -32,6 +32,7 @@
 <script setup lang="ts">
 import { useMediaOverviewStore } from '@store';
 import IconButton from '@components/Buttons/IconButton.vue';
+import type { IMetaDataMediaFilter } from '@interfaces';
 
 const mediaOverviewStore = useMediaOverviewStore();
 
@@ -40,8 +41,8 @@ withDefaults(defineProps<{
 }>(), {
 	libraryId: 0,
 });
+
+function unsetMetaData(key: keyof IMetaDataMediaFilter) {
+	useSubscription(mediaOverviewStore.unsetMetaData(key).subscribe());
+}
 </script>
-
-<style lang="scss">
-
-</style>

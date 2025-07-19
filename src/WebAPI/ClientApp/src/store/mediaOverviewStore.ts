@@ -168,16 +168,36 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 			countryId,
 			roleId,
 			genreId,
-		}: {
-			countryId?: number;
-			roleId?: number;
-			genreId?: number;
-		}) {
-			state.metadata.countryId = isNumber(countryId) ? countryId : 0;
-			state.metadata.roleId = isNumber(roleId) ? roleId : 0;
-			state.metadata.genreId = isNumber(genreId) ? genreId : 0;
+		}: Partial<IMetaDataMediaFilter>): Observable<PlexMediaStatisticsDTO | null> {
+			if (isNumber(countryId)) {
+				state.metadata.countryId = countryId;
+			}
 
-			actions.requestMedia().subscribe();
+			if (isNumber(roleId)) {
+				state.metadata.roleId = roleId;
+			}
+
+			if (isNumber(genreId)) {
+				state.metadata.genreId = genreId;
+			}
+
+			return actions.requestMedia();
+		},
+		unsetMetaData(key: keyof IMetaDataMediaFilter): Observable<PlexMediaStatisticsDTO | null> {
+			if (key in state.metadata) {
+				// Reset the metadata key to 0
+				state.metadata[key] = 0;
+			}
+
+			return actions.requestMedia();
+		},
+		clearMetaDataFilter() {
+			state.metadata = {
+				countryId: 0,
+				roleId: 0,
+				genreId: 0,
+			};
+			return actions.requestMedia();
 		},
 		changeAllMediaOverviewType(mediaType: PlexMediaType) {
 			state.mediaType = mediaType;

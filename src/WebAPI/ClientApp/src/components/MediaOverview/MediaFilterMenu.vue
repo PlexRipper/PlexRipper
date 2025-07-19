@@ -9,7 +9,7 @@
 				<q-item
 					v-close-popup
 					clickable
-					@click="mediaOverviewStore.setMetaData({})">
+					@click="mediaOverviewStore.clearMetaDataFilter()">
 					<q-item-section>{{ t('components.media-filter-menu.all') }}</q-item-section>
 				</q-item>
 				<q-separator />
@@ -44,8 +44,15 @@
 							v-for="genre in mediaOverviewStore.getGenres"
 							:key="genre.id"
 							clickable
-							@click="mediaOverviewStore.setMetaData({ genreId: genre.id })">
-							<q-item-section>{{ genre.name }}</q-item-section>
+							@click="setMetadataFilter({ genreId: genre.id })">
+							<q-item-section avatar>
+								<q-icon
+									v-if="genre.id === mediaOverviewStore.metadata.genreId"
+									name="mdi-check" />
+							</q-item-section>
+							<q-item-section>
+								{{ genre.name }}
+							</q-item-section>
 						</q-item>
 					</template>
 
@@ -55,7 +62,12 @@
 							v-for="country in mediaOverviewStore.getCountries"
 							:key="country.id"
 							clickable
-							@click="mediaOverviewStore.setMetaData({ countryId: country.id })">
+							@click="setMetadataFilter({ countryId: country.id })">
+							<q-item-section avatar>
+								<q-icon
+									v-if="country.id === mediaOverviewStore.metadata.countryId"
+									name="mdi-check" />
+							</q-item-section>
 							<q-item-section>{{ country.name }}</q-item-section>
 						</q-item>
 					</template>
@@ -66,7 +78,12 @@
 							v-for="role in mediaOverviewStore.getRoles"
 							:key="role.id"
 							clickable
-							@click="mediaOverviewStore.setMetaData({ roleId: role.id })">
+							@click="setMetadataFilter({ roleId: role.id })">
+							<q-item-section avatar>
+								<q-icon
+									v-if="role.id === mediaOverviewStore.metadata.roleId"
+									name="mdi-check" />
+							</q-item-section>
 							<q-item-section>{{ role.name }}</q-item-section>
 						</q-item>
 					</template>
@@ -108,5 +125,22 @@ const menuItems: { text: string; type: MediaMetaDataTypes }[] = [
 
 function onMenuOpen(category: MediaMetaDataTypes) {
 	set(menuIndex, category);
+}
+
+function setMetadataFilter({
+	countryId,
+	roleId,
+	genreId,
+}: {
+	countryId?: number;
+	roleId?: number;
+	genreId?: number;
+}) {
+	useSubscription(
+		mediaOverviewStore.setMetaData({
+			countryId,
+			roleId,
+			genreId,
+		}).subscribe());
 }
 </script>

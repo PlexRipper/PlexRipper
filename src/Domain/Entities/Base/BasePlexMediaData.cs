@@ -88,4 +88,11 @@ public abstract class BasePlexMediaData : BaseEntity
     public PlexServer? PlexServer { get; init; }
 
     #endregion
+
+    #region Helpers
+
+    [NotMapped]
+    public VideoQuality Quality => VideoResolution.ToVideoQuality();
+
+    #endregion
 }

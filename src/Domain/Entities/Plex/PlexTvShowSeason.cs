@@ -31,9 +31,9 @@ public class PlexTvShowSeason : BasePlexMedia
     public List<PlexMediaQuality> Qualities =>
         Episodes
             .SelectMany(x => x.MediaDataList)
-            .Select(y => new PlexMediaQuality(y.Quality))
+            .Select(y => y.ToPlexMediaQuality())
             .Distinct()
-            .Reverse() // This sorts from lowest to highest quality
+            .OrderBy(q => q.Quality)
             .ToList();
 
     #endregion

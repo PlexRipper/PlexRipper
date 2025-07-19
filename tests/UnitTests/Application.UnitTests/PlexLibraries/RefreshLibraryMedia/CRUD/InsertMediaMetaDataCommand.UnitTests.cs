@@ -343,7 +343,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
     }
 
     [Fact]
-    public async Task ShouldFilterOutActorsWithNullTagKey_WhenActorsHaveNullKeys()
+    public async Task ShouldFilterOutActorsWithEmptyTag_WhenActorsHaveNullKeys()
     {
         // Arrange
         var seed = await SetupDatabase(

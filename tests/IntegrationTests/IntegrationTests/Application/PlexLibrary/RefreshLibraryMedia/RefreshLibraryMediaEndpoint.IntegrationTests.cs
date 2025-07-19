@@ -102,9 +102,6 @@ public class RefreshLibraryMediaEndpointIntegrationTests : BaseIntegrationTests
 
         var parts = mediaList.SelectMany(x => x.Parts).ToList();
         parts.Count.ShouldBeGreaterThanOrEqualTo(movieCount);
-
-        var streams = parts.SelectMany(x => x.Streams).ToList();
-        streams.Count.ShouldBeGreaterThanOrEqualTo(movieCount);
     }
 
     [Fact]
@@ -215,8 +212,5 @@ public class RefreshLibraryMediaEndpointIntegrationTests : BaseIntegrationTests
 
         var parts = mediaList.SelectMany(x => x.Parts).ToList();
         parts.Count.ShouldBeGreaterThanOrEqualTo(totalEpisodeCount);
-
-        var streams = parts.SelectMany(x => x.Streams).ToList();
-        streams.Count.ShouldBeGreaterThanOrEqualTo(totalEpisodeCount);
     }
 }

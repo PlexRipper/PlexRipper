@@ -172,6 +172,9 @@ public class SyncPlexMoviesCommandHandler : IRequestHandler<SyncPlexMoviesComman
             }
         }
 
+        // Remove duplicates before inserting
+        list = list.DistinctBy(x => new { x.PlexActorId, x.PlexMovieId }).ToList();
+
         var insertResult = await Result.Try(() => _dbContext.BulkInsertAsync(list, _config, ct));
         if (insertResult.IsFailed)
         {
@@ -219,6 +222,9 @@ public class SyncPlexMoviesCommandHandler : IRequestHandler<SyncPlexMoviesComman
             }
         }
 
+        // Remove duplicates before inserting
+        list = list.DistinctBy(x => new { x.GenresId, x.PlexMovieId }).ToList();
+
         var insertResult = await Result.Try(() => _dbContext.BulkInsertAsync(list, _config, ct));
         if (insertResult.IsFailed)
         {
@@ -265,6 +271,9 @@ public class SyncPlexMoviesCommandHandler : IRequestHandler<SyncPlexMoviesComman
                 }
             }
         }
+
+        // Remove duplicates before inserting
+        list = list.DistinctBy(x => new { x.CountryId, x.PlexMovieId }).ToList();
 
         var insertResult = await Result.Try(() => _dbContext.BulkInsertAsync(list, _config, ct));
         if (insertResult.IsFailed)

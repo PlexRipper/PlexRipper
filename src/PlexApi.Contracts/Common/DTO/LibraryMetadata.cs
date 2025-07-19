@@ -1,10 +1,17 @@
+using System.Diagnostics.CodeAnalysis;
 using PlexRipper.Domain;
 
 namespace PlexApi.Contracts;
 
 public record LibraryMetadata
 {
-    public required PlexLibrary Library { get; init; }
+    [SetsRequiredMembers]
+    public LibraryMetadata(PlexLibrary plexLibrary)
+    {
+        Library = plexLibrary;
+    }
+
+    public PlexLibrary Library { get; private set; }
 
     public required IReadOnlyCollection<LibraryMediaItemCountryDTO> Countries { get; init; } = [];
 

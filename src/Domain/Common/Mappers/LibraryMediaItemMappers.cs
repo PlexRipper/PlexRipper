@@ -3,13 +3,7 @@ namespace PlexRipper.Domain;
 public static class LibraryMediaItemMappers
 {
     public static PlexActor ToPlexActor(this LibraryMediaItemRoleDTO role) =>
-        new()
-        {
-            Name = role.Name,
-            PlexKey = role.TagKey ?? string.Empty, // If empty, then it will be discarded when adding to db
-            Thumb = role.Thumb,
-            Key = role.Name.ToMd5Hash(),
-        };
+        new() { Name = role.Name, Key = role.Key };
 
     public static List<PlexActor> ToPlexActor(this IEnumerable<LibraryMediaItemRoleDTO>? source) =>
         source?.Select(x => x.ToPlexActor()).ToList() ?? [];

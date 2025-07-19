@@ -79,7 +79,7 @@ public class InsertMediaMetaDataCommandHandler
 
         var syncGenresResult = await InsertGenres(genres);
         var syncCountriesResult = await InsertCountries(countries);
-        var syncRolesResult = await InsertPlexRoles(roles);
+        var syncRolesResult = await InsertPlexActors(roles);
 
         var results = Result.Merge(syncGenresResult, syncCountriesResult, syncRolesResult);
         if (results.IsFailed)
@@ -95,7 +95,7 @@ public class InsertMediaMetaDataCommandHandler
         );
     }
 
-    private async Task<Result<Dictionary<string, PlexActor>>> InsertPlexRoles(
+    private async Task<Result<Dictionary<string, PlexActor>>> InsertPlexActors(
         IReadOnlyCollection<LibraryMediaItemRoleDTO> sourceList
     )
     {
@@ -103,7 +103,11 @@ public class InsertMediaMetaDataCommandHandler
 
         _log.Here().Debug("Started inserting {Count} {NameOfPlexActor}", sourceList.Count, nameof(PlexActor));
 
-        var newPlexActors = sourceList.DistinctBy(x => x.Key).Select(x => x.ToPlexActor()).ToList();
+        var newPlexActors = sourceList
+            .Where(x => !string.IsNullOrEmpty(x.Key) && !string.IsNullOrEmpty(x.Name))
+            .DistinctBy(x => x.Key)
+            .Select(x => x.ToPlexActor())
+            .ToList();
         if (!newPlexActors.Any())
         {
             _log.Here().Debug("No {PlexActorName} to insert", nameof(PlexActor));
@@ -159,7 +163,10 @@ public class InsertMediaMetaDataCommandHandler
         _log.Here().Debug("Started inserting {Count} {NameOfPlexGenre}", sourceList.Count, nameof(PlexGenre));
 
         // Distinct by Genre Name because PlexId is not globally unique across all Plex servers
-        var newPlexGenres = sourceList.Where(x => !x.Key.IsNullOrEmpty()).DistinctBy(x => x.Key).ToPlexGenre();
+        var newPlexGenres = sourceList
+            .Where(x => !string.IsNullOrEmpty(x.Key) && !string.IsNullOrEmpty(x.Name))
+            .DistinctBy(x => x.Key)
+            .ToPlexGenre();
         if (newPlexGenres.IsNullOrEmpty())
         {
             _log.Here().Debug("No {NameOfPlexGenre} to insert ", nameof(PlexGenre));
@@ -216,7 +223,10 @@ public class InsertMediaMetaDataCommandHandler
 
         _log.Here().Debug("Started inserting {Count} {NameOfPlexCountry}", sourceList.Count, nameof(PlexCountry));
 
-        var newPlexCountries = sourceList.Where(x => !x.Key.IsNullOrEmpty()).DistinctBy(x => x.Key).ToPlexCountry();
+        var newPlexCountries = sourceList
+            .Where(x => !string.IsNullOrEmpty(x.Key) && !string.IsNullOrEmpty(x.Name))
+            .DistinctBy(x => x.Key)
+            .ToPlexCountry();
         if (newPlexCountries.IsNullOrEmpty())
         {
             _log.Here().Debug("No {NameOfPlexCountry} to insert", nameof(PlexCountry));

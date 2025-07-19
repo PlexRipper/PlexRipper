@@ -11,8 +11,8 @@ public partial class FakePlexApiData
             .RuleFor(x => x.Name, f => f.Movies().ActorName())
             .RuleFor(x => x.Role, f => f.Movies().MovieTagline())
             .RuleFor(x => x.Filter, (_, x) => $"actor={x.PlexId}")
-            .RuleFor(x => x.TagKey, f => f.Random.AlphaNumeric(24))
-            .RuleFor(x => x.Thumb, f => f.Image.PicsumUrl());
+            .RuleFor(x => x.Thumb, f => f.Image.PicsumUrl())
+            .RuleFor(x => x.Key, f => f.Random.Hash(24));
 
     public static Faker<LibraryMediaItemRoleDTO> GetLibraryMediaItemActorDTO(
         Seed seed,

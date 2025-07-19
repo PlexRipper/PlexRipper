@@ -54,7 +54,7 @@ public class SyncPlexLibraryMediaMetaDataCommandUnitTests : BaseCommandUnitTest<
         plexLibrary.ShouldNotBeNull();
 
         // Create and insert initial Plex actors
-        var mediaItemActorRoles = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).GenerateUnique(50, x => x.TagKey);
+        var mediaItemActorRoles = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).GenerateUnique(50, x => x.Key);
         var plexActors = mediaItemActorRoles.ToPlexActor();
 
         var dbContext = IDbContext;
@@ -72,7 +72,7 @@ public class SyncPlexLibraryMediaMetaDataCommandUnitTests : BaseCommandUnitTest<
         await dbContext.SaveChangesAsync();
 
         // Create new data with different roles
-        var newPlexApiActors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).GenerateUnique(30, x => x.TagKey);
+        var newPlexApiActors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).GenerateUnique(30, x => x.Key);
         var newPlexActors = newPlexApiActors.ToPlexActor();
         await dbContext.PlexActors.AddRangeAsync(newPlexActors);
         await dbContext.SaveChangesAsync();
@@ -120,7 +120,7 @@ public class SyncPlexLibraryMediaMetaDataCommandUnitTests : BaseCommandUnitTest<
         plexLibrary.ShouldNotBeNull();
 
         // Create actors data
-        var actorRoles = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).GenerateUnique(15, x => x.TagKey);
+        var actorRoles = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).GenerateUnique(15, x => x.Key);
         var plexActors = actorRoles.ToPlexActor();
         var dbContext = IDbContext;
         await dbContext.PlexActors.AddRangeAsync(plexActors);
@@ -196,7 +196,7 @@ public class SyncPlexLibraryMediaMetaDataCommandUnitTests : BaseCommandUnitTest<
         plexLibrary.ShouldNotBeNull();
 
         // Create some initial data to ensure we're actually clearing it
-        var actorRoles = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).GenerateUnique(5, x => x.TagKey);
+        var actorRoles = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).GenerateUnique(5, x => x.Key);
         var plexActors = actorRoles.ToPlexActor();
         var dbContext = IDbContext;
         await dbContext.PlexActors.AddRangeAsync(plexActors);

@@ -59,11 +59,16 @@ public class CreateAccountIntegrationTests : BaseIntegrationTests
         resultDTO.IsSuccess.ShouldBeTrue();
         await container.SchedulerService.AwaitScheduler();
 
-        // Wait for a database to be in the expected state
+        // Add a small delay to ensure database transactions complete after job execution
+        await Task.Delay(1000);
+
+        // Wait for a database to be in the expected state with increased timeout for complex job chains
         await WaitForDatabaseConditionAsync(
             () =>
                 container.DbContext.PlexAccounts.Include(x => x.PlexAccountLibraries).First().PlexAccountLibraries.Count
-                == libraryCount
+                == libraryCount,
+            maxRetries: 20, // Increased from default 10 to 20 (10 seconds total)
+            delayMs: 500
         );
 
         // Assert

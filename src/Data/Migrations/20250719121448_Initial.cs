@@ -79,6 +79,7 @@ namespace PlexRipper.Data.Migrations
                     Id = table.Column<int>(type: "INTEGER", nullable: false).Annotation("Sqlite:Autoincrement", true),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
                     Key = table.Column<string>(type: "TEXT", nullable: false),
+                    PlexKey = table.Column<string>(type: "TEXT", nullable: false),
                     Thumb = table.Column<string>(type: "TEXT", nullable: true),
                 },
                 constraints: table =>
@@ -332,11 +333,15 @@ namespace PlexRipper.Data.Migrations
                     ScannedAt = table.Column<DateTime>(type: "TEXT", nullable: true),
                     SyncedAt = table.Column<DateTime>(type: "TEXT", nullable: true),
                     Uuid = table.Column<string>(type: "TEXT", nullable: false),
+                    Language = table.Column<string>(type: "TEXT", nullable: false),
                     MediaSize = table.Column<long>(type: "INTEGER", nullable: false),
                     MovieCount = table.Column<int>(type: "INTEGER", nullable: false),
                     TvShowCount = table.Column<int>(type: "INTEGER", nullable: false),
                     SeasonCount = table.Column<int>(type: "INTEGER", nullable: false),
                     EpisodeCount = table.Column<int>(type: "INTEGER", nullable: false),
+                    ActorsCount = table.Column<int>(type: "INTEGER", nullable: false),
+                    GenresCount = table.Column<int>(type: "INTEGER", nullable: false),
+                    CountriesCount = table.Column<int>(type: "INTEGER", nullable: false),
                     PlexServerId = table.Column<int>(type: "INTEGER", nullable: false),
                     DefaultDestinationId = table.Column<int>(type: "INTEGER", nullable: true),
                 },
@@ -578,7 +583,6 @@ namespace PlexRipper.Data.Migrations
                 {
                     PlexLibraryId = table.Column<int>(type: "INTEGER", nullable: false),
                     PlexActorId = table.Column<int>(type: "INTEGER", nullable: false),
-                    PlexKey = table.Column<int>(type: "INTEGER", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -606,7 +610,6 @@ namespace PlexRipper.Data.Migrations
                 {
                     PlexLibraryId = table.Column<int>(type: "INTEGER", nullable: false),
                     PlexCountryId = table.Column<int>(type: "INTEGER", nullable: false),
-                    PlexKey = table.Column<int>(type: "INTEGER", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -634,7 +637,6 @@ namespace PlexRipper.Data.Migrations
                 {
                     PlexLibraryId = table.Column<int>(type: "INTEGER", nullable: false),
                     PlexGenreId = table.Column<int>(type: "INTEGER", nullable: false),
-                    PlexKey = table.Column<int>(type: "INTEGER", nullable: false),
                 },
                 constraints: table =>
                 {

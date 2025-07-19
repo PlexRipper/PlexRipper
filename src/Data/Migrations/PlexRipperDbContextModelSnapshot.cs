@@ -918,9 +918,6 @@ namespace PlexRipper.Data.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Thumb")
-                        .HasColumnType("TEXT");
-
                     b.HasKey("Id");
 
                     b.HasIndex("Key")
@@ -1083,10 +1080,6 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(1);
 
-                    b.Property<int>("PlexKey")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(3);
-
                     b.HasKey("PlexActorId", "PlexLibraryId");
 
                     b.HasIndex("PlexLibraryId");
@@ -1104,10 +1097,6 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(1);
 
-                    b.Property<int>("PlexKey")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(3);
-
                     b.HasKey("PlexCountryId", "PlexLibraryId");
 
                     b.HasIndex("PlexLibraryId");
@@ -1124,10 +1113,6 @@ namespace PlexRipper.Data.Migrations
                     b.Property<int>("PlexLibraryId")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(1);
-
-                    b.Property<int>("PlexKey")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(3);
 
                     b.HasKey("PlexGenreId", "PlexLibraryId");
 

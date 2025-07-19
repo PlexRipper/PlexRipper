@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using Data.Contracts;
 using EFCore.BulkExtensions;
 using FastEndpoints;
@@ -10,6 +11,12 @@ using PlexApi.Contracts;
 
 namespace PlexRipper.Application;
 
+/// <summary>
+/// Command to insert or update media metadata (actors, genres, and countries) for a <see cref="PlexLibrary"/> into the database.
+/// This operation ensures all metadata entities exist with proper database IDs, enabling media items to be linked to their associated metadata.
+/// The command performs bulk upsert operations for optimal performance and returns dictionaries of inserted entities keyed by their Plex IDs.
+/// </summary>
+/// <param name="LibraryMetadata">The library metadata containing collections of actors, genres, and countries to be inserted or updated in the database</param>
 public record InsertMediaMetaDataCommand(LibraryMetadata LibraryMetadata)
     : ICommand<Result<InsertMediaMetaDataCommandResponse>>;
 
@@ -23,24 +30,30 @@ public class InsertMediaMetaDataCommandValidator : Validator<InsertMediaMetaData
 
 public record InsertMediaMetaDataCommandResponse
 {
-    public required PlexLibrary PlexLibrary { get; init; }
+    [SetsRequiredMembers]
+    public InsertMediaMetaDataCommandResponse(PlexLibrary plexLibrary)
+    {
+        PlexLibrary = plexLibrary;
+    }
+
+    public PlexLibrary PlexLibrary { get; private set; }
 
     public int PlexLibraryId => PlexLibrary.Id;
 
     /// <summary>
-    /// The int key is the PlexId of the actor for this <see cref="PlexLibrary"/>
+    /// The string key is the hashkey of the actor name for this <see cref="PlexLibrary"/>
     /// </summary>
-    public required Dictionary<int, PlexActor> PlexActors { get; init; }
+    public required Dictionary<string, PlexActor> PlexActors { get; init; } = new();
 
     /// <summary>
-    /// The int key is the PlexId of the genre for this <see cref="PlexLibrary"/>
+    /// The string key is the hashkey of the genre name for this <see cref="PlexLibrary"/>
     /// </summary>
-    public required Dictionary<int, PlexGenre> PlexGenres { get; init; }
+    public required Dictionary<string, PlexGenre> PlexGenres { get; init; } = new();
 
     /// <summary>
-    /// The int key is the PlexId of the country for this <see cref="PlexLibrary"/>
+    /// The string key is the hashkey of the country name for this <see cref="PlexLibrary"/>
     /// </summary>
-    public required Dictionary<int, PlexCountry> PlexCountries { get; init; }
+    public required Dictionary<string, PlexCountry> PlexCountries { get; init; } = new();
 }
 
 public class InsertMediaMetaDataCommandHandler
@@ -66,16 +79,15 @@ public class InsertMediaMetaDataCommandHandler
 
         var syncGenresResult = await InsertGenres(genres);
         var syncCountriesResult = await InsertCountries(countries);
-        var syncRolesResult = await InsertPlexRoles(roles);
+        var syncRolesResult = await InsertPlexActors(roles);
 
         var results = Result.Merge(syncGenresResult, syncCountriesResult, syncRolesResult);
         if (results.IsFailed)
             return results;
 
         return Result.Ok(
-            new InsertMediaMetaDataCommandResponse
+            new InsertMediaMetaDataCommandResponse(command.LibraryMetadata.Library)
             {
-                PlexLibrary = command.LibraryMetadata.Library,
                 PlexActors = syncRolesResult.Value,
                 PlexGenres = syncGenresResult.Value,
                 PlexCountries = syncCountriesResult.Value,
@@ -83,7 +95,7 @@ public class InsertMediaMetaDataCommandHandler
         );
     }
 
-    private async Task<Result<Dictionary<int, PlexActor>>> InsertPlexRoles(
+    private async Task<Result<Dictionary<string, PlexActor>>> InsertPlexActors(
         IReadOnlyCollection<LibraryMediaItemRoleDTO> sourceList
     )
     {
@@ -91,15 +103,15 @@ public class InsertMediaMetaDataCommandHandler
 
         _log.Here().Debug("Started inserting {Count} {NameOfPlexActor}", sourceList.Count, nameof(PlexActor));
 
-        var resultDict = new Dictionary<int, PlexActor>();
-
-        var distinctRoles = sourceList.Where(x => !x.TagKey.IsNullOrEmpty()).DistinctBy(x => x.TagKey).ToList();
-        var newPlexActors = distinctRoles.ToPlexActor();
-
-        if (newPlexActors.IsNullOrEmpty())
+        var newPlexActors = sourceList
+            .Where(x => !string.IsNullOrEmpty(x.Key) && !string.IsNullOrEmpty(x.Name))
+            .DistinctBy(x => x.Key)
+            .Select(x => x.ToPlexActor())
+            .ToList();
+        if (!newPlexActors.Any())
         {
             _log.Here().Debug("No {PlexActorName} to insert", nameof(PlexActor));
-            return Result.Ok(resultDict);
+            return Result.Ok(new Dictionary<string, PlexActor>());
         }
 
         var result = await Result.Try(
@@ -126,10 +138,10 @@ public class InsertMediaMetaDataCommandHandler
         }
 
         // Query the database to get entities with proper IDs (SQLite limitation workaround)
-        var genreHashSet = newPlexActors.Select(x => x.Key).ToHashSet();
-        newPlexActors = await _dbContext.PlexActors.Where(x => genreHashSet.Contains(x.Key)).ToListAsync();
+        var newPlexActorKeys = newPlexActors.Select(x => x.Key).ToHashSet();
+        newPlexActors = await _dbContext.PlexActors.Where(x => newPlexActorKeys.Contains(x.Key)).ToListAsync();
 
-        resultDict = newPlexActors.ToPlexIdDictionary(sourceList);
+        var plexActorsWithIds = newPlexActors.ToHashKeyDictionary(sourceList);
 
         stopWatch.Stop();
 
@@ -139,10 +151,10 @@ public class InsertMediaMetaDataCommandHandler
             nameof(PlexActor),
             stopWatch.Elapsed.TotalSeconds
         );
-        return Result.Ok(resultDict);
+        return Result.Ok(plexActorsWithIds);
     }
 
-    private async Task<Result<Dictionary<int, PlexGenre>>> InsertGenres(
+    private async Task<Result<Dictionary<string, PlexGenre>>> InsertGenres(
         IReadOnlyCollection<LibraryMediaItemGenreDTO> sourceList
     )
     {
@@ -150,14 +162,15 @@ public class InsertMediaMetaDataCommandHandler
 
         _log.Here().Debug("Started inserting {Count} {NameOfPlexGenre}", sourceList.Count, nameof(PlexGenre));
 
-        var resultDict = new Dictionary<int, PlexGenre>();
-
         // Distinct by Genre Name because PlexId is not globally unique across all Plex servers
-        var newPlexGenres = sourceList.Where(x => !x.Key.IsNullOrEmpty()).DistinctBy(x => x.Key).ToPlexGenre();
+        var newPlexGenres = sourceList
+            .Where(x => !string.IsNullOrEmpty(x.Key) && !string.IsNullOrEmpty(x.Name))
+            .DistinctBy(x => x.Key)
+            .ToPlexGenre();
         if (newPlexGenres.IsNullOrEmpty())
         {
             _log.Here().Debug("No {NameOfPlexGenre} to insert ", nameof(PlexGenre));
-            return Result.Ok(resultDict);
+            return Result.Ok(new Dictionary<string, PlexGenre>());
         }
 
         var insertResult = await Result.Try(async Task () =>
@@ -187,10 +200,9 @@ public class InsertMediaMetaDataCommandHandler
         }
 
         // Query the database to get entities with proper IDs (SQLite limitation workaround)
-        var genreHashSet = newPlexGenres.Select(x => x.Key).ToHashSet();
-        newPlexGenres = await _dbContext.PlexGenres.Where(x => genreHashSet.Contains(x.Key)).ToListAsync();
-
-        resultDict = newPlexGenres.ToPlexIdDictionary(sourceList);
+        var newPlexGenreKeys = newPlexGenres.Select(x => x.Key).ToHashSet();
+        var plexGenresWithIds = await _dbContext.PlexGenres.Where(x => newPlexGenreKeys.Contains(x.Key)).ToListAsync();
+        var resultDict = plexGenresWithIds.ToHashKeyDictionary(sourceList);
 
         stopWatch.Stop();
 
@@ -203,7 +215,7 @@ public class InsertMediaMetaDataCommandHandler
         return Result.Ok(resultDict);
     }
 
-    private async Task<Result<Dictionary<int, PlexCountry>>> InsertCountries(
+    private async Task<Result<Dictionary<string, PlexCountry>>> InsertCountries(
         IReadOnlyCollection<LibraryMediaItemCountryDTO> sourceList
     )
     {
@@ -211,13 +223,14 @@ public class InsertMediaMetaDataCommandHandler
 
         _log.Here().Debug("Started inserting {Count} {NameOfPlexCountry}", sourceList.Count, nameof(PlexCountry));
 
-        var resultDict = new Dictionary<int, PlexCountry>();
-
-        var newPlexCountries = sourceList.Where(x => !x.Key.IsNullOrEmpty()).DistinctBy(x => x.Key).ToPlexCountry();
+        var newPlexCountries = sourceList
+            .Where(x => !string.IsNullOrEmpty(x.Key) && !string.IsNullOrEmpty(x.Name))
+            .DistinctBy(x => x.Key)
+            .ToPlexCountry();
         if (newPlexCountries.IsNullOrEmpty())
         {
             _log.Here().Debug("No {NameOfPlexCountry} to insert", nameof(PlexCountry));
-            return Result.Ok(resultDict);
+            return Result.Ok(new Dictionary<string, PlexCountry>());
         }
 
         var insertResult = await Result.Try(async Task () =>
@@ -250,7 +263,7 @@ public class InsertMediaMetaDataCommandHandler
         var countryHashSet = newPlexCountries.Select(x => x.Key).ToHashSet();
         newPlexCountries = await _dbContext.PlexCountries.Where(x => countryHashSet.Contains(x.Key)).ToListAsync();
 
-        resultDict = newPlexCountries.ToPlexIdDictionary(sourceList);
+        var resultDict = newPlexCountries.ToHashKeyDictionary(sourceList);
 
         stopWatch.Stop();
 

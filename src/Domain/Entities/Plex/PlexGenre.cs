@@ -5,7 +5,7 @@ public class PlexGenre : BaseEntity
     public required string Name { get; init; }
 
     /// <summary>
-    /// A md5 hash of the name.
+    /// A MD5 hash of the name.
     /// </summary>
     public required string Key { get; init; }
 

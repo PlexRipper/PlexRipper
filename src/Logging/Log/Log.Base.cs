@@ -24,6 +24,10 @@ public partial class Log : ILog
 
     public bool IsLogLevelEnabled(LogEventLevel logLevel = LogEventLevel.Debug) => _logger.IsEnabled(logLevel);
 
+    public bool IsLogLevelVerbose() => _logger.IsEnabled(LogEventLevel.Verbose);
+
+    public bool IsLogLevelDebug() => _logger.IsEnabled(LogEventLevel.Debug);
+
     private LogMetaData Write(
         LogEventLevel logLevel,
         string messageTemplate,

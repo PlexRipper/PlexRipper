@@ -62,9 +62,8 @@ public class GetLibraryMediaCommandHandler : ICommandHandler<GetLibraryMediaComm
         }
 
         return Result.Ok(
-            new LibraryMetadata
+            new LibraryMetadata(updatedPlexLibrary)
             {
-                Library = updatedPlexLibrary,
                 Countries = mediaList.SelectMany(x => x.Country).ToList(),
                 Genres = mediaList.SelectMany(x => x.Genre).ToList(),
                 Actors = mediaList.SelectMany(x => x.Role).ToList(),

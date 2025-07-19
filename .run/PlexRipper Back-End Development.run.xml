@@ -7,18 +7,23 @@
     <envs>
       <env name="DEVELOPMENT_ROOT_PATH" value="$PROJECT_DIR$/../../DATA/PlexRipperCache/" />
       <env name="DOTNET_ENVIRONMENT" value="Development" />
-      <env name="DOTNET_HTTP_PORTS" value="5000" />
       <env name="INFORMATIONAL_VERSION" value="0.26.9-dev-2025-12-11" />
-      <env name="PGID" value="1000" />
       <env name="PUID" value="1000" />
-      <env name="LOG_LEVEL" value="VERBOSE" />
+      <env name="PGID" value="1000" />
       <env name="LOG_ENV_VARS" value="false" />
-      <env name="UNMASKED" value="true" />
       <env name="VERSION" value="0.26.9" />
+      <env name="LOG_LEVEL" value="DEBUG" />
+      <env name="UNMASKED" value="true" />
+      <env name="DOTNET_HTTP_PORTS" value="5000" />
     </envs>
     <option name="USE_EXTERNAL_CONSOLE" value="0" />
+    <option name="ENV_FILE_PATHS" value="" />
+    <option name="REDIRECT_INPUT_PATH" value="" />
+    <option name="PTY_MODE" value="Auto" />
     <option name="USE_MONO" value="0" />
     <option name="RUNTIME_ARGUMENTS" value="" />
+    <option name="AUTO_ATTACH_CHILDREN" value="0" />
+    <option name="MIXED_MODE_DEBUG" value="0" />
     <option name="RUNTIME_TYPE" value="coreclr" />
     <option name="PROJECT_PATH" value="$PROJECT_DIR$/src/WebAPI/WebAPI.csproj" />
     <option name="PROJECT_EXE_PATH_TRACKING" value="1" />

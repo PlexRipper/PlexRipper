@@ -70,8 +70,8 @@ public static partial class MediaContainerMappers
             PlexId = x.Id,
             Role = x.Role,
             Filter = x.Filter,
-            TagKey = x.TagKey,
             Thumb = x.Thumb,
+            Key = x.Tag.ToMd5Hash(),
         };
 
     public static MetaDataRatingsDTO ToDTO(this GetMediaMetaDataRatings x) =>

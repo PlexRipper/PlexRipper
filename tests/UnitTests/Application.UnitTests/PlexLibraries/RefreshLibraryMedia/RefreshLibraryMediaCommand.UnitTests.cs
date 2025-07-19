@@ -120,9 +120,8 @@ public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLi
                     }
 
                     return Result.Ok(
-                        new LibraryMetadata
+                        new LibraryMetadata(updatedLibrary)
                         {
-                            Library = updatedLibrary,
                             Countries = [],
                             Genres = [],
                             Actors = [],
@@ -131,17 +130,7 @@ public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLi
                 }
             );
         mock.SetupCommand(It.IsAny<InsertMediaMetaDataCommand>)
-            .ReturnsAsync(
-                Result.Ok(
-                    new InsertMediaMetaDataCommandResponse
-                    {
-                        PlexLibrary = updatedLibrary,
-                        PlexActors = new Dictionary<int, PlexActor>(),
-                        PlexGenres = new Dictionary<int, PlexGenre>(),
-                        PlexCountries = new Dictionary<int, PlexCountry>(),
-                    }
-                )
-            );
+            .ReturnsAsync(Result.Ok(new InsertMediaMetaDataCommandResponse(updatedLibrary)));
         mock.SetupCommand(It.IsAny<SyncPlexLibraryMediaMetaDataCommand>).ReturnsAsync(Result.Ok());
 
         switch (libraryType)
@@ -188,31 +177,10 @@ public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLi
         mock.Mock<IRefreshLibraryProgressReporter>()
             .Setup(x => x.SendProgress(It.IsAny<RefreshLibraryProgressUpdate>()));
 
-        mock.SetupCommand(It.IsAny<GetLibraryMediaCommand>)
-            .ReturnsAsync(
-                Result.Ok(
-                    new LibraryMetadata
-                    {
-                        Library = plexLibrary,
-                        Countries = [],
-                        Genres = [],
-                        Actors = [],
-                    }
-                )
-            );
+        mock.SetupCommand(It.IsAny<GetLibraryMediaCommand>).ReturnsAsync(Result.Ok(new LibraryMetadata(plexLibrary)));
 
         mock.SetupCommand(It.IsAny<InsertMediaMetaDataCommand>)
-            .ReturnsAsync(
-                Result.Ok(
-                    new InsertMediaMetaDataCommandResponse
-                    {
-                        PlexLibrary = plexLibrary,
-                        PlexActors = new Dictionary<int, PlexActor>(),
-                        PlexGenres = new Dictionary<int, PlexGenre>(),
-                        PlexCountries = new Dictionary<int, PlexCountry>(),
-                    }
-                )
-            );
+            .ReturnsAsync(Result.Ok(new InsertMediaMetaDataCommandResponse(plexLibrary)));
         mock.SetupCommand(It.IsAny<SyncPlexLibraryMediaMetaDataCommand>)
             .ReturnsAsync(Result.Fail("Metadata sync failed"));
 
@@ -243,29 +211,9 @@ public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLi
             .Setup(x => x.SendProgress(It.IsAny<RefreshLibraryProgressUpdate>()));
 
         mock.SetupCommand(It.IsAny<InsertMediaMetaDataCommand>)
-            .ReturnsAsync(
-                Result.Ok(
-                    new InsertMediaMetaDataCommandResponse
-                    {
-                        PlexLibrary = updatedLibrary,
-                        PlexActors = new Dictionary<int, PlexActor>(),
-                        PlexGenres = new Dictionary<int, PlexGenre>(),
-                        PlexCountries = new Dictionary<int, PlexCountry>(),
-                    }
-                )
-            );
+            .ReturnsAsync(Result.Ok(new InsertMediaMetaDataCommandResponse(updatedLibrary)));
         mock.SetupCommand(It.IsAny<GetLibraryMediaCommand>)
-            .ReturnsAsync(
-                Result.Ok(
-                    new LibraryMetadata
-                    {
-                        Library = updatedLibrary,
-                        Countries = [],
-                        Genres = [],
-                        Actors = [],
-                    }
-                )
-            );
+            .ReturnsAsync(Result.Ok(new LibraryMetadata(updatedLibrary)));
 
         mock.SetupCommand(It.IsAny<SyncPlexLibraryMediaMetaDataCommand>).ReturnsAsync(Result.Ok());
 
@@ -300,30 +248,10 @@ public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLi
             .Setup(x => x.SendProgress(It.IsAny<RefreshLibraryProgressUpdate>()));
 
         mock.SetupCommand(It.IsAny<GetLibraryMediaCommand>)
-            .ReturnsAsync(
-                Result.Ok(
-                    new LibraryMetadata
-                    {
-                        Library = updatedLibrary,
-                        Countries = [],
-                        Genres = [],
-                        Actors = [],
-                    }
-                )
-            );
+            .ReturnsAsync(Result.Ok(new LibraryMetadata(updatedLibrary)));
 
         mock.SetupCommand(It.IsAny<InsertMediaMetaDataCommand>)
-            .ReturnsAsync(
-                Result.Ok(
-                    new InsertMediaMetaDataCommandResponse
-                    {
-                        PlexLibrary = updatedLibrary,
-                        PlexActors = new Dictionary<int, PlexActor>(),
-                        PlexGenres = new Dictionary<int, PlexGenre>(),
-                        PlexCountries = new Dictionary<int, PlexCountry>(),
-                    }
-                )
-            );
+            .ReturnsAsync(Result.Ok(new InsertMediaMetaDataCommandResponse(updatedLibrary)));
         mock.SetupCommand(It.IsAny<SyncPlexLibraryMediaMetaDataCommand>).ReturnsAsync(Result.Ok());
 
         mock.SetupCommand(It.IsAny<RefreshPlexTvShowLibraryCommand>)

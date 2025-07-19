@@ -5,12 +5,9 @@ public class PlexActor : BaseEntity
     public required string Name { get; init; }
 
     /// <summary>
-    /// Gets the unique identifier for the actor in Plex, this is globally unique across Plex Servers and is created by Plex itself.
-    /// <example>5d776824103a2d001f563a7e</example>
+    /// A MD5 hash of the name.
     /// </summary>
     public required string Key { get; init; }
-
-    public required string? Thumb { get; init; }
 
     public ICollection<PlexLibrary> PlexLibraries { get; set; } = [];
 

@@ -265,16 +265,21 @@ public static partial class StringExtensions
         if (input is null)
             throw new ArgumentNullException(nameof(input));
 
-        // Normalize: trim and lowercase so “Foo” and “foo” yield the same hash
         var normalized = input.Trim().ToLowerInvariant();
         using var md5 = MD5.Create();
-        var bytes = Encoding.UTF8.GetBytes(normalized);
-        var hash = md5.ComputeHash(bytes);
+        var hash = md5.ComputeHash(Encoding.UTF8.GetBytes(normalized));
 
-        var sb = new StringBuilder(hash.Length * 2);
-        foreach (var b in hash)
-            sb.Append(b.ToString("x2")); // lowercase hex
+        // Allocate a char array directly for hex conversion
+        var chars = new char[hash.Length * 2];
+        for (var i = 0; i < hash.Length; i++)
+        {
+            var b = hash[i];
+            chars[i * 2] = GetHexChar(b >> 4);
+            chars[i * 2 + 1] = GetHexChar(b & 0xF);
+        }
 
-        return sb.ToString();
+        return new string(chars);
+
+        static char GetHexChar(int val) => (char)(val < 10 ? '0' + val : 'a' + (val - 10));
     }
 }

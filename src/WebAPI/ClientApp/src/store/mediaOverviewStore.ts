@@ -82,11 +82,39 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 
 	const actions = {
 		refreshMetaData() {
-			console.log(state.mediaType);
 			return plexLibraryApi.getLibraryMediaMetadata(state.libraryId, { mediaType: state.mediaType }).pipe(tap((result) => {
 				if (result.isSuccess && result.value) {
 					return state.metadataList = result.value;
 				}
+			}));
+		},
+		refreshAllLibraryMediaByType(page: number = 0, size: number = 100): Observable<PlexMediaStatisticsDTO | null> {
+			return plexMediaApi.getAllMediaByTypeEndpoint({
+				mediaType: state.mediaType,
+				page,
+				size,
+				filterOwnedMedia: settingsStore.generalSettings.hideMediaFromOwnedServers,
+				filterOfflineMedia: settingsStore.generalSettings.hideMediaFromOfflineServers,
+				...state.metadata,
+			}).pipe(map(({ isSuccess, value }): PlexMediaStatisticsDTO | null => {
+				if (isSuccess && value) {
+					return value;
+				}
+				return null;
+			}));
+		},
+		refreshLibraryMedia(page: number = 0, size: number = 100): Observable<PlexMediaStatisticsDTO | null> {
+			return plexLibraryApi.getPlexLibraryMediaEndpoint(state.libraryId, {
+				page,
+				size,
+				filterOfflineMedia: false,
+				filterOwnedMedia: false,
+				...state.metadata,
+			}).pipe(map(({ isSuccess, value }): PlexMediaStatisticsDTO | null => {
+				if (isSuccess && value) {
+					return value;
+				}
+				return null;
 			}));
 		},
 		requestMedia(): Observable<PlexMediaStatisticsDTO | null> {
@@ -99,42 +127,18 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 
 			state.loading = true;
 
-			return forkJoin([iif(
-				() => state.libraryId === 0,
-				// Using defer to prevent both api calls from being executed
-				defer(() =>
-					plexMediaApi.getAllMediaByTypeEndpoint({
-						mediaType: state.mediaType,
-						page,
-						size,
-						filterOwnedMedia: settingsStore.generalSettings.hideMediaFromOwnedServers,
-						filterOfflineMedia: settingsStore.generalSettings.hideMediaFromOfflineServers,
-						...state.metadata,
-					}),
-				),
-				defer(() =>
-					plexLibraryApi.getPlexLibraryMediaEndpoint(state.libraryId, {
-						page,
-						size,
-						filterOfflineMedia: false,
-						filterOwnedMedia: false,
-						...state.metadata,
-					}),
-				)),
-			]).pipe(
-				map(([media]) => media),
-				map(({ isSuccess, value }): PlexMediaStatisticsDTO | null => {
-					if (isSuccess && value) {
-						return value;
-					}
-					return null;
-				}),
-				tap((data) => {
-					actions.setMedia(data, state.mediaType);
-					state.loading = false;
-				}),
-				tap(() => actions.refreshMetaData()),
-			);
+			return forkJoin([
+				actions.refreshMetaData(),
+				iif(
+					() => state.libraryId === 0,
+					// Using defer to prevent both api calls from being executed
+					defer(() => actions.refreshAllLibraryMediaByType(page, size)),
+					defer(() => actions.refreshLibraryMedia(page, size)))
+					.pipe(tap((data) => {
+						actions.setMedia(data, state.mediaType);
+						state.loading = false;
+					}))])
+				.pipe(map(([_, media]) => media));
 		},
 		setMedia(data: PlexMediaStatisticsDTO | null, mediaType: PlexMediaType) {
 			if (data) {
@@ -164,16 +168,36 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 			countryId,
 			roleId,
 			genreId,
-		}: {
-			countryId?: number;
-			roleId?: number;
-			genreId?: number;
-		}) {
-			state.metadata.countryId = isNumber(countryId) ? countryId : 0;
-			state.metadata.roleId = isNumber(roleId) ? roleId : 0;
-			state.metadata.genreId = isNumber(genreId) ? genreId : 0;
+		}: Partial<IMetaDataMediaFilter>): Observable<PlexMediaStatisticsDTO | null> {
+			if (isNumber(countryId)) {
+				state.metadata.countryId = countryId;
+			}
 
-			actions.requestMedia().subscribe();
+			if (isNumber(roleId)) {
+				state.metadata.roleId = roleId;
+			}
+
+			if (isNumber(genreId)) {
+				state.metadata.genreId = genreId;
+			}
+
+			return actions.requestMedia();
+		},
+		unsetMetaData(key: keyof IMetaDataMediaFilter): Observable<PlexMediaStatisticsDTO | null> {
+			if (key in state.metadata) {
+				// Reset the metadata key to 0
+				state.metadata[key] = 0;
+			}
+
+			return actions.requestMedia();
+		},
+		clearMetaDataFilter() {
+			state.metadata = {
+				countryId: 0,
+				roleId: 0,
+				genreId: 0,
+			};
+			return actions.requestMedia();
 		},
 		changeAllMediaOverviewType(mediaType: PlexMediaType) {
 			state.mediaType = mediaType;

@@ -71,8 +71,8 @@ public static partial class MediaContainerMappers
             PlexId = -1,
             Role = null,
             Filter = null,
-            TagKey = null,
             Thumb = null,
+            Key = x.Tag.ToMd5Hash(),
         };
 
     public static LibraryMediaItemMediaDTO ToItemMediaDTO(this GetLibrarySectionsAllMedia media) =>

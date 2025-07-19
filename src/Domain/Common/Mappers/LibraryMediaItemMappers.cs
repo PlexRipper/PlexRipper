@@ -3,12 +3,7 @@ namespace PlexRipper.Domain;
 public static class LibraryMediaItemMappers
 {
     public static PlexActor ToPlexActor(this LibraryMediaItemRoleDTO role) =>
-        new()
-        {
-            Name = role.Name,
-            Key = role.TagKey ?? string.Empty, // If empty, then it will be discarded when adding to db
-            Thumb = role.Thumb,
-        };
+        new() { Name = role.Name, Key = role.Key };
 
     public static List<PlexActor> ToPlexActor(this IEnumerable<LibraryMediaItemRoleDTO>? source) =>
         source?.Select(x => x.ToPlexActor()).ToList() ?? [];
@@ -25,52 +20,52 @@ public static class LibraryMediaItemMappers
     public static List<PlexGenre> ToPlexGenre(this IEnumerable<LibraryMediaItemGenreDTO>? source) =>
         source?.Select(x => x.ToPlexGenre()).ToList() ?? [];
 
-    public static Dictionary<int, PlexActor> ToPlexIdDictionary(
+    public static Dictionary<string, PlexActor> ToHashKeyDictionary(
         this IEnumerable<PlexActor> source,
         IReadOnlyCollection<LibraryMediaItemRoleDTO> plexApiRoles
     )
     {
-        var resultDict = new Dictionary<int, PlexActor>();
+        var resultDict = new Dictionary<string, PlexActor>();
 
         foreach (var actor in source)
         {
-            var plexId = plexApiRoles.FirstOrDefault(x => x.TagKey == actor.Key);
+            var plexId = plexApiRoles.FirstOrDefault(x => x.Key == actor.Key);
             if (plexId != null)
-                resultDict.Add(plexId.PlexId, actor);
+                resultDict.Add(plexId.Key, actor);
         }
 
         return resultDict;
     }
 
-    public static Dictionary<int, PlexCountry> ToPlexIdDictionary(
+    public static Dictionary<string, PlexCountry> ToHashKeyDictionary(
         this IEnumerable<PlexCountry> source,
         IReadOnlyCollection<LibraryMediaItemCountryDTO> plexApiCountries
     )
     {
-        var resultDict = new Dictionary<int, PlexCountry>();
+        var resultDict = new Dictionary<string, PlexCountry>();
 
         foreach (var country in source)
         {
             var plexId = plexApiCountries.FirstOrDefault(x => x.Key == country.Key);
             if (plexId != null)
-                resultDict.Add(plexId.PlexId, country);
+                resultDict.Add(plexId.Key, country);
         }
 
         return resultDict;
     }
 
-    public static Dictionary<int, PlexGenre> ToPlexIdDictionary(
+    public static Dictionary<string, PlexGenre> ToHashKeyDictionary(
         this IEnumerable<PlexGenre> source,
         IReadOnlyCollection<LibraryMediaItemGenreDTO> plexApiGenres
     )
     {
-        var resultDict = new Dictionary<int, PlexGenre>();
+        var resultDict = new Dictionary<string, PlexGenre>();
 
         foreach (var genre in source)
         {
             var plexId = plexApiGenres.FirstOrDefault(x => x.Key == genre.Key);
             if (plexId != null)
-                resultDict.Add(plexId.PlexId, genre);
+                resultDict.Add(plexId.Key, genre);
         }
 
         return resultDict;

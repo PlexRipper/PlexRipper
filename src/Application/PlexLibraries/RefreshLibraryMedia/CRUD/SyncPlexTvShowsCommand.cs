@@ -160,7 +160,7 @@ public class SyncPlexTvShowsCommandHandler : IRequestHandler<SyncPlexTvShowsComm
 
     private async Task<Result> SyncTvShowGenres(
         List<PlexTvShow> plexTvShows,
-        Dictionary<int, PlexGenre> genreDict,
+        Dictionary<string, PlexGenre> genreDict,
         int plexLibraryId,
         string libraryName,
         CancellationToken cancellationToken
@@ -206,7 +206,7 @@ public class SyncPlexTvShowsCommandHandler : IRequestHandler<SyncPlexTvShowsComm
 
     private async Task<Result> SyncTvShowCountries(
         List<PlexTvShow> plexTvShows,
-        Dictionary<int, PlexCountry> countryDict,
+        Dictionary<string, PlexCountry> countryDict,
         int plexLibraryId,
         string libraryName,
         CancellationToken cancellationToken
@@ -254,7 +254,7 @@ public class SyncPlexTvShowsCommandHandler : IRequestHandler<SyncPlexTvShowsComm
 
     private async Task<Result> SyncTvShowActors(
         List<PlexTvShow> plexTvShows,
-        Dictionary<int, PlexActor> actorDict,
+        Dictionary<string, PlexActor> actorDict,
         int plexLibraryId,
         string libraryName,
         CancellationToken cancellationToken

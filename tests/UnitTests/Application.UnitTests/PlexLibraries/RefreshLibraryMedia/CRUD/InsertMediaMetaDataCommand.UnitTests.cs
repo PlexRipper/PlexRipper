@@ -29,12 +29,11 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
 
         // Act
         var command = new InsertMediaMetaDataCommand(
-            LibraryMetadata: new LibraryMetadata
+            LibraryMetadata: new LibraryMetadata(plexLibrary)
             {
                 Actors = actors,
                 Genres = genres,
                 Countries = countries,
-                Library = plexLibrary,
             }
         );
         var result = await TestHandlerExecuteAsync<InsertMediaMetaDataCommandResponse>(command);
@@ -46,8 +45,8 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         actorsDb.Count.ShouldBe(actors.Count);
         foreach (var actor in actors)
             actorsDb.ShouldContain(
-                x => x.Name == actor.Name && x.Key == actor.TagKey,
-                $"Actor {actor.Name} with key {actor.TagKey} not found in database"
+                x => x.Name == actor.Name && x.Key == actor.Key,
+                $"Actor {actor.Name} with key {actor.Key} not found in database"
             );
 
         var genresDb = await IDbContext.PlexGenres.ToListAsync();
@@ -78,7 +77,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         plexLibrary.ShouldNotBeNull();
 
         // Create initial data
-        var initialActors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).GenerateUnique(50, x => x.TagKey);
+        var initialActors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).GenerateUnique(50, x => x.Key);
         var initialGenres = FakePlexApiData.GetLibraryMediaItemGenreDTO(seed).GenerateUnique(50, x => x.Key);
         var initialCountries = FakePlexApiData.GetLibraryMediaItemCountryDTO(seed).GenerateUnique(50, x => x.Key);
 
@@ -90,18 +89,17 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         await dbContext.SaveChangesAsync();
 
         // Create new data with some overlaps
-        var newActors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).GenerateUnique(100, x => x.TagKey);
+        var newActors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).GenerateUnique(100, x => x.Key);
         var newGenres = FakePlexApiData.GetLibraryMediaItemGenreDTO(seed).GenerateUnique(100, x => x.Key);
         var newCountries = FakePlexApiData.GetLibraryMediaItemCountryDTO(seed).GenerateUnique(100, x => x.Key);
 
         // Act
         var command = new InsertMediaMetaDataCommand(
-            LibraryMetadata: new LibraryMetadata
+            LibraryMetadata: new LibraryMetadata(plexLibrary)
             {
                 Actors = newActors,
                 Genres = newGenres,
                 Countries = newCountries,
-                Library = plexLibrary,
             }
         );
         var result = await TestHandlerExecuteAsync<InsertMediaMetaDataCommandResponse>(command);
@@ -112,7 +110,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         var actorsDb = await IDbContext.PlexActors.ToListAsync();
         actorsDb.Count.ShouldBe(initialActors.Count + newActors.Count);
         foreach (var actor in newActors)
-            actorsDb.ShouldContain(x => x.Name == actor.Name && x.Key == actor.TagKey);
+            actorsDb.ShouldContain(x => x.Name == actor.Name && x.Key == actor.Key);
 
         var genresDb = await IDbContext.PlexGenres.ToListAsync();
         genresDb.Count.ShouldBe(newGenres.Count);
@@ -142,15 +140,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         plexLibrary.ShouldNotBeNull();
 
         // Act
-        var command = new InsertMediaMetaDataCommand(
-            LibraryMetadata: new LibraryMetadata
-            {
-                Actors = [],
-                Genres = [],
-                Countries = [],
-                Library = plexLibrary,
-            }
-        );
+        var command = new InsertMediaMetaDataCommand(LibraryMetadata: new LibraryMetadata(plexLibrary));
         var result = await TestHandlerExecuteAsync<InsertMediaMetaDataCommandResponse>(command);
 
         // Assert
@@ -189,13 +179,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
 
         // Act
         var command = new InsertMediaMetaDataCommand(
-            LibraryMetadata: new LibraryMetadata
-            {
-                Actors = plexApiActors,
-                Genres = [],
-                Countries = [],
-                Library = plexLibrary,
-            }
+            LibraryMetadata: new LibraryMetadata(plexLibrary) { Actors = plexApiActors }
         );
         var result = await TestHandlerExecuteAsync<InsertMediaMetaDataCommandResponse>(command);
 
@@ -222,28 +206,15 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync();
         plexLibrary.ShouldNotBeNull();
 
-        var actors1 = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).Generate(50);
-        var actors2 = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).Generate(50);
+        var actors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).GenerateUnique(100, x => x.Name);
 
         // Act
         var command1 = new InsertMediaMetaDataCommand(
-            LibraryMetadata: new LibraryMetadata
-            {
-                Actors = actors1,
-                Genres = [],
-                Countries = [],
-                Library = plexLibrary,
-            }
+            LibraryMetadata: new LibraryMetadata(plexLibrary) { Actors = actors.Slice(0, 50) }
         );
 
         var command2 = new InsertMediaMetaDataCommand(
-            LibraryMetadata: new LibraryMetadata
-            {
-                Actors = actors2,
-                Genres = [],
-                Countries = [],
-                Library = plexLibrary,
-            }
+            LibraryMetadata: new LibraryMetadata(plexLibrary) { Actors = actors.Slice(50, 50) }
         );
 
         var results = await Task.WhenAll(
@@ -275,18 +246,17 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         plexLibrary.ShouldNotBeNull();
 
         // Create a large dataset
-        var actors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).Generate(1000);
+        var actors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).GenerateUnique(1000, x => x.Name);
         var genres = FakePlexApiData.GetLibraryMediaItemGenreDTO(seed).Generate(1000);
         var countries = FakePlexApiData.GetLibraryMediaItemCountryDTO(seed).Generate(1000);
 
         // Act
         var command = new InsertMediaMetaDataCommand(
-            LibraryMetadata: new LibraryMetadata
+            LibraryMetadata: new LibraryMetadata(plexLibrary)
             {
                 Actors = actors,
                 Genres = genres,
                 Countries = countries,
-                Library = plexLibrary,
             }
         );
         var result = await TestHandlerExecuteAsync<InsertMediaMetaDataCommandResponse>(command);
@@ -329,13 +299,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
 
         // Act
         var command = new InsertMediaMetaDataCommand(
-            LibraryMetadata: new LibraryMetadata
-            {
-                Actors = newActors,
-                Genres = [],
-                Countries = [],
-                Library = plexLibrary,
-            }
+            LibraryMetadata: new LibraryMetadata(plexLibrary) { Actors = newActors }
         );
         var result = await TestHandlerExecuteAsync<InsertMediaMetaDataCommandResponse>(command);
 
@@ -347,7 +311,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         // Verify that existing items were updated
         foreach (var actor in newActors.Take(25))
         {
-            var dbActor = actorsDb.FirstOrDefault(x => x.Key == actor.TagKey);
+            var dbActor = actorsDb.FirstOrDefault(x => x.Key == actor.Key);
             dbActor.ShouldNotBeNull();
             dbActor.Name.ShouldBe(actor.Name);
         }
@@ -379,7 +343,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
     }
 
     [Fact]
-    public async Task ShouldFilterOutActorsWithNullTagKey_WhenActorsHaveNullKeys()
+    public async Task ShouldFilterOutActorsWithEmptyKey_WhenActorsHaveEmptyKeys()
     {
         // Arrange
         var seed = await SetupDatabase(
@@ -395,24 +359,18 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         plexLibrary.ShouldNotBeNull();
 
         // Create actors with some having null TagKey
-        var actorsWithKeys = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).Generate(50);
+        var actorsWithKeys = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).GenerateUnique(50, x => x.Name);
         var actorsWithNullKeys = FakePlexApiData
             .GetLibraryMediaItemActorDTO(seed)
-            .Generate(30)
-            .Select(x => x with { TagKey = null })
+            .GenerateUnique(30, x => x.Name)
+            .Select(x => x with { Key = string.Empty })
             .ToList();
 
         var allActors = actorsWithKeys.Concat(actorsWithNullKeys).ToList();
 
         // Act
         var command = new InsertMediaMetaDataCommand(
-            LibraryMetadata: new LibraryMetadata
-            {
-                Actors = allActors,
-                Genres = [],
-                Countries = [],
-                Library = plexLibrary,
-            }
+            LibraryMetadata: new LibraryMetadata(plexLibrary) { Actors = allActors }
         );
         var result = await TestHandlerExecuteAsync<InsertMediaMetaDataCommandResponse>(command);
 
@@ -420,7 +378,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         result.IsSuccess.ShouldBeTrue();
         var actorsDb = await IDbContext.PlexActors.ToListAsync();
 
-        // Only actors with TagKey should be inserted
+        // Only actors with Tag should be inserted
         actorsDb.Count.ShouldBe(50);
         actorsDb.ShouldAllBe(x => x.Key != string.Empty);
     }
@@ -441,19 +399,13 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync();
         plexLibrary.ShouldNotBeNull();
 
-        var actors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).Generate(25);
+        var actors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).GenerateUnique(25, x => x.Name);
 
         // Genres and Countries are empty
 
         // Act
         var command = new InsertMediaMetaDataCommand(
-            LibraryMetadata: new LibraryMetadata
-            {
-                Actors = actors,
-                Genres = [],
-                Countries = [],
-                Library = plexLibrary,
-            }
+            LibraryMetadata: new LibraryMetadata(plexLibrary) { Actors = actors }
         );
         var result = await TestHandlerExecuteAsync<InsertMediaMetaDataCommandResponse>(command);
 
@@ -488,18 +440,17 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync();
         plexLibrary.ShouldNotBeNull();
 
-        var actors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).GenerateUnique(10, x => x.TagKey);
+        var actors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).GenerateUnique(10, x => x.Key);
         var genres = FakePlexApiData.GetLibraryMediaItemGenreDTO(seed).GenerateUnique(10, x => x.Key);
         var countries = FakePlexApiData.GetLibraryMediaItemCountryDTO(seed).GenerateUnique(10, x => x.Key);
 
         // Act
         var command = new InsertMediaMetaDataCommand(
-            LibraryMetadata: new LibraryMetadata
+            LibraryMetadata: new LibraryMetadata(plexLibrary)
             {
                 Actors = actors,
                 Genres = genres,
                 Countries = countries,
-                Library = plexLibrary,
             }
         );
         var result = await TestHandlerExecuteAsync<InsertMediaMetaDataCommandResponse>(command);
@@ -508,22 +459,22 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         result.IsSuccess.ShouldBeTrue();
 
         // Verify dictionary keys match the source PlexIds
-        foreach (var actor in actors.Where(x => x.TagKey != null))
+        foreach (var actor in actors.Where(x => x.Key != null))
         {
-            result.Value.PlexActors.ShouldContainKey(actor.PlexId);
-            result.Value.PlexActors[actor.PlexId].Name.ShouldBe(actor.Name);
+            result.Value.PlexActors.ShouldContainKey(actor.Key);
+            result.Value.PlexActors[actor.Key].Name.ShouldBe(actor.Name);
         }
 
         foreach (var genre in genres)
         {
-            result.Value.PlexGenres.ShouldContainKey(genre.PlexId);
-            result.Value.PlexGenres[genre.PlexId].Key.ShouldBe(genre.Key);
+            result.Value.PlexGenres.ShouldContainKey(genre.Key);
+            result.Value.PlexGenres[genre.Key].Key.ShouldBe(genre.Key);
         }
 
         foreach (var country in countries)
         {
-            result.Value.PlexCountries.ShouldContainKey(country.PlexId);
-            result.Value.PlexCountries[country.PlexId].Key.ShouldBe(country.Key);
+            result.Value.PlexCountries.ShouldContainKey(country.Key);
+            result.Value.PlexCountries[country.Key].Key.ShouldBe(country.Key);
         }
     }
 
@@ -565,13 +516,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
 
         // Act
         var command = new InsertMediaMetaDataCommand(
-            LibraryMetadata: new LibraryMetadata
-            {
-                Actors = specialActors,
-                Genres = [],
-                Countries = [],
-                Library = plexLibrary,
-            }
+            LibraryMetadata: new LibraryMetadata(plexLibrary) { Actors = specialActors }
         );
         var result = await TestHandlerExecuteAsync<InsertMediaMetaDataCommandResponse>(command);
 
@@ -608,12 +553,11 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         var countries = FakePlexApiData.GetLibraryMediaItemCountryDTO(seed).Generate(20);
 
         var command = new InsertMediaMetaDataCommand(
-            LibraryMetadata: new LibraryMetadata
+            LibraryMetadata: new LibraryMetadata(plexLibrary)
             {
                 Actors = actors,
                 Genres = genres,
                 Countries = countries,
-                Library = plexLibrary,
             }
         );
 
@@ -659,13 +603,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
 
         // Act
         var command = new InsertMediaMetaDataCommand(
-            LibraryMetadata: new LibraryMetadata
-            {
-                Actors = actors,
-                Genres = [],
-                Countries = [],
-                Library = plexLibrary,
-            }
+            LibraryMetadata: new LibraryMetadata(plexLibrary) { Actors = actors }
         );
         var result = await TestHandlerExecuteAsync<InsertMediaMetaDataCommandResponse>(command);
 
@@ -706,13 +644,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
 
         // Act
         var command = new InsertMediaMetaDataCommand(
-            LibraryMetadata: new LibraryMetadata
-            {
-                Actors = longNameActors,
-                Genres = [],
-                Countries = [],
-                Library = plexLibrary,
-            }
+            LibraryMetadata: new LibraryMetadata(plexLibrary) { Actors = longNameActors }
         );
         var result = await TestHandlerExecuteAsync<InsertMediaMetaDataCommandResponse>(command);
 
@@ -740,15 +672,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         plexLibrary.ShouldNotBeNull();
 
         // Act
-        var command = new InsertMediaMetaDataCommand(
-            LibraryMetadata: new LibraryMetadata
-            {
-                Actors = [],
-                Genres = [],
-                Countries = [],
-                Library = plexLibrary,
-            }
-        );
+        var command = new InsertMediaMetaDataCommand(LibraryMetadata: new LibraryMetadata(plexLibrary));
         var result = await TestHandlerExecuteAsync<InsertMediaMetaDataCommandResponse>(command);
 
         // Assert
@@ -777,7 +701,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
 
         // Create data with zero keys
         var baseData = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).Generate(5);
-        var actorsWithZeroKeys = baseData.Select(x => x with { TagKey = string.Empty }).ToList();
+        var actorsWithZeroKeys = baseData.Select(x => x with { Key = string.Empty }).ToList();
 
         var baseGenres = FakePlexApiData.GetLibraryMediaItemGenreDTO(seed).Generate(3);
         var genresWithZeroKeys = baseGenres.Select(x => x with { Key = string.Empty }).ToList();
@@ -787,12 +711,11 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
 
         // Act
         var command = new InsertMediaMetaDataCommand(
-            LibraryMetadata: new LibraryMetadata
+            LibraryMetadata: new LibraryMetadata(plexLibrary)
             {
                 Actors = actorsWithZeroKeys,
                 Genres = genresWithZeroKeys,
                 Countries = countriesWithZeroKeys,
-                Library = plexLibrary,
             }
         );
         var result = await TestHandlerExecuteAsync<InsertMediaMetaDataCommandResponse>(command);
@@ -825,18 +748,17 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync();
         plexLibrary.ShouldNotBeNull();
 
-        var actors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).GenerateUnique(15, x => x.TagKey);
+        var actors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).GenerateUnique(15, x => x.Key);
         var genres = FakePlexApiData.GetLibraryMediaItemGenreDTO(seed).GenerateUnique(12, x => x.Key);
         var countries = FakePlexApiData.GetLibraryMediaItemCountryDTO(seed).GenerateUnique(8, x => x.Key);
 
         // Act
         var command = new InsertMediaMetaDataCommand(
-            LibraryMetadata: new LibraryMetadata
+            LibraryMetadata: new LibraryMetadata(plexLibrary)
             {
                 Actors = actors,
                 Genres = genres,
                 Countries = countries,
-                Library = plexLibrary,
             }
         );
         var result = await TestHandlerExecuteAsync<InsertMediaMetaDataCommandResponse>(command);
@@ -845,9 +767,18 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         result.IsSuccess.ShouldBeTrue();
 
         // Verify dictionary keys are valid PlexIds
-        result.Value.PlexActors.Keys.ShouldAllBe(key => key > 0, "All actor PlexIds should be positive");
-        result.Value.PlexGenres.Keys.ShouldAllBe(key => key > 0, "All genre PlexIds should be positive");
-        result.Value.PlexCountries.Keys.ShouldAllBe(key => key > 0, "All country PlexIds should be positive");
+        result.Value.PlexActors.Keys.ShouldAllBe(
+            key => !string.IsNullOrEmpty(key),
+            "All actor PlexIds should be positive"
+        );
+        result.Value.PlexGenres.Keys.ShouldAllBe(
+            key => !string.IsNullOrEmpty(key),
+            "All genre PlexIds should be positive"
+        );
+        result.Value.PlexCountries.Keys.ShouldAllBe(
+            key => !string.IsNullOrEmpty(key),
+            "All country PlexIds should be positive"
+        );
 
         // Verify entities have valid database IDs
         result.Value.PlexActors.Values.ShouldAllBe(actor => actor.Id > 0, "All actors should have valid database IDs");
@@ -892,33 +823,33 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         }
 
         // Verify source data mapping is correct
-        foreach (var sourceActor in actors.Where(x => !string.IsNullOrEmpty(x.TagKey)))
+        foreach (var sourceActor in actors.Where(x => !string.IsNullOrEmpty(x.Key)))
         {
             result.Value.PlexActors.ShouldContainKey(
-                sourceActor.PlexId,
-                $"Response should contain actor with PlexId {sourceActor.PlexId}"
+                sourceActor.Key,
+                $"Response should contain actor with PlexId {sourceActor.Key}"
             );
-            var responseActor = result.Value.PlexActors[sourceActor.PlexId];
+            var responseActor = result.Value.PlexActors[sourceActor.Key];
             responseActor.Name.ShouldBe(sourceActor.Name);
         }
 
         foreach (var sourceGenre in genres.Where(x => !string.IsNullOrEmpty(x.Key)))
         {
             result.Value.PlexGenres.ShouldContainKey(
-                sourceGenre.PlexId,
-                $"Response should contain genre with PlexId {sourceGenre.PlexId}"
+                sourceGenre.Key,
+                $"Response should contain genre with PlexId {sourceGenre.Key}"
             );
-            var responseGenre = result.Value.PlexGenres[sourceGenre.PlexId];
+            var responseGenre = result.Value.PlexGenres[sourceGenre.Key];
             responseGenre.Name.ShouldBe(sourceGenre.Name);
         }
 
         foreach (var sourceCountry in countries.Where(x => !string.IsNullOrEmpty(x.Key)))
         {
             result.Value.PlexCountries.ShouldContainKey(
-                sourceCountry.PlexId,
-                $"Response should contain country with PlexId {sourceCountry.PlexId}"
+                sourceCountry.Key,
+                $"Response should contain country with PlexId {sourceCountry.Key}"
             );
-            var responseCountry = result.Value.PlexCountries[sourceCountry.PlexId];
+            var responseCountry = result.Value.PlexCountries[sourceCountry.Key];
             responseCountry.Name.ShouldBe(sourceCountry.Name);
         }
     }

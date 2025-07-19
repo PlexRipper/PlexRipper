@@ -41,15 +41,7 @@ public class SyncPlexTvShowsCommand_UnitTests : BaseUnitTest<SyncPlexTvShowsComm
         library.TvShows.AddRange(newTvShows);
 
         // Act
-        var request = new SyncPlexTvShowsCommand(
-            new InsertMediaMetaDataCommandResponse
-            {
-                PlexLibrary = library,
-                PlexActors = [],
-                PlexGenres = [],
-                PlexCountries = [],
-            }
-        );
+        var request = new SyncPlexTvShowsCommand(new InsertMediaMetaDataCommandResponse(library));
         (await _validator.ValidateAsync(request)).IsValid.ShouldBeTrue();
         var result = await _sut.Handle(request, CancellationToken.None);
 
@@ -99,15 +91,7 @@ public class SyncPlexTvShowsCommand_UnitTests : BaseUnitTest<SyncPlexTvShowsComm
         library.TvShows.AddRange(newTvShows);
 
         // Act
-        var request = new SyncPlexTvShowsCommand(
-            new InsertMediaMetaDataCommandResponse
-            {
-                PlexLibrary = library,
-                PlexActors = [],
-                PlexGenres = [],
-                PlexCountries = [],
-            }
-        );
+        var request = new SyncPlexTvShowsCommand(new InsertMediaMetaDataCommandResponse(library));
         var result = await _sut.Handle(request, CancellationToken.None);
 
         // Assert
@@ -146,15 +130,7 @@ public class SyncPlexTvShowsCommand_UnitTests : BaseUnitTest<SyncPlexTvShowsComm
         library.TvShows.AddRange(newTvShows);
 
         // Act
-        var request = new SyncPlexTvShowsCommand(
-            new InsertMediaMetaDataCommandResponse
-            {
-                PlexLibrary = library,
-                PlexActors = [],
-                PlexGenres = [],
-                PlexCountries = [],
-            }
-        );
+        var request = new SyncPlexTvShowsCommand(new InsertMediaMetaDataCommandResponse(library));
         (await _validator.ValidateAsync(request)).IsValid.ShouldBeTrue();
         var result = await _sut.Handle(request, CancellationToken.None);
 
@@ -192,15 +168,7 @@ public class SyncPlexTvShowsCommand_UnitTests : BaseUnitTest<SyncPlexTvShowsComm
         library.TvShows.AddRange(newTvShows);
 
         // Act
-        var request = new SyncPlexTvShowsCommand(
-            new InsertMediaMetaDataCommandResponse
-            {
-                PlexLibrary = library,
-                PlexActors = [],
-                PlexGenres = [],
-                PlexCountries = [],
-            }
-        );
+        var request = new SyncPlexTvShowsCommand(new InsertMediaMetaDataCommandResponse(library));
         (await _validator.ValidateAsync(request)).IsValid.ShouldBeTrue();
         var result = await _sut.Handle(request, CancellationToken.None);
 
@@ -237,15 +205,7 @@ public class SyncPlexTvShowsCommand_UnitTests : BaseUnitTest<SyncPlexTvShowsComm
         library.TvShows.AddRange(newTvShows);
 
         // Act
-        var request = new SyncPlexTvShowsCommand(
-            new InsertMediaMetaDataCommandResponse
-            {
-                PlexLibrary = library,
-                PlexActors = [],
-                PlexGenres = [],
-                PlexCountries = [],
-            }
-        );
+        var request = new SyncPlexTvShowsCommand(new InsertMediaMetaDataCommandResponse(library));
 
         var result = await _sut.Handle(request, CancellationToken.None);
         (await _validator.ValidateAsync(request)).IsValid.ShouldBeTrue();
@@ -298,15 +258,7 @@ public class SyncPlexTvShowsCommand_UnitTests : BaseUnitTest<SyncPlexTvShowsComm
         library.TvShows.AddRange(newTvShows);
 
         // Act
-        var request = new SyncPlexTvShowsCommand(
-            new InsertMediaMetaDataCommandResponse
-            {
-                PlexLibrary = library,
-                PlexActors = [],
-                PlexGenres = [],
-                PlexCountries = [],
-            }
-        );
+        var request = new SyncPlexTvShowsCommand(new InsertMediaMetaDataCommandResponse(library));
         (await _validator.ValidateAsync(request)).IsValid.ShouldBeTrue();
         var result = await _sut.Handle(request, CancellationToken.None);
 

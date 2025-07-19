@@ -78,13 +78,16 @@ public class PlexApiClient : IPlexApiClient
         // Remove the auto-generated user-agent header from Plex SDK
         request.Headers.Remove("user-agent");
 
-        if (_log.IsLogLevelEnabled(LogEventLevel.Verbose))
+        if (_log.IsLogLevelVerbose())
         {
             var curl = _defaultClient.GenerateCurlInString(request);
             _log.Verbose("Request CURL: {RequestUrl}", curl);
         }
-        else
-            _log.Debug("Request: {RequestUrl}", request.RequestUri?.ToString());
+        else if (_log.IsLogLevelDebug())
+        {
+            var curl = _defaultClient.GenerateCurlInString(request);
+            _log.Debug("Request CURL: {RequestUrl}", curl);
+        }
 
         HttpResponseMessage? response = null;
         var requestUri = request.RequestUri?.ToString();

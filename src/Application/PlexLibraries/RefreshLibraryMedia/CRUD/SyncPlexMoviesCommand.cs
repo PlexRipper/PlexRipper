@@ -142,7 +142,7 @@ public class SyncPlexMoviesCommandHandler : IRequestHandler<SyncPlexMoviesComman
 
     private async Task<Result<int>> SyncMovieActors(
         List<PlexMovie> movies,
-        Dictionary<int, PlexActor> plexActorsDict,
+        Dictionary<string, PlexActor> plexActorsDict,
         int libraryId,
         string libraryName,
         CancellationToken ct
@@ -172,6 +172,9 @@ public class SyncPlexMoviesCommandHandler : IRequestHandler<SyncPlexMoviesComman
             }
         }
 
+        // Remove duplicates before inserting
+        list = list.DistinctBy(x => new { x.PlexActorId, x.PlexMovieId }).ToList();
+
         var insertResult = await Result.Try(() => _dbContext.BulkInsertAsync(list, _config, ct));
         if (insertResult.IsFailed)
         {
@@ -188,7 +191,7 @@ public class SyncPlexMoviesCommandHandler : IRequestHandler<SyncPlexMoviesComman
 
     private async Task<Result<int>> SyncMovieGenres(
         List<PlexMovie> movies,
-        Dictionary<int, PlexGenre> plexGenreDict,
+        Dictionary<string, PlexGenre> plexGenreDict,
         int libraryId,
         string libraryName,
         CancellationToken ct
@@ -219,6 +222,9 @@ public class SyncPlexMoviesCommandHandler : IRequestHandler<SyncPlexMoviesComman
             }
         }
 
+        // Remove duplicates before inserting
+        list = list.DistinctBy(x => new { x.GenresId, x.PlexMovieId }).ToList();
+
         var insertResult = await Result.Try(() => _dbContext.BulkInsertAsync(list, _config, ct));
         if (insertResult.IsFailed)
         {
@@ -235,7 +241,7 @@ public class SyncPlexMoviesCommandHandler : IRequestHandler<SyncPlexMoviesComman
 
     private async Task<Result<int>> SyncMovieCountries(
         List<PlexMovie> movies,
-        Dictionary<int, PlexCountry> plexCountryDict,
+        Dictionary<string, PlexCountry> plexCountryDict,
         int libraryId,
         string libraryName,
         CancellationToken ct
@@ -265,6 +271,9 @@ public class SyncPlexMoviesCommandHandler : IRequestHandler<SyncPlexMoviesComman
                 }
             }
         }
+
+        // Remove duplicates before inserting
+        list = list.DistinctBy(x => new { x.CountryId, x.PlexMovieId }).ToList();
 
         var insertResult = await Result.Try(() => _dbContext.BulkInsertAsync(list, _config, ct));
         if (insertResult.IsFailed)

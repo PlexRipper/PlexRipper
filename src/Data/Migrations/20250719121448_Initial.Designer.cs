@@ -11,8 +11,8 @@ using PlexRipper.Data;
 namespace PlexRipper.Data.Migrations
 {
     [DbContext(typeof(PlexRipperDbContext))]
-    [Migration("20250529205108_AddGenreCountryAndActorCountToPlexLibrary")]
-    partial class AddGenreCountryAndActorCountToPlexLibrary
+    [Migration("20250719121448_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -921,6 +921,10 @@ namespace PlexRipper.Data.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("PlexKey")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Thumb")
                         .HasColumnType("TEXT");
 
@@ -987,11 +991,11 @@ namespace PlexRipper.Data.Migrations
 
                     b.Property<int>("ActorsCount")
                         .HasColumnType("INTEGER")
-                        .HasColumnOrder(15);
+                        .HasColumnOrder(16);
 
                     b.Property<int>("CountriesCount")
                         .HasColumnType("INTEGER")
-                        .HasColumnOrder(17);
+                        .HasColumnOrder(18);
 
                     b.Property<DateTime?>("CreatedAt")
                         .HasColumnType("TEXT")
@@ -1002,24 +1006,29 @@ namespace PlexRipper.Data.Migrations
 
                     b.Property<int>("EpisodeCount")
                         .HasColumnType("INTEGER")
-                        .HasColumnOrder(14);
+                        .HasColumnOrder(15);
 
                     b.Property<int>("GenresCount")
                         .HasColumnType("INTEGER")
-                        .HasColumnOrder(16);
+                        .HasColumnOrder(17);
 
                     b.Property<string>("Key")
                         .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(3);
 
+                    b.Property<string>("Language")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(10);
+
                     b.Property<long>("MediaSize")
                         .HasColumnType("INTEGER")
-                        .HasColumnOrder(10);
+                        .HasColumnOrder(11);
 
                     b.Property<int>("MovieCount")
                         .HasColumnType("INTEGER")
-                        .HasColumnOrder(11);
+                        .HasColumnOrder(12);
 
                     b.Property<int>("PlexServerId")
                         .HasColumnType("INTEGER");
@@ -1030,7 +1039,7 @@ namespace PlexRipper.Data.Migrations
 
                     b.Property<int>("SeasonCount")
                         .HasColumnType("INTEGER")
-                        .HasColumnOrder(13);
+                        .HasColumnOrder(14);
 
                     b.Property<DateTime?>("SyncedAt")
                         .HasColumnType("TEXT")
@@ -1044,7 +1053,7 @@ namespace PlexRipper.Data.Migrations
 
                     b.Property<int>("TvShowCount")
                         .HasColumnType("INTEGER")
-                        .HasColumnOrder(12);
+                        .HasColumnOrder(13);
 
                     b.Property<string>("Type")
                         .IsRequired()
@@ -1081,10 +1090,6 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(1);
 
-                    b.Property<int>("PlexKey")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(3);
-
                     b.HasKey("PlexActorId", "PlexLibraryId");
 
                     b.HasIndex("PlexLibraryId");
@@ -1102,10 +1107,6 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(1);
 
-                    b.Property<int>("PlexKey")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(3);
-
                     b.HasKey("PlexCountryId", "PlexLibraryId");
 
                     b.HasIndex("PlexLibraryId");
@@ -1122,10 +1123,6 @@ namespace PlexRipper.Data.Migrations
                     b.Property<int>("PlexLibraryId")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(1);
-
-                    b.Property<int>("PlexKey")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(3);
 
                     b.HasKey("PlexGenreId", "PlexLibraryId");
 

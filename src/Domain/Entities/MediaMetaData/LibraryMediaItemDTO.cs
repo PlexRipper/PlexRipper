@@ -105,7 +105,7 @@ public record LibraryMediaItemCountryDTO
     public required string Filter { get; init; }
 
     /// <summary>
-    /// A md5 hash of the name, used as a unique key.
+    /// A MD5 hash of the name, used as a unique key.
     /// </summary>
     public required string Key { get; init; }
 }
@@ -119,7 +119,7 @@ public record LibraryMediaItemGenreDTO
     public required string Filter { get; init; }
 
     /// <summary>
-    /// A md5 hash of the name, used as a unique key.
+    /// A MD5 hash of the name, used as a unique key.
     /// </summary>
     public required string Key { get; init; }
 }
@@ -137,7 +137,7 @@ public record LibraryMediaItemRoleDTO
     public required string? Thumb { get; init; }
 
     /// <summary>
-    /// A md5 hash of the name, used as a unique key.
+    /// A MD5 hash of the name, used as a unique key.
     /// </summary>
     public required string Key { get; init; }
 }

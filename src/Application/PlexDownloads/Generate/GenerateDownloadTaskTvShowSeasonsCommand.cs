@@ -25,13 +25,17 @@ public class GenerateDownloadTaskTvShowSeasonsCommandHandler
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
-    private readonly IMediator _mediator;
+    private readonly ICommandExecutor _command;
 
-    public GenerateDownloadTaskTvShowSeasonsCommandHandler(ILog log, IPlexRipperDbContext dbContext, IMediator mediator)
+    public GenerateDownloadTaskTvShowSeasonsCommandHandler(
+        ILog log,
+        IPlexRipperDbContext dbContext,
+        ICommandExecutor command
+    )
     {
         _log = log;
         _dbContext = dbContext;
-        _mediator = mediator;
+        _command = command;
     }
 
     public async Task<Result> Handle(
@@ -114,7 +118,7 @@ public class GenerateDownloadTaskTvShowSeasonsCommandHandler
         await _dbContext.SaveChangesAsync(cancellationToken);
 
         // Create episodes downloadTasks
-        await _mediator.Send(
+        await _command.Send(
             new GenerateDownloadTaskTvShowEpisodesCommand(
                 new CreateDownloadTasksRequest(episodesIds, command.Request.DestinationFolderPathId)
             ),

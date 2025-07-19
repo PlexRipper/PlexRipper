@@ -10,13 +10,9 @@ namespace PlexRipper.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "PlexKey",
-                table: "PlexActors");
+            migrationBuilder.DropColumn(name: "PlexKey", table: "PlexActors");
 
-            migrationBuilder.DropColumn(
-                name: "Thumb",
-                table: "PlexActors");
+            migrationBuilder.DropColumn(name: "Thumb", table: "PlexActors");
         }
 
         /// <inheritdoc />
@@ -27,13 +23,10 @@ namespace PlexRipper.Data.Migrations
                 table: "PlexActors",
                 type: "TEXT",
                 nullable: false,
-                defaultValue: "");
+                defaultValue: ""
+            );
 
-            migrationBuilder.AddColumn<string>(
-                name: "Thumb",
-                table: "PlexActors",
-                type: "TEXT",
-                nullable: true);
+            migrationBuilder.AddColumn<string>(name: "Thumb", table: "PlexActors", type: "TEXT", nullable: true);
         }
     }
 }

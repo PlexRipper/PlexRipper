@@ -1,23 +1,21 @@
 import Log from 'consola';
-import { defineStore, acceptHMRUpdate } from 'pinia';
+import { acceptHMRUpdate, defineStore } from 'pinia';
 import { map, switchMap, tap } from 'rxjs/operators';
 import type { Observable } from 'rxjs';
 import { of } from 'rxjs';
-import { sum, merge, keyBy, values, flatMapDeep, clone, cloneDeep } from 'lodash-es';
+import { clone, cloneDeep, flatMapDeep, keyBy, merge, sum, values } from 'lodash-es';
 import {
-	type CreateDownloadTasksRequest, DownloadActions,
+	type BaseResultDTO,
+	type CreateDownloadTasksRequest,
+	DownloadActions,
 	type DownloadMediaDTO,
 	type DownloadPreviewDTO,
 	type DownloadProgressDTO,
+	DownloadStatus,
 	type PlexServerDTO,
 	type ServerDownloadProgressDTO,
-	type BaseResultDTO,
 } from '@dto';
-import type {
-	ISetupResult,
-	IPTreeTableSelectionKeys,
-	IDownloadsSelection,
-} from '@interfaces';
+import type { IDownloadsSelection, IPTreeTableSelectionKeys, ISetupResult } from '@interfaces';
 import { downloadApi } from '@api';
 import { useServerStore } from '@store';
 
@@ -190,7 +188,7 @@ export const useDownloadStore = defineStore('DownloadStore', () => {
 			});
 		}),
 		getActiveDownloadList(serverId = 0): DownloadProgressDTO[] {
-			return getters.getDownloadsByServerId(serverId);
+			return getters.getDownloadsByServerId(serverId).flatMap((x) => x.children).flatMap((x) => x.children).flatMap((x) => x.children).filter((x) => x.status != DownloadStatus.Completed && x.status != DownloadStatus.Error);
 		},
 		/**
      * Get the total number of download tasks that are downloadable in the download list.

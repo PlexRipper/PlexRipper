@@ -12,7 +12,7 @@ public record DownloadProgressDTO
     public required string Title { get; set; }
 
     /// <summary>
-    /// Note: Naming third just 'type' will cause errors in the Typescript type generating.
+    /// Note: Naming third just 'type' will cause errors in the TypeScript type generating.
     /// </summary>
     public required PlexMediaType MediaType { get; set; }
 

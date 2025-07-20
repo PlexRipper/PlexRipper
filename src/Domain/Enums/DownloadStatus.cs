@@ -7,7 +7,7 @@ namespace PlexRipper.Domain;
 public enum DownloadStatus
 {
     // NOTE: Make sure the indexes are correct, 1,2,3,4,5 etc and that there is no skip in between
-    // Otherwise the Typescript DTO translator in the front-end starts messing up
+    // Otherwise the TypeScript DTO translator in the front-end starts messing up
 
     /// <summary>
     /// String value was unable to be parsed to this enum.

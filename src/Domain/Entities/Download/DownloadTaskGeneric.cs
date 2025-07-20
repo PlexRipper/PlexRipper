@@ -20,7 +20,7 @@ public record DownloadTaskGeneric : IDownloadTaskProgress, IDownloadFileTransfer
     public required string FullTitle { get; init; }
 
     /// <summary>
-    /// Note: Naming third just 'type' will cause errors in the Typescript type generating.
+    /// Note: Naming third just 'type' will cause errors in the TypeScript type generating.
     /// </summary>
     public required PlexMediaType MediaType { get; init; }
 
@@ -77,7 +77,7 @@ public record DownloadTaskGeneric : IDownloadTaskProgress, IDownloadFileTransfer
 
     /// <summary>
     /// The nested <see cref="DownloadTaskGeneric"/> used for seasons and episodes.
-    /// "Required = Required.Default" is used for ensuring its optional in the Typescript generating.
+    /// "Required = Required.Default" is used for ensuring its optional in the TypeScript generating.
     /// </summary>
     public required List<DownloadTaskGeneric> Children { get; set; } = [];
 

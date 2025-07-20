@@ -1,5 +1,57 @@
 PlexRipper Changelog
 
+# [0.32.0](https://github.com/PlexRipper/PlexRipper/compare/v0.31.1...v0.32.0) (2025-07-20)
+
+
+### Bug Fixes
+
+* **WebAPI:** fix library sync failing when there is a music library ([ba2def8](https://github.com/PlexRipper/PlexRipper/commit/ba2def8fc3b99780bbea12365e142c9ede3dee92))
+* **WebAPI:** Fixed an issue where duplicate metadata relations could be inserted, throwing exceptions ([840486e](https://github.com/PlexRipper/PlexRipper/commit/840486e60faa6055eee3cb624cf5e8a7bd80a90a))
+* **WebAPI:** Fixed an issue where episodes could not be downloaded ([0939a9f](https://github.com/PlexRipper/PlexRipper/commit/0939a9f806ba787586d414d2d494456f9f908a83))
+* **WebAPI:** Fixed an issue where the database was not reset correctly when an attempted migration failed ([61c58c4](https://github.com/PlexRipper/PlexRipper/commit/61c58c447c2fe31dc68fce47cea3fec3d8caf7a2))
+* **WebAPI:** Fixed an issue where the folder browser would throw exceptions when there were stale file handles ([08ba5f4](https://github.com/PlexRipper/PlexRipper/commit/08ba5f42e386e9c1f30dd871d5678b3d3a021de8))
+* **WebAPI:** Fixed an issue where you could not login with username and password ([0d8f5b0](https://github.com/PlexRipper/PlexRipper/commit/0d8f5b0436c77d49c4b77f8019bfed2f72951ccb))
+* **Web-UI:** Fixed and improved the media filter menu in the searchbar ([67c9713](https://github.com/PlexRipper/PlexRipper/commit/67c9713aeb03f63ed826936f8ac076c638fd15b4))
+* **Web-UI:** Fixed incorrect count of active downloads ([23c2ba0](https://github.com/PlexRipper/PlexRipper/commit/23c2ba0c2ee31e604f9c8cca567c126063052168))
+* **WebAPI:** fixed incorrect genre and country update when syncing a movie library ([5ac503b](https://github.com/PlexRipper/PlexRipper/commit/5ac503b1b330fb9b74e54e8c918ba333f93e99b7))
+* **Web-UI:** Fixed media posters not loading when using firefox with "https-only-mode". Now PlexRipper will prioritize https connections and thus prevent this from happening ([7d961bb](https://github.com/PlexRipper/PlexRipper/commit/7d961bbb7902b6394538141b739dbe159ea9f532))
+* **Web-UI:** Fixed missing quality chips from media overview in the front-end ([4eafebb](https://github.com/PlexRipper/PlexRipper/commit/4eafebb0ca021a0c20b7ebb894f5a635864418de))
+* **WebAPI:** Fixed missing quality chips from media overview ([8a81d4c](https://github.com/PlexRipper/PlexRipper/commit/8a81d4c1e3f7ff386e95d9d2f27a6469ce8a121a))
+* **WebAPI:** Fixed the FirstTimeSetup property not reset to true when the database is reset ([1fdd752](https://github.com/PlexRipper/PlexRipper/commit/1fdd752b3575f8e9e1ff1152c52719d2732fb0fe))
+* **WebAPI:** Rename test method to reflect filtering logic for actors with empty keys ([ae0f52b](https://github.com/PlexRipper/PlexRipper/commit/ae0f52b6fb3226a9db29c60ad2f2fd2c65344432))
+* **WebAPI:** Use drive name instead of volume name for file system model when an exception is thrown ([098e84b](https://github.com/PlexRipper/PlexRipper/commit/098e84b1ac4375f35fc848b19abf11bd8d85dfdf))
+
+
+### Features
+
+* **Web-UI:** Added a metadata search input field so you can find a specific actor more easily ([5ca067e](https://github.com/PlexRipper/PlexRipper/commit/5ca067eebe12333dc90b0f2b59eb40fd68cc72e2))
+* **Logging:** Added setup for FluentResults integration and result logging configuration ([38d69db](https://github.com/PlexRipper/PlexRipper/commit/38d69dbfc93f39e9da4e22258d2f5350379d07a9))
+* **WebAPI:** allow all media details to be synced into PlexRipper, such as subtitles, roles, countries etc ([9793869](https://github.com/PlexRipper/PlexRipper/commit/9793869d8f2b82b4becf795a0929aeecb95293b7))
+* **WebAPI:** enhance media metadata sync with detailed logging and performance tracking ([abd7496](https://github.com/PlexRipper/PlexRipper/commit/abd749618d8a1d132279ed87f44e1bd29ba7e039))
+* **WebAPI:** implement HTTPS prioritization and add ChosenConnection flag when sending all connections ([3cf41cf](https://github.com/PlexRipper/PlexRipper/commit/3cf41cfc753d77fd3846fe9facbcb337359b4fde))
+* **WebAPI:** Make the logging clickable and open the place where something has happened ([a8213ac](https://github.com/PlexRipper/PlexRipper/commit/a8213ac05af9d42b302d1b445f05b3b5ce4ec7cd))
+* **Web-UI:** Make the metadata header in the media overview menu stick to the top to always be visible ([c330bc2](https://github.com/PlexRipper/PlexRipper/commit/c330bc2b8ba169fd263198edb8393e66c75624c5))
+* **Web-UI:** When refreshing a page, instead of displaying 0%, show an indeterminate loading icon ([b6b58a2](https://github.com/PlexRipper/PlexRipper/commit/b6b58a2c175010b0e7e437863ead4963c0e4ffc5))
+
+
+### Performance Improvements
+
+* **WebAPI:** greatly improve performance of requesting and querying library metadata such as genre, countries and actors ([f2a1db8](https://github.com/PlexRipper/PlexRipper/commit/f2a1db80ecce5a00ab8bbf4be04a36b8e1d6b9e0))
+* **WebAPI:** greatly improved the performance of loading a media library, this should resolve the 10 min wait with big libraries ([71b1f77](https://github.com/PlexRipper/PlexRipper/commit/71b1f77883f84dc042f3539a71d43f61e4fc1754))
+* **WebAPI:** greatly improved the performance of loading the home page library ([888d3c2](https://github.com/PlexRipper/PlexRipper/commit/888d3c24c2e4b027bf42595aeea8d95005547c98))
+* **Web-UI:** Improve media overview performance by loading the media and metadata at the same time ([ee8a2a3](https://github.com/PlexRipper/PlexRipper/commit/ee8a2a3a6e132285f7357dffd8e47d5260c8d536))
+* **Web-UI:** Made the loading of library metadata not block the media view, just make it load in the background ([319ba83](https://github.com/PlexRipper/PlexRipper/commit/319ba83443ba889ca6ca6e422e5d7170b171362e))
+* **WebAPI:** Minor performance improvement how strings are converted from and to enums ([bae1bf1](https://github.com/PlexRipper/PlexRipper/commit/bae1bf1e9a32593df19a00e433f3b4dbcbc0bb94))
+* **WebAPI:** optimize MD5 hash computation and hex conversion ([d0d5821](https://github.com/PlexRipper/PlexRipper/commit/d0d58214da5253a9356f57bd0b10d53e60214f29))
+* **WebAPI:** optimize media title and genre generation using lazy loading ([336520c](https://github.com/PlexRipper/PlexRipper/commit/336520cf2789f225d9ad27099c459acdee0413a9))
+* **WebAPI:** optimize metadata sync with bulk operations ([ae87a03](https://github.com/PlexRipper/PlexRipper/commit/ae87a03686025339f94aea169a69500348d524cb))
+* **WebAPI:** wrap bulk operations in transactions to ensure consistency ([2739e2e](https://github.com/PlexRipper/PlexRipper/commit/2739e2e4451913d9c8c57341efbd00813b0ab6b2))
+
+
+### Reverts
+
+* **WebAPI:** revert snapshot ([4353ecd](https://github.com/PlexRipper/PlexRipper/commit/4353ecdaea099601b61425c346d13bee9859f9f1))
+
 ## [0.31.1](https://github.com/PlexRipper/PlexRipper/compare/v0.31.0...v0.31.1) (2025-04-27)
 
 

@@ -6,6 +6,7 @@
         <Nullable>enable</Nullable>
         <AssemblyName>PlexRipper.Identity</AssemblyName>
         <RootNamespace>PlexRipper.Identity</RootNamespace>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     </PropertyGroup>
 
     <ItemGroup>

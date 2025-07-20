@@ -5,7 +5,8 @@
 		<LangVersion>11</LangVersion>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-	</PropertyGroup>
+	        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    </PropertyGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\Domain\Domain.csproj" />

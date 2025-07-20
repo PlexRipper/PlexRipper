@@ -6,7 +6,8 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<AssemblyName>PlexRipper.HttpClient</AssemblyName>
 		<RootNamespace>PlexRipper.HttpClient</RootNamespace>
-	</PropertyGroup>
+	        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    </PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Autofac" Version="6.5.0" />

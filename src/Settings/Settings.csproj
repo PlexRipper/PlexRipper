@@ -1,31 +1,32 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFramework>net8.0</TargetFramework>
-		<LangVersion>12</LangVersion>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<AssemblyName>PlexRipper.Settings</AssemblyName>
-		<RootNamespace>PlexRipper.Settings</RootNamespace>
-		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-		<ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
-		<Nullable>enable</Nullable>
-	</PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <LangVersion>12</LangVersion>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <AssemblyName>PlexRipper.Settings</AssemblyName>
+        <RootNamespace>PlexRipper.Settings</RootNamespace>
+        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+        <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
+        <Nullable>enable</Nullable>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    </PropertyGroup>
 
-	<ItemGroup>
-		<PackageReference Include="Autofac" Version="8.0.0" />
-		<PackageReference Include="CSharpier.MsBuild" Version="0.29.2">
-		  <PrivateAssets>all</PrivateAssets>
-		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
-	</ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Autofac" Version="8.0.0"/>
+        <PackageReference Include="CSharpier.MsBuild" Version="0.29.2">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
 
-	<ItemGroup>
-		<ProjectReference Include="..\FileSystem.Contracts\FileSystem.Contracts.csproj" />
-		<ProjectReference Include="..\Settings.Contracts\Settings.Contracts.csproj" />
-	</ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\FileSystem.Contracts\FileSystem.Contracts.csproj"/>
+        <ProjectReference Include="..\Settings.Contracts\Settings.Contracts.csproj"/>
+    </ItemGroup>
 
-	<ItemGroup>
-		<Compile Include="..\Domain\GlobalUsings.cs" />
-	</ItemGroup>
+    <ItemGroup>
+        <Compile Include="..\Domain\GlobalUsings.cs"/>
+    </ItemGroup>
 
 </Project>

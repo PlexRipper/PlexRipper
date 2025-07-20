@@ -20,16 +20,6 @@ public partial class Log
 
     /// <inheritdoc/>
     [MessageTemplateFormatMethod("messageTemplate")]
-    public LogMetaData Debug(
-        Exception? ex,
-        string messageTemplate,
-        [CallerMemberName] string memberName = "",
-        [CallerFilePath] string sourceFilePath = "",
-        [CallerLineNumber] int sourceLineNumber = 0
-    ) => Write(LogEventLevel.Debug, ex, messageTemplate, sourceFilePath, memberName, sourceLineNumber);
-
-    /// <inheritdoc/>
-    [MessageTemplateFormatMethod("messageTemplate")]
     public LogMetaData Debug<T>(
         string messageTemplate,
         T propertyValue,
@@ -154,10 +144,6 @@ public partial class Log
             propertyValue4,
             propertyValue5
         );
-
-    #endregion
-
-    #region WithHere
 
     #endregion
 }

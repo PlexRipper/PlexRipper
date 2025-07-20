@@ -1,6 +1,7 @@
 <template>
 	<q-chip
 		outline
+		:clickable="clickable"
 		:color="color"
 		:style="styles"
 		:size="size">
@@ -19,9 +20,11 @@ const props = withDefaults(defineProps<{
 	color?: NamedColor;
 	textColor?: NamedColor;
 	size?: string;
+	clickable?: boolean;
 }>(), {
 	color: 'primary',
 	size: 'md',
+	clickable: false,
 });
 
 const styles = computed(() => {

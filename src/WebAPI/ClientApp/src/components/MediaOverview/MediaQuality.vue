@@ -7,17 +7,22 @@
 			:key="j"
 			:color="getQualityDisplay(quality.quality).color"
 			size="md"
-			:value="getQualityDisplay(quality.quality).label" />
+			clickable
+			:value="getQualityDisplay(quality.quality).label"
+			@click="$emit('download', [quality])" />
 	</div>
 </template>
 
 <script setup lang="ts">
 import Log from 'consola';
 import { VideoQuality, type PlexMediaQualityDTO } from '@dto';
+import type { IMediaActionEmits } from '@interfaces';
 
 defineProps<{
 	qualities: PlexMediaQualityDTO[];
 }>();
+
+defineEmits<IMediaActionEmits>();
 
 const getQualityDisplay = (quality: VideoQuality): {
 	color: string;

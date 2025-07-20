@@ -128,6 +128,7 @@ export interface DownloadMediaDTO {
   plexLibraryId: number;
   /** @format int32 */
   plexServerId: number;
+  qualities: PlexMediaQualityDTO[];
   type: PlexMediaType;
 }
 
@@ -699,9 +700,11 @@ export interface PlexMediaMetadataDTO {
 
 export interface PlexMediaQualityDTO {
   /** @format int32 */
-  id: number;
+  dataId: number;
+  mediaDataType: PlexMediaType;
+  /** @format int32 */
+  mediaId: number;
   quality: VideoQuality;
-  type: PlexMediaType;
 }
 
 export interface PlexMediaSlimDTO {

@@ -26,13 +26,13 @@ public static partial class ResultExtensions
         switch (logLevel)
         {
             case LogEventLevel.Verbose:
-                _log.Verbose(e, messageTemplate, memberName, sourceFilePath, sourceLineNumber);
+                _log.Verbose(messageTemplate, memberName, sourceFilePath, sourceLineNumber);
                 break;
             case LogEventLevel.Debug:
-                _log.Debug(e, messageTemplate, memberName, sourceFilePath, sourceLineNumber);
+                _log.Debug(messageTemplate, memberName, sourceFilePath, sourceLineNumber);
                 break;
             case LogEventLevel.Information:
-                _log.Information(e, messageTemplate, memberName, sourceFilePath, sourceLineNumber);
+                _log.Information(messageTemplate, memberName, sourceFilePath, sourceLineNumber);
                 break;
             case LogEventLevel.Warning:
                 _log.Warning(e, messageTemplate, memberName, sourceFilePath, sourceLineNumber);

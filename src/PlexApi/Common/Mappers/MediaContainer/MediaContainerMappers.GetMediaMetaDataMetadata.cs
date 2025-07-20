@@ -33,7 +33,7 @@ public static partial class MediaContainerMappers
             Guid = data.Guid,
             AddedAt = DateTimeExtensions.FromUnixTime(data.AddedAt),
             UpdatedAt = DateTimeExtensions.FromUnixTime(data.UpdatedAt ?? 0),
-            OriginallyAvailableAt = data.OriginallyAvailableAt.ToString(),
+            OriginallyAvailableAt = data.OriginallyAvailableAt?.ToString() ?? string.Empty,
             Ratings = data.Ratings?.Select(x => x.ToDTO()).ToList() ?? [],
             Guids = data.Guids?.Select(x => new MetaDataGuidsDTO { Id = x.Id }).ToList() ?? [],
             GrandparentTitle = data.GrandparentTitle ?? string.Empty,

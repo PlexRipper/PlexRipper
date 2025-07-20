@@ -2,12 +2,6 @@ namespace PlexRipper.Domain;
 
 public static partial class EnumMapperExtensions
 {
-    /// <summary>
-    /// Converts string to <see cref="DownloadTaskType"/> by a fast method.
-    /// </summary>
-    /// <param name="value">The string representation of <see cref="DownloadTaskType"/>.</param>
-    /// <returns>The converted enum of type <see cref="DownloadTaskType"/>.</returns>
-    /// <exception cref="ArgumentOutOfRangeException">Throws exception if value is not found.</exception>
     private static readonly Dictionary<string, DownloadTaskType> _downloadTaskTypeMap =
         new(StringComparer.Ordinal)
         {

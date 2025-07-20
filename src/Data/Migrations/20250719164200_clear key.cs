@@ -5,7 +5,7 @@
 namespace PlexRipper.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class clearkey : Migration
+    public partial class Clearkey : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

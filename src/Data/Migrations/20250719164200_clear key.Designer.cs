@@ -12,7 +12,7 @@ namespace PlexRipper.Data.Migrations
 {
     [DbContext(typeof(PlexRipperDbContext))]
     [Migration("20250719164200_clear key")]
-    partial class clearkey
+    partial class Clearkey
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

@@ -1,9 +1,13 @@
 using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
 
+namespace PlexRipper.Domain;
+
 /// <summary>
 /// Represents normalized video resolution tiers used by Plex.
 /// </summary>
+
+// ReSharper disable InconsistentNaming
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum VideoQuality
 {

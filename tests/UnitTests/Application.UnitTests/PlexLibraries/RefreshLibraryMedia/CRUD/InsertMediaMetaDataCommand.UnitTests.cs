@@ -459,7 +459,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         result.IsSuccess.ShouldBeTrue();
 
         // Verify dictionary keys match the source PlexIds
-        foreach (var actor in actors.Where(x => x.Key != null))
+        foreach (var actor in actors)
         {
             result.Value.PlexActors.ShouldContainKey(actor.Key);
             result.Value.PlexActors[actor.Key].Name.ShouldBe(actor.Name);

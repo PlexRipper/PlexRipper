@@ -114,10 +114,6 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
 
             // Get or create season download task
             var downloadTaskTvShowSeason = GetOrCreateSeasonDownloadTask(plexSeason, downloadTaskTvShow);
-            if (downloadTaskTvShowSeason is null)
-            {
-                return Result.Fail($"Failed to create or retrieve Season download task for {plexSeason.Title}");
-            }
 
             // Get or create episode download task
             var episodeDownloadTask = downloadTaskTvShowSeason.Children.FirstOrDefault(x => x.Key == tvShowEpisode.Key);
@@ -141,10 +137,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
             // Process episode media data
             var processResult = ProcessEpisodeMediaData(tvShowEpisode, episodeDownloadTask, request);
             if (processResult.IsFailed)
-            {
                 processResult.LogError();
-                continue;
-            }
         }
 
         return (await Result.Try(() => _dbContext.SaveChangesAsync(ct))).ToResult();
@@ -170,7 +163,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
                 _tvShowDownloads.Add(downloadTaskTvShow);
         }
 
-        // Create new TV Show download task if none exists
+        // Create a new TV Show download task if none exists
         if (downloadTaskTvShow is null)
         {
             downloadTaskTvShow = plexTvShow.MapToDownloadTask();

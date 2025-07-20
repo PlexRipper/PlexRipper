@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-
-namespace PlexRipper.Domain;
+﻿namespace PlexRipper.Domain;
 
 /// <summary>
 /// A log entry for the <see cref="DownloadWorkerTask">download worker</see>.

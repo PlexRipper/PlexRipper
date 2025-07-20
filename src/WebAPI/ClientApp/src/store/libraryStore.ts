@@ -6,7 +6,7 @@ import { get } from '@vueuse/core';
 import type { PlexLibraryDTO, PlexServerDTO } from '@dto';
 import type { ISetupResult } from '@interfaces';
 import { plexLibraryApi } from '@api';
-import { DataType } from '@dto';
+import { RefreshDataType } from '@dto';
 import { useServerStore, useSettingsStore, useSignalrStore } from '@store';
 import { cloneDeep } from 'lodash-es';
 
@@ -28,7 +28,7 @@ export const useLibraryStore = defineStore('LibraryStore', () => {
 	const actions = {
 		setup(): Observable<ISetupResult> {
 			// Listen for refresh notifications
-			signalRStore.getRefreshNotification(DataType.PlexLibrary).pipe(switchMap(() => actions.refreshLibraries())).subscribe();
+			signalRStore.getRefreshNotification(RefreshDataType.PlexLibrary).pipe(switchMap(() => actions.refreshLibraries())).subscribe();
 
 			return actions.refreshLibraries().pipe(switchMap(() => of({ name: 'useLibraryStore', isSuccess: true })));
 		},

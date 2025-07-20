@@ -54,6 +54,7 @@ public class RefreshPlexTvShowLibraryCommandHandler
     )
     {
         var plexLibrary = command.LibraryMetadata.PlexLibrary;
+        var plexLibraryId = plexLibrary.Id;
 
         if (plexLibrary.Type != PlexMediaType.TvShow)
             return Result.Fail("PlexLibrary is not of type TvShow").LogError();
@@ -72,7 +73,7 @@ public class RefreshPlexTvShowLibraryCommandHandler
                             {
                                 Action = command.Action,
                                 PlexLibraryType = PlexMediaType.TvShow,
-                                PlexLibraryId = plexLibrary.Id,
+                                PlexLibraryId = plexLibraryId,
                                 Step = 2,
                                 Percentage = progress.Percentage,
                                 TimeRemaining = progress.TimeRemaining,
@@ -95,7 +96,7 @@ public class RefreshPlexTvShowLibraryCommandHandler
                             {
                                 Action = command.Action,
                                 PlexLibraryType = PlexMediaType.TvShow,
-                                PlexLibraryId = plexLibrary.Id,
+                                PlexLibraryId = plexLibraryId,
                                 Step = 3,
                                 Percentage = progress.Percentage,
                                 TimeRemaining = progress.TimeRemaining,

@@ -54,7 +54,10 @@ public class InspectPlexServerJob : IJob
                     new CheckAllConnectionsStatusByPlexServerCommand(plexServerId),
                     cancellationToken
                 );
-                await _signalRService.SendRefreshNotificationAsync([DataType.PlexServerConnection], cancellationToken);
+                await _signalRService.SendRefreshNotificationAsync(
+                    [RefreshDataType.PlexServerConnection],
+                    cancellationToken
+                );
 
                 if (checkResult.IsFailed)
                     return checkResult.LogError();
@@ -86,7 +89,7 @@ public class InspectPlexServerJob : IJob
 
         // Notify front-end
         await _signalRService.SendRefreshNotificationAsync(
-            [DataType.PlexAccount, DataType.PlexLibrary],
+            [RefreshDataType.PlexAccount, RefreshDataType.PlexLibrary],
             CancellationToken.None
         );
 

@@ -145,7 +145,7 @@ public class RefreshPlexAccountAccessEndpoint
 
         // Send notifications to the client to refresh the PlexServerConnection data
         await _signalRService.SendRefreshNotificationAsync(
-            [DataType.PlexAccount, DataType.PlexServer, DataType.PlexServerConnection],
+            [RefreshDataType.PlexAccount, RefreshDataType.PlexServer, RefreshDataType.PlexServerConnection],
             CancellationToken.None
         );
 

@@ -79,8 +79,6 @@ namespace PlexRipper.Data.Migrations
                     Id = table.Column<int>(type: "INTEGER", nullable: false).Annotation("Sqlite:Autoincrement", true),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
                     Key = table.Column<string>(type: "TEXT", nullable: false),
-                    PlexKey = table.Column<string>(type: "TEXT", nullable: false),
-                    Thumb = table.Column<string>(type: "TEXT", nullable: true),
                 },
                 constraints: table =>
                 {

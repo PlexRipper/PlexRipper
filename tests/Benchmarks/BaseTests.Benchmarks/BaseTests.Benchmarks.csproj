@@ -8,12 +8,13 @@
         <GenerateProgramFile>false</GenerateProgramFile>
         <IsPackable>false</IsPackable>
         <IsTestProject>true</IsTestProject>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)' == ''">
         <Configuration>Release</Configuration>
     </PropertyGroup>
-    
+
     <PropertyGroup Condition="'$(Configuration)'=='Release'">
         <Optimize>true</Optimize>
         <DebugType>none</DebugType>

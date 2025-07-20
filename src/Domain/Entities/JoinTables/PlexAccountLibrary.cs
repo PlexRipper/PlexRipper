@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-
-namespace PlexRipper.Domain;
+﻿namespace PlexRipper.Domain;
 
 /// <summary>
 /// This is a join table entity that will return the specific libraries the PlexAccount has access to.

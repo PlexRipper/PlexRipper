@@ -9,7 +9,7 @@ import { useCypressSignalRMock } from 'cypress-signalr-mock';
 import { isEqual, cloneDeep, isArray } from 'lodash-es';
 import type { ISetupResult } from '@interfaces';
 import type {
-	DataType,
+	RefreshDataType,
 	LibraryProgress,
 	NotificationDTO,
 	ServerConnectionCheckStatusProgressDTO,
@@ -31,7 +31,7 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 		libraryProgressSubject: Subject<LibraryProgress[]>;
 		syncServerMediaProgressSubject: Subject<SyncServerMediaProgress[]>;
 		serverConnectionCheckStatusProgressSubject: Subject<ServerConnectionCheckStatusProgressDTO[]>;
-		refreshDataNotificationSubject: Subject<DataType>;
+		refreshDataNotificationSubject: Subject<RefreshDataType>;
 	}
 
 	const defaultState: ISignalRStoreState = {
@@ -44,7 +44,7 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 		libraryProgressSubject: new Subject<LibraryProgress[]>(),
 		syncServerMediaProgressSubject: new Subject<SyncServerMediaProgress[]>(),
 		serverConnectionCheckStatusProgressSubject: new Subject<ServerConnectionCheckStatusProgressDTO[]>(),
-		refreshDataNotificationSubject: new Subject<DataType>(),
+		refreshDataNotificationSubject: new Subject<RefreshDataType>(),
 	};
 
 	const state = reactive<ISignalRStoreState>(cloneDeep(defaultState));
@@ -112,7 +112,7 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 
 		notificationHubConnection?.on(MessageTypes.Notification, (data: NotificationDTO) => notificationsStore.setNotification(data));
 
-		notificationHubConnection?.on(MessageTypes.RefreshNotification, (data: DataType) => {
+		notificationHubConnection?.on(MessageTypes.RefreshNotification, (data: RefreshDataType) => {
 			state.refreshDataNotificationSubject.next(data);
 		});
 	}
@@ -205,7 +205,7 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 		getServerConnectionProgressByPlexServerId(plexServerId: number): Observable<ServerConnectionCheckStatusProgressDTO[]> {
 			return getters.getAllServerConnectionProgress().pipe(map((x) => x?.filter((y) => y.plexServerId === plexServerId)), distinctUntilChanged(isEqual));
 		},
-		getRefreshNotification(filterOn: DataType): Observable<DataType> {
+		getRefreshNotification(filterOn: RefreshDataType): Observable<RefreshDataType> {
 			return state.refreshDataNotificationSubject.asObservable().pipe(filter((x) => x === filterOn));
 		}, // endregion
 	};

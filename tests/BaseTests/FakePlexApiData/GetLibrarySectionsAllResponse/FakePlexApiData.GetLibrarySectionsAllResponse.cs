@@ -1,9 +1,6 @@
 using System.Net;
-using Bogus.Hollywood;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
-using NodaTime;
 using PlexApi.Contracts;
-using PlexRipper.PlexApi;
 
 namespace PlexRipper.BaseTests;
 
@@ -35,7 +32,6 @@ public partial class FakePlexApiData
         Action<PlexApiDataConfig>? options = null
     )
     {
-        var config = PlexApiDataConfig.FromOptions(options);
         var type = library.Type.ToPlexMediaType();
 
         return new GetLibrarySectionsAllResponseBody

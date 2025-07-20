@@ -114,7 +114,7 @@ public static partial class DbContextExtensions
         {
             case PlexMediaType.Movie:
             {
-                var query = dbContext.PlexMovies.AsNoTracking();
+                var query = dbContext.PlexMovies.IncludeMediaData().AsNoTracking();
 
                 if (filter.CountryId > 0)
                     query = query.Include(x => x.Countries);
@@ -172,9 +172,7 @@ public static partial class DbContextExtensions
         }
 
         if (plexLibraryId == 0)
-        {
             plexMediaSlimDtos = plexMediaSlimDtos.OrderByNatural(x => x.SearchTitle).ToList();
-        }
 
         // Add token to retrieve thumbnail in front-end
         Dictionary<int, string> tokensCache = new();

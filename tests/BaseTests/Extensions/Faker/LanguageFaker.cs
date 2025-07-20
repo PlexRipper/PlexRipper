@@ -1,5 +1,4 @@
 using System.Globalization;
-using System.Globalization;
 using Bogus.Premium;
 
 namespace PlexRipper.BaseTests;

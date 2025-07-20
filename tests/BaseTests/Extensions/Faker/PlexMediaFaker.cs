@@ -1,5 +1,4 @@
 using Bogus.Premium;
-using PlexApi.Contracts;
 
 namespace PlexRipper.BaseTests;
 
@@ -32,10 +31,8 @@ public class PlexMediaDataSet : DataSet
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, "PlexMediaType not supported."),
         };
 
-    public string MediaTitle(DownloadTaskType type)
-    {
-        var index = _faker.Random.Int(0, 1000 - 1);
-        return type switch
+    public string MediaTitle(DownloadTaskType type) =>
+        type switch
         {
             DownloadTaskType.Movie =>
                 $"Movie - {_faker.PickRandomFromDataset(PlexMovieShowTitlesDataset.PlexMovieTitles.Value)}",
@@ -50,7 +47,6 @@ public class PlexMediaDataSet : DataSet
                 $"EpisodeData - {_faker.PickRandomFromDataset(PlexEpisodeShowTitlesDataset.PlexEpisodeTitles.Value)}",
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, "PlexMediaType not supported."),
         };
-    }
 
     public string Guid(PlexMediaType type) =>
         $"plex://{type.ToPlexApiString()}/${_faker.Random.Guid().ToString().Replace("-", "")}";

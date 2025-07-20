@@ -3,7 +3,6 @@ using Data.Contracts;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
 using Moq.Contrib.HttpClient;
 using PlexApi.Contracts;
-using PlexRipper.PlexApi;
 
 namespace PlexRipper.BaseTests;
 
@@ -387,7 +386,8 @@ public class MockPlexApiServer : IMockPlexApiServer
 
                                 var metadataList = metadataIds
                                     .Select(x => GetMediaItem(x.ToString()))
-                                    .Where(x => x != null)
+                                    .Where(x => x is not null)
+                                    .Select(x => x!)
                                     .ToList();
 
                                 var responseBody = FakePlexApiData.GetMediaMetaDataResponseBodyResponse(

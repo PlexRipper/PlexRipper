@@ -6,8 +6,8 @@ namespace PlexRipper.Domain;
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum PlexMediaType
 {
-    // NOTE: Make sure the indexes are correct, 1,2,3,4,5 etc and that there is no skip in between
-    // Otherwise the Typescript DTO translator in the front-end starts messing up
+    // NOTE: Make sure the indexes are correct, 1,2,3,4,5 etc. and that there is no skip in between
+    // Otherwise the TypeScript DTO translator in the front-end starts messing up
     [EnumMember(Value = nameof(None))]
     None = 0,
 

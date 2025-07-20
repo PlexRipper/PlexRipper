@@ -83,13 +83,6 @@ export interface CreatePlexServerConnectionEndpointRequest {
   url: string;
 }
 
-export enum DataType {
-  PlexAccount = "PlexAccount",
-  PlexServer = "PlexServer",
-  PlexLibrary = "PlexLibrary",
-  PlexServerConnection = "PlexServerConnection",
-}
-
 export interface DateTimeSettingsDTO {
   longDateFormat: string;
   shortDateFormat: string;
@@ -705,9 +698,10 @@ export interface PlexMediaMetadataDTO {
 }
 
 export interface PlexMediaQualityDTO {
-  displayQuality: string;
-  hashId: string;
-  quality: string;
+  /** @format int32 */
+  id: number;
+  quality: VideoQuality;
+  type: PlexMediaType;
 }
 
 export interface PlexMediaSlimDTO {
@@ -868,6 +862,13 @@ export interface PlexServerStatusDTO {
   /** @format int32 */
   statusCode: number;
   statusMessage: string;
+}
+
+export enum RefreshDataType {
+  PlexAccount = "PlexAccount",
+  PlexServer = "PlexServer",
+  PlexLibrary = "PlexLibrary",
+  PlexServerConnection = "PlexServerConnection",
 }
 
 export interface RefreshPlexAccountAccessRapportDTO {
@@ -1315,6 +1316,17 @@ export interface ValidatePlexAccountResponse {
 export interface ValidatePlexServerConnectionEndpointRequest {
   /** @minLength 1 */
   url: string;
+}
+
+export enum VideoQuality {
+  Unknown = "Unknown",
+  SD = "SD",
+  DVD = "DVD",
+  HD = "HD",
+  FullHD = "FullHD",
+  QHD = "QHD",
+  UHD4K = "UHD_4K",
+  UHD8K = "UHD_8K",
 }
 
 export enum ViewMode {

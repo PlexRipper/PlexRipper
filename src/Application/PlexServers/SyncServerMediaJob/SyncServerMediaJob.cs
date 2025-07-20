@@ -129,7 +129,7 @@ public class SyncServerMediaJob : IJob
             }
 
             // Send a refresh notification to all clients
-            await _signalRService.SendRefreshNotificationAsync(DataType.PlexLibrary);
+            await _signalRService.SendRefreshNotificationAsync(RefreshDataType.PlexLibrary);
 
             if (results.Any())
             {

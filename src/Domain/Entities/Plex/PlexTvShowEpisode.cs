@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-
-namespace PlexRipper.Domain;
+﻿namespace PlexRipper.Domain;
 
 public class PlexTvShowEpisode : BasePlexMedia
 {
@@ -24,7 +22,7 @@ public class PlexTvShowEpisode : BasePlexMedia
 
     public int TvShowSeasonId { get; set; }
 
-    public ICollection<PlexTvShowEpisodeMediaData> MediaDataList { get; set; } = [];
+    public ICollection<PlexTvShowEpisodeMediaData> MediaDataList { get; init; } = [];
 
     #endregion
 
@@ -34,17 +32,8 @@ public class PlexTvShowEpisode : BasePlexMedia
     public override PlexMediaType Type => PlexMediaType.Episode;
 
     [NotMapped]
-    public List<PlexMediaQuality> Qualities
-    {
-        get
-        {
-            return MediaDataList
-                .Select(y => new PlexMediaQuality(y.VideoResolution))
-                .Reverse() // This sorts from lowest to highest quality
-                .TakeLast(1) // TODO:remove this when quality selector for downloading is implemented
-                .ToList();
-        }
-    }
+    public List<PlexMediaQuality> Qualities =>
+        MediaDataList.Select(y => y.ToPlexMediaQuality()).OrderBy(q => q.Quality).ToList();
 
     #endregion
 }

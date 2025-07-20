@@ -22,7 +22,7 @@ public record DownloadTaskDTO : IDownloadTaskProgress
     public required string FullTitle { get; set; }
 
     /// <summary>
-    /// Note: Naming third just 'type' will cause errors in the Typescript type generating.
+    /// Note: Naming third just 'type' will cause errors in the TypeScript type generating.
     /// </summary>
     public required PlexMediaType MediaType { get; set; }
 
@@ -68,7 +68,7 @@ public record DownloadTaskDTO : IDownloadTaskProgress
 
     /// <summary>
     /// The nested <see cref="DownloadTaskGeneric"/> used for seasons and episodes.
-    /// "Required = Required.Default" is used for ensuring it's optional in the Typescript generating.
+    /// "Required = Required.Default" is used for ensuring it's optional in the TypeScript generating.
     /// </summary>
     public required List<DownloadTaskDTO> Children { get; set; }
 }

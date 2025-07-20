@@ -107,7 +107,9 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
         await dbContext.SaveChangesAsync();
 
         mock.Mock<ISignalRService>()
-            .Setup(m => m.SendRefreshNotificationAsync(It.IsAny<List<DataType>>(), It.IsAny<CancellationToken>()))
+            .Setup(m =>
+                m.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>(), It.IsAny<CancellationToken>())
+            )
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Once);
 
@@ -174,7 +176,9 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
         await dbContext.SaveChangesAsync();
 
         mock.Mock<ISignalRService>()
-            .Setup(m => m.SendRefreshNotificationAsync(It.IsAny<List<DataType>>(), It.IsAny<CancellationToken>()))
+            .Setup(m =>
+                m.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>(), It.IsAny<CancellationToken>())
+            )
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Once);
 

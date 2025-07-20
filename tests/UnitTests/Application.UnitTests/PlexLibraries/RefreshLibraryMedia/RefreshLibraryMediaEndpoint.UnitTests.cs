@@ -54,7 +54,7 @@ public class RefreshLibraryMediaEndpointUnitTests : BaseUnitTest<RefreshLibraryM
         // Act
         var rawResponse = SetupEndpointUnitTest<RefreshLibraryMediaEndpoint>();
         await rawResponse.HandleAsync(new RefreshLibraryMediaEndpointRequest(plexLibrary.Id), CancellationToken.None);
-        var resultDTO = rawResponse.Response as BaseResultDTO;
+        var resultDTO = rawResponse.Response;
 
         // Assert
         resultDTO.ShouldNotBeNull();

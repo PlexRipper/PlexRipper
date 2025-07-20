@@ -4,7 +4,7 @@ namespace Application.Contracts;
 
 /// <summary>
 /// The <see cref="ResultDTO{T}"/> without the value.
-/// NOTE: This is named BaseResultDTO to allow for type generating and using this as a base. In Typescript this works differently than C#
+/// NOTE: This is named BaseResultDTO to allow for type generating and using this as a base. In TypeScript this works differently than C#
 /// </summary>
 public class BaseResultDTO
 {

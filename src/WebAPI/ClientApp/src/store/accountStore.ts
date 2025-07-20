@@ -4,7 +4,7 @@ import type { Observable } from 'rxjs';
 import { forkJoin, of } from 'rxjs';
 import { switchMap, tap } from 'rxjs/operators';
 import type { PlexAccountDTO } from '@dto';
-import { DataType } from '@dto';
+import { RefreshDataType } from '@dto';
 import type { ISetupResult } from '@interfaces';
 import { plexAccountApi } from '@api';
 import { useLibraryStore, useServerStore, useSignalrStore } from '@store';
@@ -30,7 +30,7 @@ export const useAccountStore = defineStore('AccountStore', () => {
 	const actions = {
 		setup(): Observable<ISetupResult> {
 			// Listen for refresh notifications
-			signalRStore.getRefreshNotification(DataType.PlexAccount).pipe(switchMap(() => actions.refreshAccounts())).subscribe();
+			signalRStore.getRefreshNotification(RefreshDataType.PlexAccount).pipe(switchMap(() => actions.refreshAccounts())).subscribe();
 
 			return actions.refreshAccounts().pipe(switchMap(() => of({ name: 'useAccountStore', isSuccess: true })));
 		},

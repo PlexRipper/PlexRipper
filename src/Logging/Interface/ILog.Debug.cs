@@ -29,26 +29,6 @@ public partial interface ILog
     );
 
     /// <summary>
-    /// Write a log event with the <see cref="LogEventLevel.Debug"/> level and associated exception.
-    /// </summary>
-    /// <param name="exception">Exception related to the event.</param>
-    /// <param name="messageTemplate">Message template describing the event.</param>
-    /// <param name="memberName">This is automatically passed by the Caller Information and should not be filled in.</param>
-    /// <param name="sourceFilePath">This is automatically passed by the Caller Information and should not be filled in.</param>
-    /// <param name="sourceLineNumber">This is automatically passed by the Caller Information and should not be filled in.</param>
-    /// <example>
-    /// Log.Debug(ex, "Processed {RecordCount} records in {TimeMS}.", records.Length, sw.ElapsedMilliseconds);
-    /// </example>
-    [MessageTemplateFormatMethod("messageTemplate")]
-    LogMetaData Debug(
-        Exception? exception,
-        string messageTemplate,
-        [CallerMemberName] string memberName = "",
-        [CallerFilePath] string sourceFilePath = "",
-        [CallerLineNumber] int sourceLineNumber = 0
-    );
-
-    /// <summary>
     /// Write a log event with the <see cref="LogEventLevel.Debug"/> level.
     /// </summary>
     /// <param name="messageTemplate">Message template describing the event.</param>

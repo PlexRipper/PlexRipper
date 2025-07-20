@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-
-namespace PlexRipper.Domain;
+﻿namespace PlexRipper.Domain;
 
 public class PlexTvShowSeason : BasePlexMedia
 {
@@ -28,6 +26,15 @@ public class PlexTvShowSeason : BasePlexMedia
 
     [NotMapped]
     public override PlexMediaType Type => PlexMediaType.Season;
+
+    [NotMapped]
+    public List<PlexMediaQuality> Qualities =>
+        Episodes
+            .SelectMany(x => x.MediaDataList)
+            .Select(y => y.ToPlexMediaQuality())
+            .Distinct()
+            .OrderBy(q => q.Quality)
+            .ToList();
 
     #endregion
 }

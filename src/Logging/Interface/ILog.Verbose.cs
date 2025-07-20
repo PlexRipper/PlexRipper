@@ -17,15 +17,6 @@ public partial interface ILog
     );
 
     [MessageTemplateFormatMethod("messageTemplate")]
-    LogMetaData Verbose(
-        Exception? ex,
-        string messageTemplate,
-        [CallerMemberName] string memberName = "",
-        [CallerFilePath] string sourceFilePath = "",
-        [CallerLineNumber] int sourceLineNumber = 0
-    );
-
-    [MessageTemplateFormatMethod("messageTemplate")]
     LogMetaData Verbose<T>(
         string messageTemplate,
         T propertyValue = default!,

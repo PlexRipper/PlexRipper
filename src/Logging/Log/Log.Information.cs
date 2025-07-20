@@ -20,16 +20,6 @@ public partial class Log
 
     /// <inheritdoc/>
     [MessageTemplateFormatMethod("messageTemplate")]
-    public LogMetaData Information(
-        Exception? ex,
-        string messageTemplate,
-        [CallerMemberName] string memberName = "",
-        [CallerFilePath] string sourceFilePath = "",
-        [CallerLineNumber] int sourceLineNumber = 0
-    ) => Write(LogEventLevel.Information, ex, messageTemplate, sourceFilePath, memberName, sourceLineNumber);
-
-    /// <inheritdoc/>
-    [MessageTemplateFormatMethod("messageTemplate")]
     public LogMetaData Information<T>(
         string messageTemplate,
         T propertyValue = default!,

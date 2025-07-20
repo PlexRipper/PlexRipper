@@ -5,37 +5,67 @@
 		<QGlowChip
 			v-for="(quality, j) in qualities"
 			:key="j"
-			:color="getQualityColor(quality.quality)"
+			:color="getQualityDisplay(quality.quality).color"
 			size="md"
-			:value="quality.displayQuality" />
+			:value="getQualityDisplay(quality.quality).label" />
 	</div>
 </template>
 
 <script setup lang="ts">
 import Log from 'consola';
-import type { PlexMediaQualityDTO } from '@dto';
+import { VideoQuality, type PlexMediaQualityDTO } from '@dto';
 
 defineProps<{
 	qualities: PlexMediaQualityDTO[];
 }>();
 
-const getQualityColor = (quality: string): string => {
+const getQualityDisplay = (quality: VideoQuality): {
+	color: string;
+	label: string;
+} => {
 	switch (quality) {
-		case 'sd':
-			return 'brown darken-4';
-		case '480':
-			return 'deep-orange';
-		case '576':
-			return 'yellow darken-1';
-		case '720':
-			return 'lime accent-4';
-		case '1080':
-			return 'blue accent-3';
-		case '4k':
-			return 'red darken-4';
+		case VideoQuality.SD: // "480p"
+			return {
+				color: 'deep-orange',
+				label: 'SD (480p)',
+			};
+		case VideoQuality.DVD: // "576p"
+			return {
+				color: 'yellow darken-1',
+				label: 'DVD (576p)',
+			};
+		case VideoQuality.HD: // "720p"
+			return {
+				color: 'lime accent-4',
+				label: 'HD (720p)',
+			};
+		case VideoQuality.FullHD: // "1080p"
+			return {
+				color: 'blue accent-3',
+				label: 'Full HD (1080p)',
+			};
+		case VideoQuality.QHD: // "1440p"
+			return {
+				color: 'indigo accent-2',
+				label: 'QHD (1440p)',
+			};
+		case VideoQuality.UHD4K: // "4K"
+			return {
+				color: 'red darken-4',
+				label: '4K (2160p)',
+			};
+		case VideoQuality.UHD8K: // "8K"
+			return {
+				color: 'pink darken-4',
+				label: '8K (4320p)',
+			};
+		case VideoQuality.Unknown:
 		default:
-			Log.error('Missing quality color option', quality);
-			return 'blue-grey';
+			Log.error('Missing quality display mapping for', quality);
+			return {
+				color: 'blue-grey',
+				label: 'Unknown',
+			};
 	}
 };
 </script>

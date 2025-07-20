@@ -1,7 +1,6 @@
 using System.Net;
 using System.Text;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
-using PlexApi.Contracts;
 
 namespace PlexRipper.BaseTests;
 

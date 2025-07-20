@@ -35,6 +35,7 @@ public class GenerateDownloadTaskMoviesCommandHandler_UnitTests : BaseUnitTest<G
                 MediaIds = plexMovies.Select(x => x.Id).ToList(),
                 PlexServerId = 1,
                 PlexLibraryId = 1,
+                Qualities = [],
             },
         };
 
@@ -85,6 +86,7 @@ public class GenerateDownloadTaskMoviesCommandHandler_UnitTests : BaseUnitTest<G
                 MediaIds = plexMovies.Select(x => x.Id).ToList(),
                 PlexServerId = 1,
                 PlexLibraryId = 1,
+                Qualities = [],
             },
         };
 
@@ -130,6 +132,7 @@ public class GenerateDownloadTaskMoviesCommandHandler_UnitTests : BaseUnitTest<G
                 MediaIds = plexMovies.Select(x => x.Id).ToList(),
                 PlexServerId = 1,
                 PlexLibraryId = 1,
+                Qualities = [],
             },
         };
 

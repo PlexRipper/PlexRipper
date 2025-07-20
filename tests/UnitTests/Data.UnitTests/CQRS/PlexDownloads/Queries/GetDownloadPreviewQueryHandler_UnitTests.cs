@@ -60,6 +60,7 @@ public class GetDownloadPreviewQueryHandler_UnitTests : BaseUnitTest<GetDownload
                 Type = PlexMediaType.TvShow,
                 PlexServerId = 1,
                 PlexLibraryId = 1,
+                Qualities = [],
             }
         );
 
@@ -70,6 +71,7 @@ public class GetDownloadPreviewQueryHandler_UnitTests : BaseUnitTest<GetDownload
                 Type = PlexMediaType.Season,
                 PlexServerId = 1,
                 PlexLibraryId = 1,
+                Qualities = [],
             }
         );
 
@@ -80,6 +82,7 @@ public class GetDownloadPreviewQueryHandler_UnitTests : BaseUnitTest<GetDownload
                 Type = PlexMediaType.Episode,
                 PlexServerId = 1,
                 PlexLibraryId = 1,
+                Qualities = [],
             }
         );
 

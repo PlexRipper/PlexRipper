@@ -2,9 +2,11 @@
 
 namespace Application.Contracts;
 
-public class DownloadMediaDTO
+public record DownloadMediaDTO
 {
     public required List<int> MediaIds { get; init; } = [];
+
+    public required List<PlexMediaQualityDTO> Qualities { get; init; } = [];
 
     public required PlexMediaType Type { get; init; }
 

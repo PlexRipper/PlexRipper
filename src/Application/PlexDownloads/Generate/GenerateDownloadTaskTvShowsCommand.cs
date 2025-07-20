@@ -88,6 +88,7 @@ public class GenerateDownloadTaskTvShowsCommandHandler : IRequestHandler<Generat
                             PlexLibraryId = tvShow.PlexLibraryId,
                             PlexServerId = tvShow.PlexServerId,
                             Type = PlexMediaType.Season,
+                            Qualities = [],
                         }
                     );
                 }

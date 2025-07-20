@@ -109,6 +109,7 @@ public class GenerateDownloadTaskTvShowSeasonsCommandHandler
                         PlexLibraryId = season.PlexLibraryId,
                         PlexServerId = season.PlexServerId,
                         Type = PlexMediaType.Episode,
+                        Qualities = [],
                     }
                 );
             }

@@ -27,6 +27,10 @@ public static class DownloadMediaExtensions
                     PlexServerId = plexServerId,
                     PlexLibraryId = 0, // TODO: - Fix this
                     Type = type,
+                    Qualities = typedList
+                        .FindAll(x => x.PlexServerId == plexServerId)
+                        .SelectMany(x => x.Qualities)
+                        .ToList(),
                 }
             );
 
@@ -48,6 +52,7 @@ public static class DownloadMediaExtensions
                 PlexLibraryId = group.Key.PlexLibraryId,
                 MediaIds = group.SelectMany(x => x.MediaIds).Distinct().ToList(),
                 Type = group.Key.Type,
+                Qualities = group.SelectMany(x => x.Qualities).ToList(),
             })
             .ToList();
     }

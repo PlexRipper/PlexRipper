@@ -27,6 +27,7 @@ public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest<CreateDo
                 MediaIds = [1, 2, 3],
                 PlexServerId = 1,
                 PlexLibraryId = 1,
+                Qualities = [],
             },
             new()
             {
@@ -34,6 +35,7 @@ public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest<CreateDo
                 MediaIds = [1, 2, 3],
                 PlexServerId = 1,
                 PlexLibraryId = 1,
+                Qualities = [],
             },
             new()
             {
@@ -41,6 +43,7 @@ public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest<CreateDo
                 MediaIds = [1, 2, 3],
                 PlexServerId = 1,
                 PlexLibraryId = 1,
+                Qualities = [],
             },
             new()
             {
@@ -48,6 +51,7 @@ public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest<CreateDo
                 MediaIds = [1, 2, 3],
                 PlexServerId = 1,
                 PlexLibraryId = 1,
+                Qualities = [],
             },
         };
 
@@ -84,6 +88,7 @@ public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest<CreateDo
                 MediaIds = [1, 2, 3],
                 PlexServerId = 1,
                 PlexLibraryId = 1,
+                Qualities = [],
             },
             new()
             {
@@ -91,6 +96,7 @@ public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest<CreateDo
                 MediaIds = [1, 2, 3],
                 PlexServerId = 1,
                 PlexLibraryId = 1,
+                Qualities = [],
             },
         };
 

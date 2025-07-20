@@ -56,6 +56,7 @@ public class DownloadTaskFactoryGenerateTvShowEpisodesDownloadTasksAsyncUnitTest
                 MediaIds = plexEpisodes.Select(x => x.Id).ToList(),
                 PlexServerId = 1,
                 PlexLibraryId = 1,
+                Qualities = [],
             },
         };
 
@@ -127,6 +128,7 @@ public class DownloadTaskFactoryGenerateTvShowEpisodesDownloadTasksAsyncUnitTest
                 MediaIds = plexEpisodes.Select(x => x.Id).ToList(),
                 PlexServerId = 1,
                 PlexLibraryId = 1,
+                Qualities = [],
             },
         };
 
@@ -179,6 +181,7 @@ public class DownloadTaskFactoryGenerateTvShowEpisodesDownloadTasksAsyncUnitTest
                 MediaIds = validEpisodeIds.Concat(invalidEpisodeIds).ToList(),
                 PlexServerId = 1,
                 PlexLibraryId = 1,
+                Qualities = [],
             },
         };
 
@@ -226,6 +229,7 @@ public class DownloadTaskFactoryGenerateTvShowEpisodesDownloadTasksAsyncUnitTest
                 MediaIds = duplicatedEpisodeIds,
                 PlexServerId = 1,
                 PlexLibraryId = 1,
+                Qualities = [],
             },
         };
 
@@ -298,6 +302,7 @@ public class DownloadTaskFactoryGenerateTvShowEpisodesDownloadTasksAsyncUnitTest
                 MediaIds = plexEpisodes.Select(x => x.Id).ToList(),
                 PlexServerId = 1,
                 PlexLibraryId = 1,
+                Qualities = [],
             },
         };
         var command = new GenerateDownloadTaskTvShowEpisodesCommand(downloadMediaDtos);
@@ -351,6 +356,7 @@ public class DownloadTaskFactoryGenerateTvShowEpisodesDownloadTasksAsyncUnitTest
                 MediaIds = plexEpisodes.Select(x => x.Id).ToList(),
                 PlexServerId = 1,
                 PlexLibraryId = 1,
+                Qualities = [],
             },
         };
 
@@ -418,6 +424,7 @@ public class DownloadTaskFactoryGenerateTvShowEpisodesDownloadTasksAsyncUnitTest
                 MediaIds = plexEpisodes.Select(x => x.Id).ToList(),
                 PlexServerId = 1,
                 PlexLibraryId = 1,
+                Qualities = [],
             },
             new()
             {
@@ -425,6 +432,7 @@ public class DownloadTaskFactoryGenerateTvShowEpisodesDownloadTasksAsyncUnitTest
                 MediaIds = plexMovies.Select(x => x.Id).ToList(),
                 PlexServerId = 1,
                 PlexLibraryId = 1,
+                Qualities = [],
             },
         };
 
@@ -477,6 +485,7 @@ public class DownloadTaskFactoryGenerateTvShowEpisodesDownloadTasksAsyncUnitTest
                 MediaIds = plexEpisodes.Select(x => x.Id).ToList(),
                 PlexServerId = 1,
                 PlexLibraryId = 1,
+                Qualities = [],
             },
         };
 
@@ -510,6 +519,7 @@ public class DownloadTaskFactoryGenerateTvShowEpisodesDownloadTasksAsyncUnitTest
                 MediaIds = new List<int>(), // Empty list
                 PlexServerId = 1,
                 PlexLibraryId = 1,
+                Qualities = [],
             },
         };
 
@@ -549,6 +559,7 @@ public class DownloadTaskFactoryGenerateTvShowEpisodesDownloadTasksAsyncUnitTest
                 MediaIds = plexEpisodes.Select(x => x.Id).ToList(),
                 PlexServerId = 1,
                 PlexLibraryId = 1,
+                Qualities = [],
             },
         };
 

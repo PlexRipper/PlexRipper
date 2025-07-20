@@ -33,9 +33,10 @@ public static class PlexMediaDataDTOMapper
     public static PlexMediaQualityDTO ToDTO(this PlexMediaQuality source) =>
         new()
         {
-            Id = source.Id,
+            DataId = source.DataId,
             Quality = source.Quality,
-            Type = source.Type,
+            MediaDataType = source.MediaDataType,
+            MediaId = source.MediaId,
         };
 
     public static List<PlexMediaQualityDTO> ToDTO(this List<PlexMediaQuality> source) => source.ConvertAll(ToDTO);

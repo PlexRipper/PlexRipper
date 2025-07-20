@@ -39,7 +39,7 @@
     "@primevue/themes": "^4.2.5",
     "@vueuse/rxjs": "^12.0.0",
     "axios": "^1.7.9",
-    "caniuse-lite": "^1.0.30001689",
+    "caniuse-lite": "^1.0.30001727",
     "check-password-strength": "^2.0.10",
     "consola": "^3.3.3",
     "date-fns": "^2.30.0",

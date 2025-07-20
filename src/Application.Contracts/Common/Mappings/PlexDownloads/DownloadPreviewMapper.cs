@@ -28,12 +28,13 @@ public static class DownloadPreviewMapper
         {
             Id = source.Id,
             Title = source.Title,
-            Size = source.MediaSize,
+            Size = source.MediaDataList.Sum(x => x.Parts.Sum(p => p.Size)),
             ChildCount = source.ChildCount,
             MediaType = source.Type,
             TvShowId = default,
             SeasonId = default,
             Children = [],
+            Qualities = source.Qualities,
         };
 
     public static IQueryable<DownloadPreview> ProjectToDownloadPreview(this IQueryable<PlexMovie> source) =>
@@ -54,6 +55,7 @@ public static class DownloadPreviewMapper
             TvShowId = default,
             SeasonId = default,
             Children = [],
+            Qualities = source.Qualities,
         };
 
     public static IQueryable<DownloadPreview> ProjectToDownloadPreview(this IQueryable<PlexTvShow> source) =>
@@ -74,6 +76,7 @@ public static class DownloadPreviewMapper
             TvShowId = source.TvShowId,
             SeasonId = default,
             Children = [],
+            Qualities = source.Qualities,
         };
 
     public static IQueryable<DownloadPreview> ProjectToDownloadPreview(this IQueryable<PlexTvShowSeason> source) =>
@@ -94,6 +97,7 @@ public static class DownloadPreviewMapper
             TvShowId = source.TvShowId,
             SeasonId = source.TvShowSeasonId,
             Children = [],
+            Qualities = source.Qualities,
         };
 
     public static IQueryable<DownloadPreview> ProjectToDownloadPreview(this IQueryable<PlexTvShowEpisode> source) =>
@@ -105,6 +109,7 @@ public static class DownloadPreviewMapper
             TvShowId = source.TvShowId,
             SeasonId = source.TvShowSeasonId,
             EpisodeId = source.Id,
+            Quality = source.Qualities.PickMediaQuality(),
         };
 
     public static IQueryable<TvShowEpisodeKeyDTO> ProjectToEpisodeKey(this IQueryable<PlexTvShowEpisode> source) =>

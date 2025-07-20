@@ -2,21 +2,23 @@ using PlexRipper.Domain;
 
 namespace Application.Contracts;
 
-public class DownloadPreview
+public record DownloadPreview
 {
-    public int Id { get; init; }
+    public required int Id { get; init; }
 
-    public string Title { get; init; } = string.Empty;
+    public required string Title { get; init; }
 
-    public long Size { get; set; }
+    public required long Size { get; set; }
 
-    public int ChildCount { get; set; }
+    public required int ChildCount { get; set; }
 
-    public PlexMediaType MediaType { get; init; } = PlexMediaType.Unknown;
+    public required PlexMediaType MediaType { get; init; } = PlexMediaType.Unknown;
 
-    public int TvShowId { get; init; }
+    public required int TvShowId { get; init; }
 
-    public int SeasonId { get; init; }
+    public required int SeasonId { get; init; }
 
-    public List<DownloadPreview> Children { get; init; } = [];
+    public required List<PlexMediaQuality> Qualities { get; init; }
+
+    public required List<DownloadPreview> Children { get; init; } = [];
 }

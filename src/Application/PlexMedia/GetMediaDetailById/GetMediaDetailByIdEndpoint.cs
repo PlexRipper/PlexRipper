@@ -113,8 +113,7 @@ public class GetMediaDetailByIdEndpoint : BaseEndpoint<GetMediaDetailByIdEndpoin
 
         foreach (var season in plexTvShow.Seasons)
             season.Episodes = _dbContext
-                .PlexTvShowEpisodes.IncludeMediaData()
-                .Where(x => x.TvShowSeasonId == season.Id)
+                .PlexTvShowEpisodes.Where(x => x.TvShowSeasonId == season.Id)
                 .Take(season.ChildCount)
                 .ToList();
 

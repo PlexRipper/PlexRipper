@@ -12,114 +12,130 @@ namespace PlexRipper.Data.Migrations
         {
             migrationBuilder.DropForeignKey(
                 name: "FK_PlexTvShowMediaQuality_PlexMediaQuality_PlexMediaQualityId",
-                table: "PlexTvShowMediaQuality");
+                table: "PlexTvShowMediaQuality"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_PlexTvShowSeasonMediaQuality_PlexMediaQuality_PlexMediaQualityId",
-                table: "PlexTvShowSeasonMediaQuality");
+                table: "PlexTvShowSeasonMediaQuality"
+            );
 
-            migrationBuilder.DropTable(
-                name: "PlexMovieMediaQuality");
+            migrationBuilder.DropTable(name: "PlexMovieMediaQuality");
 
-            migrationBuilder.DropTable(
-                name: "PlexTvShowEpisodeMediaQuality");
+            migrationBuilder.DropTable(name: "PlexTvShowEpisodeMediaQuality");
 
-            migrationBuilder.DropTable(
-                name: "PlexMediaQuality");
+            migrationBuilder.DropTable(name: "PlexMediaQuality");
 
             migrationBuilder.DropPrimaryKey(
                 name: "PK_PlexTvShowSeasonMediaQuality",
-                table: "PlexTvShowSeasonMediaQuality");
+                table: "PlexTvShowSeasonMediaQuality"
+            );
 
-            migrationBuilder.DropPrimaryKey(
-                name: "PK_PlexTvShowMediaQuality",
-                table: "PlexTvShowMediaQuality");
+            migrationBuilder.DropPrimaryKey(name: "PK_PlexTvShowMediaQuality", table: "PlexTvShowMediaQuality");
 
             migrationBuilder.RenameColumn(
                 name: "PlexMediaQualityId",
                 table: "PlexTvShowSeasonMediaQuality",
-                newName: "Quality");
+                newName: "Quality"
+            );
 
             migrationBuilder.RenameColumn(
                 name: "PlexMediaQualityId",
                 table: "PlexTvShowMediaQuality",
-                newName: "Quality");
+                newName: "Quality"
+            );
 
-            migrationBuilder.AlterColumn<int>(
-                name: "PlexTvShowSeasonId",
-                table: "PlexTvShowSeasonMediaQuality",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER")
+            migrationBuilder
+                .AlterColumn<int>(
+                    name: "PlexTvShowSeasonId",
+                    table: "PlexTvShowSeasonMediaQuality",
+                    type: "INTEGER",
+                    nullable: false,
+                    oldClrType: typeof(int),
+                    oldType: "INTEGER"
+                )
                 .Annotation("Relational:ColumnOrder", 2)
                 .OldAnnotation("Relational:ColumnOrder", 3);
 
-            migrationBuilder.AlterColumn<int>(
-                name: "PlexLibraryId",
-                table: "PlexTvShowSeasonMediaQuality",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER")
+            migrationBuilder
+                .AlterColumn<int>(
+                    name: "PlexLibraryId",
+                    table: "PlexTvShowSeasonMediaQuality",
+                    type: "INTEGER",
+                    nullable: false,
+                    oldClrType: typeof(int),
+                    oldType: "INTEGER"
+                )
                 .Annotation("Relational:ColumnOrder", 1)
                 .OldAnnotation("Relational:ColumnOrder", 2);
 
-            migrationBuilder.AlterColumn<int>(
-                name: "Quality",
-                table: "PlexTvShowSeasonMediaQuality",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER")
+            migrationBuilder
+                .AlterColumn<int>(
+                    name: "Quality",
+                    table: "PlexTvShowSeasonMediaQuality",
+                    type: "INTEGER",
+                    nullable: false,
+                    oldClrType: typeof(int),
+                    oldType: "INTEGER"
+                )
                 .Annotation("Relational:ColumnOrder", 3)
                 .OldAnnotation("Relational:ColumnOrder", 1);
 
-            migrationBuilder.AddColumn<int>(
-                name: "Id",
-                table: "PlexTvShowSeasonMediaQuality",
-                type: "INTEGER",
-                nullable: false,
-                defaultValue: 0)
+            migrationBuilder
+                .AddColumn<int>(
+                    name: "Id",
+                    table: "PlexTvShowSeasonMediaQuality",
+                    type: "INTEGER",
+                    nullable: false,
+                    defaultValue: 0
+                )
                 .Annotation("Relational:ColumnOrder", 0)
                 .Annotation("Sqlite:Autoincrement", true);
 
-            migrationBuilder.AlterColumn<int>(
-                name: "PlexTvShowId",
-                table: "PlexTvShowMediaQuality",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER")
+            migrationBuilder
+                .AlterColumn<int>(
+                    name: "PlexTvShowId",
+                    table: "PlexTvShowMediaQuality",
+                    type: "INTEGER",
+                    nullable: false,
+                    oldClrType: typeof(int),
+                    oldType: "INTEGER"
+                )
                 .Annotation("Relational:ColumnOrder", 2)
                 .OldAnnotation("Relational:ColumnOrder", 3);
 
-            migrationBuilder.AlterColumn<int>(
-                name: "PlexLibraryId",
-                table: "PlexTvShowMediaQuality",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER")
+            migrationBuilder
+                .AlterColumn<int>(
+                    name: "PlexLibraryId",
+                    table: "PlexTvShowMediaQuality",
+                    type: "INTEGER",
+                    nullable: false,
+                    oldClrType: typeof(int),
+                    oldType: "INTEGER"
+                )
                 .Annotation("Relational:ColumnOrder", 1)
                 .OldAnnotation("Relational:ColumnOrder", 2);
 
-            migrationBuilder.AlterColumn<int>(
-                name: "Quality",
-                table: "PlexTvShowMediaQuality",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER")
+            migrationBuilder
+                .AlterColumn<int>(
+                    name: "Quality",
+                    table: "PlexTvShowMediaQuality",
+                    type: "INTEGER",
+                    nullable: false,
+                    oldClrType: typeof(int),
+                    oldType: "INTEGER"
+                )
                 .Annotation("Relational:ColumnOrder", 3)
                 .OldAnnotation("Relational:ColumnOrder", 1);
 
-            migrationBuilder.AddColumn<int>(
-                name: "Id",
-                table: "PlexTvShowMediaQuality",
-                type: "INTEGER",
-                nullable: false,
-                defaultValue: 0)
+            migrationBuilder
+                .AddColumn<int>(
+                    name: "Id",
+                    table: "PlexTvShowMediaQuality",
+                    type: "INTEGER",
+                    nullable: false,
+                    defaultValue: 0
+                )
                 .Annotation("Relational:ColumnOrder", 0)
                 .Annotation("Sqlite:Autoincrement", true);
 
@@ -128,39 +144,46 @@ namespace PlexRipper.Data.Migrations
                 table: "PlexTvShowEpisodeData",
                 type: "INTEGER",
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: 0
+            );
 
             migrationBuilder.AddColumn<int>(
                 name: "Quality",
                 table: "PlexMovieData",
                 type: "INTEGER",
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: 0
+            );
 
             migrationBuilder.AddPrimaryKey(
                 name: "PK_PlexTvShowSeasonMediaQuality",
                 table: "PlexTvShowSeasonMediaQuality",
-                column: "Id");
+                column: "Id"
+            );
 
             migrationBuilder.AddPrimaryKey(
                 name: "PK_PlexTvShowMediaQuality",
                 table: "PlexTvShowMediaQuality",
-                column: "Id");
+                column: "Id"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexTvShowSeasonMediaQuality_PlexLibraryId",
                 table: "PlexTvShowSeasonMediaQuality",
-                column: "PlexLibraryId");
+                column: "PlexLibraryId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexTvShowMediaQuality_PlexLibraryId",
                 table: "PlexTvShowMediaQuality",
-                column: "PlexLibraryId");
+                column: "PlexLibraryId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexTvShowEpisodeData_Quality",
                 table: "PlexTvShowEpisodeData",
-                column: "Quality");
+                column: "Quality"
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_PlexTvShowMediaQuality_PlexLibraries_PlexLibraryId",
@@ -168,7 +191,8 @@ namespace PlexRipper.Data.Migrations
                 column: "PlexLibraryId",
                 principalTable: "PlexLibraries",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_PlexTvShowSeasonMediaQuality_PlexLibraries_PlexLibraryId",
@@ -176,7 +200,8 @@ namespace PlexRipper.Data.Migrations
                 column: "PlexLibraryId",
                 principalTable: "PlexLibraries",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
         }
 
         /// <inheritdoc />
@@ -184,140 +209,149 @@ namespace PlexRipper.Data.Migrations
         {
             migrationBuilder.DropForeignKey(
                 name: "FK_PlexTvShowMediaQuality_PlexLibraries_PlexLibraryId",
-                table: "PlexTvShowMediaQuality");
+                table: "PlexTvShowMediaQuality"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_PlexTvShowSeasonMediaQuality_PlexLibraries_PlexLibraryId",
-                table: "PlexTvShowSeasonMediaQuality");
+                table: "PlexTvShowSeasonMediaQuality"
+            );
 
             migrationBuilder.DropPrimaryKey(
                 name: "PK_PlexTvShowSeasonMediaQuality",
-                table: "PlexTvShowSeasonMediaQuality");
+                table: "PlexTvShowSeasonMediaQuality"
+            );
 
             migrationBuilder.DropIndex(
                 name: "IX_PlexTvShowSeasonMediaQuality_PlexLibraryId",
-                table: "PlexTvShowSeasonMediaQuality");
+                table: "PlexTvShowSeasonMediaQuality"
+            );
 
-            migrationBuilder.DropPrimaryKey(
-                name: "PK_PlexTvShowMediaQuality",
-                table: "PlexTvShowMediaQuality");
+            migrationBuilder.DropPrimaryKey(name: "PK_PlexTvShowMediaQuality", table: "PlexTvShowMediaQuality");
 
             migrationBuilder.DropIndex(
                 name: "IX_PlexTvShowMediaQuality_PlexLibraryId",
-                table: "PlexTvShowMediaQuality");
+                table: "PlexTvShowMediaQuality"
+            );
 
-            migrationBuilder.DropIndex(
-                name: "IX_PlexTvShowEpisodeData_Quality",
-                table: "PlexTvShowEpisodeData");
+            migrationBuilder.DropIndex(name: "IX_PlexTvShowEpisodeData_Quality", table: "PlexTvShowEpisodeData");
 
-            migrationBuilder.DropColumn(
-                name: "Id",
-                table: "PlexTvShowSeasonMediaQuality");
+            migrationBuilder.DropColumn(name: "Id", table: "PlexTvShowSeasonMediaQuality");
 
-            migrationBuilder.DropColumn(
-                name: "Id",
-                table: "PlexTvShowMediaQuality");
+            migrationBuilder.DropColumn(name: "Id", table: "PlexTvShowMediaQuality");
 
-            migrationBuilder.DropColumn(
-                name: "Quality",
-                table: "PlexTvShowEpisodeData");
+            migrationBuilder.DropColumn(name: "Quality", table: "PlexTvShowEpisodeData");
 
-            migrationBuilder.DropColumn(
-                name: "Quality",
-                table: "PlexMovieData");
+            migrationBuilder.DropColumn(name: "Quality", table: "PlexMovieData");
 
             migrationBuilder.RenameColumn(
                 name: "Quality",
                 table: "PlexTvShowSeasonMediaQuality",
-                newName: "PlexMediaQualityId");
+                newName: "PlexMediaQualityId"
+            );
 
             migrationBuilder.RenameColumn(
                 name: "Quality",
                 table: "PlexTvShowMediaQuality",
-                newName: "PlexMediaQualityId");
+                newName: "PlexMediaQualityId"
+            );
 
-            migrationBuilder.AlterColumn<int>(
-                name: "PlexTvShowSeasonId",
-                table: "PlexTvShowSeasonMediaQuality",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER")
+            migrationBuilder
+                .AlterColumn<int>(
+                    name: "PlexTvShowSeasonId",
+                    table: "PlexTvShowSeasonMediaQuality",
+                    type: "INTEGER",
+                    nullable: false,
+                    oldClrType: typeof(int),
+                    oldType: "INTEGER"
+                )
                 .Annotation("Relational:ColumnOrder", 3)
                 .OldAnnotation("Relational:ColumnOrder", 2);
 
-            migrationBuilder.AlterColumn<int>(
-                name: "PlexLibraryId",
-                table: "PlexTvShowSeasonMediaQuality",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER")
+            migrationBuilder
+                .AlterColumn<int>(
+                    name: "PlexLibraryId",
+                    table: "PlexTvShowSeasonMediaQuality",
+                    type: "INTEGER",
+                    nullable: false,
+                    oldClrType: typeof(int),
+                    oldType: "INTEGER"
+                )
                 .Annotation("Relational:ColumnOrder", 2)
                 .OldAnnotation("Relational:ColumnOrder", 1);
 
-            migrationBuilder.AlterColumn<int>(
-                name: "PlexMediaQualityId",
-                table: "PlexTvShowSeasonMediaQuality",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER")
+            migrationBuilder
+                .AlterColumn<int>(
+                    name: "PlexMediaQualityId",
+                    table: "PlexTvShowSeasonMediaQuality",
+                    type: "INTEGER",
+                    nullable: false,
+                    oldClrType: typeof(int),
+                    oldType: "INTEGER"
+                )
                 .Annotation("Relational:ColumnOrder", 1)
                 .OldAnnotation("Relational:ColumnOrder", 3);
 
-            migrationBuilder.AlterColumn<int>(
-                name: "PlexTvShowId",
-                table: "PlexTvShowMediaQuality",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER")
+            migrationBuilder
+                .AlterColumn<int>(
+                    name: "PlexTvShowId",
+                    table: "PlexTvShowMediaQuality",
+                    type: "INTEGER",
+                    nullable: false,
+                    oldClrType: typeof(int),
+                    oldType: "INTEGER"
+                )
                 .Annotation("Relational:ColumnOrder", 3)
                 .OldAnnotation("Relational:ColumnOrder", 2);
 
-            migrationBuilder.AlterColumn<int>(
-                name: "PlexLibraryId",
-                table: "PlexTvShowMediaQuality",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER")
+            migrationBuilder
+                .AlterColumn<int>(
+                    name: "PlexLibraryId",
+                    table: "PlexTvShowMediaQuality",
+                    type: "INTEGER",
+                    nullable: false,
+                    oldClrType: typeof(int),
+                    oldType: "INTEGER"
+                )
                 .Annotation("Relational:ColumnOrder", 2)
                 .OldAnnotation("Relational:ColumnOrder", 1);
 
-            migrationBuilder.AlterColumn<int>(
-                name: "PlexMediaQualityId",
-                table: "PlexTvShowMediaQuality",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER")
+            migrationBuilder
+                .AlterColumn<int>(
+                    name: "PlexMediaQualityId",
+                    table: "PlexTvShowMediaQuality",
+                    type: "INTEGER",
+                    nullable: false,
+                    oldClrType: typeof(int),
+                    oldType: "INTEGER"
+                )
                 .Annotation("Relational:ColumnOrder", 1)
                 .OldAnnotation("Relational:ColumnOrder", 3);
 
             migrationBuilder.AddPrimaryKey(
                 name: "PK_PlexTvShowSeasonMediaQuality",
                 table: "PlexTvShowSeasonMediaQuality",
-                columns: new[] { "PlexMediaQualityId", "PlexLibraryId", "PlexTvShowSeasonId" });
+                columns: new[] { "PlexMediaQualityId", "PlexLibraryId", "PlexTvShowSeasonId" }
+            );
 
             migrationBuilder.AddPrimaryKey(
                 name: "PK_PlexTvShowMediaQuality",
                 table: "PlexTvShowMediaQuality",
-                columns: new[] { "PlexMediaQualityId", "PlexLibraryId", "PlexTvShowId" });
+                columns: new[] { "PlexMediaQualityId", "PlexLibraryId", "PlexTvShowId" }
+            );
 
             migrationBuilder.CreateTable(
                 name: "PlexMediaQuality",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Quality = table.Column<int>(type: "INTEGER", nullable: false)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false).Annotation("Sqlite:Autoincrement", true),
+                    Quality = table.Column<int>(type: "INTEGER", nullable: false),
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_PlexMediaQuality", x => x.Id);
-                });
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "PlexMovieMediaQuality",
@@ -325,24 +359,35 @@ namespace PlexRipper.Data.Migrations
                 {
                     PlexMediaQualityId = table.Column<int>(type: "INTEGER", nullable: false),
                     PlexLibraryId = table.Column<int>(type: "INTEGER", nullable: false),
-                    PlexMovieId = table.Column<int>(type: "INTEGER", nullable: false)
+                    PlexMovieId = table.Column<int>(type: "INTEGER", nullable: false),
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PlexMovieMediaQuality", x => new { x.PlexMediaQualityId, x.PlexLibraryId, x.PlexMovieId });
+                    table.PrimaryKey(
+                        "PK_PlexMovieMediaQuality",
+                        x => new
+                        {
+                            x.PlexMediaQualityId,
+                            x.PlexLibraryId,
+                            x.PlexMovieId,
+                        }
+                    );
                     table.ForeignKey(
                         name: "FK_PlexMovieMediaQuality_PlexMediaQuality_PlexMediaQualityId",
                         column: x => x.PlexMediaQualityId,
                         principalTable: "PlexMediaQuality",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Cascade
+                    );
                     table.ForeignKey(
                         name: "FK_PlexMovieMediaQuality_PlexMovie_PlexMovieId",
                         column: x => x.PlexMovieId,
                         principalTable: "PlexMovie",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
+                        onDelete: ReferentialAction.Cascade
+                    );
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "PlexTvShowEpisodeMediaQuality",
@@ -350,39 +395,53 @@ namespace PlexRipper.Data.Migrations
                 {
                     PlexMediaQualityId = table.Column<int>(type: "INTEGER", nullable: false),
                     PlexLibraryId = table.Column<int>(type: "INTEGER", nullable: false),
-                    PlexTvShowEpisodeId = table.Column<int>(type: "INTEGER", nullable: false)
+                    PlexTvShowEpisodeId = table.Column<int>(type: "INTEGER", nullable: false),
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PlexTvShowEpisodeMediaQuality", x => new { x.PlexMediaQualityId, x.PlexLibraryId, x.PlexTvShowEpisodeId });
+                    table.PrimaryKey(
+                        "PK_PlexTvShowEpisodeMediaQuality",
+                        x => new
+                        {
+                            x.PlexMediaQualityId,
+                            x.PlexLibraryId,
+                            x.PlexTvShowEpisodeId,
+                        }
+                    );
                     table.ForeignKey(
                         name: "FK_PlexTvShowEpisodeMediaQuality_PlexMediaQuality_PlexMediaQualityId",
                         column: x => x.PlexMediaQualityId,
                         principalTable: "PlexMediaQuality",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Cascade
+                    );
                     table.ForeignKey(
                         name: "FK_PlexTvShowEpisodeMediaQuality_PlexTvShowEpisodes_PlexTvShowEpisodeId",
                         column: x => x.PlexTvShowEpisodeId,
                         principalTable: "PlexTvShowEpisodes",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
+                        onDelete: ReferentialAction.Cascade
+                    );
+                }
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexMediaQuality_Quality",
                 table: "PlexMediaQuality",
-                column: "Quality");
+                column: "Quality"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexMovieMediaQuality_PlexMovieId",
                 table: "PlexMovieMediaQuality",
-                column: "PlexMovieId");
+                column: "PlexMovieId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexTvShowEpisodeMediaQuality_PlexTvShowEpisodeId",
                 table: "PlexTvShowEpisodeMediaQuality",
-                column: "PlexTvShowEpisodeId");
+                column: "PlexTvShowEpisodeId"
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_PlexTvShowMediaQuality_PlexMediaQuality_PlexMediaQualityId",
@@ -390,7 +449,8 @@ namespace PlexRipper.Data.Migrations
                 column: "PlexMediaQualityId",
                 principalTable: "PlexMediaQuality",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_PlexTvShowSeasonMediaQuality_PlexMediaQuality_PlexMediaQualityId",
@@ -398,7 +458,8 @@ namespace PlexRipper.Data.Migrations
                 column: "PlexMediaQualityId",
                 principalTable: "PlexMediaQuality",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
         }
     }
 }

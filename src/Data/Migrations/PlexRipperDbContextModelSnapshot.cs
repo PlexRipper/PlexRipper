@@ -1673,17 +1673,9 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(3);
 
-                    b.Property<int>("PlexMovieMediaDataId")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(4);
-
                     b.HasKey("PlexMediaQualityId", "PlexLibraryId", "PlexMovieId");
 
-                    b.HasIndex("PlexLibraryId");
-
                     b.HasIndex("PlexMovieId");
-
-                    b.HasIndex("PlexMovieMediaDataId");
 
                     b.ToTable("PlexMovieMediaQuality");
                 });
@@ -2559,17 +2551,9 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(3);
 
-                    b.Property<int>("PlexTvShowEpisodeMediaDataId")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(4);
-
                     b.HasKey("PlexMediaQualityId", "PlexLibraryId", "PlexTvShowEpisodeId");
 
-                    b.HasIndex("PlexLibraryId");
-
                     b.HasIndex("PlexTvShowEpisodeId");
-
-                    b.HasIndex("PlexTvShowEpisodeMediaDataId");
 
                     b.ToTable("PlexTvShowEpisodeMediaQuality");
                 });
@@ -3290,37 +3274,17 @@ namespace PlexRipper.Data.Migrations
 
             modelBuilder.Entity("PlexRipper.Domain.PlexMovieMediaQuality", b =>
                 {
-                    b.HasOne("PlexRipper.Domain.PlexLibrary", "PlexLibrary")
-                        .WithMany()
-                        .HasForeignKey("PlexLibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("PlexRipper.Domain.PlexMediaQuality", "PlexMediaQuality")
+                    b.HasOne("PlexRipper.Domain.PlexMediaQuality", null)
                         .WithMany()
                         .HasForeignKey("PlexMediaQualityId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlexRipper.Domain.PlexMovie", "PlexMovie")
+                    b.HasOne("PlexRipper.Domain.PlexMovie", null)
                         .WithMany()
                         .HasForeignKey("PlexMovieId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("PlexRipper.Domain.PlexMovieMediaData", "PlexMovieMediaData")
-                        .WithMany()
-                        .HasForeignKey("PlexMovieMediaDataId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("PlexLibrary");
-
-                    b.Navigation("PlexMediaQuality");
-
-                    b.Navigation("PlexMovie");
-
-                    b.Navigation("PlexMovieMediaData");
                 });
 
             modelBuilder.Entity("PlexRipper.Domain.PlexServerConnection", b =>
@@ -3544,37 +3508,17 @@ namespace PlexRipper.Data.Migrations
 
             modelBuilder.Entity("PlexRipper.Domain.PlexTvShowEpisodeMediaQuality", b =>
                 {
-                    b.HasOne("PlexRipper.Domain.PlexLibrary", "PlexLibrary")
-                        .WithMany()
-                        .HasForeignKey("PlexLibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("PlexRipper.Domain.PlexMediaQuality", "PlexMediaQuality")
+                    b.HasOne("PlexRipper.Domain.PlexMediaQuality", null)
                         .WithMany()
                         .HasForeignKey("PlexMediaQualityId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlexRipper.Domain.PlexTvShowEpisode", "PlexTvShowEpisode")
+                    b.HasOne("PlexRipper.Domain.PlexTvShowEpisode", null)
                         .WithMany()
                         .HasForeignKey("PlexTvShowEpisodeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("PlexRipper.Domain.PlexTvShowEpisodeMediaData", "PlexTvShowEpisodeMediaData")
-                        .WithMany()
-                        .HasForeignKey("PlexTvShowEpisodeMediaDataId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("PlexLibrary");
-
-                    b.Navigation("PlexMediaQuality");
-
-                    b.Navigation("PlexTvShowEpisode");
-
-                    b.Navigation("PlexTvShowEpisodeMediaData");
                 });
 
             modelBuilder.Entity("PlexRipper.Domain.PlexTvShowGenres", b =>

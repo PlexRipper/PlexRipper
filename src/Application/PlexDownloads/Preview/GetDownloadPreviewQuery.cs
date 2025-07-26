@@ -163,7 +163,7 @@ public class GetDownloadPreviewQueryHandler : IRequestHandler<GetDownloadPreview
             new DownloadMediaDTO
             {
                 MediaIds = missingEpisodeIds.Select(x => x.EpisodeId).ToList(),
-                Qualities = missingEpisodeIds.SelectMany(x => x.Quality.ToDTO()).ToList(),
+                Qualities = missingEpisodeIds.SelectMany(x => x.Qualities).ToList().ToDTO(),
                 Type = PlexMediaType.Episode,
                 PlexServerId = 0,
                 PlexLibraryId = 0,
@@ -236,7 +236,7 @@ public class GetDownloadPreviewQueryHandler : IRequestHandler<GetDownloadPreview
                             TvShowId = z.TvShowId,
                             SeasonId = z.TvShowSeasonId,
                             EpisodeId = z.Id,
-                            Quality = z.Qualities.PickMediaQuality(),
+                            MediaDataList = z.MediaDataList.ToList(),
                         })
                     )
                 )
@@ -260,7 +260,7 @@ public class GetDownloadPreviewQueryHandler : IRequestHandler<GetDownloadPreview
                         TvShowId = y.TvShowId,
                         SeasonId = y.TvShowSeasonId,
                         EpisodeId = y.Id,
-                        Quality = y.Qualities.PickMediaQuality(),
+                        MediaDataList = y.MediaDataList.ToList(),
                     })
                 )
                 .ToListAsync(cancellationToken);

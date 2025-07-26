@@ -109,7 +109,7 @@ public static class DownloadPreviewMapper
             TvShowId = source.TvShowId,
             SeasonId = source.TvShowSeasonId,
             EpisodeId = source.Id,
-            Quality = source.Qualities.PickMediaQuality(),
+            MediaDataList = source.MediaDataList.ToList(),
         };
 
     public static IQueryable<TvShowEpisodeKeyDTO> ProjectToEpisodeKey(this IQueryable<PlexTvShowEpisode> source) =>

@@ -10,4 +10,19 @@ public class PlexMovieMediaQuality
 
     [Column(Order = 3)]
     public required int PlexMovieId { get; set; }
+
+    [Column(Order = 4)]
+    public required int PlexMovieMediaDataId { get; set; }
+
+    #region Navigation Properties
+
+    public PlexMediaQuality? PlexMediaQuality { get; set; }
+
+    public PlexLibrary? PlexLibrary { get; set; }
+
+    public PlexMovie? PlexMovie { get; set; }
+
+    public PlexMovieMediaData? PlexMovieMediaData { get; set; }
+
+    #endregion
 }

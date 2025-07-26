@@ -24,16 +24,14 @@ public class PlexTvShowEpisode : BasePlexMedia
 
     public ICollection<PlexTvShowEpisodeMediaData> MediaDataList { get; init; } = [];
 
+    public required ICollection<PlexMediaQuality> Qualities { get; set; } = [];
+
     #endregion
 
     #region Helpers
 
     [NotMapped]
     public override PlexMediaType Type => PlexMediaType.Episode;
-
-    [NotMapped]
-    public List<PlexMediaQuality> Qualities =>
-        MediaDataList.Select(y => y.ToPlexMediaQuality()).OrderBy(q => q.Quality).ToList();
 
     #endregion
 }

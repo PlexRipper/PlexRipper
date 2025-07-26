@@ -11,9 +11,7 @@ public class PlexMovie : BasePlexMedia
 
     public ICollection<PlexMovieMediaData> MediaDataList { get; set; } = [];
 
-    [NotMapped]
-    public List<PlexMediaQuality> Qualities =>
-        MediaDataList.Select(y => y.ToPlexMediaQuality()).OrderBy(q => q.Quality).ToList();
+    public ICollection<PlexMediaQuality> Qualities { get; set; } = [];
 
     [NotMapped]
     public override PlexMediaType Type => PlexMediaType.Movie;

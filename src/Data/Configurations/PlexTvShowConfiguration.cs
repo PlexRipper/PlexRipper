@@ -32,5 +32,13 @@ public class PlexTvShowConfiguration : IEntityTypeConfiguration<PlexTvShow>
                 l => l.HasOne<PlexCountry>().WithMany().HasForeignKey(e => e.CountryId),
                 r => r.HasOne<PlexTvShow>().WithMany().HasForeignKey(e => e.PlexTvShowId)
             );
+
+        builder
+            .HasMany(x => x.Qualities)
+            .WithMany(x => x.TvShows)
+            .UsingEntity<PlexTvShowMediaQuality>(
+                l => l.HasOne<PlexMediaQuality>().WithMany().HasForeignKey(e => e.PlexMediaQualityId),
+                r => r.HasOne<PlexTvShow>().WithMany().HasForeignKey(e => e.PlexTvShowId)
+            );
     }
 }

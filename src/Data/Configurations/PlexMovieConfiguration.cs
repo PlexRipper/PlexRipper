@@ -34,6 +34,14 @@ public class PlexMovieConfiguration : IEntityTypeConfiguration<PlexMovie>
             );
 
         builder
+            .HasMany(x => x.Qualities)
+            .WithMany(x => x.Movies)
+            .UsingEntity<PlexMovieMediaQuality>(
+                l => l.HasOne<PlexMediaQuality>().WithMany().HasForeignKey(e => e.PlexMediaQualityId),
+                r => r.HasOne<PlexMovie>().WithMany().HasForeignKey(e => e.PlexMovieId)
+            );
+
+        builder
             .HasMany(x => x.MediaDataList)
             .WithOne(x => x.PlexMovie)
             .HasForeignKey(x => x.PlexMovieId)

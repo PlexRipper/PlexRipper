@@ -9,6 +9,14 @@ public class PlexTvShowEpisodeConfiguration : IEntityTypeConfiguration<PlexTvSho
     {
         builder.HasIndex(x => x.SortIndex);
 
+        builder
+            .HasMany(x => x.Qualities)
+            .WithMany(x => x.TvShowEpisodes)
+            .UsingEntity<PlexTvShowEpisodeMediaQuality>(
+                l => l.HasOne<PlexMediaQuality>().WithMany().HasForeignKey(e => e.PlexMediaQualityId),
+                r => r.HasOne<PlexTvShowEpisode>().WithMany().HasForeignKey(e => e.PlexTvShowEpisodeId)
+            );
+
         // Configure one-to-many relationship with MediaDataList
         builder
             .HasMany(x => x.MediaDataList)

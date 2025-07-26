@@ -20,21 +20,14 @@ public class PlexTvShowSeason : BasePlexMedia
 
     public ICollection<PlexTvShowEpisode> Episodes { get; set; } = [];
 
+    public required ICollection<PlexMediaQuality> Qualities { get; set; } = [];
+
     #endregion
 
     #region Helpers
 
     [NotMapped]
     public override PlexMediaType Type => PlexMediaType.Season;
-
-    [NotMapped]
-    public List<PlexMediaQuality> Qualities =>
-        Episodes
-            .SelectMany(x => x.MediaDataList)
-            .Select(y => y.ToPlexMediaQuality())
-            .Distinct()
-            .OrderBy(q => q.Quality)
-            .ToList();
 
     #endregion
 }

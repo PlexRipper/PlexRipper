@@ -20,9 +20,7 @@ public class PlexTvShowSeason : BasePlexMedia
 
     public ICollection<PlexTvShowEpisode> Episodes { get; set; } = [];
 
-    public required ICollection<PlexMediaQuality> Qualities { get; set; } = [];
-
-    public ICollection<PlexTvShowSeasonMediaQuality> PlexTvShowSeasonMediaQualities { get; set; } = [];
+    public ICollection<PlexTvShowSeasonMediaQuality> Qualities { get; set; } = [];
 
     #endregion
 

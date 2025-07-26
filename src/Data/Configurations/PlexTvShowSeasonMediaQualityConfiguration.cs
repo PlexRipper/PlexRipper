@@ -7,11 +7,10 @@ public class PlexTvShowSeasonMediaQualityConfiguration : IEntityTypeConfiguratio
 {
     public void Configure(EntityTypeBuilder<PlexTvShowSeasonMediaQuality> builder)
     {
-        builder.HasKey(bc => new
-        {
-            bc.PlexMediaQualityId,
-            bc.PlexLibraryId,
-            bc.PlexTvShowSeasonId,
-        });
+        builder
+            .HasOne(e => e.PlexLibrary)
+            .WithMany()
+            .HasForeignKey(e => e.PlexLibraryId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

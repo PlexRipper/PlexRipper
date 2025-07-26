@@ -1,6 +1,6 @@
-using PlexRipper.Domain;
+using Application.Contracts;
 
-namespace Application.Contracts;
+namespace PlexRipper.Application;
 
 public record DownloadPreview
 {

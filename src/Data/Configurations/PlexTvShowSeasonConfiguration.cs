@@ -11,14 +11,6 @@ public class PlexTvShowSeasonConfiguration : IEntityTypeConfiguration<PlexTvShow
 
         builder
             .HasMany(x => x.Qualities)
-            .WithMany(x => x.TvShowSeasons)
-            .UsingEntity<PlexTvShowSeasonMediaQuality>(
-                l => l.HasOne<PlexMediaQuality>().WithMany().HasForeignKey(e => e.PlexMediaQualityId),
-                r => r.HasOne<PlexTvShowSeason>().WithMany().HasForeignKey(e => e.PlexTvShowSeasonId)
-            );
-
-        builder
-            .HasMany(x => x.PlexTvShowSeasonMediaQualities)
             .WithOne(x => x.PlexTvShowSeason)
             .HasForeignKey(x => x.PlexTvShowSeasonId)
             .OnDelete(DeleteBehavior.Cascade);

@@ -46,7 +46,7 @@ public static partial class PlexMediaDTOMapper
         new()
         {
             Duration = source.Duration,
-            VideoResolution = source.VideoResolution,
+            VideoResolution = source.RawVideoResolution,
             Width = source.Width,
             Height = source.Height,
             Bitrate = source.Bitrate,

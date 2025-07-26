@@ -1,11 +1,6 @@
-using PlexRipper.Domain;
+namespace PlexRipper.Application;
 
-namespace Application.Contracts;
-
-/// <summary>
-/// This is meant to be a slim version of <see cref="PlexMediaQualityDTO"/> that only contains the media type and quality. For high-level media containers such as TV-Shows, Seasons and Movies, this DTO is used to represent the quality of the media data contained within.
-/// </summary>
-public record PlexMediaSlimQualityDTO
+public record PlexMediaQuality
 {
     /// <summary>
     ///  The type of media data, such as <see cref="PlexMediaType.Movie"/> or <see cref="PlexMediaType.Episode"/>.
@@ -16,4 +11,14 @@ public record PlexMediaSlimQualityDTO
     /// The quality of the media data, such as <see cref="VideoQuality.DVD"/> or <see cref="VideoQuality.HD"/>.
     /// </summary>
     public required VideoQuality Quality { get; init; }
+
+    /// <summary>
+    /// The media id such as <see cref="PlexMovie"/> or <see cref="PlexTvShowEpisode"/>.
+    /// </summary>
+    public int MediaId { get; init; }
+
+    /// <summary>
+    /// The media data id such as <see cref="PlexMovieMediaData"/> or <see cref="PlexTvShowEpisodeMediaData"/>.
+    /// </summary>
+    public int DataId { get; init; }
 }

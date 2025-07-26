@@ -1,6 +1,6 @@
 namespace PlexRipper.Domain;
 
-public class PlexTvShowMediaQuality
+public class PlexTvShowMediaQuality : BasePlexMediaQuality
 {
     [Column(Order = 1)]
     public required int PlexMediaQualityId { get; set; }
@@ -13,8 +13,6 @@ public class PlexTvShowMediaQuality
 
     #region Navigation Properties
 
-    public PlexMediaQuality? PlexMediaQuality { get; set; }
-
     public PlexLibrary? PlexLibrary { get; set; }
 
     public PlexTvShow? PlexTvShow { get; set; }
@@ -22,5 +20,5 @@ public class PlexTvShowMediaQuality
     #endregion
 
     [NotMapped]
-    public PlexMediaType Type => PlexMediaType.TvShow;
+    public override PlexMediaType Type => PlexMediaType.TvShow;
 }

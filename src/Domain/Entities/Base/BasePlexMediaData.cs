@@ -47,10 +47,13 @@ public abstract class BasePlexMediaData : BaseEntity
     /// </summary>
     public required string VideoCodec { get; set; }
 
+    public required VideoQuality Quality { get; set; }
+
     /// <summary>
     /// Video resolution (e.g., 4k).
     /// </summary>
-    public required string VideoResolution { get; set; }
+    [Column("VideoResolution")]
+    public required string RawVideoResolution { get; set; }
 
     /// <summary>
     /// File container type.
@@ -86,13 +89,6 @@ public abstract class BasePlexMediaData : BaseEntity
     public PlexLibrary? PlexLibrary { get; set; }
 
     public PlexServer? PlexServer { get; init; }
-
-    #endregion
-
-    #region Helpers
-
-    [NotMapped]
-    public VideoQuality Quality => VideoResolution.ToVideoQuality();
 
     #endregion
 }

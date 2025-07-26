@@ -24,7 +24,15 @@ public static class PlexMediaSlimDTOMapper
             Type = source.Type,
             HasThumb = source.HasThumb,
             GrandChildCount = 0,
-            Qualities = source.MovieMediaQualities.ToDTO(),
+            Qualities = source
+                .MediaDataList.Select(x => new PlexMediaQualityDTO
+                {
+                    Quality = x.Quality,
+                    MediaDataType = source.Type,
+                    DataId = x.Id,
+                    MediaId = source.Id,
+                })
+                .ToList(),
             Key = source.Key,
             MetaDataKey = source.MetaDataKey,
             PlexToken = string.Empty,
@@ -60,7 +68,7 @@ public static class PlexMediaSlimDTOMapper
             Key = source.Key,
             MetaDataKey = source.MetaDataKey,
             HasThumb = source.HasThumb,
-            Qualities = source.TvShowMediaQualities.ToDTO(),
+            Qualities = source.Qualities.ToDTO(),
             PlexToken = string.Empty,
         };
 

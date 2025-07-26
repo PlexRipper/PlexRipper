@@ -11,11 +11,6 @@ public class PlexMovie : BasePlexMedia
 
     public ICollection<PlexMovieMediaData> MediaDataList { get; set; } = [];
 
-    public ICollection<PlexMediaQuality> Qualities { get; set; } = [];
-
-    // Navigation property to access join table data with media data relationship
-    public ICollection<PlexMovieMediaQuality> MovieMediaQualities { get; set; } = [];
-
     [NotMapped]
     public override PlexMediaType Type => PlexMediaType.Movie;
 }

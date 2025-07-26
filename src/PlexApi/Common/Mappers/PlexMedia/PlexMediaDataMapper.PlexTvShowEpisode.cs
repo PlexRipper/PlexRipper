@@ -50,7 +50,6 @@ public static partial class PlexMediaDataMapper
             PlexLibraryId = default,
             PlexServerId = default,
             FullBannerUrl = string.Empty,
-            Qualities = [],
         };
 
     public static ICollection<PlexTvShowEpisodeMediaData> ToEpisodeMediaDataList(
@@ -70,7 +69,8 @@ public static partial class PlexMediaDataMapper
             AudioChannels = source.AudioChannels,
             AudioCodec = source.AudioCodec,
             VideoCodec = source.VideoCodec,
-            VideoResolution = source.VideoResolution,
+            RawVideoResolution = source.VideoResolution,
+            Quality = source.VideoResolution.ToVideoQuality(),
             Container = source.Container,
             VideoFrameRate = source.VideoFrameRate,
             VideoProfile = source.VideoProfile,

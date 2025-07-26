@@ -16,9 +16,7 @@ public class PlexTvShow : BasePlexMedia
 
     public required ICollection<PlexCountry> Countries { get; init; } = [];
 
-    public required ICollection<PlexMediaQuality> Qualities { get; set; } = [];
-
-    public ICollection<PlexTvShowMediaQuality> TvShowMediaQualities { get; set; } = [];
+    public required ICollection<PlexTvShowMediaQuality> Qualities { get; set; } = [];
 
     #endregion
 }

@@ -27,13 +27,6 @@ public class PlexTvShowEpisode : BasePlexMedia
     /// </summary>
     public ICollection<PlexTvShowEpisodeMediaData> MediaDataList { get; init; } = [];
 
-    /// <summary>
-    /// Gets or sets the list of qualities available for this episode.
-    /// </summary>
-    public required ICollection<PlexMediaQuality> Qualities { get; set; } = [];
-
-    public ICollection<PlexTvShowEpisodeMediaQuality> TvShowEpisodeMediaQualities { get; set; } = [];
-
     #endregion
 
     #region Helpers

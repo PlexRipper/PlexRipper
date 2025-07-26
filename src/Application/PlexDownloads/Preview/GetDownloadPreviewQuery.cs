@@ -339,7 +339,6 @@ public class GetDownloadPreviewQueryHandler : IRequestHandler<GetDownloadPreview
                 tvShowEpisodeKeys = await _dbContext
                     .PlexTvShowEpisodes.AsNoTracking()
                     .Include(x => x.MediaDataList)
-                    .Include(x => x.Qualities)
                     .Where(x => allEpisodeIds.Contains(x.Id))
                     .ProjectToEpisodeKey()
                     .ToListAsync(cancellationToken);

@@ -2,7 +2,7 @@ namespace PlexRipper.Domain;
 
 public static class PlexMediaQualityExtensions
 {
-    public static ICollection<PlexMediaQuality> PickMediaQuality(this ICollection<PlexMediaQuality> qualities)
+    public static ICollection<BasePlexMediaQuality> PickMediaQuality(this ICollection<BasePlexMediaQuality> qualities)
     {
         if (!qualities.Any())
             return [];

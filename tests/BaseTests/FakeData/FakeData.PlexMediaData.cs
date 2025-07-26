@@ -18,7 +18,7 @@ public static partial class FakeData
             .RuleFor(x => x.AspectRatio, f => f.Random.Float(1, 2))
             .RuleFor(x => x.VideoCodec, f => f.System.FileType())
             .RuleFor(x => x.AudioChannels, f => f.Random.Int(2, 5))
-            .RuleFor(x => x.VideoResolution, f => f.PickRandom("sd", "720p", "1080p"))
+            .RuleFor(x => x.RawVideoResolution, f => f.PickRandom("sd", "720p", "1080p"))
             .RuleFor(x => x.Duration, f => f.Random.Int(50000, 55124400))
             .RuleFor(x => x.Container, f => f.System.FileType())
             .RuleFor(x => x.HasVoiceActivity, f => f.Random.Bool())

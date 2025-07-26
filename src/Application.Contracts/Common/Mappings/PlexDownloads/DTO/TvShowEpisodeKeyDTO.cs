@@ -13,5 +13,5 @@ public record TvShowEpisodeKeyDTO
     public required List<PlexTvShowEpisodeMediaData> MediaDataList { get; init; }
 
     public List<PlexMediaQuality> Qualities =>
-        MediaDataList.Select(y => y.ToPlexMediaQuality()).OrderBy(q => q.Quality).ToList().PickMediaQuality();
+        MediaDataList.Select(y => y.ToPlexMediaQuality()).ToList().PickMediaQuality();
 }

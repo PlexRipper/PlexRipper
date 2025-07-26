@@ -231,16 +231,27 @@ public class GetDownloadPreviewQueryHandler : IRequestHandler<GetDownloadPreview
                 .Where(x => tvShowIds.Contains(x.Id))
                 .SelectMany(x =>
                     x.Seasons.SelectMany(y =>
-                        y.Episodes.Select(z => new TvShowEpisodeKeyDTO
+                        y.Episodes.Select(z => new
                         {
                             TvShowId = z.TvShowId,
                             SeasonId = z.TvShowSeasonId,
                             EpisodeId = z.Id,
-                            MediaDataList = z.MediaDataList.ToList(),
+                            MediaDataList = z.MediaDataList,
                         })
                     )
                 )
                 .ToListAsync(cancellationToken);
+
+            // Apply quality selection in memory
+            tvShowEpisodeKeys = tvShowEpisodes
+                .Select(x => new TvShowEpisodeKeyDTO
+                {
+                    TvShowId = x.TvShowId,
+                    SeasonId = x.SeasonId,
+                    EpisodeId = x.EpisodeId,
+                    MediaDataList = x.MediaDataList.ToList(),
+                })
+                .ToList();
         }
 
         // Get all the episode ids from the seasons
@@ -255,15 +266,26 @@ public class GetDownloadPreviewQueryHandler : IRequestHandler<GetDownloadPreview
                 .ThenInclude(x => x.MediaDataList)
                 .Where(x => seasonIds.Contains(x.Id))
                 .SelectMany(x =>
-                    x.Episodes.Select(y => new TvShowEpisodeKeyDTO
+                    x.Episodes.Select(y => new
                     {
                         TvShowId = y.TvShowId,
                         SeasonId = y.TvShowSeasonId,
                         EpisodeId = y.Id,
-                        MediaDataList = y.MediaDataList.ToList(),
+                        MediaDataList = y.MediaDataList,
                     })
                 )
                 .ToListAsync(cancellationToken);
+
+            // Apply quality selection in memory
+            seasonEpisodeKeys = seasonEpisodes
+                .Select(x => new TvShowEpisodeKeyDTO
+                {
+                    TvShowId = x.TvShowId,
+                    SeasonId = x.SeasonId,
+                    EpisodeId = x.EpisodeId,
+                    MediaDataList = x.MediaDataList.ToList(),
+                })
+                .ToList();
         }
 
         // Get all the episode ids from the episodes
@@ -276,8 +298,25 @@ public class GetDownloadPreviewQueryHandler : IRequestHandler<GetDownloadPreview
                 .PlexTvShowEpisodes.AsNoTracking()
                 .Include(x => x.MediaDataList)
                 .Where(x => episodeIds.Contains(x.Id))
-                .ProjectToEpisodeKey()
+                .Select(x => new
+                {
+                    TvShowId = x.TvShowId,
+                    SeasonId = x.TvShowSeasonId,
+                    EpisodeId = x.Id,
+                    MediaDataList = x.MediaDataList,
+                })
                 .ToListAsync(cancellationToken);
+
+            // Apply quality selection in memory
+            episodesKeys = episodes
+                .Select(x => new TvShowEpisodeKeyDTO
+                {
+                    TvShowId = x.TvShowId,
+                    SeasonId = x.SeasonId,
+                    EpisodeId = x.EpisodeId,
+                    MediaDataList = x.MediaDataList.ToList(),
+                })
+                .ToList();
         }
 
         if (!episodesKeys.Any() && !seasonEpisodeKeys.Any() && !tvShowEpisodeKeys.Any())

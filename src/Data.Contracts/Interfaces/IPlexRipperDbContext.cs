@@ -50,7 +50,11 @@ public interface IPlexRipperDbContext : IDisposable
 
     public DbSet<PlexTvShow> PlexTvShows { get; }
 
+    public DbSet<PlexTvShowMediaQuality> PlexTvShowMediaQualities { get; }
+
     public DbSet<PlexTvShowSeason> PlexTvShowSeason { get; }
+
+    public DbSet<PlexTvShowSeasonMediaQuality> PlexTvShowSeasonMediaQualities { get; }
 
     public DbSet<PlexTvShowEpisode> PlexTvShowEpisodes { get; }
 

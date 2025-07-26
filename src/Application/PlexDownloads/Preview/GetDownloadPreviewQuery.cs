@@ -216,10 +216,8 @@ public class GetDownloadPreviewQueryHandler : IRequestHandler<GetDownloadPreview
 
             if (missingEpisodeIds.Any())
             {
-                // Group by server and library to maintain proper structure
-                var groupedEpisodes = missingEpisodeIds
-                    .GroupBy(x => new { TvShowId = x.TvShowId, SeasonId = x.SeasonId })
-                    .FirstOrDefault(); // Use first group for server/library info
+                // Group by server and library to maintain a proper structure
+                var groupedEpisodes = missingEpisodeIds.GroupBy(x => new { x.TvShowId, x.SeasonId }).FirstOrDefault();
 
                 if (groupedEpisodes != null)
                 {
@@ -227,7 +225,7 @@ public class GetDownloadPreviewQueryHandler : IRequestHandler<GetDownloadPreview
                         new DownloadMediaDTO
                         {
                             MediaIds = missingEpisodeIds.Select(x => x.EpisodeId).ToList(),
-                            Qualities = [], // TODO Get from actual episode data
+                            Qualities = missingEpisodeIds.SelectMany(x => x.MediaDataList).ToPlexMediaQuality(),
                             Type = PlexMediaType.Episode,
                             PlexServerId = 1, // TODO: Get from actual episode data
                             PlexLibraryId = 1, // TODO: Get from actual episode data

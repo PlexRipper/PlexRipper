@@ -109,21 +109,23 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
         value.Count.ShouldBe(4);
 
         // Full tvShows should have been added (first 2 results should be TV shows)
-        // Note: Handler logic may filter seasons, so we check what's actually returned
-        for (var i = 0; i < 2; i++)
-        {
-            value[i].ShouldNotBeNull();
-            value[i].Children.Count.ShouldBeGreaterThan(0); // Handler returns filtered seasons
-            value[i].Children.ShouldAllBe(x => x.Children.Count > 0); // Handler returns filtered episodes
-        }
+        // First TV show: 3 seasons with 5 episodes each
+        value[0].ShouldNotBeNull();
+        value[0].Children.Count.ShouldBe(3);
+        value[0].Children.ShouldAllBe(x => x.Children.Count == 5);
 
-        // Seasons check (seasons from 4th TV show - handler may return all available seasons)
-        value[2].Children.Count.ShouldBeGreaterThan(0); // Handler returns available seasons
-        value[2].Children.ShouldAllBe(x => x.Children.Count > 0); // Episodes per season
+        // Second TV show: 1 season with 4 episodes
+        value[1].ShouldNotBeNull();
+        value[1].Children.Count.ShouldBe(1);
+        value[1].Children.ShouldAllBe(x => x.Children.Count == 4);
 
-        // Loose episodes (episodes from 5th TV show)
-        value[3].Children.Count.ShouldBeGreaterThan(0); // Handler returns seasons containing the episodes
-        value[3].Children.ShouldAllBe(x => x.Children.Count > 0); // Episodes in each season
+        // Seasons check (seasons from 4th TV show): 5 seasons with 5 episodes each
+        value[2].Children.Count.ShouldBe(5);
+        value[2].Children.ShouldAllBe(x => x.Children.Count == 5);
+
+        // Loose episodes (episodes from 5th TV show): 5 seasons with 5 episodes each
+        value[3].Children.Count.ShouldBe(5);
+        value[3].Children.ShouldAllBe(x => x.Children.Count == 5);
     }
 
     #region Movie Tests

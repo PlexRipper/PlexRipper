@@ -10,5 +10,5 @@ public record TvShowEpisodeKeyDTO
 
     public required int EpisodeId { get; init; }
 
-    public required PlexMediaQuality Quality { get; init; }
+    public required List<PlexMediaQuality> Quality { get; init; }
 }

@@ -24,6 +24,9 @@ public class GetDownloadPreviewQueryHandler : IRequestHandler<GetDownloadPreview
         _dbContext = dbContext;
     }
 
+    /// <summary>
+    /// Handles the GetDownloadPreviewQuery by generating download previews for movies and TV shows.
+    /// </summary>
     public async Task<Result<List<DownloadPreview>>> Handle(
         GetDownloadPreviewQuery request,
         CancellationToken cancellationToken
@@ -33,19 +36,21 @@ public class GetDownloadPreviewQueryHandler : IRequestHandler<GetDownloadPreview
         if (!request.DownloadMedias.Any())
             return Result.Ok(downloadPreviews);
 
+        // Merge and process movie previews
         var moviesPreview = request.DownloadMedias.Merge(PlexMediaType.Movie);
-
-        // Create all the movie previews
         var movieResult = await CreateMoviePreviews(moviesPreview);
         downloadPreviews.AddRange(movieResult);
 
-        // Create all the TV show previews
+        // Process TV show previews (including seasons and episodes)
         var tvShowResult = await CreateTvShowPreviews(request.DownloadMedias, cancellationToken);
         downloadPreviews.AddRange(tvShowResult);
 
         return Result.Ok(downloadPreviews);
     }
 
+    /// <summary>
+    /// Creates download previews for movies, handling both with and without quality selection.
+    /// </summary>
     private async Task<IEnumerable<DownloadPreview>> CreateMoviePreviews(List<DownloadMediaDTO> moviesDownloadMedia)
     {
         if (!moviesDownloadMedia.Any() || !moviesDownloadMedia.Any(x => x.MediaIds.Count > 0))
@@ -57,6 +62,7 @@ public class GetDownloadPreviewQueryHandler : IRequestHandler<GetDownloadPreview
 
         var baseQuery = _dbContext.PlexMovies.AsNoTracking();
 
+        // Fetch movies with specific qualities
         if (movieQualities.Any())
         {
             var movieMediaDataIds = movieQualities.Select(x => x.DataId).ToHashSet();
@@ -71,7 +77,7 @@ public class GetDownloadPreviewQueryHandler : IRequestHandler<GetDownloadPreview
             previews.AddRange(resultWithQualities);
         }
 
-        // Get all the movie ids that do not have qualities
+        // Fetch movies without specific qualities
         var movieIds = moviesDownloadMedia.SelectMany(x => x.MediaIds).Except(movieIdsWithQuality).ToHashSet();
         if (movieIds.Any())
         {
@@ -85,10 +91,13 @@ public class GetDownloadPreviewQueryHandler : IRequestHandler<GetDownloadPreview
             previews.AddRange(result);
         }
 
-        // TODO This might need to use an SortTitle
+        // TODO: This might need to use a SortTitle
         return previews.OrderByNatural(x => x.Title);
     }
 
+    /// <summary>
+    /// Creates download previews for TV shows, including their seasons and episodes, and builds the hierarchy.
+    /// </summary>
     private async Task<IEnumerable<DownloadPreview>> CreateTvShowPreviews(
         List<DownloadMediaDTO> downloadMedias,
         CancellationToken cancellationToken
@@ -98,6 +107,7 @@ public class GetDownloadPreviewQueryHandler : IRequestHandler<GetDownloadPreview
         var seasonDownloadMedia = downloadMedias.Merge(PlexMediaType.Season);
         var episodeDownloadMedia = downloadMedias.Merge(PlexMediaType.Episode);
 
+        // Get all episode keys for the requested TV shows, seasons, and episodes
         var allKeys = await GetEpisodeKeys(
             tvShowDownloadMedia,
             seasonDownloadMedia,
@@ -107,8 +117,6 @@ public class GetDownloadPreviewQueryHandler : IRequestHandler<GetDownloadPreview
 
         var tvShowIds = allKeys.Select(x => x.TvShowId).Distinct().ToList();
         var seasonIds = allKeys.Select(x => x.SeasonId).Distinct().ToList();
-
-        // These are the episode ids that we need to create previews for based on the tv show and season download media
         var missingEpisodeIds = allKeys.Select(x => x.EpisodeId).Distinct().ToList();
 
         // Retrieve all the tv shows, seasons and episodes
@@ -126,7 +134,7 @@ public class GetDownloadPreviewQueryHandler : IRequestHandler<GetDownloadPreview
 
         var episodes = await CreateEpisodePreviews(episodeDownloadMedia, allKeys);
 
-        // Build hierarchy
+        // Build hierarchy: add episodes to seasons, and seasons to TV shows
         foreach (var season in seasons)
         {
             var result = episodes.Where(x => x.SeasonId == season.Id).ToList().OrderByNatural(x => x.Title);
@@ -151,15 +159,16 @@ public class GetDownloadPreviewQueryHandler : IRequestHandler<GetDownloadPreview
         List<TvShowEpisodeKeyDTO> missingEpisodeIds
     )
     {
-        var extraEpisode = await _dbContext.DownloadTaskTvShowEpisode.Select()
-        episodeDownloadMedia.Add(new DownloadMediaDTO
-        {
-            MediaIds = missingEpisodeIds.Select(x => x.EpisodeId).ToList(),
-            Qualities = missingEpisodeIds.Select(x => x.Quality).ToList(),
-            Type = PlexMediaType.Episode,
-            PlexServerId = 0,
-            PlexLibraryId = 0
-        });
+        episodeDownloadMedia.Add(
+            new DownloadMediaDTO
+            {
+                MediaIds = missingEpisodeIds.Select(x => x.EpisodeId).ToList(),
+                Qualities = missingEpisodeIds.SelectMany(x => x.Quality.ToDTO()).ToList(),
+                Type = PlexMediaType.Episode,
+                PlexServerId = 0,
+                PlexLibraryId = 0,
+            }
+        );
 
         if (!episodeDownloadMedia.Any() || !episodeDownloadMedia.Any(x => x.MediaIds.Count > 0))
             return [];
@@ -184,7 +193,7 @@ public class GetDownloadPreviewQueryHandler : IRequestHandler<GetDownloadPreview
             previews.AddRange(resultWithQualities);
         }
 
-        // Get all the movie ids that do not have qualities
+        // Get all the episode ids that do not have qualities
         var episodeIds = episodeDownloadMedia.SelectMany(x => x.MediaIds).Except(episodeIdsWithQuality).ToHashSet();
         if (episodeIds.Any())
         {
@@ -198,7 +207,7 @@ public class GetDownloadPreviewQueryHandler : IRequestHandler<GetDownloadPreview
             previews.AddRange(result);
         }
 
-        // TODO This might need to use an SortTitle
+        // TODO This might need to use a SortTitle
         return previews.OrderByNatural(x => x.Title);
     }
 
@@ -210,13 +219,15 @@ public class GetDownloadPreviewQueryHandler : IRequestHandler<GetDownloadPreview
     )
     {
         var tvShowEpisodeKeys = new List<TvShowEpisodeKeyDTO>();
-        if (!tvShowDownloadMedia.Any() || tvShowDownloadMedia.Any(x => x.MediaIds.Count > 0))
+        // Only fetch if there are any TV show MediaIds
+        if (tvShowDownloadMedia.Any(x => x.MediaIds.Count > 0))
         {
             var tvShowIds = tvShowDownloadMedia.SelectMany(x => x.MediaIds).ToHashSet();
-            tvShowEpisodeKeys = await _dbContext
+            var tvShowEpisodes = await _dbContext
                 .PlexTvShows.AsNoTracking()
                 .Include(x => x.Seasons)
                 .ThenInclude(x => x.Episodes)
+                .ThenInclude(x => x.MediaDataList)
                 .Where(x => tvShowIds.Contains(x.Id))
                 .SelectMany(x =>
                     x.Seasons.SelectMany(y =>
@@ -234,12 +245,14 @@ public class GetDownloadPreviewQueryHandler : IRequestHandler<GetDownloadPreview
 
         // Get all the episode ids from the seasons
         var seasonEpisodeKeys = new List<TvShowEpisodeKeyDTO>();
-        if (!seasonDownloadMedia.Any() || seasonDownloadMedia.Any(x => x.MediaIds.Count > 0))
+        // Only fetch if there are any season MediaIds
+        if (seasonDownloadMedia.Any(x => x.MediaIds.Count > 0))
         {
             var seasonIds = seasonDownloadMedia.SelectMany(x => x.MediaIds).ToHashSet();
-            seasonEpisodeKeys = await _dbContext
+            var seasonEpisodes = await _dbContext
                 .PlexTvShowSeason.AsNoTracking()
                 .Include(x => x.Episodes)
+                .ThenInclude(x => x.MediaDataList)
                 .Where(x => seasonIds.Contains(x.Id))
                 .SelectMany(x =>
                     x.Episodes.Select(y => new TvShowEpisodeKeyDTO
@@ -255,11 +268,13 @@ public class GetDownloadPreviewQueryHandler : IRequestHandler<GetDownloadPreview
 
         // Get all the episode ids from the episodes
         var episodesKeys = new List<TvShowEpisodeKeyDTO>();
-        if (!episodeDownloadMedia.Any() || episodeDownloadMedia.Any(x => x.MediaIds.Count > 0))
+        // Only fetch if there are any episode MediaIds
+        if (episodeDownloadMedia.Any(x => x.MediaIds.Count > 0))
         {
             var episodeIds = episodeDownloadMedia.SelectMany(x => x.MediaIds).ToHashSet();
-            episodesKeys = await _dbContext
+            var episodes = await _dbContext
                 .PlexTvShowEpisodes.AsNoTracking()
+                .Include(x => x.MediaDataList)
                 .Where(x => episodeIds.Contains(x.Id))
                 .ProjectToEpisodeKey()
                 .ToListAsync(cancellationToken);
@@ -268,7 +283,7 @@ public class GetDownloadPreviewQueryHandler : IRequestHandler<GetDownloadPreview
         if (!episodesKeys.Any() && !seasonEpisodeKeys.Any() && !tvShowEpisodeKeys.Any())
             return [];
 
-        // Merge all composite keys and remove duplicates
+        // Merge all composite keys and remove duplicates by EpisodeId
         return episodesKeys.Concat(seasonEpisodeKeys).Concat(tvShowEpisodeKeys).DistinctBy(x => x.EpisodeId).ToList();
     }
 }

@@ -13,5 +13,23 @@ public class PlexTvShowMediaQualityConfiguration : IEntityTypeConfiguration<Plex
             bc.PlexLibraryId,
             bc.PlexTvShowId,
         });
+
+        builder
+            .HasOne(x => x.PlexMediaQuality)
+            .WithMany()
+            .HasForeignKey(x => x.PlexMediaQualityId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder
+            .HasOne(x => x.PlexLibrary)
+            .WithMany()
+            .HasForeignKey(x => x.PlexLibraryId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder
+            .HasOne(x => x.PlexTvShow)
+            .WithMany()
+            .HasForeignKey(x => x.PlexTvShowId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

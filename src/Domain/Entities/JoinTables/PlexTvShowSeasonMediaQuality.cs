@@ -10,4 +10,17 @@ public class PlexTvShowSeasonMediaQuality
 
     [Column(Order = 3)]
     public required int PlexTvShowSeasonId { get; set; }
+
+    #region Navigation Properties
+
+    public PlexMediaQuality? PlexMediaQuality { get; set; }
+
+    public PlexLibrary? PlexLibrary { get; set; }
+
+    public PlexTvShowSeason? PlexTvShowSeason { get; set; }
+
+    #endregion
+
+    [NotMapped]
+    public PlexMediaType Type => PlexMediaType.TvShow;
 }

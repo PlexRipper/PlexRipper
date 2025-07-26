@@ -17,9 +17,14 @@ public class PlexTvShowEpisodeConfiguration : IEntityTypeConfiguration<PlexTvSho
                 r => r.HasOne<PlexTvShowEpisode>().WithMany().HasForeignKey(e => e.PlexTvShowEpisodeId)
             );
 
-        // Configure one-to-many relationship with MediaDataList
         builder
             .HasMany(x => x.MediaDataList)
+            .WithOne(x => x.PlexTvShowEpisode)
+            .HasForeignKey(x => x.PlexTvShowEpisodeId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder
+            .HasMany(x => x.TvShowEpisodeMediaQualities)
             .WithOne(x => x.PlexTvShowEpisode)
             .HasForeignKey(x => x.PlexTvShowEpisodeId)
             .OnDelete(DeleteBehavior.Cascade);

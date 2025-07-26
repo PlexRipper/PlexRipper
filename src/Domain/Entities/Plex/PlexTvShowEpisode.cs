@@ -22,9 +22,17 @@ public class PlexTvShowEpisode : BasePlexMedia
 
     public int TvShowSeasonId { get; set; }
 
+    /// <summary>
+    /// Gets or sets the list of media data for this episode.
+    /// </summary>
     public ICollection<PlexTvShowEpisodeMediaData> MediaDataList { get; init; } = [];
 
+    /// <summary>
+    /// Gets or sets the list of qualities available for this episode.
+    /// </summary>
     public required ICollection<PlexMediaQuality> Qualities { get; set; } = [];
+
+    public ICollection<PlexTvShowEpisodeMediaQuality> TvShowEpisodeMediaQualities { get; set; } = [];
 
     #endregion
 

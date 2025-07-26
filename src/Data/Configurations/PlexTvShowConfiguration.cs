@@ -40,5 +40,12 @@ public class PlexTvShowConfiguration : IEntityTypeConfiguration<PlexTvShow>
                 l => l.HasOne<PlexMediaQuality>().WithMany().HasForeignKey(e => e.PlexMediaQualityId),
                 r => r.HasOne<PlexTvShow>().WithMany().HasForeignKey(e => e.PlexTvShowId)
             );
+
+        // Navigation property relationship to join table
+        builder
+            .HasMany(x => x.TvShowMediaQualities)
+            .WithOne(x => x.PlexTvShow)
+            .HasForeignKey(x => x.PlexTvShowId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

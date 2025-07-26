@@ -46,5 +46,12 @@ public class PlexMovieConfiguration : IEntityTypeConfiguration<PlexMovie>
             .WithOne(x => x.PlexMovie)
             .HasForeignKey(x => x.PlexMovieId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // Navigation property relationship to join table
+        builder
+            .HasMany(x => x.MovieMediaQualities)
+            .WithOne(x => x.PlexMovie)
+            .HasForeignKey(x => x.PlexMovieId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

@@ -22,6 +22,8 @@ public class PlexTvShowSeason : BasePlexMedia
 
     public required ICollection<PlexMediaQuality> Qualities { get; set; } = [];
 
+    public ICollection<PlexTvShowSeasonMediaQuality> PlexTvShowSeasonMediaQualities { get; set; } = [];
+
     #endregion
 
     #region Helpers

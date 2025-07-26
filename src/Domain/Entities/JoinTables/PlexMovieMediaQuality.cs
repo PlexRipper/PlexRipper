@@ -25,4 +25,7 @@ public class PlexMovieMediaQuality
     public PlexMovieMediaData? PlexMovieMediaData { get; set; }
 
     #endregion
+
+    [NotMapped]
+    public PlexMediaType Type => PlexMediaType.Movie;
 }

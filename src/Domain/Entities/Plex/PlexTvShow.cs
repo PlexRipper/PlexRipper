@@ -18,5 +18,7 @@ public class PlexTvShow : BasePlexMedia
 
     public required ICollection<PlexMediaQuality> Qualities { get; set; } = [];
 
+    public ICollection<PlexTvShowMediaQuality> TvShowMediaQualities { get; set; } = [];
+
     #endregion
 }

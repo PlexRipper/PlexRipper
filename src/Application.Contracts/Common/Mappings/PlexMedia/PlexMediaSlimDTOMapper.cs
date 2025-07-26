@@ -24,7 +24,7 @@ public static class PlexMediaSlimDTOMapper
             Type = source.Type,
             HasThumb = source.HasThumb,
             GrandChildCount = 0,
-            Qualities = source.Qualities.ToDTO(),
+            Qualities = source.MovieMediaQualities.ToDTO(),
             Key = source.Key,
             MetaDataKey = source.MetaDataKey,
             PlexToken = string.Empty,
@@ -60,7 +60,7 @@ public static class PlexMediaSlimDTOMapper
             Key = source.Key,
             MetaDataKey = source.MetaDataKey,
             HasThumb = source.HasThumb,
-            Qualities = [], // TODO Qualities for TV Shows should be determined by the nested seasons, min/max qualities
+            Qualities = source.TvShowMediaQualities.ToDTO(),
             PlexToken = string.Empty,
         };
 
@@ -89,7 +89,7 @@ public static class PlexMediaSlimDTOMapper
             Key = source.Key,
             MetaDataKey = source.MetaDataKey,
             PlexToken = string.Empty,
-            Qualities = source.Qualities.ToDTO(),
+            Qualities = source.MediaDataList.ToPlexMediaQuality(),
         };
 
     public static IQueryable<PlexMediaSlimDTO> ProjectToMediaSlimDTO(this IQueryable<PlexTvShowEpisode> source) =>

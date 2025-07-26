@@ -50,6 +50,7 @@ public static partial class PlexMediaDataMapper
             PlexLibraryId = default,
             PlexServerId = default,
             FullBannerUrl = string.Empty,
+            Qualities = [],
         };
 
     public static ICollection<PlexTvShowEpisodeMediaData> ToEpisodeMediaDataList(

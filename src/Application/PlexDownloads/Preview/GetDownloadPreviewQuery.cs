@@ -227,7 +227,7 @@ public class GetDownloadPreviewQueryHandler : IRequestHandler<GetDownloadPreview
                         new DownloadMediaDTO
                         {
                             MediaIds = missingEpisodeIds.Select(x => x.EpisodeId).ToList(),
-                            Qualities = missingEpisodeIds.SelectMany(x => x.Qualities).ToList().ToDTO(),
+                            Qualities = [], // TODO Get from actual episode data
                             Type = PlexMediaType.Episode,
                             PlexServerId = 1, // TODO: Get from actual episode data
                             PlexLibraryId = 1, // TODO: Get from actual episode data
@@ -336,29 +336,13 @@ public class GetDownloadPreviewQueryHandler : IRequestHandler<GetDownloadPreview
             // Single query to get all episode data
             if (allEpisodeIds.Any())
             {
-                var episodes = await _dbContext
+                tvShowEpisodeKeys = await _dbContext
                     .PlexTvShowEpisodes.AsNoTracking()
                     .Include(x => x.MediaDataList)
+                    .Include(x => x.Qualities)
                     .Where(x => allEpisodeIds.Contains(x.Id))
-                    .Select(x => new
-                    {
-                        TvShowId = x.TvShowId,
-                        SeasonId = x.TvShowSeasonId,
-                        EpisodeId = x.Id,
-                        MediaDataList = x.MediaDataList,
-                    })
+                    .ProjectToEpisodeKey()
                     .ToListAsync(cancellationToken);
-
-                // Apply quality selection in memory
-                tvShowEpisodeKeys = episodes
-                    .Select(x => new TvShowEpisodeKeyDTO
-                    {
-                        TvShowId = x.TvShowId,
-                        SeasonId = x.SeasonId,
-                        EpisodeId = x.EpisodeId,
-                        MediaDataList = x.MediaDataList.ToList(),
-                    })
-                    .ToList();
             }
 
             return Result.Ok(tvShowEpisodeKeys);
@@ -379,7 +363,7 @@ public class GetDownloadPreviewQueryHandler : IRequestHandler<GetDownloadPreview
         List<DownloadPreview> episodes
     )
     {
-        // Group episodes by season for efficient lookup
+        // Group episodes by season for an efficient lookup
         var episodesBySeasonId = episodes
             .GroupBy(x => x.SeasonId)
             .ToDictionary(g => g.Key, g => g.OrderByNatural(x => x.Title).ToList());

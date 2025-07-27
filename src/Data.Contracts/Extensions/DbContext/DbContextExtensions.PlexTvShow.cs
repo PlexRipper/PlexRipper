@@ -135,9 +135,8 @@ public static partial class DbContextExtensions
                     Quality = x.Quality,
                     PlexLibraryId = x.PlexLibraryId,
                     PlexTvShowId = x.PlexTvShowSeason?.TvShowId ?? 0,
-                    PlexTvShowSeasonId = x.PlexTvShowSeasonId,
                 })
-                .DistinctBy(x => (x.Quality, x.PlexTvShowSeasonId))
+                .DistinctBy(x => (x.Quality, x.PlexTvShowId))
                 .ToList();
             await context.BulkInsertAsync(tvShowQualities, BulkConfigPreset.Default, ct);
 

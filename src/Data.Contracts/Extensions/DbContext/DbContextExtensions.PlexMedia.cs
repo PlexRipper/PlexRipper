@@ -126,6 +126,7 @@ public static partial class DbContextExtensions
                     query = query.Include(x => x.Actors);
 
                 plexMediaSlimDtos = await query
+                    .Include(x => x.MediaDataList)
                     .ApplyWhere(plexLibraryId > 0, x => x.PlexLibraryId == plexLibraryId)
                     .ApplyWhere(plexLibraryId == 0, x => allowedPlexLibraryIds.Contains(x.PlexLibraryId))
                     .ApplyWhere(filter.CountryId > 0, x => x.Countries.Any(y => y.Id == filter.CountryId))
@@ -153,6 +154,7 @@ public static partial class DbContextExtensions
                     query = query.Include(x => x.Actors);
 
                 plexMediaSlimDtos = await query
+                    .Include(x => x.Qualities)
                     .ApplyWhere(plexLibraryId > 0, x => x.PlexLibraryId == plexLibraryId)
                     .ApplyWhere(plexLibraryId == 0, x => allowedPlexLibraryIds.Contains(x.PlexLibraryId))
                     .ApplyWhere(filter.CountryId > 0, x => x.Countries.Any(y => y.Id == filter.CountryId))

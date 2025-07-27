@@ -18,7 +18,4 @@ public class PlexTvShowMediaQuality : BasePlexMediaQuality
 
     [NotMapped]
     public override PlexMediaType Type => PlexMediaType.TvShow;
-
-    [NotMapped]
-    public int PlexTvShowSeasonId { get; set; }
 }

@@ -785,7 +785,8 @@
                 "connection-dialog-header": "Connection Dialog"
             },
             "buttons": {
-                "header": "Buttons Debug"
+                "main-header": "Buttons Debug",
+                "media-quality-header": "Media Quality Display"
             }
         },
         "empty": {

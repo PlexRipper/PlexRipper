@@ -37,12 +37,17 @@ import Log from 'consola';
 import { VideoQuality, type PlexMediaQualityDTO } from '@dto';
 import type { IMediaActionEmits } from '@interfaces';
 
-defineProps<{
+const props = withDefaults(defineProps<{
 	qualities: PlexMediaQualityDTO[];
-}>();
+	trunacted?: boolean; // Whether to truncate the display of qualities
+}>(), {
+	trunacted: true, // Default to false if not provided
+});
 
 defineEmits<IMediaActionEmits>();
-const minCount = 1; // Minimum number of qualities to display
+const minCount = computed(() => {
+	return props.trunacted ? 1 : 100;
+});
 
 const getQualityDisplay = (quality: VideoQuality): {
 	color: string;
@@ -51,32 +56,32 @@ const getQualityDisplay = (quality: VideoQuality): {
 	switch (quality) {
 		case VideoQuality.SubSD144P: // "144p"
 			return {
-				color: 'deep-orange',
-				label: 'SubSD (144p)',
+				color: 'brown-3',
+				label: '144p',
 			};
 		case VideoQuality.SubSDCIF: // "240p"
 			return {
-				color: 'deep-orange',
-				label: 'SubSDCIF (240p)',
+				color: 'orange-4',
+				label: '240p',
 			};
 		case VideoQuality.NHD: // "360p"
 			return {
-				color: 'deep-orange',
-				label: 'NHD (360p)',
+				color: 'orange-9',
+				label: '360p',
 			};
 		case VideoQuality.SD: // "480p"
 			return {
-				color: 'deep-orange',
+				color: 'amber-8',
 				label: 'SD (480p)',
 			};
 		case VideoQuality.DVD: // "576p"
 			return {
-				color: 'yellow darken-1',
+				color: 'yellow-7',
 				label: 'DVD (576p)',
 			};
 		case VideoQuality.HD: // "720p"
 			return {
-				color: 'lime accent-4',
+				color: 'light-green-13',
 				label: 'HD (720p)',
 			};
 		case VideoQuality.FullHD: // "1080p"
@@ -86,24 +91,24 @@ const getQualityDisplay = (quality: VideoQuality): {
 			};
 		case VideoQuality.QHD: // "1440p"
 			return {
-				color: 'indigo accent-2',
+				color: 'teal-5',
 				label: 'QHD (1440p)',
 			};
-		case VideoQuality.UHD4K: // "4K"
+		case VideoQuality.UHD4K: // "2160p"
 			return {
 				color: 'red darken-4',
 				label: '4K (2160p)',
 			};
-		case VideoQuality.UHD8K: // "8K"
+		case VideoQuality.UHD8K: // "4320p"
 			return {
-				color: 'pink darken-4',
+				color: 'purple-8',
 				label: '8K (4320p)',
 			};
 		case VideoQuality.Unknown:
 		default:
 			Log.error('Missing quality display mapping for', quality);
 			return {
-				color: 'blue-grey',
+				color: 'blue-grey-4',
 				label: 'Unknown',
 			};
 	}

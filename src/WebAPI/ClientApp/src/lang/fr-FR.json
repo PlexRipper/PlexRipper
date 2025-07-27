@@ -785,7 +785,8 @@
                 "connection-dialog-header": "Dialogue de connexion"
             },
             "buttons": {
-                "header": "Boutons de débogage"
+                "main-header": "Boutons de débogage",
+                "media-quality-header": "Affichage de la qualité des médias"
             }
         },
         "empty": {

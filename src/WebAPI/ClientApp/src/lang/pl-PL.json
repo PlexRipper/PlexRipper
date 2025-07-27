@@ -785,7 +785,8 @@
                 "connection-dialog-header": "Dialog połączenia"
             },
             "buttons": {
-                "header": "Przyciski Debugowania"
+                "main-header": "Przyciski Debugowania",
+                "media-quality-header": "Wyświetlacz jakości multimediów"
             }
         },
         "empty": {

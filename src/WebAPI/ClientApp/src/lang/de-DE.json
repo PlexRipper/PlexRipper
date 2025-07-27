@@ -785,7 +785,8 @@
                 "connection-dialog-header": "Dialogfeld Verbindung"
             },
             "buttons": {
-                "header": "Schaltflächen Debug"
+                "main-header": "Schaltflächen Debug",
+                "media-quality-header": "Medienqualitätsanzeige"
             }
         },
         "empty": {

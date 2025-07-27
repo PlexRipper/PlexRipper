@@ -105,6 +105,10 @@ const getQualityDisplay = (quality: VideoQuality): {
 				label: '8K (4320p)',
 			};
 		case VideoQuality.Unknown:
+			return {
+				color: 'blue-grey-4',
+				label: 'Unknown',
+			};
 		default:
 			Log.error('Missing quality display mapping for', quality);
 			return {

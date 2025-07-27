@@ -16,7 +16,7 @@ public static class PlexMediaQualityMappers
         };
 
     public static List<PlexMediaQualityDTO> ToDTO(this IEnumerable<PlexTvShowMediaQuality> source) =>
-        source.Select(x => x.ToDTO()).ToList();
+        source.SortByQuality().Select(x => x.ToDTO()).ToList();
 
     #endregion
 
@@ -32,7 +32,7 @@ public static class PlexMediaQualityMappers
         };
 
     public static List<PlexMediaQualityDTO> ToDTO(this IEnumerable<PlexTvShowSeasonMediaQuality> source) =>
-        source.Select(x => x.ToDTO()).ToList();
+        source.SortByQuality().Select(x => x.ToDTO()).ToList();
 
     #endregion
 
@@ -48,7 +48,7 @@ public static class PlexMediaQualityMappers
         };
 
     public static List<PlexMediaQualityDTO> ToPlexMediaQuality(this IEnumerable<PlexTvShowEpisodeMediaData> source) =>
-        source.Select(x => x.ToPlexMediaQuality()).ToList();
+        source.SortByQuality().Select(x => x.ToPlexMediaQuality()).ToList();
 
     #endregion
 }

@@ -35,7 +35,8 @@ public static class DownloadPreviewMapper
             SeasonId = default,
             Children = [],
             Qualities = source
-                .MediaDataList.Select(x => new PlexMediaQuality
+                .MediaDataList.SortByQuality()
+                .Select(x => new PlexMediaQuality
                 {
                     Quality = x.Quality,
                     MediaDataType = source.Type,
@@ -64,7 +65,8 @@ public static class DownloadPreviewMapper
             SeasonId = default,
             Children = [],
             Qualities = source
-                .Qualities.Select(x => new PlexMediaQuality
+                .Qualities.SortByQuality()
+                .Select(x => new PlexMediaQuality
                 {
                     Quality = x.Quality,
                     MediaDataType = x.Type,
@@ -93,7 +95,8 @@ public static class DownloadPreviewMapper
             SeasonId = default,
             Children = [],
             Qualities = source
-                .Qualities.Select(x => new PlexMediaQuality
+                .Qualities.SortByQuality()
+                .Select(x => new PlexMediaQuality
                 {
                     Quality = x.Quality,
                     MediaDataType = x.Type,
@@ -122,7 +125,8 @@ public static class DownloadPreviewMapper
             SeasonId = source.TvShowSeasonId,
             Children = [],
             Qualities = source
-                .MediaDataList.Select(x => new PlexMediaQuality
+                .MediaDataList.SortByQuality()
+                .Select(x => new PlexMediaQuality
                 {
                     Quality = x.Quality,
                     MediaDataType = source.Type,

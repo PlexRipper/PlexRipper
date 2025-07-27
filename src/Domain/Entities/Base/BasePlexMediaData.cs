@@ -1,6 +1,6 @@
 namespace PlexRipper.Domain;
 
-public abstract class BasePlexMediaData : BaseEntity
+public abstract class BasePlexMediaData : BasePlexMediaQuality
 {
     /// <summary>
     /// Unique media identifier.
@@ -46,8 +46,6 @@ public abstract class BasePlexMediaData : BaseEntity
     /// Video codec used.
     /// </summary>
     public required string VideoCodec { get; set; }
-
-    public required VideoQuality Quality { get; set; }
 
     /// <summary>
     /// Video resolution (e.g., 4k).

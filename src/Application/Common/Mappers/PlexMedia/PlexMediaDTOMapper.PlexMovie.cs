@@ -26,7 +26,8 @@ public static partial class PlexMediaDTOMapper
             Type = source.Type,
             HasThumb = source.HasThumb,
             Qualities = source
-                .MediaDataList.Select(x => new PlexMediaQualityDTO
+                .MediaDataList.SortByQuality()
+                .Select(x => new PlexMediaQualityDTO
                 {
                     Quality = x.Quality,
                     MediaDataType = source.Type,

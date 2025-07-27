@@ -2,14 +2,33 @@
 	<div
 		v-if="qualities.length"
 		class="media-quality-container">
-		<QGlowChip
+		<!-- Show all available qualities as chips -->
+		<QHover
 			v-for="(quality, j) in qualities"
-			:key="j"
-			:color="getQualityDisplay(quality.quality).color"
-			size="md"
-			clickable
-			:value="getQualityDisplay(quality.quality).label"
-			@click="$emit('download', [quality])" />
+			:key="j">
+			<template #default="{ }">
+				<QGlowChip
+					class="hover-expand-chip"
+					clickable
+					:color="getQualityDisplay(quality.quality).color"
+					size="md"
+					:value="qualities.length > minCount ? '' : getQualityDisplay(quality.quality).label"
+					@click="$emit('download', [quality])" />
+				<template v-if="qualities.length > minCount">
+					<q-tooltip
+						anchor="bottom middle"
+						self="top middle"
+						:offset="[0, 0]"
+						class="no-background">
+						<QGlowChip
+							class="hover-expand-chip"
+							:color="getQualityDisplay(quality.quality).color"
+							size="md"
+							:value="getQualityDisplay(quality.quality).label" />
+					</q-tooltip>
+				</template>
+			</template>
+		</QHover>
 	</div>
 </template>
 
@@ -23,6 +42,7 @@ defineProps<{
 }>();
 
 defineEmits<IMediaActionEmits>();
+const minCount = 1; // Minimum number of qualities to display
 
 const getQualityDisplay = (quality: VideoQuality): {
 	color: string;
@@ -77,7 +97,10 @@ const getQualityDisplay = (quality: VideoQuality): {
 
 <style lang="scss">
 .media-quality-container {
-  padding: 0;
   text-align: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  justify-content: center;
 }
 </style>

@@ -38,5 +38,7 @@ const styles = computed(() => {
 .q-chip--outline {
   border-width: 2px;
   box-shadow: 0 0 10px 2px;
+  transition: all 0.25s ease;
+
 }
 </style>

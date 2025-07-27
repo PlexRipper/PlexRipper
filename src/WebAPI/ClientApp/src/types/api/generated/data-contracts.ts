@@ -1323,6 +1323,9 @@ export interface ValidatePlexServerConnectionEndpointRequest {
 
 export enum VideoQuality {
   Unknown = "Unknown",
+  SubSD144P = "SubSD_144p",
+  SubSDCIF = "SubSD_CIF",
+  NHD = "nHD",
   SD = "SD",
   DVD = "DVD",
   HD = "HD",

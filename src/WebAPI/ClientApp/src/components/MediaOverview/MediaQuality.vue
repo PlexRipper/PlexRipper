@@ -49,6 +49,21 @@ const getQualityDisplay = (quality: VideoQuality): {
 	label: string;
 } => {
 	switch (quality) {
+		case VideoQuality.SubSD144P: // "144p"
+			return {
+				color: 'deep-orange',
+				label: 'SubSD (144p)',
+			};
+		case VideoQuality.SubSDCIF: // "240p"
+			return {
+				color: 'deep-orange',
+				label: 'SubSDCIF (240p)',
+			};
+		case VideoQuality.NHD: // "360p"
+			return {
+				color: 'deep-orange',
+				label: 'NHD (360p)',
+			};
 		case VideoQuality.SD: // "480p"
 			return {
 				color: 'deep-orange',

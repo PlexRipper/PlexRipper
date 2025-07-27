@@ -7,9 +7,9 @@ public static class PlexMediaQualityExtensions
         if (!qualities.Any())
             return [];
 
-        var nonUnknown = qualities.OrderByDescending(q => (int)q.Quality).ToList();
+        var nonUnknown = qualities.SortByQuality().ToList();
 
-        return [nonUnknown.First()];
+        return [nonUnknown.Last()];
     }
 
     /// <summary>

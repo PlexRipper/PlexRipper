@@ -39,7 +39,7 @@ public static class DownloadPreviewMapper
                 .Select(x => new PlexMediaQuality
                 {
                     Quality = x.Quality,
-                    MediaDataType = source.Type,
+                    MediaDataType = x.Type,
                     DataId = x.Id,
                     MediaId = source.Id,
                 })

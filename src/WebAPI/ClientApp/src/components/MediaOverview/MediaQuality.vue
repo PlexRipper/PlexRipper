@@ -56,22 +56,22 @@ const getQualityDisplay = (quality: VideoQuality): {
 	switch (quality) {
 		case VideoQuality.SubSD144P: // "144p"
 			return {
-				color: 'brown-3',
+				color: 'brown-6',
 				label: '144p',
 			};
 		case VideoQuality.SubSDCIF: // "240p"
 			return {
-				color: 'orange-4',
+				color: 'deep-orange-6',
 				label: '240p',
 			};
 		case VideoQuality.NHD: // "360p"
 			return {
-				color: 'orange-9',
+				color: 'orange-7',
 				label: '360p',
 			};
 		case VideoQuality.SD: // "480p"
 			return {
-				color: 'amber-8',
+				color: 'amber-7',
 				label: 'SD (480p)',
 			};
 		case VideoQuality.DVD: // "576p"
@@ -86,12 +86,12 @@ const getQualityDisplay = (quality: VideoQuality): {
 			};
 		case VideoQuality.FullHD: // "1080p"
 			return {
-				color: 'blue accent-3',
+				color: 'light-blue-6',
 				label: 'Full HD (1080p)',
 			};
 		case VideoQuality.QHD: // "1440p"
 			return {
-				color: 'teal-5',
+				color: 'cyan-6',
 				label: 'QHD (1440p)',
 			};
 		case VideoQuality.UHD4K: // "2160p"

@@ -18,6 +18,24 @@ public enum VideoQuality
     Unknown = 0,
 
     /// <summary>
+    /// Extremely low resolution, typically 144p (256×144). Used for very low-bandwidth scenarios.
+    /// </summary>
+    [EnumMember(Value = nameof(SubSD_144p))]
+    SubSD_144p = 144,
+
+    /// <summary>
+    /// Sub-SD resolution, typically 240p (352×240). Used in very low-quality streaming.
+    /// </summary>
+    [EnumMember(Value = nameof(SubSD_CIF))]
+    SubSD_CIF = 240,
+
+    /// <summary>
+    /// nHD resolution, typically 360p (640×360). Common for low-bandwidth streaming.
+    /// </summary>
+    [EnumMember(Value = nameof(nHD))]
+    nHD = 360,
+
+    /// <summary>
     /// Standard Definition, typically 480p.
     /// </summary>
     [EnumMember(Value = nameof(SD))]

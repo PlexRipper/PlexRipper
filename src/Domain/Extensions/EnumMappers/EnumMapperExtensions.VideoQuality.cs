@@ -5,27 +5,41 @@ public static partial class EnumMapperExtensions
     private static readonly Dictionary<string, VideoQuality> _videoQualityMap =
         new(StringComparer.OrdinalIgnoreCase)
         {
+            // Sub-SD: very low resolutions
+            ["144"] = VideoQuality.SubSD_144p,
+            ["144p"] = VideoQuality.SubSD_144p,
+            ["240"] = VideoQuality.SubSD_CIF,
+            ["240p"] = VideoQuality.SubSD_CIF,
+            ["cif"] = VideoQuality.SubSD_CIF,
+            ["360"] = VideoQuality.nHD,
+            ["360p"] = VideoQuality.nHD,
+
             // Standard Definition
-            ["sd"] = VideoQuality.SD,
             ["480"] = VideoQuality.SD,
             ["480p"] = VideoQuality.SD,
+            ["sd"] = VideoQuality.SD,
 
             // PAL SD
             ["576"] = VideoQuality.DVD,
             ["576p"] = VideoQuality.DVD,
+            ["dvd"] = VideoQuality.DVD,
 
-            // HD
+            // High Definition
             ["720"] = VideoQuality.HD,
             ["720p"] = VideoQuality.HD,
+            ["hd"] = VideoQuality.HD,
 
             // Full HD
             ["1080"] = VideoQuality.FullHD,
             ["1080p"] = VideoQuality.FullHD,
+            ["fullhd"] = VideoQuality.FullHD,
+            ["fhd"] = VideoQuality.FullHD,
 
             // Quad HD / 2K
             ["1440"] = VideoQuality.QHD,
             ["1440p"] = VideoQuality.QHD,
             ["2k"] = VideoQuality.QHD,
+            ["qhd"] = VideoQuality.QHD,
 
             // 4K / UHD
             ["2160"] = VideoQuality.UHD_4K,

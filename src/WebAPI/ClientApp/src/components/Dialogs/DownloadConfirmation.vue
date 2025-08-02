@@ -23,13 +23,28 @@
 					</QText>
 				</QCol>
 			</QRow>
-		</template>
-		<template #default>
 			<TreeTable
-				v-if="!loading"
-				v-model:expanded-keys="expandedKeys"
+				:lazy="true"
+				:loading="loading"
 				:size="'small'"
-				:value="downloadPreview">
+				class="download-confirmation-table-header">
+				<Column
+					v-for="(col, i) in getDownloadPreviewTableColumns"
+					:key="i"
+					:expander="i === 0"
+					:field="col.field"
+					:header="col.label"
+					:style="{ width: col.width ? `${col.width}px` : 'auto' }" />
+			</TreeTable>
+		</template>
+		<template #default="{ size }">
+			<TreeTable
+				v-model:expanded-keys="expandedKeys"
+				:lazy="true"
+				:loading="loading"
+				:size="'small'"
+				:value="downloadPreview"
+				class="download-confirmation-table-body">
 				<Column
 					v-for="(col, i) in getDownloadPreviewTableColumns"
 					:key="i"
@@ -37,31 +52,29 @@
 					:field="col.field"
 					:header="col.label"
 					:style="{ width: col.width ? `${col.width}px` : 'auto' }">
-					<template #body="{ node }: { node: IDownloadPreviewNode }">
+					<template #body="{ node }: { node: DownloadPreviewDTO }">
 						<template v-if="col.type === 'title'">
 							<QMediaTypeIcon
-								v-if="node.mediaType"
-								:size="26"
-								:media-type="node.mediaType" />
+								:media-type="node.type"
+								:size="26" />
 							<QText
-								:cy="`column-title-${node.id}`"
+								:cy="`column-title-${node.key}`"
 								:value="node.title" />
 						</template>
 						<!-- Media Quality -->
 						<MediaQuality
 							v-else-if="col.type === 'media-quality'"
 							:align="'center'"
-							:data-cy="`column-${col.field}-${node.id}`"
+							:data-cy="`column-${col.field}-${node.key}`"
 							:qualities="node.qualities" />
 						<!-- File Size -->
 						<QFileSize
 							v-else-if="col.type === 'file-size'"
-							:cy="`column-dataTotal-${node.id}`"
+							:cy="`column-dataTotal-${node.key}`"
 							:size="node.size" />
 					</template>
 				</Column>
 			</TreeTable>
-			<Print> {{ downloadPreview }}</Print>
 		</template>
 		<!-- Download Actions -->
 		<template #actions="{ close }">
@@ -124,19 +137,18 @@
 import { get, set } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
 import {
-	type CreateDownloadTasksRequest, type DownloadMediaDTO,
-	type DownloadPreviewDTO, type FolderPathDTO, FolderType, type PlexMediaQualityDTO,
+	type CreateDownloadTasksRequest,
+	type DownloadMediaDTO,
+	type DownloadPreviewDTO,
+	type FolderPathDTO,
+	FolderType,
 	PlexMediaType,
 } from '@dto';
 import { DialogType } from '@enums';
 import { useI18n } from 'vue-i18n';
-import { useFolderPathStore, useDownloadStore, useDialogStore } from '@store';
-import { sum } from 'lodash-es';
-import type { TreeNode } from 'primevue/treenode';
-
-interface IDownloadPreviewNode extends TreeNode, Omit<DownloadPreviewDTO, 'children'> {
-	children?: IDownloadPreviewNode[];
-}
+import { useDialogStore, useDownloadStore, useFolderPathStore } from '@store';
+import Log from 'consola';
+import QCardDialog from '@components/Common/QCardDialog.vue';
 
 const { t } = useI18n();
 const downloadStore = useDownloadStore();
@@ -148,7 +160,7 @@ const emits = defineEmits<{
 }>();
 const expandedKeys = ref<Record<string, boolean>>({});
 const loading = ref(true);
-const downloadPreview = ref<IDownloadPreviewNode[]>([]);
+const downloadPreview = ref<DownloadPreviewDTO[]>([]);
 const downloadMediaCommand = ref<DownloadMediaDTO[]>([]);
 const mediaType = ref<PlexMediaType>(PlexMediaType.Unknown);
 const totalSize = ref(0);
@@ -178,12 +190,13 @@ const getDownloadPreviewTableColumns = computed((): {
 			label: t('components.media-list.columns.quality'),
 			field: 'qualities',
 			type: 'media-quality',
+			width: 200,
 		},
 		{
 			label: t('components.download-confirmation.columns.file-size'),
 			field: 'size',
 			type: 'file-size',
-			width: 100,
+			width: 150,
 		},
 	];
 });
@@ -191,45 +204,6 @@ const getDownloadPreviewTableColumns = computed((): {
 const selectedFolderPath = ref<FolderPathDTO>(get(customDirectory));
 
 const folderPathDestinations = computed(() => folderPathStore.getFolderPaths().filter((x) => x.mediaType === get(mediaType)));
-
-function mapDownloadPreviewToNode(item: DownloadPreviewDTO): IDownloadPreviewNode {
-	return {
-		id: item.id,
-		key: item.id.toString(),
-		label: item.title,
-		title: item.title,
-		data: item,
-		dataTotal: item.size,
-		size: item.size,
-		qualities: item.qualities,
-		childCount: item.childCount,
-		mediaType: item.mediaType,
-		children: item.children?.map(mapDownloadPreviewToNode),
-	};
-}
-
-function collectAllNodeKeys(nodes: IDownloadPreviewNode[]): Record<string, boolean> {
-	const keys: Record<string, boolean> = {};
-
-	function collectKeysRecursive(node: IDownloadPreviewNode): void {
-		keys[node.key] = true;
-		if (node.children && node.children.length > 0) {
-			node.children.forEach(collectKeysRecursive);
-		}
-	}
-
-	nodes.forEach(collectKeysRecursive);
-	return keys;
-}
-
-function toggleExpanded(state: boolean): void {
-	if (state) {
-		const allKeys = collectAllNodeKeys(get(downloadPreview));
-		set(expandedKeys, allKeys);
-	} else {
-		set(expandedKeys, {});
-	}
-}
 
 function openDialog(data: DownloadMediaDTO[]): void {
 	set(loading, true);
@@ -248,16 +222,21 @@ function openDialog(data: DownloadMediaDTO[]): void {
 	set(downloadMediaCommand, data);
 	useSubscription(
 		downloadStore.previewDownload(data).subscribe((result) => {
-			set(downloadPreview, result.map(mapDownloadPreviewToNode));
-			toggleExpanded(true);
-			set(totalSize, sum(result.map((x) => x.size)));
+			if (!result) {
+				Log.error('Download preview failed, no data received');
+				set(loading, false);
+				return;
+			}
+
+			set(downloadPreview, Object.freeze(result.previews));
+			set(totalSize, result.totalSize);
+			set(expandedKeys, result.expanded);
 			set(loading, false);
 		}),
 	);
 }
 
 function closeDialog(): void {
-	set(downloadPreview, []);
 }
 
 function onCustomDirectorySelected(path: FolderPathDTO): void {
@@ -274,3 +253,18 @@ function onDownload(close: () => void) {
 	close();
 }
 </script>
+
+<style lang="scss">
+.download-confirmation-table-header {
+
+  .p-treetable-empty-message {
+    display: none;
+  }
+}
+
+.download-confirmation-table-body {
+  .p-treetable-thead {
+    display: none;
+  }
+}
+</style>

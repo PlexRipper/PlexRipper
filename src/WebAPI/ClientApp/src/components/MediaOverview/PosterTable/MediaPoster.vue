@@ -12,6 +12,7 @@
 			<MediaQuality
 				class="media-poster-quality-bar"
 				:qualities="mediaItem.qualities"
+				clickable
 				@download="onDownload" />
 		</q-card-section>
 		<QLoadingOverlay :loading="loading" />

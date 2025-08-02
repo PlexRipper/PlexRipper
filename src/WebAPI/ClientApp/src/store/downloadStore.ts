@@ -8,8 +8,7 @@ import {
 	type BaseResultDTO,
 	type CreateDownloadTasksRequest,
 	DownloadActions,
-	type DownloadMediaDTO,
-	type DownloadPreviewDTO,
+	type DownloadMediaDTO, type DownloadPreviewContainerDTO,
 	type DownloadProgressDTO,
 	DownloadStatus,
 	type PlexServerDTO,
@@ -97,13 +96,13 @@ export const useDownloadStore = defineStore('DownloadStore', () => {
 				downloads: merged,
 			});
 		},
-		previewDownload(downloadMediaCommand: DownloadMediaDTO[]): Observable<DownloadPreviewDTO[]> {
+		previewDownload(downloadMediaCommand: DownloadMediaDTO[]): Observable<DownloadPreviewContainerDTO | null> {
 			return downloadApi.getDownloadPreviewEndpoint(downloadMediaCommand).pipe(
 				map((response) => {
 					if (response && response.isSuccess) {
-						return response.value ?? [];
+						return response.value ?? null;
 					}
-					return [];
+					return null;
 				}),
 			);
 		},

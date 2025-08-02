@@ -9,7 +9,7 @@
 			<template #default="{ }">
 				<QGlowChip
 					class="hover-expand-chip"
-					clickable
+					:clickable="clickable"
 					:color="getQualityDisplay(quality.quality).color"
 					size="md"
 					:value="qualities.length > minCount ? '' : getQualityDisplay(quality.quality).label"
@@ -39,14 +39,17 @@ import type { IMediaActionEmits } from '@interfaces';
 
 const props = withDefaults(defineProps<{
 	qualities: PlexMediaQualityDTO[];
-	trunacted?: boolean; // Whether to truncate the display of qualities
+	truncated?: boolean; // Whether to truncate the display of qualities
+	// Whether the chips are clickable
+	clickable?: boolean;
 }>(), {
-	trunacted: true, // Default to false if not provided
+	truncated: true,
+	clickable: false,
 });
 
 defineEmits<IMediaActionEmits>();
 const minCount = computed(() => {
-	return props.trunacted ? 1 : 100;
+	return props.truncated ? 1 : 100;
 });
 
 const getQualityDisplay = (quality: VideoQuality): {

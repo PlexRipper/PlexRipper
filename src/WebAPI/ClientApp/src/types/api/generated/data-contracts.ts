@@ -132,17 +132,21 @@ export interface DownloadMediaDTO {
   type: PlexMediaType;
 }
 
+export interface DownloadPreviewContainerDTO {
+  expanded: Record<string, boolean>;
+  previews: DownloadPreviewDTO[];
+  /** @format int64 */
+  totalSize: number;
+}
+
 export interface DownloadPreviewDTO {
-  /** @format int32 */
-  childCount: number;
   children: DownloadPreviewDTO[];
-  /** @format int32 */
-  id: number;
-  mediaType: PlexMediaType;
-   qualities: PlexMediaQualityDTO[];
+  key: string;
+  qualities: PlexMediaQualityDTO[];
   /** @format int64 */
   size: number;
   title: string;
+  type: PlexMediaType;
 }
 
 export interface DownloadProgressDTO {
@@ -909,6 +913,15 @@ export interface ResultDTOOfCountResponseDTO {
   value?: CountResponseDTO | null;
 }
 
+export interface ResultDTOOfDownloadPreviewContainerDTO {
+  errors: ErrorDTO[];
+  isSuccess: boolean;
+  /** @format int32 */
+  statusCode: number;
+  successes: SuccessDTO[];
+  value?: DownloadPreviewContainerDTO | null;
+}
+
 export interface ResultDTOOfDownloadTaskDTO {
   errors: ErrorDTO[];
   isSuccess: boolean;
@@ -943,15 +956,6 @@ export interface ResultDTOOfGeneratePlexTokenResponse {
   statusCode: number;
   successes: SuccessDTO[];
   value?: GeneratePlexTokenResponse | null;
-}
-
-export interface ResultDTOOfListOfDownloadPreviewDTO {
-  errors: ErrorDTO[];
-  isSuccess: boolean;
-  /** @format int32 */
-  statusCode: number;
-  successes: SuccessDTO[];
-  value?: DownloadPreviewDTO[] | null;
 }
 
 export interface ResultDTOOfListOfDownloadWorkerLogDTO {

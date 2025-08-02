@@ -28,13 +28,15 @@
 			<TreeTable
 				v-if="!loading"
 				v-model:expanded-keys="expandedKeys"
+				:size="'small'"
 				:value="downloadPreview">
 				<Column
 					v-for="(col, i) in getDownloadPreviewTableColumns"
 					:key="i"
 					:expander="i === 0"
 					:field="col.field"
-					:header="col.label">
+					:header="col.label"
+					:style="{ width: col.width ? `${col.width}px` : 'auto' }">
 					<template #body="{ node }: { node: IDownloadPreviewNode }">
 						<template v-if="col.type === 'title'">
 							<QMediaTypeIcon
@@ -50,21 +52,10 @@
 							v-else-if="col.type === 'media-quality'"
 							:align="'center'"
 							:data-cy="`column-${col.field}-${node.id}`"
-							:qualities="node[col.field] as PlexMediaQualityDTO[]" />
+							:qualities="node.qualities" />
 						<!-- File Size -->
 						<QFileSize
 							v-else-if="col.type === 'file-size'"
-							:cy="`column-dataTotal-${node.id}`"
-							:size="node.size" />
-					</template>
-				</Column>
-
-				<Column
-					field="dataTotal"
-					header="Size"
-					style="max-width: 10rem">
-					<template #body="{ node }: { node: IDownloadPreviewNode }">
-						<QFileSize
 							:cy="`column-dataTotal-${node.id}`"
 							:size="node.size" />
 					</template>
@@ -175,6 +166,7 @@ const getDownloadPreviewTableColumns = computed((): {
 	label: string;
 	field: keyof DownloadPreviewDTO;
 	type?: 'title' | 'duration' | 'file-size' | 'file-speed' | 'date' | 'actions' | 'datetime' | 'percentage' | 'index' | 'media-quality';
+	width?: number;
 }[] => {
 	return [
 		{
@@ -191,6 +183,7 @@ const getDownloadPreviewTableColumns = computed((): {
 			label: t('components.download-confirmation.columns.file-size'),
 			field: 'size',
 			type: 'file-size',
+			width: 100,
 		},
 	];
 });

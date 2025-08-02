@@ -24,6 +24,7 @@
 							class="hover-expand-chip"
 							:color="getQualityDisplay(quality.quality).color"
 							size="md"
+							has-background
 							:value="getQualityDisplay(quality.quality).label" />
 					</q-tooltip>
 				</template>

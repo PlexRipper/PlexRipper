@@ -134,8 +134,16 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
                 );
             }
 
+            // Find the download media DTO that contains this episode
+            var downloadMediaDto = downloadMediaList.FirstOrDefault(x => x.MediaIds.Contains(tvShowEpisode.Id));
+            if (downloadMediaDto is null)
+            {
+                _log.Warning("No download media DTO found for episode {EpisodeKey}", tvShowEpisode.Key);
+                continue;
+            }
+
             // Process episode media data
-            var processResult = ProcessEpisodeMediaData(tvShowEpisode, episodeDownloadTask, request);
+            var processResult = ProcessEpisodeMediaData(tvShowEpisode, episodeDownloadTask, downloadMediaDto, request);
             if (processResult.IsFailed)
                 processResult.LogError();
         }
@@ -196,17 +204,15 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
     private Result ProcessEpisodeMediaData(
         PlexTvShowEpisode tvShowEpisode,
         DownloadTaskTvShowEpisode episodeDownloadTask,
+        DownloadMediaDTO downloadMediaDto,
         CreateDownloadTasksRequest request
     )
     {
-        // TODO: Quality Selector needs to be implemented here
-        var episodeData = tvShowEpisode.MediaDataList.FirstOrDefault();
+        var episodeData = SelectEpisodeQuality(tvShowEpisode, downloadMediaDto);
         if (episodeData is null)
         {
-            return ResultExtensions
-                .IsEmpty(nameof(tvShowEpisode.MediaDataList))
-                .WithError($"No media data found for episode {tvShowEpisode.Key} ({tvShowEpisode.Title})")
-                .LogError();
+            _log.Error("Failed to select quality for episode {EpisodeKey}", tvShowEpisode.Key);
+            return Result.Fail($"No suitable quality found for episode {tvShowEpisode.Key} ({tvShowEpisode.Title})");
         }
 
         // Map episodeData to DownloadTaskTvShowEpisodeFile and add to episodeDownloadTask
@@ -221,5 +227,67 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
         _dbContext.DownloadTaskTvShowEpisodeFile.AddRange(downloadFiles);
 
         return Result.Ok();
+    }
+
+    /// <summary>
+    /// Selects the appropriate episode quality from the available media data list.
+    /// First attempts to use the requested quality, then falls back to the best available quality.
+    /// </summary>
+    /// <param name="tvShowEpisode">The episode containing media data options</param>
+    /// <param name="downloadMediaDto">The download request containing quality preferences</param>
+    /// <returns>The selected episode media data, or null if no suitable quality is found</returns>
+    private PlexTvShowEpisodeMediaData? SelectEpisodeQuality(
+        PlexTvShowEpisode tvShowEpisode,
+        DownloadMediaDTO downloadMediaDto
+    )
+    {
+        if (!tvShowEpisode.MediaDataList.Any())
+        {
+            _log.Warning("Episode {EpisodeKey} has no media data available", tvShowEpisode.Key);
+            return null;
+        }
+
+        // Try to find the specifically requested quality
+        var requestedQuality = downloadMediaDto.Qualities.FirstOrDefault(x => x.MediaId == tvShowEpisode.Id);
+        if (requestedQuality is not null)
+        {
+            var specificQuality = tvShowEpisode.MediaDataList.FirstOrDefault(x => x.Id == requestedQuality.DataId);
+            if (specificQuality is not null)
+            {
+                _log.Debug(
+                    "Selected requested quality {Quality} for episode {EpisodeKey} ({EpisodeTitle}) (DataId: {DataId})",
+                    requestedQuality.Quality,
+                    tvShowEpisode.Key,
+                    tvShowEpisode.Title,
+                    requestedQuality.DataId
+                );
+                return specificQuality;
+            }
+        }
+
+        // Fall back to the best available quality
+        var bestQuality = tvShowEpisode.MediaDataList.PickMediaQuality();
+        if (bestQuality is not null)
+        {
+            _log.Debug(
+                "Selected best available quality {Quality} for episode {EpisodeKey} ({EpisodeTitle}) (DataId: {DataId})",
+                bestQuality.Quality,
+                tvShowEpisode.Key,
+                tvShowEpisode.Title,
+                bestQuality.Id
+            );
+        }
+        else
+        {
+            _log.Error(
+                "No suitable quality found for episode {EpisodeKey} ({EpisodeTitle}) (ID: {EpisodeId}) from {AvailableCount} media data options",
+                tvShowEpisode.Key,
+                tvShowEpisode.Title,
+                tvShowEpisode.Id,
+                tvShowEpisode.MediaDataList.Count
+            );
+        }
+
+        return bestQuality;
     }
 }

@@ -48,7 +48,7 @@
             "current-folder-has-no-write-permission": "The current folder has no write permission! Select one that has."
         },
         "download-confirmation": {
-            "description": "PlexRipper will start inging the following:",
+            "description": "PlexRipper will start downloading the following",
             "header": "Are you sure?",
             "total-size": "Total size:",
             "columns": {

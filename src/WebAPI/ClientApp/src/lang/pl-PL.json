@@ -48,7 +48,7 @@
             "current-folder-has-no-write-permission": "Bieżący folder nie ma uprawnień do zapisu! Wybierz taki, który je ma."
         },
         "download-confirmation": {
-            "description": "PlexRipper rozpocznie pobieranie następujących elementów:",
+            "description": "PlexRipper rozpocznie pobieranie następujących plików",
             "header": "Czy jesteś pewny?",
             "total-size": "Całkowity rozmiar:",
             "columns": {

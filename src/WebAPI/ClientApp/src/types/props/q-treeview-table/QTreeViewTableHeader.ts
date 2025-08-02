@@ -3,7 +3,7 @@ export interface QTreeViewTableHeader {
 	field: string;
 	sortField?: string;
 	width?: number;
-	type?: 'title' | 'duration' | 'file-size' | 'file-speed' | 'date' | 'actions' | 'datetime' | 'percentage' | 'index';
+	type?: 'title' | 'duration' | 'file-size' | 'file-speed' | 'date' | 'actions' | 'datetime' | 'percentage' | 'index' | 'media-quality';
 	sortable?: boolean;
 	required?: boolean;
 	sortOrder?: 'asc' | 'desc' | 'no-sort';

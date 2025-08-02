@@ -139,6 +139,7 @@ export interface DownloadPreviewDTO {
   /** @format int32 */
   id: number;
   mediaType: PlexMediaType;
+   qualities: PlexMediaQualityDTO[];
   /** @format int64 */
   size: number;
   title: string;

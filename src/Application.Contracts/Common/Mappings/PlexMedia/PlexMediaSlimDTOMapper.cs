@@ -29,7 +29,7 @@ public static class PlexMediaSlimDTOMapper
                 .Select(x => new PlexMediaQualityDTO
                 {
                     Quality = x.Quality,
-                    MediaDataType = source.Type,
+                    MediaDataType = x.Type,
                     DataId = x.Id,
                     MediaId = source.Id,
                 })

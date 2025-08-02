@@ -43,7 +43,7 @@ public class GetDownloadPreviewQueryHandler : IRequestHandler<GetDownloadPreview
         {
             var downloadPreviews = new List<DownloadPreview>();
 
-            if (!request.DownloadMedias?.Any() == true)
+            if (!request.DownloadMedias.Any())
             {
                 return Result.Ok(downloadPreviews);
             }
@@ -120,7 +120,6 @@ public class GetDownloadPreviewQueryHandler : IRequestHandler<GetDownloadPreview
                 previews.AddRange(result);
             }
 
-            // Use SortTitle when available, fallback to Title
             var sortedPreviews = previews.OrderByNatural(x => x.Title);
             return Result.Ok(sortedPreviews);
         }

@@ -4,14 +4,16 @@ namespace Application.Contracts;
 
 public static class PlexMediaQualityMappers
 {
+    private const int NoMediaDataId = -1;
+
     #region PlexTvShowMediaQuality
 
     public static PlexMediaQualityDTO ToDTO(this PlexTvShowMediaQuality source) =>
         new()
         {
             Quality = source.Quality,
-            MediaId = -1,
-            DataId = -1,
+            MediaId = NoMediaDataId,
+            DataId = NoMediaDataId,
             MediaDataType = source.Type,
         };
 
@@ -36,7 +38,7 @@ public static class PlexMediaQualityMappers
 
     #endregion
 
-    #region PlexTvShowMediaQuality
+    #region PlexTvShowEpisodeMediaData
 
     public static PlexMediaQualityDTO ToPlexMediaQuality(this PlexTvShowEpisodeMediaData source) =>
         new()

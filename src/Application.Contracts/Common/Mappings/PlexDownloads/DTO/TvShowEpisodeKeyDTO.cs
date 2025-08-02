@@ -10,5 +10,5 @@ public record TvShowEpisodeKeyDTO
 
     public required int EpisodeId { get; init; }
 
-    public required List<PlexTvShowEpisodeMediaData> MediaDataList { get; init; }
+    public required ICollection<PlexTvShowEpisodeMediaData> MediaDataList { get; init; }
 }

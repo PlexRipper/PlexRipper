@@ -7,6 +7,7 @@ public static class DownloadPreviewMapper
     #region ToDTO
 
     private static int _currentId = 1;
+    private const int NoMediaDataId = -1;
 
     public static DownloadPreviewDTO ToDTO(this DownloadPreview source) =>
         new()
@@ -113,7 +114,7 @@ public static class DownloadPreviewMapper
                 {
                     Quality = x.Quality,
                     MediaDataType = x.Type,
-                    DataId = -1,
+                    DataId = NoMediaDataId,
                     MediaId = source.Id,
                 })
                 .ToList(),
@@ -143,7 +144,7 @@ public static class DownloadPreviewMapper
                 {
                     Quality = x.Quality,
                     MediaDataType = x.Type,
-                    DataId = -1,
+                    DataId = NoMediaDataId,
                     MediaId = source.Id,
                 })
                 .ToList(),
@@ -172,7 +173,7 @@ public static class DownloadPreviewMapper
                 .Select(x => new PlexMediaQuality
                 {
                     Quality = x.Quality,
-                    MediaDataType = source.Type,
+                    MediaDataType = x.Type,
                     MediaId = source.Id,
                     DataId = x.Id,
                 })
@@ -188,7 +189,7 @@ public static class DownloadPreviewMapper
             TvShowId = source.TvShowId,
             SeasonId = source.TvShowSeasonId,
             EpisodeId = source.Id,
-            MediaDataList = source.MediaDataList.ToList(),
+            MediaDataList = source.MediaDataList,
         };
 
     public static IQueryable<TvShowEpisodeKeyDTO> ProjectToEpisodeKey(this IQueryable<PlexTvShowEpisode> source) =>

@@ -13,7 +13,7 @@ public class GetDownloadPreviewEndpointRequestValidator : Validator<List<Downloa
     }
 }
 
-public class GetDownloadPreviewEndpoint : BaseEndpoint<List<DownloadMediaDTO>, List<DownloadPreviewDTO>>
+public class GetDownloadPreviewEndpoint : BaseEndpoint<List<DownloadMediaDTO>, DownloadPreviewContainerDTO>
 {
     private readonly IMediator _mediator;
 
@@ -29,7 +29,7 @@ public class GetDownloadPreviewEndpoint : BaseEndpoint<List<DownloadMediaDTO>, L
         Post(EndpointPath);
 
         Description(x =>
-            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<DownloadPreviewDTO>>))
+            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<DownloadPreviewContainerDTO>))
                 .Produces(StatusCodes.Status400BadRequest, typeof(BaseResultDTO))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))
         );

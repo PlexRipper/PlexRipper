@@ -6,18 +6,61 @@ public static class DownloadPreviewMapper
 {
     #region ToDTO
 
+    private static int _currentId = 1;
+
     public static DownloadPreviewDTO ToDTO(this DownloadPreview source) =>
         new()
         {
-            Id = source.Id,
+            // Media Id's can overlap, so we use a static counter to generate unique keys
+            Key = Interlocked.Increment(ref _currentId).ToString(),
             Title = source.Title,
             Size = source.Size,
-            ChildCount = source.ChildCount,
-            MediaType = source.MediaType,
-            Children = source.Children.ToDTO(),
+            Type = source.MediaType,
+            Children = source.Children.ConvertAll(ToDTO),
+            Qualities = source
+                .Qualities.Select(x => new PlexMediaQualityDTO
+                {
+                    Quality = x.Quality,
+                    MediaDataType = x.MediaDataType,
+                    DataId = x.DataId,
+                    MediaId = x.MediaId,
+                })
+                .ToList(),
         };
 
-    public static List<DownloadPreviewDTO> ToDTO(this List<DownloadPreview> source) => source.ConvertAll(ToDTO);
+    public static DownloadPreviewContainerDTO ToDTO(this List<DownloadPreview> source)
+    {
+        var previews = source.ConvertAll(ToDTO);
+
+        Dictionary<string, bool> FlattenKeysToDictionary(List<DownloadPreviewDTO> list)
+        {
+            var result = new Dictionary<string, bool>();
+
+            void Traverse(DownloadPreviewDTO item, int depth)
+            {
+                result.Add(item.Key, true);
+
+                // Don't need all the episode keys as well to be fully expanded
+                if (depth >= 0)
+                    return;
+
+                foreach (var child in item.Children)
+                    Traverse(child, depth + 1);
+            }
+
+            foreach (var item in list)
+                Traverse(item, 0);
+
+            return result;
+        }
+
+        return new DownloadPreviewContainerDTO
+        {
+            TotalSize = previews.Sum(x => x.Size),
+            Expanded = FlattenKeysToDictionary(previews),
+            Previews = previews,
+        };
+    }
 
     #endregion
 

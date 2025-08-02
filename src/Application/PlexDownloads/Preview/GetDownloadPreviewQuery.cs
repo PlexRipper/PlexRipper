@@ -373,6 +373,7 @@ public class GetDownloadPreviewQueryHandler : IRequestHandler<GetDownloadPreview
                 season.Children.AddRange(seasonEpisodes);
                 season.Size = season.Children.Sum(x => x.Size);
                 season.ChildCount = season.Children.Count;
+                season.Qualities.AddRange(seasonEpisodes.SelectMany(x => x.Qualities).DistinctBy(x => x.Quality));
             }
         }
 
@@ -389,6 +390,7 @@ public class GetDownloadPreviewQueryHandler : IRequestHandler<GetDownloadPreview
                 tvShow.Children.AddRange(tvShowSeasons);
                 tvShow.Size = tvShow.Children.Sum(x => x.Size);
                 tvShow.ChildCount = tvShow.Children.Count;
+                tvShow.Qualities.AddRange(tvShowSeasons.SelectMany(x => x.Qualities).DistinctBy(x => x.Quality));
             }
         }
     }

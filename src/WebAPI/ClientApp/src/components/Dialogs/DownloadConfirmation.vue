@@ -34,10 +34,10 @@
 					:expander="i === 0"
 					:field="col.field"
 					:header="col.label"
-					:style="{ width: col.width ? `${col.width}px` : 'auto' }" />
+					:style="{ 'width': col.width ? `${col.width}px` : 'auto', 'text-align': 'center' }" />
 			</TreeTable>
 		</template>
-		<template #default="{ size }">
+		<template #default>
 			<TreeTable
 				v-model:expanded-keys="expandedKeys"
 				:lazy="true"
@@ -48,7 +48,7 @@
 				<Column
 					v-for="(col, i) in getDownloadPreviewTableColumns"
 					:key="i"
-					:expander="i === 0"
+					:expander="i === 0 && hasAnyChildren"
 					:field="col.field"
 					:header="col.label"
 					:style="{ width: col.width ? `${col.width}px` : 'auto' }">
@@ -66,12 +66,15 @@
 							v-else-if="col.type === 'media-quality'"
 							:align="'center'"
 							:data-cy="`column-${col.field}-${node.key}`"
-							:qualities="node.qualities" />
+							:qualities="node.qualities"
+							class="q-mx-auto" />
 						<!-- File Size -->
 						<QFileSize
 							v-else-if="col.type === 'file-size'"
 							:cy="`column-dataTotal-${node.key}`"
-							:size="node.size" />
+							:size="node.size"
+							align="center"
+							class="q-mx-auto" />
 					</template>
 				</Column>
 			</TreeTable>
@@ -147,7 +150,6 @@ import { DialogType } from '@enums';
 import { useI18n } from 'vue-i18n';
 import { useDialogStore, useDownloadStore, useFolderPathStore } from '@store';
 import Log from 'consola';
-import QCardDialog from '@components/Common/QCardDialog.vue';
 
 const { t } = useI18n();
 const downloadStore = useDownloadStore();
@@ -200,6 +202,8 @@ const getDownloadPreviewTableColumns = computed((): {
 	];
 });
 
+const hasAnyChildren = computed(() => get(downloadPreview).some((x) => x.children && x.children.length > 0));
+
 const selectedFolderPath = ref<FolderPathDTO>(get(customDirectory));
 
 const folderPathDestinations = computed(() => folderPathStore.getFolderPaths().filter((x) => x.mediaType === get(mediaType)));
@@ -235,9 +239,6 @@ function openDialog(data: DownloadMediaDTO[]): void {
 	);
 }
 
-function closeDialog(): void {
-}
-
 function onCustomDirectorySelected(path: FolderPathDTO): void {
 	set(customDirectory, path);
 	set(selectedFolderPath, get(customDirectory));
@@ -256,6 +257,12 @@ function onDownload(close: () => void) {
 <style lang="scss">
 .download-confirmation-table-header {
   padding-right: 10px;
+
+  .p-treetable-thead tr > th:not(:first-child) .p-treetable-column-title {
+    margin: 0 auto;
+    padding-left: 1rem;
+  }
+
   .p-treetable-empty-message {
     display: none;
   }

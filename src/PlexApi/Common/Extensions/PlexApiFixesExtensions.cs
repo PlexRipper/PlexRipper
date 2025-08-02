@@ -4,6 +4,20 @@ namespace PlexRipper.PlexApi;
 
 public static class PlexApiFixesExtensions
 {
+    private static readonly Regex[] CompiledPatterns = new[]
+    {
+        new Regex(@"(?<!\d)(4320p|8K)(?!\d)", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+        new Regex(@"(?<!\d)(2160p|4K)(?!\d)", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+        new Regex(@"(?<!\d)1440p(?!\d)", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+        new Regex(@"(?<!\d)1080p(?!\d)", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+        new Regex(@"(?<!\d)720p(?!\d)", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+        new Regex(@"(?<!\d)576p(?!\d)", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+        new Regex(@"(?<!\d)480p(?!\d)", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+        new Regex(@"(?<!\d)360p(?!\d)", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+        new Regex(@"(?<!\d)240p(?!\d)", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+        new Regex(@"(?<!\d)144p(?!\d)", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+    };
+
     /// <summary>
     /// Sometimes Plex does not return the quality of a media item.
     /// This extension method will parse the filename and return the quality if it can be determined.
@@ -14,28 +28,12 @@ public static class PlexApiFixesExtensions
     {
         if (string.IsNullOrWhiteSpace(filename))
             return string.Empty;
-
-        var patterns = new[]
+        foreach (var regex in CompiledPatterns)
         {
-            @"(?<!\d)(4320p|8K)(?!\d)",
-            @"(?<!\d)(2160p|4K)(?!\d)",
-            @"(?<!\d)1440p(?!\d)",
-            @"(?<!\d)1080p(?!\d)",
-            @"(?<!\d)720p(?!\d)",
-            @"(?<!\d)576p(?!\d)",
-            @"(?<!\d)480p(?!\d)",
-            @"(?<!\d)360p(?!\d)",
-            @"(?<!\d)240p(?!\d)",
-            @"(?<!\d)144p(?!\d)",
-        };
-
-        foreach (var pattern in patterns)
-        {
-            var match = Regex.Match(filename, pattern, RegexOptions.IgnoreCase);
+            var match = regex.Match(filename);
             if (match.Success)
                 return match.Value.ToLowerInvariant();
         }
-
         return string.Empty;
     }
 }

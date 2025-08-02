@@ -25,7 +25,7 @@ public static partial class DbContextExtensions
                 return ResultExtensions.IsZero(nameof(plexServerId));
 
             if (plexLibraryId == 0)
-                return ResultExtensions.IsZero(nameof(plexServerId));
+                return ResultExtensions.IsZero(nameof(plexLibraryId));
 
             var rapport = new BulkInsertTvShowsRapport();
 

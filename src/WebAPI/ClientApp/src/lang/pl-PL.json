@@ -49,7 +49,6 @@
         },
         "download-confirmation": {
             "description": "PlexRipper rozpocznie pobieranie następujących plików",
-            "header": "Czy jesteś pewny?",
             "total-size": "Całkowity rozmiar:",
             "columns": {
                 "file-size": "Rozmiar pliku",

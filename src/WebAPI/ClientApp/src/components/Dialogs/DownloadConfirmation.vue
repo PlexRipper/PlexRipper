@@ -79,7 +79,6 @@
 		<!-- Download Actions -->
 		<template #actions="{ close }">
 			<CancelButton @click="close()" />
-
 			<q-btn-dropdown
 				color="green"
 				label="Download"
@@ -256,7 +255,7 @@ function onDownload(close: () => void) {
 
 <style lang="scss">
 .download-confirmation-table-header {
-
+  padding-right: 10px;
   .p-treetable-empty-message {
     display: none;
   }

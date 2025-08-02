@@ -68,7 +68,7 @@
 </template>
 
 <script setup lang="ts">
-import { type PlexMediaQualityDTO, type PlexMediaSlimDTO, PlexMediaType } from '@dto';
+import { type PlexMediaSlimDTO, PlexMediaType } from '@dto';
 import { useServerStore } from '@store';
 import type { IMediaActionEmits } from '@interfaces';
 

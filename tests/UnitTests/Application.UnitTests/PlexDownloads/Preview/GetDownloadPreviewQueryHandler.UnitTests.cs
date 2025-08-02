@@ -845,7 +845,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
                 PlexLibraryId = 1,
                 Qualities = [],
             },
-            // Some seasons from second show
+            // Some seasons from the second show
             new()
             {
                 MediaIds = secondShow.Seasons.Take(2).Select(x => x.Id).ToList(),
@@ -854,7 +854,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
                 PlexLibraryId = 1,
                 Qualities = [],
             },
-            // Some episodes from second show's third season
+            // Some episodes from the second show's third season
             new()
             {
                 MediaIds = secondShow.Seasons.ElementAt(2).Episodes.Take(2).Select(x => x.Id).ToList(),
@@ -875,19 +875,19 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
         var value = result.Value;
         value.Count.ShouldBe(2); // 2 TV shows
 
-        // First show should have all seasons and episodes
+        // The first show should have all seasons and episodes
         var firstShowResult = value.First(x => x.Id == firstShow.Id);
         firstShowResult.Children.Count.ShouldBe(3); // All 3 seasons
         firstShowResult.Children.ShouldAllBe(x => x.Children.Count == 4); // All 4 episodes per season
 
-        // Second show should have partial content
+        // The second show should have partial content
         var secondShowResult = value.First(x => x.Id == secondShow.Id);
         secondShowResult.Children.Count.ShouldBe(3); // 2 complete seasons + 1 partial season
 
-        // First two seasons should have all episodes
+        // The first two seasons should have all episodes
         secondShowResult.Children.Take(2).ShouldAllBe(x => x.Children.Count == 4);
 
-        // Third season should have only the requested episodes
+        // The third season should have only the requested episodes
         secondShowResult.Children.ElementAt(2).Children.Count.ShouldBe(2);
     }
 

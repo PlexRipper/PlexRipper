@@ -89,6 +89,10 @@ public class MergeFilesFromFileTaskCommandUnitTests : BaseUnitTest<MergeFilesFro
 
         MockCreateDirectoryFromFilePath();
 
+        mock.Mock<IFile>()
+            .Setup(x => x.Create(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<FileOptions>()))
+            .Throws<UnauthorizedAccessException>();
+
         mock.Mock<IMediator>()
             .Setup(m => m.Publish(It.IsAny<SendNotificationResult>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask)

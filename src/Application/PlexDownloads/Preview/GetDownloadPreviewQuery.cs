@@ -220,14 +220,22 @@ public class GetDownloadPreviewQueryHandler : IRequestHandler<GetDownloadPreview
 
                 if (groupedEpisodes != null)
                 {
+                    // Get PlexServerId and PlexLibraryId from the first episode in the group
+                    var firstEpisodeId = groupedEpisodes.First().EpisodeId;
+                    var episodeServerInfo = await _dbContext
+                        .PlexTvShowEpisodes.AsNoTracking()
+                        .Where(x => x.Id == firstEpisodeId)
+                        .Select(x => new { x.PlexServerId, x.PlexLibraryId })
+                        .FirstOrDefaultAsync(cancellationToken);
+
                     episodeDownloadMedia.Add(
                         new DownloadMediaDTO
                         {
                             MediaIds = missingEpisodeIds.Select(x => x.EpisodeId).ToList(),
                             Qualities = missingEpisodeIds.SelectMany(x => x.MediaDataList).ToPlexMediaQuality(),
                             Type = PlexMediaType.Episode,
-                            PlexServerId = 1, // TODO: Get from actual episode data
-                            PlexLibraryId = 1, // TODO: Get from actual episode data
+                            PlexServerId = episodeServerInfo?.PlexServerId ?? 0,
+                            PlexLibraryId = episodeServerInfo?.PlexLibraryId ?? 0,
                         }
                     );
                 }

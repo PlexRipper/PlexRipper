@@ -1,11 +1,9 @@
 <template>
-	<!-- The "Are you sure" dialog -->
 	<QCardDialog
 		:loading="loading"
 		:name="DialogType.MediaDownloadConfirmationDialog"
 		:type="[] as DownloadMediaDTO[]"
 		full-height
-		@closed="closeDialog"
 		@opened="openDialog">
 		<template #top-row>
 			<QRow class="q-pa-md">

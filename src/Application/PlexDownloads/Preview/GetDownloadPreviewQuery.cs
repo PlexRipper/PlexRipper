@@ -49,14 +49,14 @@ public class GetDownloadPreviewQueryHandler : IRequestHandler<GetDownloadPreview
             }
 
             // Process movies
-            var movieResult = await CreateMoviePreviews(request.DownloadMedias!, cancellationToken);
+            var movieResult = await CreateMoviePreviews(request.DownloadMedias, cancellationToken);
             if (movieResult.IsFailed)
                 return movieResult.ToResult();
 
             downloadPreviews.AddRange(movieResult.Value);
 
             // Process TV shows (including seasons and episodes)
-            var tvShowResult = await CreateTvShowPreviews(request.DownloadMedias!, cancellationToken);
+            var tvShowResult = await CreateTvShowPreviews(request.DownloadMedias, cancellationToken);
             if (tvShowResult.IsFailed)
                 return tvShowResult.ToResult();
 

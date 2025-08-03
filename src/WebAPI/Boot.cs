@@ -1,4 +1,3 @@
-using System.Net;
 using Application.Contracts;
 using Environment;
 using Logging.Interface;

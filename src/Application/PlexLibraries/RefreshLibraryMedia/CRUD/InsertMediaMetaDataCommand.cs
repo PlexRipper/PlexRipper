@@ -6,7 +6,6 @@ using FastEndpoints;
 using FluentValidation;
 using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using PlexApi.Contracts;
 
 namespace PlexRipper.Application;

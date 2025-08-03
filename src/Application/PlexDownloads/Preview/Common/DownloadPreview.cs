@@ -1,5 +1,3 @@
-using Application.Contracts;
-
 namespace PlexRipper.Application;
 
 public record DownloadPreview

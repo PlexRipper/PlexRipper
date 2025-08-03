@@ -24,24 +24,18 @@
       },
       "Bogus": {
         "type": "Direct",
-        "requested": "[35.6.1, )",
-        "resolved": "35.6.1",
-        "contentHash": "QPJ8zLL0ScEunEoUNhMDigD4ykA/n7vXCZUQdGCFGHBfP2mNYjiCzR9Cj12eaFaDlwkhIC1HKQZihWl8OgbLsw=="
+        "requested": "[35.6.3, )",
+        "resolved": "35.6.3",
+        "contentHash": "+5omfZWy8gOcbpc48vKfMI4h/ecbdf3NQm6xCl3zMbaP4J3rMMm5h3kPFeIWBgt4mbz6YY0eeZDLR/6yv1khKw=="
       },
       "Bogus.Hollywood": {
         "type": "Direct",
-        "requested": "[35.6.1, )",
-        "resolved": "35.6.1",
-        "contentHash": "YfemgtISpBVYKDtX+2S0eQvV3UIXgHoVxpR/KFTOjwiSebVRCESxgjC3vpo78oibMiasYinOVkcDMARm2q1tng==",
+        "requested": "[35.6.3, )",
+        "resolved": "35.6.3",
+        "contentHash": "C2h/1sqtjAOOdaZWcbFaM4qPRcnMZaMimyso92XlyYv6j5kvUj8RIHxRZ+GmAjSTljXAobo3xhzCu2JwXBymEw==",
         "dependencies": {
-          "Bogus": "35.6.1"
+          "Bogus": "35.6.3"
         }
-      },
-      "Bogus.Tools.Analyzer": {
-        "type": "Direct",
-        "requested": "[35.6.1, )",
-        "resolved": "35.6.1",
-        "contentHash": "nBAzw7nHEn42/NicD6hNeYOXo993byUbPZ7tOxDR+wG1O/8xKyV/tBnA6kjz9rkY/Uj93hHSH4ZKSSIQZ+mwiw=="
       },
       "CSharpier.MsBuild": {
         "type": "Direct",
@@ -263,14 +257,6 @@
         "dependencies": {
           "FastEndpoints": "5.32.0",
           "NSwag.AspNetCore": "14.2.0"
-        }
-      },
-      "FlexLabs.EntityFrameworkCore.Upsert": {
-        "type": "Transitive",
-        "resolved": "8.0.0",
-        "contentHash": "Z7KFJhVEuhLQMK763gXTaqfYFd3MknU0Du9IngXEtFXaEP4rKMxRlaWYntv58z3DEj1/UqBjLxojKMrUEDwNcw==",
-        "dependencies": {
-          "Microsoft.EntityFrameworkCore.Relational": "8.0.0"
         }
       },
       "FluentResults": {
@@ -1756,7 +1742,6 @@
         "dependencies": {
           "Application.Contracts": "[1.0.0, )",
           "EFCore.BulkExtensions.SQLite": "[9.0.1, )",
-          "FlexLabs.EntityFrameworkCore.Upsert": "[8.0.0, )",
           "Microsoft.EntityFrameworkCore": "[9.0.7, )",
           "PlexRipper.Domain": "[1.0.0, )"
         }

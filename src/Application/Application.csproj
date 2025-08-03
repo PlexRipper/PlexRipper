@@ -23,7 +23,7 @@
         <PackageReference Include="FastEndpoints.Swagger" Version="5.32.0"/>
         <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.9.0"/>
         <PackageReference Include="MediatR.Extensions.Autofac.DependencyInjection" Version="12.0.0"/>
-        <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.1"/>
+        <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.7" />
         <PackageReference Include="Polly" Version="8.3.1"/>
         <PackageReference Include="Polly.Core" Version="8.4.2"/>
         <PackageReference Include="Quartz.Serialization.SystemTextJson" Version="3.13.0"/>

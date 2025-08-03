@@ -26,8 +26,7 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="FastEndpoints.Testing" Version="5.32.0"/>
-        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.11"/>
-        <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="8.0.10"/>
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.7" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1"/>
         <PackageReference Include="Moq" Version="4.20.70"/>
         <PackageReference Include="Moq.Contrib.HttpClient" Version="1.4.0"/>

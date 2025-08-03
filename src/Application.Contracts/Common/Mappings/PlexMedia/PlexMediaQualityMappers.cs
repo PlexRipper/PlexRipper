@@ -30,7 +30,7 @@ public static class PlexMediaQualityMappers
             Quality = source.Quality,
             MediaDataType = source.Type,
             MediaId = source.PlexTvShowSeasonId,
-            DataId = -1,
+            DataId = NoMediaDataId,
         };
 
     public static List<PlexMediaQualityDTO> ToDTO(this IEnumerable<PlexTvShowSeasonMediaQuality> source) =>

@@ -127,7 +127,7 @@ public static partial class DbContextExtensions
                 .ToList();
             await context.BulkInsertAsync(seasonQualities, BulkConfigPreset.Default, ct);
 
-            // Add TvShowSeason Qualities for each tv-show
+            // Add TvShow Qualities for each tv-show
             var tvShowQualities = seasonQualities
                 .Select(x => new PlexTvShowMediaQuality
                 {

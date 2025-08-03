@@ -8,9 +8,9 @@ public record DownloadPreview
 
     public required string Title { get; init; }
 
-    public required long Size { get; init; }
+    public required long Size { get; set; }
 
-    public required int ChildCount { get; init; }
+    public required int ChildCount { get; set; }
 
     public required PlexMediaType MediaType { get; init; } = PlexMediaType.Unknown;
 

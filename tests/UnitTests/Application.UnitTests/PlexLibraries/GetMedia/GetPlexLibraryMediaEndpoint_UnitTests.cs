@@ -36,7 +36,7 @@ public class GetPlexLibraryMediaEndpoint_UnitTests : BaseUnitTest<GetPlexLibrary
 
         // Act
         var ep = SetupEndpointUnitTest<GetPlexLibraryMediaEndpoint>();
-        await ep.HandleAsync(request, CancellationToken.None);
+        await ep.HandleAsync(request, CancellationToken);
         var result = ep.Response as ResultDTO<PlexMediaStatisticsDTO>;
 
         // Assert
@@ -83,7 +83,7 @@ public class GetPlexLibraryMediaEndpoint_UnitTests : BaseUnitTest<GetPlexLibrary
 
         // Act
         var ep = SetupEndpointUnitTest<GetPlexLibraryMediaEndpoint>();
-        await ep.HandleAsync(request, CancellationToken.None);
+        await ep.HandleAsync(request, CancellationToken);
         var result = ep.Response as ResultDTO<PlexMediaStatisticsDTO>;
 
         // Assert

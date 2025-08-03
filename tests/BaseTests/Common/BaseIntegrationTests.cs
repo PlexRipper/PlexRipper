@@ -8,6 +8,8 @@ public class BaseIntegrationTests
 {
     private readonly ILog _log;
 
+    protected CancellationToken CancellationToken => TestContext.Current.CancellationToken;
+
     protected BaseIntegrationTests(ITestOutputHelper output, LogEventLevel logLevel = LogEventLevel.Debug)
     {
         EnvironmentExtensions.SetLogLevel(logLevel);

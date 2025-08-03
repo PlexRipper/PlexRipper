@@ -39,7 +39,7 @@ public class MergeFilesFromFileTaskCommandUnitTests : BaseUnitTest<MergeFilesFro
 
         var downloadTask = await IDbContext
             .DownloadTaskTvShowEpisodeFile.Include(x => x.DownloadWorkerTasks)
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(CancellationToken);
         downloadTask.ShouldNotBeNull();
 
         var progress = new Subject<IDownloadFileTransferProgress>();
@@ -60,7 +60,7 @@ public class MergeFilesFromFileTaskCommandUnitTests : BaseUnitTest<MergeFilesFro
 
         // Act
         var command = new MergeFilesFromFileTaskCommand(downloadTask.ToKey(), progress);
-        var result = await _sut.Handle(command, CancellationToken.None);
+        var result = await _sut.Handle(command, CancellationToken);
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -82,7 +82,9 @@ public class MergeFilesFromFileTaskCommandUnitTests : BaseUnitTest<MergeFilesFro
             }
         );
 
-        var key = await IDbContext.DownloadTaskTvShowEpisodeFile.Select(x => x.ToKey()).FirstOrDefaultAsync();
+        var key = await IDbContext
+            .DownloadTaskTvShowEpisodeFile.Select(x => x.ToKey())
+            .FirstOrDefaultAsync(CancellationToken);
         key.ShouldNotBeNull();
 
         var progress = new Subject<IDownloadFileTransferProgress>();
@@ -103,12 +105,12 @@ public class MergeFilesFromFileTaskCommandUnitTests : BaseUnitTest<MergeFilesFro
 
         // Act
         var command = new MergeFilesFromFileTaskCommand(key, progress);
-        var result = await _sut.Handle(command, CancellationToken.None);
+        var result = await _sut.Handle(command, CancellationToken);
 
         // Assert
         result.IsFailed.ShouldBeTrue();
 
-        var downloadTaskDb = await IDbContext.GetDownloadTaskFileAsync(key);
+        var downloadTaskDb = await IDbContext.GetDownloadTaskFileAsync(key, CancellationToken);
         downloadTaskDb.ShouldNotBeNull();
         downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.MergeError);
     }
@@ -130,7 +132,7 @@ public class MergeFilesFromFileTaskCommandUnitTests : BaseUnitTest<MergeFilesFro
 
         var downloadFileTask = await IDbContext
             .DownloadTaskTvShowEpisodeFile.Include(x => x.DownloadWorkerTasks)
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(CancellationToken);
         downloadFileTask.ShouldNotBeNull();
 
         var fileSizeInMb = 10;
@@ -178,13 +180,13 @@ public class MergeFilesFromFileTaskCommandUnitTests : BaseUnitTest<MergeFilesFro
 
         // Act
         var command = new MergeFilesFromFileTaskCommand(downloadFileTask.ToKey(), progress);
-        var result = await _sut.Handle(command, CancellationToken.None);
+        var result = await _sut.Handle(command, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
         progressList.Any().ShouldBeTrue();
 
-        var fileTaskPaused = await IDbContext.GetDownloadTaskFileAsync(downloadFileTask.ToKey());
+        var fileTaskPaused = await IDbContext.GetDownloadTaskFileAsync(downloadFileTask.ToKey(), CancellationToken);
         fileTaskPaused.ShouldNotBeNull();
         fileTaskPaused.CurrentFileTransferPathIndex.ShouldBe(3);
         fileTaskPaused.CurrentFileTransferBytesOffset.ShouldBe(0);
@@ -212,7 +214,7 @@ public class MergeFilesFromFileTaskCommandUnitTests : BaseUnitTest<MergeFilesFro
 
         var downloadFileTask = await IDbContext
             .DownloadTaskTvShowEpisodeFile.Include(x => x.DownloadWorkerTasks)
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(CancellationToken);
         downloadFileTask.ShouldNotBeNull();
 
         var fileSizeInMb = 10;
@@ -273,10 +275,7 @@ public class MergeFilesFromFileTaskCommandUnitTests : BaseUnitTest<MergeFilesFro
         result.IsSuccess.ShouldBeTrue();
         progressList.Any().ShouldBeTrue();
 
-        var fileTaskPaused = await IDbContext.GetDownloadTaskFileAsync(
-            downloadFileTask.ToKey(),
-            CancellationToken.None
-        );
+        var fileTaskPaused = await IDbContext.GetDownloadTaskFileAsync(downloadFileTask.ToKey(), CancellationToken);
         fileTaskPaused.ShouldNotBeNull();
         fileTaskPaused.CurrentFileTransferPathIndex.ShouldBe(1);
         fileTaskPaused.CurrentFileTransferBytesOffset.ShouldBeGreaterThan(0);
@@ -306,12 +305,12 @@ public class MergeFilesFromFileTaskCommandUnitTests : BaseUnitTest<MergeFilesFro
         var downloadFileTask = await dbContext
             .DownloadTaskTvShowEpisodeFile.AsTracking()
             .Include(x => x.DownloadWorkerTasks)
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(CancellationToken);
         downloadFileTask.ShouldNotBeNull();
 
         downloadFileTask.CurrentFileTransferPathIndex = 2;
         downloadFileTask.CurrentFileTransferBytesOffset = 2348;
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var fileSizeInMb = 10;
         var progress = new Subject<IDownloadFileTransferProgress>();
@@ -356,10 +355,7 @@ public class MergeFilesFromFileTaskCommandUnitTests : BaseUnitTest<MergeFilesFro
         result.IsSuccess.ShouldBeTrue();
         progressList.Any().ShouldBeTrue();
 
-        var fileTaskPaused = await IDbContext.GetDownloadTaskFileAsync(
-            downloadFileTask.ToKey(),
-            CancellationToken.None
-        );
+        var fileTaskPaused = await IDbContext.GetDownloadTaskFileAsync(downloadFileTask.ToKey(), CancellationToken);
         fileTaskPaused.ShouldNotBeNull();
         fileTaskPaused.CurrentFileTransferPathIndex.ShouldBe(3);
         fileTaskPaused.CurrentFileTransferBytesOffset.ShouldBe(0);
@@ -392,7 +388,7 @@ public class MergeFilesFromFileTaskCommandUnitTests : BaseUnitTest<MergeFilesFro
         var downloadFileTask = await dbContext
             .DownloadTaskTvShowEpisodeFile.AsTracking()
             .Include(x => x.DownloadWorkerTasks)
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(CancellationToken);
         downloadFileTask.ShouldNotBeNull();
 
         var progress = new Subject<IDownloadFileTransferProgress>();
@@ -439,7 +435,7 @@ public class MergeFilesFromFileTaskCommandUnitTests : BaseUnitTest<MergeFilesFro
 
         var downloadTaskCompleted = await IDbContext.GetDownloadTaskFileAsync(
             downloadFileTask.ToKey(),
-            CancellationToken.None
+            CancellationToken
         );
         downloadTaskCompleted.ShouldNotBeNull();
         downloadTaskCompleted.CurrentFileTransferPathIndex.ShouldBe(3);

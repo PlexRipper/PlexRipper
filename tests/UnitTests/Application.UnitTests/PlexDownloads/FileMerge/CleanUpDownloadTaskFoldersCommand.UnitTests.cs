@@ -26,17 +26,20 @@ public class CreateDirectoryFromFilePathUnitTests : BaseUnitTest<CleanUpDownload
         var dbContext = IDbContext;
         var downloadTask = await dbContext
             .DownloadTaskTvShowEpisodeFile.Include(x => x.DownloadWorkerTasks)
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(CancellationToken);
         downloadTask.ShouldNotBeNull();
 
         var downloadWorkerTaskIds = downloadTask.DownloadWorkerTasks.Select(x => x.Id).ToList();
         await dbContext
             .DownloadWorkerTasks.Where(x => downloadWorkerTaskIds.Contains(x.Id))
-            .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadDirectory, "").SetProperty(x => x.FileName, ""));
+            .ExecuteUpdateAsync(
+                p => p.SetProperty(x => x.DownloadDirectory, "").SetProperty(x => x.FileName, ""),
+                CancellationToken
+            );
 
         // Act
         var request = new CleanUpDownloadTaskFoldersCommand(downloadTask.ToKey());
-        var result = await _sut.Handle(request, CancellationToken.None);
+        var result = await _sut.Handle(request, CancellationToken);
 
         // Assert
         result.ShouldNotBeNull();
@@ -61,21 +64,23 @@ public class CreateDirectoryFromFilePathUnitTests : BaseUnitTest<CleanUpDownload
         var dbContext = IDbContext;
         var downloadTask = await dbContext
             .DownloadTaskTvShowEpisodeFile.Include(x => x.DownloadWorkerTasks)
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(CancellationToken);
         downloadTask.ShouldNotBeNull();
 
         var downloadWorkerTaskIds = downloadTask.DownloadWorkerTasks.Select(x => x.Id).ToList();
         await dbContext
             .DownloadWorkerTasks.Where(x => downloadWorkerTaskIds.Contains(x.Id))
-            .ExecuteUpdateAsync(p =>
-                p.SetProperty(
-                        x => x.DownloadDirectory,
-                        "/mnt/DATA/PlexRipperCache/Downloads/TvShows/Reno 911!/Season 1"
-                    )
-                    .SetProperty(
-                        x => x.FileName,
-                        "Reno 911! - S01E01 - How We Do It in Reno (Pilot) WEBDL-1080p.part1.mkv"
-                    )
+            .ExecuteUpdateAsync(
+                p =>
+                    p.SetProperty(
+                            x => x.DownloadDirectory,
+                            "/mnt/DATA/PlexRipperCache/Downloads/TvShows/Reno 911!/Season 1"
+                        )
+                        .SetProperty(
+                            x => x.FileName,
+                            "Reno 911! - S01E01 - How We Do It in Reno (Pilot) WEBDL-1080p.part1.mkv"
+                        ),
+                CancellationToken
             );
 
         mock.Mock<IPath>()
@@ -87,7 +92,7 @@ public class CreateDirectoryFromFilePathUnitTests : BaseUnitTest<CleanUpDownload
 
         // Act
         var request = new CleanUpDownloadTaskFoldersCommand(downloadTask.ToKey());
-        var result = await _sut.Handle(request, CancellationToken.None);
+        var result = await _sut.Handle(request, CancellationToken);
 
         // Assert
         result.ShouldNotBeNull();
@@ -112,22 +117,24 @@ public class CreateDirectoryFromFilePathUnitTests : BaseUnitTest<CleanUpDownload
         var dbContext = IDbContext;
         var downloadTask = await dbContext
             .DownloadTaskTvShowEpisodeFile.Include(x => x.DownloadWorkerTasks)
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(CancellationToken);
         downloadTask.ShouldNotBeNull();
         downloadTask.DownloadWorkerTasks.ShouldNotBeEmpty();
 
         var downloadWorkerTaskIds = downloadTask.DownloadWorkerTasks.Select(x => x.Id).ToList();
         await dbContext
             .DownloadWorkerTasks.Where(x => downloadWorkerTaskIds.Contains(x.Id))
-            .ExecuteUpdateAsync(p =>
-                p.SetProperty(
-                        x => x.DownloadDirectory,
-                        "/mnt/DATA/PlexRipperCache/Downloads/TvShows/Reno 911!/Season 1"
-                    )
-                    .SetProperty(
-                        x => x.FileName,
-                        "Reno 911! - S01E01 - How We Do It in Reno (Pilot) WEBDL-1080p.part1.mkv"
-                    )
+            .ExecuteUpdateAsync(
+                p =>
+                    p.SetProperty(
+                            x => x.DownloadDirectory,
+                            "/mnt/DATA/PlexRipperCache/Downloads/TvShows/Reno 911!/Season 1"
+                        )
+                        .SetProperty(
+                            x => x.FileName,
+                            "Reno 911! - S01E01 - How We Do It in Reno (Pilot) WEBDL-1080p.part1.mkv"
+                        ),
+                CancellationToken
             );
 
         mock.Mock<IPath>()
@@ -142,7 +149,7 @@ public class CreateDirectoryFromFilePathUnitTests : BaseUnitTest<CleanUpDownload
 
         // Act
         var request = new CleanUpDownloadTaskFoldersCommand(downloadTask.ToKey());
-        var result = await _sut.Handle(request, CancellationToken.None);
+        var result = await _sut.Handle(request, CancellationToken);
 
         // Assert
         result.ShouldNotBeNull();

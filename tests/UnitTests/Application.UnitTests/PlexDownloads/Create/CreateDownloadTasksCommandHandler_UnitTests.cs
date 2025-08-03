@@ -58,7 +58,7 @@ public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest<CreateDo
         // Act
         var request = new CreateDownloadTasksCommand(downloadMediaDtos);
         var handler = mock.Create<CreateDownloadTasksCommandHandler>();
-        var result = await handler.Handle(request, CancellationToken.None);
+        var result = await handler.Handle(request, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -103,7 +103,7 @@ public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest<CreateDo
         // Act
         var request = new CreateDownloadTasksCommand(new CreateDownloadTasksRequest(downloadMediaDtos));
         var handler = mock.Create<CreateDownloadTasksCommandHandler>();
-        var result = await handler.Handle(request, CancellationToken.None);
+        var result = await handler.Handle(request, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -128,7 +128,7 @@ public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest<CreateDo
         // Act
         var request = new CreateDownloadTasksCommand([]);
         var handler = mock.Create<CreateDownloadTasksCommandHandler>();
-        var result = await handler.Handle(request, CancellationToken.None);
+        var result = await handler.Handle(request, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

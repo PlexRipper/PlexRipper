@@ -21,7 +21,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
             }
         );
 
-        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync();
+        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync(CancellationToken);
         plexLibrary.ShouldNotBeNull();
         var actors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).Generate(100);
         var genres = FakePlexApiData.GetLibraryMediaItemGenreDTO(seed).Generate(100);
@@ -41,7 +41,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         // Assert
         result.IsSuccess.ShouldBeTrue();
 
-        var actorsDb = await IDbContext.PlexActors.ToListAsync();
+        var actorsDb = await IDbContext.PlexActors.ToListAsync(CancellationToken);
         actorsDb.Count.ShouldBe(actors.Count);
         foreach (var actor in actors)
             actorsDb.ShouldContain(
@@ -49,12 +49,12 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
                 $"Actor {actor.Name} with key {actor.Key} not found in database"
             );
 
-        var genresDb = await IDbContext.PlexGenres.ToListAsync();
+        var genresDb = await IDbContext.PlexGenres.ToListAsync(CancellationToken);
         genresDb.Count.ShouldBe(59);
         foreach (var genre in genres)
             genresDb.ShouldContain(x => x.Key == genre.Key, $"Genre {genre.Name} not found in database");
 
-        var countriesDb = await IDbContext.PlexCountries.ToListAsync();
+        var countriesDb = await IDbContext.PlexCountries.ToListAsync(CancellationToken);
         countriesDb.Count.ShouldBe(81);
         foreach (var country in countries)
             countriesDb.ShouldContain(x => x.Key == country.Key, $"Country {country.Name} not found in database");
@@ -73,7 +73,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
             }
         );
 
-        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync();
+        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync(CancellationToken);
         plexLibrary.ShouldNotBeNull();
 
         // Create initial data
@@ -83,10 +83,10 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
 
         // Insert initial data
         var dbContext = IDbContext;
-        await dbContext.PlexActors.AddRangeAsync(initialActors.ToPlexActor());
-        await dbContext.PlexGenres.AddRangeAsync(initialGenres.ToPlexGenre());
-        await dbContext.PlexCountries.AddRangeAsync(initialCountries.ToPlexCountry());
-        await dbContext.SaveChangesAsync();
+        await dbContext.PlexActors.AddRangeAsync(initialActors.ToPlexActor(), CancellationToken);
+        await dbContext.PlexGenres.AddRangeAsync(initialGenres.ToPlexGenre(), CancellationToken);
+        await dbContext.PlexCountries.AddRangeAsync(initialCountries.ToPlexCountry(), CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         // Create new data with some overlaps
         var newActors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).GenerateUnique(100, x => x.Key);
@@ -107,17 +107,17 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         // Assert
         result.IsSuccess.ShouldBeTrue();
 
-        var actorsDb = await IDbContext.PlexActors.ToListAsync();
+        var actorsDb = await IDbContext.PlexActors.ToListAsync(CancellationToken);
         actorsDb.Count.ShouldBe(initialActors.Count + newActors.Count);
         foreach (var actor in newActors)
             actorsDb.ShouldContain(x => x.Name == actor.Name && x.Key == actor.Key);
 
-        var genresDb = await IDbContext.PlexGenres.ToListAsync();
+        var genresDb = await IDbContext.PlexGenres.ToListAsync(CancellationToken);
         genresDb.Count.ShouldBe(newGenres.Count);
         foreach (var genre in newGenres)
             genresDb.ShouldContain(x => x.Key == genre.Key);
 
-        var countriesDb = await IDbContext.PlexCountries.ToListAsync();
+        var countriesDb = await IDbContext.PlexCountries.ToListAsync(CancellationToken);
         countriesDb.Count.ShouldBe(130);
         foreach (var country in newCountries)
             countriesDb.ShouldContain(x => x.Key == country.Key);
@@ -136,7 +136,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
             }
         );
 
-        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync();
+        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync(CancellationToken);
         plexLibrary.ShouldNotBeNull();
 
         // Act
@@ -146,13 +146,13 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         // Assert
         result.IsSuccess.ShouldBeTrue();
 
-        var actorsDb = await IDbContext.PlexActors.ToListAsync();
+        var actorsDb = await IDbContext.PlexActors.ToListAsync(CancellationToken);
         actorsDb.ShouldBeEmpty();
 
-        var genresDb = await IDbContext.PlexGenres.ToListAsync();
+        var genresDb = await IDbContext.PlexGenres.ToListAsync(CancellationToken);
         genresDb.ShouldBeEmpty();
 
-        var countriesDb = await IDbContext.PlexCountries.ToListAsync();
+        var countriesDb = await IDbContext.PlexCountries.ToListAsync(CancellationToken);
         countriesDb.ShouldBeEmpty();
     }
 
@@ -169,7 +169,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
             }
         );
 
-        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync();
+        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync(CancellationToken);
         plexLibrary.ShouldNotBeNull();
 
         // Create data with duplicate PlexKeys
@@ -185,7 +185,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        var actorsDb = await IDbContext.PlexActors.ToListAsync();
+        var actorsDb = await IDbContext.PlexActors.ToListAsync(CancellationToken);
         actorsDb.Count.ShouldBe(10); // Should only have unique PlexKeys
         actorsDb.Select(x => x.Key).Distinct().Count().ShouldBe(10);
     }
@@ -203,7 +203,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
             }
         );
 
-        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync();
+        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync(CancellationToken);
         plexLibrary.ShouldNotBeNull();
 
         var actors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).GenerateUnique(100, x => x.Name);
@@ -224,7 +224,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
 
         // Assert
         results.All(x => x.IsSuccess).ShouldBeTrue();
-        var actorsDb = await IDbContext.PlexActors.ToListAsync();
+        var actorsDb = await IDbContext.PlexActors.ToListAsync(CancellationToken);
         actorsDb.Count.ShouldBe(100);
         actorsDb.Select(x => x.Key).Distinct().Count().ShouldBe(100);
     }
@@ -242,7 +242,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
             }
         );
 
-        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync();
+        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync(CancellationToken);
         plexLibrary.ShouldNotBeNull();
 
         // Create a large dataset
@@ -263,9 +263,9 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        var actorsDb = await IDbContext.PlexActors.ToListAsync();
-        var genresDb = await IDbContext.PlexGenres.ToListAsync();
-        var countriesDb = await IDbContext.PlexCountries.ToListAsync();
+        var actorsDb = await IDbContext.PlexActors.ToListAsync(CancellationToken);
+        var genresDb = await IDbContext.PlexGenres.ToListAsync(CancellationToken);
+        var countriesDb = await IDbContext.PlexCountries.ToListAsync(CancellationToken);
 
         actorsDb.Count.ShouldBe(1000);
         genresDb.Count.ShouldBe(100); // These are deduplicated
@@ -285,13 +285,13 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
             }
         );
 
-        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync();
+        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync(CancellationToken);
         plexLibrary.ShouldNotBeNull();
 
         // Create initial data
         var initialActors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).Generate(50);
-        await IDbContext.PlexActors.AddRangeAsync(initialActors.ToPlexActor());
-        await IDbContext.SaveChangesAsync();
+        await IDbContext.PlexActors.AddRangeAsync(initialActors.ToPlexActor(), CancellationToken);
+        await IDbContext.SaveChangesAsync(CancellationToken);
 
         // Create new data with some overlapping PlexKeys but different names
         var newActors = initialActors.Take(25).Select(r => r with { Name = r.Name + "_updated" }).ToList();
@@ -305,7 +305,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        var actorsDb = await IDbContext.PlexActors.ToListAsync();
+        var actorsDb = await IDbContext.PlexActors.ToListAsync(CancellationToken);
         actorsDb.Count.ShouldBe(50);
 
         // Verify that existing items were updated
@@ -330,7 +330,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
             }
         );
 
-        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync();
+        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync(CancellationToken);
         plexLibrary.ShouldNotBeNull();
 
         // Act
@@ -355,7 +355,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
             }
         );
 
-        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync();
+        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync(CancellationToken);
         plexLibrary.ShouldNotBeNull();
 
         // Create actors with some having null TagKey
@@ -376,7 +376,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        var actorsDb = await IDbContext.PlexActors.ToListAsync();
+        var actorsDb = await IDbContext.PlexActors.ToListAsync(CancellationToken);
 
         // Only actors with Tag should be inserted
         actorsDb.Count.ShouldBe(50);
@@ -396,7 +396,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
             }
         );
 
-        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync();
+        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync(CancellationToken);
         plexLibrary.ShouldNotBeNull();
 
         var actors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).GenerateUnique(25, x => x.Name);
@@ -415,9 +415,9 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         result.Value.PlexGenres.ShouldBeEmpty();
         result.Value.PlexCountries.ShouldBeEmpty();
 
-        var actorsDb = await IDbContext.PlexActors.ToListAsync();
-        var genresDb = await IDbContext.PlexGenres.ToListAsync();
-        var countriesDb = await IDbContext.PlexCountries.ToListAsync();
+        var actorsDb = await IDbContext.PlexActors.ToListAsync(CancellationToken);
+        var genresDb = await IDbContext.PlexGenres.ToListAsync(CancellationToken);
+        var countriesDb = await IDbContext.PlexCountries.ToListAsync(CancellationToken);
 
         actorsDb.Count.ShouldBe(25);
         genresDb.ShouldBeEmpty();
@@ -437,7 +437,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
             }
         );
 
-        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync();
+        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync(CancellationToken);
         plexLibrary.ShouldNotBeNull();
 
         var actors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).GenerateUnique(10, x => x.Key);
@@ -491,7 +491,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
             }
         );
 
-        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync();
+        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync(CancellationToken);
         plexLibrary.ShouldNotBeNull();
 
         // Create actors with special characters
@@ -522,7 +522,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        var actorsDb = await IDbContext.PlexActors.ToListAsync();
+        var actorsDb = await IDbContext.PlexActors.ToListAsync(CancellationToken);
         actorsDb.Count.ShouldBe(5);
 
         actorsDb.ShouldContain(x => x.Name == "José María Aznar");
@@ -545,7 +545,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
             }
         );
 
-        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync();
+        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync(CancellationToken);
         plexLibrary.ShouldNotBeNull();
 
         var actors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).Generate(20);
@@ -571,9 +571,9 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         result2.IsSuccess.ShouldBeTrue();
         result3.IsSuccess.ShouldBeTrue();
 
-        var actorsDb = await IDbContext.PlexActors.ToListAsync();
-        var genresDb = await IDbContext.PlexGenres.ToListAsync();
-        var countriesDb = await IDbContext.PlexCountries.ToListAsync();
+        var actorsDb = await IDbContext.PlexActors.ToListAsync(CancellationToken);
+        var genresDb = await IDbContext.PlexGenres.ToListAsync(CancellationToken);
+        var countriesDb = await IDbContext.PlexCountries.ToListAsync(CancellationToken);
 
         // Should not have duplicates
         actorsDb.Count.ShouldBe(20);
@@ -596,7 +596,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
             }
         );
 
-        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync();
+        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync(CancellationToken);
         plexLibrary.ShouldNotBeNull();
 
         var actors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).Generate(5);
@@ -626,7 +626,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
             }
         );
 
-        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync();
+        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync(CancellationToken);
         plexLibrary.ShouldNotBeNull();
 
         // Create actors with very long names
@@ -650,7 +650,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        var actorsDb = await IDbContext.PlexActors.ToListAsync();
+        var actorsDb = await IDbContext.PlexActors.ToListAsync(CancellationToken);
         actorsDb.Count.ShouldBe(3);
         actorsDb.ShouldAllBe(x => x.Name.Length >= 250);
     }
@@ -668,7 +668,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
             }
         );
 
-        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync();
+        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync(CancellationToken);
         plexLibrary.ShouldNotBeNull();
 
         // Act
@@ -696,7 +696,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
             }
         );
 
-        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync();
+        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync(CancellationToken);
         plexLibrary.ShouldNotBeNull();
 
         // Create data with zero keys
@@ -723,9 +723,9 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         // Assert
         result.IsSuccess.ShouldBeTrue();
 
-        var actorsDb = await IDbContext.PlexActors.ToListAsync();
-        var genresDb = await IDbContext.PlexGenres.ToListAsync();
-        var countriesDb = await IDbContext.PlexCountries.ToListAsync();
+        var actorsDb = await IDbContext.PlexActors.ToListAsync(CancellationToken);
+        var genresDb = await IDbContext.PlexGenres.ToListAsync(CancellationToken);
+        var countriesDb = await IDbContext.PlexCountries.ToListAsync(CancellationToken);
 
         actorsDb.Count.ShouldBe(0);
         genresDb.Count.ShouldBe(0);
@@ -745,7 +745,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
             }
         );
 
-        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync();
+        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync(CancellationToken);
         plexLibrary.ShouldNotBeNull();
 
         var actors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).GenerateUnique(15, x => x.Key);
@@ -789,9 +789,9 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         );
 
         // Verify database entities match returned entities
-        var actorsDb = await IDbContext.PlexActors.ToListAsync();
-        var genresDb = await IDbContext.PlexGenres.ToListAsync();
-        var countriesDb = await IDbContext.PlexCountries.ToListAsync();
+        var actorsDb = await IDbContext.PlexActors.ToListAsync(CancellationToken);
+        var genresDb = await IDbContext.PlexGenres.ToListAsync(CancellationToken);
+        var countriesDb = await IDbContext.PlexCountries.ToListAsync(CancellationToken);
 
         actorsDb.Count.ShouldBe(result.Value.PlexActors.Count);
         genresDb.Count.ShouldBe(result.Value.PlexGenres.Count);

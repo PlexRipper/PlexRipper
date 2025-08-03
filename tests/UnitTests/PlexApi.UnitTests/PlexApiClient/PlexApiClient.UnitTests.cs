@@ -45,7 +45,7 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
                 x.Key == "Content-Type" && x.Value.Any(y => y.Contains(ContentType.ApplicationJson))
             )
             .ShouldBeTrue();
-        var json = await responseMessage.Content.ReadAsStringAsync();
+        var json = await responseMessage.Content.ReadAsStringAsync(CancellationToken);
         json.ShouldNotBeNullOrEmpty();
 
         // Verify json response
@@ -107,7 +107,7 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
         // Assert
         responseMessage.ShouldNotBeNull();
         responseMessage.StatusCode.ShouldBe(HttpStatusCode.InternalServerError);
-        var json = await responseMessage.Content.ReadAsStringAsync();
+        var json = await responseMessage.Content.ReadAsStringAsync(CancellationToken);
         json.ShouldNotBeNullOrEmpty();
 
         // Verify JSON response content
@@ -136,7 +136,7 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
         // Assert
         responseMessage.ShouldNotBeNull();
         responseMessage.StatusCode.ShouldBe(HttpStatusCode.OK);
-        var json = await responseMessage.Content.ReadAsStringAsync();
+        var json = await responseMessage.Content.ReadAsStringAsync(CancellationToken);
         json.ShouldNotBeNullOrEmpty();
     }
 
@@ -169,7 +169,7 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
         // Assert
         responseMessage.ShouldNotBeNull();
         responseMessage.StatusCode.ShouldBe(HttpStatusCode.OK);
-        var json = await responseMessage.Content.ReadAsStringAsync();
+        var json = await responseMessage.Content.ReadAsStringAsync(CancellationToken);
         json.ShouldBe("{ \"message\": \"Success\" }");
 
         HttpHandlerMock.VerifyRequest(url, Times.Exactly(3));

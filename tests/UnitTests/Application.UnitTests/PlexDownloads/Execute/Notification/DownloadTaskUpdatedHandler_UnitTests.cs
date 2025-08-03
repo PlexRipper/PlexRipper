@@ -25,7 +25,7 @@ public class DownloadTaskUpdatedHandler_UnitTests : BaseUnitTest<DownloadTaskUpd
             }
         );
 
-        var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync();
+        var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync(cancellationToken: CancellationToken);
 
         mock.Mock<ISignalRService>()
             .Setup(x =>
@@ -35,7 +35,7 @@ public class DownloadTaskUpdatedHandler_UnitTests : BaseUnitTest<DownloadTaskUpd
 
         // Act
         var command = new DownloadTaskUpdatedNotification(downloadTasks[0].ToKey());
-        await _sut.Handle(command, CancellationToken.None);
+        await _sut.Handle(command, CancellationToken);
 
         // Assert
         mock.Mock<ISignalRService>()
@@ -55,7 +55,7 @@ public class DownloadTaskUpdatedHandler_UnitTests : BaseUnitTest<DownloadTaskUpd
         // Arrange
         await SetupDatabase(81983, config => config.MovieDownloadTasksCount = 5);
 
-        var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync();
+        var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync(cancellationToken: CancellationToken);
         var updatedDownloadTask = downloadTasks[0].Children[0];
         await IDbContext.SetDownloadStatus(updatedDownloadTask.ToKey(), DownloadStatus.DownloadFinished);
 
@@ -71,7 +71,7 @@ public class DownloadTaskUpdatedHandler_UnitTests : BaseUnitTest<DownloadTaskUpd
 
         // Act
         var command = new DownloadTaskUpdatedNotification(downloadTasks[0].ToKey());
-        await _sut.Handle(command, CancellationToken.None);
+        await _sut.Handle(command, CancellationToken);
 
         // Assert
         mock.Mock<ISignalRService>()

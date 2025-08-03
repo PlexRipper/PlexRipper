@@ -23,8 +23,8 @@ public class InMemoryDatabase_UnitTests : BaseUnitTest
 
         // Act
         plexRipperContext.Notifications.Add(notification);
-        await plexRipperContext.SaveChangesAsync(CancellationToken.None);
-        var notifications = await plexRipperContext.Notifications.ToListAsync(CancellationToken.None);
+        await plexRipperContext.SaveChangesAsync(CancellationToken);
+        var notifications = await plexRipperContext.Notifications.ToListAsync(CancellationToken);
 
         // Assert
         notifications.Count.ShouldBe(1);
@@ -46,10 +46,10 @@ public class InMemoryDatabase_UnitTests : BaseUnitTest
 
         // Act
         plexRipperContext.Notifications.Add(notification);
-        await plexRipperContext.SaveChangesAsync(CancellationToken.None);
+        await plexRipperContext.SaveChangesAsync(CancellationToken);
         plexRipperContext.Notifications.Remove(notification);
-        await plexRipperContext.SaveChangesAsync(CancellationToken.None);
-        var notifications = await plexRipperContext.Notifications.ToListAsync(CancellationToken.None);
+        await plexRipperContext.SaveChangesAsync(CancellationToken);
+        var notifications = await plexRipperContext.Notifications.ToListAsync(CancellationToken);
 
         // Assert
         notifications.Count.ShouldBe(0);

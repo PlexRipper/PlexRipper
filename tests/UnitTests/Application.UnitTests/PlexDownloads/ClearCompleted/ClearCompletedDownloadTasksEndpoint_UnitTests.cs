@@ -23,22 +23,25 @@ public class ClearCompletedDownloadTasksEndpoint_UnitTests : BaseUnitTest<ClearC
 
         // Set download tasks to completed
         var dbContext = IDbContext;
-        var downloadTasks = await dbContext.DownloadTaskMovie.AsTracking().Include(x => x.Children).ToListAsync();
+        var downloadTasks = await dbContext
+            .DownloadTaskMovie.AsTracking()
+            .Include(x => x.Children)
+            .ToListAsync(CancellationToken);
 
         downloadTasks.SetDownloadStatus(DownloadStatus.Completed);
-        await dbContext.SaveChangesAsync(CancellationToken.None);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         // Act
         var ep = SetupEndpointUnitTest<ClearCompletedDownloadTasksEndpoint>();
-        await ep.HandleAsync(downloadTasks.Select(x => x.Id).Take(5).ToList(), default);
+        await ep.HandleAsync(downloadTasks.Select(x => x.Id).Take(5).ToList(), CancellationToken);
         var result = ep.Response;
 
         // Assert
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
 
-        var downloadTasksDb = await IDbContext.DownloadTaskMovie.ToListAsync();
-        var downloadTasksFileDb = await IDbContext.DownloadTaskMovieFile.ToListAsync();
+        var downloadTasksDb = await IDbContext.DownloadTaskMovie.ToListAsync(CancellationToken);
+        var downloadTasksFileDb = await IDbContext.DownloadTaskMovieFile.ToListAsync(CancellationToken);
         downloadTasksDb.Count.ShouldBe(5);
         downloadTasksFileDb.Count.ShouldBe(5);
     }
@@ -59,14 +62,17 @@ public class ClearCompletedDownloadTasksEndpoint_UnitTests : BaseUnitTest<ClearC
 
         // Set download tasks to completed
         var dbContext = IDbContext;
-        var downloadTasks = await dbContext.DownloadTaskMovie.AsTracking().Include(x => x.Children).ToListAsync();
+        var downloadTasks = await dbContext
+            .DownloadTaskMovie.AsTracking()
+            .Include(x => x.Children)
+            .ToListAsync(CancellationToken);
 
         downloadTasks.SetDownloadStatus(DownloadStatus.Completed);
-        await dbContext.SaveChangesAsync(CancellationToken.None);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         // Act
         var ep = SetupEndpointUnitTest<ClearCompletedDownloadTasksEndpoint>();
-        await ep.HandleAsync([], CancellationToken.None);
+        await ep.HandleAsync([], CancellationToken);
         var result = ep.Response;
 
         // Assert
@@ -74,8 +80,8 @@ public class ClearCompletedDownloadTasksEndpoint_UnitTests : BaseUnitTest<ClearC
         result.IsSuccess.ShouldBeTrue();
         dbContext = IDbContext;
 
-        var downloadTasksDb = await dbContext.DownloadTaskMovie.ToListAsync();
-        var downloadTasksFileDb = await dbContext.DownloadTaskMovieFile.ToListAsync();
+        var downloadTasksDb = await dbContext.DownloadTaskMovie.ToListAsync(CancellationToken);
+        var downloadTasksFileDb = await dbContext.DownloadTaskMovieFile.ToListAsync(CancellationToken);
         downloadTasksDb.ShouldBeEmpty();
         downloadTasksFileDb.ShouldBeEmpty();
     }

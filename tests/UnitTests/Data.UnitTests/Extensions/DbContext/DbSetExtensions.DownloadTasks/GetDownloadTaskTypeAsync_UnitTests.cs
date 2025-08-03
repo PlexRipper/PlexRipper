@@ -13,11 +13,11 @@ public class GetDownloadTaskTypeAsync_UnitTests : BaseUnitTest
     {
         // Arrange
         await SetupDatabase(81434, config => config.MovieDownloadTasksCount = 5);
-        var downloadTasks = await IDbContext.DownloadTaskMovie.ToListAsync();
+        var downloadTasks = await IDbContext.DownloadTaskMovie.ToListAsync(CancellationToken);
         var testDownloadTask = downloadTasks[2];
 
         // Act
-        var downloadTaskType = await IDbContext.GetDownloadTaskTypeAsync(testDownloadTask.Id);
+        var downloadTaskType = await IDbContext.GetDownloadTaskTypeAsync(testDownloadTask.Id, CancellationToken);
 
         // Assert
         downloadTaskType.ShouldBe(DownloadTaskType.Movie);
@@ -28,11 +28,11 @@ public class GetDownloadTaskTypeAsync_UnitTests : BaseUnitTest
     {
         // Arrange
         await SetupDatabase(91671, config => config.TvShowDownloadTasksCount = 2);
-        var downloadTasks = await IDbContext.DownloadTaskTvShow.ToListAsync();
+        var downloadTasks = await IDbContext.DownloadTaskTvShow.ToListAsync(CancellationToken);
         var testDownloadTask = downloadTasks[1];
 
         // Act
-        var downloadTaskType = await IDbContext.GetDownloadTaskTypeAsync(testDownloadTask.Id);
+        var downloadTaskType = await IDbContext.GetDownloadTaskTypeAsync(testDownloadTask.Id, CancellationToken);
 
         // Assert
         downloadTaskType.ShouldBe(DownloadTaskType.TvShow);
@@ -43,11 +43,11 @@ public class GetDownloadTaskTypeAsync_UnitTests : BaseUnitTest
     {
         // Arrange
         await SetupDatabase(48398, config => config.TvShowDownloadTasksCount = 3);
-        var downloadTasks = await IDbContext.DownloadTaskTvShowSeason.ToListAsync();
+        var downloadTasks = await IDbContext.DownloadTaskTvShowSeason.ToListAsync(CancellationToken);
         var testDownloadTask = downloadTasks[2];
 
         // Act
-        var downloadTaskType = await IDbContext.GetDownloadTaskTypeAsync(testDownloadTask.Id);
+        var downloadTaskType = await IDbContext.GetDownloadTaskTypeAsync(testDownloadTask.Id, CancellationToken);
 
         // Assert
         downloadTaskType.ShouldBe(DownloadTaskType.Season);
@@ -58,11 +58,11 @@ public class GetDownloadTaskTypeAsync_UnitTests : BaseUnitTest
     {
         // Arrange
         await SetupDatabase(74950, config => config.TvShowDownloadTasksCount = 2);
-        var downloadTasks = await IDbContext.DownloadTaskTvShowEpisode.ToListAsync();
+        var downloadTasks = await IDbContext.DownloadTaskTvShowEpisode.ToListAsync(CancellationToken);
         var testDownloadTask = downloadTasks[0];
 
         // Act
-        var downloadTaskType = await IDbContext.GetDownloadTaskTypeAsync(testDownloadTask.Id);
+        var downloadTaskType = await IDbContext.GetDownloadTaskTypeAsync(testDownloadTask.Id, CancellationToken);
 
         // Assert
         downloadTaskType.ShouldBe(DownloadTaskType.Episode);

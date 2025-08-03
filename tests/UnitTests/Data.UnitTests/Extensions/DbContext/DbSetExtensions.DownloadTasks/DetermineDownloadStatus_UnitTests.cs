@@ -20,15 +20,15 @@ public class DetermineDownloadStatus_UnitTests : BaseUnitTest
             }
         );
 
-        var downloadTasks = await IDbContext.DownloadTaskMovie.Include(x => x.Children).ToListAsync();
+        var downloadTasks = await IDbContext.DownloadTaskMovie.Include(x => x.Children).ToListAsync(CancellationToken);
         var testDownloadTask = downloadTasks.First().Children.First();
         await IDbContext.SetDownloadStatus(testDownloadTask.ToKey(), DownloadStatus.DownloadFinished);
 
         // Act
-        await IDbContext.DetermineDownloadStatus(testDownloadTask.ToKey());
+        await IDbContext.DetermineDownloadStatus(testDownloadTask.ToKey(), CancellationToken);
 
         // Assert
-        downloadTasks = await IDbContext.DownloadTaskMovie.Include(x => x.Children).ToListAsync();
+        downloadTasks = await IDbContext.DownloadTaskMovie.Include(x => x.Children).ToListAsync(CancellationToken);
 
         downloadTasks[0].DownloadStatus.ShouldBe(DownloadStatus.DownloadFinished);
     }
@@ -47,7 +47,7 @@ public class DetermineDownloadStatus_UnitTests : BaseUnitTest
             }
         );
 
-        var downloadTasks = await IDbContext.DownloadTaskTvShow.IncludeAll().ToListAsync();
+        var downloadTasks = await IDbContext.DownloadTaskTvShow.IncludeAll().ToListAsync(CancellationToken);
 
         var downloadTaskTvShowEpisodeFile = downloadTasks
             .ElementAt(3)
@@ -58,10 +58,13 @@ public class DetermineDownloadStatus_UnitTests : BaseUnitTest
         await IDbContext.SetDownloadStatus(downloadTaskTvShowEpisodeFile.ToKey(), DownloadStatus.Error);
 
         // Act
-        await IDbContext.DetermineDownloadStatus(downloadTaskTvShowEpisodeFile.ToKey());
+        await IDbContext.DetermineDownloadStatus(downloadTaskTvShowEpisodeFile.ToKey(), CancellationToken);
 
         // Assert
-        var downloadTasksDb = await IDbContext.DownloadTaskTvShow.AsTracking().IncludeAll().ToListAsync();
+        var downloadTasksDb = await IDbContext
+            .DownloadTaskTvShow.AsTracking()
+            .IncludeAll()
+            .ToListAsync(CancellationToken);
         downloadTasksDb[3].DownloadStatus.ShouldBe(DownloadStatus.Error);
     }
 }

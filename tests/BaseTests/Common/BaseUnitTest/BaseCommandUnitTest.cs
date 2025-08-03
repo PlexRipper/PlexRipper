@@ -29,7 +29,7 @@ public abstract class BaseCommandUnitTest<TCommand> : BaseUnitTest
     protected async Task<Result> TestHandlerExecuteAsync(TCommand command)
     {
         var validator = GetValidator();
-        var validationResult = await validator.ValidateAsync(command, CancellationToken.None);
+        var validationResult = await validator.ValidateAsync(command, CancellationToken);
         if (!validationResult.IsValid)
             return validationResult.ToResult();
 
@@ -49,7 +49,7 @@ public abstract class BaseCommandUnitTest<TCommand> : BaseUnitTest
         dynamic dynHandler = handler;
 
         // we still strongly type the command and CancellationToken
-        Result result = await dynHandler.ExecuteAsync(command, CancellationToken.None);
+        Result result = await dynHandler.ExecuteAsync(command, CancellationToken);
         return result;
     }
 
@@ -60,7 +60,7 @@ public abstract class BaseCommandUnitTest<TCommand> : BaseUnitTest
     protected async Task<Result<TResponse>> TestHandlerExecuteAsync<TResponse>(TCommand command)
     {
         var validator = GetValidator();
-        var validationResult = await validator.ValidateAsync(command, CancellationToken.None);
+        var validationResult = await validator.ValidateAsync(command, CancellationToken);
         if (!validationResult.IsValid)
             return validationResult.ToResult();
 
@@ -80,7 +80,7 @@ public abstract class BaseCommandUnitTest<TCommand> : BaseUnitTest
         dynamic dynHandler = handler;
 
         // we still strongly type the command and CancellationToken
-        Result<TResponse> result = await dynHandler.ExecuteAsync(command, CancellationToken.None);
+        Result<TResponse> result = await dynHandler.ExecuteAsync(command, CancellationToken);
         return result;
     }
 

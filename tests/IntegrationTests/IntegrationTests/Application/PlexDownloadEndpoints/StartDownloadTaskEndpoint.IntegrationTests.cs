@@ -47,7 +47,9 @@ public class StartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
                 };
             }
         );
-        var downloadTasks = await container.DbContext.GetAllDownloadTasksByServerAsync();
+        var downloadTasks = await container.DbContext.GetAllDownloadTasksByServerAsync(
+            cancellationToken: CancellationToken
+        );
         downloadTasks.Count.ShouldBe(1);
         var downloadTask = downloadTasks.First().Children.FirstOrDefault();
         downloadTask.ShouldNotBeNull();
@@ -63,13 +65,16 @@ public class StartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
         >(new StartDownloadTaskEndpointRequest(downloadTask.Id));
         testResult.Response.IsSuccessStatusCode.ShouldBeTrue();
 
-        await container.SchedulerService.AwaitScheduler();
+        await container.SchedulerService.AwaitScheduler(CancellationToken);
         await Task.Delay(2000, TestContext.Current.CancellationToken);
 
         // Assert
         var result = testResult.Result;
         result.IsSuccess.ShouldBeTrue();
-        var downloadTaskDb = await container.DbContext.GetDownloadTaskAsync(downloadTask.Id);
+        var downloadTaskDb = await container.DbContext.GetDownloadTaskAsync(
+            downloadTask.Id,
+            cancellationToken: CancellationToken
+        );
         downloadTaskDb.ShouldNotBeNull();
         downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.Completed);
     }

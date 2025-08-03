@@ -81,7 +81,7 @@ public class DownloadWorkerStartUnitTests : BaseUnitTest<DownloadWorker>
 
         SetupHttpClient();
 
-        await IDbContext.PlexServerStatuses.Where(x => x.Id > 0).ExecuteDeleteAsync();
+        await IDbContext.PlexServerStatuses.Where(x => x.Id > 0).ExecuteDeleteAsync(CancellationToken);
         var downloadWorkerTask = IDbContext.DownloadWorkerTasks.First();
 
         var sut = mock.Create<DownloadWorker>(new NamedParameter("downloadWorkerTask", downloadWorkerTask));

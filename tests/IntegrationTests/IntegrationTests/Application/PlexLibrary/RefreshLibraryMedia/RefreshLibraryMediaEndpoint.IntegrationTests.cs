@@ -52,7 +52,7 @@ public class RefreshLibraryMediaEndpointIntegrationTests : BaseIntegrationTests
             }
         );
 
-        var plexLibrary = await container.DbContext.PlexLibraries.FirstOrDefaultAsync();
+        var plexLibrary = await container.DbContext.PlexLibraries.FirstOrDefaultAsync(CancellationToken);
         plexLibrary.ShouldNotBeNull();
 
         // Act
@@ -74,7 +74,7 @@ public class RefreshLibraryMediaEndpointIntegrationTests : BaseIntegrationTests
         var dbContext = container.DbContext;
         var refreshedLibrary = await dbContext
             .PlexLibraries.Include(x => x.Movies)
-            .FirstOrDefaultAsync(x => x.Id == plexLibrary.Id);
+            .FirstOrDefaultAsync(x => x.Id == plexLibrary.Id, CancellationToken);
 
         refreshedLibrary.ShouldNotBeNull();
         refreshedLibrary.Movies.Count.ShouldBe(movieCount);
@@ -83,17 +83,17 @@ public class RefreshLibraryMediaEndpointIntegrationTests : BaseIntegrationTests
         refreshedLibrary.GenresCount.ShouldBe(genreCount * movieCount);
         refreshedLibrary.CountriesCount.ShouldBe(countryCount * movieCount);
 
-        var movieActorCount = await dbContext.PlexMovieActors.CountAsync();
+        var movieActorCount = await dbContext.PlexMovieActors.CountAsync(CancellationToken);
         movieActorCount.ShouldBe(roleCount * movieCount);
 
-        var genreMovieCount = await dbContext.PlexMovieGenres.CountAsync();
+        var genreMovieCount = await dbContext.PlexMovieGenres.CountAsync(CancellationToken);
         genreMovieCount.ShouldBe(genreCount * movieCount);
 
-        var countryMovieCount = await dbContext.PlexMovieCountries.CountAsync();
+        var countryMovieCount = await dbContext.PlexMovieCountries.CountAsync(CancellationToken);
         countryMovieCount.ShouldBe(countryCount * movieCount);
 
         // Verify media data
-        var movies = await dbContext.PlexMovies.IncludeMediaData().ToListAsync();
+        var movies = await dbContext.PlexMovies.IncludeMediaData().ToListAsync(CancellationToken);
         movies.ShouldNotBeEmpty();
         movies.Count.ShouldBe(movieCount);
 
@@ -148,7 +148,7 @@ public class RefreshLibraryMediaEndpointIntegrationTests : BaseIntegrationTests
             }
         );
 
-        var plexLibrary = await container.DbContext.PlexLibraries.FirstOrDefaultAsync();
+        var plexLibrary = await container.DbContext.PlexLibraries.FirstOrDefaultAsync(CancellationToken);
         plexLibrary.ShouldNotBeNull();
 
         // Act
@@ -172,7 +172,7 @@ public class RefreshLibraryMediaEndpointIntegrationTests : BaseIntegrationTests
             .PlexLibraries.Include(x => x.TvShows)
             .ThenInclude(x => x.Seasons)
             .ThenInclude(x => x.Episodes)
-            .FirstOrDefaultAsync(x => x.Id == plexLibrary.Id);
+            .FirstOrDefaultAsync(x => x.Id == plexLibrary.Id, CancellationToken);
 
         refreshedLibrary.ShouldNotBeNull();
         refreshedLibrary.TvShows.Count.ShouldBe(tvShowCount);
@@ -183,27 +183,27 @@ public class RefreshLibraryMediaEndpointIntegrationTests : BaseIntegrationTests
         refreshedLibrary.GenresCount.ShouldBeGreaterThan(0);
         refreshedLibrary.CountriesCount.ShouldBeGreaterThan(0);
 
-        var actors = await dbContext.PlexTvShowActors.ToListAsync();
+        var actors = await dbContext.PlexTvShowActors.ToListAsync(CancellationToken);
         actors.ShouldNotBeEmpty();
 
-        var genres = await dbContext.PlexTvShowGenres.ToListAsync();
+        var genres = await dbContext.PlexTvShowGenres.ToListAsync(CancellationToken);
         genres.ShouldNotBeEmpty();
 
-        var countries = await dbContext.PlexTvShowCountries.ToListAsync();
+        var countries = await dbContext.PlexTvShowCountries.ToListAsync(CancellationToken);
         countries.ShouldNotBeEmpty();
 
         // Verify the library was refreshed
-        var movieActorCount = await dbContext.PlexTvShowActors.CountAsync();
+        var movieActorCount = await dbContext.PlexTvShowActors.CountAsync(CancellationToken);
         movieActorCount.ShouldBe(roleCount * tvShowCount);
 
-        var genreTvShowCount = await dbContext.PlexTvShowGenres.CountAsync();
+        var genreTvShowCount = await dbContext.PlexTvShowGenres.CountAsync(CancellationToken);
         genreTvShowCount.ShouldBe(genreCount * tvShowCount);
 
-        var countryTvShowCount = await dbContext.PlexTvShowCountries.CountAsync();
+        var countryTvShowCount = await dbContext.PlexTvShowCountries.CountAsync(CancellationToken);
         countryTvShowCount.ShouldBe(countryCount * tvShowCount);
 
         // Verify media data
-        var episodes = await dbContext.PlexTvShowEpisodes.IncludeMediaData().ToListAsync();
+        var episodes = await dbContext.PlexTvShowEpisodes.IncludeMediaData().ToListAsync(CancellationToken);
         episodes.ShouldNotBeEmpty();
         episodes.Count.ShouldBe(totalEpisodeCount);
 

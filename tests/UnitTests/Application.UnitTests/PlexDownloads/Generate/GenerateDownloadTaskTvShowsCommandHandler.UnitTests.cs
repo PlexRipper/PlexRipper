@@ -23,7 +23,7 @@ public class GenerateDownloadTaskTvShowsCommandHandler_UnitTests
                 config.TvShowEpisodeCount = 3;
             }
         );
-        var plexTvShows = await IDbContext.PlexTvShows.IncludeAll().ToListAsync();
+        var plexTvShows = await IDbContext.PlexTvShows.IncludeAll().ToListAsync(CancellationToken);
 
         var tvShows = new List<DownloadMediaDTO>
         {
@@ -41,11 +41,13 @@ public class GenerateDownloadTaskTvShowsCommandHandler_UnitTests
 
         // Act
         var command = new GenerateDownloadTaskTvShowsCommand(tvShows);
-        var result = await _sut.Handle(command, CancellationToken.None);
+        var result = await _sut.Handle(command, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        var downloadTaskTvShows = await IDbContext.GetAllDownloadTasksByServerAsync();
+        var downloadTaskTvShows = await IDbContext.GetAllDownloadTasksByServerAsync(
+            cancellationToken: CancellationToken
+        );
 
         downloadTaskTvShows.Count.ShouldBe(5);
 

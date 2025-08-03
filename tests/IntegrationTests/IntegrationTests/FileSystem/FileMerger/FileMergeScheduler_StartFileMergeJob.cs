@@ -46,18 +46,18 @@ public class FileMergeSchedulerStartFileMergeJobIntegrationTests : BaseIntegrati
         downloadTasks.ShouldNotBeNull();
 
         downloadTasks.SetDownloadStatus(DownloadStatus.DownloadFinished);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var downloadTask = container.DbContext.DownloadTaskMovieFile.First();
 
         // Act
         var startResult = await container.FileMergeScheduler.StartFileMergeJob(downloadTask.ToKey());
-        await container.SchedulerService.AwaitScheduler();
+        await container.SchedulerService.AwaitScheduler(CancellationToken);
 
         // Assert
         startResult.IsSuccess.ShouldBeTrue();
 
-        var downloadTaskDb = await container.DbContext.GetDownloadTaskAsync(downloadTask.Id);
+        var downloadTaskDb = await container.DbContext.GetDownloadTaskAsync(downloadTask.ToKey(), CancellationToken);
         downloadTaskDb.ShouldNotBeNull();
         downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.Completed);
 

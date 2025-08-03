@@ -26,7 +26,7 @@ public class GenerateDownloadTaskMoviesCommandHandler_UnitTests : BaseUnitTest<G
             }
         );
 
-        var plexMovies = await IDbContext.PlexMovies.ToListAsync();
+        var plexMovies = await IDbContext.PlexMovies.ToListAsync(CancellationToken);
         var movies = new List<DownloadMediaDTO>
         {
             new()
@@ -41,18 +41,18 @@ public class GenerateDownloadTaskMoviesCommandHandler_UnitTests : BaseUnitTest<G
 
         // Act
         var command = new GenerateDownloadTaskMoviesCommand(movies);
-        var result = await _sut.Handle(command, CancellationToken.None);
+        var result = await _sut.Handle(command, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        var plexDownloadTaskMovies = await IDbContext.DownloadTaskMovie.IncludeAll().ToListAsync();
+        var plexDownloadTaskMovies = await IDbContext.DownloadTaskMovie.IncludeAll().ToListAsync(CancellationToken);
 
         plexDownloadTaskMovies.Count.ShouldBe(5);
 
         foreach (var downloadTaskMovie in plexDownloadTaskMovies)
         {
             downloadTaskMovie.Calculate();
-            var validationResult = await validator.ValidateAsync(downloadTaskMovie);
+            var validationResult = await validator.ValidateAsync(downloadTaskMovie, CancellationToken);
 
             // Ignore DownloadDirectory and DestinationDirectory errors as these are set in the DownloadJob
             var validErrors = validationResult.Errors.FindAll(x =>
@@ -77,7 +77,7 @@ public class GenerateDownloadTaskMoviesCommandHandler_UnitTests : BaseUnitTest<G
             }
         );
 
-        var plexMovies = await IDbContext.PlexMovies.ToListAsync();
+        var plexMovies = await IDbContext.PlexMovies.ToListAsync(CancellationToken);
         var movies = new List<DownloadMediaDTO>
         {
             new()
@@ -93,11 +93,11 @@ public class GenerateDownloadTaskMoviesCommandHandler_UnitTests : BaseUnitTest<G
         // Act
         var request = new CreateDownloadTasksRequest(movies, 99);
         var command = new GenerateDownloadTaskMoviesCommand(request);
-        var result = await _sut.Handle(command, CancellationToken.None);
+        var result = await _sut.Handle(command, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        var plexDownloadTaskMovies = await IDbContext.DownloadTaskMovie.IncludeAll().ToListAsync();
+        var plexDownloadTaskMovies = await IDbContext.DownloadTaskMovie.IncludeAll().ToListAsync(CancellationToken);
 
         plexDownloadTaskMovies.Count.ShouldBe(5);
 
@@ -123,7 +123,7 @@ public class GenerateDownloadTaskMoviesCommandHandler_UnitTests : BaseUnitTest<G
             }
         );
 
-        var plexMovies = await IDbContext.PlexMovies.ToListAsync();
+        var plexMovies = await IDbContext.PlexMovies.ToListAsync(CancellationToken);
         var movies = new List<DownloadMediaDTO>
         {
             new()
@@ -138,7 +138,7 @@ public class GenerateDownloadTaskMoviesCommandHandler_UnitTests : BaseUnitTest<G
 
         // Act
         var command = new GenerateDownloadTaskMoviesCommand(movies);
-        var result = await _sut.Handle(command, CancellationToken.None);
+        var result = await _sut.Handle(command, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -146,14 +146,14 @@ public class GenerateDownloadTaskMoviesCommandHandler_UnitTests : BaseUnitTest<G
         var plexDownloadTaskMovies = await IDbContext
             .DownloadTaskMovie.IncludeAll()
             .Include(x => x.Children)
-            .ToListAsync();
+            .ToListAsync(CancellationToken);
 
         plexDownloadTaskMovies.Count.ShouldBe(2);
 
         foreach (var downloadTaskMovie in plexDownloadTaskMovies)
         {
             downloadTaskMovie.Calculate();
-            var validationResult = await validator.ValidateAsync(downloadTaskMovie);
+            var validationResult = await validator.ValidateAsync(downloadTaskMovie, CancellationToken);
 
             // Ignore DownloadDirectory and DestinationDirectory errors as these are set in the DownloadJob
             var validErrors = validationResult.Errors.FindAll(x =>

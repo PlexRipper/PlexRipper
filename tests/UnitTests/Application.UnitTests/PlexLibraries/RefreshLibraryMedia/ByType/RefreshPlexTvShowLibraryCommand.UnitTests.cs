@@ -59,12 +59,12 @@ public class RefreshPlexTvShowLibraryCommand_UnitTests : BaseUnitTest<RefreshPle
         // Act
         var result = await _sut.ExecuteAsync(
             new RefreshPlexTvShowLibraryCommand(new InsertMediaMetaDataCommandResponse(testLibrary), _ => { }),
-            CancellationToken.None
+            CancellationToken
         );
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        var updatedLibrary = await IDbContext.PlexLibraries.FindAsync(testLibrary.Id);
+        var updatedLibrary = await IDbContext.PlexLibraries.GetAsync(testLibrary.Id, CancellationToken);
         updatedLibrary.ShouldNotBeNull();
         updatedLibrary.SyncedAt.ShouldNotBeNull();
         mock.Mock<IRefreshLibraryProgressReporter>()
@@ -89,7 +89,7 @@ public class RefreshPlexTvShowLibraryCommand_UnitTests : BaseUnitTest<RefreshPle
         // Act
         var result = await _sut.ExecuteAsync(
             new RefreshPlexTvShowLibraryCommand(new InsertMediaMetaDataCommandResponse(testLibrary), _ => { }),
-            CancellationToken.None
+            CancellationToken
         );
 
         // Assert
@@ -115,12 +115,12 @@ public class RefreshPlexTvShowLibraryCommand_UnitTests : BaseUnitTest<RefreshPle
         // Act
         var result = await _sut.ExecuteAsync(
             new RefreshPlexTvShowLibraryCommand(new InsertMediaMetaDataCommandResponse(testLibrary), _ => { }),
-            CancellationToken.None
+            CancellationToken
         );
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        var updatedLibrary = await IDbContext.PlexLibraries.FindAsync(testLibrary.Id);
+        var updatedLibrary = await IDbContext.PlexLibraries.GetAsync(testLibrary.Id, CancellationToken);
         updatedLibrary.ShouldNotBeNull();
         updatedLibrary.SyncedAt.ShouldNotBeNull();
     }
@@ -148,7 +148,7 @@ public class RefreshPlexTvShowLibraryCommand_UnitTests : BaseUnitTest<RefreshPle
         // Act
         var result = await _sut.ExecuteAsync(
             new RefreshPlexTvShowLibraryCommand(new InsertMediaMetaDataCommandResponse(testLibrary), _ => { }),
-            CancellationToken.None
+            CancellationToken
         );
 
         // Assert
@@ -187,7 +187,7 @@ public class RefreshPlexTvShowLibraryCommand_UnitTests : BaseUnitTest<RefreshPle
         // Act
         var result = await _sut.ExecuteAsync(
             new RefreshPlexTvShowLibraryCommand(new InsertMediaMetaDataCommandResponse(testLibrary), _ => { }),
-            CancellationToken.None
+            CancellationToken
         );
 
         // Assert
@@ -243,7 +243,7 @@ public class RefreshPlexTvShowLibraryCommand_UnitTests : BaseUnitTest<RefreshPle
         // Act
         var result = await _sut.ExecuteAsync(
             new RefreshPlexTvShowLibraryCommand(new InsertMediaMetaDataCommandResponse(testLibrary), _ => { }),
-            CancellationToken.None
+            CancellationToken
         );
 
         // Assert

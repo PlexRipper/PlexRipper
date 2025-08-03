@@ -21,7 +21,7 @@ public class RefreshPlexServerAccessCommandUnitTests : BaseUnitTest<RefreshPlexS
             }
         );
 
-        var plexAccount = await IDbContext.PlexAccounts.FirstOrDefaultAsync();
+        var plexAccount = await IDbContext.PlexAccounts.FirstOrDefaultAsync(CancellationToken);
         plexAccount.ShouldNotBeNull();
 
         mock.Mock<ICommandExecutor>()
@@ -31,7 +31,7 @@ public class RefreshPlexServerAccessCommandUnitTests : BaseUnitTest<RefreshPlexS
         // Act
         var request = new RefreshPlexServerAccessCommand(plexAccount.Id);
         var handler = mock.Create<RefreshPlexServerAccessCommandHandler>();
-        var result = await handler.Handle(request, CancellationToken.None);
+        var result = await handler.Handle(request, CancellationToken);
 
         // Assert
         result.ShouldNotBeNull();
@@ -49,7 +49,7 @@ public class RefreshPlexServerAccessCommandUnitTests : BaseUnitTest<RefreshPlexS
             }
         );
 
-        var plexAccount = await IDbContext.PlexAccounts.FirstOrDefaultAsync();
+        var plexAccount = await IDbContext.PlexAccounts.FirstOrDefaultAsync(CancellationToken);
         plexAccount.ShouldNotBeNull();
 
         var plexServers = FakeData.GetPlexServer(seed).Generate(10);
@@ -79,7 +79,7 @@ public class RefreshPlexServerAccessCommandUnitTests : BaseUnitTest<RefreshPlexS
 
         var request = new RefreshPlexServerAccessCommand(plexAccount.Id);
         var handler = mock.Create<RefreshPlexServerAccessCommandHandler>();
-        var result = await handler.Handle(request, CancellationToken.None);
+        var result = await handler.Handle(request, CancellationToken);
 
         // Assert
         result.ShouldNotBeNull();

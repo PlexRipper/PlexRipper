@@ -39,7 +39,7 @@ public class CreateDownloadTasksEndpointIntegrationTests : BaseIntegrationTests
             }
         );
 
-        var plexMovies = await container.DbContext.PlexMovies.ToListAsync();
+        var plexMovies = await container.DbContext.PlexMovies.ToListAsync(CancellationToken);
         plexMovies.Count.ShouldBe(
             plexMovieCount,
             $"PlexMovies count should be 10 failed with database name: {container.DbContext.DatabaseName}"
@@ -76,7 +76,9 @@ public class CreateDownloadTasksEndpointIntegrationTests : BaseIntegrationTests
         // Assert
         var result = testResult.Result;
         result.IsSuccess.ShouldBeTrue();
-        var downloadTasksDb = await container.DbContext.GetAllDownloadTasksByServerAsync();
+        var downloadTasksDb = await container.DbContext.GetAllDownloadTasksByServerAsync(
+            cancellationToken: CancellationToken
+        );
         downloadTasksDb.ShouldNotBeNull();
         downloadTasksDb.ShouldNotBeEmpty();
         downloadTasksDb.Count.ShouldBe(plexMovieCount);

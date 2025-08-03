@@ -17,7 +17,7 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
         await SetupDatabase(63209);
 
         // Act
-        var result = await _sut.Handle(new StartDownloadTaskCommand(Guid.Empty), CancellationToken.None);
+        var result = await _sut.Handle(new StartDownloadTaskCommand(Guid.Empty), CancellationToken);
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -44,14 +44,14 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
             .Include(x => x.Children)
             .ThenInclude(x => x.Children)
             .ThenInclude(x => x.Children)
-            .ToListAsync();
+            .ToListAsync(CancellationToken);
 
         var alreadyMergingTask = tvShowDownloadTasks.First();
         var pausedMergeTask = tvShowDownloadTasks.Last();
 
         alreadyMergingTask.SetDownloadStatus(DownloadStatus.Merging);
         pausedMergeTask.SetDownloadStatus(DownloadStatus.MergePaused);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         mock.Mock<IFileMergeScheduler>()
             .Setup(x => x.IsDownloadTaskMerging(It.IsAny<DownloadTaskKey>()))
@@ -71,7 +71,7 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
             .Verifiable(Times.Once);
 
         // Act
-        var result = await _sut.Handle(new StartDownloadTaskCommand(pausedMergeTask.Id), CancellationToken.None);
+        var result = await _sut.Handle(new StartDownloadTaskCommand(pausedMergeTask.Id), CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -97,14 +97,14 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
             .Include(x => x.Children)
             .ThenInclude(x => x.Children)
             .ThenInclude(x => x.Children)
-            .ToListAsync();
+            .ToListAsync(CancellationToken);
 
         tvShowDownloadTasks.SetDownloadStatus(DownloadStatus.Completed);
         var lastDownloadTask = tvShowDownloadTasks.Last();
         lastDownloadTask.SetDownloadStatus(DownloadStatus.Queued);
         var downloadingTask = lastDownloadTask.Children.First().Children.First().Children.First();
         downloadingTask.DownloadStatus = DownloadStatus.Downloading;
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         mock.Mock<IDownloadTaskScheduler>()
             .Setup(x => x.GetCurrentlyDownloadingKeysByServer(It.IsAny<int>()))
@@ -123,12 +123,12 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
         mock.PublishMediator(It.IsAny<CheckDownloadQueueNotification>).Returns(Task.CompletedTask);
 
         // Act
-        var result = await _sut.Handle(new StartDownloadTaskCommand(lastDownloadTask.Id), CancellationToken.None);
+        var result = await _sut.Handle(new StartDownloadTaskCommand(lastDownloadTask.Id), CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
 
-        var downloadTasks = await IDbContext.GetDownloadableChildTasks(lastDownloadTask.ToKey());
+        var downloadTasks = await IDbContext.GetDownloadableChildTasks(lastDownloadTask.ToKey(), CancellationToken);
         for (var i = 0; i < downloadTasks.Count; i++)
         {
             if (i > 0)
@@ -166,7 +166,7 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
             .Include(x => x.Children)
             .ThenInclude(x => x.Children)
             .ThenInclude(x => x.Children)
-            .ToListAsync();
+            .ToListAsync(CancellationToken);
 
         tvShowDownloadTasks.SetDownloadStatus(DownloadStatus.Completed);
         var lastDownloadTask = tvShowDownloadTasks.Last();
@@ -175,7 +175,7 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
         var downloadingTask = lastDownloadTask.Children.ElementAt(0).Children.ElementAt(1).Children.ElementAt(0);
 
         downloadingTask.DownloadStatus = DownloadStatus.Downloading;
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         mock.Mock<IDownloadTaskScheduler>()
             .Setup(x => x.GetCurrentlyDownloadingKeysByServer(It.IsAny<int>()))
@@ -203,12 +203,12 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
         mock.PublishMediator(It.IsAny<CheckDownloadQueueNotification>).Returns(Task.CompletedTask);
 
         // Act
-        var result = await _sut.Handle(new StartDownloadTaskCommand(lastDownloadTask.Id), CancellationToken.None);
+        var result = await _sut.Handle(new StartDownloadTaskCommand(lastDownloadTask.Id), CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
 
-        var downloadTasks = await IDbContext.GetDownloadableChildTasks(lastDownloadTask.ToKey());
+        var downloadTasks = await IDbContext.GetDownloadableChildTasks(lastDownloadTask.ToKey(), CancellationToken);
         for (var i = 0; i < downloadTasks.Count; i++)
         {
             if (i > 0)

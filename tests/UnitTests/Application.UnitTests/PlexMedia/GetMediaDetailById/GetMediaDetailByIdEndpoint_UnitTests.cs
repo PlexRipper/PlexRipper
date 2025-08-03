@@ -33,7 +33,7 @@ public class GetMediaDetailByIdEndpoint_UnitTests : BaseUnitTest<GetMediaDetailB
 
         // Act
         var ep = SetupEndpointUnitTest<GetMediaDetailByIdEndpoint>();
-        await ep.HandleAsync(request, CancellationToken.None);
+        await ep.HandleAsync(request, CancellationToken);
         var result = ep.Response as ResultDTO<PlexMediaDTO>;
 
         // Assert
@@ -72,7 +72,7 @@ public class GetMediaDetailByIdEndpoint_UnitTests : BaseUnitTest<GetMediaDetailB
 
         // Act
         var ep = SetupEndpointUnitTest<GetMediaDetailByIdEndpoint>();
-        await ep.HandleAsync(request, CancellationToken.None);
+        await ep.HandleAsync(request, CancellationToken);
         var result = ep.Response as ResultDTO<PlexMediaDTO>;
 
         // Assert

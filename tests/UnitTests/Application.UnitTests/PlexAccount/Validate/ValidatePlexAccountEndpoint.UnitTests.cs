@@ -25,7 +25,7 @@ public class ValidatePlexAccountEndpointUnitTests : BaseUnitTest
 
         // Act
         var ep = SetupEndpointUnitTest<ValidatePlexAccountEndpoint>();
-        await ep.HandleAsync(new ValidatePlexAccountEndpointRequest(testAccountDTO), CancellationToken.None);
+        await ep.HandleAsync(new ValidatePlexAccountEndpointRequest(testAccountDTO), CancellationToken);
         var result = ep.Response as ResultDTO<ValidatePlexAccountResponse>;
 
         // Assert
@@ -65,7 +65,7 @@ public class ValidatePlexAccountEndpointUnitTests : BaseUnitTest
 
         // Act
         var ep = SetupEndpointUnitTest<ValidatePlexAccountEndpoint>();
-        await ep.HandleAsync(new ValidatePlexAccountEndpointRequest(testAccountDTO), CancellationToken.None);
+        await ep.HandleAsync(new ValidatePlexAccountEndpointRequest(testAccountDTO), CancellationToken);
         var result = ep.Response as ResultDTO<ValidatePlexAccountResponse>;
 
         // Assert
@@ -104,7 +104,7 @@ public class ValidatePlexAccountEndpointUnitTests : BaseUnitTest
 
         // Act
         var ep = SetupEndpointUnitTest<ValidatePlexAccountEndpoint>();
-        await ep.HandleAsync(new ValidatePlexAccountEndpointRequest(testAccountDTO), CancellationToken.None);
+        await ep.HandleAsync(new ValidatePlexAccountEndpointRequest(testAccountDTO), CancellationToken);
         var result = ep.Response as ResultDTO<ValidatePlexAccountResponse>;
 
         // Assert
@@ -140,7 +140,7 @@ public class ValidatePlexAccountEndpointUnitTests : BaseUnitTest
 
         // Act
         var ep = SetupEndpointUnitTest<ValidatePlexAccountEndpoint>();
-        await ep.HandleAsync(new ValidatePlexAccountEndpointRequest(testAccountDTO), CancellationToken.None);
+        await ep.HandleAsync(new ValidatePlexAccountEndpointRequest(testAccountDTO), CancellationToken);
         var result = ep.Response as ResultDTO<ValidatePlexAccountResponse>;
 
         // Assert
@@ -178,7 +178,7 @@ public class ValidatePlexAccountEndpointUnitTests : BaseUnitTest
 
         // Act
         var ep = SetupEndpointUnitTest<ValidatePlexAccountEndpoint>();
-        await ep.HandleAsync(new ValidatePlexAccountEndpointRequest(testAccountDTO), CancellationToken.None);
+        await ep.HandleAsync(new ValidatePlexAccountEndpointRequest(testAccountDTO), CancellationToken);
         var result = ep.Response as ResultDTO<ValidatePlexAccountResponse>;
 
         // Assert
@@ -218,7 +218,7 @@ public class ValidatePlexAccountEndpointUnitTests : BaseUnitTest
 
         // Act
         var ep = SetupEndpointUnitTest<ValidatePlexAccountEndpoint>();
-        await ep.HandleAsync(new ValidatePlexAccountEndpointRequest(testAccountDTO), CancellationToken.None);
+        await ep.HandleAsync(new ValidatePlexAccountEndpointRequest(testAccountDTO), CancellationToken);
         var result = ep.Response;
 
         // Assert

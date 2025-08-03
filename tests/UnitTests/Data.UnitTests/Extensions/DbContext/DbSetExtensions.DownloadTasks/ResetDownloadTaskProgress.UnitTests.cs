@@ -32,16 +32,16 @@ public class ResetDownloadTaskProgressUnitTests : BaseUnitTest
         switch (type)
         {
             case DownloadTaskType.Movie:
-                key = await dbContext.DownloadTaskMovie.ProjectToKey().FirstOrDefaultAsync();
+                key = await dbContext.DownloadTaskMovie.ProjectToKey().FirstOrDefaultAsync(CancellationToken);
                 break;
             case DownloadTaskType.TvShow:
-                key = await dbContext.DownloadTaskTvShow.ProjectToKey().FirstOrDefaultAsync();
+                key = await dbContext.DownloadTaskTvShow.ProjectToKey().FirstOrDefaultAsync(CancellationToken);
                 break;
             case DownloadTaskType.Season:
-                key = await dbContext.DownloadTaskTvShowSeason.ProjectToKey().FirstOrDefaultAsync();
+                key = await dbContext.DownloadTaskTvShowSeason.ProjectToKey().FirstOrDefaultAsync(CancellationToken);
                 break;
             case DownloadTaskType.Episode:
-                key = await dbContext.DownloadTaskTvShowEpisode.ProjectToKey().FirstOrDefaultAsync();
+                key = await dbContext.DownloadTaskTvShowEpisode.ProjectToKey().FirstOrDefaultAsync(CancellationToken);
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(type), type, null);
@@ -50,7 +50,7 @@ public class ResetDownloadTaskProgressUnitTests : BaseUnitTest
         key.ShouldNotBeNull();
 
         // Act
-        var result = await dbContext.ResetDownloadTaskProgress(key, DownloadStatus.Stopped);
+        var result = await dbContext.ResetDownloadTaskProgress(key, DownloadStatus.Stopped, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeFalse();
@@ -63,7 +63,7 @@ public class ResetDownloadTaskProgressUnitTests : BaseUnitTest
         // Arrange
         await SetupDatabase(43481, config => config.MovieDownloadTasksCount = 5);
         var dbContext = IDbContext;
-        var downloadTasks = await dbContext.DownloadTaskMovieFile.AsTracking().ToListAsync();
+        var downloadTasks = await dbContext.DownloadTaskMovieFile.AsTracking().ToListAsync(CancellationToken);
         var testDownloadTask = downloadTasks[2];
 
         testDownloadTask.DataTotal = 5000;
@@ -73,14 +73,18 @@ public class ResetDownloadTaskProgressUnitTests : BaseUnitTest
         testDownloadTask.FileDataTransferred = 50;
         testDownloadTask.CurrentFileTransferPathIndex = 50;
         testDownloadTask.CurrentFileTransferBytesOffset = 50;
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         // Act
-        var resetResult = await IDbContext.ResetDownloadTaskProgress(testDownloadTask.ToKey(), DownloadStatus.Stopped);
+        var resetResult = await IDbContext.ResetDownloadTaskProgress(
+            testDownloadTask.ToKey(),
+            DownloadStatus.Stopped,
+            CancellationToken
+        );
 
         // Assert
         resetResult.IsSuccess.ShouldBeTrue();
-        var downloadTaskDb = await dbContext.GetDownloadTaskFileAsync(testDownloadTask.ToKey());
+        var downloadTaskDb = await dbContext.GetDownloadTaskFileAsync(testDownloadTask.ToKey(), CancellationToken);
         downloadTaskDb.ShouldNotBeNull();
         downloadTaskDb.DownloadSpeed.ShouldBe(0);
         downloadTaskDb.DataReceived.ShouldBe(0);
@@ -118,7 +122,7 @@ public class ResetDownloadTaskProgressUnitTests : BaseUnitTest
             }
         );
         var dbContext = IDbContext;
-        var downloadTasks = await dbContext.DownloadTaskTvShowEpisodeFile.AsTracking().ToListAsync();
+        var downloadTasks = await dbContext.DownloadTaskTvShowEpisodeFile.AsTracking().ToListAsync(CancellationToken);
         var testDownloadTask = downloadTasks[4];
 
         testDownloadTask.DataTotal = 5000;
@@ -128,14 +132,18 @@ public class ResetDownloadTaskProgressUnitTests : BaseUnitTest
         testDownloadTask.FileDataTransferred = 50;
         testDownloadTask.CurrentFileTransferPathIndex = 50;
         testDownloadTask.CurrentFileTransferBytesOffset = 50;
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         // Act
-        var resetResult = await IDbContext.ResetDownloadTaskProgress(testDownloadTask.ToKey(), DownloadStatus.Stopped);
+        var resetResult = await IDbContext.ResetDownloadTaskProgress(
+            testDownloadTask.ToKey(),
+            DownloadStatus.Stopped,
+            CancellationToken
+        );
 
         // Assert
         resetResult.IsSuccess.ShouldBeTrue();
-        var downloadTaskDb = await dbContext.GetDownloadTaskFileAsync(testDownloadTask.ToKey());
+        var downloadTaskDb = await dbContext.GetDownloadTaskFileAsync(testDownloadTask.ToKey(), CancellationToken);
         downloadTaskDb.ShouldNotBeNull();
         downloadTaskDb.DownloadSpeed.ShouldBe(0);
         downloadTaskDb.DataReceived.ShouldBe(0);

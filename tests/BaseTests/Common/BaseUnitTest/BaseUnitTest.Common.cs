@@ -19,6 +19,8 @@ public partial class BaseUnitTest
     // Use loose behavior here to avoid Dispose() not mocked exception
     protected Mock<HttpMessageHandler> HttpHandlerMock = new(MockBehavior.Loose);
 
+    protected CancellationToken CancellationToken => TestContext.Current.CancellationToken;
+
     /// <summary>
     /// This constructor is run before every test
     /// </summary>

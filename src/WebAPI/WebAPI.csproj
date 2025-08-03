@@ -28,8 +28,8 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="FastEndpoints.Security" Version="5.32.0"/>
-        <PackageReference Include="FastEndpoints.Swagger" Version="5.32.0"/>
+        <PackageReference Include="FastEndpoints.Security" Version="7.0.1" />
+        <PackageReference Include="FastEndpoints.Swagger" Version="7.0.1" />
         <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="9.0.7" />
         <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="9.0.7" />
         <PackageReference Include="Quartz.Extensions.Hosting" Version="3.13.0"/>

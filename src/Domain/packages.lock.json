@@ -16,13 +16,13 @@
       },
       "FastEndpoints": {
         "type": "Direct",
-        "requested": "[5.32.0, )",
-        "resolved": "5.32.0",
-        "contentHash": "NduYOi+MlmpAyZ/kuMWxJDpp/SNDrQLsfDIIPBYjE84W53/oGCutjwe093Zf80qSRp0CfA9qivL+FRZkawLn8w==",
+        "requested": "[7.0.1, )",
+        "resolved": "7.0.1",
+        "contentHash": "UOCLrptt8AQP3W969Q74LZ8XnGg64033TBw59DNC9e/mTCKyilofPWo9yWjiPnwtIru0k3+0QAXko+JDTjaOMA==",
         "dependencies": {
-          "FastEndpoints.Attributes": "5.32.0",
-          "FastEndpoints.Messaging.Core": "5.32.0",
-          "FluentValidation": "11.11.0"
+          "FastEndpoints.Attributes": "7.0.1",
+          "FastEndpoints.Messaging.Core": "7.0.1",
+          "FluentValidation": "12.0.0"
         }
       },
       "JetBrains.Annotations": {
@@ -81,13 +81,16 @@
       },
       "FastEndpoints.Attributes": {
         "type": "Transitive",
-        "resolved": "5.32.0",
-        "contentHash": "XCo661wVHEUyHKWPhO0sU+K6UHYvPYjKn2SSnyxgDrfZK2l04k9s6Cgx7E6ramO5LAUAob5cK9Lcm1OHWzrtIQ=="
+        "resolved": "7.0.1",
+        "contentHash": "YPBP+5LuMWnSK/VEJfp1Ui8Jjehvx2LxZlylC9WIdHc/PfUfHTwP7j93haYNZt2RQElxM/fOYSi/MzOFC1d8/g==",
+        "dependencies": {
+          "Microsoft.Extensions.Primitives": "8.0.0"
+        }
       },
       "FastEndpoints.Messaging.Core": {
         "type": "Transitive",
-        "resolved": "5.32.0",
-        "contentHash": "hWXeN936xjXwxLugXZkqedODbPC5p6xjo3NxiVo8I/d+fTzVLqXhj+xmF82dkaDpZsFcpAxJ0BsX8pACAd04Gw=="
+        "resolved": "7.0.1",
+        "contentHash": "JqC1nc2D7w/Opc3rqXCrGr8qds1TRU386O7s2E+g+/D5Od2WhRsfTIQf+gvqVDXgKSTtvXnMpPQCdJnpPaqK9A=="
       },
       "FluentResults": {
         "type": "Transitive",
@@ -100,8 +103,8 @@
       },
       "FluentValidation": {
         "type": "Transitive",
-        "resolved": "11.11.0",
-        "contentHash": "cyIVdQBwSipxWG8MA3Rqox7iNbUNUTK5bfJi9tIdm4CAfH71Oo5ABLP4/QyrUwuakqpUEPGtE43BDddvEehuYw=="
+        "resolved": "12.0.0",
+        "contentHash": "8NVLxtMUXynRHJIX3Hn1ACovaqZIJASufXIIFkD0EUbcd5PmMsL1xUD5h548gCezJ5BzlITaR9CAMrGe29aWpA=="
       },
       "MediatR.Contracts": {
         "type": "Transitive",
@@ -117,6 +120,11 @@
         "type": "Transitive",
         "resolved": "2.1.1",
         "contentHash": "XRzK7ZF+O6FzdfWrlFTi1Rgj2080ZDsd46vzOjadHUB0Cz5kOvDG8vI7caa5YFrsHQpcfn0DxtjS4E46N4FZsA=="
+      },
+      "Microsoft.Extensions.Primitives": {
+        "type": "Transitive",
+        "resolved": "8.0.0",
+        "contentHash": "bXJEZrW9ny8vjMF1JV253WeLhpEVzFo1lyaZu1vQ4ZxWUlVvknZ/+ftFgVheLubb4eZPSwwxBeqS1JkCOjxd8g=="
       },
       "Microsoft.NETCore.Platforms": {
         "type": "Transitive",

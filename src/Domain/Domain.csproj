@@ -18,7 +18,7 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="FastEndpoints" Version="5.32.0"/>
+        <PackageReference Include="FastEndpoints" Version="7.0.1" />
         <PackageReference Include="JetBrains.Annotations" Version="2025.2.0" />
         <PackageReference Include="MediatR" Version="12.2.0"/>
         <PackageReference Include="NaturalSort.Extension" Version="4.3.0"/>

@@ -19,7 +19,7 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="FastEndpoints" Version="5.32.0"/>
+        <PackageReference Include="FastEndpoints" Version="7.0.1" />
         <PackageReference Include="HttpClientToCurl" Version="2.0.6"/>
         <PackageReference Include="Polly" Version="8.3.1"/>
     </ItemGroup>

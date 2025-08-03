@@ -21,33 +21,33 @@
       },
       "FastEndpoints": {
         "type": "Direct",
-        "requested": "[5.32.0, )",
-        "resolved": "5.32.0",
-        "contentHash": "NduYOi+MlmpAyZ/kuMWxJDpp/SNDrQLsfDIIPBYjE84W53/oGCutjwe093Zf80qSRp0CfA9qivL+FRZkawLn8w==",
+        "requested": "[7.0.1, )",
+        "resolved": "7.0.1",
+        "contentHash": "UOCLrptt8AQP3W969Q74LZ8XnGg64033TBw59DNC9e/mTCKyilofPWo9yWjiPnwtIru0k3+0QAXko+JDTjaOMA==",
         "dependencies": {
-          "FastEndpoints.Attributes": "5.32.0",
-          "FastEndpoints.Messaging.Core": "5.32.0",
-          "FluentValidation": "11.11.0"
+          "FastEndpoints.Attributes": "7.0.1",
+          "FastEndpoints.Messaging.Core": "7.0.1",
+          "FluentValidation": "12.0.0"
         }
       },
       "FastEndpoints.Security": {
         "type": "Direct",
-        "requested": "[5.32.0, )",
-        "resolved": "5.32.0",
-        "contentHash": "m6Oe1Fzm2W5yI2k9e0LeFZsrTbldenijCHxfNfGTwieBWcZpyfNvkBfESqf9fhC9kJ1QieLsFzOKGuPgcfwzrw==",
+        "requested": "[7.0.1, )",
+        "resolved": "7.0.1",
+        "contentHash": "oi25/gBEoUtAYEL5hGBtMmHkn+m1/bpZ6yH+mHFmFGb63hTarN8079mV9Vcpzr7bolUwC5d/Cxug8mSZdrXvxg==",
         "dependencies": {
-          "FastEndpoints": "5.32.0",
-          "Microsoft.AspNetCore.Authentication.JwtBearer": "9.0.0"
+          "FastEndpoints": "7.0.1",
+          "Microsoft.AspNetCore.Authentication.JwtBearer": "9.0.7"
         }
       },
       "FastEndpoints.Swagger": {
         "type": "Direct",
-        "requested": "[5.32.0, )",
-        "resolved": "5.32.0",
-        "contentHash": "wRFIpcqlNn5lBhc5AopyecBXwm/B+Nj5KLfbs4aXDcwaIsM4Dx09Uamgfxwht+VQGB5fkXUYTiRq9bVVbqXs/Q==",
+        "requested": "[7.0.1, )",
+        "resolved": "7.0.1",
+        "contentHash": "USjsX4NwzNgVC0N0f74Xq+SF1SqBLx76tzoZymuTiaWlMWuIhGTRPrfWFpYcTXgQ0EeiHqnwpwzV54lqdIU+/A==",
         "dependencies": {
-          "FastEndpoints": "5.32.0",
-          "NSwag.AspNetCore": "14.2.0"
+          "FastEndpoints": "7.0.1",
+          "NSwag.AspNetCore": "14.4.0"
         }
       },
       "MediatR.Extensions.Autofac.DependencyInjection": {
@@ -133,13 +133,16 @@
       },
       "FastEndpoints.Attributes": {
         "type": "Transitive",
-        "resolved": "5.32.0",
-        "contentHash": "XCo661wVHEUyHKWPhO0sU+K6UHYvPYjKn2SSnyxgDrfZK2l04k9s6Cgx7E6ramO5LAUAob5cK9Lcm1OHWzrtIQ=="
+        "resolved": "7.0.1",
+        "contentHash": "YPBP+5LuMWnSK/VEJfp1Ui8Jjehvx2LxZlylC9WIdHc/PfUfHTwP7j93haYNZt2RQElxM/fOYSi/MzOFC1d8/g==",
+        "dependencies": {
+          "Microsoft.Extensions.Primitives": "8.0.0"
+        }
       },
       "FastEndpoints.Messaging.Core": {
         "type": "Transitive",
-        "resolved": "5.32.0",
-        "contentHash": "hWXeN936xjXwxLugXZkqedODbPC5p6xjo3NxiVo8I/d+fTzVLqXhj+xmF82dkaDpZsFcpAxJ0BsX8pACAd04Gw=="
+        "resolved": "7.0.1",
+        "contentHash": "JqC1nc2D7w/Opc3rqXCrGr8qds1TRU386O7s2E+g+/D5Od2WhRsfTIQf+gvqVDXgKSTtvXnMpPQCdJnpPaqK9A=="
       },
       "FlexLabs.EntityFrameworkCore.Upsert": {
         "type": "Transitive",
@@ -160,8 +163,8 @@
       },
       "FluentValidation": {
         "type": "Transitive",
-        "resolved": "11.11.0",
-        "contentHash": "cyIVdQBwSipxWG8MA3Rqox7iNbUNUTK5bfJi9tIdm4CAfH71Oo5ABLP4/QyrUwuakqpUEPGtE43BDddvEehuYw=="
+        "resolved": "12.0.0",
+        "contentHash": "8NVLxtMUXynRHJIX3Hn1ACovaqZIJASufXIIFkD0EUbcd5PmMsL1xUD5h548gCezJ5BzlITaR9CAMrGe29aWpA=="
       },
       "JetBrains.Annotations": {
         "type": "Transitive",
@@ -198,8 +201,8 @@
       },
       "Microsoft.AspNetCore.Authentication.JwtBearer": {
         "type": "Transitive",
-        "resolved": "9.0.0",
-        "contentHash": "bs+1Pq3vQdS2lTyxNUd9fEhtMsq3eLUpK36k2t56iDMVrk6OrAoFtvrQrTK0Y0OetTcJrUkGU7hBlf+ORzHLqQ==",
+        "resolved": "9.0.7",
+        "contentHash": "lloN3XvIgXmdocfghzfszOHJb45OYR3fgOg/h536o+zNB2SmP3JrqeOieCBZ7sipgGcgbxP0boA+loVhdsJxWg==",
         "dependencies": {
           "Microsoft.IdentityModel.Protocols.OpenIdConnect": "8.0.1"
         }
@@ -311,8 +314,8 @@
       },
       "Microsoft.Extensions.ApiDescription.Server": {
         "type": "Transitive",
-        "resolved": "6.0.3",
-        "contentHash": "/FkS66n3wJaUR+Grkg+dMMIyrfmfkEybNoyOhdBMURxavPx6Q1Kn7NY5Ho41s975gpXA9Pnw7WRJbxwICLFgbw=="
+        "resolved": "8.0.14",
+        "contentHash": "wH+yLZAhfDUnlz8gFGFzDhmYOG9Yb9KTKENENm65E9nmRu2oZ1eTtb2N3x6qgDZ4X3pISiW1PxD/HfSpxMBpNw=="
       },
       "Microsoft.Extensions.Caching.Abstractions": {
         "type": "Transitive",
@@ -556,8 +559,8 @@
       },
       "Namotion.Reflection": {
         "type": "Transitive",
-        "resolved": "3.2.0",
-        "contentHash": "YfGjDPzMEs3vRMI4CMkJwOg75SV5JEDV72kMccD2GCo++TfgOYb5ZTpABYq3dUQqFtnAPpqMKM+deLlrUwnN1g=="
+        "resolved": "3.4.2",
+        "contentHash": "ZHrvPdAg7zV78iOTiH9ua+34rBfn4iH6Bjfo2bzUHOGD3KkjGUvqxBFy+v9p6qwV+GEeYWl4NOqXH8tVcZOMpw=="
       },
       "NaturalSort.Extension": {
         "type": "Transitive",
@@ -638,35 +641,35 @@
       },
       "NJsonSchema": {
         "type": "Transitive",
-        "resolved": "11.1.0",
-        "contentHash": "H7QO+bM/2uzF81mVyy4U8ha4MXS9eOX06rTvBgJKquzIuLUGuiOTc4nknkCFKW7mr+xnWgzY7Spevz5ZEK8fGg==",
+        "resolved": "11.3.2",
+        "contentHash": "QXvelMLKz1NsMPc0HndaaxryNIV1V+AFYuZV9w3H6e+03jp3f3n1w8XLcIaA5WA51EHQdZEP4V2Bfgl6kpxDKg==",
         "dependencies": {
-          "NJsonSchema.Annotations": "11.1.0",
-          "Namotion.Reflection": "3.2.0",
+          "NJsonSchema.Annotations": "11.3.2",
+          "Namotion.Reflection": "3.4.2",
           "Newtonsoft.Json": "13.0.3"
         }
       },
       "NJsonSchema.Annotations": {
         "type": "Transitive",
-        "resolved": "11.1.0",
-        "contentHash": "2gU72pKhMLrQt7TjHv+nrb8CxxgUaBk2SD/CaB5f00SxuWdOT4YVQaGy+jTVx+8IgQit+9WWMvBWU9f6U2HNiQ=="
+        "resolved": "11.3.2",
+        "contentHash": "rSwQFKdLlq/lbAJfYqI5KBE46KJCbc99L6G9XM1nVpCOxE0eoaNE8+fkJ7Ws+I5VqP7oEPGKXTR3Q7PmYoeTDA=="
       },
       "NJsonSchema.NewtonsoftJson": {
         "type": "Transitive",
-        "resolved": "11.1.0",
-        "contentHash": "7eC9PNAqHt2RU1CWz4xzZsBdTWCOVH1dpytV2UF5vifi8gOOEAftPdTRUw9O0txNTY65AQUvHU0+P7yuCGWo/g==",
+        "resolved": "11.3.2",
+        "contentHash": "qb93cjF/X6ifcdVfMjDV0ItfN1/7np2buKOn7pZqOBRBA0gU5TzKw4lJtblA7EQh2hXqx7ptDcbuYGKfaYfLWw==",
         "dependencies": {
-          "NJsonSchema": "11.1.0",
+          "NJsonSchema": "11.3.2",
           "Newtonsoft.Json": "13.0.3"
         }
       },
       "NJsonSchema.Yaml": {
         "type": "Transitive",
-        "resolved": "11.1.0",
-        "contentHash": "SUQMwNageNORSEsP0/CUhHSf1TT5iZ2dNN6CFQppVEI2hqo1VRFVs17wFxlKI8TUOks4kgXP3Kn5p7atgNzGUA==",
+        "resolved": "11.3.2",
+        "contentHash": "xGPr+gJYcNquAN2YTFyLZvJPRO01nCmuzU8vvxozTEqYO97JRo/Lip0JrulVyqZoaqnUCtbCvgIRCrS/4XqWaw==",
         "dependencies": {
-          "NJsonSchema": "11.1.0",
-          "YamlDotNet": "16.2.0"
+          "NJsonSchema": "11.3.2",
+          "YamlDotNet": "16.3.0"
         }
       },
       "NodaTime": {
@@ -679,57 +682,57 @@
       },
       "NSwag.Annotations": {
         "type": "Transitive",
-        "resolved": "14.2.0",
-        "contentHash": "156Gc3UluDj75KQOpBuh/72r8Nv3InNDkrfNNL8mqPLqhIkTCAGkkhD3lsW8V3i7Cz23Aqu1D0aJIWrEVzt+Uw=="
+        "resolved": "14.4.0",
+        "contentHash": "2K/V0IJz1ffJ+A5hvaPkE6TAP4uty2U2e4dOom0LD69hG6iKNF7aEfVMMeLJgGcspl8B+W7X2Ys+RPy74SJnPg=="
       },
       "NSwag.AspNetCore": {
         "type": "Transitive",
-        "resolved": "14.2.0",
-        "contentHash": "K0qYdx4MmsIPyKlwVQLhAWgb5gE596e1qzIgpO+xOMV88En+lONQ49n1zxGiT7kYa1UoOIZd714fEo9BpRe2wg==",
+        "resolved": "14.4.0",
+        "contentHash": "kgnCLBfb4Giih/wkHWU1XVPEvV43Q7OLqMk3/h88nuH2e1JmkBlRf49Pxx1jL87X+0Ewj45myjT5jfCgoLsPFA==",
         "dependencies": {
-          "Microsoft.Extensions.ApiDescription.Server": "6.0.3",
+          "Microsoft.Extensions.ApiDescription.Server": "8.0.14",
           "Microsoft.Extensions.FileProviders.Embedded": "9.0.0",
-          "NSwag.Annotations": "14.2.0",
-          "NSwag.Core": "14.2.0",
-          "NSwag.Core.Yaml": "14.2.0",
-          "NSwag.Generation": "14.2.0",
-          "NSwag.Generation.AspNetCore": "14.2.0"
+          "NSwag.Annotations": "14.4.0",
+          "NSwag.Core": "14.4.0",
+          "NSwag.Core.Yaml": "14.4.0",
+          "NSwag.Generation": "14.4.0",
+          "NSwag.Generation.AspNetCore": "14.4.0"
         }
       },
       "NSwag.Core": {
         "type": "Transitive",
-        "resolved": "14.2.0",
-        "contentHash": "1dcOFGimKGRZnSEyu/cLaWX7vPJrHpZzFs3uSNE8x/48SFBK6zzjBsXdhNvSaInvQp2dDJHcAIy90I7fOp+IIw==",
+        "resolved": "14.4.0",
+        "contentHash": "Zo79LJPCJa2KcD2BblRGTQJp7c2ZduZZg0xeI+D8hmcfgHpuQhOHYdd2WSS+cYfO2sEZVtnsbrYM+SGvKvNMCw==",
         "dependencies": {
-          "NJsonSchema": "11.1.0"
+          "NJsonSchema": "11.3.2"
         }
       },
       "NSwag.Core.Yaml": {
         "type": "Transitive",
-        "resolved": "14.2.0",
-        "contentHash": "ULOD9qNCI25oy5Ke9CfNmJM2nI4fDxWWI6BOZaiTaAJdFsC9N6/Lt7pNQw6cKVl1XXQV5WdtUFeBqP0ZRwDxiA==",
+        "resolved": "14.4.0",
+        "contentHash": "qb80vaks2eX6l1c6a8N1xxgUOGJvRrEKzTL1VS6oR1gP9R4+/pZFCuHF0uFvw9x9CmpF2UwbuZWdylz5KkrE+g==",
         "dependencies": {
-          "NJsonSchema.Yaml": "11.1.0",
-          "NSwag.Core": "14.2.0"
+          "NJsonSchema.Yaml": "11.3.2",
+          "NSwag.Core": "14.4.0"
         }
       },
       "NSwag.Generation": {
         "type": "Transitive",
-        "resolved": "14.2.0",
-        "contentHash": "FNUSJgqR1u+rsVKwSKsPXF4mIZb6Woac/Ucui5m+dfsuCFZe1VgMsTYCeGpmDqpjIwtTNUaIcGuwqMHH9Fstlw==",
+        "resolved": "14.4.0",
+        "contentHash": "ll9EvxxwBlcJiAUAOWtgYN3N8hKuzR7sHPfv7VmVy7Joyin3sjAaY/+tBBBi1s/NydTxUPpZ+IlThEaFFc7xfA==",
         "dependencies": {
-          "NJsonSchema.NewtonsoftJson": "11.1.0",
-          "NSwag.Core": "14.2.0"
+          "NJsonSchema.NewtonsoftJson": "11.3.2",
+          "NSwag.Core": "14.4.0"
         }
       },
       "NSwag.Generation.AspNetCore": {
         "type": "Transitive",
-        "resolved": "14.2.0",
-        "contentHash": "9VO43wD5IK9O79ZESXD44QtNhoWZi2/5oLHV2JbCd0dR6bJ+9SHqcn+LK3VJFvcRZjFry0JSNd6WBDQL+AH72A==",
+        "resolved": "14.4.0",
+        "contentHash": "b1+qdKuThjkuJkL72QiL0ziGiR39O4DgJY7f3C+MnmRGGRjXj4BoEKvJXkZyi6Dn2M7Li/vMVKoHQCaQjrYwlA==",
         "dependencies": {
           "Microsoft.Extensions.DependencyInjection.Abstractions": "9.0.0",
           "Microsoft.Extensions.Options": "9.0.0",
-          "NSwag.Generation": "14.2.0"
+          "NSwag.Generation": "14.4.0"
         }
       },
       "PasswordGenerator": {
@@ -1738,8 +1741,8 @@
       },
       "YamlDotNet": {
         "type": "Transitive",
-        "resolved": "16.2.0",
-        "contentHash": "iKVYog7JNiFOTr4gMHSjCqrGFD2NyABUHgSkRq9XR8A2+fsWepSWTpjHAOnKo1LVAHjy33o6I0u6lo5Ng0NtAw=="
+        "resolved": "16.3.0",
+        "contentHash": "SgMOdxbz8X65z8hraIs6hOEdnkH6hESTAIUa7viEngHOYaH+6q5XJmwr1+yb9vJpNQ19hCQY69xbFsLtXpobQA=="
       },
       "application.contracts": {
         "type": "Project",
@@ -1808,7 +1811,7 @@
         "type": "Project",
         "dependencies": {
           "ByteSize": "[2.1.2, )",
-          "FastEndpoints": "[5.32.0, )",
+          "FastEndpoints": "[7.0.1, )",
           "FluentResultExtensions": "[1.0.0, )",
           "JetBrains.Annotations": "[2025.2.0, )",
           "MediatR": "[12.2.0, )",

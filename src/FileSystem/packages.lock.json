@@ -546,6 +546,7 @@
         "type": "Project",
         "dependencies": {
           "FluentResults": "[4.0.0, )",
+          "FluentValidation": "[12.0.0, )",
           "Logging": "[1.0.0, )"
         }
       },

@@ -26,7 +26,7 @@ COPY ./src/WebAPI/ClientApp/ ./
 RUN bun run generate --fail-on-error
     
 # Stage 2 - Build the .NET back-end
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0 AS back-end
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:9.0 AS back-end
 
 ARG VERSION
 ARG INFORMATIONAL_VERSION
@@ -103,11 +103,11 @@ RUN \
    wget https://dot.net/v1/dotnet-install.sh -O /tmp/dotnet-install.sh && \
    chmod +x /tmp/dotnet-install.sh && \
    if  [ "$TARGETPLATFORM" = "linux/arm/v7" ] ; then \
-       /tmp/dotnet-install.sh --version 8.0.10 --runtime aspnetcore --install-dir /usr/share/dotnet --architecture arm ; \
+       /tmp/dotnet-install.sh --version 9.0.7 --runtime aspnetcore --install-dir /usr/share/dotnet --architecture arm ; \
    elif [ "$TARGETPLATFORM" = "linux/arm64/v8" ] ; then \
-       /tmp/dotnet-install.sh --version 8.0.10 --runtime aspnetcore --install-dir /usr/share/dotnet --architecture arm64 ; \
+       /tmp/dotnet-install.sh --version 9.0.7 --runtime aspnetcore --install-dir /usr/share/dotnet --architecture arm64 ; \
    else \
-       /tmp/dotnet-install.sh --version 8.0.10 --runtime aspnetcore --install-dir /usr/share/dotnet --architecture x64 ; \
+       /tmp/dotnet-install.sh --version 9.0.7 --runtime aspnetcore --install-dir /usr/share/dotnet --architecture x64 ; \
    fi
 
 ## Make dotnet command available

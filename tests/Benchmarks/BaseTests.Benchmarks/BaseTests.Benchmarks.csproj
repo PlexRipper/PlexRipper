@@ -26,6 +26,10 @@
     <ItemGroup>
         <PackageReference Include="BenchmarkDotNet" Version="0.15.2" />
         <PackageReference Include="BenchmarkDotNet.Diagnostics.dotTrace" Version="0.15.2" />
+        <PackageReference Include="CSharpier.MsBuild" Version="1.0.3">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
     </ItemGroup>
 
     <ItemGroup>

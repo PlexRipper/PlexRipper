@@ -14,7 +14,7 @@
 
     <ItemGroup>
         <PackageReference Include="ByteSize" Version="2.1.2"/>
-        <PackageReference Include="CSharpier.MsBuild" Version="0.29.2">
+        <PackageReference Include="CSharpier.MsBuild" Version="1.0.3">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>

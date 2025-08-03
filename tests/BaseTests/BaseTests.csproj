@@ -18,7 +18,7 @@
         <PackageReference Include="Autofac.Extras.Moq" Version="7.0.0" />
         <PackageReference Include="Bogus" Version="35.6.3" />
         <PackageReference Include="Bogus.Hollywood" Version="35.6.3" />
-        <PackageReference Include="CSharpier.MsBuild" Version="0.29.2">
+        <PackageReference Include="CSharpier.MsBuild" Version="1.0.3">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>

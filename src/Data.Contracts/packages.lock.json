@@ -19,6 +19,15 @@
           "NetTopologySuite.IO.SpatiaLite": "2.0.0"
         }
       },
+      "FlexLabs.EntityFrameworkCore.Upsert": {
+        "type": "Direct",
+        "requested": "[9.0.0, )",
+        "resolved": "9.0.0",
+        "contentHash": "WYOPubVEpZeFJGvsYXhvmNBOkXXrZrHAhqfuNM/4237cPfdfVKuAweCKbyFKUba+oGM0P5kwRN5O+w95IHByDQ==",
+        "dependencies": {
+          "Microsoft.EntityFrameworkCore.Relational": "[9.0.0, 10.0.0)"
+        }
+      },
       "Microsoft.EntityFrameworkCore": {
         "type": "Direct",
         "requested": "[9.0.7, )",
@@ -1291,7 +1300,6 @@
         "type": "Project",
         "dependencies": {
           "FluentResults": "[3.16.0, )",
-          "FluentValidation": "[11.11.0, )",
           "Logging": "[1.0.0, )"
         }
       },
@@ -1317,7 +1325,6 @@
           "ByteSize": "[2.1.2, )",
           "FastEndpoints": "[5.32.0, )",
           "FluentResultExtensions": "[1.0.0, )",
-          "FluentValidation": "[11.11.0, )",
           "JetBrains.Annotations": "[2025.2.0, )",
           "MediatR": "[12.2.0, )",
           "NaturalSort.Extension": "[4.3.0, )",

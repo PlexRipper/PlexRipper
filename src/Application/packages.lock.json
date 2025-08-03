@@ -50,16 +50,6 @@
           "NSwag.AspNetCore": "14.2.0"
         }
       },
-      "FluentValidation.DependencyInjectionExtensions": {
-        "type": "Direct",
-        "requested": "[11.9.0, )",
-        "resolved": "11.9.0",
-        "contentHash": "Ko++xvN7HUf4WlHJL6bhsybUj/uho8ApOYIdxGjpF8Ot7Fukz6LRfRJ06H0KXhWqmMHWEbu89hJbjKJHtg7b9g==",
-        "dependencies": {
-          "FluentValidation": "11.9.0",
-          "Microsoft.Extensions.Dependencyinjection.Abstractions": "2.1.0"
-        }
-      },
       "MediatR.Extensions.Autofac.DependencyInjection": {
         "type": "Direct",
         "requested": "[12.0.0, )",
@@ -150,6 +140,14 @@
         "type": "Transitive",
         "resolved": "5.32.0",
         "contentHash": "hWXeN936xjXwxLugXZkqedODbPC5p6xjo3NxiVo8I/d+fTzVLqXhj+xmF82dkaDpZsFcpAxJ0BsX8pACAd04Gw=="
+      },
+      "FlexLabs.EntityFrameworkCore.Upsert": {
+        "type": "Transitive",
+        "resolved": "9.0.0",
+        "contentHash": "WYOPubVEpZeFJGvsYXhvmNBOkXXrZrHAhqfuNM/4237cPfdfVKuAweCKbyFKUba+oGM0P5kwRN5O+w95IHByDQ==",
+        "dependencies": {
+          "Microsoft.EntityFrameworkCore.Relational": "[9.0.0, 10.0.0)"
+        }
       },
       "FluentResults": {
         "type": "Transitive",
@@ -1756,6 +1754,7 @@
         "dependencies": {
           "Application.Contracts": "[1.0.0, )",
           "EFCore.BulkExtensions.SQLite": "[9.0.1, )",
+          "FlexLabs.EntityFrameworkCore.Upsert": "[9.0.0, )",
           "Microsoft.EntityFrameworkCore": "[9.0.7, )",
           "PlexRipper.Domain": "[1.0.0, )"
         }
@@ -1778,7 +1777,6 @@
         "type": "Project",
         "dependencies": {
           "FluentResults": "[3.16.0, )",
-          "FluentValidation": "[11.11.0, )",
           "Logging": "[1.0.0, )"
         }
       },
@@ -1812,7 +1810,6 @@
           "ByteSize": "[2.1.2, )",
           "FastEndpoints": "[5.32.0, )",
           "FluentResultExtensions": "[1.0.0, )",
-          "FluentValidation": "[11.11.0, )",
           "JetBrains.Annotations": "[2025.2.0, )",
           "MediatR": "[12.2.0, )",
           "NaturalSort.Extension": "[4.3.0, )",

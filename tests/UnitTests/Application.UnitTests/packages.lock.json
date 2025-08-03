@@ -197,6 +197,14 @@
           "Microsoft.AspNetCore.Mvc.Testing": "9.0.0"
         }
       },
+      "FlexLabs.EntityFrameworkCore.Upsert": {
+        "type": "Transitive",
+        "resolved": "9.0.0",
+        "contentHash": "WYOPubVEpZeFJGvsYXhvmNBOkXXrZrHAhqfuNM/4237cPfdfVKuAweCKbyFKUba+oGM0P5kwRN5O+w95IHByDQ==",
+        "dependencies": {
+          "Microsoft.EntityFrameworkCore.Relational": "[9.0.0, 10.0.0)"
+        }
+      },
       "FluentResults": {
         "type": "Transitive",
         "resolved": "3.16.0",
@@ -210,24 +218,6 @@
         "type": "Transitive",
         "resolved": "11.11.0",
         "contentHash": "cyIVdQBwSipxWG8MA3Rqox7iNbUNUTK5bfJi9tIdm4CAfH71Oo5ABLP4/QyrUwuakqpUEPGtE43BDddvEehuYw=="
-      },
-      "FluentValidation.AspNetCore": {
-        "type": "Transitive",
-        "resolved": "11.3.0",
-        "contentHash": "jtFVgKnDFySyBlPS8bZbTKEEwJZnn11rXXJ2SQnjDhZ56rQqybBg9Joq4crRLz3y0QR8WoOq4iE4piV81w/Djg==",
-        "dependencies": {
-          "FluentValidation": "11.5.1",
-          "FluentValidation.DependencyInjectionExtensions": "11.5.1"
-        }
-      },
-      "FluentValidation.DependencyInjectionExtensions": {
-        "type": "Transitive",
-        "resolved": "11.9.0",
-        "contentHash": "Ko++xvN7HUf4WlHJL6bhsybUj/uho8ApOYIdxGjpF8Ot7Fukz6LRfRJ06H0KXhWqmMHWEbu89hJbjKJHtg7b9g==",
-        "dependencies": {
-          "FluentValidation": "11.9.0",
-          "Microsoft.Extensions.Dependencyinjection.Abstractions": "2.1.0"
-        }
       },
       "HttpClientToCurl": {
         "type": "Transitive",
@@ -1731,6 +1721,7 @@
         "dependencies": {
           "Application.Contracts": "[1.0.0, )",
           "EFCore.BulkExtensions.SQLite": "[9.0.1, )",
+          "FlexLabs.EntityFrameworkCore.Upsert": "[9.0.0, )",
           "Microsoft.EntityFrameworkCore": "[9.0.7, )",
           "PlexRipper.Domain": "[1.0.0, )"
         }
@@ -1753,7 +1744,6 @@
         "type": "Project",
         "dependencies": {
           "FluentResults": "[3.16.0, )",
-          "FluentValidation": "[11.11.0, )",
           "Logging": "[1.0.0, )"
         }
       },
@@ -1791,7 +1781,6 @@
           "FastEndpoints.Security": "[5.32.0, )",
           "FastEndpoints.Swagger": "[5.32.0, )",
           "FileSystem.Contracts": "[1.0.0, )",
-          "FluentValidation.DependencyInjectionExtensions": "[11.9.0, )",
           "MediatR.Extensions.Autofac.DependencyInjection": "[12.0.0, )",
           "Microsoft.Extensions.Http": "[9.0.7, )",
           "PlexApi.Contracts": "[1.0.0, )",
@@ -1845,7 +1834,6 @@
           "ByteSize": "[2.1.2, )",
           "FastEndpoints": "[5.32.0, )",
           "FluentResultExtensions": "[1.0.0, )",
-          "FluentValidation": "[11.11.0, )",
           "JetBrains.Annotations": "[2025.2.0, )",
           "MediatR": "[12.2.0, )",
           "NaturalSort.Extension": "[4.3.0, )",
@@ -1912,7 +1900,6 @@
           "Autofac.Extensions.DependencyInjection": "[9.0.0, )",
           "FastEndpoints.Security": "[5.32.0, )",
           "FastEndpoints.Swagger": "[5.32.0, )",
-          "FluentValidation.AspNetCore": "[11.3.0, )",
           "Microsoft.AspNetCore.SpaServices.Extensions": "[9.0.7, )",
           "Microsoft.Extensions.Http.Polly": "[9.0.7, )",
           "PlexRipper.Application": "[1.0.0, )",

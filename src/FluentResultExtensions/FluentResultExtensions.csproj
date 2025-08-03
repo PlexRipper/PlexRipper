@@ -16,11 +16,16 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="FluentResults" Version="3.16.0"/>
-        <PackageReference Include="FluentValidation" Version="11.11.0"/>
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\Logging\Logging.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="FluentValidation">
+        <HintPath>..\..\..\..\..\home\jason\.nuget\packages\fluentvalidation\11.11.0\lib\net8.0\FluentValidation.dll</HintPath>
+      </Reference>
     </ItemGroup>
 
 </Project>

@@ -25,12 +25,6 @@
           "FluentValidation": "11.11.0"
         }
       },
-      "FluentValidation": {
-        "type": "Direct",
-        "requested": "[11.11.0, )",
-        "resolved": "11.11.0",
-        "contentHash": "cyIVdQBwSipxWG8MA3Rqox7iNbUNUTK5bfJi9tIdm4CAfH71Oo5ABLP4/QyrUwuakqpUEPGtE43BDddvEehuYw=="
-      },
       "JetBrains.Annotations": {
         "type": "Direct",
         "requested": "[2025.2.0, )",
@@ -103,6 +97,11 @@
           "Microsoft.Extensions.Logging.Abstractions": "2.1.1",
           "System.Threading.Tasks.Extensions": "4.5.4"
         }
+      },
+      "FluentValidation": {
+        "type": "Transitive",
+        "resolved": "11.11.0",
+        "contentHash": "cyIVdQBwSipxWG8MA3Rqox7iNbUNUTK5bfJi9tIdm4CAfH71Oo5ABLP4/QyrUwuakqpUEPGtE43BDddvEehuYw=="
       },
       "MediatR.Contracts": {
         "type": "Transitive",
@@ -1106,7 +1105,6 @@
         "type": "Project",
         "dependencies": {
           "FluentResults": "[3.16.0, )",
-          "FluentValidation": "[11.11.0, )",
           "Logging": "[1.0.0, )"
         }
       },

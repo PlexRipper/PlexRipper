@@ -2,8 +2,11 @@ namespace PlexRipper.Domain;
 
 public static partial class EnumMapperExtensions
 {
-    private static readonly Dictionary<string, ViewMode> _viewModeMap =
-        new(StringComparer.Ordinal) { ["Poster"] = ViewMode.Poster, ["Table"] = ViewMode.Table };
+    private static readonly Dictionary<string, ViewMode> _viewModeMap = new(StringComparer.Ordinal)
+    {
+        ["Poster"] = ViewMode.Poster,
+        ["Table"] = ViewMode.Table,
+    };
 
     /// <summary>
     /// Converts string to <see cref="ViewMode"/> by a fast method.

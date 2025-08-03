@@ -1,5 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
     <PropertyGroup>
         <TargetFramework>net9.0</TargetFramework>
         <LangVersion>13</LangVersion>
@@ -10,7 +9,6 @@
         <Nullable>enable</Nullable>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     </PropertyGroup>
-
     <ItemGroup>
         <PackageReference Include="coverlet.collector" Version="6.0.4">
             <PrivateAssets>all</PrivateAssets>
@@ -27,13 +25,11 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
     </ItemGroup>
-
     <ItemGroup>
-        <ProjectReference Include="..\..\BaseTests\BaseTests.csproj"/>
+        <ProjectReference Include="..\..\BaseTests\BaseTests.csproj" />
     </ItemGroup>
     <ItemGroup>
-        <Compile Include="..\..\..\src\Domain\GlobalUsings.cs"/>
-        <Compile Include="..\..\BaseTests\GlobalTestsUsings.cs"/>
+        <Compile Include="..\..\..\src\Domain\GlobalUsings.cs" />
+        <Compile Include="..\..\BaseTests\GlobalTestsUsings.cs" />
     </ItemGroup>
-
 </Project>

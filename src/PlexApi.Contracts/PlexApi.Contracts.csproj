@@ -1,5 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
     <PropertyGroup>
         <TargetFramework>net9.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
@@ -9,18 +8,15 @@
         <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     </PropertyGroup>
-
     <ItemGroup>
-        <ProjectReference Include="..\Application.Contracts\Application.Contracts.csproj"/>
-        <ProjectReference Include="..\Domain\Domain.csproj"/>
+        <ProjectReference Include="..\Application.Contracts\Application.Contracts.csproj" />
+        <ProjectReference Include="..\Domain\Domain.csproj" />
     </ItemGroup>
-
     <ItemGroup>
         <PackageReference Include="CSharpier.MsBuild" Version="1.0.3">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="LukeHagar.PlexAPI.SDK" Version="0.15.1"/>
+        <PackageReference Include="LukeHagar.PlexAPI.SDK" Version="0.15.1" />
     </ItemGroup>
-
 </Project>

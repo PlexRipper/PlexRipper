@@ -1,5 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
     <PropertyGroup>
         <TargetFramework>net9.0</TargetFramework>
         <LangVersion>13</LangVersion>
@@ -11,7 +10,6 @@
         <Nullable>enable</Nullable>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     </PropertyGroup>
-
     <ItemGroup>
         <PackageReference Include="Autofac" Version="8.3.0" />
         <PackageReference Include="CSharpier.MsBuild" Version="1.0.3">
@@ -19,14 +17,11 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
     </ItemGroup>
-
     <ItemGroup>
-        <ProjectReference Include="..\FileSystem.Contracts\FileSystem.Contracts.csproj"/>
-        <ProjectReference Include="..\Settings.Contracts\Settings.Contracts.csproj"/>
+        <ProjectReference Include="..\FileSystem.Contracts\FileSystem.Contracts.csproj" />
+        <ProjectReference Include="..\Settings.Contracts\Settings.Contracts.csproj" />
     </ItemGroup>
-
     <ItemGroup>
-        <Compile Include="..\Domain\GlobalUsings.cs"/>
+        <Compile Include="..\Domain\GlobalUsings.cs" />
     </ItemGroup>
-
 </Project>

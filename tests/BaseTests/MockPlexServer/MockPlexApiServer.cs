@@ -32,21 +32,18 @@ public class MockPlexApiServer : IMockPlexApiServer
     /// <summary>
     /// Key: GetAllLibrariesDirectory.Uuid (library Uuid)
     /// </summary>
-
     // ReSharper disable once CollectionNeverQueried.Local
     private readonly Dictionary<string, List<GetMediaMetaDataMetadata>> _tvShows = [];
 
     /// <summary>
     /// Key: GetAllLibrariesDirectory.Uuid (library Uuid)
     /// </summary>
-
     // ReSharper disable once CollectionNeverQueried.Local
     private readonly Dictionary<string, List<GetMediaMetaDataMetadata>> _seasons = [];
 
     /// <summary>
     /// Key: GetAllLibrariesDirectory.Uuid (library Uuid)
     /// </summary>
-
     // ReSharper disable once CollectionNeverQueried.Local
     private readonly Dictionary<string, List<GetMediaMetaDataMetadata>> _episodes = [];
 

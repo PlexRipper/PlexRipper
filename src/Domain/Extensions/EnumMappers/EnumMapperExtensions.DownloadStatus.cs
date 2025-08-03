@@ -2,28 +2,27 @@ namespace PlexRipper.Domain;
 
 public static partial class EnumMapperExtensions
 {
-    private static readonly Dictionary<string, DownloadStatus> _stringToStatus =
-        new(StringComparer.Ordinal)
-        {
-            ["Unknown"] = DownloadStatus.Unknown,
-            ["Error"] = DownloadStatus.Error,
-            ["Queued"] = DownloadStatus.Queued,
-            ["Downloading"] = DownloadStatus.Downloading,
-            ["DownloadFinished"] = DownloadStatus.DownloadFinished,
-            ["Paused"] = DownloadStatus.Paused,
-            ["Stopped"] = DownloadStatus.Stopped,
-            ["Deleted"] = DownloadStatus.Deleted,
-            ["Merging"] = DownloadStatus.Merging,
-            ["Moving"] = DownloadStatus.Moving,
-            ["MergePaused"] = DownloadStatus.MergePaused,
-            ["MovePaused"] = DownloadStatus.MovePaused,
-            ["MergeFinished"] = DownloadStatus.MergeFinished,
-            ["MoveFinished"] = DownloadStatus.MoveFinished,
-            ["Completed"] = DownloadStatus.Completed,
-            ["ServerUnreachable"] = DownloadStatus.ServerUnreachable,
-            ["MoveError"] = DownloadStatus.MoveError,
-            ["MergeError"] = DownloadStatus.MergeError,
-        };
+    private static readonly Dictionary<string, DownloadStatus> _stringToStatus = new(StringComparer.Ordinal)
+    {
+        ["Unknown"] = DownloadStatus.Unknown,
+        ["Error"] = DownloadStatus.Error,
+        ["Queued"] = DownloadStatus.Queued,
+        ["Downloading"] = DownloadStatus.Downloading,
+        ["DownloadFinished"] = DownloadStatus.DownloadFinished,
+        ["Paused"] = DownloadStatus.Paused,
+        ["Stopped"] = DownloadStatus.Stopped,
+        ["Deleted"] = DownloadStatus.Deleted,
+        ["Merging"] = DownloadStatus.Merging,
+        ["Moving"] = DownloadStatus.Moving,
+        ["MergePaused"] = DownloadStatus.MergePaused,
+        ["MovePaused"] = DownloadStatus.MovePaused,
+        ["MergeFinished"] = DownloadStatus.MergeFinished,
+        ["MoveFinished"] = DownloadStatus.MoveFinished,
+        ["Completed"] = DownloadStatus.Completed,
+        ["ServerUnreachable"] = DownloadStatus.ServerUnreachable,
+        ["MoveError"] = DownloadStatus.MoveError,
+        ["MergeError"] = DownloadStatus.MergeError,
+    };
 
     /// <summary>
     /// Converts string to <see cref="DownloadStatus"/> by a fast method.

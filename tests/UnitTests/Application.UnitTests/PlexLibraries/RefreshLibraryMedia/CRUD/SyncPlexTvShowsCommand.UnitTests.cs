@@ -4,8 +4,9 @@ namespace PlexRipper.Application.UnitTests;
 
 public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsCommandHandler>
 {
-    private SyncPlexTvShowsCommandValidator _validator =
-        new(LogManager.CreateLogInstance<SyncPlexTvShowsCommandValidator>());
+    private SyncPlexTvShowsCommandValidator _validator = new(
+        LogManager.CreateLogInstance<SyncPlexTvShowsCommandValidator>()
+    );
 
     public SyncPlexTvShowsCommandUnitTests(ITestOutputHelper output)
         : base(output) { }

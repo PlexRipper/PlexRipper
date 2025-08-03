@@ -1,5 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
     <PropertyGroup>
         <TargetFramework>net9.0</TargetFramework>
         <LangVersion>13</LangVersion>
@@ -11,9 +10,8 @@
         <Nullable>enable</Nullable>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     </PropertyGroup>
-
     <ItemGroup>
-        <PackageReference Include="AppAny.Quartz.EntityFrameworkCore.Migrations.SQLite" Version="0.5.1"/>
+        <PackageReference Include="AppAny.Quartz.EntityFrameworkCore.Migrations.SQLite" Version="0.5.1" />
         <PackageReference Include="Autofac" Version="8.3.0" />
         <PackageReference Include="CSharpier.MsBuild" Version="1.0.3">
             <PrivateAssets>all</PrivateAssets>
@@ -32,17 +30,14 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
     </ItemGroup>
-
     <ItemGroup>
-        <ProjectReference Include="..\Data.Contracts\Data.Contracts.csproj"/>
-        <ProjectReference Include="..\FileSystem.Contracts\FileSystem.Contracts.csproj"/>
-        <ProjectReference Include="..\Identity.Contracts\Identity.Contracts.csproj"/>
-        <ProjectReference Include="..\Settings.Contracts\Settings.Contracts.csproj"/>
+        <ProjectReference Include="..\Data.Contracts\Data.Contracts.csproj" />
+        <ProjectReference Include="..\FileSystem.Contracts\FileSystem.Contracts.csproj" />
+        <ProjectReference Include="..\Identity.Contracts\Identity.Contracts.csproj" />
+        <ProjectReference Include="..\Settings.Contracts\Settings.Contracts.csproj" />
     </ItemGroup>
-
     <ItemGroup>
-        <Compile Include="..\Domain\GlobalUsings.cs"/>
-        <Compile Remove="CQRS\PlexServers\Commands\AddOrUpdatePlexServersCommandHandler.cs"/>
+        <Compile Include="..\Domain\GlobalUsings.cs" />
+        <Compile Remove="CQRS\PlexServers\Commands\AddOrUpdatePlexServersCommandHandler.cs" />
     </ItemGroup>
-
 </Project>

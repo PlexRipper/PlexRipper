@@ -14,22 +14,21 @@ namespace PlexRipper.Identity.Migrations
                 name: "DataProtectionKeys",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false).Annotation("Sqlite:Autoincrement", true),
                     FriendlyName = table.Column<string>(type: "TEXT", nullable: true),
-                    Xml = table.Column<string>(type: "TEXT", nullable: true)
+                    Xml = table.Column<string>(type: "TEXT", nullable: true),
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_DataProtectionKeys", x => x.Id);
-                });
+                }
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "DataProtectionKeys");
+            migrationBuilder.DropTable(name: "DataProtectionKeys");
         }
     }
 }

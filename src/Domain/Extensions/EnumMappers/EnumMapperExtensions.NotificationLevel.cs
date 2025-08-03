@@ -2,18 +2,17 @@ namespace PlexRipper.Domain;
 
 public static partial class EnumMapperExtensions
 {
-    private static readonly Dictionary<string, NotificationLevel> _map =
-        new(StringComparer.Ordinal)
-        {
-            ["None"] = NotificationLevel.None,
-            ["Verbose"] = NotificationLevel.Verbose,
-            ["Debug"] = NotificationLevel.Debug,
-            ["Information"] = NotificationLevel.Information,
-            ["Success"] = NotificationLevel.Success,
-            ["Warning"] = NotificationLevel.Warning,
-            ["Error"] = NotificationLevel.Error,
-            ["Fatal"] = NotificationLevel.Fatal,
-        };
+    private static readonly Dictionary<string, NotificationLevel> _map = new(StringComparer.Ordinal)
+    {
+        ["None"] = NotificationLevel.None,
+        ["Verbose"] = NotificationLevel.Verbose,
+        ["Debug"] = NotificationLevel.Debug,
+        ["Information"] = NotificationLevel.Information,
+        ["Success"] = NotificationLevel.Success,
+        ["Warning"] = NotificationLevel.Warning,
+        ["Error"] = NotificationLevel.Error,
+        ["Fatal"] = NotificationLevel.Fatal,
+    };
 
     public static NotificationLevel ToNotificationLevel(this string value)
     {

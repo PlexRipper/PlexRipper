@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
     <PropertyGroup>
         <TargetFramework>net9.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
@@ -8,17 +7,15 @@
         <RootNamespace>PlexRipper.Identity</RootNamespace>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     </PropertyGroup>
-
     <ItemGroup>
-        <ProjectReference Include="..\Data.Contracts\Data.Contracts.csproj"/>
-        <ProjectReference Include="..\Identity.Contracts\Identity.Contracts.csproj"/>
-        <ProjectReference Include="..\Logging\Logging.csproj"/>
+        <ProjectReference Include="..\Data.Contracts\Data.Contracts.csproj" />
+        <ProjectReference Include="..\Identity.Contracts\Identity.Contracts.csproj" />
+        <ProjectReference Include="..\Logging\Logging.csproj" />
     </ItemGroup>
-
     <ItemGroup>
         <PackageReference Include="CSharpier.MsBuild" Version="1.0.3">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.7">
             <PrivateAssets>all</PrivateAssets>
@@ -31,5 +28,4 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
     </ItemGroup>
-
 </Project>

@@ -50,13 +50,12 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
     private readonly IPlexRipperDbContext _dbContext;
     private readonly ILog _log;
 
-    private readonly BulkConfig? _bulkInsertConfig =
-        new()
-        {
-            SetOutputIdentity = false,
-            PreserveInsertOrder = true,
-            UseTempDB = true,
-        };
+    private readonly BulkConfig? _bulkInsertConfig = new()
+    {
+        SetOutputIdentity = false,
+        PreserveInsertOrder = true,
+        UseTempDB = true,
+    };
 
     public SyncPlexLibraryMediaMetaDataCommandHandler(IPlexRipperDbContext dbContext, ILog log)
     {

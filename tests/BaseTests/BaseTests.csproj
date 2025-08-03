@@ -1,5 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
     <PropertyGroup>
         <TargetFramework>net9.0</TargetFramework>
         <LangVersion>13</LangVersion>
@@ -12,7 +11,6 @@
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
         <OutputType>Exe</OutputType>
     </PropertyGroup>
-
     <ItemGroup>
         <PackageReference Include="Autofac" Version="8.3.0" />
         <PackageReference Include="Autofac.Extras.Moq" Version="7.0.0" />
@@ -26,7 +24,7 @@
         <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.7" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
         <PackageReference Include="Moq" Version="4.20.72" />
-        <PackageReference Include="Moq.Contrib.HttpClient" Version="1.4.0"/>
+        <PackageReference Include="Moq.Contrib.HttpClient" Version="1.4.0" />
         <PackageReference Include="Shouldly" Version="4.3.0" />
         <PackageReference Include="TestableIO.System.IO.Abstractions.TestingHelpers" Version="22.0.15" />
         <PackageReference Include="xunit.v3" Version="3.0.0" />
@@ -35,19 +33,15 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
     </ItemGroup>
-
     <ItemGroup>
-        <ProjectReference Include="..\..\src\WebAPI\WebAPI.csproj"/>
+        <ProjectReference Include="..\..\src\WebAPI\WebAPI.csproj" />
     </ItemGroup>
-
     <ItemGroup>
         <None Update="xunit.runner.json">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
     </ItemGroup>
-
     <ItemGroup>
-        <Compile Include="..\..\src\Domain\GlobalUsings.cs"/>
+        <Compile Include="..\..\src\Domain\GlobalUsings.cs" />
     </ItemGroup>
-
 </Project>

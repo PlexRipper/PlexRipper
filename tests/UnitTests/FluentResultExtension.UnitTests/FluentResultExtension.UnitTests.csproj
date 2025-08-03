@@ -1,5 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
     <PropertyGroup>
         <TargetFramework>net9.0</TargetFramework>
         <LangVersion>13</LangVersion>
@@ -12,7 +11,6 @@
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
         <OutputType>Exe</OutputType>
     </PropertyGroup>
-
     <ItemGroup>
         <PackageReference Include="CSharpier.MsBuild" Version="1.0.3">
             <PrivateAssets>all</PrivateAssets>
@@ -27,13 +25,11 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
     </ItemGroup>
-
     <ItemGroup>
-        <ProjectReference Include="..\..\BaseTests\BaseTests.csproj"/>
+        <ProjectReference Include="..\..\BaseTests\BaseTests.csproj" />
     </ItemGroup>
     <ItemGroup>
-        <Compile Include="..\..\..\src\Domain\GlobalUsings.cs"/>
-        <Compile Include="..\..\BaseTests\GlobalTestsUsings.cs"/>
+        <Compile Include="..\..\..\src\Domain\GlobalUsings.cs" />
+        <Compile Include="..\..\BaseTests\GlobalTestsUsings.cs" />
     </ItemGroup>
-
 </Project>

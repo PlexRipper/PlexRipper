@@ -11,22 +11,21 @@ namespace PlexRipper.Domain;
 
 public static partial class StringExtensions
 {
-    private static readonly HashSet<string> StopWords =
-        new(StringComparer.OrdinalIgnoreCase)
-        {
-            "a",
-            "an",
-            "and",
-            "the",
-            "of",
-            "in",
-            "on",
-            "for",
-            "with",
-            "to",
-            "by",
-            "at",
-        };
+    private static readonly HashSet<string> StopWords = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "a",
+        "an",
+        "and",
+        "the",
+        "of",
+        "in",
+        "on",
+        "for",
+        "with",
+        "to",
+        "by",
+        "at",
+    };
 
     private static readonly string[] Articles = ["a", "an", "the"];
 

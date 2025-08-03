@@ -2,19 +2,18 @@ namespace PlexRipper.Domain;
 
 public static partial class EnumMapperExtensions
 {
-    private static readonly Dictionary<string, DownloadTaskType> _downloadTaskTypeMap =
-        new(StringComparer.Ordinal)
-        {
-            ["None"] = DownloadTaskType.None,
-            ["Movie"] = DownloadTaskType.Movie,
-            ["MovieData"] = DownloadTaskType.MovieData,
-            ["MoviePart"] = DownloadTaskType.MoviePart,
-            ["TvShow"] = DownloadTaskType.TvShow,
-            ["Season"] = DownloadTaskType.Season,
-            ["Episode"] = DownloadTaskType.Episode,
-            ["EpisodeData"] = DownloadTaskType.EpisodeData,
-            ["EpisodePart"] = DownloadTaskType.EpisodePart,
-        };
+    private static readonly Dictionary<string, DownloadTaskType> _downloadTaskTypeMap = new(StringComparer.Ordinal)
+    {
+        ["None"] = DownloadTaskType.None,
+        ["Movie"] = DownloadTaskType.Movie,
+        ["MovieData"] = DownloadTaskType.MovieData,
+        ["MoviePart"] = DownloadTaskType.MoviePart,
+        ["TvShow"] = DownloadTaskType.TvShow,
+        ["Season"] = DownloadTaskType.Season,
+        ["Episode"] = DownloadTaskType.Episode,
+        ["EpisodeData"] = DownloadTaskType.EpisodeData,
+        ["EpisodePart"] = DownloadTaskType.EpisodePart,
+    };
 
     /// <summary>
     /// Converts string to <see cref="DownloadTaskType"/> by a fast method.

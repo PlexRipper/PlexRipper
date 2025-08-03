@@ -113,17 +113,16 @@ public class InsertMediaMetaDataCommandHandler
             return Result.Ok(new Dictionary<string, PlexActor>());
         }
 
-        var result = await Result.Try(
-            () =>
-                _dbContext.BulkInsertOrUpdateAsync(
-                    newPlexActors,
-                    new BulkConfig
-                    {
-                        SetOutputIdentity = false,
-                        UpdateByProperties = [nameof(PlexActor.Key)],
-                        UseTempDB = true,
-                    }
-                )
+        var result = await Result.Try(() =>
+            _dbContext.BulkInsertOrUpdateAsync(
+                newPlexActors,
+                new BulkConfig
+                {
+                    SetOutputIdentity = false,
+                    UpdateByProperties = [nameof(PlexActor.Key)],
+                    UseTempDB = true,
+                }
+            )
         );
 
         if (result.IsFailed)

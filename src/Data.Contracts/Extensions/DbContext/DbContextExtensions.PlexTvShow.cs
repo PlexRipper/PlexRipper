@@ -6,7 +6,7 @@ namespace Data.Contracts;
 public static partial class DbContextExtensions
 {
     /// <summary>
-    /// Bulk inserts the Plex tv-shows and the movie media data into the database.
+    /// Bulk inserts the Plex TV shows and their hierarchical media data (seasons, episodes, media data, parts, and streams) into the database.
     /// </summary>
     public static async Task<Result<BulkInsertTvShowsRapport>> BulkInsertPlexTvShowsAsync(
         this IPlexRipperDbContext context,
@@ -34,7 +34,7 @@ public static partial class DbContextExtensions
             await context.BulkInsertAsync(plexTvShows, BulkConfigPreset.Default, ct);
             rapport.CreatedTvShows = plexTvShows.Count;
 
-            // Add tv-show media data for each tv-show
+            // Insert seasons for each TV show
             var seasons = plexTvShows
                 .SelectMany(tvShow =>
                 {
@@ -46,7 +46,7 @@ public static partial class DbContextExtensions
             await context.BulkInsertAsync(seasons, BulkConfigPreset.Default, ct);
             rapport.CreatedSeasons = seasons.Count;
 
-            // Add tv-show media data for each tv-show
+            // Insert episodes for each season
             var episodes = seasons
                 .SelectMany(season =>
                 {
@@ -67,7 +67,7 @@ public static partial class DbContextExtensions
             await context.BulkInsertAsync(episodes, BulkConfigPreset.Default, ct);
             rapport.CreatedEpisodes = episodes.Count;
 
-            // Add tv-show media data for each tv-show
+            // Insert media data for each episode
             var mediaData = episodes
                 .SelectMany(episode =>
                 {
@@ -82,7 +82,7 @@ public static partial class DbContextExtensions
 
             await context.BulkInsertAsync(mediaData, BulkConfigPreset.Default, ct);
 
-            // Add tv-show media data parts for each media data
+            // Insert media data parts for each media data
             var parts = mediaData
                 .SelectMany(data =>
                 {
@@ -97,7 +97,7 @@ public static partial class DbContextExtensions
                 .ToList();
             await context.BulkInsertAsync(parts, BulkConfigPreset.Default, ct);
 
-            // Add tv-show media data streams for each part
+            // Insert media data streams for each media data part
             var streams = parts
                 .SelectMany(part =>
                 {

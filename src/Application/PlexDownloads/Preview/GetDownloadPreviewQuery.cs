@@ -203,7 +203,7 @@ public class GetDownloadPreviewQueryHandler : IRequestHandler<GetDownloadPreview
 
     private async Task<Result<IEnumerable<DownloadPreview>>> CreateEpisodePreviews(
         List<DownloadMediaDTO> episodeDownloadMedia,
-        List<TvShowEpisodeKeyDTO> episodeKeys,
+        List<TvShowEpisodeKey> episodeKeys,
         CancellationToken cancellationToken
     )
     {
@@ -291,7 +291,7 @@ public class GetDownloadPreviewQueryHandler : IRequestHandler<GetDownloadPreview
     /// <summary>
     /// Optimized method to get episode keys from TV shows, seasons, and episodes with a single query approach.
     /// </summary>
-    private async Task<Result<List<TvShowEpisodeKeyDTO>>> GetEpisodeKeys(
+    private async Task<Result<List<TvShowEpisodeKey>>> GetEpisodeKeys(
         List<DownloadMediaDTO> tvShowDownloadMedia,
         List<DownloadMediaDTO> seasonDownloadMedia,
         List<DownloadMediaDTO> episodeDownloadMedia,
@@ -300,7 +300,7 @@ public class GetDownloadPreviewQueryHandler : IRequestHandler<GetDownloadPreview
     {
         try
         {
-            var tvShowEpisodeKeys = new List<TvShowEpisodeKeyDTO>();
+            var tvShowEpisodeKeys = new List<TvShowEpisodeKey>();
 
             // Collect all episode IDs from different sources
             var allEpisodeIds = new HashSet<int>();

@@ -183,7 +183,7 @@ public static class DownloadPreviewMapper
     public static IQueryable<DownloadPreview> ProjectToDownloadPreview(this IQueryable<PlexTvShowEpisode> source) =>
         source.Select(x => ProjectToDownloadPreviewMapper(x));
 
-    private static TvShowEpisodeKeyDTO ProjectToEpisodeKey(this PlexTvShowEpisode source) =>
+    private static TvShowEpisodeKey ProjectToEpisodeKey(this PlexTvShowEpisode source) =>
         new()
         {
             TvShowId = source.TvShowId,
@@ -192,7 +192,7 @@ public static class DownloadPreviewMapper
             MediaDataList = source.MediaDataList,
         };
 
-    public static IQueryable<TvShowEpisodeKeyDTO> ProjectToEpisodeKey(this IQueryable<PlexTvShowEpisode> source) =>
+    public static IQueryable<TvShowEpisodeKey> ProjectToEpisodeKey(this IQueryable<PlexTvShowEpisode> source) =>
         source.Select(x => ProjectToEpisodeKey(x));
 
     #endregion

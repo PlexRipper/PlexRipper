@@ -7,7 +7,7 @@ public record PlexMediaQualityDTO
     /// <summary>
     ///  The type of media data, such as <see cref="PlexMediaType.Movie"/> or <see cref="PlexMediaType.Episode"/>.
     /// </summary>
-    public required PlexMediaType MediaDataType { get; set; }
+    public required PlexMediaType MediaDataType { get; init; }
 
     /// <summary>
     /// The quality of the media data, such as <see cref="VideoQuality.DVD"/> or <see cref="VideoQuality.HD"/>.

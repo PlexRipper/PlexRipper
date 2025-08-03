@@ -1,8 +1,6 @@
-using PlexRipper.Domain;
+namespace PlexRipper.Application;
 
-namespace Application.Contracts;
-
-public record TvShowEpisodeKeyDTO
+public record TvShowEpisodeKey
 {
     public required int TvShowId { get; init; }
 

@@ -18,9 +18,4 @@
     <ItemGroup>
         <ProjectReference Include="..\Logging\Logging.csproj" />
     </ItemGroup>
-    <ItemGroup>
-        <Reference Include="FluentValidation">
-            <HintPath>..\..\..\..\..\home\jason\.nuget\packages\fluentvalidation\11.11.0\lib\net8.0\FluentValidation.dll</HintPath>
-        </Reference>
-    </ItemGroup>
 </Project>

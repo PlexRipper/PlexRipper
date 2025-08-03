@@ -64,8 +64,6 @@ public class SyncServerMediaJob : IJob
                 return;
             }
 
-            var results = new List<Result>();
-
             var plexLibraries = forceSync
                 ? plexServer.PlexLibraries
                 : plexServer
@@ -113,7 +111,10 @@ public class SyncServerMediaJob : IJob
                 );
             });
 
+            var results = new List<Result>();
+
             // Sync movie type libraries first because it is a lot quicker than TvShows.
+            // Also, no parallel execution because its the same server and we don't want to overload it.
             foreach (var library in plexLibraries.Where(x => x.Type == PlexMediaType.Movie))
             {
                 var result = await _commandExecutor.Send(new RefreshLibraryMediaCommand(library.Id, progress));
@@ -134,11 +135,7 @@ public class SyncServerMediaJob : IJob
             if (results.Any())
             {
                 var failedResult = Result.Fail($"Some libraries failed to sync in PlexServer: {plexServer.Name}");
-                results.ForEach(x =>
-                {
-                    failedResult.AddNestedErrors(x.Errors);
-                });
-                failedResult.LogError();
+                Result.Merge(failedResult, results.Merge()).LogError();
                 return;
             }
 

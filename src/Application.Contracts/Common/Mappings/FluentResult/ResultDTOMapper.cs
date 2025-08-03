@@ -33,14 +33,16 @@ public static class ResultDTOMapper
             StatusCode = 0,
         };
 
-    private static List<ErrorDTO> ToErrorDTOs(this List<IError> reasons) =>
-        reasons.ConvertAll(x => new ErrorDTO
-        {
-            Message = x.Message,
-            Reasons = x.Reasons,
-            Metadata = x.Metadata,
-        });
+    private static IReadOnlyList<ErrorDTO> ToErrorDTOs(this IReadOnlyList<IError> reasons) =>
+        reasons
+            .Select(x => new ErrorDTO
+            {
+                Message = x.Message,
+                Reasons = x.Reasons,
+                Metadata = x.Metadata,
+            })
+            .ToList();
 
-    private static List<SuccessDTO> ToSuccessDTOs(this List<ISuccess> reasons) =>
-        reasons.ConvertAll(x => new SuccessDTO { Message = x.Message, Metadata = x.Metadata });
+    private static IReadOnlyList<SuccessDTO> ToSuccessDTOs(this IReadOnlyList<ISuccess> reasons) =>
+        reasons.Select(x => new SuccessDTO { Message = x.Message, Metadata = x.Metadata }).ToList();
 }

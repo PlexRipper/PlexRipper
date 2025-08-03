@@ -3,15 +3,15 @@ using Serilog.Events;
 
 namespace Logging.UnitTests;
 
-public class Log_UnitTests : BaseUnitTest<Log_UnitTests>
+public class LogUnitTests : BaseUnitTest<LogUnitTests>
 {
-    private readonly ILog<Log_UnitTests> _log;
+    private readonly ILog<LogUnitTests> _log;
     private readonly ILog _logEmpty;
 
-    public Log_UnitTests(ITestOutputHelper output)
+    public LogUnitTests(ITestOutputHelper output)
         : base(output)
     {
-        _log = new TestLogConfig(output).CreateLogInstance<Log_UnitTests>();
+        _log = new TestLogConfig(output).CreateLogInstance<LogUnitTests>();
         _logEmpty = new TestLogConfig(output).CreateLogInstance();
     }
 
@@ -127,12 +127,12 @@ public class Log_UnitTests : BaseUnitTest<Log_UnitTests>
         errorLogEvent.LogLevel.ShouldBe(LogEventLevel.Error);
         fatalLogEvent.LogLevel.ShouldBe(LogEventLevel.Fatal);
 
-        verboseLogEvent.ClassName.ShouldBe(nameof(Log_UnitTests));
-        debugLogEvent.ClassName.ShouldBe(nameof(Log_UnitTests));
-        warningLogEvent.ClassName.ShouldBe(nameof(Log_UnitTests));
-        informationLogEvent.ClassName.ShouldBe(nameof(Log_UnitTests));
-        errorLogEvent.ClassName.ShouldBe(nameof(Log_UnitTests));
-        fatalLogEvent.ClassName.ShouldBe(nameof(Log_UnitTests));
+        verboseLogEvent.ClassName.ShouldBe(nameof(LogUnitTests));
+        debugLogEvent.ClassName.ShouldBe(nameof(LogUnitTests));
+        warningLogEvent.ClassName.ShouldBe(nameof(LogUnitTests));
+        informationLogEvent.ClassName.ShouldBe(nameof(LogUnitTests));
+        errorLogEvent.ClassName.ShouldBe(nameof(LogUnitTests));
+        fatalLogEvent.ClassName.ShouldBe(nameof(LogUnitTests));
 
         verboseLogEvent.MethodName.ShouldBe(nameof(ShouldLogWithClassNameAndMethodName_WhenLoggingToUnitTestConsole));
         debugLogEvent.MethodName.ShouldBe(nameof(ShouldLogWithClassNameAndMethodName_WhenLoggingToUnitTestConsole));
@@ -205,12 +205,12 @@ public class Log_UnitTests : BaseUnitTest<Log_UnitTests>
         errorLogEvent.LogLevel.ShouldBe(LogEventLevel.Error);
         fatalLogEvent.LogLevel.ShouldBe(LogEventLevel.Fatal);
 
-        verboseLogEvent.ClassName.ShouldBe(nameof(Log_UnitTests));
-        debugLogEvent.ClassName.ShouldBe(nameof(Log_UnitTests));
-        warningLogEvent.ClassName.ShouldBe(nameof(Log_UnitTests));
-        informationLogEvent.ClassName.ShouldBe(nameof(Log_UnitTests));
-        errorLogEvent.ClassName.ShouldBe(nameof(Log_UnitTests));
-        fatalLogEvent.ClassName.ShouldBe(nameof(Log_UnitTests));
+        verboseLogEvent.ClassName.ShouldBe(nameof(LogUnitTests));
+        debugLogEvent.ClassName.ShouldBe(nameof(LogUnitTests));
+        warningLogEvent.ClassName.ShouldBe(nameof(LogUnitTests));
+        informationLogEvent.ClassName.ShouldBe(nameof(LogUnitTests));
+        errorLogEvent.ClassName.ShouldBe(nameof(LogUnitTests));
+        fatalLogEvent.ClassName.ShouldBe(nameof(LogUnitTests));
 
         verboseLogEvent.MethodName.ShouldBe(
             nameof(ShouldLogWithClassNameAndMethodName_WhenLoggingWithHereToUnitTestConsole)

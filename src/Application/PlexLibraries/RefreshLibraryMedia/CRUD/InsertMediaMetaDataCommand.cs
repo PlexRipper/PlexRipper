@@ -167,7 +167,7 @@ public class InsertMediaMetaDataCommandHandler
             .Where(x => !string.IsNullOrEmpty(x.Key) && !string.IsNullOrEmpty(x.Name))
             .DistinctBy(x => x.Key)
             .ToPlexGenre();
-        if (newPlexGenres.IsNullOrEmpty())
+        if (!newPlexGenres.Any())
         {
             _log.Here().Debug("No {NameOfPlexGenre} to insert ", nameof(PlexGenre));
             return Result.Ok(new Dictionary<string, PlexGenre>());
@@ -227,7 +227,7 @@ public class InsertMediaMetaDataCommandHandler
             .Where(x => !string.IsNullOrEmpty(x.Key) && !string.IsNullOrEmpty(x.Name))
             .DistinctBy(x => x.Key)
             .ToPlexCountry();
-        if (newPlexCountries.IsNullOrEmpty())
+        if (!newPlexCountries.Any())
         {
             _log.Here().Debug("No {NameOfPlexCountry} to insert", nameof(PlexCountry));
             return Result.Ok(new Dictionary<string, PlexCountry>());

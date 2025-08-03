@@ -104,7 +104,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
 
         _log.Here().Debug("Started syncing {Count} roles for library {LibraryName}", sourceDict.Count, libraryName);
 
-        if (sourceDict.IsNullOrEmpty())
+        if (!sourceDict.Any())
         {
             _log.Here()
                 .Warning(

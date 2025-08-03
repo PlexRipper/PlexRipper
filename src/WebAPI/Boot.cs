@@ -55,8 +55,6 @@ public class Boot : IHostedService
     /// <inheritdoc />
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        ServicePointManager.DefaultConnectionLimit = 1000;
-
         if (EnvironmentExtensions.GetPuid() == 911 && EnvironmentExtensions.GetPgid() == 1001)
         {
             _log.ErrorLine(

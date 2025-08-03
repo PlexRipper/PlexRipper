@@ -43,7 +43,7 @@ public class GetAllSubtitlesEndpoint : BaseEndpoint<GetAllSubtitlesEndpointReque
             var subtitles = await _dbContext
                 .PlexMovieDataStreams.Where(x => x.StreamType == StreamType.Subtitle)
                 .ToListAsync(ct);
-            await SendOkAsync(Result.Ok(subtitles).ToResultDTO(), ct);
+            await SendFluentResult(Result.Ok(subtitles), ct);
             return;
         }
 
@@ -52,7 +52,7 @@ public class GetAllSubtitlesEndpoint : BaseEndpoint<GetAllSubtitlesEndpointReque
             var subtitles = await _dbContext
                 .PlexTvShowEpisodeDataStreams.Where(x => x.StreamType == StreamType.Subtitle)
                 .ToListAsync(ct);
-            await SendOkAsync(Result.Ok(subtitles).ToResultDTO(), ct);
+            await SendFluentResult(Result.Ok(subtitles), ct);
         }
     }
 }

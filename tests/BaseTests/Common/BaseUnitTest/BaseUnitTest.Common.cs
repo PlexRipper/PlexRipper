@@ -32,9 +32,12 @@ public partial class BaseUnitTest
         EnvironmentExtensions.EnableUnmaskedLog(true);
 
         LogManager.SetupLogging(logEventLevel);
-        LogConfig.SetTestOutputHelper(output);
+
+        var testLogConfig = new TestLogConfig(output);
+
         BogusExtensions.Setup();
-        Log = LogManager.CreateLogInstance(output, typeof(BaseUnitTest));
+
+        Log = testLogConfig.CreateLogInstance<BaseUnitTest>(_logEventLevel);
 
         mock = AutoMock.GetStrict(SetDefaultBuilder);
     }

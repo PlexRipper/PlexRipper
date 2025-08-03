@@ -87,6 +87,6 @@ public class GetAllUniqueMediaTitlesEndpoint : BaseEndpoint<GetAllUniqueMediaTit
             json = Regex.Unescape(JsonSerializer.Serialize(result, DefaultJsonSerializerOptions.ConfigStandard));
         }
 
-        await SendStringAsync(json, cancellation: ct);
+        await Send.StringAsync(json, 200, "application/json", ct);
     }
 }

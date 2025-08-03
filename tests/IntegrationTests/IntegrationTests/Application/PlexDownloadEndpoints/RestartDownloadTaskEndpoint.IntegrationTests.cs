@@ -57,8 +57,8 @@ public class RestartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
         // In CI this is sometimes completed to quickly
         downloadTaskDb.DownloadStatus.ShouldBeOneOf(DownloadStatus.Queued, DownloadStatus.Completed);
 
-        await container.SchedulerService.AwaitScheduler();
-        await Task.Delay(2000);
+        await container.SchedulerService.AwaitScheduler(TestContext.Current.CancellationToken);
+        await Task.Delay(2000, TestContext.Current.CancellationToken);
 
         // Assert
         var result = testResult.Result;

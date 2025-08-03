@@ -55,9 +55,9 @@ public partial class BaseUnitTest
             .Register<ILogger>(
                 (_, _) =>
                 {
-                    LogManager.SetupLogging(_logEventLevel);
-                    LogConfig.SetTestOutputHelper(_output);
-                    return LogConfig.GetLogger();
+                    var logConfig = new TestLogConfig(_output);
+                    LogManager.SetupLogging(_logEventLevel); //TODO might need to be removed if LogManager
+                    return logConfig.GetLogger(_logEventLevel);
                 }
             )
             .SingleInstance();

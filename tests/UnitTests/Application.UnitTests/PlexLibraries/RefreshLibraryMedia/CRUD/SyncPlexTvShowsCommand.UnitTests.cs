@@ -42,7 +42,7 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
 
         // Act
         var request = new SyncPlexTvShowsCommand(new InsertMediaMetaDataCommandResponse(library));
-        (await _validator.ValidateAsync(request)).IsValid.ShouldBeTrue();
+        (await _validator.ValidateAsync(request, TestContext.Current.CancellationToken)).IsValid.ShouldBeTrue();
         var result = await _sut.Handle(request, CancellationToken.None);
 
         // Assert
@@ -131,7 +131,7 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
 
         // Act
         var request = new SyncPlexTvShowsCommand(new InsertMediaMetaDataCommandResponse(library));
-        (await _validator.ValidateAsync(request)).IsValid.ShouldBeTrue();
+        (await _validator.ValidateAsync(request, TestContext.Current.CancellationToken)).IsValid.ShouldBeTrue();
         var result = await _sut.Handle(request, CancellationToken.None);
 
         // Assert
@@ -169,7 +169,7 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
 
         // Act
         var request = new SyncPlexTvShowsCommand(new InsertMediaMetaDataCommandResponse(library));
-        (await _validator.ValidateAsync(request)).IsValid.ShouldBeTrue();
+        (await _validator.ValidateAsync(request, TestContext.Current.CancellationToken)).IsValid.ShouldBeTrue();
         var result = await _sut.Handle(request, CancellationToken.None);
 
         // Assert
@@ -208,7 +208,7 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
         var request = new SyncPlexTvShowsCommand(new InsertMediaMetaDataCommandResponse(library));
 
         var result = await _sut.Handle(request, CancellationToken.None);
-        (await _validator.ValidateAsync(request)).IsValid.ShouldBeTrue();
+        (await _validator.ValidateAsync(request, TestContext.Current.CancellationToken)).IsValid.ShouldBeTrue();
         var result2 = await _sut.Handle(request, CancellationToken.None);
 
         // Assert
@@ -259,7 +259,7 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
 
         // Act
         var request = new SyncPlexTvShowsCommand(new InsertMediaMetaDataCommandResponse(library));
-        (await _validator.ValidateAsync(request)).IsValid.ShouldBeTrue();
+        (await _validator.ValidateAsync(request, TestContext.Current.CancellationToken)).IsValid.ShouldBeTrue();
         var result = await _sut.Handle(request, CancellationToken.None);
 
         // Assert

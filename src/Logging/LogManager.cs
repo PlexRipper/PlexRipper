@@ -3,7 +3,6 @@ using Environment;
 using Logging.Interface;
 using Serilog.Core;
 using Serilog.Events;
-using Xunit.Abstractions;
 
 namespace Logging;
 
@@ -39,7 +38,7 @@ public static class LogManager
     public static void SetupLogging(LogEventLevel minimumLogLevel = LogEventLevel.Debug)
     {
         MinimumLogLevel = minimumLogLevel;
-        Serilog.Log.Logger = LogConfig.GetLogger();
+        Serilog.Log.Logger = new LogConfig().GetLogger();
         _log.Information("Logging level set to {LogLevel}", MinimumLogLevel);
 
         if (EnvironmentExtensions.IsUnmasked())
@@ -58,36 +57,13 @@ public static class LogManager
     /// </summary>
     /// <returns></returns>
     public static ILog<T> CreateLogInstance<T>()
-        where T : class => new Log<T>(LogConfig.GetLogger(), typeof(T));
+        where T : class => new Log<T>(new LogConfig().GetLogger(), typeof(T));
 
     /// <summary>
     /// Returns a new typed <see cref="ILog"/> instance.
     /// </summary>
     /// <returns></returns>
-    public static ILog CreateLogInstance(ITestOutputHelper output)
-    {
-        LogConfig.SetTestOutputHelper(output);
-        return new Log(LogConfig.GetLogger());
-    }
-
-    public static ILog<T> CreateLogInstance<T>(ITestOutputHelper output)
-        where T : class
-    {
-        LogConfig.SetTestOutputHelper(output);
-        return new Log<T>(LogConfig.GetLogger(), typeof(T));
-    }
-
-    /// <summary>
-    /// Returns a new typed <see cref="ILog"/> instance.
-    /// </summary>
-    /// <returns></returns>
-    public static ILog CreateLogInstance(Type classType) => new Log<Type>(LogConfig.GetLogger(), classType);
-
-    public static ILog CreateLogInstance(ITestOutputHelper output, Type classType)
-    {
-        LogConfig.SetTestOutputHelper(output);
-        return new Log<Type>(LogConfig.GetLogger(), classType);
-    }
+    public static ILog CreateLogInstance(Type classType) => new Log<Type>(new LogConfig().GetLogger(), classType);
 
     public static void CloseAndFlush()
     {

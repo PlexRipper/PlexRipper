@@ -1,6 +1,7 @@
 using Environment;
 using Logging.Common;
 using Logging.Enricher;
+using Logging.Interface;
 using Logging.Masks;
 using Serilog;
 using Serilog.Core;
@@ -9,13 +10,15 @@ using Serilog.Events;
 using Serilog.Filters;
 using Serilog.Formatting.Display;
 using Serilog.Sinks.Console.LogThemes;
-using Xunit.Abstractions;
 
 namespace Logging;
 
-public static class LogConfig
+public class LogConfig
 {
     public static MessageTemplateTextFormatter TemplateTextFormatter => new(Template);
+
+    public static readonly string Template =
+        $"{{NewLine}}{{Timestamp:HH:mm:ss}} [{{Level}}] [{{{nameof(LogMetaData.ClassName)}}}.cs:{{{nameof(LogMetaData.LineNumber)}}}.{{{nameof(LogMetaData.MethodName)}}}()] => {{Message:lj}}{{NewLine}}{{Exception}}";
 
     public static LoggerConfiguration GetBaseConfiguration()
     {
@@ -56,25 +59,8 @@ public static class LogConfig
             .WriteTo.Console(theme: LogThemes.SystemColored, outputTemplate: Template);
     }
 
-    public static void SetTestOutputHelper(ITestOutputHelper output)
-    {
-        _testOutput = output;
-    }
-
-    public static Logger GetLogger()
-    {
-        var minimumLogLevel = LogManager.MinimumLogLevel;
-        if (_testOutput is not null)
-        {
-            // Test Logger
-            return GetBaseConfiguration()
-                .WriteTo.TestOutput(_testOutput, TemplateTextFormatter, minimumLogLevel)
-                .WriteTo.TestCorrelator(minimumLogLevel)
-                .MinimumLevel.Is(minimumLogLevel)
-                .CreateLogger();
-        }
-
-        return GetBaseConfiguration()
+    public virtual Logger GetLogger(LogEventLevel minimumLogLevel = LogEventLevel.Debug) =>
+        GetBaseConfiguration()
             .WriteTo.File(
                 TemplateTextFormatter,
                 Path.Combine(PathProvider.LogsDirectory, "log.txt"),
@@ -85,10 +71,18 @@ public static class LogConfig
             )
             .MinimumLevel.Is(minimumLogLevel)
             .CreateLogger();
-    }
 
-    public static readonly string Template =
-        $"{{NewLine}}{{Timestamp:HH:mm:ss}} [{{Level}}] [{{{nameof(LogMetaData.ClassName)}}}.cs:{{{nameof(LogMetaData.LineNumber)}}}.{{{nameof(LogMetaData.MethodName)}}}()] => {{Message:lj}}{{NewLine}}{{Exception}}";
+    public ILog CreateLogInstance() => new Log(GetLogger());
 
-    private static ITestOutputHelper? _testOutput;
+    public ILog<T> CreateLogInstance<T>()
+        where T : class => new Log<T>(GetLogger(), typeof(T));
+
+    public ILog<T> CreateLogInstance<T>(LogEventLevel minimumLogLevel)
+        where T : class => new Log<T>(GetLogger(minimumLogLevel), typeof(T));
+
+    /// <summary>
+    /// Returns a new typed <see cref="ILog"/> instance.
+    /// </summary>
+    /// <returns></returns>
+    public ILog CreateLogInstance(Type classType) => new Log<Type>(GetLogger(), classType);
 }

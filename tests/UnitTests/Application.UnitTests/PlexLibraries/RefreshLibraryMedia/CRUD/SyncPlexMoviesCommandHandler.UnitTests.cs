@@ -34,7 +34,7 @@ public class SyncPlexMoviesCommandHandlerUnitTests : BaseUnitTest<SyncPlexMovies
             PlexCountries = [], // TODO add metadata here
         };
         var request = new SyncPlexMoviesCommand(insertCommand);
-        (await _validator.ValidateAsync(request)).IsValid.ShouldBeTrue();
+        (await _validator.ValidateAsync(request, TestContext.Current.CancellationToken)).IsValid.ShouldBeTrue();
         var result = await _sut.Handle(request, CancellationToken.None);
 
         // Assert
@@ -74,7 +74,7 @@ public class SyncPlexMoviesCommandHandlerUnitTests : BaseUnitTest<SyncPlexMovies
             PlexCountries = [], // TODO add metadata here
         };
         var request = new SyncPlexMoviesCommand(insertCommand);
-        (await _validator.ValidateAsync(request)).IsValid.ShouldBeTrue();
+        (await _validator.ValidateAsync(request, TestContext.Current.CancellationToken)).IsValid.ShouldBeTrue();
         var result = await _sut.Handle(request, CancellationToken.None);
 
         // Assert
@@ -130,7 +130,7 @@ public class SyncPlexMoviesCommandHandlerUnitTests : BaseUnitTest<SyncPlexMovies
             PlexCountries = [], // TODO add metadata here
         };
         var request = new SyncPlexMoviesCommand(insertCommand);
-        (await _validator.ValidateAsync(request)).IsValid.ShouldBeTrue();
+        (await _validator.ValidateAsync(request, TestContext.Current.CancellationToken)).IsValid.ShouldBeTrue();
         var result = await _sut.Handle(request, CancellationToken.None);
 
         // Assert

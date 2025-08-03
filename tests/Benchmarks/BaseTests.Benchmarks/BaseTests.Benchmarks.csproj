@@ -4,12 +4,11 @@
         <TargetFramework>net9.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <!-- Disable entry point generation as this project has it's own entry point -->
-        <GenerateProgramFile>false</GenerateProgramFile>
         <IsPackable>false</IsPackable>
-        <IsTestProject>true</IsTestProject>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
         <OutputType>Exe</OutputType>
+        <StartupObject>BaseTests.Benchmarks.ProgramBenchmarks</StartupObject>
+        <GenerateProgramFile>false</GenerateProgramFile>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)' == ''">
@@ -25,19 +24,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
-        <PackageReference Include="coverlet.collector" Version="6.0.4">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
         <PackageReference Include="BenchmarkDotNet" Version="0.15.2" />
         <PackageReference Include="BenchmarkDotNet.Diagnostics.dotTrace" Version="0.15.2" />
-        <PackageReference Include="BenchmarkDotNet.TestAdapter" Version="0.15.2" />
-        <PackageReference Include="xunit.v3" Version="3.0.0" />
-        <PackageReference Include="xunit.runner.visualstudio" Version="3.1.3">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
     </ItemGroup>
 
     <ItemGroup>

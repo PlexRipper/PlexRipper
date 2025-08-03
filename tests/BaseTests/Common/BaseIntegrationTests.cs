@@ -14,10 +14,10 @@ public class BaseIntegrationTests
         EnvironmentExtensions.EnableUnmaskedLog(true);
 
         // Ensure that the test output helper is set first
-        LogConfig.SetTestOutputHelper(output);
+        var testLogConfig = new TestLogConfig(output);
 
         LogManager.SetupLogging(logLevel);
-        _log = LogManager.CreateLogInstance(typeof(BaseIntegrationTests));
+        _log = testLogConfig.CreateLogInstance<BaseIntegrationTests>();
 
         BogusExtensions.Setup();
     }

@@ -2,7 +2,7 @@ using BenchmarkDotNet.Attributes;
 using Moq;
 using PlexRipper.BaseTests;
 using Serilog.Events;
-using Xunit.Abstractions;
+using Xunit;
 
 namespace BaseTests.Benchmarks;
 

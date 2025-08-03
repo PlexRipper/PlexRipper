@@ -14,14 +14,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Autofac" Version="8.0.0"/>
+        <PackageReference Include="Autofac" Version="8.3.0" />
         <PackageReference Include="CSharpier.MsBuild" Version="0.29.2">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="FastEndpoints" Version="7.0.1" />
         <PackageReference Include="HttpClientToCurl" Version="2.0.6"/>
-        <PackageReference Include="Polly" Version="8.3.1"/>
     </ItemGroup>
 
     <ItemGroup>

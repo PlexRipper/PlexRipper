@@ -211,8 +211,8 @@ public class DownloadWorker : IDisposable
 
                     responseStream.SetThrottleSpeed(_downloadSpeedLimit);
 
-                    var readResult = await Result.Try(
-                        () => responseStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken)
+                    var readResult = await Result.Try(() =>
+                        responseStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken)
                     );
 
                     if (readResult.IsFailed)

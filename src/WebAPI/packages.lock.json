@@ -778,8 +778,11 @@
       },
       "Polly": {
         "type": "Transitive",
-        "resolved": "7.2.4",
-        "contentHash": "bw00Ck5sh6ekduDE3mnCo1ohzuad946uslCDEENu3091+6UKnBuKLo4e+yaNcCzXxOZCXWY2gV4a35+K1d4LDA=="
+        "resolved": "8.6.2",
+        "contentHash": "+irkpMJQ29+o8+u/SdN+1+AP4rB4TGoKZ6gXhD04dPKG+DX2grvKJ6Z6UAK3vYkSQQcbATt+YPt+ac6/X2wVAA==",
+        "dependencies": {
+          "Polly.Core": "8.6.2"
+        }
       },
       "Polly.Core": {
         "type": "Transitive",
@@ -1190,6 +1193,7 @@
           "PlexRipper.Domain": "[1.0.0, )",
           "PlexRipper.Identity.Contracts": "[1.0.0, )",
           "PlexRipper.Settings": "[1.0.0, )",
+          "Polly": "[8.6.2, )",
           "Polly.Core": "[8.6.2, )",
           "Quartz.Serialization.SystemTextJson": "[3.14.0, )",
           "Settings.Contracts": "[1.0.0, )",
@@ -1265,6 +1269,7 @@
           "FastEndpoints": "[7.0.1, )",
           "HttpClientToCurl": "[2.0.6, )",
           "PlexApi.Contracts": "[1.0.0, )",
+          "Polly": "[8.6.2, )",
           "Settings.Contracts": "[1.0.0, )"
         }
       },

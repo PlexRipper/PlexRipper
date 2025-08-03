@@ -34,6 +34,15 @@
         "resolved": "2.0.6",
         "contentHash": "IhFs+fmeSvm7Ac1LfQ8serUGzj5Up+gZAg7os/nGajizLTMW/+S/M7GbJlBNWotvQGaxEu/sDirjsgVSMoc31g=="
       },
+      "Polly": {
+        "type": "Direct",
+        "requested": "[8.6.2, )",
+        "resolved": "8.6.2",
+        "contentHash": "+irkpMJQ29+o8+u/SdN+1+AP4rB4TGoKZ6gXhD04dPKG+DX2grvKJ6Z6UAK3vYkSQQcbATt+YPt+ac6/X2wVAA==",
+        "dependencies": {
+          "Polly.Core": "8.6.2"
+        }
+      },
       "ByteSize": {
         "type": "Transitive",
         "resolved": "2.1.2",
@@ -298,6 +307,11 @@
         "type": "Transitive",
         "resolved": "2.1.0",
         "contentHash": "G70cCeAOYCk/uTuFw5PBGpYY9kmBZyzld7tphachvyU514PowMRDYyKwTefxIHNGWrhXY2d1DV5B1tDEnTtY3A=="
+      },
+      "Polly.Core": {
+        "type": "Transitive",
+        "resolved": "8.6.2",
+        "contentHash": "ImAKLH6qVDjj0vzw+QxMYxxT/NhQrHK+sZE4GT5JbIfDBOrMDbE4we3BR6SqUQCJuKdjOKf3smUjxIgOUUfNVw=="
       },
       "Quartz": {
         "type": "Transitive",

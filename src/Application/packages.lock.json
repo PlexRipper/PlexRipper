@@ -74,6 +74,15 @@
           "Microsoft.Extensions.Options": "9.0.7"
         }
       },
+      "Polly": {
+        "type": "Direct",
+        "requested": "[8.6.2, )",
+        "resolved": "8.6.2",
+        "contentHash": "+irkpMJQ29+o8+u/SdN+1+AP4rB4TGoKZ6gXhD04dPKG+DX2grvKJ6Z6UAK3vYkSQQcbATt+YPt+ac6/X2wVAA==",
+        "dependencies": {
+          "Polly.Core": "8.6.2"
+        }
+      },
       "Polly.Core": {
         "type": "Direct",
         "requested": "[8.6.2, )",

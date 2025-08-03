@@ -21,6 +21,7 @@
         </PackageReference>
         <PackageReference Include="FastEndpoints" Version="7.0.1" />
         <PackageReference Include="HttpClientToCurl" Version="2.0.6"/>
+        <PackageReference Include="Polly" Version="8.6.2" />
     </ItemGroup>
 
     <ItemGroup>

@@ -154,8 +154,8 @@
       },
       "FluentResults": {
         "type": "Transitive",
-        "resolved": "3.16.0",
-        "contentHash": "VWacGzOyN9k7LOKqiNLnFvqTDLbFvepHlINdM3pPTD0YWI+a+VW/Q9gcx4gmJDpDZ32cAsczz5vmRjLCL5UOhA==",
+        "resolved": "4.0.0",
+        "contentHash": "wKfdLvDnDVhXlSreU7u/NFNHH6EfoOhAloEID4ePAyk+ZliowKZJvX+aCL4hxhFc9Jj74t62amS4LyOYTjXGCg==",
         "dependencies": {
           "Microsoft.Extensions.Logging.Abstractions": "2.1.1",
           "System.Threading.Tasks.Extensions": "4.5.4"
@@ -953,7 +953,7 @@
       "fluentresultextensions": {
         "type": "Project",
         "dependencies": {
-          "FluentResults": "[3.16.0, )",
+          "FluentResults": "[4.0.0, )",
           "Logging": "[1.0.0, )"
         }
       },
@@ -962,7 +962,7 @@
         "dependencies": {
           "Autofac": "[8.3.0, )",
           "Environment": "[1.0.0, )",
-          "FluentResults": "[3.16.0, )",
+          "FluentResults": "[4.0.0, )",
           "Serilog": "[4.3.0, )",
           "Serilog.Enrichers.Sensitive": "[1.7.3, )",
           "Serilog.Sinks.Console": "[6.0.0, )",

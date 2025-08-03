@@ -387,17 +387,6 @@
           "System.Reactive": "6.0.1"
         }
       },
-      "Serilog.Sinks.XUnit": {
-        "type": "Transitive",
-        "resolved": "3.0.19",
-        "contentHash": "TlibhWRbxB2fl+w5XEtRtzuxsceDF18bNJIXsmDiHqlK+KN6PSKDeDQq1rEa3V712q0ouvKbYAiVCE+5DOkYdQ==",
-        "dependencies": {
-          "Serilog": "4.1.0",
-          "xunit.abstractions": "2.0.3",
-          "xunit.extensibility.core": "2.9.2",
-          "xunit.extensibility.execution": "2.9.2"
-        }
-      },
       "SQLitePCLRaw.core": {
         "type": "Transitive",
         "resolved": "2.1.10",
@@ -521,27 +510,6 @@
         "resolved": "9.0.0",
         "contentHash": "uksk86YlnzAdyfVNu3wICU0X5iXVe9LF7Q3UkngNliHWEvM5gvAlOUr+jmd9JwmbJWISH5+i1vyXE02lEVz7WQ=="
       },
-      "xunit.abstractions": {
-        "type": "Transitive",
-        "resolved": "2.0.3",
-        "contentHash": "pot1I4YOxlWjIb5jmwvvQNbTrZ3lJQ+jUGkGjWE3hEFM0l5gOnBWS+H3qsex68s5cO52g+44vpGzhAt+42vwKg=="
-      },
-      "xunit.extensibility.core": {
-        "type": "Transitive",
-        "resolved": "2.9.2",
-        "contentHash": "Ol+KlBJz1x8BrdnhN2DeOuLrr1I/cTwtHCggL9BvYqFuVd/TUSzxNT5O0NxCIXth30bsKxgMfdqLTcORtM52yQ==",
-        "dependencies": {
-          "xunit.abstractions": "2.0.3"
-        }
-      },
-      "xunit.extensibility.execution": {
-        "type": "Transitive",
-        "resolved": "2.9.2",
-        "contentHash": "rKMpq4GsIUIJibXuZoZ8lYp5EpROlnYaRpwu9Zr0sRZXE7JqJfEEbCsUriZqB+ByXCLFBJyjkTRULMdC+U566g==",
-        "dependencies": {
-          "xunit.extensibility.core": "[2.9.2]"
-        }
-      },
       "application.contracts": {
         "type": "Project",
         "dependencies": {
@@ -593,8 +561,7 @@
           "Serilog.Sinks.Console.LogThemes": "[0.3.0, )",
           "Serilog.Sinks.Debug": "[3.0.0, )",
           "Serilog.Sinks.File": "[7.0.0, )",
-          "Serilog.Sinks.TestCorrelator": "[4.0.0, )",
-          "Serilog.Sinks.XUnit": "[3.0.19, )"
+          "Serilog.Sinks.TestCorrelator": "[4.0.0, )"
         }
       },
       "PlexRipper.Domain": {

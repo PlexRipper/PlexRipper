@@ -17,7 +17,7 @@ import type {
   CountResponseDTO,
   CreateDownloadTasksRequest,
   DownloadMediaDTO,
-  DownloadPreviewDTO,
+  DownloadPreviewContainerDTO,
   DownloadTaskDTO,
   DownloadTaskType,
   DownloadWorkerLogDTO,
@@ -179,7 +179,7 @@ export class Download {
    */
   getDownloadPreviewEndpoint = (data: DownloadMediaDTO[], params: RequestParams = {}) =>
     from(
-      Axios.request<DownloadPreviewDTO[]>({
+      Axios.request<DownloadPreviewContainerDTO>({
         url: `/api/Download/preview`,
         method: "POST",
         data: data,
@@ -188,7 +188,7 @@ export class Download {
         format: "json",
         ...params,
       }),
-    ).pipe(apiCheckPipe<DownloadPreviewDTO[]>);
+    ).pipe(apiCheckPipe<DownloadPreviewContainerDTO>);
 
   /**
    * No description

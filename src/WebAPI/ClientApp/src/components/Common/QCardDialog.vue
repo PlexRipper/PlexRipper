@@ -40,10 +40,12 @@
 			<!-- Dialog Content	-->
 			<div
 				v-if="$slots['default']"
+				ref="el"
 				:class="{ 'dialog-container-content': true, [`dialog-container-content-${props.contentHeight}`]: contentHeight !== '0' }">
 				<slot
 					v-if="!loading"
-					:value="parentValue" />
+					:value="parentValue"
+					:size="contentSize" />
 			</div>
 			<!-- Dialog Actions	-->
 			<div
@@ -63,13 +65,14 @@
 </template>
 
 <script setup lang="ts" generic="T">
-import { get, set } from '@vueuse/core';
+import { get, set, useElementSize } from '@vueuse/core';
 import { useDialogStore } from '@store';
 
 const dialogStore = useDialogStore();
 
 const showDialog = ref(false);
 const dataValue = ref<T>();
+
 const props = withDefaults(
 	defineProps<{
 		name: string;
@@ -105,6 +108,8 @@ defineEmits<{
 	(e: 'opened', value: T): void;
 	(e: 'closed'): void;
 }>();
+
+const contentSize = useElementSize(useTemplateRef('el'));
 
 const parentValue = computed(() => {
 	return get(dataValue);

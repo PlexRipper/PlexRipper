@@ -86,7 +86,8 @@ public static partial class MediaContainerMappers
             AudioChannels = media.AudioChannels ?? 0,
             AudioCodec = media.AudioCodec ?? string.Empty,
             VideoCodec = media.VideoCodec ?? string.Empty,
-            VideoResolution = media.VideoResolution ?? string.Empty,
+            VideoResolution =
+                media.VideoResolution ?? media.Part?.FirstOrDefault()?.File.ParseQualityFromFileName() ?? string.Empty,
             Container = media.Container ?? string.Empty,
             VideoFrameRate = media.VideoFrameRate ?? string.Empty,
             VideoProfile = media.VideoProfile ?? string.Empty,

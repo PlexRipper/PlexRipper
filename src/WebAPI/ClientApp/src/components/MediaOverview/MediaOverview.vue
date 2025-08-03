@@ -216,6 +216,7 @@ useMediaOverviewBarDownloadCommandBus().on(() => {
 		plexLibraryId: mediaOverviewStore.libraryId,
 		mediaIds: mediaOverviewStore.selection.keys,
 		type: props.mediaType,
+		qualities: [],
 	};
 	sendMediaOverviewDownloadCommand([downloadCommand]);
 });

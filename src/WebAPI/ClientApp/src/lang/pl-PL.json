@@ -48,8 +48,7 @@
             "current-folder-has-no-write-permission": "Bieżący folder nie ma uprawnień do zapisu! Wybierz taki, który je ma."
         },
         "download-confirmation": {
-            "description": "PlexRipper rozpocznie pobieranie następujących elementów:",
-            "header": "Czy jesteś pewny?",
+            "description": "PlexRipper rozpocznie pobieranie następujących plików",
             "total-size": "Całkowity rozmiar:",
             "columns": {
                 "file-size": "Rozmiar pliku",
@@ -785,7 +784,8 @@
                 "connection-dialog-header": "Dialog połączenia"
             },
             "buttons": {
-                "header": "Przyciski Debugowania"
+                "main-header": "Przyciski Debugowania",
+                "media-quality-header": "Wyświetlacz jakości multimediów"
             }
         },
         "empty": {

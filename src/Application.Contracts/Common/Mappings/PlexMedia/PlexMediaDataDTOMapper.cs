@@ -28,20 +28,6 @@ public static class PlexMediaDataDTOMapper
 
     #endregion
 
-    #region PlexMediaQuality
-
-    public static PlexMediaQualityDTO ToDTO(this PlexMediaQuality source) =>
-        new()
-        {
-            Id = source.Id,
-            Quality = source.Quality,
-            Type = source.Type,
-        };
-
-    public static List<PlexMediaQualityDTO> ToDTO(this List<PlexMediaQuality> source) => source.ConvertAll(ToDTO);
-
-    #endregion
-
     #region PlexMediaDataPart
 
     public static PlexMediaDataPartDTO ToDTO(this LibraryMediaItemPartDTO source) =>

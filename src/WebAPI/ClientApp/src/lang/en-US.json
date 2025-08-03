@@ -48,8 +48,7 @@
             "current-folder-has-no-write-permission": "The current folder has no write permission! Select one that has."
         },
         "download-confirmation": {
-            "description": "PlexRipper will start inging the following:",
-            "header": "Are you sure?",
+            "description": "PlexRipper will start downloading the following",
             "total-size": "Total size:",
             "columns": {
                 "file-size": "File size",
@@ -785,7 +784,8 @@
                 "connection-dialog-header": "Connection Dialog"
             },
             "buttons": {
-                "header": "Buttons Debug"
+                "main-header": "Buttons Debug",
+                "media-quality-header": "Media Quality Display"
             }
         },
         "empty": {

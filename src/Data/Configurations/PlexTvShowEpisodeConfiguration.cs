@@ -9,7 +9,6 @@ public class PlexTvShowEpisodeConfiguration : IEntityTypeConfiguration<PlexTvSho
     {
         builder.HasIndex(x => x.SortIndex);
 
-        // Configure one-to-many relationship with MediaDataList
         builder
             .HasMany(x => x.MediaDataList)
             .WithOne(x => x.PlexTvShowEpisode)

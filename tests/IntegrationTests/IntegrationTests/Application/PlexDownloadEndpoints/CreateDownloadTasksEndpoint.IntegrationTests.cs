@@ -53,6 +53,7 @@ public class CreateDownloadTasksEndpointIntegrationTests : BaseIntegrationTests
                 MediaIds = plexMovies.Select(x => x.Id).ToList(),
                 PlexServerId = plexMovies.First().PlexServerId,
                 PlexLibraryId = plexMovies.First().PlexLibraryId,
+                Qualities = [],
             },
         };
 

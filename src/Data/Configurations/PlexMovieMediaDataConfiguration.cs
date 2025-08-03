@@ -7,6 +7,8 @@ public class PlexMovieMediaDataConfiguration : IEntityTypeConfiguration<PlexMovi
 {
     public void Configure(EntityTypeBuilder<PlexMovieMediaData> builder)
     {
+        builder.HasIndex(x => x.Quality);
+
         builder
             .HasMany(x => x.Parts)
             .WithOne(x => x.PlexMovieMediaData)

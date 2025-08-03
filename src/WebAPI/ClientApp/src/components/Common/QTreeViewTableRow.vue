@@ -69,6 +69,13 @@
 								:data-cy="`column-${column.field}-${node.id}`"
 								:value="node[column.field]" />
 						</template>
+						<!-- Media Quality -->
+						<template v-if="column['type'] === 'media-quality'">
+							<MediaQuality
+								:align="column.align"
+								:data-cy="`column-${column.field}-${node.id}`"
+								:qualities="node[column.field]" />
+						</template>
 						<!-- Date format -->
 						<template v-else-if="column['type'] === 'date'">
 							<QDateTime
@@ -79,12 +86,14 @@
 						<!-- Filesize format -->
 						<template v-else-if="column['type'] === 'file-size'">
 							<QFileSize
+								:align="column.align"
 								:data-cy="`column-${column.field}-${node.id}`"
 								:size="node[column.field]" />
 						</template>
 						<!-- File Speed format -->
 						<template v-else-if="column['type'] === 'file-speed'">
 							<QFileSize
+								:align="column.align"
 								:data-cy="`column-${column.field}-${node.id}`"
 								:size="node[column.field]"
 								speed />

@@ -42,7 +42,11 @@ public sealed class PlexRipperDbContext : DbContext, IPlexRipperDbContext, IPlex
 
     public DbSet<PlexTvShow> PlexTvShows { get; set; }
 
+    public DbSet<PlexTvShowMediaQuality> PlexTvShowMediaQualities { get; set; }
+
     public DbSet<PlexTvShowSeason> PlexTvShowSeason { get; set; }
+
+    public DbSet<PlexTvShowSeasonMediaQuality> PlexTvShowSeasonMediaQualities { get; set; }
 
     public DbSet<PlexTvShowEpisode> PlexTvShowEpisodes { get; set; }
 

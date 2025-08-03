@@ -9,6 +9,7 @@ export function toDownloadMedia(mediaItem: PlexMediaDTO | PlexMediaSlimDTO): Dow
 			type: mediaItem.type,
 			plexServerId: mediaItem.plexServerId,
 			plexLibraryId: mediaItem.plexLibraryId,
+			qualities: mediaItem.qualities,
 		},
 	];
 }

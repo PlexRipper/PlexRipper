@@ -1,5 +1,5 @@
 <template>
-	<QSection :header="$t('pages.debug.buttons.header')">
+	<QSection :header="$t('pages.debug.buttons.main-header')">
 		<QRow
 			justify="between"
 			class="q-my-md">

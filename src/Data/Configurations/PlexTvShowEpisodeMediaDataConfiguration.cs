@@ -7,6 +7,8 @@ public class PlexTvShowEpisodeMediaDataConfiguration : IEntityTypeConfiguration<
 {
     public void Configure(EntityTypeBuilder<PlexTvShowEpisodeMediaData> builder)
     {
+        builder.HasIndex(x => x.Quality);
+
         builder
             .HasMany(x => x.Parts)
             .WithOne(x => x.PlexTvShowEpisodeMediaData)

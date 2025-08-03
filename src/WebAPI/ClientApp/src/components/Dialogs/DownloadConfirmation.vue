@@ -1,39 +1,89 @@
 <template>
-	<!-- The "Are you sure" dialog -->
 	<QCardDialog
-		:name="DialogType.MediaDownloadConfirmationDialog"
 		:loading="loading"
-		full-height
+		:name="DialogType.MediaDownloadConfirmationDialog"
 		:type="[] as DownloadMediaDTO[]"
-		@opened="openDialog"
-		@closed="closeDialog">
-		<template #title>
-			{{ t('components.download-confirmation.header') }}
-		</template>
+		full-height
+		@opened="openDialog">
 		<template #top-row>
-			<span>{{ t('components.download-confirmation.description') }}</span> <br>
-			<span>{{ t('components.download-confirmation.total-size') }}</span>
-			<QFileSize
-				:size="totalSize"
-				class="q-ml-sm" />
+			<QRow class="q-pa-md">
+				<QCol>
+					<QText size="h5">
+						{{ t('components.download-confirmation.description') }}
+					</QText>
+				</QCol>
+				<QCol cols="auto">
+					<QText>
+						{{ t('components.download-confirmation.total-size') }}
+						<QFileSize
+							:size="totalSize"
+							class="q-ml-sm" />
+					</QText>
+				</QCol>
+			</QRow>
+			<TreeTable
+				:lazy="true"
+				:loading="loading"
+				:size="'small'"
+				class="download-confirmation-table-header">
+				<Column
+					v-for="(col, i) in getDownloadPreviewTableColumns"
+					:key="i"
+					:expander="i === 0"
+					:field="col.field"
+					:header="col.label"
+					:style="{ 'width': col.width ? `${col.width}px` : 'auto', 'text-align': 'center' }" />
+			</TreeTable>
 		</template>
 		<template #default>
-			<div>
-				<QTreeViewTable
-					:columns="getDownloadPreviewTableColumns()"
-					:nodes="downloadPreview"
-					default-expand-all
-					connectors
-					not-selectable />
-			</div>
+			<TreeTable
+				v-model:expanded-keys="expandedKeys"
+				:lazy="true"
+				:loading="loading"
+				:size="'small'"
+				:value="downloadPreview"
+				class="download-confirmation-table-body">
+				<Column
+					v-for="(col, i) in getDownloadPreviewTableColumns"
+					:key="i"
+					:expander="i === 0 && hasAnyChildren"
+					:field="col.field"
+					:header="col.label"
+					:style="{ width: col.width ? `${col.width}px` : 'auto' }">
+					<template #body="{ node }: { node: DownloadPreviewDTO }">
+						<template v-if="col.type === 'title'">
+							<QMediaTypeIcon
+								:media-type="node.type"
+								:size="26" />
+							<QText
+								:cy="`column-title-${node.key}`"
+								:value="node.title" />
+						</template>
+						<!-- Media Quality -->
+						<MediaQuality
+							v-else-if="col.type === 'media-quality'"
+							:align="'center'"
+							:data-cy="`column-${col.field}-${node.key}`"
+							:qualities="node.qualities"
+							class="q-mx-auto" />
+						<!-- File Size -->
+						<QFileSize
+							v-else-if="col.type === 'file-size'"
+							:cy="`column-dataTotal-${node.key}`"
+							:size="node.size"
+							align="center"
+							class="q-mx-auto" />
+					</template>
+				</Column>
+			</TreeTable>
 		</template>
+		<!-- Download Actions -->
 		<template #actions="{ close }">
 			<CancelButton @click="close()" />
-
 			<q-btn-dropdown
-				outline
 				color="green"
 				label="Download"
+				outline
 				split
 				@click="onDownload(close)">
 				<QSection :header="$t('components.download-confirmation.destination.header')">
@@ -42,8 +92,8 @@
 						<q-item
 							v-for="folderPath in folderPathDestinations"
 							:key="folderPath.id"
-							tag="label"
-							clickable>
+							clickable
+							tag="label">
 							<q-item-section avatar>
 								<q-radio
 									v-model="selectedFolderPath"
@@ -83,20 +133,21 @@
 	</QCardDialog>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { get, set } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
 import {
 	type CreateDownloadTasksRequest,
 	type DownloadMediaDTO,
 	type DownloadPreviewDTO,
-	type FolderPathDTO, FolderType,
+	type FolderPathDTO,
+	FolderType,
 	PlexMediaType,
 } from '@dto';
 import { DialogType } from '@enums';
 import { useI18n } from 'vue-i18n';
-import { useFolderPathStore, useDownloadStore, useDialogStore } from '@store';
-import { sum } from 'lodash-es';
+import { useDialogStore, useDownloadStore, useFolderPathStore } from '@store';
+import Log from 'consola';
 
 const { t } = useI18n();
 const downloadStore = useDownloadStore();
@@ -106,7 +157,7 @@ const dialogStore = useDialogStore();
 const emits = defineEmits<{
 	(e: 'download', downloadCommand: CreateDownloadTasksRequest): void;
 }>();
-
+const expandedKeys = ref<Record<string, boolean>>({});
 const loading = ref(true);
 const downloadPreview = ref<DownloadPreviewDTO[]>([]);
 const downloadMediaCommand = ref<DownloadMediaDTO[]>([]);
@@ -121,6 +172,36 @@ const customDirectory = ref<FolderPathDTO>({
 	isValid: true,
 	isDefault: false,
 });
+
+const getDownloadPreviewTableColumns = computed((): {
+	label: string;
+	field: keyof DownloadPreviewDTO;
+	type?: 'title' | 'duration' | 'file-size' | 'file-speed' | 'date' | 'actions' | 'datetime' | 'percentage' | 'index' | 'media-quality';
+	width?: number;
+}[] => {
+	return [
+		{
+			label: t('components.download-confirmation.columns.title'),
+			field: 'title',
+			type: 'title',
+		},
+		{
+			label: t('components.media-list.columns.quality'),
+			field: 'qualities',
+			type: 'media-quality',
+			width: 200,
+		},
+		{
+			label: t('components.download-confirmation.columns.file-size'),
+			field: 'size',
+			type: 'file-size',
+			width: 150,
+		},
+	];
+});
+
+const hasAnyChildren = computed(() => get(downloadPreview).some((x) => x.children && x.children.length > 0));
+
 const selectedFolderPath = ref<FolderPathDTO>(get(customDirectory));
 
 const folderPathDestinations = computed(() => folderPathStore.getFolderPaths().filter((x) => x.mediaType === get(mediaType)));
@@ -142,15 +223,18 @@ function openDialog(data: DownloadMediaDTO[]): void {
 	set(downloadMediaCommand, data);
 	useSubscription(
 		downloadStore.previewDownload(data).subscribe((result) => {
-			set(downloadPreview, result);
-			set(totalSize, sum(result.map((x) => x.size)));
+			if (!result) {
+				Log.error('Download preview failed, no data received');
+				set(loading, false);
+				return;
+			}
+
+			set(downloadPreview, Object.freeze(result.previews));
+			set(totalSize, result.totalSize);
+			set(expandedKeys, result.expanded);
 			set(loading, false);
 		}),
 	);
-}
-
-function closeDialog(): void {
-	downloadPreview.value = [];
 }
 
 function onCustomDirectorySelected(path: FolderPathDTO): void {
@@ -167,3 +251,24 @@ function onDownload(close: () => void) {
 	close();
 }
 </script>
+
+<style lang="scss">
+.download-confirmation-table-header {
+  padding-right: 10px;
+
+  .p-treetable-thead tr > th:not(:first-child) .p-treetable-column-title {
+    margin: 0 auto;
+    padding-left: 1rem;
+  }
+
+  .p-treetable-empty-message {
+    display: none;
+  }
+}
+
+.download-confirmation-table-body {
+  .p-treetable-thead {
+    display: none;
+  }
+}
+</style>

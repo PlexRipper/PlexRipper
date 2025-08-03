@@ -22,6 +22,9 @@ public class PlexTvShowEpisode : BasePlexMedia
 
     public int TvShowSeasonId { get; set; }
 
+    /// <summary>
+    /// Gets or sets the list of media data for this episode.
+    /// </summary>
     public ICollection<PlexTvShowEpisodeMediaData> MediaDataList { get; init; } = [];
 
     #endregion
@@ -30,10 +33,6 @@ public class PlexTvShowEpisode : BasePlexMedia
 
     [NotMapped]
     public override PlexMediaType Type => PlexMediaType.Episode;
-
-    [NotMapped]
-    public List<PlexMediaQuality> Qualities =>
-        MediaDataList.Select(y => y.ToPlexMediaQuality()).OrderBy(q => q.Quality).ToList();
 
     #endregion
 }

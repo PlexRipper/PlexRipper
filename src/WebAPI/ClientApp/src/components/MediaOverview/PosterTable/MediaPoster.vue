@@ -6,20 +6,22 @@
 				:all-media-mode="mediaOverviewStore.allMediaMode"
 				overlay
 				actions
-				@action="onAction" />
+				@download="onDownload"
+				@open-media-details="$emit('open-media-details', mediaItem)" />
 			<!--	Quality bar	-->
 			<MediaQuality
 				class="media-poster-quality-bar"
-				:qualities="mediaItem.qualities" />
+				:qualities="mediaItem.qualities"
+				clickable
+				@download="onDownload" />
 		</q-card-section>
 		<QLoadingOverlay :loading="loading" />
 	</q-card>
 </template>
 
 <script setup lang="ts">
-import Log from 'consola';
 import { get } from '@vueuse/core';
-import { type DownloadMediaDTO, type PlexMediaSlimDTO, PlexMediaType } from '@dto';
+import { type DownloadMediaDTO, type PlexMediaQualityDTO, type PlexMediaSlimDTO, PlexMediaType } from '@dto';
 import { useMediaOverviewStore } from '@store';
 
 const mediaOverviewStore = useMediaOverviewStore();
@@ -36,25 +38,16 @@ const emit = defineEmits<{
 const loading = ref(false);
 const mediaType = computed(() => props.mediaItem?.type ?? PlexMediaType.Unknown);
 
-function onAction(event: 'download' | 'open-media-details') {
+function onDownload(mediaQualities: PlexMediaQualityDTO[]) {
 	const downloadCommand: DownloadMediaDTO = {
 		type: get(mediaType),
 		mediaIds: [props.mediaItem.id],
 		plexLibraryId: props.mediaItem.plexLibraryId,
 		plexServerId: props.mediaItem.plexServerId,
+		qualities: mediaQualities,
 	};
 
-	switch (event) {
-		case 'download':
-			emit('download', [downloadCommand]);
-			break;
-		case 'open-media-details':
-			emit('open-media-details', props.mediaItem);
-			break;
-		default:
-			Log.error('Unknown action event', event);
-			break;
-	}
+	emit('download', [downloadCommand]);
 }
 </script>
 

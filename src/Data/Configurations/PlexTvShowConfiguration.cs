@@ -32,5 +32,11 @@ public class PlexTvShowConfiguration : IEntityTypeConfiguration<PlexTvShow>
                 l => l.HasOne<PlexCountry>().WithMany().HasForeignKey(e => e.CountryId),
                 r => r.HasOne<PlexTvShow>().WithMany().HasForeignKey(e => e.PlexTvShowId)
             );
+
+        builder
+            .HasMany(x => x.Qualities)
+            .WithOne(x => x.PlexTvShow)
+            .HasForeignKey(x => x.PlexTvShowId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

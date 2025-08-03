@@ -21,10 +21,12 @@
 				<MediaQuality :qualities="row.qualities" />
 			</q-td>
 		</template>
-		<!-- Media size -->
+		<!-- Media Year -->
 		<template #body-cell-year="{ row }">
 			<q-td class="text-center">
-				<QText :value="row.year" />
+				<QText
+					:value="row.year"
+					align="center" />
 			</q-td>
 		</template>
 		<!-- Duration -->
@@ -32,19 +34,23 @@
 			<q-td class="text-center">
 				<QDuration
 					short
+					align="center"
 					:value="row.duration" />
 			</q-td>
 		</template>
 		<!-- Media size -->
 		<template #body-cell-mediaSize="{ row }">
 			<q-td class="text-center">
-				<QFileSize :size="row.mediaSize" />
+				<QFileSize
+					align="center"
+					:size="row.mediaSize" />
 			</q-td>
 		</template>
 		<!-- Added At Date format -->
 		<template #body-cell-addedAt="{ row }">
 			<q-td class="text-center">
 				<QDateTime
+					align="center"
 					:text="row.addedAt"
 					short-date />
 			</q-td>
@@ -53,6 +59,7 @@
 		<template #body-cell-updatedAt="{ row }">
 			<q-td class="text-center">
 				<QDateTime
+					align="center"
 					:text="row.updatedAt"
 					short-date />
 			</q-td>
@@ -81,6 +88,7 @@ import {
 	sendMediaOverviewDownloadCommand,
 } from '@composables/event-bus';
 import { toDownloadMedia } from '@composables/conversion';
+import QDateTime from '@components/Common/QDateTime.vue';
 
 const mediaTableColumns = getMediaTableColumns();
 const router = useRouter();

@@ -48,8 +48,7 @@
             "current-folder-has-no-write-permission": "Der aktuelle Ordner hat keine Schreibberechtigung! Wählen Sie einen Ordner mit Schreibberechtigung aus."
         },
         "download-confirmation": {
-            "description": "PlexRipper fängt an folgendes herunterzuladen:",
-            "header": "Sind Sie sicher?",
+            "description": "PlexRipper beginnt mit dem Herunterladen der folgenden",
             "total-size": "Gesamt größe:",
             "columns": {
                 "file-size": "Dateigröße",
@@ -785,7 +784,8 @@
                 "connection-dialog-header": "Dialogfeld Verbindung"
             },
             "buttons": {
-                "header": "Schaltflächen Debug"
+                "main-header": "Schaltflächen Debug",
+                "media-quality-header": "Medienqualitätsanzeige"
             }
         },
         "empty": {

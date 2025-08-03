@@ -3,19 +3,13 @@
 [Table("PlexMovie")]
 public class PlexMovie : BasePlexMedia
 {
-    public required ICollection<PlexActor> Actors { get; set; } = [];
+    public required ICollection<PlexActor> Actors { get; init; } = [];
 
-    public required ICollection<PlexGenre> Genres { get; set; } = [];
+    public required ICollection<PlexGenre> Genres { get; init; } = [];
 
-    public required ICollection<PlexCountry> Countries { get; set; } = [];
+    public required ICollection<PlexCountry> Countries { get; init; } = [];
 
-    public ICollection<PlexMovieMediaData> MediaDataList { get; set; } = [];
-
-    [NotMapped]
-    public List<PlexMediaQuality> Qualities
-    {
-        get { return MediaDataList.Select(y => y.ToPlexMediaQuality()).OrderBy(q => q.Quality).ToList(); }
-    }
+    public ICollection<PlexMovieMediaData> MediaDataList { get; init; } = [];
 
     [NotMapped]
     public override PlexMediaType Type => PlexMediaType.Movie;

@@ -72,24 +72,3 @@ export const getMediaTableColumns = (): QTreeViewTableHeader[] => {
 		},
 	];
 };
-
-export const getDownloadPreviewTableColumns = (): QTreeViewTableHeader[] => {
-	const { t } = useI18n();
-	return [
-		{
-			label: t('components.download-confirmation.columns.title'),
-			field: 'title',
-			align: 'left',
-			sortOrder: 'asc',
-			sortable: true,
-			required: true,
-		},
-		{
-			label: t('components.download-confirmation.columns.file-size'),
-			field: 'size',
-			type: 'file-size',
-			width: 120,
-			align: 'right',
-		},
-	];
-};

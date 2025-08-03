@@ -8,5 +8,11 @@ public class PlexTvShowSeasonConfiguration : IEntityTypeConfiguration<PlexTvShow
     public void Configure(EntityTypeBuilder<PlexTvShowSeason> builder)
     {
         builder.HasIndex(x => x.SortIndex);
+
+        builder
+            .HasMany(x => x.Qualities)
+            .WithOne(x => x.PlexTvShowSeason)
+            .HasForeignKey(x => x.PlexTvShowSeasonId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

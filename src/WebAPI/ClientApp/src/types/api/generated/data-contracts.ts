@@ -128,19 +128,25 @@ export interface DownloadMediaDTO {
   plexLibraryId: number;
   /** @format int32 */
   plexServerId: number;
+  qualities: PlexMediaQualityDTO[];
   type: PlexMediaType;
 }
 
+export interface DownloadPreviewContainerDTO {
+  expanded: Record<string, boolean>;
+  previews: DownloadPreviewDTO[];
+  /** @format int64 */
+  totalSize: number;
+}
+
 export interface DownloadPreviewDTO {
-  /** @format int32 */
-  childCount: number;
   children: DownloadPreviewDTO[];
-  /** @format int32 */
-  id: number;
-  mediaType: PlexMediaType;
+  key: string;
+  qualities: PlexMediaQualityDTO[];
   /** @format int64 */
   size: number;
   title: string;
+  type: PlexMediaType;
 }
 
 export interface DownloadProgressDTO {
@@ -699,9 +705,11 @@ export interface PlexMediaMetadataDTO {
 
 export interface PlexMediaQualityDTO {
   /** @format int32 */
-  id: number;
+  dataId: number;
+  mediaDataType: PlexMediaType;
+  /** @format int32 */
+  mediaId: number;
   quality: VideoQuality;
-  type: PlexMediaType;
 }
 
 export interface PlexMediaSlimDTO {
@@ -905,6 +913,15 @@ export interface ResultDTOOfCountResponseDTO {
   value?: CountResponseDTO | null;
 }
 
+export interface ResultDTOOfDownloadPreviewContainerDTO {
+  errors: ErrorDTO[];
+  isSuccess: boolean;
+  /** @format int32 */
+  statusCode: number;
+  successes: SuccessDTO[];
+  value?: DownloadPreviewContainerDTO | null;
+}
+
 export interface ResultDTOOfDownloadTaskDTO {
   errors: ErrorDTO[];
   isSuccess: boolean;
@@ -939,15 +956,6 @@ export interface ResultDTOOfGeneratePlexTokenResponse {
   statusCode: number;
   successes: SuccessDTO[];
   value?: GeneratePlexTokenResponse | null;
-}
-
-export interface ResultDTOOfListOfDownloadPreviewDTO {
-  errors: ErrorDTO[];
-  isSuccess: boolean;
-  /** @format int32 */
-  statusCode: number;
-  successes: SuccessDTO[];
-  value?: DownloadPreviewDTO[] | null;
 }
 
 export interface ResultDTOOfListOfDownloadWorkerLogDTO {
@@ -1320,6 +1328,9 @@ export interface ValidatePlexServerConnectionEndpointRequest {
 
 export enum VideoQuality {
   Unknown = "Unknown",
+  SubSD144P = "SubSD_144p",
+  SubSDCIF = "SubSD_CIF",
+  NHD = "nHD",
   SD = "SD",
   DVD = "DVD",
   HD = "HD",

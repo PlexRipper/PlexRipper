@@ -2,17 +2,26 @@ using PlexRipper.Domain;
 
 namespace Application.Contracts;
 
-public class DownloadPreviewDTO
+public record DownloadPreviewContainerDTO
 {
-    public int Id { get; set; }
+    public required long TotalSize { get; init; }
 
-    public string Title { get; set; } = string.Empty;
+    public required Dictionary<string, bool> Expanded { get; init; }
 
-    public long Size { get; set; }
+    public required List<DownloadPreviewDTO> Previews { get; init; }
+}
 
-    public int ChildCount { get; set; }
+public record DownloadPreviewDTO
+{
+    public required string Key { get; init; }
 
-    public PlexMediaType MediaType { get; set; }
+    public required string Title { get; init; }
 
-    public List<DownloadPreviewDTO> Children { get; set; } = [];
+    public required long Size { get; init; }
+
+    public required PlexMediaType Type { get; init; }
+
+    public required List<DownloadPreviewDTO> Children { get; init; } = [];
+
+    public required List<PlexMediaQualityDTO> Qualities { get; init; } = [];
 }

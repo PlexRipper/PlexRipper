@@ -10,6 +10,12 @@ public class PlexMovieConfiguration : IEntityTypeConfiguration<PlexMovie>
         builder.HasIndex(x => x.SortIndex);
 
         builder
+            .HasMany(x => x.MediaDataList)
+            .WithOne(x => x.PlexMovie)
+            .HasForeignKey(x => x.PlexMovieId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder
             .HasMany(x => x.Actors)
             .WithMany(x => x.PlexMovieActors)
             .UsingEntity<PlexMovieActors>(
@@ -32,11 +38,5 @@ public class PlexMovieConfiguration : IEntityTypeConfiguration<PlexMovie>
                 l => l.HasOne<PlexCountry>().WithMany().HasForeignKey(e => e.CountryId),
                 r => r.HasOne<PlexMovie>().WithMany().HasForeignKey(e => e.PlexMovieId)
             );
-
-        builder
-            .HasMany(x => x.MediaDataList)
-            .WithOne(x => x.PlexMovie)
-            .HasForeignKey(x => x.PlexMovieId)
-            .OnDelete(DeleteBehavior.Cascade);
     }
 }

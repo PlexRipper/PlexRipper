@@ -4,6 +4,7 @@ using Data.Contracts;
 using FastEndpoints;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application;
 
@@ -113,7 +114,8 @@ public class GetMediaDetailByIdEndpoint : BaseEndpoint<GetMediaDetailByIdEndpoin
 
         foreach (var season in plexTvShow.Seasons)
             season.Episodes = _dbContext
-                .PlexTvShowEpisodes.Where(x => x.TvShowSeasonId == season.Id)
+                .PlexTvShowEpisodes.Include(x => x.MediaDataList)
+                .Where(x => x.TvShowSeasonId == season.Id)
                 .Take(season.ChildCount)
                 .ToList();
 

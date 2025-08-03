@@ -254,6 +254,7 @@ useMediaOverviewBarDownloadCommandBus().on(() => {
 			mediaIds: seasonIds,
 			plexLibraryId: mediaItem.plexLibraryId,
 			plexServerId: mediaItem.plexServerId,
+			qualities: mediaItem.qualities,
 		});
 	}
 
@@ -263,6 +264,7 @@ useMediaOverviewBarDownloadCommandBus().on(() => {
 			mediaIds: episodesIds,
 			plexLibraryId: mediaItem.plexLibraryId,
 			plexServerId: mediaItem.plexServerId,
+			qualities: mediaItem.qualities,
 		});
 	}
 

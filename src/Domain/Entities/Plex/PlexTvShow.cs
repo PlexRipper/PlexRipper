@@ -16,9 +16,7 @@ public class PlexTvShow : BasePlexMedia
 
     public required ICollection<PlexCountry> Countries { get; init; } = [];
 
-    #endregion
+    public required ICollection<PlexTvShowMediaQuality> Qualities { get; set; } = [];
 
-    [NotMapped]
-    public List<PlexMediaQuality> Qualities =>
-        Seasons.SelectMany(x => x.Qualities).Distinct().OrderBy(q => q.Quality).ToList();
+    #endregion
 }

@@ -25,7 +25,7 @@ public static partial class PlexMediaDTOMapper
             PlexServerId = source.PlexServerId,
             Type = source.Type,
             HasThumb = source.HasThumb,
-            Qualities = source.Qualities.ToDTO(),
+            Qualities = source.MediaDataList.ToPlexMediaQuality(),
             Key = source.Key,
             HasArt = source.HasArt,
             HasTheme = source.HasTheme,
@@ -46,7 +46,7 @@ public static partial class PlexMediaDTOMapper
         new()
         {
             Duration = source.Duration,
-            VideoResolution = source.VideoResolution,
+            VideoResolution = source.RawVideoResolution,
             Width = source.Width,
             Height = source.Height,
             Bitrate = source.Bitrate,

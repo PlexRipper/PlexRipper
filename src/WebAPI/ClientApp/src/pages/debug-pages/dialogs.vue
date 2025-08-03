@@ -218,6 +218,7 @@ function openDownloadConfirmationDialog(): void {
 			plexLibraryId: 9,
 			mediaIds: [24, 25, 26, 27, 28],
 			type: PlexMediaType.TvShow,
+			qualities: [],
 		},
 	];
 	dialogStore.openMediaConfirmationDownloadDialog(demo);

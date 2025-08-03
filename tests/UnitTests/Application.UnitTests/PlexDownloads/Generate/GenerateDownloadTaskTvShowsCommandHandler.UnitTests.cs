@@ -33,6 +33,7 @@ public class GenerateDownloadTaskTvShowsCommandHandler_UnitTests
                 MediaIds = plexTvShows.Select(x => x.Id).ToList(),
                 PlexServerId = 1,
                 PlexLibraryId = 1,
+                Qualities = [],
             },
         };
 

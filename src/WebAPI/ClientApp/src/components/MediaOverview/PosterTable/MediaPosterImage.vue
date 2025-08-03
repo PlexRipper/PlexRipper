@@ -19,7 +19,8 @@
 								:media-item="mediaItem"
 								:actions="actions"
 								:all-media-mode="allMediaMode"
-								@action="$emit('action', $event)" />
+								@download="$emit('download', $event)"
+								@open-media-details="$emit('open-media-details')" />
 						</div>
 					</template>
 					<template #error>
@@ -29,7 +30,8 @@
 							:actions="actions"
 							:media-item="mediaItem"
 							:all-media-mode="allMediaMode"
-							@action="$emit('action', $event)" />
+							@download="$emit('download', $event)"
+							@open-media-details="$emit('open-media-details')" />
 					</template>
 				</q-img>
 			</template>
@@ -41,13 +43,15 @@
 			:actions="actions"
 			:media-item="mediaItem"
 			:all-media-mode="allMediaMode"
-			@action="$emit('action', $event)" />
+			@download="$emit('download', $event)"
+			@open-media-details="$emit('open-media-details')" />
 	</QGlowContainer>
 </template>
 
 <script setup lang="ts">
 import { toFullThumbUrl } from '@composables/conversion';
 import type { PlexMediaSlimDTO } from '@dto';
+import type { IMediaActionEmits } from '@interfaces';
 import { useServerConnectionStore, useSettingsStore } from '#imports';
 
 const connectionStore = useServerConnectionStore();
@@ -69,9 +73,7 @@ const props = withDefaults(defineProps<{
 	thumbHeight: 300,
 });
 
-defineEmits<{
-	(e: 'action', event: 'download' | 'open-media-details'): void;
-}>();
+defineEmits<IMediaActionEmits>();
 
 const imageUrl = computed((): string => {
 	if (!props.mediaItem?.hasThumb) {

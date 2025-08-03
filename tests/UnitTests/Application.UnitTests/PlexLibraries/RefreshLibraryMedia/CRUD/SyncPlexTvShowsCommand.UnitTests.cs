@@ -2,12 +2,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application.UnitTests;
 
-public class SyncPlexTvShowsCommand_UnitTests : BaseUnitTest<SyncPlexTvShowsCommandHandler>
+public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsCommandHandler>
 {
     private SyncPlexTvShowsCommandValidator _validator =
         new(LogManager.CreateLogInstance<SyncPlexTvShowsCommandValidator>());
 
-    public SyncPlexTvShowsCommand_UnitTests(ITestOutputHelper output)
+    public SyncPlexTvShowsCommandUnitTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]

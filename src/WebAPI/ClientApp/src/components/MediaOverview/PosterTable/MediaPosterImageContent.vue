@@ -51,7 +51,7 @@
 						size="xl"
 						flat
 						:outline="false"
-						@click="$emit('action', 'download')" />
+						@click="$emit('download', [])" />
 				</QCol>
 				<QCol cols="auto">
 					<BaseButton
@@ -60,7 +60,7 @@
 						:outline="false"
 						size="xl"
 						flat
-						@click="$emit('action', 'open-media-details')" />
+						@click="$emit('open-media-details')" />
 				</QCol>
 			</QRow>
 		</QCardActions>
@@ -70,6 +70,7 @@
 <script setup lang="ts">
 import { type PlexMediaSlimDTO, PlexMediaType } from '@dto';
 import { useServerStore } from '@store';
+import type { IMediaActionEmits } from '@interfaces';
 
 const serverStore = useServerStore();
 
@@ -88,9 +89,7 @@ const props = withDefaults(defineProps<{
 	thumbHeight: 300,
 });
 
-defineEmits<{
-	(e: 'action', event: 'download' | 'open-media-details'): void;
-}>();
+defineEmits<IMediaActionEmits>();
 
 const mediaType = computed(() => props.mediaItem?.type ?? PlexMediaType.Unknown);
 </script>

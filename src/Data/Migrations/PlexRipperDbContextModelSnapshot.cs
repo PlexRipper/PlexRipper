@@ -1392,6 +1392,8 @@ namespace PlexRipper.Data.Migrations
 
                     b.HasIndex("PlexServerId");
 
+                    b.HasIndex("Quality");
+
                     b.ToTable("PlexMovieData");
                 });
 

@@ -11,7 +11,7 @@ using PlexRipper.Data;
 namespace PlexRipper.Data.Migrations
 {
     [DbContext(typeof(PlexRipperDbContext))]
-    [Migration("20250802153308_AddMediaQualityJoinTables")]
+    [Migration("20250803080637_AddMediaQualityJoinTables")]
     partial class AddMediaQualityJoinTables
     {
         /// <inheritdoc />
@@ -1394,6 +1394,8 @@ namespace PlexRipper.Data.Migrations
                     b.HasIndex("PlexMovieId");
 
                     b.HasIndex("PlexServerId");
+
+                    b.HasIndex("Quality");
 
                     b.ToTable("PlexMovieData");
                 });

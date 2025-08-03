@@ -20,12 +20,12 @@
         </PackageReference>
         <PackageReference Include="FastEndpoints" Version="5.32.0"/>
         <PackageReference Include="FluentValidation" Version="11.11.0"/>
-        <PackageReference Include="JetBrains.Annotations" Version="2024.2.0"/>
+        <PackageReference Include="JetBrains.Annotations" Version="2025.2.0" />
         <PackageReference Include="MediatR" Version="12.2.0"/>
         <PackageReference Include="NaturalSort.Extension" Version="4.3.0"/>
         <PackageReference Include="PasswordGenerator" Version="2.1.0"/>
         <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0"/>
-        <PackageReference Include="System.Reactive" Version="5.0.0"/>
+        <PackageReference Include="System.Reactive" Version="6.0.1" />
         <PackageReference Include="System.Text.Json" Version="9.0.7" />
     </ItemGroup>
 

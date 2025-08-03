@@ -19,7 +19,7 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="System.IO.Abstractions" Version="21.1.7"/>
+        <PackageReference Include="System.IO.Abstractions" Version="22.0.15" />
         <PackageReference Include="System.IO.FileSystem" Version="4.3.0"/>
     </ItemGroup>
 

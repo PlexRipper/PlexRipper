@@ -166,7 +166,7 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
             .Include(x => x.Children)
             .ThenInclude(x => x.Children)
             .ThenInclude(x => x.Children)
-            .ToListAsync(CancellationToken);
+            .ToListAsync(CancellationToken.None);
 
         tvShowDownloadTasks.SetDownloadStatus(DownloadStatus.Completed);
         var lastDownloadTask = tvShowDownloadTasks.Last();

@@ -1,7 +1,7 @@
 {
   "version": 1,
   "dependencies": {
-    "net8.0": {
+    "net9.0": {
       "CSharpier.MsBuild": {
         "type": "Direct",
         "requested": "[0.29.2, )",

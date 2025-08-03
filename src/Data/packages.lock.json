@@ -1,7 +1,7 @@
 {
   "version": 1,
   "dependencies": {
-    "net8.0": {
+    "net9.0": {
       "AppAny.Quartz.EntityFrameworkCore.Migrations.SQLite": {
         "type": "Direct",
         "requested": "[0.5.1, )",

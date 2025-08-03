@@ -1,7 +1,7 @@
 {
   "version": 1,
   "dependencies": {
-    "net8.0": {
+    "net9.0": {
       "Autofac": {
         "type": "Direct",
         "requested": "[8.0.0, )",

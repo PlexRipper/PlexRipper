@@ -52,7 +52,7 @@ public class RefreshPlexTvShowLibraryCommand_UnitTests : BaseUnitTest<RefreshPle
             .Setup(x => x.Send(It.IsAny<GetAllMediaEpisodesCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok(episodesList));
 
-        mock.Mock<IMediator>()
+        mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<SyncPlexTvShowsCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok(new BulkInsertTvShowsRapport()));
 
@@ -236,7 +236,7 @@ public class RefreshPlexTvShowLibraryCommand_UnitTests : BaseUnitTest<RefreshPle
             .Setup(x => x.Send(It.IsAny<GetAllMediaEpisodesCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok(episodesList));
 
-        mock.Mock<IMediator>()
+        mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<SyncPlexTvShowsCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Fail("Failed to sync TV shows"));
 

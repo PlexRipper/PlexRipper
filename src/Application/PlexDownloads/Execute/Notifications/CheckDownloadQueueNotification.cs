@@ -1,8 +1,9 @@
 using Application.Contracts;
+using FastEndpoints;
 
 namespace PlexRipper.Application;
 
-public record CheckDownloadQueueNotification : INotification
+public record CheckDownloadQueueNotification : IEvent
 {
     public CheckDownloadQueueNotification(int plexServerId)
     {
@@ -17,7 +18,7 @@ public record CheckDownloadQueueNotification : INotification
     public List<int> PlexServerIds { get; }
 }
 
-public class CheckDownloadQueueHandler : INotificationHandler<CheckDownloadQueueNotification>
+public class CheckDownloadQueueHandler : IEventHandler<CheckDownloadQueueNotification>
 {
     private readonly IDownloadQueue _downloadQueue;
 
@@ -26,7 +27,7 @@ public class CheckDownloadQueueHandler : INotificationHandler<CheckDownloadQueue
         _downloadQueue = downloadQueue;
     }
 
-    public async Task Handle(CheckDownloadQueueNotification notification, CancellationToken cancellationToken)
+    public async Task HandleAsync(CheckDownloadQueueNotification notification, CancellationToken cancellationToken)
     {
         await _downloadQueue.CheckDownloadQueue(notification.PlexServerIds);
     }

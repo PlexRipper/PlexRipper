@@ -1,10 +1,11 @@
 using Application.Contracts;
 using Data.Contracts;
+using FastEndpoints;
 using Logging.Interface;
 
 namespace PlexRipper.Application;
 
-public record ServerOnlineStatusChangedNotification : INotification
+public record ServerOnlineStatusChangedNotification : IEvent
 {
     public ServerOnlineStatusChangedNotification(int plexServerId, bool isOnline)
     {
@@ -17,7 +18,7 @@ public record ServerOnlineStatusChangedNotification : INotification
     public bool IsOnline { get; }
 }
 
-public class ServerOnlineStatusChangedHandler : INotificationHandler<ServerOnlineStatusChangedNotification>
+public class ServerOnlineStatusChangedHandler : IEventHandler<ServerOnlineStatusChangedNotification>
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
@@ -30,7 +31,10 @@ public class ServerOnlineStatusChangedHandler : INotificationHandler<ServerOnlin
         _downloadQueue = downloadQueue;
     }
 
-    public async Task Handle(ServerOnlineStatusChangedNotification notification, CancellationToken cancellationToken)
+    public async Task HandleAsync(
+        ServerOnlineStatusChangedNotification notification,
+        CancellationToken cancellationToken
+    )
     {
         if (notification.IsOnline)
         {

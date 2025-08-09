@@ -17,7 +17,7 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
         await SetupDatabase(63209);
 
         // Act
-        var result = await _sut.Handle(new StartDownloadTaskCommand(Guid.Empty), CancellationToken);
+        var result = await _sut.ExecuteAsync(new StartDownloadTaskCommand(Guid.Empty), CancellationToken);
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -63,15 +63,13 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
             .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Once);
 
-        mock.SetupMediator(It.IsAny<DownloadTaskUpdatedNotification>)
-            .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once);
+        mock.SetupCommand(It.IsAny<DownloadTaskUpdatedNotification>).ReturnsAsync(Result.Ok()).Verifiable(Times.Once);
         mock.PublishMediator(It.IsAny<CheckDownloadQueueNotification>)
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Once);
 
         // Act
-        var result = await _sut.Handle(new StartDownloadTaskCommand(pausedMergeTask.Id), CancellationToken);
+        var result = await _sut.ExecuteAsync(new StartDownloadTaskCommand(pausedMergeTask.Id), CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -118,12 +116,12 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
             .Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>()))
             .ReturnsAsync(Result.Ok());
 
-        mock.SetupMediator(It.IsAny<PauseDownloadTaskCommand>).ReturnOk();
-        mock.SetupMediator(It.IsAny<DownloadTaskUpdatedNotification>).Returns(Task.CompletedTask);
+        mock.SetupCommand(It.IsAny<PauseDownloadTaskCommand>).ReturnOk();
+        mock.SetupCommand(It.IsAny<DownloadTaskUpdatedNotification>).ReturnsAsync(Result.Ok());
         mock.PublishMediator(It.IsAny<CheckDownloadQueueNotification>).Returns(Task.CompletedTask);
 
         // Act
-        var result = await _sut.Handle(new StartDownloadTaskCommand(lastDownloadTask.Id), CancellationToken);
+        var result = await _sut.ExecuteAsync(new StartDownloadTaskCommand(lastDownloadTask.Id), CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -189,7 +187,7 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
             .Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>()))
             .ReturnsAsync(Result.Ok());
 
-        mock.SetupMediator(It.IsAny<PauseDownloadTaskCommand>)
+        mock.SetupCommand(It.IsAny<PauseDownloadTaskCommand>)
             .ReturnsAsync(
                 (PauseDownloadTaskCommand command, CancellationToken ct) =>
                 {
@@ -199,11 +197,11 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
                     return Result.Ok();
                 }
             );
-        mock.SetupMediator(It.IsAny<DownloadTaskUpdatedNotification>).Returns(Task.CompletedTask);
+        mock.SetupCommand(It.IsAny<DownloadTaskUpdatedNotification>).ReturnsAsync(Result.Ok());
         mock.PublishMediator(It.IsAny<CheckDownloadQueueNotification>).Returns(Task.CompletedTask);
 
         // Act
-        var result = await _sut.Handle(new StartDownloadTaskCommand(lastDownloadTask.Id), CancellationToken);
+        var result = await _sut.ExecuteAsync(new StartDownloadTaskCommand(lastDownloadTask.Id), CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

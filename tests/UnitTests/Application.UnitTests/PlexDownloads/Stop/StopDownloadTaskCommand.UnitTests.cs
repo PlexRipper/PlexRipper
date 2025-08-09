@@ -17,7 +17,7 @@ public class StopDownloadTaskCommand_UnitTests : BaseUnitTest<StopDownloadTaskCo
         await SetupDatabase(72951);
 
         // Act
-        var result = await _sut.Handle(new StopDownloadTaskCommand(Guid.Empty), CancellationToken);
+        var result = await _sut.ExecuteAsync(new StopDownloadTaskCommand(Guid.Empty), CancellationToken);
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -38,10 +38,13 @@ public class StopDownloadTaskCommand_UnitTests : BaseUnitTest<StopDownloadTaskCo
             .Setup(x => x.StopDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Fail("Error"));
         mock.Mock<IFile>().Setup(x => x.Delete(It.IsAny<string>()));
-        mock.SetupMediator(It.IsAny<DownloadTaskUpdatedNotification>).Returns(Task.CompletedTask);
+        mock.SetupCommand(It.IsAny<DownloadTaskUpdatedNotification>).ReturnsAsync(Result.Ok());
 
         // Act
-        var result = await _sut.Handle(new StopDownloadTaskCommand(movieDownloadTasks.First().Id), CancellationToken);
+        var result = await _sut.ExecuteAsync(
+            new StopDownloadTaskCommand(movieDownloadTasks.First().Id),
+            CancellationToken
+        );
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -64,10 +67,13 @@ public class StopDownloadTaskCommand_UnitTests : BaseUnitTest<StopDownloadTaskCo
             .Setup(x => x.StopDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
             .ReturnOk();
         mock.Mock<IFile>().Setup(x => x.Delete(It.IsAny<string>()));
-        mock.SetupMediator(It.IsAny<DownloadTaskUpdatedNotification>).Returns(Task.CompletedTask);
+        mock.SetupCommand(It.IsAny<DownloadTaskUpdatedNotification>).ReturnsAsync(Result.Ok());
 
         // Act
-        var result = await _sut.Handle(new StopDownloadTaskCommand(movieDownloadTasks.First().Id), CancellationToken);
+        var result = await _sut.ExecuteAsync(
+            new StopDownloadTaskCommand(movieDownloadTasks.First().Id),
+            CancellationToken
+        );
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -117,10 +123,13 @@ public class StopDownloadTaskCommand_UnitTests : BaseUnitTest<StopDownloadTaskCo
             .Setup(x => x.StopDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
             .ReturnOk();
         mock.Mock<IFile>().Setup(x => x.Delete(It.IsAny<string>()));
-        mock.SetupMediator(It.IsAny<DownloadTaskUpdatedNotification>).Returns(Task.CompletedTask);
+        mock.SetupCommand(It.IsAny<DownloadTaskUpdatedNotification>).ReturnsAsync(Result.Ok());
 
         // Act
-        var result = await _sut.Handle(new StopDownloadTaskCommand(tvShowDownloadTasks.First().Id), CancellationToken);
+        var result = await _sut.ExecuteAsync(
+            new StopDownloadTaskCommand(tvShowDownloadTasks.First().Id),
+            CancellationToken
+        );
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

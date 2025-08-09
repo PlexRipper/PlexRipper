@@ -3,6 +3,7 @@ using System.IO.Abstractions;
 using System.Reactive.Subjects;
 using Application.Contracts;
 using Data.Contracts;
+using FastEndpoints;
 using FluentValidation;
 using Logging.Interface;
 
@@ -11,7 +12,7 @@ namespace PlexRipper.Application;
 public record MergeFilesFromFileTaskCommand(
     DownloadTaskKey Key,
     Subject<IDownloadFileTransferProgress>? FileMergeProgress = null
-) : IRequest<Result>;
+) : ICommand<Result>;
 
 public class MergeFilesFromFileTaskCommandValidator : AbstractValidator<MergeFilesFromFileTaskCommand>
 {
@@ -22,10 +23,11 @@ public class MergeFilesFromFileTaskCommandValidator : AbstractValidator<MergeFil
     }
 }
 
-public class MergeFilesFromFileTaskCommandHandler : IRequestHandler<MergeFilesFromFileTaskCommand, Result>
+public class MergeFilesFromFileTaskCommandHandler : ICommandHandler<MergeFilesFromFileTaskCommand, Result>
 {
     private readonly ILog _log;
-    private readonly IMediator _mediator;
+    private readonly ICommandExecutor _commandExecutor;
+    private readonly IEventPublisher _eventPublisher;
     private readonly IPlexRipperDbContext _dbContext;
     private readonly IFile _file;
     private readonly IDirectory _directory;
@@ -42,7 +44,8 @@ public class MergeFilesFromFileTaskCommandHandler : IRequestHandler<MergeFilesFr
 
     public MergeFilesFromFileTaskCommandHandler(
         ILog log,
-        IMediator mediator,
+        ICommandExecutor commandExecutor,
+        IEventPublisher eventPublisher,
         IPlexRipperDbContext dbContext,
         IFile file,
         IDirectory directory,
@@ -50,14 +53,15 @@ public class MergeFilesFromFileTaskCommandHandler : IRequestHandler<MergeFilesFr
     )
     {
         _log = log;
-        _mediator = mediator;
+        _commandExecutor = commandExecutor;
+        _eventPublisher = eventPublisher;
         _dbContext = dbContext;
         _file = file;
         _directory = directory;
         _path = path;
     }
 
-    public async Task<Result> Handle(MergeFilesFromFileTaskCommand command, CancellationToken cancellationToken)
+    public async Task<Result> ExecuteAsync(MergeFilesFromFileTaskCommand command, CancellationToken cancellationToken)
     {
         var key = command.Key;
         var fileMergeProgress = command.FileMergeProgress;
@@ -168,7 +172,7 @@ public class MergeFilesFromFileTaskCommandHandler : IRequestHandler<MergeFilesFr
                         _log.VerboseLine(downloadTask.ToString());
 
                         await _dbContext.UpdateDownloadFileTransferProgress(key, downloadTask.ToFileTransferProgress());
-                        await _mediator.Send(new DownloadTaskUpdatedNotification(key), CancellationToken.None);
+                        await _commandExecutor.Send(new DownloadTaskUpdatedNotification(key), CancellationToken.None);
 
                         stopwatch.Restart();
                         previousDataTransferred = 0;
@@ -256,7 +260,7 @@ public class MergeFilesFromFileTaskCommandHandler : IRequestHandler<MergeFilesFr
     {
         await _dbContext.SetDownloadStatus(downloadTask.ToKey(), downloadTask.DownloadStatus);
 
-        await _mediator.Send(new DownloadTaskUpdatedNotification(downloadTask.ToKey()));
+        await _commandExecutor.Send(new DownloadTaskUpdatedNotification(downloadTask.ToKey()));
     }
 
     private async Task<Result> ErrorDownloadTask(DownloadTaskFileBase downloadTask, Result result)
@@ -265,9 +269,9 @@ public class MergeFilesFromFileTaskCommandHandler : IRequestHandler<MergeFilesFr
 
         await _dbContext.SetDownloadStatus(downloadTask.ToKey(), downloadTask.DownloadStatus);
 
-        await _mediator.Send(new DownloadTaskUpdatedNotification(downloadTask.ToKey()));
+        await _commandExecutor.Send(new DownloadTaskUpdatedNotification(downloadTask.ToKey()));
 
-        await _mediator.SendNotificationAsync(result);
+        await _eventPublisher.PublishAsync(new SendNotificationResult(result), CancellationToken.None);
 
         return result;
     }

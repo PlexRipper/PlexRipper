@@ -29,7 +29,7 @@ public class GetPlexLibraryByIdEndpoint : BaseEndpoint<GetPlexLibraryByIdEndpoin
 
     public override string EndpointPath => ApiRoutes.PlexLibraryController + "/{PlexLibraryId}";
 
-    public GetPlexLibraryByIdEndpoint(ILog log, IPlexRipperDbContext dbContext, IMediator mediator)
+    public GetPlexLibraryByIdEndpoint(ILog log, IPlexRipperDbContext dbContext, ICommandExecutor commandExecutor)
     {
         _dbContext = dbContext;
     }

@@ -31,7 +31,7 @@ public class AddOrUpdatePlexAccountServersCommandHandler_UnitTests : BaseUnitTes
         // Act
         var request = new AddOrUpdatePlexAccountServersCommand(plexAccount.Id, serverAccessTokens);
         var handler = new AddOrUpdatePlexAccountServersCommandHandler(Log, IDbContext);
-        var result = await handler.Handle(request, CancellationToken);
+        var result = await handler.ExecuteAsync(request, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -77,7 +77,7 @@ public class AddOrUpdatePlexAccountServersCommandHandler_UnitTests : BaseUnitTes
         // Act
         var request = new AddOrUpdatePlexAccountServersCommand(plexAccount.Id, serverAccessTokens);
         var handler = new AddOrUpdatePlexAccountServersCommandHandler(Log, IDbContext);
-        var result = await handler.Handle(request, CancellationToken);
+        var result = await handler.ExecuteAsync(request, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -124,7 +124,7 @@ public class AddOrUpdatePlexAccountServersCommandHandler_UnitTests : BaseUnitTes
         // Act
         var request = new AddOrUpdatePlexAccountServersCommand(plexAccount.Id, serverAccessTokens);
         var handler = new AddOrUpdatePlexAccountServersCommandHandler(Log, IDbContext);
-        var result = await handler.Handle(request, CancellationToken);
+        var result = await handler.ExecuteAsync(request, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

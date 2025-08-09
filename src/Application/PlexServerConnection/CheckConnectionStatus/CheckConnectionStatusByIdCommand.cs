@@ -1,12 +1,13 @@
 using Application.Contracts;
 using Data.Contracts;
+using FastEndpoints;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using PlexApi.Contracts;
 
 namespace PlexRipper.Application;
 
-public record CheckConnectionStatusByIdCommand(int PlexServerConnectionId) : IRequest<Result<PlexServerStatus>>;
+public record CheckConnectionStatusByIdCommand(int PlexServerConnectionId) : ICommand<Result<PlexServerStatus>>;
 
 public class CheckConnectionStatusByIdCommandValidator : AbstractValidator<CheckConnectionStatusByIdCommand>
 {
@@ -17,7 +18,7 @@ public class CheckConnectionStatusByIdCommandValidator : AbstractValidator<Check
 }
 
 public class CheckConnectionStatusByIdCommandHandler
-    : IRequestHandler<CheckConnectionStatusByIdCommand, Result<PlexServerStatus>>
+    : ICommandHandler<CheckConnectionStatusByIdCommand, Result<PlexServerStatus>>
 {
     private readonly ISignalRService _signalRService;
     private readonly ICommandExecutor _commandDispatcher;
@@ -35,7 +36,7 @@ public class CheckConnectionStatusByIdCommandHandler
         _commandDispatcher = commandDispatcher;
     }
 
-    public async Task<Result<PlexServerStatus>> Handle(
+    public async Task<Result<PlexServerStatus>> ExecuteAsync(
         CheckConnectionStatusByIdCommand command,
         CancellationToken cancellationToken
     )

@@ -25,7 +25,7 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
 
         // Act
         var request = new CheckAllConnectionsStatusByPlexServerCommand(plexServer.Id);
-        var result = await _sut.Handle(request, CancellationToken);
+        var result = await _sut.ExecuteAsync(request, CancellationToken);
 
         // Assert
         result.ShouldNotBeNull();
@@ -40,7 +40,7 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
         var request = new CheckAllConnectionsStatusByPlexServerCommand(999);
 
         // Act
-        var result = await _sut.Handle(request, CancellationToken);
+        var result = await _sut.ExecuteAsync(request, CancellationToken);
 
         // Assert
         result.ShouldNotBeNull();
@@ -66,7 +66,7 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
         var request = new CheckAllConnectionsStatusByPlexServerCommand(plexServer.Id);
 
         // Act
-        var result = await _sut.Handle(request, CancellationToken);
+        var result = await _sut.ExecuteAsync(request, CancellationToken);
 
         // Assert
         result.ShouldNotBeNull();
@@ -113,7 +113,7 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Once);
 
-        mock.SetupMediator(It.IsAny<CheckConnectionStatusByIdCommand>)
+        mock.SetupCommand(It.IsAny<CheckConnectionStatusByIdCommand>)
             .ReturnsAsync(
                 (CheckConnectionStatusByIdCommand req, CancellationToken _) =>
                     Result.Ok(
@@ -135,7 +135,7 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
 
         // Act
         var request = new CheckAllConnectionsStatusByPlexServerCommand(1);
-        var result = await _sut.Handle(request, CancellationToken);
+        var result = await _sut.ExecuteAsync(request, CancellationToken);
 
         // Assert
         result.ShouldNotBeNull();
@@ -182,7 +182,7 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Once);
 
-        mock.SetupMediator(It.IsAny<CheckConnectionStatusByIdCommand>)
+        mock.SetupCommand(It.IsAny<CheckConnectionStatusByIdCommand>)
             .ReturnsAsync(
                 (CheckConnectionStatusByIdCommand req, CancellationToken _) =>
                     Result.Ok(
@@ -204,7 +204,7 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
 
         // Act
         var request = new CheckAllConnectionsStatusByPlexServerCommand(1);
-        var result = await _sut.Handle(request, CancellationToken);
+        var result = await _sut.ExecuteAsync(request, CancellationToken);
 
         // Assert
         result.ShouldNotBeNull();

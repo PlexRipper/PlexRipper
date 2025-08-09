@@ -1,12 +1,13 @@
 ﻿using Application.Contracts;
 using Data.Contracts;
+using FastEndpoints;
 using FluentValidation;
 using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application;
 
-public record AddOrUpdatePlexLibrariesCommand : IRequest<Result<List<PlexLibraryAccessRapport>>>
+public record AddOrUpdatePlexLibrariesCommand : ICommand<Result<List<PlexLibraryAccessRapport>>>
 {
     public required int PlexAccountId { get; init; }
 
@@ -30,7 +31,7 @@ public class AddOrUpdatePlexLibrariesValidator : AbstractValidator<AddOrUpdatePl
 }
 
 public class AddOrUpdatePlexLibrariesCommandHandler
-    : IRequestHandler<AddOrUpdatePlexLibrariesCommand, Result<List<PlexLibraryAccessRapport>>>
+    : ICommandHandler<AddOrUpdatePlexLibrariesCommand, Result<List<PlexLibraryAccessRapport>>>
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
@@ -42,7 +43,7 @@ public class AddOrUpdatePlexLibrariesCommandHandler
         _dbContext = dbContext;
     }
 
-    public async Task<Result<List<PlexLibraryAccessRapport>>> Handle(
+    public async Task<Result<List<PlexLibraryAccessRapport>>> ExecuteAsync(
         AddOrUpdatePlexLibrariesCommand command,
         CancellationToken cancellationToken
     )

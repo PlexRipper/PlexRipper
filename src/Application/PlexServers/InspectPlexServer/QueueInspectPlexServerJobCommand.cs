@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using Application.Contracts;
 using Data.Contracts;
+using FastEndpoints;
 using FluentValidation;
 using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
@@ -8,7 +9,7 @@ using Quartz;
 
 namespace PlexRipper.Application;
 
-public record QueueInspectPlexServerJobCommand(List<int> PlexServerIds) : IRequest<Result>;
+public record QueueInspectPlexServerJobCommand(List<int> PlexServerIds) : ICommand<Result>;
 
 public class QueueInspectPlexServerJobCommandValidator : AbstractValidator<QueueInspectPlexServerJobCommand>
 {
@@ -18,7 +19,7 @@ public class QueueInspectPlexServerJobCommandValidator : AbstractValidator<Queue
     }
 }
 
-public class QueueInspectPlexServerJobCommandHandler : IRequestHandler<QueueInspectPlexServerJobCommand, Result>
+public class QueueInspectPlexServerJobCommandHandler : ICommandHandler<QueueInspectPlexServerJobCommand, Result>
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
@@ -31,7 +32,10 @@ public class QueueInspectPlexServerJobCommandHandler : IRequestHandler<QueueInsp
         _scheduler = scheduler;
     }
 
-    public async Task<Result> Handle(QueueInspectPlexServerJobCommand command, CancellationToken cancellationToken)
+    public async Task<Result> ExecuteAsync(
+        QueueInspectPlexServerJobCommand command,
+        CancellationToken cancellationToken
+    )
     {
         var plexServerIds = command.PlexServerIds;
 

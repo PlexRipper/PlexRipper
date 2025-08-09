@@ -29,7 +29,7 @@ public class DownloadWorkerStartUnitTests : BaseUnitTest<DownloadWorker>
         SetupHttpClient();
 
         var destinationStream = new MemoryStream();
-        mock.SetupMediator(It.IsAny<CreateDownloadFileStreamCommand>)
+        mock.SetupCommand(It.IsAny<CreateDownloadFileStreamCommand>)
             .ReturnsAsync(Result.Ok<Stream>(destinationStream))
             .Verifiable(Times.Once);
 
@@ -114,7 +114,7 @@ public class DownloadWorkerStartUnitTests : BaseUnitTest<DownloadWorker>
 
         SetupHttpClient();
 
-        mock.SetupMediator(It.IsAny<CreateDownloadFileStreamCommand>)
+        mock.SetupCommand(It.IsAny<CreateDownloadFileStreamCommand>)
             .ReturnsAsync(Result.Ok<Stream>(new MemoryStream()))
             .Verifiable(Times.Once);
 
@@ -158,7 +158,7 @@ public class DownloadWorkerStartUnitTests : BaseUnitTest<DownloadWorker>
 
         SetupHttpClient();
 
-        mock.SetupMediator(It.IsAny<CreateDownloadFileStreamCommand>)
+        mock.SetupCommand(It.IsAny<CreateDownloadFileStreamCommand>)
             .ReturnsAsync(Result.Ok<Stream>(new MemoryStream()))
             .Verifiable(Times.Once);
 

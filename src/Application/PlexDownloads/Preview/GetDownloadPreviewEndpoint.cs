@@ -15,13 +15,13 @@ public class GetDownloadPreviewEndpointRequestValidator : Validator<List<Downloa
 
 public class GetDownloadPreviewEndpoint : BaseEndpoint<List<DownloadMediaDTO>, DownloadPreviewContainerDTO>
 {
-    private readonly IMediator _mediator;
+    private readonly ICommandExecutor _commandExecutor;
 
     public override string EndpointPath => ApiRoutes.DownloadController + "/preview";
 
-    public GetDownloadPreviewEndpoint(IMediator mediator)
+    public GetDownloadPreviewEndpoint(ICommandExecutor commandExecutor)
     {
-        _mediator = mediator;
+        _commandExecutor = commandExecutor;
     }
 
     public override void Configure()
@@ -37,7 +37,7 @@ public class GetDownloadPreviewEndpoint : BaseEndpoint<List<DownloadMediaDTO>, D
 
     public override async Task HandleAsync(List<DownloadMediaDTO> downloadMedias, CancellationToken ct)
     {
-        var result = await _mediator.Send(new GetDownloadPreviewQuery(downloadMedias), ct);
+        var result = await _commandExecutor.Send(new GetDownloadPreviewQuery(downloadMedias), ct);
 
         await SendFluentResult(result, x => x.ToDTO(), ct);
     }

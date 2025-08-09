@@ -20,13 +20,13 @@ public class RefreshPlexServerConnectionsEndpointRequestValidator
 public class RefreshPlexServerConnectionsEndpoint : BaseEndpoint<RefreshPlexServerConnectionsEndpointRequest>
 {
     private readonly IPlexRipperDbContext _dbContext;
-    private readonly IMediator _mediator;
+    private readonly ICommandExecutor _commandExecutor;
     public override string EndpointPath => ApiRoutes.PlexServerController + "/{PlexServerId}/refresh";
 
-    public RefreshPlexServerConnectionsEndpoint(IPlexRipperDbContext dbContext, IMediator mediator)
+    public RefreshPlexServerConnectionsEndpoint(IPlexRipperDbContext dbContext, ICommandExecutor commandExecutor)
     {
         _dbContext = dbContext;
-        _mediator = mediator;
+        _commandExecutor = commandExecutor;
     }
 
     public override void Configure()
@@ -50,6 +50,6 @@ public class RefreshPlexServerConnectionsEndpoint : BaseEndpoint<RefreshPlexServ
             return;
         }
 
-        await _mediator.Send(new RefreshPlexServerAccessCommand(plexAccountResult.Value.Id), ct);
+        await _commandExecutor.Send(new RefreshPlexServerAccessCommand(plexAccountResult.Value.Id), ct);
     }
 }

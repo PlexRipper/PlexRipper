@@ -11,13 +11,13 @@ namespace PlexRipper.BaseTests;
 public static class MoqExtensions
 {
     // TODO:rename to SendMediator
-    public static ISetup<IMediator, Task<TResult>> SetupMediator<TResult>(
+    public static ISetup<ICommandExecutor, Task<TResult>> SetupCommand<TResult>(
         this AutoMock mock,
-        Func<IRequest<TResult>> request,
+        Func<ICommand<TResult>> request,
         bool isVerifiable = false
     )
     {
-        var result = mock.Mock<IMediator>().Setup(m => m.Send(request.Invoke(), It.IsAny<CancellationToken>()));
+        var result = mock.Mock<ICommandExecutor>().Setup(m => m.Send(request.Invoke(), It.IsAny<CancellationToken>()));
         if (isVerifiable)
             result.Verifiable();
         return result;
@@ -58,65 +58,68 @@ public static class MoqExtensions
         return result;
     }
 
-    public static ISetup<IMediator, Task> SetupMediator(
+    public static ISetup<ICommandExecutor, Task> SetupCommand(
         this AutoMock mock,
-        Func<IRequest> request,
+        Func<ICommand> request,
         bool isVerifiable = false
     )
     {
-        var result = mock.Mock<IMediator>().Setup(m => m.Send(request.Invoke(), It.IsAny<CancellationToken>()));
+        var result = mock.Mock<ICommandExecutor>().Setup(m => m.Send(request.Invoke(), It.IsAny<CancellationToken>()));
         if (isVerifiable)
             result.Verifiable();
         return result;
     }
 
-    public static ISetup<IMediator, Task> PublishMediator(this AutoMock mock, Func<INotification> request)
+    public static ISetup<IEventPublisher, Task> PublishMediator(this AutoMock mock, Func<IEvent> request)
     {
-        return mock.Mock<IMediator>().Setup(x => x.Publish(request.Invoke(), It.IsAny<CancellationToken>()));
+        return mock.Mock<IEventPublisher>().Setup(x => x.PublishAsync(request.Invoke(), It.IsAny<CancellationToken>()));
     }
 
     #region Verify
 
-    public static void VerifyMediator(this AutoMock mock, Func<INotification> notification, Times times)
+    public static void VerifyMediator(this AutoMock mock, Func<IEvent> notification, Times times)
     {
-        mock.Mock<IMediator>().Verify(x => x.Publish(notification.Invoke(), It.IsAny<CancellationToken>()), times);
+        mock.Mock<IEventPublisher>()
+            .Verify(x => x.PublishAsync(notification.Invoke(), It.IsAny<CancellationToken>()), times);
     }
 
-    public static void VerifyMediator(this AutoMock mock, Func<INotification> notification, Func<Times> times)
+    public static void VerifyMediator(this AutoMock mock, Func<IEvent> notification, Func<Times> times)
     {
-        mock.Mock<IMediator>().Verify(x => x.Publish(notification.Invoke(), It.IsAny<CancellationToken>()), times);
+        mock.Mock<IEventPublisher>()
+            .Verify(x => x.PublishAsync(notification.Invoke(), It.IsAny<CancellationToken>()), times);
     }
 
-    public static void VerifyMediator(this AutoMock mock, Func<IRequest> request, Times times)
+    public static void VerifyMediator(this AutoMock mock, Func<ICommand> request, Times times)
     {
-        mock.Mock<IMediator>().Verify(x => x.Send(request.Invoke(), It.IsAny<CancellationToken>()), times);
+        mock.Mock<ICommandExecutor>().Verify(x => x.Send(request.Invoke(), It.IsAny<CancellationToken>()), times);
     }
 
-    public static void VerifyMediator(this AutoMock mock, Func<IRequest> request, Func<Times> times)
+    public static void VerifyMediator(this AutoMock mock, Func<ICommand> request, Func<Times> times)
     {
-        mock.Mock<IMediator>().Verify(x => x.Send(request.Invoke(), It.IsAny<CancellationToken>()), times);
+        mock.Mock<ICommandExecutor>().Verify(x => x.Send(request.Invoke(), It.IsAny<CancellationToken>()), times);
     }
 
-    public static void VerifyMediator<T>(this AutoMock mock, Func<IRequest<T>> request, Func<Times> times)
+    public static void VerifyMediator<T>(this AutoMock mock, Func<ICommand<T>> request, Func<Times> times)
     {
-        mock.Mock<IMediator>().Verify(x => x.Send(request.Invoke(), It.IsAny<CancellationToken>()), times);
+        mock.Mock<ICommandExecutor>().Verify(x => x.Send(request.Invoke(), It.IsAny<CancellationToken>()), times);
     }
 
-    public static void VerifyMediator<T>(this AutoMock mock, Func<IRequest<T>> request, Times times)
+    public static void VerifyMediator<T>(this AutoMock mock, Func<ICommand<T>> request, Times times)
     {
-        mock.Mock<IMediator>().Verify(x => x.Send(request.Invoke(), It.IsAny<CancellationToken>()), times);
+        mock.Mock<ICommandExecutor>().Verify(x => x.Send(request.Invoke(), It.IsAny<CancellationToken>()), times);
     }
 
     #region Publish/Notification
 
-    public static void VerifyNotification(this AutoMock mock, Func<INotification> notification, Func<Times> times)
+    public static void VerifyNotification(this AutoMock mock, Func<IEvent> notification, Func<Times> times)
     {
-        mock.Mock<IMediator>().Verify(x => x.Publish(notification.Invoke(), It.IsAny<CancellationToken>()), times);
+        mock.Mock<IEventPublisher>()
+            .Verify(x => x.PublishAsync(notification.Invoke(), It.IsAny<CancellationToken>()), times);
     }
 
-    public static void VerifyNotification(this AutoMock mock, INotification notification, Func<Times> times)
+    public static void VerifyNotification(this AutoMock mock, IEvent notification, Func<Times> times)
     {
-        mock.Mock<IMediator>().Verify(x => x.Publish(notification, It.IsAny<CancellationToken>()), times);
+        mock.Mock<IEventPublisher>().Verify(x => x.PublishAsync(notification, It.IsAny<CancellationToken>()), times);
     }
 
     #endregion
@@ -128,9 +131,6 @@ public static class MoqExtensions
 
     public static IReturnsResult<T> ReturnOk<T>(this ISetup<T, Task<Result<T>>> mock)
         where T : class => mock.ReturnsAsync(Result.Ok());
-
-    public static IReturnsResult<IMediator> ReturnOk(this IReturnsThrows<IMediator, Task<Result>> mock) =>
-        mock.ReturnsAsync(Result.Ok());
 
     public static void SetupIdentityRequest(this Mock<HttpMessageHandler> mock, Seed seed, string uri = "")
     {

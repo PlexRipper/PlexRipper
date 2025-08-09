@@ -15,7 +15,7 @@ public class CreatePlexAccountEndpointUnitTests : BaseUnitTest
         await SetupDatabase(352);
         var newAccount = PlexAccount.Create("TestUsername", "Password123");
 
-        mock.SetupMediator(It.IsAny<InspectAllPlexServersByAccountIdCommand>).ReturnsAsync(Result.Ok());
+        mock.SetupCommand(It.IsAny<InspectAllPlexServersByAccountIdCommand>).ReturnsAsync(Result.Ok());
 
         // Act
         var endPoint = SetupEndpointUnitTest<CreatePlexAccountEndpoint>();
@@ -39,7 +39,7 @@ public class CreatePlexAccountEndpointUnitTests : BaseUnitTest
 
         var newAccount = PlexAccount.Create(plexAccount.Username, "Password123");
 
-        mock.SetupMediator(It.IsAny<InspectAllPlexServersByAccountIdCommand>).ReturnsAsync(Result.Ok());
+        mock.SetupCommand(It.IsAny<InspectAllPlexServersByAccountIdCommand>).ReturnsAsync(Result.Ok());
 
         // Act
         var endPoint = SetupEndpointUnitTest<CreatePlexAccountEndpoint>();

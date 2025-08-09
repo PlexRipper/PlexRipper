@@ -1,13 +1,14 @@
 using Application.Contracts;
 using Application.Contracts.Validators;
 using Data.Contracts;
+using FastEndpoints;
 using FluentValidation;
 using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application;
 
-public record GenerateDownloadTaskTvShowsCommand : IRequest<Result>
+public record GenerateDownloadTaskTvShowsCommand : ICommand<Result>
 {
     public GenerateDownloadTaskTvShowsCommand(CreateDownloadTasksRequest request)
     {
@@ -32,20 +33,27 @@ public class GenerateDownloadTaskTvShowsCommandValidator : AbstractValidator<Gen
     }
 }
 
-public class GenerateDownloadTaskTvShowsCommandHandler : IRequestHandler<GenerateDownloadTaskTvShowsCommand, Result>
+public class GenerateDownloadTaskTvShowsCommandHandler : ICommandHandler<GenerateDownloadTaskTvShowsCommand, Result>
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
-    private readonly IMediator _mediator;
+    private readonly ICommandExecutor _commandExecutor;
 
-    public GenerateDownloadTaskTvShowsCommandHandler(ILog log, IPlexRipperDbContext dbContext, IMediator mediator)
+    public GenerateDownloadTaskTvShowsCommandHandler(
+        ILog log,
+        IPlexRipperDbContext dbContext,
+        ICommandExecutor commandExecutor
+    )
     {
         _log = log;
         _dbContext = dbContext;
-        _mediator = mediator;
+        _commandExecutor = commandExecutor;
     }
 
-    public async Task<Result> Handle(GenerateDownloadTaskTvShowsCommand command, CancellationToken cancellationToken)
+    public async Task<Result> ExecuteAsync(
+        GenerateDownloadTaskTvShowsCommand command,
+        CancellationToken cancellationToken
+    )
     {
         var groupedList = command.Request.DownloadMedias.MergeAndGroupList();
         var plexTvShowList = groupedList.FindAll(x => x.Type == PlexMediaType.TvShow);
@@ -99,7 +107,7 @@ public class GenerateDownloadTaskTvShowsCommandHandler : IRequestHandler<Generat
             await _dbContext.SaveChangesAsync(cancellationToken);
 
             // Create seasons downloadTasks
-            await _mediator.Send(
+            await _commandExecutor.Send(
                 new GenerateDownloadTaskTvShowSeasonsCommand(
                     new CreateDownloadTasksRequest(seasonsIds, command.Request.DestinationFolderPathId)
                 ),

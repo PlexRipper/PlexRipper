@@ -1,5 +1,6 @@
 using Application.Contracts;
 using Data.Contracts;
+using FastEndpoints;
 using FileSystem.Contracts;
 using FluentValidation;
 using Logging.Interface;
@@ -11,7 +12,7 @@ namespace PlexRipper.Application;
 /// </summary>
 /// <param name="DownloadTaskGuid">The id of the <see cref="DownloadTaskGeneric"/> to Pause.</param>
 /// <returns>If successful a list of the DownloadTasks that were Paused.</returns>
-public record PauseDownloadTaskCommand(Guid DownloadTaskGuid) : IRequest<Result>;
+public record PauseDownloadTaskCommand(Guid DownloadTaskGuid) : ICommand<Result>;
 
 public class PauseDownloadTaskCommandValidator : AbstractValidator<PauseDownloadTaskCommand>
 {
@@ -21,7 +22,7 @@ public class PauseDownloadTaskCommandValidator : AbstractValidator<PauseDownload
     }
 }
 
-public class PauseDownloadTaskCommandHandler : IRequestHandler<PauseDownloadTaskCommand, Result>
+public class PauseDownloadTaskCommandHandler : ICommandHandler<PauseDownloadTaskCommand, Result>
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
@@ -41,7 +42,7 @@ public class PauseDownloadTaskCommandHandler : IRequestHandler<PauseDownloadTask
         _fileMergeScheduler = fileMergeScheduler;
     }
 
-    public async Task<Result> Handle(PauseDownloadTaskCommand command, CancellationToken cancellationToken)
+    public async Task<Result> ExecuteAsync(PauseDownloadTaskCommand command, CancellationToken cancellationToken)
     {
         var key = await _dbContext.GetDownloadTaskKeyAsync(command.DownloadTaskGuid, cancellationToken);
         if (key is null)

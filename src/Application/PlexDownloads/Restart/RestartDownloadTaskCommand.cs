@@ -1,4 +1,5 @@
 using Data.Contracts;
+using FastEndpoints;
 using FluentValidation;
 
 namespace PlexRipper.Application;
@@ -8,7 +9,7 @@ namespace PlexRipper.Application;
 /// </summary>
 /// <param name="DownloadTaskGuid">The id of the <see cref="DownloadTaskGeneric"/> to restart.</param>
 /// <returns>Is successful.</returns>
-public record RestartDownloadTaskCommand(Guid DownloadTaskGuid) : IRequest<Result>;
+public record RestartDownloadTaskCommand(Guid DownloadTaskGuid) : ICommand<Result>;
 
 public class RestartDownloadTaskCommandValidator : AbstractValidator<RestartDownloadTaskCommand>
 {
@@ -18,18 +19,24 @@ public class RestartDownloadTaskCommandValidator : AbstractValidator<RestartDown
     }
 }
 
-public class RestartDownloadTaskCommandHandler : IRequestHandler<RestartDownloadTaskCommand, Result>
+public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownloadTaskCommand, Result>
 {
     private readonly IPlexRipperDbContext _dbContext;
-    private readonly IMediator _mediator;
+    private readonly ICommandExecutor _commandExecutor;
+    private readonly IEventPublisher _eventPublisher;
 
-    public RestartDownloadTaskCommandHandler(IPlexRipperDbContext dbContext, IMediator mediator)
+    public RestartDownloadTaskCommandHandler(
+        IPlexRipperDbContext dbContext,
+        ICommandExecutor commandExecutor,
+        IEventPublisher eventPublisher
+    )
     {
         _dbContext = dbContext;
-        _mediator = mediator;
+        _commandExecutor = commandExecutor;
+        _eventPublisher = eventPublisher;
     }
 
-    public async Task<Result> Handle(RestartDownloadTaskCommand command, CancellationToken cancellationToken)
+    public async Task<Result> ExecuteAsync(RestartDownloadTaskCommand command, CancellationToken cancellationToken)
     {
         var downloadTaskKey = await _dbContext.GetDownloadTaskKeyAsync(command.DownloadTaskGuid, cancellationToken);
         if (downloadTaskKey is null)
@@ -46,17 +53,20 @@ public class RestartDownloadTaskCommandHandler : IRequestHandler<RestartDownload
                 continue;
             }
 
-            var stopResult = await _mediator.Send(new StopDownloadTaskCommand(childKey.Id), cancellationToken);
+            var stopResult = await _commandExecutor.Send(new StopDownloadTaskCommand(childKey.Id), cancellationToken);
 
             if (stopResult.IsFailed)
                 return stopResult.LogError();
 
             await _dbContext.SetDownloadStatus(childKey, DownloadStatus.Queued);
 
-            await _mediator.Send(new DownloadTaskUpdatedNotification(childKey), cancellationToken);
+            await _commandExecutor.Send(new DownloadTaskUpdatedNotification(childKey), cancellationToken);
         }
 
-        await _mediator.Publish(new CheckDownloadQueueNotification(downloadTaskKey.PlexServerId), cancellationToken);
+        await _eventPublisher.PublishAsync(
+            new CheckDownloadQueueNotification(downloadTaskKey.PlexServerId),
+            cancellationToken
+        );
 
         return Result.Ok();
     }

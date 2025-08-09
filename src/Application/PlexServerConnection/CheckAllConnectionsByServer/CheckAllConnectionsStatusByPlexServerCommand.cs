@@ -1,5 +1,6 @@
 using Application.Contracts;
 using Data.Contracts;
+using FastEndpoints;
 using FluentValidation;
 using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
@@ -12,7 +13,7 @@ namespace PlexRipper.Application;
 /// </summary>
 /// <param name="PlexServerId">The id of the <see cref="PlexServer" /> to check the connections for.</param>
 /// <returns>Returns successful result if any connection connected.</returns>
-public record CheckAllConnectionsStatusByPlexServerCommand(int PlexServerId) : IRequest<Result<List<PlexServerStatus>>>;
+public record CheckAllConnectionsStatusByPlexServerCommand(int PlexServerId) : ICommand<Result<List<PlexServerStatus>>>;
 
 public class CheckAllConnectionsStatusByPlexServerValidator
     : AbstractValidator<CheckAllConnectionsStatusByPlexServerCommand>
@@ -24,27 +25,30 @@ public class CheckAllConnectionsStatusByPlexServerValidator
 }
 
 public class CheckAllConnectionsStatusByPlexServerHandler
-    : IRequestHandler<CheckAllConnectionsStatusByPlexServerCommand, Result<List<PlexServerStatus>>>
+    : ICommandHandler<CheckAllConnectionsStatusByPlexServerCommand, Result<List<PlexServerStatus>>>
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
-    private readonly IMediator _mediator;
+    private readonly ICommandExecutor _commandExecutor;
+    private readonly IEventPublisher _eventPublisher;
     private readonly ISignalRService _signalRService;
 
     public CheckAllConnectionsStatusByPlexServerHandler(
         ILog log,
         IPlexRipperDbContext dbContext,
-        IMediator mediator,
+        ICommandExecutor commandExecutor,
+        IEventPublisher eventPublisher,
         ISignalRService signalRService
     )
     {
         _log = log;
         _dbContext = dbContext;
-        _mediator = mediator;
+        _commandExecutor = commandExecutor;
+        _eventPublisher = eventPublisher;
         _signalRService = signalRService;
     }
 
-    public async Task<Result<List<PlexServerStatus>>> Handle(
+    public async Task<Result<List<PlexServerStatus>>> ExecuteAsync(
         CheckAllConnectionsStatusByPlexServerCommand command,
         CancellationToken cancellationToken
     )
@@ -76,7 +80,10 @@ public class CheckAllConnectionsStatusByPlexServerHandler
 
         // Create connection check tasks for all connections
         var connectionTasks = connections.Select(async plexServerConnection =>
-            await _mediator.Send(new CheckConnectionStatusByIdCommand(plexServerConnection.Id), cancellationToken)
+            await _commandExecutor.Send(
+                new CheckConnectionStatusByIdCommand(plexServerConnection.Id),
+                cancellationToken
+            )
         );
 
         var tasksResult = await Task.WhenAll(connectionTasks);
@@ -89,7 +96,7 @@ public class CheckAllConnectionsStatusByPlexServerHandler
 
         if (previousResult != currentOnlineStatus)
         {
-            await _mediator.Publish(
+            await _eventPublisher.PublishAsync(
                 new ServerOnlineStatusChangedNotification(plexServerId, currentOnlineStatus),
                 CancellationToken.None
             );

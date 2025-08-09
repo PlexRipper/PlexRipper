@@ -39,7 +39,7 @@ public class CreateDirectoryFromFilePathUnitTests : BaseUnitTest<CleanUpDownload
 
         // Act
         var request = new CleanUpDownloadTaskFoldersCommand(downloadTask.ToKey());
-        var result = await _sut.Handle(request, CancellationToken);
+        var result = await _sut.ExecuteAsync(request, CancellationToken);
 
         // Assert
         result.ShouldNotBeNull();
@@ -92,7 +92,7 @@ public class CreateDirectoryFromFilePathUnitTests : BaseUnitTest<CleanUpDownload
 
         // Act
         var request = new CleanUpDownloadTaskFoldersCommand(downloadTask.ToKey());
-        var result = await _sut.Handle(request, CancellationToken);
+        var result = await _sut.ExecuteAsync(request, CancellationToken);
 
         // Assert
         result.ShouldNotBeNull();
@@ -149,7 +149,7 @@ public class CreateDirectoryFromFilePathUnitTests : BaseUnitTest<CleanUpDownload
 
         // Act
         var request = new CleanUpDownloadTaskFoldersCommand(downloadTask.ToKey());
-        var result = await _sut.Handle(request, CancellationToken);
+        var result = await _sut.ExecuteAsync(request, CancellationToken);
 
         // Assert
         result.ShouldNotBeNull();

@@ -13,21 +13,24 @@ public class DownloadJob : IJob, IDisposable
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
-    private readonly IMediator _mediator;
+    private readonly ICommandExecutor _commandExecutor;
+    private readonly IEventPublisher _eventPublisher;
     private readonly IDownloadManagerSettings _downloadManagerSettings;
     private readonly IPlexDownloadClient _plexDownloadClient;
 
     public DownloadJob(
         ILog log,
         IPlexRipperDbContext dbContext,
-        IMediator mediator,
+        ICommandExecutor commandExecutor,
+        IEventPublisher eventPublisher,
         IDownloadManagerSettings downloadManagerSettings,
         IPlexDownloadClient plexDownloadClient
     )
     {
         _log = log;
         _dbContext = dbContext;
-        _mediator = mediator;
+        _commandExecutor = commandExecutor;
+        _eventPublisher = eventPublisher;
         _downloadManagerSettings = downloadManagerSettings;
         _plexDownloadClient = plexDownloadClient;
     }
@@ -108,7 +111,7 @@ public class DownloadJob : IJob, IDisposable
             var startResult = _plexDownloadClient.Start();
             if (startResult.IsFailed)
             {
-                await _mediator.SendNotificationAsync(startResult);
+                await _eventPublisher.PublishAsync(new SendNotificationResult(startResult), token);
                 return;
             }
 
@@ -127,7 +130,7 @@ public class DownloadJob : IJob, IDisposable
                 await _plexDownloadClient.StopAsync();
 
                 await _dbContext.SetDownloadStatus(downloadTaskKey, DownloadStatus.Paused);
-                await _mediator.Send(new DownloadTaskUpdatedNotification(downloadTaskKey), CancellationToken.None);
+                await _commandExecutor.Send(new DownloadTaskUpdatedNotification(downloadTaskKey), token);
             }
         }
         catch (Exception ex) when (ex is not OperationCanceledException)

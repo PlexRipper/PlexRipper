@@ -1,4 +1,5 @@
 using Application.Contracts;
+using FastEndpoints;
 using FluentValidation;
 using Logging.Interface;
 using Microsoft.AspNetCore.Identity;
@@ -8,7 +9,7 @@ using Settings.Contracts;
 
 namespace PlexRipper.Application;
 
-public record CreateDefaultAppUserCommand : IRequest<Result>;
+public record CreateDefaultAppUserCommand : ICommand<Result>;
 
 public class CreateDefaultAppUserCommandValidator : AbstractValidator<CreateDefaultAppUserCommand>
 {
@@ -18,7 +19,7 @@ public class CreateDefaultAppUserCommandValidator : AbstractValidator<CreateDefa
     }
 }
 
-public class CreateDefaultAppUserCommandHandler : IRequestHandler<CreateDefaultAppUserCommand, Result>
+public class CreateDefaultAppUserCommandHandler : ICommandHandler<CreateDefaultAppUserCommand, Result>
 {
     private readonly ILog _log;
     private readonly IAuthenticationSettings _authenticationSettings;
@@ -38,7 +39,7 @@ public class CreateDefaultAppUserCommandHandler : IRequestHandler<CreateDefaultA
         _roleManager = roleManager;
     }
 
-    public async Task<Result> Handle(CreateDefaultAppUserCommand command, CancellationToken cancellationToken)
+    public async Task<Result> ExecuteAsync(CreateDefaultAppUserCommand command, CancellationToken cancellationToken)
     {
         if (_authenticationSettings.ResetCredentials)
         {

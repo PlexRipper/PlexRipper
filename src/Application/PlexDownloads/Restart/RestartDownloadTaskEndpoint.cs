@@ -15,10 +15,9 @@ public class RestartDownloadTaskEndpointRequestValidator : Validator<RestartDown
     }
 }
 
-public class RestartDownloadTaskEndpoint(IMediator mediator) : BaseEndpoint<RestartDownloadTaskEndpointRequest>
+public class RestartDownloadTaskEndpoint(ICommandExecutor commandExecutor)
+    : BaseEndpoint<RestartDownloadTaskEndpointRequest>
 {
-    private readonly IMediator _mediator = mediator;
-
     public override string EndpointPath => ApiRoutes.DownloadController + "/restart/{DownloadTaskGuid}";
 
     public override void Configure()
@@ -34,7 +33,7 @@ public class RestartDownloadTaskEndpoint(IMediator mediator) : BaseEndpoint<Rest
 
     public override async Task HandleAsync(RestartDownloadTaskEndpointRequest req, CancellationToken ct)
     {
-        var restartResult = await _mediator.Send(new RestartDownloadTaskCommand(req.DownloadTaskGuid), ct);
+        var restartResult = await commandExecutor.Send(new RestartDownloadTaskCommand(req.DownloadTaskGuid), ct);
 
         await SendFluentResult(restartResult, ct);
     }

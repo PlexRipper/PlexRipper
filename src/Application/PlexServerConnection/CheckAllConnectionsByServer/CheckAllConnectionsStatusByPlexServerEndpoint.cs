@@ -19,13 +19,13 @@ public class CheckAllConnectionsStatusByPlexServerRequestValidator
 public class CheckAllConnectionsStatusByPlexServerEndpoint
     : BaseEndpoint<CheckAllConnectionsStatusByPlexServerRequest, List<PlexServerStatusDTO>>
 {
-    private readonly IMediator _mediator;
+    private readonly ICommandExecutor _commandExecutor;
 
     public override string EndpointPath => ApiRoutes.PlexServerConnectionController + "/check/by-server/{PlexServerId}";
 
-    public CheckAllConnectionsStatusByPlexServerEndpoint(IMediator mediator)
+    public CheckAllConnectionsStatusByPlexServerEndpoint(ICommandExecutor commandExecutor)
     {
-        _mediator = mediator;
+        _commandExecutor = commandExecutor;
     }
 
     public override void Configure()
@@ -42,7 +42,10 @@ public class CheckAllConnectionsStatusByPlexServerEndpoint
 
     public override async Task HandleAsync(CheckAllConnectionsStatusByPlexServerRequest req, CancellationToken ct)
     {
-        var result = await _mediator.Send(new CheckAllConnectionsStatusByPlexServerCommand(req.PlexServerId), ct);
+        var result = await _commandExecutor.Send(
+            new CheckAllConnectionsStatusByPlexServerCommand(req.PlexServerId),
+            ct
+        );
         if (result.IsFailed)
             await SendFluentResult(result.ToResult(), ct);
         else

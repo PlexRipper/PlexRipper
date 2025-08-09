@@ -16,7 +16,7 @@ public class DownloadCommands_PauseDownloadTasksAsync_UnitTests : BaseUnitTest<P
         await SetupDatabase(34006);
 
         // Act
-        var result = await _sut.Handle(new PauseDownloadTaskCommand(Guid.Empty), CancellationToken);
+        var result = await _sut.ExecuteAsync(new PauseDownloadTaskCommand(Guid.Empty), CancellationToken);
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -36,10 +36,13 @@ public class DownloadCommands_PauseDownloadTasksAsync_UnitTests : BaseUnitTest<P
         mock.Mock<IDownloadTaskScheduler>()
             .Setup(x => x.StopDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Fail("Error"));
-        mock.SetupMediator(It.IsAny<DownloadTaskUpdatedNotification>).Returns(Task.CompletedTask);
+        mock.SetupCommand(It.IsAny<DownloadTaskUpdatedNotification>).ReturnsAsync(Result.Ok());
 
         // Act
-        var result = await _sut.Handle(new PauseDownloadTaskCommand(movieDownloadTasks.First().Id), CancellationToken);
+        var result = await _sut.ExecuteAsync(
+            new PauseDownloadTaskCommand(movieDownloadTasks.First().Id),
+            CancellationToken
+        );
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -73,7 +76,7 @@ public class DownloadCommands_PauseDownloadTasksAsync_UnitTests : BaseUnitTest<P
             .Verifiable(Times.Once);
 
         // Act
-        var result = await _sut.Handle(new PauseDownloadTaskCommand(testDownloadTask.Id), CancellationToken);
+        var result = await _sut.ExecuteAsync(new PauseDownloadTaskCommand(testDownloadTask.Id), CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -119,7 +122,7 @@ public class DownloadCommands_PauseDownloadTasksAsync_UnitTests : BaseUnitTest<P
             .Verifiable(Times.Once);
 
         // Act
-        var result = await _sut.Handle(new PauseDownloadTaskCommand(testDownloadTask.Id), CancellationToken);
+        var result = await _sut.ExecuteAsync(new PauseDownloadTaskCommand(testDownloadTask.Id), CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

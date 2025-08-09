@@ -17,13 +17,13 @@ public class StopDownloadTaskEndpointRequestValidator : Validator<StopDownloadTa
 
 public class StopDownloadTaskEndpoint : BaseEndpoint<StopDownloadTaskEndpointRequest>
 {
-    private readonly IMediator _mediator;
+    private readonly ICommandExecutor _commandExecutor;
 
     public override string EndpointPath => ApiRoutes.DownloadController + "/stop/{DownloadTaskGuid}";
 
-    public StopDownloadTaskEndpoint(IMediator mediator)
+    public StopDownloadTaskEndpoint(ICommandExecutor commandExecutor)
     {
-        _mediator = mediator;
+        _commandExecutor = commandExecutor;
     }
 
     public override void Configure()
@@ -39,7 +39,7 @@ public class StopDownloadTaskEndpoint : BaseEndpoint<StopDownloadTaskEndpointReq
 
     public override async Task HandleAsync(StopDownloadTaskEndpointRequest req, CancellationToken ct)
     {
-        var stopResult = await _mediator.Send(new StopDownloadTaskCommand(req.DownloadTaskGuid), ct);
+        var stopResult = await _commandExecutor.Send(new StopDownloadTaskCommand(req.DownloadTaskGuid), ct);
 
         await SendFluentResult(stopResult, ct);
     }

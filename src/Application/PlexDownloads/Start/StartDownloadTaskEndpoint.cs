@@ -17,13 +17,13 @@ public class StartDownloadTaskEndpointRequestValidator : Validator<StartDownload
 
 public class StartDownloadTaskEndpoint : BaseEndpoint<StartDownloadTaskEndpointRequest>
 {
-    private readonly IMediator _mediator;
+    private readonly ICommandExecutor _commandExecutor;
 
     public override string EndpointPath => ApiRoutes.DownloadController + "/start/{DownloadTaskGuid}";
 
-    public StartDownloadTaskEndpoint(IMediator mediator)
+    public StartDownloadTaskEndpoint(ICommandExecutor commandExecutor)
     {
-        _mediator = mediator;
+        _commandExecutor = commandExecutor;
     }
 
     public override void Configure()
@@ -38,7 +38,7 @@ public class StartDownloadTaskEndpoint : BaseEndpoint<StartDownloadTaskEndpointR
 
     public override async Task HandleAsync(StartDownloadTaskEndpointRequest req, CancellationToken ct)
     {
-        var startResult = await _mediator.Send(new StartDownloadTaskCommand(req.DownloadTaskGuid), ct);
+        var startResult = await _commandExecutor.Send(new StartDownloadTaskCommand(req.DownloadTaskGuid), ct);
 
         await SendFluentResult(startResult, ct);
     }

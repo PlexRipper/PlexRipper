@@ -24,19 +24,19 @@ public class DeleteDownloadTaskEndpointRequestValidator : Validator<DeleteDownlo
 public class DeleteDownloadTaskEndpoint : BaseEndpoint<DeleteDownloadTaskEndpointRequest>
 {
     private readonly IPlexRipperDbContext _dbContext;
-    private readonly IMediator _mediator;
+    private readonly ICommandExecutor _commandExecutor;
     private readonly IDownloadTaskScheduler _downloadTaskScheduler;
 
     public override string EndpointPath => ApiRoutes.DownloadController + "/delete";
 
     public DeleteDownloadTaskEndpoint(
         IPlexRipperDbContext dbContext,
-        IMediator mediator,
+        ICommandExecutor commandExecutor,
         IDownloadTaskScheduler downloadTaskScheduler
     )
     {
         _dbContext = dbContext;
-        _mediator = mediator;
+        _commandExecutor = commandExecutor;
         _downloadTaskScheduler = downloadTaskScheduler;
     }
 
@@ -57,7 +57,7 @@ public class DeleteDownloadTaskEndpoint : BaseEndpoint<DeleteDownloadTaskEndpoin
         {
             var downloadTaskKey = await _dbContext.GetDownloadTaskKeyAsync(downloadTaskId, ct);
             if (downloadTaskKey is not null && await _downloadTaskScheduler.IsDownloading(downloadTaskKey, ct))
-                await _mediator.Send(new StopDownloadTaskCommand(downloadTaskKey.Id), ct);
+                await _commandExecutor.Send(new StopDownloadTaskCommand(downloadTaskKey.Id), ct);
         }
 
         // Delete Download tasks

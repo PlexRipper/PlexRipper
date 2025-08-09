@@ -1,6 +1,7 @@
 using Application.Contracts;
 using Application.Contracts.Validators;
 using Data.Contracts;
+using FastEndpoints;
 using FluentValidation;
 using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
@@ -11,7 +12,7 @@ namespace PlexRipper.Application;
 /// Creates <see cref="DownloadTaskMovie">DownloadTaskMovies</see> from <see cref="PlexMovie">PlexMovies</see> and inserts it into Database.
 /// </summary>
 /// <returns>The created <see cref="DownloadTaskGeneric"/>.</returns>
-public record GenerateDownloadTaskMoviesCommand : IRequest<Result>
+public record GenerateDownloadTaskMoviesCommand : ICommand<Result>
 {
     public GenerateDownloadTaskMoviesCommand(CreateDownloadTasksRequest request)
     {
@@ -36,7 +37,7 @@ public class GenerateDownloadTaskMoviesCommandValidator : AbstractValidator<Gene
     }
 }
 
-public class GenerateDownloadTaskMoviesCommandHandler : IRequestHandler<GenerateDownloadTaskMoviesCommand, Result>
+public class GenerateDownloadTaskMoviesCommandHandler : ICommandHandler<GenerateDownloadTaskMoviesCommand, Result>
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
@@ -47,7 +48,10 @@ public class GenerateDownloadTaskMoviesCommandHandler : IRequestHandler<Generate
         _dbContext = dbContext;
     }
 
-    public async Task<Result> Handle(GenerateDownloadTaskMoviesCommand command, CancellationToken cancellationToken)
+    public async Task<Result> ExecuteAsync(
+        GenerateDownloadTaskMoviesCommand command,
+        CancellationToken cancellationToken
+    )
     {
         var groupedList = command.Request.DownloadMedias.MergeAndGroupList();
         var request = command.Request;

@@ -1,4 +1,5 @@
 ﻿using Data.Contracts;
+using FastEndpoints;
 using FluentValidation;
 using Logging.Interface;
 
@@ -10,7 +11,7 @@ namespace PlexRipper.Application;
 /// </summary>
 /// <param name="PlexAccountId">The id of the <see cref="PlexAccount"/> to check for.</param>
 /// <returns></returns>
-public record InspectAllPlexServersByAccountIdCommand(int PlexAccountId) : IRequest<Result>;
+public record InspectAllPlexServersByAccountIdCommand(int PlexAccountId) : ICommand<Result>;
 
 public class InspectAllPlexServersByAccountIdCommandValidator
     : AbstractValidator<InspectAllPlexServersByAccountIdCommand>
@@ -22,20 +23,24 @@ public class InspectAllPlexServersByAccountIdCommandValidator
 }
 
 public class InspectAllPlexServersByAccountIdCommandHandler
-    : IRequestHandler<InspectAllPlexServersByAccountIdCommand, Result>
+    : ICommandHandler<InspectAllPlexServersByAccountIdCommand, Result>
 {
     private readonly ILog _log;
-    private readonly IMediator _mediator;
+    private readonly ICommandExecutor _commandExecutor;
     private readonly IPlexRipperDbContext _dbContext;
 
-    public InspectAllPlexServersByAccountIdCommandHandler(ILog log, IMediator mediator, IPlexRipperDbContext dbContext)
+    public InspectAllPlexServersByAccountIdCommandHandler(
+        ILog log,
+        ICommandExecutor commandExecutor,
+        IPlexRipperDbContext dbContext
+    )
     {
         _log = log;
-        _mediator = mediator;
+        _commandExecutor = commandExecutor;
         _dbContext = dbContext;
     }
 
-    public async Task<Result> Handle(
+    public async Task<Result> ExecuteAsync(
         InspectAllPlexServersByAccountIdCommand command,
         CancellationToken cancellationToken
     )
@@ -50,7 +55,10 @@ public class InspectAllPlexServersByAccountIdCommandHandler
                 plexAccountDisplayName
             );
 
-        var refreshResult = await _mediator.Send(new RefreshPlexServerAccessCommand(plexAccountId), cancellationToken);
+        var refreshResult = await _commandExecutor.Send(
+            new RefreshPlexServerAccessCommand(plexAccountId),
+            cancellationToken
+        );
         if (refreshResult.IsFailed)
             return refreshResult.LogError();
 
@@ -63,7 +71,7 @@ public class InspectAllPlexServersByAccountIdCommandHandler
             return Result.Ok();
 
         // Inspect all PlexServers
-        await _mediator.Send(
+        await _commandExecutor.Send(
             new QueueInspectPlexServerJobCommand(plexServers.Value.Select(x => x.Id).ToList()),
             CancellationToken.None
         );

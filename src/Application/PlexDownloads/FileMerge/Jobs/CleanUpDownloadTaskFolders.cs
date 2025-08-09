@@ -1,10 +1,11 @@
 using System.IO.Abstractions;
 using Data.Contracts;
+using FastEndpoints;
 using FluentValidation;
 
 namespace PlexRipper.Application;
 
-public record CleanUpDownloadTaskFoldersCommand(DownloadTaskKey DownloadTaskKey) : IRequest<Result>;
+public record CleanUpDownloadTaskFoldersCommand(DownloadTaskKey DownloadTaskKey) : ICommand<Result>;
 
 public class CleanUpDownloadTaskFoldersValidator : AbstractValidator<CleanUpDownloadTaskFoldersCommand>
 {
@@ -14,7 +15,7 @@ public class CleanUpDownloadTaskFoldersValidator : AbstractValidator<CleanUpDown
     }
 }
 
-public class CleanUpDownloadTaskFoldersHandler : IRequestHandler<CleanUpDownloadTaskFoldersCommand, Result>
+public class CleanUpDownloadTaskFoldersHandler : ICommandHandler<CleanUpDownloadTaskFoldersCommand, Result>
 {
     private readonly IPlexRipperDbContext _dbContext;
     private readonly IPath _path;
@@ -27,7 +28,10 @@ public class CleanUpDownloadTaskFoldersHandler : IRequestHandler<CleanUpDownload
         _directory = directory;
     }
 
-    public async Task<Result> Handle(CleanUpDownloadTaskFoldersCommand command, CancellationToken cancellationToken)
+    public async Task<Result> ExecuteAsync(
+        CleanUpDownloadTaskFoldersCommand command,
+        CancellationToken cancellationToken
+    )
     {
         var downloadTaskKey = command.DownloadTaskKey;
         var downloadTask = await _dbContext.GetDownloadTaskFileAsync(downloadTaskKey, cancellationToken);

@@ -35,7 +35,7 @@ public class DownloadTaskUpdatedHandler_UnitTests : BaseUnitTest<DownloadTaskUpd
 
         // Act
         var command = new DownloadTaskUpdatedNotification(downloadTasks[0].ToKey());
-        await _sut.Handle(command, CancellationToken);
+        await _sut.ExecuteAsync(command, CancellationToken);
 
         // Assert
         mock.Mock<ISignalRService>()
@@ -71,7 +71,7 @@ public class DownloadTaskUpdatedHandler_UnitTests : BaseUnitTest<DownloadTaskUpd
 
         // Act
         var command = new DownloadTaskUpdatedNotification(downloadTasks[0].ToKey());
-        await _sut.Handle(command, CancellationToken);
+        await _sut.ExecuteAsync(command, CancellationToken);
 
         // Assert
         mock.Mock<ISignalRService>()

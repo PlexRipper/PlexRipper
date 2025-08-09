@@ -1,11 +1,12 @@
 using Application.Contracts;
 using Data.Contracts;
+using FastEndpoints;
 using FileSystem.Contracts;
 using FluentValidation;
 
 namespace PlexRipper.Application;
 
-public record StartDownloadTaskCommand(Guid DownloadTaskGuid) : IRequest<Result>;
+public record StartDownloadTaskCommand(Guid DownloadTaskGuid) : ICommand<Result>;
 
 public class StartDownloadTaskCommandValidator : AbstractValidator<StartDownloadTaskCommand>
 {
@@ -15,27 +16,30 @@ public class StartDownloadTaskCommandValidator : AbstractValidator<StartDownload
     }
 }
 
-public class StartDownloadTaskCommandHandler : IRequestHandler<StartDownloadTaskCommand, Result>
+public class StartDownloadTaskCommandHandler : ICommandHandler<StartDownloadTaskCommand, Result>
 {
     private readonly IPlexRipperDbContext _dbContext;
-    private readonly IMediator _mediator;
+    private readonly ICommandExecutor _commandExecutor;
+    private readonly IEventPublisher _eventPublisher;
     private readonly IDownloadTaskScheduler _downloadTaskScheduler;
     private readonly IFileMergeScheduler _fileMergeScheduler;
 
     public StartDownloadTaskCommandHandler(
         IPlexRipperDbContext dbContext,
-        IMediator mediator,
+        ICommandExecutor commandExecutor,
+        IEventPublisher eventPublisher,
         IDownloadTaskScheduler downloadTaskScheduler,
         IFileMergeScheduler fileMergeScheduler
     )
     {
         _dbContext = dbContext;
-        _mediator = mediator;
+        _commandExecutor = commandExecutor;
+        _eventPublisher = eventPublisher;
         _downloadTaskScheduler = downloadTaskScheduler;
         _fileMergeScheduler = fileMergeScheduler;
     }
 
-    public async Task<Result> Handle(StartDownloadTaskCommand command, CancellationToken cancellationToken)
+    public async Task<Result> ExecuteAsync(StartDownloadTaskCommand command, CancellationToken cancellationToken)
     {
         var key = await _dbContext.GetDownloadTaskKeyAsync(command.DownloadTaskGuid, cancellationToken);
         if (key is null)
@@ -71,7 +75,7 @@ public class StartDownloadTaskCommandHandler : IRequestHandler<StartDownloadTask
 
                     // Avoid pausing the download task that just started
                     foreach (var downloadKey in activeDownloadKeys.Where(x => x != nextDownloadTaskKey))
-                        await _mediator.Send(new PauseDownloadTaskCommand(downloadKey.Id), cancellationToken);
+                        await _commandExecutor.Send(new PauseDownloadTaskCommand(downloadKey.Id), cancellationToken);
                 }
 
                 break;
@@ -96,9 +100,9 @@ public class StartDownloadTaskCommandHandler : IRequestHandler<StartDownloadTask
                 );
         }
 
-        await _mediator.Send(new DownloadTaskUpdatedNotification(key), cancellationToken);
+        await _commandExecutor.Send(new DownloadTaskUpdatedNotification(key), cancellationToken);
 
-        await _mediator.Publish(new CheckDownloadQueueNotification(key.PlexServerId), cancellationToken);
+        await _eventPublisher.PublishAsync(new CheckDownloadQueueNotification(key.PlexServerId), cancellationToken);
 
         return Result.Ok();
     }

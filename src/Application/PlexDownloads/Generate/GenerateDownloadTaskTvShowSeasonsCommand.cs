@@ -1,13 +1,14 @@
 using Application.Contracts;
 using Application.Contracts.Validators;
 using Data.Contracts;
+using FastEndpoints;
 using FluentValidation;
 using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application;
 
-public record GenerateDownloadTaskTvShowSeasonsCommand(CreateDownloadTasksRequest Request) : IRequest<Result>;
+public record GenerateDownloadTaskTvShowSeasonsCommand(CreateDownloadTasksRequest Request) : ICommand<Result>;
 
 public class GenerateDownloadTaskTvShowSeasonsCommandValidator
     : AbstractValidator<GenerateDownloadTaskTvShowSeasonsCommand>
@@ -21,7 +22,7 @@ public class GenerateDownloadTaskTvShowSeasonsCommandValidator
 }
 
 public class GenerateDownloadTaskTvShowSeasonsCommandHandler
-    : IRequestHandler<GenerateDownloadTaskTvShowSeasonsCommand, Result>
+    : ICommandHandler<GenerateDownloadTaskTvShowSeasonsCommand, Result>
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
@@ -38,7 +39,7 @@ public class GenerateDownloadTaskTvShowSeasonsCommandHandler
         _command = command;
     }
 
-    public async Task<Result> Handle(
+    public async Task<Result> ExecuteAsync(
         GenerateDownloadTaskTvShowSeasonsCommand command,
         CancellationToken cancellationToken
     )

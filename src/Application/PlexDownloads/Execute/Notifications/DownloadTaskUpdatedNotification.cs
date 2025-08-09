@@ -1,14 +1,12 @@
 using Application.Contracts;
 using Data.Contracts;
+using FastEndpoints;
 
 namespace PlexRipper.Application;
 
-/// <summary>
-/// NOTE: This should be an IRequest to ensure there is always 1 handler for this notification.
-/// </summary>
-public record DownloadTaskUpdatedNotification(DownloadTaskKey Key) : IRequest;
+public record DownloadTaskUpdatedNotification(DownloadTaskKey Key) : ICommand<Result>;
 
-public class DownloadTaskUpdatedHandler : IRequestHandler<DownloadTaskUpdatedNotification>
+public class DownloadTaskUpdatedHandler : ICommandHandler<DownloadTaskUpdatedNotification, Result>
 {
     private readonly IPlexRipperDbContext _dbContext;
     private readonly ISignalRService _signalRService;
@@ -19,7 +17,10 @@ public class DownloadTaskUpdatedHandler : IRequestHandler<DownloadTaskUpdatedNot
         _signalRService = signalRService;
     }
 
-    public async Task Handle(DownloadTaskUpdatedNotification notification, CancellationToken cancellationToken)
+    public async Task<Result> ExecuteAsync(
+        DownloadTaskUpdatedNotification notification,
+        CancellationToken cancellationToken
+    )
     {
         var plexServerId = notification.Key.PlexServerId;
 
@@ -37,7 +38,9 @@ public class DownloadTaskUpdatedHandler : IRequestHandler<DownloadTaskUpdatedNot
         var changedDownloadTask = await _dbContext.GetDownloadTaskAsync(notification.Key, cancellationToken);
         if (changedDownloadTask is null)
         {
-            ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), notification.Key.ToString()).LogError();
+            return ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), notification.Key.ToString()).LogError();
         }
+
+        return Result.Ok();
     }
 }

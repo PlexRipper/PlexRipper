@@ -76,7 +76,6 @@ public partial class BaseUnitTest
                 s.AddTransient(_ => mock.Create<ILog>());
                 s.AddTransient(_ => mock.Create<IPlexRipperDbContext>());
                 s.AddTransient(_ => mock.Create<ICommandExecutor>());
-                s.AddSingleton(_ => mock.Create<IMediator>());
                 s.AddSingleton(_ => mock.Create<ISchedulerService>());
                 s.AddSingleton(_ => mock.Mock<ISignalRService>().Object);
             });

@@ -60,9 +60,9 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<PlexDownloadClient>
             statusList.Add(task.DownloadStatus);
         }
 
-        mock.Mock<IMediator>()
+        mock.Mock<ICommandExecutor>()
             .Setup(m => m.Send(It.IsAny<DownloadTaskUpdatedNotification>(), It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask)
+            .ReturnsAsync(Result.Ok())
             .Callback<DownloadTaskUpdatedNotification, CancellationToken>(
                 (notification, _) => AddDownloadTaskUpdateAsync(notification).GetAwaiter().GetResult()
             )
@@ -71,7 +71,7 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<PlexDownloadClient>
         // DownloadWorkerMocks
         var destinationStream = new MemoryStream();
 
-        mock.SetupMediator(It.IsAny<CreateDownloadFileStreamCommand>)
+        mock.SetupCommand(It.IsAny<CreateDownloadFileStreamCommand>)
             .ReturnsAsync(Result.Ok<Stream>(destinationStream))
             .Verifiable(Times.Once);
 

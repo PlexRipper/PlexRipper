@@ -54,7 +54,7 @@ public class MergeFilesFromFileTaskCommandUnitTests : BaseUnitTest<MergeFilesFro
             .Setup(m => m.PublishAsync(It.IsAny<SendNotificationResult>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Once);
-        mock.SetupCommand(It.IsAny<DownloadTaskUpdatedNotification>).ReturnsAsync(Result.Ok()).Verifiable(Times.Once);
+        mock.SetupCommand(It.IsAny<DownloadTaskUpdatedCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.Once);
 
         // Act
         var command = new MergeFilesFromFileTaskCommand(downloadTask.ToKey(), progress);
@@ -97,7 +97,7 @@ public class MergeFilesFromFileTaskCommandUnitTests : BaseUnitTest<MergeFilesFro
             .Setup(m => m.PublishAsync(It.IsAny<SendNotificationResult>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Once);
-        mock.SetupCommand(It.IsAny<DownloadTaskUpdatedNotification>).ReturnsAsync(Result.Ok()).Verifiable(Times.Once);
+        mock.SetupCommand(It.IsAny<DownloadTaskUpdatedCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.Once);
 
         // Act
         var command = new MergeFilesFromFileTaskCommand(key, progress);
@@ -170,9 +170,7 @@ public class MergeFilesFromFileTaskCommandUnitTests : BaseUnitTest<MergeFilesFro
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Never);
 
-        mock.SetupCommand(It.IsAny<DownloadTaskUpdatedNotification>)
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.AtLeastOnce);
+        mock.SetupCommand(It.IsAny<DownloadTaskUpdatedCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.AtLeastOnce);
 
         // Act
         var command = new MergeFilesFromFileTaskCommand(downloadFileTask.ToKey(), progress);
@@ -259,9 +257,7 @@ public class MergeFilesFromFileTaskCommandUnitTests : BaseUnitTest<MergeFilesFro
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Never);
 
-        mock.SetupCommand(It.IsAny<DownloadTaskUpdatedNotification>)
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.AtLeastOnce);
+        mock.SetupCommand(It.IsAny<DownloadTaskUpdatedCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.AtLeastOnce);
 
         // Act
         var command = new MergeFilesFromFileTaskCommand(downloadFileTask.ToKey(), progress);
@@ -339,9 +335,7 @@ public class MergeFilesFromFileTaskCommandUnitTests : BaseUnitTest<MergeFilesFro
             .Setup(m => m.PublishAsync(It.IsAny<SendNotificationResult>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Never);
-        mock.SetupCommand(It.IsAny<DownloadTaskUpdatedNotification>)
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.AtLeastOnce);
+        mock.SetupCommand(It.IsAny<DownloadTaskUpdatedCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.AtLeastOnce);
 
         // Act
         var command = new MergeFilesFromFileTaskCommand(downloadFileTask.ToKey(), progress);
@@ -417,9 +411,7 @@ public class MergeFilesFromFileTaskCommandUnitTests : BaseUnitTest<MergeFilesFro
             .Setup(m => m.PublishAsync(It.IsAny<SendNotificationResult>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Never);
-        mock.SetupCommand(It.IsAny<DownloadTaskUpdatedNotification>)
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.AtLeastOnce);
+        mock.SetupCommand(It.IsAny<DownloadTaskUpdatedCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.AtLeastOnce);
 
         // Act
         var command = new MergeFilesFromFileTaskCommand(downloadFileTask.ToKey(), progress);

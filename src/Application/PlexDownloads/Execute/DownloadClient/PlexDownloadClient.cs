@@ -191,7 +191,7 @@ public class PlexDownloadClient : IAsyncDisposable, IPlexDownloadClient
         await _dbContext.UpdateDownloadProgress(DownloadTask.ToKey(), DownloadTask);
         await _dbContext.SetDownloadStatus(DownloadTask.ToKey(), DownloadStatus);
 
-        await _commandExecutor.Send(new DownloadTaskUpdatedNotification(DownloadTask.ToKey()));
+        await _commandExecutor.Send(new DownloadTaskUpdatedCommand(DownloadTask.ToKey()));
 
         _log.Verbose("{@DownloadTask}", DownloadTask.ToString());
     }

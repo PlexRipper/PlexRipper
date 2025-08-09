@@ -68,7 +68,7 @@ public class FileMergeJob : IJob
                     .DownloadWorkerTasks.Where(x => x.DownloadTaskId == downloadTask.Id)
                     .ExecuteDeleteAsync();
 
-                await _commandExecutor.Send(new DownloadTaskUpdatedNotification(downloadTaskKey));
+                await _commandExecutor.Send(new DownloadTaskUpdatedCommand(downloadTaskKey));
             }
         }
         catch (TaskCanceledException)

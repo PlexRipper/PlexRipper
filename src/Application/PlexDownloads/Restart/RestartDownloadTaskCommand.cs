@@ -60,7 +60,7 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
 
             await _dbContext.SetDownloadStatus(childKey, DownloadStatus.Queued);
 
-            await _commandExecutor.Send(new DownloadTaskUpdatedNotification(childKey), cancellationToken);
+            await _commandExecutor.Send(new DownloadTaskUpdatedCommand(childKey), cancellationToken);
         }
 
         await _eventPublisher.PublishAsync(

@@ -59,9 +59,9 @@ public class PlexDownloadClientStopAsyncUnitTests : BaseUnitTest<PlexDownloadCli
         var updateList = new List<IDownloadTaskProgress>();
         var statusList = new List<DownloadStatus>();
 
-        async Task AddDownloadTaskUpdateAsync(DownloadTaskUpdatedNotification notification)
+        async Task AddDownloadTaskUpdateAsync(DownloadTaskUpdatedCommand command)
         {
-            var task = await IDbContext.GetDownloadTaskAsync(notification.Key);
+            var task = await IDbContext.GetDownloadTaskAsync(command.Key);
             task.ShouldNotBeNull();
             updateList.Add(task);
             statusList.Add(task.DownloadStatus);
@@ -73,7 +73,7 @@ public class PlexDownloadClientStopAsyncUnitTests : BaseUnitTest<PlexDownloadCli
             .Callback<ICommand<Result>, CancellationToken>(
                 (command, _) =>
                 {
-                    if (command is DownloadTaskUpdatedNotification notification)
+                    if (command is DownloadTaskUpdatedCommand notification)
                     {
                         AddDownloadTaskUpdateAsync(notification).GetAwaiter().GetResult();
                     }

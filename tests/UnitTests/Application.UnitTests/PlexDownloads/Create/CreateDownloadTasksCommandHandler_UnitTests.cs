@@ -17,7 +17,7 @@ public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest<CreateDo
         mock.SetupCommand(It.IsAny<GenerateDownloadTaskTvShowEpisodesCommand>)
             .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Once);
-        mock.PublishMediator(It.IsAny<CheckDownloadQueueNotification>).Returns(Task.CompletedTask);
+        mock.PublishEvent(It.IsAny<CheckDownloadQueueNotification>).Returns(Task.CompletedTask);
 
         var downloadMediaDtos = new List<DownloadMediaDTO>
         {
@@ -62,9 +62,9 @@ public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest<CreateDo
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        mock.VerifyMediator(It.IsAny<GenerateDownloadTaskMoviesCommand>, Times.Once);
-        mock.VerifyMediator(It.IsAny<GenerateDownloadTaskTvShowsCommand>, Times.Once);
-        mock.VerifyMediator(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>, Times.Once);
+        mock.VerifyEventPublished(It.IsAny<GenerateDownloadTaskMoviesCommand>, Times.Once);
+        mock.VerifyEventPublished(It.IsAny<GenerateDownloadTaskTvShowsCommand>, Times.Once);
+        mock.VerifyEventPublished(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>, Times.Once);
         mock.VerifyNotification(It.IsAny<CheckDownloadQueueNotification>, Times.Once);
     }
 
@@ -78,7 +78,7 @@ public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest<CreateDo
         mock.SetupCommand(It.IsAny<GenerateDownloadTaskTvShowEpisodesCommand>)
             .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Never);
-        mock.PublishMediator(It.IsAny<CheckDownloadQueueNotification>).Returns(Task.CompletedTask);
+        mock.PublishEvent(It.IsAny<CheckDownloadQueueNotification>).Returns(Task.CompletedTask);
 
         var downloadMediaDtos = new List<DownloadMediaDTO>
         {
@@ -107,9 +107,9 @@ public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest<CreateDo
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        mock.VerifyMediator(It.IsAny<GenerateDownloadTaskMoviesCommand>, Times.Once);
-        mock.VerifyMediator(It.IsAny<GenerateDownloadTaskTvShowsCommand>, Times.Once);
-        mock.VerifyMediator(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>, Times.Never);
+        mock.VerifyEventPublished(It.IsAny<GenerateDownloadTaskMoviesCommand>, Times.Once);
+        mock.VerifyEventPublished(It.IsAny<GenerateDownloadTaskTvShowsCommand>, Times.Once);
+        mock.VerifyEventPublished(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>, Times.Never);
         mock.VerifyNotification(It.IsAny<CheckDownloadQueueNotification>, Times.Once);
     }
 
@@ -123,7 +123,7 @@ public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest<CreateDo
         mock.SetupCommand(It.IsAny<GenerateDownloadTaskTvShowEpisodesCommand>)
             .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Never);
-        mock.PublishMediator(It.IsAny<CheckDownloadQueueNotification>).Returns(Task.CompletedTask);
+        mock.PublishEvent(It.IsAny<CheckDownloadQueueNotification>).Returns(Task.CompletedTask);
 
         // Act
         var request = new CreateDownloadTasksCommand([]);
@@ -132,9 +132,9 @@ public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest<CreateDo
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        mock.VerifyMediator(It.IsAny<GenerateDownloadTaskMoviesCommand>, Times.Never);
-        mock.VerifyMediator(It.IsAny<GenerateDownloadTaskTvShowsCommand>, Times.Never);
-        mock.VerifyMediator(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>, Times.Never);
+        mock.VerifyEventPublished(It.IsAny<GenerateDownloadTaskMoviesCommand>, Times.Never);
+        mock.VerifyEventPublished(It.IsAny<GenerateDownloadTaskTvShowsCommand>, Times.Never);
+        mock.VerifyEventPublished(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>, Times.Never);
         mock.VerifyNotification(It.IsAny<CheckDownloadQueueNotification>, Times.Never);
     }
 }

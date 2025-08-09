@@ -129,7 +129,7 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
             )
             .Verifiable(Times.AtLeastOnce);
 
-        mock.PublishMediator(It.IsAny<ServerOnlineStatusChangedNotification>)
+        mock.PublishEvent(It.IsAny<ServerOnlineStatusChangedNotification>)
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Once);
 
@@ -198,7 +198,7 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
             )
             .Verifiable(Times.AtLeastOnce);
 
-        mock.PublishMediator(It.IsAny<ServerOnlineStatusChangedNotification>)
+        mock.PublishEvent(It.IsAny<ServerOnlineStatusChangedNotification>)
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Never);
 

@@ -38,7 +38,7 @@ public class StopDownloadTaskCommand_UnitTests : BaseUnitTest<StopDownloadTaskCo
             .Setup(x => x.StopDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Fail("Error"));
         mock.Mock<IFile>().Setup(x => x.Delete(It.IsAny<string>()));
-        mock.SetupCommand(It.IsAny<DownloadTaskUpdatedNotification>).ReturnsAsync(Result.Ok());
+        mock.SetupCommand(It.IsAny<DownloadTaskUpdatedCommand>).ReturnsAsync(Result.Ok());
 
         // Act
         var result = await _sut.ExecuteAsync(
@@ -67,7 +67,7 @@ public class StopDownloadTaskCommand_UnitTests : BaseUnitTest<StopDownloadTaskCo
             .Setup(x => x.StopDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
             .ReturnOk();
         mock.Mock<IFile>().Setup(x => x.Delete(It.IsAny<string>()));
-        mock.SetupCommand(It.IsAny<DownloadTaskUpdatedNotification>).ReturnsAsync(Result.Ok());
+        mock.SetupCommand(It.IsAny<DownloadTaskUpdatedCommand>).ReturnsAsync(Result.Ok());
 
         // Act
         var result = await _sut.ExecuteAsync(
@@ -79,7 +79,7 @@ public class StopDownloadTaskCommand_UnitTests : BaseUnitTest<StopDownloadTaskCo
         result.IsSuccess.ShouldBeTrue();
         mock.Mock<IDownloadTaskScheduler>()
             .Verify(x => x.StopDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()), Times.Once);
-        mock.VerifyMediator(It.IsAny<DownloadTaskUpdatedNotification>, Times.Once);
+        mock.VerifyEventPublished(It.IsAny<DownloadTaskUpdatedCommand>, Times.Once);
 
         var downloadTasks = await IDbContext.GetDownloadableChildTasks(
             movieDownloadTasks.First().ToKey(),
@@ -123,7 +123,7 @@ public class StopDownloadTaskCommand_UnitTests : BaseUnitTest<StopDownloadTaskCo
             .Setup(x => x.StopDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
             .ReturnOk();
         mock.Mock<IFile>().Setup(x => x.Delete(It.IsAny<string>()));
-        mock.SetupCommand(It.IsAny<DownloadTaskUpdatedNotification>).ReturnsAsync(Result.Ok());
+        mock.SetupCommand(It.IsAny<DownloadTaskUpdatedCommand>).ReturnsAsync(Result.Ok());
 
         // Act
         var result = await _sut.ExecuteAsync(
@@ -135,7 +135,7 @@ public class StopDownloadTaskCommand_UnitTests : BaseUnitTest<StopDownloadTaskCo
         result.IsSuccess.ShouldBeTrue();
         mock.Mock<IDownloadTaskScheduler>()
             .Verify(x => x.StopDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()), Times.Once);
-        mock.VerifyMediator(It.IsAny<DownloadTaskUpdatedNotification>, Times.Exactly(4));
+        mock.VerifyEventPublished(It.IsAny<DownloadTaskUpdatedCommand>, Times.Exactly(4));
 
         var downloadTasks = await IDbContext.GetDownloadableChildTasks(
             tvShowDownloadTasks.First().ToKey(),

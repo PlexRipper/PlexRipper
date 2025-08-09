@@ -35,41 +35,41 @@ public static class MoqExtensions
         return result;
     }
 
-    public static ISetup<IEventPublisher, Task> PublishMediator(this AutoMock mock, Func<IEvent> request)
+    public static ISetup<IEventPublisher, Task> PublishEvent(this AutoMock mock, Func<IEvent> request)
     {
         return mock.Mock<IEventPublisher>().Setup(x => x.PublishAsync(request.Invoke(), It.IsAny<CancellationToken>()));
     }
 
     #region Verify
 
-    public static void VerifyMediator(this AutoMock mock, Func<IEvent> notification, Times times)
+    public static void VerifyEventPublished(this AutoMock mock, Func<IEvent> notification, Times times)
     {
         mock.Mock<IEventPublisher>()
             .Verify(x => x.PublishAsync(notification.Invoke(), It.IsAny<CancellationToken>()), times);
     }
 
-    public static void VerifyMediator(this AutoMock mock, Func<IEvent> notification, Func<Times> times)
+    public static void VerifyEventPublished(this AutoMock mock, Func<IEvent> notification, Func<Times> times)
     {
         mock.Mock<IEventPublisher>()
             .Verify(x => x.PublishAsync(notification.Invoke(), It.IsAny<CancellationToken>()), times);
     }
 
-    public static void VerifyMediator(this AutoMock mock, Func<ICommand> request, Times times)
+    public static void VerifyEventPublished(this AutoMock mock, Func<ICommand> request, Times times)
     {
         mock.Mock<ICommandExecutor>().Verify(x => x.Send(request.Invoke(), It.IsAny<CancellationToken>()), times);
     }
 
-    public static void VerifyMediator(this AutoMock mock, Func<ICommand> request, Func<Times> times)
+    public static void VerifyEventPublished(this AutoMock mock, Func<ICommand> request, Func<Times> times)
     {
         mock.Mock<ICommandExecutor>().Verify(x => x.Send(request.Invoke(), It.IsAny<CancellationToken>()), times);
     }
 
-    public static void VerifyMediator<T>(this AutoMock mock, Func<ICommand<T>> request, Func<Times> times)
+    public static void VerifyEventPublished<T>(this AutoMock mock, Func<ICommand<T>> request, Func<Times> times)
     {
         mock.Mock<ICommandExecutor>().Verify(x => x.Send(request.Invoke(), It.IsAny<CancellationToken>()), times);
     }
 
-    public static void VerifyMediator<T>(this AutoMock mock, Func<ICommand<T>> request, Times times)
+    public static void VerifyEventPublished<T>(this AutoMock mock, Func<ICommand<T>> request, Times times)
     {
         mock.Mock<ICommandExecutor>().Verify(x => x.Send(request.Invoke(), It.IsAny<CancellationToken>()), times);
     }

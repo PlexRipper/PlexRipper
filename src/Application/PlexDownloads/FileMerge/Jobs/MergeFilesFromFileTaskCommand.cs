@@ -172,7 +172,7 @@ public class MergeFilesFromFileTaskCommandHandler : ICommandHandler<MergeFilesFr
                         _log.VerboseLine(downloadTask.ToString());
 
                         await _dbContext.UpdateDownloadFileTransferProgress(key, downloadTask.ToFileTransferProgress());
-                        await _commandExecutor.Send(new DownloadTaskUpdatedNotification(key), CancellationToken.None);
+                        await _commandExecutor.Send(new DownloadTaskUpdatedCommand(key), CancellationToken.None);
 
                         stopwatch.Restart();
                         previousDataTransferred = 0;
@@ -260,7 +260,7 @@ public class MergeFilesFromFileTaskCommandHandler : ICommandHandler<MergeFilesFr
     {
         await _dbContext.SetDownloadStatus(downloadTask.ToKey(), downloadTask.DownloadStatus);
 
-        await _commandExecutor.Send(new DownloadTaskUpdatedNotification(downloadTask.ToKey()));
+        await _commandExecutor.Send(new DownloadTaskUpdatedCommand(downloadTask.ToKey()));
     }
 
     private async Task<Result> ErrorDownloadTask(DownloadTaskFileBase downloadTask, Result result)
@@ -269,7 +269,7 @@ public class MergeFilesFromFileTaskCommandHandler : ICommandHandler<MergeFilesFr
 
         await _dbContext.SetDownloadStatus(downloadTask.ToKey(), downloadTask.DownloadStatus);
 
-        await _commandExecutor.Send(new DownloadTaskUpdatedNotification(downloadTask.ToKey()));
+        await _commandExecutor.Send(new DownloadTaskUpdatedCommand(downloadTask.ToKey()));
 
         await _eventPublisher.PublishAsync(new SendNotificationResult(result), CancellationToken.None);
 

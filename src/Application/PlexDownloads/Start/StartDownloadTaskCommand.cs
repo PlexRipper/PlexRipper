@@ -100,7 +100,7 @@ public class StartDownloadTaskCommandHandler : ICommandHandler<StartDownloadTask
                 );
         }
 
-        await _commandExecutor.Send(new DownloadTaskUpdatedNotification(key), cancellationToken);
+        await _commandExecutor.Send(new DownloadTaskUpdatedCommand(key), cancellationToken);
 
         await _eventPublisher.PublishAsync(new CheckDownloadQueueNotification(key.PlexServerId), cancellationToken);
 

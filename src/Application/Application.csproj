@@ -42,7 +42,4 @@
     <ItemGroup>
         <InternalsVisibleTo Include="PlexRipper.Application.UnitTests" />
     </ItemGroup>
-    <ItemGroup>
-        <Folder Include="Config\Mediatr\" />
-    </ItemGroup>
 </Project>

@@ -130,7 +130,7 @@ public class DownloadJob : IJob, IDisposable
                 await _plexDownloadClient.StopAsync();
 
                 await _dbContext.SetDownloadStatus(downloadTaskKey, DownloadStatus.Paused);
-                await _commandExecutor.Send(new DownloadTaskUpdatedNotification(downloadTaskKey), token);
+                await _commandExecutor.Send(new DownloadTaskUpdatedCommand(downloadTaskKey), token);
             }
         }
         catch (Exception ex) when (ex is not OperationCanceledException)

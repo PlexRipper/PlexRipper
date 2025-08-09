@@ -92,7 +92,7 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
 
             // TODO: delete file tasks but first check if already merging
 
-            await _commandExecutor.Send(new DownloadTaskUpdatedNotification(downloadTaskKey), cancellationToken);
+            await _commandExecutor.Send(new DownloadTaskUpdatedCommand(downloadTaskKey), cancellationToken);
         }
 
         return Result.Ok();

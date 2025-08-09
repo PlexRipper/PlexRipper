@@ -34,7 +34,7 @@ public class DownloadTaskUpdatedHandler_UnitTests : BaseUnitTest<DownloadTaskUpd
             .Returns(Task.CompletedTask);
 
         // Act
-        var command = new DownloadTaskUpdatedNotification(downloadTasks[0].ToKey());
+        var command = new DownloadTaskUpdatedCommand(downloadTasks[0].ToKey());
         await _sut.ExecuteAsync(command, CancellationToken);
 
         // Assert
@@ -70,7 +70,7 @@ public class DownloadTaskUpdatedHandler_UnitTests : BaseUnitTest<DownloadTaskUpd
             .ReturnsAsync(Result.Ok());
 
         // Act
-        var command = new DownloadTaskUpdatedNotification(downloadTasks[0].ToKey());
+        var command = new DownloadTaskUpdatedCommand(downloadTasks[0].ToKey());
         await _sut.ExecuteAsync(command, CancellationToken);
 
         // Assert

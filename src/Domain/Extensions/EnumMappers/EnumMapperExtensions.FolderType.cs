@@ -2,7 +2,7 @@ namespace PlexRipper.Domain;
 
 public static partial class EnumMapperExtensions
 {
-    private static readonly Dictionary<string, FolderType> _folderTypeMap = new(StringComparer.Ordinal)
+    private static readonly Dictionary<string, FolderType> _folderTypeMap = new(StringComparer.OrdinalIgnoreCase)
     {
         ["None"] = FolderType.None,
         ["DownloadFolder"] = FolderType.DownloadFolder,

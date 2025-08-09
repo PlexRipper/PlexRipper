@@ -11,7 +11,7 @@ namespace PlexRipper.Domain;
 
 public static partial class StringExtensions
 {
-    private static readonly HashSet<string> StopWords = new(StringComparer.OrdinalIgnoreCase)
+    private static readonly HashSet<string> _stopWords = new(StringComparer.OrdinalIgnoreCase)
     {
         "a",
         "an",
@@ -143,7 +143,7 @@ public static partial class StringExtensions
         // Split title into words and remove stop words
         var words = normalizedTitle
             .Split(' ', StringSplitOptions.RemoveEmptyEntries)
-            .Where(word => !StopWords.Contains(word));
+            .Where(word => !_stopWords.Contains(word));
 
         // Join the words back into a string
         var searchTitle = string.Join(" ", words);

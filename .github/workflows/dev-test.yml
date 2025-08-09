@@ -246,7 +246,6 @@ jobs:
             matrix:
                 integration_test_project:
                     - tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj
-                    # Add more if needed
         steps:
             -   name: Checkout Source Code
                 uses: actions/checkout@v4
@@ -257,7 +256,7 @@ jobs:
                     project-path: ${{ matrix.integration_test_project }}
 
             -   name: Run Integration Tests 
-                run: dotnet test ${{ matrix.integration_test_project }} --no-build --verbosity normal --logger "trx;LogFileName=integration_test_results.trx" --filter "Category!=Flaky"
+                run: dotnet test ${{ matrix.integration_test_project }} --no-build --verbosity normal --logger "trx;LogFileName=integration_test_results.trx"
 
             -   name: Upload Integration Test Results
                 if: always()

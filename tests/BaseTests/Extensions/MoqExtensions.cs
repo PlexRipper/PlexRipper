@@ -10,7 +10,6 @@ namespace PlexRipper.BaseTests;
 
 public static class MoqExtensions
 {
-    // TODO:rename to SendMediator
     public static ISetup<ICommandExecutor, Task<TResult>> SetupCommand<TResult>(
         this AutoMock mock,
         Func<ICommand<TResult>> request,
@@ -35,16 +34,6 @@ public static class MoqExtensions
         return result;
     }
 
-    public static ISetup<ICommandExecutor, Task<TResult>> SetupCommandOfType<TCommand, TResult>(this AutoMock mock)
-        where TCommand : class, ICommand<TResult>
-    {
-        var result = mock.Mock<ICommandExecutor>()
-            .Setup(m => m.Send(It.Is<TCommand>(_ => true), It.IsAny<CancellationToken>()));
-
-        result.Verifiable(Times.AtLeastOnce);
-        return result;
-    }
-
     public static IReturnsResult<ISignalRService> SendRefreshNotification(this AutoMock mock, bool isVerifiable = false)
     {
         var result = mock.Mock<ISignalRService>()
@@ -53,18 +42,6 @@ public static class MoqExtensions
             )
             .Returns(Task.CompletedTask);
 
-        if (isVerifiable)
-            result.Verifiable();
-        return result;
-    }
-
-    public static ISetup<ICommandExecutor, Task> SetupCommand(
-        this AutoMock mock,
-        Func<ICommand> request,
-        bool isVerifiable = false
-    )
-    {
-        var result = mock.Mock<ICommandExecutor>().Setup(m => m.Send(request.Invoke(), It.IsAny<CancellationToken>()));
         if (isVerifiable)
             result.Verifiable();
         return result;

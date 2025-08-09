@@ -9,21 +9,18 @@ public class DownloadJobListener : IDownloadJobListener
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
-    private readonly ICommandExecutor _commandExecutor;
     private readonly IEventPublisher _eventPublisher;
     private readonly IFileMergeQueue _fileMergeQueue;
 
     public DownloadJobListener(
         ILog log,
         IPlexRipperDbContext dbContext,
-        ICommandExecutor commandExecutor,
         IEventPublisher eventPublisher,
         IFileMergeQueue fileMergeQueue
     )
     {
         _log = log;
         _dbContext = dbContext;
-        _commandExecutor = commandExecutor;
         _eventPublisher = eventPublisher;
         _fileMergeQueue = fileMergeQueue;
     }

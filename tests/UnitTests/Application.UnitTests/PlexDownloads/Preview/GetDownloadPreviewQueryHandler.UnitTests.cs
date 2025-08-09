@@ -251,7 +251,6 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
             .ToListAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         var moviesWithQuality = movies.Take(2).ToList();
-        var moviesWithoutQuality = movies.Skip(2).ToList();
 
         var qualities = moviesWithQuality
             .SelectMany(movie =>

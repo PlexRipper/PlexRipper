@@ -32,7 +32,7 @@ public class PlexDownloadClient : IAsyncDisposable, IPlexDownloadClient
     /// Initializes a new instance of the <see cref="PlexDownloadClient"/> class.
     /// </summary>
     /// <param name="log"></param>
-    /// <param name="mediator"></param>
+    /// <param name="commandExecutor"></param>
     /// <param name="dbContext"></param>
     /// <param name="downloadWorkerFactory"></param>
     /// <param name="serverSettings"></param>

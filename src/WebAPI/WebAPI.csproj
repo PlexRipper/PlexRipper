@@ -24,15 +24,15 @@
     <ItemGroup>
         <InternalsVisibleTo Include="FluentResultExtension.UnitTests" />
         <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="10.0.0" />
-        <PackageReference Include="CSharpier.MsBuild" Version="1.0.3">
+        <PackageReference Include="CSharpier.MsBuild" Version="1.1.1">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="FastEndpoints.Security" Version="7.0.1" />
         <PackageReference Include="FastEndpoints.Swagger" Version="7.0.1" />
-        <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="9.0.7" />
-        <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="9.0.7" />
-        <PackageReference Include="Quartz.Extensions.Hosting" Version="3.14.0" />
+        <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="9.0.8" />
+        <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="9.0.8" />
+        <PackageReference Include="Quartz.Extensions.Hosting" Version="3.15.0" />
         <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
     </ItemGroup>
     <ItemGroup>

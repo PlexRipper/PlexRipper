@@ -16,9 +16,9 @@
         <ProjectReference Include="..\FileSystem.Contracts\FileSystem.Contracts.csproj" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Autofac" Version="8.3.0" />
+        <PackageReference Include="Autofac" Version="8.4.0" />
         <PackageReference Include="Autofac.Extras.Quartz" Version="10.0.0" />
-        <PackageReference Include="CSharpier.MsBuild" Version="1.0.3">
+        <PackageReference Include="CSharpier.MsBuild" Version="1.1.1">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>

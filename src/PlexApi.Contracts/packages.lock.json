@@ -4,9 +4,9 @@
     "net9.0": {
       "CSharpier.MsBuild": {
         "type": "Direct",
-        "requested": "[1.0.3, )",
-        "resolved": "1.0.3",
-        "contentHash": "Bc7EQC/20z0GO3iN9u/pa5ku7jjzCldzfCn52SDxM6r8+dqeqrQVyOh3Ydy8nU4Gei2CKieQQ6SL4nxHSHIxBw=="
+        "requested": "[1.1.1, )",
+        "resolved": "1.1.1",
+        "contentHash": "XXfwF9m9c/TSKsqOqZjn6aNAmzx/mkVcZfORpWfZVr/GJ8p5FhPlUhgh8bLHTcJ5rei63tQxlW0fG/l0nZk7IQ=="
       },
       "LukeHagar.PlexAPI.SDK": {
         "type": "Direct",
@@ -20,8 +20,8 @@
       },
       "Autofac": {
         "type": "Transitive",
-        "resolved": "8.3.0",
-        "contentHash": "0Bv8aSKuK4nQAiDKw3+pIv9hUhbPwS63ql9KhjR6DRgE14UNdXrMqO8YMI0PnffZPyCrMs85lNhZRI4eBgQO4w==",
+        "resolved": "8.4.0",
+        "contentHash": "XMWHyO6fXTv8rwCfhm6+64mQS6CyL0rve/hWSODsUrVuEGtq1fjxSOlVTBqCRsW6L8K3OQDskJaPB1boVMI2eQ==",
         "dependencies": {
           "System.Diagnostics.DiagnosticSource": "8.0.1"
         }
@@ -108,8 +108,8 @@
       },
       "Quartz": {
         "type": "Transitive",
-        "resolved": "3.14.0",
-        "contentHash": "j8mY6S0FWbtuEFbStUEZAkkGpZLbSuTT0us1w0DUQqhi+vwg/7XXS36TeH3o34zZoqYGyXvk6jrKnW/p6kS8sg==",
+        "resolved": "3.15.0",
+        "contentHash": "seV76VI/OW9xdsEHJlfErciicfMmmU8lcGde2SJIYxVK+k4smAaBkm0FY8a4AiVb6MMpjTvH252438ol/OOUwQ==",
         "dependencies": {
           "Microsoft.Extensions.Logging.Abstractions": "2.1.1"
         }
@@ -193,8 +193,8 @@
       },
       "System.Text.Json": {
         "type": "Transitive",
-        "resolved": "9.0.7",
-        "contentHash": "u/lN2FEEXs3ghj2ta8tWA4r2MS9Yni07K7jDmnz8h1UPDf0lIIIEMkWx383Zz4fJjJio7gDl+00RYuQ/7R8ZQw=="
+        "resolved": "9.0.8",
+        "contentHash": "mIQir9jBqk0V7X0Nw5hzPJZC8DuGdf+2DS3jAVsr6rq5+/VyH5rza0XGcONJUWBrZ+G6BCwNyjWYd9lncBu48A=="
       },
       "System.Threading.Tasks.Extensions": {
         "type": "Transitive",
@@ -205,7 +205,7 @@
         "type": "Project",
         "dependencies": {
           "PlexRipper.Domain": "[1.0.0, )",
-          "Quartz": "[3.14.0, )",
+          "Quartz": "[3.15.0, )",
           "WebAPI.Contracts": "[1.0.0, )"
         }
       },
@@ -226,7 +226,7 @@
       "logging": {
         "type": "Project",
         "dependencies": {
-          "Autofac": "[8.3.0, )",
+          "Autofac": "[8.4.0, )",
           "Environment": "[1.0.0, )",
           "FluentResults": "[4.0.0, )",
           "Serilog": "[4.3.0, )",
@@ -249,7 +249,7 @@
           "PasswordGenerator": "[2.1.0, )",
           "System.ComponentModel.Annotations": "[5.0.0, )",
           "System.Reactive": "[6.0.1, )",
-          "System.Text.Json": "[9.0.7, )"
+          "System.Text.Json": "[9.0.8, )"
         }
       },
       "webapi.contracts": {

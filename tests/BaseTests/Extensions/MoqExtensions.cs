@@ -22,18 +22,6 @@ public static class MoqExtensions
         return result;
     }
 
-    public static ISetup<ICommandExecutor, Task<TResult>> SetupCommand<TResult>(
-        this AutoMock mock,
-        Func<ICommand<TResult>> request
-    )
-    {
-        var result = mock.Mock<ICommandExecutor>().Setup(m => m.Send(request.Invoke(), It.IsAny<CancellationToken>()));
-
-        // This is to ensure unit tests to contain unused mock setups
-        result.Verifiable(Times.AtLeastOnce);
-        return result;
-    }
-
     public static IReturnsResult<ISignalRService> SendRefreshNotification(this AutoMock mock, bool isVerifiable = false)
     {
         var result = mock.Mock<ISignalRService>()

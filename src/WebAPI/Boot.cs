@@ -63,7 +63,7 @@ public class Boot : IHostedService
             return;
         }
 
-        var defaultUser = await CreateDefaultAppUser();
+        var defaultUser = await _commandExecutor.Send(new CreateDefaultAppUserCommand(), CancellationToken.None);
         if (defaultUser.IsFailed)
         {
             TerminateApplication();
@@ -115,8 +115,6 @@ public class Boot : IHostedService
         // Perform post-stopped activities here
         _log.InformationLine("PlexRipper has been shutdown! R.I.P.");
     }
-
-    private async Task<Result> CreateDefaultAppUser() => await _commandExecutor.Send(new CreateDefaultAppUserCommand());
 
     #endregion
 }

@@ -4,8 +4,6 @@ using Autofac;
 using Autofac.Extras.Quartz;
 using Environment;
 using FileSystem.Contracts;
-using MediatR.Extensions.Autofac.DependencyInjection;
-using MediatR.Extensions.Autofac.DependencyInjection.Builder;
 using Module = Autofac.Module;
 
 namespace PlexRipper.FileSystem.Config;
@@ -30,12 +28,5 @@ public class FileSystemModule : Module
         builder.Register(ctx => ctx.Resolve<IFileSystem>().Path).As<IPath>().SingleInstance();
         builder.Register(ctx => ctx.Resolve<IFileSystem>().File).As<IFile>().SingleInstance();
         builder.Register(ctx => ctx.Resolve<IFileSystem>().Directory).As<IDirectory>().SingleInstance();
-
-        // MediatR
-        var configuration = MediatRConfigurationBuilder
-            .Create(assembly)
-            .WithAllOpenGenericHandlerTypesRegistered()
-            .Build();
-        builder.RegisterMediatR(configuration);
     }
 }

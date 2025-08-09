@@ -67,6 +67,8 @@ public static partial class Startup
             ];
         });
 
+        services.AddCommandMiddleware(c => c.Register(typeof(ValidationPipeline<,>)));
+
         if (!EnvironmentExtensions.IsIntegrationTestMode())
         {
             // Used to deploy the front-end Nuxt client

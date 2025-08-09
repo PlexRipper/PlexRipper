@@ -24,7 +24,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
 
         var plexAccount = IDbContext.PlexAccounts.FirstOrDefault();
         plexAccount.ShouldNotBeNull();
-        var plexServers = await IDbContext.PlexServers.ToListAsync();
+        var plexServers = await IDbContext.PlexServers.ToListAsync(CancellationToken);
         plexServers.ShouldNotBeNull();
 
         var plexLibraries = new List<PlexLibrary>();
@@ -43,7 +43,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             PlexAccountId = plexAccount.Id,
             PlexLibraries = plexLibraries,
         };
-        var result = await _sut.Handle(request, CancellationToken.None);
+        var result = await _sut.Handle(request, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -93,7 +93,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
         var dbContext = IDbContext;
         var plexAccount = dbContext.PlexAccounts.FirstOrDefault();
         plexAccount.ShouldNotBeNull();
-        var plexServers = await dbContext.PlexServers.ToListAsync();
+        var plexServers = await dbContext.PlexServers.ToListAsync(CancellationToken);
         plexServers.ShouldNotBeNull();
 
         // Set values that should not be overwritten by refreshing the libraries
@@ -111,7 +111,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
                 plexLibrary.SetTvShowMetaData(100, 100, 100, 1000);
         }
 
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         // Create API Data
         var updatedTime = DateTime.Now - TimeSpan.FromHours(4);
@@ -122,7 +122,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             PlexAccountId = plexAccount.Id,
             PlexLibraries = plexLibraries.ToApiLibraries(updatedTime),
         };
-        var result = await _sut.Handle(request, CancellationToken.None);
+        var result = await _sut.Handle(request, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -202,7 +202,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
         };
 
         // Act
-        var result = await _sut.Handle(request, CancellationToken.None);
+        var result = await _sut.Handle(request, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

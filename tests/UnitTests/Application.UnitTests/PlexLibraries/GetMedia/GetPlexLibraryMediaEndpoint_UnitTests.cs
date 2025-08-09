@@ -36,7 +36,7 @@ public class GetPlexLibraryMediaEndpoint_UnitTests : BaseUnitTest<GetPlexLibrary
 
         // Act
         var ep = SetupEndpointUnitTest<GetPlexLibraryMediaEndpoint>();
-        await ep.HandleAsync(request, CancellationToken.None);
+        await ep.HandleAsync(request, CancellationToken);
         var result = ep.Response as ResultDTO<PlexMediaStatisticsDTO>;
 
         // Assert
@@ -49,7 +49,10 @@ public class GetPlexLibraryMediaEndpoint_UnitTests : BaseUnitTest<GetPlexLibrary
         result.Value.MediaCount.ShouldBe(result.Value.MediaList.Count);
         foreach (var mediaSlimDTO in result.Value.MediaList)
         {
-            var validationResult = await PlexMediaSlimDtoValidator.ValidateAsync(mediaSlimDTO);
+            var validationResult = await PlexMediaSlimDtoValidator.ValidateAsync(
+                mediaSlimDTO,
+                TestContext.Current.CancellationToken
+            );
             validationResult.Errors.ShouldBeEmpty();
         }
     }
@@ -80,7 +83,7 @@ public class GetPlexLibraryMediaEndpoint_UnitTests : BaseUnitTest<GetPlexLibrary
 
         // Act
         var ep = SetupEndpointUnitTest<GetPlexLibraryMediaEndpoint>();
-        await ep.HandleAsync(request, CancellationToken.None);
+        await ep.HandleAsync(request, CancellationToken);
         var result = ep.Response as ResultDTO<PlexMediaStatisticsDTO>;
 
         // Assert
@@ -94,7 +97,10 @@ public class GetPlexLibraryMediaEndpoint_UnitTests : BaseUnitTest<GetPlexLibrary
 
         foreach (var plexMediaSlimDto in result.Value.MediaList)
         {
-            var validationResult = await PlexMediaSlimDtoValidator.ValidateAsync(plexMediaSlimDto);
+            var validationResult = await PlexMediaSlimDtoValidator.ValidateAsync(
+                plexMediaSlimDto,
+                TestContext.Current.CancellationToken
+            );
             validationResult.Errors.ShouldBeEmpty();
         }
     }

@@ -166,8 +166,8 @@ public class DownloadWorker : IDisposable
                 var result = _log.Here()
                     .Error("Could not create a download destination filestream for DownloadWorker with id: {Id}", Id)
                     .ToResult();
-                result.Errors.AddRange(fileStreamResult.Errors);
-                SetDownloadWorkerTaskChanged(DownloadStatus.Error, result);
+
+                SetDownloadWorkerTaskChanged(DownloadStatus.Error, Result.Merge(result, fileStreamResult).ToResult());
                 return;
             }
 
@@ -211,8 +211,8 @@ public class DownloadWorker : IDisposable
 
                     responseStream.SetThrottleSpeed(_downloadSpeedLimit);
 
-                    var readResult = await Result.Try(
-                        () => responseStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken)
+                    var readResult = await Result.Try(() =>
+                        responseStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken)
                     );
 
                     if (readResult.IsFailed)

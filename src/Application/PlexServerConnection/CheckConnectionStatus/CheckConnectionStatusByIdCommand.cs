@@ -70,12 +70,11 @@ public class CheckConnectionStatusByIdCommandHandler
         // Add plexServer status to DB, the PlexServerStatus table functions as a server log.
         var plexServerStatus = serverStatusResult.Value;
 
-        var upsertResult = await Result.Try(
-            () =>
-                _dbContext
-                    .PlexServerStatuses.Upsert(plexServerStatus)
-                    .On(x => new { x.PlexServerConnectionId })
-                    .RunAsync(cancellationToken)
+        var upsertResult = await Result.Try(() =>
+            _dbContext
+                .PlexServerStatuses.Upsert(plexServerStatus)
+                .On(x => new { x.PlexServerConnectionId })
+                .RunAsync(cancellationToken)
         );
 
         if (upsertResult.IsFailed)

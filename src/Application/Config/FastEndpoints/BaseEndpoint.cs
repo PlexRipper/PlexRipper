@@ -16,7 +16,7 @@ public abstract class BaseEndpoint<TRequest> : Endpoint<TRequest, BaseResultDTO>
             async statusCode =>
             {
                 resultDTO.StatusCode = statusCode;
-                await SendAsync(resultDTO, statusCode, ct);
+                await Send.ResponseAsync(resultDTO, statusCode, ct);
             }
         );
     }
@@ -35,7 +35,7 @@ public abstract class BaseEndpoint<TRequest, TDTO> : BaseEndpoint<TRequest>
             async statusCode =>
             {
                 resultDTO.StatusCode = statusCode;
-                await SendAsync(resultDTO, statusCode, ct);
+                await Send.ResponseAsync(resultDTO, statusCode, ct);
             }
         );
     }
@@ -50,7 +50,7 @@ public abstract class BaseEndpoint<TRequest, TDTO> : BaseEndpoint<TRequest>
             async statusCode =>
             {
                 resultDTO.StatusCode = statusCode;
-                await SendAsync(resultDTO, statusCode, ct);
+                await Send.ResponseAsync(resultDTO, statusCode, ct);
             }
         );
     }
@@ -70,7 +70,7 @@ public abstract class BaseEndpointWithoutRequest : EndpointWithoutRequest<BaseRe
             async statusCode =>
             {
                 resultDTO.StatusCode = statusCode;
-                await SendAsync(resultDTO, statusCode, ct);
+                await Send.ResponseAsync(resultDTO, statusCode, ct);
             }
         );
     }
@@ -92,7 +92,7 @@ public abstract class BaseEndpointWithoutRequest<TResponse> : BaseEndpointWithou
             async statusCode =>
             {
                 resultDTO.StatusCode = statusCode;
-                await SendAsync(resultDTO, statusCode, ct);
+                await Send.ResponseAsync(resultDTO, statusCode, ct);
             }
         );
     }

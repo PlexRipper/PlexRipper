@@ -1,3 +1,4 @@
+using Data.Contracts;
 using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application.UnitTests;
@@ -32,12 +33,12 @@ public class RefreshPlexMovieLibraryCommandUnitTests : BaseUnitTest<RefreshPlexM
         // Act
         var result = await _sut.ExecuteAsync(
             new RefreshPlexMovieLibraryCommand(new InsertMediaMetaDataCommandResponse(testLibrary), _ => { }),
-            CancellationToken.None
+            CancellationToken
         );
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        var updatedLibrary = await IDbContext.PlexLibraries.FindAsync(testLibrary.Id);
+        var updatedLibrary = await IDbContext.PlexLibraries.GetAsync(testLibrary.Id, CancellationToken);
         updatedLibrary.ShouldNotBeNull();
         updatedLibrary.SyncedAt.ShouldNotBeNull();
         mock.Mock<IRefreshLibraryProgressReporter>()
@@ -66,12 +67,12 @@ public class RefreshPlexMovieLibraryCommandUnitTests : BaseUnitTest<RefreshPlexM
         // Act
         var result = await _sut.ExecuteAsync(
             new RefreshPlexMovieLibraryCommand(new InsertMediaMetaDataCommandResponse(testLibrary), _ => { }),
-            CancellationToken.None
+            CancellationToken
         );
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        var updatedLibrary = await IDbContext.PlexLibraries.FindAsync(testLibrary.Id);
+        var updatedLibrary = await IDbContext.PlexLibraries.GetAsync(testLibrary.Id, CancellationToken);
         updatedLibrary.ShouldNotBeNull();
         updatedLibrary.SyncedAt.ShouldNotBeNull();
 
@@ -109,12 +110,12 @@ public class RefreshPlexMovieLibraryCommandUnitTests : BaseUnitTest<RefreshPlexM
         // Act
         var result = await _sut.ExecuteAsync(
             new RefreshPlexMovieLibraryCommand(new InsertMediaMetaDataCommandResponse(testLibrary), _ => { }),
-            CancellationToken.None
+            CancellationToken
         );
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        var updatedLibrary = await IDbContext.PlexLibraries.FindAsync(testLibrary.Id);
+        var updatedLibrary = await IDbContext.PlexLibraries.GetAsync(testLibrary.Id, CancellationToken);
         updatedLibrary.ShouldNotBeNull();
         updatedLibrary.SyncedAt.ShouldNotBeNull();
 
@@ -146,7 +147,7 @@ public class RefreshPlexMovieLibraryCommandUnitTests : BaseUnitTest<RefreshPlexM
         // Act
         var result = await _sut.ExecuteAsync(
             new RefreshPlexMovieLibraryCommand(new InsertMediaMetaDataCommandResponse(testLibrary), _ => { }),
-            CancellationToken.None
+            CancellationToken
         );
 
         // Assert

@@ -68,13 +68,13 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<Applicati
             .DownloadTaskMovie.AsTracking()
             .Where(x => x.PlexServerId == 1)
             .IncludeAll()
-            .ToListAsync();
+            .ToListAsync(CancellationToken);
         mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>())).ReturnOk();
         mock.Mock<IDownloadTaskScheduler>().Setup(x => x.IsServerDownloading(It.IsAny<int>())).ReturnsAsync(false);
 
         var startedDownloadTask = downloadTasks[0];
         startedDownloadTask.SetDownloadStatus(DownloadStatus.Downloading);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         // Act
         var result = await _sut.CheckDownloadQueueServer(1);
@@ -97,7 +97,7 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<Applicati
             }
         );
 
-        var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync();
+        var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync(cancellationToken: CancellationToken);
         mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>())).ReturnOk();
         mock.Mock<IDownloadTaskScheduler>().Setup(x => x.IsServerDownloading(It.IsAny<int>())).ReturnsAsync(false);
 
@@ -125,9 +125,12 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<Applicati
             }
         );
 
-        var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync(asTracking: true);
+        var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync(
+            asTracking: true,
+            cancellationToken: CancellationToken
+        );
         downloadTasks[0].SetDownloadStatus(DownloadStatus.Completed);
-        await IDbContext.SaveChangesAsync();
+        await IDbContext.SaveChangesAsync(CancellationToken);
 
         mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>())).ReturnOk();
         mock.Mock<IDownloadTaskScheduler>().Setup(x => x.IsServerDownloading(It.IsAny<int>())).ReturnsAsync(false);
@@ -157,9 +160,12 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<Applicati
                 config.TvShowEpisodeDownloadTasksCount = 2;
             }
         );
-        var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync(asTracking: true);
+        var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync(
+            asTracking: true,
+            cancellationToken: CancellationToken
+        );
         downloadTasks[0].SetDownloadStatus(DownloadStatus.Completed);
-        await IDbContext.SaveChangesAsync();
+        await IDbContext.SaveChangesAsync(CancellationToken);
 
         mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>())).ReturnOk();
         mock.Mock<IDownloadTaskScheduler>().Setup(x => x.IsServerDownloading(It.IsAny<int>())).ReturnsAsync(false);

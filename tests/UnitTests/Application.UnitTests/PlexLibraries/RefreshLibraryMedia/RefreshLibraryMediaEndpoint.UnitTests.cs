@@ -25,7 +25,7 @@ public class RefreshLibraryMediaEndpointUnitTests : BaseUnitTest<RefreshLibraryM
 
         // Act
         var rawResponse = SetupEndpointUnitTest<RefreshLibraryMediaEndpoint>();
-        await rawResponse.HandleAsync(new RefreshLibraryMediaEndpointRequest(plexLibrary.Id), CancellationToken.None);
+        await rawResponse.HandleAsync(new RefreshLibraryMediaEndpointRequest(plexLibrary.Id), CancellationToken);
         var resultDTO = rawResponse.Response as ResultDTO<PlexLibraryDTO>;
 
         // Assert
@@ -53,7 +53,7 @@ public class RefreshLibraryMediaEndpointUnitTests : BaseUnitTest<RefreshLibraryM
 
         // Act
         var rawResponse = SetupEndpointUnitTest<RefreshLibraryMediaEndpoint>();
-        await rawResponse.HandleAsync(new RefreshLibraryMediaEndpointRequest(plexLibrary.Id), CancellationToken.None);
+        await rawResponse.HandleAsync(new RefreshLibraryMediaEndpointRequest(plexLibrary.Id), CancellationToken);
         var resultDTO = rawResponse.Response;
 
         // Assert
@@ -86,7 +86,7 @@ public class RefreshLibraryMediaEndpointUnitTests : BaseUnitTest<RefreshLibraryM
 
         // Act
         var rawResponse = SetupEndpointUnitTest<RefreshLibraryMediaEndpoint>();
-        await rawResponse.HandleAsync(new RefreshLibraryMediaEndpointRequest(plexLibrary.Id), CancellationToken.None);
+        await rawResponse.HandleAsync(new RefreshLibraryMediaEndpointRequest(plexLibrary.Id), CancellationToken);
         var resultDTO = rawResponse.Response as ResultDTO<PlexLibraryDTO>;
 
         // Assert

@@ -57,43 +57,39 @@ public static class DefaultJsonSerializerOptions
             },
         };
 
-    private static readonly Lazy<JsonSerializerOptions> ConfigStandardField =
-        new(() =>
-        {
-            var options = CreateBaseOptions();
-            options.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-            return options;
-        });
+    private static readonly Lazy<JsonSerializerOptions> ConfigStandardField = new(() =>
+    {
+        var options = CreateBaseOptions();
+        options.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+        return options;
+    });
 
-    private static readonly Lazy<JsonSerializerOptions> ConfigCapitalizedField =
-        new(() =>
-        {
-            var options = CreateBaseOptions();
-            options.PropertyNamingPolicy = null;
-            return options;
-        });
+    private static readonly Lazy<JsonSerializerOptions> ConfigCapitalizedField = new(() =>
+    {
+        var options = CreateBaseOptions();
+        options.PropertyNamingPolicy = null;
+        return options;
+    });
 
-    private static readonly Lazy<JsonSerializerOptions> ConfigPlexApiSerializationField =
-        new(() =>
-        {
-            var options = CreateBaseOptions();
-            options.Converters.Clear();
-            options.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.KebabCaseLower));
-            return options;
-        });
+    private static readonly Lazy<JsonSerializerOptions> ConfigPlexApiSerializationField = new(() =>
+    {
+        var options = CreateBaseOptions();
+        options.Converters.Clear();
+        options.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.KebabCaseLower));
+        return options;
+    });
 
-    private static readonly Lazy<JsonSerializerOptions> ConfigManagerOptionsField =
-        new(() =>
-        {
-            var options = CreateBaseOptions();
+    private static readonly Lazy<JsonSerializerOptions> ConfigManagerOptionsField = new(() =>
+    {
+        var options = CreateBaseOptions();
 
-            //If Model.property is collect and this config is Populate,then skip propertyInfo.Set
-            options.PreferredObjectCreationHandling = JsonObjectCreationHandling.Populate;
-            options.WriteIndented = true;
-            options.PropertyNamingPolicy = null;
+        //If Model.property is collect and this config is Populate,then skip propertyInfo.Set
+        options.PreferredObjectCreationHandling = JsonObjectCreationHandling.Populate;
+        options.WriteIndented = true;
+        options.PropertyNamingPolicy = null;
 
-            return options;
-        });
+        return options;
+    });
 
     public static JsonSerializerOptions ConfigStandard => ConfigStandardField.Value;
 

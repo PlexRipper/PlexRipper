@@ -2,19 +2,18 @@ namespace PlexRipper.Domain;
 
 public static partial class EnumMapperExtensions
 {
-    private static readonly Dictionary<string, FolderType> _folderTypeMap =
-        new(StringComparer.Ordinal)
-        {
-            ["None"] = FolderType.None,
-            ["DownloadFolder"] = FolderType.DownloadFolder,
-            ["MovieFolder"] = FolderType.MovieFolder,
-            ["TvShowFolder"] = FolderType.TvShowFolder,
-            ["MusicFolder"] = FolderType.MusicFolder,
-            ["PhotosFolder"] = FolderType.PhotosFolder,
-            ["OtherVideosFolder"] = FolderType.OtherVideosFolder,
-            ["GamesVideosFolder"] = FolderType.GamesVideosFolder,
-            ["Unknown"] = FolderType.Unknown,
-        };
+    private static readonly Dictionary<string, FolderType> _folderTypeMap = new(StringComparer.Ordinal)
+    {
+        ["None"] = FolderType.None,
+        ["DownloadFolder"] = FolderType.DownloadFolder,
+        ["MovieFolder"] = FolderType.MovieFolder,
+        ["TvShowFolder"] = FolderType.TvShowFolder,
+        ["MusicFolder"] = FolderType.MusicFolder,
+        ["PhotosFolder"] = FolderType.PhotosFolder,
+        ["OtherVideosFolder"] = FolderType.OtherVideosFolder,
+        ["GamesVideosFolder"] = FolderType.GamesVideosFolder,
+        ["Unknown"] = FolderType.Unknown,
+    };
 
     /// <summary>
     /// Converts string to <see cref="FolderType"/> by a fast method.

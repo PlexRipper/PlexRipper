@@ -1,8 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
     <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
-        <LangVersion>12</LangVersion>
+        <TargetFramework>net9.0</TargetFramework>
+        <LangVersion>13</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
         <RootNamespace>PlexRipper.PlexApi</RootNamespace>
         <AssemblyName>PlexRipper.PlexApi</AssemblyName>
@@ -12,26 +11,21 @@
         <Nullable>enable</Nullable>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     </PropertyGroup>
-
     <ItemGroup>
-        <PackageReference Include="Autofac" Version="8.0.0"/>
-        <PackageReference Include="CSharpier.MsBuild" Version="0.29.2">
+        <PackageReference Include="Autofac" Version="8.3.0" />
+        <PackageReference Include="CSharpier.MsBuild" Version="1.0.3">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="FastEndpoints" Version="5.32.0"/>
-        <PackageReference Include="HttpClientToCurl" Version="2.0.6"/>
-        <PackageReference Include="Polly" Version="8.3.1"/>
+        <PackageReference Include="FastEndpoints" Version="7.0.1" />
+        <PackageReference Include="HttpClientToCurl" Version="2.0.6" />
+        <PackageReference Include="Polly" Version="8.6.2" />
     </ItemGroup>
-
     <ItemGroup>
-        <Compile Include="..\Domain\GlobalUsings.cs"/>
-        <ProjectReference Include="..\Data.Contracts\Data.Contracts.csproj"/>
-        <ProjectReference Include="..\PlexApi.Contracts\PlexApi.Contracts.csproj"/>
-        <Compile Remove="Common\OpenPlexApiFactory.cs"/>
-        <ProjectReference Include="..\Settings.Contracts\Settings.Contracts.csproj"/>
+        <Compile Include="..\Domain\GlobalUsings.cs" />
+        <ProjectReference Include="..\Data.Contracts\Data.Contracts.csproj" />
+        <ProjectReference Include="..\PlexApi.Contracts\PlexApi.Contracts.csproj" />
+        <Compile Remove="Common\OpenPlexApiFactory.cs" />
+        <ProjectReference Include="..\Settings.Contracts\Settings.Contracts.csproj" />
     </ItemGroup>
-
 </Project>
-
-

@@ -1,40 +1,37 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
     <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
-        <LangVersion>12</LangVersion>
+        <TargetFramework>net9.0</TargetFramework>
+        <LangVersion>13</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
         <IsPackable>false</IsPackable>
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
         <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
         <Nullable>enable</Nullable>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <OutputType>Exe</OutputType>
     </PropertyGroup>
-
     <ItemGroup>
-        <PackageReference Include="CSharpier.MsBuild" Version="0.29.2">
+        <PackageReference Include="CSharpier.MsBuild" Version="1.0.3">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1"/>
-        <PackageReference Include="xunit" Version="2.9.2"/>
-        <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+        <PackageReference Include="xunit.v3" Version="3.0.0" />
+        <PackageReference Include="xunit.runner.visualstudio" Version="3.1.3">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
-        <PackageReference Include="coverlet.collector" Version="6.0.2">
+        <PackageReference Include="coverlet.collector" Version="6.0.4">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
     </ItemGroup>
-
     <ItemGroup>
-        <ProjectReference Include="..\..\..\src\FileSystem\FileSystem.csproj"/>
-        <ProjectReference Include="..\..\BaseTests\BaseTests.csproj"/>
+        <ProjectReference Include="..\..\..\src\FileSystem\FileSystem.csproj" />
+        <ProjectReference Include="..\..\BaseTests\BaseTests.csproj" />
     </ItemGroup>
     <ItemGroup>
-        <Compile Include="..\..\..\src\Domain\GlobalUsings.cs"/>
-        <Compile Include="..\..\BaseTests\GlobalTestsUsings.cs"/>
+        <Compile Include="..\..\..\src\Domain\GlobalUsings.cs" />
+        <Compile Include="..\..\BaseTests\GlobalTestsUsings.cs" />
     </ItemGroup>
-
 </Project>

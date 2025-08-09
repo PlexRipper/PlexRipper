@@ -12,7 +12,7 @@ public class ChoosePlexServerConnection_UnitTests : BaseUnitTest
     public async Task ShouldReturnAFailedResult_WhenThePlexServerIdIsInvalid()
     {
         // Act
-        var result = await MockIDbContext.Object.ChoosePlexServerConnection(0);
+        var result = await MockIDbContext.Object.ChoosePlexServerConnection(0, CancellationToken);
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -24,7 +24,7 @@ public class ChoosePlexServerConnection_UnitTests : BaseUnitTest
     {
         // Act
         await SetupDatabase(47893);
-        var result = await IDbContext.ChoosePlexServerConnection(999);
+        var result = await IDbContext.ChoosePlexServerConnection(999, CancellationToken);
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -43,7 +43,7 @@ public class ChoosePlexServerConnection_UnitTests : BaseUnitTest
                 config.PlexServerConnectionPerServerCount = 0;
             }
         );
-        var result = await IDbContext.ChoosePlexServerConnection(1);
+        var result = await IDbContext.ChoosePlexServerConnection(1, CancellationToken);
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -66,16 +66,16 @@ public class ChoosePlexServerConnection_UnitTests : BaseUnitTest
         var plexServer = await dbContext
             .PlexServers.AsTracking()
             .Include(x => x.PlexServerConnections)
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(CancellationToken);
         plexServer.ShouldNotBeNull();
         var preferredConnection = plexServer.PlexServerConnections.ElementAt(2);
         plexServer.PreferredConnectionId = preferredConnection.Id;
 
         // Add status to all connections
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         // Act
-        var result = await IDbContext.ChoosePlexServerConnection(plexServer.Id);
+        var result = await IDbContext.ChoosePlexServerConnection(plexServer.Id, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -95,12 +95,14 @@ public class ChoosePlexServerConnection_UnitTests : BaseUnitTest
             }
         );
 
-        var plexServer = await IDbContext.PlexServers.Include(x => x.PlexServerConnections).FirstOrDefaultAsync();
+        var plexServer = await IDbContext
+            .PlexServers.Include(x => x.PlexServerConnections)
+            .FirstOrDefaultAsync(CancellationToken);
         plexServer.ShouldNotBeNull();
-        await IDbContext.PlexServerStatuses.ExecuteDeleteAsync();
+        await IDbContext.PlexServerStatuses.ExecuteDeleteAsync(CancellationToken);
 
         // Act
-        var result = await IDbContext.ChoosePlexServerConnection(plexServer.Id);
+        var result = await IDbContext.ChoosePlexServerConnection(plexServer.Id, CancellationToken);
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -120,7 +122,7 @@ public class ChoosePlexServerConnection_UnitTests : BaseUnitTest
         );
 
         var dbContext = IDbContext;
-        var plexServer = await dbContext.PlexServers.FirstOrDefaultAsync();
+        var plexServer = await dbContext.PlexServers.FirstOrDefaultAsync(CancellationToken);
         plexServer.ShouldNotBeNull();
 
         var plexServerConnections = FakeData.GetPlexServerConnections(seed).Generate(5);
@@ -175,10 +177,10 @@ public class ChoosePlexServerConnection_UnitTests : BaseUnitTest
         }
 
         dbContext.PlexServerConnections.AddRange(plexServerConnections);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         // Act
-        var result = await IDbContext.ChoosePlexServerConnection(plexServer.Id);
+        var result = await IDbContext.ChoosePlexServerConnection(plexServer.Id, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

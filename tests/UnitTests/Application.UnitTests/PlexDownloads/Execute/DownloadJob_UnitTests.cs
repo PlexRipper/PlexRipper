@@ -30,10 +30,8 @@ public class DownloadJob_UnitTests : BaseUnitTest<DownloadJob>
             { DownloadJob.DownloadTaskIdParameter, JsonSerializer.Serialize(testDownloadTask.ToKey()) },
         };
         mock.Mock<IJobExecutionContext>().SetupGet(x => x.JobDetail.JobDataMap).Returns(new JobDataMap(dict));
-        mock.Mock<IJobExecutionContext>().SetupGet(x => x.CancellationToken).Returns(CancellationToken.None);
-        mock.Mock<IPlexDownloadClient>()
-            .Setup(x => x.Setup(It.IsAny<DownloadTaskKey>(), CancellationToken.None))
-            .ReturnOk();
+        mock.Mock<IJobExecutionContext>().SetupGet(x => x.CancellationToken).Returns(CancellationToken);
+        mock.Mock<IPlexDownloadClient>().Setup(x => x.Setup(It.IsAny<DownloadTaskKey>(), CancellationToken)).ReturnOk();
         mock.Mock<IPlexDownloadClient>().Setup(x => x.Start()).Returns(Result.Ok());
         mock.Mock<IPlexDownloadClient>().SetupGet(x => x.DownloadProcessTask).Returns(Task.CompletedTask);
         mock.Mock<IPlexDownloadClient>()
@@ -44,7 +42,7 @@ public class DownloadJob_UnitTests : BaseUnitTest<DownloadJob>
         await _sut.Execute(mock.Create<IJobExecutionContext>());
 
         // Assert
-        var downloadWorkerTasks = await IDbContext.DownloadWorkerTasks.ToListAsync();
+        var downloadWorkerTasks = await IDbContext.DownloadWorkerTasks.ToListAsync(CancellationToken);
         downloadWorkerTasks.Count.ShouldBe(4);
         downloadWorkerTasks.ShouldAllBe(x => x.DownloadTaskId == testDownloadTask.Id);
     }
@@ -67,10 +65,8 @@ public class DownloadJob_UnitTests : BaseUnitTest<DownloadJob>
             { DownloadJob.DownloadTaskIdParameter, JsonSerializer.Serialize(testDownloadTask.ToKey()) },
         };
         mock.Mock<IJobExecutionContext>().SetupGet(x => x.JobDetail.JobDataMap).Returns(new JobDataMap(dict));
-        mock.Mock<IJobExecutionContext>().SetupGet(x => x.CancellationToken).Returns(CancellationToken.None);
-        mock.Mock<IPlexDownloadClient>()
-            .Setup(x => x.Setup(It.IsAny<DownloadTaskKey>(), CancellationToken.None))
-            .ReturnOk();
+        mock.Mock<IJobExecutionContext>().SetupGet(x => x.CancellationToken).Returns(CancellationToken);
+        mock.Mock<IPlexDownloadClient>().Setup(x => x.Setup(It.IsAny<DownloadTaskKey>(), CancellationToken)).ReturnOk();
         mock.Mock<IPlexDownloadClient>().Setup(x => x.Start()).Returns(Result.Ok());
         mock.Mock<IPlexDownloadClient>().SetupGet(x => x.DownloadProcessTask).Returns(Task.CompletedTask);
         mock.Mock<IPlexDownloadClient>()
@@ -83,12 +79,15 @@ public class DownloadJob_UnitTests : BaseUnitTest<DownloadJob>
         // Assert
         var downloadTaskResult = await IDbContext
             .DownloadTaskMovieFile.Include(x => x.DownloadWorkerTasks)
-            .FirstOrDefaultAsync(x => x.Id == testDownloadTask.Id);
+            .FirstOrDefaultAsync(x => x.Id == testDownloadTask.Id, CancellationToken);
         downloadTaskResult.ShouldNotBeNull();
         downloadTaskResult.DownloadWorkerTasks.Count.ShouldBe(4);
 
         var downloadFolder = await IDbContext.GetDownloadFolder();
-        var destinationFolder = await IDbContext.GetDefaultDestinationFolderPath(PlexMediaType.Movie);
+        var destinationFolder = await IDbContext.GetDefaultDestinationFolderPath(
+            PlexMediaType.Movie,
+            CancellationToken
+        );
 
         downloadTaskResult.DownloadDirectory.ShouldContain(downloadFolder.DirectoryPath);
         downloadTaskResult.DestinationDirectory.ShouldContain(destinationFolder.DirectoryPath);

@@ -1,16 +1,9 @@
-using Logging.Interface;
-
 namespace Logging.UnitTests;
 
 public class LogToStringUnitTests : BaseUnitTest
 {
-    private readonly ILog<LogToStringUnitTests> _log;
-
     public LogToStringUnitTests(ITestOutputHelper output)
-        : base(output)
-    {
-        _log = LogManager.CreateLogInstance<LogToStringUnitTests>(output);
-    }
+        : base(output) { }
 
     [Fact]
     public void ShouldCorrectlyInterpolateStringResult_WhenToStringIsCalledOnLogEvent()
@@ -21,7 +14,7 @@ public class LogToStringUnitTests : BaseUnitTest
         var fileName = "test.txt";
 
         // Act
-        var logEvent = _log.Here().Debug("Download worker with id: {Id} start for filename: {FileName}", id, fileName);
+        var logEvent = Log.Here().Debug("Download worker with id: {Id} start for filename: {FileName}", id, fileName);
         var logString = logEvent.ToString();
 
         // Assert

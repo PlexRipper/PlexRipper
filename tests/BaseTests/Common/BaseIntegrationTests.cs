@@ -8,16 +8,18 @@ public class BaseIntegrationTests
 {
     private readonly ILog _log;
 
+    protected CancellationToken CancellationToken => TestContext.Current.CancellationToken;
+
     protected BaseIntegrationTests(ITestOutputHelper output, LogEventLevel logLevel = LogEventLevel.Debug)
     {
         EnvironmentExtensions.SetLogLevel(logLevel);
         EnvironmentExtensions.EnableUnmaskedLog(true);
 
         // Ensure that the test output helper is set first
-        LogConfig.SetTestOutputHelper(output);
+        var testLogConfig = new TestLogConfig(output);
 
         LogManager.SetupLogging(logLevel);
-        _log = LogManager.CreateLogInstance(typeof(BaseIntegrationTests));
+        _log = testLogConfig.CreateLogInstance<BaseIntegrationTests>();
 
         BogusExtensions.Setup();
     }

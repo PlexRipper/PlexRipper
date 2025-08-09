@@ -20,7 +20,7 @@ public class SyncPlexLibraryMediaMetaDataCommandUnitTests : BaseCommandUnitTest<
             }
         );
 
-        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync();
+        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync(CancellationToken);
         plexLibrary.ShouldNotBeNull();
 
         plexLibrary.Id = 9999; // Set to a non-existent library ID
@@ -50,7 +50,7 @@ public class SyncPlexLibraryMediaMetaDataCommandUnitTests : BaseCommandUnitTest<
             }
         );
 
-        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync();
+        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync(CancellationToken);
         plexLibrary.ShouldNotBeNull();
 
         // Create and insert initial Plex actors
@@ -58,8 +58,8 @@ public class SyncPlexLibraryMediaMetaDataCommandUnitTests : BaseCommandUnitTest<
         var plexActors = mediaItemActorRoles.ToPlexActor();
 
         var dbContext = IDbContext;
-        await dbContext.PlexActors.AddRangeAsync(plexActors);
-        await dbContext.SaveChangesAsync();
+        await dbContext.PlexActors.AddRangeAsync(plexActors, CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var plexActorDict = plexActors.ToHashKeyDictionary(mediaItemActorRoles);
 
@@ -68,14 +68,14 @@ public class SyncPlexLibraryMediaMetaDataCommandUnitTests : BaseCommandUnitTest<
             .Select(x => new PlexLibraryActors(plexLibrary.Id, x.Value.Id))
             .ToList();
         dbContext = IDbContext;
-        await dbContext.PlexLibraryActors.AddRangeAsync(initialPlexLibraryActors);
-        await dbContext.SaveChangesAsync();
+        await dbContext.PlexLibraryActors.AddRangeAsync(initialPlexLibraryActors, CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         // Create new data with different roles
         var newPlexApiActors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).GenerateUnique(30, x => x.Key);
         var newPlexActors = newPlexApiActors.ToPlexActor();
-        await dbContext.PlexActors.AddRangeAsync(newPlexActors);
-        await dbContext.SaveChangesAsync();
+        await dbContext.PlexActors.AddRangeAsync(newPlexActors, CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         // Act
         var command = new SyncPlexLibraryMediaMetaDataCommand(
@@ -92,12 +92,12 @@ public class SyncPlexLibraryMediaMetaDataCommandUnitTests : BaseCommandUnitTest<
         dbContext = IDbContext;
         var libraryRolesList = await dbContext
             .PlexLibraryActors.Where(x => x.PlexLibraryId == plexLibrary.Id)
-            .ToListAsync();
+            .ToListAsync(CancellationToken);
 
         libraryRolesList.Count.ShouldBe(newPlexApiActors.Count);
         foreach (var role in newPlexApiActors)
         {
-            var roleDb = await dbContext.PlexActors.FirstOrDefaultAsync(x => x.Key == role.Key);
+            var roleDb = await dbContext.PlexActors.FirstOrDefaultAsync(x => x.Key == role.Key, CancellationToken);
             roleDb.ShouldNotBeNull();
             libraryRolesList.ShouldContain(x => x.PlexActorId == roleDb.Id);
         }
@@ -116,27 +116,27 @@ public class SyncPlexLibraryMediaMetaDataCommandUnitTests : BaseCommandUnitTest<
             }
         );
 
-        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync();
+        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync(CancellationToken);
         plexLibrary.ShouldNotBeNull();
 
         // Create actors data
         var actorRoles = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).GenerateUnique(15, x => x.Key);
         var plexActors = actorRoles.ToPlexActor();
         var dbContext = IDbContext;
-        await dbContext.PlexActors.AddRangeAsync(plexActors);
-        await dbContext.SaveChangesAsync();
+        await dbContext.PlexActors.AddRangeAsync(plexActors, CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         // Create genres data
         var genreItems = FakePlexApiData.GetLibraryMediaItemGenreDTO(seed).GenerateUnique(8, x => x.Key);
         var plexGenres = genreItems.ToPlexGenre();
-        await dbContext.PlexGenres.AddRangeAsync(plexGenres);
-        await dbContext.SaveChangesAsync();
+        await dbContext.PlexGenres.AddRangeAsync(plexGenres, CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         // Create countries data
         var countryItems = FakePlexApiData.GetLibraryMediaItemCountryDTO(seed).GenerateUnique(5, x => x.Key);
         var plexCountries = countryItems.ToPlexCountry();
-        await dbContext.PlexCountries.AddRangeAsync(plexCountries);
-        await dbContext.SaveChangesAsync();
+        await dbContext.PlexCountries.AddRangeAsync(plexCountries, CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         // Verify initial counts are 0
         plexLibrary.ActorsCount.ShouldBe(0);
@@ -159,7 +159,10 @@ public class SyncPlexLibraryMediaMetaDataCommandUnitTests : BaseCommandUnitTest<
 
         // Refresh the library from the database to get updated counts
         dbContext = IDbContext;
-        var updatedLibrary = await dbContext.PlexLibraries.FirstOrDefaultAsync(x => x.Id == plexLibrary.Id);
+        var updatedLibrary = await dbContext.PlexLibraries.FirstOrDefaultAsync(
+            x => x.Id == plexLibrary.Id,
+            CancellationToken
+        );
         updatedLibrary.ShouldNotBeNull();
 
         // Verify the counts are updated correctly
@@ -168,10 +171,17 @@ public class SyncPlexLibraryMediaMetaDataCommandUnitTests : BaseCommandUnitTest<
         updatedLibrary.CountriesCount.ShouldBe(5);
 
         // Verify the relationship entities were created correctly
-        var libraryActorsCount = await dbContext.PlexLibraryActors.CountAsync(x => x.PlexLibraryId == plexLibrary.Id);
-        var libraryGenresCount = await dbContext.PlexLibraryGenres.CountAsync(x => x.PlexLibraryId == plexLibrary.Id);
-        var libraryCountriesCount = await dbContext.PlexLibraryCountries.CountAsync(x =>
-            x.PlexLibraryId == plexLibrary.Id
+        var libraryActorsCount = await dbContext.PlexLibraryActors.CountAsync(
+            x => x.PlexLibraryId == plexLibrary.Id,
+            CancellationToken
+        );
+        var libraryGenresCount = await dbContext.PlexLibraryGenres.CountAsync(
+            x => x.PlexLibraryId == plexLibrary.Id,
+            CancellationToken
+        );
+        var libraryCountriesCount = await dbContext.PlexLibraryCountries.CountAsync(
+            x => x.PlexLibraryId == plexLibrary.Id,
+            CancellationToken
         );
 
         libraryActorsCount.ShouldBe(15);
@@ -192,31 +202,33 @@ public class SyncPlexLibraryMediaMetaDataCommandUnitTests : BaseCommandUnitTest<
             }
         );
 
-        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync();
+        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync(CancellationToken);
         plexLibrary.ShouldNotBeNull();
 
         // Create some initial data to ensure we're actually clearing it
         var actorRoles = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).GenerateUnique(5, x => x.Key);
         var plexActors = actorRoles.ToPlexActor();
         var dbContext = IDbContext;
-        await dbContext.PlexActors.AddRangeAsync(plexActors);
-        await dbContext.SaveChangesAsync();
+        await dbContext.PlexActors.AddRangeAsync(plexActors, CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         // Create initial relationship data
         var initialPlexLibraryActors = plexActors
             .ToHashKeyDictionary(actorRoles)
             .Select((x) => new PlexLibraryActors(plexLibrary.Id, x.Value.Id))
             .ToList();
-        await dbContext.PlexLibraryActors.AddRangeAsync(initialPlexLibraryActors);
-        await dbContext.SaveChangesAsync();
+        await dbContext.PlexLibraryActors.AddRangeAsync(initialPlexLibraryActors, CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         // Set initial counts manually to simulate existing data
         await dbContext
             .PlexLibraries.Where(x => x.Id == plexLibrary.Id)
-            .ExecuteUpdateAsync(p =>
-                p.SetProperty(x => x.ActorsCount, 5)
-                    .SetProperty(x => x.GenresCount, 3)
-                    .SetProperty(x => x.CountriesCount, 2)
+            .ExecuteUpdateAsync(
+                p =>
+                    p.SetProperty(x => x.ActorsCount, 5)
+                        .SetProperty(x => x.GenresCount, 3)
+                        .SetProperty(x => x.CountriesCount, 2),
+                CancellationToken
             );
 
         // Act - sync with empty metadata
@@ -230,7 +242,10 @@ public class SyncPlexLibraryMediaMetaDataCommandUnitTests : BaseCommandUnitTest<
 
         // Refresh the library from the database to get updated counts
         dbContext = IDbContext;
-        var updatedLibrary = await dbContext.PlexLibraries.FirstOrDefaultAsync(x => x.Id == plexLibrary.Id);
+        var updatedLibrary = await dbContext.PlexLibraries.FirstOrDefaultAsync(
+            x => x.Id == plexLibrary.Id,
+            CancellationToken
+        );
         updatedLibrary.ShouldNotBeNull();
 
         // Verify all counts are now 0
@@ -239,10 +254,17 @@ public class SyncPlexLibraryMediaMetaDataCommandUnitTests : BaseCommandUnitTest<
         updatedLibrary.CountriesCount.ShouldBe(0);
 
         // Verify the relationship entities were actually removed
-        var libraryActorsCount = await dbContext.PlexLibraryActors.CountAsync(x => x.PlexLibraryId == plexLibrary.Id);
-        var libraryGenresCount = await dbContext.PlexLibraryGenres.CountAsync(x => x.PlexLibraryId == plexLibrary.Id);
-        var libraryCountriesCount = await dbContext.PlexLibraryCountries.CountAsync(x =>
-            x.PlexLibraryId == plexLibrary.Id
+        var libraryActorsCount = await dbContext.PlexLibraryActors.CountAsync(
+            x => x.PlexLibraryId == plexLibrary.Id,
+            CancellationToken
+        );
+        var libraryGenresCount = await dbContext.PlexLibraryGenres.CountAsync(
+            x => x.PlexLibraryId == plexLibrary.Id,
+            CancellationToken
+        );
+        var libraryCountriesCount = await dbContext.PlexLibraryCountries.CountAsync(
+            x => x.PlexLibraryId == plexLibrary.Id,
+            CancellationToken
         );
 
         libraryActorsCount.ShouldBe(0);

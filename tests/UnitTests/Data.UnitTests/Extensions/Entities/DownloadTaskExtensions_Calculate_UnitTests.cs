@@ -22,7 +22,7 @@ public class DownloadTaskExtensions_Calculate_UnitTests : BaseUnitTest
             }
         );
 
-        var downloadTasks = await IDbContext.DownloadTaskTvShow.IncludeAll().ToListAsync();
+        var downloadTasks = await IDbContext.DownloadTaskTvShow.IncludeAll().ToListAsync(CancellationToken);
 
         foreach (var downloadTaskTvShow in downloadTasks)
         foreach (var downloadTaskTvShowSeason in downloadTaskTvShow.Children)

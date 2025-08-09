@@ -63,9 +63,9 @@ public class FileMergeQueueUnitTests : BaseUnitTest<FileMergeQueue>
         );
 
         var dbContext = IDbContext;
-        var downloadTasks = await dbContext.DownloadTaskMovieFile.AsTracking().ToListAsync();
+        var downloadTasks = await dbContext.DownloadTaskMovieFile.AsTracking().ToListAsync(CancellationToken);
         downloadTasks.SetDownloadStatus(DownloadStatus.DownloadFinished);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         mock.Mock<IFileMergeScheduler>()
             .Setup(x => x.IsAnyFileMergeJobRunning())
@@ -101,9 +101,9 @@ public class FileMergeQueueUnitTests : BaseUnitTest<FileMergeQueue>
         );
 
         var dbContext = IDbContext;
-        var downloadTasks = await dbContext.DownloadTaskTvShowEpisodeFile.AsTracking().ToListAsync();
+        var downloadTasks = await dbContext.DownloadTaskTvShowEpisodeFile.AsTracking().ToListAsync(CancellationToken);
         downloadTasks.SetDownloadStatus(DownloadStatus.DownloadFinished);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         mock.Mock<IFileMergeScheduler>()
             .Setup(x => x.IsAnyFileMergeJobRunning())

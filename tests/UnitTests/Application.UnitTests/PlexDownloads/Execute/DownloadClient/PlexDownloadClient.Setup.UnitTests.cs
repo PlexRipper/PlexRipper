@@ -33,7 +33,8 @@ public class PlexDownloadClientSetupUnitTests : BaseUnitTest
                 Id = default,
                 PlexServerId = 0,
                 PlexLibraryId = 0,
-            }
+            },
+            CancellationToken
         );
 
         // Assert

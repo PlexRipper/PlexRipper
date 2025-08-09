@@ -119,7 +119,7 @@ public class GeneratePlexTokenEndpoint : BaseEndpoint<GeneratePlexTokenEndpointR
         }
 
         var result = Result.Ok();
-        result.WithErrors(validateResult.Errors.FindAll(x => x.GetType() == typeof(PlexError)));
+        result.WithErrors(validateResult.Errors.Where(x => x.GetType() == typeof(PlexError)));
         await SendFluentResult(result, ct);
     }
 }

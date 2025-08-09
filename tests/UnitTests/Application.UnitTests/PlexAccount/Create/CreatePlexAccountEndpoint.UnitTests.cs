@@ -21,7 +21,7 @@ public class CreatePlexAccountEndpointUnitTests : BaseUnitTest
         var endPoint = SetupEndpointUnitTest<CreatePlexAccountEndpoint>();
         await endPoint.HandleAsync(
             new CreatePlexAccountEndpointRequest { PlexAccount = newAccount.ToDTO() },
-            CancellationToken.None
+            CancellationToken
         );
         var result = endPoint.Response;
 
@@ -34,7 +34,7 @@ public class CreatePlexAccountEndpointUnitTests : BaseUnitTest
     {
         // Arrange
         await SetupDatabase(234, config => config.PlexAccountCount = 1);
-        var plexAccount = await IDbContext.PlexAccounts.GetAsync(1);
+        var plexAccount = await IDbContext.PlexAccounts.GetAsync(1, CancellationToken);
         plexAccount.ShouldNotBeNull();
 
         var newAccount = PlexAccount.Create(plexAccount.Username, "Password123");
@@ -45,7 +45,7 @@ public class CreatePlexAccountEndpointUnitTests : BaseUnitTest
         var endPoint = SetupEndpointUnitTest<CreatePlexAccountEndpoint>();
         await endPoint.HandleAsync(
             new CreatePlexAccountEndpointRequest { PlexAccount = newAccount.ToDTO() },
-            CancellationToken.None
+            CancellationToken
         );
         var result = endPoint.Response;
 

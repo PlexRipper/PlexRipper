@@ -198,18 +198,6 @@ jobs:
             -   name: Checkout Source Code
                 uses: actions/checkout@v4
 
-            -   name: Setup .NET
-                uses: actions/setup-dotnet@v3
-                with:
-                    dotnet-version: 7.0.x
-
-            -   name: Cache NuGet packages
-                uses: actions/cache@v3
-                with:
-                    path: ~/.nuget/packages
-                    key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
-                    restore-keys: ${{ runner.os }}-nuget-
-
             -   name: Dotnet Setup
                 uses: ./.github/workflows/steps/dotnet-setup/
                 with:
@@ -258,22 +246,9 @@ jobs:
             matrix:
                 integration_test_project:
                     - tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj
-                    # Add more if needed
         steps:
             -   name: Checkout Source Code
                 uses: actions/checkout@v4
-
-            -   name: Setup .NET
-                uses: actions/setup-dotnet@v3
-                with:
-                    dotnet-version: 7.0.x
-
-            -   name: Cache NuGet packages
-                uses: actions/cache@v3
-                with:
-                    path: ~/.nuget/packages
-                    key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
-                    restore-keys: ${{ runner.os }}-nuget-
 
             -   name: Dotnet Setup
                 uses: ./.github/workflows/steps/dotnet-setup/
@@ -281,7 +256,7 @@ jobs:
                     project-path: ${{ matrix.integration_test_project }}
 
             -   name: Run Integration Tests 
-                run: dotnet test ${{ matrix.integration_test_project }} --no-build --verbosity normal --logger "trx;LogFileName=integration_test_results.trx" --filter "Category!=Flaky"
+                run: dotnet test ${{ matrix.integration_test_project }} --no-build --verbosity normal --logger "trx;LogFileName=integration_test_results.trx"
 
             -   name: Upload Integration Test Results
                 if: always()

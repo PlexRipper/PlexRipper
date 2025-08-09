@@ -2,14 +2,15 @@ namespace PlexRipper.Domain;
 
 public static partial class EnumMapperExtensions
 {
-    private static readonly Dictionary<string, FileSystemEntityType> _fileSystemEntityTypeMap =
-        new(StringComparer.Ordinal)
-        {
-            ["Parent"] = FileSystemEntityType.Parent,
-            ["Drive"] = FileSystemEntityType.Drive,
-            ["Folder"] = FileSystemEntityType.Folder,
-            ["File"] = FileSystemEntityType.File,
-        };
+    private static readonly Dictionary<string, FileSystemEntityType> _fileSystemEntityTypeMap = new(
+        StringComparer.Ordinal
+    )
+    {
+        ["Parent"] = FileSystemEntityType.Parent,
+        ["Drive"] = FileSystemEntityType.Drive,
+        ["Folder"] = FileSystemEntityType.Folder,
+        ["File"] = FileSystemEntityType.File,
+    };
 
     /// <summary>
     /// Converts string to <see cref="FileSystemEntityType"/> by a fast method.

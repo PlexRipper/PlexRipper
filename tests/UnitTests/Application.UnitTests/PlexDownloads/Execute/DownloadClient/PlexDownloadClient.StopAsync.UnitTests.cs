@@ -31,9 +31,12 @@ public class PlexDownloadClientStopAsyncUnitTests : BaseUnitTest<PlexDownloadCli
         SetupHttpClient(x => x.SetupDownloadFile(100));
         var downloadSpeedLimit = 1000;
         var dbContext = IDbContext;
-        var downloadTask = await dbContext.DownloadTaskMovieFile.FirstAsync();
-        await dbContext.DownloadWorkerTasks.AddRangeAsync(downloadTask.GenerateDownloadWorkerTasks(1));
-        await dbContext.SaveChangesAsync();
+        var downloadTask = await dbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+        await dbContext.DownloadWorkerTasks.AddRangeAsync(
+            downloadTask.GenerateDownloadWorkerTasks(1),
+            CancellationToken
+        );
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         // PlexDownloadClientMocks
         mock.Mock<IServerSettingsModule>()
@@ -91,10 +94,10 @@ public class PlexDownloadClientStopAsyncUnitTests : BaseUnitTest<PlexDownloadCli
             )
         );
 
-        await sut.Setup(downloadTask.ToKey());
+        await sut.Setup(downloadTask.ToKey(), CancellationToken);
 
         var startResult = sut.Start();
-        await Task.Delay(1500);
+        await Task.Delay(1500, TestContext.Current.CancellationToken);
         var stopResult = await sut.StopAsync();
 
         // Wait for the process to complete

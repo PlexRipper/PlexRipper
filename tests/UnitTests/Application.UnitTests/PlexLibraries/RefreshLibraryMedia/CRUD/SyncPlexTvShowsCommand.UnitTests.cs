@@ -4,8 +4,9 @@ namespace PlexRipper.Application.UnitTests;
 
 public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsCommandHandler>
 {
-    private SyncPlexTvShowsCommandValidator _validator =
-        new(LogManager.CreateLogInstance<SyncPlexTvShowsCommandValidator>());
+    private SyncPlexTvShowsCommandValidator _validator = new(
+        LogManager.CreateLogInstance<SyncPlexTvShowsCommandValidator>()
+    );
 
     public SyncPlexTvShowsCommandUnitTests(ITestOutputHelper output)
         : base(output) { }
@@ -42,8 +43,8 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
 
         // Act
         var request = new SyncPlexTvShowsCommand(new InsertMediaMetaDataCommandResponse(library));
-        (await _validator.ValidateAsync(request)).IsValid.ShouldBeTrue();
-        var result = await _sut.Handle(request, CancellationToken.None);
+        (await _validator.ValidateAsync(request, TestContext.Current.CancellationToken)).IsValid.ShouldBeTrue();
+        var result = await _sut.Handle(request, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -92,7 +93,7 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
 
         // Act
         var request = new SyncPlexTvShowsCommand(new InsertMediaMetaDataCommandResponse(library));
-        var result = await _sut.Handle(request, CancellationToken.None);
+        var result = await _sut.Handle(request, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -131,8 +132,8 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
 
         // Act
         var request = new SyncPlexTvShowsCommand(new InsertMediaMetaDataCommandResponse(library));
-        (await _validator.ValidateAsync(request)).IsValid.ShouldBeTrue();
-        var result = await _sut.Handle(request, CancellationToken.None);
+        (await _validator.ValidateAsync(request, TestContext.Current.CancellationToken)).IsValid.ShouldBeTrue();
+        var result = await _sut.Handle(request, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -169,8 +170,8 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
 
         // Act
         var request = new SyncPlexTvShowsCommand(new InsertMediaMetaDataCommandResponse(library));
-        (await _validator.ValidateAsync(request)).IsValid.ShouldBeTrue();
-        var result = await _sut.Handle(request, CancellationToken.None);
+        (await _validator.ValidateAsync(request, TestContext.Current.CancellationToken)).IsValid.ShouldBeTrue();
+        var result = await _sut.Handle(request, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -207,9 +208,9 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
         // Act
         var request = new SyncPlexTvShowsCommand(new InsertMediaMetaDataCommandResponse(library));
 
-        var result = await _sut.Handle(request, CancellationToken.None);
-        (await _validator.ValidateAsync(request)).IsValid.ShouldBeTrue();
-        var result2 = await _sut.Handle(request, CancellationToken.None);
+        var result = await _sut.Handle(request, CancellationToken);
+        (await _validator.ValidateAsync(request, TestContext.Current.CancellationToken)).IsValid.ShouldBeTrue();
+        var result2 = await _sut.Handle(request, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -259,8 +260,8 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
 
         // Act
         var request = new SyncPlexTvShowsCommand(new InsertMediaMetaDataCommandResponse(library));
-        (await _validator.ValidateAsync(request)).IsValid.ShouldBeTrue();
-        var result = await _sut.Handle(request, CancellationToken.None);
+        (await _validator.ValidateAsync(request, TestContext.Current.CancellationToken)).IsValid.ShouldBeTrue();
+        var result = await _sut.Handle(request, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

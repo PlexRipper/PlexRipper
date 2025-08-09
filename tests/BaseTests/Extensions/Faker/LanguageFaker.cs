@@ -8,48 +8,42 @@ public static class LanguageFaker
     /// <summary>
     /// Language names (English names like "English", "French")
     /// </summary>
-    public static readonly Lazy<HashSet<string>> LanguageNames =
-        new(
-            () =>
+    public static readonly Lazy<HashSet<string>> LanguageNames = new(() =>
 
-                [
-                    .. CultureInfo
-                        .GetCultures(CultureTypes.SpecificCultures | CultureTypes.NeutralCultures)
-                        .Select(c => c.EnglishName)
-                        .Where(name => !string.IsNullOrWhiteSpace(name)),
-                ]
-        );
+        [
+            .. CultureInfo
+                .GetCultures(CultureTypes.SpecificCultures | CultureTypes.NeutralCultures)
+                .Select(c => c.EnglishName)
+                .Where(name => !string.IsNullOrWhiteSpace(name)),
+        ]
+    );
 
     /// <summary>
     /// Language tags (e.g., "en-US", "fr-FR")
     /// </summary>
-    public static readonly Lazy<HashSet<string>> LanguageTags =
-        new(
-            () =>
+    public static readonly Lazy<HashSet<string>> LanguageTags = new(() =>
 
-                [
-                    .. CultureInfo
-                        .GetCultures(CultureTypes.SpecificCultures | CultureTypes.NeutralCultures)
-                        .Select(c => c.Name)
-                        .Where(tag => !string.IsNullOrWhiteSpace(tag)),
-                ]
-        );
+        [
+            .. CultureInfo
+                .GetCultures(CultureTypes.SpecificCultures | CultureTypes.NeutralCultures)
+                .Select(c => c.Name)
+                .Where(tag => !string.IsNullOrWhiteSpace(tag)),
+        ]
+    );
 
     //
     /// <summary>
     /// ISO language codes (e.g., "en", "fr")
     /// </summary>
-    public static readonly Lazy<HashSet<string>> LanguageCodes =
-        new(
-            () =>
+    public static readonly Lazy<HashSet<string>> LanguageCodes = new(() =>
 
-                [
-                    .. CultureInfo
-                        .GetCultures(CultureTypes.SpecificCultures | CultureTypes.NeutralCultures)
-                        .Select(c => c.TwoLetterISOLanguageName)
-                        .Where(code => !string.IsNullOrWhiteSpace(code)),
-                ]
-        );
+        [
+            .. CultureInfo
+                .GetCultures(CultureTypes.SpecificCultures | CultureTypes.NeutralCultures)
+                .Select(c => c.TwoLetterISOLanguageName)
+                .Where(code => !string.IsNullOrWhiteSpace(code)),
+        ]
+    );
 
     public static LanguageDataSet Language(this Faker faker)
     {

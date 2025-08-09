@@ -16,7 +16,7 @@ public class AddOrUpdatePlexServerCommandUnitTests : BaseUnitTest<AddOrUpdatePle
 
         // Act
         var request = new AddOrUpdatePlexServersCommand(expectedPlexServers);
-        var result = await _sut.Handle(request, CancellationToken.None);
+        var result = await _sut.Handle(request, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -74,7 +74,7 @@ public class AddOrUpdatePlexServerCommandUnitTests : BaseUnitTest<AddOrUpdatePle
         // Act
         // Now update
         var request = new AddOrUpdatePlexServersCommand(updatedServers);
-        var result = await _sut.Handle(request, CancellationToken.None);
+        var result = await _sut.Handle(request, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -122,11 +122,11 @@ public class AddOrUpdatePlexServerCommandUnitTests : BaseUnitTest<AddOrUpdatePle
         // Act
         // First add the 5 servers
         var request = new AddOrUpdatePlexServersCommand(plexServers);
-        var addResult = await _sut.Handle(request, CancellationToken.None);
+        var addResult = await _sut.Handle(request, CancellationToken);
 
         // Now update
         request = new AddOrUpdatePlexServersCommand(changedPlexServers);
-        var updateResult = await _sut.Handle(request, CancellationToken.None);
+        var updateResult = await _sut.Handle(request, CancellationToken);
 
         // Assert
         addResult.IsSuccess.ShouldBeTrue();
@@ -171,7 +171,7 @@ public class AddOrUpdatePlexServerCommandUnitTests : BaseUnitTest<AddOrUpdatePle
         // Act
         // Now update
         var request = new AddOrUpdatePlexServersCommand([plexServer]);
-        var result = await _sut.Handle(request, CancellationToken.None);
+        var result = await _sut.Handle(request, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -212,8 +212,8 @@ public class AddOrUpdatePlexServerCommandUnitTests : BaseUnitTest<AddOrUpdatePle
         var customConnections = FakeData
             .GetPlexServerConnections(seed, isCustom: true, plexServerId: plexServer.Id)
             .Generate(3);
-        await dbContext.PlexServerConnections.AddRangeAsync(customConnections);
-        await dbContext.SaveChangesAsync();
+        await dbContext.PlexServerConnections.AddRangeAsync(customConnections, CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         // Update data setup
         foreach (var conn in plexServer.PlexServerConnections.Take(4).ToList())
@@ -225,7 +225,7 @@ public class AddOrUpdatePlexServerCommandUnitTests : BaseUnitTest<AddOrUpdatePle
         // Act
         // Now update
         var request = new AddOrUpdatePlexServersCommand([plexServer]);
-        var result = await _sut.Handle(request, CancellationToken.None);
+        var result = await _sut.Handle(request, CancellationToken);
 
         // Assert
         var checkConnections = new List<PlexServerConnection>();

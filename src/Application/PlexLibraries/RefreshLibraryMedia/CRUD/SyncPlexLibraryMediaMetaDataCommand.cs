@@ -5,7 +5,6 @@ using FastEndpoints;
 using FluentValidation;
 using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 
 namespace PlexRipper.Application;
 
@@ -51,13 +50,12 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
     private readonly IPlexRipperDbContext _dbContext;
     private readonly ILog _log;
 
-    private readonly BulkConfig? _bulkInsertConfig =
-        new()
-        {
-            SetOutputIdentity = false,
-            PreserveInsertOrder = true,
-            UseTempDB = true,
-        };
+    private readonly BulkConfig? _bulkInsertConfig = new()
+    {
+        SetOutputIdentity = false,
+        PreserveInsertOrder = true,
+        UseTempDB = true,
+    };
 
     public SyncPlexLibraryMediaMetaDataCommandHandler(IPlexRipperDbContext dbContext, ILog log)
     {
@@ -104,7 +102,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
 
         _log.Here().Debug("Started syncing {Count} roles for library {LibraryName}", sourceDict.Count, libraryName);
 
-        if (sourceDict.IsNullOrEmpty())
+        if (!sourceDict.Any())
         {
             _log.Here()
                 .Warning(

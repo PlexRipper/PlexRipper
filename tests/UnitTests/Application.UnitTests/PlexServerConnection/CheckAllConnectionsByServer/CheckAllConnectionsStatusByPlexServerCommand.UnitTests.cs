@@ -21,11 +21,11 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
             }
         );
         var plexServer = IDbContext.PlexServers.First();
-        await IDbContext.PlexServers.ExecuteUpdateAsync(p => p.SetProperty(x => x.IsEnabled, false));
+        await IDbContext.PlexServers.ExecuteUpdateAsync(p => p.SetProperty(x => x.IsEnabled, false), CancellationToken);
 
         // Act
         var request = new CheckAllConnectionsStatusByPlexServerCommand(plexServer.Id);
-        var result = await _sut.Handle(request, CancellationToken.None);
+        var result = await _sut.Handle(request, CancellationToken);
 
         // Assert
         result.ShouldNotBeNull();
@@ -40,7 +40,7 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
         var request = new CheckAllConnectionsStatusByPlexServerCommand(999);
 
         // Act
-        var result = await _sut.Handle(request, CancellationToken.None);
+        var result = await _sut.Handle(request, CancellationToken);
 
         // Assert
         result.ShouldNotBeNull();
@@ -61,12 +61,12 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
 
         var dbContext = IDbContext;
         var plexServer = dbContext.PlexServers.First();
-        await dbContext.PlexServerConnections.ExecuteDeleteAsync();
+        await dbContext.PlexServerConnections.ExecuteDeleteAsync(CancellationToken);
 
         var request = new CheckAllConnectionsStatusByPlexServerCommand(plexServer.Id);
 
         // Act
-        var result = await _sut.Handle(request, CancellationToken.None);
+        var result = await _sut.Handle(request, CancellationToken);
 
         // Assert
         result.ShouldNotBeNull();
@@ -87,7 +87,7 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
 
         // Set server to offline
         var dbContext = IDbContext;
-        await dbContext.PlexServerStatuses.ExecuteDeleteAsync();
+        await dbContext.PlexServerStatuses.ExecuteDeleteAsync(CancellationToken);
 
         var connections = dbContext.PlexServerConnections.Where(x => x.PlexServerId == 1).ToList();
         foreach (var connection in connections)
@@ -104,7 +104,7 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
             );
         }
 
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         mock.Mock<ISignalRService>()
             .Setup(m =>
@@ -135,7 +135,7 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
 
         // Act
         var request = new CheckAllConnectionsStatusByPlexServerCommand(1);
-        var result = await _sut.Handle(request, CancellationToken.None);
+        var result = await _sut.Handle(request, CancellationToken);
 
         // Assert
         result.ShouldNotBeNull();
@@ -156,7 +156,7 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
 
         // Set server to online
         var dbContext = IDbContext;
-        await dbContext.PlexServerStatuses.ExecuteDeleteAsync();
+        await dbContext.PlexServerStatuses.ExecuteDeleteAsync(CancellationToken);
 
         var connections = dbContext.PlexServerConnections.Where(x => x.PlexServerId == 1).ToList();
         foreach (var connection in connections)
@@ -173,7 +173,7 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
             );
         }
 
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         mock.Mock<ISignalRService>()
             .Setup(m =>
@@ -204,7 +204,7 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
 
         // Act
         var request = new CheckAllConnectionsStatusByPlexServerCommand(1);
-        var result = await _sut.Handle(request, CancellationToken.None);
+        var result = await _sut.Handle(request, CancellationToken);
 
         // Assert
         result.ShouldNotBeNull();

@@ -15,7 +15,7 @@ public class GenerateTokenEndpointUnitTests : BaseUnitTest
     {
         // Arrange
         var seed = await SetupDatabase(2305, config => config.PlexAccountCount = 1);
-        var plexAccount = await IDbContext.PlexAccounts.FirstAsync();
+        var plexAccount = await IDbContext.PlexAccounts.FirstAsync(CancellationToken);
 
         mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<PlexSignInCommand>(), It.IsAny<CancellationToken>()))
@@ -25,7 +25,7 @@ public class GenerateTokenEndpointUnitTests : BaseUnitTest
         var ep = SetupEndpointUnitTest<GeneratePlexTokenEndpoint>();
         await ep.HandleAsync(
             new GeneratePlexTokenEndpointRequest { PlexAccountId = plexAccount.Id, VerificationCode = "" },
-            CancellationToken.None
+            CancellationToken
         );
         var result = ep.Response as ResultDTO<GeneratePlexTokenResponse>;
 
@@ -45,7 +45,7 @@ public class GenerateTokenEndpointUnitTests : BaseUnitTest
     {
         // Arrange
         await SetupDatabase(232432, config => config.PlexAccountCount = 1);
-        var plexAccount = await IDbContext.PlexAccounts.FirstAsync();
+        var plexAccount = await IDbContext.PlexAccounts.FirstAsync(CancellationToken);
 
         mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<PlexSignInCommand>(), It.IsAny<CancellationToken>()))
@@ -57,7 +57,7 @@ public class GenerateTokenEndpointUnitTests : BaseUnitTest
         var ep = SetupEndpointUnitTest<GeneratePlexTokenEndpoint>();
         await ep.HandleAsync(
             new GeneratePlexTokenEndpointRequest { PlexAccountId = plexAccount.Id },
-            CancellationToken.None
+            CancellationToken
         );
         var result = ep.Response as ResultDTO<GeneratePlexTokenResponse>;
 
@@ -76,7 +76,7 @@ public class GenerateTokenEndpointUnitTests : BaseUnitTest
     {
         // Arrange
         await SetupDatabase(433222, config => config.PlexAccountCount = 1);
-        var plexAccount = await IDbContext.PlexAccounts.FirstAsync();
+        var plexAccount = await IDbContext.PlexAccounts.FirstAsync(CancellationToken);
 
         mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<PlexSignInCommand>(), It.IsAny<CancellationToken>()))
@@ -86,7 +86,7 @@ public class GenerateTokenEndpointUnitTests : BaseUnitTest
         var ep = SetupEndpointUnitTest<GeneratePlexTokenEndpoint>();
         await ep.HandleAsync(
             new GeneratePlexTokenEndpointRequest { PlexAccountId = plexAccount.Id },
-            CancellationToken.None
+            CancellationToken
         );
         var result = ep.Response as ResultDTO<GeneratePlexTokenResponse>;
 
@@ -105,7 +105,7 @@ public class GenerateTokenEndpointUnitTests : BaseUnitTest
     {
         // Arrange
         await SetupDatabase(433222, config => config.PlexAccountCount = 1);
-        var plexAccount = await IDbContext.PlexAccounts.FirstAsync();
+        var plexAccount = await IDbContext.PlexAccounts.FirstAsync(CancellationToken);
 
         mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<PlexSignInCommand>(), It.IsAny<CancellationToken>()))
@@ -119,7 +119,7 @@ public class GenerateTokenEndpointUnitTests : BaseUnitTest
         var ep = SetupEndpointUnitTest<GeneratePlexTokenEndpoint>();
         await ep.HandleAsync(
             new GeneratePlexTokenEndpointRequest { PlexAccountId = plexAccount.Id },
-            CancellationToken.None
+            CancellationToken
         );
         var result = ep.Response;
 

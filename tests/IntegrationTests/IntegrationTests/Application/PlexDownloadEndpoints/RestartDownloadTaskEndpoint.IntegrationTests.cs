@@ -35,7 +35,9 @@ public class RestartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
                 };
             }
         );
-        var downloadTasks = await container.DbContext.GetAllDownloadTasksByServerAsync();
+        var downloadTasks = await container.DbContext.GetAllDownloadTasksByServerAsync(
+            cancellationToken: CancellationToken
+        );
         downloadTasks.Count.ShouldBe(1);
         var downloadTask = downloadTasks[0].Children[0];
 
@@ -49,21 +51,29 @@ public class RestartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
             RestartDownloadTaskEndpointRequest,
             BaseResultDTO
         >(new RestartDownloadTaskEndpointRequest(downloadTask.Id));
-        testResult.Response.IsSuccessStatusCode.ShouldBeTrue(await testResult.Response.Content.ReadAsStringAsync());
+        testResult.Response.IsSuccessStatusCode.ShouldBeTrue(
+            await testResult.Response.Content.ReadAsStringAsync(CancellationToken)
+        );
 
-        var downloadTaskDb = await container.DbContext.GetDownloadTaskAsync(downloadTask.Id);
+        var downloadTaskDb = await container.DbContext.GetDownloadTaskAsync(
+            downloadTask.Id,
+            cancellationToken: CancellationToken
+        );
         downloadTaskDb.ShouldNotBeNull();
 
         // In CI this is sometimes completed to quickly
         downloadTaskDb.DownloadStatus.ShouldBeOneOf(DownloadStatus.Queued, DownloadStatus.Completed);
 
-        await container.SchedulerService.AwaitScheduler();
-        await Task.Delay(2000);
+        await container.SchedulerService.AwaitScheduler(TestContext.Current.CancellationToken);
+        await Task.Delay(2000, TestContext.Current.CancellationToken);
 
         // Assert
         var result = testResult.Result;
         result.IsSuccess.ShouldBeTrue();
-        downloadTaskDb = await container.DbContext.GetDownloadTaskAsync(downloadTask.Id);
+        downloadTaskDb = await container.DbContext.GetDownloadTaskAsync(
+            downloadTask.Id,
+            cancellationToken: CancellationToken
+        );
         downloadTaskDb.ShouldNotBeNull();
         downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.Completed);
     }

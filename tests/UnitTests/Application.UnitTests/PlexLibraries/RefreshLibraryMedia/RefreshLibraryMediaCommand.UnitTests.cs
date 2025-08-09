@@ -11,7 +11,9 @@ public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLi
 
     private async Task<PlexLibrary> GetUpdatedLibrary(Seed seed, PlexMediaType type)
     {
-        var plexLibrary = await IDbContext.PlexLibraries.Where(x => x.Type == type).FirstOrDefaultAsync();
+        var plexLibrary = await IDbContext
+            .PlexLibraries.Where(x => x.Type == type)
+            .FirstOrDefaultAsync(CancellationToken);
         plexLibrary.ShouldNotBeNull();
 
         var fakeLibrary = FakeData.GetPlexLibrary(seed, type).Generate();
@@ -65,7 +67,7 @@ public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLi
     {
         // Arrange
         await SetupDatabase(1338, config => config.PlexMovieLibraryCount = 1);
-        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync();
+        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync(CancellationToken);
         plexLibrary.ShouldNotBeNull();
 
         mock.SetupCommand(It.IsAny<GetLibraryMediaCommand>).ReturnsAsync(Result.Fail<LibraryMetadata>("Sync failed"));
@@ -151,7 +153,9 @@ public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLi
         // Assert
         result.IsSuccess.ShouldBeTrue();
 
-        var dbLibrary = await IDbContext.PlexLibraries.Where(x => x.Id == updatedLibrary.Id).FirstOrDefaultAsync();
+        var dbLibrary = await IDbContext
+            .PlexLibraries.Where(x => x.Id == updatedLibrary.Id)
+            .FirstOrDefaultAsync(CancellationToken);
         dbLibrary.ShouldNotBeNull();
         dbLibrary.SyncedAt.ShouldNotBeNull();
 
@@ -171,7 +175,7 @@ public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLi
                 config.PlexMovieLibraryCount = 3;
             }
         );
-        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync();
+        var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync(CancellationToken);
         plexLibrary.ShouldNotBeNull();
 
         mock.Mock<IRefreshLibraryProgressReporter>()

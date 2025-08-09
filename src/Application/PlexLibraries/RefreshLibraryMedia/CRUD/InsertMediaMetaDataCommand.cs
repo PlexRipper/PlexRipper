@@ -6,7 +6,6 @@ using FastEndpoints;
 using FluentValidation;
 using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using PlexApi.Contracts;
 
 namespace PlexRipper.Application;
@@ -114,17 +113,16 @@ public class InsertMediaMetaDataCommandHandler
             return Result.Ok(new Dictionary<string, PlexActor>());
         }
 
-        var result = await Result.Try(
-            () =>
-                _dbContext.BulkInsertOrUpdateAsync(
-                    newPlexActors,
-                    new BulkConfig
-                    {
-                        SetOutputIdentity = false,
-                        UpdateByProperties = [nameof(PlexActor.Key)],
-                        UseTempDB = true,
-                    }
-                )
+        var result = await Result.Try(() =>
+            _dbContext.BulkInsertOrUpdateAsync(
+                newPlexActors,
+                new BulkConfig
+                {
+                    SetOutputIdentity = false,
+                    UpdateByProperties = [nameof(PlexActor.Key)],
+                    UseTempDB = true,
+                }
+            )
         );
 
         if (result.IsFailed)
@@ -167,7 +165,7 @@ public class InsertMediaMetaDataCommandHandler
             .Where(x => !string.IsNullOrEmpty(x.Key) && !string.IsNullOrEmpty(x.Name))
             .DistinctBy(x => x.Key)
             .ToPlexGenre();
-        if (newPlexGenres.IsNullOrEmpty())
+        if (!newPlexGenres.Any())
         {
             _log.Here().Debug("No {NameOfPlexGenre} to insert ", nameof(PlexGenre));
             return Result.Ok(new Dictionary<string, PlexGenre>());
@@ -227,7 +225,7 @@ public class InsertMediaMetaDataCommandHandler
             .Where(x => !string.IsNullOrEmpty(x.Key) && !string.IsNullOrEmpty(x.Name))
             .DistinctBy(x => x.Key)
             .ToPlexCountry();
-        if (newPlexCountries.IsNullOrEmpty())
+        if (!newPlexCountries.Any())
         {
             _log.Here().Debug("No {NameOfPlexCountry} to insert", nameof(PlexCountry));
             return Result.Ok(new Dictionary<string, PlexCountry>());

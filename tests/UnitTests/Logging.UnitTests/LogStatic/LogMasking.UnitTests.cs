@@ -3,11 +3,11 @@ using Serilog.Sinks.TestCorrelator;
 
 namespace Logging.UnitTests;
 
-public class LogMasking_UnitTests : BaseUnitTest<LogMasking_UnitTests>
+public class LogMaskingUnitTests : BaseUnitTest<LogMaskingUnitTests>
 {
     #region Setup/Teardown
 
-    public LogMasking_UnitTests(ITestOutputHelper output)
+    public LogMaskingUnitTests(ITestOutputHelper output)
         : base(output) { }
 
     #endregion
@@ -23,7 +23,7 @@ public class LogMasking_UnitTests : BaseUnitTest<LogMasking_UnitTests>
             EnvironmentExtensions.EnableUnmaskedLog(false);
             EnvironmentExtensions.IsUnmasked().ShouldBeFalse();
 
-            var log = LogManager.CreateLogInstance<Log_UnitTests>(_output);
+            var log = new TestLogConfig(_output).CreateLogInstance<LogUnitTests>();
             using (var context = TestCorrelator.CreateContext())
             {
                 // Act
@@ -51,7 +51,7 @@ public class LogMasking_UnitTests : BaseUnitTest<LogMasking_UnitTests>
                 EnvironmentExtensions.EnableUnmaskedLog(false);
                 EnvironmentExtensions.IsUnmasked().ShouldBeFalse();
 
-                var logEvents = TestCorrelator.GetLogEventsFromContextGuid(context.Guid).ToList();
+                var logEvents = TestCorrelator.GetLogEventsFromContextId(context.Id).ToList();
                 logEvents.ShouldNotBeEmpty();
 
                 foreach (var logEvent in logEvents)

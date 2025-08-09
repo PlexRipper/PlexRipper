@@ -12,9 +12,9 @@ public class BaseResultDTO
 
     public required int StatusCode { get; set; }
 
-    public required List<ErrorDTO> Errors { get; set; } = [];
+    public required IReadOnlyList<ErrorDTO> Errors { get; set; } = [];
 
-    public required List<SuccessDTO> Successes { get; set; } = [];
+    public required IReadOnlyList<SuccessDTO> Successes { get; set; } = [];
 }
 
 public class ResultDTO<T> : BaseResultDTO

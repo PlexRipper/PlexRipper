@@ -17,7 +17,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
         var request = new GetDownloadPreviewQuery(new List<DownloadMediaDTO>());
 
         // Act
-        var result = await _sut.Handle(request, CancellationToken.None);
+        var result = await _sut.Handle(request, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -44,7 +44,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
             .PlexTvShows.Include(x => x.Seasons)
             .ThenInclude(x => x.Episodes)
             .AsNoTracking()
-            .ToListAsync();
+            .ToListAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         tvShows.Count.ShouldBe(5);
 
@@ -99,7 +99,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
         var request = new GetDownloadPreviewQuery(downloadMedia);
 
         // Act
-        var result = await _sut.Handle(request, CancellationToken.None);
+        var result = await _sut.Handle(request, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -144,7 +144,9 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
             }
         );
 
-        var movies = await IDbContext.PlexMovies.AsNoTracking().ToListAsync();
+        var movies = await IDbContext
+            .PlexMovies.AsNoTracking()
+            .ToListAsync(cancellationToken: TestContext.Current.CancellationToken);
         movies.Count.ShouldBe(3);
 
         var downloadMedia = new List<DownloadMediaDTO>
@@ -162,7 +164,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
         var request = new GetDownloadPreviewQuery(downloadMedia);
 
         // Act
-        var result = await _sut.Handle(request, CancellationToken.None);
+        var result = await _sut.Handle(request, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -187,7 +189,10 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
             }
         );
 
-        var movies = await IDbContext.PlexMovies.Include(x => x.MediaDataList).AsNoTracking().ToListAsync();
+        var movies = await IDbContext
+            .PlexMovies.Include(x => x.MediaDataList)
+            .AsNoTracking()
+            .ToListAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         var qualities = movies
             .SelectMany(movie =>
@@ -216,7 +221,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
         var request = new GetDownloadPreviewQuery(downloadMedia);
 
         // Act
-        var result = await _sut.Handle(request, CancellationToken.None);
+        var result = await _sut.Handle(request, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -240,7 +245,10 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
             }
         );
 
-        var movies = await IDbContext.PlexMovies.Include(x => x.MediaDataList).AsNoTracking().ToListAsync();
+        var movies = await IDbContext
+            .PlexMovies.Include(x => x.MediaDataList)
+            .AsNoTracking()
+            .ToListAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         var moviesWithQuality = movies.Take(2).ToList();
         var moviesWithoutQuality = movies.Skip(2).ToList();
@@ -274,7 +282,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
         var request = new GetDownloadPreviewQuery(downloadMedia);
 
         // Act
-        var result = await _sut.Handle(request, CancellationToken.None);
+        var result = await _sut.Handle(request, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -305,7 +313,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
         var request = new GetDownloadPreviewQuery(downloadMedia);
 
         // Act
-        var result = await _sut.Handle(request, CancellationToken.None);
+        var result = await _sut.Handle(request, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -332,7 +340,9 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
             }
         );
 
-        var tvShows = await IDbContext.PlexTvShows.AsNoTracking().ToListAsync();
+        var tvShows = await IDbContext
+            .PlexTvShows.AsNoTracking()
+            .ToListAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         var downloadMedia = new List<DownloadMediaDTO>
         {
@@ -349,7 +359,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
         var request = new GetDownloadPreviewQuery(downloadMedia);
 
         // Act
-        var result = await _sut.Handle(request, CancellationToken.None);
+        var result = await _sut.Handle(request, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -378,8 +388,9 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
             }
         );
 
-        var seasons = await IDbContext.PlexTvShowSeason.AsNoTracking().ToListAsync();
-        var tvShows = await IDbContext.PlexTvShows.AsNoTracking().ToListAsync();
+        var seasons = await IDbContext
+            .PlexTvShowSeason.AsNoTracking()
+            .ToListAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         var downloadMedia = new List<DownloadMediaDTO>
         {
@@ -396,7 +407,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
         var request = new GetDownloadPreviewQuery(downloadMedia);
 
         // Act
-        var result = await _sut.Handle(request, CancellationToken.None);
+        var result = await _sut.Handle(request, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -426,7 +437,9 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
             }
         );
 
-        var episodes = await IDbContext.PlexTvShowEpisodes.AsNoTracking().ToListAsync();
+        var episodes = await IDbContext
+            .PlexTvShowEpisodes.AsNoTracking()
+            .ToListAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         var downloadMedia = new List<DownloadMediaDTO>
         {
@@ -443,7 +456,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
         var request = new GetDownloadPreviewQuery(downloadMedia);
 
         // Act
-        var result = await _sut.Handle(request, CancellationToken.None);
+        var result = await _sut.Handle(request, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -475,7 +488,10 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
             }
         );
 
-        var episodes = await IDbContext.PlexTvShowEpisodes.Include(x => x.MediaDataList).AsNoTracking().ToListAsync();
+        var episodes = await IDbContext
+            .PlexTvShowEpisodes.Include(x => x.MediaDataList)
+            .AsNoTracking()
+            .ToListAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         var qualities = episodes
             .SelectMany(episode =>
@@ -506,7 +522,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
         var request = new GetDownloadPreviewQuery(downloadMedia);
 
         // Act
-        var result = await _sut.Handle(request, CancellationToken.None);
+        var result = await _sut.Handle(request, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -545,7 +561,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
         var request = new GetDownloadPreviewQuery(downloadMedia);
 
         // Act
-        var result = await _sut.Handle(request, CancellationToken.None);
+        var result = await _sut.Handle(request, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -566,7 +582,9 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
             }
         );
 
-        var movies = await IDbContext.PlexMovies.AsNoTracking().ToListAsync();
+        var movies = await IDbContext
+            .PlexMovies.AsNoTracking()
+            .ToListAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         var downloadMedia = new List<DownloadMediaDTO>
         {
@@ -591,7 +609,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
         var request = new GetDownloadPreviewQuery(downloadMedia);
 
         // Act
-        var result = await _sut.Handle(request, CancellationToken.None);
+        var result = await _sut.Handle(request, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -616,7 +634,9 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
             }
         );
 
-        var tvShows = await IDbContext.PlexTvShows.AsNoTracking().ToListAsync();
+        var tvShows = await IDbContext
+            .PlexTvShows.AsNoTracking()
+            .ToListAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         var downloadMedia = new List<DownloadMediaDTO>
         {
@@ -633,7 +653,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
         var request = new GetDownloadPreviewQuery(downloadMedia);
 
         // Act
-        var result = await _sut.Handle(request, CancellationToken.None);
+        var result = await _sut.Handle(request, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -671,8 +691,12 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
             }
         );
 
-        var movies = await IDbContext.PlexMovies.AsNoTracking().ToListAsync();
-        var tvShows = await IDbContext.PlexTvShows.AsNoTracking().ToListAsync();
+        var movies = await IDbContext
+            .PlexMovies.AsNoTracking()
+            .ToListAsync(cancellationToken: TestContext.Current.CancellationToken);
+        var tvShows = await IDbContext
+            .PlexTvShows.AsNoTracking()
+            .ToListAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         var downloadMedia = new List<DownloadMediaDTO>
         {
@@ -697,7 +721,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
         var request = new GetDownloadPreviewQuery(downloadMedia);
 
         // Act
-        var result = await _sut.Handle(request, CancellationToken.None);
+        var result = await _sut.Handle(request, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -733,9 +757,15 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
             }
         );
 
-        var movies = await IDbContext.PlexMovies.Include(x => x.MediaDataList).AsNoTracking().ToListAsync();
+        var movies = await IDbContext
+            .PlexMovies.Include(x => x.MediaDataList)
+            .AsNoTracking()
+            .ToListAsync(cancellationToken: TestContext.Current.CancellationToken);
 
-        var episodes = await IDbContext.PlexTvShowEpisodes.Include(x => x.MediaDataList).AsNoTracking().ToListAsync();
+        var episodes = await IDbContext
+            .PlexTvShowEpisodes.Include(x => x.MediaDataList)
+            .AsNoTracking()
+            .ToListAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         var movieQualities = movies
             .SelectMany(movie =>
@@ -788,7 +818,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
         var request = new GetDownloadPreviewQuery(downloadMedia);
 
         // Act
-        var result = await _sut.Handle(request, CancellationToken.None);
+        var result = await _sut.Handle(request, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -829,7 +859,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
             .PlexTvShows.Include(x => x.Seasons)
             .ThenInclude(x => x.Episodes)
             .AsNoTracking()
-            .ToListAsync();
+            .ToListAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         var firstShow = tvShows[0];
         var secondShow = tvShows[1];
@@ -868,7 +898,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
         var request = new GetDownloadPreviewQuery(downloadMedia);
 
         // Act
-        var result = await _sut.Handle(request, CancellationToken.None);
+        var result = await _sut.Handle(request, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -907,7 +937,9 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
             }
         );
 
-        var episodes = await IDbContext.PlexTvShowEpisodes.AsNoTracking().ToListAsync();
+        var episodes = await IDbContext
+            .PlexTvShowEpisodes.AsNoTracking()
+            .ToListAsync(cancellationToken: TestContext.Current.CancellationToken);
         var targetEpisode = episodes[0];
 
         var downloadMedia = new List<DownloadMediaDTO>
@@ -933,7 +965,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
         var request = new GetDownloadPreviewQuery(downloadMedia);
 
         // Act
-        var result = await _sut.Handle(request, CancellationToken.None);
+        var result = await _sut.Handle(request, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

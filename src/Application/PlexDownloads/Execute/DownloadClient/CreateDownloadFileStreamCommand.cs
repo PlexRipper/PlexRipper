@@ -62,8 +62,8 @@ public class CreateDownloadFileStreamCommandHandler : IRequestHandler<CreateDown
             Stream fileStream;
             if (_file.Exists(filePath))
             {
-                var openResult = Result.Try(
-                    () => _file.Open(filePath, FileMode.Open, FileAccess.ReadWrite, FileShare.Delete)
+                var openResult = Result.Try(() =>
+                    _file.Open(filePath, FileMode.Open, FileAccess.ReadWrite, FileShare.Delete)
                 );
                 if (openResult.IsFailed)
                     return openResult.ToResult().LogError();

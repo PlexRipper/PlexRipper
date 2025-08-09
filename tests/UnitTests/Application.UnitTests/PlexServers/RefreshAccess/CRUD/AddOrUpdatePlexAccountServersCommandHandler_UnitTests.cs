@@ -26,12 +26,12 @@ public class AddOrUpdatePlexAccountServersCommandHandler_UnitTests : BaseUnitTes
         var serverAccessTokens = FakeData.GetServerAccessTokenDTO(seed, plexAccount, plexServers);
 
         // Remove all associations
-        await IDbContext.PlexAccountServers.ExecuteDeleteAsync();
+        await IDbContext.PlexAccountServers.ExecuteDeleteAsync(CancellationToken);
 
         // Act
         var request = new AddOrUpdatePlexAccountServersCommand(plexAccount.Id, serverAccessTokens);
         var handler = new AddOrUpdatePlexAccountServersCommandHandler(Log, IDbContext);
-        var result = await handler.Handle(request, CancellationToken.None);
+        var result = await handler.Handle(request, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -72,12 +72,12 @@ public class AddOrUpdatePlexAccountServersCommandHandler_UnitTests : BaseUnitTes
         serverAccessTokens.ForEach(x => x.AccessToken = "######");
 
         // Remove all associations
-        await IDbContext.PlexAccountServers.ExecuteDeleteAsync();
+        await IDbContext.PlexAccountServers.ExecuteDeleteAsync(CancellationToken);
 
         // Act
         var request = new AddOrUpdatePlexAccountServersCommand(plexAccount.Id, serverAccessTokens);
         var handler = new AddOrUpdatePlexAccountServersCommandHandler(Log, IDbContext);
-        var result = await handler.Handle(request, CancellationToken.None);
+        var result = await handler.Handle(request, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -119,12 +119,12 @@ public class AddOrUpdatePlexAccountServersCommandHandler_UnitTests : BaseUnitTes
         serverAccessTokens[1].AccessToken = string.Empty;
 
         // Remove all associations
-        await IDbContext.PlexAccountServers.ExecuteDeleteAsync();
+        await IDbContext.PlexAccountServers.ExecuteDeleteAsync(CancellationToken);
 
         // Act
         var request = new AddOrUpdatePlexAccountServersCommand(plexAccount.Id, serverAccessTokens);
         var handler = new AddOrUpdatePlexAccountServersCommandHandler(Log, IDbContext);
-        var result = await handler.Handle(request, CancellationToken.None);
+        var result = await handler.Handle(request, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

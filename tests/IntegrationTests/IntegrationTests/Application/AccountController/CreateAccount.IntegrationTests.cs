@@ -6,7 +6,7 @@ using PlexRipper.Application;
 
 namespace IntegrationTests.AccountController;
 
-[CollectionDefinition("SequentialIntegrationTests", DisableParallelization = true)]
+[Collection("SequentialIntegrationTests")]
 public class CreateAccountIntegrationTests : BaseIntegrationTests
 {
     public CreateAccountIntegrationTests(ITestOutputHelper output)
@@ -57,10 +57,10 @@ public class CreateAccountIntegrationTests : BaseIntegrationTests
 
         var resultDTO = response.Result;
         resultDTO.IsSuccess.ShouldBeTrue();
-        await container.SchedulerService.AwaitScheduler();
+        await container.SchedulerService.AwaitScheduler(TestContext.Current.CancellationToken);
 
         // Add a small delay to ensure database transactions complete after job execution
-        await Task.Delay(1000);
+        await Task.Delay(1000, TestContext.Current.CancellationToken);
 
         // Wait for a database to be in the expected state with increased timeout for complex job chains
         await WaitForDatabaseConditionAsync(

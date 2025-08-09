@@ -19,6 +19,8 @@ public partial class BaseUnitTest
     // Use loose behavior here to avoid Dispose() not mocked exception
     protected Mock<HttpMessageHandler> HttpHandlerMock = new(MockBehavior.Loose);
 
+    protected CancellationToken CancellationToken => TestContext.Current.CancellationToken;
+
     /// <summary>
     /// This constructor is run before every test
     /// </summary>
@@ -32,9 +34,12 @@ public partial class BaseUnitTest
         EnvironmentExtensions.EnableUnmaskedLog(true);
 
         LogManager.SetupLogging(logEventLevel);
-        LogConfig.SetTestOutputHelper(output);
+
+        var testLogConfig = new TestLogConfig(output);
+
         BogusExtensions.Setup();
-        Log = LogManager.CreateLogInstance(output, typeof(BaseUnitTest));
+
+        Log = testLogConfig.CreateLogInstance<BaseUnitTest>(_logEventLevel);
 
         mock = AutoMock.GetStrict(SetDefaultBuilder);
     }

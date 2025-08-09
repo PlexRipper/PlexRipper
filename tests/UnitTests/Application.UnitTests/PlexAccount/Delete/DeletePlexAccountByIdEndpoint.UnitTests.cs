@@ -34,7 +34,7 @@ public class DeletePlexAccountByIdEndpointUnitTests : BaseUnitTest
 
         // Act
         var ep = SetupEndpointUnitTest<DeletePlexAccountByIdEndpoint>();
-        await ep.HandleAsync(new DeletePlexAccountByIdRequest(testAccount.Id), CancellationToken.None);
+        await ep.HandleAsync(new DeletePlexAccountByIdRequest(testAccount.Id), CancellationToken);
         var result = ep.Response;
 
         // Assert

@@ -1,20 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
     <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFramework>net9.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <!-- Disable entry point generation as this project has it's own entry point -->
-        <GenerateProgramFile>false</GenerateProgramFile>
         <IsPackable>false</IsPackable>
-        <IsTestProject>true</IsTestProject>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <OutputType>Exe</OutputType>
+        <StartupObject>BaseTests.Benchmarks.ProgramBenchmarks</StartupObject>
+        <GenerateProgramFile>false</GenerateProgramFile>
     </PropertyGroup>
-
     <PropertyGroup Condition="'$(Configuration)' == ''">
         <Configuration>Release</Configuration>
     </PropertyGroup>
-
     <PropertyGroup Condition="'$(Configuration)'=='Release'">
         <Optimize>true</Optimize>
         <DebugType>none</DebugType>
@@ -22,22 +19,15 @@
         <TieredCompilation>false</TieredCompilation>
         <Prefer32Bit>false</Prefer32Bit>
     </PropertyGroup>
-
     <ItemGroup>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1"/>
-        <PackageReference Include="coverlet.collector" Version="6.0.0"/>
-        <PackageReference Include="BenchmarkDotNet" Version="0.14.0"/>
-        <PackageReference Include="BenchmarkDotNet.Diagnostics.dotTrace" Version="0.14.0"/>
-        <PackageReference Include="BenchmarkDotNet.TestAdapter" Version="0.14.0"/>
-        <PackageReference Include="xunit" Version="2.9.2"/>
-        <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
+        <PackageReference Include="BenchmarkDotNet" Version="0.15.2" />
+        <PackageReference Include="BenchmarkDotNet.Diagnostics.dotTrace" Version="0.15.2" />
+        <PackageReference Include="CSharpier.MsBuild" Version="1.0.3">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
     </ItemGroup>
-
     <ItemGroup>
-        <ProjectReference Include="..\..\BaseTests\BaseTests.csproj"/>
+        <ProjectReference Include="..\..\BaseTests\BaseTests.csproj" />
     </ItemGroup>
-
 </Project>

@@ -11,7 +11,7 @@ public class LogModule : Module
 {
     protected override void Load(ContainerBuilder builder)
     {
-        builder.Register<ILogger>((_, _) => LogConfig.GetLogger()).SingleInstance();
+        builder.Register<ILogger>((_, _) => new LogConfig().GetLogger()).SingleInstance();
         builder.RegisterType<Log>().As<ILog>().SingleInstance();
 
         builder

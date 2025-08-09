@@ -15,17 +15,17 @@ namespace Logging;
 
 public class LogConfig
 {
-    public static MessageTemplateTextFormatter TemplateTextFormatter => new(Template);
-
-    public static readonly string Template =
+    private static readonly string _template =
         $"{{NewLine}}{{Timestamp:HH:mm:ss}} [{{Level}}] [{{{nameof(LogMetaData.ClassName)}}}.cs:{{{nameof(LogMetaData.LineNumber)}}}.{{{nameof(LogMetaData.MethodName)}}}()] => {{Message:lj}}{{NewLine}}{{Exception}}";
 
-    public static LoggerConfiguration GetBaseConfiguration()
+    protected static MessageTemplateTextFormatter TemplateTextFormatter => new(_template);
+
+    protected static LoggerConfiguration GetBaseConfiguration()
     {
         var config = new LoggerConfiguration()
             .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
             .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
-            // This filters: No XML encryptor configured. Key {*} may be persisted to storage in unencrypted form.
+            // These filters: No XML encryptor configured. Key {*} may be persisted to storage in unencrypted form.
             // This can be ignored because we use proper auth: https://github.com/dotnet/aspnetcore/issues/3309#issuecomment-404246838
             .Filter.ByExcluding(Matching.FromSource("Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager"))
             .MinimumLevel.Override("Quartz", LogEventLevel.Warning)
@@ -55,8 +55,8 @@ public class LogConfig
 
         return config
             .Enrich.With<ExternalFrameworkEnricher>()
-            .WriteTo.Debug(outputTemplate: Template)
-            .WriteTo.Console(theme: LogThemes.SystemColored, outputTemplate: Template);
+            .WriteTo.Debug(outputTemplate: _template)
+            .WriteTo.Console(theme: LogThemes.SystemColored, outputTemplate: _template);
     }
 
     public virtual Logger GetLogger(LogEventLevel minimumLogLevel = LogEventLevel.Debug) =>

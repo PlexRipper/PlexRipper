@@ -15,7 +15,7 @@ public class PlexRipperWebApplicationFactory : WebApplicationFactory<Program>
 
     public readonly string MemoryDbName;
 
-    private static readonly ILog _log = LogManager.CreateLogInstance(typeof(PlexRipperWebApplicationFactory));
+    private static readonly ILog _log = new LogConfig().CreateLogInstance<PlexRipperWebApplicationFactory>();
 
     private readonly UnitTestDataConfig _config;
 

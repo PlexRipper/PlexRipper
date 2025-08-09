@@ -11,8 +11,9 @@ namespace PlexRipper.BaseTests;
 
 public static partial class MockDatabase
 {
-    private static readonly ILog _log = LogManager.CreateLogInstance(typeof(MockDatabase));
-    private static readonly NaturalSortComparer NaturalComparer = new(StringComparison.InvariantCultureIgnoreCase);
+    private static readonly ILog _log = new LogConfig().CreateLogInstance(typeof(MockDatabase));
+
+    private static readonly NaturalSortComparer _naturalComparer = new(StringComparison.InvariantCultureIgnoreCase);
 
     #region Methods
 
@@ -225,7 +226,7 @@ public static partial class MockDatabase
 
         databaseConnection.CreateCollation(
             OrderByNaturalExtensions.CollationName,
-            (x, y) => NaturalComparer.Compare(x, y)
+            (x, y) => _naturalComparer.Compare(x, y)
         );
 
         optionsBuilder.UseSqlite(databaseConnection);
@@ -246,7 +247,7 @@ public static partial class MockDatabase
 
         databaseConnection.CreateCollation(
             OrderByNaturalExtensions.CollationName,
-            (x, y) => NaturalComparer.Compare(x, y)
+            (x, y) => _naturalComparer.Compare(x, y)
         );
 
         optionsBuilder.UseSqlite(databaseConnection);

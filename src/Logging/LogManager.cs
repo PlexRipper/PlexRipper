@@ -52,19 +52,6 @@ public static class LogManager
         }
     }
 
-    /// <summary>
-    /// Returns a new typed <see cref="ILog"/> instance.
-    /// </summary>
-    /// <returns></returns>
-    public static ILog<T> CreateLogInstance<T>()
-        where T : class => new Log<T>(new LogConfig().GetLogger(), typeof(T));
-
-    /// <summary>
-    /// Returns a new typed <see cref="ILog"/> instance.
-    /// </summary>
-    /// <returns></returns>
-    public static ILog CreateLogInstance(Type classType) => new Log<Type>(new LogConfig().GetLogger(), classType);
-
     public static void CloseAndFlush()
     {
         Serilog.Log.CloseAndFlush();
@@ -74,6 +61,6 @@ public static class LogManager
 
     #endregion
 
-    private static readonly ILog _log = CreateLogInstance(typeof(LogManager));
+    private static readonly ILog _log = new LogConfig().CreateLogInstance(typeof(LogManager));
     public static LogEventLevel MinimumLogLevel { get; private set; }
 }

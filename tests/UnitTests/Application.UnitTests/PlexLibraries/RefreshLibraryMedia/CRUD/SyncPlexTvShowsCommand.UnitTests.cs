@@ -4,12 +4,15 @@ namespace PlexRipper.Application.UnitTests;
 
 public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsCommandHandler>
 {
-    private SyncPlexTvShowsCommandValidator _validator = new(
-        LogManager.CreateLogInstance<SyncPlexTvShowsCommandValidator>()
-    );
+    private readonly SyncPlexTvShowsCommandValidator _validator;
 
     public SyncPlexTvShowsCommandUnitTests(ITestOutputHelper output)
-        : base(output) { }
+        : base(output)
+    {
+        _validator = new SyncPlexTvShowsCommandValidator(
+            new TestLogConfig(output).CreateLogInstance<SyncPlexTvShowsCommandValidator>()
+        );
+    }
 
     [Fact]
     public async Task ShouldCreateAllTvShows_WhenNoneExists()

@@ -6,7 +6,7 @@ namespace PlexRipper.Domain;
 
 public static class StopWatchExtensions
 {
-    private static readonly ILog _log = LogManager.CreateLogInstance(typeof(StopWatchExtensions));
+    private static readonly ILog _log = new LogConfig().CreateLogInstance(typeof(StopWatchExtensions));
 
     public static void StopAndLog(
         this Stopwatch stopwatch,

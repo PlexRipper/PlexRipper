@@ -10,7 +10,7 @@ namespace PlexRipper.WebAPI;
 /// </summary>
 public class Program
 {
-    private static readonly ILog _log = LogManager.CreateLogInstance(typeof(Program));
+    private static readonly ILog _log = new LogConfig().CreateLogInstance(typeof(Program));
 
     /// <summary>
     ///  The main method entry point for the application.

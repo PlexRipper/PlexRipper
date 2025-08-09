@@ -5,8 +5,9 @@ namespace PlexRipper.Domain;
 
 public static class DataFormat
 {
-    private static readonly NumberFormatInfo NumberFormat = NumberFormatInfo.InvariantInfo;
-    private static readonly ILog _log = LogManager.CreateLogInstance(typeof(DataFormat));
+    private static readonly NumberFormatInfo _numberFormat = NumberFormatInfo.InvariantInfo;
+
+    private static readonly ILog _log = new LogConfig().CreateLogInstance(typeof(DataFormat));
 
     /// <summary>
     /// Format file size or downloaded size string.
@@ -20,11 +21,11 @@ public static class DataFormat
         var gigaByteSize = megaByteSize / 1024D;
         return byteSize switch
         {
-            < 1024 => string.Format(NumberFormat, "{0} B", byteSize),
-            < 1048576 => string.Format(NumberFormat, "{0:0.00} kB", kiloByteSize),
+            < 1024 => string.Format(_numberFormat, "{0} B", byteSize),
+            < 1048576 => string.Format(_numberFormat, "{0:0.00} kB", kiloByteSize),
             var _ => byteSize < 1073741824
-                ? string.Format(NumberFormat, "{0:0.00} MB", megaByteSize)
-                : string.Format(NumberFormat, "{0:0.00} GB", gigaByteSize),
+                ? string.Format(_numberFormat, "{0:0.00} MB", megaByteSize)
+                : string.Format(_numberFormat, "{0:0.00} GB", gigaByteSize),
         };
     }
 
@@ -42,9 +43,9 @@ public static class DataFormat
         if (speed < 1024)
             return speed + " B/s";
         if (speed < 1048576)
-            return kbSpeed.ToString("#.00", NumberFormat) + " kB/s";
+            return kbSpeed.ToString("#.00", _numberFormat) + " kB/s";
 
-        return mbSpeed.ToString("#.00", NumberFormat) + " MB/s";
+        return mbSpeed.ToString("#.00", _numberFormat) + " MB/s";
     }
 
     /// <summary>

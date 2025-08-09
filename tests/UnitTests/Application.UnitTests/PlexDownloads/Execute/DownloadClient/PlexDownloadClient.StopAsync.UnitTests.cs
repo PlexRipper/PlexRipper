@@ -2,6 +2,7 @@
 using Autofac;
 using ByteSizeLib;
 using Data.Contracts;
+using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 using PlexApi.Contracts;
 using PlexRipper.PlexApi;
@@ -38,14 +39,20 @@ public class PlexDownloadClientStopAsyncUnitTests : BaseUnitTest<PlexDownloadCli
         );
         await dbContext.SaveChangesAsync(CancellationToken);
 
+        // Get the actual machine identifier from the database
+        var serverMachineIdentifier = await dbContext.GetPlexServerMachineIdentifierById(
+            downloadTask.PlexServerId,
+            CancellationToken
+        );
+
         // PlexDownloadClientMocks
         mock.Mock<IServerSettingsModule>()
-            .Setup(x => x.GetDownloadSpeedLimit(It.IsAny<string>()))
+            .Setup(x => x.GetDownloadSpeedLimit(serverMachineIdentifier))
             .Returns(downloadSpeedLimit)
             .Verifiable(Times.Once);
 
         mock.Mock<IServerSettingsModule>()
-            .Setup(x => x.GetDownloadSpeedLimitObservable(It.IsAny<string>()))
+            .Setup(x => x.GetDownloadSpeedLimitObservable(serverMachineIdentifier))
             .Returns(Observable.Return(downloadSpeedLimit))
             .Verifiable(Times.Once);
 
@@ -61,10 +68,16 @@ public class PlexDownloadClientStopAsyncUnitTests : BaseUnitTest<PlexDownloadCli
         }
 
         mock.Mock<ICommandExecutor>()
-            .Setup(m => m.Send(It.IsAny<DownloadTaskUpdatedNotification>(), It.IsAny<CancellationToken>()))
+            .Setup(m => m.Send(It.IsAny<ICommand<Result>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok())
-            .Callback<DownloadTaskUpdatedNotification, CancellationToken>(
-                (notification, _) => AddDownloadTaskUpdateAsync(notification).GetAwaiter().GetResult()
+            .Callback<ICommand<Result>, CancellationToken>(
+                (command, _) =>
+                {
+                    if (command is DownloadTaskUpdatedNotification notification)
+                    {
+                        AddDownloadTaskUpdateAsync(notification).GetAwaiter().GetResult();
+                    }
+                }
             )
             .Verifiable(Times.AtLeastOnce);
 

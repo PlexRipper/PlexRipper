@@ -19,7 +19,6 @@
         <PackageReference Include="FastEndpoints" Version="7.0.1" />
         <PackageReference Include="FastEndpoints.Security" Version="7.0.1" />
         <PackageReference Include="FastEndpoints.Swagger" Version="7.0.1" />
-        <PackageReference Include="MediatR.Extensions.Autofac.DependencyInjection" Version="12.0.0" />
         <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.7" />
         <PackageReference Include="Polly" Version="8.6.2" />
         <PackageReference Include="Polly.Core" Version="8.6.2" />
@@ -42,5 +41,8 @@
     </ItemGroup>
     <ItemGroup>
         <InternalsVisibleTo Include="PlexRipper.Application.UnitTests" />
+    </ItemGroup>
+    <ItemGroup>
+        <Folder Include="Config\Mediatr\" />
     </ItemGroup>
 </Project>

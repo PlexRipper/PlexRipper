@@ -77,16 +77,16 @@ Follow one of these guides depending on your platform:
     <tr style="border: none;">
         <td style="border: none;">
             <a href="https://hub.docker.com/r/plexripper/plexripper">
-                <img src="https://img.shields.io/docker/pulls/reaparr/reaparr?label=Docker%20Pulls&style=flat-square" />
+                <img src="https://img.shields.io/docker/pulls/plexripper/plexripper?label=Docker%20Pulls&style=flat-square" />
             </a>
         </td>
         <td style="border: none;">
-            <a href="https://github.com/Reaparr/Reaparr//graphs/contributors" alt="Commit Activity">
+            <a href="https://github.com/Reaparr/Reaparr/graphs/contributors" alt="Commit Activity">
                 <img src="https://img.shields.io/github/commit-activity/y/reaparr/reaparr?style=flat-square&label=Commit%20Activity" alt="Commit Activity" />
             </a>
         </td>
         <td style="border: none;">
-            <a href="https://github.com/Reaparr/Reaparr//actions/workflows/dev-test.yml" alt="Code Checks">
+            <a href="https://github.com/Reaparr/Reaparr/actions/workflows/dev-test.yml" alt="Code Checks">
                 <img src="https://img.shields.io/github/actions/workflow/status/Reaparr/Reaparr/dev-test.yml?style=flat-square&label=Checks" alt="Code Checks" />
             </a>
         </td>

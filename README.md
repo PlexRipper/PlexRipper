@@ -1,4 +1,4 @@
-<div style="text-align: center; margin-top: 1rem;"><a href="https://www.reaparr.rocks/"><img src="https://raw.githubusercontent.com/Reaparr/Reaparr/dev/export/reaparr/Logo/reaparr-full.svg" alt="Reaparr Logo" width="256" /></a>
+<div style="text-align: center; margin-top: 1rem;"><a href="https://www.reaparr.rocks/"><img src="https://raw.githubusercontent.com/Reaparr/Reaparr/dev/export/reaparr/logo/reaparr-full.svg" alt="Reaparr Logo" width="256" /></a>
 </div>
 <h2 style="text-align: center; margin: 0;">Reaparr</h2>
 

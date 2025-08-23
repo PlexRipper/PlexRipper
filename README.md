@@ -1,5 +1,4 @@
 <h1 align="center">
-  <br>
   <a href="https://www.reaparr.rocks/"><img src="https://raw.githubusercontent.com/Reaparr/Reaparr/dev/export/reaparr/logo/reaparr-full.svg" alt="Reaparr Logo" width="256"></a>
   <br>
   <i>REAPARR</i>
@@ -139,4 +138,5 @@ Rider </a>
 
 <a href="http://www.jetbrains.com/profiler/"><img src="https://raw.githubusercontent.com/reaparr/reaparr/dev/export/jetbrains/dottrace.svg" alt="Jetbrains DotTrace" width="32">
 DotTrace </a>
+
 

@@ -1,6 +1,6 @@
 <h1 align="center">
   <br>
-  <a href="https://www.reaparr.rocks/"><img src="https://raw.githubusercontent.com/reaparr/reaparr/dev/export/reaparr/logo/reaparr-full-256.png" alt="Reaparr Logo" width="256"></a>
+  <a href="https://www.reaparr.rocks/"><img src="https://raw.githubusercontent.com/Reaparr/Reaparr/refs/heads/dev/export/reaparr/Logo/reaparr-full-256.png" alt="Reaparr Logo" width="256"></a>
   <br>
   Reaparr
   <br>
@@ -33,8 +33,6 @@
 		<a href="https://www.reaparr.rocks/">Website</a> • <a href="#key-features">Features</a> • <a href="#what-is-reaparr">What is Reaparr?</a> • <a href="#installation">Installation</a>
 	</strong>
 </p>
-
-<video src="https://github.com/user-attachments/assets/e0f8077e-2653-49eb-835d-4c83edd22687" loop autoplay muted controls title="Reaparr Demo" style="max-width: 100%; height: auto; display: block;"></video>
 
 ## Key Features
  - Intuitive interface for seamless media management and downloads!

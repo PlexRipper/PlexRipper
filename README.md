@@ -1,8 +1,8 @@
 <h1 align="center">
   <br>
-  <a href="https://www.plexripper.rocks/"><img src="https://raw.githubusercontent.com/plexripper/plexripper/dev/export/plexripper/logo/full/full-logo-1024.png" alt="PlexRipper" width="200"></a>
+  <a href="https://www.reaparr.rocks/"><img src="https://raw.githubusercontent.com/reaparr/reaparr/dev/export/reaparr/logo/reaparr-full-256.png" alt="Reaparr Logo" width="256"></a>
   <br>
-  PlexRipper
+  Reaparr
   <br>
 </h1>
 
@@ -10,18 +10,18 @@
 
 <h5 align="center"><i>This tool is not affiliated with, endorsed by, or associated with Plex Inc.</i></h5>
 <h4 align="center">
-⭐ Star us on <a href="https://github.com/PlexRipper/PlexRipper">GitHub</a> and <a href="https://hub.docker.com/r/plexripper/plexripper">DockerHub</a> — it motivates us a lot and helps to pay the rent!</h4>
+⭐ Star us on <a href="https://github.com/Reaparr/Reaparr/">GitHub</a> and <a href="https://hub.docker.com/r/plexripper/plexripper">DockerHub</a> — it motivates us a lot and helps to pay the rent!</h4>
 
 
 
 <p align="center">
-  <a href="https://github.com/PlexRipper/PlexRipper"><img src="https://img.shields.io/github/stars/plexripper/plexripper?style=social"></a>
-  <a href="https://github.com/PlexRipper/PlexRipper"><img src="https://img.shields.io/github/followers/plexripper?style=social"></a>
+  <a href="https://github.com/Reaparr/Reaparr/"><img src="https://img.shields.io/github/stars/reaparr/reaparr?style=social"></a>
+  <a href="https://github.com/Reaparr/Reaparr/"><img src="https://img.shields.io/github/followers/reaparr?style=social"></a>
   <a href="https://hub.docker.com/r/plexripper/plexripper"><img src="https://img.shields.io/docker/stars/plexripper/plexripper"></a>
   <a href="https://hub.docker.com/r/plexripper/plexripper"><img src="https://img.shields.io/docker/pulls/plexripper/plexripper?label=Docker%20Pulls&style=flat-square" /></a>
 </p>
 
-<h4 align="center">Also maximize your PlexRipper experience! Join our <a href="https://discord.com/invite/Qa3BtxN77g">Discord</a> for expert tips, updates, and a helpful community!</h4>
+<h4 align="center">Also maximize your Reaparr experience! Join our <a href="https://discord.com/invite/Qa3BtxN77g">Discord</a> for expert tips, updates, and a helpful community!</h4>
 <p  align="center">
             <a href="https://discord.com/invite/Qa3BtxN77g">
                 <img src="https://img.shields.io/discord/1169347287135309834?style=flat-square&label=Discord" alt="Discord" />
@@ -30,11 +30,11 @@
 
 <p align="center">
 	<strong>
-		<a href="https://www.plexripper.rocks/">Website</a> • <a href="#key-features">Features</a> • <a href="#what-is-plexripper">What is PlexRipper?</a> • <a href="#installation">Installation</a>
+		<a href="https://www.reaparr.rocks/">Website</a> • <a href="#key-features">Features</a> • <a href="#what-is-reaparr">What is Reaparr?</a> • <a href="#installation">Installation</a>
 	</strong>
 </p>
 
-<video src="https://github.com/user-attachments/assets/e0f8077e-2653-49eb-835d-4c83edd22687" loop autoplay muted controls title="PlexRipper Demo"  style="max-width: 100%; height: auto; display: block;"></video>
+<video src="https://github.com/user-attachments/assets/e0f8077e-2653-49eb-835d-4c83edd22687" loop autoplay muted controls title="Reaparr Demo" style="max-width: 100%; height: auto; display: block;"></video>
 
 ## Key Features
  - Intuitive interface for seamless media management and downloads!
@@ -44,15 +44,15 @@
  - Scalable, multi-threaded, and resilient download manager to handle huge libraries!
  - Packed with quality of life features and more!
 
-## What is PlexRipper?
-PlexRipper is an independent media management tool designed to help users organize and interact with their personal media libraries. It is not affiliated with, endorsed by, or associated with Plex Inc. or any other media platform.
+## What is Reaparr?
+Reaparr is an independent media management tool designed to help users organize and interact with their personal media libraries. It is not affiliated with, endorsed by, or associated with Plex Inc. or any other media platform.
 
-Users are solely responsible for ensuring compliance with Plex’s Terms of Service and applicable laws in their jurisdiction. PlexRipper does not bypass security measures or access features requiring a valid Plex Pass subscription.
+Users are solely responsible for ensuring compliance with Plex’s Terms of Service and applicable laws in their jurisdiction. Reaparr does not bypass security measures or access features requiring a valid Plex Pass subscription.
 
-PlexRipper is intended for personal use only. Users must:
+Reaparr is intended for personal use only. Users must:
 - Have explicit ownership or permission to access and download content.
-- Avoid using PlexRipper to infringe upon copyrights or violate platform terms.
-- Use PlexRipper responsibly, ensuring it does not overload or disrupt server operations.
+- Avoid using Reaparr to infringe upon copyrights or violate platform terms.
+- Use Reaparr responsibly, ensuring it does not overload or disrupt server operations.
 
 Prohibited activities include:
 - Downloading content from servers without proper authorization.
@@ -63,15 +63,15 @@ Prohibited activities include:
 
 Follow one of these guides depending on your platform:
 <ul>
-    <li><a href="https://www.plexripper.rocks/guides/installation/docker">Docker</a></li>
-    <li><a href="https://www.plexripper.rocks/guides/installation/unraid">Unraid</a></li>
-    <li><a href="https://www.plexripper.rocks/guides/installation/windows">Windows</a></li>
-    <li><a href="https://www.plexripper.rocks/guides/installation/linux">Linux</a></li>
-    <li><a href="https://www.plexripper.rocks/guides/installation/macos">MacOS</a></li>
-    <li><a href="https://www.plexripper.rocks/guides/installation/synology">Synology</a></li>
+    <li><a href="https://www.reaparr.rocks/guides/installation/docker">Docker</a></li>
+    <li><a href="https://www.reaparr.rocks/guides/installation/unraid">Unraid</a></li>
+    <li><a href="https://www.reaparr.rocks/guides/installation/windows">Windows</a></li>
+    <li><a href="https://www.reaparr.rocks/guides/installation/linux">Linux</a></li>
+    <li><a href="https://www.reaparr.rocks/guides/installation/macos">MacOS</a></li>
+    <li><a href="https://www.reaparr.rocks/guides/installation/synology">Synology</a></li>
 </ul>
 
-#### Visit [www.plexripper.rocks](https://www.plexripper.rocks/) for more information!
+#### Visit [www.reaparr.rocks](https://www.reaparr.rocks/) for more information!
 
 ## Project Status
 
@@ -79,17 +79,17 @@ Follow one of these guides depending on your platform:
     <tr style="border: none;">
         <td style="border: none;">
             <a href="https://hub.docker.com/r/plexripper/plexripper">
-                <img src="https://img.shields.io/docker/pulls/plexripper/plexripper?label=Docker%20Pulls&style=flat-square" />
+                <img src="https://img.shields.io/docker/pulls/reaparr/reaparr?label=Docker%20Pulls&style=flat-square" />
             </a>
         </td>
         <td style="border: none;">
-            <a href="https://github.com/PlexRipper/PlexRipper/graphs/contributors" alt="Commit Activity">
-                <img src="https://img.shields.io/github/commit-activity/y/plexripper/plexripper?style=flat-square&label=Commit%20Activity" alt="Commit Activity" />
+            <a href="https://github.com/Reaparr/Reaparr//graphs/contributors" alt="Commit Activity">
+                <img src="https://img.shields.io/github/commit-activity/y/reaparr/reaparr?style=flat-square&label=Commit%20Activity" alt="Commit Activity" />
             </a>
         </td>
         <td style="border: none;">
-            <a href="https://github.com/PlexRipper/PlexRipper/actions/workflows/dev-test.yml" alt="Code Checks">
-                <img src="https://img.shields.io/github/actions/workflow/status/PlexRipper/PlexRipper/dev-test.yml?style=flat-square&label=Checks" alt="Code Checks" />
+            <a href="https://github.com/Reaparr/Reaparr//actions/workflows/dev-test.yml" alt="Code Checks">
+                <img src="https://img.shields.io/github/actions/workflow/status/Reaparr/Reaparr/dev-test.yml?style=flat-square&label=Checks" alt="Code Checks" />
             </a>
         </td>
         <td style="border: none;">
@@ -100,30 +100,30 @@ Follow one of these guides depending on your platform:
     </tr>
     <tr style="border: none;">
         <td style="border: none;">
-            <img src="https://img.shields.io/docker/image-size/plexripper/plexripper/latest?style=flat-square&label=PlexRipper%20Stable%20Image%20Size" alt="PlexRipper Stable Image Size" />
+            <img src="https://img.shields.io/docker/image-size/plexripper/plexripper/latest?style=flat-square&label=Reaparr%20Stable%20Image%20Size" alt="Reaparr Stable Image Size" />
         </td>
         <td style="border: none;">
-            <img src="https://img.shields.io/docker/image-size/plexripper/plexripper/dev?style=flat-square&label=PlexRipper%20Dev%20Image Size" alt="PlexRipper Dev Image Size" />
+            <img src="https://img.shields.io/docker/image-size/plexripper/plexripper/dev?style=flat-square&label=Reaparr%20Dev%20Image Size" alt="Reaparr Dev Image Size" />
         </td>
         <td style="border: none;">
-            <img src="https://img.shields.io/github/repo-size/plexripper/plexripper?style=flat-square&label=PlexRipper%20Repo%20Size" alt="PlexRipper Repo Size" />
+            <img src="https://img.shields.io/github/repo-size/reaparr/reaparr?style=flat-square&label=Reaparr%20Repo%20Size" alt="Reaparr Repo Size" />
         </td>
         <td style="border: none;">
-            <img src="https://img.shields.io/github/created-at/plexripper/plexripper?style=flat-square&label=PlexRipper%20Birthdate" alt="PlexRipper Birthdate" />
+            <img src="https://img.shields.io/github/created-at/reaparr/reaparr?style=flat-square&label=Reaparr%20Birthdate" alt="Reaparr Birthdate" />
         </td>
     </tr>
 </table>
 
 ## Sponsors
 
-<p>Huge thank you to <a href="http://www.jetbrains.com/"><img src="https://raw.githubusercontent.com/plexripper/plexripper/dev/export/jetbrains/jetbrains.svg" alt="Jetbrains" width="32"> JetBrains </a> for supporting open source projects and providing us with free licenses of their great tools!</p>
+<p>Huge thank you to <a href="http://www.jetbrains.com/"><img src="https://raw.githubusercontent.com/reaparr/reaparr/dev/export/jetbrains/jetbrains.svg" alt="Jetbrains" width="32"> JetBrains </a> for supporting open source projects and providing us with free licenses of their great tools!</p>
 
-PlexRipper very contentedly uses the following tools:
+Reaparr very contentedly uses the following tools:
 
-  <a href="http://www.jetbrains.com/resharper/"><img src="https://raw.githubusercontent.com/plexripper/plexripper/dev/export/jetbrains/resharper.svg" alt="Jetbrains Resharper" width="32"> Resharper </a>
+  <a href="http://www.jetbrains.com/resharper/"><img src="https://raw.githubusercontent.com/reaparr/reaparr/dev/export/jetbrains/resharper.svg" alt="Jetbrains Resharper" width="32"> Resharper </a>
 
-  <a href="http://www.jetbrains.com/webstorm/"><img src="https://raw.githubusercontent.com/plexripper/plexripper/dev/export/jetbrains/webstorm.svg" alt="Jetbrains WebStorm" width="32"> WebStorm </a>
+  <a href="http://www.jetbrains.com/webstorm/"><img src="https://raw.githubusercontent.com/reaparr/reaparr/dev/export/jetbrains/webstorm.svg" alt="Jetbrains WebStorm" width="32"> WebStorm </a>
 
-  <a href="http://www.jetbrains.com/rider/"><img src="https://raw.githubusercontent.com/plexripper/plexripper/dev/export/jetbrains/rider.svg" alt="Jetbrains Rider" width="32"> Rider </a>
+  <a href="http://www.jetbrains.com/rider/"><img src="https://raw.githubusercontent.com/reaparr/reaparr/dev/export/jetbrains/rider.svg" alt="Jetbrains Rider" width="32"> Rider </a>
 
-  <a href="http://www.jetbrains.com/profiler/"><img src="https://raw.githubusercontent.com/plexripper/plexripper/dev/export/jetbrains/dottrace.svg" alt="Jetbrains DotTrace" width="32"> DotTrace </a>
+  <a href="http://www.jetbrains.com/profiler/"><img src="https://raw.githubusercontent.com/reaparr/reaparr/dev/export/jetbrains/dottrace.svg" alt="Jetbrains DotTrace" width="32"> DotTrace </a>

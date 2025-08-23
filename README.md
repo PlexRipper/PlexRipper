@@ -1,7 +1,7 @@
 <h1 align="center">
   <a href="https://www.reaparr.rocks/"><img src="https://raw.githubusercontent.com/Reaparr/Reaparr/dev/export/reaparr/logo/reaparr-full.svg" alt="Reaparr Logo" width="256"></a>
   <br>
-  <i>REAPARR</i>
+  <a href="https://www.reaparr.rocks/"><img src="https://raw.githubusercontent.com/Reaparr/Reaparr/dev/export/reaparr/title/reaparr-title.svg" alt="Reaparr Title" width="400"></a>
   <br>
 </h1>
 
@@ -138,5 +138,6 @@ Rider </a>
 
 <a href="http://www.jetbrains.com/profiler/"><img src="https://raw.githubusercontent.com/reaparr/reaparr/dev/export/jetbrains/dottrace.svg" alt="Jetbrains DotTrace" width="32">
 DotTrace </a>
+
 
 

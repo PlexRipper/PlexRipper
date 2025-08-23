@@ -1,6 +1,10 @@
-<div style="text-align: center; margin-top: 1rem;"><a href="https://www.reaparr.rocks/"><img src="https://raw.githubusercontent.com/Reaparr/Reaparr/dev/export/reaparr/logo/reaparr-full.svg" alt="Reaparr Logo" width="256" /></a>
-</div>
-<h2 style="text-align: center; margin: 0;">Reaparr</h2>
+<h1 align="center">
+  <br>
+  <a href="https://www.reaparr.rocks/"><img src="https://raw.githubusercontent.com/Reaparr/Reaparr/dev/export/reaparr/logo/reaparr-full.svg" alt="Reaparr Logo" width="256"></a>
+  <br>
+  <i>REAPARR</i>
+  <br>
+</h1>
 
 <h4 align="center">A cross-platform Plex media downloader that seamlessly adds media from other Plex servers to your
 own!</h4>
@@ -8,7 +12,7 @@ own!</h4>
 <h5 align="center"><i>This tool is not affiliated with, endorsed by, or associated with Plex Inc.</i></h5>
 <h4 align="center">
 ⭐ Star us on <a href="https://github.com/Reaparr/Reaparr/">GitHub</a>
-and <a href="https://hub.docker.com/r/plexripper/plexripper">DockerHub</a> — it motivates us a lot and helps to pay the
+and <a href="https://hub.docker.com/r/reaparr/reaparr">DockerHub</a> — it motivates us a lot and helps to pay the
 rent!</h4>
 
 
@@ -135,3 +139,4 @@ Rider </a>
 
 <a href="http://www.jetbrains.com/profiler/"><img src="https://raw.githubusercontent.com/reaparr/reaparr/dev/export/jetbrains/dottrace.svg" alt="Jetbrains DotTrace" width="32">
 DotTrace </a>
+

@@ -24,15 +24,15 @@ runs:
             with:
                 webhook: ${{ inputs.webhook }}
                 nodetail: true
-                title: "New PlexRipper development version has been released!"
+                title: "New Reaparr development version has been released!"
                 color: "#0200ff" # Blue
                 description: |
-                    A new **development** version `${{ inputs.version }}` of PlexRipper is now available on Docker!
+                    A new **development** version `${{ inputs.version }}` of Reaparr is now available on Docker!
                     [Development changelog](${{ inputs.changelog-url }})
-                    Click [here](https://hub.docker.com/repository/docker/plexripper/plexripper/tags) to download the development version!
-                username: PlexRipper
+                    Click [here](https://hub.docker.com/repository/docker/reaparr/reaparr/tags) to download the development version!
+                username: Reaparr
                 url: ${{ inputs.changelog-url }}
-                avatar_url: "https://raw.githubusercontent.com/PlexRipper/PlexRipper/refs/heads/dev/export/plexripper/logo/full/full-logo-512.png"
+                avatar_url: "https://raw.githubusercontent.com/Reaparr/Reaparr/refs/heads/dev/export/reaparr/logo/reaparr-full.svg"
 
         -   name: Notify Discord of build status (Stable)
             if: ${{ inputs.is-dev != 'true' }}
@@ -40,12 +40,12 @@ runs:
             with:
                 webhook: ${{ inputs.webhook }}
                 nodetail: true
-                title: "New PlexRipper version has been released!"
+                title: "New Reaparr version has been released!"
                 color: "#ff0000" # Red
                 description: |
-                    A new **stable** version `${{ inputs.version }}` of PlexRipper is now available on Docker!
+                    A new **stable** version `${{ inputs.version }}` of Reaparr is now available on Docker!
                     [Release changelog](${{ inputs.changelog-url }})
-                    Click [here](https://hub.docker.com/repository/docker/plexripper/plexripper/tags) to download the stable version!
-                username: PlexRipper
+                    Click [here](https://hub.docker.com/repository/docker/reaparr/reaparr/tags) to download the stable version!
+                username: Reaparr
                 url: ${{ inputs.changelog-url }}
-                avatar_url: "https://raw.githubusercontent.com/PlexRipper/PlexRipper/refs/heads/dev/export/plexripper/logo/full/full-logo-512.png"
+                avatar_url: "https://raw.githubusercontent.com/Reaparr/Reaparr/refs/heads/dev/export/reaparr/logo/reaparr-full.svg"

@@ -30,7 +30,7 @@ runs:
                     A new **development** version `${{ inputs.version }}` of Reaparr is now available on Docker!
                     [Development changelog](${{ inputs.changelog-url }})
                     Click [here](https://hub.docker.com/repository/docker/reaparr/reaparr/tags) to download the development version!
-                username: PlexRipper
+                username: Reaparr
                 url: ${{ inputs.changelog-url }}
                 avatar_url: "https://raw.githubusercontent.com/Reaparr/Reaparr/refs/heads/dev/export/reaparr/logo/reaparr-full.svg"
 
@@ -46,6 +46,6 @@ runs:
                     A new **stable** version `${{ inputs.version }}` of Reaparr is now available on Docker!
                     [Release changelog](${{ inputs.changelog-url }})
                     Click [here](https://hub.docker.com/repository/docker/reaparr/reaparr/tags) to download the stable version!
-                username: PlexRipper
+                username: Reaparr
                 url: ${{ inputs.changelog-url }}
                 avatar_url: "https://raw.githubusercontent.com/Reaparr/Reaparr/refs/heads/dev/export/reaparr/logo/reaparr-full.svg"

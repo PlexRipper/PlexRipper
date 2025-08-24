@@ -81,7 +81,7 @@ jobs:
                 uses: docker/metadata-action@v5
                 with:
                     images: |
-                        name=plexripper/plexripper
+                        name=reaparr/reaparr
                     tags: |
                         type=semver,pattern={{version}},value=${{ env.VERSION_NO_V }}
 
@@ -106,4 +106,4 @@ jobs:
                     webhook: ${{ secrets.DISCORD_RELEASES_CHANNEL_WEBHOOK }}
                     version: ${{ env.VERSION_NO_V }}
                     is-dev: false
-                    changelog-url: "https://github.com/PlexRipper/PlexRipper/releases/tag/v${{ env.VERSION_NO_V }}"
+                    changelog-url: "https://github.com/Reaparr/Reaparr/releases/tag/v${{ env.VERSION_NO_V }}"

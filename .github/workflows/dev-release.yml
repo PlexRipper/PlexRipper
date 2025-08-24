@@ -1,4 +1,4 @@
-name: Create PlexRipper Dev Container Release
+name: Create Reaparr Dev Container Release
 
 on:
     workflow_dispatch:
@@ -61,7 +61,7 @@ jobs:
                 uses: docker/metadata-action@v5
                 with:
                     images: |
-                        name=plexripper/plexripper
+                        name=reaparr/reaparr
                     tags: |
                         type=raw,value=${{ env.VERSION_WITH_DATE }}
                         type=raw,value=dev
@@ -85,7 +85,7 @@ jobs:
                 id: comparison_link
                 run: |
                     # Construct the comparison URL
-                    COMPARISON_URL="https://github.com/PlexRipper/PlexRipper/compare/${{ steps.get_current_release.outputs.tag_name }}...HEAD"
+                    COMPARISON_URL="https://github.com/Reaparr/Reaparr/compare/${{ steps.get_current_release.outputs.tag_name }}...HEAD"
                     echo "COMPARISON_URL=$COMPARISON_URL" >> $GITHUB_ENV
 
             -   name: Setup Semantic Release packages
@@ -95,14 +95,14 @@ jobs:
                 id: release_notes
                 run: |
                     TAG_NAME=${{ steps.get_current_release.outputs.tag_name }}
-                    COMPARISON_URL="https://github.com/PlexRipper/PlexRipper/compare/$TAG_NAME...HEAD"
+                    COMPARISON_URL="https://github.com/Reaparr/Reaparr/compare/$TAG_NAME...HEAD"
                     echo "COMPARISON_URL=$COMPARISON_URL" >> $GITHUB_ENV
                     
                     # Generate release notes and format it to GitHub markdown
                     TEMP_FILE=$(mktemp)
                     npx --prefix src/WebAPI/ClientApp/ semantic-release --dry-run --range "$TAG_NAME..HEAD" | \
                     perl -ne 'print if /^###/ .. eof' | \
-                    sed -e 's/\(\S*\) (\(\S*\))/[**\1**](https:\/\/github.com\/PlexRipper\/PlexRipper\/commit\/\2)/g' | \
+                    sed -e 's/\(\S*\) (\(\S*\))/[**\1**](https:\/\/github.com\/Reaparr\/Reaparr\/commit\/\2)/g' | \
                     sed -e 's/^# \(.*\)/# \1/' \
                     -e 's/^### \(.*\)/### \1/' \
                     -e 's/^    \* \([^:]*\): \(.*\)$/- **\1**: \2/' > $TEMP_FILE
@@ -161,4 +161,4 @@ jobs:
                     webhook: ${{ secrets.DISCORD_RELEASES_CHANNEL_WEBHOOK }}
                     version: ${{ env.VERSION_WITH_DATE }}
                     is-dev: true
-                    changelog-url: 'https://github.com/PlexRipper/PlexRipper/releases/tag/dev-latest'
+                    changelog-url: 'https://github.com/Reaparr/Reaparr/releases/tag/dev-latest'

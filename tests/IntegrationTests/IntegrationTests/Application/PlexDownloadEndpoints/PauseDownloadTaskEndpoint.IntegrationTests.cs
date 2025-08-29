@@ -1,6 +1,5 @@
 namespace IntegrationTests;
 
-[CollectionDefinition("Non-Parallel Tests", DisableParallelization = true)]
 public class PauseDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
 {
     public PauseDownloadTaskEndpointIntegrationTests(ITestOutputHelper output)

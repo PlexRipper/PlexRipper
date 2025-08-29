@@ -17,10 +17,7 @@ public class DownloadTaskUpdatedHandler : ICommandHandler<DownloadTaskUpdatedCom
         _signalRService = signalRService;
     }
 
-    public async Task<Result> ExecuteAsync(
-        DownloadTaskUpdatedCommand command,
-        CancellationToken cancellationToken
-    )
+    public async Task<Result> ExecuteAsync(DownloadTaskUpdatedCommand command, CancellationToken cancellationToken)
     {
         var plexServerId = command.Key.PlexServerId;
 

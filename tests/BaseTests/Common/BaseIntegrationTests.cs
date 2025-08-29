@@ -4,6 +4,7 @@ using Serilog.Events;
 
 namespace PlexRipper.BaseTests;
 
+[Collection("Integration Tests")]
 public class BaseIntegrationTests
 {
     private readonly ILog _log;

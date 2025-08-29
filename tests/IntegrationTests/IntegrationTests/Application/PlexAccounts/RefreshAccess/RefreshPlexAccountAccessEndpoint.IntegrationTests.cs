@@ -5,7 +5,6 @@ using PlexRipper.Application;
 
 namespace IntegrationTests.PlexAccounts.RefreshAccess;
 
-[Collection("Sequential")]
 public class RefreshPlexAccountAccessEndpointIntegrationTestsIntegrationTests : BaseIntegrationTests
 {
     public RefreshPlexAccountAccessEndpointIntegrationTestsIntegrationTests(ITestOutputHelper output)

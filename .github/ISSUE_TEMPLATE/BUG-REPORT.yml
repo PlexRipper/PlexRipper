@@ -1,5 +1,5 @@
 name: "Bug Report 🐛"
-description: Report a bug you found in PlexRipper!
+description: Report a bug you found in Reaparr!
 title: "[BUG] - <title>"
 labels: [
   "bug"
@@ -17,8 +17,8 @@ body:
   - type: input
     id: version
     attributes:
-      label: "PlexRipper version"
-      description: Please enter the version of PlexRipper this bug occurred on. If you write "latest" the issue will be closed immediately.
+      label: "Reaparr version"
+      description: Please enter the version of Reaparr this bug occurred on. If you write "latest" the issue will be closed immediately.
       placeholder: ex. v0.10.0
     validations:
       required: true
@@ -26,7 +26,7 @@ body:
     id: os
     attributes:
       label: "Platform"
-      description: "On what server/platform operating system is PlexRipper running?"
+      description: "On what server/platform operating system is Reaparr running?"
       multiple: false
       options:
         - Unraid

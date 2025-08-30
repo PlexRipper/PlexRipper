@@ -1,8 +1,8 @@
 version: '3.4'
 services:
-    plexripper:
-        container_name: PlexRipper
-        image: plexripper/plexripper:latest
+    reaparr:
+        container_name: Reaparr
+        image: reaparr/reaparr:latest
         build:
             context: .
             dockerfile: ./Dockerfile
@@ -15,11 +15,11 @@ services:
             - PGID=1000
             - TZ=America/New_York
             - LOG_LEVEL=INFORMATION # Set the logging level in the docker logging
-            - LOG_ENV_VARS=false # Enable Log dump of all available ENV variables on PlexRipper startup
+            - LOG_ENV_VARS=false # Enable Log dump of all available ENV variables on Reaparr startup
             - UNMASKED=false # Unmask sensitive data in logs if true
         volumes:
-            # The paths /mnt/TURBO/PlexRipperDockerCache/ are examples, and you will need valid paths on your device with write permission.
-            - /mnt/TURBO/PlexRipperDockerCache/Config:/Config
-            - /mnt/TURBO/PlexRipperDockerCache/Downloads:/Downloads
-            - /mnt/TURBO/PlexRipperDockerCache/Movies:/Movies
-            - /mnt/TURBO/PlexRipperDockerCache/TvShows:/TvShows
+            # The paths /mnt/TURBO/ReaparrDockerCache/ are examples, and you will need valid paths on your device with write permission.
+            - /mnt/TURBO/ReaparrDockerCache/Config:/Config
+            - /mnt/TURBO/ReaparrDockerCache/Downloads:/Downloads
+            - /mnt/TURBO/ReaparrDockerCache/Movies:/Movies
+            - /mnt/TURBO/ReaparrDockerCache/TvShows:/TvShows

@@ -15,18 +15,23 @@ export interface AppCredentialsDTO {
   userName: string;
 }
 
-/** @example {"username":"PlexRipperRocks","password":"Pl€XR!ℙℙ€R69","rememberMe":false} */
+/** @example {"username":"ReaparrRocks","password":"R€Aℙℙ@RR69","rememberMe":false} */
 export interface AppUserLoginEndpointRequest {
   /**
    * @minLength 1
-   * @default "Pl€XR!ℙℙ€R69"
+   * @default "R€Aℙℙ@RR69"
+   * @example "R€Aℙℙ@RR69"
    */
   password: string;
-  /** @default false */
+  /**
+   * @default false
+   * @example false
+   */
   rememberMe: boolean;
   /**
    * @minLength 1
-   * @default "PlexRipperRocks"
+   * @default "ReaparrRocks"
+   * @example "ReaparrRocks"
    */
   username: string;
 }
@@ -268,11 +273,17 @@ export interface ErrorDTO {
   reasons: IError[];
 }
 
+/** the dto used to send an error response to the client */
 export interface ErrorResponse {
+  /** the collection of errors for the current context */
   errors: Record<string, string[]>;
-  /** @default "One or more errors occurred!" */
+  /**
+   * the message for the error response
+   * @default "One or more errors occurred!"
+   */
   message: string;
   /**
+   * the http status code sent to the client. default is 400.
    * @format int32
    * @default 400
    */
@@ -351,7 +362,9 @@ export interface GeneratePlexTokenResponse {
   plexAuthToken: string;
 }
 
+/** Definition of an error */
 export interface IError {
+  /** Reasons of the error */
   reasons?: IError[] | null;
 }
 
@@ -1275,11 +1288,17 @@ export interface SyncServerMediaProgress {
   serverId: number;
 }
 
-/** @example {"username":"PlexRipperRocks","password":"Pl€XR!ℙℙ€R69"} */
+/** @example {"username":"ReaparrRocks","password":"R€Aℙℙ@RR69"} */
 export interface UpdateCredentialsEndpointRequest {
-  /** @minLength 8 */
+  /**
+   * @minLength 8
+   * @example "R€Aℙℙ@RR69"
+   */
   password?: string | null;
-  /** @minLength 8 */
+  /**
+   * @minLength 8
+   * @example "ReaparrRocks"
+   */
   username?: string | null;
 }
 

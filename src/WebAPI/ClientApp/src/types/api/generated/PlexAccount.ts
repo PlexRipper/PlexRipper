@@ -35,7 +35,7 @@ export class PlexAccount {
    */
   createPlexAccountEndpoint = (data: PlexAccountDTO, params: RequestParams = {}) =>
     from(
-      Axios.request<BaseResultDTO>({
+      Axios.request<PlexAccountDTO>({
         url: `/api/PlexAccount`,
         method: "POST",
         data: data,
@@ -44,7 +44,7 @@ export class PlexAccount {
         format: "json",
         ...params,
       }),
-    ).pipe(apiCheckPipe<BaseResultDTO>);
+    ).pipe(apiCheckPipe<PlexAccountDTO>);
 
   /**
    * No description

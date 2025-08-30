@@ -1092,22 +1092,14 @@
         "resolved": "16.3.0",
         "contentHash": "SgMOdxbz8X65z8hraIs6hOEdnkH6hESTAIUa7viEngHOYaH+6q5XJmwr1+yb9vJpNQ19hCQY69xbFsLtXpobQA=="
       },
-      "application.contracts": {
-        "type": "Project",
-        "dependencies": {
-          "PlexRipper.Domain": "[1.0.0, )",
-          "Quartz": "[3.15.0, )",
-          "WebAPI.Contracts": "[1.0.0, )"
-        }
-      },
       "data.contracts": {
         "type": "Project",
         "dependencies": {
-          "Application.Contracts": "[1.0.0, )",
           "EFCore.BulkExtensions.SQLite": "[9.0.1, )",
           "FlexLabs.EntityFrameworkCore.Upsert": "[9.0.0, )",
           "Microsoft.EntityFrameworkCore": "[9.0.8, )",
-          "PlexRipper.Domain": "[1.0.0, )"
+          "PlexRipper.Domain": "[1.0.0, )",
+          "Reaparr.Application.Contracts": "[1.0.0, )"
         }
       },
       "environment": {
@@ -1150,15 +1142,14 @@
       "plexapi.contracts": {
         "type": "Project",
         "dependencies": {
-          "Application.Contracts": "[1.0.0, )",
           "LukeHagar.PlexAPI.SDK": "[0.15.1, )",
-          "PlexRipper.Domain": "[1.0.0, )"
+          "PlexRipper.Domain": "[1.0.0, )",
+          "Reaparr.Application.Contracts": "[1.0.0, )"
         }
       },
       "PlexRipper.Application": {
         "type": "Project",
         "dependencies": {
-          "Application.Contracts": "[1.0.0, )",
           "Autofac.Extras.Quartz": "[10.0.0, )",
           "Data.Contracts": "[1.0.0, )",
           "FastEndpoints": "[7.0.1, )",
@@ -1173,6 +1164,7 @@
           "Polly": "[8.6.2, )",
           "Polly.Core": "[8.6.2, )",
           "Quartz.Serialization.SystemTextJson": "[3.15.0, )",
+          "Reaparr.Application.Contracts": "[1.0.0, )",
           "Settings.Contracts": "[1.0.0, )",
           "WebAPI.Contracts": "[1.0.0, )"
         }
@@ -1209,11 +1201,11 @@
       "PlexRipper.FileSystem": {
         "type": "Project",
         "dependencies": {
-          "Application.Contracts": "[1.0.0, )",
           "Autofac": "[8.4.0, )",
           "Autofac.Extras.Quartz": "[10.0.0, )",
           "Data.Contracts": "[1.0.0, )",
           "FileSystem.Contracts": "[1.0.0, )",
+          "Reaparr.Application.Contracts": "[1.0.0, )",
           "System.IO.Abstractions": "[22.0.15, )",
           "System.IO.FileSystem": "[4.3.0, )"
         }
@@ -1254,6 +1246,14 @@
           "Autofac": "[8.4.0, )",
           "FileSystem.Contracts": "[1.0.0, )",
           "Settings.Contracts": "[1.0.0, )"
+        }
+      },
+      "Reaparr.Application.Contracts": {
+        "type": "Project",
+        "dependencies": {
+          "PlexRipper.Domain": "[1.0.0, )",
+          "Quartz": "[3.15.0, )",
+          "WebAPI.Contracts": "[1.0.0, )"
         }
       },
       "settings.contracts": {

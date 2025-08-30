@@ -4,6 +4,8 @@
         <LangVersion>13</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
         <IsPackable>false</IsPackable>
+        <RootNamespace>Reaparr.PlexApi.UnitTests</RootNamespace>
+        <AssemblyName>Reaparr.PlexApi.UnitTests</AssemblyName>
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
         <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
         <Nullable>enable</Nullable>

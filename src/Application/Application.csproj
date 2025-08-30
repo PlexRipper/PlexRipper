@@ -3,8 +3,8 @@
         <TargetFramework>net9.0</TargetFramework>
         <LangVersion>13</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
-        <RootNamespace>PlexRipper.Application</RootNamespace>
-        <AssemblyName>PlexRipper.Application</AssemblyName>
+        <RootNamespace>Reaparr.Application</RootNamespace>
+        <AssemblyName>Reaparr.Application</AssemblyName>
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
         <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
         <Nullable>enable</Nullable>
@@ -40,6 +40,6 @@
         <FrameworkReference Include="Microsoft.AspNetCore.App" />
     </ItemGroup>
     <ItemGroup>
-        <InternalsVisibleTo Include="PlexRipper.Application.UnitTests" />
+        <InternalsVisibleTo Include="Reaparr.Application.UnitTests" />
     </ItemGroup>
 </Project>

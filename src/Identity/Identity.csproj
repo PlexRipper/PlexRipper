@@ -3,8 +3,8 @@
         <TargetFramework>net9.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <AssemblyName>PlexRipper.Identity</AssemblyName>
-        <RootNamespace>PlexRipper.Identity</RootNamespace>
+        <AssemblyName>Reaparr.Identity</AssemblyName>
+        <RootNamespace>Reaparr.Identity</RootNamespace>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     </PropertyGroup>
     <ItemGroup>

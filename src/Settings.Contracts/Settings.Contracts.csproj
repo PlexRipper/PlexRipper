@@ -4,6 +4,8 @@
         <LangVersion>13</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <RootNamespace>Reaparr.Settings.Contracts</RootNamespace>
+        <AssemblyName>Reaparr.Settings.Contracts</AssemblyName>
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
         <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>

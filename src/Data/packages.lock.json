@@ -855,22 +855,14 @@
         "resolved": "9.0.0",
         "contentHash": "uksk86YlnzAdyfVNu3wICU0X5iXVe9LF7Q3UkngNliHWEvM5gvAlOUr+jmd9JwmbJWISH5+i1vyXE02lEVz7WQ=="
       },
-      "application.contracts": {
-        "type": "Project",
-        "dependencies": {
-          "PlexRipper.Domain": "[1.0.0, )",
-          "Quartz": "[3.15.0, )",
-          "WebAPI.Contracts": "[1.0.0, )"
-        }
-      },
       "data.contracts": {
         "type": "Project",
         "dependencies": {
-          "Application.Contracts": "[1.0.0, )",
           "EFCore.BulkExtensions.SQLite": "[9.0.1, )",
           "FlexLabs.EntityFrameworkCore.Upsert": "[9.0.0, )",
           "Microsoft.EntityFrameworkCore": "[9.0.8, )",
-          "PlexRipper.Domain": "[1.0.0, )"
+          "PlexRipper.Domain": "[1.0.0, )",
+          "Reaparr.Application.Contracts": "[1.0.0, )"
         }
       },
       "environment": {
@@ -930,6 +922,14 @@
           "Data.Contracts": "[1.0.0, )",
           "Microsoft.AspNetCore.DataProtection.EntityFrameworkCore": "[9.0.8, )",
           "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "[9.0.8, )"
+        }
+      },
+      "Reaparr.Application.Contracts": {
+        "type": "Project",
+        "dependencies": {
+          "PlexRipper.Domain": "[1.0.0, )",
+          "Quartz": "[3.15.0, )",
+          "WebAPI.Contracts": "[1.0.0, )"
         }
       },
       "settings.contracts": {

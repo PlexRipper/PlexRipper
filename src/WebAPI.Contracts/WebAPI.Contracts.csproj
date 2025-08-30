@@ -4,6 +4,8 @@
         <LangVersion>13</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <RootNamespace>Reaparr.WebAPI.Contracts</RootNamespace>
+        <AssemblyName>Reaparr.WebAPI.Contracts</AssemblyName>
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
         <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>

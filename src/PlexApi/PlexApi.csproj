@@ -3,8 +3,8 @@
         <TargetFramework>net9.0</TargetFramework>
         <LangVersion>13</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
-        <RootNamespace>PlexRipper.PlexApi</RootNamespace>
-        <AssemblyName>PlexRipper.PlexApi</AssemblyName>
+        <RootNamespace>Reaparr.PlexApi</RootNamespace>
+        <AssemblyName>Reaparr.PlexApi</AssemblyName>
         <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
         <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>

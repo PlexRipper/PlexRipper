@@ -4,6 +4,8 @@
         <LangVersion>13</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
         <IsPackable>false</IsPackable>
+        <RootNamespace>Reaparr.Settings.UnitTests</RootNamespace>
+        <AssemblyName>Reaparr.Settings.UnitTests</AssemblyName>
         <IncludeSymbolsInSingleFile>true</IncludeSymbolsInSingleFile>
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
         <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>

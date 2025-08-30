@@ -40,20 +40,32 @@ public class AppExtensions
             _log.Here(sourceFilePath, memberName, sourceLineNumber).Debug("Vars:\n {EnvironmentVars}", json);
         }
 
-        // Retrieve PUID and PGID from environment variables
-        _log.Here(sourceFilePath, memberName, sourceLineNumber)
-            .Information(
-                "PUID from env: {EnvPUID} and from the system: {PUID}",
-                EnvironmentExtensions.GetPuid(),
-                getuid()
-            );
-
-        _log.Here(sourceFilePath, memberName, sourceLineNumber)
-            .Information(
-                "PGID from env: {EnvPGID} and from the system: {PGID}",
-                EnvironmentExtensions.GetPgid(),
-                getgid()
-            );
+        // Retrieve PUID and PGID; guard for non-Unix platforms
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            _log.Here(sourceFilePath, memberName, sourceLineNumber)
+                .Information(
+                    "PUID from env: {EnvPUID} and from the system: {PUID}",
+                    EnvironmentExtensions.GetPuid(),
+                    getuid()
+                );
+            _log.Here(sourceFilePath, memberName, sourceLineNumber)
+                .Information(
+                    "PGID from env: {EnvPGID} and from the system: {PGID}",
+                    EnvironmentExtensions.GetPgid(),
+                    getgid()
+                );
+        }
+        else
+        {
+            _log.Here(sourceFilePath, memberName, sourceLineNumber)
+                .Information(
+                    "Non-Unix OS ({OS}); only env values available. PUID: {EnvPUID}, PGID: {EnvPGID}",
+                    RuntimeInformation.OSDescription,
+                    EnvironmentExtensions.GetPuid(),
+                    EnvironmentExtensions.GetPgid()
+                );
+        }
 
         _log.Here(sourceFilePath, memberName, sourceLineNumber)
             .Information("Current system Username: {SystemPUIDName}", System.Environment.UserName);

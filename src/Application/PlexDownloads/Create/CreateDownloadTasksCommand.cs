@@ -95,10 +95,7 @@ public class CreateDownloadTasksCommandHandler : ICommandHandler<CreateDownloadT
                 .Distinct()
                 .ToList();
 
-            await _eventPublisher.PublishAsync(
-                new CheckDownloadQueueNotification(uniquePlexServers),
-                cancellationToken
-            );
+            await _eventPublisher.PublishAsync(new CheckDownloadQueueEvent(uniquePlexServers), cancellationToken);
         }
 
         return Result.Ok();

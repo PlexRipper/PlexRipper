@@ -55,7 +55,7 @@ public class DownloadJobListener : IDownloadJobListener
                 );
                 await _fileMergeQueue.CheckFileMergeQueue();
                 await _eventPublisher.PublishAsync(
-                    new CheckDownloadQueueNotification(downloadTaskKey.PlexServerId),
+                    new CheckDownloadQueueEvent(downloadTaskKey.PlexServerId),
                     cancellationToken
                 );
             }

@@ -3,14 +3,14 @@ using FastEndpoints;
 
 namespace PlexRipper.Application;
 
-public record CheckDownloadQueueNotification : IEvent
+public record CheckDownloadQueueEvent : IEvent
 {
-    public CheckDownloadQueueNotification(int plexServerId)
+    public CheckDownloadQueueEvent(int plexServerId)
     {
         PlexServerIds = [plexServerId];
     }
 
-    public CheckDownloadQueueNotification(List<int> plexServerIds)
+    public CheckDownloadQueueEvent(List<int> plexServerIds)
     {
         PlexServerIds = plexServerIds;
     }
@@ -18,7 +18,7 @@ public record CheckDownloadQueueNotification : IEvent
     public List<int> PlexServerIds { get; }
 }
 
-public class CheckDownloadQueueHandler : IEventHandler<CheckDownloadQueueNotification>
+public class CheckDownloadQueueHandler : IEventHandler<CheckDownloadQueueEvent>
 {
     private readonly IDownloadQueue _downloadQueue;
 
@@ -27,9 +27,9 @@ public class CheckDownloadQueueHandler : IEventHandler<CheckDownloadQueueNotific
         _downloadQueue = downloadQueue;
     }
 
-    public async Task HandleAsync(CheckDownloadQueueNotification notification, CancellationToken cancellationToken)
+    public async Task HandleAsync(CheckDownloadQueueEvent @event, CancellationToken cancellationToken)
     {
-        var checkResult = await _downloadQueue.CheckDownloadQueue(notification.PlexServerIds);
+        var checkResult = await _downloadQueue.CheckDownloadQueue(@event.PlexServerIds);
         if (checkResult.IsFailed)
             checkResult.LogError();
     }

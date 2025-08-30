@@ -64,7 +64,7 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
             .Verifiable(Times.Once);
 
         mock.SetupCommand(It.IsAny<DownloadTaskUpdatedCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.Once);
-        mock.PublishEvent(It.IsAny<CheckDownloadQueueNotification>).Returns(Task.CompletedTask).Verifiable(Times.Once);
+        mock.PublishEvent(It.IsAny<CheckDownloadQueueEvent>).Returns(Task.CompletedTask).Verifiable(Times.Once);
 
         // Act
         var result = await _sut.ExecuteAsync(new StartDownloadTaskCommand(pausedMergeTask.Id), CancellationToken);
@@ -116,7 +116,7 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
 
         mock.SetupCommand(It.IsAny<PauseDownloadTaskCommand>).ReturnOk();
         mock.SetupCommand(It.IsAny<DownloadTaskUpdatedCommand>).ReturnsAsync(Result.Ok());
-        mock.PublishEvent(It.IsAny<CheckDownloadQueueNotification>).Returns(Task.CompletedTask);
+        mock.PublishEvent(It.IsAny<CheckDownloadQueueEvent>).Returns(Task.CompletedTask);
 
         // Act
         var result = await _sut.ExecuteAsync(new StartDownloadTaskCommand(lastDownloadTask.Id), CancellationToken);
@@ -139,7 +139,7 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
         // Verify that the downloading task was not paused as we are starting one that is already downloading
         mock.VerifyEventPublished(It.IsAny<PauseDownloadTaskCommand>, Times.Never());
         mock.VerifyEventPublished(It.IsAny<DownloadTaskUpdatedCommand>, Times.Once());
-        mock.VerifyEventPublished(It.IsAny<CheckDownloadQueueNotification>, Times.Once());
+        mock.VerifyEventPublished(It.IsAny<CheckDownloadQueueEvent>, Times.Once());
     }
 
     [Fact]
@@ -196,7 +196,7 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
                 }
             );
         mock.SetupCommand(It.IsAny<DownloadTaskUpdatedCommand>).ReturnsAsync(Result.Ok());
-        mock.PublishEvent(It.IsAny<CheckDownloadQueueNotification>).Returns(Task.CompletedTask);
+        mock.PublishEvent(It.IsAny<CheckDownloadQueueEvent>).Returns(Task.CompletedTask);
 
         // Act
         var result = await _sut.ExecuteAsync(new StartDownloadTaskCommand(lastDownloadTask.Id), CancellationToken);
@@ -219,6 +219,6 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
         // Verify that the downloading task was not paused as we are starting one that is already downloading
         mock.VerifyEventPublished(It.IsAny<PauseDownloadTaskCommand>, Times.Once());
         mock.VerifyEventPublished(It.IsAny<DownloadTaskUpdatedCommand>, Times.Once());
-        mock.VerifyEventPublished(It.IsAny<CheckDownloadQueueNotification>, Times.Once());
+        mock.VerifyEventPublished(It.IsAny<CheckDownloadQueueEvent>, Times.Once());
     }
 }

@@ -64,7 +64,7 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
         }
 
         await _eventPublisher.PublishAsync(
-            new CheckDownloadQueueNotification(downloadTaskKey.PlexServerId),
+            new CheckDownloadQueueEvent(downloadTaskKey.PlexServerId),
             cancellationToken
         );
 

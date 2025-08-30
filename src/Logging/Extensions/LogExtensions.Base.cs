@@ -26,9 +26,9 @@ public static partial class LogExtensions
         [CallerMemberName] string memberName = ""
     ) =>
         logger
-            .ForContext("MethodName", sourceFilePath)
-            .ForContext("MethodName", memberName)
-            .ForContext("LineNumber", sourceLineNumber);
+            .ForContext(nameof(LogMetaData.ClassName), Path.GetFileNameWithoutExtension(sourceFilePath))
+            .ForContext(nameof(LogMetaData.MethodName), memberName)
+            .ForContext(nameof(LogMetaData.LineNumber), sourceLineNumber);
 
     public static Result ToResult(this LogMetaData logMetaData)
     {

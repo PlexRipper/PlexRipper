@@ -3,7 +3,7 @@ using FluentValidation;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 using Reaparr.FileSystem.Contracts;
-using ILog = Reaparr.Logging.ILog;
+using Reaparr.Logging;
 
 namespace Reaparr.Application;
 

@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Reaparr.Logging;
-using ILog = Reaparr.Logging.ILog;
 
 namespace Reaparr.Domain;
 

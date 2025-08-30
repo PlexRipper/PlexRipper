@@ -7,7 +7,7 @@ namespace Reaparr.BaseTests;
 
 public class MockSignalRService : ISignalRService
 {
-    private readonly Logging.ILog<MockSignalRService> _log;
+    private readonly ILog<MockSignalRService> _log;
 
     public BlockingCollection<DownloadTaskDTO> DownloadTaskUpdate { get; } = new();
 

@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Reaparr.Application.Contracts;
 using Reaparr.Identity.Contracts;
-using ILog = Reaparr.Logging.ILog;
+using Reaparr.Logging;
 
 namespace Reaparr.Application;
 
@@ -112,14 +112,14 @@ public class AppUserLoginEndpoint : BaseEndpoint<AppUserLoginEndpointRequest>
             var result = _log.Warning("User {Username} is locked out.", username).ToResult();
             result.Add403ForbiddenError();
 
-            await SendFluentResult(result.ToResult(), ct);
+            await SendFluentResult(result, ct);
         }
         else
         {
             var result = _log.Warning("Failed to sign in user {Username}.", username).ToResult();
             result.Add401UnauthorizedError();
 
-            await SendFluentResult(result.ToResult(), ct);
+            await SendFluentResult(result, ct);
         }
     }
 }

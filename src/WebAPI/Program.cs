@@ -2,7 +2,6 @@ using Reaparr.Application;
 using Reaparr.Environment;
 using Reaparr.FluentResultExtensions;
 using Reaparr.Logging;
-using ILog = Reaparr.Logging.ILog;
 
 namespace Reaparr.WebAPI;
 

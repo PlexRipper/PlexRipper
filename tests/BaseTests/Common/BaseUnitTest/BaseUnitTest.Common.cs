@@ -6,7 +6,6 @@ using Reaparr.Data.Contracts;
 using Reaparr.Environment;
 using Reaparr.Logging;
 using Serilog.Events;
-using ILog = Reaparr.Logging.ILog;
 
 namespace Reaparr.BaseTests;
 

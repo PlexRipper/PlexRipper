@@ -3,7 +3,6 @@ using System.Runtime.InteropServices;
 using System.Text.Json;
 using Reaparr.Environment;
 using Reaparr.Logging;
-using ILog = Reaparr.Logging.ILog;
 
 namespace Reaparr.Application;
 

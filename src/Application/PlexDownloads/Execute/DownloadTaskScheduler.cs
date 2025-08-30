@@ -1,7 +1,7 @@
 using System.Text.Json;
 using Quartz;
 using Reaparr.Application.Contracts;
-using ILog = Reaparr.Logging.ILog;
+using Reaparr.Logging;
 
 namespace Reaparr.Application;
 

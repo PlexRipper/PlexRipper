@@ -8,7 +8,6 @@ using Reaparr.Application.Contracts;
 using Reaparr.Logging;
 using Reaparr.PlexApi.Contracts;
 using Serilog.Events;
-using ILog = Reaparr.Logging.ILog;
 
 namespace Reaparr.PlexApi;
 

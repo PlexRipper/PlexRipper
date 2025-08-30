@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.SignalR;
 using Reaparr.Application.Contracts;
+using Reaparr.Logging;
 using Reaparr.WebAPI.Contracts;
-using ILog = Reaparr.Logging.ILog;
 
 namespace Reaparr.WebAPI;
 

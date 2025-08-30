@@ -4,7 +4,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Reaparr.Application.Contracts;
 using Reaparr.FileSystem.Contracts;
-using ILog = Reaparr.Logging.ILog;
+using Reaparr.Logging;
 
 namespace Reaparr.Application;
 

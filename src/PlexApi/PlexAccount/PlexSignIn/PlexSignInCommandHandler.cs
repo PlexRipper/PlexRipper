@@ -1,7 +1,7 @@
 using FastEndpoints;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
+using Reaparr.Logging;
 using Reaparr.PlexApi.Contracts;
-using ILog = Reaparr.Logging.ILog;
 
 namespace Reaparr.PlexApi;
 

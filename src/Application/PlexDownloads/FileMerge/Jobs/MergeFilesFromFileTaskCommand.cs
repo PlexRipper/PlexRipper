@@ -6,7 +6,6 @@ using FluentValidation;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 using Reaparr.Logging;
-using ILog = Reaparr.Logging.ILog;
 
 namespace Reaparr.Application;
 

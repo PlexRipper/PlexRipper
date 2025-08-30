@@ -6,7 +6,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Reaparr.Logging;
 using Reaparr.WebAPI;
-using ILog = Reaparr.Logging.ILog;
 
 namespace Reaparr.BaseTests;
 

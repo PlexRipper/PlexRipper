@@ -4,7 +4,7 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
-using ILog = Reaparr.Logging.ILog;
+using Reaparr.Logging;
 
 namespace Reaparr.Application;
 

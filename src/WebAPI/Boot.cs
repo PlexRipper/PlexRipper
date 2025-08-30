@@ -1,7 +1,7 @@
 using Reaparr.Application;
 using Reaparr.Application.Contracts;
 using Reaparr.Environment;
-using ILog = Reaparr.Logging.ILog;
+using Reaparr.Logging;
 
 namespace Reaparr.WebAPI;
 

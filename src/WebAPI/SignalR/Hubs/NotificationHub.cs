@@ -9,7 +9,7 @@ namespace Reaparr.WebAPI;
 /// </summary>
 public class NotificationHub : Hub<INotificationHub>, INotificationHub
 {
-    private readonly Logging.ILog<NotificationHub> _log;
+    private readonly ILog<NotificationHub> _log;
 
     /// <summary>
     ///  Initializes a new instance of the <see cref="NotificationHub"/> class.

@@ -2,8 +2,8 @@ using FastEndpoints;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Reaparr.Application.Contracts;
+using Reaparr.Logging;
 using Reaparr.PlexApi.Contracts;
-using ILog = Reaparr.Logging.ILog;
 
 namespace Reaparr.Application;
 

@@ -2,7 +2,6 @@ using FluentResults;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Domain;
 using Reaparr.Logging;
-using ILog = Reaparr.Logging.ILog;
 
 namespace Reaparr.Data.Contracts;
 

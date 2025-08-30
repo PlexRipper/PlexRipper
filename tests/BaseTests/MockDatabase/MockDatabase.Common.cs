@@ -6,7 +6,6 @@ using Reaparr.Data;
 using Reaparr.Data.Contracts;
 using Reaparr.Identity;
 using Reaparr.Logging;
-using ILog = Reaparr.Logging.ILog;
 
 namespace Reaparr.BaseTests;
 

@@ -1,5 +1,5 @@
-﻿using Reaparr.Settings.Contracts;
-using ILog = Reaparr.Logging.ILog;
+﻿using Reaparr.Logging;
+using Reaparr.Settings.Contracts;
 
 namespace Reaparr.BaseTests;
 

@@ -1,7 +1,7 @@
 using FastEndpoints;
 using FluentValidation;
 using Quartz;
-using ILog = Reaparr.Logging.ILog;
+using Reaparr.Logging;
 
 namespace Reaparr.Application;
 

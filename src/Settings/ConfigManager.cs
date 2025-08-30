@@ -2,7 +2,6 @@
 using Reaparr.Environment;
 using Reaparr.Logging;
 using Reaparr.Settings.Contracts;
-using ILog = Reaparr.Logging.ILog;
 
 namespace Reaparr.Settings;
 

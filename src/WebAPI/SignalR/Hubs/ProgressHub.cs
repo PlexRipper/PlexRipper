@@ -10,7 +10,7 @@ namespace Reaparr.WebAPI;
 /// </summary>
 public class ProgressHub : Hub<IProgressHub>, IProgressHub
 {
-    private readonly Logging.ILog<ProgressHub> _log;
+    private readonly ILog<ProgressHub> _log;
 
     /// <summary>
     ///  Initializes a new instance of the <see cref="ProgressHub"/> class.

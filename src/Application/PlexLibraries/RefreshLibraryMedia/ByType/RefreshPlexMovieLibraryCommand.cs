@@ -1,8 +1,8 @@
 using FastEndpoints;
 using FluentValidation;
 using Reaparr.Data.Contracts;
+using Reaparr.Logging;
 using Reaparr.WebAPI.Contracts;
-using ILog = Reaparr.Logging.ILog;
 
 namespace Reaparr.Application;
 

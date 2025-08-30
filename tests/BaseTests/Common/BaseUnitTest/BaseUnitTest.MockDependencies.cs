@@ -10,7 +10,6 @@ using Reaparr.Identity.Contracts;
 using Reaparr.Logging;
 using Reaparr.PlexApi.Contracts;
 using Serilog;
-using ILog = Reaparr.Logging.ILog;
 using Log = Reaparr.Logging.Log;
 
 namespace Reaparr.BaseTests;

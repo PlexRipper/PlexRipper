@@ -1,6 +1,5 @@
 ﻿using System.Globalization;
 using Reaparr.Logging;
-using ILog = Reaparr.Logging.ILog;
 
 namespace Reaparr.Domain;
 

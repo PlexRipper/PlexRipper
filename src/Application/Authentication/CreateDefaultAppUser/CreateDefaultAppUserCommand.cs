@@ -6,7 +6,6 @@ using Reaparr.Application.Contracts;
 using Reaparr.Identity.Contracts;
 using Reaparr.Logging;
 using Reaparr.Settings.Contracts;
-using ILog = Reaparr.Logging.ILog;
 
 namespace Reaparr.Application;
 

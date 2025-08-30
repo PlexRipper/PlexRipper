@@ -3,7 +3,7 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
-using ILog = Reaparr.Logging.ILog;
+using Reaparr.Logging;
 
 namespace Reaparr.Application;
 
@@ -73,7 +73,9 @@ public class CheckAllConnectionsStatusByPlexServerHandler
         var connections = plexServer.PlexServerConnections.ToList();
         if (!connections.Any())
         {
-            return _log.Error("No connections found for the plex server {PlexServerName}", plexServerName).ToResult();
+            return _log.Here()
+                .Error("No connections found for the plex server {PlexServerName}", plexServerName)
+                .ToResult();
         }
 
         var previousResult = await _dbContext.IsServerOnline(plexServerId, cancellationToken: cancellationToken);
@@ -105,7 +107,8 @@ public class CheckAllConnectionsStatusByPlexServerHandler
         if (currentOnlineStatus)
             return Result.Ok(combinedResults.Value.ToList());
 
-        return _log.Error(
+        return _log.Here()
+            .Error(
                 "All connections to plex server with name: {PlexServerName} and id: {PlexServerId} failed to connect",
                 plexServerName,
                 plexServerId

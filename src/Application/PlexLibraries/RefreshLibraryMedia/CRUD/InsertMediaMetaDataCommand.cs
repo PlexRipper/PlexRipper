@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using Reaparr.Data.Contracts;
 using Reaparr.Logging;
 using Reaparr.PlexApi.Contracts;
-using ILog = Reaparr.Logging.ILog;
 
 namespace Reaparr.Application;
 

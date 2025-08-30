@@ -1,6 +1,6 @@
 using FastEndpoints;
 using Reaparr.Data.Contracts;
-using ILog = Reaparr.Logging.ILog;
+using Reaparr.Logging;
 
 namespace Reaparr.Application;
 

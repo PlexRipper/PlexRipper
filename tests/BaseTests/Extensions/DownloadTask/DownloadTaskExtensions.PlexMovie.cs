@@ -1,6 +1,6 @@
-using Data.Contracts;
+using Reaparr.Data.Contracts;
 
-namespace PlexRipper.BaseTests;
+namespace Reaparr.BaseTests;
 
 public static partial class DownloadTaskExtensions
 {

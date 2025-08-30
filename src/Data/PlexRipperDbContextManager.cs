@@ -1,12 +1,13 @@
 using System.Globalization;
 using System.IO.Abstractions;
-using Data.Contracts;
-using Environment;
-using Logging.Interface;
-using PlexRipper.Identity.Contracts;
-using Settings.Contracts;
+using Reaparr.Data.Contracts;
+using Reaparr.Environment;
+using Reaparr.Identity.Contracts;
+using Reaparr.Logging;
+using Reaparr.Logging.Interface;
+using Reaparr.Settings.Contracts;
 
-namespace PlexRipper.Data;
+namespace Reaparr.Data;
 
 public class PlexRipperDbContextManager : IPlexRipperDbContextManager
 {

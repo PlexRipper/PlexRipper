@@ -1,6 +1,6 @@
-using Settings.Contracts;
+using Reaparr.Settings.Contracts;
 
-namespace PlexRipper.Settings;
+namespace Reaparr.Settings;
 
 public static class SettingsModelToDTOMapper
 {

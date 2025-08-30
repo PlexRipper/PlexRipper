@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace Application.Contracts;
+namespace Reaparr.Application.Contracts;
 
 public record CreateDownloadTasksRequest
 {

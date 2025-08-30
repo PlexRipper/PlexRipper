@@ -1,11 +1,11 @@
-﻿using Data.Contracts;
-using FastEndpoints;
+﻿using FastEndpoints;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using PlexApi.Contracts;
-using WebAPI.Contracts;
+using Reaparr.Data.Contracts;
+using Reaparr.PlexApi.Contracts;
+using Reaparr.WebAPI.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 /// <summary>
 /// Retrieves the new media metadata from the PlexApi and stores it in the database.

@@ -1,8 +1,8 @@
 using FastEndpoints;
 using FluentResults;
-using PlexRipper.Domain;
+using Reaparr.Domain;
 
-namespace PlexApi.Contracts;
+namespace Reaparr.PlexApi.Contracts;
 
 /// <summary>
 /// Fetches all the <see cref="PlexTvShowSeason">Plex TvShow Seasons</see> from the Plex api with the given <see cref="PlexLibrary"/>.

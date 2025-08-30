@@ -1,6 +1,6 @@
 ﻿using Serilog.Events;
 
-namespace Environment;
+namespace Reaparr.Environment;
 
 public static class EnvironmentExtensions
 {

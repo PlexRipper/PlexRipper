@@ -2,17 +2,19 @@ using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using Autofac;
 using ByteSizeLib;
-using Data.Contracts;
-using Environment;
-using Logging.Interface;
-using PlexApi.Contracts;
-using PlexRipper.Data;
-using PlexRipper.Identity;
-using PlexRipper.Identity.Contracts;
+using Reaparr.Data;
+using Reaparr.Data.Contracts;
+using Reaparr.Environment;
+using Reaparr.Identity;
+using Reaparr.Identity.Contracts;
+using Reaparr.Logging;
+using Reaparr.Logging.Interface;
+using Reaparr.PlexApi.Contracts;
 using Serilog;
-using Log = Logging.Log;
+using ILog = Reaparr.Logging.ILog;
+using Log = Reaparr.Logging.Log;
 
-namespace PlexRipper.BaseTests;
+namespace Reaparr.BaseTests;
 
 public partial class BaseUnitTest
 {

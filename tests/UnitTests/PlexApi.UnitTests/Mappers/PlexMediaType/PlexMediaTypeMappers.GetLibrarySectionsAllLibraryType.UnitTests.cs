@@ -1,7 +1,8 @@
 using LukeHagar.PlexAPI.SDK.Models.Requests;
-using PlexApi.Contracts;
+using Reaparr.BaseTests;
+using Reaparr.PlexApi.Contracts;
 
-namespace PlexApi.UnitTests;
+namespace Reaparr.PlexApi.UnitTests;
 
 public class PlexMediaTypeMappersToGetLibrarySectionsAllLibraryTypeUnitTests : BaseUnitTest
 {

@@ -1,7 +1,8 @@
-using FileSystem.Contracts;
 using Microsoft.EntityFrameworkCore;
+using Reaparr.BaseTests;
+using Reaparr.FileSystem.Contracts;
 
-namespace PlexRipper.Application.UnitTests;
+namespace Reaparr.Application.UnitTests;
 
 public class FileMergeQueueUnitTests : BaseUnitTest<FileMergeQueue>
 {

@@ -1,4 +1,4 @@
-namespace PlexRipper.Domain;
+namespace Reaparr.Domain;
 
 /// <summary>
 /// This holds the task and state of individual DownloadWorkers.

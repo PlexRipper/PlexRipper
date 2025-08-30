@@ -1,8 +1,8 @@
 ﻿using System.IO.Abstractions.TestingHelpers;
-using Data.Contracts;
-using Settings.Contracts;
+using Reaparr.Data.Contracts;
+using Reaparr.Settings.Contracts;
 
-namespace PlexRipper.BaseTests;
+namespace Reaparr.BaseTests;
 
 public class UnitTestDataConfig : BaseConfig<UnitTestDataConfig>
 {

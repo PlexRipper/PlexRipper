@@ -1,7 +1,7 @@
 ﻿using Autofac;
-using Data.Contracts;
+using Reaparr.Data.Contracts;
 
-namespace PlexRipper.Data;
+namespace Reaparr.Data;
 
 public class DataModule : Module
 {

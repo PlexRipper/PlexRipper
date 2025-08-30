@@ -3,7 +3,7 @@ using FluentResults;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 
-namespace Data.Contracts;
+namespace Reaparr.Data.Contracts;
 
 public interface IDbContextDatabaseHelpers
 {

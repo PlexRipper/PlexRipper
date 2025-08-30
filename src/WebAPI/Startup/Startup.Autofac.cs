@@ -1,8 +1,9 @@
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using Reaparr.Logging;
 using Serilog;
 
-namespace PlexRipper.WebAPI;
+namespace Reaparr.WebAPI;
 
 public static partial class Startup
 {

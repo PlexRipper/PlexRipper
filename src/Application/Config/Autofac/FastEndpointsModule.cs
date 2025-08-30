@@ -3,7 +3,7 @@ using Autofac;
 using FastEndpoints;
 using Module = Autofac.Module;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public class FastEndpointsModule : Module
 {

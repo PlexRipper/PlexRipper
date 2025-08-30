@@ -1,7 +1,8 @@
-﻿using Environment;
+﻿using Reaparr.BaseTests;
+using Reaparr.Environment;
 using Serilog.Sinks.TestCorrelator;
 
-namespace Logging.UnitTests;
+namespace Reaparr.Logging.UnitTests;
 
 public class LogMaskingUnitTests : BaseUnitTest<LogMaskingUnitTests>
 {

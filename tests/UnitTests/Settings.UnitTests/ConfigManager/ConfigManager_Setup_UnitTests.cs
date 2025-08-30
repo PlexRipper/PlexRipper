@@ -1,10 +1,10 @@
 using System.IO.Abstractions;
 using System.Reactive.Subjects;
-using Environment;
-using PlexRipper.Settings;
-using Settings.Contracts;
+using Reaparr.BaseTests;
+using Reaparr.Environment;
+using Reaparr.Settings.Contracts;
 
-namespace Settings.UnitTests;
+namespace Reaparr.Settings.UnitTests;
 
 public class ConfigManager_Setup_UnitTests : BaseUnitTest<ConfigManager>
 {

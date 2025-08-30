@@ -1,8 +1,9 @@
-using Environment;
-using Logging.Interface;
+using Reaparr.Environment;
+using Reaparr.Logging;
 using Serilog.Events;
+using ILog = Reaparr.Logging.ILog;
 
-namespace PlexRipper.BaseTests;
+namespace Reaparr.BaseTests;
 
 [Collection("Integration Tests")]
 public abstract class BaseIntegrationTests

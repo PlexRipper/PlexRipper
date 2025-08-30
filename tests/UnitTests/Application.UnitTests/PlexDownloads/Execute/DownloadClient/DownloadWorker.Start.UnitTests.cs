@@ -1,9 +1,10 @@
 using Autofac;
 using ByteSizeLib;
 using Microsoft.EntityFrameworkCore;
-using PlexApi.Contracts;
+using Reaparr.BaseTests;
+using Reaparr.PlexApi.Contracts;
 
-namespace PlexRipper.Application.UnitTests;
+namespace Reaparr.Application.UnitTests;
 
 public class DownloadWorkerStartUnitTests : BaseUnitTest<DownloadWorker>
 {

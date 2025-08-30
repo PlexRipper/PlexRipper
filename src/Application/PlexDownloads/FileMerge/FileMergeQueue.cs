@@ -1,10 +1,10 @@
-using Application.Contracts;
-using Data.Contracts;
-using FileSystem.Contracts;
-using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
+using Reaparr.FileSystem.Contracts;
+using ILog = Reaparr.Logging.ILog;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public class FileMergeQueue : IFileMergeQueue
 {

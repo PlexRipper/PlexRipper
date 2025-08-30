@@ -1,7 +1,7 @@
 using FluentResults;
-using PlexRipper.Domain;
+using Reaparr.Domain;
 
-namespace Application.Contracts;
+namespace Reaparr.Application.Contracts;
 
 public interface IFileMergeQueue
 {

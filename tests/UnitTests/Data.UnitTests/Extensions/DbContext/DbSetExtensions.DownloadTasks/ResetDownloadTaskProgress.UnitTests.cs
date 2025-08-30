@@ -1,7 +1,8 @@
-using Data.Contracts;
 using Microsoft.EntityFrameworkCore;
+using Reaparr.BaseTests;
+using Reaparr.Data.Contracts;
 
-namespace Data.UnitTests;
+namespace Reaparr.Data.UnitTests;
 
 public class ResetDownloadTaskProgressUnitTests : BaseUnitTest
 {

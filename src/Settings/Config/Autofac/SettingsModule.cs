@@ -1,8 +1,8 @@
 ﻿using Autofac;
-using Settings.Contracts;
+using Reaparr.Settings.Contracts;
 using Module = Autofac.Module;
 
-namespace PlexRipper.Settings.Config;
+namespace Reaparr.Settings.Config;
 
 public class SettingsModule : Module
 {

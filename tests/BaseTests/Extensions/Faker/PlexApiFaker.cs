@@ -1,6 +1,6 @@
 using Bogus.Premium;
 
-namespace PlexRipper.BaseTests;
+namespace Reaparr.BaseTests;
 
 public static class PlexApiFaker
 {

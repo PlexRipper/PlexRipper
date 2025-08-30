@@ -1,8 +1,8 @@
 using FastEndpoints;
 using FluentResults;
-using PlexRipper.Domain;
+using Reaparr.Domain;
 
-namespace PlexApi.Contracts;
+namespace Reaparr.PlexApi.Contracts;
 
 public record GetLibraryMediaCommand(PlexLibrary PlexLibrary, Action<MediaSyncProgress> Action)
     : ICommand<Result<LibraryMetadata>>;

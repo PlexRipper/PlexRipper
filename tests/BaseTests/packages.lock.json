@@ -1715,44 +1715,133 @@
         "resolved": "16.3.0",
         "contentHash": "SgMOdxbz8X65z8hraIs6hOEdnkH6hESTAIUa7viEngHOYaH+6q5XJmwr1+yb9vJpNQ19hCQY69xbFsLtXpobQA=="
       },
-      "data.contracts": {
+      "Reaparr.Application": {
+        "type": "Project",
+        "dependencies": {
+          "Autofac.Extras.Quartz": "[10.0.0, )",
+          "FastEndpoints": "[7.0.1, )",
+          "FastEndpoints.Security": "[7.0.1, )",
+          "FastEndpoints.Swagger": "[7.0.1, )",
+          "Microsoft.Extensions.Http": "[9.0.8, )",
+          "Polly": "[8.6.2, )",
+          "Polly.Core": "[8.6.2, )",
+          "Quartz.Serialization.SystemTextJson": "[3.15.0, )",
+          "Reaparr.Application.Contracts": "[1.0.0, )",
+          "Reaparr.Data.Contracts": "[1.0.0, )",
+          "Reaparr.Domain": "[1.0.0, )",
+          "Reaparr.FileSystem.Contracts": "[1.0.0, )",
+          "Reaparr.Identity.Contracts": "[1.0.0, )",
+          "Reaparr.PlexApi.Contracts": "[1.0.0, )",
+          "Reaparr.Settings": "[1.0.0, )",
+          "Reaparr.Settings.Contracts": "[1.0.0, )",
+          "Reaparr.WebAPI.Contracts": "[1.0.0, )"
+        }
+      },
+      "Reaparr.Application.Contracts": {
+        "type": "Project",
+        "dependencies": {
+          "Quartz": "[3.15.0, )",
+          "Reaparr.Domain": "[1.0.0, )",
+          "Reaparr.WebAPI.Contracts": "[1.0.0, )"
+        }
+      },
+      "Reaparr.Data": {
+        "type": "Project",
+        "dependencies": {
+          "AppAny.Quartz.EntityFrameworkCore.Migrations.SQLite": "[0.5.1, )",
+          "Autofac": "[8.4.0, )",
+          "Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore": "[9.0.8, )",
+          "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "[9.0.8, )",
+          "Microsoft.EntityFrameworkCore.InMemory": "[9.0.8, )",
+          "Microsoft.EntityFrameworkCore.Sqlite": "[9.0.8, )",
+          "Reaparr.Data.Contracts": "[1.0.0, )",
+          "Reaparr.FileSystem.Contracts": "[1.0.0, )",
+          "Reaparr.Identity.Contracts": "[1.0.0, )",
+          "Reaparr.Settings.Contracts": "[1.0.0, )"
+        }
+      },
+      "Reaparr.Data.Contracts": {
         "type": "Project",
         "dependencies": {
           "EFCore.BulkExtensions.SQLite": "[9.0.1, )",
           "FlexLabs.EntityFrameworkCore.Upsert": "[9.0.0, )",
           "Microsoft.EntityFrameworkCore": "[9.0.8, )",
-          "PlexRipper.Domain": "[1.0.0, )",
-          "Reaparr.Application.Contracts": "[1.0.0, )"
+          "Reaparr.Application.Contracts": "[1.0.0, )",
+          "Reaparr.Domain": "[1.0.0, )"
         }
       },
-      "environment": {
+      "Reaparr.Domain": {
+        "type": "Project",
+        "dependencies": {
+          "ByteSize": "[2.1.2, )",
+          "FastEndpoints": "[7.0.1, )",
+          "JetBrains.Annotations": "[2025.2.0, )",
+          "NaturalSort.Extension": "[4.3.0, )",
+          "PasswordGenerator": "[2.1.0, )",
+          "Reaparr.FluentResultExtensions": "[1.0.0, )",
+          "System.ComponentModel.Annotations": "[5.0.0, )",
+          "System.Reactive": "[6.0.1, )",
+          "System.Text.Json": "[9.0.8, )"
+        }
+      },
+      "Reaparr.Environment": {
         "type": "Project",
         "dependencies": {
           "Serilog": "[4.3.0, )"
         }
       },
-      "filesystem.contracts": {
+      "Reaparr.FileSystem": {
         "type": "Project",
         "dependencies": {
-          "PlexRipper.Domain": "[1.0.0, )",
+          "Autofac": "[8.4.0, )",
+          "Autofac.Extras.Quartz": "[10.0.0, )",
+          "Reaparr.Application.Contracts": "[1.0.0, )",
+          "Reaparr.Data.Contracts": "[1.0.0, )",
+          "Reaparr.FileSystem.Contracts": "[1.0.0, )",
           "System.IO.Abstractions": "[22.0.15, )",
           "System.IO.FileSystem": "[4.3.0, )"
         }
       },
-      "fluentresultextensions": {
+      "Reaparr.FileSystem.Contracts": {
+        "type": "Project",
+        "dependencies": {
+          "Reaparr.Domain": "[1.0.0, )",
+          "System.IO.Abstractions": "[22.0.15, )",
+          "System.IO.FileSystem": "[4.3.0, )"
+        }
+      },
+      "Reaparr.FluentResultExtensions": {
         "type": "Project",
         "dependencies": {
           "FluentResults": "[4.0.0, )",
           "FluentValidation": "[12.0.0, )",
-          "Logging": "[1.0.0, )"
+          "Reaparr.Logging": "[1.0.0, )"
         }
       },
-      "logging": {
+      "Reaparr.Identity": {
+        "type": "Project",
+        "dependencies": {
+          "Microsoft.EntityFrameworkCore.InMemory": "[9.0.8, )",
+          "Microsoft.EntityFrameworkCore.Sqlite": "[9.0.8, )",
+          "Reaparr.Data.Contracts": "[1.0.0, )",
+          "Reaparr.Identity.Contracts": "[1.0.0, )",
+          "Reaparr.Logging": "[1.0.0, )"
+        }
+      },
+      "Reaparr.Identity.Contracts": {
+        "type": "Project",
+        "dependencies": {
+          "Microsoft.AspNetCore.DataProtection.EntityFrameworkCore": "[9.0.8, )",
+          "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "[9.0.8, )",
+          "Reaparr.Data.Contracts": "[1.0.0, )"
+        }
+      },
+      "Reaparr.Logging": {
         "type": "Project",
         "dependencies": {
           "Autofac": "[8.4.0, )",
-          "Environment": "[1.0.0, )",
           "FluentResults": "[4.0.0, )",
+          "Reaparr.Environment": "[1.0.0, )",
           "Serilog": "[4.3.0, )",
           "Serilog.Enrichers.Sensitive": "[1.7.3, )",
           "Serilog.Sinks.Console": "[6.0.0, )",
@@ -1762,116 +1851,41 @@
           "Serilog.Sinks.TestCorrelator": "[4.0.0, )"
         }
       },
-      "plexapi.contracts": {
+      "Reaparr.PlexApi": {
+        "type": "Project",
+        "dependencies": {
+          "Autofac": "[8.4.0, )",
+          "FastEndpoints": "[7.0.1, )",
+          "HttpClientToCurl": "[2.0.6, )",
+          "Polly": "[8.6.2, )",
+          "Reaparr.Data.Contracts": "[1.0.0, )",
+          "Reaparr.PlexApi.Contracts": "[1.0.0, )",
+          "Reaparr.Settings.Contracts": "[1.0.0, )"
+        }
+      },
+      "Reaparr.PlexApi.Contracts": {
         "type": "Project",
         "dependencies": {
           "LukeHagar.PlexAPI.SDK": "[0.15.1, )",
-          "PlexRipper.Domain": "[1.0.0, )",
-          "Reaparr.Application.Contracts": "[1.0.0, )"
-        }
-      },
-      "PlexRipper.Application": {
-        "type": "Project",
-        "dependencies": {
-          "Autofac.Extras.Quartz": "[10.0.0, )",
-          "Data.Contracts": "[1.0.0, )",
-          "FastEndpoints": "[7.0.1, )",
-          "FastEndpoints.Security": "[7.0.1, )",
-          "FastEndpoints.Swagger": "[7.0.1, )",
-          "FileSystem.Contracts": "[1.0.0, )",
-          "Microsoft.Extensions.Http": "[9.0.8, )",
-          "PlexApi.Contracts": "[1.0.0, )",
-          "PlexRipper.Domain": "[1.0.0, )",
-          "PlexRipper.Identity.Contracts": "[1.0.0, )",
-          "PlexRipper.Settings": "[1.0.0, )",
-          "Polly": "[8.6.2, )",
-          "Polly.Core": "[8.6.2, )",
-          "Quartz.Serialization.SystemTextJson": "[3.15.0, )",
           "Reaparr.Application.Contracts": "[1.0.0, )",
-          "Settings.Contracts": "[1.0.0, )",
-          "WebAPI.Contracts": "[1.0.0, )"
+          "Reaparr.Domain": "[1.0.0, )"
         }
       },
-      "PlexRipper.Data": {
-        "type": "Project",
-        "dependencies": {
-          "AppAny.Quartz.EntityFrameworkCore.Migrations.SQLite": "[0.5.1, )",
-          "Autofac": "[8.4.0, )",
-          "Data.Contracts": "[1.0.0, )",
-          "FileSystem.Contracts": "[1.0.0, )",
-          "Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore": "[9.0.8, )",
-          "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "[9.0.8, )",
-          "Microsoft.EntityFrameworkCore.InMemory": "[9.0.8, )",
-          "Microsoft.EntityFrameworkCore.Sqlite": "[9.0.8, )",
-          "PlexRipper.Identity.Contracts": "[1.0.0, )",
-          "Settings.Contracts": "[1.0.0, )"
-        }
-      },
-      "PlexRipper.Domain": {
-        "type": "Project",
-        "dependencies": {
-          "ByteSize": "[2.1.2, )",
-          "FastEndpoints": "[7.0.1, )",
-          "FluentResultExtensions": "[1.0.0, )",
-          "JetBrains.Annotations": "[2025.2.0, )",
-          "NaturalSort.Extension": "[4.3.0, )",
-          "PasswordGenerator": "[2.1.0, )",
-          "System.ComponentModel.Annotations": "[5.0.0, )",
-          "System.Reactive": "[6.0.1, )",
-          "System.Text.Json": "[9.0.8, )"
-        }
-      },
-      "PlexRipper.FileSystem": {
+      "Reaparr.Settings": {
         "type": "Project",
         "dependencies": {
           "Autofac": "[8.4.0, )",
-          "Autofac.Extras.Quartz": "[10.0.0, )",
-          "Data.Contracts": "[1.0.0, )",
-          "FileSystem.Contracts": "[1.0.0, )",
-          "Reaparr.Application.Contracts": "[1.0.0, )",
-          "System.IO.Abstractions": "[22.0.15, )",
-          "System.IO.FileSystem": "[4.3.0, )"
+          "Reaparr.FileSystem.Contracts": "[1.0.0, )",
+          "Reaparr.Settings.Contracts": "[1.0.0, )"
         }
       },
-      "PlexRipper.Identity": {
+      "Reaparr.Settings.Contracts": {
         "type": "Project",
         "dependencies": {
-          "Data.Contracts": "[1.0.0, )",
-          "Logging": "[1.0.0, )",
-          "Microsoft.EntityFrameworkCore.InMemory": "[9.0.8, )",
-          "Microsoft.EntityFrameworkCore.Sqlite": "[9.0.8, )",
-          "PlexRipper.Identity.Contracts": "[1.0.0, )"
+          "Reaparr.Domain": "[1.0.0, )"
         }
       },
-      "PlexRipper.Identity.Contracts": {
-        "type": "Project",
-        "dependencies": {
-          "Data.Contracts": "[1.0.0, )",
-          "Microsoft.AspNetCore.DataProtection.EntityFrameworkCore": "[9.0.8, )",
-          "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "[9.0.8, )"
-        }
-      },
-      "PlexRipper.PlexApi": {
-        "type": "Project",
-        "dependencies": {
-          "Autofac": "[8.4.0, )",
-          "Data.Contracts": "[1.0.0, )",
-          "FastEndpoints": "[7.0.1, )",
-          "HttpClientToCurl": "[2.0.6, )",
-          "PlexApi.Contracts": "[1.0.0, )",
-          "Polly": "[8.6.2, )",
-          "Settings.Contracts": "[1.0.0, )"
-        }
-      },
-      "PlexRipper.Settings": {
-        "type": "Project",
-        "dependencies": {
-          "Autofac": "[8.4.0, )",
-          "FileSystem.Contracts": "[1.0.0, )",
-          "Settings.Contracts": "[1.0.0, )"
-        }
-      },
-      "PlexRipper.WebAPI": {
+      "Reaparr.WebAPI": {
         "type": "Project",
         "dependencies": {
           "Autofac.Extensions.DependencyInjection": "[10.0.0, )",
@@ -1879,35 +1893,21 @@
           "FastEndpoints.Swagger": "[7.0.1, )",
           "Microsoft.AspNetCore.SpaServices.Extensions": "[9.0.8, )",
           "Microsoft.Extensions.Http.Polly": "[9.0.8, )",
-          "PlexRipper.Application": "[1.0.0, )",
-          "PlexRipper.Data": "[1.0.0, )",
-          "PlexRipper.FileSystem": "[1.0.0, )",
-          "PlexRipper.Identity": "[1.0.0, )",
-          "PlexRipper.PlexApi": "[1.0.0, )",
-          "PlexRipper.Settings": "[1.0.0, )",
           "Quartz.Extensions.Hosting": "[3.15.0, )",
-          "Serilog.AspNetCore": "[9.0.0, )",
-          "WebAPI.Contracts": "[1.0.0, )"
+          "Reaparr.Application": "[1.0.0, )",
+          "Reaparr.Data": "[1.0.0, )",
+          "Reaparr.FileSystem": "[1.0.0, )",
+          "Reaparr.Identity": "[1.0.0, )",
+          "Reaparr.PlexApi": "[1.0.0, )",
+          "Reaparr.Settings": "[1.0.0, )",
+          "Reaparr.WebAPI.Contracts": "[1.0.0, )",
+          "Serilog.AspNetCore": "[9.0.0, )"
         }
       },
-      "Reaparr.Application.Contracts": {
+      "Reaparr.WebAPI.Contracts": {
         "type": "Project",
         "dependencies": {
-          "PlexRipper.Domain": "[1.0.0, )",
-          "Quartz": "[3.15.0, )",
-          "WebAPI.Contracts": "[1.0.0, )"
-        }
-      },
-      "settings.contracts": {
-        "type": "Project",
-        "dependencies": {
-          "PlexRipper.Domain": "[1.0.0, )"
-        }
-      },
-      "webapi.contracts": {
-        "type": "Project",
-        "dependencies": {
-          "PlexRipper.Domain": "[1.0.0, )"
+          "Reaparr.Domain": "[1.0.0, )"
         }
       }
     }

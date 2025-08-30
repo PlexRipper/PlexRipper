@@ -1,8 +1,9 @@
-﻿using Application.Contracts;
-using FluentResultExtensions;
-using PlexApi.Contracts;
+﻿using Reaparr.Application.Contracts;
+using Reaparr.BaseTests;
+using Reaparr.FluentResultExtensions;
+using Reaparr.PlexApi.Contracts;
 
-namespace PlexRipper.Application.UnitTests;
+namespace Reaparr.Application.UnitTests;
 
 public class ValidatePlexAccountEndpointUnitTests : BaseUnitTest
 {

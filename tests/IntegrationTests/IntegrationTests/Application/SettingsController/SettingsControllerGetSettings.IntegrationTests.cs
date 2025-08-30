@@ -1,11 +1,12 @@
 ﻿using System.Text.Json;
-using Application.Contracts;
 using FastEndpoints;
-using PlexRipper.Application;
-using PlexRipper.Settings;
-using Settings.Contracts;
+using Reaparr.Application;
+using Reaparr.Application.Contracts;
+using Reaparr.BaseTests;
+using Reaparr.Settings;
+using Reaparr.Settings.Contracts;
 
-namespace IntegrationTests.SettingsController;
+namespace Reaparr.IntegrationTests.SettingsController;
 
 public class SettingsControllerGetSettingsIntegrationTests : BaseIntegrationTests
 {

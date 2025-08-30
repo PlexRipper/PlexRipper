@@ -1,7 +1,7 @@
-using Application.Contracts;
-using WebAPI.Contracts;
+using Reaparr.Application.Contracts;
+using Reaparr.WebAPI.Contracts;
 
-namespace PlexRipper.WebAPI;
+namespace Reaparr.WebAPI;
 
 /// <summary>
 ///  The ProgressHub class is a SignalR hub that sends progress updates to the front-end.

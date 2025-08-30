@@ -1,13 +1,14 @@
 using System.Reflection;
-using Application.Contracts;
-using Data.Contracts;
-using Environment;
 using FastEndpoints;
-using Logging.Interface;
 using Microsoft.Extensions.DependencyInjection;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
+using Reaparr.Environment;
+using Reaparr.Logging;
 using Serilog.Events;
+using ILog = Reaparr.Logging.ILog;
 
-namespace PlexRipper.BaseTests;
+namespace Reaparr.BaseTests;
 
 public partial class BaseUnitTest
 {

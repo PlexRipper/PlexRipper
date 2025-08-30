@@ -1,7 +1,8 @@
-using Data.Contracts;
-using PlexRipper.Data;
+using Reaparr.Data;
+using Reaparr.Data.Contracts;
+using Reaparr.Logging;
 
-namespace PlexRipper.BaseTests;
+namespace Reaparr.BaseTests;
 
 public static partial class MockDatabase
 {

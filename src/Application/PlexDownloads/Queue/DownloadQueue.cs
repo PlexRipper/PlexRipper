@@ -1,9 +1,10 @@
 ﻿using System.Threading.Channels;
-using Application.Contracts;
-using Data.Contracts;
-using Logging.Interface;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
+using Reaparr.Logging;
+using ILog = Reaparr.Logging.ILog;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 /// <summary>
 /// The DownloadQueue is responsible for deciding which downloadTask is handled.

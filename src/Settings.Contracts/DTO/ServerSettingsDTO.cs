@@ -1,4 +1,4 @@
-﻿namespace Settings.Contracts;
+﻿namespace Reaparr.Settings.Contracts;
 
 public class ServerSettingsDTO : IServerSettings
 {

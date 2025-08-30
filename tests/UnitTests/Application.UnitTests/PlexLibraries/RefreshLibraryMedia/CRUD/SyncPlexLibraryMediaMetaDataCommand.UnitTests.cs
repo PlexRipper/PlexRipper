@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using Reaparr.BaseTests;
 
-namespace PlexRipper.Application.UnitTests;
+namespace Reaparr.Application.UnitTests;
 
 public class SyncPlexLibraryMediaMetaDataCommandUnitTests : BaseCommandUnitTest<SyncPlexLibraryMediaMetaDataCommand>
 {

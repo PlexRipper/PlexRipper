@@ -1,10 +1,10 @@
 using System.Text.Json;
-using Logging;
-using Logging.Interface;
-using PlexRipper.Domain;
 using Quartz;
+using Reaparr.Domain;
+using Reaparr.Logging;
+using ILog = Reaparr.Logging.ILog;
 
-namespace Application.Contracts;
+namespace Reaparr.Application.Contracts;
 
 public static class JobDataMapExtensions
 {

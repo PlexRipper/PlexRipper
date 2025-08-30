@@ -1,6 +1,6 @@
 using Bogus.Hollywood;
 
-namespace PlexRipper.BaseTests;
+namespace Reaparr.BaseTests;
 
 public partial class FakePlexApiData
 {

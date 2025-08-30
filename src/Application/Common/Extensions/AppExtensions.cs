@@ -1,10 +1,11 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text.Json;
-using Environment;
-using Logging.Interface;
+using Reaparr.Environment;
+using Reaparr.Logging;
+using ILog = Reaparr.Logging.ILog;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public class AppExtensions
 {

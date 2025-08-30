@@ -1,10 +1,10 @@
 ﻿using System.Net;
-using Data.Contracts;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
 using Moq.Contrib.HttpClient;
-using PlexApi.Contracts;
+using Reaparr.Data.Contracts;
+using Reaparr.PlexApi.Contracts;
 
-namespace PlexRipper.BaseTests;
+namespace Reaparr.BaseTests;
 
 public class MockPlexApiServer : IMockPlexApiServer
 {

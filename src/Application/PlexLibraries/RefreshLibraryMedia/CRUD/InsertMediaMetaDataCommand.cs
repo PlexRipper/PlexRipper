@@ -1,14 +1,15 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using Data.Contracts;
 using EFCore.BulkExtensions;
 using FastEndpoints;
 using FluentValidation;
-using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
-using PlexApi.Contracts;
+using Reaparr.Data.Contracts;
+using Reaparr.Logging;
+using Reaparr.PlexApi.Contracts;
+using ILog = Reaparr.Logging.ILog;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 /// <summary>
 /// Command to insert or update media metadata (actors, genres, and countries) for a <see cref="PlexLibrary"/> into the database.

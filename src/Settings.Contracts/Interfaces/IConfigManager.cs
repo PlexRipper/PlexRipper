@@ -1,7 +1,7 @@
 ﻿using FluentResults;
-using PlexRipper.Domain;
+using Reaparr.Domain;
 
-namespace Settings.Contracts;
+namespace Reaparr.Settings.Contracts;
 
 public interface IConfigManager : ISetup
 {

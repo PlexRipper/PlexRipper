@@ -1,7 +1,8 @@
-using Application.Contracts;
 using Microsoft.EntityFrameworkCore;
+using Reaparr.Application.Contracts;
+using Reaparr.BaseTests;
 
-namespace PlexRipper.Application.UnitTests;
+namespace Reaparr.Application.UnitTests;
 
 public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
     : BaseUnitTest<CheckAllConnectionsStatusByPlexServerHandler>

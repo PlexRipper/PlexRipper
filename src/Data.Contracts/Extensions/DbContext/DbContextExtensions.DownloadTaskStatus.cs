@@ -1,9 +1,9 @@
 using System.Diagnostics.CodeAnalysis;
-using Logging;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Domain;
+using Reaparr.Domain;
+using Reaparr.Logging;
 
-namespace Data.Contracts;
+namespace Reaparr.Data.Contracts;
 
 public static partial class DbContextExtensions
 {

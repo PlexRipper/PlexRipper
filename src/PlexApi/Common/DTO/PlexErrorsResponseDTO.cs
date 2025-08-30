@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace PlexRipper.PlexApi;
+namespace Reaparr.PlexApi;
 
 public class PlexErrorsResponseDTO
 {

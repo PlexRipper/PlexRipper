@@ -1,6 +1,6 @@
-using Application.Contracts;
+using Reaparr.Application.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public static class DownloadPreviewMapper
 {

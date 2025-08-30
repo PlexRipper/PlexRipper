@@ -3,7 +3,7 @@ using Serilog.Core;
 using Serilog.Events;
 using Serilog.Formatting;
 
-namespace PlexRipper.BaseTests
+namespace Reaparr.BaseTests
 {
     /// <summary>
     /// Provides extension methods that create Serilog loggers

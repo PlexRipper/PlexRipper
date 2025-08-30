@@ -1,7 +1,5 @@
 using System.Reflection;
 using System.Text.Json.Serialization;
-using Application.Contracts;
-using Environment;
 using FastEndpoints;
 using FastEndpoints.Security;
 using FastEndpoints.Swagger;
@@ -12,12 +10,14 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Http;
 using NSwag;
 using NSwag.Generation.Processors.Security;
-using PlexRipper.Application;
-using PlexRipper.Identity;
-using PlexRipper.Identity.Contracts;
-using PlexRipper.PlexApi;
+using Reaparr.Application;
+using Reaparr.Application.Contracts;
+using Reaparr.Environment;
+using Reaparr.Identity;
+using Reaparr.Identity.Contracts;
+using Reaparr.PlexApi;
 
-namespace PlexRipper.WebAPI;
+namespace Reaparr.WebAPI;
 
 /// <summary>
 ///  The Startup class configures the application services and the HTTP request pipeline.

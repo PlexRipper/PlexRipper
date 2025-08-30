@@ -1,4 +1,4 @@
-namespace PlexRipper.Domain;
+namespace Reaparr.Domain;
 
 public record DownloadTaskGeneric : IDownloadTaskProgress, IDownloadFileTransferProgress
 {

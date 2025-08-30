@@ -1,11 +1,11 @@
-using Application.Contracts;
 using FastEndpoints;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
-using PlexRipper.Settings;
-using Settings.Contracts;
+using Reaparr.Application.Contracts;
+using Reaparr.Settings;
+using Reaparr.Settings.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public class UpdateUserSettingsEndpointRequest
 {

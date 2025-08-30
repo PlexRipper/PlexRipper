@@ -1,8 +1,8 @@
-using Data.Contracts;
 using FastEndpoints;
-using Logging.Interface;
+using Reaparr.Data.Contracts;
+using ILog = Reaparr.Logging.ILog;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public record DownloadTaskWorkerLogNotification(IList<DownloadWorkerLog> logs) : IEvent;
 

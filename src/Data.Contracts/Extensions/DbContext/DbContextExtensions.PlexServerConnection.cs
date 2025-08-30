@@ -1,10 +1,10 @@
 using FluentResults;
-using Logging;
-using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Domain;
+using Reaparr.Domain;
+using Reaparr.Logging;
+using ILog = Reaparr.Logging.ILog;
 
-namespace Data.Contracts;
+namespace Reaparr.Data.Contracts;
 
 public static partial class DbContextExtensions
 {

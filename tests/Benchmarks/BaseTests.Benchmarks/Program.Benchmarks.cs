@@ -1,6 +1,6 @@
 using BenchmarkDotNet.Running;
 
-namespace BaseTests.Benchmarks;
+namespace Reaparr.BaseTests.Benchmarks;
 
 public class ProgramBenchmarks
 {

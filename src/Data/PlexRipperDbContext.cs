@@ -2,15 +2,15 @@ using System.Data;
 using System.Reflection;
 using AppAny.Quartz.EntityFrameworkCore.Migrations;
 using AppAny.Quartz.EntityFrameworkCore.Migrations.SQLite;
-using Data.Contracts;
 using EFCore.BulkExtensions;
-using Environment;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using Reaparr.Data.Contracts;
+using Reaparr.Environment;
 
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 
-namespace PlexRipper.Data;
+namespace Reaparr.Data;
 
 public sealed class PlexRipperDbContext : DbContext, IPlexRipperDbContext, IPlexRipperDbContextDatabase
 {

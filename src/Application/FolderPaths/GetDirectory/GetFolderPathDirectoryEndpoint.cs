@@ -1,12 +1,12 @@
 using System.IO.Abstractions;
-using Application.Contracts;
 using FastEndpoints;
-using FileSystem.Contracts;
 using FluentValidation;
-using Logging.Interface;
 using Microsoft.AspNetCore.Http;
+using Reaparr.Application.Contracts;
+using Reaparr.FileSystem.Contracts;
+using ILog = Reaparr.Logging.ILog;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public class GetFolderPathDirectoryRequest
 {

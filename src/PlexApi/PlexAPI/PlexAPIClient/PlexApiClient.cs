@@ -1,15 +1,16 @@
 using System.Net;
 using System.Text.Json;
-using Application.Contracts;
 using HttpClientToCurl;
-using PlexApi.Contracts;
 using Polly;
 using Polly.Timeout;
 using Polly.Wrap;
+using Reaparr.Application.Contracts;
+using Reaparr.Logging;
+using Reaparr.PlexApi.Contracts;
 using Serilog.Events;
-using ILog = Logging.Interface.ILog;
+using ILog = Reaparr.Logging.ILog;
 
-namespace PlexRipper.PlexApi;
+namespace Reaparr.PlexApi;
 
 public class PlexApiClient : IPlexApiClient
 {

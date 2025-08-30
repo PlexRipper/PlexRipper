@@ -1,7 +1,7 @@
 using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
 
-namespace Application.Contracts;
+namespace Reaparr.Application.Contracts;
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum JobTypes

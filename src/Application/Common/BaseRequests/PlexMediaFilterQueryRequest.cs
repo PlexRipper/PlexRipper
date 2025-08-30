@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using FastEndpoints;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public abstract record PlexMediaFilterQueryRequest
 {

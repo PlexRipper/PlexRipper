@@ -1,8 +1,9 @@
-using Application.Contracts;
 using Microsoft.EntityFrameworkCore;
-using PlexApi.Contracts;
+using Reaparr.Application.Contracts;
+using Reaparr.BaseTests;
+using Reaparr.PlexApi.Contracts;
 
-namespace PlexRipper.Application.UnitTests;
+namespace Reaparr.Application.UnitTests;
 
 public class RefreshPlexServerAccessCommandUnitTests : BaseUnitTest<RefreshPlexServerAccessCommandHandler>
 {

@@ -1,7 +1,7 @@
 using LukeHagar.PlexAPI.SDK.Models.Requests;
-using PlexApi.Contracts;
+using Reaparr.PlexApi.Contracts;
 
-namespace PlexRipper.PlexApi;
+namespace Reaparr.PlexApi;
 
 public static partial class MediaContainerMappers
 {

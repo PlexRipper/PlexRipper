@@ -2,12 +2,12 @@
 using System.Reflection;
 using Autofac;
 using Autofac.Extras.Quartz;
-using Data.Contracts;
-using Environment;
-using PlexRipper.Domain.Autofac;
+using Reaparr.Data.Contracts;
+using Reaparr.Domain.Autofac;
+using Reaparr.Environment;
 using Module = Autofac.Module;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public class QuartzModule : Module
 {

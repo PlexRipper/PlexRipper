@@ -1,4 +1,6 @@
-﻿namespace Domain.UnitTests;
+﻿using Reaparr.BaseTests;
+
+namespace Reaparr.Domain.UnitTests;
 
 public class PathSystem_SanitizeFileName_UnitTests : BaseUnitTest
 {

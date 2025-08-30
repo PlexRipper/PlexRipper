@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public record RefreshPlexServerAccessRapportRow
 {

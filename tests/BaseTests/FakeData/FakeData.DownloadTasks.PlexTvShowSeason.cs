@@ -1,6 +1,6 @@
 using ByteSizeLib;
 
-namespace PlexRipper.BaseTests;
+namespace Reaparr.BaseTests;
 
 public static partial class FakeData
 {

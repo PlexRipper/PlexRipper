@@ -1,17 +1,18 @@
 ﻿using System.Net.Http.Headers;
-using Application.Contracts;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
-using Data.Contracts;
-using Environment;
-using FileSystem.Contracts;
-using Logging.Interface;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Data;
-using Settings.Contracts;
+using Reaparr.Application.Contracts;
+using Reaparr.Data;
+using Reaparr.Data.Contracts;
+using Reaparr.Environment;
+using Reaparr.FileSystem.Contracts;
+using Reaparr.Logging;
+using Reaparr.Settings.Contracts;
+using ILog = Reaparr.Logging.ILog;
 
-namespace PlexRipper.BaseTests;
+namespace Reaparr.BaseTests;
 
 public class BaseContainer : IDisposable
 {

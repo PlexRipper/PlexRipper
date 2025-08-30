@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Identity;
 
-namespace PlexRipper.Identity.Contracts;
+namespace Reaparr.Identity.Contracts;
 
 public class AppUser : IdentityUser { }

@@ -1,6 +1,6 @@
-using Application.Contracts;
+using Reaparr.Application.Contracts;
 
-namespace PlexApi.Contracts;
+namespace Reaparr.PlexApi.Contracts;
 
 public record PlexApiClientOptions
 {

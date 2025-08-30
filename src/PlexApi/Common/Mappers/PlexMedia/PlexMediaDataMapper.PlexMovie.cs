@@ -1,4 +1,4 @@
-namespace PlexRipper.PlexApi;
+namespace Reaparr.PlexApi;
 
 public static partial class PlexMediaDataMapper
 {

@@ -1,4 +1,4 @@
-namespace BaseTests.UnitTests.IDE_Tests;
+namespace Reaparr.BaseTests.UnitTests.IDE_Tests;
 
 public class Normal_Empty_UnitTests
 {

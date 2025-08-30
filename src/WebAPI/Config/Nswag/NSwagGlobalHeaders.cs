@@ -3,7 +3,7 @@ using NSwag;
 using NSwag.Generation.Processors;
 using NSwag.Generation.Processors.Contexts;
 
-namespace PlexRipper.WebAPI;
+namespace Reaparr.WebAPI;
 
 internal sealed class NSwagGlobalHeaders : IOperationProcessor
 {

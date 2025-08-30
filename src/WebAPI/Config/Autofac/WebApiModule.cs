@@ -1,7 +1,7 @@
-﻿using Application.Contracts;
-using Autofac;
+﻿using Autofac;
+using Reaparr.Application.Contracts;
 
-namespace PlexRipper.WebAPI;
+namespace Reaparr.WebAPI;
 
 /// <summary>
 ///  Autofac module for the WebAPI project.

@@ -1,10 +1,10 @@
-using Application.Contracts;
-using Data.Contracts;
-using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
 using Quartz;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
+using ILog = Reaparr.Logging.ILog;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 /// <summary>
 /// This job will check the status of all connections for a given Plex Server and runs periodically.

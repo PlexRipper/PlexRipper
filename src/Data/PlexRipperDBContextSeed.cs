@@ -1,7 +1,7 @@
-﻿using Environment;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using Reaparr.Environment;
 
-namespace PlexRipper.Data;
+namespace Reaparr.Data;
 
 public static class PlexRipperDBContextSeed
 {

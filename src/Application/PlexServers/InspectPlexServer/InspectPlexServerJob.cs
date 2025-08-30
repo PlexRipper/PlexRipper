@@ -1,9 +1,9 @@
-﻿using Application.Contracts;
-using Data.Contracts;
-using Logging.Interface;
-using Quartz;
+﻿using Quartz;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
+using ILog = Reaparr.Logging.ILog;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 /// <summary>
 /// Executed on a new Plex Account to check all connections and refresh libraries.

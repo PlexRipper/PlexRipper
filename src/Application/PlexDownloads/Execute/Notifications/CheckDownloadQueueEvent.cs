@@ -1,7 +1,7 @@
-using Application.Contracts;
 using FastEndpoints;
+using Reaparr.Application.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public record CheckDownloadQueueEvent : IEvent
 {

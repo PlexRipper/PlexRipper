@@ -1,13 +1,14 @@
 using System.Diagnostics;
 using System.IO.Abstractions;
 using System.Reactive.Subjects;
-using Application.Contracts;
-using Data.Contracts;
 using FastEndpoints;
 using FluentValidation;
-using Logging.Interface;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
+using Reaparr.Logging;
+using ILog = Reaparr.Logging.ILog;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public record MergeFilesFromFileTaskCommand(
     DownloadTaskKey Key,

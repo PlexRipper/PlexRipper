@@ -1,8 +1,8 @@
-using Data.Contracts;
 using FastEndpoints;
 using FluentValidation;
+using Reaparr.Data.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 /// <summary>
 /// Restart the <see cref="DownloadTaskGeneric"/> by deleting the PlexDownloadClient and starting a new one.

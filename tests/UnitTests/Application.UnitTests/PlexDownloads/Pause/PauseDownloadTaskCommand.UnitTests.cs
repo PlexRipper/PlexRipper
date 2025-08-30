@@ -1,8 +1,9 @@
-﻿using Application.Contracts;
-using Data.Contracts;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using Reaparr.Application.Contracts;
+using Reaparr.BaseTests;
+using Reaparr.Data.Contracts;
 
-namespace PlexRipper.Application.UnitTests;
+namespace Reaparr.Application.UnitTests;
 
 public class DownloadCommands_PauseDownloadTasksAsync_UnitTests : BaseUnitTest<PauseDownloadTaskCommandHandler>
 {

@@ -1,7 +1,7 @@
 using System.Text.Json;
 using Quartz;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public static class QuartzExtensions
 {

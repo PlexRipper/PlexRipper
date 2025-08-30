@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 
-namespace BaseTests.UnitTests.Data;
+namespace Reaparr.BaseTests.UnitTests.Data;
 
 public class InMemoryDatabase_UnitTests : BaseUnitTest
 {

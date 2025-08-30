@@ -1,12 +1,12 @@
 using System.Diagnostics;
-using Data.Contracts;
 using EFCore.BulkExtensions;
 using FastEndpoints;
 using FluentValidation;
-using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
+using Reaparr.Data.Contracts;
+using ILog = Reaparr.Logging.ILog;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public record SyncPlexMoviesCommand(InsertMediaMetaDataCommandResponse LibraryMetadata)
     : ICommand<Result<CrudMoviesReport>>;

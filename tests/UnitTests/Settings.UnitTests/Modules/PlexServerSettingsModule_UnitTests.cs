@@ -1,6 +1,7 @@
-using Settings.Contracts;
+using Reaparr.BaseTests;
+using Reaparr.Settings.Contracts;
 
-namespace Settings.UnitTests.Modules;
+namespace Reaparr.Settings.UnitTests.Modules;
 
 public class PlexServerSettingsModule_UnitTests : BaseUnitTest<PlexServerSettingsModule>
 {

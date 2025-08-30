@@ -1,7 +1,7 @@
-﻿using PlexRipper.Domain;
-using WebAPI.Contracts;
+﻿using Reaparr.Domain;
+using Reaparr.WebAPI.Contracts;
 
-namespace Application.Contracts;
+namespace Reaparr.Application.Contracts;
 
 public interface ISignalRService
 {

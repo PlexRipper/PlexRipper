@@ -1,8 +1,9 @@
 using System.Text.Json;
-using Logging.Interface;
-using Settings.Contracts;
+using Reaparr.Logging;
+using Reaparr.Settings.Contracts;
+using ILog = Reaparr.Logging.ILog;
 
-namespace PlexRipper.Settings;
+namespace Reaparr.Settings;
 
 public static class UserSettingsSerializer
 {

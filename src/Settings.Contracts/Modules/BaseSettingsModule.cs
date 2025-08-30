@@ -3,7 +3,7 @@ using System.Reactive.Subjects;
 using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
 
-namespace Settings.Contracts;
+namespace Reaparr.Settings.Contracts;
 
 public record BaseSettingsModule<TModel>
     where TModel : class

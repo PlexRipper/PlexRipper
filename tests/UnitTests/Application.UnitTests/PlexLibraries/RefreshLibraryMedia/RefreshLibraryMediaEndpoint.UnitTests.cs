@@ -1,6 +1,7 @@
-using Application.Contracts;
+using Reaparr.Application.Contracts;
+using Reaparr.BaseTests;
 
-namespace PlexRipper.Application.UnitTests;
+namespace Reaparr.Application.UnitTests;
 
 public class RefreshLibraryMediaEndpointUnitTests : BaseUnitTest<RefreshLibraryMediaEndpoint>
 {

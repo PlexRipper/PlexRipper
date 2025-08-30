@@ -1,4 +1,4 @@
-﻿namespace FluentResultExtensionTests;
+﻿namespace Reaparr.FluentResultExtension.UnitTests;
 
 public class ResultExtensionsGeneral
 {

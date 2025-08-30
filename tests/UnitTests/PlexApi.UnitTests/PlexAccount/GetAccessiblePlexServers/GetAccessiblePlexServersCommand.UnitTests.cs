@@ -4,12 +4,12 @@ using LukeHagar.PlexAPI.SDK.Models.Errors;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
-using PlexApi.Contracts;
-using PlexRipper.PlexApi;
-using PlexRipper.PlexApi.GetAccessiblePlexServers;
-using Settings.Contracts;
+using Reaparr.BaseTests;
+using Reaparr.PlexApi.Contracts;
+using Reaparr.PlexApi.GetAccessiblePlexServers;
+using Reaparr.Settings.Contracts;
 
-namespace PlexApi.UnitTests;
+namespace Reaparr.PlexApi.UnitTests;
 
 public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexServersCommandHandler>
 {

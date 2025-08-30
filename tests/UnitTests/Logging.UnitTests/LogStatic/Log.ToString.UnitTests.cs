@@ -1,4 +1,6 @@
-namespace Logging.UnitTests;
+using Reaparr.BaseTests;
+
+namespace Reaparr.Logging.UnitTests;
 
 public class LogToStringUnitTests : BaseUnitTest
 {

@@ -1,14 +1,15 @@
 ﻿using System.Reactive.Linq;
 using Autofac;
 using ByteSizeLib;
-using Data.Contracts;
 using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
-using PlexApi.Contracts;
-using PlexRipper.PlexApi;
-using Settings.Contracts;
+using Reaparr.BaseTests;
+using Reaparr.Data.Contracts;
+using Reaparr.PlexApi;
+using Reaparr.PlexApi.Contracts;
+using Reaparr.Settings.Contracts;
 
-namespace PlexRipper.Application.UnitTests;
+namespace Reaparr.Application.UnitTests;
 
 public class PlexDownloadClientStopAsyncUnitTests : BaseUnitTest<PlexDownloadClient>
 {

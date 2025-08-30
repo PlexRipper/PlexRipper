@@ -1,10 +1,10 @@
-using Data.Contracts;
 using FastEndpoints;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
-using PlexApi.Contracts;
-using Settings.Contracts;
+using Reaparr.Data.Contracts;
+using Reaparr.PlexApi.Contracts;
+using Reaparr.Settings.Contracts;
 
-namespace PlexRipper.PlexApi.GetAccessiblePlexServers;
+namespace Reaparr.PlexApi.GetAccessiblePlexServers;
 
 public class GetAccessiblePlexServersCommandHandler
     : ICommandHandler<GetAccessiblePlexServersCommand, Result<List<PlexServerAccessDTO>>>

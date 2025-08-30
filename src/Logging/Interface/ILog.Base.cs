@@ -1,8 +1,8 @@
 using Serilog.Events;
 
-namespace Logging.Interface;
+namespace Reaparr.Logging;
 
-public partial interface ILog
+public interface ILog
 {
     bool IsLogLevelEnabled(LogEventLevel logLevel = LogEventLevel.Debug);
 

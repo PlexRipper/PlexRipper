@@ -1,8 +1,9 @@
-﻿using Data.Contracts;
+﻿using Reaparr.BaseTests;
+using Reaparr.Data.Contracts;
 
-namespace PlexRipper.Application.UnitTests.DownloadQueue;
+namespace Reaparr.Application.UnitTests;
 
-public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Application.DownloadQueue>
+public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<DownloadQueue>
 {
     public DownloadQueue_GetNextDownloadTask_UnitTests(ITestOutputHelper output)
         : base(output) { }

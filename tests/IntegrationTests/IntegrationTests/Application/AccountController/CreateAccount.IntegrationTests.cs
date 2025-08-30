@@ -1,10 +1,11 @@
-using Application.Contracts;
-using Data.Contracts;
 using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application;
+using Reaparr.Application;
+using Reaparr.Application.Contracts;
+using Reaparr.BaseTests;
+using Reaparr.Data.Contracts;
 
-namespace IntegrationTests.AccountController;
+namespace Reaparr.IntegrationTests.AccountController;
 
 public class CreateAccountIntegrationTests : BaseIntegrationTests
 {

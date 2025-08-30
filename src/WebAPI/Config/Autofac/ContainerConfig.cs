@@ -1,12 +1,13 @@
 ﻿using Autofac;
-using PlexRipper.Application;
-using PlexRipper.Data;
-using PlexRipper.FileSystem.Config;
-using PlexRipper.Identity;
-using PlexRipper.PlexApi;
-using PlexRipper.Settings.Config;
+using Reaparr.Application;
+using Reaparr.Data;
+using Reaparr.FileSystem.Config;
+using Reaparr.Identity;
+using Reaparr.Logging;
+using Reaparr.PlexApi;
+using Reaparr.Settings.Config;
 
-namespace PlexRipper.WebAPI;
+namespace Reaparr.WebAPI;
 
 /// <summary>
 ///  The ContainerConfig class contains all the Autofac modules.

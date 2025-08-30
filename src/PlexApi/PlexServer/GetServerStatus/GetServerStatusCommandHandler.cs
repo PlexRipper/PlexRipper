@@ -1,8 +1,8 @@
-using Data.Contracts;
 using FastEndpoints;
-using PlexApi.Contracts;
+using Reaparr.Data.Contracts;
+using Reaparr.PlexApi.Contracts;
 
-namespace PlexRipper.PlexApi;
+namespace Reaparr.PlexApi;
 
 public class GetServerStatusCommandHandler : ICommandHandler<GetServerStatusCommand, Result<PlexServerStatus>>
 {

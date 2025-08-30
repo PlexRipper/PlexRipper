@@ -1,8 +1,8 @@
-using Application.Contracts;
-using Data.Contracts;
 using FastEndpoints;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public record DownloadTaskUpdatedCommand(DownloadTaskKey Key) : ICommand<Result>;
 

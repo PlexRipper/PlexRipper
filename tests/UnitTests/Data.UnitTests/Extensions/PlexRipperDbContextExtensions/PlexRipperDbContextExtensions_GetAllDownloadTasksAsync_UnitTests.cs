@@ -1,6 +1,7 @@
-using Data.Contracts;
+using Reaparr.BaseTests;
+using Reaparr.Data.Contracts;
 
-namespace Data.UnitTests;
+namespace Reaparr.Data.UnitTests;
 
 public class PlexRipperDbContextExtensions_GetAllDownloadTasksAsync_UnitTests : BaseUnitTest
 {

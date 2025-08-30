@@ -1,7 +1,7 @@
 ﻿using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
 
-namespace PlexRipper.Domain;
+namespace Reaparr.Domain;
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum DownloadStatus

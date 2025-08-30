@@ -1,9 +1,9 @@
 using FastEndpoints;
-using Logging.Interface;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
-using PlexApi.Contracts;
+using Reaparr.PlexApi.Contracts;
+using ILog = Reaparr.Logging.ILog;
 
-namespace PlexRipper.PlexApi;
+namespace Reaparr.PlexApi;
 
 public class PlexSignInCommandHandler : ICommandHandler<PlexSignInCommand, Result<PlexAccount>>
 {

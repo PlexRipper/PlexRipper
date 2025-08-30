@@ -1,7 +1,7 @@
-using Application.Contracts;
-using PlexRipper.Application;
+using Reaparr.Application;
+using Reaparr.Application.Contracts;
 
-namespace PlexRipper.BaseTests;
+namespace Reaparr.BaseTests;
 
 public static class TestHttpClientExtensions
 {

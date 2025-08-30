@@ -1,11 +1,11 @@
 using System.Diagnostics.CodeAnalysis;
-using Application.Contracts;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Identity.Contracts;
+using Reaparr.Application.Contracts;
+using Reaparr.Identity.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public class AppCredentialsDTO
 {

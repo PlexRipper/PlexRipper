@@ -173,26 +173,26 @@
         "resolved": "4.5.4",
         "contentHash": "zteT+G8xuGu6mS+mzDzYXbzS7rd3K6Fjb9RiZlYlJPam2/hU7JCBZBVEcywNuR+oZ1ncTvc/cq0faRr3P01OVg=="
       },
-      "environment": {
+      "Reaparr.Environment": {
         "type": "Project",
         "dependencies": {
           "Serilog": "[4.3.0, )"
         }
       },
-      "fluentresultextensions": {
+      "Reaparr.FluentResultExtensions": {
         "type": "Project",
         "dependencies": {
           "FluentResults": "[4.0.0, )",
           "FluentValidation": "[12.0.0, )",
-          "Logging": "[1.0.0, )"
+          "Reaparr.Logging": "[1.0.0, )"
         }
       },
-      "logging": {
+      "Reaparr.Logging": {
         "type": "Project",
         "dependencies": {
           "Autofac": "[8.4.0, )",
-          "Environment": "[1.0.0, )",
           "FluentResults": "[4.0.0, )",
+          "Reaparr.Environment": "[1.0.0, )",
           "Serilog": "[4.3.0, )",
           "Serilog.Enrichers.Sensitive": "[1.7.3, )",
           "Serilog.Sinks.Console": "[6.0.0, )",

@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace PlexRipper.Domain;
+namespace Reaparr.Domain;
 
 public class PlexLibraryCountries
 {

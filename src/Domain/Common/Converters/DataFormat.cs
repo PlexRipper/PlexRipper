@@ -1,7 +1,8 @@
 ﻿using System.Globalization;
-using Logging.Interface;
+using Reaparr.Logging;
+using ILog = Reaparr.Logging.ILog;
 
-namespace PlexRipper.Domain;
+namespace Reaparr.Domain;
 
 public static class DataFormat
 {

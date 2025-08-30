@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 
-namespace PlexRipper.Identity.Contracts;
+namespace Reaparr.Identity.Contracts;
 
 public interface IAuthDbContext : IDataProtectionKeyContext, IDisposable { }

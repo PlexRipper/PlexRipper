@@ -1,11 +1,12 @@
 using System.IO.Abstractions;
-using Data.Contracts;
-using Environment;
-using PlexRipper.Data;
-using PlexRipper.Identity.Contracts;
-using Settings.Contracts;
+using Reaparr.BaseTests;
+using Reaparr.Data;
+using Reaparr.Data.Contracts;
+using Reaparr.Environment;
+using Reaparr.Identity.Contracts;
+using Reaparr.Settings.Contracts;
 
-namespace Domain.UnitTests;
+namespace Reaparr.Domain.UnitTests;
 
 public class PlexRipperDbContextManagerUnitTests : BaseUnitTest<PlexRipperDbContextManager>
 {

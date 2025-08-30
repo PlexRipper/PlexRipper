@@ -1,4 +1,4 @@
-﻿namespace PlexRipper.Domain;
+﻿namespace Reaparr.Domain;
 
 [Table("PlexMovie")]
 public class PlexMovie : BasePlexMedia

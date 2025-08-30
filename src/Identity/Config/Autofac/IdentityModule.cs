@@ -1,7 +1,7 @@
 ﻿using Autofac;
-using PlexRipper.Identity.Contracts;
+using Reaparr.Identity.Contracts;
 
-namespace PlexRipper.Identity;
+namespace Reaparr.Identity;
 
 public class IdentityModule : Module
 {

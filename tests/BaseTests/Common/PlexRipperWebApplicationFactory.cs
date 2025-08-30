@@ -1,13 +1,14 @@
 using Autofac;
-using Logging.Interface;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using PlexRipper.WebAPI;
+using Reaparr.Logging;
+using Reaparr.WebAPI;
+using ILog = Reaparr.Logging.ILog;
 
-namespace PlexRipper.BaseTests;
+namespace Reaparr.BaseTests;
 
 public class PlexRipperWebApplicationFactory : WebApplicationFactory<Program>
 {

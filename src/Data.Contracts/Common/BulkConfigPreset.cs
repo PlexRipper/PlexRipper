@@ -1,6 +1,6 @@
 using EFCore.BulkExtensions;
 
-namespace Data.Contracts;
+namespace Reaparr.Data.Contracts;
 
 public static class BulkConfigPreset
 {

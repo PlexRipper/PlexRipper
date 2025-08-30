@@ -1,6 +1,6 @@
 using System.Net.Http.Headers;
 
-namespace PlexRipper.Domain;
+namespace Reaparr.Domain;
 
 public static class ContentType
 {

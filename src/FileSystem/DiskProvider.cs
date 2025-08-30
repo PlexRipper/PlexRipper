@@ -1,6 +1,6 @@
-﻿using FileSystem.Contracts;
+﻿using Reaparr.FileSystem.Contracts;
 
-namespace PlexRipper.FileSystem;
+namespace Reaparr.FileSystem;
 
 public sealed class DiskProvider : IDiskProvider
 {

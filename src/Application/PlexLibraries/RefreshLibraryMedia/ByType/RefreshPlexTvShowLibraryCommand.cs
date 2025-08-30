@@ -1,13 +1,14 @@
 using System.Diagnostics;
-using Data.Contracts;
 using FastEndpoints;
 using FluentValidation;
-using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
-using PlexApi.Contracts;
-using WebAPI.Contracts;
+using Reaparr.Data.Contracts;
+using Reaparr.Logging;
+using Reaparr.PlexApi.Contracts;
+using Reaparr.WebAPI.Contracts;
+using ILog = Reaparr.Logging.ILog;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public record RefreshPlexTvShowLibraryCommand(
     InsertMediaMetaDataCommandResponse LibraryMetadata,

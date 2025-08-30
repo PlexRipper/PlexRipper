@@ -1,9 +1,9 @@
-using Application.Contracts;
-using Environment;
-using Logging.Interface;
-using PlexRipper.Application;
+using Reaparr.Application;
+using Reaparr.Application.Contracts;
+using Reaparr.Environment;
+using ILog = Reaparr.Logging.ILog;
 
-namespace PlexRipper.WebAPI;
+namespace Reaparr.WebAPI;
 
 /// <summary>
 /// The Boot class is used to sequentially start various processes needed to start PlexRipper.

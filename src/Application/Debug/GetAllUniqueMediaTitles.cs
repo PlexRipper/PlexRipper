@@ -1,11 +1,11 @@
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using Application.Contracts;
-using Data.Contracts;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public record GetAllUniqueMediaTitlesEndpointRequest
 {

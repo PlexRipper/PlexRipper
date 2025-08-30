@@ -1,9 +1,10 @@
-﻿using Data.Contracts;
-using FastEndpoints;
+﻿using FastEndpoints;
 using FluentValidation;
-using Logging.Interface;
+using Reaparr.Data.Contracts;
+using Reaparr.Logging;
+using ILog = Reaparr.Logging.ILog;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 /// <summary>
 /// Inspects the <see cref="PlexServer">PlexServers</see> for connectivity.

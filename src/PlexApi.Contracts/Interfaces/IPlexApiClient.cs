@@ -1,7 +1,7 @@
 using LukeHagar.PlexAPI.SDK.Utils;
-using PlexRipper.Domain;
+using Reaparr.Domain;
 
-namespace PlexApi.Contracts;
+namespace Reaparr.PlexApi.Contracts;
 
 public interface IPlexApiClient : IDisposable, ISpeakeasyHttpClient
 {

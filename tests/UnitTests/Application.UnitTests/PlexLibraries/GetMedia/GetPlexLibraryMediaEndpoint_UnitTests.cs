@@ -1,7 +1,8 @@
-using Application.Contracts;
-using Application.Contracts.Validators;
+using Reaparr.Application.Contracts;
+using Reaparr.Application.Contracts.Validators;
+using Reaparr.BaseTests;
 
-namespace PlexRipper.Application.UnitTests;
+namespace Reaparr.Application.UnitTests;
 
 public class GetPlexLibraryMediaEndpoint_UnitTests : BaseUnitTest<GetPlexLibraryMediaEndpoint>
 {

@@ -2,9 +2,9 @@ using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage;
-using PlexRipper.Domain;
+using Reaparr.Domain;
 
-namespace Data.Contracts;
+namespace Reaparr.Data.Contracts;
 
 public interface IPlexRipperDbContext : IDisposable
 {

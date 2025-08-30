@@ -1,10 +1,9 @@
 using System.Runtime.CompilerServices;
-using Environment;
-using Logging.Interface;
+using Reaparr.Environment;
 using Serilog.Core;
 using Serilog.Events;
 
-namespace Logging;
+namespace Reaparr.Logging;
 
 public static class LogManager
 {

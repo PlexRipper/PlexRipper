@@ -1,11 +1,11 @@
 ﻿using System.IO.Abstractions;
 using Autofac;
-using Environment;
-using Logging.Interface;
-using PlexRipper.Settings;
-using Settings.Contracts;
+using Reaparr.BaseTests;
+using Reaparr.Environment;
+using Reaparr.Settings.Contracts;
+using ILog = Reaparr.Logging.ILog;
 
-namespace Settings.UnitTests;
+namespace Reaparr.Settings.UnitTests;
 
 public class ConfigManager_ResetConfig_UnitTests : BaseUnitTest<ConfigManager>
 {

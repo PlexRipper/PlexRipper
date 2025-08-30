@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace PlexRipper.Domain.Validators;
+namespace Reaparr.Domain.Validators;
 
 public class DownloadTaskEpisodeValidator : AbstractValidator<DownloadTaskTvShowEpisode>
 {

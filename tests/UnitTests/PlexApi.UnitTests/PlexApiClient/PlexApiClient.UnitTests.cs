@@ -2,10 +2,10 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 using Moq.Contrib.HttpClient;
-using PlexApi.Contracts;
-using PlexRipper.PlexApi;
+using Reaparr.BaseTests;
+using Reaparr.PlexApi.Contracts;
 
-namespace PlexApi.UnitTests;
+namespace Reaparr.PlexApi.UnitTests;
 
 public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, PlexApiClient>>
 {

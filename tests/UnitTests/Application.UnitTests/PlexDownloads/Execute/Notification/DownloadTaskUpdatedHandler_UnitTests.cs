@@ -1,7 +1,8 @@
-using Application.Contracts;
-using Data.Contracts;
+using Reaparr.Application.Contracts;
+using Reaparr.BaseTests;
+using Reaparr.Data.Contracts;
 
-namespace PlexRipper.Application.UnitTests;
+namespace Reaparr.Application.UnitTests;
 
 public class DownloadTaskUpdatedHandler_UnitTests : BaseUnitTest<DownloadTaskUpdatedHandler>
 {

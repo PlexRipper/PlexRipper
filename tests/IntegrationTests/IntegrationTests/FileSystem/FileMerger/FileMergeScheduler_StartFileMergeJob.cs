@@ -1,7 +1,8 @@
-using Data.Contracts;
 using Microsoft.EntityFrameworkCore;
+using Reaparr.BaseTests;
+using Reaparr.Data.Contracts;
 
-namespace IntegrationTests.FileSystem.FileMerger;
+namespace Reaparr.IntegrationTests.FileSystem.FileMerger;
 
 public class FileMergeSchedulerStartFileMergeJobIntegrationTests : BaseIntegrationTests
 {

@@ -1,6 +1,6 @@
-using FluentResultExtensions;
+using Reaparr.FluentResultExtensions;
 
-namespace FluentResultExtensionTests;
+namespace Reaparr.FluentResultExtension.UnitTests;
 
 public class ResultExtensionsWebApi404Tests
 {

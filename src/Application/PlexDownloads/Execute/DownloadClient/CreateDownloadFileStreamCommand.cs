@@ -1,9 +1,9 @@
 using System.IO.Abstractions;
 using FastEndpoints;
-using FileSystem.Contracts;
 using FluentValidation;
+using Reaparr.FileSystem.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public record CreateDownloadFileStreamCommand(string Directory, string FileName, long FileSize)
     : ICommand<Result<Stream>>;

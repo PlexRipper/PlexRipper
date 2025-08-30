@@ -1,14 +1,14 @@
 using System.ComponentModel;
-using Application.Contracts;
 using FastEndpoints;
 using FastEndpoints.Security;
 using FluentValidation;
-using Logging.Interface;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using PlexRipper.Identity.Contracts;
+using Reaparr.Application.Contracts;
+using Reaparr.Identity.Contracts;
+using ILog = Reaparr.Logging.ILog;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public record AppUserLoginEndpointRequest
 {

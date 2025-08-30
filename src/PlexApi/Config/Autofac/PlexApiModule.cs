@@ -1,7 +1,7 @@
 ﻿using Autofac;
-using PlexApi.Contracts;
+using Reaparr.PlexApi.Contracts;
 
-namespace PlexRipper.PlexApi;
+namespace Reaparr.PlexApi;
 
 public class PlexApiModule : Module
 {

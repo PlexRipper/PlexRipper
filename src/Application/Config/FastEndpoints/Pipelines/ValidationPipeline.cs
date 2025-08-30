@@ -3,7 +3,7 @@ using FluentValidation;
 using FluentValidation.Results;
 using ValidationResult = FluentValidation.Results.ValidationResult;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public class ValidationPipeline<TRequest, TResponse> : ICommandMiddleware<TRequest, TResponse>
     where TRequest : ICommand<TResponse>

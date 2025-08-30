@@ -1,9 +1,10 @@
 ﻿using System.IO.Abstractions;
-using Environment;
-using Logging.Interface;
-using Settings.Contracts;
+using Reaparr.Environment;
+using Reaparr.Logging;
+using Reaparr.Settings.Contracts;
+using ILog = Reaparr.Logging.ILog;
 
-namespace PlexRipper.Settings;
+namespace Reaparr.Settings;
 
 public class ConfigManager : IConfigManager
 {

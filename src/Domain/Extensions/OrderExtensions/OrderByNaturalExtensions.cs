@@ -1,6 +1,6 @@
 using NaturalSort.Extension;
 
-namespace PlexRipper.Domain;
+namespace Reaparr.Domain;
 
 // Source: https://github.com/tompazourek/NaturalSort.Extension
 public static class OrderByNaturalExtensions

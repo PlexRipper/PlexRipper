@@ -1,9 +1,8 @@
-using Logging.Common;
-using Logging.Interface;
+using Reaparr.Logging.Common;
 using Serilog;
 using Serilog.Events;
 
-namespace Logging;
+namespace Reaparr.Logging;
 
 public partial class Log : ILog
 {

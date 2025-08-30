@@ -1,4 +1,4 @@
-namespace PlexRipper.Domain;
+namespace Reaparr.Domain;
 
 /// <summary>
 /// Every <see cref="PlexServer"/> might have different ways to setup a connection through various domains or ip addresses.

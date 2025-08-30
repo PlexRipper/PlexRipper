@@ -1,9 +1,9 @@
-using Data.Contracts;
 using FastEndpoints;
-using Logging.Interface;
-using PlexApi.Contracts;
+using Reaparr.Data.Contracts;
+using Reaparr.PlexApi.Contracts;
+using ILog = Reaparr.Logging.ILog;
 
-namespace PlexRipper.PlexApi;
+namespace Reaparr.PlexApi;
 
 public class GetLibrarySectionsCommandHandler : ICommandHandler<GetLibrarySectionsCommand, Result<List<PlexLibrary>>>
 {

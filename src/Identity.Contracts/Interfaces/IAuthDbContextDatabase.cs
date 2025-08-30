@@ -1,5 +1,5 @@
-using Data.Contracts;
+using Reaparr.Data.Contracts;
 
-namespace PlexRipper.Identity.Contracts;
+namespace Reaparr.Identity.Contracts;
 
 public interface IAuthDbContextDatabase : IDbContextDatabaseHelpers { }

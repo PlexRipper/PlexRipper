@@ -1,18 +1,18 @@
 ﻿using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
-using Application.Contracts;
 using Autofac;
 using Autofac.Extras.Quartz;
 using ByteSizeLib;
-using Data.Contracts;
-using Environment;
-using PlexRipper.Application;
-using PlexRipper.Data;
-using PlexRipper.Identity;
-using PlexRipper.Identity.Contracts;
-using Settings.Contracts;
+using Reaparr.Application;
+using Reaparr.Application.Contracts;
+using Reaparr.Data;
+using Reaparr.Data.Contracts;
+using Reaparr.Environment;
+using Reaparr.Identity;
+using Reaparr.Identity.Contracts;
+using Reaparr.Settings.Contracts;
 
-namespace PlexRipper.BaseTests;
+namespace Reaparr.BaseTests;
 
 /// <summary>
 /// Add the default test mock modules here which can later be overridden

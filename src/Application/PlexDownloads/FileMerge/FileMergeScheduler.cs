@@ -1,9 +1,9 @@
 using System.Text.Json;
-using FileSystem.Contracts;
-using Logging.Interface;
 using Quartz;
+using Reaparr.FileSystem.Contracts;
+using ILog = Reaparr.Logging.ILog;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public class FileMergeScheduler : IFileMergeScheduler
 {

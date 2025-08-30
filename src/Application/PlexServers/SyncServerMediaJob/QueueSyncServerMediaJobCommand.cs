@@ -1,9 +1,9 @@
 using FastEndpoints;
 using FluentValidation;
-using Logging.Interface;
 using Quartz;
+using ILog = Reaparr.Logging.ILog;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public record QueueSyncServerMediaJobCommand(int PlexServerId, bool ForceSync = false) : ICommand<Result>;
 

@@ -1,8 +1,9 @@
+using Reaparr.Logging;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
 
-namespace PlexRipper.BaseTests;
+namespace Reaparr.BaseTests;
 
 public class TestLogConfig : LogConfig
 {

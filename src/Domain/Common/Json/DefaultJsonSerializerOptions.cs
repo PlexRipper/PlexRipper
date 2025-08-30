@@ -2,7 +2,7 @@
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 
-namespace PlexRipper.Domain;
+namespace Reaparr.Domain;
 
 public static class DefaultJsonSerializerOptions
 {

@@ -1,7 +1,8 @@
-using Data.Contracts;
 using Microsoft.EntityFrameworkCore;
+using Reaparr.BaseTests;
+using Reaparr.Data.Contracts;
 
-namespace PlexRipper.Application.UnitTests;
+namespace Reaparr.Application.UnitTests;
 
 public class RefreshPlexMovieLibraryCommandUnitTests : BaseUnitTest<RefreshPlexMovieLibraryCommandHandler>
 {

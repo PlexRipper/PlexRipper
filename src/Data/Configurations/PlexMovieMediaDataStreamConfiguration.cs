@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace PlexRipper.Data.Configurations;
+namespace Reaparr.Data.Configurations;
 
 public class PlexMovieMediaDataStreamConfiguration : IEntityTypeConfiguration<PlexMovieMediaDataStream>
 {

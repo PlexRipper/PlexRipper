@@ -1,7 +1,7 @@
 using ByteSizeLib;
 using Serilog.Events;
 
-namespace BaseTests.UnitTests;
+namespace Reaparr.BaseTests.UnitTests;
 
 public class FakeDataDownloadTasksUnitTests : BaseUnitTest
 {

@@ -1,5 +1,5 @@
 using Quartz;
 
-namespace Application.Contracts;
+namespace Reaparr.Application.Contracts;
 
 public interface IDownloadJobListener : IJobListener { }

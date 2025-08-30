@@ -1,13 +1,14 @@
-using Data.Contracts;
-using Logging.Interface;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NaturalSort.Extension;
-using PlexRipper.Data;
-using PlexRipper.Identity;
+using Reaparr.Data;
+using Reaparr.Data.Contracts;
+using Reaparr.Identity;
+using Reaparr.Logging;
+using ILog = Reaparr.Logging.ILog;
 
-namespace PlexRipper.BaseTests;
+namespace Reaparr.BaseTests;
 
 public static partial class MockDatabase
 {

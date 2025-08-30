@@ -1,10 +1,10 @@
 using System.Reflection;
-using Environment;
 using FastEndpoints;
 using FastEndpoints.Swagger;
 using Microsoft.AspNetCore.Http.Extensions;
+using Reaparr.Environment;
 
-namespace PlexRipper.WebAPI;
+namespace Reaparr.WebAPI;
 
 public static partial class Startup
 {

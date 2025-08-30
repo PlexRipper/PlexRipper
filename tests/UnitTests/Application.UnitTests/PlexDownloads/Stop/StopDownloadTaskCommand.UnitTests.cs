@@ -1,9 +1,10 @@
 ﻿using System.IO.Abstractions;
-using Application.Contracts;
-using Data.Contracts;
 using Microsoft.EntityFrameworkCore;
+using Reaparr.Application.Contracts;
+using Reaparr.BaseTests;
+using Reaparr.Data.Contracts;
 
-namespace PlexRipper.Application.UnitTests;
+namespace Reaparr.Application.UnitTests;
 
 public class StopDownloadTaskCommand_UnitTests : BaseUnitTest<StopDownloadTaskCommandHandler>
 {

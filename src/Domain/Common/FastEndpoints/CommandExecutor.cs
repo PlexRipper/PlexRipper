@@ -1,7 +1,7 @@
 using FastEndpoints;
-using Logging.Interface;
+using Reaparr.Logging.Interface;
 
-namespace PlexRipper.Domain;
+namespace Reaparr.Domain;
 
 public class CommandExecutor : ICommandExecutor
 {

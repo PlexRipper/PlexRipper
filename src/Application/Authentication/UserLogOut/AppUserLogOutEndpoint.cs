@@ -1,10 +1,10 @@
-using Application.Contracts;
 using FastEndpoints.Security;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using PlexRipper.Identity.Contracts;
+using Reaparr.Application.Contracts;
+using Reaparr.Identity.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public class AppUserLogOutEndpoint : BaseEndpointWithoutRequest<string>
 {

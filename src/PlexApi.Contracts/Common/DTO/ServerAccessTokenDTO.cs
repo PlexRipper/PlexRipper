@@ -1,4 +1,4 @@
-namespace PlexApi.Contracts;
+namespace Reaparr.PlexApi.Contracts;
 
 public record ServerAccessTokenDTO
 {

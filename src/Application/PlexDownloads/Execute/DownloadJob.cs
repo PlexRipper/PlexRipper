@@ -1,13 +1,14 @@
 ﻿using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
-using Application.Contracts;
-using Data.Contracts;
-using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
 using Quartz;
-using Settings.Contracts;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
+using Reaparr.Logging;
+using Reaparr.Settings.Contracts;
+using ILog = Reaparr.Logging.ILog;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public class DownloadJob : IJob, IDisposable
 {

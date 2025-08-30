@@ -1,8 +1,8 @@
-using Environment;
-using Logging.Common;
-using Logging.Enricher;
-using Logging.Interface;
-using Logging.Masks;
+using Reaparr.Environment;
+using Reaparr.Logging.Common;
+using Reaparr.Logging.Enricher;
+using Reaparr.Logging.Interface;
+using Reaparr.Logging.Masks;
 using Serilog;
 using Serilog.Core;
 using Serilog.Enrichers.Sensitive;
@@ -11,7 +11,7 @@ using Serilog.Filters;
 using Serilog.Formatting.Display;
 using Serilog.Sinks.Console.LogThemes;
 
-namespace Logging;
+namespace Reaparr.Logging;
 
 public class LogConfig
 {

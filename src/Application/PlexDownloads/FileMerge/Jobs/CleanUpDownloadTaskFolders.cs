@@ -1,9 +1,9 @@
 using System.IO.Abstractions;
-using Data.Contracts;
 using FastEndpoints;
 using FluentValidation;
+using Reaparr.Data.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public record CleanUpDownloadTaskFoldersCommand(DownloadTaskKey DownloadTaskKey) : ICommand<Result>;
 

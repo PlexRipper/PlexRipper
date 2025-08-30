@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public record RefreshPlexServerAccessRapport(int PlexAccountId, string PlexAccountName)
 {

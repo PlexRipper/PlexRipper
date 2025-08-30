@@ -1,8 +1,8 @@
-using Data.Contracts;
-using PlexRipper.Data;
-using PlexRipper.Identity.Contracts;
+using Reaparr.Data;
+using Reaparr.Data.Contracts;
+using Reaparr.Identity.Contracts;
 
-namespace PlexRipper.BaseTests;
+namespace Reaparr.BaseTests;
 
 public partial class BaseUnitTest : IDisposable
 {

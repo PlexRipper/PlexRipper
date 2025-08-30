@@ -1,8 +1,8 @@
-using Environment;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
+using Reaparr.Environment;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public static class EndpointExtensions
 {

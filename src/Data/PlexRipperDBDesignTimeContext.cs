@@ -1,7 +1,7 @@
-using Environment;
 using Microsoft.EntityFrameworkCore.Design;
+using Reaparr.Environment;
 
-namespace PlexRipper.Data;
+namespace Reaparr.Data;
 
 public class PlexRipperDbDesignTimeContext : IDesignTimeDbContextFactory<PlexRipperDbContext>
 {

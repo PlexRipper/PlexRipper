@@ -1,11 +1,11 @@
-using Data.Contracts;
 using FluentResults;
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Identity.Contracts;
+using Reaparr.Data.Contracts;
+using Reaparr.Identity.Contracts;
 
-namespace PlexRipper.Identity;
+namespace Reaparr.Identity;
 
 public sealed class AuthDbContext : IdentityDbContext<AppUser>, IAuthDbContext, IAuthDbContextDatabase
 {

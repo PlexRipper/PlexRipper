@@ -1,13 +1,13 @@
 ﻿using System.Linq.Expressions;
 using System.Net;
 using System.Text;
-using Application.Contracts;
 using FastEndpoints;
 using Moq.Contrib.HttpClient;
 using Moq.Language.Flow;
 using Newtonsoft.Json;
+using Reaparr.Application.Contracts;
 
-namespace PlexRipper.BaseTests;
+namespace Reaparr.BaseTests;
 
 public static class MoqExtensions
 {

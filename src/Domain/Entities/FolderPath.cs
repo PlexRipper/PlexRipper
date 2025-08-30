@@ -1,6 +1,6 @@
 ﻿// ReSharper disable CollectionNeverUpdated.Global
 // ReSharper disable UnusedAutoPropertyAccessor.Global
-namespace PlexRipper.Domain;
+namespace Reaparr.Domain;
 
 public class FolderPath : BaseEntity
 {

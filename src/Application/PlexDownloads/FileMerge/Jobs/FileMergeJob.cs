@@ -1,9 +1,10 @@
-using Data.Contracts;
-using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
 using Quartz;
+using Reaparr.Data.Contracts;
+using Reaparr.Logging;
+using ILog = Reaparr.Logging.ILog;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public class FileMergeJob : IJob
 {

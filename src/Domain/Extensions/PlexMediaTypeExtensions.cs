@@ -1,6 +1,6 @@
-﻿using Environment;
+﻿using Reaparr.Environment;
 
-namespace PlexRipper.Domain;
+namespace Reaparr.Domain;
 
 public static class PlexMediaTypeExtensions
 {

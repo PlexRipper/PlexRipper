@@ -1,10 +1,10 @@
-using Data.Contracts;
 using FastEndpoints;
 using FluentValidation;
-using Logging.Interface;
-using WebAPI.Contracts;
+using Reaparr.Data.Contracts;
+using Reaparr.WebAPI.Contracts;
+using ILog = Reaparr.Logging.ILog;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public record RefreshPlexMovieLibraryCommand(
     InsertMediaMetaDataCommandResponse LibraryMetadata,

@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace Environment;
+namespace Reaparr.Environment;
 
 public class PathProvider : IPathProvider
 {

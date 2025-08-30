@@ -1,9 +1,9 @@
 using System.Text.Json;
-using Application.Contracts;
-using Logging.Interface;
 using Quartz;
+using Reaparr.Application.Contracts;
+using ILog = Reaparr.Logging.ILog;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public class DownloadTaskScheduler : IDownloadTaskScheduler
 {

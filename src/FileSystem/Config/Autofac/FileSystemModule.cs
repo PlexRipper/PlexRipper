@@ -2,11 +2,11 @@ using System.IO.Abstractions;
 using System.Reflection;
 using Autofac;
 using Autofac.Extras.Quartz;
-using Environment;
-using FileSystem.Contracts;
+using Reaparr.Environment;
+using Reaparr.FileSystem.Contracts;
 using Module = Autofac.Module;
 
-namespace PlexRipper.FileSystem.Config;
+namespace Reaparr.FileSystem.Config;
 
 /// <summary>
 /// Used to register all dependencies in Autofac for the FileSystem project.

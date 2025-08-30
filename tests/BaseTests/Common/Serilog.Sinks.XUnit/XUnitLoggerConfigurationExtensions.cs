@@ -6,7 +6,7 @@ using Serilog.Formatting;
 using Serilog.Formatting.Display;
 using Xunit.Sdk;
 
-namespace PlexRipper.BaseTests
+namespace Reaparr.BaseTests
 {
     /// <summary>
     /// Adds the WriteTo.TestOutput() extension method to <see cref="LoggerConfiguration"/>.

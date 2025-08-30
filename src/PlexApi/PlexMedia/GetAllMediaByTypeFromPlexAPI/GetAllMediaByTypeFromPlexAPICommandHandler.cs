@@ -1,11 +1,12 @@
-using Data.Contracts;
 using FastEndpoints;
 using LukeHagar.PlexAPI.SDK;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
-using PlexApi.Contracts;
-using ILog = Logging.Interface.ILog;
+using Reaparr.Data.Contracts;
+using Reaparr.Logging;
+using Reaparr.PlexApi.Contracts;
+using ILog = Reaparr.Logging.ILog;
 
-namespace PlexRipper.PlexApi;
+namespace Reaparr.PlexApi;
 
 public record GetAllMediaByTypeFromPlexApiCommand(
     PlexLibrary PlexLibrary,

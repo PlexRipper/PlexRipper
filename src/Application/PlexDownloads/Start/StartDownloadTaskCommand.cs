@@ -1,10 +1,10 @@
-using Application.Contracts;
-using Data.Contracts;
 using FastEndpoints;
-using FileSystem.Contracts;
 using FluentValidation;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
+using Reaparr.FileSystem.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public record StartDownloadTaskCommand(Guid DownloadTaskGuid) : ICommand<Result>;
 

@@ -1,9 +1,10 @@
-using Environment;
-using FluentResultExtensions;
-using Logging.Interface;
-using PlexRipper.Application;
+using Reaparr.Application;
+using Reaparr.Environment;
+using Reaparr.FluentResultExtensions;
+using Reaparr.Logging;
+using ILog = Reaparr.Logging.ILog;
 
-namespace PlexRipper.WebAPI;
+namespace Reaparr.WebAPI;
 
 /// <summary>
 ///  The main class entry point for the application.

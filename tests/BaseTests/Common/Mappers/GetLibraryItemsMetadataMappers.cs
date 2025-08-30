@@ -1,6 +1,6 @@
 using LukeHagar.PlexAPI.SDK.Models.Requests;
 
-namespace PlexRipper.BaseTests;
+namespace Reaparr.BaseTests;
 
 public static class GetLibrarySectionsAllMetadataMappers
 {

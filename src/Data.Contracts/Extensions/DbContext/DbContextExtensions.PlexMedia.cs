@@ -1,9 +1,9 @@
-using Application.Contracts;
 using FluentResults;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Domain;
+using Reaparr.Application.Contracts;
+using Reaparr.Domain;
 
-namespace Data.Contracts;
+namespace Reaparr.Data.Contracts;
 
 public static partial class DbContextExtensions
 {

@@ -1,4 +1,4 @@
-namespace PlexApi.UnitTests;
+namespace Reaparr.PlexApi.UnitTests;
 
 public static class PlexApiWrapperTestData
 {

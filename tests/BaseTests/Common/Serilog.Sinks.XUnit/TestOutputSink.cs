@@ -4,7 +4,7 @@ using Serilog.Formatting;
 using Xunit.Sdk;
 using Xunit.v3;
 
-namespace PlexRipper.BaseTests
+namespace Reaparr.BaseTests
 {
     /// <summary>
     /// A sink to direct Serilog output to the XUnit test output

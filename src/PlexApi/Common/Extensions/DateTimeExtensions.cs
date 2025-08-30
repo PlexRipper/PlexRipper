@@ -1,6 +1,6 @@
 using NodaTime;
 
-namespace PlexRipper.PlexApi;
+namespace Reaparr.PlexApi;
 
 public static class DateTimeExtensions
 {

@@ -8,6 +8,10 @@
 **/.toolstarget
 **/.vs
 **/.vscode
+**/.idea
+**/.idea/**
+**/.run
+**/.run/**
 **/*.*proj.user
 **/*.dbmdl
 **/*.jfm

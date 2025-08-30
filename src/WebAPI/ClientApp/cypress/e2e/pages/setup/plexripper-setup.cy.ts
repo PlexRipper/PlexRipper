@@ -4,7 +4,7 @@ import { generateResultDTO } from '@mock';
 import type { AppCredentialsDTO } from '@dto';
 import { randPassword } from '@ngneat/falso';
 
-describe('PlexRipper new setup process', () => {
+describe('Reaparr new setup process', () => {
 	beforeEach(() => {
 		cy.basePageSetup({
 			plexAccountCount: 0,
@@ -46,7 +46,7 @@ describe('PlexRipper new setup process', () => {
 			areTabsActive(3, 3);
 			cy.getCy('setup-page-next-button').should('be.disabled');
 
-			const newUsername = 'PlexRipperRocks123';
+			const newUsername = 'ReaparrRocks123';
 			const newPassword = 'x!WCF*bnT$FEu6';
 			cy.getCy('app-username-input').clear();
 			cy.getCy('app-username-input').type(newUsername);

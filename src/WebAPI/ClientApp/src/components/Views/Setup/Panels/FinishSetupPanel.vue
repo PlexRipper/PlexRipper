@@ -24,7 +24,7 @@ defineProps<{
 }>();
 
 const list = ref([{
-	link: 'https://github.com/PlexRipper/PlexRipper/',
+	link: 'https://github.com/Reaparr/Reaparr/',
 	text: t('pages.setup.finished.list.item-1'),
 },
 {
@@ -32,7 +32,7 @@ const list = ref([{
 	text: t('pages.setup.finished.list.item-5'),
 },
 {
-	link: 'https://github.com/PlexRipper/PlexRipper/issues',
+	link: 'https://github.com/Reaparr/Reaparr/issues',
 	text: t('pages.setup.finished.list.item-2'),
 },
 {
@@ -40,7 +40,7 @@ const list = ref([{
 	text: t('pages.setup.finished.list.item-3'),
 },
 {
-	link: 'https://github.com/PlexRipper/PlexRipper/',
+	link: 'https://github.com/Reaparr/Reaparr/',
 	text: t('pages.setup.finished.list.item-4'),
 },
 ]);

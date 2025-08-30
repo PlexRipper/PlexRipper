@@ -48,7 +48,7 @@
             "current-folder-has-no-write-permission": "Bieżący folder nie ma uprawnień do zapisu! Wybierz taki, który je ma."
         },
         "download-confirmation": {
-            "description": "PlexRipper rozpocznie pobieranie następujących plików",
+            "description": "Reaparr rozpocznie pobieranie następujących plików",
             "total-size": "Całkowity rozmiar:",
             "columns": {
                 "file-size": "Rozmiar pliku",
@@ -266,14 +266,14 @@
             "tv-shows-metadata": "{tvShowCount} Programy telewizyjne - {seasonCount} Sezony - {episodeCount} Odcinki - {fileSize} "
         },
         "discord-invite-dialog": {
-            "discord-invite-button-text": "Dołącz do PlexRipper Discord!",
-            "header": "Dołącz do nowego PlexRipper Discord!",
+            "discord-invite-button-text": "Dołącz do Reaparr Discord!",
+            "header": "Dołącz do nowego Reaparr Discord!",
             "reasons": {
                 "reason-1": "Udostępniaj i wymieniaj się dostępem do serwera Plex!",
-                "reason-2": "Uzyskaj pomoc w czasie rzeczywistym dotyczącą konfiguracji i rozwiązywania problemów z PlexRipperem!",
+                "reason-2": "Uzyskaj pomoc w czasie rzeczywistym dotyczącą konfiguracji i rozwiązywania problemów z Reaparrem!",
                 "reason-3": "Dołącz do społeczności podobnie myślących użytkowników PlexRip i entuzjastów Plex!",
                 "reason-4": "Weź udział w dyskusjach na temat nowych funkcji i wydań!",
-                "reason-5": "Uzyskaj dostęp do ekskluzywnych aktualizacji i ogłoszeń dotyczących PlexRipper!"
+                "reason-5": "Uzyskaj dostęp do ekskluzywnych aktualizacji i ogłoszeń dotyczących Reaparr!"
             }
         },
         "sync-server-media-dialog": {
@@ -338,7 +338,7 @@
     },
     "confirmation": {
         "delete-account": {
-            "text": "Spowoduje to usunięcie tego konta Plex z PlexRipper!\n\nSpowoduje to również usunięcie wszystkich niedostępnych serwerów współdzielonych Plex, bibliotek Plex i wszystkich zawartych w nich multimediów. Wszelkie aktywne pliki do pobrania, które zostały rozpoczęte lub ustawione w kolejce na tym koncie, zostaną anulowane i usunięte. Zakończone pobieranie pozostanie nietknięte.",
+            "text": "Spowoduje to usunięcie tego konta Plex z Reaparr!\n\nSpowoduje to również usunięcie wszystkich niedostępnych serwerów współdzielonych Plex, bibliotek Plex i wszystkich zawartych w nich multimediów. Wszelkie aktywne pliki do pobrania, które zostały rozpoczęte lub ustawione w kolejce na tym koncie, zostaną anulowane i usunięte. Zakończone pobieranie pozostanie nietknięte.",
             "title": "Jesteś pewny?",
             "warning": "Może to potrwać około 5 minut lub dłużej, po czym okno zamknie się automatycznie!"
         },
@@ -347,7 +347,7 @@
             "title": "Jesteś pewny?"
         },
         "reset-db": {
-            "text": "Spowoduje to utworzenie kopii zapasowej bieżącej bazy danych w \"config/Database Backup/\" i utworzenie nowej, po czym nastąpi przekierowanie do strony konfiguracji. Nie spowoduje to zresetowania ustawień, ponieważ są one przechowywane w pliku \"config/PlexRipperSettings.json\".",
+            "text": "Spowoduje to utworzenie kopii zapasowej bieżącej bazy danych w \"config/Database Backup/\" i utworzenie nowej, po czym nastąpi przekierowanie do strony konfiguracji. Nie spowoduje to zresetowania ustawień, ponieważ są one przechowywane w pliku \"config/ReaparrSettings.json\".",
             "title": "Jesteś pewny?"
         },
         "not-found": {
@@ -394,7 +394,7 @@
             "view": "Widok",
             "media-options": "Opcje"
         },
-        "name-version": "PlexRipper - V{version}",
+        "name-version": "Reaparr - V{version}",
         "units": {
             "per-second": "/s"
         },
@@ -490,7 +490,7 @@
                 "download-manager-section": {
                     "download-segments": {
                         "label": "Pobierz segmenty",
-                        "text": "PlexRipper obsługuje pobieranie wielowątkowe i może dzielić pobierane multimedia na różne części i pobierać każdą z nich osobno. Ma to tendencję do zwiększania ogólnej prędkości pobierania, ale wadą jest to, że będzie to wymagało dodatkowego czasu na połączenie różnych części w jeden kompletny plik multimedialny.\n\nUstawienie tej wartości na 1 spowoduje wyłączenie pobierania wielowątkowego i pobranie pliku multimedialnego jako jednego kompletnego pliku. Liczba segmentów pobierania nie ma wpływu na szybkość scalanego pliku multimedialnego.",
+                        "text": "Reaparr obsługuje pobieranie wielowątkowe i może dzielić pobierane multimedia na różne części i pobierać każdą z nich osobno. Ma to tendencję do zwiększania ogólnej prędkości pobierania, ale wadą jest to, że będzie to wymagało dodatkowego czasu na połączenie różnych części w jeden kompletny plik multimedialny.\n\nUstawienie tej wartości na 1 spowoduje wyłączenie pobierania wielowątkowego i pobranie pliku multimedialnego jako jednego kompletnego pliku. Liczba segmentów pobierania nie ma wpływu na szybkość scalanego pliku multimedialnego.",
                         "title": "Pobierz segmenty"
                     }
                 },
@@ -519,15 +519,15 @@
                 "setup-section": {
                     "go-to-setup-page": {
                         "label": "Przejdź do strony konfiguracji",
-                        "text": "Przejdziesz do strony konfiguracji PlexRipper.",
+                        "text": "Przejdziesz do strony konfiguracji Reaparr.",
                         "title": "Przejdź do strony konfiguracji"
                     }
                 }
             },
             "accounts": {
                 "app-username": {
-                    "text": "Wprowadź nazwę użytkownika, której będziesz używać do logowania się do PlexRipper.",
-                    "title": "Nazwa użytkownika PlexRipper",
+                    "text": "Wprowadź nazwę użytkownika, której będziesz używać do logowania się do Reaparr.",
+                    "title": "Nazwa użytkownika Reaparr",
                     "label": "Nazwa użytkownika"
                 },
                 "app-confirm-password": {
@@ -535,8 +535,8 @@
                 },
                 "app-password": {
                     "label": "Hasło",
-                    "text": "Wprowadź hasło, którego będziesz używać do bezpiecznego logowania się do PlexRipper.",
-                    "title": "Hasło PlexRipper"
+                    "text": "Wprowadź hasło, którego będziesz używać do bezpiecznego logowania się do Reaparr.",
+                    "title": "Hasło Reaparr"
                 }
             },
             "paths": {
@@ -604,7 +604,7 @@
                 "language": {
                     "language-selection": {
                         "label": "Język",
-                        "text": "Spowoduje to zmianę języka na prawie wszystko. Tekst taki jak błędy raczej nie zostanie przetłumaczony. Wszelkie poprawki tłumaczeń lub nowe języki są bardzo mile widziane, sprawdź www.plexripper.rocks, aby uzyskać informacje na temat dodawania nowych języków.",
+                        "text": "Spowoduje to zmianę języka na prawie wszystko. Tekst taki jak błędy raczej nie zostanie przetłumaczony. Wszelkie poprawki tłumaczeń lub nowe języki są bardzo mile widziane, sprawdź www.reaparr.rocks, aby uzyskać informacje na temat dodawania nowych języków.",
                         "title": "Wybierz preferowany język"
                     }
                 },
@@ -675,7 +675,7 @@
                     "header": "Ustawienia debugowania"
                 },
                 "setup": {
-                    "header": "Konfiguracja PlexRipper"
+                    "header": "Konfiguracja Reaparr"
                 }
             },
             "ui": {
@@ -712,21 +712,21 @@
                     "heading": "Proszę przeczytać i zgodzić się na poniższe warunki przed kontynuowaniem:",
                     "section1": {
                         "title": "Użycie prawne i etyczne",
-                        "content": "Jesteś odpowiedzialny za zapewnienie, że korzystanie z PlexRipper jest zgodne ze wszystkimi obowiązującymi przepisami prawa, w tym przepisami o prawie autorskim, oraz z Warunkami korzystania z usług wszelkich platform, z którymi się kontaktujesz. PlexRipper jest zaprojektowany wyłącznie do osobistego zarządzania mediami i tworzenia kopii zapasowych. Nie może być używany do nieautoryzowanego pobierania, naruszenia praw autorskich ani żadnej innej nielegalnej działalności."
+                        "content": "Jesteś odpowiedzialny za zapewnienie, że korzystanie z Reaparr jest zgodne ze wszystkimi obowiązującymi przepisami prawa, w tym przepisami o prawie autorskim, oraz z Warunkami korzystania z usług wszelkich platform, z którymi się kontaktujesz. Reaparr jest zaprojektowany wyłącznie do osobistego zarządzania mediami i tworzenia kopii zapasowych. Nie może być używany do nieautoryzowanego pobierania, naruszenia praw autorskich ani żadnej innej nielegalnej działalności."
                     },
                     "section2": {
                         "title": "Własność i pozwolenia",
-                        "content": "Musisz mieć wyraźne prawo własności lub pozwolenie na dostęp do treści multimedialnych i serwerów, z którymi się kontaktujesz, korzystając z PlexRipper. Nieautoryzowany dostęp lub użycie serwerów lub mediów osób trzecich jest surowo zabronione."
+                        "content": "Musisz mieć wyraźne prawo własności lub pozwolenie na dostęp do treści multimedialnych i serwerów, z którymi się kontaktujesz, korzystając z Reaparr. Nieautoryzowany dostęp lub użycie serwerów lub mediów osób trzecich jest surowo zabronione."
                     },
                     "section3": {
                         "title": "Brak powiązań",
-                        "content": "PlexRipper jest niezależnym narzędziem i nie jest powiązany, popierany ani związany z Plex Inc. ani żadną inną platformą."
+                        "content": "Reaparr jest niezależnym narzędziem i nie jest powiązany, popierany ani związany z Plex Inc. ani żadną inną platformą."
                     },
                     "section4": {
                         "title": "Ograniczenie odpowiedzialności",
-                        "content": "Twórcy PlexRipper nie ponoszą odpowiedzialności za jakiekolwiek niewłaściwe użycie narzędzia ani za konsekwencje wynikające z nieautoryzowanego lub nielegalnego użycia."
+                        "content": "Twórcy Reaparr nie ponoszą odpowiedzialności za jakiekolwiek niewłaściwe użycie narzędzia ani za konsekwencje wynikające z nieautoryzowanego lub nielegalnego użycia."
                     },
-                    "confirmation": "Przechodząc dalej, potwierdzasz, że rozumiesz i akceptujesz te warunki oraz że będziesz korzystać z PlexRipper w sposób odpowiedzialny i etyczny."
+                    "confirmation": "Przechodząc dalej, potwierdzasz, że rozumiesz i akceptujesz te warunki oraz że będziesz korzystać z Reaparr w sposób odpowiedzialny i etyczny."
                 }
             },
             "finished": {
@@ -735,25 +735,25 @@
                     "item-1": "Daj gwiazdkę na Githubie!",
                     "item-5": "Daj gwiazdkę na stronie DockerHub!",
                     "item-2": "Poproś o nowe funkcje i zgłaszaj błędy!",
-                    "item-3": "Przetłumacz PlexRipper na swój język!",
+                    "item-3": "Przetłumacz Reaparr na swój język!",
                     "item-4": "Przejrzyj kod i przekaż nam swoją opinię lub zasugeruj ulepszenia!"
                 },
                 "text": {
                     "p-1": "Jeśli podoba Ci się ten projekt i chcesz okazać swoje uznanie, rozważ poniższe możliwości:"
                 },
-                "title": "Możesz teraz rozpocząć korzystanie z PlexRippera!"
+                "title": "Możesz teraz rozpocząć korzystanie z Reaparra!"
             },
             "intro": {
                 "header": "Rozpoczęcie",
                 "list": {
-                    "item-1": "PlexRipper ma discorda! Dołącz do nas, aby uzyskać wsparcie i dyskusje na temat nowych funkcji i wydań!",
-                    "item-2": "PlexRipper ma stronę internetową z często zadawanymi pytaniami! Upewnij się, że je przeczytałeś, zanim zaczniesz szukać pomocy!",
-                    "item-3": "PlexRipper jest obecnie w fazie aktywnego rozwoju, więc mogą występować tu i ówdzie pewne błędy. Upewnij się, że zgłosisz wszystkie, które znajdziesz na stronie Github issues."
+                    "item-1": "Reaparr ma discorda! Dołącz do nas, aby uzyskać wsparcie i dyskusje na temat nowych funkcji i wydań!",
+                    "item-2": "Reaparr ma stronę internetową z często zadawanymi pytaniami! Upewnij się, że je przeczytałeś, zanim zaczniesz szukać pomocy!",
+                    "item-3": "Reaparr jest obecnie w fazie aktywnego rozwoju, więc mogą występować tu i ówdzie pewne błędy. Upewnij się, że zgłosisz wszystkie, które znajdziesz na stronie Github issues."
                 },
                 "text": {
                     "p-1": "Oto kilka przydatnych informacji:"
                 },
-                "title": "Witamy w instalatorze PlexRipper!"
+                "title": "Witamy w instalatorze Reaparr!"
             },
             "paths": {
                 "header": "Sprawdzanie ścieżek",
@@ -799,7 +799,7 @@
         "login": {
             "header": "ZALOGUJ SIĘ, ABY KONTYNUOWAĆ",
             "invalid-credentials": "Nieprawidłowa nazwa użytkownika lub hasło",
-            "locked-out": "Nie udało Ci się zhakować PlexRippera, teraz masz 5 minut przerwy!",
+            "locked-out": "Nie udało Ci się zhakować Reaparra, teraz masz 5 minut przerwy!",
             "remember-me": "Pamiętaj mnie",
             "forgot-your-password": "Zapomniałeś hasła?"
         }

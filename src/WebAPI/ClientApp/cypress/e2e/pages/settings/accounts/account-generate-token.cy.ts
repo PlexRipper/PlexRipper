@@ -3,7 +3,7 @@ import { generateFailedResultDTO, generateResultDTO } from '@mock';
 import type { GeneratePlexTokenResponse, PlexAccountDTO } from '@dto';
 import { PlexAccountPaths } from '@api-urls';
 
-describe('Add Plex account to PlexRipper', () => {
+describe('Add Plex account to Reaparr', () => {
 	beforeEach(() => {
 		cy.basePageSetup({
 			plexAccountCount: 2,

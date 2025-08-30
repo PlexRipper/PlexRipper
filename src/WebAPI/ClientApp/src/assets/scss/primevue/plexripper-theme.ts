@@ -1,7 +1,7 @@
 import { definePreset } from '@primevue/themes';
 import Aura from '@primevue/themes/aura';
 
-const plexRipperTheme = definePreset(Aura, {
+const reaparrTheme = definePreset(Aura, {
 	options: {
 		darkModeSelector: '.body--dark',
 	},
@@ -102,7 +102,7 @@ const plexRipperTheme = definePreset(Aura, {
 });
 
 export default {
-	preset: plexRipperTheme,
+	preset: reaparrTheme,
 	options: {
 		ripple: true,
 	},

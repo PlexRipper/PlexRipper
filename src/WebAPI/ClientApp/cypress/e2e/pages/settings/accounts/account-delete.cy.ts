@@ -2,7 +2,7 @@ import { route } from '@fixtures';
 import { generateResultDTO } from '@mock';
 import { PlexAccountPaths } from '@api-urls';
 
-describe('Remove Plex account from PlexRipper', () => {
+describe('Remove Plex account from Reaparr', () => {
 	beforeEach(() => {
 		cy.basePageSetup({
 			plexAccountCount: 2,

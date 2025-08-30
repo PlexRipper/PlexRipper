@@ -25,7 +25,7 @@
 					flat
 					rounded
 					style="padding: 0.5rem"
-					href="https://github.com/PlexRipper/PlexRipper"
+					href="https://github.com/Reaparr/Reaparr"
 					target="_blank" />
 
 				<q-btn

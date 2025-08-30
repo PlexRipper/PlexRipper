@@ -97,7 +97,7 @@ export const useGlobalStore = defineStore('GlobalStore', () => {
 			if (!version || state.version === version) {
 				return;
 			}
-			Log.info('PlexRipper App Version:', version);
+			Log.info('Reaparr App Version:', version);
 			state.version = version;
 		},
 		$reset() {

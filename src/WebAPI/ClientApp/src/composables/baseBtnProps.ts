@@ -3,7 +3,7 @@ import { ButtonType } from '@enums';
 
 export function baseBtnPropsDefault() {
 	return {
-		// region PlexRipper
+		// region Reaparr
 		cy: {
 			type: String,
 			default: '',

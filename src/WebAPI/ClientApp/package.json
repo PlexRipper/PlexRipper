@@ -6,12 +6,12 @@
   "private": true,
   "type": "module",
   "bugs": {
-    "url": "https://github.com/PlexRipper/PlexRipper/issues"
+    "url": "https://github.com/Reaparr/Reaparr/issues"
   },
-  "homepage": "https://github.com/PlexRipper/PlexRipper",
+  "homepage": "https://github.com/Reaparr/Reaparr",
   "repository": {
     "type": "git",
-    "url": "https://github.com/PlexRipper/PlexRipper.git"
+    "url": "https://github.com/Reaparr/Reaparr.git"
   },
   "scripts": {
     "dev": "nuxi dev",

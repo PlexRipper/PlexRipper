@@ -1,4 +1,4 @@
-describe('PlexRipper Server Dialog', () => {
+describe('Reaparr Server Dialog', () => {
 	beforeEach(() => {
 		cy.basePageSetup({
 			plexAccountCount: 1,

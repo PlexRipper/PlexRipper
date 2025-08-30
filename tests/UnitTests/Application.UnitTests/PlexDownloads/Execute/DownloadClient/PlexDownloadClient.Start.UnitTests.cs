@@ -2,6 +2,7 @@
 using Autofac;
 using ByteSizeLib;
 using Data.Contracts;
+using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 using PlexApi.Contracts;
 using PlexRipper.PlexApi;
@@ -38,40 +39,52 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<PlexDownloadClient>
         );
         await dbContext.SaveChangesAsync(CancellationToken);
 
+        // Get the actual machine identifier from the database
+        var serverMachineIdentifier = await dbContext.GetPlexServerMachineIdentifierById(
+            downloadTask.PlexServerId,
+            CancellationToken
+        );
+
         // PlexDownloadClientMocks
         mock.Mock<IServerSettingsModule>()
-            .Setup(x => x.GetDownloadSpeedLimit(It.IsAny<string>()))
+            .Setup(x => x.GetDownloadSpeedLimit(serverMachineIdentifier))
             .Returns(downloadSpeedLimit)
             .Verifiable(Times.Once);
 
         mock.Mock<IServerSettingsModule>()
-            .Setup(x => x.GetDownloadSpeedLimitObservable(It.IsAny<string>()))
+            .Setup(x => x.GetDownloadSpeedLimitObservable(serverMachineIdentifier))
             .Returns(Observable.Return(downloadSpeedLimit))
             .Verifiable(Times.Once);
 
         var updateList = new List<IDownloadTaskProgress>();
         var statusList = new List<DownloadStatus>();
 
-        async Task AddDownloadTaskUpdateAsync(DownloadTaskUpdatedNotification notification)
+        async Task AddDownloadTaskUpdateAsync(DownloadTaskUpdatedCommand command)
         {
-            var task = await IDbContext.GetDownloadTaskAsync(notification.Key);
+            var task = await IDbContext.GetDownloadTaskAsync(command.Key);
             task.ShouldNotBeNull();
             updateList.Add(task);
             statusList.Add(task.DownloadStatus);
         }
 
-        mock.Mock<IMediator>()
-            .Setup(m => m.Send(It.IsAny<DownloadTaskUpdatedNotification>(), It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask)
-            .Callback<DownloadTaskUpdatedNotification, CancellationToken>(
-                (notification, _) => AddDownloadTaskUpdateAsync(notification).GetAwaiter().GetResult()
+        mock.Mock<ICommandExecutor>()
+            .Setup(m => m.Send(It.IsAny<ICommand<Result>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok())
+            .Callback<ICommand<Result>, CancellationToken>(
+                (command, _) =>
+                {
+                    if (command is DownloadTaskUpdatedCommand notification)
+                    {
+                        AddDownloadTaskUpdateAsync(notification).GetAwaiter().GetResult();
+                    }
+                }
             )
             .Verifiable(Times.AtLeastOnce);
 
         // DownloadWorkerMocks
         var destinationStream = new MemoryStream();
 
-        mock.SetupMediator(It.IsAny<CreateDownloadFileStreamCommand>)
+        mock.SetupCommand(It.IsAny<CreateDownloadFileStreamCommand>)
             .ReturnsAsync(Result.Ok<Stream>(destinationStream))
             .Verifiable(Times.Once);
 

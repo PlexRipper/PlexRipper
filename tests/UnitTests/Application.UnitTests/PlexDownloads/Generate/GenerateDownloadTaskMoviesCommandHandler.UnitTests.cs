@@ -41,7 +41,7 @@ public class GenerateDownloadTaskMoviesCommandHandler_UnitTests : BaseUnitTest<G
 
         // Act
         var command = new GenerateDownloadTaskMoviesCommand(movies);
-        var result = await _sut.Handle(command, CancellationToken);
+        var result = await _sut.ExecuteAsync(command, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -93,7 +93,7 @@ public class GenerateDownloadTaskMoviesCommandHandler_UnitTests : BaseUnitTest<G
         // Act
         var request = new CreateDownloadTasksRequest(movies, 99);
         var command = new GenerateDownloadTaskMoviesCommand(request);
-        var result = await _sut.Handle(command, CancellationToken);
+        var result = await _sut.ExecuteAsync(command, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -138,7 +138,7 @@ public class GenerateDownloadTaskMoviesCommandHandler_UnitTests : BaseUnitTest<G
 
         // Act
         var command = new GenerateDownloadTaskMoviesCommand(movies);
-        var result = await _sut.Handle(command, CancellationToken);
+        var result = await _sut.ExecuteAsync(command, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

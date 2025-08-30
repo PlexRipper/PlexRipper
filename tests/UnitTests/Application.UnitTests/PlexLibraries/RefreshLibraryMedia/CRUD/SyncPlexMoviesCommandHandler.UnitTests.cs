@@ -35,7 +35,7 @@ public class SyncPlexMoviesCommandHandlerUnitTests : BaseUnitTest<SyncPlexMovies
         };
         var request = new SyncPlexMoviesCommand(insertCommand);
         (await _validator.ValidateAsync(request, TestContext.Current.CancellationToken)).IsValid.ShouldBeTrue();
-        var result = await _sut.Handle(request, CancellationToken);
+        var result = await _sut.ExecuteAsync(request, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -75,7 +75,7 @@ public class SyncPlexMoviesCommandHandlerUnitTests : BaseUnitTest<SyncPlexMovies
         };
         var request = new SyncPlexMoviesCommand(insertCommand);
         (await _validator.ValidateAsync(request, TestContext.Current.CancellationToken)).IsValid.ShouldBeTrue();
-        var result = await _sut.Handle(request, CancellationToken);
+        var result = await _sut.ExecuteAsync(request, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -131,7 +131,7 @@ public class SyncPlexMoviesCommandHandlerUnitTests : BaseUnitTest<SyncPlexMovies
         };
         var request = new SyncPlexMoviesCommand(insertCommand);
         (await _validator.ValidateAsync(request, TestContext.Current.CancellationToken)).IsValid.ShouldBeTrue();
-        var result = await _sut.Handle(request, CancellationToken);
+        var result = await _sut.ExecuteAsync(request, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

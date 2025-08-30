@@ -2,6 +2,7 @@ using System.Runtime.CompilerServices;
 using FluentResults;
 using Logging.Common;
 using Logging.Interface;
+using Serilog;
 
 namespace Logging;
 
@@ -17,6 +18,17 @@ public static partial class LogExtensions
         var className = Path.GetFileNameWithoutExtension(sourceFilePath);
         return new LogMetaData(logger, className, memberName, sourceLineNumber);
     }
+
+    public static ILogger Here(
+        this ILogger logger,
+        [CallerLineNumber] int sourceLineNumber = 0,
+        [CallerFilePath] string sourceFilePath = "",
+        [CallerMemberName] string memberName = ""
+    ) =>
+        logger
+            .ForContext(nameof(LogMetaData.ClassName), Path.GetFileNameWithoutExtension(sourceFilePath))
+            .ForContext(nameof(LogMetaData.MethodName), memberName)
+            .ForContext(nameof(LogMetaData.LineNumber), sourceLineNumber);
 
     public static Result ToResult(this LogMetaData logMetaData)
     {

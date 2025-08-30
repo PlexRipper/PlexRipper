@@ -22,17 +22,18 @@ public class PauseDownloadTaskEndpointRequestValidator : Validator<PauseDownload
 
 public class PauseDownloadTaskEndpoint : BaseEndpoint<PauseDownloadTaskEndpointRequest>
 {
-    private readonly IMediator _mediator;
+    private readonly ICommandExecutor _commandExecutor;
 
     public override string EndpointPath => ApiRoutes.DownloadController + "/pause/{DownloadTaskGuid}";
 
-    public PauseDownloadTaskEndpoint(IMediator mediator)
+    public PauseDownloadTaskEndpoint(ICommandExecutor commandExecutor)
     {
-        _mediator = mediator;
+        _commandExecutor = commandExecutor;
     }
 
     public override void Configure()
     {
+        // TODO state is changed - use POST / PUT
         Get(EndpointPath);
 
         Description(x =>
@@ -44,7 +45,7 @@ public class PauseDownloadTaskEndpoint : BaseEndpoint<PauseDownloadTaskEndpointR
 
     public override async Task HandleAsync(PauseDownloadTaskEndpointRequest req, CancellationToken ct)
     {
-        var pauseResult = await _mediator.Send(new PauseDownloadTaskCommand(req.DownloadTaskGuid), ct);
+        var pauseResult = await _commandExecutor.Send(new PauseDownloadTaskCommand(req.DownloadTaskGuid), ct);
 
         await SendFluentResult(pauseResult, ct);
     }

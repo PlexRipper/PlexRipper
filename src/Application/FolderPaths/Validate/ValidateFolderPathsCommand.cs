@@ -1,11 +1,12 @@
 using System.IO.Abstractions;
 using Data.Contracts;
+using FastEndpoints;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application;
 
-public record ValidateFolderPathsCommand(PlexMediaType MediaType = PlexMediaType.None) : IRequest<Result>;
+public record ValidateFolderPathsCommand(PlexMediaType MediaType = PlexMediaType.None) : ICommand<Result>;
 
 public class ValidateFolderPathsValidator : AbstractValidator<ValidateFolderPathsCommand>
 {
@@ -15,7 +16,7 @@ public class ValidateFolderPathsValidator : AbstractValidator<ValidateFolderPath
     }
 }
 
-public class ValidateFolderPathsHandler : IRequestHandler<ValidateFolderPathsCommand, Result>
+public class ValidateFolderPathsHandler : ICommandHandler<ValidateFolderPathsCommand, Result>
 {
     private readonly IPlexRipperDbContext _dbContext;
     private readonly IDirectory _directory;
@@ -26,7 +27,7 @@ public class ValidateFolderPathsHandler : IRequestHandler<ValidateFolderPathsCom
         _directory = directory;
     }
 
-    public async Task<Result> Handle(ValidateFolderPathsCommand command, CancellationToken cancellationToken)
+    public async Task<Result> ExecuteAsync(ValidateFolderPathsCommand command, CancellationToken cancellationToken)
     {
         List<FolderPath> folderPaths;
 

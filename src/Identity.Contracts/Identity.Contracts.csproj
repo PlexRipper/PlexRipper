@@ -8,12 +8,12 @@
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="CSharpier.MsBuild" Version="1.0.3">
+        <PackageReference Include="CSharpier.MsBuild" Version="1.1.1">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.AspNetCore.DataProtection.EntityFrameworkCore" Version="9.0.7" />
-        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.7" />
+        <PackageReference Include="Microsoft.AspNetCore.DataProtection.EntityFrameworkCore" Version="9.0.8" />
+        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.8" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\Data.Contracts\Data.Contracts.csproj" />

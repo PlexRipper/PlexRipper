@@ -8,7 +8,7 @@ namespace Application.Contracts;
 
 public static class JobDataMapExtensions
 {
-    private static ILog _log = LogManager.CreateLogInstance(typeof(JobDataMapExtensions));
+    private static readonly ILog _log = new LogConfig().CreateLogInstance(typeof(JobDataMapExtensions));
 
     public static List<int> GetIntListValue(this JobDataMap dataMap, string parameterName)
     {

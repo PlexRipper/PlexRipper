@@ -8,7 +8,7 @@ namespace Data.Contracts;
 
 public static partial class DbContextExtensions
 {
-    private static readonly ILog _log = LogManager.CreateLogInstance(typeof(DbContextExtensions));
+    private static readonly ILog _log = new LogConfig().CreateLogInstance(typeof(DbContextExtensions));
 
     public static async Task<Result<PlexServerConnection>> ChoosePlexServerConnection(
         this IPlexRipperDbContext dbContext,

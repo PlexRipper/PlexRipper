@@ -1,11 +1,12 @@
 using Data.Contracts;
+using FastEndpoints;
 using Logging.Interface;
 
 namespace PlexRipper.Application;
 
-public record DownloadTaskWorkerLogNotification(IList<DownloadWorkerLog> logs) : INotification;
+public record DownloadTaskWorkerLogNotification(IList<DownloadWorkerLog> logs) : IEvent;
 
-public class DownloadTaskWorkerLogNotificationHandler : INotificationHandler<DownloadTaskWorkerLogNotification>
+public class DownloadTaskWorkerLogNotificationHandler : IEventHandler<DownloadTaskWorkerLogNotification>
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
@@ -16,7 +17,10 @@ public class DownloadTaskWorkerLogNotificationHandler : INotificationHandler<Dow
         _dbContext = dbContext;
     }
 
-    public async Task Handle(DownloadTaskWorkerLogNotification logNotification, CancellationToken cancellationToken)
+    public async Task HandleAsync(
+        DownloadTaskWorkerLogNotification logNotification,
+        CancellationToken cancellationToken
+    )
     {
         var logs = logNotification.logs;
         if (!logs.Any())

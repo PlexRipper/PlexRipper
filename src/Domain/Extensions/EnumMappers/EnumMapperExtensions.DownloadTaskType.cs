@@ -2,7 +2,9 @@ namespace PlexRipper.Domain;
 
 public static partial class EnumMapperExtensions
 {
-    private static readonly Dictionary<string, DownloadTaskType> _downloadTaskTypeMap = new(StringComparer.Ordinal)
+    private static readonly Dictionary<string, DownloadTaskType> _downloadTaskTypeMap = new(
+        StringComparer.OrdinalIgnoreCase
+    )
     {
         ["None"] = DownloadTaskType.None,
         ["Movie"] = DownloadTaskType.Movie,

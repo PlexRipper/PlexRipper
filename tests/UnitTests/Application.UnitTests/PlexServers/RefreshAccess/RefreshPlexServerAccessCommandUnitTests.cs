@@ -31,7 +31,7 @@ public class RefreshPlexServerAccessCommandUnitTests : BaseUnitTest<RefreshPlexS
         // Act
         var request = new RefreshPlexServerAccessCommand(plexAccount.Id);
         var handler = mock.Create<RefreshPlexServerAccessCommandHandler>();
-        var result = await handler.Handle(request, CancellationToken);
+        var result = await handler.ExecuteAsync(request, CancellationToken);
 
         // Assert
         result.ShouldNotBeNull();
@@ -67,10 +67,10 @@ public class RefreshPlexServerAccessCommandUnitTests : BaseUnitTest<RefreshPlexS
             .Setup(x => x.Send(It.IsAny<GetAccessiblePlexServersCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok(list));
 
-        mock.SetupMediator(It.IsAny<AddOrUpdatePlexServersCommand>).ReturnsAsync(Result.Ok());
-        mock.SetupMediator(It.IsAny<AddOrUpdatePlexAccountServersCommand>)
+        mock.SetupCommand(It.IsAny<AddOrUpdatePlexServersCommand>).ReturnsAsync(Result.Ok());
+        mock.SetupCommand(It.IsAny<AddOrUpdatePlexAccountServersCommand>)
             .ReturnsAsync(Result.Ok(new RefreshPlexServerAccessRapport(plexAccount.Id, plexAccount.DisplayName)));
-        mock.SetupMediator(It.IsAny<RefreshLibraryAccessCommand>)
+        mock.SetupCommand(It.IsAny<RefreshLibraryAccessCommand>)
             .ReturnsAsync(Result.Ok(new PlexLibraryAccessRefreshResponse { OfflineServers = [], Reports = [] }));
 
         mock.SendRefreshNotification();
@@ -79,7 +79,7 @@ public class RefreshPlexServerAccessCommandUnitTests : BaseUnitTest<RefreshPlexS
 
         var request = new RefreshPlexServerAccessCommand(plexAccount.Id);
         var handler = mock.Create<RefreshPlexServerAccessCommandHandler>();
-        var result = await handler.Handle(request, CancellationToken);
+        var result = await handler.ExecuteAsync(request, CancellationToken);
 
         // Assert
         result.ShouldNotBeNull();

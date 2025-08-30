@@ -25,19 +25,19 @@ public class RefreshPlexMovieLibraryCommandHandler
     : ICommandHandler<RefreshPlexMovieLibraryCommand, Result<PlexLibrary>>
 {
     private readonly ILog _log;
-    private readonly IMediator _mediator;
+    private readonly ICommandExecutor _commandExecutor;
     private readonly IPlexRipperDbContext _dbContext;
     private readonly IRefreshLibraryProgressReporter _progressReporter;
 
     public RefreshPlexMovieLibraryCommandHandler(
         ILog log,
-        IMediator mediator,
+        ICommandExecutor commandExecutor,
         IPlexRipperDbContext dbContext,
         IRefreshLibraryProgressReporter progressReporter
     )
     {
         _log = log;
-        _mediator = mediator;
+        _commandExecutor = commandExecutor;
         _dbContext = dbContext;
         _progressReporter = progressReporter;
     }
@@ -55,11 +55,11 @@ public class RefreshPlexMovieLibraryCommandHandler
             foreach (var plexMovie in plexLibrary.Movies)
                 plexMovie.SortIndex = i++;
 
-            var createResult = await _mediator.Send(
+            var syncResult = await _commandExecutor.Send(
                 new SyncPlexMoviesCommand(command.LibraryMetadata),
                 cancellationToken
             );
-            if (createResult.IsFailed)
+            if (syncResult.IsFailed)
             {
                 await _progressReporter.SendProgress(
                     new RefreshLibraryProgressUpdate
@@ -72,7 +72,7 @@ public class RefreshPlexMovieLibraryCommandHandler
                     }
                 );
 
-                return createResult.ToResult().LogError();
+                return syncResult.ToResult().LogError();
             }
         }
         else

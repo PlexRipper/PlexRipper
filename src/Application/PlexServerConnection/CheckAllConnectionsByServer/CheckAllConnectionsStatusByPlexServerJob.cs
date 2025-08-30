@@ -14,7 +14,7 @@ public class CheckAllConnectionsStatusByPlexServerJob : IJob
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
-    private readonly IMediator _mediator;
+    private readonly ICommandExecutor _commandExecutor;
     private readonly ISignalRService _signalRService;
 
     public static JobKey GetJobKey() =>
@@ -23,13 +23,13 @@ public class CheckAllConnectionsStatusByPlexServerJob : IJob
     public CheckAllConnectionsStatusByPlexServerJob(
         ILog log,
         IPlexRipperDbContext dbContext,
-        IMediator mediator,
+        ICommandExecutor commandExecutor,
         ISignalRService signalRService
     )
     {
         _log = log;
         _dbContext = dbContext;
-        _mediator = mediator;
+        _commandExecutor = commandExecutor;
         _signalRService = signalRService;
     }
 
@@ -65,7 +65,7 @@ public class CheckAllConnectionsStatusByPlexServerJob : IJob
 
             await Task.WhenAll(
                 plexServers.Select(async plexServer =>
-                    await _mediator.Send(
+                    await _commandExecutor.Send(
                         new CheckAllConnectionsStatusByPlexServerCommand(plexServer.Id),
                         cancellationToken
                     )

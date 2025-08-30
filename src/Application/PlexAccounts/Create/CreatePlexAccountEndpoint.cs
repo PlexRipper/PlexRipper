@@ -41,15 +41,15 @@ public class CreatePlexAccountEndpoint : BaseEndpoint<CreatePlexAccountEndpointR
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
-    private readonly IMediator _mediator;
+    private readonly ICommandExecutor _commandExecutor;
 
     public override string EndpointPath => ApiRoutes.PlexAccountController + "/";
 
-    public CreatePlexAccountEndpoint(ILog log, IPlexRipperDbContext dbContext, IMediator mediator)
+    public CreatePlexAccountEndpoint(ILog log, IPlexRipperDbContext dbContext, ICommandExecutor commandExecutor)
     {
         _log = log;
         _dbContext = dbContext;
-        _mediator = mediator;
+        _commandExecutor = commandExecutor;
     }
 
     public override void Configure()
@@ -119,8 +119,11 @@ public class CreatePlexAccountEndpoint : BaseEndpoint<CreatePlexAccountEndpointR
 
         await SendFluentResult(result, model => model.ToDTO(), ct);
 
-        // Return the Ok result and then kick off the inspect job
-        var inspectResult = await _mediator.Send(new InspectAllPlexServersByAccountIdCommand(plexAccount.Id), ct);
+        // Return the Ok result and then kick off the inspecting job
+        var inspectResult = await _commandExecutor.Send(
+            new InspectAllPlexServersByAccountIdCommand(plexAccount.Id),
+            ct
+        );
         if (inspectResult.IsFailed)
             _log.Error("Failed to queue inspect server job for PlexAccount with id {PlexAccountId}", plexAccount.Id);
     }

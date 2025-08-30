@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Data.Contracts;
 using EFCore.BulkExtensions;
+using FastEndpoints;
 using FluentValidation;
 using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
@@ -8,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 namespace PlexRipper.Application;
 
 public record SyncPlexMoviesCommand(InsertMediaMetaDataCommandResponse LibraryMetadata)
-    : IRequest<Result<CrudMoviesReport>>;
+    : ICommand<Result<CrudMoviesReport>>;
 
 public class SyncPlexMoviesCommandValidator : AbstractValidator<SyncPlexMoviesCommand>
 {
@@ -35,7 +36,7 @@ public class SyncPlexMoviesCommandValidator : AbstractValidator<SyncPlexMoviesCo
     }
 }
 
-public class SyncPlexMoviesCommandHandler : IRequestHandler<SyncPlexMoviesCommand, Result<CrudMoviesReport>>
+public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesCommand, Result<CrudMoviesReport>>
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
@@ -50,7 +51,7 @@ public class SyncPlexMoviesCommandHandler : IRequestHandler<SyncPlexMoviesComman
         _dbContext = dbContext;
     }
 
-    public async Task<Result<CrudMoviesReport>> Handle(
+    public async Task<Result<CrudMoviesReport>> ExecuteAsync(
         SyncPlexMoviesCommand command,
         CancellationToken cancellationToken
     )

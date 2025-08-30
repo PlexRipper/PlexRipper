@@ -1,11 +1,12 @@
 using System.IO.Abstractions;
+using FastEndpoints;
 using FileSystem.Contracts;
 using FluentValidation;
 
 namespace PlexRipper.Application;
 
 public record CreateDownloadFileStreamCommand(string Directory, string FileName, long FileSize)
-    : IRequest<Result<Stream>>;
+    : ICommand<Result<Stream>>;
 
 public class CreateDownloadFileStreamCommandValidator : AbstractValidator<CreateDownloadFileStreamCommand>
 {
@@ -17,7 +18,7 @@ public class CreateDownloadFileStreamCommandValidator : AbstractValidator<Create
     }
 }
 
-public class CreateDownloadFileStreamCommandHandler : IRequestHandler<CreateDownloadFileStreamCommand, Result<Stream>>
+public class CreateDownloadFileStreamCommandHandler : ICommandHandler<CreateDownloadFileStreamCommand, Result<Stream>>
 {
     private readonly IPath _path;
     private readonly IDirectory _directory;
@@ -30,7 +31,7 @@ public class CreateDownloadFileStreamCommandHandler : IRequestHandler<CreateDown
         _file = file;
     }
 
-    public async Task<Result<Stream>> Handle(
+    public async Task<Result<Stream>> ExecuteAsync(
         CreateDownloadFileStreamCommand command,
         CancellationToken cancellationToken
     )

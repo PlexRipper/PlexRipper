@@ -23,14 +23,14 @@ public class CreateDownloadTasksEndpointRequestValidator : Validator<CreateDownl
 public class CreateDownloadTasksEndpoint : BaseEndpoint<CreateDownloadTasksEndpointRequest>
 {
     private readonly ILog _log;
-    private readonly IMediator _mediator;
+    private readonly ICommandExecutor _commandExecutor;
 
     public override string EndpointPath => ApiRoutes.DownloadController + "/create";
 
-    public CreateDownloadTasksEndpoint(ILog log, IMediator mediator)
+    public CreateDownloadTasksEndpoint(ILog log, ICommandExecutor commandExecutor)
     {
         _log = log;
-        _mediator = mediator;
+        _commandExecutor = commandExecutor;
     }
 
     public override void Configure()
@@ -50,7 +50,7 @@ public class CreateDownloadTasksEndpoint : BaseEndpoint<CreateDownloadTasksEndpo
         foreach (var downloadMediaDto in req.Request.DownloadMedias)
             _log.Debug("DownloadMediaDTO: {@DownloadMediaDto} ", downloadMediaDto);
 
-        var result = await _mediator.Send(new CreateDownloadTasksCommand(req.Request), ct);
+        var result = await _commandExecutor.Send(new CreateDownloadTasksCommand(req.Request), ct);
 
         await SendFluentResult(result, ct);
     }

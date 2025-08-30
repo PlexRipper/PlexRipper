@@ -13,7 +13,7 @@ public class Boot : IHostedService
     #region Fields
 
     private readonly ILog _log;
-    private readonly IMediator _mediator;
+    private readonly ICommandExecutor _commandExecutor;
 
     private readonly IHostApplicationLifetime _appLifetime;
 
@@ -30,14 +30,14 @@ public class Boot : IHostedService
     /// </summary>
     public Boot(
         ILog log,
-        IMediator mediator,
+        ICommandExecutor commandExecutor,
         IHostApplicationLifetime appLifetime,
         ISchedulerService schedulerService,
         IDownloadQueue downloadQueue
     )
     {
         _log = log;
-        _mediator = mediator;
+        _commandExecutor = commandExecutor;
         _appLifetime = appLifetime;
         _schedulerService = schedulerService;
         _downloadQueue = downloadQueue;
@@ -63,7 +63,7 @@ public class Boot : IHostedService
             return;
         }
 
-        var defaultUser = await CreateDefaultAppUser();
+        var defaultUser = await _commandExecutor.Send(new CreateDefaultAppUserCommand(), CancellationToken.None);
         if (defaultUser.IsFailed)
         {
             TerminateApplication();
@@ -115,8 +115,6 @@ public class Boot : IHostedService
         // Perform post-stopped activities here
         _log.InformationLine("PlexRipper has been shutdown! R.I.P.");
     }
-
-    private async Task<Result> CreateDefaultAppUser() => await _mediator.Send(new CreateDefaultAppUserCommand());
 
     #endregion
 }

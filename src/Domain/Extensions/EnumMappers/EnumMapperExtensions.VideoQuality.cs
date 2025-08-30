@@ -58,6 +58,6 @@ public static partial class EnumMapperExtensions
         if (string.IsNullOrWhiteSpace(value))
             return VideoQuality.Unknown;
 
-        return _videoQualityMap.GetValueOrDefault(value.Trim().ToLowerInvariant(), VideoQuality.Unknown);
+        return _videoQualityMap.GetValueOrDefault(value.Trim(), VideoQuality.Unknown);
     }
 }

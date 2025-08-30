@@ -4,7 +4,7 @@ namespace PlexRipper.Domain;
 
 public static class DownloadTaskPhaseExtensions
 {
-    private static ILog _log = LogManager.CreateLogInstance(typeof(DownloadTaskPhaseExtensions));
+    private static readonly ILog _log = new LogConfig().CreateLogInstance(typeof(DownloadTaskPhaseExtensions));
 
     public static DownloadTaskPhase ToDownloadTaskPhase(this DownloadStatus downloadStatus)
     {

@@ -67,8 +67,6 @@ public class BaseContainer : IDisposable
 
     public IDownloadQueue GetDownloadQueue => Resolve<IDownloadQueue>();
 
-    public IMediator Mediator => Resolve<IMediator>();
-
     public IPathProvider PathProvider => Resolve<IPathProvider>();
 
     public PlexRipperDbContext PlexRipperDbContext => Resolve<PlexRipperDbContext>();

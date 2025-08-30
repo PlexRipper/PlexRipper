@@ -14,7 +14,7 @@ namespace PlexRipper.Application;
 public class PlexDownloadClient : IAsyncDisposable, IPlexDownloadClient
 {
     private readonly ILog _log;
-    private readonly IMediator _mediator;
+    private readonly ICommandExecutor _commandExecutor;
     private readonly IPlexRipperDbContext _dbContext;
     private readonly Func<DownloadWorkerTask, DownloadWorker> _downloadWorkerFactory;
 
@@ -32,20 +32,20 @@ public class PlexDownloadClient : IAsyncDisposable, IPlexDownloadClient
     /// Initializes a new instance of the <see cref="PlexDownloadClient"/> class.
     /// </summary>
     /// <param name="log"></param>
-    /// <param name="mediator"></param>
+    /// <param name="commandExecutor"></param>
     /// <param name="dbContext"></param>
     /// <param name="downloadWorkerFactory"></param>
     /// <param name="serverSettings"></param>
     public PlexDownloadClient(
         ILog log,
-        IMediator mediator,
+        ICommandExecutor commandExecutor,
         IPlexRipperDbContext dbContext,
         Func<DownloadWorkerTask, DownloadWorker> downloadWorkerFactory,
         IServerSettingsModule serverSettings
     )
     {
         _log = log;
-        _mediator = mediator;
+        _commandExecutor = commandExecutor;
         _dbContext = dbContext;
         _downloadWorkerFactory = downloadWorkerFactory;
         _serverSettings = serverSettings;
@@ -191,7 +191,7 @@ public class PlexDownloadClient : IAsyncDisposable, IPlexDownloadClient
         await _dbContext.UpdateDownloadProgress(DownloadTask.ToKey(), DownloadTask);
         await _dbContext.SetDownloadStatus(DownloadTask.ToKey(), DownloadStatus);
 
-        await _mediator.Send(new DownloadTaskUpdatedNotification(DownloadTask.ToKey()));
+        await _commandExecutor.Send(new DownloadTaskUpdatedCommand(DownloadTask.ToKey()));
 
         _log.Verbose("{@DownloadTask}", DownloadTask.ToString());
     }

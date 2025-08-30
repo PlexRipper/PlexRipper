@@ -1,4 +1,5 @@
 using Data.Contracts;
+using FastEndpoints;
 using FluentValidation;
 using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
@@ -7,7 +8,7 @@ using PlexApi.Contracts;
 namespace PlexRipper.Application;
 
 public record AddOrUpdatePlexAccountServersCommand(int PlexAccountId, List<ServerAccessTokenDTO> ServerAccessTokens)
-    : IRequest<Result<RefreshPlexServerAccessRapport>>;
+    : ICommand<Result<RefreshPlexServerAccessRapport>>;
 
 public class AddOrUpdatePlexAccountServersCommandValidator : AbstractValidator<AddOrUpdatePlexAccountServersCommand>
 {
@@ -18,7 +19,7 @@ public class AddOrUpdatePlexAccountServersCommandValidator : AbstractValidator<A
 }
 
 public class AddOrUpdatePlexAccountServersCommandHandler
-    : IRequestHandler<AddOrUpdatePlexAccountServersCommand, Result<RefreshPlexServerAccessRapport>>
+    : ICommandHandler<AddOrUpdatePlexAccountServersCommand, Result<RefreshPlexServerAccessRapport>>
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
@@ -29,7 +30,7 @@ public class AddOrUpdatePlexAccountServersCommandHandler
         _dbContext = dbContext;
     }
 
-    public async Task<Result<RefreshPlexServerAccessRapport>> Handle(
+    public async Task<Result<RefreshPlexServerAccessRapport>> ExecuteAsync(
         AddOrUpdatePlexAccountServersCommand command,
         CancellationToken cancellationToken
     )

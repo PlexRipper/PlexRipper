@@ -50,17 +50,15 @@ public class MergeFilesFromFileTaskCommandUnitTests : BaseUnitTest<MergeFilesFro
             .Throws(new Exception("Failed to create directory"))
             .Verifiable(Times.Once);
 
-        mock.Mock<IMediator>()
-            .Setup(m => m.Publish(It.IsAny<SendNotificationResult>(), It.IsAny<CancellationToken>()))
+        mock.Mock<IEventPublisher>()
+            .Setup(m => m.PublishAsync(It.IsAny<SendNotificationResult>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Once);
-        mock.SetupMediator(It.IsAny<DownloadTaskUpdatedNotification>)
-            .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once);
+        mock.SetupCommand(It.IsAny<DownloadTaskUpdatedCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.Once);
 
         // Act
         var command = new MergeFilesFromFileTaskCommand(downloadTask.ToKey(), progress);
-        var result = await _sut.Handle(command, CancellationToken);
+        var result = await _sut.ExecuteAsync(command, CancellationToken);
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -95,17 +93,15 @@ public class MergeFilesFromFileTaskCommandUnitTests : BaseUnitTest<MergeFilesFro
             .Setup(x => x.Create(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<FileOptions>()))
             .Throws<UnauthorizedAccessException>();
 
-        mock.Mock<IMediator>()
-            .Setup(m => m.Publish(It.IsAny<SendNotificationResult>(), It.IsAny<CancellationToken>()))
+        mock.Mock<IEventPublisher>()
+            .Setup(m => m.PublishAsync(It.IsAny<SendNotificationResult>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Once);
-        mock.SetupMediator(It.IsAny<DownloadTaskUpdatedNotification>)
-            .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once);
+        mock.SetupCommand(It.IsAny<DownloadTaskUpdatedCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.Once);
 
         // Act
         var command = new MergeFilesFromFileTaskCommand(key, progress);
-        var result = await _sut.Handle(command, CancellationToken);
+        var result = await _sut.ExecuteAsync(command, CancellationToken);
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -169,18 +165,16 @@ public class MergeFilesFromFileTaskCommandUnitTests : BaseUnitTest<MergeFilesFro
         mock.Mock<IFileSystem>().Setup(x => x.Path).Returns(mock.Mock<IPath>().Object);
         mock.Mock<IFileSystem>().Setup(x => x.Directory).Returns(mock.Mock<IDirectory>().Object);
 
-        mock.Mock<IMediator>()
-            .Setup(m => m.Publish(It.IsAny<SendNotificationResult>(), It.IsAny<CancellationToken>()))
+        mock.Mock<IEventPublisher>()
+            .Setup(m => m.PublishAsync(It.IsAny<SendNotificationResult>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Never);
 
-        mock.SetupMediator(It.IsAny<DownloadTaskUpdatedNotification>)
-            .Returns(Task.CompletedTask)
-            .Verifiable(Times.AtLeastOnce);
+        mock.SetupCommand(It.IsAny<DownloadTaskUpdatedCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.AtLeastOnce);
 
         // Act
         var command = new MergeFilesFromFileTaskCommand(downloadFileTask.ToKey(), progress);
-        var result = await _sut.Handle(command, CancellationToken);
+        var result = await _sut.ExecuteAsync(command, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -258,18 +252,16 @@ public class MergeFilesFromFileTaskCommandUnitTests : BaseUnitTest<MergeFilesFro
 
         mock.Mock<IFile>().Setup(x => x.Delete(It.IsAny<string>())).Verifiable(Times.AtLeastOnce());
 
-        mock.Mock<IMediator>()
-            .Setup(m => m.Publish(It.IsAny<SendNotificationResult>(), It.IsAny<CancellationToken>()))
+        mock.Mock<IEventPublisher>()
+            .Setup(m => m.PublishAsync(It.IsAny<SendNotificationResult>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Never);
 
-        mock.SetupMediator(It.IsAny<DownloadTaskUpdatedNotification>)
-            .Returns(Task.CompletedTask)
-            .Verifiable(Times.AtLeastOnce);
+        mock.SetupCommand(It.IsAny<DownloadTaskUpdatedCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.AtLeastOnce);
 
         // Act
         var command = new MergeFilesFromFileTaskCommand(downloadFileTask.ToKey(), progress);
-        var result = await _sut.Handle(command, cancellationTokenSource.Token);
+        var result = await _sut.ExecuteAsync(command, cancellationTokenSource.Token);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -339,17 +331,15 @@ public class MergeFilesFromFileTaskCommandUnitTests : BaseUnitTest<MergeFilesFro
 
         mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true).Verifiable(Times.Exactly(2));
 
-        mock.Mock<IMediator>()
-            .Setup(m => m.Publish(It.IsAny<SendNotificationResult>(), It.IsAny<CancellationToken>()))
+        mock.Mock<IEventPublisher>()
+            .Setup(m => m.PublishAsync(It.IsAny<SendNotificationResult>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Never);
-        mock.SetupMediator(It.IsAny<DownloadTaskUpdatedNotification>)
-            .Returns(Task.CompletedTask)
-            .Verifiable(Times.AtLeastOnce);
+        mock.SetupCommand(It.IsAny<DownloadTaskUpdatedCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.AtLeastOnce);
 
         // Act
         var command = new MergeFilesFromFileTaskCommand(downloadFileTask.ToKey(), progress);
-        var result = await _sut.Handle(command, cancellationTokenSource.Token);
+        var result = await _sut.ExecuteAsync(command, cancellationTokenSource.Token);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -417,17 +407,15 @@ public class MergeFilesFromFileTaskCommandUnitTests : BaseUnitTest<MergeFilesFro
         mock.Mock<IFile>().Setup(x => x.Delete(It.IsAny<string>())).Verifiable(Times.Exactly(4));
         mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true).Verifiable((Times.Exactly(4)));
 
-        mock.Mock<IMediator>()
-            .Setup(m => m.Publish(It.IsAny<SendNotificationResult>(), It.IsAny<CancellationToken>()))
+        mock.Mock<IEventPublisher>()
+            .Setup(m => m.PublishAsync(It.IsAny<SendNotificationResult>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Never);
-        mock.SetupMediator(It.IsAny<DownloadTaskUpdatedNotification>)
-            .Returns(Task.CompletedTask)
-            .Verifiable(Times.AtLeastOnce);
+        mock.SetupCommand(It.IsAny<DownloadTaskUpdatedCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.AtLeastOnce);
 
         // Act
         var command = new MergeFilesFromFileTaskCommand(downloadFileTask.ToKey(), progress);
-        var result = await _sut.Handle(command, cancellationTokenSource.Token);
+        var result = await _sut.ExecuteAsync(command, cancellationTokenSource.Token);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

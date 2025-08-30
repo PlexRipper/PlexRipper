@@ -15,19 +15,19 @@ public class InspectPlexServerJob : IJob
     private readonly IPlexRipperDbContext _dbContext;
     private readonly ISignalRService _signalRService;
     private readonly ILog _log;
-    private readonly IMediator _mediator;
+    private readonly ICommandExecutor _commandExecutor;
 
     public static JobKey GetJobKey() => new(Guid.NewGuid().ToString(), nameof(InspectPlexServerJob));
 
     public InspectPlexServerJob(
         ILog log,
-        IMediator mediator,
+        ICommandExecutor commandExecutor,
         IPlexRipperDbContext dbContext,
         ISignalRService signalRService
     )
     {
         _log = log;
-        _mediator = mediator;
+        _commandExecutor = commandExecutor;
         _dbContext = dbContext;
         _signalRService = signalRService;
     }
@@ -50,7 +50,7 @@ public class InspectPlexServerJob : IJob
             var serverTasks = plexServerIds.Select(async plexServerId =>
             {
                 // Check all Plex Server Connections
-                var checkResult = await _mediator.Send(
+                var checkResult = await _commandExecutor.Send(
                     new CheckAllConnectionsStatusByPlexServerCommand(plexServerId),
                     cancellationToken
                 );
@@ -85,7 +85,7 @@ public class InspectPlexServerJob : IJob
             return accountsResult.ToResult().LogError();
 
         var plexAccountId = accountsResult.Value.First().Id;
-        await _mediator.Send(new RefreshLibraryAccessCommand(plexAccountId, plexServerId), cancellationToken);
+        await _commandExecutor.Send(new RefreshLibraryAccessCommand(plexAccountId, plexServerId), cancellationToken);
 
         // Notify front-end
         await _signalRService.SendRefreshNotificationAsync(
@@ -94,7 +94,7 @@ public class InspectPlexServerJob : IJob
         );
 
         // Sync library media
-        await _mediator.Send(new QueueSyncServerMediaJobCommand(plexServerId, true), CancellationToken.None);
+        await _commandExecutor.Send(new QueueSyncServerMediaJobCommand(plexServerId, true), CancellationToken.None);
         return Result.Ok();
     }
 }

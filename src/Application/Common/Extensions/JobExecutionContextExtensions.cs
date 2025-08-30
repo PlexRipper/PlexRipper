@@ -7,7 +7,7 @@ namespace PlexRipper.Application;
 
 public static class JobExecutionContextExtensions
 {
-    private static ILog _log = LogManager.CreateLogInstance(typeof(JobExecutionContextExtensions));
+    private static readonly ILog _log = new LogConfig().CreateLogInstance(typeof(JobExecutionContextExtensions));
 
     /// <summary>
     /// Converts the <see cref="IJobExecutionContext"/> to a <see cref="JobStatusUpdate{T}"/>.

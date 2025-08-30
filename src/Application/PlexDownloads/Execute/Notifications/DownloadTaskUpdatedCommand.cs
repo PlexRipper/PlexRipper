@@ -1,14 +1,12 @@
 using Application.Contracts;
 using Data.Contracts;
+using FastEndpoints;
 
 namespace PlexRipper.Application;
 
-/// <summary>
-/// NOTE: This should be an IRequest to ensure there is always 1 handler for this notification.
-/// </summary>
-public record DownloadTaskUpdatedNotification(DownloadTaskKey Key) : IRequest;
+public record DownloadTaskUpdatedCommand(DownloadTaskKey Key) : ICommand<Result>;
 
-public class DownloadTaskUpdatedHandler : IRequestHandler<DownloadTaskUpdatedNotification>
+public class DownloadTaskUpdatedHandler : ICommandHandler<DownloadTaskUpdatedCommand, Result>
 {
     private readonly IPlexRipperDbContext _dbContext;
     private readonly ISignalRService _signalRService;
@@ -19,12 +17,12 @@ public class DownloadTaskUpdatedHandler : IRequestHandler<DownloadTaskUpdatedNot
         _signalRService = signalRService;
     }
 
-    public async Task Handle(DownloadTaskUpdatedNotification notification, CancellationToken cancellationToken)
+    public async Task<Result> ExecuteAsync(DownloadTaskUpdatedCommand command, CancellationToken cancellationToken)
     {
-        var plexServerId = notification.Key.PlexServerId;
+        var plexServerId = command.Key.PlexServerId;
 
         // Ensure the up-to-date download status is written to the database as the DownloadQueue depends on that status to pick a new DownloadTask
-        await _dbContext.DetermineDownloadStatus(notification.Key, cancellationToken);
+        await _dbContext.DetermineDownloadStatus(command.Key, cancellationToken);
 
         var downloadTasks = await _dbContext.GetAllDownloadTasksByServerAsync(
             plexServerId,
@@ -34,10 +32,10 @@ public class DownloadTaskUpdatedHandler : IRequestHandler<DownloadTaskUpdatedNot
         // Update the front-end with the download progress
         await _signalRService.SendDownloadProgressUpdateAsync(downloadTasks, cancellationToken);
 
-        var changedDownloadTask = await _dbContext.GetDownloadTaskAsync(notification.Key, cancellationToken);
+        var changedDownloadTask = await _dbContext.GetDownloadTaskAsync(command.Key, cancellationToken);
         if (changedDownloadTask is null)
-        {
-            ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), notification.Key.ToString()).LogError();
-        }
+            return ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), command.Key.ToString()).LogError();
+
+        return Result.Ok();
     }
 }

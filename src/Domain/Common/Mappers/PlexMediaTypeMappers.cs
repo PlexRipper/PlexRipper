@@ -4,7 +4,7 @@ namespace PlexRipper.Domain;
 
 public static class PlexMediaTypeMappers
 {
-    private static readonly ILog _log = LogManager.CreateLogInstance(typeof(PlexMediaTypeMappers));
+    private static readonly ILog _log = new LogConfig().CreateLogInstance(typeof(PlexMediaTypeMappers));
 
     /// <summary>
     /// Converts string to <see cref="PlexMediaType"/> by a fast method.

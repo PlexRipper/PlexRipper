@@ -4,8 +4,28 @@ namespace PlexRipper.Domain;
 
 public static class DownloadTaskActions
 {
-    // ReSharper disable once InconsistentNaming
-    private static readonly ILog _log = LogManager.CreateLogInstance(typeof(DownloadTaskActions));
+    private static readonly ILog _log = new LogConfig().CreateLogInstance(typeof(DownloadTaskActions));
+
+    private static readonly DownloadStatus[] _anyStatuses =
+    [
+        DownloadStatus.ServerUnreachable,
+        DownloadStatus.Error,
+        DownloadStatus.MoveError,
+        DownloadStatus.MergeError,
+        DownloadStatus.Paused,
+        DownloadStatus.MergePaused,
+        DownloadStatus.MovePaused,
+        DownloadStatus.Stopped,
+        DownloadStatus.Downloading,
+        DownloadStatus.Queued,
+        DownloadStatus.Merging,
+        DownloadStatus.Moving,
+        DownloadStatus.MergeFinished,
+        DownloadStatus.MoveFinished,
+        DownloadStatus.DownloadFinished,
+        DownloadStatus.Deleted,
+        DownloadStatus.Completed,
+    ];
 
     public static List<DownloadActions> Convert(DownloadStatus downloadStatus)
     {
@@ -92,28 +112,7 @@ public static class DownloadTaskActions
 
         // If any of these statuses are present, return that status.
         // Earlier statuses take precedence.
-        List<DownloadStatus> anyStatuses =
-        [
-            DownloadStatus.ServerUnreachable,
-            DownloadStatus.Error,
-            DownloadStatus.MoveError,
-            DownloadStatus.MergeError,
-            DownloadStatus.Paused,
-            DownloadStatus.MergePaused,
-            DownloadStatus.MovePaused,
-            DownloadStatus.Stopped,
-            DownloadStatus.Downloading,
-            DownloadStatus.Queued,
-            DownloadStatus.Merging,
-            DownloadStatus.Moving,
-            DownloadStatus.MergeFinished,
-            DownloadStatus.MoveFinished,
-            DownloadStatus.DownloadFinished,
-            DownloadStatus.Deleted,
-            DownloadStatus.Completed,
-        ];
-
-        foreach (var status in anyStatuses.Where(status => downloadStatusList.Any(x => x == status)))
+        foreach (var status in _anyStatuses.Where(status => downloadStatusList.Any(x => x == status)))
             return status;
 
         _log.Error("Unable to determine the aggregate status of the download tasks. {StatusList}", downloadStatusList);

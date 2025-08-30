@@ -24,7 +24,7 @@ public class DownloadWorker : IDisposable
 
     private readonly ILog<DownloadWorker> _log;
 
-    private readonly IMediator _mediator;
+    private readonly ICommandExecutor _commandExecutor;
 
     private readonly IPlexRipperDbContext _dbContext;
 
@@ -40,20 +40,20 @@ public class DownloadWorker : IDisposable
     /// Initializes a new instance of the <see cref="DownloadWorker"/> class.
     /// </summary>
     /// <param name="log"></param>
-    /// <param name="mediator"></param>
+    /// <param name="commandExecutor"></param>
     /// <param name="dbContext"></param>
     /// <param name="downloadWorkerTask">The download task this worker will execute.</param>
     /// <param name="clientFactory">The factory to create a new <see cref="IPlexApiClient"/>.</param>
     public DownloadWorker(
         ILog<DownloadWorker> log,
-        IMediator mediator,
+        ICommandExecutor commandExecutor,
         IPlexRipperDbContext dbContext,
         DownloadWorkerTask downloadWorkerTask,
         Func<PlexApiClientOptions?, IPlexApiClient> clientFactory
     )
     {
         _log = log;
-        _mediator = mediator;
+        _commandExecutor = commandExecutor;
         _dbContext = dbContext;
         DownloadWorkerTask = downloadWorkerTask;
 
@@ -153,7 +153,7 @@ public class DownloadWorker : IDisposable
             var downloadUrl = downloadUrlResult.Value;
 
             // Prepare destination stream
-            var fileStreamResult = await _mediator.Send(
+            var fileStreamResult = await _commandExecutor.Send(
                 new CreateDownloadFileStreamCommand(
                     DownloadWorkerTask.DownloadDirectory,
                     FileName,

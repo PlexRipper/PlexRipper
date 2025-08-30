@@ -23,7 +23,7 @@ public class RefreshPlexAccountAccessEndpoint
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
-    private readonly IMediator _mediator;
+    private readonly ICommandExecutor _commandExecutor;
     private readonly ISignalRService _signalRService;
     private List<RefreshPlexAccountAccessRapportDTO> _list = new();
 
@@ -32,13 +32,13 @@ public class RefreshPlexAccountAccessEndpoint
     public RefreshPlexAccountAccessEndpoint(
         ILog log,
         IPlexRipperDbContext dbContext,
-        IMediator mediator,
+        ICommandExecutor commandExecutor,
         ISignalRService signalRService
     )
     {
         _log = log;
         _dbContext = dbContext;
-        _mediator = mediator;
+        _commandExecutor = commandExecutor;
         _signalRService = signalRService;
     }
 
@@ -75,7 +75,7 @@ public class RefreshPlexAccountAccessEndpoint
         // Execute
         foreach (var plexAccountId in plexAccountIds)
         {
-            var serverAccessResult = await _mediator.Send(new RefreshPlexServerAccessCommand(plexAccountId), ct);
+            var serverAccessResult = await _commandExecutor.Send(new RefreshPlexServerAccessCommand(plexAccountId), ct);
 
             if (serverAccessResult.IsFailed)
             {
@@ -126,7 +126,7 @@ public class RefreshPlexAccountAccessEndpoint
             else
             {
                 // Update library access
-                var libraryAccessResult = await _mediator.Send(
+                var libraryAccessResult = await _commandExecutor.Send(
                     new RefreshLibraryAccessCommand(plexAccountId),
                     CancellationToken.None
                 );

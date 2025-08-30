@@ -1,4 +1,5 @@
 using Application.Contracts;
+using FastEndpoints;
 using FluentValidation;
 
 namespace PlexRipper.Application;
@@ -7,7 +8,7 @@ namespace PlexRipper.Application;
 /// Generates a nested list of <see cref="DownloadTaskGeneric"/> and adds to the download queue.
 /// </summary>
 /// <returns>Returns true if all downloadTasks were added successfully.</returns>
-public record CreateDownloadTasksCommand : IRequest<Result>
+public record CreateDownloadTasksCommand : ICommand<Result>
 {
     public CreateDownloadTasksCommand(CreateDownloadTasksRequest request)
     {
@@ -31,40 +32,46 @@ public class CreateDownloadTasksCommandValidator : AbstractValidator<CreateDownl
     }
 }
 
-public class CreateDownloadTasksCommandHandler : IRequestHandler<CreateDownloadTasksCommand, Result>
+public class CreateDownloadTasksCommandHandler : ICommandHandler<CreateDownloadTasksCommand, Result>
 {
-    private readonly IMediator _mediator;
     private readonly ICommandExecutor _commandExecutor;
+    private readonly IEventPublisher _eventPublisher;
     private bool _generatedTasks;
 
-    public CreateDownloadTasksCommandHandler(IMediator mediator, ICommandExecutor commandExecutor)
+    public CreateDownloadTasksCommandHandler(ICommandExecutor commandExecutor, IEventPublisher eventPublisher)
     {
-        _mediator = mediator;
         _commandExecutor = commandExecutor;
+        _eventPublisher = eventPublisher;
     }
 
-    public async Task<Result> Handle(CreateDownloadTasksCommand command, CancellationToken cancellationToken)
+    public async Task<Result> ExecuteAsync(CreateDownloadTasksCommand command, CancellationToken cancellationToken)
     {
         var request = command.Request;
         var downloadMedias = command.Request.DownloadMedias;
 
         if (downloadMedias.Any(x => x.Type == PlexMediaType.Movie))
         {
-            var result = await _mediator.Send(new GenerateDownloadTaskMoviesCommand(request), cancellationToken);
+            var result = await _commandExecutor.Send(new GenerateDownloadTaskMoviesCommand(request), cancellationToken);
             result.LogIfFailed();
             _generatedTasks = true;
         }
 
         if (downloadMedias.Any(x => x.Type == PlexMediaType.TvShow))
         {
-            var result = await _mediator.Send(new GenerateDownloadTaskTvShowsCommand(request), cancellationToken);
+            var result = await _commandExecutor.Send(
+                new GenerateDownloadTaskTvShowsCommand(request),
+                cancellationToken
+            );
             result.LogIfFailed();
             _generatedTasks = true;
         }
 
         if (downloadMedias.Any(x => x.Type == PlexMediaType.Season))
         {
-            var result = await _mediator.Send(new GenerateDownloadTaskTvShowSeasonsCommand(request), cancellationToken);
+            var result = await _commandExecutor.Send(
+                new GenerateDownloadTaskTvShowSeasonsCommand(request),
+                cancellationToken
+            );
             result.LogIfFailed();
             _generatedTasks = true;
         }
@@ -88,7 +95,7 @@ public class CreateDownloadTasksCommandHandler : IRequestHandler<CreateDownloadT
                 .Distinct()
                 .ToList();
 
-            await _mediator.Publish(new CheckDownloadQueueNotification(uniquePlexServers), cancellationToken);
+            await _eventPublisher.PublishAsync(new CheckDownloadQueueEvent(uniquePlexServers), cancellationToken);
         }
 
         return Result.Ok();

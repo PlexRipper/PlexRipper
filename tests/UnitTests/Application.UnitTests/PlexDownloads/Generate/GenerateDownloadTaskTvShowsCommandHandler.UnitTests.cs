@@ -37,11 +37,11 @@ public class GenerateDownloadTaskTvShowsCommandHandler_UnitTests
             },
         };
 
-        mock.SetupMediator(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>).ReturnsAsync(Result.Ok());
+        mock.SetupCommand(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>).ReturnsAsync(Result.Ok());
 
         // Act
         var command = new GenerateDownloadTaskTvShowsCommand(tvShows);
-        var result = await _sut.Handle(command, CancellationToken);
+        var result = await _sut.ExecuteAsync(command, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

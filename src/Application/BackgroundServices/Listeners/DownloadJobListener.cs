@@ -9,19 +9,19 @@ public class DownloadJobListener : IDownloadJobListener
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
-    private readonly IMediator _mediator;
+    private readonly IEventPublisher _eventPublisher;
     private readonly IFileMergeQueue _fileMergeQueue;
 
     public DownloadJobListener(
         ILog log,
         IPlexRipperDbContext dbContext,
-        IMediator mediator,
+        IEventPublisher eventPublisher,
         IFileMergeQueue fileMergeQueue
     )
     {
         _log = log;
         _dbContext = dbContext;
-        _mediator = mediator;
+        _eventPublisher = eventPublisher;
         _fileMergeQueue = fileMergeQueue;
     }
 
@@ -54,8 +54,8 @@ public class DownloadJobListener : IDownloadJobListener
                     downloadTaskKey.Id
                 );
                 await _fileMergeQueue.CheckFileMergeQueue();
-                await _mediator.Publish(
-                    new CheckDownloadQueueNotification(downloadTaskKey.PlexServerId),
+                await _eventPublisher.PublishAsync(
+                    new CheckDownloadQueueEvent(downloadTaskKey.PlexServerId),
                     cancellationToken
                 );
             }

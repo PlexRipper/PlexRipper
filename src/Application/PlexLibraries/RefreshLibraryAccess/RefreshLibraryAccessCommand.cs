@@ -1,5 +1,6 @@
 using Application.Contracts;
 using Data.Contracts;
+using FastEndpoints;
 using FluentValidation;
 using Logging.Interface;
 using PlexApi.Contracts;
@@ -13,7 +14,7 @@ namespace PlexRipper.Application;
 /// <param name="PlexServerId">The id of the <see cref="PlexServer"/> to retrieve <see cref="PlexLibrary">Plex Libraries</see> for.</param>
 ///  <returns>If successful.</returns>
 public record RefreshLibraryAccessCommand(int PlexAccountId, int PlexServerId = 0)
-    : IRequest<Result<PlexLibraryAccessRefreshResponse>>;
+    : ICommand<Result<PlexLibraryAccessRefreshResponse>>;
 
 public class RefreshLibraryAccessValidator : AbstractValidator<RefreshLibraryAccessCommand>
 {
@@ -25,27 +26,27 @@ public class RefreshLibraryAccessValidator : AbstractValidator<RefreshLibraryAcc
 }
 
 public class RefreshLibraryAccessHandler
-    : IRequestHandler<RefreshLibraryAccessCommand, Result<PlexLibraryAccessRefreshResponse>>
+    : ICommandHandler<RefreshLibraryAccessCommand, Result<PlexLibraryAccessRefreshResponse>>
 {
     private readonly ILog _log;
-    private readonly IMediator _mediator;
+    private readonly ICommandExecutor _commandExecutor;
     private readonly IPlexRipperDbContext _dbContext;
     private readonly ICommandExecutor _commandDispatcher;
 
     public RefreshLibraryAccessHandler(
         ILog log,
-        IMediator mediator,
+        ICommandExecutor commandExecutor,
         IPlexRipperDbContext dbContext,
         ICommandExecutor commandDispatcher
     )
     {
         _log = log;
-        _mediator = mediator;
+        _commandExecutor = commandExecutor;
         _dbContext = dbContext;
         _commandDispatcher = commandDispatcher;
     }
 
-    public async Task<Result<PlexLibraryAccessRefreshResponse>> Handle(
+    public async Task<Result<PlexLibraryAccessRefreshResponse>> ExecuteAsync(
         RefreshLibraryAccessCommand command,
         CancellationToken cancellationToken
     )
@@ -58,7 +59,7 @@ public class RefreshLibraryAccessHandler
         // Determine the Plex servers to refresh the Plex libraries for
         if (plexServerId == 0)
         {
-            var result = await _dbContext.GetAccessiblePlexServers(plexAccountId, CancellationToken.None);
+            var result = await _dbContext.GetAccessiblePlexServers(plexAccountId, cancellationToken);
             if (result.IsFailed)
                 return result.ToResult();
 
@@ -66,7 +67,7 @@ public class RefreshLibraryAccessHandler
         }
         else
         {
-            var plexServer = await _dbContext.PlexServers.GetAsync(plexServerId, CancellationToken.None);
+            var plexServer = await _dbContext.PlexServers.GetAsync(plexServerId, cancellationToken);
             if (plexServer is not null)
             {
                 plexServers.Add(plexServer);
@@ -101,7 +102,7 @@ public class RefreshLibraryAccessHandler
 
         var plexLibraries = libraryResults.Where(x => x.IsSuccess).SelectMany(x => x.Value).ToList();
 
-        var updateResult = await _mediator.Send(
+        var updateResult = await _commandExecutor.Send(
             new AddOrUpdatePlexLibrariesCommand { PlexAccountId = plexAccountId, PlexLibraries = plexLibraries },
             cancellationToken
         );

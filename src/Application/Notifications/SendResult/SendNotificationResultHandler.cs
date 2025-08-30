@@ -1,10 +1,11 @@
 using Application.Contracts;
 using Data.Contracts;
+using FastEndpoints;
 using Logging.Interface;
 
 namespace PlexRipper.Application;
 
-public class SendNotificationResultHandler : INotificationHandler<SendNotificationResult>
+public class SendNotificationResultHandler : IEventHandler<SendNotificationResult>
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
@@ -17,7 +18,7 @@ public class SendNotificationResultHandler : INotificationHandler<SendNotificati
         _signalRService = signalRService;
     }
 
-    public async Task Handle(SendNotificationResult notification, CancellationToken cancellationToken)
+    public async Task HandleAsync(SendNotificationResult notification, CancellationToken cancellationToken)
     {
         if (notification.Result.HasError<Error>())
         {

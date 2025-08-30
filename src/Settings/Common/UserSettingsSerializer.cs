@@ -6,7 +6,7 @@ namespace PlexRipper.Settings;
 
 public static class UserSettingsSerializer
 {
-    private static readonly ILog Log = LogManager.CreateLogInstance(typeof(ResultExtensions));
+    private static readonly ILog _log = new LogConfig().CreateLogInstance(typeof(UserSettingsSerializer));
 
     public static string Serialize(IUserSettings userSettings)
     {
@@ -16,8 +16,8 @@ public static class UserSettingsSerializer
         }
         catch (Exception e)
         {
-            Log.ErrorLine("Failed to serialize settings");
-            Log.Error(e);
+            _log.ErrorLine("Failed to serialize settings");
+            _log.Error(e);
         }
 
         return string.Empty;
@@ -41,8 +41,8 @@ public static class UserSettingsSerializer
         }
         catch (Exception e)
         {
-            Log.ErrorLine("Failed to deserialize settings");
-            Log.Error(e);
+            _log.ErrorLine("Failed to deserialize settings");
+            _log.Error(e);
         }
 
         return new UserSettings();

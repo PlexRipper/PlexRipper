@@ -5,7 +5,7 @@ using Quartz;
 
 namespace PlexRipper.Application;
 
-public record QueueSyncServerMediaJobCommand(int PlexServerId, bool ForceSync = false) : IRequest<Result>;
+public record QueueSyncServerMediaJobCommand(int PlexServerId, bool ForceSync = false) : ICommand<Result>;
 
 public class QueueSyncServerMediaJobCommandValidator : Validator<QueueSyncServerMediaJobCommand>
 {
@@ -15,7 +15,7 @@ public class QueueSyncServerMediaJobCommandValidator : Validator<QueueSyncServer
     }
 }
 
-public class QueueSyncServerMediaJobCommandHandler : IRequestHandler<QueueSyncServerMediaJobCommand, Result>
+public class QueueSyncServerMediaJobCommandHandler : ICommandHandler<QueueSyncServerMediaJobCommand, Result>
 {
     private readonly ILog _log;
     private readonly IScheduler _scheduler;
@@ -26,7 +26,7 @@ public class QueueSyncServerMediaJobCommandHandler : IRequestHandler<QueueSyncSe
         _scheduler = scheduler;
     }
 
-    public async Task<Result> Handle(QueueSyncServerMediaJobCommand command, CancellationToken cancellationToken)
+    public async Task<Result> ExecuteAsync(QueueSyncServerMediaJobCommand command, CancellationToken cancellationToken)
     {
         if (command.PlexServerId <= 0)
             return ResultExtensions.IsInvalidId(nameof(command.PlexServerId), command.PlexServerId);

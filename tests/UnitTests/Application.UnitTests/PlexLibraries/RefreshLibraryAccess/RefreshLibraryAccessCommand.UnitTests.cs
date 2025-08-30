@@ -15,7 +15,7 @@ public class RefreshLibraryAccessCommandUnitTests : BaseUnitTest<RefreshLibraryA
         var request = new RefreshLibraryAccessCommand(0);
 
         // Act
-        var result = await _sut.Handle(request, CancellationToken);
+        var result = await _sut.ExecuteAsync(request, CancellationToken);
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -37,7 +37,7 @@ public class RefreshLibraryAccessCommandUnitTests : BaseUnitTest<RefreshLibraryA
 
         // Act
         var request = new RefreshLibraryAccessCommand(1);
-        var result = await _sut.Handle(request, CancellationToken);
+        var result = await _sut.ExecuteAsync(request, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -75,13 +75,13 @@ public class RefreshLibraryAccessCommandUnitTests : BaseUnitTest<RefreshLibraryA
         rapport.AddGranted(4, plexLibraries.Find(x => x.Id == 4)?.Name ?? string.Empty);
         rapport.AddGranted(5, plexLibraries.Find(x => x.Id == 5)?.Name ?? string.Empty);
 
-        mock.SetupMediator(It.IsAny<AddOrUpdatePlexLibrariesCommand>)
+        mock.SetupCommand(It.IsAny<AddOrUpdatePlexLibrariesCommand>)
             .ReturnsAsync(Result.Ok(new List<PlexLibraryAccessRapport> { rapport }))
             .Verifiable(Times.Once);
 
         // Act
         var request = new RefreshLibraryAccessCommand(1, 1);
-        var result = await _sut.Handle(request, CancellationToken);
+        var result = await _sut.ExecuteAsync(request, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

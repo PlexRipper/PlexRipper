@@ -4,18 +4,18 @@
     "net9.0": {
       "Autofac": {
         "type": "Direct",
-        "requested": "[8.3.0, )",
-        "resolved": "8.3.0",
-        "contentHash": "0Bv8aSKuK4nQAiDKw3+pIv9hUhbPwS63ql9KhjR6DRgE14UNdXrMqO8YMI0PnffZPyCrMs85lNhZRI4eBgQO4w==",
+        "requested": "[8.4.0, )",
+        "resolved": "8.4.0",
+        "contentHash": "XMWHyO6fXTv8rwCfhm6+64mQS6CyL0rve/hWSODsUrVuEGtq1fjxSOlVTBqCRsW6L8K3OQDskJaPB1boVMI2eQ==",
         "dependencies": {
           "System.Diagnostics.DiagnosticSource": "8.0.1"
         }
       },
       "CSharpier.MsBuild": {
         "type": "Direct",
-        "requested": "[1.0.3, )",
-        "resolved": "1.0.3",
-        "contentHash": "Bc7EQC/20z0GO3iN9u/pa5ku7jjzCldzfCn52SDxM6r8+dqeqrQVyOh3Ydy8nU4Gei2CKieQQ6SL4nxHSHIxBw=="
+        "requested": "[1.1.1, )",
+        "resolved": "1.1.1",
+        "contentHash": "XXfwF9m9c/TSKsqOqZjn6aNAmzx/mkVcZfORpWfZVr/GJ8p5FhPlUhgh8bLHTcJ5rei63tQxlW0fG/l0nZk7IQ=="
       },
       "FluentResults": {
         "type": "Direct",

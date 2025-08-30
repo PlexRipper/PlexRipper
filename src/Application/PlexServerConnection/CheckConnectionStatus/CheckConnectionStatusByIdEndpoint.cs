@@ -17,13 +17,13 @@ public class CheckConnectionStatusByIdRequestValidator : Validator<CheckConnecti
 
 public class CheckConnectionStatusByIdEndpoint : BaseEndpoint<CheckConnectionStatusByIdRequest, PlexServerStatusDTO>
 {
-    private readonly IMediator _mediator;
+    private readonly ICommandExecutor _commandExecutor;
 
     public override string EndpointPath => ApiRoutes.PlexServerConnectionController + "/check/{PlexServerConnectionId}";
 
-    public CheckConnectionStatusByIdEndpoint(IMediator mediator)
+    public CheckConnectionStatusByIdEndpoint(ICommandExecutor commandExecutor)
     {
-        _mediator = mediator;
+        _commandExecutor = commandExecutor;
     }
 
     public override void Configure()
@@ -40,7 +40,7 @@ public class CheckConnectionStatusByIdEndpoint : BaseEndpoint<CheckConnectionSta
 
     public override async Task HandleAsync(CheckConnectionStatusByIdRequest req, CancellationToken ct)
     {
-        var result = await _mediator.Send(new CheckConnectionStatusByIdCommand(req.PlexServerConnectionId), ct);
+        var result = await _commandExecutor.Send(new CheckConnectionStatusByIdCommand(req.PlexServerConnectionId), ct);
         if (result.IsFailed)
             await SendFluentResult(result.ToResult(), ct);
         else

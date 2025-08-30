@@ -1,6 +1,5 @@
 using Application.Contracts;
 using Data.Contracts;
-using FileSystem.Contracts;
 
 namespace PlexRipper.Application.UnitTests;
 
@@ -34,8 +33,8 @@ public class DownloadTaskUpdatedHandler_UnitTests : BaseUnitTest<DownloadTaskUpd
             .Returns(Task.CompletedTask);
 
         // Act
-        var command = new DownloadTaskUpdatedNotification(downloadTasks[0].ToKey());
-        await _sut.Handle(command, CancellationToken);
+        var command = new DownloadTaskUpdatedCommand(downloadTasks[0].ToKey());
+        await _sut.ExecuteAsync(command, CancellationToken);
 
         // Assert
         mock.Mock<ISignalRService>()
@@ -65,13 +64,9 @@ public class DownloadTaskUpdatedHandler_UnitTests : BaseUnitTest<DownloadTaskUpd
             )
             .Returns(Task.CompletedTask);
 
-        mock.Mock<IFileMergeScheduler>()
-            .Setup(x => x.StartFileMergeJob(It.IsAny<DownloadTaskKey>()))
-            .ReturnsAsync(Result.Ok());
-
         // Act
-        var command = new DownloadTaskUpdatedNotification(downloadTasks[0].ToKey());
-        await _sut.Handle(command, CancellationToken);
+        var command = new DownloadTaskUpdatedCommand(downloadTasks[0].ToKey());
+        await _sut.ExecuteAsync(command, CancellationToken);
 
         // Assert
         mock.Mock<ISignalRService>()

@@ -28,21 +28,19 @@ public class RefreshPlexTvShowLibraryCommandHandler
     : ICommandHandler<RefreshPlexTvShowLibraryCommand, Result<PlexLibrary>>
 {
     private readonly ILog _log;
-    private readonly IMediator _mediator;
-    private readonly IPlexRipperDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
+    private readonly IPlexRipperDbContext _dbContext;
     private readonly IRefreshLibraryProgressReporter _progressReporter;
 
     public RefreshPlexTvShowLibraryCommandHandler(
         ILog log,
-        IMediator mediator,
-        IPlexRipperDbContext dbContext,
         ICommandExecutor commandExecutor,
+        IPlexRipperDbContext dbContext,
         IRefreshLibraryProgressReporter progressReporter
     )
     {
         _log = log;
-        _mediator = mediator;
+        _commandExecutor = commandExecutor;
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;
         _progressReporter = progressReporter;
@@ -136,7 +134,7 @@ public class RefreshPlexTvShowLibraryCommandHandler
             );
 
             // Update the MetaData of this library
-            var syncResult = await _mediator.Send(
+            var syncResult = await _commandExecutor.Send(
                 new SyncPlexTvShowsCommand(command.LibraryMetadata),
                 cancellationToken
             );

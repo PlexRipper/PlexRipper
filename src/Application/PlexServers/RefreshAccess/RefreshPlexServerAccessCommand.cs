@@ -1,4 +1,5 @@
 using Data.Contracts;
+using FastEndpoints;
 using FluentValidation;
 using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +11,7 @@ namespace PlexRipper.Application;
 /// Retrieve the latest accessible <see cref="PlexServer">PlexServers</see> for this <see cref="PlexAccount"/> from the PlexAPI and stores it in the Database.
 /// </summary>
 /// <param name="PlexAccountId">The id of the <see cref="PlexAccount"/> to check.</param>
-public record RefreshPlexServerAccessCommand(int PlexAccountId) : IRequest<Result<RefreshPlexServerAccessRapport>>;
+public record RefreshPlexServerAccessCommand(int PlexAccountId) : ICommand<Result<RefreshPlexServerAccessRapport>>;
 
 public class RefreshPlexServerAccessCommandValidator : AbstractValidator<RefreshPlexServerAccessCommand>
 {
@@ -21,27 +22,24 @@ public class RefreshPlexServerAccessCommandValidator : AbstractValidator<Refresh
 }
 
 public class RefreshPlexServerAccessCommandHandler
-    : IRequestHandler<RefreshPlexServerAccessCommand, Result<RefreshPlexServerAccessRapport>>
+    : ICommandHandler<RefreshPlexServerAccessCommand, Result<RefreshPlexServerAccessRapport>>
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
-    private readonly IMediator _mediator;
     private readonly ICommandExecutor _commandExecutor;
 
     public RefreshPlexServerAccessCommandHandler(
         ILog log,
         IPlexRipperDbContext dbContext,
-        IMediator mediator,
         ICommandExecutor commandExecutor
     )
     {
         _log = log;
         _dbContext = dbContext;
-        _mediator = mediator;
         _commandExecutor = commandExecutor;
     }
 
-    public async Task<Result<RefreshPlexServerAccessRapport>> Handle(
+    public async Task<Result<RefreshPlexServerAccessRapport>> ExecuteAsync(
         RefreshPlexServerAccessCommand command,
         CancellationToken cancellationToken
     )
@@ -83,12 +81,15 @@ public class RefreshPlexServerAccessCommandHandler
         var serverAccessTokens = result.Value.Select(x => x.AccessToken).ToList();
 
         // Add PlexServers and their PlexServerConnections
-        var updateResult = await _mediator.Send(new AddOrUpdatePlexServersCommand(serverList), CancellationToken.None);
+        var updateResult = await _commandExecutor.Send(
+            new AddOrUpdatePlexServersCommand(serverList),
+            CancellationToken.None
+        );
         if (updateResult.IsFailed)
             return updateResult.LogError();
 
         // Add or update the PlexAccount and PlexServer relationships
-        var plexServerAccountAccessRapport = await _mediator.Send(
+        var plexServerAccountAccessRapport = await _commandExecutor.Send(
             new AddOrUpdatePlexAccountServersCommand(plexAccountId, serverAccessTokens),
             cancellationToken
         );

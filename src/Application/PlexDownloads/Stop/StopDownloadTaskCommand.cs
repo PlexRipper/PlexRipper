@@ -1,6 +1,7 @@
 using System.IO.Abstractions;
 using Application.Contracts;
 using Data.Contracts;
+using FastEndpoints;
 using FluentValidation;
 using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
@@ -12,7 +13,7 @@ namespace PlexRipper.Application;
 /// </summary>
 /// <param name="DownloadTaskGuid">The id of the <see cref="DownloadTaskGeneric"/> to stop.</param>
 /// <returns>If successful a list of the DownloadTasks that were stopped.</returns>
-public record StopDownloadTaskCommand(Guid DownloadTaskGuid) : IRequest<Result>;
+public record StopDownloadTaskCommand(Guid DownloadTaskGuid) : ICommand<Result>;
 
 public class StopDownloadTaskCommandValidator : AbstractValidator<StopDownloadTaskCommand>
 {
@@ -22,30 +23,30 @@ public class StopDownloadTaskCommandValidator : AbstractValidator<StopDownloadTa
     }
 }
 
-public class StopDownloadTaskCommandHandler : IRequestHandler<StopDownloadTaskCommand, Result>
+public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCommand, Result>
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
-    private readonly IMediator _mediator;
+    private readonly ICommandExecutor _commandExecutor;
     private readonly IFile _file;
     private readonly IDownloadTaskScheduler _downloadTaskScheduler;
 
     public StopDownloadTaskCommandHandler(
         ILog log,
         IPlexRipperDbContext dbContext,
-        IMediator mediator,
+        ICommandExecutor commandExecutor,
         IFile file,
         IDownloadTaskScheduler downloadTaskScheduler
     )
     {
         _log = log;
         _dbContext = dbContext;
-        _mediator = mediator;
+        _commandExecutor = commandExecutor;
         _file = file;
         _downloadTaskScheduler = downloadTaskScheduler;
     }
 
-    public async Task<Result> Handle(StopDownloadTaskCommand command, CancellationToken cancellationToken)
+    public async Task<Result> ExecuteAsync(StopDownloadTaskCommand command, CancellationToken cancellationToken)
     {
         var key = await _dbContext.GetDownloadTaskKeyAsync(command.DownloadTaskGuid, cancellationToken);
         if (key is null)
@@ -91,7 +92,7 @@ public class StopDownloadTaskCommandHandler : IRequestHandler<StopDownloadTaskCo
 
             // TODO: delete file tasks but first check if already merging
 
-            await _mediator.Send(new DownloadTaskUpdatedNotification(downloadTaskKey), cancellationToken);
+            await _commandExecutor.Send(new DownloadTaskUpdatedCommand(downloadTaskKey), cancellationToken);
         }
 
         return Result.Ok();

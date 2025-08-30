@@ -9,7 +9,7 @@ public static partial class DbContextExtensions
     /// Bulk inserts the Plex TV shows and their hierarchical media data (seasons, episodes, media data, parts, and streams) into the database.
     /// </summary>
     public static async Task<Result<BulkInsertTvShowsRapport>> BulkInsertPlexTvShowsAsync(
-        this IPlexRipperDbContext context,
+        this IReaparrDbContext context,
         List<PlexTvShow> plexTvShows,
         int plexServerId,
         int plexLibraryId,

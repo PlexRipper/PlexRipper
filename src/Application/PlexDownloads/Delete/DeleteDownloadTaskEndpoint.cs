@@ -23,14 +23,14 @@ public class DeleteDownloadTaskEndpointRequestValidator : Validator<DeleteDownlo
 
 public class DeleteDownloadTaskEndpoint : BaseEndpoint<DeleteDownloadTaskEndpointRequest>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IDownloadTaskScheduler _downloadTaskScheduler;
 
     public override string EndpointPath => ApiRoutes.DownloadController + "/delete";
 
     public DeleteDownloadTaskEndpoint(
-        IPlexRipperDbContext dbContext,
+        IReaparrDbContext dbContext,
         ICommandExecutor commandExecutor,
         IDownloadTaskScheduler downloadTaskScheduler
     )

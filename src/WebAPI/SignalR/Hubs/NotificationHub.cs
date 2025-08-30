@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using Reaparr.Application.Contracts;
-using Reaparr.Logging.Interface;
+using Reaparr.Logging;
 
 namespace Reaparr.WebAPI;
 
@@ -9,7 +9,7 @@ namespace Reaparr.WebAPI;
 /// </summary>
 public class NotificationHub : Hub<INotificationHub>, INotificationHub
 {
-    private readonly ILog<NotificationHub> _log;
+    private readonly Logging.ILog<NotificationHub> _log;
 
     /// <summary>
     ///  Initializes a new instance of the <see cref="NotificationHub"/> class.

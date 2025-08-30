@@ -35,10 +35,10 @@ public class AddOrUpdatePlexLibrariesCommandHandler
     : ICommandHandler<AddOrUpdatePlexLibrariesCommand, Result<List<PlexLibraryAccessRapport>>>
 {
     private readonly ILog _log;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly List<PlexLibraryAccessRapport> _list = [];
 
-    public AddOrUpdatePlexLibrariesCommandHandler(ILog log, IPlexRipperDbContext dbContext)
+    public AddOrUpdatePlexLibrariesCommandHandler(ILog log, IReaparrDbContext dbContext)
     {
         _log = log;
         _dbContext = dbContext;

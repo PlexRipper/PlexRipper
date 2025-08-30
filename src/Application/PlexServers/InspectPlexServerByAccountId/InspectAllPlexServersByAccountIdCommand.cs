@@ -28,12 +28,12 @@ public class InspectAllPlexServersByAccountIdCommandHandler
 {
     private readonly ILog _log;
     private readonly ICommandExecutor _commandExecutor;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     public InspectAllPlexServersByAccountIdCommandHandler(
         ILog log,
         ICommandExecutor commandExecutor,
-        IPlexRipperDbContext dbContext
+        IReaparrDbContext dbContext
     )
     {
         _log = log;

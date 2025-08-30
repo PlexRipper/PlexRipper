@@ -42,12 +42,12 @@ public class GeneratePlexTokenResponse
 
 public class GeneratePlexTokenEndpoint : BaseEndpoint<GeneratePlexTokenEndpointRequest, GeneratePlexTokenResponse>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
 
     public override string EndpointPath => ApiRoutes.PlexAccountController + "/generate-token/{PlexAccountId}";
 
-    public GeneratePlexTokenEndpoint(IPlexRipperDbContext dbContext, ICommandExecutor commandExecutor)
+    public GeneratePlexTokenEndpoint(IReaparrDbContext dbContext, ICommandExecutor commandExecutor)
     {
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;

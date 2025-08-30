@@ -1,5 +1,4 @@
-﻿using Reaparr.BaseTests;
-using Serilog.Events;
+﻿using Serilog.Events;
 using Serilog.Sinks.TestCorrelator;
 
 namespace Reaparr.FluentResultExtension.UnitTests.Logging;

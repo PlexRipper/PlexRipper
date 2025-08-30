@@ -19,11 +19,11 @@ public class RefreshPlexServerConnectionsEndpointRequestValidator
 
 public class RefreshPlexServerConnectionsEndpoint : BaseEndpoint<RefreshPlexServerConnectionsEndpointRequest>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
     public override string EndpointPath => ApiRoutes.PlexServerController + "/{PlexServerId}/refresh";
 
-    public RefreshPlexServerConnectionsEndpoint(IPlexRipperDbContext dbContext, ICommandExecutor commandExecutor)
+    public RefreshPlexServerConnectionsEndpoint(IReaparrDbContext dbContext, ICommandExecutor commandExecutor)
     {
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;

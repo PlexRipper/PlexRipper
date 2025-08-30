@@ -1,6 +1,5 @@
 using System.IO.Abstractions;
 using Autofac;
-using Reaparr.BaseTests;
 using Reaparr.Environment;
 using Reaparr.FileSystem.Contracts;
 

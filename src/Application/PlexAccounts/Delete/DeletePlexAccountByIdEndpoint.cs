@@ -21,12 +21,12 @@ public class DeletePlexAccountByIdRequestValidator : Validator<DeletePlexAccount
 public class DeletePlexAccountByIdEndpoint : BaseEndpoint<DeletePlexAccountByIdRequest>
 {
     private readonly ILog _log;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly ISignalRService _signalRService;
 
     public override string EndpointPath => ApiRoutes.PlexAccountController + "/{PlexAccountId}";
 
-    public DeletePlexAccountByIdEndpoint(ILog log, IPlexRipperDbContext dbContext, ISignalRService signalRService)
+    public DeletePlexAccountByIdEndpoint(ILog log, IReaparrDbContext dbContext, ISignalRService signalRService)
     {
         _log = log;
         _dbContext = dbContext;

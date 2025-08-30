@@ -8,7 +8,7 @@ namespace Reaparr.Data.Contracts;
 public static partial class DbContextExtensions
 {
     public static async Task<Result<int>> GetPlexMediaByMediaKeyAsync(
-        this IPlexRipperDbContext dbContext,
+        this IReaparrDbContext dbContext,
         int plexMediaKey,
         int plexServerId,
         PlexMediaType mediaType,
@@ -71,7 +71,7 @@ public static partial class DbContextExtensions
     }
 
     public static async Task<Result<List<PlexMediaSlimDTO>>> GetMediaByType(
-        this IPlexRipperDbContext dbContext,
+        this IReaparrDbContext dbContext,
         MediaQueryFilter filter,
         CancellationToken ct = default
     )
@@ -207,7 +207,7 @@ public static partial class DbContextExtensions
     /// Bulk inserts the Plex movies and the movie media data into the database.
     /// </summary>
     public static async Task<Result> BulkInsertPlexMoviesAsync(
-        this IPlexRipperDbContext context,
+        this IReaparrDbContext context,
         List<PlexMovie> plexMovies,
         int plexServerId,
         int plexLibraryId,

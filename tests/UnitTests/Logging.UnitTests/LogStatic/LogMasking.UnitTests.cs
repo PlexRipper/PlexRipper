@@ -1,5 +1,4 @@
-﻿using Reaparr.BaseTests;
-using Reaparr.Environment;
+﻿using Reaparr.Environment;
 using Serilog.Sinks.TestCorrelator;
 
 namespace Reaparr.Logging.UnitTests;

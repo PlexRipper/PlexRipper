@@ -12,7 +12,7 @@ using Reaparr.Environment;
 
 namespace Reaparr.Data;
 
-public sealed class PlexRipperDbContext : DbContext, IPlexRipperDbContext, IPlexRipperDbContextDatabase
+public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbContextDatabase
 {
     public DbSet<PlexAccount> PlexAccounts { get; set; }
 
@@ -167,15 +167,15 @@ public sealed class PlexRipperDbContext : DbContext, IPlexRipperDbContext, IPlex
     public Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default) =>
         Database.BeginTransactionAsync(cancellationToken);
 
-    public PlexRipperDbContext(string databaseName)
+    public ReaparrDbContext(string databaseName)
     {
         DatabaseName = databaseName;
     }
 
-    public PlexRipperDbContext(IPathProvider pathProvider)
+    public ReaparrDbContext(IPathProvider pathProvider)
         : this(pathProvider.DatabaseName) { }
 
-    public PlexRipperDbContext(DbContextOptions<PlexRipperDbContext> options, string databaseName)
+    public ReaparrDbContext(DbContextOptions<ReaparrDbContext> options, string databaseName)
         : base(options)
     {
         DatabaseName = databaseName;
@@ -187,7 +187,7 @@ public sealed class PlexRipperDbContext : DbContext, IPlexRipperDbContext, IPlex
     {
         if (!optionsBuilder.IsConfigured)
         {
-            optionsBuilder.DefaultConfiguration(typeof(PlexRipperDbContext));
+            optionsBuilder.DefaultConfiguration(typeof(ReaparrDbContext));
         }
     }
 
@@ -199,7 +199,7 @@ public sealed class PlexRipperDbContext : DbContext, IPlexRipperDbContext, IPlex
         builder.AddQuartz(x => x.UseSqlite());
 
         // TODO Make extensions methods
-        builder = PlexRipperDBContextSeed.SeedDatabase(builder);
+        builder = ReaparrDBContextSeed.SeedDatabase(builder);
 
         base.OnModelCreating(builder);
     }

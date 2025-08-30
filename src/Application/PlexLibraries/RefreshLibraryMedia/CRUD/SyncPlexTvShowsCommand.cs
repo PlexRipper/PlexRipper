@@ -5,7 +5,6 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Data.Contracts;
 using Reaparr.Logging;
-using Reaparr.Logging.Interface;
 using ILog = Reaparr.Logging.ILog;
 
 namespace Reaparr.Application;
@@ -68,7 +67,7 @@ public class SyncPlexTvShowsCommandValidator : AbstractValidator<SyncPlexTvShows
 public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsCommand, Result<BulkInsertTvShowsRapport>>
 {
     private readonly ILog _log;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     private readonly BulkConfig? _config = new()
     {
@@ -80,7 +79,7 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
         UseTempDB = true,
     };
 
-    public SyncPlexTvShowsCommandHandler(ILog log, IPlexRipperDbContext dbContext)
+    public SyncPlexTvShowsCommandHandler(ILog log, IReaparrDbContext dbContext)
     {
         _log = log;
         _dbContext = dbContext;

@@ -28,14 +28,14 @@ public class CheckAllConnectionsStatusByPlexServerHandler
     : ICommandHandler<CheckAllConnectionsStatusByPlexServerCommand, Result<List<PlexServerStatus>>>
 {
     private readonly ILog _log;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IEventPublisher _eventPublisher;
     private readonly ISignalRService _signalRService;
 
     public CheckAllConnectionsStatusByPlexServerHandler(
         ILog log,
-        IPlexRipperDbContext dbContext,
+        IReaparrDbContext dbContext,
         ICommandExecutor commandExecutor,
         IEventPublisher eventPublisher,
         ISignalRService signalRService

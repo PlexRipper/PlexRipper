@@ -47,9 +47,9 @@ public class MockPlexApiServer : IMockPlexApiServer
     // ReSharper disable once CollectionNeverQueried.Local
     private readonly Dictionary<string, List<GetMediaMetaDataMetadata>> _episodes = [];
 
-    private IPlexRipperDbContext _dbContext;
+    private IReaparrDbContext _dbContext;
 
-    public MockPlexApiServer(IPlexRipperDbContext dbContext)
+    public MockPlexApiServer(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
     }

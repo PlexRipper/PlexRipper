@@ -1,6 +1,5 @@
 using Reaparr.Application.Contracts;
 using Reaparr.Application.Contracts.Validators;
-using Reaparr.BaseTests;
 
 namespace Reaparr.Application.UnitTests;
 

@@ -36,12 +36,12 @@ public class GenerateDownloadTaskTvShowsCommandValidator : AbstractValidator<Gen
 public class GenerateDownloadTaskTvShowsCommandHandler : ICommandHandler<GenerateDownloadTaskTvShowsCommand, Result>
 {
     private readonly ILog _log;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
 
     public GenerateDownloadTaskTvShowsCommandHandler(
         ILog log,
-        IPlexRipperDbContext dbContext,
+        IReaparrDbContext dbContext,
         ICommandExecutor commandExecutor
     )
     {

@@ -10,9 +10,9 @@ public class FileMergeJob : IJob
 {
     private readonly ILog _log;
     private readonly ICommandExecutor _commandExecutor;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
-    public FileMergeJob(ILog log, ICommandExecutor commandExecutor, IPlexRipperDbContext dbContext)
+    public FileMergeJob(ILog log, ICommandExecutor commandExecutor, IReaparrDbContext dbContext)
     {
         _log = log;
         _commandExecutor = commandExecutor;

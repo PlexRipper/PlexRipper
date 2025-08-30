@@ -8,13 +8,13 @@ namespace Reaparr.Application;
 public class DownloadJobListener : IDownloadJobListener
 {
     private readonly ILog _log;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly IEventPublisher _eventPublisher;
     private readonly IFileMergeQueue _fileMergeQueue;
 
     public DownloadJobListener(
         ILog log,
-        IPlexRipperDbContext dbContext,
+        IReaparrDbContext dbContext,
         IEventPublisher eventPublisher,
         IFileMergeQueue fileMergeQueue
     )

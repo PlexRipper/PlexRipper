@@ -25,13 +25,13 @@ public class PauseDownloadTaskCommandValidator : AbstractValidator<PauseDownload
 public class PauseDownloadTaskCommandHandler : ICommandHandler<PauseDownloadTaskCommand, Result>
 {
     private readonly ILog _log;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly IDownloadTaskScheduler _downloadTaskScheduler;
     private readonly IFileMergeScheduler _fileMergeScheduler;
 
     public PauseDownloadTaskCommandHandler(
         ILog log,
-        IPlexRipperDbContext dbContext,
+        IReaparrDbContext dbContext,
         IDownloadTaskScheduler downloadTaskScheduler,
         IFileMergeScheduler fileMergeScheduler
     )

@@ -7,10 +7,10 @@ namespace Reaparr.Application;
 
 public class GetAllFolderPathsEndpoint : BaseEndpointWithoutRequest<List<FolderPathDTO>>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     public override string EndpointPath => ApiRoutes.FolderPathController + "/";
 
-    public GetAllFolderPathsEndpoint(IPlexRipperDbContext dbContext)
+    public GetAllFolderPathsEndpoint(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
     }

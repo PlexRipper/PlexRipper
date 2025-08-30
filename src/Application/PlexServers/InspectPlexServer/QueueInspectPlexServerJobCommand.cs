@@ -22,10 +22,10 @@ public class QueueInspectPlexServerJobCommandValidator : AbstractValidator<Queue
 public class QueueInspectPlexServerJobCommandHandler : ICommandHandler<QueueInspectPlexServerJobCommand, Result>
 {
     private readonly ILog _log;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly IScheduler _scheduler;
 
-    public QueueInspectPlexServerJobCommandHandler(ILog log, IPlexRipperDbContext dbContext, IScheduler scheduler)
+    public QueueInspectPlexServerJobCommandHandler(ILog log, IReaparrDbContext dbContext, IScheduler scheduler)
     {
         _log = log;
         _dbContext = dbContext;

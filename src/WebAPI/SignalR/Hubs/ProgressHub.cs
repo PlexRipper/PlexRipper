@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using Reaparr.Application.Contracts;
-using Reaparr.Logging.Interface;
+using Reaparr.Logging;
 using Reaparr.WebAPI.Contracts;
 
 namespace Reaparr.WebAPI;
@@ -10,7 +10,7 @@ namespace Reaparr.WebAPI;
 /// </summary>
 public class ProgressHub : Hub<IProgressHub>, IProgressHub
 {
-    private readonly ILog<ProgressHub> _log;
+    private readonly Logging.ILog<ProgressHub> _log;
 
     /// <summary>
     ///  Initializes a new instance of the <see cref="ProgressHub"/> class.

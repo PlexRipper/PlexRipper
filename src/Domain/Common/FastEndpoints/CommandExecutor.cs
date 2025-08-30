@@ -1,11 +1,11 @@
 using FastEndpoints;
-using Reaparr.Logging.Interface;
+using Reaparr.Logging;
 
 namespace Reaparr.Domain;
 
 public class CommandExecutor : ICommandExecutor
 {
-    private readonly ILog<CommandExecutor> _log;
+    private readonly Logging.ILog<CommandExecutor> _log;
 
     public CommandExecutor(ILog<CommandExecutor> log)
     {

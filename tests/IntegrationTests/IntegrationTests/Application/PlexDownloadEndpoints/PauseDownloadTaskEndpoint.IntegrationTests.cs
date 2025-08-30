@@ -1,5 +1,3 @@
-using Reaparr.BaseTests;
-
 namespace Reaparr.IntegrationTests;
 
 public class PauseDownloadTaskEndpointIntegrationTests : BaseIntegrationTests

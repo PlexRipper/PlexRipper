@@ -1,6 +1,5 @@
 using LukeHagar.PlexAPI.SDK.Models.Requests;
 using NodaTime;
-using Reaparr.BaseTests;
 
 namespace Reaparr.PlexApi.UnitTests
 {

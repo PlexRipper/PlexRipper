@@ -14,12 +14,12 @@ public class UnitTestDataConfig : BaseConfig<UnitTestDataConfig>
 
     public int PlexServerSettingsCount { get; set; } = 5;
 
-    public Action<Mock<HttpMessageHandler>, IPlexRipperDbContext>? HttpClientOptions { get; set; }
+    public Action<Mock<HttpMessageHandler>, IReaparrDbContext>? HttpClientOptions { get; set; }
 
     /// <summary>
     /// Set the mock option to create a mock PlexApi Server with the given configuration.
     /// </summary>
     public Action<PlexApiDataConfig>? BaseMockHttpClientOptions { get; set; }
 
-    public Action<MockFileSystem, IPlexRipperDbContext>? FileSystemOptions { get; set; }
+    public Action<MockFileSystem, IReaparrDbContext>? FileSystemOptions { get; set; }
 }

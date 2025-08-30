@@ -19,12 +19,12 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
     : ICommandHandler<GetAllMediaByTypeFromPlexApiCommand, Result<List<LibraryMediaItemDTO>>>
 {
     private readonly ILog _log;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly IPlexApiClientFactory _plexApiClientFactory;
 
     public GetAllMediaByTypeFromPlexApiCommandHandler(
         ILog log,
-        IPlexRipperDbContext dbContext,
+        IReaparrDbContext dbContext,
         IPlexApiClientFactory plexApiClientFactory
     )
     {

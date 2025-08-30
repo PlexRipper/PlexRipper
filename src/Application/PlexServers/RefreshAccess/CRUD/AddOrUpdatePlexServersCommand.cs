@@ -40,9 +40,9 @@ public class AddOrUpdatePlexServersCommandHandler
     : ICommandHandler<AddOrUpdatePlexServersCommand, Result<PlexServerRapport>>
 {
     private readonly ILog _log;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
-    public AddOrUpdatePlexServersCommandHandler(ILog log, IPlexRipperDbContext dbContext)
+    public AddOrUpdatePlexServersCommandHandler(ILog log, IReaparrDbContext dbContext)
     {
         _log = log;
         _dbContext = dbContext;

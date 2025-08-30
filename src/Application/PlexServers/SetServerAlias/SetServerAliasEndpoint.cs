@@ -25,12 +25,12 @@ public class SetServerAliasRequestValidator : Validator<SetServerAliasRequest>
 
 public class SetServerAlias : BaseEndpoint<SetServerAliasRequest>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly IServerSettingsModule _serverSettingsModule;
 
     public override string EndpointPath => ApiRoutes.PlexServerController + "/{PlexServerId}/set-server-alias";
 
-    public SetServerAlias(IPlexRipperDbContext dbContext, IServerSettingsModule serverSettingsModule)
+    public SetServerAlias(IReaparrDbContext dbContext, IServerSettingsModule serverSettingsModule)
     {
         _dbContext = dbContext;
         _serverSettingsModule = serverSettingsModule;

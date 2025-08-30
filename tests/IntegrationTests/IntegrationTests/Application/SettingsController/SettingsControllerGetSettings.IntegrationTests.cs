@@ -2,7 +2,6 @@
 using FastEndpoints;
 using Reaparr.Application;
 using Reaparr.Application.Contracts;
-using Reaparr.BaseTests;
 using Reaparr.Settings;
 using Reaparr.Settings.Contracts;
 

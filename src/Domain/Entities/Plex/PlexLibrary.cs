@@ -157,7 +157,7 @@ public class PlexLibrary : BaseEntity
     }
 
     /// <summary>
-    /// Gets a value indicating whether this <see cref="PlexLibrary"/> has been updated since it was last synced with PlexRipper.
+    /// Gets a value indicating whether this <see cref="PlexLibrary"/> has been updated since it was last synced with Reaparr.
     /// </summary>
     [NotMapped]
     public bool Outdated => SyncedAt < UpdatedAt;

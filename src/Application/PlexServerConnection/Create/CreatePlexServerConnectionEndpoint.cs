@@ -34,11 +34,11 @@ public class CreatePlexServerConnectionEndpointRequestValidator : Validator<Crea
 public class CreatePlexServerConnectionEndpoint
     : BaseEndpoint<CreatePlexServerConnectionEndpointRequest, ResultDTO<PlexServerConnectionDTO>>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.PlexServerConnectionController;
 
-    public CreatePlexServerConnectionEndpoint(IPlexRipperDbContext dbContext)
+    public CreatePlexServerConnectionEndpoint(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
     }

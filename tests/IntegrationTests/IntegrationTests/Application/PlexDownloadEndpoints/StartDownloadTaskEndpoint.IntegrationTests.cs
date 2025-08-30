@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application;
 using Reaparr.Application.Contracts;
-using Reaparr.BaseTests;
 using Reaparr.Data.Contracts;
 
 namespace Reaparr.IntegrationTests;

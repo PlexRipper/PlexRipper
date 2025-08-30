@@ -40,12 +40,12 @@ public class CreatePlexAccountEndpointRequestValidator : Validator<CreatePlexAcc
 public class CreatePlexAccountEndpoint : BaseEndpoint<CreatePlexAccountEndpointRequest, PlexAccountDTO>
 {
     private readonly ILog _log;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
 
     public override string EndpointPath => ApiRoutes.PlexAccountController + "/";
 
-    public CreatePlexAccountEndpoint(ILog log, IPlexRipperDbContext dbContext, ICommandExecutor commandExecutor)
+    public CreatePlexAccountEndpoint(ILog log, IReaparrDbContext dbContext, ICommandExecutor commandExecutor)
     {
         _log = log;
         _dbContext = dbContext;

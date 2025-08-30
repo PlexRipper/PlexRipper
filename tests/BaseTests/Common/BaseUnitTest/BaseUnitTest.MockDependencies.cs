@@ -8,7 +8,6 @@ using Reaparr.Environment;
 using Reaparr.Identity;
 using Reaparr.Identity.Contracts;
 using Reaparr.Logging;
-using Reaparr.Logging.Interface;
 using Reaparr.PlexApi.Contracts;
 using Serilog;
 using ILog = Reaparr.Logging.ILog;
@@ -66,13 +65,13 @@ public partial class BaseUnitTest
 
         // Database context can be set up once and then retrieved by its DB name.
         builder
-            .Register((_, _) => MockDatabase.GetMemoryPlexRipperDbContext(_databaseName))
-            .As<PlexRipperDbContext>()
+            .Register((_, _) => MockDatabase.GetMemoryReaparrDbContext(_databaseName))
+            .As<ReaparrDbContext>()
             .InstancePerDependency();
 
         builder
-            .Register((_, _) => MockDatabase.GetMemoryPlexRipperDbContext(_databaseName))
-            .As<IPlexRipperDbContext>()
+            .Register((_, _) => MockDatabase.GetMemoryReaparrDbContext(_databaseName))
+            .As<IReaparrDbContext>()
             .InstancePerDependency();
 
         builder
@@ -143,7 +142,7 @@ public partial class BaseUnitTest
         Build();
     }
 
-    protected void SetupFileSystem(Action<MockFileSystem, IPlexRipperDbContext> action)
+    protected void SetupFileSystem(Action<MockFileSystem, IReaparrDbContext> action)
     {
         _fileSystemSetup = builder =>
         {
@@ -152,7 +151,7 @@ public partial class BaseUnitTest
                 {
                     DataBaseSetupGuard();
 
-                    var dbContext = ctx.Resolve<IPlexRipperDbContext>();
+                    var dbContext = ctx.Resolve<IReaparrDbContext>();
 
                     action.Invoke(_fileSystem, dbContext);
 

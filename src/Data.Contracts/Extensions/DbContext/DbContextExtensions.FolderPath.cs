@@ -6,13 +6,13 @@ namespace Reaparr.Data.Contracts;
 
 public static partial class DbContextExtensions
 {
-    public static async Task<FolderPath> GetDownloadFolder(this IPlexRipperDbContext dbContext)
+    public static async Task<FolderPath> GetDownloadFolder(this IReaparrDbContext dbContext)
     {
         // This is the default download folder, which always exists in the database
         return (await dbContext.FolderPaths.FirstOrDefaultAsync(x => x.FolderType == FolderType.DownloadFolder))!;
     }
 
-    public static async Task<FolderPath?> GetDestinationFolder(this IPlexRipperDbContext dbContext, int plexLibraryId)
+    public static async Task<FolderPath?> GetDestinationFolder(this IReaparrDbContext dbContext, int plexLibraryId)
     {
         var plexLibrary = await dbContext
             .PlexLibraries.Include(x => x.DefaultDestination)
@@ -34,11 +34,11 @@ public static partial class DbContextExtensions
     /// Gets a dictionary of the default destination <see cref="FolderPath"/> for each <see cref="PlexMediaType"/>.
     /// </summary>
     /// <param name="mediaType"> The <see cref="PlexMediaType"/> to get the default destination <see cref="FolderPath"/> for.</param>
-    /// <param name="dbContext"> The <see cref="IPlexRipperDbContext"/> to use.</param>
+    /// <param name="dbContext"> The <see cref="IReaparrDbContext"/> to use.</param>
     /// <param name="token">The <see cref="CancellationToken"/> to use.</param>
     /// <returns></returns>
     public static async Task<FolderPath> GetDefaultDestinationFolderPath(
-        this IPlexRipperDbContext dbContext,
+        this IReaparrDbContext dbContext,
         PlexMediaType mediaType,
         CancellationToken token = default
     )

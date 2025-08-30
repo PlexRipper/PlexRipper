@@ -1,6 +1,4 @@
-﻿using Reaparr.BaseTests;
-using Reaparr.Logging.Interface;
-using Serilog.Events;
+﻿using Serilog.Events;
 
 namespace Reaparr.Logging.UnitTests;
 

@@ -13,7 +13,7 @@ public static partial class Startup
     {
         var container = app.Services.GetAutofacRoot();
 
-        var dbContextManager = container.Resolve<IPlexRipperDbContextManager>();
+        var dbContextManager = container.Resolve<IReaparrDbContextManager>();
 
         return dbContextManager.Setup();
     }

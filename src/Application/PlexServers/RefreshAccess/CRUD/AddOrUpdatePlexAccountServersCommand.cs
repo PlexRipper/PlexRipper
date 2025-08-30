@@ -23,9 +23,9 @@ public class AddOrUpdatePlexAccountServersCommandHandler
     : ICommandHandler<AddOrUpdatePlexAccountServersCommand, Result<RefreshPlexServerAccessRapport>>
 {
     private readonly ILog _log;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
-    public AddOrUpdatePlexAccountServersCommandHandler(ILog log, IPlexRipperDbContext dbContext)
+    public AddOrUpdatePlexAccountServersCommandHandler(ILog log, IReaparrDbContext dbContext)
     {
         _log = log;
         _dbContext = dbContext;

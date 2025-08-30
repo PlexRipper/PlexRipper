@@ -7,10 +7,10 @@ public class DataModule : Module
 {
     protected override void Load(ContainerBuilder builder)
     {
-        builder.RegisterType<PlexRipperDbContext>().As<IPlexRipperDbContext>().AsSelf().InstancePerDependency();
+        builder.RegisterType<ReaparrDbContext>().As<IReaparrDbContext>().AsSelf().InstancePerDependency();
 
-        builder.RegisterType<PlexRipperDbContext>().As<IPlexRipperDbContextDatabase>().InstancePerDependency();
+        builder.RegisterType<ReaparrDbContext>().As<IReaparrDbContextDatabase>().InstancePerDependency();
 
-        builder.RegisterType<PlexRipperDbContextManager>().As<IPlexRipperDbContextManager>().InstancePerDependency();
+        builder.RegisterType<ReaparrDbContextManager>().As<IReaparrDbContextManager>().InstancePerDependency();
     }
 }

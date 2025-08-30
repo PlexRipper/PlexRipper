@@ -13,7 +13,7 @@ namespace Reaparr.Application;
 public class CheckAllConnectionsStatusByPlexServerJob : IJob
 {
     private readonly ILog _log;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
     private readonly ISignalRService _signalRService;
 
@@ -22,7 +22,7 @@ public class CheckAllConnectionsStatusByPlexServerJob : IJob
 
     public CheckAllConnectionsStatusByPlexServerJob(
         ILog log,
-        IPlexRipperDbContext dbContext,
+        IReaparrDbContext dbContext,
         ICommandExecutor commandExecutor,
         ISignalRService signalRService
     )

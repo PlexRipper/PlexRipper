@@ -1,5 +1,3 @@
-using Reaparr.BaseTests;
-
 namespace Reaparr.Domain.UnitTests;
 
 public class StringExtensions_GetFileName : BaseUnitTest

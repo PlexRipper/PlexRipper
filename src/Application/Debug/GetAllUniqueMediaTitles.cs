@@ -18,13 +18,13 @@ public record GetAllUniqueMediaTitlesEndpointRequest
 
 public class GetAllUniqueMediaTitlesEndpoint : BaseEndpoint<GetAllUniqueMediaTitlesEndpointRequest, List<string>>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     private readonly Random _random = new();
 
     public override string EndpointPath => ApiRoutes.DebugController + "/unique-media-titles";
 
-    public GetAllUniqueMediaTitlesEndpoint(IPlexRipperDbContext dbContext)
+    public GetAllUniqueMediaTitlesEndpoint(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
     }

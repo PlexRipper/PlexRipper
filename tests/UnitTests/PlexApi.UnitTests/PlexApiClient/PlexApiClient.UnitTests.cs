@@ -2,7 +2,6 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 using Moq.Contrib.HttpClient;
-using Reaparr.BaseTests;
 using Reaparr.PlexApi.Contracts;
 
 namespace Reaparr.PlexApi.UnitTests;

@@ -9,12 +9,12 @@ namespace Reaparr.PlexApi.GetAccessiblePlexServers;
 public class GetAccessiblePlexServersCommandHandler
     : ICommandHandler<GetAccessiblePlexServersCommand, Result<List<PlexServerAccessDTO>>>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly IPlexApiClientFactory _plexApiClientFactory;
     private readonly IServerSettingsModule _serverSettingsModule;
 
     public GetAccessiblePlexServersCommandHandler(
-        IPlexRipperDbContext dbContext,
+        IReaparrDbContext dbContext,
         IPlexApiClientFactory plexApiClientFactory,
         IServerSettingsModule serverSettingsModule
     )

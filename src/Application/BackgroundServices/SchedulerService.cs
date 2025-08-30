@@ -2,7 +2,7 @@
 using Quartz.Impl.Matchers;
 using Reaparr.Application.Contracts;
 using Reaparr.Environment;
-using Reaparr.Logging.Interface;
+using Reaparr.Logging;
 
 namespace Reaparr.Application;
 

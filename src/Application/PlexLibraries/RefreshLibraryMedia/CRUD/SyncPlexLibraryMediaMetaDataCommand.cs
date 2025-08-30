@@ -48,7 +48,7 @@ public class SyncPlexLibraryMediaMetaDataCommandValidator : Validator<SyncPlexLi
 
 public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPlexLibraryMediaMetaDataCommand, Result>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly ILog _log;
 
     private readonly BulkConfig? _bulkInsertConfig = new()
@@ -58,7 +58,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
         UseTempDB = true,
     };
 
-    public SyncPlexLibraryMediaMetaDataCommandHandler(IPlexRipperDbContext dbContext, ILog log)
+    public SyncPlexLibraryMediaMetaDataCommandHandler(IReaparrDbContext dbContext, ILog log)
     {
         _dbContext = dbContext;
         _log = log;

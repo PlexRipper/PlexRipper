@@ -29,7 +29,7 @@ public class MergeFilesFromFileTaskCommandHandler : ICommandHandler<MergeFilesFr
     private readonly ILog _log;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IEventPublisher _eventPublisher;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly IFile _file;
     private readonly IDirectory _directory;
     private readonly IPath _path;
@@ -47,7 +47,7 @@ public class MergeFilesFromFileTaskCommandHandler : ICommandHandler<MergeFilesFr
         ILog log,
         ICommandExecutor commandExecutor,
         IEventPublisher eventPublisher,
-        IPlexRipperDbContext dbContext,
+        IReaparrDbContext dbContext,
         IFile file,
         IDirectory directory,
         IPath path

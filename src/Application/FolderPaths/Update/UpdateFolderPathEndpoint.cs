@@ -28,11 +28,11 @@ public class UpdateFolderPathEndpointRequestValidator : Validator<UpdateFolderPa
 
 public class UpdateFolderPathEndpoint : BaseEndpoint<UpdateFolderPathEndpointRequest, FolderPathDTO>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.FolderPathController + "/";
 
-    public UpdateFolderPathEndpoint(IPlexRipperDbContext dbContext)
+    public UpdateFolderPathEndpoint(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
     }

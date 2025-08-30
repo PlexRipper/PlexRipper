@@ -112,14 +112,14 @@ public class AppUserLoginEndpoint : BaseEndpoint<AppUserLoginEndpointRequest>
             var result = _log.Warning("User {Username} is locked out.", username).ToResult();
             result.Add403ForbiddenError();
 
-            await SendFluentResult(result, ct);
+            await SendFluentResult(result.ToResult(), ct);
         }
         else
         {
             var result = _log.Warning("Failed to sign in user {Username}.", username).ToResult();
             result.Add401UnauthorizedError();
 
-            await SendFluentResult(result, ct);
+            await SendFluentResult(result.ToResult(), ct);
         }
     }
 }

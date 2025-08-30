@@ -2,7 +2,6 @@ using System.Net;
 using FastEndpoints;
 using Reaparr.Application;
 using Reaparr.Application.Contracts;
-using Reaparr.BaseTests;
 
 namespace Reaparr.IntegrationTests.PlexAccounts.RefreshAccess;
 

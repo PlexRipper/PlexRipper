@@ -17,11 +17,11 @@ public class CleanUpDownloadTaskFoldersValidator : AbstractValidator<CleanUpDown
 
 public class CleanUpDownloadTaskFoldersHandler : ICommandHandler<CleanUpDownloadTaskFoldersCommand, Result>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly IPath _path;
     private readonly IDirectory _directory;
 
-    public CleanUpDownloadTaskFoldersHandler(IPlexRipperDbContext dbContext, IPath path, IDirectory directory)
+    public CleanUpDownloadTaskFoldersHandler(IReaparrDbContext dbContext, IPath path, IDirectory directory)
     {
         _dbContext = dbContext;
         _path = path;

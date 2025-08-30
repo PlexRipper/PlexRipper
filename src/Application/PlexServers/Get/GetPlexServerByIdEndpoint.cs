@@ -19,11 +19,11 @@ public class GetPlexServerByIdEndpointRequestValidator : Validator<GetPlexServer
 
 public class GetPlexServerByIdEndpoint : BaseEndpoint<GetPlexServerByIdEndpointRequest, PlexServerDTO>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.PlexServerController + "/{PlexServerId}";
 
-    public GetPlexServerByIdEndpoint(IPlexRipperDbContext dbContext)
+    public GetPlexServerByIdEndpoint(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
     }

@@ -2,7 +2,6 @@ using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Quartz;
 using Reaparr.Application.Contracts;
-using Reaparr.BaseTests;
 using Reaparr.Data.Contracts;
 using Reaparr.Settings.Contracts;
 

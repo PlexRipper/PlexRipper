@@ -10,7 +10,7 @@ public class SyncServerMediaJob : IJob
 {
     private readonly ILog _log;
     private readonly ICommandExecutor _commandExecutor;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly ISignalRService _signalRService;
 
     public static string PlexServerIdParameter => "plexServerId";
@@ -21,7 +21,7 @@ public class SyncServerMediaJob : IJob
     public SyncServerMediaJob(
         ILog log,
         ICommandExecutor commandExecutor,
-        IPlexRipperDbContext dbContext,
+        IReaparrDbContext dbContext,
         ISignalRService signalRService
     )
     {

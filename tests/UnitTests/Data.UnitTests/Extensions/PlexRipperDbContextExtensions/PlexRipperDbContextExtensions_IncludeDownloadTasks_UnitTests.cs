@@ -1,11 +1,10 @@
-﻿using Reaparr.BaseTests;
-using Reaparr.Data.Contracts;
+﻿using Reaparr.Data.Contracts;
 
 namespace Reaparr.Data.UnitTests;
 
-public class PlexRipperDbContextExtensions_IncludeDownloadTasks_UnitTests : BaseUnitTest
+public class ReaparrDbContextExtensions_IncludeDownloadTasks_UnitTests : BaseUnitTest
 {
-    public PlexRipperDbContextExtensions_IncludeDownloadTasks_UnitTests(ITestOutputHelper output)
+    public ReaparrDbContextExtensions_IncludeDownloadTasks_UnitTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]

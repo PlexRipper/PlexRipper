@@ -18,14 +18,14 @@ public class StartDownloadTaskCommandValidator : AbstractValidator<StartDownload
 
 public class StartDownloadTaskCommandHandler : ICommandHandler<StartDownloadTaskCommand, Result>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IEventPublisher _eventPublisher;
     private readonly IDownloadTaskScheduler _downloadTaskScheduler;
     private readonly IFileMergeScheduler _fileMergeScheduler;
 
     public StartDownloadTaskCommandHandler(
-        IPlexRipperDbContext dbContext,
+        IReaparrDbContext dbContext,
         ICommandExecutor commandExecutor,
         IEventPublisher eventPublisher,
         IDownloadTaskScheduler downloadTaskScheduler,

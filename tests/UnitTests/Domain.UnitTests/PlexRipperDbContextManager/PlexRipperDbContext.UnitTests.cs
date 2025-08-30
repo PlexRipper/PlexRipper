@@ -1,5 +1,4 @@
 using System.IO.Abstractions;
-using Reaparr.BaseTests;
 using Reaparr.Data;
 using Reaparr.Data.Contracts;
 using Reaparr.Environment;
@@ -8,11 +7,11 @@ using Reaparr.Settings.Contracts;
 
 namespace Reaparr.Domain.UnitTests;
 
-public class PlexRipperDbContextManagerUnitTests : BaseUnitTest<PlexRipperDbContextManager>
+public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextManager>
 {
     private string DatabasePath => "/Config/" + PathProvider.DatabaseName;
 
-    public PlexRipperDbContextManagerUnitTests(ITestOutputHelper output)
+    public ReaparrDbContextManagerUnitTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]
@@ -22,9 +21,9 @@ public class PlexRipperDbContextManagerUnitTests : BaseUnitTest<PlexRipperDbCont
 
         mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
         mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.CanConnect()).Returns(true);
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(false);
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns([]);
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(true);
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(false);
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns([]);
         mock.Mock<IAuthDbContextDatabase>().Setup(x => x.CanConnect()).Returns(true);
         mock.Mock<IAuthDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(false);
         mock.Mock<IAuthDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns([]);
@@ -34,9 +33,9 @@ public class PlexRipperDbContextManagerUnitTests : BaseUnitTest<PlexRipperDbCont
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        mock.Mock<IPlexRipperDbContextDatabase>().Verify(x => x.CanConnect(), Times.Once);
-        mock.Mock<IPlexRipperDbContextDatabase>().Verify(x => x.GetPendingMigrations(), Times.Once);
-        mock.Mock<IPlexRipperDbContextDatabase>().Verify(x => x.Migrate(), Times.Never);
+        mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.CanConnect(), Times.Once);
+        mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.GetPendingMigrations(), Times.Once);
+        mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.Migrate(), Times.Never);
         mock.Mock<IAuthDbContextDatabase>().Verify(x => x.CanConnect(), Times.Never);
         mock.Mock<IAuthDbContextDatabase>().Verify(x => x.GetPendingMigrations(), Times.Once);
         mock.Mock<IAuthDbContextDatabase>().Verify(x => x.Migrate(), Times.Never);
@@ -48,7 +47,7 @@ public class PlexRipperDbContextManagerUnitTests : BaseUnitTest<PlexRipperDbCont
         // Arrange
         mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
         mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(false).Verifiable(Times.Once);
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok()).Verifiable(Times.Once);
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok()).Verifiable(Times.Once);
         mock.Mock<IAuthDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok()).Verifiable(Times.Once);
 
         // Act
@@ -56,7 +55,7 @@ public class PlexRipperDbContextManagerUnitTests : BaseUnitTest<PlexRipperDbCont
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        mock.Mock<IPlexRipperDbContextDatabase>().Verify(x => x.Migrate(), Times.Once); // Database creation involves migration
+        mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.Migrate(), Times.Once); // Database creation involves migration
     }
 
     [Fact]
@@ -68,7 +67,7 @@ public class PlexRipperDbContextManagerUnitTests : BaseUnitTest<PlexRipperDbCont
             .Returns(() => DatabasePath)
             .Verifiable(Times.Exactly(2));
         mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(false).Verifiable(Times.Once);
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok()).Verifiable(Times.Once);
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok()).Verifiable(Times.Once);
         mock.Mock<IAuthDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok()).Verifiable(Times.Once);
 
         // Act
@@ -84,7 +83,7 @@ public class PlexRipperDbContextManagerUnitTests : BaseUnitTest<PlexRipperDbCont
         // Arrange
         mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
         mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(false);
-        mock.Mock<IPlexRipperDbContextDatabase>()
+        mock.Mock<IReaparrDbContextDatabase>()
             .Setup(x => x.Migrate())
             .Throws(new Exception("Test Exception"))
             .Verifiable(Times.Once);
@@ -111,11 +110,11 @@ public class PlexRipperDbContextManagerUnitTests : BaseUnitTest<PlexRipperDbCont
         mock.Mock<IDirectory>()
             .Setup(x => x.CreateDirectory(It.IsAny<string>()))
             .Returns(new Mock<IDirectoryInfo>().Object);
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok()).Verifiable(Times.Once);
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok()).Verifiable(Times.Once);
         mock.Mock<IAuthDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok()).Verifiable(Times.Once);
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.CanConnect()).Returns(false);
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.EnsureDeleted()).Returns(Result.Ok(true));
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.CloseConnection());
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(false);
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.EnsureDeleted()).Returns(Result.Ok(true));
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CloseConnection());
         mock.Mock<IGeneralSettings>().SetupSet(x => x.FirstTimeSetup = true).Verifiable(Times.Once);
 
         // Act
@@ -123,24 +122,24 @@ public class PlexRipperDbContextManagerUnitTests : BaseUnitTest<PlexRipperDbCont
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        var mockDbContext = mock.Mock<IPlexRipperDbContextDatabase>();
+        var mockDbContext = mock.Mock<IReaparrDbContextDatabase>();
         mockDbContext.Verify(x => x.CanConnect(), Times.Once);
         mockDbContext.Verify(x => x.EnsureDeleted(), Times.Once); // Database is reset
         mockDbContext.Verify(x => x.Migrate(), Times.Once); // Database is recreated after reset
     }
 
     [Fact]
-    public void ShouldMigratePlexRipperDatabase_WhenPendingMigrationsExist()
+    public void ShouldMigrateReaparrDatabase_WhenPendingMigrationsExist()
     {
         // Arrange
         mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
         mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.CanConnect()).Returns(true);
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(false);
-        mock.Mock<IPlexRipperDbContextDatabase>()
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(true);
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(false);
+        mock.Mock<IReaparrDbContextDatabase>()
             .Setup(x => x.GetPendingMigrations())
             .Returns(["Migration1", "Migration2"]);
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok()).Verifiable(Times.Once);
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok()).Verifiable(Times.Once);
         mock.Mock<IAuthDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(false);
         mock.Mock<IAuthDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns([]);
 
@@ -149,7 +148,7 @@ public class PlexRipperDbContextManagerUnitTests : BaseUnitTest<PlexRipperDbCont
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        mock.Mock<IPlexRipperDbContextDatabase>().Verify(x => x.Migrate(), Times.Once);
+        mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.Migrate(), Times.Once);
         mock.Mock<IAuthDbContextDatabase>().Verify(x => x.Migrate(), Times.Never);
     }
 
@@ -159,9 +158,9 @@ public class PlexRipperDbContextManagerUnitTests : BaseUnitTest<PlexRipperDbCont
         // Arrange
         mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
         mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.CanConnect()).Returns(true);
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(false);
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns([]);
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(true);
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(false);
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns([]);
         mock.Mock<IAuthDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(false);
         mock.Mock<IAuthDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns(["AuthMigration1"]);
         mock.Mock<IAuthDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok()).Verifiable(Times.Once);
@@ -171,7 +170,7 @@ public class PlexRipperDbContextManagerUnitTests : BaseUnitTest<PlexRipperDbCont
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        mock.Mock<IPlexRipperDbContextDatabase>().Verify(x => x.Migrate(), Times.Never);
+        mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.Migrate(), Times.Never);
         mock.Mock<IAuthDbContextDatabase>().Verify(x => x.Migrate(), Times.Once);
     }
 
@@ -181,9 +180,9 @@ public class PlexRipperDbContextManagerUnitTests : BaseUnitTest<PlexRipperDbCont
         // Arrange
         mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
         mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.CanConnect()).Returns(true);
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(true);
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns(["Migration1"]);
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(true);
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(true);
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns(["Migration1"]);
         mock.Mock<IAuthDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(true);
         mock.Mock<IAuthDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns(["AuthMigration1"]);
 
@@ -192,12 +191,12 @@ public class PlexRipperDbContextManagerUnitTests : BaseUnitTest<PlexRipperDbCont
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        mock.Mock<IPlexRipperDbContextDatabase>().Verify(x => x.Migrate(), Times.Never);
+        mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.Migrate(), Times.Never);
         mock.Mock<IAuthDbContextDatabase>().Verify(x => x.Migrate(), Times.Never);
     }
 
     [Fact]
-    public void ShouldResetDatabase_WhenPlexRipperMigrationFails()
+    public void ShouldResetDatabase_WhenReaparrMigrationFails()
     {
         // Arrange
         mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
@@ -209,15 +208,15 @@ public class PlexRipperDbContextManagerUnitTests : BaseUnitTest<PlexRipperDbCont
             .Setup(x => x.CreateDirectory(It.IsAny<string>()))
             .Returns(new Mock<IDirectoryInfo>().Object);
 
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.CanConnect()).Returns(true);
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(false);
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns(["Migration1"]);
-        mock.Mock<IPlexRipperDbContextDatabase>()
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(true);
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(false);
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns(["Migration1"]);
+        mock.Mock<IReaparrDbContextDatabase>()
             .SetupSequence(x => x.Migrate())
             .Returns(Result.Fail("Migration failed"))
             .Returns(Result.Ok()); // Second call during database reset
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.CloseConnection());
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.EnsureDeleted()).Returns(Result.Ok(true));
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CloseConnection());
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.EnsureDeleted()).Returns(Result.Ok(true));
         mock.Mock<IAuthDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok());
         mock.Mock<IAuthDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(false);
         mock.Mock<IAuthDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns([]);
@@ -228,8 +227,8 @@ public class PlexRipperDbContextManagerUnitTests : BaseUnitTest<PlexRipperDbCont
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        mock.Mock<IPlexRipperDbContextDatabase>().Verify(x => x.Migrate(), Times.Exactly(2)); // Once for a migration attempt and once for a reset
-        mock.Mock<IPlexRipperDbContextDatabase>().Verify(x => x.EnsureDeleted(), Times.Once);
+        mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.Migrate(), Times.Exactly(2)); // Once for a migration attempt and once for a reset
+        mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.EnsureDeleted(), Times.Once);
     }
 
     [Fact]
@@ -245,12 +244,12 @@ public class PlexRipperDbContextManagerUnitTests : BaseUnitTest<PlexRipperDbCont
             .Setup(x => x.CreateDirectory(It.IsAny<string>()))
             .Returns(new Mock<IDirectoryInfo>().Object);
 
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.CanConnect()).Returns(true);
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(false);
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns([]);
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok());
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.CloseConnection());
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.EnsureDeleted()).Returns(Result.Ok(true));
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(true);
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(false);
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns([]);
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok());
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CloseConnection());
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.EnsureDeleted()).Returns(Result.Ok(true));
 
         mock.Mock<IAuthDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(false);
         mock.Mock<IAuthDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns(["AuthMigration1"]);
@@ -266,7 +265,7 @@ public class PlexRipperDbContextManagerUnitTests : BaseUnitTest<PlexRipperDbCont
         // Assert
         result.IsSuccess.ShouldBeTrue();
         mock.Mock<IAuthDbContextDatabase>().Verify(x => x.Migrate(), Times.Exactly(2)); // Once for migration attempt, once for reset
-        mock.Mock<IPlexRipperDbContextDatabase>().Verify(x => x.EnsureDeleted(), Times.Once);
+        mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.EnsureDeleted(), Times.Once);
     }
 
     [Fact]
@@ -282,15 +281,15 @@ public class PlexRipperDbContextManagerUnitTests : BaseUnitTest<PlexRipperDbCont
             .Setup(x => x.CreateDirectory(It.IsAny<string>()))
             .Returns(new Mock<IDirectoryInfo>().Object);
 
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.CanConnect()).Returns(true);
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(false);
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns(["Migration1"]);
-        mock.Mock<IPlexRipperDbContextDatabase>()
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(true);
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(false);
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns(["Migration1"]);
+        mock.Mock<IReaparrDbContextDatabase>()
             .SetupSequence(x => x.Migrate())
             .Throws(new Exception("Migration exception"))
             .Returns(Result.Ok()); // Second call during database reset
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.CloseConnection());
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.EnsureDeleted()).Returns(Result.Ok(true));
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CloseConnection());
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.EnsureDeleted()).Returns(Result.Ok(true));
         mock.Mock<IAuthDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok());
         mock.Mock<IAuthDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(false);
         mock.Mock<IAuthDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns([]);
@@ -301,7 +300,7 @@ public class PlexRipperDbContextManagerUnitTests : BaseUnitTest<PlexRipperDbCont
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        mock.Mock<IPlexRipperDbContextDatabase>().Verify(x => x.EnsureDeleted(), Times.Once);
+        mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.EnsureDeleted(), Times.Once);
     }
 
     [Fact]
@@ -314,7 +313,7 @@ public class PlexRipperDbContextManagerUnitTests : BaseUnitTest<PlexRipperDbCont
         mock.Mock<IDirectory>()
             .Setup(x => x.CreateDirectory(It.IsAny<string>()))
             .Throws(new Exception("Directory creation failed"));
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.CanConnect()).Returns(false);
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(false);
 
         // Act
         var result = _sut.Setup();
@@ -339,10 +338,10 @@ public class PlexRipperDbContextManagerUnitTests : BaseUnitTest<PlexRipperDbCont
             .Setup(x => x.CreateDirectory(It.IsAny<string>()))
             .Returns(new Mock<IDirectoryInfo>().Object);
 
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.CanConnect()).Returns(false);
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.CloseConnection());
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.EnsureDeleted()).Returns(Result.Ok(true));
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok());
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(false);
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CloseConnection());
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.EnsureDeleted()).Returns(Result.Ok(true));
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok());
         mock.Mock<IAuthDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok());
         mock.Mock<IGeneralSettings>().SetupSet(x => x.FirstTimeSetup = true).Verifiable(Times.Once);
 
@@ -369,9 +368,9 @@ public class PlexRipperDbContextManagerUnitTests : BaseUnitTest<PlexRipperDbCont
             .Setup(x => x.CreateDirectory(It.IsAny<string>()))
             .Returns(new Mock<IDirectoryInfo>().Object);
 
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.CanConnect()).Returns(false);
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.CloseConnection());
-        mock.Mock<IPlexRipperDbContextDatabase>()
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(false);
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CloseConnection());
+        mock.Mock<IReaparrDbContextDatabase>()
             .Setup(x => x.EnsureDeleted())
             .Returns(Result.Fail("Database deletion failed"));
 
@@ -380,8 +379,8 @@ public class PlexRipperDbContextManagerUnitTests : BaseUnitTest<PlexRipperDbCont
 
         // Assert
         result.IsFailed.ShouldBeTrue();
-        mock.Mock<IPlexRipperDbContextDatabase>().Verify(x => x.EnsureDeleted(), Times.Once);
-        mock.Mock<IPlexRipperDbContextDatabase>().Verify(x => x.Migrate(), Times.Never); // Should not attempt to recreate if deletion failed
+        mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.EnsureDeleted(), Times.Once);
+        mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.Migrate(), Times.Never); // Should not attempt to recreate if deletion failed
     }
 
     [Fact]
@@ -397,10 +396,10 @@ public class PlexRipperDbContextManagerUnitTests : BaseUnitTest<PlexRipperDbCont
             .Setup(x => x.CreateDirectory(It.IsAny<string>()))
             .Returns(new Mock<IDirectoryInfo>().Object);
 
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.CanConnect()).Returns(false);
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.CloseConnection());
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.EnsureDeleted()).Returns(Result.Ok(true));
-        mock.Mock<IPlexRipperDbContextDatabase>()
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(false);
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CloseConnection());
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.EnsureDeleted()).Returns(Result.Ok(true));
+        mock.Mock<IReaparrDbContextDatabase>()
             .Setup(x => x.Migrate())
             .Throws(new Exception("Database creation failed"));
 
@@ -409,8 +408,8 @@ public class PlexRipperDbContextManagerUnitTests : BaseUnitTest<PlexRipperDbCont
 
         // Assert
         result.IsFailed.ShouldBeTrue();
-        mock.Mock<IPlexRipperDbContextDatabase>().Verify(x => x.EnsureDeleted(), Times.Once);
-        mock.Mock<IPlexRipperDbContextDatabase>().Verify(x => x.Migrate(), Times.Once);
+        mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.EnsureDeleted(), Times.Once);
+        mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.Migrate(), Times.Once);
     }
 
     [Fact]
@@ -418,8 +417,8 @@ public class PlexRipperDbContextManagerUnitTests : BaseUnitTest<PlexRipperDbCont
     {
         // Arrange
         mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.CanConnect()).Returns(false);
-        mock.Mock<IPlexRipperDbContextDatabase>()
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(false);
+        mock.Mock<IReaparrDbContextDatabase>()
             .Setup(x => x.CloseConnection())
             .Throws(new Exception("Connection close failed"));
         mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
@@ -444,10 +443,10 @@ public class PlexRipperDbContextManagerUnitTests : BaseUnitTest<PlexRipperDbCont
             .Setup(x => x.CreateDirectory(It.IsAny<string>()))
             .Returns(new Mock<IDirectoryInfo>().Object);
 
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.CanConnect()).Returns(false);
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.CloseConnection());
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.EnsureDeleted()).Returns(Result.Ok(true));
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok());
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(false);
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CloseConnection());
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.EnsureDeleted()).Returns(Result.Ok(true));
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok());
         mock.Mock<IAuthDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok());
 
         var generalSettingsMock = mock.Mock<IGeneralSettings>();
@@ -467,10 +466,10 @@ public class PlexRipperDbContextManagerUnitTests : BaseUnitTest<PlexRipperDbCont
         // Arrange
         mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
         mock.Mock<IFile>().Setup(x => x.Exists(DatabasePath)).Returns(false); // Database doesn't exist for backup
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.CanConnect()).Returns(false);
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.CloseConnection());
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.EnsureDeleted()).Returns(Result.Ok(true));
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok());
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(false);
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CloseConnection());
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.EnsureDeleted()).Returns(Result.Ok(true));
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok());
         mock.Mock<IAuthDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok());
 
         // Act
@@ -488,7 +487,7 @@ public class PlexRipperDbContextManagerUnitTests : BaseUnitTest<PlexRipperDbCont
         // Arrange
         mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
         mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(false);
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok());
+        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok());
         mock.Mock<IAuthDbContextDatabase>()
             .Setup(x => x.Migrate())
             .Throws(new Exception("Auth database creation failed"));
@@ -498,7 +497,7 @@ public class PlexRipperDbContextManagerUnitTests : BaseUnitTest<PlexRipperDbCont
 
         // Assert
         result.IsFailed.ShouldBeTrue();
-        mock.Mock<IPlexRipperDbContextDatabase>().Verify(x => x.Migrate(), Times.Once);
+        mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.Migrate(), Times.Once);
         mock.Mock<IAuthDbContextDatabase>().Verify(x => x.Migrate(), Times.Once);
     }
 }

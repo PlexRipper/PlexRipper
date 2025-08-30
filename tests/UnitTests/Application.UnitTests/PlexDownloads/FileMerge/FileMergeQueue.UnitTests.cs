@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Reaparr.BaseTests;
 using Reaparr.FileSystem.Contracts;
 
 namespace Reaparr.Application.UnitTests;

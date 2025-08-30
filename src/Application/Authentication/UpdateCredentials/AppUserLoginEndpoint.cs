@@ -116,7 +116,7 @@ public class UpdateCredentialsEndpoint : BaseEndpoint<UpdateCredentialsEndpointR
             }
         }
 
-        _log.WarningLine("The PlexRipper app credentials have been updated! Make sure this is intended");
+        _log.WarningLine("The Reaparr app credentials have been updated! Make sure this is intended");
 
         // Respond with success
         await SendFluentResult(Result.Ok(), ct);

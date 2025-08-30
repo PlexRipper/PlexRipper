@@ -21,11 +21,11 @@ public class GetPlexAccountByIdEndpointRequestValidator : Validator<GetPlexAccou
 public class GetPlexAccountByIdEndpoint : BaseEndpoint<GetPlexAccountByIdEndpointRequest, PlexAccountDTO>
 {
     private readonly ILog _log;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.PlexAccountController + "/{PlexAccountId}";
 
-    public GetPlexAccountByIdEndpoint(ILog log, IPlexRipperDbContext dbContext)
+    public GetPlexAccountByIdEndpoint(ILog log, IReaparrDbContext dbContext)
     {
         _log = log;
         _dbContext = dbContext;

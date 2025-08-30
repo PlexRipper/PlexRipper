@@ -22,7 +22,7 @@ public class RefreshPlexAccountAccessEndpoint
     : BaseEndpoint<RefreshPlexAccountAccessEndpointRequest, ResultDTO<List<RefreshPlexAccountAccessRapportDTO>>>
 {
     private readonly ILog _log;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
     private readonly ISignalRService _signalRService;
     private List<RefreshPlexAccountAccessRapportDTO> _list = new();
@@ -31,7 +31,7 @@ public class RefreshPlexAccountAccessEndpoint
 
     public RefreshPlexAccountAccessEndpoint(
         ILog log,
-        IPlexRipperDbContext dbContext,
+        IReaparrDbContext dbContext,
         ICommandExecutor commandExecutor,
         ISignalRService signalRService
     )

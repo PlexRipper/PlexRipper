@@ -42,11 +42,11 @@ public class GetMediaDetailByIdEndpointRequestValidator : Validator<GetMediaDeta
 
 public class GetMediaDetailByIdEndpoint : BaseEndpoint<GetMediaDetailByIdEndpointRequest, PlexMediaDTO>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.PlexMediaController + "/detail/{PlexMediaId}";
 
-    public GetMediaDetailByIdEndpoint(IPlexRipperDbContext dbContext)
+    public GetMediaDetailByIdEndpoint(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
     }

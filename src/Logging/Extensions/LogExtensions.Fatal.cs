@@ -1,4 +1,3 @@
-using Reaparr.Logging.Common;
 using Serilog.Events;
 
 namespace Reaparr.Logging;

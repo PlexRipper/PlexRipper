@@ -3,12 +3,11 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using PlexRipper.Identity;
 using Reaparr.Identity;
 
 #nullable disable
 
-namespace PlexRipper.Identity.Migrations
+namespace Reaparr.Identity.Migrations
 {
     [DbContext(typeof(AuthDbContext))]
     partial class AuthDbContextModelSnapshot : ModelSnapshot
@@ -163,7 +162,7 @@ namespace PlexRipper.Identity.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("PlexRipper.Identity.Contracts.AppUser", b =>
+            modelBuilder.Entity("Reaparr.Identity.Contracts.AppUser", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("TEXT");
@@ -238,7 +237,7 @@ namespace PlexRipper.Identity.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("PlexRipper.Identity.Contracts.AppUser", null)
+                    b.HasOne("Reaparr.Identity.Contracts.AppUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -247,7 +246,7 @@ namespace PlexRipper.Identity.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("PlexRipper.Identity.Contracts.AppUser", null)
+                    b.HasOne("Reaparr.Identity.Contracts.AppUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -262,7 +261,7 @@ namespace PlexRipper.Identity.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlexRipper.Identity.Contracts.AppUser", null)
+                    b.HasOne("Reaparr.Identity.Contracts.AppUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -271,7 +270,7 @@ namespace PlexRipper.Identity.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("PlexRipper.Identity.Contracts.AppUser", null)
+                    b.HasOne("Reaparr.Identity.Contracts.AppUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)

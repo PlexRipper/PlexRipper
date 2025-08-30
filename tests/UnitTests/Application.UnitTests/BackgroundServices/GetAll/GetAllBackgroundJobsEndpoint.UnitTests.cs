@@ -1,6 +1,5 @@
 using System.Text.Json;
 using Reaparr.Application.Contracts;
-using Reaparr.BaseTests;
 
 namespace Reaparr.Application.UnitTests;
 

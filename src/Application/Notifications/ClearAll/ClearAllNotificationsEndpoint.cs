@@ -11,11 +11,11 @@ namespace Reaparr.Application;
 /// <returns>Returns the number of <see cref="Notification">Notifications</see> that have been deleted.</returns>
 public class ClearAllNotificationsEndpoint : BaseEndpointWithoutRequest<CountResponseDTO>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.NotificationController + "/clear";
 
-    public ClearAllNotificationsEndpoint(IPlexRipperDbContext dbContext)
+    public ClearAllNotificationsEndpoint(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
     }

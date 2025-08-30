@@ -45,13 +45,13 @@ public class CreateDefaultAppUserCommandHandler : ICommandHandler<CreateDefaultA
         if (_authenticationSettings.ResetCredentials)
         {
             _log.Warning(
-                "Setting: {ResetCredentials} has been enabled! Resetting PlexRipper app username and password!",
+                "Setting: {ResetCredentials} has been enabled! Resetting Reaparr app username and password!",
                 nameof(_authenticationSettings.ResetCredentials)
             );
             var toBeDeletedUser = await _userManager.Users.FirstOrDefaultAsync(cancellationToken: cancellationToken);
             if (toBeDeletedUser != null)
             {
-                _log.InformationLine("PlexRipper app user was found, deleting now and creating the default one.");
+                _log.InformationLine("Reaparr app user was found, deleting now and creating the default one.");
                 await _userManager.DeleteAsync(toBeDeletedUser);
             }
         }

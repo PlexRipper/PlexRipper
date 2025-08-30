@@ -1,5 +1,4 @@
 ﻿using Autofac;
-using Reaparr.BaseTests;
 using Reaparr.PlexApi;
 using Reaparr.PlexApi.Contracts;
 

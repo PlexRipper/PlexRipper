@@ -1,6 +1,5 @@
 using FastEndpoints;
 using Reaparr.Logging;
-using Reaparr.Logging.Interface;
 
 namespace Reaparr.Domain;
 

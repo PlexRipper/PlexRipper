@@ -41,11 +41,11 @@ public class GetAllMediaByTypeRequestValidator : Validator<GetAllMediaByTypeRequ
 
 public class GetAllMediaByTypeEndpoint : BaseEndpoint<GetAllMediaByTypeRequest, PlexMediaStatisticsDTO>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.PlexMediaController;
 
-    public GetAllMediaByTypeEndpoint(IPlexRipperDbContext dbContext)
+    public GetAllMediaByTypeEndpoint(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
     }

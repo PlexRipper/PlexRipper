@@ -39,13 +39,13 @@ public class SyncPlexMoviesCommandValidator : AbstractValidator<SyncPlexMoviesCo
 public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesCommand, Result<CrudMoviesReport>>
 {
     private readonly ILog _log;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     private readonly CrudMoviesReport _report = new();
 
     private readonly BulkConfig? _config = new() { BatchSize = 500, SetOutputIdentity = true };
 
-    public SyncPlexMoviesCommandHandler(ILog log, IPlexRipperDbContext dbContext)
+    public SyncPlexMoviesCommandHandler(ILog log, IReaparrDbContext dbContext)
     {
         _log = log;
         _dbContext = dbContext;

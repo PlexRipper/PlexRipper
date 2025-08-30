@@ -2,19 +2,19 @@ using Bogus.Premium;
 
 namespace Reaparr.BaseTests;
 
-public static class PlexRipperFaker
+public static class ReaparrFaker
 {
-    public static PlexRipperData PlexRipper(this Faker faker)
+    public static ReaparrData Reaparr(this Faker faker)
     {
-        return ContextHelper.GetOrSet(faker, () => new PlexRipperData(faker));
+        return ContextHelper.GetOrSet(faker, () => new ReaparrData(faker));
     }
 }
 
-public class PlexRipperData : DataSet
+public class ReaparrData : DataSet
 {
     private readonly Faker _faker;
 
-    public PlexRipperData(Faker faker)
+    public ReaparrData(Faker faker)
     {
         _faker = faker;
     }

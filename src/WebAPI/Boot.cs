@@ -6,7 +6,7 @@ using ILog = Reaparr.Logging.ILog;
 namespace Reaparr.WebAPI;
 
 /// <summary>
-/// The Boot class is used to sequentially start various processes needed to start PlexRipper.
+/// The Boot class is used to sequentially start various processes needed to start Reaparr.
 /// </summary>
 public class Boot : IHostedService
 {
@@ -26,7 +26,7 @@ public class Boot : IHostedService
     #region Constructor
 
     /// <summary>
-    /// The Boot class is used to sequentially start various processes needed to start PlexRipper.
+    /// The Boot class is used to sequentially start various processes needed to start Reaparr.
     /// </summary>
     public Boot(
         ILog log,
@@ -57,7 +57,7 @@ public class Boot : IHostedService
         if (EnvironmentExtensions.GetPuid() == 911 && EnvironmentExtensions.GetPgid() == 1001)
         {
             _log.ErrorLine(
-                "PlexRipper has invalid PUID and PGID values and thus has defaulted to root, this is not allowed"
+                "Reaparr has invalid PUID and PGID values and thus has defaulted to root, this is not allowed"
             );
             TerminateApplication();
             return;
@@ -113,7 +113,7 @@ public class Boot : IHostedService
         _log.DebugLine("Boot.OnStopped has been called");
 
         // Perform post-stopped activities here
-        _log.InformationLine("PlexRipper has been shutdown! R.I.P.");
+        _log.InformationLine("Reaparr has been shutdown! R.I.P.");
     }
 
     #endregion

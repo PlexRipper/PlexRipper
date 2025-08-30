@@ -21,11 +21,11 @@ public class GetDownloadTaskLogsByDownloadTaskIdRequestValidator : Validator<Get
 public class GetDownloadTaskLogsByDownloadTaskIdEndpoint
     : BaseEndpoint<GetDownloadTaskLogsByDownloadTaskIdRequest, List<DownloadWorkerLogDTO>>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.DownloadController + "/logs/{DownloadTaskGuid}/";
 
-    public GetDownloadTaskLogsByDownloadTaskIdEndpoint(IPlexRipperDbContext dbContext)
+    public GetDownloadTaskLogsByDownloadTaskIdEndpoint(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
     }

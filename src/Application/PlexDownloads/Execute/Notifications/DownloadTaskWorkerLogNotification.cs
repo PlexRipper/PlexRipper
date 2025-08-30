@@ -9,9 +9,9 @@ public record DownloadTaskWorkerLogNotification(IList<DownloadWorkerLog> logs) :
 public class DownloadTaskWorkerLogNotificationHandler : IEventHandler<DownloadTaskWorkerLogNotification>
 {
     private readonly ILog _log;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
-    public DownloadTaskWorkerLogNotificationHandler(ILog log, IPlexRipperDbContext dbContext)
+    public DownloadTaskWorkerLogNotificationHandler(ILog log, IReaparrDbContext dbContext)
     {
         _log = log;
         _dbContext = dbContext;

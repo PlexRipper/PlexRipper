@@ -26,12 +26,12 @@ public class RefreshLibraryMediaCommandValidator : AbstractValidator<RefreshLibr
 
 public class RefreshLibraryMediaCommandHandler : ICommandHandler<RefreshLibraryMediaCommand, Result<PlexLibrary>>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IRefreshLibraryProgressReporter _progressReporter;
 
     public RefreshLibraryMediaCommandHandler(
-        IPlexRipperDbContext dbContext,
+        IReaparrDbContext dbContext,
         ICommandExecutor commandExecutor,
         IRefreshLibraryProgressReporter progressReporter
     )
@@ -106,7 +106,7 @@ public class RefreshLibraryMediaCommandHandler : ICommandHandler<RefreshLibraryM
                 );
             default:
                 return Result
-                    .Fail($"Library type {newPlexLibrary.Type} is currently not supported by PlexRipper")
+                    .Fail($"Library type {newPlexLibrary.Type} is currently not supported by Reaparr")
                     .LogWarning();
         }
     }

@@ -23,10 +23,10 @@ public class GetDownloadPreviewQueryValidator : AbstractValidator<GetDownloadPre
 
 public class GetDownloadPreviewQueryHandler : ICommandHandler<GetDownloadPreviewQuery, Result<List<DownloadPreview>>>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly ILog _log;
 
-    public GetDownloadPreviewQueryHandler(IPlexRipperDbContext dbContext, ILog log)
+    public GetDownloadPreviewQueryHandler(IReaparrDbContext dbContext, ILog log)
     {
         _dbContext = dbContext;
         _log = log;

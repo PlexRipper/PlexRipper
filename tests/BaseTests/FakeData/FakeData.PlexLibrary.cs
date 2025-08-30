@@ -10,7 +10,7 @@ public static partial class FakeData
             .Ignore(x => x.Id)
             .RuleFor(x => x.Key, _ => GetUniqueNumber().ToString())
             .RuleFor(x => x.Title, f => f.Company.CompanyName())
-            .RuleFor(x => x.Type, f => libraryType == PlexMediaType.None ? f.PlexRipper().LibraryType : libraryType)
+            .RuleFor(x => x.Type, f => libraryType == PlexMediaType.None ? f.Reaparr().LibraryType : libraryType)
             .RuleFor(x => x.PlexServerId, _ => GetUniqueNumber())
             .Ignore(x => x.PlexServer)
             .RuleFor(x => x.CreatedAt, f => f.Date.Past(4))

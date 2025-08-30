@@ -12,14 +12,14 @@ namespace Reaparr.Application;
 public class DownloadQueue : IDownloadQueue
 {
     private readonly ILog _log;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly IDownloadTaskScheduler _downloadTaskScheduler;
 
     private readonly Channel<int> _plexServersToCheckChannel = Channel.CreateUnbounded<int>();
 
     private readonly CancellationToken _token = new();
 
-    public DownloadQueue(ILog log, IPlexRipperDbContext dbContext, IDownloadTaskScheduler downloadTaskScheduler)
+    public DownloadQueue(ILog log, IReaparrDbContext dbContext, IDownloadTaskScheduler downloadTaskScheduler)
     {
         _log = log;
         _dbContext = dbContext;

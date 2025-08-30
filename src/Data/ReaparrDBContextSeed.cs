@@ -3,7 +3,7 @@ using Reaparr.Environment;
 
 namespace Reaparr.Data;
 
-public static class PlexRipperDBContextSeed
+public static class ReaparrDBContextSeed
 {
     public static ModelBuilder SeedDatabase(ModelBuilder builder)
     {

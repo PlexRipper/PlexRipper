@@ -1,4 +1,3 @@
-using Reaparr.BaseTests;
 using Reaparr.Settings.Contracts;
 
 namespace Reaparr.Settings.UnitTests;

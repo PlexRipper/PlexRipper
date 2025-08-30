@@ -21,11 +21,11 @@ public class DeleteFolderPathEndpointRequestValidator : Validator<DeleteFolderPa
 public class DeleteFolderPathEndpoint : BaseEndpoint<DeleteFolderPathEndpointRequest, BaseResultDTO>
 {
     private readonly ILog _log;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.FolderPathController + "/{Id}";
 
-    public DeleteFolderPathEndpoint(ILog log, IPlexRipperDbContext dbContext)
+    public DeleteFolderPathEndpoint(ILog log, IReaparrDbContext dbContext)
     {
         _log = log;
         _dbContext = dbContext;

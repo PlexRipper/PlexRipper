@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace PlexRipper.Identity.Migrations
+namespace Reaparr.Identity.Migrations
 {
     /// <inheritdoc />
     public partial class InitialIdentitySchema : Migration

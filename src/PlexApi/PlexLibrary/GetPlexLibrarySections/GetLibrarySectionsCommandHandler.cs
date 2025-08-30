@@ -8,12 +8,12 @@ namespace Reaparr.PlexApi;
 public class GetLibrarySectionsCommandHandler : ICommandHandler<GetLibrarySectionsCommand, Result<List<PlexLibrary>>>
 {
     private readonly ILog _log;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly IPlexApiClientFactory _plexApiClientFactory;
 
     public GetLibrarySectionsCommandHandler(
         ILog log,
-        IPlexRipperDbContext dbContext,
+        IReaparrDbContext dbContext,
         IPlexApiClientFactory plexApiClientFactory
     )
     {

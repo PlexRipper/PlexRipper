@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
-using Reaparr.BaseTests;
 using Reaparr.Data.Contracts;
 using Reaparr.Domain.Validators;
 

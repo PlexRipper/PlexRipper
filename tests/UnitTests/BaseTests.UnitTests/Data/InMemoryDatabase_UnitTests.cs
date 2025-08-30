@@ -12,7 +12,7 @@ public class InMemoryDatabase_UnitTests : BaseUnitTest
     {
         // Arrange
         var dbContext = MockDatabase.GetMemoryDbContext();
-        var (plexRipperContext, _) = dbContext;
+        var (context, _) = dbContext;
         var notification = new Notification
         {
             Hidden = false,
@@ -22,9 +22,9 @@ public class InMemoryDatabase_UnitTests : BaseUnitTest
         };
 
         // Act
-        plexRipperContext.Notifications.Add(notification);
-        await plexRipperContext.SaveChangesAsync(CancellationToken);
-        var notifications = await plexRipperContext.Notifications.ToListAsync(CancellationToken);
+        context.Notifications.Add(notification);
+        await context.SaveChangesAsync(CancellationToken);
+        var notifications = await context.Notifications.ToListAsync(CancellationToken);
 
         // Assert
         notifications.Count.ShouldBe(1);
@@ -35,7 +35,7 @@ public class InMemoryDatabase_UnitTests : BaseUnitTest
     {
         // Arrange
         var dbContext = MockDatabase.GetMemoryDbContext();
-        var (plexRipperContext, _) = dbContext;
+        var (context, _) = dbContext;
         var notification = new Notification
         {
             Hidden = false,
@@ -45,11 +45,11 @@ public class InMemoryDatabase_UnitTests : BaseUnitTest
         };
 
         // Act
-        plexRipperContext.Notifications.Add(notification);
-        await plexRipperContext.SaveChangesAsync(CancellationToken);
-        plexRipperContext.Notifications.Remove(notification);
-        await plexRipperContext.SaveChangesAsync(CancellationToken);
-        var notifications = await plexRipperContext.Notifications.ToListAsync(CancellationToken);
+        context.Notifications.Add(notification);
+        await context.SaveChangesAsync(CancellationToken);
+        context.Notifications.Remove(notification);
+        await context.SaveChangesAsync(CancellationToken);
+        var notifications = await context.Notifications.ToListAsync(CancellationToken);
 
         // Assert
         notifications.Count.ShouldBe(0);

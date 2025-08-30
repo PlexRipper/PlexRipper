@@ -34,11 +34,11 @@ public class UpdatePlexAccountByIdEndpointRequestValidator : Validator<UpdatePle
 
 public class UpdatePlexAccountByIdEndpoint : BaseEndpoint<UpdatePlexAccountByIdEndpointRequest, PlexAccountDTO>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.PlexAccountController;
 
-    public UpdatePlexAccountByIdEndpoint(IPlexRipperDbContext dbContext)
+    public UpdatePlexAccountByIdEndpoint(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
     }

@@ -1,7 +1,7 @@
 using Serilog;
 using Serilog.Events;
 
-namespace Reaparr.Logging.Common;
+namespace Reaparr.Logging;
 
 public record LogMetaData
 {

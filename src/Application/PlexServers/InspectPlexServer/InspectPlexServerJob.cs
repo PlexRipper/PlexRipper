@@ -12,7 +12,7 @@ public class InspectPlexServerJob : IJob
 {
     public static string PlexServerIdsParameter => "plexServerIds";
 
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly ISignalRService _signalRService;
     private readonly ILog _log;
     private readonly ICommandExecutor _commandExecutor;
@@ -22,7 +22,7 @@ public class InspectPlexServerJob : IJob
     public InspectPlexServerJob(
         ILog log,
         ICommandExecutor commandExecutor,
-        IPlexRipperDbContext dbContext,
+        IReaparrDbContext dbContext,
         ISignalRService signalRService
     )
     {

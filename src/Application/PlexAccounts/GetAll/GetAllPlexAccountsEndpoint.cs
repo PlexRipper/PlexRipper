@@ -29,11 +29,11 @@ public record GetAllPlexAccountsEndpointRequest
 
 public class GetAllPlexAccountsEndpoint : BaseEndpoint<GetAllPlexAccountsEndpointRequest, List<PlexAccountDTO>>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.PlexAccountController;
 
-    public GetAllPlexAccountsEndpoint(IPlexRipperDbContext dbContext)
+    public GetAllPlexAccountsEndpoint(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
     }

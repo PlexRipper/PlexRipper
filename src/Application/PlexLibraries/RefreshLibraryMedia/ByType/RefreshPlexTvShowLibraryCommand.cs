@@ -30,13 +30,13 @@ public class RefreshPlexTvShowLibraryCommandHandler
 {
     private readonly ILog _log;
     private readonly ICommandExecutor _commandExecutor;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly IRefreshLibraryProgressReporter _progressReporter;
 
     public RefreshPlexTvShowLibraryCommandHandler(
         ILog log,
         ICommandExecutor commandExecutor,
-        IPlexRipperDbContext dbContext,
+        IReaparrDbContext dbContext,
         IRefreshLibraryProgressReporter progressReporter
     )
     {

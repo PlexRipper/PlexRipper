@@ -27,12 +27,12 @@ public class SetPlexLibraryDefaultDestinationByIdEndpointRequestValidator
 public class SetPlexLibraryDefaultDestinationByIdEndpoint
     : BaseEndpoint<SetPlexLibraryDefaultDestinationByIdEndpointRequest, BaseResultDTO>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath =>
         ApiRoutes.PlexLibraryController + "/{PlexLibraryId}/default/destination/{FolderPathId}";
 
-    public SetPlexLibraryDefaultDestinationByIdEndpoint(IPlexRipperDbContext dbContext)
+    public SetPlexLibraryDefaultDestinationByIdEndpoint(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
     }

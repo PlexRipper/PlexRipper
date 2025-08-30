@@ -18,10 +18,10 @@ public class ValidateFolderPathsValidator : AbstractValidator<ValidateFolderPath
 
 public class ValidateFolderPathsHandler : ICommandHandler<ValidateFolderPathsCommand, Result>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly IDirectory _directory;
 
-    public ValidateFolderPathsHandler(IPlexRipperDbContext dbContext, IDirectory directory)
+    public ValidateFolderPathsHandler(IReaparrDbContext dbContext, IDirectory directory)
     {
         _dbContext = dbContext;
         _directory = directory;

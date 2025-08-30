@@ -22,11 +22,11 @@ public class CheckConnectionStatusByIdCommandHandler
 {
     private readonly ISignalRService _signalRService;
     private readonly ICommandExecutor _commandDispatcher;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private PlexServerConnection? _plexServerConnection;
 
     public CheckConnectionStatusByIdCommandHandler(
-        IPlexRipperDbContext dbContext,
+        IReaparrDbContext dbContext,
         ISignalRService signalRService,
         ICommandExecutor commandDispatcher
     )

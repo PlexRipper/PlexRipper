@@ -25,12 +25,12 @@ public class GenerateDownloadTaskTvShowSeasonsCommandHandler
     : ICommandHandler<GenerateDownloadTaskTvShowSeasonsCommand, Result>
 {
     private readonly ILog _log;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _command;
 
     public GenerateDownloadTaskTvShowSeasonsCommandHandler(
         ILog log,
-        IPlexRipperDbContext dbContext,
+        IReaparrDbContext dbContext,
         ICommandExecutor command
     )
     {

@@ -6,10 +6,10 @@ namespace Reaparr.PlexApi;
 
 public class GetServerStatusCommandHandler : ICommandHandler<GetServerStatusCommand, Result<PlexServerStatus>>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly IPlexApiClientFactory _plexApiClientFactory;
 
-    public GetServerStatusCommandHandler(IPlexRipperDbContext dbContext, IPlexApiClientFactory plexApiClientFactory)
+    public GetServerStatusCommandHandler(IReaparrDbContext dbContext, IPlexApiClientFactory plexApiClientFactory)
     {
         _dbContext = dbContext;
         _plexApiClientFactory = plexApiClientFactory;

@@ -4,7 +4,6 @@ using LukeHagar.PlexAPI.SDK.Models.Errors;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
-using Reaparr.BaseTests;
 using Reaparr.PlexApi.Contracts;
 using Reaparr.PlexApi.GetAccessiblePlexServers;
 using Reaparr.Settings.Contracts;

@@ -6,7 +6,7 @@ using Reaparr.Domain;
 
 namespace Reaparr.Data.Contracts;
 
-public interface IPlexRipperDbContext : IDisposable
+public interface IReaparrDbContext : IDisposable
 {
     #region Properties
 

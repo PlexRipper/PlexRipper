@@ -11,7 +11,7 @@ public static partial class DbContextExtensions
     private static readonly ILog _log = new LogConfig().CreateLogInstance(typeof(DbContextExtensions));
 
     public static async Task<Result<PlexServerConnection>> ChoosePlexServerConnection(
-        this IPlexRipperDbContext dbContext,
+        this IReaparrDbContext dbContext,
         int plexServerId,
         CancellationToken cancellationToken = default
     )
@@ -119,11 +119,11 @@ public static partial class DbContextExtensions
     /// Returns an authentication token needed to authenticate communication with the <see cref="PlexServer" />.
     /// Note: An PlexAccountId of 0 can be passed to automatically retrieve first a non-main account token, and if not found a main account server token.
     /// </summary>
-    /// <param name="dbContext"> The <see cref="IPlexRipperDbContext" /> to retrieve the token from.</param>
+    /// <param name="dbContext"> The <see cref="IReaparrDbContext" /> to retrieve the token from.</param>
     /// <param name="plexServerId">The id of the <see cref="PlexServer" /> to retrieve a token for.</param>
     /// <param name="cancellationToken"> The cancellation token to cancel operation.</param>
     public static Task<Result<string>> GetPlexServerTokenAsync(
-        this IPlexRipperDbContext dbContext,
+        this IReaparrDbContext dbContext,
         int plexServerId,
         CancellationToken cancellationToken = default
     ) => GetPlexServerTokenAsync(dbContext, plexServerId, 0, cancellationToken);
@@ -132,12 +132,12 @@ public static partial class DbContextExtensions
     ///  Returns the authentication token needed to authenticate communication with the <see cref="PlexServer" />.
     /// Note: An PlexAccountId of 0 can be passed to automatically retrieve first a non-main account token, and if not found a main account server token.
     /// </summary>
-    /// <param name="dbContext">The <see cref="IPlexRipperDbContext" /> to retrieve the token from.</param>
+    /// <param name="dbContext">The <see cref="IReaparrDbContext" /> to retrieve the token from.</param>
     /// <param name="plexServerId">The id of the <see cref="PlexServer" /> to retrieve a token for.</param>
     /// <param name="plexAccountId"> An PlexAccountId of 0 can be passed to automatically retrieve first a non-main account token, and if not found a main account server token.</param>
     /// <param name="cancellationToken"> The cancellation token to cancel operation.</param>
     public static async Task<Result<string>> GetPlexServerTokenAsync(
-        this IPlexRipperDbContext dbContext,
+        this IReaparrDbContext dbContext,
         int plexServerId,
         int plexAccountId = 0,
         CancellationToken cancellationToken = default

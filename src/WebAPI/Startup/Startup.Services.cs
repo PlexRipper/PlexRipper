@@ -43,7 +43,7 @@ public static partial class Startup
                         .AllowAnyHeader()
                         .AllowAnyMethod()
                         .AllowCredentials()
-                        .WithExposedHeaders("X-PlexRipper-Version");
+                        .WithExposedHeaders("X-Reaparr-Version");
                 }
             );
         });
@@ -123,7 +123,7 @@ public static partial class Startup
                 // options.ExcludeNonFastEndpoints = true;
                 options.DocumentSettings = s =>
                 {
-                    s.Title = "PlexRipper Internal API  (NOT FOR EXTERNAL USE)";
+                    s.Title = "Reaparr Internal API  (NOT FOR EXTERNAL USE)";
                     s.Version = "v1";
 
                     s.MarkNonNullablePropsAsRequired();
@@ -139,7 +139,7 @@ public static partial class Startup
                             Type = OpenApiSecuritySchemeType.ApiKey,
                             In = OpenApiSecurityApiKeyLocation.Cookie,
                             Name = DefaultUserAppCredentials.DefaultCookieName,
-                            Description = "Cookie-based authentication for the internal PlexRipper API",
+                            Description = "Cookie-based authentication for the internal Reaparr API",
                         }
                     );
 

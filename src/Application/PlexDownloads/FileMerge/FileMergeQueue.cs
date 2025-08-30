@@ -9,10 +9,10 @@ namespace Reaparr.Application;
 public class FileMergeQueue : IFileMergeQueue
 {
     private readonly ILog _log;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly IFileMergeScheduler _fileMergeScheduler;
 
-    public FileMergeQueue(ILog log, IPlexRipperDbContext dbContext, IFileMergeScheduler fileMergeScheduler)
+    public FileMergeQueue(ILog log, IReaparrDbContext dbContext, IFileMergeScheduler fileMergeScheduler)
     {
         _log = log;
         _dbContext = dbContext;

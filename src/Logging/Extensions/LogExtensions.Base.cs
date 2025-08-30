@@ -1,6 +1,5 @@
 using System.Runtime.CompilerServices;
 using FluentResults;
-using Reaparr.Logging.Common;
 using Serilog;
 
 namespace Reaparr.Logging;

@@ -27,11 +27,11 @@ public class IsUsernameAvailableEndpointRequestValidator : Validator<IsUsernameA
 
 public class IsUsernameAvailableEndpoint : BaseEndpoint<IsUsernameAvailableEndpointRequest, bool>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.PlexAccountController + "/check";
 
-    public IsUsernameAvailableEndpoint(IPlexRipperDbContext dbContext)
+    public IsUsernameAvailableEndpoint(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
     }

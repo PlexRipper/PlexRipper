@@ -1,7 +1,6 @@
 ﻿using System.IO.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
-using Reaparr.BaseTests;
 using Reaparr.Data.Contracts;
 
 namespace Reaparr.Application.UnitTests;

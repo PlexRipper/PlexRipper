@@ -7,8 +7,6 @@ using Polly;
 using Polly.Retry;
 using Reaparr.Data.Contracts;
 using Reaparr.Logging;
-using Reaparr.Logging.Common;
-using Reaparr.Logging.Interface;
 using Reaparr.PlexApi.Contracts;
 
 namespace Reaparr.Application;
@@ -27,7 +25,7 @@ public class DownloadWorker : IDisposable
 
     private readonly ICommandExecutor _commandExecutor;
 
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     private readonly IPlexApiClient _httpClient;
 
@@ -48,7 +46,7 @@ public class DownloadWorker : IDisposable
     public DownloadWorker(
         ILog<DownloadWorker> log,
         ICommandExecutor commandExecutor,
-        IPlexRipperDbContext dbContext,
+        IReaparrDbContext dbContext,
         DownloadWorkerTask downloadWorkerTask,
         Func<PlexApiClientOptions?, IPlexApiClient> clientFactory
     )

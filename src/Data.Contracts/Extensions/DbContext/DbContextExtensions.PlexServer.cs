@@ -5,7 +5,7 @@ namespace Reaparr.Data.Contracts;
 public static partial class DbContextExtensions
 {
     public static async Task<string> GetPlexServerNameById(
-        this IPlexRipperDbContext dbContext,
+        this IReaparrDbContext dbContext,
         int plexServerId,
         CancellationToken cancellationToken = default
     )
@@ -18,7 +18,7 @@ public static partial class DbContextExtensions
     }
 
     public static async Task<string> GetPlexServerMachineIdentifierById(
-        this IPlexRipperDbContext dbContext,
+        this IReaparrDbContext dbContext,
         int plexServerId,
         CancellationToken cancellationToken = default
     )
@@ -28,7 +28,7 @@ public static partial class DbContextExtensions
     }
 
     public static async Task<bool> IsServerOnline(
-        this IPlexRipperDbContext dbContext,
+        this IReaparrDbContext dbContext,
         int plexServerId,
         CancellationToken cancellationToken = default
     )

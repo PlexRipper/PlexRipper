@@ -38,11 +38,11 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
     : ICommandHandler<GenerateDownloadTaskTvShowEpisodesCommand, Result>
 {
     private readonly ILog _log;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     private readonly List<DownloadTaskTvShow> _tvShowDownloads = [];
 
-    public GenerateDownloadTaskTvShowEpisodesCommandHandler(ILog log, IPlexRipperDbContext dbContext)
+    public GenerateDownloadTaskTvShowEpisodesCommandHandler(ILog log, IReaparrDbContext dbContext)
     {
         _log = log;
         _dbContext = dbContext;

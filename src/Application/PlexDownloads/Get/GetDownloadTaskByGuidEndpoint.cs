@@ -33,11 +33,11 @@ public class GetDownloadTaskByGuidRequestValidator : Validator<GetDownloadTaskBy
 
 public class GetDownloadTaskByGuidEndpoint : BaseEndpoint<GetDownloadTaskByGuidRequest, DownloadTaskDTO>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.DownloadController + "/detail/{DownloadTaskGuid}";
 
-    public GetDownloadTaskByGuidEndpoint(IPlexRipperDbContext dbContext)
+    public GetDownloadTaskByGuidEndpoint(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
     }

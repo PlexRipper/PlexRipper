@@ -21,12 +21,12 @@ public class RestartDownloadTaskCommandValidator : AbstractValidator<RestartDown
 
 public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownloadTaskCommand, Result>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IEventPublisher _eventPublisher;
 
     public RestartDownloadTaskCommandHandler(
-        IPlexRipperDbContext dbContext,
+        IReaparrDbContext dbContext,
         ICommandExecutor commandExecutor,
         IEventPublisher eventPublisher
     )

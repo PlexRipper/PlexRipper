@@ -12,11 +12,11 @@ namespace Reaparr.Application;
 /// <returns>Is successful.</returns>
 public class ClearCompletedDownloadTasksEndpoint : BaseEndpoint<List<Guid>, ResultDTO<CountResponseDTO>>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.DownloadController + "/clear";
 
-    public ClearCompletedDownloadTasksEndpoint(IPlexRipperDbContext dbContext)
+    public ClearCompletedDownloadTasksEndpoint(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
     }

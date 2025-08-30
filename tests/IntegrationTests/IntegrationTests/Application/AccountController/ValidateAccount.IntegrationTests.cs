@@ -3,7 +3,6 @@ using FastEndpoints;
 using Moq.Contrib.HttpClient;
 using Reaparr.Application;
 using Reaparr.Application.Contracts;
-using Reaparr.BaseTests;
 
 namespace Reaparr.IntegrationTests.AccountController;
 

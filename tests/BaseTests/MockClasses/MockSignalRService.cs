@@ -1,13 +1,13 @@
 ﻿using System.Collections.Concurrent;
 using Reaparr.Application.Contracts;
-using Reaparr.Logging.Interface;
+using Reaparr.Logging;
 using Reaparr.WebAPI.Contracts;
 
 namespace Reaparr.BaseTests;
 
 public class MockSignalRService : ISignalRService
 {
-    private readonly ILog<MockSignalRService> _log;
+    private readonly Logging.ILog<MockSignalRService> _log;
 
     public BlockingCollection<DownloadTaskDTO> DownloadTaskUpdate { get; } = new();
 

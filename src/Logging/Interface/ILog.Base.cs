@@ -2,7 +2,7 @@ using Serilog.Events;
 
 namespace Reaparr.Logging;
 
-public interface ILog
+public partial interface ILog
 {
     bool IsLogLevelEnabled(LogEventLevel logLevel = LogEventLevel.Debug);
 

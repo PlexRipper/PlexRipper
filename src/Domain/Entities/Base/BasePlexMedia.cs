@@ -1,7 +1,7 @@
 ﻿namespace Reaparr.Domain;
 
 /// <summary>
-///     Plex stores media in 1 generic type but PlexRipper stores it by type, this is the base entity for common
+///     Plex stores media in 1 generic type but Reaparr stores it by type, this is the base entity for common
 ///     properties.
 /// </summary>
 public class BasePlexMedia : BaseEntity

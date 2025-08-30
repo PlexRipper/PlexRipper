@@ -7,11 +7,11 @@ namespace Reaparr.Application;
 
 public class GetAllNotificationsEndpoint : BaseEndpointWithoutRequest<List<NotificationDTO>>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.NotificationController + "/";
 
-    public GetAllNotificationsEndpoint(IPlexRipperDbContext dbContext)
+    public GetAllNotificationsEndpoint(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
     }

@@ -1,6 +1,5 @@
 using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
-using Reaparr.BaseTests;
 using Reaparr.PlexApi.Contracts;
 
 namespace Reaparr.Application.UnitTests;

@@ -3,15 +3,14 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using PlexRipper.Data;
 using Reaparr.Data;
 
 #nullable disable
 
-namespace PlexRipper.Data.Migrations
+namespace Reaparr.Data.Migrations
 {
-    [DbContext(typeof(PlexRipperDbContext))]
-    partial class PlexRipperDbContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(ReaparrDbContext))]
+    partial class ReaparrDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
@@ -463,7 +462,7 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("QRTZ_TRIGGERS", (string)null);
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.DownloadTaskBase", b =>
+            modelBuilder.Entity("Reaparr.Domain.DownloadTaskBase", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -513,7 +512,7 @@ namespace PlexRipper.Data.Migrations
                     b.UseTpcMappingStrategy();
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.DownloadWorkerLog", b =>
+            modelBuilder.Entity("Reaparr.Domain.DownloadWorkerLog", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -549,7 +548,7 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("DownloadWorkerTasksLogs");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.DownloadWorkerTask", b =>
+            modelBuilder.Entity("Reaparr.Domain.DownloadWorkerTask", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -617,7 +616,7 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("DownloadWorkerTasks");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.FolderPath", b =>
+            modelBuilder.Entity("Reaparr.Domain.FolderPath", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -735,7 +734,7 @@ namespace PlexRipper.Data.Migrations
                         });
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.Notification", b =>
+            modelBuilder.Entity("Reaparr.Domain.Notification", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -767,7 +766,7 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("Notifications");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexAccount", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexAccount", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -847,7 +846,7 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("PlexAccounts");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexAccountLibrary", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexAccountLibrary", b =>
                 {
                     b.Property<int>("PlexAccountId")
                         .HasColumnType("INTEGER")
@@ -874,7 +873,7 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("PlexAccountLibraries");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexAccountServer", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexAccountServer", b =>
                 {
                     b.Property<int>("PlexAccountId")
                         .HasColumnType("INTEGER")
@@ -904,7 +903,7 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("PlexAccountServers");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexActor", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexActor", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -927,7 +926,7 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("PlexActors");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexCountry", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexCountry", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -950,7 +949,7 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("PlexCountries");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexGenre", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexGenre", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -973,7 +972,7 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("PlexGenres");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexLibrary", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexLibrary", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1071,7 +1070,7 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("PlexLibraries");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexLibraryActors", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexLibraryActors", b =>
                 {
                     b.Property<int>("PlexActorId")
                         .HasColumnType("INTEGER")
@@ -1088,7 +1087,7 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("PlexLibraryActors");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexLibraryCountries", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexLibraryCountries", b =>
                 {
                     b.Property<int>("PlexCountryId")
                         .HasColumnType("INTEGER")
@@ -1105,7 +1104,7 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("PlexLibraryCountries");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexLibraryGenres", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexLibraryGenres", b =>
                 {
                     b.Property<int>("PlexGenreId")
                         .HasColumnType("INTEGER")
@@ -1122,7 +1121,7 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("PlexLibraryGenres");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexMovie", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexMovie", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1249,7 +1248,7 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("PlexMovie");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexMovieActors", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexMovieActors", b =>
                 {
                     b.Property<int>("PlexActorId")
                         .HasColumnType("INTEGER")
@@ -1270,7 +1269,7 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("PlexMovieActors");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexMovieCountries", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexMovieCountries", b =>
                 {
                     b.Property<int>("CountryId")
                         .HasColumnType("INTEGER")
@@ -1291,7 +1290,7 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("PlexMovieCountries");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexMovieGenres", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexMovieGenres", b =>
                 {
                     b.Property<int>("GenresId")
                         .HasColumnType("INTEGER")
@@ -1312,7 +1311,7 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("PlexMovieGenres");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexMovieMediaData", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexMovieMediaData", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1398,7 +1397,7 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("PlexMovieData");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexMovieMediaDataPart", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexMovieMediaDataPart", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1468,7 +1467,7 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("PlexMovieDataParts");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexMovieMediaDataStream", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexMovieMediaDataStream", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1649,7 +1648,7 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("PlexMovieDataStreams");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexServer", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexServer", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1763,7 +1762,7 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("PlexServers");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexServerConnection", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexServerConnection", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1819,7 +1818,7 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("PlexServerConnections");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexServerStatus", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexServerStatus", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1861,7 +1860,7 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("PlexServerStatuses");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexTvShow", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexTvShow", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1991,7 +1990,7 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("PlexTvShows");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexTvShowActors", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexTvShowActors", b =>
                 {
                     b.Property<int>("PlexActorId")
                         .HasColumnType("INTEGER")
@@ -2012,7 +2011,7 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("PlexTvShowActors");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexTvShowCountries", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexTvShowCountries", b =>
                 {
                     b.Property<int>("CountryId")
                         .HasColumnType("INTEGER")
@@ -2033,7 +2032,7 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("PlexTvShowCountries");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexTvShowEpisode", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexTvShowEpisode", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -2176,7 +2175,7 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("PlexTvShowEpisodes");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexTvShowEpisodeMediaData", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexTvShowEpisodeMediaData", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -2262,7 +2261,7 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("PlexTvShowEpisodeData");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexTvShowEpisodeMediaDataPart", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexTvShowEpisodeMediaDataPart", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -2332,7 +2331,7 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("PlexTvShowEpisodeDataParts");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexTvShowEpisodeMediaDataStream", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexTvShowEpisodeMediaDataStream", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -2513,7 +2512,7 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("PlexTvShowEpisodeDataStreams");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexTvShowGenres", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexTvShowGenres", b =>
                 {
                     b.Property<int>("GenresId")
                         .HasColumnType("INTEGER")
@@ -2534,7 +2533,7 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("PlexTvShowGenres");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexTvShowMediaQuality", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexTvShowMediaQuality", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -2562,7 +2561,7 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("PlexTvShowMediaQualities");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexTvShowSeason", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexTvShowSeason", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -2700,7 +2699,7 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("PlexTvShowSeason");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexTvShowSeasonMediaQuality", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexTvShowSeasonMediaQuality", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -2728,9 +2727,9 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("PlexTvShowSeasonMediaQualities");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.DownloadTaskFileBase", b =>
+            modelBuilder.Entity("Reaparr.Domain.DownloadTaskFileBase", b =>
                 {
-                    b.HasBaseType("PlexRipper.Domain.DownloadTaskBase");
+                    b.HasBaseType("Reaparr.Domain.DownloadTaskBase");
 
                     b.Property<long>("CurrentFileTransferBytesOffset")
                         .HasColumnType("INTEGER");
@@ -2786,9 +2785,9 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable((string)null);
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.DownloadTaskParentBase", b =>
+            modelBuilder.Entity("Reaparr.Domain.DownloadTaskParentBase", b =>
                 {
-                    b.HasBaseType("PlexRipper.Domain.DownloadTaskBase");
+                    b.HasBaseType("Reaparr.Domain.DownloadTaskBase");
 
                     b.Property<int>("Year")
                         .HasColumnType("INTEGER")
@@ -2797,9 +2796,9 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable((string)null);
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.DownloadTaskMovieFile", b =>
+            modelBuilder.Entity("Reaparr.Domain.DownloadTaskMovieFile", b =>
                 {
-                    b.HasBaseType("PlexRipper.Domain.DownloadTaskFileBase");
+                    b.HasBaseType("Reaparr.Domain.DownloadTaskFileBase");
 
                     b.Property<Guid>("ParentId")
                         .HasColumnType("TEXT");
@@ -2809,9 +2808,9 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("DownloadTaskMovieFile");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.DownloadTaskTvShowEpisodeFile", b =>
+            modelBuilder.Entity("Reaparr.Domain.DownloadTaskTvShowEpisodeFile", b =>
                 {
-                    b.HasBaseType("PlexRipper.Domain.DownloadTaskFileBase");
+                    b.HasBaseType("Reaparr.Domain.DownloadTaskFileBase");
 
                     b.Property<Guid>("ParentId")
                         .HasColumnType("TEXT");
@@ -2821,23 +2820,23 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("DownloadTaskTvShowEpisodeFile");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.DownloadTaskMovie", b =>
+            modelBuilder.Entity("Reaparr.Domain.DownloadTaskMovie", b =>
                 {
-                    b.HasBaseType("PlexRipper.Domain.DownloadTaskParentBase");
+                    b.HasBaseType("Reaparr.Domain.DownloadTaskParentBase");
 
                     b.ToTable("DownloadTaskMovie");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.DownloadTaskTvShow", b =>
+            modelBuilder.Entity("Reaparr.Domain.DownloadTaskTvShow", b =>
                 {
-                    b.HasBaseType("PlexRipper.Domain.DownloadTaskParentBase");
+                    b.HasBaseType("Reaparr.Domain.DownloadTaskParentBase");
 
                     b.ToTable("DownloadTaskTvShow");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.DownloadTaskTvShowEpisode", b =>
+            modelBuilder.Entity("Reaparr.Domain.DownloadTaskTvShowEpisode", b =>
                 {
-                    b.HasBaseType("PlexRipper.Domain.DownloadTaskParentBase");
+                    b.HasBaseType("Reaparr.Domain.DownloadTaskParentBase");
 
                     b.Property<Guid>("ParentId")
                         .HasColumnType("TEXT");
@@ -2847,9 +2846,9 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("DownloadTaskTvShowEpisode");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.DownloadTaskTvShowSeason", b =>
+            modelBuilder.Entity("Reaparr.Domain.DownloadTaskTvShowSeason", b =>
                 {
-                    b.HasBaseType("PlexRipper.Domain.DownloadTaskParentBase");
+                    b.HasBaseType("Reaparr.Domain.DownloadTaskParentBase");
 
                     b.Property<Guid>("ParentId")
                         .HasColumnType("TEXT");
@@ -2914,15 +2913,15 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("JobDetail");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.DownloadTaskBase", b =>
+            modelBuilder.Entity("Reaparr.Domain.DownloadTaskBase", b =>
                 {
-                    b.HasOne("PlexRipper.Domain.PlexLibrary", "PlexLibrary")
+                    b.HasOne("Reaparr.Domain.PlexLibrary", "PlexLibrary")
                         .WithMany()
                         .HasForeignKey("PlexLibraryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlexRipper.Domain.PlexServer", "PlexServer")
+                    b.HasOne("Reaparr.Domain.PlexServer", "PlexServer")
                         .WithMany()
                         .HasForeignKey("PlexServerId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2933,9 +2932,9 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("PlexServer");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.DownloadWorkerLog", b =>
+            modelBuilder.Entity("Reaparr.Domain.DownloadWorkerLog", b =>
                 {
-                    b.HasOne("PlexRipper.Domain.DownloadWorkerTask", "DownloadWorkerTask")
+                    b.HasOne("Reaparr.Domain.DownloadWorkerTask", "DownloadWorkerTask")
                         .WithMany("DownloadWorkerTaskLogs")
                         .HasForeignKey("DownloadWorkerTaskId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2944,15 +2943,15 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("DownloadWorkerTask");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.DownloadWorkerTask", b =>
+            modelBuilder.Entity("Reaparr.Domain.DownloadWorkerTask", b =>
                 {
-                    b.HasOne("PlexRipper.Domain.DownloadTaskFileBase", "DownloadTask")
+                    b.HasOne("Reaparr.Domain.DownloadTaskFileBase", "DownloadTask")
                         .WithMany("DownloadWorkerTasks")
                         .HasForeignKey("DownloadTaskId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlexRipper.Domain.PlexServer", "PlexServer")
+                    b.HasOne("Reaparr.Domain.PlexServer", "PlexServer")
                         .WithMany()
                         .HasForeignKey("PlexServerId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2963,21 +2962,21 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("PlexServer");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexAccountLibrary", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexAccountLibrary", b =>
                 {
-                    b.HasOne("PlexRipper.Domain.PlexAccount", "PlexAccount")
+                    b.HasOne("Reaparr.Domain.PlexAccount", "PlexAccount")
                         .WithMany("PlexAccountLibraries")
                         .HasForeignKey("PlexAccountId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlexRipper.Domain.PlexLibrary", "PlexLibrary")
+                    b.HasOne("Reaparr.Domain.PlexLibrary", "PlexLibrary")
                         .WithMany("PlexAccountLibraries")
                         .HasForeignKey("PlexLibraryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlexRipper.Domain.PlexServer", "PlexServer")
+                    b.HasOne("Reaparr.Domain.PlexServer", "PlexServer")
                         .WithMany()
                         .HasForeignKey("PlexServerId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2990,15 +2989,15 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("PlexServer");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexAccountServer", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexAccountServer", b =>
                 {
-                    b.HasOne("PlexRipper.Domain.PlexAccount", "PlexAccount")
+                    b.HasOne("Reaparr.Domain.PlexAccount", "PlexAccount")
                         .WithMany("PlexAccountServers")
                         .HasForeignKey("PlexAccountId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlexRipper.Domain.PlexServer", "PlexServer")
+                    b.HasOne("Reaparr.Domain.PlexServer", "PlexServer")
                         .WithMany("PlexAccountServers")
                         .HasForeignKey("PlexServerId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -3009,14 +3008,14 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("PlexServer");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexLibrary", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexLibrary", b =>
                 {
-                    b.HasOne("PlexRipper.Domain.FolderPath", "DefaultDestination")
+                    b.HasOne("Reaparr.Domain.FolderPath", "DefaultDestination")
                         .WithMany("PlexLibraries")
                         .HasForeignKey("DefaultDestinationId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("PlexRipper.Domain.PlexServer", "PlexServer")
+                    b.HasOne("Reaparr.Domain.PlexServer", "PlexServer")
                         .WithMany("PlexLibraries")
                         .HasForeignKey("PlexServerId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -3027,60 +3026,60 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("PlexServer");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexLibraryActors", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexLibraryActors", b =>
                 {
-                    b.HasOne("PlexRipper.Domain.PlexActor", null)
+                    b.HasOne("Reaparr.Domain.PlexActor", null)
                         .WithMany()
                         .HasForeignKey("PlexActorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlexRipper.Domain.PlexLibrary", null)
+                    b.HasOne("Reaparr.Domain.PlexLibrary", null)
                         .WithMany()
                         .HasForeignKey("PlexLibraryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexLibraryCountries", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexLibraryCountries", b =>
                 {
-                    b.HasOne("PlexRipper.Domain.PlexCountry", null)
+                    b.HasOne("Reaparr.Domain.PlexCountry", null)
                         .WithMany()
                         .HasForeignKey("PlexCountryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlexRipper.Domain.PlexLibrary", null)
+                    b.HasOne("Reaparr.Domain.PlexLibrary", null)
                         .WithMany()
                         .HasForeignKey("PlexLibraryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexLibraryGenres", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexLibraryGenres", b =>
                 {
-                    b.HasOne("PlexRipper.Domain.PlexGenre", null)
+                    b.HasOne("Reaparr.Domain.PlexGenre", null)
                         .WithMany()
                         .HasForeignKey("PlexGenreId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlexRipper.Domain.PlexLibrary", null)
+                    b.HasOne("Reaparr.Domain.PlexLibrary", null)
                         .WithMany()
                         .HasForeignKey("PlexLibraryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexMovie", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexMovie", b =>
                 {
-                    b.HasOne("PlexRipper.Domain.PlexLibrary", "PlexLibrary")
+                    b.HasOne("Reaparr.Domain.PlexLibrary", "PlexLibrary")
                         .WithMany("Movies")
                         .HasForeignKey("PlexLibraryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlexRipper.Domain.PlexServer", "PlexServer")
+                    b.HasOne("Reaparr.Domain.PlexServer", "PlexServer")
                         .WithMany()
                         .HasForeignKey("PlexServerId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -3091,66 +3090,66 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("PlexServer");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexMovieActors", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexMovieActors", b =>
                 {
-                    b.HasOne("PlexRipper.Domain.PlexActor", null)
+                    b.HasOne("Reaparr.Domain.PlexActor", null)
                         .WithMany()
                         .HasForeignKey("PlexActorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlexRipper.Domain.PlexMovie", null)
+                    b.HasOne("Reaparr.Domain.PlexMovie", null)
                         .WithMany()
                         .HasForeignKey("PlexMovieId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexMovieCountries", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexMovieCountries", b =>
                 {
-                    b.HasOne("PlexRipper.Domain.PlexCountry", null)
+                    b.HasOne("Reaparr.Domain.PlexCountry", null)
                         .WithMany()
                         .HasForeignKey("CountryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlexRipper.Domain.PlexMovie", null)
+                    b.HasOne("Reaparr.Domain.PlexMovie", null)
                         .WithMany()
                         .HasForeignKey("PlexMovieId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexMovieGenres", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexMovieGenres", b =>
                 {
-                    b.HasOne("PlexRipper.Domain.PlexGenre", null)
+                    b.HasOne("Reaparr.Domain.PlexGenre", null)
                         .WithMany()
                         .HasForeignKey("GenresId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlexRipper.Domain.PlexMovie", null)
+                    b.HasOne("Reaparr.Domain.PlexMovie", null)
                         .WithMany()
                         .HasForeignKey("PlexMovieId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexMovieMediaData", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexMovieMediaData", b =>
                 {
-                    b.HasOne("PlexRipper.Domain.PlexLibrary", "PlexLibrary")
+                    b.HasOne("Reaparr.Domain.PlexLibrary", "PlexLibrary")
                         .WithMany()
                         .HasForeignKey("PlexLibraryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlexRipper.Domain.PlexMovie", "PlexMovie")
+                    b.HasOne("Reaparr.Domain.PlexMovie", "PlexMovie")
                         .WithMany("MediaDataList")
                         .HasForeignKey("PlexMovieId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlexRipper.Domain.PlexServer", "PlexServer")
+                    b.HasOne("Reaparr.Domain.PlexServer", "PlexServer")
                         .WithMany()
                         .HasForeignKey("PlexServerId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -3163,27 +3162,27 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("PlexServer");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexMovieMediaDataPart", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexMovieMediaDataPart", b =>
                 {
-                    b.HasOne("PlexRipper.Domain.PlexLibrary", "PlexLibrary")
+                    b.HasOne("Reaparr.Domain.PlexLibrary", "PlexLibrary")
                         .WithMany()
                         .HasForeignKey("PlexLibraryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlexRipper.Domain.PlexMovie", "PlexMovie")
+                    b.HasOne("Reaparr.Domain.PlexMovie", "PlexMovie")
                         .WithMany()
                         .HasForeignKey("PlexMovieId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlexRipper.Domain.PlexMovieMediaData", "PlexMovieMediaData")
+                    b.HasOne("Reaparr.Domain.PlexMovieMediaData", "PlexMovieMediaData")
                         .WithMany("Parts")
                         .HasForeignKey("PlexMovieMediaDataId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlexRipper.Domain.PlexServer", "PlexServer")
+                    b.HasOne("Reaparr.Domain.PlexServer", "PlexServer")
                         .WithMany()
                         .HasForeignKey("PlexServerId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -3198,33 +3197,33 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("PlexServer");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexMovieMediaDataStream", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexMovieMediaDataStream", b =>
                 {
-                    b.HasOne("PlexRipper.Domain.PlexLibrary", "PlexLibrary")
+                    b.HasOne("Reaparr.Domain.PlexLibrary", "PlexLibrary")
                         .WithMany()
                         .HasForeignKey("PlexLibraryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlexRipper.Domain.PlexMovie", "PlexMovie")
+                    b.HasOne("Reaparr.Domain.PlexMovie", "PlexMovie")
                         .WithMany()
                         .HasForeignKey("PlexMovieId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlexRipper.Domain.PlexMovieMediaData", "PlexMovieMediaData")
+                    b.HasOne("Reaparr.Domain.PlexMovieMediaData", "PlexMovieMediaData")
                         .WithMany()
                         .HasForeignKey("PlexMovieMediaDataId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlexRipper.Domain.PlexMovieMediaDataPart", "PlexMovieMediaDataPart")
+                    b.HasOne("Reaparr.Domain.PlexMovieMediaDataPart", "PlexMovieMediaDataPart")
                         .WithMany("Streams")
                         .HasForeignKey("PlexMovieMediaDataPartId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlexRipper.Domain.PlexServer", "PlexServer")
+                    b.HasOne("Reaparr.Domain.PlexServer", "PlexServer")
                         .WithMany()
                         .HasForeignKey("PlexServerId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -3241,9 +3240,9 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("PlexServer");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexServerConnection", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexServerConnection", b =>
                 {
-                    b.HasOne("PlexRipper.Domain.PlexServer", "PlexServer")
+                    b.HasOne("Reaparr.Domain.PlexServer", "PlexServer")
                         .WithMany("PlexServerConnections")
                         .HasForeignKey("PlexServerId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -3252,15 +3251,15 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("PlexServer");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexServerStatus", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexServerStatus", b =>
                 {
-                    b.HasOne("PlexRipper.Domain.PlexServerConnection", "PlexServerConnection")
+                    b.HasOne("Reaparr.Domain.PlexServerConnection", "PlexServerConnection")
                         .WithOne("LatestConnectionStatus")
-                        .HasForeignKey("PlexRipper.Domain.PlexServerStatus", "PlexServerConnectionId")
+                        .HasForeignKey("Reaparr.Domain.PlexServerStatus", "PlexServerConnectionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlexRipper.Domain.PlexServer", "PlexServer")
+                    b.HasOne("Reaparr.Domain.PlexServer", "PlexServer")
                         .WithMany("ServerStatus")
                         .HasForeignKey("PlexServerId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -3271,15 +3270,15 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("PlexServerConnection");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexTvShow", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexTvShow", b =>
                 {
-                    b.HasOne("PlexRipper.Domain.PlexLibrary", "PlexLibrary")
+                    b.HasOne("Reaparr.Domain.PlexLibrary", "PlexLibrary")
                         .WithMany("TvShows")
                         .HasForeignKey("PlexLibraryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlexRipper.Domain.PlexServer", "PlexServer")
+                    b.HasOne("Reaparr.Domain.PlexServer", "PlexServer")
                         .WithMany()
                         .HasForeignKey("PlexServerId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -3290,57 +3289,57 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("PlexServer");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexTvShowActors", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexTvShowActors", b =>
                 {
-                    b.HasOne("PlexRipper.Domain.PlexActor", null)
+                    b.HasOne("Reaparr.Domain.PlexActor", null)
                         .WithMany()
                         .HasForeignKey("PlexActorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlexRipper.Domain.PlexTvShow", null)
+                    b.HasOne("Reaparr.Domain.PlexTvShow", null)
                         .WithMany()
                         .HasForeignKey("PlexTvShowId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexTvShowCountries", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexTvShowCountries", b =>
                 {
-                    b.HasOne("PlexRipper.Domain.PlexCountry", null)
+                    b.HasOne("Reaparr.Domain.PlexCountry", null)
                         .WithMany()
                         .HasForeignKey("CountryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlexRipper.Domain.PlexTvShow", null)
+                    b.HasOne("Reaparr.Domain.PlexTvShow", null)
                         .WithMany()
                         .HasForeignKey("PlexTvShowId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexTvShowEpisode", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexTvShowEpisode", b =>
                 {
-                    b.HasOne("PlexRipper.Domain.PlexLibrary", "PlexLibrary")
+                    b.HasOne("Reaparr.Domain.PlexLibrary", "PlexLibrary")
                         .WithMany()
                         .HasForeignKey("PlexLibraryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlexRipper.Domain.PlexServer", "PlexServer")
+                    b.HasOne("Reaparr.Domain.PlexServer", "PlexServer")
                         .WithMany()
                         .HasForeignKey("PlexServerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlexRipper.Domain.PlexTvShow", "TvShow")
+                    b.HasOne("Reaparr.Domain.PlexTvShow", "TvShow")
                         .WithMany()
                         .HasForeignKey("TvShowId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlexRipper.Domain.PlexTvShowSeason", "TvShowSeason")
+                    b.HasOne("Reaparr.Domain.PlexTvShowSeason", "TvShowSeason")
                         .WithMany("Episodes")
                         .HasForeignKey("TvShowSeasonId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -3355,21 +3354,21 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("TvShowSeason");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexTvShowEpisodeMediaData", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexTvShowEpisodeMediaData", b =>
                 {
-                    b.HasOne("PlexRipper.Domain.PlexLibrary", "PlexLibrary")
+                    b.HasOne("Reaparr.Domain.PlexLibrary", "PlexLibrary")
                         .WithMany()
                         .HasForeignKey("PlexLibraryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlexRipper.Domain.PlexServer", "PlexServer")
+                    b.HasOne("Reaparr.Domain.PlexServer", "PlexServer")
                         .WithMany()
                         .HasForeignKey("PlexServerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlexRipper.Domain.PlexTvShowEpisode", "PlexTvShowEpisode")
+                    b.HasOne("Reaparr.Domain.PlexTvShowEpisode", "PlexTvShowEpisode")
                         .WithMany("MediaDataList")
                         .HasForeignKey("PlexTvShowEpisodeId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -3382,27 +3381,27 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("PlexTvShowEpisode");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexTvShowEpisodeMediaDataPart", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexTvShowEpisodeMediaDataPart", b =>
                 {
-                    b.HasOne("PlexRipper.Domain.PlexLibrary", "PlexLibrary")
+                    b.HasOne("Reaparr.Domain.PlexLibrary", "PlexLibrary")
                         .WithMany()
                         .HasForeignKey("PlexLibraryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlexRipper.Domain.PlexServer", "PlexServer")
+                    b.HasOne("Reaparr.Domain.PlexServer", "PlexServer")
                         .WithMany()
                         .HasForeignKey("PlexServerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlexRipper.Domain.PlexTvShowEpisode", "PlexTvShowEpisode")
+                    b.HasOne("Reaparr.Domain.PlexTvShowEpisode", "PlexTvShowEpisode")
                         .WithMany()
                         .HasForeignKey("PlexTvShowEpisodeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlexRipper.Domain.PlexTvShowEpisodeMediaData", "PlexTvShowEpisodeMediaData")
+                    b.HasOne("Reaparr.Domain.PlexTvShowEpisodeMediaData", "PlexTvShowEpisodeMediaData")
                         .WithMany("Parts")
                         .HasForeignKey("PlexTvShowEpisodeMediaDataId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -3417,33 +3416,33 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("PlexTvShowEpisodeMediaData");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexTvShowEpisodeMediaDataStream", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexTvShowEpisodeMediaDataStream", b =>
                 {
-                    b.HasOne("PlexRipper.Domain.PlexLibrary", "PlexLibrary")
+                    b.HasOne("Reaparr.Domain.PlexLibrary", "PlexLibrary")
                         .WithMany()
                         .HasForeignKey("PlexLibraryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlexRipper.Domain.PlexServer", "PlexServer")
+                    b.HasOne("Reaparr.Domain.PlexServer", "PlexServer")
                         .WithMany()
                         .HasForeignKey("PlexServerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlexRipper.Domain.PlexTvShowEpisode", "PlexTvShowEpisode")
+                    b.HasOne("Reaparr.Domain.PlexTvShowEpisode", "PlexTvShowEpisode")
                         .WithMany()
                         .HasForeignKey("PlexTvShowEpisodeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlexRipper.Domain.PlexTvShowEpisodeMediaData", "PlexTvShowEpisodeMediaData")
+                    b.HasOne("Reaparr.Domain.PlexTvShowEpisodeMediaData", "PlexTvShowEpisodeMediaData")
                         .WithMany()
                         .HasForeignKey("PlexTvShowEpisodeMediaDataId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlexRipper.Domain.PlexTvShowEpisodeMediaDataPart", "PlexTvShowEpisodeMediaDataPart")
+                    b.HasOne("Reaparr.Domain.PlexTvShowEpisodeMediaDataPart", "PlexTvShowEpisodeMediaDataPart")
                         .WithMany("Streams")
                         .HasForeignKey("PlexTvShowEpisodeMediaDataPartId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -3460,30 +3459,30 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("PlexTvShowEpisodeMediaDataPart");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexTvShowGenres", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexTvShowGenres", b =>
                 {
-                    b.HasOne("PlexRipper.Domain.PlexGenre", null)
+                    b.HasOne("Reaparr.Domain.PlexGenre", null)
                         .WithMany()
                         .HasForeignKey("GenresId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlexRipper.Domain.PlexTvShow", null)
+                    b.HasOne("Reaparr.Domain.PlexTvShow", null)
                         .WithMany()
                         .HasForeignKey("PlexTvShowId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexTvShowMediaQuality", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexTvShowMediaQuality", b =>
                 {
-                    b.HasOne("PlexRipper.Domain.PlexLibrary", "PlexLibrary")
+                    b.HasOne("Reaparr.Domain.PlexLibrary", "PlexLibrary")
                         .WithMany()
                         .HasForeignKey("PlexLibraryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlexRipper.Domain.PlexTvShow", "PlexTvShow")
+                    b.HasOne("Reaparr.Domain.PlexTvShow", "PlexTvShow")
                         .WithMany("Qualities")
                         .HasForeignKey("PlexTvShowId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -3494,21 +3493,21 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("PlexTvShow");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexTvShowSeason", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexTvShowSeason", b =>
                 {
-                    b.HasOne("PlexRipper.Domain.PlexLibrary", "PlexLibrary")
+                    b.HasOne("Reaparr.Domain.PlexLibrary", "PlexLibrary")
                         .WithMany()
                         .HasForeignKey("PlexLibraryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlexRipper.Domain.PlexServer", "PlexServer")
+                    b.HasOne("Reaparr.Domain.PlexServer", "PlexServer")
                         .WithMany()
                         .HasForeignKey("PlexServerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlexRipper.Domain.PlexTvShow", "TvShow")
+                    b.HasOne("Reaparr.Domain.PlexTvShow", "TvShow")
                         .WithMany("Seasons")
                         .HasForeignKey("TvShowId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -3521,15 +3520,15 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("TvShow");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexTvShowSeasonMediaQuality", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexTvShowSeasonMediaQuality", b =>
                 {
-                    b.HasOne("PlexRipper.Domain.PlexLibrary", "PlexLibrary")
+                    b.HasOne("Reaparr.Domain.PlexLibrary", "PlexLibrary")
                         .WithMany()
                         .HasForeignKey("PlexLibraryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlexRipper.Domain.PlexTvShowSeason", "PlexTvShowSeason")
+                    b.HasOne("Reaparr.Domain.PlexTvShowSeason", "PlexTvShowSeason")
                         .WithMany("Qualities")
                         .HasForeignKey("PlexTvShowSeasonId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -3540,9 +3539,9 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("PlexTvShowSeason");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.DownloadTaskMovieFile", b =>
+            modelBuilder.Entity("Reaparr.Domain.DownloadTaskMovieFile", b =>
                 {
-                    b.HasOne("PlexRipper.Domain.DownloadTaskMovie", "Parent")
+                    b.HasOne("Reaparr.Domain.DownloadTaskMovie", "Parent")
                         .WithMany("Children")
                         .HasForeignKey("ParentId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -3551,9 +3550,9 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("Parent");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.DownloadTaskTvShowEpisodeFile", b =>
+            modelBuilder.Entity("Reaparr.Domain.DownloadTaskTvShowEpisodeFile", b =>
                 {
-                    b.HasOne("PlexRipper.Domain.DownloadTaskTvShowEpisode", "Parent")
+                    b.HasOne("Reaparr.Domain.DownloadTaskTvShowEpisode", "Parent")
                         .WithMany("Children")
                         .HasForeignKey("ParentId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -3562,9 +3561,9 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("Parent");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.DownloadTaskTvShowEpisode", b =>
+            modelBuilder.Entity("Reaparr.Domain.DownloadTaskTvShowEpisode", b =>
                 {
-                    b.HasOne("PlexRipper.Domain.DownloadTaskTvShowSeason", "Parent")
+                    b.HasOne("Reaparr.Domain.DownloadTaskTvShowSeason", "Parent")
                         .WithMany("Children")
                         .HasForeignKey("ParentId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -3573,9 +3572,9 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("Parent");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.DownloadTaskTvShowSeason", b =>
+            modelBuilder.Entity("Reaparr.Domain.DownloadTaskTvShowSeason", b =>
                 {
-                    b.HasOne("PlexRipper.Domain.DownloadTaskTvShow", "Parent")
+                    b.HasOne("Reaparr.Domain.DownloadTaskTvShow", "Parent")
                         .WithMany("Children")
                         .HasForeignKey("ParentId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -3600,24 +3599,24 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("SimpleTriggers");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.DownloadWorkerTask", b =>
+            modelBuilder.Entity("Reaparr.Domain.DownloadWorkerTask", b =>
                 {
                     b.Navigation("DownloadWorkerTaskLogs");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.FolderPath", b =>
+            modelBuilder.Entity("Reaparr.Domain.FolderPath", b =>
                 {
                     b.Navigation("PlexLibraries");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexAccount", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexAccount", b =>
                 {
                     b.Navigation("PlexAccountLibraries");
 
                     b.Navigation("PlexAccountServers");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexLibrary", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexLibrary", b =>
                 {
                     b.Navigation("Movies");
 
@@ -3626,22 +3625,22 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("TvShows");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexMovie", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexMovie", b =>
                 {
                     b.Navigation("MediaDataList");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexMovieMediaData", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexMovieMediaData", b =>
                 {
                     b.Navigation("Parts");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexMovieMediaDataPart", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexMovieMediaDataPart", b =>
                 {
                     b.Navigation("Streams");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexServer", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexServer", b =>
                 {
                     b.Navigation("PlexAccountServers");
 
@@ -3652,61 +3651,61 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("ServerStatus");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexServerConnection", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexServerConnection", b =>
                 {
                     b.Navigation("LatestConnectionStatus");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexTvShow", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexTvShow", b =>
                 {
                     b.Navigation("Qualities");
 
                     b.Navigation("Seasons");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexTvShowEpisode", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexTvShowEpisode", b =>
                 {
                     b.Navigation("MediaDataList");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexTvShowEpisodeMediaData", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexTvShowEpisodeMediaData", b =>
                 {
                     b.Navigation("Parts");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexTvShowEpisodeMediaDataPart", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexTvShowEpisodeMediaDataPart", b =>
                 {
                     b.Navigation("Streams");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.PlexTvShowSeason", b =>
+            modelBuilder.Entity("Reaparr.Domain.PlexTvShowSeason", b =>
                 {
                     b.Navigation("Episodes");
 
                     b.Navigation("Qualities");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.DownloadTaskFileBase", b =>
+            modelBuilder.Entity("Reaparr.Domain.DownloadTaskFileBase", b =>
                 {
                     b.Navigation("DownloadWorkerTasks");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.DownloadTaskMovie", b =>
+            modelBuilder.Entity("Reaparr.Domain.DownloadTaskMovie", b =>
                 {
                     b.Navigation("Children");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.DownloadTaskTvShow", b =>
+            modelBuilder.Entity("Reaparr.Domain.DownloadTaskTvShow", b =>
                 {
                     b.Navigation("Children");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.DownloadTaskTvShowEpisode", b =>
+            modelBuilder.Entity("Reaparr.Domain.DownloadTaskTvShowEpisode", b =>
                 {
                     b.Navigation("Children");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.DownloadTaskTvShowSeason", b =>
+            modelBuilder.Entity("Reaparr.Domain.DownloadTaskTvShowSeason", b =>
                 {
                     b.Navigation("Children");
                 });

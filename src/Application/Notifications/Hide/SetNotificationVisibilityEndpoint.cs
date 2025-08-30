@@ -25,11 +25,11 @@ public class SetNotificationVisibilityEndpointRequestValidator : Validator<SetNo
 
 public class SetNotificationVisibilityEndpoint : BaseEndpoint<SetNotificationVisibilityEndpointRequest, BaseResultDTO>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.NotificationController;
 
-    public SetNotificationVisibilityEndpoint(IPlexRipperDbContext dbContext)
+    public SetNotificationVisibilityEndpoint(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
     }

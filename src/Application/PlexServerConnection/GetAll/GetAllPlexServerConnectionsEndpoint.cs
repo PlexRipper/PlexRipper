@@ -7,11 +7,11 @@ namespace Reaparr.Application;
 
 public class GetAllPlexServerConnectionsEndpoint : BaseEndpointWithoutRequest<List<PlexServerConnectionDTO>>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.PlexServerConnectionController + "/";
 
-    public GetAllPlexServerConnectionsEndpoint(IPlexRipperDbContext dbContext)
+    public GetAllPlexServerConnectionsEndpoint(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
     }

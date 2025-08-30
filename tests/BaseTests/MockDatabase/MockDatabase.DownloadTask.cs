@@ -6,8 +6,8 @@ namespace Reaparr.BaseTests;
 
 public static partial class MockDatabase
 {
-    private static async Task<PlexRipperDbContext> AddDownloadTaskMovies(
-        this PlexRipperDbContext context,
+    private static async Task<ReaparrDbContext> AddDownloadTaskMovies(
+        this ReaparrDbContext context,
         Seed seed,
         Action<FakeDataConfig>? options = null
     )
@@ -30,7 +30,7 @@ public static partial class MockDatabase
 
         _log.Here()
             .Debug(
-                "Added {MovieDownloadTasksCount} Movie {NameOfDownloadTask}s to PlexRipperDbContext: {DatabaseName}",
+                "Added {MovieDownloadTasksCount} Movie {NameOfDownloadTask}s to ReaparrDbContext: {DatabaseName}",
                 config.MovieDownloadTasksCount,
                 nameof(DownloadTaskMovie),
                 context.DatabaseName
@@ -39,8 +39,8 @@ public static partial class MockDatabase
         return context;
     }
 
-    private static async Task<PlexRipperDbContext> AddDownloadTaskTvShows(
-        this PlexRipperDbContext context,
+    private static async Task<ReaparrDbContext> AddDownloadTaskTvShows(
+        this ReaparrDbContext context,
         Seed seed,
         Action<FakeDataConfig>? options = null
     )
@@ -63,7 +63,7 @@ public static partial class MockDatabase
 
         _log.Here()
             .Debug(
-                "Added {TvShowDownloadTasksCount} TvShow {NameOfDownloadTask}s to PlexRipperDbContext: {DatabaseName}",
+                "Added {TvShowDownloadTasksCount} TvShow {NameOfDownloadTask}s to ReaparrDbContext: {DatabaseName}",
                 config.TvShowDownloadTasksCount,
                 nameof(DownloadTaskTvShow),
                 context.DatabaseName

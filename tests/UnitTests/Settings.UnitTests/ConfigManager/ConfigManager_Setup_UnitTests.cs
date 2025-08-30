@@ -1,6 +1,5 @@
 using System.IO.Abstractions;
 using System.Reactive.Subjects;
-using Reaparr.BaseTests;
 using Reaparr.Environment;
 using Reaparr.Settings.Contracts;
 
@@ -16,9 +15,9 @@ public class ConfigManager_Setup_UnitTests : BaseUnitTest<ConfigManager>
     {
         // Arrange
         mock.Mock<IUserSettings>().SetupGet(x => x.SettingsUpdated).Returns(new Subject<UserSettings>());
-        mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_PlexRipperSettings.json");
+        mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_ReaparrSettings.json");
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "/");
-        mock.Mock<IPathProvider>().SetupGet(x => x.ConfigDirectory).Returns(() => "/TEST_PlexRipperSettings.json");
+        mock.Mock<IPathProvider>().SetupGet(x => x.ConfigDirectory).Returns(() => "/TEST_ReaparrSettings.json");
         mock.Mock<IDirectory>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true).Verifiable(Times.Once);
         mock.Mock<IDirectory>()
             .Setup(x => x.CreateDirectory(It.IsAny<string>()))
@@ -41,9 +40,9 @@ public class ConfigManager_Setup_UnitTests : BaseUnitTest<ConfigManager>
     {
         // Arrange
         mock.Mock<IUserSettings>().SetupGet(x => x.SettingsUpdated).Returns(new Subject<UserSettings>());
-        mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_PlexRipperSettings.json");
+        mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_ReaparrSettings.json");
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigDirectory).Returns(() => "/");
-        mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "/TEST_PlexRipperSettings.json");
+        mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "/TEST_ReaparrSettings.json");
 
         mock.Mock<IFile>().Setup(x => x.WriteAllText(It.IsAny<string>(), It.IsAny<string>())).Verifiable(Times.Once);
 

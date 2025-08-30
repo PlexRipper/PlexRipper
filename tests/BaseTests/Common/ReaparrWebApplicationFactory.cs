@@ -10,17 +10,17 @@ using ILog = Reaparr.Logging.ILog;
 
 namespace Reaparr.BaseTests;
 
-public class PlexRipperWebApplicationFactory : WebApplicationFactory<Program>
+public class ReaparrWebApplicationFactory : WebApplicationFactory<Program>
 {
     public Seed Seed { get; }
 
     public readonly string MemoryDbName;
 
-    private static readonly ILog _log = new LogConfig().CreateLogInstance<PlexRipperWebApplicationFactory>();
+    private static readonly ILog _log = new LogConfig().CreateLogInstance<ReaparrWebApplicationFactory>();
 
     private readonly UnitTestDataConfig _config;
 
-    public PlexRipperWebApplicationFactory(Seed seed, string memoryDbName, Action<UnitTestDataConfig>? options = null)
+    public ReaparrWebApplicationFactory(Seed seed, string memoryDbName, Action<UnitTestDataConfig>? options = null)
     {
         this.WithWebHostBuilder(builder =>
         {

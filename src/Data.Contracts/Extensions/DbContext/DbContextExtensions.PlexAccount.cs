@@ -7,7 +7,7 @@ namespace Reaparr.Data.Contracts;
 public static partial class DbContextExtensions
 {
     public static async Task<Result<List<PlexAccount>>> GetPlexAccountsWithAccessAsync(
-        this IPlexRipperDbContext dbContext,
+        this IReaparrDbContext dbContext,
         int plexServerId,
         CancellationToken cancellationToken = default
     )
@@ -35,7 +35,7 @@ public static partial class DbContextExtensions
     }
 
     public static async Task<Result<PlexAccount>> ChoosePlexAccountToConnect(
-        this IPlexRipperDbContext dbContext,
+        this IReaparrDbContext dbContext,
         int plexServerId,
         CancellationToken ct = default
     )
@@ -73,7 +73,7 @@ public static partial class DbContextExtensions
     }
 
     public static async Task<Result<List<PlexServer>>> GetAccessiblePlexServers(
-        this IPlexRipperDbContext dbContext,
+        this IReaparrDbContext dbContext,
         int plexAccountId,
         CancellationToken cancellationToken = default
     )
@@ -94,7 +94,7 @@ public static partial class DbContextExtensions
     }
 
     public static async Task<bool> IsUsernameAvailable(
-        this IPlexRipperDbContext dbContext,
+        this IReaparrDbContext dbContext,
         string username,
         CancellationToken cancellationToken = default
     )
@@ -107,7 +107,7 @@ public static partial class DbContextExtensions
     }
 
     public static async Task<string> GetPlexAccountDisplayName(
-        this IPlexRipperDbContext dbContext,
+        this IReaparrDbContext dbContext,
         int plexAccountId,
         CancellationToken cancellationToken = default
     )

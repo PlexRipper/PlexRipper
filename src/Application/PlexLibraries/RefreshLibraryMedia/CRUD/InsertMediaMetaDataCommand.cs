@@ -60,9 +60,9 @@ public class InsertMediaMetaDataCommandHandler
     : ICommandHandler<InsertMediaMetaDataCommand, Result<InsertMediaMetaDataCommandResponse>>
 {
     private readonly ILog _log;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
-    public InsertMediaMetaDataCommandHandler(IPlexRipperDbContext dbContext, ILog log)
+    public InsertMediaMetaDataCommandHandler(IReaparrDbContext dbContext, ILog log)
     {
         _dbContext = dbContext;
         _log = log;

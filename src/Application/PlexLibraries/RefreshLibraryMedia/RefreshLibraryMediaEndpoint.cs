@@ -18,12 +18,12 @@ public class RefreshLibraryMediaEndpointRequestValidator : Validator<RefreshLibr
 
 public class RefreshLibraryMediaEndpoint : BaseEndpoint<RefreshLibraryMediaEndpointRequest, PlexLibraryDTO>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
 
     public override string EndpointPath => ApiRoutes.PlexLibraryController + "/refresh/{PlexLibraryId}";
 
-    public RefreshLibraryMediaEndpoint(IPlexRipperDbContext dbContext, ICommandExecutor commandExecutor)
+    public RefreshLibraryMediaEndpoint(IReaparrDbContext dbContext, ICommandExecutor commandExecutor)
     {
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;

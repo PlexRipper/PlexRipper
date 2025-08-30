@@ -1,7 +1,5 @@
 using Reaparr.Environment;
-using Reaparr.Logging.Common;
 using Reaparr.Logging.Enricher;
-using Reaparr.Logging.Interface;
 using Reaparr.Logging.Masks;
 using Serilog;
 using Serilog.Core;

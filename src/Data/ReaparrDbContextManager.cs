@@ -4,16 +4,15 @@ using Reaparr.Data.Contracts;
 using Reaparr.Environment;
 using Reaparr.Identity.Contracts;
 using Reaparr.Logging;
-using Reaparr.Logging.Interface;
 using Reaparr.Settings.Contracts;
 
 namespace Reaparr.Data;
 
-public class PlexRipperDbContextManager : IPlexRipperDbContextManager
+public class ReaparrDbContextManager : IReaparrDbContextManager
 {
-    private readonly ILog<PlexRipperDbContextManager> _log;
+    private readonly ILog<ReaparrDbContextManager> _log;
 
-    private readonly IPlexRipperDbContextDatabase _plexRipperDbContextDatabase;
+    private readonly IReaparrDbContextDatabase _reaparrDbContextDatabase;
     private readonly IAuthDbContextDatabase _authDbContextDatabase;
     private readonly IGeneralSettings _generalSettings;
 
@@ -23,9 +22,9 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
     private readonly IFile _file;
     private string DatabasePath => _pathProvider.DatabasePath;
 
-    public PlexRipperDbContextManager(
-        ILog<PlexRipperDbContextManager> log,
-        IPlexRipperDbContextDatabase plexRipperDbContextDatabase,
+    public ReaparrDbContextManager(
+        ILog<ReaparrDbContextManager> log,
+        IReaparrDbContextDatabase reaparrDbContextDatabase,
         IAuthDbContextDatabase authDbContextDatabase,
         IGeneralSettings generalSettings,
         IPathProvider pathProvider,
@@ -34,7 +33,7 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
     )
     {
         _log = log;
-        _plexRipperDbContextDatabase = plexRipperDbContextDatabase;
+        _reaparrDbContextDatabase = reaparrDbContextDatabase;
         _authDbContextDatabase = authDbContextDatabase;
         _generalSettings = generalSettings;
         _pathProvider = pathProvider;
@@ -53,7 +52,7 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
         if (_file.Exists(DatabasePath))
         {
             // Check if the database can be connected to.
-            if (_plexRipperDbContextDatabase.CanConnect())
+            if (_reaparrDbContextDatabase.CanConnect())
             {
                 _log.InformationLine("Database was successfully connected!");
                 _log.Information("Database connected at: {DatabasePath}", DatabasePath);
@@ -77,8 +76,8 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
     {
         try
         {
-            _log.InformationLine("Resetting PlexRipper database now");
-            _plexRipperDbContextDatabase.CloseConnection();
+            _log.InformationLine("Resetting Reaparr database now");
+            _reaparrDbContextDatabase.CloseConnection();
 
             var backUpResult = BackUpDatabase();
             if (backUpResult.IsFailed)
@@ -87,7 +86,7 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
                 return backUpResult.LogError();
             }
 
-            var deletedResult = _plexRipperDbContextDatabase.EnsureDeleted();
+            var deletedResult = _reaparrDbContextDatabase.EnsureDeleted();
             if (deletedResult.IsFailed)
             {
                 _log.Error("Database could not be deleted at {DatabasePath}", DatabasePath);
@@ -122,7 +121,7 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
         try
         {
             // Create the database while applying any pending migrations.
-            _plexRipperDbContextDatabase.Migrate();
+            _reaparrDbContextDatabase.Migrate();
             _authDbContextDatabase.Migrate();
             _log.Information("The new database was successfully created at: {DatabasePath}", DatabasePath);
             return Result.Ok();
@@ -142,11 +141,11 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
         {
             // Don't migrate when running in memory, this causes an error:
             // "Relational-specific methods can only be used when the context is using a relational database provider."
-            var pendingMigrations = _plexRipperDbContextDatabase.GetPendingMigrations();
-            if (!_plexRipperDbContextDatabase.IsInMemory() && pendingMigrations.Any())
+            var pendingMigrations = _reaparrDbContextDatabase.GetPendingMigrations();
+            if (!_reaparrDbContextDatabase.IsInMemory() && pendingMigrations.Any())
             {
                 _log.InformationLine("Attempting to migrate database, this might take a while");
-                var migrateResult = _plexRipperDbContextDatabase.Migrate();
+                var migrateResult = _reaparrDbContextDatabase.Migrate();
                 if (migrateResult.IsFailed)
                 {
                     _log.ErrorLine("Failed to migrate the database");
@@ -189,7 +188,7 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
 
     private Result BackUpDatabase()
     {
-        _log.InformationLine("Attempting to back-up the PlexRipper database");
+        _log.InformationLine("Attempting to back-up the Reaparr database");
         if (!_file.Exists(_pathProvider.DatabasePath))
         {
             _log.InformationLine("Database does not exist, cannot continue to back-up");

@@ -21,10 +21,10 @@ public record ServerOnlineStatusChangedNotification : IEvent
 public class ServerOnlineStatusChangedHandler : IEventHandler<ServerOnlineStatusChangedNotification>
 {
     private readonly ILog _log;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly IDownloadQueue _downloadQueue;
 
-    public ServerOnlineStatusChangedHandler(ILog log, IPlexRipperDbContext dbContext, IDownloadQueue downloadQueue)
+    public ServerOnlineStatusChangedHandler(ILog log, IReaparrDbContext dbContext, IDownloadQueue downloadQueue)
     {
         _log = log;
         _dbContext = dbContext;

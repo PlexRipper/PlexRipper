@@ -7,7 +7,7 @@ namespace Reaparr.WebAPI;
 public static partial class Startup
 {
     /// <summary>
-    /// Set up the PlexRipperConfig.json file.
+    /// Set up the ReaparrConfig.json file.
     /// </summary>
     /// <param name="app"></param>
     /// <returns></returns>

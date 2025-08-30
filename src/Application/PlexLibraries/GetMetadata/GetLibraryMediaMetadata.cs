@@ -30,11 +30,11 @@ public class GetLibraryMediaMetadataRequestValidator : Validator<GetLibraryMedia
 
 public class GetLibraryMediaMetadata : BaseEndpoint<GetLibraryMediaMetadataRequest, PlexMediaMetadataDTO>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.PlexLibraryController + "/{PlexLibraryId}/metadata";
 
-    public GetLibraryMediaMetadata(IPlexRipperDbContext dbContext)
+    public GetLibraryMediaMetadata(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
     }

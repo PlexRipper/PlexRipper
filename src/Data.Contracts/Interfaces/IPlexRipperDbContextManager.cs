@@ -2,4 +2,4 @@ using Reaparr.Domain;
 
 namespace Reaparr.Data.Contracts;
 
-public interface IPlexRipperDbContextManager : ISetup { }
+public interface IReaparrDbContextManager : ISetup { }

@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
-using Reaparr.BaseTests;
 using Reaparr.PlexApi.Contracts;
 
 namespace Reaparr.Application.UnitTests;

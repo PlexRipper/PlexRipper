@@ -24,11 +24,11 @@ public class GetPlexLibraryMediaEndpointRequestValidator : Validator<GetPlexLibr
 
 public class GetPlexLibraryMediaEndpoint : BaseEndpoint<GetPlexLibraryMediaEndpointRequest, PlexMediaStatisticsDTO>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.PlexLibraryController + "/{PlexLibraryId}/media";
 
-    public GetPlexLibraryMediaEndpoint(IPlexRipperDbContext dbContext)
+    public GetPlexLibraryMediaEndpoint(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
     }

@@ -1,6 +1,5 @@
 ﻿using System.IO.Abstractions;
 using Autofac;
-using Reaparr.BaseTests;
 using Reaparr.Environment;
 using Reaparr.Settings.Contracts;
 using ILog = Reaparr.Logging.ILog;
@@ -18,7 +17,7 @@ public class ConfigManager_LoadConfig_UnitTests : BaseUnitTest<ConfigManager>
         // Arrange
         var settingsModel = FakeData.GetSettingsModel(new Seed(89944)).Generate();
         var settingsJson = UserSettingsSerializer.Serialize(settingsModel);
-        mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_PlexRipperSettings.json");
+        mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_ReaparrSettings.json");
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigDirectory).Returns(() => "");
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "");
         mock.Mock<IFile>().Setup(x => x.ReadAllText(It.IsAny<string>())).Returns(() => settingsJson);
@@ -36,7 +35,7 @@ public class ConfigManager_LoadConfig_UnitTests : BaseUnitTest<ConfigManager>
     public void ShouldResetSettings_WhenFailingToReadSettingsFromFile()
     {
         // Arrange
-        mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_PlexRipperSettings.json");
+        mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_ReaparrSettings.json");
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "");
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigDirectory).Returns(() => "");
         mock.Mock<IFile>().Setup(x => x.ReadAllText(It.IsAny<string>())).Returns(() => "");
@@ -67,7 +66,7 @@ public class ConfigManager_LoadConfig_UnitTests : BaseUnitTest<ConfigManager>
     {
         // Arrange
         mock.Mock<IFile>().Setup(x => x.ReadAllText(It.IsAny<string>())).Returns(() => "{}");
-        mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_PlexRipperSettings.json");
+        mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_ReaparrSettings.json");
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "/");
         mock.Mock<IUserSettings>().Setup(x => x.Reset());
 
@@ -96,7 +95,7 @@ public class ConfigManager_LoadConfig_UnitTests : BaseUnitTest<ConfigManager>
     {
         // Arrange
         mock.Mock<IFile>().Setup(x => x.ReadAllText(It.IsAny<string>())).Returns(() => "@#$%^&");
-        mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_PlexRipperSettings.json");
+        mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_ReaparrSettings.json");
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "");
         mock.Mock<IUserSettings>().Setup(x => x.Reset());
 

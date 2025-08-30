@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace PlexRipper.Identity.Migrations
+namespace Reaparr.Identity.Migrations
 {
     /// <inheritdoc />
     public partial class AddKeysTable : Migration

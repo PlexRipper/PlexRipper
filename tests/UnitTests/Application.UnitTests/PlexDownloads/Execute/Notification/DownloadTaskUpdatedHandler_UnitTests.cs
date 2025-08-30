@@ -1,6 +1,5 @@
 using Application.Contracts;
 using Data.Contracts;
-using FileSystem.Contracts;
 
 namespace PlexRipper.Application.UnitTests;
 
@@ -64,10 +63,6 @@ public class DownloadTaskUpdatedHandler_UnitTests : BaseUnitTest<DownloadTaskUpd
                 x.SendDownloadProgressUpdateAsync(It.IsAny<List<DownloadTaskGeneric>>(), It.IsAny<CancellationToken>())
             )
             .Returns(Task.CompletedTask);
-
-        mock.Mock<IFileMergeScheduler>()
-            .Setup(x => x.StartFileMergeJob(It.IsAny<DownloadTaskKey>()))
-            .ReturnsAsync(Result.Ok());
 
         // Act
         var command = new DownloadTaskUpdatedCommand(downloadTasks[0].ToKey());

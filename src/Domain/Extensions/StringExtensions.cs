@@ -122,7 +122,7 @@ public static partial class StringExtensions
 
         // Remove punctuation and diacritics
         sortTitle = RemoveDiacritics(sortTitle);
-        sortTitle = RemoveWhiteSpaceRegex().Replace(sortTitle, "");
+        sortTitle = RemovePunctuationRegex().Replace(sortTitle, "");
 
         // Trim any leading or trailing whitespace
         return sortTitle.Trim();
@@ -138,7 +138,7 @@ public static partial class StringExtensions
 
         // Remove punctuation and diacritics
         var normalizedTitle = RemoveDiacritics(lowerTitle);
-        normalizedTitle = RemoveWhiteSpaceRegex().Replace(normalizedTitle, "");
+        normalizedTitle = RemovePunctuationRegex().Replace(normalizedTitle, "");
 
         // Split title into words and remove stop words
         var words = normalizedTitle
@@ -179,7 +179,7 @@ public static partial class StringExtensions
     }
 
     [GeneratedRegex(@"[^\w\s]")]
-    private static partial Regex RemoveWhiteSpaceRegex();
+    private static partial Regex RemovePunctuationRegex();
 
     public static string GetFileName(this string path)
     {

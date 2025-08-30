@@ -106,7 +106,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
         {
             _log.Here()
                 .Warning(
-                    "No {NameOfPlexActor} relations were given to be inserted for library {LibraryName} with {libraryId}, all current {NameOfPlexActor} relations will be dropped",
+                    "No {NameOfPlexActor} relations were given to be inserted for library {LibraryName} with {libraryId}, all current {NameOfPlexActor2} relations will be dropped",
                     nameof(PlexActor),
                     libraryName,
                     libraryId,
@@ -177,7 +177,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
         {
             _log.Here()
                 .Warning(
-                    "No {NameOfPlexGenre} relations were given to be inserted for library {LibraryName} with {libraryId}, all current {NameOfPlexGenre} relations will be dropped",
+                    "No {NameOfPlexGenre} relations were given to be inserted for library {LibraryName} with {libraryId}, all current {NameOfPlexGenre2} relations will be dropped",
                     nameof(PlexGenre),
                     libraryName,
                     libraryId,
@@ -244,7 +244,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
         {
             _log.Here()
                 .Warning(
-                    "No {NameOfPlexCountry} relations were given to be inserted for library {LibraryName} with {libraryId}, all current {NameOfPlexCountry} relations will be dropped",
+                    "No {NameOfPlexCountry} relations were given to be inserted for library {LibraryName} with {libraryId}, all current {NameOfPlexCountry2} relations will be dropped",
                     nameof(PlexCountry),
                     libraryName,
                     libraryId,

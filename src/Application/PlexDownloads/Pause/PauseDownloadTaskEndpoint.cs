@@ -33,6 +33,7 @@ public class PauseDownloadTaskEndpoint : BaseEndpoint<PauseDownloadTaskEndpointR
 
     public override void Configure()
     {
+        // TODO state is changed - use POST / PUT
         Get(EndpointPath);
 
         Description(x =>

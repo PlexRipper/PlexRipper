@@ -59,7 +59,7 @@ public class RefreshLibraryAccessHandler
         // Determine the Plex servers to refresh the Plex libraries for
         if (plexServerId == 0)
         {
-            var result = await _dbContext.GetAccessiblePlexServers(plexAccountId, CancellationToken.None);
+            var result = await _dbContext.GetAccessiblePlexServers(plexAccountId, cancellationToken);
             if (result.IsFailed)
                 return result.ToResult();
 
@@ -67,7 +67,7 @@ public class RefreshLibraryAccessHandler
         }
         else
         {
-            var plexServer = await _dbContext.PlexServers.GetAsync(plexServerId, CancellationToken.None);
+            var plexServer = await _dbContext.PlexServers.GetAsync(plexServerId, cancellationToken);
             if (plexServer is not null)
             {
                 plexServers.Add(plexServer);

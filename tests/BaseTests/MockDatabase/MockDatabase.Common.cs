@@ -13,6 +13,11 @@ public static partial class MockDatabase
 {
     private static readonly ILog _log = new LogConfig().CreateLogInstance(typeof(MockDatabase));
 
+    /// <summary>
+    /// NaturalSortComparer uses InvariantCultureIgnoreCase for deterministic test results.
+    /// Note: If UI-facing code uses CurrentCultureIgnoreCase, this difference is intentional
+    /// to prevent future confusion or drift between test and production behavior.
+    /// </summary>
     private static readonly NaturalSortComparer _naturalComparer = new(StringComparison.InvariantCultureIgnoreCase);
 
     #region Methods
@@ -224,10 +229,7 @@ public static partial class MockDatabase
 
         SqliteConnection databaseConnection = new(DatabaseConnectionString(dbName));
 
-        databaseConnection.CreateCollation(
-            OrderByNaturalExtensions.CollationName,
-            (x, y) => _naturalComparer.Compare(x, y)
-        );
+        databaseConnection.CreateCollation(OrderByNaturalExtensions.CollationName, _naturalComparer.Compare);
 
         optionsBuilder.UseSqlite(databaseConnection);
 
@@ -245,10 +247,7 @@ public static partial class MockDatabase
 
         SqliteConnection databaseConnection = new(DatabaseConnectionString(dbName));
 
-        databaseConnection.CreateCollation(
-            OrderByNaturalExtensions.CollationName,
-            (x, y) => _naturalComparer.Compare(x, y)
-        );
+        databaseConnection.CreateCollation(OrderByNaturalExtensions.CollationName, _naturalComparer.Compare);
 
         optionsBuilder.UseSqlite(databaseConnection);
 

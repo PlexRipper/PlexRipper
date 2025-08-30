@@ -55,11 +55,11 @@ public class RefreshPlexMovieLibraryCommandHandler
             foreach (var plexMovie in plexLibrary.Movies)
                 plexMovie.SortIndex = i++;
 
-            var createResult = await _commandExecutor.Send(
+            var syncResult = await _commandExecutor.Send(
                 new SyncPlexMoviesCommand(command.LibraryMetadata),
                 cancellationToken
             );
-            if (createResult.IsFailed)
+            if (syncResult.IsFailed)
             {
                 await _progressReporter.SendProgress(
                     new RefreshLibraryProgressUpdate
@@ -72,7 +72,7 @@ public class RefreshPlexMovieLibraryCommandHandler
                     }
                 );
 
-                return createResult.ToResult().LogError();
+                return syncResult.ToResult().LogError();
             }
         }
         else

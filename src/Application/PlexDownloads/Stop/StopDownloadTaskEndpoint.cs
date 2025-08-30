@@ -28,6 +28,7 @@ public class StopDownloadTaskEndpoint : BaseEndpoint<StopDownloadTaskEndpointReq
 
     public override void Configure()
     {
+        // TODO state is changed - use POST / PUT
         Get(EndpointPath);
 
         Description(x =>

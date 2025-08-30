@@ -27,6 +27,7 @@ public class FileMergeJob : IJob
         // Jobs should swallow exceptions as otherwise Quartz will keep re-executing it
         // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
         var dataMap = context.JobDetail.JobDataMap;
+        var ct = context.CancellationToken;
         var downloadTaskKey = dataMap.GetJsonValue<DownloadTaskKey>(DownloadTaskIdParameter);
         if (downloadTaskKey is null)
         {
@@ -44,10 +45,7 @@ public class FileMergeJob : IJob
                     downloadTaskKey.Id
                 );
 
-            var result = await _commandExecutor.Send(
-                new MergeFilesFromFileTaskCommand(downloadTaskKey),
-                context.CancellationToken
-            );
+            var result = await _commandExecutor.Send(new MergeFilesFromFileTaskCommand(downloadTaskKey), ct);
 
             if (result.IsFailed)
             {
@@ -55,20 +53,20 @@ public class FileMergeJob : IJob
                 return;
             }
 
-            var downloadTask = await _dbContext.GetDownloadTaskFileAsync(downloadTaskKey, context.CancellationToken);
+            var downloadTask = await _dbContext.GetDownloadTaskFileAsync(downloadTaskKey, ct);
 
             if (downloadTask!.DownloadStatus is DownloadStatus.MoveFinished or DownloadStatus.MergeFinished)
             {
                 await _dbContext.SetDownloadStatus(downloadTaskKey, DownloadStatus.Completed);
 
                 // Clean up the DownloadWorkerTasks
-                await _commandExecutor.Send(new CleanUpDownloadTaskFoldersCommand(downloadTaskKey));
+                await _commandExecutor.Send(new CleanUpDownloadTaskFoldersCommand(downloadTaskKey), ct);
 
                 await _dbContext
                     .DownloadWorkerTasks.Where(x => x.DownloadTaskId == downloadTask.Id)
-                    .ExecuteDeleteAsync();
+                    .ExecuteDeleteAsync(ct);
 
-                await _commandExecutor.Send(new DownloadTaskUpdatedCommand(downloadTaskKey));
+                await _commandExecutor.Send(new DownloadTaskUpdatedCommand(downloadTaskKey), ct);
             }
         }
         catch (TaskCanceledException)

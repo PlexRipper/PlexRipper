@@ -43,14 +43,14 @@ public class AppExtensions
         // Retrieve PUID and PGID from environment variables
         _log.Here(sourceFilePath, memberName, sourceLineNumber)
             .Information(
-                "PUID from env: {PUID} and from the system: {PUID}",
+                "PUID from env: {EnvPUID} and from the system: {PUID}",
                 EnvironmentExtensions.GetPuid(),
                 getuid()
             );
 
         _log.Here(sourceFilePath, memberName, sourceLineNumber)
             .Information(
-                "PGID from env: {PGID} and from the system: {PGID}",
+                "PGID from env: {EnvPGID} and from the system: {PGID}",
                 EnvironmentExtensions.GetPgid(),
                 getgid()
             );

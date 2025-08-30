@@ -29,6 +29,8 @@ public class CheckDownloadQueueHandler : IEventHandler<CheckDownloadQueueNotific
 
     public async Task HandleAsync(CheckDownloadQueueNotification notification, CancellationToken cancellationToken)
     {
-        await _downloadQueue.CheckDownloadQueue(notification.PlexServerIds);
+        var checkResult = await _downloadQueue.CheckDownloadQueue(notification.PlexServerIds);
+        if (checkResult.IsFailed)
+            checkResult.LogError();
     }
 }

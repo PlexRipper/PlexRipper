@@ -57,7 +57,14 @@ public class DeleteDownloadTaskEndpoint : BaseEndpoint<DeleteDownloadTaskEndpoin
         {
             var downloadTaskKey = await _dbContext.GetDownloadTaskKeyAsync(downloadTaskId, ct);
             if (downloadTaskKey is not null && await _downloadTaskScheduler.IsDownloading(downloadTaskKey, ct))
-                await _commandExecutor.Send(new StopDownloadTaskCommand(downloadTaskKey.Id), ct);
+            {
+                var stopResult = await _commandExecutor.Send(new StopDownloadTaskCommand(downloadTaskKey.Id), ct);
+                if (stopResult.IsFailed)
+                {
+                    await SendFluentResult(stopResult, ct);
+                    return;
+                }
+            }
         }
 
         // Delete Download tasks

@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Linq.Expressions;
+using System.Net;
 using System.Text;
 using Application.Contracts;
 using FastEndpoints;
@@ -17,6 +18,18 @@ public static class MoqExtensions
     )
     {
         var result = mock.Mock<ICommandExecutor>().Setup(m => m.Send(request.Invoke(), It.IsAny<CancellationToken>()));
+        if (isVerifiable)
+            result.Verifiable();
+        return result;
+    }
+
+    public static ISetup<ICommandExecutor, Task<TResult>> SetupCommand<TResult>(
+        this AutoMock mock,
+        Expression<Func<ICommand<TResult>, bool>> matcher,
+        bool isVerifiable = false
+    )
+    {
+        var result = mock.Mock<ICommandExecutor>().Setup(m => m.Send(It.Is(matcher), It.IsAny<CancellationToken>()));
         if (isVerifiable)
             result.Verifiable();
         return result;
@@ -51,7 +64,7 @@ public static class MoqExtensions
     public static void VerifyEventPublished(this AutoMock mock, Func<IEvent> notification, Func<Times> times)
     {
         mock.Mock<IEventPublisher>()
-            .Verify(x => x.PublishAsync(notification.Invoke(), It.IsAny<CancellationToken>()), times);
+            .Verify(x => x.PublishAsync(notification.Invoke(), It.IsAny<CancellationToken>()), times());
     }
 
     public static void VerifyEventPublished(this AutoMock mock, Func<ICommand> request, Times times)
@@ -61,12 +74,12 @@ public static class MoqExtensions
 
     public static void VerifyEventPublished(this AutoMock mock, Func<ICommand> request, Func<Times> times)
     {
-        mock.Mock<ICommandExecutor>().Verify(x => x.Send(request.Invoke(), It.IsAny<CancellationToken>()), times);
+        mock.Mock<ICommandExecutor>().Verify(x => x.Send(request.Invoke(), It.IsAny<CancellationToken>()), times());
     }
 
     public static void VerifyEventPublished<T>(this AutoMock mock, Func<ICommand<T>> request, Func<Times> times)
     {
-        mock.Mock<ICommandExecutor>().Verify(x => x.Send(request.Invoke(), It.IsAny<CancellationToken>()), times);
+        mock.Mock<ICommandExecutor>().Verify(x => x.Send(request.Invoke(), It.IsAny<CancellationToken>()), times());
     }
 
     public static void VerifyEventPublished<T>(this AutoMock mock, Func<ICommand<T>> request, Times times)
@@ -79,12 +92,12 @@ public static class MoqExtensions
     public static void VerifyNotification(this AutoMock mock, Func<IEvent> notification, Func<Times> times)
     {
         mock.Mock<IEventPublisher>()
-            .Verify(x => x.PublishAsync(notification.Invoke(), It.IsAny<CancellationToken>()), times);
+            .Verify(x => x.PublishAsync(notification.Invoke(), It.IsAny<CancellationToken>()), times());
     }
 
     public static void VerifyNotification(this AutoMock mock, IEvent notification, Func<Times> times)
     {
-        mock.Mock<IEventPublisher>().Verify(x => x.PublishAsync(notification, It.IsAny<CancellationToken>()), times);
+        mock.Mock<IEventPublisher>().Verify(x => x.PublishAsync(notification, It.IsAny<CancellationToken>()), times());
     }
 
     #endregion

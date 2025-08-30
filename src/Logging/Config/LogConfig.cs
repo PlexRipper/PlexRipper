@@ -18,7 +18,7 @@ public class LogConfig
     private static readonly string _template =
         $"{{NewLine}}{{Timestamp:HH:mm:ss}} [{{Level}}] [{{{nameof(LogMetaData.ClassName)}}}.cs:{{{nameof(LogMetaData.LineNumber)}}}.{{{nameof(LogMetaData.MethodName)}}}()] => {{Message:lj}}{{NewLine}}{{Exception}}";
 
-    protected static MessageTemplateTextFormatter TemplateTextFormatter => new(_template);
+    protected static MessageTemplateTextFormatter TemplateTextFormatter = new(_template);
 
     protected static LoggerConfiguration GetBaseConfiguration()
     {

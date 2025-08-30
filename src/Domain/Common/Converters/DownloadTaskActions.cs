@@ -6,7 +6,7 @@ public static class DownloadTaskActions
 {
     private static readonly ILog _log = new LogConfig().CreateLogInstance(typeof(DownloadTaskActions));
 
-    private static readonly List<DownloadStatus> _anyStatuses =
+    private static readonly DownloadStatus[] _anyStatuses =
     [
         DownloadStatus.ServerUnreachable,
         DownloadStatus.Error,

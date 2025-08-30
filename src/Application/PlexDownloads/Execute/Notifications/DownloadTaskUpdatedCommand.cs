@@ -34,9 +34,7 @@ public class DownloadTaskUpdatedHandler : ICommandHandler<DownloadTaskUpdatedCom
 
         var changedDownloadTask = await _dbContext.GetDownloadTaskAsync(command.Key, cancellationToken);
         if (changedDownloadTask is null)
-        {
             return ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), command.Key.ToString()).LogError();
-        }
 
         return Result.Ok();
     }

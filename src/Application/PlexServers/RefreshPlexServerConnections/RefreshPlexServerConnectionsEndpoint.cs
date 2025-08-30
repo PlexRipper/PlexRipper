@@ -50,6 +50,11 @@ public class RefreshPlexServerConnectionsEndpoint : BaseEndpoint<RefreshPlexServ
             return;
         }
 
-        await _commandExecutor.Send(new RefreshPlexServerAccessCommand(plexAccountResult.Value.Id), ct);
+        var refreshResult = await _commandExecutor.Send(
+            new RefreshPlexServerAccessCommand(plexAccountResult.Value.Id),
+            ct
+        );
+
+        await SendFluentResult(refreshResult.ToResult(), ct);
     }
 }

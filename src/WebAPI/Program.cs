@@ -10,7 +10,7 @@ namespace Reaparr.WebAPI;
 /// </summary>
 public class Program
 {
-    private static readonly ILog _log = new LogConfig().CreateLogInstance(typeof(Program));
+    private static readonly Serilog.ILogger _log = new LogConfig().CreateLogInstance(typeof(Program));
 
     /// <summary>
     ///  The main method entry point for the application.
@@ -20,7 +20,7 @@ public class Program
     {
         try
         {
-            _log.InformationLine("Starting Reaparr!");
+            _log.Information("Starting Reaparr!");
 
             LogManager.SetupLogging(EnvironmentExtensions.GetLogLevel());
             FluentResultConfiguration.Setup();
@@ -34,7 +34,7 @@ public class Program
 
             AppExtensions.LogIdentity();
 
-            _log.InformationLine("Initiating boot process");
+            _log.Information("Initiating boot process");
 
             var builder = WebApplication.CreateBuilder(args);
 
@@ -64,7 +64,7 @@ public class Program
         }
         catch (Exception e)
         {
-            _log.FatalLine("Reaparr crashed due to exception!");
+            _log.Fatal("Reaparr crashed due to exception!");
             Result.Fail(new ExceptionalError(e)).LogFatal();
             System.Environment.Exit(2);
         }
@@ -77,7 +77,7 @@ public class Program
 
     private static void FailedToStart(Result result)
     {
-        _log.FatalLine("Reaparr failed to start!");
+        _log.Fatal("Reaparr failed to start!");
 
         result.LogFatal();
 

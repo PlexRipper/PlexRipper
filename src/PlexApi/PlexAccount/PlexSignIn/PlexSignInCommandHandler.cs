@@ -1,16 +1,16 @@
 using FastEndpoints;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
-using Reaparr.Logging;
 using Reaparr.PlexApi.Contracts;
+using Serilog;
 
 namespace Reaparr.PlexApi;
 
 public class PlexSignInCommandHandler : ICommandHandler<PlexSignInCommand, Result<PlexAccount>>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IPlexApiClientFactory _plexApiClientFactory;
 
-    public PlexSignInCommandHandler(ILog log, IPlexApiClientFactory plexApiClientFactory)
+    public PlexSignInCommandHandler(ILogger log, IPlexApiClientFactory plexApiClientFactory)
     {
         _log = log;
         _plexApiClientFactory = plexApiClientFactory;

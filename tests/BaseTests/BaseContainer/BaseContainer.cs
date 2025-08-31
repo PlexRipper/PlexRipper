@@ -10,6 +10,7 @@ using Reaparr.Environment;
 using Reaparr.FileSystem.Contracts;
 using Reaparr.Logging;
 using Reaparr.Settings.Contracts;
+using Serilog;
 
 namespace Reaparr.BaseTests;
 
@@ -17,7 +18,7 @@ public class BaseContainer : IDisposable
 {
     private readonly ReaparrWebApplicationFactory _factory;
 
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
 
     private readonly ILifetimeScope _lifeTimeScope;
 
@@ -26,7 +27,7 @@ public class BaseContainer : IDisposable
     /// <summary>
     /// Creates an Autofac container and sets up a test database.
     /// </summary>
-    private BaseContainer(ILog log, Seed seed, string memoryDbName, Action<UnitTestDataConfig>? options = null)
+    private BaseContainer(ILogger log, Seed seed, string memoryDbName, Action<UnitTestDataConfig>? options = null)
     {
         _log = log;
 
@@ -38,7 +39,7 @@ public class BaseContainer : IDisposable
         _lifeTimeScope = _factory.Services.GetAutofacRoot().BeginLifetimeScope();
     }
 
-    public static async Task<BaseContainer> Create(ILog log, Seed seed, Action<UnitTestDataConfig>? options = null)
+    public static async Task<BaseContainer> Create(ILogger log, Seed seed, Action<UnitTestDataConfig>? options = null)
     {
         var config = UnitTestDataConfig.FromOptions(options);
 
@@ -136,6 +137,6 @@ public class BaseContainer : IDisposable
         _log.Information("Disposing lifetime scope for container {DatabaseName}", dbName);
         _lifeTimeScope.Dispose();
 
-        _log.FatalLine("Container disposed");
+        _log.Fatal("Container disposed");
     }
 }

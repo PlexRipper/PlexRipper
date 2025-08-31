@@ -2,8 +2,8 @@ using FastEndpoints;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Reaparr.Application.Contracts;
-using Reaparr.Logging;
 using Reaparr.PlexApi.Contracts;
+using Serilog;
 
 namespace Reaparr.Application;
 
@@ -54,12 +54,12 @@ public class ValidatePlexAccountEndpointRequestValidator : Validator<ValidatePle
 
 public class ValidatePlexAccountEndpoint : BaseEndpoint<ValidatePlexAccountEndpointRequest, ValidatePlexAccountResponse>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
 
     public override string EndpointPath => ApiRoutes.PlexAccountController + "/validate";
 
-    public ValidatePlexAccountEndpoint(ILog log, ICommandExecutor commandExecutor)
+    public ValidatePlexAccountEndpoint(ILogger log, ICommandExecutor commandExecutor)
     {
         _log = log;
         _commandExecutor = commandExecutor;

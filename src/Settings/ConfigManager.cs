@@ -2,6 +2,7 @@
 using Reaparr.Environment;
 using Reaparr.Logging;
 using Reaparr.Settings.Contracts;
+using Serilog;
 
 namespace Reaparr.Settings;
 
@@ -9,7 +10,7 @@ public class ConfigManager : IConfigManager
 {
     #region Fields
 
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IPathProvider _pathProvider;
 
     private readonly IUserSettings _userSettings;
@@ -22,7 +23,7 @@ public class ConfigManager : IConfigManager
     #region Constructor
 
     public ConfigManager(
-        ILog log,
+        ILogger log,
         IPathProvider pathProvider,
         IUserSettings userSettings,
         IFile file,
@@ -103,7 +104,7 @@ public class ConfigManager : IConfigManager
 
     public virtual Result LoadConfig()
     {
-        _log.DebugLine("Loading user config settings now");
+        _log.Debug("Loading user config settings now");
         var readResult = ReadFromConfigFile();
         if (readResult.IsFailed)
         {
@@ -144,7 +145,7 @@ public class ConfigManager : IConfigManager
 
     public virtual Result SaveConfig()
     {
-        _log.DebugLine("Saving user config settings now");
+        _log.Debug("Saving user config settings now");
 
         var jsonSettings = UserSettingsSerializer.Serialize(_userSettings);
 
@@ -153,7 +154,7 @@ public class ConfigManager : IConfigManager
         if (writeResult.IsFailed)
             return writeResult;
 
-        _log.DebugLine("UserSettings were saved successfully!");
+        _log.Debug("UserSettings were saved successfully!");
 
         return Result.Ok().WithSuccess("UserSettings were saved successfully!").LogInformation();
     }

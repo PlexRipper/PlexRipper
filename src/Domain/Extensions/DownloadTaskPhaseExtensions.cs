@@ -1,10 +1,11 @@
 using Reaparr.Logging;
+using Serilog;
 
 namespace Reaparr.Domain;
 
 public static class DownloadTaskPhaseExtensions
 {
-    private static readonly ILog _log = new LogConfig().CreateLogInstance(typeof(DownloadTaskPhaseExtensions));
+    private static readonly ILogger _log = new LogConfig().CreateLogInstance(typeof(DownloadTaskPhaseExtensions));
 
     public static DownloadTaskPhase ToDownloadTaskPhase(this DownloadStatus downloadStatus)
     {

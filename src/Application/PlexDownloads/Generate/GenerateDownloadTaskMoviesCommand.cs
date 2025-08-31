@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Application.Contracts.Validators;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
+using Serilog;
 
 namespace Reaparr.Application;
 
@@ -39,10 +39,10 @@ public class GenerateDownloadTaskMoviesCommandValidator : AbstractValidator<Gene
 
 public class GenerateDownloadTaskMoviesCommandHandler : ICommandHandler<GenerateDownloadTaskMoviesCommand, Result>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
-    public GenerateDownloadTaskMoviesCommandHandler(ILog log, IReaparrDbContext dbContext)
+    public GenerateDownloadTaskMoviesCommandHandler(ILogger log, IReaparrDbContext dbContext)
     {
         _log = log;
         _dbContext = dbContext;

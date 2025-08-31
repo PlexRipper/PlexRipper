@@ -6,6 +6,7 @@ using Reaparr.Application.Contracts;
 using Reaparr.Identity.Contracts;
 using Reaparr.Logging;
 using Reaparr.Settings.Contracts;
+using Serilog;
 
 namespace Reaparr.Application;
 
@@ -21,13 +22,13 @@ public class CreateDefaultAppUserCommandValidator : AbstractValidator<CreateDefa
 
 public class CreateDefaultAppUserCommandHandler : ICommandHandler<CreateDefaultAppUserCommand, Result>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IAuthenticationSettings _authenticationSettings;
     private readonly UserManager<AppUser> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
 
     public CreateDefaultAppUserCommandHandler(
-        ILog log,
+        ILogger log,
         IAuthenticationSettings authenticationSettings,
         UserManager<AppUser> userManager,
         RoleManager<IdentityRole> roleManager
@@ -50,7 +51,7 @@ public class CreateDefaultAppUserCommandHandler : ICommandHandler<CreateDefaultA
             var toBeDeletedUser = await _userManager.Users.FirstOrDefaultAsync(cancellationToken: cancellationToken);
             if (toBeDeletedUser != null)
             {
-                _log.InformationLine("Reaparr app user was found, deleting now and creating the default one.");
+                _log.Information("Reaparr app user was found, deleting now and creating the default one.");
                 await _userManager.DeleteAsync(toBeDeletedUser);
             }
         }

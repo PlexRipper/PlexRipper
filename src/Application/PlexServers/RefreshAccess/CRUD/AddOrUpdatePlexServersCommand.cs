@@ -3,6 +3,7 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Data.Contracts;
 using Reaparr.Logging;
+using Serilog;
 
 namespace Reaparr.Application;
 
@@ -38,10 +39,10 @@ public class AddOrUpdatePlexServersCommandValidator : AbstractValidator<AddOrUpd
 public class AddOrUpdatePlexServersCommandHandler
     : ICommandHandler<AddOrUpdatePlexServersCommand, Result<PlexServerRapport>>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
-    public AddOrUpdatePlexServersCommandHandler(ILog log, IReaparrDbContext dbContext)
+    public AddOrUpdatePlexServersCommandHandler(ILogger log, IReaparrDbContext dbContext)
     {
         _log = log;
         _dbContext = dbContext;
@@ -96,7 +97,7 @@ public class AddOrUpdatePlexServersCommandHandler
 
         await _dbContext.SaveChangesAsync(cancellationToken);
 
-        _log.InformationLine(rapport.ToString());
+        _log.Information(rapport.ToString());
 
         return Result.Ok(rapport);
     }

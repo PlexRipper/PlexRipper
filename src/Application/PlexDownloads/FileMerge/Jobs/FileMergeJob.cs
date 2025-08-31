@@ -2,16 +2,17 @@ using Microsoft.EntityFrameworkCore;
 using Quartz;
 using Reaparr.Data.Contracts;
 using Reaparr.Logging;
+using Serilog;
 
 namespace Reaparr.Application;
 
 public class FileMergeJob : IJob
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IReaparrDbContext _dbContext;
 
-    public FileMergeJob(ILog log, ICommandExecutor commandExecutor, IReaparrDbContext dbContext)
+    public FileMergeJob(ILogger log, ICommandExecutor commandExecutor, IReaparrDbContext dbContext)
     {
         _log = log;
         _commandExecutor = commandExecutor;
@@ -75,7 +76,7 @@ public class FileMergeJob : IJob
         }
         catch (Exception e)
         {
-            _log.Error(e);
+            _log.ErrorResult(e);
         }
     }
 }

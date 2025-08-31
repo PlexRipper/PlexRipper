@@ -4,7 +4,7 @@ using FastEndpoints;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
+using Serilog;
 
 namespace Reaparr.Application;
 
@@ -38,14 +38,14 @@ public class SyncPlexMoviesCommandValidator : AbstractValidator<SyncPlexMoviesCo
 
 public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesCommand, Result<CrudMoviesReport>>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
     private readonly CrudMoviesReport _report = new();
 
     private readonly BulkConfig? _config = new() { BatchSize = 500, SetOutputIdentity = true };
 
-    public SyncPlexMoviesCommandHandler(ILog log, IReaparrDbContext dbContext)
+    public SyncPlexMoviesCommandHandler(ILogger log, IReaparrDbContext dbContext)
     {
         _log = log;
         _dbContext = dbContext;
@@ -131,7 +131,7 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
                 stopWatch.Elapsed.TotalMilliseconds
             );
 
-            _log.DebugLine(_report.ToString());
+            _log.Debug(_report.ToString());
 
             return Result.Ok(_report);
         }

@@ -2,7 +2,7 @@ using FastEndpoints;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Reaparr.Application.Contracts;
-using Reaparr.Logging;
+using Serilog;
 
 namespace Reaparr.Application;
 
@@ -22,12 +22,12 @@ public class CreateDownloadTasksEndpointRequestValidator : Validator<CreateDownl
 
 public class CreateDownloadTasksEndpoint : BaseEndpoint<CreateDownloadTasksEndpointRequest>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
 
     public override string EndpointPath => ApiRoutes.DownloadController + "/create";
 
-    public CreateDownloadTasksEndpoint(ILog log, ICommandExecutor commandExecutor)
+    public CreateDownloadTasksEndpoint(ILogger log, ICommandExecutor commandExecutor)
     {
         _log = log;
         _commandExecutor = commandExecutor;
@@ -46,7 +46,7 @@ public class CreateDownloadTasksEndpoint : BaseEndpoint<CreateDownloadTasksEndpo
 
     public override async Task HandleAsync(CreateDownloadTasksEndpointRequest req, CancellationToken ct)
     {
-        _log.DebugLine("Attempting to add download task orders: ");
+        _log.Debug("Attempting to add download task orders: ");
         foreach (var downloadMediaDto in req.Request.DownloadMedias)
             _log.Debug("DownloadMediaDTO: {@DownloadMediaDto} ", downloadMediaDto);
 

@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Reaparr.Data.Contracts;
 using Reaparr.Logging;
 using Reaparr.PlexApi.Contracts;
+using Serilog;
 
 namespace Reaparr.Application;
 
@@ -58,10 +59,10 @@ public record InsertMediaMetaDataCommandResponse
 public class InsertMediaMetaDataCommandHandler
     : ICommandHandler<InsertMediaMetaDataCommand, Result<InsertMediaMetaDataCommandResponse>>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
-    public InsertMediaMetaDataCommandHandler(IReaparrDbContext dbContext, ILog log)
+    public InsertMediaMetaDataCommandHandler(IReaparrDbContext dbContext, ILogger log)
     {
         _dbContext = dbContext;
         _log = log;

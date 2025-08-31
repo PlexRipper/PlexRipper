@@ -5,6 +5,7 @@ using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 using Reaparr.Environment;
 using Reaparr.Logging;
+using Serilog;
 using Serilog.Events;
 
 namespace Reaparr.BaseTests;
@@ -14,7 +15,7 @@ public partial class BaseUnitTest
     protected readonly ITestOutputHelper _output;
     protected readonly LogEventLevel _logEventLevel;
 
-    protected readonly ILog Log;
+    protected readonly ILogger Log;
 
     // Use loose behavior here to avoid Dispose() not mocked exception
     protected Mock<HttpMessageHandler> HttpHandlerMock = new(MockBehavior.Loose);
@@ -73,7 +74,7 @@ public partial class BaseUnitTest
             ctx.AddTestServices(s =>
             {
                 // All different dependencies that are needed for the endpoint need to be added here. And then they can be mocked in the test.
-                s.AddTransient(_ => mock.Create<ILog>());
+                s.AddTransient(_ => mock.Create<ILogger>());
                 s.AddTransient(_ => mock.Create<IReaparrDbContext>());
                 s.AddTransient(_ => mock.Create<ICommandExecutor>());
                 s.AddSingleton(_ => mock.Create<ISchedulerService>());

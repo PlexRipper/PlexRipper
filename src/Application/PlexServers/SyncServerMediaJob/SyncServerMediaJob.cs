@@ -3,12 +3,13 @@ using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 using Reaparr.Logging;
 using Reaparr.WebAPI.Contracts;
+using Serilog;
 
 namespace Reaparr.Application;
 
 public class SyncServerMediaJob : IJob
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IReaparrDbContext _dbContext;
     private readonly ISignalRService _signalRService;
@@ -19,7 +20,7 @@ public class SyncServerMediaJob : IJob
     public static JobKey GetJobKey(int id) => new($"{PlexServerIdParameter}_{id}", nameof(SyncServerMediaJob));
 
     public SyncServerMediaJob(
-        ILog log,
+        ILogger log,
         ICommandExecutor commandExecutor,
         IReaparrDbContext dbContext,
         ISignalRService signalRService
@@ -147,7 +148,7 @@ public class SyncServerMediaJob : IJob
         }
         catch (Exception e)
         {
-            _log.Error(e);
+            _log.ErrorResult(e);
         }
     }
 }

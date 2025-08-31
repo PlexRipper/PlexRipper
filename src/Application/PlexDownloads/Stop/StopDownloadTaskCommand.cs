@@ -4,7 +4,7 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
+using Serilog;
 
 namespace Reaparr.Application;
 
@@ -25,14 +25,14 @@ public class StopDownloadTaskCommandValidator : AbstractValidator<StopDownloadTa
 
 public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCommand, Result>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IFile _file;
     private readonly IDownloadTaskScheduler _downloadTaskScheduler;
 
     public StopDownloadTaskCommandHandler(
-        ILog log,
+        ILogger log,
         IReaparrDbContext dbContext,
         ICommandExecutor commandExecutor,
         IFile file,

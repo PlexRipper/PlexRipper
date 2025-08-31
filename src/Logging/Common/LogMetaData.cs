@@ -5,16 +5,9 @@ namespace Reaparr.Logging;
 
 public record LogMetaData
 {
-    public LogMetaData(string className, string memberName, int lineNumber)
+    public LogMetaData(ILogger log, string className, string memberName, int lineNumber)
     {
-        ClassName = className;
-        MethodName = memberName;
-        LineNumber = lineNumber;
-    }
-
-    public LogMetaData(ILog logger, string className, string memberName, int lineNumber)
-    {
-        _logger = logger.GetLogger();
+        _logger = log;
         ClassName = className;
         MethodName = memberName;
         LineNumber = lineNumber;

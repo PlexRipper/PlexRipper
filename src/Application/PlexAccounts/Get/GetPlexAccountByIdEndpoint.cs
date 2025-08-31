@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
+using Serilog;
 
 namespace Reaparr.Application;
 
@@ -20,12 +20,12 @@ public class GetPlexAccountByIdEndpointRequestValidator : Validator<GetPlexAccou
 
 public class GetPlexAccountByIdEndpoint : BaseEndpoint<GetPlexAccountByIdEndpointRequest, PlexAccountDTO>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.PlexAccountController + "/{PlexAccountId}";
 
-    public GetPlexAccountByIdEndpoint(ILog log, IReaparrDbContext dbContext)
+    public GetPlexAccountByIdEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
         _log = log;
         _dbContext = dbContext;

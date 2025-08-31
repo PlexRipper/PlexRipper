@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
+using Serilog;
 
 namespace Reaparr.Application;
 
@@ -29,13 +29,13 @@ public class SetPreferredPlexServerConnectionEndpointRequestValidator
 public class SetPreferredPlexServerConnectionEndpoint
     : BaseEndpoint<SetPreferredPlexServerConnectionEndpointRequest, BaseResultDTO>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath =>
         ApiRoutes.PlexServerController + "/{PlexServerId}/preferred-connection/{PlexServerConnectionId}";
 
-    public SetPreferredPlexServerConnectionEndpoint(ILog log, IReaparrDbContext dbContext)
+    public SetPreferredPlexServerConnectionEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
         _log = log;
         _dbContext = dbContext;

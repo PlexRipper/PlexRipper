@@ -70,17 +70,15 @@ public class LogConfig
             .MinimumLevel.Is(minimumLogLevel)
             .CreateLogger();
 
-    public ILog CreateLogInstance() => new Log(GetLogger());
+    public ILogger CreateLogInstance<T>()
+        where T : class => GetLogger().ForContext<T>();
 
-    public ILog<T> CreateLogInstance<T>()
-        where T : class => new Log<T>(GetLogger(), typeof(T));
-
-    public ILog<T> CreateLogInstance<T>(LogEventLevel minimumLogLevel)
-        where T : class => new Log<T>(GetLogger(minimumLogLevel), typeof(T));
+    public ILogger CreateLogInstance<T>(LogEventLevel minimumLogLevel)
+        where T : class => GetLogger(minimumLogLevel).ForContext<T>();
 
     /// <summary>
     /// Returns a new typed <see cref="ILog"/> instance.
     /// </summary>
     /// <returns></returns>
-    public ILog CreateLogInstance(Type classType) => new Log<Type>(GetLogger(), classType);
+    public ILogger CreateLogInstance(Type classType) => GetLogger().ForContext(classType);
 }

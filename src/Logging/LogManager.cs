@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using Reaparr.Environment;
+using Serilog;
 using Serilog.Core;
 using Serilog.Events;
 
@@ -60,6 +61,6 @@ public static class LogManager
 
     #endregion
 
-    private static readonly ILog _log = new LogConfig().CreateLogInstance(typeof(LogManager));
+    private static readonly ILogger _log = new LogConfig().CreateLogInstance(typeof(LogManager));
     public static LogEventLevel MinimumLogLevel { get; private set; }
 }

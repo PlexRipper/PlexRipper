@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using Reaparr.Logging;
+using Serilog;
 
 namespace Reaparr.Domain;
 
@@ -7,7 +8,7 @@ public static class DataFormat
 {
     private static readonly NumberFormatInfo _numberFormat = NumberFormatInfo.InvariantInfo;
 
-    private static readonly ILog _log = new LogConfig().CreateLogInstance(typeof(DataFormat));
+    private static readonly ILogger _log = new LogConfig().CreateLogInstance(typeof(DataFormat));
 
     /// <summary>
     /// Format file size or downloaded size string.
@@ -78,7 +79,7 @@ public static class DataFormat
         }
         catch (Exception e)
         {
-            _log.Error(e);
+            _log.ErrorResult(e);
             throw;
         }
     }
@@ -94,7 +95,7 @@ public static class DataFormat
         }
         catch (Exception e)
         {
-            _log.Error(e);
+            _log.ErrorResult(e);
             throw;
         }
     }

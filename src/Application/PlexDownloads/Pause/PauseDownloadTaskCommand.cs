@@ -3,7 +3,7 @@ using FluentValidation;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 using Reaparr.FileSystem.Contracts;
-using Reaparr.Logging;
+using Serilog;
 
 namespace Reaparr.Application;
 
@@ -24,13 +24,13 @@ public class PauseDownloadTaskCommandValidator : AbstractValidator<PauseDownload
 
 public class PauseDownloadTaskCommandHandler : ICommandHandler<PauseDownloadTaskCommand, Result>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly IDownloadTaskScheduler _downloadTaskScheduler;
     private readonly IFileMergeScheduler _fileMergeScheduler;
 
     public PauseDownloadTaskCommandHandler(
-        ILog log,
+        ILogger log,
         IReaparrDbContext dbContext,
         IDownloadTaskScheduler downloadTaskScheduler,
         IFileMergeScheduler fileMergeScheduler

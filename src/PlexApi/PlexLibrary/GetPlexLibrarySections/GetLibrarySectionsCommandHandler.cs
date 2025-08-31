@@ -1,18 +1,18 @@
 using FastEndpoints;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
 using Reaparr.PlexApi.Contracts;
+using Serilog;
 
 namespace Reaparr.PlexApi;
 
 public class GetLibrarySectionsCommandHandler : ICommandHandler<GetLibrarySectionsCommand, Result<List<PlexLibrary>>>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly IPlexApiClientFactory _plexApiClientFactory;
 
     public GetLibrarySectionsCommandHandler(
-        ILog log,
+        ILogger log,
         IReaparrDbContext dbContext,
         IPlexApiClientFactory plexApiClientFactory
     )

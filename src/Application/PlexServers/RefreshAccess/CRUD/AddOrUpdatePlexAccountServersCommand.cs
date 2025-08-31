@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Reaparr.Data.Contracts;
 using Reaparr.Logging;
 using Reaparr.PlexApi.Contracts;
+using Serilog;
 
 namespace Reaparr.Application;
 
@@ -21,12 +22,12 @@ public class AddOrUpdatePlexAccountServersCommandValidator : AbstractValidator<A
 public class AddOrUpdatePlexAccountServersCommandHandler
     : ICommandHandler<AddOrUpdatePlexAccountServersCommand, Result<RefreshPlexServerAccessRapport>>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
-    public AddOrUpdatePlexAccountServersCommandHandler(ILog log, IReaparrDbContext dbContext)
+    public AddOrUpdatePlexAccountServersCommandHandler(ILogger log, IReaparrDbContext dbContext)
     {
-        _log = log;
+        _log = log.ForContext<AddOrUpdatePlexAccountServersCommandHandler>();
         _dbContext = dbContext;
     }
 
@@ -42,10 +43,11 @@ public class AddOrUpdatePlexAccountServersCommandHandler
         foreach (var serverAccessToken in serverAccessTokens)
             if (string.IsNullOrWhiteSpace(serverAccessToken.AccessToken))
             {
-                _log.Error(
-                    "Server Access Token was given with an empty access token for machine identifier: {MachineIdentifier}",
-                    serverAccessToken.MachineIdentifier
-                );
+                _log.Here()
+                    .Error(
+                        "Server Access Token was given with an empty access token for machine identifier: {MachineIdentifier}",
+                        serverAccessToken.MachineIdentifier
+                    );
             }
 
         serverAccessTokens.RemoveAll(x => string.IsNullOrWhiteSpace(x.AccessToken));
@@ -57,7 +59,7 @@ public class AddOrUpdatePlexAccountServersCommandHandler
         var rapport = new RefreshPlexServerAccessRapport(plexAccount.Id, plexAccount.DisplayName);
 
         // Add or update the PlexAccount and PlexServer relationships
-        _log.InformationLine("Adding or updating the PlexAccount association with PlexServers now");
+        _log.Here().Information("Adding or updating the PlexAccount association with PlexServers now");
 
         // Fetch all relevant PlexServers in one query
         var machineIdentifiers = serverAccessTokens.Select(x => x.MachineIdentifier).ToList();
@@ -72,10 +74,11 @@ public class AddOrUpdatePlexAccountServersCommandHandler
         {
             if (!plexServers.TryGetValue(serverAccessToken.MachineIdentifier, out var plexServer))
             {
-                _log.ErrorLine(
-                    "Server Access Token was given for a machine identifier that has no PlexServer in the database: {MachineIdentifier}",
-                    serverAccessToken.MachineIdentifier
-                );
+                _log.Here()
+                    .Error(
+                        "Server Access Token was given for a machine identifier that has no PlexServer in the database: {MachineIdentifier}",
+                        serverAccessToken.MachineIdentifier
+                    );
                 continue;
             }
 
@@ -130,7 +133,7 @@ public class AddOrUpdatePlexAccountServersCommandHandler
 
         await _dbContext.SaveChangesAsync(cancellationToken);
 
-        _log.InformationLine("Checking if there are any PlexServers this PlexAccount has no access to anymore");
+        _log.Here().Information("Checking if there are any PlexServers this PlexAccount has no access to anymore");
 
         // The list of all past and current serverId's the plexAccount has access too
         var removalList = await _dbContext
@@ -164,10 +167,11 @@ public class AddOrUpdatePlexAccountServersCommandHandler
         }
         else
         {
-            _log.Information(
-                "No Plex server access for {PlexAccountDisplayName} has been lost",
-                plexAccount.DisplayName
-            );
+            _log.Here()
+                .Information(
+                    "No Plex server access for {PlexAccountDisplayName} has been lost",
+                    plexAccount.DisplayName
+                );
         }
 
         return Result.Ok(rapport);

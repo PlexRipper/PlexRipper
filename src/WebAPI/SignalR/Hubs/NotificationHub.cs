@@ -9,15 +9,15 @@ namespace Reaparr.WebAPI;
 /// </summary>
 public class NotificationHub : Hub<INotificationHub>, INotificationHub
 {
-    private readonly ILog<NotificationHub> _log;
+    private readonly Serilog.ILogger _log;
 
     /// <summary>
     ///  Initializes a new instance of the <see cref="NotificationHub"/> class.
     /// </summary>
-    /// <param name="log">  The <see cref="ILog{NotificationHub}"/> instance to use for logging.</param>
-    public NotificationHub(ILog<NotificationHub> log)
+    /// <param name="log">  The <see cref="Serilog.ILogger"/> instance to use for logging.</param>
+    public NotificationHub(Serilog.ILogger log)
     {
-        _log = log;
+        _log = log.ForContext<NotificationHub>();
     }
 
     /// <inheritdoc/>

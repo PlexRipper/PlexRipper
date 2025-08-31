@@ -1,7 +1,7 @@
 using FastEndpoints;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
+using Serilog;
 
 namespace Reaparr.Application;
 
@@ -20,11 +20,11 @@ public record ServerOnlineStatusChangedNotification : IEvent
 
 public class ServerOnlineStatusChangedHandler : IEventHandler<ServerOnlineStatusChangedNotification>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly IDownloadQueue _downloadQueue;
 
-    public ServerOnlineStatusChangedHandler(ILog log, IReaparrDbContext dbContext, IDownloadQueue downloadQueue)
+    public ServerOnlineStatusChangedHandler(ILogger log, IReaparrDbContext dbContext, IDownloadQueue downloadQueue)
     {
         _log = log;
         _dbContext = dbContext;

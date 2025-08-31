@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 using Reaparr.Logging;
+using Serilog;
 
 namespace Reaparr.Application;
 
@@ -33,11 +34,11 @@ public class AddOrUpdatePlexLibrariesValidator : AbstractValidator<AddOrUpdatePl
 public class AddOrUpdatePlexLibrariesCommandHandler
     : ICommandHandler<AddOrUpdatePlexLibrariesCommand, Result<List<PlexLibraryAccessRapport>>>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly List<PlexLibraryAccessRapport> _list = [];
 
-    public AddOrUpdatePlexLibrariesCommandHandler(ILog log, IReaparrDbContext dbContext)
+    public AddOrUpdatePlexLibrariesCommandHandler(ILogger log, IReaparrDbContext dbContext)
     {
         _log = log;
         _dbContext = dbContext;
@@ -205,7 +206,7 @@ public class AddOrUpdatePlexLibrariesCommandHandler
         await _dbContext.SaveChangesAsync(cancellationToken);
 
         foreach (var rapport in _list)
-            _log.InformationLine(rapport.ToString());
+            _log.Information(rapport.ToString());
 
         return Result.Ok(_list);
     }

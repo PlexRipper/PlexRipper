@@ -1,7 +1,7 @@
 using FastEndpoints;
 using FluentValidation;
 using Quartz;
-using Reaparr.Logging;
+using Serilog;
 
 namespace Reaparr.Application;
 
@@ -17,10 +17,10 @@ public class QueueSyncServerMediaJobCommandValidator : Validator<QueueSyncServer
 
 public class QueueSyncServerMediaJobCommandHandler : ICommandHandler<QueueSyncServerMediaJobCommand, Result>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IScheduler _scheduler;
 
-    public QueueSyncServerMediaJobCommandHandler(ILog log, IScheduler scheduler)
+    public QueueSyncServerMediaJobCommandHandler(ILogger log, IScheduler scheduler)
     {
         _log = log;
         _scheduler = scheduler;

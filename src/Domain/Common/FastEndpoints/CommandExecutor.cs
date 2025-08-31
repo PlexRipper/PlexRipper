@@ -1,13 +1,14 @@
 using FastEndpoints;
 using Reaparr.Logging;
+using Serilog;
 
 namespace Reaparr.Domain;
 
 public class CommandExecutor : ICommandExecutor
 {
-    private readonly ILog<CommandExecutor> _log;
+    private readonly Serilog.ILogger _log;
 
-    public CommandExecutor(ILog<CommandExecutor> log)
+    public CommandExecutor(ILogger log)
     {
         _log = log;
     }
@@ -20,7 +21,7 @@ public class CommandExecutor : ICommandExecutor
         }
         catch (Exception e)
         {
-            _log.Error(e);
+            _log.ErrorResult(e);
             throw;
         }
     }

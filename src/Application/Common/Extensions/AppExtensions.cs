@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using System.Text.Json;
 using Reaparr.Environment;
 using Reaparr.Logging;
+using Serilog;
 
 namespace Reaparr.Application;
 
@@ -22,7 +23,7 @@ public class AppExtensions
     [DllImport("libc")]
     public static extern uint getgid();
 
-    private static readonly ILog _log = new LogConfig().CreateLogInstance<AppExtensions>();
+    private static readonly ILogger _log = new LogConfig().CreateLogInstance<AppExtensions>();
 
     /// <summary>
     ///   Log the identity of the current process, including environment variables and user/group IDs.

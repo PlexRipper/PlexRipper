@@ -10,15 +10,15 @@ namespace Reaparr.WebAPI;
 /// </summary>
 public class ProgressHub : Hub<IProgressHub>, IProgressHub
 {
-    private readonly ILog<ProgressHub> _log;
+    private readonly Serilog.ILogger _log;
 
     /// <summary>
     ///  Initializes a new instance of the <see cref="ProgressHub"/> class.
     /// </summary>
-    /// <param name="log"> The <see cref="ILog{ProgressHub}"/> instance to use for logging.</param>
-    public ProgressHub(ILog<ProgressHub> log)
+    /// <param name="log"> The <see cref="Serilog.ILogger"/> instance to use for logging.</param>
+    public ProgressHub(Serilog.ILogger log)
     {
-        _log = log;
+        _log = log.ForContext<ProgressHub>();
     }
 
     /// <inheritdoc/>

@@ -4,7 +4,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Reaparr.Application.Contracts;
 using Reaparr.FileSystem.Contracts;
-using Reaparr.Logging;
+using Serilog;
 
 namespace Reaparr.Application;
 
@@ -32,14 +32,14 @@ public class GetFolderPathDirectoryRequestValidator : Validator<GetFolderPathDir
 
 public class GetFolderPathDirectoryEndpoint : BaseEndpoint<GetFolderPathDirectoryRequest, FileSystemDTO>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IDirectory _directory;
     private readonly IPath _path;
     private readonly IDiskProvider _diskProvider;
 
     public override string EndpointPath => ApiRoutes.FolderPathController + "/directory";
 
-    public GetFolderPathDirectoryEndpoint(ILog log, IDirectory directory, IPath path, IDiskProvider diskProvider)
+    public GetFolderPathDirectoryEndpoint(ILogger log, IDirectory directory, IPath path, IDiskProvider diskProvider)
     {
         _log = log;
         _directory = directory;

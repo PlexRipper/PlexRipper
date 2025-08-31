@@ -23,7 +23,7 @@ public class LogMaskingUnitTests : BaseUnitTest<LogMaskingUnitTests>
             EnvironmentExtensions.EnableUnmaskedLog(false);
             EnvironmentExtensions.IsUnmasked().ShouldBeFalse();
 
-            var log = new TestLogConfig(_output).CreateLogInstance<LogUnitTests>();
+            var log = new TestLogConfig(_output).CreateLogInstance<LogMaskingUnitTests>();
             using (var context = TestCorrelator.CreateContext())
             {
                 // Act

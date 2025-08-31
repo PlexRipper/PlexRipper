@@ -4,6 +4,7 @@ using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 using Reaparr.Logging;
 using Reaparr.Settings.Contracts;
+using Serilog;
 
 namespace Reaparr.Application;
 
@@ -13,7 +14,7 @@ namespace Reaparr.Application;
 /// </summary>
 public class PlexDownloadClient : IAsyncDisposable, IPlexDownloadClient
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IReaparrDbContext _dbContext;
     private readonly Func<DownloadWorkerTask, DownloadWorker> _downloadWorkerFactory;
@@ -37,7 +38,7 @@ public class PlexDownloadClient : IAsyncDisposable, IPlexDownloadClient
     /// <param name="downloadWorkerFactory"></param>
     /// <param name="serverSettings"></param>
     public PlexDownloadClient(
-        ILog log,
+        ILogger log,
         ICommandExecutor commandExecutor,
         IReaparrDbContext dbContext,
         Func<DownloadWorkerTask, DownloadWorker> downloadWorkerFactory,
@@ -216,7 +217,7 @@ public class PlexDownloadClient : IAsyncDisposable, IPlexDownloadClient
     {
         if (!_downloadWorkers.Any())
         {
-            _log.WarningLine("No download workers have been made yet, cannot setup subscriptions");
+            _log.Warning("No download workers have been made yet, cannot setup subscriptions");
             return;
         }
 
@@ -232,7 +233,7 @@ public class PlexDownloadClient : IAsyncDisposable, IPlexDownloadClient
                 {
                     if (ex.GetType() != typeof(OperationCanceledException))
                     {
-                        _log.Error(ex);
+                        _log.Here().ErrorResult(ex);
                         _downloadWorkerTaskUpdateCompletionSource.SetException(ex);
                     }
 
@@ -255,7 +256,7 @@ public class PlexDownloadClient : IAsyncDisposable, IPlexDownloadClient
             {
                 if (ex.GetType() != typeof(OperationCanceledException))
                 {
-                    _log.Error(ex);
+                    _log.ErrorResult(ex);
                     _downloadWorkerLogCompletionSource.SetException(ex);
                 }
 

@@ -6,6 +6,7 @@ using Reaparr.Data.Contracts;
 using Reaparr.Logging;
 using Reaparr.PlexApi.Contracts;
 using Reaparr.WebAPI.Contracts;
+using Serilog;
 
 namespace Reaparr.Application;
 
@@ -27,13 +28,13 @@ public class RefreshPlexTvShowLibraryCommandValidator : AbstractValidator<Refres
 public class RefreshPlexTvShowLibraryCommandHandler
     : ICommandHandler<RefreshPlexTvShowLibraryCommand, Result<PlexLibrary>>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IReaparrDbContext _dbContext;
     private readonly IRefreshLibraryProgressReporter _progressReporter;
 
     public RefreshPlexTvShowLibraryCommandHandler(
-        ILog log,
+        ILogger log,
         ICommandExecutor commandExecutor,
         IReaparrDbContext dbContext,
         IRefreshLibraryProgressReporter progressReporter

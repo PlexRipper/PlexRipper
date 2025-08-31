@@ -3,7 +3,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
+using Serilog;
 
 namespace Reaparr.Application;
 
@@ -29,7 +29,7 @@ public class GetPlexLibraryByIdEndpoint : BaseEndpoint<GetPlexLibraryByIdEndpoin
 
     public override string EndpointPath => ApiRoutes.PlexLibraryController + "/{PlexLibraryId}";
 
-    public GetPlexLibraryByIdEndpoint(ILog log, IReaparrDbContext dbContext)
+    public GetPlexLibraryByIdEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
     }

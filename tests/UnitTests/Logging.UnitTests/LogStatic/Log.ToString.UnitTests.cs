@@ -14,10 +14,10 @@ public class LogToStringUnitTests : BaseUnitTest
         var fileName = "test.txt";
 
         // Act
-        var logEvent = Log.Here().Debug("Download worker with id: {Id} start for filename: {FileName}", id, fileName);
-        var logString = logEvent.ToString();
+        var logEvent = Log.Here()
+            .DebugMsg("Download worker with id: {Id} start for filename: {FileName}", id, fileName);
 
         // Assert
-        logString.ShouldBe($"Download worker with id: {id} start for filename: \"{fileName}\"");
+        logEvent.ShouldBe($"Download worker with id: {id} start for filename: \"{fileName}\"");
     }
 }

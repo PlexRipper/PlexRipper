@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
+using Serilog;
 
 namespace Reaparr.Application;
 
@@ -21,7 +21,7 @@ public class RefreshPlexAccountAccessEndpointRequestValidator : Validator<Refres
 public class RefreshPlexAccountAccessEndpoint
     : BaseEndpoint<RefreshPlexAccountAccessEndpointRequest, ResultDTO<List<RefreshPlexAccountAccessRapportDTO>>>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
     private readonly ISignalRService _signalRService;
@@ -30,7 +30,7 @@ public class RefreshPlexAccountAccessEndpoint
     public override string EndpointPath => ApiRoutes.PlexAccountController + "/refresh/{PlexAccountId}";
 
     public RefreshPlexAccountAccessEndpoint(
-        ILog log,
+        ILogger log,
         IReaparrDbContext dbContext,
         ICommandExecutor commandExecutor,
         ISignalRService signalRService
@@ -64,7 +64,7 @@ public class RefreshPlexAccountAccessEndpoint
             var enabledAccounts = await _dbContext.PlexAccounts.Where(x => x.IsEnabled).ToListAsync(ct);
             if (!enabledAccounts.Any())
             {
-                _log.WarningLine("No enabled Plex accounts found to start the refresh PlexServer access job");
+                _log.Warning("No enabled Plex accounts found to start the refresh PlexServer access job");
                 await SendFluentResult(Result.Ok(), ct);
                 return;
             }

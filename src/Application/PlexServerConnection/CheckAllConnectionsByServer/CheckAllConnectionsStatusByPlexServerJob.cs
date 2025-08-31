@@ -3,6 +3,7 @@ using Quartz;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 using Reaparr.Logging;
+using Serilog;
 
 namespace Reaparr.Application;
 
@@ -12,7 +13,7 @@ namespace Reaparr.Application;
 [DisallowConcurrentExecution]
 public class CheckAllConnectionsStatusByPlexServerJob : IJob
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
     private readonly ISignalRService _signalRService;
@@ -21,7 +22,7 @@ public class CheckAllConnectionsStatusByPlexServerJob : IJob
         new(nameof(CheckAllConnectionsStatusByPlexServerJob), nameof(CheckAllConnectionsStatusByPlexServerJob));
 
     public CheckAllConnectionsStatusByPlexServerJob(
-        ILog log,
+        ILogger log,
         IReaparrDbContext dbContext,
         ICommandExecutor commandExecutor,
         ISignalRService signalRService
@@ -84,7 +85,7 @@ public class CheckAllConnectionsStatusByPlexServerJob : IJob
         }
         catch (Exception e)
         {
-            _log.Error(e);
+            _log.ErrorResult(e);
         }
     }
 }

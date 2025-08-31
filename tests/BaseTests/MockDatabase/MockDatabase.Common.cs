@@ -11,7 +11,7 @@ namespace Reaparr.BaseTests;
 
 public static partial class MockDatabase
 {
-    private static readonly ILog _log = new LogConfig().CreateLogInstance(typeof(MockDatabase));
+    private static readonly Serilog.ILogger _log = new LogConfig().CreateLogInstance(typeof(MockDatabase));
 
     /// <summary>
     /// NaturalSortComparer uses InvariantCultureIgnoreCase for deterministic test results.

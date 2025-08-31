@@ -7,20 +7,21 @@ using Polly.Wrap;
 using Reaparr.Application.Contracts;
 using Reaparr.Logging;
 using Reaparr.PlexApi.Contracts;
+using Serilog;
 using Serilog.Events;
 
 namespace Reaparr.PlexApi;
 
 public class PlexApiClient : IPlexApiClient
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
 
     private readonly HttpClient _defaultClient;
 
     private readonly PlexApiClientOptions _options;
     private readonly AsyncPolicyWrap<HttpResponseMessage> _policyWrap;
 
-    public PlexApiClient(ILog log, HttpClient httpClient, PlexApiClientOptions options)
+    public PlexApiClient(ILogger log, HttpClient httpClient, PlexApiClientOptions options)
     {
         _log = log;
         _defaultClient = httpClient;

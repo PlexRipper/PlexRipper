@@ -1,16 +1,16 @@
 using System.Text.Json;
 using Quartz;
 using Reaparr.Application.Contracts;
-using Reaparr.Logging;
+using Serilog;
 
 namespace Reaparr.Application;
 
 public class DownloadTaskScheduler : IDownloadTaskScheduler
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IScheduler _scheduler;
 
-    public DownloadTaskScheduler(ILog log, IScheduler scheduler)
+    public DownloadTaskScheduler(ILogger log, IScheduler scheduler)
     {
         _log = log;
         _scheduler = scheduler;

@@ -2,6 +2,7 @@
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 using Reaparr.Logging;
+using Serilog;
 
 namespace Reaparr.Application;
 
@@ -14,13 +15,13 @@ public class InspectPlexServerJob : IJob
 
     private readonly IReaparrDbContext _dbContext;
     private readonly ISignalRService _signalRService;
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
 
     public static JobKey GetJobKey() => new(Guid.NewGuid().ToString(), nameof(InspectPlexServerJob));
 
     public InspectPlexServerJob(
-        ILog log,
+        ILogger log,
         ICommandExecutor commandExecutor,
         IReaparrDbContext dbContext,
         ISignalRService signalRService
@@ -73,7 +74,7 @@ public class InspectPlexServerJob : IJob
         {
             // Jobs should swallow exceptions as otherwise Quartz will keep re-executing it
             // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
-            _log.Error(e);
+            _log.ErrorResult(e);
         }
     }
 

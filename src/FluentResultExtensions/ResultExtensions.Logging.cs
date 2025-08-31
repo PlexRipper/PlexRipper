@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
+using Reaparr.Logging;
 using Serilog.Core;
 using Serilog.Events;
 
@@ -38,7 +39,7 @@ public static partial class ResultExtensions
                 _log.Warning(e, messageTemplate, memberName, sourceFilePath, sourceLineNumber);
                 break;
             case LogEventLevel.Error:
-                _log.Error(e, messageTemplate, memberName, sourceFilePath, sourceLineNumber);
+                _log.ErrorResult(e, messageTemplate, memberName, sourceFilePath, sourceLineNumber);
                 break;
             case LogEventLevel.Fatal:
                 _log.Fatal(e, messageTemplate, memberName, sourceFilePath, sourceLineNumber);
@@ -113,7 +114,7 @@ public static partial class ResultExtensions
     {
         var msg = ((IReason)error).ToLogString();
         foreach (var reason in error.Reasons)
-            msg += $"{System.Environment.NewLine} {Delimiter(1)} {reason.ToLogString(2)}";
+            msg += $"{Environment.NewLine} {Delimiter(1)} {reason.ToLogString(2)}";
 
         return msg;
     }

@@ -2,8 +2,8 @@ using FastEndpoints;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
 using Reaparr.PlexApi.Contracts;
+using Serilog;
 
 namespace Reaparr.Application;
 
@@ -24,12 +24,12 @@ public class RefreshPlexServerAccessCommandValidator : AbstractValidator<Refresh
 public class RefreshPlexServerAccessCommandHandler
     : ICommandHandler<RefreshPlexServerAccessCommand, Result<RefreshPlexServerAccessRapport>>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
 
     public RefreshPlexServerAccessCommandHandler(
-        ILog log,
+        ILogger log,
         IReaparrDbContext dbContext,
         ICommandExecutor commandExecutor
     )

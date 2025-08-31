@@ -1,12 +1,13 @@
 using System.Text.Json;
 using Reaparr.Logging;
 using Reaparr.Settings.Contracts;
+using Serilog;
 
 namespace Reaparr.Settings;
 
 public static class UserSettingsSerializer
 {
-    private static readonly ILog _log = new LogConfig().CreateLogInstance(typeof(UserSettingsSerializer));
+    private static readonly ILogger _log = new LogConfig().CreateLogInstance(typeof(UserSettingsSerializer));
 
     public static string Serialize(IUserSettings userSettings)
     {
@@ -16,8 +17,8 @@ public static class UserSettingsSerializer
         }
         catch (Exception e)
         {
-            _log.ErrorLine("Failed to serialize settings");
-            _log.Error(e);
+            _log.Error("Failed to serialize settings");
+            _log.ErrorResult(e);
         }
 
         return string.Empty;
@@ -41,8 +42,8 @@ public static class UserSettingsSerializer
         }
         catch (Exception e)
         {
-            _log.ErrorLine("Failed to deserialize settings");
-            _log.Error(e);
+            _log.Error("Failed to deserialize settings");
+            _log.ErrorResult(e);
         }
 
         return new UserSettings();

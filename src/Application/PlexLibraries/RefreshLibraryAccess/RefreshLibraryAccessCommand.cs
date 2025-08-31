@@ -4,6 +4,7 @@ using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 using Reaparr.Logging;
 using Reaparr.PlexApi.Contracts;
+using Serilog;
 
 namespace Reaparr.Application;
 
@@ -28,13 +29,13 @@ public class RefreshLibraryAccessValidator : AbstractValidator<RefreshLibraryAcc
 public class RefreshLibraryAccessHandler
     : ICommandHandler<RefreshLibraryAccessCommand, Result<PlexLibraryAccessRefreshResponse>>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandDispatcher;
 
     public RefreshLibraryAccessHandler(
-        ILog log,
+        ILogger log,
         ICommandExecutor commandExecutor,
         IReaparrDbContext dbContext,
         ICommandExecutor commandDispatcher
@@ -154,12 +155,11 @@ public class RefreshLibraryAccessHandler
             if (!libraries.Value.Any())
             {
                 return _log.Here()
-                    .Warning(
+                    .WarningResult(
                         "PlexServer with name {PlexServerName} returned no Plex libraries for Plex account {plexAccountName}",
                         plexServerName,
                         plexAccountName
-                    )
-                    .ToResult();
+                    );
             }
 
             return libraries;

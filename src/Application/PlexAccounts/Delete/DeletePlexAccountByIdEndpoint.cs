@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
+using Serilog;
 
 namespace Reaparr.Application;
 
@@ -20,13 +20,13 @@ public class DeletePlexAccountByIdRequestValidator : Validator<DeletePlexAccount
 
 public class DeletePlexAccountByIdEndpoint : BaseEndpoint<DeletePlexAccountByIdRequest>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly ISignalRService _signalRService;
 
     public override string EndpointPath => ApiRoutes.PlexAccountController + "/{PlexAccountId}";
 
-    public DeletePlexAccountByIdEndpoint(ILog log, IReaparrDbContext dbContext, ISignalRService signalRService)
+    public DeletePlexAccountByIdEndpoint(ILogger log, IReaparrDbContext dbContext, ISignalRService signalRService)
     {
         _log = log;
         _dbContext = dbContext;

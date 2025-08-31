@@ -1,12 +1,13 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Reaparr.Logging;
+using Serilog;
 
 namespace Reaparr.Domain;
 
 public static class StopWatchExtensions
 {
-    private static readonly ILog _log = new LogConfig().CreateLogInstance(typeof(StopWatchExtensions));
+    private static readonly ILogger _log = new LogConfig().CreateLogInstance(typeof(StopWatchExtensions));
 
     public static void StopAndLog(
         this Stopwatch stopwatch,

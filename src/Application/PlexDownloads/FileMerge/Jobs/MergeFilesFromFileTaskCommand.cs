@@ -6,6 +6,7 @@ using FluentValidation;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 using Reaparr.Logging;
+using Serilog;
 
 namespace Reaparr.Application;
 
@@ -25,7 +26,7 @@ public class MergeFilesFromFileTaskCommandValidator : AbstractValidator<MergeFil
 
 public class MergeFilesFromFileTaskCommandHandler : ICommandHandler<MergeFilesFromFileTaskCommand, Result>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IEventPublisher _eventPublisher;
     private readonly IReaparrDbContext _dbContext;
@@ -43,7 +44,7 @@ public class MergeFilesFromFileTaskCommandHandler : ICommandHandler<MergeFilesFr
     private const int _bufferSize = 1048576;
 
     public MergeFilesFromFileTaskCommandHandler(
-        ILog log,
+        ILogger log,
         ICommandExecutor commandExecutor,
         IEventPublisher eventPublisher,
         IReaparrDbContext dbContext,
@@ -169,7 +170,7 @@ public class MergeFilesFromFileTaskCommandHandler : ICommandHandler<MergeFilesFr
 
                     if (stopwatch.ElapsedMilliseconds > 1000)
                     {
-                        _log.VerboseLine(downloadTask.ToString());
+                        _log.Verbose(downloadTask.ToString());
 
                         await _dbContext.UpdateDownloadFileTransferProgress(key, downloadTask.ToFileTransferProgress());
                         await _commandExecutor.Send(new DownloadTaskUpdatedCommand(key), CancellationToken.None);
@@ -234,7 +235,7 @@ public class MergeFilesFromFileTaskCommandHandler : ICommandHandler<MergeFilesFr
         }
         catch (Exception ex)
         {
-            return (await ErrorDownloadTask(downloadTask, _log.Error(ex).ToResult()));
+            return (await ErrorDownloadTask(downloadTask, _log.ErrorResult(ex)));
         }
         finally
         {

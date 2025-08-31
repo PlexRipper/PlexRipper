@@ -2,7 +2,7 @@
 using Quartz.Impl.Matchers;
 using Reaparr.Application.Contracts;
 using Reaparr.Environment;
-using Reaparr.Logging;
+using Serilog;
 
 namespace Reaparr.Application;
 
@@ -10,7 +10,7 @@ public class SchedulerService : ISchedulerService
 {
     #region Fields
 
-    private readonly ILog<SchedulerService> _log;
+    private readonly Serilog.ILogger _log;
     private readonly IScheduler _scheduler;
     private readonly IAllJobListener _allJobListener;
     private readonly IDownloadJobListener _downloadJobListener;
@@ -20,13 +20,13 @@ public class SchedulerService : ISchedulerService
     #region Constructors
 
     public SchedulerService(
-        ILog<SchedulerService> log,
+        ILogger log,
         IScheduler scheduler,
         IAllJobListener allJobListener,
         IDownloadJobListener downloadJobListener
     )
     {
-        _log = log;
+        _log = log.ForContext<SchedulerService>();
         _scheduler = scheduler;
         _allJobListener = allJobListener;
         _downloadJobListener = downloadJobListener;
@@ -47,7 +47,7 @@ public class SchedulerService : ISchedulerService
         SetupListeners();
         if (!_scheduler.IsStarted)
         {
-            _log.DebugLine("Starting Quartz Scheduler");
+            _log.Debug("Starting Quartz Scheduler");
             await _scheduler.Start();
         }
 
@@ -65,11 +65,11 @@ public class SchedulerService : ISchedulerService
     {
         if (!_scheduler.IsShutdown)
         {
-            _log.DebugLine("Shutting down Quartz Scheduler");
+            _log.Debug("Shutting down Quartz Scheduler");
 
             foreach (var runningJob in await _scheduler.GetCurrentlyExecutingJobs())
             {
-                _log.WarningLine("Stopping running job {JobKey}", runningJob.JobDetail.Key.ToString());
+                _log.Warning("Stopping running job {JobKey}", runningJob.JobDetail.Key.ToString());
                 await _scheduler.Interrupt(runningJob.JobDetail.Key);
             }
 
@@ -84,7 +84,7 @@ public class SchedulerService : ISchedulerService
 
     private void SetupListeners()
     {
-        _log.DebugLine("Setting up Quartz listeners");
+        _log.Debug("Setting up Quartz listeners");
         _scheduler.ListenerManager.AddJobListener(_allJobListener, GroupMatcher<JobKey>.AnyGroup());
         _scheduler.ListenerManager.AddJobListener(
             _downloadJobListener,

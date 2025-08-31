@@ -1,16 +1,16 @@
 using System.Text.Json;
 using Quartz;
 using Reaparr.FileSystem.Contracts;
-using Reaparr.Logging;
+using Serilog;
 
 namespace Reaparr.Application;
 
 public class FileMergeScheduler : IFileMergeScheduler
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IScheduler _scheduler;
 
-    public FileMergeScheduler(ILog log, IScheduler scheduler)
+    public FileMergeScheduler(ILogger log, IScheduler scheduler)
     {
         _log = log;
         _scheduler = scheduler;

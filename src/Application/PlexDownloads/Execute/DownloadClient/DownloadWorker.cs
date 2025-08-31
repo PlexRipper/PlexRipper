@@ -8,6 +8,7 @@ using Polly.Retry;
 using Reaparr.Data.Contracts;
 using Reaparr.Logging;
 using Reaparr.PlexApi.Contracts;
+using Serilog;
 
 namespace Reaparr.Application;
 
@@ -21,7 +22,7 @@ public class DownloadWorker : IDisposable
 
     private readonly Subject<DownloadWorkerTaskProgress> _downloadWorkerUpdate = new();
 
-    private readonly ILog<DownloadWorker> _log;
+    private readonly Serilog.ILogger _log;
 
     private readonly ICommandExecutor _commandExecutor;
 
@@ -44,14 +45,14 @@ public class DownloadWorker : IDisposable
     /// <param name="downloadWorkerTask">The download task this worker will execute.</param>
     /// <param name="clientFactory">The factory to create a new <see cref="IPlexApiClient"/>.</param>
     public DownloadWorker(
-        ILog<DownloadWorker> log,
+        Serilog.ILogger log,
         ICommandExecutor commandExecutor,
         IReaparrDbContext dbContext,
         DownloadWorkerTask downloadWorkerTask,
         Func<PlexApiClientOptions?, IPlexApiClient> clientFactory
     )
     {
-        _log = log;
+        _log = log.ForContext<DownloadWorker>();
         _commandExecutor = commandExecutor;
         _dbContext = dbContext;
         DownloadWorkerTask = downloadWorkerTask;
@@ -163,8 +164,10 @@ public class DownloadWorker : IDisposable
             if (fileStreamResult.IsFailed)
             {
                 var result = _log.Here()
-                    .Error("Could not create a download destination filestream for DownloadWorker with id: {Id}", Id)
-                    .ToResult();
+                    .ErrorResult(
+                        "Could not create a download destination filestream for DownloadWorker with id: {Id}",
+                        Id
+                    );
 
                 SetDownloadWorkerTaskChanged(DownloadStatus.Error, Result.Merge(result, fileStreamResult).ToResult());
                 return;
@@ -204,8 +207,11 @@ public class DownloadWorker : IDisposable
                     if (responseStream is null)
                     {
                         return _log.Here()
-                            .Error("Download worker {Id} with {FileName} had an empty download stream", Id, FileName)
-                            .ToResult();
+                            .ErrorResult(
+                                "Download worker {Id} with {FileName} had an empty download stream",
+                                Id,
+                                FileName
+                            );
                     }
 
                     responseStream.SetThrottleSpeed(_downloadSpeedLimit);
@@ -264,12 +270,11 @@ public class DownloadWorker : IDisposable
                 if (loopIndex == 0 && bytesRead <= 0)
                 {
                     var errorResult = _log.Here()
-                        .Error(
+                        .ErrorResult(
                             "Download worker with id: {Id} and filename: {FileName} had and empty download stream on start",
                             Id,
                             FileName
-                        )
-                        .ToResult();
+                        );
                     SetDownloadWorkerTaskChanged(DownloadStatus.ServerUnreachable, errorResult);
                     break;
                 }
@@ -332,7 +337,7 @@ public class DownloadWorker : IDisposable
         if (DownloadWorkerTask.DownloadStatus == status)
             return;
 
-        var msg = _log.Debug(
+        var msg = _log.DebugMsg(
             "Download worker with id: {Id} and with filename: {FileName} changed status to {Status}",
             Id,
             FileName,
@@ -340,28 +345,31 @@ public class DownloadWorker : IDisposable
         );
         DownloadWorkerTask.DownloadStatus = status;
 
-        SendDownloadWorkerLog(status.ToNotificationLevel(), msg.ToString());
+        SendDownloadWorkerLog(status.ToNotificationLevel(), msg);
 
-        LogMetaData? logMsg = null;
+        string? logMsg = null;
         switch (status)
         {
             case DownloadStatus.Stopped:
-                logMsg = _log.Here().Information("Download worker {Id} with {FileName} was stopped!", Id, FileName);
+                logMsg = _log.Here().InformationMsg("Download worker {Id} with {FileName} was stopped!", Id, FileName);
                 break;
             case DownloadStatus.Error:
-                logMsg = _log.Here().Error("Download worker {Id} with {FileName} had an error!", Id, FileName);
+                logMsg = _log.Here().ErrorMsg("Download worker {Id} with {FileName} had an error!", Id, FileName);
                 break;
             case DownloadStatus.DownloadFinished:
-                logMsg = _log.Here().Information("Download worker {Id} with {FileName} finished!", Id, FileName);
+                logMsg = _log.Here().InformationMsg("Download worker {Id} with {FileName} finished!", Id, FileName);
                 break;
             case DownloadStatus.ServerUnreachable:
-                logMsg = _log.Error("The server {PlexServerName} is unreachable!", DownloadWorkerTask.PlexServer?.Name);
+                logMsg = _log.ErrorMsg(
+                    "The server {PlexServerName} is unreachable!",
+                    DownloadWorkerTask.PlexServer?.Name ?? "Unknown"
+                );
                 break;
         }
 
         if (logMsg != null)
         {
-            SendDownloadWorkerLog(status.ToNotificationLevel(), logMsg.ToString());
+            SendDownloadWorkerLog(status.ToNotificationLevel(), logMsg);
         }
 
         if (errorResult != null)

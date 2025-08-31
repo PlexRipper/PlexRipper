@@ -6,12 +6,13 @@ using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 using Reaparr.Logging;
 using Reaparr.Settings.Contracts;
+using Serilog;
 
 namespace Reaparr.Application;
 
 public class DownloadJob : IJob, IDisposable
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IEventPublisher _eventPublisher;
@@ -19,7 +20,7 @@ public class DownloadJob : IJob, IDisposable
     private readonly IPlexDownloadClient _plexDownloadClient;
 
     public DownloadJob(
-        ILog log,
+        ILogger log,
         IReaparrDbContext dbContext,
         ICommandExecutor commandExecutor,
         IEventPublisher eventPublisher,
@@ -135,7 +136,7 @@ public class DownloadJob : IJob, IDisposable
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            _log.Error(ex);
+            _log.ErrorResult(ex);
         }
         finally
         {
@@ -178,7 +179,7 @@ public class DownloadJob : IJob, IDisposable
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            _log.Error(ex);
+            _log.ErrorResult(ex);
         }
     }
 

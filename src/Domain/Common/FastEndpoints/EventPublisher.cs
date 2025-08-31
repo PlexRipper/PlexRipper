@@ -1,13 +1,14 @@
 using FastEndpoints;
 using Reaparr.Logging;
+using Serilog;
 
 namespace Reaparr.Domain;
 
 public class EventPublisher : IEventPublisher
 {
-    private readonly ILog<EventPublisher> _log;
+    private readonly Serilog.ILogger _log;
 
-    public EventPublisher(ILog<EventPublisher> log)
+    public EventPublisher(ILogger log)
     {
         _log = log;
     }
@@ -31,7 +32,7 @@ public class EventPublisher : IEventPublisher
         {
             // Swallow exception to avoid breaking the fire and forget
             _log.Here().Error("Error publishing event {EventType}: {ErrorMessage}", @event, e.Message);
-            _log.Error(e);
+            _log.ErrorResult(e);
         }
     }
 }

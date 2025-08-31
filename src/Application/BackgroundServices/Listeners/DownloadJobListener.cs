@@ -1,19 +1,19 @@
 using Quartz;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
+using Serilog;
 
 namespace Reaparr.Application;
 
 public class DownloadJobListener : IDownloadJobListener
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly IEventPublisher _eventPublisher;
     private readonly IFileMergeQueue _fileMergeQueue;
 
     public DownloadJobListener(
-        ILog log,
+        ILogger log,
         IReaparrDbContext dbContext,
         IEventPublisher eventPublisher,
         IFileMergeQueue fileMergeQueue

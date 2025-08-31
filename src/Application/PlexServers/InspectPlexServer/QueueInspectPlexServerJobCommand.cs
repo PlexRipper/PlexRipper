@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Quartz;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
+using Serilog;
 
 namespace Reaparr.Application;
 
@@ -21,11 +21,11 @@ public class QueueInspectPlexServerJobCommandValidator : AbstractValidator<Queue
 
 public class QueueInspectPlexServerJobCommandHandler : ICommandHandler<QueueInspectPlexServerJobCommand, Result>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly IScheduler _scheduler;
 
-    public QueueInspectPlexServerJobCommandHandler(ILog log, IReaparrDbContext dbContext, IScheduler scheduler)
+    public QueueInspectPlexServerJobCommandHandler(ILogger log, IReaparrDbContext dbContext, IScheduler scheduler)
     {
         _log = log;
         _dbContext = dbContext;

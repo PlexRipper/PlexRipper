@@ -2,6 +2,7 @@
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 using Reaparr.Logging;
+using Serilog;
 
 namespace Reaparr.Application;
 
@@ -10,7 +11,7 @@ namespace Reaparr.Application;
 /// </summary>
 public class DownloadQueue : IDownloadQueue
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly IDownloadTaskScheduler _downloadTaskScheduler;
 
@@ -18,7 +19,7 @@ public class DownloadQueue : IDownloadQueue
 
     private readonly CancellationToken _token = new();
 
-    public DownloadQueue(ILog log, IReaparrDbContext dbContext, IDownloadTaskScheduler downloadTaskScheduler)
+    public DownloadQueue(ILogger log, IReaparrDbContext dbContext, IDownloadTaskScheduler downloadTaskScheduler)
     {
         _log = log;
         _dbContext = dbContext;
@@ -63,11 +64,10 @@ public class DownloadQueue : IDownloadQueue
         // Check if the server is online
         if (!await _dbContext.IsServerOnline(plexServerId, cancellationToken: _token))
         {
-            return _log.Warning(
-                    "PlexServer with name: {PlexServerName} is not online, cannot continue checking the DownloadQueue to pick the following download",
-                    plexServerName
-                )
-                .ToResult();
+            return _log.WarningResult(
+                "PlexServer with name: {PlexServerName} is not online, cannot continue checking the DownloadQueue to pick the following download",
+                plexServerName
+            );
         }
 
         if (await _downloadTaskScheduler.IsServerDownloading(plexServerId))

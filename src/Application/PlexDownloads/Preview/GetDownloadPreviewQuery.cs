@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 using Reaparr.Logging;
+using Serilog;
 
 namespace Reaparr.Application;
 
@@ -24,9 +25,9 @@ public class GetDownloadPreviewQueryValidator : AbstractValidator<GetDownloadPre
 public class GetDownloadPreviewQueryHandler : ICommandHandler<GetDownloadPreviewQuery, Result<List<DownloadPreview>>>
 {
     private readonly IReaparrDbContext _dbContext;
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
 
-    public GetDownloadPreviewQueryHandler(IReaparrDbContext dbContext, ILog log)
+    public GetDownloadPreviewQueryHandler(IReaparrDbContext dbContext, ILogger log)
     {
         _dbContext = dbContext;
         _log = log;
@@ -67,8 +68,8 @@ public class GetDownloadPreviewQueryHandler : ICommandHandler<GetDownloadPreview
         }
         catch (Exception ex)
         {
-            _log.Error(ex);
-            return Result.Fail($"Failed to create download previews: {ex.Message}");
+            _log.Here().Error("Failed to create download previews: {ExceptionMsg}", ex.Message);
+            return Result.Fail(new ExceptionalError(ex)).LogError();
         }
     }
 
@@ -126,8 +127,7 @@ public class GetDownloadPreviewQueryHandler : ICommandHandler<GetDownloadPreview
         }
         catch (Exception ex)
         {
-            _log.Error(ex);
-            return Result.Fail($"Failed to create movie previews: {ex.Message}");
+            return Result.Fail(new ExceptionalError(ex)).LogError();
         }
     }
 
@@ -197,8 +197,8 @@ public class GetDownloadPreviewQueryHandler : ICommandHandler<GetDownloadPreview
         }
         catch (Exception ex)
         {
-            _log.Error(ex);
-            return Result.Fail($"Failed to create TV show previews: {ex.Message}");
+            _log.Here().Error("Failed to create TV show previews: {ExceptionMsg}", ex.Message);
+            return Result.Fail(new ExceptionalError(ex)).LogError();
         }
     }
 
@@ -284,8 +284,7 @@ public class GetDownloadPreviewQueryHandler : ICommandHandler<GetDownloadPreview
         }
         catch (Exception ex)
         {
-            _log.Error(ex);
-            return Result.Fail($"Failed to create episode previews: {ex.Message}");
+            return Result.Fail(new ExceptionalError(ex)).LogError();
         }
     }
 
@@ -354,8 +353,7 @@ public class GetDownloadPreviewQueryHandler : ICommandHandler<GetDownloadPreview
         }
         catch (Exception ex)
         {
-            _log.Error(ex);
-            return Result.Fail($"Failed to get episode keys: {ex.Message}");
+            return _log.Here().ErrorResult(ex, "Failed to get episode keys");
         }
     }
 

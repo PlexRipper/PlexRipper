@@ -1,10 +1,11 @@
 using Reaparr.Logging;
+using Serilog;
 
 namespace Reaparr.Domain;
 
 public static class PlexMediaTypeMappers
 {
-    private static readonly ILog _log = new LogConfig().CreateLogInstance(typeof(PlexMediaTypeMappers));
+    private static readonly ILogger _log = new LogConfig().CreateLogInstance(typeof(PlexMediaTypeMappers));
 
     /// <summary>
     /// Converts string to <see cref="PlexMediaType"/> by a fast method.
@@ -45,7 +46,7 @@ public static class PlexMediaTypeMappers
         PlexMediaType DefaultException()
         {
             var logResult = _log.Here()
-                .Error(
+                .ErrorResult(
                     "Failed to convert string \"{Value}\" to type {NameOfPlexMediaType}",
                     value,
                     nameof(PlexMediaType)
@@ -84,7 +85,7 @@ public static class PlexMediaTypeMappers
         string DefaultException()
         {
             var logResult = _log.Here()
-                .Error(
+                .ErrorResult(
                     "Failed to convert value \"{Value}\" to type {NameOfPlexMediaType}",
                     source,
                     nameof(PlexMediaType)
@@ -119,7 +120,7 @@ public static class PlexMediaTypeMappers
         string DefaultException()
         {
             var logResult = _log.Here()
-                .Error(
+                .ErrorResult(
                     "Failed to convert value \"{Value}\" to type {NameOfPlexMediaType}",
                     source,
                     nameof(PlexMediaType)

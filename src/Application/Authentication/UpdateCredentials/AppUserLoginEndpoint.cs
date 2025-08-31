@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Identity.Contracts;
-using Reaparr.Logging;
+using Serilog;
 
 namespace Reaparr.Application;
 
@@ -40,10 +40,10 @@ public class UpdateCredentialsEndpoint : BaseEndpoint<UpdateCredentialsEndpointR
 {
     public override string EndpointPath => ApiRoutes.AuthenticatedController;
 
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly UserManager<AppUser> _userManager;
 
-    public UpdateCredentialsEndpoint(ILog log, UserManager<AppUser> userManager)
+    public UpdateCredentialsEndpoint(ILogger log, UserManager<AppUser> userManager)
     {
         _log = log;
         _userManager = userManager;
@@ -116,7 +116,7 @@ public class UpdateCredentialsEndpoint : BaseEndpoint<UpdateCredentialsEndpointR
             }
         }
 
-        _log.WarningLine("The Reaparr app credentials have been updated! Make sure this is intended");
+        _log.Warning("The Reaparr app credentials have been updated! Make sure this is intended");
 
         // Respond with success
         await SendFluentResult(Result.Ok(), ct);

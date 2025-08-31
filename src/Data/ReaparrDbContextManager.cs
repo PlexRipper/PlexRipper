@@ -5,12 +5,13 @@ using Reaparr.Environment;
 using Reaparr.Identity.Contracts;
 using Reaparr.Logging;
 using Reaparr.Settings.Contracts;
+using Serilog;
 
 namespace Reaparr.Data;
 
 public class ReaparrDbContextManager : IReaparrDbContextManager
 {
-    private readonly ILog<ReaparrDbContextManager> _log;
+    private readonly Serilog.ILogger _log;
 
     private readonly IReaparrDbContextDatabase _reaparrDbContextDatabase;
     private readonly IAuthDbContextDatabase _authDbContextDatabase;
@@ -23,7 +24,7 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
     private string DatabasePath => _pathProvider.DatabasePath;
 
     public ReaparrDbContextManager(
-        ILog<ReaparrDbContextManager> log,
+        ILogger log,
         IReaparrDbContextDatabase reaparrDbContextDatabase,
         IAuthDbContextDatabase authDbContextDatabase,
         IGeneralSettings generalSettings,
@@ -45,7 +46,7 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
     {
         if (EnvironmentExtensions.IsIntegrationTestMode())
         {
-            _log.InformationLine("Integration test mode detected, skipping database setup");
+            _log.Information("Integration test mode detected, skipping database setup");
             return Result.Ok();
         }
 
@@ -54,7 +55,7 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
             // Check if the database can be connected to.
             if (_reaparrDbContextDatabase.CanConnect())
             {
-                _log.InformationLine("Database was successfully connected!");
+                _log.Information("Database was successfully connected!");
                 _log.Information("Database connected at: {DatabasePath}", DatabasePath);
 
                 return MigrateDatabase();
@@ -67,7 +68,7 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
             return ResetDatabase();
         }
 
-        _log.WarningLine("Database does not exist, creating a new one now");
+        _log.Warning("Database does not exist, creating a new one now");
 
         return CreateDatabase();
     }
@@ -76,13 +77,13 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
     {
         try
         {
-            _log.InformationLine("Resetting Reaparr database now");
+            _log.Information("Resetting Reaparr database now");
             _reaparrDbContextDatabase.CloseConnection();
 
             var backUpResult = BackUpDatabase();
             if (backUpResult.IsFailed)
             {
-                _log.ErrorLine("Failed to back-up database");
+                _log.Error("Failed to back-up database");
                 return backUpResult.LogError();
             }
 
@@ -104,14 +105,14 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
             }
 
             _generalSettings.FirstTimeSetup = true;
-            _log.InformationLine("First time setup has been set to true because the database has been reset");
+            _log.Information("First time setup has been set to true because the database has been reset");
 
             return Result.Ok();
         }
         catch (Exception e)
         {
-            _log.FatalLine("Failed to reset database!");
-            _log.FatalLine("TO FIX THIS: DELETE DATABASE MANUALLY FROM THE CONFIG DIRECTORY");
+            _log.Fatal("Failed to reset database!");
+            _log.Fatal("TO FIX THIS: DELETE DATABASE MANUALLY FROM THE CONFIG DIRECTORY");
             return Result.Fail(new ExceptionalError(e)).LogFatal();
         }
     }
@@ -128,8 +129,8 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
         }
         catch (Exception e)
         {
-            _log.ErrorLine("Failed to create the database");
-            _log.Error(e);
+            _log.Error("Failed to create the database");
+            _log.ErrorResult(e);
 
             return Result.Fail(new ExceptionalError(e)).LogError();
         }
@@ -144,34 +145,34 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
             var pendingMigrations = _reaparrDbContextDatabase.GetPendingMigrations();
             if (!_reaparrDbContextDatabase.IsInMemory() && pendingMigrations.Any())
             {
-                _log.InformationLine("Attempting to migrate database, this might take a while");
+                _log.Information("Attempting to migrate database, this might take a while");
                 var migrateResult = _reaparrDbContextDatabase.Migrate();
                 if (migrateResult.IsFailed)
                 {
-                    _log.ErrorLine("Failed to migrate the database");
+                    _log.Error("Failed to migrate the database");
                     migrateResult.LogError();
                     ResetDatabase();
                 }
                 else
                 {
-                    _log.InformationLine("Database migration successful!");
+                    _log.Information("Database migration successful!");
                 }
             }
 
             pendingMigrations = _authDbContextDatabase.GetPendingMigrations();
             if (!_authDbContextDatabase.IsInMemory() && pendingMigrations.Any())
             {
-                _log.InformationLine("Attempting to migrate Authentication tables database");
+                _log.Information("Attempting to migrate Authentication tables database");
                 var migrateResult = _authDbContextDatabase.Migrate();
                 if (migrateResult.IsFailed)
                 {
-                    _log.ErrorLine("Failed to migrate Authentication tables database");
+                    _log.Error("Failed to migrate Authentication tables database");
                     migrateResult.LogError();
                     ResetDatabase();
                 }
                 else
                 {
-                    _log.InformationLine("Authentication tables migration successful!");
+                    _log.Information("Authentication tables migration successful!");
                 }
             }
 
@@ -179,8 +180,8 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
         }
         catch (Exception e)
         {
-            _log.ErrorLine("Failed to migrate the database or the database is corrupted");
-            _log.Error(e);
+            _log.Error("Failed to migrate the database or the database is corrupted");
+            _log.ErrorResult(e);
 
             return ResetDatabase();
         }
@@ -188,10 +189,10 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
 
     private Result BackUpDatabase()
     {
-        _log.InformationLine("Attempting to back-up the Reaparr database");
+        _log.Information("Attempting to back-up the Reaparr database");
         if (!_file.Exists(_pathProvider.DatabasePath))
         {
-            _log.InformationLine("Database does not exist, cannot continue to back-up");
+            _log.Information("Database does not exist, cannot continue to back-up");
             return Result.Ok();
         }
 

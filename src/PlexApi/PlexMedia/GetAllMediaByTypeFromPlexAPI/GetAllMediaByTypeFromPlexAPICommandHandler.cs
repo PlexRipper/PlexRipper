@@ -4,7 +4,7 @@ using LukeHagar.PlexAPI.SDK.Models.Requests;
 using Reaparr.Data.Contracts;
 using Reaparr.Logging;
 using Reaparr.PlexApi.Contracts;
-using ILog = Reaparr.Logging.ILog;
+using Serilog;
 
 namespace Reaparr.PlexApi;
 
@@ -18,12 +18,12 @@ public record GetAllMediaByTypeFromPlexApiCommand(
 public class GetAllMediaByTypeFromPlexApiCommandHandler
     : ICommandHandler<GetAllMediaByTypeFromPlexApiCommand, Result<List<LibraryMediaItemDTO>>>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly IPlexApiClientFactory _plexApiClientFactory;
 
     public GetAllMediaByTypeFromPlexApiCommandHandler(
-        ILog log,
+        ILogger log,
         IReaparrDbContext dbContext,
         IPlexApiClientFactory plexApiClientFactory
     )

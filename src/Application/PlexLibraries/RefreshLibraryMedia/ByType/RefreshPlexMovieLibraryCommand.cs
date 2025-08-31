@@ -1,8 +1,8 @@
 using FastEndpoints;
 using FluentValidation;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
 using Reaparr.WebAPI.Contracts;
+using Serilog;
 
 namespace Reaparr.Application;
 
@@ -24,13 +24,13 @@ public class RefreshPlexMovieLibraryCommandValidator : AbstractValidator<Refresh
 public class RefreshPlexMovieLibraryCommandHandler
     : ICommandHandler<RefreshPlexMovieLibraryCommand, Result<PlexLibrary>>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IReaparrDbContext _dbContext;
     private readonly IRefreshLibraryProgressReporter _progressReporter;
 
     public RefreshPlexMovieLibraryCommandHandler(
-        ILog log,
+        ILogger log,
         ICommandExecutor commandExecutor,
         IReaparrDbContext dbContext,
         IRefreshLibraryProgressReporter progressReporter

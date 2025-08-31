@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 using Reaparr.Logging;
+using Serilog;
 
 namespace Reaparr.Application;
 
@@ -27,14 +28,14 @@ public class CheckAllConnectionsStatusByPlexServerValidator
 public class CheckAllConnectionsStatusByPlexServerHandler
     : ICommandHandler<CheckAllConnectionsStatusByPlexServerCommand, Result<List<PlexServerStatus>>>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IEventPublisher _eventPublisher;
     private readonly ISignalRService _signalRService;
 
     public CheckAllConnectionsStatusByPlexServerHandler(
-        ILog log,
+        ILogger log,
         IReaparrDbContext dbContext,
         ICommandExecutor commandExecutor,
         IEventPublisher eventPublisher,
@@ -73,9 +74,7 @@ public class CheckAllConnectionsStatusByPlexServerHandler
         var connections = plexServer.PlexServerConnections.ToList();
         if (!connections.Any())
         {
-            return _log.Here()
-                .Error("No connections found for the plex server {PlexServerName}", plexServerName)
-                .ToResult();
+            return _log.Here().ErrorResult("No connections found for the plex server {PlexServerName}", plexServerName);
         }
 
         var previousResult = await _dbContext.IsServerOnline(plexServerId, cancellationToken: cancellationToken);
@@ -108,11 +107,10 @@ public class CheckAllConnectionsStatusByPlexServerHandler
             return Result.Ok(combinedResults.Value.ToList());
 
         return _log.Here()
-            .Error(
+            .ErrorResult(
                 "All connections to plex server with name: {PlexServerName} and id: {PlexServerId} failed to connect",
                 plexServerName,
                 plexServerId
-            )
-            .ToResult();
+            );
     }
 }

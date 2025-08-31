@@ -5,6 +5,7 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Data.Contracts;
 using Reaparr.Logging;
+using Serilog;
 
 namespace Reaparr.Application;
 
@@ -13,7 +14,7 @@ public record SyncPlexTvShowsCommand(InsertMediaMetaDataCommandResponse LibraryM
 
 public class SyncPlexTvShowsCommandValidator : AbstractValidator<SyncPlexTvShowsCommand>
 {
-    public SyncPlexTvShowsCommandValidator(ILog<SyncPlexTvShowsCommandValidator> log)
+    public SyncPlexTvShowsCommandValidator(ILogger log)
     {
         var stopWatch = Stopwatch.StartNew();
         RuleFor(x => x.LibraryMetadata).NotNull();
@@ -65,7 +66,7 @@ public class SyncPlexTvShowsCommandValidator : AbstractValidator<SyncPlexTvShows
 
 public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsCommand, Result<BulkInsertTvShowsRapport>>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
     private readonly BulkConfig? _config = new()
@@ -78,7 +79,7 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
         UseTempDB = true,
     };
 
-    public SyncPlexTvShowsCommandHandler(ILog log, IReaparrDbContext dbContext)
+    public SyncPlexTvShowsCommandHandler(ILogger log, IReaparrDbContext dbContext)
     {
         _log = log;
         _dbContext = dbContext;
@@ -148,7 +149,7 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
                 stopWatch.Elapsed.TotalMilliseconds
             );
 
-            _log.DebugLine(bulkInsertRapportResult.Value.ToString());
+            _log.Debug(bulkInsertRapportResult.Value.ToString());
 
             return bulkInsertRapportResult;
         }

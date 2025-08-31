@@ -133,7 +133,7 @@ public static partial class DbContextExtensions
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            _log.Error(ex);
+            _log.ErrorResult(ex);
             throw;
         }
     }

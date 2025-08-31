@@ -28,7 +28,7 @@ const list = ref([{
 	text: t('pages.setup.finished.list.item-1'),
 },
 {
-	link: 'https://hub.docker.com/r/plexripper/plexripper',
+	link: 'https://hub.docker.com/r/reaparr/reaparr',
 	text: t('pages.setup.finished.list.item-5'),
 },
 {
@@ -36,7 +36,7 @@ const list = ref([{
 	text: t('pages.setup.finished.list.item-2'),
 },
 {
-	link: 'https://www.plexripper.rocks/contributing/translating',
+	link: 'https://www.reaparr.rocks/contributing/translating',
 	text: t('pages.setup.finished.list.item-3'),
 },
 {

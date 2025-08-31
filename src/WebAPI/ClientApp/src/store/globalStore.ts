@@ -33,7 +33,7 @@ interface IAppConfigStoreState {
 
 export const useGlobalStore = defineStore('GlobalStore', () => {
 	const defaultState: IAppConfigStoreState = {
-		version: '?',
+		version: '0.26.9-dev-2025-12-11',
 		config: {} as IAppConfig,
 		pageReadyObservable: new ReplaySubject<boolean>(),
 	};

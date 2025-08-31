@@ -28,7 +28,7 @@ const list: { text: string; link?: string }[] = [
 	},
 	{
 		text: t('pages.setup.intro.list.item-2'),
-		link: 'https://plexripper.rocks/faq',
+		link: 'https://reaparr.rocks/faq',
 	},
 	{
 		text: t('pages.setup.intro.list.item-3'),

@@ -13,10 +13,17 @@
 					<q-btn
 						to="/"
 						flat>
-						<Logo
-							:size="24"
-							class="q-mr-md" />
-						{{ t('general.name-version', { version: globalStore.version }) }}
+						<div class="row items-center no-wrap">
+							<Logo class="full-height" />
+							<q-img
+								class="q-mx-sm full-height"
+								no-spinner
+								src="/img/logo/reaparr-title.svg"
+								alt="Loading Reaparr" />
+							<span>
+								{{ globalStore.version }}
+							</span>
+						</div>
 					</q-btn>
 				</q-toolbar-title>
 
@@ -72,10 +79,6 @@ function showNotificationsDrawer(): void {
 
 <style lang="scss">
 @use '@/assets/scss/variables' as *;
-
-.app-bar {
-  height: $app-bar-height;
-}
 
 body {
   &.body--dark {

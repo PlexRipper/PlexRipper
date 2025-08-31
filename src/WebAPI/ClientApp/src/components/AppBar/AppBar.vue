@@ -1,73 +1,70 @@
 <template>
 	<q-header class="app-bar">
-		<QRow no-wrap>
-			<q-toolbar class="app-bar">
-				<q-toolbar-title>
-					<q-btn
-						flat
-						round
-						dense
-						icon="mdi-menu"
-						class="q-mr-sm"
-						@click.stop="showNavigationDrawer" />
-					<q-btn
-						to="/"
-						flat
-						class="q-pa-sm">
-						<div
-							class="row items-center no-wrap"
-							style="height: 2rem;">
-							<img
-								src="/img/logo/reaparr-full.svg"
-								alt="Reaparr"
-								style="height: 125%; width: auto;">
-							<img
-								src="/img/logo/reaparr-title.svg"
-								alt="Reaparr"
-								style="height: 100%; width: auto; margin-left: 0.5rem; margin-top: 3px;">
-						</div>
-					</q-btn>
-					<q-btn
-						flat
-						round
-						class="q-pa-none"
-						@click="copy(globalStore.version)">
-						<q-icon name="mdi-alpha-v-circle-outline" />
-						<q-tooltip
-							anchor="bottom middle"
-							self="top middle"
-							:offset="[10, 10]">
-							{{ $t('components.app-bar.copy-version', { version: globalStore.version }) }}
-						</q-tooltip>
-					</q-btn>
-				</q-toolbar-title>
-
-				<q-btn
-					icon="mdi-github"
-					flat
-					rounded
-					style="padding: 0.5rem"
-					href="https://github.com/Reaparr/Reaparr"
-					target="_blank" />
-
+		<q-toolbar class="app-bar">
+			<q-toolbar-title>
 				<q-btn
 					flat
-					rounded
-					style="padding: 0.5rem"
-					@click="dialogStore.openDialog(DialogType.DiscordServerInviteDialog)">
-					<DiscordIcon />
+					dense
+					:icon="showNavigationDrawerState ? 'mdi-arrow-collapse-left' : 'mdi-arrow-collapse-right'"
+					class="q-mr-sm"
+					@click.stop="showNavigationDrawer" />
+				<q-btn
+					to="/"
+					flat
+					class="q-pa-sm">
+					<div
+						class="row items-center no-wrap"
+						style="height: 2rem;">
+						<img
+							src="/img/logo/reaparr-full.svg"
+							alt="Reaparr"
+							style="height: 125%; width: auto;">
+						<img
+							src="/img/logo/reaparr-title.svg"
+							alt="Reaparr"
+							style="height: 100%; width: auto; margin-left: 0.5rem; margin-top: 3px;">
+					</div>
 				</q-btn>
+				<q-btn
+					flat
+					round
+					class="q-pa-none"
+					@click="copy(globalStore.version)">
+					<q-icon name="mdi-alpha-v-circle-outline" />
+					<q-tooltip
+						anchor="bottom middle"
+						self="top middle"
+						:offset="[10, 10]">
+						{{ $t('components.app-bar.copy-version', { version: globalStore.version }) }}
+					</q-tooltip>
+				</q-btn>
+			</q-toolbar-title>
 
-				<!-- Background Activity Toggle -->
-				<BackgroundActivityToggleButton />
+			<q-btn
+				icon="mdi-github"
+				flat
+				rounded
+				style="padding: 0.5rem"
+				href="https://github.com/Reaparr/Reaparr"
+				target="_blank" />
 
-				<!-- Account Selector -->
-				<AccountSelector />
+			<q-btn
+				flat
+				rounded
+				style="padding: 0.5rem"
+				@click="dialogStore.openDialog(DialogType.DiscordServerInviteDialog)">
+				<DiscordIcon />
+			</q-btn>
 
-				<!-- Notifications Selector -->
-				<NotificationButton @toggle="showNotificationsDrawer" />
-			</q-toolbar>
-		</QRow>
+			<!-- Background Activity Toggle -->
+			<BackgroundActivityToggleButton />
+
+			<!-- Account Selector -->
+			<AccountSelector />
+
+			<!-- Notifications Selector -->
+			<NotificationButton @toggle="showNotificationsDrawer" />
+		</q-toolbar>
 	</q-header>
 </template>
 
@@ -80,6 +77,10 @@ const globalStore = useGlobalStore();
 const dialogStore = useDialogStore();
 
 const { copy } = useClipboard({ legacy: true });
+
+defineProps<{
+	showNavigationDrawerState?: boolean;
+}>();
 
 const emit = defineEmits<{
 	(e: 'show-navigation' | 'show-notifications'): void;

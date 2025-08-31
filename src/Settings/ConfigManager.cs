@@ -67,7 +67,8 @@ public class ConfigManager : IConfigManager
             _log.Information("Config directory exists, will use {ConfigDirectory}", _pathProvider.ConfigDirectory);
             var migrateResult = MigrateLegacyFileNames();
             if (migrateResult.IsFailed)
-                return migrateResult.LogFatal();;
+                return migrateResult.LogFatal();
+            ;
         }
         else
         {

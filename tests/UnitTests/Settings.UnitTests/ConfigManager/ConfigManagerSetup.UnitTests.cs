@@ -5,9 +5,9 @@ using Reaparr.Settings.Contracts;
 
 namespace Reaparr.Settings.UnitTests;
 
-public class ConfigManager_Setup_UnitTests : BaseUnitTest<ConfigManager>
+public class ConfigManagerSetupUnitTests : BaseUnitTest<ConfigManager>
 {
-    public ConfigManager_Setup_UnitTests(ITestOutputHelper output)
+    public ConfigManagerSetupUnitTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]

@@ -41,9 +41,10 @@ jobs:
                     # Strip the 'v' prefix from the version tag
                     VERSION_NO_V="${{ steps.get_current_release.outputs.tag_name }}"
                     VERSION_NO_V="${VERSION_NO_V#v}"
-                    # Add the current date in YYYY-MM-DD format
+                    # Keep current date (YYYY-MM-DD) and add hours+minutes (HHmm) to avoid collisions
                     DEV_DATE=$(date +%Y-%m-%d)
-                    VERSION_WITH_DATE="${VERSION_NO_V}-dev-${DEV_DATE}"
+                    DEV_TIME=$(date +%H%M)
+                    VERSION_WITH_DATE="${VERSION_NO_V}-dev-${DEV_DATE}-${DEV_TIME}"
                     echo "VERSION_NO_V=$VERSION_NO_V" >> $GITHUB_ENV
                     echo "VERSION_WITH_DATE=$VERSION_WITH_DATE" >> $GITHUB_ENV
 

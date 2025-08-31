@@ -395,7 +395,6 @@
             "view": "Sicht",
             "media-options": "Optionen"
         },
-        "name-version": "Reaparr - V{version}",
         "units": {
             "per-second": "/s"
         },

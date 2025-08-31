@@ -45,7 +45,7 @@ public class UpdateCredentialsEndpoint : BaseEndpoint<UpdateCredentialsEndpointR
 
     public UpdateCredentialsEndpoint(ILogger log, UserManager<AppUser> userManager)
     {
-        _log = log;
+        _log = log.ForContext<UpdateCredentialsEndpoint>();
         _userManager = userManager;
     }
 

@@ -26,7 +26,7 @@ public class SyncServerMediaJob : IJob
         ISignalRService signalRService
     )
     {
-        _log = log;
+        _log = log.ForContext<SyncServerMediaJob>();
         _commandExecutor = commandExecutor;
         _dbContext = dbContext;
         _signalRService = signalRService;

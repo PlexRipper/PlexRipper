@@ -42,7 +42,7 @@ public class CheckAllConnectionsStatusByPlexServerHandler
         ISignalRService signalRService
     )
     {
-        _log = log;
+        _log = log.ForContext<CheckAllConnectionsStatusByPlexServerHandler>();
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;
         _eventPublisher = eventPublisher;

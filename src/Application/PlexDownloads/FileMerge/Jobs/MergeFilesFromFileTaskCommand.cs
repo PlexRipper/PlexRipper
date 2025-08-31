@@ -53,7 +53,7 @@ public class MergeFilesFromFileTaskCommandHandler : ICommandHandler<MergeFilesFr
         IPath path
     )
     {
-        _log = log;
+        _log = log.ForContext<MergeFilesFromFileTaskCommandHandler>();
         _commandExecutor = commandExecutor;
         _eventPublisher = eventPublisher;
         _dbContext = dbContext;

@@ -28,7 +28,7 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
         IPlexApiClientFactory plexApiClientFactory
     )
     {
-        _log = log;
+        _log = log.ForContext<GetAllMediaByTypeFromPlexApiCommandHandler>();
         _dbContext = dbContext;
         _plexApiClientFactory = plexApiClientFactory;
     }

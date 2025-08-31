@@ -61,7 +61,7 @@ public class ValidatePlexAccountEndpoint : BaseEndpoint<ValidatePlexAccountEndpo
 
     public ValidatePlexAccountEndpoint(ILogger log, ICommandExecutor commandExecutor)
     {
-        _log = log;
+        _log = log.ForContext<ValidatePlexAccountEndpoint>();
         _commandExecutor = commandExecutor;
     }
 

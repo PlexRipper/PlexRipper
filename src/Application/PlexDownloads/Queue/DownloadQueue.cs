@@ -21,7 +21,7 @@ public class DownloadQueue : IDownloadQueue
 
     public DownloadQueue(ILogger log, IReaparrDbContext dbContext, IDownloadTaskScheduler downloadTaskScheduler)
     {
-        _log = log;
+        _log = log.ForContext<DownloadQueue>();
         _dbContext = dbContext;
         _downloadTaskScheduler = downloadTaskScheduler;
     }

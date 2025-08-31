@@ -15,7 +15,7 @@ public class FileMergeQueue : IFileMergeQueue
 
     public FileMergeQueue(ILogger log, IReaparrDbContext dbContext, IFileMergeScheduler fileMergeScheduler)
     {
-        _log = log;
+        _log = log.ForContext<FileMergeQueue>();
         _dbContext = dbContext;
         _fileMergeScheduler = fileMergeScheduler;
     }

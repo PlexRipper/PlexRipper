@@ -47,7 +47,7 @@ public class CreatePlexAccountEndpoint : BaseEndpoint<CreatePlexAccountEndpointR
 
     public CreatePlexAccountEndpoint(ILogger log, IReaparrDbContext dbContext, ICommandExecutor commandExecutor)
     {
-        _log = log;
+        _log = log.ForContext<CreatePlexAccountEndpoint>();
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;
     }

@@ -31,7 +31,7 @@ public class ConfigManager : IConfigManager
         IDirectory directory
     )
     {
-        _log = log;
+        _log = log.ForContext<ConfigManager>();
         _pathProvider = pathProvider;
         _userSettings = userSettings;
         _file = file;

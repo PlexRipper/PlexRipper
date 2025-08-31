@@ -12,7 +12,7 @@ public class PlexSignInCommandHandler : ICommandHandler<PlexSignInCommand, Resul
 
     public PlexSignInCommandHandler(ILogger log, IPlexApiClientFactory plexApiClientFactory)
     {
-        _log = log;
+        _log = log.ForContext<PlexSignInCommandHandler>();
         _plexApiClientFactory = plexApiClientFactory;
     }
 

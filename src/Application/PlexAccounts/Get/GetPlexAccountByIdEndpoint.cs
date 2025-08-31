@@ -27,7 +27,7 @@ public class GetPlexAccountByIdEndpoint : BaseEndpoint<GetPlexAccountByIdEndpoin
 
     public GetPlexAccountByIdEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
-        _log = log;
+        _log = log.ForContext<GetPlexAccountByIdEndpoint>();
         _dbContext = dbContext;
     }
 

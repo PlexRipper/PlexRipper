@@ -44,7 +44,7 @@ public class AddOrUpdatePlexServersCommandHandler
 
     public AddOrUpdatePlexServersCommandHandler(ILogger log, IReaparrDbContext dbContext)
     {
-        _log = log;
+        _log = log.ForContext<AddOrUpdatePlexServersCommandHandler>();
         _dbContext = dbContext;
     }
 

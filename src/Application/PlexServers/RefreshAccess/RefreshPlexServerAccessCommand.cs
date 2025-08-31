@@ -34,7 +34,7 @@ public class RefreshPlexServerAccessCommandHandler
         ICommandExecutor commandExecutor
     )
     {
-        _log = log;
+        _log = log.ForContext<RefreshPlexServerAccessCommandHandler>();
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;
     }

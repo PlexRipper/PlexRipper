@@ -53,7 +53,7 @@ public class AppUserLoginEndpoint : BaseEndpoint<AppUserLoginEndpointRequest>
 
     public AppUserLoginEndpoint(ILogger log, SignInManager<AppUser> signInManager)
     {
-        _log = log;
+        _log = log.ForContext<AppUserLoginEndpoint>();
         _signInManager = signInManager;
     }
 

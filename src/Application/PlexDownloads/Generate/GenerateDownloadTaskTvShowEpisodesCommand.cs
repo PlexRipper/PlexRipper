@@ -44,7 +44,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
 
     public GenerateDownloadTaskTvShowEpisodesCommandHandler(ILogger log, IReaparrDbContext dbContext)
     {
-        _log = log;
+        _log = log.ForContext<GenerateDownloadTaskTvShowEpisodesCommandHandler>();
         _dbContext = dbContext;
     }
 

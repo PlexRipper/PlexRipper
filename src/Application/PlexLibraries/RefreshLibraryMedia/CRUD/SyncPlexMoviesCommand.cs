@@ -47,7 +47,7 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
 
     public SyncPlexMoviesCommandHandler(ILogger log, IReaparrDbContext dbContext)
     {
-        _log = log;
+        _log = log.ForContext<SyncPlexMoviesCommandHandler>();
         _dbContext = dbContext;
     }
 

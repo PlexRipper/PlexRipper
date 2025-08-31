@@ -29,7 +29,7 @@ public class BaseContainer : IDisposable
     /// </summary>
     private BaseContainer(ILogger log, Seed seed, string memoryDbName, Action<UnitTestDataConfig>? options = null)
     {
-        _log = log;
+        _log = log.ForContext<BaseContainer>();
 
         _log.Information("Setting up BaseContainer with database: {MemoryDbName}", memoryDbName);
 

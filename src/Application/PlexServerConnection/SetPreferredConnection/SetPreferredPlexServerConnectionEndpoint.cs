@@ -37,7 +37,7 @@ public class SetPreferredPlexServerConnectionEndpoint
 
     public SetPreferredPlexServerConnectionEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
-        _log = log;
+        _log = log.ForContext<SetPreferredPlexServerConnectionEndpoint>();
         _dbContext = dbContext;
     }
 

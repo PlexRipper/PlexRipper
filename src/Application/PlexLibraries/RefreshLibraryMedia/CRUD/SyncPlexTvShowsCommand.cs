@@ -81,7 +81,7 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
 
     public SyncPlexTvShowsCommandHandler(ILogger log, IReaparrDbContext dbContext)
     {
-        _log = log;
+        _log = log.ForContext<SyncPlexTvShowsCommandHandler>();
         _dbContext = dbContext;
     }
 

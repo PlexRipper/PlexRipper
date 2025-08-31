@@ -27,7 +27,7 @@ public class SignalRService : ISignalRService
         IHubContext<NotificationHub, INotificationHub> notificationHub
     )
     {
-        _log = log;
+        _log = log.ForContext<SignalRService>();
         _progressHub = progressHub;
         _notificationHub = notificationHub;
     }

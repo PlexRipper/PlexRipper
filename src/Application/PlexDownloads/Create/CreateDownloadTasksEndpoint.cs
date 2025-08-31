@@ -29,7 +29,7 @@ public class CreateDownloadTasksEndpoint : BaseEndpoint<CreateDownloadTasksEndpo
 
     public CreateDownloadTasksEndpoint(ILogger log, ICommandExecutor commandExecutor)
     {
-        _log = log;
+        _log = log.ForContext<CreateDownloadTasksEndpoint>();
         _commandExecutor = commandExecutor;
     }
 

@@ -26,7 +26,7 @@ public class ServerOnlineStatusChangedHandler : IEventHandler<ServerOnlineStatus
 
     public ServerOnlineStatusChangedHandler(ILogger log, IReaparrDbContext dbContext, IDownloadQueue downloadQueue)
     {
-        _log = log;
+        _log = log.ForContext<ServerOnlineStatusChangedHandler>();
         _dbContext = dbContext;
         _downloadQueue = downloadQueue;
     }

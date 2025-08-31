@@ -13,7 +13,7 @@ public class SendNotificationResultHandler : IEventHandler<SendNotificationResul
 
     public SendNotificationResultHandler(ILogger log, IReaparrDbContext dbContext, ISignalRService signalRService)
     {
-        _log = log;
+        _log = log.ForContext<SendNotificationResultHandler>();
         _dbContext = dbContext;
         _signalRService = signalRService;
     }

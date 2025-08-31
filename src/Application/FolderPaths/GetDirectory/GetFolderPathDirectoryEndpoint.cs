@@ -41,7 +41,7 @@ public class GetFolderPathDirectoryEndpoint : BaseEndpoint<GetFolderPathDirector
 
     public GetFolderPathDirectoryEndpoint(ILogger log, IDirectory directory, IPath path, IDiskProvider diskProvider)
     {
-        _log = log;
+        _log = log.ForContext<GetFolderPathDirectoryEndpoint>();
         _directory = directory;
         _path = path;
         _diskProvider = diskProvider;

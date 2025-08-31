@@ -27,7 +27,7 @@ public class QueueInspectPlexServerJobCommandHandler : ICommandHandler<QueueInsp
 
     public QueueInspectPlexServerJobCommandHandler(ILogger log, IReaparrDbContext dbContext, IScheduler scheduler)
     {
-        _log = log;
+        _log = log.ForContext<QueueInspectPlexServerJobCommandHandler>();
         _dbContext = dbContext;
         _scheduler = scheduler;
     }

@@ -22,7 +22,7 @@ public class QueueSyncServerMediaJobCommandHandler : ICommandHandler<QueueSyncSe
 
     public QueueSyncServerMediaJobCommandHandler(ILogger log, IScheduler scheduler)
     {
-        _log = log;
+        _log = log.ForContext<QueueSyncServerMediaJobCommandHandler>();
         _scheduler = scheduler;
     }
 

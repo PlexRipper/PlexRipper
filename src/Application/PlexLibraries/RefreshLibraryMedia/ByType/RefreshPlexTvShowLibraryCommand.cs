@@ -40,7 +40,7 @@ public class RefreshPlexTvShowLibraryCommandHandler
         IRefreshLibraryProgressReporter progressReporter
     )
     {
-        _log = log;
+        _log = log.ForContext<RefreshPlexTvShowLibraryCommandHandler>();
         _commandExecutor = commandExecutor;
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;

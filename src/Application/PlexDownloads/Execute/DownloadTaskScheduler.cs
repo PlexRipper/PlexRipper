@@ -12,7 +12,7 @@ public class DownloadTaskScheduler : IDownloadTaskScheduler
 
     public DownloadTaskScheduler(ILogger log, IScheduler scheduler)
     {
-        _log = log;
+        _log = log.ForContext<DownloadTaskScheduler>();
         _scheduler = scheduler;
     }
 

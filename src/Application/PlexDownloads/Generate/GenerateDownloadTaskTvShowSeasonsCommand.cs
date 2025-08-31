@@ -34,7 +34,7 @@ public class GenerateDownloadTaskTvShowSeasonsCommandHandler
         ICommandExecutor command
     )
     {
-        _log = log;
+        _log = log.ForContext<GenerateDownloadTaskTvShowSeasonsCommandHandler>();
         _dbContext = dbContext;
         _command = command;
     }

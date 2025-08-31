@@ -28,7 +28,7 @@ public class DownloadJob : IJob, IDisposable
         IPlexDownloadClient plexDownloadClient
     )
     {
-        _log = log;
+        _log = log.ForContext<DownloadJob>();
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;
         _eventPublisher = eventPublisher;

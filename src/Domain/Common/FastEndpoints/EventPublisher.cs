@@ -10,7 +10,7 @@ public class EventPublisher : IEventPublisher
 
     public EventPublisher(ILogger log)
     {
-        _log = log;
+        _log = log.ForContext<EventPublisher>();
     }
 
     /// <inheritdoc/>

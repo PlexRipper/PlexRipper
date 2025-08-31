@@ -12,7 +12,7 @@ public class FileMergeScheduler : IFileMergeScheduler
 
     public FileMergeScheduler(ILogger log, IScheduler scheduler)
     {
-        _log = log;
+        _log = log.ForContext<FileMergeScheduler>();
         _scheduler = scheduler;
     }
 

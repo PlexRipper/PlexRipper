@@ -10,7 +10,7 @@ public class CommandExecutor : ICommandExecutor
 
     public CommandExecutor(ILogger log)
     {
-        _log = log;
+        _log = log.ForContext<CommandExecutor>();
     }
 
     public async Task<TResult> Send<TResult>(ICommand<TResult> command, CancellationToken ct = default)

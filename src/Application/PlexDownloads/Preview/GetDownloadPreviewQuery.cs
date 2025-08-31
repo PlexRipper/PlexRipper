@@ -30,7 +30,7 @@ public class GetDownloadPreviewQueryHandler : ICommandHandler<GetDownloadPreview
     public GetDownloadPreviewQueryHandler(IReaparrDbContext dbContext, ILogger log)
     {
         _dbContext = dbContext;
-        _log = log;
+        _log = log.ForContext<GetDownloadPreviewQueryHandler>();
     }
 
     /// <summary>

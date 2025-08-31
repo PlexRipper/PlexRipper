@@ -28,7 +28,7 @@ public class DeletePlexAccountByIdEndpoint : BaseEndpoint<DeletePlexAccountByIdR
 
     public DeletePlexAccountByIdEndpoint(ILogger log, IReaparrDbContext dbContext, ISignalRService signalRService)
     {
-        _log = log;
+        _log = log.ForContext<DeletePlexAccountByIdEndpoint>();
         _dbContext = dbContext;
         _signalRService = signalRService;
     }

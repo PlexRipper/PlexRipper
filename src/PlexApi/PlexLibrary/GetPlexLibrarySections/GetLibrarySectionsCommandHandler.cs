@@ -17,7 +17,7 @@ public class GetLibrarySectionsCommandHandler : ICommandHandler<GetLibrarySectio
         IPlexApiClientFactory plexApiClientFactory
     )
     {
-        _log = log;
+        _log = log.ForContext<GetLibrarySectionsCommandHandler>();
         _dbContext = dbContext;
         _plexApiClientFactory = plexApiClientFactory;
     }

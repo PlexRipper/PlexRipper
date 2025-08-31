@@ -14,7 +14,7 @@ public class FileMergeJob : IJob
 
     public FileMergeJob(ILogger log, ICommandExecutor commandExecutor, IReaparrDbContext dbContext)
     {
-        _log = log;
+        _log = log.ForContext<FileMergeJob>();
         _commandExecutor = commandExecutor;
         _dbContext = dbContext;
     }

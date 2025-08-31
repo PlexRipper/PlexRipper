@@ -36,7 +36,7 @@ public class RefreshPlexAccountAccessEndpoint
         ISignalRService signalRService
     )
     {
-        _log = log;
+        _log = log.ForContext<RefreshPlexAccountAccessEndpoint>();
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;
         _signalRService = signalRService;

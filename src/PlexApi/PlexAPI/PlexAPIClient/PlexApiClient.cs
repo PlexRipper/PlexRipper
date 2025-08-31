@@ -23,7 +23,7 @@ public class PlexApiClient : IPlexApiClient
 
     public PlexApiClient(ILogger log, HttpClient httpClient, PlexApiClientOptions options)
     {
-        _log = log;
+        _log = log.ForContext<PlexApiClient>();
         _defaultClient = httpClient;
         _defaultClient.DefaultRequestHeaders.Accept.Add(ContentType.ApplicationJsonHeaderValue);
 

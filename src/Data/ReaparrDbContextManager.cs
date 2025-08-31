@@ -33,7 +33,7 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
         IFile file
     )
     {
-        _log = log;
+        _log = log.ForContext<ReaparrDbContextManager>();
         _reaparrDbContextDatabase = reaparrDbContextDatabase;
         _authDbContextDatabase = authDbContextDatabase;
         _generalSettings = generalSettings;

@@ -65,7 +65,7 @@ public class InsertMediaMetaDataCommandHandler
     public InsertMediaMetaDataCommandHandler(IReaparrDbContext dbContext, ILogger log)
     {
         _dbContext = dbContext;
-        _log = log;
+        _log = log.ForContext<InsertMediaMetaDataCommandHandler>();
     }
 
     public async Task<Result<InsertMediaMetaDataCommandResponse>> ExecuteAsync(

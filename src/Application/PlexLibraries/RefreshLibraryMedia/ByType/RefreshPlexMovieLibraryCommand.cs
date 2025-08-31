@@ -36,7 +36,7 @@ public class RefreshPlexMovieLibraryCommandHandler
         IRefreshLibraryProgressReporter progressReporter
     )
     {
-        _log = log;
+        _log = log.ForContext<RefreshPlexMovieLibraryCommandHandler>();
         _commandExecutor = commandExecutor;
         _dbContext = dbContext;
         _progressReporter = progressReporter;

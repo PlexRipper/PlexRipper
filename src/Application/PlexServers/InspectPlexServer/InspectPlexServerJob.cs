@@ -27,7 +27,7 @@ public class InspectPlexServerJob : IJob
         ISignalRService signalRService
     )
     {
-        _log = log;
+        _log = log.ForContext<InspectPlexServerJob>();
         _commandExecutor = commandExecutor;
         _dbContext = dbContext;
         _signalRService = signalRService;

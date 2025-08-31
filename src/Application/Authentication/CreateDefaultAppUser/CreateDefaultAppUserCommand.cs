@@ -34,7 +34,7 @@ public class CreateDefaultAppUserCommandHandler : ICommandHandler<CreateDefaultA
         RoleManager<IdentityRole> roleManager
     )
     {
-        _log = log;
+        _log = log.ForContext<CreateDefaultAppUserCommandHandler>();
         _authenticationSettings = authenticationSettings;
         _userManager = userManager;
         _roleManager = roleManager;

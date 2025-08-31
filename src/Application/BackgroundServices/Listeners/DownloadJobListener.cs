@@ -19,7 +19,7 @@ public class DownloadJobListener : IDownloadJobListener
         IFileMergeQueue fileMergeQueue
     )
     {
-        _log = log;
+        _log = log.ForContext<DownloadJobListener>();
         _dbContext = dbContext;
         _eventPublisher = eventPublisher;
         _fileMergeQueue = fileMergeQueue;

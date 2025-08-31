@@ -13,6 +13,6 @@ public static partial class ResultExtensions
 
     public static void SetLogger(ILogger log)
     {
-        _log = log;
+        _log = log.ForContext(typeof(ResultExtensions));
     }
 }

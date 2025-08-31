@@ -10,7 +10,7 @@ public class MockConfigManager : IConfigManager
 
     public MockConfigManager(ILogger log, IUserSettings userSettings)
     {
-        _log = log;
+        _log = log.ForContext<MockConfigManager>();
         _userSettings = userSettings;
     }
 

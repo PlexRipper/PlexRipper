@@ -27,7 +27,7 @@ public class DeleteFolderPathEndpoint : BaseEndpoint<DeleteFolderPathEndpointReq
 
     public DeleteFolderPathEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
-        _log = log;
+        _log = log.ForContext<DeleteFolderPathEndpoint>();
         _dbContext = dbContext;
     }
 

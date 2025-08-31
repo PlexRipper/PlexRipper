@@ -36,7 +36,7 @@ public class InspectAllPlexServersByAccountIdCommandHandler
         IReaparrDbContext dbContext
     )
     {
-        _log = log;
+        _log = log.ForContext<InspectAllPlexServersByAccountIdCommandHandler>();
         _commandExecutor = commandExecutor;
         _dbContext = dbContext;
     }

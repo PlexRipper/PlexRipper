@@ -14,7 +14,7 @@ public class DownloadTaskWorkerLogNotificationHandler : IEventHandler<DownloadTa
 
     public DownloadTaskWorkerLogNotificationHandler(ILogger log, IReaparrDbContext dbContext)
     {
-        _log = log;
+        _log = log.ForContext<DownloadTaskWorkerLogNotificationHandler>();
         _dbContext = dbContext;
     }
 

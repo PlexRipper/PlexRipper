@@ -17,7 +17,7 @@ public class MockSignalRService : ISignalRService
 
     public MockSignalRService(ILogger log)
     {
-        _log = log;
+        _log = log.ForContext<MockSignalRService>();
     }
 
     public Task SendLibraryProgressUpdateAsync(LibraryProgress libraryProgress) => Task.CompletedTask;

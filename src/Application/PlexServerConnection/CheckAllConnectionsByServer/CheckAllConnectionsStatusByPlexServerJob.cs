@@ -28,7 +28,7 @@ public class CheckAllConnectionsStatusByPlexServerJob : IJob
         ISignalRService signalRService
     )
     {
-        _log = log;
+        _log = log.ForContext<CheckAllConnectionsStatusByPlexServerJob>();
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;
         _signalRService = signalRService;

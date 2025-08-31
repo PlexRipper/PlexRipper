@@ -45,7 +45,7 @@ public class PlexDownloadClient : IAsyncDisposable, IPlexDownloadClient
         IServerSettingsModule serverSettings
     )
     {
-        _log = log;
+        _log = log.ForContext<PlexDownloadClient>();
         _commandExecutor = commandExecutor;
         _dbContext = dbContext;
         _downloadWorkerFactory = downloadWorkerFactory;

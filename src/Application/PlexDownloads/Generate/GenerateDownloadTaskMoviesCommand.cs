@@ -44,7 +44,7 @@ public class GenerateDownloadTaskMoviesCommandHandler : ICommandHandler<Generate
 
     public GenerateDownloadTaskMoviesCommandHandler(ILogger log, IReaparrDbContext dbContext)
     {
-        _log = log;
+        _log = log.ForContext<GenerateDownloadTaskMoviesCommandHandler>();
         _dbContext = dbContext;
     }
 

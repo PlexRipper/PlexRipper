@@ -45,7 +45,7 @@ public class GenerateDownloadTaskTvShowsCommandHandler : ICommandHandler<Generat
         ICommandExecutor commandExecutor
     )
     {
-        _log = log;
+        _log = log.ForContext<GenerateDownloadTaskTvShowsCommandHandler>();
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;
     }

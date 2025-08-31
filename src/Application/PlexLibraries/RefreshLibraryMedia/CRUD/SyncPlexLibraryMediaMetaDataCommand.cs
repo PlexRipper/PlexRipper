@@ -61,7 +61,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
     public SyncPlexLibraryMediaMetaDataCommandHandler(IReaparrDbContext dbContext, ILogger log)
     {
         _dbContext = dbContext;
-        _log = log;
+        _log = log.ForContext<SyncPlexLibraryMediaMetaDataCommandHandler>();
     }
 
     public async Task<Result> ExecuteAsync(SyncPlexLibraryMediaMetaDataCommand command, CancellationToken ct)

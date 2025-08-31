@@ -36,7 +36,7 @@ public class PauseDownloadTaskCommandHandler : ICommandHandler<PauseDownloadTask
         IFileMergeScheduler fileMergeScheduler
     )
     {
-        _log = log;
+        _log = log.ForContext<PauseDownloadTaskCommandHandler>();
         _dbContext = dbContext;
         _downloadTaskScheduler = downloadTaskScheduler;
         _fileMergeScheduler = fileMergeScheduler;

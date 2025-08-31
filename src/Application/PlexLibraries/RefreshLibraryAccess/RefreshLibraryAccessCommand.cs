@@ -41,7 +41,7 @@ public class RefreshLibraryAccessHandler
         ICommandExecutor commandDispatcher
     )
     {
-        _log = log;
+        _log = log.ForContext<RefreshLibraryAccessHandler>();
         _commandExecutor = commandExecutor;
         _dbContext = dbContext;
         _commandDispatcher = commandDispatcher;

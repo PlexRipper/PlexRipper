@@ -39,7 +39,7 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
         IDownloadTaskScheduler downloadTaskScheduler
     )
     {
-        _log = log;
+        _log = log.ForContext<StopDownloadTaskCommandHandler>();
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;
         _file = file;

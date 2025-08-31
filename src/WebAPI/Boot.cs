@@ -35,7 +35,7 @@ public class Boot : IHostedService
         IDownloadQueue downloadQueue
     )
     {
-        _log = log;
+        _log = log.ForContext<Boot>();
         _commandExecutor = commandExecutor;
         _appLifetime = appLifetime;
         _schedulerService = schedulerService;

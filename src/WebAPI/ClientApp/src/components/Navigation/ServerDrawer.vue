@@ -128,15 +128,20 @@ function isLibrarySyncing(plexLibraryId: number): boolean {
 function openMediaPage(library: PlexLibraryDTO): void {
 	switch (library.type) {
 		case PlexMediaType.Movie:
+		case PlexMediaType.OtherVideos:
 			router.push(`/movies/${library.id}`);
 			break;
 		case PlexMediaType.TvShow:
 			router.push(`/tvshows/${library.id}`);
 			break;
 		case PlexMediaType.Music:
+		case PlexMediaType.Artist:
+		case PlexMediaType.Album:
+		case PlexMediaType.Song:
 			router.push(`/music/${library.id}`);
 			break;
 		case PlexMediaType.Photos:
+		case PlexMediaType.PhotoAlbum:
 			router.push(`/photos/${library.id}`);
 			break;
 		default:

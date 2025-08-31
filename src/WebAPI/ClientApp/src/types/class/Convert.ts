@@ -82,7 +82,13 @@ export const Convert = {
 			case PlexMediaType.Movie:
 				return 'mdi-filmstrip';
 			case PlexMediaType.Music:
+			case PlexMediaType.Artist:
+			case PlexMediaType.Album:
+			case PlexMediaType.Song:
 				return 'mdi-music';
+			case PlexMediaType.Photos:
+			case PlexMediaType.PhotoAlbum:
+				return 'mdi-image';
 			default:
 				return 'mdi-help-circle-outline';
 		}

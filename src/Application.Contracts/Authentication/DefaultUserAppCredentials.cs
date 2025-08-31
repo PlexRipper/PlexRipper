@@ -6,7 +6,7 @@ public static class DefaultUserAppCredentials
 
     public const string DefaultUsername = "ReaparrRocks";
 
-    public const string DefaultPassword = "R€Aℙℙ@RR69";
+    public const string DefaultPassword = "R€Aℙℙ@rr69";
 
     public const string DefaultAdminRole = "Admin";
 }

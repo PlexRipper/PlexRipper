@@ -79,7 +79,7 @@ public class Boot : IHostedService
 
     private void TerminateApplication()
     {
-        _log.ErrorLine("An error occurred during the boot process, terminating application");
+        _log.FatalLine("An error occurred during the boot process, terminating application");
         _appLifetime.StopApplication();
     }
 

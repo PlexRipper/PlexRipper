@@ -79,7 +79,7 @@ public static class DataFormat
         }
         catch (Exception e)
         {
-            _log.ErrorResult(e);
+            _log.Here().ErrorResult(e);
             throw;
         }
     }
@@ -95,7 +95,7 @@ public static class DataFormat
         }
         catch (Exception e)
         {
-            _log.ErrorResult(e);
+            _log.Here().ErrorResult(e);
             throw;
         }
     }

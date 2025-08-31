@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Identity.Contracts;
+using Reaparr.Logging;
 using Serilog;
 
 namespace Reaparr.Application;
@@ -116,7 +117,7 @@ public class UpdateCredentialsEndpoint : BaseEndpoint<UpdateCredentialsEndpointR
             }
         }
 
-        _log.Warning("The Reaparr app credentials have been updated! Make sure this is intended");
+        _log.Here().Warning("The Reaparr app credentials have been updated! Make sure this is intended");
 
         // Respond with success
         await SendFluentResult(Result.Ok(), ct);

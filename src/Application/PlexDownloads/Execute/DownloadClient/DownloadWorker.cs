@@ -337,7 +337,7 @@ public class DownloadWorker : IDisposable
         if (DownloadWorkerTask.DownloadStatus == status)
             return;
 
-        var msg = _log.DebugMsg(
+        var msg = _log.Here().DebugMsg(
             "Download worker with id: {Id} and with filename: {FileName} changed status to {Status}",
             Id,
             FileName,
@@ -360,7 +360,7 @@ public class DownloadWorker : IDisposable
                 logMsg = _log.Here().InformationMsg("Download worker {Id} with {FileName} finished!", Id, FileName);
                 break;
             case DownloadStatus.ServerUnreachable:
-                logMsg = _log.ErrorMsg(
+                logMsg = _log.Here().ErrorMsg(
                     "The server {PlexServerName} is unreachable!",
                     DownloadWorkerTask.PlexServer?.Name ?? "Unknown"
                 );

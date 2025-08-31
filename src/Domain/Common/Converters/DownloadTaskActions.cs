@@ -83,7 +83,7 @@ public static class DownloadTaskActions
                 actions.Add(DownloadActions.Delete);
                 break;
             default:
-                _log.Error("Unknown download status {DownloadStatus}", downloadStatus);
+                _log.Here().Error("Unknown download status {DownloadStatus}", downloadStatus);
                 break;
         }
 
@@ -99,7 +99,7 @@ public static class DownloadTaskActions
     {
         if (!downloadStatusList.Any())
         {
-            _log.Warning(
+            _log.Here().Warning(
                 "{NameOfDownloadStatusList} was empty, cannot determine the aggregate status of the download tasks",
                 nameof(downloadStatusList)
             );
@@ -116,7 +116,7 @@ public static class DownloadTaskActions
         foreach (var status in _anyStatuses.Where(status => downloadStatusList.Any(x => x == status)))
             return status;
 
-        _log.Error("Unable to determine the aggregate status of the download tasks. {StatusList}", downloadStatusList);
+        _log.Here().Error("Unable to determine the aggregate status of the download tasks. {StatusList}", downloadStatusList);
 
         return DownloadStatus.Unknown;
     }

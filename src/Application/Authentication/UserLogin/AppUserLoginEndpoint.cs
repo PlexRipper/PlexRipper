@@ -90,7 +90,7 @@ public class AppUserLoginEndpoint : BaseEndpoint<AppUserLoginEndpointRequest>
         var username = req.Username;
         var password = req.Password;
 
-        _log.Information("Attempting to sign in user {Username}.", username);
+        _log.Here().Information("Attempting to sign in user {Username}.", username);
 
         // Attempt to sign in the user
         var signInResult = await _signInManager.PasswordSignInAsync(
@@ -102,7 +102,7 @@ public class AppUserLoginEndpoint : BaseEndpoint<AppUserLoginEndpointRequest>
 
         if (signInResult.Succeeded)
         {
-            _log.Information("User {Username} signed in successfully.", username);
+            _log.Here().Information("User {Username} signed in successfully.", username);
 
             await CookieAuth.SignInAsync(u => u.Roles.Add(DefaultUserAppCredentials.DefaultAdminRole));
 
@@ -110,14 +110,14 @@ public class AppUserLoginEndpoint : BaseEndpoint<AppUserLoginEndpointRequest>
         }
         else if (signInResult.IsLockedOut)
         {
-            var result = _log.WarningResult("User {Username} is locked out.", username);
+            var result = _log.Here().WarningResult("User {Username} is locked out.", username);
             result.Add403ForbiddenError();
 
             await SendFluentResult(result, ct);
         }
         else
         {
-            var result = _log.WarningResult("Failed to sign in user {Username}.", username);
+            var result = _log.Here().WarningResult("Failed to sign in user {Username}.", username);
             result.Add401UnauthorizedError();
 
             await SendFluentResult(result, ct);

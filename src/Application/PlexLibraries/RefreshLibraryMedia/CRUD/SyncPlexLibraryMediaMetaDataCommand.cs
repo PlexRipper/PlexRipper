@@ -117,7 +117,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
             await _dbContext.PlexLibraryActors.Where(x => x.PlexLibraryId == libraryId).ExecuteDeleteAsync();
             stopWatch.Stop();
 
-            _log.Debug(
+            _log.Here().Debug(
                 "Finished dropping all {NameOfPlexActor} relations for library {LibraryName} in {ElapsedSeconds:F2} seconds",
                 nameof(PlexActor),
                 libraryName,
@@ -144,7 +144,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
 
         if (insertResult.IsSuccess)
         {
-            _log.Debug(
+            _log.Here().Debug(
                 "Finished creating {Count} {NameOfPlexActor} relations for library {LibraryName} in {ElapsedSeconds:F2} seconds",
                 newActors.Count,
                 nameof(PlexActor),
@@ -154,7 +154,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
             return Result.Ok(newActors.Count);
         }
 
-        _log.Error(
+        _log.Here().Error(
             "Failed creating {Count} {NameOfPlexActor} relations for library {LibraryName} after {ElapsedSeconds:F2} seconds",
             newActors.Count,
             libraryName,
@@ -188,7 +188,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
 
             stopWatch.Stop();
 
-            _log.Debug(
+            _log.Here().Debug(
                 "Finished dropping all {NameOfPlexGenre} relations for library {LibraryName} in {ElapsedSeconds:F2} seconds",
                 nameof(PlexGenre),
                 libraryName,
@@ -211,7 +211,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
 
         if (insertResult.IsSuccess)
         {
-            _log.Debug(
+            _log.Here().Debug(
                 "Finished creating {Count} {NameOfPlexGenre} relations for library {LibraryName} in {ElapsedSeconds:F2} seconds",
                 newGenres.Count,
                 nameof(PlexGenre),
@@ -221,7 +221,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
             return Result.Ok(newGenres.Count);
         }
 
-        _log.Error(
+        _log.Here().Error(
             "Failed creating {Count} {NameOfPlexGenre} relations for library {LibraryName} after {ElapsedSeconds:F2} seconds",
             newGenres.Count,
             libraryName,
@@ -254,7 +254,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
             await _dbContext.PlexLibraryCountries.Where(x => x.PlexLibraryId == libraryId).ExecuteDeleteAsync();
             stopWatch.Stop();
 
-            _log.Debug(
+            _log.Here().Debug(
                 "Finished dropping all {NameOfPlexCountry} relations for library {LibraryName} in {ElapsedSeconds:F2} seconds",
                 nameof(PlexCountry),
                 libraryName,
@@ -277,7 +277,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
 
         if (insertResult.IsSuccess)
         {
-            _log.Debug(
+            _log.Here().Debug(
                 "Finished creating {Count} {NameOfPlexCountry} relations for library {LibraryName} in {ElapsedSeconds:F2} seconds",
                 newCountries.Count,
                 nameof(PlexCountry),
@@ -287,7 +287,7 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
             return Result.Ok(newCountries.Count);
         }
 
-        _log.Error(
+        _log.Here().Error(
             "Failed creating {Count} {NameOfPlexCountry} relations for library {LibraryName} after {ElapsedSeconds:F2} seconds",
             newCountries.Count,
             libraryName,

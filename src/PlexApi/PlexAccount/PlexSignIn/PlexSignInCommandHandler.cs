@@ -1,5 +1,6 @@
 using FastEndpoints;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
+using Reaparr.Logging;
 using Reaparr.PlexApi.Contracts;
 using Serilog;
 
@@ -19,7 +20,7 @@ public class PlexSignInCommandHandler : ICommandHandler<PlexSignInCommand, Resul
     public async Task<Result<PlexAccount>> ExecuteAsync(PlexSignInCommand command, CancellationToken ct)
     {
         var plexAccount = command.PlexAccount;
-        _log.Debug("Requesting PlexToken for account {UserName}", plexAccount.Username);
+        _log.Here().Debug("Requesting PlexToken for account {UserName}", plexAccount.Username);
 
         var plexTvClient = _plexApiClientFactory.CreateTvClient();
 
@@ -65,7 +66,7 @@ public class PlexSignInCommandHandler : ICommandHandler<PlexSignInCommand, Resul
 
         if (result.IsSuccess)
         {
-            _log.Information(
+            _log.Here().Information(
                 "Successfully retrieved the PlexAccount data for user {PlexAccountDisplayName} from the PlexApi",
                 plexAccount.DisplayName
             );

@@ -107,7 +107,7 @@ public class RefreshPlexTvShowLibraryCommandHandler
             if (rawEpisodesDataResult.IsFailed)
                 return rawEpisodesDataResult.ToResult();
 
-            _log.Information("Merging all data received from PlexApi for library {PlexLibraryName}", plexLibrary.Name);
+            _log.Here().Information("Merging all data received from PlexApi for library {PlexLibraryName}", plexLibrary.Name);
 
             // Phase 4 of 5: PlexLibrary media data was parsed successfully.
             _log.Here()
@@ -167,7 +167,7 @@ public class RefreshPlexTvShowLibraryCommandHandler
 
             if (plexLibrary.TvShows.Any() && mediaSize == 0)
             {
-                _log.Error(
+                _log.Here().Error(
                     "No media size was found for library {PlexLibraryName} with id: {PlexLibraryId}",
                     plexLibrary.Title,
                     plexLibrary.Id
@@ -197,7 +197,7 @@ public class RefreshPlexTvShowLibraryCommandHandler
         }
         else
         {
-            _log.Warning(
+            _log.Here().Warning(
                 "No TV shows were found for library {PlexLibraryName} with id: {PlexLibraryId}",
                 plexLibrary.Title,
                 plexLibrary.Id
@@ -210,7 +210,7 @@ public class RefreshPlexTvShowLibraryCommandHandler
             .PlexLibraries.Where(x => x.Id == plexLibrary.Id)
             .ExecuteUpdateAsync(p => p.SetProperty(x => x.SyncedAt, plexLibrary.SyncedAt), CancellationToken.None);
 
-        _log.Information(
+        _log.Here().Information(
             "Successfully refreshed library {PlexLibraryName} with id: {PlexLibraryId}",
             plexLibrary.Title,
             plexLibrary.Id
@@ -334,7 +334,7 @@ public class RefreshPlexTvShowLibraryCommandHandler
         // Log invalid seasons and episodes
         if (inValidSeasons.Any())
         {
-            _log.Warning(
+            _log.Here().Warning(
                 "Found {Count} invalid seasons which are missing a ParentGUID in library {PlexLibraryName} with id: {PlexLibraryId}",
                 inValidSeasons.Count,
                 library.Title,
@@ -344,7 +344,7 @@ public class RefreshPlexTvShowLibraryCommandHandler
 
         if (inValidEpisodes.Any())
         {
-            _log.Warning(
+            _log.Here().Warning(
                 "Found {Count} invalid episodes which are missing a ParentGUID in library {PlexLibraryName} with id: {PlexLibraryId}",
                 inValidEpisodes.Count,
                 library.Title,

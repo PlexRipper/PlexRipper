@@ -2,6 +2,7 @@ using FastEndpoints;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Data.Contracts;
+using Reaparr.Logging;
 using Reaparr.PlexApi.Contracts;
 using Serilog;
 
@@ -48,23 +49,23 @@ public class RefreshPlexServerAccessCommandHandler
 
         var plexAccountName = await _dbContext.GetPlexAccountDisplayName(plexAccountId, cancellationToken);
 
-        _log.Debug("Refreshing Plex servers access for PlexAccount: {PlexAccountName}", plexAccountName);
+        _log.Here().Debug("Refreshing Plex servers access for PlexAccount: {PlexAccountName}", plexAccountName);
 
         var result = await _commandExecutor.Send(new GetAccessiblePlexServersCommand(plexAccountId), cancellationToken);
 
         // If the Plex API returns a 401 Unauthorized error, remove the PlexAccount and PlexServerAccess
         if (result.HasPlex401UnauthorizedError())
         {
-            _log.Warning(
+            _log.Here().Warning(
                 "Plex API returned 401 Unauthorized for PlexAccount: {PlexAccountDisplayName}",
                 plexAccountName
             );
-            _log.Warning(
+            _log.Here().Warning(
                 "Removing PlexServerAccess and LibraryAccess for PlexAccount: {PlexAccountDisplayName}",
                 plexAccountName
             );
 
-            _log.Error("{PlexAccountName} token has been invalidated and has lost Plex Server access", plexAccountName);
+            _log.Here().Error("{PlexAccountName} token has been invalidated and has lost Plex Server access", plexAccountName);
             return await RemovePlexAccess(plexAccountId);
         }
 
@@ -73,7 +74,7 @@ public class RefreshPlexServerAccessCommandHandler
 
         if (!result.Value.Any())
         {
-            _log.Warning("No Plex servers found for PlexAccount: {plexAccountName}", plexAccountName);
+            _log.Here().Warning("No Plex servers found for PlexAccount: {plexAccountName}", plexAccountName);
             return await RemovePlexAccess(plexAccountId);
         }
 
@@ -97,7 +98,7 @@ public class RefreshPlexServerAccessCommandHandler
         if (plexServerAccountAccessRapport.IsFailed)
             return plexServerAccountAccessRapport.LogError();
 
-        _log.Information(
+        _log.Here().Information(
             "Successfully refreshed accessible Plex servers for account {PlexAccountDisplayName}",
             plexAccountName
         );

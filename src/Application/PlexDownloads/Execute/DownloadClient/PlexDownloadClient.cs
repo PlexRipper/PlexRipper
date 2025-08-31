@@ -128,7 +128,7 @@ public class PlexDownloadClient : IAsyncDisposable, IPlexDownloadClient
         if (_downloadWorkers.Any(x => x.DownloadWorkerTask.DownloadStatus == DownloadStatus.Downloading))
             return Result.Fail("The PlexDownloadClient is already downloading and can not be started.").LogWarning();
 
-        _log.Debug("Start downloading {FileName}", DownloadTask.FileName);
+        _log.Here().Debug("Start downloading {FileName}", DownloadTask.FileName);
         try
         {
             var results = new List<Result>();
@@ -194,7 +194,7 @@ public class PlexDownloadClient : IAsyncDisposable, IPlexDownloadClient
 
         await _commandExecutor.Send(new DownloadTaskUpdatedCommand(DownloadTask.ToKey()));
 
-        _log.Verbose("{@DownloadTask}", DownloadTask.ToString());
+        _log.Here().Verbose("{@DownloadTask}", DownloadTask.ToString());
     }
 
     private async Task SetupDownloadLimitWatcher(DownloadTaskGeneric downloadTask)
@@ -217,7 +217,7 @@ public class PlexDownloadClient : IAsyncDisposable, IPlexDownloadClient
     {
         if (!_downloadWorkers.Any())
         {
-            _log.Warning("No download workers have been made yet, cannot setup subscriptions");
+            _log.Here().Warning("No download workers have been made yet, cannot setup subscriptions");
             return;
         }
 
@@ -256,7 +256,7 @@ public class PlexDownloadClient : IAsyncDisposable, IPlexDownloadClient
             {
                 if (ex.GetType() != typeof(OperationCanceledException))
                 {
-                    _log.ErrorResult(ex);
+                    _log.Here().ErrorResult(ex);
                     _downloadWorkerLogCompletionSource.SetException(ex);
                 }
 

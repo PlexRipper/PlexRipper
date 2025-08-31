@@ -24,7 +24,7 @@ public class ProgressHub : Hub<IProgressHub>, IProgressHub
     /// <inheritdoc/>
     public async Task JobStatusUpdate(JobStatusUpdateDTO jobStatusUpdate, CancellationToken cancellationToken = default)
     {
-        _log.Debug(
+        _log.Here().Debug(
             "Sending progress: {MessageTypesNotification} => {@JobStatusUpdateDto}",
             MessageTypes.JobStatusUpdate.ToString(),
             jobStatusUpdate
@@ -38,7 +38,7 @@ public class ProgressHub : Hub<IProgressHub>, IProgressHub
         CancellationToken cancellationToken = default
     )
     {
-        _log.Debug(
+        _log.Here().Debug(
             "Sending progress: {MessageTypesNotification} => {@SyncServerProgress}",
             MessageTypes.SyncServerMediaProgress.ToString(),
             syncServerMediaProgress
@@ -52,7 +52,7 @@ public class ProgressHub : Hub<IProgressHub>, IProgressHub
         CancellationToken cancellationToken = default
     )
     {
-        _log.Debug(
+        _log.Here().Debug(
             "Sending progress: {MessageTypesNotification} => {@ServerConnectionCheckStatusProgress}",
             MessageTypes.ServerConnectionCheckStatusProgress.ToString(),
             serverConnectionCheckStatusProgress
@@ -66,7 +66,7 @@ public class ProgressHub : Hub<IProgressHub>, IProgressHub
         CancellationToken cancellationToken = default
     )
     {
-        _log.Debug(
+        _log.Here().Debug(
             "Sending progress: {MessageTypesNotification} => {@ServerDownloadProgress}",
             MessageTypes.ServerDownloadProgress.ToString(),
             serverDownloadProgress
@@ -77,7 +77,7 @@ public class ProgressHub : Hub<IProgressHub>, IProgressHub
     /// <inheritdoc/>
     public async Task DownloadTaskUpdate(DownloadTaskDTO downloadTask, CancellationToken cancellationToken = default)
     {
-        _log.Debug(
+        _log.Here().Debug(
             "Sending progress: {MessageTypesNotification} => {@DownloadTaskUpdate}",
             MessageTypes.DownloadTaskUpdate.ToString(),
             downloadTask
@@ -88,7 +88,7 @@ public class ProgressHub : Hub<IProgressHub>, IProgressHub
     /// <inheritdoc/>
     public async Task LibraryProgress(LibraryProgress libraryProgress, CancellationToken cancellationToken = default)
     {
-        _log.Debug(
+        _log.Here().Debug(
             "Sending progress: {MessageTypesNotification} => {@LibraryProgress}",
             MessageTypes.LibraryProgress.ToString(),
             libraryProgress

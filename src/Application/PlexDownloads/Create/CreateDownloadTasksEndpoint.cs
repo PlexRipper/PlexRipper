@@ -2,6 +2,7 @@ using FastEndpoints;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Reaparr.Application.Contracts;
+using Reaparr.Logging;
 using Serilog;
 
 namespace Reaparr.Application;
@@ -46,9 +47,9 @@ public class CreateDownloadTasksEndpoint : BaseEndpoint<CreateDownloadTasksEndpo
 
     public override async Task HandleAsync(CreateDownloadTasksEndpointRequest req, CancellationToken ct)
     {
-        _log.Debug("Attempting to add download task orders: ");
+        _log.Here().Debug("Attempting to add download task orders: ");
         foreach (var downloadMediaDto in req.Request.DownloadMedias)
-            _log.Debug("DownloadMediaDTO: {@DownloadMediaDto} ", downloadMediaDto);
+            _log.Here().Debug("DownloadMediaDTO: {@DownloadMediaDto} ", downloadMediaDto);
 
         var result = await _commandExecutor.Send(new CreateDownloadTasksCommand(req.Request), ct);
 

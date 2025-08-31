@@ -26,13 +26,13 @@ public class EventPublisher : IEventPublisher
         }
         catch (OperationCanceledException) when (ct.IsCancellationRequested)
         {
-            _log.Warning("Publish of {EventType} canceled.", @event.GetType().Name);
+            _log.Here().Warning("Publish of {EventType} canceled.", @event.GetType().Name);
         }
         catch (Exception e)
         {
             // Swallow exception to avoid breaking the fire and forget
             _log.Here().Error("Error publishing event {EventType}: {ErrorMessage}", @event, e.Message);
-            _log.ErrorResult(e);
+            _log.Here().ErrorResult(e);
         }
     }
 }

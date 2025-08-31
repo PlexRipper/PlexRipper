@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Quartz;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
+using Reaparr.Logging;
 using Serilog;
 
 namespace Reaparr.Application;
@@ -69,7 +70,7 @@ public class QueueInspectPlexServerJobCommandHandler : ICommandHandler<QueueInsp
         foreach (var i in alreadyRunning)
         {
             var plexServerName = await _dbContext.GetPlexServerNameById(i, cancellationToken);
-            _log.Error(
+            _log.Here().Error(
                 "Job {InspectPlexServerJobName} is already running for serverL {PlexServerIdName} with id: {PlexServerId}",
                 nameof(InspectPlexServerJob),
                 plexServerName,

@@ -17,8 +17,8 @@ public static class UserSettingsSerializer
         }
         catch (Exception e)
         {
-            _log.Error("Failed to serialize settings");
-            _log.ErrorResult(e);
+            _log.Here().Error("Failed to serialize settings");
+            _log.Here().ErrorResult(e);
         }
 
         return string.Empty;
@@ -42,8 +42,8 @@ public static class UserSettingsSerializer
         }
         catch (Exception e)
         {
-            _log.Error("Failed to deserialize settings");
-            _log.ErrorResult(e);
+            _log.Here().Error("Failed to deserialize settings");
+            _log.Here().ErrorResult(e);
         }
 
         return new UserSettings();

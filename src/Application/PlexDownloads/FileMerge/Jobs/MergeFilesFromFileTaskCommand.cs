@@ -170,7 +170,7 @@ public class MergeFilesFromFileTaskCommandHandler : ICommandHandler<MergeFilesFr
 
                     if (stopwatch.ElapsedMilliseconds > 1000)
                     {
-                        _log.Verbose(downloadTask.ToString());
+                        _log.Here().Verbose(downloadTask.ToString());
 
                         await _dbContext.UpdateDownloadFileTransferProgress(key, downloadTask.ToFileTransferProgress());
                         await _commandExecutor.Send(new DownloadTaskUpdatedCommand(key), CancellationToken.None);
@@ -192,7 +192,7 @@ public class MergeFilesFromFileTaskCommandHandler : ICommandHandler<MergeFilesFr
                 // Important: Reset the offset between files otherwise it skips parts of the file
                 downloadTask.CurrentFileTransferBytesOffset = 0;
 
-                _log.Debug("Deleting file {FilePath} since it has been merged already", filePath);
+                _log.Here().Debug("Deleting file {FilePath} since it has been merged already", filePath);
                 await _readStream.DisposeAsync();
                 _readStream = null;
 
@@ -222,7 +222,7 @@ public class MergeFilesFromFileTaskCommandHandler : ICommandHandler<MergeFilesFr
         }
         catch (OperationCanceledException)
         {
-            _log.Warning("The file merge operation was cancelled for file task {FileTaskId}", key.Id);
+            _log.Here().Warning("The file merge operation was cancelled for file task {FileTaskId}", key.Id);
 
             downloadTask.DownloadStatus = downloadTask.IsSingleFile
                 ? DownloadStatus.MovePaused
@@ -235,7 +235,7 @@ public class MergeFilesFromFileTaskCommandHandler : ICommandHandler<MergeFilesFr
         }
         catch (Exception ex)
         {
-            return (await ErrorDownloadTask(downloadTask, _log.ErrorResult(ex)));
+            return (await ErrorDownloadTask(downloadTask, _log.Here().ErrorResult(ex)));
         }
         finally
         {

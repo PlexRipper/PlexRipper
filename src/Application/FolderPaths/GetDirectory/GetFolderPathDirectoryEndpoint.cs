@@ -4,6 +4,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Reaparr.Application.Contracts;
 using Reaparr.FileSystem.Contracts;
+using Reaparr.Logging;
 using Serilog;
 
 namespace Reaparr.Application;
@@ -77,7 +78,7 @@ public class GetFolderPathDirectoryEndpoint : BaseEndpoint<GetFolderPathDirector
         bool allowFoldersWithoutTrailingSlashes
     )
     {
-        _log.Debug("Looking up path: {Query}", query);
+        _log.Here().Debug("Looking up path: {Query}", query);
 
         var defaultResult = new FileSystemResult
         {
@@ -101,7 +102,7 @@ public class GetFolderPathDirectoryEndpoint : BaseEndpoint<GetFolderPathDirector
                     }
                     catch (IOException ex) when (ex.Message.Contains("Stale file handle"))
                     {
-                        _log.Warning("Stale file handle detected for drive {DriveName}, skipping", d.Name);
+                        _log.Here().Warning("Stale file handle detected for drive {DriveName}, skipping", d.Name);
 
                         return new FileSystemModel
                         {
@@ -117,7 +118,7 @@ public class GetFolderPathDirectoryEndpoint : BaseEndpoint<GetFolderPathDirector
                     }
                     catch (Exception ex)
                     {
-                        _log.Warning(ex, "Error accessing drive information for {DriveName}, skipping", d.Name);
+                        _log.Here().Warning(ex, "Error accessing drive information for {DriveName}, skipping", d.Name);
 
                         return new FileSystemModel
                         {

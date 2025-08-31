@@ -4,6 +4,7 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
+using Reaparr.Logging;
 using Serilog;
 
 namespace Reaparr.Application;
@@ -63,7 +64,7 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
                 continue;
             }
 
-            _log.Information("Stopping {DownloadTaskFullTitle} from downloading", downloadTask.FullTitle);
+            _log.Here().Information("Stopping {DownloadTaskFullTitle} from downloading", downloadTask.FullTitle);
 
             if (await _downloadTaskScheduler.IsDownloading(downloadTaskKey, cancellationToken))
             {
@@ -75,7 +76,7 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
                 }
             }
 
-            _log.Debug("Deleting partially downloaded files of {DownloadTaskFullTitle}", downloadTask.FullTitle);
+            _log.Here().Debug("Deleting partially downloaded files of {DownloadTaskFullTitle}", downloadTask.FullTitle);
 
             foreach (var filePath in downloadTask.FilePaths)
             {

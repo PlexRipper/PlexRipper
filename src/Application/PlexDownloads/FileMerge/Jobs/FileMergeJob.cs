@@ -50,7 +50,7 @@ public class FileMergeJob : IJob
 
             if (result.IsFailed)
             {
-                _log.Error("Failed to merge all files for {DownloadTaskKey}", downloadTaskKey);
+                _log.Here().Error("Failed to merge all files for {DownloadTaskKey}", downloadTaskKey);
                 return;
             }
 
@@ -72,11 +72,11 @@ public class FileMergeJob : IJob
         }
         catch (TaskCanceledException)
         {
-            _log.Warning("{JobName} for {DownloadTaskKey} was cancelled", nameof(FileMergeJob), downloadTaskKey);
+            _log.Here().Warning("{JobName} for {DownloadTaskKey} was cancelled", nameof(FileMergeJob), downloadTaskKey);
         }
         catch (Exception e)
         {
-            _log.ErrorResult(e);
+            _log.Here().ErrorResult(e);
         }
     }
 }

@@ -44,14 +44,14 @@ public class CreateDefaultAppUserCommandHandler : ICommandHandler<CreateDefaultA
     {
         if (_authenticationSettings.ResetCredentials)
         {
-            _log.Warning(
+            _log.Here().Warning(
                 "Setting: {ResetCredentials} has been enabled! Resetting Reaparr app username and password!",
                 nameof(_authenticationSettings.ResetCredentials)
             );
             var toBeDeletedUser = await _userManager.Users.FirstOrDefaultAsync(cancellationToken: cancellationToken);
             if (toBeDeletedUser != null)
             {
-                _log.Information("Reaparr app user was found, deleting now and creating the default one.");
+                _log.Here().Information("Reaparr app user was found, deleting now and creating the default one.");
                 await _userManager.DeleteAsync(toBeDeletedUser);
             }
         }
@@ -105,7 +105,7 @@ public class CreateDefaultAppUserCommandHandler : ICommandHandler<CreateDefaultA
 
         if (_authenticationSettings.ResetCredentials)
         {
-            _log.Information(
+            _log.Here().Information(
                 "Setting: {ResetCredentials} back to false!",
                 nameof(_authenticationSettings.ResetCredentials)
             );

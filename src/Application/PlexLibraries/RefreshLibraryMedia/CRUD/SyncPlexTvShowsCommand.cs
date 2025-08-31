@@ -102,7 +102,7 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
             if (string.IsNullOrWhiteSpace(plexLibraryName))
                 return ResultExtensions.EntityNotFound(nameof(command.LibraryMetadata.PlexLibrary), plexLibraryId);
 
-            _log.Debug(
+            _log.Here().Debug(
                 "Starting syncing of tv shows in library: {PlexLibraryName} with id:  {PlexLibraryId} by first removing all media and then reinserting it",
                 plexLibraryName,
                 plexLibraryId
@@ -142,14 +142,14 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
 
             stopWatch.Stop();
 
-            _log.Information(
+            _log.Here().Information(
                 "Finished media syncing plexLibrary: {PlexLibraryName} with id: {PlexLibraryId} in {TotalMilliseconds} milliseconds",
                 plexLibraryName,
                 plexLibraryId,
                 stopWatch.Elapsed.TotalMilliseconds
             );
 
-            _log.Debug(bulkInsertRapportResult.Value.ToString());
+            _log.Here().Debug(bulkInsertRapportResult.Value.ToString());
 
             return bulkInsertRapportResult;
         }
@@ -167,7 +167,7 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
         CancellationToken cancellationToken
     )
     {
-        _log.Debug(
+        _log.Here().Debug(
             "Starting syncing of TV show genres for library: {LibraryName} with id: {LibraryId}",
             libraryName,
             plexLibraryId
@@ -213,7 +213,7 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
         CancellationToken cancellationToken
     )
     {
-        _log.Debug(
+        _log.Here().Debug(
             "Starting syncing of TV show countries for library: {LibraryName} with id: {LibraryId}",
             libraryName,
             plexLibraryId
@@ -261,7 +261,7 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
         CancellationToken cancellationToken
     )
     {
-        _log.Debug(
+        _log.Here().Debug(
             "Starting syncing of TV show actors for library: {LibraryName} with id: {LibraryId}",
             libraryName,
             plexLibraryId

@@ -3,6 +3,7 @@ using FluentValidation;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 using Reaparr.FileSystem.Contracts;
+using Reaparr.Logging;
 using Serilog;
 
 namespace Reaparr.Application;
@@ -58,7 +59,7 @@ public class PauseDownloadTaskCommandHandler : ICommandHandler<PauseDownloadTask
                 continue;
             }
 
-            _log.Information("Pausing DownloadTask with id {DownloadTaskTitle} from downloading", downloadTask.Title);
+            _log.Here().Information("Pausing DownloadTask with id {DownloadTaskTitle} from downloading", downloadTask.Title);
 
             if (await _downloadTaskScheduler.IsDownloading(downloadTaskKey, cancellationToken))
             {

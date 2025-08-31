@@ -3,6 +3,7 @@ using FastEndpoints;
 using FastEndpoints.Swagger;
 using Microsoft.AspNetCore.Http.Extensions;
 using Reaparr.Environment;
+using Reaparr.Logging;
 
 namespace Reaparr.WebAPI;
 
@@ -15,7 +16,7 @@ public static partial class Startup
     /// <param name="env"> The <see cref="IWebHostEnvironment"/> instance to configure.</param>
     public static void ConfigureApplication(this WebApplication app, IWebHostEnvironment env)
     {
-        _log.Information(
+        _log.Here().Information(
             "Running location: {Location}",
             Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
         );

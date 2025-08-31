@@ -1,5 +1,6 @@
 using FastEndpoints;
 using Reaparr.Data.Contracts;
+using Reaparr.Logging;
 using Reaparr.PlexApi.Contracts;
 using Serilog;
 
@@ -52,7 +53,7 @@ public class GetLibrarySectionsCommandHandler : ICommandHandler<GetLibrarySectio
 
         if (response.Value.Object?.MediaContainer?.Directory is null)
         {
-            _log.Error(
+            _log.Here().Error(
                 "Plex server: {PlexServerName} returned an empty response when libraries were requested",
                 connection.PlexServer?.Name
             );

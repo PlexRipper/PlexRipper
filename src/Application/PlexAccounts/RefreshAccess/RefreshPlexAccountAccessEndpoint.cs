@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
+using Reaparr.Logging;
 using Serilog;
 
 namespace Reaparr.Application;
@@ -64,7 +65,7 @@ public class RefreshPlexAccountAccessEndpoint
             var enabledAccounts = await _dbContext.PlexAccounts.Where(x => x.IsEnabled).ToListAsync(ct);
             if (!enabledAccounts.Any())
             {
-                _log.Warning("No enabled Plex accounts found to start the refresh PlexServer access job");
+                _log.Here().Warning("No enabled Plex accounts found to start the refresh PlexServer access job");
                 await SendFluentResult(Result.Ok(), ct);
                 return;
             }

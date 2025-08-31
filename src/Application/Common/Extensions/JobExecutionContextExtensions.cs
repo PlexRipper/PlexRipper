@@ -86,7 +86,7 @@ public static class JobExecutionContextExtensions
             }
             catch (Exception e)
             {
-                _log.ErrorResult(e);
+                _log.Here().ErrorResult(e);
                 throw;
             }
         }

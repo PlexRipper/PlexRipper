@@ -20,12 +20,12 @@ public class Program
     {
         try
         {
-            _log.Information("Starting Reaparr!");
+            _log.Here().Information("Starting Reaparr!");
 
             LogManager.SetupLogging(EnvironmentExtensions.GetLogLevel());
             FluentResultConfiguration.Setup();
 
-            _log.Information(
+            _log.Here().Information(
                 "Currently running {Channel} version {Version} on {CurrentOS}",
                 EnvironmentExtensions.IsDevRelease() ? "DEVELOPMENT" : "STABLE",
                 EnvironmentExtensions.GetVersion(),
@@ -34,7 +34,7 @@ public class Program
 
             AppExtensions.LogIdentity();
 
-            _log.Information("Initiating boot process");
+            _log.Here().Information("Initiating boot process");
 
             var builder = WebApplication.CreateBuilder(args);
 
@@ -64,7 +64,7 @@ public class Program
         }
         catch (Exception e)
         {
-            _log.Fatal("Reaparr crashed due to exception!");
+            _log.Here().Fatal("Reaparr crashed due to exception!");
             Result.Fail(new ExceptionalError(e)).LogFatal();
             System.Environment.Exit(2);
         }
@@ -77,7 +77,7 @@ public class Program
 
     private static void FailedToStart(Result result)
     {
-        _log.Fatal("Reaparr failed to start!");
+        _log.Here().Fatal("Reaparr failed to start!");
 
         result.LogFatal();
 

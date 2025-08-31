@@ -1,6 +1,7 @@
 using FastEndpoints;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
+using Reaparr.Logging;
 using Serilog;
 
 namespace Reaparr.Application;
@@ -42,7 +43,7 @@ public class ServerOnlineStatusChangedHandler : IEventHandler<ServerOnlineStatus
                 notification.PlexServerId,
                 cancellationToken: cancellationToken
             );
-            _log.Information(
+            _log.Here().Information(
                 "Server {PlexServerName} came online, checking DownloadQueue to resume downloads",
                 plexServerName
             );

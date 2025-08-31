@@ -40,7 +40,7 @@ public class InspectPlexServerJob : IJob
 
         var plexServerIds = dataMap.GetIntListValue(PlexServerIdsParameter);
 
-        _log.Debug(
+        _log.Here().Debug(
             "Executing job: {InspectPlexServerJobName} for {Count} servers",
             nameof(InspectPlexServerJob),
             plexServerIds.Count
@@ -68,13 +68,13 @@ public class InspectPlexServerJob : IJob
 
             await Task.WhenAll(serverTasks);
 
-            _log.Information("Successfully finished the inspection of {Count}", plexServerIds.Count);
+            _log.Here().Information("Successfully finished the inspection of {Count}", plexServerIds.Count);
         }
         catch (Exception e)
         {
             // Jobs should swallow exceptions as otherwise Quartz will keep re-executing it
             // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
-            _log.ErrorResult(e);
+            _log.Here().ErrorResult(e);
         }
     }
 

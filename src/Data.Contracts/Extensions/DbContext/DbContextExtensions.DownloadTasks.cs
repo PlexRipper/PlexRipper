@@ -24,7 +24,7 @@ public static partial class DbContextExtensions
         var tokenResult = await dbContext.GetPlexServerTokenAsync(plexServerId, cancellationToken);
         if (tokenResult.IsFailed)
         {
-            _log.Error("Could not find a valid token for server {ServerName}", plexServer?.Name ?? "Unknown");
+            _log.Here().Error("Could not find a valid token for server {ServerName}", plexServer?.Name ?? "Unknown");
             return tokenResult.ToResult();
         }
 
@@ -192,7 +192,7 @@ public static partial class DbContextExtensions
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            _log.ErrorResult(ex);
+            _log.Here().ErrorResult(ex);
             throw;
         }
     }
@@ -282,7 +282,7 @@ public static partial class DbContextExtensions
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            _log.ErrorResult(ex);
+            _log.Here().ErrorResult(ex);
         }
 
         return DownloadStatus.Unknown;

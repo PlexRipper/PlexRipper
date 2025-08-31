@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
+using Reaparr.Logging;
 using Serilog;
 
 namespace Reaparr.Application;
@@ -94,7 +95,7 @@ public class CreatePlexAccountEndpoint : BaseEndpoint<CreatePlexAccountEndpointR
             }
         }
 
-        _log.Debug("Creating account with username {DisplayName}", plexAccount.DisplayName);
+        _log.Here().Debug("Creating account with username {DisplayName}", plexAccount.DisplayName);
 
         // Generate plexAccount clientId
         if (plexAccount.ClientId == string.Empty)
@@ -125,6 +126,6 @@ public class CreatePlexAccountEndpoint : BaseEndpoint<CreatePlexAccountEndpointR
             ct
         );
         if (inspectResult.IsFailed)
-            _log.Error("Failed to queue inspect server job for PlexAccount with id {PlexAccountId}", plexAccount.Id);
+            _log.Here().Error("Failed to queue inspect server job for PlexAccount with id {PlexAccountId}", plexAccount.Id);
     }
 }

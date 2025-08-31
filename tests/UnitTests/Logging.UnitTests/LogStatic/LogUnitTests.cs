@@ -32,37 +32,37 @@
 //     {
 //         var position = new { Latitude = 25, Longitude = 134 };
 //
-//         var verboseLogEvent = _log.Verbose(
+//         var verboseLogEvent = _log.Here().Verbose(
 //             "This is a verbose string with a json object: {Position}, a number {Count}, a bool: {Boolean}",
 //             position,
 //             9999,
 //             true
 //         );
-//         var debugLogEvent = _log.Debug(
+//         var debugLogEvent = _log.Here().Debug(
 //             "This is a debug string with a json object: {Position}, a number {Count}, a bool: {Boolean}",
 //             position,
 //             9999,
 //             true
 //         );
-//         var warningLogEvent = _log.Warning(
+//         var warningLogEvent = _log.Here().Warning(
 //             "This is a warning string with a json object: {Position}, a number {Count}, a bool: {Boolean}",
 //             position,
 //             9999,
 //             true
 //         );
-//         var informationLogEvent = _log.Information(
+//         var informationLogEvent = _log.Here().Information(
 //             "This is an information string with a json object: {Position}, a number {Count}, a bool: {Boolean}",
 //             position,
 //             9999,
 //             true
 //         );
-//         var errorLogEvent = _log.Error(
+//         var errorLogEvent = _log.Here().Error(
 //             "This is an error string with a json object: {Position}, a number {Count}, a bool: {Boolean}",
 //             position,
 //             9999,
 //             true
 //         );
-//         var fatalLogEvent = _log.Fatal(
+//         var fatalLogEvent = _log.Here().Fatal(
 //             "This is a fatal string with a json object: {Position}, a number {Count}, a bool: {Boolean}",
 //             position,
 //             9999,
@@ -82,37 +82,37 @@
 //     {
 //         var position = new { Latitude = 25, Longitude = 134 };
 //
-//         var verboseLogEvent = _log.Verbose(
+//         var verboseLogEvent = _log.Here().Verbose(
 //             "This is a verbose string with a json object: {Position}, a number {Count}, a bool: {Boolean}",
 //             position,
 //             9999,
 //             true
 //         );
-//         var debugLogEvent = _log.Debug(
+//         var debugLogEvent = _log.Here().Debug(
 //             "This is a debug string with a json object: {Position}, a number {Count}, a bool: {Boolean}",
 //             position,
 //             9999,
 //             true
 //         );
-//         var warningLogEvent = _log.Warning(
+//         var warningLogEvent = _log.Here().Warning(
 //             "This is a warning string with a json object: {Position}, a number {Count}, a bool: {Boolean}",
 //             position,
 //             9999,
 //             true
 //         );
-//         var informationLogEvent = _log.Information(
+//         var informationLogEvent = _log.Here().Information(
 //             "This is an information string with a json object: {Position}, a number {Count}, a bool: {Boolean}",
 //             position,
 //             9999,
 //             true
 //         );
-//         var errorLogEvent = _log.Error(
+//         var errorLogEvent = _log.Here().Error(
 //             "This is an error string with a json object: {Position}, a number {Count}, a bool: {Boolean}",
 //             position,
 //             9999,
 //             true
 //         );
-//         var fatalLogEvent = _log.Fatal(
+//         var fatalLogEvent = _log.Here().Fatal(
 //             "This is a fatal string with a json object: {Position}, a number {Count}, a bool: {Boolean}",
 //             position,
 //             9999,

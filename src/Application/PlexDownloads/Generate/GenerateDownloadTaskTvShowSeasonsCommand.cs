@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Application.Contracts.Validators;
 using Reaparr.Data.Contracts;
+using Reaparr.Logging;
 using Serilog;
 
 namespace Reaparr.Application;
@@ -49,7 +50,7 @@ public class GenerateDownloadTaskTvShowSeasonsCommandHandler
         if (!plexSeasonList.Any())
             return ResultExtensions.IsEmpty(nameof(plexSeasonList)).LogWarning();
 
-        _log.Debug(
+        _log.Here().Debug(
             "Creating {PlexTvShowIdsCount} season download tasks",
             plexSeasonList.SelectMany(x => x.MediaIds).ToList().Count
         );

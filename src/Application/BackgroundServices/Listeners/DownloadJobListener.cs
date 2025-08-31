@@ -1,6 +1,7 @@
 using Quartz;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
+using Reaparr.Logging;
 using Serilog;
 
 namespace Reaparr.Application;
@@ -37,19 +38,19 @@ public class DownloadJobListener : IDownloadJobListener
         // Make sure your trigger and job listeners never throw an exception (use a try-catch) and that they can handle internal problems. Jobs can get stuck after Quartz is unable to determine whether required logic in listener was completed successfully when listener notification failed.
         try
         {
-            _log.Debug("JobWasExecuted for job: {JobKey}", context.JobDetail.Key.ToString());
+            _log.Here().Debug("JobWasExecuted for job: {JobKey}", context.JobDetail.Key.ToString());
             var dataMap = context.JobDetail.JobDataMap;
             var downloadTaskKey = dataMap.GetJsonValue<DownloadTaskKey>(DownloadJob.DownloadTaskIdParameter);
             if (downloadTaskKey is null)
             {
-                _log.Error("DownloadTaskKey is null in job: {JobKey}", context.JobDetail.Key.ToString());
+                _log.Here().Error("DownloadTaskKey is null in job: {JobKey}", context.JobDetail.Key.ToString());
                 return;
             }
 
             var status = await _dbContext.GetDownloadTaskStatusAsync(downloadTaskKey, cancellationToken);
             if (status == DownloadStatus.DownloadFinished)
             {
-                _log.Debug(
+                _log.Here().Debug(
                     "DownloadTask with id: {DownloadTaskId} has finished downloading, starting fileMergeJob and executing DownloadQueueCheck",
                     downloadTaskKey.Id
                 );

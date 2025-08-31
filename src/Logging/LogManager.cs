@@ -24,13 +24,13 @@ public static class LogManager
         {
             // ReSharper disable once StringLiteralTypo
             case { } s when s.StartsWith("dbug:"):
-                _log.Debug(messageTemplate, memberName, sourceFilePath, sourceLineNumber);
+                _log.Here().Debug(messageTemplate, memberName, sourceFilePath, sourceLineNumber);
                 break;
             case { } s when s.StartsWith("info:"):
-                _log.Information(messageTemplate, memberName, sourceFilePath, sourceLineNumber);
+                _log.Here().Information(messageTemplate, memberName, sourceFilePath, sourceLineNumber);
                 break;
             case { } s when s.StartsWith("fail:"):
-                _log.Error(messageTemplate, memberName, sourceFilePath, sourceLineNumber);
+                _log.Here().Error(messageTemplate, memberName, sourceFilePath, sourceLineNumber);
                 break;
         }
     }
@@ -39,16 +39,16 @@ public static class LogManager
     {
         MinimumLogLevel = minimumLogLevel;
         Serilog.Log.Logger = new LogConfig().GetLogger(minimumLogLevel);
-        _log.Information("Logging level set to {LogLevel}", MinimumLogLevel);
+        _log.Here().Information("Logging level set to {LogLevel}", MinimumLogLevel);
 
         if (EnvironmentExtensions.IsUnmasked())
         {
-            _log.Warning(
+            _log.Here().Warning(
                 "Environment variable {UnmaskedKey} has been set to true, which means that sensitive data will be shown in the logs!",
                 EnvironmentExtensions.UnmaskedModeKey
             );
 
-            _log.Warning("This username should be shown: {Username}", "SomeSecretUsername");
+            _log.Here().Warning("This username should be shown: {Username}", "SomeSecretUsername");
         }
     }
 

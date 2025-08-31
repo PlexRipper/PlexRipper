@@ -1,5 +1,6 @@
 using FluentResults;
 using Reaparr.Domain;
+using Reaparr.Logging;
 
 namespace Reaparr.Data.Contracts;
 
@@ -144,7 +145,7 @@ public static partial class DbContextExtensions
         }
         catch (Exception e)
         {
-            _log.Error(
+            _log.Here().Error(
                 "Error while bulk inserting plex tv-shows with serverId: {PlexServerId} and libraryId: {PlexLibraryId}",
                 plexServerId,
                 plexLibraryId

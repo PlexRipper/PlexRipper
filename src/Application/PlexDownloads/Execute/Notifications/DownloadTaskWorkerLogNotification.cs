@@ -34,7 +34,7 @@ public class DownloadTaskWorkerLogNotificationHandler : IEventHandler<DownloadTa
         }
         catch (Exception e)
         {
-            _log.ErrorResult(e);
+            _log.Here().ErrorResult(e);
         }
     }
 }

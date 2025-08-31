@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Application.Contracts.Validators;
 using Reaparr.Data.Contracts;
+using Reaparr.Logging;
 using Serilog;
 
 namespace Reaparr.Application;
@@ -58,7 +59,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
         if (!downloadMediaList.Any())
             return ResultExtensions.IsEmpty(nameof(downloadMediaList)).LogWarning();
 
-        _log.Debug("Processing {PlexEpisodeIdsCount} episodes download tasks", episodeIds.Count);
+        _log.Here().Debug("Processing {PlexEpisodeIdsCount} episodes download tasks", episodeIds.Count);
 
         // Get all unique library IDs to optimize database queries
         var libraryIds = groupedList.Select(x => x.PlexLibraryId).Distinct().ToList();
@@ -74,7 +75,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
         var missingLibraryIds = libraryIds.Except(plexLibraries.Keys).ToList();
         if (missingLibraryIds.Any())
         {
-            _log.Warning("Missing libraries with IDs: {MissingLibraryIds}", string.Join(", ", missingLibraryIds));
+            _log.Here().Warning("Missing libraries with IDs: {MissingLibraryIds}", string.Join(", ", missingLibraryIds));
             return Result.Fail($"Missing libraries with IDs: {string.Join(", ", missingLibraryIds)}").LogError();
         }
 
@@ -90,7 +91,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
 
         if (!plexEpisodes.Any())
         {
-            _log.Warning("No episodes found for media IDs: {MediaIds}", string.Join(", ", episodeIds));
+            _log.Here().Warning("No episodes found for media IDs: {MediaIds}", string.Join(", ", episodeIds));
         }
 
         foreach (var tvShowEpisode in plexEpisodes)
@@ -98,7 +99,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
             var plexTvShow = tvShowEpisode.TvShow!;
             var plexSeason = tvShowEpisode.TvShowSeason!;
 
-            _log.Debug(
+            _log.Here().Debug(
                 "Processing episode {EpisodeKey} from season {SeasonKey} of show {ShowKey}",
                 tvShowEpisode.Key,
                 plexSeason.Key,
@@ -119,7 +120,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
             var episodeDownloadTask = downloadTaskTvShowSeason.Children.FirstOrDefault(x => x.Key == tvShowEpisode.Key);
             if (episodeDownloadTask is null)
             {
-                _log.Debug("Creating new episode download task for episode {EpisodeKey}", tvShowEpisode.Key);
+                _log.Here().Debug("Creating new episode download task for episode {EpisodeKey}", tvShowEpisode.Key);
                 episodeDownloadTask = tvShowEpisode.MapToDownloadTask();
                 episodeDownloadTask.ParentId = downloadTaskTvShowSeason.Id;
                 downloadTaskTvShowSeason.Children.Add(episodeDownloadTask);
@@ -127,7 +128,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
             }
             else
             {
-                _log.Debug(
+                _log.Here().Debug(
                     "Found existing episode download task for episode {EpisodeKey} with ID {EpisodeId}",
                     tvShowEpisode.Key,
                     episodeDownloadTask.Id
@@ -138,7 +139,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
             var downloadMediaDto = downloadMediaList.FirstOrDefault(x => x.MediaIds.Contains(tvShowEpisode.Id));
             if (downloadMediaDto is null)
             {
-                _log.Warning("No download media DTO found for episode {EpisodeKey}", tvShowEpisode.Key);
+                _log.Here().Warning("No download media DTO found for episode {EpisodeKey}", tvShowEpisode.Key);
                 continue;
             }
 
@@ -211,7 +212,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
         var episodeData = SelectEpisodeQuality(tvShowEpisode, downloadMediaDto);
         if (episodeData is null)
         {
-            _log.Error("Failed to select quality for episode {EpisodeKey}", tvShowEpisode.Key);
+            _log.Here().Error("Failed to select quality for episode {EpisodeKey}", tvShowEpisode.Key);
             return Result.Fail($"No suitable quality found for episode {tvShowEpisode.Key} ({tvShowEpisode.Title})");
         }
 
@@ -243,7 +244,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
     {
         if (!tvShowEpisode.MediaDataList.Any())
         {
-            _log.Warning("Episode {EpisodeKey} has no media data available", tvShowEpisode.Key);
+            _log.Here().Warning("Episode {EpisodeKey} has no media data available", tvShowEpisode.Key);
             return null;
         }
 
@@ -254,7 +255,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
             var specificQuality = tvShowEpisode.MediaDataList.FirstOrDefault(x => x.Id == requestedQuality.DataId);
             if (specificQuality is not null)
             {
-                _log.Debug(
+                _log.Here().Debug(
                     "Selected requested quality {Quality} for episode {EpisodeKey} ({EpisodeTitle}) (DataId: {DataId})",
                     requestedQuality.Quality,
                     tvShowEpisode.Key,
@@ -269,7 +270,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
         var bestQuality = tvShowEpisode.MediaDataList.PickMediaQuality();
         if (bestQuality is not null)
         {
-            _log.Debug(
+            _log.Here().Debug(
                 "Selected best available quality {Quality} for episode {EpisodeKey} ({EpisodeTitle}) (DataId: {DataId})",
                 bestQuality.Quality,
                 tvShowEpisode.Key,
@@ -279,7 +280,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
         }
         else
         {
-            _log.Error(
+            _log.Here().Error(
                 "No suitable quality found for episode {EpisodeKey} ({EpisodeTitle}) (ID: {EpisodeId}) from {AvailableCount} media data options",
                 tvShowEpisode.Key,
                 tvShowEpisode.Title,

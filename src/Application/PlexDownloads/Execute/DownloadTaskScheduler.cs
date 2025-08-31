@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Quartz;
 using Reaparr.Application.Contracts;
+using Reaparr.Logging;
 using Serilog;
 
 namespace Reaparr.Application;
@@ -46,7 +47,7 @@ public class DownloadTaskScheduler : IDownloadTaskScheduler
         if (!downloadTaskKey.IsValid)
             return ResultExtensions.IsInvalidId(nameof(DownloadTaskKey), downloadTaskKey.Id).LogWarning();
 
-        _log.Information("Stopping DownloadClient for DownloadTaskId {DownloadTaskId}", downloadTaskKey);
+        _log.Here().Information("Stopping DownloadClient for DownloadTaskId {DownloadTaskId}", downloadTaskKey);
 
         var jobKey = DownloadJob.GetJobKey(downloadTaskKey.Id);
         if (!await _scheduler.IsJobRunning(jobKey))

@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Quartz;
 using Reaparr.FileSystem.Contracts;
+using Reaparr.Logging;
 using Serilog;
 
 namespace Reaparr.Application;
@@ -47,7 +48,7 @@ public class FileMergeScheduler : IFileMergeScheduler
         if (!downloadTaskKey.IsValid)
             return ResultExtensions.IsInvalidId(nameof(DownloadTaskKey), downloadTaskKey.Id).LogWarning();
 
-        _log.Information(
+        _log.Here().Information(
             "Stopping FileMergeJob for {NameOfDownloadFileTask)} with id: {FileTaskId}",
             nameof(DownloadTaskKey),
             downloadTaskKey.Id

@@ -47,7 +47,7 @@ public class SignalRService : ISignalRService
         var update = downloadTasks.ToServerDownloadProgressDTOList();
         if (!update.Any())
         {
-            _log.Error($"Update for ServerDownloadProgress contained no entries to be sent");
+            _log.Here().Error($"Update for ServerDownloadProgress contained no entries to be sent");
             return;
         }
 

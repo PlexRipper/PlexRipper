@@ -2,6 +2,7 @@ using FastEndpoints;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Reaparr.Application.Contracts;
+using Reaparr.Logging;
 using Reaparr.PlexApi.Contracts;
 using Serilog;
 
@@ -88,7 +89,7 @@ public class ValidatePlexAccountEndpoint : BaseEndpoint<ValidatePlexAccountEndpo
 
             if (validateResult.IsSuccess)
             {
-                _log.Information(
+                _log.Here().Information(
                     "Successfully validated the PlexAccount Authentication Token for user {PlexAccountDisplayName} from the PlexApi",
                     plexAccount.DisplayName
                 );
@@ -104,7 +105,7 @@ public class ValidatePlexAccountEndpoint : BaseEndpoint<ValidatePlexAccountEndpo
                 return;
             }
 
-            _log.Warning(
+            _log.Here().Warning(
                 "Failed to validate the PlexAccount Authentication Token for user {PlexAccountDisplayName} from the PlexApi",
                 plexAccount.DisplayName
             );
@@ -115,7 +116,7 @@ public class ValidatePlexAccountEndpoint : BaseEndpoint<ValidatePlexAccountEndpo
 
             if (validateResult.IsSuccess)
             {
-                _log.Debug(
+                _log.Here().Debug(
                     "The PlexAccount with displayName {PlexAccountDisplayName} has been validated",
                     plexAccount.DisplayName
                 );

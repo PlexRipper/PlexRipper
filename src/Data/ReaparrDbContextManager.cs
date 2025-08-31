@@ -46,7 +46,7 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
     {
         if (EnvironmentExtensions.IsIntegrationTestMode())
         {
-            _log.Information("Integration test mode detected, skipping database setup");
+            _log.Here().Information("Integration test mode detected, skipping database setup");
             return Result.Ok();
         }
 
@@ -55,20 +55,20 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
             // Check if the database can be connected to.
             if (_reaparrDbContextDatabase.CanConnect())
             {
-                _log.Information("Database was successfully connected!");
-                _log.Information("Database connected at: {DatabasePath}", DatabasePath);
+                _log.Here().Information("Database was successfully connected!");
+                _log.Here().Information("Database connected at: {DatabasePath}", DatabasePath);
 
                 return MigrateDatabase();
             }
 
-            _log.Error(
+            _log.Here().Error(
                 "Database exists at {DatabasePath} but could not be connected to, resetting database now",
                 DatabasePath
             );
             return ResetDatabase();
         }
 
-        _log.Warning("Database does not exist, creating a new one now");
+        _log.Here().Warning("Database does not exist, creating a new one now");
 
         return CreateDatabase();
     }
@@ -77,42 +77,42 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
     {
         try
         {
-            _log.Information("Resetting Reaparr database now");
+            _log.Here().Information("Resetting Reaparr database now");
             _reaparrDbContextDatabase.CloseConnection();
 
             var backUpResult = BackUpDatabase();
             if (backUpResult.IsFailed)
             {
-                _log.Error("Failed to back-up database");
+                _log.Here().Error("Failed to back-up database");
                 return backUpResult.LogError();
             }
 
             var deletedResult = _reaparrDbContextDatabase.EnsureDeleted();
             if (deletedResult.IsFailed)
             {
-                _log.Error("Database could not be deleted at {DatabasePath}", DatabasePath);
+                _log.Here().Error("Database could not be deleted at {DatabasePath}", DatabasePath);
                 return deletedResult.LogError();
             }
 
             if (deletedResult.Value)
-                _log.Warning("Database was successfully deleted at: {DatabasePath}", DatabasePath);
+                _log.Here().Warning("Database was successfully deleted at: {DatabasePath}", DatabasePath);
 
             var createdResult = CreateDatabase();
             if (createdResult.IsFailed)
             {
-                _log.Error("Database could not be created at {DatabasePath}", DatabasePath);
+                _log.Here().Error("Database could not be created at {DatabasePath}", DatabasePath);
                 return createdResult.LogError();
             }
 
             _generalSettings.FirstTimeSetup = true;
-            _log.Information("First time setup has been set to true because the database has been reset");
+            _log.Here().Information("First time setup has been set to true because the database has been reset");
 
             return Result.Ok();
         }
         catch (Exception e)
         {
-            _log.Fatal("Failed to reset database!");
-            _log.Fatal("TO FIX THIS: DELETE DATABASE MANUALLY FROM THE CONFIG DIRECTORY");
+            _log.Here().Fatal("Failed to reset database!");
+            _log.Here().Fatal("TO FIX THIS: DELETE DATABASE MANUALLY FROM THE CONFIG DIRECTORY");
             return Result.Fail(new ExceptionalError(e)).LogFatal();
         }
     }
@@ -124,13 +124,13 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
             // Create the database while applying any pending migrations.
             _reaparrDbContextDatabase.Migrate();
             _authDbContextDatabase.Migrate();
-            _log.Information("The new database was successfully created at: {DatabasePath}", DatabasePath);
+            _log.Here().Information("The new database was successfully created at: {DatabasePath}", DatabasePath);
             return Result.Ok();
         }
         catch (Exception e)
         {
-            _log.Error("Failed to create the database");
-            _log.ErrorResult(e);
+            _log.Here().Error("Failed to create the database");
+            _log.Here().ErrorResult(e);
 
             return Result.Fail(new ExceptionalError(e)).LogError();
         }
@@ -145,34 +145,34 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
             var pendingMigrations = _reaparrDbContextDatabase.GetPendingMigrations();
             if (!_reaparrDbContextDatabase.IsInMemory() && pendingMigrations.Any())
             {
-                _log.Information("Attempting to migrate database, this might take a while");
+                _log.Here().Information("Attempting to migrate database, this might take a while");
                 var migrateResult = _reaparrDbContextDatabase.Migrate();
                 if (migrateResult.IsFailed)
                 {
-                    _log.Error("Failed to migrate the database");
+                    _log.Here().Error("Failed to migrate the database");
                     migrateResult.LogError();
                     ResetDatabase();
                 }
                 else
                 {
-                    _log.Information("Database migration successful!");
+                    _log.Here().Information("Database migration successful!");
                 }
             }
 
             pendingMigrations = _authDbContextDatabase.GetPendingMigrations();
             if (!_authDbContextDatabase.IsInMemory() && pendingMigrations.Any())
             {
-                _log.Information("Attempting to migrate Authentication tables database");
+                _log.Here().Information("Attempting to migrate Authentication tables database");
                 var migrateResult = _authDbContextDatabase.Migrate();
                 if (migrateResult.IsFailed)
                 {
-                    _log.Error("Failed to migrate Authentication tables database");
+                    _log.Here().Error("Failed to migrate Authentication tables database");
                     migrateResult.LogError();
                     ResetDatabase();
                 }
                 else
                 {
-                    _log.Information("Authentication tables migration successful!");
+                    _log.Here().Information("Authentication tables migration successful!");
                 }
             }
 
@@ -180,8 +180,8 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
         }
         catch (Exception e)
         {
-            _log.Error("Failed to migrate the database or the database is corrupted");
-            _log.ErrorResult(e);
+            _log.Here().Error("Failed to migrate the database or the database is corrupted");
+            _log.Here().ErrorResult(e);
 
             return ResetDatabase();
         }
@@ -189,10 +189,10 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
 
     private Result BackUpDatabase()
     {
-        _log.Information("Attempting to back-up the Reaparr database");
+        _log.Here().Information("Attempting to back-up the Reaparr database");
         if (!_file.Exists(_pathProvider.DatabasePath))
         {
-            _log.Information("Database does not exist, cannot continue to back-up");
+            _log.Here().Information("Database does not exist, cannot continue to back-up");
             return Result.Ok();
         }
 
@@ -202,7 +202,7 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
         var createDirectoryResult = Result.Try(() => _directory.CreateDirectory(dbBackUpPath));
         if (createDirectoryResult.IsFailed)
         {
-            _log.Error("Failed to create back-up directory at {DbBackUpPath}", dbBackUpPath);
+            _log.Here().Error("Failed to create back-up directory at {DbBackUpPath}", dbBackUpPath);
             return createDirectoryResult.LogError();
         }
 
@@ -243,7 +243,7 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
                 continue;
             }
 
-            _log.Warning("Could not find: {DatabaseFilePath} to backup", databaseFilePath);
+            _log.Here().Warning("Could not find: {DatabaseFilePath} to backup", databaseFilePath);
         }
 
         return Result.Ok();

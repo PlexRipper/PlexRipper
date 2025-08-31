@@ -46,7 +46,7 @@ public class DownloadJob : IJob, IDisposable
         var downloadTaskKey = dataMap.GetJsonValue<DownloadTaskKey>(DownloadTaskIdParameter);
 
         var token = context.CancellationToken;
-        _log.Debug(
+        _log.Here().Debug(
             "Executing job: {DownloadJobName} for {DownloadTaskIdName} with id: {DownloadTaskId}",
             nameof(DownloadJob),
             nameof(downloadTaskKey),
@@ -73,7 +73,7 @@ public class DownloadJob : IJob, IDisposable
 
             if (!downloadTask.IsDownloadable)
             {
-                _log.Warning(
+                _log.Here().Warning(
                     "DownloadTask {DownloadTaskId} is not downloadable, aborting DownloadJob",
                     downloadTaskKey
                 );
@@ -94,12 +94,12 @@ public class DownloadJob : IJob, IDisposable
                 downloadTask.DownloadWorkerTasks = downloadTask.GenerateDownloadWorkerTasks(parts);
                 await _dbContext.DownloadWorkerTasks.AddRangeAsync(downloadTask.DownloadWorkerTasks, token);
                 await _dbContext.SaveChangesAsync(token);
-                _log.Debug("Generated DownloadWorkerTasks for {DownloadTaskFullTitle}", downloadTask.FullTitle);
+                _log.Here().Debug("Generated DownloadWorkerTasks for {DownloadTaskFullTitle}", downloadTask.FullTitle);
             }
 
             downloadTask = result.Value;
 
-            _log.Debug("Creating Download client for {DownloadTaskFullTitle}", downloadTask.FullTitle);
+            _log.Here().Debug("Creating Download client for {DownloadTaskFullTitle}", downloadTask.FullTitle);
             var downloadClientResult = await _plexDownloadClient.Setup(downloadTask.ToKey(), token);
             if (downloadClientResult.IsFailed)
             {
@@ -122,7 +122,7 @@ public class DownloadJob : IJob, IDisposable
             }
             catch (TaskCanceledException)
             {
-                _log.Information(
+                _log.Here().Information(
                     "{DownloadJobName} with {DownloadTaskIdName}: {DownloadTaskId} has been requested to be stopped",
                     nameof(DownloadJob),
                     nameof(downloadTaskKey),
@@ -136,11 +136,11 @@ public class DownloadJob : IJob, IDisposable
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            _log.ErrorResult(ex);
+            _log.Here().ErrorResult(ex);
         }
         finally
         {
-            _log.Debug(
+            _log.Here().Debug(
                 "Exiting job: {DownloadJobName} for {DownloadTaskName} with id: {DownloadTaskId}",
                 nameof(DownloadJob),
                 nameof(DownloadTaskGeneric),
@@ -179,7 +179,7 @@ public class DownloadJob : IJob, IDisposable
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            _log.ErrorResult(ex);
+            _log.Here().ErrorResult(ex);
         }
     }
 

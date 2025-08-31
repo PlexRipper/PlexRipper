@@ -17,7 +17,7 @@ public static partial class Startup
         builder.UseServiceProviderFactory(new AutofacServiceProviderFactory());
         builder.ConfigureContainer<ContainerBuilder>(containerBuilder =>
         {
-            _log.Debug("Setting up Autofac Containers");
+            _log.Here().Debug("Setting up Autofac Containers");
             ContainerConfig.ConfigureContainer(containerBuilder);
         });
 

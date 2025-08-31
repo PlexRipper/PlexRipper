@@ -26,7 +26,7 @@ public static class JobDataMapExtensions
         }
         catch (Exception e)
         {
-            _log.ErrorResult(e);
+            _log.Here().ErrorResult(e);
         }
 
         return [];

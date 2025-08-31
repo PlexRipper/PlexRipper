@@ -103,7 +103,7 @@ public static partial class DbContextExtensions
         var directConnections = successPlexServerConnections.Where(x => !x.IsPlexTvConnection).ToList();
         if (directConnections.Any())
         {
-            _log.Verbose(
+            _log.Here().Verbose(
                 "Found a direct connection that was successful. We're gonna use that: {DirectConnection}",
                 directConnections.First()
             );

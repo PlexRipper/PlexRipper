@@ -64,7 +64,7 @@ public class DownloadQueue : IDownloadQueue
         // Check if the server is online
         if (!await _dbContext.IsServerOnline(plexServerId, cancellationToken: _token))
         {
-            return _log.WarningResult(
+            return _log.Here().WarningResult(
                 "PlexServer with name: {PlexServerName} is not online, cannot continue checking the DownloadQueue to pick the following download",
                 plexServerName
             );
@@ -88,7 +88,7 @@ public class DownloadQueue : IDownloadQueue
         var nextDownloadTaskResult = GetNextDownloadTask(downloadTasks);
         if (nextDownloadTaskResult.IsFailed)
         {
-            _log.Information(
+            _log.Here().Information(
                 "There are no available downloadTasks remaining for PlexServer with Id: {PlexServerName}",
                 plexServerName
             );
@@ -97,7 +97,7 @@ public class DownloadQueue : IDownloadQueue
 
         var nextDownloadTask = nextDownloadTaskResult.Value;
 
-        _log.Information(
+        _log.Here().Information(
             "Selected download task {NextDownloadTaskFullTitle} to start as the next task",
             nextDownloadTask.FullTitle
         );

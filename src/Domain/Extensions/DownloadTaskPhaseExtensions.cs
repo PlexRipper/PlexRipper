@@ -38,7 +38,7 @@ public static class DownloadTaskPhaseExtensions
 
             case DownloadStatus.Unknown:
             default:
-                _log.Error("Unknown download task phase with downloadStatus {DownloadStatus}.", downloadStatus);
+                _log.Here().Error("Unknown download task phase with downloadStatus {DownloadStatus}.", downloadStatus);
                 return DownloadTaskPhase.Unknown;
         }
     }

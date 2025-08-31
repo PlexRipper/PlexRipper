@@ -73,7 +73,7 @@ public class AddOrUpdatePlexLibrariesCommandHandler
 
                 if (plexLibraryDb is null)
                 {
-                    _log.Debug("Adding PlexLibrary {PlexLibraryName} to the database", incomingPlexLibrary.Title);
+                    _log.Here().Debug("Adding PlexLibrary {PlexLibraryName} to the database", incomingPlexLibrary.Title);
                     await _dbContext.PlexLibraries.AddAsync(incomingPlexLibrary, cancellationToken);
                 }
                 else
@@ -82,7 +82,7 @@ public class AddOrUpdatePlexLibrariesCommandHandler
                     incomingPlexLibrary.SyncedAt = plexLibraryDb.SyncedAt;
                     incomingPlexLibrary.DefaultDestinationId = plexLibraryDb.DefaultDestinationId;
 
-                    _log.Debug(
+                    _log.Here().Debug(
                         "Updating PlexLibrary {PlexLibraryName} with id: {PlexLibraryId} in the database",
                         incomingPlexLibrary.Title,
                         incomingPlexLibrary.Id
@@ -110,7 +110,7 @@ public class AddOrUpdatePlexLibrariesCommandHandler
         await _dbContext.SaveChangesAsync(cancellationToken);
 
         // Add or update the PlexAccount, PlexServer and PlexLibrary relationships
-        _log.Information(
+        _log.Here().Information(
             "Adding, updating or removing the PlexAccount: {PlexAccountDisplayName} association with PlexLibraries now",
             plexAccount.DisplayName
         );
@@ -206,7 +206,7 @@ public class AddOrUpdatePlexLibrariesCommandHandler
         await _dbContext.SaveChangesAsync(cancellationToken);
 
         foreach (var rapport in _list)
-            _log.Information(rapport.ToString());
+            _log.Here().Information(rapport.ToString());
 
         return Result.Ok(_list);
     }

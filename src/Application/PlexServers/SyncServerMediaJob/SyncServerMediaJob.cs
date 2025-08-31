@@ -38,7 +38,7 @@ public class SyncServerMediaJob : IJob
         var plexServerId = dataMap.GetIntValue(PlexServerIdParameter);
         var forceSync = dataMap.GetBooleanValue(ForceSyncParameter);
 
-        _log.Debug(
+        _log.Here().Debug(
             "Executing job: {SyncServerMediaJobName)} for {PlexServerName)}: {PlexServerId}",
             nameof(SyncServerMediaJob),
             nameof(PlexServer),
@@ -75,7 +75,7 @@ public class SyncServerMediaJob : IJob
 
             if (!plexLibraries.Any())
             {
-                _log.Information(
+                _log.Here().Information(
                     "PlexServer {PlexServerName} with id {PlexServerId} has no libraries to sync",
                     plexServer.Name,
                     plexServer.Id
@@ -140,7 +140,7 @@ public class SyncServerMediaJob : IJob
                 return;
             }
 
-            _log.Information(
+            _log.Here().Information(
                 "Successfully synced server \"{PlexServerName}\" with id {PlexServerId} has no libraries to sync",
                 plexServer.Name,
                 plexServer.Id
@@ -148,7 +148,7 @@ public class SyncServerMediaJob : IJob
         }
         catch (Exception e)
         {
-            _log.ErrorResult(e);
+            _log.Here().ErrorResult(e);
         }
     }
 }

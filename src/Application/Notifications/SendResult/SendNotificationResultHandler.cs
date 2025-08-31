@@ -1,6 +1,7 @@
 using FastEndpoints;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
+using Reaparr.Logging;
 using Serilog;
 
 namespace Reaparr.Application;
@@ -31,6 +32,6 @@ public class SendNotificationResultHandler : IEventHandler<SendNotificationResul
             }
         }
         else
-            _log.Warning("No errors to send as notifications from Result: {ResultObject}", notification.Result);
+            _log.Here().Warning("No errors to send as notifications from Result: {ResultObject}", notification.Result);
     }
 }

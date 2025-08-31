@@ -40,7 +40,7 @@ public class FileMergeQueue : IFileMergeQueue
 
         if (key is null)
         {
-            return _log.ErrorResult("No DownloadTask found to either merge or move");
+            return _log.Here().ErrorResult("No DownloadTask found to either merge or move");
         }
 
         var startResult = await _fileMergeScheduler.StartFileMergeJob(key);

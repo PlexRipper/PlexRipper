@@ -29,6 +29,6 @@ public static class StopWatchExtensions
             return;
         }
 
-        _log.Debug("Execution Time: took {ElapsedMilliseconds} ms", stopwatch.ElapsedMilliseconds);
+        _log.Here().Debug("Execution Time: took {ElapsedMilliseconds} ms", stopwatch.ElapsedMilliseconds);
     }
 }

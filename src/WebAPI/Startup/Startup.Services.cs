@@ -15,6 +15,7 @@ using Reaparr.Application.Contracts;
 using Reaparr.Environment;
 using Reaparr.Identity;
 using Reaparr.Identity.Contracts;
+using Reaparr.Logging;
 using Reaparr.PlexApi;
 
 namespace Reaparr.WebAPI;
@@ -78,7 +79,7 @@ public static partial class Startup
                     Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "",
                     "wwwroot"
                 );
-                _log.Debug("Setting up SPA static files for production at {Path}", path);
+                _log.Here().Debug("Setting up SPA static files for production at {Path}", path);
                 services.AddSpaStaticFiles(configuration => configuration.RootPath = path);
             }
 

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
+using Reaparr.Logging;
 using Serilog;
 
 namespace Reaparr.Application;
@@ -58,7 +59,7 @@ public class SetPreferredPlexServerConnectionEndpoint
         var plexServerConnectionId = req.PlexServerConnectionId;
         var plexServerId = req.PlexServerId;
 
-        _log.Debug(
+        _log.Here().Debug(
             "Setting the preferred {NameOfPlexServerConnection} for {PlexServerIdName}: {PlexServerId}",
             nameof(PlexServerConnection),
             nameof(plexServerId),

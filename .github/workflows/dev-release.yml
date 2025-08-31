@@ -103,7 +103,7 @@ jobs:
                     TEMP_FILE=$(mktemp)
                     npx --prefix src/WebAPI/ClientApp/ semantic-release --dry-run --range "$TAG_NAME..HEAD" | \
                     perl -ne 'print if /^###/ .. eof' | \
-                    sed -e 's/\(\S*\) (\(\S*\))/[**\1**](https:\/\/github.com\/Reaparr\/Reaparr\/commit\/\2)/g' | \
+                    sed -E -e 's/\(([0-9a-f]{7,})\)/([\1](https:\/\/github.com\/Reaparr\/Reaparr\/commit\/\1))/g' | \
                     sed -e 's/^# \(.*\)/# \1/' \
                     -e 's/^### \(.*\)/### \1/' \
                     -e 's/^    \* \([^:]*\): \(.*\)$/- **\1**: \2/' > $TEMP_FILE

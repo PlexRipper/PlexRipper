@@ -29,7 +29,8 @@
             "title": "Code de vérification d'entrée"
         },
         "app-bar": {
-            "no-accounts": "Pas de compte disponible"
+            "no-accounts": "Pas de compte disponible",
+            "copy-version": "Copier la version Reaparr - { version }"
         },
         "details-overview": {
             "total-duration": "Durée totale:",

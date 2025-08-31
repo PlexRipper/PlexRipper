@@ -29,7 +29,8 @@
             "title": "Input Verification Code"
         },
         "app-bar": {
-            "no-accounts": "No Accounts available"
+            "no-accounts": "No Accounts available",
+            "copy-version": "Copy Reaparr version - { version }"
         },
         "details-overview": {
             "total-duration": "Total duration:",

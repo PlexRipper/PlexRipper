@@ -44,7 +44,7 @@ function setupAxios(appConfig: IAppConfig, router: Router) {
 	// Source: https://github.com/axios/axios/issues/41#issuecomment-386762576
 	Axios.interceptors.response.use(
 		(config) => {
-			useGlobalStore().setAppVersion(config.headers['X-Reaparr-Version']);
+			useGlobalStore().setAppVersion(config.headers['x-reaparr-version']);
 			return config;
 		},
 		(error) => {

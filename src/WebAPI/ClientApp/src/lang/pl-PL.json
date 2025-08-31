@@ -29,7 +29,8 @@
             "title": "Wprowadź kod weryfikacyjny"
         },
         "app-bar": {
-            "no-accounts": "Brak dostępnych kont"
+            "no-accounts": "Brak dostępnych kont",
+            "copy-version": "Kopiuj wersję Reaparr - { version }"
         },
         "details-overview": {
             "total-duration": "Całkowity czas trwania:",

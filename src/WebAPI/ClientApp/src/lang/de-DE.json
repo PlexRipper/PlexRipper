@@ -29,7 +29,8 @@
             "title": "Bestätigungscode eingeben"
         },
         "app-bar": {
-            "no-accounts": "Keine Konten verfügbar"
+            "no-accounts": "Keine Konten verfügbar",
+            "copy-version": "Reaparr-Version kopieren - { version }"
         },
         "details-overview": {
             "total-duration": "Gesamtdauer:",

@@ -28,6 +28,7 @@ public class ConfigManagerSaveConfigUnitTests : BaseUnitTest<ConfigManager>
             mock.Container.Resolve<IPathProvider>(),
             mock.Container.Resolve<IUserSettings>(),
             mock.Container.Resolve<IFile>(),
+            mock.Container.Resolve<IPath>(),
             mock.Container.Resolve<IDirectory>()
         );
         sut.Setup(x => x.SaveConfig()).CallBase();

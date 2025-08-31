@@ -1,21 +1,21 @@
 ﻿using System.Net.Http.Headers;
-using Application.Contracts;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
-using Data.Contracts;
-using Environment;
-using FileSystem.Contracts;
-using Logging.Interface;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Data;
-using Settings.Contracts;
+using Reaparr.Application.Contracts;
+using Reaparr.Data;
+using Reaparr.Data.Contracts;
+using Reaparr.Environment;
+using Reaparr.FileSystem.Contracts;
+using Reaparr.Logging;
+using Reaparr.Settings.Contracts;
 
-namespace PlexRipper.BaseTests;
+namespace Reaparr.BaseTests;
 
 public class BaseContainer : IDisposable
 {
-    private readonly PlexRipperWebApplicationFactory _factory;
+    private readonly ReaparrWebApplicationFactory _factory;
 
     private readonly ILog _log;
 
@@ -32,7 +32,7 @@ public class BaseContainer : IDisposable
 
         _log.Information("Setting up BaseContainer with database: {MemoryDbName}", memoryDbName);
 
-        _factory = new PlexRipperWebApplicationFactory(seed, memoryDbName, options);
+        _factory = new ReaparrWebApplicationFactory(seed, memoryDbName, options);
 
         // Create a separate scope as not to interfere with tests running in parallel
         _lifeTimeScope = _factory.Services.GetAutofacRoot().BeginLifetimeScope();
@@ -69,7 +69,7 @@ public class BaseContainer : IDisposable
 
     public IPathProvider PathProvider => Resolve<IPathProvider>();
 
-    public PlexRipperDbContext PlexRipperDbContext => Resolve<PlexRipperDbContext>();
+    public ReaparrDbContext ReaparrDbContext => Resolve<ReaparrDbContext>();
 
     public ISchedulerService SchedulerService => Resolve<ISchedulerService>();
 
@@ -81,14 +81,14 @@ public class BaseContainer : IDisposable
 
     public IServerSettingsModule GetServerSettings => Resolve<IServerSettingsModule>();
 
-    public IPlexRipperDbContext DbContext => Resolve<IPlexRipperDbContext>();
+    public IReaparrDbContext DbContext => Resolve<IReaparrDbContext>();
 
     public async Task SetDownloadSpeedLimit(Action<UnitTestDataConfig>? options = null)
     {
         var config = new UnitTestDataConfig();
         options?.Invoke(config);
 
-        var plexServers = await PlexRipperDbContext.PlexServers.ToListAsync();
+        var plexServers = await ReaparrDbContext.PlexServers.ToListAsync();
         foreach (var plexServer in plexServers)
             GetServerSettings.SetDownloadSpeedLimit(plexServer.MachineIdentifier, config.DownloadSpeedLimitInKib);
     }
@@ -121,7 +121,7 @@ public class BaseContainer : IDisposable
         try
         {
             // Ensure the database is deleted
-            PlexRipperDbContext.Database.EnsureDeleted();
+            ReaparrDbContext.Database.EnsureDeleted();
         }
         catch (Exception ex)
         {

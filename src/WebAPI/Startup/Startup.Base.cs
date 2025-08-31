@@ -1,6 +1,6 @@
-using Logging.Interface;
+using Reaparr.Logging;
 
-namespace PlexRipper.WebAPI;
+namespace Reaparr.WebAPI;
 
 public static partial class Startup
 {

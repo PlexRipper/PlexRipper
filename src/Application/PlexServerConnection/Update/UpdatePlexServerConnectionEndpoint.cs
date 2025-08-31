@@ -1,10 +1,10 @@
-using Application.Contracts;
-using Data.Contracts;
 using FastEndpoints;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public record UpdatePlexServerConnectionEndpointRequest
 {
@@ -37,11 +37,11 @@ public class UpdatePlexServerConnectionEndpointRequestValidator : Validator<Upda
 public class UpdatePlexServerConnectionEndpoint
     : BaseEndpoint<UpdatePlexServerConnectionEndpointRequest, ResultDTO<PlexServerConnectionDTO>>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.PlexServerConnectionController;
 
-    public UpdatePlexServerConnectionEndpoint(IPlexRipperDbContext dbContext)
+    public UpdatePlexServerConnectionEndpoint(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
     }

@@ -1,7 +1,7 @@
-using Application.Contracts;
 using Microsoft.EntityFrameworkCore;
+using Reaparr.Application.Contracts;
 
-namespace PlexRipper.Application.UnitTests;
+namespace Reaparr.Application.UnitTests;
 
 public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadPreviewQueryHandler>
 {

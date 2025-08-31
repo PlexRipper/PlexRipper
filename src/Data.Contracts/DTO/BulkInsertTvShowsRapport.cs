@@ -1,4 +1,4 @@
-namespace Data.Contracts;
+namespace Reaparr.Data.Contracts;
 
 public record BulkInsertTvShowsRapport
 {

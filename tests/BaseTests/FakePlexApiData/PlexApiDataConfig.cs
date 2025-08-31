@@ -1,6 +1,6 @@
 using System.Net;
 
-namespace PlexRipper.BaseTests;
+namespace Reaparr.BaseTests;
 
 public class PlexApiDataConfig : BaseConfig<PlexApiDataConfig>
 {

@@ -1,4 +1,4 @@
-namespace PlexRipper.BaseTests;
+namespace Reaparr.BaseTests;
 
 public class BaseConfig<T>
     where T : new()

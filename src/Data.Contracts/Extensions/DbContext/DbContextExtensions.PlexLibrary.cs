@@ -1,12 +1,12 @@
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Domain;
+using Reaparr.Domain;
 
-namespace Data.Contracts;
+namespace Reaparr.Data.Contracts;
 
 public static partial class DbContextExtensions
 {
     public static async Task<string> GetPlexLibraryNameById(
-        this IPlexRipperDbContext dbContext,
+        this IReaparrDbContext dbContext,
         int plexLibraryId,
         CancellationToken cancellationToken = default
     )
@@ -18,10 +18,7 @@ public static partial class DbContextExtensions
         return plexLibraryName ?? "Library Name Not Found";
     }
 
-    public static async Task<int> GetPlexServerIdFromPlexLibraryId(
-        this IPlexRipperDbContext dbContext,
-        int plexLibraryId
-    )
+    public static async Task<int> GetPlexServerIdFromPlexLibraryId(this IReaparrDbContext dbContext, int plexLibraryId)
     {
         return await dbContext
             .PlexLibraries.Where(x => x.Id == plexLibraryId)
@@ -30,7 +27,7 @@ public static partial class DbContextExtensions
     }
 
     public static async Task UpdatePlexLibraryById(
-        this IPlexRipperDbContext dbContext,
+        this IReaparrDbContext dbContext,
         PlexLibrary plexLibrary,
         CancellationToken cancellationToken = default
     )

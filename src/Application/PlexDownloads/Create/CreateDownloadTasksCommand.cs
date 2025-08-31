@@ -1,8 +1,8 @@
-using Application.Contracts;
 using FastEndpoints;
 using FluentValidation;
+using Reaparr.Application.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 /// <summary>
 /// Generates a nested list of <see cref="DownloadTaskGeneric"/> and adds to the download queue.

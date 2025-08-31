@@ -1,9 +1,9 @@
 using System.Net;
-using Application.Contracts;
 using FastEndpoints;
-using PlexRipper.Application;
+using Reaparr.Application;
+using Reaparr.Application.Contracts;
 
-namespace IntegrationTests.PlexAccounts.RefreshAccess;
+namespace Reaparr.IntegrationTests.PlexAccounts.RefreshAccess;
 
 public class RefreshPlexAccountAccessEndpointIntegrationTestsIntegrationTests : BaseIntegrationTests
 {

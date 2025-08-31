@@ -1,10 +1,8 @@
 using System.Runtime.CompilerServices;
 using FluentResults;
-using Logging.Common;
-using Logging.Interface;
 using Serilog;
 
-namespace Logging;
+namespace Reaparr.Logging;
 
 public static partial class LogExtensions
 {

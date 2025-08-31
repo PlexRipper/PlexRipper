@@ -1,11 +1,11 @@
-using Application.Contracts;
-using Data.Contracts;
 using FastEndpoints;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public record SearchPlexMediaRequest
 {
@@ -23,11 +23,11 @@ public class SearchPlexMediaRequestValidator : Validator<SearchPlexMediaRequest>
 
 public class SearchPlexMediaEndpoint : BaseEndpoint<SearchPlexMediaRequest, ResultDTO<List<PlexMediaSlimDTO>>>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.PlexMediaController + "/search";
 
-    public SearchPlexMediaEndpoint(IPlexRipperDbContext dbContext)
+    public SearchPlexMediaEndpoint(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
     }

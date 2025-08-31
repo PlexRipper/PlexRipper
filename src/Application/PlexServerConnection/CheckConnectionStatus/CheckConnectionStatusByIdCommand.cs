@@ -1,11 +1,11 @@
-using Application.Contracts;
-using Data.Contracts;
 using FastEndpoints;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using PlexApi.Contracts;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
+using Reaparr.PlexApi.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public record CheckConnectionStatusByIdCommand(int PlexServerConnectionId) : ICommand<Result<PlexServerStatus>>;
 
@@ -22,11 +22,11 @@ public class CheckConnectionStatusByIdCommandHandler
 {
     private readonly ISignalRService _signalRService;
     private readonly ICommandExecutor _commandDispatcher;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private PlexServerConnection? _plexServerConnection;
 
     public CheckConnectionStatusByIdCommandHandler(
-        IPlexRipperDbContext dbContext,
+        IReaparrDbContext dbContext,
         ISignalRService signalRService,
         ICommandExecutor commandDispatcher
     )

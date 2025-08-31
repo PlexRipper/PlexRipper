@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using ByteSizeLib;
 
-namespace PlexRipper.Domain;
+namespace Reaparr.Domain;
 
 /// <summary>
 /// Source: https://stackoverflow.com/a/32724000/8205497

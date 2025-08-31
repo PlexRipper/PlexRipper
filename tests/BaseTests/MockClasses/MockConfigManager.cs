@@ -1,7 +1,7 @@
-﻿using Logging.Interface;
-using Settings.Contracts;
+﻿using Reaparr.Logging;
+using Reaparr.Settings.Contracts;
 
-namespace PlexRipper.BaseTests;
+namespace Reaparr.BaseTests;
 
 public class MockConfigManager : IConfigManager
 {

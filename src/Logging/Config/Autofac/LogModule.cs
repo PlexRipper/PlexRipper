@@ -1,8 +1,7 @@
 ﻿using Autofac;
-using Logging.Interface;
 using Serilog;
 
-namespace Logging;
+namespace Reaparr.Logging;
 
 /// <summary>
 /// Add the default test mock modules here which can later be overridden

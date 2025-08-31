@@ -1,4 +1,4 @@
-﻿namespace Domain.UnitTests.Converters;
+﻿namespace Reaparr.Domain.UnitTests.Converters;
 
 public class DownloadTaskActions_Aggregate_UnitTests : BaseUnitTest
 {

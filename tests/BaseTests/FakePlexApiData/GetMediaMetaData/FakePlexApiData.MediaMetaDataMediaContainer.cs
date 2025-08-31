@@ -1,9 +1,9 @@
 using Bogus.Hollywood;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
 using NodaTime;
-using PlexRipper.PlexApi;
+using Reaparr.PlexApi;
 
-namespace PlexRipper.BaseTests;
+namespace Reaparr.BaseTests;
 
 public partial class FakePlexApiData
 {

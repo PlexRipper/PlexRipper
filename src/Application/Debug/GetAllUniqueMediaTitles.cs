@@ -1,11 +1,11 @@
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using Application.Contracts;
-using Data.Contracts;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public record GetAllUniqueMediaTitlesEndpointRequest
 {
@@ -18,13 +18,13 @@ public record GetAllUniqueMediaTitlesEndpointRequest
 
 public class GetAllUniqueMediaTitlesEndpoint : BaseEndpoint<GetAllUniqueMediaTitlesEndpointRequest, List<string>>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     private readonly Random _random = new();
 
     public override string EndpointPath => ApiRoutes.DebugController + "/unique-media-titles";
 
-    public GetAllUniqueMediaTitlesEndpoint(IPlexRipperDbContext dbContext)
+    public GetAllUniqueMediaTitlesEndpoint(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
     }

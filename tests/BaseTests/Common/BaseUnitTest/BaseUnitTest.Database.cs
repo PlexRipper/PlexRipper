@@ -1,8 +1,8 @@
-using Data.Contracts;
-using PlexRipper.Data;
-using PlexRipper.Identity.Contracts;
+using Reaparr.Data;
+using Reaparr.Data.Contracts;
+using Reaparr.Identity.Contracts;
 
-namespace PlexRipper.BaseTests;
+namespace Reaparr.BaseTests;
 
 public partial class BaseUnitTest : IDisposable
 {
@@ -11,16 +11,16 @@ public partial class BaseUnitTest : IDisposable
     protected bool IsDatabaseSetup;
 
     /// <summary>
-    /// Gets a new instance of <see cref="PlexRipperDbContext"/> for every time it is called.
+    /// Gets a new instance of <see cref="ReaparrDbContext"/> for every time it is called.
     /// </summary>
     // ReSharper disable once InconsistentNaming
-    protected IPlexRipperDbContext IDbContext
+    protected IReaparrDbContext IDbContext
     {
         get
         {
             DataBaseSetupGuard();
 
-            return MockDatabase.GetMemoryPlexRipperDbContext(_databaseName);
+            return MockDatabase.GetMemoryReaparrDbContext(_databaseName);
         }
     }
 
@@ -45,10 +45,10 @@ public partial class BaseUnitTest : IDisposable
         }
     }
 
-    protected Mock<IPlexRipperDbContext> MockIDbContext => new();
+    protected Mock<IReaparrDbContext> MockIDbContext => new();
 
     /// <summary>
-    /// Creates and maintains a unique in memory database <see cref="PlexRipperDbContext"/> for every test.
+    /// Creates and maintains a unique in memory database <see cref="ReaparrDbContext"/> for every test.
     /// </summary>
     /// <param name="seed"> The fake data seed to use for the database setup.</param>
     /// <param name="options"> The options to use for the fake data setup.</param>
@@ -56,7 +56,7 @@ public partial class BaseUnitTest : IDisposable
         SetupDatabase(new Seed(seed), options);
 
     /// <summary>
-    /// Creates and maintains a unique in memory database <see cref="PlexRipperDbContext"/> for every test.
+    /// Creates and maintains a unique in memory database <see cref="ReaparrDbContext"/> for every test.
     /// </summary>
     /// <param name="seed"> The fake data seed to use for the database setup.</param>
     /// <param name="options"> The options to use for the fake data setup.</param>

@@ -1,11 +1,11 @@
-using Application.Contracts;
-using Data.Contracts;
 using FastEndpoints;
-using FileSystem.Contracts;
 using FluentValidation;
-using Logging.Interface;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
+using Reaparr.FileSystem.Contracts;
+using Reaparr.Logging;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 /// <summary>
 /// Pauses and disposes of the PlexDownloadClient executing the <see cref="DownloadTaskGeneric"/> if it is downloading.
@@ -25,13 +25,13 @@ public class PauseDownloadTaskCommandValidator : AbstractValidator<PauseDownload
 public class PauseDownloadTaskCommandHandler : ICommandHandler<PauseDownloadTaskCommand, Result>
 {
     private readonly ILog _log;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly IDownloadTaskScheduler _downloadTaskScheduler;
     private readonly IFileMergeScheduler _fileMergeScheduler;
 
     public PauseDownloadTaskCommandHandler(
         ILog log,
-        IPlexRipperDbContext dbContext,
+        IReaparrDbContext dbContext,
         IDownloadTaskScheduler downloadTaskScheduler,
         IFileMergeScheduler fileMergeScheduler
     )

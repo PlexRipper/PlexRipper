@@ -1,9 +1,9 @@
-using Application.Contracts;
-using Data.Contracts;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 /// <summary>
 /// Deletes/Clears all <see cref="Notification">Notifications</see>.
@@ -11,11 +11,11 @@ namespace PlexRipper.Application;
 /// <returns>Returns the number of <see cref="Notification">Notifications</see> that have been deleted.</returns>
 public class ClearAllNotificationsEndpoint : BaseEndpointWithoutRequest<CountResponseDTO>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.NotificationController + "/clear";
 
-    public ClearAllNotificationsEndpoint(IPlexRipperDbContext dbContext)
+    public ClearAllNotificationsEndpoint(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
     }

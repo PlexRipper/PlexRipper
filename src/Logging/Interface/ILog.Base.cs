@@ -1,6 +1,6 @@
 using Serilog.Events;
 
-namespace Logging.Interface;
+namespace Reaparr.Logging;
 
 public partial interface ILog
 {

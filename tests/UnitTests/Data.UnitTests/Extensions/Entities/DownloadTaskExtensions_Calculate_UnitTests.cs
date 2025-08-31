@@ -1,7 +1,7 @@
-using Data.Contracts;
 using Microsoft.EntityFrameworkCore;
+using Reaparr.Data.Contracts;
 
-namespace Data.UnitTests.Entities;
+namespace Reaparr.Data.UnitTests.Entities;
 
 public class DownloadTaskExtensions_Calculate_UnitTests : BaseUnitTest
 {

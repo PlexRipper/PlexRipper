@@ -1,9 +1,9 @@
-using Application.Contracts;
 using FastEndpoints;
 using FluentResults;
-using PlexRipper.Domain;
+using Reaparr.Application.Contracts;
+using Reaparr.Domain;
 
-namespace PlexApi.Contracts;
+namespace Reaparr.PlexApi.Contracts;
 
 /// <summary>
 /// Attempts to connect to a server by the given <see cref="PlexServerConnection"/> and returns the <see cref="PlexServerStatus"/> based on the result.

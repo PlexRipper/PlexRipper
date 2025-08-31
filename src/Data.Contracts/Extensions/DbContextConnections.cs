@@ -1,12 +1,12 @@
-using Environment;
-using Logging;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NaturalSort.Extension;
-using PlexRipper.Domain;
+using Reaparr.Domain;
+using Reaparr.Environment;
+using Reaparr.Logging;
 
-namespace Data.Contracts;
+namespace Reaparr.Data.Contracts;
 
 public static class DbContextConnections
 {

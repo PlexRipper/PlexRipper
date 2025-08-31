@@ -1,8 +1,7 @@
 using System.Runtime.CompilerServices;
-using Logging.Common;
 using Serilog.Core;
 
-namespace Logging.Interface;
+namespace Reaparr.Logging;
 
 public partial interface ILog
 {

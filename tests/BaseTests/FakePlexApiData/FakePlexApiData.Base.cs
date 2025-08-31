@@ -1,7 +1,7 @@
 using System.Net;
 using System.Text.Json;
 
-namespace PlexRipper.BaseTests;
+namespace Reaparr.BaseTests;
 
 public static partial class FakePlexApiData
 {

@@ -1,17 +1,17 @@
 {
-  "name": "plexripper-web-ui",
+  "name": "reaparr-web-ui",
   "version": "0.32.0",
   "description": "The best cross-platform Plex media downloader there is! In active development and feedback is very welcome!",
   "author": "JasonLandbridge",
   "private": true,
   "type": "module",
   "bugs": {
-    "url": "https://github.com/PlexRipper/PlexRipper/issues"
+    "url": "https://github.com/Reaparr/Reaparr/issues"
   },
-  "homepage": "https://github.com/PlexRipper/PlexRipper",
+  "homepage": "https://github.com/Reaparr/Reaparr",
   "repository": {
     "type": "git",
-    "url": "https://github.com/PlexRipper/PlexRipper.git"
+    "url": "https://github.com/Reaparr/Reaparr.git"
   },
   "scripts": {
     "dev": "nuxi dev",

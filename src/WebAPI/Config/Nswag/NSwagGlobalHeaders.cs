@@ -3,7 +3,7 @@ using NSwag;
 using NSwag.Generation.Processors;
 using NSwag.Generation.Processors.Contexts;
 
-namespace PlexRipper.WebAPI;
+namespace Reaparr.WebAPI;
 
 internal sealed class NSwagGlobalHeaders : IOperationProcessor
 {
@@ -12,17 +12,17 @@ internal sealed class NSwagGlobalHeaders : IOperationProcessor
         // NOTE: See "EndpointExtensions.AddResponseHeaders" for globally added response headers
         foreach (var response in context.OperationDescription.Operation.Responses.Values)
         {
-            response.Headers["X-PlexRipper-Version"] = new OpenApiHeader
+            response.Headers["X-Reaparr-Version"] = new OpenApiHeader
             {
                 Kind = OpenApiParameterKind.Header,
                 Example = "0.26.0-dev-2024-12-11",
                 IsRequired = true,
-                Description = "Current PlexRipper version",
+                Description = "Current Reaparr version",
                 Schema = new JsonSchema
                 {
                     Type = JsonObjectType.String,
                     Example = "0.26.0-dev-2024-12-11",
-                    Description = "Current PlexRipper version",
+                    Description = "Current Reaparr version",
                 },
             };
         }

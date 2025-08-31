@@ -3,8 +3,8 @@
         <TargetFramework>net9.0</TargetFramework>
         <LangVersion>13</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
-        <AssemblyName>Environment</AssemblyName>
-        <RootNamespace>Environment</RootNamespace>
+        <AssemblyName>Reaparr.Environment</AssemblyName>
+        <RootNamespace>Reaparr.Environment</RootNamespace>
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
         <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
         <Nullable>enable</Nullable>

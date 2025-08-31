@@ -1,10 +1,9 @@
 using System.Runtime.CompilerServices;
-using Logging.Common;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
 
-namespace Logging.Interface;
+namespace Reaparr.Logging;
 
 public partial interface ILog
 {

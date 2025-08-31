@@ -1,9 +1,9 @@
-using Environment;
-using FluentResultExtensions;
-using Logging.Interface;
-using PlexRipper.Application;
+using Reaparr.Application;
+using Reaparr.Environment;
+using Reaparr.FluentResultExtensions;
+using Reaparr.Logging;
 
-namespace PlexRipper.WebAPI;
+namespace Reaparr.WebAPI;
 
 /// <summary>
 ///  The main class entry point for the application.
@@ -20,7 +20,7 @@ public class Program
     {
         try
         {
-            _log.InformationLine("Starting PlexRipper!");
+            _log.InformationLine("Starting Reaparr!");
 
             LogManager.SetupLogging(EnvironmentExtensions.GetLogLevel());
             FluentResultConfiguration.Setup();
@@ -64,7 +64,7 @@ public class Program
         }
         catch (Exception e)
         {
-            _log.FatalLine("PlexRipper crashed due to exception!");
+            _log.FatalLine("Reaparr crashed due to exception!");
             Result.Fail(new ExceptionalError(e)).LogFatal();
             System.Environment.Exit(2);
         }
@@ -77,7 +77,7 @@ public class Program
 
     private static void FailedToStart(Result result)
     {
-        _log.FatalLine("PlexRipper failed to start!");
+        _log.FatalLine("Reaparr failed to start!");
 
         result.LogFatal();
 

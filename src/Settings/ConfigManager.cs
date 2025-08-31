@@ -1,9 +1,9 @@
 ﻿using System.IO.Abstractions;
-using Environment;
-using Logging.Interface;
-using Settings.Contracts;
+using Reaparr.Environment;
+using Reaparr.Logging;
+using Reaparr.Settings.Contracts;
 
-namespace PlexRipper.Settings;
+namespace Reaparr.Settings;
 
 public class ConfigManager : IConfigManager
 {
@@ -14,6 +14,7 @@ public class ConfigManager : IConfigManager
 
     private readonly IUserSettings _userSettings;
     private readonly IFile _file;
+    private readonly IPath _path;
     private readonly IDirectory _directory;
 
     #endregion
@@ -25,6 +26,7 @@ public class ConfigManager : IConfigManager
         IPathProvider pathProvider,
         IUserSettings userSettings,
         IFile file,
+        IPath path,
         IDirectory directory
     )
     {
@@ -32,6 +34,7 @@ public class ConfigManager : IConfigManager
         _pathProvider = pathProvider;
         _userSettings = userSettings;
         _file = file;
+        _path = path;
         _directory = directory;
     }
 
@@ -52,10 +55,21 @@ public class ConfigManager : IConfigManager
 
         var configDirectoryExistsResult = Result.Try(() => _directory.Exists(_pathProvider.ConfigDirectory));
         if (configDirectoryExistsResult.IsFailed)
+        {
+            configDirectoryExistsResult.WithError(
+                "Failed to check if config directory exists, ensure it is mounted correctly and has the correct permissions"
+            );
             return configDirectoryExistsResult.LogFatal();
+        }
 
         if (configDirectoryExistsResult.Value)
+        {
             _log.Information("Config directory exists, will use {ConfigDirectory}", _pathProvider.ConfigDirectory);
+            var migrateResult = MigrateLegacyFileNames();
+            if (migrateResult.IsFailed)
+                return migrateResult.LogFatal();
+            ;
+        }
         else
         {
             _log.Information(
@@ -171,6 +185,57 @@ public class ConfigManager : IConfigManager
         }
 
         return readResult;
+    }
+
+    private Result MigrateLegacyFileNames()
+    {
+        try
+        {
+            var configDirectory = _pathProvider.ConfigDirectory;
+
+            if (!_directory.Exists(configDirectory))
+                return Result.Fail("Config directory does not exist").LogFatal();
+
+            var oldConfigPath = _path.Combine(configDirectory, "PlexRipperSettings.json");
+            var newConfigPath = _pathProvider.ConfigFileLocation;
+
+            if (_file.Exists(oldConfigPath) && !_file.Exists(newConfigPath))
+            {
+                _log.Here().Information("Renaming legacy config file {Old} -> {New}", oldConfigPath, newConfigPath);
+                _file.Move(oldConfigPath, newConfigPath);
+            }
+
+            var oldDbPath = _path.Combine(configDirectory, "PlexRipperDB.db");
+            var newDbPath = _pathProvider.DatabasePath;
+
+            if (_file.Exists(oldDbPath) && !_file.Exists(newDbPath))
+            {
+                _log.Here().Information("Renaming legacy database file {Old} -> {New}", oldDbPath, newDbPath);
+                _file.Move(oldDbPath, newDbPath);
+            }
+
+            var oldWalPath = oldDbPath + "-wal";
+            var newWalPath = _pathProvider.DatabasePath + "-wal";
+            if (_file.Exists(oldWalPath) && !_file.Exists(newWalPath))
+            {
+                _log.Here().Information("Renaming legacy database WAL file {Old} -> {New}", oldWalPath, newWalPath);
+                _file.Move(oldWalPath, newWalPath);
+            }
+
+            var oldShmPath = oldDbPath + "-shm";
+            var newShmPath = _pathProvider.DatabasePath + "-shm";
+            if (_file.Exists(oldShmPath) && !_file.Exists(newShmPath))
+            {
+                _log.Here().Information("Renaming legacy database SHM file {Old} -> {New}", oldShmPath, newShmPath);
+                _file.Move(oldShmPath, newShmPath);
+            }
+        }
+        catch (Exception e)
+        {
+            _log.Here().Error("Failed legacy file rename: {Message}", e.Message);
+        }
+
+        return Result.Ok();
     }
 
     #endregion

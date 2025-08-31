@@ -1,16 +1,16 @@
-﻿using Application.Contracts;
-using Data.Contracts;
-using Logging.Interface;
-using Quartz;
-using WebAPI.Contracts;
+﻿using Quartz;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
+using Reaparr.Logging;
+using Reaparr.WebAPI.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public class SyncServerMediaJob : IJob
 {
     private readonly ILog _log;
     private readonly ICommandExecutor _commandExecutor;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly ISignalRService _signalRService;
 
     public static string PlexServerIdParameter => "plexServerId";
@@ -21,7 +21,7 @@ public class SyncServerMediaJob : IJob
     public SyncServerMediaJob(
         ILog log,
         ICommandExecutor commandExecutor,
-        IPlexRipperDbContext dbContext,
+        IReaparrDbContext dbContext,
         ISignalRService signalRService
     )
     {

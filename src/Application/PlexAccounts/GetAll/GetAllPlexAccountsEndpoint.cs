@@ -1,10 +1,10 @@
-using Application.Contracts;
-using Data.Contracts;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 /// <summary>
 /// Retrieves all <see cref="PlexAccount"/>s with the included <see cref="PlexServer"/>s and <see cref="PlexLibrary"/>s.
@@ -29,11 +29,11 @@ public record GetAllPlexAccountsEndpointRequest
 
 public class GetAllPlexAccountsEndpoint : BaseEndpoint<GetAllPlexAccountsEndpointRequest, List<PlexAccountDTO>>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.PlexAccountController;
 
-    public GetAllPlexAccountsEndpoint(IPlexRipperDbContext dbContext)
+    public GetAllPlexAccountsEndpoint(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
     }

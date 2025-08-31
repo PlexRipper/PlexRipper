@@ -1,4 +1,4 @@
-namespace PlexRipper.Application.UnitTests;
+namespace Reaparr.Application.UnitTests;
 
 public class SyncPlexMoviesCommandHandlerUnitTests : BaseUnitTest<SyncPlexMoviesCommandHandler>
 {

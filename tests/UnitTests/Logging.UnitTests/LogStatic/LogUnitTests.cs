@@ -1,7 +1,6 @@
-﻿using Logging.Interface;
-using Serilog.Events;
+﻿using Serilog.Events;
 
-namespace Logging.UnitTests;
+namespace Reaparr.Logging.UnitTests;
 
 public class LogUnitTests : BaseUnitTest<LogUnitTests>
 {

@@ -1,4 +1,4 @@
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public record DownloadPreview
 {

@@ -4,6 +4,8 @@
         <LangVersion>13</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
         <IsPackable>false</IsPackable>
+        <RootNamespace>Reaparr.FileSystem.UnitTests</RootNamespace>
+        <AssemblyName>Reaparr.FileSystem.UnitTests</AssemblyName>
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
         <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
         <Nullable>enable</Nullable>

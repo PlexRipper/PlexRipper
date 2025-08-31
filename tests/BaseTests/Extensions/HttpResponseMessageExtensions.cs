@@ -1,8 +1,8 @@
 ﻿using System.Net.Http.Json;
 using System.Text.Json;
-using Application.Contracts;
+using Reaparr.Application.Contracts;
 
-namespace PlexRipper.BaseTests;
+namespace Reaparr.BaseTests;
 
 public static class HttpResponseMessageExtensions
 {

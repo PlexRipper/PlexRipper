@@ -4,6 +4,8 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <LangVersion>13</LangVersion>
+        <RootNamespace>Reaparr.PlexApi.Contracts</RootNamespace>
+        <AssemblyName>Reaparr.PlexApi.Contracts</AssemblyName>
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
         <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>

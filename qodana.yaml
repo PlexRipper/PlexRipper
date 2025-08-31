@@ -15,4 +15,4 @@ exclude:
     -   name: XmlHighlighting
     -   name: ExplicitCallerInfoArgument
 dot-net:
-    solution: PlexRipper.sln
+    solution: Reaparr.sln

@@ -3,14 +3,13 @@ using System.Net.Http.Headers;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using ByteSizeLib;
-using Data.Contracts;
-using Logging.Common;
-using Logging.Interface;
-using PlexApi.Contracts;
 using Polly;
 using Polly.Retry;
+using Reaparr.Data.Contracts;
+using Reaparr.Logging;
+using Reaparr.PlexApi.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 /// <summary>
 /// The <see cref="DownloadWorker"/> is part of the multithreaded <see cref="PlexDownloadClient"/>
@@ -26,7 +25,7 @@ public class DownloadWorker : IDisposable
 
     private readonly ICommandExecutor _commandExecutor;
 
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     private readonly IPlexApiClient _httpClient;
 
@@ -47,7 +46,7 @@ public class DownloadWorker : IDisposable
     public DownloadWorker(
         ILog<DownloadWorker> log,
         ICommandExecutor commandExecutor,
-        IPlexRipperDbContext dbContext,
+        IReaparrDbContext dbContext,
         DownloadWorkerTask downloadWorkerTask,
         Func<PlexApiClientOptions?, IPlexApiClient> clientFactory
     )

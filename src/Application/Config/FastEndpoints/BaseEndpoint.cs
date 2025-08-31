@@ -1,7 +1,7 @@
-using Application.Contracts;
 using FastEndpoints;
+using Reaparr.Application.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public abstract class BaseEndpoint<TRequest> : Endpoint<TRequest, BaseResultDTO>
     where TRequest : class

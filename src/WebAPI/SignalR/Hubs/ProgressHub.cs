@@ -1,9 +1,9 @@
-﻿using Application.Contracts;
-using Logging.Interface;
-using Microsoft.AspNetCore.SignalR;
-using WebAPI.Contracts;
+﻿using Microsoft.AspNetCore.SignalR;
+using Reaparr.Application.Contracts;
+using Reaparr.Logging;
+using Reaparr.WebAPI.Contracts;
 
-namespace PlexRipper.WebAPI;
+namespace Reaparr.WebAPI;
 
 /// <summary>
 ///  The ProgressHub class is a SignalR hub that sends progress updates to the front-end.

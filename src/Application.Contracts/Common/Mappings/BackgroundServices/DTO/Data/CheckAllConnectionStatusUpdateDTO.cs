@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Application.Contracts;
+namespace Reaparr.Application.Contracts;
 
 public record CheckAllConnectionStatusUpdateDTO
 {

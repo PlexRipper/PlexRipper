@@ -1,12 +1,12 @@
 using System.Diagnostics.CodeAnalysis;
-using Application.Contracts;
-using Data.Contracts;
 using FastEndpoints;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 /// <summary>
 /// Gets the <see cref="PlexMediaDTO"/> with all children
@@ -42,11 +42,11 @@ public class GetMediaDetailByIdEndpointRequestValidator : Validator<GetMediaDeta
 
 public class GetMediaDetailByIdEndpoint : BaseEndpoint<GetMediaDetailByIdEndpointRequest, PlexMediaDTO>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.PlexMediaController + "/detail/{PlexMediaId}";
 
-    public GetMediaDetailByIdEndpoint(IPlexRipperDbContext dbContext)
+    public GetMediaDetailByIdEndpoint(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
     }

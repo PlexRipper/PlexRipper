@@ -1,7 +1,7 @@
 using FastEndpoints;
 using FluentResults;
 
-namespace PlexApi.Contracts;
+namespace Reaparr.PlexApi.Contracts;
 
 /// <summary>
 /// Used to validate the connection URL to the Plex server.

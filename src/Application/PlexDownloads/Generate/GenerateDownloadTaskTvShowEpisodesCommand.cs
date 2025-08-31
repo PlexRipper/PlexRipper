@@ -1,12 +1,12 @@
-using Application.Contracts;
-using Application.Contracts.Validators;
-using Data.Contracts;
 using FastEndpoints;
 using FluentValidation;
-using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
+using Reaparr.Application.Contracts;
+using Reaparr.Application.Contracts.Validators;
+using Reaparr.Data.Contracts;
+using Reaparr.Logging;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public record GenerateDownloadTaskTvShowEpisodesCommand : ICommand<Result>
 {
@@ -38,11 +38,11 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
     : ICommandHandler<GenerateDownloadTaskTvShowEpisodesCommand, Result>
 {
     private readonly ILog _log;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     private readonly List<DownloadTaskTvShow> _tvShowDownloads = [];
 
-    public GenerateDownloadTaskTvShowEpisodesCommandHandler(ILog log, IPlexRipperDbContext dbContext)
+    public GenerateDownloadTaskTvShowEpisodesCommandHandler(ILog log, IReaparrDbContext dbContext)
     {
         _log = log;
         _dbContext = dbContext;

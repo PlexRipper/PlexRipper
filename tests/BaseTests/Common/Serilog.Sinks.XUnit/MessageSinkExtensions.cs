@@ -4,7 +4,7 @@ using Serilog.Events;
 using Serilog.Formatting;
 using Xunit.Sdk;
 
-namespace PlexRipper.BaseTests
+namespace Reaparr.BaseTests
 {
     /// <summary>
     /// Provides extension methods that create Serilog loggers

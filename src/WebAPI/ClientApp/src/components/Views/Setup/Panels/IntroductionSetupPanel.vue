@@ -28,11 +28,11 @@ const list: { text: string; link?: string }[] = [
 	},
 	{
 		text: t('pages.setup.intro.list.item-2'),
-		link: 'https://plexripper.rocks/faq',
+		link: 'https://reaparr.rocks/faq',
 	},
 	{
 		text: t('pages.setup.intro.list.item-3'),
-		link: 'https://github.com/PlexRipper/PlexRipper/issues',
+		link: 'https://github.com/Reaparr/Reaparr/issues',
 	},
 ];
 </script>

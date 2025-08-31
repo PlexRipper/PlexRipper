@@ -1,8 +1,8 @@
 using FastEndpoints;
 using FluentResults;
-using PlexRipper.Domain;
+using Reaparr.Domain;
 
-namespace PlexApi.Contracts;
+namespace Reaparr.PlexApi.Contracts;
 
 /// <summary>
 /// Sign in user with username and password and return user data with a Plex authentication token.

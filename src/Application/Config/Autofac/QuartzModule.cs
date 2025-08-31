@@ -2,12 +2,12 @@
 using System.Reflection;
 using Autofac;
 using Autofac.Extras.Quartz;
-using Data.Contracts;
-using Environment;
-using PlexRipper.Domain.Autofac;
+using Reaparr.Data.Contracts;
+using Reaparr.Domain.Autofac;
+using Reaparr.Environment;
 using Module = Autofac.Module;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public class QuartzModule : Module
 {
@@ -18,7 +18,7 @@ public class QuartzModule : Module
         // Source: https://github.com/alphacloud/Autofac.Extras.Quartz
         var quartzProps = new NameValueCollection
         {
-            { "quartz.scheduler.instanceName", "PlexRipper Scheduler" },
+            { "quartz.scheduler.instanceName", "Reaparr Scheduler" },
             { "quartz.serializer.type", "stj" },
             { "quartz.threadPool.type", "Quartz.Simpl.SimpleThreadPool, Quartz" },
             { "quartz.threadPool.threadCount", "10" },
@@ -50,7 +50,7 @@ public class QuartzModule : Module
         new()
         {
             // The unique identifier for the scheduler is needed to prevent conflicts when running multiple schedulers in integration tests
-            { "quartz.scheduler.instanceName", "TestPlexRipper_Scheduler" + Guid.NewGuid() },
+            { "quartz.scheduler.instanceName", "TestReaparr_Scheduler" + Guid.NewGuid() },
             { "quartz.scheduler.instanceId", Guid.NewGuid().ToString() },
             { "quartz.serializer.type", "stj" },
             { "quartz.jobStore.type", "Quartz.Simpl.RAMJobStore, Quartz" },

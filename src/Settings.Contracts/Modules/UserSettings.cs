@@ -2,7 +2,7 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Text.Json.Serialization;
 
-namespace Settings.Contracts;
+namespace Reaparr.Settings.Contracts;
 
 /// <inheritdoc cref="IUserSettings"/>
 public class UserSettings : IUserSettings

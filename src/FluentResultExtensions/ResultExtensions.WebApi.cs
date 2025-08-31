@@ -1,4 +1,4 @@
-﻿using FluentResultExtensions;
+﻿using Reaparr.FluentResultExtensions;
 
 // ReSharper disable once CheckNamespace
 // Needs to be in the same namespace as the FluentResults package

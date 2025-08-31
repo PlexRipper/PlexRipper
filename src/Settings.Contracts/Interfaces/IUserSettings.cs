@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Settings.Contracts;
+namespace Reaparr.Settings.Contracts;
 
 /// <summary>
 /// Used to store and load settings from a json file.

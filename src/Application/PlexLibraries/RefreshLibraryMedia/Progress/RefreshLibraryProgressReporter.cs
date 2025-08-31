@@ -1,7 +1,7 @@
-using Application.Contracts;
-using WebAPI.Contracts;
+using Reaparr.Application.Contracts;
+using Reaparr.WebAPI.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public record RefreshLibraryProgressUpdate
 {

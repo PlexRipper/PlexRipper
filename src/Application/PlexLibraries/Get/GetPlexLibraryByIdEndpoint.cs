@@ -1,11 +1,11 @@
-using Application.Contracts;
-using Data.Contracts;
 using FastEndpoints;
 using FluentValidation;
-using Logging.Interface;
 using Microsoft.AspNetCore.Http;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
+using Reaparr.Logging;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 /// <summary>
 /// Returns the PlexLibrary by the Id, will refresh if the library has no media assigned.
@@ -25,11 +25,11 @@ public class GetPlexLibraryByIdEndpointRequestValidator : Validator<GetPlexLibra
 
 public class GetPlexLibraryByIdEndpoint : BaseEndpoint<GetPlexLibraryByIdEndpointRequest, PlexLibraryDTO>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.PlexLibraryController + "/{PlexLibraryId}";
 
-    public GetPlexLibraryByIdEndpoint(ILog log, IPlexRipperDbContext dbContext)
+    public GetPlexLibraryByIdEndpoint(ILog log, IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
     }

@@ -1,9 +1,8 @@
 using System.Runtime.CompilerServices;
-using Logging.Common;
 using Serilog.Core;
 using Serilog.Events;
 
-namespace Logging;
+namespace Reaparr.Logging;
 
 public partial class Log
 {

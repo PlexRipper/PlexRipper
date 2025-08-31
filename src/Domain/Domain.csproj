@@ -3,8 +3,8 @@
         <TargetFramework>net9.0</TargetFramework>
         <LangVersion>13</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
-        <RootNamespace>PlexRipper.Domain</RootNamespace>
-        <AssemblyName>PlexRipper.Domain</AssemblyName>
+        <RootNamespace>Reaparr.Domain</RootNamespace>
+        <AssemblyName>Reaparr.Domain</AssemblyName>
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
         <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
         <Nullable>enable</Nullable>

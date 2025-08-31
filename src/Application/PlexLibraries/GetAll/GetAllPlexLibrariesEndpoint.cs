@@ -1,20 +1,20 @@
-using Application.Contracts;
-using Data.Contracts;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 /// <summary>
 /// Retrieves all the <see cref="PlexLibrary">PlexLibraries</see> from the database.
 /// </summary>
 public class GetAllPlexLibrariesEndpoint : BaseEndpointWithoutRequest<List<PlexLibraryDTO>>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.PlexLibraryController + "/";
 
-    public GetAllPlexLibrariesEndpoint(IPlexRipperDbContext dbContext)
+    public GetAllPlexLibrariesEndpoint(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
     }

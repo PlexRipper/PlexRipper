@@ -1,9 +1,9 @@
 using System.Diagnostics.CodeAnalysis;
-using Application.Contracts;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
+using Reaparr.Application.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public record GetAllBackgroundJobsEndpointRequest
 {

@@ -1,11 +1,12 @@
-using Data.Contracts;
 using FastEndpoints;
 using LukeHagar.PlexAPI.SDK;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
-using PlexApi.Contracts;
-using ILog = Logging.Interface.ILog;
+using Reaparr.Data.Contracts;
+using Reaparr.Logging;
+using Reaparr.PlexApi.Contracts;
+using ILog = Reaparr.Logging.ILog;
 
-namespace PlexRipper.PlexApi;
+namespace Reaparr.PlexApi;
 
 public record GetAllMediaByTypeFromPlexApiCommand(
     PlexLibrary PlexLibrary,
@@ -18,12 +19,12 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
     : ICommandHandler<GetAllMediaByTypeFromPlexApiCommand, Result<List<LibraryMediaItemDTO>>>
 {
     private readonly ILog _log;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly IPlexApiClientFactory _plexApiClientFactory;
 
     public GetAllMediaByTypeFromPlexApiCommandHandler(
         ILog log,
-        IPlexRipperDbContext dbContext,
+        IReaparrDbContext dbContext,
         IPlexApiClientFactory plexApiClientFactory
     )
     {

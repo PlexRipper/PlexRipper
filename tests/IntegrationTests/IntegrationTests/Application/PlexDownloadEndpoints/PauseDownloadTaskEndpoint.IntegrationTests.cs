@@ -1,4 +1,4 @@
-namespace IntegrationTests;
+namespace Reaparr.IntegrationTests;
 
 public class PauseDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
 {

@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Serilog.Events;
 
-namespace Logging;
+namespace Reaparr.Logging;
 
 public static class LogLevelMapper
 {

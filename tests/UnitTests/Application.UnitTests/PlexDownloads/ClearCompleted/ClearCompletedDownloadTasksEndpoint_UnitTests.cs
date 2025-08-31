@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 
-namespace PlexRipper.Application.UnitTests.ClearCompleted;
+namespace Reaparr.Application.UnitTests.ClearCompleted;
 
 public class ClearCompletedDownloadTasksEndpoint_UnitTests : BaseUnitTest<ClearCompletedDownloadTasksEndpoint>
 {

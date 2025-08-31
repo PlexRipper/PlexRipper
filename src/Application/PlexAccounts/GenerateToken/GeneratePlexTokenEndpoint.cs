@@ -1,11 +1,11 @@
-using Application.Contracts;
-using Data.Contracts;
 using FastEndpoints;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
-using PlexApi.Contracts;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
+using Reaparr.PlexApi.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public record GeneratePlexTokenEndpointRequest
 {
@@ -42,12 +42,12 @@ public class GeneratePlexTokenResponse
 
 public class GeneratePlexTokenEndpoint : BaseEndpoint<GeneratePlexTokenEndpointRequest, GeneratePlexTokenResponse>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
 
     public override string EndpointPath => ApiRoutes.PlexAccountController + "/generate-token/{PlexAccountId}";
 
-    public GeneratePlexTokenEndpoint(IPlexRipperDbContext dbContext, ICommandExecutor commandExecutor)
+    public GeneratePlexTokenEndpoint(IReaparrDbContext dbContext, ICommandExecutor commandExecutor)
     {
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;

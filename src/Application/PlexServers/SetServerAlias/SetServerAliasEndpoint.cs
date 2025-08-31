@@ -1,11 +1,11 @@
-using Application.Contracts;
-using Data.Contracts;
 using FastEndpoints;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
-using Settings.Contracts;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
+using Reaparr.Settings.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public record SetServerAliasRequest
 {
@@ -25,12 +25,12 @@ public class SetServerAliasRequestValidator : Validator<SetServerAliasRequest>
 
 public class SetServerAlias : BaseEndpoint<SetServerAliasRequest>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly IServerSettingsModule _serverSettingsModule;
 
     public override string EndpointPath => ApiRoutes.PlexServerController + "/{PlexServerId}/set-server-alias";
 
-    public SetServerAlias(IPlexRipperDbContext dbContext, IServerSettingsModule serverSettingsModule)
+    public SetServerAlias(IReaparrDbContext dbContext, IServerSettingsModule serverSettingsModule)
     {
         _dbContext = dbContext;
         _serverSettingsModule = serverSettingsModule;

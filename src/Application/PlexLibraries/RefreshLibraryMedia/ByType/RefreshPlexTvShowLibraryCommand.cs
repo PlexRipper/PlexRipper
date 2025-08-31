@@ -1,13 +1,13 @@
 using System.Diagnostics;
-using Data.Contracts;
 using FastEndpoints;
 using FluentValidation;
-using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
-using PlexApi.Contracts;
-using WebAPI.Contracts;
+using Reaparr.Data.Contracts;
+using Reaparr.Logging;
+using Reaparr.PlexApi.Contracts;
+using Reaparr.WebAPI.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public record RefreshPlexTvShowLibraryCommand(
     InsertMediaMetaDataCommandResponse LibraryMetadata,
@@ -29,13 +29,13 @@ public class RefreshPlexTvShowLibraryCommandHandler
 {
     private readonly ILog _log;
     private readonly ICommandExecutor _commandExecutor;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly IRefreshLibraryProgressReporter _progressReporter;
 
     public RefreshPlexTvShowLibraryCommandHandler(
         ILog log,
         ICommandExecutor commandExecutor,
-        IPlexRipperDbContext dbContext,
+        IReaparrDbContext dbContext,
         IRefreshLibraryProgressReporter progressReporter
     )
     {

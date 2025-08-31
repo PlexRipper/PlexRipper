@@ -1,7 +1,7 @@
 import type { ButtonType } from '@enums';
 
 export interface IBaseButtonProps extends Record<string, unknown> {
-	// PlexRipper
+	// Reaparr
 	cy: string;
 	type: ButtonType;
 	tooltipText: string;

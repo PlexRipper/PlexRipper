@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace PlexRipper.Data.Migrations
+namespace Reaparr.Data.Migrations
 {
     /// <inheritdoc />
     public partial class AddMediaQualityJoinTables : Migration

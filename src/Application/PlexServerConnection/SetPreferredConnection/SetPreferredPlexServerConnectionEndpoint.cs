@@ -1,12 +1,12 @@
-using Application.Contracts;
-using Data.Contracts;
 using FastEndpoints;
 using FluentValidation;
-using Logging.Interface;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
+using Reaparr.Logging;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 /// <summary>
 /// Sets the preferred connection for a <see cref="PlexServer"/>
@@ -30,12 +30,12 @@ public class SetPreferredPlexServerConnectionEndpoint
     : BaseEndpoint<SetPreferredPlexServerConnectionEndpointRequest, BaseResultDTO>
 {
     private readonly ILog _log;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath =>
         ApiRoutes.PlexServerController + "/{PlexServerId}/preferred-connection/{PlexServerConnectionId}";
 
-    public SetPreferredPlexServerConnectionEndpoint(ILog log, IPlexRipperDbContext dbContext)
+    public SetPreferredPlexServerConnectionEndpoint(ILog log, IReaparrDbContext dbContext)
     {
         _log = log;
         _dbContext = dbContext;

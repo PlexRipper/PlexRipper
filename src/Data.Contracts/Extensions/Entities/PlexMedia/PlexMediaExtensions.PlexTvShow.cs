@@ -1,6 +1,6 @@
-using PlexRipper.Domain;
+using Reaparr.Domain;
 
-namespace Data.Contracts;
+namespace Reaparr.Data.Contracts;
 
 public static partial class PlexMediaExtensions
 {

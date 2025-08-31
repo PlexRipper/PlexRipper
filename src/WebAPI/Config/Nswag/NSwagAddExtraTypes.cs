@@ -1,9 +1,9 @@
-using Application.Contracts;
 using NSwag.Generation.Processors;
 using NSwag.Generation.Processors.Contexts;
-using WebAPI.Contracts;
+using Reaparr.Application.Contracts;
+using Reaparr.WebAPI.Contracts;
 
-namespace PlexRipper.WebAPI;
+namespace Reaparr.WebAPI;
 
 /// <summary>
 ///  Adds extra types to the Swagger client that are not automatically added.

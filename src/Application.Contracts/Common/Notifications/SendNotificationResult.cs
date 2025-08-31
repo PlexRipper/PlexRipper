@@ -1,6 +1,6 @@
 using FastEndpoints;
 using FluentResults;
 
-namespace Application.Contracts;
+namespace Reaparr.Application.Contracts;
 
 public record SendNotificationResult(Result Result) : IEvent;

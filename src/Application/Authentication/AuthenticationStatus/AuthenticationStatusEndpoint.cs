@@ -1,7 +1,7 @@
-using Application.Contracts;
 using Microsoft.AspNetCore.Http;
+using Reaparr.Application.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public class AuthenticationStatusEndpoint : BaseEndpointWithoutRequest<UserClaimsDTO>
 {

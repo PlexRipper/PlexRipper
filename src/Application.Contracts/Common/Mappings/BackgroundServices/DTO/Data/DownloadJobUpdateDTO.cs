@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
-using PlexRipper.Domain;
+using Reaparr.Domain;
 
-namespace Application.Contracts;
+namespace Reaparr.Application.Contracts;
 
 public record DownloadJobUpdateDTO
 {

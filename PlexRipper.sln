@@ -280,7 +280,7 @@ Global
 		SolutionGuid = {B4C02A51-7A0F-40AF-B559-20772614ED60}
 	EndGlobalSection
 	GlobalSection(RiderSharedRunConfigurations) = postSolution
-		File = src\.run\PlexRipper Back-End Development.run.xml
+		File = src\.run\Reaparr Back-End Development.run.xml
 		File = src\WebAPI\ClientApp\.run\dev.run.xml
 	EndGlobalSection
 EndGlobal

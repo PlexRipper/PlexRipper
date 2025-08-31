@@ -1,7 +1,6 @@
-using Logging.Interface;
 using Serilog;
 
-namespace Logging;
+namespace Reaparr.Logging;
 
 public class Log<T> : Log, ILog<T>
     where T : class

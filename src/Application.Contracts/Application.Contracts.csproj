@@ -4,6 +4,8 @@
         <LangVersion>13</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <RootNamespace>Reaparr.Application.Contracts</RootNamespace>
+        <AssemblyName>Reaparr.Application.Contracts</AssemblyName>
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     </PropertyGroup>

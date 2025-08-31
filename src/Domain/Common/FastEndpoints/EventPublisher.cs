@@ -1,7 +1,7 @@
 using FastEndpoints;
-using Logging.Interface;
+using Reaparr.Logging;
 
-namespace PlexRipper.Domain;
+namespace Reaparr.Domain;
 
 public class EventPublisher : IEventPublisher
 {

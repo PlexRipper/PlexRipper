@@ -1,12 +1,12 @@
-using Application.Contracts;
-using Data.Contracts;
 using FastEndpoints;
 using FluentValidation;
-using Logging.Interface;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
+using Reaparr.Logging;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 /// <summary>
 /// Creates an <see cref="PlexAccount"/> in the Database and performs an QueueInspectPlexServerByPlexAccountIdJob().
@@ -40,12 +40,12 @@ public class CreatePlexAccountEndpointRequestValidator : Validator<CreatePlexAcc
 public class CreatePlexAccountEndpoint : BaseEndpoint<CreatePlexAccountEndpointRequest, PlexAccountDTO>
 {
     private readonly ILog _log;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
 
     public override string EndpointPath => ApiRoutes.PlexAccountController + "/";
 
-    public CreatePlexAccountEndpoint(ILog log, IPlexRipperDbContext dbContext, ICommandExecutor commandExecutor)
+    public CreatePlexAccountEndpoint(ILog log, IReaparrDbContext dbContext, ICommandExecutor commandExecutor)
     {
         _log = log;
         _dbContext = dbContext;

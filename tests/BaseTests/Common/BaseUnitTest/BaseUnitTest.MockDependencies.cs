@@ -2,17 +2,17 @@ using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using Autofac;
 using ByteSizeLib;
-using Data.Contracts;
-using Environment;
-using Logging.Interface;
-using PlexApi.Contracts;
-using PlexRipper.Data;
-using PlexRipper.Identity;
-using PlexRipper.Identity.Contracts;
+using Reaparr.Data;
+using Reaparr.Data.Contracts;
+using Reaparr.Environment;
+using Reaparr.Identity;
+using Reaparr.Identity.Contracts;
+using Reaparr.Logging;
+using Reaparr.PlexApi.Contracts;
 using Serilog;
-using Log = Logging.Log;
+using Log = Reaparr.Logging.Log;
 
-namespace PlexRipper.BaseTests;
+namespace Reaparr.BaseTests;
 
 public partial class BaseUnitTest
 {
@@ -64,13 +64,13 @@ public partial class BaseUnitTest
 
         // Database context can be set up once and then retrieved by its DB name.
         builder
-            .Register((_, _) => MockDatabase.GetMemoryPlexRipperDbContext(_databaseName))
-            .As<PlexRipperDbContext>()
+            .Register((_, _) => MockDatabase.GetMemoryReaparrDbContext(_databaseName))
+            .As<ReaparrDbContext>()
             .InstancePerDependency();
 
         builder
-            .Register((_, _) => MockDatabase.GetMemoryPlexRipperDbContext(_databaseName))
-            .As<IPlexRipperDbContext>()
+            .Register((_, _) => MockDatabase.GetMemoryReaparrDbContext(_databaseName))
+            .As<IReaparrDbContext>()
             .InstancePerDependency();
 
         builder
@@ -141,7 +141,7 @@ public partial class BaseUnitTest
         Build();
     }
 
-    protected void SetupFileSystem(Action<MockFileSystem, IPlexRipperDbContext> action)
+    protected void SetupFileSystem(Action<MockFileSystem, IReaparrDbContext> action)
     {
         _fileSystemSetup = builder =>
         {
@@ -150,7 +150,7 @@ public partial class BaseUnitTest
                 {
                     DataBaseSetupGuard();
 
-                    var dbContext = ctx.Resolve<IPlexRipperDbContext>();
+                    var dbContext = ctx.Resolve<IReaparrDbContext>();
 
                     action.Invoke(_fileSystem, dbContext);
 

@@ -1,18 +1,18 @@
 ﻿using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
-using Application.Contracts;
 using Autofac;
 using Autofac.Extras.Quartz;
 using ByteSizeLib;
-using Data.Contracts;
-using Environment;
-using PlexRipper.Application;
-using PlexRipper.Data;
-using PlexRipper.Identity;
-using PlexRipper.Identity.Contracts;
-using Settings.Contracts;
+using Reaparr.Application;
+using Reaparr.Application.Contracts;
+using Reaparr.Data;
+using Reaparr.Data.Contracts;
+using Reaparr.Environment;
+using Reaparr.Identity;
+using Reaparr.Identity.Contracts;
+using Reaparr.Settings.Contracts;
 
-namespace PlexRipper.BaseTests;
+namespace Reaparr.BaseTests;
 
 /// <summary>
 /// Add the default test mock modules here which can later be overridden
@@ -26,13 +26,13 @@ public class TestModule : Module
     {
         // Database context can be setup once and then retrieved by its DB name.
         builder
-            .Register((_, _) => MockDatabase.GetMemoryPlexRipperDbContext(MemoryDbName))
-            .As<PlexRipperDbContext>()
+            .Register((_, _) => MockDatabase.GetMemoryReaparrDbContext(MemoryDbName))
+            .As<ReaparrDbContext>()
             .InstancePerDependency();
 
         builder
-            .Register((_, _) => MockDatabase.GetMemoryPlexRipperDbContext(MemoryDbName))
-            .As<IPlexRipperDbContext>()
+            .Register((_, _) => MockDatabase.GetMemoryReaparrDbContext(MemoryDbName))
+            .As<IReaparrDbContext>()
             .InstancePerDependency();
 
         builder
@@ -85,7 +85,7 @@ public class TestModule : Module
 
                     if (Config.HttpClientOptions is not null)
                     {
-                        var dbContext = context.Resolve<IPlexRipperDbContext>();
+                        var dbContext = context.Resolve<IReaparrDbContext>();
                         Config.HttpClientOptions.Invoke(handler, dbContext);
                     }
 
@@ -123,7 +123,7 @@ public class TestModule : Module
                 fileSystem.AddDirectory(PathProvider.DefaultOtherDestinationFolder);
                 fileSystem.AddDirectory(PathProvider.DefaultGamesDestinationFolder);
 
-                var dbContext = ctx.Resolve<IPlexRipperDbContext>();
+                var dbContext = ctx.Resolve<IReaparrDbContext>();
                 if (Config.FileSystemOptions is not null)
                 {
                     Config.FileSystemOptions.Invoke(fileSystem, dbContext);

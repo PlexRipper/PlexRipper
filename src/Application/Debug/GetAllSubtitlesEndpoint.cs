@@ -1,10 +1,10 @@
-using Application.Contracts;
-using Data.Contracts;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public record GetAllSubtitlesEndpointRequest
 {
@@ -17,11 +17,11 @@ public record GetAllSubtitlesEndpointRequest
 
 public class GetAllSubtitlesEndpoint : BaseEndpoint<GetAllSubtitlesEndpointRequest, List<string>>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.DebugController + "/get-all-subtitles";
 
-    public GetAllSubtitlesEndpoint(IPlexRipperDbContext dbContext)
+    public GetAllSubtitlesEndpoint(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
     }

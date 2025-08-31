@@ -1,6 +1,6 @@
-using Settings.Contracts;
+using Reaparr.Settings.Contracts;
 
-namespace Settings.UnitTests;
+namespace Reaparr.Settings.UnitTests;
 
 public class UserSettings_SettingsUpdated_UnitTests : BaseUnitTest
 {

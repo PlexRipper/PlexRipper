@@ -1,4 +1,4 @@
-namespace Settings.Contracts;
+namespace Reaparr.Settings.Contracts;
 
 public record AuthenticationModule : BaseSettingsModule<AuthenticationModule>, IAuthenticationSettings
 {
@@ -11,7 +11,7 @@ public record AuthenticationModule : BaseSettingsModule<AuthenticationModule>, I
     }
 
     /// <summary>
-    /// When true, will reset the PlexRipper app credentials and then set to false again.
+    /// When true, will reset the Reaparr app credentials and then set to false again.
     /// </summary>
     /// <returns></returns>
     public static AuthenticationModule Create() => new() { ResetCredentials = false };

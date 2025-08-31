@@ -1,17 +1,17 @@
-using Application.Contracts;
-using Data.Contracts;
 using FastEndpoints;
-using Logging.Interface;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
+using Reaparr.Logging;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public class SendNotificationResultHandler : IEventHandler<SendNotificationResult>
 {
     private readonly ILog _log;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly ISignalRService _signalRService;
 
-    public SendNotificationResultHandler(ILog log, IPlexRipperDbContext dbContext, ISignalRService signalRService)
+    public SendNotificationResultHandler(ILog log, IReaparrDbContext dbContext, ISignalRService signalRService)
     {
         _log = log;
         _dbContext = dbContext;

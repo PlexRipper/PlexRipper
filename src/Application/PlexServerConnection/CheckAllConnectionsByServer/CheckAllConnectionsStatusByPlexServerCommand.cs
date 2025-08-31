@@ -1,11 +1,11 @@
-using Application.Contracts;
-using Data.Contracts;
 using FastEndpoints;
 using FluentValidation;
-using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
+using Reaparr.Logging;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 /// <summary>
 /// Checks every <see cref="PlexServerConnection"/> in parallel of a <see cref="PlexServer"/> whether it connects or not
@@ -28,14 +28,14 @@ public class CheckAllConnectionsStatusByPlexServerHandler
     : ICommandHandler<CheckAllConnectionsStatusByPlexServerCommand, Result<List<PlexServerStatus>>>
 {
     private readonly ILog _log;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IEventPublisher _eventPublisher;
     private readonly ISignalRService _signalRService;
 
     public CheckAllConnectionsStatusByPlexServerHandler(
         ILog log,
-        IPlexRipperDbContext dbContext,
+        IReaparrDbContext dbContext,
         ICommandExecutor commandExecutor,
         IEventPublisher eventPublisher,
         ISignalRService signalRService
@@ -73,7 +73,9 @@ public class CheckAllConnectionsStatusByPlexServerHandler
         var connections = plexServer.PlexServerConnections.ToList();
         if (!connections.Any())
         {
-            return _log.Error("No connections found for the plex server {PlexServerName}", plexServerName).ToResult();
+            return _log.Here()
+                .Error("No connections found for the plex server {PlexServerName}", plexServerName)
+                .ToResult();
         }
 
         var previousResult = await _dbContext.IsServerOnline(plexServerId, cancellationToken: cancellationToken);
@@ -105,7 +107,8 @@ public class CheckAllConnectionsStatusByPlexServerHandler
         if (currentOnlineStatus)
             return Result.Ok(combinedResults.Value.ToList());
 
-        return _log.Error(
+        return _log.Here()
+            .Error(
                 "All connections to plex server with name: {PlexServerName} and id: {PlexServerId} failed to connect",
                 plexServerName,
                 plexServerId

@@ -1,11 +1,11 @@
-using Application.Contracts;
-using Data.Contracts;
 using FastEndpoints;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public record DeletePlexServerConnectionByIdRequest(int PlexServerConnectionId);
 
@@ -19,11 +19,11 @@ public class DeletePlexServerConnectionByIdRequestValidator : Validator<DeletePl
 
 public class DeletePlexServerConnectionById : BaseEndpoint<DeletePlexServerConnectionByIdRequest>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.PlexServerConnectionController + "/{PlexServerConnectionId}";
 
-    public DeletePlexServerConnectionById(IPlexRipperDbContext dbContext)
+    public DeletePlexServerConnectionById(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
     }

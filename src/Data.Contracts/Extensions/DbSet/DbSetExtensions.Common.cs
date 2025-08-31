@@ -1,9 +1,9 @@
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using PlexRipper.Domain;
+using Reaparr.Domain;
 
-namespace Data.Contracts;
+namespace Reaparr.Data.Contracts;
 
 public static partial class DbSetExtensions
 {

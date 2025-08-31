@@ -1,7 +1,7 @@
 using System.IO.Abstractions;
 using FluentResults;
 
-namespace FileSystem.Contracts;
+namespace Reaparr.FileSystem.Contracts;
 
 public static class IPathExtensions
 {

@@ -1,13 +1,13 @@
-using Application.Contracts;
 using FastEndpoints;
 using FluentValidation;
-using Logging.Interface;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Identity.Contracts;
+using Reaparr.Application.Contracts;
+using Reaparr.Identity.Contracts;
+using Reaparr.Logging;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public record UpdateCredentialsEndpointRequest
 {
@@ -116,7 +116,7 @@ public class UpdateCredentialsEndpoint : BaseEndpoint<UpdateCredentialsEndpointR
             }
         }
 
-        _log.WarningLine("The PlexRipper app credentials have been updated! Make sure this is intended");
+        _log.WarningLine("The Reaparr app credentials have been updated! Make sure this is intended");
 
         // Respond with success
         await SendFluentResult(Result.Ok(), ct);

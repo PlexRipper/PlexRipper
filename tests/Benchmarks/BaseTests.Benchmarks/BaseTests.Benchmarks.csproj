@@ -4,9 +4,11 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <IsPackable>false</IsPackable>
+        <RootNamespace>Reaparr.BaseTests.Benchmarks</RootNamespace>
+        <AssemblyName>Reaparr.BaseTests.Benchmarks</AssemblyName>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
         <OutputType>Exe</OutputType>
-        <StartupObject>BaseTests.Benchmarks.ProgramBenchmarks</StartupObject>
+        <StartupObject>Reaparr.BaseTests.Benchmarks.ProgramBenchmarks</StartupObject>
         <GenerateProgramFile>false</GenerateProgramFile>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)' == ''">

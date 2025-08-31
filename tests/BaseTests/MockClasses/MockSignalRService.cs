@@ -1,9 +1,9 @@
 ﻿using System.Collections.Concurrent;
-using Application.Contracts;
-using Logging.Interface;
-using WebAPI.Contracts;
+using Reaparr.Application.Contracts;
+using Reaparr.Logging;
+using Reaparr.WebAPI.Contracts;
 
-namespace PlexRipper.BaseTests;
+namespace Reaparr.BaseTests;
 
 public class MockSignalRService : ISignalRService
 {

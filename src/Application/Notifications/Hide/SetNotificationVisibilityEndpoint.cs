@@ -1,11 +1,11 @@
-using Application.Contracts;
-using Data.Contracts;
 using FastEndpoints;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public record SetNotificationVisibilityEndpointRequest
 {
@@ -25,11 +25,11 @@ public class SetNotificationVisibilityEndpointRequestValidator : Validator<SetNo
 
 public class SetNotificationVisibilityEndpoint : BaseEndpoint<SetNotificationVisibilityEndpointRequest, BaseResultDTO>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.NotificationController;
 
-    public SetNotificationVisibilityEndpoint(IPlexRipperDbContext dbContext)
+    public SetNotificationVisibilityEndpoint(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
     }

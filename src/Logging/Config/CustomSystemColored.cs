@@ -1,7 +1,7 @@
 using Serilog.Sinks.Console.LogThemes;
 using Serilog.Sinks.SystemConsole.Themes;
 
-namespace Logging;
+namespace Reaparr.Logging;
 
 public class CustomSystemColored : ColoredSystemThemeTemplate
 {

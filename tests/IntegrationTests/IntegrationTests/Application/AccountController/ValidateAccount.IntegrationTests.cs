@@ -1,10 +1,10 @@
 using System.Net;
-using Application.Contracts;
 using FastEndpoints;
 using Moq.Contrib.HttpClient;
-using PlexRipper.Application;
+using Reaparr.Application;
+using Reaparr.Application.Contracts;
 
-namespace IntegrationTests.AccountController;
+namespace Reaparr.IntegrationTests.AccountController;
 
 public class ValidateAccountIntegrationTests : BaseIntegrationTests
 {

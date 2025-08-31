@@ -1,6 +1,6 @@
 using FastEndpoints;
 
-namespace PlexRipper.Domain;
+namespace Reaparr.Domain;
 
 /// <summary>
 /// Defines a contract for publishing domain events with configurable execution modes.

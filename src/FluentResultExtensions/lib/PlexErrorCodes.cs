@@ -1,4 +1,4 @@
-namespace FluentResultExtensions;
+namespace Reaparr.FluentResultExtensions;
 
 public static class PlexErrorCodes
 {

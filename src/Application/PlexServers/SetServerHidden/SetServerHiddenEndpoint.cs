@@ -1,12 +1,12 @@
-using Application.Contracts;
-using Data.Contracts;
 using FastEndpoints;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Settings.Contracts;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
+using Reaparr.Settings.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public record SetServerHiddenRequest
 {
@@ -26,12 +26,12 @@ public class SetServerHiddenRequestValidator : Validator<SetServerHiddenRequest>
 
 public class SetServerHiddenRequestEndpoint : BaseEndpoint<SetServerHiddenRequest>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly IServerSettingsModule _serverSettingsModule;
 
     public override string EndpointPath => ApiRoutes.PlexServerController + "/{PlexServerId}/set-server-hidden";
 
-    public SetServerHiddenRequestEndpoint(IPlexRipperDbContext dbContext, IServerSettingsModule serverSettingsModule)
+    public SetServerHiddenRequestEndpoint(IReaparrDbContext dbContext, IServerSettingsModule serverSettingsModule)
     {
         _dbContext = dbContext;
         _serverSettingsModule = serverSettingsModule;

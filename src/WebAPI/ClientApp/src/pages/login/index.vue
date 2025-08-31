@@ -69,7 +69,7 @@
 					<QCol cols="auto">
 						<!-- Remember Me -->
 						<a
-							href="https://www.plexripper.rocks/faq#what-if-i-forgot-my-username-and-password-to-log-into-plex-ripper"
+							href="https://www.reaparr.rocks/faq#what-if-i-forgot-my-username-and-password-to-log-into-reaparr"
 							target="_blank"
 							class="link">
 							<QText>{{ $t('pages.login.forgot-your-password') }}</QText>

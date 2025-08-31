@@ -1,10 +1,10 @@
-using Application.Contracts;
-using Data.Contracts;
 using FastEndpoints;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 /// <summary>
 /// Checks if an <see cref="PlexAccount"/> with the same username already exists.
@@ -27,11 +27,11 @@ public class IsUsernameAvailableEndpointRequestValidator : Validator<IsUsernameA
 
 public class IsUsernameAvailableEndpoint : BaseEndpoint<IsUsernameAvailableEndpointRequest, bool>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.PlexAccountController + "/check";
 
-    public IsUsernameAvailableEndpoint(IPlexRipperDbContext dbContext)
+    public IsUsernameAvailableEndpoint(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
     }

@@ -1,9 +1,9 @@
-﻿using Application.Contracts;
-using Data.Contracts;
-using Microsoft.EntityFrameworkCore;
-using PlexRipper.Domain.Validators;
+﻿using Microsoft.EntityFrameworkCore;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
+using Reaparr.Domain.Validators;
 
-namespace PlexRipper.Application.UnitTests;
+namespace Reaparr.Application.UnitTests;
 
 public class DownloadTaskFactoryGenerateTvShowEpisodesDownloadTasksAsyncUnitTests
     : BaseCommandUnitTest<GenerateDownloadTaskTvShowEpisodesCommand>

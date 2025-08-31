@@ -1,13 +1,13 @@
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
-using Settings.Contracts;
+using Reaparr.Settings.Contracts;
 
-namespace PlexRipper.WebAPI;
+namespace Reaparr.WebAPI;
 
 public static partial class Startup
 {
     /// <summary>
-    /// Set up the PlexRipperConfig.json file.
+    /// Set up the ReaparrConfig.json file.
     /// </summary>
     /// <param name="app"></param>
     /// <returns></returns>

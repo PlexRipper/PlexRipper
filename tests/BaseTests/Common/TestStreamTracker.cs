@@ -1,7 +1,7 @@
 ﻿using System.Reactive.Linq;
 using System.Reactive.Subjects;
 
-namespace PlexRipper.BaseTests;
+namespace Reaparr.BaseTests;
 
 public class TestStreamTracker : ITestStreamTracker
 {

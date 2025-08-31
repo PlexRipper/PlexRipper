@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using Logging.Interface;
+using Reaparr.Logging;
 
-namespace PlexRipper.Domain;
+namespace Reaparr.Domain;
 
 public static class StopWatchExtensions
 {

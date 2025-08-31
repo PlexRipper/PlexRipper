@@ -1,12 +1,12 @@
-using Application.Contracts;
-using Application.Contracts.Validators;
-using Data.Contracts;
 using FastEndpoints;
 using FluentValidation;
-using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
+using Reaparr.Application.Contracts;
+using Reaparr.Application.Contracts.Validators;
+using Reaparr.Data.Contracts;
+using Reaparr.Logging;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 /// <summary>
 /// Creates <see cref="DownloadTaskMovie">DownloadTaskMovies</see> from <see cref="PlexMovie">PlexMovies</see> and inserts it into Database.
@@ -40,9 +40,9 @@ public class GenerateDownloadTaskMoviesCommandValidator : AbstractValidator<Gene
 public class GenerateDownloadTaskMoviesCommandHandler : ICommandHandler<GenerateDownloadTaskMoviesCommand, Result>
 {
     private readonly ILog _log;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
-    public GenerateDownloadTaskMoviesCommandHandler(ILog log, IPlexRipperDbContext dbContext)
+    public GenerateDownloadTaskMoviesCommandHandler(ILog log, IReaparrDbContext dbContext)
     {
         _log = log;
         _dbContext = dbContext;

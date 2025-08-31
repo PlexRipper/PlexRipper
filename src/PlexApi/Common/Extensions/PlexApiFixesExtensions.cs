@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace PlexRipper.PlexApi;
+namespace Reaparr.PlexApi;
 
 public static class PlexApiFixesExtensions
 {

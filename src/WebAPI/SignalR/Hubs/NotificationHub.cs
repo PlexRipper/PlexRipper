@@ -1,8 +1,8 @@
-﻿using Application.Contracts;
-using Logging.Interface;
-using Microsoft.AspNetCore.SignalR;
+﻿using Microsoft.AspNetCore.SignalR;
+using Reaparr.Application.Contracts;
+using Reaparr.Logging;
 
-namespace PlexRipper.WebAPI;
+namespace Reaparr.WebAPI;
 
 /// <summary>
 ///  The NotificationHub class is a SignalR hub that sends notifications to the front-end.

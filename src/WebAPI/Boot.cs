@@ -1,12 +1,12 @@
-using Application.Contracts;
-using Environment;
-using Logging.Interface;
-using PlexRipper.Application;
+using Reaparr.Application;
+using Reaparr.Application.Contracts;
+using Reaparr.Environment;
+using Reaparr.Logging;
 
-namespace PlexRipper.WebAPI;
+namespace Reaparr.WebAPI;
 
 /// <summary>
-/// The Boot class is used to sequentially start various processes needed to start PlexRipper.
+/// The Boot class is used to sequentially start various processes needed to start Reaparr.
 /// </summary>
 public class Boot : IHostedService
 {
@@ -26,7 +26,7 @@ public class Boot : IHostedService
     #region Constructor
 
     /// <summary>
-    /// The Boot class is used to sequentially start various processes needed to start PlexRipper.
+    /// The Boot class is used to sequentially start various processes needed to start Reaparr.
     /// </summary>
     public Boot(
         ILog log,
@@ -57,7 +57,7 @@ public class Boot : IHostedService
         if (EnvironmentExtensions.GetPuid() == 911 && EnvironmentExtensions.GetPgid() == 1001)
         {
             _log.ErrorLine(
-                "PlexRipper has invalid PUID and PGID values and thus has defaulted to root, this is not allowed"
+                "Reaparr has invalid PUID and PGID values and thus has defaulted to root, this is not allowed"
             );
             TerminateApplication();
             return;
@@ -79,7 +79,7 @@ public class Boot : IHostedService
 
     private void TerminateApplication()
     {
-        _log.ErrorLine("An error occurred during the boot process, terminating application");
+        _log.FatalLine("An error occurred during the boot process, terminating application");
         _appLifetime.StopApplication();
     }
 
@@ -113,7 +113,7 @@ public class Boot : IHostedService
         _log.DebugLine("Boot.OnStopped has been called");
 
         // Perform post-stopped activities here
-        _log.InformationLine("PlexRipper has been shutdown! R.I.P.");
+        _log.InformationLine("Reaparr has been shutdown! R.I.P.");
     }
 
     #endregion

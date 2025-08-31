@@ -1,10 +1,10 @@
 ﻿using System.Net;
-using Data.Contracts;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
 using Moq.Contrib.HttpClient;
-using PlexApi.Contracts;
+using Reaparr.Data.Contracts;
+using Reaparr.PlexApi.Contracts;
 
-namespace PlexRipper.BaseTests;
+namespace Reaparr.BaseTests;
 
 public class MockPlexApiServer : IMockPlexApiServer
 {
@@ -47,9 +47,9 @@ public class MockPlexApiServer : IMockPlexApiServer
     // ReSharper disable once CollectionNeverQueried.Local
     private readonly Dictionary<string, List<GetMediaMetaDataMetadata>> _episodes = [];
 
-    private IPlexRipperDbContext _dbContext;
+    private IReaparrDbContext _dbContext;
 
-    public MockPlexApiServer(IPlexRipperDbContext dbContext)
+    public MockPlexApiServer(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
     }

@@ -5,6 +5,8 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <IsPackable>false</IsPackable>
         <PackageId>IntegrationTests</PackageId>
+        <RootNamespace>Reaparr.IntegrationTests</RootNamespace>
+        <AssemblyName>Reaparr.IntegrationTests</AssemblyName>
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
         <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
         <Nullable>enable</Nullable>

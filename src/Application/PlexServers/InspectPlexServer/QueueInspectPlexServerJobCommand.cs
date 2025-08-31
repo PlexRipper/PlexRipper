@@ -1,13 +1,13 @@
 ﻿using System.Text.Json;
-using Application.Contracts;
-using Data.Contracts;
 using FastEndpoints;
 using FluentValidation;
-using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
 using Quartz;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
+using Reaparr.Logging;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public record QueueInspectPlexServerJobCommand(List<int> PlexServerIds) : ICommand<Result>;
 
@@ -22,10 +22,10 @@ public class QueueInspectPlexServerJobCommandValidator : AbstractValidator<Queue
 public class QueueInspectPlexServerJobCommandHandler : ICommandHandler<QueueInspectPlexServerJobCommand, Result>
 {
     private readonly ILog _log;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly IScheduler _scheduler;
 
-    public QueueInspectPlexServerJobCommandHandler(ILog log, IPlexRipperDbContext dbContext, IScheduler scheduler)
+    public QueueInspectPlexServerJobCommandHandler(ILog log, IReaparrDbContext dbContext, IScheduler scheduler)
     {
         _log = log;
         _dbContext = dbContext;

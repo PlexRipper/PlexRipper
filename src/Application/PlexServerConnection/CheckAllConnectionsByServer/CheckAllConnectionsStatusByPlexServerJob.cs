@@ -1,10 +1,10 @@
-using Application.Contracts;
-using Data.Contracts;
-using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
 using Quartz;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
+using Reaparr.Logging;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 /// <summary>
 /// This job will check the status of all connections for a given Plex Server and runs periodically.
@@ -13,7 +13,7 @@ namespace PlexRipper.Application;
 public class CheckAllConnectionsStatusByPlexServerJob : IJob
 {
     private readonly ILog _log;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
     private readonly ISignalRService _signalRService;
 
@@ -22,7 +22,7 @@ public class CheckAllConnectionsStatusByPlexServerJob : IJob
 
     public CheckAllConnectionsStatusByPlexServerJob(
         ILog log,
-        IPlexRipperDbContext dbContext,
+        IReaparrDbContext dbContext,
         ICommandExecutor commandExecutor,
         ISignalRService signalRService
     )

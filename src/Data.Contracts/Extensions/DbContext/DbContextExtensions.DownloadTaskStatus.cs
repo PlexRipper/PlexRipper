@@ -1,20 +1,20 @@
 using System.Diagnostics.CodeAnalysis;
-using Logging;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Domain;
+using Reaparr.Domain;
+using Reaparr.Logging;
 
-namespace Data.Contracts;
+namespace Reaparr.Data.Contracts;
 
 public static partial class DbContextExtensions
 {
     /// <summary>
     /// This will determine the download status of the download task and it's children. It will start from the lower nested hierarchy and traverse up to the root to determine the <see cref="DownloadStatus"/>.
     /// </summary>
-    /// <param name="dbContext">The <see cref="IPlexRipperDbContext"/> to extend from. </param>
+    /// <param name="dbContext">The <see cref="IReaparrDbContext"/> to extend from. </param>
     /// <param name="key">The <see cref="DownloadTaskKey"/> to traverse from. </param>
     /// <param name="cancellationToken">The <see cref="CancellationToken"/> to observe. </param>
     public static async Task DetermineDownloadStatus(
-        this IPlexRipperDbContext dbContext,
+        this IReaparrDbContext dbContext,
         DownloadTaskKey key,
         CancellationToken cancellationToken = default
     )
@@ -141,11 +141,11 @@ public static partial class DbContextExtensions
     /// <summary>
     /// Sets the <see cref="DownloadStatus"/> of the download task but not its children or parent and immediately saves the changes to the database.
     /// </summary>
-    /// <param name="dbContext"> The <see cref="IPlexRipperDbContext"/> to extend from. </param>
+    /// <param name="dbContext"> The <see cref="IReaparrDbContext"/> to extend from. </param>
     /// <param name="key"> The <see cref="DownloadTaskKey"/> of the download task to update. </param>
     /// <param name="status"> The <see cref="DownloadStatus"/> to set. </param>
     public static async Task SetDownloadStatus(
-        this IPlexRipperDbContext dbContext,
+        this IReaparrDbContext dbContext,
         DownloadTaskKey key,
         DownloadStatus status
     )

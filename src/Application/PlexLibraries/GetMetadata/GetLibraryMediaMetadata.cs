@@ -1,12 +1,12 @@
 using System.ComponentModel;
-using Application.Contracts;
-using Data.Contracts;
 using FastEndpoints;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public record GetLibraryMediaMetadataRequest
 {
@@ -30,11 +30,11 @@ public class GetLibraryMediaMetadataRequestValidator : Validator<GetLibraryMedia
 
 public class GetLibraryMediaMetadata : BaseEndpoint<GetLibraryMediaMetadataRequest, PlexMediaMetadataDTO>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.PlexLibraryController + "/{PlexLibraryId}/metadata";
 
-    public GetLibraryMediaMetadata(IPlexRipperDbContext dbContext)
+    public GetLibraryMediaMetadata(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
     }

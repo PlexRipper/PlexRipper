@@ -1,11 +1,11 @@
-﻿using Application.Contracts;
-using Data.Contracts;
-using FastEndpoints;
+﻿using FastEndpoints;
 using FluentValidation;
-using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
+using Reaparr.Logging;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public record GetDownloadPreviewQuery(List<DownloadMediaDTO> DownloadMedias) : ICommand<Result<List<DownloadPreview>>>;
 
@@ -23,10 +23,10 @@ public class GetDownloadPreviewQueryValidator : AbstractValidator<GetDownloadPre
 
 public class GetDownloadPreviewQueryHandler : ICommandHandler<GetDownloadPreviewQuery, Result<List<DownloadPreview>>>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly ILog _log;
 
-    public GetDownloadPreviewQueryHandler(IPlexRipperDbContext dbContext, ILog log)
+    public GetDownloadPreviewQueryHandler(IReaparrDbContext dbContext, ILog log)
     {
         _dbContext = dbContext;
         _log = log;

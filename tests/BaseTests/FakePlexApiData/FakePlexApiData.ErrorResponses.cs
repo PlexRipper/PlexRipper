@@ -1,7 +1,7 @@
-﻿using FluentResultExtensions;
-using PlexRipper.PlexApi;
+﻿using Reaparr.FluentResultExtensions;
+using Reaparr.PlexApi;
 
-namespace PlexRipper.BaseTests;
+namespace Reaparr.BaseTests;
 
 public partial class FakePlexApiData
 {

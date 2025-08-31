@@ -1,14 +1,14 @@
 using FluentResults;
-using Logging;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Domain;
+using Reaparr.Domain;
+using Reaparr.Logging;
 
-namespace Data.Contracts;
+namespace Reaparr.Data.Contracts;
 
 public static partial class DbContextExtensions
 {
     public static async Task<Result<string>> GetDownloadUrl(
-        this IPlexRipperDbContext dbContext,
+        this IReaparrDbContext dbContext,
         int plexServerId,
         string fileLocationUrl,
         CancellationToken cancellationToken = default
@@ -33,7 +33,7 @@ public static partial class DbContextExtensions
     }
 
     public static async Task<DownloadTaskKey?> GetDownloadTaskKeyAsync(
-        this IPlexRipperDbContext dbContext,
+        this IReaparrDbContext dbContext,
         Guid guid,
         CancellationToken cancellationToken = default
     )
@@ -62,7 +62,7 @@ public static partial class DbContextExtensions
     }
 
     public static async Task<DownloadTaskType> GetDownloadTaskTypeAsync(
-        this IPlexRipperDbContext dbContext,
+        this IReaparrDbContext dbContext,
         Guid guid,
         CancellationToken cancellationToken = default
     )
@@ -94,12 +94,12 @@ public static partial class DbContextExtensions
     /// <summary>
     /// Retrieves a <see cref="DownloadTaskGeneric"/> from the database based on the <paramref name="key"/> with all its children and related entities.
     /// </summary>
-    /// <param name="dbContext"> The <see cref="IPlexRipperDbContext"/> to query. </param>
+    /// <param name="dbContext"> The <see cref="IReaparrDbContext"/> to query. </param>
     /// <param name="key"> The <see cref="DownloadTaskKey"/> to retrieve the <see cref="DownloadTaskGeneric"/> by. </param>
     /// <param name="cancellationToken"> The token to monitor for cancellation requests. </param>
     /// <returns> The <see cref="DownloadTaskGeneric"/> if found, otherwise null. </returns>
     public static Task<DownloadTaskGeneric?> GetDownloadTaskAsync(
-        this IPlexRipperDbContext dbContext,
+        this IReaparrDbContext dbContext,
         DownloadTaskKey key,
         CancellationToken cancellationToken = default
     ) => dbContext.GetDownloadTaskAsync(key.Id, key.Type, cancellationToken);
@@ -107,13 +107,13 @@ public static partial class DbContextExtensions
     /// <summary>
     /// Retrieves a <see cref="DownloadTaskGeneric"/> from the database based on the <paramref name="id"/> and <paramref name="type"/> with all its children and related entities.
     /// </summary>
-    /// <param name="dbContext"> The <see cref="IPlexRipperDbContext"/> to query. </param>
+    /// <param name="dbContext"> The <see cref="IReaparrDbContext"/> to query. </param>
     /// <param name="id"> The id of the <see cref="DownloadTaskGeneric"/> to retrieve. </param>
     /// <param name="type"> The type of the root <see cref="DownloadTaskGeneric"/> to retrieve. </param>
     /// <param name="cancellationToken"> The token to monitor for cancellation requests. </param>
     /// <returns> The <see cref="DownloadTaskGeneric"/> if found, otherwise null. </returns>
     public static async Task<DownloadTaskGeneric?> GetDownloadTaskAsync(
-        this IPlexRipperDbContext dbContext,
+        this IReaparrDbContext dbContext,
         Guid id,
         DownloadTaskType type = DownloadTaskType.None,
         CancellationToken cancellationToken = default
@@ -198,7 +198,7 @@ public static partial class DbContextExtensions
     }
 
     public static async Task<DownloadStatus> GetDownloadTaskStatusAsync(
-        this IPlexRipperDbContext dbContext,
+        this IReaparrDbContext dbContext,
         DownloadTaskKey key,
         CancellationToken cancellationToken = default
     )
@@ -289,7 +289,7 @@ public static partial class DbContextExtensions
     }
 
     public static async Task<DownloadTaskFileBase?> GetDownloadTaskFileAsync(
-        this IPlexRipperDbContext dbContext,
+        this IReaparrDbContext dbContext,
         DownloadTaskKey key,
         CancellationToken cancellationToken = default
     )
@@ -319,7 +319,7 @@ public static partial class DbContextExtensions
     }
 
     public static async Task<List<DownloadTaskGeneric>> GetAllDownloadTasksByServerAsync(
-        this IPlexRipperDbContext dbContext,
+        this IReaparrDbContext dbContext,
         int plexServerId = 0,
         bool asTracking = false,
         CancellationToken cancellationToken = default
@@ -353,7 +353,7 @@ public static partial class DbContextExtensions
     }
 
     public static Task<DownloadTaskTvShow?> GetDownloadTaskTvShowByMediaKeyQuery(
-        this IPlexRipperDbContext dbContext,
+        this IReaparrDbContext dbContext,
         int plexServerId,
         int mediaKey,
         CancellationToken cancellationToken = default
@@ -366,7 +366,7 @@ public static partial class DbContextExtensions
     }
 
     public static async Task UpdateDownloadProgress(
-        this IPlexRipperDbContext dbContext,
+        this IReaparrDbContext dbContext,
         DownloadTaskKey key,
         IDownloadTaskProgress progress,
         CancellationToken cancellationToken = default
@@ -414,7 +414,7 @@ public static partial class DbContextExtensions
     }
 
     public static async Task<Result> ResetDownloadTaskProgress(
-        this IPlexRipperDbContext dbContext,
+        this IReaparrDbContext dbContext,
         DownloadTaskKey key,
         DownloadStatus downloadStatus,
         CancellationToken cancellationToken = default
@@ -475,7 +475,7 @@ public static partial class DbContextExtensions
     }
 
     public static async Task UpdateDownloadFileTransferProgress(
-        this IPlexRipperDbContext dbContext,
+        this IReaparrDbContext dbContext,
         DownloadTaskKey key,
         IDownloadFileTransferProgress progress
     )
@@ -520,7 +520,7 @@ public static partial class DbContextExtensions
     }
 
     public static async Task UpdateDownloadWorkerProgress(
-        this IPlexRipperDbContext dbContext,
+        this IReaparrDbContext dbContext,
         IList<DownloadWorkerTaskProgress> updates,
         CancellationToken cancellationToken = default
     )
@@ -549,7 +549,7 @@ public static partial class DbContextExtensions
     }
 
     public static async Task<List<DownloadTaskKey>> GetDownloadableChildTaskKeys(
-        this IPlexRipperDbContext dbContext,
+        this IReaparrDbContext dbContext,
         DownloadTaskKey key,
         CancellationToken cancellationToken = default
     )
@@ -580,7 +580,7 @@ public static partial class DbContextExtensions
     }
 
     public static async Task<List<DownloadTaskGeneric>> GetDownloadableChildTasks(
-        this IPlexRipperDbContext dbContext,
+        this IReaparrDbContext dbContext,
         DownloadTaskKey key,
         CancellationToken cancellationToken = default
     )

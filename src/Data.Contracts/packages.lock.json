@@ -361,34 +361,48 @@
         "resolved": "4.5.4",
         "contentHash": "zteT+G8xuGu6mS+mzDzYXbzS7rd3K6Fjb9RiZlYlJPam2/hU7JCBZBVEcywNuR+oZ1ncTvc/cq0faRr3P01OVg=="
       },
-      "application.contracts": {
+      "Reaparr.Application.Contracts": {
         "type": "Project",
         "dependencies": {
-          "PlexRipper.Domain": "[1.0.0, )",
           "Quartz": "[3.15.0, )",
-          "WebAPI.Contracts": "[1.0.0, )"
+          "Reaparr.Domain": "[1.0.0, )",
+          "Reaparr.WebAPI.Contracts": "[1.0.0, )"
         }
       },
-      "environment": {
+      "Reaparr.Domain": {
+        "type": "Project",
+        "dependencies": {
+          "ByteSize": "[2.1.2, )",
+          "FastEndpoints": "[7.0.1, )",
+          "JetBrains.Annotations": "[2025.2.0, )",
+          "NaturalSort.Extension": "[4.3.0, )",
+          "PasswordGenerator": "[2.1.0, )",
+          "Reaparr.FluentResultExtensions": "[1.0.0, )",
+          "System.ComponentModel.Annotations": "[5.0.0, )",
+          "System.Reactive": "[6.0.1, )",
+          "System.Text.Json": "[9.0.8, )"
+        }
+      },
+      "Reaparr.Environment": {
         "type": "Project",
         "dependencies": {
           "Serilog": "[4.3.0, )"
         }
       },
-      "fluentresultextensions": {
+      "Reaparr.FluentResultExtensions": {
         "type": "Project",
         "dependencies": {
           "FluentResults": "[4.0.0, )",
           "FluentValidation": "[12.0.0, )",
-          "Logging": "[1.0.0, )"
+          "Reaparr.Logging": "[1.0.0, )"
         }
       },
-      "logging": {
+      "Reaparr.Logging": {
         "type": "Project",
         "dependencies": {
           "Autofac": "[8.4.0, )",
-          "Environment": "[1.0.0, )",
           "FluentResults": "[4.0.0, )",
+          "Reaparr.Environment": "[1.0.0, )",
           "Serilog": "[4.3.0, )",
           "Serilog.Enrichers.Sensitive": "[1.7.3, )",
           "Serilog.Sinks.Console": "[6.0.0, )",
@@ -398,24 +412,10 @@
           "Serilog.Sinks.TestCorrelator": "[4.0.0, )"
         }
       },
-      "PlexRipper.Domain": {
+      "Reaparr.WebAPI.Contracts": {
         "type": "Project",
         "dependencies": {
-          "ByteSize": "[2.1.2, )",
-          "FastEndpoints": "[7.0.1, )",
-          "FluentResultExtensions": "[1.0.0, )",
-          "JetBrains.Annotations": "[2025.2.0, )",
-          "NaturalSort.Extension": "[4.3.0, )",
-          "PasswordGenerator": "[2.1.0, )",
-          "System.ComponentModel.Annotations": "[5.0.0, )",
-          "System.Reactive": "[6.0.1, )",
-          "System.Text.Json": "[9.0.8, )"
-        }
-      },
-      "webapi.contracts": {
-        "type": "Project",
-        "dependencies": {
-          "PlexRipper.Domain": "[1.0.0, )"
+          "Reaparr.Domain": "[1.0.0, )"
         }
       }
     }

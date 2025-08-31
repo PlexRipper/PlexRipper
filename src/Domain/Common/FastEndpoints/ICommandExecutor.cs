@@ -1,6 +1,6 @@
 using FastEndpoints;
 
-namespace PlexRipper.Domain;
+namespace Reaparr.Domain;
 
 public interface ICommandExecutor
 {

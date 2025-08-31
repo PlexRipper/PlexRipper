@@ -1,7 +1,7 @@
 ﻿using FastEndpoints;
-using PlexApi.Contracts;
+using Reaparr.PlexApi.Contracts;
 
-namespace PlexRipper.PlexApi;
+namespace Reaparr.PlexApi;
 
 /// <summary>
 /// This service is an extra layer of abstraction to convert incoming DTO's from the PlexAPI to workable entities.

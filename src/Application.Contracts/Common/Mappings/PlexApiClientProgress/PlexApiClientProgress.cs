@@ -1,4 +1,4 @@
-﻿namespace Application.Contracts;
+﻿namespace Reaparr.Application.Contracts;
 
 public class PlexApiClientProgress
 {

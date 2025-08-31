@@ -1,7 +1,7 @@
 using LukeHagar.PlexAPI.SDK;
-using PlexApi.Contracts;
+using Reaparr.PlexApi.Contracts;
 
-namespace PlexRipper.PlexApi;
+namespace Reaparr.PlexApi;
 
 public interface IPlexApiClientFactory
 {

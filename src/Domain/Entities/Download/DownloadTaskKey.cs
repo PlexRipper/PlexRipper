@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace PlexRipper.Domain;
+namespace Reaparr.Domain;
 
 /// <summary>
 /// The key to identify various types of <see cref="DownloadTaskGeneric">DownloadTasks</see>.

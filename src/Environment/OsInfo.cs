@@ -1,4 +1,4 @@
-﻿namespace Environment;
+﻿namespace Reaparr.Environment;
 
 public static class OsInfo
 {

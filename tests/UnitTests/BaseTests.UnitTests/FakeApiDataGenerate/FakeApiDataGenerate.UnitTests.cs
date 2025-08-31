@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace BaseTests.UnitTests;
+namespace Reaparr.BaseTests.UnitTests;
 
 public class FakeApiDataGenerateUnitTests : BaseUnitTest<MockPlexApiServer>
 {

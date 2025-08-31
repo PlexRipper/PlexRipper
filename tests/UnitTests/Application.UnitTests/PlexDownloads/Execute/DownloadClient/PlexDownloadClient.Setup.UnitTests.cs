@@ -1,8 +1,8 @@
 ﻿using Autofac;
-using PlexApi.Contracts;
-using PlexRipper.PlexApi;
+using Reaparr.PlexApi;
+using Reaparr.PlexApi.Contracts;
 
-namespace PlexRipper.Application.UnitTests;
+namespace Reaparr.Application.UnitTests;
 
 public class PlexDownloadClientSetupUnitTests : BaseUnitTest
 {

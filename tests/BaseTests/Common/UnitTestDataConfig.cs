@@ -1,8 +1,8 @@
 ﻿using System.IO.Abstractions.TestingHelpers;
-using Data.Contracts;
-using Settings.Contracts;
+using Reaparr.Data.Contracts;
+using Reaparr.Settings.Contracts;
 
-namespace PlexRipper.BaseTests;
+namespace Reaparr.BaseTests;
 
 public class UnitTestDataConfig : BaseConfig<UnitTestDataConfig>
 {
@@ -14,12 +14,12 @@ public class UnitTestDataConfig : BaseConfig<UnitTestDataConfig>
 
     public int PlexServerSettingsCount { get; set; } = 5;
 
-    public Action<Mock<HttpMessageHandler>, IPlexRipperDbContext>? HttpClientOptions { get; set; }
+    public Action<Mock<HttpMessageHandler>, IReaparrDbContext>? HttpClientOptions { get; set; }
 
     /// <summary>
     /// Set the mock option to create a mock PlexApi Server with the given configuration.
     /// </summary>
     public Action<PlexApiDataConfig>? BaseMockHttpClientOptions { get; set; }
 
-    public Action<MockFileSystem, IPlexRipperDbContext>? FileSystemOptions { get; set; }
+    public Action<MockFileSystem, IReaparrDbContext>? FileSystemOptions { get; set; }
 }

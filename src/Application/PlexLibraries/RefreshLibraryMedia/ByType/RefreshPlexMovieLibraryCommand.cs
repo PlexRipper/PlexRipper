@@ -1,10 +1,10 @@
-using Data.Contracts;
 using FastEndpoints;
 using FluentValidation;
-using Logging.Interface;
-using WebAPI.Contracts;
+using Reaparr.Data.Contracts;
+using Reaparr.Logging;
+using Reaparr.WebAPI.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public record RefreshPlexMovieLibraryCommand(
     InsertMediaMetaDataCommandResponse LibraryMetadata,
@@ -26,13 +26,13 @@ public class RefreshPlexMovieLibraryCommandHandler
 {
     private readonly ILog _log;
     private readonly ICommandExecutor _commandExecutor;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly IRefreshLibraryProgressReporter _progressReporter;
 
     public RefreshPlexMovieLibraryCommandHandler(
         ILog log,
         ICommandExecutor commandExecutor,
-        IPlexRipperDbContext dbContext,
+        IReaparrDbContext dbContext,
         IRefreshLibraryProgressReporter progressReporter
     )
     {

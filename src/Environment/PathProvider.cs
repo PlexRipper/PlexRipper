@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace Environment;
+namespace Reaparr.Environment;
 
 public class PathProvider : IPathProvider
 {
@@ -30,9 +30,9 @@ public class PathProvider : IPathProvider
 
     #region FileNames
 
-    public static string ConfigFileName => "PlexRipperSettings.json";
+    public static string ConfigFileName => "ReaparrSettings.json";
 
-    public static string DatabaseName => "PlexRipperDB.db";
+    public static string DatabaseName => "ReaparrDB.db";
     public static string DatabaseShmName => $"{DatabaseName}-shm";
     public static string DatabaseWalName => $"{DatabaseName}-wal";
 

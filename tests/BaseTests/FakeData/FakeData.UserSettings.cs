@@ -1,6 +1,6 @@
-﻿using Settings.Contracts;
+﻿using Reaparr.Settings.Contracts;
 
-namespace PlexRipper.BaseTests;
+namespace Reaparr.BaseTests;
 
 public static partial class FakeData
 {

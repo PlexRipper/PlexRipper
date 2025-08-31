@@ -1,8 +1,7 @@
 // ReSharper disable once CheckNamespace
 // Needs to be in the same namespace as the FluentResults package
 
-using Logging;
-using Logging.Interface;
+using Reaparr.Logging;
 
 // ReSharper disable once CheckNamespace
 namespace FluentResults;

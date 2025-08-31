@@ -1,7 +1,7 @@
-using Data.Contracts;
 using Microsoft.EntityFrameworkCore;
+using Reaparr.Data.Contracts;
 
-namespace Data.UnitTests;
+namespace Reaparr.Data.UnitTests;
 
 public class ChoosePlexServerConnection_UnitTests : BaseUnitTest
 {

@@ -1,7 +1,6 @@
-using Logging.Common;
 using Serilog.Events;
 
-namespace Logging;
+namespace Reaparr.Logging;
 
 public static partial class LogExtensions
 {

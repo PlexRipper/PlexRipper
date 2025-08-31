@@ -1,10 +1,10 @@
-using Application.Contracts;
-using Data.Contracts;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 /// <summary>
 /// Will clear any completed <see cref="DownloadTaskGeneric"/> from the database.
@@ -12,11 +12,11 @@ namespace PlexRipper.Application;
 /// <returns>Is successful.</returns>
 public class ClearCompletedDownloadTasksEndpoint : BaseEndpoint<List<Guid>, ResultDTO<CountResponseDTO>>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.DownloadController + "/clear";
 
-    public ClearCompletedDownloadTasksEndpoint(IPlexRipperDbContext dbContext)
+    public ClearCompletedDownloadTasksEndpoint(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
     }

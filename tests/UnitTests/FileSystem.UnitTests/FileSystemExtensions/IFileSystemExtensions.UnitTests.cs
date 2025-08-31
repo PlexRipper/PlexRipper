@@ -1,9 +1,9 @@
 using System.IO.Abstractions;
 using Autofac;
-using Environment;
-using FileSystem.Contracts;
+using Reaparr.Environment;
+using Reaparr.FileSystem.Contracts;
 
-namespace FileSystem.UnitTests.FileSystemExtensions;
+namespace Reaparr.FileSystem.UnitTests.FileSystemExtensions;
 
 public class IFileSystemExtensionsUnitTests : BaseUnitTest
 {

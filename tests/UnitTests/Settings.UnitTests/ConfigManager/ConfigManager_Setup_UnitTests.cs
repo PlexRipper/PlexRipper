@@ -1,10 +1,9 @@
 using System.IO.Abstractions;
 using System.Reactive.Subjects;
-using Environment;
-using PlexRipper.Settings;
-using Settings.Contracts;
+using Reaparr.Environment;
+using Reaparr.Settings.Contracts;
 
-namespace Settings.UnitTests;
+namespace Reaparr.Settings.UnitTests;
 
 public class ConfigManager_Setup_UnitTests : BaseUnitTest<ConfigManager>
 {
@@ -16,15 +15,15 @@ public class ConfigManager_Setup_UnitTests : BaseUnitTest<ConfigManager>
     {
         // Arrange
         mock.Mock<IUserSettings>().SetupGet(x => x.SettingsUpdated).Returns(new Subject<UserSettings>());
-        mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_PlexRipperSettings.json");
+        mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_ReaparrSettings.json");
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "/");
-        mock.Mock<IPathProvider>().SetupGet(x => x.ConfigDirectory).Returns(() => "/TEST_PlexRipperSettings.json");
-        mock.Mock<IDirectory>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true).Verifiable(Times.Once);
+        mock.Mock<IPathProvider>().SetupGet(x => x.ConfigDirectory).Returns(() => "/TEST_ReaparrSettings.json");
+        mock.Mock<IDirectory>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
         mock.Mock<IDirectory>()
             .Setup(x => x.CreateDirectory(It.IsAny<string>()))
             .Returns(mock.Mock<IDirectoryInfo>().Object)
             .Verifiable(Times.Never);
-        mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true).Verifiable(Times.Once);
+        mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
         mock.Mock<IUserSettings>().Setup(x => x.Reset());
 
         // Act
@@ -41,9 +40,9 @@ public class ConfigManager_Setup_UnitTests : BaseUnitTest<ConfigManager>
     {
         // Arrange
         mock.Mock<IUserSettings>().SetupGet(x => x.SettingsUpdated).Returns(new Subject<UserSettings>());
-        mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_PlexRipperSettings.json");
+        mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_ReaparrSettings.json");
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigDirectory).Returns(() => "/");
-        mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "/TEST_PlexRipperSettings.json");
+        mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "/TEST_ReaparrSettings.json");
 
         mock.Mock<IFile>().Setup(x => x.WriteAllText(It.IsAny<string>(), It.IsAny<string>())).Verifiable(Times.Once);
 

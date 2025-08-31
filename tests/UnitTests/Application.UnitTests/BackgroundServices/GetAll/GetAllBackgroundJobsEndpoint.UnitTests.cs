@@ -1,7 +1,7 @@
 using System.Text.Json;
-using Application.Contracts;
+using Reaparr.Application.Contracts;
 
-namespace PlexRipper.Application.UnitTests;
+namespace Reaparr.Application.UnitTests;
 
 public class GetAllBackgroundJobsEndpointUnitTests : BaseUnitTest<GetAllBackgroundJobsEndpoint>
 {

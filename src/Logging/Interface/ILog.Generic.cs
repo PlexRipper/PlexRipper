@@ -1,4 +1,4 @@
-namespace Logging.Interface;
+namespace Reaparr.Logging;
 
 // Make T optional to allow for non-generic implementations
 // ReSharper disable once UnusedTypeParameter

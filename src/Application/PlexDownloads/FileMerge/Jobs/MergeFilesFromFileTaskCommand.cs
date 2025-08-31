@@ -1,13 +1,13 @@
 using System.Diagnostics;
 using System.IO.Abstractions;
 using System.Reactive.Subjects;
-using Application.Contracts;
-using Data.Contracts;
 using FastEndpoints;
 using FluentValidation;
-using Logging.Interface;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
+using Reaparr.Logging;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public record MergeFilesFromFileTaskCommand(
     DownloadTaskKey Key,
@@ -28,7 +28,7 @@ public class MergeFilesFromFileTaskCommandHandler : ICommandHandler<MergeFilesFr
     private readonly ILog _log;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IEventPublisher _eventPublisher;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly IFile _file;
     private readonly IDirectory _directory;
     private readonly IPath _path;
@@ -46,7 +46,7 @@ public class MergeFilesFromFileTaskCommandHandler : ICommandHandler<MergeFilesFr
         ILog log,
         ICommandExecutor commandExecutor,
         IEventPublisher eventPublisher,
-        IPlexRipperDbContext dbContext,
+        IReaparrDbContext dbContext,
         IFile file,
         IDirectory directory,
         IPath path

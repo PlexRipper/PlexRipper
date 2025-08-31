@@ -16,7 +16,7 @@ export function setupMockAuthenticationEndpoints(this: BasePageSetupResult, conf
 		statusCode: 200,
 		body: generateResultDTO<AppCredentialsDTO>({
 			isDefaultCredentials: true,
-			userName: 'PlexRipperRocks',
+			userName: 'ReaparrRocks',
 			password: 'Pl€XR!ℙℙ€R69',
 		}),
 		// Headers are not sent with authentication requests

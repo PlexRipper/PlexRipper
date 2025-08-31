@@ -1,12 +1,12 @@
 using System.Diagnostics;
-using Data.Contracts;
 using EFCore.BulkExtensions;
 using FastEndpoints;
 using FluentValidation;
-using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
+using Reaparr.Data.Contracts;
+using Reaparr.Logging;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public record SyncPlexMoviesCommand(InsertMediaMetaDataCommandResponse LibraryMetadata)
     : ICommand<Result<CrudMoviesReport>>;
@@ -39,13 +39,13 @@ public class SyncPlexMoviesCommandValidator : AbstractValidator<SyncPlexMoviesCo
 public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesCommand, Result<CrudMoviesReport>>
 {
     private readonly ILog _log;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     private readonly CrudMoviesReport _report = new();
 
     private readonly BulkConfig? _config = new() { BatchSize = 500, SetOutputIdentity = true };
 
-    public SyncPlexMoviesCommandHandler(ILog log, IPlexRipperDbContext dbContext)
+    public SyncPlexMoviesCommandHandler(ILog log, IReaparrDbContext dbContext)
     {
         _log = log;
         _dbContext = dbContext;

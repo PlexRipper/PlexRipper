@@ -1,9 +1,9 @@
 ﻿using System.Threading.Channels;
-using Application.Contracts;
-using Data.Contracts;
-using Logging.Interface;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
+using Reaparr.Logging;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 /// <summary>
 /// The DownloadQueue is responsible for deciding which downloadTask is handled.
@@ -11,14 +11,14 @@ namespace PlexRipper.Application;
 public class DownloadQueue : IDownloadQueue
 {
     private readonly ILog _log;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly IDownloadTaskScheduler _downloadTaskScheduler;
 
     private readonly Channel<int> _plexServersToCheckChannel = Channel.CreateUnbounded<int>();
 
     private readonly CancellationToken _token = new();
 
-    public DownloadQueue(ILog log, IPlexRipperDbContext dbContext, IDownloadTaskScheduler downloadTaskScheduler)
+    public DownloadQueue(ILog log, IReaparrDbContext dbContext, IDownloadTaskScheduler downloadTaskScheduler)
     {
         _log = log;
         _dbContext = dbContext;

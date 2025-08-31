@@ -1,4 +1,4 @@
-namespace PlexRipper.Domain;
+namespace Reaparr.Domain;
 
 /// <summary>
 /// The Plex Account entity in the database.

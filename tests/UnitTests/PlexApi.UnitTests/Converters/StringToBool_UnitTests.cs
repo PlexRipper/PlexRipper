@@ -1,7 +1,7 @@
 using System.Text;
 using System.Text.Json;
 
-namespace PlexApi.UnitTests.Converters;
+namespace Reaparr.PlexApi.UnitTests.Converters;
 
 public class StringToBool : BaseUnitTest
 {
@@ -15,7 +15,7 @@ public class StringToBool : BaseUnitTest
     public void ShouldConvertToTrue_WhenStringOfOne(string json, bool expected)
     {
         // Arrange
-        var sut = new PlexRipper.PlexApi.Converters.StringToBool();
+        var sut = new PlexApi.Converters.StringToBool();
         var utf8JsonReader = new Utf8JsonReader(
             Encoding.UTF8.GetBytes(json),
             false,

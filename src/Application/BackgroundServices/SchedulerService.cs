@@ -1,10 +1,10 @@
-﻿using Application.Contracts;
-using Environment;
-using Logging.Interface;
-using Quartz;
+﻿using Quartz;
 using Quartz.Impl.Matchers;
+using Reaparr.Application.Contracts;
+using Reaparr.Environment;
+using Reaparr.Logging;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public class SchedulerService : ISchedulerService
 {

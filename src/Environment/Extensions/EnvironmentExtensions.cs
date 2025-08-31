@@ -1,6 +1,6 @@
 ﻿using Serilog.Events;
 
-namespace Environment;
+namespace Reaparr.Environment;
 
 public static class EnvironmentExtensions
 {
@@ -32,7 +32,7 @@ public static class EnvironmentExtensions
         System.Environment.GetEnvironmentVariable(IntegrationTestModeKey) == TrueValue;
 
     /// <summary>
-    /// This is the path that is used to store the /config, /downloads, /movies and /tvshows folders required to boot PlexRipper in development mode in a non-docker environment.
+    /// This is the path that is used to store the /config, /downloads, /movies and /tvshows folders required to boot Reaparr in development mode in a non-docker environment.
     /// </summary>
     /// <returns></returns>
     public static string? GetDevelopmentRootPath() => System.Environment.GetEnvironmentVariable(DevelopmentRootPathKey);

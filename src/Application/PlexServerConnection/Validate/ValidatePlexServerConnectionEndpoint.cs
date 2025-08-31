@@ -1,10 +1,10 @@
-using Application.Contracts;
 using FastEndpoints;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
-using PlexApi.Contracts;
+using Reaparr.Application.Contracts;
+using Reaparr.PlexApi.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public record ValidatePlexServerConnectionEndpointRequest
 {

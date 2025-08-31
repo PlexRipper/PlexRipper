@@ -1,11 +1,11 @@
-using Application.Contracts;
-using Data.Contracts;
 using FastEndpoints;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public class UpdateFolderPathEndpointRequest
 {
@@ -28,11 +28,11 @@ public class UpdateFolderPathEndpointRequestValidator : Validator<UpdateFolderPa
 
 public class UpdateFolderPathEndpoint : BaseEndpoint<UpdateFolderPathEndpointRequest, FolderPathDTO>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.FolderPathController + "/";
 
-    public UpdateFolderPathEndpoint(IPlexRipperDbContext dbContext)
+    public UpdateFolderPathEndpoint(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
     }

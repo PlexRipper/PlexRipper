@@ -1,10 +1,9 @@
 using BenchmarkDotNet.Attributes;
 using Moq;
-using PlexRipper.BaseTests;
 using Serilog.Events;
 using Xunit;
 
-namespace BaseTests.Benchmarks;
+namespace Reaparr.BaseTests.Benchmarks;
 
 public class FakeApiDataGenerateBenchmark : BaseUnitTest
 {

@@ -1,6 +1,6 @@
 using FluentResults;
 
-namespace Application.Contracts;
+namespace Reaparr.Application.Contracts;
 
 public static class ResultDTOMapper
 {

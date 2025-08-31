@@ -1,12 +1,12 @@
-using Application.Contracts;
-using Application.Contracts.Validators;
-using Data.Contracts;
 using FastEndpoints;
 using FluentValidation;
-using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
+using Reaparr.Application.Contracts;
+using Reaparr.Application.Contracts.Validators;
+using Reaparr.Data.Contracts;
+using Reaparr.Logging;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public record GenerateDownloadTaskTvShowsCommand : ICommand<Result>
 {
@@ -36,12 +36,12 @@ public class GenerateDownloadTaskTvShowsCommandValidator : AbstractValidator<Gen
 public class GenerateDownloadTaskTvShowsCommandHandler : ICommandHandler<GenerateDownloadTaskTvShowsCommand, Result>
 {
     private readonly ILog _log;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
 
     public GenerateDownloadTaskTvShowsCommandHandler(
         ILog log,
-        IPlexRipperDbContext dbContext,
+        IReaparrDbContext dbContext,
         ICommandExecutor commandExecutor
     )
     {

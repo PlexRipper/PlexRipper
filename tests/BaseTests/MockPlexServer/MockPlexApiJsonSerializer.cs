@@ -2,7 +2,7 @@ using System.Reflection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
-namespace PlexRipper.BaseTests;
+namespace Reaparr.BaseTests;
 
 public static class MockPlexApiJsonSerializer
 {

@@ -1,6 +1,6 @@
 ﻿using System.Reactive.Linq;
 
-namespace Settings.Contracts;
+namespace Reaparr.Settings.Contracts;
 
 public record PlexServerSettingsModule : BaseSettingsModule<PlexServerSettingsModule>, IServerSettingsModule
 {

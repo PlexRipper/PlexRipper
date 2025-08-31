@@ -1,12 +1,12 @@
 using System.Diagnostics;
-using Data.Contracts;
 using EFCore.BulkExtensions;
 using FastEndpoints;
 using FluentValidation;
-using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
+using Reaparr.Data.Contracts;
+using Reaparr.Logging;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public record SyncPlexTvShowsCommand(InsertMediaMetaDataCommandResponse LibraryMetadata)
     : ICommand<Result<BulkInsertTvShowsRapport>>;
@@ -66,7 +66,7 @@ public class SyncPlexTvShowsCommandValidator : AbstractValidator<SyncPlexTvShows
 public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsCommand, Result<BulkInsertTvShowsRapport>>
 {
     private readonly ILog _log;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     private readonly BulkConfig? _config = new()
     {
@@ -78,7 +78,7 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
         UseTempDB = true,
     };
 
-    public SyncPlexTvShowsCommandHandler(ILog log, IPlexRipperDbContext dbContext)
+    public SyncPlexTvShowsCommandHandler(ILog log, IReaparrDbContext dbContext)
     {
         _log = log;
         _dbContext = dbContext;

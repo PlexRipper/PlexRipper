@@ -1,6 +1,6 @@
-﻿using Data.Contracts;
+﻿using Reaparr.Data.Contracts;
 
-namespace PlexRipper.Application.UnitTests;
+namespace Reaparr.Application.UnitTests;
 
 public class DeletePlexAccountByIdEndpointUnitTests : BaseUnitTest
 {

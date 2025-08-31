@@ -1,13 +1,13 @@
-using Data.Contracts;
-using Logging.Interface;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NaturalSort.Extension;
-using PlexRipper.Data;
-using PlexRipper.Identity;
+using Reaparr.Data;
+using Reaparr.Data.Contracts;
+using Reaparr.Identity;
+using Reaparr.Logging;
 
-namespace PlexRipper.BaseTests;
+namespace Reaparr.BaseTests;
 
 public static partial class MockDatabase
 {
@@ -24,8 +24,8 @@ public static partial class MockDatabase
 
     #region Private
 
-    private static async Task<PlexRipperDbContext> AddPlexServers(
-        this PlexRipperDbContext context,
+    private static async Task<ReaparrDbContext> AddPlexServers(
+        this ReaparrDbContext context,
         Seed seed,
         Action<FakeDataConfig>? options = null
     )
@@ -70,17 +70,17 @@ public static partial class MockDatabase
 
         _log.Here()
             .Debug(
-                "Added {PlexServerCount} {NameOfPlexServer}s to {NameOfPlexRipperDbContext}: {DatabaseName}",
+                "Added {PlexServerCount} {NameOfPlexServer}s to {NameOfReaparrDbContext}: {DatabaseName}",
                 config.PlexServerCount,
                 nameof(PlexServer),
-                nameof(PlexRipperDbContext),
+                nameof(ReaparrDbContext),
                 context.DatabaseName
             );
         return context;
     }
 
-    private static async Task<PlexRipperDbContext> AddPlexLibraries(
-        this PlexRipperDbContext context,
+    private static async Task<ReaparrDbContext> AddPlexLibraries(
+        this ReaparrDbContext context,
         Seed seed,
         Action<FakeDataConfig>? options = null
     )
@@ -123,8 +123,8 @@ public static partial class MockDatabase
         return context;
     }
 
-    private static async Task<PlexRipperDbContext> AddPlexAccount(
-        this PlexRipperDbContext context,
+    private static async Task<ReaparrDbContext> AddPlexAccount(
+        this ReaparrDbContext context,
         Seed seed,
         Action<FakeDataConfig>? options
     )
@@ -142,7 +142,7 @@ public static partial class MockDatabase
 
             _log.Here()
                 .Debug(
-                    "Added 1 {NameOfPlexAccount}: {PlexAccountTitle} to PlexRipperDbContext: {DatabaseName}",
+                    "Added 1 {NameOfPlexAccount}: {PlexAccountTitle} to ReaparrDbContext: {DatabaseName}",
                     nameof(PlexAccount),
                     plexAccount.Title,
                     context.DatabaseName
@@ -179,7 +179,7 @@ public static partial class MockDatabase
         return context;
     }
 
-    private static async Task<PlexRipperDbContext> AddPlexAccountLibraries(this PlexRipperDbContext context)
+    private static async Task<ReaparrDbContext> AddPlexAccountLibraries(this ReaparrDbContext context)
     {
         var plexLibraries = await context.PlexLibraries.ToListAsync();
         var plexAccounts = await context.PlexAccounts.ToListAsync();
@@ -216,15 +216,15 @@ public static partial class MockDatabase
     /// Passing in the same dbName will create a new context for the same database
     /// </summary>
     /// <param name="dbName">leave empty to generate a random one</param>
-    /// <returns>A <see cref="PlexRipperDbContext" /> in memory instance.</returns>
+    /// <returns>A <see cref="ReaparrDbContext" /> in memory instance.</returns>
     /// <exception cref="ArgumentOutOfRangeException"></exception>
     ///
-    public static (PlexRipperDbContext, AuthDbContext) GetMemoryDbContext(string dbName = "") =>
-        (GetMemoryPlexRipperDbContext(dbName), GetMemoryAuthDbContext(dbName));
+    public static (ReaparrDbContext, AuthDbContext) GetMemoryDbContext(string dbName = "") =>
+        (GetMemoryReaparrDbContext(dbName), GetMemoryAuthDbContext(dbName));
 
-    public static PlexRipperDbContext GetMemoryPlexRipperDbContext(string dbName = "")
+    public static ReaparrDbContext GetMemoryReaparrDbContext(string dbName = "")
     {
-        var optionsBuilder = new DbContextOptionsBuilder<PlexRipperDbContext>();
+        var optionsBuilder = new DbContextOptionsBuilder<ReaparrDbContext>();
         dbName = string.IsNullOrEmpty(dbName) ? GetMemoryDatabaseName() : dbName;
 
         SqliteConnection databaseConnection = new(DatabaseConnectionString(dbName));
@@ -237,7 +237,7 @@ public static partial class MockDatabase
         optionsBuilder.EnableSensitiveDataLogging();
         optionsBuilder.EnableDetailedErrors();
         optionsBuilder.LogTo(text => LogManager.DbContextLogger(text), LogLevel.Warning);
-        return new PlexRipperDbContext(optionsBuilder.Options, dbName);
+        return new ReaparrDbContext(optionsBuilder.Options, dbName);
     }
 
     public static AuthDbContext GetMemoryAuthDbContext(string dbName = "")
@@ -272,50 +272,50 @@ public static partial class MockDatabase
         }.ToString();
 
     public static async Task Setup(
-        this (PlexRipperDbContext, AuthDbContext) context,
+        this (ReaparrDbContext, AuthDbContext) context,
         Seed seed,
         Action<FakeDataConfig>? options = null
     )
     {
         var config = FakeDataConfig.FromOptions(options);
 
-        var (plexRipperContext, authContext) = context;
+        var (reaparrContext, authContext) = context;
 
         authContext.Migrate();
 
         // PlexServers and Libraries added
         _log.Here()
             .Debug(
-                "Setting up {NameOfPlexRipperDbContext} for {DatabaseName}",
-                nameof(PlexRipperDbContext),
-                plexRipperContext.DatabaseName
+                "Setting up {NameOfReaparrDbContext} for {DatabaseName}",
+                nameof(ReaparrDbContext),
+                reaparrContext.DatabaseName
             );
 
         if (config.ShouldHavePlexServer)
-            plexRipperContext = await plexRipperContext.AddPlexServers(seed, options);
+            reaparrContext = await reaparrContext.AddPlexServers(seed, options);
 
         if (config.ShouldHavePlexLibrary)
-            plexRipperContext = await plexRipperContext.AddPlexLibraries(seed, options);
+            reaparrContext = await reaparrContext.AddPlexLibraries(seed, options);
 
         if (config.PlexAccountCount > 0)
-            plexRipperContext = await plexRipperContext.AddPlexAccount(seed, options);
+            reaparrContext = await reaparrContext.AddPlexAccount(seed, options);
 
         if (config.MovieCount > 0)
-            plexRipperContext = await plexRipperContext.AddPlexMovies(seed, options);
+            reaparrContext = await reaparrContext.AddPlexMovies(seed, options);
 
         if (config.TvShowCount > 0)
-            plexRipperContext = await plexRipperContext.AddPlexTvShows(seed, options);
+            reaparrContext = await reaparrContext.AddPlexTvShows(seed, options);
 
         if (config.MovieDownloadTasksCount > 0)
-            plexRipperContext = await plexRipperContext.AddDownloadTaskMovies(seed, options);
+            reaparrContext = await reaparrContext.AddDownloadTaskMovies(seed, options);
 
         if (config.TvShowDownloadTasksCount > 0)
-            plexRipperContext = await plexRipperContext.AddDownloadTaskTvShows(seed, options);
+            reaparrContext = await reaparrContext.AddDownloadTaskTvShows(seed, options);
 
         if (config.AccountHasAccessToAllLibraries)
-            plexRipperContext = await plexRipperContext.AddPlexAccountLibraries();
+            reaparrContext = await reaparrContext.AddPlexAccountLibraries();
 
-        plexRipperContext.ShouldNotBeNull();
+        reaparrContext.ShouldNotBeNull();
     }
 
     #endregion
@@ -324,8 +324,8 @@ public static partial class MockDatabase
 
     #region Add Media
 
-    private static async Task<PlexRipperDbContext> AddPlexMovies(
-        this PlexRipperDbContext context,
+    private static async Task<ReaparrDbContext> AddPlexMovies(
+        this ReaparrDbContext context,
         Seed seed,
         Action<FakeDataConfig>? options = null
     )
@@ -344,7 +344,7 @@ public static partial class MockDatabase
 
         _log.Here()
             .Debug(
-                "Added {MovieCount} {NameOfPlexMovie}s to PlexRipperDbContext: {DatabaseName}",
+                "Added {MovieCount} {NameOfPlexMovie}s to ReaparrDbContext: {DatabaseName}",
                 config.MovieCount,
                 nameof(PlexMovie),
                 context.DatabaseName
@@ -353,8 +353,8 @@ public static partial class MockDatabase
         return context;
     }
 
-    private static async Task<PlexRipperDbContext> AddPlexTvShows(
-        this PlexRipperDbContext context,
+    private static async Task<ReaparrDbContext> AddPlexTvShows(
+        this ReaparrDbContext context,
         Seed seed,
         Action<FakeDataConfig>? options = null
     )
@@ -372,7 +372,7 @@ public static partial class MockDatabase
 
         _log.Here()
             .Debug(
-                "Added {TvShowCount} {NameOfPlexTvShow}s to PlexRipperDbContext: {DatabaseName}",
+                "Added {TvShowCount} {NameOfPlexTvShow}s to ReaparrDbContext: {DatabaseName}",
                 config.TvShowCount,
                 nameof(PlexTvShow),
                 context.DatabaseName

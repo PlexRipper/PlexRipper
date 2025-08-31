@@ -3,8 +3,8 @@
         <TargetFramework>net9.0</TargetFramework>
         <LangVersion>13</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
-        <RootNamespace>PlexRipper.BaseTests</RootNamespace>
-        <AssemblyName>PlexRipper.BaseTests</AssemblyName>
+        <RootNamespace>Reaparr.BaseTests</RootNamespace>
+        <AssemblyName>Reaparr.BaseTests</AssemblyName>
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
         <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
         <Nullable>enable</Nullable>

@@ -1,11 +1,11 @@
 using System.Text.Json;
-using Application.Contracts;
-using Data.Contracts;
 using Microsoft.EntityFrameworkCore;
 using Quartz;
-using Settings.Contracts;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
+using Reaparr.Settings.Contracts;
 
-namespace PlexRipper.Application.UnitTests;
+namespace Reaparr.Application.UnitTests;
 
 public class DownloadJob_UnitTests : BaseUnitTest<DownloadJob>
 {

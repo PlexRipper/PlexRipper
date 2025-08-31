@@ -1,8 +1,8 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
-using PlexRipper.Domain;
+using Reaparr.Domain;
 
-namespace Application.Contracts;
+namespace Reaparr.Application.Contracts;
 
 public record PlexLibraryAccessRapport(string _plexAccountName, int PlexServerId, string _plexServerName)
 {

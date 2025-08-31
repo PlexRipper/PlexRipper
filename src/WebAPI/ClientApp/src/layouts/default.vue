@@ -7,6 +7,7 @@
 			<!--	Use for everything else	-->
 			<template v-if="!isEmptyLayout">
 				<AppBar
+					:show-navigation-drawer-state="showNavigationDrawerState"
 					@show-navigation="toggleNavigationsDrawer"
 					@show-notifications="toggleNotificationsDrawer" />
 				<NavigationDrawer :show-drawer="showNavigationDrawerState" />

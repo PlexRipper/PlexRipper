@@ -1,11 +1,11 @@
-using Application.Contracts;
-using Data.Contracts;
 using FastEndpoints;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public record DeleteDownloadTaskEndpointRequest
 {
@@ -23,14 +23,14 @@ public class DeleteDownloadTaskEndpointRequestValidator : Validator<DeleteDownlo
 
 public class DeleteDownloadTaskEndpoint : BaseEndpoint<DeleteDownloadTaskEndpointRequest>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IDownloadTaskScheduler _downloadTaskScheduler;
 
     public override string EndpointPath => ApiRoutes.DownloadController + "/delete";
 
     public DeleteDownloadTaskEndpoint(
-        IPlexRipperDbContext dbContext,
+        IReaparrDbContext dbContext,
         ICommandExecutor commandExecutor,
         IDownloadTaskScheduler downloadTaskScheduler
     )

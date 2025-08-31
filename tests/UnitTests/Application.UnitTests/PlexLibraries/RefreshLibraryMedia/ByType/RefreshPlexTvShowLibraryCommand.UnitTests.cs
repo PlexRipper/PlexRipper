@@ -1,8 +1,8 @@
-using Data.Contracts;
 using Microsoft.EntityFrameworkCore;
-using PlexApi.Contracts;
+using Reaparr.Data.Contracts;
+using Reaparr.PlexApi.Contracts;
 
-namespace PlexRipper.Application.UnitTests;
+namespace Reaparr.Application.UnitTests;
 
 public class RefreshPlexTvShowLibraryCommand_UnitTests : BaseUnitTest<RefreshPlexTvShowLibraryCommandHandler>
 {

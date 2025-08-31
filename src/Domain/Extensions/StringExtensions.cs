@@ -4,10 +4,10 @@ using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
-using Environment;
 using PasswordGenerator;
+using Reaparr.Environment;
 
-namespace PlexRipper.Domain;
+namespace Reaparr.Domain;
 
 public static partial class StringExtensions
 {

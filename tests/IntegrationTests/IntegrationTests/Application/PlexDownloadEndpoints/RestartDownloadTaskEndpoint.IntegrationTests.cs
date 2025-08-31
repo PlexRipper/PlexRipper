@@ -1,9 +1,9 @@
-﻿using Application.Contracts;
-using Data.Contracts;
-using FastEndpoints;
-using PlexRipper.Application;
+﻿using FastEndpoints;
+using Reaparr.Application;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
 
-namespace IntegrationTests;
+namespace Reaparr.IntegrationTests;
 
 public class RestartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
 {

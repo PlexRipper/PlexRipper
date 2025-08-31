@@ -1,8 +1,8 @@
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
-using Data.Contracts;
+using Reaparr.Data.Contracts;
 
-namespace PlexRipper.WebAPI;
+namespace Reaparr.WebAPI;
 
 public static partial class Startup
 {
@@ -13,7 +13,7 @@ public static partial class Startup
     {
         var container = app.Services.GetAutofacRoot();
 
-        var dbContextManager = container.Resolve<IPlexRipperDbContextManager>();
+        var dbContextManager = container.Resolve<IReaparrDbContextManager>();
 
         return dbContextManager.Setup();
     }

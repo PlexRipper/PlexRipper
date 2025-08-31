@@ -1,17 +1,17 @@
-using Data.Contracts;
 using FastEndpoints;
-using Logging.Interface;
+using Reaparr.Data.Contracts;
+using Reaparr.Logging;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public record DownloadTaskWorkerLogNotification(IList<DownloadWorkerLog> logs) : IEvent;
 
 public class DownloadTaskWorkerLogNotificationHandler : IEventHandler<DownloadTaskWorkerLogNotification>
 {
     private readonly ILog _log;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
-    public DownloadTaskWorkerLogNotificationHandler(ILog log, IPlexRipperDbContext dbContext)
+    public DownloadTaskWorkerLogNotificationHandler(ILog log, IReaparrDbContext dbContext)
     {
         _log = log;
         _dbContext = dbContext;

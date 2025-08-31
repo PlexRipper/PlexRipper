@@ -3,8 +3,8 @@
         <TargetFramework>net9.0</TargetFramework>
         <LangVersion>13</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
-        <RootNamespace>PlexRipper.WebAPI</RootNamespace>
-        <AssemblyName>PlexRipper.WebAPI</AssemblyName>
+        <RootNamespace>Reaparr.WebAPI</RootNamespace>
+        <AssemblyName>Reaparr.WebAPI</AssemblyName>
         <UserSecretsId>0732cfe0-5874-40d5-99f7-8794dfabd959</UserSecretsId>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
         <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>

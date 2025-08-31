@@ -1,11 +1,11 @@
-using Application.Contracts;
-using Data.Contracts;
 using FastEndpoints;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public record GetPlexServerConnectionByIdEndpointRequest(int PlexServerConnectionId);
 
@@ -20,11 +20,11 @@ public class GetPlexServerConnectionByIdEndpointRequestValidator : Validator<Get
 public class GetPlexServerConnectionByIdEndpoint
     : BaseEndpoint<GetPlexServerConnectionByIdEndpointRequest, PlexServerConnectionDTO>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.PlexServerConnectionController + "/{PlexServerConnectionId}";
 
-    public GetPlexServerConnectionByIdEndpoint(IPlexRipperDbContext dbContext)
+    public GetPlexServerConnectionByIdEndpoint(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
     }

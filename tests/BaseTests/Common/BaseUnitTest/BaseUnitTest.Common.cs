@@ -1,13 +1,13 @@
 using System.Reflection;
-using Application.Contracts;
-using Data.Contracts;
-using Environment;
 using FastEndpoints;
-using Logging.Interface;
 using Microsoft.Extensions.DependencyInjection;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
+using Reaparr.Environment;
+using Reaparr.Logging;
 using Serilog.Events;
 
-namespace PlexRipper.BaseTests;
+namespace Reaparr.BaseTests;
 
 public partial class BaseUnitTest
 {
@@ -74,7 +74,7 @@ public partial class BaseUnitTest
             {
                 // All different dependencies that are needed for the endpoint need to be added here. And then they can be mocked in the test.
                 s.AddTransient(_ => mock.Create<ILog>());
-                s.AddTransient(_ => mock.Create<IPlexRipperDbContext>());
+                s.AddTransient(_ => mock.Create<IReaparrDbContext>());
                 s.AddTransient(_ => mock.Create<ICommandExecutor>());
                 s.AddSingleton(_ => mock.Create<ISchedulerService>());
                 s.AddSingleton(_ => mock.Mock<ISignalRService>().Object);
@@ -86,7 +86,7 @@ public partial class BaseUnitTest
     {
         if (IsDatabaseSetup)
         {
-            MockDatabase.GetMemoryPlexRipperDbContext(_databaseName).EnsureDeleted();
+            MockDatabase.GetMemoryReaparrDbContext(_databaseName).EnsureDeleted();
         }
     }
 }

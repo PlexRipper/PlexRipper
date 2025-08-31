@@ -1,6 +1,6 @@
-using PlexRipper.Domain;
+using Reaparr.Domain;
 
-namespace FileSystem.Contracts;
+namespace Reaparr.FileSystem.Contracts;
 
 public static class DirectoryInfoMappers
 {

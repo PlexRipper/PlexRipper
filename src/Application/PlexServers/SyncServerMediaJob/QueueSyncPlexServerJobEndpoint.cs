@@ -1,10 +1,10 @@
 using System.ComponentModel;
-using Application.Contracts;
 using FastEndpoints;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
+using Reaparr.Application.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public record QueueSyncPlexServerJobEndpointRequest
 {

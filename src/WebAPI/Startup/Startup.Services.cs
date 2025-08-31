@@ -1,7 +1,5 @@
 using System.Reflection;
 using System.Text.Json.Serialization;
-using Application.Contracts;
-using Environment;
 using FastEndpoints;
 using FastEndpoints.Security;
 using FastEndpoints.Swagger;
@@ -12,12 +10,14 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Http;
 using NSwag;
 using NSwag.Generation.Processors.Security;
-using PlexRipper.Application;
-using PlexRipper.Identity;
-using PlexRipper.Identity.Contracts;
-using PlexRipper.PlexApi;
+using Reaparr.Application;
+using Reaparr.Application.Contracts;
+using Reaparr.Environment;
+using Reaparr.Identity;
+using Reaparr.Identity.Contracts;
+using Reaparr.PlexApi;
 
-namespace PlexRipper.WebAPI;
+namespace Reaparr.WebAPI;
 
 /// <summary>
 ///  The Startup class configures the application services and the HTTP request pipeline.
@@ -43,7 +43,7 @@ public static partial class Startup
                         .AllowAnyHeader()
                         .AllowAnyMethod()
                         .AllowCredentials()
-                        .WithExposedHeaders("X-PlexRipper-Version");
+                        .WithExposedHeaders("X-Reaparr-Version");
                 }
             );
         });
@@ -123,7 +123,7 @@ public static partial class Startup
                 // options.ExcludeNonFastEndpoints = true;
                 options.DocumentSettings = s =>
                 {
-                    s.Title = "PlexRipper Internal API  (NOT FOR EXTERNAL USE)";
+                    s.Title = "Reaparr Internal API  (NOT FOR EXTERNAL USE)";
                     s.Version = "v1";
 
                     s.MarkNonNullablePropsAsRequired();
@@ -139,7 +139,7 @@ public static partial class Startup
                             Type = OpenApiSecuritySchemeType.ApiKey,
                             In = OpenApiSecurityApiKeyLocation.Cookie,
                             Name = DefaultUserAppCredentials.DefaultCookieName,
-                            Description = "Cookie-based authentication for the internal PlexRipper API",
+                            Description = "Cookie-based authentication for the internal Reaparr API",
                         }
                     );
 

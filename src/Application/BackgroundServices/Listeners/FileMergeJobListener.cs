@@ -1,7 +1,7 @@
-using Application.Contracts;
 using Quartz;
+using Reaparr.Application.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public class FileMergeJobListener : IFileMergeJobListener
 {

@@ -1,4 +1,4 @@
-namespace FileSystem.Contracts;
+namespace Reaparr.FileSystem.Contracts;
 
 public static class DirectoryInfoExtensions
 {

@@ -1,11 +1,11 @@
-using Data.Contracts;
 using FastEndpoints;
 using FluentValidation;
-using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
-using PlexApi.Contracts;
+using Reaparr.Data.Contracts;
+using Reaparr.Logging;
+using Reaparr.PlexApi.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public record AddOrUpdatePlexAccountServersCommand(int PlexAccountId, List<ServerAccessTokenDTO> ServerAccessTokens)
     : ICommand<Result<RefreshPlexServerAccessRapport>>;
@@ -22,9 +22,9 @@ public class AddOrUpdatePlexAccountServersCommandHandler
     : ICommandHandler<AddOrUpdatePlexAccountServersCommand, Result<RefreshPlexServerAccessRapport>>
 {
     private readonly ILog _log;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
-    public AddOrUpdatePlexAccountServersCommandHandler(ILog log, IPlexRipperDbContext dbContext)
+    public AddOrUpdatePlexAccountServersCommandHandler(ILog log, IReaparrDbContext dbContext)
     {
         _log = log;
         _dbContext = dbContext;

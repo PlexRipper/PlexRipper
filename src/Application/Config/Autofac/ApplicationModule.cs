@@ -1,9 +1,9 @@
-﻿using Application.Contracts;
-using Autofac;
-using FileSystem.Contracts;
+﻿using Autofac;
+using Reaparr.Application.Contracts;
+using Reaparr.FileSystem.Contracts;
 using Module = Autofac.Module;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 /// <summary>
 /// Used to register all dependencies in Autofac for the Application project.

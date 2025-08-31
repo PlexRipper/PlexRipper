@@ -37,13 +37,13 @@ export default defineNuxtConfig({
 
 	app: {
 		head: {
-			title: 'PlexRipper',
+			title: 'Reaparr',
 			script: [
 				{ src: 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js' },
 				{ src: 'https://cdn.jsdelivr.net/npm/vanta/dist/vanta.waves.min.js' },
 			],
 			link: [
-				{ rel: 'icon', type: 'image/x-icon', href: '/favicon.png' },
+				{ rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
 			],
 			noscript: [{ children: 'JavaScript is required' }],
 		},
@@ -161,7 +161,7 @@ export default defineNuxtConfig({
 		strategy: 'no_prefix',
 	},
 	primevue: {
-		importTheme: { from: '@/assets/scss/primevue/plexripper-theme.ts' },
+		importTheme: { from: '@/assets/scss/primevue/reaparr-theme.ts' },
 	},
 	quasar: {
 		// Plugins: https://quasar.dev/quasar-plugins

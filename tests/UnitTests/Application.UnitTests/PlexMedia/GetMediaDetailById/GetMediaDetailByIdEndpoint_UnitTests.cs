@@ -1,7 +1,7 @@
-using Application.Contracts;
-using Application.Contracts.Validators;
+using Reaparr.Application.Contracts;
+using Reaparr.Application.Contracts.Validators;
 
-namespace PlexRipper.Application.UnitTests;
+namespace Reaparr.Application.UnitTests;
 
 public class GetMediaDetailByIdEndpoint_UnitTests : BaseUnitTest<GetMediaDetailByIdEndpoint>
 {

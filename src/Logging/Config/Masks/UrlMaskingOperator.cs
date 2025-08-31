@@ -2,7 +2,7 @@ using System.Text.RegularExpressions;
 using System.Web;
 using Serilog.Enrichers.Sensitive;
 
-namespace Logging.Masks;
+namespace Reaparr.Logging.Masks;
 
 public class UrlMaskingOperator : RegexMaskingOperator
 {

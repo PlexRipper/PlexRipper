@@ -1,6 +1,6 @@
-using Application.Contracts;
+using Reaparr.Application.Contracts;
 
-namespace PlexRipper.WebAPI;
+namespace Reaparr.WebAPI;
 
 /// <summary>
 ///  The NotificationHub class is a SignalR hub that sends notifications to the front-end.

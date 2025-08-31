@@ -1,8 +1,8 @@
 using System.Net;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
-using PlexApi.Contracts;
+using Reaparr.PlexApi.Contracts;
 
-namespace PlexRipper.BaseTests;
+namespace Reaparr.BaseTests;
 
 public partial class FakePlexApiData
 {

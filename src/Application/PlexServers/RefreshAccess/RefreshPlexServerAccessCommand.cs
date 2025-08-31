@@ -1,11 +1,11 @@
-using Data.Contracts;
 using FastEndpoints;
 using FluentValidation;
-using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
-using PlexApi.Contracts;
+using Reaparr.Data.Contracts;
+using Reaparr.Logging;
+using Reaparr.PlexApi.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 /// <summary>
 /// Retrieve the latest accessible <see cref="PlexServer">PlexServers</see> for this <see cref="PlexAccount"/> from the PlexAPI and stores it in the Database.
@@ -25,12 +25,12 @@ public class RefreshPlexServerAccessCommandHandler
     : ICommandHandler<RefreshPlexServerAccessCommand, Result<RefreshPlexServerAccessRapport>>
 {
     private readonly ILog _log;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
 
     public RefreshPlexServerAccessCommandHandler(
         ILog log,
-        IPlexRipperDbContext dbContext,
+        IReaparrDbContext dbContext,
         ICommandExecutor commandExecutor
     )
     {

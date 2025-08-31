@@ -19,8 +19,8 @@ rent!</h4>
 <p align="center">
   <a href="https://github.com/Reaparr/Reaparr/"><img src="https://img.shields.io/github/stars/reaparr/reaparr?style=social"></a>
   <a href="https://github.com/Reaparr/Reaparr/"><img src="https://img.shields.io/github/followers/reaparr?style=social"></a>
-  <a href="https://hub.docker.com/r/plexripper/plexripper"><img src="https://img.shields.io/docker/stars/plexripper/plexripper"></a>
-  <a href="https://hub.docker.com/r/plexripper/plexripper"><img src="https://img.shields.io/docker/pulls/plexripper/plexripper?label=Docker%20Pulls&style=flat-square" /></a>
+  <a href="https://hub.docker.com/r/reaparr/reaparr"><img src="https://img.shields.io/docker/stars/reaparr/reaparr"></a>
+  <a href="https://hub.docker.com/r/reaparr/reaparr"><img src="https://img.shields.io/docker/pulls/plexripper/plexripper?label=Docker%20Pulls&style=flat-square" /></a>
 </p>
 
 <h4 align="center">Also maximize your Reaparr experience! Join our <a href="https://discord.com/invite/Qa3BtxN77g">
@@ -85,7 +85,7 @@ Follow one of these guides depending on your platform:
 <table style="border: none;">
     <tr style="border: none;">
         <td style="border: none;">
-            <a href="https://hub.docker.com/r/plexripper/plexripper">
+            <a href="https://hub.docker.com/r/reaparr/reaparr">
                 <img src="https://img.shields.io/docker/pulls/plexripper/plexripper?label=Docker%20Pulls&style=flat-square" />
             </a>
         </td>
@@ -107,10 +107,10 @@ Follow one of these guides depending on your platform:
     </tr>
     <tr style="border: none;">
         <td style="border: none;">
-            <img src="https://img.shields.io/docker/image-size/plexripper/plexripper/latest?style=flat-square&label=Reaparr%20Stable%20Image%20Size" alt="Reaparr Stable Image Size" />
+            <img src="https://img.shields.io/docker/image-size/reaparr/reaparr/latest?style=flat-square&label=Reaparr%20Stable%20Image%20Size" alt="Reaparr Stable Image Size" />
         </td>
         <td style="border: none;">
-            <img src="https://img.shields.io/docker/image-size/plexripper/plexripper/dev?style=flat-square&label=Reaparr%20Dev%20Image Size" alt="Reaparr Dev Image Size" />
+            <img src="https://img.shields.io/docker/image-size/reaparr/reaparr/dev?style=flat-square&label=Reaparr%20Dev%20Image Size" alt="Reaparr Dev Image Size" />
         </td>
         <td style="border: none;">
             <img src="https://img.shields.io/github/repo-size/reaparr/reaparr?style=flat-square&label=Reaparr%20Repo%20Size" alt="Reaparr Repo Size" />

@@ -1,10 +1,10 @@
-using Application.Contracts;
 using FastEndpoints;
 using FluentValidation;
-using Logging.Interface;
 using Microsoft.AspNetCore.Http;
+using Reaparr.Application.Contracts;
+using Reaparr.Logging;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public record CreateDownloadTasksEndpointRequest
 {

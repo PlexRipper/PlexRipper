@@ -1,8 +1,7 @@
 using LukeHagar.PlexAPI.SDK.Models.Requests;
 using NodaTime;
-using PlexRipper.PlexApi;
 
-namespace PlexApi.UnitTests
+namespace Reaparr.PlexApi.UnitTests
 {
     public class MediaContainerMappersUnitTests : BaseUnitTest
     {

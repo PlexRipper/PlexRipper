@@ -1,10 +1,10 @@
-using Application.Contracts;
-using Data.Contracts;
 using FastEndpoints;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public record GetDownloadTaskByGuidRequest
 {
@@ -33,11 +33,11 @@ public class GetDownloadTaskByGuidRequestValidator : Validator<GetDownloadTaskBy
 
 public class GetDownloadTaskByGuidEndpoint : BaseEndpoint<GetDownloadTaskByGuidRequest, DownloadTaskDTO>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.DownloadController + "/detail/{DownloadTaskGuid}";
 
-    public GetDownloadTaskByGuidEndpoint(IPlexRipperDbContext dbContext)
+    public GetDownloadTaskByGuidEndpoint(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
     }

@@ -4,8 +4,8 @@
         <LangVersion>13</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
         <IsPackable>false</IsPackable>
-        <RootNamespace>PlexRipper.Application.UnitTests</RootNamespace>
-        <AssemblyName>PlexRipper.Application.UnitTests</AssemblyName>
+        <RootNamespace>Reaparr.Application.UnitTests</RootNamespace>
+        <AssemblyName>Reaparr.Application.UnitTests</AssemblyName>
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
         <Nullable>enable</Nullable>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>

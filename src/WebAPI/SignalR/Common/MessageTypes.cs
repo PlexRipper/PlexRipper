@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Serialization;
 
-namespace PlexRipper.WebAPI;
+namespace Reaparr.WebAPI;
 
 /// <summary>
 ///  Message types for SignalR communication from server to client.

@@ -1,7 +1,7 @@
 using System.IO.Abstractions;
 using Microsoft.EntityFrameworkCore;
 
-namespace PlexRipper.Application.UnitTests;
+namespace Reaparr.Application.UnitTests;
 
 public class CreateDirectoryFromFilePathUnitTests : BaseUnitTest<CleanUpDownloadTaskFoldersHandler>
 {
@@ -74,7 +74,7 @@ public class CreateDirectoryFromFilePathUnitTests : BaseUnitTest<CleanUpDownload
                 p =>
                     p.SetProperty(
                             x => x.DownloadDirectory,
-                            "/mnt/DATA/PlexRipperCache/Downloads/TvShows/Reno 911!/Season 1"
+                            "/mnt/DATA/ReaparrCache/Downloads/TvShows/Reno 911!/Season 1"
                         )
                         .SetProperty(
                             x => x.FileName,
@@ -85,7 +85,7 @@ public class CreateDirectoryFromFilePathUnitTests : BaseUnitTest<CleanUpDownload
 
         mock.Mock<IPath>()
             .Setup(x => x.GetDirectoryName(It.IsAny<string>()))
-            .Returns("/mnt/DATA/PlexRipperCache/Downloads/TvShows/Reno 911!/Season 1/");
+            .Returns("/mnt/DATA/ReaparrCache/Downloads/TvShows/Reno 911!/Season 1/");
 
         mock.Mock<IDirectory>().Setup(x => x.GetFiles(It.IsAny<string>())).Returns([]);
         mock.Mock<IDirectory>().Setup(x => x.Delete(It.IsAny<string>()));
@@ -128,7 +128,7 @@ public class CreateDirectoryFromFilePathUnitTests : BaseUnitTest<CleanUpDownload
                 p =>
                     p.SetProperty(
                             x => x.DownloadDirectory,
-                            "/mnt/DATA/PlexRipperCache/Downloads/TvShows/Reno 911!/Season 1"
+                            "/mnt/DATA/ReaparrCache/Downloads/TvShows/Reno 911!/Season 1"
                         )
                         .SetProperty(
                             x => x.FileName,
@@ -139,7 +139,7 @@ public class CreateDirectoryFromFilePathUnitTests : BaseUnitTest<CleanUpDownload
 
         mock.Mock<IPath>()
             .Setup(x => x.GetDirectoryName(It.IsAny<string>()))
-            .Returns("/mnt/DATA/PlexRipperCache/Downloads/TvShows/Reno 911!/Season 1/")
+            .Returns("/mnt/DATA/ReaparrCache/Downloads/TvShows/Reno 911!/Season 1/")
             .Verifiable(Times.Once);
 
         mock.Mock<IDirectory>()

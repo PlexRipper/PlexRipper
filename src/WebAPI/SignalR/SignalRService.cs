@@ -1,9 +1,9 @@
-using Application.Contracts;
-using Logging.Interface;
 using Microsoft.AspNetCore.SignalR;
-using WebAPI.Contracts;
+using Reaparr.Application.Contracts;
+using Reaparr.Logging;
+using Reaparr.WebAPI.Contracts;
 
-namespace PlexRipper.WebAPI;
+namespace Reaparr.WebAPI;
 
 /// <summary>
 /// A SignalR wrapper to send data to the front-end implementation.

@@ -1,7 +1,6 @@
-using PlexRipper.Settings;
-using Settings.Contracts;
+using Reaparr.Settings.Contracts;
 
-namespace Settings.UnitTests.Common;
+namespace Reaparr.Settings.UnitTests.Common;
 
 public class UserSettingsSerializerUnitTests : BaseUnitTest
 {

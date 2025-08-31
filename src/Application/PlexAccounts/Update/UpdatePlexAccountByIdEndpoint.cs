@@ -1,11 +1,11 @@
-using Application.Contracts;
-using Data.Contracts;
 using FastEndpoints;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public class UpdatePlexAccountByIdEndpointRequest
 {
@@ -34,11 +34,11 @@ public class UpdatePlexAccountByIdEndpointRequestValidator : Validator<UpdatePle
 
 public class UpdatePlexAccountByIdEndpoint : BaseEndpoint<UpdatePlexAccountByIdEndpointRequest, PlexAccountDTO>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.PlexAccountController;
 
-    public UpdatePlexAccountByIdEndpoint(IPlexRipperDbContext dbContext)
+    public UpdatePlexAccountByIdEndpoint(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
     }

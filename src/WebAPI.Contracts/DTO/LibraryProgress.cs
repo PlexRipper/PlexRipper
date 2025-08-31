@@ -1,6 +1,6 @@
-﻿using PlexRipper.Domain;
+﻿using Reaparr.Domain;
 
-namespace WebAPI.Contracts;
+namespace Reaparr.WebAPI.Contracts;
 
 public record LibraryProgress
 {

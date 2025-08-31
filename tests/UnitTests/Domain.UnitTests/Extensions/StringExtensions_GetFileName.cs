@@ -1,4 +1,4 @@
-namespace Domain.UnitTests;
+namespace Reaparr.Domain.UnitTests;
 
 public class StringExtensions_GetFileName : BaseUnitTest
 {

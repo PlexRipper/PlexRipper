@@ -1,10 +1,10 @@
-using Application.Contracts;
-using Data.Contracts;
 using FastEndpoints;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public record CreateFolderPathEndpointRequest
 {
@@ -25,11 +25,11 @@ public class CreateFolderPathEndpointRequestValidator : Validator<CreateFolderPa
 
 public class CreateFolderPathEndpoint : BaseEndpoint<CreateFolderPathEndpointRequest, FolderPathDTO>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.FolderPathController + "/";
 
-    public CreateFolderPathEndpoint(IPlexRipperDbContext dbContext)
+    public CreateFolderPathEndpoint(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
     }

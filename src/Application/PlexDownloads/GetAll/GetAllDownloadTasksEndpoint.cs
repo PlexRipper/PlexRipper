@@ -1,16 +1,16 @@
-using Application.Contracts;
-using Data.Contracts;
 using Microsoft.AspNetCore.Http;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public class GetAllDownloadTasksEndpoint : BaseEndpointWithoutRequest<List<ServerDownloadProgressDTO>>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.DownloadController;
 
-    public GetAllDownloadTasksEndpoint(IPlexRipperDbContext dbContext)
+    public GetAllDownloadTasksEndpoint(IReaparrDbContext dbContext)
     {
         _dbContext = dbContext;
     }

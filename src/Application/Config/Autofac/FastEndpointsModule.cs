@@ -3,7 +3,7 @@ using Autofac;
 using FastEndpoints;
 using Module = Autofac.Module;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public class FastEndpointsModule : Module
 {
@@ -15,18 +15,19 @@ public class FastEndpointsModule : Module
         builder.RegisterType<CommandExecutor>().As<ICommandExecutor>().InstancePerLifetimeScope();
         builder.RegisterType<EventPublisher>().As<IEventPublisher>().SingleInstance();
 
+        // NOTE: This is not needed and leads to shared instance issues with the DbContext
         // Register all command handlers implementing ICommandHandler<TCommand, TResult>
-        builder
-            .RegisterAssemblyTypes(assembly)
-            .AsClosedTypesOf(typeof(ICommandHandler<,>))
-            .AsImplementedInterfaces()
-            .InstancePerLifetimeScope();
-
-        // Register all event handlers implementing IEventHandler<TEvent>
-        builder
-            .RegisterAssemblyTypes(assembly)
-            .AsClosedTypesOf(typeof(IEventHandler<>))
-            .AsImplementedInterfaces()
-            .InstancePerLifetimeScope();
+        // builder
+        //     .RegisterAssemblyTypes(assembly)
+        //     .AsClosedTypesOf(typeof(ICommandHandler<,>))
+        //     .AsImplementedInterfaces()
+        //     .InstancePerLifetimeScope();
+        //
+        // // Register all event handlers implementing IEventHandler<TEvent>
+        // builder
+        //     .RegisterAssemblyTypes(assembly)
+        //     .AsClosedTypesOf(typeof(IEventHandler<>))
+        //     .AsImplementedInterfaces()
+        //     .InstancePerLifetimeScope();
     }
 }

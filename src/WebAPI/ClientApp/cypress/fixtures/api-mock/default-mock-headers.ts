@@ -1,5 +1,5 @@
 export const headers = {
 	headers: {
-		'x-plexripper-version': '1.0.0',
+		'x-reaparr-version': '1.0.0',
 	},
 };

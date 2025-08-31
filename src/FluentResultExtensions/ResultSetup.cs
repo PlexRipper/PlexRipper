@@ -1,8 +1,8 @@
 using FluentResults;
-using Logging;
 using Microsoft.Extensions.Logging;
+using Reaparr.Logging;
 
-namespace FluentResultExtensions;
+namespace Reaparr.FluentResultExtensions;
 
 public static class FluentResultConfiguration
 {

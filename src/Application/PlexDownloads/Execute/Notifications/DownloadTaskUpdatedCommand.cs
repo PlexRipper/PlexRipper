@@ -1,17 +1,17 @@
-using Application.Contracts;
-using Data.Contracts;
 using FastEndpoints;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 public record DownloadTaskUpdatedCommand(DownloadTaskKey Key) : ICommand<Result>;
 
 public class DownloadTaskUpdatedHandler : ICommandHandler<DownloadTaskUpdatedCommand, Result>
 {
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly ISignalRService _signalRService;
 
-    public DownloadTaskUpdatedHandler(IPlexRipperDbContext dbContext, ISignalRService signalRService)
+    public DownloadTaskUpdatedHandler(IReaparrDbContext dbContext, ISignalRService signalRService)
     {
         _dbContext = dbContext;
         _signalRService = signalRService;

@@ -1,11 +1,11 @@
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
-using Application.Contracts;
-using Data.Contracts;
-using Logging.Interface;
-using Settings.Contracts;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
+using Reaparr.Logging;
+using Reaparr.Settings.Contracts;
 
-namespace PlexRipper.Application;
+namespace Reaparr.Application;
 
 /// <summary>
 /// The PlexDownloadClient handles a single <see cref="DownloadTaskGeneric"/> at a time and
@@ -15,7 +15,7 @@ public class PlexDownloadClient : IAsyncDisposable, IPlexDownloadClient
 {
     private readonly ILog _log;
     private readonly ICommandExecutor _commandExecutor;
-    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IReaparrDbContext _dbContext;
     private readonly Func<DownloadWorkerTask, DownloadWorker> _downloadWorkerFactory;
 
     private readonly List<DownloadWorker> _downloadWorkers = [];
@@ -39,7 +39,7 @@ public class PlexDownloadClient : IAsyncDisposable, IPlexDownloadClient
     public PlexDownloadClient(
         ILog log,
         ICommandExecutor commandExecutor,
-        IPlexRipperDbContext dbContext,
+        IReaparrDbContext dbContext,
         Func<DownloadWorkerTask, DownloadWorker> downloadWorkerFactory,
         IServerSettingsModule serverSettings
     )

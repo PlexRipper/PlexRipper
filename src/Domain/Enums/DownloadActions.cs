@@ -1,7 +1,7 @@
 ﻿using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
 
-namespace PlexRipper.Domain;
+namespace Reaparr.Domain;
 
 /// <summary>
 /// Used to define the actions that can be taken on a <see cref="DownloadTaskGeneric"/>

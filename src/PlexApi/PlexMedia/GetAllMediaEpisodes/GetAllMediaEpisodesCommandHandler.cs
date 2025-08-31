@@ -1,7 +1,7 @@
 using FastEndpoints;
-using PlexApi.Contracts;
+using Reaparr.PlexApi.Contracts;
 
-namespace PlexRipper.PlexApi;
+namespace Reaparr.PlexApi;
 
 public class GetAllMediaEpisodesCommandHandler
     : ICommandHandler<GetAllMediaEpisodesCommand, Result<List<PlexTvShowEpisode>>>

@@ -1,4 +1,4 @@
-﻿namespace PlexRipper.BaseTests;
+﻿namespace Reaparr.BaseTests;
 
 public partial class FakeData
 {

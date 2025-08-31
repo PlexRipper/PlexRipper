@@ -1,8 +1,7 @@
-using Logging.Common;
 using Serilog.Core;
 using Serilog.Events;
 
-namespace Logging.Enricher;
+namespace Reaparr.Logging.Enricher;
 
 /// <summary>
 ///

@@ -1,12 +1,12 @@
 using System.IO.Abstractions;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using Application.Contracts;
 using ByteSizeLib;
-using Data.Contracts;
 using Microsoft.EntityFrameworkCore;
+using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
 
-namespace PlexRipper.Application.UnitTests;
+namespace Reaparr.Application.UnitTests;
 
 public class MergeFilesFromFileTaskCommandUnitTests : BaseUnitTest<MergeFilesFromFileTaskCommandHandler>
 {

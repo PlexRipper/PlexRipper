@@ -1,7 +1,7 @@
 using FluentValidation;
 using Serilog.Events;
 
-namespace PlexRipper.BaseTests;
+namespace Reaparr.BaseTests;
 
 public abstract class BaseCommandUnitTest<TCommand> : BaseUnitTest
     where TCommand : class

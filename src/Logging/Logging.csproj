@@ -25,6 +25,9 @@
         <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
         <PackageReference Include="Serilog.Sinks.Seq" Version="9.0.0" />
         <PackageReference Include="Serilog.Sinks.TestCorrelator" Version="4.0.0" />
+        <PackageReference Include="SerilogTracing" Version="2.3.1" />
+        <PackageReference Include="SerilogTracing.Expressions" Version="2.3.1" />
+        <PackageReference Include="SerilogTracing.Instrumentation.AspNetCore" Version="2.3.1" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\Environment\Environment.csproj" />

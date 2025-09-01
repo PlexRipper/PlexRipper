@@ -22,13 +22,11 @@ public static partial class LogExtensions
         [CallerFilePath] string sourceFilePath = "",
         [CallerMemberName] string memberName = "",
         [CallerLineNumber] int sourceLineNumber = 0
-    ) => logger
-        .ForContext(nameof(LogMetaData.ClassName), Path.GetFileNameWithoutExtension(sourceFilePath))
-        .ForContext(nameof(LogMetaData.MethodName), memberName)
-        .ForContext(nameof(LogMetaData.LineNumber), sourceLineNumber);
-
-
-
+    ) =>
+        logger
+            .ForContext(nameof(LogMetaData.ClassName), Path.GetFileNameWithoutExtension(sourceFilePath))
+            .ForContext(nameof(LogMetaData.MethodName), memberName)
+            .ForContext(nameof(LogMetaData.LineNumber), sourceLineNumber);
 
     public static string RenderMessage(this ILogger log, string messageTemplate, params object[] args)
     {
@@ -44,11 +42,6 @@ public static partial class LogExtensions
 
         return parsed.Render(logEvent.Properties);
     }
-
-
-
-
-
 
     public static Result ToResult(this LogMetaData logMetaData)
     {

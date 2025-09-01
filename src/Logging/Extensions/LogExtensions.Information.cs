@@ -11,6 +11,4 @@ public static partial class LogExtensions
         log.Information(messageTemplate, args);
         return log.RenderMessage(messageTemplate, args);
     }
-
-
 }

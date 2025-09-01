@@ -1,6 +1,6 @@
+using FluentResults;
 using Serilog;
 using Serilog.Core;
-using FluentResults;
 
 namespace Reaparr.Logging;
 
@@ -15,11 +15,11 @@ public static partial class LogExtensions
 
         return Result.Fail(new Error(renderedMessage));
     }
+
     [MessageTemplateFormatMethod("messageTemplate")]
     public static string WarningMsg(this ILogger log, string messageTemplate, params object[] args)
     {
         log.Warning(messageTemplate, args);
         return log.RenderMessage(messageTemplate, args);
     }
-
 }

@@ -1,6 +1,3 @@
 namespace Reaparr.Logging;
 
-public static partial class LogExtensions
-{
-   
-}
+public static partial class LogExtensions { }

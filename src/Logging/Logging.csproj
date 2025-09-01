@@ -23,6 +23,7 @@
         <PackageReference Include="Serilog.Sinks.Console.LogThemes" Version="0.3.0" />
         <PackageReference Include="Serilog.Sinks.Debug" Version="3.0.0" />
         <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+        <PackageReference Include="Serilog.Sinks.Seq" Version="9.0.0" />
         <PackageReference Include="Serilog.Sinks.TestCorrelator" Version="4.0.0" />
     </ItemGroup>
     <ItemGroup>

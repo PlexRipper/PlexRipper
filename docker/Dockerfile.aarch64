@@ -111,6 +111,7 @@ COPY --from=client-build /tmp/ClientApp/.output/public /app/wwwroot
 
 ## Copy the s6-overlay config files
 COPY docker/etc/ /etc/
+COPY docker/10-config /etc/fix-attrs.d/10-config
 
 ## Set version label
 LABEL company="Reaparr" \

@@ -8,9 +8,7 @@ namespace Reaparr.Logging;
 
 public static class LogManager
 {
-    #region Methods
-
-    #region Public
+    public static LogEventLevel MinimumLogLevel { get; private set; }
 
     [MessageTemplateFormatMethod("messageTemplate")]
     public static void DbContextLogger(
@@ -24,13 +22,13 @@ public static class LogManager
         {
             // ReSharper disable once StringLiteralTypo
             case { } s when s.StartsWith("dbug:"):
-                _log.Here().Debug(messageTemplate, memberName, sourceFilePath, sourceLineNumber);
+                GetLogger().Here().Debug(messageTemplate, memberName, sourceFilePath, sourceLineNumber);
                 break;
             case { } s when s.StartsWith("info:"):
-                _log.Here().Information(messageTemplate, memberName, sourceFilePath, sourceLineNumber);
+                GetLogger().Here().Information(messageTemplate, memberName, sourceFilePath, sourceLineNumber);
                 break;
             case { } s when s.StartsWith("fail:"):
-                _log.Here().Error(messageTemplate, memberName, sourceFilePath, sourceLineNumber);
+                GetLogger().Here().Error(messageTemplate, memberName, sourceFilePath, sourceLineNumber);
                 break;
         }
     }
@@ -38,30 +36,29 @@ public static class LogManager
     public static void SetupLogging(LogEventLevel minimumLogLevel = LogEventLevel.Debug)
     {
         MinimumLogLevel = minimumLogLevel;
-        Serilog.Log.Logger = new LogConfig().GetLogger(minimumLogLevel);
-        _log.Here().Information("Logging level set to {LogLevel}", MinimumLogLevel);
+        Log.Logger = new LogConfig().GetLogger(minimumLogLevel);
+
+        GetLogger().Here().Information("Logging level set to {LogLevel}", MinimumLogLevel);
 
         if (EnvironmentExtensions.IsUnmasked())
         {
-            _log.Here()
+            GetLogger()
+                .Here()
                 .Warning(
                     "Environment variable {UnmaskedKey} has been set to true, which means that sensitive data will be shown in the logs!",
                     EnvironmentExtensions.UnmaskedModeKey
                 );
 
-            _log.Here().Warning("This username should be shown: {Username}", "SomeSecretUsername");
+            GetLogger().Here().Warning("This username should be shown: {Username}", "SomeSecretUsername");
         }
     }
 
     public static void CloseAndFlush()
     {
-        Serilog.Log.CloseAndFlush();
+        Log.CloseAndFlush();
     }
 
-    #endregion
+    public static ILogger GetLogger<T>() => Log.Logger.ForContext<T>();
 
-    #endregion
-
-    private static readonly ILogger _log = new LogConfig().CreateLogInstance(typeof(LogManager));
-    public static LogEventLevel MinimumLogLevel { get; private set; }
+    public static ILogger GetLogger() => Log.Logger;
 }

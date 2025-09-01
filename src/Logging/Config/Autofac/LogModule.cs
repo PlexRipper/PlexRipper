@@ -10,6 +10,6 @@ public class LogModule : Module
 {
     protected override void Load(ContainerBuilder builder)
     {
-        builder.RegisterInstance(new LogConfig().GetLogger()).As<ILogger>().SingleInstance();
+        builder.RegisterInstance(Log.Logger).As<ILogger>().SingleInstance();
     }
 }

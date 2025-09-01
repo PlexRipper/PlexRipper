@@ -1,64 +1,42 @@
+using FluentResults;
+using Serilog;
 using Serilog.Core;
-using Serilog.Events;
 
 namespace Reaparr.Logging;
 
 public static partial class LogExtensions
 {
-    [MessageTemplateFormatMethod("messageTemplate")]
-    public static LogMetaData Error<T0>(this LogMetaData logMetaData, string messageTemplate, T0 propertyValue0)
+    public static Result ErrorResult(this ILogger log, Exception? ex)
     {
-        logMetaData.Update(LogEventLevel.Error, messageTemplate, propertyValue0).Write();
-        return logMetaData;
+        log.ErrorResult(ex, "");
+
+        return Result.Fail(new ExceptionalError(ex));
     }
 
     [MessageTemplateFormatMethod("messageTemplate")]
-    public static LogMetaData Error<T0, T1>(
-        this LogMetaData logMetaData,
-        string messageTemplate,
-        T0 propertyValue0,
-        T1 propertyValue1
-    )
+    public static Result ErrorResult(this ILogger log, Exception? ex, string messageTemplate, params object[] args)
     {
-        logMetaData.Update(LogEventLevel.Error, messageTemplate, propertyValue0, propertyValue1).Write();
-        return logMetaData;
+        log.Error(ex, messageTemplate, args);
+
+        var renderedMessage = log.RenderMessage(messageTemplate, args);
+
+        return Result.Fail(new ExceptionalError(renderedMessage, ex));
     }
 
     [MessageTemplateFormatMethod("messageTemplate")]
-    public static LogMetaData Error<T0, T1, T2>(
-        this LogMetaData logMetaData,
-        string messageTemplate,
-        T0 propertyValue0,
-        T1 propertyValue1,
-        T2 propertyValue2
-    )
+    public static Result ErrorResult(this ILogger log, string messageTemplate, params object[] args)
     {
-        logMetaData
-            .Update(LogEventLevel.Error, messageTemplate, propertyValue0, propertyValue1, propertyValue2)
-            .Write();
-        return logMetaData;
+        log.Error(messageTemplate, args);
+
+        var renderedMessage = log.RenderMessage(messageTemplate, args);
+
+        return Result.Fail(new Error(renderedMessage));
     }
 
     [MessageTemplateFormatMethod("messageTemplate")]
-    public static LogMetaData Error<T0, T1, T2, T3>(
-        this LogMetaData logMetaData,
-        string messageTemplate,
-        T0 propertyValue0,
-        T1 propertyValue1,
-        T2 propertyValue2,
-        T3 propertyValue3
-    )
+    public static string ErrorMsg(this ILogger log, string messageTemplate, params object[] args)
     {
-        logMetaData
-            .Update(
-                LogEventLevel.Error,
-                messageTemplate,
-                propertyValue0,
-                propertyValue1,
-                propertyValue2,
-                propertyValue3
-            )
-            .Write();
-        return logMetaData;
+        log.Error(messageTemplate, args);
+        return log.RenderMessage(messageTemplate, args);
     }
 }

@@ -25,12 +25,13 @@ public class Program
             LogManager.SetupLogging(EnvironmentExtensions.GetLogLevel());
             FluentResultConfiguration.Setup();
 
-            _log.Here().Information(
-                "Currently running {Channel} version {Version} on {CurrentOS}",
-                EnvironmentExtensions.IsDevRelease() ? "DEVELOPMENT" : "STABLE",
-                EnvironmentExtensions.GetVersion(),
-                OsInfo.CurrentOS
-            );
+            _log.Here()
+                .Information(
+                    "Currently running {Channel} version {Version} on {CurrentOS}",
+                    EnvironmentExtensions.IsDevRelease() ? "DEVELOPMENT" : "STABLE",
+                    EnvironmentExtensions.GetVersion(),
+                    OsInfo.CurrentOS
+                );
 
             AppExtensions.LogIdentity();
 

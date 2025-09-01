@@ -75,7 +75,8 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
         var missingLibraryIds = libraryIds.Except(plexLibraries.Keys).ToList();
         if (missingLibraryIds.Any())
         {
-            _log.Here().Warning("Missing libraries with IDs: {MissingLibraryIds}", string.Join(", ", missingLibraryIds));
+            _log.Here()
+                .Warning("Missing libraries with IDs: {MissingLibraryIds}", string.Join(", ", missingLibraryIds));
             return Result.Fail($"Missing libraries with IDs: {string.Join(", ", missingLibraryIds)}").LogError();
         }
 
@@ -99,12 +100,13 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
             var plexTvShow = tvShowEpisode.TvShow!;
             var plexSeason = tvShowEpisode.TvShowSeason!;
 
-            _log.Here().Debug(
-                "Processing episode {EpisodeKey} from season {SeasonKey} of show {ShowKey}",
-                tvShowEpisode.Key,
-                plexSeason.Key,
-                plexTvShow.Key
-            );
+            _log.Here()
+                .Debug(
+                    "Processing episode {EpisodeKey} from season {SeasonKey} of show {ShowKey}",
+                    tvShowEpisode.Key,
+                    plexSeason.Key,
+                    plexTvShow.Key
+                );
 
             // Get or create Tv-show download tasks
             var downloadTaskTvShow = await GetOrCreateTvShowDownloadTaskAsync(plexTvShow, ct);
@@ -128,11 +130,12 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
             }
             else
             {
-                _log.Here().Debug(
-                    "Found existing episode download task for episode {EpisodeKey} with ID {EpisodeId}",
-                    tvShowEpisode.Key,
-                    episodeDownloadTask.Id
-                );
+                _log.Here()
+                    .Debug(
+                        "Found existing episode download task for episode {EpisodeKey} with ID {EpisodeId}",
+                        tvShowEpisode.Key,
+                        episodeDownloadTask.Id
+                    );
             }
 
             // Find the download media DTO that contains this episode
@@ -255,13 +258,14 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
             var specificQuality = tvShowEpisode.MediaDataList.FirstOrDefault(x => x.Id == requestedQuality.DataId);
             if (specificQuality is not null)
             {
-                _log.Here().Debug(
-                    "Selected requested quality {Quality} for episode {EpisodeKey} ({EpisodeTitle}) (DataId: {DataId})",
-                    requestedQuality.Quality,
-                    tvShowEpisode.Key,
-                    tvShowEpisode.Title,
-                    requestedQuality.DataId
-                );
+                _log.Here()
+                    .Debug(
+                        "Selected requested quality {Quality} for episode {EpisodeKey} ({EpisodeTitle}) (DataId: {DataId})",
+                        requestedQuality.Quality,
+                        tvShowEpisode.Key,
+                        tvShowEpisode.Title,
+                        requestedQuality.DataId
+                    );
                 return specificQuality;
             }
         }
@@ -270,23 +274,25 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
         var bestQuality = tvShowEpisode.MediaDataList.PickMediaQuality();
         if (bestQuality is not null)
         {
-            _log.Here().Debug(
-                "Selected best available quality {Quality} for episode {EpisodeKey} ({EpisodeTitle}) (DataId: {DataId})",
-                bestQuality.Quality,
-                tvShowEpisode.Key,
-                tvShowEpisode.Title,
-                bestQuality.Id
-            );
+            _log.Here()
+                .Debug(
+                    "Selected best available quality {Quality} for episode {EpisodeKey} ({EpisodeTitle}) (DataId: {DataId})",
+                    bestQuality.Quality,
+                    tvShowEpisode.Key,
+                    tvShowEpisode.Title,
+                    bestQuality.Id
+                );
         }
         else
         {
-            _log.Here().Error(
-                "No suitable quality found for episode {EpisodeKey} ({EpisodeTitle}) (ID: {EpisodeId}) from {AvailableCount} media data options",
-                tvShowEpisode.Key,
-                tvShowEpisode.Title,
-                tvShowEpisode.Id,
-                tvShowEpisode.MediaDataList.Count
-            );
+            _log.Here()
+                .Error(
+                    "No suitable quality found for episode {EpisodeKey} ({EpisodeTitle}) (ID: {EpisodeId}) from {AvailableCount} media data options",
+                    tvShowEpisode.Key,
+                    tvShowEpisode.Title,
+                    tvShowEpisode.Id,
+                    tvShowEpisode.MediaDataList.Count
+                );
         }
 
         return bestQuality;

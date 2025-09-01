@@ -16,10 +16,11 @@ public static partial class Startup
     /// <param name="env"> The <see cref="IWebHostEnvironment"/> instance to configure.</param>
     public static void ConfigureApplication(this WebApplication app, IWebHostEnvironment env)
     {
-        _log.Here().Information(
-            "Running location: {Location}",
-            Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
-        );
+        _log.Here()
+            .Information(
+                "Running location: {Location}",
+                Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
+            );
 
         // This has to always be first
         app.UseCors(CORSConfiguration);

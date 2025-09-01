@@ -105,7 +105,8 @@ public class BaseContainer : IDisposable
         // Wait for any pending async operations to complete before disposing
         // This prevents ObjectDisposedException when FastEndpoints command handlers
         // are still executing in background threads during parallel test execution
-        _log.Here().Information("Waiting for async operations to complete before disposing container {DatabaseName}", dbName);
+        _log.Here()
+            .Information("Waiting for async operations to complete before disposing container {DatabaseName}", dbName);
 
         try
         {

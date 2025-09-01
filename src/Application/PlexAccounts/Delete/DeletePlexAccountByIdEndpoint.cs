@@ -76,13 +76,14 @@ public class DeletePlexAccountByIdEndpoint : BaseEndpoint<DeletePlexAccountByIdR
         await _dbContext.PlexAccountServers.Where(x => x.PlexAccountId == req.PlexAccountId).ExecuteDeleteAsync(ct);
         await _dbContext.PlexAccountLibraries.Where(x => x.PlexAccountId == req.PlexAccountId).ExecuteDeleteAsync(ct);
 
-        _log.Here().Debug(
-            "Deleted {PlexAccount} with Id: {CommandId} from the database, and cleaned up {DeletedServersCount} PlexServers and {DeletedLibrariesCount} PlexLibraries",
-            nameof(PlexAccount),
-            req.PlexAccountId,
-            deletedServersCount,
-            deletedLibrariesCount
-        );
+        _log.Here()
+            .Debug(
+                "Deleted {PlexAccount} with Id: {CommandId} from the database, and cleaned up {DeletedServersCount} PlexServers and {DeletedLibrariesCount} PlexLibraries",
+                nameof(PlexAccount),
+                req.PlexAccountId,
+                deletedServersCount,
+                deletedLibrariesCount
+            );
 
         await _signalRService.SendRefreshNotificationAsync(
             [

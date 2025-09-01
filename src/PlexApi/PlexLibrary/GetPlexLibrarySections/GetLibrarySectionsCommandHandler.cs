@@ -53,10 +53,11 @@ public class GetLibrarySectionsCommandHandler : ICommandHandler<GetLibrarySectio
 
         if (response.Value.Object?.MediaContainer?.Directory is null)
         {
-            _log.Here().Error(
-                "Plex server: {PlexServerName} returned an empty response when libraries were requested",
-                connection.PlexServer?.Name
-            );
+            _log.Here()
+                .Error(
+                    "Plex server: {PlexServerName} returned an empty response when libraries were requested",
+                    connection.PlexServer?.Name
+                );
             return response.ToResult();
         }
 

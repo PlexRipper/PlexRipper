@@ -50,10 +50,11 @@ public class GenerateDownloadTaskTvShowSeasonsCommandHandler
         if (!plexSeasonList.Any())
             return ResultExtensions.IsEmpty(nameof(plexSeasonList)).LogWarning();
 
-        _log.Here().Debug(
-            "Creating {PlexTvShowIdsCount} season download tasks",
-            plexSeasonList.SelectMany(x => x.MediaIds).ToList().Count
-        );
+        _log.Here()
+            .Debug(
+                "Creating {PlexTvShowIdsCount} season download tasks",
+                plexSeasonList.SelectMany(x => x.MediaIds).ToList().Count
+            );
 
         var episodesIds = new List<DownloadMediaDTO>();
         var seasonsToInsert = new List<DownloadTaskTvShowSeason>();

@@ -23,11 +23,12 @@ public class NotificationHub : Hub<INotificationHub>, INotificationHub
     /// <inheritdoc/>
     public async Task Notification(NotificationDTO notification, CancellationToken cancellationToken = default)
     {
-        _log.Here().Debug(
-            "Sending notification: {MessageTypesNotification} => {@NotificationDto}",
-            MessageTypes.Notification.ToString(),
-            notification
-        );
+        _log.Here()
+            .Debug(
+                "Sending notification: {MessageTypesNotification} => {@NotificationDto}",
+                MessageTypes.Notification.ToString(),
+                notification
+            );
         await Clients.All.Notification(notification, cancellationToken);
     }
 

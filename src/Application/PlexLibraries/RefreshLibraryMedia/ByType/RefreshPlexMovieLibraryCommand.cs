@@ -78,11 +78,12 @@ public class RefreshPlexMovieLibraryCommandHandler
         }
         else
         {
-            _log.Here().Warning(
-                "No Movies were found for library {PlexLibraryName} with id: {PlexLibraryId}",
-                plexLibrary.Title,
-                plexLibrary.Id
-            );
+            _log.Here()
+                .Warning(
+                    "No Movies were found for library {PlexLibraryName} with id: {PlexLibraryId}",
+                    plexLibrary.Title,
+                    plexLibrary.Id
+                );
         }
 
         // Phase 2 of 3: PlexLibrary media data was parsed successfully.
@@ -104,11 +105,12 @@ public class RefreshPlexMovieLibraryCommandHandler
 
         if (plexLibrary.Movies.Any() && mediaSize == 0)
         {
-            _log.Here().Error(
-                "No media size was found for library {PlexLibraryName} with id: {PlexLibraryId}",
-                plexLibrary.Title,
-                plexLibrary.Id
-            );
+            _log.Here()
+                .Error(
+                    "No media size was found for library {PlexLibraryName} with id: {PlexLibraryId}",
+                    plexLibrary.Title,
+                    plexLibrary.Id
+                );
         }
 
         // Mark the library as synced
@@ -116,11 +118,12 @@ public class RefreshPlexMovieLibraryCommandHandler
 
         await _dbContext.UpdatePlexLibraryById(plexLibrary, CancellationToken.None);
 
-        _log.Here().Information(
-            "Successfully refreshed library {PlexLibraryName} with id: {PlexLibraryId}",
-            plexLibrary.Title,
-            plexLibrary.Id
-        );
+        _log.Here()
+            .Information(
+                "Successfully refreshed library {PlexLibraryName} with id: {PlexLibraryId}",
+                plexLibrary.Title,
+                plexLibrary.Id
+            );
 
         // Phase 3 of 3: Movies have been successfully updated in the database.
         await _progressReporter.SendProgress(

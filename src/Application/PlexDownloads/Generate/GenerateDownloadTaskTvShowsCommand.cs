@@ -61,10 +61,11 @@ public class GenerateDownloadTaskTvShowsCommandHandler : ICommandHandler<Generat
         if (!plexTvShowList.Any())
             return ResultExtensions.IsEmpty(nameof(plexTvShowList)).LogWarning();
 
-        _log.Here().Debug(
-            "Creating {PlexTvShowIdsCount} TvShow download tasks",
-            plexTvShowList.SelectMany(x => x.MediaIds).ToList().Count
-        );
+        _log.Here()
+            .Debug(
+                "Creating {PlexTvShowIdsCount} TvShow download tasks",
+                plexTvShowList.SelectMany(x => x.MediaIds).ToList().Count
+            );
 
         foreach (var downloadMediaDto in plexTvShowList)
         {

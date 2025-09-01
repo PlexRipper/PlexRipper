@@ -65,7 +65,8 @@ public class ConfigManager : IConfigManager
 
         if (configDirectoryExistsResult.Value)
         {
-            _log.Here().Information("Config directory exists, will use {ConfigDirectory}", _pathProvider.ConfigDirectory);
+            _log.Here()
+                .Information("Config directory exists, will use {ConfigDirectory}", _pathProvider.ConfigDirectory);
             var migrateResult = MigrateLegacyFileNames();
             if (migrateResult.IsFailed)
                 return migrateResult.LogFatal();
@@ -73,14 +74,16 @@ public class ConfigManager : IConfigManager
         }
         else
         {
-            _log.Here().Information(
-                "Config directory does not exist, will create now at {ConfigDirectory}",
-                _pathProvider.ConfigDirectory
-            );
+            _log.Here()
+                .Information(
+                    "Config directory does not exist, will create now at {ConfigDirectory}",
+                    _pathProvider.ConfigDirectory
+                );
             var createResult = Result.Try(() => _directory.CreateDirectory(_pathProvider.ConfigDirectory));
             if (createResult.IsFailed)
             {
-                _log.Here().Fatal("Failed to create config directory at {ConfigDirectory}", _pathProvider.ConfigDirectory);
+                _log.Here()
+                    .Fatal("Failed to create config directory at {ConfigDirectory}", _pathProvider.ConfigDirectory);
                 return createResult.LogFatal();
             }
 
@@ -108,10 +111,11 @@ public class ConfigManager : IConfigManager
         var readResult = ReadFromConfigFile();
         if (readResult.IsFailed)
         {
-            _log.Here().Information(
-                "Resetting {ConfigFileName} because it could not be loaded correctly",
-                _pathProvider.ConfigFileName
-            );
+            _log.Here()
+                .Information(
+                    "Resetting {ConfigFileName} because it could not be loaded correctly",
+                    _pathProvider.ConfigFileName
+                );
             return ResetConfig();
         }
 

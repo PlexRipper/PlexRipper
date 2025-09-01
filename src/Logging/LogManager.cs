@@ -43,10 +43,11 @@ public static class LogManager
 
         if (EnvironmentExtensions.IsUnmasked())
         {
-            _log.Here().Warning(
-                "Environment variable {UnmaskedKey} has been set to true, which means that sensitive data will be shown in the logs!",
-                EnvironmentExtensions.UnmaskedModeKey
-            );
+            _log.Here()
+                .Warning(
+                    "Environment variable {UnmaskedKey} has been set to true, which means that sensitive data will be shown in the logs!",
+                    EnvironmentExtensions.UnmaskedModeKey
+                );
 
             _log.Here().Warning("This username should be shown: {Username}", "SomeSecretUsername");
         }

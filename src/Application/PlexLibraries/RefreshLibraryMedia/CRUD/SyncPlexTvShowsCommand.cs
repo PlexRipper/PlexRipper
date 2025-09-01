@@ -102,11 +102,12 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
             if (string.IsNullOrWhiteSpace(plexLibraryName))
                 return ResultExtensions.EntityNotFound(nameof(command.LibraryMetadata.PlexLibrary), plexLibraryId);
 
-            _log.Here().Debug(
-                "Starting syncing of tv shows in library: {PlexLibraryName} with id:  {PlexLibraryId} by first removing all media and then reinserting it",
-                plexLibraryName,
-                plexLibraryId
-            );
+            _log.Here()
+                .Debug(
+                    "Starting syncing of tv shows in library: {PlexLibraryName} with id:  {PlexLibraryId} by first removing all media and then reinserting it",
+                    plexLibraryName,
+                    plexLibraryId
+                );
 
             var stopWatch = Stopwatch.StartNew();
 
@@ -142,12 +143,13 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
 
             stopWatch.Stop();
 
-            _log.Here().Information(
-                "Finished media syncing plexLibrary: {PlexLibraryName} with id: {PlexLibraryId} in {TotalMilliseconds} milliseconds",
-                plexLibraryName,
-                plexLibraryId,
-                stopWatch.Elapsed.TotalMilliseconds
-            );
+            _log.Here()
+                .Information(
+                    "Finished media syncing plexLibrary: {PlexLibraryName} with id: {PlexLibraryId} in {TotalMilliseconds} milliseconds",
+                    plexLibraryName,
+                    plexLibraryId,
+                    stopWatch.Elapsed.TotalMilliseconds
+                );
 
             _log.Here().Debug(bulkInsertRapportResult.Value.ToString());
 
@@ -167,11 +169,12 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
         CancellationToken cancellationToken
     )
     {
-        _log.Here().Debug(
-            "Starting syncing of TV show genres for library: {LibraryName} with id: {LibraryId}",
-            libraryName,
-            plexLibraryId
-        );
+        _log.Here()
+            .Debug(
+                "Starting syncing of TV show genres for library: {LibraryName} with id: {LibraryId}",
+                libraryName,
+                plexLibraryId
+            );
         var stopWatch = Stopwatch.StartNew();
 
         await _dbContext
@@ -213,11 +216,12 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
         CancellationToken cancellationToken
     )
     {
-        _log.Here().Debug(
-            "Starting syncing of TV show countries for library: {LibraryName} with id: {LibraryId}",
-            libraryName,
-            plexLibraryId
-        );
+        _log.Here()
+            .Debug(
+                "Starting syncing of TV show countries for library: {LibraryName} with id: {LibraryId}",
+                libraryName,
+                plexLibraryId
+            );
         var stopWatch = Stopwatch.StartNew();
 
         await _dbContext
@@ -261,11 +265,12 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
         CancellationToken cancellationToken
     )
     {
-        _log.Here().Debug(
-            "Starting syncing of TV show actors for library: {LibraryName} with id: {LibraryId}",
-            libraryName,
-            plexLibraryId
-        );
+        _log.Here()
+            .Debug(
+                "Starting syncing of TV show actors for library: {LibraryName} with id: {LibraryId}",
+                libraryName,
+                plexLibraryId
+            );
         var stopWatch = Stopwatch.StartNew();
 
         await _dbContext

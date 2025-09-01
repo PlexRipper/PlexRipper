@@ -70,12 +70,13 @@ public class QueueInspectPlexServerJobCommandHandler : ICommandHandler<QueueInsp
         foreach (var i in alreadyRunning)
         {
             var plexServerName = await _dbContext.GetPlexServerNameById(i, cancellationToken);
-            _log.Here().Error(
-                "Job {InspectPlexServerJobName} is already running for serverL {PlexServerIdName} with id: {PlexServerId}",
-                nameof(InspectPlexServerJob),
-                plexServerName,
-                i
-            );
+            _log.Here()
+                .Error(
+                    "Job {InspectPlexServerJobName} is already running for serverL {PlexServerIdName} with id: {PlexServerId}",
+                    nameof(InspectPlexServerJob),
+                    plexServerName,
+                    i
+                );
         }
 
         var queuedServerIds = enabledServerIds.Where(x => !alreadyRunning.Contains(x)).ToList();

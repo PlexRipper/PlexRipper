@@ -75,7 +75,8 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
         var totalSize = totalSizeResult.Value;
         if (totalSize == 0)
         {
-            _log.Here().Warning("The library with name: {PlexLibraryName} contains no media to retrieve", plexLibrary.Name);
+            _log.Here()
+                .Warning("The library with name: {PlexLibraryName} contains no media to retrieve", plexLibrary.Name);
             return Result.Ok(mediaList);
         }
 
@@ -224,11 +225,12 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
 
         if (response.IsFailed)
         {
-            _log.Here().Error(
-                "Failed to get metadata for rating keys: {RatingKeys}. Error: {Error}",
-                string.Join(",", ratingKeys),
-                response.Errors
-            );
+            _log.Here()
+                .Error(
+                    "Failed to get metadata for rating keys: {RatingKeys}. Error: {Error}",
+                    string.Join(",", ratingKeys),
+                    response.Errors
+                );
             return response.ToResult().LogError();
         }
 

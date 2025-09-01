@@ -50,10 +50,11 @@ public class DownloadJobListener : IDownloadJobListener
             var status = await _dbContext.GetDownloadTaskStatusAsync(downloadTaskKey, cancellationToken);
             if (status == DownloadStatus.DownloadFinished)
             {
-                _log.Here().Debug(
-                    "DownloadTask with id: {DownloadTaskId} has finished downloading, starting fileMergeJob and executing DownloadQueueCheck",
-                    downloadTaskKey.Id
-                );
+                _log.Here()
+                    .Debug(
+                        "DownloadTask with id: {DownloadTaskId} has finished downloading, starting fileMergeJob and executing DownloadQueueCheck",
+                        downloadTaskKey.Id
+                    );
                 await _fileMergeQueue.CheckFileMergeQueue();
                 await _eventPublisher.PublishAsync(
                     new CheckDownloadQueueEvent(downloadTaskKey.PlexServerId),

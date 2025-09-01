@@ -54,13 +54,14 @@ public class PlexApiClient : IPlexApiClient
                     retryAttempt => TimeSpan.FromSeconds(retryAttempt),
                     (response, timeSpan, retryAttempt, context) =>
                     {
-                        _log.Here().Warning(
-                            "Request to {Url} failed, retrying {RetryAttempt} of {RetryCount} in {Delay}s",
-                            context["RequestUri"],
-                            retryAttempt,
-                            _options.RetryCount,
-                            timeSpan.TotalSeconds
-                        );
+                        _log.Here()
+                            .Warning(
+                                "Request to {Url} failed, retrying {RetryAttempt} of {RetryCount} in {Delay}s",
+                                context["RequestUri"],
+                                retryAttempt,
+                                _options.RetryCount,
+                                timeSpan.TotalSeconds
+                            );
 
                         SendProgressUpdate(
                             _options.Action,

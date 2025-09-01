@@ -66,10 +66,11 @@ public class PlexSignInCommandHandler : ICommandHandler<PlexSignInCommand, Resul
 
         if (result.IsSuccess)
         {
-            _log.Here().Information(
-                "Successfully retrieved the PlexAccount data for user {PlexAccountDisplayName} from the PlexApi",
-                plexAccount.DisplayName
-            );
+            _log.Here()
+                .Information(
+                    "Successfully retrieved the PlexAccount data for user {PlexAccountDisplayName} from the PlexApi",
+                    plexAccount.DisplayName
+                );
         }
 
         return result;

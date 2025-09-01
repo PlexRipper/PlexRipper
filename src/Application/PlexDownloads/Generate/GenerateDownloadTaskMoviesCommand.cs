@@ -60,10 +60,11 @@ public class GenerateDownloadTaskMoviesCommandHandler : ICommandHandler<Generate
         if (!plexMoviesList.Any())
             return ResultExtensions.IsEmpty(nameof(plexMoviesList)).LogWarning();
 
-        _log.Here().Debug(
-            "Creating {PlexMovieIdsCount} movie download tasks",
-            plexMoviesList.SelectMany(x => x.MediaIds).ToList().Count
-        );
+        _log.Here()
+            .Debug(
+                "Creating {PlexMovieIdsCount} movie download tasks",
+                plexMoviesList.SelectMany(x => x.MediaIds).ToList().Count
+            );
 
         // Create downloadTasks
         var downloadTasks = new List<DownloadTaskMovie>();
@@ -94,11 +95,12 @@ public class GenerateDownloadTaskMoviesCommandHandler : ICommandHandler<Generate
                 var movieData = SelectMovieQuality(plexMovie, downloadMediaDto);
                 if (movieData is null)
                 {
-                    _log.Here().Error(
-                        "Failed to select quality for movie {MovieTitle} (ID: {MovieId})",
-                        plexMovie.Title,
-                        plexMovie.Id
-                    );
+                    _log.Here()
+                        .Error(
+                            "Failed to select quality for movie {MovieTitle} (ID: {MovieId})",
+                            plexMovie.Title,
+                            plexMovie.Id
+                        );
                     continue;
                 }
 
@@ -131,11 +133,12 @@ public class GenerateDownloadTaskMoviesCommandHandler : ICommandHandler<Generate
     {
         if (!plexMovie.MediaDataList.Any())
         {
-            _log.Here().Warning(
-                "Movie {MovieTitle} (ID: {MovieId}) has no media data available",
-                plexMovie.Title,
-                plexMovie.Id
-            );
+            _log.Here()
+                .Warning(
+                    "Movie {MovieTitle} (ID: {MovieId}) has no media data available",
+                    plexMovie.Title,
+                    plexMovie.Id
+                );
             return null;
         }
 
@@ -146,12 +149,13 @@ public class GenerateDownloadTaskMoviesCommandHandler : ICommandHandler<Generate
             var specificQuality = plexMovie.MediaDataList.FirstOrDefault(x => x.Id == requestedQuality.DataId);
             if (specificQuality is not null)
             {
-                _log.Here().Debug(
-                    "Selected requested quality {Quality} for movie {MovieTitle} (DataId: {DataId})",
-                    requestedQuality.Quality,
-                    plexMovie.Title,
-                    requestedQuality.DataId
-                );
+                _log.Here()
+                    .Debug(
+                        "Selected requested quality {Quality} for movie {MovieTitle} (DataId: {DataId})",
+                        requestedQuality.Quality,
+                        plexMovie.Title,
+                        requestedQuality.DataId
+                    );
                 return specificQuality;
             }
         }
@@ -160,21 +164,23 @@ public class GenerateDownloadTaskMoviesCommandHandler : ICommandHandler<Generate
         var bestQuality = plexMovie.MediaDataList.PickMediaQuality();
         if (bestQuality is not null)
         {
-            _log.Here().Debug(
-                "Selected best available quality {Quality} for movie {MovieTitle} (DataId: {DataId})",
-                bestQuality.Quality,
-                plexMovie.Title,
-                bestQuality.Id
-            );
+            _log.Here()
+                .Debug(
+                    "Selected best available quality {Quality} for movie {MovieTitle} (DataId: {DataId})",
+                    bestQuality.Quality,
+                    plexMovie.Title,
+                    bestQuality.Id
+                );
         }
         else
         {
-            _log.Here().Error(
-                "No suitable quality found for movie {MovieTitle} (ID: {MovieId}) from {AvailableCount} media data options",
-                plexMovie.Title,
-                plexMovie.Id,
-                plexMovie.MediaDataList.Count
-            );
+            _log.Here()
+                .Error(
+                    "No suitable quality found for movie {MovieTitle} (ID: {MovieId}) from {AvailableCount} media data options",
+                    plexMovie.Title,
+                    plexMovie.Id,
+                    plexMovie.MediaDataList.Count
+                );
         }
 
         return bestQuality;

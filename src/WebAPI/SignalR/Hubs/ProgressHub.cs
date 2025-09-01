@@ -24,11 +24,12 @@ public class ProgressHub : Hub<IProgressHub>, IProgressHub
     /// <inheritdoc/>
     public async Task JobStatusUpdate(JobStatusUpdateDTO jobStatusUpdate, CancellationToken cancellationToken = default)
     {
-        _log.Here().Debug(
-            "Sending progress: {MessageTypesNotification} => {@JobStatusUpdateDto}",
-            MessageTypes.JobStatusUpdate.ToString(),
-            jobStatusUpdate
-        );
+        _log.Here()
+            .Debug(
+                "Sending progress: {MessageTypesNotification} => {@JobStatusUpdateDto}",
+                MessageTypes.JobStatusUpdate.ToString(),
+                jobStatusUpdate
+            );
         await Clients.All.JobStatusUpdate(jobStatusUpdate, cancellationToken);
     }
 
@@ -38,11 +39,12 @@ public class ProgressHub : Hub<IProgressHub>, IProgressHub
         CancellationToken cancellationToken = default
     )
     {
-        _log.Here().Debug(
-            "Sending progress: {MessageTypesNotification} => {@SyncServerProgress}",
-            MessageTypes.SyncServerMediaProgress.ToString(),
-            syncServerMediaProgress
-        );
+        _log.Here()
+            .Debug(
+                "Sending progress: {MessageTypesNotification} => {@SyncServerProgress}",
+                MessageTypes.SyncServerMediaProgress.ToString(),
+                syncServerMediaProgress
+            );
         await Clients.All.SyncServerMediaProgress(syncServerMediaProgress, cancellationToken);
     }
 
@@ -52,11 +54,12 @@ public class ProgressHub : Hub<IProgressHub>, IProgressHub
         CancellationToken cancellationToken = default
     )
     {
-        _log.Here().Debug(
-            "Sending progress: {MessageTypesNotification} => {@ServerConnectionCheckStatusProgress}",
-            MessageTypes.ServerConnectionCheckStatusProgress.ToString(),
-            serverConnectionCheckStatusProgress
-        );
+        _log.Here()
+            .Debug(
+                "Sending progress: {MessageTypesNotification} => {@ServerConnectionCheckStatusProgress}",
+                MessageTypes.ServerConnectionCheckStatusProgress.ToString(),
+                serverConnectionCheckStatusProgress
+            );
         await Clients.All.ServerConnectionCheckStatusProgress(serverConnectionCheckStatusProgress, cancellationToken);
     }
 
@@ -66,33 +69,36 @@ public class ProgressHub : Hub<IProgressHub>, IProgressHub
         CancellationToken cancellationToken = default
     )
     {
-        _log.Here().Debug(
-            "Sending progress: {MessageTypesNotification} => {@ServerDownloadProgress}",
-            MessageTypes.ServerDownloadProgress.ToString(),
-            serverDownloadProgress
-        );
+        _log.Here()
+            .Debug(
+                "Sending progress: {MessageTypesNotification} => {@ServerDownloadProgress}",
+                MessageTypes.ServerDownloadProgress.ToString(),
+                serverDownloadProgress
+            );
         await Clients.All.ServerDownloadProgress(serverDownloadProgress, cancellationToken);
     }
 
     /// <inheritdoc/>
     public async Task DownloadTaskUpdate(DownloadTaskDTO downloadTask, CancellationToken cancellationToken = default)
     {
-        _log.Here().Debug(
-            "Sending progress: {MessageTypesNotification} => {@DownloadTaskUpdate}",
-            MessageTypes.DownloadTaskUpdate.ToString(),
-            downloadTask
-        );
+        _log.Here()
+            .Debug(
+                "Sending progress: {MessageTypesNotification} => {@DownloadTaskUpdate}",
+                MessageTypes.DownloadTaskUpdate.ToString(),
+                downloadTask
+            );
         await Clients.All.DownloadTaskUpdate(downloadTask, cancellationToken);
     }
 
     /// <inheritdoc/>
     public async Task LibraryProgress(LibraryProgress libraryProgress, CancellationToken cancellationToken = default)
     {
-        _log.Here().Debug(
-            "Sending progress: {MessageTypesNotification} => {@LibraryProgress}",
-            MessageTypes.LibraryProgress.ToString(),
-            libraryProgress
-        );
+        _log.Here()
+            .Debug(
+                "Sending progress: {MessageTypesNotification} => {@LibraryProgress}",
+                MessageTypes.LibraryProgress.ToString(),
+                libraryProgress
+            );
         await Clients.All.LibraryProgress(libraryProgress, cancellationToken);
     }
 }

@@ -40,11 +40,12 @@ public class InspectPlexServerJob : IJob
 
         var plexServerIds = dataMap.GetIntListValue(PlexServerIdsParameter);
 
-        _log.Here().Debug(
-            "Executing job: {InspectPlexServerJobName} for {Count} servers",
-            nameof(InspectPlexServerJob),
-            plexServerIds.Count
-        );
+        _log.Here()
+            .Debug(
+                "Executing job: {InspectPlexServerJobName} for {Count} servers",
+                nameof(InspectPlexServerJob),
+                plexServerIds.Count
+            );
 
         try
         {

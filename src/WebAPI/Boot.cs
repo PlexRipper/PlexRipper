@@ -56,7 +56,8 @@ public class Boot : IHostedService
     {
         if (EnvironmentExtensions.GetPuid() == 911 && EnvironmentExtensions.GetPgid() == 1001)
         {
-            _log.Here().Error("Reaparr has invalid PUID and PGID values and thus has defaulted to root, this is not allowed");
+            _log.Here()
+                .Error("Reaparr has invalid PUID and PGID values and thus has defaulted to root, this is not allowed");
             TerminateApplication();
             return;
         }

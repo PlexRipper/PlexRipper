@@ -68,7 +68,8 @@ public static partial class DbContextExtensions
         if (mainAccount is not null)
             return Result.Ok(mainAccount);
 
-        _log.Here().Warning("No account could be chosen to connect to PlexServer with id: {PlexServerId}", plexServerId);
+        _log.Here()
+            .Warning("No account could be chosen to connect to PlexServer with id: {PlexServerId}", plexServerId);
 
         return Result.Fail($"No account could be chosen to connect to PlexServer with id: {plexServerId}").LogError();
     }
@@ -89,7 +90,8 @@ public static partial class DbContextExtensions
             return ResultExtensions.EntityNotFound(nameof(PlexAccount), plexAccountId);
 
         if (!plexAccount.PlexServers.Any())
-            _log.Here().Warning("No accessible PlexServers found for PlexAccount: {DisplayName}", plexAccount.DisplayName);
+            _log.Here()
+                .Warning("No accessible PlexServers found for PlexAccount: {DisplayName}", plexAccount.DisplayName);
 
         return Result.Ok(plexAccount.PlexServers);
     }

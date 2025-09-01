@@ -61,10 +61,11 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
                 return MigrateDatabase();
             }
 
-            _log.Here().Error(
-                "Database exists at {DatabasePath} but could not be connected to, resetting database now",
-                DatabasePath
-            );
+            _log.Here()
+                .Error(
+                    "Database exists at {DatabasePath} but could not be connected to, resetting database now",
+                    DatabasePath
+                );
             return ResetDatabase();
         }
 

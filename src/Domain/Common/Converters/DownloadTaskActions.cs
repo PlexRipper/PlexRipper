@@ -99,10 +99,11 @@ public static class DownloadTaskActions
     {
         if (!downloadStatusList.Any())
         {
-            _log.Here().Warning(
-                "{NameOfDownloadStatusList} was empty, cannot determine the aggregate status of the download tasks",
-                nameof(downloadStatusList)
-            );
+            _log.Here()
+                .Warning(
+                    "{NameOfDownloadStatusList} was empty, cannot determine the aggregate status of the download tasks",
+                    nameof(downloadStatusList)
+                );
             return DownloadStatus.Unknown;
         }
 
@@ -116,7 +117,8 @@ public static class DownloadTaskActions
         foreach (var status in _anyStatuses.Where(status => downloadStatusList.Any(x => x == status)))
             return status;
 
-        _log.Here().Error("Unable to determine the aggregate status of the download tasks. {StatusList}", downloadStatusList);
+        _log.Here()
+            .Error("Unable to determine the aggregate status of the download tasks. {StatusList}", downloadStatusList);
 
         return DownloadStatus.Unknown;
     }

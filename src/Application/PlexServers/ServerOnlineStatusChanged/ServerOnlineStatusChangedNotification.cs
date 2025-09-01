@@ -43,10 +43,11 @@ public class ServerOnlineStatusChangedHandler : IEventHandler<ServerOnlineStatus
                 notification.PlexServerId,
                 cancellationToken: cancellationToken
             );
-            _log.Here().Information(
-                "Server {PlexServerName} came online, checking DownloadQueue to resume downloads",
-                plexServerName
-            );
+            _log.Here()
+                .Information(
+                    "Server {PlexServerName} came online, checking DownloadQueue to resume downloads",
+                    plexServerName
+                );
             await _downloadQueue.CheckDownloadQueue([notification.PlexServerId]);
         }
     }

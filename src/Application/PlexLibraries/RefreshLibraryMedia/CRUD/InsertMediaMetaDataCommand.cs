@@ -128,11 +128,12 @@ public class InsertMediaMetaDataCommandHandler
 
         if (result.IsFailed)
         {
-            _log.Here().Error(
-                "Failed to insert {NameOfPlexActor} after {ElapsedSeconds:F2} seconds",
-                nameof(PlexActor),
-                stopWatch.Elapsed.TotalSeconds
-            );
+            _log.Here()
+                .Error(
+                    "Failed to insert {NameOfPlexActor} after {ElapsedSeconds:F2} seconds",
+                    nameof(PlexActor),
+                    stopWatch.Elapsed.TotalSeconds
+                );
             return result.LogError();
         }
 
@@ -144,12 +145,13 @@ public class InsertMediaMetaDataCommandHandler
 
         stopWatch.Stop();
 
-        _log.Here().Debug(
-            "Finished inserting {Count} {NameOfPlexActor} for library {ElapsedSeconds:F2} seconds",
-            sourceList.Count,
-            nameof(PlexActor),
-            stopWatch.Elapsed.TotalSeconds
-        );
+        _log.Here()
+            .Debug(
+                "Finished inserting {Count} {NameOfPlexActor} for library {ElapsedSeconds:F2} seconds",
+                sourceList.Count,
+                nameof(PlexActor),
+                stopWatch.Elapsed.TotalSeconds
+            );
         return Result.Ok(plexActorsWithIds);
     }
 
@@ -190,11 +192,12 @@ public class InsertMediaMetaDataCommandHandler
 
         if (insertResult.IsFailed)
         {
-            _log.Here().Error(
-                "Failed to insert {NameOfPlexGenre} after {ElapsedSeconds:F2} seconds",
-                nameof(PlexGenre),
-                stopWatch.Elapsed.TotalSeconds
-            );
+            _log.Here()
+                .Error(
+                    "Failed to insert {NameOfPlexGenre} after {ElapsedSeconds:F2} seconds",
+                    nameof(PlexGenre),
+                    stopWatch.Elapsed.TotalSeconds
+                );
             return insertResult.LogError();
         }
 
@@ -205,12 +208,13 @@ public class InsertMediaMetaDataCommandHandler
 
         stopWatch.Stop();
 
-        _log.Here().Debug(
-            "Finished inserting {Count} {NameOfPlexGenre} in {ElapsedSeconds:F2} seconds",
-            newPlexGenres.Count,
-            nameof(PlexGenre),
-            stopWatch.Elapsed.TotalSeconds
-        );
+        _log.Here()
+            .Debug(
+                "Finished inserting {Count} {NameOfPlexGenre} in {ElapsedSeconds:F2} seconds",
+                newPlexGenres.Count,
+                nameof(PlexGenre),
+                stopWatch.Elapsed.TotalSeconds
+            );
         return Result.Ok(resultDict);
     }
 
@@ -250,11 +254,12 @@ public class InsertMediaMetaDataCommandHandler
 
         if (insertResult.IsFailed)
         {
-            _log.Here().Error(
-                "Failed to insert {NameOfPlexCountry} after {ElapsedSeconds:F2} seconds",
-                nameof(PlexCountry),
-                stopWatch.Elapsed.TotalSeconds
-            );
+            _log.Here()
+                .Error(
+                    "Failed to insert {NameOfPlexCountry} after {ElapsedSeconds:F2} seconds",
+                    nameof(PlexCountry),
+                    stopWatch.Elapsed.TotalSeconds
+                );
             return insertResult.LogError();
         }
 
@@ -266,12 +271,13 @@ public class InsertMediaMetaDataCommandHandler
 
         stopWatch.Stop();
 
-        _log.Here().Debug(
-            "Finished inserting {Count} {NameOfPlexCountry} in {ElapsedSeconds:F2} seconds",
-            newPlexCountries.Count,
-            nameof(PlexCountry),
-            stopWatch.Elapsed.TotalSeconds
-        );
+        _log.Here()
+            .Debug(
+                "Finished inserting {Count} {NameOfPlexCountry} in {ElapsedSeconds:F2} seconds",
+                newPlexCountries.Count,
+                nameof(PlexCountry),
+                stopWatch.Elapsed.TotalSeconds
+            );
         return Result.Ok(resultDict);
     }
 }

@@ -73,7 +73,8 @@ public class AddOrUpdatePlexLibrariesCommandHandler
 
                 if (plexLibraryDb is null)
                 {
-                    _log.Here().Debug("Adding PlexLibrary {PlexLibraryName} to the database", incomingPlexLibrary.Title);
+                    _log.Here()
+                        .Debug("Adding PlexLibrary {PlexLibraryName} to the database", incomingPlexLibrary.Title);
                     await _dbContext.PlexLibraries.AddAsync(incomingPlexLibrary, cancellationToken);
                 }
                 else
@@ -82,11 +83,12 @@ public class AddOrUpdatePlexLibrariesCommandHandler
                     incomingPlexLibrary.SyncedAt = plexLibraryDb.SyncedAt;
                     incomingPlexLibrary.DefaultDestinationId = plexLibraryDb.DefaultDestinationId;
 
-                    _log.Here().Debug(
-                        "Updating PlexLibrary {PlexLibraryName} with id: {PlexLibraryId} in the database",
-                        incomingPlexLibrary.Title,
-                        incomingPlexLibrary.Id
-                    );
+                    _log.Here()
+                        .Debug(
+                            "Updating PlexLibrary {PlexLibraryName} with id: {PlexLibraryId} in the database",
+                            incomingPlexLibrary.Title,
+                            incomingPlexLibrary.Id
+                        );
 
                     if (incomingPlexLibrary.Type == PlexMediaType.Movie)
                         incomingPlexLibrary.SetMovieMetaData(plexLibraryDb.MovieCount, plexLibraryDb.MediaSize);
@@ -110,10 +112,11 @@ public class AddOrUpdatePlexLibrariesCommandHandler
         await _dbContext.SaveChangesAsync(cancellationToken);
 
         // Add or update the PlexAccount, PlexServer and PlexLibrary relationships
-        _log.Here().Information(
-            "Adding, updating or removing the PlexAccount: {PlexAccountDisplayName} association with PlexLibraries now",
-            plexAccount.DisplayName
-        );
+        _log.Here()
+            .Information(
+                "Adding, updating or removing the PlexAccount: {PlexAccountDisplayName} association with PlexLibraries now",
+                plexAccount.DisplayName
+            );
 
         foreach (var (plexServerId, incomingPlexLibraries) in plexServerLibrariesDict)
         {

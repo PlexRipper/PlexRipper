@@ -46,12 +46,13 @@ public class DownloadJob : IJob, IDisposable
         var downloadTaskKey = dataMap.GetJsonValue<DownloadTaskKey>(DownloadTaskIdParameter);
 
         var token = context.CancellationToken;
-        _log.Here().Debug(
-            "Executing job: {DownloadJobName} for {DownloadTaskIdName} with id: {DownloadTaskId}",
-            nameof(DownloadJob),
-            nameof(downloadTaskKey),
-            downloadTaskKey
-        );
+        _log.Here()
+            .Debug(
+                "Executing job: {DownloadJobName} for {DownloadTaskIdName} with id: {DownloadTaskId}",
+                nameof(DownloadJob),
+                nameof(downloadTaskKey),
+                downloadTaskKey
+            );
 
         // Jobs should swallow exceptions as otherwise Quartz will keep re-executing it
         // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
@@ -73,10 +74,11 @@ public class DownloadJob : IJob, IDisposable
 
             if (!downloadTask.IsDownloadable)
             {
-                _log.Here().Warning(
-                    "DownloadTask {DownloadTaskId} is not downloadable, aborting DownloadJob",
-                    downloadTaskKey
-                );
+                _log.Here()
+                    .Warning(
+                        "DownloadTask {DownloadTaskId} is not downloadable, aborting DownloadJob",
+                        downloadTaskKey
+                    );
                 return;
             }
 
@@ -122,12 +124,13 @@ public class DownloadJob : IJob, IDisposable
             }
             catch (TaskCanceledException)
             {
-                _log.Here().Information(
-                    "{DownloadJobName} with {DownloadTaskIdName}: {DownloadTaskId} has been requested to be stopped",
-                    nameof(DownloadJob),
-                    nameof(downloadTaskKey),
-                    downloadTaskKey
-                );
+                _log.Here()
+                    .Information(
+                        "{DownloadJobName} with {DownloadTaskIdName}: {DownloadTaskId} has been requested to be stopped",
+                        nameof(DownloadJob),
+                        nameof(downloadTaskKey),
+                        downloadTaskKey
+                    );
                 await _plexDownloadClient.StopAsync();
 
                 await _dbContext.SetDownloadStatus(downloadTaskKey, DownloadStatus.Paused);
@@ -140,12 +143,13 @@ public class DownloadJob : IJob, IDisposable
         }
         finally
         {
-            _log.Here().Debug(
-                "Exiting job: {DownloadJobName} for {DownloadTaskName} with id: {DownloadTaskId}",
-                nameof(DownloadJob),
-                nameof(DownloadTaskGeneric),
-                downloadTaskKey
-            );
+            _log.Here()
+                .Debug(
+                    "Exiting job: {DownloadJobName} for {DownloadTaskName} with id: {DownloadTaskId}",
+                    nameof(DownloadJob),
+                    nameof(DownloadTaskGeneric),
+                    downloadTaskKey
+                );
         }
     }
 

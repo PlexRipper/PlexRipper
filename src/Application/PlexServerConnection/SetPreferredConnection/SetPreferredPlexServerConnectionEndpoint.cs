@@ -59,12 +59,13 @@ public class SetPreferredPlexServerConnectionEndpoint
         var plexServerConnectionId = req.PlexServerConnectionId;
         var plexServerId = req.PlexServerId;
 
-        _log.Here().Debug(
-            "Setting the preferred {NameOfPlexServerConnection} for {PlexServerIdName}: {PlexServerId}",
-            nameof(PlexServerConnection),
-            nameof(plexServerId),
-            plexServerId
-        );
+        _log.Here()
+            .Debug(
+                "Setting the preferred {NameOfPlexServerConnection} for {PlexServerIdName}: {PlexServerId}",
+                nameof(PlexServerConnection),
+                nameof(plexServerId),
+                plexServerId
+            );
 
         var plexServer = await _dbContext
             .PlexServers.Include(x => x.PlexServerConnections)

@@ -85,7 +85,8 @@ public class AddOrUpdatePlexServersCommandHandler
             else
             {
                 // Create plexServer
-                _log.Here().Debug("Adding PlexServer with name: {PlexServerName} to the database", incomingPlexServer.Name);
+                _log.Here()
+                    .Debug("Adding PlexServer with name: {PlexServerName} to the database", incomingPlexServer.Name);
                 foreach (var plexServerConnection in incomingPlexServer.PlexServerConnections)
                     plexServerConnection.PlexServerId = incomingPlexServer.Id;
 

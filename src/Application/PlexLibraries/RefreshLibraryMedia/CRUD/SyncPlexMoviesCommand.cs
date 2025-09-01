@@ -63,11 +63,12 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
             var plexServerId = command.LibraryMetadata.PlexLibrary.PlexServerId;
             var libraryName = await _dbContext.GetPlexLibraryNameById(plexLibraryId, cancellationToken);
 
-            _log.Here().Debug(
-                "Starting syncing of movies in library: {PlexLibraryName} with id: {PlexLibraryId} by first removing all media and then reinserting it",
-                libraryName,
-                plexLibraryId
-            );
+            _log.Here()
+                .Debug(
+                    "Starting syncing of movies in library: {PlexLibraryName} with id: {PlexLibraryId} by first removing all media and then reinserting it",
+                    libraryName,
+                    plexLibraryId
+                );
 
             var stopWatch = Stopwatch.StartNew();
 
@@ -125,12 +126,13 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
 
             stopWatch.Stop();
 
-            _log.Here().Information(
-                "Finished media syncing plexLibrary: {PlexLibraryName} with id: {PlexLibraryId} in {TotalMilliseconds} milliseconds",
-                libraryName,
-                plexLibraryId,
-                stopWatch.Elapsed.TotalMilliseconds
-            );
+            _log.Here()
+                .Information(
+                    "Finished media syncing plexLibrary: {PlexLibraryName} with id: {PlexLibraryId} in {TotalMilliseconds} milliseconds",
+                    libraryName,
+                    plexLibraryId,
+                    stopWatch.Elapsed.TotalMilliseconds
+                );
 
             _log.Here().Debug(_report.ToString());
 
@@ -150,11 +152,12 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
         CancellationToken ct
     )
     {
-        _log.Here().Debug(
-            "Starting syncing of movie actors for library: {LibraryName} with id: {LibraryId}",
-            libraryName,
-            libraryId
-        );
+        _log.Here()
+            .Debug(
+                "Starting syncing of movie actors for library: {LibraryName} with id: {LibraryId}",
+                libraryName,
+                libraryId
+            );
         var stopWatch = Stopwatch.StartNew();
         await _dbContext
             .PlexMovieActors.Where(x => x.PlexLibraryId == libraryId)
@@ -199,11 +202,12 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
         CancellationToken ct
     )
     {
-        _log.Here().Debug(
-            "Starting syncing of movie genres for library: {LibraryName} with id: {LibraryId}",
-            libraryName,
-            libraryId
-        );
+        _log.Here()
+            .Debug(
+                "Starting syncing of movie genres for library: {LibraryName} with id: {LibraryId}",
+                libraryName,
+                libraryId
+            );
         var stopWatch = Stopwatch.StartNew();
 
         await _dbContext
@@ -249,11 +253,12 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
         CancellationToken ct
     )
     {
-        _log.Here().Debug(
-            "Starting syncing of movie countries for library: {LibraryName} with id: {LibraryId}",
-            libraryName,
-            libraryId
-        );
+        _log.Here()
+            .Debug(
+                "Starting syncing of movie countries for library: {LibraryName} with id: {LibraryId}",
+                libraryName,
+                libraryId
+            );
         var stopWatch = Stopwatch.StartNew();
 
         await _dbContext

@@ -38,12 +38,13 @@ public class SyncServerMediaJob : IJob
         var plexServerId = dataMap.GetIntValue(PlexServerIdParameter);
         var forceSync = dataMap.GetBooleanValue(ForceSyncParameter);
 
-        _log.Here().Debug(
-            "Executing job: {SyncServerMediaJobName)} for {PlexServerName)}: {PlexServerId}",
-            nameof(SyncServerMediaJob),
-            nameof(PlexServer),
-            plexServerId
-        );
+        _log.Here()
+            .Debug(
+                "Executing job: {SyncServerMediaJobName)} for {PlexServerName)}: {PlexServerId}",
+                nameof(SyncServerMediaJob),
+                nameof(PlexServer),
+                plexServerId
+            );
 
         // Jobs should swallow exceptions as otherwise Quartz will keep re-executing it
         // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
@@ -75,11 +76,12 @@ public class SyncServerMediaJob : IJob
 
             if (!plexLibraries.Any())
             {
-                _log.Here().Information(
-                    "PlexServer {PlexServerName} with id {PlexServerId} has no libraries to sync",
-                    plexServer.Name,
-                    plexServer.Id
-                );
+                _log.Here()
+                    .Information(
+                        "PlexServer {PlexServerName} with id {PlexServerId} has no libraries to sync",
+                        plexServer.Name,
+                        plexServer.Id
+                    );
                 return;
             }
 
@@ -140,11 +142,12 @@ public class SyncServerMediaJob : IJob
                 return;
             }
 
-            _log.Here().Information(
-                "Successfully synced server \"{PlexServerName}\" with id {PlexServerId} has no libraries to sync",
-                plexServer.Name,
-                plexServer.Id
-            );
+            _log.Here()
+                .Information(
+                    "Successfully synced server \"{PlexServerName}\" with id {PlexServerId} has no libraries to sync",
+                    plexServer.Name,
+                    plexServer.Id
+                );
         }
         catch (Exception e)
         {

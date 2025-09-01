@@ -48,11 +48,12 @@ public class FileMergeScheduler : IFileMergeScheduler
         if (!downloadTaskKey.IsValid)
             return ResultExtensions.IsInvalidId(nameof(DownloadTaskKey), downloadTaskKey.Id).LogWarning();
 
-        _log.Here().Information(
-            "Stopping FileMergeJob for {NameOfDownloadFileTask)} with id: {FileTaskId}",
-            nameof(DownloadTaskKey),
-            downloadTaskKey.Id
-        );
+        _log.Here()
+            .Information(
+                "Stopping FileMergeJob for {NameOfDownloadFileTask)} with id: {FileTaskId}",
+                nameof(DownloadTaskKey),
+                downloadTaskKey.Id
+            );
 
         var jobKey = FileMergeJob.GetJobKey(downloadTaskKey.Id);
         if (!await _scheduler.IsJobRunning(jobKey))

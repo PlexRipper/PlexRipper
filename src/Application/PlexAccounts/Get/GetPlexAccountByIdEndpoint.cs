@@ -59,7 +59,8 @@ public class GetPlexAccountByIdEndpoint : BaseEndpoint<GetPlexAccountByIdEndpoin
             return;
         }
 
-        _log.Here().Debug("Found an {NameOfPlexAccount} with the id: {AccountId}", nameof(PlexAccount), req.PlexAccountId);
+        _log.Here()
+            .Debug("Found an {NameOfPlexAccount} with the id: {AccountId}", nameof(PlexAccount), req.PlexAccountId);
         await SendFluentResult(Result.Ok(plexAccount), x => x.ToDTO(), ct);
     }
 }

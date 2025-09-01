@@ -77,11 +77,12 @@ public class CheckAllConnectionsStatusByPlexServerJob : IJob
             update.Status = JobStatus.Completed;
             await _signalRService.SendJobStatusUpdateAsync(update);
 
-            _log.Here().Debug(
-                "{JobName} for servers with ids: {PlexServerIds} completed",
-                nameof(CheckAllConnectionsStatusByPlexServerJob),
-                plexServers.Select(x => x.Id).ToList()
-            );
+            _log.Here()
+                .Debug(
+                    "{JobName} for servers with ids: {PlexServerIds} completed",
+                    nameof(CheckAllConnectionsStatusByPlexServerJob),
+                    plexServers.Select(x => x.Id).ToList()
+                );
         }
         catch (Exception e)
         {

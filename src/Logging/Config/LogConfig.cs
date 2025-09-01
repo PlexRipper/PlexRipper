@@ -26,8 +26,7 @@ public class LogConfig
             // These filters: No XML encryptor configured. Key {*} may be persisted to storage in unencrypted form.
             // This can be ignored because we use proper auth: https://github.com/dotnet/aspnetcore/issues/3309#issuecomment-404246838
             .Filter.ByExcluding(Matching.FromSource("Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager"))
-            .MinimumLevel.Override("Quartz", LogEventLevel.Warning)
-            .Enrich.FromLogContext();
+            .MinimumLevel.Override("Quartz", LogEventLevel.Warning);
 
         // Do not mask data when debugging
         if (!EnvironmentExtensions.IsUnmasked())
@@ -52,6 +51,7 @@ public class LogConfig
         }
 
         return config
+            .Enrich.FromLogContext()
             .Enrich.With<ExternalFrameworkEnricher>()
             .WriteTo.Debug(outputTemplate: _template)
             .WriteTo.Console(theme: LogThemes.SystemColored, outputTemplate: _template);
@@ -59,6 +59,7 @@ public class LogConfig
 
     public virtual Logger GetLogger(LogEventLevel minimumLogLevel = LogEventLevel.Debug) =>
         GetBaseConfiguration()
+            .WriteTo.Seq("http://localhost:5341")
             .WriteTo.File(
                 TemplateTextFormatter,
                 Path.Combine(PathProvider.LogsDirectory, "log.txt"),

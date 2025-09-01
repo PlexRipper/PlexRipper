@@ -36,10 +36,9 @@ public partial class BaseUnitTest
 
         LogManager.SetupLogging(logEventLevel);
 
-        var testLogConfig = new TestLogConfig(output);
-
         BogusExtensions.Setup();
 
+        var testLogConfig = new TestLogConfig(output);
         Log = testLogConfig.CreateLogInstance<BaseUnitTest>(_logEventLevel);
 
         mock = AutoMock.GetStrict(SetDefaultBuilder);

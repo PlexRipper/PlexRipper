@@ -23,7 +23,7 @@ public class AppExtensions
     [DllImport("libc")]
     public static extern uint getgid();
 
-    private static readonly ILogger _log = new LogConfig().CreateLogInstance<AppExtensions>();
+    private static readonly ILogger _log = LogManager.GetLogger<AppExtensions>();
 
     /// <summary>
     ///   Log the identity of the current process, including environment variables and user/group IDs.

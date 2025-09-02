@@ -6,6 +6,7 @@ using Serilog.Events;
 using Serilog.Filters;
 using Serilog.Formatting.Display;
 using Serilog.Sinks.Console.LogThemes;
+using Serilog.Templates;
 
 namespace Reaparr.Logging;
 
@@ -20,7 +21,18 @@ public class LogConfig
     public static string SourceContext => nameof(SourceContext);
 
     private static readonly string _template =
-        $"{{NewLine}}{{Timestamp:HH:mm:ss}} [{{Level}}] [{{{nameof(FileName)}}}.cs:{{{nameof(LineNumber)}}}.{{{nameof(MethodName)}}}()] => {{Message:lj}}{{NewLine}}{{Exception}}";
+        $"{{NewLine}}{{Timestamp:HH:mm:ss}} [{{Level}}] [{{{FileName}}}.cs:{{{LineNumber}}}.{{{MethodName}}}()] => {{Message:lj}}{{NewLine}}{{Exception}}";
+
+    private static readonly ExpressionTemplate _newTemplate = new(
+        // Template
+        "{@t:HH:mm:ss} [{@l:u3}] "
+            + "{#if FileName is not null}"
+            + "[{FileName}:{LineNumber}.{MethodName}()]"
+            + "{#else}"
+            + "[{SourceContext}]"
+            + "{#end} => {@m}\n{@x}",
+        theme: LogThemes.SystemColored.ToTemplateTheme()
+    );
 
     protected static readonly MessageTemplateTextFormatter TemplateTextFormatter = new(_template);
 
@@ -56,10 +68,7 @@ public class LogConfig
             });
         }
 
-        return config
-            .Enrich.FromLogContext()
-            .WriteTo.Debug(outputTemplate: _template)
-            .WriteTo.Console(formatter: new ConditionalTextFormatter());
+        return config.Enrich.FromLogContext().WriteTo.Debug(_newTemplate).WriteTo.Console(_newTemplate);
     }
 
     public virtual Logger GetLogger(LogEventLevel minimumLogLevel = LogEventLevel.Debug) =>

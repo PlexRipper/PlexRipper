@@ -110,6 +110,14 @@
         "resolved": "1.7.3",
         "contentHash": "U/38ICup0xDMDL8TjprLDCWI16MkQTPEJfWgPROFxtGjsBf+SW1W2fMfEhdiAYLGCTSFWNXmVGdVjU58Gyr0eQ=="
       },
+      "Serilog.Expressions": {
+        "type": "Transitive",
+        "resolved": "5.0.0",
+        "contentHash": "QhZjXtUcA2QfQRA60m+DfyIfidKsQV7HBstbYEDqzJKMbJH/KnKthkkjciRuYrmFE+scWv1JibC5LlXrdtOUmw==",
+        "dependencies": {
+          "Serilog": "4.0.0"
+        }
+      },
       "Serilog.Sinks.Console": {
         "type": "Transitive",
         "resolved": "6.0.0",
@@ -233,6 +241,7 @@
           "Reaparr.Environment": "[1.0.0, )",
           "Serilog": "[4.3.0, )",
           "Serilog.Enrichers.Sensitive": "[1.7.3, )",
+          "Serilog.Expressions": "[5.0.0, )",
           "Serilog.Sinks.Console": "[6.0.0, )",
           "Serilog.Sinks.Console.LogThemes": "[0.3.0, )",
           "Serilog.Sinks.Debug": "[3.0.0, )",

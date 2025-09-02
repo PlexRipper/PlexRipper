@@ -69,7 +69,8 @@ public static partial class Startup
                     .ToDictionary(e => e.Key, e => e.Select(m => m.ErrorMessage).ToArray());
                 foreach (var reason in errors)
                     result.Errors[0].Metadata.Add(reason.Key, reason.Value);
-                return result;
+
+                return result.LogError();
             };
         });
     }

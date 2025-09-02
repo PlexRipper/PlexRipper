@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using FluentResults;
+using Microsoft.AspNetCore.Http;
 using Serilog;
 using Serilog.Events;
 using Serilog.Parsing;
@@ -53,5 +54,10 @@ public static partial class LogExtensions
         error.Metadata.Add("Exception", logMetaData.Exception);
 
         return Result.Fail(error);
+    }
+
+    public static void DebugApiCall(this ILogger log, HttpContext context, object? request = null)
+    {
+        log.Debug("{Method}: {EndpointPath} with {Request}", context.Request.Method, context.Request.Path, request);
     }
 }

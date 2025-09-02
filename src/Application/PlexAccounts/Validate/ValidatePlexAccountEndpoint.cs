@@ -80,6 +80,7 @@ public class ValidatePlexAccountEndpoint : BaseEndpoint<ValidatePlexAccountEndpo
 
     public override async Task HandleAsync(ValidatePlexAccountEndpointRequest req, CancellationToken ct)
     {
+        _log.Here().DebugApiCall(HttpContext, req);
         var plexAccount = req.PlexAccount.ToModel();
 
         Result<PlexAccount> validateResult;

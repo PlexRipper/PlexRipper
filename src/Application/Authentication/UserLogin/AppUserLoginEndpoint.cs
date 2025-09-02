@@ -87,6 +87,7 @@ public class AppUserLoginEndpoint : BaseEndpoint<AppUserLoginEndpointRequest>
 
     public override async Task HandleAsync(AppUserLoginEndpointRequest req, CancellationToken ct)
     {
+        _log.Here().DebugApiCall(HttpContext, req);
         var username = req.Username;
         var password = req.Password;
 

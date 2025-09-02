@@ -1,17 +1,21 @@
 using Microsoft.AspNetCore.Http;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
+using Reaparr.Logging;
+using Serilog;
 
 namespace Reaparr.Application;
 
 public class GetAllDownloadTasksEndpoint : BaseEndpointWithoutRequest<List<ServerDownloadProgressDTO>>
 {
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.DownloadController;
 
-    public GetAllDownloadTasksEndpoint(IReaparrDbContext dbContext)
+    public GetAllDownloadTasksEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
+        _log = log.ForContext<GetAllDownloadTasksEndpoint>();
         _dbContext = dbContext;
     }
 
@@ -27,6 +31,7 @@ public class GetAllDownloadTasksEndpoint : BaseEndpointWithoutRequest<List<Serve
 
     public override async Task HandleAsync(CancellationToken ct)
     {
+        _log.Here().DebugApiCall(HttpContext);
         var downloadList = await _dbContext.GetAllDownloadTasksByServerAsync(cancellationToken: ct);
         await SendFluentResult(Result.Ok(downloadList), x => x.ToServerDownloadProgressDTOList(), ct);
     }

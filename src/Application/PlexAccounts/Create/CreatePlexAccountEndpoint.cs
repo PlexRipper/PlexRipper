@@ -66,6 +66,7 @@ public class CreatePlexAccountEndpoint : BaseEndpoint<CreatePlexAccountEndpointR
 
     public override async Task HandleAsync(CreatePlexAccountEndpointRequest req, CancellationToken ct)
     {
+        _log.Here().DebugApiCall(HttpContext, req);
         var plexAccount = req.PlexAccount!.ToModel();
         plexAccount.Id = 0;
 

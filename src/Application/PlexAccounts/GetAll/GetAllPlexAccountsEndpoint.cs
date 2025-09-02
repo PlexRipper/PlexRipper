@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
+using Reaparr.Logging;
+using Serilog;
 
 namespace Reaparr.Application;
 
@@ -29,12 +31,14 @@ public record GetAllPlexAccountsEndpointRequest
 
 public class GetAllPlexAccountsEndpoint : BaseEndpoint<GetAllPlexAccountsEndpointRequest, List<PlexAccountDTO>>
 {
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.PlexAccountController;
 
-    public GetAllPlexAccountsEndpoint(IReaparrDbContext dbContext)
+    public GetAllPlexAccountsEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
+        _log = log.ForContext<GetAllPlexAccountsEndpoint>();
         _dbContext = dbContext;
     }
 
@@ -50,6 +54,7 @@ public class GetAllPlexAccountsEndpoint : BaseEndpoint<GetAllPlexAccountsEndpoin
 
     public override async Task HandleAsync(GetAllPlexAccountsEndpointRequest req, CancellationToken ct)
     {
+        _log.Here().DebugApiCall(HttpContext, req);
         var query = _dbContext
             .PlexAccounts.Include(x => x.PlexAccountServers)
             .Include(x => x.PlexAccountLibraries)

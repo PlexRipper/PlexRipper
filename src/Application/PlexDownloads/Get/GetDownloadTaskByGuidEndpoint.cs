@@ -3,6 +3,8 @@ using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
+using Reaparr.Logging;
+using Serilog;
 
 namespace Reaparr.Application;
 
@@ -33,12 +35,14 @@ public class GetDownloadTaskByGuidRequestValidator : Validator<GetDownloadTaskBy
 
 public class GetDownloadTaskByGuidEndpoint : BaseEndpoint<GetDownloadTaskByGuidRequest, DownloadTaskDTO>
 {
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.DownloadController + "/detail/{DownloadTaskGuid}";
 
-    public GetDownloadTaskByGuidEndpoint(IReaparrDbContext dbContext)
+    public GetDownloadTaskByGuidEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
+        _log = log.ForContext<GetDownloadTaskByGuidEndpoint>();
         _dbContext = dbContext;
     }
 
@@ -56,6 +60,7 @@ public class GetDownloadTaskByGuidEndpoint : BaseEndpoint<GetDownloadTaskByGuidR
 
     public override async Task HandleAsync(GetDownloadTaskByGuidRequest req, CancellationToken ct)
     {
+        _log.Here().DebugApiCall(HttpContext, req);
         var downloadTask = await _dbContext.GetDownloadTaskAsync(req.DownloadTaskGuid, req.Type, ct);
 
         if (downloadTask is null)

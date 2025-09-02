@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
+using Reaparr.Logging;
+using Serilog;
 
 namespace Reaparr.Application;
 
@@ -30,12 +32,14 @@ public class GetLibraryMediaMetadataRequestValidator : Validator<GetLibraryMedia
 
 public class GetLibraryMediaMetadata : BaseEndpoint<GetLibraryMediaMetadataRequest, PlexMediaMetadataDTO>
 {
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.PlexLibraryController + "/{PlexLibraryId}/metadata";
 
-    public GetLibraryMediaMetadata(IReaparrDbContext dbContext)
+    public GetLibraryMediaMetadata(ILogger log, IReaparrDbContext dbContext)
     {
+        _log = log.ForContext<GetLibraryMediaMetadata>();
         _dbContext = dbContext;
     }
 
@@ -50,6 +54,7 @@ public class GetLibraryMediaMetadata : BaseEndpoint<GetLibraryMediaMetadataReque
 
     public override async Task HandleAsync(GetLibraryMediaMetadataRequest req, CancellationToken ct)
     {
+        _log.Here().DebugApiCall(HttpContext, req);
         if (req.PlexLibraryId > 0)
         {
             // First, verify the library exists

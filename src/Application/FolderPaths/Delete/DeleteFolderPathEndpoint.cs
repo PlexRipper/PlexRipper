@@ -45,6 +45,7 @@ public class DeleteFolderPathEndpoint : BaseEndpoint<DeleteFolderPathEndpointReq
 
     public override async Task HandleAsync(DeleteFolderPathEndpointRequest req, CancellationToken ct)
     {
+        _log.Here().DebugApiCall(HttpContext, req);
         await _dbContext.FolderPaths.Where(x => x.Id == req.Id).ExecuteDeleteAsync(ct);
         _log.Here()
             .Debug("Deleted {FolderPathName} with Id: {CommandId} from the database", nameof(FolderPath), req.Id);

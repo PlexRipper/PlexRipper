@@ -3,6 +3,8 @@ using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
+using Reaparr.Logging;
+using Serilog;
 using Reaparr.Settings.Contracts;
 
 namespace Reaparr.Application;
@@ -25,13 +27,15 @@ public class SetServerAliasRequestValidator : Validator<SetServerAliasRequest>
 
 public class SetServerAlias : BaseEndpoint<SetServerAliasRequest>
 {
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly IServerSettingsModule _serverSettingsModule;
 
     public override string EndpointPath => ApiRoutes.PlexServerController + "/{PlexServerId}/set-server-alias";
 
-    public SetServerAlias(IReaparrDbContext dbContext, IServerSettingsModule serverSettingsModule)
+    public SetServerAlias(ILogger log, IReaparrDbContext dbContext, IServerSettingsModule serverSettingsModule)
     {
+        _log = log.ForContext<SetServerAlias>();
         _dbContext = dbContext;
         _serverSettingsModule = serverSettingsModule;
     }
@@ -49,6 +53,7 @@ public class SetServerAlias : BaseEndpoint<SetServerAliasRequest>
 
     public override async Task HandleAsync(SetServerAliasRequest req, CancellationToken ct)
     {
+        _log.Here().DebugApiCall(HttpContext, req);
         var machineIdentifier = await _dbContext.GetPlexServerMachineIdentifierById(req.PlexServerId, ct);
         if (machineIdentifier == string.Empty)
         {

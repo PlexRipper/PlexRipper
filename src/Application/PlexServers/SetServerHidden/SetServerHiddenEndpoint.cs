@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
+using Reaparr.Logging;
+using Serilog;
 using Reaparr.Settings.Contracts;
 
 namespace Reaparr.Application;
@@ -26,13 +28,15 @@ public class SetServerHiddenRequestValidator : Validator<SetServerHiddenRequest>
 
 public class SetServerHiddenRequestEndpoint : BaseEndpoint<SetServerHiddenRequest>
 {
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly IServerSettingsModule _serverSettingsModule;
 
     public override string EndpointPath => ApiRoutes.PlexServerController + "/{PlexServerId}/set-server-hidden";
 
-    public SetServerHiddenRequestEndpoint(IReaparrDbContext dbContext, IServerSettingsModule serverSettingsModule)
+    public SetServerHiddenRequestEndpoint(ILogger log, IReaparrDbContext dbContext, IServerSettingsModule serverSettingsModule)
     {
+        _log = log.ForContext<SetServerHiddenRequestEndpoint>();
         _dbContext = dbContext;
         _serverSettingsModule = serverSettingsModule;
     }
@@ -50,6 +54,7 @@ public class SetServerHiddenRequestEndpoint : BaseEndpoint<SetServerHiddenReques
 
     public override async Task HandleAsync(SetServerHiddenRequest req, CancellationToken ct)
     {
+        _log.Here().DebugApiCall(HttpContext, req);
         var machineIdentifier = await _dbContext.GetPlexServerMachineIdentifierById(req.PlexServerId, ct);
         if (machineIdentifier == string.Empty)
         {

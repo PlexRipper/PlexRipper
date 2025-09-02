@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
+using Reaparr.Logging;
+using Serilog;
 
 namespace Reaparr.Application;
 
@@ -28,12 +30,14 @@ public class UpdateFolderPathEndpointRequestValidator : Validator<UpdateFolderPa
 
 public class UpdateFolderPathEndpoint : BaseEndpoint<UpdateFolderPathEndpointRequest, FolderPathDTO>
 {
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.FolderPathController + "/";
 
-    public UpdateFolderPathEndpoint(IReaparrDbContext dbContext)
+    public UpdateFolderPathEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
+        _log = log.ForContext<UpdateFolderPathEndpoint>();
         _dbContext = dbContext;
     }
 
@@ -50,6 +54,7 @@ public class UpdateFolderPathEndpoint : BaseEndpoint<UpdateFolderPathEndpointReq
 
     public override async Task HandleAsync(UpdateFolderPathEndpointRequest req, CancellationToken ct)
     {
+        _log.Here().DebugApiCall(HttpContext, req);
         // TODO: Should prevent updating reserved folder paths with id < 10
         var folderPath = req.FolderPathDto!.ToModel();
         var folderPathDb = await _dbContext

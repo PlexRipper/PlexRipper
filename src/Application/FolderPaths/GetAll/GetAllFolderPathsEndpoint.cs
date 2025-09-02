@@ -2,16 +2,20 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
+using Reaparr.Logging;
+using Serilog;
 
 namespace Reaparr.Application;
 
 public class GetAllFolderPathsEndpoint : BaseEndpointWithoutRequest<List<FolderPathDTO>>
 {
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     public override string EndpointPath => ApiRoutes.FolderPathController + "/";
 
-    public GetAllFolderPathsEndpoint(IReaparrDbContext dbContext)
+    public GetAllFolderPathsEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
+        _log = log.ForContext<GetAllFolderPathsEndpoint>();
         _dbContext = dbContext;
     }
 
@@ -24,6 +28,7 @@ public class GetAllFolderPathsEndpoint : BaseEndpointWithoutRequest<List<FolderP
 
     public override async Task HandleAsync(CancellationToken ct)
     {
+        _log.Here().DebugApiCall(HttpContext);
         var folderPaths = await _dbContext.FolderPaths.ToListAsync(ct);
 
         await SendFluentResult(Result.Ok(folderPaths), list => list.ToDTO(), ct);

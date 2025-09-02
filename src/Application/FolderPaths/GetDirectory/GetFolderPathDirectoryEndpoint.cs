@@ -65,6 +65,7 @@ public class GetFolderPathDirectoryEndpoint : BaseEndpoint<GetFolderPathDirector
 
     public override async Task HandleAsync(GetFolderPathDirectoryRequest req, CancellationToken ct)
     {
+        _log.Here().DebugApiCall(HttpContext, req);
         var path = req.Path;
 
         var result = LookupContents(path, false, true);

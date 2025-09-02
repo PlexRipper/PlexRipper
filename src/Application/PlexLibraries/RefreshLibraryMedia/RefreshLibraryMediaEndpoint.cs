@@ -3,6 +3,8 @@ using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
+using Reaparr.Logging;
+using Serilog;
 
 namespace Reaparr.Application;
 
@@ -18,13 +20,15 @@ public class RefreshLibraryMediaEndpointRequestValidator : Validator<RefreshLibr
 
 public class RefreshLibraryMediaEndpoint : BaseEndpoint<RefreshLibraryMediaEndpointRequest, PlexLibraryDTO>
 {
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
 
     public override string EndpointPath => ApiRoutes.PlexLibraryController + "/refresh/{PlexLibraryId}";
 
-    public RefreshLibraryMediaEndpoint(IReaparrDbContext dbContext, ICommandExecutor commandExecutor)
+    public RefreshLibraryMediaEndpoint(ILogger log, IReaparrDbContext dbContext, ICommandExecutor commandExecutor)
     {
+        _log = log.ForContext<RefreshLibraryMediaEndpoint>();
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;
     }
@@ -43,6 +47,7 @@ public class RefreshLibraryMediaEndpoint : BaseEndpoint<RefreshLibraryMediaEndpo
 
     public override async Task HandleAsync(RefreshLibraryMediaEndpointRequest req, CancellationToken ct)
     {
+        _log.Here().DebugApiCall(HttpContext, req);
         var result = await _commandExecutor.Send(new RefreshLibraryMediaCommand(req.PlexLibraryId, _ => { }), ct);
         if (result.IsFailed)
         {

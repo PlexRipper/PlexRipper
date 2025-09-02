@@ -56,6 +56,7 @@ public class SetPreferredPlexServerConnectionEndpoint
 
     public override async Task HandleAsync(SetPreferredPlexServerConnectionEndpointRequest req, CancellationToken ct)
     {
+        _log.Here().DebugApiCall(HttpContext, req);
         var plexServerConnectionId = req.PlexServerConnectionId;
         var plexServerId = req.PlexServerId;
 

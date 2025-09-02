@@ -48,6 +48,7 @@ public class DeletePlexAccountByIdEndpoint : BaseEndpoint<DeletePlexAccountByIdR
 
     public override async Task HandleAsync(DeletePlexAccountByIdRequest req, CancellationToken ct)
     {
+        _log.Here().DebugApiCall(HttpContext, req);
         var deletedPlexAccountsCount = await _dbContext
             .PlexAccounts.Where(x => x.Id == req.PlexAccountId)
             .ExecuteDeleteAsync(ct);

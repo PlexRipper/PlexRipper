@@ -55,6 +55,7 @@ public class RefreshPlexAccountAccessEndpoint
 
     public override async Task HandleAsync(RefreshPlexAccountAccessEndpointRequest req, CancellationToken ct)
     {
+        _log.Here().DebugApiCall(HttpContext, req);
         var plexAccountIds = new List<int>();
         if (req.PlexAccountId > 0)
         {

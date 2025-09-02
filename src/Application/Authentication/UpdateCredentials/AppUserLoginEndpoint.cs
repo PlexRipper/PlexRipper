@@ -75,6 +75,7 @@ public class UpdateCredentialsEndpoint : BaseEndpoint<UpdateCredentialsEndpointR
 
     public override async Task HandleAsync(UpdateCredentialsEndpointRequest req, CancellationToken ct)
     {
+        _log.Here().DebugApiCall(HttpContext, req);
         // There is only 1 app user in the database
         var user = await _userManager.Users.FirstOrDefaultAsync(ct);
         if (user is null)

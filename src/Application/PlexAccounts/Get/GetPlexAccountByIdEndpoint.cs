@@ -46,6 +46,7 @@ public class GetPlexAccountByIdEndpoint : BaseEndpoint<GetPlexAccountByIdEndpoin
 
     public override async Task HandleAsync(GetPlexAccountByIdEndpointRequest req, CancellationToken ct)
     {
+        _log.Here().DebugApiCall(HttpContext, req);
         var plexAccount = await _dbContext
             .PlexAccounts.Include(x => x.PlexAccountServers)
             .Include(x => x.PlexAccountLibraries)

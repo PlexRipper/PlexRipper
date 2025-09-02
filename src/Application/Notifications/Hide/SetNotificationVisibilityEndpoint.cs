@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
+using Reaparr.Logging;
+using Serilog;
 
 namespace Reaparr.Application;
 
@@ -25,12 +27,14 @@ public class SetNotificationVisibilityEndpointRequestValidator : Validator<SetNo
 
 public class SetNotificationVisibilityEndpoint : BaseEndpoint<SetNotificationVisibilityEndpointRequest, BaseResultDTO>
 {
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.NotificationController;
 
-    public SetNotificationVisibilityEndpoint(IReaparrDbContext dbContext)
+    public SetNotificationVisibilityEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
+        _log = log.ForContext<SetNotificationVisibilityEndpoint>();
         _dbContext = dbContext;
     }
 
@@ -46,6 +50,7 @@ public class SetNotificationVisibilityEndpoint : BaseEndpoint<SetNotificationVis
 
     public override async Task HandleAsync(SetNotificationVisibilityEndpointRequest req, CancellationToken ct)
     {
+        _log.Here().DebugApiCall(HttpContext, req);
         var changed = await _dbContext
             .Notifications.Where(x => x.Id == req.Id)
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.Hidden, req.Hidden), ct);

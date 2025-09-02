@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
+using Reaparr.Logging;
+using Serilog;
 
 namespace Reaparr.Application;
 
@@ -21,12 +23,14 @@ public class GetDownloadTaskLogsByDownloadTaskIdRequestValidator : Validator<Get
 public class GetDownloadTaskLogsByDownloadTaskIdEndpoint
     : BaseEndpoint<GetDownloadTaskLogsByDownloadTaskIdRequest, List<DownloadWorkerLogDTO>>
 {
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.DownloadController + "/logs/{DownloadTaskGuid}/";
 
-    public GetDownloadTaskLogsByDownloadTaskIdEndpoint(IReaparrDbContext dbContext)
+    public GetDownloadTaskLogsByDownloadTaskIdEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
+        _log = log.ForContext<GetDownloadTaskLogsByDownloadTaskIdEndpoint>();
         _dbContext = dbContext;
     }
 
@@ -42,6 +46,7 @@ public class GetDownloadTaskLogsByDownloadTaskIdEndpoint
 
     public override async Task HandleAsync(GetDownloadTaskLogsByDownloadTaskIdRequest req, CancellationToken ct)
     {
+        _log.Here().DebugApiCall(HttpContext, req);
         var key = await _dbContext.GetDownloadTaskKeyAsync(req.DownloadTaskGuid, ct);
         if (key is null)
         {

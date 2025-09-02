@@ -3,6 +3,8 @@ using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
+using Reaparr.Logging;
+using Serilog;
 
 namespace Reaparr.Application;
 
@@ -41,12 +43,14 @@ public class GetAllMediaByTypeRequestValidator : Validator<GetAllMediaByTypeRequ
 
 public class GetAllMediaByTypeEndpoint : BaseEndpoint<GetAllMediaByTypeRequest, PlexMediaStatisticsDTO>
 {
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.PlexMediaController;
 
-    public GetAllMediaByTypeEndpoint(IReaparrDbContext dbContext)
+    public GetAllMediaByTypeEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
+        _log = log.ForContext<GetAllMediaByTypeEndpoint>();
         _dbContext = dbContext;
     }
 
@@ -63,6 +67,7 @@ public class GetAllMediaByTypeEndpoint : BaseEndpoint<GetAllMediaByTypeRequest, 
 
     public override async Task HandleAsync(GetAllMediaByTypeRequest req, CancellationToken ct)
     {
+        _log.Here().DebugApiCall(HttpContext, req);
         // When 0, just take everything
         var take = req.Size <= 0 ? 0 : req.Size;
         var skip = req.Page * req.Size;

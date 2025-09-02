@@ -2,9 +2,7 @@ using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
 using Reaparr.Settings.Contracts;
-using Serilog;
 
 namespace Reaparr.Application;
 

@@ -1,9 +1,7 @@
 ﻿using Quartz;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
 using Reaparr.WebAPI.Contracts;
-using Serilog;
 
 namespace Reaparr.Application;
 

@@ -2,7 +2,6 @@
 using System.Reactive.Subjects;
 using Autofac;
 using Reaparr.Environment;
-using Reaparr.Logging;
 using Reaparr.Settings.Contracts;
 
 namespace Reaparr.Settings.UnitTests;

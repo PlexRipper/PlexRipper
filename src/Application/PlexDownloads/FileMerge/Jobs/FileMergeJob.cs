@@ -1,8 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Quartz;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
-using Serilog;
 
 namespace Reaparr.Application;
 

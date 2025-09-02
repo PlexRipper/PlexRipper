@@ -15,7 +15,6 @@ using Reaparr.Application.Contracts;
 using Reaparr.Environment;
 using Reaparr.Identity;
 using Reaparr.Identity.Contracts;
-using Reaparr.Logging;
 using Reaparr.PlexApi;
 
 namespace Reaparr.WebAPI;

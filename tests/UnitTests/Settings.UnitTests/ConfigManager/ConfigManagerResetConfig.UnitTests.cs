@@ -1,7 +1,6 @@
 ﻿using System.IO.Abstractions;
 using Autofac;
 using Reaparr.Environment;
-using Reaparr.Logging;
 using Reaparr.Settings.Contracts;
 
 namespace Reaparr.Settings.UnitTests;

@@ -2,8 +2,6 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using Reaparr.Environment;
-using Reaparr.Logging;
-using Serilog;
 
 namespace Reaparr.Application;
 

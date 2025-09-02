@@ -1,5 +1,4 @@
-﻿using Serilog;
-using Serilog.Core;
+﻿using Serilog.Core;
 using Serilog.Events;
 using Serilog.Formatting;
 using Xunit.Sdk;

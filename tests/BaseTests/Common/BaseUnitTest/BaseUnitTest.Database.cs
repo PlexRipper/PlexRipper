@@ -1,7 +1,6 @@
 using Reaparr.Data;
 using Reaparr.Data.Contracts;
 using Reaparr.Identity.Contracts;
-using Reaparr.Logging;
 
 namespace Reaparr.BaseTests;
 

@@ -4,9 +4,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Reaparr.Logging;
 using Reaparr.WebAPI;
-using Serilog;
 
 namespace Reaparr.BaseTests;
 

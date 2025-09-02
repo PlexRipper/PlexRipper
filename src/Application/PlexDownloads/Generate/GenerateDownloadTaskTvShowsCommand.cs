@@ -4,8 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Application.Contracts.Validators;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
-using Serilog;
 
 namespace Reaparr.Application;
 

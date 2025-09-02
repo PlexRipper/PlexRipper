@@ -2,7 +2,6 @@
 using Autofac;
 using Reaparr.Environment;
 using Reaparr.Settings.Contracts;
-using Serilog;
 
 namespace Reaparr.Settings.UnitTests;
 

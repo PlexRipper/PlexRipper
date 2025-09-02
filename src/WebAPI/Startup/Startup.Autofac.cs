@@ -1,7 +1,5 @@
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
-using Reaparr.Logging;
-using Serilog;
 
 namespace Reaparr.WebAPI;
 

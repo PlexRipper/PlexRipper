@@ -2,9 +2,7 @@ using FastEndpoints;
 using FluentValidation;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
 using Reaparr.PlexApi.Contracts;
-using Serilog;
 
 namespace Reaparr.Application;
 

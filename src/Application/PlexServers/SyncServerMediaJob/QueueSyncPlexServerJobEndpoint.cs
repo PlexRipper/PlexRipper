@@ -1,7 +1,6 @@
 using System.ComponentModel;
 using FastEndpoints;
 using FluentValidation;
-using Microsoft.AspNetCore.Http;
 using Reaparr.Application.Contracts;
 
 namespace Reaparr.Application;

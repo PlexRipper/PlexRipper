@@ -1,8 +1,6 @@
 using System.Text.Json;
 using Quartz;
 using Reaparr.FileSystem.Contracts;
-using Reaparr.Logging;
-using Serilog;
 
 namespace Reaparr.Application;
 

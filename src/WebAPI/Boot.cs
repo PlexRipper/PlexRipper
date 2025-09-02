@@ -1,7 +1,6 @@
 using Reaparr.Application;
 using Reaparr.Application.Contracts;
 using Reaparr.Environment;
-using Reaparr.Logging;
 
 namespace Reaparr.WebAPI;
 

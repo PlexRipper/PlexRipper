@@ -1,5 +1,4 @@
 using FastEndpoints;
-using Microsoft.AspNetCore.Http;
 using Reaparr.Environment;
 
 namespace Reaparr.Application;

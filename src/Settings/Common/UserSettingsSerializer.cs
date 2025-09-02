@@ -1,7 +1,5 @@
 using System.Text.Json;
-using Reaparr.Logging;
 using Reaparr.Settings.Contracts;
-using Serilog;
 
 namespace Reaparr.Settings;
 

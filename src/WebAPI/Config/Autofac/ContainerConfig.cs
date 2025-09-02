@@ -3,7 +3,6 @@ using Reaparr.Application;
 using Reaparr.Data;
 using Reaparr.FileSystem.Config;
 using Reaparr.Identity;
-using Reaparr.Logging;
 using Reaparr.PlexApi;
 using Reaparr.Settings.Config;
 

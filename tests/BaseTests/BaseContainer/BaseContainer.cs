@@ -8,9 +8,7 @@ using Reaparr.Data;
 using Reaparr.Data.Contracts;
 using Reaparr.Environment;
 using Reaparr.FileSystem.Contracts;
-using Reaparr.Logging;
 using Reaparr.Settings.Contracts;
-using Serilog;
 
 namespace Reaparr.BaseTests;
 

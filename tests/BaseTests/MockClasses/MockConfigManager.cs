@@ -1,6 +1,4 @@
-﻿using Reaparr.Logging;
-using Reaparr.Settings.Contracts;
-using Serilog;
+﻿using Reaparr.Settings.Contracts;
 
 namespace Reaparr.BaseTests;
 

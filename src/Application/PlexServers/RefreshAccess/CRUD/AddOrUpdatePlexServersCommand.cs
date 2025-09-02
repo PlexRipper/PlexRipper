@@ -2,8 +2,6 @@ using FastEndpoints;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
-using Serilog;
 
 namespace Reaparr.Application;
 

@@ -1,8 +1,5 @@
-using Microsoft.AspNetCore.Http;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
-using Serilog;
 
 namespace Reaparr.Application;
 

@@ -1,6 +1,4 @@
 using Reaparr.Environment;
-using Reaparr.Logging;
-using Serilog;
 using Serilog.Events;
 
 namespace Reaparr.BaseTests;

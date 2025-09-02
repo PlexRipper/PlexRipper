@@ -4,9 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Identity.Contracts;
-using Reaparr.Logging;
 using Reaparr.Settings.Contracts;
-using Serilog;
 
 namespace Reaparr.Application;
 

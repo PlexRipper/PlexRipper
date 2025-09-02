@@ -1,8 +1,6 @@
 ﻿using FastEndpoints;
 using FluentValidation;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
-using Serilog;
 
 namespace Reaparr.Application;
 

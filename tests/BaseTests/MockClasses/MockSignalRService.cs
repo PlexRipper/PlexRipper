@@ -1,8 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using Reaparr.Application.Contracts;
-using Reaparr.Logging;
 using Reaparr.WebAPI.Contracts;
-using Serilog;
 
 namespace Reaparr.BaseTests;
 

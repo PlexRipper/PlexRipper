@@ -4,8 +4,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 using Reaparr.Environment;
-using Reaparr.Logging;
-using Serilog;
 using Serilog.Events;
 
 namespace Reaparr.BaseTests;

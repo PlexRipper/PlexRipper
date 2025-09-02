@@ -1,5 +1,4 @@
 using FastEndpoints.Security;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Reaparr.Application.Contracts;
 using Reaparr.Identity.Contracts;

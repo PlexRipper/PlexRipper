@@ -3,9 +3,7 @@ using System.IO.Abstractions;
 using Reaparr.Data.Contracts;
 using Reaparr.Environment;
 using Reaparr.Identity.Contracts;
-using Reaparr.Logging;
 using Reaparr.Settings.Contracts;
-using Serilog;
 
 namespace Reaparr.Data;
 

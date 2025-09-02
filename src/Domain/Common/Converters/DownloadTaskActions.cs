@@ -1,7 +1,4 @@
-﻿using Reaparr.Logging;
-using Serilog;
-
-namespace Reaparr.Domain;
+﻿namespace Reaparr.Domain;
 
 public static class DownloadTaskActions
 {

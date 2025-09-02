@@ -1,8 +1,6 @@
 ﻿using System.IO.Abstractions;
 using Reaparr.Environment;
-using Reaparr.Logging;
 using Reaparr.Settings.Contracts;
-using Serilog;
 
 namespace Reaparr.Settings;
 

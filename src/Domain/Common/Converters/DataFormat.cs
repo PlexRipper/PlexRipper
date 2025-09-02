@@ -1,6 +1,4 @@
 ﻿using System.Globalization;
-using Reaparr.Logging;
-using Serilog;
 
 namespace Reaparr.Domain;
 

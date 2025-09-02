@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.SignalR;
 using Reaparr.Application.Contracts;
-using Reaparr.Logging;
 using Reaparr.WebAPI.Contracts;
 
 namespace Reaparr.WebAPI;

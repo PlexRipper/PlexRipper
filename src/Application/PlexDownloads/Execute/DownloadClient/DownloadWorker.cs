@@ -6,9 +6,7 @@ using ByteSizeLib;
 using Polly;
 using Polly.Retry;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
 using Reaparr.PlexApi.Contracts;
-using Serilog;
 
 namespace Reaparr.Application;
 

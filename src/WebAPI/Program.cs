@@ -1,7 +1,6 @@
 using Reaparr.Application;
 using Reaparr.Environment;
 using Reaparr.FluentResultExtensions;
-using Reaparr.Logging;
 
 namespace Reaparr.WebAPI;
 

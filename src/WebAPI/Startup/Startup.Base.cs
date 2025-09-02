@@ -1,5 +1,3 @@
-using Reaparr.Logging;
-
 namespace Reaparr.WebAPI;
 
 public static partial class Startup

@@ -1,6 +1,4 @@
 using FastEndpoints;
-using Reaparr.Logging;
-using Serilog;
 
 namespace Reaparr.Domain;
 

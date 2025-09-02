@@ -5,7 +5,6 @@ using NaturalSort.Extension;
 using Reaparr.Data;
 using Reaparr.Data.Contracts;
 using Reaparr.Identity;
-using Reaparr.Logging;
 
 namespace Reaparr.BaseTests;
 

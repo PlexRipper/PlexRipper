@@ -2,9 +2,7 @@ using FastEndpoints;
 using LukeHagar.PlexAPI.SDK;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
 using Reaparr.PlexApi.Contracts;
-using Serilog;
 
 namespace Reaparr.PlexApi;
 

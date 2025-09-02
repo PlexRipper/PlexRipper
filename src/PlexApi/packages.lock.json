@@ -317,14 +317,6 @@
         "resolved": "1.7.3",
         "contentHash": "U/38ICup0xDMDL8TjprLDCWI16MkQTPEJfWgPROFxtGjsBf+SW1W2fMfEhdiAYLGCTSFWNXmVGdVjU58Gyr0eQ=="
       },
-      "Serilog.Expressions": {
-        "type": "Transitive",
-        "resolved": "4.0.0",
-        "contentHash": "dsC8GtalMDXMzywA60fHeBvqAjQ1EM75zSrdA7j7TxJfmrfss6BOxzgoT5thqjY+icLNbovUsC5KTYRlXzCpXg==",
-        "dependencies": {
-          "Serilog": "3.1.0"
-        }
-      },
       "Serilog.Sinks.Console": {
         "type": "Transitive",
         "resolved": "6.0.0",
@@ -374,31 +366,6 @@
           "Serilog": "3.1.1",
           "System.Collections.Immutable": "8.0.0",
           "System.Reactive": "6.0.1"
-        }
-      },
-      "SerilogTracing": {
-        "type": "Transitive",
-        "resolved": "2.3.1",
-        "contentHash": "tkl/Rm3kzdOAQ2uwMARw2vE7QftYij9Tjbplg1SuaB+h+YfkX0RQDAxKwnMEVBZbsbnst4JGfk3J66V1EDovPA==",
-        "dependencies": {
-          "Serilog": "4.0.0"
-        }
-      },
-      "SerilogTracing.Expressions": {
-        "type": "Transitive",
-        "resolved": "2.3.1",
-        "contentHash": "OLvZcUvSb72MsN6NXHIDe39RTfdu8HV+EwxiNHSdo1h9S2eBLoYhjmabxsXyIi7P6Xf9Ejo4YZwp0VZu4hlBjA==",
-        "dependencies": {
-          "Serilog.Expressions": "4.0.0",
-          "SerilogTracing": "2.3.1"
-        }
-      },
-      "SerilogTracing.Instrumentation.AspNetCore": {
-        "type": "Transitive",
-        "resolved": "2.3.1",
-        "contentHash": "Io2hYPUI8ErppTm7iLjatItYFKuB8UPSgSfaUjt8j8S6AsXXRj+PPcim78y+5APv5KRRbz+Jb6dRNfcMyc+tsg==",
-        "dependencies": {
-          "SerilogTracing": "2.3.1"
         }
       },
       "SQLitePCLRaw.core": {
@@ -508,10 +475,7 @@
           "Serilog.Sinks.Debug": "[3.0.0, )",
           "Serilog.Sinks.File": "[7.0.0, )",
           "Serilog.Sinks.Seq": "[9.0.0, )",
-          "Serilog.Sinks.TestCorrelator": "[4.0.0, )",
-          "SerilogTracing": "[2.3.1, )",
-          "SerilogTracing.Expressions": "[2.3.1, )",
-          "SerilogTracing.Instrumentation.AspNetCore": "[2.3.1, )"
+          "Serilog.Sinks.TestCorrelator": "[4.0.0, )"
         }
       },
       "Reaparr.PlexApi.Contracts": {

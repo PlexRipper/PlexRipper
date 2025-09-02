@@ -4,7 +4,6 @@ using FastEndpoints.Swagger;
 using Microsoft.AspNetCore.Http.Extensions;
 using Reaparr.Environment;
 using Reaparr.Logging;
-using SerilogTracing;
 
 namespace Reaparr.WebAPI;
 
@@ -22,9 +21,6 @@ public static partial class Startup
                 "Running location: {Location}",
                 Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
             );
-
-        // Setup SerilogTracing listener BEFORE app.Run()
-        var listener = new ActivityListenerConfiguration().Instrument.AspNetCoreRequests().TraceToSharedLogger();
 
         // This has to always be first
         app.UseCors(CORSConfiguration);

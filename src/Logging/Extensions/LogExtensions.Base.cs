@@ -1,18 +1,12 @@
 using System.Runtime.CompilerServices;
-using FluentResults;
-using Microsoft.AspNetCore.Http;
 using Serilog;
 using Serilog.Events;
-using Serilog.Parsing;
 
 namespace Reaparr.Logging;
 
 public static partial class LogExtensions
 {
-    private static readonly MessageTemplateParser _templateParser = new();
-
-    public static bool IsLogLevelEnabled(this ILogger logger, LogEventLevel logLevel = LogEventLevel.Debug) =>
-        logger.IsEnabled(logLevel);
+    public static bool IsLogLevelEnabled(this ILogger logger, LogEventLevel logLevel) => logger.IsEnabled(logLevel);
 
     public static bool IsLogLevelVerbose(this ILogger logger) => logger.IsEnabled(LogEventLevel.Verbose);
 
@@ -23,41 +17,29 @@ public static partial class LogExtensions
         [CallerFilePath] string sourceFilePath = "",
         [CallerMemberName] string memberName = "",
         [CallerLineNumber] int sourceLineNumber = 0
-    ) =>
-        logger
-            .ForContext(nameof(LogMetaData.ClassName), Path.GetFileNameWithoutExtension(sourceFilePath))
-            .ForContext(nameof(LogMetaData.MethodName), memberName)
-            .ForContext(nameof(LogMetaData.LineNumber), sourceLineNumber);
+    ) => logger
+        .ForContext(nameof(LogConfig.FileName), Path.GetFileNameWithoutExtension(sourceFilePath))
+        .ForContext(nameof(LogConfig.MethodName), memberName)
+        .ForContext(nameof(LogConfig.LineNumber), sourceLineNumber);
 
     public static string RenderMessage(this ILogger log, string messageTemplate, params object[] args)
     {
-        var parsed = _templateParser.Parse(messageTemplate);
+        log.BindMessageTemplate(messageTemplate, args, out var parsedTemplate, out var boundProperties);
+
+        if (parsedTemplate is null)
+        {
+            // Fallback: return the original template if parsing fails
+            return messageTemplate;
+        }
 
         var logEvent = new LogEvent(
             DateTimeOffset.Now,
-            LogEventLevel.Information, // Level doesn’t matter for rendering
+            LogEventLevel.Information,
             exception: null,
-            messageTemplate: parsed,
-            properties: args.Select((a, i) => new LogEventProperty("Arg" + i, new ScalarValue(a)))
+            messageTemplate: parsedTemplate,
+            properties: boundProperties ?? []
         );
 
-        return parsed.Render(logEvent.Properties);
-    }
-
-    public static Result ToResult(this LogMetaData logMetaData)
-    {
-        var error = new Error(logMetaData.ToString());
-        error.Metadata.Add("ClassName", logMetaData.ClassName);
-        error.Metadata.Add("MethodName", logMetaData.MethodName);
-        error.Metadata.Add("LineNumber", logMetaData.LineNumber);
-        error.Metadata.Add("LogLevel", logMetaData.LogLevel);
-        error.Metadata.Add("Exception", logMetaData.Exception);
-
-        return Result.Fail(error);
-    }
-
-    public static void DebugApiCall(this ILogger log, HttpContext context, object? request = null)
-    {
-        log.Debug("{Method}: {EndpointPath} with {Request}", context.Request.Method, context.Request.Path, request);
+        return logEvent.RenderMessage();
     }
 }

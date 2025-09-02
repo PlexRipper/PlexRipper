@@ -31,7 +31,11 @@ public class SetServerHiddenRequestEndpoint : BaseEndpoint<SetServerHiddenReques
 
     public override string EndpointPath => ApiRoutes.PlexServerController + "/{PlexServerId}/set-server-hidden";
 
-    public SetServerHiddenRequestEndpoint(ILogger log, IReaparrDbContext dbContext, IServerSettingsModule serverSettingsModule)
+    public SetServerHiddenRequestEndpoint(
+        ILogger log,
+        IReaparrDbContext dbContext,
+        IServerSettingsModule serverSettingsModule
+    )
     {
         _log = log.ForContext<SetServerHiddenRequestEndpoint>();
         _dbContext = dbContext;

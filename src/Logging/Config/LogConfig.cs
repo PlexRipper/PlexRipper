@@ -1,6 +1,4 @@
 using Reaparr.Environment;
-using Reaparr.Logging.Enricher;
-using Reaparr.Logging.Masks;
 using Serilog;
 using Serilog.Core;
 using Serilog.Enrichers.Sensitive;
@@ -13,8 +11,17 @@ namespace Reaparr.Logging;
 
 public class LogConfig
 {
+    public static string ClassName => nameof(ClassName);
+
+    public static string FileName => nameof(FileName);
+    public static string MethodName => nameof(MethodName);
+
+    public static string LineNumber => nameof(LineNumber);
+
+    public static string SourceContext => nameof(SourceContext);
+
     private static readonly string _template =
-        $"{{NewLine}}{{Timestamp:HH:mm:ss}} [{{Level}}] [{{{nameof(LogMetaData.ClassName)}}}.cs:{{{nameof(LogMetaData.LineNumber)}}}.{{{nameof(LogMetaData.MethodName)}}}()] => {{Message:lj}}{{NewLine}}{{Exception}}";
+        $"{{NewLine}}{{Timestamp:HH:mm:ss}} [{{Level}}] [{{{nameof(ClassName)}}}.cs:{{{nameof(LineNumber)}}}.{{{nameof(MethodName)}}}()] => {{Message:lj}}{{NewLine}}{{Exception}}";
 
     protected static readonly MessageTemplateTextFormatter TemplateTextFormatter = new(_template);
 
@@ -52,7 +59,6 @@ public class LogConfig
 
         return config
             .Enrich.FromLogContext()
-            .Enrich.With<ExternalFrameworkEnricher>()
             .WriteTo.Debug(outputTemplate: _template)
             .WriteTo.Console(theme: LogThemes.SystemColored, outputTemplate: _template);
     }

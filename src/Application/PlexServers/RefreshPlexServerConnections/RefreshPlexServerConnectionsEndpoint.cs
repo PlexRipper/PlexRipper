@@ -23,7 +23,11 @@ public class RefreshPlexServerConnectionsEndpoint : BaseEndpoint<RefreshPlexServ
     private readonly ICommandExecutor _commandExecutor;
     public override string EndpointPath => ApiRoutes.PlexServerController + "/{PlexServerId}/refresh";
 
-    public RefreshPlexServerConnectionsEndpoint(ILogger log, IReaparrDbContext dbContext, ICommandExecutor commandExecutor)
+    public RefreshPlexServerConnectionsEndpoint(
+        ILogger log,
+        IReaparrDbContext dbContext,
+        ICommandExecutor commandExecutor
+    )
     {
         _log = log.ForContext<RefreshPlexServerConnectionsEndpoint>();
         _dbContext = dbContext;

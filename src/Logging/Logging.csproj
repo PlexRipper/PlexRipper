@@ -22,7 +22,7 @@
         <PackageReference Include="Serilog.Enrichers.Sensitive" Version="1.7.3" />
         <PackageReference Include="Serilog.Expressions" Version="5.0.0" />
         <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
-        <PackageReference Include="Serilog.Sinks.Console.LogThemes" Version="0.3.0" />
+        <PackageReference Include="Serilog.Sinks.Console.LogThemes" Version="0.4.0" />
         <PackageReference Include="Serilog.Sinks.Debug" Version="3.0.0" />
         <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
         <PackageReference Include="Serilog.Sinks.Seq" Version="9.0.0" />

@@ -708,8 +708,8 @@
       },
       "Serilog.Sinks.Console.LogThemes": {
         "type": "Transitive",
-        "resolved": "0.3.0",
-        "contentHash": "6r5wQsJp/9u3i9Boqy4FCn26ibfzI3Irijm+05yJ/63f9KFC5TCrw9erH25XNYJd2++AldpKpvLfH37+JpKL4g==",
+        "resolved": "0.4.0",
+        "contentHash": "w7OLGCJXM7QPvacr52IyKI9lQIEo7VE9az7lyDH7sfeygpQGQbxMzU7uWFVDMYoQv+XRZ0KFvy8jGZQtjjH8Ew==",
         "dependencies": {
           "Serilog.Sinks.Console": "4.1.0"
         }
@@ -1006,7 +1006,7 @@
           "Serilog.Enrichers.Sensitive": "[1.7.3, )",
           "Serilog.Expressions": "[5.0.0, )",
           "Serilog.Sinks.Console": "[6.0.0, )",
-          "Serilog.Sinks.Console.LogThemes": "[0.3.0, )",
+          "Serilog.Sinks.Console.LogThemes": "[0.4.0, )",
           "Serilog.Sinks.Debug": "[3.0.0, )",
           "Serilog.Sinks.File": "[7.0.0, )",
           "Serilog.Sinks.Seq": "[9.0.0, )",

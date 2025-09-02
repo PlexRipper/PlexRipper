@@ -25,12 +25,12 @@ public class LogConfig
 
     private static readonly ExpressionTemplate _newTemplate = new(
         // Template
-        "{@t:HH:mm:ss} [{@l:u3}] "
+        "{@t:HH:mm:ss} [{@l}] "
             + "{#if FileName is not null}"
             + "[{FileName}:{LineNumber}.{MethodName}()]"
             + "{#else}"
             + "[{SourceContext}]"
-            + "{#end} => {@m}\n{@x}",
+            + "{#end} => {@m}\n{@x}\n",
         theme: LogThemes.SystemColored.ToTemplateTheme()
     );
 
@@ -75,7 +75,7 @@ public class LogConfig
         GetBaseConfiguration()
             .WriteTo.Seq("http://localhost:5341")
             .WriteTo.File(
-                new ConditionalTextFormatter(),
+                _newTemplate,
                 Path.Combine(PathProvider.LogsDirectory, "log.txt"),
                 minimumLogLevel,
                 rollingInterval: RollingInterval.Day,

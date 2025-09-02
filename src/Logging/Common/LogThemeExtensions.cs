@@ -10,7 +10,7 @@ public static class LogThemeExtensions
     {
         IReadOnlyDictionary<TemplateThemeStyle, string> mapped = consoleTheme.Styles.ToDictionary(
             x => x.Key.ToTemplate(),
-            x => x.Value.ToAnsi()
+            x => x.Value.ToAnsiString()
         );
 
         return new TemplateTheme(mapped);

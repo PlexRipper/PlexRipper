@@ -69,9 +69,9 @@
       },
       "Serilog.Sinks.Console.LogThemes": {
         "type": "Direct",
-        "requested": "[0.3.0, )",
-        "resolved": "0.3.0",
-        "contentHash": "6r5wQsJp/9u3i9Boqy4FCn26ibfzI3Irijm+05yJ/63f9KFC5TCrw9erH25XNYJd2++AldpKpvLfH37+JpKL4g==",
+        "requested": "[0.4.0, )",
+        "resolved": "0.4.0",
+        "contentHash": "w7OLGCJXM7QPvacr52IyKI9lQIEo7VE9az7lyDH7sfeygpQGQbxMzU7uWFVDMYoQv+XRZ0KFvy8jGZQtjjH8Ew==",
         "dependencies": {
           "Serilog.Sinks.Console": "4.1.0"
         }

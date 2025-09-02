@@ -1,7 +1,4 @@
-﻿using System.IO;
-using System.Linq;
-using Serilog.Events;
-using Serilog.Formatting.Display;
+﻿using Serilog.Events;
 using Serilog.Sinks.TestCorrelator;
 
 namespace Reaparr.Logging.UnitTests;
@@ -28,8 +25,8 @@ public class LogExtensionsUnitTests
         log.IsLogLevelEnabled(LogEventLevel.Warning).ShouldBeTrue();
         log.IsLogLevelEnabled(LogEventLevel.Error).ShouldBeTrue();
         log.IsLogLevelEnabled(LogEventLevel.Fatal).ShouldBeTrue();
-    }  
-    
+    }
+
     [Fact]
     public void ShouldNotLogTheSetLogLevel_WhenLogLevelIsAbove()
     {
@@ -102,21 +99,19 @@ public class LogExtensionsUnitTests
 
         foreach (var logEvent in logEvents)
         {
-            var sourceContext = (
-                logEvent.Properties[nameof(LogConfig.SourceContext)] as ScalarValue
-            )?.Value?.ToString();
+            var sourceContext = logEvent.GetStringProperty(LogConfig.SourceContext);
             sourceContext.ShouldNotBeNull();
             sourceContext.ShouldContain(nameof(LogExtensionsUnitTests));
 
-            var fileName = (logEvent.Properties[nameof(LogConfig.FileName)] as ScalarValue)?.Value?.ToString();
+            var fileName = logEvent.GetStringProperty(LogConfig.FileName);
             fileName.ShouldNotBeNull();
             fileName.ShouldContain("LogExtensions.UnitTests");
 
-            var methodName = (logEvent.Properties[nameof(LogConfig.MethodName)] as ScalarValue)?.Value?.ToString();
+            var methodName = logEvent.GetStringProperty(LogConfig.MethodName);
             methodName.ShouldNotBeNull();
             methodName.ShouldBe(nameof(ShouldLogWithCorrectLogProperties_WhenEachLogTypeIsCalled));
 
-            var lineNumber = (logEvent.Properties[nameof(LogConfig.LineNumber)] as ScalarValue)?.Value as int?;
+            var lineNumber = logEvent.GetIntProperty(LogConfig.LineNumber);
             lineNumber.ShouldNotBeNull();
             lineNumber.ShouldNotBe(0);
 
@@ -126,5 +121,4 @@ public class LogExtensionsUnitTests
             );
         }
     }
-
 }

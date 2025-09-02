@@ -11,9 +11,8 @@ namespace Reaparr.Logging;
 
 public class LogConfig
 {
-    public static string ClassName => nameof(ClassName);
-
     public static string FileName => nameof(FileName);
+    public static string FilePath => nameof(FilePath);
     public static string MethodName => nameof(MethodName);
 
     public static string LineNumber => nameof(LineNumber);
@@ -21,7 +20,7 @@ public class LogConfig
     public static string SourceContext => nameof(SourceContext);
 
     private static readonly string _template =
-        $"{{NewLine}}{{Timestamp:HH:mm:ss}} [{{Level}}] [{{{nameof(ClassName)}}}.cs:{{{nameof(LineNumber)}}}.{{{nameof(MethodName)}}}()] => {{Message:lj}}{{NewLine}}{{Exception}}";
+        $"{{NewLine}}{{Timestamp:HH:mm:ss}} [{{Level}}] [{{{nameof(FileName)}}}.cs:{{{nameof(LineNumber)}}}.{{{nameof(MethodName)}}}()] => {{Message:lj}}{{NewLine}}{{Exception}}";
 
     protected static readonly MessageTemplateTextFormatter TemplateTextFormatter = new(_template);
 
@@ -60,14 +59,14 @@ public class LogConfig
         return config
             .Enrich.FromLogContext()
             .WriteTo.Debug(outputTemplate: _template)
-            .WriteTo.Console(theme: LogThemes.SystemColored, outputTemplate: _template);
+            .WriteTo.Console(formatter: new ConditionalTextFormatter());
     }
 
     public virtual Logger GetLogger(LogEventLevel minimumLogLevel = LogEventLevel.Debug) =>
         GetBaseConfiguration()
             .WriteTo.Seq("http://localhost:5341")
             .WriteTo.File(
-                TemplateTextFormatter,
+                new ConditionalTextFormatter(),
                 Path.Combine(PathProvider.LogsDirectory, "log.txt"),
                 minimumLogLevel,
                 rollingInterval: RollingInterval.Day,

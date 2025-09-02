@@ -17,10 +17,12 @@ public static partial class LogExtensions
         [CallerFilePath] string sourceFilePath = "",
         [CallerMemberName] string memberName = "",
         [CallerLineNumber] int sourceLineNumber = 0
-    ) => logger
-        .ForContext(nameof(LogConfig.FileName), Path.GetFileNameWithoutExtension(sourceFilePath))
-        .ForContext(nameof(LogConfig.MethodName), memberName)
-        .ForContext(nameof(LogConfig.LineNumber), sourceLineNumber);
+    ) =>
+        logger
+            .ForContext(nameof(LogConfig.FileName), Path.GetFileName(sourceFilePath))
+            .ForContext(nameof(LogConfig.FilePath), sourceFilePath)
+            .ForContext(nameof(LogConfig.MethodName), memberName)
+            .ForContext(nameof(LogConfig.LineNumber), sourceLineNumber);
 
     public static string RenderMessage(this ILogger log, string messageTemplate, params object[] args)
     {
@@ -42,4 +44,12 @@ public static partial class LogExtensions
 
         return logEvent.RenderMessage();
     }
+
+    public static string GetStringProperty(this LogEvent logEvent, string propertyName) =>
+        logEvent.Properties.TryGetValue(propertyName, out var propertyValue)
+            ? propertyValue.ToString().Trim('"')
+            : string.Empty;
+
+    public static int? GetIntProperty(this LogEvent logEvent, string propertyName) =>
+        int.TryParse(logEvent.GetStringProperty(propertyName), out var value) ? value : null;
 }

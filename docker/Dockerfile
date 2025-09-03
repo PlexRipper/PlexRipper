@@ -72,8 +72,9 @@ COPY . .
 WORKDIR "/src/src/WebAPI"
 
 ## Build and Publish
-RUN dotnet build "WebAPI.csproj" -c Release -o /app/build /p:AssemblyVersion=$VERSION  /p:InformationalVersion=$INFORMATIONAL_VERSION --no-restore
-RUN dotnet publish "WebAPI.csproj" -c Release -o /app/publish /p:AssemblyVersion=$VERSION  /p:InformationalVersion=$INFORMATIONAL_VERSION
+RUN dotnet publish "WebAPI.csproj" -c Release -o /app/publish \
+    /p:AssemblyVersion=${VERSION} \
+    /p:InformationalVersion=${INFORMATIONAL_VERSION}
 
 # Stage 3 - Runtime Image
 FROM --platform=$TARGETPLATFORM mcr.microsoft.com/dotnet/aspnet:9.0-alpine AS final
@@ -86,8 +87,6 @@ ARG S6_OVERLAY_VERSION="3.2.1.0"
 
 ## Set environment variables
 ENV PORT=${PORT}
-ENV VERSION=${VERSION}
-ENV INFORMATIONAL_VERSION=${INFORMATIONAL_VERSION}
 ENV DOTNET_ENVIRONMENT=Production
 ENV DOTNET_URLS=http://+:${PORT}
 ENV ASPNETCORE_URLS=http://+:${PORT}
@@ -119,7 +118,9 @@ LABEL company="Reaparr" \
     maintainer="reaparr@protonmail.com" \
     org.opencontainers.image.authors="Reaparr" \
     org.opencontainers.image.vendor="Reaparr"
-
+    org.opencontainers.image.version="${VERSION}" \
+    org.opencontainers.image.revision="${INFORMATIONAL_VERSION}"
+      
 EXPOSE ${PORT}
 VOLUME /Config /Downloads /Movies /TvShows
 

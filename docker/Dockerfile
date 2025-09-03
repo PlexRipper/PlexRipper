@@ -84,7 +84,7 @@ RUN dotnet publish "WebAPI.csproj" -c Release -o /app/publish \
     -p:UseAppHost=false
 
 # Stage 3 - Runtime Image
-FROM --platform=$TARGETPLATFORM mcr.microsoft.com/dotnet/aspnet:9.0-alpine AS final
+FROM ghcr.io/linuxserver/baseimage-alpine:3.20 AS final
 
 ARG VERSION
 ARG INFORMATIONAL_VERSION
@@ -99,14 +99,11 @@ ENV DOTNET_URLS=http://+:${PORT}
 ENV S6_SERVICES_GRACETIME=15000
 
 # Install dependencies and s6-overlay
-RUN apk add --no-cache bash xz curl icu-libs krb5-libs libgcc libintl libssl3 libstdc++ zlib
-ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz /
-ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-x86_64.tar.xz /
-RUN set -eux; \
-    tar -C / -Jxpf /s6-overlay-noarch.tar.xz; \
-    tar -C / -Jxpf /s6-overlay-x86_64.tar.xz; \
-    rm -f /s6-overlay-*.tar.xz; \
-    apk del --no-cache --purge xz
+RUN apk add --no-cache bash icu-libs krb5-libs libgcc libintl libssl3 libstdc++ zlib curl \
+ && curl -sSL https://dot.net/v1/dotnet-install.sh -o /tmp/dotnet-install.sh \
+ && chmod +x /tmp/dotnet-install.sh \
+ && /tmp/dotnet-install.sh --runtime aspnetcore --version 9.0.7 --install-dir /usr/share/dotnet --architecture x64 \
+ && rm -rf /tmp/*
 
 ## Make dotnet command available
 ENV PATH="$PATH:/usr/share/dotnet"
@@ -119,10 +116,6 @@ COPY --from=client-build /tmp/ClientApp/.output/public /app/wwwroot
 ## Copy the s6-overlay config files
 COPY docker/etc/ /etc/
 COPY docker/10-config /etc/fix-attrs.d/10-config
-
-# Create non-root user
-RUN addgroup -S reaparr && adduser -S reaparr -G reaparr
-USER reaparr
 
 ## Set version label
 LABEL company="Reaparr" \

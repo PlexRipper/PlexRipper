@@ -115,6 +115,8 @@ COPY --from=client-build /tmp/ClientApp/.output/public /app/wwwroot
 
 ## Copy the s6-overlay config files
 COPY docker/etc/ /etc/
+
+### This fixes the permissions on the config directory and Reaparr crashes if it can't write to it
 COPY docker/10-config /etc/fix-attrs.d/10-config
 
 ## Set version label

@@ -84,7 +84,7 @@ RUN dotnet publish "WebAPI.csproj" -c Release -o /app/publish \
     -p:UseAppHost=false
 
 # Stage 3 - Runtime Image
-FROM ghcr.io/linuxserver/baseimage-alpine:3.20 AS final
+FROM --platform=$TARGETPLATFORM ghcr.io/linuxserver/baseimage-alpine:3.20 AS final
 
 ARG VERSION
 ARG INFORMATIONAL_VERSION

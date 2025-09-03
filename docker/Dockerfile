@@ -1,12 +1,10 @@
 ARG VERSION=0.0.0
 ARG INFORMATIONAL_VERSION=0.0.0
 ARG PORT=7000
-ARG TARGETPLATFORM=linux/amd64
-ARG BUILDPLATFORM=linux/amd64
 
 # Stage 1 - Build the Nuxt front-end
 # TODO: bun 1.2.1 breaks build so its pinned to this for now
-FROM --platform=$BUILDPLATFORM oven/bun:1.1.45-alpine AS client-build
+FROM oven/bun:1.1.45-alpine AS client-build
 
 ARG PORT
 
@@ -26,10 +24,7 @@ COPY ./src/WebAPI/ClientApp/ ./
 RUN bun run generate --fail-on-error
     
 # Stage 2 - Build the .NET back-end
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:9.0 AS back-end
-
-ARG VERSION
-ARG INFORMATIONAL_VERSION
+FROM  mcr.microsoft.com/dotnet/sdk:9.0 AS back-end
 
 WORKDIR /src
 
@@ -79,12 +74,12 @@ WORKDIR "/src/src/WebAPI"
 ## Build and Publish
 RUN dotnet publish "WebAPI.csproj" -c Release -o /app/publish \
     --no-restore \
-    /p:AssemblyVersion=${VERSION} \
-    /p:InformationalVersion=${INFORMATIONAL_VERSION} \
+    /p:AssemblyVersion=$VERSION \
+    /p:InformationalVersion=$INFORMATIONAL_VERSION \
     -p:UseAppHost=false
 
 # Stage 3 - Runtime Image
-FROM --platform=$TARGETPLATFORM ghcr.io/linuxserver/baseimage-alpine:3.20 AS final
+FROM ghcr.io/linuxserver/baseimage-alpine:3.20 AS final
 
 ARG VERSION
 ARG INFORMATIONAL_VERSION
@@ -97,6 +92,8 @@ ENV PORT=${PORT}
 ENV DOTNET_ENVIRONMENT=Production
 ENV DOTNET_URLS=http://+:${PORT}
 ENV S6_SERVICES_GRACETIME=15000
+ENV VERSION=${VERSION}
+ENV INFORMATIONAL_VERSION=${INFORMATIONAL_VERSION}
 
 # Install dependencies and s6-overlay
 RUN apk add --no-cache bash icu-libs krb5-libs libgcc libintl libssl3 libstdc++ zlib curl \
@@ -124,8 +121,8 @@ LABEL company="Reaparr" \
     maintainer="reaparr@protonmail.com" \
     org.opencontainers.image.authors="Reaparr" \
     org.opencontainers.image.vendor="Reaparr" \
-    org.opencontainers.image.version="${VERSION}" \
-    org.opencontainers.image.revision="${INFORMATIONAL_VERSION}"
+    org.opencontainers.image.version=$VERSION \
+    org.opencontainers.image.revision=$INFORMATIONAL_VERSION
       
 EXPOSE ${PORT}
 VOLUME /Config /Downloads /Movies /TvShows

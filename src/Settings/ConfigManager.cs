@@ -1,6 +1,5 @@
 ﻿using System.IO.Abstractions;
 using Reaparr.Environment;
-using Reaparr.Logging;
 using Reaparr.Settings.Contracts;
 
 namespace Reaparr.Settings;
@@ -9,7 +8,7 @@ public class ConfigManager : IConfigManager
 {
     #region Fields
 
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IPathProvider _pathProvider;
 
     private readonly IUserSettings _userSettings;
@@ -22,7 +21,7 @@ public class ConfigManager : IConfigManager
     #region Constructor
 
     public ConfigManager(
-        ILog log,
+        ILogger log,
         IPathProvider pathProvider,
         IUserSettings userSettings,
         IFile file,
@@ -30,7 +29,7 @@ public class ConfigManager : IConfigManager
         IDirectory directory
     )
     {
-        _log = log;
+        _log = log.ForContext<ConfigManager>();
         _pathProvider = pathProvider;
         _userSettings = userSettings;
         _file = file;
@@ -64,7 +63,8 @@ public class ConfigManager : IConfigManager
 
         if (configDirectoryExistsResult.Value)
         {
-            _log.Information("Config directory exists, will use {ConfigDirectory}", _pathProvider.ConfigDirectory);
+            _log.Here()
+                .Information("Config directory exists, will use {ConfigDirectory}", _pathProvider.ConfigDirectory);
             var migrateResult = MigrateLegacyFileNames();
             if (migrateResult.IsFailed)
                 return migrateResult.LogFatal();
@@ -72,18 +72,20 @@ public class ConfigManager : IConfigManager
         }
         else
         {
-            _log.Information(
-                "Config directory does not exist, will create now at {ConfigDirectory}",
-                _pathProvider.ConfigDirectory
-            );
+            _log.Here()
+                .Information(
+                    "Config directory does not exist, will create now at {ConfigDirectory}",
+                    _pathProvider.ConfigDirectory
+                );
             var createResult = Result.Try(() => _directory.CreateDirectory(_pathProvider.ConfigDirectory));
             if (createResult.IsFailed)
             {
-                _log.Fatal("Failed to create config directory at {ConfigDirectory}", _pathProvider.ConfigDirectory);
+                _log.Here()
+                    .Fatal("Failed to create config directory at {ConfigDirectory}", _pathProvider.ConfigDirectory);
                 return createResult.LogFatal();
             }
 
-            _log.Debug("Directory: {ConfigDirectory} created!", _pathProvider.ConfigDirectory);
+            _log.Here().Debug("Directory: {ConfigDirectory} created!", _pathProvider.ConfigDirectory);
         }
 
         if (!ConfigFileExists())
@@ -103,14 +105,15 @@ public class ConfigManager : IConfigManager
 
     public virtual Result LoadConfig()
     {
-        _log.DebugLine("Loading user config settings now");
+        _log.Here().Debug("Loading user config settings now");
         var readResult = ReadFromConfigFile();
         if (readResult.IsFailed)
         {
-            _log.Information(
-                "Resetting {ConfigFileName} because it could not be loaded correctly",
-                _pathProvider.ConfigFileName
-            );
+            _log.Here()
+                .Information(
+                    "Resetting {ConfigFileName} because it could not be loaded correctly",
+                    _pathProvider.ConfigFileName
+                );
             return ResetConfig();
         }
 
@@ -126,8 +129,8 @@ public class ConfigManager : IConfigManager
         catch (Exception e)
         {
             Result.Fail(new ExceptionalError(e)).LogError();
-            _log.Error("Failed to JSON parse the contents from {ConfigFileName}", _pathProvider.ConfigFileName);
-            _log.Error("Contents: {Contents}", readResult.Value);
+            _log.Here().Error("Failed to JSON parse the contents from {ConfigFileName}", _pathProvider.ConfigFileName);
+            _log.Here().Error("Contents: {Contents}", readResult.Value);
             return ResetConfig();
         }
     }
@@ -144,7 +147,7 @@ public class ConfigManager : IConfigManager
 
     public virtual Result SaveConfig()
     {
-        _log.DebugLine("Saving user config settings now");
+        _log.Here().Debug("Saving user config settings now");
 
         var jsonSettings = UserSettingsSerializer.Serialize(_userSettings);
 
@@ -153,7 +156,7 @@ public class ConfigManager : IConfigManager
         if (writeResult.IsFailed)
             return writeResult;
 
-        _log.DebugLine("UserSettings were saved successfully!");
+        _log.Here().Debug("UserSettings were saved successfully!");
 
         return Result.Ok().WithSuccess("UserSettings were saved successfully!").LogInformation();
     }

@@ -1,10 +1,8 @@
 using FastEndpoints;
 using FluentValidation;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
 
 namespace Reaparr.Application;
 
@@ -29,15 +27,15 @@ public class SetPreferredPlexServerConnectionEndpointRequestValidator
 public class SetPreferredPlexServerConnectionEndpoint
     : BaseEndpoint<SetPreferredPlexServerConnectionEndpointRequest, BaseResultDTO>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath =>
         ApiRoutes.PlexServerController + "/{PlexServerId}/preferred-connection/{PlexServerConnectionId}";
 
-    public SetPreferredPlexServerConnectionEndpoint(ILog log, IReaparrDbContext dbContext)
+    public SetPreferredPlexServerConnectionEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
-        _log = log;
+        _log = log.ForContext<SetPreferredPlexServerConnectionEndpoint>();
         _dbContext = dbContext;
     }
 
@@ -55,15 +53,17 @@ public class SetPreferredPlexServerConnectionEndpoint
 
     public override async Task HandleAsync(SetPreferredPlexServerConnectionEndpointRequest req, CancellationToken ct)
     {
+        _log.Here().DebugApiCall(HttpContext, req);
         var plexServerConnectionId = req.PlexServerConnectionId;
         var plexServerId = req.PlexServerId;
 
-        _log.Debug(
-            "Setting the preferred {NameOfPlexServerConnection} for {PlexServerIdName}: {PlexServerId}",
-            nameof(PlexServerConnection),
-            nameof(plexServerId),
-            plexServerId
-        );
+        _log.Here()
+            .Debug(
+                "Setting the preferred {NameOfPlexServerConnection} for {PlexServerIdName}: {PlexServerId}",
+                nameof(PlexServerConnection),
+                nameof(plexServerId),
+                plexServerId
+            );
 
         var plexServer = await _dbContext
             .PlexServers.Include(x => x.PlexServerConnections)

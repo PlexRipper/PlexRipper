@@ -1,19 +1,18 @@
 using Microsoft.EntityFrameworkCore;
 using Quartz;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
 
 namespace Reaparr.Application;
 
 public class FileMergeJob : IJob
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IReaparrDbContext _dbContext;
 
-    public FileMergeJob(ILog log, ICommandExecutor commandExecutor, IReaparrDbContext dbContext)
+    public FileMergeJob(ILogger log, ICommandExecutor commandExecutor, IReaparrDbContext dbContext)
     {
-        _log = log;
+        _log = log.ForContext<FileMergeJob>();
         _commandExecutor = commandExecutor;
         _dbContext = dbContext;
     }
@@ -49,7 +48,7 @@ public class FileMergeJob : IJob
 
             if (result.IsFailed)
             {
-                _log.Error("Failed to merge all files for {DownloadTaskKey}", downloadTaskKey);
+                _log.Here().Error("Failed to merge all files for {DownloadTaskKey}", downloadTaskKey);
                 return;
             }
 
@@ -71,11 +70,11 @@ public class FileMergeJob : IJob
         }
         catch (TaskCanceledException)
         {
-            _log.Warning("{JobName} for {DownloadTaskKey} was cancelled", nameof(FileMergeJob), downloadTaskKey);
+            _log.Here().Warning("{JobName} for {DownloadTaskKey} was cancelled", nameof(FileMergeJob), downloadTaskKey);
         }
         catch (Exception e)
         {
-            _log.Error(e);
+            _log.Here().ErrorResult(e);
         }
     }
 }

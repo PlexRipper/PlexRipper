@@ -1,7 +1,6 @@
 using Reaparr.Application;
 using Reaparr.Environment;
 using Reaparr.FluentResultExtensions;
-using Reaparr.Logging;
 
 namespace Reaparr.WebAPI;
 
@@ -10,7 +9,7 @@ namespace Reaparr.WebAPI;
 /// </summary>
 public class Program
 {
-    private static readonly ILog _log = new LogConfig().CreateLogInstance(typeof(Program));
+    private static readonly Serilog.ILogger _log = new LogConfig().CreateLogInstance(typeof(Program));
 
     /// <summary>
     ///  The main method entry point for the application.
@@ -20,21 +19,22 @@ public class Program
     {
         try
         {
-            _log.InformationLine("Starting Reaparr!");
+            _log.Here().Information("Starting Reaparr!");
 
             LogManager.SetupLogging(EnvironmentExtensions.GetLogLevel());
             FluentResultConfiguration.Setup();
 
-            _log.Information(
-                "Currently running {Channel} version {Version} on {CurrentOS}",
-                EnvironmentExtensions.IsDevRelease() ? "DEVELOPMENT" : "STABLE",
-                EnvironmentExtensions.GetVersion(),
-                OsInfo.CurrentOS
-            );
+            _log.Here()
+                .Information(
+                    "Currently running {Channel} version {Version} on {CurrentOS}",
+                    EnvironmentExtensions.IsDevRelease() ? "DEVELOPMENT" : "STABLE",
+                    EnvironmentExtensions.GetVersion(),
+                    OsInfo.CurrentOS
+                );
 
             AppExtensions.LogIdentity();
 
-            _log.InformationLine("Initiating boot process");
+            _log.Here().Information("Initiating boot process");
 
             var builder = WebApplication.CreateBuilder(args);
 
@@ -64,7 +64,7 @@ public class Program
         }
         catch (Exception e)
         {
-            _log.FatalLine("Reaparr crashed due to exception!");
+            _log.Here().Fatal("Reaparr crashed due to exception!");
             Result.Fail(new ExceptionalError(e)).LogFatal();
             System.Environment.Exit(2);
         }
@@ -77,9 +77,11 @@ public class Program
 
     private static void FailedToStart(Result result)
     {
-        _log.FatalLine("Reaparr failed to start!");
+        _log.Here().Fatal("Reaparr failed to start!");
 
         result.LogFatal();
+
+        _log.Here().Fatal("Reaparr has been shutdown! R.I.P.");
 
         System.Environment.Exit(1);
     }

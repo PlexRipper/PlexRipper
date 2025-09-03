@@ -1,10 +1,8 @@
 using System.IO.Abstractions;
 using FastEndpoints;
 using FluentValidation;
-using Microsoft.AspNetCore.Http;
 using Reaparr.Application.Contracts;
 using Reaparr.FileSystem.Contracts;
-using Reaparr.Logging;
 
 namespace Reaparr.Application;
 
@@ -32,16 +30,16 @@ public class GetFolderPathDirectoryRequestValidator : Validator<GetFolderPathDir
 
 public class GetFolderPathDirectoryEndpoint : BaseEndpoint<GetFolderPathDirectoryRequest, FileSystemDTO>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IDirectory _directory;
     private readonly IPath _path;
     private readonly IDiskProvider _diskProvider;
 
     public override string EndpointPath => ApiRoutes.FolderPathController + "/directory";
 
-    public GetFolderPathDirectoryEndpoint(ILog log, IDirectory directory, IPath path, IDiskProvider diskProvider)
+    public GetFolderPathDirectoryEndpoint(ILogger log, IDirectory directory, IPath path, IDiskProvider diskProvider)
     {
-        _log = log;
+        _log = log.ForContext<GetFolderPathDirectoryEndpoint>();
         _directory = directory;
         _path = path;
         _diskProvider = diskProvider;
@@ -64,6 +62,7 @@ public class GetFolderPathDirectoryEndpoint : BaseEndpoint<GetFolderPathDirector
 
     public override async Task HandleAsync(GetFolderPathDirectoryRequest req, CancellationToken ct)
     {
+        _log.Here().DebugApiCall(HttpContext, req);
         var path = req.Path;
 
         var result = LookupContents(path, false, true);
@@ -77,7 +76,7 @@ public class GetFolderPathDirectoryEndpoint : BaseEndpoint<GetFolderPathDirector
         bool allowFoldersWithoutTrailingSlashes
     )
     {
-        _log.Debug("Looking up path: {Query}", query);
+        _log.Here().Debug("Looking up path: {Query}", query);
 
         var defaultResult = new FileSystemResult
         {
@@ -101,7 +100,7 @@ public class GetFolderPathDirectoryEndpoint : BaseEndpoint<GetFolderPathDirector
                     }
                     catch (IOException ex) when (ex.Message.Contains("Stale file handle"))
                     {
-                        _log.Warning("Stale file handle detected for drive {DriveName}, skipping", d.Name);
+                        _log.Here().Warning("Stale file handle detected for drive {DriveName}, skipping", d.Name);
 
                         return new FileSystemModel
                         {
@@ -117,7 +116,7 @@ public class GetFolderPathDirectoryEndpoint : BaseEndpoint<GetFolderPathDirector
                     }
                     catch (Exception ex)
                     {
-                        _log.Warning(ex, "Error accessing drive information for {DriveName}, skipping", d.Name);
+                        _log.Here().Warning(ex, "Error accessing drive information for {DriveName}, skipping", d.Name);
 
                         return new FileSystemModel
                         {

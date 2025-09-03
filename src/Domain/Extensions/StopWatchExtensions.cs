@@ -1,12 +1,11 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using Reaparr.Logging;
 
 namespace Reaparr.Domain;
 
 public static class StopWatchExtensions
 {
-    private static readonly ILog _log = new LogConfig().CreateLogInstance(typeof(StopWatchExtensions));
+    private static readonly ILogger _log = new LogConfig().CreateLogInstance(typeof(StopWatchExtensions));
 
     public static void StopAndLog(
         this Stopwatch stopwatch,
@@ -28,6 +27,6 @@ public static class StopWatchExtensions
             return;
         }
 
-        _log.Debug("Execution Time: took {ElapsedMilliseconds} ms", stopwatch.ElapsedMilliseconds);
+        _log.Here().Debug("Execution Time: took {ElapsedMilliseconds} ms", stopwatch.ElapsedMilliseconds);
     }
 }

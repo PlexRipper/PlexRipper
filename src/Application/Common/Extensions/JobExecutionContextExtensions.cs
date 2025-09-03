@@ -1,13 +1,12 @@
 using System.Text.Json;
 using Quartz;
 using Reaparr.Application.Contracts;
-using Reaparr.Logging;
 
 namespace Reaparr.Application;
 
 public static class JobExecutionContextExtensions
 {
-    private static readonly ILog _log = new LogConfig().CreateLogInstance(typeof(JobExecutionContextExtensions));
+    private static readonly ILogger _log = new LogConfig().CreateLogInstance(typeof(JobExecutionContextExtensions));
 
     /// <summary>
     /// Converts the <see cref="IJobExecutionContext"/> to a <see cref="JobStatusUpdate{T}"/>.
@@ -85,7 +84,7 @@ public static class JobExecutionContextExtensions
             }
             catch (Exception e)
             {
-                _log.Error(e);
+                _log.Here().ErrorResult(e);
                 throw;
             }
         }

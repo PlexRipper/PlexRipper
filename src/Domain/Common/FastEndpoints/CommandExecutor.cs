@@ -1,15 +1,14 @@
 using FastEndpoints;
-using Reaparr.Logging;
 
 namespace Reaparr.Domain;
 
 public class CommandExecutor : ICommandExecutor
 {
-    private readonly ILog<CommandExecutor> _log;
+    private readonly Serilog.ILogger _log;
 
-    public CommandExecutor(ILog<CommandExecutor> log)
+    public CommandExecutor(ILogger log)
     {
-        _log = log;
+        _log = log.ForContext<CommandExecutor>();
     }
 
     public async Task<TResult> Send<TResult>(ICommand<TResult> command, CancellationToken ct = default)
@@ -20,7 +19,7 @@ public class CommandExecutor : ICommandExecutor
         }
         catch (Exception e)
         {
-            _log.Error(e);
+            _log.Here().ErrorResult(e);
             throw;
         }
     }

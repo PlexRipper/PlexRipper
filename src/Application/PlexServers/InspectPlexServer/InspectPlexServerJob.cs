@@ -1,7 +1,6 @@
 ﻿using Quartz;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
 
 namespace Reaparr.Application;
 
@@ -14,19 +13,19 @@ public class InspectPlexServerJob : IJob
 
     private readonly IReaparrDbContext _dbContext;
     private readonly ISignalRService _signalRService;
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
 
     public static JobKey GetJobKey() => new(Guid.NewGuid().ToString(), nameof(InspectPlexServerJob));
 
     public InspectPlexServerJob(
-        ILog log,
+        ILogger log,
         ICommandExecutor commandExecutor,
         IReaparrDbContext dbContext,
         ISignalRService signalRService
     )
     {
-        _log = log;
+        _log = log.ForContext<InspectPlexServerJob>();
         _commandExecutor = commandExecutor;
         _dbContext = dbContext;
         _signalRService = signalRService;
@@ -39,11 +38,12 @@ public class InspectPlexServerJob : IJob
 
         var plexServerIds = dataMap.GetIntListValue(PlexServerIdsParameter);
 
-        _log.Debug(
-            "Executing job: {InspectPlexServerJobName} for {Count} servers",
-            nameof(InspectPlexServerJob),
-            plexServerIds.Count
-        );
+        _log.Here()
+            .Debug(
+                "Executing job: {InspectPlexServerJobName} for {Count} servers",
+                nameof(InspectPlexServerJob),
+                plexServerIds.Count
+            );
 
         try
         {
@@ -67,13 +67,13 @@ public class InspectPlexServerJob : IJob
 
             await Task.WhenAll(serverTasks);
 
-            _log.Information("Successfully finished the inspection of {Count}", plexServerIds.Count);
+            _log.Here().Information("Successfully finished the inspection of {Count}", plexServerIds.Count);
         }
         catch (Exception e)
         {
             // Jobs should swallow exceptions as otherwise Quartz will keep re-executing it
             // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
-            _log.Error(e);
+            _log.Here().ErrorResult(e);
         }
     }
 

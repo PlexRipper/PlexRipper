@@ -1,10 +1,8 @@
-using Reaparr.Logging;
-
 namespace Reaparr.Domain;
 
 public static class DownloadTaskPhaseExtensions
 {
-    private static readonly ILog _log = new LogConfig().CreateLogInstance(typeof(DownloadTaskPhaseExtensions));
+    private static readonly ILogger _log = new LogConfig().CreateLogInstance(typeof(DownloadTaskPhaseExtensions));
 
     public static DownloadTaskPhase ToDownloadTaskPhase(this DownloadStatus downloadStatus)
     {
@@ -37,7 +35,7 @@ public static class DownloadTaskPhaseExtensions
 
             case DownloadStatus.Unknown:
             default:
-                _log.Error("Unknown download task phase with downloadStatus {DownloadStatus}.", downloadStatus);
+                _log.Here().Error("Unknown download task phase with downloadStatus {DownloadStatus}.", downloadStatus);
                 return DownloadTaskPhase.Unknown;
         }
     }

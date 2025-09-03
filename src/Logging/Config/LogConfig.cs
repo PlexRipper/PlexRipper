@@ -1,6 +1,4 @@
 using Reaparr.Environment;
-using Reaparr.Logging.Enricher;
-using Reaparr.Logging.Masks;
 using Serilog;
 using Serilog.Core;
 using Serilog.Enrichers.Sensitive;
@@ -8,15 +6,35 @@ using Serilog.Events;
 using Serilog.Filters;
 using Serilog.Formatting.Display;
 using Serilog.Sinks.Console.LogThemes;
+using Serilog.Templates;
 
 namespace Reaparr.Logging;
 
 public class LogConfig
 {
-    private static readonly string _template =
-        $"{{NewLine}}{{Timestamp:HH:mm:ss}} [{{Level}}] [{{{nameof(LogMetaData.ClassName)}}}.cs:{{{nameof(LogMetaData.LineNumber)}}}.{{{nameof(LogMetaData.MethodName)}}}()] => {{Message:lj}}{{NewLine}}{{Exception}}";
+    public static string FileName => nameof(FileName);
+    public static string FilePath => nameof(FilePath);
+    public static string MethodName => nameof(MethodName);
 
-    protected static MessageTemplateTextFormatter TemplateTextFormatter = new(_template);
+    public static string LineNumber => nameof(LineNumber);
+
+    public static string SourceContext => nameof(SourceContext);
+
+    private static readonly string _template =
+        $"{{NewLine}}{{Timestamp:HH:mm:ss}} [{{Level}}] [{{{FileName}}}.cs:{{{LineNumber}}}.{{{MethodName}}}()] => {{Message:lj}}{{NewLine}}{{Exception}}";
+
+    private static readonly ExpressionTemplate _newTemplate = new(
+        // Template
+        "{@t:HH:mm:ss} [{@l}] "
+            + "{#if FileName is not null}"
+            + "[{FileName}:{LineNumber}.{MethodName}()]"
+            + "{#else}"
+            + "[{SourceContext}]"
+            + "{#end} => {@m}\n{@x}\n",
+        theme: LogThemes.SystemColored.ToTemplateTheme()
+    );
+
+    protected static readonly MessageTemplateTextFormatter TemplateTextFormatter = new(_template);
 
     protected static LoggerConfiguration GetBaseConfiguration()
     {
@@ -26,8 +44,7 @@ public class LogConfig
             // These filters: No XML encryptor configured. Key {*} may be persisted to storage in unencrypted form.
             // This can be ignored because we use proper auth: https://github.com/dotnet/aspnetcore/issues/3309#issuecomment-404246838
             .Filter.ByExcluding(Matching.FromSource("Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager"))
-            .MinimumLevel.Override("Quartz", LogEventLevel.Warning)
-            .Enrich.FromLogContext();
+            .MinimumLevel.Override("Quartz", LogEventLevel.Warning);
 
         // Do not mask data when debugging
         if (!EnvironmentExtensions.IsUnmasked())
@@ -51,16 +68,14 @@ public class LogConfig
             });
         }
 
-        return config
-            .Enrich.With<ExternalFrameworkEnricher>()
-            .WriteTo.Debug(outputTemplate: _template)
-            .WriteTo.Console(theme: LogThemes.SystemColored, outputTemplate: _template);
+        return config.Enrich.FromLogContext().WriteTo.Debug(_newTemplate).WriteTo.Console(_newTemplate);
     }
 
     public virtual Logger GetLogger(LogEventLevel minimumLogLevel = LogEventLevel.Debug) =>
         GetBaseConfiguration()
+            .WriteTo.Seq("http://localhost:5341")
             .WriteTo.File(
-                TemplateTextFormatter,
+                _newTemplate,
                 Path.Combine(PathProvider.LogsDirectory, "log.txt"),
                 minimumLogLevel,
                 rollingInterval: RollingInterval.Day,
@@ -70,17 +85,15 @@ public class LogConfig
             .MinimumLevel.Is(minimumLogLevel)
             .CreateLogger();
 
-    public ILog CreateLogInstance() => new Log(GetLogger());
+    public ILogger CreateLogInstance<T>()
+        where T : class => GetLogger().ForContext<T>();
 
-    public ILog<T> CreateLogInstance<T>()
-        where T : class => new Log<T>(GetLogger(), typeof(T));
-
-    public ILog<T> CreateLogInstance<T>(LogEventLevel minimumLogLevel)
-        where T : class => new Log<T>(GetLogger(minimumLogLevel), typeof(T));
+    public ILogger CreateLogInstance<T>(LogEventLevel minimumLogLevel)
+        where T : class => GetLogger(minimumLogLevel).ForContext<T>();
 
     /// <summary>
     /// Returns a new typed <see cref="ILog"/> instance.
     /// </summary>
     /// <returns></returns>
-    public ILog CreateLogInstance(Type classType) => new Log<Type>(GetLogger(), classType);
+    public ILogger CreateLogInstance(Type classType) => GetLogger().ForContext(classType);
 }

@@ -1,10 +1,8 @@
-using Reaparr.Logging;
-
 namespace Reaparr.WebAPI;
 
 public static partial class Startup
 {
-    private static readonly ILog _log = new LogConfig().CreateLogInstance(typeof(Startup));
+    private static readonly Serilog.ILogger _log = new LogConfig().CreateLogInstance(typeof(Startup));
 
     /// <summary>
     ///  The CORS Configuration name.

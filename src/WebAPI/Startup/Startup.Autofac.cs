@@ -1,7 +1,5 @@
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
-using Reaparr.Logging;
-using Serilog;
 
 namespace Reaparr.WebAPI;
 
@@ -17,7 +15,7 @@ public static partial class Startup
         builder.UseServiceProviderFactory(new AutofacServiceProviderFactory());
         builder.ConfigureContainer<ContainerBuilder>(containerBuilder =>
         {
-            _log.DebugLine("Setting up Autofac Containers");
+            _log.Here().Debug("Setting up Autofac Containers");
             ContainerConfig.ConfigureContainer(containerBuilder);
         });
 

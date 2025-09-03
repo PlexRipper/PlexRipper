@@ -33,6 +33,11 @@ ARG INFORMATIONAL_VERSION
 
 WORKDIR /src
 
+## Speed up and stabilize dotnet restore/publish
+ENV DOTNET_CLI_TELEMETRY_OPTOUT=1 \
+    DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1 \
+    NUGET_XMLDOC_MODE=skip
+
 ## Domain Projects
 COPY ["src/Domain/Domain.csproj", "src/Domain/"]
 COPY ["src/Environment/Environment.csproj", "src/Environment/"]
@@ -72,8 +77,11 @@ COPY . .
 WORKDIR "/src/src/WebAPI"
 
 ## Build and Publish
-RUN dotnet build "WebAPI.csproj" -c Release -o /app/build /p:AssemblyVersion=$VERSION  /p:InformationalVersion=$INFORMATIONAL_VERSION --no-restore
-RUN dotnet publish "WebAPI.csproj" -c Release -o /app/publish /p:AssemblyVersion=$VERSION  /p:InformationalVersion=$INFORMATIONAL_VERSION
+RUN dotnet publish "WebAPI.csproj" -c Release -o /app/publish \
+    --no-restore \
+    /p:AssemblyVersion=${VERSION} \
+    /p:InformationalVersion=${INFORMATIONAL_VERSION} \
+    -p:UseAppHost=false
 
 # Stage 3 - Runtime Image
 FROM --platform=$TARGETPLATFORM ghcr.io/linuxserver/baseimage-alpine:3.20 AS final
@@ -82,33 +90,20 @@ ARG VERSION
 ARG INFORMATIONAL_VERSION
 ARG PORT
 ARG TARGETPLATFORM
+ARG S6_OVERLAY_VERSION="3.2.1.0"
 
 ## Set environment variables
 ENV PORT=${PORT}
-ENV VERSION=${VERSION}
-ENV INFORMATIONAL_VERSION=${INFORMATIONAL_VERSION}
 ENV DOTNET_ENVIRONMENT=Production
 ENV DOTNET_URLS=http://+:${PORT}
-ENV ASPNETCORE_URLS=http://+:${PORT}
 ENV S6_SERVICES_GRACETIME=15000
 
-## Install dotnet runtime
-RUN \
-   echo "**** Updating package information ****" && \
-   apk update && \
-   echo "**** Install pre-reqs ****" && \
-   apk add --no-cache bash icu-libs krb5-libs libgcc libintl libssl3 libstdc++ zlib && \
-   echo "**** Installing dotnet runtime for $TARGETPLATFORM ****" && \
-   mkdir -p /usr/share/dotnet && \
-   wget https://dot.net/v1/dotnet-install.sh -O /tmp/dotnet-install.sh && \
-   chmod +x /tmp/dotnet-install.sh && \
-   if  [ "$TARGETPLATFORM" = "linux/arm/v7" ] ; then \
-       /tmp/dotnet-install.sh --version 9.0.7 --runtime aspnetcore --install-dir /usr/share/dotnet --architecture arm ; \
-   elif [ "$TARGETPLATFORM" = "linux/arm64/v8" ] ; then \
-       /tmp/dotnet-install.sh --version 9.0.7 --runtime aspnetcore --install-dir /usr/share/dotnet --architecture arm64 ; \
-   else \
-       /tmp/dotnet-install.sh --version 9.0.7 --runtime aspnetcore --install-dir /usr/share/dotnet --architecture x64 ; \
-   fi
+# Install dependencies and s6-overlay
+RUN apk add --no-cache bash icu-libs krb5-libs libgcc libintl libssl3 libstdc++ zlib curl \
+ && curl -sSL https://dot.net/v1/dotnet-install.sh -o /tmp/dotnet-install.sh \
+ && chmod +x /tmp/dotnet-install.sh \
+ && /tmp/dotnet-install.sh --runtime aspnetcore --version 9.0.7 --install-dir /usr/share/dotnet --architecture x64 \
+ && rm -rf /tmp/*
 
 ## Make dotnet command available
 ENV PATH="$PATH:/usr/share/dotnet"
@@ -121,12 +116,17 @@ COPY --from=client-build /tmp/ClientApp/.output/public /app/wwwroot
 ## Copy the s6-overlay config files
 COPY docker/etc/ /etc/
 
+### This fixes the permissions on the config directory and Reaparr crashes if it can't write to it
+COPY docker/10-config /etc/fix-attrs.d/10-config
+
 ## Set version label
 LABEL company="Reaparr" \
     maintainer="reaparr@protonmail.com" \
     org.opencontainers.image.authors="Reaparr" \
-    org.opencontainers.image.vendor="Reaparr"
-
+    org.opencontainers.image.vendor="Reaparr" \
+    org.opencontainers.image.version="${VERSION}" \
+    org.opencontainers.image.revision="${INFORMATIONAL_VERSION}"
+      
 EXPOSE ${PORT}
 VOLUME /Config /Downloads /Movies /TvShows
 

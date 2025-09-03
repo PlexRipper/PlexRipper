@@ -5,26 +5,12 @@ namespace Reaparr.Logging;
 
 public record LogMetaData
 {
-    public LogMetaData(string className, string memberName, int lineNumber)
+    public LogMetaData(ILogger log, string className, string memberName, int lineNumber)
     {
-        ClassName = className;
-        MethodName = memberName;
-        LineNumber = lineNumber;
-    }
-
-    public LogMetaData(ILog logger, string className, string memberName, int lineNumber)
-    {
-        _logger = logger.GetLogger();
-        ClassName = className;
-        MethodName = memberName;
-        LineNumber = lineNumber;
+        _logger = log;
     }
 
     private ILogger _logger { get; } = null!;
-
-    public string ClassName { get; init; }
-    public string MethodName { get; init; }
-    public int LineNumber { get; init; }
 
     public string MessageTemplate { get; set; } = string.Empty;
     public object?[]? PropertyValues { get; set; }
@@ -38,8 +24,6 @@ public record LogMetaData
         PropertyValues = propertyValues;
         return this;
     }
-
-    public void Write() => _logger.Write(ToEvent());
 
     /// <summary>
     /// Returns a rendered string of the message template with bound properties.
@@ -68,16 +52,6 @@ public record LogMetaData
         }
 
         var properties = boundProperties?.ToList() ?? new List<LogEventProperty>();
-
-        properties.AddRange(
-            new List<LogEventProperty>
-            {
-                // This works when each file only has 1 class and is named the same
-                new(nameof(ClassName), new ScalarValue(ClassName)),
-                new(nameof(MethodName), new ScalarValue(MethodName)),
-                new(nameof(LineNumber), new ScalarValue(LineNumber)),
-            }
-        );
 
         return new LogEvent(dateTimeOffset, LogLevel, Exception, parsedTemplate, properties);
     }

@@ -2,7 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using Quartz;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
 
 namespace Reaparr.Application;
 
@@ -12,7 +11,7 @@ namespace Reaparr.Application;
 [DisallowConcurrentExecution]
 public class CheckAllConnectionsStatusByPlexServerJob : IJob
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
     private readonly ISignalRService _signalRService;
@@ -21,13 +20,13 @@ public class CheckAllConnectionsStatusByPlexServerJob : IJob
         new(nameof(CheckAllConnectionsStatusByPlexServerJob), nameof(CheckAllConnectionsStatusByPlexServerJob));
 
     public CheckAllConnectionsStatusByPlexServerJob(
-        ILog log,
+        ILogger log,
         IReaparrDbContext dbContext,
         ICommandExecutor commandExecutor,
         ISignalRService signalRService
     )
     {
-        _log = log;
+        _log = log.ForContext<CheckAllConnectionsStatusByPlexServerJob>();
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;
         _signalRService = signalRService;
@@ -76,15 +75,16 @@ public class CheckAllConnectionsStatusByPlexServerJob : IJob
             update.Status = JobStatus.Completed;
             await _signalRService.SendJobStatusUpdateAsync(update);
 
-            _log.Debug(
-                "{JobName} for servers with ids: {PlexServerIds} completed",
-                nameof(CheckAllConnectionsStatusByPlexServerJob),
-                plexServers.Select(x => x.Id).ToList()
-            );
+            _log.Here()
+                .Debug(
+                    "{JobName} for servers with ids: {PlexServerIds} completed",
+                    nameof(CheckAllConnectionsStatusByPlexServerJob),
+                    plexServers.Select(x => x.Id).ToList()
+                );
         }
         catch (Exception e)
         {
-            _log.Error(e);
+            _log.Here().ErrorResult(e);
         }
     }
 }

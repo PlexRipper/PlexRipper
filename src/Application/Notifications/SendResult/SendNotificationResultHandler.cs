@@ -1,19 +1,18 @@
 using FastEndpoints;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
 
 namespace Reaparr.Application;
 
 public class SendNotificationResultHandler : IEventHandler<SendNotificationResult>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly ISignalRService _signalRService;
 
-    public SendNotificationResultHandler(ILog log, IReaparrDbContext dbContext, ISignalRService signalRService)
+    public SendNotificationResultHandler(ILogger log, IReaparrDbContext dbContext, ISignalRService signalRService)
     {
-        _log = log;
+        _log = log.ForContext<SendNotificationResultHandler>();
         _dbContext = dbContext;
         _signalRService = signalRService;
     }
@@ -31,6 +30,6 @@ public class SendNotificationResultHandler : IEventHandler<SendNotificationResul
             }
         }
         else
-            _log.Warning("No errors to send as notifications from Result: {ResultObject}", notification.Result);
+            _log.Here().Warning("No errors to send as notifications from Result: {ResultObject}", notification.Result);
     }
 }

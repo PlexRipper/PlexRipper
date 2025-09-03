@@ -1,7 +1,6 @@
 ﻿using System.Threading.Channels;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
 
 namespace Reaparr.Application;
 
@@ -10,7 +9,7 @@ namespace Reaparr.Application;
 /// </summary>
 public class DownloadQueue : IDownloadQueue
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly IDownloadTaskScheduler _downloadTaskScheduler;
 
@@ -18,9 +17,9 @@ public class DownloadQueue : IDownloadQueue
 
     private readonly CancellationToken _token = new();
 
-    public DownloadQueue(ILog log, IReaparrDbContext dbContext, IDownloadTaskScheduler downloadTaskScheduler)
+    public DownloadQueue(ILogger log, IReaparrDbContext dbContext, IDownloadTaskScheduler downloadTaskScheduler)
     {
-        _log = log;
+        _log = log.ForContext<DownloadQueue>();
         _dbContext = dbContext;
         _downloadTaskScheduler = downloadTaskScheduler;
     }
@@ -63,11 +62,11 @@ public class DownloadQueue : IDownloadQueue
         // Check if the server is online
         if (!await _dbContext.IsServerOnline(plexServerId, cancellationToken: _token))
         {
-            return _log.Warning(
+            return _log.Here()
+                .WarningResult(
                     "PlexServer with name: {PlexServerName} is not online, cannot continue checking the DownloadQueue to pick the following download",
                     plexServerName
-                )
-                .ToResult();
+                );
         }
 
         if (await _downloadTaskScheduler.IsServerDownloading(plexServerId))
@@ -88,19 +87,21 @@ public class DownloadQueue : IDownloadQueue
         var nextDownloadTaskResult = GetNextDownloadTask(downloadTasks);
         if (nextDownloadTaskResult.IsFailed)
         {
-            _log.Information(
-                "There are no available downloadTasks remaining for PlexServer with Id: {PlexServerName}",
-                plexServerName
-            );
+            _log.Here()
+                .Information(
+                    "There are no available downloadTasks remaining for PlexServer with Id: {PlexServerName}",
+                    plexServerName
+                );
             return Result.Ok();
         }
 
         var nextDownloadTask = nextDownloadTaskResult.Value;
 
-        _log.Information(
-            "Selected download task {NextDownloadTaskFullTitle} to start as the next task",
-            nextDownloadTask.FullTitle
-        );
+        _log.Here()
+            .Information(
+                "Selected download task {NextDownloadTaskFullTitle} to start as the next task",
+                nextDownloadTask.FullTitle
+            );
 
         await _downloadTaskScheduler.StartDownloadTaskJob(nextDownloadTask.ToKey());
 

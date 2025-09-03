@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
+using Reaparr.Logging;
 using Serilog.Core;
 using Serilog.Events;
 
@@ -26,22 +27,28 @@ public static partial class ResultExtensions
         switch (logLevel)
         {
             case LogEventLevel.Verbose:
-                _log.Verbose(messageTemplate, memberName, sourceFilePath, sourceLineNumber);
+                _log.Here(sourceFilePath, memberName, sourceLineNumber)
+                    .Verbose(messageTemplate, memberName, sourceFilePath, sourceLineNumber);
                 break;
             case LogEventLevel.Debug:
-                _log.Debug(messageTemplate, memberName, sourceFilePath, sourceLineNumber);
+                _log.Here(sourceFilePath, memberName, sourceLineNumber)
+                    .Debug(messageTemplate, memberName, sourceFilePath, sourceLineNumber);
                 break;
             case LogEventLevel.Information:
-                _log.Information(messageTemplate, memberName, sourceFilePath, sourceLineNumber);
+                _log.Here(sourceFilePath, memberName, sourceLineNumber)
+                    .Information(messageTemplate, memberName, sourceFilePath, sourceLineNumber);
                 break;
             case LogEventLevel.Warning:
-                _log.Warning(e, messageTemplate, memberName, sourceFilePath, sourceLineNumber);
+                _log.Here(sourceFilePath, memberName, sourceLineNumber)
+                    .Warning(e, messageTemplate, memberName, sourceFilePath, sourceLineNumber);
                 break;
             case LogEventLevel.Error:
-                _log.Error(e, messageTemplate, memberName, sourceFilePath, sourceLineNumber);
+                _log.Here(sourceFilePath, memberName, sourceLineNumber)
+                    .ErrorResult(e, messageTemplate, memberName, sourceFilePath, sourceLineNumber);
                 break;
             case LogEventLevel.Fatal:
-                _log.Fatal(e, messageTemplate, memberName, sourceFilePath, sourceLineNumber);
+                _log.Here(sourceFilePath, memberName, sourceLineNumber)
+                    .Fatal(e, messageTemplate, memberName, sourceFilePath, sourceLineNumber);
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(logLevel), logLevel, null);
@@ -113,7 +120,7 @@ public static partial class ResultExtensions
     {
         var msg = ((IReason)error).ToLogString();
         foreach (var reason in error.Reasons)
-            msg += $"{System.Environment.NewLine} {Delimiter(1)} {reason.ToLogString(2)}";
+            msg += $"{Environment.NewLine} {Delimiter(1)} {reason.ToLogString(2)}";
 
         return msg;
     }

@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Domain;
+using Reaparr.Logging;
 
 namespace Reaparr.Data.Contracts;
 
@@ -38,7 +39,7 @@ public static partial class DbContextExtensions
 
         if (plexLibraryDb is null)
         {
-            _log.ErrorLine($"PlexLibrary with Id {plexLibrary.Id} not found in the database");
+            _log.Here().Error($"PlexLibrary with Id {plexLibrary.Id} not found in the database");
             return;
         }
 

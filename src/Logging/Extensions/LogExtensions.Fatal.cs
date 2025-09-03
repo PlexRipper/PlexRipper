@@ -1,20 +1,14 @@
-using Serilog.Events;
+using Serilog;
+using Serilog.Core;
 
 namespace Reaparr.Logging;
 
 public static partial class LogExtensions
 {
-    public static LogMetaData Fatal<T0, T1, T2>(
-        this LogMetaData logMetaData,
-        string messageTemplate,
-        T0 propertyValue0,
-        T1 propertyValue1,
-        T2 propertyValue2
-    )
+    [MessageTemplateFormatMethod("messageTemplate")]
+    public static string FatalMsg(this ILogger log, string messageTemplate, params object[] args)
     {
-        logMetaData
-            .Update(LogEventLevel.Fatal, messageTemplate, propertyValue0, propertyValue1, propertyValue2)
-            .Write();
-        return logMetaData;
+        log.Fatal(messageTemplate, args);
+        return log.RenderMessage(messageTemplate, args);
     }
 }

@@ -2,18 +2,14 @@ using System.Text.RegularExpressions;
 using System.Web;
 using Serilog.Enrichers.Sensitive;
 
-namespace Reaparr.Logging.Masks;
+namespace Reaparr.Logging;
 
 public class UrlMaskingOperator : RegexMaskingOperator
 {
-    #region Constructors
-
     public UrlMaskingOperator()
-        : base(urlReplacePattern) { }
+        : base(StatusUrlReplacePattern) { }
 
-    #endregion
-
-    private const string urlReplacePattern =
+    private const string StatusUrlReplacePattern =
         @"^(https?://)(?:www\.)?([a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(?::\d+)?(?:/[^\s]*)?$";
 
     protected override string PreprocessMask(string mask, Match match)

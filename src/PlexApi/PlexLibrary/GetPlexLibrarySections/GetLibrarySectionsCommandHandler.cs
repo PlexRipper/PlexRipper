@@ -1,23 +1,22 @@
 using FastEndpoints;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
 using Reaparr.PlexApi.Contracts;
 
 namespace Reaparr.PlexApi;
 
 public class GetLibrarySectionsCommandHandler : ICommandHandler<GetLibrarySectionsCommand, Result<List<PlexLibrary>>>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly IPlexApiClientFactory _plexApiClientFactory;
 
     public GetLibrarySectionsCommandHandler(
-        ILog log,
+        ILogger log,
         IReaparrDbContext dbContext,
         IPlexApiClientFactory plexApiClientFactory
     )
     {
-        _log = log;
+        _log = log.ForContext<GetLibrarySectionsCommandHandler>();
         _dbContext = dbContext;
         _plexApiClientFactory = plexApiClientFactory;
     }
@@ -52,10 +51,11 @@ public class GetLibrarySectionsCommandHandler : ICommandHandler<GetLibrarySectio
 
         if (response.Value.Object?.MediaContainer?.Directory is null)
         {
-            _log.Error(
-                "Plex server: {PlexServerName} returned an empty response when libraries were requested",
-                connection.PlexServer?.Name
-            );
+            _log.Here()
+                .Error(
+                    "Plex server: {PlexServerName} returned an empty response when libraries were requested",
+                    connection.PlexServer?.Name
+                );
             return response.ToResult();
         }
 

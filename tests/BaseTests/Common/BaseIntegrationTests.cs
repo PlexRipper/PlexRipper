@@ -1,5 +1,4 @@
 using Reaparr.Environment;
-using Reaparr.Logging;
 using Serilog.Events;
 
 namespace Reaparr.BaseTests;
@@ -7,7 +6,7 @@ namespace Reaparr.BaseTests;
 [Collection("Integration Tests")]
 public abstract class BaseIntegrationTests
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
 
     protected CancellationToken CancellationToken => TestContext.Current.CancellationToken;
 

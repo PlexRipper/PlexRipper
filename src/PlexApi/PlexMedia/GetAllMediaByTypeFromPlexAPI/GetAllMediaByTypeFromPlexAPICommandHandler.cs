@@ -2,9 +2,7 @@ using FastEndpoints;
 using LukeHagar.PlexAPI.SDK;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
 using Reaparr.PlexApi.Contracts;
-using ILog = Reaparr.Logging.ILog;
 
 namespace Reaparr.PlexApi;
 
@@ -18,17 +16,17 @@ public record GetAllMediaByTypeFromPlexApiCommand(
 public class GetAllMediaByTypeFromPlexApiCommandHandler
     : ICommandHandler<GetAllMediaByTypeFromPlexApiCommand, Result<List<LibraryMediaItemDTO>>>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly IPlexApiClientFactory _plexApiClientFactory;
 
     public GetAllMediaByTypeFromPlexApiCommandHandler(
-        ILog log,
+        ILogger log,
         IReaparrDbContext dbContext,
         IPlexApiClientFactory plexApiClientFactory
     )
     {
-        _log = log;
+        _log = log.ForContext<GetAllMediaByTypeFromPlexApiCommandHandler>();
         _dbContext = dbContext;
         _plexApiClientFactory = plexApiClientFactory;
     }
@@ -75,7 +73,8 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
         var totalSize = totalSizeResult.Value;
         if (totalSize == 0)
         {
-            _log.Warning("The library with name: {PlexLibraryName} contains no media to retrieve", plexLibrary.Name);
+            _log.Here()
+                .Warning("The library with name: {PlexLibraryName} contains no media to retrieve", plexLibrary.Name);
             return Result.Ok(mediaList);
         }
 
@@ -224,11 +223,12 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
 
         if (response.IsFailed)
         {
-            _log.Error(
-                "Failed to get metadata for rating keys: {RatingKeys}. Error: {Error}",
-                string.Join(",", ratingKeys),
-                response.Errors
-            );
+            _log.Here()
+                .Error(
+                    "Failed to get metadata for rating keys: {RatingKeys}. Error: {Error}",
+                    string.Join(",", ratingKeys),
+                    response.Errors
+                );
             return response.ToResult().LogError();
         }
 

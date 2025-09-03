@@ -15,10 +15,11 @@ public static partial class Startup
     /// <param name="env"> The <see cref="IWebHostEnvironment"/> instance to configure.</param>
     public static void ConfigureApplication(this WebApplication app, IWebHostEnvironment env)
     {
-        _log.Information(
-            "Running location: {Location}",
-            Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
-        );
+        _log.Here()
+            .Information(
+                "Running location: {Location}",
+                Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
+            );
 
         // This has to always be first
         app.UseCors(CORSConfiguration);
@@ -63,7 +64,8 @@ public static partial class Startup
                     .ToDictionary(e => e.Key, e => e.Select(m => m.ErrorMessage).ToArray());
                 foreach (var reason in errors)
                     result.Errors[0].Metadata.Add(reason.Key, reason.Value);
-                return result;
+
+                return result.LogError();
             };
         });
     }

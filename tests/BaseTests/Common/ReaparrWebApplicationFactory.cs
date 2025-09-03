@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Reaparr.Logging;
 using Reaparr.WebAPI;
 
 namespace Reaparr.BaseTests;
@@ -15,7 +14,7 @@ public class ReaparrWebApplicationFactory : WebApplicationFactory<Program>
 
     public readonly string MemoryDbName;
 
-    private static readonly ILog _log = new LogConfig().CreateLogInstance<ReaparrWebApplicationFactory>();
+    private static readonly ILogger _log = new LogConfig().CreateLogInstance<ReaparrWebApplicationFactory>();
 
     private readonly UnitTestDataConfig _config;
 
@@ -53,7 +52,7 @@ public class ReaparrWebApplicationFactory : WebApplicationFactory<Program>
         }
         catch (Exception e)
         {
-            _log.Fatal(e);
+            _log.Here().Fatal(e.Message);
             throw;
         }
     }

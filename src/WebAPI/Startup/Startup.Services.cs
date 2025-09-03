@@ -78,7 +78,7 @@ public static partial class Startup
                     Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "",
                     "wwwroot"
                 );
-                _log.Debug("Setting up SPA static files for production at {Path}", path);
+                _log.Here().Debug("Setting up SPA static files for production at {Path}", path);
                 services.AddSpaStaticFiles(configuration => configuration.RootPath = path);
             }
 

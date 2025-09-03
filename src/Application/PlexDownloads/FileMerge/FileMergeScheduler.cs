@@ -1,18 +1,17 @@
 using System.Text.Json;
 using Quartz;
 using Reaparr.FileSystem.Contracts;
-using Reaparr.Logging;
 
 namespace Reaparr.Application;
 
 public class FileMergeScheduler : IFileMergeScheduler
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IScheduler _scheduler;
 
-    public FileMergeScheduler(ILog log, IScheduler scheduler)
+    public FileMergeScheduler(ILogger log, IScheduler scheduler)
     {
-        _log = log;
+        _log = log.ForContext<FileMergeScheduler>();
         _scheduler = scheduler;
     }
 
@@ -47,11 +46,12 @@ public class FileMergeScheduler : IFileMergeScheduler
         if (!downloadTaskKey.IsValid)
             return ResultExtensions.IsInvalidId(nameof(DownloadTaskKey), downloadTaskKey.Id).LogWarning();
 
-        _log.Information(
-            "Stopping FileMergeJob for {NameOfDownloadFileTask)} with id: {FileTaskId}",
-            nameof(DownloadTaskKey),
-            downloadTaskKey.Id
-        );
+        _log.Here()
+            .Information(
+                "Stopping FileMergeJob for {NameOfDownloadFileTask)} with id: {FileTaskId}",
+                nameof(DownloadTaskKey),
+                downloadTaskKey.Id
+            );
 
         var jobKey = FileMergeJob.GetJobKey(downloadTaskKey.Id);
         if (!await _scheduler.IsJobRunning(jobKey))

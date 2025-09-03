@@ -1,5 +1,3 @@
-using Reaparr.Logging;
-
 namespace Reaparr.Domain;
 
 public static partial class EnumMapperExtensions

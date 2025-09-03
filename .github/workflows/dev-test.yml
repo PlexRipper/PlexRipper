@@ -4,6 +4,7 @@ on:
     workflow_dispatch:
     pull_request:
         branches: [ dev ]
+        types: [opened, ready_for_review, reopened, synchronize]
         paths-ignore:
             - '.github/**'
             - '.idea/**'
@@ -19,7 +20,7 @@ jobs:
     # Check if PR is in draft
     Check-PR-Status:
         runs-on: ubuntu-latest
-        if: github.event_name != 'workflow_dispatch' && !github.event.pull_request.draft
+        if: github.event.pull_request.draft == false
         steps:
             - run: echo "PR is not in draft, proceeding with tests"
 

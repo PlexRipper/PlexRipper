@@ -1,13 +1,12 @@
 ﻿using System.Collections.Concurrent;
 using Reaparr.Application.Contracts;
-using Reaparr.Logging;
 using Reaparr.WebAPI.Contracts;
 
 namespace Reaparr.BaseTests;
 
 public class MockSignalRService : ISignalRService
 {
-    private readonly ILog<MockSignalRService> _log;
+    private readonly Serilog.ILogger _log;
 
     public BlockingCollection<DownloadTaskDTO> DownloadTaskUpdate { get; } = new();
 
@@ -15,9 +14,9 @@ public class MockSignalRService : ISignalRService
     public BlockingCollection<JobStatusUpdateDTO> JobStatusUpdateList { get; } = new();
     public BlockingCollection<RefreshDataType> RefreshNotificationList { get; } = new();
 
-    public MockSignalRService(ILog<MockSignalRService> log)
+    public MockSignalRService(ILogger log)
     {
-        _log = log;
+        _log = log.ForContext<MockSignalRService>();
     }
 
     public Task SendLibraryProgressUpdateAsync(LibraryProgress libraryProgress) => Task.CompletedTask;
@@ -40,7 +39,7 @@ public class MockSignalRService : ISignalRService
         var update = downloadTasks.ToServerDownloadProgressDTOList();
 
         ServerDownloadProgressList.Add(update.First(), cancellationToken);
-        _log.Verbose("{ClassName} => {@DownloadTaskDto}", nameof(MockSignalRService), update.First());
+        _log.Here().Verbose("{ClassName} => {@DownloadTaskDto}", nameof(MockSignalRService), update.First());
 
         return Task.CompletedTask;
     }
@@ -52,7 +51,7 @@ public class MockSignalRService : ISignalRService
         where T : class
     {
         JobStatusUpdateList.Add(jobStatusUpdate.ToDTO());
-        _log.Verbose("{ClassName} => {@JobStatusUpdate}", nameof(MockSignalRService), jobStatusUpdate);
+        _log.Here().Verbose("{ClassName} => {@JobStatusUpdate}", nameof(MockSignalRService), jobStatusUpdate);
 
         return Task.CompletedTask;
     }
@@ -60,7 +59,7 @@ public class MockSignalRService : ISignalRService
     public Task SendRefreshNotificationAsync(RefreshDataType dataType, CancellationToken cancellationToken = default)
     {
         RefreshNotificationList.Add(dataType, cancellationToken);
-        _log.Verbose("{ClassName} => {@DataType}", nameof(MockSignalRService), dataType);
+        _log.Here().Verbose("{ClassName} => {@DataType}", nameof(MockSignalRService), dataType);
 
         return Task.CompletedTask;
     }

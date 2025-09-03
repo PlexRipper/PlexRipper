@@ -1,42 +1,55 @@
 using System.Runtime.CompilerServices;
-using FluentResults;
 using Serilog;
+using Serilog.Events;
 
 namespace Reaparr.Logging;
 
 public static partial class LogExtensions
 {
-    public static LogMetaData Here(
-        this ILog logger,
-        [CallerFilePath] string sourceFilePath = "",
-        [CallerMemberName] string memberName = "",
-        [CallerLineNumber] int sourceLineNumber = 0
-    )
-    {
-        var className = Path.GetFileNameWithoutExtension(sourceFilePath);
-        return new LogMetaData(logger, className, memberName, sourceLineNumber);
-    }
+    public static bool IsLogLevelEnabled(this ILogger logger, LogEventLevel logLevel) => logger.IsEnabled(logLevel);
+
+    public static bool IsLogLevelVerbose(this ILogger logger) => logger.IsEnabled(LogEventLevel.Verbose);
+
+    public static bool IsLogLevelDebug(this ILogger logger) => logger.IsEnabled(LogEventLevel.Debug);
 
     public static ILogger Here(
         this ILogger logger,
-        [CallerLineNumber] int sourceLineNumber = 0,
         [CallerFilePath] string sourceFilePath = "",
-        [CallerMemberName] string memberName = ""
+        [CallerMemberName] string memberName = "",
+        [CallerLineNumber] int sourceLineNumber = 0
     ) =>
         logger
-            .ForContext(nameof(LogMetaData.ClassName), Path.GetFileNameWithoutExtension(sourceFilePath))
-            .ForContext(nameof(LogMetaData.MethodName), memberName)
-            .ForContext(nameof(LogMetaData.LineNumber), sourceLineNumber);
+            .ForContext(nameof(LogConfig.FileName), Path.GetFileName(sourceFilePath))
+            .ForContext(nameof(LogConfig.FilePath), sourceFilePath)
+            .ForContext(nameof(LogConfig.MethodName), memberName)
+            .ForContext(nameof(LogConfig.LineNumber), sourceLineNumber);
 
-    public static Result ToResult(this LogMetaData logMetaData)
+    public static string RenderMessage(this ILogger log, string messageTemplate, params object[] args)
     {
-        var error = new Error(logMetaData.ToString());
-        error.Metadata.Add("ClassName", logMetaData.ClassName);
-        error.Metadata.Add("MethodName", logMetaData.MethodName);
-        error.Metadata.Add("LineNumber", logMetaData.LineNumber);
-        error.Metadata.Add("LogLevel", logMetaData.LogLevel);
-        error.Metadata.Add("Exception", logMetaData.Exception);
+        log.BindMessageTemplate(messageTemplate, args, out var parsedTemplate, out var boundProperties);
 
-        return Result.Fail(error);
+        if (parsedTemplate is null)
+        {
+            // Fallback: return the original template if parsing fails
+            return messageTemplate;
+        }
+
+        var logEvent = new LogEvent(
+            DateTimeOffset.Now,
+            LogEventLevel.Information,
+            exception: null,
+            messageTemplate: parsedTemplate,
+            properties: boundProperties ?? []
+        );
+
+        return logEvent.RenderMessage();
     }
+
+    public static string GetStringProperty(this LogEvent logEvent, string propertyName) =>
+        logEvent.Properties.TryGetValue(propertyName, out var propertyValue)
+            ? propertyValue.ToString().Trim('"')
+            : string.Empty;
+
+    public static int? GetIntProperty(this LogEvent logEvent, string propertyName) =>
+        int.TryParse(logEvent.GetStringProperty(propertyName), out var value) ? value : null;
 }

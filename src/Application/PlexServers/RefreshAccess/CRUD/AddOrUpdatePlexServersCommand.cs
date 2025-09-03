@@ -2,7 +2,6 @@ using FastEndpoints;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
 
 namespace Reaparr.Application;
 
@@ -38,12 +37,12 @@ public class AddOrUpdatePlexServersCommandValidator : AbstractValidator<AddOrUpd
 public class AddOrUpdatePlexServersCommandHandler
     : ICommandHandler<AddOrUpdatePlexServersCommand, Result<PlexServerRapport>>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
-    public AddOrUpdatePlexServersCommandHandler(ILog log, IReaparrDbContext dbContext)
+    public AddOrUpdatePlexServersCommandHandler(ILogger log, IReaparrDbContext dbContext)
     {
-        _log = log;
+        _log = log.ForContext<AddOrUpdatePlexServersCommandHandler>();
         _dbContext = dbContext;
     }
 
@@ -56,7 +55,7 @@ public class AddOrUpdatePlexServersCommandHandler
         var rapport = new PlexServerRapport();
 
         // Add or update the PlexServers in the database
-        _log.Information("Adding or updating {PlexServersCount} PlexServers now", incomingPlexServers.Count);
+        _log.Here().Information("Adding or updating {PlexServersCount} PlexServers now", incomingPlexServers.Count);
 
         var machineIds = incomingPlexServers.Select(x => x.MachineIdentifier).ToList();
         var plexServerDbList = await _dbContext
@@ -73,7 +72,7 @@ public class AddOrUpdatePlexServersCommandHandler
             if (existingServer != null)
             {
                 // PlexServer already exists
-                _log.Debug("Updating PlexServer with id: {PlexServerDbId} in the database", existingServer.Id);
+                _log.Here().Debug("Updating PlexServer with id: {PlexServerDbId} in the database", existingServer.Id);
                 incomingPlexServer.Id = existingServer.Id;
 
                 _dbContext.Entry(existingServer).CurrentValues.SetValues(incomingPlexServer);
@@ -84,7 +83,8 @@ public class AddOrUpdatePlexServersCommandHandler
             else
             {
                 // Create plexServer
-                _log.Debug("Adding PlexServer with name: {PlexServerName} to the database", incomingPlexServer.Name);
+                _log.Here()
+                    .Debug("Adding PlexServer with name: {PlexServerName} to the database", incomingPlexServer.Name);
                 foreach (var plexServerConnection in incomingPlexServer.PlexServerConnections)
                     plexServerConnection.PlexServerId = incomingPlexServer.Id;
 
@@ -96,7 +96,7 @@ public class AddOrUpdatePlexServersCommandHandler
 
         await _dbContext.SaveChangesAsync(cancellationToken);
 
-        _log.InformationLine(rapport.ToString());
+        _log.Here().Information(rapport.ToString());
 
         return Result.Ok(rapport);
     }

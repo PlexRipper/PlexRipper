@@ -4,7 +4,6 @@ using FastEndpoints;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
 
 namespace Reaparr.Application;
 
@@ -38,16 +37,16 @@ public class SyncPlexMoviesCommandValidator : AbstractValidator<SyncPlexMoviesCo
 
 public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesCommand, Result<CrudMoviesReport>>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
     private readonly CrudMoviesReport _report = new();
 
     private readonly BulkConfig? _config = new() { BatchSize = 500, SetOutputIdentity = true };
 
-    public SyncPlexMoviesCommandHandler(ILog log, IReaparrDbContext dbContext)
+    public SyncPlexMoviesCommandHandler(ILogger log, IReaparrDbContext dbContext)
     {
-        _log = log;
+        _log = log.ForContext<SyncPlexMoviesCommandHandler>();
         _dbContext = dbContext;
     }
 
@@ -62,11 +61,12 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
             var plexServerId = command.LibraryMetadata.PlexLibrary.PlexServerId;
             var libraryName = await _dbContext.GetPlexLibraryNameById(plexLibraryId, cancellationToken);
 
-            _log.Debug(
-                "Starting syncing of movies in library: {PlexLibraryName} with id: {PlexLibraryId} by first removing all media and then reinserting it",
-                libraryName,
-                plexLibraryId
-            );
+            _log.Here()
+                .Debug(
+                    "Starting syncing of movies in library: {PlexLibraryName} with id: {PlexLibraryId} by first removing all media and then reinserting it",
+                    libraryName,
+                    plexLibraryId
+                );
 
             var stopWatch = Stopwatch.StartNew();
 
@@ -118,20 +118,21 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
             var mergeResult = Result.Merge(syncActorResult, syncGenreResult, syncCountriesResult);
             if (mergeResult.IsFailed)
             {
-                _log.Error("Failed to sync movie metadata: {Error}", mergeResult.Errors);
+                _log.Here().Error("Failed to sync movie metadata: {Error}", mergeResult.Errors);
                 return mergeResult.LogError();
             }
 
             stopWatch.Stop();
 
-            _log.Information(
-                "Finished media syncing plexLibrary: {PlexLibraryName} with id: {PlexLibraryId} in {TotalMilliseconds} milliseconds",
-                libraryName,
-                plexLibraryId,
-                stopWatch.Elapsed.TotalMilliseconds
-            );
+            _log.Here()
+                .Information(
+                    "Finished media syncing plexLibrary: {PlexLibraryName} with id: {PlexLibraryId} in {TotalMilliseconds} milliseconds",
+                    libraryName,
+                    plexLibraryId,
+                    stopWatch.Elapsed.TotalMilliseconds
+                );
 
-            _log.DebugLine(_report.ToString());
+            _log.Here().Debug(_report.ToString());
 
             return Result.Ok(_report);
         }
@@ -149,11 +150,12 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
         CancellationToken ct
     )
     {
-        _log.Debug(
-            "Starting syncing of movie actors for library: {LibraryName} with id: {LibraryId}",
-            libraryName,
-            libraryId
-        );
+        _log.Here()
+            .Debug(
+                "Starting syncing of movie actors for library: {LibraryName} with id: {LibraryId}",
+                libraryName,
+                libraryId
+            );
         var stopWatch = Stopwatch.StartNew();
         await _dbContext
             .PlexMovieActors.Where(x => x.PlexLibraryId == libraryId)
@@ -179,7 +181,7 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
         var insertResult = await Result.Try(() => _dbContext.BulkInsertAsync(list, _config, ct));
         if (insertResult.IsFailed)
         {
-            _log.Error("Failed to sync movie actors: {Error}", insertResult.Errors);
+            _log.Here().Error("Failed to sync movie actors: {Error}", insertResult.Errors);
             return insertResult;
         }
 
@@ -198,11 +200,12 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
         CancellationToken ct
     )
     {
-        _log.Debug(
-            "Starting syncing of movie genres for library: {LibraryName} with id: {LibraryId}",
-            libraryName,
-            libraryId
-        );
+        _log.Here()
+            .Debug(
+                "Starting syncing of movie genres for library: {LibraryName} with id: {LibraryId}",
+                libraryName,
+                libraryId
+            );
         var stopWatch = Stopwatch.StartNew();
 
         await _dbContext
@@ -229,7 +232,7 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
         var insertResult = await Result.Try(() => _dbContext.BulkInsertAsync(list, _config, ct));
         if (insertResult.IsFailed)
         {
-            _log.Error("Failed to sync movie genres: {Error}", insertResult.Errors);
+            _log.Here().Error("Failed to sync movie genres: {Error}", insertResult.Errors);
             return insertResult;
         }
 
@@ -248,11 +251,12 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
         CancellationToken ct
     )
     {
-        _log.Debug(
-            "Starting syncing of movie countries for library: {LibraryName} with id: {LibraryId}",
-            libraryName,
-            libraryId
-        );
+        _log.Here()
+            .Debug(
+                "Starting syncing of movie countries for library: {LibraryName} with id: {LibraryId}",
+                libraryName,
+                libraryId
+            );
         var stopWatch = Stopwatch.StartNew();
 
         await _dbContext
@@ -279,7 +283,7 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
         var insertResult = await Result.Try(() => _dbContext.BulkInsertAsync(list, _config, ct));
         if (insertResult.IsFailed)
         {
-            _log.Error("Failed to sync movie countries: {Error}", insertResult.Errors);
+            _log.Here().Error("Failed to sync movie countries: {Error}", insertResult.Errors);
             return insertResult;
         }
 

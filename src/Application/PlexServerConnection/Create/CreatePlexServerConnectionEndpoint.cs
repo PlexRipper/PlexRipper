@@ -1,6 +1,5 @@
 using FastEndpoints;
 using FluentValidation;
-using Microsoft.AspNetCore.Http;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 
@@ -34,12 +33,14 @@ public class CreatePlexServerConnectionEndpointRequestValidator : Validator<Crea
 public class CreatePlexServerConnectionEndpoint
     : BaseEndpoint<CreatePlexServerConnectionEndpointRequest, ResultDTO<PlexServerConnectionDTO>>
 {
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.PlexServerConnectionController;
 
-    public CreatePlexServerConnectionEndpoint(IReaparrDbContext dbContext)
+    public CreatePlexServerConnectionEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
+        _log = log.ForContext<CreatePlexServerConnectionEndpoint>();
         _dbContext = dbContext;
     }
 
@@ -57,6 +58,7 @@ public class CreatePlexServerConnectionEndpoint
 
     public override async Task HandleAsync(CreatePlexServerConnectionEndpointRequest req, CancellationToken ct)
     {
+        _log.Here().DebugApiCall(HttpContext, req);
         var connection = new PlexServerConnection
         {
             Id = 0,

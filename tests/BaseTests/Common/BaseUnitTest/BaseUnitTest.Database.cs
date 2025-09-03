@@ -28,10 +28,10 @@ public partial class BaseUnitTest : IDisposable
     {
         if (!IsDatabaseSetup)
         {
-            var logEvent = Log.ErrorLine(
+            var logEvent = Log.ErrorMsg(
                 "The test database has not been setup yet, run SetupDatabase() in the test first!"
             );
-            throw new Exception(logEvent.ToString());
+            throw new Exception(logEvent);
         }
     }
 

@@ -1,10 +1,8 @@
 using FastEndpoints;
 using FluentValidation;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
 
 namespace Reaparr.Application;
 
@@ -20,15 +18,15 @@ public class DeletePlexAccountByIdRequestValidator : Validator<DeletePlexAccount
 
 public class DeletePlexAccountByIdEndpoint : BaseEndpoint<DeletePlexAccountByIdRequest>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly ISignalRService _signalRService;
 
     public override string EndpointPath => ApiRoutes.PlexAccountController + "/{PlexAccountId}";
 
-    public DeletePlexAccountByIdEndpoint(ILog log, IReaparrDbContext dbContext, ISignalRService signalRService)
+    public DeletePlexAccountByIdEndpoint(ILogger log, IReaparrDbContext dbContext, ISignalRService signalRService)
     {
-        _log = log;
+        _log = log.ForContext<DeletePlexAccountByIdEndpoint>();
         _dbContext = dbContext;
         _signalRService = signalRService;
     }
@@ -47,6 +45,7 @@ public class DeletePlexAccountByIdEndpoint : BaseEndpoint<DeletePlexAccountByIdR
 
     public override async Task HandleAsync(DeletePlexAccountByIdRequest req, CancellationToken ct)
     {
+        _log.Here().DebugApiCall(HttpContext, req);
         var deletedPlexAccountsCount = await _dbContext
             .PlexAccounts.Where(x => x.Id == req.PlexAccountId)
             .ExecuteDeleteAsync(ct);
@@ -75,13 +74,14 @@ public class DeletePlexAccountByIdEndpoint : BaseEndpoint<DeletePlexAccountByIdR
         await _dbContext.PlexAccountServers.Where(x => x.PlexAccountId == req.PlexAccountId).ExecuteDeleteAsync(ct);
         await _dbContext.PlexAccountLibraries.Where(x => x.PlexAccountId == req.PlexAccountId).ExecuteDeleteAsync(ct);
 
-        _log.Debug(
-            "Deleted {PlexAccount} with Id: {CommandId} from the database, and cleaned up {DeletedServersCount} PlexServers and {DeletedLibrariesCount} PlexLibraries",
-            nameof(PlexAccount),
-            req.PlexAccountId,
-            deletedServersCount,
-            deletedLibrariesCount
-        );
+        _log.Here()
+            .Debug(
+                "Deleted {PlexAccount} with Id: {CommandId} from the database, and cleaned up {DeletedServersCount} PlexServers and {DeletedLibrariesCount} PlexLibraries",
+                nameof(PlexAccount),
+                req.PlexAccountId,
+                deletedServersCount,
+                deletedLibrariesCount
+            );
 
         await _signalRService.SendRefreshNotificationAsync(
             [

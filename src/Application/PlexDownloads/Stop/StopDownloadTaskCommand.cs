@@ -4,7 +4,6 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
 
 namespace Reaparr.Application;
 
@@ -25,21 +24,21 @@ public class StopDownloadTaskCommandValidator : AbstractValidator<StopDownloadTa
 
 public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCommand, Result>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IFile _file;
     private readonly IDownloadTaskScheduler _downloadTaskScheduler;
 
     public StopDownloadTaskCommandHandler(
-        ILog log,
+        ILogger log,
         IReaparrDbContext dbContext,
         ICommandExecutor commandExecutor,
         IFile file,
         IDownloadTaskScheduler downloadTaskScheduler
     )
     {
-        _log = log;
+        _log = log.ForContext<StopDownloadTaskCommandHandler>();
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;
         _file = file;
@@ -63,7 +62,7 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
                 continue;
             }
 
-            _log.Information("Stopping {DownloadTaskFullTitle} from downloading", downloadTask.FullTitle);
+            _log.Here().Information("Stopping {DownloadTaskFullTitle} from downloading", downloadTask.FullTitle);
 
             if (await _downloadTaskScheduler.IsDownloading(downloadTaskKey, cancellationToken))
             {
@@ -75,7 +74,7 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
                 }
             }
 
-            _log.Debug("Deleting partially downloaded files of {DownloadTaskFullTitle}", downloadTask.FullTitle);
+            _log.Here().Debug("Deleting partially downloaded files of {DownloadTaskFullTitle}", downloadTask.FullTitle);
 
             foreach (var filePath in downloadTask.FilePaths)
             {

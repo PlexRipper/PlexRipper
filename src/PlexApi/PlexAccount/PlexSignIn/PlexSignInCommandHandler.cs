@@ -1,25 +1,24 @@
 using FastEndpoints;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
-using Reaparr.Logging;
 using Reaparr.PlexApi.Contracts;
 
 namespace Reaparr.PlexApi;
 
 public class PlexSignInCommandHandler : ICommandHandler<PlexSignInCommand, Result<PlexAccount>>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IPlexApiClientFactory _plexApiClientFactory;
 
-    public PlexSignInCommandHandler(ILog log, IPlexApiClientFactory plexApiClientFactory)
+    public PlexSignInCommandHandler(ILogger log, IPlexApiClientFactory plexApiClientFactory)
     {
-        _log = log;
+        _log = log.ForContext<PlexSignInCommandHandler>();
         _plexApiClientFactory = plexApiClientFactory;
     }
 
     public async Task<Result<PlexAccount>> ExecuteAsync(PlexSignInCommand command, CancellationToken ct)
     {
         var plexAccount = command.PlexAccount;
-        _log.Debug("Requesting PlexToken for account {UserName}", plexAccount.Username);
+        _log.Here().Debug("Requesting PlexToken for account {UserName}", plexAccount.Username);
 
         var plexTvClient = _plexApiClientFactory.CreateTvClient();
 
@@ -65,10 +64,11 @@ public class PlexSignInCommandHandler : ICommandHandler<PlexSignInCommand, Resul
 
         if (result.IsSuccess)
         {
-            _log.Information(
-                "Successfully retrieved the PlexAccount data for user {PlexAccountDisplayName} from the PlexApi",
-                plexAccount.DisplayName
-            );
+            _log.Here()
+                .Information(
+                    "Successfully retrieved the PlexAccount data for user {PlexAccountDisplayName} from the PlexApi",
+                    plexAccount.DisplayName
+                );
         }
 
         return result;

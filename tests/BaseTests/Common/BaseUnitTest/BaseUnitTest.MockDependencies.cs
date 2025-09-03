@@ -7,10 +7,7 @@ using Reaparr.Data.Contracts;
 using Reaparr.Environment;
 using Reaparr.Identity;
 using Reaparr.Identity.Contracts;
-using Reaparr.Logging;
 using Reaparr.PlexApi.Contracts;
-using Serilog;
-using Log = Reaparr.Logging.Log;
 
 namespace Reaparr.BaseTests;
 
@@ -82,9 +79,6 @@ public partial class BaseUnitTest
             .Register((_, _) => MockDatabase.GetMemoryAuthDbContext(_databaseName))
             .As<IAuthDbContext>()
             .InstancePerDependency();
-
-        builder.RegisterType<Log>().As<ILog>().SingleInstance();
-        builder.RegisterGeneric(typeof(Log<>)).As(typeof(ILog<>)).InstancePerDependency();
     }
 
     protected void SetupHttpClient(Action<Mock<HttpMessageHandler>>? action = null)

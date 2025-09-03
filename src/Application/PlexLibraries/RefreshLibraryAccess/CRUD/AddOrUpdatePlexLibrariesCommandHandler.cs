@@ -3,7 +3,6 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
 
 namespace Reaparr.Application;
 
@@ -33,13 +32,13 @@ public class AddOrUpdatePlexLibrariesValidator : AbstractValidator<AddOrUpdatePl
 public class AddOrUpdatePlexLibrariesCommandHandler
     : ICommandHandler<AddOrUpdatePlexLibrariesCommand, Result<List<PlexLibraryAccessRapport>>>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly List<PlexLibraryAccessRapport> _list = [];
 
-    public AddOrUpdatePlexLibrariesCommandHandler(ILog log, IReaparrDbContext dbContext)
+    public AddOrUpdatePlexLibrariesCommandHandler(ILogger log, IReaparrDbContext dbContext)
     {
-        _log = log;
+        _log = log.ForContext<AddOrUpdatePlexLibrariesCommandHandler>();
         _dbContext = dbContext;
     }
 
@@ -72,7 +71,8 @@ public class AddOrUpdatePlexLibrariesCommandHandler
 
                 if (plexLibraryDb is null)
                 {
-                    _log.Debug("Adding PlexLibrary {PlexLibraryName} to the database", incomingPlexLibrary.Title);
+                    _log.Here()
+                        .Debug("Adding PlexLibrary {PlexLibraryName} to the database", incomingPlexLibrary.Title);
                     await _dbContext.PlexLibraries.AddAsync(incomingPlexLibrary, cancellationToken);
                 }
                 else
@@ -81,11 +81,12 @@ public class AddOrUpdatePlexLibrariesCommandHandler
                     incomingPlexLibrary.SyncedAt = plexLibraryDb.SyncedAt;
                     incomingPlexLibrary.DefaultDestinationId = plexLibraryDb.DefaultDestinationId;
 
-                    _log.Debug(
-                        "Updating PlexLibrary {PlexLibraryName} with id: {PlexLibraryId} in the database",
-                        incomingPlexLibrary.Title,
-                        incomingPlexLibrary.Id
-                    );
+                    _log.Here()
+                        .Debug(
+                            "Updating PlexLibrary {PlexLibraryName} with id: {PlexLibraryId} in the database",
+                            incomingPlexLibrary.Title,
+                            incomingPlexLibrary.Id
+                        );
 
                     if (incomingPlexLibrary.Type == PlexMediaType.Movie)
                         incomingPlexLibrary.SetMovieMetaData(plexLibraryDb.MovieCount, plexLibraryDb.MediaSize);
@@ -109,10 +110,11 @@ public class AddOrUpdatePlexLibrariesCommandHandler
         await _dbContext.SaveChangesAsync(cancellationToken);
 
         // Add or update the PlexAccount, PlexServer and PlexLibrary relationships
-        _log.Information(
-            "Adding, updating or removing the PlexAccount: {PlexAccountDisplayName} association with PlexLibraries now",
-            plexAccount.DisplayName
-        );
+        _log.Here()
+            .Information(
+                "Adding, updating or removing the PlexAccount: {PlexAccountDisplayName} association with PlexLibraries now",
+                plexAccount.DisplayName
+            );
 
         foreach (var (plexServerId, incomingPlexLibraries) in plexServerLibrariesDict)
         {
@@ -205,7 +207,7 @@ public class AddOrUpdatePlexLibrariesCommandHandler
         await _dbContext.SaveChangesAsync(cancellationToken);
 
         foreach (var rapport in _list)
-            _log.InformationLine(rapport.ToString());
+            _log.Here().Information(rapport.ToString());
 
         return Result.Ok(_list);
     }

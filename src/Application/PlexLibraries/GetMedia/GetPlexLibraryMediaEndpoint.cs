@@ -1,6 +1,5 @@
 using FastEndpoints;
 using FluentValidation;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
@@ -24,12 +23,14 @@ public class GetPlexLibraryMediaEndpointRequestValidator : Validator<GetPlexLibr
 
 public class GetPlexLibraryMediaEndpoint : BaseEndpoint<GetPlexLibraryMediaEndpointRequest, PlexMediaStatisticsDTO>
 {
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.PlexLibraryController + "/{PlexLibraryId}/media";
 
-    public GetPlexLibraryMediaEndpoint(IReaparrDbContext dbContext)
+    public GetPlexLibraryMediaEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
+        _log = log.ForContext<GetPlexLibraryMediaEndpoint>();
         _dbContext = dbContext;
     }
 
@@ -47,6 +48,7 @@ public class GetPlexLibraryMediaEndpoint : BaseEndpoint<GetPlexLibraryMediaEndpo
 
     public override async Task HandleAsync(GetPlexLibraryMediaEndpointRequest req, CancellationToken ct)
     {
+        _log.Here().DebugApiCall(HttpContext, req);
         var plexLibrary = await _dbContext
             .PlexLibraries.AsNoTracking()
             .Include(x => x.PlexServer)

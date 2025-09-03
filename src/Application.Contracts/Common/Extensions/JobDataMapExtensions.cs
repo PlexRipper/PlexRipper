@@ -2,12 +2,13 @@ using System.Text.Json;
 using Quartz;
 using Reaparr.Domain;
 using Reaparr.Logging;
+using Serilog;
 
 namespace Reaparr.Application.Contracts;
 
 public static class JobDataMapExtensions
 {
-    private static readonly ILog _log = new LogConfig().CreateLogInstance(typeof(JobDataMapExtensions));
+    private static readonly ILogger _log = new LogConfig().CreateLogInstance(typeof(JobDataMapExtensions));
 
     public static List<int> GetIntListValue(this JobDataMap dataMap, string parameterName)
     {
@@ -16,7 +17,7 @@ public static class JobDataMapExtensions
             var serializedIds = dataMap.GetString(parameterName);
             if (serializedIds is null)
             {
-                _log.WarningLine("No {ParameterName} found in job data map", parameterName);
+                _log.Here().Warning("No {ParameterName} found in job data map", parameterName);
                 return [];
             }
 
@@ -25,7 +26,7 @@ public static class JobDataMapExtensions
         }
         catch (Exception e)
         {
-            _log.Error(e);
+            _log.Here().ErrorResult(e);
         }
 
         return [];

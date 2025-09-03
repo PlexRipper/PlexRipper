@@ -1,22 +1,21 @@
-﻿using Reaparr.Logging;
-using Reaparr.Settings.Contracts;
+﻿using Reaparr.Settings.Contracts;
 
 namespace Reaparr.BaseTests;
 
 public class MockConfigManager : IConfigManager
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IUserSettings _userSettings;
 
-    public MockConfigManager(ILog log, IUserSettings userSettings)
+    public MockConfigManager(ILogger log, IUserSettings userSettings)
     {
-        _log = log;
+        _log = log.ForContext<MockConfigManager>();
         _userSettings = userSettings;
     }
 
     public Result Setup()
     {
-        _log.InformationLine("Setting up default user config settings in integration mode");
+        _log.Here().Information("Setting up default user config settings in integration mode");
         _userSettings.Reset();
         return Result.Ok();
     }

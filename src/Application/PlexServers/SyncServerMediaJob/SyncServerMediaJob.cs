@@ -1,14 +1,13 @@
 ﻿using Quartz;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
 using Reaparr.WebAPI.Contracts;
 
 namespace Reaparr.Application;
 
 public class SyncServerMediaJob : IJob
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IReaparrDbContext _dbContext;
     private readonly ISignalRService _signalRService;
@@ -19,13 +18,13 @@ public class SyncServerMediaJob : IJob
     public static JobKey GetJobKey(int id) => new($"{PlexServerIdParameter}_{id}", nameof(SyncServerMediaJob));
 
     public SyncServerMediaJob(
-        ILog log,
+        ILogger log,
         ICommandExecutor commandExecutor,
         IReaparrDbContext dbContext,
         ISignalRService signalRService
     )
     {
-        _log = log;
+        _log = log.ForContext<SyncServerMediaJob>();
         _commandExecutor = commandExecutor;
         _dbContext = dbContext;
         _signalRService = signalRService;
@@ -37,12 +36,13 @@ public class SyncServerMediaJob : IJob
         var plexServerId = dataMap.GetIntValue(PlexServerIdParameter);
         var forceSync = dataMap.GetBooleanValue(ForceSyncParameter);
 
-        _log.Debug(
-            "Executing job: {SyncServerMediaJobName)} for {PlexServerName)}: {PlexServerId}",
-            nameof(SyncServerMediaJob),
-            nameof(PlexServer),
-            plexServerId
-        );
+        _log.Here()
+            .Debug(
+                "Executing job: {SyncServerMediaJobName)} for {PlexServerName)}: {PlexServerId}",
+                nameof(SyncServerMediaJob),
+                nameof(PlexServer),
+                plexServerId
+            );
 
         // Jobs should swallow exceptions as otherwise Quartz will keep re-executing it
         // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
@@ -74,11 +74,12 @@ public class SyncServerMediaJob : IJob
 
             if (!plexLibraries.Any())
             {
-                _log.Information(
-                    "PlexServer {PlexServerName} with id {PlexServerId} has no libraries to sync",
-                    plexServer.Name,
-                    plexServer.Id
-                );
+                _log.Here()
+                    .Information(
+                        "PlexServer {PlexServerName} with id {PlexServerId} has no libraries to sync",
+                        plexServer.Name,
+                        plexServer.Id
+                    );
                 return;
             }
 
@@ -139,15 +140,16 @@ public class SyncServerMediaJob : IJob
                 return;
             }
 
-            _log.Information(
-                "Successfully synced server \"{PlexServerName}\" with id {PlexServerId} has no libraries to sync",
-                plexServer.Name,
-                plexServer.Id
-            );
+            _log.Here()
+                .Information(
+                    "Successfully synced server \"{PlexServerName}\" with id {PlexServerId} has no libraries to sync",
+                    plexServer.Name,
+                    plexServer.Id
+                );
         }
         catch (Exception e)
         {
-            _log.Error(e);
+            _log.Here().ErrorResult(e);
         }
     }
 }

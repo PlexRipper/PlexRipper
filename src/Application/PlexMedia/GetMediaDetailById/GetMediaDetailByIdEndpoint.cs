@@ -1,7 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using FastEndpoints;
 using FluentValidation;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
@@ -42,12 +41,14 @@ public class GetMediaDetailByIdEndpointRequestValidator : Validator<GetMediaDeta
 
 public class GetMediaDetailByIdEndpoint : BaseEndpoint<GetMediaDetailByIdEndpointRequest, PlexMediaDTO>
 {
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.PlexMediaController + "/detail/{PlexMediaId}";
 
-    public GetMediaDetailByIdEndpoint(IReaparrDbContext dbContext)
+    public GetMediaDetailByIdEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
+        _log = log.ForContext<GetMediaDetailByIdEndpoint>();
         _dbContext = dbContext;
     }
 
@@ -65,6 +66,7 @@ public class GetMediaDetailByIdEndpoint : BaseEndpoint<GetMediaDetailByIdEndpoin
 
     public override async Task HandleAsync(GetMediaDetailByIdEndpointRequest req, CancellationToken ct)
     {
+        _log.Here().DebugApiCall(HttpContext, req);
         if (req.Type == PlexMediaType.Movie)
         {
             var plexMovie = await _dbContext.PlexMovies.GetAsync(req.PlexMediaId, ct);

@@ -303,6 +303,23 @@
           "Microsoft.EntityFrameworkCore.Relational": "9.0.8"
         }
       },
+      "Microsoft.AspNetCore.Http.Abstractions": {
+        "type": "Transitive",
+        "resolved": "2.3.0",
+        "contentHash": "39r9PPrjA6s0blyFv5qarckjNkaHRA5B+3b53ybuGGNTXEj1/DStQJ4NWjFL6QTRQpL9zt7nDyKxZdJOlcnq+Q==",
+        "dependencies": {
+          "Microsoft.AspNetCore.Http.Features": "2.3.0",
+          "System.Text.Encodings.Web": "8.0.0"
+        }
+      },
+      "Microsoft.AspNetCore.Http.Features": {
+        "type": "Transitive",
+        "resolved": "2.3.0",
+        "contentHash": "f10WUgcsKqrkmnz6gt8HeZ7kyKjYN30PO7cSic1lPtH7paPtnQqXPOveul/SIPI43PhRD4trttg4ywnrEmmJpA==",
+        "dependencies": {
+          "Microsoft.Extensions.Primitives": "8.0.0"
+        }
+      },
       "Microsoft.AspNetCore.Identity.EntityFrameworkCore": {
         "type": "Transitive",
         "resolved": "9.0.8",
@@ -1108,6 +1125,14 @@
         "resolved": "1.7.3",
         "contentHash": "U/38ICup0xDMDL8TjprLDCWI16MkQTPEJfWgPROFxtGjsBf+SW1W2fMfEhdiAYLGCTSFWNXmVGdVjU58Gyr0eQ=="
       },
+      "Serilog.Expressions": {
+        "type": "Transitive",
+        "resolved": "5.0.0",
+        "contentHash": "QhZjXtUcA2QfQRA60m+DfyIfidKsQV7HBstbYEDqzJKMbJH/KnKthkkjciRuYrmFE+scWv1JibC5LlXrdtOUmw==",
+        "dependencies": {
+          "Serilog": "4.0.0"
+        }
+      },
       "Serilog.Extensions.Hosting": {
         "type": "Transitive",
         "resolved": "9.0.0",
@@ -1157,8 +1182,8 @@
       },
       "Serilog.Sinks.Console.LogThemes": {
         "type": "Transitive",
-        "resolved": "0.3.0",
-        "contentHash": "6r5wQsJp/9u3i9Boqy4FCn26ibfzI3Irijm+05yJ/63f9KFC5TCrw9erH25XNYJd2++AldpKpvLfH37+JpKL4g==",
+        "resolved": "0.4.0",
+        "contentHash": "w7OLGCJXM7QPvacr52IyKI9lQIEo7VE9az7lyDH7sfeygpQGQbxMzU7uWFVDMYoQv+XRZ0KFvy8jGZQtjjH8Ew==",
         "dependencies": {
           "Serilog.Sinks.Console": "4.1.0"
         }
@@ -1177,6 +1202,15 @@
         "contentHash": "fKL7mXv7qaiNBUC71ssvn/dU0k9t0o45+qm2XgKAlSt19xF+ijjxyA3R6HmCgfKEKwfcfkwWjayuQtRueZFkYw==",
         "dependencies": {
           "Serilog": "4.2.0"
+        }
+      },
+      "Serilog.Sinks.Seq": {
+        "type": "Transitive",
+        "resolved": "9.0.0",
+        "contentHash": "aNU8A0K322q7+voPNmp1/qNPH+9QK8xvM1p72sMmCG0wGlshFzmtDW9QnVSoSYCj0MgQKcMOlgooovtBhRlNHw==",
+        "dependencies": {
+          "Serilog": "4.2.0",
+          "Serilog.Sinks.File": "6.0.0"
         }
       },
       "Serilog.Sinks.TestCorrelator": {
@@ -1586,6 +1620,11 @@
           "System.Runtime": "4.3.0"
         }
       },
+      "System.Text.Encodings.Web": {
+        "type": "Transitive",
+        "resolved": "8.0.0",
+        "contentHash": "yev/k9GHAEGx2Rg3/tU6MQh4HGBXJs70y7j1LaM1i/ER9po+6nnQ6RRqTJn1E7Xu0fbIFK80Nh5EoODxrbxwBQ=="
+      },
       "System.Text.Json": {
         "type": "Transitive",
         "resolved": "9.0.8",
@@ -1849,13 +1888,16 @@
         "dependencies": {
           "Autofac": "[8.4.0, )",
           "FluentResults": "[4.0.0, )",
+          "Microsoft.AspNetCore.Http.Abstractions": "[2.3.0, )",
           "Reaparr.Environment": "[1.0.0, )",
           "Serilog": "[4.3.0, )",
           "Serilog.Enrichers.Sensitive": "[1.7.3, )",
+          "Serilog.Expressions": "[5.0.0, )",
           "Serilog.Sinks.Console": "[6.0.0, )",
-          "Serilog.Sinks.Console.LogThemes": "[0.3.0, )",
+          "Serilog.Sinks.Console.LogThemes": "[0.4.0, )",
           "Serilog.Sinks.Debug": "[3.0.0, )",
           "Serilog.Sinks.File": "[7.0.0, )",
+          "Serilog.Sinks.Seq": "[9.0.0, )",
           "Serilog.Sinks.TestCorrelator": "[4.0.0, )"
         }
       },

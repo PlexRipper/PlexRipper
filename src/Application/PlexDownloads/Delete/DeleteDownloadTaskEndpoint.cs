@@ -1,6 +1,5 @@
 using FastEndpoints;
 using FluentValidation;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
@@ -23,6 +22,7 @@ public class DeleteDownloadTaskEndpointRequestValidator : Validator<DeleteDownlo
 
 public class DeleteDownloadTaskEndpoint : BaseEndpoint<DeleteDownloadTaskEndpointRequest>
 {
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IDownloadTaskScheduler _downloadTaskScheduler;
@@ -30,11 +30,13 @@ public class DeleteDownloadTaskEndpoint : BaseEndpoint<DeleteDownloadTaskEndpoin
     public override string EndpointPath => ApiRoutes.DownloadController + "/delete";
 
     public DeleteDownloadTaskEndpoint(
+        ILogger log,
         IReaparrDbContext dbContext,
         ICommandExecutor commandExecutor,
         IDownloadTaskScheduler downloadTaskScheduler
     )
     {
+        _log = log.ForContext<DeleteDownloadTaskEndpoint>();
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;
         _downloadTaskScheduler = downloadTaskScheduler;
@@ -53,6 +55,7 @@ public class DeleteDownloadTaskEndpoint : BaseEndpoint<DeleteDownloadTaskEndpoin
 
     public override async Task HandleAsync(DeleteDownloadTaskEndpointRequest req, CancellationToken ct)
     {
+        _log.Here().DebugApiCall(HttpContext, req);
         foreach (var downloadTaskId in req.DownloadTaskIds)
         {
             var downloadTaskKey = await _dbContext.GetDownloadTaskKeyAsync(downloadTaskId, ct);

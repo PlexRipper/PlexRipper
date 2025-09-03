@@ -1,7 +1,6 @@
 using FastEndpoints;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
 
 namespace Reaparr.Application;
 
@@ -20,13 +19,13 @@ public record ServerOnlineStatusChangedNotification : IEvent
 
 public class ServerOnlineStatusChangedHandler : IEventHandler<ServerOnlineStatusChangedNotification>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly IDownloadQueue _downloadQueue;
 
-    public ServerOnlineStatusChangedHandler(ILog log, IReaparrDbContext dbContext, IDownloadQueue downloadQueue)
+    public ServerOnlineStatusChangedHandler(ILogger log, IReaparrDbContext dbContext, IDownloadQueue downloadQueue)
     {
-        _log = log;
+        _log = log.ForContext<ServerOnlineStatusChangedHandler>();
         _dbContext = dbContext;
         _downloadQueue = downloadQueue;
     }
@@ -42,10 +41,11 @@ public class ServerOnlineStatusChangedHandler : IEventHandler<ServerOnlineStatus
                 notification.PlexServerId,
                 cancellationToken: cancellationToken
             );
-            _log.Information(
-                "Server {PlexServerName} came online, checking DownloadQueue to resume downloads",
-                plexServerName
-            );
+            _log.Here()
+                .Information(
+                    "Server {PlexServerName} came online, checking DownloadQueue to resume downloads",
+                    plexServerName
+                );
             await _downloadQueue.CheckDownloadQueue([notification.PlexServerId]);
         }
     }

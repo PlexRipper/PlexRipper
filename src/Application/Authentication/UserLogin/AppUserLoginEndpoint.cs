@@ -2,11 +2,9 @@ using System.ComponentModel;
 using FastEndpoints;
 using FastEndpoints.Security;
 using FluentValidation;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Reaparr.Application.Contracts;
 using Reaparr.Identity.Contracts;
-using Reaparr.Logging;
 
 namespace Reaparr.Application;
 
@@ -47,12 +45,12 @@ public class AppUserLoginEndpoint : BaseEndpoint<AppUserLoginEndpointRequest>
 {
     public override string EndpointPath => ApiRoutes.LoginEndpoint;
 
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly SignInManager<AppUser> _signInManager;
 
-    public AppUserLoginEndpoint(ILog log, SignInManager<AppUser> signInManager)
+    public AppUserLoginEndpoint(ILogger log, SignInManager<AppUser> signInManager)
     {
-        _log = log;
+        _log = log.ForContext<AppUserLoginEndpoint>();
         _signInManager = signInManager;
     }
 
@@ -86,10 +84,11 @@ public class AppUserLoginEndpoint : BaseEndpoint<AppUserLoginEndpointRequest>
 
     public override async Task HandleAsync(AppUserLoginEndpointRequest req, CancellationToken ct)
     {
+        _log.Here().DebugApiCall(HttpContext, req);
         var username = req.Username;
         var password = req.Password;
 
-        _log.Information("Attempting to sign in user {Username}.", username);
+        _log.Here().Information("Attempting to sign in user {Username}.", username);
 
         // Attempt to sign in the user
         var signInResult = await _signInManager.PasswordSignInAsync(
@@ -101,7 +100,7 @@ public class AppUserLoginEndpoint : BaseEndpoint<AppUserLoginEndpointRequest>
 
         if (signInResult.Succeeded)
         {
-            _log.Information("User {Username} signed in successfully.", username);
+            _log.Here().Information("User {Username} signed in successfully.", username);
 
             await CookieAuth.SignInAsync(u => u.Roles.Add(DefaultUserAppCredentials.DefaultAdminRole));
 
@@ -109,14 +108,14 @@ public class AppUserLoginEndpoint : BaseEndpoint<AppUserLoginEndpointRequest>
         }
         else if (signInResult.IsLockedOut)
         {
-            var result = _log.Warning("User {Username} is locked out.", username).ToResult();
+            var result = _log.Here().WarningResult("User {Username} is locked out.", username);
             result.Add403ForbiddenError();
 
             await SendFluentResult(result, ct);
         }
         else
         {
-            var result = _log.Warning("Failed to sign in user {Username}.", username).ToResult();
+            var result = _log.Here().WarningResult("Failed to sign in user {Username}.", username);
             result.Add401UnauthorizedError();
 
             await SendFluentResult(result, ct);

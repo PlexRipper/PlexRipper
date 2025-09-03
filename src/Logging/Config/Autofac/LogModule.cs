@@ -10,16 +10,6 @@ public class LogModule : Module
 {
     protected override void Load(ContainerBuilder builder)
     {
-        builder.Register<ILogger>((_, _) => new LogConfig().GetLogger()).SingleInstance();
-        builder.RegisterType<Log>().As<ILog>().SingleInstance();
-
-        builder
-            .RegisterGeneric(typeof(Log<>))
-            .As(typeof(ILog<>))
-            .WithParameter(
-                (pi, _) => pi.ParameterType == typeof(Type),
-                (pi, _) => pi.Member.DeclaringType?.GetGenericArguments()[0]
-            )
-            .InstancePerDependency();
+        builder.RegisterInstance(Log.Logger).As<ILogger>().SingleInstance();
     }
 }

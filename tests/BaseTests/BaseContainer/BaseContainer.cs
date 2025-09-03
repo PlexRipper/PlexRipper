@@ -8,7 +8,6 @@ using Reaparr.Data;
 using Reaparr.Data.Contracts;
 using Reaparr.Environment;
 using Reaparr.FileSystem.Contracts;
-using Reaparr.Logging;
 using Reaparr.Settings.Contracts;
 
 namespace Reaparr.BaseTests;
@@ -17,7 +16,7 @@ public class BaseContainer : IDisposable
 {
     private readonly ReaparrWebApplicationFactory _factory;
 
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
 
     private readonly ILifetimeScope _lifeTimeScope;
 
@@ -26,11 +25,11 @@ public class BaseContainer : IDisposable
     /// <summary>
     /// Creates an Autofac container and sets up a test database.
     /// </summary>
-    private BaseContainer(ILog log, Seed seed, string memoryDbName, Action<UnitTestDataConfig>? options = null)
+    private BaseContainer(ILogger log, Seed seed, string memoryDbName, Action<UnitTestDataConfig>? options = null)
     {
-        _log = log;
+        _log = log.ForContext<BaseContainer>();
 
-        _log.Information("Setting up BaseContainer with database: {MemoryDbName}", memoryDbName);
+        _log.Here().Information("Setting up BaseContainer with database: {MemoryDbName}", memoryDbName);
 
         _factory = new ReaparrWebApplicationFactory(seed, memoryDbName, options);
 
@@ -38,7 +37,7 @@ public class BaseContainer : IDisposable
         _lifeTimeScope = _factory.Services.GetAutofacRoot().BeginLifetimeScope();
     }
 
-    public static async Task<BaseContainer> Create(ILog log, Seed seed, Action<UnitTestDataConfig>? options = null)
+    public static async Task<BaseContainer> Create(ILogger log, Seed seed, Action<UnitTestDataConfig>? options = null)
     {
         var config = UnitTestDataConfig.FromOptions(options);
 
@@ -99,23 +98,24 @@ public class BaseContainer : IDisposable
     public void Dispose()
     {
         var dbName = DatabaseName;
-        _log.Warning("Integration Test with DatabaseName: \"{DatabaseName}\" has ended, Disposing!", dbName);
+        _log.Here().Warning("Integration Test with DatabaseName: \"{DatabaseName}\" has ended, Disposing!", dbName);
 
         // Wait for any pending async operations to complete before disposing
         // This prevents ObjectDisposedException when FastEndpoints command handlers
         // are still executing in background threads during parallel test execution
-        _log.Information("Waiting for async operations to complete before disposing container {DatabaseName}", dbName);
+        _log.Here()
+            .Information("Waiting for async operations to complete before disposing container {DatabaseName}", dbName);
 
         try
         {
             // Use a more robust delay mechanism
             var delay = Task.Delay(TimeSpan.FromSeconds(3));
             delay.Wait();
-            _log.Information("Async operations wait completed for container {DatabaseName}", dbName);
+            _log.Here().Information("Async operations wait completed for container {DatabaseName}", dbName);
         }
         catch (Exception ex)
         {
-            _log.Error("Error during async operations wait: {Error}", ex.Message);
+            _log.Here().Error("Error during async operations wait: {Error}", ex.Message);
         }
 
         try
@@ -129,13 +129,13 @@ public class BaseContainer : IDisposable
                 .Error("Failed to delete database: {DatabaseName}, Error: {ExceptionMessage}", dbName, ex.Message);
         }
 
-        _log.Information("Disposing factory for container {DatabaseName}", dbName);
+        _log.Here().Information("Disposing factory for container {DatabaseName}", dbName);
         _factory.Dispose();
 
         // Dispose of the lifetime scope as the last step
-        _log.Information("Disposing lifetime scope for container {DatabaseName}", dbName);
+        _log.Here().Information("Disposing lifetime scope for container {DatabaseName}", dbName);
         _lifeTimeScope.Dispose();
 
-        _log.FatalLine("Container disposed");
+        _log.Here().Fatal("Container disposed");
     }
 }

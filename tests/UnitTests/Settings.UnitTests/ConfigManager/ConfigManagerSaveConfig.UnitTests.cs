@@ -2,7 +2,6 @@
 using System.Reactive.Subjects;
 using Autofac;
 using Reaparr.Environment;
-using Reaparr.Logging;
 using Reaparr.Settings.Contracts;
 
 namespace Reaparr.Settings.UnitTests;
@@ -24,7 +23,7 @@ public class ConfigManagerSaveConfigUnitTests : BaseUnitTest<ConfigManager>
         // Were mocking other methods from ConfigManager, that's why we need to mock it manually here
         var sut = new Mock<ConfigManager>(
             MockBehavior.Strict,
-            mock.Container.Resolve<ILog>(),
+            mock.Container.Resolve<Serilog.ILogger>(),
             mock.Container.Resolve<IPathProvider>(),
             mock.Container.Resolve<IUserSettings>(),
             mock.Container.Resolve<IFile>(),

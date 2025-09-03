@@ -1,6 +1,5 @@
 using FastEndpoints;
 using FluentValidation;
-using Microsoft.AspNetCore.Http;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 
@@ -19,12 +18,18 @@ public class RefreshPlexServerConnectionsEndpointRequestValidator
 
 public class RefreshPlexServerConnectionsEndpoint : BaseEndpoint<RefreshPlexServerConnectionsEndpointRequest>
 {
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
     public override string EndpointPath => ApiRoutes.PlexServerController + "/{PlexServerId}/refresh";
 
-    public RefreshPlexServerConnectionsEndpoint(IReaparrDbContext dbContext, ICommandExecutor commandExecutor)
+    public RefreshPlexServerConnectionsEndpoint(
+        ILogger log,
+        IReaparrDbContext dbContext,
+        ICommandExecutor commandExecutor
+    )
     {
+        _log = log.ForContext<RefreshPlexServerConnectionsEndpoint>();
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;
     }
@@ -42,6 +47,7 @@ public class RefreshPlexServerConnectionsEndpoint : BaseEndpoint<RefreshPlexServ
 
     public override async Task HandleAsync(RefreshPlexServerConnectionsEndpointRequest req, CancellationToken ct)
     {
+        _log.Here().DebugApiCall(HttpContext, req);
         // Pick an account that has access to the PlexServer to connect with
         var plexAccountResult = await _dbContext.ChoosePlexAccountToConnect(req.PlexServerId, ct);
         if (plexAccountResult.IsFailed)

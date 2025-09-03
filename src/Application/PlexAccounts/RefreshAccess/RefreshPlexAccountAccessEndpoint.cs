@@ -1,10 +1,8 @@
 using FastEndpoints;
 using FluentValidation;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
 
 namespace Reaparr.Application;
 
@@ -21,7 +19,7 @@ public class RefreshPlexAccountAccessEndpointRequestValidator : Validator<Refres
 public class RefreshPlexAccountAccessEndpoint
     : BaseEndpoint<RefreshPlexAccountAccessEndpointRequest, ResultDTO<List<RefreshPlexAccountAccessRapportDTO>>>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
     private readonly ISignalRService _signalRService;
@@ -30,13 +28,13 @@ public class RefreshPlexAccountAccessEndpoint
     public override string EndpointPath => ApiRoutes.PlexAccountController + "/refresh/{PlexAccountId}";
 
     public RefreshPlexAccountAccessEndpoint(
-        ILog log,
+        ILogger log,
         IReaparrDbContext dbContext,
         ICommandExecutor commandExecutor,
         ISignalRService signalRService
     )
     {
-        _log = log;
+        _log = log.ForContext<RefreshPlexAccountAccessEndpoint>();
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;
         _signalRService = signalRService;
@@ -54,6 +52,7 @@ public class RefreshPlexAccountAccessEndpoint
 
     public override async Task HandleAsync(RefreshPlexAccountAccessEndpointRequest req, CancellationToken ct)
     {
+        _log.Here().DebugApiCall(HttpContext, req);
         var plexAccountIds = new List<int>();
         if (req.PlexAccountId > 0)
         {
@@ -64,7 +63,7 @@ public class RefreshPlexAccountAccessEndpoint
             var enabledAccounts = await _dbContext.PlexAccounts.Where(x => x.IsEnabled).ToListAsync(ct);
             if (!enabledAccounts.Any())
             {
-                _log.WarningLine("No enabled Plex accounts found to start the refresh PlexServer access job");
+                _log.Here().Warning("No enabled Plex accounts found to start the refresh PlexServer access job");
                 await SendFluentResult(Result.Ok(), ct);
                 return;
             }

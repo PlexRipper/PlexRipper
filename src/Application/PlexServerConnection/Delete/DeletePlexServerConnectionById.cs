@@ -1,6 +1,5 @@
 using FastEndpoints;
 using FluentValidation;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
@@ -19,12 +18,14 @@ public class DeletePlexServerConnectionByIdRequestValidator : Validator<DeletePl
 
 public class DeletePlexServerConnectionById : BaseEndpoint<DeletePlexServerConnectionByIdRequest>
 {
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.PlexServerConnectionController + "/{PlexServerConnectionId}";
 
-    public DeletePlexServerConnectionById(IReaparrDbContext dbContext)
+    public DeletePlexServerConnectionById(ILogger log, IReaparrDbContext dbContext)
     {
+        _log = log.ForContext<DeletePlexServerConnectionById>();
         _dbContext = dbContext;
     }
 
@@ -42,6 +43,7 @@ public class DeletePlexServerConnectionById : BaseEndpoint<DeletePlexServerConne
 
     public override async Task HandleAsync(DeletePlexServerConnectionByIdRequest req, CancellationToken ct)
     {
+        _log.Here().DebugApiCall(HttpContext, req);
         var deleteCount = await _dbContext
             .PlexServerConnections.Where(x => x.Id == req.PlexServerConnectionId)
             .ExecuteDeleteAsync(ct);

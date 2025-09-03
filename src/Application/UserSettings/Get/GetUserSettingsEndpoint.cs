@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Http;
 using Reaparr.Application.Contracts;
 using Reaparr.Settings;
 using Reaparr.Settings.Contracts;

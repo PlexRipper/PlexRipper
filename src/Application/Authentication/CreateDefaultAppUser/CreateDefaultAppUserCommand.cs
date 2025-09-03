@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Identity.Contracts;
-using Reaparr.Logging;
 using Reaparr.Settings.Contracts;
 
 namespace Reaparr.Application;
@@ -21,19 +20,19 @@ public class CreateDefaultAppUserCommandValidator : AbstractValidator<CreateDefa
 
 public class CreateDefaultAppUserCommandHandler : ICommandHandler<CreateDefaultAppUserCommand, Result>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IAuthenticationSettings _authenticationSettings;
     private readonly UserManager<AppUser> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
 
     public CreateDefaultAppUserCommandHandler(
-        ILog log,
+        ILogger log,
         IAuthenticationSettings authenticationSettings,
         UserManager<AppUser> userManager,
         RoleManager<IdentityRole> roleManager
     )
     {
-        _log = log;
+        _log = log.ForContext<CreateDefaultAppUserCommandHandler>();
         _authenticationSettings = authenticationSettings;
         _userManager = userManager;
         _roleManager = roleManager;
@@ -43,14 +42,15 @@ public class CreateDefaultAppUserCommandHandler : ICommandHandler<CreateDefaultA
     {
         if (_authenticationSettings.ResetCredentials)
         {
-            _log.Warning(
-                "Setting: {ResetCredentials} has been enabled! Resetting Reaparr app username and password!",
-                nameof(_authenticationSettings.ResetCredentials)
-            );
+            _log.Here()
+                .Warning(
+                    "Setting: {ResetCredentials} has been enabled! Resetting Reaparr app username and password!",
+                    nameof(_authenticationSettings.ResetCredentials)
+                );
             var toBeDeletedUser = await _userManager.Users.FirstOrDefaultAsync(cancellationToken: cancellationToken);
             if (toBeDeletedUser != null)
             {
-                _log.InformationLine("Reaparr app user was found, deleting now and creating the default one.");
+                _log.Here().Information("Reaparr app user was found, deleting now and creating the default one.");
                 await _userManager.DeleteAsync(toBeDeletedUser);
             }
         }
@@ -104,10 +104,11 @@ public class CreateDefaultAppUserCommandHandler : ICommandHandler<CreateDefaultA
 
         if (_authenticationSettings.ResetCredentials)
         {
-            _log.Information(
-                "Setting: {ResetCredentials} back to false!",
-                nameof(_authenticationSettings.ResetCredentials)
-            );
+            _log.Here()
+                .Information(
+                    "Setting: {ResetCredentials} back to false!",
+                    nameof(_authenticationSettings.ResetCredentials)
+                );
             _authenticationSettings.ResetCredentials = false;
         }
 

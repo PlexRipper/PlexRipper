@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Application.Contracts.Validators;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
 
 namespace Reaparr.Application;
 
@@ -35,17 +34,17 @@ public class GenerateDownloadTaskTvShowsCommandValidator : AbstractValidator<Gen
 
 public class GenerateDownloadTaskTvShowsCommandHandler : ICommandHandler<GenerateDownloadTaskTvShowsCommand, Result>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
 
     public GenerateDownloadTaskTvShowsCommandHandler(
-        ILog log,
+        ILogger log,
         IReaparrDbContext dbContext,
         ICommandExecutor commandExecutor
     )
     {
-        _log = log;
+        _log = log.ForContext<GenerateDownloadTaskTvShowsCommandHandler>();
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;
     }
@@ -60,10 +59,11 @@ public class GenerateDownloadTaskTvShowsCommandHandler : ICommandHandler<Generat
         if (!plexTvShowList.Any())
             return ResultExtensions.IsEmpty(nameof(plexTvShowList)).LogWarning();
 
-        _log.Debug(
-            "Creating {PlexTvShowIdsCount} TvShow download tasks",
-            plexTvShowList.SelectMany(x => x.MediaIds).ToList().Count
-        );
+        _log.Here()
+            .Debug(
+                "Creating {PlexTvShowIdsCount} TvShow download tasks",
+                plexTvShowList.SelectMany(x => x.MediaIds).ToList().Count
+            );
 
         foreach (var downloadMediaDto in plexTvShowList)
         {

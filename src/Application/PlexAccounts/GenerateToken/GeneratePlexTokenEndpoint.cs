@@ -1,6 +1,5 @@
 using FastEndpoints;
 using FluentValidation;
-using Microsoft.AspNetCore.Http;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 using Reaparr.PlexApi.Contracts;
@@ -42,13 +41,15 @@ public class GeneratePlexTokenResponse
 
 public class GeneratePlexTokenEndpoint : BaseEndpoint<GeneratePlexTokenEndpointRequest, GeneratePlexTokenResponse>
 {
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
 
     public override string EndpointPath => ApiRoutes.PlexAccountController + "/generate-token/{PlexAccountId}";
 
-    public GeneratePlexTokenEndpoint(IReaparrDbContext dbContext, ICommandExecutor commandExecutor)
+    public GeneratePlexTokenEndpoint(ILogger log, IReaparrDbContext dbContext, ICommandExecutor commandExecutor)
     {
+        _log = log.ForContext<GeneratePlexTokenEndpoint>();
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;
     }
@@ -67,6 +68,7 @@ public class GeneratePlexTokenEndpoint : BaseEndpoint<GeneratePlexTokenEndpointR
 
     public override async Task HandleAsync(GeneratePlexTokenEndpointRequest req, CancellationToken ct)
     {
+        _log.Here().DebugApiCall(HttpContext, req);
         var plexAccount = await _dbContext.PlexAccounts.GetAsync(req.PlexAccountId, ct);
         if (plexAccount is null)
         {

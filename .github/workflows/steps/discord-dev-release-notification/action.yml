@@ -32,7 +32,7 @@ runs:
                     Click [here](https://hub.docker.com/repository/docker/reaparr/reaparr/tags) to download the development version!
                 username: Reaparr
                 url: ${{ inputs.changelog-url }}
-                avatar_url: "https://raw.githubusercontent.com/Reaparr/Reaparr/refs/heads/dev/export/reaparr/logo/reaparr-full.svg"
+                avatar_url: "https://raw.githubusercontent.com/Reaparr/Reaparr/refs/heads/dev/export/reaparr/logo/reaparr-full-1024.png"
 
         -   name: Notify Discord of build status (Stable)
             if: ${{ inputs.is-dev != 'true' }}
@@ -48,4 +48,4 @@ runs:
                     Click [here](https://hub.docker.com/repository/docker/reaparr/reaparr/tags) to download the stable version!
                 username: Reaparr
                 url: ${{ inputs.changelog-url }}
-                avatar_url: "https://raw.githubusercontent.com/Reaparr/Reaparr/refs/heads/dev/export/reaparr/logo/reaparr-full.svg"
+                avatar_url: "https://raw.githubusercontent.com/Reaparr/Reaparr/refs/heads/dev/export/reaparr/logo/reaparr-full-1024.png"

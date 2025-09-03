@@ -1,7 +1,6 @@
 using FastEndpoints;
 using FluentValidation;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
 using Reaparr.WebAPI.Contracts;
 
 namespace Reaparr.Application;
@@ -24,19 +23,19 @@ public class RefreshPlexMovieLibraryCommandValidator : AbstractValidator<Refresh
 public class RefreshPlexMovieLibraryCommandHandler
     : ICommandHandler<RefreshPlexMovieLibraryCommand, Result<PlexLibrary>>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IReaparrDbContext _dbContext;
     private readonly IRefreshLibraryProgressReporter _progressReporter;
 
     public RefreshPlexMovieLibraryCommandHandler(
-        ILog log,
+        ILogger log,
         ICommandExecutor commandExecutor,
         IReaparrDbContext dbContext,
         IRefreshLibraryProgressReporter progressReporter
     )
     {
-        _log = log;
+        _log = log.ForContext<RefreshPlexMovieLibraryCommandHandler>();
         _commandExecutor = commandExecutor;
         _dbContext = dbContext;
         _progressReporter = progressReporter;
@@ -77,11 +76,12 @@ public class RefreshPlexMovieLibraryCommandHandler
         }
         else
         {
-            _log.Warning(
-                "No Movies were found for library {PlexLibraryName} with id: {PlexLibraryId}",
-                plexLibrary.Title,
-                plexLibrary.Id
-            );
+            _log.Here()
+                .Warning(
+                    "No Movies were found for library {PlexLibraryName} with id: {PlexLibraryId}",
+                    plexLibrary.Title,
+                    plexLibrary.Id
+                );
         }
 
         // Phase 2 of 3: PlexLibrary media data was parsed successfully.
@@ -103,11 +103,12 @@ public class RefreshPlexMovieLibraryCommandHandler
 
         if (plexLibrary.Movies.Any() && mediaSize == 0)
         {
-            _log.Error(
-                "No media size was found for library {PlexLibraryName} with id: {PlexLibraryId}",
-                plexLibrary.Title,
-                plexLibrary.Id
-            );
+            _log.Here()
+                .Error(
+                    "No media size was found for library {PlexLibraryName} with id: {PlexLibraryId}",
+                    plexLibrary.Title,
+                    plexLibrary.Id
+                );
         }
 
         // Mark the library as synced
@@ -115,11 +116,12 @@ public class RefreshPlexMovieLibraryCommandHandler
 
         await _dbContext.UpdatePlexLibraryById(plexLibrary, CancellationToken.None);
 
-        _log.Information(
-            "Successfully refreshed library {PlexLibraryName} with id: {PlexLibraryId}",
-            plexLibrary.Title,
-            plexLibrary.Id
-        );
+        _log.Here()
+            .Information(
+                "Successfully refreshed library {PlexLibraryName} with id: {PlexLibraryId}",
+                plexLibrary.Title,
+                plexLibrary.Id
+            );
 
         // Phase 3 of 3: Movies have been successfully updated in the database.
         await _progressReporter.SendProgress(

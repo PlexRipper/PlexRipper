@@ -5,7 +5,6 @@ using Polly;
 using Polly.Timeout;
 using Polly.Wrap;
 using Reaparr.Application.Contracts;
-using Reaparr.Logging;
 using Reaparr.PlexApi.Contracts;
 using Serilog.Events;
 
@@ -13,16 +12,16 @@ namespace Reaparr.PlexApi;
 
 public class PlexApiClient : IPlexApiClient
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
 
     private readonly HttpClient _defaultClient;
 
     private readonly PlexApiClientOptions _options;
     private readonly AsyncPolicyWrap<HttpResponseMessage> _policyWrap;
 
-    public PlexApiClient(ILog log, HttpClient httpClient, PlexApiClientOptions options)
+    public PlexApiClient(ILogger log, HttpClient httpClient, PlexApiClientOptions options)
     {
-        _log = log;
+        _log = log.ForContext<PlexApiClient>();
         _defaultClient = httpClient;
         _defaultClient.DefaultRequestHeaders.Accept.Add(ContentType.ApplicationJsonHeaderValue);
 
@@ -53,13 +52,14 @@ public class PlexApiClient : IPlexApiClient
                     retryAttempt => TimeSpan.FromSeconds(retryAttempt),
                     (response, timeSpan, retryAttempt, context) =>
                     {
-                        _log.Warning(
-                            "Request to {Url} failed, retrying {RetryAttempt} of {RetryCount} in {Delay}s",
-                            context["RequestUri"],
-                            retryAttempt,
-                            _options.RetryCount,
-                            timeSpan.TotalSeconds
-                        );
+                        _log.Here()
+                            .Warning(
+                                "Request to {Url} failed, retrying {RetryAttempt} of {RetryCount} in {Delay}s",
+                                context["RequestUri"],
+                                retryAttempt,
+                                _options.RetryCount,
+                                timeSpan.TotalSeconds
+                            );
 
                         SendProgressUpdate(
                             _options.Action,
@@ -78,15 +78,15 @@ public class PlexApiClient : IPlexApiClient
         // Remove the auto-generated user-agent header from Plex SDK
         request.Headers.Remove("user-agent");
 
-        if (_log.IsLogLevelVerbose())
+        if (_log.Here().IsLogLevelVerbose())
         {
             var curl = _defaultClient.GenerateCurlInString(request);
-            _log.Verbose("Request CURL: {RequestUrl}", curl);
+            _log.Here().Verbose("Request CURL: {RequestUrl}", curl);
         }
-        else if (_log.IsLogLevelDebug())
+        else if (_log.Here().IsLogLevelDebug())
         {
             var curl = _defaultClient.GenerateCurlInString(request);
-            _log.Debug("Request CURL: {RequestUrl}", curl);
+            _log.Here().Debug("Request CURL: {RequestUrl}", curl);
         }
 
         HttpResponseMessage? response = null;
@@ -145,7 +145,7 @@ public class PlexApiClient : IPlexApiClient
         }
         catch (TimeoutRejectedException)
         {
-            _log.Error("Request to {Url} timed out.", requestUri);
+            _log.Here().Error("Request to {Url} timed out.", requestUri);
             response = new HttpResponseMessage
             {
                 StatusCode = HttpStatusCode.GatewayTimeout,
@@ -188,7 +188,7 @@ public class PlexApiClient : IPlexApiClient
             SendProgressUpdate(_options.Action, response, _options.RetryCount, _options.RetryCount);
         }
 
-        if (_log.IsLogLevelEnabled(LogEventLevel.Verbose))
+        if (_log.Here().IsLogLevelEnabled(LogEventLevel.Verbose))
         {
             _log.Here().Verbose("Response: {Response}", await response.Content.ReadAsFormattedJsonAsync());
         }

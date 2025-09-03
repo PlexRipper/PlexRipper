@@ -1,10 +1,8 @@
 using FastEndpoints;
 using FluentValidation;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
 
 namespace Reaparr.Application;
 
@@ -39,15 +37,15 @@ public class CreatePlexAccountEndpointRequestValidator : Validator<CreatePlexAcc
 
 public class CreatePlexAccountEndpoint : BaseEndpoint<CreatePlexAccountEndpointRequest, PlexAccountDTO>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
 
     public override string EndpointPath => ApiRoutes.PlexAccountController + "/";
 
-    public CreatePlexAccountEndpoint(ILog log, IReaparrDbContext dbContext, ICommandExecutor commandExecutor)
+    public CreatePlexAccountEndpoint(ILogger log, IReaparrDbContext dbContext, ICommandExecutor commandExecutor)
     {
-        _log = log;
+        _log = log.ForContext<CreatePlexAccountEndpoint>();
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;
     }
@@ -65,6 +63,7 @@ public class CreatePlexAccountEndpoint : BaseEndpoint<CreatePlexAccountEndpointR
 
     public override async Task HandleAsync(CreatePlexAccountEndpointRequest req, CancellationToken ct)
     {
+        _log.Here().DebugApiCall(HttpContext, req);
         var plexAccount = req.PlexAccount!.ToModel();
         plexAccount.Id = 0;
 
@@ -94,7 +93,7 @@ public class CreatePlexAccountEndpoint : BaseEndpoint<CreatePlexAccountEndpointR
             }
         }
 
-        _log.Debug("Creating account with username {DisplayName}", plexAccount.DisplayName);
+        _log.Here().Debug("Creating account with username {DisplayName}", plexAccount.DisplayName);
 
         // Generate plexAccount clientId
         if (plexAccount.ClientId == string.Empty)
@@ -125,6 +124,7 @@ public class CreatePlexAccountEndpoint : BaseEndpoint<CreatePlexAccountEndpointR
             ct
         );
         if (inspectResult.IsFailed)
-            _log.Error("Failed to queue inspect server job for PlexAccount with id {PlexAccountId}", plexAccount.Id);
+            _log.Here()
+                .Error("Failed to queue inspect server job for PlexAccount with id {PlexAccountId}", plexAccount.Id);
     }
 }

@@ -1,7 +1,6 @@
 ﻿using FastEndpoints;
 using FluentValidation;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
 
 namespace Reaparr.Application;
 
@@ -25,17 +24,17 @@ public class InspectAllPlexServersByAccountIdCommandValidator
 public class InspectAllPlexServersByAccountIdCommandHandler
     : ICommandHandler<InspectAllPlexServersByAccountIdCommand, Result>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IReaparrDbContext _dbContext;
 
     public InspectAllPlexServersByAccountIdCommandHandler(
-        ILog log,
+        ILogger log,
         ICommandExecutor commandExecutor,
         IReaparrDbContext dbContext
     )
     {
-        _log = log;
+        _log = log.ForContext<InspectAllPlexServersByAccountIdCommandHandler>();
         _commandExecutor = commandExecutor;
         _dbContext = dbContext;
     }

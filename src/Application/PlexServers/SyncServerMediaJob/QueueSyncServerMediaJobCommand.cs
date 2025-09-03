@@ -1,7 +1,6 @@
 using FastEndpoints;
 using FluentValidation;
 using Quartz;
-using Reaparr.Logging;
 
 namespace Reaparr.Application;
 
@@ -17,12 +16,12 @@ public class QueueSyncServerMediaJobCommandValidator : Validator<QueueSyncServer
 
 public class QueueSyncServerMediaJobCommandHandler : ICommandHandler<QueueSyncServerMediaJobCommand, Result>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IScheduler _scheduler;
 
-    public QueueSyncServerMediaJobCommandHandler(ILog log, IScheduler scheduler)
+    public QueueSyncServerMediaJobCommandHandler(ILogger log, IScheduler scheduler)
     {
-        _log = log;
+        _log = log.ForContext<QueueSyncServerMediaJobCommandHandler>();
         _scheduler = scheduler;
     }
 
@@ -56,7 +55,7 @@ public class QueueSyncServerMediaJobCommandHandler : ICommandHandler<QueueSyncSe
             .StartNow()
             .Build();
 
-        _log.Information("Sync Server Job for server with id {PlexServerId} has started", command.PlexServerId);
+        _log.Here().Information("Sync Server Job for server with id {PlexServerId} has started", command.PlexServerId);
         await _scheduler.ScheduleJob(job, trigger, cancellationToken);
 
         return Result.Ok();

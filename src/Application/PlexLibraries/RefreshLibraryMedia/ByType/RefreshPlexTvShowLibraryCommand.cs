@@ -3,7 +3,6 @@ using FastEndpoints;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
 using Reaparr.PlexApi.Contracts;
 using Reaparr.WebAPI.Contracts;
 
@@ -27,19 +26,19 @@ public class RefreshPlexTvShowLibraryCommandValidator : AbstractValidator<Refres
 public class RefreshPlexTvShowLibraryCommandHandler
     : ICommandHandler<RefreshPlexTvShowLibraryCommand, Result<PlexLibrary>>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IReaparrDbContext _dbContext;
     private readonly IRefreshLibraryProgressReporter _progressReporter;
 
     public RefreshPlexTvShowLibraryCommandHandler(
-        ILog log,
+        ILogger log,
         ICommandExecutor commandExecutor,
         IReaparrDbContext dbContext,
         IRefreshLibraryProgressReporter progressReporter
     )
     {
-        _log = log;
+        _log = log.ForContext<RefreshPlexTvShowLibraryCommandHandler>();
         _commandExecutor = commandExecutor;
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;
@@ -106,7 +105,8 @@ public class RefreshPlexTvShowLibraryCommandHandler
             if (rawEpisodesDataResult.IsFailed)
                 return rawEpisodesDataResult.ToResult();
 
-            _log.Information("Merging all data received from PlexApi for library {PlexLibraryName}", plexLibrary.Name);
+            _log.Here()
+                .Information("Merging all data received from PlexApi for library {PlexLibraryName}", plexLibrary.Name);
 
             // Phase 4 of 5: PlexLibrary media data was parsed successfully.
             _log.Here()
@@ -166,11 +166,12 @@ public class RefreshPlexTvShowLibraryCommandHandler
 
             if (plexLibrary.TvShows.Any() && mediaSize == 0)
             {
-                _log.Error(
-                    "No media size was found for library {PlexLibraryName} with id: {PlexLibraryId}",
-                    plexLibrary.Title,
-                    plexLibrary.Id
-                );
+                _log.Here()
+                    .Error(
+                        "No media size was found for library {PlexLibraryName} with id: {PlexLibraryId}",
+                        plexLibrary.Title,
+                        plexLibrary.Id
+                    );
             }
 
             await _dbContext.UpdatePlexLibraryById(plexLibrary, CancellationToken.None);
@@ -196,11 +197,12 @@ public class RefreshPlexTvShowLibraryCommandHandler
         }
         else
         {
-            _log.Warning(
-                "No TV shows were found for library {PlexLibraryName} with id: {PlexLibraryId}",
-                plexLibrary.Title,
-                plexLibrary.Id
-            );
+            _log.Here()
+                .Warning(
+                    "No TV shows were found for library {PlexLibraryName} with id: {PlexLibraryId}",
+                    plexLibrary.Title,
+                    plexLibrary.Id
+                );
         }
 
         // Mark the library as synced
@@ -209,11 +211,12 @@ public class RefreshPlexTvShowLibraryCommandHandler
             .PlexLibraries.Where(x => x.Id == plexLibrary.Id)
             .ExecuteUpdateAsync(p => p.SetProperty(x => x.SyncedAt, plexLibrary.SyncedAt), CancellationToken.None);
 
-        _log.Information(
-            "Successfully refreshed library {PlexLibraryName} with id: {PlexLibraryId}",
-            plexLibrary.Title,
-            plexLibrary.Id
-        );
+        _log.Here()
+            .Information(
+                "Successfully refreshed library {PlexLibraryName} with id: {PlexLibraryId}",
+                plexLibrary.Title,
+                plexLibrary.Id
+            );
 
         return Result.Ok(plexLibrary);
     }
@@ -333,22 +336,24 @@ public class RefreshPlexTvShowLibraryCommandHandler
         // Log invalid seasons and episodes
         if (inValidSeasons.Any())
         {
-            _log.Warning(
-                "Found {Count} invalid seasons which are missing a ParentGUID in library {PlexLibraryName} with id: {PlexLibraryId}",
-                inValidSeasons.Count,
-                library.Title,
-                library.Id
-            );
+            _log.Here()
+                .Warning(
+                    "Found {Count} invalid seasons which are missing a ParentGUID in library {PlexLibraryName} with id: {PlexLibraryId}",
+                    inValidSeasons.Count,
+                    library.Title,
+                    library.Id
+                );
         }
 
         if (inValidEpisodes.Any())
         {
-            _log.Warning(
-                "Found {Count} invalid episodes which are missing a ParentGUID in library {PlexLibraryName} with id: {PlexLibraryId}",
-                inValidEpisodes.Count,
-                library.Title,
-                library.Id
-            );
+            _log.Here()
+                .Warning(
+                    "Found {Count} invalid episodes which are missing a ParentGUID in library {PlexLibraryName} with id: {PlexLibraryId}",
+                    inValidEpisodes.Count,
+                    library.Title,
+                    library.Id
+                );
         }
 
         return (validSeasons, validEpisodes);

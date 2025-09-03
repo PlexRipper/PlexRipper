@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
@@ -26,12 +25,14 @@ public class AppCredentialsDTO
 
 public class GetAppCredentials : BaseEndpointWithoutRequest<AppCredentialsDTO>
 {
+    private readonly Serilog.ILogger _log;
     private readonly UserManager<AppUser> _userManager;
 
     public override string EndpointPath => ApiRoutes.AuthenticatedController;
 
-    public GetAppCredentials(UserManager<AppUser> userManager)
+    public GetAppCredentials(ILogger log, UserManager<AppUser> userManager)
     {
+        _log = log.ForContext<GetAppCredentials>();
         _userManager = userManager;
     }
 
@@ -52,6 +53,7 @@ public class GetAppCredentials : BaseEndpointWithoutRequest<AppCredentialsDTO>
 
     public override async Task HandleAsync(CancellationToken ct)
     {
+        _log.Here().DebugApiCall(HttpContext);
         // There is only 1 app user in the database
         var user = await _userManager.Users.FirstOrDefaultAsync(ct);
         if (user is null)

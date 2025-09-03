@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
@@ -10,12 +9,14 @@ namespace Reaparr.Application;
 /// </summary>
 public class GetAllPlexLibrariesEndpoint : BaseEndpointWithoutRequest<List<PlexLibraryDTO>>
 {
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.PlexLibraryController + "/";
 
-    public GetAllPlexLibrariesEndpoint(IReaparrDbContext dbContext)
+    public GetAllPlexLibrariesEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
+        _log = log.ForContext<GetAllPlexLibrariesEndpoint>();
         _dbContext = dbContext;
     }
 
@@ -31,6 +32,7 @@ public class GetAllPlexLibrariesEndpoint : BaseEndpointWithoutRequest<List<PlexL
 
     public override async Task HandleAsync(CancellationToken ct)
     {
+        _log.Here().DebugApiCall(HttpContext);
         var plexLibraries = await _dbContext.PlexLibraries.ToListAsync(ct);
 
         await SendFluentResult(Result.Ok(plexLibraries), x => x.ToDTO(), ct);

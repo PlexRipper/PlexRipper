@@ -1,10 +1,8 @@
 using FastEndpoints;
 using FluentValidation;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
 
 namespace Reaparr.Application;
 
@@ -20,14 +18,14 @@ public class DeleteFolderPathEndpointRequestValidator : Validator<DeleteFolderPa
 
 public class DeleteFolderPathEndpoint : BaseEndpoint<DeleteFolderPathEndpointRequest, BaseResultDTO>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.FolderPathController + "/{Id}";
 
-    public DeleteFolderPathEndpoint(ILog log, IReaparrDbContext dbContext)
+    public DeleteFolderPathEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
-        _log = log;
+        _log = log.ForContext<DeleteFolderPathEndpoint>();
         _dbContext = dbContext;
     }
 
@@ -44,8 +42,10 @@ public class DeleteFolderPathEndpoint : BaseEndpoint<DeleteFolderPathEndpointReq
 
     public override async Task HandleAsync(DeleteFolderPathEndpointRequest req, CancellationToken ct)
     {
+        _log.Here().DebugApiCall(HttpContext, req);
         await _dbContext.FolderPaths.Where(x => x.Id == req.Id).ExecuteDeleteAsync(ct);
-        _log.Debug("Deleted {FolderPathName} with Id: {CommandId} from the database", nameof(FolderPath), req.Id);
+        _log.Here()
+            .Debug("Deleted {FolderPathName} with Id: {CommandId} from the database", nameof(FolderPath), req.Id);
 
         await SendFluentResult(Result.Ok(), ct);
     }

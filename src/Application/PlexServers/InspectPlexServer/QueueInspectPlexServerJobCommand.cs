@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore;
 using Quartz;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
 
 namespace Reaparr.Application;
 
@@ -21,13 +20,13 @@ public class QueueInspectPlexServerJobCommandValidator : AbstractValidator<Queue
 
 public class QueueInspectPlexServerJobCommandHandler : ICommandHandler<QueueInspectPlexServerJobCommand, Result>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly IScheduler _scheduler;
 
-    public QueueInspectPlexServerJobCommandHandler(ILog log, IReaparrDbContext dbContext, IScheduler scheduler)
+    public QueueInspectPlexServerJobCommandHandler(ILogger log, IReaparrDbContext dbContext, IScheduler scheduler)
     {
-        _log = log;
+        _log = log.ForContext<QueueInspectPlexServerJobCommandHandler>();
         _dbContext = dbContext;
         _scheduler = scheduler;
     }
@@ -69,12 +68,13 @@ public class QueueInspectPlexServerJobCommandHandler : ICommandHandler<QueueInsp
         foreach (var i in alreadyRunning)
         {
             var plexServerName = await _dbContext.GetPlexServerNameById(i, cancellationToken);
-            _log.Error(
-                "Job {InspectPlexServerJobName} is already running for serverL {PlexServerIdName} with id: {PlexServerId}",
-                nameof(InspectPlexServerJob),
-                plexServerName,
-                i
-            );
+            _log.Here()
+                .Error(
+                    "Job {InspectPlexServerJobName} is already running for serverL {PlexServerIdName} with id: {PlexServerId}",
+                    nameof(InspectPlexServerJob),
+                    plexServerName,
+                    i
+                );
         }
 
         var queuedServerIds = enabledServerIds.Where(x => !alreadyRunning.Contains(x)).ToList();

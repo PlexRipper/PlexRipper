@@ -1,64 +1,20 @@
+using Microsoft.AspNetCore.Http;
+using Serilog;
 using Serilog.Core;
-using Serilog.Events;
 
 namespace Reaparr.Logging;
 
 public static partial class LogExtensions
 {
-    [MessageTemplateFormatMethod("messageTemplate")]
-    public static LogMetaData Debug<T0>(this LogMetaData logMetaData, string messageTemplate, T0 propertyValue0)
+    public static void DebugApiCall(this ILogger log, HttpContext context, object? request = null)
     {
-        logMetaData.Update(LogEventLevel.Debug, messageTemplate, propertyValue0).Write();
-        return logMetaData;
+        log.Debug("{Method}: {EndpointPath} with {Request}", context.Request.Method, context.Request.Path, request);
     }
 
     [MessageTemplateFormatMethod("messageTemplate")]
-    public static LogMetaData Debug<T0, T1>(
-        this LogMetaData logMetaData,
-        string messageTemplate,
-        T0 propertyValue0,
-        T1 propertyValue1
-    )
+    public static string DebugMsg(this ILogger log, string messageTemplate, params object[] args)
     {
-        logMetaData.Update(LogEventLevel.Debug, messageTemplate, propertyValue0, propertyValue1).Write();
-        return logMetaData;
-    }
-
-    [MessageTemplateFormatMethod("messageTemplate")]
-    public static LogMetaData Debug<T0, T1, T2>(
-        this LogMetaData logMetaData,
-        string messageTemplate,
-        T0 propertyValue0,
-        T1 propertyValue1,
-        T2 propertyValue2
-    )
-    {
-        logMetaData
-            .Update(LogEventLevel.Debug, messageTemplate, propertyValue0, propertyValue1, propertyValue2)
-            .Write();
-        return logMetaData;
-    }
-
-    [MessageTemplateFormatMethod("messageTemplate")]
-    public static LogMetaData Debug<T0, T1, T2, T3>(
-        this LogMetaData logMetaData,
-        string messageTemplate,
-        T0 propertyValue0,
-        T1 propertyValue1,
-        T2 propertyValue2,
-        T3 propertyValue3
-    )
-    {
-        logMetaData
-            .Update(
-                LogEventLevel.Debug,
-                messageTemplate,
-                propertyValue0,
-                propertyValue1,
-                propertyValue2,
-                propertyValue3
-            )
-            .Write();
-        return logMetaData;
+        log.Debug(messageTemplate, args);
+        return log.RenderMessage(messageTemplate, args);
     }
 }

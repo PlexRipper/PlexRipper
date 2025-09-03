@@ -2,12 +2,13 @@ using FluentResults;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Domain;
 using Reaparr.Logging;
+using Serilog;
 
 namespace Reaparr.Data.Contracts;
 
 public static partial class DbContextExtensions
 {
-    private static readonly ILog _log = new LogConfig().CreateLogInstance(typeof(DbContextExtensions));
+    private static readonly ILogger _log = new LogConfig().CreateLogInstance(typeof(DbContextExtensions));
 
     public static async Task<Result<PlexServerConnection>> ChoosePlexServerConnection(
         this IReaparrDbContext dbContext,
@@ -31,23 +32,21 @@ public static partial class DbContextExtensions
         if (!plexServerConnections.Any())
         {
             return _log.Here()
-                .Error(
+                .ErrorResult(
                     "PlexServer with id {PlexServerId} and name {PlexServerName} has no connections available!",
                     plexServer.Id,
                     plexServer.Name
-                )
-                .ToResult();
+                );
         }
 
         if (plexServerConnections.All(x => !x.IsOnline))
         {
             return _log.Here()
-                .Warning(
+                .WarningResult(
                     "PlexServer with id {plexServerId} and name {PlexServerName} has no online connections available!",
                     plexServer.Id,
                     plexServer.Name
                 )
-                .ToResult()
                 .Add504GatewayTimeoutError();
         }
 
@@ -104,10 +103,11 @@ public static partial class DbContextExtensions
         var directConnections = successPlexServerConnections.Where(x => !x.IsPlexTvConnection).ToList();
         if (directConnections.Any())
         {
-            _log.Verbose(
-                "Found a direct connection that was successful. We're gonna use that: {DirectConnection}",
-                directConnections.First()
-            );
+            _log.Here()
+                .Verbose(
+                    "Found a direct connection that was successful. We're gonna use that: {DirectConnection}",
+                    directConnections.First()
+                );
             return Result.Ok(directConnections.First());
         }
 

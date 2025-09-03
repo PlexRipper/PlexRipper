@@ -1,10 +1,8 @@
 using FastEndpoints;
 using FluentValidation;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
 
 namespace Reaparr.Application;
 
@@ -20,14 +18,14 @@ public class GetPlexAccountByIdEndpointRequestValidator : Validator<GetPlexAccou
 
 public class GetPlexAccountByIdEndpoint : BaseEndpoint<GetPlexAccountByIdEndpointRequest, PlexAccountDTO>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.PlexAccountController + "/{PlexAccountId}";
 
-    public GetPlexAccountByIdEndpoint(ILog log, IReaparrDbContext dbContext)
+    public GetPlexAccountByIdEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
-        _log = log;
+        _log = log.ForContext<GetPlexAccountByIdEndpoint>();
         _dbContext = dbContext;
     }
 
@@ -45,6 +43,7 @@ public class GetPlexAccountByIdEndpoint : BaseEndpoint<GetPlexAccountByIdEndpoin
 
     public override async Task HandleAsync(GetPlexAccountByIdEndpointRequest req, CancellationToken ct)
     {
+        _log.Here().DebugApiCall(HttpContext, req);
         var plexAccount = await _dbContext
             .PlexAccounts.Include(x => x.PlexAccountServers)
             .Include(x => x.PlexAccountLibraries)
@@ -58,7 +57,8 @@ public class GetPlexAccountByIdEndpoint : BaseEndpoint<GetPlexAccountByIdEndpoin
             return;
         }
 
-        _log.Debug("Found an {NameOfPlexAccount} with the id: {AccountId}", nameof(PlexAccount), req.PlexAccountId);
+        _log.Here()
+            .Debug("Found an {NameOfPlexAccount} with the id: {AccountId}", nameof(PlexAccount), req.PlexAccountId);
         await SendFluentResult(Result.Ok(plexAccount), x => x.ToDTO(), ct);
     }
 }

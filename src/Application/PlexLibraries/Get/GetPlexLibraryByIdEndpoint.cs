@@ -1,9 +1,7 @@
 using FastEndpoints;
 using FluentValidation;
-using Microsoft.AspNetCore.Http;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
 
 namespace Reaparr.Application;
 
@@ -25,12 +23,14 @@ public class GetPlexLibraryByIdEndpointRequestValidator : Validator<GetPlexLibra
 
 public class GetPlexLibraryByIdEndpoint : BaseEndpoint<GetPlexLibraryByIdEndpointRequest, PlexLibraryDTO>
 {
+    private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.PlexLibraryController + "/{PlexLibraryId}";
 
-    public GetPlexLibraryByIdEndpoint(ILog log, IReaparrDbContext dbContext)
+    public GetPlexLibraryByIdEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
+        _log = log.ForContext<GetPlexLibraryByIdEndpoint>();
         _dbContext = dbContext;
     }
 
@@ -48,6 +48,8 @@ public class GetPlexLibraryByIdEndpoint : BaseEndpoint<GetPlexLibraryByIdEndpoin
 
     public override async Task HandleAsync(GetPlexLibraryByIdEndpointRequest req, CancellationToken ct)
     {
+        _log.Here().DebugApiCall(HttpContext, req);
+
         var plexLibrary = await _dbContext.PlexLibraries.GetAsync(req.PlexLibraryId, ct);
         if (plexLibrary is null)
         {

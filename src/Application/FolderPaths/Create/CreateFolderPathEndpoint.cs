@@ -1,6 +1,5 @@
 using FastEndpoints;
 using FluentValidation;
-using Microsoft.AspNetCore.Http;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 
@@ -25,12 +24,14 @@ public class CreateFolderPathEndpointRequestValidator : Validator<CreateFolderPa
 
 public class CreateFolderPathEndpoint : BaseEndpoint<CreateFolderPathEndpointRequest, FolderPathDTO>
 {
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.FolderPathController + "/";
 
-    public CreateFolderPathEndpoint(IReaparrDbContext dbContext)
+    public CreateFolderPathEndpoint(ILogger log, IReaparrDbContext dbContext)
     {
+        _log = log.ForContext<CreateFolderPathEndpoint>();
         _dbContext = dbContext;
     }
 
@@ -47,6 +48,7 @@ public class CreateFolderPathEndpoint : BaseEndpoint<CreateFolderPathEndpointReq
 
     public override async Task HandleAsync(CreateFolderPathEndpointRequest req, CancellationToken ct)
     {
+        _log.Here().DebugApiCall(HttpContext, req);
         var folderPath = req.FolderPathDto!.ToModel();
         await _dbContext.FolderPaths.AddAsync(folderPath, ct);
         await _dbContext.SaveChangesAsync(ct);

@@ -1,15 +1,14 @@
 using FastEndpoints;
-using Reaparr.Logging;
 
 namespace Reaparr.Domain;
 
 public class EventPublisher : IEventPublisher
 {
-    private readonly ILog<EventPublisher> _log;
+    private readonly Serilog.ILogger _log;
 
-    public EventPublisher(ILog<EventPublisher> log)
+    public EventPublisher(ILogger log)
     {
-        _log = log;
+        _log = log.ForContext<EventPublisher>();
     }
 
     /// <inheritdoc/>
@@ -25,13 +24,13 @@ public class EventPublisher : IEventPublisher
         }
         catch (OperationCanceledException) when (ct.IsCancellationRequested)
         {
-            _log.Warning("Publish of {EventType} canceled.", @event.GetType().Name);
+            _log.Here().Warning("Publish of {EventType} canceled.", @event.GetType().Name);
         }
         catch (Exception e)
         {
             // Swallow exception to avoid breaking the fire and forget
             _log.Here().Error("Error publishing event {EventType}: {ErrorMessage}", @event, e.Message);
-            _log.Error(e);
+            _log.Here().ErrorResult(e);
         }
     }
 }

@@ -2,7 +2,6 @@ using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
 using Reaparr.Settings.Contracts;
 
 namespace Reaparr.Application;
@@ -13,7 +12,7 @@ namespace Reaparr.Application;
 /// </summary>
 public class PlexDownloadClient : IAsyncDisposable, IPlexDownloadClient
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IReaparrDbContext _dbContext;
     private readonly Func<DownloadWorkerTask, DownloadWorker> _downloadWorkerFactory;
@@ -37,14 +36,14 @@ public class PlexDownloadClient : IAsyncDisposable, IPlexDownloadClient
     /// <param name="downloadWorkerFactory"></param>
     /// <param name="serverSettings"></param>
     public PlexDownloadClient(
-        ILog log,
+        ILogger log,
         ICommandExecutor commandExecutor,
         IReaparrDbContext dbContext,
         Func<DownloadWorkerTask, DownloadWorker> downloadWorkerFactory,
         IServerSettingsModule serverSettings
     )
     {
-        _log = log;
+        _log = log.ForContext<PlexDownloadClient>();
         _commandExecutor = commandExecutor;
         _dbContext = dbContext;
         _downloadWorkerFactory = downloadWorkerFactory;
@@ -127,7 +126,7 @@ public class PlexDownloadClient : IAsyncDisposable, IPlexDownloadClient
         if (_downloadWorkers.Any(x => x.DownloadWorkerTask.DownloadStatus == DownloadStatus.Downloading))
             return Result.Fail("The PlexDownloadClient is already downloading and can not be started.").LogWarning();
 
-        _log.Debug("Start downloading {FileName}", DownloadTask.FileName);
+        _log.Here().Debug("Start downloading {FileName}", DownloadTask.FileName);
         try
         {
             var results = new List<Result>();
@@ -193,7 +192,7 @@ public class PlexDownloadClient : IAsyncDisposable, IPlexDownloadClient
 
         await _commandExecutor.Send(new DownloadTaskUpdatedCommand(DownloadTask.ToKey()));
 
-        _log.Verbose("{@DownloadTask}", DownloadTask.ToString());
+        _log.Here().Verbose("{@DownloadTask}", DownloadTask.ToString());
     }
 
     private async Task SetupDownloadLimitWatcher(DownloadTaskGeneric downloadTask)
@@ -216,7 +215,7 @@ public class PlexDownloadClient : IAsyncDisposable, IPlexDownloadClient
     {
         if (!_downloadWorkers.Any())
         {
-            _log.WarningLine("No download workers have been made yet, cannot setup subscriptions");
+            _log.Here().Warning("No download workers have been made yet, cannot setup subscriptions");
             return;
         }
 
@@ -232,7 +231,7 @@ public class PlexDownloadClient : IAsyncDisposable, IPlexDownloadClient
                 {
                     if (ex.GetType() != typeof(OperationCanceledException))
                     {
-                        _log.Error(ex);
+                        _log.Here().ErrorResult(ex);
                         _downloadWorkerTaskUpdateCompletionSource.SetException(ex);
                     }
 
@@ -255,7 +254,7 @@ public class PlexDownloadClient : IAsyncDisposable, IPlexDownloadClient
             {
                 if (ex.GetType() != typeof(OperationCanceledException))
                 {
-                    _log.Error(ex);
+                    _log.Here().ErrorResult(ex);
                     _downloadWorkerLogCompletionSource.SetException(ex);
                 }
 

@@ -24,7 +24,7 @@ public static partial class DbContextExtensions
         var tokenResult = await dbContext.GetPlexServerTokenAsync(plexServerId, cancellationToken);
         if (tokenResult.IsFailed)
         {
-            _log.Error("Could not find a valid token for server {ServerName}", plexServer?.Name ?? "Unknown");
+            _log.Here().Error("Could not find a valid token for server {ServerName}", plexServer?.Name ?? "Unknown");
             return tokenResult.ToResult();
         }
 
@@ -192,7 +192,7 @@ public static partial class DbContextExtensions
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            _log.Error(ex);
+            _log.Here().ErrorResult(ex);
             throw;
         }
     }
@@ -282,7 +282,7 @@ public static partial class DbContextExtensions
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            _log.Error(ex);
+            _log.Here().ErrorResult(ex);
         }
 
         return DownloadStatus.Unknown;
@@ -457,13 +457,12 @@ public static partial class DbContextExtensions
             case DownloadTaskType.Season:
             case DownloadTaskType.Episode:
                 return _log.Here()
-                    .Error(
+                    .ErrorResult(
                         "{Name} of type {Type} is not supported in {MethodName}",
                         nameof(DownloadTaskType),
                         key.Type,
                         nameof(ResetDownloadTaskProgress)
-                    )
-                    .ToResult();
+                    );
             case DownloadTaskType.None:
             case DownloadTaskType.MoviePart:
             case DownloadTaskType.EpisodePart:

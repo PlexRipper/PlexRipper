@@ -1,6 +1,5 @@
 using FastEndpoints;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
 
 namespace Reaparr.Application;
 
@@ -8,12 +7,12 @@ public record DownloadTaskWorkerLogNotification(IList<DownloadWorkerLog> logs) :
 
 public class DownloadTaskWorkerLogNotificationHandler : IEventHandler<DownloadTaskWorkerLogNotification>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
-    public DownloadTaskWorkerLogNotificationHandler(ILog log, IReaparrDbContext dbContext)
+    public DownloadTaskWorkerLogNotificationHandler(ILogger log, IReaparrDbContext dbContext)
     {
-        _log = log;
+        _log = log.ForContext<DownloadTaskWorkerLogNotificationHandler>();
         _dbContext = dbContext;
     }
 
@@ -33,7 +32,7 @@ public class DownloadTaskWorkerLogNotificationHandler : IEventHandler<DownloadTa
         }
         catch (Exception e)
         {
-            _log.Error(e);
+            _log.Here().ErrorResult(e);
         }
     }
 }

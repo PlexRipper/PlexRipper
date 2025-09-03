@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Application.Contracts.Validators;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
 
 namespace Reaparr.Application;
 
@@ -24,17 +23,17 @@ public class GenerateDownloadTaskTvShowSeasonsCommandValidator
 public class GenerateDownloadTaskTvShowSeasonsCommandHandler
     : ICommandHandler<GenerateDownloadTaskTvShowSeasonsCommand, Result>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _command;
 
     public GenerateDownloadTaskTvShowSeasonsCommandHandler(
-        ILog log,
+        ILogger log,
         IReaparrDbContext dbContext,
         ICommandExecutor command
     )
     {
-        _log = log;
+        _log = log.ForContext<GenerateDownloadTaskTvShowSeasonsCommandHandler>();
         _dbContext = dbContext;
         _command = command;
     }
@@ -49,10 +48,11 @@ public class GenerateDownloadTaskTvShowSeasonsCommandHandler
         if (!plexSeasonList.Any())
             return ResultExtensions.IsEmpty(nameof(plexSeasonList)).LogWarning();
 
-        _log.Debug(
-            "Creating {PlexTvShowIdsCount} season download tasks",
-            plexSeasonList.SelectMany(x => x.MediaIds).ToList().Count
-        );
+        _log.Here()
+            .Debug(
+                "Creating {PlexTvShowIdsCount} season download tasks",
+                plexSeasonList.SelectMany(x => x.MediaIds).ToList().Count
+            );
 
         var episodesIds = new List<DownloadMediaDTO>();
         var seasonsToInsert = new List<DownloadTaskTvShowSeason>();

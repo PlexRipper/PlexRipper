@@ -5,7 +5,6 @@ using FastEndpoints;
 using FluentValidation;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
 
 namespace Reaparr.Application;
 
@@ -25,7 +24,7 @@ public class MergeFilesFromFileTaskCommandValidator : AbstractValidator<MergeFil
 
 public class MergeFilesFromFileTaskCommandHandler : ICommandHandler<MergeFilesFromFileTaskCommand, Result>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IEventPublisher _eventPublisher;
     private readonly IReaparrDbContext _dbContext;
@@ -43,7 +42,7 @@ public class MergeFilesFromFileTaskCommandHandler : ICommandHandler<MergeFilesFr
     private const int _bufferSize = 1048576;
 
     public MergeFilesFromFileTaskCommandHandler(
-        ILog log,
+        ILogger log,
         ICommandExecutor commandExecutor,
         IEventPublisher eventPublisher,
         IReaparrDbContext dbContext,
@@ -52,7 +51,7 @@ public class MergeFilesFromFileTaskCommandHandler : ICommandHandler<MergeFilesFr
         IPath path
     )
     {
-        _log = log;
+        _log = log.ForContext<MergeFilesFromFileTaskCommandHandler>();
         _commandExecutor = commandExecutor;
         _eventPublisher = eventPublisher;
         _dbContext = dbContext;
@@ -169,7 +168,7 @@ public class MergeFilesFromFileTaskCommandHandler : ICommandHandler<MergeFilesFr
 
                     if (stopwatch.ElapsedMilliseconds > 1000)
                     {
-                        _log.VerboseLine(downloadTask.ToString());
+                        _log.Here().Verbose(downloadTask.ToString());
 
                         await _dbContext.UpdateDownloadFileTransferProgress(key, downloadTask.ToFileTransferProgress());
                         await _commandExecutor.Send(new DownloadTaskUpdatedCommand(key), CancellationToken.None);
@@ -191,7 +190,7 @@ public class MergeFilesFromFileTaskCommandHandler : ICommandHandler<MergeFilesFr
                 // Important: Reset the offset between files otherwise it skips parts of the file
                 downloadTask.CurrentFileTransferBytesOffset = 0;
 
-                _log.Debug("Deleting file {FilePath} since it has been merged already", filePath);
+                _log.Here().Debug("Deleting file {FilePath} since it has been merged already", filePath);
                 await _readStream.DisposeAsync();
                 _readStream = null;
 
@@ -221,7 +220,7 @@ public class MergeFilesFromFileTaskCommandHandler : ICommandHandler<MergeFilesFr
         }
         catch (OperationCanceledException)
         {
-            _log.Warning("The file merge operation was cancelled for file task {FileTaskId}", key.Id);
+            _log.Here().Warning("The file merge operation was cancelled for file task {FileTaskId}", key.Id);
 
             downloadTask.DownloadStatus = downloadTask.IsSingleFile
                 ? DownloadStatus.MovePaused
@@ -234,7 +233,7 @@ public class MergeFilesFromFileTaskCommandHandler : ICommandHandler<MergeFilesFr
         }
         catch (Exception ex)
         {
-            return (await ErrorDownloadTask(downloadTask, _log.Error(ex).ToResult()));
+            return (await ErrorDownloadTask(downloadTask, _log.Here().ErrorResult(ex)));
         }
         finally
         {

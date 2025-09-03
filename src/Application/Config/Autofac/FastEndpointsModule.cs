@@ -1,6 +1,5 @@
 using System.Reflection;
 using Autofac;
-using FastEndpoints;
 using Module = Autofac.Module;
 
 namespace Reaparr.Application;

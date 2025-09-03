@@ -1,11 +1,9 @@
 using FastEndpoints;
 using FluentValidation;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Identity.Contracts;
-using Reaparr.Logging;
 
 namespace Reaparr.Application;
 
@@ -40,12 +38,12 @@ public class UpdateCredentialsEndpoint : BaseEndpoint<UpdateCredentialsEndpointR
 {
     public override string EndpointPath => ApiRoutes.AuthenticatedController;
 
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly UserManager<AppUser> _userManager;
 
-    public UpdateCredentialsEndpoint(ILog log, UserManager<AppUser> userManager)
+    public UpdateCredentialsEndpoint(ILogger log, UserManager<AppUser> userManager)
     {
-        _log = log;
+        _log = log.ForContext<UpdateCredentialsEndpoint>();
         _userManager = userManager;
     }
 
@@ -74,6 +72,7 @@ public class UpdateCredentialsEndpoint : BaseEndpoint<UpdateCredentialsEndpointR
 
     public override async Task HandleAsync(UpdateCredentialsEndpointRequest req, CancellationToken ct)
     {
+        _log.Here().DebugApiCall(HttpContext, req);
         // There is only 1 app user in the database
         var user = await _userManager.Users.FirstOrDefaultAsync(ct);
         if (user is null)
@@ -116,7 +115,7 @@ public class UpdateCredentialsEndpoint : BaseEndpoint<UpdateCredentialsEndpointR
             }
         }
 
-        _log.WarningLine("The Reaparr app credentials have been updated! Make sure this is intended");
+        _log.Here().Warning("The Reaparr app credentials have been updated! Make sure this is intended");
 
         // Respond with success
         await SendFluentResult(Result.Ok(), ct);

@@ -1,8 +1,6 @@
 using FastEndpoints;
 using FluentValidation;
-using Microsoft.AspNetCore.Http;
 using Reaparr.Application.Contracts;
-using Reaparr.Logging;
 using Reaparr.PlexApi.Contracts;
 
 namespace Reaparr.Application;
@@ -54,14 +52,14 @@ public class ValidatePlexAccountEndpointRequestValidator : Validator<ValidatePle
 
 public class ValidatePlexAccountEndpoint : BaseEndpoint<ValidatePlexAccountEndpointRequest, ValidatePlexAccountResponse>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
 
     public override string EndpointPath => ApiRoutes.PlexAccountController + "/validate";
 
-    public ValidatePlexAccountEndpoint(ILog log, ICommandExecutor commandExecutor)
+    public ValidatePlexAccountEndpoint(ILogger log, ICommandExecutor commandExecutor)
     {
-        _log = log;
+        _log = log.ForContext<ValidatePlexAccountEndpoint>();
         _commandExecutor = commandExecutor;
     }
 
@@ -79,6 +77,7 @@ public class ValidatePlexAccountEndpoint : BaseEndpoint<ValidatePlexAccountEndpo
 
     public override async Task HandleAsync(ValidatePlexAccountEndpointRequest req, CancellationToken ct)
     {
+        _log.Here().DebugApiCall(HttpContext, req);
         var plexAccount = req.PlexAccount.ToModel();
 
         Result<PlexAccount> validateResult;
@@ -88,10 +87,11 @@ public class ValidatePlexAccountEndpoint : BaseEndpoint<ValidatePlexAccountEndpo
 
             if (validateResult.IsSuccess)
             {
-                _log.Information(
-                    "Successfully validated the PlexAccount Authentication Token for user {PlexAccountDisplayName} from the PlexApi",
-                    plexAccount.DisplayName
-                );
+                _log.Here()
+                    .Information(
+                        "Successfully validated the PlexAccount Authentication Token for user {PlexAccountDisplayName} from the PlexApi",
+                        plexAccount.DisplayName
+                    );
 
                 var response = Result.Ok(
                     new ValidatePlexAccountResponse
@@ -104,10 +104,11 @@ public class ValidatePlexAccountEndpoint : BaseEndpoint<ValidatePlexAccountEndpo
                 return;
             }
 
-            _log.Warning(
-                "Failed to validate the PlexAccount Authentication Token for user {PlexAccountDisplayName} from the PlexApi",
-                plexAccount.DisplayName
-            );
+            _log.Here()
+                .Warning(
+                    "Failed to validate the PlexAccount Authentication Token for user {PlexAccountDisplayName} from the PlexApi",
+                    plexAccount.DisplayName
+                );
         }
         else
         {
@@ -115,10 +116,11 @@ public class ValidatePlexAccountEndpoint : BaseEndpoint<ValidatePlexAccountEndpo
 
             if (validateResult.IsSuccess)
             {
-                _log.Debug(
-                    "The PlexAccount with displayName {PlexAccountDisplayName} has been validated",
-                    plexAccount.DisplayName
-                );
+                _log.Here()
+                    .Debug(
+                        "The PlexAccount with displayName {PlexAccountDisplayName} has been validated",
+                        plexAccount.DisplayName
+                    );
                 var response = Result.Ok(
                     new ValidatePlexAccountResponse
                     {

@@ -1,10 +1,8 @@
-﻿using Reaparr.Logging;
-
-namespace Reaparr.Domain;
+﻿namespace Reaparr.Domain;
 
 public static class DownloadTaskActions
 {
-    private static readonly ILog _log = new LogConfig().CreateLogInstance(typeof(DownloadTaskActions));
+    private static readonly ILogger _log = new LogConfig().CreateLogInstance(typeof(DownloadTaskActions));
 
     private static readonly DownloadStatus[] _anyStatuses =
     [
@@ -82,7 +80,7 @@ public static class DownloadTaskActions
                 actions.Add(DownloadActions.Delete);
                 break;
             default:
-                _log.Error("Unknown download status {DownloadStatus}", downloadStatus);
+                _log.Here().Error("Unknown download status {DownloadStatus}", downloadStatus);
                 break;
         }
 
@@ -98,10 +96,11 @@ public static class DownloadTaskActions
     {
         if (!downloadStatusList.Any())
         {
-            _log.Warning(
-                "{NameOfDownloadStatusList} was empty, cannot determine the aggregate status of the download tasks",
-                nameof(downloadStatusList)
-            );
+            _log.Here()
+                .Warning(
+                    "{NameOfDownloadStatusList} was empty, cannot determine the aggregate status of the download tasks",
+                    nameof(downloadStatusList)
+                );
             return DownloadStatus.Unknown;
         }
 
@@ -115,7 +114,8 @@ public static class DownloadTaskActions
         foreach (var status in _anyStatuses.Where(status => downloadStatusList.Any(x => x == status)))
             return status;
 
-        _log.Error("Unable to determine the aggregate status of the download tasks. {StatusList}", downloadStatusList);
+        _log.Here()
+            .Error("Unable to determine the aggregate status of the download tasks. {StatusList}", downloadStatusList);
 
         return DownloadStatus.Unknown;
     }

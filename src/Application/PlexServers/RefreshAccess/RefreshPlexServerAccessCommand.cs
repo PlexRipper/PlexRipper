@@ -2,7 +2,6 @@ using FastEndpoints;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Data.Contracts;
-using Reaparr.Logging;
 using Reaparr.PlexApi.Contracts;
 
 namespace Reaparr.Application;
@@ -24,17 +23,17 @@ public class RefreshPlexServerAccessCommandValidator : AbstractValidator<Refresh
 public class RefreshPlexServerAccessCommandHandler
     : ICommandHandler<RefreshPlexServerAccessCommand, Result<RefreshPlexServerAccessRapport>>
 {
-    private readonly ILog _log;
+    private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
 
     public RefreshPlexServerAccessCommandHandler(
-        ILog log,
+        ILogger log,
         IReaparrDbContext dbContext,
         ICommandExecutor commandExecutor
     )
     {
-        _log = log;
+        _log = log.ForContext<RefreshPlexServerAccessCommandHandler>();
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;
     }
@@ -48,23 +47,26 @@ public class RefreshPlexServerAccessCommandHandler
 
         var plexAccountName = await _dbContext.GetPlexAccountDisplayName(plexAccountId, cancellationToken);
 
-        _log.Debug("Refreshing Plex servers access for PlexAccount: {PlexAccountName}", plexAccountName);
+        _log.Here().Debug("Refreshing Plex servers access for PlexAccount: {PlexAccountName}", plexAccountName);
 
         var result = await _commandExecutor.Send(new GetAccessiblePlexServersCommand(plexAccountId), cancellationToken);
 
         // If the Plex API returns a 401 Unauthorized error, remove the PlexAccount and PlexServerAccess
         if (result.HasPlex401UnauthorizedError())
         {
-            _log.Warning(
-                "Plex API returned 401 Unauthorized for PlexAccount: {PlexAccountDisplayName}",
-                plexAccountName
-            );
-            _log.Warning(
-                "Removing PlexServerAccess and LibraryAccess for PlexAccount: {PlexAccountDisplayName}",
-                plexAccountName
-            );
+            _log.Here()
+                .Warning(
+                    "Plex API returned 401 Unauthorized for PlexAccount: {PlexAccountDisplayName}",
+                    plexAccountName
+                );
+            _log.Here()
+                .Warning(
+                    "Removing PlexServerAccess and LibraryAccess for PlexAccount: {PlexAccountDisplayName}",
+                    plexAccountName
+                );
 
-            _log.Error("{PlexAccountName} token has been invalidated and has lost Plex Server access", plexAccountName);
+            _log.Here()
+                .Error("{PlexAccountName} token has been invalidated and has lost Plex Server access", plexAccountName);
             return await RemovePlexAccess(plexAccountId);
         }
 
@@ -73,7 +75,7 @@ public class RefreshPlexServerAccessCommandHandler
 
         if (!result.Value.Any())
         {
-            _log.Warning("No Plex servers found for PlexAccount: {plexAccountName}", plexAccountName);
+            _log.Here().Warning("No Plex servers found for PlexAccount: {plexAccountName}", plexAccountName);
             return await RemovePlexAccess(plexAccountId);
         }
 
@@ -97,10 +99,11 @@ public class RefreshPlexServerAccessCommandHandler
         if (plexServerAccountAccessRapport.IsFailed)
             return plexServerAccountAccessRapport.LogError();
 
-        _log.Information(
-            "Successfully refreshed accessible Plex servers for account {PlexAccountDisplayName}",
-            plexAccountName
-        );
+        _log.Here()
+            .Information(
+                "Successfully refreshed accessible Plex servers for account {PlexAccountDisplayName}",
+                plexAccountName
+            );
 
         return plexServerAccountAccessRapport;
     }

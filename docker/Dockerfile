@@ -76,12 +76,13 @@ RUN dotnet build "WebAPI.csproj" -c Release -o /app/build /p:AssemblyVersion=$VE
 RUN dotnet publish "WebAPI.csproj" -c Release -o /app/publish /p:AssemblyVersion=$VERSION  /p:InformationalVersion=$INFORMATIONAL_VERSION
 
 # Stage 3 - Runtime Image
-FROM --platform=$TARGETPLATFORM ghcr.io/linuxserver/baseimage-alpine:3.20 AS final
+FROM --platform=$TARGETPLATFORM mcr.microsoft.com/dotnet/aspnet:9.0-alpine AS final
 
 ARG VERSION
 ARG INFORMATIONAL_VERSION
 ARG PORT
 ARG TARGETPLATFORM
+ARG S6_OVERLAY_VERSION="3.2.1.0"
 
 ## Set environment variables
 ENV PORT=${PORT}
@@ -92,23 +93,10 @@ ENV DOTNET_URLS=http://+:${PORT}
 ENV ASPNETCORE_URLS=http://+:${PORT}
 ENV S6_SERVICES_GRACETIME=15000
 
-## Install dotnet runtime
-RUN \
-   echo "**** Updating package information ****" && \
-   apk update && \
-   echo "**** Install pre-reqs ****" && \
-   apk add --no-cache bash icu-libs krb5-libs libgcc libintl libssl3 libstdc++ zlib && \
-   echo "**** Installing dotnet runtime for $TARGETPLATFORM ****" && \
-   mkdir -p /usr/share/dotnet && \
-   wget https://dot.net/v1/dotnet-install.sh -O /tmp/dotnet-install.sh && \
-   chmod +x /tmp/dotnet-install.sh && \
-   if  [ "$TARGETPLATFORM" = "linux/arm/v7" ] ; then \
-       /tmp/dotnet-install.sh --version 9.0.7 --runtime aspnetcore --install-dir /usr/share/dotnet --architecture arm ; \
-   elif [ "$TARGETPLATFORM" = "linux/arm64/v8" ] ; then \
-       /tmp/dotnet-install.sh --version 9.0.7 --runtime aspnetcore --install-dir /usr/share/dotnet --architecture arm64 ; \
-   else \
-       /tmp/dotnet-install.sh --version 9.0.7 --runtime aspnetcore --install-dir /usr/share/dotnet --architecture x64 ; \
-   fi
+# Install dependencies and s6-overlay
+RUN apk add --no-cache bash xz curl icu-libs krb5-libs libgcc libintl libssl3 libstdc++ zlib
+ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz /
+ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-x86_64.tar.xz /
 
 ## Make dotnet command available
 ENV PATH="$PATH:/usr/share/dotnet"
@@ -121,6 +109,10 @@ COPY --from=client-build /tmp/ClientApp/.output/public /app/wwwroot
 ## Copy the s6-overlay config files
 COPY docker/etc/ /etc/
 COPY docker/10-config /etc/fix-attrs.d/10-config
+
+# Create non-root user
+RUN addgroup -S reaparr && adduser -S reaparr -G reaparr
+USER reaparr
 
 ## Set version label
 LABEL company="Reaparr" \

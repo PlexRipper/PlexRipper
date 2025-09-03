@@ -81,6 +81,8 @@ public class Program
 
         result.LogFatal();
 
+        _log.Here().Fatal("Reaparr has been shutdown! R.I.P.");
+
         System.Environment.Exit(1);
     }
 }

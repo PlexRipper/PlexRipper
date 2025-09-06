@@ -20,12 +20,46 @@ public class NotificationHub : Hub<INotificationHub>, INotificationHub
     }
 
     /// <inheritdoc/>
+    public override Task OnConnectedAsync()
+    {
+        _log.Here()
+            .Debug("Client connected to {HubName}: {ConnectionId}", nameof(NotificationHub), Context.ConnectionId);
+        return base.OnConnectedAsync();
+    }
+
+    /// <inheritdoc/>
+    public override Task OnDisconnectedAsync(Exception? exception)
+    {
+        if (exception != null)
+        {
+            _log.Here()
+                .Error(
+                    exception,
+                    "Client disconnected with error from {HubName}: {ConnectionId}",
+                    nameof(NotificationHub),
+                    Context.ConnectionId
+                );
+        }
+        else
+        {
+            _log.Here()
+                .Warning(
+                    "Client disconnected from {HubName}: {ConnectionId}",
+                    nameof(ProgressHub),
+                    Context.ConnectionId
+                );
+        }
+
+        return base.OnDisconnectedAsync(exception);
+    }
+
+    /// <inheritdoc/>
     public async Task Notification(NotificationDTO notification, CancellationToken cancellationToken = default)
     {
         _log.Here()
             .Debug(
                 "Sending notification: {MessageTypesNotification} => {@NotificationDto}",
-                MessageTypes.Notification.ToString(),
+                nameof(MessageTypes.Notification),
                 notification
             );
         await Clients.All.Notification(notification, cancellationToken);

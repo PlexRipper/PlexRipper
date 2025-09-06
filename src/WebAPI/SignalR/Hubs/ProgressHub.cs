@@ -21,6 +21,39 @@ public class ProgressHub : Hub<IProgressHub>, IProgressHub
     }
 
     /// <inheritdoc/>
+    public override Task OnConnectedAsync()
+    {
+        _log.Here().Debug("Client connected to {HubName}: {ConnectionId}", nameof(ProgressHub), Context.ConnectionId);
+        return base.OnConnectedAsync();
+    }
+
+    /// <inheritdoc/>
+    public override Task OnDisconnectedAsync(Exception? exception)
+    {
+        if (exception != null)
+        {
+            _log.Here()
+                .Error(
+                    exception,
+                    "Client disconnected with error from {HubName}: {ConnectionId}",
+                    nameof(ProgressHub),
+                    Context.ConnectionId
+                );
+        }
+        else
+        {
+            _log.Here()
+                .Warning(
+                    "Client disconnected from {HubName}: {ConnectionId}",
+                    nameof(ProgressHub),
+                    Context.ConnectionId
+                );
+        }
+
+        return base.OnDisconnectedAsync(exception);
+    }
+
+    /// <inheritdoc/>
     public async Task JobStatusUpdate(JobStatusUpdateDTO jobStatusUpdate, CancellationToken cancellationToken = default)
     {
         _log.Here()

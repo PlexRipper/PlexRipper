@@ -98,6 +98,8 @@ public class PlexLibrary : BaseEntity
     [Column(Order = 18)]
     public int CountriesCount { get; init; }
 
+    public int MediaCount { get; }
+
     #endregion
 
     #region Relationships
@@ -141,20 +143,6 @@ public class PlexLibrary : BaseEntity
 
     [NotMapped]
     public string Name => Title;
-
-    [NotMapped]
-    public int MediaCount
-    {
-        get
-        {
-            return Type switch
-            {
-                PlexMediaType.Movie => MovieCount,
-                PlexMediaType.TvShow => TvShowCount,
-                _ => -1,
-            };
-        }
-    }
 
     /// <summary>
     /// Gets a value indicating whether this <see cref="PlexLibrary"/> has been updated since it was last synced with Reaparr.

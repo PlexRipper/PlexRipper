@@ -46,6 +46,12 @@ public class PlexLibraryConfiguration : IEntityTypeConfiguration<PlexLibrary>
         builder.Property(c => c.Title).UseCollation(OrderByNaturalExtensions.CollationName);
 
         builder
+            .Property(c => c.MediaCount)
+            .HasComputedColumnSql(
+                $"CASE WHEN Type = '{PlexMediaType.Movie.ToPlexMediaTypeString()}' THEN {nameof(PlexLibrary.MovieCount)} WHEN Type = '{PlexMediaType.TvShow.ToPlexMediaTypeString()}' THEN {nameof(PlexLibrary.TvShowCount)} ELSE -1 END"
+            );
+
+        builder
             .HasMany(x => x.Actors)
             .WithMany(x => x.PlexLibraries)
             .UsingEntity<PlexLibraryActors>(

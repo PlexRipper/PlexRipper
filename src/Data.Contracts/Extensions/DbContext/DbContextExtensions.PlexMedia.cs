@@ -133,6 +133,10 @@ public static partial class DbContextExtensions
                     .ApplyWhere(filter.CountryId > 0, x => x.Countries.Any(y => y.Id == filter.CountryId))
                     .ApplyWhere(filter.GenreId > 0, x => x.Genres.Any(y => y.Id == filter.GenreId))
                     .ApplyWhere(filter.ActorId > 0, x => x.Actors.Any(y => y.Id == filter.ActorId))
+                    .ApplyWhere(
+                        filter.Quality != VideoQuality.None,
+                        x => x.MediaDataList.Any(y => y.Quality == filter.Quality)
+                    )
                     .ApplyOrderBy(plexLibraryId > 0, x => x.SortIndex)
                     .ApplySkip(filter.Skip)
                     .ApplyTake(filter.Take)
@@ -161,6 +165,10 @@ public static partial class DbContextExtensions
                     .ApplyWhere(filter.CountryId > 0, x => x.Countries.Any(y => y.Id == filter.CountryId))
                     .ApplyWhere(filter.GenreId > 0, x => x.Genres.Any(y => y.Id == filter.GenreId))
                     .ApplyWhere(filter.ActorId > 0, x => x.Actors.Any(y => y.Id == filter.ActorId))
+                    .ApplyWhere(
+                        filter.Quality != VideoQuality.None,
+                        x => x.Qualities.Any(y => y.Quality == filter.Quality)
+                    )
                     .ApplyOrderBy(plexLibraryId > 0, x => x.SortIndex)
                     .ApplySkip(filter.Skip)
                     .ApplyTake(filter.Take)

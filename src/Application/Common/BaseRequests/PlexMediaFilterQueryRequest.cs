@@ -14,6 +14,7 @@ public abstract record PlexMediaFilterQueryRequest
         int countryId = 0,
         int actorId = 0,
         int genreId = 0,
+        VideoQuality quality = VideoQuality.None,
         bool filterOfflineMedia = false,
         bool filterOwnedMedia = false
     )
@@ -23,6 +24,7 @@ public abstract record PlexMediaFilterQueryRequest
         CountryId = countryId;
         ActorId = actorId;
         GenreId = genreId;
+        Quality = quality;
         FilterOfflineMedia = filterOfflineMedia;
         FilterOwnedMedia = filterOwnedMedia;
     }
@@ -46,6 +48,10 @@ public abstract record PlexMediaFilterQueryRequest
     [QueryParam, BindFrom("roleId")]
     [DefaultValue(0)]
     public int ActorId { get; init; }
+
+    [QueryParam, BindFrom("quality")]
+    [DefaultValue(VideoQuality.None)]
+    public VideoQuality Quality { get; init; }
 
     [QueryParam, BindFrom("filterOfflineMedia")]
     [DefaultValue(false)]

@@ -14,7 +14,13 @@ public enum VideoQuality
     /// The resolution could not be determined or was not recognized.
     /// </summary>
     [EnumMember(Value = nameof(Unknown))]
-    Unknown = 0,
+    Unknown = -1,
+
+    /// <summary>
+    /// The "null" quality, indicating no specific quality level.
+    /// </summary>
+    [EnumMember(Value = nameof(None))]
+    None = 0,
 
     /// <summary>
     /// Extremely low resolution, typically 144p (256×144). Used for very low-bandwidth scenarios.

@@ -130,8 +130,8 @@ export default defineNuxtConfig({
 	},
 
 	i18n: {
-		lazy: true,
-		langDir: './lang/',
+		restructureDir: 'src',
+		langDir: 'lang',
 		defaultLocale: 'en-US', // Ensure the SettingsStore is updated as well when changes are made here:
 		locales: [
 			{ text: 'English', code: 'en-US', iso: 'en-US', bcp47Code: 'en', file: 'en-US.json' },

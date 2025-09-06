@@ -24,8 +24,10 @@
 </template>
 
 <script setup lang="ts">
+import { NotificationLevel } from '@dto';
+
 const props = withDefaults(defineProps<{
-	type?: 'error' | 'warning' | 'info';
+	type?: 'error' | 'warning' | 'info' | 'success' | NotificationLevel;
 	dismissible?: boolean;
 	cy?: string;
 }>(), {
@@ -43,12 +45,20 @@ const classConfig = computed(() => {
 
 const alertIcon = computed((): string => {
 	switch (props.type) {
-		case 'error':
-			return 'mdi-alert-circle-outline';
-		case 'warning':
-			return 'mdi-alert-outline';
+		case 'success':
+		case NotificationLevel.Success:
+			return 'mdi-check-circle-outline';
 		case 'info':
+		case NotificationLevel.Information:
+		case NotificationLevel.Debug:
 			return 'mdi-information-outline';
+		case 'warning':
+		case NotificationLevel.Warning:
+			return 'mdi-alert-outline';
+		case 'error':
+		case NotificationLevel.Fatal:
+		case NotificationLevel.Error:
+			return 'mdi-alert-circle-outline';
 		default:
 			return 'mdi-close';
 	}

@@ -134,26 +134,24 @@ export default defineNuxtConfig({
 		langDir: 'lang',
 		defaultLocale: 'en-US', // Ensure the SettingsStore is updated as well when changes are made here:
 		locales: [
-			{ text: 'English', code: 'en-US', iso: 'en-US', bcp47Code: 'en', file: 'en-US.json' },
+			{
+				text: 'English',
+				code: 'en-US',
+				file: 'en-US.json',
+			},
 			{
 				text: 'Français',
 				code: 'fr-FR',
-				iso: 'fr-FR',
-				bcp47Code: 'fr',
 				file: 'fr-FR.json',
 			},
 			{
 				text: 'Deutsch',
 				code: 'de-DE',
-				iso: 'de-DE',
-				bcp47Code: 'de',
 				file: 'de-DE.json',
 			},
 			{
 				text: 'Polski',
 				code: 'pl-PL',
-				iso: 'pl-PL',
-				bcp47Code: 'pl',
 				file: 'pl-PL.json',
 			},
 		],

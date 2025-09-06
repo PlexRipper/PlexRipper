@@ -19,5 +19,6 @@ export default defineI18nConfig(() => ({
 		'en-US': defaultNumberFormat,
 		'de-DE': defaultNumberFormat,
 		'fr-FR': defaultNumberFormat,
+		'pl-PL': defaultNumberFormat,
 	},
 }));

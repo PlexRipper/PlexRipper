@@ -7177,7 +7177,7 @@
 								<name>video-quality</name>
 								<children>
 									<concept_node>
-										<name>-1-unknown</name>
+										<name>quality-0-none</name>
 										<description/>
 										<comment/>
 										<translations>
@@ -7200,7 +7200,7 @@
 										</translations>
 									</concept_node>
 									<concept_node>
-										<name>0-none</name>
+										<name>quality-1-unknown</name>
 										<description/>
 										<comment/>
 										<translations>
@@ -7223,7 +7223,7 @@
 										</translations>
 									</concept_node>
 									<concept_node>
-										<name>144-subsd-144p</name>
+										<name>quality-144-subsd-144p</name>
 										<description/>
 										<comment/>
 										<translations>
@@ -7246,7 +7246,7 @@
 										</translations>
 									</concept_node>
 									<concept_node>
-										<name>240-subsd-cif</name>
+										<name>quality-240-subsd-cif</name>
 										<description/>
 										<comment/>
 										<translations>
@@ -7269,7 +7269,7 @@
 										</translations>
 									</concept_node>
 									<concept_node>
-										<name>360-nhd</name>
+										<name>quality-360-nhd</name>
 										<description/>
 										<comment/>
 										<translations>
@@ -7292,7 +7292,7 @@
 										</translations>
 									</concept_node>
 									<concept_node>
-										<name>480-sd</name>
+										<name>quality-480-sd</name>
 										<description/>
 										<comment/>
 										<translations>
@@ -7315,7 +7315,7 @@
 										</translations>
 									</concept_node>
 									<concept_node>
-										<name>576-dvd</name>
+										<name>quality-576-dvd</name>
 										<description/>
 										<comment/>
 										<translations>
@@ -7338,7 +7338,7 @@
 										</translations>
 									</concept_node>
 									<concept_node>
-										<name>720-hd</name>
+										<name>quality-720-hd</name>
 										<description/>
 										<comment/>
 										<translations>
@@ -7361,7 +7361,7 @@
 										</translations>
 									</concept_node>
 									<concept_node>
-										<name>1080-fullhd</name>
+										<name>quality-1080-fullhd</name>
 										<description/>
 										<comment/>
 										<translations>
@@ -7384,7 +7384,7 @@
 										</translations>
 									</concept_node>
 									<concept_node>
-										<name>1440-qhd</name>
+										<name>quality-1440-qhd</name>
 										<description/>
 										<comment/>
 										<translations>
@@ -7407,7 +7407,7 @@
 										</translations>
 									</concept_node>
 									<concept_node>
-										<name>2160-uhd-4k</name>
+										<name>quality-2160-uhd-4k</name>
 										<description/>
 										<comment/>
 										<translations>
@@ -7430,7 +7430,7 @@
 										</translations>
 									</concept_node>
 									<concept_node>
-										<name>4320-uhd-8k</name>
+										<name>quality-4320-uhd-8k</name>
 										<description/>
 										<comment/>
 										<translations>

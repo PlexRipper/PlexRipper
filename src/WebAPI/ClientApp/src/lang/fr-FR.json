@@ -341,7 +341,7 @@
         "alert-display-debug": {
             "error-example": "Une erreur inattendue s'est produite lors du chargement des options de qualité multimédia. Veuillez réessayer ultérieurement.",
             "info-example": "Il s'agit d'un message d'information aléatoire sur les paramètres de qualité des médias. Lorem ipsum dolor sit amet.",
-            "warning-example": "Attention ! Il se peut que la configuration soit incorrecte. Vérification aléatoire : 42XY-LMN."
+            "warning-example": "Attention! Il se peut que la configuration soit incorrecte. Vérification aléatoire: 42XY-LMN."
         }
     },
     "confirmation": {
@@ -433,18 +433,18 @@
             "move-paused": "Déplacement en pause"
         },
         "video-quality": {
-            "-1-unknown": "Unknown",
-            "0-none": "Aucun",
-            "144-subsd-144p": "144p",
-            "240-subsd-cif": "240p",
-            "360-nhd": "360p",
-            "480-sd": "SD (480p)",
-            "576-dvd": "DVD (576p)",
-            "720-hd": "HD (720p)",
-            "1080-fullhd": "Full HD (1080p)",
-            "1440-qhd": "QHD (1440p)",
-            "2160-uhd-4k": "4K (2160p)",
-            "4320-uhd-8k": "8K (4320p)"
+            "quality-1-unknown": "Unknown",
+            "quality-0-none": "Aucun",
+            "quality-144-subsd-144p": "144p",
+            "quality-240-subsd-cif": "240p",
+            "quality-360-nhd": "360p",
+            "quality-480-sd": "SD (480p)",
+            "quality-576-dvd": "DVD (576p)",
+            "quality-720-hd": "HD (720p)",
+            "quality-1080-fullhd": "Full HD (1080p)",
+            "quality-1440-qhd": "QHD (1440p)",
+            "quality-2160-uhd-4k": "4K (2160p)",
+            "quality-4320-uhd-8k": "8K (4320p)"
         }
     },
     "help": {

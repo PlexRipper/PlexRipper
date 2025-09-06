@@ -28,29 +28,29 @@ export function translateVideoQuality(quality?: VideoQuality): string {
 
 	switch (quality) {
 		case VideoQuality.None:
-			return t('general.video-quality.0-none');
+			return t('general.video-quality.quality-0-none');
 		case VideoQuality.Unknown:
-			return t('general.video-quality.-1-unknown');
+			return t('general.video-quality.quality-1-unknown');
 		case VideoQuality.SubSD144P:
-			return t('general.video-quality.144-subsd-144p');
+			return t('general.video-quality.quality-144-subsd-144p');
 		case VideoQuality.SubSDCIF:
-			return t('general.video-quality.240-subsd-cif');
+			return t('general.video-quality.quality-240-subsd-cif');
 		case VideoQuality.NHD:
-			return t('general.video-quality.360-nhd');
+			return t('general.video-quality.quality-360-nhd');
 		case VideoQuality.SD:
-			return t('general.video-quality.480-sd');
+			return t('general.video-quality.quality-480-sd');
 		case VideoQuality.DVD:
-			return t('general.video-quality.576-dvd');
+			return t('general.video-quality.quality-576-dvd');
 		case VideoQuality.HD:
-			return t('general.video-quality.720-hd');
+			return t('general.video-quality.quality-720-hd');
 		case VideoQuality.FullHD:
-			return t('general.video-quality.1080-fullhd');
+			return t('general.video-quality.quality-1080-fullhd');
 		case VideoQuality.QHD:
-			return t('general.video-quality.1440-qhd');
+			return t('general.video-quality.quality-1440-qhd');
 		case VideoQuality.UHD4K:
-			return t('general.video-quality.2160-uhd-4k');
+			return t('general.video-quality.quality-2160-uhd-4k');
 		case VideoQuality.UHD8K:
-			return t('general.video-quality.4320-uhd-8k');
+			return t('general.video-quality.quality-4320-uhd-8k');
 		default:
 			return t('general.error.unknown');
 	}

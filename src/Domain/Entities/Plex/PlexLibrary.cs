@@ -63,40 +63,40 @@ public class PlexLibrary : BaseEntity
     /// Gets the total file size of the nested media.
     /// </summary>
     [Column(Order = 11)]
-    public long MediaSize { get; private set; }
+    public long MediaSize { get; init; }
 
     /// <summary>
     /// Gets the total <see cref="PlexMovie"/> count.
     /// </summary>
     [Column(Order = 12)]
-    public int MovieCount { get; private set; }
+    public int MovieCount { get; init; }
 
     /// <summary>
     /// Gets the total <see cref="PlexTvShow"/> count.
     /// </summary>
     [Column(Order = 13)]
-    public int TvShowCount { get; private set; }
+    public int TvShowCount { get; init; }
 
     /// <summary>
     /// Gets the total <see cref="PlexTvShowSeason"/> count of all <see cref="PlexTvShow">PlexTvShows</see> in this library.
     /// </summary>
     [Column(Order = 14)]
-    public int SeasonCount { get; private set; }
+    public int SeasonCount { get; init; }
 
     /// <summary>
     /// Gets the total <see cref="PlexTvShowEpisode"/> count of all <see cref="PlexTvShow">PlexTvShows</see> in this library.
     /// </summary>
     [Column(Order = 15)]
-    public int EpisodeCount { get; private set; }
+    public int EpisodeCount { get; init; }
 
     [Column(Order = 16)]
-    public int ActorsCount { get; set; }
+    public int ActorsCount { get; init; }
 
     [Column(Order = 17)]
-    public int GenresCount { get; set; }
+    public int GenresCount { get; init; }
 
     [Column(Order = 18)]
-    public int CountriesCount { get; set; }
+    public int CountriesCount { get; init; }
 
     #endregion
 
@@ -161,26 +161,6 @@ public class PlexLibrary : BaseEntity
     /// </summary>
     [NotMapped]
     public bool Outdated => SyncedAt < UpdatedAt;
-
-    public void SetMovieMetaData(int movieCount, long mediaSize)
-    {
-        MovieCount = movieCount;
-        MediaSize = mediaSize;
-
-        TvShowCount = 0;
-        SeasonCount = 0;
-        EpisodeCount = 0;
-    }
-
-    public void SetTvShowMetaData(int tvShowCount, int seasonCount, int episodeCount, long mediaSize)
-    {
-        TvShowCount = tvShowCount;
-        SeasonCount = seasonCount;
-        EpisodeCount = episodeCount;
-        MediaSize = mediaSize;
-
-        MovieCount = 0;
-    }
 
     public override void SetNull()
     {

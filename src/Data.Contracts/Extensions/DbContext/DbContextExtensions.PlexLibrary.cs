@@ -27,24 +27,56 @@ public static partial class DbContextExtensions
             .FirstOrDefaultAsync(CancellationToken.None);
     }
 
-    public static async Task UpdatePlexLibraryById(
+    public static async Task SetLibraryMetaData(
         this IReaparrDbContext dbContext,
-        PlexLibrary plexLibrary,
-        CancellationToken cancellationToken = default
+        int plexLibraryId,
+        int actorsCount,
+        int genreCount,
+        int countryCount
     )
     {
-        var plexLibraryDb = await dbContext
-            .PlexLibraries.AsTracking()
-            .FirstOrDefaultAsync(x => x.Id == plexLibrary.Id, cancellationToken);
+        await dbContext
+            .PlexLibraries.Where(x => x.Id == plexLibraryId)
+            .ExecuteUpdateAsync(p =>
+                p.SetProperty(x => x.ActorsCount, actorsCount)
+                    .SetProperty(x => x.GenresCount, genreCount)
+                    .SetProperty(x => x.CountriesCount, countryCount)
+            );
+    }
 
-        if (plexLibraryDb is null)
-        {
-            _log.Here().Error($"PlexLibrary with Id {plexLibrary.Id} not found in the database");
-            return;
-        }
+    public static async Task SetMovieMediaMetrics(
+        this IReaparrDbContext dbContext,
+        int plexLibraryId,
+        int movieCount,
+        long mediaSize
+    )
+    {
+        await dbContext
+            .PlexLibraries.Where(x => x.Id == plexLibraryId)
+            .ExecuteUpdateAsync(p =>
+                p.SetProperty(x => x.SyncedAt, DateTime.UtcNow)
+                    .SetProperty(x => x.MovieCount, movieCount)
+                    .SetProperty(x => x.MediaSize, mediaSize)
+            );
+    }
 
-        dbContext.Entry(plexLibraryDb).CurrentValues.SetValues(plexLibrary);
-
-        await dbContext.SaveChangesAsync(cancellationToken);
+    public static async Task SetTvShowMediaMetrics(
+        this IReaparrDbContext dbContext,
+        int plexLibraryId,
+        int tvShowCount,
+        int seasonCount,
+        int episodeCount,
+        long mediaSize
+    )
+    {
+        await dbContext
+            .PlexLibraries.Where(x => x.Id == plexLibraryId)
+            .ExecuteUpdateAsync(p =>
+                p.SetProperty(x => x.SyncedAt, DateTime.UtcNow)
+                    .SetProperty(x => x.TvShowCount, tvShowCount)
+                    .SetProperty(x => x.SeasonCount, seasonCount)
+                    .SetProperty(x => x.EpisodeCount, episodeCount)
+                    .SetProperty(x => x.MediaSize, mediaSize)
+            );
     }
 }

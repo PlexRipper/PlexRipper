@@ -47,6 +47,7 @@ public class RefreshPlexMovieLibraryCommandHandler
     )
     {
         var plexLibrary = command.LibraryMetadata.PlexLibrary;
+        var plexLibraryId = command.LibraryMetadata.PlexLibraryId;
 
         if (plexLibrary.Movies.Any())
         {
@@ -96,26 +97,6 @@ public class RefreshPlexMovieLibraryCommandHandler
             }
         );
 
-        // Refresh the PlexLibrary from the database to ensure we have the latest data
-        plexLibrary = await _dbContext.PlexLibraries.GetAsync(plexLibrary.Id, cancellationToken);
-        var mediaSize = plexLibrary!.Movies.Sum(x => x.MediaSize);
-        plexLibrary.SetMovieMetaData(plexLibrary.Movies.Count, mediaSize);
-
-        if (plexLibrary.Movies.Any() && mediaSize == 0)
-        {
-            _log.Here()
-                .Error(
-                    "No media size was found for library {PlexLibraryName} with id: {PlexLibraryId}",
-                    plexLibrary.Title,
-                    plexLibrary.Id
-                );
-        }
-
-        // Mark the library as synced
-        plexLibrary.SyncedAt = DateTime.UtcNow;
-
-        await _dbContext.UpdatePlexLibraryById(plexLibrary, CancellationToken.None);
-
         _log.Here()
             .Information(
                 "Successfully refreshed library {PlexLibraryName} with id: {PlexLibraryId}",
@@ -135,6 +116,10 @@ public class RefreshPlexMovieLibraryCommandHandler
             }
         );
 
-        return Result.Ok(plexLibrary);
+        // Refresh the PlexLibrary from the database to ensure we have the latest data
+        var plexLibraryDb = await _dbContext.PlexLibraries.GetAsync(plexLibrary.Id, cancellationToken);
+        return plexLibraryDb is null
+            ? ResultExtensions.EntityNotFound(nameof(PlexLibrary), plexLibraryId)
+            : Result.Ok(plexLibraryDb);
     }
 }

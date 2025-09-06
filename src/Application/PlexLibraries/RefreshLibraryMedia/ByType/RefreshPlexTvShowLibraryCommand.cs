@@ -121,7 +121,8 @@ public class RefreshPlexTvShowLibraryCommandHandler
             var rawEpisodesData = rawEpisodesDataResult.Value;
 
             // Phase 4 of 5: PlexLibrary media data was parsed successfully.
-            var tvShows = BuildTvShowTree(plexLibrary, plexLibrary.TvShows, rawSeasonData, rawEpisodesData);
+            BuildTvShowTree(plexLibrary, plexLibrary.TvShows, rawSeasonData, rawEpisodesData);
+
             await _progressReporter.SendProgress(
                 new RefreshLibraryProgressUpdate
                 {
@@ -154,28 +155,6 @@ public class RefreshPlexTvShowLibraryCommandHandler
                 return syncResult.ToResult().LogError();
             }
 
-            // Refresh the PlexLibrary from the database to ensure we have the latest data
-            plexLibrary = await _dbContext.PlexLibraries.GetAsync(plexLibrary.Id, cancellationToken);
-            var mediaSize = tvShows.Sum(x => x.MediaSize);
-            plexLibrary!.SetTvShowMetaData(
-                plexLibrary.TvShows.Count,
-                rawSeasonData.Count,
-                rawEpisodesData.Count,
-                mediaSize
-            );
-
-            if (plexLibrary.TvShows.Any() && mediaSize == 0)
-            {
-                _log.Here()
-                    .Error(
-                        "No media size was found for library {PlexLibraryName} with id: {PlexLibraryId}",
-                        plexLibrary.Title,
-                        plexLibrary.Id
-                    );
-            }
-
-            await _dbContext.UpdatePlexLibraryById(plexLibrary, CancellationToken.None);
-
             _log.Here()
                 .Debug(
                     "Finished updating all media in the database for library {PlexLibraryName} in {ElapsedSeconds:F2} seconds",
@@ -205,12 +184,6 @@ public class RefreshPlexTvShowLibraryCommandHandler
                 );
         }
 
-        // Mark the library as synced
-        plexLibrary.SyncedAt = DateTime.UtcNow;
-        await _dbContext
-            .PlexLibraries.Where(x => x.Id == plexLibrary.Id)
-            .ExecuteUpdateAsync(p => p.SetProperty(x => x.SyncedAt, plexLibrary.SyncedAt), CancellationToken.None);
-
         _log.Here()
             .Information(
                 "Successfully refreshed library {PlexLibraryName} with id: {PlexLibraryId}",
@@ -218,10 +191,14 @@ public class RefreshPlexTvShowLibraryCommandHandler
                 plexLibrary.Id
             );
 
-        return Result.Ok(plexLibrary);
+        // Refresh the PlexLibrary from the database to ensure we have the latest data
+        var plexLibraryDb = await _dbContext.PlexLibraries.GetAsync(plexLibrary.Id, cancellationToken);
+        return plexLibraryDb is null
+            ? ResultExtensions.EntityNotFound(nameof(PlexLibrary), plexLibraryId)
+            : Result.Ok(plexLibraryDb);
     }
 
-    private ICollection<PlexTvShow> BuildTvShowTree(
+    private void BuildTvShowTree(
         PlexLibrary plexLibrary,
         ICollection<PlexTvShow> rawTvShowData,
         ICollection<PlexTvShowSeason> rawSeasonData,
@@ -295,8 +272,6 @@ public class RefreshPlexTvShowLibraryCommandHandler
 
             i++;
         }
-
-        return rawTvShowData;
     }
 
     private (List<PlexTvShowSeason> validSeasons, List<PlexTvShowEpisode> validEpisodes) Filter(

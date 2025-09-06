@@ -56,7 +56,6 @@ public class GetLibraryMediaMetadata : BaseEndpoint<GetLibraryMediaMetadataReque
         {
             // First, verify the library exists
             var plexLibrary = await _dbContext.PlexLibraries.GetAsync(req.PlexLibraryId, ct);
-
             if (plexLibrary is null)
             {
                 await SendFluentResult(ResultExtensions.EntityNotFound(nameof(PlexLibrary), req.PlexLibraryId), ct);
@@ -89,6 +88,7 @@ public class GetLibraryMediaMetadata : BaseEndpoint<GetLibraryMediaMetadataReque
 
             var mediaMetadataDTO = new PlexMediaMetadataDTO
             {
+                MediaCount = plexLibrary.MediaCount,
                 Roles = roles,
                 Countries = countries,
                 Genres = genres,
@@ -103,6 +103,10 @@ public class GetLibraryMediaMetadata : BaseEndpoint<GetLibraryMediaMetadataReque
         }
         else
         {
+            var mediaCount = await _dbContext
+                .PlexLibraries.Where(pl => pl.Type == req.MediaType)
+                .SumAsync(pl => pl.MediaCount, ct);
+
             // Get counts efficiently for global metadata
             var roleCount = await _dbContext
                 .PlexLibraries.Where(pl => pl.Type == req.MediaType)
@@ -153,6 +157,7 @@ public class GetLibraryMediaMetadata : BaseEndpoint<GetLibraryMediaMetadataReque
                 Result.Ok(
                     new PlexMediaMetadataDTO
                     {
+                        MediaCount = mediaCount,
                         QualityCount = uniqueQualities.Count,
                         Roles = uniqueRoles,
                         Countries = uniqueCountries,

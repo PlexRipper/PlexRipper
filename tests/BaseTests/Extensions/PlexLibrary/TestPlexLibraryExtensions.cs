@@ -11,8 +11,6 @@ public static class TestPlexLibraryExtensions
             plexLibrary.UpdatedAt = updatedTime;
             plexLibrary.SyncedAt = null;
             plexLibrary.DefaultDestinationId = null;
-            plexLibrary.SetMovieMetaData(0, 0);
-            plexLibrary.SetTvShowMetaData(0, 0, 0, 0);
         }
 
         return plexLibraries;

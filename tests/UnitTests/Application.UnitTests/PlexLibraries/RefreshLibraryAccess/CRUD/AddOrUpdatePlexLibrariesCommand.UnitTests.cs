@@ -103,12 +103,6 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
         {
             plexLibrary.SyncedAt = syncedAtDateTime;
             plexLibrary.DefaultDestinationId = 5;
-
-            if (plexLibrary.Type == PlexMediaType.Movie)
-                plexLibrary.SetMovieMetaData(100, 1000);
-
-            if (plexLibrary.Type == PlexMediaType.TvShow)
-                plexLibrary.SetTvShowMetaData(100, 100, 100, 1000);
         }
 
         await dbContext.SaveChangesAsync(CancellationToken);

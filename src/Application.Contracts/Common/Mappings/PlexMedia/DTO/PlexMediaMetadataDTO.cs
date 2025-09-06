@@ -1,7 +1,14 @@
+using Reaparr.Domain;
+
 namespace Reaparr.Application.Contracts;
 
 public record PlexMediaMetadataDTO
 {
+    /// <summary>
+    /// Gets or sets the total count of media items associated with the <see cref="PlexLibrary"/>.
+    /// </summary>
+    public required int MediaCount { get; init; }
+    
     public required int RoleCount { get; init; }
 
     public required int CountryCount { get; init; }

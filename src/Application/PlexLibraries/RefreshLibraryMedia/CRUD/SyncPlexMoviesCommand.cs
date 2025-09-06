@@ -22,10 +22,7 @@ public class SyncPlexMoviesCommandValidator : AbstractValidator<SyncPlexMoviesCo
 
         RuleFor(x => x.LibraryMetadata.PlexLibrary.Movies).NotNull();
         RuleForEach(x => x.LibraryMetadata.PlexLibrary.Movies)
-            .ChildRules(movie =>
-            {
-                movie.RuleFor(x => x.Key).GreaterThan(0);
-            });
+            .ChildRules(movie => movie.RuleFor(x => x.Key).GreaterThan(0));
 
         RuleFor(x => x.LibraryMetadata.PlexActors).NotNull();
         RuleFor(x => x.LibraryMetadata.PlexGenres).NotNull();
@@ -80,6 +77,12 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
                 .PlexLibraries.AsTracking()
                 .FirstOrDefaultAsync(x => x.Id == plexLibraryId, cancellationToken);
 
+            if (plexLibrary == null)
+                return ResultExtensions.EntityNotFound(nameof(plexLibrary), plexLibraryId).LogError();
+
+            var mediaSize = plexMovies.Sum(x => x.MediaSize);
+            await _dbContext.SetMovieMediaMetrics(plexLibraryId, plexMovies.Count, mediaSize);
+
             var syncActorResult = await SyncMovieActors(
                 plexMovies,
                 command.LibraryMetadata.PlexActors,
@@ -88,8 +91,7 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
                 cancellationToken
             );
 
-            if (syncActorResult.IsSuccess)
-                plexLibrary!.ActorsCount = syncActorResult.Value;
+            var actorsCount = syncActorResult.Value;
 
             var syncGenreResult = await SyncMovieGenres(
                 plexMovies,
@@ -99,8 +101,7 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
                 cancellationToken
             );
 
-            if (syncGenreResult.IsSuccess)
-                plexLibrary!.GenresCount = syncGenreResult.Value;
+            var genresCount = syncGenreResult.Value;
 
             var syncCountriesResult = await SyncMovieCountries(
                 plexMovies,
@@ -110,10 +111,9 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
                 cancellationToken
             );
 
-            if (syncCountriesResult.IsSuccess)
-                plexLibrary!.CountriesCount = syncCountriesResult.Value;
+            var countriesCount = syncCountriesResult.Value;
 
-            await _dbContext.SaveChangesAsync(cancellationToken);
+            await _dbContext.SetLibraryMetaData(plexLibraryId, actorsCount, genresCount, countriesCount);
 
             var mergeResult = Result.Merge(syncActorResult, syncGenreResult, syncCountriesResult);
             if (mergeResult.IsFailed)
@@ -323,8 +323,7 @@ public record CrudMoviesReport
 
     public int DeletedMovies { get; set; }
 
-    public override string ToString() =>
-        $@"
+    public override string ToString() => $@"
         CreatedMovies: {CreatedMovies}
         UpdatedMovies: {UpdatedMovies}
         DeletedMovies: {DeletedMovies}";

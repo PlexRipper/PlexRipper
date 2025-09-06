@@ -214,7 +214,6 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 				genreId: 0,
 				quality: VideoQuality.None,
 			};
-			return actions.requestMedia();
 		},
 		changeAllMediaOverviewType(mediaType: PlexMediaType) {
 			state.mediaType = mediaType;

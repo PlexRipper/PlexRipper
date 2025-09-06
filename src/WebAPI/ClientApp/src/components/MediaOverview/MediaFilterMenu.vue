@@ -200,6 +200,8 @@ function setMetadataFilter({
 }
 
 function clearMetadataFilter() {
-	useSubscription(mediaOverviewStore.clearMetaDataFilter().subscribe());
+	mediaOverviewStore.clearMetaDataFilter();
+
+	useSubscription(mediaOverviewStore.requestMedia().subscribe());
 }
 </script>

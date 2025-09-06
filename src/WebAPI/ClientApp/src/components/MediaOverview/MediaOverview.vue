@@ -261,6 +261,8 @@ onMounted(() => {
 		isDetailView: false,
 	});
 
+	mediaOverviewStore.clearMetaDataFilter();
+
 	// Initial data load
 	useSubscription(mediaOverviewStore.requestMedia().subscribe());
 

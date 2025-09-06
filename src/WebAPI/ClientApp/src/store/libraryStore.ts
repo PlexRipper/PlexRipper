@@ -44,15 +44,22 @@ export const useLibraryStore = defineStore('LibraryStore', () => {
 		},
 		refreshLibrary(libraryId: number) {
 			return plexLibraryApi.getPlexLibraryByIdEndpoint(libraryId).pipe(
-				tap((library) => {
-					if (library.isSuccess && library.value) {
-						const i = state.libraries.findIndex((x) => x.id === libraryId);
-						if (i > -1) {
-							// We freeze library here as it doesn't have to be Vue reactive.
-							state.libraries.splice(i, 1, Object.freeze(library.value));
-						}
-						state.libraries.push(Object.freeze(library.value));
+				map(({ isSuccess, value }) => {
+					if (isSuccess && value) {
+						return value;
 					}
+					return null;
+				}),
+				tap((library) => {
+					if (!library) {
+						return;
+					}
+					const i = state.libraries.findIndex((x) => x.id === libraryId);
+					if (i > -1) {
+						// We freeze library here as it doesn't have to be Vue reactive.
+						state.libraries.splice(i, 1, Object.freeze(library));
+					}
+					state.libraries.push(Object.freeze(library));
 				}),
 			);
 		},

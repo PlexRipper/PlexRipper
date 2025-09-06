@@ -13,7 +13,7 @@ import type { IMediaOverviewSort } from '@composables/event-bus';
 import type { IMetaDataMediaFilter, ISelection } from '@interfaces';
 import { plexLibraryApi, plexMediaApi } from '@api';
 import { map, tap } from 'rxjs/operators';
-import { defer, forkJoin, iif, type Observable, of } from 'rxjs';
+import { defer, forkJoin, type Observable, of } from 'rxjs';
 import { useLibraryStore, useSettingsStore } from '@store';
 import { getVideoQualityColor, translateVideoQuality } from '@composables';
 
@@ -135,16 +135,24 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 
 			return forkJoin([
 				actions.refreshMetaData(),
-				iif(
-					() => state.libraryId === 0,
-					// Using defer to prevent both api calls from being executed
-					defer(() => actions.refreshAllLibraryMediaByType(page, size)),
-					defer(() => actions.refreshLibraryMedia(page, size)))
-					.pipe(tap((data) => {
+				defer(() =>
+					state.libraryId > 0
+						? libraryStore.refreshLibrary(state.libraryId)
+						: of(null),
+				),
+				defer(() =>
+					state.libraryId === 0
+						? actions.refreshAllLibraryMediaByType(page, size)
+						: actions.refreshLibraryMedia(page, size),
+				).pipe(
+					tap((data) => {
 						actions.setMedia(data, state.mediaType);
-						state.loading = false;
-					}))])
-				.pipe(map(([_, media]) => media));
+					}),
+				),
+			]).pipe(
+				map(([_, __, media]) => media),
+				tap(() => state.loading = false),
+			);
 		},
 		setMedia(data: PlexMediaStatisticsDTO | null, mediaType: PlexMediaType) {
 			if (data) {

@@ -1,19 +1,21 @@
-import { cloneDeep, isEqual, orderBy, sortBy, isNumber } from 'lodash-es';
-import { defineStore, acceptHMRUpdate } from 'pinia';
+import { cloneDeep, isEqual, isNumber, orderBy, sortBy, uniqueId } from 'lodash-es';
+import { acceptHMRUpdate, defineStore } from 'pinia';
 import { get } from '@vueuse/core';
 import {
-	PlexMediaType,
-	ViewMode,
 	type PlexMediaMetadataDTO,
 	type PlexMediaSlimDTO,
 	type PlexMediaStatisticsDTO,
+	PlexMediaType,
+	VideoQuality,
+	ViewMode,
 } from '@dto';
 import type { IMediaOverviewSort } from '@composables/event-bus';
 import type { IMetaDataMediaFilter, ISelection } from '@interfaces';
 import { plexLibraryApi, plexMediaApi } from '@api';
 import { map, tap } from 'rxjs/operators';
-import { iif, defer, type Observable, of, forkJoin } from 'rxjs';
-import { useSettingsStore, useLibraryStore } from '@store';
+import { defer, forkJoin, iif, type Observable, of } from 'rxjs';
+import { useLibraryStore, useSettingsStore } from '@store';
+import { getVideoQualityColor, translateVideoQuality } from '@composables';
 
 interface IMediaOverviewStoreState {
 	libraryId: number;
@@ -64,14 +66,17 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 			countryId: 0,
 			roleId: 0,
 			genreId: 0,
+			quality: VideoQuality.None,
 		},
 		metadataList: {
 			roleCount: 0,
 			countryCount: 0,
 			genreCount: 0,
+			qualityCount: 0,
 			roles: [],
 			countries: [],
 			genres: [],
+			qualities: [],
 		},
 	};
 
@@ -168,6 +173,7 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 			countryId,
 			roleId,
 			genreId,
+			quality,
 		}: Partial<IMetaDataMediaFilter>): Observable<PlexMediaStatisticsDTO | null> {
 			if (isNumber(countryId)) {
 				state.metadata.countryId = countryId;
@@ -181,12 +187,22 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 				state.metadata.genreId = genreId;
 			}
 
+			if (quality) {
+				state.metadata.quality = quality;
+			}
+
 			return actions.requestMedia();
 		},
 		unsetMetaData(key: keyof IMetaDataMediaFilter): Observable<PlexMediaStatisticsDTO | null> {
-			if (key in state.metadata) {
-				// Reset the metadata key to 0
-				state.metadata[key] = 0;
+			switch (key) {
+				case 'countryId':
+				case 'roleId':
+				case 'genreId':
+					state.metadata[key] = 0;
+					break;
+				case 'quality':
+					state.metadata[key] = VideoQuality.None;
+					break;
 			}
 
 			return actions.requestMedia();
@@ -196,6 +212,7 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 				countryId: 0,
 				roleId: 0,
 				genreId: 0,
+				quality: VideoQuality.None,
 			};
 			return actions.requestMedia();
 		},
@@ -341,13 +358,15 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 		getGenres: computed(() => sortBy(state.metadataList.genres, (x) => x.name)),
 		getRoles: computed(() => sortBy(state.metadataList.roles, (x) => x.name)),
 		getCountries: computed(() => sortBy(state.metadataList.countries, (x) => x.name)),
+		getQualities: computed(() => state.metadataList.qualities),
 		getFilterChips: computed(() => {
-			const result: { text: string; key: keyof IMetaDataMediaFilter }[] = [];
+			const result: { text: string; key: keyof IMetaDataMediaFilter; color?: string; id: string }[] = [];
 
 			if (state.metadata.countryId > 0) {
 				result.push({
 					text: state.metadataList.countries.find((x) => x.id === state.metadata.countryId)?.name ?? '',
 					key: 'countryId',
+					id: uniqueId(),
 				});
 			}
 
@@ -355,6 +374,7 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 				result.push({
 					text: state.metadataList.roles.find((x) => x.id === state.metadata.roleId)?.name ?? '',
 					key: 'roleId',
+					id: uniqueId(),
 				});
 			}
 
@@ -362,6 +382,17 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 				result.push({
 					text: state.metadataList.genres.find((x) => x.id === state.metadata.genreId)?.name ?? '',
 					key: 'genreId',
+					id: uniqueId(),
+				});
+			}
+
+			if (state.metadata.quality != VideoQuality.None) {
+				const quality = state.metadataList.qualities.find((x) => x.quality === state.metadata.quality)?.quality;
+				result.push({
+					text: translateVideoQuality(quality),
+					key: 'quality',
+					color: getVideoQualityColor(quality),
+					id: uniqueId(),
 				});
 			}
 

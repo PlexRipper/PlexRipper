@@ -12,14 +12,13 @@
 			</IconButton>
 		</template>
 		<template #append>
-			<q-chip
-				v-for="(chip, index) in mediaOverviewStore.getFilterChips"
-				:key="index"
+			<QGlowChip
+				v-for="chip in mediaOverviewStore.getFilterChips"
+				:key="chip.id"
+				:value="chip.text"
+				:color="chip.color"
 				removable
-				outline
-				@remove="unsetMetaData(chip.key)">
-				{{ chip.text }}
-			</q-chip>
+				@remove="unsetMetaData(chip.key)" />
 			<q-icon
 				v-if="mediaOverviewStore.filterQuery !== ''"
 				name="mdi-close"

@@ -15,12 +15,12 @@ export interface AppCredentialsDTO {
   userName: string;
 }
 
-/** @example {"username":"ReaparrRocks","password":"R€Aℙℙ@RR69","rememberMe":false} */
+/** @example {"username":"ReaparrRocks","password":"R€Aℙℙ@rr69","rememberMe":false} */
 export interface AppUserLoginEndpointRequest {
   /**
    * @minLength 1
-   * @default "R€Aℙℙ@RR69"
-   * @example "R€Aℙℙ@RR69"
+   * @default "R€Aℙℙ@rr69"
+   * @example "R€Aℙℙ@rr69"
    */
   password: string;
   /**
@@ -711,6 +711,9 @@ export interface PlexMediaMetadataDTO {
   /** @format int32 */
   genreCount: number;
   genres: PlexGenreDTO[];
+  qualities: PlexQualityDTO[];
+  /** @format int32 */
+  qualityCount: number;
   /** @format int32 */
   roleCount: number;
   roles: PlexRoleDTO[];
@@ -791,6 +794,13 @@ export enum PlexMediaType {
   OtherVideos = "OtherVideos",
   Games = "Games",
   Unknown = "Unknown",
+}
+
+export interface PlexQualityDTO {
+  /** @format int32 */
+  count: number;
+  name: string;
+  quality: VideoQuality;
 }
 
 export interface PlexRoleDTO {
@@ -1288,11 +1298,11 @@ export interface SyncServerMediaProgress {
   serverId: number;
 }
 
-/** @example {"username":"ReaparrRocks","password":"R€Aℙℙ@RR69"} */
+/** @example {"username":"ReaparrRocks","password":"R€Aℙℙ@rr69"} */
 export interface UpdateCredentialsEndpointRequest {
   /**
    * @minLength 8
-   * @example "R€Aℙℙ@RR69"
+   * @example "R€Aℙℙ@rr69"
    */
   password?: string | null;
   /**
@@ -1357,6 +1367,7 @@ export enum VideoQuality {
   QHD = "QHD",
   UHD4K = "UHD_4K",
   UHD8K = "UHD_8K",
+  None = "None",
 }
 
 export enum ViewMode {

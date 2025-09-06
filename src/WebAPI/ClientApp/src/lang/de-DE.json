@@ -333,7 +333,8 @@
             "meta-data": {
                 "country": "Land",
                 "genre": "Genre",
-                "roles": "Rollen"
+                "roles": "Rollen",
+                "quality": "Qualität"
             }
         }
     },
@@ -424,6 +425,20 @@
             "move-error": "Verschiebe Fehler",
             "move-finished": "Verschieben abgeschlossen",
             "move-paused": "Verschieben pausiert"
+        },
+        "video-quality": {
+            "-1-unknown": "Unknown",
+            "0-none": "Keiner",
+            "144-subsd-144p": "144p",
+            "240-subsd-cif": "240p",
+            "360-nhd": "360p",
+            "480-sd": "SD (480p)",
+            "576-dvd": "DVD (576p)",
+            "720-hd": "HD (720p)",
+            "1080-fullhd": "Full HD (1080p)",
+            "1440-qhd": "QHD (1440p)",
+            "2160-uhd-4k": "4K (2160p)",
+            "4320-uhd-8k": "8K (4320p)"
         }
     },
     "help": {

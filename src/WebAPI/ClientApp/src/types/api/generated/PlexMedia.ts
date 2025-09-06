@@ -11,7 +11,13 @@
 
 import type { RequestParams } from "./http-client";
 
-import type { PlexMediaDTO, PlexMediaSlimDTO, PlexMediaStatisticsDTO, PlexMediaType } from "./data-contracts";
+import type {
+  PlexMediaDTO,
+  PlexMediaSlimDTO,
+  PlexMediaStatisticsDTO,
+  PlexMediaType,
+  VideoQuality,
+} from "./data-contracts";
 
 import { apiCheckPipe } from "@api/base";
 import Axios from "axios";
@@ -48,6 +54,8 @@ export class PlexMedia {
        * @default 0
        */
       page: number;
+      /** @default -1 */
+      quality: VideoQuality;
       /**
        * @format int32
        * @default 0
@@ -144,6 +152,8 @@ export class PlexMediaPaths {
      * @default 0
      */
     page: number;
+    /** @default -1 */
+    quality: VideoQuality;
     /**
      * @format int32
      * @default 0

@@ -102,6 +102,24 @@
 							<q-item-section>{{ role.name }}</q-item-section>
 						</q-item>
 					</template>
+
+					<!-- Show Quality Sub-Menu -->
+					<template v-if="menuIndex === MediaMetaDataTypes.Quality">
+						<q-item
+							v-for="qualityDto in mediaOverviewStore.getQualities.filter(x => x.name.toLowerCase().includes(menuFilterQuery.toLowerCase()))"
+							:key="qualityDto.name"
+							clickable
+							@click="setMetadataFilter({ quality: qualityDto.quality })">
+							<q-item-section avatar>
+								<q-icon
+									v-if="qualityDto.quality === mediaOverviewStore.metadata.quality"
+									name="mdi-check" />
+							</q-item-section>
+							<q-item-section>
+								<MediaVideoQuality :quality="qualityDto.quality" />
+							</q-item-section>
+						</q-item>
+					</template>
 				</QScroll>
 			</template>
 		</q-list>
@@ -113,6 +131,7 @@ import { get, set } from '@vueuse/core';
 import { useMediaOverviewStore } from '@store';
 import { MediaMetaDataTypes } from '@enums';
 import IconButton from '@components/Buttons/IconButton.vue';
+import type { VideoQuality } from '@dto';
 
 const menuIndex = ref<MediaMetaDataTypes>(MediaMetaDataTypes.None);
 const mediaOverviewStore = useMediaOverviewStore();
@@ -140,6 +159,10 @@ const menuItems: { text: string; type: MediaMetaDataTypes }[] = [
 		text: t('components.media-filter-menu.meta-data.roles'),
 		type: MediaMetaDataTypes.Roles,
 	},
+	{
+		text: t('components.media-filter-menu.meta-data.quality'),
+		type: MediaMetaDataTypes.Quality,
+	},
 ];
 
 function onMenuOpen(category: MediaMetaDataTypes) {
@@ -161,16 +184,19 @@ function setMetadataFilter({
 	countryId,
 	roleId,
 	genreId,
+	quality,
 }: {
 	countryId?: number;
 	roleId?: number;
 	genreId?: number;
+	quality?: VideoQuality;
 }) {
 	useSubscription(
 		mediaOverviewStore.setMetaData({
 			countryId,
 			roleId,
 			genreId,
+			quality,
 		}).subscribe());
 }
 

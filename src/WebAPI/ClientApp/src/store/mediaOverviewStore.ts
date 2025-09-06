@@ -69,6 +69,7 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 			quality: VideoQuality.None,
 		},
 		metadataList: {
+			mediaCount: 0,
 			roleCount: 0,
 			countryCount: 0,
 			genreCount: 0,
@@ -306,6 +307,9 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 		}),
 		hasNoSearchResults: computed((): boolean => {
 			return state.filterQuery != '' && get(getters.getMediaItems).length === 0;
+		}),
+		hasNoFilterResults: computed((): boolean => {
+			return state.metadataList.mediaCount > 0 && get(getters.getMediaItems).length === 0;
 		}),
 		allMediaMode: computed(() => state.libraryId === 0),
 		library: computed(() => libraryStore.getLibrary(state.libraryId)),

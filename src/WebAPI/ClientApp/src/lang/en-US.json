@@ -80,7 +80,8 @@
             "library-not-yet-synced": "The library media data has not yet been synced. Please wait or refresh now.",
             "steps-remaining": "Step {index} of {total}:",
             "no-search-results": "No media found that contains \"{query}\"",
-            "no-media-items-available": "No media items found!"
+            "no-media-items-available": "No media items found!",
+            "no-filter-results": "No media results match the current filter settings. Please adjust or reset your filters to display available results"
         },
         "navigation-drawer": {
             "accounts": "Accounts",
@@ -336,6 +337,11 @@
                 "roles": "Roles",
                 "quality": "Quality"
             }
+        },
+        "alert-display-debug": {
+            "error-example": "An unexpected error occurred while loading media quality options. Please try again later.",
+            "info-example": "This is a random info message about media quality settings. Lorem ipsum dolor sit amet.",
+            "warning-example": "Heads up! Something might not be configured correctly. Random check: 42XY-LMN."
         }
     },
     "confirmation": {
@@ -800,7 +806,8 @@
             },
             "buttons": {
                 "main-header": "Buttons Debug",
-                "media-quality-header": "Media Quality Display"
+                "media-quality-header": "Media Quality Display",
+                "alert-display-header": "Alert Display Header"
             }
         },
         "empty": {

@@ -25,11 +25,11 @@
 
 <script setup lang="ts">
 const props = withDefaults(defineProps<{
-	type?: 'error' | 'warning' | 'info' | string;
+	type?: 'error' | 'warning' | 'info';
 	dismissible?: boolean;
 	cy?: string;
 }>(), {
-	type: '',
+	type: 'info',
 	dismissible: false,
 	cy: '',
 });
@@ -61,7 +61,7 @@ const alertIcon = computed((): string => {
 .q-alert {
   display: block;
   font-size: 16px;
-  margin: 0;
+  margin: 1rem;
   padding: 16px;
   position: relative;
   transition: 0.3s cubic-bezier(0.25, 0.8, 0.5, 1);
@@ -74,13 +74,13 @@ const alertIcon = computed((): string => {
   }
 
   &--warning {
-    border-color: #fff8e1;
+    border-color: #ff6f00;
     color: #ff6f00;
   }
 
   &--info {
     border-color: #e8f5e9;
-    color: #1b5e20;
+    color: #e8f5e9;
   }
 
   .q-alert-wrapper {

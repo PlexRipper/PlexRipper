@@ -711,6 +711,8 @@ export interface PlexMediaMetadataDTO {
   /** @format int32 */
   genreCount: number;
   genres: PlexGenreDTO[];
+  /** @format int32 */
+  mediaCount: number;
   qualities: PlexQualityDTO[];
   /** @format int32 */
   qualityCount: number;

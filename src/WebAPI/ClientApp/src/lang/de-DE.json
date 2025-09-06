@@ -80,7 +80,8 @@
             "library-not-yet-synced": "Die Mediendaten der Bibliothek wurden noch nicht synchronisiert. Bitte warten Sie oder aktualisieren Sie jetzt.",
             "steps-remaining": "Schritt {index} von {total}:",
             "no-search-results": "Es wurden keine Medien gefunden, die \"{query}\" enthalten.",
-            "no-media-items-available": "Keine Medienelemente gefunden!"
+            "no-media-items-available": "Keine Medienelemente gefunden!",
+            "no-filter-results": "Keine Medienergebnisse entsprechen den aktuellen Filtereinstellungen. Bitte passen Sie Ihre Filter an oder setzen Sie sie zurück, um die verfügbaren Ergebnisse anzuzeigen"
         },
         "navigation-drawer": {
             "accounts": "Konten",
@@ -336,6 +337,11 @@
                 "roles": "Rollen",
                 "quality": "Qualität"
             }
+        },
+        "alert-display-debug": {
+            "error-example": "Beim Laden der Medienqualitätsoptionen ist ein unerwarteter Fehler aufgetreten. Bitte versuchen Sie es später noch einmal.",
+            "info-example": "Dies ist eine zufällige Informationsmeldung zu den Medienqualitätseinstellungen. Lorem ipsum dolor sit amet.",
+            "warning-example": "Achtung! Möglicherweise ist etwas nicht richtig konfiguriert. Stichprobenprüfung: 42XY-LMN."
         }
     },
     "confirmation": {
@@ -800,7 +806,8 @@
             },
             "buttons": {
                 "main-header": "Schaltflächen Debug",
-                "media-quality-header": "Medienqualitätsanzeige"
+                "media-quality-header": "Medienqualitätsanzeige",
+                "alert-display-header": "Kopfzeile der Alarmanzeige"
             }
         },
         "empty": {

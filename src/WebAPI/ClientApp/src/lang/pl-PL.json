@@ -80,7 +80,8 @@
             "library-not-yet-synced": "Dane multimediów bibliotecznych nie zostały jeszcze zsynchronizowane. Proszę czekać lub odświeżyć teraz.",
             "steps-remaining": "Krok {index} z {total}:",
             "no-search-results": "Nie znaleziono nośników zawierających „{query}”",
-            "no-media-items-available": "Nie znaleziono żadnych elementów multimedialnych!"
+            "no-media-items-available": "Nie znaleziono żadnych elementów multimedialnych!",
+            "no-filter-results": "Brak wyników wyszukiwania multimediów zgodnych z aktualnymi ustawieniami filtra. Dostosuj lub zresetuj filtry, aby wyświetlić dostępne wyniki."
         },
         "navigation-drawer": {
             "accounts": "Konta",
@@ -336,6 +337,11 @@
                 "roles": "Role",
                 "quality": "Jakość"
             }
+        },
+        "alert-display-debug": {
+            "error-example": "Wystąpił nieoczekiwany błąd podczas ładowania opcji jakości multimediów. Spróbuj ponownie później.",
+            "info-example": "To jest losowa wiadomość informacyjna na temat ustawień jakości multimediów. Lorem ipsum dolor sit amet.",
+            "warning-example": "Uwaga! Coś może być niepoprawnie skonfigurowane. Losowe sprawdzenie: 42XY-LMN."
         }
     },
     "confirmation": {
@@ -800,7 +806,8 @@
             },
             "buttons": {
                 "main-header": "Przyciski Debugowania",
-                "media-quality-header": "Wyświetlacz jakości multimediów"
+                "media-quality-header": "Wyświetlacz jakości multimediów",
+                "alert-display-header": "Nagłówek wyświetlacza alertów"
             }
         },
         "empty": {

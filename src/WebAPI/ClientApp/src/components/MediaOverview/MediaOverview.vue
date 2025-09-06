@@ -38,40 +38,32 @@
 		</div>
 		<div class="media-overview-content">
 			<!-- Media Overview -->
-			<template v-if="!mediaOverviewStore.loading && mediaOverviewStore.itemsLength">
-				<template v-if="mediaOverviewStore.hasNoSearchResults">
-					<QAlert type="warning">
-						<QText
-							:value="t('components.media-overview.no-search-results', { query: mediaOverviewStore.filterQuery })" />
-					</QAlert>
-				</template>
-				<template v-else>
-					<!--	Data table display	-->
-					<QRow align="start">
-						<QCol>
-							<template v-if="mediaOverviewStore.getMediaViewMode === ViewMode.Table">
-								<MediaTable
-									:disable-hover-click="mediaType !== PlexMediaType.TvShow"
-									:rows="mediaOverviewStore.getMediaItems"
-									is-scrollable />
-							</template>
+			<template v-if="!mediaOverviewStore.loading && mediaOverviewStore.itemsLength && !mediaOverviewStore.hasNoSearchResults">
+				<!--	Data table display	-->
+				<QRow align="start">
+					<QCol>
+						<template v-if="mediaOverviewStore.getMediaViewMode === ViewMode.Table">
+							<MediaTable
+								:disable-hover-click="mediaType !== PlexMediaType.TvShow"
+								:rows="mediaOverviewStore.getMediaItems"
+								is-scrollable />
+						</template>
 
-							<!-- Poster display -->
-							<template v-else>
-								<PosterTable
-									:items="mediaOverviewStore.getMediaItems"
-									:library-id="libraryId"
-									:media-type="mediaType" />
-							</template>
-						</QCol>
-						<!-- Alphabet Navigation -->
-						<AlphabetNavigation />
-					</QRow>
-				</template>
+						<!-- Poster display -->
+						<template v-else>
+							<PosterTable
+								:items="mediaOverviewStore.getMediaItems"
+								:library-id="libraryId"
+								:media-type="mediaType" />
+						</template>
+					</QCol>
+					<!-- Alphabet Navigation -->
+					<AlphabetNavigation />
+				</QRow>
 			</template>
 
-			<!-- No Media Overview -->
-			<template v-else-if="!mediaOverviewStore.loading">
+			<!-- No Media Overview - Error Messages -->
+			<template v-else>
 				<QRow
 					class="q-mt-md"
 					justify="center"
@@ -80,16 +72,22 @@
 						<QAlert
 							type="warning">
 							<template v-if="mediaOverviewStore.allMediaMode">
-								{{ $t('components.media-overview.no-media-items-available') }}
+								{{ t('components.media-overview.no-media-items-available') }}
+							</template>
+							<template v-else-if="mediaOverviewStore.hasNoSearchResults">
+								{{ t('components.media-overview.no-search-results', { query: mediaOverviewStore.filterQuery }) }}
+							</template>
+							<template v-else-if="mediaOverviewStore.hasNoFilterResults">
+								{{ t('components.media-overview.no-filter-results') }}
 							</template>
 							<template v-else-if="library?.syncedAt === null">
-								{{ $t('components.media-overview.library-not-yet-synced') }}
+								{{ t('components.media-overview.library-not-yet-synced') }}
 							</template>
 							<template v-else-if="!mediaOverviewStore.itemsLength">
-								{{ $t('components.media-overview.no-data') }}
+								{{ t('components.media-overview.no-data') }}
 							</template>
 							<template v-else>
-								{{ $t('components.media-overview.could-not-display') }}
+								{{ t('components.media-overview.could-not-display') }}
 							</template>
 						</QAlert>
 					</QCol>

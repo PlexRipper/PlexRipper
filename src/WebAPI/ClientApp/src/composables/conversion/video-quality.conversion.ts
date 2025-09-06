@@ -1,5 +1,4 @@
 import { VideoQuality } from '@dto';
-import { useI18n } from 'vue-i18n';
 
 const qualityColorMap: Record<VideoQuality, string> = {
 	[VideoQuality.None]: 'black',
@@ -24,7 +23,8 @@ export function getVideoQualityColor(quality?: VideoQuality): string {
 }
 
 export function translateVideoQuality(quality?: VideoQuality): string {
-	const { t } = useI18n();
+	const { $i18n } = useNuxtApp();
+	const { t } = $i18n;
 
 	switch (quality) {
 		case VideoQuality.None:

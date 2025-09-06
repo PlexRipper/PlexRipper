@@ -1,8 +1,8 @@
 import { DownloadStatus } from '@dto';
-import { useI18n } from 'vue-i18n';
 
 export function translateDownloadStatus(status: DownloadStatus) {
-	const { t } = useI18n();
+	const { $i18n } = useNuxtApp();
+	const { t } = $i18n;
 
 	switch (status) {
 		case DownloadStatus.Unknown:

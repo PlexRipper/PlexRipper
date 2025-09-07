@@ -4,7 +4,7 @@ ARG PORT=7000
 
 # Stage 1 - Build the Nuxt front-end
 # TODO: bun 1.2.1 breaks build so its pinned to this for now
-FROM oven/bun:1.1.45-alpine AS client-build
+FROM --platform=$BUILDPLATFORM oven/bun:1.1.45-alpine AS client-build
 
 ARG PORT
 
@@ -24,7 +24,7 @@ COPY ./src/WebAPI/ClientApp/ ./
 RUN bun run generate --fail-on-error
     
 # Stage 2 - Build the .NET back-end
-FROM  mcr.microsoft.com/dotnet/sdk:9.0 AS back-end
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:9.0 AS back-end
 
 WORKDIR /src
 
@@ -79,7 +79,7 @@ RUN dotnet publish "WebAPI.csproj" -c Release -o /app/publish \
     -p:UseAppHost=false
 
 # Stage 3 - Runtime Image
-FROM ghcr.io/linuxserver/baseimage-alpine:3.20 AS final
+FROM --platform=$TARGETPLATFORM ghcr.io/linuxserver/baseimage-alpine:3.20 AS final
 
 ARG VERSION
 ARG INFORMATIONAL_VERSION

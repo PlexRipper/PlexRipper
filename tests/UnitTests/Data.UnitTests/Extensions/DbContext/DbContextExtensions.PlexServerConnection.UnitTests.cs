@@ -188,6 +188,240 @@ public class DbContextExtensionsPlexServerConnectionUnitTests : BaseUnitTest
     }
 
     [Fact]
+    public async Task ShouldPreferHttpsConnection_WhenAvailable()
+    {
+        // Arrange
+        var seed = await SetupDatabase(
+            19501,
+            cfg =>
+            {
+                cfg.PlexServerCount = 1;
+                cfg.PlexServerConnectionPerServerCount = 0;
+            }
+        );
+
+        var db = IDbContext;
+        var server = await db.PlexServers.FirstAsync(CancellationToken);
+
+        var httpConn = FakeData.GetPlexServerConnections(seed).Generate();
+        var httpsConn = new PlexServerConnection
+        {
+            Protocol = "https",
+            Address = httpConn.Address,
+            Port = httpConn.Port,
+            Url = $"https://{httpConn.Address}:{httpConn.Port}",
+            Local = false,
+            Relay = false,
+            IPv4 = true,
+            IPv6 = false,
+            IsCustom = false,
+            PlexServerId = server.Id,
+        };
+
+        httpConn = new PlexServerConnection
+        {
+            Protocol = "http",
+            Address = httpConn.Address,
+            Port = httpConn.Port,
+            Url = $"http://{httpConn.Address}:{httpConn.Port}",
+            Local = false,
+            Relay = false,
+            IPv4 = true,
+            IPv6 = false,
+            IsCustom = false,
+            PlexServerId = server.Id,
+        };
+
+        var statusHttps = FakeData.GetPlexServerStatus(seed).Generate();
+        statusHttps.PlexServerId = server.Id;
+        // set connection id after save, but attach now
+        httpsConn.LatestConnectionStatus = statusHttps;
+
+        var statusHttp = FakeData.GetPlexServerStatus(seed).Generate();
+        statusHttp.PlexServerId = server.Id;
+        httpConn.LatestConnectionStatus = statusHttp;
+
+        db.PlexServerConnections.AddRange(httpsConn, httpConn);
+        await db.SaveChangesAsync(CancellationToken);
+
+        // Now that connection ids exist, set FK backrefs for statuses
+        statusHttps.PlexServerConnectionId = httpsConn.Id;
+        statusHttp.PlexServerConnectionId = httpConn.Id;
+        await db.SaveChangesAsync(CancellationToken);
+
+        // Act
+        var result = await db.ChoosePlexServerConnection(server.Id, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Protocol.ShouldBe("https");
+    }
+
+    [Fact]
+    public async Task ShouldPreferLocalConnection_WhenAvailable()
+    {
+        // Arrange
+        var seed = await SetupDatabase(
+            19502,
+            cfg =>
+            {
+                cfg.PlexServerCount = 1;
+                cfg.PlexServerConnectionPerServerCount = 0;
+            }
+        );
+
+        var db = IDbContext;
+        var server = await db.PlexServers.FirstAsync(CancellationToken);
+
+        var publicConn = FakeData.GetPlexServerConnections(seed).Generate();
+        publicConn.PlexServerId = server.Id;
+        publicConn = new PlexServerConnection
+        {
+            Protocol = "http",
+            Address = publicConn.Address,
+            Port = publicConn.Port,
+            Url = $"http://{publicConn.Address}:{publicConn.Port}",
+            Local = false,
+            Relay = false,
+            IPv4 = true,
+            IPv6 = false,
+            IsCustom = false,
+            PlexServerId = server.Id,
+        };
+
+        var localConn = new PlexServerConnection
+        {
+            Protocol = "http",
+            Address = "127.0.0.1",
+            Port = 32400,
+            Url = "http://127.0.0.1:32400",
+            Local = true,
+            Relay = false,
+            IPv4 = true,
+            IPv6 = false,
+            IsCustom = false,
+            PlexServerId = server.Id,
+        };
+
+        var statusPublic = FakeData.GetPlexServerStatus(seed).Generate();
+        statusPublic.PlexServerId = server.Id;
+        var statusLocal = FakeData.GetPlexServerStatus(seed).Generate();
+        statusLocal.PlexServerId = server.Id;
+        publicConn.LatestConnectionStatus = statusPublic;
+        localConn.LatestConnectionStatus = statusLocal;
+
+        db.PlexServerConnections.AddRange(publicConn, localConn);
+        await db.SaveChangesAsync(CancellationToken);
+
+        // Link statuses with saved connection ids
+        statusPublic.PlexServerConnectionId = publicConn.Id;
+        statusLocal.PlexServerConnectionId = localConn.Id;
+        await db.SaveChangesAsync(CancellationToken);
+
+        // Act
+        var result = await db.ChoosePlexServerConnection(server.Id, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Local.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task ShouldReturn504GatewayTimeout_WhenNoOnlineConnections()
+    {
+        // Arrange
+        var seed = await SetupDatabase(
+            19503,
+            cfg =>
+            {
+                cfg.PlexServerCount = 1;
+                cfg.PlexServerConnectionPerServerCount = 0;
+            }
+        );
+        var db = IDbContext;
+        var server = await db.PlexServers.FirstAsync(CancellationToken);
+
+        var conn = FakeData.GetPlexServerConnections(seed).Generate(2);
+        foreach (var c in conn)
+        {
+            c.PlexServerId = server.Id;
+            var status = FakeData.GetPlexServerStatus(seed, isSuccessful: false).Generate();
+            status.PlexServerId = server.Id;
+            c.LatestConnectionStatus = status;
+        }
+        db.PlexServerConnections.AddRange(conn);
+        await db.SaveChangesAsync(CancellationToken);
+
+        // Act
+        var result = await db.ChoosePlexServerConnection(server.Id, CancellationToken);
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        result.ToResult().Has504GatewayTimeoutError().ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task ShouldPreferDirectOverPlexRelay_WhenBothAvailable()
+    {
+        // Arrange
+        var seed = await SetupDatabase(
+            19504,
+            cfg =>
+            {
+                cfg.PlexServerCount = 1;
+                cfg.PlexServerConnectionPerServerCount = 0;
+            }
+        );
+        var db = IDbContext;
+        var server = await db.PlexServers.FirstAsync(CancellationToken);
+
+        var relay = new PlexServerConnection
+        {
+            Protocol = "http",
+            Address = "relay.plex.direct",
+            Port = 32400,
+            Url = "http://relay.plex.direct:32400",
+            Local = false,
+            Relay = true,
+            IPv4 = true,
+            IPv6 = false,
+            IsCustom = false,
+            PlexServerId = server.Id,
+        };
+        var direct = new PlexServerConnection
+        {
+            Protocol = "http",
+            Address = "public.example.com",
+            Port = 32400,
+            Url = "http://public.example.com:32400",
+            Local = false,
+            Relay = false,
+            IPv4 = true,
+            IPv6 = false,
+            IsCustom = false,
+            PlexServerId = server.Id,
+        };
+
+        var relayStatus = FakeData.GetPlexServerStatus(seed).Generate();
+        relayStatus.PlexServerId = server.Id;
+        relay.LatestConnectionStatus = relayStatus;
+
+        var directStatus = FakeData.GetPlexServerStatus(seed).Generate();
+        directStatus.PlexServerId = server.Id;
+        direct.LatestConnectionStatus = directStatus;
+
+        db.PlexServerConnections.AddRange(relay, direct);
+        await db.SaveChangesAsync(CancellationToken);
+
+        // Act
+        var result = await db.ChoosePlexServerConnection(server.Id, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Url.ShouldBe(direct.Url);
+    }
+
+    [Fact]
     public async Task ShouldReturnNonMainAccountToken_WhenAvailable()
     {
         // Arrange

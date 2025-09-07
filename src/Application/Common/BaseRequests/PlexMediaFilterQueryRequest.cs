@@ -49,6 +49,10 @@ public abstract record PlexMediaFilterQueryRequest
     [DefaultValue(0)]
     public int ActorId { get; init; }
 
+    /// <summary>
+    /// Optional quality filter. Defaults to <see cref="VideoQuality.None"/> which applies no filter.
+    /// Any other value filters media to the provided quality.
+    /// </summary>
     [QueryParam, BindFrom("quality")]
     [DefaultValue(VideoQuality.None)]
     public VideoQuality Quality { get; init; }

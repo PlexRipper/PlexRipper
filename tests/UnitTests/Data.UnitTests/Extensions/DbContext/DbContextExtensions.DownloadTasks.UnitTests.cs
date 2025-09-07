@@ -285,4 +285,157 @@ public class DbContextExtensionsDownloadTasksUnitTests : BaseUnitTest
         downloadTaskDb.PlexServerId.ShouldBe(testDownloadTask.PlexServerId);
         downloadTaskDb.PlexLibraryId.ShouldBe(testDownloadTask.PlexLibraryId);
     }
+
+    [Fact]
+    public async Task ShouldBuildDownloadUrl_WithHttpsConnectionAndToken()
+    {
+        // Arrange
+        var seed = await SetupDatabase(
+            561231,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexServerConnectionPerServerCount = 0;
+                config.PlexAccountCount = 1;
+            }
+        );
+
+        var db = IDbContext;
+        var server = await db.PlexServers.FirstAsync(CancellationToken);
+
+        // Create an HTTPS online connection
+        var conn = FakeData.GetPlexServerConnections(seed).Generate();
+        conn = new PlexServerConnection
+        {
+            Protocol = "https",
+            Address = conn.Address,
+            Port = conn.Port,
+            Url = $"https://{conn.Address}:{conn.Port}",
+            Local = false,
+            Relay = false,
+            IPv4 = true,
+            IPv6 = false,
+            IsCustom = false,
+            PlexServerId = server.Id,
+        };
+        conn.LatestConnectionStatus = FakeData.GetPlexServerStatus(seed).Generate();
+        conn.LatestConnectionStatus.PlexServerId = server.Id;
+        conn.LatestConnectionStatus.PlexServerConnectionId = conn.Id;
+        db.PlexServerConnections.Add(conn);
+        await db.SaveChangesAsync(CancellationToken);
+
+        var access = await db.PlexAccountServers.FirstAsync(CancellationToken);
+        var fileLocationUrl = "/library/parts/123/file.mkv";
+
+        // Act
+        var result = await db.GetDownloadUrl(server.Id, fileLocationUrl, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldBe($"{conn.Url}{fileLocationUrl}?X-Plex-Token={access.AuthToken}");
+    }
+
+    [Fact]
+    public async Task ShouldFail_GetDownloadUrl_WhenNoConnectionsAvailable()
+    {
+        // Arrange
+        await SetupDatabase(
+            992341,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexServerConnectionPerServerCount = 0;
+                config.PlexAccountCount = 1;
+            }
+        );
+        var db = IDbContext;
+        var server = await db.PlexServers.FirstAsync(CancellationToken);
+
+        // Act
+        var result = await db.GetDownloadUrl(server.Id, "/file", CancellationToken);
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task ShouldFail_GetDownloadUrl_WhenNoTokenAvailable()
+    {
+        // Arrange
+        var seed = await SetupDatabase(
+            335522,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexServerConnectionPerServerCount = 0;
+                config.PlexAccountCount = 0;
+            }
+        );
+
+        var db = IDbContext;
+        var server = await db.PlexServers.FirstAsync(CancellationToken);
+        var conn = FakeData.GetPlexServerConnections(seed).Generate();
+        conn = new PlexServerConnection
+        {
+            Protocol = "http",
+            Address = conn.Address,
+            Port = conn.Port,
+            Url = $"http://{conn.Address}:{conn.Port}",
+            Local = false,
+            Relay = false,
+            IPv4 = true,
+            IPv6 = false,
+            IsCustom = false,
+            PlexServerId = server.Id,
+        };
+        conn.LatestConnectionStatus = FakeData.GetPlexServerStatus(seed).Generate();
+        conn.LatestConnectionStatus.PlexServerId = server.Id;
+        conn.LatestConnectionStatus.PlexServerConnectionId = conn.Id;
+        db.PlexServerConnections.Add(conn);
+        await db.SaveChangesAsync(CancellationToken);
+
+        // Act
+        var result = await db.GetDownloadUrl(server.Id, "/file", CancellationToken);
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task ShouldReturnNullDownloadTaskKey_WhenGuidEmpty()
+    {
+        // Arrange
+        await SetupDatabase(114455);
+
+        // Act
+        var key = await IDbContext.GetDownloadTaskKeyAsync(Guid.Empty, CancellationToken);
+
+        // Assert
+        key.ShouldBeNull();
+    }
+
+    [Fact]
+    public async Task ShouldReturnDownloadTask_WhenTypeIsNoneAndIdMatchesMovieFile()
+    {
+        // Arrange
+        await SetupDatabase(
+            226677,
+            config =>
+            {
+                config.MovieDownloadTasksCount = 3;
+            }
+        );
+        var db = IDbContext;
+        var movieFile = await db.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+
+        // Act
+        var generic = await db.GetDownloadTaskAsync(movieFile.Id, DownloadTaskType.None, CancellationToken);
+
+        // Assert
+        generic.ShouldNotBeNull();
+        generic!.Id.ShouldBe(movieFile.Id);
+        generic.DownloadTaskType.ShouldBe(DownloadTaskType.MovieData);
+        generic.PlexServer.ShouldNotBeNull();
+        generic.PlexLibrary.ShouldNotBeNull();
+    }
 }

@@ -1,5 +1,65 @@
 Reaparr Changelog
 
+# [0.33.0](https://github.com/Reaparr/Reaparr/compare/v0.32.0...v0.33.0) (2025-09-07)
+
+
+### Bug Fixes
+
+* **WebAPI:** Added more potential media qualities to parse ([c5888f8](https://github.com/Reaparr/Reaparr/commit/c5888f8deeea0c52346a850ab45876eeced6e747))
+* **Web-UI:** Adjust dimensions of media filter menu for improved layout ([1590714](https://github.com/Reaparr/Reaparr/commit/15907146b4dc09e5ccccf0ce9694a407933243e8))
+* **Web-UI:** Align media details in the MediaQTable for better readability ([a72aec4](https://github.com/Reaparr/Reaparr/commit/a72aec475fc803460251d4dd0f743ab0c3054ca4))
+* **WebAPI:** Fixed a bug where plexLibrary metadata counts were not set correctly ([5c43b9c](https://github.com/Reaparr/Reaparr/commit/5c43b9ccf48738807f2551ce0585537631768919))
+* **Web-UI:** Fixed an issue where if the filters were to strict and 0 results were availble, it would say the library would need to be synced ([fdfd5b6](https://github.com/Reaparr/Reaparr/commit/fdfd5b68ff041990bce40b06792f2a422d144bec))
+* **Web-UI:** Fixed an issue where Music and Photo libraries were not displayed correctly and warned that they are not yet supported ([a935198](https://github.com/Reaparr/Reaparr/commit/a93519854f4feb065b7daf316f0adbc0220c4005))
+* **WebAPI:** fixed missing qualities displaying next to episodes when viewing a TV show in detail ([e0b098e](https://github.com/Reaparr/Reaparr/commit/e0b098ea0fb89f715adf54599a9833cd4e365d77))
+* **WebAPI:** Fixed the incorrect version being build into the docker image, leading to 0.0.0 ([336bc5d](https://github.com/Reaparr/Reaparr/commit/336bc5d541fa804329af50574bd9e69011fea28b))
+* **WebAPI:** Fixed the issue where AddedAt and UpdatedAt were not parsed correctly, and thus it always displayed and 1970 date in the tv show detail screen ([743a93d](https://github.com/Reaparr/Reaparr/commit/743a93d08d572da44a446756ce7e6b8cb6108934))
+* **WebAPI:** Fixed the qualities not being sorted when displayed in the UI ([044039a](https://github.com/Reaparr/Reaparr/commit/044039a93afd077a052b8bb22cc046aaaedd6813))
+* **WebAPI:** Fixed the source generated info not being passed down when using LogByType ([a98e553](https://github.com/Reaparr/Reaparr/commit/a98e5537574133d8a3c1c97b8e96e6f72a26cf85))
+* **Web-UI:** Fixed warning of missing translation import ([087e47d](https://github.com/Reaparr/Reaparr/commit/087e47d313a1e61589b983cf3863ec285c5bd113))
+* **WebAPI:** Possible fix for first time Docker startup where the /Config folder is not owned by Reaparr ([7e13bb6](https://github.com/Reaparr/Reaparr/commit/7e13bb6c2599377c37c74ebc9e98ad0e5e9feda6))
+* **WebAPI:** Possible fix for the first time boot of Reaparr crashing due to permission issues ([d8fb422](https://github.com/Reaparr/Reaparr/commit/d8fb422dced9809accb6f6d538a8ffb5354962c5))
+* **Web-UI:** Prevent the flash of an warning while a library media overview is still loading ([2706166](https://github.com/Reaparr/Reaparr/commit/2706166fb01d6afaa51292cd94ba744c4f4f4f12))
+* **WebAPI:** Retrieve PlexServerId and PlexLibraryId from episode data and add to the preview ([58eab89](https://github.com/Reaparr/Reaparr/commit/58eab8971f12c41137b45c97056627659c697f12))
+* **Web-UI:** Selected quality for download is now working ([d192fdd](https://github.com/Reaparr/Reaparr/commit/d192fdddb918925e88d898d309737d3cbbe48e51))
+* **WebAPI:** Sometimes Plex does not give any info on the media file, so now we parse the filename to at least determine quality ([175e736](https://github.com/Reaparr/Reaparr/commit/175e736a6d7d875a49e3f94b7af7ea92038ec7a5))
+* **Web-UI:** The media filters are now cleared when moving to a different library ([f5863ba](https://github.com/Reaparr/Reaparr/commit/f5863ba4210c66676fb6922ee307f4a5010270af))
+* **Web-UI:** Type errors from Vue-i18n upgrade ([27950f7](https://github.com/Reaparr/Reaparr/commit/27950f746d5aa206e7c7b5289b5fc7edc16a7c5d))
+* **WebAPI:** Update avatar URL to use higher resolution image when posting a release in Discord ([9eed6ed](https://github.com/Reaparr/Reaparr/commit/9eed6edcfa597f02a9c69517134e9923e0e9ae92))
+* **Web-UI:** Update branding and links to reflect Reaparr ([5064c69](https://github.com/Reaparr/Reaparr/commit/5064c69053af4d9d9d34b0aa0e0b85eb42224026))
+* **WebAPI:** Update branding to not show links in console ([b089cf0](https://github.com/Reaparr/Reaparr/commit/b089cf0d7c2b3844874eb2cb38a67e1903451e4a))
+* **WebAPI:** update logo path in README for correct display ([8a4a8d2](https://github.com/Reaparr/Reaparr/commit/8a4a8d2a9f8aa8dc261a2c8e42b9b2155c1e7dc2))
+
+
+### Features
+
+* **Web-UI:** Add a background to the glow chips such that they are more readable when hovering over them ([6e8300a](https://github.com/Reaparr/Reaparr/commit/6e8300ae1ee525ba6bb4cc7792e6fa96b5e8a66a))
+* **WebAPI:** Added a migration to automatically convert the old named database and settings file to the new Reaparr one ([6c40df2](https://github.com/Reaparr/Reaparr/commit/6c40df2a92f31dca09efc68b6a4b696937c663a1))
+* **Web-UI:** Added media quality overview to the Debug buttons page ([d578025](https://github.com/Reaparr/Reaparr/commit/d5780257b31480987f2b1d9405bbbd00cf7b2848))
+* **WebAPI:** Added new Reaparr logo ([da89ecd](https://github.com/Reaparr/Reaparr/commit/da89ecdc4bad7cc7e543b511e6a748a43768b29c))
+* **WebAPI:** Added svg logo for title ([#483](https://github.com/Reaparr/Reaparr/issues/483)) ([83ea99c](https://github.com/Reaparr/Reaparr/commit/83ea99cbbfe85ee25668dc9571fc6add4246e012))
+* **WebAPI:** Added svg logo for title ([940ebd1](https://github.com/Reaparr/Reaparr/commit/940ebd121b31e09e287a76ca4a3c7d54bae0c395))
+* **Web-UI:** Changed the navigation drawer icon to more accurately display what it does ([bf9f520](https://github.com/Reaparr/Reaparr/commit/bf9f520ffba479eca84fcb30be5e8a9ac5d56a45))
+* **WebAPI:** Compressed ([d6983b2](https://github.com/Reaparr/Reaparr/commit/d6983b2dd9969c8eac4dabe5f3f6dcefcddfb25d))
+* **Web-UI:** Enhance download confirmation dialog with media quality display ([49f62d3](https://github.com/Reaparr/Reaparr/commit/49f62d39c5f7611f0ed7fd365f238c2897083d15))
+* **Web-UI:** Improved the coloring of media quality chips such that they are more instantly recognizable ([b16b367](https://github.com/Reaparr/Reaparr/commit/b16b367fe9df9f593f0b2ce92b84793a2a96e8e1))
+* **Web-UI:** Made the version numbering in the Reaparr logo copy-able from the little V icon ([f295b52](https://github.com/Reaparr/Reaparr/commit/f295b523de1411e39cf79023e7e8a5186c17aa5f))
+* **Web-UI:** Media can now be filtered on quality by clicking on the little magnify glass icon in the search bar ([051590a](https://github.com/Reaparr/Reaparr/commit/051590a82b064538f1f6b4088fd5e21055f2e3d0))
+* **Web-UI:** TvShows now display all media qualities that are found within the episodes ([a0e72da](https://github.com/Reaparr/Reaparr/commit/a0e72daaa27320ef6737d11bd7a531309d6e8d58))
+
+
+### Performance Improvements
+
+* **Web-UI:** Moved some rendering logic to display the download preview to the back-end ([a8d71c8](https://github.com/Reaparr/Reaparr/commit/a8d71c8bca5565f0e02e2e00b40c19a19d614270))
+
+
+### Reverts
+
+* **Web-UI:** Revert Cypress upgrade for now ([d7e0cbe](https://github.com/Reaparr/Reaparr/commit/d7e0cbefc888aebcdad16ed9b190a340a5d9593b))
+* **WebAPI:** revert migrations to later combine ([6f34cf2](https://github.com/Reaparr/Reaparr/commit/6f34cf2f3c90c90ee6cfc81ec2da02a9fb43d98e))
+* **WebAPI:** revert migration ([ce30c94](https://github.com/Reaparr/Reaparr/commit/ce30c94bbecef163f962786ccfc9712495bc0bdd))
+* **WebAPI:** set dotnet install back ([d9d7223](https://github.com/Reaparr/Reaparr/commit/d9d7223a26fa7012ca84cbc443543323f247dcb5))
+
 # [0.32.0](https://github.com/Reaparr/Reaparr/compare/v0.31.1...v0.32.0) (2025-07-20)
 
 

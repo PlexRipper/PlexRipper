@@ -43,7 +43,7 @@ public class ProgressHub : Hub<IProgressHub>, IProgressHub
         else
         {
             _log.Here()
-                .Warning(
+                .Debug(
                     "Client disconnected from {HubName}: {ConnectionId}",
                     nameof(ProgressHub),
                     Context.ConnectionId

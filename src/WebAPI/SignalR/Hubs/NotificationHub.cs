@@ -43,9 +43,9 @@ public class NotificationHub : Hub<INotificationHub>, INotificationHub
         else
         {
             _log.Here()
-                .Warning(
+                .Debug(
                     "Client disconnected from {HubName}: {ConnectionId}",
-                    nameof(ProgressHub),
+                    nameof(NotificationHub),
                     Context.ConnectionId
                 );
         }

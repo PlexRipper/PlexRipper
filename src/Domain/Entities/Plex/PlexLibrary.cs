@@ -98,7 +98,7 @@ public class PlexLibrary : BaseEntity
     [Column(Order = 18)]
     public int CountriesCount { get; init; }
 
-    public int MediaCount { get; }
+    public int MediaCount { get; private set;}
 
     #endregion
 

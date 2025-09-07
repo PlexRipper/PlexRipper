@@ -192,7 +192,7 @@ public class RefreshPlexTvShowLibraryCommandHandler
             );
 
         // Refresh the PlexLibrary from the database to ensure we have the latest data
-        var plexLibraryDb = await _dbContext.PlexLibraries.GetAsync(plexLibrary.Id, cancellationToken);
+        var plexLibraryDb = await _dbContext.PlexLibraries.GetAsync(plexLibraryId, cancellationToken);
         return plexLibraryDb is null
             ? ResultExtensions.EntityNotFound(nameof(PlexLibrary), plexLibraryId)
             : Result.Ok(plexLibraryDb);

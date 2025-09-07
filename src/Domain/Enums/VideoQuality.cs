@@ -11,6 +11,12 @@ namespace Reaparr.Domain;
 public enum VideoQuality
 {
     /// <summary>
+    /// The "null" quality, indicating no specific quality level.
+    /// </summary>
+    [EnumMember(Value = nameof(None))]
+    None = -1,
+
+    /// <summary>
     /// The resolution could not be determined or was not recognized.
     /// </summary>
     [EnumMember(Value = nameof(Unknown))]

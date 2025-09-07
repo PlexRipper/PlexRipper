@@ -1,14 +1,8 @@
-import { type BasePageSetupResult, urlBuilder } from '@fixtures';
+import { type BasePageSetupResult, headers, urlBuilder } from '@fixtures';
 import type { MockConfig } from '@mock';
-import {
-	generatePlexMedia,
-	generatePlexMediaSlims,
-	generateResultDTO,
-} from '@mock';
+import { generatePlexMedia, generatePlexMediaSlims, generateResultDTO } from '@mock';
 import { PlexLibraryPaths, PlexMediaPaths } from '@api/api-paths';
-import { headers } from '@fixtures';
-import type { PlexMediaStatisticsDTO } from '@dto';
-import { PlexMediaType } from '@dto';
+import { type PlexMediaStatisticsDTO, PlexMediaType, VideoQuality } from '@dto';
 
 export function setupMockPlexMediaEndpoints(
 	this: BasePageSetupResult,
@@ -50,6 +44,7 @@ export function setupMockPlexMediaEndpoints(
 			roleId: 0,
 			page: 0,
 			size: 0,
+			quality: VideoQuality.None,
 		}));
 
 		cy.intercept(

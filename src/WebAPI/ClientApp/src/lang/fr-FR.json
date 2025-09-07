@@ -80,7 +80,8 @@
             "library-not-yet-synced": "Les données multimédias de la bibliothèque n'ont pas encore été synchronisées. Veuillez patienter ou actualiser maintenant.",
             "steps-remaining": "Étape {index} sur {total}:",
             "no-search-results": "Aucun média contenant \"{query}\" n'a été trouvé",
-            "no-media-items-available": "Aucun élément multimédia trouvé!"
+            "no-media-items-available": "Aucun élément multimédia trouvé!",
+            "no-filter-results": "Aucun résultat multimédia ne correspond aux paramètres de filtre actuels. Veuillez ajuster ou réinitialiser vos filtres pour afficher les résultats disponibles."
         },
         "navigation-drawer": {
             "accounts": "Comptes",
@@ -333,8 +334,14 @@
             "meta-data": {
                 "country": "Pays",
                 "genre": "Genre",
-                "roles": "Les rôles"
+                "roles": "Les rôles",
+                "quality": "Qualité"
             }
+        },
+        "alert-display-debug": {
+            "error-example": "Une erreur inattendue s'est produite lors du chargement des options de qualité multimédia. Veuillez réessayer ultérieurement.",
+            "info-example": "Il s'agit d'un message d'information aléatoire sur les paramètres de qualité des médias. Lorem ipsum dolor sit amet.",
+            "warning-example": "Attention! Il se peut que la configuration soit incorrecte. Vérification aléatoire: 42XY-LMN."
         }
     },
     "confirmation": {
@@ -424,6 +431,20 @@
             "move-error": "Erreur de déplacement",
             "move-finished": "Déplacement terminé",
             "move-paused": "Déplacement en pause"
+        },
+        "video-quality": {
+            "quality-1-unknown": "Unknown",
+            "quality-0-none": "Aucun",
+            "quality-144-subsd-144p": "144p",
+            "quality-240-subsd-cif": "240p",
+            "quality-360-nhd": "360p",
+            "quality-480-sd": "SD (480p)",
+            "quality-576-dvd": "DVD (576p)",
+            "quality-720-hd": "HD (720p)",
+            "quality-1080-fullhd": "Full HD (1080p)",
+            "quality-1440-qhd": "QHD (1440p)",
+            "quality-2160-uhd-4k": "4K (2160p)",
+            "quality-4320-uhd-8k": "8K (4320p)"
         }
     },
     "help": {
@@ -785,7 +806,8 @@
             },
             "buttons": {
                 "main-header": "Boutons de débogage",
-                "media-quality-header": "Affichage de la qualité des médias"
+                "media-quality-header": "Affichage de la qualité des médias",
+                "alert-display-header": "En-tête d'affichage d'alerte"
             }
         },
         "empty": {

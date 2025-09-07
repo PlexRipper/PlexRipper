@@ -7,6 +7,14 @@ using Reaparr.Data.Contracts;
 
 namespace Reaparr.Application;
 
+/// <summary>
+/// Command to synchronize Plex library media metadata (actors, genres, countries) for a
+/// specific Plex library. The synchronization is a destructive replace: all existing
+/// relations for the target library are removed and then recreated from the provided
+/// <paramref name="LibraryMetadata"/> collections.
+/// </summary>
+/// <param name="LibraryMetadata">Aggregated metadata for the target Plex library.</param>
+/// <returns>Returns the result of the operation.</returns>
 public record SyncPlexLibraryMediaMetaDataCommand(InsertMediaMetaDataCommandResponse LibraryMetadata)
     : ICommand<Result>;
 
@@ -65,16 +73,15 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
     public async Task<Result> ExecuteAsync(SyncPlexLibraryMediaMetaDataCommand command, CancellationToken ct)
     {
         var libraryId = command.LibraryMetadata.PlexLibraryId;
+
+        // First, verify the library exists
+        var library = await _dbContext.PlexLibraries.GetAsync(libraryId, cancellationToken: ct);
+        if (library == null)
+            return ResultExtensions.EntityNotFound(nameof(PlexLibrary), libraryId);
+
         var roles = command.LibraryMetadata.PlexActors;
         var genres = command.LibraryMetadata.PlexGenres;
         var countries = command.LibraryMetadata.PlexCountries;
-
-        var libraryDb = await _dbContext
-            .PlexLibraries.AsTracking()
-            .FirstOrDefaultAsync(x => x.Id == libraryId, cancellationToken: ct);
-
-        if (libraryDb is null)
-            return ResultExtensions.EntityNotFound(nameof(PlexLibrary), libraryId);
 
         var libraryName = await _dbContext.GetPlexLibraryNameById(libraryId, CancellationToken.None);
 
@@ -82,11 +89,11 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
         var syncCountriesResult = await SyncCountries(countries, libraryId, libraryName);
         var syncRolesResult = await SyncRoles(roles, libraryId, libraryName);
 
-        libraryDb.ActorsCount = syncRolesResult.ValueOrDefault;
-        libraryDb.GenresCount = syncGenresResult.ValueOrDefault;
-        libraryDb.CountriesCount = syncCountriesResult.ValueOrDefault;
+        var actorsCount = syncRolesResult.ValueOrDefault;
+        var genresCount = syncGenresResult.ValueOrDefault;
+        var countriesCount = syncCountriesResult.ValueOrDefault;
 
-        await _dbContext.SaveChangesAsync(CancellationToken.None);
+        await _dbContext.SetLibraryMetaData(libraryId, actorsCount, genresCount, countriesCount);
 
         return Result.Merge(syncGenresResult, syncCountriesResult, syncRolesResult).ToResult();
     }

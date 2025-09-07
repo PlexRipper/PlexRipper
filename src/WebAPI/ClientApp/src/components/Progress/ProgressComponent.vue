@@ -18,7 +18,7 @@
 							<template v-if="!indeterminate">
 								<span
 									v-if="getPercentage < 100"
-									class="text-bold"> {{ $n(getPercentage / 100, 'percent') }}</span>
+									class="text-bold"> {{ n(getPercentage / 100, 'percent') }}</span>
 								<q-icon
 									v-else
 									large
@@ -70,7 +70,7 @@
 							striped
 							stream
 							color="red">
-							<strong>{{ $n(getPercentage / 100, 'percent') }}</strong>
+							<strong>{{ n(getPercentage / 100, 'percent') }}</strong>
 						</q-linear-progress>
 					</QCol>
 				</QRow>
@@ -80,6 +80,8 @@
 </template>
 
 <script setup lang="ts">
+const { n } = useI18n();
+
 const props = defineProps<{
 	text?: string;
 	percentage: number;

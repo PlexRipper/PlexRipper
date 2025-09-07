@@ -21,4 +21,6 @@ public record MediaQueryFilter
     public required int ActorId { get; init; }
 
     public required int GenreId { get; init; }
+
+    public required VideoQuality Quality { get; init; }
 }

@@ -17,7 +17,7 @@ namespace Reaparr.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .UseCollation("NATURALSORT")
-                .HasAnnotation("ProductVersion", "8.0.11");
+                .HasAnnotation("ProductVersion", "9.0.8");
 
             modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzBlobTrigger", b =>
                 {
@@ -1011,6 +1011,11 @@ namespace Reaparr.Data.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(10);
+
+                    b.Property<int>("MediaCount")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("INTEGER")
+                        .HasComputedColumnSql("CASE WHEN Type = 'Movie' THEN MovieCount WHEN Type = 'TvShow' THEN TvShowCount ELSE -1 END");
 
                     b.Property<long>("MediaSize")
                         .HasColumnType("INTEGER")

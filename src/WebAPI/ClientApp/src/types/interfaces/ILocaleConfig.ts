@@ -1,7 +1,9 @@
+import type { Locale } from 'vue-i18n';
+
 export interface ILocaleConfig {
 	text: string;
-	code: string;
+	code: Locale;
 	iso: string;
 	bcp47Code: string;
-	file: string;
+	img: string;
 }

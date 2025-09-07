@@ -14,7 +14,7 @@
 						:key="notification.id"
 						:min-width="200"
 						:max-width="450"
-						:type="notification.level.toLowerCase()"
+						:type="notification.level"
 						dense
 						dismissible
 						outlined

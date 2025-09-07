@@ -81,6 +81,7 @@ public class GetAllMediaByTypeEndpoint : BaseEndpoint<GetAllMediaByTypeRequest, 
                 CountryId = req.CountryId,
                 ActorId = req.ActorId,
                 GenreId = req.GenreId,
+                Quality = req.Quality,
             },
             ct: ct
         );

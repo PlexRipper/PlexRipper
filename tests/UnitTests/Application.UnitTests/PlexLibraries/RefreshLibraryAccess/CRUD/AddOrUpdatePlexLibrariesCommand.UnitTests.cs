@@ -101,14 +101,9 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
         var plexLibraries = dbContext.PlexLibraries.AsTracking().ToList();
         foreach (var plexLibrary in plexLibraries)
         {
+            // Should not be overwritten because this happens when media is synced
             plexLibrary.SyncedAt = syncedAtDateTime;
             plexLibrary.DefaultDestinationId = 5;
-
-            if (plexLibrary.Type == PlexMediaType.Movie)
-                plexLibrary.SetMovieMetaData(100, 1000);
-
-            if (plexLibrary.Type == PlexMediaType.TvShow)
-                plexLibrary.SetTvShowMetaData(100, 100, 100, 1000);
         }
 
         await dbContext.SaveChangesAsync(CancellationToken);
@@ -146,18 +141,6 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
             plexLibraryDb.UpdatedAt.ShouldBe(updatedTime);
             plexLibraryDb.SyncedAt.ShouldBe(syncedAtDateTime);
             plexLibraryDb.DefaultDestinationId.ShouldBe(5);
-
-            if (plexLibraryDb.Type == PlexMediaType.Movie)
-                plexLibraryDb.MovieCount.ShouldBe(100);
-
-            if (plexLibraryDb.Type == PlexMediaType.TvShow)
-            {
-                plexLibraryDb.TvShowCount.ShouldBe(100);
-                plexLibraryDb.SeasonCount.ShouldBe(100);
-                plexLibraryDb.EpisodeCount.ShouldBe(100);
-            }
-
-            plexLibraryDb.MediaSize.ShouldBe(1000);
         }
 
         foreach (var plexAccountLibrary in plexAccountLibrariesDb)

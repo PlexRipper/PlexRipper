@@ -88,17 +88,6 @@ public class AddOrUpdatePlexLibrariesCommandHandler
                             incomingPlexLibrary.Id
                         );
 
-                    if (incomingPlexLibrary.Type == PlexMediaType.Movie)
-                        incomingPlexLibrary.SetMovieMetaData(plexLibraryDb.MovieCount, plexLibraryDb.MediaSize);
-
-                    if (incomingPlexLibrary.Type == PlexMediaType.TvShow)
-                        incomingPlexLibrary.SetTvShowMetaData(
-                            plexLibraryDb.TvShowCount,
-                            plexLibraryDb.SeasonCount,
-                            plexLibraryDb.EpisodeCount,
-                            plexLibraryDb.MediaSize
-                        );
-
                     incomingPlexLibrary.DefaultDestinationId = plexLibraryDb.DefaultDestinationId;
                     _dbContext.Entry(plexLibraryDb).CurrentValues.SetValues(incomingPlexLibrary);
                 }

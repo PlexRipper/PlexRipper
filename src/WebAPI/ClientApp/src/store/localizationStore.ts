@@ -3,20 +3,20 @@ import { acceptHMRUpdate, defineStore } from 'pinia';
 import type { Observable } from 'rxjs';
 import { of } from 'rxjs';
 import { get } from '@vueuse/core';
-import type { ISetupResult, ILocaleConfig, I18nObjectType } from '@interfaces';
+import type { ISetupResult, I18nObjectType, ILocaleConfig } from '@interfaces';
 import { useSettingsStore } from '@store';
 import { cloneDeep } from 'lodash-es';
+import type { LocaleObject } from '@nuxtjs/i18n';
+import type { Locale } from 'vue-i18n';
 
 interface ILocalizationStoreState {
 	i18nRef: I18nObjectType;
-	locales: ILocaleConfig[];
 }
 
 export const useLocalizationStore = defineStore('LocalizationStore', () => {
 	// State
 	const defaultState: ILocalizationStoreState = {
 		i18nRef: {} as I18nObjectType,
-		locales: [],
 	};
 
 	const state = reactive<ILocalizationStoreState>(cloneDeep(defaultState));
@@ -34,23 +34,28 @@ export const useLocalizationStore = defineStore('LocalizationStore', () => {
 
 			// @ts-expect-error - This is a valid assignment, typescript is being retarted here.
 			state.i18nRef = i18n;
-			state.locales = get(i18n.locales).map((x) => {
-				return {
-					text: x.text,
-					code: x.code ?? '',
-					iso: x.iso ?? '',
-					bcp47Code: x.bcp47Code,
-					file: x.file as string,
-				};
-			});
 			Log.info('Localization Options:', get(getters.getLanguageLocaleOptions));
 			actions.changeLanguageLocale(get(i18n.locale));
 		},
-		changeLanguageLocale(isoCode: string) {
+		changeLanguageLocale(isoCode: Locale) {
+			if (!state.i18nRef) {
+				Log.error('i18n object is not defined');
+				return;
+			}
+			Log.info('Localization Options:', isoCode);
 			state.i18nRef.setLocale(isoCode).then(() => {
 				useSettingsStore().languageSettings.language = isoCode;
 				Log.info('Localization has been set to:', isoCode);
 			});
+		},
+		toILocalConfig(locale: LocaleObject): ILocaleConfig {
+			return {
+				text: locale.name!,
+				code: locale.code,
+				iso: locale.code,
+				bcp47Code: locale.code.slice(0, 2),
+				img: `/img/flags/${locale.code}.svg`,
+			};
 		},
 		$reset: () => {
 		},
@@ -58,14 +63,12 @@ export const useLocalizationStore = defineStore('LocalizationStore', () => {
 
 	// Getters
 	const getters = {
-		getLanguageLocale: computed((): ILocaleConfig | null => {
-			if (!state.i18nRef) {
-				return null;
-			}
-			return state.locales.find((locale) => locale.code === state.i18nRef.locale) as ILocaleConfig;
+		getLanguageLocale: computed((): ILocaleConfig => {
+			const locale = state.i18nRef.locales.find((locale) => locale.code === state.i18nRef.locale) as LocaleObject;
+			return actions.toILocalConfig(locale);
 		}),
 		getLanguageLocaleOptions: computed((): ILocaleConfig[] => {
-			return state.locales;
+			return state.i18nRef.locales.map((x) => (actions.toILocalConfig(x)));
 		}),
 	};
 

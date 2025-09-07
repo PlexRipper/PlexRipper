@@ -37,15 +37,9 @@
 				@action="onAction" />
 		</div>
 		<div class="media-overview-content">
-			<!-- Media Overview -->
-			<template v-if="!mediaOverviewStore.loading && mediaOverviewStore.itemsLength">
-				<template v-if="mediaOverviewStore.hasNoSearchResults">
-					<QAlert type="warning">
-						<QText
-							:value="t('components.media-overview.no-search-results', { query: mediaOverviewStore.filterQuery })" />
-					</QAlert>
-				</template>
-				<template v-else>
+			<template v-if="!mediaOverviewStore.loading">
+				<!-- Media Overview -->
+				<template v-if="mediaOverviewStore.itemsLength && !mediaOverviewStore.hasNoSearchResults">
 					<!--	Data table display	-->
 					<QRow align="start">
 						<QCol>
@@ -68,33 +62,39 @@
 						<AlphabetNavigation />
 					</QRow>
 				</template>
+				<!-- No Media Overview - Error Messages -->
+				<template v-else>
+					<QRow
+						class="q-mt-md"
+						justify="center"
+						gutter="md">
+						<QCol cols="auto">
+							<QAlert
+								type="warning">
+								<template v-if="mediaOverviewStore.allMediaMode">
+									{{ t('components.media-overview.no-media-items-available') }}
+								</template>
+								<template v-else-if="mediaOverviewStore.hasNoSearchResults">
+									{{ t('components.media-overview.no-search-results', { query: mediaOverviewStore.filterQuery }) }}
+								</template>
+								<template v-else-if="mediaOverviewStore.hasNoFilterResults">
+									{{ t('components.media-overview.no-filter-results') }}
+								</template>
+								<template v-else-if="library?.syncedAt === null">
+									{{ t('components.media-overview.library-not-yet-synced') }}
+								</template>
+								<template v-else-if="!mediaOverviewStore.itemsLength">
+									{{ t('components.media-overview.no-data') }}
+								</template>
+								<template v-else>
+									{{ t('components.media-overview.could-not-display') }}
+								</template>
+							</QAlert>
+						</QCol>
+					</QRow>
+				</template>
 			</template>
 
-			<!-- No Media Overview -->
-			<template v-else-if="!mediaOverviewStore.loading">
-				<QRow
-					class="q-mt-md"
-					justify="center"
-					gutter="md">
-					<QCol cols="auto">
-						<QAlert
-							type="warning">
-							<template v-if="mediaOverviewStore.allMediaMode">
-								{{ $t('components.media-overview.no-media-items-available') }}
-							</template>
-							<template v-else-if="library?.syncedAt === null">
-								{{ $t('components.media-overview.library-not-yet-synced') }}
-							</template>
-							<template v-else-if="!mediaOverviewStore.itemsLength">
-								{{ $t('components.media-overview.no-data') }}
-							</template>
-							<template v-else>
-								{{ $t('components.media-overview.could-not-display') }}
-							</template>
-						</QAlert>
-					</QCol>
-				</QRow>
-			</template>
 			<!-- Media Selection Dialog -->
 			<MediaSelectionDialog />
 			<!-- Media Options Dialog -->
@@ -260,6 +260,8 @@ onMounted(() => {
 		mediaType: props.mediaType,
 		isDetailView: false,
 	});
+
+	mediaOverviewStore.clearMetaDataFilter();
 
 	// Initial data load
 	useSubscription(mediaOverviewStore.requestMedia().subscribe());

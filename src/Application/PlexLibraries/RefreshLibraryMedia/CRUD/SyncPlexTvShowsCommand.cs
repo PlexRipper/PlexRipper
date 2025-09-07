@@ -7,6 +7,26 @@ using Reaparr.Data.Contracts;
 
 namespace Reaparr.Application;
 
+/// <summary>
+/// Command to fully synchronize TV show media for a specific Plex library using the
+/// provided metadata. This is a destructive replace operation that:
+/// - Removes all existing TV show media (shows, seasons, episodes) and related data for the library
+/// - Bulk-inserts the TV shows from <paramref name="LibraryMetadata"/>
+/// - Updates library media metrics (created counts and total media size)
+/// - Rebuilds TV show relations for genres, countries, and actors based on the supplied dictionaries
+/// The operation uses high-throughput bulk operations (EFCore.BulkExtensions) and logs progress
+/// and timings for observability. Validation ensures a consistent library and server context
+/// and a well-formed hierarchy of shows → seasons → episodes before executing.
+/// </summary>
+/// <param name="LibraryMetadata">
+/// Aggregated payload containing the target <c>PlexLibrary</c> (with <c>TvShows</c>) and the
+/// lookup dictionaries for <c>PlexGenres</c>, <c>PlexCountries</c>, and <c>PlexActors</c> used to
+/// map per-show keys to persistent ids.
+/// </param>
+/// <returns>
+/// A <see cref="Result{T}"/> wrapping <see cref="BulkInsertTvShowsRapport"/> with counts of created and
+/// deleted shows, seasons, and episodes, reflecting the effects of the synchronization.
+/// </returns>
 public record SyncPlexTvShowsCommand(InsertMediaMetaDataCommandResponse LibraryMetadata)
     : ICommand<Result<BulkInsertTvShowsRapport>>;
 
@@ -91,6 +111,7 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
         try
         {
             var plexLibraryId = command.LibraryMetadata.PlexLibraryId;
+
             var plexLibraryName = await _dbContext.GetPlexLibraryNameById(
                 plexLibraryId,
                 cancellationToken: cancellationToken
@@ -121,12 +142,27 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
             );
 
             if (bulkInsertRapportResult.IsFailed)
-                return bulkInsertRapportResult;
+            {
+                stopWatch.Stop();
+                return bulkInsertRapportResult.LogError();
+            }
+
+            var bulkInsertRapport = bulkInsertRapportResult.Value;
 
             // Map the removed media counts to the bulk insert rapport
-            bulkInsertRapportResult.Value.DeletedTvShows = removeRapport.DeletedTvShows;
-            bulkInsertRapportResult.Value.DeletedSeasons = removeRapport.DeletedSeasons;
-            bulkInsertRapportResult.Value.DeletedEpisodes = removeRapport.DeletedEpisodes;
+            bulkInsertRapport.DeletedTvShows = removeRapport.DeletedTvShows;
+            bulkInsertRapport.DeletedSeasons = removeRapport.DeletedSeasons;
+            bulkInsertRapport.DeletedEpisodes = removeRapport.DeletedEpisodes;
+
+            // Update counts in PlexLibrary
+            var mediaSize = plexTvShows.Sum(x => x.MediaSize);
+            await _dbContext.SetTvShowMediaMetrics(
+                plexLibraryId,
+                bulkInsertRapport.CreatedTvShows,
+                bulkInsertRapport.CreatedSeasons,
+                bulkInsertRapport.CreatedEpisodes,
+                mediaSize
+            );
 
             // Sync metadata such as Countries, Roles and Genre
             var genreDict = command.LibraryMetadata.PlexGenres;
@@ -149,9 +185,9 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
                     stopWatch.Elapsed.TotalMilliseconds
                 );
 
-            _log.Here().Debug(bulkInsertRapportResult.Value.ToString());
+            _log.Here().Debug(bulkInsertRapport.ToString());
 
-            return bulkInsertRapportResult;
+            return Result.Ok(bulkInsertRapport);
         }
         catch (Exception e)
         {

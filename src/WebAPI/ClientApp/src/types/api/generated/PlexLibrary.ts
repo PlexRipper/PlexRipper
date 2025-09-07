@@ -17,6 +17,7 @@ import type {
   PlexMediaMetadataDTO,
   PlexMediaStatisticsDTO,
   PlexMediaType,
+  VideoQuality,
 } from "./data-contracts";
 
 import { apiCheckPipe } from "@api/base";
@@ -90,6 +91,8 @@ export class PlexLibrary {
        * @default 0
        */
       page: number;
+      /** @default -1 */
+      quality: VideoQuality;
       /**
        * @format int32
        * @default 0
@@ -209,6 +212,8 @@ export class PlexLibraryPaths {
        * @default 0
        */
       page: number;
+      /** @default -1 */
+      quality: VideoQuality;
       /**
        * @format int32
        * @default 0

@@ -24,12 +24,14 @@
 </template>
 
 <script setup lang="ts">
+import { NotificationLevel } from '@dto';
+
 const props = withDefaults(defineProps<{
-	type?: 'error' | 'warning' | 'info' | string;
+	type?: 'error' | 'warning' | 'info' | 'success' | NotificationLevel;
 	dismissible?: boolean;
 	cy?: string;
 }>(), {
-	type: '',
+	type: 'info',
 	dismissible: false,
 	cy: '',
 });
@@ -43,12 +45,20 @@ const classConfig = computed(() => {
 
 const alertIcon = computed((): string => {
 	switch (props.type) {
-		case 'error':
-			return 'mdi-alert-circle-outline';
-		case 'warning':
-			return 'mdi-alert-outline';
+		case 'success':
+		case NotificationLevel.Success:
+			return 'mdi-check-circle-outline';
 		case 'info':
+		case NotificationLevel.Information:
+		case NotificationLevel.Debug:
 			return 'mdi-information-outline';
+		case 'warning':
+		case NotificationLevel.Warning:
+			return 'mdi-alert-outline';
+		case 'error':
+		case NotificationLevel.Fatal:
+		case NotificationLevel.Error:
+			return 'mdi-alert-circle-outline';
 		default:
 			return 'mdi-close';
 	}
@@ -61,7 +71,7 @@ const alertIcon = computed((): string => {
 .q-alert {
   display: block;
   font-size: 16px;
-  margin: 0;
+  margin: 1rem;
   padding: 16px;
   position: relative;
   transition: 0.3s cubic-bezier(0.25, 0.8, 0.5, 1);
@@ -74,13 +84,13 @@ const alertIcon = computed((): string => {
   }
 
   &--warning {
-    border-color: #fff8e1;
+    border-color: #ff6f00;
     color: #ff6f00;
   }
 
   &--info {
     border-color: #e8f5e9;
-    color: #1b5e20;
+    color: #e8f5e9;
   }
 
   .q-alert-wrapper {

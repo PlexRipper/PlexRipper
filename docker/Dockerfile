@@ -28,6 +28,9 @@ FROM  mcr.microsoft.com/dotnet/sdk:9.0 AS back-end
 
 WORKDIR /src
 
+ARG VERSION
+ARG INFORMATIONAL_VERSION
+
 ## Speed up and stabilize dotnet restore/publish
 ENV DOTNET_CLI_TELEMETRY_OPTOUT=1 \
     DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1 \
@@ -74,8 +77,8 @@ WORKDIR "/src/src/WebAPI"
 ## Build and Publish
 RUN dotnet publish "WebAPI.csproj" -c Release -o /app/publish \
     --no-restore \
-    /p:AssemblyVersion=$VERSION \
-    /p:InformationalVersion=$INFORMATIONAL_VERSION \
+    /p:AssemblyVersion=${VERSION} \
+    /p:InformationalVersion=${INFORMATIONAL_VERSION} \
     -p:UseAppHost=false
 
 # Stage 3 - Runtime Image

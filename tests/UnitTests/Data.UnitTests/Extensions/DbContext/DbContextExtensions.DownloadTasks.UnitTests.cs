@@ -3,10 +3,130 @@ using Reaparr.Data.Contracts;
 
 namespace Reaparr.Data.UnitTests;
 
-public class ResetDownloadTaskProgressUnitTests : BaseUnitTest
+public class DbContextExtensionsDownloadTasksUnitTests : BaseUnitTest
 {
-    public ResetDownloadTaskProgressUnitTests(ITestOutputHelper output)
+    public DbContextExtensionsDownloadTasksUnitTests(ITestOutputHelper output)
         : base(output) { }
+
+    [Fact]
+    public async Task ShouldSetTheDownloadTaskParentOfTypeMovieDataToDownloadFinished_WhenTheMovieDataIsDownloadStatusIsDownloadFinished()
+    {
+        // Arrange
+        await SetupDatabase(
+            77674,
+            config =>
+            {
+                config.MovieDownloadTasksCount = 5;
+            }
+        );
+
+        var downloadTasks = await IDbContext.DownloadTaskMovie.Include(x => x.Children).ToListAsync(CancellationToken);
+        var testDownloadTask = downloadTasks.First().Children.First();
+        await IDbContext.SetDownloadStatus(testDownloadTask.ToKey(), DownloadStatus.DownloadFinished);
+
+        // Act
+        await IDbContext.DetermineDownloadStatus(testDownloadTask.ToKey(), CancellationToken);
+
+        // Assert
+        downloadTasks = await IDbContext.DownloadTaskMovie.Include(x => x.Children).ToListAsync(CancellationToken);
+
+        downloadTasks[0].DownloadStatus.ShouldBe(DownloadStatus.DownloadFinished);
+    }
+
+    [Fact]
+    public async Task ShouldSetTheDownloadTaskParentOfTypeEpisodeDataToError_WhenTheEpisodeDataIsDownloadStatusIsError()
+    {
+        // Arrange
+        await SetupDatabase(
+            864828,
+            config =>
+            {
+                config.TvShowDownloadTasksCount = 5;
+                config.TvShowSeasonDownloadTasksCount = 5;
+                config.TvShowEpisodeDownloadTasksCount = 5;
+            }
+        );
+
+        var downloadTasks = await IDbContext.DownloadTaskTvShow.IncludeAll().ToListAsync(CancellationToken);
+
+        var downloadTaskTvShowEpisodeFile = downloadTasks
+            .ElementAt(3)
+            .Children.ElementAt(2)
+            .Children.ElementAt(3)
+            .Children.ElementAt(0);
+
+        await IDbContext.SetDownloadStatus(downloadTaskTvShowEpisodeFile.ToKey(), DownloadStatus.Error);
+
+        // Act
+        await IDbContext.DetermineDownloadStatus(downloadTaskTvShowEpisodeFile.ToKey(), CancellationToken);
+
+        // Assert
+        var downloadTasksDb = await IDbContext
+            .DownloadTaskTvShow.AsTracking()
+            .IncludeAll()
+            .ToListAsync(CancellationToken);
+        downloadTasksDb[3].DownloadStatus.ShouldBe(DownloadStatus.Error);
+    }
+
+    [Fact]
+    public async Task ShouldReturnDownloadTaskTypeMovie_WhenTheGuidIsOfTypeDownloadTaskMovie()
+    {
+        // Arrange
+        await SetupDatabase(81434, config => config.MovieDownloadTasksCount = 5);
+        var downloadTasks = await IDbContext.DownloadTaskMovie.ToListAsync(CancellationToken);
+        var testDownloadTask = downloadTasks[2];
+
+        // Act
+        var downloadTaskType = await IDbContext.GetDownloadTaskTypeAsync(testDownloadTask.Id, CancellationToken);
+
+        // Assert
+        downloadTaskType.ShouldBe(DownloadTaskType.Movie);
+    }
+
+    [Fact]
+    public async Task ShouldReturnDownloadTaskTypeTvShow_WhenTheGuidIsOfTypeDownloadTaskTvShow()
+    {
+        // Arrange
+        await SetupDatabase(91671, config => config.TvShowDownloadTasksCount = 2);
+        var downloadTasks = await IDbContext.DownloadTaskTvShow.ToListAsync(CancellationToken);
+        var testDownloadTask = downloadTasks[1];
+
+        // Act
+        var downloadTaskType = await IDbContext.GetDownloadTaskTypeAsync(testDownloadTask.Id, CancellationToken);
+
+        // Assert
+        downloadTaskType.ShouldBe(DownloadTaskType.TvShow);
+    }
+
+    [Fact]
+    public async Task ShouldReturnDownloadTaskTypeSeason_WhenTheGuidIsOfTypeDownloadTaskTvShowSeason()
+    {
+        // Arrange
+        await SetupDatabase(48398, config => config.TvShowDownloadTasksCount = 3);
+        var downloadTasks = await IDbContext.DownloadTaskTvShowSeason.ToListAsync(CancellationToken);
+        var testDownloadTask = downloadTasks[2];
+
+        // Act
+        var downloadTaskType = await IDbContext.GetDownloadTaskTypeAsync(testDownloadTask.Id, CancellationToken);
+
+        // Assert
+        downloadTaskType.ShouldBe(DownloadTaskType.Season);
+    }
+
+    [Fact]
+    public async Task ShouldReturnDownloadTaskTypeEpisode_WhenTheGuidIsOfTypeDownloadTaskTvShowEpisode()
+    {
+        // Arrange
+        await SetupDatabase(74950, config => config.TvShowDownloadTasksCount = 2);
+        var downloadTasks = await IDbContext.DownloadTaskTvShowEpisode.ToListAsync(CancellationToken);
+        var testDownloadTask = downloadTasks[0];
+
+        // Act
+        var downloadTaskType = await IDbContext.GetDownloadTaskTypeAsync(testDownloadTask.Id, CancellationToken);
+
+        // Assert
+        downloadTaskType.ShouldBe(DownloadTaskType.Episode);
+    }
 
     [Theory]
     [InlineData(DownloadTaskType.Movie)]

@@ -3,9 +3,9 @@ using Reaparr.Data.Contracts;
 
 namespace Reaparr.Data.UnitTests;
 
-public class ChoosePlexServerConnection_UnitTests : BaseUnitTest
+public class DbContextExtensionsPlexServerConnectionUnitTests : BaseUnitTest
 {
-    public ChoosePlexServerConnection_UnitTests(ITestOutputHelper output)
+    public DbContextExtensionsPlexServerConnectionUnitTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]
@@ -185,5 +185,114 @@ public class ChoosePlexServerConnection_UnitTests : BaseUnitTest
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Value.ShouldBe(plexServerConnections[2]);
+    }
+
+    [Fact]
+    public async Task ShouldReturnNonMainAccountToken_WhenAvailable()
+    {
+        // Arrange
+        var seed = await SetupDatabase(
+            12100,
+            cfg =>
+            {
+                cfg.PlexServerCount = 1;
+                cfg.PlexAccountCount = 1;
+            }
+        );
+        var db = IDbContext;
+
+        // Add a second, non-main account with access to same server
+        var nonMain = FakeData.GetPlexAccount(seed).Generate();
+        UpdateInitProperty(nonMain, nameof(PlexAccount.IsMain), false);
+        db.PlexAccounts.Add(nonMain);
+        await db.SaveChangesAsync(CancellationToken);
+
+        var server = db.PlexServers.First();
+        var nonMainAccess = new PlexAccountServer
+        {
+            PlexAccountId = nonMain.Id,
+            PlexServerId = server.Id,
+            AuthToken = "NON_MAIN_TOKEN",
+            AuthTokenCreationDate = DateTime.UtcNow,
+            IsServerOwned = false,
+        };
+        db.PlexAccountServers.Add(nonMainAccess);
+        await db.SaveChangesAsync(CancellationToken);
+
+        // Act
+        var result = await db.GetPlexServerTokenAsync(server.Id, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldBe("NON_MAIN_TOKEN");
+    }
+
+    [Fact]
+    public async Task ShouldFallbackToMainAccountToken_WhenNonMainIsUnavailable()
+    {
+        // Arrange
+        await SetupDatabase(
+            12101,
+            cfg =>
+            {
+                cfg.PlexServerCount = 1;
+                cfg.PlexAccountCount = 1;
+            }
+        );
+        var db = IDbContext;
+        var server = db.PlexServers.First();
+        var mainAccess = db.PlexAccountServers.First(x => x.PlexServerId == server.Id);
+
+        // Act
+        var result = await db.GetPlexServerTokenAsync(server.Id, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldBe(mainAccess.AuthToken);
+    }
+
+    [Fact]
+    public async Task ShouldReturnFailedResult_WhenNoTokensAvailable()
+    {
+        // Arrange
+        await SetupDatabase(
+            12102,
+            cfg =>
+            {
+                cfg.PlexServerCount = 1;
+                cfg.PlexAccountCount = 0;
+            }
+        );
+        var db = IDbContext;
+        var server = db.PlexServers.First();
+
+        // Act
+        var result = await db.GetPlexServerTokenAsync(server.Id, CancellationToken);
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task ShouldReturnTokenForSpecificAccount_WhenPlexAccountIdProvided()
+    {
+        // Arrange
+        await SetupDatabase(
+            12103,
+            cfg =>
+            {
+                cfg.PlexServerCount = 1;
+                cfg.PlexAccountCount = 1;
+            }
+        );
+        var db = IDbContext;
+        var access = db.PlexAccountServers.First();
+
+        // Act
+        var result = await db.GetPlexServerTokenAsync(access.PlexServerId, access.PlexAccountId, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldBe(access.AuthToken);
     }
 }

@@ -2,7 +2,8 @@
 	<q-select
 		v-model:model-value="language"
 		:dense="dense"
-		:options="languageOptions"
+		:options="localizationStore.getLanguageLocaleOptions"
+		:option-value="'code' as keyof ILocaleConfig"
 		data-cy="language-selector">
 		<template #selected-item="scope">
 			<q-item
@@ -39,14 +40,8 @@
 </template>
 
 <script setup lang="ts">
-import { get } from '@vueuse/core';
 import type { ILocaleConfig } from '@interfaces';
 import { useLocalizationStore } from '@store';
-
-interface ILanguageOption extends ILocaleConfig {
-	value: string;
-	img: string;
-}
 
 withDefaults(defineProps<{ dense?: boolean }>(), {
 	dense: false,
@@ -55,16 +50,7 @@ withDefaults(defineProps<{ dense?: boolean }>(), {
 const localizationStore = useLocalizationStore();
 
 const language = computed({
-	get: (): ILanguageOption =>
-		get(languageOptions).find((x) => x.value === localizationStore.getLanguageLocale?.code) ?? ({} as ILanguageOption),
-	set: (value: ILanguageOption) => localizationStore.changeLanguageLocale(value.code),
+	get: (): ILocaleConfig =>	localizationStore.getLanguageLocale,
+	set: (value: ILocaleConfig) => localizationStore.changeLanguageLocale(value.code),
 });
-
-const languageOptions = computed((): ILanguageOption[] =>
-	localizationStore.getLanguageLocaleOptions.map((locale) => ({
-		...locale,
-		value: locale.code,
-		img: `/img/flags/${locale.code}.svg`,
-	})),
-);
 </script>

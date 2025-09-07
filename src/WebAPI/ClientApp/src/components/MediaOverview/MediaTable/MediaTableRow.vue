@@ -24,7 +24,7 @@
 						class="media-table-row--column"
 						cols="auto"
 						style="min-width: 50px">
-						<QText>{{ `#${$n(row[column.field])}` }}</QText>
+						<QText>{{ `#${n(row[column.field])}` }}</QText>
 					</QCol>
 				</template>
 				<!-- Title -->
@@ -86,7 +86,7 @@
 		</template>
 		<!-- No row -->
 		<QCol v-else>
-			<QText :value="$t('components.q-tree-view-table-row.invalid-node')" />
+			<QText :value="t('components.q-tree-view-table-row.invalid-node')" />
 		</QCol>
 		<!--	Highlight animation effect	-->
 		<svg
@@ -140,6 +140,7 @@ const props = withDefaults(
 );
 
 const router = useRouter();
+const { t, n } = useI18n();
 
 defineEmits<{
 	(e: 'selected', state: boolean): void;

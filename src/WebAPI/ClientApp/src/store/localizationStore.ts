@@ -38,6 +38,11 @@ export const useLocalizationStore = defineStore('LocalizationStore', () => {
 			actions.changeLanguageLocale(get(i18n.locale));
 		},
 		changeLanguageLocale(isoCode: Locale) {
+			if (!state.i18nRef) {
+				Log.error('i18n object is not defined');
+				return;
+			}
+			Log.info('Localization Options:', isoCode);
 			state.i18nRef.setLocale(isoCode).then(() => {
 				useSettingsStore().languageSettings.language = isoCode;
 				Log.info('Localization has been set to:', isoCode);
@@ -45,11 +50,11 @@ export const useLocalizationStore = defineStore('LocalizationStore', () => {
 		},
 		toILocalConfig(locale: LocaleObject): ILocaleConfig {
 			return {
-				text: locale.text as string,
+				text: locale.name!,
 				code: locale.code,
 				iso: locale.code,
 				bcp47Code: locale.code.slice(0, 2),
-				file: locale.file as string,
+				img: `/img/flags/${locale.code}.svg`,
 			};
 		},
 		$reset: () => {
@@ -58,10 +63,7 @@ export const useLocalizationStore = defineStore('LocalizationStore', () => {
 
 	// Getters
 	const getters = {
-		getLanguageLocale: computed((): ILocaleConfig | null => {
-			if (!state.i18nRef) {
-				return null;
-			}
+		getLanguageLocale: computed((): ILocaleConfig => {
 			const locale = state.i18nRef.locales.find((locale) => locale.code === state.i18nRef.locale) as LocaleObject;
 			return actions.toILocalConfig(locale);
 		}),

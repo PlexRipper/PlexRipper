@@ -5,5 +5,5 @@ export interface ILocaleConfig {
 	code: Locale;
 	iso: string;
 	bcp47Code: string;
-	file: string;
+	img: string;
 }

@@ -130,32 +130,37 @@ export default defineNuxtConfig({
 	},
 
 	i18n: {
+		autoDeclare: true,
 		restructureDir: 'src',
 		langDir: 'lang',
 		defaultLocale: 'en-US', // Ensure the SettingsStore is updated as well when changes are made here:
 		locales: [
 			{
-				text: 'English',
+				name: 'English',
 				code: 'en-US',
 				file: 'en-US.json',
 			},
 			{
-				text: 'Français',
+				name: 'Français',
 				code: 'fr-FR',
 				file: 'fr-FR.json',
 			},
 			{
-				text: 'Deutsch',
+				name: 'Deutsch',
 				code: 'de-DE',
 				file: 'de-DE.json',
 			},
 			{
-				text: 'Polski',
+				name: 'Polski',
 				code: 'pl-PL',
 				file: 'pl-PL.json',
 			},
 		],
-		vueI18n: './src/config/vueI18n.config.ts',
+		bundle: {
+			compositionOnly: true,
+			runtimeOnly: true,
+		},
+		vueI18n: './config/vueI18n.config.ts',
 		strategy: 'no_prefix',
 	},
 	primevue: {

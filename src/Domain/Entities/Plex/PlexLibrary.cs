@@ -98,7 +98,10 @@ public class PlexLibrary : BaseEntity
     [Column(Order = 18)]
     public int CountriesCount { get; init; }
 
-    public int MediaCount { get; private set;}
+    /// <summary>
+    /// Computed property that gets the total count of media items associated with this <see cref="PlexLibrary"/>.
+    /// </summary>
+    public int MediaCount { get; private set; }
 
     #endregion
 

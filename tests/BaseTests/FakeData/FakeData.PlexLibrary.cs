@@ -22,6 +22,7 @@ public static partial class FakeData
             .Ignore(x => x.DefaultDestination)
             .Ignore(x => x.DefaultDestinationId)
             .Ignore(x => x.MediaSize)
+            .Ignore(x => x.MediaCount)
             .Ignore(x => x.MovieCount)
             .Ignore(x => x.TvShowCount)
             .Ignore(x => x.SeasonCount)

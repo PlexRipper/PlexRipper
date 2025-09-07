@@ -73,6 +73,12 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
     public async Task<Result> ExecuteAsync(SyncPlexLibraryMediaMetaDataCommand command, CancellationToken ct)
     {
         var libraryId = command.LibraryMetadata.PlexLibraryId;
+
+        // First, verify the library exists
+        var library = await _dbContext.PlexLibraries.GetAsync(libraryId, cancellationToken: ct);
+        if (library == null)
+            return ResultExtensions.EntityNotFound(nameof(PlexLibrary), libraryId);
+
         var roles = command.LibraryMetadata.PlexActors;
         var genres = command.LibraryMetadata.PlexGenres;
         var countries = command.LibraryMetadata.PlexCountries;

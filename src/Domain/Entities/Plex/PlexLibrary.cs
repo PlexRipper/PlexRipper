@@ -150,15 +150,5 @@ public class PlexLibrary : BaseEntity
     [NotMapped]
     public bool Outdated => SyncedAt < UpdatedAt;
 
-    public override void SetNull()
-    {
-        base.SetNull();
-        PlexServer = null;
-        Movies = [];
-        TvShows = [];
-        PlexAccountLibraries = [];
-        DefaultDestination = null;
-    }
-
     #endregion
 }

@@ -20,11 +20,11 @@ public class NotificationHub : Hub<INotificationHub>, INotificationHub
     }
 
     /// <inheritdoc/>
-    public override Task OnConnectedAsync()
+    public override async Task OnConnectedAsync()
     {
+        await base.OnConnectedAsync();
         _log.Here()
             .Debug("Client connected to {HubName}: {ConnectionId}", nameof(NotificationHub), Context.ConnectionId);
-        return base.OnConnectedAsync();
     }
 
     /// <inheritdoc/>

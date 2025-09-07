@@ -99,8 +99,9 @@ public class PlexLibrary : BaseEntity
     public int CountriesCount { get; init; }
 
     /// <summary>
-    /// Computed property that gets the total count of media items associated with this <see cref="PlexLibrary"/>.
+    /// DB-computed column that holds the total count of media items associated with this <see cref="PlexLibrary"/>.
     /// </summary>
+    [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
     public int MediaCount { get; private set; }
 
     #endregion

@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Http.Extensions;
 using Reaparr.Application;
 using Reaparr.Environment;
 
-namespace Reaparr.WebAPI;
+namespace Reaparr.AppHost;
 
 public static partial class Startup
 {

@@ -1754,6 +1754,24 @@
         "resolved": "16.3.0",
         "contentHash": "SgMOdxbz8X65z8hraIs6hOEdnkH6hESTAIUa7viEngHOYaH+6q5XJmwr1+yb9vJpNQ19hCQY69xbFsLtXpobQA=="
       },
+      "Reaparr.AppHost": {
+        "type": "Project",
+        "dependencies": {
+          "Autofac.Extensions.DependencyInjection": "[10.0.0, )",
+          "FastEndpoints.Security": "[7.0.1, )",
+          "FastEndpoints.Swagger": "[7.0.1, )",
+          "Microsoft.AspNetCore.SpaServices.Extensions": "[9.0.8, )",
+          "Microsoft.Extensions.Http.Polly": "[9.0.8, )",
+          "Quartz.Extensions.Hosting": "[3.15.0, )",
+          "Reaparr.Application": "[1.0.0, )",
+          "Reaparr.Data": "[1.0.0, )",
+          "Reaparr.FileSystem": "[1.0.0, )",
+          "Reaparr.Identity": "[1.0.0, )",
+          "Reaparr.PlexApi": "[1.0.0, )",
+          "Reaparr.Settings": "[1.0.0, )",
+          "Serilog.AspNetCore": "[9.0.0, )"
+        }
+      },
       "Reaparr.Application": {
         "type": "Project",
         "dependencies": {
@@ -1923,24 +1941,6 @@
         "type": "Project",
         "dependencies": {
           "Reaparr.Domain": "[1.0.0, )"
-        }
-      },
-      "Reaparr.WebAPI": {
-        "type": "Project",
-        "dependencies": {
-          "Autofac.Extensions.DependencyInjection": "[10.0.0, )",
-          "FastEndpoints.Security": "[7.0.1, )",
-          "FastEndpoints.Swagger": "[7.0.1, )",
-          "Microsoft.AspNetCore.SpaServices.Extensions": "[9.0.8, )",
-          "Microsoft.Extensions.Http.Polly": "[9.0.8, )",
-          "Quartz.Extensions.Hosting": "[3.15.0, )",
-          "Reaparr.Application": "[1.0.0, )",
-          "Reaparr.Data": "[1.0.0, )",
-          "Reaparr.FileSystem": "[1.0.0, )",
-          "Reaparr.Identity": "[1.0.0, )",
-          "Reaparr.PlexApi": "[1.0.0, )",
-          "Reaparr.Settings": "[1.0.0, )",
-          "Serilog.AspNetCore": "[9.0.0, )"
         }
       }
     }

@@ -1,7 +1,7 @@
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 
-namespace Reaparr.WebAPI;
+namespace Reaparr.AppHost;
 
 public static partial class Startup
 {

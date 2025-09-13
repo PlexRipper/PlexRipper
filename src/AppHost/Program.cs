@@ -2,7 +2,7 @@ using Reaparr.Application;
 using Reaparr.Environment;
 using Reaparr.FluentResultExtensions;
 
-namespace Reaparr.WebAPI;
+namespace Reaparr.AppHost;
 
 /// <summary>
 ///  The main class entry point for the application.

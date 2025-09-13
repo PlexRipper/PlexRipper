@@ -2,7 +2,7 @@
 using Reaparr.Application;
 using Reaparr.Application.Contracts;
 
-namespace Reaparr.WebAPI;
+namespace Reaparr.AppHost;
 
 /// <summary>
 ///  Autofac module for the AppHost project.

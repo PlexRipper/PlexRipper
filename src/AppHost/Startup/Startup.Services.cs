@@ -17,7 +17,7 @@ using Reaparr.Identity;
 using Reaparr.Identity.Contracts;
 using Reaparr.PlexApi;
 
-namespace Reaparr.WebAPI;
+namespace Reaparr.AppHost;
 
 /// <summary>
 ///  The Startup class configures the application services and the HTTP request pipeline.

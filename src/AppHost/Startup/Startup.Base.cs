@@ -1,4 +1,4 @@
-namespace Reaparr.WebAPI;
+namespace Reaparr.AppHost;
 
 public static partial class Startup
 {

@@ -3,7 +3,7 @@ using NSwag;
 using NSwag.Generation.Processors;
 using NSwag.Generation.Processors.Contexts;
 
-namespace Reaparr.WebAPI;
+namespace Reaparr.AppHost;
 
 internal sealed class NSwagGlobalHeaders : IOperationProcessor
 {

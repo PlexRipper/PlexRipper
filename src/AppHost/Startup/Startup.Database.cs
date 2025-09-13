@@ -2,7 +2,7 @@ using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Reaparr.Data.Contracts;
 
-namespace Reaparr.WebAPI;
+namespace Reaparr.AppHost;
 
 public static partial class Startup
 {

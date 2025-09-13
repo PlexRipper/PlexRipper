@@ -3,7 +3,7 @@ using NSwag.Generation.Processors.Contexts;
 using Reaparr.Application;
 using Reaparr.Application.Contracts;
 
-namespace Reaparr.WebAPI;
+namespace Reaparr.AppHost;
 
 /// <summary>
 ///  Adds extra types to the Swagger client that are not automatically added.

@@ -6,7 +6,7 @@ using Reaparr.Identity;
 using Reaparr.PlexApi;
 using Reaparr.Settings.Config;
 
-namespace Reaparr.WebAPI;
+namespace Reaparr.AppHost;
 
 /// <summary>
 ///  The ContainerConfig class contains all the Autofac modules.

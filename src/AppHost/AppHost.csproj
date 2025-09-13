@@ -3,8 +3,8 @@
         <TargetFramework>net9.0</TargetFramework>
         <LangVersion>13</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
-        <RootNamespace>Reaparr.WebAPI</RootNamespace>
-        <AssemblyName>Reaparr.WebAPI</AssemblyName>
+        <RootNamespace>Reaparr.AppHost</RootNamespace>
+        <AssemblyName>Reaparr.AppHost</AssemblyName>
         <UserSecretsId>0732cfe0-5874-40d5-99f7-8794dfabd959</UserSecretsId>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
         <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>

@@ -2,7 +2,7 @@ using Reaparr.Application;
 using Reaparr.Application.Contracts;
 using Reaparr.Environment;
 
-namespace Reaparr.WebAPI;
+namespace Reaparr.AppHost;
 
 /// <summary>
 /// The Boot class is used to sequentially start various processes needed to start Reaparr.

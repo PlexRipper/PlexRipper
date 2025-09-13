@@ -17,4 +17,7 @@
         </PackageReference>
         <PackageReference Include="Serilog" Version="4.3.0" />
     </ItemGroup>
+    <ItemGroup>
+      <Folder Include="_Shared\" />
+    </ItemGroup>
 </Project>

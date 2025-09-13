@@ -28,4 +28,7 @@
     <ItemGroup>
         <Compile Include="..\Domain\GlobalUsings.cs" />
     </ItemGroup>
+    <ItemGroup>
+      <Folder Include="_Shared\" />
+    </ItemGroup>
 </Project>

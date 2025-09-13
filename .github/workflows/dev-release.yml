@@ -100,7 +100,7 @@ jobs:
                     
                     # Generate release notes and format it to GitHub markdown
                     TEMP_FILE=$(mktemp)
-                    npx --prefix src/WebAPI/ClientApp/ semantic-release --dry-run --range "$TAG_NAME..HEAD" | \
+                    npx --prefix src/AppHost/ClientApp/ semantic-release --dry-run --range "$TAG_NAME..HEAD" | \
                     perl -ne 'print if /^###/ .. eof' | \
                     sed -E -e 's/\(([0-9a-f]{7,})\)/([\1](https:\/\/github.com\/Reaparr\/Reaparr\/commit\/\1))/g' | \
                     sed -e 's/^# \(.*\)/# \1/' \

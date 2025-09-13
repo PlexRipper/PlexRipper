@@ -44,7 +44,7 @@
         <ProjectReference Include="..\Settings\Settings.csproj" />
     </ItemGroup>
     <ItemGroup>
-        <None Remove="WebAPI.csproj.DotSettings" />
+        <None Remove="AppHost.csproj.DotSettings" />
         <None Remove="ClientApp\**" />
     </ItemGroup>
     <ItemGroup>

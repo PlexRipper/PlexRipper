@@ -1,8 +1,8 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Reaparr Back-End Development" type="DotNetProject" factoryName=".NET Project" activateToolWindowBeforeRun="false">
-    <option name="EXE_PATH" value="$PROJECT_DIR$/src/WebAPI/bin/Debug/net9.0/Reaparr.WebAPI" />
+    <option name="EXE_PATH" value="$PROJECT_DIR$/src/AppHost/bin/Debug/net9.0/Reaparr.AppHost" />
     <option name="PROGRAM_PARAMETERS" value="" />
-    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/WebAPI" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/AppHost" />
     <option name="PASS_PARENT_ENVS" value="0" />
     <envs>
       <env name="DEVELOPMENT_ROOT_PATH" value="$PROJECT_DIR$/../../DATA/ReaparrCache/" />

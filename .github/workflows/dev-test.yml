@@ -74,7 +74,7 @@ jobs:
                 uses: ./.github/workflows/steps/client-app-install/
             -   name: Run Typescript type check
                 run: bun run typecheck
-                working-directory: src/WebAPI/ClientApp/
+                working-directory: src/AppHost/ClientApp/
 
     # Front-End-Unit-Tests:
     Front-End-Unit-Tests:
@@ -96,13 +96,13 @@ jobs:
                 uses: ./.github/workflows/steps/client-app-install/
             -   name: Run Vitest tests
                 run: bun run test
-                working-directory: src/WebAPI/ClientApp/
+                working-directory: src/AppHost/ClientApp/
             -   name: Upload test results
                 if: always()
                 uses: actions/upload-artifact@v4
                 with:
                     name: frontend-test-results
-                    path: src/WebAPI/ClientApp/test-results
+                    path: src/AppHost/ClientApp/test-results
                     retention-days: 7
 
     Front-End-Eslint-Check:
@@ -124,7 +124,7 @@ jobs:
                 uses: ./.github/workflows/steps/client-app-install/
             -   name: Run eslint check
                 run: bun run lint
-                working-directory: src/WebAPI/ClientApp/
+                working-directory: src/AppHost/ClientApp/
 
     Front-End-Integration-Tests:
         needs: [Check-Frontend-Changes, Check-PR-Status]
@@ -157,7 +157,7 @@ jobs:
                     browser: firefox
                     start: bun run static-server
                     parallel: true
-                    working-directory: ./src/WebAPI/ClientApp/
+                    working-directory: ./src/AppHost/ClientApp/
                     wait-on: 'http://localhost:${{ env.PORT }}'
                 env:
                     CYPRESS_NODE_ENV: development

@@ -15,6 +15,7 @@ public class TorznabEndpointRequestValidator : Validator<TorznabEndpointRequest>
 
 public sealed class TorznabEndpoint : Endpoint<TorznabEndpointRequest>
 {
+    private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
 
     public override void Configure()
@@ -24,13 +25,16 @@ public sealed class TorznabEndpoint : Endpoint<TorznabEndpointRequest>
         AllowAnonymous();
     }
 
-    public TorznabEndpoint(ICommandExecutor commandExecutor)
+    public TorznabEndpoint(ILogger logger, ICommandExecutor commandExecutor)
     {
+        _log = logger.ForContext<TorznabEndpoint>();
         _commandExecutor = commandExecutor;
     }
 
     public override async Task HandleAsync(TorznabEndpointRequest req, CancellationToken ct)
     {
+        _log.Here().DebugApiCall(HttpContext, req);
+        
         switch (req.Type)
         {
             case "caps":
@@ -45,7 +49,11 @@ public sealed class TorznabEndpoint : Endpoint<TorznabEndpointRequest>
                     Query = req.Query,
                     Season = req.Season,
                     Episode = req.Episode,
-                    TVDB_ID = req.TvdbId
+                    TVDB_ID = req.TvdbId,
+                    IMDB_ID = req.ImdbId,
+                    TMDB_ID = req.TmdbId,
+                    Limit = req.Limit,
+                    Offset = req.Offset,
                 }, ct);
                 await Send.XMLAsync(searchTvShowResponse, cancellationToken: ct);
                 break;

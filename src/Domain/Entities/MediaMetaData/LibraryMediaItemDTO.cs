@@ -14,6 +14,10 @@ public record LibraryMediaItemDTO
 
     public required int Year { get; init; }
 
+    public required int ParentIndex { get; init; }
+
+    public required int Index { get; init; }
+
     public required string Studio { get; init; }
 
     public required string ContentRating { get; init; }

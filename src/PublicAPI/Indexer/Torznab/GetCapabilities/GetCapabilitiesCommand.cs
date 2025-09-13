@@ -20,6 +20,47 @@ public class GetCapabilitiesCommandHandler : ICommandHandler<GetCapabilitiesComm
     {
         var response = new TorznabCapsResponseDTO
         {
+            Xmlns = new System.Xml.Serialization.XmlSerializerNamespaces(new[]
+            {
+                new System.Xml.XmlQualifiedName("torznab", "http://torznab.com/schemas/2015/feed"),
+            }),
+            Server = new TorznabServer
+            {
+                Version = "1.3",
+                Title = "Reaparr Indexer"
+            },
+            Limits = new TorznabLimits
+            {
+                Max = 100,
+                Default = 50
+            },
+            Searching = new TorznabSearching
+            {
+                Search = new TorznabSearch
+                {
+                    Available = "yes",
+                    SupportedParams = "q,cat,limit,offset,extended,attrs"
+                },
+                TvSearch = new TorznabSearch
+                {
+                    Available = "yes",
+                    SupportedParams = "q,season,ep,tvdbid,imdbid,tmdbid,extended,attrs,cat,limit,offset",
+                },
+                MovieSearch = new TorznabSearch
+                {
+                    Available = "yes",
+                    SupportedParams = "q,imdbid,tmdbid,extended,attrs,cat,limit,offset",
+                },
+            },
+            Attributes =
+            [
+                new TorznabCapsAttr { Name = "seeders", Value = "yes" },
+                new TorznabCapsAttr { Name = "peers", Value = "yes" },
+                new TorznabCapsAttr { Name = "language", Value = "en" },
+                new TorznabCapsAttr { Name = "downloadvolumefactor", Value = "1.0" },
+                new TorznabCapsAttr { Name = "uploadvolumefactor", Value = "1.0" },
+                new TorznabCapsAttr { Name = "tags", Value = "yes" },
+            ],
             Categories =
             [
                 // Movies

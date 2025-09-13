@@ -1,8 +1,12 @@
+using System.Xml;
 using System.Xml.Serialization;
 
 [XmlRoot("caps")]
 public record TorznabCapsResponseDTO
 {
+    [XmlNamespaceDeclarations]
+    public XmlSerializerNamespaces? Xmlns { get; set; }
+
     [XmlElement("server")]
     public TorznabServer Server { get; set; } = new();
 
@@ -15,6 +19,10 @@ public record TorznabCapsResponseDTO
     [XmlArray("categories")]
     [XmlArrayItem("category")]
     public List<TorznabCategory> Categories { get; set; } = new();
+
+    [XmlArray("attributes", Namespace = "http://torznab.com/schemas/2015/feed")]
+    [XmlArrayItem("attr", Namespace = "http://torznab.com/schemas/2015/feed")]
+    public List<TorznabCapsAttr> Attributes { get; set; } = new();
 }
 
 public record TorznabServer
@@ -51,6 +59,9 @@ public record TorznabSearch
 {
     [XmlAttribute("available")]
     public string Available { get; set; } = "yes";
+
+    [XmlAttribute("supportedParams")]
+    public string SupportedParams { get; set; } = string.Empty;
 }
 
 public record TorznabCategory
@@ -71,4 +82,13 @@ public record TorznabCategory
 
     [XmlAttribute("name")]
     public string Name { get; set; } = string.Empty;
+}
+
+public record TorznabCapsAttr
+{
+    [XmlAttribute("name")]
+    public string Name { get; set; } = string.Empty;
+
+    [XmlAttribute("value")]
+    public string Value { get; set; } = string.Empty;
 }

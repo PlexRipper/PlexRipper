@@ -1,18 +1,27 @@
+using System.Xml;
+
 namespace Reaparr.PublicAPI.SearchTvShow;
 
 using System.Xml.Serialization;
 
 [XmlRoot("rss")]
-public class TorznabMediaSearchResponseDTO
+public record TorznabMediaSearchResponseDTO
 {
     [XmlAttribute("version")]
     public string Version { get; set; } = "2.0";
 
     [XmlElement("channel")]
     public TorznabChannel Channel { get; set; } = new();
+
+    // Declare namespaces so XmlSerializer knows about "torznab"
+    [XmlNamespaceDeclarations]
+    public XmlSerializerNamespaces Xmlns { get; set; } = new(
+    [
+        new XmlQualifiedName("torznab", "http://torznab.com/schemas/2015/feed"),
+    ]);
 }
 
-public class TorznabChannel
+public record TorznabChannel
 {
     [XmlElement("title")]
     public string Title { get; set; } = "PlexRipper Torznab";
@@ -21,13 +30,16 @@ public class TorznabChannel
     public string Description { get; set; } = "TV search results";
 
     [XmlElement("language")]
-    public string Language { get; set; } = "en-us";
+    public string Language { get; set; } = "en-us";   
+    
+    [XmlElement("category")]
+    public string Category { get; set; } = "search";
 
     [XmlElement("item")]
     public List<TorznabItem> Items { get; set; } = new();
 }
 
-public class TorznabItem
+public record TorznabItem
 {
     [XmlElement("title")]
     public string Title { get; set; } = string.Empty;
@@ -44,14 +56,15 @@ public class TorznabItem
     [XmlElement("size")]
     public long Size { get; set; }
 
-    [XmlElement("torznab:attr")]
+    // Instead of torznab:attr, map to namespace
+    [XmlElement("attr", Namespace = "http://torznab.com/schemas/2015/feed")]
     public List<TorznabAttr> Attributes { get; set; } = new();
     
     [XmlElement("enclosure")]
     public TorznabEnclosure Enclosure { get; set; } = new();
 }
 
-public class TorznabGuid
+public record TorznabGuid
 {
     [XmlAttribute("isPermaLink")]
     public string IsPermaLink { get; set; } = "false";
@@ -60,8 +73,16 @@ public class TorznabGuid
     public string Value { get; set; } = string.Empty;
 }
 
-public class TorznabAttr
+public record TorznabAttr
 {
+    public TorznabAttr() { }
+
+    public TorznabAttr(string name, string value)
+    {
+        Name = name;
+        Value = value;
+    }
+
     [XmlAttribute("name")]
     public string Name { get; set; } = string.Empty;
 
@@ -69,7 +90,7 @@ public class TorznabAttr
     public string Value { get; set; } = string.Empty;
 }
 
-public class TorznabEnclosure
+public record TorznabEnclosure
 {
     [XmlAttribute("url")]
     public string Url { get; set; } = string.Empty;
@@ -80,4 +101,3 @@ public class TorznabEnclosure
     [XmlAttribute("type")]
     public string Type { get; set; } = "application/x-bittorrent";
 }
-

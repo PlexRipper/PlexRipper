@@ -31,49 +31,22 @@ public record TorznabEndpointRequest
     public int Episode { get; init; } = 0;
 
     /// <summary>
-    /// Thetvdb.com series ID for tvsearch queries.
+    /// TheTVDB series ID for tvsearch queries.
     /// </summary>
     [QueryParam, BindFrom("tvdbid")]
     public int TvdbId { get; init; } = 0;
 
     /// <summary>
-    /// TV Rage ID.
-    /// </summary>
-    [QueryParam, BindFrom("rid")]
-    public int Rid { get; init; } = 0;
-
-    /// <summary>
     /// IMDb ID for movie queries (e.g. "tt1234567").
     /// </summary>
     [QueryParam, BindFrom("imdbid")]
-    public int ImdbId { get; init; } = 0;
+    public string ImdbId { get; init; } = string.Empty;
 
     /// <summary>
     /// TMDb ID for movie queries.
     /// </summary>
     [QueryParam, BindFrom("tmdbid")]
     public int TmdbId { get; init; } = 0;
-
-    /// <summary>
-    /// Optional author field (used by Readarr for book search).
-    /// Not required for Sonarr/Radarr.
-    /// </summary>
-    [QueryParam, BindFrom("author")]
-    public string? Author { get; init; }
-
-    /// <summary>
-    /// Optional title field (used by Readarr for book search).
-    /// Not required for Sonarr/Radarr.
-    /// </summary>
-    [QueryParam, BindFrom("title")]
-    public string? Title { get; init; }
-
-    /// <summary>
-    /// Optional ISBN field (used by Readarr for book search).
-    /// Not required for Sonarr/Radarr.
-    /// </summary>
-    [QueryParam, BindFrom("isbn")]
-    public string? Isbn { get; init; }
 
     /// <summary>
     /// API key provided by the requesting client (Sonarr/Radarr).
@@ -90,8 +63,20 @@ public record TorznabEndpointRequest
 
     /// <summary>
     /// Offset of results for pagination.
-    /// Used together with limit.
     /// </summary>
     [QueryParam, BindFrom("offset")]
     public int Offset { get; init; } = 0;
+
+    /// <summary>
+    /// One or more category IDs (comma-separated).
+    /// Example: "5030,5040".
+    /// </summary>
+    [QueryParam, BindFrom("cat")]
+    public int[] Categories { get; init; } = [];
+
+    /// <summary>
+    /// Extended flag (0 = basic, 1 = include extended attributes).
+    /// </summary>
+    [QueryParam, BindFrom("extended")]
+    public int Extended { get; init; } = 0;
 }

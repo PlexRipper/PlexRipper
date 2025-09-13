@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
 using Serilog;
 using Serilog.Core;
 
@@ -8,7 +9,12 @@ public static partial class LogExtensions
 {
     public static void DebugApiCall(this ILogger log, HttpContext context, object? request = null)
     {
-        log.Debug("{Method}: {EndpointPath} with {Request}", context.Request.Method, context.Request.Path, request);
+        log.Debug(
+            "{Method}: {EndpointPath} with {Request}",
+            context.Request.Method,
+            context.Request.GetDisplayUrl(),
+            request
+        );
     }
 
     [MessageTemplateFormatMethod("messageTemplate")]

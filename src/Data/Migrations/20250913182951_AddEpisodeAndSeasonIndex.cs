@@ -17,7 +17,8 @@ namespace Reaparr.Data.Migrations
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<int>(
                 name: "Guid_TMDB",
@@ -26,14 +27,16 @@ namespace Reaparr.Data.Migrations
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AddColumn<int>(
                 name: "SeasonNumber",
                 table: "PlexTvShowSeason",
                 type: "INTEGER",
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: 0
+            );
 
             migrationBuilder.AlterColumn<int>(
                 name: "Guid_TVDB",
@@ -42,7 +45,8 @@ namespace Reaparr.Data.Migrations
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<int>(
                 name: "Guid_TMDB",
@@ -51,7 +55,8 @@ namespace Reaparr.Data.Migrations
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<int>(
                 name: "Guid_TVDB",
@@ -60,7 +65,8 @@ namespace Reaparr.Data.Migrations
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<int>(
                 name: "Guid_TMDB",
@@ -69,14 +75,16 @@ namespace Reaparr.Data.Migrations
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AddColumn<int>(
                 name: "EpisodeNumber",
                 table: "PlexTvShowEpisodes",
                 type: "INTEGER",
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: 0
+            );
 
             migrationBuilder.AlterColumn<int>(
                 name: "Guid_TVDB",
@@ -85,7 +93,8 @@ namespace Reaparr.Data.Migrations
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<int>(
                 name: "Guid_TMDB",
@@ -94,19 +103,16 @@ namespace Reaparr.Data.Migrations
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "SeasonNumber",
-                table: "PlexTvShowSeason");
+            migrationBuilder.DropColumn(name: "SeasonNumber", table: "PlexTvShowSeason");
 
-            migrationBuilder.DropColumn(
-                name: "EpisodeNumber",
-                table: "PlexTvShowEpisodes");
+            migrationBuilder.DropColumn(name: "EpisodeNumber", table: "PlexTvShowEpisodes");
 
             migrationBuilder.AlterColumn<string>(
                 name: "Guid_TVDB",
@@ -115,7 +121,8 @@ namespace Reaparr.Data.Migrations
                 nullable: true,
                 oldClrType: typeof(int),
                 oldType: "INTEGER",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "Guid_TMDB",
@@ -124,7 +131,8 @@ namespace Reaparr.Data.Migrations
                 nullable: true,
                 oldClrType: typeof(int),
                 oldType: "INTEGER",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "Guid_TVDB",
@@ -133,7 +141,8 @@ namespace Reaparr.Data.Migrations
                 nullable: true,
                 oldClrType: typeof(int),
                 oldType: "INTEGER",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "Guid_TMDB",
@@ -142,7 +151,8 @@ namespace Reaparr.Data.Migrations
                 nullable: true,
                 oldClrType: typeof(int),
                 oldType: "INTEGER",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "Guid_TVDB",
@@ -151,7 +161,8 @@ namespace Reaparr.Data.Migrations
                 nullable: true,
                 oldClrType: typeof(int),
                 oldType: "INTEGER",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "Guid_TMDB",
@@ -160,7 +171,8 @@ namespace Reaparr.Data.Migrations
                 nullable: true,
                 oldClrType: typeof(int),
                 oldType: "INTEGER",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "Guid_TVDB",
@@ -169,7 +181,8 @@ namespace Reaparr.Data.Migrations
                 nullable: true,
                 oldClrType: typeof(int),
                 oldType: "INTEGER",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "Guid_TMDB",
@@ -178,7 +191,8 @@ namespace Reaparr.Data.Migrations
                 nullable: true,
                 oldClrType: typeof(int),
                 oldType: "INTEGER",
-                oldNullable: true);
+                oldNullable: true
+            );
         }
     }
 }

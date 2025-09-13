@@ -129,7 +129,7 @@ public class BasePlexMedia : BaseEntity
     /// <example>tmdb://1433</example>
     /// </summary>
     [Column(Order = 25)]
-    public required string? Guid_TMDB { get; init; }
+    public required int? Guid_TMDB { get; init; }
 
     /// <summary>
     /// Gets or sets the TVDB guid.
@@ -137,7 +137,7 @@ public class BasePlexMedia : BaseEntity
     /// <example>tvdb://73141</example>
     /// </summary>
     [Column(Order = 26)]
-    public required string? Guid_TVDB { get; init; }
+    public required int? Guid_TVDB { get; init; }
 
     #endregion
 

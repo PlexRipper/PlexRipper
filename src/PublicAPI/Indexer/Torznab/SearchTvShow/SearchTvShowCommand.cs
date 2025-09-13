@@ -1,5 +1,7 @@
 using FastEndpoints;
 using FluentValidation;
+using Microsoft.EntityFrameworkCore;
+using Reaparr.Data.Contracts;
 using Reaparr.PublicAPI.SearchTvShow;
 
 public record SearchTvShowCommand : ICommand<TorznabMediaSearchResponseDTO>
@@ -10,25 +12,32 @@ public record SearchTvShowCommand : ICommand<TorznabMediaSearchResponseDTO>
 
     public required int Episode { get; init; }
 
+    public required int Limit { get; init; }
+
+    public required int Offset { get; init; }
+
     public required int TVDB_ID { get; init; }
+
+    public required int TMDB_ID { get; init; }
+
+    public required string IMDB_ID { get; init; }
 }
 
 public class SearchTvShowCommandValidator : AbstractValidator<SearchTvShowCommand>
 {
-    public SearchTvShowCommandValidator()
-    {
-        RuleFor(x => x).NotNull();
-    }
+    public SearchTvShowCommandValidator() { }
 }
 
 public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, TorznabMediaSearchResponseDTO>
 {
-    private readonly ICommandExecutor _commandExecutor;
+    private readonly ILogger _log;
+    private readonly IReaparrDbContext _dbContext;
     private readonly IEventPublisher _eventPublisher;
 
-    public SearchTvShowCommandHandler(ICommandExecutor commandExecutor, IEventPublisher eventPublisher)
+    public SearchTvShowCommandHandler(ILogger log, IReaparrDbContext dbContext, IEventPublisher eventPublisher)
     {
-        _commandExecutor = commandExecutor;
+        _log = log.ForContext<SearchTvShowCommandHandler>();
+        _dbContext = dbContext;
         _eventPublisher = eventPublisher;
     }
 
@@ -36,42 +45,98 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, T
         SearchTvShowCommand command,
         CancellationToken cancellationToken)
     {
+        var episodes = new List<PlexTvShowEpisode>();
+        if (command is { Season: 0, Episode: 0, Query: "" })
+        {
+            episodes = await _dbContext.PlexTvShowEpisodes.Skip(command.Offset)
+                .Take(command.Limit)
+                .Include(x => x.TvShowSeason)
+                .Include(x => x.TvShow)
+                .Include(e => e.MediaDataList)
+                .ThenInclude(x => x.Parts)
+                .ToListAsync(cancellationToken);
+        }
+        else
+        {
+            episodes = await _dbContext.PlexTvShowEpisodes
+                .Include(x => x.TvShowSeason)
+                .Include(x => x.TvShow)
+                .Where(e =>
+                    e.TvShow.Guid_IMDB == command.IMDB_ID
+                    || e.TvShow.Guid_TMDB == command.TMDB_ID
+                    || e.TvShow.Guid_TVDB == command.TVDB_ID)
+                .Where(e => e.TvShowSeason.SeasonNumber == command.Season)
+                .Where(e => e.EpisodeNumber == command.Episode)
+                .Include(e => e.MediaDataList)
+                .ThenInclude(x => x.Parts)
+                .ToListAsync(cancellationToken);
+        }
 
-        await Task.CompletedTask;
+        var items = new List<TorznabItem>();
+
+        foreach (var episode in episodes)
+        {
+            var tvShow = episode.TvShow;
+            var season = episode.TvShowSeason;
+            if (tvShow is null)
+            {
+                _log.Error("TvShow is null for episode {EpisodeId}", episode.Id);
+                continue;
+            }
+
+            if (season is null)
+            {
+                _log.Error("Seasson is null for episode {EpisodeId}", episode.Id);
+                continue;
+            }
+
+            foreach (var mediaData in episode.MediaDataList)
+            foreach (var part in mediaData.Parts)
+            {
+                var item = new TorznabItem()
+                {
+                    Title = Path.GetFileName(part.File),
+                    PubDate = episode.AddedAt.ToString("R"),
+                    Guid = new TorznabGuid { Value = Guid.NewGuid().ToString() },
+                    Link = $"http://localhost:5000/api/public/download/{Guid.NewGuid()}",
+                    Size = part.Size,
+                    Enclosure = new TorznabEnclosure
+                    {
+                        Url = $"http://localhost:5000/api/public/download/{Guid.NewGuid()}",
+                        Length = part.Size,
+                        Type = "application/x-bittorrent",
+                    },
+                };
+                item.Attributes.Add(new TorznabAttr("season", season.SeasonNumber.ToString()));
+                item.Attributes.Add(new TorznabAttr("episode", episode.EpisodeNumber.ToString()));
+                item.Attributes.Add(new TorznabAttr("seeders", "100"));
+                item.Attributes.Add(new TorznabAttr("peers", "100"));
+                item.Attributes.Add(new TorznabAttr("type", "series"));
+                item.Attributes.Add(new TorznabAttr("language", "English"));
+                item.Attributes.Add(new TorznabAttr("downloadvolumefactor", "0.0")); // Freeleech 
+
+                if (tvShow.Guid_TVDB is not null)
+                    item.Attributes.Add(new TorznabAttr("tvdbid", tvShow.Guid_TVDB.ToString()));
+
+                if (tvShow.Guid_TMDB is not null)
+                    item.Attributes.Add(new TorznabAttr("tmdbid", tvShow.Guid_TMDB.ToString()));
+
+                if (!string.IsNullOrEmpty(tvShow.Guid_IMDB))
+                    item.Attributes.Add(new TorznabAttr("imdb", tvShow.Guid_IMDB));
+
+                items.Add(item);
+            }
+        }
+
         return new TorznabMediaSearchResponseDTO
         {
             Channel = new TorznabChannel
             {
-                Title = "PlexRipper Torznab",
+                Title = "Reaparr Indexer",
                 Description = $"TV Search results for {command.Query}",
-                Items =
-                {
-                    new TorznabItem
-                    {
-                        Title = $"{command.Query}.S{command.Season:00}E{command.Episode:00}.1080p.WEBRip",
-                        Guid = new TorznabGuid { Value = Guid.NewGuid().ToString() },
-                        Link = $"http://localhost:5000/api/public/download/{Guid.NewGuid()}",
-                        PubDate = DateTime.UtcNow.ToString("R"),
-                        Size = 2147483648,
-                        Enclosure = new TorznabEnclosure
-                        {
-                            Url = $"http://localhost:5000/api/public/download/{Guid.NewGuid()}",
-                            Length = 2147483648,
-                            Type = "application/x-bittorrent",
-                        },
-                        Attributes =
-                        {
-                            new TorznabAttr { Name = "category", Value = "5030" },
-                            new TorznabAttr { Name = "infohash", Value = "ABCDEF123456..." },
-                            new TorznabAttr { Name = "seeders", Value = "100" },
-                            new TorznabAttr { Name = "peers", Value = "120" },
-                            new TorznabAttr { Name = "language", Value = "English" },
-                            new TorznabAttr { Name = "downloadvolumefactor", Value = "1" },
-                            new TorznabAttr { Name = "uploadvolumefactor", Value = "1" },
-                            new TorznabAttr { Name = "tvdbid", Value = "81189" }
-                        },
-                    },
-                },
+                Language = "en-us",
+                Category = "search",
+                Items = items,
             },
         };
     }

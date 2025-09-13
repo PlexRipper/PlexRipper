@@ -2,6 +2,8 @@
 
 public class PlexTvShowSeason : BasePlexMedia
 {
+    public required int SeasonNumber { get; set; }
+
     /// <summary>
     /// The Plex key of the <see cref="PlexTvShow"/> this belongs too.
     /// </summary>

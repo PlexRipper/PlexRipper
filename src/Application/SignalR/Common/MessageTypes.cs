@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Serialization;
 
-namespace Reaparr.WebAPI;
+namespace Reaparr.Application;
 
 /// <summary>
 ///  Message types for SignalR communication from server to client.

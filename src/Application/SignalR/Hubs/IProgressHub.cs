@@ -1,7 +1,6 @@
 using Reaparr.Application.Contracts;
-using Reaparr.WebAPI.Contracts;
 
-namespace Reaparr.WebAPI;
+namespace Reaparr.Application;
 
 /// <summary>
 ///  The ProgressHub class is a SignalR hub that sends progress updates to the front-end.

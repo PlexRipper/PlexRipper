@@ -1,6 +1,6 @@
 using Reaparr.Application.Contracts;
 
-namespace Reaparr.WebAPI;
+namespace Reaparr.Application;
 
 /// <summary>
 ///  The NotificationHub class is a SignalR hub that sends notifications to the front-end.

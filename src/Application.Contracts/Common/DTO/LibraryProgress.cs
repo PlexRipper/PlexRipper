@@ -1,6 +1,6 @@
 ﻿using Reaparr.Domain;
 
-namespace Reaparr.WebAPI.Contracts;
+namespace Reaparr.Application.Contracts;
 
 public record LibraryProgress
 {

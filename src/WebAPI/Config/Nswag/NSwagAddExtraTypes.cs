@@ -1,7 +1,7 @@
 using NSwag.Generation.Processors;
 using NSwag.Generation.Processors.Contexts;
+using Reaparr.Application;
 using Reaparr.Application.Contracts;
-using Reaparr.WebAPI.Contracts;
 
 namespace Reaparr.WebAPI;
 

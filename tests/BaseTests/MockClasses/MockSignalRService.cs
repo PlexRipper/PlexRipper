@@ -1,6 +1,6 @@
 ﻿using System.Collections.Concurrent;
+using Reaparr.Application;
 using Reaparr.Application.Contracts;
-using Reaparr.WebAPI.Contracts;
 
 namespace Reaparr.BaseTests;
 

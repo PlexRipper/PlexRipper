@@ -1,5 +1,4 @@
 ﻿using Reaparr.Domain;
-using Reaparr.WebAPI.Contracts;
 
 namespace Reaparr.Application.Contracts;
 

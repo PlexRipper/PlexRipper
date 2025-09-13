@@ -1149,16 +1149,14 @@
           "Reaparr.Identity.Contracts": "[1.0.0, )",
           "Reaparr.PlexApi.Contracts": "[1.0.0, )",
           "Reaparr.Settings": "[1.0.0, )",
-          "Reaparr.Settings.Contracts": "[1.0.0, )",
-          "Reaparr.WebAPI.Contracts": "[1.0.0, )"
+          "Reaparr.Settings.Contracts": "[1.0.0, )"
         }
       },
       "Reaparr.Application.Contracts": {
         "type": "Project",
         "dependencies": {
           "Quartz": "[3.15.0, )",
-          "Reaparr.Domain": "[1.0.0, )",
-          "Reaparr.WebAPI.Contracts": "[1.0.0, )"
+          "Reaparr.Domain": "[1.0.0, )"
         }
       },
       "Reaparr.Data": {
@@ -1299,12 +1297,6 @@
         }
       },
       "Reaparr.Settings.Contracts": {
-        "type": "Project",
-        "dependencies": {
-          "Reaparr.Domain": "[1.0.0, )"
-        }
-      },
-      "Reaparr.WebAPI.Contracts": {
         "type": "Project",
         "dependencies": {
           "Reaparr.Domain": "[1.0.0, )"

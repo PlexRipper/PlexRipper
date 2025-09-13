@@ -1,4 +1,4 @@
-﻿namespace Reaparr.WebAPI.Contracts;
+﻿namespace Reaparr.Application.Contracts;
 
 public class SyncServerMediaProgress
 {

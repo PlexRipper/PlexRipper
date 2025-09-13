@@ -1,7 +1,6 @@
 ﻿using Quartz;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
-using Reaparr.WebAPI.Contracts;
 
 namespace Reaparr.Application;
 

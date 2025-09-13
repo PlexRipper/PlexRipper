@@ -34,7 +34,6 @@
         <ProjectReference Include="..\PlexApi.Contracts\PlexApi.Contracts.csproj" />
         <ProjectReference Include="..\Settings.Contracts\Settings.Contracts.csproj" />
         <ProjectReference Include="..\Settings\Settings.csproj" />
-        <ProjectReference Include="..\WebAPI.Contracts\WebAPI.Contracts.csproj" />
     </ItemGroup>
     <ItemGroup>
         <FrameworkReference Include="Microsoft.AspNetCore.App" />

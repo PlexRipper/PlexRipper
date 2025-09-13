@@ -32,7 +32,7 @@ public static class ContainerConfig
         builder.RegisterModule<SettingsModule>();
 
         // Presentation
-        builder.RegisterModule<WebApiModule>();
+        builder.RegisterModule<AppHostModule>();
 
         // Packages
         builder.RegisterModule<QuartzModule>();

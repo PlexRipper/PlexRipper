@@ -29,5 +29,10 @@ public class ApplicationModule : Module
             .RegisterType<RefreshLibraryProgressReporter>()
             .As<IRefreshLibraryProgressReporter>()
             .InstancePerDependency();
+        
+        // SignalR
+        builder.RegisterType<SignalRService>().As<ISignalRService>();
+        builder.RegisterType<ProgressHub>().ExternallyOwned();
+        builder.RegisterType<NotificationHub>().ExternallyOwned();
     }
 }

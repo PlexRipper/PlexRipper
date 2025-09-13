@@ -13,7 +13,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{664D406C
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Application.UnitTests", "tests\UnitTests\Application.UnitTests\Application.UnitTests.csproj", "{DEFF4009-1FAB-4392-80B6-707E2DC5C00B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebAPI", "src\WebAPI\WebAPI.csproj", "{1D811D12-E2B0-41F0-9C95-EDF06E4904F0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppHost", "src\AppHost\AppHost.csproj", "{1D811D12-E2B0-41F0-9C95-EDF06E4904F0}"
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker\docker-compose.dcproj", "{935CDCB2-099E-41A5-B585-707D42DBCE1E}"
 EndProject

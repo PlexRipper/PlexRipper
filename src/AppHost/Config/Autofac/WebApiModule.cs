@@ -5,7 +5,7 @@ using Reaparr.Application.Contracts;
 namespace Reaparr.WebAPI;
 
 /// <summary>
-///  Autofac module for the WebAPI project.
+///  Autofac module for the AppHost project.
 /// </summary>
 public class WebApiModule : Module
 {

@@ -5,6 +5,12 @@
         <LangVersion>13</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <AssemblyName>Reaparr.PublicAPI</AssemblyName>
+        <RootNamespace>Reaparr.PublicAPI</RootNamespace>
     </PropertyGroup>
-
+    <ItemGroup>
+        <PackageReference Include="FastEndpoints" Version="7.0.1" />
+        <PackageReference Include="FastEndpoints.Swagger" Version="7.0.1" />
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
 </Project>

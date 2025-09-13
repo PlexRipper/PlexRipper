@@ -1341,6 +1341,16 @@
           "Reaparr.Domain": "[1.0.0, )"
         }
       },
+      "Reaparr.PublicAPI": {
+        "type": "Project",
+        "dependencies": {
+          "FastEndpoints": "[7.0.1, )",
+          "FastEndpoints.Swagger": "[7.0.1, )"
+        }
+      },
+      "Reaparr.PublicAPI.Contracts": {
+        "type": "Project"
+      },
       "Reaparr.Settings": {
         "type": "Project",
         "dependencies": {

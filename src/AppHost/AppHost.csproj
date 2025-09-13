@@ -38,6 +38,7 @@
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\Application\Application.csproj" />
+        <ProjectReference Include="..\PublicAPI\PublicAPI.csproj" />
         <ProjectReference Include="..\Data\Data.csproj" />
         <ProjectReference Include="..\FileSystem\FileSystem.csproj" />
         <ProjectReference Include="..\Identity\Identity.csproj" />

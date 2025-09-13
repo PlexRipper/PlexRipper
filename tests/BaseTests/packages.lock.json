@@ -1819,6 +1819,7 @@
           "Reaparr.FileSystem": "[1.0.0, )",
           "Reaparr.Identity": "[1.0.0, )",
           "Reaparr.PlexApi": "[1.0.0, )",
+          "Reaparr.PublicAPI": "[1.0.0, )",
           "Reaparr.Settings": "[1.0.0, )",
           "Serilog.AspNetCore": "[9.0.0, )"
         }
@@ -1980,6 +1981,13 @@
           "LukeHagar.PlexAPI.SDK": "[0.15.1, )",
           "Reaparr.Application.Contracts": "[1.0.0, )",
           "Reaparr.Domain": "[1.0.0, )"
+        }
+      },
+      "Reaparr.PublicAPI": {
+        "type": "Project",
+        "dependencies": {
+          "FastEndpoints": "[7.0.1, )",
+          "FastEndpoints.Swagger": "[7.0.1, )"
         }
       },
       "Reaparr.Settings": {

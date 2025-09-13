@@ -31,6 +31,10 @@
               <option name="containerPath" value="/config" />
               <option name="hostPath" value="$PROJECT_DIR$/../../DATA/DockerCache/Sonarr/Config/" />
             </DockerVolumeBindingImpl>
+            <DockerVolumeBindingImpl>
+              <option name="containerPath" value="/Destination" />
+              <option name="hostPath" value="$PROJECT_DIR$/../../DATA/DockerCache/Sonarr/Destination" />
+            </DockerVolumeBindingImpl>
           </list>
         </option>
       </settings>

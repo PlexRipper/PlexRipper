@@ -16,43 +16,43 @@ public record TorznabEndpointRequest
     /// Used in search, tvsearch, and movie queries.
     /// </summary>
     [QueryParam, BindFrom("q")]
-    public string? Query { get; init; }
+    public string Query { get; init; } = string.Empty;
 
     /// <summary>
     /// Season number for tvsearch queries.
     /// </summary>
     [QueryParam, BindFrom("season")]
-    public int? Season { get; init; }
+    public int Season { get; init; } = 0;
 
     /// <summary>
     /// Episode number for tvsearch queries.
     /// </summary>
     [QueryParam, BindFrom("ep")]
-    public int? Episode { get; init; }
+    public int Episode { get; init; } = 0;
 
     /// <summary>
     /// Thetvdb.com series ID for tvsearch queries.
     /// </summary>
     [QueryParam, BindFrom("tvdbid")]
-    public int? TvdbId { get; init; }
+    public int TvdbId { get; init; } = 0;
 
     /// <summary>
-    /// TV Rage ID (legacy, rarely used by Sonarr).
+    /// TV Rage ID.
     /// </summary>
     [QueryParam, BindFrom("rid")]
-    public int? Rid { get; init; }
+    public int Rid { get; init; } = 0;
 
     /// <summary>
     /// IMDb ID for movie queries (e.g. "tt1234567").
     /// </summary>
     [QueryParam, BindFrom("imdbid")]
-    public string? ImdbId { get; init; }
+    public int ImdbId { get; init; } = 0;
 
     /// <summary>
     /// TMDb ID for movie queries.
     /// </summary>
     [QueryParam, BindFrom("tmdbid")]
-    public int? TmdbId { get; init; }
+    public int TmdbId { get; init; } = 0;
 
     /// <summary>
     /// Optional author field (used by Readarr for book search).
@@ -79,19 +79,19 @@ public record TorznabEndpointRequest
     /// API key provided by the requesting client (Sonarr/Radarr).
     /// </summary>
     [QueryParam, BindFrom("apikey")]
-    public string? ApiKey { get; init; }
+    public string ApiKey { get; init; } = string.Empty;
 
     /// <summary>
     /// Max number of results to return.
     /// Sonarr/Radarr will pass this for pagination.
     /// </summary>
     [QueryParam, BindFrom("limit")]
-    public int? Limit { get; init; }
+    public int Limit { get; init; } = 50;
 
     /// <summary>
     /// Offset of results for pagination.
     /// Used together with limit.
     /// </summary>
     [QueryParam, BindFrom("offset")]
-    public int? Offset { get; init; }
+    public int Offset { get; init; } = 0;
 }

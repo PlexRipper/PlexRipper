@@ -15,8 +15,8 @@ runs:
             id: check_frontend
             shell: bash
             run: |
-                echo "Checking for changes in src/WebAPI/ClientApp/"
-                if git diff --name-only origin/${{ github.base_ref }} | grep -q "^src/WebAPI/ClientApp/"; then
+                echo "Checking for changes in src/AppHost/ClientApp/"
+                if git diff --name-only origin/${{ github.base_ref }} | grep -q "^src/AppHost/ClientApp/"; then
                   echo "Frontend changes detected."
                   echo "should_run=true" >> $GITHUB_OUTPUT
                 else

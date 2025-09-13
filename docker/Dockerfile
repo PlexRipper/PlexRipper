@@ -18,11 +18,11 @@ ENV NUXT_PUBLIC_IS_DOCKER=true
 WORKDIR /tmp/ClientApp
 
 ## Copy the package.json and install the dependencies
-COPY ./src/WebAPI/ClientApp/package.json ./src/WebAPI/ClientApp/bun.lockb ./
+COPY ./src/AppHost/ClientApp/package.json ./src/AppHost/ClientApp/bun.lockb ./
 RUN bun install --frozen-lockfile
 
 ## Copy the project files
-COPY ./src/WebAPI/ClientApp/ ./
+COPY ./src/AppHost/ClientApp/ ./
 RUN bun run generate --fail-on-error
     
 # Stage 2 - Build the .NET back-end
@@ -65,19 +65,18 @@ COPY ["src/PlexApi.Contracts/PlexApi.Contracts.csproj", "src/PlexApi.Contracts/"
 COPY ["src/Settings/Settings.csproj", "src/Settings/"]
 COPY ["src/Settings.Contracts/Settings.Contracts.csproj", "src/Settings.Contracts/"]
 
-## WebAPI Projects
-COPY ["src/WebAPI/WebAPI.csproj", "src/WebAPI/"]
-COPY ["src/WebAPI.Contracts/WebAPI.Contracts.csproj", "src/WebAPI.Contracts/"]
+## AppHost Projects
+COPY ["src/AppHost/AppHost.csproj", "src/AppHost/"]
 
 
 ## Restore Projects
-RUN dotnet restore "src/WebAPI/WebAPI.csproj" --locked-mode
+RUN dotnet restore "src/AppHost/AppHost.csproj" --locked-mode
 
 COPY . .
-WORKDIR "/src/src/WebAPI"
+WORKDIR "/src/src/AppHost"
 
 ## Build and Publish
-RUN dotnet publish "WebAPI.csproj" -c Release -o /app/publish \
+RUN dotnet publish "AppHost.csproj" -c Release -o /app/publish \
     --no-restore \
     /p:AssemblyVersion=${VERSION} \
     /p:InformationalVersion=${INFORMATIONAL_VERSION} \
@@ -93,6 +92,8 @@ ARG TARGETPLATFORM
 ARG S6_OVERLAY_VERSION="3.2.1.0"
 
 ## Set environment variables
+ENV VERSION=${VERSION}
+ENV INFORMATIONAL_VERSION=${INFORMATIONAL_VERSION}
 ENV PORT=${PORT}
 ENV DOTNET_ENVIRONMENT=Production
 ENV DOTNET_URLS=http://+:${PORT}

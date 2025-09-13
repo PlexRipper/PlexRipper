@@ -450,8 +450,7 @@
         "type": "Project",
         "dependencies": {
           "Quartz": "[3.15.0, )",
-          "Reaparr.Domain": "[1.0.0, )",
-          "Reaparr.WebAPI.Contracts": "[1.0.0, )"
+          "Reaparr.Domain": "[1.0.0, )"
         }
       },
       "Reaparr.Data.Contracts": {
@@ -519,12 +518,6 @@
         }
       },
       "Reaparr.Settings.Contracts": {
-        "type": "Project",
-        "dependencies": {
-          "Reaparr.Domain": "[1.0.0, )"
-        }
-      },
-      "Reaparr.WebAPI.Contracts": {
         "type": "Project",
         "dependencies": {
           "Reaparr.Domain": "[1.0.0, )"

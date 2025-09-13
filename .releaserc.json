@@ -56,7 +56,7 @@
             "@semantic-release/npm",
             {
                 "npmPublish": false,
-                "pkgRoot": "./src/WebAPI/ClientApp/"
+                "pkgRoot": "./src/AppHost/ClientApp/"
             }
         ],
         [
@@ -64,7 +64,7 @@
             {
                 "assets": [
                     "CHANGELOG.md",
-                    "./src/WebAPI/ClientApp/package.json"
+                    "./src/AppHost/ClientApp/package.json"
                 ],
                 "message": "chore(release): Bump version to ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
             }

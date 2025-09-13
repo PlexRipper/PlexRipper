@@ -259,7 +259,7 @@
           "Serilog.Sinks.TestCorrelator": "[4.0.0, )"
         }
       },
-      "Reaparr.WebAPI.Contracts": {
+      "Reaparr.AppHost.Contracts": {
         "type": "Project",
         "dependencies": {
           "Reaparr.Domain": "[1.0.0, )"

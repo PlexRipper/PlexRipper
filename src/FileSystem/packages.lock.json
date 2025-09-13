@@ -529,8 +529,7 @@
         "type": "Project",
         "dependencies": {
           "Quartz": "[3.15.0, )",
-          "Reaparr.Domain": "[1.0.0, )",
-          "Reaparr.WebAPI.Contracts": "[1.0.0, )"
+          "Reaparr.Domain": "[1.0.0, )"
         }
       },
       "Reaparr.Data.Contracts": {
@@ -595,12 +594,6 @@
           "Serilog.Sinks.File": "[7.0.0, )",
           "Serilog.Sinks.Seq": "[9.0.0, )",
           "Serilog.Sinks.TestCorrelator": "[4.0.0, )"
-        }
-      },
-      "Reaparr.WebAPI.Contracts": {
-        "type": "Project",
-        "dependencies": {
-          "Reaparr.Domain": "[1.0.0, )"
         }
       }
     }

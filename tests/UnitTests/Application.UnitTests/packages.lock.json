@@ -1744,6 +1744,24 @@
         "resolved": "16.3.0",
         "contentHash": "SgMOdxbz8X65z8hraIs6hOEdnkH6hESTAIUa7viEngHOYaH+6q5XJmwr1+yb9vJpNQ19hCQY69xbFsLtXpobQA=="
       },
+      "Reaparr.AppHost": {
+        "type": "Project",
+        "dependencies": {
+          "Autofac.Extensions.DependencyInjection": "[10.0.0, )",
+          "FastEndpoints.Security": "[7.0.1, )",
+          "FastEndpoints.Swagger": "[7.0.1, )",
+          "Microsoft.AspNetCore.SpaServices.Extensions": "[9.0.8, )",
+          "Microsoft.Extensions.Http.Polly": "[9.0.8, )",
+          "Quartz.Extensions.Hosting": "[3.15.0, )",
+          "Reaparr.Application": "[1.0.0, )",
+          "Reaparr.Data": "[1.0.0, )",
+          "Reaparr.FileSystem": "[1.0.0, )",
+          "Reaparr.Identity": "[1.0.0, )",
+          "Reaparr.PlexApi": "[1.0.0, )",
+          "Reaparr.Settings": "[1.0.0, )",
+          "Serilog.AspNetCore": "[9.0.0, )"
+        }
+      },
       "Reaparr.Application": {
         "type": "Project",
         "dependencies": {
@@ -1762,16 +1780,14 @@
           "Reaparr.Identity.Contracts": "[1.0.0, )",
           "Reaparr.PlexApi.Contracts": "[1.0.0, )",
           "Reaparr.Settings": "[1.0.0, )",
-          "Reaparr.Settings.Contracts": "[1.0.0, )",
-          "Reaparr.WebAPI.Contracts": "[1.0.0, )"
+          "Reaparr.Settings.Contracts": "[1.0.0, )"
         }
       },
       "Reaparr.Application.Contracts": {
         "type": "Project",
         "dependencies": {
           "Quartz": "[3.15.0, )",
-          "Reaparr.Domain": "[1.0.0, )",
-          "Reaparr.WebAPI.Contracts": "[1.0.0, )"
+          "Reaparr.Domain": "[1.0.0, )"
         }
       },
       "Reaparr.BaseTests": {
@@ -1786,7 +1802,7 @@
           "Microsoft.NET.Test.Sdk": "[17.14.1, )",
           "Moq": "[4.20.72, )",
           "Moq.Contrib.HttpClient": "[1.4.0, )",
-          "Reaparr.WebAPI": "[1.0.0, )",
+          "Reaparr.AppHost": "[1.0.0, )",
           "Shouldly": "[4.3.0, )",
           "TestableIO.System.IO.Abstractions.TestingHelpers": "[22.0.15, )",
           "xunit.v3": "[3.0.0, )"
@@ -1930,31 +1946,6 @@
         }
       },
       "Reaparr.Settings.Contracts": {
-        "type": "Project",
-        "dependencies": {
-          "Reaparr.Domain": "[1.0.0, )"
-        }
-      },
-      "Reaparr.WebAPI": {
-        "type": "Project",
-        "dependencies": {
-          "Autofac.Extensions.DependencyInjection": "[10.0.0, )",
-          "FastEndpoints.Security": "[7.0.1, )",
-          "FastEndpoints.Swagger": "[7.0.1, )",
-          "Microsoft.AspNetCore.SpaServices.Extensions": "[9.0.8, )",
-          "Microsoft.Extensions.Http.Polly": "[9.0.8, )",
-          "Quartz.Extensions.Hosting": "[3.15.0, )",
-          "Reaparr.Application": "[1.0.0, )",
-          "Reaparr.Data": "[1.0.0, )",
-          "Reaparr.FileSystem": "[1.0.0, )",
-          "Reaparr.Identity": "[1.0.0, )",
-          "Reaparr.PlexApi": "[1.0.0, )",
-          "Reaparr.Settings": "[1.0.0, )",
-          "Reaparr.WebAPI.Contracts": "[1.0.0, )",
-          "Serilog.AspNetCore": "[9.0.0, )"
-        }
-      },
-      "Reaparr.WebAPI.Contracts": {
         "type": "Project",
         "dependencies": {
           "Reaparr.Domain": "[1.0.0, )"

@@ -28,7 +28,7 @@ jobs:
                 uses: ./.github/workflows/steps/client-app-install/
             -   name: GitHub Release
                 id: get-next-version
-                run: npx --prefix src/WebAPI/ClientApp/ semantic-release
+                run: npx --prefix src/AppHost/ClientApp/ semantic-release
                 env:
                     GH_TOKEN: ${{ secrets.GH_TOKEN }}
                     GIT_AUTHOR_NAME: ${{ vars.GIT_AUTHOR_NAME }}

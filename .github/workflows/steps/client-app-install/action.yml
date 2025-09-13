@@ -11,4 +11,4 @@ runs:
         -   name: Clean install node_modules
             shell: bash
             run: bun install
-            working-directory: src/WebAPI/ClientApp/
+            working-directory: src/AppHost/ClientApp/

@@ -1,0 +1,25 @@
+using Reaparr.Application.Contracts;
+
+namespace Reaparr.Application;
+
+/// <summary>
+///  The NotificationHub class is a SignalR hub that sends notifications to the front-end.
+/// </summary>
+public interface INotificationHub
+{
+    /// <summary>
+    ///  Sends a notification to the front-end.
+    /// </summary>
+    /// <param name="notification"></param>
+    /// <param name="cancellationToken"> The <see cref="CancellationToken"/> to use.</param>
+    /// <returns></returns>
+    Task Notification(NotificationDTO notification, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    ///  Refreshes the notification.
+    /// </summary>
+    /// <param name="dataType"></param>
+    /// <param name="cancellationToken"> The <see cref="CancellationToken"/> to use.</param>
+    /// <returns></returns>
+    Task RefreshNotification(RefreshDataType dataType, CancellationToken cancellationToken = default);
+}

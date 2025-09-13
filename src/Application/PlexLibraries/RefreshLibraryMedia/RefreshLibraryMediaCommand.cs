@@ -1,9 +1,9 @@
 ﻿using FastEndpoints;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 using Reaparr.PlexApi.Contracts;
-using Reaparr.WebAPI.Contracts;
 
 namespace Reaparr.Application;
 

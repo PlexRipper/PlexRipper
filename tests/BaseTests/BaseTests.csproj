@@ -34,7 +34,7 @@
         </PackageReference>
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="..\..\src\WebAPI\WebAPI.csproj" />
+        <ProjectReference Include="..\..\src\AppHost\AppHost.csproj" />
     </ItemGroup>
     <ItemGroup>
         <None Update="xunit.runner.json">

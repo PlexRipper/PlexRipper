@@ -16,7 +16,7 @@ runs:
             shell: bash
             run: |
                 echo "Checking for changes in backend files..."
-                if git diff --name-only origin/${{ github.base_ref }} | grep -qE '^(src/(?!WebAPI/ClientApp)|tests)'; then
+                if git diff --name-only origin/${{ github.base_ref }} | grep -qE '^(src/(?!AppHost/ClientApp)|tests)'; then
                   echo "Backend changes detected."
                   echo "should_run=true" >> $GITHUB_OUTPUT
                 else

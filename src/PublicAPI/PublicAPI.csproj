@@ -13,4 +13,10 @@
         <PackageReference Include="FastEndpoints.Swagger" Version="7.0.1" />
         <FrameworkReference Include="Microsoft.AspNetCore.App" />
     </ItemGroup>
+        <ItemGroup>
+          <Compile Include="..\Domain\GlobalUsings.cs">
+            <Link>GlobalUsings.cs</Link>
+          </Compile>
+        </ItemGroup>
+
 </Project>

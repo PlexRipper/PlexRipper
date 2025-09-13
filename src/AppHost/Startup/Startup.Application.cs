@@ -4,6 +4,7 @@ using FastEndpoints.Swagger;
 using Microsoft.AspNetCore.Http.Extensions;
 using Reaparr.Application;
 using Reaparr.Environment;
+using Reaparr.PublicAPI;
 
 namespace Reaparr.AppHost;
 
@@ -58,6 +59,15 @@ public static partial class Startup
         // Setup FastEndpoints
         app.UseFastEndpoints(c =>
         {
+            c.Endpoints.Configurator = ep =>
+            {
+                if (ep.Routes.All(x => x.StartsWith(PublicApiRoutes.Base)))
+                    ep.Options(b => b.IsPublicApi());
+                // If the route starts with /api/internal, tag it for Swagger
+                else if (ep.Routes.All(x => x.StartsWith(ApiRoutes.Base)))
+                    ep.Options(b => b.IsInternalApi());
+            };
+
             // https://fast-endpoints.com/docs/swagger-support#short-endpoint-names
             c.Endpoints.ShortNames = true;
 

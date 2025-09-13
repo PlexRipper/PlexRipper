@@ -41,6 +41,6 @@
         <Compile Remove="CQRS\PlexServers\Commands\AddOrUpdatePlexServersCommandHandler.cs" />
     </ItemGroup>
     <ItemGroup>
-      <Folder Include="_Shared\" />
+        <Folder Include="_Shared\" />
     </ItemGroup>
 </Project>

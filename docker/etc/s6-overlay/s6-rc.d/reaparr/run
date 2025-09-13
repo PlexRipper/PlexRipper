@@ -1,2 +1,2 @@
 #!/usr/bin/with-contenv sh
-exec s6-setuidgid abc dotnet /app/Reaparr.WebAPI.dll
+exec s6-setuidgid abc dotnet /app/Reaparr.AppHost.dll

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Reaparr.Data;
 
@@ -10,9 +11,11 @@ using Reaparr.Data;
 namespace Reaparr.Data.Migrations
 {
     [DbContext(typeof(ReaparrDbContext))]
-    partial class ReaparrDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250913182951_AddEpisodeAndSeasonIndex")]
+    partial class AddEpisodeAndSeasonIndex
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2743,6 +2746,9 @@ namespace Reaparr.Data.Migrations
                     b.HasBaseType("Reaparr.Domain.DownloadTaskBase");
 
                     b.Property<long>("CurrentFileTransferBytesOffset")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("CurrentFileTransferPathIndex")
                         .HasColumnType("INTEGER");
 
                     b.Property<long>("DataReceived")

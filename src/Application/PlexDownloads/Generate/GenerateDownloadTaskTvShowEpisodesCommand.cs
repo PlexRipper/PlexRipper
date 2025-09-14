@@ -100,9 +100,12 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
 
             _log.Here()
                 .Debug(
-                    "Processing episode {EpisodeKey} from season {SeasonKey} of show {ShowKey}",
+                    "Processing episode \"{EpisodeTitle}\" with key: {EpisodeKey} from season \"{SeasonTitle}\" with key: {SeasonKey} of show \"{TvShowTitle}\" with key: {ShowKey}",
+                    tvShowEpisode.Title,
                     tvShowEpisode.Key,
+                    plexSeason.Title,
                     plexSeason.Key,
+                    plexTvShow.Title,
                     plexTvShow.Key
                 );
 

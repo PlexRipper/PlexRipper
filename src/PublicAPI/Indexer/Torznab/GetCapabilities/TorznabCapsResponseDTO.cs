@@ -1,5 +1,6 @@
-using System.Xml;
 using System.Xml.Serialization;
+
+namespace Reaparr.PublicAPI;
 
 [XmlRoot("caps")]
 public record TorznabCapsResponseDTO

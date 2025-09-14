@@ -1,7 +1,6 @@
-using System.Text;
-using System.Xml.Serialization;
 using FastEndpoints;
 using FluentValidation;
+using Reaparr.PublicAPI.SearchTvShow;
 
 namespace Reaparr.PublicAPI;
 

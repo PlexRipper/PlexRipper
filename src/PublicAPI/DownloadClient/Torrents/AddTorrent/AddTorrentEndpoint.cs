@@ -2,6 +2,7 @@ using BencodeNET.Parsing;
 using BencodeNET.Torrents;
 using FastEndpoints;
 using FluentValidation;
+using Reaparr.Application.Contracts;
 
 namespace Reaparr.PublicAPI;
 
@@ -33,6 +34,7 @@ public class AddTorrentEndpointRequestValidator : Validator<AddTorrentEndpointRe
 
 public class AddTorrentEndpoint : Endpoint<AddTorrentEndpointRequest>
 {
+    private readonly ICommandExecutor _commandExecutor;
     private readonly ILogger _log;
 
     public override void Configure()
@@ -43,9 +45,10 @@ public class AddTorrentEndpoint : Endpoint<AddTorrentEndpointRequest>
         AllowAnonymous();
     }
 
-    public AddTorrentEndpoint(ILogger logger)
+    public AddTorrentEndpoint(ILogger logger, ICommandExecutor commandExecutor)
     {
         _log = logger.ForContext<AddTorrentEndpoint>();
+        _commandExecutor = commandExecutor;
     }
 
     public override async Task HandleAsync(AddTorrentEndpointRequest req, CancellationToken ct)
@@ -58,14 +61,42 @@ public class AddTorrentEndpoint : Endpoint<AddTorrentEndpointRequest>
         var parser = new BencodeParser();
         var torrent = parser.Parse<Torrent>(req.TorrentFile.OpenReadStream());
 
-        var guid = torrent.ExtraFields?.TryGetValue("reaparr-guid", out var guidVal) == true
-            ? guidVal.ToString()
-            : null;
+        var metadata = torrent.ExtraFields.ToTorrentMetadataDTO();
 
         _log.Here()
             .Debug(
-                "[Torrent/Add] Uploaded torrent file: {FileName}, {Size} bytes, ReaparrGuid={Guid}",
-                req.TorrentFile.FileName, torrent.File.FileSize, guid ?? "<none>");
+                "[Torrent/Add] Uploaded torrent file: {FileName}, {Size} bytes, MetaData={MetaData}",
+                req.TorrentFile.FileName, torrent.File.FileSize, metadata);
+
+        List<DownloadMediaDTO> list =
+        [
+            new()
+            {
+                Qualities =
+                [
+                    new PlexMediaQualityDTO
+                    {
+                        MediaDataType = metadata.Type,
+                        MediaId = metadata.MediaId,
+                        DataId = metadata.DataId,
+                        Quality = metadata.Quality,
+                    },
+                ],
+                MediaIds = [metadata.MediaId],
+                Type = metadata.Type,
+                PlexServerId = metadata.ServerId,
+                PlexLibraryId = metadata.LibraryId,
+            },
+        ];
+        var createResult = await _commandExecutor.Send(new CreateDownloadTasksCommand(list), ct);
+        if (createResult.IsFailed)
+        {
+            _log.Here()
+                .Error("[Torrent/Add] Failed to create download tasks for torrent {FileName}, Error: {Error}",
+                    req.TorrentFile.FileName, createResult.Errors);
+            await Send.StringAsync("Fail.", cancellation: ct);
+            return;
+        }
 
         await Send.StringAsync("Ok.", cancellation: ct);
     }

@@ -3,8 +3,8 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Data.Contracts;
 using Reaparr.Environment;
-using Reaparr.PublicAPI;
-using Reaparr.PublicAPI.SearchTvShow;
+
+namespace Reaparr.PublicAPI.SearchTvShow;
 
 public record SearchTvShowCommand : ICommand<TorznabMediaSearchResponseDTO>
 {
@@ -73,18 +73,7 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, T
         }
 
         var items = new List<TorznabItem>();
-        var releaseId = Guid.NewGuid();
-        _log.Here().Debug("ReleaseId: {ReleaseId}", releaseId);
 
-        var url = new UriBuilder()
-        {
-            Host = "localhost",
-            Port = EnvironmentExtensions.GetPort,
-            Path = PublicApiRoutes.DownloadTorrent,
-            Query = $"guid={releaseId}",
-        };
-
-        
         foreach (var episode in episodes)
         {
             var tvShow = episode.TvShow;
@@ -104,16 +93,31 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, T
             foreach (var mediaData in episode.MediaDataList)
             foreach (var part in mediaData.Parts)
             {
-                var item = new TorznabItem()
+                var url = new TorrentMetadataDTO
+                {
+                    Type = PlexMediaType.Episode,
+                    MediaId = episode.Id,
+                    DataId = mediaData.Id,
+                    Quality = mediaData.Quality,
+                    LibraryId = part.PlexLibraryId,
+                    ServerId = part.PlexServerId,
+                }.ToUrl();
+
+                _log.Here()
+                    .Debug(
+                        "Generated torrent URL for PlexTvShowEpisodeMediaDataPartId {PlexTvShowEpisodeMediaDataPartId}: {Url}",
+                        part.Id, url);
+
+                var item = new TorznabItem
                 {
                     Title = Path.GetFileName(part.File),
                     PubDate = episode.AddedAt.ToString("R"),
-                    Guid = new TorznabGuid { Value = url.ToString() },
-                    Link = url.ToString(),
+                    Guid = new TorznabGuid { Value = url },
+                    Link = url,
                     Size = part.Size,
                     Enclosure = new TorznabEnclosure
                     {
-                        Url = url.ToString(),
+                        Url = url,
                         Length = part.Size,
                         Type = "application/x-bittorrent",
                     },

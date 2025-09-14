@@ -51,7 +51,8 @@ public static partial class FakeData
         .Ignore(x => x.Countries)
         .RuleFor(x => x.Title, f => f.PlexMedia().MediaTitle(PlexMediaType.Movie))
         .RuleFor(x => x.Guid, f => f.PlexMedia().Guid(PlexMediaType.Movie))
-        .FinishWith((_, movie) =>
+        .FinishWith(
+            (_, movie) =>
             {
                 movie.FullTitle = $"{movie.Title} ({movie.Year})";
 
@@ -79,7 +80,8 @@ public static partial class FakeData
         .Ignore(x => x.Qualities)
         .RuleFor(x => x.Title, f => f.PlexMedia().MediaTitle(PlexMediaType.TvShow))
         .RuleFor(x => x.Guid, f => f.PlexMedia().Guid(PlexMediaType.TvShow))
-        .FinishWith((_, tvShow) =>
+        .FinishWith(
+            (_, tvShow) =>
             {
                 foreach (var (season, seasonIndex) in tvShow.Seasons.Select((season, index) => (season, index)))
                 {
@@ -88,7 +90,7 @@ public static partial class FakeData
                     season.ParentGuid = tvShow.Guid;
                     season.FullTitle = $"{tvShow.Title}/{season.Title}";
                     season.SeasonNumber = seasonIndex + 1;
-                    
+
                     foreach (
                         var (episode, episodeIndex) in season.Episodes.Select((episode, index) => (episode, index))
                     )
@@ -133,7 +135,8 @@ public static partial class FakeData
         var config = FakeDataConfig.FromOptions(options);
         return _plexTvShowSeason
             .RuleFor(x => x.Episodes, _ => GetPlexTvShowEpisode(seed, options).Generate(config.TvShowEpisodeCount))
-            .FinishWith((_, tvShowSeason) =>
+            .FinishWith(
+                (_, tvShowSeason) =>
                 {
                     tvShowSeason.MediaSize = tvShowSeason.Episodes.Select(x => x.MediaSize).Sum();
                     foreach (var episode in tvShowSeason.Episodes)
@@ -157,7 +160,8 @@ public static partial class FakeData
         .RuleFor(x => x.ParentKey, _ => GetUniqueNumber())
         .RuleFor(x => x.Title, f => f.PlexMedia().MediaTitle(PlexMediaType.Episode))
         .RuleFor(x => x.Guid, f => f.PlexMedia().Guid(PlexMediaType.Episode))
-        .FinishWith((_, tvShowEpisode) =>
+        .FinishWith(
+            (_, tvShowEpisode) =>
             {
                 foreach (var mediaData in tvShowEpisode.MediaDataList)
                 foreach (var mediaDataPart in mediaData.Parts)

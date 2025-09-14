@@ -2,6 +2,8 @@ using FastEndpoints;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Data.Contracts;
+using Reaparr.Environment;
+using Reaparr.PublicAPI;
 using Reaparr.PublicAPI.SearchTvShow;
 
 public record SearchTvShowCommand : ICommand<TorznabMediaSearchResponseDTO>
@@ -32,20 +34,18 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, T
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
-    private readonly IEventPublisher _eventPublisher;
 
-    public SearchTvShowCommandHandler(ILogger log, IReaparrDbContext dbContext, IEventPublisher eventPublisher)
+    public SearchTvShowCommandHandler(ILogger log, IReaparrDbContext dbContext)
     {
         _log = log.ForContext<SearchTvShowCommandHandler>();
         _dbContext = dbContext;
-        _eventPublisher = eventPublisher;
     }
 
     public async Task<TorznabMediaSearchResponseDTO> ExecuteAsync(
         SearchTvShowCommand command,
         CancellationToken cancellationToken)
     {
-        var episodes = new List<PlexTvShowEpisode>();
+        List<PlexTvShowEpisode> episodes;
         if (command is { Season: 0, Episode: 0, Query: "" })
         {
             episodes = await _dbContext.PlexTvShowEpisodes.Skip(command.Offset)
@@ -62,10 +62,10 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, T
                 .Include(x => x.TvShowSeason)
                 .Include(x => x.TvShow)
                 .Where(e =>
-                    e.TvShow.Guid_IMDB == command.IMDB_ID
+                    e.TvShow!.Guid_IMDB == command.IMDB_ID
                     || e.TvShow.Guid_TMDB == command.TMDB_ID
                     || e.TvShow.Guid_TVDB == command.TVDB_ID)
-                .Where(e => e.TvShowSeason.SeasonNumber == command.Season)
+                .Where(e => e.TvShowSeason!.SeasonNumber == command.Season)
                 .Where(e => e.EpisodeNumber == command.Episode)
                 .Include(e => e.MediaDataList)
                 .ThenInclude(x => x.Parts)
@@ -73,7 +73,18 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, T
         }
 
         var items = new List<TorznabItem>();
+        var releaseId = Guid.NewGuid();
+        _log.Here().Debug("ReleaseId: {ReleaseId}", releaseId);
 
+        var url = new UriBuilder()
+        {
+            Host = "localhost",
+            Port = EnvironmentExtensions.GetPort,
+            Path = PublicApiRoutes.DownloadTorrent,
+            Query = $"guid={releaseId}",
+        };
+
+        
         foreach (var episode in episodes)
         {
             var tvShow = episode.TvShow;
@@ -86,7 +97,7 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, T
 
             if (season is null)
             {
-                _log.Error("Seasson is null for episode {EpisodeId}", episode.Id);
+                _log.Error("Season is null for episode {EpisodeId}", episode.Id);
                 continue;
             }
 
@@ -97,12 +108,12 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, T
                 {
                     Title = Path.GetFileName(part.File),
                     PubDate = episode.AddedAt.ToString("R"),
-                    Guid = new TorznabGuid { Value = Guid.NewGuid().ToString() },
-                    Link = $"http://localhost:5000/api/public/download/{Guid.NewGuid()}",
+                    Guid = new TorznabGuid { Value = url.ToString() },
+                    Link = url.ToString(),
                     Size = part.Size,
                     Enclosure = new TorznabEnclosure
                     {
-                        Url = $"http://localhost:5000/api/public/download/{Guid.NewGuid()}",
+                        Url = url.ToString(),
                         Length = part.Size,
                         Type = "application/x-bittorrent",
                     },

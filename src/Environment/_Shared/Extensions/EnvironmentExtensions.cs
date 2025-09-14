@@ -75,6 +75,9 @@ public static class EnvironmentExtensions
 
     public static int GetPgid() => int.Parse(System.Environment.GetEnvironmentVariable("PGID") ?? "-1");
 
+    public static int GetPort =>
+        int.Parse(System.Environment.GetEnvironmentVariable("DOTNET_HTTP_PORTS")?.Split(';')[0] ?? "5000");
+
     public static void SetLogLevel(LogEventLevel logLevel)
     {
         System.Environment.SetEnvironmentVariable(LogLevelKey, logLevel.ToString().ToUpper());

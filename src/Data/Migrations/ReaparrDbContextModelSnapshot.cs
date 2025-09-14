@@ -485,7 +485,7 @@ namespace Reaparr.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnOrder(14);
 
-                    b.Property<int>("PlexId")
+                    b.Property<long>("PlexId")
                         .HasColumnType("INTEGER")
                         .HasColumnName("Key")
                         .HasColumnOrder(1);

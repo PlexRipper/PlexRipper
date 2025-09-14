@@ -106,7 +106,7 @@ public static class PlexMediaExtensions
             .Parts.Select(part => new DownloadTaskMovieFile
             {
                 Id = default,
-                PlexId = 0,
+                PlexId = part.PlexId,
                 HashId = null,
                 DataTotal = part.Size,
                 DownloadStatus = DownloadStatus.Queued,
@@ -156,7 +156,7 @@ public static class PlexMediaExtensions
             .Parts.Select(part => new DownloadTaskTvShowEpisodeFile
             {
                 Id = default,
-                PlexId = 0,
+                PlexId = part.PlexId,
                 HashId = null,
                 DataTotal = part.Size,
                 DownloadStatus = DownloadStatus.Queued,

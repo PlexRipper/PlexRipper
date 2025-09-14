@@ -9,7 +9,7 @@ public record DownloadTaskDTO : IDownloadTaskProgress
     /// <summary>
     /// The identifier used by Plex to keep track of media.
     /// </summary>
-    public required int Key { get; set; }
+    public required long Key { get; set; }
 
     /// <summary>
     /// The formatted media title as shown in Plex.

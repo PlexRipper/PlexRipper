@@ -7,7 +7,7 @@ public abstract class DownloadTaskBase : BaseEntityGuid
     /// This is only unique on that specific server.
     /// </summary>
     [Column("Key", Order = 1)]
-    public required int PlexId { get; init; }
+    public required long PlexId { get; init; }
 
     /// <summary>
     /// Gets or sets the media display title.

@@ -1,7 +1,15 @@
 using System.Text.Json.Serialization;
 using FastEndpoints;
+using Microsoft.EntityFrameworkCore;
+using Reaparr.Data.Contracts;
 
 namespace Reaparr.PublicAPI;
+
+public record TorrentsInfoEndpointRequest
+{
+    [QueryParam, BindFrom("category")]
+    public required string Category { get; init; }
+}
 
 public record QBittorrentTorrentInfo
 {
@@ -27,7 +35,7 @@ public record QBittorrentTorrentInfo
     /// Download progress (0.0 = 0%, 1.0 = 100%).
     /// </summary>
     [JsonPropertyName("progress")]
-    public double Progress { get; set; }
+    public decimal Progress { get; set; }
 
     /// <summary>
     /// Current download speed in bytes per second.
@@ -54,8 +62,17 @@ public record QBittorrentTorrentInfo
     public string SavePath { get; set; } = string.Empty;
 }
 
-public sealed class TorrentsInfoEndpoint : EndpointWithoutRequest<List<QBittorrentTorrentInfo>>
+public sealed class TorrentsInfoEndpoint : Endpoint<TorrentsInfoEndpointRequest, List<QBittorrentTorrentInfo>>
 {
+    private readonly IReaparrDbContext _dbContext;
+    private readonly ILogger _log;
+
+    public TorrentsInfoEndpoint(ILogger logger, IReaparrDbContext dbContext)
+    {
+        _log = logger.ForContext<TorrentsInfoEndpoint>();
+        _dbContext = dbContext;
+    }
+
     public override void Configure()
     {
         Get(PublicApiRoutes.DownloadClient + "/torrents/info");
@@ -63,34 +80,62 @@ public sealed class TorrentsInfoEndpoint : EndpointWithoutRequest<List<QBittorre
         AllowAnonymous();
     }
 
-    public override async Task HandleAsync(CancellationToken ct)
+    public override async Task HandleAsync(TorrentsInfoEndpointRequest req, CancellationToken ct)
     {
-        var torrents = new List<QBittorrentTorrentInfo>
-        {
-            new QBittorrentTorrentInfo
-            {
-                Hash = "abc123def4567890abc123def4567890abc12345",
-                Name = "Ubuntu.22.04.3.Desktop.amd64.iso",
-                Size = 4700372992, // ~4.4 GB
-                Progress = 0.75,
-                DlSpeed = 2097152, // 2 MB/s
-                Eta = 900, // 15 minutes
-                State = "downloading",
-                SavePath = "/home/user/Downloads"
-            },
-            new QBittorrentTorrentInfo
-            {
-                Hash = "def456abc7890123def456abc7890123def456ab",
-                Name = "Big.Buck.Bunny.1080p.mp4",
-                Size = 1073741824, // 1 GB
-                Progress = 1.0,
-                DlSpeed = 0,
-                Eta = 8640000, // effectively infinity (completed)
-                State = "stalledUP",
-                SavePath = "/home/user/Downloads/Movies"
-            }
-        };
+        _log.Here().DebugApiCall(HttpContext);
+
+        // Query all download tasks that have a HashId (Sonarr/Radarr tracking id)
+        var episodeFilesTask = _dbContext
+            .DownloadTaskTvShowEpisodeFile
+            .Where(x => x.HashId != null)
+            .Include(x => x.Parent)
+            .ToListAsync(ct);
+
+        var movieFilesTask = _dbContext
+            .DownloadTaskMovieFile
+            .Where(x => x.HashId != null)
+            .Include(x => x.Parent)
+            .ToListAsync(ct);
+
+        await Task.WhenAll(episodeFilesTask, movieFilesTask);
+
+        var episodeInfos = episodeFilesTask.Result.Select(MapToTorrentInfo).ToList();
+        var movieInfos = movieFilesTask.Result.Select(MapToTorrentInfo).ToList();
+
+        var torrents = new List<QBittorrentTorrentInfo>(episodeInfos.Count + movieInfos.Count);
+        torrents.AddRange(episodeInfos);
+        torrents.AddRange(movieInfos);
 
         await Send.OkAsync(torrents, ct);
     }
+
+    private static QBittorrentTorrentInfo MapToTorrentInfo(DownloadTaskFileBase file)
+    {
+        // Save path: prefer active download directory, else destination directory
+        var savePath = !string.IsNullOrWhiteSpace(file.DownloadDirectory)
+            ? file.DownloadDirectory
+            : (file.DestinationDirectory);
+
+        return new QBittorrentTorrentInfo
+        {
+            Hash = file.HashId!,
+            Name = file.FileName,
+            Size = file.DataTotal,
+            Progress = file.Percentage,
+            DlSpeed = file.Speed,
+            Eta = (int)file.TimeRemaining,
+            State = MapStatusToQbittorrentState(file.DownloadStatus),
+            SavePath = savePath,
+        };
+    }
+
+    private static string MapStatusToQbittorrentState(DownloadStatus status) => status switch
+    {
+        DownloadStatus.Downloading or DownloadStatus.DownloadFinished => "downloading",
+        DownloadStatus.Paused or DownloadStatus.MergePaused or DownloadStatus.MovePaused => "pausedDL",
+        DownloadStatus.Queued => "queuedDL",
+        DownloadStatus.Completed => "stalledUP",
+        DownloadStatus.Error or DownloadStatus.MoveError or DownloadStatus.MergeError => "error",
+        _ => "downloading",
+    };
 }

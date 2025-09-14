@@ -7,7 +7,7 @@ public class DownloadTaskMovieValidator : AbstractValidator<DownloadTaskMovie>
     public DownloadTaskMovieValidator()
     {
         RuleFor(x => x.Id).NotEqual(Guid.Empty);
-        RuleFor(x => x.Key).GreaterThan(0);
+        RuleFor(x => x.PlexId).GreaterThan(0);
         RuleFor(x => x.Title).NotEmpty();
         RuleFor(x => x.FullTitle).NotEmpty();
         RuleFor(x => x.Year).GreaterThan(0);

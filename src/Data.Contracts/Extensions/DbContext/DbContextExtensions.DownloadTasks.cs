@@ -362,7 +362,7 @@ public static partial class DbContextExtensions
         return dbContext
             .DownloadTaskTvShow.AsTracking()
             .IncludeAll()
-            .FirstOrDefaultAsync(x => x.PlexServerId == plexServerId && x.Key == mediaKey, cancellationToken);
+            .FirstOrDefaultAsync(x => x.PlexServerId == plexServerId && x.PlexId == mediaKey, cancellationToken);
     }
 
     public static async Task UpdateDownloadProgress(

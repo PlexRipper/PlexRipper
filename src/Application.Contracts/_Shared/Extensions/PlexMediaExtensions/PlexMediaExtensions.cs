@@ -8,7 +8,7 @@ public static class PlexMediaExtensions
         new()
         {
             Id = default,
-            Key = plexMovie.Key,
+            PlexId = plexMovie.Key,
             DataTotal = 0,
             DownloadStatus = DownloadStatus.Queued,
             CreatedAt = DateTime.UtcNow,
@@ -30,7 +30,7 @@ public static class PlexMediaExtensions
         new()
         {
             Id = default,
-            Key = plexTvShow.Key,
+            PlexId = plexTvShow.Key,
             DataTotal = 0,
             DownloadStatus = DownloadStatus.Queued,
             CreatedAt = DateTime.UtcNow,
@@ -52,7 +52,7 @@ public static class PlexMediaExtensions
         new()
         {
             Id = default,
-            Key = plexTvShowSeason.Key,
+            PlexId = plexTvShowSeason.Key,
             DataTotal = 0,
             DownloadStatus = DownloadStatus.Queued,
             CreatedAt = DateTime.UtcNow,
@@ -76,7 +76,7 @@ public static class PlexMediaExtensions
         new()
         {
             Id = default,
-            Key = plexTvShowEpisode.Key,
+            PlexId = plexTvShowEpisode.Key,
             DataTotal = 0,
             DownloadStatus = DownloadStatus.Queued,
             CreatedAt = DateTime.UtcNow,
@@ -106,7 +106,8 @@ public static class PlexMediaExtensions
             .Parts.Select(part => new DownloadTaskMovieFile
             {
                 Id = default,
-                Key = 0,
+                PlexId = 0,
+                HashId = null,
                 DataTotal = part.Size,
                 DownloadStatus = DownloadStatus.Queued,
                 CreatedAt = DateTime.UtcNow,
@@ -130,7 +131,8 @@ public static class PlexMediaExtensions
                     SeasonFolder = string.Empty,
                     KeepCompletedInDownloadFolder = false,
                 },
-                DownloadWorkerTasks = [],
+                DownloadWorkerTasks =
+                    [],
                 Parent = null,
                 ParentId = default,
                 DestinationFolderPathId = request.DestinationFolderPathId,
@@ -155,7 +157,8 @@ public static class PlexMediaExtensions
             .Parts.Select(part => new DownloadTaskTvShowEpisodeFile
             {
                 Id = default,
-                Key = 0,
+                PlexId = 0,
+                HashId = null,
                 DataTotal = part.Size,
                 DownloadStatus = DownloadStatus.Queued,
                 CreatedAt = DateTime.UtcNow,
@@ -179,7 +182,8 @@ public static class PlexMediaExtensions
                     SeasonFolder = plexTvShowEpisode.TvShowSeason.Title.SanitizeFolderName(),
                     KeepCompletedInDownloadFolder = false,
                 },
-                DownloadWorkerTasks = [],
+                DownloadWorkerTasks =
+                    [],
                 Parent = null,
                 ParentId = default,
                 DestinationFolderPathId = request.DestinationFolderPathId,

@@ -33,8 +33,4 @@
       <Compile Include="..\..\BaseTests\GlobalTestsUsings.cs" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="DownloadClient\Torrents\AddTorrent\" />
-    </ItemGroup>
-
 </Project>

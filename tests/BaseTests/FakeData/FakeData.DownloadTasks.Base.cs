@@ -38,6 +38,7 @@ public static partial class FakeData
     {
         return faker
             .ApplyDownloadTaskBase(downloadTaskType)
+            .Ignore(x => x.HashId)
             .Ignore(x => x.DataReceived)
             .Ignore(x => x.DownloadSpeed)
             .Ignore(x => x.FileTransferSpeed)

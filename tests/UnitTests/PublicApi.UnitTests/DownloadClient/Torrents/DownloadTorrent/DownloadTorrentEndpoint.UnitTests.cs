@@ -59,7 +59,20 @@ public class DownloadTorrentEndpointUnitTests : BaseUnitTest
         torrent.File.ShouldNotBeNull();
         torrent.File.FileName.ShouldEndWith(".torrent");
         torrent.File.FileSize.ShouldBeGreaterThan(0);
-        
+
+        // Assert – piece size and standard fields
+        torrent.PieceSize.ShouldBe(256 * 1024);
+        torrent.CreatedBy.ShouldBe("Reaparr");
+        torrent.Comment.ShouldContain("Reaparr");
+
+        // Assert – extra fields contain request metadata
+        var extra = torrent.ExtraFields;
+        extra.ShouldNotBeNull();
+        foreach (var kv in req.Values)
+        {
+            extra.TryGetValue(kv.Key, out var v).ShouldBeTrue();
+            v!.ToString().ShouldBe(kv.Value);
+        }
     }
 
     [Fact]
@@ -108,6 +121,20 @@ public class DownloadTorrentEndpointUnitTests : BaseUnitTest
         torrent.File.ShouldNotBeNull();
         torrent.File.FileName.ShouldEndWith(".torrent");
         torrent.File.FileSize.ShouldBeGreaterThan(0);
+
+        // Assert – piece size and standard fields
+        torrent.PieceSize.ShouldBe(256 * 1024);
+        torrent.CreatedBy.ShouldBe("Reaparr");
+        torrent.Comment.ShouldContain("Reaparr");
+
+        // Assert – extra fields contain request metadata
+        var extra = torrent.ExtraFields;
+        extra.ShouldNotBeNull();
+        foreach (var kv in req.Values)
+        {
+            extra.TryGetValue(kv.Key, out var v).ShouldBeTrue();
+            v!.ToString().ShouldBe(kv.Value);
+        }
     }
 
     [Fact]

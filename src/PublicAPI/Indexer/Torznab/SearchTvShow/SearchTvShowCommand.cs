@@ -98,6 +98,8 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, T
                     Type = PlexMediaType.Episode,
                     MediaId = episode.Id,
                     DataId = mediaData.Id,
+                    PartId = part.Id,
+                    PartPlexId = part.PlexId,
                     Quality = mediaData.Quality,
                     LibraryId = part.PlexLibraryId,
                     ServerId = part.PlexServerId,

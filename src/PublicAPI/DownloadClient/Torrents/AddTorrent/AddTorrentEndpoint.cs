@@ -2,7 +2,9 @@ using BencodeNET.Parsing;
 using BencodeNET.Torrents;
 using FastEndpoints;
 using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
 
 namespace Reaparr.PublicAPI;
 
@@ -34,6 +36,7 @@ public class AddTorrentEndpointRequestValidator : Validator<AddTorrentEndpointRe
 
 public class AddTorrentEndpoint : Endpoint<AddTorrentEndpointRequest>
 {
+    private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
     private readonly ILogger _log;
 
@@ -45,9 +48,10 @@ public class AddTorrentEndpoint : Endpoint<AddTorrentEndpointRequest>
         AllowAnonymous();
     }
 
-    public AddTorrentEndpoint(ILogger logger, ICommandExecutor commandExecutor)
+    public AddTorrentEndpoint(ILogger logger, IReaparrDbContext dbContext, ICommandExecutor commandExecutor)
     {
         _log = logger.ForContext<AddTorrentEndpoint>();
+        _dbContext = dbContext;
         _commandExecutor = commandExecutor;
     }
 
@@ -60,8 +64,8 @@ public class AddTorrentEndpoint : Endpoint<AddTorrentEndpointRequest>
 
         var parser = new BencodeParser();
         var torrent = parser.Parse<Torrent>(req.TorrentFile.OpenReadStream());
-
         var metadata = torrent.ExtraFields.ToTorrentMetadataDTO();
+        var hashId = torrent.GetInfoHash();
 
         _log.Here()
             .Debug(
@@ -98,6 +102,31 @@ public class AddTorrentEndpoint : Endpoint<AddTorrentEndpointRequest>
             return;
         }
 
+        // Set the hashId on the created download tasks so Sonarr/Radarr can keep track
+        await SetHashIdOnDownloadTask(metadata, hashId);
+
         await Send.StringAsync("Ok.", cancellation: ct);
+    }
+
+    private async Task SetHashIdOnDownloadTask(TorrentMetadataDTO metaData, string hashId)
+    {
+        switch (metaData.Type)
+        {
+            case PlexMediaType.Episode:
+                await _dbContext.DownloadTaskTvShowEpisodeFile.Where(x => x.PlexLibraryId == metaData.LibraryId && 
+                                                                          x.PlexServerId == metaData.ServerId &&
+                                                                          x.PlexId == metaData.PartPlexId)
+                    .ExecuteUpdateAsync(p => p.SetProperty(x => x.HashId, hashId));
+                break;
+            case PlexMediaType.Movie:
+                await _dbContext.DownloadTaskMovieFile.Where(x => x.PlexLibraryId == metaData.LibraryId && 
+                                                                  x.PlexServerId == metaData.ServerId &&
+                                                                  x.PlexId == metaData.PartPlexId)
+                    .ExecuteUpdateAsync(p => p.SetProperty(x => x.HashId, hashId));
+                break;
+            default:
+                _log.Here().Error("Unsupported PlexMediaType {PlexMediaType} for setting HashId on DownloadTask", metaData.Type);
+                break;
+        }
     }
 }

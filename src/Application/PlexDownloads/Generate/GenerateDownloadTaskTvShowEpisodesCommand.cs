@@ -120,7 +120,9 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
             var downloadTaskTvShowSeason = GetOrCreateSeasonDownloadTask(plexSeason, downloadTaskTvShow);
 
             // Get or create episode download task
-            var episodeDownloadTask = downloadTaskTvShowSeason.Children.FirstOrDefault(x => x.PlexId == tvShowEpisode.Key);
+            var episodeDownloadTask = downloadTaskTvShowSeason.Children.FirstOrDefault(x =>
+                x.PlexId == tvShowEpisode.Key
+            );
             if (episodeDownloadTask is null)
             {
                 _log.Here().Debug("Creating new episode download task for episode {EpisodeKey}", tvShowEpisode.Key);

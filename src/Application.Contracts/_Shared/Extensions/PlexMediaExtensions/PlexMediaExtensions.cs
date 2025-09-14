@@ -131,8 +131,7 @@ public static class PlexMediaExtensions
                     SeasonFolder = string.Empty,
                     KeepCompletedInDownloadFolder = false,
                 },
-                DownloadWorkerTasks =
-                    [],
+                DownloadWorkerTasks = [],
                 Parent = null,
                 ParentId = default,
                 DestinationFolderPathId = request.DestinationFolderPathId,
@@ -182,8 +181,7 @@ public static class PlexMediaExtensions
                     SeasonFolder = plexTvShowEpisode.TvShowSeason.Title.SanitizeFolderName(),
                     KeepCompletedInDownloadFolder = false,
                 },
-                DownloadWorkerTasks =
-                    [],
+                DownloadWorkerTasks = [],
                 Parent = null,
                 ParentId = default,
                 DestinationFolderPathId = request.DestinationFolderPathId,

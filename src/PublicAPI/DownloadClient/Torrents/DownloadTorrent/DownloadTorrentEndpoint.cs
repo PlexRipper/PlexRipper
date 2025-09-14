@@ -2,6 +2,8 @@ using BencodeNET.Objects;
 using BencodeNET.Torrents;
 using FastEndpoints;
 using FluentValidation;
+using Microsoft.EntityFrameworkCore;
+using Reaparr.Data.Contracts;
 
 namespace Reaparr.PublicAPI;
 
@@ -12,22 +14,26 @@ public class DownloadTorrentEndpointRequestValidator : Validator<DownloadTorrent
     public DownloadTorrentEndpointRequestValidator()
     {
         RuleFor(x => x.DataId).GreaterThan(0);
+        RuleFor(x => x.MediaId).GreaterThan(0);
+        RuleFor(x => x.LibraryId).GreaterThan(0);
+        RuleFor(x => x.ServerId).GreaterThan(0);
+        RuleFor(x => x.Quality).IsInEnum();
+        RuleFor(x => x.Type).IsInEnum();
     }
 }
 
 public class DownloadTorrentEndpoint : Endpoint<DownloadTorrentEndpointRequest>
 {
-    private const int StatusFakeSize = 100 * 1024 * 1024; // 100MB placeholder
+    private readonly IReaparrDbContext _dbContext;
 
     private const int StatusPieceLength = 256 * 1024; // 256KB
 
     private readonly ILogger _log;
-    private int _numPieces;
 
-    public DownloadTorrentEndpoint(ILogger logger)
+    public DownloadTorrentEndpoint(ILogger logger, IReaparrDbContext dbContext)
     {
         _log = logger.ForContext<DownloadTorrentEndpoint>();
-        _numPieces = (int)Math.Ceiling((double)StatusFakeSize / StatusPieceLength);
+        _dbContext = dbContext;
     }
 
     public override void Configure()
@@ -37,7 +43,8 @@ public class DownloadTorrentEndpoint : Endpoint<DownloadTorrentEndpointRequest>
         AllowAnonymous();
         Summary(x =>
         {
-            x.Description = "Generates a minimal torrent file that will be used with Reaparr as a DownloadClient to trigger a download in Reaparr. This torrent cannot be used in normal DownloadClients!";
+            x.Description =
+                "Generates a minimal torrent file that will be used with Reaparr as a DownloadClient to trigger a download in Reaparr. This torrent cannot be used in normal DownloadClients!";
         });
         Description(x => x
             .Produces(StatusCodes.Status200OK, contentType: "application/x-bittorrent")
@@ -49,7 +56,17 @@ public class DownloadTorrentEndpoint : Endpoint<DownloadTorrentEndpointRequest>
         _log.Here().DebugApiCall(HttpContext, req);
 
         // Create minimal torrent
-        var fileName = Guid.NewGuid().ToString("N") + ".torrent";
+        var fileInfos = await GetFileNames(req);
+        var fileInfo = fileInfos.FirstOrDefault();
+        if (fileInfo is null)
+        {
+            _log.Here().Error("Could not find file info for {Type} with DataId {DataId}", req.Type, req.DataId);
+            await Send.NotFoundAsync(ct);
+            return;
+        }
+
+        var fileName = fileInfo.FileName + ".torrent";
+        var numPieces = (int)Math.Ceiling((double)fileInfo.Size / StatusPieceLength);
 
         // Add extra fields to identify the torrent as a Reaparr status torrent and include metadata
         // that can later be used to trigger a Download command in Reaparr
@@ -65,17 +82,16 @@ public class DownloadTorrentEndpoint : Endpoint<DownloadTorrentEndpointRequest>
         var torrent = new Torrent
         {
             CreationDate = DateTime.UtcNow,
-            Pieces = new byte[_numPieces * 20],
+            Pieces = new byte[numPieces * 20], // Empty pieces (20 bytes SHA1 hash each)
             PieceSize = StatusPieceLength,
             Trackers =
             [
-                ["udp://tracker.opentrackr.org:1337/announce"]
+                ["udp://tracker.opentrackr.org:1337/announce"],
             ],
-            File = new SingleFileInfo()
+            File = new SingleFileInfo
             {
-                // Fake file reference - Sonarr/Radarr just needs a torrent that parses
                 FileName = fileName,
-                FileSize = StatusFakeSize,
+                FileSize = fileInfo.Size,
             },
             ExtraFields = extraFields,
         };
@@ -87,5 +103,44 @@ public class DownloadTorrentEndpoint : Endpoint<DownloadTorrentEndpointRequest>
             "application/x-bittorrent",
             cancellation: ct
         );
+    }
+
+    private async Task<List<MediaFileInfo>> GetFileNames(DownloadTorrentEndpointRequest req)
+    {
+        var fileNames = new List<MediaFileInfo>();
+        if (req.Type == PlexMediaType.Episode)
+        {
+            fileNames = await _dbContext.PlexTvShowEpisodeData.Include(x => x.Parts)
+                .Where(x => x.Id == req.DataId)
+                .SelectMany(x => x.Parts)
+                .Select(x => new MediaFileInfo
+                {
+                    FileName = Path.GetFileName(x.File),
+                    Size = x.Size,
+                })
+                .ToListAsync();
+        }
+
+        if (req.Type == PlexMediaType.Movie)
+        {
+            fileNames = await _dbContext.PlexMovieData.Include(x => x.Parts)
+                .Where(x => x.Id == req.DataId)
+                .SelectMany(x => x.Parts)
+                .Select(x => new MediaFileInfo
+                {
+                    FileName = Path.GetFileName(x.File),
+                    Size = x.Size,
+                })
+                .ToListAsync();
+        }
+
+        return fileNames;
+    }
+
+    private record MediaFileInfo
+    {
+        public required string FileName { get; init; }
+
+        public required long Size { get; init; }
     }
 }

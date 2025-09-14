@@ -13,6 +13,13 @@ public abstract class DownloadTaskFileBase : DownloadTaskBase, IDownloadTaskProg
     public required string FileLocationUrl { get; init; }
 
     /// <summary>
+    /// When a download is added through a torrent or nzb, this is the unique hash id of that download.
+    /// This is the hash id of the torrent that Sonarr/Radarr uses to keep track of the download.
+    /// </summary>
+    [Column(Order = 13)]
+    public required string? HashId { get; init; }
+
+    /// <summary>
     /// Gets or sets get or sets the media quality of this <see cref="DownloadTaskGeneric"/>.
     /// </summary>
     [Column(Order = 15)]

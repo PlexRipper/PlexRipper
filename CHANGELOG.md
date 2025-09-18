@@ -1,5 +1,12 @@
 Reaparr Changelog
 
+## [0.33.1](https://github.com/Reaparr/Reaparr/compare/v0.33.0...v0.33.1) (2025-09-18)
+
+
+### Bug Fixes
+
+* **WebAPI:** Fixed missing version from the Docker logs ([f8d8d77](https://github.com/Reaparr/Reaparr/commit/f8d8d770d0fc3e41b94c526e9e2288fadf8c9303))
+
 # [0.33.0](https://github.com/Reaparr/Reaparr/compare/v0.32.0...v0.33.0) (2025-09-07)
 
 

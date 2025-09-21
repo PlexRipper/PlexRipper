@@ -1,5 +1,13 @@
 Reaparr Changelog
 
+## [0.33.2](https://github.com/Reaparr/Reaparr/compare/v0.33.1...v0.33.2) (2025-09-21)
+
+
+### Bug Fixes
+
+* **WebAPI:** Fixed permission issue on Unraid where it didnt take the PUID and PGID into account ([64332d0](https://github.com/Reaparr/Reaparr/commit/64332d03fd01cfb39edab4dcab18c6c9d81db4f7))
+* **WebAPI:** Fixed permission issue on Unraid where it didnt take the… ([#495](https://github.com/Reaparr/Reaparr/issues/495)) ([1d69a47](https://github.com/Reaparr/Reaparr/commit/1d69a47e71ec85df6f28b6ede97d7053ada70573))
+
 ## [0.33.1](https://github.com/Reaparr/Reaparr/compare/v0.33.0...v0.33.1) (2025-09-18)
 
 

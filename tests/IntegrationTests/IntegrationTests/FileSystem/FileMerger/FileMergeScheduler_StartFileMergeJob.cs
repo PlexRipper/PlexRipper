@@ -9,7 +9,8 @@ public class FileMergeSchedulerStartFileMergeJobIntegrationTests : BaseIntegrati
         : base(output) { }
 
     [Fact]
-    public async Task ShouldFinishMergingDownloadTaskAsFileTaskJobAndSetToCompleted_WhenDownloadTaskHasFinishedDownloading()
+    public async Task
+        ShouldFinishMergingDownloadTaskAsFileTaskJobAndSetToCompleted_WhenDownloadTaskHasFinishedDownloading()
     {
         // Arrange
         using var container = await CreateContainer(
@@ -29,11 +30,9 @@ public class FileMergeSchedulerStartFileMergeJobIntegrationTests : BaseIntegrati
                 config.FileSystemOptions = (system, dbContext) =>
                 {
                     var downloadTask = dbContext.DownloadTaskMovieFile.Include(x => x.DownloadWorkerTasks).First();
-                    downloadTask.FilePaths.Count.ShouldBeGreaterThan(0);
-                    foreach (var filePath in downloadTask.FilePaths)
-                    {
-                        system.AddFile(filePath, FakeData.GetFileMockData(10, 4));
-                    }
+                    downloadTask.FilePath.ShouldNotBeNullOrEmpty();
+
+                    system.AddFile(downloadTask.FilePath, FakeData.GetFileMockData(10, 4));
                 };
             }
         );

@@ -155,10 +155,10 @@ public class MergeFilesFromFileTaskCommandUnitTests : BaseUnitTest<MergeFilesFro
                 readStreams.Add(FakeData.GetFileSystemStream(fileSizeInMb));
                 return readStreams.Last();
             })
-            .Verifiable(Times.Exactly(downloadFileTask.FilePaths.Count));
+            .Verifiable(Times.Exactly(1));
         mock.Mock<IFile>()
             .Setup(x => x.Delete(It.IsAny<string>()))
-            .Verifiable(Times.Exactly(downloadFileTask.FilePaths.Count));
+            .Verifiable(Times.Exactly(1));
         mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true).Verifiable(Times.Exactly(4));
 
         mock.Mock<IFileSystem>().Setup(x => x.File).Returns(mock.Mock<IFile>().Object);

@@ -71,13 +71,8 @@ public class MergeFilesFromFileTaskCommandHandler : ICommandHandler<MergeFilesFr
             return ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), command.Key.Id).LogError();
         }
 
-        var sourceFilePaths = downloadTask.FilePaths.Distinct().ToList();
-        _log.Here()
-            .Debug(
-                "Starting file merge process for {FilePathsCount} parts into a file {FileName}",
-                sourceFilePaths.Count,
-                downloadTask.FileName
-            );
+        var sourceFilePath = downloadTask.FilePath;
+        _log.Here().Debug("Starting file move process for {FileName}", downloadTask.FileName);
 
         try
         {
@@ -88,64 +83,61 @@ public class MergeFilesFromFileTaskCommandHandler : ICommandHandler<MergeFilesFr
             if (string.IsNullOrEmpty(directoryPathResult.Value))
                 return Result.Fail($"Could not determine the directory name of path: {directoryPathResult.Value}");
 
-            // Ensure destination directory exists and is otherwise created.
+            // Ensure a destination directory exists and is otherwise created.
             var createDirectoryResult = Result
                 .Try((() => _directory.CreateDirectory(directoryPathResult.Value)))
                 .ToResult();
             if (createDirectoryResult.IsFailed)
                 return (await ErrorDownloadTask(downloadTask, createDirectoryResult)).LogError();
 
-            var writeStreamResult = Result.Try(
-                (() => _file.Create(downloadTask.DestinationFilePath, _bufferSize, FileOptions.SequentialScan))
-            );
-            if (writeStreamResult.IsFailed)
-                return (await ErrorDownloadTask(downloadTask, writeStreamResult.ToResult())).LogError();
-
-            _writeStream = writeStreamResult.Value;
-
-            // Resume the file merge if it was previously interrupted
-            if (downloadTask.CurrentFileTransferBytesOffset > 0)
+            if (string.IsNullOrWhiteSpace(sourceFilePath) || !_file.Exists(sourceFilePath))
             {
-                _writeStream.Seek(downloadTask.CurrentFileTransferBytesOffset, SeekOrigin.Begin);
+                var result = Result
+                    .Fail($"Source file does not exist and cannot be moved: {sourceFilePath}")
+                    .LogError();
+                return await ErrorDownloadTask(downloadTask, result);
             }
 
             // Update download task status
-            downloadTask.DownloadStatus = downloadTask.IsSingleFile ? DownloadStatus.Moving : DownloadStatus.Merging;
+            downloadTask.DownloadStatus = DownloadStatus.Moving;
             await UpdateDownloadTaskStatus(downloadTask);
 
-            var stopwatch = Stopwatch.StartNew(); // Start timing for speed calculation
-            var previousDataTransferred = downloadTask.FileDataTransferred;
-
-            for (var index = downloadTask.CurrentFileTransferPathIndex; index < sourceFilePaths.Count; index++)
+            // Try fast move (rename). If a destination exists, delete it first
+            Result.Try((() =>
             {
-                var filePath = sourceFilePaths[index];
+                if (_file.Exists(downloadTask.DestinationFilePath))
+                    _file.Delete(downloadTask.DestinationFilePath);
+            })).LogIfFailed();
 
-                if (!_file.Exists(filePath))
-                {
-                    var result = Result
-                        .Fail($"Filepath: {filePath} does not exist and cannot be used to merge/move the file!")
-                        .LogError();
+            var moveResult = Result.Try((() => _file.Move(sourceFilePath, downloadTask.DestinationFilePath)));
+            if (moveResult.IsFailed)
+            {
+                // Fallback to copy when a move is not possible (e.g., across filesystems)
+                var writeStreamResult = Result.Try(
+                    (() => _file.Create(downloadTask.DestinationFilePath, _bufferSize, FileOptions.SequentialScan))
+                );
+                if (writeStreamResult.IsFailed)
+                    return (await ErrorDownloadTask(downloadTask, writeStreamResult.ToResult())).LogError();
 
-                    return (await ErrorDownloadTask(downloadTask, result)).LogError();
-                }
+                _writeStream = writeStreamResult.Value;
 
                 var inputStreamResult = Result.Try(
-                    (() => _file.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    (() => _file.Open(sourceFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
                 );
                 if (inputStreamResult.IsFailed)
                     return (await ErrorDownloadTask(downloadTask, inputStreamResult.ToResult())).LogError();
 
                 _readStream = inputStreamResult.Value;
 
+                // Resume the file move/copy if it was previously interrupted
                 if (downloadTask.CurrentFileTransferBytesOffset > 0)
                 {
                     _readStream.Seek(downloadTask.CurrentFileTransferBytesOffset, SeekOrigin.Begin);
+                    _writeStream.Seek(downloadTask.CurrentFileTransferBytesOffset, SeekOrigin.Begin);
                 }
 
-                downloadTask.CurrentFileTransferPathIndex = index;
-                downloadTask.CurrentFileTransferBytesOffset = 0;
-
-                cancellationToken.ThrowIfCancellationRequested();
+                var stopwatch = Stopwatch.StartNew();
+                var previousDataTransferred = 0L;
 
                 var buffer = new byte[_bufferSize];
                 int bytesRead;
@@ -154,7 +146,6 @@ public class MergeFilesFromFileTaskCommandHandler : ICommandHandler<MergeFilesFr
                     await _writeStream.WriteAsync(buffer, 0, bytesRead, CancellationToken.None);
 
                     downloadTask.CurrentFileTransferBytesOffset += bytesRead;
-
                     downloadTask.FileDataTransferred += bytesRead;
                     previousDataTransferred += bytesRead;
 
@@ -163,7 +154,6 @@ public class MergeFilesFromFileTaskCommandHandler : ICommandHandler<MergeFilesFr
                         stopwatch.Elapsed.TotalSeconds
                     );
 
-                    // Send progress
                     fileMergeProgress?.OnNext(downloadTask.ToFileTransferProgress());
 
                     if (stopwatch.ElapsedMilliseconds > 1000)
@@ -180,51 +170,33 @@ public class MergeFilesFromFileTaskCommandHandler : ICommandHandler<MergeFilesFr
                     cancellationToken.ThrowIfCancellationRequested();
                 }
 
-                _log.Here()
-                    .Debug(
-                        "The file at {FilePath} has been merged into the single media file at {DestinationPath}",
-                        filePath,
-                        downloadTask.DestinationDirectory
-                    );
-
-                // Important: Reset the offset between files otherwise it skips parts of the file
-                downloadTask.CurrentFileTransferBytesOffset = 0;
-
-                _log.Here().Debug("Deleting file {FilePath} since it has been merged already", filePath);
                 await _readStream.DisposeAsync();
                 _readStream = null;
+                await _writeStream.DisposeAsync();
+                _writeStream = null;
 
-                var deleteResult = Result.Try((() => _file.Delete(filePath)));
+                // Copy finished, delete a source temp file
+                var deleteResult = Result.Try((() => _file.Delete(sourceFilePath)));
                 if (deleteResult.IsFailed)
-                    return (await ErrorDownloadTask(downloadTask, deleteResult)).LogError();
+                    return await ErrorDownloadTask(downloadTask, deleteResult);
+            }
+            else
+            {
+                // Move (rename) successful: finish instantly
+                downloadTask.CurrentFileTransferBytesOffset = downloadTask.DataTotal;
+                downloadTask.FileDataTransferred = downloadTask.DataTotal;
+                await _dbContext.UpdateDownloadFileTransferProgress(key, downloadTask.ToFileTransferProgress());
+                fileMergeProgress?.OnNext(downloadTask.ToFileTransferProgress());
             }
 
-            // Important: Reset the offset between files otherwise it skips parts of the file
-            downloadTask.CurrentFileTransferBytesOffset = 0;
-
-            _log.Here()
-                .Information(
-                    "Finished combining {FilePathsCount} files into {FileTaskFileName}",
-                    downloadTask.FilePaths.Count,
-                    downloadTask.FileName
-                );
-
-            await _dbContext.UpdateDownloadFileTransferProgress(key, downloadTask.ToFileTransferProgress());
-            fileMergeProgress?.OnNext(downloadTask.ToFileTransferProgress());
-
-            downloadTask.DownloadStatus = downloadTask.IsSingleFile
-                ? DownloadStatus.MoveFinished
-                : DownloadStatus.MergeFinished;
-
+            downloadTask.DownloadStatus = DownloadStatus.MoveFinished;
             await UpdateDownloadTaskStatus(downloadTask);
         }
         catch (OperationCanceledException)
         {
-            _log.Here().Warning("The file merge operation was cancelled for file task {FileTaskId}", key.Id);
+            _log.Here().Warning("The file move operation was cancelled for file task {FileTaskId}", key.Id);
 
-            downloadTask.DownloadStatus = downloadTask.IsSingleFile
-                ? DownloadStatus.MovePaused
-                : DownloadStatus.MergePaused;
+            downloadTask.DownloadStatus = DownloadStatus.MovePaused;
 
             await UpdateDownloadTaskStatus(downloadTask);
             await _dbContext.UpdateDownloadFileTransferProgress(key, downloadTask.ToFileTransferProgress());
@@ -272,6 +244,6 @@ public class MergeFilesFromFileTaskCommandHandler : ICommandHandler<MergeFilesFr
 
         await _eventPublisher.PublishAsync(new SendNotificationResult(result), CancellationToken.None);
 
-        return result;
+        return result.LogError();
     }
 }

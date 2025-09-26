@@ -39,7 +39,7 @@ public class CleanUpDownloadTaskFoldersHandler : ICommandHandler<CleanUpDownload
         if (downloadTask is null)
             return ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), downloadTaskKey.Id).LogError();
 
-        var filePath = downloadTask.FilePaths.FirstOrDefault();
+        var filePath = downloadTask.FilePath;
         if (string.IsNullOrEmpty(filePath))
             return ResultExtensions.IsEmpty(nameof(filePath)).LogError();
 

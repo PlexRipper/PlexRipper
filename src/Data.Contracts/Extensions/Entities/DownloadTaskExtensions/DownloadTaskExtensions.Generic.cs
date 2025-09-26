@@ -41,7 +41,7 @@ public static partial class DownloadTaskExtensions
                     PartIndex = partIndex,
                     StartByte = startPosition,
                     EndByte = endPosition,
-                    FileName = downloadTask.FileName.AddPartIndexToFileName(partIndex),
+                    FileName = downloadTask.FileName.AddTempPartToFileName(),
                     DownloadStatus = DownloadStatus.Queued,
                     BytesReceived = 0,
                     ElapsedTime = 0,
@@ -51,4 +51,7 @@ public static partial class DownloadTaskExtensions
 
         return downloadWorkerTasks;
     }
+
+    private static string AddTempPartToFileName(this string fileName) =>
+        $"{Path.GetFileNameWithoutExtension(fileName)}.temp{Path.GetExtension(fileName)}";
 }

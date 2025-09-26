@@ -71,7 +71,7 @@ public class MergeFilesFromFileTaskCommandHandler : ICommandHandler<MergeFilesFr
             return ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), command.Key.Id).LogError();
         }
 
-        var sourceFilePaths = downloadTask.FilePaths;
+        var sourceFilePaths = downloadTask.FilePaths.Distinct().ToList();
         _log.Here()
             .Debug(
                 "Starting file merge process for {FilePathsCount} parts into a file {FileName}",

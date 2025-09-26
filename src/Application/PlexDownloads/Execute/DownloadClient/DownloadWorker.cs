@@ -173,8 +173,9 @@ public class DownloadWorker : IDisposable
 
             destinationStream = fileStreamResult.Value;
 
-            // Is 0 when starting new and > 0 when resuming.
-            destinationStream.Position = DownloadWorkerTask.BytesReceived;
+            // Position the destination stream at the absolute byte offset for this segment
+            // Support resume by advancing with BytesReceived from the segment start
+            destinationStream.Position = DownloadWorkerTask.StartByte + DownloadWorkerTask.BytesReceived;
 
             // Create download HttpRequestMessage with range header
             var request = new HttpRequestMessage(HttpMethod.Get, downloadUrl);

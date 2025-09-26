@@ -98,9 +98,6 @@ public static partial class StringExtensions
         return string.Join(" ", name.Split(invalids, StringSplitOptions.RemoveEmptyEntries)).TrimEnd('.');
     }
 
-    public static string AddPartIndexToFileName(this string fileName, int partIndex) =>
-        $"{Path.GetFileNameWithoutExtension(fileName)}.part{partIndex}{Path.GetExtension(fileName)}";
-
     /// <summary>
     /// Converts a title to a sort title that can be used for sorting.
     /// </summary>

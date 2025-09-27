@@ -5,6 +5,7 @@ using FastEndpoints;
 using FluentValidation;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
+using Reaparr.FileSystem.Contracts;
 using Reaparr.Settings.Contracts;
 
 namespace Reaparr.Application;
@@ -34,12 +35,6 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
     private readonly IPath _path;
     private readonly IDownloadManagerSettings _downloadManagerSettings;
 
-    /// <summary>
-    /// Based on https://github.com/dotnet/runtime/discussions/74405#discussioncomment-3488674
-    /// 1048576 bytes = 1 MB
-    /// </summary>
-    private readonly int _bufferSize = 1048576;
-
     public MoveDownloadFileFromFileTaskCommandHandler(
         ILogger log,
         ICommandExecutor commandExecutor,
@@ -61,23 +56,29 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
         _downloadManagerSettings = downloadManagerSettings;
     }
 
-    public async Task<Result> ExecuteAsync(MoveDownloadFileFromFileTaskCommand command, CancellationToken cancellationToken)
+    public async Task<Result> ExecuteAsync(
+        MoveDownloadFileFromFileTaskCommand command,
+        CancellationToken cancellationToken
+    )
     {
         var key = command.Key;
         var fileMergeProgress = command.FileMergeProgress;
 
         var downloadTask = await _dbContext.GetDownloadTaskFileAsync(command.Key, CancellationToken.None);
         if (downloadTask == null)
-        {
             return ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), command.Key.Id).LogError();
-        }
 
         // Resolve paths
-        var tempOrSourcePath = downloadTask.FilePath;
-        var finalPathInDownloads = _path.Combine(downloadTask.DownloadDirectory, downloadTask.FileName);
+        var downloadFilePath = downloadTask.FilePath;
         var destinationPath = downloadTask.DestinationFilePath;
 
-        _log.Here().Debug("Starting file move process for {FileName}", downloadTask.FileName);
+        _log.Here().Debug("Starting file move process for {DownloadFilePath}", downloadFilePath);
+
+        if (string.IsNullOrWhiteSpace(downloadFilePath) || !_file.Exists(downloadFilePath))
+        {
+            var result = Result.Fail($"Source file does not exist and cannot be moved: {downloadFilePath}").LogError();
+            return await ErrorDownloadTask(key, result);
+        }
 
         try
         {
@@ -95,55 +96,8 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
             if (createDirectoryResult.IsFailed)
                 return await ErrorDownloadTask(key, createDirectoryResult);
 
-            // If a final-named file already exists in downloads, prefer it and remove temp
-            if (_file.Exists(finalPathInDownloads))
-            {
-                if (
-                    _file.Exists(tempOrSourcePath)
-                    && !string.Equals(tempOrSourcePath, finalPathInDownloads, StringComparison.OrdinalIgnoreCase)
-                )
-                    Result.Try((() => _file.Delete(tempOrSourcePath))).LogIfFailed();
-
-                tempOrSourcePath = finalPathInDownloads;
-            }
-
-            if (string.IsNullOrWhiteSpace(tempOrSourcePath) || !_file.Exists(tempOrSourcePath))
-            {
-                var result = Result
-                    .Fail($"Source file does not exist and cannot be moved: {tempOrSourcePath}")
-                    .LogError();
-                return await ErrorDownloadTask(key, result);
-            }
-
-            // Update status
-            await UpdateDownloadTaskStatus(key, DownloadStatus.Moving);
-
-            // Toggle decision (per task overrides global when true)
-            var keepInDownloads =
-                downloadTask.DirectoryMeta.KeepCompletedInDownloadFolder
-                || _downloadManagerSettings.KeepCompletedInDownloadFolder;
-
-            var targetPath = keepInDownloads ? finalPathInDownloads : destinationPath;
-
-            // If the target already exists, delete it to replace 
-            Result.Try((() =>
-                {
-                    if (_file.Exists(targetPath))
-                    {
-                        _file.Delete(targetPath);
-                        _log.Here()
-                            .Warning(
-                                "Overwrote existing file at destination {TargetPath} with source {SourcePath} for file task {FileTaskId}",
-                                targetPath,
-                                tempOrSourcePath,
-                                key.Id
-                            );
-                    }
-                }))
-                .LogIfFailed();
-
             // If source and target are the same, finish immediately
-            if (string.Equals(tempOrSourcePath, targetPath, StringComparison.OrdinalIgnoreCase))
+            if (downloadFilePath == destinationPath)
             {
                 downloadTask.CurrentFileTransferBytesOffset = downloadTask.DataTotal;
                 downloadTask.FileDataTransferred = downloadTask.DataTotal;
@@ -153,41 +107,58 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
                 await UpdateDownloadTaskStatus(key, DownloadStatus.MoveFinished);
                 return Result.Ok();
             }
-
-            // Try fast rename move first
-            var moveResult = Result.Try((() => _file.Move(tempOrSourcePath, targetPath)));
-            if (moveResult.IsFailed)
-            {
-                var copyResult = await CopyWithResumeAsync(
-                    downloadTask,
-                    tempOrSourcePath,
-                    targetPath,
-                    fileMergeProgress,
-                    key,
-                    cancellationToken
-                );
-                if (copyResult.IsFailed)
-                    return await ErrorDownloadTask(key, copyResult);
-
-                // After a successful copy, remove the original temp if still present and different from target
-                Result.Try((() =>
-                            {
-                                if (!string.Equals(tempOrSourcePath, targetPath, StringComparison.OrdinalIgnoreCase)
-                                    && _file.Exists(tempOrSourcePath))
-                                    _file.Delete(tempOrSourcePath);
-                            }
-                        )
-                    )
-                    .LogIfFailed();
-            }
             else
             {
-                // Instant finish on rename
+                // Update status
+                await UpdateDownloadTaskStatus(key, DownloadStatus.Moving);
+            }
+
+            var keepInDownloads = ShouldKeepInDownloads(downloadTask);
+            if (keepInDownloads)
+            {
+                // Rename it to remove .reapTemp suffix if present
+                _file.Move(downloadFilePath, downloadFilePath.RemoveReapTempSuffix());
+
                 downloadTask.CurrentFileTransferBytesOffset = downloadTask.DataTotal;
                 downloadTask.FileDataTransferred = downloadTask.DataTotal;
                 await _dbContext.UpdateDownloadFileTransferProgress(key, downloadTask.ToFileTransferProgress());
                 fileMergeProgress?.OnNext(downloadTask.ToFileTransferProgress());
+
+                await UpdateDownloadTaskStatus(key, DownloadStatus.MoveFinished);
+                return Result.Ok();
             }
+
+            var copyResult = await MoveWithResumeAsync(
+                downloadTask,
+                downloadFilePath,
+                destinationPath,
+                key,
+                cancellationToken
+            );
+            if (copyResult.IsFailed)
+                return await ErrorDownloadTask(key, copyResult);
+
+            // After a successful copy, remove the original temp if still present and different from target
+            Result
+                .Try(
+                    (
+                        () =>
+                        {
+                            if (
+                                !string.Equals(downloadFilePath, destinationPath, StringComparison.OrdinalIgnoreCase)
+                                && _file.Exists(downloadFilePath)
+                            )
+                                _file.Delete(downloadFilePath);
+                        }
+                    )
+                )
+                .LogIfFailed();
+
+            // Instant finish on rename
+            downloadTask.CurrentFileTransferBytesOffset = downloadTask.DataTotal;
+            downloadTask.FileDataTransferred = downloadTask.DataTotal;
+            await _dbContext.UpdateDownloadFileTransferProgress(key, downloadTask.ToFileTransferProgress());
+            fileMergeProgress?.OnNext(downloadTask.ToFileTransferProgress());
 
             await UpdateDownloadTaskStatus(key, DownloadStatus.MoveFinished);
         }
@@ -213,77 +184,60 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
         return Result.Ok();
     }
 
-    private async Task<Result> CopyWithResumeAsync(
+    private async Task<Result> MoveWithResumeAsync(
         DownloadTaskFileBase downloadTask,
         string sourcePath,
         string targetPath,
-        Subject<IDownloadFileTransferProgress>? fileMergeProgress,
         DownloadTaskKey key,
         CancellationToken cancellationToken
     )
     {
-        var writeStreamResult = Result.Try(() =>
-            _file.Open(targetPath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None));
-        if (writeStreamResult.IsFailed)
-            return writeStreamResult.ToResult();
-
-        await using var writeStream = writeStreamResult.Value;
-
-        var inputStreamResult = Result.Try(
-            (() => _file.Open(sourcePath, FileMode.Open, FileAccess.Read, FileShare.Read))
-        );
-        if (inputStreamResult.IsFailed)
-            return inputStreamResult.ToResult();
-
-        await using var readStream = inputStreamResult.Value;
-
-        // Resume if needed
-        if (downloadTask.CurrentFileTransferBytesOffset > 0)
-        {
-            readStream.Seek(downloadTask.CurrentFileTransferBytesOffset, SeekOrigin.Begin);
-            writeStream.Seek(downloadTask.CurrentFileTransferBytesOffset, SeekOrigin.Begin);
-        }
-
         var stopwatch = Stopwatch.StartNew();
-        var previousDataTransferred = 0L;
 
-        var buffer = new byte[_bufferSize];
-        int bytesRead;
-        while ((bytesRead = await readStream.ReadAsync(buffer, 0, buffer.Length, CancellationToken.None)) > 0)
+        void SendProgress(MoveFileTransferProgressDTO progress)
         {
-            await writeStream.WriteAsync(buffer, 0, bytesRead, CancellationToken.None);
-
-            downloadTask.CurrentFileTransferBytesOffset += bytesRead;
-            downloadTask.FileDataTransferred += bytesRead;
-            previousDataTransferred += bytesRead;
-
-            downloadTask.FileTransferSpeed = DataFormat.GetTransferSpeed(
-                previousDataTransferred,
-                stopwatch.Elapsed.TotalSeconds
-            );
-
-            fileMergeProgress?.OnNext(downloadTask.ToFileTransferProgress());
+            downloadTask.CurrentFileTransferBytesOffset = progress.Transferred;
+            downloadTask.FileDataTransferred = progress.Transferred;
+            downloadTask.FileTransferSpeed = progress.FileTransferSpeed;
 
             if (stopwatch.ElapsedMilliseconds > 1000)
             {
                 _log.Here().Verbose(downloadTask.ToString());
 
-                await _dbContext.UpdateDownloadFileTransferProgress(key, downloadTask.ToFileTransferProgress());
-                await _commandExecutor.Send(new DownloadTaskUpdatedCommand(key), CancellationToken.None);
+                var fileTransferProgress = downloadTask.ToFileTransferProgress();
+
+                _ = Task.Run(
+                    async () =>
+                    {
+                        try
+                        {
+                            await _dbContext.UpdateDownloadFileTransferProgress(key, fileTransferProgress);
+                            await _commandExecutor.Send(new DownloadTaskUpdatedCommand(key), CancellationToken.None);
+                        }
+                        catch (Exception ex)
+                        {
+                            _log.Here()
+                                .Error(ex, "Error while updating file transfer progress for {FileTaskId}", key.Id);
+                        }
+                    },
+                    cancellationToken
+                );
 
                 stopwatch.Restart();
-                previousDataTransferred = 0;
-            }
-
-            if (cancellationToken.IsCancellationRequested)
-            {
-                _log.Here()
-                    .Information("User Cancellation requested during file copy for file task {FileTaskId}", key.Id);
-                break;
             }
         }
 
-        return Result.Ok();
+        return await _commandExecutor.Send(
+            new MoveFileWithResumeCommand
+            {
+                SourcePath = sourcePath,
+                TargetPath = targetPath,
+                Progress = SendProgress,
+                CurrentOffset = downloadTask.CurrentFileTransferBytesOffset,
+                DataTotal = downloadTask.DataTotal,
+            },
+            cancellationToken
+        );
     }
 
     private async Task UpdateDownloadTaskStatus(DownloadTaskKey key, DownloadStatus status)
@@ -303,4 +257,9 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
 
         return result.LogError();
     }
+
+    private bool ShouldKeepInDownloads(DownloadTaskFileBase downloadTask) =>
+        downloadTask.DirectoryMeta.KeepCompletedInDownloadFolder
+        || _downloadManagerSettings.KeepCompletedInDownloadFolder
+        || downloadTask.FilePath == downloadTask.DestinationFilePath;
 }

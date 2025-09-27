@@ -70,7 +70,8 @@ public class MoveDownloadFileJob : IJob
         }
         catch (TaskCanceledException)
         {
-            _log.Here().Warning("{JobName} for {DownloadTaskKey} was cancelled", nameof(MoveDownloadFileJob), downloadTaskKey);
+            _log.Here()
+                .Warning("{JobName} for {DownloadTaskKey} was cancelled", nameof(MoveDownloadFileJob), downloadTaskKey);
         }
         catch (Exception e)
         {

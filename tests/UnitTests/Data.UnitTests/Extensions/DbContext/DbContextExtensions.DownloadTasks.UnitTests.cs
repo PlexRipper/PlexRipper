@@ -191,7 +191,6 @@ public class DbContextExtensionsDownloadTasksUnitTests : BaseUnitTest
         testDownloadTask.DataReceived = 50;
         testDownloadTask.FileTransferSpeed = 50;
         testDownloadTask.FileDataTransferred = 50;
-        testDownloadTask.CurrentFileTransferPathIndex = 50;
         testDownloadTask.CurrentFileTransferBytesOffset = 50;
         await dbContext.SaveChangesAsync(CancellationToken);
 
@@ -210,7 +209,6 @@ public class DbContextExtensionsDownloadTasksUnitTests : BaseUnitTest
         downloadTaskDb.DataReceived.ShouldBe(0);
         downloadTaskDb.FileTransferSpeed.ShouldBe(0);
         downloadTaskDb.FileDataTransferred.ShouldBe(0);
-        downloadTaskDb.CurrentFileTransferPathIndex.ShouldBe(0);
         downloadTaskDb.CurrentFileTransferBytesOffset.ShouldBe(0);
         downloadTaskDb.DataTotal.ShouldBe(5000);
         downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.Stopped);
@@ -250,7 +248,6 @@ public class DbContextExtensionsDownloadTasksUnitTests : BaseUnitTest
         testDownloadTask.DataReceived = 50;
         testDownloadTask.FileTransferSpeed = 50;
         testDownloadTask.FileDataTransferred = 50;
-        testDownloadTask.CurrentFileTransferPathIndex = 50;
         testDownloadTask.CurrentFileTransferBytesOffset = 50;
         await dbContext.SaveChangesAsync(CancellationToken);
 
@@ -269,7 +266,6 @@ public class DbContextExtensionsDownloadTasksUnitTests : BaseUnitTest
         downloadTaskDb.DataReceived.ShouldBe(0);
         downloadTaskDb.FileTransferSpeed.ShouldBe(0);
         downloadTaskDb.FileDataTransferred.ShouldBe(0);
-        downloadTaskDb.CurrentFileTransferPathIndex.ShouldBe(0);
         downloadTaskDb.CurrentFileTransferBytesOffset.ShouldBe(0);
         downloadTaskDb.DataTotal.ShouldBe(5000);
 

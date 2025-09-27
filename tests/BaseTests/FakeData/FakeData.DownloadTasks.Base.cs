@@ -42,7 +42,6 @@ public static partial class FakeData
             .Ignore(x => x.DownloadSpeed)
             .Ignore(x => x.FileTransferSpeed)
             .Ignore(x => x.FileDataTransferred)
-            .Ignore(x => x.CurrentFileTransferPathIndex)
             .Ignore(x => x.CurrentFileTransferBytesOffset)
             .Ignore(x => x.DestinationFolderPathId)
             .RuleFor(x => x.Quality, f => f.PickRandom("sd", "720p", "1080p", "2160p"))

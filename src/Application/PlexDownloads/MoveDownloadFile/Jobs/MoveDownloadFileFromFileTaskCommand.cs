@@ -9,21 +9,21 @@ using Reaparr.Settings.Contracts;
 
 namespace Reaparr.Application;
 
-public record MergeFilesFromFileTaskCommand(
+public record MoveDownloadFileFromFileTaskCommand(
     DownloadTaskKey Key,
     Subject<IDownloadFileTransferProgress>? FileMergeProgress = null
 ) : ICommand<Result>;
 
-public class MergeFilesFromFileTaskCommandValidator : AbstractValidator<MergeFilesFromFileTaskCommand>
+public class MoveDownloadFileFromFileTaskCommandValidator : AbstractValidator<MoveDownloadFileFromFileTaskCommand>
 {
-    public MergeFilesFromFileTaskCommandValidator()
+    public MoveDownloadFileFromFileTaskCommandValidator()
     {
         RuleFor(x => x.Key).NotNull();
         RuleFor(x => x.Key.Id).NotEqual(Guid.Empty);
     }
 }
 
-public class MergeFilesFromFileTaskCommandHandler : ICommandHandler<MergeFilesFromFileTaskCommand, Result>
+public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDownloadFileFromFileTaskCommand, Result>
 {
     private readonly Serilog.ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
@@ -40,7 +40,7 @@ public class MergeFilesFromFileTaskCommandHandler : ICommandHandler<MergeFilesFr
     /// </summary>
     private readonly int _bufferSize = 1048576;
 
-    public MergeFilesFromFileTaskCommandHandler(
+    public MoveDownloadFileFromFileTaskCommandHandler(
         ILogger log,
         ICommandExecutor commandExecutor,
         IEventPublisher eventPublisher,
@@ -51,7 +51,7 @@ public class MergeFilesFromFileTaskCommandHandler : ICommandHandler<MergeFilesFr
         IDownloadManagerSettings downloadManagerSettings
     )
     {
-        _log = log.ForContext<MergeFilesFromFileTaskCommandHandler>();
+        _log = log.ForContext<MoveDownloadFileFromFileTaskCommandHandler>();
         _commandExecutor = commandExecutor;
         _eventPublisher = eventPublisher;
         _dbContext = dbContext;
@@ -61,7 +61,7 @@ public class MergeFilesFromFileTaskCommandHandler : ICommandHandler<MergeFilesFr
         _downloadManagerSettings = downloadManagerSettings;
     }
 
-    public async Task<Result> ExecuteAsync(MergeFilesFromFileTaskCommand command, CancellationToken cancellationToken)
+    public async Task<Result> ExecuteAsync(MoveDownloadFileFromFileTaskCommand command, CancellationToken cancellationToken)
     {
         var key = command.Key;
         var fileMergeProgress = command.FileMergeProgress;

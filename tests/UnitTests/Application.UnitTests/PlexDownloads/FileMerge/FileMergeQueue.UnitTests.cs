@@ -3,7 +3,7 @@ using Reaparr.FileSystem.Contracts;
 
 namespace Reaparr.Application.UnitTests;
 
-public class FileMergeQueueUnitTests : BaseUnitTest<FileMergeQueue>
+public class FileMergeQueueUnitTests : BaseUnitTest<MoveDownloadFileJobQueue>
 {
     public FileMergeQueueUnitTests(ITestOutputHelper output)
         : base(output) { }

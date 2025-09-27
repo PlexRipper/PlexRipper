@@ -15,8 +15,8 @@ public class ApplicationModule : Module
     {
         builder.RegisterType<DownloadQueue>().As<IDownloadQueue>().SingleInstance();
         builder.RegisterType<DownloadTaskScheduler>().As<IDownloadTaskScheduler>().SingleInstance();
-        builder.RegisterType<FileMergeScheduler>().As<IFileMergeScheduler>().SingleInstance();
-        builder.RegisterType<FileMergeQueue>().As<IFileMergeQueue>().SingleInstance();
+        builder.RegisterType<MoveDownloadFileJobScheduler>().As<IFileMergeScheduler>().SingleInstance();
+        builder.RegisterType<MoveDownloadFileJobQueue>().As<IFileMergeQueue>().SingleInstance();
         builder.RegisterType<DownloadWorker>().InstancePerDependency();
         builder.RegisterType<PlexDownloadClient>().As<IPlexDownloadClient>().InstancePerDependency();
 

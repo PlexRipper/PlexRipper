@@ -8,9 +8,9 @@ using Reaparr.Data.Contracts;
 
 namespace Reaparr.Application.UnitTests;
 
-public class MergeFilesFromFileTaskCommandUnitTests : BaseUnitTest<MergeFilesFromFileTaskCommandHandler>
+public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDownloadFileFromFileTaskCommandHandler>
 {
-    public MergeFilesFromFileTaskCommandUnitTests(ITestOutputHelper output)
+    public MoveDownloadFileFromFileTaskCommandUnitTests(ITestOutputHelper output)
         : base(output) { }
 
     private void MockCreateDirectoryFromFilePath()
@@ -57,7 +57,7 @@ public class MergeFilesFromFileTaskCommandUnitTests : BaseUnitTest<MergeFilesFro
         mock.SetupCommand(It.IsAny<DownloadTaskUpdatedCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.Once);
 
         // Act
-        var command = new MergeFilesFromFileTaskCommand(downloadTask.ToKey(), progress);
+        var command = new MoveDownloadFileFromFileTaskCommand(downloadTask.ToKey(), progress);
         var result = await _sut.ExecuteAsync(command, CancellationToken);
 
         // Assert
@@ -100,7 +100,7 @@ public class MergeFilesFromFileTaskCommandUnitTests : BaseUnitTest<MergeFilesFro
         mock.SetupCommand(It.IsAny<DownloadTaskUpdatedCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.Once);
 
         // Act
-        var command = new MergeFilesFromFileTaskCommand(key, progress);
+        var command = new MoveDownloadFileFromFileTaskCommand(key, progress);
         var result = await _sut.ExecuteAsync(command, CancellationToken);
 
         // Assert
@@ -171,7 +171,7 @@ public class MergeFilesFromFileTaskCommandUnitTests : BaseUnitTest<MergeFilesFro
         mock.SetupCommand(It.IsAny<DownloadTaskUpdatedCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.AtLeastOnce);
 
         // Act
-        var command = new MergeFilesFromFileTaskCommand(downloadFileTask.ToKey(), progress);
+        var command = new MoveDownloadFileFromFileTaskCommand(downloadFileTask.ToKey(), progress);
         var result = await _sut.ExecuteAsync(command, CancellationToken);
 
         // Assert
@@ -258,7 +258,7 @@ public class MergeFilesFromFileTaskCommandUnitTests : BaseUnitTest<MergeFilesFro
         mock.SetupCommand(It.IsAny<DownloadTaskUpdatedCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.AtLeastOnce);
 
         // Act
-        var command = new MergeFilesFromFileTaskCommand(downloadFileTask.ToKey(), progress);
+        var command = new MoveDownloadFileFromFileTaskCommand(downloadFileTask.ToKey(), progress);
         var result = await _sut.ExecuteAsync(command, cancellationTokenSource.Token);
 
         // Assert
@@ -336,7 +336,7 @@ public class MergeFilesFromFileTaskCommandUnitTests : BaseUnitTest<MergeFilesFro
         mock.SetupCommand(It.IsAny<DownloadTaskUpdatedCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.AtLeastOnce);
 
         // Act
-        var command = new MergeFilesFromFileTaskCommand(downloadFileTask.ToKey(), progress);
+        var command = new MoveDownloadFileFromFileTaskCommand(downloadFileTask.ToKey(), progress);
         var result = await _sut.ExecuteAsync(command, cancellationTokenSource.Token);
 
         // Assert
@@ -412,7 +412,7 @@ public class MergeFilesFromFileTaskCommandUnitTests : BaseUnitTest<MergeFilesFro
         mock.SetupCommand(It.IsAny<DownloadTaskUpdatedCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.AtLeastOnce);
 
         // Act
-        var command = new MergeFilesFromFileTaskCommand(downloadFileTask.ToKey(), progress);
+        var command = new MoveDownloadFileFromFileTaskCommand(downloadFileTask.ToKey(), progress);
         var result = await _sut.ExecuteAsync(command, cancellationTokenSource.Token);
 
         // Assert

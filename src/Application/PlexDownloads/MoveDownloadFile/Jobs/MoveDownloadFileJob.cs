@@ -4,22 +4,22 @@ using Reaparr.Data.Contracts;
 
 namespace Reaparr.Application;
 
-public class FileMergeJob : IJob
+public class MoveDownloadFileJob : IJob
 {
     private readonly Serilog.ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IReaparrDbContext _dbContext;
 
-    public FileMergeJob(ILogger log, ICommandExecutor commandExecutor, IReaparrDbContext dbContext)
+    public MoveDownloadFileJob(ILogger log, ICommandExecutor commandExecutor, IReaparrDbContext dbContext)
     {
-        _log = log.ForContext<FileMergeJob>();
+        _log = log.ForContext<MoveDownloadFileJob>();
         _commandExecutor = commandExecutor;
         _dbContext = dbContext;
     }
 
     public static string DownloadTaskIdParameter => "DownloadTaskId";
 
-    public static JobKey GetJobKey(Guid id) => new($"{DownloadTaskIdParameter}_{id}", nameof(FileMergeJob));
+    public static JobKey GetJobKey(Guid id) => new($"{DownloadTaskIdParameter}_{id}", nameof(MoveDownloadFileJob));
 
     public async Task Execute(IJobExecutionContext context)
     {
@@ -39,12 +39,12 @@ public class FileMergeJob : IJob
             _log.Here()
                 .Information(
                     "Executing job: {NameOfFileMergeJob} for {NameOfFileTaskId} with id: {FileTaskId}",
-                    nameof(FileMergeJob),
+                    nameof(MoveDownloadFileJob),
                     nameof(downloadTaskKey),
                     downloadTaskKey.Id
                 );
 
-            var result = await _commandExecutor.Send(new MergeFilesFromFileTaskCommand(downloadTaskKey), ct);
+            var result = await _commandExecutor.Send(new MoveDownloadFileFromFileTaskCommand(downloadTaskKey), ct);
 
             if (result.IsFailed)
             {
@@ -70,7 +70,7 @@ public class FileMergeJob : IJob
         }
         catch (TaskCanceledException)
         {
-            _log.Here().Warning("{JobName} for {DownloadTaskKey} was cancelled", nameof(FileMergeJob), downloadTaskKey);
+            _log.Here().Warning("{JobName} for {DownloadTaskKey} was cancelled", nameof(MoveDownloadFileJob), downloadTaskKey);
         }
         catch (Exception e)
         {

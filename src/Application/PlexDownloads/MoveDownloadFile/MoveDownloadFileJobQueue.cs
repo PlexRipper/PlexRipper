@@ -5,15 +5,15 @@ using Reaparr.FileSystem.Contracts;
 
 namespace Reaparr.Application;
 
-public class FileMergeQueue : IFileMergeQueue
+public class MoveDownloadFileJobQueue : IFileMergeQueue
 {
     private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly IFileMergeScheduler _fileMergeScheduler;
 
-    public FileMergeQueue(ILogger log, IReaparrDbContext dbContext, IFileMergeScheduler fileMergeScheduler)
+    public MoveDownloadFileJobQueue(ILogger log, IReaparrDbContext dbContext, IFileMergeScheduler fileMergeScheduler)
     {
-        _log = log.ForContext<FileMergeQueue>();
+        _log = log.ForContext<MoveDownloadFileJobQueue>();
         _dbContext = dbContext;
         _fileMergeScheduler = fileMergeScheduler;
     }

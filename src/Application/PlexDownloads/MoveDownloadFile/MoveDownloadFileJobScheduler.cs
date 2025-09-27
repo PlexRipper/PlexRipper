@@ -4,19 +4,19 @@ using Reaparr.FileSystem.Contracts;
 
 namespace Reaparr.Application;
 
-public class FileMergeScheduler : IFileMergeScheduler
+public class MoveDownloadFileJobScheduler : IFileMergeScheduler
 {
     private readonly Serilog.ILogger _log;
     private readonly IScheduler _scheduler;
 
-    public FileMergeScheduler(ILogger log, IScheduler scheduler)
+    public MoveDownloadFileJobScheduler(ILogger log, IScheduler scheduler)
     {
-        _log = log.ForContext<FileMergeScheduler>();
+        _log = log.ForContext<MoveDownloadFileJobScheduler>();
         _scheduler = scheduler;
     }
 
     /// <summary>
-    /// Should only be called by the <see cref="FileMergeQueue"/> to start a new <see cref="FileMergeJob"/>.
+    /// Should only be called by the <see cref="MoveDownloadFileJobQueue"/> to start a new <see cref="MoveDownloadFileJob"/>.
     /// </summary>
     /// <param name="downloadTaskKey"> The key of the <see cref="DownloadTaskGeneric"/> to merge/move. </param>
     public async Task<Result> StartFileMergeJob(DownloadTaskKey downloadTaskKey)
@@ -24,13 +24,13 @@ public class FileMergeScheduler : IFileMergeScheduler
         if (!downloadTaskKey.IsValid)
             return ResultExtensions.IsInvalidId(nameof(DownloadTaskKey), downloadTaskKey.Id).LogWarning();
 
-        var jobKey = FileMergeJob.GetJobKey(downloadTaskKey.Id);
+        var jobKey = MoveDownloadFileJob.GetJobKey(downloadTaskKey.Id);
         if (await _scheduler.IsJobRunning(jobKey))
-            return Result.Fail($"{nameof(FileMergeJob)} with {jobKey} already exists").LogWarning();
+            return Result.Fail($"{nameof(MoveDownloadFileJob)} with {jobKey} already exists").LogWarning();
 
         var job = JobBuilder
-            .Create<FileMergeJob>()
-            .UsingJobData(FileMergeJob.DownloadTaskIdParameter, JsonSerializer.Serialize(downloadTaskKey))
+            .Create<MoveDownloadFileJob>()
+            .UsingJobData(MoveDownloadFileJob.DownloadTaskIdParameter, JsonSerializer.Serialize(downloadTaskKey))
             .WithIdentity(jobKey)
             .Build();
 
@@ -53,11 +53,11 @@ public class FileMergeScheduler : IFileMergeScheduler
                 downloadTaskKey.Id
             );
 
-        var jobKey = FileMergeJob.GetJobKey(downloadTaskKey.Id);
+        var jobKey = MoveDownloadFileJob.GetJobKey(downloadTaskKey.Id);
         if (!await _scheduler.IsJobRunning(jobKey))
         {
             return Result
-                .Fail($"{nameof(FileMergeJob)} with {jobKey} cannot be stopped because it is not running")
+                .Fail($"{nameof(MoveDownloadFileJob)} with {jobKey} cannot be stopped because it is not running")
                 .LogWarning();
         }
 
@@ -69,8 +69,8 @@ public class FileMergeScheduler : IFileMergeScheduler
     }
 
     public async Task<bool> IsDownloadTaskMerging(DownloadTaskKey downloadTaskKey) =>
-        await _scheduler.IsJobRunningAsync(FileMergeJob.GetJobKey(downloadTaskKey.Id));
+        await _scheduler.IsJobRunningAsync(MoveDownloadFileJob.GetJobKey(downloadTaskKey.Id));
 
     public async Task<bool> IsAnyFileMergeJobRunning() =>
-        (await _scheduler.GetRunningJobDataMaps(typeof(FileMergeJob))).Any();
+        (await _scheduler.GetRunningJobDataMaps(typeof(MoveDownloadFileJob))).Any();
 }

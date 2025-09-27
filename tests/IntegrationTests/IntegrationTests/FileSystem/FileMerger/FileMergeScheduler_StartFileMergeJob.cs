@@ -9,8 +9,7 @@ public class FileMergeSchedulerStartFileMergeJobIntegrationTests : BaseIntegrati
         : base(output) { }
 
     [Fact]
-    public async Task
-        ShouldFinishMergingDownloadTaskAsFileTaskJobAndSetToCompleted_WhenDownloadTaskHasFinishedDownloading()
+    public async Task ShouldFinishMergingDownloadTaskAsFileTaskJobAndSetToCompleted_WhenDownloadTaskHasFinishedDownloading()
     {
         // Arrange
         using var container = await CreateContainer(

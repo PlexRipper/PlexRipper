@@ -61,6 +61,7 @@ public static partial class FakeData
                         MovieFolder = x.Title,
                         TvShowFolder = string.Empty,
                         SeasonFolder = string.Empty,
+                        KeepCompletedInDownloadFolder = false,
                     }
             )
             .Ignore(x => x.DownloadWorkerTasks);

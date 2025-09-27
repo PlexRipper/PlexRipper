@@ -174,9 +174,6 @@ public abstract class DownloadTaskFileBase : DownloadTaskBase, IDownloadTaskProg
     [NotMapped]
     public long TimeRemaining => DownloadTaskPhaseExtensions.TimeRemaining(DownloadTaskPhase, this, this);
 
-    [NotMapped]
-    public bool IsSingleFile => DownloadWorkerTasks.Count == 1;
-
     public override string ToString() =>
         $"[FileMergeProgress {Title} - {Percentage}% - {DataFormat.FormatSpeedString(Speed)} - {DataFormat.FormatSizeString(DownloadTaskPhase == DownloadTaskPhase.FileTransfer ? FileDataTransferred : DataReceived)} / {DataFormat.FormatSizeString(DataTotal)} - {DataFormat.FormatTimeSpanString(TimeSpan.FromSeconds(TimeRemaining))}]";
 

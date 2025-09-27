@@ -5,9 +5,11 @@ public record DownloadManagerSettingsModule
         IDownloadManagerSettings
 {
     private int _downloadSegments = 4;
+
     private bool _keepCompletedInDownloadFolder = false;
 
-    public static DownloadManagerSettingsModule Create() => new() { DownloadSegments = 4, KeepCompletedInDownloadFolder = false };
+    public static DownloadManagerSettingsModule Create() =>
+        new() { DownloadSegments = 4, KeepCompletedInDownloadFolder = false };
 
     public required int DownloadSegments
     {

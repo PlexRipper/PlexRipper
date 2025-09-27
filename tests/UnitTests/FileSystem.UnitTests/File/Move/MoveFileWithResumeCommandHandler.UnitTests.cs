@@ -382,4 +382,69 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
         result.IsSuccess.ShouldBeTrue();
         seenTotals.ShouldContain(999_999);
     }
+
+    [Fact]
+    public async Task ExecuteAsync_Success_DeletesSourceFileAfterCompletion()
+    {
+        var sourcePath = "/test/source-delete-success.bin";
+        var targetPath = "/test/target-delete-success.bin";
+        var content = CreateBytes(256 * 1024);
+
+        SetupFileSystem(fs =>
+        {
+            fs.AddDirectory("/test");
+            fs.AddFile(sourcePath, new MockFileData(content));
+            fs.AddFile(targetPath, new MockFileData(Array.Empty<byte>()));
+        });
+
+        var command = new MoveFileWithResumeCommand
+        {
+            SourcePath = sourcePath,
+            TargetPath = targetPath,
+            CurrentOffset = 0,
+            DataTotal = content.LongLength,
+            Progress = _ => { },
+        };
+
+        var result = await _sut.ExecuteAsync(command, CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+
+        var file = mock.Create<IFile>();
+        file.Exists(sourcePath).ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_Cancelled_DoesNotDeleteSourceFile()
+    {
+        var sourcePath = "/test/source-delete-cancel.bin";
+        var targetPath = "/test/target-delete-cancel.bin";
+        var content = CreateBytes(2_500_000);
+
+        SetupFileSystem(fs =>
+        {
+            fs.AddDirectory("/test");
+            fs.AddFile(sourcePath, new MockFileData(content));
+            fs.AddFile(targetPath, new MockFileData(Array.Empty<byte>()));
+        });
+
+        var cts = new CancellationTokenSource();
+        cts.Cancel();
+
+        var command = new MoveFileWithResumeCommand
+        {
+            SourcePath = sourcePath,
+            TargetPath = targetPath,
+            CurrentOffset = 0,
+            DataTotal = content.LongLength,
+            Progress = _ => { },
+        };
+
+        var result = await _sut.ExecuteAsync(command, cts.Token);
+
+        result.IsSuccess.ShouldBeTrue();
+
+        var file = mock.Create<IFile>();
+        file.Exists(sourcePath).ShouldBeTrue();
+    }
 }

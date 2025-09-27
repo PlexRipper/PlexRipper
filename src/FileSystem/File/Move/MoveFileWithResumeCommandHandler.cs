@@ -47,14 +47,13 @@ public class MoveFileWithResumeCommandHandler : ICommandHandler<MoveFileWithResu
         if (writeStreamResult.IsFailed)
             return writeStreamResult.ToResult();
 
-        await using Stream? writeStream = writeStreamResult.Value;
-
         var inputStreamResult = Result.Try(
             (() => _file.Open(sourcePath, FileMode.Open, FileAccess.Read, FileShare.Read))
         );
         if (inputStreamResult.IsFailed)
             return inputStreamResult.ToResult();
 
+        await using Stream? writeStream = writeStreamResult.Value;
         await using Stream? readStream = inputStreamResult.Value;
 
         // Resume if needed
@@ -98,6 +97,12 @@ public class MoveFileWithResumeCommandHandler : ICommandHandler<MoveFileWithResu
                     );
                 break;
             }
+        }
+
+        // Only after a successful completion, delete the source file if it still exists
+        if (!cancellationToken.IsCancellationRequested && _file.Exists(sourcePath))
+        {
+            Result.Try(() => _file.Delete(sourcePath)).LogIfFailed();
         }
 
         return Result.Ok();

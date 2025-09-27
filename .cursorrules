@@ -26,6 +26,9 @@ rules: |
   - The test class name must match the file name without the `.cs` extension.
     Example: `ClearCompletedDownloadTasksEndpoint.UnitTests`.
 
+  # File system interaction rules
+  - If the SUT interacts with the file system, use SetupFileSystem from the BaseUnitTest class, with MockFileSystem instead of mocking interfaces from System.IO.Abstractions manually.
+
   # Test data generation
   - Always use existing functionality from the `tests/BaseTests` project for generating test data.
   - Prefer using the provided Faker-based builders and helpers rather than creating new random data inline.

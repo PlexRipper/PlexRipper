@@ -34,9 +34,6 @@ public class MergeFilesFromFileTaskCommandHandler : ICommandHandler<MergeFilesFr
     private readonly IPath _path;
     private readonly IDownloadManagerSettings _downloadManagerSettings;
 
-    private Stream? _readStream;
-    private Stream? _writeStream;
-
     /// <summary>
     /// Based on https://github.com/dotnet/runtime/discussions/74405#discussioncomment-3488674
     /// 1048576 bytes = 1 MB
@@ -128,17 +125,21 @@ public class MergeFilesFromFileTaskCommandHandler : ICommandHandler<MergeFilesFr
 
             var targetPath = keepInDownloads ? finalPathInDownloads : destinationPath;
 
-            // If target already exists, delete to replace
-            Result
-                .Try(
-                    (
-                        () =>
-                        {
-                            if (_file.Exists(targetPath))
-                                _file.Delete(targetPath);
-                        }
-                    )
-                )
+            // If the target already exists, delete it to replace 
+            Result.Try((() =>
+                {
+                    if (_file.Exists(targetPath))
+                    {
+                        _file.Delete(targetPath);
+                        _log.Here()
+                            .Warning(
+                                "Overwrote existing file at destination {TargetPath} with source {SourcePath} for file task {FileTaskId}",
+                                targetPath,
+                                tempOrSourcePath,
+                                key.Id
+                            );
+                    }
+                }))
                 .LogIfFailed();
 
             // If source and target are the same, finish immediately
@@ -206,18 +207,6 @@ public class MergeFilesFromFileTaskCommandHandler : ICommandHandler<MergeFilesFr
         }
         finally
         {
-            if (_readStream != null)
-            {
-                await _readStream.DisposeAsync();
-                _readStream = null;
-            }
-
-            if (_writeStream != null)
-            {
-                await _writeStream.DisposeAsync();
-                _writeStream = null;
-            }
-
             fileMergeProgress?.OnCompleted();
         }
 
@@ -233,13 +222,12 @@ public class MergeFilesFromFileTaskCommandHandler : ICommandHandler<MergeFilesFr
         CancellationToken cancellationToken
     )
     {
-        var writeStreamResult = Result.Try(
-            (() => _file.Open(targetPath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None))
-        );
+        var writeStreamResult = Result.Try(() =>
+            _file.Open(targetPath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None));
         if (writeStreamResult.IsFailed)
             return writeStreamResult.ToResult();
 
-        _writeStream = writeStreamResult.Value;
+        await using var writeStream = writeStreamResult.Value;
 
         var inputStreamResult = Result.Try(
             (() => _file.Open(sourcePath, FileMode.Open, FileAccess.Read, FileShare.Read))
@@ -247,13 +235,13 @@ public class MergeFilesFromFileTaskCommandHandler : ICommandHandler<MergeFilesFr
         if (inputStreamResult.IsFailed)
             return inputStreamResult.ToResult();
 
-        _readStream = inputStreamResult.Value;
+        await using var readStream = inputStreamResult.Value;
 
         // Resume if needed
         if (downloadTask.CurrentFileTransferBytesOffset > 0)
         {
-            _readStream.Seek(downloadTask.CurrentFileTransferBytesOffset, SeekOrigin.Begin);
-            _writeStream.Seek(downloadTask.CurrentFileTransferBytesOffset, SeekOrigin.Begin);
+            readStream.Seek(downloadTask.CurrentFileTransferBytesOffset, SeekOrigin.Begin);
+            writeStream.Seek(downloadTask.CurrentFileTransferBytesOffset, SeekOrigin.Begin);
         }
 
         var stopwatch = Stopwatch.StartNew();
@@ -261,9 +249,9 @@ public class MergeFilesFromFileTaskCommandHandler : ICommandHandler<MergeFilesFr
 
         var buffer = new byte[_bufferSize];
         int bytesRead;
-        while ((bytesRead = await _readStream.ReadAsync(buffer, 0, buffer.Length, CancellationToken.None)) > 0)
+        while ((bytesRead = await readStream.ReadAsync(buffer, 0, buffer.Length, CancellationToken.None)) > 0)
         {
-            await _writeStream.WriteAsync(buffer, 0, bytesRead, CancellationToken.None);
+            await writeStream.WriteAsync(buffer, 0, bytesRead, CancellationToken.None);
 
             downloadTask.CurrentFileTransferBytesOffset += bytesRead;
             downloadTask.FileDataTransferred += bytesRead;
@@ -294,11 +282,6 @@ public class MergeFilesFromFileTaskCommandHandler : ICommandHandler<MergeFilesFr
                 break;
             }
         }
-
-        await _readStream.DisposeAsync();
-        _readStream = null;
-        await _writeStream.DisposeAsync();
-        _writeStream = null;
 
         return Result.Ok();
     }

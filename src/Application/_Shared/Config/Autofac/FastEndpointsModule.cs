@@ -8,25 +8,8 @@ public class FastEndpointsModule : Module
 {
     protected override void Load(ContainerBuilder builder)
     {
-        var assembly = Assembly.GetExecutingAssembly();
-
         // Register the command executor and event publisher
         builder.RegisterType<CommandExecutor>().As<ICommandExecutor>().InstancePerLifetimeScope();
         builder.RegisterType<EventPublisher>().As<IEventPublisher>().SingleInstance();
-
-        // NOTE: This is not needed and leads to shared instance issues with the DbContext
-        // Register all command handlers implementing ICommandHandler<TCommand, TResult>
-        // builder
-        //     .RegisterAssemblyTypes(assembly)
-        //     .AsClosedTypesOf(typeof(ICommandHandler<,>))
-        //     .AsImplementedInterfaces()
-        //     .InstancePerLifetimeScope();
-        //
-        // // Register all event handlers implementing IEventHandler<TEvent>
-        // builder
-        //     .RegisterAssemblyTypes(assembly)
-        //     .AsClosedTypesOf(typeof(IEventHandler<>))
-        //     .AsImplementedInterfaces()
-        //     .InstancePerLifetimeScope();
     }
 }

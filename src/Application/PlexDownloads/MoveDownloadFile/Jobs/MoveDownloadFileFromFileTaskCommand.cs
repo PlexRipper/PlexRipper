@@ -85,7 +85,7 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
             // Ensure destination directory exists
             var directoryPathResult = Result.Try(() => _path.GetDirectoryName(destinationPath));
             if (directoryPathResult.IsFailed)
-                return directoryPathResult.ToResult();
+                return await ErrorDownloadTask(key, directoryPathResult.ToResult());
 
             if (string.IsNullOrEmpty(directoryPathResult.Value))
                 return Result.Fail($"Could not determine the directory name of path: {directoryPathResult.Value}");
@@ -128,31 +128,15 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
                 return Result.Ok();
             }
 
-            var copyResult = await MoveWithResumeAsync(
+            var moveResult = await MoveWithResumeAsync(
                 downloadTask,
                 downloadFilePath,
                 destinationPath,
                 key,
                 cancellationToken
             );
-            if (copyResult.IsFailed)
-                return await ErrorDownloadTask(key, copyResult);
-
-            // After a successful copy, remove the original temp if still present and different from target
-            Result
-                .Try(
-                    (
-                        () =>
-                        {
-                            if (
-                                !string.Equals(downloadFilePath, destinationPath, StringComparison.OrdinalIgnoreCase)
-                                && _file.Exists(downloadFilePath)
-                            )
-                                _file.Delete(downloadFilePath);
-                        }
-                    )
-                )
-                .LogIfFailed();
+            if (moveResult.IsFailed)
+                return await ErrorDownloadTask(key, moveResult);
 
             // Instant finish on rename
             downloadTask.CurrentFileTransferBytesOffset = downloadTask.DataTotal;

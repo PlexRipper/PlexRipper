@@ -58,14 +58,11 @@ public static partial class DownloadTaskExtensions
             case DownloadStatus.DownloadFinished:
             case DownloadStatus.Merging:
             case DownloadStatus.Moving:
-            case DownloadStatus.MergePaused:
             case DownloadStatus.MovePaused:
             case DownloadStatus.MoveError:
-            case DownloadStatus.MergeError:
                 downloadTask.DataReceived = downloadTask.DataTotal;
                 downloadTask.FileDataTransferred = 0;
                 break;
-            case DownloadStatus.MergeFinished:
             case DownloadStatus.MoveFinished:
             case DownloadStatus.Completed:
                 downloadTask.DataReceived = downloadTask.DataTotal;

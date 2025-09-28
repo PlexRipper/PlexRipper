@@ -28,8 +28,12 @@ public class AllJobListener : IAllJobListener
         catch (Exception ex)
         {
             _log.Here()
-                .Error(ex, "Failed to check the JobToBeExecuted: {Name} queue after a job was executed: {JobDetail}", Name,
-                    context.JobDetail);
+                .Error(
+                    ex,
+                    "Failed to check the JobToBeExecuted: {Name} queue after a job was executed: {JobDetail}",
+                    Name,
+                    context.JobDetail
+                );
         }
     }
 
@@ -48,8 +52,12 @@ public class AllJobListener : IAllJobListener
         catch (Exception ex)
         {
             _log.Here()
-                .Error(ex, "Failed to check the JobWasExecuted: {Name} queue after a job was executed: {JobDetail}", Name,
-                    context.JobDetail);
+                .Error(
+                    ex,
+                    "Failed to check the JobWasExecuted: {Name} queue after a job was executed: {JobDetail}",
+                    Name,
+                    context.JobDetail
+                );
         }
     }
 

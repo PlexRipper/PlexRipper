@@ -54,7 +54,7 @@ public class MoveDownloadFileJob : IJob
 
             var downloadTask = await _dbContext.GetDownloadTaskFileAsync(downloadTaskKey, ct);
 
-            if (downloadTask!.DownloadStatus is DownloadStatus.MoveFinished or DownloadStatus.MergeFinished)
+            if (downloadTask!.DownloadStatus is DownloadStatus.MoveFinished)
             {
                 await _dbContext.SetDownloadStatus(downloadTaskKey, DownloadStatus.Completed);
 

@@ -63,8 +63,12 @@ public class DownloadJobListener : IDownloadJobListener
         catch (Exception ex)
         {
             _log.Here()
-                .Error(ex, "Failed to check the {Name} queue after a job was executed: {JobDetail}", Name,
-                    context.JobDetail);
+                .Error(
+                    ex,
+                    "Failed to check the {Name} queue after a job was executed: {JobDetail}",
+                    Name,
+                    context.JobDetail
+                );
         }
     }
 

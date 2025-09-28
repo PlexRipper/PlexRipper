@@ -120,8 +120,10 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
                 return await ErrorDownloadTask(key, directoryPathResult.ToResult());
 
             if (string.IsNullOrEmpty(directoryPathResult.Value))
-                return await ErrorDownloadTask(key,
-                    Result.Fail($"Could not determine the directory name of path: {directoryPathResult.Value}"));
+                return await ErrorDownloadTask(
+                    key,
+                    Result.Fail($"Could not determine the directory name of path: {directoryPathResult.Value}")
+                );
 
             // Ensure the destination directory exists only when we are actually moving
             var createDirectoryResult = Result

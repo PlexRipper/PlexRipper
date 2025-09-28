@@ -11,7 +11,11 @@ public class MoveDownloadMoveDownloadFileJobQueue : IMoveDownloadFileQueue
     private readonly IReaparrDbContext _dbContext;
     private readonly IMoveDownloadFileScheduler _moveDownloadFileScheduler;
 
-    public MoveDownloadMoveDownloadFileJobQueue(ILogger log, IReaparrDbContext dbContext, IMoveDownloadFileScheduler moveDownloadFileScheduler)
+    public MoveDownloadMoveDownloadFileJobQueue(
+        ILogger log,
+        IReaparrDbContext dbContext,
+        IMoveDownloadFileScheduler moveDownloadFileScheduler
+    )
     {
         _log = log.ForContext<MoveDownloadMoveDownloadFileJobQueue>();
         _dbContext = dbContext;

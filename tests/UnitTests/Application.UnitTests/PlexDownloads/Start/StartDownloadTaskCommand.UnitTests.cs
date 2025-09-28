@@ -49,8 +49,8 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
         var alreadyMergingTask = tvShowDownloadTasks.First();
         var pausedMergeTask = tvShowDownloadTasks.Last();
 
-        alreadyMergingTask.SetDownloadStatus(DownloadStatus.Merging);
-        pausedMergeTask.SetDownloadStatus(DownloadStatus.MergePaused);
+        alreadyMergingTask.SetDownloadStatus(DownloadStatus.Moving);
+        pausedMergeTask.SetDownloadStatus(DownloadStatus.MovePaused);
         await dbContext.SaveChangesAsync(CancellationToken);
 
         mock.Mock<IMoveDownloadFileScheduler>()

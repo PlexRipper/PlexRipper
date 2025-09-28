@@ -82,23 +82,11 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
 
         try
         {
-            // Ensure destination directory exists
-            var directoryPathResult = Result.Try(() => _path.GetDirectoryName(destinationPath));
-            if (directoryPathResult.IsFailed)
-                return await ErrorDownloadTask(key, directoryPathResult.ToResult());
-
-            if (string.IsNullOrEmpty(directoryPathResult.Value))
-                return Result.Fail($"Could not determine the directory name of path: {directoryPathResult.Value}");
-
-            var createDirectoryResult = Result
-                .Try((() => _directory.CreateDirectory(directoryPathResult.Value)))
-                .ToResult();
-            if (createDirectoryResult.IsFailed)
-                return await ErrorDownloadTask(key, createDirectoryResult);
-
-            // If source and target are the same, finish immediately
-            if (downloadFilePath == destinationPath)
+            if (downloadFilePath.RemoveReapTempSuffix() == destinationPath)
             {
+                // Just rename it to remove .reapTemp suffix if present
+                _file.Move(downloadFilePath.RemoveReapTempSuffix(), destinationPath);
+
                 downloadTask.CurrentFileTransferBytesOffset = downloadTask.DataTotal;
                 downloadTask.FileDataTransferred = downloadTask.DataTotal;
                 await _dbContext.UpdateDownloadFileTransferProgress(key, downloadTask.ToFileTransferProgress());
@@ -107,13 +95,11 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
                 await UpdateDownloadTaskStatus(key, DownloadStatus.MoveFinished);
                 return Result.Ok();
             }
-            else
-            {
-                // Update status
-                await UpdateDownloadTaskStatus(key, DownloadStatus.Moving);
-            }
 
+            // Determine if we should keep the file in the downloads directory
+            var destinationDirectoryPath = _path.GetDirectoryName(destinationPath);
             var keepInDownloads = ShouldKeepInDownloads(downloadTask);
+
             if (keepInDownloads)
             {
                 // Rename it to remove .reapTemp suffix if present
@@ -127,6 +113,25 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
                 await UpdateDownloadTaskStatus(key, DownloadStatus.MoveFinished);
                 return Result.Ok();
             }
+
+            // Ensure destination directory exists
+            var directoryPathResult = Result.Try(() => _path.GetDirectoryName(destinationPath));
+            if (directoryPathResult.IsFailed)
+                return await ErrorDownloadTask(key, directoryPathResult.ToResult());
+
+            if (string.IsNullOrEmpty(directoryPathResult.Value))
+                return await ErrorDownloadTask(key,
+                    Result.Fail($"Could not determine the directory name of path: {directoryPathResult.Value}"));
+
+            // Ensure the destination directory exists only when we are actually moving
+            var createDirectoryResult = Result
+                .Try((() => _directory.CreateDirectory(destinationDirectoryPath!)))
+                .ToResult();
+            if (createDirectoryResult.IsFailed)
+                return await ErrorDownloadTask(key, createDirectoryResult);
+
+            // Update status before moving
+            await UpdateDownloadTaskStatus(key, DownloadStatus.Moving);
 
             var moveResult = await MoveWithResumeAsync(
                 downloadTask,
@@ -245,5 +250,6 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
     private bool ShouldKeepInDownloads(DownloadTaskFileBase downloadTask) =>
         downloadTask.DirectoryMeta.KeepCompletedInDownloadFolder
         || _downloadManagerSettings.KeepCompletedInDownloadFolder
-        || downloadTask.FilePath == downloadTask.DestinationFilePath;
+        || downloadTask.FilePath == downloadTask.DestinationFilePath
+        || string.IsNullOrWhiteSpace(downloadTask.DestinationFilePath);
 }

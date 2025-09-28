@@ -109,6 +109,8 @@ public static partial class Startup
 
                 options.FlattenSchema = true;
 
+                options.EndpointFilter = ep => !ep.EndpointType.IsDefined(typeof(HideFromOpenApiAttribute));
+
                 options.SerializerSettings = serializerOptions =>
                 {
                     var config = DefaultJsonSerializerOptions.ConfigStandard;

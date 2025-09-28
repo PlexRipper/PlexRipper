@@ -422,12 +422,8 @@
             "paused": "Angehalten",
             "stopped": "Gestoppt",
             "deleted": "Gelöscht",
-            "merging": "Zusammenführen",
             "moving": "Ziehen um",
             "completed": "Vollendet",
-            "merge-error": "Zusammenführungsfehler",
-            "merge-finished": "Zusammenführung abgeschlossen",
-            "merge-paused": "Zusammenführung pausiert",
             "move-error": "Verschiebe Fehler",
             "move-finished": "Verschieben abgeschlossen",
             "move-paused": "Verschieben pausiert"
@@ -513,6 +509,11 @@
                         "label": "Download Teile",
                         "text": "Reaparr Multithread-Downloads und kann Medien, die heruntergeladen werden sollen, in individuellen teilen herunterladen und wieder zusammen führen. Das führt in der regel zu einer höheren Downloadgesschwindigkeit aber benötigt auch etwas mehr Zeit um die Teile wieder zusammenzusetzen.\n\nDas setzen auf den Wert 1 deaktiviert die Funktion und lädt die Datei am Stück herunter. Die Anzahl der Segmente hat keinen Einfluss auf die Dauer des zusammen setzens.",
                         "title": "Download Teile"
+                    },
+                    "keep-in-downloads": {
+                        "label": "Verschieben Sie die abgeschlossenen Downloads nicht in Zielordner",
+                        "title": "Verschieben Sie die abgeschlossenen Downloads nicht in Zielordner",
+                        "text": "Wenn aktiviert, verbleiben abgeschlossene Downloads im Download-Ordner und werden nicht in den Zielordner verschoben."
                     }
                 },
                 "debug-section": {

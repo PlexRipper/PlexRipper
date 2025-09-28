@@ -422,12 +422,8 @@
             "paused": "En pause",
             "stopped": "Arrêté",
             "deleted": "Supprimé",
-            "merging": "Fusionner",
             "moving": "En mouvement",
             "completed": "Complété",
-            "merge-error": "Erreur de fusion",
-            "merge-finished": "Fusion terminée",
-            "merge-paused": "Fusion en pause",
             "move-error": "Erreur de déplacement",
             "move-finished": "Déplacement terminé",
             "move-paused": "Déplacement en pause"
@@ -513,6 +509,11 @@
                         "label": "Télécharger par Segments",
                         "text": "Reaparr supporte le téléchargement multi-threaded et vous pouvez diviser le media qui va-t-être téléchargé en different parties individuelle. Cela a tendance à augmenter la vitesse de téléchargement globale, mais l'inconvénient est qu'il faudra plus de temps pour fusionner les différentes parties en un seul fichier multimédia complet.\n\nLa définition de cette valeur sur 1 désactivera le téléchargement multithread et téléchargera le fichier multimédia en tant que un dossier complet. Le nombre de segments de téléchargement n'a aucune influence sur la vitesse de fusion du fichier multimédia.",
                         "title": "Télécharger par Segments"
+                    },
+                    "keep-in-downloads": {
+                        "label": "Ne déplacez pas les téléchargements terminés vers les dossiers de destination",
+                        "title": "Ne déplacez pas les téléchargements terminés vers les dossiers de destination",
+                        "text": "Si cette option est activée, les téléchargements terminés resteront dans le dossier de téléchargement et ne seront pas déplacés vers le dossier de destination."
                     }
                 },
                 "debug-section": {

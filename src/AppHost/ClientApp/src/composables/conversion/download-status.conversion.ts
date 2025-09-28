@@ -29,18 +29,12 @@ export function translateDownloadStatus(status: DownloadStatus) {
 			return t('general.download-status.queued');
 		case DownloadStatus.Stopped:
 			return t('general.download-status.stopped');
-		case DownloadStatus.MergePaused:
-			return t('general.download-status.merge-paused');
 		case DownloadStatus.MovePaused:
 			return t('general.download-status.move-paused');
-		case DownloadStatus.MergeFinished:
-			return t('general.download-status.merge-finished');
 		case DownloadStatus.MoveFinished:
 			return t('general.download-status.move-finished');
 		case DownloadStatus.MoveError:
 			return t('general.download-status.move-error');
-		case DownloadStatus.MergeError:
-			return t('general.download-status.merge-error');
 		default:
 			return t('general.error.unknown');
 	}

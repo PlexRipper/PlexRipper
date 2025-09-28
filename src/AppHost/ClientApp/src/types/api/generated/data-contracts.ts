@@ -125,6 +125,7 @@ export interface DownloadJobUpdateDTO {
 export interface DownloadManagerSettingsDTO {
   /** @format int32 */
   downloadSegments: number;
+  keepCompletedInDownloadFolder: boolean;
 }
 
 export interface DownloadMediaDTO {
@@ -184,14 +185,11 @@ export enum DownloadStatus {
   Deleted = "Deleted",
   Merging = "Merging",
   Moving = "Moving",
-  MergePaused = "MergePaused",
   MovePaused = "MovePaused",
-  MergeFinished = "MergeFinished",
   MoveFinished = "MoveFinished",
   Completed = "Completed",
   ServerUnreachable = "ServerUnreachable",
   MoveError = "MoveError",
-  MergeError = "MergeError",
 }
 
 export interface DownloadTaskDTO {
@@ -235,7 +233,6 @@ export interface DownloadTaskDTO {
 export interface DownloadTaskKey {
   /** @format guid */
   id: string;
-  isDownloadable: boolean;
   isValid: boolean;
   /** @format int32 */
   plexLibraryId: number;
@@ -288,10 +285,6 @@ export interface ErrorResponse {
    * @default 400
    */
   statusCode: number;
-}
-
-export interface FileMergeJobUpdateDTO {
-  id: DownloadTaskKey;
 }
 
 export interface FileSystemDTO {
@@ -390,7 +383,7 @@ export enum JobTypes {
   Unknown = "Unknown",
   CheckAllConnectionsStatusByPlexServerJob = "CheckAllConnectionsStatusByPlexServerJob",
   DownloadJob = "DownloadJob",
-  FileMergeJob = "FileMergeJob",
+  MoveDownloadFileJob = "MoveDownloadFileJob",
   SyncServerMediaJob = "SyncServerMediaJob",
   InspectPlexServerJob = "InspectPlexServerJob",
 }
@@ -503,20 +496,20 @@ export interface LibraryProgress {
   totalSteps: number;
 }
 
-/**
- * Message types for SignalR communication from server to client.
- *
- */
 export enum MessageTypes {
   LibraryProgress = "LibraryProgress",
   DownloadTaskUpdate = "DownloadTaskUpdate",
   ServerDownloadProgress = "ServerDownloadProgress",
   ServerConnectionCheckStatusProgress = "ServerConnectionCheckStatusProgress",
-  FileMergeProgress = "FileMergeProgress",
+  MoveDownloadFileProgress = "MoveDownloadFileProgress",
   SyncServerMediaProgress = "SyncServerMediaProgress",
   Notification = "Notification",
   JobStatusUpdate = "JobStatusUpdate",
   RefreshNotification = "RefreshNotification",
+}
+
+export interface MoveDownloadFileJobUpdateDTO {
+  id: DownloadTaskKey;
 }
 
 export interface NotificationDTO {

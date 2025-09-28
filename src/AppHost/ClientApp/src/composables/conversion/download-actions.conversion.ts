@@ -27,12 +27,10 @@ export function toDownloadActions(downloadStatus: DownloadStatus): DownloadActio
 			actions.push(DownloadActions.Pause, DownloadActions.Stop);
 			break;
 		case DownloadStatus.DownloadFinished:
-		case DownloadStatus.MergeFinished:
 		case DownloadStatus.MoveFinished:
 			actions.push(DownloadActions.Delete);
 			break;
 		case DownloadStatus.Paused:
-		case DownloadStatus.MergePaused:
 		case DownloadStatus.MovePaused:
 			actions.push(DownloadActions.Start, DownloadActions.Stop, DownloadActions.Delete);
 			break;
@@ -48,7 +46,6 @@ export function toDownloadActions(downloadStatus: DownloadStatus): DownloadActio
 			break;
 		case DownloadStatus.Error:
 		case DownloadStatus.MoveError:
-		case DownloadStatus.MergeError:
 			actions.push(DownloadActions.Restart, DownloadActions.Delete);
 			break;
 		case DownloadStatus.ServerUnreachable:

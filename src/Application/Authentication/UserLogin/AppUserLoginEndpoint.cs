@@ -45,7 +45,7 @@ public class AppUserLoginEndpoint : BaseEndpoint<AppUserLoginEndpointRequest>
 {
     public override string EndpointPath => ApiRoutes.LoginEndpoint;
 
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly SignInManager<AppUser> _signInManager;
 
     public AppUserLoginEndpoint(ILogger log, SignInManager<AppUser> signInManager)

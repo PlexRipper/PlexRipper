@@ -6,7 +6,7 @@ namespace Reaparr.BaseTests;
 [Collection("Integration Tests")]
 public abstract class BaseIntegrationTests
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
 
     protected CancellationToken CancellationToken => TestContext.Current.CancellationToken;
 

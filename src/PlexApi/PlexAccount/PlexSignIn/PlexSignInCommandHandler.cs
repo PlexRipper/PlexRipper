@@ -6,7 +6,7 @@ namespace Reaparr.PlexApi;
 
 public class PlexSignInCommandHandler : ICommandHandler<PlexSignInCommand, Result<PlexAccount>>
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly IPlexApiClientFactory _plexApiClientFactory;
 
     public PlexSignInCommandHandler(ILogger log, IPlexApiClientFactory plexApiClientFactory)

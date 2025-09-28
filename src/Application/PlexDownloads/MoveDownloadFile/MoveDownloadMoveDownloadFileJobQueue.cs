@@ -7,7 +7,7 @@ namespace Reaparr.Application;
 
 public class MoveDownloadMoveDownloadFileJobQueue : IMoveDownloadFileQueue
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly IMoveDownloadFileScheduler _moveDownloadFileScheduler;
 

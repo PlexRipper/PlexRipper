@@ -10,7 +10,7 @@ namespace Reaparr.Application;
 
 public class DownloadJob : IJob, IDisposable
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IEventPublisher _eventPublisher;

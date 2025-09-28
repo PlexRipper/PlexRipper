@@ -5,7 +5,7 @@ namespace Reaparr.Application;
 
 public class GetAllDownloadTasksEndpoint : BaseEndpointWithoutRequest<List<ServerDownloadProgressDTO>>
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.DownloadController;

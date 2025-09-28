@@ -52,7 +52,7 @@ public class ValidatePlexAccountEndpointRequestValidator : Validator<ValidatePle
 
 public class ValidatePlexAccountEndpoint : BaseEndpoint<ValidatePlexAccountEndpointRequest, ValidatePlexAccountResponse>
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
 
     public override string EndpointPath => ApiRoutes.PlexAccountController + "/validate";

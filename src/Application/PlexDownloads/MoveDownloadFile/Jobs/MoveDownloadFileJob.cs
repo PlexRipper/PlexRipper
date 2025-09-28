@@ -6,7 +6,7 @@ namespace Reaparr.Application;
 
 public class MoveDownloadFileJob : IJob
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IReaparrDbContext _dbContext;
 

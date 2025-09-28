@@ -38,7 +38,7 @@ public class GenerateDownloadTaskMoviesCommandValidator : AbstractValidator<Gene
 
 public class GenerateDownloadTaskMoviesCommandHandler : ICommandHandler<GenerateDownloadTaskMoviesCommand, Result>
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
     public GenerateDownloadTaskMoviesCommandHandler(ILogger log, IReaparrDbContext dbContext)

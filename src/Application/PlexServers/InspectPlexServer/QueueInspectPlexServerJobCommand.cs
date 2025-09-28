@@ -20,7 +20,7 @@ public class QueueInspectPlexServerJobCommandValidator : AbstractValidator<Queue
 
 public class QueueInspectPlexServerJobCommandHandler : ICommandHandler<QueueInspectPlexServerJobCommand, Result>
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly IScheduler _scheduler;
 

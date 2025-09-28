@@ -30,7 +30,7 @@ public class GetFolderPathDirectoryRequestValidator : Validator<GetFolderPathDir
 
 public class GetFolderPathDirectoryEndpoint : BaseEndpoint<GetFolderPathDirectoryRequest, FileSystemDTO>
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly IDirectory _directory;
     private readonly IPath _path;
     private readonly IDiskProvider _diskProvider;

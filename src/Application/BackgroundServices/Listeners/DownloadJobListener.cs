@@ -6,7 +6,7 @@ namespace Reaparr.Application;
 
 public class DownloadJobListener : IDownloadJobListener
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly IEventPublisher _eventPublisher;
     private readonly IMoveDownloadFileQueue _moveDownloadFileQueue;

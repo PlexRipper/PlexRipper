@@ -20,7 +20,7 @@ public class GetDownloadTaskLogsByDownloadTaskIdRequestValidator : Validator<Get
 public class GetDownloadTaskLogsByDownloadTaskIdEndpoint
     : BaseEndpoint<GetDownloadTaskLogsByDownloadTaskIdRequest, List<DownloadWorkerLogDTO>>
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.DownloadController + "/logs/{DownloadTaskGuid}/";

@@ -23,7 +23,7 @@ public class PauseDownloadTaskCommandValidator : AbstractValidator<PauseDownload
 
 public class PauseDownloadTaskCommandHandler : ICommandHandler<PauseDownloadTaskCommand, Result>
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly IDownloadTaskScheduler _downloadTaskScheduler;
     private readonly IMoveDownloadFileScheduler _moveDownloadFileScheduler;

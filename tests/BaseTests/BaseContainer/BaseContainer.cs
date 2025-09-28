@@ -16,7 +16,7 @@ public class BaseContainer : IDisposable
 {
     private readonly ReaparrWebApplicationFactory _factory;
 
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
 
     private readonly ILifetimeScope _lifeTimeScope;
 

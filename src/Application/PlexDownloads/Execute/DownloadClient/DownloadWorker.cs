@@ -20,7 +20,7 @@ public class DownloadWorker : IDisposable
 
     private readonly Subject<DownloadWorkerTaskProgress> _downloadWorkerUpdate = new();
 
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
 
     private readonly ICommandExecutor _commandExecutor;
 
@@ -43,7 +43,7 @@ public class DownloadWorker : IDisposable
     /// <param name="downloadWorkerTask">The download task this worker will execute.</param>
     /// <param name="clientFactory">The factory to create a new <see cref="IPlexApiClient"/>.</param>
     public DownloadWorker(
-        Serilog.ILogger log,
+        ILogger log,
         ICommandExecutor commandExecutor,
         IReaparrDbContext dbContext,
         DownloadWorkerTask downloadWorkerTask,

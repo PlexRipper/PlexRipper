@@ -12,7 +12,7 @@ namespace Reaparr.Application;
 /// </summary>
 public class PlexDownloadClient : IAsyncDisposable, IPlexDownloadClient
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IReaparrDbContext _dbContext;
     private readonly Func<DownloadWorkerTask, DownloadWorker> _downloadWorkerFactory;

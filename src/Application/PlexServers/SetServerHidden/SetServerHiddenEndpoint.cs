@@ -25,7 +25,7 @@ public class SetServerHiddenRequestValidator : Validator<SetServerHiddenRequest>
 
 public class SetServerHiddenRequestEndpoint : BaseEndpoint<SetServerHiddenRequest>
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly IServerSettingsModule _serverSettingsModule;
 

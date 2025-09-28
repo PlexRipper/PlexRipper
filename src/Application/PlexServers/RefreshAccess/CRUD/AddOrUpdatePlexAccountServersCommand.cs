@@ -20,7 +20,7 @@ public class AddOrUpdatePlexAccountServersCommandValidator : AbstractValidator<A
 public class AddOrUpdatePlexAccountServersCommandHandler
     : ICommandHandler<AddOrUpdatePlexAccountServersCommand, Result<RefreshPlexServerAccessRapport>>
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
     public AddOrUpdatePlexAccountServersCommandHandler(ILogger log, IReaparrDbContext dbContext)

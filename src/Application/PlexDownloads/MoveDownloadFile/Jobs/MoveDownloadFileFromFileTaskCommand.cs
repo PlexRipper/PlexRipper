@@ -26,7 +26,7 @@ public class MoveDownloadFileFromFileTaskCommandValidator : AbstractValidator<Mo
 
 public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDownloadFileFromFileTaskCommand, Result>
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IEventPublisher _eventPublisher;
     private readonly IReaparrDbContext _dbContext;

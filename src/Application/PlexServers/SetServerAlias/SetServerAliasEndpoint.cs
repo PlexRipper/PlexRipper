@@ -24,7 +24,7 @@ public class SetServerAliasRequestValidator : Validator<SetServerAliasRequest>
 
 public class SetServerAlias : BaseEndpoint<SetServerAliasRequest>
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly IServerSettingsModule _serverSettingsModule;
 

@@ -20,7 +20,7 @@ public class CreateDefaultAppUserCommandValidator : AbstractValidator<CreateDefa
 
 public class CreateDefaultAppUserCommandHandler : ICommandHandler<CreateDefaultAppUserCommand, Result>
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly IAuthenticationSettings _authenticationSettings;
     private readonly UserManager<AppUser> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;

@@ -23,7 +23,7 @@ public class RefreshPlexMovieLibraryCommandValidator : AbstractValidator<Refresh
 public class RefreshPlexMovieLibraryCommandHandler
     : ICommandHandler<RefreshPlexMovieLibraryCommand, Result<PlexLibrary>>
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IReaparrDbContext _dbContext;
     private readonly IRefreshLibraryProgressReporter _progressReporter;

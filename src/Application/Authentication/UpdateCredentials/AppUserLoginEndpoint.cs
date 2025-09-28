@@ -38,7 +38,7 @@ public class UpdateCredentialsEndpoint : BaseEndpoint<UpdateCredentialsEndpointR
 {
     public override string EndpointPath => ApiRoutes.AuthenticatedController;
 
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly UserManager<AppUser> _userManager;
 
     public UpdateCredentialsEndpoint(ILogger log, UserManager<AppUser> userManager)

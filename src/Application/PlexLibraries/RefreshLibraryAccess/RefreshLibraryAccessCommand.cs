@@ -27,7 +27,7 @@ public class RefreshLibraryAccessValidator : AbstractValidator<RefreshLibraryAcc
 public class RefreshLibraryAccessHandler
     : ICommandHandler<RefreshLibraryAccessCommand, Result<PlexLibraryAccessRefreshResponse>>
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandDispatcher;

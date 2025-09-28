@@ -23,7 +23,7 @@ public class GetDownloadPreviewQueryValidator : AbstractValidator<GetDownloadPre
 public class GetDownloadPreviewQueryHandler : ICommandHandler<GetDownloadPreviewQuery, Result<List<DownloadPreview>>>
 {
     private readonly IReaparrDbContext _dbContext;
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
 
     public GetDownloadPreviewQueryHandler(IReaparrDbContext dbContext, ILogger log)
     {

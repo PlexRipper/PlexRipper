@@ -36,7 +36,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandValidator
 public class GenerateDownloadTaskTvShowEpisodesCommandHandler
     : ICommandHandler<GenerateDownloadTaskTvShowEpisodesCommand, Result>
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
     private readonly List<DownloadTaskTvShow> _tvShowDownloads = [];

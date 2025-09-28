@@ -24,7 +24,7 @@ public class StopDownloadTaskCommandValidator : AbstractValidator<StopDownloadTa
 
 public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCommand, Result>
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IFile _file;

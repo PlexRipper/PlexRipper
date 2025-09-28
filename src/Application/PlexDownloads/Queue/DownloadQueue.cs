@@ -9,7 +9,7 @@ namespace Reaparr.Application;
 /// </summary>
 public class DownloadQueue : IDownloadQueue
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly IDownloadTaskScheduler _downloadTaskScheduler;
 

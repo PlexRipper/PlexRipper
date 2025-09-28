@@ -55,7 +55,7 @@ public class SyncPlexLibraryMediaMetaDataCommandValidator : Validator<SyncPlexLi
 public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPlexLibraryMediaMetaDataCommand, Result>
 {
     private readonly IReaparrDbContext _dbContext;
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
 
     private readonly BulkConfig? _bulkInsertConfig = new()
     {

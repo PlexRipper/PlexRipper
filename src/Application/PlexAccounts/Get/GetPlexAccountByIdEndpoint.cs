@@ -18,7 +18,7 @@ public class GetPlexAccountByIdEndpointRequestValidator : Validator<GetPlexAccou
 
 public class GetPlexAccountByIdEndpoint : BaseEndpoint<GetPlexAccountByIdEndpointRequest, PlexAccountDTO>
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.PlexAccountController + "/{PlexAccountId}";

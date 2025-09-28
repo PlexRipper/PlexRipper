@@ -8,13 +8,13 @@ namespace Reaparr.Application;
 /// </summary>
 public class ProgressHub : Hub<IProgressHub>, IProgressHub
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
 
     /// <summary>
     ///  Initializes a new instance of the <see cref="ProgressHub"/> class.
     /// </summary>
     /// <param name="log"> The <see cref="Serilog.ILogger"/> instance to use for logging.</param>
-    public ProgressHub(Serilog.ILogger log)
+    public ProgressHub(ILogger log)
     {
         _log = log.ForContext<ProgressHub>();
     }

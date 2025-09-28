@@ -18,7 +18,7 @@ public class RefreshPlexServerConnectionsEndpointRequestValidator
 
 public class RefreshPlexServerConnectionsEndpoint : BaseEndpoint<RefreshPlexServerConnectionsEndpointRequest>
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
     public override string EndpointPath => ApiRoutes.PlexServerController + "/{PlexServerId}/refresh";

@@ -23,7 +23,7 @@ public class RefreshPlexServerAccessCommandValidator : AbstractValidator<Refresh
 public class RefreshPlexServerAccessCommandHandler
     : ICommandHandler<RefreshPlexServerAccessCommand, Result<RefreshPlexServerAccessRapport>>
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
 

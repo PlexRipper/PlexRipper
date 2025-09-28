@@ -24,7 +24,7 @@ public class CreateFolderPathEndpointRequestValidator : Validator<CreateFolderPa
 
 public class CreateFolderPathEndpoint : BaseEndpoint<CreateFolderPathEndpointRequest, FolderPathDTO>
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.FolderPathController + "/";

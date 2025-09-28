@@ -25,7 +25,7 @@ public class AppCredentialsDTO
 
 public class GetAppCredentials : BaseEndpointWithoutRequest<AppCredentialsDTO>
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly UserManager<AppUser> _userManager;
 
     public override string EndpointPath => ApiRoutes.AuthenticatedController;

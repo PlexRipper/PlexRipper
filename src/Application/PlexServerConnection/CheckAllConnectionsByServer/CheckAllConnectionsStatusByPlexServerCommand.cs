@@ -26,7 +26,7 @@ public class CheckAllConnectionsStatusByPlexServerValidator
 public class CheckAllConnectionsStatusByPlexServerHandler
     : ICommandHandler<CheckAllConnectionsStatusByPlexServerCommand, Result<List<PlexServerStatus>>>
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IEventPublisher _eventPublisher;

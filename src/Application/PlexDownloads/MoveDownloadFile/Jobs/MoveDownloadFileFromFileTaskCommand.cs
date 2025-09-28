@@ -12,7 +12,7 @@ namespace Reaparr.Application;
 
 public record MoveDownloadFileFromFileTaskCommand(
     DownloadTaskKey Key,
-    Subject<IDownloadFileTransferProgress>? FileMergeProgress = null
+    Subject<IDownloadFileTransferProgress>? MoveDownloadFileProgress = null
 ) : ICommand<Result>;
 
 public class MoveDownloadFileFromFileTaskCommandValidator : AbstractValidator<MoveDownloadFileFromFileTaskCommand>
@@ -62,7 +62,7 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
     )
     {
         var key = command.Key;
-        var fileMergeProgress = command.FileMergeProgress;
+        var moveDownloadFileProgress = command.MoveDownloadFileProgress;
 
         var downloadTask = await _dbContext.GetDownloadTaskFileAsync(command.Key, CancellationToken.None);
         if (downloadTask == null)
@@ -90,7 +90,7 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
                 downloadTask.CurrentFileTransferBytesOffset = downloadTask.DataTotal;
                 downloadTask.FileDataTransferred = downloadTask.DataTotal;
                 await _dbContext.UpdateDownloadFileTransferProgress(key, downloadTask.ToFileTransferProgress());
-                fileMergeProgress?.OnNext(downloadTask.ToFileTransferProgress());
+                moveDownloadFileProgress?.OnNext(downloadTask.ToFileTransferProgress());
 
                 await UpdateDownloadTaskStatus(key, DownloadStatus.MoveFinished);
                 return Result.Ok();
@@ -108,7 +108,7 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
                 downloadTask.CurrentFileTransferBytesOffset = downloadTask.DataTotal;
                 downloadTask.FileDataTransferred = downloadTask.DataTotal;
                 await _dbContext.UpdateDownloadFileTransferProgress(key, downloadTask.ToFileTransferProgress());
-                fileMergeProgress?.OnNext(downloadTask.ToFileTransferProgress());
+                moveDownloadFileProgress?.OnNext(downloadTask.ToFileTransferProgress());
 
                 await UpdateDownloadTaskStatus(key, DownloadStatus.MoveFinished);
                 return Result.Ok();
@@ -147,7 +147,7 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
             downloadTask.CurrentFileTransferBytesOffset = downloadTask.DataTotal;
             downloadTask.FileDataTransferred = downloadTask.DataTotal;
             await _dbContext.UpdateDownloadFileTransferProgress(key, downloadTask.ToFileTransferProgress());
-            fileMergeProgress?.OnNext(downloadTask.ToFileTransferProgress());
+            moveDownloadFileProgress?.OnNext(downloadTask.ToFileTransferProgress());
 
             await UpdateDownloadTaskStatus(key, DownloadStatus.MoveFinished);
         }
@@ -167,7 +167,7 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
         }
         finally
         {
-            fileMergeProgress?.OnCompleted();
+            moveDownloadFileProgress?.OnCompleted();
         }
 
         return Result.Ok();

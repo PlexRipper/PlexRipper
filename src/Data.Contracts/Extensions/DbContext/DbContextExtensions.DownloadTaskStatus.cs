@@ -76,7 +76,7 @@ public static partial class DbContextExtensions
                         break;
                     }
 
-                    // The DownloadStatus here is determined by PlexDownloadClient and the FileMerger
+                    // The DownloadStatus here is determined by PlexDownloadClient and the MoveDownloadFileJob
                     case DownloadTaskType.MovieData:
                     {
                         parentKey = await dbContext
@@ -87,7 +87,7 @@ public static partial class DbContextExtensions
                         break;
                     }
 
-                    // The DownloadStatus here is determined by PlexDownloadClient and the FileMerger
+                    // The DownloadStatus here is determined by PlexDownloadClient and the MoveDownloadFileJob
                     case DownloadTaskType.EpisodeData:
                     {
                         parentKey = await dbContext

@@ -17,8 +17,8 @@ public enum JobTypes
     [EnumMember(Value = nameof(DownloadJob))]
     DownloadJob = 2,
 
-    [EnumMember(Value = nameof(FileMergeJob))]
-    FileMergeJob = 3,
+    [EnumMember(Value = nameof(MoveDownloadFileJob))]
+    MoveDownloadFileJob = 3,
 
     [EnumMember(Value = nameof(SyncServerMediaJob))]
     SyncServerMediaJob = 4,

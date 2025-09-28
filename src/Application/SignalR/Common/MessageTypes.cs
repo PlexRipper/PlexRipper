@@ -14,7 +14,7 @@ public enum MessageTypes
     LibraryProgress = 0,
 
     /// <summary>
-    ///  Download task progress message type.
+    ///  Download the task progress message type.
     /// </summary>
     [EnumMember(Value = nameof(DownloadTaskUpdate))]
     DownloadTaskUpdate = 2,
@@ -34,8 +34,8 @@ public enum MessageTypes
     /// <summary>
     ///  File merge progress message type.
     /// </summary>
-    [EnumMember(Value = nameof(FileMergeProgress))]
-    FileMergeProgress = 6,
+    [EnumMember(Value = nameof(MoveDownloadFileProgress))]
+    MoveDownloadFileProgress = 6,
 
     /// <summary>
     ///  Sync server media progress message type.
@@ -56,7 +56,7 @@ public enum MessageTypes
     JobStatusUpdate = 9,
 
     /// <summary>
-    ///  Refresh notification message type.
+    ///  Refresh the notification message type.
     /// </summary>
     [EnumMember(Value = nameof(RefreshNotification))]
     RefreshNotification = 10,

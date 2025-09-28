@@ -48,7 +48,7 @@ public class MoveDownloadMoveDownloadFileJobScheduler : IMoveDownloadFileSchedul
 
         _log.Here()
             .Information(
-                "Stopping FileMergeJob for {NameOfDownloadFileTask)} with id: {FileTaskId}",
+                "Stopping MoveDownloadJob for {NameOfDownloadFileTask)} with id: {FileTaskId}",
                 nameof(DownloadTaskKey),
                 downloadTaskKey.Id
             );

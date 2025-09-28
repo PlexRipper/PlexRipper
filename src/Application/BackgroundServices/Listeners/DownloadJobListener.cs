@@ -50,7 +50,7 @@ public class DownloadJobListener : IDownloadJobListener
             {
                 _log.Here()
                     .Debug(
-                        "DownloadTask with id: {DownloadTaskId} has finished downloading, starting fileMergeJob and executing DownloadQueueCheck",
+                        "DownloadTask with id: {DownloadTaskId} has finished downloading, starting moveDownloadJob and executing DownloadQueueCheck",
                         downloadTaskKey.Id
                     );
                 await _moveDownloadFileQueue.CheckMoveDownloadFileJobQueue();

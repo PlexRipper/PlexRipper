@@ -45,7 +45,6 @@ public class TestModule : Module
             .As<IAuthDbContext>()
             .InstancePerDependency();
 
-        builder.RegisterType<TestStreamTracker>().As<ITestStreamTracker>().SingleInstance();
         builder.RegisterType<MockConfigManager>().As<IConfigManager>().SingleInstance();
         builder.RegisterType<MockSignalRService>().As<ISignalRService>().SingleInstance();
         builder.RegisterType<MockPlexApiServer>().As<IMockPlexApiServer>().SingleInstance();

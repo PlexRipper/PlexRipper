@@ -170,7 +170,7 @@ public abstract class DownloadTaskFileBase : DownloadTaskBase, IDownloadTaskProg
     public long TimeRemaining => DownloadTaskPhaseExtensions.TimeRemaining(DownloadTaskPhase, this, this);
 
     public override string ToString() =>
-        $"[FileMergeProgress {Title} - {Percentage}% - {DataFormat.FormatSpeedString(Speed)} - {DataFormat.FormatSizeString(DownloadTaskPhase == DownloadTaskPhase.FileTransfer ? FileDataTransferred : DataReceived)} / {DataFormat.FormatSizeString(DataTotal)} - {DataFormat.FormatTimeSpanString(TimeSpan.FromSeconds(TimeRemaining))}]";
+        $"[MoveDownloadFileProgress {Title} - {Percentage}% - {DataFormat.FormatSpeedString(Speed)} - {DataFormat.FormatSizeString(DownloadTaskPhase == DownloadTaskPhase.FileTransfer ? FileDataTransferred : DataReceived)} / {DataFormat.FormatSizeString(DataTotal)} - {DataFormat.FormatTimeSpanString(TimeSpan.FromSeconds(TimeRemaining))}]";
 
     public IDownloadFileTransferProgress ToFileTransferProgress() =>
         new DownloadFileTransferProgress

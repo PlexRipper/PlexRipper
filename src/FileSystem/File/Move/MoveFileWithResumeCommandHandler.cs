@@ -39,7 +39,7 @@ public class MoveFileWithResumeCommandHandler : ICommandHandler<MoveFileWithResu
         var targetPath = command.TargetPath;
         var currentOffset = command.CurrentOffset;
         var dataTotal = command.DataTotal;
-        var fileMergeProgress = command.Progress;
+        var moveDownloadFileProgres = command.Progress;
 
         var writeStreamResult = Result.Try(() =>
             _file.Open(targetPath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None)
@@ -75,7 +75,7 @@ public class MoveFileWithResumeCommandHandler : ICommandHandler<MoveFileWithResu
             currentOffset += bytesRead;
             previousDataTransferred += bytesRead;
 
-            fileMergeProgress(
+            moveDownloadFileProgres(
                 new MoveFileTransferProgressDTO
                 {
                     Transferred = currentOffset,

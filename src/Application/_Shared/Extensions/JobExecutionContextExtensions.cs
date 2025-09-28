@@ -55,7 +55,7 @@ public static class JobExecutionContextExtensions
                 );
                 break;
 
-            case JobTypes.FileMergeJob:
+            case JobTypes.MoveDownloadFileJob:
                 jsonString = ToJsonString(
                     new MoveDownloadFileJobUpdateDTO
                     {

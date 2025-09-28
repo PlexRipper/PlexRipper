@@ -85,8 +85,8 @@ public class GetAllBackgroundJobsEndpoint : BaseEndpoint<GetAllBackgroundJobsEnd
             Guid.NewGuid().ToString()
         );
 
-        var fileMergeJobUpdate = new JobStatusUpdate<MoveDownloadFileJobUpdateDTO>(
-            JobTypes.FileMergeJob,
+        var moveDownloadJobUpdate = new JobStatusUpdate<MoveDownloadFileJobUpdateDTO>(
+            JobTypes.MoveDownloadFileJob,
             JobStatus.Completed,
             new MoveDownloadFileJobUpdateDTO
             {
@@ -113,7 +113,7 @@ public class GetAllBackgroundJobsEndpoint : BaseEndpoint<GetAllBackgroundJobsEnd
             downloadJobUpdate.ToDTO(),
             inspectPlexServerJobUpdate.ToDTO(),
             syncServerMediaJobUpdate.ToDTO(),
-            fileMergeJobUpdate.ToDTO(),
+            moveDownloadJobUpdate.ToDTO(),
             checkAllConnectionsStatusJobUpdate.ToDTO(),
         ];
     }

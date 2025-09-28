@@ -38,7 +38,7 @@ public class MoveDownloadFileJob : IJob
         {
             _log.Here()
                 .Information(
-                    "Executing job: {NameOfFileMergeJob} for {NameOfFileTaskId} with id: {FileTaskId}",
+                    "Executing job: {NameOfMoveDownloadJob} for {NameOfFileTaskId} with id: {FileTaskId}",
                     nameof(MoveDownloadFileJob),
                     nameof(downloadTaskKey),
                     downloadTaskKey.Id

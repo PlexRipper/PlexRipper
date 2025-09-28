@@ -9,6 +9,8 @@ public class ValidatePlexAccountEndpointRequestValidator : Validator<PlexSignInC
 {
     public ValidatePlexAccountEndpointRequestValidator()
     {
+        RuleFor(x => x.ClientId).NotEmpty().MinimumLength(5);
+
         RuleFor(x => x.Username).NotEmpty().MinimumLength(5);
 
         RuleFor(x => x.Password).NotEmpty().MinimumLength(5);
@@ -33,12 +35,11 @@ public class PlexSignInCommandHandler : ICommandHandler<PlexSignInCommand, Resul
         _log.Here().Debug("Requesting PlexToken for account {UserName}", command.Username);
 
         var plexTvClient = _plexApiClientFactory.CreateTvClient();
-        var clientId = Guid.NewGuid().ToString();
         var response = await plexTvClient
             .Authentication.PostUsersSignInDataAsync(
                 new PostUsersSignInDataRequest
                 {
-                    ClientID = clientId,
+                    ClientID = command.ClientId,
                     RequestBody = new PostUsersSignInDataRequestBody
                     {
                         Login = command.Username,
@@ -53,7 +54,7 @@ public class PlexSignInCommandHandler : ICommandHandler<PlexSignInCommand, Resul
         var isValid = response.Value.RawResponse.IsSuccessStatusCode;
         var result = response.ToApiResult(x => new PlexSignInCommandResult
         {
-            ClientId = clientId,
+            ClientId = command.ClientId,
             Username = command.Username,
             Password = command.Password,
 

@@ -43,10 +43,11 @@ public class ValidateCredentialsIntegrationTests : BaseIntegrationTests
         var response = await client.POSTAsync<
             ValidatePlexCredentialsEndpoint,
             ValidatePlexCredentialsEndpointRequest,
-            ResultDTO<ValidatePlexCredentialsResponse>
+            ResultDTO<ValidatePlexCredentialsDTO>
         >(
             new ValidatePlexCredentialsEndpointRequest
             {
+                ClientId = Guid.NewGuid().ToString(),
                 DisplayName = plexAccountDTO.DisplayName,
                 Username = plexAccountDTO.Username,
                 Password = plexAccountDTO.Password,
@@ -90,10 +91,11 @@ public class ValidateCredentialsIntegrationTests : BaseIntegrationTests
         var response = await client.POSTAsync<
             ValidatePlexCredentialsEndpoint,
             ValidatePlexCredentialsEndpointRequest,
-            ResultDTO<ValidatePlexCredentialsResponse>
+            ResultDTO<ValidatePlexCredentialsDTO>
         >(
             new ValidatePlexCredentialsEndpointRequest
             {
+                ClientId = Guid.NewGuid().ToString(),
                 DisplayName = plexAccountDTO.DisplayName,
                 Username = plexAccountDTO.Username,
                 Password = plexAccountDTO.Password,

@@ -9,6 +9,8 @@ namespace Reaparr.PlexApi.Contracts;
 /// </summary>
 public record PlexSignInCommand : ICommand<Result<PlexSignInCommandResult>>
 {
+    public required string ClientId { get; init; }
+
     public required string Username { get; init; }
 
     public required string Password { get; init; }

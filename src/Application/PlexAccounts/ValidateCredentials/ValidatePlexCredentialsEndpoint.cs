@@ -10,6 +10,7 @@ namespace Reaparr.Application;
 /// </summary>
 public record ValidatePlexCredentialsEndpointRequest
 {
+    public required string ClientId { get; init; }
     public required string DisplayName { get; init; } = "UnknownDisplayName";
 
     public required string Username { get; init; }
@@ -19,9 +20,9 @@ public record ValidatePlexCredentialsEndpointRequest
     public required string VerificationCode { get; set; }
 }
 
-public class ValidatePlexCredentialsResponse
+public record ValidatePlexCredentialsDTO()
 {
-    public required bool IsUnAuthorized { get; set; }
+    public required bool IsUnAuthorized { get; init; }
 
     public required string ClientId { get; init; }
 
@@ -57,7 +58,7 @@ public class ValidatePlexCredentialsEndpointRequestValidator : Validator<Validat
 }
 
 public class ValidatePlexCredentialsEndpoint
-    : BaseEndpoint<ValidatePlexCredentialsEndpointRequest, ValidatePlexCredentialsResponse>
+    : BaseEndpoint<ValidatePlexCredentialsEndpointRequest, ValidatePlexCredentialsDTO>
 {
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
@@ -75,7 +76,7 @@ public class ValidatePlexCredentialsEndpoint
         Post(EndpointPath);
 
         Description(x =>
-            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<ValidatePlexCredentialsResponse>))
+            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<ValidatePlexCredentialsDTO>))
                 .Produces(StatusCodes.Status400BadRequest, typeof(BaseResultDTO))
                 .Produces(StatusCodes.Status401Unauthorized, typeof(BaseResultDTO))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))
@@ -86,9 +87,12 @@ public class ValidatePlexCredentialsEndpoint
     {
         _log.Here().DebugApiCall(HttpContext, req);
 
+        var clientId = string.IsNullOrWhiteSpace(req.ClientId) ? Guid.NewGuid().ToString() : req.ClientId;
+
         var signInResult = await _commandExecutor.Send(
             new PlexSignInCommand
             {
+                ClientId = clientId,
                 Username = req.Username,
                 Password = req.Password,
                 VerificationCode = req.VerificationCode,
@@ -96,31 +100,46 @@ public class ValidatePlexCredentialsEndpoint
             ct
         );
 
-        var isUnAuthorized = false;
-        if (signInResult.IsSuccess)
-        {
-            _log.Here().Debug("The PlexAccount with displayName {Name} has been validated", req.DisplayName);
-        }
-
-        // If the PlexAPI returns a 2fa error, we need to return a verification code to the client.
+        // If the PlexAPI returns a 2FA error, we need to return a verification code to the client.
         if (signInResult.HasPlexErrorEnterVerificationCode())
         {
-            isUnAuthorized = true;
             _log.Here()
                 .Warning("The PlexAccount with displayName {Name} requires a verification code (2FA)", req.DisplayName);
+            var response = new ValidatePlexCredentialsDTO
+            {
+                IsUnAuthorized = true,
+                ClientId = clientId,
+                Username = req.Username,
+                Password = req.Password,
+                Email = string.Empty,
+                Title = string.Empty,
+                PlexId = 0,
+                Uuid = string.Empty,
+                AuthenticationToken = string.Empty,
+                IsValidated = false,
+                ValidatedAt = null,
+                Is2Fa = true,
+            };
+            await SendFluentResult(Result.Ok(response), ct);
+
+            return;
         }
 
         // If the PlexAPI rejects the credentials
         if (signInResult.HasPlex401UnauthorizedError())
         {
-            isUnAuthorized = true;
             _log.Here().Warning("Invalid Plex credentials provided for username {Username}", req.Username);
+            await SendFluentResult(signInResult, ct);
+            return;
         }
 
-        var response = Result.Ok(
-            new ValidatePlexCredentialsResponse
+        if (signInResult.IsSuccess)
+        {
+            _log.Here().Debug("The PlexAccount with displayName {Name} has been validated", req.DisplayName);
+
+            var response = new ValidatePlexCredentialsDTO
             {
-                IsUnAuthorized = isUnAuthorized,
+                IsUnAuthorized = false,
                 ClientId = signInResult.Value.ClientId,
                 Username = signInResult.Value.Username,
                 Password = signInResult.Value.Password,
@@ -132,9 +151,12 @@ public class ValidatePlexCredentialsEndpoint
                 IsValidated = signInResult.Value.IsValidated,
                 ValidatedAt = signInResult.Value.ValidatedAt,
                 Is2Fa = signInResult.Value.Is2Fa,
-            }
-        );
+            };
+            await SendFluentResult(Result.Ok(response), ct);
+            return;
+        }
 
-        await SendFluentResult(response, ct);
+        // Default: return all errors if none of the above conditions matched
+        await SendFluentResult(signInResult.ToResult(), ct);
     }
 }

@@ -79,7 +79,33 @@ public class ValidatePlexTokenEndpoint
             ct
         );
 
-        var isUnAuthorized = false;
+        // If the PlexAPI rejects the token with 401 Unauthorized
+        if (validateResult.HasPlex401UnauthorizedError())
+        {
+            _log.Here()
+                .Warning(
+                    "Failed to validate the PlexAccount Authentication Token for user {PlexAccountDisplayName} from the PlexApi",
+                    req.DisplayName
+                );
+
+            var response = new ValidatePlexTokenEndpointResponse
+            {
+                IsUnAuthorized = true,
+                ClientId = string.Empty,
+                Username = string.Empty,
+                Email = string.Empty,
+                Title = string.Empty,
+                PlexId = 0,
+                Uuid = string.Empty,
+                AuthenticationToken = string.Empty,
+                IsValidated = false,
+                ValidatedAt = null,
+                Is2Fa = false,
+            };
+            await SendFluentResult(Result.Ok(response), ct);
+            return;
+        }
+
         if (validateResult.IsSuccess)
         {
             _log.Here()
@@ -87,23 +113,10 @@ public class ValidatePlexTokenEndpoint
                     "Successfully validated the PlexAccount Authentication Token for user {PlexAccountDisplayName} from the PlexApi",
                     req.DisplayName
                 );
-        }
 
-        // We can't directly return a 401 Unauthorized status code, as it will cause the client to log out.
-        if (validateResult.HasPlex401UnauthorizedError())
-        {
-            isUnAuthorized = true;
-            _log.Here()
-                .Warning(
-                    "Failed to validate the PlexAccount Authentication Token for user {PlexAccountDisplayName} from the PlexApi",
-                    req.DisplayName
-                );
-        }
-
-        var response = Result.Ok(
-            new ValidatePlexTokenEndpointResponse
+            var response = new ValidatePlexTokenEndpointResponse
             {
-                IsUnAuthorized = isUnAuthorized,
+                IsUnAuthorized = false,
                 ClientId = validateResult.Value.ClientId,
                 Username = validateResult.Value.Username,
                 Email = validateResult.Value.Email,
@@ -114,9 +127,12 @@ public class ValidatePlexTokenEndpoint
                 IsValidated = validateResult.Value.IsValidated,
                 ValidatedAt = validateResult.Value.ValidatedAt,
                 Is2Fa = validateResult.Value.Is2Fa,
-            }
-        );
+            };
+            await SendFluentResult(Result.Ok(response), ct);
+            return;
+        }
 
-        await SendFluentResult(response, ct);
+        // Default: return all errors if none of the above conditions matched
+        await SendFluentResult(validateResult, ct);
     }
 }

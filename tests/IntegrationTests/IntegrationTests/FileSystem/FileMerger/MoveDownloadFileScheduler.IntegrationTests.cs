@@ -1,11 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Data.Contracts;
 
-namespace Reaparr.IntegrationTests.FileSystem.FileMerger;
+namespace Reaparr.IntegrationTests.FileSystem;
 
-public class FileMergeSchedulerStartFileMergeJobIntegrationTests : BaseIntegrationTests
+public class MoveDownloadFileSchedulerIntegrationTests : BaseIntegrationTests
 {
-    public FileMergeSchedulerStartFileMergeJobIntegrationTests(ITestOutputHelper output)
+    public MoveDownloadFileSchedulerIntegrationTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]
@@ -49,7 +49,7 @@ public class FileMergeSchedulerStartFileMergeJobIntegrationTests : BaseIntegrati
         var downloadTask = container.DbContext.DownloadTaskMovieFile.First();
 
         // Act
-        var startResult = await container.FileMergeScheduler.StartFileMergeJob(downloadTask.ToKey());
+        var startResult = await container.MoveDownloadFileScheduler.StartMoveDownloadFileJob(downloadTask.ToKey());
         await container.SchedulerService.AwaitScheduler(CancellationToken);
 
         // Assert

@@ -6,11 +6,14 @@ namespace Reaparr.Application;
 public class AllJobListener : IAllJobListener
 {
     private readonly ISignalRService _signalRService;
+    private readonly ILogger _log;
 
     public string Name => nameof(AllJobListener);
 
-    public AllJobListener(ISignalRService signalRService)
+    public AllJobListener(ILogger log, ISignalRService signalRService)
     {
+        _log = log.ForContext<AllJobListener>();
+
         _signalRService = signalRService;
     }
 
@@ -22,9 +25,11 @@ public class AllJobListener : IAllJobListener
         {
             await SendJobExecutionContextAsync(context, JobStatus.Started);
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            Result.Fail(new ExceptionalError(e)).LogError();
+            _log.Here()
+                .Error(ex, "Failed to check the JobToBeExecuted: {Name} queue after a job was executed: {JobDetail}", Name,
+                    context.JobDetail);
         }
     }
 
@@ -40,9 +45,11 @@ public class AllJobListener : IAllJobListener
         {
             await SendJobExecutionContextAsync(context, JobStatus.Completed);
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            Result.Fail(new ExceptionalError(e)).LogError();
+            _log.Here()
+                .Error(ex, "Failed to check the JobWasExecuted: {Name} queue after a job was executed: {JobDetail}", Name,
+                    context.JobDetail);
         }
     }
 

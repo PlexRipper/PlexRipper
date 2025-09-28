@@ -57,7 +57,7 @@ public static class JobExecutionContextExtensions
 
             case JobTypes.FileMergeJob:
                 jsonString = ToJsonString(
-                    new FileMergeJobUpdateDTO
+                    new MoveDownloadFileJobUpdateDTO
                     {
                         DownloadTaskId = dataMap.GetJsonValue<DownloadTaskKey>(
                             MoveDownloadFileJob.DownloadTaskIdParameter

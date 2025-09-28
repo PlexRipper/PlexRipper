@@ -10,13 +10,9 @@ namespace Reaparr.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "CurrentFileTransferPathIndex",
-                table: "DownloadTaskTvShowEpisodeFile");
+            migrationBuilder.DropColumn(name: "CurrentFileTransferPathIndex", table: "DownloadTaskTvShowEpisodeFile");
 
-            migrationBuilder.DropColumn(
-                name: "CurrentFileTransferPathIndex",
-                table: "DownloadTaskMovieFile");
+            migrationBuilder.DropColumn(name: "CurrentFileTransferPathIndex", table: "DownloadTaskMovieFile");
         }
 
         /// <inheritdoc />
@@ -27,14 +23,16 @@ namespace Reaparr.Data.Migrations
                 table: "DownloadTaskTvShowEpisodeFile",
                 type: "INTEGER",
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: 0
+            );
 
             migrationBuilder.AddColumn<int>(
                 name: "CurrentFileTransferPathIndex",
                 table: "DownloadTaskMovieFile",
                 type: "INTEGER",
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: 0
+            );
         }
     }
 }

@@ -3,22 +3,22 @@ using Reaparr.FileSystem.Contracts;
 
 namespace Reaparr.Application.UnitTests;
 
-public class FileMergeQueueUnitTests : BaseUnitTest<MoveDownloadFileJobQueue>
+public class MoveDownloadMoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadMoveDownloadFileJobQueue>
 {
-    public FileMergeQueueUnitTests(ITestOutputHelper output)
+    public MoveDownloadMoveDownloadFileJobQueueUnitTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]
     public async Task ShouldNotRunAnotherFileMergeJob_WhenAJobIsAlreadyRunning()
     {
         // Arrange
-        mock.Mock<IFileMergeScheduler>()
-            .Setup(x => x.IsAnyFileMergeJobRunning())
+        mock.Mock<IMoveDownloadFileScheduler>()
+            .Setup(x => x.IsAnyMoveDownloadFileJobRunning())
             .ReturnsAsync(true)
             .Verifiable(Times.Once);
 
         // Act
-        var result = await _sut.CheckFileMergeQueue();
+        var result = await _sut.CheckMoveDownloadFileJobQueue();
 
         // Assert
         result.ShouldNotBeNull();
@@ -31,18 +31,18 @@ public class FileMergeQueueUnitTests : BaseUnitTest<MoveDownloadFileJobQueue>
         await SetupDatabase(9, config => config.PlexServerCount = 1);
 
         // Arrange
-        mock.Mock<IFileMergeScheduler>()
-            .Setup(x => x.IsAnyFileMergeJobRunning())
+        mock.Mock<IMoveDownloadFileScheduler>()
+            .Setup(x => x.IsAnyMoveDownloadFileJobRunning())
             .ReturnsAsync(true)
             .Verifiable(Times.Once);
 
-        mock.Mock<IFileMergeScheduler>()
-            .Setup(x => x.StartFileMergeJob(It.IsAny<DownloadTaskKey>()))
+        mock.Mock<IMoveDownloadFileScheduler>()
+            .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()))
             .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Never);
 
         // Act
-        var result = await _sut.CheckFileMergeQueue();
+        var result = await _sut.CheckMoveDownloadFileJobQueue();
 
         // Assert
         result.ShouldNotBeNull();
@@ -67,18 +67,18 @@ public class FileMergeQueueUnitTests : BaseUnitTest<MoveDownloadFileJobQueue>
         downloadTasks.SetDownloadStatus(DownloadStatus.DownloadFinished);
         await dbContext.SaveChangesAsync(CancellationToken);
 
-        mock.Mock<IFileMergeScheduler>()
-            .Setup(x => x.IsAnyFileMergeJobRunning())
+        mock.Mock<IMoveDownloadFileScheduler>()
+            .Setup(x => x.IsAnyMoveDownloadFileJobRunning())
             .ReturnsAsync(false)
             .Verifiable(Times.Once);
 
-        mock.Mock<IFileMergeScheduler>()
-            .Setup(x => x.StartFileMergeJob(It.IsAny<DownloadTaskKey>()))
+        mock.Mock<IMoveDownloadFileScheduler>()
+            .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()))
             .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Once);
 
         // Act
-        var result = await _sut.CheckFileMergeQueue();
+        var result = await _sut.CheckMoveDownloadFileJobQueue();
 
         // Assert
         result.ShouldNotBeNull();
@@ -105,18 +105,18 @@ public class FileMergeQueueUnitTests : BaseUnitTest<MoveDownloadFileJobQueue>
         downloadTasks.SetDownloadStatus(DownloadStatus.DownloadFinished);
         await dbContext.SaveChangesAsync(CancellationToken);
 
-        mock.Mock<IFileMergeScheduler>()
-            .Setup(x => x.IsAnyFileMergeJobRunning())
+        mock.Mock<IMoveDownloadFileScheduler>()
+            .Setup(x => x.IsAnyMoveDownloadFileJobRunning())
             .ReturnsAsync(false)
             .Verifiable(Times.Once);
 
-        mock.Mock<IFileMergeScheduler>()
-            .Setup(x => x.StartFileMergeJob(It.IsAny<DownloadTaskKey>()))
+        mock.Mock<IMoveDownloadFileScheduler>()
+            .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()))
             .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Once);
 
         // Act
-        var result = await _sut.CheckFileMergeQueue();
+        var result = await _sut.CheckMoveDownloadFileJobQueue();
 
         // Assert
         result.ShouldNotBeNull();

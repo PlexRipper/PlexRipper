@@ -15,15 +15,15 @@ public class ApplicationModule : Module
     {
         builder.RegisterType<DownloadQueue>().As<IDownloadQueue>().SingleInstance();
         builder.RegisterType<DownloadTaskScheduler>().As<IDownloadTaskScheduler>().SingleInstance();
-        builder.RegisterType<MoveDownloadFileJobScheduler>().As<IFileMergeScheduler>().SingleInstance();
-        builder.RegisterType<MoveDownloadFileJobQueue>().As<IFileMergeQueue>().SingleInstance();
+        builder.RegisterType<MoveDownloadMoveDownloadFileJobScheduler>().As<IMoveDownloadFileScheduler>().SingleInstance();
+        builder.RegisterType<MoveDownloadMoveDownloadFileJobQueue>().As<IMoveDownloadFileQueue>().SingleInstance();
         builder.RegisterType<DownloadWorker>().InstancePerDependency();
         builder.RegisterType<PlexDownloadClient>().As<IPlexDownloadClient>().InstancePerDependency();
 
         builder.RegisterType<SchedulerService>().As<ISchedulerService>().SingleInstance();
         builder.RegisterType<AllJobListener>().As<IAllJobListener>().SingleInstance();
         builder.RegisterType<DownloadJobListener>().As<IDownloadJobListener>().SingleInstance();
-        builder.RegisterType<FileMergeJobListener>().As<IFileMergeJobListener>().SingleInstance();
+        builder.RegisterType<MoveDownloadJobListener>().As<IMoveDownloadJobListener>().SingleInstance();
 
         builder
             .RegisterType<RefreshLibraryProgressReporter>()

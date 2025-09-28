@@ -3,16 +3,18 @@ using Reaparr.Application.Contracts;
 
 namespace Reaparr.Application;
 
-public class FileMergeJobListener : IFileMergeJobListener
+public class MoveDownloadJobListener : IMoveDownloadJobListener
 {
-    private readonly IFileMergeQueue _fileMergeQueue;
+    private readonly ILogger _log;
+    private readonly IMoveDownloadFileQueue _moveDownloadFileQueue;
 
-    public FileMergeJobListener(IFileMergeQueue fileMergeQueue)
+    public MoveDownloadJobListener(ILogger log, IMoveDownloadFileQueue moveDownloadFileQueue)
     {
-        _fileMergeQueue = fileMergeQueue;
+        _log = log.ForContext<MoveDownloadJobListener>();
+        _moveDownloadFileQueue = moveDownloadFileQueue;
     }
 
-    public string Name => nameof(FileMergeJobListener);
+    public string Name => nameof(MoveDownloadJobListener);
 
     public async Task JobWasExecuted(
         IJobExecutionContext context,
@@ -24,11 +26,13 @@ public class FileMergeJobListener : IFileMergeJobListener
         // Make sure your trigger and job listeners never throw an exception (use a try-catch) and that they can handle internal problems. Jobs can get stuck after Quartz is unable to determine whether required logic in listener was completed successfully when listener notification failed.
         try
         {
-            await _fileMergeQueue.CheckFileMergeQueue();
+            await _moveDownloadFileQueue.CheckMoveDownloadFileJobQueue();
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            Result.Fail(new ExceptionalError(e)).LogError();
+            _log.Here()
+                .Error(ex, "Failed to check the {Name} queue after a job was executed: {JobDetail}", Name,
+                    context.JobDetail);
         }
     }
 

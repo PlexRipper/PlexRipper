@@ -53,13 +53,13 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
         pausedMergeTask.SetDownloadStatus(DownloadStatus.MergePaused);
         await dbContext.SaveChangesAsync(CancellationToken);
 
-        mock.Mock<IFileMergeScheduler>()
-            .Setup(x => x.IsDownloadTaskMerging(It.IsAny<DownloadTaskKey>()))
+        mock.Mock<IMoveDownloadFileScheduler>()
+            .Setup(x => x.IsDownloadFileMoving(It.IsAny<DownloadTaskKey>()))
             .ReturnsAsync(false)
             .Verifiable(Times.Once);
 
-        mock.Mock<IFileMergeScheduler>()
-            .Setup(x => x.StartFileMergeJob(It.IsAny<DownloadTaskKey>()))
+        mock.Mock<IMoveDownloadFileScheduler>()
+            .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()))
             .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Once);
 

@@ -9,19 +9,19 @@ public class DownloadJobListener : IDownloadJobListener
     private readonly Serilog.ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly IEventPublisher _eventPublisher;
-    private readonly IFileMergeQueue _fileMergeQueue;
+    private readonly IMoveDownloadFileQueue _moveDownloadFileQueue;
 
     public DownloadJobListener(
         ILogger log,
         IReaparrDbContext dbContext,
         IEventPublisher eventPublisher,
-        IFileMergeQueue fileMergeQueue
+        IMoveDownloadFileQueue moveDownloadFileQueue
     )
     {
         _log = log.ForContext<DownloadJobListener>();
         _dbContext = dbContext;
         _eventPublisher = eventPublisher;
-        _fileMergeQueue = fileMergeQueue;
+        _moveDownloadFileQueue = moveDownloadFileQueue;
     }
 
     public string Name => nameof(DownloadJobListener);
@@ -53,16 +53,18 @@ public class DownloadJobListener : IDownloadJobListener
                         "DownloadTask with id: {DownloadTaskId} has finished downloading, starting fileMergeJob and executing DownloadQueueCheck",
                         downloadTaskKey.Id
                     );
-                await _fileMergeQueue.CheckFileMergeQueue();
+                await _moveDownloadFileQueue.CheckMoveDownloadFileJobQueue();
                 await _eventPublisher.PublishAsync(
                     new CheckDownloadQueueEvent(downloadTaskKey.PlexServerId),
                     cancellationToken
                 );
             }
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            Result.Fail(new ExceptionalError(e)).LogError();
+            _log.Here()
+                .Error(ex, "Failed to check the {Name} queue after a job was executed: {JobDetail}", Name,
+                    context.JobDetail);
         }
     }
 

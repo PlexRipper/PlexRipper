@@ -99,7 +99,7 @@ public class GetAllBackgroundJobsEndpointUnitTests : BaseUnitTest<GetAllBackgrou
             Guid.NewGuid().ToString()
         );
 
-        var fileMergeJobUpdatePayload = new FileMergeJobUpdateDTO
+        var fileMergeJobUpdatePayload = new MoveDownloadFileJobUpdateDTO
         {
             DownloadTaskId = new DownloadTaskKey
             {

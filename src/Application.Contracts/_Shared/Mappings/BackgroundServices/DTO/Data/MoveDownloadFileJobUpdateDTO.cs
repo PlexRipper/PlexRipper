@@ -3,7 +3,7 @@ using Reaparr.Domain;
 
 namespace Reaparr.Application.Contracts;
 
-public record FileMergeJobUpdateDTO
+public record MoveDownloadFileJobUpdateDTO
 {
     [JsonPropertyName("id")]
     public required DownloadTaskKey DownloadTaskId { get; init; }

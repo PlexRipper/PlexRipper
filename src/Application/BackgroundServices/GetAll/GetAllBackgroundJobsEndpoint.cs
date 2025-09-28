@@ -85,10 +85,10 @@ public class GetAllBackgroundJobsEndpoint : BaseEndpoint<GetAllBackgroundJobsEnd
             Guid.NewGuid().ToString()
         );
 
-        var fileMergeJobUpdate = new JobStatusUpdate<FileMergeJobUpdateDTO>(
+        var fileMergeJobUpdate = new JobStatusUpdate<MoveDownloadFileJobUpdateDTO>(
             JobTypes.FileMergeJob,
             JobStatus.Completed,
-            new FileMergeJobUpdateDTO
+            new MoveDownloadFileJobUpdateDTO
             {
                 DownloadTaskId = new DownloadTaskKey
                 {

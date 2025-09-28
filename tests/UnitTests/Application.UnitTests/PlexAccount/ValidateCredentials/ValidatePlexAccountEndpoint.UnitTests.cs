@@ -4,9 +4,9 @@ using Reaparr.PlexApi.Contracts;
 
 namespace Reaparr.Application.UnitTests;
 
-public class ValidatePlexAccountEndpointUnitTests : BaseUnitTest
+public class ValidatePlexCredentialsEndpointUnitTests : BaseUnitTest
 {
-    public ValidatePlexAccountEndpointUnitTests(ITestOutputHelper output)
+    public ValidatePlexCredentialsEndpointUnitTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]
@@ -21,12 +21,38 @@ public class ValidatePlexAccountEndpointUnitTests : BaseUnitTest
 
         mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<PlexSignInCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Ok(testAccountResponse));
+            .ReturnsAsync(
+                Result.Ok(
+                    new PlexSignInCommandResult
+                    {
+                        ClientId = testAccountResponse.ClientId,
+                        Username = testAccountResponse.Username,
+                        Password = testAccountResponse.Password,
+                        Email = testAccountResponse.Email,
+                        Title = testAccountResponse.Title,
+                        PlexId = testAccountResponse.PlexId,
+                        Uuid = testAccountResponse.Uuid,
+                        AuthenticationToken = testAccountResponse.AuthenticationToken,
+                        IsValidated = testAccountResponse.IsValidated,
+                        ValidatedAt = testAccountResponse.ValidatedAt,
+                        Is2Fa = testAccountResponse.Is2Fa,
+                    }
+                )
+            );
 
         // Act
-        var ep = SetupEndpointUnitTest<ValidatePlexAccountEndpoint>();
-        await ep.HandleAsync(new ValidatePlexAccountEndpointRequest(testAccountDTO), CancellationToken);
-        var result = ep.Response as ResultDTO<ValidatePlexAccountResponse>;
+        var ep = SetupEndpointUnitTest<ValidatePlexCredentialsEndpoint>();
+        await ep.HandleAsync(
+            new ValidatePlexCredentialsEndpointRequest()
+            {
+                DisplayName = testAccountDTO.DisplayName,
+                Username = testAccountDTO.Username,
+                Password = testAccountDTO.Password,
+                VerificationCode = testAccountDTO.VerificationCode,
+            },
+            CancellationToken
+        );
+        var result = ep.Response as ResultDTO<ValidatePlexCredentialsResponse>;
 
         // Assert
         result.ShouldNotBeNull();
@@ -34,7 +60,7 @@ public class ValidatePlexAccountEndpointUnitTests : BaseUnitTest
         var value = result.Value;
         value.ShouldNotBeNull();
         value.IsUnAuthorized.ShouldBeFalse();
-        var account = value.PlexAccountDTO;
+        var account = value;
         account.ShouldNotBeNull();
         account.IsValidated.ShouldBeTrue();
         account.ValidatedAt.ShouldNotBeNull();
@@ -43,47 +69,7 @@ public class ValidatePlexAccountEndpointUnitTests : BaseUnitTest
         account.Email.ShouldBe(testAccountDTO.Email);
         account.Username.ShouldBe(testAccountDTO.Username);
         account.Password.ShouldBe(testAccountDTO.Password);
-        account.CustomAuthenticationToken.ShouldBeEmpty();
-    }
-
-    [Fact]
-    public async Task ShouldValidateThePlexToken_WhenTokenIsValid()
-    {
-        // Arrange
-        var seed = new Seed(2058);
-        var testAccountDTO = FakeData.GetPlexAccount(seed).Generate().ToDTO();
-        testAccountDTO.Username = string.Empty;
-        testAccountDTO.Password = string.Empty;
-        testAccountDTO.CustomAuthenticationToken = "valid-token";
-
-        var testAccountResponse = testAccountDTO.ToModel();
-        UpdateInitProperty(testAccountResponse, nameof(testAccountResponse.ValidatedAt), DateTime.UtcNow);
-
-        mock.Mock<ICommandExecutor>()
-            .Setup(x => x.Send(It.IsAny<ValidatePlexTokenCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Ok(testAccountResponse));
-
-        // Act
-        var ep = SetupEndpointUnitTest<ValidatePlexAccountEndpoint>();
-        await ep.HandleAsync(new ValidatePlexAccountEndpointRequest(testAccountDTO), CancellationToken);
-        var result = ep.Response as ResultDTO<ValidatePlexAccountResponse>;
-
-        // Assert
-        result.ShouldNotBeNull();
-        result.IsSuccess.ShouldBeTrue();
-        var value = result.Value;
-        value.ShouldNotBeNull();
-        value.IsUnAuthorized.ShouldBeFalse();
-        var account = value.PlexAccountDTO;
-        account.ShouldNotBeNull();
-        account.IsValidated.ShouldBeTrue();
-        account.ValidatedAt.ShouldNotBeNull();
-        account.ValidatedAt?.ShouldBe(DateTime.UtcNow, TimeSpan.FromSeconds(5));
-        account.Is2Fa.ShouldBeFalse();
-        account.Email.ShouldBe(testAccountDTO.Email);
-        account.Username.ShouldBe(testAccountDTO.Username);
-        account.Password.ShouldBe(testAccountDTO.Password);
-        account.CustomAuthenticationToken.ShouldNotBeEmpty();
+        account.AuthenticationToken.ShouldNotBeEmpty();
     }
 
     [Fact]
@@ -103,9 +89,18 @@ public class ValidatePlexAccountEndpointUnitTests : BaseUnitTest
             );
 
         // Act
-        var ep = SetupEndpointUnitTest<ValidatePlexAccountEndpoint>();
-        await ep.HandleAsync(new ValidatePlexAccountEndpointRequest(testAccountDTO), CancellationToken);
-        var result = ep.Response as ResultDTO<ValidatePlexAccountResponse>;
+        var ep = SetupEndpointUnitTest<ValidatePlexCredentialsEndpoint>();
+        await ep.HandleAsync(
+            new ValidatePlexCredentialsEndpointRequest()
+            {
+                DisplayName = testAccountDTO.DisplayName,
+                Username = testAccountDTO.Username,
+                Password = testAccountDTO.Password,
+                VerificationCode = testAccountDTO.VerificationCode,
+            },
+            CancellationToken
+        );
+        var result = ep.Response as ResultDTO<ValidatePlexCredentialsResponse>;
 
         // Assert
         result.ShouldNotBeNull();
@@ -113,7 +108,7 @@ public class ValidatePlexAccountEndpointUnitTests : BaseUnitTest
         var value = result.Value;
         value.ShouldNotBeNull();
         value.IsUnAuthorized.ShouldBeFalse();
-        var account = value.PlexAccountDTO;
+        var account = value;
         account.ShouldNotBeNull();
         account.IsValidated.ShouldBeFalse();
         account.ValidatedAt.ShouldBe(null);
@@ -121,7 +116,7 @@ public class ValidatePlexAccountEndpointUnitTests : BaseUnitTest
         account.Email.ShouldBe(testAccountDTO.Email);
         account.Username.ShouldBe(testAccountDTO.Username);
         account.Password.ShouldBe(testAccountDTO.Password);
-        account.CustomAuthenticationToken.ShouldBeEmpty();
+        account.AuthenticationToken.ShouldNotBeEmpty();
     }
 
     [Fact]
@@ -139,9 +134,18 @@ public class ValidatePlexAccountEndpointUnitTests : BaseUnitTest
             .ReturnsAsync(Result.Fail(new PlexError("Unauthorized")).AddPlex401UnauthorizedError());
 
         // Act
-        var ep = SetupEndpointUnitTest<ValidatePlexAccountEndpoint>();
-        await ep.HandleAsync(new ValidatePlexAccountEndpointRequest(testAccountDTO), CancellationToken);
-        var result = ep.Response as ResultDTO<ValidatePlexAccountResponse>;
+        var ep = SetupEndpointUnitTest<ValidatePlexCredentialsEndpoint>();
+        await ep.HandleAsync(
+            new ValidatePlexCredentialsEndpointRequest()
+            {
+                DisplayName = testAccountDTO.DisplayName,
+                Username = testAccountDTO.Username,
+                Password = testAccountDTO.Password,
+                VerificationCode = testAccountDTO.VerificationCode,
+            },
+            CancellationToken
+        );
+        var result = ep.Response as ResultDTO<ValidatePlexCredentialsResponse>;
 
         // Assert
         result.ShouldNotBeNull();
@@ -149,7 +153,7 @@ public class ValidatePlexAccountEndpointUnitTests : BaseUnitTest
         var value = result.Value;
         value.ShouldNotBeNull();
         value.IsUnAuthorized.ShouldBeTrue();
-        var account = value.PlexAccountDTO;
+        var account = value;
         account.ShouldNotBeNull();
         account.IsValidated.ShouldBeFalse();
         account.ValidatedAt.ShouldBe(null);
@@ -157,7 +161,7 @@ public class ValidatePlexAccountEndpointUnitTests : BaseUnitTest
         account.Email.ShouldBe(testAccountDTO.Email);
         account.Username.ShouldBe(testAccountDTO.Username);
         account.Password.ShouldBe(testAccountDTO.Password);
-        account.CustomAuthenticationToken.ShouldBeEmpty();
+        account.AuthenticationToken.ShouldNotBeEmpty();
     }
 
     [Fact]
@@ -177,9 +181,18 @@ public class ValidatePlexAccountEndpointUnitTests : BaseUnitTest
             .ReturnsAsync(Result.Fail(new PlexError("Unauthorized")).AddPlex401UnauthorizedError());
 
         // Act
-        var ep = SetupEndpointUnitTest<ValidatePlexAccountEndpoint>();
-        await ep.HandleAsync(new ValidatePlexAccountEndpointRequest(testAccountDTO), CancellationToken);
-        var result = ep.Response as ResultDTO<ValidatePlexAccountResponse>;
+        var ep = SetupEndpointUnitTest<ValidatePlexCredentialsEndpoint>();
+        await ep.HandleAsync(
+            new ValidatePlexCredentialsEndpointRequest()
+            {
+                DisplayName = testAccountDTO.DisplayName,
+                Username = testAccountDTO.Username,
+                Password = testAccountDTO.Password,
+                VerificationCode = testAccountDTO.VerificationCode,
+            },
+            CancellationToken
+        );
+        var result = ep.Response as ResultDTO<ValidatePlexCredentialsResponse>;
 
         // Assert
         result.ShouldNotBeNull();
@@ -187,7 +200,7 @@ public class ValidatePlexAccountEndpointUnitTests : BaseUnitTest
         var value = result.Value;
         value.ShouldNotBeNull();
         value.IsUnAuthorized.ShouldBeTrue();
-        var account = value.PlexAccountDTO;
+        var account = value;
         account.ShouldNotBeNull();
         account.IsValidated.ShouldBeFalse();
         account.ValidatedAt.ShouldBe(null);
@@ -195,7 +208,7 @@ public class ValidatePlexAccountEndpointUnitTests : BaseUnitTest
         account.Email.ShouldBe(testAccountDTO.Email);
         account.Username.ShouldBe(testAccountDTO.Username);
         account.Password.ShouldBe(testAccountDTO.Password);
-        account.CustomAuthenticationToken.ShouldNotBeEmpty();
+        account.AuthenticationToken.ShouldNotBeEmpty();
     }
 
     [Fact]
@@ -217,8 +230,17 @@ public class ValidatePlexAccountEndpointUnitTests : BaseUnitTest
             );
 
         // Act
-        var ep = SetupEndpointUnitTest<ValidatePlexAccountEndpoint>();
-        await ep.HandleAsync(new ValidatePlexAccountEndpointRequest(testAccountDTO), CancellationToken);
+        var ep = SetupEndpointUnitTest<ValidatePlexCredentialsEndpoint>();
+        await ep.HandleAsync(
+            new ValidatePlexCredentialsEndpointRequest()
+            {
+                DisplayName = testAccountDTO.DisplayName,
+                Username = testAccountDTO.Username,
+                Password = testAccountDTO.Password,
+                VerificationCode = testAccountDTO.VerificationCode,
+            },
+            CancellationToken
+        );
         var result = ep.Response;
 
         // Assert

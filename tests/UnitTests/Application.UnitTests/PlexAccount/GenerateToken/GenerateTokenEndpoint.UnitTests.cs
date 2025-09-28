@@ -19,7 +19,26 @@ public class GenerateTokenEndpointUnitTests : BaseUnitTest
 
         mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<PlexSignInCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Ok(FakeData.GetPlexAccount(seed).Generate()));
+            .ReturnsAsync(() =>
+            {
+                var x = FakeData.GetPlexAccount(seed).Generate();
+                return Result.Ok(
+                    new PlexSignInCommandResult
+                    {
+                        ClientId = x.ClientId,
+                        Username = x.Username,
+                        Password = x.Password,
+                        Email = x.Email,
+                        Title = x.Title,
+                        PlexId = x.PlexId,
+                        Uuid = x.Uuid,
+                        AuthenticationToken = x.AuthenticationToken,
+                        IsValidated = x.IsValidated,
+                        ValidatedAt = x.ValidatedAt,
+                        Is2Fa = x.Is2Fa,
+                    }
+                );
+            });
 
         // Act
         var ep = SetupEndpointUnitTest<GeneratePlexTokenEndpoint>();

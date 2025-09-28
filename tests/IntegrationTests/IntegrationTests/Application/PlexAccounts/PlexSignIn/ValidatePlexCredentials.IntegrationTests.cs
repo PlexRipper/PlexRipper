@@ -4,11 +4,11 @@ using Moq.Contrib.HttpClient;
 using Reaparr.Application;
 using Reaparr.Application.Contracts;
 
-namespace Reaparr.IntegrationTests.AccountController;
+namespace Reaparr.IntegrationTests;
 
-public class ValidateAccountIntegrationTests : BaseIntegrationTests
+public class ValidateCredentialsIntegrationTests : BaseIntegrationTests
 {
-    public ValidateAccountIntegrationTests(ITestOutputHelper output)
+    public ValidateCredentialsIntegrationTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]
@@ -41,10 +41,18 @@ public class ValidateAccountIntegrationTests : BaseIntegrationTests
         await client.SignIn();
 
         var response = await client.POSTAsync<
-            ValidatePlexAccountEndpoint,
-            ValidatePlexAccountEndpointRequest,
-            ResultDTO<ValidatePlexAccountResponse>
-        >(new ValidatePlexAccountEndpointRequest(plexAccountDTO));
+            ValidatePlexCredentialsEndpoint,
+            ValidatePlexCredentialsEndpointRequest,
+            ResultDTO<ValidatePlexCredentialsResponse>
+        >(
+            new ValidatePlexCredentialsEndpointRequest
+            {
+                DisplayName = plexAccountDTO.DisplayName,
+                Username = plexAccountDTO.Username,
+                Password = plexAccountDTO.Password,
+                VerificationCode = plexAccountDTO.VerificationCode,
+            }
+        );
         response.Response.IsSuccessStatusCode.ShouldBeTrue();
         var result = response.Result;
 
@@ -80,10 +88,18 @@ public class ValidateAccountIntegrationTests : BaseIntegrationTests
         await client.SignIn();
 
         var response = await client.POSTAsync<
-            ValidatePlexAccountEndpoint,
-            ValidatePlexAccountEndpointRequest,
-            ResultDTO<ValidatePlexAccountResponse>
-        >(new ValidatePlexAccountEndpointRequest(plexAccountDTO));
+            ValidatePlexCredentialsEndpoint,
+            ValidatePlexCredentialsEndpointRequest,
+            ResultDTO<ValidatePlexCredentialsResponse>
+        >(
+            new ValidatePlexCredentialsEndpointRequest
+            {
+                DisplayName = plexAccountDTO.DisplayName,
+                Username = plexAccountDTO.Username,
+                Password = plexAccountDTO.Password,
+                VerificationCode = plexAccountDTO.VerificationCode,
+            }
+        );
         response.Response.IsSuccessStatusCode.ShouldBeTrue();
         var result = response.Result;
 

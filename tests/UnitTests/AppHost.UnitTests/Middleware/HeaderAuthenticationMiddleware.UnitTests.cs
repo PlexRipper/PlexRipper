@@ -119,10 +119,10 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         {
             Enabled = false,
             MappingType = HeaderMappingType.Username,
-            TrustedProxies = new List<string>(),
+            TrustedProxies = [],
             EnableLogging = true,
             MaxHeaderLength = 100,
-            RequireHttps = false
+            RequireHttps = false,
         };
 
         var authSettings = AuthenticationModule.Create();
@@ -130,20 +130,19 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
 
-        using (TestCorrelator.CreateContext())
-        {
-            // Act
-            var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
-                next.Object));
-            await sut.InvokeAsync(context);
+        using var correlatorContext = TestCorrelator.CreateContext();
 
-            // Assert
-            nextCalled.ShouldBeTrue();
-            next.Verify(x => x(context), Times.Once);
+        // Act
+        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
+            next.Object));
+        await sut.InvokeAsync(context);
 
-            var logEvents = TestCorrelator.GetLogEventsFromCurrentContext();
-            logEvents.ShouldContain(e => e.MessageTemplate.Text.Contains("Header authentication is disabled"));
-        }
+        // Assert
+        nextCalled.ShouldBeTrue();
+        next.Verify(x => x(context), Times.Once);
+
+        var logEvents = TestCorrelator.GetLogEventsFromCurrentContext();
+        logEvents.ShouldContain(e => e.MessageTemplate.Text.Contains("Header authentication is disabled"));
     }
 
     [Fact]
@@ -166,28 +165,27 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         {
             Enabled = true,
             MappingType = HeaderMappingType.Username,
-            TrustedProxies = new List<string> { "127.0.0.1" },
+            TrustedProxies = ["127.0.0.1"],
             EnableLogging = true, // Enable logging for this test
             MaxHeaderLength = 100,
-            RequireHttps = false
+            RequireHttps = false,
         };
 
         SetupAuthenticationSettings(headerAuthSettings);
 
-        using (TestCorrelator.CreateContext())
-        {
-            // Act
-            var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
-                next.Object));
-            await sut.InvokeAsync(context);
+        using var correlatorContext = TestCorrelator.CreateContext();
 
-            // Assert
-            nextCalled.ShouldBeTrue();
-            next.Verify(x => x(context), Times.Once);
+        // Act
+        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
+            next.Object));
+        await sut.InvokeAsync(context);
 
-            var logEvents = TestCorrelator.GetLogEventsFromCurrentContext();
-            logEvents.ShouldContain(e => e.MessageTemplate.Text.Contains("User is already authenticated"));
-        }
+        // Assert
+        nextCalled.ShouldBeTrue();
+        next.Verify(x => x(context), Times.Once);
+
+        var logEvents = TestCorrelator.GetLogEventsFromCurrentContext();
+        logEvents.ShouldContain(e => e.MessageTemplate.Text.Contains("User is already authenticated"));
     }
 
     #endregion
@@ -226,10 +224,10 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         {
             Enabled = true,
             MappingType = HeaderMappingType.Username,
-            TrustedProxies = new List<string> { trustedProxy },
+            TrustedProxies = [trustedProxy],
             EnableLogging = false,
             MaxHeaderLength = 100,
-            RequireHttps = false
+            RequireHttps = false,
         };
 
         var authSettings = AuthenticationModule.Create();
@@ -239,9 +237,6 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TestUsername)).ReturnsAsync((AppUser?)null);
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
-
-        // UserService is already configured in SetupMocks
-        // RequestDelegate is provided via constructor parameter
 
         // Act
         var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
@@ -285,10 +280,10 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         {
             Enabled = true,
             MappingType = HeaderMappingType.Username,
-            TrustedProxies = new List<string> { "10.0.0.0/8" },
+            TrustedProxies = ["10.0.0.0/8"],
             EnableLogging = true,
             MaxHeaderLength = 100,
-            RequireHttps = false
+            RequireHttps = false,
         };
 
         var authSettings = AuthenticationModule.Create();
@@ -296,23 +291,20 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
 
-        // RequestDelegate is provided via constructor parameter
+        using var correlatorContext = TestCorrelator.CreateContext();
 
-        using (TestCorrelator.CreateContext())
-        {
-            // Act
-            var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
-                next.Object));
-            await sut.InvokeAsync(context);
+        // Act
+        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
+            next.Object));
+        await sut.InvokeAsync(context);
 
-            // Assert
-            nextCalled.ShouldBeTrue();
-            next.Verify(x => x(context), Times.Once);
+        // Assert
+        nextCalled.ShouldBeTrue();
+        next.Verify(x => x(context), Times.Once);
 
-            var logEvents = TestCorrelator.GetLogEventsFromCurrentContext();
-            logEvents.ShouldContain(e =>
-                e.MessageTemplate.Text.Contains("Request with header authentication token from untrusted IP"));
-        }
+        var logEvents = TestCorrelator.GetLogEventsFromCurrentContext();
+        logEvents.ShouldContain(e =>
+            e.MessageTemplate.Text.Contains("Request with header authentication token from untrusted IP"));
     }
 
     [Fact]
@@ -336,18 +328,16 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         {
             Enabled = true,
             MappingType = HeaderMappingType.Username,
-            TrustedProxies = new List<string>(),
+            TrustedProxies = [],
             EnableLogging = false,
             MaxHeaderLength = 100,
-            RequireHttps = false
+            RequireHttps = false,
         };
 
         var authSettings = AuthenticationModule.Create();
         authSettings.HeaderAuthentication = headerAuthSettings;
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
-
-        // RequestDelegate is provided via constructor parameter
 
         // Act
         var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
@@ -376,8 +366,6 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
             });
 
         SetupMocks();
-
-        // RequestDelegate is provided via constructor parameter
 
         // Act
         var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
@@ -414,10 +402,10 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         {
             Enabled = true,
             MappingType = HeaderMappingType.Username,
-            TrustedProxies = new List<string> { "192.168.1.0/24" },
+            TrustedProxies = ["192.168.1.0/24"],
             EnableLogging = true,
             MaxHeaderLength = 100,
-            RequireHttps = true
+            RequireHttps = true,
         };
 
         var authSettings = AuthenticationModule.Create();
@@ -425,22 +413,19 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
 
-        // RequestDelegate is provided via constructor parameter
+        using var correlatorContext = TestCorrelator.CreateContext();
 
-        using (TestCorrelator.CreateContext())
-        {
-            // Act
-            var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
-                next.Object));
-            await sut.InvokeAsync(context);
+        // Act
+        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
+            next.Object));
+        await sut.InvokeAsync(context);
 
-            // Assert
-            nextCalled.ShouldBeTrue();
-            next.Verify(x => x(context), Times.Once);
+        // Assert
+        nextCalled.ShouldBeTrue();
+        next.Verify(x => x(context), Times.Once);
 
-            var logEvents = TestCorrelator.GetLogEventsFromCurrentContext();
-            logEvents.ShouldContain(e => e.MessageTemplate.Text.Contains("Header authentication requires HTTPS"));
-        }
+        var logEvents = TestCorrelator.GetLogEventsFromCurrentContext();
+        logEvents.ShouldContain(e => e.MessageTemplate.Text.Contains("Header authentication requires HTTPS"));
     }
 
     [Fact]
@@ -465,10 +450,10 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         {
             Enabled = true,
             MappingType = HeaderMappingType.Username,
-            TrustedProxies = new List<string> { "192.168.1.0/24" },
+            TrustedProxies = ["192.168.1.0/24"],
             EnableLogging = false,
             MaxHeaderLength = 100,
-            RequireHttps = true
+            RequireHttps = true,
         };
 
         var authSettings = AuthenticationModule.Create();
@@ -478,9 +463,6 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TestUsername)).ReturnsAsync((AppUser?)null);
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
-
-        // UserService is already configured in SetupMocks
-        // RequestDelegate is provided via constructor parameter
 
         // Act
         var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
@@ -513,10 +495,10 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         {
             Enabled = true,
             MappingType = HeaderMappingType.Username,
-            TrustedProxies = new List<string> { "192.168.1.0/24" },
+            TrustedProxies = ["192.168.1.0/24"],
             EnableLogging = false,
             MaxHeaderLength = 100,
-            RequireHttps = false
+            RequireHttps = false,
         };
 
         var authSettings = AuthenticationModule.Create();
@@ -526,9 +508,6 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TestUsername)).ReturnsAsync((AppUser?)null);
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
-
-        // UserService is already configured in SetupMocks
-        // RequestDelegate is provided via constructor parameter
 
         // Act
         var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
@@ -565,10 +544,10 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         {
             Enabled = true,
             MappingType = HeaderMappingType.Username,
-            TrustedProxies = new List<string> { "192.168.1.0/24" },
+            TrustedProxies = ["192.168.1.0/24"],
             EnableLogging = true,
             MaxHeaderLength = 256,
-            RequireHttps = false
+            RequireHttps = false,
         };
 
         var authSettings = AuthenticationModule.Create();
@@ -576,22 +555,19 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
 
-        // RequestDelegate is provided via constructor parameter
+        using var correlatorContext = TestCorrelator.CreateContext();
 
-        using (TestCorrelator.CreateContext())
-        {
-            // Act
-            var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
-                next.Object));
-            await sut.InvokeAsync(context);
+        // Act
+        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
+            next.Object));
+        await sut.InvokeAsync(context);
 
-            // Assert
-            nextCalled.ShouldBeTrue();
-            next.Verify(x => x(context), Times.Once);
+        // Assert
+        nextCalled.ShouldBeTrue();
+        next.Verify(x => x(context), Times.Once);
 
-            var logEvents = TestCorrelator.GetLogEventsFromCurrentContext();
-            logEvents.ShouldContain(e => e.MessageTemplate.Text.Contains("Header value exceeds maximum length"));
-        }
+        var logEvents = TestCorrelator.GetLogEventsFromCurrentContext();
+        logEvents.ShouldContain(e => e.MessageTemplate.Text.Contains("Header value exceeds maximum length"));
     }
 
     [Fact]
@@ -616,10 +592,10 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         {
             Enabled = true,
             MappingType = HeaderMappingType.Username,
-            TrustedProxies = new List<string> { "192.168.1.0/24" },
+            TrustedProxies = ["192.168.1.0/24"],
             EnableLogging = false,
             MaxHeaderLength = 256,
-            RequireHttps = false
+            RequireHttps = false,
         };
 
         var authSettings = AuthenticationModule.Create();
@@ -629,9 +605,6 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(validHeaderValue)).ReturnsAsync((AppUser?)null);
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
-
-        // UserService is already configured in SetupMocks
-        // RequestDelegate is provided via constructor parameter
 
         // Act
         var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
@@ -664,34 +637,31 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         {
             Enabled = true,
             MappingType = HeaderMappingType.Username,
-            TrustedProxies = new List<string> { "192.168.1.0/24" },
+            TrustedProxies = ["192.168.1.0/24"],
             EnableLogging = false,
             MaxHeaderLength = 256,
-            RequireHttps = false
+            RequireHttps = false,
         };
-        headerAuthSettings.TrustedProxies = new List<string> { "192.168.1.0/24" };
+        headerAuthSettings.TrustedProxies = ["192.168.1.0/24"];
 
         var authSettings = AuthenticationModule.Create();
         authSettings.HeaderAuthentication = headerAuthSettings;
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
 
-        // RequestDelegate is provided via constructor parameter
+        using var correlatorContext = TestCorrelator.CreateContext();
 
-        using (TestCorrelator.CreateContext())
-        {
-            // Act
-            var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
-                next.Object));
-            await sut.InvokeAsync(context);
+        // Act
+        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
+            next.Object));
+        await sut.InvokeAsync(context);
 
-            // Assert
-            nextCalled.ShouldBeTrue();
-            next.Verify(x => x(context), Times.Once);
+        // Assert
+        nextCalled.ShouldBeTrue();
+        next.Verify(x => x(context), Times.Once);
 
-            var logEvents = TestCorrelator.GetLogEventsFromCurrentContext();
-            logEvents.ShouldNotContain(e => e.MessageTemplate.Text.Contains("Header value exceeds maximum length"));
-        }
+        var logEvents = TestCorrelator.GetLogEventsFromCurrentContext();
+        logEvents.ShouldNotContain(e => e.MessageTemplate.Text.Contains("Header value exceeds maximum length"));
     }
 
     #endregion
@@ -719,10 +689,10 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         {
             Enabled = true,
             MappingType = HeaderMappingType.Username,
-            TrustedProxies = new List<string> { "192.168.1.0/24" },
+            TrustedProxies = ["192.168.1.0/24"],
             EnableLogging = true,
             MaxHeaderLength = 100,
-            RequireHttps = false
+            RequireHttps = false,
         };
 
         var authSettings = AuthenticationModule.Create();
@@ -733,23 +703,19 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
 
-        // UserService is already configured in SetupMocks
-        // RequestDelegate is provided via constructor parameter
+        using var correlatorContext = TestCorrelator.CreateContext();
 
-        using (TestCorrelator.CreateContext())
-        {
-            // Act
-            var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
-                next.Object));
-            await sut.InvokeAsync(context);
+        // Act
+        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
+            next.Object));
+        await sut.InvokeAsync(context);
 
-            // Assert
-            nextCalled.ShouldBeTrue();
-            next.Verify(x => x(context), Times.Once);
+        // Assert
+        nextCalled.ShouldBeTrue();
+        next.Verify(x => x(context), Times.Once);
 
-            var logEvents = TestCorrelator.GetLogEventsFromCurrentContext();
-            logEvents.ShouldContain(e => e.MessageTemplate.Text.Contains("The wrong user is passed in"));
-        }
+        var logEvents = TestCorrelator.GetLogEventsFromCurrentContext();
+        logEvents.ShouldContain(e => e.MessageTemplate.Text.Contains("The wrong user is passed in"));
     }
 
     [Fact]
@@ -773,10 +739,10 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         {
             Enabled = true,
             MappingType = HeaderMappingType.Email,
-            TrustedProxies = new List<string> { "192.168.1.0/24" },
+            TrustedProxies = ["192.168.1.0/24"],
             EnableLogging = true,
             MaxHeaderLength = 100,
-            RequireHttps = false
+            RequireHttps = false,
         };
 
         var authSettings = AuthenticationModule.Create();
@@ -787,23 +753,19 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
 
-        // UserService is already configured in SetupMocks
-        // RequestDelegate is provided via constructor parameter
+        using var correlatorContext = TestCorrelator.CreateContext();
 
-        using (TestCorrelator.CreateContext())
-        {
-            // Act
-            var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
-                next.Object));
-            await sut.InvokeAsync(context);
+        // Act
+        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
+            next.Object));
+        await sut.InvokeAsync(context);
 
-            // Assert
-            nextCalled.ShouldBeTrue();
-            next.Verify(x => x(context), Times.Once);
+        // Assert
+        nextCalled.ShouldBeTrue();
+        next.Verify(x => x(context), Times.Once);
 
-            var logEvents = TestCorrelator.GetLogEventsFromCurrentContext();
-            logEvents.ShouldContain(e => e.MessageTemplate.Text.Contains("The wrong user is passed in"));
-        }
+        var logEvents = TestCorrelator.GetLogEventsFromCurrentContext();
+        logEvents.ShouldContain(e => e.MessageTemplate.Text.Contains("The wrong user is passed in"));
     }
 
     [Fact]
@@ -827,10 +789,10 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         {
             Enabled = true,
             MappingType = HeaderMappingType.Username,
-            TrustedProxies = new List<string> { "192.168.1.0/24" },
+            TrustedProxies = ["192.168.1.0/24"],
             EnableLogging = true,
             MaxHeaderLength = 100,
-            RequireHttps = false
+            RequireHttps = false,
         };
 
         var authSettings = AuthenticationModule.Create();
@@ -840,27 +802,23 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
 
         // Configure UserService mock in AutoMock
         mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TestUsername)).ReturnsAsync(testUser);
-        mock.Mock<IUserService>().Setup(x => x.GetRolesAsync(testUser)).ReturnsAsync(new List<string> { "User" });
+        mock.Mock<IUserService>().Setup(x => x.GetRolesAsync(testUser)).ReturnsAsync(["User"]);
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
 
-        // UserService is already configured in SetupMocks
-        // RequestDelegate is provided via constructor parameter
+        using var correlatorContext = TestCorrelator.CreateContext();
 
-        using (TestCorrelator.CreateContext())
-        {
-            // Act
-            var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
-                next.Object));
-            await sut.InvokeAsync(context);
+        // Act
+        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
+            next.Object));
+        await sut.InvokeAsync(context);
 
-            // Assert
-            nextCalled.ShouldBeTrue();
-            next.Verify(x => x(context), Times.Once);
+        // Assert
+        nextCalled.ShouldBeTrue();
+        next.Verify(x => x(context), Times.Once);
 
-            var logEvents = TestCorrelator.GetLogEventsFromCurrentContext();
-            logEvents.ShouldContain(e => e.MessageTemplate.Text.Contains("User authenticated via header"));
-        }
+        var logEvents = TestCorrelator.GetLogEventsFromCurrentContext();
+        logEvents.ShouldContain(e => e.MessageTemplate.Text.Contains("User authenticated via header"));
     }
 
     [Fact]
@@ -884,10 +842,10 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         {
             Enabled = true,
             MappingType = HeaderMappingType.Email,
-            TrustedProxies = new List<string> { "192.168.1.0/24" },
+            TrustedProxies = ["192.168.1.0/24"],
             EnableLogging = true,
             MaxHeaderLength = 100,
-            RequireHttps = false
+            RequireHttps = false,
         };
 
         var authSettings = AuthenticationModule.Create();
@@ -897,27 +855,23 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
 
         // Configure UserService mock in AutoMock
         mock.Mock<IUserService>().Setup(x => x.FindByEmailAsync(TestEmail)).ReturnsAsync(testUser);
-        mock.Mock<IUserService>().Setup(x => x.GetRolesAsync(testUser)).ReturnsAsync(new List<string> { "User" });
+        mock.Mock<IUserService>().Setup(x => x.GetRolesAsync(testUser)).ReturnsAsync(["User"]);
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
 
-        // UserService is already configured in SetupMocks
-        // RequestDelegate is provided via constructor parameter
+        using var correlatorContext = TestCorrelator.CreateContext();
 
-        using (TestCorrelator.CreateContext())
-        {
-            // Act
-            var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
-                next.Object));
-            await sut.InvokeAsync(context);
+        // Act
+        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
+            next.Object));
+        await sut.InvokeAsync(context);
 
-            // Assert
-            nextCalled.ShouldBeTrue();
-            next.Verify(x => x(context), Times.Once);
+        // Assert
+        nextCalled.ShouldBeTrue();
+        next.Verify(x => x(context), Times.Once);
 
-            var logEvents = TestCorrelator.GetLogEventsFromCurrentContext();
-            logEvents.ShouldContain(e => e.MessageTemplate.Text.Contains("User authenticated via header"));
-        }
+        var logEvents = TestCorrelator.GetLogEventsFromCurrentContext();
+        logEvents.ShouldContain(e => e.MessageTemplate.Text.Contains("User authenticated via header"));
     }
 
     #endregion
@@ -952,10 +906,10 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         {
             Enabled = true,
             MappingType = HeaderMappingType.Username,
-            TrustedProxies = new List<string> { "192.168.1.0/24" },
+            TrustedProxies = ["192.168.1.0/24"],
             EnableLogging = false,
             MaxHeaderLength = 100,
-            RequireHttps = false
+            RequireHttps = false,
         };
 
         var authSettings = AuthenticationModule.Create();
@@ -965,9 +919,6 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(maliciousValue)).ReturnsAsync((AppUser?)null);
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
-
-        // UserService is already configured in SetupMocks
-        // RequestDelegate is provided via constructor parameter
 
         // Act
         var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
@@ -1001,18 +952,16 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         {
             Enabled = true,
             MappingType = HeaderMappingType.Username,
-            TrustedProxies = new List<string> { "192.168.1.0/24" },
+            TrustedProxies = ["192.168.1.0/24"],
             EnableLogging = false,
             MaxHeaderLength = 256,
-            RequireHttps = false
+            RequireHttps = false,
         };
 
         var authSettings = AuthenticationModule.Create();
         authSettings.HeaderAuthentication = headerAuthSettings;
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
-
-        // RequestDelegate is provided via constructor parameter
 
         // Act
         var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
@@ -1041,8 +990,6 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
             });
 
         SetupMocks();
-
-        // RequestDelegate is provided via constructor parameter
 
         // Act
         var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
@@ -1087,10 +1034,10 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         {
             Enabled = true,
             MappingType = HeaderMappingType.Username,
-            TrustedProxies = new List<string> { trustedProxy },
+            TrustedProxies = [trustedProxy],
             EnableLogging = false,
             MaxHeaderLength = 100,
-            RequireHttps = false
+            RequireHttps = false,
         };
 
         var authSettings = AuthenticationModule.Create();
@@ -1100,9 +1047,6 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TestUsername)).ReturnsAsync((AppUser?)null);
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
-
-        // UserService is already configured in SetupMocks
-        // RequestDelegate is provided via constructor parameter
 
         // Act
         var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
@@ -1150,10 +1094,10 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         {
             Enabled = true,
             MappingType = HeaderMappingType.Username,
-            TrustedProxies = new List<string> { "192.168.1.0/24" },
+            TrustedProxies = ["192.168.1.0/24"],
             EnableLogging = false,
             MaxHeaderLength = 100,
-            RequireHttps = false
+            RequireHttps = false,
         };
 
         var authSettings = AuthenticationModule.Create();
@@ -1165,12 +1109,9 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TestUsername)).ReturnsAsync(testUser);
         mock.Mock<IUserService>()
             .Setup(x => x.GetRolesAsync(testUser))
-            .ReturnsAsync(new List<string> { "User", "Admin" });
+            .ReturnsAsync(["User", "Admin"]);
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
-
-        // UserService is already configured in SetupMocks
-        // RequestDelegate is provided via constructor parameter
 
         // Act
         var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
@@ -1204,10 +1145,10 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         {
             Enabled = true,
             MappingType = HeaderMappingType.Username,
-            TrustedProxies = new List<string> { "192.168.1.0/24" },
+            TrustedProxies = ["192.168.1.0/24"],
             EnableLogging = false,
             MaxHeaderLength = 100,
-            RequireHttps = false
+            RequireHttps = false,
         };
 
         var authSettings = AuthenticationModule.Create();
@@ -1217,17 +1158,14 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         {
             Id = TestUserId,
             UserName = TestUsername,
-            Email = null // No email
+            Email = null, // No email
         };
 
         // Configure UserService mock in AutoMock
         mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TestUsername)).ReturnsAsync(testUser);
-        mock.Mock<IUserService>().Setup(x => x.GetRolesAsync(testUser)).ReturnsAsync(new List<string> { "User" });
+        mock.Mock<IUserService>().Setup(x => x.GetRolesAsync(testUser)).ReturnsAsync(["User"]);
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
-
-        // UserService is already configured in SetupMocks
-        // RequestDelegate is provided via constructor parameter
 
         // Act
         var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
@@ -1261,10 +1199,10 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         {
             Enabled = true,
             MappingType = HeaderMappingType.Username,
-            TrustedProxies = new List<string> { "192.168.1.0/24" },
+            TrustedProxies = ["192.168.1.0/24"],
             EnableLogging = false,
             MaxHeaderLength = 100,
-            RequireHttps = false
+            RequireHttps = false,
         };
 
         var authSettings = AuthenticationModule.Create();
@@ -1274,17 +1212,14 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         {
             Id = TestUserId,
             UserName = TestUsername,
-            Email = "" // Empty email
+            Email = "", // Empty email
         };
 
         // Configure UserService mock in AutoMock
         mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TestUsername)).ReturnsAsync(testUser);
-        mock.Mock<IUserService>().Setup(x => x.GetRolesAsync(testUser)).ReturnsAsync(new List<string> { "User" });
+        mock.Mock<IUserService>().Setup(x => x.GetRolesAsync(testUser)).ReturnsAsync(["User"]);
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
-
-        // UserService is already configured in SetupMocks
-        // RequestDelegate is provided via constructor parameter
 
         // Act
         var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
@@ -1318,10 +1253,10 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         {
             Enabled = true,
             MappingType = HeaderMappingType.Username,
-            TrustedProxies = new List<string> { "192.168.1.0/24" },
+            TrustedProxies = ["192.168.1.0/24"],
             EnableLogging = false,
             MaxHeaderLength = 100,
-            RequireHttps = false
+            RequireHttps = false,
         };
 
         var authSettings = AuthenticationModule.Create();
@@ -1331,17 +1266,14 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         {
             Id = TestUserId,
             UserName = null, // Null username
-            Email = TestEmail
+            Email = TestEmail,
         };
 
         // Configure UserService mock in AutoMock
         mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TestUsername)).ReturnsAsync(testUser);
-        mock.Mock<IUserService>().Setup(x => x.GetRolesAsync(testUser)).ReturnsAsync(new List<string> { "User" });
+        mock.Mock<IUserService>().Setup(x => x.GetRolesAsync(testUser)).ReturnsAsync(["User"]);
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
-
-        // UserService is already configured in SetupMocks
-        // RequestDelegate is provided via constructor parameter
 
         // Act
         var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
@@ -1363,7 +1295,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
     {
         // Arrange
         var context = CreateHttpContext();
-        context.Request.Headers[TestHeaderName] = new StringValues(new[] { TestUsername, "malicious_user" });
+        context.Request.Headers[TestHeaderName] = new StringValues([TestUsername, "malicious_user"]);
         context.Connection.RemoteIpAddress = IPAddress.Parse("192.168.1.1");
 
         var nextCalled = false;
@@ -1379,10 +1311,10 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         {
             Enabled = true,
             MappingType = HeaderMappingType.Username,
-            TrustedProxies = new List<string> { "192.168.1.0/24" },
+            TrustedProxies = ["192.168.1.0/24"],
             EnableLogging = false,
             MaxHeaderLength = 100,
-            RequireHttps = false
+            RequireHttps = false,
         };
 
         var authSettings = AuthenticationModule.Create();
@@ -1392,9 +1324,6 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TestUsername)).ReturnsAsync((AppUser?)null);
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
-
-        // UserService is already configured in SetupMocks
-        // RequestDelegate is provided via constructor parameter
 
         // Act
         var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
@@ -1430,10 +1359,10 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         {
             Enabled = true,
             MappingType = HeaderMappingType.Username,
-            TrustedProxies = new List<string> { "192.168.1.0/24" },
+            TrustedProxies = ["192.168.1.0/24"],
             EnableLogging = false,
             MaxHeaderLength = 100,
-            RequireHttps = false
+            RequireHttps = false,
         };
 
         var authSettings = AuthenticationModule.Create();
@@ -1443,9 +1372,6 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TestUsername)).ReturnsAsync((AppUser?)null);
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
-
-        // UserService is already configured in SetupMocks
-        // RequestDelegate is provided via constructor parameter
 
         // Act
         var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
@@ -1480,10 +1406,10 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         {
             Enabled = true,
             MappingType = HeaderMappingType.Username,
-            TrustedProxies = new List<string> { "192.168.1.0/24" },
+            TrustedProxies = ["192.168.1.0/24"],
             EnableLogging = false,
             MaxHeaderLength = 100,
-            RequireHttps = false
+            RequireHttps = false,
         };
 
         var authSettings = AuthenticationModule.Create();
@@ -1494,23 +1420,19 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
 
-        // UserService is already configured in SetupMocks
-        // RequestDelegate is provided via constructor parameter
+        using var correlatorContext = TestCorrelator.CreateContext();
 
-        using (TestCorrelator.CreateContext())
-        {
-            // Act
-            var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
-                next.Object));
-            await sut.InvokeAsync(context);
+        // Act
+        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
+            next.Object));
+        await sut.InvokeAsync(context);
 
-            // Assert
-            nextCalled.ShouldBeTrue();
-            next.Verify(x => x(context), Times.Once);
+        // Assert
+        nextCalled.ShouldBeTrue();
+        next.Verify(x => x(context), Times.Once);
 
-            var logEvents = TestCorrelator.GetLogEventsFromCurrentContext();
-            logEvents.ShouldNotContain(e => e.MessageTemplate.Text.Contains("The wrong user is passed in"));
-        }
+        var logEvents = TestCorrelator.GetLogEventsFromCurrentContext();
+        logEvents.ShouldNotContain(e => e.MessageTemplate.Text.Contains("The wrong user is passed in"));
     }
 
     [Theory]
@@ -1541,10 +1463,10 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         {
             Enabled = true,
             MappingType = HeaderMappingType.Username,
-            TrustedProxies = new List<string> { cidrRange },
+            TrustedProxies = [cidrRange],
             EnableLogging = false,
             MaxHeaderLength = 100,
-            RequireHttps = false
+            RequireHttps = false,
         };
 
         var authSettings = AuthenticationModule.Create();
@@ -1554,9 +1476,6 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TestUsername)).ReturnsAsync((AppUser?)null);
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
-
-        // UserService is already configured in SetupMocks
-        // RequestDelegate is provided via constructor parameter
 
         // Act
         var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
@@ -1602,10 +1521,10 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         {
             Enabled = true,
             MappingType = HeaderMappingType.Username,
-            TrustedProxies = new List<string> { "192.168.1.0/24" },
+            TrustedProxies = ["192.168.1.0/24"],
             EnableLogging = false,
             MaxHeaderLength = 100,
-            RequireHttps = false
+            RequireHttps = false,
         };
 
         var authSettings = AuthenticationModule.Create();
@@ -1615,9 +1534,6 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TestUsername)).ReturnsAsync((AppUser?)null);
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
-
-        // UserService is already configured in SetupMocks
-        // RequestDelegate is provided via constructor parameter
 
         // Act
         var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
@@ -1653,10 +1569,10 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         {
             Enabled = true,
             MappingType = HeaderMappingType.Username,
-            TrustedProxies = new List<string> { cidrRange },
+            TrustedProxies = [cidrRange],
             EnableLogging = false,
             MaxHeaderLength = 100,
-            RequireHttps = false
+            RequireHttps = false,
         };
 
         var authSettings = AuthenticationModule.Create();
@@ -1666,9 +1582,6 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TestUsername)).ReturnsAsync((AppUser?)null);
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
-
-        // UserService is already configured in SetupMocks
-        // RequestDelegate is provided via constructor parameter
 
         // Act
         var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
@@ -1712,18 +1625,16 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         {
             Enabled = true,
             MappingType = HeaderMappingType.Username,
-            TrustedProxies = new List<string> { "192.168.1.0/33" }, // Invalid CIDR
+            TrustedProxies = ["192.168.1.0/33"], // Invalid CIDR
             EnableLogging = false,
             MaxHeaderLength = 100,
-            RequireHttps = false
+            RequireHttps = false,
         };
 
         var authSettings = AuthenticationModule.Create();
         authSettings.HeaderAuthentication = headerAuthSettings;
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
-
-        // RequestDelegate is provided via constructor parameter
 
         // Act
         var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
@@ -1755,18 +1666,16 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         {
             Enabled = true,
             MappingType = HeaderMappingType.Username,
-            TrustedProxies = new List<string> { "" }, // Empty CIDR
+            TrustedProxies = [""], // Empty CIDR
             EnableLogging = false,
             MaxHeaderLength = 100,
-            RequireHttps = false
+            RequireHttps = false,
         };
 
         var authSettings = AuthenticationModule.Create();
         authSettings.HeaderAuthentication = headerAuthSettings;
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
-
-        // RequestDelegate is provided via constructor parameter
 
         // Act
         var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
@@ -1798,18 +1707,16 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         {
             Enabled = true,
             MappingType = HeaderMappingType.Username,
-            TrustedProxies = new List<string> { null! }, // Null CIDR
+            TrustedProxies = [null!], // Null CIDR
             EnableLogging = false,
             MaxHeaderLength = 100,
-            RequireHttps = false
+            RequireHttps = false,
         };
 
         var authSettings = AuthenticationModule.Create();
         authSettings.HeaderAuthentication = headerAuthSettings;
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
-
-        // RequestDelegate is provided via constructor parameter
 
         // Act
         var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
@@ -1843,7 +1750,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
 
         // Create a large list of trusted proxies
         var trustedProxies = new List<string>();
-        for (int i = 0; i < 1000; i++)
+        for (var i = 0; i < 1000; i++)
         {
             trustedProxies.Add($"192.168.{i % 256}.0/24");
         }
@@ -1857,7 +1764,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
             TrustedProxies = trustedProxies,
             EnableLogging = false,
             MaxHeaderLength = 100,
-            RequireHttps = false
+            RequireHttps = false,
         };
 
         var authSettings = AuthenticationModule.Create();
@@ -1867,9 +1774,6 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TestUsername)).ReturnsAsync((AppUser?)null);
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
-
-        // UserService is already configured in SetupMocks
-        // RequestDelegate is provided via constructor parameter
 
         // Act
         var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
@@ -1892,10 +1796,10 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         {
             Enabled = true,
             MappingType = HeaderMappingType.Username,
-            TrustedProxies = new List<string> { "192.168.1.0/24" },
+            TrustedProxies = ["192.168.1.0/24"],
             EnableLogging = false,
             MaxHeaderLength = 100,
-            RequireHttps = false
+            RequireHttps = false,
         };
 
         var authSettings = AuthenticationModule.Create();
@@ -1918,9 +1822,8 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
 
         var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
 
-        for (int i = 0; i < 10; i++)
+        for (var i = 0; i < 10; i++)
         {
-#pragma warning disable xUnit1051 // Calls to methods which accept CancellationToken should use TestContext.Current.CancellationToken
             var task = Task.Run(async () =>
             {
                 var context = CreateHttpContext();
@@ -1935,8 +1838,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
                 {
                     results.Add(nextCalled);
                 }
-            });
-#pragma warning restore xUnit1051
+            }, TestContext.Current.CancellationToken);
 
             tasks.Add(task);
         }
@@ -1961,16 +1863,14 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         context.Request.Headers[TestHeaderName] = TestUsername;
         context.Connection.RemoteIpAddress = IPAddress.Parse("192.168.1.1");
 
-        var next = new Mock<RequestDelegate>();
-
         var headerAuthSettings = new HeaderAuthenticationSettings
         {
             Enabled = true,
             MappingType = HeaderMappingType.Username,
-            TrustedProxies = new List<string> { "192.168.1.0/24" },
+            TrustedProxies = ["192.168.1.0/24"],
             EnableLogging = false,
             MaxHeaderLength = 100,
-            RequireHttps = false
+            RequireHttps = false,
         };
 
         var authSettings = AuthenticationModule.Create();
@@ -1982,9 +1882,6 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
             .ThrowsAsync(new InvalidOperationException("Database connection failed"));
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
-
-        // UserService is already configured in SetupMocks
-        // RequestDelegate is provided via constructor parameter
 
         // Act & Assert
         await Should.ThrowAsync<InvalidOperationException>(async () =>
@@ -1999,16 +1896,14 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         context.Request.Headers[TestHeaderName] = TestUsername;
         context.Connection.RemoteIpAddress = IPAddress.Parse("192.168.1.1");
 
-        var next = new Mock<RequestDelegate>();
-
         var headerAuthSettings = new HeaderAuthenticationSettings
         {
             Enabled = true,
             MappingType = HeaderMappingType.Username,
-            TrustedProxies = new List<string> { "192.168.1.0/24" },
+            TrustedProxies = ["192.168.1.0/24"],
             EnableLogging = false,
             MaxHeaderLength = 100,
-            RequireHttps = false
+            RequireHttps = false,
         };
 
         var authSettings = AuthenticationModule.Create();
@@ -2023,9 +1918,6 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
             .ThrowsAsync(new InvalidOperationException("Role service unavailable"));
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
-
-        // UserService is already configured in SetupMocks
-        // RequestDelegate is provided via constructor parameter
 
         // Act & Assert
         await Should.ThrowAsync<InvalidOperationException>(async () =>
@@ -2064,10 +1956,10 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         {
             Enabled = true,
             MappingType = HeaderMappingType.Username,
-            TrustedProxies = new List<string> { "192.168.1.0/24" },
+            TrustedProxies = ["192.168.1.0/24"],
             EnableLogging = false,
             MaxHeaderLength = 256,
-            RequireHttps = false
+            RequireHttps = false,
         };
 
         var authSettings = AuthenticationModule.Create();
@@ -2080,9 +1972,6 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         }
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
-
-        // UserService is already configured in SetupMocks
-        // RequestDelegate is provided via constructor parameter
 
         // Act
         var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
@@ -2122,10 +2011,10 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         {
             Enabled = true,
             MappingType = HeaderMappingType.Username,
-            TrustedProxies = new List<string> { cidrRange },
+            TrustedProxies = [cidrRange],
             EnableLogging = true, // Enable logging to see what's happening
             MaxHeaderLength = 100,
-            RequireHttps = false
+            RequireHttps = false,
         };
 
         var authSettings = AuthenticationModule.Create();
@@ -2135,9 +2024,6 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TestUsername)).ReturnsAsync((AppUser?)null);
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
-
-        // UserService is already configured in SetupMocks
-        // RequestDelegate is provided via constructor parameter
 
         // Act
         var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
@@ -2186,10 +2072,10 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         {
             Enabled = true,
             MappingType = HeaderMappingType.Username,
-            TrustedProxies = new List<string> { "192.168.1.0/24" },
+            TrustedProxies = ["192.168.1.0/24"],
             EnableLogging = false,
             MaxHeaderLength = 100,
-            RequireHttps = false
+            RequireHttps = false,
         };
         headerAuthSettings.RequireHttps = true;
         headerAuthSettings.MaxHeaderLength = 256;
@@ -2204,29 +2090,25 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TestUsername)).ReturnsAsync(testUser);
         mock.Mock<IUserService>()
             .Setup(x => x.GetRolesAsync(testUser))
-            .ReturnsAsync(new List<string> { "User", "Admin" });
+            .ReturnsAsync(["User", "Admin"]);
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
 
-        // UserService is already configured in SetupMocks
-        // RequestDelegate is provided via constructor parameter
+        using var correlatorContext = TestCorrelator.CreateContext();
 
-        using (TestCorrelator.CreateContext())
-        {
-            // Act
-            var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
-                next.Object));
-            await sut.InvokeAsync(context);
+        // Act
+        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
+            next.Object));
+        await sut.InvokeAsync(context);
 
-            // Assert
-            nextCalled.ShouldBeTrue();
-            next.Verify(x => x(context), Times.Once);
-            mock.Mock<IUserService>().Verify(x => x.FindByNameAsync(TestUsername), Times.Once);
-            mock.Mock<IUserService>().Verify(x => x.GetRolesAsync(testUser), Times.Once);
+        // Assert
+        nextCalled.ShouldBeTrue();
+        next.Verify(x => x(context), Times.Once);
+        mock.Mock<IUserService>().Verify(x => x.FindByNameAsync(TestUsername), Times.Once);
+        mock.Mock<IUserService>().Verify(x => x.GetRolesAsync(testUser), Times.Once);
 
-            var logEvents = TestCorrelator.GetLogEventsFromCurrentContext();
-            logEvents.ShouldContain(e => e.MessageTemplate.Text.Contains("User authenticated via header"));
-        }
+        var logEvents = TestCorrelator.GetLogEventsFromCurrentContext();
+        logEvents.ShouldContain(e => e.MessageTemplate.Text.Contains("User authenticated via header"));
     }
 
     [Fact]
@@ -2251,10 +2133,10 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         {
             Enabled = true,
             MappingType = HeaderMappingType.Username,
-            TrustedProxies = new List<string> { "192.168.1.0/24" },
+            TrustedProxies = ["192.168.1.0/24"],
             EnableLogging = false,
             MaxHeaderLength = 100,
-            RequireHttps = false
+            RequireHttps = false,
         };
         headerAuthSettings.RequireHttps = true;
         headerAuthSettings.MaxHeaderLength = 256;
@@ -2263,8 +2145,6 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         authSettings.HeaderAuthentication = headerAuthSettings;
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
-
-        // RequestDelegate is provided via constructor parameter
 
         // Act
         var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
@@ -2301,7 +2181,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         {
             Id = TestUserId,
             UserName = TestUsername,
-            Email = TestEmail
+            Email = TestEmail,
         };
     }
 
@@ -2311,10 +2191,10 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         {
             Enabled = true,
             MappingType = HeaderMappingType.Username,
-            TrustedProxies = new List<string> { "127.0.0.1" },
+            TrustedProxies = ["127.0.0.1"],
             EnableLogging = false,
             MaxHeaderLength = 100,
-            RequireHttps = false
+            RequireHttps = false,
         };
 
         var authSettings = AuthenticationModule.Create();

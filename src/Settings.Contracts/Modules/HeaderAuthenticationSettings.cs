@@ -96,14 +96,17 @@ public record HeaderAuthenticationSettings
             return false;
 
         // Validate trusted proxies are valid IP addresses or CIDR ranges
-        foreach (var proxy in TrustedProxies)
+        if (TrustedProxies != null)
         {
-            if (string.IsNullOrWhiteSpace(proxy))
-                return false;
+            foreach (var proxy in TrustedProxies)
+            {
+                if (string.IsNullOrWhiteSpace(proxy))
+                    return false;
 
-            // Check if it's a valid IP or CIDR
-            if (!IsValidIpOrCidr(proxy))
-                return false;
+                // Check if it's a valid IP or CIDR
+                if (!IsValidIpOrCidr(proxy))
+                    return false;
+            }
         }
 
         return true;

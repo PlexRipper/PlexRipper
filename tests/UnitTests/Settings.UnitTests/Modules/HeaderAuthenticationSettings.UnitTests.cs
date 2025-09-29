@@ -1,4 +1,6 @@
 using Reaparr.Settings.Contracts;
+using Shouldly;
+using Xunit;
 
 namespace Reaparr.Settings.UnitTests;
 
@@ -12,11 +14,7 @@ public class HeaderAuthenticationSettingsUnitTests
 
         // Assert
         settings.Enabled.ShouldBeFalse();
-        settings.HeaderName.ShouldBe("X-Auth-User");
         settings.MappingType.ShouldBe(HeaderMappingType.Username);
-        settings.CustomMappingExpression.ShouldBeNull();
-        settings.AutoCreateUsers.ShouldBeFalse();
-        settings.DefaultRole.ShouldBe("Admin");
         settings.TrustedProxies.ShouldBeEmpty();
         settings.EnableLogging.ShouldBeTrue();
         settings.MaxHeaderLength.ShouldBe(256);
@@ -43,9 +41,7 @@ public class HeaderAuthenticationSettingsUnitTests
         // Arrange
         var settings = HeaderAuthenticationSettings.Create();
         settings.Enabled = true;
-        settings.HeaderName = "X-Auth-User";
         settings.MaxHeaderLength = 100;
-        settings.DefaultRole = "User";
         settings.TrustedProxies = new List<string> { "192.168.1.0/24", "10.0.0.1" };
 
         // Act
@@ -53,21 +49,6 @@ public class HeaderAuthenticationSettingsUnitTests
 
         // Assert
         isValid.ShouldBeTrue();
-    }
-
-    [Fact]
-    public void ShouldBeInvalid_WhenEnabledWithEmptyHeaderName()
-    {
-        // Arrange
-        var settings = HeaderAuthenticationSettings.Create();
-        settings.Enabled = true;
-        settings.HeaderName = "";
-
-        // Act
-        var isValid = settings.IsValid();
-
-        // Assert
-        isValid.ShouldBeFalse();
     }
 
     [Fact]
@@ -86,12 +67,12 @@ public class HeaderAuthenticationSettingsUnitTests
     }
 
     [Fact]
-    public void ShouldBeInvalid_WhenEnabledWithEmptyDefaultRole()
+    public void ShouldBeInvalid_WhenEnabledWithNegativeMaxHeaderLength()
     {
         // Arrange
         var settings = HeaderAuthenticationSettings.Create();
         settings.Enabled = true;
-        settings.DefaultRole = "";
+        settings.MaxHeaderLength = -1;
 
         // Act
         var isValid = settings.IsValid();
@@ -136,14 +117,29 @@ public class HeaderAuthenticationSettingsUnitTests
         // Arrange
         var settings = HeaderAuthenticationSettings.Create();
         settings.Enabled = true;
-        settings.TrustedProxies = new List<string> 
-        { 
-            "192.168.1.0/24", 
-            "10.0.0.0/8", 
+        settings.TrustedProxies = new List<string>
+        {
+            "192.168.1.0/24",
+            "10.0.0.0/8",
             "172.16.0.0/12",
             "127.0.0.1",
-            "::1"
+            "::1",
         };
+
+        // Act
+        var isValid = settings.IsValid();
+
+        // Assert
+        isValid.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void ShouldBeValid_WithIpv6Addresses()
+    {
+        // Arrange
+        var settings = HeaderAuthenticationSettings.Create();
+        settings.Enabled = true;
+        settings.TrustedProxies = new List<string> { "::1", "2001:db8::1", "2001:db8::/32", "fe80::1" };
 
         // Act
         var isValid = settings.IsValid();
@@ -161,6 +157,13 @@ public class HeaderAuthenticationSettingsUnitTests
     [InlineData("192.168.1.0/33", false)]
     [InlineData("192.168.1.0/", false)]
     [InlineData("192.168.1.0/24/extra", false)]
+    [InlineData("192.168.1.0/0", true)] // Valid CIDR with /0
+    [InlineData("192.168.1.0/32", true)] // Valid CIDR with /32
+    [InlineData("192.168.1.0/-1", false)] // Invalid negative CIDR
+    [InlineData("192.168.1.0/abc", false)] // Invalid non-numeric CIDR
+    [InlineData("   ", false)] // Whitespace only
+    [InlineData("\t", false)] // Tab only
+    [InlineData("\n", false)] // Newline only
     public void ShouldValidateIpOrCidrCorrectly(string input, bool expectedValid)
     {
         // Arrange
@@ -185,42 +188,9 @@ public class HeaderAuthenticationSettingsUnitTests
         var emailMapping = HeaderAuthenticationSettings.Create();
         emailMapping.MappingType = HeaderMappingType.Email;
 
-        var customMapping = HeaderAuthenticationSettings.Create();
-        customMapping.MappingType = HeaderMappingType.Custom;
-
         // Assert
         usernameMapping.MappingType.ShouldBe(HeaderMappingType.Username);
         emailMapping.MappingType.ShouldBe(HeaderMappingType.Email);
-        customMapping.MappingType.ShouldBe(HeaderMappingType.Custom);
-    }
-
-    [Fact]
-    public void ShouldAllowCustomMappingExpression()
-    {
-        // Arrange
-        var settings = HeaderAuthenticationSettings.Create();
-        var customExpression = "headerValue.ToLower().Replace('-', '_')";
-
-        // Act
-        settings.CustomMappingExpression = customExpression;
-
-        // Assert
-        settings.CustomMappingExpression.ShouldBe(customExpression);
-    }
-
-    [Fact]
-    public void ShouldSupportAutoCreateUsersConfiguration()
-    {
-        // Arrange
-        var settings = HeaderAuthenticationSettings.Create();
-
-        // Act
-        settings.AutoCreateUsers = true;
-        settings.DefaultRole = "User";
-
-        // Assert
-        settings.AutoCreateUsers.ShouldBeTrue();
-        settings.DefaultRole.ShouldBe("User");
     }
 
     [Fact]
@@ -260,5 +230,150 @@ public class HeaderAuthenticationSettingsUnitTests
 
         // Assert
         settings.MaxHeaderLength.ShouldBe(512);
+    }
+
+    [Fact]
+    public void ShouldBeValid_WhenTrustedProxiesIsNull()
+    {
+        // Arrange
+        var settings = HeaderAuthenticationSettings.Create();
+        settings.Enabled = true;
+        settings.TrustedProxies = null!;
+
+        // Act
+        var isValid = settings.IsValid();
+
+        // Assert
+        isValid.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void ShouldBeValid_WhenTrustedProxiesIsEmpty()
+    {
+        // Arrange
+        var settings = HeaderAuthenticationSettings.Create();
+        settings.Enabled = true;
+        settings.TrustedProxies = new List<string>();
+
+        // Act
+        var isValid = settings.IsValid();
+
+        // Assert
+        isValid.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void ShouldBeInvalid_WhenTrustedProxiesContainsEmptyString()
+    {
+        // Arrange
+        var settings = HeaderAuthenticationSettings.Create();
+        settings.Enabled = true;
+        settings.TrustedProxies = new List<string> { "" };
+
+        // Act
+        var isValid = settings.IsValid();
+
+        // Assert
+        isValid.ShouldBeFalse();
+    }
+
+    [Fact]
+    public void ShouldBeInvalid_WhenTrustedProxiesContainsNullString()
+    {
+        // Arrange
+        var settings = HeaderAuthenticationSettings.Create();
+        settings.Enabled = true;
+        settings.TrustedProxies = new List<string> { null! };
+
+        // Act
+        var isValid = settings.IsValid();
+
+        // Assert
+        isValid.ShouldBeFalse();
+    }
+
+    [Fact]
+    public void ShouldBeInvalid_WhenTrustedProxiesContainsWhitespaceOnlyString()
+    {
+        // Arrange
+        var settings = HeaderAuthenticationSettings.Create();
+        settings.Enabled = true;
+        settings.TrustedProxies = new List<string> { "   " };
+
+        // Act
+        var isValid = settings.IsValid();
+
+        // Assert
+        isValid.ShouldBeFalse();
+    }
+
+    [Fact]
+    public void ShouldUpdateProperties_WhenUpdateMethodIsCalled()
+    {
+        // Arrange
+        var originalSettings = HeaderAuthenticationSettings.Create();
+        var updatedSettings = HeaderAuthenticationSettings.Create();
+        updatedSettings.Enabled = true;
+        updatedSettings.MappingType = HeaderMappingType.Email;
+        updatedSettings.MaxHeaderLength = 512;
+        updatedSettings.RequireHttps = false;
+        updatedSettings.EnableLogging = false;
+        updatedSettings.TrustedProxies = new List<string> { "192.168.1.1" };
+
+        // Act
+        originalSettings.Update(updatedSettings);
+
+        // Assert
+        originalSettings.Enabled.ShouldBeTrue();
+        originalSettings.MappingType.ShouldBe(HeaderMappingType.Email);
+        originalSettings.MaxHeaderLength.ShouldBe(512);
+        originalSettings.RequireHttps.ShouldBeFalse();
+        originalSettings.EnableLogging.ShouldBeFalse();
+        originalSettings.TrustedProxies.ShouldContain("192.168.1.1");
+    }
+
+    [Fact]
+    public async Task ShouldNotifyObservers_WhenPropertiesChange()
+    {
+        // Arrange
+        var settings = HeaderAuthenticationSettings.Create();
+        var changeNotifications = new List<HeaderAuthenticationSettings>();
+
+        using var subscription = settings.HasChanged.Subscribe(changeNotifications.Add);
+
+        // Act
+        settings.Enabled = true;
+        settings.MaxHeaderLength = 1024;
+        settings.MappingType = HeaderMappingType.Email;
+
+        // Wait a bit to ensure all notifications are processed
+        await Task.Delay(10, TestContext.Current.CancellationToken);
+
+        // Assert
+        changeNotifications.Count.ShouldBeGreaterThan(0);
+        changeNotifications.Last().Enabled.ShouldBeTrue();
+        changeNotifications.Last().MaxHeaderLength.ShouldBe(1024);
+        changeNotifications.Last().MappingType.ShouldBe(HeaderMappingType.Email);
+    }
+
+    [Fact]
+    public async Task ShouldNotNotifyObservers_WhenSameValueIsSet()
+    {
+        // Arrange
+        var settings = HeaderAuthenticationSettings.Create();
+        var changeNotifications = new List<HeaderAuthenticationSettings>();
+
+        using var subscription = settings.HasChanged.Subscribe(changeNotifications.Add);
+        var initialCount = changeNotifications.Count;
+
+        // Act
+        settings.Enabled = false; // Same as default value
+        settings.MaxHeaderLength = 256; // Same as default value
+
+        // Wait a bit to ensure notifications are processed
+        await Task.Delay(10, TestContext.Current.CancellationToken);
+
+        // Assert
+        changeNotifications.Count.ShouldBe(initialCount);
     }
 }

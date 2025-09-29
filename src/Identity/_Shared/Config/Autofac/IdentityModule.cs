@@ -11,7 +11,7 @@ public class IdentityModule : Module
         builder.RegisterType<AuthDbContext>().As<IAuthDbContext>().AsSelf().InstancePerDependency();
 
         builder.RegisterType<AuthDbContext>().As<IAuthDbContextDatabase>().InstancePerDependency();
-        
+
         builder.RegisterType<IdentityUserService>().As<IUserService>().InstancePerLifetimeScope();
 
         builder.RegisterType<IdentityRoleService>().As<IRoleService>().InstancePerLifetimeScope();

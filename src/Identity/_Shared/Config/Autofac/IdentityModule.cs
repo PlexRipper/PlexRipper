@@ -16,6 +16,6 @@ public class IdentityModule : Module
 
         builder.RegisterType<IdentityRoleService>().As<IRoleService>().InstancePerLifetimeScope();
 
-        builder.RegisterType<IdentitySignInService>().As<ISignInService>().InstancePerLifetimeScope();
+        builder.RegisterType<IdentityIdentitySignInService>().As<IIdentitySignInService>().InstancePerLifetimeScope();
     }
 }

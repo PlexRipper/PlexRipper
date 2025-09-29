@@ -13,6 +13,7 @@ namespace Reaparr.AppHost;
 public class HeaderAuthenticationMiddleware
 {
     private readonly RequestDelegate _next;
+    private readonly IIdentitySignInService _signInService;
     private readonly Serilog.ILogger _log;
     private readonly IHeaderAuthenticationSettings _headerAuthentication;
     private readonly IUserService _userService;
@@ -23,12 +24,14 @@ public class HeaderAuthenticationMiddleware
     public HeaderAuthenticationMiddleware(
         RequestDelegate next,
         Serilog.ILogger log,
+        IIdentitySignInService signInService,
         IAuthenticationSettings authenticationSettings,
         IUserService userService
     )
     {
-        _next = next;
         _log = log.ForContext<HeaderAuthenticationMiddleware>();
+        _next = next;
+        _signInService = signInService;
         _headerAuthentication = authenticationSettings.HeaderAuthentication;
         _userService = userService;
     }
@@ -51,11 +54,12 @@ public class HeaderAuthenticationMiddleware
         // Skip if header authentication is disabled
         if (!_headerAuthentication.Enabled)
         {
-            _log.Here()
-                .Warning(
-                    "Header authentication is disabled but the header: {HeaderName} was present. Enable header authentication first in the settings file",
-                    EnvironmentExtensions.GetHeaderAuthTokenName()
-                );
+            if (_headerAuthentication.EnableLogging)
+                _log.Here()
+                    .Warning(
+                        "Header authentication is disabled but the header: {HeaderName} was present. Enable header authentication first in the settings file",
+                        EnvironmentExtensions.GetHeaderAuthTokenName()
+                    );
             await _next(context);
             return;
         }
@@ -63,7 +67,9 @@ public class HeaderAuthenticationMiddleware
         // Skip if the user is already authenticated
         if (context.User.Identity?.IsAuthenticated == true)
         {
-            _log.Here().Debug("User is already authenticated");
+            if (_headerAuthentication.EnableLogging)
+                _log.Here().Debug("User is already authenticated");
+
             await _next(context);
             return;
         }
@@ -71,11 +77,12 @@ public class HeaderAuthenticationMiddleware
         // Check if request comes from trusted proxy
         if (!IsRequestFromTrustedProxy(context))
         {
-            _log.Here()
-                .Warning(
-                    "Request with header authentication token from untrusted IP: {RemoteIp}",
-                    context.Connection.RemoteIpAddress
-                );
+            if (_headerAuthentication.EnableLogging)
+                _log.Here()
+                    .Warning(
+                        "Request with header authentication token from untrusted IP: {RemoteIp}",
+                        context.Connection.RemoteIpAddress
+                    );
             await _next(context);
             return;
         }
@@ -84,13 +91,11 @@ public class HeaderAuthenticationMiddleware
         if (_headerAuthentication.RequireHttps && !context.Request.IsHttps)
         {
             if (_headerAuthentication.EnableLogging)
-            {
                 _log.Here()
                     .Warning(
                         "Header authentication requires HTTPS but request is not secure. IP: {RemoteIp}",
                         context.Connection.RemoteIpAddress
                     );
-            }
 
             await _next(context);
             return;
@@ -100,7 +105,6 @@ public class HeaderAuthenticationMiddleware
         if (headerValue.Length > _headerAuthentication.MaxHeaderLength)
         {
             if (_headerAuthentication.EnableLogging)
-            {
                 _log.Here()
                     .Warning(
                         "Header value exceeds maximum length. Length: {Length}, Max: {MaxLength}, IP: {RemoteIp}",
@@ -108,7 +112,6 @@ public class HeaderAuthenticationMiddleware
                         _headerAuthentication.MaxHeaderLength,
                         context.Connection.RemoteIpAddress
                     );
-            }
 
             await _next(context);
             return;
@@ -119,7 +122,6 @@ public class HeaderAuthenticationMiddleware
         if (user == null)
         {
             if (_headerAuthentication.EnableLogging)
-            {
                 _log.Here()
                     .Warning(
                         "The wrong user is passed in. Make sure to use the same username you use to log into Reaparr. Header: {HeaderName}, Value: {HeaderValue}, IP: {RemoteIp}",
@@ -127,7 +129,6 @@ public class HeaderAuthenticationMiddleware
                         headerValue,
                         context.Connection.RemoteIpAddress
                     );
-            }
 
             await _next(context);
             return;
@@ -136,14 +137,9 @@ public class HeaderAuthenticationMiddleware
         // Allow sign-in
         var claims = await CreateUserClaims(user);
 
-        await CookieAuth.SignInAsync(u =>
-        {
-            u.Roles.AddRange(claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value));
-            u.Claims.AddRange(claims);
-        });
+        await _signInService.SignInAsync(claims, claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value));
 
         if (_headerAuthentication.EnableLogging)
-        {
             _log.Here()
                 .Debug(
                     "User authenticated via header. User: {UserName}, IP: {RemoteIp}, Header: {HeaderName}",
@@ -151,7 +147,6 @@ public class HeaderAuthenticationMiddleware
                     context.Connection.RemoteIpAddress,
                     EnvironmentExtensions.GetHeaderAuthTokenName()
                 );
-        }
 
         await _next(context);
     }

@@ -8,11 +8,11 @@ public class AppUserLogOutEndpoint : BaseEndpointWithoutRequest<string>
 {
     public override string EndpointPath => ApiRoutes.LogOutEndpoint;
 
-    private readonly ISignInService _signInService;
+    private readonly IIdentitySignInService _identitySignInService;
 
-    public AppUserLogOutEndpoint(ISignInService signInService)
+    public AppUserLogOutEndpoint(IIdentitySignInService identitySignInService)
     {
-        _signInService = signInService;
+        _identitySignInService = identitySignInService;
     }
 
     public override void Configure()
@@ -27,7 +27,7 @@ public class AppUserLogOutEndpoint : BaseEndpointWithoutRequest<string>
 
     public override async Task HandleAsync(CancellationToken ct)
     {
-        await _signInService.SignOutAsync();
+        await _identitySignInService.SignOutAsync();
 
         await CookieAuth.SignOutAsync();
 

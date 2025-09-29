@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 
 namespace Reaparr.Identity.Contracts;
@@ -5,7 +6,7 @@ namespace Reaparr.Identity.Contracts;
 /// <summary>
 /// Service interface for sign-in operations
 /// </summary>
-public interface ISignInService
+public interface IIdentitySignInService
 {
     /// <summary>
     /// Attempts to sign in a user with username and password
@@ -16,4 +17,6 @@ public interface ISignInService
     /// Signs out the current user
     /// </summary>
     Task SignOutAsync();
+
+    Task SignInAsync(IEnumerable<Claim> claims, IEnumerable<string> roles);
 }

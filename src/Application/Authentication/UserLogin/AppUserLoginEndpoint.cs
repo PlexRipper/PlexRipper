@@ -45,12 +45,12 @@ public class AppUserLoginEndpoint : BaseEndpoint<AppUserLoginEndpointRequest>
     public override string EndpointPath => ApiRoutes.LoginEndpoint;
 
     private readonly ILogger _log;
-    private readonly ISignInService _signInService;
+    private readonly IIdentitySignInService _identitySignInService;
 
-    public AppUserLoginEndpoint(ILogger log, ISignInService signInService)
+    public AppUserLoginEndpoint(ILogger log, IIdentitySignInService identitySignInService)
     {
         _log = log.ForContext<AppUserLoginEndpoint>();
-        _signInService = signInService;
+        _identitySignInService = identitySignInService;
     }
 
     public override void Configure()
@@ -90,7 +90,7 @@ public class AppUserLoginEndpoint : BaseEndpoint<AppUserLoginEndpointRequest>
         _log.Here().Information("Attempting to sign in user {Username}.", username);
 
         // Attempt to sign in the user
-        var signInResult = await _signInService.PasswordSignInAsync(
+        var signInResult = await _identitySignInService.PasswordSignInAsync(
             username,
             password,
             isPersistent: req.RememberMe,
@@ -99,9 +99,9 @@ public class AppUserLoginEndpoint : BaseEndpoint<AppUserLoginEndpointRequest>
 
         if (signInResult.Succeeded)
         {
-            _log.Here().Information("User {Username} signed in successfully.", username);
+            await _identitySignInService.SignInAsync([], [DefaultUserAppCredentials.DefaultAdminRole]);
 
-            await CookieAuth.SignInAsync(u => u.Roles.Add(DefaultUserAppCredentials.DefaultAdminRole));
+            _log.Here().Information("User {Username} signed in successfully.", username);
 
             await SendFluentResult(Result.Ok(), ct);
         }

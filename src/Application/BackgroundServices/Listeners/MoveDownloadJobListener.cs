@@ -27,7 +27,7 @@ public class MoveDownloadJobListener : IMoveDownloadJobListener
         try
         {
             _log.Here().Debug("Move download job completed, checking for next task in queue");
-            
+
             await _moveDownloadFileQueue.CheckMoveDownloadFileJobQueue();
         }
         catch (Exception ex)

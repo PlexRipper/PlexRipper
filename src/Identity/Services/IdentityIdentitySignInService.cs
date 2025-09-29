@@ -24,7 +24,7 @@ public class IdentityIdentitySignInService : IIdentitySignInService
         bool isPersistent,
         bool lockoutOnFailure
     ) => await _signInManager.PasswordSignInAsync(userName, password, isPersistent, lockoutOnFailure);
-    
+
     /// <inheritdoc/>
     public async Task SignInAsync(IEnumerable<Claim> claims, IEnumerable<string> roles)
     {

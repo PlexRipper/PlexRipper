@@ -1,12 +1,10 @@
 using System.Net;
 using System.Security.Claims;
 using FastEndpoints.Security;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Reaparr.Environment;
 using Reaparr.Identity.Contracts;
 using Reaparr.Settings.Contracts;
-using ILogger = Serilog.ILogger;
 
 namespace Reaparr.AppHost;
 
@@ -16,20 +14,16 @@ namespace Reaparr.AppHost;
 public class HeaderAuthenticationMiddleware
 {
     private readonly RequestDelegate _next;
-    private readonly ILogger _log;
+    private readonly Serilog.ILogger _log;
     private readonly IHeaderAuthenticationSettings _headerAuthentication;
     private readonly UserManager<AppUser> _userManager;
 
     /// <summary>
     /// Constructor for HeaderAuthenticationMiddleware
     /// </summary>
-    /// <param name="next"></param>
-    /// <param name="log"></param>
-    /// <param name="authenticationSettings"></param>
-    /// <param name="userManager"></param>
     public HeaderAuthenticationMiddleware(
         RequestDelegate next,
-        ILogger log,
+        Serilog.ILogger log,
         IAuthenticationSettings authenticationSettings,
         UserManager<AppUser> userManager
     )
@@ -98,6 +92,7 @@ public class HeaderAuthenticationMiddleware
                         context.Connection.RemoteIpAddress
                     );
             }
+
             await _next(context);
             return;
         }
@@ -115,6 +110,7 @@ public class HeaderAuthenticationMiddleware
                         context.Connection.RemoteIpAddress
                     );
             }
+
             await _next(context);
             return;
         }
@@ -133,19 +129,19 @@ public class HeaderAuthenticationMiddleware
                         context.Connection.RemoteIpAddress
                     );
             }
+
             await _next(context);
             return;
         }
 
         // Allow sign-in
         var claims = await CreateUserClaims(user);
-        
+
         await CookieAuth.SignInAsync(u =>
         {
             u.Roles.AddRange(claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value));
             u.Claims.AddRange(claims);
         });
-        
 
         if (_headerAuthentication.EnableLogging)
         {
@@ -195,11 +191,9 @@ public class HeaderAuthenticationMiddleware
             var mask = CreateSubnetMask(prefixLength);
             return IsIpInSubnet(ip, networkIp, mask);
         }
-        else
-        {
-            // Single IP address
-            return IPAddress.TryParse(cidrOrIp, out var singleIp) && ip.Equals(singleIp);
-        }
+
+        // Single IP address
+        return IPAddress.TryParse(cidrOrIp, out var singleIp) && ip.Equals(singleIp);
     }
 
     private static IPAddress CreateSubnetMask(int prefixLength)
@@ -219,6 +213,7 @@ public class HeaderAuthenticationMiddleware
             if ((ipBytes[i] & maskBytes[i]) != (networkBytes[i] & maskBytes[i]))
                 return false;
         }
+
         return true;
     }
 
@@ -233,20 +228,12 @@ public class HeaderAuthenticationMiddleware
 
     private async Task<AppUser?> MapHeaderToUser(string headerValue)
     {
-        AppUser? user = null;
-
-        switch (_headerAuthentication.MappingType)
+        return _headerAuthentication.MappingType switch
         {
-            case HeaderMappingType.Username:
-                user = await _userManager.FindByNameAsync(headerValue);
-                break;
-
-            case HeaderMappingType.Email:
-                user = await _userManager.FindByEmailAsync(headerValue);
-                break;
-        }
-
-        return user;
+            HeaderMappingType.Username => await _userManager.FindByNameAsync(headerValue),
+            HeaderMappingType.Email => await _userManager.FindByEmailAsync(headerValue),
+            _ => null,
+        };
     }
 
     private async Task<List<Claim>> CreateUserClaims(AppUser user)

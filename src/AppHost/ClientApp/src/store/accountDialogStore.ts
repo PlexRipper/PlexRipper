@@ -77,10 +77,58 @@ export const useAccountDialogStore = defineStore('AccountDialogStore', () => {
 			dialogStore.closeDialog(DialogType.AccountDialog);
 			actions.$reset();
 		},
+		validatePlexToken() {
+			state.validateLoading = true;
+
+			return plexAccountApi.validatePlexTokenEndpoint({
+				displayName: state.displayName,
+				manualAuthenticationToken: state.authenticationToken,
+			}).pipe(
+				tap(({ value, isSuccess }) => {
+					if (!isSuccess) {
+						state.isValidated = false;
+						state.hasValidationErrors = true;
+						state.validateLoading = false;
+						dialogStore.openDialog(DialogType.AccountTokenValidateDialog);
+						return;
+					}
+
+					state.hasValidationErrors = false;
+					state.validateLoading = false;
+
+					if (!value) {
+						state.isValidated = false;
+						state.hasValidationErrors = true;
+						state.validationErrors = [];
+						return;
+					}
+
+					// Update state with validated token data
+					Object.assign(state, {
+						clientId: value.clientId,
+						username: value.username,
+						email: value.email,
+						title: value.title,
+						plexId: value.plexId,
+						uuid: value.uuid,
+						authenticationToken: value.authenticationToken,
+						isValidated: value.isValidated,
+						validatedAt: value.validatedAt,
+						is2Fa: value.is2Fa,
+					});
+
+					// Account was validated successfully
+					if (value.isValidated) {
+						Log.info('Token validation successful');
+						return;
+					}
+				}),
+			);
+		},
 		validatePlexAccount() {
 			state.validateLoading = true;
 
-			return plexAccountApi.validatePlexAccountEndpoint(get(getters.getAccountData)).pipe(
+			return plexAccountApi.validatePlexCredentialsEndpoint(get(getters.getAccountData)).pipe(
 				tap(({ value, isSuccess }) => {
 					if (!isSuccess || value?.isUnAuthorized) {
 						state.isValidated = false;
@@ -90,58 +138,79 @@ export const useAccountDialogStore = defineStore('AccountDialogStore', () => {
 						return;
 					}
 
-					const account = value?.plexAccountDTO;
-
 					state.hasValidationErrors = false;
 					state.validateLoading = false;
 
-					if (!account) {
+					if (!value) {
 						state.isValidated = false;
 						state.hasValidationErrors = true;
 						state.validationErrors = [];
 						return;
 					}
 
-					Object.assign(state, account);
-					console.log('Account', account);
+					// Update state with validated credentials data
+					Object.assign(state, {
+						clientId: value.clientId,
+						username: value.username,
+						email: value.email,
+						title: value.title,
+						plexId: value.plexId,
+						uuid: value.uuid,
+						authenticationToken: value.authenticationToken,
+						isValidated: value.isValidated,
+						validatedAt: value.validatedAt,
+						is2Fa: value.is2Fa,
+					});
 
-					if (account.isValidated && !(account.username != '' && account.password != '')) {
+					if (value.isValidated && !(value.username != '' && value.password != '')) {
 						Log.info('Account is validated and was added by token');
 						dialogStore.openDialog(DialogType.AccountTokenValidateDialog);
 						return;
 					}
 
 					// Account has no 2FA and was valid
-					if (account.isValidated && !account.is2Fa) {
+					if (value.isValidated && !value.is2Fa) {
 						Log.info('Account has no 2FA and was valid');
 						return;
 					}
 
 					// Account has no 2FA and was invalid
-					if (!account.isValidated && !account.is2Fa) {
+					if (!value.isValidated && !value.is2Fa) {
 						Log.info('Account has no 2FA and was invalid');
 						return;
 					}
 
 					// Account has 2FA
-					if (!account.isValidated && account.is2Fa) {
+					if (!value.isValidated && value.is2Fa) {
 						Log.info('Account has 2FA enabled');
 						dialogStore.openDialog(DialogType.AccountVerificationCodeDialog);
 						return;
 					}
 
-					if (!account.isValidated && account.is2Fa) {
+					if (!value.isValidated && value.is2Fa) {
 						Log.info('Account was valid and has 2FA enabled, this makes no sense and sounds like a bug');
 					}
 				}),
 			);
 		},
 		validateVerificationCode() {
-			return plexAccountApi.validatePlexAccountEndpoint(get(getters.getAccountData)).pipe(
+			return plexAccountApi.validatePlexCredentialsEndpoint(get(getters.getAccountData)).pipe(
 				tap(({ value, isSuccess }) => {
 					if (isSuccess && value) {
 						dialogStore.closeDialog(DialogType.AccountVerificationCodeDialog);
-						Object.assign(state, value);
+						// Update state with validated credentials data
+						Object.assign(state, {
+							clientId: value.clientId,
+							username: value.username,
+							email: value.email,
+							title: value.title,
+							plexId: value.plexId,
+							uuid: value.uuid,
+							authenticationToken: value.authenticationToken,
+							isValidated: value.isValidated,
+							validatedAt: value.validatedAt,
+							is2Fa: value.is2Fa,
+						});
 					} else {
 						Log.error('Validate Error', value);
 					}

@@ -26,6 +26,8 @@ public class MoveDownloadJobListener : IMoveDownloadJobListener
         // Make sure your trigger and job listeners never throw an exception (use a try-catch) and that they can handle internal problems. Jobs can get stuck after Quartz is unable to determine whether required logic in listener was completed successfully when listener notification failed.
         try
         {
+            _log.Here().Debug("Move download job completed, checking for next task in queue");
+            
             await _moveDownloadFileQueue.CheckMoveDownloadFileJobQueue();
         }
         catch (Exception ex)

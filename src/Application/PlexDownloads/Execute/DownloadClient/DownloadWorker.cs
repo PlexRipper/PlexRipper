@@ -302,6 +302,13 @@ public class DownloadWorker : IDisposable
 
                 if (DownloadWorkerTask.IsCompleted)
                 {
+                    _log.Here()
+                        .Information(
+                            "Download worker {WorkerId} completed downloading segment {FileName} (part {PartIndex})",
+                            Id,
+                            FileName,
+                            DownloadWorkerTask.PartIndex
+                        );
                     SetDownloadWorkerTaskChanged(DownloadStatus.DownloadFinished);
                     break;
                 }

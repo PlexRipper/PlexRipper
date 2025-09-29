@@ -1,6 +1,5 @@
 using System.Net;
 using System.Security.Claims;
-using FastEndpoints.Security;
 using Reaparr.Environment;
 using Reaparr.Identity.Contracts;
 using Reaparr.Settings.Contracts;
@@ -182,18 +181,68 @@ public class HeaderAuthenticationMiddleware
             if (!IPAddress.TryParse(parts[0], out var networkIp) || !int.TryParse(parts[1], out var prefixLength))
                 return false;
 
-            var mask = CreateSubnetMask(prefixLength);
-            return IsIpInSubnet(ip, networkIp, mask);
+            try
+            {
+                var mask = CreateSubnetMask(
+                    prefixLength,
+                    networkIp.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork ? 4 : 6
+                );
+                return IsIpInSubnet(ip, networkIp, mask);
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                return false; // Invalid prefix length
+            }
         }
 
         // Single IP address
         return IPAddress.TryParse(cidrOrIp, out var singleIp) && ip.Equals(singleIp);
     }
 
-    private static IPAddress CreateSubnetMask(int prefixLength)
+    private static IPAddress CreateSubnetMask(int prefixLength, int addressFamily)
     {
-        var mask = 0xFFFFFFFF << (32 - prefixLength);
-        return new IPAddress(BitConverter.GetBytes(mask).Reverse().ToArray());
+        if (addressFamily == 4) // IPv4
+        {
+            if (prefixLength < 0 || prefixLength > 32)
+                throw new ArgumentOutOfRangeException(
+                    nameof(prefixLength),
+                    "IPv4 prefix length must be between 0 and 32"
+                );
+
+            if (prefixLength == 0)
+            {
+                return new IPAddress(new byte[] { 0, 0, 0, 0 });
+            }
+
+            var mask = 0xFFFFFFFF << (32 - prefixLength);
+            var maskBytes = BitConverter.GetBytes(mask);
+            Array.Reverse(maskBytes);
+            return new IPAddress(maskBytes);
+        }
+        else // IPv6
+        {
+            if (prefixLength < 0 || prefixLength > 128)
+                throw new ArgumentOutOfRangeException(
+                    nameof(prefixLength),
+                    "IPv6 prefix length must be between 0 and 128"
+                );
+
+            var mask = new byte[16];
+            var fullBytes = prefixLength / 8;
+            var remainingBits = prefixLength % 8;
+
+            for (int i = 0; i < fullBytes; i++)
+            {
+                mask[i] = 0xFF;
+            }
+
+            if (remainingBits > 0)
+            {
+                mask[fullBytes] = (byte)(0xFF << (8 - remainingBits));
+            }
+
+            return new IPAddress(mask);
+        }
     }
 
     private static bool IsIpInSubnet(IPAddress ip, IPAddress network, IPAddress mask)
@@ -201,6 +250,10 @@ public class HeaderAuthenticationMiddleware
         var ipBytes = ip.GetAddressBytes();
         var networkBytes = network.GetAddressBytes();
         var maskBytes = mask.GetAddressBytes();
+
+        // IP addresses must have the same length to be comparable
+        if (ipBytes.Length != networkBytes.Length || ipBytes.Length != maskBytes.Length)
+            return false;
 
         for (int i = 0; i < ipBytes.Length; i++)
         {

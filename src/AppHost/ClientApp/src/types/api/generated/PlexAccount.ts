@@ -17,7 +17,10 @@ import type {
   GeneratePlexTokenResponse,
   PlexAccountDTO,
   RefreshPlexAccountAccessRapportDTO,
-  ValidatePlexAccountResponse,
+  ValidatePlexCredentialsDTO,
+  ValidatePlexCredentialsEndpointRequest,
+  ValidatePlexTokenEndpointRequest,
+  ValidatePlexTokenEndpointResponse,
 } from "./data-contracts";
 
 import { apiCheckPipe } from "@api/base";
@@ -198,14 +201,14 @@ export class PlexAccount {
   /**
    * No description
    * * @tags Plexaccount
-   * @name ValidatePlexAccountEndpoint
-   * @request POST:/api/PlexAccount/validate
+   * @name ValidatePlexCredentialsEndpoint
+   * @request POST:/api/PlexAccount/validate/credentials
    * @secure
    */
-  validatePlexAccountEndpoint = (data: PlexAccountDTO, params: RequestParams = {}) =>
+  validatePlexCredentialsEndpoint = (data: ValidatePlexCredentialsEndpointRequest, params: RequestParams = {}) =>
     from(
-      Axios.request<ValidatePlexAccountResponse>({
-        url: `/api/PlexAccount/validate`,
+      Axios.request<ValidatePlexCredentialsDTO>({
+        url: `/api/PlexAccount/validate/credentials`,
         method: "POST",
         data: data,
         secure: true,
@@ -213,7 +216,27 @@ export class PlexAccount {
         format: "json",
         ...params,
       }),
-    ).pipe(apiCheckPipe<ValidatePlexAccountResponse>);
+    ).pipe(apiCheckPipe<ValidatePlexCredentialsDTO>);
+
+  /**
+   * No description
+   * * @tags Plexaccount
+   * @name ValidatePlexTokenEndpoint
+   * @request POST:/api/PlexAccount/validate/token
+   * @secure
+   */
+  validatePlexTokenEndpoint = (data: ValidatePlexTokenEndpointRequest, params: RequestParams = {}) =>
+    from(
+      Axios.request<ValidatePlexTokenEndpointResponse>({
+        url: `/api/PlexAccount/validate/token`,
+        method: "POST",
+        data: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+    ).pipe(apiCheckPipe<ValidatePlexTokenEndpointResponse>);
 }
 
 export class PlexAccountPaths {
@@ -246,5 +269,8 @@ export class PlexAccountPaths {
   static refreshPlexAccountAccessEndpoint = (plexAccountId: number) =>
     queryString.stringifyUrl({ url: `/api/PlexAccount/refresh/${plexAccountId}` });
 
-  static validatePlexAccountEndpoint = () => queryString.stringifyUrl({ url: `/api/PlexAccount/validate` });
+  static validatePlexCredentialsEndpoint = () =>
+    queryString.stringifyUrl({ url: `/api/PlexAccount/validate/credentials` });
+
+  static validatePlexTokenEndpoint = () => queryString.stringifyUrl({ url: `/api/PlexAccount/validate/token` });
 }

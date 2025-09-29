@@ -1201,13 +1201,22 @@ export interface ResultDTOOfUserClaimsDTO {
   value?: UserClaimsDTO | null;
 }
 
-export interface ResultDTOOfValidatePlexAccountResponse {
+export interface ResultDTOOfValidatePlexCredentialsDTO {
   errors: ErrorDTO[];
   isSuccess: boolean;
   /** @format int32 */
   statusCode: number;
   successes: SuccessDTO[];
-  value?: ValidatePlexAccountResponse | null;
+  value?: ValidatePlexCredentialsDTO | null;
+}
+
+export interface ResultDTOOfValidatePlexTokenEndpointResponse {
+  errors: ErrorDTO[];
+  isSuccess: boolean;
+  /** @format int32 */
+  statusCode: number;
+  successes: SuccessDTO[];
+  value?: ValidatePlexTokenEndpointResponse | null;
 }
 
 export interface ServerConnectionCheckStatusProgressDTO {
@@ -1340,14 +1349,58 @@ export interface UserClaimsDTO {
   userName: string;
 }
 
-export interface ValidatePlexAccountResponse {
+export interface ValidatePlexCredentialsDTO {
+  is2Fa: boolean;
+  authenticationToken: string;
+  clientId: string;
+  email: string;
   isUnAuthorized: boolean;
-  plexAccountDTO: PlexAccountDTO;
+  isValidated: boolean;
+  password: string;
+  /** @format int64 */
+  plexId: number;
+  title: string;
+  username: string;
+  uuid: string;
+  /** @format date-time */
+  validatedAt?: string | null;
+}
+
+export interface ValidatePlexCredentialsEndpointRequest {
+  clientId: string;
+  displayName: string;
+  /** @minLength 5 */
+  password: string;
+  /** @minLength 5 */
+  username: string;
+  verificationCode: string;
 }
 
 export interface ValidatePlexServerConnectionEndpointRequest {
   /** @minLength 1 */
   url: string;
+}
+
+export interface ValidatePlexTokenEndpointRequest {
+  displayName: string;
+  /** @minLength 5 */
+  manualAuthenticationToken: string;
+}
+
+export interface ValidatePlexTokenEndpointResponse {
+  is2Fa: boolean;
+  authenticationToken: string;
+  clientId: string;
+  email: string;
+  isUnAuthorized: boolean;
+  isValidated: boolean;
+  /** @format int64 */
+  plexId: number;
+  title: string;
+  username: string;
+  uuid: string;
+  /** @format date-time */
+  validatedAt?: string | null;
 }
 
 export enum VideoQuality {

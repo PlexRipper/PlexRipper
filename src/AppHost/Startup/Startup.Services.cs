@@ -145,6 +145,19 @@ public static partial class Startup
                         }
                     );
 
+                    // 🔹 Header-based authentication
+                    s.AddAuth(
+                        "HeaderAuth",
+                        new()
+                        {
+                            Type = OpenApiSecuritySchemeType.ApiKey,
+                            In = OpenApiSecurityApiKeyLocation.Header,
+                            Name = EnvironmentExtensions.GetHeaderAuthTokenName(),
+                            Description = "Header-based authentication via trusted proxy",
+                        }
+                    );
+                    s.OperationProcessors.Add(new OperationSecurityScopeProcessor("HeaderAuth"));
+
                     s.OperationProcessors.Add(new OperationSecurityScopeProcessor("CookieAuth"));
                 };
             });

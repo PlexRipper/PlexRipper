@@ -11,29 +11,9 @@ public interface IHeaderAuthenticationSettings
     bool Enabled { get; set; }
 
     /// <summary>
-    /// The name of the HTTP header to trust for user identity
-    /// </summary>
-    string HeaderName { get; set; }
-
-    /// <summary>
     /// How to map the header value to a Reaparr user (by username, email, or custom mapping)
     /// </summary>
     HeaderMappingType MappingType { get; set; }
-
-    /// <summary>
-    /// Custom mapping function (when MappingType is Custom)
-    /// </summary>
-    string? CustomMappingExpression { get; set; }
-
-    /// <summary>
-    /// Whether to auto-create users if they don't exist
-    /// </summary>
-    bool AutoCreateUsers { get; set; }
-
-    /// <summary>
-    /// Default role to assign to auto-created users
-    /// </summary>
-    string DefaultRole { get; set; }
 
     /// <summary>
     /// List of trusted proxy IP addresses or CIDR ranges
@@ -70,9 +50,4 @@ public enum HeaderMappingType
     /// Map header value to email address
     /// </summary>
     Email = 1,
-
-    /// <summary>
-    /// Use custom mapping expression
-    /// </summary>
-    Custom = 2,
 }

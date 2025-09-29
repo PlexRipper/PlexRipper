@@ -11,11 +11,6 @@ public record HeaderAuthenticationSettingsDTO : IHeaderAuthenticationSettings
     public bool Enabled { get; set; }
 
     /// <summary>
-    /// The name of the HTTP header to trust for user identity
-    /// </summary>
-    public string HeaderName { get; set; } = "X-Auth-User";
-
-    /// <summary>
     /// How to map the header value to a Reaparr user (by username, email, or custom mapping)
     /// </summary>
     public HeaderMappingType MappingType { get; set; } = HeaderMappingType.Username;

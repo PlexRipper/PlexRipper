@@ -10,11 +10,7 @@ public record HeaderAuthenticationSettings
         IHeaderAuthenticationSettings
 {
     private bool _enabled;
-    private string _headerName = "X-Auth-User";
     private HeaderMappingType _mappingType = HeaderMappingType.Username;
-    private string? _customMappingExpression;
-    private bool _autoCreateUsers = false;
-    private string _defaultRole = "Admin";
     private List<string> _trustedProxies = new();
     private bool _enableLogging = true;
     private int _maxHeaderLength = 256;
@@ -30,48 +26,12 @@ public record HeaderAuthenticationSettings
     }
 
     /// <summary>
-    /// The name of the HTTP header to trust for user identity
-    /// </summary>
-    public required string HeaderName
-    {
-        get => _headerName;
-        set => SetProperty(ref _headerName, value);
-    }
-
-    /// <summary>
     /// How to map the header value to a Reaparr user (by username, email, or custom mapping)
     /// </summary>
     public required HeaderMappingType MappingType
     {
         get => _mappingType;
         set => SetProperty(ref _mappingType, value);
-    }
-
-    /// <summary>
-    /// Custom mapping function (when MappingType is Custom)
-    /// </summary>
-    public string? CustomMappingExpression
-    {
-        get => _customMappingExpression;
-        set => SetProperty(ref _customMappingExpression, value);
-    }
-
-    /// <summary>
-    /// Whether to auto-create users if they don't exist
-    /// </summary>
-    public required bool AutoCreateUsers
-    {
-        get => _autoCreateUsers;
-        set => SetProperty(ref _autoCreateUsers, value);
-    }
-
-    /// <summary>
-    /// Default role to assign to auto-created users
-    /// </summary>
-    public required string DefaultRole
-    {
-        get => _defaultRole;
-        set => SetProperty(ref _defaultRole, value);
     }
 
     /// <summary>
@@ -117,11 +77,7 @@ public record HeaderAuthenticationSettings
         new()
         {
             Enabled = false,
-            HeaderName = "X-Auth-User",
             MappingType = HeaderMappingType.Username,
-            CustomMappingExpression = null,
-            AutoCreateUsers = false,
-            DefaultRole = "Admin",
             TrustedProxies = new List<string>(),
             EnableLogging = true,
             MaxHeaderLength = 256,
@@ -136,11 +92,7 @@ public record HeaderAuthenticationSettings
         if (!Enabled)
             return true;
 
-        if (string.IsNullOrWhiteSpace(HeaderName))
-            return false;
         if (MaxHeaderLength <= 0)
-            return false;
-        if (string.IsNullOrWhiteSpace(DefaultRole))
             return false;
 
         // Validate trusted proxies are valid IP addresses or CIDR ranges

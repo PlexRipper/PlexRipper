@@ -36,7 +36,7 @@ rules: |
   - If new data generation patterns are needed, extend the `BaseTests` project, not individual test files.
   
   # Mocking rules (AutoMoq)
-  - Use AutoMoq to automatically create mocks for dependencies.
+  - Use AutoMock to automatically create mocks for dependencies.
   - Always verify mocks with explicit invocation counts using Moq's Verify API.
     Example: `mock.Verify(x => x.Method(), Times.Once());`
   - If a dependency should not be called, explicitly assert with `Times.Never()`.

@@ -39,12 +39,12 @@ public class UpdateCredentialsEndpoint : BaseEndpoint<UpdateCredentialsEndpointR
     public override string EndpointPath => ApiRoutes.AuthenticatedController;
 
     private readonly ILogger _log;
-    private readonly UserManager<AppUser> _userManager;
+    private readonly IUserService _userService;
 
-    public UpdateCredentialsEndpoint(ILogger log, UserManager<AppUser> userManager)
+    public UpdateCredentialsEndpoint(ILogger log, IUserService userService)
     {
         _log = log.ForContext<UpdateCredentialsEndpoint>();
-        _userManager = userManager;
+        _userService = userService;
     }
 
     public override void Configure()
@@ -74,7 +74,7 @@ public class UpdateCredentialsEndpoint : BaseEndpoint<UpdateCredentialsEndpointR
     {
         _log.Here().DebugApiCall(HttpContext, req);
         // There is only 1 app user in the database
-        var user = await _userManager.Users.FirstOrDefaultAsync(ct);
+        var user = await _userService.GetFirstUserAsync(ct);
         if (user is null)
         {
             var result = Result.Fail("No app user found in the database").LogError();
@@ -91,7 +91,7 @@ public class UpdateCredentialsEndpoint : BaseEndpoint<UpdateCredentialsEndpointR
             user.UserName = newUsername;
             user.NormalizedUserName = newUsername.ToUpper();
 
-            var usernameResult = await _userManager.UpdateAsync(user);
+            var usernameResult = await _userService.UpdateAsync(user);
             if (!usernameResult.Succeeded)
             {
                 var result = Result.Fail(usernameResult.Errors.Select(e => e.Description)).LogError();
@@ -104,8 +104,8 @@ public class UpdateCredentialsEndpoint : BaseEndpoint<UpdateCredentialsEndpointR
         if (newPassword is not null)
         {
             // Update the password
-            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-            var passwordResult = await _userManager.ResetPasswordAsync(user, token, newPassword);
+            var token = await _userService.GeneratePasswordResetTokenAsync(user);
+            var passwordResult = await _userService.ResetPasswordAsync(user, token, newPassword);
             if (!passwordResult.Succeeded)
             {
                 var result = Result.Fail(passwordResult.Errors.Select(e => e.Description)).LogError();

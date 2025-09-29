@@ -1,5 +1,4 @@
 using FastEndpoints.Security;
-using Microsoft.AspNetCore.Identity;
 using Reaparr.Application.Contracts;
 using Reaparr.Identity.Contracts;
 
@@ -9,11 +8,11 @@ public class AppUserLogOutEndpoint : BaseEndpointWithoutRequest<string>
 {
     public override string EndpointPath => ApiRoutes.LogOutEndpoint;
 
-    private readonly SignInManager<AppUser> _signInManager;
+    private readonly ISignInService _signInService;
 
-    public AppUserLogOutEndpoint(SignInManager<AppUser> signInManager)
+    public AppUserLogOutEndpoint(ISignInService signInService)
     {
-        _signInManager = signInManager;
+        _signInService = signInService;
     }
 
     public override void Configure()
@@ -28,7 +27,7 @@ public class AppUserLogOutEndpoint : BaseEndpointWithoutRequest<string>
 
     public override async Task HandleAsync(CancellationToken ct)
     {
-        await _signInManager.SignOutAsync();
+        await _signInService.SignOutAsync();
 
         await CookieAuth.SignOutAsync();
 

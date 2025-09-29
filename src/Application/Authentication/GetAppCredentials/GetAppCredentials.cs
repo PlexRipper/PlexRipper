@@ -26,14 +26,14 @@ public class AppCredentialsDTO
 public class GetAppCredentials : BaseEndpointWithoutRequest<AppCredentialsDTO>
 {
     private readonly ILogger _log;
-    private readonly UserManager<AppUser> _userManager;
+    private readonly IUserService _userService;
 
     public override string EndpointPath => ApiRoutes.AuthenticatedController;
 
-    public GetAppCredentials(ILogger log, UserManager<AppUser> userManager)
+    public GetAppCredentials(ILogger log, IUserService userService)
     {
         _log = log.ForContext<GetAppCredentials>();
-        _userManager = userManager;
+        _userService = userService;
     }
 
     public override void Configure()
@@ -55,7 +55,7 @@ public class GetAppCredentials : BaseEndpointWithoutRequest<AppCredentialsDTO>
     {
         _log.Here().DebugApiCall(HttpContext);
         // There is only 1 app user in the database
-        var user = await _userManager.Users.FirstOrDefaultAsync(ct);
+        var user = await _userService.GetFirstUserAsync(ct);
         if (user is null)
         {
             var result = Result.Fail("No app user found in the database").LogError();
@@ -65,7 +65,7 @@ public class GetAppCredentials : BaseEndpointWithoutRequest<AppCredentialsDTO>
 
         var isDefaultCredentials =
             user.UserName == DefaultUserAppCredentials.DefaultUsername
-            && await _userManager.CheckPasswordAsync(user, DefaultUserAppCredentials.DefaultPassword);
+            && await _userService.CheckPasswordAsync(user, DefaultUserAppCredentials.DefaultPassword);
 
         // Don't send back the real password as this is hidden anyway when updating the password
         await SendFluentResult(

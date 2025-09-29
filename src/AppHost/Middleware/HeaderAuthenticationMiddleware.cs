@@ -1,7 +1,6 @@
 using System.Net;
 using System.Security.Claims;
 using FastEndpoints.Security;
-using Microsoft.AspNetCore.Identity;
 using Reaparr.Environment;
 using Reaparr.Identity.Contracts;
 using Reaparr.Settings.Contracts;
@@ -16,7 +15,7 @@ public class HeaderAuthenticationMiddleware
     private readonly RequestDelegate _next;
     private readonly Serilog.ILogger _log;
     private readonly IHeaderAuthenticationSettings _headerAuthentication;
-    private readonly UserManager<AppUser> _userManager;
+    private readonly IUserService _userService;
 
     /// <summary>
     /// Constructor for HeaderAuthenticationMiddleware
@@ -25,13 +24,13 @@ public class HeaderAuthenticationMiddleware
         RequestDelegate next,
         Serilog.ILogger log,
         IAuthenticationSettings authenticationSettings,
-        UserManager<AppUser> userManager
+        IUserService userService
     )
     {
         _next = next;
         _log = log.ForContext<HeaderAuthenticationMiddleware>();
         _headerAuthentication = authenticationSettings.HeaderAuthentication;
-        _userManager = userManager;
+        _userService = userService;
     }
 
     /// <summary>
@@ -230,8 +229,8 @@ public class HeaderAuthenticationMiddleware
     {
         return _headerAuthentication.MappingType switch
         {
-            HeaderMappingType.Username => await _userManager.FindByNameAsync(headerValue),
-            HeaderMappingType.Email => await _userManager.FindByEmailAsync(headerValue),
+            HeaderMappingType.Username => await _userService.FindByNameAsync(headerValue),
+            HeaderMappingType.Email => await _userService.FindByEmailAsync(headerValue),
             _ => null,
         };
     }
@@ -251,7 +250,7 @@ public class HeaderAuthenticationMiddleware
         }
 
         // Add role claims
-        var roles = await _userManager.GetRolesAsync(user);
+        var roles = await _userService.GetRolesAsync(user);
         foreach (var role in roles)
         {
             claims.Add(new Claim(ClaimTypes.Role, role));

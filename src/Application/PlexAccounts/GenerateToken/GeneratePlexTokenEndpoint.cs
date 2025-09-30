@@ -85,7 +85,7 @@ public class GeneratePlexTokenEndpoint : BaseEndpoint<GeneratePlexTokenEndpointR
         var validateResult = await _commandExecutor.Send(
             new PlexSignInCommand
             {
-                ClientId = string.Empty,
+                ClientId = plexAccount.ClientId,
                 Username = plexAccount.Username,
                 Password = plexAccount.Password,
                 VerificationCode = plexAccount.VerificationCode,

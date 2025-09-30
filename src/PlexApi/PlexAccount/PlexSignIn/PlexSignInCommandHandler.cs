@@ -51,6 +51,9 @@ public class PlexSignInCommandHandler : ICommandHandler<PlexSignInCommand, Resul
             )
             .ToResponse();
 
+        if (response.IsFailed)
+            return response.ToResult().LogError();
+
         var isValid = response.Value.RawResponse.IsSuccessStatusCode;
         var result = response.ToApiResult(x => new PlexSignInCommandResult
         {

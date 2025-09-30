@@ -1,9 +1,7 @@
 using System.Net;
-using System.Reflection;
 using System.Security.Claims;
 using Autofac;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Primitives;
 using Reaparr.Identity.Contracts;
 using Reaparr.Settings.Contracts;

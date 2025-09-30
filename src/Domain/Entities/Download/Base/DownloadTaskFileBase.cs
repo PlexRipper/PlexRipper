@@ -157,13 +157,6 @@ public abstract class DownloadTaskFileBase : DownloadTaskBase, IDownloadTaskProg
     }
 
     /// <summary>
-    /// Gets a joined string of temp file paths of the <see cref="DownloadWorkerTasks"/> delimited by ";".
-    /// </summary>
-    [NotMapped]
-    public string GetFilePathsCompressed =>
-        string.Join(';', DownloadWorkerTasks.Select(x => x.DownloadFilePath).ToArray());
-
-    /// <summary>
     /// Gets the time remaining in seconds the <see cref="DownloadTaskFileBase"/> to finish.
     /// </summary>
     [NotMapped]

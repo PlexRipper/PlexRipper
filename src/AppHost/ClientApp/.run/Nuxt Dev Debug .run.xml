@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+	<configuration default="false" name="Nuxt Dev Debug" type="CompoundRunConfigurationType">
+		<toRun name="client: firefox" type="JavascriptDebugType" />
+		<toRun name="server: nuxt" type="NodeJSConfigurationType" />
+		<method v="2" />
+	</configuration>
+	<configuration default="false" name="Nuxt Dev Debug " type="CompoundRunConfigurationType">
+		<method v="2" />
+	</configuration>
+</component>

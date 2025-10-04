@@ -42,8 +42,25 @@ public class CreateAccountIntegrationTests : BaseIntegrationTests
         );
 
         var plexAccount = FakeData.GetPlexAccount(4347564).Generate();
-        var plexAccountDTO = plexAccount.ToDTO();
-
+        var plexAccountDTO = new CreatePlexAccountDTO
+        {
+            DisplayName = plexAccount.DisplayName,
+            Username = plexAccount.Username,
+            Password = plexAccount.Password,
+            IsEnabled = plexAccount.IsEnabled,
+            IsMain = plexAccount.IsMain,
+            IsValidated = plexAccount.IsValidated,
+            ValidatedAt = plexAccount.ValidatedAt,
+            Uuid = plexAccount.Uuid,
+            PlexId = plexAccount.PlexId,
+            Email = plexAccount.Email,
+            Title = plexAccount.Title,
+            ClientId = plexAccount.ClientId,
+            Is2Fa = plexAccount.Is2Fa,
+            CustomAuthenticationToken = plexAccount.CustomAuthenticationToken,
+            AuthenticationToken = plexAccount.AuthenticationToken,
+        };
+        
         // Act
         var client = container.GetApiClient();
         await client.SignIn();

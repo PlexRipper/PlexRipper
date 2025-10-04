@@ -17,10 +17,29 @@ public class CreatePlexAccountEndpointUnitTests : BaseUnitTest
 
         mock.SetupCommand(It.IsAny<InspectAllPlexServersByAccountIdCommand>).ReturnsAsync(Result.Ok());
 
+        var createPlexAccountDTO = new CreatePlexAccountDTO
+        {
+            DisplayName = newAccount.DisplayName,
+            Username = newAccount.Username,
+            Password = newAccount.Password,
+            IsEnabled = newAccount.IsEnabled,
+            IsMain = newAccount.IsMain,
+            IsValidated = newAccount.IsValidated,
+            ValidatedAt = newAccount.ValidatedAt,
+            Uuid = newAccount.Uuid,
+            PlexId = newAccount.PlexId,
+            Email = newAccount.Email,
+            Title = newAccount.Title,
+            ClientId = newAccount.ClientId,
+            Is2Fa = newAccount.Is2Fa,
+            CustomAuthenticationToken = newAccount.CustomAuthenticationToken,
+            AuthenticationToken = newAccount.AuthenticationToken
+        };
+
         // Act
         var endPoint = SetupEndpointUnitTest<CreatePlexAccountEndpoint>();
         await endPoint.HandleAsync(
-            new CreatePlexAccountEndpointRequest { PlexAccount = newAccount.ToDTO() },
+            new CreatePlexAccountEndpointRequest { PlexAccount = createPlexAccountDTO },
             CancellationToken
         );
         var result = endPoint.Response;
@@ -41,10 +60,30 @@ public class CreatePlexAccountEndpointUnitTests : BaseUnitTest
 
         mock.SetupCommand(It.IsAny<InspectAllPlexServersByAccountIdCommand>).ReturnsAsync(Result.Ok());
 
+        var createPlexAccountDTO = new CreatePlexAccountDTO
+        {
+            DisplayName = newAccount.DisplayName,
+            Username = newAccount.Username,
+            Password = newAccount.Password,
+            IsEnabled = newAccount.IsEnabled,
+            IsMain = newAccount.IsMain,
+            IsValidated = newAccount.IsValidated,
+            ValidatedAt = newAccount.ValidatedAt,
+            Uuid = newAccount.Uuid,
+            PlexId = newAccount.PlexId,
+            Email = newAccount.Email,
+            Title = newAccount.Title,
+            ClientId = newAccount.ClientId,
+            Is2Fa = newAccount.Is2Fa,
+            CustomAuthenticationToken = newAccount.CustomAuthenticationToken,
+            AuthenticationToken = newAccount.AuthenticationToken
+        };
+        
+        
         // Act
         var endPoint = SetupEndpointUnitTest<CreatePlexAccountEndpoint>();
         await endPoint.HandleAsync(
-            new CreatePlexAccountEndpointRequest { PlexAccount = newAccount.ToDTO() },
+            new CreatePlexAccountEndpointRequest { PlexAccount = createPlexAccountDTO },
             CancellationToken
         );
         var result = endPoint.Response;

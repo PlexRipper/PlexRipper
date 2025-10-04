@@ -13,7 +13,7 @@ namespace Reaparr.Application;
 public class CreatePlexAccountEndpointRequest
 {
     [FromBody]
-    public required PlexAccountDTO? PlexAccount { get; init; }
+    public required CreatePlexAccountDTO PlexAccount { get; init; }
 }
 
 public class CreatePlexAccountEndpointRequestValidator : Validator<CreatePlexAccountEndpointRequest>
@@ -21,14 +21,28 @@ public class CreatePlexAccountEndpointRequestValidator : Validator<CreatePlexAcc
     public CreatePlexAccountEndpointRequestValidator()
     {
         RuleFor(x => x.PlexAccount).NotNull();
-        RuleFor(x => x.PlexAccount!.DisplayName).NotEmpty();
+        RuleFor(x => x.PlexAccount.DisplayName).NotEmpty();
 
-        RuleFor(x => x.PlexAccount!.Username)
+        RuleFor(x => x.PlexAccount.ClientId).NotEmpty();
+
+        RuleFor(x => x.PlexAccount.PlexId).NotEmpty();
+
+        RuleFor(x => x.PlexAccount.Uuid).NotEmpty();
+
+        RuleFor(x => x.PlexAccount.IsValidated).Equal(true);
+        RuleFor(x => x.PlexAccount.ValidatedAt).NotNull();
+
+        RuleFor(x => x.PlexAccount.Username)
             .NotEmpty()
             .MinimumLength(5)
             .When(m => string.IsNullOrEmpty(m.PlexAccount!.CustomAuthenticationToken));
 
-        RuleFor(x => x.PlexAccount!.Password)
+        RuleFor(x => x.PlexAccount.Password)
+            .NotEmpty()
+            .MinimumLength(5)
+            .When(m => string.IsNullOrEmpty(m.PlexAccount!.CustomAuthenticationToken));
+
+        RuleFor(x => x.PlexAccount.AuthenticationToken)
             .NotEmpty()
             .MinimumLength(5)
             .When(m => string.IsNullOrEmpty(m.PlexAccount!.CustomAuthenticationToken));
@@ -64,10 +78,11 @@ public class CreatePlexAccountEndpoint : BaseEndpoint<CreatePlexAccountEndpointR
     public override async Task HandleAsync(CreatePlexAccountEndpointRequest req, CancellationToken ct)
     {
         _log.Here().DebugApiCall(HttpContext, req);
-        var plexAccount = req.PlexAccount!.ToModel();
-        plexAccount.Id = 0;
+        var plexAccount = req.PlexAccount;
 
-        if (!plexAccount.IsAuthTokenMode)
+        var isAuthTokenMode = !(plexAccount.Username != string.Empty && plexAccount.Password != string.Empty);
+
+        if (!isAuthTokenMode)
         {
             // Check if account with the same username already exists
             var isAvailable = await _dbContext.IsUsernameAvailable(plexAccount.Username, ct);
@@ -99,18 +114,41 @@ public class CreatePlexAccountEndpoint : BaseEndpoint<CreatePlexAccountEndpointR
         if (plexAccount.ClientId == string.Empty)
             plexAccount.ClientId = Guid.NewGuid().ToString();
 
-        await _dbContext.PlexAccounts.AddAsync(plexAccount, ct);
+        var plexAccountDb = new PlexAccount
+        {
+            Id = 0,
+            DisplayName = plexAccount.DisplayName,
+            Username = plexAccount.Username,
+            Password = plexAccount.Password,
+            IsEnabled = plexAccount.IsEnabled,
+            IsValidated = plexAccount.IsValidated,
+            ValidatedAt = plexAccount.ValidatedAt,
+            PlexId = plexAccount.PlexId,
+            Uuid = plexAccount.Uuid,
+            ClientId = plexAccount.ClientId,
+            Title = plexAccount.Title,
+            Email = plexAccount.Email,
+            HasPassword = true,
+            CustomAuthenticationToken = plexAccount.CustomAuthenticationToken,
+            AuthenticationToken = plexAccount.AuthenticationToken,
+            IsMain = plexAccount.IsMain,
+            Is2Fa = plexAccount.Is2Fa,
+            VerificationCode = "",
+        };
+
+        await _dbContext.PlexAccounts.AddAsync(plexAccountDb, ct);
+
         await _dbContext.SaveChangesAsync(ct);
         await _dbContext.Entry(plexAccount).GetDatabaseValuesAsync(ct);
 
-        var plexAccountDb = await _dbContext
+        plexAccountDb = await _dbContext
             .PlexAccounts.Include(x => x.PlexAccountServers)
             .Include(x => x.PlexAccountLibraries)
-            .GetAsync(plexAccount.Id, ct);
+            .GetAsync(plexAccountDb.Id, ct);
 
         if (plexAccountDb is null)
         {
-            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(PlexAccount), plexAccount.Id), ct);
+            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(PlexAccount), 0), ct);
             return;
         }
 
@@ -120,11 +158,12 @@ public class CreatePlexAccountEndpoint : BaseEndpoint<CreatePlexAccountEndpointR
 
         // Return the Ok result and then kick off the inspecting job
         var inspectResult = await _commandExecutor.Send(
-            new InspectAllPlexServersByAccountIdCommand(plexAccount.Id),
+            new InspectAllPlexServersByAccountIdCommand(plexAccountDb.Id),
             ct
         );
+
         if (inspectResult.IsFailed)
             _log.Here()
-                .Error("Failed to queue inspect server job for PlexAccount with id {PlexAccountId}", plexAccount.Id);
+                .Error("Failed to queue inspect server job for PlexAccount with id {PlexAccountId}", plexAccountDb.Id);
     }
 }

@@ -6,8 +6,7 @@ import { PlexAccountPaths } from '@api-urls';
 describe('Add Plex account to Reaparr', () => {
 	beforeEach(() => {
 		cy.basePageSetup({
-			plexAccountCount: 2,
-			plexServerCount: 5,
+			plexAccountCount: 2, plexServerCount: 5,
 		});
 
 		cy.visit(route('/settings/accounts'));
@@ -30,8 +29,7 @@ describe('Add Plex account to Reaparr', () => {
 		// Validate Action, should return is2Fa true and isValidated false
 		cy.validatePlexCredentialsEndpoint({
 			partialData: {
-				is2Fa: true,
-				isValidated: false,
+				is2Fa: true, isValidated: false,
 			},
 		});
 		cy.getCy('account-dialog-validate-button').click();
@@ -39,8 +37,7 @@ describe('Add Plex account to Reaparr', () => {
 		// Insert verification code, should return is2Fa true and isValidated true
 		cy.validatePlexCredentialsEndpoint({
 			partialData: {
-				is2Fa: true,
-				isValidated: true,
+				is2Fa: true, isValidated: true,
 			},
 		});
 
@@ -48,13 +45,11 @@ describe('Add Plex account to Reaparr', () => {
 
 		// Create Action
 		cy.intercept('POST', PlexAccountPaths.createPlexAccountEndpoint(), {
-			statusCode: 200,
-			body: generateResultDTO(plexAccount),
+			statusCode: 200, body: generateResultDTO(plexAccount),
 		});
 
 		cy.intercept('GET', PlexAccountPaths.getPlexAccountByIdEndpoint(plexAccount.id), {
-			statusCode: 200,
-			body: generateResultDTO(plexAccount),
+			statusCode: 200, body: generateResultDTO(plexAccount),
 		});
 
 		cy.getCy('account-dialog-save-button').click();
@@ -64,13 +59,8 @@ describe('Add Plex account to Reaparr', () => {
 	it('Should create an Account when a valid token is added manually', () => {
 		cy.getPageData().then(() => {
 			const account: PlexAccountDTO = generatePlexAccount({
-				id: 99,
-				partialData: {
-					username: '',
-					password: '',
-					isValidated: false,
-					is2Fa: false,
-					hasPassword: true,
+				id: 99, partialData: {
+					username: '', password: '', isValidated: false, is2Fa: false, hasPassword: true,
 				},
 			});
 
@@ -108,14 +98,12 @@ describe('Add Plex account to Reaparr', () => {
 
 			// Create Action
 			cy.intercept('POST', PlexAccountPaths.createPlexAccountEndpoint(), {
-				statusCode: 200,
-				body: generateResultDTO(account),
+				statusCode: 200, body: generateResultDTO(account),
 			}).as('createAccount');
 
 			// Hide Account dialog
 			cy.intercept('GET', PlexAccountPaths.getPlexAccountByIdEndpoint(account.id), {
-				statusCode: 200,
-				body: generateResultDTO(account),
+				statusCode: 200, body: generateResultDTO(account),
 			});
 
 			cy.getCy('account-dialog-save-button').click();
@@ -148,12 +136,8 @@ describe('Add Plex account to Reaparr', () => {
 	it('Should show failed validation dialog when a invalid token is added manually, and then allow for another validation and succeed', () => {
 		cy.getPageData().then(() => {
 			const account: PlexAccountDTO = generatePlexAccount({
-				id: 99,
-				partialData: {
-					username: '',
-					password: '',
-					isValidated: false,
-					is2Fa: false,
+				id: 99, partialData: {
+					username: '', password: '', isValidated: false, is2Fa: false,
 				},
 			});
 
@@ -166,10 +150,18 @@ describe('Add Plex account to Reaparr', () => {
 			cy.getCy('account-form-auth-token-input').type(account.authenticationToken);
 
 			// Validate Action, failed
-			cy.validatePlexCredentialsEndpoint({
+			cy.validatePlexTokenEndpoint({
 				isUnAuthorized: true, partialData: {
-					...account,
+					authenticationToken: account.authenticationToken,
+					clientId: account.clientId,
+					email: account.email,
+					is2Fa: false,
 					isValidated: false,
+					plexId: account.plexId,
+					title: account.title,
+					username: account.username,
+					uuid: account.uuid,
+					validatedAt: account.validatedAt,
 				},
 			});
 
@@ -179,11 +171,18 @@ describe('Add Plex account to Reaparr', () => {
 
 			cy.getCy('auth-token-validation-dialog-hide-button').click();
 			// Validate Action, success
-			cy.validatePlexCredentialsEndpoint({
-				isUnAuthorized: false,
-				partialData: {
-					...account,
+			cy.validatePlexTokenEndpoint({
+				isUnAuthorized: false, partialData: {
+					authenticationToken: account.authenticationToken,
+					clientId: account.clientId,
+					email: account.email,
+					is2Fa: false,
 					isValidated: true,
+					plexId: account.plexId,
+					title: account.title,
+					username: account.username,
+					uuid: account.uuid,
+					validatedAt: account.validatedAt,
 				},
 			});
 
@@ -196,14 +195,12 @@ describe('Add Plex account to Reaparr', () => {
 
 			// Create Action
 			cy.intercept('POST', PlexAccountPaths.createPlexAccountEndpoint(), {
-				statusCode: 200,
-				body: generateResultDTO(account),
+				statusCode: 200, body: generateResultDTO(account),
 			}).as('createAccount');
 
 			// Hide Account dialog
 			cy.intercept('GET', PlexAccountPaths.getPlexAccountByIdEndpoint(account.id), {
-				statusCode: 200,
-				body: generateResultDTO(account),
+				statusCode: 200, body: generateResultDTO(account),
 			});
 
 			cy.getCy('account-dialog-save-button').click();
@@ -211,7 +208,24 @@ describe('Add Plex account to Reaparr', () => {
 
 			cy.wait('@createAccount').then((interception) => {
 				expect(interception.request.method).to.equal('POST');
-				expect(interception.request.body).to.deep.equal({ ...account, isValidated: true });
+				const expectedBody: CreatePlexAccountDTO = {
+					isValidated: true,
+					password: account.password,
+					username: account.username,
+					uuid: account.uuid,
+					validatedAt: account.validatedAt,
+					authenticationToken: account.apiAuthenticationToken,
+					customAuthenticationToken: account.authenticationToken,
+					clientId: account.clientId,
+					displayName: account.displayName,
+					email: account.email,
+					is2Fa: account.is2Fa,
+					isEnabled: account.isEnabled,
+					isMain: account.isMain,
+					plexId: account.plexId,
+					title: account.title,
+				};
+				expect(interception.request.body).to.deep.equal(expectedBody);
 			});
 		});
 	});

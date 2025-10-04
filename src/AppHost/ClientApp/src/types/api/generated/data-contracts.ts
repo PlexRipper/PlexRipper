@@ -67,6 +67,26 @@ export interface CreateDownloadTasksRequest {
   downloadMedias: DownloadMediaDTO[];
 }
 
+export interface CreatePlexAccountDTO {
+  is2Fa: boolean;
+  authenticationToken: string;
+  clientId: string;
+  customAuthenticationToken: string;
+  displayName: string;
+  email: string;
+  isEnabled: boolean;
+  isMain: boolean;
+  isValidated: boolean;
+  password: string;
+  /** @format int64 */
+  plexId: number;
+  title: string;
+  username: string;
+  uuid: string;
+  /** @format date-time */
+  validatedAt?: string | null;
+}
+
 export interface CreatePlexServerConnectionEndpointRequest {
   /** @minLength 1 */
   address: string;

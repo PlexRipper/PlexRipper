@@ -14,6 +14,7 @@ import { ContentType } from "./http-client";
 
 import type {
   BaseResultDTO,
+  CreatePlexAccountDTO,
   GeneratePlexTokenResponse,
   PlexAccountDTO,
   RefreshPlexAccountAccessRapportDTO,
@@ -36,7 +37,7 @@ export class PlexAccount {
    * @request POST:/api/PlexAccount
    * @secure
    */
-  createPlexAccountEndpoint = (data: PlexAccountDTO, params: RequestParams = {}) =>
+  createPlexAccountEndpoint = (data: CreatePlexAccountDTO, params: RequestParams = {}) =>
     from(
       Axios.request<PlexAccountDTO>({
         url: `/api/PlexAccount`,

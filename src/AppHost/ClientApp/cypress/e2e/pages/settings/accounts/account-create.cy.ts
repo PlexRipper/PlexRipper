@@ -1,6 +1,6 @@
 import { route } from '@fixtures';
 import { generatePlexAccount, generateResultDTO } from '@mock';
-import type { PlexAccountDTO } from '@dto';
+import type { CreatePlexAccountDTO, PlexAccountDTO } from '@dto';
 import { PlexAccountPaths } from '@api-urls';
 
 describe('Add Plex account to Reaparr', () => {
@@ -13,11 +13,11 @@ describe('Add Plex account to Reaparr', () => {
 		cy.visit(route('/settings/accounts'));
 	});
 
-	xit('Should create an Account when input is valid and close on save', () => {
+	it('Should create an Account when input is valid and close on save', () => {
 		cy.getPageData().then(() => cy.createPlexAccount(null));
 	});
 
-	xit('Should request a verification code when 2Fa is enabled for an Plex account', function () {
+	it('Should request a verification code when 2Fa is enabled for an Plex account', function () {
 		const plexAccount: PlexAccountDTO = generatePlexAccount({ id: 99 });
 
 		cy.getCy('account-overview-add-account').click();
@@ -70,6 +70,7 @@ describe('Add Plex account to Reaparr', () => {
 					password: '',
 					isValidated: false,
 					is2Fa: false,
+					hasPassword: true,
 				},
 			});
 
@@ -84,8 +85,18 @@ describe('Add Plex account to Reaparr', () => {
 			// Validate Action
 			cy.validatePlexTokenEndpoint({
 				partialData: {
-					...account,
+					id: 0, // Id is not created on validation
+					authenticationToken: account.authenticationToken,
+					clientId: account.clientId,
+					email: account.email,
+					is2Fa: false,
 					isValidated: true,
+					plexId: account.plexId,
+					title: account.title,
+					username: account.username,
+					uuid: account.uuid,
+					validatedAt: account.validatedAt,
+					hasPassword: account.hasPassword,
 				},
 			});
 
@@ -112,12 +123,29 @@ describe('Add Plex account to Reaparr', () => {
 
 			cy.wait('@createAccount').then((interception) => {
 				expect(interception.request.method).to.equal('POST');
-				expect(interception.request.body).to.deep.equal({ ...account, isValidated: true });
+				const expectedBody: CreatePlexAccountDTO = {
+					isValidated: true,
+					password: account.password,
+					username: account.username,
+					uuid: account.uuid,
+					validatedAt: account.validatedAt,
+					authenticationToken: account.apiAuthenticationToken,
+					customAuthenticationToken: account.authenticationToken,
+					clientId: account.clientId,
+					displayName: account.displayName,
+					email: account.email,
+					is2Fa: account.is2Fa,
+					isEnabled: account.isEnabled,
+					isMain: account.isMain,
+					plexId: account.plexId,
+					title: account.title,
+				};
+				expect(interception.request.body).to.deep.equal(expectedBody);
 			});
 		});
 	});
 
-	xit('Should show failed validation dialog when a invalid token is added manually, and then allow for another validation and succeed', () => {
+	it('Should show failed validation dialog when a invalid token is added manually, and then allow for another validation and succeed', () => {
 		cy.getPageData().then(() => {
 			const account: PlexAccountDTO = generatePlexAccount({
 				id: 99,

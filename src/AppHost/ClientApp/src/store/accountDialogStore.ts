@@ -1,8 +1,8 @@
 import Log from 'consola';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { get } from '@vueuse/core';
-import { tap, catchError } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { tap, catchError, switchMap } from 'rxjs/operators';
+import { type Observable, of } from 'rxjs';
 import { DialogType } from '@enums';
 import { plexAccountApi } from '@api';
 import type { IError, PlexAccountDTO } from '@dto';
@@ -128,26 +128,14 @@ export const useAccountDialogStore = defineStore('AccountDialogStore', () => {
 						return;
 					}
 
-					if (value.isValidated) {
-						Log.info('Account is validated and was added by token');
-						dialogStore.openDialog(DialogType.AccountTokenValidateDialog);
-						return;
-					}
-					state.hasValidationErrors = false;
-
-					if (!value) {
-						state.isValidated = false;
-						state.hasValidationErrors = true;
-						state.validationErrors = [];
-						return;
-					}
-
 					// Update state with validated token data
 					updateStateWithAccountData(value);
+					state.hasValidationErrors = false;
 
 					// Account was validated successfully
 					if (value.isValidated) {
 						Log.info('Token validation successful');
+						dialogStore.openDialog(DialogType.AccountTokenValidateDialog);
 						return;
 					}
 				}),
@@ -228,10 +216,27 @@ export const useAccountDialogStore = defineStore('AccountDialogStore', () => {
 		generateToken(verificationCode: string = '') {
 			return plexAccountApi.generatePlexTokenEndpoint(state.id, { verificationCode });
 		},
-		saveAccount() {
+		saveAccount(): Observable<void> {
 			state.savingLoading = true;
 			if (state.isNewAccount) {
-				return accountStore.createPlexAccount(get(getters.getAccountData)).pipe(
+				const accountData = get(getters.getAccountData);
+				return accountStore.createPlexAccount({
+					customAuthenticationToken: accountData.authenticationToken,
+					authenticationToken: accountData.apiAuthenticationToken,
+					clientId: accountData.clientId,
+					displayName: accountData.displayName,
+					email: accountData.email,
+					is2Fa: accountData.is2Fa,
+					isEnabled: accountData.isEnabled,
+					isMain: accountData.isMain,
+					isValidated: accountData.isValidated,
+					password: accountData.password,
+					plexId: accountData.plexId,
+					title: accountData.title,
+					username: accountData.username,
+					uuid: accountData.uuid,
+					validatedAt: accountData.validatedAt,
+				}).pipe(
 					tap(() => {
 						state.savingLoading = false;
 						dialogStore.closeDialog(DialogType.AccountDialog);
@@ -243,6 +248,7 @@ export const useAccountDialogStore = defineStore('AccountDialogStore', () => {
 					state.savingLoading = false;
 					dialogStore.closeDialog(DialogType.AccountDialog);
 				}),
+				switchMap(() => of(void 0)),
 			);
 		},
 		switchInputMode(isAuthTokenMode: boolean) {

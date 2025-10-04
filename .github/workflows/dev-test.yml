@@ -130,6 +130,11 @@ jobs:
         needs: [Check-Frontend-Changes, Check-PR-Status]
         if: needs.Check-Frontend-Changes.outputs.should_run == 'true' && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
         runs-on: ubuntu-latest
+        strategy:
+            # https://github.com/cypress-io/github-action/issues/48
+            fail-fast: false
+            matrix:
+                containers: [ 1, 2 ] # Uses 2 parallel instances
         steps:
             -   uses: actions/checkout@v4
             -   uses: oven-sh/setup-bun@v1

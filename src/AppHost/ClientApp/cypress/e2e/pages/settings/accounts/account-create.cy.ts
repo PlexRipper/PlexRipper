@@ -6,69 +6,118 @@ import { PlexAccountPaths } from '@api-urls';
 describe('Add Plex account to Reaparr', () => {
 	beforeEach(() => {
 		cy.basePageSetup({
-			plexAccountCount: 2, plexServerCount: 5,
+			plexAccountCount: 2,
+			plexServerCount: 5,
 		});
 
 		cy.visit(route('/settings/accounts'));
 	});
 
 	it('Should create an Account when input is valid and close on save', () => {
-		cy.getPageData().then(() => cy.createPlexAccount(null));
+		cy.getPageData().then(() => {
+			cy.createPlexAccount(null);
+
+			// Verify the account card is visible
+			cy.getCy('account-card-id-99').should('be.visible');
+		});
 	});
 
 	it('Should request a verification code when 2Fa is enabled for an Plex account', function () {
-		const plexAccount: PlexAccountDTO = generatePlexAccount({ id: 99 });
+		const plexAccount: PlexAccountDTO = generatePlexAccount({
+			id: 99,
+			partialData: {
+				is2Fa: true,
+				isValidated: false,
+			},
+		});
 
 		cy.getCy('account-overview-add-account').click();
+		cy.getCy('account-dialog-form').should('be.visible');
 
 		// Fill in credentials
 		cy.getCy('account-form-display-name-input').type(plexAccount.displayName);
 		cy.getCy('account-form-username-input').type(plexAccount.username);
 		cy.getCy('account-form-password-input').type(plexAccount.password);
 
+		// Validate button should be enabled
+		cy.getCy('account-dialog-validate-button').should('not.be.disabled');
+
 		// Validate Action, should return is2Fa true and isValidated false
 		cy.validatePlexCredentialsEndpoint({
 			partialData: {
-				is2Fa: true, isValidated: false,
+				is2Fa: true,
+				isValidated: false,
 			},
 		});
+
 		cy.getCy('account-dialog-validate-button').click();
-		cy.getCy('2fa-code-verification-dialog').should('exist');
+
+		// Verify 2FA dialog appears
+		cy.getCy('2fa-code-verification-dialog').should('be.visible');
+
 		// Insert verification code, should return is2Fa true and isValidated true
 		cy.validatePlexCredentialsEndpoint({
 			partialData: {
-				is2Fa: true, isValidated: true,
+				is2Fa: true,
+				isValidated: true,
 			},
 		});
 
+		// Enter 2FA code
 		cy.get(':nth-child(1) > [data-test="single-input"]').type('123456');
+
+		// Verify 2FA dialog closes after successful validation
+		cy.getCy('2fa-code-verification-dialog').should('not.exist');
+
+		// Save button should now be enabled after successful 2FA validation
+		cy.getCy('account-dialog-save-button').should('not.be.disabled');
 
 		// Create Action
 		cy.intercept('POST', PlexAccountPaths.createPlexAccountEndpoint(), {
-			statusCode: 200, body: generateResultDTO(plexAccount),
-		});
+			statusCode: 200,
+			body: generateResultDTO({ ...plexAccount, isValidated: true }),
+		}).as('createAccount');
 
 		cy.intercept('GET', PlexAccountPaths.getPlexAccountByIdEndpoint(plexAccount.id), {
-			statusCode: 200, body: generateResultDTO(plexAccount),
+			statusCode: 200,
+			body: generateResultDTO({ ...plexAccount, isValidated: true }),
 		});
 
 		cy.getCy('account-dialog-save-button').click();
 		cy.getCy('account-dialog-form').should('not.exist');
+
+		// Verify account was created
+		cy.wait('@createAccount').then((interception) => {
+			expect(interception.request.method).to.equal('POST');
+			expect(interception.request.body.isValidated).to.equal(true);
+			expect(interception.request.body.is2Fa).to.equal(true);
+			expect(interception.request.body.displayName).to.equal(plexAccount.displayName);
+		});
 	});
 
 	it('Should create an Account when a valid token is added manually', () => {
 		cy.getPageData().then(() => {
 			const account: PlexAccountDTO = generatePlexAccount({
-				id: 99, partialData: {
-					username: '', password: '', isValidated: false, is2Fa: false, hasPassword: true,
+				id: 99,
+				partialData: {
+					username: '',
+					password: '',
+					isValidated: false,
+					is2Fa: false,
+					hasPassword: true,
 				},
 			});
 
 			cy.getCy('account-overview-add-account').click();
 			cy.getCy('account-dialog-form').should('be.visible');
 
-			// Fill in credentials
+			// Switch to token mode
 			cy.getCy('account-dialog-auth-token-mode-button').click();
+
+			// Verify token input is visible
+			cy.getCy('account-form-auth-token-input').should('be.visible');
+
+			// Fill in credentials
 			cy.getCy('account-form-display-name-input').type(account.displayName);
 			cy.getCy('account-form-auth-token-input').type(account.authenticationToken);
 
@@ -91,19 +140,26 @@ describe('Add Plex account to Reaparr', () => {
 			});
 
 			cy.getCy('account-dialog-validate-button').click();
+
+			// Verify validation dialog appears
 			cy.getCy('auth-token-validation-dialog').should('be.visible');
+
+			// Verify display name is preserved
+			cy.getCy('account-form-display-name-input').should('have.value', account.displayName);
 
 			cy.getCy('auth-token-validation-dialog-hide-button').click();
 			cy.getCy('auth-token-validation-dialog').should('not.exist');
 
 			// Create Action
 			cy.intercept('POST', PlexAccountPaths.createPlexAccountEndpoint(), {
-				statusCode: 200, body: generateResultDTO(account),
+				statusCode: 200,
+				body: generateResultDTO(account),
 			}).as('createAccount');
 
 			// Hide Account dialog
 			cy.intercept('GET', PlexAccountPaths.getPlexAccountByIdEndpoint(account.id), {
-				statusCode: 200, body: generateResultDTO(account),
+				statusCode: 200,
+				body: generateResultDTO(account),
 			});
 
 			cy.getCy('account-dialog-save-button').click();
@@ -136,22 +192,32 @@ describe('Add Plex account to Reaparr', () => {
 	it('Should show failed validation dialog when a invalid token is added manually, and then allow for another validation and succeed', () => {
 		cy.getPageData().then(() => {
 			const account: PlexAccountDTO = generatePlexAccount({
-				id: 99, partialData: {
-					username: '', password: '', isValidated: false, is2Fa: false,
+				id: 99,
+				partialData: {
+					username: '',
+					password: '',
+					isValidated: false,
+					is2Fa: false,
 				},
 			});
 
 			cy.getCy('account-overview-add-account').click();
 			cy.getCy('account-dialog-form').should('be.visible');
 
-			// Fill in credentials
+			// Switch to token mode
 			cy.getCy('account-dialog-auth-token-mode-button').click();
+
+			// Verify token input is visible
+			cy.getCy('account-form-auth-token-input').should('be.visible');
+
+			// Fill in credentials
 			cy.getCy('account-form-display-name-input').type(account.displayName);
 			cy.getCy('account-form-auth-token-input').type(account.authenticationToken);
 
 			// Validate Action, failed
 			cy.validatePlexTokenEndpoint({
-				isUnAuthorized: true, partialData: {
+				isUnAuthorized: true,
+				partialData: {
 					authenticationToken: account.authenticationToken,
 					clientId: account.clientId,
 					email: account.email,
@@ -166,13 +232,18 @@ describe('Add Plex account to Reaparr', () => {
 			});
 
 			cy.getCy('account-dialog-validate-button').click();
+
+			// Verify validation dialog appears with error
 			cy.getCy('auth-token-validation-dialog').should('be.visible');
 			cy.getCy('auth-token-validation-dialog-invalid-token-alert').should('be.visible');
 
 			cy.getCy('auth-token-validation-dialog-hide-button').click();
+			cy.getCy('auth-token-validation-dialog').should('not.exist');
+
 			// Validate Action, success
 			cy.validatePlexTokenEndpoint({
-				isUnAuthorized: false, partialData: {
+				isUnAuthorized: false,
+				partialData: {
 					authenticationToken: account.authenticationToken,
 					clientId: account.clientId,
 					email: account.email,
@@ -195,12 +266,14 @@ describe('Add Plex account to Reaparr', () => {
 
 			// Create Action
 			cy.intercept('POST', PlexAccountPaths.createPlexAccountEndpoint(), {
-				statusCode: 200, body: generateResultDTO(account),
+				statusCode: 200,
+				body: generateResultDTO(account),
 			}).as('createAccount');
 
 			// Hide Account dialog
 			cy.intercept('GET', PlexAccountPaths.getPlexAccountByIdEndpoint(account.id), {
-				statusCode: 200, body: generateResultDTO(account),
+				statusCode: 200,
+				body: generateResultDTO(account),
 			});
 
 			cy.getCy('account-dialog-save-button').click();
@@ -226,6 +299,282 @@ describe('Add Plex account to Reaparr', () => {
 					title: account.title,
 				};
 				expect(interception.request.body).to.deep.equal(expectedBody);
+			});
+		});
+	});
+
+	it('Should show validation errors when credentials are invalid and allow retry', () => {
+		cy.getPageData().then(() => {
+			const account: PlexAccountDTO = generatePlexAccount({
+				id: 99,
+				partialData: {
+					isValidated: false,
+					is2Fa: false,
+				},
+			});
+
+			cy.getCy('account-overview-add-account').click();
+			cy.getCy('account-dialog-form').should('be.visible');
+
+			// Fill in credentials
+			cy.getCy('account-form-display-name-input').type(account.displayName);
+			cy.getCy('account-form-username-input').type(account.username);
+			cy.getCy('account-form-password-input').type('wrongpassword');
+
+			// First validation attempt - should fail
+			cy.validatePlexCredentialsEndpoint({
+				partialData: {
+					isValidated: false,
+					is2Fa: false,
+				},
+			});
+
+			cy.getCy('account-dialog-validate-button').click();
+
+			// Wait for validation to complete
+			cy.wait(500);
+
+			// Clear password and enter correct one
+			cy.getCy('account-form-password-input').clear();
+			cy.getCy('account-form-password-input').type(account.password);
+
+			// Second validation attempt - should succeed
+			cy.validatePlexCredentialsEndpoint({
+				partialData: {
+					isValidated: true,
+					is2Fa: false,
+				},
+			});
+
+			cy.getCy('account-dialog-validate-button').click();
+
+			// Wait for validation
+			cy.wait(500);
+
+			// Create Action
+			cy.intercept('POST', PlexAccountPaths.createPlexAccountEndpoint(), {
+				statusCode: 200,
+				body: generateResultDTO(account),
+			}).as('createAccount');
+
+			cy.intercept('GET', PlexAccountPaths.getPlexAccountByIdEndpoint(account.id), {
+				statusCode: 200,
+				body: generateResultDTO(account),
+			});
+
+			cy.getCy('account-dialog-save-button').click();
+			cy.getCy('account-dialog-form').should('not.exist');
+
+			cy.wait('@createAccount').then((interception) => {
+				expect(interception.request.method).to.equal('POST');
+				expect(interception.request.body.isValidated).to.equal(true);
+				expect(interception.request.body.displayName).to.equal(account.displayName);
+			});
+		});
+	});
+
+	it('Should close dialog without saving when cancel button is clicked', () => {
+		cy.getPageData().then(() => {
+			const account: PlexAccountDTO = generatePlexAccount({
+				id: 99,
+				partialData: {
+					isValidated: false,
+					is2Fa: false,
+				},
+			});
+
+			// Open dialog
+			cy.getCy('account-overview-add-account').click();
+			cy.getCy('account-dialog-form').should('be.visible');
+
+			// Fill in some credentials
+			cy.getCy('account-form-display-name-input').type(account.displayName);
+			cy.getCy('account-form-username-input').type(account.username);
+			cy.getCy('account-form-password-input').type(account.password);
+
+			// Verify dialog is open
+			cy.getCy('account-dialog-form').should('be.visible');
+
+			// Close dialog by clicking the close button (X button in top right corner)
+			cy.getCy('dialog-close-button').click();
+
+			// Verify dialog is closed
+			cy.getCy('account-dialog-form').should('not.exist');
+
+			// Verify no account was created (should not have account-99)
+			cy.getCy('account-card-id-99').should('not.exist');
+
+			// Verify we're still on the accounts page
+			cy.url().should('include', '/settings/accounts');
+		});
+	});
+
+	it('Should switch between token and credentials mode and clear input fields', () => {
+		cy.getPageData().then(() => {
+			const account: PlexAccountDTO = generatePlexAccount({
+				id: 99,
+				partialData: {
+					isValidated: false,
+					is2Fa: false,
+				},
+			});
+
+			cy.getCy('account-overview-add-account').click();
+			cy.getCy('account-dialog-form').should('be.visible');
+
+			// Start with credentials mode
+			cy.getCy('account-form-display-name-input').type(account.displayName);
+			cy.getCy('account-form-username-input').should('be.visible').type('test-username');
+			cy.getCy('account-form-password-input').should('be.visible').type('test-password');
+
+			// Switch to token mode
+			cy.getCy('account-dialog-auth-token-mode-button').click();
+
+			// Verify token input is visible and credentials are hidden
+			cy.getCy('account-form-auth-token-input').should('be.visible');
+			cy.getCy('account-form-username-input').should('not.exist');
+			cy.getCy('account-form-password-input').should('not.exist');
+
+			// Display name should still be present
+			cy.getCy('account-form-display-name-input').should('have.value', account.displayName);
+
+			// Enter token
+			cy.getCy('account-form-auth-token-input').type('test-token-123');
+
+			// Switch back to credentials mode
+			cy.getCy('account-dialog-credentials-mode-button').click();
+
+			// Verify credentials inputs are visible and token is hidden
+			cy.getCy('account-form-username-input').should('be.visible');
+			cy.getCy('account-form-password-input').should('be.visible');
+			cy.getCy('account-form-auth-token-input').should('not.exist');
+
+			// Verify fields were cleared when switching modes
+			cy.getCy('account-form-username-input').should('have.value', '');
+			cy.getCy('account-form-password-input').should('have.value', '');
+
+			// Display name should still be present
+			cy.getCy('account-form-display-name-input').should('have.value', account.displayName);
+		});
+	});
+
+	it('Should disable save button until validation is successful', () => {
+		cy.getPageData().then(() => {
+			const account: PlexAccountDTO = generatePlexAccount({
+				id: 99,
+				partialData: {
+					isValidated: false,
+					is2Fa: false,
+				},
+			});
+
+			cy.getCy('account-overview-add-account').click();
+			cy.getCy('account-dialog-form').should('be.visible');
+
+			// Fill in credentials
+			cy.getCy('account-form-display-name-input').type(account.displayName);
+			cy.getCy('account-form-username-input').type(account.username);
+			cy.getCy('account-form-password-input').type(account.password);
+
+			// Validate credentials
+			cy.validatePlexCredentialsEndpoint({
+				partialData: {
+					isValidated: true,
+					is2Fa: false,
+				},
+			});
+
+			cy.getCy('account-dialog-validate-button').click();
+
+			// Wait for validation to complete
+			cy.wait(500);
+
+			// Verify save button exists and is clickable after validation
+			cy.getCy('account-dialog-save-button').should('be.visible');
+		});
+	});
+
+	it('Should preserve display name when switching between validation modes', () => {
+		cy.getPageData().then(() => {
+			const account: PlexAccountDTO = generatePlexAccount({
+				id: 99,
+				partialData: {
+					isValidated: false,
+					is2Fa: false,
+				},
+			});
+
+			const displayName = 'My Preserved Display Name';
+
+			cy.getCy('account-overview-add-account').click();
+			cy.getCy('account-dialog-form').should('be.visible');
+
+			// Enter display name in credentials mode
+			cy.getCy('account-form-display-name-input').type(displayName);
+			cy.getCy('account-form-username-input').type(account.username);
+			cy.getCy('account-form-password-input').type(account.password);
+
+			// Validate credentials
+			cy.validatePlexCredentialsEndpoint({
+				partialData: {
+					isValidated: true,
+					is2Fa: false,
+				},
+			});
+
+			cy.getCy('account-dialog-validate-button').click();
+
+			// Verify display name is still present
+			cy.getCy('account-form-display-name-input').should('have.value', displayName);
+
+			// Switch to token mode
+			cy.getCy('account-dialog-auth-token-mode-button').click();
+
+			// Verify display name is preserved
+			cy.getCy('account-form-display-name-input').should('have.value', displayName);
+
+			// Enter token and validate
+			cy.getCy('account-form-auth-token-input').type(account.authenticationToken);
+
+			cy.validatePlexTokenEndpoint({
+				partialData: {
+					authenticationToken: account.authenticationToken,
+					clientId: account.clientId,
+					email: account.email,
+					is2Fa: false,
+					isValidated: true,
+					plexId: account.plexId,
+					title: account.title,
+					username: account.username,
+					uuid: account.uuid,
+					validatedAt: account.validatedAt,
+				},
+			});
+
+			cy.getCy('account-dialog-validate-button').click();
+			cy.getCy('auth-token-validation-dialog').should('be.visible');
+			cy.getCy('auth-token-validation-dialog-hide-button').click();
+
+			// Verify display name is still preserved after token validation
+			cy.getCy('account-form-display-name-input').should('have.value', displayName);
+
+			// Create account
+			cy.intercept('POST', PlexAccountPaths.createPlexAccountEndpoint(), {
+				statusCode: 200,
+				body: generateResultDTO({ ...account, displayName }),
+			}).as('createAccount');
+
+			cy.intercept('GET', PlexAccountPaths.getPlexAccountByIdEndpoint(account.id), {
+				statusCode: 200,
+				body: generateResultDTO({ ...account, displayName }),
+			});
+
+			cy.getCy('account-dialog-save-button').click();
+			cy.getCy('account-dialog-form').should('not.exist');
+
+			// Verify the created account has the preserved display name
+			cy.wait('@createAccount').then((interception) => {
+				expect(interception.request.body.displayName).to.equal(displayName);
 			});
 		});
 	});

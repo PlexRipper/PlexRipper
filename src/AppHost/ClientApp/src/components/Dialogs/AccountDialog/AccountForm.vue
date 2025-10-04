@@ -107,11 +107,16 @@
 						:label="$t('help.account-form.auth-token.label')"
 						:title="$t('help.account-form.auth-token.title')"
 						:text="$t('help.account-form.auth-token.text')">
-						<PasswordInputField
+						<q-input
 							v-model="accountDialogStore.authenticationToken"
-							disable-validation
-							class="q-my-md"
-							cy="account-form-auth-token-input" />
+							:rules="getAuthTokenRules"
+							color="red"
+							full-width
+							outlined
+							required
+							hide-bottom-space
+							type="password"
+							data-cy="account-form-auth-token-input" />
 					</HelpRow>
 				</HelpGroup>
 			</q-tab-panel>
@@ -141,6 +146,14 @@ const getDisplayNameRules = computed(() => [
 ]);
 
 const getUsernameRules = computed(() => [(v: string): boolean | string => !!v || t('components.account-form.validation.username-is-required')]);
+
+const getAuthTokenRules = computed(() => [
+	(v: string): boolean | string => !!v || t('components.account-form.validation.auth-token-required'),
+	(v: string): boolean | string => (v && v.length >= 5) || t('components.account-form.validation.auth-token-length', {
+		count: 5,
+	}),
+	(v: string): boolean | string => (v && /^[a-zA-Z0-9_-]+$/.test(v)) || t('components.account-form.validation.auth-token-format'),
+]);
 
 function setValidationState(state: boolean) {
 	accountDialogStore.$patch({

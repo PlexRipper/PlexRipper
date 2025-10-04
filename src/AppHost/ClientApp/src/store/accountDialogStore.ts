@@ -1,7 +1,8 @@
 import Log from 'consola';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { get } from '@vueuse/core';
-import { tap } from 'rxjs/operators';
+import { tap, catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
 import { DialogType } from '@enums';
 import { plexAccountApi } from '@api';
 import type { IError, PlexAccountDTO } from '@dto';
@@ -61,6 +62,33 @@ export const useAccountDialogStore = defineStore('AccountDialogStore', () => {
 	const dialogStore = useDialogStore();
 	const accountStore = useAccountStore();
 
+	// Helper function to update state with validated account data
+	const updateStateWithAccountData = (accountData: {
+		clientId: string;
+		username: string;
+		email: string;
+		title: string;
+		plexId: number;
+		uuid: string;
+		authenticationToken: string;
+		isValidated: boolean;
+		validatedAt?: string | null;
+		is2Fa: boolean;
+	}) => {
+		Object.assign(state, {
+			clientId: accountData.clientId,
+			username: accountData.username,
+			email: accountData.email,
+			title: accountData.title,
+			plexId: accountData.plexId,
+			uuid: accountData.uuid,
+			authenticationToken: accountData.authenticationToken,
+			isValidated: accountData.isValidated,
+			validatedAt: accountData.validatedAt,
+			is2Fa: accountData.is2Fa,
+		});
+	};
+
 	const actions = {
 		openDialog({ accountId }: IAccountDialog): void {
 			state.isNewAccount = accountId === 0;
@@ -84,17 +112,28 @@ export const useAccountDialogStore = defineStore('AccountDialogStore', () => {
 				displayName: state.displayName,
 				manualAuthenticationToken: state.authenticationToken,
 			}).pipe(
-				tap(({ value, isSuccess }) => {
-					if (!isSuccess) {
+				tap(({ value, isSuccess, errors }) => {
+					// Always reset loading state
+					state.validateLoading = false;
+
+					if (!isSuccess || !value) {
+						Log.error('Token validation failed', errors);
+						return;
+					}
+
+					if (!isSuccess || value?.isUnAuthorized) {
 						state.isValidated = false;
 						state.hasValidationErrors = true;
-						state.validateLoading = false;
 						dialogStore.openDialog(DialogType.AccountTokenValidateDialog);
 						return;
 					}
 
+					if (value.isValidated) {
+						Log.info('Account is validated and was added by token');
+						dialogStore.openDialog(DialogType.AccountTokenValidateDialog);
+						return;
+					}
 					state.hasValidationErrors = false;
-					state.validateLoading = false;
 
 					if (!value) {
 						state.isValidated = false;
@@ -104,24 +143,21 @@ export const useAccountDialogStore = defineStore('AccountDialogStore', () => {
 					}
 
 					// Update state with validated token data
-					Object.assign(state, {
-						clientId: value.clientId,
-						username: value.username,
-						email: value.email,
-						title: value.title,
-						plexId: value.plexId,
-						uuid: value.uuid,
-						authenticationToken: value.authenticationToken,
-						isValidated: value.isValidated,
-						validatedAt: value.validatedAt,
-						is2Fa: value.is2Fa,
-					});
+					updateStateWithAccountData(value);
 
 					// Account was validated successfully
 					if (value.isValidated) {
 						Log.info('Token validation successful');
 						return;
 					}
+				}),
+				catchError((error) => {
+					// Reset loading state on error
+					state.validateLoading = false;
+					state.isValidated = false;
+					state.hasValidationErrors = true;
+					Log.error('Token validation failed', error);
+					return of({ value: null, isSuccess: false });
 				}),
 			);
 		},
@@ -130,43 +166,18 @@ export const useAccountDialogStore = defineStore('AccountDialogStore', () => {
 
 			return plexAccountApi.validatePlexCredentialsEndpoint(get(getters.getAccountData)).pipe(
 				tap(({ value, isSuccess }) => {
-					if (!isSuccess || value?.isUnAuthorized) {
-						state.isValidated = false;
-						state.hasValidationErrors = true;
-						state.validateLoading = false;
-						dialogStore.openDialog(DialogType.AccountTokenValidateDialog);
-						return;
-					}
-
-					state.hasValidationErrors = false;
+					// Always reset loading state
 					state.validateLoading = false;
 
-					if (!value) {
+					if (!isSuccess || !value) {
 						state.isValidated = false;
 						state.hasValidationErrors = true;
-						state.validationErrors = [];
+						dialogStore.openDialog(DialogType.AccountTokenValidateDialog);
 						return;
 					}
 
 					// Update state with validated credentials data
-					Object.assign(state, {
-						clientId: value.clientId,
-						username: value.username,
-						email: value.email,
-						title: value.title,
-						plexId: value.plexId,
-						uuid: value.uuid,
-						authenticationToken: value.authenticationToken,
-						isValidated: value.isValidated,
-						validatedAt: value.validatedAt,
-						is2Fa: value.is2Fa,
-					});
-
-					if (value.isValidated && !(value.username != '' && value.password != '')) {
-						Log.info('Account is validated and was added by token');
-						dialogStore.openDialog(DialogType.AccountTokenValidateDialog);
-						return;
-					}
+					updateStateWithAccountData(value);
 
 					// Account has no 2FA and was valid
 					if (value.isValidated && !value.is2Fa) {
@@ -191,6 +202,14 @@ export const useAccountDialogStore = defineStore('AccountDialogStore', () => {
 						Log.info('Account was valid and has 2FA enabled, this makes no sense and sounds like a bug');
 					}
 				}),
+				catchError((error) => {
+					// Reset loading state on error
+					state.validateLoading = false;
+					state.isValidated = false;
+					state.hasValidationErrors = true;
+					Log.error('Credentials validation failed', error);
+					return of({ value: null, isSuccess: false });
+				}),
 			);
 		},
 		validateVerificationCode() {
@@ -199,18 +218,7 @@ export const useAccountDialogStore = defineStore('AccountDialogStore', () => {
 					if (isSuccess && value) {
 						dialogStore.closeDialog(DialogType.AccountVerificationCodeDialog);
 						// Update state with validated credentials data
-						Object.assign(state, {
-							clientId: value.clientId,
-							username: value.username,
-							email: value.email,
-							title: value.title,
-							plexId: value.plexId,
-							uuid: value.uuid,
-							authenticationToken: value.authenticationToken,
-							isValidated: value.isValidated,
-							validatedAt: value.validatedAt,
-							is2Fa: value.is2Fa,
-						});
+						updateStateWithAccountData(value);
 					} else {
 						Log.error('Validate Error', value);
 					}

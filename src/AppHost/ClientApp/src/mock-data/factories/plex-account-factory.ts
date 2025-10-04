@@ -54,7 +54,7 @@ export function generatePlexAccount({
 		isEnabled: true,
 		isMain: randBoolean(),
 		isValidated: randBoolean(),
-		password: randPassword()[0],
+		password: randPassword(),
 		plexId: randNumber({ min: 1, max: 10000 }),
 		title: randCompanyName(),
 		username: randCompanyName(),

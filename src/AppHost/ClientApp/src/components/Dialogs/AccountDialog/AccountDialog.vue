@@ -59,7 +59,7 @@
 								:disabled="accountDialogStore.validateLoading"
 								cy="account-dialog-validate-button"
 								block
-								@click="!accountDialogStore.isAuthTokenMode ? validatePlexAccount : validatePlexToken" />
+								@click="!accountDialogStore.isAuthTokenMode ? validatePlexAccount() : validatePlexToken()" />
 						</QCol>
 						<!-- Save account -->
 						<QCol>

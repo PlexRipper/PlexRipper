@@ -9,6 +9,8 @@
 		outlined
 		required
 		hide-bottom-space
+		name="password"
+		autocomplete="current-password"
 		:data-cy="cy"
 		:append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
 		:type="showPassword ? 'text' : 'password'"

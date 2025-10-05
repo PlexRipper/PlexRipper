@@ -81,6 +81,8 @@
 							outlined
 							required
 							hide-bottom-space
+							name="username"
+							autocomplete="username"
 							data-cy="account-form-username-input" />
 					</HelpRow>
 

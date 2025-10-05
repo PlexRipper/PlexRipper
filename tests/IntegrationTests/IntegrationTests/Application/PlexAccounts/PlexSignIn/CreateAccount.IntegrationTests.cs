@@ -60,7 +60,7 @@ public class CreateAccountIntegrationTests : BaseIntegrationTests
             CustomAuthenticationToken = plexAccount.CustomAuthenticationToken,
             AuthenticationToken = plexAccount.AuthenticationToken,
         };
-        
+
         // Act
         var client = container.GetApiClient();
         await client.SignIn();

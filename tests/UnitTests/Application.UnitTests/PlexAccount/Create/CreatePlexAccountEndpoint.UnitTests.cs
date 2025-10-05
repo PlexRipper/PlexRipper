@@ -33,7 +33,7 @@ public class CreatePlexAccountEndpointUnitTests : BaseUnitTest
             ClientId = newAccount.ClientId,
             Is2Fa = newAccount.Is2Fa,
             CustomAuthenticationToken = newAccount.CustomAuthenticationToken,
-            AuthenticationToken = newAccount.AuthenticationToken
+            AuthenticationToken = newAccount.AuthenticationToken,
         };
 
         // Act
@@ -76,10 +76,9 @@ public class CreatePlexAccountEndpointUnitTests : BaseUnitTest
             ClientId = newAccount.ClientId,
             Is2Fa = newAccount.Is2Fa,
             CustomAuthenticationToken = newAccount.CustomAuthenticationToken,
-            AuthenticationToken = newAccount.AuthenticationToken
+            AuthenticationToken = newAccount.AuthenticationToken,
         };
-        
-        
+
         // Act
         var endPoint = SetupEndpointUnitTest<CreatePlexAccountEndpoint>();
         await endPoint.HandleAsync(

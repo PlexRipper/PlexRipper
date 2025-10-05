@@ -4,7 +4,7 @@ using Reaparr.Application;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 
-namespace Reaparr.IntegrationTests.AccountController;
+namespace Reaparr.IntegrationTests;
 
 public class CreateAccountIntegrationTests : BaseIntegrationTests
 {
@@ -42,7 +42,7 @@ public class CreateAccountIntegrationTests : BaseIntegrationTests
         );
 
         var plexAccount = FakeData.GetPlexAccount(4347564).Generate();
-        var plexAccountDTO = new CreatePlexAccountDTO
+        var plexAccountDTO = new CreatePlexAccountEndpointRequest
         {
             DisplayName = plexAccount.DisplayName,
             Username = plexAccount.Username,
@@ -68,7 +68,7 @@ public class CreateAccountIntegrationTests : BaseIntegrationTests
             CreatePlexAccountEndpoint,
             CreatePlexAccountEndpointRequest,
             ResultDTO<PlexAccountDTO>
-        >(new CreatePlexAccountEndpointRequest { PlexAccount = plexAccountDTO });
+        >(plexAccountDTO);
         response.Response.IsSuccessStatusCode.ShouldBeTrue();
 
         var resultDTO = response.Result;

@@ -1,5 +1,4 @@
-﻿using Reaparr.Application.Contracts;
-using Reaparr.Data.Contracts;
+﻿using Reaparr.Data.Contracts;
 
 namespace Reaparr.Application.UnitTests;
 
@@ -17,7 +16,7 @@ public class CreatePlexAccountEndpointUnitTests : BaseUnitTest
 
         mock.SetupCommand(It.IsAny<InspectAllPlexServersByAccountIdCommand>).ReturnsAsync(Result.Ok());
 
-        var createPlexAccountDTO = new CreatePlexAccountDTO
+        var createPlexAccountDTO = new CreatePlexAccountEndpointRequest
         {
             DisplayName = newAccount.DisplayName,
             Username = newAccount.Username,
@@ -38,10 +37,7 @@ public class CreatePlexAccountEndpointUnitTests : BaseUnitTest
 
         // Act
         var endPoint = SetupEndpointUnitTest<CreatePlexAccountEndpoint>();
-        await endPoint.HandleAsync(
-            new CreatePlexAccountEndpointRequest { PlexAccount = createPlexAccountDTO },
-            CancellationToken
-        );
+        await endPoint.HandleAsync(createPlexAccountDTO, CancellationToken);
         var result = endPoint.Response;
 
         // Assert
@@ -60,7 +56,7 @@ public class CreatePlexAccountEndpointUnitTests : BaseUnitTest
 
         mock.SetupCommand(It.IsAny<InspectAllPlexServersByAccountIdCommand>).ReturnsAsync(Result.Ok());
 
-        var createPlexAccountDTO = new CreatePlexAccountDTO
+        var createPlexAccountDTO = new CreatePlexAccountEndpointRequest
         {
             DisplayName = newAccount.DisplayName,
             Username = newAccount.Username,
@@ -81,10 +77,7 @@ public class CreatePlexAccountEndpointUnitTests : BaseUnitTest
 
         // Act
         var endPoint = SetupEndpointUnitTest<CreatePlexAccountEndpoint>();
-        await endPoint.HandleAsync(
-            new CreatePlexAccountEndpointRequest { PlexAccount = createPlexAccountDTO },
-            CancellationToken
-        );
+        await endPoint.HandleAsync(createPlexAccountDTO, CancellationToken);
         var result = endPoint.Response;
 
         // Assert

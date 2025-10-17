@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -12,7 +13,11 @@
 import type { RequestParams } from "./http-client";
 import { ContentType } from "./http-client";
 
-import type { BaseResultDTO, FileSystemDTO, FolderPathDTO } from "./data-contracts";
+import type {
+  BaseResultDTO,
+  FileSystemDTO,
+  FolderPathDTO,
+} from "./data-contracts";
 
 import { apiCheckPipe } from "@api/base";
 import Axios from "axios";
@@ -27,7 +32,10 @@ export class FolderPath {
    * @request POST:/api/FolderPath
    * @secure
    */
-  createFolderPathEndpoint = (data: FolderPathDTO, params: RequestParams = {}) =>
+  createFolderPathEndpoint = (
+    data: FolderPathDTO,
+    params: RequestParams = {},
+  ) =>
     from(
       Axios.request<FolderPathDTO>({
         url: `/api/FolderPath`,
@@ -65,7 +73,10 @@ export class FolderPath {
    * @request PUT:/api/FolderPath
    * @secure
    */
-  updateFolderPathEndpoint = (data: FolderPathDTO, params: RequestParams = {}) =>
+  updateFolderPathEndpoint = (
+    data: FolderPathDTO,
+    params: RequestParams = {},
+  ) =>
     from(
       Axios.request<FolderPathDTO>({
         url: `/api/FolderPath`,
@@ -124,13 +135,17 @@ export class FolderPath {
 }
 
 export class FolderPathPaths {
-  static createFolderPathEndpoint = () => queryString.stringifyUrl({ url: `/api/FolderPath` });
+  static createFolderPathEndpoint = () =>
+    queryString.stringifyUrl({ url: `/api/FolderPath` });
 
-  static getAllFolderPathsEndpoint = () => queryString.stringifyUrl({ url: `/api/FolderPath` });
+  static getAllFolderPathsEndpoint = () =>
+    queryString.stringifyUrl({ url: `/api/FolderPath` });
 
-  static updateFolderPathEndpoint = () => queryString.stringifyUrl({ url: `/api/FolderPath` });
+  static updateFolderPathEndpoint = () =>
+    queryString.stringifyUrl({ url: `/api/FolderPath` });
 
-  static deleteFolderPathEndpoint = (id: number) => queryString.stringifyUrl({ url: `/api/FolderPath/${id}` });
+  static deleteFolderPathEndpoint = (id: number) =>
+    queryString.stringifyUrl({ url: `/api/FolderPath/${id}` });
 
   static getFolderPathDirectoryEndpoint = (query?: {
     /** @default "" */

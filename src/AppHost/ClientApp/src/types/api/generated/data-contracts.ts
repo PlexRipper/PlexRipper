@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -67,24 +68,33 @@ export interface CreateDownloadTasksRequest {
   downloadMedias: DownloadMediaDTO[];
 }
 
-export interface CreatePlexAccountDTO {
+export interface CreatePlexAccountEndpointRequest {
   is2Fa: boolean;
+  /** @minLength 5 */
   authenticationToken: string;
+  /** @minLength 1 */
   clientId: string;
   customAuthenticationToken: string;
+  /** @minLength 1 */
   displayName: string;
   email: string;
   isEnabled: boolean;
   isMain: boolean;
   isValidated: boolean;
+  /** @minLength 5 */
   password: string;
-  /** @format int64 */
+  /**
+   * @format int64
+   * @minLength 1
+   */
   plexId: number;
   title: string;
+  /** @minLength 5 */
   username: string;
+  /** @minLength 1 */
   uuid: string;
   /** @format date-time */
-  validatedAt?: string | null;
+  validatedAt: string;
 }
 
 export interface CreatePlexServerConnectionEndpointRequest {
@@ -562,9 +572,9 @@ export enum PlexAccessState {
 
 export interface PlexAccountDTO {
   is2Fa: boolean;
-  apiAuthenticationToken: string;
   authenticationToken: string;
   clientId: string;
+  customAuthenticationToken: string;
   displayName: string;
   email: string;
   hasPassword: boolean;
@@ -1433,8 +1443,8 @@ export enum VideoQuality {
   HD = "HD",
   FullHD = "FullHD",
   QHD = "QHD",
-  UHD4K = "UHD_4K",
-  UHD8K = "UHD_8K",
+  UHD_4K = "UHD_4K",
+  UHD_8K = "UHD_8K",
   None = "None",
 }
 

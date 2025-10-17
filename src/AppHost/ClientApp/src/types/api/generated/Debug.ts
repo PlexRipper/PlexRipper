@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -77,11 +78,13 @@ export class DebugPaths {
     /** @format int32 */
     count?: number | null;
     type: PlexMediaType;
-  }) => queryString.stringifyUrl({ url: `/api/Debug/get-all-subtitles`, query });
+  }) =>
+    queryString.stringifyUrl({ url: `/api/Debug/get-all-subtitles`, query });
 
   static getAllUniqueMediaTitlesEndpoint = (query: {
     /** @format int32 */
     count: number;
     type: PlexMediaType;
-  }) => queryString.stringifyUrl({ url: `/api/Debug/unique-media-titles`, query });
+  }) =>
+    queryString.stringifyUrl({ url: `/api/Debug/unique-media-titles`, query });
 }

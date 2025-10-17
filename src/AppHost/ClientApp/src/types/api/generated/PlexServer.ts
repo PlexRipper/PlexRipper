@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -48,7 +49,10 @@ export class PlexServer {
    * @request GET:/api/PlexServer/{PlexServerId}
    * @secure
    */
-  getPlexServerByIdEndpoint = (plexServerId: number, params: RequestParams = {}) =>
+  getPlexServerByIdEndpoint = (
+    plexServerId: number,
+    params: RequestParams = {},
+  ) =>
     from(
       Axios.request<PlexServerDTO>({
         url: `/api/PlexServer/${plexServerId}`,
@@ -85,7 +89,10 @@ export class PlexServer {
    * @request GET:/api/PlexServer/{PlexServerId}/inspect
    * @secure
    */
-  queueInspectPlexServerJobEndpoint = (plexServerId: number, params: RequestParams = {}) =>
+  queueInspectPlexServerJobEndpoint = (
+    plexServerId: number,
+    params: RequestParams = {},
+  ) =>
     from(
       Axios.request<BaseResultDTO>({
         url: `/api/PlexServer/${plexServerId}/inspect`,
@@ -103,7 +110,10 @@ export class PlexServer {
    * @request GET:/api/PlexServer/{PlexServerId}/refresh
    * @secure
    */
-  refreshPlexServerConnectionsEndpoint = (plexServerId: number, params: RequestParams = {}) =>
+  refreshPlexServerConnectionsEndpoint = (
+    plexServerId: number,
+    params: RequestParams = {},
+  ) =>
     from(
       Axios.request<PlexServerDTO>({
         url: `/api/PlexServer/${plexServerId}/refresh`,
@@ -192,33 +202,51 @@ export class PlexServer {
 }
 
 export class PlexServerPaths {
-  static setPreferredPlexServerConnectionEndpoint = (plexServerId: number, plexServerConnectionId: number) =>
-    queryString.stringifyUrl({ url: `/api/PlexServer/${plexServerId}/preferred-connection/${plexServerConnectionId}` });
+  static setPreferredPlexServerConnectionEndpoint = (
+    plexServerId: number,
+    plexServerConnectionId: number,
+  ) =>
+    queryString.stringifyUrl({
+      url: `/api/PlexServer/${plexServerId}/preferred-connection/${plexServerConnectionId}`,
+    });
 
   static getPlexServerByIdEndpoint = (plexServerId: number) =>
     queryString.stringifyUrl({ url: `/api/PlexServer/${plexServerId}` });
 
-  static getAllPlexServersEndpoint = () => queryString.stringifyUrl({ url: `/api/PlexServer` });
+  static getAllPlexServersEndpoint = () =>
+    queryString.stringifyUrl({ url: `/api/PlexServer` });
 
   static queueInspectPlexServerJobEndpoint = (plexServerId: number) =>
-    queryString.stringifyUrl({ url: `/api/PlexServer/${plexServerId}/inspect` });
+    queryString.stringifyUrl({
+      url: `/api/PlexServer/${plexServerId}/inspect`,
+    });
 
   static refreshPlexServerConnectionsEndpoint = (plexServerId: number) =>
-    queryString.stringifyUrl({ url: `/api/PlexServer/${plexServerId}/refresh` });
+    queryString.stringifyUrl({
+      url: `/api/PlexServer/${plexServerId}/refresh`,
+    });
 
   static setServerAlias = (
     plexServerId: number,
     query: {
       serverAlias: string;
     },
-  ) => queryString.stringifyUrl({ url: `/api/PlexServer/${plexServerId}/set-server-alias`, query });
+  ) =>
+    queryString.stringifyUrl({
+      url: `/api/PlexServer/${plexServerId}/set-server-alias`,
+      query,
+    });
 
   static setServerHiddenRequestEndpoint = (
     plexServerId: number,
     query: {
       hidden: boolean;
     },
-  ) => queryString.stringifyUrl({ url: `/api/PlexServer/${plexServerId}/set-server-hidden`, query });
+  ) =>
+    queryString.stringifyUrl({
+      url: `/api/PlexServer/${plexServerId}/set-server-hidden`,
+      query,
+    });
 
   static queueSyncPlexServerJobEndpoint = (
     plexServerId: number,
@@ -226,5 +254,9 @@ export class PlexServerPaths {
       /** @default false */
       forceSync?: boolean;
     },
-  ) => queryString.stringifyUrl({ url: `/api/PlexServer/${plexServerId}/sync`, query });
+  ) =>
+    queryString.stringifyUrl({
+      url: `/api/PlexServer/${plexServerId}/sync`,
+      query,
+    });
 }

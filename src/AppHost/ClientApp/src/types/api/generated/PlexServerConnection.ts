@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -35,7 +36,10 @@ export class PlexServerConnection {
    * @request GET:/api/PlexServerConnection/check/by-server/{PlexServerId}
    * @secure
    */
-  checkAllConnectionsStatusByPlexServerEndpoint = (plexServerId: number, params: RequestParams = {}) =>
+  checkAllConnectionsStatusByPlexServerEndpoint = (
+    plexServerId: number,
+    params: RequestParams = {},
+  ) =>
     from(
       Axios.request<PlexServerStatusDTO[]>({
         url: `/api/PlexServerConnection/check/by-server/${plexServerId}`,
@@ -53,7 +57,10 @@ export class PlexServerConnection {
    * @request GET:/api/PlexServerConnection/check/{PlexServerConnectionId}
    * @secure
    */
-  checkConnectionStatusByIdEndpoint = (plexServerConnectionId: number, params: RequestParams = {}) =>
+  checkConnectionStatusByIdEndpoint = (
+    plexServerConnectionId: number,
+    params: RequestParams = {},
+  ) =>
     from(
       Axios.request<PlexServerStatusDTO>({
         url: `/api/PlexServerConnection/check/${plexServerConnectionId}`,
@@ -71,7 +78,10 @@ export class PlexServerConnection {
    * @request POST:/api/PlexServerConnection
    * @secure
    */
-  createPlexServerConnectionEndpoint = (data: CreatePlexServerConnectionEndpointRequest, params: RequestParams = {}) =>
+  createPlexServerConnectionEndpoint = (
+    data: CreatePlexServerConnectionEndpointRequest,
+    params: RequestParams = {},
+  ) =>
     from(
       Axios.request<PlexServerConnectionDTO>({
         url: `/api/PlexServerConnection`,
@@ -109,7 +119,10 @@ export class PlexServerConnection {
    * @request PATCH:/api/PlexServerConnection
    * @secure
    */
-  updatePlexServerConnectionEndpoint = (data: UpdatePlexServerConnectionEndpointRequest, params: RequestParams = {}) =>
+  updatePlexServerConnectionEndpoint = (
+    data: UpdatePlexServerConnectionEndpointRequest,
+    params: RequestParams = {},
+  ) =>
     from(
       Axios.request<PlexServerConnectionDTO>({
         url: `/api/PlexServerConnection`,
@@ -129,7 +142,10 @@ export class PlexServerConnection {
    * @request DELETE:/api/PlexServerConnection/{PlexServerConnectionId}
    * @secure
    */
-  deletePlexServerConnectionById = (plexServerConnectionId: number, params: RequestParams = {}) =>
+  deletePlexServerConnectionById = (
+    plexServerConnectionId: number,
+    params: RequestParams = {},
+  ) =>
     from(
       Axios.request<BaseResultDTO>({
         url: `/api/PlexServerConnection/${plexServerConnectionId}`,
@@ -147,7 +163,10 @@ export class PlexServerConnection {
    * @request GET:/api/PlexServerConnection/{PlexServerConnectionId}
    * @secure
    */
-  getPlexServerConnectionByIdEndpoint = (plexServerConnectionId: number, params: RequestParams = {}) =>
+  getPlexServerConnectionByIdEndpoint = (
+    plexServerConnectionId: number,
+    params: RequestParams = {},
+  ) =>
     from(
       Axios.request<PlexServerConnectionDTO>({
         url: `/api/PlexServerConnection/${plexServerConnectionId}`,
@@ -183,23 +202,38 @@ export class PlexServerConnection {
 }
 
 export class PlexServerConnectionPaths {
-  static checkAllConnectionsStatusByPlexServerEndpoint = (plexServerId: number) =>
-    queryString.stringifyUrl({ url: `/api/PlexServerConnection/check/by-server/${plexServerId}` });
+  static checkAllConnectionsStatusByPlexServerEndpoint = (
+    plexServerId: number,
+  ) =>
+    queryString.stringifyUrl({
+      url: `/api/PlexServerConnection/check/by-server/${plexServerId}`,
+    });
 
   static checkConnectionStatusByIdEndpoint = (plexServerConnectionId: number) =>
-    queryString.stringifyUrl({ url: `/api/PlexServerConnection/check/${plexServerConnectionId}` });
+    queryString.stringifyUrl({
+      url: `/api/PlexServerConnection/check/${plexServerConnectionId}`,
+    });
 
-  static createPlexServerConnectionEndpoint = () => queryString.stringifyUrl({ url: `/api/PlexServerConnection` });
+  static createPlexServerConnectionEndpoint = () =>
+    queryString.stringifyUrl({ url: `/api/PlexServerConnection` });
 
-  static getAllPlexServerConnectionsEndpoint = () => queryString.stringifyUrl({ url: `/api/PlexServerConnection` });
+  static getAllPlexServerConnectionsEndpoint = () =>
+    queryString.stringifyUrl({ url: `/api/PlexServerConnection` });
 
-  static updatePlexServerConnectionEndpoint = () => queryString.stringifyUrl({ url: `/api/PlexServerConnection` });
+  static updatePlexServerConnectionEndpoint = () =>
+    queryString.stringifyUrl({ url: `/api/PlexServerConnection` });
 
   static deletePlexServerConnectionById = (plexServerConnectionId: number) =>
-    queryString.stringifyUrl({ url: `/api/PlexServerConnection/${plexServerConnectionId}` });
+    queryString.stringifyUrl({
+      url: `/api/PlexServerConnection/${plexServerConnectionId}`,
+    });
 
-  static getPlexServerConnectionByIdEndpoint = (plexServerConnectionId: number) =>
-    queryString.stringifyUrl({ url: `/api/PlexServerConnection/${plexServerConnectionId}` });
+  static getPlexServerConnectionByIdEndpoint = (
+    plexServerConnectionId: number,
+  ) =>
+    queryString.stringifyUrl({
+      url: `/api/PlexServerConnection/${plexServerConnectionId}`,
+    });
 
   static validatePlexServerConnectionEndpoint = () =>
     queryString.stringifyUrl({ url: `/api/PlexServerConnection/validate` });

@@ -1,8 +1,6 @@
-﻿using System.Text.Json.Serialization;
+﻿namespace Reaparr.Application.Contracts;
 
-namespace Reaparr.Application.Contracts;
-
-public class PlexAccountDTO
+public record PlexAccountDTO
 {
     public required int Id { get; set; }
 
@@ -31,14 +29,15 @@ public class PlexAccountDTO
     public required bool HasPassword { get; set; }
 
     /// <summary>
-    /// The user has the option to provide their own token to authenticate with plex.tv.
-    /// This is not the same as the auto filled AuthenticationToken when provided by the username and password
+    /// The user can provide their own token to authenticate with plex.tv.
+    /// This is different from the <see cref="AuthenticationToken"/> when provided by the username and password
     /// </summary>
-    [JsonPropertyName("authenticationToken")]
     public required string CustomAuthenticationToken { get; set; }
 
-    [JsonPropertyName("apiAuthenticationToken")]
-    public required string AuthenticationToken { get; set; }
+    /// <summary>
+    /// The authentication token provided by Plex when logging in with username and password.
+    /// </summary>
+    public required string AuthenticationToken { get; init; }
 
     public required string ClientId { get; set; }
 

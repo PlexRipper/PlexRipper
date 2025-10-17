@@ -1,6 +1,6 @@
 ﻿namespace Reaparr.Application.Contracts;
 
-public class FileSystemDTO
+public record FileSystemDTO
 {
     public required string Parent { get; init; } = string.Empty;
 

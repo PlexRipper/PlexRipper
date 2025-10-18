@@ -205,8 +205,8 @@ function confirm(): void {
 
 function requestDirectories(newPath?: string): void {
 	if (!newPath) {
-		Log.error(`path was invalid "${newPath}" when requesting directories`);
-		return;
+		Log.warn(`path was invalid "${newPath}" setting to default empty root file-system view`);
+		newPath = '';
 	}
 
 	if (path.value) {

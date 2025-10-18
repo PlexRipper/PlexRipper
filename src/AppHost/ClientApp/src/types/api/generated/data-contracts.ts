@@ -213,7 +213,6 @@ export enum DownloadStatus {
   Paused = "Paused",
   Stopped = "Stopped",
   Deleted = "Deleted",
-  Merging = "Merging",
   Moving = "Moving",
   MovePaused = "MovePaused",
   MoveFinished = "MoveFinished",

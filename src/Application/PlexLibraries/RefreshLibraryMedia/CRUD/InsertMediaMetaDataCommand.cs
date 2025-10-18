@@ -57,7 +57,7 @@ public record InsertMediaMetaDataCommandResponse
 public class InsertMediaMetaDataCommandHandler
     : ICommandHandler<InsertMediaMetaDataCommand, Result<InsertMediaMetaDataCommandResponse>>
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
     public InsertMediaMetaDataCommandHandler(IReaparrDbContext dbContext, ILogger log)

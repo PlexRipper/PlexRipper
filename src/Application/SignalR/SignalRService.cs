@@ -8,7 +8,7 @@ namespace Reaparr.Application;
 /// </summary>
 public class SignalRService : ISignalRService
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly IHubContext<ProgressHub, IProgressHub> _progressHub;
 
     private readonly IHubContext<NotificationHub, INotificationHub> _notificationHub;
@@ -20,7 +20,7 @@ public class SignalRService : ISignalRService
     /// <param name="progressHub">The <see cref="ProgressHub"/>.</param>
     /// <param name="notificationHub">The <see cref="NotificationHub"/>.</param>
     public SignalRService(
-        Serilog.ILogger log,
+        ILogger log,
         IHubContext<ProgressHub, IProgressHub> progressHub,
         IHubContext<NotificationHub, INotificationHub> notificationHub
     )

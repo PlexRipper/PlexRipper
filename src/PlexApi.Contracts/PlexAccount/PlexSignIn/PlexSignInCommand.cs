@@ -1,6 +1,4 @@
 using FastEndpoints;
-using FluentResults;
-using Reaparr.Domain;
 
 namespace Reaparr.PlexApi.Contracts;
 
@@ -9,4 +7,13 @@ namespace Reaparr.PlexApi.Contracts;
 /// <remarks>NOTE: Plex "Managed" users do not work.</remarks>
 /// <example>URL: https://plex.tv/api/v2/users/signin?X-Plex-Client-Identifier=Chrome</example>
 /// </summary>
-public record PlexSignInCommand(PlexAccount PlexAccount) : ICommand<Result<PlexAccount>>;
+public record PlexSignInCommand : ICommand<Result<PlexSignInCommandResult>>
+{
+    public required string ClientId { get; init; }
+
+    public required string Username { get; init; }
+
+    public required string Password { get; init; }
+
+    public required string VerificationCode { get; init; }
+}

@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -37,7 +38,10 @@ export class Download {
    * @request POST:/api/Download/clear
    * @secure
    */
-  clearCompletedDownloadTasksEndpoint = (data: string[], params: RequestParams = {}) =>
+  clearCompletedDownloadTasksEndpoint = (
+    data: string[],
+    params: RequestParams = {},
+  ) =>
     from(
       Axios.request<CountResponseDTO>({
         url: `/api/Download/clear`,
@@ -57,7 +61,10 @@ export class Download {
    * @request POST:/api/Download/create
    * @secure
    */
-  createDownloadTasksEndpoint = (data: CreateDownloadTasksRequest, params: RequestParams = {}) =>
+  createDownloadTasksEndpoint = (
+    data: CreateDownloadTasksRequest,
+    params: RequestParams = {},
+  ) =>
     from(
       Axios.request<BaseResultDTO>({
         url: `/api/Download/create`,
@@ -141,7 +148,10 @@ export class Download {
    * @request GET:/api/Download/logs/{DownloadTaskGuid}
    * @secure
    */
-  getDownloadTaskLogsByDownloadTaskIdEndpoint = (downloadTaskGuid: string, params: RequestParams = {}) =>
+  getDownloadTaskLogsByDownloadTaskIdEndpoint = (
+    downloadTaskGuid: string,
+    params: RequestParams = {},
+  ) =>
     from(
       Axios.request<DownloadWorkerLogDTO[]>({
         url: `/api/Download/logs/${downloadTaskGuid}`,
@@ -159,7 +169,10 @@ export class Download {
    * @request GET:/api/Download/pause/{DownloadTaskGuid}
    * @secure
    */
-  pauseDownloadTaskEndpoint = (downloadTaskGuid: string, params: RequestParams = {}) =>
+  pauseDownloadTaskEndpoint = (
+    downloadTaskGuid: string,
+    params: RequestParams = {},
+  ) =>
     from(
       Axios.request<BaseResultDTO>({
         url: `/api/Download/pause/${downloadTaskGuid}`,
@@ -177,7 +190,10 @@ export class Download {
    * @request POST:/api/Download/preview
    * @secure
    */
-  getDownloadPreviewEndpoint = (data: DownloadMediaDTO[], params: RequestParams = {}) =>
+  getDownloadPreviewEndpoint = (
+    data: DownloadMediaDTO[],
+    params: RequestParams = {},
+  ) =>
     from(
       Axios.request<DownloadPreviewContainerDTO>({
         url: `/api/Download/preview`,
@@ -197,7 +213,10 @@ export class Download {
    * @request GET:/api/Download/restart/{DownloadTaskGuid}
    * @secure
    */
-  restartDownloadTaskEndpoint = (downloadTaskGuid: string, params: RequestParams = {}) =>
+  restartDownloadTaskEndpoint = (
+    downloadTaskGuid: string,
+    params: RequestParams = {},
+  ) =>
     from(
       Axios.request<BaseResultDTO>({
         url: `/api/Download/restart/${downloadTaskGuid}`,
@@ -215,7 +234,10 @@ export class Download {
    * @request GET:/api/Download/start/{DownloadTaskGuid}
    * @secure
    */
-  startDownloadTaskEndpoint = (downloadTaskGuid: string, params: RequestParams = {}) =>
+  startDownloadTaskEndpoint = (
+    downloadTaskGuid: string,
+    params: RequestParams = {},
+  ) =>
     from(
       Axios.request<BaseResultDTO>({
         url: `/api/Download/start/${downloadTaskGuid}`,
@@ -233,7 +255,10 @@ export class Download {
    * @request GET:/api/Download/stop/{DownloadTaskGuid}
    * @secure
    */
-  stopDownloadTaskEndpoint = (downloadTaskGuid: string, params: RequestParams = {}) =>
+  stopDownloadTaskEndpoint = (
+    downloadTaskGuid: string,
+    params: RequestParams = {},
+  ) =>
     from(
       Axios.request<BaseResultDTO>({
         url: `/api/Download/stop/${downloadTaskGuid}`,
@@ -246,11 +271,14 @@ export class Download {
 }
 
 export class DownloadPaths {
-  static clearCompletedDownloadTasksEndpoint = () => queryString.stringifyUrl({ url: `/api/Download/clear` });
+  static clearCompletedDownloadTasksEndpoint = () =>
+    queryString.stringifyUrl({ url: `/api/Download/clear` });
 
-  static createDownloadTasksEndpoint = () => queryString.stringifyUrl({ url: `/api/Download/create` });
+  static createDownloadTasksEndpoint = () =>
+    queryString.stringifyUrl({ url: `/api/Download/create` });
 
-  static deleteDownloadTaskEndpoint = () => queryString.stringifyUrl({ url: `/api/Download/delete` });
+  static deleteDownloadTaskEndpoint = () =>
+    queryString.stringifyUrl({ url: `/api/Download/delete` });
 
   static getDownloadTaskByGuidEndpoint = (
     downloadTaskGuid: string,
@@ -258,23 +286,37 @@ export class DownloadPaths {
       /** @default 0 */
       type?: DownloadTaskType;
     },
-  ) => queryString.stringifyUrl({ url: `/api/Download/detail/${downloadTaskGuid}`, query });
+  ) =>
+    queryString.stringifyUrl({
+      url: `/api/Download/detail/${downloadTaskGuid}`,
+      query,
+    });
 
-  static getAllDownloadTasksEndpoint = () => queryString.stringifyUrl({ url: `/api/Download` });
+  static getAllDownloadTasksEndpoint = () =>
+    queryString.stringifyUrl({ url: `/api/Download` });
 
-  static getDownloadTaskLogsByDownloadTaskIdEndpoint = (downloadTaskGuid: string) =>
+  static getDownloadTaskLogsByDownloadTaskIdEndpoint = (
+    downloadTaskGuid: string,
+  ) =>
     queryString.stringifyUrl({ url: `/api/Download/logs/${downloadTaskGuid}` });
 
   static pauseDownloadTaskEndpoint = (downloadTaskGuid: string) =>
-    queryString.stringifyUrl({ url: `/api/Download/pause/${downloadTaskGuid}` });
+    queryString.stringifyUrl({
+      url: `/api/Download/pause/${downloadTaskGuid}`,
+    });
 
-  static getDownloadPreviewEndpoint = () => queryString.stringifyUrl({ url: `/api/Download/preview` });
+  static getDownloadPreviewEndpoint = () =>
+    queryString.stringifyUrl({ url: `/api/Download/preview` });
 
   static restartDownloadTaskEndpoint = (downloadTaskGuid: string) =>
-    queryString.stringifyUrl({ url: `/api/Download/restart/${downloadTaskGuid}` });
+    queryString.stringifyUrl({
+      url: `/api/Download/restart/${downloadTaskGuid}`,
+    });
 
   static startDownloadTaskEndpoint = (downloadTaskGuid: string) =>
-    queryString.stringifyUrl({ url: `/api/Download/start/${downloadTaskGuid}` });
+    queryString.stringifyUrl({
+      url: `/api/Download/start/${downloadTaskGuid}`,
+    });
 
   static stopDownloadTaskEndpoint = (downloadTaskGuid: string) =>
     queryString.stringifyUrl({ url: `/api/Download/stop/${downloadTaskGuid}` });

@@ -5,8 +5,7 @@ ARG TARGETPLATFORM=linux/amd64
 ARG BUILDPLATFORM=linux/amd64
 
 # Stage 1 - Build the Nuxt front-end
-# TODO: bun 1.2.1 breaks build so its pinned to this for now
-FROM --platform=$BUILDPLATFORM oven/bun:1.1.45-alpine AS client-build
+FROM --platform=$BUILDPLATFORM oven/bun:1.3-alpine AS client-build
 
 ARG PORT
 
@@ -83,6 +82,9 @@ RUN dotnet publish "AppHost.csproj" -c Release -o /app/publish \
     -p:UseAppHost=false
 
 # Stage 3 - Runtime Image
+FROM --platform=$TARGETPLATFORM mcr.microsoft.com/dotnet/aspnet:9.0-alpine AS dotnet-runtime
+
+# Stage 4 - Final Image with s6-overlay
 FROM --platform=$TARGETPLATFORM ghcr.io/linuxserver/baseimage-alpine:3.20 AS final
 
 ARG VERSION
@@ -99,12 +101,11 @@ ENV DOTNET_ENVIRONMENT=Production
 ENV DOTNET_URLS=http://+:${PORT}
 ENV S6_SERVICES_GRACETIME=15000
 
-# Install dependencies and s6-overlay
-RUN apk add --no-cache bash icu-libs krb5-libs libgcc libintl libssl3 libstdc++ zlib curl \
- && curl -sSL https://dot.net/v1/dotnet-install.sh -o /tmp/dotnet-install.sh \
- && chmod +x /tmp/dotnet-install.sh \
- && /tmp/dotnet-install.sh --runtime aspnetcore --version 9.0.7 --install-dir /usr/share/dotnet --architecture x64 \
- && rm -rf /tmp/*
+# Install dependencies
+RUN apk add --no-cache bash icu-libs krb5-libs libgcc libintl libssl3 libstdc++ zlib
+
+## Copy .NET runtime from official image
+COPY --from=dotnet-runtime /usr/share/dotnet /usr/share/dotnet
 
 ## Make dotnet command available
 ENV PATH="$PATH:/usr/share/dotnet"

@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -33,7 +34,10 @@ export class PlexLibrary {
    * @request GET:/api/PlexLibrary/{PlexLibraryId}
    * @secure
    */
-  getPlexLibraryByIdEndpoint = (plexLibraryId: number, params: RequestParams = {}) =>
+  getPlexLibraryByIdEndpoint = (
+    plexLibraryId: number,
+    params: RequestParams = {},
+  ) =>
     from(
       Axios.request<PlexLibraryDTO>({
         url: `/api/PlexLibrary/${plexLibraryId}`,
@@ -150,7 +154,10 @@ export class PlexLibrary {
    * @request GET:/api/PlexLibrary/refresh/{PlexLibraryId}
    * @secure
    */
-  refreshLibraryMediaEndpoint = (plexLibraryId: number, params: RequestParams = {}) =>
+  refreshLibraryMediaEndpoint = (
+    plexLibraryId: number,
+    params: RequestParams = {},
+  ) =>
     from(
       Axios.request<PlexLibraryDTO>({
         url: `/api/PlexLibrary/refresh/${plexLibraryId}`,
@@ -188,7 +195,8 @@ export class PlexLibraryPaths {
   static getPlexLibraryByIdEndpoint = (plexLibraryId: number) =>
     queryString.stringifyUrl({ url: `/api/PlexLibrary/${plexLibraryId}` });
 
-  static getAllPlexLibrariesEndpoint = () => queryString.stringifyUrl({ url: `/api/PlexLibrary` });
+  static getAllPlexLibrariesEndpoint = () =>
+    queryString.stringifyUrl({ url: `/api/PlexLibrary` });
 
   static getPlexLibraryMediaEndpoint = (
     plexLibraryId: number,
@@ -225,7 +233,11 @@ export class PlexLibraryPaths {
        */
       size: number;
     },
-  ) => queryString.stringifyUrl({ url: `/api/PlexLibrary/${plexLibraryId}/media`, query });
+  ) =>
+    queryString.stringifyUrl({
+      url: `/api/PlexLibrary/${plexLibraryId}/media`,
+      query,
+    });
 
   static getLibraryMediaMetadata = (
     plexLibraryId: number,
@@ -233,11 +245,22 @@ export class PlexLibraryPaths {
       /** @default 0 */
       mediaType: PlexMediaType;
     },
-  ) => queryString.stringifyUrl({ url: `/api/PlexLibrary/${plexLibraryId}/metadata`, query });
+  ) =>
+    queryString.stringifyUrl({
+      url: `/api/PlexLibrary/${plexLibraryId}/metadata`,
+      query,
+    });
 
   static refreshLibraryMediaEndpoint = (plexLibraryId: number) =>
-    queryString.stringifyUrl({ url: `/api/PlexLibrary/refresh/${plexLibraryId}` });
+    queryString.stringifyUrl({
+      url: `/api/PlexLibrary/refresh/${plexLibraryId}`,
+    });
 
-  static setPlexLibraryDefaultDestinationByIdEndpoint = (plexLibraryId: number, folderPathId: number) =>
-    queryString.stringifyUrl({ url: `/api/PlexLibrary/${plexLibraryId}/default/destination/${folderPathId}` });
+  static setPlexLibraryDefaultDestinationByIdEndpoint = (
+    plexLibraryId: number,
+    folderPathId: number,
+  ) =>
+    queryString.stringifyUrl({
+      url: `/api/PlexLibrary/${plexLibraryId}/default/destination/${folderPathId}`,
+    });
 }

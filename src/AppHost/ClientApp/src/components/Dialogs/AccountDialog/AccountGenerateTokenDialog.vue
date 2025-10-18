@@ -87,8 +87,8 @@ function onComplete(verificationCode: string) {
 
 function requestToken(verificationCode: string = '') {
 	useSubscription(accountDialogStore.generateToken(verificationCode).subscribe({
-		next({ isSuccess, value, errors }) {
-			if (errors.some((x) => x.message.includes('verification code'))) {
+		next({ isSuccess, value }) {
+			if (value?.needsVerificationCode) {
 				set(needVerificationToken, true);
 				return;
 			}

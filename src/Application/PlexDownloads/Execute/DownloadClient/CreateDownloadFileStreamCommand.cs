@@ -60,29 +60,24 @@ public class CreateDownloadFileStreamCommandHandler : ICommandHandler<CreateDown
                 return combineResult.ToResult();
 
             var filePath = combineResult.Value;
-            Stream fileStream;
-            if (_file.Exists(filePath))
-            {
-                var openResult = Result.Try(() =>
-                    _file.Open(filePath, FileMode.Open, FileAccess.ReadWrite, FileShare.Delete)
-                );
-                if (openResult.IsFailed)
-                    return openResult.ToResult().LogError();
+            var openOrCreateResult = Result.Try(() =>
+                _file.Open(
+                    filePath,
+                    FileMode.OpenOrCreate,
+                    FileAccess.ReadWrite,
+                    FileShare.ReadWrite | FileShare.Delete
+                )
+            );
+            if (openOrCreateResult.IsFailed)
+                return openOrCreateResult.ToResult().LogError();
 
-                fileStream = openResult.Value;
-            }
-            else
-            {
-                var createResult = Result.Try(() => _file.Create(filePath, 2048, FileOptions.Asynchronous));
-                if (createResult.IsFailed)
-                    return createResult.ToResult().LogError();
+            var fileStream = openOrCreateResult.Value;
 
-                fileStream = createResult.Value;
-            }
+            // Ensure file length is at least the requested size without truncating existing data
+            if (fileStream.Length < fileSize)
+                fileStream.SetLength(fileSize);
 
-            // Pre-allocate the required file size
-            fileStream.SetLength(fileSize);
-            return Result.Ok(fileStream);
+            return Result.Ok((Stream)fileStream);
         }
         catch (Exception e)
         {

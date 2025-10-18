@@ -12,7 +12,7 @@ namespace Reaparr.PlexApi;
 
 public class PlexApiClient : IPlexApiClient
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
 
     private readonly HttpClient _defaultClient;
 

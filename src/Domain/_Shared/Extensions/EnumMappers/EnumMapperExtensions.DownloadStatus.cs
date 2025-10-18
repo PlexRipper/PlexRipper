@@ -12,16 +12,12 @@ public static partial class EnumMapperExtensions
         ["Paused"] = DownloadStatus.Paused,
         ["Stopped"] = DownloadStatus.Stopped,
         ["Deleted"] = DownloadStatus.Deleted,
-        ["Merging"] = DownloadStatus.Merging,
         ["Moving"] = DownloadStatus.Moving,
-        ["MergePaused"] = DownloadStatus.MergePaused,
         ["MovePaused"] = DownloadStatus.MovePaused,
-        ["MergeFinished"] = DownloadStatus.MergeFinished,
         ["MoveFinished"] = DownloadStatus.MoveFinished,
         ["Completed"] = DownloadStatus.Completed,
         ["ServerUnreachable"] = DownloadStatus.ServerUnreachable,
         ["MoveError"] = DownloadStatus.MoveError,
-        ["MergeError"] = DownloadStatus.MergeError,
     };
 
     /// <summary>
@@ -57,16 +53,12 @@ public static partial class EnumMapperExtensions
             DownloadStatus.Paused => "Paused",
             DownloadStatus.Stopped => "Stopped",
             DownloadStatus.Deleted => "Deleted",
-            DownloadStatus.Merging => "Merging",
             DownloadStatus.Moving => "Moving",
-            DownloadStatus.MergePaused => "MergePaused",
             DownloadStatus.MovePaused => "MovePaused",
-            DownloadStatus.MergeFinished => "MergeFinished",
             DownloadStatus.MoveFinished => "MoveFinished",
             DownloadStatus.Completed => "Completed",
             DownloadStatus.ServerUnreachable => "ServerUnreachable",
             DownloadStatus.MoveError => "MoveError",
-            DownloadStatus.MergeError => "MergeError",
             _ => DefaultException(),
         };
 

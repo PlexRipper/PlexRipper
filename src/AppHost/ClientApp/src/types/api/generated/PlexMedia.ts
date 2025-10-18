@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -171,7 +172,11 @@ export class PlexMediaPaths {
     query: {
       type: PlexMediaType;
     },
-  ) => queryString.stringifyUrl({ url: `/api/PlexMedia/detail/${plexMediaId}`, query });
+  ) =>
+    queryString.stringifyUrl({
+      url: `/api/PlexMedia/detail/${plexMediaId}`,
+      query,
+    });
 
   static searchPlexMediaEndpoint = (query: { query: string }) =>
     queryString.stringifyUrl({ url: `/api/PlexMedia/search`, query });

@@ -38,6 +38,7 @@
 				:title="$t('help.account-form.display-name.title')"
 				:text="$t('help.account-form.display-name.text')">
 				<q-input
+					id="plex-display-name"
 					v-model="accountDialogStore.displayName"
 					:rules="getDisplayNameRules"
 					color="red"
@@ -45,6 +46,8 @@
 					outlined
 					required
 					hide-bottom-space
+					name="plex-display-name"
+					autocomplete="name"
 					data-cy="account-form-display-name-input" />
 			</HelpRow>
 		</HelpGroup>
@@ -74,6 +77,7 @@
 						:title="$t('help.account-form.username.title')"
 						:text="$t('help.account-form.username.text')">
 						<q-input
+							id="plex-username"
 							v-model="accountDialogStore.username"
 							:rules="getUsernameRules"
 							color="red"
@@ -81,6 +85,8 @@
 							outlined
 							required
 							hide-bottom-space
+							name="plex-username"
+							autocomplete="username"
 							data-cy="account-form-username-input" />
 					</HelpRow>
 
@@ -90,9 +96,11 @@
 						:title="$t('help.account-form.password.title')"
 						:text="$t('help.account-form.password.text')">
 						<PasswordInputField
+							id="plex-password"
 							v-model="accountDialogStore.password"
 							disable-validation
 							class="q-my-md"
+							name="plex-password"
 							cy="account-form-password-input" />
 					</HelpRow>
 				</HelpGroup>
@@ -107,11 +115,16 @@
 						:label="$t('help.account-form.auth-token.label')"
 						:title="$t('help.account-form.auth-token.title')"
 						:text="$t('help.account-form.auth-token.text')">
-						<PasswordInputField
+						<q-input
 							v-model="accountDialogStore.authenticationToken"
-							disable-validation
-							class="q-my-md"
-							cy="account-form-auth-token-input" />
+							:rules="getAuthTokenRules"
+							color="red"
+							full-width
+							outlined
+							required
+							hide-bottom-space
+							type="password"
+							data-cy="account-form-auth-token-input" />
 					</HelpRow>
 				</HelpGroup>
 			</q-tab-panel>
@@ -141,6 +154,14 @@ const getDisplayNameRules = computed(() => [
 ]);
 
 const getUsernameRules = computed(() => [(v: string): boolean | string => !!v || t('components.account-form.validation.username-is-required')]);
+
+const getAuthTokenRules = computed(() => [
+	(v: string): boolean | string => !!v || t('components.account-form.validation.auth-token-required'),
+	(v: string): boolean | string => (v && v.length == 20) || t('components.account-form.validation.auth-token-length', {
+		count: 20,
+	}),
+	(v: string): boolean | string => (v && /^[a-zA-Z0-9_-]+$/.test(v)) || t('components.account-form.validation.auth-token-format'),
+]);
 
 function setValidationState(state: boolean) {
 	accountDialogStore.$patch({

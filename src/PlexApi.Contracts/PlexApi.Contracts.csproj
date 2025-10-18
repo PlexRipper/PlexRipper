@@ -21,4 +21,9 @@
         </PackageReference>
         <PackageReference Include="LukeHagar.PlexAPI.SDK" Version="0.15.1" />
     </ItemGroup>
+    <ItemGroup>
+        <Compile Include="..\Domain\GlobalUsings.cs">
+            <Link>GlobalUsings.cs</Link>
+        </Compile>
+    </ItemGroup>
 </Project>

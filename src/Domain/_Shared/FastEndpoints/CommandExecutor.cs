@@ -4,7 +4,7 @@ namespace Reaparr.Domain;
 
 public class CommandExecutor : ICommandExecutor
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
 
     public CommandExecutor(ILogger log)
     {

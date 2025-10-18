@@ -41,7 +41,10 @@ export const useSettingsStore = defineStore('SettingsStore', () => {
 			tvShowViewMode: ViewMode.Poster,
 			allOverviewViewMode: PlexMediaType.TvShow,
 		},
-		downloadManagerSettings: { downloadSegments: 4 },
+		downloadManagerSettings: {
+			downloadSegments: 4,
+			keepCompletedInDownloadFolder: false,
+		},
 		languageSettings: { language: 'en-US' },
 		serverSettings: {
 			data: [],

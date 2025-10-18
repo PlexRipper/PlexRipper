@@ -2739,9 +2739,6 @@ namespace Reaparr.Data.Migrations
                     b.Property<long>("CurrentFileTransferBytesOffset")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("CurrentFileTransferPathIndex")
-                        .HasColumnType("INTEGER");
-
                     b.Property<long>("DataReceived")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(5);

@@ -61,7 +61,11 @@ public static class SettingsModelToDTOMapper
     public static LanguageSettingsModule ToModel(this LanguageSettingsDTO dto) => new() { Language = dto.Language };
 
     public static DownloadManagerSettingsModule ToModel(this DownloadManagerSettingsDTO dto) =>
-        new() { DownloadSegments = dto.DownloadSegments };
+        new()
+        {
+            DownloadSegments = dto.DownloadSegments,
+            KeepCompletedInDownloadFolder = dto.KeepCompletedInDownloadFolder,
+        };
 
     public static PlexServerSettingsModule ToModel(this ServerSettingsDTO dto) => new() { Data = dto.Data };
 
@@ -133,7 +137,11 @@ public static class SettingsModelToDTOMapper
     public static LanguageSettingsDTO ToDTO(this LanguageSettingsModule module) => new() { Language = module.Language };
 
     public static DownloadManagerSettingsDTO ToDTO(this DownloadManagerSettingsModule module) =>
-        new() { DownloadSegments = module.DownloadSegments };
+        new()
+        {
+            DownloadSegments = module.DownloadSegments,
+            KeepCompletedInDownloadFolder = module.KeepCompletedInDownloadFolder,
+        };
 
     public static ServerSettingsDTO ToDTO(this PlexServerSettingsModule module) => new() { Data = module.Data };
 

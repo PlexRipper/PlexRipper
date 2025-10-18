@@ -7,7 +7,6 @@ import { catchError, of } from 'rxjs';
 import { tap, switchMap } from 'rxjs/operators';
 import { useGlobalStore } from '@store';
 import { get } from '@vueuse/core';
-import { useRouter } from '#imports';
 
 export const useAuthenticationStore = defineStore('AuthenticationStore', () => {
 	const state = reactive<{

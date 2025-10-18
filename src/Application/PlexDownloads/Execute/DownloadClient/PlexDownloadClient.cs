@@ -12,7 +12,7 @@ namespace Reaparr.Application;
 /// </summary>
 public class PlexDownloadClient : IAsyncDisposable, IPlexDownloadClient
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IReaparrDbContext _dbContext;
     private readonly Func<DownloadWorkerTask, DownloadWorker> _downloadWorkerFactory;
@@ -184,7 +184,22 @@ public class PlexDownloadClient : IAsyncDisposable, IPlexDownloadClient
         DownloadTask.DataReceived = downloadWorkerUpdates.Sum(x => x.DataReceived);
         DownloadTask.DownloadSpeed = downloadWorkerUpdates.Sum(x => x.DownloadSpeed);
 
-        DownloadStatus = DownloadTaskActions.Aggregate(downloadWorkerUpdates.Select(x => x.Status).ToList());
+        var newStatus = DownloadTaskActions.Aggregate(downloadWorkerUpdates.Select(x => x.Status).ToList());
+
+        // Log state transitions
+        if (DownloadStatus != newStatus)
+        {
+            _log.Here()
+                .Information(
+                    "DownloadTask {DownloadTaskId} ({FileName}) transitioning from {OldStatus} to {NewStatus}",
+                    DownloadTask.Id,
+                    DownloadTask.FileName,
+                    DownloadStatus,
+                    newStatus
+                );
+        }
+
+        DownloadStatus = newStatus;
 
         await _dbContext.UpdateDownloadWorkerProgress(downloadWorkerUpdates);
         await _dbContext.UpdateDownloadProgress(DownloadTask.ToKey(), DownloadTask);

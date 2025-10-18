@@ -203,7 +203,12 @@ function confirm(): void {
 	dialogStore.closeDialog(DialogType.DirectoryBrowserDialog);
 }
 
-function requestDirectories(newPath: string): void {
+function requestDirectories(newPath?: string): void {
+	if (!newPath) {
+		Log.warn(`path was invalid "${newPath}" setting to default empty root file-system view`);
+		newPath = '';
+	}
+
 	if (path.value) {
 		path.value.directory = newPath;
 	}

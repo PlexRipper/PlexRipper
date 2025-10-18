@@ -38,6 +38,7 @@ public static partial class FakeData
         return new Faker<AuthenticationModule>()
             .StrictMode(true)
             .UseSeed(seed.Next())
+            .RuleFor(x => x.HeaderAuthentication, _ => HeaderAuthenticationSettings.Create())
             .RuleFor(x => x.ResetCredentials, _ => false);
     }
 
@@ -103,7 +104,8 @@ public static partial class FakeData
         return new Faker<DownloadManagerSettingsModule>()
             .StrictMode(true)
             .UseSeed(seed.Next())
-            .RuleFor(x => x.DownloadSegments, f => f.Random.Int(1, 3));
+            .RuleFor(x => x.DownloadSegments, f => f.Random.Int(1, 3))
+            .RuleFor(x => x.KeepCompletedInDownloadFolder, f => false);
     }
 
     public static Faker<LanguageSettingsModule> GetLanguageSettings(

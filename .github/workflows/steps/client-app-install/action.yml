@@ -6,8 +6,15 @@ runs:
         -   name: Setup Bun
             uses: oven-sh/setup-bun@v2
             with:
-                # TODO: bun 1.2.1 breaks build so its pinned to this for now
-                bun-version: "1.1.45"
+                bun-version: latest
+
+        -   name: Cache Bun dependencies
+            uses: actions/cache@v3
+            with:
+                path: ~/.bun/install/cache
+                key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+                restore-keys: ${{ runner.os }}-bun-
+
         -   name: Clean install node_modules
             shell: bash
             run: bun install

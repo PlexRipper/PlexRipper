@@ -19,6 +19,15 @@
 					class="q-mt-lg"
 					@change="settingsStore.downloadManagerSettings.downloadSegments = $event" />
 			</HelpRow>
+			<!-- Keep completed in download folder -->
+			<HelpRow
+				:label="$t('help.settings.advanced.download-manager-section.keep-in-downloads.label')"
+				:title="$t('help.settings.advanced.download-manager-section.keep-in-downloads.title')"
+				:text="$t('help.settings.advanced.download-manager-section.keep-in-downloads.text')">
+				<QToggle
+					:model-value="settingsStore.downloadManagerSettings.keepCompletedInDownloadFolder"
+					@update:model-value="settingsStore.downloadManagerSettings.keepCompletedInDownloadFolder = $event" />
+			</HelpRow>
 		</HelpGroup>
 	</QSection>
 </template>

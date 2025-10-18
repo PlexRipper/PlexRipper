@@ -37,6 +37,7 @@
         <Compile Include="..\..\BaseTests\GlobalTestsUsings.cs" />
     </ItemGroup>
     <ItemGroup>
+        <Folder Include="Application\PlexAccounts\Create\" />
         <Folder Include="FileSystem" />
     </ItemGroup>
 </Project>

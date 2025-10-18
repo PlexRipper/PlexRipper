@@ -246,7 +246,10 @@
             "validation": {
                 "display-name-length": "Display name must be at least {count} characters",
                 "display-name-required": "Display name is required",
-                "username-is-required": "Username is required"
+                "username-is-required": "Username is required",
+                "auth-token-format": "Authentication token may only contain letters, numbers, underscores, and hyphens.",
+                "auth-token-length": "Authentication token must be {count} characters long.",
+                "auth-token-required": "Authentication token is required."
             }
         },
         "media-overview-bar": {
@@ -422,12 +425,8 @@
             "paused": "Paused",
             "stopped": "Stopped",
             "deleted": "Deleted",
-            "merging": "Merging",
             "moving": "Moving",
             "completed": "Completed",
-            "merge-error": "Merging Error",
-            "merge-finished": "Merging Finished",
-            "merge-paused": "Merging Paused",
             "move-error": "Move Error",
             "move-finished": "Moving Finished",
             "move-paused": "Moving Paused"
@@ -513,6 +512,11 @@
                         "label": "Download Segments",
                         "text": "Reaparr supports multi-threaded downloading and can divide the media that will be downloaded into different parts and download each part individually. This tends to increase the overall download speed but the downside is that it will require extra time to merge the different parts afterwards into one complete media file.\n\nSetting this value to 1 will disable multi-threaded downloading and download the media file as one complete file. The number of download segments has no influence on the speed of the media file being merged.",
                         "title": "Download Segments"
+                    },
+                    "keep-in-downloads": {
+                        "label": "Do not move the completed downloads to destination folders",
+                        "title": "Do not move the completed downloads to destination folders",
+                        "text": "If enabled, completed downloads will remain in the download folder and will not be moved to the destination folder."
                     }
                 },
                 "debug-section": {

@@ -6,7 +6,7 @@ namespace Reaparr.Application;
 
 public class DownloadTaskScheduler : IDownloadTaskScheduler
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly IScheduler _scheduler;
 
     public DownloadTaskScheduler(ILogger log, IScheduler scheduler)

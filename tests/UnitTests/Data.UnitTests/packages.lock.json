@@ -1890,6 +1890,7 @@
       "Reaparr.Identity": {
         "type": "Project",
         "dependencies": {
+          "FastEndpoints.Security": "[7.0.1, )",
           "Microsoft.EntityFrameworkCore.InMemory": "[9.0.8, )",
           "Microsoft.EntityFrameworkCore.Sqlite": "[9.0.8, )",
           "Reaparr.Data.Contracts": "[1.0.0, )",

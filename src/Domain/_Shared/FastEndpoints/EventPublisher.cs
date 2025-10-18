@@ -4,7 +4,7 @@ namespace Reaparr.Domain;
 
 public class EventPublisher : IEventPublisher
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
 
     public EventPublisher(ILogger log)
     {

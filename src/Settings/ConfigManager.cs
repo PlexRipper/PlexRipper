@@ -8,7 +8,7 @@ public class ConfigManager : IConfigManager
 {
     #region Fields
 
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly IPathProvider _pathProvider;
 
     private readonly IUserSettings _userSettings;

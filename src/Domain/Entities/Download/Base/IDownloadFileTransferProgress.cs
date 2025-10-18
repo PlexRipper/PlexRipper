@@ -12,7 +12,5 @@ public interface IDownloadFileTransferProgress
     /// </summary>
     long FileDataTransferred { get; set; }
 
-    int CurrentFileTransferPathIndex { get; set; }
-
     long CurrentFileTransferBytesOffset { get; set; }
 }

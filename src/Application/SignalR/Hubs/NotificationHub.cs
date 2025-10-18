@@ -8,13 +8,13 @@ namespace Reaparr.Application;
 /// </summary>
 public class NotificationHub : Hub<INotificationHub>, INotificationHub
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
 
     /// <summary>
     ///  Initializes a new instance of the <see cref="NotificationHub"/> class.
     /// </summary>
     /// <param name="log">  The <see cref="Serilog.ILogger"/> instance to use for logging.</param>
-    public NotificationHub(Serilog.ILogger log)
+    public NotificationHub(ILogger log)
     {
         _log = log.ForContext<NotificationHub>();
     }

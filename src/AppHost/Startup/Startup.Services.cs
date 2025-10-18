@@ -109,6 +109,8 @@ public static partial class Startup
 
                 options.FlattenSchema = true;
 
+                options.EndpointFilter = ep => !ep.EndpointType.IsDefined(typeof(HideFromOpenApiAttribute));
+
                 options.SerializerSettings = serializerOptions =>
                 {
                     var config = DefaultJsonSerializerOptions.ConfigStandard;
@@ -142,6 +144,19 @@ public static partial class Startup
                             Description = "Cookie-based authentication for the internal Reaparr API",
                         }
                     );
+
+                    // 🔹 Header-based authentication
+                    s.AddAuth(
+                        "HeaderAuth",
+                        new()
+                        {
+                            Type = OpenApiSecuritySchemeType.ApiKey,
+                            In = OpenApiSecurityApiKeyLocation.Header,
+                            Name = EnvironmentExtensions.GetHeaderAuthTokenName(),
+                            Description = "Header-based authentication via trusted proxy",
+                        }
+                    );
+                    s.OperationProcessors.Add(new OperationSecurityScopeProcessor("HeaderAuth"));
 
                     s.OperationProcessors.Add(new OperationSecurityScopeProcessor("CookieAuth"));
                 };

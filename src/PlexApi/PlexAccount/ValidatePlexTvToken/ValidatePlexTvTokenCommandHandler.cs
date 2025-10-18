@@ -1,46 +1,67 @@
 using FastEndpoints;
+using FluentValidation;
 using Reaparr.PlexApi.Contracts;
 
 namespace Reaparr.PlexApi;
 
-public class ValidatePlexTvTokenCommandHandler : ICommandHandler<ValidatePlexTokenCommand, Result<PlexAccount>>
+public class ValidatePlexTokenCommandValidator : Validator<ValidatePlexTokenCommand>
+{
+    public ValidatePlexTokenCommandValidator()
+    {
+        RuleFor(x => x.AuthenticationToken).MinimumLength(5);
+    }
+}
+
+public class ValidatePlexTvTokenCommandHandler
+    : ICommandHandler<ValidatePlexTokenCommand, Result<ValidatePlexTokenCommandResult>>
 {
     private readonly IPlexApiClientFactory _plexApiClientFactory;
+    private readonly ILogger _log;
 
-    public ValidatePlexTvTokenCommandHandler(IPlexApiClientFactory plexApiClientFactory)
+    public ValidatePlexTvTokenCommandHandler(ILogger log, IPlexApiClientFactory plexApiClientFactory)
     {
+        _log = log.ForContext<ValidatePlexTvTokenCommandHandler>();
+
         _plexApiClientFactory = plexApiClientFactory;
     }
 
-    public async Task<Result<PlexAccount>> ExecuteAsync(ValidatePlexTokenCommand command, CancellationToken ct)
+    public async Task<Result<ValidatePlexTokenCommandResult>> ExecuteAsync(
+        ValidatePlexTokenCommand command,
+        CancellationToken ct
+    )
     {
-        var plexAccount = command.PlexAccount;
-        var client = _plexApiClientFactory.CreateTvClient(plexAccount.GetAuthToken);
+        var clientId = Guid.NewGuid().ToString();
+
+        var client = _plexApiClientFactory.CreateTvClient(command.AuthenticationToken);
 
         var response = await client.Authentication.GetTokenDetailsAsync().ToResponse();
 
-        return response.ToApiResult(x => new PlexAccount
+        var isValid = response.Value.RawResponse.IsSuccessStatusCode;
+        var result = response.ToApiResult(x => new ValidatePlexTokenCommandResult
         {
-            Id = plexAccount.Id,
-            DisplayName = plexAccount.DisplayName,
+            ClientId = clientId,
             Username = x.UserPlexAccount!.Username,
-            Password = plexAccount.Password,
-            IsEnabled = plexAccount.IsEnabled,
-            IsValidated = true,
-            ValidatedAt = DateTime.UtcNow,
             PlexId = x.UserPlexAccount!.Id,
             Uuid = x.UserPlexAccount!.Uuid,
-            ClientId = plexAccount.ClientId,
+            IsValidated = isValid,
+            ValidatedAt = isValid ? DateTime.UtcNow : null,
+
             Title = x.UserPlexAccount!.Title,
             Email = x.UserPlexAccount!.Email,
-            HasPassword = x.UserPlexAccount!.HasPassword.GetValueOrDefault(),
             AuthenticationToken = x.UserPlexAccount!.AuthToken,
-            CustomAuthenticationToken = plexAccount.CustomAuthenticationToken,
-            IsMain = plexAccount.IsMain,
-            PlexAccountServers = [],
-            PlexAccountLibraries = [],
             Is2Fa = x.UserPlexAccount!.TwoFactorEnabled.GetValueOrDefault(),
-            VerificationCode = string.Empty,
         });
+
+        if (result.IsSuccess)
+        {
+            var username = response.Value.UserPlexAccount!.Username;
+            _log.Here()
+                .Information(
+                    "Successfully retrieved the PlexAccount data for user {UserName} from the PlexApi",
+                    username
+                );
+        }
+
+        return result;
     }
 }

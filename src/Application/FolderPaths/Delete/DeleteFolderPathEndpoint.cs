@@ -18,7 +18,7 @@ public class DeleteFolderPathEndpointRequestValidator : Validator<DeleteFolderPa
 
 public class DeleteFolderPathEndpoint : BaseEndpoint<DeleteFolderPathEndpointRequest, BaseResultDTO>
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.FolderPathController + "/{Id}";

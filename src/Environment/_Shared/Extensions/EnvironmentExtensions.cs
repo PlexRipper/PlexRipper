@@ -4,19 +4,21 @@ namespace Reaparr.Environment;
 
 public static class EnvironmentExtensions
 {
-    public const string IntegrationTestModeKey = "IntegrationTestMode";
+    private const string IntegrationTestModeKey = "IntegrationTestMode";
 
     public const string UnmaskedModeKey = "UNMASKED";
 
-    public const string LogEnvVarsKey = "LOG_ENV_VARS";
+    private const string LogEnvVarsKey = "LOG_ENV_VARS";
 
-    public const string LogLevelKey = "LOG_LEVEL";
+    private const string LogLevelKey = "LOG_LEVEL";
 
-    public const string VersionKey = "VERSION";
+    private const string VersionKey = "VERSION";
 
-    public const string InformationalVersionKey = "INFORMATIONAL_VERSION";
+    private const string InformationalVersionKey = "INFORMATIONAL_VERSION";
 
-    public const string DevelopmentRootPathKey = "DEVELOPMENT_ROOT_PATH";
+    private const string DevelopmentRootPathKey = "DEVELOPMENT_ROOT_PATH";
+
+    private const string AuthHeaderTokenName = "AUTH_HEADER_TOKEN";
 
     private static readonly string TrueValue = Convert.ToString(true);
 
@@ -36,6 +38,9 @@ public static class EnvironmentExtensions
     /// </summary>
     /// <returns></returns>
     public static string? GetDevelopmentRootPath() => System.Environment.GetEnvironmentVariable(DevelopmentRootPathKey);
+
+    public static string GetHeaderAuthTokenName() =>
+        System.Environment.GetEnvironmentVariable(AuthHeaderTokenName) ?? "X-Auth-User";
 
     /// <summary>
     /// When set to true, the application will not mask/censor sensitive data in the logs.

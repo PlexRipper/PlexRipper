@@ -11,7 +11,7 @@ namespace Reaparr.Application;
 [DisallowConcurrentExecution]
 public class CheckAllConnectionsStatusByPlexServerJob : IJob
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
     private readonly ISignalRService _signalRService;

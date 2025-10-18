@@ -58,34 +58,16 @@ public enum DownloadStatus
     Deleted = 7,
 
     /// <summary>
-    /// Download segments are being merged into 1 media file.
-    /// </summary>
-    [EnumMember(Value = nameof(Merging))]
-    Merging = 8,
-
-    /// <summary>
     /// Download file is being moved.
     /// </summary>
     [EnumMember(Value = nameof(Moving))]
     Moving = 9,
 
     /// <summary>
-    /// Download file has been merged.
-    /// </summary>
-    [EnumMember(Value = nameof(MergePaused))]
-    MergePaused = 10,
-
-    /// <summary>
     /// Download file has been moved.
     /// </summary>
     [EnumMember(Value = nameof(MovePaused))]
     MovePaused = 11,
-
-    /// <summary>
-    /// Download file has been merged.
-    /// </summary>
-    [EnumMember(Value = nameof(MergeFinished))]
-    MergeFinished = 12,
 
     /// <summary>
     /// Download file has been moved.
@@ -110,10 +92,4 @@ public enum DownloadStatus
     /// </summary>
     [EnumMember(Value = nameof(MoveError))]
     MoveError = 16,
-
-    /// <summary>
-    /// The server is offline.
-    /// </summary>
-    [EnumMember(Value = nameof(MergeError))]
-    MergeError = 17,
 }

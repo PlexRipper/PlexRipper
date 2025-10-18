@@ -24,7 +24,7 @@ public class InspectAllPlexServersByAccountIdCommandValidator
 public class InspectAllPlexServersByAccountIdCommandHandler
     : ICommandHandler<InspectAllPlexServersByAccountIdCommand, Result>
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IReaparrDbContext _dbContext;
 

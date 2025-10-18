@@ -45,5 +45,27 @@ export function baseSetup(): { ctx: Context; appConfig: IAppConfig } {
 export function getAxiosMock() {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore - https://github.com/ctimmerm/axios-mock-adapter/issues/400
-	return new MockAdapter(axios, { onNoMatch: 'throwException' });
+	const mock = new MockAdapter(axios, { onNoMatch: 'throwException' });
+
+	// Default mocks to avoid noisy missing-mock errors in setup flows
+	mock.onGet('/api/Authentication/status').reply(200, {
+		isSuccess: true,
+		errors: [],
+		successes: [],
+		statusCode: 200,
+		value: {
+			claims: [],
+			isLoggedIn: true,
+			userName: 'test-user',
+		},
+	});
+	mock.onGet('/api/BackgroundJobs').reply(200, {
+		isSuccess: true,
+		errors: [],
+		successes: [],
+		statusCode: 200,
+		value: [],
+	});
+
+	return mock;
 }

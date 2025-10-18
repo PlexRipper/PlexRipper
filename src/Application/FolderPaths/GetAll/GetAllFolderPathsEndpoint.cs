@@ -6,7 +6,7 @@ namespace Reaparr.Application;
 
 public class GetAllFolderPathsEndpoint : BaseEndpointWithoutRequest<List<FolderPathDTO>>
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     public override string EndpointPath => ApiRoutes.FolderPathController + "/";
 

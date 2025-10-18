@@ -1,7 +1,8 @@
 import Log from 'consola';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { get } from '@vueuse/core';
-import { tap } from 'rxjs/operators';
+import { tap, catchError, switchMap } from 'rxjs/operators';
+import { type Observable, of } from 'rxjs';
 import { DialogType } from '@enums';
 import { plexAccountApi } from '@api';
 import type { IError, PlexAccountDTO } from '@dto';
@@ -39,7 +40,7 @@ export const useAccountDialogStore = defineStore('AccountDialogStore', () => {
 		title: '',
 		plexId: 0,
 		authenticationToken: '',
-		apiAuthenticationToken: '',
+		customAuthenticationToken: '',
 		email: '',
 		plexServerAccess: [],
 		plexLibraryAccess: [],
@@ -61,6 +62,33 @@ export const useAccountDialogStore = defineStore('AccountDialogStore', () => {
 	const dialogStore = useDialogStore();
 	const accountStore = useAccountStore();
 
+	// Helper function to update state with validated account data
+	const updateStateWithAccountData = (accountData: {
+		clientId: string;
+		username: string;
+		email: string;
+		title: string;
+		plexId: number;
+		uuid: string;
+		authenticationToken: string;
+		isValidated: boolean;
+		validatedAt?: string | null;
+		is2Fa: boolean;
+	}) => {
+		Object.assign(state, {
+			clientId: accountData.clientId,
+			username: accountData.username,
+			email: accountData.email,
+			title: accountData.title,
+			plexId: accountData.plexId,
+			uuid: accountData.uuid,
+			authenticationToken: accountData.authenticationToken,
+			isValidated: accountData.isValidated,
+			validatedAt: accountData.validatedAt,
+			is2Fa: accountData.is2Fa,
+		});
+	};
+
 	const actions = {
 		openDialog({ accountId }: IAccountDialog): void {
 			state.isNewAccount = accountId === 0;
@@ -77,71 +105,108 @@ export const useAccountDialogStore = defineStore('AccountDialogStore', () => {
 			dialogStore.closeDialog(DialogType.AccountDialog);
 			actions.$reset();
 		},
-		validatePlexAccount() {
+		validatePlexToken() {
 			state.validateLoading = true;
 
-			return plexAccountApi.validatePlexAccountEndpoint(get(getters.getAccountData)).pipe(
-				tap(({ value, isSuccess }) => {
+			return plexAccountApi.validatePlexTokenEndpoint({
+				displayName: state.displayName,
+				manualAuthenticationToken: state.authenticationToken,
+			}).pipe(
+				tap(({ value, isSuccess, errors }) => {
+					// Always reset loading state
+					state.validateLoading = false;
+
+					if (!isSuccess || !value) {
+						Log.error('Token validation failed', errors);
+						return;
+					}
+
 					if (!isSuccess || value?.isUnAuthorized) {
 						state.isValidated = false;
 						state.hasValidationErrors = true;
-						state.validateLoading = false;
 						dialogStore.openDialog(DialogType.AccountTokenValidateDialog);
 						return;
 					}
 
-					const account = value?.plexAccountDTO;
-
+					// Update state with validated token data
+					updateStateWithAccountData(value);
 					state.hasValidationErrors = false;
+
+					// Account was validated successfully
+					if (value.isValidated) {
+						Log.info('Token validation successful');
+						dialogStore.openDialog(DialogType.AccountTokenValidateDialog);
+						return;
+					}
+				}),
+				catchError((error) => {
+					// Reset loading state on error
+					state.validateLoading = false;
+					state.isValidated = false;
+					state.hasValidationErrors = true;
+					Log.error('Token validation failed', error);
+					return of({ value: null, isSuccess: false });
+				}),
+			);
+		},
+		validatePlexAccount() {
+			state.validateLoading = true;
+
+			return plexAccountApi.validatePlexCredentialsEndpoint(get(getters.getAccountData)).pipe(
+				tap(({ value, isSuccess }) => {
+					// Always reset loading state
 					state.validateLoading = false;
 
-					if (!account) {
+					if (!isSuccess || !value) {
 						state.isValidated = false;
 						state.hasValidationErrors = true;
-						state.validationErrors = [];
-						return;
-					}
-
-					Object.assign(state, account);
-					console.log('Account', account);
-
-					if (account.isValidated && !(account.username != '' && account.password != '')) {
-						Log.info('Account is validated and was added by token');
 						dialogStore.openDialog(DialogType.AccountTokenValidateDialog);
 						return;
 					}
 
+					// Update state with validated credentials data
+					updateStateWithAccountData(value);
+
 					// Account has no 2FA and was valid
-					if (account.isValidated && !account.is2Fa) {
+					if (value.isValidated && !value.is2Fa) {
 						Log.info('Account has no 2FA and was valid');
 						return;
 					}
 
 					// Account has no 2FA and was invalid
-					if (!account.isValidated && !account.is2Fa) {
+					if (!value.isValidated && !value.is2Fa) {
 						Log.info('Account has no 2FA and was invalid');
 						return;
 					}
 
 					// Account has 2FA
-					if (!account.isValidated && account.is2Fa) {
+					if (!value.isValidated && value.is2Fa) {
 						Log.info('Account has 2FA enabled');
 						dialogStore.openDialog(DialogType.AccountVerificationCodeDialog);
 						return;
 					}
 
-					if (!account.isValidated && account.is2Fa) {
+					if (!value.isValidated && value.is2Fa) {
 						Log.info('Account was valid and has 2FA enabled, this makes no sense and sounds like a bug');
 					}
+				}),
+				catchError((error) => {
+					// Reset loading state on error
+					state.validateLoading = false;
+					state.isValidated = false;
+					state.hasValidationErrors = true;
+					Log.error('Credentials validation failed', error);
+					return of({ value: null, isSuccess: false });
 				}),
 			);
 		},
 		validateVerificationCode() {
-			return plexAccountApi.validatePlexAccountEndpoint(get(getters.getAccountData)).pipe(
+			return plexAccountApi.validatePlexCredentialsEndpoint(get(getters.getAccountData)).pipe(
 				tap(({ value, isSuccess }) => {
 					if (isSuccess && value) {
 						dialogStore.closeDialog(DialogType.AccountVerificationCodeDialog);
-						Object.assign(state, value);
+						// Update state with validated credentials data
+						updateStateWithAccountData(value);
 					} else {
 						Log.error('Validate Error', value);
 					}
@@ -151,14 +216,32 @@ export const useAccountDialogStore = defineStore('AccountDialogStore', () => {
 		generateToken(verificationCode: string = '') {
 			return plexAccountApi.generatePlexTokenEndpoint(state.id, { verificationCode });
 		},
-		saveAccount() {
+		saveAccount(): Observable<void> {
 			state.savingLoading = true;
 			if (state.isNewAccount) {
-				return accountStore.createPlexAccount(get(getters.getAccountData)).pipe(
+				const accountData = get(getters.getAccountData);
+				return accountStore.createPlexAccount({
+					customAuthenticationToken: accountData.customAuthenticationToken,
+					authenticationToken: accountData.authenticationToken,
+					clientId: accountData.clientId,
+					displayName: accountData.displayName,
+					email: accountData.email,
+					is2Fa: accountData.is2Fa,
+					isEnabled: accountData.isEnabled,
+					isMain: accountData.isMain,
+					isValidated: accountData.isValidated,
+					password: accountData.password,
+					plexId: accountData.plexId,
+					title: accountData.title,
+					username: accountData.username,
+					uuid: accountData.uuid,
+					validatedAt: accountData.validatedAt!,
+				}).pipe(
 					tap(() => {
 						state.savingLoading = false;
 						dialogStore.closeDialog(DialogType.AccountDialog);
 					}),
+					switchMap(() => of(void 0)),
 				);
 			}
 			return accountStore.updatePlexAccount(get(getters.getAccountData)).pipe(
@@ -166,6 +249,7 @@ export const useAccountDialogStore = defineStore('AccountDialogStore', () => {
 					state.savingLoading = false;
 					dialogStore.closeDialog(DialogType.AccountDialog);
 				}),
+				switchMap(() => of(void 0)),
 			);
 		},
 		switchInputMode(isAuthTokenMode: boolean) {
@@ -196,6 +280,12 @@ export const useAccountDialogStore = defineStore('AccountDialogStore', () => {
 			}
 			return false;
 		}),
+		isAllowedToSave: computed(() => {
+			if (state.isNewAccount) {
+				return state.displayName !== '' && state.isValidated;
+			}
+			return true;
+		}),
 		getAccountData: computed((): PlexAccountDTO => {
 			return {
 				id: state.id,
@@ -205,7 +295,7 @@ export const useAccountDialogStore = defineStore('AccountDialogStore', () => {
 				uuid: state.uuid,
 				validatedAt: state.validatedAt,
 				verificationCode: state.verificationCode,
-				apiAuthenticationToken: state.apiAuthenticationToken,
+				customAuthenticationToken: state.customAuthenticationToken,
 				authenticationToken: state.authenticationToken,
 				clientId: state.clientId,
 				displayName: state.displayName,

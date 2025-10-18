@@ -6,7 +6,7 @@ import vitePreprocessor from 'cypress-vite';
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 
 export default defineConfig({
-	projectId: 'qo5tth',
+	projectId: '7arca4',
 	env: {
 		BASE_URL: 'http://localhost:3030',
 	},

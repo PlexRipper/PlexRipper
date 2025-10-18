@@ -3,7 +3,7 @@ import { acceptHMRUpdate, defineStore } from 'pinia';
 import type { Observable } from 'rxjs';
 import { forkJoin, of } from 'rxjs';
 import { switchMap, tap } from 'rxjs/operators';
-import type { PlexAccountDTO } from '@dto';
+import type { CreatePlexAccountEndpointRequest, PlexAccountDTO } from '@dto';
 import { RefreshDataType } from '@dto';
 import type { ISetupResult } from '@interfaces';
 import { plexAccountApi } from '@api';
@@ -54,12 +54,13 @@ export const useAccountStore = defineStore('AccountStore', () => {
      * Creates a PlexAccount in the database, returns the new accountId and then also refreshes all the Plex Servers that are accessible
      * @param {PlexAccountDTO} account
      */
-		createPlexAccount(account: PlexAccountDTO): Observable<PlexAccountDTO | undefined> {
+		createPlexAccount(account: CreatePlexAccountEndpointRequest): Observable<PlexAccountDTO> {
 			return plexAccountApi.createPlexAccountEndpoint(account).pipe(
-				switchMap(() =>
-					forkJoin([actions.refreshAccounts(), serverStore.refreshPlexServers(), libraryStore.refreshLibraries()]),
+				switchMap((result) =>
+					forkJoin([actions.refreshAccounts(), serverStore.refreshPlexServers(), libraryStore.refreshLibraries()]).pipe(
+						switchMap(() => of(result.value as PlexAccountDTO)),
+					),
 				),
-				switchMap(() => of(actions.getAccount(account.id))),
 			);
 		},
 		updatePlexAccount(account: PlexAccountDTO) {

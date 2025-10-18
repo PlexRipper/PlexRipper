@@ -10,8 +10,8 @@ const qualityColorMap: Record<VideoQuality, string> = {
 	[VideoQuality.HD]: 'light-green-13',
 	[VideoQuality.FullHD]: 'light-blue-6',
 	[VideoQuality.QHD]: 'cyan-6',
-	[VideoQuality.UHD4K]: 'red darken-4',
-	[VideoQuality.UHD8K]: 'purple-8',
+	[VideoQuality.UHD_4K]: 'red darken-4',
+	[VideoQuality.UHD_8K]: 'purple-8',
 	[VideoQuality.Unknown]: 'blue-grey-4',
 };
 
@@ -47,9 +47,9 @@ export function translateVideoQuality(quality?: VideoQuality): string {
 			return t('general.video-quality.quality-1080-fullhd');
 		case VideoQuality.QHD:
 			return t('general.video-quality.quality-1440-qhd');
-		case VideoQuality.UHD4K:
+		case VideoQuality.UHD_4K:
 			return t('general.video-quality.quality-2160-uhd-4k');
-		case VideoQuality.UHD8K:
+		case VideoQuality.UHD_8K:
 			return t('general.video-quality.quality-4320-uhd-8k');
 		default:
 			return t('general.error.unknown');

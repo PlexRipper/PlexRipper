@@ -99,7 +99,7 @@ public class GetAllBackgroundJobsEndpointUnitTests : BaseUnitTest<GetAllBackgrou
             Guid.NewGuid().ToString()
         );
 
-        var fileMergeJobUpdatePayload = new FileMergeJobUpdateDTO
+        var moveDownloadJobUpdatePayload = new MoveDownloadFileJobUpdateDTO
         {
             DownloadTaskId = new DownloadTaskKey
             {
@@ -110,10 +110,10 @@ public class GetAllBackgroundJobsEndpointUnitTests : BaseUnitTest<GetAllBackgrou
             },
         };
 
-        var fileMergeJobUpdate = new JobStatusUpdate<string>(
-            JobTypes.FileMergeJob,
+        var moveDownloadJobUpdate = new JobStatusUpdate<string>(
+            JobTypes.MoveDownloadFileJob,
             JobStatus.Completed,
-            ToJsonString(fileMergeJobUpdatePayload),
+            ToJsonString(moveDownloadJobUpdatePayload),
             Guid.NewGuid().ToString()
         );
 
@@ -133,7 +133,7 @@ public class GetAllBackgroundJobsEndpointUnitTests : BaseUnitTest<GetAllBackgrou
             downloadJobUpdate,
             inspectPlexServerJobUpdate,
             syncServerMediaJobUpdate,
-            fileMergeJobUpdate,
+            moveDownloadJobUpdate,
             checkAllConnectionsStatusJobUpdate,
         };
 
@@ -155,7 +155,7 @@ public class GetAllBackgroundJobsEndpointUnitTests : BaseUnitTest<GetAllBackgrou
         ValidateJobStatusUpdate(responseValue[0], downloadJobUpdate, downloadJobUpdatePayload);
         ValidateJobStatusUpdate(responseValue[1], inspectPlexServerJobUpdate, inspectPlexServerJobUpdatePayload);
         ValidateJobStatusUpdate(responseValue[2], syncServerMediaJobUpdate, syncServerMediaJobUpdatePayload);
-        ValidateJobStatusUpdate(responseValue[3], fileMergeJobUpdate, fileMergeJobUpdatePayload);
+        ValidateJobStatusUpdate(responseValue[3], moveDownloadJobUpdate, moveDownloadJobUpdatePayload);
         ValidateJobStatusUpdate(
             responseValue[4],
             checkAllConnectionsStatusJobUpdate,

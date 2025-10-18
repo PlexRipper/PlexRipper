@@ -20,7 +20,7 @@ public class CreateDownloadTasksEndpointRequestValidator : Validator<CreateDownl
 
 public class CreateDownloadTasksEndpoint : BaseEndpoint<CreateDownloadTasksEndpointRequest>
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
 
     public override string EndpointPath => ApiRoutes.DownloadController + "/create";

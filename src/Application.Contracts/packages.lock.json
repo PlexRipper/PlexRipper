@@ -258,12 +258,6 @@
           "Serilog.Sinks.Seq": "[9.0.0, )",
           "Serilog.Sinks.TestCorrelator": "[4.0.0, )"
         }
-      },
-      "Reaparr.AppHost.Contracts": {
-        "type": "Project",
-        "dependencies": {
-          "Reaparr.Domain": "[1.0.0, )"
-        }
       }
     }
   }

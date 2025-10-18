@@ -131,9 +131,9 @@ public static partial class ResultExtensions
 
         if (reason.Metadata.Any())
         {
-            msg += $"{System.Environment.NewLine} {Delimiter(level)} Metadata:";
+            msg += $"{Environment.NewLine} {Delimiter(level)} Metadata:";
             foreach (var entry in reason.Metadata)
-                msg += $"{System.Environment.NewLine} {Delimiter(level + 1)} {entry.Key} - {entry.Value}";
+                msg += $"{Environment.NewLine} {Delimiter(level + 1)} {entry.Key} - {entry.Value}";
         }
 
         return msg;

@@ -71,7 +71,7 @@ function createFileSystem() {
 	const fs = new MemoryFileSystem();
 
 	for (const defaultFolderPath of defaultFolderPaths) {
-		fs.createDirectory(defaultFolderPath.directory + defaultFolderPath.directory + 'Inside');
+		fs.createDirectory(defaultFolderPath.directory + '/Inside');
 	}
 
 	return fs;

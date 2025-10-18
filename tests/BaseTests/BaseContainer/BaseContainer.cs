@@ -16,7 +16,7 @@ public class BaseContainer : IDisposable
 {
     private readonly ReaparrWebApplicationFactory _factory;
 
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
 
     private readonly ILifetimeScope _lifeTimeScope;
 
@@ -74,7 +74,7 @@ public class BaseContainer : IDisposable
 
     public IDownloadTaskScheduler DownloadTaskScheduler => Resolve<IDownloadTaskScheduler>();
 
-    public IFileMergeScheduler FileMergeScheduler => Resolve<IFileMergeScheduler>();
+    public IMoveDownloadFileScheduler MoveDownloadFileScheduler => Resolve<IMoveDownloadFileScheduler>();
 
     public MockSignalRService MockSignalRService => (MockSignalRService)Resolve<ISignalRService>();
 

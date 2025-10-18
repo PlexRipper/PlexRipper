@@ -26,7 +26,7 @@ public class RefreshPlexTvShowLibraryCommandValidator : AbstractValidator<Refres
 public class RefreshPlexTvShowLibraryCommandHandler
     : ICommandHandler<RefreshPlexTvShowLibraryCommand, Result<PlexLibrary>>
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IReaparrDbContext _dbContext;
     private readonly IRefreshLibraryProgressReporter _progressReporter;

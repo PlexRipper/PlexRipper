@@ -41,7 +41,7 @@ public class GeneratePlexTokenResponse
 
 public class GeneratePlexTokenEndpoint : BaseEndpoint<GeneratePlexTokenEndpointRequest, GeneratePlexTokenResponse>
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
 
@@ -82,7 +82,16 @@ public class GeneratePlexTokenEndpoint : BaseEndpoint<GeneratePlexTokenEndpointR
             plexAccount.VerificationCode = req.VerificationCode;
         }
 
-        var validateResult = await _commandExecutor.Send(new PlexSignInCommand(plexAccount), ct);
+        var validateResult = await _commandExecutor.Send(
+            new PlexSignInCommand
+            {
+                ClientId = plexAccount.ClientId,
+                Username = plexAccount.Username,
+                Password = plexAccount.Password,
+                VerificationCode = plexAccount.VerificationCode,
+            },
+            ct
+        );
 
         if (validateResult.IsSuccess)
         {

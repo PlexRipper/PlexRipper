@@ -30,7 +30,7 @@
 					:title="toTranslation(folderPath.folderType).title"
 					:label="toTranslation(folderPath.folderType).label"
 					:text="toTranslation(folderPath.folderType).text"
-					@update:edit-model="saveDisplayName(folderPath.id, $event)">
+					@update:edit-model="saveDisplayName(folderPath.id, $event!)">
 					<!--	Folder Path Display	-->
 					<QRow :cy="`default-${kebabCase(folderPath.folderType)}-row`">
 						<QCol cols="7">
@@ -163,7 +163,7 @@ function toTranslation(type: FolderType): IHelp {
 	}
 }
 
-const saveDisplayName = (id: number, value: string): void => {
+function saveDisplayName(id: number, value: string) {
 	useSubscription(
 		folderPathStore.setFolderPathDisplayName(id, value).subscribe({
 			error(err) {
@@ -171,7 +171,7 @@ const saveDisplayName = (id: number, value: string): void => {
 			},
 		}),
 	);
-};
+}
 </script>
 
 <style lang="scss">

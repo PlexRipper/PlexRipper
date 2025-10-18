@@ -32,7 +32,7 @@ const qualities: PlexMediaQualityDTO[] = [
 	{ quality: VideoQuality.HD, dataId: 0, mediaDataType: PlexMediaType.Unknown, mediaId: 0 },
 	{ quality: VideoQuality.FullHD, dataId: 0, mediaDataType: PlexMediaType.Unknown, mediaId: 0 },
 	{ quality: VideoQuality.QHD, dataId: 0, mediaDataType: PlexMediaType.Unknown, mediaId: 0 },
-	{ quality: VideoQuality.UHD4K, dataId: 0, mediaDataType: PlexMediaType.Unknown, mediaId: 0 },
-	{ quality: VideoQuality.UHD8K, dataId: 0, mediaDataType: PlexMediaType.Unknown, mediaId: 0 },
+	{ quality: VideoQuality.UHD_4K, dataId: 0, mediaDataType: PlexMediaType.Unknown, mediaId: 0 },
+	{ quality: VideoQuality.UHD_8K, dataId: 0, mediaDataType: PlexMediaType.Unknown, mediaId: 0 },
 ];
 </script>

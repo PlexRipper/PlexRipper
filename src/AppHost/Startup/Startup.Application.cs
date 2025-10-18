@@ -48,6 +48,9 @@ public static partial class Startup
             });
         }
 
+        // Use custom header authentication middleware
+        app.UseMiddleware<HeaderAuthenticationMiddleware>();
+
         app.UseAuthentication();
         app.UseAuthorization();
 

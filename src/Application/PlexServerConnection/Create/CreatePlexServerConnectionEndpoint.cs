@@ -33,7 +33,7 @@ public class CreatePlexServerConnectionEndpointRequestValidator : Validator<Crea
 public class CreatePlexServerConnectionEndpoint
     : BaseEndpoint<CreatePlexServerConnectionEndpointRequest, ResultDTO<PlexServerConnectionDTO>>
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.PlexServerConnectionController;

@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -45,7 +46,10 @@ export class Settings {
    * @request PUT:/api/Settings
    * @secure
    */
-  updateUserSettingsEndpoint = (data: SettingsModelDTO, params: RequestParams = {}) =>
+  updateUserSettingsEndpoint = (
+    data: SettingsModelDTO,
+    params: RequestParams = {},
+  ) =>
     from(
       Axios.request<SettingsModelDTO>({
         url: `/api/Settings`,
@@ -78,9 +82,12 @@ export class Settings {
 }
 
 export class SettingsPaths {
-  static getUserSettingsEndpoint = () => queryString.stringifyUrl({ url: `/api/Settings` });
+  static getUserSettingsEndpoint = () =>
+    queryString.stringifyUrl({ url: `/api/Settings` });
 
-  static updateUserSettingsEndpoint = () => queryString.stringifyUrl({ url: `/api/Settings` });
+  static updateUserSettingsEndpoint = () =>
+    queryString.stringifyUrl({ url: `/api/Settings` });
 
-  static resetDatabaseEndpoint = () => queryString.stringifyUrl({ url: `/api/Settings/resetdb` });
+  static resetDatabaseEndpoint = () =>
+    queryString.stringifyUrl({ url: `/api/Settings/resetdb` });
 }

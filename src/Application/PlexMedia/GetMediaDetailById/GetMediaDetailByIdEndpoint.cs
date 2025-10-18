@@ -41,7 +41,7 @@ public class GetMediaDetailByIdEndpointRequestValidator : Validator<GetMediaDeta
 
 public class GetMediaDetailByIdEndpoint : BaseEndpoint<GetMediaDetailByIdEndpointRequest, PlexMediaDTO>
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.PlexMediaController + "/detail/{PlexMediaId}";

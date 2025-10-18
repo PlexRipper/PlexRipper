@@ -56,7 +56,24 @@ describe('AccountService.createPlexAccount()', () => {
 		await subscribeSpyTo(accountStore.setup()).onComplete();
 		await subscribeSpyTo(serverStore.setup()).onComplete();
 
-		const createAccountResult = subscribeSpyTo(accountStore.createPlexAccount(plexAccount));
+		const createAccountResult = subscribeSpyTo(accountStore.createPlexAccount({
+			authenticationToken: plexAccount.authenticationToken,
+			customAuthenticationToken: plexAccount.customAuthenticationToken,
+			clientId: plexAccount.clientId,
+			displayName: plexAccount.displayName,
+			email: plexAccount.email,
+			is2Fa: plexAccount.is2Fa,
+			isEnabled: plexAccount.isEnabled,
+			isMain: plexAccount.isMain,
+			isValidated: plexAccount.isValidated,
+			validatedAt: plexAccount.validatedAt!,
+			password: plexAccount.password,
+			plexId: plexAccount.plexId,
+			title: plexAccount.title,
+			username: plexAccount.username,
+			uuid: plexAccount.uuid,
+
+		}));
 		await createAccountResult.onComplete();
 		const getServersResult = serverStore.getServers();
 

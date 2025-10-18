@@ -20,22 +20,22 @@ public class CreateDefaultAppUserCommandValidator : AbstractValidator<CreateDefa
 
 public class CreateDefaultAppUserCommandHandler : ICommandHandler<CreateDefaultAppUserCommand, Result>
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly IAuthenticationSettings _authenticationSettings;
-    private readonly UserManager<AppUser> _userManager;
-    private readonly RoleManager<IdentityRole> _roleManager;
+    private readonly IUserService _userService;
+    private readonly IRoleService _roleService;
 
     public CreateDefaultAppUserCommandHandler(
         ILogger log,
         IAuthenticationSettings authenticationSettings,
-        UserManager<AppUser> userManager,
-        RoleManager<IdentityRole> roleManager
+        IUserService userService,
+        IRoleService roleService
     )
     {
         _log = log.ForContext<CreateDefaultAppUserCommandHandler>();
         _authenticationSettings = authenticationSettings;
-        _userManager = userManager;
-        _roleManager = roleManager;
+        _userService = userService;
+        _roleService = roleService;
     }
 
     public async Task<Result> ExecuteAsync(CreateDefaultAppUserCommand command, CancellationToken cancellationToken)
@@ -47,11 +47,11 @@ public class CreateDefaultAppUserCommandHandler : ICommandHandler<CreateDefaultA
                     "Setting: {ResetCredentials} has been enabled! Resetting Reaparr app username and password!",
                     nameof(_authenticationSettings.ResetCredentials)
                 );
-            var toBeDeletedUser = await _userManager.Users.FirstOrDefaultAsync(cancellationToken: cancellationToken);
+            var toBeDeletedUser = await _userService.GetFirstUserAsync(cancellationToken);
             if (toBeDeletedUser != null)
             {
                 _log.Here().Information("Reaparr app user was found, deleting now and creating the default one.");
-                await _userManager.DeleteAsync(toBeDeletedUser);
+                await _userService.DeleteAsync(toBeDeletedUser);
             }
         }
 
@@ -60,9 +60,9 @@ public class CreateDefaultAppUserCommandHandler : ICommandHandler<CreateDefaultA
         var defaultRoles = new[] { adminRole };
         foreach (var role in defaultRoles)
         {
-            if (!await _roleManager.RoleExistsAsync(role))
+            if (!await _roleService.RoleExistsAsync(role))
             {
-                await _roleManager.CreateAsync(new IdentityRole(role));
+                await _roleService.CreateAsync(new IdentityRole(role));
             }
         }
 
@@ -77,13 +77,13 @@ public class CreateDefaultAppUserCommandHandler : ICommandHandler<CreateDefaultA
             EmailConfirmed = true,
         };
 
-        var user = await _userManager.Users.FirstOrDefaultAsync(cancellationToken: cancellationToken);
+        var user = await _userService.GetFirstUserAsync(cancellationToken);
         if (user is null)
         {
-            var result = await _userManager.CreateAsync(defaultUser, defaultPassword);
+            var result = await _userService.CreateAsync(defaultUser, defaultPassword);
             if (result.Succeeded)
             {
-                await _userManager.AddToRoleAsync(defaultUser, adminRole);
+                await _userService.AddToRoleAsync(defaultUser, adminRole);
                 _log.Here()
                     .Warning(
                         "APP USER CREATED: user \"{DefaultUserName}\" with password \"{DefaultPassword}\" created successfully, make sure to update this default user!",

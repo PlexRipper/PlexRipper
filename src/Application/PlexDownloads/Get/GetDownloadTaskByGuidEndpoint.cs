@@ -32,7 +32,7 @@ public class GetDownloadTaskByGuidRequestValidator : Validator<GetDownloadTaskBy
 
 public class GetDownloadTaskByGuidEndpoint : BaseEndpoint<GetDownloadTaskByGuidRequest, DownloadTaskDTO>
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.DownloadController + "/detail/{DownloadTaskGuid}";

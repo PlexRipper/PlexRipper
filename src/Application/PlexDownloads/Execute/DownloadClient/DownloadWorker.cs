@@ -20,7 +20,7 @@ public class DownloadWorker : IDisposable
 
     private readonly Subject<DownloadWorkerTaskProgress> _downloadWorkerUpdate = new();
 
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
 
     private readonly ICommandExecutor _commandExecutor;
 
@@ -43,7 +43,7 @@ public class DownloadWorker : IDisposable
     /// <param name="downloadWorkerTask">The download task this worker will execute.</param>
     /// <param name="clientFactory">The factory to create a new <see cref="IPlexApiClient"/>.</param>
     public DownloadWorker(
-        Serilog.ILogger log,
+        ILogger log,
         ICommandExecutor commandExecutor,
         IReaparrDbContext dbContext,
         DownloadWorkerTask downloadWorkerTask,
@@ -173,8 +173,9 @@ public class DownloadWorker : IDisposable
 
             destinationStream = fileStreamResult.Value;
 
-            // Is 0 when starting new and > 0 when resuming.
-            destinationStream.Position = DownloadWorkerTask.BytesReceived;
+            // Position the destination stream at the absolute byte offset for this segment
+            // Support resume by advancing with BytesReceived from the segment start
+            destinationStream.Position = DownloadWorkerTask.StartByte + DownloadWorkerTask.BytesReceived;
 
             // Create download HttpRequestMessage with range header
             var request = new HttpRequestMessage(HttpMethod.Get, downloadUrl);
@@ -301,6 +302,13 @@ public class DownloadWorker : IDisposable
 
                 if (DownloadWorkerTask.IsCompleted)
                 {
+                    _log.Here()
+                        .Information(
+                            "Download worker {WorkerId} completed downloading segment {FileName} (part {PartIndex})",
+                            Id,
+                            FileName,
+                            DownloadWorkerTask.PartIndex
+                        );
                     SetDownloadWorkerTaskChanged(DownloadStatus.DownloadFinished);
                     break;
                 }

@@ -13,7 +13,7 @@ public class InspectPlexServerJob : IJob
 
     private readonly IReaparrDbContext _dbContext;
     private readonly ISignalRService _signalRService;
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
 
     public static JobKey GetJobKey() => new(Guid.NewGuid().ToString(), nameof(InspectPlexServerJob));

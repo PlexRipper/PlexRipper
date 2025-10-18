@@ -67,8 +67,6 @@ public record DownloadTaskGeneric : IDownloadTaskProgress, IDownloadFileTransfer
 
     public required long FileDataTransferred { get; set; }
 
-    public required int CurrentFileTransferPathIndex { get; set; }
-
     public required long CurrentFileTransferBytesOffset { get; set; }
 
     #endregion

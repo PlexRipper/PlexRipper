@@ -4,6 +4,8 @@ namespace Reaparr.Data.Contracts;
 
 public static partial class DownloadTaskExtensions
 {
+    private const string TempDownloadFileSuffix = ".reaptemp";
+
     public static List<DownloadWorkerTask> GenerateDownloadWorkerTasks(
         this DownloadTaskFileBase downloadTask,
         int parts
@@ -41,7 +43,7 @@ public static partial class DownloadTaskExtensions
                     PartIndex = partIndex,
                     StartByte = startPosition,
                     EndByte = endPosition,
-                    FileName = downloadTask.FileName.AddPartIndexToFileName(partIndex),
+                    FileName = downloadTask.FileName.AddReaparrTempSuffixToFileName(),
                     DownloadStatus = DownloadStatus.Queued,
                     BytesReceived = 0,
                     ElapsedTime = 0,
@@ -51,4 +53,12 @@ public static partial class DownloadTaskExtensions
 
         return downloadWorkerTasks;
     }
+
+    private static string AddReaparrTempSuffixToFileName(this string fileName) =>
+        $"{Path.GetFileNameWithoutExtension(fileName)}{Path.GetExtension(fileName)}{TempDownloadFileSuffix}";
+
+    public static string RemoveReapTempSuffix(this string filePath) =>
+        filePath.EndsWith(TempDownloadFileSuffix, StringComparison.OrdinalIgnoreCase)
+            ? filePath[..^TempDownloadFileSuffix.Length]
+            : filePath;
 }

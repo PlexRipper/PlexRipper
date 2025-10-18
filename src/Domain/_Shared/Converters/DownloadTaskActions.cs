@@ -9,16 +9,12 @@ public static class DownloadTaskActions
         DownloadStatus.ServerUnreachable,
         DownloadStatus.Error,
         DownloadStatus.MoveError,
-        DownloadStatus.MergeError,
         DownloadStatus.Paused,
-        DownloadStatus.MergePaused,
         DownloadStatus.MovePaused,
         DownloadStatus.Stopped,
         DownloadStatus.Downloading,
         DownloadStatus.Queued,
-        DownloadStatus.Merging,
         DownloadStatus.Moving,
-        DownloadStatus.MergeFinished,
         DownloadStatus.MoveFinished,
         DownloadStatus.DownloadFinished,
         DownloadStatus.Deleted,
@@ -44,12 +40,10 @@ public static class DownloadTaskActions
                 actions.Add(DownloadActions.Stop);
                 break;
             case DownloadStatus.DownloadFinished:
-            case DownloadStatus.MergeFinished:
             case DownloadStatus.MoveFinished:
                 actions.Add(DownloadActions.Delete);
                 break;
             case DownloadStatus.Paused:
-            case DownloadStatus.MergePaused:
             case DownloadStatus.MovePaused:
                 actions.Add(DownloadActions.Start);
                 actions.Add(DownloadActions.Stop);
@@ -64,13 +58,11 @@ public static class DownloadTaskActions
                 actions.Add(DownloadActions.Delete);
                 break;
             case DownloadStatus.Moving:
-            case DownloadStatus.Merging:
                 actions.Add(DownloadActions.Pause);
                 actions.Add(DownloadActions.Stop);
                 break;
             case DownloadStatus.Error:
             case DownloadStatus.MoveError:
-            case DownloadStatus.MergeError:
                 actions.Add(DownloadActions.Restart);
                 actions.Add(DownloadActions.Delete);
                 break;

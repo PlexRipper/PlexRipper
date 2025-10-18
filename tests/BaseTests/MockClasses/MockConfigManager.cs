@@ -4,7 +4,7 @@ namespace Reaparr.BaseTests;
 
 public class MockConfigManager : IConfigManager
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly IUserSettings _userSettings;
 
     public MockConfigManager(ILogger log, IUserSettings userSettings)

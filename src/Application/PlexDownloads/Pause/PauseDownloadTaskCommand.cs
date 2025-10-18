@@ -23,22 +23,22 @@ public class PauseDownloadTaskCommandValidator : AbstractValidator<PauseDownload
 
 public class PauseDownloadTaskCommandHandler : ICommandHandler<PauseDownloadTaskCommand, Result>
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly IDownloadTaskScheduler _downloadTaskScheduler;
-    private readonly IFileMergeScheduler _fileMergeScheduler;
+    private readonly IMoveDownloadFileScheduler _moveDownloadFileScheduler;
 
     public PauseDownloadTaskCommandHandler(
         ILogger log,
         IReaparrDbContext dbContext,
         IDownloadTaskScheduler downloadTaskScheduler,
-        IFileMergeScheduler fileMergeScheduler
+        IMoveDownloadFileScheduler moveDownloadFileScheduler
     )
     {
         _log = log.ForContext<PauseDownloadTaskCommandHandler>();
         _dbContext = dbContext;
         _downloadTaskScheduler = downloadTaskScheduler;
-        _fileMergeScheduler = fileMergeScheduler;
+        _moveDownloadFileScheduler = moveDownloadFileScheduler;
     }
 
     public async Task<Result> ExecuteAsync(PauseDownloadTaskCommand command, CancellationToken cancellationToken)
@@ -65,9 +65,9 @@ public class PauseDownloadTaskCommandHandler : ICommandHandler<PauseDownloadTask
                 return await _downloadTaskScheduler.StopDownloadTaskJob(downloadTaskKey, cancellationToken);
             }
 
-            if (await _fileMergeScheduler.IsDownloadTaskMerging(downloadTaskKey))
+            if (await _moveDownloadFileScheduler.IsDownloadFileMoving(downloadTaskKey))
             {
-                await _fileMergeScheduler.StopFileMergeJob(downloadTaskKey);
+                await _moveDownloadFileScheduler.StopMoveDownloadFileJob(downloadTaskKey);
             }
         }
 

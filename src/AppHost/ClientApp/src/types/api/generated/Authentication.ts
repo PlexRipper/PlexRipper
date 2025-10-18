@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -71,7 +72,10 @@ export class Authentication {
    * @request PUT:/api/Authentication
    * @secure
    */
-  updateCredentialsEndpoint = (data: UpdateCredentialsEndpointRequest, params: RequestParams = {}) =>
+  updateCredentialsEndpoint = (
+    data: UpdateCredentialsEndpointRequest,
+    params: RequestParams = {},
+  ) =>
     from(
       Axios.request<BaseResultDTO>({
         url: `/api/Authentication`,
@@ -92,7 +96,10 @@ export class Authentication {
    * @request POST:/api/Authentication/login
    * @secure
    */
-  appUserLoginEndpoint = (data: AppUserLoginEndpointRequest, params: RequestParams = {}) =>
+  appUserLoginEndpoint = (
+    data: AppUserLoginEndpointRequest,
+    params: RequestParams = {},
+  ) =>
     from(
       Axios.request<BaseResultDTO>({
         url: `/api/Authentication/login`,
@@ -125,13 +132,18 @@ export class Authentication {
 }
 
 export class AuthenticationPaths {
-  static authenticationStatusEndpoint = () => queryString.stringifyUrl({ url: `/api/Authentication/status` });
+  static authenticationStatusEndpoint = () =>
+    queryString.stringifyUrl({ url: `/api/Authentication/status` });
 
-  static getAppCredentials = () => queryString.stringifyUrl({ url: `/api/Authentication` });
+  static getAppCredentials = () =>
+    queryString.stringifyUrl({ url: `/api/Authentication` });
 
-  static updateCredentialsEndpoint = () => queryString.stringifyUrl({ url: `/api/Authentication` });
+  static updateCredentialsEndpoint = () =>
+    queryString.stringifyUrl({ url: `/api/Authentication` });
 
-  static appUserLoginEndpoint = () => queryString.stringifyUrl({ url: `/api/Authentication/login` });
+  static appUserLoginEndpoint = () =>
+    queryString.stringifyUrl({ url: `/api/Authentication/login` });
 
-  static appUserLogOutEndpoint = () => queryString.stringifyUrl({ url: `/api/Authentication/logout` });
+  static appUserLogOutEndpoint = () =>
+    queryString.stringifyUrl({ url: `/api/Authentication/logout` });
 }

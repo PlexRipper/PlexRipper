@@ -16,6 +16,7 @@
 				<QRow justify="center">
 					<QCol cols="auto">
 						<VOtpInput
+							id="verification-code"
 							v-model:value="accountDialogStore.verificationCode"
 							input-classes="otp-input"
 							separator=""
@@ -23,6 +24,8 @@
 							:should-auto-focus="true"
 							input-type="number"
 							inputmode="numeric"
+							name="verification-code"
+							autocomplete="one-time-code"
 							data-cy="2fa-code-verification-input"
 							:conditional-class="['one', 'two', 'three', 'four', 'five', 'six']"
 							@on-complete="onComplete" />

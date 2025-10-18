@@ -49,7 +49,7 @@ public class DownloadTaskUpdatedHandler_UnitTests : BaseUnitTest<DownloadTaskUpd
     }
 
     [Fact]
-    public async Task ShouldStartFileMergeJobAndDownloadQueue_WhenDownloadTaskHasFinished()
+    public async Task ShouldStartMoveDownloadJobAndDownloadQueue_WhenDownloadTaskHasFinished()
     {
         // Arrange
         await SetupDatabase(81983, config => config.MovieDownloadTasksCount = 5);

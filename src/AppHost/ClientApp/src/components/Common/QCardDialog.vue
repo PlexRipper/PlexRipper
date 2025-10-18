@@ -25,7 +25,9 @@
 					<div
 						v-if="closeButton"
 						class="dialog-close-button">
-						<CloseIconButton @click="closeDialog" />
+						<CloseIconButton
+							cy="dialog-close-button"
+							@click="closeDialog" />
 					</div>
 				</QCardTitle>
 			</div>

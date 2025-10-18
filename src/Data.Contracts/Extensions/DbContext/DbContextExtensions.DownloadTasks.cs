@@ -431,7 +431,6 @@ public static partial class DbContextExtensions
                                 .SetProperty(x => x.DataReceived, 0)
                                 .SetProperty(x => x.FileTransferSpeed, 0)
                                 .SetProperty(x => x.FileDataTransferred, 0)
-                                .SetProperty(x => x.CurrentFileTransferPathIndex, 0)
                                 .SetProperty(x => x.CurrentFileTransferBytesOffset, 0)
                                 .SetProperty(x => x.DownloadStatus, downloadStatus),
                         cancellationToken
@@ -446,7 +445,6 @@ public static partial class DbContextExtensions
                                 .SetProperty(x => x.DataReceived, 0)
                                 .SetProperty(x => x.FileTransferSpeed, 0)
                                 .SetProperty(x => x.FileDataTransferred, 0)
-                                .SetProperty(x => x.CurrentFileTransferPathIndex, 0)
                                 .SetProperty(x => x.CurrentFileTransferBytesOffset, 0)
                                 .SetProperty(x => x.DownloadStatus, downloadStatus),
                         cancellationToken
@@ -487,7 +485,6 @@ public static partial class DbContextExtensions
                     .ExecuteUpdateAsync(p =>
                         p.SetProperty(x => x.FileTransferSpeed, progress.FileTransferSpeed)
                             .SetProperty(x => x.FileDataTransferred, progress.FileDataTransferred)
-                            .SetProperty(x => x.CurrentFileTransferPathIndex, progress.CurrentFileTransferPathIndex)
                             .SetProperty(x => x.CurrentFileTransferBytesOffset, progress.CurrentFileTransferBytesOffset)
                     );
                 break;
@@ -497,7 +494,6 @@ public static partial class DbContextExtensions
                     .ExecuteUpdateAsync(p =>
                         p.SetProperty(x => x.FileTransferSpeed, progress.FileTransferSpeed)
                             .SetProperty(x => x.FileDataTransferred, progress.FileDataTransferred)
-                            .SetProperty(x => x.CurrentFileTransferPathIndex, progress.CurrentFileTransferPathIndex)
                             .SetProperty(x => x.CurrentFileTransferBytesOffset, progress.CurrentFileTransferBytesOffset)
                     );
                 break;

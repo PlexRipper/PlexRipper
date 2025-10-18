@@ -22,21 +22,21 @@ public class StartDownloadTaskCommandHandler : ICommandHandler<StartDownloadTask
     private readonly ICommandExecutor _commandExecutor;
     private readonly IEventPublisher _eventPublisher;
     private readonly IDownloadTaskScheduler _downloadTaskScheduler;
-    private readonly IFileMergeScheduler _fileMergeScheduler;
+    private readonly IMoveDownloadFileScheduler _moveDownloadFileScheduler;
 
     public StartDownloadTaskCommandHandler(
         IReaparrDbContext dbContext,
         ICommandExecutor commandExecutor,
         IEventPublisher eventPublisher,
         IDownloadTaskScheduler downloadTaskScheduler,
-        IFileMergeScheduler fileMergeScheduler
+        IMoveDownloadFileScheduler moveDownloadFileScheduler
     )
     {
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;
         _eventPublisher = eventPublisher;
         _downloadTaskScheduler = downloadTaskScheduler;
-        _fileMergeScheduler = fileMergeScheduler;
+        _moveDownloadFileScheduler = moveDownloadFileScheduler;
     }
 
     public async Task<Result> ExecuteAsync(StartDownloadTaskCommand command, CancellationToken cancellationToken)
@@ -82,9 +82,9 @@ public class StartDownloadTaskCommandHandler : ICommandHandler<StartDownloadTask
 
             case DownloadTaskPhase.FileTransfer:
                 // Multiple merging tasks can be processing at the same time
-                if (!(await _fileMergeScheduler.IsDownloadTaskMerging(nextDownloadTaskKey)))
+                if (!(await _moveDownloadFileScheduler.IsDownloadFileMoving(nextDownloadTaskKey)))
                 {
-                    await _fileMergeScheduler.StartFileMergeJob(nextDownloadTaskKey);
+                    await _moveDownloadFileScheduler.StartMoveDownloadFileJob(nextDownloadTaskKey);
                 }
 
                 break;

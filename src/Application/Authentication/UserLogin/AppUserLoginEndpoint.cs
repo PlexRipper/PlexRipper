@@ -2,7 +2,6 @@ using System.ComponentModel;
 using FastEndpoints;
 using FastEndpoints.Security;
 using FluentValidation;
-using Microsoft.AspNetCore.Identity;
 using Reaparr.Application.Contracts;
 using Reaparr.Identity.Contracts;
 
@@ -45,13 +44,13 @@ public class AppUserLoginEndpoint : BaseEndpoint<AppUserLoginEndpointRequest>
 {
     public override string EndpointPath => ApiRoutes.LoginEndpoint;
 
-    private readonly Serilog.ILogger _log;
-    private readonly SignInManager<AppUser> _signInManager;
+    private readonly ILogger _log;
+    private readonly IIdentitySignInService _identitySignInService;
 
-    public AppUserLoginEndpoint(ILogger log, SignInManager<AppUser> signInManager)
+    public AppUserLoginEndpoint(ILogger log, IIdentitySignInService identitySignInService)
     {
         _log = log.ForContext<AppUserLoginEndpoint>();
-        _signInManager = signInManager;
+        _identitySignInService = identitySignInService;
     }
 
     public override void Configure()
@@ -91,7 +90,7 @@ public class AppUserLoginEndpoint : BaseEndpoint<AppUserLoginEndpointRequest>
         _log.Here().Information("Attempting to sign in user {Username}.", username);
 
         // Attempt to sign in the user
-        var signInResult = await _signInManager.PasswordSignInAsync(
+        var signInResult = await _identitySignInService.PasswordSignInAsync(
             username,
             password,
             isPersistent: req.RememberMe,
@@ -100,9 +99,9 @@ public class AppUserLoginEndpoint : BaseEndpoint<AppUserLoginEndpointRequest>
 
         if (signInResult.Succeeded)
         {
-            _log.Here().Information("User {Username} signed in successfully.", username);
+            await _identitySignInService.SignInAsync([], [DefaultUserAppCredentials.DefaultAdminRole]);
 
-            await CookieAuth.SignInAsync(u => u.Roles.Add(DefaultUserAppCredentials.DefaultAdminRole));
+            _log.Here().Information("User {Username} signed in successfully.", username);
 
             await SendFluentResult(Result.Ok(), ct);
         }

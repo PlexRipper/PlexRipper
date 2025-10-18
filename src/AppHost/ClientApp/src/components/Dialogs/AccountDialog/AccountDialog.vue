@@ -22,7 +22,6 @@
 		<template #default>
 			<div>
 				<AccountForm />
-				<Print>{{ accountDialogStore.$state }}</Print>
 			</div>
 		</template>
 		<!-- Dialog Actions	-->
@@ -60,11 +59,12 @@
 								:disabled="accountDialogStore.validateLoading"
 								cy="account-dialog-validate-button"
 								block
-								@click="validatePlexAccount" />
+								@click="!accountDialogStore.isAuthTokenMode ? validatePlexAccount() : validatePlexToken()" />
 						</QCol>
 						<!-- Save account -->
 						<QCol>
 							<SaveButton
+								:disabled="!accountDialogStore.isAllowedToSave"
 								:label="accountDialogStore.isNewAccount ? $t('general.commands.save') : $t('general.commands.update')"
 								:cy="`account-dialog-${accountDialogStore.isNewAccount ? 'save' : 'update'}-button`"
 								:loading="accountDialogStore.savingLoading"
@@ -154,6 +154,10 @@ const validationStyle = computed(
 
 function validatePlexAccount() {
 	useSubscription(accountDialogStore.validatePlexAccount().subscribe());
+}
+
+function validatePlexToken() {
+	useSubscription(accountDialogStore.validatePlexToken().subscribe());
 }
 
 function deleteAccount() {

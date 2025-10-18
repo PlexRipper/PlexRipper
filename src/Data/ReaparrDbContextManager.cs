@@ -9,7 +9,7 @@ namespace Reaparr.Data;
 
 public class ReaparrDbContextManager : IReaparrDbContextManager
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
 
     private readonly IReaparrDbContextDatabase _reaparrDbContextDatabase;
     private readonly IAuthDbContextDatabase _authDbContextDatabase;

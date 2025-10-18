@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -68,7 +69,10 @@ export class Notification {
    * @request PATCH:/api/Notification
    * @secure
    */
-  setNotificationVisibilityEndpoint = (data: SetNotificationVisibilityEndpointRequest, params: RequestParams = {}) =>
+  setNotificationVisibilityEndpoint = (
+    data: SetNotificationVisibilityEndpointRequest,
+    params: RequestParams = {},
+  ) =>
     from(
       Axios.request<BaseResultDTO>({
         url: `/api/Notification`,
@@ -83,9 +87,12 @@ export class Notification {
 }
 
 export class NotificationPaths {
-  static clearAllNotificationsEndpoint = () => queryString.stringifyUrl({ url: `/api/Notification/clear` });
+  static clearAllNotificationsEndpoint = () =>
+    queryString.stringifyUrl({ url: `/api/Notification/clear` });
 
-  static getAllNotificationsEndpoint = () => queryString.stringifyUrl({ url: `/api/Notification` });
+  static getAllNotificationsEndpoint = () =>
+    queryString.stringifyUrl({ url: `/api/Notification` });
 
-  static setNotificationVisibilityEndpoint = () => queryString.stringifyUrl({ url: `/api/Notification` });
+  static setNotificationVisibilityEndpoint = () =>
+    queryString.stringifyUrl({ url: `/api/Notification` });
 }

@@ -9,7 +9,7 @@ public class SchedulerService : ISchedulerService
 {
     #region Fields
 
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly IScheduler _scheduler;
     private readonly IAllJobListener _allJobListener;
     private readonly IDownloadJobListener _downloadJobListener;

@@ -111,7 +111,7 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Download
     }
 
     [Fact]
-    public async Task ShouldHaveNoNextDownloadTask_WhenMergingAndDownloadFinished()
+    public async Task ShouldHaveNoNextDownloadTask_WhenMovingAndDownloadFinished()
     {
         // Arrange
         await SetupDatabase(61612, config => config.MovieDownloadTasksCount = 5);
@@ -120,7 +120,7 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Download
             asTracking: true,
             cancellationToken: CancellationToken
         );
-        downloadTasks[0].SetDownloadStatus(DownloadStatus.Merging);
+        downloadTasks[0].SetDownloadStatus(DownloadStatus.Moving);
         downloadTasks[1].SetDownloadStatus(DownloadStatus.DownloadFinished);
         downloadTasks[2].SetDownloadStatus(DownloadStatus.DownloadFinished);
         downloadTasks[3].SetDownloadStatus(DownloadStatus.DownloadFinished);
@@ -135,7 +135,7 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Download
     }
 
     [Fact]
-    public async Task ShouldHaveLastQueuedDownloadTask_WhenMergingQueuedAndDownloadFinished()
+    public async Task ShouldHaveLastQueuedDownloadTask_WhenMovingQueuedAndDownloadFinished()
     {
         // Arrange
         await SetupDatabase(13297, config => config.MovieDownloadTasksCount = 5);
@@ -144,7 +144,7 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Download
             asTracking: true,
             cancellationToken: CancellationToken
         );
-        downloadTasks[0].SetDownloadStatus(DownloadStatus.Merging);
+        downloadTasks[0].SetDownloadStatus(DownloadStatus.Moving);
         downloadTasks[1].SetDownloadStatus(DownloadStatus.DownloadFinished);
         downloadTasks[2].SetDownloadStatus(DownloadStatus.DownloadFinished);
         downloadTasks[3].SetDownloadStatus(DownloadStatus.DownloadFinished);

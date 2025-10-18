@@ -11,4 +11,7 @@ public record DownloadTaskDirectory
     public required string TvShowFolder { get; set; }
 
     public required string SeasonFolder { get; set; }
+
+    // Optional per-task override; when true, keep completed files in the download folder
+    public required bool KeepCompletedInDownloadFolder { get; set; }
 }

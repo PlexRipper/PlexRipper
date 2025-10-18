@@ -11,6 +11,8 @@
 			outlined
 			required
 			hide-bottom-space
+			name="reaparr-username"
+			autocomplete="reaparr-username"
 			data-cy="app-username-input" />
 	</HelpRow>
 	<!-- Password Input -->
@@ -23,6 +25,8 @@
 			v-model:has-focus="passwordInputFocus"
 			hide-mask-button
 			show-strength
+			name="reaparr-password"
+			autocomplete="reaparr-password"
 			cy="app-password-input" />
 	</HelpRow>
 

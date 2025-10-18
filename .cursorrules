@@ -1,0 +1,44 @@
+[Tests.Unit]
+rules: |
+  - Write tests using xUnit with [Fact] attributes.
+  - Use async Task test methods whenever async operations are involved.
+  - Use Shouldly for assertions (ShouldBeTrue, ShouldNotBeNull, ShouldBeEmpty, etc.).
+  - Follow the Arrange–Act–Assert pattern with clear comments.
+  - Name test methods in the format: ShouldExpectedBehavior_WhenCondition.
+  - Use the BaseUnitTest<TEndpoint> base class for endpoints when available.
+  - Use SetupDatabase(seed, config => { ... }) to seed EF Core test data.
+  - Use IDbContext for database queries and mutations.
+  - When testing endpoints, use SetupEndpointUnitTest<TEndpoint>() and call HandleAsync on it.
+  - Always assert against both the endpoint Response and the state of the database after execution.
+  - Keep tests deterministic: seed data explicitly, never random.
+  - Prefer expressive, scenario-driven test names over generic ones.
+
+  # Organization rules
+  - Each production project must have a corresponding UnitTest project with the same name + `.UnitTests` suffix.
+    Example: code in `Reaparr.Application` is tested in `Reaparr.Application.UnitTests`.
+  - Tests must always be placed in the corresponding `*.UnitTests` project of the SUT.
+  - Within that project, follow the same folder structure as the SUT for files only, not for namespaces.
+  - The namespace of every test class must always be exactly the project namespace + `.UnitTests` (do not include subfolders).
+    Example: all tests in `Reaparr.Application.UnitTests` must use `namespace Reaparr.Application.UnitTests;`.
+  - Each unit test file must be named after the SUT file with `.UnitTests.cs` appended.
+    Example: `ClearCompletedDownloadTasksEndpoint.cs` → `ClearCompletedDownloadTasksEndpoint.UnitTests.cs`.
+  - Never use underscores in test file names.
+  - The test class name must match the file name without the `.cs` extension.
+    Example: `ClearCompletedDownloadTasksEndpoint.UnitTests`.
+
+  # File system interaction rules
+  - If the SUT interacts with the file system, use SetupFileSystem from the BaseUnitTest class, with MockFileSystem instead of mocking interfaces from System.IO.Abstractions manually.
+
+  # Test data generation
+  - Always use existing functionality from the `tests/BaseTests` project for generating test data.
+  - Prefer using the provided Faker-based builders and helpers rather than creating new random data inline.
+  - Never instantiate Bogus/Faker directly inside tests unless wrapped by a helper in `BaseTests`.
+  - If new data generation patterns are needed, extend the `BaseTests` project, not individual test files.
+  
+  # Mocking rules (AutoMoq)
+  - Use AutoMock to automatically create mocks for dependencies.
+  - Always verify mocks with explicit invocation counts using Moq's Verify API.
+    Example: `mock.Verify(x => x.Method(), Times.Once());`
+  - If a dependency should not be called, explicitly assert with `Times.Never()`.
+  - Do not leave mocks unverified in tests; every mock must either be asserted for calls or asserted that no calls occurred.
+  - Prefer `Times.Once()` or `Times.Never()` over vague call expectations.

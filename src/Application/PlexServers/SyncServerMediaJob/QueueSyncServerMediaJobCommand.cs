@@ -16,7 +16,7 @@ public class QueueSyncServerMediaJobCommandValidator : Validator<QueueSyncServer
 
 public class QueueSyncServerMediaJobCommandHandler : ICommandHandler<QueueSyncServerMediaJobCommand, Result>
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly IScheduler _scheduler;
 
     public QueueSyncServerMediaJobCommandHandler(ILogger log, IScheduler scheduler)

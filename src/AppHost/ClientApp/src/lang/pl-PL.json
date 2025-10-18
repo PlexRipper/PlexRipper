@@ -246,7 +246,10 @@
             "validation": {
                 "display-name-length": "Nazwa wyświetlana musi mieć co najmniej {count} znaków",
                 "display-name-required": "Nazwa wyświetlana jest wymagana",
-                "username-is-required": "Nazwa użytkownika jest wymagana"
+                "username-is-required": "Nazwa użytkownika jest wymagana",
+                "auth-token-format": "Token uwierzytelniający może zawierać tylko litery, cyfry, podkreślenia i myślniki.",
+                "auth-token-length": "Token uwierzytelniający musi mieć co najmniej {count} znaków.",
+                "auth-token-required": "Wymagany jest token uwierzytelniający."
             }
         },
         "media-overview-bar": {
@@ -422,12 +425,8 @@
             "paused": "Wstrzymano",
             "stopped": "Zatrzymany",
             "deleted": "Usunięto",
-            "merging": "Łączenie",
             "moving": "Poruszający",
             "completed": "Zakończony",
-            "merge-error": "Błąd scalania",
-            "merge-finished": "Scalanie zakończone",
-            "merge-paused": "Scalanie wstrzymane",
             "move-error": "Błąd przenoszenia",
             "move-finished": "Przenoszenie zakończone",
             "move-paused": "Przenoszenie wstrzymane"
@@ -513,6 +512,11 @@
                         "label": "Pobierz segmenty",
                         "text": "Reaparr obsługuje pobieranie wielowątkowe i może dzielić pobierane multimedia na różne części i pobierać każdą z nich osobno. Ma to tendencję do zwiększania ogólnej prędkości pobierania, ale wadą jest to, że będzie to wymagało dodatkowego czasu na połączenie różnych części w jeden kompletny plik multimedialny.\n\nUstawienie tej wartości na 1 spowoduje wyłączenie pobierania wielowątkowego i pobranie pliku multimedialnego jako jednego kompletnego pliku. Liczba segmentów pobierania nie ma wpływu na szybkość scalanego pliku multimedialnego.",
                         "title": "Pobierz segmenty"
+                    },
+                    "keep-in-downloads": {
+                        "label": "Nie przenoś ukończonych pobrań do folderów docelowych",
+                        "title": "Nie przenoś ukończonych pobrań do folderów docelowych",
+                        "text": "Jeżeli ta opcja jest włączona, ukończone pobieranie pozostanie w folderze pobierania i nie zostanie przeniesione do folderu docelowego."
                     }
                 },
                 "debug-section": {

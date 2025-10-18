@@ -58,11 +58,6 @@ public abstract class DownloadTaskFileBase : DownloadTaskBase, IDownloadTaskProg
     public required long FileDataTransferred { get; set; }
 
     /// <summary>
-    /// Gets or sets the current file transfer path index used to pause and resume from this file path index.
-    /// </summary>
-    public int CurrentFileTransferPathIndex { get; set; }
-
-    /// <summary>
     /// Gets or sets the current file transfer bytes offset in combination with the CurrentFileTransferPathIndex used to pause and resume from this offset.
     /// </summary>
     public long CurrentFileTransferBytesOffset { get; set; }
@@ -93,7 +88,7 @@ public abstract class DownloadTaskFileBase : DownloadTaskBase, IDownloadTaskProg
     public string DestinationFilePath => Path.Join(DestinationDirectory, FileName);
 
     [NotMapped]
-    public List<string> FilePaths => DownloadWorkerTasks.Select(x => x.DownloadFilePath).ToList();
+    public string FilePath => DownloadWorkerTasks.Select(x => x.DownloadFilePath).Distinct().First();
 
     [NotMapped]
     public decimal Percentage => DownloadTaskPhaseExtensions.Percentage(DownloadTaskPhase, this, this);
@@ -162,30 +157,19 @@ public abstract class DownloadTaskFileBase : DownloadTaskBase, IDownloadTaskProg
     }
 
     /// <summary>
-    /// Gets a joined string of temp file paths of the <see cref="DownloadWorkerTasks"/> delimited by ";".
-    /// </summary>
-    [NotMapped]
-    public string GetFilePathsCompressed =>
-        string.Join(';', DownloadWorkerTasks.Select(x => x.DownloadFilePath).ToArray());
-
-    /// <summary>
     /// Gets the time remaining in seconds the <see cref="DownloadTaskFileBase"/> to finish.
     /// </summary>
     [NotMapped]
     public long TimeRemaining => DownloadTaskPhaseExtensions.TimeRemaining(DownloadTaskPhase, this, this);
 
-    [NotMapped]
-    public bool IsSingleFile => DownloadWorkerTasks.Count == 1;
-
     public override string ToString() =>
-        $"[FileMergeProgress {Title} - {Percentage}% - {DataFormat.FormatSpeedString(Speed)} - {DataFormat.FormatSizeString(DownloadTaskPhase == DownloadTaskPhase.FileTransfer ? FileDataTransferred : DataReceived)} / {DataFormat.FormatSizeString(DataTotal)} - {DataFormat.FormatTimeSpanString(TimeSpan.FromSeconds(TimeRemaining))}]";
+        $"[MoveDownloadFileProgress {Title} - {Percentage}% - {DataFormat.FormatSpeedString(Speed)} - {DataFormat.FormatSizeString(DownloadTaskPhase == DownloadTaskPhase.FileTransfer ? FileDataTransferred : DataReceived)} / {DataFormat.FormatSizeString(DataTotal)} - {DataFormat.FormatTimeSpanString(TimeSpan.FromSeconds(TimeRemaining))}]";
 
     public IDownloadFileTransferProgress ToFileTransferProgress() =>
         new DownloadFileTransferProgress
         {
             FileTransferSpeed = FileTransferSpeed,
             FileDataTransferred = FileDataTransferred,
-            CurrentFileTransferPathIndex = CurrentFileTransferPathIndex,
             CurrentFileTransferBytesOffset = CurrentFileTransferBytesOffset,
         };
 

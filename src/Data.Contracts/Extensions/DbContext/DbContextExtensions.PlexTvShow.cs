@@ -145,10 +145,14 @@ public static partial class DbContextExtensions
         }
         catch (Exception e)
         {
+            var serverName = await context.GetPlexServerNameById(plexServerId);
+            var libraryName = await context.GetPlexLibraryNameById(plexLibraryId);
             _log.Here()
                 .Error(
-                    "Error while bulk inserting plex tv-shows with serverId: {PlexServerId} and libraryId: {PlexLibraryId}",
+                    "Error while bulk inserting plex tv-shows in Plex server: {PlexServerName} with serverId: {PlexServerId} and Plex library {PlexLibraryName} libraryId: {PlexLibraryId}",
+                    serverName,
                     plexServerId,
+                    libraryName,
                     plexLibraryId
                 );
             return Result.Fail(new ExceptionalError(e)).LogError();

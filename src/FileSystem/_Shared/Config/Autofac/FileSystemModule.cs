@@ -6,7 +6,7 @@ using Reaparr.Environment;
 using Reaparr.FileSystem.Contracts;
 using Module = Autofac.Module;
 
-namespace Reaparr.FileSystem.Config;
+namespace Reaparr.FileSystem;
 
 /// <summary>
 /// Used to register all dependencies in Autofac for the FileSystem project.

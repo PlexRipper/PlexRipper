@@ -24,7 +24,7 @@ public class StopDownloadTaskCommandValidator : AbstractValidator<StopDownloadTa
 
 public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCommand, Result>
 {
-    private readonly Serilog.ILogger _log;
+    private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IFile _file;
@@ -76,10 +76,7 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
 
             _log.Here().Debug("Deleting partially downloaded files of {DownloadTaskFullTitle}", downloadTask.FullTitle);
 
-            foreach (var filePath in downloadTask.FilePaths)
-            {
-                Result.Try(() => _file.Delete(filePath)).LogIfFailed();
-            }
+            Result.Try(() => _file.Delete(downloadTask.FilePath)).LogIfFailed();
 
             // Delete all worker tasks
             await _dbContext

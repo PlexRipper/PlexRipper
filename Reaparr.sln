@@ -297,6 +297,5 @@ Global
 	EndGlobalSection
 	GlobalSection(RiderSharedRunConfigurations) = postSolution
 		File = src\.run\Reaparr Back-End Development.run.xml
-		File = src\AppHost\ClientApp\.run\dev.run.xml
 	EndGlobalSection
 EndGlobal

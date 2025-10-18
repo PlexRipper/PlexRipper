@@ -1,5 +1,5 @@
 import { route } from '@fixtures';
-import { generateFailedResultDTO, generateResultDTO } from '@mock';
+import { generateResultDTO } from '@mock';
 import type { GeneratePlexTokenResponse, PlexAccountDTO } from '@dto';
 import { PlexAccountPaths } from '@api-urls';
 

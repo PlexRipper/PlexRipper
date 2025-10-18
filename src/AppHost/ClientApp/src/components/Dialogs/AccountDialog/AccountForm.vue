@@ -38,6 +38,7 @@
 				:title="$t('help.account-form.display-name.title')"
 				:text="$t('help.account-form.display-name.text')">
 				<q-input
+					id="plex-display-name"
 					v-model="accountDialogStore.displayName"
 					:rules="getDisplayNameRules"
 					color="red"
@@ -45,6 +46,8 @@
 					outlined
 					required
 					hide-bottom-space
+					name="plex-display-name"
+					autocomplete="name"
 					data-cy="account-form-display-name-input" />
 			</HelpRow>
 		</HelpGroup>
@@ -74,6 +77,7 @@
 						:title="$t('help.account-form.username.title')"
 						:text="$t('help.account-form.username.text')">
 						<q-input
+							id="plex-username"
 							v-model="accountDialogStore.username"
 							:rules="getUsernameRules"
 							color="red"
@@ -81,7 +85,7 @@
 							outlined
 							required
 							hide-bottom-space
-							name="username"
+							name="plex-username"
 							autocomplete="username"
 							data-cy="account-form-username-input" />
 					</HelpRow>
@@ -92,9 +96,11 @@
 						:title="$t('help.account-form.password.title')"
 						:text="$t('help.account-form.password.text')">
 						<PasswordInputField
+							id="plex-password"
 							v-model="accountDialogStore.password"
 							disable-validation
 							class="q-my-md"
+							name="plex-password"
 							cy="account-form-password-input" />
 					</HelpRow>
 				</HelpGroup>

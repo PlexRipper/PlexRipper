@@ -64,6 +64,7 @@
 						<!-- Save account -->
 						<QCol>
 							<SaveButton
+								:disabled="!accountDialogStore.isAllowedToSave"
 								:label="accountDialogStore.isNewAccount ? $t('general.commands.save') : $t('general.commands.update')"
 								:cy="`account-dialog-${accountDialogStore.isNewAccount ? 'save' : 'update'}-button`"
 								:loading="accountDialogStore.savingLoading"

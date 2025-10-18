@@ -40,7 +40,7 @@ export const useAccountDialogStore = defineStore('AccountDialogStore', () => {
 		title: '',
 		plexId: 0,
 		authenticationToken: '',
-		apiAuthenticationToken: '',
+		customAuthenticationToken: '',
 		email: '',
 		plexServerAccess: [],
 		plexLibraryAccess: [],
@@ -221,8 +221,8 @@ export const useAccountDialogStore = defineStore('AccountDialogStore', () => {
 			if (state.isNewAccount) {
 				const accountData = get(getters.getAccountData);
 				return accountStore.createPlexAccount({
-					customAuthenticationToken: accountData.authenticationToken,
-					authenticationToken: accountData.apiAuthenticationToken,
+					customAuthenticationToken: accountData.customAuthenticationToken,
+					authenticationToken: accountData.authenticationToken,
 					clientId: accountData.clientId,
 					displayName: accountData.displayName,
 					email: accountData.email,
@@ -279,6 +279,12 @@ export const useAccountDialogStore = defineStore('AccountDialogStore', () => {
 			}
 			return false;
 		}),
+		isAllowedToSave: computed(() => {
+			if (state.isNewAccount) {
+				return state.displayName !== '' && state.isValidated;
+			}
+			return true;
+		}),
 		getAccountData: computed((): PlexAccountDTO => {
 			return {
 				id: state.id,
@@ -288,7 +294,7 @@ export const useAccountDialogStore = defineStore('AccountDialogStore', () => {
 				uuid: state.uuid,
 				validatedAt: state.validatedAt,
 				verificationCode: state.verificationCode,
-				apiAuthenticationToken: state.apiAuthenticationToken,
+				customAuthenticationToken: state.customAuthenticationToken,
 				authenticationToken: state.authenticationToken,
 				clientId: state.clientId,
 				displayName: state.displayName,

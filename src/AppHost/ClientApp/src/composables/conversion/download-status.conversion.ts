@@ -11,8 +11,6 @@ export function translateDownloadStatus(status: DownloadStatus) {
 			return t('general.download-status.download-finished');
 		case DownloadStatus.Deleted:
 			return t('general.download-status.deleted');
-		case DownloadStatus.Merging:
-			return t('general.download-status.merging');
 		case DownloadStatus.Moving:
 			return t('general.download-status.moving');
 		case DownloadStatus.Completed:

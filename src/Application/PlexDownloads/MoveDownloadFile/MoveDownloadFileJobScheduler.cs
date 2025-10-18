@@ -4,19 +4,19 @@ using Reaparr.FileSystem.Contracts;
 
 namespace Reaparr.Application;
 
-public class MoveDownloadMoveDownloadFileJobScheduler : IMoveDownloadFileScheduler
+public class MoveDownloadFileJobScheduler : IMoveDownloadFileScheduler
 {
     private readonly ILogger _log;
     private readonly IScheduler _scheduler;
 
-    public MoveDownloadMoveDownloadFileJobScheduler(ILogger log, IScheduler scheduler)
+    public MoveDownloadFileJobScheduler(ILogger log, IScheduler scheduler)
     {
-        _log = log.ForContext<MoveDownloadMoveDownloadFileJobScheduler>();
+        _log = log.ForContext<MoveDownloadFileJobScheduler>();
         _scheduler = scheduler;
     }
 
     /// <summary>
-    /// Should only be called by the <see cref="MoveDownloadMoveDownloadFileJobQueue"/> to start a new <see cref="MoveDownloadFileJob"/>.
+    /// Should only be called by the <see cref="MoveDownloadFileJobQueue"/> to start a new <see cref="MoveDownloadFileJob"/>.
     /// </summary>
     /// <param name="downloadTaskKey"> The key of the <see cref="DownloadTaskGeneric"/> to merge/move. </param>
     public async Task<Result> StartMoveDownloadFileJob(DownloadTaskKey downloadTaskKey)

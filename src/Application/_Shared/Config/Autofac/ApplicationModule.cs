@@ -15,11 +15,8 @@ public class ApplicationModule : Module
     {
         builder.RegisterType<DownloadQueue>().As<IDownloadQueue>().SingleInstance();
         builder.RegisterType<DownloadTaskScheduler>().As<IDownloadTaskScheduler>().SingleInstance();
-        builder
-            .RegisterType<MoveDownloadMoveDownloadFileJobScheduler>()
-            .As<IMoveDownloadFileScheduler>()
-            .SingleInstance();
-        builder.RegisterType<MoveDownloadMoveDownloadFileJobQueue>().As<IMoveDownloadFileQueue>().SingleInstance();
+        builder.RegisterType<MoveDownloadFileJobScheduler>().As<IMoveDownloadFileScheduler>().SingleInstance();
+        builder.RegisterType<MoveDownloadFileJobQueue>().As<IMoveDownloadFileQueue>().SingleInstance();
         builder.RegisterType<DownloadWorker>().InstancePerDependency();
         builder.RegisterType<PlexDownloadClient>().As<IPlexDownloadClient>().InstancePerDependency();
 

@@ -5,26 +5,29 @@ using Reaparr.FileSystem.Contracts;
 
 namespace Reaparr.Application;
 
-public class MoveDownloadMoveDownloadFileJobQueue : IMoveDownloadFileQueue
+public class MoveDownloadFileJobQueue : IMoveDownloadFileQueue
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly IMoveDownloadFileScheduler _moveDownloadFileScheduler;
 
-    public MoveDownloadMoveDownloadFileJobQueue(
+    public MoveDownloadFileJobQueue(
         ILogger log,
         IReaparrDbContext dbContext,
         IMoveDownloadFileScheduler moveDownloadFileScheduler
     )
     {
-        _log = log.ForContext<MoveDownloadMoveDownloadFileJobQueue>();
+        _log = log.ForContext<MoveDownloadFileJobQueue>();
         _dbContext = dbContext;
         _moveDownloadFileScheduler = moveDownloadFileScheduler;
     }
 
     /// <inheritdoc/>
-    public async Task<Result<DownloadTaskKey>> CheckMoveDownloadFileJobQueue()
+    public async Task<Result> CheckMoveDownloadFileJobQueue()
     {
+        if (await _moveDownloadFileScheduler.IsAnyMoveDownloadFileJobRunning())
+            return Result.Fail("A MoveDownloadFileJob is already running, skipping queue check").LogInformation();
+
         // Find the first finished task (movie preferred, then episode)
         var key =
             await _dbContext
@@ -40,6 +43,6 @@ public class MoveDownloadMoveDownloadFileJobQueue : IMoveDownloadFileQueue
             return _log.Here().ErrorResult("No DownloadTask found to either merge or move");
 
         var startResult = await _moveDownloadFileScheduler.StartMoveDownloadFileJob(key);
-        return startResult.IsSuccess ? Result.Ok(key) : startResult;
+        return startResult.IsSuccess ? Result.Ok() : startResult;
     }
 }

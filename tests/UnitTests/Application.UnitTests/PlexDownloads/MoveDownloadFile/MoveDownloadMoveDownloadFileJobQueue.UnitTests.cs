@@ -3,13 +3,13 @@ using Reaparr.FileSystem.Contracts;
 
 namespace Reaparr.Application.UnitTests;
 
-public class MoveDownloadMoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadMoveDownloadFileJobQueue>
+public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJobQueue>
 {
-    public MoveDownloadMoveDownloadFileJobQueueUnitTests(ITestOutputHelper output)
+    public MoveDownloadFileJobQueueUnitTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]
-    public async Task ShouldNotRunAnotherFileMergeJob_WhenAJobIsAlreadyRunning()
+    public async Task ShouldNotRunAnotherFileMoveJob_WhenAJobIsAlreadyRunning()
     {
         // Arrange
         mock.Mock<IMoveDownloadFileScheduler>()
@@ -26,7 +26,7 @@ public class MoveDownloadMoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDo
     }
 
     [Fact]
-    public async Task ShouldNotRunFileMergeJob_WhenNoDownloadTaskIsAvailable()
+    public async Task ShouldNotRunFileMoveJob_WhenNoDownloadTaskIsAvailable()
     {
         await SetupDatabase(9, config => config.PlexServerCount = 1);
 
@@ -50,7 +50,7 @@ public class MoveDownloadMoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDo
     }
 
     [Fact]
-    public async Task ShouldRunAFileMergeJob_WhenDownloadTaskMovieFileWithDownloadFinishedExist()
+    public async Task ShouldRunAFileMoveJob_WhenDownloadTaskMovieFileWithDownloadFinishedExist()
     {
         // Arrange
         await SetupDatabase(
@@ -86,7 +86,7 @@ public class MoveDownloadMoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDo
     }
 
     [Fact]
-    public async Task ShouldRunAFileMergeJob_WhenDownloadTaskTvShowEpisodeFileWithDownloadFinishedExist()
+    public async Task ShouldRunAFileMoveJob_WhenDownloadTaskTvShowEpisodeFileWithDownloadFinishedExist()
     {
         // Arrange
         await SetupDatabase(

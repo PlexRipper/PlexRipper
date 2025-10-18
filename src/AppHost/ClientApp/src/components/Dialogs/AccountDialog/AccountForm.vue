@@ -157,8 +157,8 @@ const getUsernameRules = computed(() => [(v: string): boolean | string => !!v ||
 
 const getAuthTokenRules = computed(() => [
 	(v: string): boolean | string => !!v || t('components.account-form.validation.auth-token-required'),
-	(v: string): boolean | string => (v && v.length >= 5) || t('components.account-form.validation.auth-token-length', {
-		count: 5,
+	(v: string): boolean | string => (v && v.length == 20) || t('components.account-form.validation.auth-token-length', {
+		count: 20,
 	}),
 	(v: string): boolean | string => (v && /^[a-zA-Z0-9_-]+$/.test(v)) || t('components.account-form.validation.auth-token-format'),
 ]);

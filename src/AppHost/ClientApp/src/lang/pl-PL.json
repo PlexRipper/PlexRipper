@@ -246,7 +246,10 @@
             "validation": {
                 "display-name-length": "Nazwa wyświetlana musi mieć co najmniej {count} znaków",
                 "display-name-required": "Nazwa wyświetlana jest wymagana",
-                "username-is-required": "Nazwa użytkownika jest wymagana"
+                "username-is-required": "Nazwa użytkownika jest wymagana",
+                "auth-token-format": "Token uwierzytelniający może zawierać tylko litery, cyfry, podkreślenia i myślniki.",
+                "auth-token-length": "Token uwierzytelniający musi mieć co najmniej {count} znaków.",
+                "auth-token-required": "Wymagany jest token uwierzytelniający."
             }
         },
         "media-overview-bar": {

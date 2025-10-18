@@ -246,7 +246,10 @@
             "validation": {
                 "display-name-length": "Display name must be at least {count} characters",
                 "display-name-required": "Display name is required",
-                "username-is-required": "Username is required"
+                "username-is-required": "Username is required",
+                "auth-token-format": "Authentication token may only contain letters, numbers, underscores, and hyphens.",
+                "auth-token-length": "Authentication token must be at least {count} characters long.",
+                "auth-token-required": "Authentication token is required."
             }
         },
         "media-overview-bar": {

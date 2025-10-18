@@ -246,7 +246,10 @@
             "validation": {
                 "display-name-length": "Der Anzeigename muss mindestens {count} Zeichen lang sein",
                 "display-name-required": "Anzeigename ist erforderlich",
-                "username-is-required": "Benutzername ist erforderlich"
+                "username-is-required": "Benutzername ist erforderlich",
+                "auth-token-format": "Authentifizierungstoken dürfen nur Buchstaben, Zahlen, Unterstriche und Bindestriche enthalten.",
+                "auth-token-length": "Das Authentifizierungstoken muss mindestens {count} Zeichen lang sein.",
+                "auth-token-required": "Ein Authentifizierungstoken ist erforderlich."
             }
         },
         "media-overview-bar": {

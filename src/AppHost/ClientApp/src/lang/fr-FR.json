@@ -246,7 +246,10 @@
             "validation": {
                 "display-name-length": "Le nom d'affichage doit comporter au moins {count} caractères",
                 "display-name-required": "Le nom d’affichage est obligatoire",
-                "username-is-required": "Nom d'utilisateur est nécessaire"
+                "username-is-required": "Nom d'utilisateur est nécessaire",
+                "auth-token-format": "Le jeton d’authentification ne peut contenir que des lettres, des chiffres, des traits de soulignement et des tirets.",
+                "auth-token-length": "Le jeton d'authentification doit comporter au moins {count} caractères.",
+                "auth-token-required": "Un jeton d'authentification est requis."
             }
         },
         "media-overview-bar": {

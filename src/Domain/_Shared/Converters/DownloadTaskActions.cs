@@ -14,7 +14,6 @@ public static class DownloadTaskActions
         DownloadStatus.Stopped,
         DownloadStatus.Downloading,
         DownloadStatus.Queued,
-        DownloadStatus.Merging,
         DownloadStatus.Moving,
         DownloadStatus.MoveFinished,
         DownloadStatus.DownloadFinished,
@@ -59,7 +58,6 @@ public static class DownloadTaskActions
                 actions.Add(DownloadActions.Delete);
                 break;
             case DownloadStatus.Moving:
-            case DownloadStatus.Merging:
                 actions.Add(DownloadActions.Pause);
                 actions.Add(DownloadActions.Stop);
                 break;

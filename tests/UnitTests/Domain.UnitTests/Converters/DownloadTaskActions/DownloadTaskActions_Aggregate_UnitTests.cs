@@ -38,24 +38,6 @@ public class DownloadTaskActions_Aggregate_UnitTests : BaseUnitTest
     }
 
     [Fact]
-    public void ShouldBeStatusDownloading_WhenSomeAreMergingAndDownloading()
-    {
-        // Arrange
-        var downloadStatusList = new List<DownloadStatus>
-        {
-            DownloadStatus.Downloading,
-            DownloadStatus.Merging,
-            DownloadStatus.Merging,
-        };
-
-        // Act
-        var status = DownloadTaskActions.Aggregate(downloadStatusList);
-
-        // Assert
-        status.ShouldBe(DownloadStatus.Downloading);
-    }
-
-    [Fact]
     public void ShouldBeStatusDownloading_WhenOneIsQueuedAndOneIsDownloadFinished()
     {
         // Arrange

@@ -20,7 +20,6 @@ public static class DownloadTaskPhaseExtensions
             case DownloadStatus.ServerUnreachable:
                 return DownloadTaskPhase.Downloading;
 
-            case DownloadStatus.Merging:
             case DownloadStatus.Moving:
             case DownloadStatus.MovePaused:
             case DownloadStatus.MoveFinished:

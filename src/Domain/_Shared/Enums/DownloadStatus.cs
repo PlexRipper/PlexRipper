@@ -58,12 +58,6 @@ public enum DownloadStatus
     Deleted = 7,
 
     /// <summary>
-    /// Download segments are being merged into 1 media file.
-    /// </summary>
-    [EnumMember(Value = nameof(Merging))]
-    Merging = 8,
-
-    /// <summary>
     /// Download file is being moved.
     /// </summary>
     [EnumMember(Value = nameof(Moving))]

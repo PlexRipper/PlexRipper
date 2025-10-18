@@ -95,7 +95,7 @@ jobs:
             -   name: Client App Install
                 uses: ./.github/workflows/steps/client-app-install/
             -   name: Run Vitest tests
-                run: bun run test
+                run: bun run unit-test
                 working-directory: src/AppHost/ClientApp/
             -   name: Upload test results
                 if: always()

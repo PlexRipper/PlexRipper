@@ -203,7 +203,12 @@ function confirm(): void {
 	dialogStore.closeDialog(DialogType.DirectoryBrowserDialog);
 }
 
-function requestDirectories(newPath: string): void {
+function requestDirectories(newPath?: string): void {
+	if (!newPath) {
+		Log.error(`path was invalid "${newPath}" when requesting directories`);
+		return;
+	}
+
 	if (path.value) {
 		path.value.directory = newPath;
 	}

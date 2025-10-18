@@ -40,14 +40,10 @@ describe('Add Plex account to Reaparr', () => {
 
 			cy.intercept('GET', PlexAccountPaths.generatePlexTokenEndpoint(account.id, { verificationCode: '' }), {
 				statusCode: 200,
-				body: generateFailedResultDTO({
-					errors: [
-						{
-							reasons: [],
-							message: 'Please enter the verification code',
-							metadata: {},
-						},
-					],
+				body: generateResultDTO<GeneratePlexTokenResponse>({
+					isUnAuthorized: false,
+					needsVerificationCode: true,
+					plexAuthToken: '',
 				}),
 			});
 			// Attempt 1
@@ -59,12 +55,18 @@ describe('Add Plex account to Reaparr', () => {
 
 			cy.intercept('GET', PlexAccountPaths.generatePlexTokenEndpoint(account.id, { verificationCode: '123456' }), {
 				statusCode: 200,
-				body: generateResultDTO({
+				body: generateResultDTO<GeneratePlexTokenResponse>({
+					isUnAuthorized: false,
+					needsVerificationCode: false,
 					plexAuthToken: 'some-plex-api-token',
-				} as GeneratePlexTokenResponse),
+				}),
 			});
 
-			cy.get(':nth-child(1) > [data-test="single-input"]').type('123456');
+			cy.getCy('2fa-code-verification-input')
+				.find('[data-test="single-input"]')
+				.each((el, i) => {
+					cy.wrap(el).type('123456'[i]);
+				});
 
 			cy.getCy('generate-token-dialog-token-input').should('have.value', 'some-plex-api-token');
 

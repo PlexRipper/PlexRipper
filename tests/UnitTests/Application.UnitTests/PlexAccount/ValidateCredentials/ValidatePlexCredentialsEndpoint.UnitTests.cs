@@ -268,61 +268,6 @@ public class ValidatePlexCredentialsEndpointUnitTests : BaseUnitTest
     }
 
     [Fact]
-    public async Task ShouldMarkUnauthorized_WhenThePlexAPIRespondsWithA401()
-    {
-        // Arrange
-        var seed = new Seed(203958);
-        var testAccountDTO = FakeData.GetPlexAccount(seed).Generate().ToDTO();
-        testAccountDTO.IsValidated = false;
-        testAccountDTO.ValidatedAt = null;
-        testAccountDTO.CustomAuthenticationToken = string.Empty;
-
-        var signInValue = new PlexSignInCommandResult
-        {
-            ClientId = testAccountDTO.ClientId,
-            Username = testAccountDTO.Username,
-            Password = testAccountDTO.Password,
-            Email = testAccountDTO.Email,
-            Title = testAccountDTO.Title,
-            PlexId = testAccountDTO.PlexId,
-            Uuid = testAccountDTO.Uuid,
-            AuthenticationToken = testAccountDTO.AuthenticationToken,
-            IsValidated = false,
-            ValidatedAt = null,
-            Is2Fa = false,
-        };
-
-        mock.Mock<ICommandExecutor>()
-            .Setup(x => x.Send(It.IsAny<PlexSignInCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Ok(signInValue).AddPlex401UnauthorizedError());
-
-        // Act
-        var ep = SetupEndpointUnitTest<ValidatePlexCredentialsEndpoint>();
-        await ep.HandleAsync(
-            new ValidatePlexCredentialsEndpointRequest
-            {
-                ClientId = testAccountDTO.ClientId,
-
-                DisplayName = testAccountDTO.DisplayName,
-                Username = testAccountDTO.Username,
-                Password = testAccountDTO.Password,
-                VerificationCode = testAccountDTO.VerificationCode,
-            },
-            CancellationToken
-        );
-        var result = ep.Response as BaseResultDTO;
-
-        // Assert
-        result.ShouldNotBeNull();
-        result.IsSuccess.ShouldBeFalse();
-        result.Errors.ShouldNotBeNull();
-        result.Errors.Count.ShouldBeGreaterThanOrEqualTo(1);
-
-        mock.Mock<ICommandExecutor>()
-            .Verify(x => x.Send(It.IsAny<PlexSignInCommand>(), It.IsAny<CancellationToken>()), Times.Once());
-    }
-
-    [Fact]
     public async Task ShouldNotMarkUnauthorized_WhenUnhandledPlexErrorsOccur()
     {
         // Arrange

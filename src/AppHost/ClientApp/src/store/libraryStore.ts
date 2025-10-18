@@ -9,6 +9,7 @@ import { plexLibraryApi } from '@api';
 import { RefreshDataType } from '@dto';
 import { useServerStore, useSettingsStore, useSignalrStore } from '@store';
 import { cloneDeep } from 'lodash-es';
+import Log from 'consola';
 
 interface ILibraryStoreState {
 	libraries: PlexLibraryDTO[];
@@ -50,17 +51,7 @@ export const useLibraryStore = defineStore('LibraryStore', () => {
 					}
 					return null;
 				}),
-				tap((library) => {
-					if (!library) {
-						return;
-					}
-					const i = state.libraries.findIndex((x) => x.id === libraryId);
-					if (i > -1) {
-						// We freeze library here as it doesn't have to be Vue reactive.
-						state.libraries.splice(i, 1, Object.freeze(library));
-					}
-					state.libraries.push(Object.freeze(library));
-				}),
+				tap((library) => actions.updateLibrary(library)),
 			);
 		},
 		/**
@@ -69,15 +60,7 @@ export const useLibraryStore = defineStore('LibraryStore', () => {
      */
 		reSyncLibrary(libraryId: number): Observable<PlexLibraryDTO | null> {
 			return plexLibraryApi.refreshLibraryMediaEndpoint(libraryId).pipe(
-				tap((library) => {
-					if (library.isSuccess && library.value) {
-						const i = state.libraries.findIndex((x) => x.id === libraryId);
-						if (i > -1) {
-							state.libraries.splice(i, 1, library.value);
-						}
-						state.libraries.push(library.value);
-					}
-				}),
+				tap((library) => actions.updateLibrary(library.value)),
 				switchMap((library): Observable<PlexLibraryDTO | null> => of(getters.getLibrary(library.value?.id ?? 0))),
 			);
 		},
@@ -90,6 +73,19 @@ export const useLibraryStore = defineStore('LibraryStore', () => {
 					}
 				}
 			});
+		},
+		updateLibrary(library?: PlexLibraryDTO | null): void {
+			if (!library) {
+				Log.error('Library was invalid, cannot update store.');
+				return;
+			}
+			const i = state.libraries.findIndex((x) => x.id === library.id);
+			if (i > -1) {
+				// We freeze library here as it doesn't have to be Vue reactive.
+				state.libraries.splice(i, 1, Object.freeze(library));
+				return;
+			}
+			state.libraries.push(Object.freeze(library));
 		},
 		$reset() {
 			Object.assign(state, cloneDeep(defaultState));

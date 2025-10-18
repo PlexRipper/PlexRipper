@@ -129,7 +129,22 @@ public class ValidatePlexCredentialsEndpoint
         if (signInResult.HasPlex401UnauthorizedError())
         {
             _log.Here().Warning("Invalid Plex credentials provided for username {Username}", req.Username);
-            await SendFluentResult(signInResult, ct);
+            var response = new ValidatePlexCredentialsDTO
+            {
+                IsUnAuthorized = true,
+                ClientId = clientId,
+                Username = req.Username,
+                Password = req.Password,
+                Email = string.Empty,
+                Title = string.Empty,
+                PlexId = 0,
+                Uuid = string.Empty,
+                AuthenticationToken = string.Empty,
+                IsValidated = false,
+                ValidatedAt = null,
+                Is2Fa = false,
+            };
+            await SendFluentResult(Result.Ok(response), ct);
             return;
         }
 

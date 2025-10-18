@@ -98,15 +98,15 @@ const getQualityDisplay = (quality: VideoQuality): {
 				color: 'cyan-6',
 				label: translateVideoQuality(VideoQuality.QHD),
 			};
-		case VideoQuality.UHD4K:
+		case VideoQuality.UHD_4K:
 			return {
 				color: 'red darken-4',
-				label: translateVideoQuality(VideoQuality.UHD4K),
+				label: translateVideoQuality(VideoQuality.UHD_4K),
 			};
-		case VideoQuality.UHD8K:
+		case VideoQuality.UHD_8K:
 			return {
 				color: 'purple-8',
-				label: translateVideoQuality(VideoQuality.UHD8K),
+				label: translateVideoQuality(VideoQuality.UHD_8K),
 			};
 		case VideoQuality.Unknown:
 			return {

@@ -235,7 +235,7 @@ export const useAccountDialogStore = defineStore('AccountDialogStore', () => {
 					title: accountData.title,
 					username: accountData.username,
 					uuid: accountData.uuid,
-					validatedAt: accountData.validatedAt,
+					validatedAt: accountData.validatedAt!,
 				}).pipe(
 					tap(() => {
 						state.savingLoading = false;

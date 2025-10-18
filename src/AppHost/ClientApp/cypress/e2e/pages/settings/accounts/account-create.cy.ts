@@ -1,6 +1,6 @@
 import { route } from '@fixtures';
 import { generatePlexAccount, generateResultDTO } from '@mock';
-import type { CreatePlexAccountDTO, PlexAccountDTO } from '@dto';
+import type { CreatePlexAccountEndpointRequest, PlexAccountDTO } from '@dto';
 import { PlexAccountPaths } from '@api-urls';
 
 describe('Add Plex account to Reaparr', () => {
@@ -167,14 +167,14 @@ describe('Add Plex account to Reaparr', () => {
 
 			cy.wait('@createAccount').then((interception) => {
 				expect(interception.request.method).to.equal('POST');
-				const expectedBody: CreatePlexAccountDTO = {
+				const expectedBody: CreatePlexAccountEndpointRequest = {
 					isValidated: true,
 					password: account.password,
 					username: account.username,
 					uuid: account.uuid,
-					validatedAt: account.validatedAt,
-					authenticationToken: account.apiAuthenticationToken,
-					customAuthenticationToken: account.authenticationToken,
+					validatedAt: account.validatedAt!,
+					authenticationToken: account.authenticationToken,
+					customAuthenticationToken: account.customAuthenticationToken,
 					clientId: account.clientId,
 					displayName: account.displayName,
 					email: account.email,
@@ -281,14 +281,14 @@ describe('Add Plex account to Reaparr', () => {
 
 			cy.wait('@createAccount').then((interception) => {
 				expect(interception.request.method).to.equal('POST');
-				const expectedBody: CreatePlexAccountDTO = {
+				const expectedBody: CreatePlexAccountEndpointRequest = {
 					isValidated: true,
 					password: account.password,
 					username: account.username,
 					uuid: account.uuid,
-					validatedAt: account.validatedAt,
-					authenticationToken: account.apiAuthenticationToken,
-					customAuthenticationToken: account.authenticationToken,
+					validatedAt: account.validatedAt!,
+					authenticationToken: account.authenticationToken,
+					customAuthenticationToken: account.customAuthenticationToken,
 					clientId: account.clientId,
 					displayName: account.displayName,
 					email: account.email,

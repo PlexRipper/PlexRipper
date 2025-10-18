@@ -57,8 +57,8 @@ describe('AccountService.createPlexAccount()', () => {
 		await subscribeSpyTo(serverStore.setup()).onComplete();
 
 		const createAccountResult = subscribeSpyTo(accountStore.createPlexAccount({
-			authenticationToken: plexAccount.apiAuthenticationToken,
-			customAuthenticationToken: plexAccount.authenticationToken,
+			authenticationToken: plexAccount.authenticationToken,
+			customAuthenticationToken: plexAccount.customAuthenticationToken,
 			clientId: plexAccount.clientId,
 			displayName: plexAccount.displayName,
 			email: plexAccount.email,
@@ -66,6 +66,7 @@ describe('AccountService.createPlexAccount()', () => {
 			isEnabled: plexAccount.isEnabled,
 			isMain: plexAccount.isMain,
 			isValidated: plexAccount.isValidated,
+			validatedAt: plexAccount.validatedAt!,
 			password: plexAccount.password,
 			plexId: plexAccount.plexId,
 			title: plexAccount.title,

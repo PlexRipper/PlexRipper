@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Nuxt Dev + Debug" type="CompoundRunConfigurationType">
-    <toRun name="Browser Debug" type="JavascriptDebugType" />
-    <toRun name="dev" type="js.build_tools.npm" />
-    <method v="2" />
-  </configuration>
+	<configuration default="false" name="Nuxt Dev + Debug" type="CompoundRunConfigurationType">
+		<toRun name="Browser Debug" type="JavascriptDebugType" />
+		<toRun name="dev" type="js.build_tools.npm" />
+		<method v="2" />
+	</configuration>
 </component>

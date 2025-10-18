@@ -45,6 +45,7 @@ import type { IDownloadTableNode, ISelection } from '@interfaces';
 import type { QTreeViewTableHeader } from '@props';
 import { flatMapDeep } from 'lodash-es';
 import { useDownloadStore, useServerConnectionStore, useDialogStore, useServerStore } from '@store';
+import { toDownloadActions } from '@composables';
 import { useI18n } from '#imports';
 
 const serverStore = useServerStore();

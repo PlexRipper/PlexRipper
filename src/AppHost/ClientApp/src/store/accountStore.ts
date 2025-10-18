@@ -54,12 +54,13 @@ export const useAccountStore = defineStore('AccountStore', () => {
      * Creates a PlexAccount in the database, returns the new accountId and then also refreshes all the Plex Servers that are accessible
      * @param {PlexAccountDTO} account
      */
-		createPlexAccount(account: CreatePlexAccountEndpointRequest): Observable<void> {
+		createPlexAccount(account: CreatePlexAccountEndpointRequest): Observable<PlexAccountDTO> {
 			return plexAccountApi.createPlexAccountEndpoint(account).pipe(
-				switchMap(() =>
-					forkJoin([actions.refreshAccounts(), serverStore.refreshPlexServers(), libraryStore.refreshLibraries()]),
+				switchMap((result) =>
+					forkJoin([actions.refreshAccounts(), serverStore.refreshPlexServers(), libraryStore.refreshLibraries()]).pipe(
+						switchMap(() => of(result.value as PlexAccountDTO)),
+					),
 				),
-				switchMap(() => of(void 0)),
 			);
 		},
 		updatePlexAccount(account: PlexAccountDTO) {

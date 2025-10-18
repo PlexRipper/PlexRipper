@@ -241,6 +241,7 @@ export const useAccountDialogStore = defineStore('AccountDialogStore', () => {
 						state.savingLoading = false;
 						dialogStore.closeDialog(DialogType.AccountDialog);
 					}),
+					switchMap(() => of(void 0)),
 				);
 			}
 			return accountStore.updatePlexAccount(get(getters.getAccountData)).pipe(

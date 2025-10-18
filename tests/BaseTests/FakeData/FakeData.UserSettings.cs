@@ -38,6 +38,7 @@ public static partial class FakeData
         return new Faker<AuthenticationModule>()
             .StrictMode(true)
             .UseSeed(seed.Next())
+            .RuleFor(x => x.HeaderAuthentication, _ => HeaderAuthenticationSettings.Create())
             .RuleFor(x => x.ResetCredentials, _ => false);
     }
 

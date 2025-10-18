@@ -1,7 +1,7 @@
 ﻿using Autofac;
 using Reaparr.Application;
 using Reaparr.Data;
-using Reaparr.FileSystem.Config;
+using Reaparr.FileSystem;
 using Reaparr.Identity;
 using Reaparr.PlexApi;
 using Reaparr.Settings.Config;

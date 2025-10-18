@@ -1,6 +1,7 @@
 using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using Autofac.Extras.Moq;
+using Reaparr.Application;
 using Reaparr.FileSystem.Contracts;
 using Shouldly;
 using Xunit;

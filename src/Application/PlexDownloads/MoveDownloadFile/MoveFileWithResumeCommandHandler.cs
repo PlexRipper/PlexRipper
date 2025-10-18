@@ -2,9 +2,39 @@ using System.Diagnostics;
 using System.IO.Abstractions;
 using FastEndpoints;
 using FluentValidation;
-using Reaparr.FileSystem.Contracts;
 
-namespace Reaparr.FileSystem;
+namespace Reaparr.Application;
+
+public record MoveFileWithResumeCommand : ICommand<Result>
+{
+    public required string SourcePath { get; init; }
+
+    public required string TargetPath { get; init; }
+
+    public required long CurrentOffset { get; init; }
+
+    public required long DataTotal { get; init; }
+
+    public required Action<MoveFileTransferProgressDTO> Progress { get; init; }
+}
+
+public record MoveFileTransferProgressDTO
+{
+    /// <summary>
+    /// Gets or sets the total size received of the file in bytes.
+    /// </summary>
+    public required long Transferred { get; init; }
+
+    /// <summary>
+    /// Gets or sets the total size of the file in bytes.
+    /// </summary>
+    public required long DataTotal { get; init; }
+
+    /// <summary>
+    /// Gets or sets the file transfer speeds.
+    /// </summary>
+    public required long FileTransferSpeed { get; init; }
+}
 
 public class MoveFileWithResumeValidator : AbstractValidator<MoveFileWithResumeCommand>
 {
@@ -42,13 +72,13 @@ public class MoveFileWithResumeCommandHandler : ICommandHandler<MoveFileWithResu
         var moveDownloadFileProgres = command.Progress;
 
         var writeStreamResult = Result.Try(() =>
-            _file.Open(targetPath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None)
+            _file.Open(targetPath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite)
         );
         if (writeStreamResult.IsFailed)
             return writeStreamResult.ToResult();
 
         var inputStreamResult = Result.Try(
-            (() => _file.Open(sourcePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+            (() => _file.Open(sourcePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
         );
         if (inputStreamResult.IsFailed)
             return inputStreamResult.ToResult();

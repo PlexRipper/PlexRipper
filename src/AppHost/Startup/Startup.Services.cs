@@ -89,10 +89,14 @@ public static partial class Startup
             // Setup SignalR
             services
                 .AddSignalR()
+                .AddJsonProtocol(options =>
+                    options.PayloadSerializerOptions = DefaultJsonSerializerOptions.ConfigStandard
+                )
                 .AddMessagePackProtocol(options =>
                 {
-                    options.SerializerOptions = MessagePackSerializerOptions.Standard
-                        .WithSecurity(MessagePackSecurity.UntrustedData);
+                    options.SerializerOptions = MessagePackSerializerOptions.Standard.WithSecurity(
+                        MessagePackSecurity.UntrustedData
+                    );
                 });
 
             services.SwaggerDocument(options =>

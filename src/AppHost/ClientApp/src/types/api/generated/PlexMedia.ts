@@ -118,7 +118,7 @@ export class PlexMedia {
     query: {
       /**
        * @format int32
-       * @example 938
+       * @example 400
        */
       height: number;
       /**
@@ -126,8 +126,11 @@ export class PlexMedia {
        * @example 57920
        */
       metaDataKey: number;
-      /** @example "1756014789" */
-      plexKey: string;
+      /**
+       * @format int32
+       * @example 1756014789
+       */
+      plexKey: number;
       /**
        * @format int32
        * @example 1
@@ -135,7 +138,7 @@ export class PlexMedia {
       plexServerId: number;
       /**
        * @format int32
-       * @example 627
+       * @example 200
        */
       width: number;
     },
@@ -227,7 +230,7 @@ export class PlexMediaPaths {
   static getPlexMediaThumbnailImageEndpoint = (query: {
     /**
      * @format int32
-     * @example 938
+     * @example 400
      */
     height: number;
     /**
@@ -235,8 +238,11 @@ export class PlexMediaPaths {
      * @example 57920
      */
     metaDataKey: number;
-    /** @example "1756014789" */
-    plexKey: string;
+    /**
+     * @format int32
+     * @example 1756014789
+     */
+    plexKey: number;
     /**
      * @format int32
      * @example 1
@@ -244,7 +250,7 @@ export class PlexMediaPaths {
     plexServerId: number;
     /**
      * @format int32
-     * @example 627
+     * @example 200
      */
     width: number;
   }) => queryString.stringifyUrl({ url: `/api/PlexMedia/thumbnail`, query });

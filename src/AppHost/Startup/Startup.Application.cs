@@ -42,7 +42,10 @@ public static partial class Startup
         {
             // Used to deploy the front-end Nuxt client
             app.UseSpaStaticFiles();
-            app.UseSpa(spa => spa.Options.SourcePath = "ClientApp");
+            app.UseSpa(spa =>
+            {
+                spa.Options.SourcePath = "ClientApp";
+            });
         }
 
         // Use custom header authentication middleware
@@ -52,25 +55,22 @@ public static partial class Startup
         app.UseAuthorization();
 
         // Setup FastEndpoints
-        app.UseResponseCaching()
-            .UseFastEndpoints(c =>
+        app.UseFastEndpoints(c =>
+        {
+            // https://fast-endpoints.com/docs/swagger-support#short-endpoint-names
+            c.Endpoints.ShortNames = true;
+
+            c.Errors.ResponseBuilder = (failures, ctx, _) =>
             {
-                // https://fast-endpoints.com/docs/swagger-support#short-endpoint-names
-                c.Endpoints.ShortNames = true;
+                var result = ResultExtensions.Create400BadRequestResult($"Bad request: {ctx.Request.GetDisplayUrl()}");
+                var errors = failures
+                    .GroupBy(f => f.PropertyName)
+                    .ToDictionary(e => e.Key, e => e.Select(m => m.ErrorMessage).ToArray());
+                foreach (var reason in errors)
+                    result.Errors[0].Metadata.Add(reason.Key, reason.Value);
 
-                c.Errors.ResponseBuilder = (failures, ctx, _) =>
-                {
-                    var result = ResultExtensions.Create400BadRequestResult(
-                        $"Bad request: {ctx.Request.GetDisplayUrl()}"
-                    );
-                    var errors = failures
-                        .GroupBy(f => f.PropertyName)
-                        .ToDictionary(e => e.Key, e => e.Select(m => m.ErrorMessage).ToArray());
-                    foreach (var reason in errors)
-                        result.Errors[0].Metadata.Add(reason.Key, reason.Value);
-
-                    return result.LogError();
-                };
-            });
+                return result.LogError();
+            };
+        });
     }
 }

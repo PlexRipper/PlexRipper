@@ -55,20 +55,17 @@ public static partial class Startup
         services.ConfigureAuthenticationServices();
 
         // Setup FastEndpoints
-        services
-            .AddFastEndpoints(options =>
-            {
-                // Manually define the assemblies to scan for FastEndpoints
-                options.DisableAutoDiscovery = true;
-                options.Assemblies =
-                [
-                    // Reference the assemblies that contain the FastEndpoints or ICommand implementations
-                    Assembly.GetAssembly(typeof(ApplicationModule))!,
-                    Assembly.GetAssembly(typeof(PlexApiModule))!,
-                ];
-            })
-            // https://fast-endpoints.com/docs/response-caching
-            .AddResponseCaching();
+        services.AddFastEndpoints(options =>
+        {
+            // Manually define the assemblies to scan for FastEndpoints
+            options.DisableAutoDiscovery = true;
+            options.Assemblies =
+            [
+                // Reference the assemblies that contain the FastEndpoints or ICommand implementations
+                Assembly.GetAssembly(typeof(ApplicationModule))!,
+                Assembly.GetAssembly(typeof(PlexApiModule))!,
+            ];
+        });
 
         services.AddCommandMiddleware(c => c.Register(typeof(ValidationPipeline<,>)));
 

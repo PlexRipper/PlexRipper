@@ -31,6 +31,7 @@ public static partial class Startup
         {
             // SignalR configuration
             app.MapHub<ProgressHub>("/progress");
+            app.MapHub<DownloadHub>("/download");
             app.MapHub<NotificationHub>("/notifications");
 
             // Place this before app.UseAuthentication().UseAuthorization(); to allow it as anonymous

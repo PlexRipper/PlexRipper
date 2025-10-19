@@ -79,7 +79,12 @@ export const useDownloadStore = defineStore('DownloadStore', () => {
 					return of();
 			}
 		},
-		updateServerDownloadProgress(serverDownloadProgress: ServerDownloadProgressDTO): void {
+		updateServerDownloadProgress(serverDownloadProgress: ServerDownloadProgressDTO | null): void {
+			if (!serverDownloadProgress) {
+				Log.warn('Received null server download progress update');
+				return;
+			}
+
 			const i = state.serverDownloads.findIndex((x) => x.id === serverDownloadProgress.id);
 			if (i === -1) {
 				state.serverDownloads.push(serverDownloadProgress);

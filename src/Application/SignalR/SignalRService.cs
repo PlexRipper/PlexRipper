@@ -10,7 +10,7 @@ public class SignalRService : ISignalRService
 {
     private readonly ILogger _log;
     private readonly IHubContext<ProgressHub, IProgressHub> _progressHub;
-
+    private readonly IHubContext<DownloadHub, IDownloadHub> _downloadHub;
     private readonly IHubContext<NotificationHub, INotificationHub> _notificationHub;
 
     /// <summary>
@@ -18,15 +18,18 @@ public class SignalRService : ISignalRService
     /// </summary>
     /// <param name="log">The <see cref="Serilog.ILogger"/>.</param>
     /// <param name="progressHub">The <see cref="ProgressHub"/>.</param>
+    /// <param name="downloadHub">The <see cref="DownloadHub"/>.</param>
     /// <param name="notificationHub">The <see cref="NotificationHub"/>.</param>
     public SignalRService(
         ILogger log,
         IHubContext<ProgressHub, IProgressHub> progressHub,
+        IHubContext<DownloadHub, IDownloadHub> downloadHub,
         IHubContext<NotificationHub, INotificationHub> notificationHub
     )
     {
         _log = log.ForContext<SignalRService>();
         _progressHub = progressHub;
+        _downloadHub = downloadHub;
         _notificationHub = notificationHub;
     }
 
@@ -45,11 +48,13 @@ public class SignalRService : ISignalRService
         var update = downloadTasks.ToServerDownloadProgressDTOList();
         if (!update.Any())
         {
-            _log.Here().Error($"Update for ServerDownloadProgress contained no entries to be sent");
+            _log.Here().Error("Update for ServerDownloadProgress contained no entries to be sent");
             return;
         }
 
-        await _progressHub.Clients.All.ServerDownloadProgress(update.First(), cancellationToken);
+        var messagePack = update.First().ToMessagePack();
+
+        await _downloadHub.Clients.All.ServerDownloadProgress(messagePack, cancellationToken);
     }
 
     /// <inheritdoc/>

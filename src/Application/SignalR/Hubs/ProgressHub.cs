@@ -54,7 +54,7 @@ public class ProgressHub : Hub<IProgressHub>, IProgressHub
         _log.Here()
             .Debug(
                 "Sending progress: {MessageTypesNotification} => {@JobStatusUpdateDto}",
-                MessageTypes.JobStatusUpdate.ToString(),
+                nameof(MessageTypes.JobStatusUpdate),
                 jobStatusUpdate
             );
         await Clients.All.JobStatusUpdate(jobStatusUpdate, cancellationToken);
@@ -69,7 +69,7 @@ public class ProgressHub : Hub<IProgressHub>, IProgressHub
         _log.Here()
             .Debug(
                 "Sending progress: {MessageTypesNotification} => {@SyncServerProgress}",
-                MessageTypes.SyncServerMediaProgress.ToString(),
+                nameof(MessageTypes.SyncServerMediaProgress),
                 syncServerMediaProgress
             );
         await Clients.All.SyncServerMediaProgress(syncServerMediaProgress, cancellationToken);
@@ -84,37 +84,10 @@ public class ProgressHub : Hub<IProgressHub>, IProgressHub
         _log.Here()
             .Debug(
                 "Sending progress: {MessageTypesNotification} => {@ServerConnectionCheckStatusProgress}",
-                MessageTypes.ServerConnectionCheckStatusProgress.ToString(),
+                nameof(MessageTypes.ServerConnectionCheckStatusProgress),
                 serverConnectionCheckStatusProgress
             );
         await Clients.All.ServerConnectionCheckStatusProgress(serverConnectionCheckStatusProgress, cancellationToken);
-    }
-
-    /// <inheritdoc/>
-    public async Task ServerDownloadProgress(
-        ServerDownloadProgressDTO serverDownloadProgress,
-        CancellationToken cancellationToken = default
-    )
-    {
-        _log.Here()
-            .Debug(
-                "Sending progress: {MessageTypesNotification} => {@ServerDownloadProgress}",
-                MessageTypes.ServerDownloadProgress.ToString(),
-                serverDownloadProgress
-            );
-        await Clients.All.ServerDownloadProgress(serverDownloadProgress, cancellationToken);
-    }
-
-    /// <inheritdoc/>
-    public async Task DownloadTaskUpdate(DownloadTaskDTO downloadTask, CancellationToken cancellationToken = default)
-    {
-        _log.Here()
-            .Debug(
-                "Sending progress: {MessageTypesNotification} => {@DownloadTaskUpdate}",
-                MessageTypes.DownloadTaskUpdate.ToString(),
-                downloadTask
-            );
-        await Clients.All.DownloadTaskUpdate(downloadTask, cancellationToken);
     }
 
     /// <inheritdoc/>
@@ -123,7 +96,7 @@ public class ProgressHub : Hub<IProgressHub>, IProgressHub
         _log.Here()
             .Debug(
                 "Sending progress: {MessageTypesNotification} => {@LibraryProgress}",
-                MessageTypes.LibraryProgress.ToString(),
+                nameof(MessageTypes.LibraryProgress),
                 libraryProgress
             );
         await Clients.All.LibraryProgress(libraryProgress, cancellationToken);

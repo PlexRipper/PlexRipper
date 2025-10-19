@@ -69,7 +69,7 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
             return ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), command.Key.Id).LogError();
 
         // Resolve paths
-        var downloadFilePath = downloadTask.FilePath;
+        var downloadFilePath = downloadTask.DownloadFilePath;
         var destinationPath = downloadTask.DestinationFilePath;
 
         _log.Here().Debug("Starting file move process for {DownloadFilePath}", downloadFilePath);
@@ -85,6 +85,10 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
             if (downloadFilePath.RemoveReapTempSuffix() == destinationPath)
             {
                 // Just rename it to remove .reapTemp suffix if present
+                if (_file.Exists(destinationPath))
+                {
+                    Result.Try(() => _file.Delete(destinationPath)).LogIfFailed();
+                }
                 _file.Move(downloadFilePath.RemoveReapTempSuffix(), destinationPath);
 
                 downloadTask.CurrentFileTransferBytesOffset = downloadTask.DataTotal;
@@ -103,7 +107,12 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
             if (keepInDownloads)
             {
                 // Rename it to remove .reapTemp suffix if present
-                _file.Move(downloadFilePath, downloadFilePath.RemoveReapTempSuffix());
+                var targetInDownloads = downloadFilePath.RemoveReapTempSuffix();
+                if (_file.Exists(targetInDownloads))
+                {
+                    Result.Try(() => _file.Delete(targetInDownloads)).LogIfFailed();
+                }
+                _file.Move(downloadFilePath, targetInDownloads);
 
                 downloadTask.CurrentFileTransferBytesOffset = downloadTask.DataTotal;
                 downloadTask.FileDataTransferred = downloadTask.DataTotal;
@@ -131,6 +140,19 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
                 .ToResult();
             if (createDirectoryResult.IsFailed)
                 return await ErrorDownloadTask(key, createDirectoryResult);
+
+            // If destination exists, delete to ensure overwrite semantics and reset resume offset
+            var destinationAlreadyExists = _file.Exists(destinationPath);
+            if (destinationAlreadyExists)
+            {
+                var deleteExistingResult = Result.Try(() => _file.Delete(destinationPath));
+                if (deleteExistingResult.IsFailed)
+                    return await ErrorDownloadTask(key, deleteExistingResult);
+
+                // Reset offset to start fresh since we removed existing target
+                downloadTask.CurrentFileTransferBytesOffset = 0;
+                downloadTask.FileDataTransferred = 0;
+            }
 
             // Update status before moving
             await UpdateDownloadTaskStatus(key, DownloadStatus.Moving);
@@ -252,6 +274,6 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
     private bool ShouldKeepInDownloads(DownloadTaskFileBase downloadTask) =>
         downloadTask.DirectoryMeta.KeepCompletedInDownloadFolder
         || _downloadManagerSettings.KeepCompletedInDownloadFolder
-        || downloadTask.FilePath == downloadTask.DestinationFilePath
+        || downloadTask.DownloadFilePath.RemoveReapTempSuffix() == downloadTask.DestinationFilePath
         || string.IsNullOrWhiteSpace(downloadTask.DestinationFilePath);
 }

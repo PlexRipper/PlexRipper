@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using FastEndpoints;
 using FastEndpoints.Security;
 using FastEndpoints.Swagger;
+using MessagePack;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
@@ -90,7 +91,13 @@ public static partial class Startup
                 .AddSignalR()
                 .AddJsonProtocol(options =>
                     options.PayloadSerializerOptions = DefaultJsonSerializerOptions.ConfigStandard
-                );
+                )
+                .AddMessagePackProtocol(options =>
+                {
+                    options.SerializerOptions = MessagePackSerializerOptions.Standard.WithSecurity(
+                        MessagePackSecurity.UntrustedData
+                    );
+                });
 
             services.SwaggerDocument(options =>
             {

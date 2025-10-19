@@ -107,6 +107,55 @@ export class PlexMedia {
     ).pipe(apiCheckPipe<PlexMediaDTO>);
 
   /**
+   * @description Proxies image bytes from Plex servers with CORS headers.
+   * * @tags Plexmedia
+   * @name GetPlexMediaThumbnailImageEndpoint
+   * @summary Proxy Plex image
+   * @request GET:/api/PlexMedia/thumbnail
+   * @secure
+   */
+  getPlexMediaThumbnailImageEndpoint = (
+    query: {
+      /**
+       * @format int32
+       * @example 400
+       */
+      height: number;
+      /**
+       * @format int32
+       * @example 57920
+       */
+      metaDataKey: number;
+      /**
+       * @format int32
+       * @example 1756014789
+       */
+      plexKey: number;
+      /**
+       * @format int32
+       * @example 1
+       */
+      plexServerId: number;
+      /**
+       * @format int32
+       * @example 200
+       */
+      width: number;
+    },
+    params: RequestParams = {},
+  ) =>
+    from(
+      Axios.request<Blob>({
+        url: `/api/PlexMedia/thumbnail`,
+        method: "GET",
+        params: query,
+        secure: true,
+        format: "blob",
+        ...params,
+      }),
+    ).pipe(apiCheckPipe<Blob>);
+
+  /**
    * No description
    * * @tags Plexmedia
    * @name SearchPlexMediaEndpoint
@@ -177,6 +226,34 @@ export class PlexMediaPaths {
       url: `/api/PlexMedia/detail/${plexMediaId}`,
       query,
     });
+
+  static getPlexMediaThumbnailImageEndpoint = (query: {
+    /**
+     * @format int32
+     * @example 400
+     */
+    height: number;
+    /**
+     * @format int32
+     * @example 57920
+     */
+    metaDataKey: number;
+    /**
+     * @format int32
+     * @example 1756014789
+     */
+    plexKey: number;
+    /**
+     * @format int32
+     * @example 1
+     */
+    plexServerId: number;
+    /**
+     * @format int32
+     * @example 200
+     */
+    width: number;
+  }) => queryString.stringifyUrl({ url: `/api/PlexMedia/thumbnail`, query });
 
   static searchPlexMediaEndpoint = (query: { query: string }) =>
     queryString.stringifyUrl({ url: `/api/PlexMedia/search`, query });

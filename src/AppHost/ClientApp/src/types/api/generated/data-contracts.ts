@@ -204,6 +204,25 @@ export interface DownloadProgressDTO {
   title: string;
 }
 
+export interface DownloadProgressMessagePackDTO {
+  children: DownloadProgressMessagePackDTO[];
+  /** @format int64 */
+  dataReceived: number;
+  /** @format int64 */
+  dataTotal: number;
+  /** @format int64 */
+  downloadSpeed: number;
+  /** @format guid */
+  id: string;
+  mediaType: PlexMediaType;
+  /** @format decimal */
+  percentage: number;
+  status: DownloadStatus;
+  /** @format int64 */
+  timeRemaining: number;
+  title: string;
+}
+
 export enum DownloadStatus {
   Unknown = "Unknown",
   Error = "Error",
@@ -1270,6 +1289,14 @@ export interface ServerDownloadProgressDTO {
   /** @format int32 */
   downloadableTasksCount: number;
   downloads: DownloadProgressDTO[];
+  /** @format int32 */
+  id: number;
+}
+
+export interface ServerDownloadProgressMessagePackDTO {
+  /** @format int32 */
+  downloadableTasksCount: number;
+  downloads: DownloadProgressMessagePackDTO[];
   /** @format int32 */
   id: number;
 }

@@ -15,11 +15,13 @@ import type {
 	ServerConnectionCheckStatusProgressDTO,
 	ServerDownloadProgressDTO,
 	SyncServerMediaProgress,
+	ServerDownloadProgressMessagePackDTO,
 } from '@dto';
 import { MessageTypes } from '@dto';
 import type { IRetryPolicy } from '@microsoft/signalr/src/IRetryPolicy';
 import { useDownloadStore, useBackgroundJobsStore, useNotificationsStore } from '@store';
 import Axios from 'axios';
+import { MessagePackHubProtocol } from '@microsoft/signalr-protocol-msgpack';
 
 export const useSignalrStore = defineStore('SignalrStore', () => {
 	interface ISignalRStoreState {
@@ -51,6 +53,7 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 
 	// Connections
 	let progressHubConnection: HubConnection | null;
+	let downloadHubConnection: HubConnection | null;
 	let notificationHubConnection: HubConnection | null;
 
 	const actions = {
@@ -77,6 +80,18 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 					.withAutomaticReconnect(retryPolicy)
 					.build();
 
+				const mock = useCypressSignalRMock('download', { enableForVitest: true });
+				if (mock) {
+					downloadHubConnection = mock; // mock uses JSON internally
+				} else {
+					downloadHubConnection = new HubConnectionBuilder()
+						.withHubProtocol(new MessagePackHubProtocol())
+						.configureLogging(LogLevel.None)
+						.withUrl(`${baseApiUrl}/download`, options)
+						.withAutomaticReconnect(retryPolicy)
+						.build();
+				}
+
 				notificationHubConnection = useCypressSignalRMock('notifications', { enableForVitest: true }) ?? new HubConnectionBuilder()
 					.configureLogging(LogLevel.None)
 					.withUrl(`${baseApiUrl}/notifications`, options)
@@ -84,11 +99,10 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 					.build();
 
 				setupSubscriptions();
-				await startProgressHubConnection();
-				await startNotificationHubConnection();
+
+				await Promise.all([startDownloadHubConnection(), startProgressHubConnection(), startNotificationHubConnection()]);
 			})()).pipe(switchMap(() => of({ name: 'useSignalrStore', isSuccess: true })), take(1));
-		},
-		$reset() {
+		}, $reset() {
 			Object.assign(state, cloneDeep(defaultState));
 		},
 	};
@@ -98,7 +112,14 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 		const backgroundStore = useBackgroundJobsStore();
 		const notificationsStore = useNotificationsStore();
 
-		progressHubConnection?.on(MessageTypes.ServerDownloadProgress, (data: ServerDownloadProgressDTO) => downloadStore.updateServerDownloadProgress(data));
+		downloadHubConnection?.on(MessageTypes.ServerDownloadProgress, (rawData: ServerDownloadProgressMessagePackDTO) => {
+			Log.debug(rawData);
+			if (Array.isArray(rawData)) {
+				downloadStore.updateServerDownloadProgress(toServerDownloadProgressDTO(rawData));
+			} else {
+				downloadStore.updateServerDownloadProgress(rawData);
+			}
+		});
 
 		progressHubConnection?.on(MessageTypes.LibraryProgress, (data: LibraryProgress) => {
 			updateState<LibraryProgress>('libraryProgress', data, 'id');
@@ -151,42 +172,25 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 
 	// region Start / Stop Hub Connections
 
-	function startProgressHubConnection(): Promise<void> {
-		if (progressHubConnection && progressHubConnection.state === HubConnectionState.Disconnected) {
-			return progressHubConnection.start().then(() => {
-				Log.info('ProgressHub is now connected!');
-			});
-		}
-		return Promise.resolve();
+	async function startDownloadHubConnection(): Promise<void> {
+		if (!downloadHubConnection || downloadHubConnection.state !== HubConnectionState.Disconnected) return;
+
+		await downloadHubConnection.start();
+		Log.info('DownloadHub connected');
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	function stopProgressHubConnection(): Promise<void> {
-		if (progressHubConnection && progressHubConnection.state !== HubConnectionState.Disconnected) {
-			return progressHubConnection.stop().then(() => {
-				Log.info('ProgressHub is now disconnected!');
-			});
-		}
-		return Promise.resolve();
+	async function startProgressHubConnection() {
+		if (!progressHubConnection || progressHubConnection.state !== HubConnectionState.Disconnected) return;
+
+		await progressHubConnection.start();
+		Log.info('ProgressHub connected');
 	}
 
-	function startNotificationHubConnection(): Promise<void> {
-		if (notificationHubConnection && notificationHubConnection.state === HubConnectionState.Disconnected) {
-			return notificationHubConnection.start().then(() => {
-				Log.info('NotificationHub is now connected!');
-			});
-		}
-		return Promise.resolve();
-	}
+	async function startNotificationHubConnection() {
+		if (!notificationHubConnection || notificationHubConnection.state !== HubConnectionState.Disconnected) return;
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	function stopNotificationHubConnection(): Promise<void> {
-		if (notificationHubConnection && notificationHubConnection.state !== HubConnectionState.Disconnected) {
-			return notificationHubConnection.stop().then(() => {
-				Log.info('NotificationHub is now disconnected!');
-			});
-		}
-		return Promise.resolve();
+		await notificationHubConnection.start();
+		Log.info('NotificationHub connected');
 	}
 
 	// endregion
@@ -216,4 +220,31 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 
 if (import.meta.hot) {
 	import.meta.hot.accept(acceptHMRUpdate(useSignalrStore, import.meta.hot));
+}
+
+function toServerDownloadProgressDTO(arr: ServerDownloadProgressMessagePackDTO): ServerDownloadProgressDTO | null {
+	if (!Array.isArray(arr))
+		return null;
+
+	function mapDownload(item) {
+		if (!Array.isArray(item))
+			return null;
+
+		return {
+			id: item[0],
+			title: item[1],
+			mediaType: item[2],
+			status: item[3],
+			percentage: Number(item[4]),
+			dataReceived: item[5],
+			dataTotal: item[6],
+			downloadSpeed: item[7],
+			timeRemaining: item[8],
+			children: Array.isArray(item[9]) ? item[9].map(mapDownload) : [],
+		};
+	}
+
+	return {
+		id: arr[0], downloadableTasksCount: arr[1], downloads: Array.isArray(arr[2]) ? arr[2].map(mapDownload) : [],
+	};
 }

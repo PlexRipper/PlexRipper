@@ -26,7 +26,7 @@ public enum MessageTypes
     ServerDownloadProgress = 3,
 
     /// <summary>
-    ///  Server connection check status message type.
+    ///  Server connection checks status message type.
     /// </summary>
     [EnumMember(Value = nameof(ServerConnectionCheckStatusProgress))]
     ServerConnectionCheckStatusProgress = 5,

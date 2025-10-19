@@ -52,7 +52,7 @@ public class GetPlexMediaThumbnailImageEndpoint : BaseEndpoint<GetPlexMediaThumb
     public override void Configure()
     {
         Get(EndpointPath);
-        ResponseCache(3600); //cache for 60 seconds
+        ResponseCache(259200); // Cache for 3 days
         Summary(s =>
         {
             s.Summary = "Proxy Plex image";
@@ -81,9 +81,9 @@ public class GetPlexMediaThumbnailImageEndpoint : BaseEndpoint<GetPlexMediaThumb
         _log.Here().DebugApiCall(HttpContext, req);
 
         // Per-response CORS headers
-        HttpContext.Response.Headers["Access-Control-Allow-Origin"] = "*";
-        HttpContext.Response.Headers["Access-Control-Allow-Methods"] = "GET, OPTIONS";
-        HttpContext.Response.Headers["Cache-Control"] = "no-store";
+        HttpContext.Response.Headers.AccessControlAllowOrigin = "*";
+        HttpContext.Response.Headers.AccessControlAllowMethods = "GET, OPTIONS";
+        HttpContext.Response.Headers.AccessControlAllowHeaders = "*";
 
         var imageResult = await _commandExecutor.Send(
             new GetThumbnailImageCommand
@@ -105,6 +105,6 @@ public class GetPlexMediaThumbnailImageEndpoint : BaseEndpoint<GetPlexMediaThumb
             return;
         }
 
-        await Send.BytesAsync(imageResult.Value.Data, contentType: MediaTypeNames.Image.Jpeg, cancellation: ct);
+        await Send.BytesAsync(imageResult.Value.Data, contentType: imageResult.Value.ContentType, cancellation: ct);
     }
 }

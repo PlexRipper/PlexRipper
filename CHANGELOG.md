@@ -1,5 +1,39 @@
 Reaparr Changelog
 
+# [0.34.0](https://github.com/Reaparr/Reaparr/compare/v0.33.2...v0.34.0) (2025-10-19)
+
+
+### Bug Fixes
+
+* **WebAPI:** Added attribute to hide catch all endpoint from swagger document generation ([cea89df](https://github.com/Reaparr/Reaparr/commit/cea89df9ceb0d8049d82be4ebfc4c4ff7e9364c4))
+* **WebAPI:** Allow Reaparr to automatically overwrite destination file after downloading and ending up with the same name ([3ea8325](https://github.com/Reaparr/Reaparr/commit/3ea832591bd271fe55f1f84a369447b71019cd94))
+* **Web-UI:** Fix an issue where navigating to Plex libraries would duplicate the entry in the side menu ([1a595e0](https://github.com/Reaparr/Reaparr/commit/1a595e046f1a6840e5dda8175dfcae511c0a064c))
+* **WebAPI:** Fixed an issue where restarting a download task will throw an error because it could not find the filepath ([8d32e3b](https://github.com/Reaparr/Reaparr/commit/8d32e3bb73e011ee41057378f4d7178ca42b549b))
+* **Web-UI:** Fixed the issue with not being able to use username and password ([94c9fe6](https://github.com/Reaparr/Reaparr/commit/94c9fe6e84052a280593302945b3796f54e8b3dd))
+* **Web-UI:** Prevent requesting image when needed data is missing ([1e9e2e3](https://github.com/Reaparr/Reaparr/commit/1e9e2e30a9b6bf1b17eae4af8afafb5e1bf37908))
+
+
+### Features
+
+* **Web-UI:** Add autofill attributes to Plex 2FA verification code to allow autocomplete from password managers ([cccd346](https://github.com/Reaparr/Reaparr/commit/cccd346c41c6c225ef9704eaeb8b2afa1b663f4b))
+* **Web-UI:** Added a nice loading fade background to the poster images ([7993472](https://github.com/Reaparr/Reaparr/commit/799347262d6cca0945f56d8c2836540b203ac493))
+* **Web-UI:** Added a toggle under Settings => Advanced => Download Manager to disable moving completed downloads out of the Downloads folder ([39e45f3](https://github.com/Reaparr/Reaparr/commit/39e45f3800db5802a2bef41dc41180ff13f2beaf))
+* **Web-UI:** Added helpers to the Plex account input fields to allow password managers to fill in the username and password ([f0408d9](https://github.com/Reaparr/Reaparr/commit/f0408d9904cf0083f21c80331f1419503f9ae922))
+* **WebAPI:** Reaparr will now download into a single file even though its still multi-threaded downloading. This skips the step of merging seperate parts making downloads faster ([f137f1a](https://github.com/Reaparr/Reaparr/commit/f137f1a449ca4d4bde5900bc8bd1f77f18b1146e))
+* **WebAPI:** Support for trusted-proxy header authentication, allowing Reaparr to authenticate users based on a secure header (e.g. X-Auth-User) forwarded by a trusted reverse proxy instead of direct password login. ([36fc086](https://github.com/Reaparr/Reaparr/commit/36fc086bb861cffb002e95292ec7ed245dfb41c1))
+
+
+### Performance Improvements
+
+* **WebAPI:** Add response cache of an hour to the Plex media thumbnail ([e333f2a](https://github.com/Reaparr/Reaparr/commit/e333f2a7d44fcf81817c71cf8afd483079b9baf8))
+* **Web-UI:** Cache Plex media images in the front-end and lower the requested quality ([c3bfe67](https://github.com/Reaparr/Reaparr/commit/c3bfe6791f231d94c6251872500f9b217e54c1bb))
+* **WebAPI:** The data send to the front-end to show download progresss is now halved and should make it less likely for out-of-memory issues ([7e78595](https://github.com/Reaparr/Reaparr/commit/7e78595180a450f4158f4a39cd0a0bc06e3de5e6))
+
+
+### Reverts
+
+* **WebAPI:** Revert adding response caching from FastEndpoints, not needed for 1 endpoint ([8c5c8f2](https://github.com/Reaparr/Reaparr/commit/8c5c8f2feb0ba388c3fd4c8057e18d5b11136020))
+
 ## [0.33.2](https://github.com/Reaparr/Reaparr/compare/v0.33.1...v0.33.2) (2025-09-21)
 
 

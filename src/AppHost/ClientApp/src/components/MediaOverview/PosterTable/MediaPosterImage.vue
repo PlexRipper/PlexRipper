@@ -1,50 +1,58 @@
 <template>
 	<QGlowContainer>
-		<QHover
-			v-if="imageUrl"
-			class="media-poster">
-			<template #default="{ hover }">
-				<q-img
-					loading="eager"
-					:src="imageUrl"
-					fit="fill"
-					no-spinner
-					crossorigin="anonymous"
-					class="media-poster--image"
-					:alt="mediaItem.title">
-					<template #default>
-						<!--	Overlay	-->
-						<div :class="['media-poster--overlay', hover && overlay ? 'on-hover' : '', 'white--text']">
+		<q-skeleton
+			v-if="loading"
+			class="media-poster-skeleton"
+			animation="fade"
+			square
+			dark />
+		<template v-else>
+			<QHover
+				v-if="imageUrl"
+				class="media-poster">
+				<template #default="{ hover }">
+					<q-img
+						loading="eager"
+						:src="imageUrl"
+						fit="fill"
+						no-spinner
+						crossorigin="anonymous"
+						class="media-poster--image"
+						:alt="mediaItem.title">
+						<template #default>
+							<!--	Overlay	-->
+							<div :class="['media-poster--overlay', hover && overlay ? 'on-hover' : '', 'white--text']">
+								<MediaPosterImageContent
+									:media-item="mediaItem"
+									:actions="actions"
+									:all-media-mode="allMediaMode"
+									@download="$emit('download', $event)"
+									@open-media-details="$emit('open-media-details')" />
+							</div>
+						</template>
+						<template #error>
+							<!--	Show fallback image	-->
 							<MediaPosterImageContent
-								:media-item="mediaItem"
+								fallback
 								:actions="actions"
+								:media-item="mediaItem"
 								:all-media-mode="allMediaMode"
 								@download="$emit('download', $event)"
 								@open-media-details="$emit('open-media-details')" />
-						</div>
-					</template>
-					<template #error>
-						<!--	Show fallback image	-->
-						<MediaPosterImageContent
-							fallback
-							:actions="actions"
-							:media-item="mediaItem"
-							:all-media-mode="allMediaMode"
-							@download="$emit('download', $event)"
-							@open-media-details="$emit('open-media-details')" />
-					</template>
-				</q-img>
-			</template>
-		</QHover>
-		<!--	Show fallback image	-->
-		<MediaPosterImageContent
-			v-else
-			fallback
-			:actions="actions"
-			:media-item="mediaItem"
-			:all-media-mode="allMediaMode"
-			@download="$emit('download', $event)"
-			@open-media-details="$emit('open-media-details')" />
+						</template>
+					</q-img>
+				</template>
+			</QHover>
+			<!--	Show fallback image	-->
+			<MediaPosterImageContent
+				v-else
+				fallback
+				:actions="actions"
+				:media-item="mediaItem"
+				:all-media-mode="allMediaMode"
+				@download="$emit('download', $event)"
+				@open-media-details="$emit('open-media-details')" />
+		</template>
 	</QGlowContainer>
 </template>
 
@@ -72,13 +80,15 @@ const props = withDefaults(defineProps<{
 	thumbWidth: 200,
 	thumbHeight: 300,
 });
+const imageUrl = ref('');
+const loading = ref(true);
 
 defineEmits<IMediaActionEmits>();
-const imageUrl = ref('');
 
 onMounted(() => {
 	if (!props.mediaItem?.hasThumb) {
-		return '';
+		set(imageUrl, '');
+		set(loading, false);
 	}
 	const useLowQualityPoster = settingsStore.generalSettings.useLowQualityPosterImages;
 
@@ -88,7 +98,10 @@ onMounted(() => {
 		metaDataKey: props.mediaItem.metaDataKey,
 		width: useLowQualityPoster ? props.thumbWidth : props.thumbWidth * 1.5,
 		height: useLowQualityPoster ? props.thumbHeight : props.thumbHeight * 1.5,
-	}).subscribe((url) => set(imageUrl, url)));
+	}).subscribe((url) => {
+		set(imageUrl, url);
+		set(loading, false);
+	}));
 });
 </script>
 
@@ -96,6 +109,13 @@ onMounted(() => {
 @use '@/assets/scss/_mixins.scss';
 
 .q-img__content > div {
+  padding: 0;
+}
+
+.media-poster-skeleton {
+  @extend .background-sm;
+  width: 200px;
+  height: 300px;
   padding: 0;
 }
 

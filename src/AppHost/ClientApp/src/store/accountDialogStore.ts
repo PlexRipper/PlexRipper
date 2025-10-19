@@ -110,7 +110,7 @@ export const useAccountDialogStore = defineStore('AccountDialogStore', () => {
 
 			return plexAccountApi.validatePlexTokenEndpoint({
 				displayName: state.displayName,
-				manualAuthenticationToken: state.authenticationToken,
+				manualAuthenticationToken: state.customAuthenticationToken,
 			}).pipe(
 				tap(({ value, isSuccess, errors }) => {
 					// Always reset loading state

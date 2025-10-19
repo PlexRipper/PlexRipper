@@ -116,7 +116,7 @@
 						:title="$t('help.account-form.auth-token.title')"
 						:text="$t('help.account-form.auth-token.text')">
 						<q-input
-							v-model="accountDialogStore.authenticationToken"
+							v-model="accountDialogStore.customAuthenticationToken"
 							:rules="getAuthTokenRules"
 							color="red"
 							full-width

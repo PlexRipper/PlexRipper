@@ -88,7 +88,7 @@ public abstract class DownloadTaskFileBase : DownloadTaskBase, IDownloadTaskProg
     public string DestinationFilePath => Path.Join(DestinationDirectory, FileName);
 
     [NotMapped]
-    public string FilePath => DownloadWorkerTasks.Select(x => x.DownloadFilePath).Distinct().First();
+    public string FilePath => Path.Combine(DownloadDirectory, FileName);
 
     [NotMapped]
     public decimal Percentage => DownloadTaskPhaseExtensions.Percentage(DownloadTaskPhase, this, this);

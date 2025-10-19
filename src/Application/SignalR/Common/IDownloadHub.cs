@@ -7,10 +7,10 @@ public interface IDownloadHub
     /// <summary>
     ///  Sends a server download progress update to the front-end.
     /// </summary>
-    /// <param name="serverDownloadProgress"></param>
+    /// <param name="messagePackDTO"></param>
     /// <param name="cancellationToken"> The <see cref="CancellationToken"/> to use.</param>
     Task ServerDownloadProgress(
-        ServerDownloadProgressDTO serverDownloadProgress,
+        ServerDownloadProgressMessagePackDTO messagePackDTO,
         CancellationToken cancellationToken = default
     );
 

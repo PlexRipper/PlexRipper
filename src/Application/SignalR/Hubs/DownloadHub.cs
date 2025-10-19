@@ -3,7 +3,6 @@ using Reaparr.Application.Contracts;
 
 namespace Reaparr.Application;
 
-
 public class DownloadHub : Hub<IDownloadHub>, IDownloadHub
 {
     private readonly ILogger _log;
@@ -48,7 +47,7 @@ public class DownloadHub : Hub<IDownloadHub>, IDownloadHub
 
     /// <inheritdoc/>
     public async Task ServerDownloadProgress(
-        ServerDownloadProgressDTO serverDownloadProgress,
+        ServerDownloadProgressMessagePackDTO messagePackDTO,
         CancellationToken cancellationToken = default
     )
     {
@@ -56,9 +55,9 @@ public class DownloadHub : Hub<IDownloadHub>, IDownloadHub
             .Debug(
                 "Sending progress: {MessageTypesNotification} => {@ServerDownloadProgress}",
                 nameof(MessageTypes.ServerDownloadProgress),
-                serverDownloadProgress
+                messagePackDTO
             );
-        await Clients.All.ServerDownloadProgress(serverDownloadProgress, cancellationToken);
+        await Clients.All.ServerDownloadProgress(messagePackDTO, cancellationToken);
     }
 
     /// <inheritdoc/>

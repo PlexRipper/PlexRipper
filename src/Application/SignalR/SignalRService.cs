@@ -52,7 +52,9 @@ public class SignalRService : ISignalRService
             return;
         }
 
-        await _downloadHub.Clients.All.ServerDownloadProgress(update.First(), cancellationToken);
+        var messagePack = update.First().ToMessagePack();
+
+        await _downloadHub.Clients.All.ServerDownloadProgress(messagePack, cancellationToken);
     }
 
     /// <inheritdoc/>

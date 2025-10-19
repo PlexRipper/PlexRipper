@@ -1,5 +1,9 @@
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text.Json;
 using FastEndpoints;
 using FluentValidation;
+using Reaparr.Domain;
 using Reaparr.PlexApi.Contracts;
 
 namespace Reaparr.PlexApi;
@@ -16,13 +20,19 @@ public class ValidatePlexTvTokenCommandHandler
     : ICommandHandler<ValidatePlexTokenCommand, Result<ValidatePlexTokenCommandResult>>
 {
     private readonly IPlexApiClientFactory _plexApiClientFactory;
+    private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger _log;
 
-    public ValidatePlexTvTokenCommandHandler(ILogger log, IPlexApiClientFactory plexApiClientFactory)
+    public ValidatePlexTvTokenCommandHandler(
+        ILogger log,
+        IPlexApiClientFactory plexApiClientFactory,
+        IHttpClientFactory httpClientFactory
+    )
     {
         _log = log.ForContext<ValidatePlexTvTokenCommandHandler>();
 
         _plexApiClientFactory = plexApiClientFactory;
+        _httpClientFactory = httpClientFactory;
     }
 
     public async Task<Result<ValidatePlexTokenCommandResult>> ExecuteAsync(
@@ -32,36 +42,96 @@ public class ValidatePlexTvTokenCommandHandler
     {
         var clientId = Guid.NewGuid().ToString();
 
-        var client = _plexApiClientFactory.CreateTvClient(command.AuthenticationToken);
+        var httpClient = _httpClientFactory.CreateClient();
 
-        var response = await client.Authentication.GetTokenDetailsAsync().ToResponse();
+        // TODO This is a temporary fix until the C# SDK is updated to support the new Plex API endpoints.
+        using var httpRequest = new HttpRequestMessage(
+            HttpMethod.Get,
+            $"https://plex.tv/api/v2/user?X-Plex-Token={command.AuthenticationToken}"
+        );
+        httpRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-        var isValid = response.Value.RawResponse.IsSuccessStatusCode;
-        var result = response.ToApiResult(x => new ValidatePlexTokenCommandResult
+        HttpResponseMessage httpResponse;
+        try
         {
-            ClientId = clientId,
-            Username = x.UserPlexAccount!.Username,
-            PlexId = x.UserPlexAccount!.Id,
-            Uuid = x.UserPlexAccount!.Uuid,
-            IsValidated = isValid,
-            ValidatedAt = isValid ? DateTime.UtcNow : null,
-
-            Title = x.UserPlexAccount!.Title,
-            Email = x.UserPlexAccount!.Email,
-            AuthenticationToken = x.UserPlexAccount!.AuthToken,
-            Is2Fa = x.UserPlexAccount!.TwoFactorEnabled.GetValueOrDefault(),
-        });
-
-        if (result.IsSuccess)
+            httpResponse = await httpClient.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead, ct);
+        }
+        catch (TaskCanceledException)
         {
-            var username = response.Value.UserPlexAccount!.Username;
-            _log.Here()
-                .Information(
-                    "Successfully retrieved the PlexAccount data for user {UserName} from the PlexApi",
-                    username
-                );
+            return Result.Fail("Request timed out").Add408RequestTimeoutError();
+        }
+        catch (HttpRequestException e)
+        {
+            return Result.Fail(new ExceptionalError(e)).Add502BadGatewayError("HTTP request failed");
         }
 
-        return result;
+        var statusCode = (int)httpResponse.StatusCode;
+
+        if (httpResponse.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            return Result.Fail("Unauthorized").AddPlex401UnauthorizedError();
+        }
+
+        if (!httpResponse.IsSuccessStatusCode)
+        {
+            var errorBody = await httpResponse.Content.ReadAsStringAsync(ct);
+            return Result
+                .Fail(string.IsNullOrWhiteSpace(errorBody) ? "Request failed" : errorBody)
+                .AddStatusCode(statusCode);
+        }
+
+        var json = await httpResponse.Content.ReadAsStringAsync(ct);
+
+        PlexUserAccount? account;
+        try
+        {
+            account = JsonSerializer.Deserialize<PlexUserAccount>(json, DefaultJsonSerializerOptions.ConfigStandard);
+        }
+        catch (JsonException e)
+        {
+            return Result
+                .Fail(new ExceptionalError(e))
+                .AddStatusCode(statusCode, "Failed to parse Plex user JSON response");
+        }
+
+        if (account is null)
+        {
+            return Result.Fail("Empty Plex user response").AddStatusCode(statusCode);
+        }
+
+        var isValidated = httpResponse.IsSuccessStatusCode;
+
+        var mapped = new ValidatePlexTokenCommandResult
+        {
+            ClientId = clientId,
+            Username = account.Username ?? string.Empty,
+            PlexId = account.Id,
+            Uuid = account.Uuid ?? string.Empty,
+            IsValidated = isValidated,
+            ValidatedAt = isValidated ? DateTime.UtcNow : null,
+            Title = account.Title ?? string.Empty,
+            Email = account.Email ?? string.Empty,
+            AuthenticationToken = account.AuthToken ?? command.AuthenticationToken,
+            Is2Fa = account.TwoFactorEnabled.GetValueOrDefault(),
+        };
+
+        _log.Here()
+            .Information(
+                "Successfully retrieved the PlexAccount data for user {UserName} from the PlexApi",
+                mapped.Username
+            );
+
+        return Result.Ok(mapped).AddStatusCode(statusCode);
     }
+}
+
+file sealed class PlexUserAccount
+{
+    public string? Username { get; set; }
+    public long Id { get; set; }
+    public string? Uuid { get; set; }
+    public string? Title { get; set; }
+    public string? Email { get; set; }
+    public string? AuthToken { get; set; }
+    public bool? TwoFactorEnabled { get; set; }
 }

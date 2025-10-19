@@ -86,12 +86,13 @@ const loading = ref(true);
 defineEmits<IMediaActionEmits>();
 
 onMounted(() => {
-	if (!props.mediaItem?.hasThumb) {
+	if (!props.mediaItem?.hasThumb || props.mediaItem.metaDataKey === 0 || props.mediaItem.key === 0) {
 		set(imageUrl, '');
 		set(loading, false);
+		return;
 	}
-	const useLowQualityPoster = settingsStore.generalSettings.useLowQualityPosterImages;
 
+	const useLowQualityPoster = settingsStore.generalSettings.useLowQualityPosterImages;
 	useSubscription(mediaStore.getMediaThumbnailUrl({
 		plexServerId: props.mediaItem.plexServerId,
 		plexKey: props.mediaItem.key.toString(),

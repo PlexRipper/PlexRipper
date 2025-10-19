@@ -52,7 +52,7 @@ public class GetPlexMediaThumbnailImageEndpoint : BaseEndpoint<GetPlexMediaThumb
     public override void Configure()
     {
         Get(EndpointPath);
-
+        ResponseCache(3600); //cache for 60 seconds
         Summary(s =>
         {
             s.Summary = "Proxy Plex image";

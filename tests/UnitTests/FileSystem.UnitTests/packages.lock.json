@@ -1826,6 +1826,7 @@
           "FastEndpoints": "[7.0.1, )",
           "FastEndpoints.Security": "[7.0.1, )",
           "FastEndpoints.Swagger": "[7.0.1, )",
+          "MessagePack": "[2.5.187, )",
           "Microsoft.Extensions.Http": "[9.0.8, )",
           "Polly": "[8.6.2, )",
           "Polly.Core": "[8.6.2, )",

@@ -80,12 +80,17 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 					.withAutomaticReconnect(retryPolicy)
 					.build();
 
-				downloadHubConnection = useCypressSignalRMock('download', { enableForVitest: true }) ?? new HubConnectionBuilder()
-					.withHubProtocol(new MessagePackHubProtocol())
-					.configureLogging(LogLevel.None)
-					.withUrl(`${baseApiUrl}/download`, options)
-					.withAutomaticReconnect(retryPolicy)
-					.build();
+				const mock = useCypressSignalRMock('download', { enableForVitest: true });
+				if (mock) {
+					downloadHubConnection = mock; // mock uses JSON internally
+				} else {
+					downloadHubConnection = new HubConnectionBuilder()
+						.withHubProtocol(new MessagePackHubProtocol())
+						.configureLogging(LogLevel.None)
+						.withUrl(`${baseApiUrl}/download`, options)
+						.withAutomaticReconnect(retryPolicy)
+						.build();
+				}
 
 				notificationHubConnection = useCypressSignalRMock('notifications', { enableForVitest: true }) ?? new HubConnectionBuilder()
 					.configureLogging(LogLevel.None)
@@ -95,14 +100,9 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 
 				setupSubscriptions();
 
-				await Promise.all([
-					startDownloadHubConnection(),
-					startProgressHubConnection(),
-					startNotificationHubConnection(),
-				]);
+				await Promise.all([startDownloadHubConnection(), startProgressHubConnection(), startNotificationHubConnection()]);
 			})()).pipe(switchMap(() => of({ name: 'useSignalrStore', isSuccess: true })), take(1));
-		},
-		$reset() {
+		}, $reset() {
 			Object.assign(state, cloneDeep(defaultState));
 		},
 	};
@@ -112,9 +112,14 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 		const backgroundStore = useBackgroundJobsStore();
 		const notificationsStore = useNotificationsStore();
 
-		downloadHubConnection?.on(MessageTypes.ServerDownloadProgress, (rawData: ServerDownloadProgressMessagePackDTO) =>
-			downloadStore.updateServerDownloadProgress(toServerDownloadProgressDTO(rawData)),
-		);
+		downloadHubConnection?.on(MessageTypes.ServerDownloadProgress, (rawData: ServerDownloadProgressMessagePackDTO) => {
+			Log.debug(rawData);
+			if (rawData instanceof ArrayBuffer || rawData instanceof Uint8Array) {
+				downloadStore.updateServerDownloadProgress(toServerDownloadProgressDTO(rawData));
+			} else {
+				downloadStore.updateServerDownloadProgress(rawData);
+			}
+		});
 
 		progressHubConnection?.on(MessageTypes.LibraryProgress, (data: LibraryProgress) => {
 			updateState<LibraryProgress>('libraryProgress', data, 'id');
@@ -168,24 +173,21 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 	// region Start / Stop Hub Connections
 
 	async function startDownloadHubConnection(): Promise<void> {
-		if (!downloadHubConnection || downloadHubConnection.state !== HubConnectionState.Disconnected)
-			return;
+		if (!downloadHubConnection || downloadHubConnection.state !== HubConnectionState.Disconnected) return;
 
 		await downloadHubConnection.start();
 		Log.info('DownloadHub connected');
 	}
 
 	async function startProgressHubConnection() {
-		if (!progressHubConnection || progressHubConnection.state !== HubConnectionState.Disconnected)
-			return;
+		if (!progressHubConnection || progressHubConnection.state !== HubConnectionState.Disconnected) return;
 
 		await progressHubConnection.start();
 		Log.info('ProgressHub connected');
 	}
 
 	async function startNotificationHubConnection() {
-		if (!notificationHubConnection || notificationHubConnection.state !== HubConnectionState.Disconnected)
-			return;
+		if (!notificationHubConnection || notificationHubConnection.state !== HubConnectionState.Disconnected) return;
 
 		await notificationHubConnection.start();
 		Log.info('NotificationHub connected');
@@ -221,12 +223,10 @@ if (import.meta.hot) {
 }
 
 function toServerDownloadProgressDTO(arr: ServerDownloadProgressMessagePackDTO): ServerDownloadProgressDTO | null {
-	if (!Array.isArray(arr))
-		return null;
+	if (!Array.isArray(arr)) return null;
 
 	function mapDownload(item) {
-		if (!Array.isArray(item))
-			return null;
+		if (!Array.isArray(item)) return null;
 
 		return {
 			id: item[0],
@@ -243,8 +243,6 @@ function toServerDownloadProgressDTO(arr: ServerDownloadProgressMessagePackDTO):
 	}
 
 	return {
-		id: arr[0],
-		downloadableTasksCount: arr[1],
-		downloads: Array.isArray(arr[2]) ? arr[2].map(mapDownload) : [],
+		id: arr[0], downloadableTasksCount: arr[1], downloads: Array.isArray(arr[2]) ? arr[2].map(mapDownload) : [],
 	};
 }

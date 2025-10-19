@@ -39,7 +39,7 @@ describe('Downloads page', () => {
 							downloadSpeed,
 						},
 					];
-					cy.hubPublish('progress', MessageTypes.ServerDownloadProgress, updatedProgress);
+					cy.hubPublish('download', MessageTypes.ServerDownloadProgress, updatedProgress);
 					cy.getCy(`column-status-${downloadTask.id}`).should('have.text', status);
 					cy.getCy(`column-dataReceived-${downloadTask.id}`).should('have.text', prettyBytes(dataReceived));
 					cy.getCy(`column-dataTotal-${downloadTask.id}`).should('have.text', prettyBytes(downloadTask.dataTotal));

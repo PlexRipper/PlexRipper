@@ -112,11 +112,9 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 		const backgroundStore = useBackgroundJobsStore();
 		const notificationsStore = useNotificationsStore();
 
-		downloadHubConnection?.on(MessageTypes.ServerDownloadProgress, (rawData: ServerDownloadProgressMessagePackDTO) => {
-			const data = toServerDownloadProgressDTO(rawData);
-			Log.debug(`Received ${MessageTypes.ServerDownloadProgress} message`, data);
-			downloadStore.updateServerDownloadProgress(data);
-		});
+		downloadHubConnection?.on(MessageTypes.ServerDownloadProgress, (rawData: ServerDownloadProgressMessagePackDTO) =>
+			downloadStore.updateServerDownloadProgress(toServerDownloadProgressDTO(rawData)),
+		);
 
 		progressHubConnection?.on(MessageTypes.LibraryProgress, (data: LibraryProgress) => {
 			updateState<LibraryProgress>('libraryProgress', data, 'id');

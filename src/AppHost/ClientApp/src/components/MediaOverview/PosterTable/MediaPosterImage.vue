@@ -49,13 +49,13 @@
 </template>
 
 <script setup lang="ts">
-import { toFullThumbUrl } from '@composables/conversion';
+import { set } from '@vueuse/core';
 import type { PlexMediaSlimDTO } from '@dto';
 import type { IMediaActionEmits } from '@interfaces';
-import { useServerConnectionStore, useSettingsStore } from '#imports';
+import { useSettingsStore, useMediaStore } from '#imports';
 
-const connectionStore = useServerConnectionStore();
 const settingsStore = useSettingsStore();
+const mediaStore = useMediaStore();
 
 const props = withDefaults(defineProps<{
 	mediaItem: PlexMediaSlimDTO;
@@ -74,27 +74,21 @@ const props = withDefaults(defineProps<{
 });
 
 defineEmits<IMediaActionEmits>();
+const imageUrl = ref('');
 
-const imageUrl = computed((): string => {
+onMounted(() => {
 	if (!props.mediaItem?.hasThumb) {
 		return '';
 	}
-
-	const connection = connectionStore.chooseServerConnection(props.mediaItem.plexServerId);
-	if (!connection) {
-		return '';
-	}
-
 	const useLowQualityPoster = settingsStore.generalSettings.useLowQualityPosterImages;
 
-	return toFullThumbUrl({
-		connectionUrl: connection.url,
-		mediaKey: props.mediaItem.key,
-		MetaDataKey: props.mediaItem.metaDataKey,
-		token: props.mediaItem.plexToken,
+	useSubscription(mediaStore.getMediaThumbnailUrl({
+		plexServerId: props.mediaItem.plexServerId,
+		plexKey: props.mediaItem.key.toString(),
+		metaDataKey: props.mediaItem.metaDataKey,
 		width: useLowQualityPoster ? props.thumbWidth : 627,
 		height: useLowQualityPoster ? props.thumbHeight : 938,
-	});
+	}).subscribe((url) => set(imageUrl, url)));
 });
 </script>
 

@@ -252,6 +252,6 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
     private bool ShouldKeepInDownloads(DownloadTaskFileBase downloadTask) =>
         downloadTask.DirectoryMeta.KeepCompletedInDownloadFolder
         || _downloadManagerSettings.KeepCompletedInDownloadFolder
-        || downloadTask.DownloadFilePath == downloadTask.DestinationFilePath
+        || downloadTask.DownloadFilePath.RemoveReapTempSuffix() == downloadTask.DestinationFilePath
         || string.IsNullOrWhiteSpace(downloadTask.DestinationFilePath);
 }

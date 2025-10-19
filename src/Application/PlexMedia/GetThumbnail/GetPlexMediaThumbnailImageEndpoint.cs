@@ -52,7 +52,6 @@ public class GetPlexMediaThumbnailImageEndpoint : BaseEndpoint<GetPlexMediaThumb
     public override void Configure()
     {
         Get(EndpointPath);
-        ResponseCache(259200); // Cache for 3 days
         Summary(s =>
         {
             s.Summary = "Proxy Plex image";
@@ -81,9 +80,13 @@ public class GetPlexMediaThumbnailImageEndpoint : BaseEndpoint<GetPlexMediaThumb
         _log.Here().DebugApiCall(HttpContext, req);
 
         // Per-response CORS headers
-        HttpContext.Response.Headers.AccessControlAllowOrigin = "*";
-        HttpContext.Response.Headers.AccessControlAllowMethods = "GET, OPTIONS";
-        HttpContext.Response.Headers.AccessControlAllowHeaders = "*";
+        #pragma warning disable ASP0015
+        HttpContext.Response.Headers["Access-Control-Allow-Origin"] = "*";
+        HttpContext.Response.Headers["Access-Control-Allow-Methods"] = "GET, OPTIONS";
+        HttpContext.Response.Headers["Access-Control-Allow-Headers"] = "*";
+        // Client cache per-URL (querystring), avoid server-side response cache collisions
+        HttpContext.Response.Headers["Cache-Control"] = "public, max-age=259200, immutable"; // 3 days
+        #pragma warning restore ASP0015
 
         var imageResult = await _commandExecutor.Send(
             new GetThumbnailImageCommand

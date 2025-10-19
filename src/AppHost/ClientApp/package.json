@@ -35,6 +35,7 @@
   },
   "dependencies": {
     "@microsoft/signalr": "^9.0.6",
+    "@microsoft/signalr-protocol-msgpack": "^9.0.6",
     "@pinia/nuxt": "^0.9.0",
     "@primevue/themes": "^4.2.5",
     "@vueuse/rxjs": "^12.0.0",

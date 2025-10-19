@@ -85,17 +85,16 @@ export const useMediaStore = defineStore('MediaStore', () => {
 			image: Blob;
 		}): string {
 			const index = state.mediaUrls.findIndex((x) => x.plexServerId === plexServerId && x.plexKey === plexKey && x.metaDataKey === metaDataKey);
-			const url = URL.createObjectURL(image);
 			const mediaObject = Object.freeze({
 				plexServerId,
 				plexKey,
 				metaDataKey,
-				url,
+				url: URL.createObjectURL(image),
 			});
 
 			void (index === -1 ? state.mediaUrls.push(mediaObject) : state.mediaUrls.splice(index, 1, mediaObject));
 
-			return url;
+			return mediaObject.url;
 		},
 		$reset() {
 			Object.assign(state, cloneDeep(defaultState));

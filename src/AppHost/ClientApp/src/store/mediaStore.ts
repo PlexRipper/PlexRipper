@@ -45,6 +45,11 @@ export const useMediaStore = defineStore('MediaStore', () => {
 			height: number;
 			width: number;
 		}): Observable<string> {
+			// Fast-path: return cached object URL if present
+			const existing = state.mediaUrls.find((x) => x.plexServerId === query.plexServerId && x.plexKey === query.plexKey && x.metaDataKey === query.metaDataKey);
+			if (existing)
+				return of(existing.url);
+
 			return from(
 				Axios.request<Blob | BaseResultDTO>({
 					url: `/api/PlexMedia/thumbnail`,
@@ -52,18 +57,20 @@ export const useMediaStore = defineStore('MediaStore', () => {
 					params: query,
 					responseType: 'blob',
 				}),
-			).pipe(map((res) => {
-				if (res.status === 200) {
-					return actions.updateMediaUrl({
-						plexServerId: query.plexServerId,
-						plexKey: query.plexKey,
-						metaDataKey: query.metaDataKey,
-						image: res.data as Blob,
-					});
-				}
-				Log.warn('Failed to get media thumbnail image', res);
-				return '';
-			}));
+			)
+				.pipe(
+					map((res) => {
+						if (res.status === 200) {
+							return actions.updateMediaUrl({
+								plexServerId: query.plexServerId,
+								plexKey: query.plexKey,
+								metaDataKey: query.metaDataKey,
+								image: res.data as Blob,
+							});
+						}
+						Log.warn('Failed to get media thumbnail image', res);
+						return '';
+					}));
 		},
 
 		updateMediaUrl({
@@ -79,14 +86,14 @@ export const useMediaStore = defineStore('MediaStore', () => {
 		}): string {
 			const index = state.mediaUrls.findIndex((x) => x.plexServerId === plexServerId && x.plexKey === plexKey && x.metaDataKey === metaDataKey);
 			const url = URL.createObjectURL(image);
-			const x = {
+			const mediaObject = Object.freeze({
 				plexServerId,
 				plexKey,
 				metaDataKey,
 				url,
-			};
+			});
 
-			void (index === -1 ? state.mediaUrls.push(x) : state.mediaUrls.splice(index, 1, x));
+			void (index === -1 ? state.mediaUrls.push(mediaObject) : state.mediaUrls.splice(index, 1, mediaObject));
 
 			return url;
 		},

@@ -86,8 +86,8 @@ onMounted(() => {
 		plexServerId: props.mediaItem.plexServerId,
 		plexKey: props.mediaItem.key.toString(),
 		metaDataKey: props.mediaItem.metaDataKey,
-		width: useLowQualityPoster ? props.thumbWidth : 627,
-		height: useLowQualityPoster ? props.thumbHeight : 938,
+		width: useLowQualityPoster ? props.thumbWidth : props.thumbWidth * 1.5,
+		height: useLowQualityPoster ? props.thumbHeight : props.thumbHeight * 1.5,
 	}).subscribe((url) => set(imageUrl, url)));
 });
 </script>

@@ -114,7 +114,7 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 
 		downloadHubConnection?.on(MessageTypes.ServerDownloadProgress, (rawData: ServerDownloadProgressMessagePackDTO) => {
 			Log.debug(rawData);
-			if (rawData instanceof ArrayBuffer || rawData instanceof Uint8Array) {
+			if (Array.isArray(rawData)) {
 				downloadStore.updateServerDownloadProgress(toServerDownloadProgressDTO(rawData));
 			} else {
 				downloadStore.updateServerDownloadProgress(rawData);
@@ -223,10 +223,12 @@ if (import.meta.hot) {
 }
 
 function toServerDownloadProgressDTO(arr: ServerDownloadProgressMessagePackDTO): ServerDownloadProgressDTO | null {
-	if (!Array.isArray(arr)) return null;
+	if (!Array.isArray(arr))
+		return null;
 
 	function mapDownload(item) {
-		if (!Array.isArray(item)) return null;
+		if (!Array.isArray(item))
+			return null;
 
 		return {
 			id: item[0],

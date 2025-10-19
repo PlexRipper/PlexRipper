@@ -12,16 +12,16 @@ public record GetPlexMediaThumbnailImageEndpointRequest
     public required int PlexServerId { get; init; }
 
     [QueryParam, BindFrom("plexKey")]
-    public required string PlexKey { get; init; }
+    public required int PlexKey { get; init; }
+
+    [QueryParam, BindFrom("metaDataKey")]
+    public required int MetaDataKey { get; init; }
 
     [QueryParam, BindFrom("width")]
     public required int Width { get; init; }
 
     [QueryParam, BindFrom("height")]
     public required int Height { get; init; }
-
-    [QueryParam, BindFrom("metaDataKey")]
-    public required int MetaDataKey { get; init; }
 }
 
 public class GetPlexMediaThumbnailImageEndpointRequestValidator : Validator<GetPlexMediaThumbnailImageEndpointRequest>
@@ -29,10 +29,10 @@ public class GetPlexMediaThumbnailImageEndpointRequestValidator : Validator<GetP
     public GetPlexMediaThumbnailImageEndpointRequestValidator()
     {
         RuleFor(x => x.PlexServerId).GreaterThan(0);
-        RuleFor(x => x.PlexKey).NotEmpty();
+        RuleFor(x => x.PlexKey).GreaterThan(0);
+        RuleFor(x => x.MetaDataKey).GreaterThan(0);
         RuleFor(x => x.Width).GreaterThan(0);
         RuleFor(x => x.Height).GreaterThan(0);
-        RuleFor(x => x.MetaDataKey).GreaterThan(0);
     }
 }
 
@@ -59,10 +59,10 @@ public class GetPlexMediaThumbnailImageEndpoint : BaseEndpoint<GetPlexMediaThumb
             s.ExampleRequest = new GetPlexMediaThumbnailImageEndpointRequest
             {
                 PlexServerId = 1,
-                PlexKey = "1756014789",
-                Width = 627,
-                Height = 938,
+                PlexKey = 1756014789,
                 MetaDataKey = 57920,
+                Width = 200,
+                Height = 400,
             };
         });
 
@@ -79,14 +79,14 @@ public class GetPlexMediaThumbnailImageEndpoint : BaseEndpoint<GetPlexMediaThumb
     {
         _log.Here().DebugApiCall(HttpContext, req);
 
-        // Per-response CORS headers
-        #pragma warning disable ASP0015
+#pragma warning disable ASP0015
         HttpContext.Response.Headers["Access-Control-Allow-Origin"] = "*";
         HttpContext.Response.Headers["Access-Control-Allow-Methods"] = "GET, OPTIONS";
         HttpContext.Response.Headers["Access-Control-Allow-Headers"] = "*";
+
         // Client cache per-URL (querystring), avoid server-side response cache collisions
         HttpContext.Response.Headers["Cache-Control"] = "public, max-age=259200, immutable"; // 3 days
-        #pragma warning restore ASP0015
+#pragma warning restore ASP0015
 
         var imageResult = await _commandExecutor.Send(
             new GetThumbnailImageCommand

@@ -31,8 +31,8 @@ public class GetPlexMediaThumbnailImageEndpointRequestValidator : Validator<GetP
         RuleFor(x => x.PlexServerId).GreaterThan(0);
         RuleFor(x => x.PlexKey).GreaterThan(0);
         RuleFor(x => x.MetaDataKey).GreaterThan(0);
-        RuleFor(x => x.Width).GreaterThan(0);
-        RuleFor(x => x.Height).GreaterThan(0);
+        RuleFor(x => x.Width).InclusiveBetween(1, 4096);
+        RuleFor(x => x.Height).InclusiveBetween(1, 4096);
     }
 }
 

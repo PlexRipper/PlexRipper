@@ -26,7 +26,7 @@ public record DownloadProgressMessagePackDTO
     public required Guid Id { get; init; }
 
     [MessagePack.Key(1)]
-    public required string Title { get; init; } = string.Empty;
+    public required string Title { get; init; }
 
     [MessagePack.Key(2)]
     [MessagePackFormatter(typeof(EnumAsStringFormatter<PlexMediaType>))]

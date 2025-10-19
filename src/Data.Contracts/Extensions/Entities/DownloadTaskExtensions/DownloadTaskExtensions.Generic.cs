@@ -54,7 +54,7 @@ public static partial class DownloadTaskExtensions
         return downloadWorkerTasks;
     }
 
-    private static string AddReaparrTempSuffixToFileName(this string fileName) =>
+    public static string AddReaparrTempSuffixToFileName(this string fileName) =>
         $"{Path.GetFileNameWithoutExtension(fileName)}{Path.GetExtension(fileName)}{TempDownloadFileSuffix}";
 
     public static string RemoveReapTempSuffix(this string filePath) =>

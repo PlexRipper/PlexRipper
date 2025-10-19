@@ -103,7 +103,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
 
         SetupFileSystem(fs =>
         {
-            fs.AddFile(downloadFileTask.FilePath, new MockFileData(content));
+            fs.AddFile(downloadFileTask.DownloadFilePath, new MockFileData(content));
             fs.AddFile(downloadFileTask.DestinationFilePath, new MockFileData(new byte[0]));
         });
 
@@ -138,7 +138,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
 
         // Source should remain since operation paused before completion
         var file = mock.Create<IFile>();
-        file.Exists(downloadFileTask.FilePath).ShouldBeTrue();
+        file.Exists(downloadFileTask.DownloadFilePath).ShouldBeTrue();
     }
 
     [Fact]
@@ -180,7 +180,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
 
         SetupFileSystem(fs =>
         {
-            fs.AddFile(downloadFileTask.FilePath, new MockFileData(content));
+            fs.AddFile(downloadFileTask.DownloadFilePath, new MockFileData(content));
             fs.AddFile(downloadFileTask.DestinationFilePath, new MockFileData([]));
         });
 
@@ -236,7 +236,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
         SetupFileSystem(fs =>
         {
             // Source exists with .reaptemp suffix
-            fs.AddFile(downloadFileTask.FilePath, new MockFileData(content));
+            fs.AddFile(downloadFileTask.DownloadFilePath, new MockFileData(content));
         });
 
         downloadFileTask.DataTotal = content.LongLength;
@@ -264,8 +264,8 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
         result.IsSuccess.ShouldBeTrue();
 
         var file = mock.Create<IFile>();
-        file.Exists(downloadFileTask.FilePath).ShouldBeFalse();
-        file.Exists(downloadFileTask.FilePath.RemoveReapTempSuffix()).ShouldBeTrue();
+        file.Exists(downloadFileTask.DownloadFilePath).ShouldBeFalse();
+        file.Exists(downloadFileTask.DownloadFilePath.RemoveReapTempSuffix()).ShouldBeTrue();
 
         var after = await IDbContext.GetDownloadTaskFileAsync(downloadFileTask.ToKey(), CancellationToken);
         after.ShouldNotBeNull();
@@ -397,7 +397,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
 
         SetupFileSystem(fs =>
         {
-            fs.AddFile(downloadFileTask.FilePath, new MockFileData(content));
+            fs.AddFile(downloadFileTask.DownloadFilePath, new MockFileData(content));
         });
 
         downloadFileTask.DataTotal = content.LongLength;
@@ -426,7 +426,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
         result.IsFailed.ShouldBeTrue();
 
         var file = mock.Create<IFile>();
-        file.Exists(downloadFileTask.FilePath).ShouldBeTrue();
+        file.Exists(downloadFileTask.DownloadFilePath).ShouldBeTrue();
 
         var after = await IDbContext.GetDownloadTaskFileAsync(downloadFileTask.ToKey(), CancellationToken);
         after.ShouldNotBeNull();

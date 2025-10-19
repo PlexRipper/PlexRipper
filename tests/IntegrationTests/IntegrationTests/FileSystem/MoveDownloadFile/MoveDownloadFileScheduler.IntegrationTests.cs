@@ -29,9 +29,9 @@ public class MoveDownloadFileSchedulerIntegrationTests : BaseIntegrationTests
                 config.FileSystemOptions = (system, dbContext) =>
                 {
                     var downloadTask = dbContext.DownloadTaskMovieFile.Include(x => x.DownloadWorkerTasks).First();
-                    downloadTask.FilePath.ShouldNotBeNullOrEmpty();
+                    downloadTask.DownloadFilePath.ShouldNotBeNullOrEmpty();
 
-                    system.AddFile(downloadTask.FilePath, FakeData.GetFileMockData(10, 4));
+                    system.AddFile(downloadTask.DownloadFilePath, FakeData.GetFileMockData(10, 4));
                 };
             }
         );

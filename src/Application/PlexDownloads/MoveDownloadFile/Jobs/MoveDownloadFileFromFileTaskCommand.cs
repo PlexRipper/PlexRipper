@@ -69,7 +69,7 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
             return ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), command.Key.Id).LogError();
 
         // Resolve paths
-        var downloadFilePath = downloadTask.FilePath;
+        var downloadFilePath = downloadTask.DownloadFilePath;
         var destinationPath = downloadTask.DestinationFilePath;
 
         _log.Here().Debug("Starting file move process for {DownloadFilePath}", downloadFilePath);
@@ -252,6 +252,6 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
     private bool ShouldKeepInDownloads(DownloadTaskFileBase downloadTask) =>
         downloadTask.DirectoryMeta.KeepCompletedInDownloadFolder
         || _downloadManagerSettings.KeepCompletedInDownloadFolder
-        || downloadTask.FilePath == downloadTask.DestinationFilePath
+        || downloadTask.DownloadFilePath == downloadTask.DestinationFilePath
         || string.IsNullOrWhiteSpace(downloadTask.DestinationFilePath);
 }

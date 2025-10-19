@@ -10,6 +10,8 @@ public static class ApiRoutes
 
     public static string PlexAccountController => Base + "/" + "PlexAccount";
 
+    public static string PlexController => Base + "/" + "Plex";
+
     public static string BackgroundJobsController => Base + "/" + "BackgroundJobs";
 
     public static string PlexServerController => Base + "/" + "PlexServer";

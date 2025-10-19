@@ -2,7 +2,7 @@ using FastEndpoints;
 
 namespace Reaparr.PlexApi.Contracts;
 
-public record GetThumbnailImageCommand : ICommand<Result<byte[]>>
+public record GetThumbnailImageCommand : ICommand<Result<ThumbnailImageResponse>>
 {
     public required int PlexServerId { get; init; }
     public required string PlexKey { get; init; }

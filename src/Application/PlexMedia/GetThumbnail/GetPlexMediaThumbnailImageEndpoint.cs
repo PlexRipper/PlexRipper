@@ -36,7 +36,7 @@ public class GetPlexMediaThumbnailImageEndpointRequestValidator : Validator<GetP
     }
 }
 
-public class GetPlexMediaThumbnailImageEndpoint : BaseEndpoint<GetPlexMediaThumbnailImageEndpointRequest>
+public class GetPlexMediaThumbnailImageEndpoint : BaseEndpoint<GetPlexMediaThumbnailImageEndpointRequest, byte[]>
 {
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
@@ -69,15 +69,17 @@ public class GetPlexMediaThumbnailImageEndpoint : BaseEndpoint<GetPlexMediaThumb
 
         Description(x =>
         {
-            x.Produces(StatusCodes.Status200OK)
-                .Produces(StatusCodes.Status404NotFound, typeof(object))
-                .Produces(StatusCodes.Status502BadGateway, typeof(object))
+            x.Produces(StatusCodes.Status200OK, typeof(byte[]), MediaTypeNames.Image.Jpeg)
+                .Produces(StatusCodes.Status404NotFound, typeof(BaseResultDTO))
+                .Produces(StatusCodes.Status502BadGateway, typeof(BaseResultDTO))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO));
         });
     }
 
     public override async Task HandleAsync(GetPlexMediaThumbnailImageEndpointRequest req, CancellationToken ct)
     {
+        _log.Here().DebugApiCall(HttpContext, req);
+
         // Per-response CORS headers
         HttpContext.Response.Headers["Access-Control-Allow-Origin"] = "*";
         HttpContext.Response.Headers["Access-Control-Allow-Methods"] = "GET, OPTIONS";
@@ -99,11 +101,10 @@ public class GetPlexMediaThumbnailImageEndpoint : BaseEndpoint<GetPlexMediaThumb
         {
             _log.Here()
                 .Warning("Failed to build Plex image URL: {Error}", imageResult.Errors.FirstOrDefault()?.Message);
-            HttpContext.Response.StatusCode = StatusCodes.Status502BadGateway;
-            await HttpContext.Response.WriteAsJsonAsync(new { error = "Failed to fetch image" }, ct);
+            await SendFluentResult(imageResult.ToResult(), ct);
             return;
         }
 
-        await Send.BytesAsync(imageResult.Value, cancellation: ct);
+        await Send.BytesAsync(imageResult.Value.Data, contentType: MediaTypeNames.Image.Jpeg, cancellation: ct);
     }
 }

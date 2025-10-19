@@ -5,7 +5,7 @@ using Reaparr.PlexApi.Contracts;
 
 namespace Reaparr.PlexApi;
 
-public class GetThumbnailImageCommandHandler : ICommandHandler<GetThumbnailImageCommand, Result<byte[]>>
+public class GetThumbnailImageCommandHandler : ICommandHandler<GetThumbnailImageCommand, Result<ThumbnailImageResponse>>
 {
     private readonly IReaparrDbContext _dbContext;
     private readonly IHttpClientFactory _httpClientFactory;
@@ -16,7 +16,10 @@ public class GetThumbnailImageCommandHandler : ICommandHandler<GetThumbnailImage
         _httpClientFactory = httpClientFactory;
     }
 
-    public async Task<Result<byte[]>> ExecuteAsync(GetThumbnailImageCommand command, CancellationToken ct)
+    public async Task<Result<ThumbnailImageResponse>> ExecuteAsync(
+        GetThumbnailImageCommand command,
+        CancellationToken ct
+    )
     {
         var plexServerId = command.PlexServerId;
 
@@ -46,8 +49,13 @@ public class GetThumbnailImageCommandHandler : ICommandHandler<GetThumbnailImage
         };
 
         var url = QueryHelpers.AddQueryString(baseUrl, query);
-        var response = await client.GetByteArrayAsync(url, ct);
+        using var response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, ct);
+        if (!response.IsSuccessStatusCode)
+            return Result.Fail("Failed to fetch image").Add502BadGatewayError();
 
-        return Result.Ok(response);
+        var contentType = response.Content.Headers.ContentType?.ToString() ?? "image/jpeg";
+        var data = await response.Content.ReadAsByteArrayAsync(ct);
+
+        return Result.Ok(new ThumbnailImageResponse { Data = data, ContentType = contentType });
     }
 }

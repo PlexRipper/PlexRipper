@@ -18,4 +18,11 @@ public record SonarrSettings : BaseSettingsModule<SonarrSettings>, ISonarrSettin
         get => _apiKey;
         set => SetProperty(ref _apiKey, value);
     }
+
+    public bool IsValidUrl() =>
+        !string.IsNullOrWhiteSpace(BaseUrl)
+        || Uri.TryCreate(BaseUrl, UriKind.Absolute, out var uriResult)
+            && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
+
+    public bool IsValidApiKey() => !string.IsNullOrWhiteSpace(ApiKey);
 }

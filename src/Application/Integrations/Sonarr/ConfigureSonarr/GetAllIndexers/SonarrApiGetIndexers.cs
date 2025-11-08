@@ -1,85 +1,45 @@
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using FastEndpoints;
-using FluentValidation;
 
 namespace Reaparr.Application;
 
-public record SonarApiUpdateDownloadClientCommand : ICommand<Result<SonarrUpdateDownloadClientDTO>>
-{
-    public required int Id { get; init; }
-    public required bool ForceSave { get; init; }
+public record SonarrApiGetIndexersCommand : ICommand<Result<List<IndexerResourceDTO>>>;
 
-    public required SonarrUpdateDownloadClientDTO Resource { get; init; }
-}
-
-public class SonarApiUpdateDownloadClientCommandValidator : Validator<SonarApiUpdateDownloadClientCommand>
-{
-    public SonarApiUpdateDownloadClientCommandValidator()
-    {
-        RuleFor(x => x.Id).GreaterThan(0);
-        RuleFor(x => x.Resource).NotNull();
-    }
-}
-
-public class SonarApiUpdateDownloadClientCommandHandler
-    : ICommandHandler<SonarApiUpdateDownloadClientCommand, Result<SonarrUpdateDownloadClientDTO>>
+public class SonarrApiGetIndexersCommandHandler
+    : ICommandHandler<SonarrApiGetIndexersCommand, Result<List<IndexerResourceDTO>>>
 {
     private readonly HttpClient _client;
 
-    public SonarApiUpdateDownloadClientCommandHandler(IHttpClientFactory httpClientFactory)
+    public SonarrApiGetIndexersCommandHandler(IHttpClientFactory httpClientFactory)
     {
         _client = httpClientFactory.CreateSonarrHttpClient();
     }
 
-    public async Task<Result<SonarrUpdateDownloadClientDTO>> ExecuteAsync(
-        SonarApiUpdateDownloadClientCommand command,
+    public async Task<Result<List<IndexerResourceDTO>>> ExecuteAsync(
+        SonarrApiGetIndexersCommand command,
         CancellationToken cancellationToken
     )
     {
-        var forceSave = command.ForceSave ? "true" : "false";
-        var requestUri = new Uri($"/api/v3/downloadclient/{command.Id}?forceSave={forceSave}", UriKind.Relative);
-        var json = JsonSerializer.Serialize(command.Resource, DefaultJsonSerializerOptions.ConfigStandard);
-
-        using var httpRequest = new HttpRequestMessage(HttpMethod.Put, requestUri)
-        {
-            Content = new StringContent(json, Encoding.UTF8, "application/json"),
-        };
-
+        using var httpRequest = new HttpRequestMessage(HttpMethod.Get, new Uri("/api/v3/indexer", UriKind.Relative));
         var response = await _client.SendAsync(httpRequest, cancellationToken);
         var body = await response.Content.ReadAsStringAsync(cancellationToken);
 
-        if (!response.IsSuccessStatusCode)
-        {
-            return Result
-                .Fail($"Failed to update download client in Sonarr. StatusCode: {response.StatusCode}")
-                .WithError(body)
-                .LogError();
-        }
-
-        var updated = JsonSerializer.Deserialize<SonarrUpdateDownloadClientDTO>(
+        var list = JsonSerializer.Deserialize<List<IndexerResourceDTO>>(
             body,
             DefaultJsonSerializerOptions.ConfigStandard
         );
-
-        return Result.Ok(updated ?? new SonarrUpdateDownloadClientDTO());
+        return Result.Ok(list ?? []);
     }
 }
 
-public sealed class SonarrUpdateDownloadClientDTO
+public sealed class IndexerResourceDTO
 {
-    [JsonPropertyName("configContract")]
-    public string? ConfigContract { get; set; }
-
-    [JsonPropertyName("enable")]
-    public bool Enable { get; set; }
-
-    [JsonPropertyName("fields")]
-    public List<SonarrUpdateFieldDTO>? Fields { get; set; }
-
     [JsonPropertyName("id")]
     public int Id { get; set; }
+
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
 
     [JsonPropertyName("implementation")]
     public string? Implementation { get; set; }
@@ -87,16 +47,28 @@ public sealed class SonarrUpdateDownloadClientDTO
     [JsonPropertyName("implementationName")]
     public string? ImplementationName { get; set; }
 
+    [JsonPropertyName("configContract")]
+    public string? ConfigContract { get; set; }
+
     [JsonPropertyName("infoLink")]
     public string? InfoLink { get; set; }
 
     [JsonPropertyName("message")]
-    public SonarrUpdateDownloadClientMessageDto? Message { get; set; }
+    public IndexerMessageDTO? Message { get; set; }
 
-    [JsonPropertyName("name")]
-    public string? Name { get; set; }
+    [JsonPropertyName("enableRss")]
+    public bool EnableRss { get; set; }
 
-    // Sonarr shows a circular reference here; keep it loosely typed
+    [JsonPropertyName("enableAutomaticSearch")]
+    public bool EnableAutomaticSearch { get; set; }
+
+    [JsonPropertyName("enableInteractiveSearch")]
+    public bool EnableInteractiveSearch { get; set; }
+
+    [JsonPropertyName("fields")]
+    public List<IndexerFieldDTO>? Fields { get; set; }
+
+    // The API shows a circular reference here; keep it loosely typed
     [JsonPropertyName("presets")]
     public List<object>? Presets { get; set; }
 
@@ -105,19 +77,26 @@ public sealed class SonarrUpdateDownloadClientDTO
 
     // The API expects lowercase strings: unknown | usenet | torrent
     [JsonPropertyName("protocol")]
-    public string? Protocol { get; set; }
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public IndexerProtocol Protocol { get; set; }
 
-    [JsonPropertyName("removeCompletedDownloads")]
-    public bool RemoveCompletedDownloads { get; set; }
+    [JsonPropertyName("seasonSearchMaximumSingleEpisodeAge")]
+    public int SeasonSearchMaximumSingleEpisodeAge { get; set; }
 
-    [JsonPropertyName("removeFailedDownloads")]
-    public bool RemoveFailedDownloads { get; set; }
+    [JsonPropertyName("supportsRss")]
+    public bool SupportsRss { get; set; }
+
+    [JsonPropertyName("supportsSearch")]
+    public bool SupportsSearch { get; set; }
 
     [JsonPropertyName("tags")]
     public List<int>? Tags { get; set; }
+
+    [JsonPropertyName("downloadClientId")]
+    public int DownloadClientId { get; set; }
 }
 
-public sealed class SonarrUpdateFieldDTO
+public sealed class IndexerFieldDTO
 {
     [JsonPropertyName("advanced")]
     public bool Advanced { get; set; }
@@ -157,7 +136,7 @@ public sealed class SonarrUpdateFieldDTO
     public string? Section { get; set; }
 
     [JsonPropertyName("selectOptions")]
-    public List<SonarrUpdateSelectOptionDto>? SelectOptions { get; set; }
+    public List<IndexerSelectOptionDTO>? SelectOptions { get; set; }
 
     [JsonPropertyName("selectOptionsProviderAction")]
     public string? SelectOptionsProviderAction { get; set; }
@@ -172,7 +151,7 @@ public sealed class SonarrUpdateFieldDTO
     public object? Value { get; set; }
 }
 
-public sealed class SonarrUpdateSelectOptionDto
+public sealed class IndexerSelectOptionDTO
 {
     [JsonPropertyName("hint")]
     public string? Hint { get; set; }
@@ -187,12 +166,29 @@ public sealed class SonarrUpdateSelectOptionDto
     public int Value { get; set; }
 }
 
-public sealed class SonarrUpdateDownloadClientMessageDto
+public sealed class IndexerMessageDTO
 {
     [JsonPropertyName("message")]
     public string? Message { get; set; }
 
     // The API expects lowercase strings: info | warning | error
     [JsonPropertyName("type")]
-    public string? Type { get; set; }
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public IndexerMessageType Type { get; set; }
+}
+
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum IndexerMessageType
+{
+    Info,
+    Warning,
+    Error,
+}
+
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum IndexerProtocol
+{
+    Unknown,
+    Usenet,
+    Torrent,
 }

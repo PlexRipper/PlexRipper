@@ -66,7 +66,11 @@ public class ConfigureSonarrIntegrationEndpoint
 
         // Upsert indexer, linking to the client
         var upsertIndexerResult = await _commandExecutor.Send(
-            new SetupSonarrIndexerCommand(reaparrBaseUri, upsertClientResult.Value.DownloadClientId),
+            new SetupSonarrIndexerCommand
+            {
+                ReaparrBaseUri = reaparrBaseUri,
+                DownloadClientId = upsertClientResult.Value.DownloadClientId,
+            },
             ct
         );
         if (!upsertIndexerResult.IsSuccess)

@@ -2,7 +2,7 @@ namespace Reaparr.Settings.Contracts;
 
 public record SonarrSettings : BaseSettingsModule<SonarrSettings>, ISonarrSettings
 {
-    private string _baseUrl = string.Empty;
+    private string _baseUrl = "http://localhost:8989";
     private string _apiKey = string.Empty;
 
     public static SonarrSettings Create() => new() { BaseUrl = string.Empty, ApiKey = string.Empty };

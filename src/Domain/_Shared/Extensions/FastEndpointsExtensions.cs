@@ -6,6 +6,9 @@ namespace Reaparr.Domain;
 
 public static class FastEndpointsExtensions
 {
+    /// <summary>
+    /// Mark an Endpoint as internal use only
+    /// </summary>
     public static TBuilder IsInternalApi<TBuilder>(this TBuilder builder)
         where TBuilder : IEndpointConventionBuilder
     {
@@ -13,6 +16,9 @@ public static class FastEndpointsExtensions
         return builder;
     }
 
+    /// <summary>
+    /// Mark an Endpoint as public facing
+    /// </summary>
     public static TBuilder IsPublicApi<TBuilder>(this TBuilder builder)
         where TBuilder : IEndpointConventionBuilder
     {

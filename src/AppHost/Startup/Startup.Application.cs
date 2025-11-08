@@ -63,7 +63,6 @@ public static partial class Startup
             {
                 if (ep.Routes.All(x => x.StartsWith(PublicApiRoutes.Base)))
                     ep.Options(b => b.IsPublicApi());
-                // If the route starts with /api/internal, tag it for Swagger
                 else if (ep.Routes.All(x => x.StartsWith(ApiRoutes.Base)))
                     ep.Options(b => b.IsInternalApi());
             };

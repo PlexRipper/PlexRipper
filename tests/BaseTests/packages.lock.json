@@ -1845,7 +1845,7 @@
           "FastEndpoints.Security": "[7.0.1, )",
           "FastEndpoints.Swagger": "[7.0.1, )",
           "MessagePack": "[2.5.187, )",
-          "Microsoft.Extensions.Http": "[9.0.8, )",
+          "Microsoft.Extensions.Http": "[9.0.9, )",
           "Polly": "[8.6.2, )",
           "Polly.Core": "[8.6.2, )",
           "Quartz.Serialization.SystemTextJson": "[3.15.0, )",

@@ -136,5 +136,9 @@ LABEL company="Reaparr" \
 EXPOSE ${PORT}
 VOLUME /Config /Downloads /Movies /TvShows
 
+# Use the non-root 'abc' user provided by linuxserver baseimage for security.
+# The s6 service script already execs the app as 'abc' (see s6-setuidgid abc).
+USER abc
+
 # Set the entrypoint to use s6-overlay
 ENTRYPOINT ["/init"]

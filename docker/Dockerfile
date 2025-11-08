@@ -44,8 +44,12 @@ COPY ["src/FluentResultExtensions/FluentResultExtensions.csproj", "src/FluentRes
 COPY ["src/Logging/Logging.csproj", "src/Logging/"]
 
 ## Core Projects
+### Application Projects
 COPY ["src/Application/Application.csproj", "src/Application/"]
 COPY ["src/Application.Contracts/Application.Contracts.csproj", "src/Application.Contracts/"]
+### Public API Projects
+COPY ["src/PublicAPI/PublicAPI.csproj", "src/PublicAPI/"]
+COPY ["src/PublicAPI.Contracts/PublicAPI.Contracts.csproj", "src/PublicAPI.Contracts/"]
 
 ## Infrastructure Projects
 ### Data Access

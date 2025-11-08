@@ -93,7 +93,8 @@
             "settings": "Paramètres",
             "ui": "Interface utilisateur",
             "buttons": "Boutons",
-            "scratchpad": "Bloc-notes"
+            "scratchpad": "Bloc-notes",
+            "integrations": "Intégrations"
         },
         "notifications-drawer": {
             "clear-notifications": "Effacer tout les notifications",
@@ -345,6 +346,23 @@
             "error-example": "Une erreur inattendue s'est produite lors du chargement des options de qualité multimédia. Veuillez réessayer ultérieurement.",
             "info-example": "Il s'agit d'un message d'information aléatoire sur les paramètres de qualité des médias. Lorem ipsum dolor sit amet.",
             "warning-example": "Attention! Il se peut que la configuration soit incorrecte. Vérification aléatoire: 42XY-LMN."
+        },
+        "api-key-input-field": {
+            "validation": {
+                "api-key-format": "La clé API ne doit contenir que des caractères hexadécimaux (0-9, A-F).",
+                "api-key-invalid-placeholder": "Valeur de clé API invalide ou non valide.",
+                "api-key-is-required": "Une clé API est requise.",
+                "api-key-length": "La clé API doit comporter exactement 32 caractères."
+            }
+        },
+        "sonarr-integration": {
+            "connection-status": {
+                "connection-failed": "Impossible de se connecter à Sonarr. Veuillez vérifier que l'URL de base est correcte.",
+                "invalid-api-key": "Connexion à Sonarr impossible, mais la clé API était invalide.",
+                "success": "Reaparr peut se connecter avec succès à Sonarr !",
+                "unknown-connection-status": "Impossible de déterminer ce qui s'est mal passé lors du test de connexion avec Sonarr",
+                "url-is-invalid": "L'URL de base de Sonarr est invalide, veuillez vérifier à nouveau."
+            }
         }
     },
     "confirmation": {
@@ -638,6 +656,20 @@
                         "label": "Désactiver l'arrière-plan animé",
                         "text": "L'arrière-plan animé peut entraîner des problèmes de performances dans le navigateur. Cette bascule peut désactiver l'animation et afficher uniquement un arrière-plan statique.",
                         "title": "Désactiver l'animation d'arrière-plan"
+                    }
+                }
+            },
+            "integrations": {
+                "sonarr": {
+                    "api-key-input": {
+                        "label": "Clé API Sonarr",
+                        "text": "Accédez à Sonarr : Paramètres → Général → Sécurité → Clé API, copiez la clé API et collez-la dans ce champ.",
+                        "title": "Clé API de Sonarr"
+                    },
+                    "base-url-input": {
+                        "label": "URL de base de Sonarr",
+                        "text": "Adresse de base où votre instance Sonarr est accessible. Exemple : http://localhost:8989 ou http://sonarr:8989",
+                        "title": "URL de base vers Sonarr"
                     }
                 }
             }

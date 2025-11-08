@@ -93,7 +93,8 @@
             "settings": "Ustawienia",
             "ui": "UI",
             "buttons": "Przyciski",
-            "scratchpad": "Notatnik"
+            "scratchpad": "Notatnik",
+            "integrations": "Integracje"
         },
         "notifications-drawer": {
             "clear-notifications": "Wyczyść wszystkie powiadomienia",
@@ -345,6 +346,23 @@
             "error-example": "Wystąpił nieoczekiwany błąd podczas ładowania opcji jakości multimediów. Spróbuj ponownie później.",
             "info-example": "To jest losowa wiadomość informacyjna na temat ustawień jakości multimediów. Lorem ipsum dolor sit amet.",
             "warning-example": "Uwaga! Coś może być niepoprawnie skonfigurowane. Losowe sprawdzenie: 42XY-LMN."
+        },
+        "api-key-input-field": {
+            "validation": {
+                "api-key-format": "Klucz API może zawierać wyłącznie znaki szesnastkowe (0-9, A-F).",
+                "api-key-invalid-placeholder": "Nieprawidłowa lub tymczasowa wartość klucza API.",
+                "api-key-is-required": "Klucz API jest wymagany",
+                "api-key-length": "Klucz API musi mieć dokładnie 32 znaki."
+            }
+        },
+        "sonarr-integration": {
+            "connection-status": {
+                "connection-failed": "Nie udało się połączyć z Sonarr. Upewnij się, że adres URL jest poprawny.",
+                "invalid-api-key": "Udało się połączyć z Sonarr, ale klucz API był nieprawidłowy",
+                "success": "Reaparr pomyślnie nawiązał połączenie z Sonarr!",
+                "unknown-connection-status": "Nie udało się ustalić, co poszło nie tak podczas testowania połączenia z Sonarr",
+                "url-is-invalid": "Bazowy adres URL Sonarr jest nieprawidłowy, sprawdź ponownie."
+            }
         }
     },
     "confirmation": {
@@ -638,6 +656,20 @@
                         "label": "Wyłącz animowane tło",
                         "text": "Animowane tło może powodować problemy z wydajnością w przeglądarce. Ten przełącznik może wyłączyć animację i pokazać tylko statyczne tło.",
                         "title": "Wyłącz animację tła"
+                    }
+                }
+            },
+            "integrations": {
+                "sonarr": {
+                    "api-key-input": {
+                        "label": "Klucz API Sonarr",
+                        "text": "Przejdź do Sonarr: Ustawienia → Ogólne → Bezpieczeństwo → Klucz API i skopiuj klucz API z tego miejsca i wklej go w tym polu",
+                        "title": "Klucz API z Sonarr"
+                    },
+                    "base-url-input": {
+                        "label": "Podstawowy adres URL Sonarr",
+                        "text": "Adres bazowy, pod którym można uzyskać dostęp do swojej instancji Sonarr. Przykład: http://localhost:8989 lub http://sonarr:8989",
+                        "title": "Podstawowy adres URL do Sonarr"
                     }
                 }
             }

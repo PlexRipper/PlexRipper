@@ -93,7 +93,8 @@
             "settings": "Einstellungen",
             "ui": "UI",
             "buttons": "Tasten",
-            "scratchpad": "Notizblock"
+            "scratchpad": "Notizblock",
+            "integrations": "Integrationen"
         },
         "notifications-drawer": {
             "clear-notifications": "Alle Benachrichtigungen löschen",
@@ -345,6 +346,23 @@
             "error-example": "Beim Laden der Medienqualitätsoptionen ist ein unerwarteter Fehler aufgetreten. Bitte versuchen Sie es später noch einmal.",
             "info-example": "Dies ist eine zufällige Informationsmeldung zu den Medienqualitätseinstellungen. Lorem ipsum dolor sit amet.",
             "warning-example": "Achtung! Möglicherweise ist etwas nicht richtig konfiguriert. Stichprobenprüfung: 42XY-LMN."
+        },
+        "api-key-input-field": {
+            "validation": {
+                "api-key-format": "Der API-Schlüssel darf nur Hexadezimalzeichen (0-9, A-F) enthalten.",
+                "api-key-invalid-placeholder": "Ungültiger oder Platzhalter-API-Schlüsselwert.",
+                "api-key-is-required": "Ein API-Schlüssel ist erforderlich.",
+                "api-key-length": "Der API-Schlüssel muss genau 32 Zeichen lang sein."
+            }
+        },
+        "sonarr-integration": {
+            "connection-status": {
+                "connection-failed": "Es konnte keine Verbindung zu Sonarr hergestellt werden. Bitte überprüfen Sie, ob die Basis-URL korrekt ist.",
+                "invalid-api-key": "Die Verbindung zu Sonarr konnte hergestellt werden, aber der API-Schlüssel war ungültig.",
+                "success": "Reaparr konnte erfolgreich eine Verbindung zu Sonarr herstellen!",
+                "unknown-connection-status": "Es konnte nicht festgestellt werden, was beim Testen der Verbindung mit Sonarr schiefgelaufen ist.",
+                "url-is-invalid": "Die Sonarr-Basis-URL ist ungültig, bitte überprüfen Sie sie erneut."
+            }
         }
     },
     "confirmation": {
@@ -638,6 +656,20 @@
                         "label": "Deaktivieren Sie den animierten Hintergrund",
                         "text": "Der animierte Hintergrund kann zu Leistungsproblemen im Browser führen. Mit diesem Schalter kann die Animation deaktiviert und nur ein statischer Hintergrund angezeigt werden.",
                         "title": "Deaktivieren Sie die Hintergrundanimation"
+                    }
+                }
+            },
+            "integrations": {
+                "sonarr": {
+                    "api-key-input": {
+                        "label": "Sonarr API-Schlüssel",
+                        "text": "Gehen Sie in Sonarr zu: Einstellungen → Allgemein → Sicherheit → API-Schlüssel, kopieren Sie den API-Schlüssel und fügen Sie ihn in dieses Feld ein.",
+                        "title": "API-Schlüssel von Sonarr"
+                    },
+                    "base-url-input": {
+                        "label": "Sonarr-Basis-URL",
+                        "text": "Basisadresse, unter der Ihre Sonarr-Instanz erreichbar ist. Beispiel: http://localhost:8989 oder http://sonarr:8989",
+                        "title": "Basis-URL zu Sonarr"
                     }
                 }
             }

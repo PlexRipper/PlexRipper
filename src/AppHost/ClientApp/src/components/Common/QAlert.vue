@@ -104,6 +104,11 @@ const alertIcon = computed((): string => {
   border: 1px solid;
   border-radius: 4px;
 
+  &--success {
+    border-color: $success-color;
+    color: $success-color;
+  }
+
   &--error {
     border-color: $error-color;
     color: $error-color;

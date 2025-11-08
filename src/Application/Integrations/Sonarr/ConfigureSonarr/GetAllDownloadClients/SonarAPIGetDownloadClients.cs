@@ -21,18 +21,25 @@ public class SonarApiGetDownloadClientsCommandHandler
         CancellationToken cancellationToken
     )
     {
-        using var httpRequest = new HttpRequestMessage(
-            HttpMethod.Get,
-            new Uri("/api/v3/downloadclient", UriKind.Relative)
-        );
-        var response = await _client.SendAsync(httpRequest, cancellationToken);
-        var body = await response.Content.ReadAsStringAsync(cancellationToken);
+        try
+        {
+            using var httpRequest = new HttpRequestMessage(
+                HttpMethod.Get,
+                new Uri("/api/v3/downloadclient", UriKind.Relative)
+            );
+            var response = await _client.SendAsync(httpRequest, cancellationToken);
+            var body = await response.Content.ReadAsStringAsync(cancellationToken);
 
-        var list = JsonSerializer.Deserialize<List<DownloadClientResourceDTO>>(
-            body,
-            DefaultJsonSerializerOptions.ConfigStandard
-        );
-        return Result.Ok(list ?? []);
+            var list = JsonSerializer.Deserialize<List<DownloadClientResourceDTO>>(
+                body,
+                DefaultJsonSerializerOptions.ConfigStandard
+            );
+            return Result.Ok(list ?? []);
+        }
+        catch (Exception e)
+        {
+            return Result.Fail(new ExceptionalError(e)).LogError();
+        }
     }
 }
 

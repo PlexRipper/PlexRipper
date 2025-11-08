@@ -27,24 +27,31 @@ public class SonarrApiCreateIndexerCommandHandler
         CancellationToken cancellationToken
     )
     {
-        var forceSave = command.ForceSave ? "true" : "false";
-        var requestUri = new Uri($"/api/v3/indexer?forceSave={forceSave}", UriKind.Relative);
-        var json = JsonSerializer.Serialize(command.Resource, DefaultJsonSerializerOptions.ConfigStandard);
-
-        using var httpRequest = new HttpRequestMessage(HttpMethod.Post, requestUri)
+        try
         {
-            Content = new StringContent(json, Encoding.UTF8, "application/json"),
-        };
+            var forceSave = command.ForceSave ? "true" : "false";
+            var requestUri = new Uri($"/api/v3/indexer?forceSave={forceSave}", UriKind.Relative);
+            var json = JsonSerializer.Serialize(command.Resource, DefaultJsonSerializerOptions.ConfigStandard);
 
-        var response = await _client.SendAsync(httpRequest, cancellationToken);
-        var body = await response.Content.ReadAsStringAsync(cancellationToken);
+            using var httpRequest = new HttpRequestMessage(HttpMethod.Post, requestUri)
+            {
+                Content = new StringContent(json, Encoding.UTF8, "application/json"),
+            };
 
-        var created = JsonSerializer.Deserialize<SonarrCreateIndexerDTO>(
-            body,
-            DefaultJsonSerializerOptions.ConfigStandard
-        );
+            var response = await _client.SendAsync(httpRequest, cancellationToken);
+            var body = await response.Content.ReadAsStringAsync(cancellationToken);
 
-        return Result.Ok(created ?? new SonarrCreateIndexerDTO());
+            var created = JsonSerializer.Deserialize<SonarrCreateIndexerDTO>(
+                body,
+                DefaultJsonSerializerOptions.ConfigStandard
+            );
+
+            return Result.Ok(created ?? new SonarrCreateIndexerDTO());
+        }
+        catch (Exception e)
+        {
+            return Result.Fail(new ExceptionalError(e)).LogError();
+        }
     }
 }
 

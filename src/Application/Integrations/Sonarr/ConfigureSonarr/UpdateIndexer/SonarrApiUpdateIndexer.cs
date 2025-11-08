@@ -38,32 +38,39 @@ public class SonarrApiUpdateIndexerCommandHandler
         CancellationToken cancellationToken
     )
     {
-        var forceSave = command.ForceSave ? "true" : "false";
-        var requestUri = new Uri($"/api/v3/indexer/{command.Id}?forceSave={forceSave}", UriKind.Relative);
-        var json = JsonSerializer.Serialize(command.Resource, DefaultJsonSerializerOptions.ConfigStandard);
-
-        using var httpRequest = new HttpRequestMessage(HttpMethod.Put, requestUri)
+        try
         {
-            Content = new StringContent(json, Encoding.UTF8, "application/json"),
-        };
+            var forceSave = command.ForceSave ? "true" : "false";
+            var requestUri = new Uri($"/api/v3/indexer/{command.Id}?forceSave={forceSave}", UriKind.Relative);
+            var json = JsonSerializer.Serialize(command.Resource, DefaultJsonSerializerOptions.ConfigStandard);
 
-        var response = await _client.SendAsync(httpRequest, cancellationToken);
-        var body = await response.Content.ReadAsStringAsync(cancellationToken);
+            using var httpRequest = new HttpRequestMessage(HttpMethod.Put, requestUri)
+            {
+                Content = new StringContent(json, Encoding.UTF8, "application/json"),
+            };
 
-        if (!response.IsSuccessStatusCode)
-        {
-            return Result
-                .Fail($"Failed to update indexer in Sonarr. StatusCode: {response.StatusCode}")
-                .WithError(body)
-                .LogError();
+            var response = await _client.SendAsync(httpRequest, cancellationToken);
+            var body = await response.Content.ReadAsStringAsync(cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return Result
+                    .Fail($"Failed to update indexer in Sonarr. StatusCode: {response.StatusCode}")
+                    .WithError(body)
+                    .LogError();
+            }
+
+            var updated = JsonSerializer.Deserialize<SonarrUpdateIndexerDTO>(
+                body,
+                DefaultJsonSerializerOptions.ConfigStandard
+            );
+
+            return Result.Ok(updated ?? new SonarrUpdateIndexerDTO());
         }
-
-        var updated = JsonSerializer.Deserialize<SonarrUpdateIndexerDTO>(
-            body,
-            DefaultJsonSerializerOptions.ConfigStandard
-        );
-
-        return Result.Ok(updated ?? new SonarrUpdateIndexerDTO());
+        catch (Exception e)
+        {
+            return Result.Fail(new ExceptionalError(e)).LogError();
+        }
     }
 }
 

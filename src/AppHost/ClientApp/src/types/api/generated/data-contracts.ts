@@ -261,7 +261,7 @@ export interface DownloadTaskDTO {
   fullTitle: string;
   /** @format guid */
   id: string;
-  /** @format int32 */
+  /** @format int64 */
   key: number;
   mediaType: PlexMediaType;
   /** @format guid */
@@ -411,6 +411,11 @@ export interface IError {
 
 export interface InspectPlexServerJobUpdateDTO {
   plexServerIds: number[];
+}
+
+export interface IntegrationsSettingsDTO {
+  radarr: RadarrSettingsDTO;
+  sonarr: SonarrSettingsDTO;
 }
 
 export enum JobStatus {
@@ -938,6 +943,11 @@ export interface PlexServerStatusDTO {
   statusMessage: string;
 }
 
+export interface RadarrSettingsDTO {
+  apiKey: string;
+  baseUrl: string;
+}
+
 export enum RefreshDataType {
   PlexAccount = "PlexAccount",
   PlexServer = "PlexServer",
@@ -1240,6 +1250,15 @@ export interface ResultDTOOfString {
   value?: string | null;
 }
 
+export interface ResultDTOOfTestConnectionToSonarrEndpointResponse {
+  errors: ErrorDTO[];
+  isSuccess: boolean;
+  /** @format int32 */
+  statusCode: number;
+  successes: SuccessDTO[];
+  value?: TestConnectionToSonarrEndpointResponse | null;
+}
+
 export interface ResultDTOOfUserClaimsDTO {
   errors: ErrorDTO[];
   isSuccess: boolean;
@@ -1328,8 +1347,14 @@ export interface SettingsModelDTO {
   displaySettings: DisplaySettingsDTO;
   downloadManagerSettings: DownloadManagerSettingsDTO;
   generalSettings: GeneralSettingsDTO;
+  integrationsSettings: IntegrationsSettingsDTO;
   languageSettings: LanguageSettingsDTO;
   serverSettings: ServerSettingsDTO;
+}
+
+export interface SonarrSettingsDTO {
+  apiKey: string;
+  baseUrl: string;
 }
 
 export enum StreamType {
@@ -1356,6 +1381,18 @@ export interface SyncServerMediaProgress {
   percentage: number;
   /** @format int32 */
   serverId: number;
+}
+
+export enum TestConnectionStatus {
+  Unknown = "Unknown",
+  Success = "Success",
+  UrlIsInvalid = "UrlIsInvalid",
+  ConnectionFailed = "ConnectionFailed",
+  InvalidApiKey = "InvalidApiKey",
+}
+
+export interface TestConnectionToSonarrEndpointResponse {
+  result: TestConnectionStatus;
 }
 
 /** @example {"username":"ReaparrRocks","password":"R€Aℙℙ@rr69"} */

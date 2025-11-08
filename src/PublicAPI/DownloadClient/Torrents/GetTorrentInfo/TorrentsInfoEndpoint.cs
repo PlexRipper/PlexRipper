@@ -132,10 +132,10 @@ public sealed class TorrentsInfoEndpoint : Endpoint<TorrentsInfoEndpointRequest,
     private static string MapStatusToQbittorrentState(DownloadStatus status) => status switch
     {
         DownloadStatus.Downloading or DownloadStatus.DownloadFinished => "downloading",
-        DownloadStatus.Paused or DownloadStatus.MergePaused or DownloadStatus.MovePaused => "pausedDL",
+        DownloadStatus.Paused or DownloadStatus.MovePaused => "pausedDL",
         DownloadStatus.Queued => "queuedDL",
         DownloadStatus.Completed => "stalledUP",
-        DownloadStatus.Error or DownloadStatus.MoveError or DownloadStatus.MergeError => "error",
+        DownloadStatus.Error or DownloadStatus.MoveError => "error",
         _ => "downloading",
     };
 }

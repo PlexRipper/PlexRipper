@@ -44,7 +44,9 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
             .Take(limit)
             .Select(e => e.MediaDataList.SelectMany(md => md.Parts).Select(p => p.File).First())
             .ToListAsync(CancellationToken);
-        var expectedEpisodeTitles = expectedPartFiles.Select(Path.GetFileName).ToList();
+        
+        // ReSharper disable once ConvertClosureToMethodGroup
+        var expectedEpisodeTitles = expectedPartFiles.Select(s => Path.GetFileName(s)).ToList();
 
         // Act
         var result = await _sut.ExecuteAsync(cmd, CancellationToken);

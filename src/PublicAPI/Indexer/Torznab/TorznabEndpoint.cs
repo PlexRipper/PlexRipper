@@ -38,7 +38,7 @@ public sealed class TorznabEndpoint : Endpoint<TorznabEndpointRequest>
         {
             case "caps":
                 var response = await _commandExecutor.Send(new GetCapabilitiesCommand(), ct);
-                await Send.XMLAsync(response, cancellationToken: ct);
+                await Send.XmlAsync(response, cancellationToken: ct);
                 break;
             case "search":
                 throw new NotImplementedException();
@@ -54,7 +54,7 @@ public sealed class TorznabEndpoint : Endpoint<TorznabEndpointRequest>
                     Limit = req.Limit,
                     Offset = req.Offset,
                 }, ct);
-                await Send.XMLAsync(searchTvShowResponse, cancellationToken: ct);
+                await Send.XmlAsync(searchTvShowResponse, cancellationToken: ct);
                 break;
             case "movie":
                 throw new NotImplementedException();

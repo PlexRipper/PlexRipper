@@ -86,10 +86,10 @@ RUN dotnet publish "AppHost.csproj" -c Release -o /app/publish \
     -p:UseAppHost=false
 
 # Stage 3 - Runtime Image
-FROM --platform=$TARGETPLATFORM mcr.microsoft.com/dotnet/aspnet:9.0-alpine AS dotnet-runtime
+FROM mcr.microsoft.com/dotnet/aspnet:9.0-alpine AS dotnet-runtime
 
 # Stage 4 - Final Image with s6-overlay
-FROM --platform=$TARGETPLATFORM ghcr.io/linuxserver/baseimage-alpine:3.20 AS final
+FROM ghcr.io/linuxserver/baseimage-alpine:3.20 AS final
 
 ARG VERSION
 ARG INFORMATIONAL_VERSION

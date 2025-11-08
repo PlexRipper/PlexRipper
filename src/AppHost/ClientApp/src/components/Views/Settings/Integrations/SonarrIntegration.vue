@@ -37,9 +37,10 @@
 				<!-- Setup Sonarr Integration -->
 				<BaseButton
 					v-else
+					:loading="isConfiguring"
 					icon="mdi-connection"
 					label="Setup Sonarr Integration"
-					@click="testSonarrConnection" />
+					@click="configureSonarrSetup" />
 			</QCol>
 		</QRow>
 
@@ -64,6 +65,7 @@ const { t } = useI18n();
 
 const passwordInputFocus = ref(false);
 const isTesting = ref(false);
+const isConfiguring = ref(false);
 const testSuccess = ref(false);
 const testMessage = ref('');
 
@@ -102,6 +104,16 @@ function testSonarrConnection() {
 			set(testMessage, errors.map((x) => x.metadata).join(', '));
 		}
 		set(isTesting, false);
+	}));
+}
+
+function configureSonarrSetup() {
+	set(isConfiguring, true);
+	useSubscription(integrationApi.configureSonarrIntegrationEndpoint({
+		url: settingsStore.integrationsSettings.sonarr.baseUrl,
+		apiKey: settingsStore.integrationsSettings.sonarr.apiKey,
+	}).subscribe(() => {
+		set(isConfiguring, false);
 	}));
 }
 </script>

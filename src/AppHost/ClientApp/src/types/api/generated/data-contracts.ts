@@ -49,6 +49,19 @@ export interface CheckAllConnectionStatusUpdateDTO {
   plexServersWithConnectionIds: Record<string, number[]>;
 }
 
+export interface ConfigureSonarrIntegrationRequest {
+  apiKey: string;
+  url: string;
+}
+
+export interface ConfigureSonarrIntegrationResponse {
+  /** @format int32 */
+  downloadClientId: number;
+  /** @format int32 */
+  indexerId: number;
+  status: string;
+}
+
 export interface ConfirmationSettingsDTO {
   askDownloadEpisodeConfirmation: boolean;
   askDownloadMovieConfirmation: boolean;
@@ -978,6 +991,15 @@ export interface ResultDTOOfBoolean {
   statusCode: number;
   successes: SuccessDTO[];
   value: boolean;
+}
+
+export interface ResultDTOOfConfigureSonarrIntegrationResponse {
+  errors: ErrorDTO[];
+  isSuccess: boolean;
+  /** @format int32 */
+  statusCode: number;
+  successes: SuccessDTO[];
+  value?: ConfigureSonarrIntegrationResponse | null;
 }
 
 export interface ResultDTOOfCountResponseDTO {

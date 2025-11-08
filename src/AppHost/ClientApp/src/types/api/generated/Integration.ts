@@ -11,8 +11,13 @@
  */
 
 import type { RequestParams } from "./http-client";
+import { ContentType } from "./http-client";
 
-import type { TestConnectionToSonarrEndpointResponse } from "./data-contracts";
+import type {
+  ConfigureSonarrIntegrationRequest,
+  ConfigureSonarrIntegrationResponse,
+  TestConnectionToSonarrEndpointResponse,
+} from "./data-contracts";
 
 import { apiCheckPipe } from "@api/base";
 import Axios from "axios";
@@ -20,6 +25,29 @@ import queryString from "query-string";
 import { from } from "rxjs";
 
 export class Integration {
+  /**
+   * No description
+   * * @tags Integration
+   * @name ConfigureSonarrIntegrationEndpoint
+   * @request POST:/api/Integration/Sonarr/Configure
+   * @secure
+   */
+  configureSonarrIntegrationEndpoint = (
+    data: ConfigureSonarrIntegrationRequest,
+    params: RequestParams = {},
+  ) =>
+    from(
+      Axios.request<ConfigureSonarrIntegrationResponse>({
+        url: `/api/Integration/Sonarr/Configure`,
+        method: "POST",
+        data: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+    ).pipe(apiCheckPipe<ConfigureSonarrIntegrationResponse>);
+
   /**
    * No description
    * * @tags Integration
@@ -47,6 +75,9 @@ export class Integration {
 }
 
 export class IntegrationPaths {
+  static configureSonarrIntegrationEndpoint = () =>
+    queryString.stringifyUrl({ url: `/api/Integration/Sonarr/Configure` });
+
   static testConnectionToSonarrEndpoint = (query: {
     apiKey: string;
     url: string;

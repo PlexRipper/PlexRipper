@@ -76,9 +76,10 @@ public static class EnvironmentExtensions
     /// <summary>
     /// Gets the application version from <c>INFORMATIONAL_VERSION</c> or <c>VERSION</c>. Defaults to <c>0.0.0</c>.
     /// </summary>
-    public static string GetVersion() => System.Environment.GetEnvironmentVariable(InformationalVersionKey)
-                                         ?? System.Environment.GetEnvironmentVariable(VersionKey)
-                                         ?? "0.0.0";
+    public static string GetVersion() =>
+        System.Environment.GetEnvironmentVariable(InformationalVersionKey)
+        ?? System.Environment.GetEnvironmentVariable(VersionKey)
+        ?? "0.0.0";
 
     /// <summary>
     /// Returns true if the current version indicates a development build (contains <c>dev</c>).
@@ -88,29 +89,29 @@ public static class EnvironmentExtensions
     /// <summary>
     /// Gets the process user ID (PUID) from the environment. Returns -1 when not set or invalid.
     /// </summary>
-    public static int GetPuid() => int.TryParse(System.Environment.GetEnvironmentVariable("PUID"), out var puid)
-        ? puid
-        : -1;
+    public static int GetPuid() =>
+        int.TryParse(System.Environment.GetEnvironmentVariable("PUID"), out var puid) ? puid : -1;
 
     /// <summary>
     /// Gets the process group ID (PGID) from the environment. Returns -1 when not set or invalid.
     /// </summary>
-    public static int GetPgid() => int.TryParse(System.Environment.GetEnvironmentVariable("PGID"), out var pgid)
-        ? pgid
-        : -1;
+    public static int GetPgid() =>
+        int.TryParse(System.Environment.GetEnvironmentVariable("PGID"), out var pgid) ? pgid : -1;
 
     /// <summary>
     /// Gets the port number from the DOTNET_HTTP_PORTS environment variable.
     /// </summary>
     /// <returns>The port number or 5000 if not configured.</returns>
-    public static int GetPort => int.TryParse(
-        System.Environment.GetEnvironmentVariable("DOTNET_HTTP_PORTS")
-            ?.Split(';', StringSplitOptions.RemoveEmptyEntries)
-            .FirstOrDefault(),
-        out var port
-    )
-        ? port
-        : 5000;
+    public static int GetPort =>
+        int.TryParse(
+            System
+                .Environment.GetEnvironmentVariable("DOTNET_HTTP_PORTS")
+                ?.Split(';', StringSplitOptions.RemoveEmptyEntries)
+                .FirstOrDefault(),
+            out var port
+        )
+            ? port
+            : 5000;
 
     /// <summary>
     /// Sets the <c>LOG_LEVEL</c> environment variable to the specified level (upper-cased).

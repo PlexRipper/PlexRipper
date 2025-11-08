@@ -1,5 +1,5 @@
-using System.Xml.Serialization;
 using System.Collections.Concurrent;
+using System.Xml.Serialization;
 using FastEndpoints;
 using Microsoft.AspNetCore.Builder;
 

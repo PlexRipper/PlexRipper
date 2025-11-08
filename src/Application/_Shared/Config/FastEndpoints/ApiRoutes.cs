@@ -33,4 +33,6 @@ public static class ApiRoutes
     public static string LoginEndpoint => AuthenticatedController + "/login";
 
     public static string LogOutEndpoint => AuthenticatedController + "/logout";
+
+    public static string IntegrationController => Base + "/" + "Integration";
 }

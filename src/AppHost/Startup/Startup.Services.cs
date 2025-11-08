@@ -197,6 +197,8 @@ public static partial class Startup
                 ServerCertificateCustomValidationCallback = (_, _, _, _) => true,
             });
 
+        services.RegisterSonarrHttpClient();
+
         // Removing all registered IHttpMessageHandlerBuilderFilter instances to disable built-in HttpClient logging
         services.RemoveAll<IHttpMessageHandlerBuilderFilter>();
     }

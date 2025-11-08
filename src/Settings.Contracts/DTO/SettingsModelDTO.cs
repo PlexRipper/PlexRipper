@@ -17,4 +17,6 @@ public class SettingsModelDTO
     public required LanguageSettingsDTO LanguageSettings { get; init; }
 
     public required ServerSettingsDTO ServerSettings { get; init; }
+
+    public required IntegrationsSettingsDTO IntegrationsSettings { get; init; }
 }

@@ -9,6 +9,7 @@ public static class SettingsModelToDTOMapper
     public static UserSettings ToModel(this SettingsModelDTO dto) =>
         new()
         {
+            IntegrationsSettings = dto.IntegrationsSettings.ToModel(),
             GeneralSettings = dto.GeneralSettings.ToModel(),
             ConfirmationSettings = dto.ConfirmationSettings.ToModel(),
             DateTimeSettings = dto.DateTimeSettings.ToModel(),
@@ -17,6 +18,27 @@ public static class SettingsModelToDTOMapper
             LanguageSettings = dto.LanguageSettings.ToModel(),
             DebugSettings = dto.DebugSettings.ToModel(),
             ServerSettings = dto.ServerSettings.ToModel(),
+        };
+
+    public static IntegrationsSettingsModule ToModel(this IntegrationsSettingsDTO dto) =>
+        new()
+        {
+            Sonarr = dto.Sonarr.ToModel(),
+            Radarr = dto.Radarr.ToModel(),
+        };
+
+    public static SonarrSettings ToModel(this SonarrSettingsDTO dto) =>
+        new()
+        {
+            BaseUrl = dto.BaseUrl,
+            ApiKey = dto.ApiKey,
+        };
+
+    public static RadarrSettings ToModel(this RadarrSettingsDTO dto) =>
+        new()
+        {
+            BaseUrl = dto.BaseUrl,
+            ApiKey = dto.ApiKey,
         };
 
     public static GeneralSettingsModule ToModel(this GeneralSettingsDTO dto) =>
@@ -84,6 +106,7 @@ public static class SettingsModelToDTOMapper
     public static SettingsModelDTO ToDTO(this IUserSettings model) =>
         new()
         {
+            IntegrationsSettings = model.IntegrationsSettings.ToDTO(),
             GeneralSettings = model.GeneralSettings.ToDTO(),
             DebugSettings = model.DebugSettings.ToDTO(),
             ConfirmationSettings = model.ConfirmationSettings.ToDTO(),
@@ -92,6 +115,27 @@ public static class SettingsModelToDTOMapper
             DownloadManagerSettings = model.DownloadManagerSettings.ToDTO(),
             LanguageSettings = model.LanguageSettings.ToDTO(),
             ServerSettings = model.ServerSettings.ToDTO(),
+        };
+
+    public static IntegrationsSettingsDTO ToDTO(this IntegrationsSettingsModule module) =>
+        new()
+        {
+            Sonarr = module.Sonarr.ToDTO(),
+            Radarr = module.Radarr.ToDTO(),
+        };
+
+    public static SonarrSettingsDTO ToDTO(this SonarrSettings module) =>
+        new()
+        {
+            BaseUrl = module.BaseUrl,
+            ApiKey = module.ApiKey,
+        };
+
+    public static RadarrSettingsDTO ToDTO(this RadarrSettings module) =>
+        new()
+        {
+            BaseUrl = module.BaseUrl,
+            ApiKey = module.ApiKey,
         };
 
     public static GeneralSettingsDTO ToDTO(this GeneralSettingsModule module) =>

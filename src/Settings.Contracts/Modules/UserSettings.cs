@@ -61,6 +61,12 @@ public class UserSettings : IUserSettings
         init => _serverSettings = value;
     }
 
+    public IntegrationsSettingsModule IntegrationsSettings
+    {
+        get => _integrationsSettings;
+        init => _integrationsSettings = value;
+    }
+
     private readonly Subject<UserSettings> _settingsUpdated = new();
 
     private GeneralSettingsModule _generalSettings = GeneralSettingsModule.Create();
@@ -72,13 +78,14 @@ public class UserSettings : IUserSettings
     private DebugSettingsModule _debugSettings = DebugSettingsModule.Create();
     private PlexServerSettingsModule _serverSettings = PlexServerSettingsModule.Create();
     private AuthenticationModule _authenticationSettings = AuthenticationModule.Create();
+    private IntegrationsSettingsModule _integrationsSettings = IntegrationsSettingsModule.Create();
 
     /// <summary>
     /// The <see cref="UserSettings"/> class is a wrapper class for the individual Settings.
     /// </summary>
     public UserSettings()
     {
-        // Alert of any  changes
+        // Alert of any changes
         Observable
             .Merge(
                 ConfirmationSettings.HasChanged.Select(_ => 1),
@@ -89,7 +96,8 @@ public class UserSettings : IUserSettings
                 DebugSettings.HasChanged.Select(_ => 1),
                 LanguageSettings.HasChanged.Select(_ => 1),
                 ServerSettings.HasChanged.Select(_ => 1),
-                AuthenticationSettings.HasChanged.Select(_ => 1)
+                AuthenticationSettings.HasChanged.Select(_ => 1),
+                IntegrationsSettings.HasChanged.Select(_ => 1)
             )
             .Throttle(TimeSpan.FromMilliseconds(500))
             .Subscribe(_ => _settingsUpdated.OnNext(this));
@@ -109,6 +117,7 @@ public class UserSettings : IUserSettings
         _debugSettings = DebugSettingsModule.Create();
         _serverSettings = PlexServerSettingsModule.Create();
         _authenticationSettings = AuthenticationModule.Create();
+        _integrationsSettings = IntegrationsSettingsModule.Create();
     }
 
     public UserSettings UpdateSettings(ISettingsModel sourceSettings)
@@ -122,6 +131,7 @@ public class UserSettings : IUserSettings
         _languageSettings.Update(sourceSettings.LanguageSettings);
         _serverSettings.Update(sourceSettings.ServerSettings);
         _authenticationSettings.Update(sourceSettings.AuthenticationSettings);
+        _integrationsSettings.Update(sourceSettings.IntegrationsSettings);
 
         return this;
     }

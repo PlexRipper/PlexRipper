@@ -1,10 +1,12 @@
 using FastEndpoints;
+using Microsoft.EntityFrameworkCore;
+using Reaparr.Identity.Contracts;
 
 namespace Reaparr.PublicAPI;
 
 public class LogoutEndpoint : EndpointWithoutRequest
 {
-    private readonly IDownloadClientSessionManager _downloadClientSessionManager;
+    private readonly IAuthDbContext _authDbContext;
     private readonly ILogger _log;
 
     public override void Configure()
@@ -14,10 +16,10 @@ public class LogoutEndpoint : EndpointWithoutRequest
         AllowAnonymous();
     }
 
-    public LogoutEndpoint(ILogger logger, IDownloadClientSessionManager downloadClientSessionManager)
+    public LogoutEndpoint(ILogger logger, IAuthDbContext authDbContext)
     {
+        _authDbContext = authDbContext;
         _log = logger.ForContext<LoginEndpoint>();
-        _downloadClientSessionManager = downloadClientSessionManager;
     }
 
     public override async Task HandleAsync(CancellationToken ct)
@@ -25,7 +27,10 @@ public class LogoutEndpoint : EndpointWithoutRequest
         _log.DebugApiCall(HttpContext);
 
         if (HttpContext.Request.Cookies.TryGetValue("SID", out var sid))
-            _downloadClientSessionManager.Remove(sid);
+        {
+            await _authDbContext.DownloadClientSessions.Where(x => x.Sid == sid)
+                .ExecuteDeleteAsync(cancellationToken: ct);
+        }
 
         // Clear cookie by setting expired SID
         HttpContext.Response.Headers.Append("Set-Cookie",

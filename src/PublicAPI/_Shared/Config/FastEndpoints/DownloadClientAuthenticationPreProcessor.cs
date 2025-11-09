@@ -1,14 +1,16 @@
 using FastEndpoints;
+using Reaparr.Identity.Contracts;
 
 namespace Reaparr.PublicAPI;
 
 public class DownloadClientAuthenticationPreProcessor<TRequest> : IPreProcessor<TRequest>
 {
-    private readonly IDownloadClientSessionManager _sessionManager;
+    private readonly IAuthDbContext _authDbContext;
 
-    public DownloadClientAuthenticationPreProcessor(IDownloadClientSessionManager sessionManager)
+    public DownloadClientAuthenticationPreProcessor(
+        IAuthDbContext authDbContext)
     {
-        _sessionManager = sessionManager;
+        _authDbContext = authDbContext;
     }
 
     public Task PreProcessAsync(IPreProcessorContext<TRequest> ctx, CancellationToken ct)
@@ -19,11 +21,30 @@ public class DownloadClientAuthenticationPreProcessor<TRequest> : IPreProcessor<
             return ctx.HttpContext.Response.SendUnauthorizedAsync(cancellation: ct);
         }
 
-        if (!_sessionManager.IsValidSession(sid))
+        if (!IsValidSession(sid))
         {
             return ctx.HttpContext.Response.SendUnauthorizedAsync(cancellation: ct);
         }
 
         return Task.CompletedTask;
+    }
+
+    public bool IsValidSession(string sid)
+    {
+        if (string.IsNullOrWhiteSpace(sid))
+            return false;
+
+        var entity = _authDbContext.DownloadClientSessions.Find(sid);
+        if (entity is null)
+            return false;
+
+        if (entity.ExpiresAt <= DateTimeOffset.UtcNow)
+        {
+            _authDbContext.DownloadClientSessions.Remove(entity);
+            _authDbContext.SaveChangesAsync();
+            return false;
+        }
+        
+        return true;
     }
 }

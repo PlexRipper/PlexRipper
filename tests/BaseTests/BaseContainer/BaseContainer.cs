@@ -1,6 +1,7 @@
 ﻿using System.Net.Http.Headers;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using FastEndpoints;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
@@ -8,6 +9,7 @@ using Reaparr.Data;
 using Reaparr.Data.Contracts;
 using Reaparr.Environment;
 using Reaparr.FileSystem.Contracts;
+using Reaparr.PublicAPI;
 using Reaparr.Settings.Contracts;
 
 namespace Reaparr.BaseTests;
@@ -62,6 +64,22 @@ public class BaseContainer : IDisposable
         var client = _factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(scheme: "TestScheme");
         return client;
+    }
+
+    public async Task SignInDownloadClient(HttpClient client)
+    {
+        var integrationsSettings = Resolve<IIntegrationsSettings>();
+        var loginRequest = new DownloadClientLoginEndpointRequest
+        {
+            Username = integrationsSettings.DownloadClientUsername,
+            Password = integrationsSettings.DownloadClientPassword,
+        };
+
+        var response = await client.POSTAsync<DownloadClientLoginEndpoint, DownloadClientLoginEndpointRequest>(
+            loginRequest
+        );
+
+        response.IsSuccessStatusCode.ShouldBeTrue("Failed to login the download client test HttpClient.");
     }
 
     public IDownloadQueue GetDownloadQueue => Resolve<IDownloadQueue>();

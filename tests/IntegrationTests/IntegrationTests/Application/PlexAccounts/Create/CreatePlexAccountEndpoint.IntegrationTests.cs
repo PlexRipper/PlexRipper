@@ -81,7 +81,7 @@ public class CreatePlexAccountEndpointIntegrationTests : BaseIntegrationTests
         // Add a small delay to ensure database transactions complete after job execution
         await Task.Delay(1000, CancellationToken);
 
-        // Wait for database to be in the expected state with increased timeout for complex job chains
+        // Wait for a database to be in the expected state with increased timeout for complex job chains
         await WaitForDatabaseConditionAsync(
             () =>
                 container.DbContext.PlexAccounts.Include(x => x.PlexAccountLibraries).First().PlexAccountLibraries.Count

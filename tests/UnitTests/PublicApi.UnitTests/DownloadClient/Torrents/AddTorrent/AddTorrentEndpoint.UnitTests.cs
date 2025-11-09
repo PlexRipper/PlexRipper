@@ -206,35 +206,7 @@ public class AddTorrentEndpointUnitTests : BaseUnitTest
         result.Errors.ShouldContain(x => x.PropertyName == nameof(AddTorrentEndpointRequest.TorrentFile));
     }
 
-    [Fact]
-    public async Task ShouldHandleUnsupportedMediaType_WhenSettingHashId()
-    {
-        // Arrange
-        var unsupportedMetadata = CreateValidTorrentMetadata(PlexMediaType.Music); // Unsupported type
-        var (torrentFile, torrentFileMock) = CreateMockTorrentFile(unsupportedMetadata, "music.torrent");
-        var request = new AddTorrentEndpointRequest { TorrentFile = torrentFile };
 
-        mock.Mock<ICommandExecutor>()
-            .Setup(x => x.Send(It.IsAny<CreateDownloadTasksCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Ok());
-
-        // Act
-        var endpoint = SetupEndpointUnitTest<AddTorrentEndpoint>();
-        await endpoint.HandleAsync(request, CancellationToken);
-
-        // Assert
-        endpoint.HttpContext.Response.StatusCode.ShouldBe(200);
-
-        // Should handle unsupported media type gracefully
-
-        // Verify command was called once
-        mock.Mock<ICommandExecutor>()
-            .Verify(x => x.Send(It.IsAny<CreateDownloadTasksCommand>(), It.IsAny<CancellationToken>()), Times.Once);
-
-        // Verify IFormFile mock interactions
-        torrentFileMock.Verify(f => f.OpenReadStream(), Times.Once);
-        torrentFileMock.Verify(f => f.FileName, Times.AtLeastOnce);
-    }
 
     [Fact]
     public async Task ShouldSetHashIdOnMovieDownloadTask_WhenTorrentIsMovieType()

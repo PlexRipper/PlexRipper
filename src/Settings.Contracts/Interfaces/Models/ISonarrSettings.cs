@@ -13,8 +13,6 @@ public interface ISonarrSettings
     /// </summary>
     string SonarrApiKey { get; set; }
 
-
-
     bool IsValidUrl();
 
     bool IsValidApiKey();

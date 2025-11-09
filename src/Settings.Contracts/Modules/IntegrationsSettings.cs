@@ -6,12 +6,13 @@ public record IntegrationsSettings : BaseSettingsModule<IntegrationsSettings>, I
     private SonarrSettings _sonarr = SonarrSettings.Create();
     private RadarrSettings _radarr = RadarrSettings.Create();
 
-    public static IntegrationsSettings Create() => new()
-    {
-        ReaparrApiKey = Guid.NewGuid().ToString(),
-        Sonarr = SonarrSettings.Create(),
-        Radarr = RadarrSettings.Create(),
-    };
+    public static IntegrationsSettings Create() =>
+        new()
+        {
+            ReaparrApiKey = Guid.NewGuid().ToString(),
+            Sonarr = SonarrSettings.Create(),
+            Radarr = RadarrSettings.Create(),
+        };
 
     /// <inheritdoc/>
     public required string ReaparrApiKey

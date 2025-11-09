@@ -11,7 +11,7 @@ public interface IIntegrationsSettings
     /// Gets or sets the Sonarr integration settings.
     /// </summary>
     SonarrSettings Sonarr { get; set; }
-    
+
     /// <summary>
     /// Gets or sets the Radarr integration settings.
     /// </summary>

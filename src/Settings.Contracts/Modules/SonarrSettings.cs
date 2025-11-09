@@ -6,11 +6,7 @@ public record SonarrSettings : BaseSettingsModule<SonarrSettings>, ISonarrSettin
     private string _sonarrApiKey = string.Empty;
 
     public static SonarrSettings Create() =>
-        new()
-        {
-            SonarrBaseUrl = "http://localhost:8989",
-            SonarrApiKey = string.Empty,
-        };
+        new() { SonarrBaseUrl = "http://localhost:8989", SonarrApiKey = string.Empty };
 
     /// <inheritdoc/>
     public required string SonarrBaseUrl
@@ -25,8 +21,6 @@ public record SonarrSettings : BaseSettingsModule<SonarrSettings>, ISonarrSettin
         get => _sonarrApiKey;
         set => SetProperty(ref _sonarrApiKey, value);
     }
-
-
 
     public bool IsValidUrl() =>
         !string.IsNullOrWhiteSpace(SonarrBaseUrl)

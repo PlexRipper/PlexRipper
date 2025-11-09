@@ -33,7 +33,7 @@ public class SettingsModule : Module
         builder
             .Register(c => c.Resolve<IUserSettings>().IntegrationsSettings)
             .As<IIntegrationsSettings>()
-            .SingleInstance();    
+            .SingleInstance();
         builder
             .Register(c => c.Resolve<IUserSettings>().IntegrationsSettings.Sonarr)
             .As<ISonarrSettings>()

@@ -23,7 +23,10 @@ public class SonarrApiGetIndexersCommandHandler
     {
         try
         {
-            using var httpRequest = new HttpRequestMessage(HttpMethod.Get, new Uri("/api/v3/indexer", UriKind.Relative));
+            using var httpRequest = new HttpRequestMessage(
+                HttpMethod.Get,
+                new Uri("/api/v3/indexer", UriKind.Relative)
+            );
             var response = await _client.SendAsync(httpRequest, cancellationToken);
             var body = await response.Content.ReadAsStringAsync(cancellationToken);
 

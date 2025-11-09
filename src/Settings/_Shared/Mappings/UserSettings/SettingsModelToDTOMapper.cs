@@ -24,7 +24,12 @@ public static class SettingsModelToDTOMapper
         new() { Sonarr = dto.Sonarr.ToModel(), Radarr = dto.Radarr.ToModel() };
 
     public static SonarrSettings ToModel(this SonarrSettingsDTO dto) =>
-        new() { BaseUrl = dto.BaseUrl, ApiKey = dto.ApiKey };
+        new()
+        {
+            SonarrBaseUrl = dto.SonarrBaseUrl,
+            SonarrApiKey = dto.SonarrApiKey,
+            ReaparrApiKey = dto.ReaparrApiKey,
+        };
 
     public static RadarrSettings ToModel(this RadarrSettingsDTO dto) =>
         new() { BaseUrl = dto.BaseUrl, ApiKey = dto.ApiKey };
@@ -109,7 +114,12 @@ public static class SettingsModelToDTOMapper
         new() { Sonarr = module.Sonarr.ToDTO(), Radarr = module.Radarr.ToDTO() };
 
     public static SonarrSettingsDTO ToDTO(this SonarrSettings module) =>
-        new() { BaseUrl = module.BaseUrl, ApiKey = module.ApiKey };
+        new()
+        {
+            SonarrBaseUrl = module.SonarrBaseUrl,
+            SonarrApiKey = module.SonarrApiKey,
+            ReaparrApiKey = module.ReaparrApiKey,
+        };
 
     public static RadarrSettingsDTO ToDTO(this RadarrSettings module) =>
         new() { BaseUrl = module.BaseUrl, ApiKey = module.ApiKey };

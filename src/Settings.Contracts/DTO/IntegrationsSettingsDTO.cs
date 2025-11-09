@@ -14,6 +14,9 @@ public class RadarrSettingsDTO
 
 public class SonarrSettingsDTO
 {
-    public required string BaseUrl { get; init; }
-    public required string ApiKey { get; init; }
+    public required string SonarrBaseUrl { get; init; }
+
+    public required string SonarrApiKey { get; init; }
+
+    public required string ReaparrApiKey { get; init; }
 }

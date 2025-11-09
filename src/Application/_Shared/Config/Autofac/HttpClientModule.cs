@@ -16,20 +16,20 @@ public static class HttpClientModule
                 (sp, client) =>
                 {
                     var settings = sp.GetRequiredService<ISonarrSettings>();
-                    if (settings.BaseUrl == string.Empty || settings.ApiKey == string.Empty)
+                    if (settings.SonarrBaseUrl == string.Empty || settings.SonarrApiKey == string.Empty)
                     {
                         throw new Exception("BaseUrl and ApiKey cannot be empty for Sonarr HttpClient.");
                     }
 
-                    if (Uri.TryCreate(settings.BaseUrl.TrimEnd('/'), UriKind.Absolute, out var baseUri))
+                    if (Uri.TryCreate(settings.SonarrBaseUrl.TrimEnd('/'), UriKind.Absolute, out var baseUri))
                         client.BaseAddress = baseUri;
 
                     client.Timeout = TimeSpan.FromSeconds(15);
                     client.DefaultRequestHeaders.Clear();
                     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-                    if (!string.IsNullOrWhiteSpace(settings.ApiKey))
-                        client.DefaultRequestHeaders.Add("X-Api-Key", settings.ApiKey);
+                    if (!string.IsNullOrWhiteSpace(settings.SonarrApiKey))
+                        client.DefaultRequestHeaders.Add("X-Api-Key", settings.SonarrApiKey);
                 }
             )
             .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });

@@ -36,11 +36,11 @@ public class SetupSonarrDownloadClientCommandHandler
         CancellationToken ct
     )
     {
-        if (string.IsNullOrWhiteSpace(_settings.BaseUrl) || string.IsNullOrWhiteSpace(_settings.ApiKey))
+        if (string.IsNullOrWhiteSpace(_settings.SonarrBaseUrl) || string.IsNullOrWhiteSpace(_settings.SonarrApiKey))
             return Result.Fail("Sonarr settings are invalid: BaseUrl and ApiKey are required.").LogError();
 
         if (
-            !Uri.TryCreate(_settings.BaseUrl.TrimEnd('/'), UriKind.Absolute, out var sonarrBaseUri)
+            !Uri.TryCreate(_settings.SonarrBaseUrl.TrimEnd('/'), UriKind.Absolute, out var sonarrBaseUri)
             || (sonarrBaseUri.Scheme != Uri.UriSchemeHttp && sonarrBaseUri.Scheme != Uri.UriSchemeHttps)
         )
             return Result.Fail("Sonarr BaseUrl is invalid.").LogError();

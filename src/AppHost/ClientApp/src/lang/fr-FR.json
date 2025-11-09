@@ -663,12 +663,12 @@
                 "sonarr": {
                     "api-key-input": {
                         "label": "Clé API Sonarr",
-                        "text": "Accédez à Sonarr : Paramètres → Général → Sécurité → Clé API, copiez la clé API et collez-la dans ce champ.",
+                        "text": "Accédez à Sonarr: Paramètres → Général → Sécurité → Clé API, copiez la clé API et collez-la dans ce champ.",
                         "title": "Clé API de Sonarr"
                     },
                     "base-url-input": {
                         "label": "URL de base de Sonarr",
-                        "text": "Adresse de base où votre instance Sonarr est accessible. Exemple : http://localhost:8989 ou http://sonarr:8989",
+                        "text": "Adresse de base où votre instance Sonarr est accessible. Exemple: http://localhost:8989 ou http://sonarr:8989",
                         "title": "URL de base vers Sonarr"
                     }
                 }

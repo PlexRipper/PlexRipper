@@ -6,7 +6,7 @@
 			:title="t('help.settings.integrations.sonarr.base-url-input.title')"
 			:text="t('help.settings.integrations.sonarr.base-url-input.text')">
 			<QInput
-				v-model="settingsStore.integrationsSettings.sonarr.baseUrl"
+				v-model="settingsStore.integrationsSettings.sonarr.sonarrBaseUrl"
 				hint="http://localhost:8989" />
 		</HelpRow>
 
@@ -16,7 +16,7 @@
 			:title="t('help.settings.integrations.sonarr.api-key-input.title')"
 			:text="t('help.settings.integrations.sonarr.api-key-input.text')">
 			<ApiKeyInputField
-				v-model="settingsStore.integrationsSettings.sonarr.apiKey"
+				v-model="settingsStore.integrationsSettings.sonarr.sonarrApiKey"
 				v-model:has-focus="passwordInputFocus"
 				show-strength
 				hint="a02a22a436504e15b7e46764b12825db"
@@ -73,8 +73,8 @@ function testSonarrConnection() {
 	set(isTesting, true);
 	set(testMessage, '');
 	useSubscription(integrationApi.testConnectionToSonarrEndpoint({
-		url: settingsStore.integrationsSettings.sonarr.baseUrl,
-		apiKey: settingsStore.integrationsSettings.sonarr.apiKey,
+		url: settingsStore.integrationsSettings.sonarr.sonarrBaseUrl,
+		apiKey: settingsStore.integrationsSettings.sonarr.sonarrApiKey,
 	}).subscribe(({ isSuccess, value, errors }) => {
 		if (isSuccess) {
 			switch (value?.result) {
@@ -110,8 +110,8 @@ function testSonarrConnection() {
 function configureSonarrSetup() {
 	set(isConfiguring, true);
 	useSubscription(integrationApi.configureSonarrIntegrationEndpoint({
-		url: settingsStore.integrationsSettings.sonarr.baseUrl,
-		apiKey: settingsStore.integrationsSettings.sonarr.apiKey,
+		url: settingsStore.integrationsSettings.sonarr.sonarrBaseUrl,
+		apiKey: settingsStore.integrationsSettings.sonarr.sonarrApiKey,
 	}).subscribe(() => {
 		set(isConfiguring, false);
 	}));

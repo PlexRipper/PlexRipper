@@ -428,6 +428,7 @@ export interface InspectPlexServerJobUpdateDTO {
 
 export interface IntegrationsSettingsDTO {
   radarr: RadarrSettingsDTO;
+  reaparrApiKey: string;
   sonarr: SonarrSettingsDTO;
 }
 
@@ -1375,8 +1376,8 @@ export interface SettingsModelDTO {
 }
 
 export interface SonarrSettingsDTO {
-  apiKey: string;
-  baseUrl: string;
+  sonarrApiKey: string;
+  sonarrBaseUrl: string;
 }
 
 export enum StreamType {

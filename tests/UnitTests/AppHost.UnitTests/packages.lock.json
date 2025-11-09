@@ -2022,7 +2022,8 @@
           "BencodeNET": "[5.0.0, )",
           "FastEndpoints": "[7.0.1, )",
           "Reaparr.Data.Contracts": "[1.0.0, )",
-          "Reaparr.Domain": "[1.0.0, )"
+          "Reaparr.Domain": "[1.0.0, )",
+          "Reaparr.Settings.Contracts": "[1.0.0, )"
         }
       },
       "Reaparr.Settings": {

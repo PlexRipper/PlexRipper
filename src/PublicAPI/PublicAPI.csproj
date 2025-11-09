@@ -17,6 +17,7 @@
         <ItemGroup>
       <ProjectReference Include="..\Data.Contracts\Data.Contracts.csproj" />
       <ProjectReference Include="..\Domain\Domain.csproj" />
+      <ProjectReference Include="..\Settings.Contracts\Settings.Contracts.csproj" />
     </ItemGroup>
         <ItemGroup>
           <Compile Include="..\Domain\GlobalUsings.cs">

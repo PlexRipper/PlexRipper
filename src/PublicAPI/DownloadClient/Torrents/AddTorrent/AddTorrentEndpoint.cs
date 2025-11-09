@@ -84,6 +84,7 @@ public class AddTorrentEndpoint : Endpoint<AddTorrentEndpointRequest>
         Description(x => x.IsDownloadClient());
         AllowFileUploads();
         AllowAnonymous();
+        PreProcessor<DownloadClientAuthenticationPreProcessor<AddTorrentEndpointRequest>>();
     }
 
     public AddTorrentEndpoint(ILogger logger, IReaparrDbContext dbContext, ICommandExecutor commandExecutor)

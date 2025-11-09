@@ -26,6 +26,8 @@ public static class SettingsModelToDTOMapper
             Sonarr = dto.Sonarr.ToModel(),
             Radarr = dto.Radarr.ToModel(),
             ReaparrApiKey = dto.ReaparrApiKey,
+            DownloadClientUsername = dto.DownloadClientUsername,
+            DownloadClientPassword = dto.DownloadClientPassword,
         };
 
     public static SonarrSettings ToModel(this SonarrSettingsDTO dto) =>
@@ -116,6 +118,8 @@ public static class SettingsModelToDTOMapper
             ReaparrApiKey = module.ReaparrApiKey,
             Sonarr = module.Sonarr.ToDTO(),
             Radarr = module.Radarr.ToDTO(),
+            DownloadClientUsername = module.DownloadClientUsername,
+            DownloadClientPassword = module.DownloadClientPassword,
         };
 
     public static SonarrSettingsDTO ToDTO(this SonarrSettings module) =>

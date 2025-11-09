@@ -9,6 +9,7 @@ public class GetAllCategoriesEndpoint : EndpointWithoutRequest<object>
         Get(PublicApiRoutes.DownloadClient + "/torrents/categories");
         Description(x => x.IsDownloadClient());
         AllowAnonymous();
+        PreProcessor<DownloadClientAuthenticationPreProcessor<EmptyRequest>>();
     }
 
     public override async Task HandleAsync(CancellationToken ct)

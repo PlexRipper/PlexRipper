@@ -9,6 +9,7 @@ public class GetPreferencesEndpoint : EndpointWithoutRequest<object>
         Get(PublicApiRoutes.DownloadClient +  "/app/preferences");
         Description(x => x.IsDownloadClient());
         AllowAnonymous();
+        PreProcessor<DownloadClientAuthenticationPreProcessor<EmptyRequest>>();
     }
 
     public override async Task HandleAsync(CancellationToken ct)

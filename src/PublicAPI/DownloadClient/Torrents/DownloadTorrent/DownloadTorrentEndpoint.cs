@@ -40,7 +40,7 @@ public class DownloadTorrentEndpoint : Endpoint<DownloadTorrentEndpointRequest>
     {
         Get(PublicApiRoutes.DownloadTorrent);
         Description(x => x.IsDownloadClient());
-        AllowAnonymous();
+
         Summary(x =>
         {
             x.Description =
@@ -49,6 +49,9 @@ public class DownloadTorrentEndpoint : Endpoint<DownloadTorrentEndpointRequest>
         Description(x => x
             .Produces(StatusCodes.Status200OK, contentType: "application/x-bittorrent")
             .Produces(StatusCodes.Status400BadRequest));
+        
+        AllowAnonymous();
+        PreProcessor<DownloadClientAuthenticationPreProcessor<DownloadTorrentEndpointRequest>>();
     }
 
     public override async Task HandleAsync(DownloadTorrentEndpointRequest req, CancellationToken ct)

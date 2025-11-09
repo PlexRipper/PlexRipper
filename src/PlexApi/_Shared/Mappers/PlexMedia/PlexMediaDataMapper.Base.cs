@@ -16,10 +16,10 @@ public static partial class PlexMediaDataMapper
         return int.TryParse(id, out var result) ? result : null;
     }
 
-	private static int? GetTvdbId(this List<MetaDataGuidsDTO> guids)
+    private static int? GetTvdbId(this List<MetaDataGuidsDTO> guids)
     {
         var id = guids.Find(x => x.Id.Contains("tvdb"))?.Id.Replace("tvdb://", "");
-		return int.TryParse(id, out var result) ? result : null;
+        return int.TryParse(id, out var result) ? result : null;
     }
 
     /// <summary>

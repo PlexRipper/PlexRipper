@@ -8,6 +8,16 @@ public interface IIntegrationsSettings
     string ReaparrApiKey { get; set; }
 
     /// <summary>
+    /// Username for qBittorrent-compatible Public API authentication.
+    /// </summary>
+    string DownloadClientUsername { get; set; }
+
+    /// <summary>
+    /// Password for qBittorrent-compatible Public API authentication.
+    /// </summary>
+    string DownloadClientPassword { get; set; }
+
+    /// <summary>
     /// Gets or sets the Sonarr integration settings.
     /// </summary>
     SonarrSettings Sonarr { get; set; }

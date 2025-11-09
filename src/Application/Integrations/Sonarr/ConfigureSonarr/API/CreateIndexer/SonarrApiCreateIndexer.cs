@@ -41,6 +41,14 @@ public class SonarrApiCreateIndexerCommandHandler
             var response = await _client.SendAsync(httpRequest, cancellationToken);
             var body = await response.Content.ReadAsStringAsync(cancellationToken);
 
+            if (!response.IsSuccessStatusCode)
+            {
+                return Result
+                    .Fail($"Failed to create indexer in Sonarr. StatusCode: {response.StatusCode}")
+                    .WithError(body)
+                    .LogError();
+            }
+
             var created = JsonSerializer.Deserialize<SonarrIndexerContractDTO>(
                 body,
                 DefaultJsonSerializerOptions.ConfigStandard

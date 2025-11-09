@@ -19,7 +19,8 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest, Delet
 	{
 		Post(PublicApiRoutes.DownloadClient + "/torrents/delete");
         Description(x => x.IsDownloadClient());
-		AllowAnonymous();
+        AllowAnonymous();
+        PreProcessor<DownloadClientAuthenticationPreProcessor<DeleteTorrentRequest>>();
 	}
 
 	public override async Task HandleAsync(DeleteTorrentRequest req, CancellationToken ct)

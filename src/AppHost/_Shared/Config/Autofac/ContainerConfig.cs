@@ -4,6 +4,7 @@ using Reaparr.Data;
 using Reaparr.FileSystem;
 using Reaparr.Identity;
 using Reaparr.PlexApi;
+using Reaparr.PublicAPI;
 using Reaparr.Settings.Config;
 
 namespace Reaparr.AppHost;
@@ -14,7 +15,7 @@ namespace Reaparr.AppHost;
 public static class ContainerConfig
 {
     /// <summary>
-    /// Autofac container builder, Serilog registration is left out due to being context dependent.
+    /// Autofac container builder, Serilog registration is left out due to being context-dependent.
     /// Integration tests have a different configuration than the application.
     /// </summary>
     /// <param name="builder">The builder through which components can be registered.</param>
@@ -22,6 +23,7 @@ public static class ContainerConfig
     {
         // Application
         builder.RegisterModule<ApplicationModule>();
+        builder.RegisterModule<PublicApiModule>();
         builder.RegisterModule<LogModule>();
 
         // Infrastructure

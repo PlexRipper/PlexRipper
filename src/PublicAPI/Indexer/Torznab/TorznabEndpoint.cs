@@ -54,7 +54,7 @@ public sealed class TorznabEndpoint : Endpoint<TorznabEndpointRequest>
             case "tvsearch":
                 var searchTvShowResponse = await _commandExecutor.Send(new SearchTvShowCommand
                 {
-                    Query = req.Query,
+                    Query = req.Query ?? string.Empty,
                     Season = req.Season ?? 0,
                     Episode = req.Episode ?? 0,
                     TVDB_ID = req.TvdbId ?? 0,

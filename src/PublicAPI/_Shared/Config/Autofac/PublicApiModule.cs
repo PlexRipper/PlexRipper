@@ -10,6 +10,7 @@ public class PublicApiModule : Module
     /// <inheritdoc/>
     protected override void Load(ContainerBuilder builder)
     {
-
+        // Register all types in this assembly that implement IDownloadClientSessionManager
+        builder.RegisterType<DownloadClientSessionManager>().As<IDownloadClientSessionManager>().SingleInstance();
     }
 }

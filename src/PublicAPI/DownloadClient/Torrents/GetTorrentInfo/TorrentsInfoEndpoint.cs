@@ -78,6 +78,7 @@ public sealed class TorrentsInfoEndpoint : Endpoint<TorrentsInfoEndpointRequest,
         Get(PublicApiRoutes.DownloadClient + "/torrents/info");
         Description(x => x.IsDownloadClient());
         AllowAnonymous();
+        PreProcessor<DownloadClientAuthenticationPreProcessor<TorrentsInfoEndpointRequest>>();
     }
 
     public override async Task HandleAsync(TorrentsInfoEndpointRequest req, CancellationToken ct)

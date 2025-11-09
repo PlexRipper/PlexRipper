@@ -16,37 +16,37 @@ public record TorznabEndpointRequest
     /// Used in search, tvsearch, and movie queries.
     /// </summary>
     [QueryParam, BindFrom("q")]
-    public string Query { get; init; } = string.Empty;
+    public string? Query { get; init; }
 
     /// <summary>
     /// Season number for tvsearch queries.
     /// </summary>
     [QueryParam, BindFrom("season")]
-    public int Season { get; init; } = 0;
+    public int? Season { get; init; }
 
     /// <summary>
     /// Episode number for tvsearch queries.
     /// </summary>
     [QueryParam, BindFrom("ep")]
-    public int Episode { get; init; } = 0;
+    public int? Episode { get; init; }
 
     /// <summary>
     /// TheTVDB series ID for tvsearch queries.
     /// </summary>
     [QueryParam, BindFrom("tvdbid")]
-    public int TvdbId { get; init; } = 0;
+    public int? TvdbId { get; init; }
 
     /// <summary>
     /// IMDb ID for movie queries (e.g. "tt1234567").
     /// </summary>
     [QueryParam, BindFrom("imdbid")]
-    public string ImdbId { get; init; } = string.Empty;
+    public string? ImdbId { get; init; } = string.Empty;
 
     /// <summary>
     /// TMDb ID for movie queries.
     /// </summary>
     [QueryParam, BindFrom("tmdbid")]
-    public int TmdbId { get; init; } = 0;
+    public int? TmdbId { get; init; }
 
     /// <summary>
     /// API key provided by the requesting client (Sonarr/Radarr).
@@ -59,24 +59,24 @@ public record TorznabEndpointRequest
     /// Sonarr/Radarr will pass this for pagination.
     /// </summary>
     [QueryParam, BindFrom("limit")]
-    public int Limit { get; init; } = 50;
+    public int? Limit { get; init; } = 50;
 
     /// <summary>
     /// Offset of results for pagination.
     /// </summary>
     [QueryParam, BindFrom("offset")]
-    public int Offset { get; init; } = 0;
+    public int? Offset { get; init; } = 0;
 
     /// <summary>
     /// One or more category IDs (comma-separated).
     /// Example: "5030,5040".
     /// </summary>
     [QueryParam, BindFrom("cat")]
-    public int[] Categories { get; init; } = [];
+    public int[]? Categories { get; init; }
 
     /// <summary>
     /// Extended flag (0 = basic, 1 = include extended attributes).
     /// </summary>
     [QueryParam, BindFrom("extended")]
-    public int Extended { get; init; } = 0;
+    public int? Extended { get; init; } = 0;
 }

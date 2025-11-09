@@ -1,5 +1,6 @@
 using FastEndpoints;
 using FluentValidation;
+using Reaparr.Application.Contracts;
 using Reaparr.PublicAPI.SearchTvShow;
 
 namespace Reaparr.PublicAPI;
@@ -20,8 +21,16 @@ public sealed class TorznabEndpoint : Endpoint<TorznabEndpointRequest>
     public override void Configure()
     {
         Get(PublicApiRoutes.Indexer);
-        Description(x => x.IsIndexer());
+        Description(x =>
+        {
+            x.IsIndexer();
+            x.Produces<BaseResultDTO>();
+            x.Produces<BaseResultDTO>(StatusCodes.Status401Unauthorized);
+            x.Produces<BaseResultDTO>(StatusCodes.Status403Forbidden);
+            x.Produces<BaseResultDTO>(StatusCodes.Status500InternalServerError);
+        });
         AllowAnonymous();
+        PreProcessor<IndexerAuthenticationPreProcessor<TorznabEndpointRequest>>();
     }
 
     public TorznabEndpoint(ILogger logger, ICommandExecutor commandExecutor)
@@ -33,7 +42,7 @@ public sealed class TorznabEndpoint : Endpoint<TorznabEndpointRequest>
     public override async Task HandleAsync(TorznabEndpointRequest req, CancellationToken ct)
     {
         _log.Here().DebugApiCall(HttpContext, req);
-        
+
         switch (req.Type)
         {
             case "caps":
@@ -46,13 +55,13 @@ public sealed class TorznabEndpoint : Endpoint<TorznabEndpointRequest>
                 var searchTvShowResponse = await _commandExecutor.Send(new SearchTvShowCommand
                 {
                     Query = req.Query,
-                    Season = req.Season,
-                    Episode = req.Episode,
-                    TVDB_ID = req.TvdbId,
-                    IMDB_ID = req.ImdbId,
-                    TMDB_ID = req.TmdbId,
-                    Limit = req.Limit,
-                    Offset = req.Offset,
+                    Season = req.Season ?? 0,
+                    Episode = req.Episode ?? 0,
+                    TVDB_ID = req.TvdbId ?? 0,
+                    IMDB_ID = req.ImdbId ?? string.Empty,
+                    TMDB_ID = req.TmdbId ?? 0,
+                    Limit = req.Limit ?? 100,
+                    Offset = req.Offset ?? 0,
                 }, ct);
                 await Send.XmlAsync(searchTvShowResponse, cancellationToken: ct);
                 break;

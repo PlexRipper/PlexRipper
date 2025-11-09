@@ -5,20 +5,19 @@ namespace Reaparr.PublicAPI;
 
 public class IndexerAuthenticationPreProcessor<TRequest> : IPreProcessor<TRequest>
 {
-    private readonly ISonarrSettings _sonarrSettings;
-    private readonly IRadarrSettings _radarrSettings;
+    private readonly IIntegrationsSettings _integrationsSettings;
     private readonly string _indexerApiKey = "apikey";
 
-    public IndexerAuthenticationPreProcessor(ISonarrSettings sonarrSettings, IRadarrSettings radarrSettings)
+    public IndexerAuthenticationPreProcessor(IIntegrationsSettings integrationsSettings)
     {
-        _sonarrSettings = sonarrSettings;
-        _radarrSettings = radarrSettings;
+        _integrationsSettings = integrationsSettings;
     }
 
     public Task PreProcessAsync(IPreProcessorContext<TRequest> ctx, CancellationToken ct)
     {
         var apiKey = ctx.HttpContext.Request.Query.TryGetValue(_indexerApiKey, out var queryKey)
-                ? queryKey.ToString() : null;
+            ? queryKey.ToString()
+            : null;
 
         if (string.IsNullOrWhiteSpace(apiKey))
         {
@@ -27,7 +26,7 @@ public class IndexerAuthenticationPreProcessor<TRequest> : IPreProcessor<TReques
             return ctx.HttpContext.Response.SendErrorsAsync(ctx.ValidationFailures, cancellation: ct);
         }
 
-        if (apiKey != _sonarrSettings.ReaparrApiKey)
+        if (apiKey != _integrationsSettings.ReaparrApiKey)
             return ctx.HttpContext.Response.SendUnauthorizedAsync(cancellation: ct);
 
         return Task.CompletedTask;

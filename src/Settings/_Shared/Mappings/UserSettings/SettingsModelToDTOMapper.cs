@@ -20,15 +20,19 @@ public static class SettingsModelToDTOMapper
             ServerSettings = dto.ServerSettings.ToModel(),
         };
 
-    public static IntegrationsSettingsModule ToModel(this IntegrationsSettingsDTO dto) =>
-        new() { Sonarr = dto.Sonarr.ToModel(), Radarr = dto.Radarr.ToModel() };
+    public static IntegrationsSettings ToModel(this IntegrationsSettingsDTO dto) =>
+        new()
+        {
+            Sonarr = dto.Sonarr.ToModel(),
+            Radarr = dto.Radarr.ToModel(),
+            ReaparrApiKey = dto.ReaparrApiKey,
+        };
 
     public static SonarrSettings ToModel(this SonarrSettingsDTO dto) =>
         new()
         {
             SonarrBaseUrl = dto.SonarrBaseUrl,
             SonarrApiKey = dto.SonarrApiKey,
-            ReaparrApiKey = dto.ReaparrApiKey,
         };
 
     public static RadarrSettings ToModel(this RadarrSettingsDTO dto) =>
@@ -110,15 +114,19 @@ public static class SettingsModelToDTOMapper
             ServerSettings = model.ServerSettings.ToDTO(),
         };
 
-    public static IntegrationsSettingsDTO ToDTO(this IntegrationsSettingsModule module) =>
-        new() { Sonarr = module.Sonarr.ToDTO(), Radarr = module.Radarr.ToDTO() };
+    public static IntegrationsSettingsDTO ToDTO(this IntegrationsSettings module) =>
+        new()
+        {
+            ReaparrApiKey = module.ReaparrApiKey,
+            Sonarr = module.Sonarr.ToDTO(),
+            Radarr = module.Radarr.ToDTO(),
+        };
 
     public static SonarrSettingsDTO ToDTO(this SonarrSettings module) =>
         new()
         {
             SonarrBaseUrl = module.SonarrBaseUrl,
             SonarrApiKey = module.SonarrApiKey,
-            ReaparrApiKey = module.ReaparrApiKey,
         };
 
     public static RadarrSettingsDTO ToDTO(this RadarrSettings module) =>

@@ -20,5 +20,5 @@ public interface ISettingsModel
 
     DebugSettingsModule DebugSettings { get; init; }
 
-    IntegrationsSettingsModule IntegrationsSettings { get; init; }
+    IntegrationsSettings IntegrationsSettings { get; init; }
 }

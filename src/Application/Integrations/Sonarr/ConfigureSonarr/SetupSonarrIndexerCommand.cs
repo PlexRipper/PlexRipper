@@ -21,18 +21,21 @@ public class SetupSonarrIndexerCommandHandler
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
     private readonly ISonarrSettings _sonarrSettings;
+    private readonly IIntegrationsSettings _integrationsSettings;
 
     private readonly string _indexerName = "Reaparr";
 
     public SetupSonarrIndexerCommandHandler(
         ILogger log,
         ICommandExecutor commandExecutor,
-        ISonarrSettings sonarrSettings
+        ISonarrSettings sonarrSettings,
+        IIntegrationsSettings integrationsSettings
     )
     {
         _log = log.ForContext<SetupSonarrIndexerCommandHandler>();
         _commandExecutor = commandExecutor;
         _sonarrSettings = sonarrSettings;
+        _integrationsSettings = integrationsSettings;
     }
 
     public async Task<Result<SetupSonarrIndexerCommandResult>> ExecuteAsync(
@@ -113,7 +116,7 @@ public class SetupSonarrIndexerCommandHandler
             [
                 new SonarrIndexerContractFieldDTO { Name = "baseUrl", Value = baseUrl },
                 new SonarrIndexerContractFieldDTO { Name = "apiPath", Value = "/api" },
-                new SonarrIndexerContractFieldDTO { Name = "apiKey", Value = _sonarrSettings.ReaparrApiKey },
+                new SonarrIndexerContractFieldDTO { Name = "apiKey", Value = _integrationsSettings.ReaparrApiKey },
                 new SonarrIndexerContractFieldDTO
                 {
                     Name = "categories",

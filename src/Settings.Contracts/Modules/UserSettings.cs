@@ -61,7 +61,7 @@ public class UserSettings : IUserSettings
         init => _serverSettings = value;
     }
 
-    public IntegrationsSettingsModule IntegrationsSettings
+    public IntegrationsSettings IntegrationsSettings
     {
         get => _integrationsSettings;
         init => _integrationsSettings = value;
@@ -78,7 +78,7 @@ public class UserSettings : IUserSettings
     private DebugSettingsModule _debugSettings = DebugSettingsModule.Create();
     private PlexServerSettingsModule _serverSettings = PlexServerSettingsModule.Create();
     private AuthenticationModule _authenticationSettings = AuthenticationModule.Create();
-    private IntegrationsSettingsModule _integrationsSettings = IntegrationsSettingsModule.Create();
+    private IntegrationsSettings _integrationsSettings = IntegrationsSettings.Create();
 
     /// <summary>
     /// The <see cref="UserSettings"/> class is a wrapper class for the individual Settings.
@@ -117,7 +117,7 @@ public class UserSettings : IUserSettings
         _debugSettings = DebugSettingsModule.Create();
         _serverSettings = PlexServerSettingsModule.Create();
         _authenticationSettings = AuthenticationModule.Create();
-        _integrationsSettings = IntegrationsSettingsModule.Create();
+        _integrationsSettings = IntegrationsSettings.Create();
     }
 
     public UserSettings UpdateSettings(ISettingsModel sourceSettings)

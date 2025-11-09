@@ -4,14 +4,12 @@ public record SonarrSettings : BaseSettingsModule<SonarrSettings>, ISonarrSettin
 {
     private string _sonarrBaseUrl = string.Empty;
     private string _sonarrApiKey = string.Empty;
-    private string _reparrApiKey = string.Empty;
 
     public static SonarrSettings Create() =>
         new()
         {
             SonarrBaseUrl = "http://localhost:8989",
             SonarrApiKey = string.Empty,
-            ReaparrApiKey = Guid.NewGuid().ToString(),
         };
 
     /// <inheritdoc/>
@@ -28,12 +26,7 @@ public record SonarrSettings : BaseSettingsModule<SonarrSettings>, ISonarrSettin
         set => SetProperty(ref _sonarrApiKey, value);
     }
 
-    /// <inheritdoc/>
-    public required string ReaparrApiKey
-    {
-        get => _reparrApiKey;
-        set => SetProperty(ref _reparrApiKey, value);
-    }
+
 
     public bool IsValidUrl() =>
         !string.IsNullOrWhiteSpace(SonarrBaseUrl)

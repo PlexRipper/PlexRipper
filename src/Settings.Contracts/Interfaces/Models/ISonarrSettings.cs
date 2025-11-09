@@ -13,10 +13,7 @@ public interface ISonarrSettings
     /// </summary>
     string SonarrApiKey { get; set; }
 
-    /// <summary>
-    /// Gets or sets the Reaparr API Key used by Sonarr to send API calls to Reaparr.
-    /// </summary>
-    string ReaparrApiKey { get; set; }
+
 
     bool IsValidUrl();
 

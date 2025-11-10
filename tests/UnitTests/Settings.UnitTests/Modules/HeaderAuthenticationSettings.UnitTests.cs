@@ -1,6 +1,4 @@
 using Reaparr.Settings.Contracts;
-using Shouldly;
-using Xunit;
 
 namespace Reaparr.Settings.UnitTests;
 
@@ -42,7 +40,7 @@ public class HeaderAuthenticationSettingsUnitTests
         var settings = HeaderAuthenticationSettings.Create();
         settings.Enabled = true;
         settings.MaxHeaderLength = 100;
-        settings.TrustedProxies = new List<string> { "192.168.1.0/24", "10.0.0.1" };
+        settings.TrustedProxies = ["192.168.1.0/24", "10.0.0.1"];
 
         // Act
         var isValid = settings.IsValid();
@@ -87,7 +85,7 @@ public class HeaderAuthenticationSettingsUnitTests
         // Arrange
         var settings = HeaderAuthenticationSettings.Create();
         settings.Enabled = true;
-        settings.TrustedProxies = new List<string> { "invalid-ip" };
+        settings.TrustedProxies = ["invalid-ip"];
 
         // Act
         var isValid = settings.IsValid();
@@ -102,7 +100,7 @@ public class HeaderAuthenticationSettingsUnitTests
         // Arrange
         var settings = HeaderAuthenticationSettings.Create();
         settings.Enabled = true;
-        settings.TrustedProxies = new List<string> { "192.168.1.0/33" };
+        settings.TrustedProxies = ["192.168.1.0/33"];
 
         // Act
         var isValid = settings.IsValid();
@@ -117,14 +115,7 @@ public class HeaderAuthenticationSettingsUnitTests
         // Arrange
         var settings = HeaderAuthenticationSettings.Create();
         settings.Enabled = true;
-        settings.TrustedProxies = new List<string>
-        {
-            "192.168.1.0/24",
-            "10.0.0.0/8",
-            "172.16.0.0/12",
-            "127.0.0.1",
-            "::1",
-        };
+        settings.TrustedProxies = ["192.168.1.0/24", "10.0.0.0/8", "172.16.0.0/12", "127.0.0.1", "::1"];
 
         // Act
         var isValid = settings.IsValid();
@@ -139,7 +130,7 @@ public class HeaderAuthenticationSettingsUnitTests
         // Arrange
         var settings = HeaderAuthenticationSettings.Create();
         settings.Enabled = true;
-        settings.TrustedProxies = new List<string> { "::1", "2001:db8::1", "2001:db8::/32", "fe80::1" };
+        settings.TrustedProxies = ["::1", "2001:db8::1", "2001:db8::/32", "fe80::1"];
 
         // Act
         var isValid = settings.IsValid();
@@ -169,7 +160,7 @@ public class HeaderAuthenticationSettingsUnitTests
         // Arrange
         var settings = HeaderAuthenticationSettings.Create();
         settings.Enabled = true;
-        settings.TrustedProxies = new List<string> { input };
+        settings.TrustedProxies = [input];
 
         // Act
         var isValid = settings.IsValid();
@@ -233,27 +224,12 @@ public class HeaderAuthenticationSettingsUnitTests
     }
 
     [Fact]
-    public void ShouldBeValid_WhenTrustedProxiesIsNull()
-    {
-        // Arrange
-        var settings = HeaderAuthenticationSettings.Create();
-        settings.Enabled = true;
-        settings.TrustedProxies = null!;
-
-        // Act
-        var isValid = settings.IsValid();
-
-        // Assert
-        isValid.ShouldBeTrue();
-    }
-
-    [Fact]
     public void ShouldBeValid_WhenTrustedProxiesIsEmpty()
     {
         // Arrange
         var settings = HeaderAuthenticationSettings.Create();
         settings.Enabled = true;
-        settings.TrustedProxies = new List<string>();
+        settings.TrustedProxies = [];
 
         // Act
         var isValid = settings.IsValid();
@@ -268,7 +244,7 @@ public class HeaderAuthenticationSettingsUnitTests
         // Arrange
         var settings = HeaderAuthenticationSettings.Create();
         settings.Enabled = true;
-        settings.TrustedProxies = new List<string> { "" };
+        settings.TrustedProxies = [""];
 
         // Act
         var isValid = settings.IsValid();
@@ -283,7 +259,7 @@ public class HeaderAuthenticationSettingsUnitTests
         // Arrange
         var settings = HeaderAuthenticationSettings.Create();
         settings.Enabled = true;
-        settings.TrustedProxies = new List<string> { null! };
+        settings.TrustedProxies = [null!];
 
         // Act
         var isValid = settings.IsValid();
@@ -298,7 +274,7 @@ public class HeaderAuthenticationSettingsUnitTests
         // Arrange
         var settings = HeaderAuthenticationSettings.Create();
         settings.Enabled = true;
-        settings.TrustedProxies = new List<string> { "   " };
+        settings.TrustedProxies = ["   "];
 
         // Act
         var isValid = settings.IsValid();
@@ -318,7 +294,7 @@ public class HeaderAuthenticationSettingsUnitTests
         updatedSettings.MaxHeaderLength = 512;
         updatedSettings.RequireHttps = false;
         updatedSettings.EnableLogging = false;
-        updatedSettings.TrustedProxies = new List<string> { "192.168.1.1" };
+        updatedSettings.TrustedProxies = ["192.168.1.1"];
 
         // Act
         originalSettings.Update(updatedSettings);

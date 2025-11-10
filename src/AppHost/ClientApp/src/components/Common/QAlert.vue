@@ -37,9 +37,35 @@ const props = withDefaults(defineProps<{
 });
 
 const classConfig = computed(() => {
+	let normalizedType: string;
+
+	switch (props.type) {
+		case 'success':
+		case NotificationLevel.Success:
+			normalizedType = 'success';
+			break;
+		case 'info':
+		case NotificationLevel.Information:
+		case NotificationLevel.Debug:
+			normalizedType = 'info';
+			break;
+		case 'warning':
+		case NotificationLevel.Warning:
+			normalizedType = 'warning';
+			break;
+		case 'error':
+		case NotificationLevel.Error:
+		case NotificationLevel.Fatal:
+			normalizedType = 'error';
+			break;
+		default:
+			normalizedType = 'info';
+			break;
+	}
+
 	return {
 		'q-alert': true,
-		[`q-alert--${props.type}`]: true,
+		[`q-alert--${normalizedType}`]: true,
 	};
 });
 
@@ -77,6 +103,11 @@ const alertIcon = computed((): string => {
   transition: 0.3s cubic-bezier(0.25, 0.8, 0.5, 1);
   border: 1px solid;
   border-radius: 4px;
+
+  &--success {
+    border-color: $success-color;
+    color: $success-color;
+  }
 
   &--error {
     border-color: $error-color;

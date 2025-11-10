@@ -1,4 +1,3 @@
-using System.Reflection;
 using Autofac;
 using Module = Autofac.Module;
 

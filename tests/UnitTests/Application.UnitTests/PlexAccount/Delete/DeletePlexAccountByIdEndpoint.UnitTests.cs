@@ -30,7 +30,7 @@ public class DeletePlexAccountByIdEndpointUnitTests : BaseUnitTest
         IDbContext.PlexMovies.ShouldNotBeEmpty();
         IDbContext.PlexTvShows.ShouldNotBeEmpty();
 
-        mock.SendRefreshNotification();
+        Mock.SendRefreshNotification();
 
         // Act
         var ep = SetupEndpointUnitTest<DeletePlexAccountByIdEndpoint>();

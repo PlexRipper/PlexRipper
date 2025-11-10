@@ -10,7 +10,7 @@ public static partial class FakeData
         return faker
             .StrictMode(true)
             .Ignore(x => x.Id)
-            .RuleFor(x => x.Key, _ => GetUniqueNumber())
+            .RuleFor(x => x.PlexId, _ => GetUniqueNumber())
             .RuleFor(x => x.Title, f => f.PlexMedia().MediaTitle(downloadTaskType))
             .RuleFor(x => x.FullTitle, (_, x) => x.Title)
             .RuleFor(x => x.DownloadStatus, _ => DownloadStatus.Queued)
@@ -38,6 +38,7 @@ public static partial class FakeData
     {
         return faker
             .ApplyDownloadTaskBase(downloadTaskType)
+            .Ignore(x => x.HashId)
             .Ignore(x => x.DataReceived)
             .Ignore(x => x.DownloadSpeed)
             .Ignore(x => x.FileTransferSpeed)

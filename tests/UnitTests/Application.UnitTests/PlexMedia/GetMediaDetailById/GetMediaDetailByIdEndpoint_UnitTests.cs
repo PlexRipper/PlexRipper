@@ -3,11 +3,11 @@ using Reaparr.Application.Contracts.Validators;
 
 namespace Reaparr.Application.UnitTests;
 
-public class GetMediaDetailByIdEndpoint_UnitTests : BaseUnitTest<GetMediaDetailByIdEndpoint>
+public class GetMediaDetailByIdEndpointUnitTests : BaseUnitTest<GetMediaDetailByIdEndpoint>
 {
     private PlexMediaDTOValidator PlexMediaDtoValidator => new();
 
-    public GetMediaDetailByIdEndpoint_UnitTests(ITestOutputHelper output)
+    public GetMediaDetailByIdEndpointUnitTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]

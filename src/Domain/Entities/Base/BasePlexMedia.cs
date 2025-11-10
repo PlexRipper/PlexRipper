@@ -117,27 +117,30 @@ public class BasePlexMedia : BaseEntity
 
     /// <summary>
     /// Gets or sets the IMDB guid.
-    /// Note: this is only the unique identifier part, and not including "imdb://".
+    /// Note: this is only the unique identifier part and not including "imdb://".
     /// <example>imdb://imdb0397306</example>
     /// </summary>
     [Column(Order = 24)]
+    // ReSharper disable once InconsistentNaming
     public required string? Guid_IMDB { get; init; }
 
     /// <summary>
     /// Gets or sets the TMDB guid.
-    /// Note: this is only the unique identifier part, and not including "tmdb://".
+    /// Note: this is only the unique identifier part and not including "tmdb://".
     /// <example>tmdb://1433</example>
     /// </summary>
     [Column(Order = 25)]
-    public required string? Guid_TMDB { get; init; }
+    // ReSharper disable once InconsistentNaming
+    public required int? Guid_TMDB { get; init; }
 
     /// <summary>
     /// Gets or sets the TVDB guid.
-    /// Note: this is only the unique identifier part, and not including "tvdb://".
+    /// Note: this is only the unique identifier part and not including "tvdb://".
     /// <example>tvdb://73141</example>
     /// </summary>
     [Column(Order = 26)]
-    public required string? Guid_TVDB { get; init; }
+    // ReSharper disable once InconsistentNaming
+    public required int? Guid_TVDB { get; init; }
 
     #endregion
 

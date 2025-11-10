@@ -44,8 +44,12 @@ COPY ["src/FluentResultExtensions/FluentResultExtensions.csproj", "src/FluentRes
 COPY ["src/Logging/Logging.csproj", "src/Logging/"]
 
 ## Core Projects
+### Application Projects
 COPY ["src/Application/Application.csproj", "src/Application/"]
 COPY ["src/Application.Contracts/Application.Contracts.csproj", "src/Application.Contracts/"]
+### Public API Projects
+COPY ["src/PublicAPI/PublicAPI.csproj", "src/PublicAPI/"]
+COPY ["src/PublicAPI.Contracts/PublicAPI.Contracts.csproj", "src/PublicAPI.Contracts/"]
 
 ## Infrastructure Projects
 ### Data Access
@@ -82,10 +86,10 @@ RUN dotnet publish "AppHost.csproj" -c Release -o /app/publish \
     -p:UseAppHost=false
 
 # Stage 3 - Runtime Image
-FROM --platform=$TARGETPLATFORM mcr.microsoft.com/dotnet/aspnet:9.0-alpine AS dotnet-runtime
+FROM mcr.microsoft.com/dotnet/aspnet:9.0-alpine AS dotnet-runtime
 
 # Stage 4 - Final Image with s6-overlay
-FROM --platform=$TARGETPLATFORM ghcr.io/linuxserver/baseimage-alpine:3.20 AS final
+FROM ghcr.io/linuxserver/baseimage-alpine:3.20 AS final
 
 ARG VERSION
 ARG INFORMATIONAL_VERSION
@@ -131,6 +135,10 @@ LABEL company="Reaparr" \
       
 EXPOSE ${PORT}
 VOLUME /Config /Downloads /Movies /TvShows
+
+# Use the non-root 'abc' user provided by linuxserver baseimage for security.
+# The s6 service script already execs the app as 'abc' (see s6-setuidgid abc).
+USER abc
 
 # Set the entrypoint to use s6-overlay
 ENTRYPOINT ["/init"]

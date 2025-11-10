@@ -2,9 +2,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Reaparr.Application.UnitTests.ClearCompleted;
 
-public class ClearCompletedDownloadTasksEndpoint_UnitTests : BaseUnitTest<ClearCompletedDownloadTasksEndpoint>
+public class ClearCompletedDownloadTasksEndpointUnitTests : BaseUnitTest<ClearCompletedDownloadTasksEndpoint>
 {
-    public ClearCompletedDownloadTasksEndpoint_UnitTests(ITestOutputHelper output)
+    public ClearCompletedDownloadTasksEndpointUnitTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]

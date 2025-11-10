@@ -3,7 +3,7 @@ using FastEndpoints;
 using Reaparr.Application;
 using Reaparr.Application.Contracts;
 
-namespace Reaparr.IntegrationTests.PlexAccounts.RefreshAccess;
+namespace Reaparr.IntegrationTests;
 
 public class RefreshPlexAccountAccessEndpointIntegrationTestsIntegrationTests : BaseIntegrationTests
 {

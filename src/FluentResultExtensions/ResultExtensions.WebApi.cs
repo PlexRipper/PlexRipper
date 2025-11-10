@@ -153,7 +153,7 @@ public static partial class ResultExtensions
     private static Result AddStatusCodeSuccess(this Result result, int statusCode, string message = "") =>
         result.AddStatusCodeSuccess(GetStatusCodeSuccess(statusCode, message));
 
-    private static Result AddStatusCodeSuccess(this Result result, Success Success) => result.WithSuccess(Success);
+    private static Result AddStatusCodeSuccess(this Result result, Success success) => result.WithSuccess(success);
 
     private static Result<T> AddStatusCodeSuccess<T>(this Result<T> result, int statusCode, string message = "") =>
         result.AddStatusCodeSuccess(GetStatusCodeSuccess(statusCode, message));

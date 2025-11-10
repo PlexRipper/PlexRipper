@@ -22,6 +22,7 @@ public abstract class BaseEndpoint<TRequest> : Endpoint<TRequest, BaseResultDTO>
     }
 }
 
+// ReSharper disable once InconsistentNaming
 public abstract class BaseEndpoint<TRequest, TDTO> : BaseEndpoint<TRequest>
     where TRequest : class
 {

@@ -1,4 +1,5 @@
 ﻿using System.IO.Abstractions.TestingHelpers;
+using Autofac;
 using Reaparr.Data.Contracts;
 using Reaparr.Settings.Contracts;
 
@@ -22,4 +23,9 @@ public class UnitTestDataConfig : BaseConfig<UnitTestDataConfig>
     public Action<PlexApiDataConfig>? BaseMockHttpClientOptions { get; set; }
 
     public Action<MockFileSystem, IReaparrDbContext>? FileSystemOptions { get; set; }
+
+    /// <summary>
+    /// Optional per-test Autofac overrides. Invoked after TestModule registration so last registration wins.
+    /// </summary>
+    public Action<ContainerBuilder>? OverrideServices { get; set; }
 }

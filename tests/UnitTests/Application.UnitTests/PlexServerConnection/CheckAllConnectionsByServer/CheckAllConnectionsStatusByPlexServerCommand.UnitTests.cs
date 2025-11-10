@@ -25,7 +25,7 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
 
         // Act
         var request = new CheckAllConnectionsStatusByPlexServerCommand(plexServer.Id);
-        var result = await _sut.ExecuteAsync(request, CancellationToken);
+        var result = await Sut.ExecuteAsync(request, CancellationToken);
 
         // Assert
         result.ShouldNotBeNull();
@@ -40,7 +40,7 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
         var request = new CheckAllConnectionsStatusByPlexServerCommand(999);
 
         // Act
-        var result = await _sut.ExecuteAsync(request, CancellationToken);
+        var result = await Sut.ExecuteAsync(request, CancellationToken);
 
         // Assert
         result.ShouldNotBeNull();
@@ -66,7 +66,7 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
         var request = new CheckAllConnectionsStatusByPlexServerCommand(plexServer.Id);
 
         // Act
-        var result = await _sut.ExecuteAsync(request, CancellationToken);
+        var result = await Sut.ExecuteAsync(request, CancellationToken);
 
         // Assert
         result.ShouldNotBeNull();
@@ -106,14 +106,14 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
 
         await dbContext.SaveChangesAsync(CancellationToken);
 
-        mock.Mock<ISignalRService>()
+        Mock.Mock<ISignalRService>()
             .Setup(m =>
                 m.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>(), It.IsAny<CancellationToken>())
             )
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Once);
 
-        mock.SetupCommand(It.IsAny<CheckConnectionStatusByIdCommand>)
+        Mock.SetupCommand(It.IsAny<CheckConnectionStatusByIdCommand>)
             .ReturnsAsync(
                 (CheckConnectionStatusByIdCommand req, CancellationToken _) =>
                     Result.Ok(
@@ -129,13 +129,13 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
             )
             .Verifiable(Times.AtLeastOnce);
 
-        mock.PublishEvent(It.IsAny<ServerOnlineStatusChangedNotification>)
+        Mock.PublishEvent(It.IsAny<ServerOnlineStatusChangedNotification>)
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Once);
 
         // Act
         var request = new CheckAllConnectionsStatusByPlexServerCommand(1);
-        var result = await _sut.ExecuteAsync(request, CancellationToken);
+        var result = await Sut.ExecuteAsync(request, CancellationToken);
 
         // Assert
         result.ShouldNotBeNull();
@@ -175,14 +175,14 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
 
         await dbContext.SaveChangesAsync(CancellationToken);
 
-        mock.Mock<ISignalRService>()
+        Mock.Mock<ISignalRService>()
             .Setup(m =>
                 m.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>(), It.IsAny<CancellationToken>())
             )
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Once);
 
-        mock.SetupCommand(It.IsAny<CheckConnectionStatusByIdCommand>)
+        Mock.SetupCommand(It.IsAny<CheckConnectionStatusByIdCommand>)
             .ReturnsAsync(
                 (CheckConnectionStatusByIdCommand req, CancellationToken _) =>
                     Result.Ok(
@@ -198,13 +198,13 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
             )
             .Verifiable(Times.AtLeastOnce);
 
-        mock.PublishEvent(It.IsAny<ServerOnlineStatusChangedNotification>)
+        Mock.PublishEvent(It.IsAny<ServerOnlineStatusChangedNotification>)
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Never);
 
         // Act
         var request = new CheckAllConnectionsStatusByPlexServerCommand(1);
-        var result = await _sut.ExecuteAsync(request, CancellationToken);
+        var result = await Sut.ExecuteAsync(request, CancellationToken);
 
         // Assert
         result.ShouldNotBeNull();

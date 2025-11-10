@@ -10,11 +10,17 @@ public static partial class PlexMediaDataMapper
     private static string? GetImdbId(this List<MetaDataGuidsDTO> guids) =>
         guids.Find(x => x.Id.Contains("imdb"))?.Id.Replace("imdb://", "");
 
-    private static string? GetTmdbId(this List<MetaDataGuidsDTO> guids) =>
-        guids.Find(x => x.Id.Contains("tmdb"))?.Id.Replace("tmdb://", "");
+    private static int? GetTmdbId(this List<MetaDataGuidsDTO> guids)
+    {
+        var id = guids.Find(x => x.Id.Contains("tmdb"))?.Id.Replace("tmdb://", "");
+        return int.TryParse(id, out var result) ? result : null;
+    }
 
-    private static string? GetTvdbId(this List<MetaDataGuidsDTO> guids) =>
-        guids.Find(x => x.Id.Contains("tvdb"))?.Id.Replace("tvdb://", "");
+    private static int? GetTvdbId(this List<MetaDataGuidsDTO> guids)
+    {
+        var id = guids.Find(x => x.Id.Contains("tvdb"))?.Id.Replace("tvdb://", "");
+        return int.TryParse(id, out var result) ? result : null;
+    }
 
     /// <summary>
     /// Retrieves the MetaDataKey from either the ThumbUrl,BannerUrl, ArtUrl or ThemeUrl.

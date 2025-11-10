@@ -1,6 +1,4 @@
 using FastEndpoints;
-using FluentResults;
-using Reaparr.Domain;
 
 namespace Reaparr.PlexApi.Contracts.GetLibraryMedia;
 

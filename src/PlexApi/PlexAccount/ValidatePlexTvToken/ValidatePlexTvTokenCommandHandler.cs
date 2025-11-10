@@ -1,9 +1,7 @@
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using FastEndpoints;
 using FluentValidation;
-using Reaparr.Domain;
 using Reaparr.PlexApi.Contracts;
 
 namespace Reaparr.PlexApi;
@@ -19,19 +17,13 @@ public class ValidatePlexTokenCommandValidator : Validator<ValidatePlexTokenComm
 public class ValidatePlexTvTokenCommandHandler
     : ICommandHandler<ValidatePlexTokenCommand, Result<ValidatePlexTokenCommandResult>>
 {
-    private readonly IPlexApiClientFactory _plexApiClientFactory;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger _log;
 
-    public ValidatePlexTvTokenCommandHandler(
-        ILogger log,
-        IPlexApiClientFactory plexApiClientFactory,
-        IHttpClientFactory httpClientFactory
-    )
+    public ValidatePlexTvTokenCommandHandler(ILogger log, IHttpClientFactory httpClientFactory)
     {
         _log = log.ForContext<ValidatePlexTvTokenCommandHandler>();
 
-        _plexApiClientFactory = plexApiClientFactory;
         _httpClientFactory = httpClientFactory;
     }
 

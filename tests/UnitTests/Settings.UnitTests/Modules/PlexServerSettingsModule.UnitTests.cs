@@ -1,10 +1,10 @@
 using Reaparr.Settings.Contracts;
 
-namespace Reaparr.Settings.UnitTests.Modules;
+namespace Reaparr.Settings.UnitTests;
 
-public class PlexServerSettingsModule_UnitTests : BaseUnitTest<PlexServerSettingsModule>
+public class PlexServerSettingsModuleUnitTests : BaseUnitTest<PlexServerSettingsModule>
 {
-    public PlexServerSettingsModule_UnitTests(ITestOutputHelper output)
+    public PlexServerSettingsModuleUnitTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]

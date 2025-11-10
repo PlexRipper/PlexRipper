@@ -19,7 +19,7 @@ public class IFileSystemExtensionsUnitTests : BaseUnitTest
         SetupFileSystem();
 
         // Act
-        var sut = mock.Container.Resolve<IPath>();
+        var sut = Mock.Container.Resolve<IPath>();
         var result = sut.GetAvailableSpaceByDirectory(path);
 
         // Assert
@@ -40,7 +40,7 @@ public class IFileSystemExtensionsUnitTests : BaseUnitTest
         });
 
         // Act
-        var sut = mock.Container.Resolve<IPath>();
+        var sut = Mock.Container.Resolve<IPath>();
         var result = sut.GetAvailableSpaceByDirectory(path);
 
         // Assert
@@ -61,7 +61,7 @@ public class IFileSystemExtensionsUnitTests : BaseUnitTest
         });
 
         // Act
-        var sut = mock.Container.Resolve<IPath>();
+        var sut = Mock.Container.Resolve<IPath>();
         var result = sut.GetAvailableSpaceByDirectory(path);
 
         // Assert
@@ -79,7 +79,7 @@ public class IFileSystemExtensionsUnitTests : BaseUnitTest
         SetupFileSystem();
 
         // Act
-        var sut = mock.Container.Resolve<IPath>();
+        var sut = Mock.Container.Resolve<IPath>();
         var result = sut.GetAvailableSpaceByDirectory(path);
 
         // Assert

@@ -1,6 +1,4 @@
 ﻿using Autofac;
-using Reaparr.Application;
-using Reaparr.Application.Contracts;
 
 namespace Reaparr.AppHost;
 

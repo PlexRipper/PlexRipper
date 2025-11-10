@@ -16,13 +16,13 @@ public partial class BaseUnitTest
     private Action<ContainerBuilder>? _fileSystemSetup;
     private Action<ContainerBuilder>? _httpClientSetup;
     private readonly MockFileSystem _fileSystem = new();
-    protected AutoMock mock { get; set; }
+    protected AutoMock Mock { get; set; }
 
     protected long DefaultAvailableSpace = (long)ByteSize.FromGigaBytes(1000).Bytes;
 
     private void Build()
     {
-        mock = AutoMock.GetStrict(builder =>
+        Mock = AutoMock.GetStrict(builder =>
         {
             SetDefaultBuilder(builder);
 
@@ -43,7 +43,7 @@ public partial class BaseUnitTest
         });
 
         // Mock to avoid HttpClient.Dispose() not mocked exception
-        mock.Mock<IPlexApiClient>().Setup(x => x.Dispose());
+        Mock.Mock<IPlexApiClient>().Setup(x => x.Dispose());
     }
 
     private void SetDefaultBuilder(ContainerBuilder builder)
@@ -52,9 +52,9 @@ public partial class BaseUnitTest
             .Register<ILogger>(
                 (_, _) =>
                 {
-                    var logConfig = new TestLogConfig(_output);
-                    LogManager.SetupLogging(_logEventLevel); //TODO might need to be removed if LogManager
-                    return logConfig.GetLogger(_logEventLevel);
+                    var logConfig = new TestLogConfig(Output);
+                    LogManager.SetupLogging(LogEventLevel); //TODO might need to be removed if LogManager
+                    return logConfig.GetLogger(LogEventLevel);
                 }
             )
             .SingleInstance();

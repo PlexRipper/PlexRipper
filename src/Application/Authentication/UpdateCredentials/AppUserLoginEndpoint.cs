@@ -1,7 +1,5 @@
 using FastEndpoints;
 using FluentValidation;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Identity.Contracts;
 

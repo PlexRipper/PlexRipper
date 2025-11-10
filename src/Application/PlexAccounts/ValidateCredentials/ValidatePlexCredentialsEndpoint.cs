@@ -20,7 +20,7 @@ public record ValidatePlexCredentialsEndpointRequest
     public required string VerificationCode { get; set; }
 }
 
-public record ValidatePlexCredentialsDTO()
+public record ValidatePlexCredentialsDTO
 {
     public required bool IsUnAuthorized { get; init; }
 

@@ -2,7 +2,7 @@ namespace Reaparr.BaseTests;
 
 public static class PlexTvShowTitlesDataset
 {
-    public static readonly Lazy<HashSet<string>> PlexTVShowTitles = new(() =>
+    public static readonly Lazy<HashSet<string>> PlexTvShowTitles = new(() =>
 
         [
             "2gether",

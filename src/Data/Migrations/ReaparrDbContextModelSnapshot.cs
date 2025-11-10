@@ -485,8 +485,9 @@ namespace Reaparr.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnOrder(14);
 
-                    b.Property<int>("Key")
+                    b.Property<long>("PlexId")
                         .HasColumnType("INTEGER")
+                        .HasColumnName("Key")
                         .HasColumnOrder(1);
 
                     b.Property<int>("PlexLibraryId")
@@ -1164,12 +1165,12 @@ namespace Reaparr.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnOrder(24);
 
-                    b.Property<string>("Guid_TMDB")
-                        .HasColumnType("TEXT")
+                    b.Property<int?>("Guid_TMDB")
+                        .HasColumnType("INTEGER")
                         .HasColumnOrder(25);
 
-                    b.Property<string>("Guid_TVDB")
-                        .HasColumnType("TEXT")
+                    b.Property<int?>("Guid_TVDB")
+                        .HasColumnType("INTEGER")
                         .HasColumnOrder(26);
 
                     b.Property<bool>("HasArt")
@@ -1906,12 +1907,12 @@ namespace Reaparr.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnOrder(24);
 
-                    b.Property<string>("Guid_TMDB")
-                        .HasColumnType("TEXT")
+                    b.Property<int?>("Guid_TMDB")
+                        .HasColumnType("INTEGER")
                         .HasColumnOrder(25);
 
-                    b.Property<string>("Guid_TVDB")
-                        .HasColumnType("TEXT")
+                    b.Property<int?>("Guid_TVDB")
+                        .HasColumnType("INTEGER")
                         .HasColumnOrder(26);
 
                     b.Property<bool>("HasArt")
@@ -2061,6 +2062,9 @@ namespace Reaparr.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(6);
 
+                    b.Property<int>("EpisodeNumber")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("FullTitle")
                         .IsRequired()
                         .HasColumnType("TEXT")
@@ -2075,12 +2079,12 @@ namespace Reaparr.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnOrder(24);
 
-                    b.Property<string>("Guid_TMDB")
-                        .HasColumnType("TEXT")
+                    b.Property<int?>("Guid_TMDB")
+                        .HasColumnType("INTEGER")
                         .HasColumnOrder(25);
 
-                    b.Property<string>("Guid_TVDB")
-                        .HasColumnType("TEXT")
+                    b.Property<int?>("Guid_TVDB")
+                        .HasColumnType("INTEGER")
                         .HasColumnOrder(26);
 
                     b.Property<bool>("HasArt")
@@ -2604,12 +2608,12 @@ namespace Reaparr.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnOrder(24);
 
-                    b.Property<string>("Guid_TMDB")
-                        .HasColumnType("TEXT")
+                    b.Property<int?>("Guid_TMDB")
+                        .HasColumnType("INTEGER")
                         .HasColumnOrder(25);
 
-                    b.Property<string>("Guid_TVDB")
-                        .HasColumnType("TEXT")
+                    b.Property<int?>("Guid_TVDB")
+                        .HasColumnType("INTEGER")
                         .HasColumnOrder(26);
 
                     b.Property<bool>("HasArt")
@@ -2660,6 +2664,9 @@ namespace Reaparr.Data.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(5);
+
+                    b.Property<int>("SeasonNumber")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("SortIndex")
                         .HasColumnType("INTEGER")
@@ -2778,6 +2785,10 @@ namespace Reaparr.Data.Migrations
                     b.Property<long>("FileTransferSpeed")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(19);
+
+                    b.Property<string>("HashId")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(13);
 
                     b.Property<string>("Quality")
                         .IsRequired()

@@ -15,7 +15,7 @@ public class GetAllBackgroundJobsEndpointUnitTests : BaseUnitTest<GetAllBackgrou
     public async Task ShouldReturnEmptyList_WhenNoBackgroundJobIsRunning()
     {
         // Arrange
-        mock.Mock<ISchedulerService>().Setup(x => x.GetRunningJobUpdates()).ReturnsAsync([]);
+        Mock.Mock<ISchedulerService>().Setup(x => x.GetRunningJobUpdates()).ReturnsAsync([]);
 
         // Act
         var rawResponse = SetupEndpointUnitTest<GetAllBackgroundJobsEndpoint>();
@@ -36,7 +36,7 @@ public class GetAllBackgroundJobsEndpointUnitTests : BaseUnitTest<GetAllBackgrou
         // Arrange
         var jobUpdate = new JobStatusUpdate<string>(JobTypes.DownloadJob, JobStatus.Started, Guid.NewGuid().ToString());
         var list = new List<JobStatusUpdate<string>> { jobUpdate };
-        mock.Mock<ISchedulerService>().Setup(x => x.GetRunningJobUpdates()).ReturnsAsync(list);
+        Mock.Mock<ISchedulerService>().Setup(x => x.GetRunningJobUpdates()).ReturnsAsync(list);
 
         // Act
         var rawResponse = SetupEndpointUnitTest<GetAllBackgroundJobsEndpoint>();
@@ -82,7 +82,7 @@ public class GetAllBackgroundJobsEndpointUnitTests : BaseUnitTest<GetAllBackgrou
 
         var inspectPlexServerJobUpdatePayload = new InspectPlexServerJobUpdateDTO
         {
-            PlexServerIds = new List<int> { 1, 2, 3, 4, 5 },
+            PlexServerIds = [1, 2, 3, 4, 5],
         };
         var inspectPlexServerJobUpdate = new JobStatusUpdate<string>(
             JobTypes.InspectPlexServerJob,
@@ -137,7 +137,7 @@ public class GetAllBackgroundJobsEndpointUnitTests : BaseUnitTest<GetAllBackgrou
             checkAllConnectionsStatusJobUpdate,
         };
 
-        mock.Mock<ISchedulerService>().Setup(x => x.GetRunningJobUpdates()).ReturnsAsync(list);
+        Mock.Mock<ISchedulerService>().Setup(x => x.GetRunningJobUpdates()).ReturnsAsync(list);
 
         // Act
         var rawResponse = SetupEndpointUnitTest<GetAllBackgroundJobsEndpoint>();

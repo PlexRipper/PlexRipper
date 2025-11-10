@@ -11,7 +11,7 @@ public record HeaderAuthenticationSettings
 {
     private bool _enabled;
     private HeaderMappingType _mappingType = HeaderMappingType.Username;
-    private List<string> _trustedProxies = new();
+    private List<string> _trustedProxies = [];
     private bool _enableLogging = true;
     private int _maxHeaderLength = 256;
     private bool _requireHttps = true;
@@ -78,7 +78,7 @@ public record HeaderAuthenticationSettings
         {
             Enabled = false,
             MappingType = HeaderMappingType.Username,
-            TrustedProxies = new List<string>(),
+            TrustedProxies = [],
             EnableLogging = true,
             MaxHeaderLength = 256,
             RequireHttps = true,
@@ -96,17 +96,15 @@ public record HeaderAuthenticationSettings
             return false;
 
         // Validate trusted proxies are valid IP addresses or CIDR ranges
-        if (TrustedProxies != null)
-        {
-            foreach (var proxy in TrustedProxies)
-            {
-                if (string.IsNullOrWhiteSpace(proxy))
-                    return false;
 
-                // Check if it's a valid IP or CIDR
-                if (!IsValidIpOrCidr(proxy))
-                    return false;
-            }
+        foreach (var proxy in TrustedProxies)
+        {
+            if (string.IsNullOrWhiteSpace(proxy))
+                return false;
+
+            // Check if it's a valid IP or CIDR
+            if (!IsValidIpOrCidr(proxy))
+                return false;
         }
 
         return true;

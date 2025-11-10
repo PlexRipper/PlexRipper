@@ -21,8 +21,8 @@ public class RefreshLibraryProgressReporter : IRefreshLibraryProgressReporter
 {
     private readonly ISignalRService _signalRService;
 
-    private const int _baseCountProgress = 1000;
-    private const int _totalProgressSteps = 1;
+    private const int BASE_COUNT_PROGRESS = 1000;
+    private const int TOTAL_PROGRESS_STEPS = 1;
 
     public RefreshLibraryProgressReporter(ISignalRService signalRService)
     {
@@ -35,10 +35,10 @@ public class RefreshLibraryProgressReporter : IRefreshLibraryProgressReporter
         {
             PlexMediaType.TvShow => 5,
             PlexMediaType.Movie => 3,
-            _ => _totalProgressSteps,
+            _ => TOTAL_PROGRESS_STEPS,
         };
 
-        var countStep = (decimal)_baseCountProgress / totalProgressSteps;
+        var countStep = (decimal)BASE_COUNT_PROGRESS / totalProgressSteps;
         var index = countStep * update.Step + countStep * update.Percentage;
 
         var progress = new LibraryProgress
@@ -47,7 +47,7 @@ public class RefreshLibraryProgressReporter : IRefreshLibraryProgressReporter
             Id = update.PlexLibraryId,
             Step = update.Step,
             Received = (int)Math.Floor(index),
-            Total = _baseCountProgress,
+            Total = BASE_COUNT_PROGRESS,
             TotalSteps = totalProgressSteps,
         };
 

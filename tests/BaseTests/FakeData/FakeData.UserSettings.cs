@@ -4,7 +4,7 @@ namespace Reaparr.BaseTests;
 
 public static partial class FakeData
 {
-    private static readonly string[] ShortDateFormat =
+    private static readonly string[] _shortDateFormat =
     [
         "MMM dd yyyy",
         "dd MMM yyyy",
@@ -13,9 +13,9 @@ public static partial class FakeData
         "yyyy-MM-dd",
     ];
 
-    private static readonly string[] LongDateFormat = ["EEEE, MMMM dd, yyyy", "EEEE, dd MMMM yyyy"];
+    private static readonly string[] _longDateFormat = ["EEEE, MMMM dd, yyyy", "EEEE, dd MMMM yyyy"];
 
-    private static readonly string[] TimeFormat = ["HH:mm:ss", "pp"];
+    private static readonly string[] _timeFormat = ["HH:mm:ss", "pp"];
 
     public static Faker<UserSettings> GetSettingsModel(Seed seed, Action<UnitTestDataConfig>? options = null)
     {
@@ -30,7 +30,8 @@ public static partial class FakeData
             .RuleFor(x => x.DownloadManagerSettings, _ => GetDownloadManagerSettings(seed, options).Generate())
             .RuleFor(x => x.LanguageSettings, _ => GetLanguageSettings(seed, options).Generate())
             .RuleFor(x => x.DebugSettings, _ => GetDebugSettings(seed, options).Generate())
-            .RuleFor(x => x.ServerSettings, _ => GetServerSettings(seed, options).Generate());
+            .RuleFor(x => x.ServerSettings, _ => GetServerSettings(seed, options).Generate())
+            .RuleFor(x => x.IntegrationsSettings, _ => IntegrationsSettings.Create());
     }
 
     public static Faker<AuthenticationModule> GetAuthenticationSettings(Seed seed)
@@ -79,9 +80,9 @@ public static partial class FakeData
         return new Faker<DateTimeSettingsModule>()
             .StrictMode(true)
             .UseSeed(seed.Next())
-            .RuleFor(x => x.ShortDateFormat, f => f.PickRandom(ShortDateFormat))
-            .RuleFor(x => x.LongDateFormat, f => f.PickRandom(LongDateFormat))
-            .RuleFor(x => x.TimeFormat, f => f.PickRandom(TimeFormat))
+            .RuleFor(x => x.ShortDateFormat, f => f.PickRandom(_shortDateFormat))
+            .RuleFor(x => x.LongDateFormat, f => f.PickRandom(_longDateFormat))
+            .RuleFor(x => x.TimeFormat, f => f.PickRandom(_timeFormat))
             .RuleFor(x => x.TimeZone, f => f.Date.TimeZoneString())
             .RuleFor(x => x.ShowRelativeDates, f => f.Random.Bool());
     }
@@ -105,7 +106,7 @@ public static partial class FakeData
             .StrictMode(true)
             .UseSeed(seed.Next())
             .RuleFor(x => x.DownloadSegments, f => f.Random.Int(1, 3))
-            .RuleFor(x => x.KeepCompletedInDownloadFolder, f => false);
+            .RuleFor(x => x.KeepCompletedInDownloadFolder, _ => false);
     }
 
     public static Faker<LanguageSettingsModule> GetLanguageSettings(

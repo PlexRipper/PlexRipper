@@ -2,9 +2,8 @@ import Log from 'consola';
 import { defineStore, acceptHMRUpdate } from 'pinia';
 import { of, Subject, type Observable } from 'rxjs';
 import { debounceTime, switchMap, tap } from 'rxjs/operators';
-import type { SettingsModelDTO } from '@dto';
+import { PlexMediaType, type SettingsModelDTO, ViewMode } from '@dto';
 
-import { PlexMediaType, ViewMode } from '@dto';
 import type { ISetupResult } from '@interfaces';
 import { settingsApi } from '@api';
 import { cloneDeep } from 'lodash-es';
@@ -46,13 +45,25 @@ export const useSettingsStore = defineStore('SettingsStore', () => {
 			keepCompletedInDownloadFolder: false,
 		},
 		languageSettings: { language: 'en-US' },
+		integrationsSettings: {
+			downloadClientUsername: '',
+			downloadClientPassword: '',
+			reaparrApiKey: '',
+			sonarr: {
+				sonarrApiKey: '',
+				sonarrBaseUrl: '',
+			},
+			radarr: {
+				apiKey: '',
+				baseUrl: '',
+			},
+		},
 		serverSettings: {
 			data: [],
 		},
 	};
 
 	const state = reactive<SettingsModelDTO>(cloneDeep(defaultState));
-
 	const _settingsUpdated = new Subject<SettingsModelDTO>();
 
 	// Actions
@@ -107,6 +118,7 @@ export const useSettingsStore = defineStore('SettingsStore', () => {
 			state.downloadManagerSettings = settings.downloadManagerSettings;
 			state.languageSettings = settings.languageSettings;
 			state.serverSettings = settings.serverSettings;
+			state.integrationsSettings = settings.integrationsSettings;
 		},
 
 		updateDownloadLimit(machineIdentifier: string, downloadLimit: number) {
@@ -171,7 +183,6 @@ export const useSettingsStore = defineStore('SettingsStore', () => {
 	// Getters
 	const getters = {
 		debugMode: computed((): boolean => state.debugSettings.debugModeEnabled),
-
 		shouldMaskServerNames: computed((): boolean => state.debugSettings.debugModeEnabled && state.debugSettings.maskServerNames),
 		shouldMaskLibraryNames: computed((): boolean => state.debugSettings.debugModeEnabled && state.debugSettings.maskLibraryNames),
 	};

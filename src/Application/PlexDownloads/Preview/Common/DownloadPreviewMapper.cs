@@ -7,7 +7,7 @@ public static class DownloadPreviewMapper
     #region ToDTO
 
     private static int _currentId = 1;
-    private const int NoMediaDataId = -1;
+    private const int NO_MEDIA_DATA_ID = -1;
 
     public static DownloadPreviewDTO ToDTO(this DownloadPreview source) =>
         new()
@@ -114,7 +114,7 @@ public static class DownloadPreviewMapper
                 {
                     Quality = x.Quality,
                     MediaDataType = x.Type,
-                    DataId = NoMediaDataId,
+                    DataId = NO_MEDIA_DATA_ID,
                     MediaId = source.Id,
                 })
                 .ToList(),
@@ -144,7 +144,7 @@ public static class DownloadPreviewMapper
                 {
                     Quality = x.Quality,
                     MediaDataType = x.Type,
-                    DataId = NoMediaDataId,
+                    DataId = NO_MEDIA_DATA_ID,
                     MediaId = source.Id,
                 })
                 .ToList(),

@@ -17,6 +17,7 @@ using Reaparr.Environment;
 using Reaparr.Identity;
 using Reaparr.Identity.Contracts;
 using Reaparr.PlexApi;
+using Reaparr.PublicAPI;
 
 namespace Reaparr.AppHost;
 
@@ -36,7 +37,7 @@ public static partial class Startup
         services.AddCors(options =>
         {
             options.AddPolicy(
-                CORSConfiguration,
+                CorsConfiguration,
                 builder =>
                 {
                     builder
@@ -65,6 +66,7 @@ public static partial class Startup
                 // Reference the assemblies that contain the FastEndpoints or ICommand implementations
                 Assembly.GetAssembly(typeof(ApplicationModule))!,
                 Assembly.GetAssembly(typeof(PlexApiModule))!,
+                Assembly.GetAssembly(typeof(PublicApiModule))!,
             ];
         });
 
@@ -99,26 +101,24 @@ public static partial class Startup
                     );
                 });
 
-            services.SwaggerDocument(options =>
+            services.SwaggerDocument(o =>
             {
                 // https://fast-endpoints.com/docs/swagger-support#swagger-operation-tags
-                options.AutoTagPathSegmentIndex = 2;
+                o.AutoTagPathSegmentIndex = 2;
 
                 // https://fast-endpoints.com/docs/swagger-support#short-schema-names
-                options.ShortSchemaNames = true;
+                o.ShortSchemaNames = true;
 
-                options.EnableJWTBearerAuth = false;
+                o.EnableJWTBearerAuth = false;
 
                 // https://fast-endpoints.com/docs/swagger-support#removing-empty-schema
-                options.RemoveEmptyRequestSchema = true;
+                o.RemoveEmptyRequestSchema = true;
 
-                options.AutoTagPathSegmentIndex = 2;
+                o.FlattenSchema = true;
 
-                options.FlattenSchema = true;
+                o.EndpointFilter = ep => !ep.EndpointType.IsDefined(typeof(HideFromOpenApiAttribute));
 
-                options.EndpointFilter = ep => !ep.EndpointType.IsDefined(typeof(HideFromOpenApiAttribute));
-
-                options.SerializerSettings = serializerOptions =>
+                o.SerializerSettings = serializerOptions =>
                 {
                     var config = DefaultJsonSerializerOptions.ConfigStandard;
                     serializerOptions.PropertyNameCaseInsensitive = config.PropertyNameCaseInsensitive;
@@ -129,10 +129,11 @@ public static partial class Startup
                     serializerOptions.Converters.Add(new JsonStringEnumConverter());
                 };
 
-                // options.ExcludeNonFastEndpoints = true;
-                options.DocumentSettings = s =>
+                o.DocumentSettings = s =>
                 {
                     s.Title = "Reaparr Internal API  (NOT FOR EXTERNAL USE)";
+                    s.DocumentName = "internal";
+                    s.ApiGroupNames = ["Internal API"];
                     s.Version = "v1";
 
                     s.MarkNonNullablePropsAsRequired();
@@ -168,6 +169,24 @@ public static partial class Startup
                     s.OperationProcessors.Add(new OperationSecurityScopeProcessor("CookieAuth"));
                 };
             });
+
+            // Separate Swagger doc for Public API
+            services.SwaggerDocument(o =>
+            {
+                // https://fast-endpoints.com/docs/swagger-support#swagger-operation-tags
+                o.AutoTagPathSegmentIndex = 0;
+
+                // https://fast-endpoints.com/docs/swagger-support#short-schema-names
+                o.ShortSchemaNames = true;
+
+                o.DocumentSettings = s =>
+                {
+                    s.Title = "Public API";
+                    s.DocumentName = "public";
+                    s.ApiGroupNames = ["Public API"];
+                    s.Version = "v1";
+                };
+            });
         }
 
         services
@@ -177,6 +196,8 @@ public static partial class Startup
                 // TODO: Disable SSL Check, might be bad
                 ServerCertificateCustomValidationCallback = (_, _, _, _) => true,
             });
+
+        services.RegisterSonarrHttpClient();
 
         // Removing all registered IHttpMessageHandlerBuilderFilter instances to disable built-in HttpClient logging
         services.RemoveAll<IHttpMessageHandlerBuilderFilter>();

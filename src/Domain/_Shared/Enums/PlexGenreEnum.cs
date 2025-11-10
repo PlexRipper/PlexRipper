@@ -76,7 +76,7 @@ public enum PlexGenreType
     Thriller = 739,
 
     [EnumMember(Value = "TV Movie")]
-    TVMovie = 4599,
+    TvMovie = 4599,
 
     [EnumMember(Value = "War")]
     War = 3773,

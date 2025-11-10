@@ -1,5 +1,3 @@
-using Reaparr.Domain;
-
 namespace Reaparr.PlexApi.Contracts;
 
 public static partial class PlexMediaTypeMappers

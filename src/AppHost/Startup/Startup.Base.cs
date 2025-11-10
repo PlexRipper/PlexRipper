@@ -7,5 +7,5 @@ public static partial class Startup
     /// <summary>
     ///  The CORS Configuration name.
     /// </summary>
-    public const string CORSConfiguration = "CORS_Configuration";
+    public const string CorsConfiguration = "CORS_Configuration";
 }

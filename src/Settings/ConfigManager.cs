@@ -68,7 +68,6 @@ public class ConfigManager : IConfigManager
             var migrateResult = MigrateLegacyFileNames();
             if (migrateResult.IsFailed)
                 return migrateResult.LogFatal();
-            ;
         }
         else
         {

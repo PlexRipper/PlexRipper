@@ -1,3 +1,4 @@
+// ReSharper disable InconsistentNaming
 namespace Reaparr.Domain;
 
 public record LibraryMediaItemDTO
@@ -13,6 +14,10 @@ public record LibraryMediaItemDTO
     public required string Summary { get; init; }
 
     public required int Year { get; init; }
+
+    public required int ParentIndex { get; init; }
+
+    public required int Index { get; init; }
 
     public required string Studio { get; init; }
 

@@ -32,7 +32,7 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
         });
 
         // Arrange
-        var client = _sut(new PlexApiClientOptions { ConnectionUrl = "http://localhost", Action = null });
+        var client = Sut(new PlexApiClientOptions { ConnectionUrl = "http://localhost", Action = null });
 
         // Act
         var responseMessage = await client.SendAsync(new HttpRequestMessage());
@@ -65,7 +65,7 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
         });
 
         // Arrange
-        var client = _sut(new PlexApiClientOptions { ConnectionUrl = "http://localhost", Action = null });
+        var client = Sut(new PlexApiClientOptions { ConnectionUrl = "http://localhost", Action = null });
 
         // Act
         var responseMessage = await client.SendAsync(new HttpRequestMessage());
@@ -98,7 +98,7 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
         });
 
         // Arrange
-        var client = _sut(new PlexApiClientOptions { ConnectionUrl = "http://localhost", Action = null });
+        var client = Sut(new PlexApiClientOptions { ConnectionUrl = "http://localhost", Action = null });
 
         // Act
         var responseMessage = await client.SendAsync(new HttpRequestMessage());
@@ -127,7 +127,7 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
         });
 
         // Arrange
-        var client = _sut(new PlexApiClientOptions { ConnectionUrl = "http://localhost", Action = null });
+        var client = Sut(new PlexApiClientOptions { ConnectionUrl = "http://localhost", Action = null });
 
         // Act
         var responseMessage = await client.SendAsync(new HttpRequestMessage());
@@ -153,7 +153,7 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
         });
 
         // Arrange
-        var client = _sut(
+        var client = Sut(
             new PlexApiClientOptions
             {
                 ConnectionUrl = "http://localhost",
@@ -184,7 +184,7 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
         });
 
         // Arrange
-        var client = _sut(new PlexApiClientOptions { ConnectionUrl = "http://localhost", Action = null });
+        var client = Sut(new PlexApiClientOptions { ConnectionUrl = "http://localhost", Action = null });
 
         // Act
         var responseMessage = await client.SendAsync(new HttpRequestMessage());

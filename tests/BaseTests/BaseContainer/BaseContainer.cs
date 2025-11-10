@@ -8,6 +8,7 @@ using Reaparr.Data;
 using Reaparr.Data.Contracts;
 using Reaparr.Environment;
 using Reaparr.FileSystem.Contracts;
+using Reaparr.PublicAPI;
 using Reaparr.Settings.Contracts;
 
 namespace Reaparr.BaseTests;
@@ -62,6 +63,24 @@ public class BaseContainer : IDisposable
         var client = _factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(scheme: "TestScheme");
         return client;
+    }
+
+    public async Task SignInDownloadClient(HttpClient client)
+    {
+        var settings = Resolve<IIntegrationsSettings>();
+
+        // Needs to be sent as application/x-www-form-urlencoded content
+        // which is not properly supported by FastEndpoints test client
+        var content = new FormUrlEncodedContent(
+            [
+                new KeyValuePair<string, string>("username", settings.DownloadClientUsername),
+                new KeyValuePair<string, string>("password", settings.DownloadClientPassword),
+            ]
+        );
+
+        var response = await client.PostAsync(PublicApiRoutes.DownloadClient + "/auth/login", content);
+
+        response.IsSuccessStatusCode.ShouldBeTrue("Failed to login the download client test HttpClient.");
     }
 
     public IDownloadQueue GetDownloadQueue => Resolve<IDownloadQueue>();

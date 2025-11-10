@@ -51,7 +51,7 @@ Cypress.Commands.add('validatePlexTokenEndpoint', ({ isUnAuthorized = false, par
 	return cy.intercept('POST', PlexAccountPaths.validatePlexTokenEndpoint(), {
 		statusCode: 200, body: generateResultDTO<ValidatePlexTokenEndpointResponse>({
 			isUnAuthorized: isUnAuthorized,
-			authenticationToken: plexAccount.authenticationToken,
+			customAuthenticationToken: plexAccount.customAuthenticationToken,
 			clientId: plexAccount.clientId,
 			email: plexAccount.email,
 			is2Fa: plexAccount.is2Fa,

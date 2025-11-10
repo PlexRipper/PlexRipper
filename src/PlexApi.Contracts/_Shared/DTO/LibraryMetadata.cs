@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using Reaparr.Domain;
 
 namespace Reaparr.PlexApi.Contracts;
 

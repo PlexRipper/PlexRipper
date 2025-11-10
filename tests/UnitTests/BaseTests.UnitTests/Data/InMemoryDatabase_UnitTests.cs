@@ -2,9 +2,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Reaparr.BaseTests.UnitTests.Data;
 
-public class InMemoryDatabase_UnitTests : BaseUnitTest
+public class InMemoryDatabaseUnitTests : BaseUnitTest
 {
-    public InMemoryDatabase_UnitTests(ITestOutputHelper output)
+    public InMemoryDatabaseUnitTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]

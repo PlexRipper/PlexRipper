@@ -43,8 +43,11 @@ public class ReaparrWebApplicationFactory : WebApplicationFactory<Program>
     protected override IHost CreateHost(IHostBuilder builder)
     {
         builder.ConfigureContainer<ContainerBuilder>(autoFacBuilder =>
-            autoFacBuilder.RegisterModule(new TestModule { MemoryDbName = MemoryDbName, Config = _config })
-        );
+        {
+            autoFacBuilder.RegisterModule(new TestModule { MemoryDbName = MemoryDbName, Config = _config });
+            // Allow per-test overrides last so they win
+            _config.OverrideServices?.Invoke(autoFacBuilder);
+        });
 
         try
         {

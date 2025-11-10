@@ -117,7 +117,7 @@ public partial class FakePlexApiData
         .RuleFor(l => l.Has64bitOffsets, f => f.Random.Bool())
         .RuleFor(l => l.Part, _ => []); // Generated in FinishWith
 
-    private static readonly Faker<GetMediaMetaDataPart> _getLibraryItemsPartFaker = new Faker<GetMediaMetaDataPart>()
+    private static readonly Faker<GetMediaMetaDataPart> _getMediaMetaDataPartFaker = new Faker<GetMediaMetaDataPart>()
         .StrictMode(true)
         .RuleFor(l => l.Id, f => f.Random.Number(100000))
         .RuleFor(l => l.Key, f => f.Random.Uuid().ToString())

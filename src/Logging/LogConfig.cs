@@ -92,7 +92,7 @@ public class LogConfig
         where T : class => GetLogger(minimumLogLevel).ForContext<T>();
 
     /// <summary>
-    /// Returns a new typed <see cref="ILog"/> instance.
+    /// Returns a new typed <see cref="ILogger"/> instance.
     /// </summary>
     /// <returns></returns>
     public ILogger CreateLogInstance(Type classType) => GetLogger().ForContext(classType);

@@ -15,7 +15,7 @@ public class RefreshLibraryAccessCommandUnitTests : BaseUnitTest<RefreshLibraryA
         var request = new RefreshLibraryAccessCommand(0);
 
         // Act
-        var result = await _sut.ExecuteAsync(request, CancellationToken);
+        var result = await Sut.ExecuteAsync(request, CancellationToken);
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -37,7 +37,7 @@ public class RefreshLibraryAccessCommandUnitTests : BaseUnitTest<RefreshLibraryA
 
         // Act
         var request = new RefreshLibraryAccessCommand(1);
-        var result = await _sut.ExecuteAsync(request, CancellationToken);
+        var result = await Sut.ExecuteAsync(request, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -62,7 +62,7 @@ public class RefreshLibraryAccessCommandUnitTests : BaseUnitTest<RefreshLibraryA
         var updatedTime = DateTime.Now - TimeSpan.FromHours(9);
         var plexLibraries = FakeData.GetPlexLibrary(seed).Generate(5).ToApiLibraries(updatedTime);
 
-        mock.Mock<ICommandExecutor>()
+        Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<GetLibrarySectionsCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok(plexLibraries))
             .Verifiable(Times.Once);
@@ -75,13 +75,13 @@ public class RefreshLibraryAccessCommandUnitTests : BaseUnitTest<RefreshLibraryA
         rapport.AddGranted(4, plexLibraries.Find(x => x.Id == 4)?.Name ?? string.Empty);
         rapport.AddGranted(5, plexLibraries.Find(x => x.Id == 5)?.Name ?? string.Empty);
 
-        mock.SetupCommand(It.IsAny<AddOrUpdatePlexLibrariesCommand>)
+        Mock.SetupCommand(It.IsAny<AddOrUpdatePlexLibrariesCommand>)
             .ReturnsAsync(Result.Ok(new List<PlexLibraryAccessRapport> { rapport }))
             .Verifiable(Times.Once);
 
         // Act
         var request = new RefreshLibraryAccessCommand(1, 1);
-        var result = await _sut.ExecuteAsync(request, CancellationToken);
+        var result = await Sut.ExecuteAsync(request, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

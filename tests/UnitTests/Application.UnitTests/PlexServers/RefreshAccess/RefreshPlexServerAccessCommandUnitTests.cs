@@ -24,13 +24,13 @@ public class RefreshPlexServerAccessCommandUnitTests : BaseUnitTest<RefreshPlexS
         var plexAccount = await IDbContext.PlexAccounts.FirstOrDefaultAsync(CancellationToken);
         plexAccount.ShouldNotBeNull();
 
-        mock.Mock<ICommandExecutor>()
+        Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<GetAccessiblePlexServersCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<PlexServerAccessDTO>());
 
         // Act
         var request = new RefreshPlexServerAccessCommand(plexAccount.Id);
-        var handler = mock.Create<RefreshPlexServerAccessCommandHandler>();
+        var handler = Mock.Create<RefreshPlexServerAccessCommandHandler>();
         var result = await handler.ExecuteAsync(request, CancellationToken);
 
         // Assert
@@ -63,22 +63,22 @@ public class RefreshPlexServerAccessCommandUnitTests : BaseUnitTest<RefreshPlexS
             })
             .ToList();
 
-        mock.Mock<ICommandExecutor>()
+        Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<GetAccessiblePlexServersCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok(list));
 
-        mock.SetupCommand(It.IsAny<AddOrUpdatePlexServersCommand>).ReturnsAsync(Result.Ok());
-        mock.SetupCommand(It.IsAny<AddOrUpdatePlexAccountServersCommand>)
+        Mock.SetupCommand(It.IsAny<AddOrUpdatePlexServersCommand>).ReturnsAsync(Result.Ok());
+        Mock.SetupCommand(It.IsAny<AddOrUpdatePlexAccountServersCommand>)
             .ReturnsAsync(Result.Ok(new RefreshPlexServerAccessRapport(plexAccount.Id, plexAccount.DisplayName)));
-        mock.SetupCommand(It.IsAny<RefreshLibraryAccessCommand>)
+        Mock.SetupCommand(It.IsAny<RefreshLibraryAccessCommand>)
             .ReturnsAsync(Result.Ok(new PlexLibraryAccessRefreshResponse { OfflineServers = [], Reports = [] }));
 
-        mock.SendRefreshNotification();
+        Mock.SendRefreshNotification();
 
         // Act
 
         var request = new RefreshPlexServerAccessCommand(plexAccount.Id);
-        var handler = mock.Create<RefreshPlexServerAccessCommandHandler>();
+        var handler = Mock.Create<RefreshPlexServerAccessCommandHandler>();
         var result = await handler.ExecuteAsync(request, CancellationToken);
 
         // Assert

@@ -19,59 +19,59 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
     {
         // Arrange
 
-        mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
-        mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(true);
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(false);
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns([]);
-        mock.Mock<IAuthDbContextDatabase>().Setup(x => x.CanConnect()).Returns(true);
-        mock.Mock<IAuthDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(false);
-        mock.Mock<IAuthDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns([]);
+        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
+        Mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(true);
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(false);
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns([]);
+        Mock.Mock<IAuthDbContextDatabase>().Setup(x => x.CanConnect()).Returns(true);
+        Mock.Mock<IAuthDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(false);
+        Mock.Mock<IAuthDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns([]);
 
         // Act
-        var result = _sut.Setup();
+        var result = Sut.Setup();
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.CanConnect(), Times.Once);
-        mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.GetPendingMigrations(), Times.Once);
-        mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.Migrate(), Times.Never);
-        mock.Mock<IAuthDbContextDatabase>().Verify(x => x.CanConnect(), Times.Never);
-        mock.Mock<IAuthDbContextDatabase>().Verify(x => x.GetPendingMigrations(), Times.Once);
-        mock.Mock<IAuthDbContextDatabase>().Verify(x => x.Migrate(), Times.Never);
+        Mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.CanConnect(), Times.Once);
+        Mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.GetPendingMigrations(), Times.Once);
+        Mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.Migrate(), Times.Never);
+        Mock.Mock<IAuthDbContextDatabase>().Verify(x => x.CanConnect(), Times.Never);
+        Mock.Mock<IAuthDbContextDatabase>().Verify(x => x.GetPendingMigrations(), Times.Once);
+        Mock.Mock<IAuthDbContextDatabase>().Verify(x => x.Migrate(), Times.Never);
     }
 
     [Fact]
     public void ShouldCreateDatabase_WhenDatabaseDoesNotExist()
     {
         // Arrange
-        mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
-        mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(false).Verifiable(Times.Once);
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok()).Verifiable(Times.Once);
-        mock.Mock<IAuthDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok()).Verifiable(Times.Once);
+        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
+        Mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(false).Verifiable(Times.Once);
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok()).Verifiable(Times.Once);
+        Mock.Mock<IAuthDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok()).Verifiable(Times.Once);
 
         // Act
-        var result = _sut.Setup();
+        var result = Sut.Setup();
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.Migrate(), Times.Once); // Database creation involves migration
+        Mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.Migrate(), Times.Once); // Database creation involves migration
     }
 
     [Fact]
     public void ShouldLogWarning_WhenDatabaseDoesNotExist()
     {
         // Arrange
-        mock.Mock<IPathProvider>()
+        Mock.Mock<IPathProvider>()
             .SetupGet(x => x.DatabasePath)
             .Returns(() => DatabasePath)
             .Verifiable(Times.Exactly(2));
-        mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(false).Verifiable(Times.Once);
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok()).Verifiable(Times.Once);
-        mock.Mock<IAuthDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok()).Verifiable(Times.Once);
+        Mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(false).Verifiable(Times.Once);
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok()).Verifiable(Times.Once);
+        Mock.Mock<IAuthDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok()).Verifiable(Times.Once);
 
         // Act
-        var result = _sut.Setup();
+        var result = Sut.Setup();
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -81,16 +81,16 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
     public void ShouldFailToCreateDatabase_WhenExceptionIsThrown()
     {
         // Arrange
-        mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
-        mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(false);
-        mock.Mock<IReaparrDbContextDatabase>()
+        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
+        Mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(false);
+        Mock.Mock<IReaparrDbContextDatabase>()
             .Setup(x => x.Migrate())
             .Throws(new Exception("Test Exception"))
             .Verifiable(Times.Once);
-        mock.Mock<IAuthDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok()).Verifiable(Times.Never);
+        Mock.Mock<IAuthDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok()).Verifiable(Times.Never);
 
         // Act
-        var result = _sut.Setup();
+        var result = Sut.Setup();
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -100,29 +100,29 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
     public void ShouldBackUpAndResetDatabase_WhenDatabaseCannotConnect()
     {
         // Arrange
-        mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
-        mock.Mock<IPathProvider>().SetupGet(x => x.DatabaseBackupDirectory).Returns(() => DatabasePath);
-        mock.Mock<IPathProvider>()
+        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
+        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabaseBackupDirectory).Returns(() => DatabasePath);
+        Mock.Mock<IPathProvider>()
             .Setup(x => x.DatabaseFiles)
             .Returns(() => [PathProvider.DatabasePath, PathProvider.Database_SHM_Path, PathProvider.Database_WAL_Path]);
-        mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
-        mock.Mock<IFile>().Setup(x => x.Copy(It.IsAny<string>(), It.IsAny<string>())).Verifiable(Times.Exactly(3));
-        mock.Mock<IDirectory>()
+        Mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
+        Mock.Mock<IFile>().Setup(x => x.Copy(It.IsAny<string>(), It.IsAny<string>())).Verifiable(Times.Exactly(3));
+        Mock.Mock<IDirectory>()
             .Setup(x => x.CreateDirectory(It.IsAny<string>()))
             .Returns(new Mock<IDirectoryInfo>().Object);
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok()).Verifiable(Times.Once);
-        mock.Mock<IAuthDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok()).Verifiable(Times.Once);
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(false);
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.EnsureDeleted()).Returns(Result.Ok(true));
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CloseConnection());
-        mock.Mock<IGeneralSettings>().SetupSet(x => x.FirstTimeSetup = true).Verifiable(Times.Once);
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok()).Verifiable(Times.Once);
+        Mock.Mock<IAuthDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok()).Verifiable(Times.Once);
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(false);
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.EnsureDeleted()).Returns(Result.Ok(true));
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CloseConnection());
+        Mock.Mock<IGeneralSettings>().SetupSet(x => x.FirstTimeSetup = true).Verifiable(Times.Once);
 
         // Act
-        var result = _sut.Setup();
+        var result = Sut.Setup();
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        var mockDbContext = mock.Mock<IReaparrDbContextDatabase>();
+        var mockDbContext = Mock.Mock<IReaparrDbContextDatabase>();
         mockDbContext.Verify(x => x.CanConnect(), Times.Once);
         mockDbContext.Verify(x => x.EnsureDeleted(), Times.Once); // Database is reset
         mockDbContext.Verify(x => x.Migrate(), Times.Once); // Database is recreated after reset
@@ -132,191 +132,191 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
     public void ShouldMigrateReaparrDatabase_WhenPendingMigrationsExist()
     {
         // Arrange
-        mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
-        mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(true);
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(false);
-        mock.Mock<IReaparrDbContextDatabase>()
+        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
+        Mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(true);
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(false);
+        Mock.Mock<IReaparrDbContextDatabase>()
             .Setup(x => x.GetPendingMigrations())
             .Returns(["Migration1", "Migration2"]);
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok()).Verifiable(Times.Once);
-        mock.Mock<IAuthDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(false);
-        mock.Mock<IAuthDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns([]);
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok()).Verifiable(Times.Once);
+        Mock.Mock<IAuthDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(false);
+        Mock.Mock<IAuthDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns([]);
 
         // Act
-        var result = _sut.Setup();
+        var result = Sut.Setup();
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.Migrate(), Times.Once);
-        mock.Mock<IAuthDbContextDatabase>().Verify(x => x.Migrate(), Times.Never);
+        Mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.Migrate(), Times.Once);
+        Mock.Mock<IAuthDbContextDatabase>().Verify(x => x.Migrate(), Times.Never);
     }
 
     [Fact]
     public void ShouldMigrateAuthDatabase_WhenPendingMigrationsExist()
     {
         // Arrange
-        mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
-        mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(true);
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(false);
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns([]);
-        mock.Mock<IAuthDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(false);
-        mock.Mock<IAuthDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns(["AuthMigration1"]);
-        mock.Mock<IAuthDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok()).Verifiable(Times.Once);
+        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
+        Mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(true);
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(false);
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns([]);
+        Mock.Mock<IAuthDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(false);
+        Mock.Mock<IAuthDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns(["AuthMigration1"]);
+        Mock.Mock<IAuthDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok()).Verifiable(Times.Once);
 
         // Act
-        var result = _sut.Setup();
+        var result = Sut.Setup();
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.Migrate(), Times.Never);
-        mock.Mock<IAuthDbContextDatabase>().Verify(x => x.Migrate(), Times.Once);
+        Mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.Migrate(), Times.Never);
+        Mock.Mock<IAuthDbContextDatabase>().Verify(x => x.Migrate(), Times.Once);
     }
 
     [Fact]
     public void ShouldSkipMigration_WhenDatabaseIsInMemory()
     {
         // Arrange
-        mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
-        mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(true);
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(true);
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns(["Migration1"]);
-        mock.Mock<IAuthDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(true);
-        mock.Mock<IAuthDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns(["AuthMigration1"]);
+        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
+        Mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(true);
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(true);
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns(["Migration1"]);
+        Mock.Mock<IAuthDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(true);
+        Mock.Mock<IAuthDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns(["AuthMigration1"]);
 
         // Act
-        var result = _sut.Setup();
+        var result = Sut.Setup();
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.Migrate(), Times.Never);
-        mock.Mock<IAuthDbContextDatabase>().Verify(x => x.Migrate(), Times.Never);
+        Mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.Migrate(), Times.Never);
+        Mock.Mock<IAuthDbContextDatabase>().Verify(x => x.Migrate(), Times.Never);
     }
 
     [Fact]
     public void ShouldResetDatabase_WhenReaparrMigrationFails()
     {
         // Arrange
-        mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
-        mock.Mock<IPathProvider>().SetupGet(x => x.DatabaseBackupDirectory).Returns(() => "/backup");
-        mock.Mock<IPathProvider>().Setup(x => x.DatabaseFiles).Returns(() => [DatabasePath]);
-        mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
-        mock.Mock<IFile>().Setup(x => x.Copy(It.IsAny<string>(), It.IsAny<string>()));
-        mock.Mock<IDirectory>()
+        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
+        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabaseBackupDirectory).Returns(() => "/backup");
+        Mock.Mock<IPathProvider>().Setup(x => x.DatabaseFiles).Returns(() => [DatabasePath]);
+        Mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
+        Mock.Mock<IFile>().Setup(x => x.Copy(It.IsAny<string>(), It.IsAny<string>()));
+        Mock.Mock<IDirectory>()
             .Setup(x => x.CreateDirectory(It.IsAny<string>()))
             .Returns(new Mock<IDirectoryInfo>().Object);
 
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(true);
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(false);
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns(["Migration1"]);
-        mock.Mock<IReaparrDbContextDatabase>()
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(true);
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(false);
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns(["Migration1"]);
+        Mock.Mock<IReaparrDbContextDatabase>()
             .SetupSequence(x => x.Migrate())
             .Returns(Result.Fail("Migration failed"))
             .Returns(Result.Ok()); // Second call during database reset
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CloseConnection());
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.EnsureDeleted()).Returns(Result.Ok(true));
-        mock.Mock<IAuthDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok());
-        mock.Mock<IAuthDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(false);
-        mock.Mock<IAuthDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns([]);
-        mock.Mock<IGeneralSettings>().SetupSet(x => x.FirstTimeSetup = true).Verifiable(Times.AtLeastOnce);
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CloseConnection());
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.EnsureDeleted()).Returns(Result.Ok(true));
+        Mock.Mock<IAuthDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok());
+        Mock.Mock<IAuthDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(false);
+        Mock.Mock<IAuthDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns([]);
+        Mock.Mock<IGeneralSettings>().SetupSet(x => x.FirstTimeSetup = true).Verifiable(Times.AtLeastOnce);
 
         // Act
-        var result = _sut.Setup();
+        var result = Sut.Setup();
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.Migrate(), Times.Exactly(2)); // Once for a migration attempt and once for a reset
-        mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.EnsureDeleted(), Times.Once);
+        Mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.Migrate(), Times.Exactly(2)); // Once for a migration attempt and once for a reset
+        Mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.EnsureDeleted(), Times.Once);
     }
 
     [Fact]
     public void ShouldResetDatabase_WhenAuthDatabaseMigrationFails()
     {
         // Arrange
-        mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
-        mock.Mock<IPathProvider>().SetupGet(x => x.DatabaseBackupDirectory).Returns(() => "/backup");
-        mock.Mock<IPathProvider>().Setup(x => x.DatabaseFiles).Returns(() => [DatabasePath]);
-        mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
-        mock.Mock<IFile>().Setup(x => x.Copy(It.IsAny<string>(), It.IsAny<string>()));
-        mock.Mock<IDirectory>()
+        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
+        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabaseBackupDirectory).Returns(() => "/backup");
+        Mock.Mock<IPathProvider>().Setup(x => x.DatabaseFiles).Returns(() => [DatabasePath]);
+        Mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
+        Mock.Mock<IFile>().Setup(x => x.Copy(It.IsAny<string>(), It.IsAny<string>()));
+        Mock.Mock<IDirectory>()
             .Setup(x => x.CreateDirectory(It.IsAny<string>()))
             .Returns(new Mock<IDirectoryInfo>().Object);
 
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(true);
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(false);
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns([]);
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok());
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CloseConnection());
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.EnsureDeleted()).Returns(Result.Ok(true));
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(true);
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(false);
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns([]);
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok());
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CloseConnection());
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.EnsureDeleted()).Returns(Result.Ok(true));
 
-        mock.Mock<IAuthDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(false);
-        mock.Mock<IAuthDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns(["AuthMigration1"]);
-        mock.Mock<IAuthDbContextDatabase>()
+        Mock.Mock<IAuthDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(false);
+        Mock.Mock<IAuthDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns(["AuthMigration1"]);
+        Mock.Mock<IAuthDbContextDatabase>()
             .SetupSequence(x => x.Migrate())
             .Returns(Result.Fail("Auth migration failed"))
             .Returns(Result.Ok()); // Second call during database reset
-        mock.Mock<IGeneralSettings>().SetupSet(x => x.FirstTimeSetup = true).Verifiable(Times.AtLeastOnce);
+        Mock.Mock<IGeneralSettings>().SetupSet(x => x.FirstTimeSetup = true).Verifiable(Times.AtLeastOnce);
 
         // Act
-        var result = _sut.Setup();
+        var result = Sut.Setup();
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        mock.Mock<IAuthDbContextDatabase>().Verify(x => x.Migrate(), Times.Exactly(2)); // Once for migration attempt, once for reset
-        mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.EnsureDeleted(), Times.Once);
+        Mock.Mock<IAuthDbContextDatabase>().Verify(x => x.Migrate(), Times.Exactly(2)); // Once for migration attempt, once for reset
+        Mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.EnsureDeleted(), Times.Once);
     }
 
     [Fact]
     public void ShouldResetDatabase_WhenMigrationThrowsException()
     {
         // Arrange
-        mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
-        mock.Mock<IPathProvider>().SetupGet(x => x.DatabaseBackupDirectory).Returns(() => "/backup");
-        mock.Mock<IPathProvider>().Setup(x => x.DatabaseFiles).Returns(() => [DatabasePath]);
-        mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
-        mock.Mock<IFile>().Setup(x => x.Copy(It.IsAny<string>(), It.IsAny<string>()));
-        mock.Mock<IDirectory>()
+        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
+        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabaseBackupDirectory).Returns(() => "/backup");
+        Mock.Mock<IPathProvider>().Setup(x => x.DatabaseFiles).Returns(() => [DatabasePath]);
+        Mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
+        Mock.Mock<IFile>().Setup(x => x.Copy(It.IsAny<string>(), It.IsAny<string>()));
+        Mock.Mock<IDirectory>()
             .Setup(x => x.CreateDirectory(It.IsAny<string>()))
             .Returns(new Mock<IDirectoryInfo>().Object);
 
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(true);
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(false);
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns(["Migration1"]);
-        mock.Mock<IReaparrDbContextDatabase>()
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(true);
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(false);
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns(["Migration1"]);
+        Mock.Mock<IReaparrDbContextDatabase>()
             .SetupSequence(x => x.Migrate())
             .Throws(new Exception("Migration exception"))
             .Returns(Result.Ok()); // Second call during database reset
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CloseConnection());
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.EnsureDeleted()).Returns(Result.Ok(true));
-        mock.Mock<IAuthDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok());
-        mock.Mock<IAuthDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(false);
-        mock.Mock<IAuthDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns([]);
-        mock.Mock<IGeneralSettings>().SetupSet(x => x.FirstTimeSetup = true).Verifiable(Times.Once);
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CloseConnection());
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.EnsureDeleted()).Returns(Result.Ok(true));
+        Mock.Mock<IAuthDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok());
+        Mock.Mock<IAuthDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(false);
+        Mock.Mock<IAuthDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns([]);
+        Mock.Mock<IGeneralSettings>().SetupSet(x => x.FirstTimeSetup = true).Verifiable(Times.Once);
 
         // Act
-        var result = _sut.Setup();
+        var result = Sut.Setup();
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.EnsureDeleted(), Times.Once);
+        Mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.EnsureDeleted(), Times.Once);
     }
 
     [Fact]
     public void ShouldFailBackup_WhenBackupDirectoryCannotBeCreated()
     {
         // Arrange
-        mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
-        mock.Mock<IPathProvider>().SetupGet(x => x.DatabaseBackupDirectory).Returns(() => "/backup");
-        mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
-        mock.Mock<IDirectory>()
+        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
+        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabaseBackupDirectory).Returns(() => "/backup");
+        Mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
+        Mock.Mock<IDirectory>()
             .Setup(x => x.CreateDirectory(It.IsAny<string>()))
             .Throws(new Exception("Directory creation failed"));
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(false);
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(false);
 
         // Act
-        var result = _sut.Setup();
+        var result = Sut.Setup();
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -327,104 +327,104 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
     {
         // Arrange
         List<string> dbFiles = [DatabasePath, DatabasePath + "-shm", DatabasePath + "-wal"];
-        mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
-        mock.Mock<IPathProvider>().SetupGet(x => x.DatabaseBackupDirectory).Returns(() => "/backup");
-        mock.Mock<IPathProvider>().Setup(x => x.DatabaseFiles).Returns(() => dbFiles);
-        mock.Mock<IFile>().Setup(x => x.Exists(DatabasePath)).Returns(true);
-        mock.Mock<IFile>().Setup(x => x.Exists(DatabasePath + "-shm")).Returns(false);
-        mock.Mock<IFile>().Setup(x => x.Exists(DatabasePath + "-wal")).Returns(true);
-        mock.Mock<IFile>().Setup(x => x.Copy(It.IsAny<string>(), It.IsAny<string>()));
-        mock.Mock<IDirectory>()
+        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
+        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabaseBackupDirectory).Returns(() => "/backup");
+        Mock.Mock<IPathProvider>().Setup(x => x.DatabaseFiles).Returns(() => dbFiles);
+        Mock.Mock<IFile>().Setup(x => x.Exists(DatabasePath)).Returns(true);
+        Mock.Mock<IFile>().Setup(x => x.Exists(DatabasePath + "-shm")).Returns(false);
+        Mock.Mock<IFile>().Setup(x => x.Exists(DatabasePath + "-wal")).Returns(true);
+        Mock.Mock<IFile>().Setup(x => x.Copy(It.IsAny<string>(), It.IsAny<string>()));
+        Mock.Mock<IDirectory>()
             .Setup(x => x.CreateDirectory(It.IsAny<string>()))
             .Returns(new Mock<IDirectoryInfo>().Object);
 
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(false);
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CloseConnection());
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.EnsureDeleted()).Returns(Result.Ok(true));
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok());
-        mock.Mock<IAuthDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok());
-        mock.Mock<IGeneralSettings>().SetupSet(x => x.FirstTimeSetup = true).Verifiable(Times.Once);
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(false);
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CloseConnection());
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.EnsureDeleted()).Returns(Result.Ok(true));
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok());
+        Mock.Mock<IAuthDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok());
+        Mock.Mock<IGeneralSettings>().SetupSet(x => x.FirstTimeSetup = true).Verifiable(Times.Once);
 
         // Act
-        var result = _sut.Setup();
+        var result = Sut.Setup();
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        mock.Mock<IFile>().Verify(x => x.Copy(DatabasePath, It.IsAny<string>()), Times.Once);
-        mock.Mock<IFile>().Verify(x => x.Copy(DatabasePath + "-wal", It.IsAny<string>()), Times.Once);
-        mock.Mock<IFile>().Verify(x => x.Copy(DatabasePath + "-shm", It.IsAny<string>()), Times.Never);
+        Mock.Mock<IFile>().Verify(x => x.Copy(DatabasePath, It.IsAny<string>()), Times.Once);
+        Mock.Mock<IFile>().Verify(x => x.Copy(DatabasePath + "-wal", It.IsAny<string>()), Times.Once);
+        Mock.Mock<IFile>().Verify(x => x.Copy(DatabasePath + "-shm", It.IsAny<string>()), Times.Never);
     }
 
     [Fact]
     public void ShouldFailReset_WhenDatabaseDeletionFails()
     {
         // Arrange
-        mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
-        mock.Mock<IPathProvider>().SetupGet(x => x.DatabaseBackupDirectory).Returns(() => "/backup");
-        mock.Mock<IPathProvider>().Setup(x => x.DatabaseFiles).Returns(() => [DatabasePath]);
-        mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
-        mock.Mock<IFile>().Setup(x => x.Copy(It.IsAny<string>(), It.IsAny<string>()));
-        mock.Mock<IDirectory>()
+        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
+        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabaseBackupDirectory).Returns(() => "/backup");
+        Mock.Mock<IPathProvider>().Setup(x => x.DatabaseFiles).Returns(() => [DatabasePath]);
+        Mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
+        Mock.Mock<IFile>().Setup(x => x.Copy(It.IsAny<string>(), It.IsAny<string>()));
+        Mock.Mock<IDirectory>()
             .Setup(x => x.CreateDirectory(It.IsAny<string>()))
             .Returns(new Mock<IDirectoryInfo>().Object);
 
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(false);
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CloseConnection());
-        mock.Mock<IReaparrDbContextDatabase>()
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(false);
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CloseConnection());
+        Mock.Mock<IReaparrDbContextDatabase>()
             .Setup(x => x.EnsureDeleted())
             .Returns(Result.Fail("Database deletion failed"));
 
         // Act
-        var result = _sut.Setup();
+        var result = Sut.Setup();
 
         // Assert
         result.IsFailed.ShouldBeTrue();
-        mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.EnsureDeleted(), Times.Once);
-        mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.Migrate(), Times.Never); // Should not attempt to recreate if deletion failed
+        Mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.EnsureDeleted(), Times.Once);
+        Mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.Migrate(), Times.Never); // Should not attempt to recreate if deletion failed
     }
 
     [Fact]
     public void ShouldFailReset_WhenDatabaseCreationFailsAfterReset()
     {
         // Arrange
-        mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
-        mock.Mock<IPathProvider>().SetupGet(x => x.DatabaseBackupDirectory).Returns(() => "/backup");
-        mock.Mock<IPathProvider>().Setup(x => x.DatabaseFiles).Returns(() => [DatabasePath]);
-        mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
-        mock.Mock<IFile>().Setup(x => x.Copy(It.IsAny<string>(), It.IsAny<string>()));
-        mock.Mock<IDirectory>()
+        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
+        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabaseBackupDirectory).Returns(() => "/backup");
+        Mock.Mock<IPathProvider>().Setup(x => x.DatabaseFiles).Returns(() => [DatabasePath]);
+        Mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
+        Mock.Mock<IFile>().Setup(x => x.Copy(It.IsAny<string>(), It.IsAny<string>()));
+        Mock.Mock<IDirectory>()
             .Setup(x => x.CreateDirectory(It.IsAny<string>()))
             .Returns(new Mock<IDirectoryInfo>().Object);
 
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(false);
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CloseConnection());
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.EnsureDeleted()).Returns(Result.Ok(true));
-        mock.Mock<IReaparrDbContextDatabase>()
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(false);
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CloseConnection());
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.EnsureDeleted()).Returns(Result.Ok(true));
+        Mock.Mock<IReaparrDbContextDatabase>()
             .Setup(x => x.Migrate())
             .Throws(new Exception("Database creation failed"));
 
         // Act
-        var result = _sut.Setup();
+        var result = Sut.Setup();
 
         // Assert
         result.IsFailed.ShouldBeTrue();
-        mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.EnsureDeleted(), Times.Once);
-        mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.Migrate(), Times.Once);
+        Mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.EnsureDeleted(), Times.Once);
+        Mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.Migrate(), Times.Once);
     }
 
     [Fact]
     public void ShouldHandleExceptionInResetDatabase_AndReturnFailure()
     {
         // Arrange
-        mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(false);
-        mock.Mock<IReaparrDbContextDatabase>()
+        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(false);
+        Mock.Mock<IReaparrDbContextDatabase>()
             .Setup(x => x.CloseConnection())
             .Throws(new Exception("Connection close failed"));
-        mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
+        Mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
 
         // Act
-        var result = _sut.Setup();
+        var result = Sut.Setup();
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -434,26 +434,26 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
     public void ShouldSetFirstTimeSetupToTrue_WhenDatabaseIsReset()
     {
         // Arrange
-        mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
-        mock.Mock<IPathProvider>().SetupGet(x => x.DatabaseBackupDirectory).Returns(() => "/backup");
-        mock.Mock<IPathProvider>().Setup(x => x.DatabaseFiles).Returns(() => [DatabasePath]);
-        mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
-        mock.Mock<IFile>().Setup(x => x.Copy(It.IsAny<string>(), It.IsAny<string>()));
-        mock.Mock<IDirectory>()
+        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
+        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabaseBackupDirectory).Returns(() => "/backup");
+        Mock.Mock<IPathProvider>().Setup(x => x.DatabaseFiles).Returns(() => [DatabasePath]);
+        Mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
+        Mock.Mock<IFile>().Setup(x => x.Copy(It.IsAny<string>(), It.IsAny<string>()));
+        Mock.Mock<IDirectory>()
             .Setup(x => x.CreateDirectory(It.IsAny<string>()))
             .Returns(new Mock<IDirectoryInfo>().Object);
 
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(false);
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CloseConnection());
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.EnsureDeleted()).Returns(Result.Ok(true));
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok());
-        mock.Mock<IAuthDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok());
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(false);
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CloseConnection());
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.EnsureDeleted()).Returns(Result.Ok(true));
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok());
+        Mock.Mock<IAuthDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok());
 
-        var generalSettingsMock = mock.Mock<IGeneralSettings>();
+        var generalSettingsMock = Mock.Mock<IGeneralSettings>();
         generalSettingsMock.SetupProperty(x => x.FirstTimeSetup);
 
         // Act
-        var result = _sut.Setup();
+        var result = Sut.Setup();
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -464,40 +464,40 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
     public void ShouldSkipBackup_WhenDatabaseDoesNotExistDuringReset()
     {
         // Arrange
-        mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
-        mock.Mock<IFile>().Setup(x => x.Exists(DatabasePath)).Returns(false); // Database doesn't exist for backup
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(false);
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CloseConnection());
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.EnsureDeleted()).Returns(Result.Ok(true));
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok());
-        mock.Mock<IAuthDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok());
+        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
+        Mock.Mock<IFile>().Setup(x => x.Exists(DatabasePath)).Returns(false); // Database doesn't exist for backup
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CanConnect()).Returns(false);
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.CloseConnection());
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.EnsureDeleted()).Returns(Result.Ok(true));
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok());
+        Mock.Mock<IAuthDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok());
 
         // Act
-        var result = _sut.Setup();
+        var result = Sut.Setup();
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        mock.Mock<IDirectory>().Verify(x => x.CreateDirectory(It.IsAny<string>()), Times.Never);
-        mock.Mock<IFile>().Verify(x => x.Copy(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        Mock.Mock<IDirectory>().Verify(x => x.CreateDirectory(It.IsAny<string>()), Times.Never);
+        Mock.Mock<IFile>().Verify(x => x.Copy(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
     }
 
     [Fact]
     public void ShouldFailAuthDatabaseCreation_WhenExceptionIsThrown()
     {
         // Arrange
-        mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
-        mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(false);
-        mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok());
-        mock.Mock<IAuthDbContextDatabase>()
+        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
+        Mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(false);
+        Mock.Mock<IReaparrDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok());
+        Mock.Mock<IAuthDbContextDatabase>()
             .Setup(x => x.Migrate())
             .Throws(new Exception("Auth database creation failed"));
 
         // Act
-        var result = _sut.Setup();
+        var result = Sut.Setup();
 
         // Assert
         result.IsFailed.ShouldBeTrue();
-        mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.Migrate(), Times.Once);
-        mock.Mock<IAuthDbContextDatabase>().Verify(x => x.Migrate(), Times.Once);
+        Mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.Migrate(), Times.Once);
+        Mock.Mock<IAuthDbContextDatabase>().Verify(x => x.Migrate(), Times.Once);
     }
 }

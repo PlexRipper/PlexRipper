@@ -46,8 +46,10 @@ public class PathProvider : IPathProvider
 
     public static string DatabasePath => Path.Combine(ConfigDirectory, DatabaseName);
 
+    // ReSharper disable once InconsistentNaming
     public static string Database_SHM_Path => Path.Combine(ConfigDirectory, DatabaseShmName);
 
+    // ReSharper disable once InconsistentNaming
     public static string Database_WAL_Path => Path.Combine(ConfigDirectory, DatabaseWalName);
 
     public static string LogsDirectory => Path.Combine(RootDirectory, _configFolder, _logsFolder);

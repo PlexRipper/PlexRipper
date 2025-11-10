@@ -10,6 +10,7 @@ public static class HttpCodes
 
     public const int Status102Processing = 102;
 
+    // ReSharper disable once InconsistentNaming
     public const int Status200OK = 200;
 
     public const int Status201Created = 201;
@@ -28,6 +29,7 @@ public static class HttpCodes
 
     public const int Status208AlreadyReported = 208;
 
+    // ReSharper disable once InconsistentNaming
     public const int Status226IMUsed = 226;
 
     public const int Status300MultipleChoices = 300;

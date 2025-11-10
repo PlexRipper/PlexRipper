@@ -65,6 +65,11 @@ const getNavItems = computed((): QExpansionListProps[] => {
 					link: '/settings/ui',
 				},
 				{
+					title: t('components.navigation-drawer.integrations'),
+					icon: 'mdi-antenna',
+					link: '/settings/integrations',
+				},
+				{
 					title: t('components.navigation-drawer.advanced'),
 					icon: 'mdi-wrench',
 					link: '/settings/advanced',

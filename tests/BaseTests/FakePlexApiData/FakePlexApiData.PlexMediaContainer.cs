@@ -7,7 +7,7 @@ namespace Reaparr.BaseTests;
 
 public partial class FakePlexApiData
 {
-    private static readonly Faker<GetLibraryItemsPart> GetLibraryItemsPartFaker = new Faker<GetLibraryItemsPart>()
+    private static readonly Faker<GetLibraryItemsPart> _getLibraryItemsPartFaker = new Faker<GetLibraryItemsPart>()
         .StrictMode(true)
         .RuleFor(l => l.Id, f => f.Random.Number(100000))
         .RuleFor(l => l.Key, f => f.Random.Uuid().ToString())
@@ -60,7 +60,7 @@ public partial class FakePlexApiData
         .RuleFor(l => l.Has64bitOffsets, f => f.Random.Bool())
         .RuleFor(l => l.Part, _ => []); // Generated in FinishWith
 
-    private static readonly Faker<GetLibraryItemsMetadata> GetLibraryItemsMetadata =
+    private static readonly Faker<GetLibraryItemsMetadata> _getLibraryItemsMetadata =
         new Faker<GetLibraryItemsMetadata>()
             .StrictMode(false)
             .RuleFor(l => l.RatingKey, f => f.Random.Number(100000).ToString())
@@ -188,7 +188,7 @@ public partial class FakePlexApiData
                 _ => throw new InvalidOperationException($"Invalid PlexMediaType: {type} value."),
             };
 
-        return GetLibraryItemsMetadata
+        return _getLibraryItemsMetadata
             .UseSeed(seed.Next())
             .FinishWith(
                 (f, x) =>
@@ -213,5 +213,5 @@ public partial class FakePlexApiData
     }
 
     public static Faker<GetLibraryItemsPart> GetPlexPart(Seed seed, Action<PlexApiDataConfig>? options = null) =>
-        GetLibraryItemsPartFaker.UseSeed(seed.Next());
+        _getLibraryItemsPartFaker.UseSeed(seed.Next());
 }

@@ -36,7 +36,7 @@ public interface IDbContextDatabaseHelpers
     ///     <para>
     ///         This method can only be used after the <see cref="DbContext" /> has been configured because
     ///         it is only then that the provider is known. This means that this method cannot be used
-    ///         in <see cref="DbContext.OnConfiguring" /> because this is where application code sets the
+    ///         in DbContext.OnConfiguring because this is where application code sets the
     ///         provider to use as part of configuring the context.
     ///     </para>
     ///     <para>

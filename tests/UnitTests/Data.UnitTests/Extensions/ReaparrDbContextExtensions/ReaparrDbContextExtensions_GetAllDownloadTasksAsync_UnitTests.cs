@@ -2,9 +2,9 @@ using Reaparr.Data.Contracts;
 
 namespace Reaparr.Data.UnitTests;
 
-public class ReaparrDbContextExtensions_GetAllDownloadTasksAsync_UnitTests : BaseUnitTest
+public class ReaparrDbContextExtensionsGetAllDownloadTasksAsyncUnitTests : BaseUnitTest
 {
-    public ReaparrDbContextExtensions_GetAllDownloadTasksAsync_UnitTests(ITestOutputHelper output)
+    public ReaparrDbContextExtensionsGetAllDownloadTasksAsyncUnitTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]

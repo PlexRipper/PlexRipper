@@ -6,8 +6,8 @@ public abstract class DownloadTaskBase : BaseEntityGuid
     /// Gets or sets the unique identifier used by the Plex Api to keep track of media.
     /// This is only unique on that specific server.
     /// </summary>
-    [Column(Order = 1)]
-    public required int Key { get; init; }
+    [Column("Key", Order = 1)]
+    public required long PlexId { get; init; }
 
     /// <summary>
     /// Gets or sets the media display title.

@@ -10,7 +10,7 @@ public static partial class FakeData
     {
         // convert mib to byte
         var b = new byte[(long)ByteSize.FromMebiBytes(sizeInMib).Bytes];
-        RandomInstance.NextBytes(b);
+        _randomInstance.NextBytes(b);
         return b;
     }
 

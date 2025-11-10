@@ -1,8 +1,8 @@
-﻿namespace Reaparr.Domain.UnitTests.Converters;
+﻿namespace Reaparr.Domain.UnitTests;
 
-public class DownloadTaskActions_Aggregate_UnitTests : BaseUnitTest
+public class DownloadTaskActionsAggregateUnitTests : BaseUnitTest
 {
-    public DownloadTaskActions_Aggregate_UnitTests(ITestOutputHelper output)
+    public DownloadTaskActionsAggregateUnitTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]

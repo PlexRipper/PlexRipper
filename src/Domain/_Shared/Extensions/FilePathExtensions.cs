@@ -2,13 +2,13 @@ namespace Reaparr.Domain;
 
 public static class FilePathExtensions
 {
-    private const string TempDownloadFileSuffix = ".reaptemp";
+    private const string TEMP_DOWNLOAD_FILE_SUFFIX = ".reaptemp";
 
     public static string AddReaparrTempSuffixToFileName(this string fileName) =>
-        $"{Path.GetFileNameWithoutExtension(fileName)}{Path.GetExtension(fileName)}{TempDownloadFileSuffix}";
+        $"{Path.GetFileNameWithoutExtension(fileName)}{Path.GetExtension(fileName)}{TEMP_DOWNLOAD_FILE_SUFFIX}";
 
     public static string RemoveReapTempSuffix(this string filePath) =>
-        filePath.EndsWith(TempDownloadFileSuffix, StringComparison.OrdinalIgnoreCase)
-            ? filePath[..^TempDownloadFileSuffix.Length]
+        filePath.EndsWith(TEMP_DOWNLOAD_FILE_SUFFIX, StringComparison.OrdinalIgnoreCase)
+            ? filePath[..^TEMP_DOWNLOAD_FILE_SUFFIX.Length]
             : filePath;
 }

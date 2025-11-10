@@ -4,9 +4,9 @@ using Reaparr.Data.Contracts;
 
 namespace Reaparr.Application.UnitTests;
 
-public class DownloadCommands_PauseDownloadTasksAsync_UnitTests : BaseUnitTest<PauseDownloadTaskCommandHandler>
+public class DownloadCommandsPauseDownloadTasksAsyncUnitTests : BaseUnitTest<PauseDownloadTaskCommandHandler>
 {
-    public DownloadCommands_PauseDownloadTasksAsync_UnitTests(ITestOutputHelper output)
+    public DownloadCommandsPauseDownloadTasksAsyncUnitTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]
@@ -16,7 +16,7 @@ public class DownloadCommands_PauseDownloadTasksAsync_UnitTests : BaseUnitTest<P
         await SetupDatabase(34006);
 
         // Act
-        var result = await _sut.ExecuteAsync(new PauseDownloadTaskCommand(Guid.Empty), CancellationToken);
+        var result = await Sut.ExecuteAsync(new PauseDownloadTaskCommand(Guid.Empty), CancellationToken);
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -30,16 +30,16 @@ public class DownloadCommands_PauseDownloadTasksAsync_UnitTests : BaseUnitTest<P
         await SetupDatabase(30082, config => config.MovieDownloadTasksCount = 2);
         var movieDownloadTasks = await IDbContext.DownloadTaskMovie.ToListAsync(CancellationToken);
 
-        mock.Mock<IDownloadTaskScheduler>()
+        Mock.Mock<IDownloadTaskScheduler>()
             .Setup(x => x.IsDownloading(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
-        mock.Mock<IDownloadTaskScheduler>()
+        Mock.Mock<IDownloadTaskScheduler>()
             .Setup(x => x.StopDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Fail("Error"));
-        mock.SetupCommand(It.IsAny<DownloadTaskUpdatedCommand>).ReturnsAsync(Result.Ok());
+        Mock.SetupCommand(It.IsAny<DownloadTaskUpdatedCommand>).ReturnsAsync(Result.Ok());
 
         // Act
-        var result = await _sut.ExecuteAsync(
+        var result = await Sut.ExecuteAsync(
             new PauseDownloadTaskCommand(movieDownloadTasks.First().Id),
             CancellationToken
         );
@@ -67,16 +67,16 @@ public class DownloadCommands_PauseDownloadTasksAsync_UnitTests : BaseUnitTest<P
                 CancellationToken
             );
 
-        mock.Mock<IDownloadTaskScheduler>()
+        Mock.Mock<IDownloadTaskScheduler>()
             .Setup(x => x.IsDownloading(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
-        mock.Mock<IDownloadTaskScheduler>()
+        Mock.Mock<IDownloadTaskScheduler>()
             .Setup(x => x.StopDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
             .ReturnOk()
             .Verifiable(Times.Once);
 
         // Act
-        var result = await _sut.ExecuteAsync(new PauseDownloadTaskCommand(testDownloadTask.Id), CancellationToken);
+        var result = await Sut.ExecuteAsync(new PauseDownloadTaskCommand(testDownloadTask.Id), CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -110,19 +110,19 @@ public class DownloadCommands_PauseDownloadTasksAsync_UnitTests : BaseUnitTest<P
                 CancellationToken
             );
 
-        mock.Mock<IDownloadTaskScheduler>()
+        Mock.Mock<IDownloadTaskScheduler>()
             .SetupSequence(x => x.IsDownloading(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true)
             .ReturnsAsync(false)
             .ReturnsAsync(false)
             .ReturnsAsync(false);
-        mock.Mock<IDownloadTaskScheduler>()
+        Mock.Mock<IDownloadTaskScheduler>()
             .Setup(x => x.StopDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
             .ReturnOk()
             .Verifiable(Times.Once);
 
         // Act
-        var result = await _sut.ExecuteAsync(new PauseDownloadTaskCommand(testDownloadTask.Id), CancellationToken);
+        var result = await Sut.ExecuteAsync(new PauseDownloadTaskCommand(testDownloadTask.Id), CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

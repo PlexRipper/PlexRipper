@@ -4,10 +4,10 @@ using Reaparr.Data.Contracts;
 
 namespace Reaparr.Application.UnitTests;
 
-public class GenerateDownloadTaskTvShowsCommandHandler_UnitTests
+public class GenerateDownloadTaskTvShowsCommandHandlerUnitTests
     : BaseUnitTest<GenerateDownloadTaskTvShowsCommandHandler>
 {
-    public GenerateDownloadTaskTvShowsCommandHandler_UnitTests(ITestOutputHelper output)
+    public GenerateDownloadTaskTvShowsCommandHandlerUnitTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]
@@ -37,11 +37,11 @@ public class GenerateDownloadTaskTvShowsCommandHandler_UnitTests
             },
         };
 
-        mock.SetupCommand(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>).ReturnsAsync(Result.Ok());
+        Mock.SetupCommand(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>).ReturnsAsync(Result.Ok());
 
         // Act
         var command = new GenerateDownloadTaskTvShowsCommand(tvShows);
-        var result = await _sut.ExecuteAsync(command, CancellationToken);
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

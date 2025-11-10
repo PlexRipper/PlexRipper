@@ -1,7 +1,5 @@
 using FastEndpoints;
-using FluentResults;
 using Reaparr.Application.Contracts;
-using Reaparr.Domain;
 
 namespace Reaparr.PlexApi.Contracts;
 

@@ -1,5 +1,6 @@
 using FluentResults;
 
+// ReSharper disable InconsistentNaming
 namespace Reaparr.Application.Contracts;
 
 public static class ResultDTOMapper

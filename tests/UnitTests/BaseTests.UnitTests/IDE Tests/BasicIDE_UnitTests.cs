@@ -1,10 +1,10 @@
 namespace Reaparr.BaseTests.UnitTests.IDE_Tests;
 
-public class Normal_Empty_UnitTests
+public class NormalEmptyUnitTests
 {
     private readonly ITestOutputHelper _output;
 
-    public Normal_Empty_UnitTests(ITestOutputHelper output)
+    public NormalEmptyUnitTests(ITestOutputHelper output)
     {
         _output = output;
     }

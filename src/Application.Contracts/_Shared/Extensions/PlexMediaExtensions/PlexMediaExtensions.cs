@@ -8,7 +8,7 @@ public static class PlexMediaExtensions
         new()
         {
             Id = default,
-            Key = plexMovie.Key,
+            PlexId = plexMovie.Key,
             DataTotal = 0,
             DownloadStatus = DownloadStatus.Queued,
             CreatedAt = DateTime.UtcNow,
@@ -30,7 +30,7 @@ public static class PlexMediaExtensions
         new()
         {
             Id = default,
-            Key = plexTvShow.Key,
+            PlexId = plexTvShow.Key,
             DataTotal = 0,
             DownloadStatus = DownloadStatus.Queued,
             CreatedAt = DateTime.UtcNow,
@@ -52,7 +52,7 @@ public static class PlexMediaExtensions
         new()
         {
             Id = default,
-            Key = plexTvShowSeason.Key,
+            PlexId = plexTvShowSeason.Key,
             DataTotal = 0,
             DownloadStatus = DownloadStatus.Queued,
             CreatedAt = DateTime.UtcNow,
@@ -76,7 +76,7 @@ public static class PlexMediaExtensions
         new()
         {
             Id = default,
-            Key = plexTvShowEpisode.Key,
+            PlexId = plexTvShowEpisode.Key,
             DataTotal = 0,
             DownloadStatus = DownloadStatus.Queued,
             CreatedAt = DateTime.UtcNow,
@@ -106,7 +106,8 @@ public static class PlexMediaExtensions
             .Parts.Select(part => new DownloadTaskMovieFile
             {
                 Id = default,
-                Key = 0,
+                PlexId = part.PlexId,
+                HashId = null,
                 DataTotal = part.Size,
                 DownloadStatus = DownloadStatus.Queued,
                 CreatedAt = DateTime.UtcNow,
@@ -155,7 +156,8 @@ public static class PlexMediaExtensions
             .Parts.Select(part => new DownloadTaskTvShowEpisodeFile
             {
                 Id = default,
-                Key = 0,
+                PlexId = part.PlexId,
+                HashId = null,
                 DataTotal = part.Size,
                 DownloadStatus = DownloadStatus.Queued,
                 CreatedAt = DateTime.UtcNow,

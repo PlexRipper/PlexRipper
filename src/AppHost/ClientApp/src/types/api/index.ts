@@ -9,6 +9,7 @@ import { PlexMedia } from '@api/generated/PlexMedia';
 import { PlexServer } from '@api/generated/PlexServer';
 import { PlexServerConnection } from '@api/generated/PlexServerConnection';
 import { Settings } from '@api/generated/Settings';
+import { Integration } from '@api/generated/Integration';
 
 export * from './baseApi';
 export * from './custom';
@@ -23,6 +24,7 @@ const plexLibraryApi = new PlexLibrary();
 const plexMediaApi = new PlexMedia();
 const plexServerApi = new PlexServer();
 const plexServerConnectionApi = new PlexServerConnection();
+const integrationApi = new Integration();
 const settingsApi = new Settings();
 
 export {
@@ -37,4 +39,5 @@ export {
 	plexServerApi,
 	plexServerConnectionApi,
 	settingsApi,
+	integrationApi,
 };

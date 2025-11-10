@@ -1,6 +1,5 @@
 using System.ComponentModel;
 using FastEndpoints;
-using FastEndpoints.Security;
 using FluentValidation;
 using Reaparr.Application.Contracts;
 using Reaparr.Identity.Contracts;

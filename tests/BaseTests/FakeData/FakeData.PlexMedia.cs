@@ -36,8 +36,8 @@ public static partial class FakeData
             .Ignore(x => x.PlexLibrary)
             .Ignore(x => x.FullBannerUrl)
             .RuleFor(x => x.Guid_IMDB, f => "imdb://tt" + f.Random.Int(10000, 99999))
-            .RuleFor(x => x.Guid_TMDB, f => "tmdb://" + f.Random.Int(10000, 99999))
-            .RuleFor(x => x.Guid_TVDB, f => "tvdb://" + f.Random.Int(10000, 99999));
+            .RuleFor(x => x.Guid_TMDB, f => f.Random.Int(10000, 99999))
+            .RuleFor(x => x.Guid_TVDB, f => f.Random.Int(10000, 99999));
     }
 
     #endregion
@@ -89,6 +89,7 @@ public static partial class FakeData
                     season.ParentKey = tvShow.Key;
                     season.ParentGuid = tvShow.Guid;
                     season.FullTitle = $"{tvShow.Title}/{season.Title}";
+                    season.SeasonNumber = seasonIndex + 1;
 
                     foreach (
                         var (episode, episodeIndex) in season.Episodes.Select((episode, index) => (episode, index))
@@ -99,6 +100,7 @@ public static partial class FakeData
                         episode.ParentKey = season.Key;
                         episode.ParentGuid = season.Guid;
                         episode.FullTitle = $"{tvShow.Title}/{season.Title}/{episode.Title}";
+                        episode.EpisodeNumber = episodeIndex + 1;
                     }
                 }
 
@@ -122,6 +124,7 @@ public static partial class FakeData
         .RuleFor(x => x.ParentKey, _ => GetUniqueNumber())
         .RuleFor(x => x.Title, _ => "Season")
         .RuleFor(x => x.Guid, f => f.PlexMedia().Guid(PlexMediaType.Season))
+        .Ignore(x => x.SeasonNumber)
         .Ignore(x => x.Qualities)
         .Ignore(x => x.TvShowId)
         .Ignore(x => x.TvShow)
@@ -153,6 +156,7 @@ public static partial class FakeData
         .Ignore(x => x.TvShowSeasonId)
         .Ignore(x => x.TvShowSeason)
         .Ignore(x => x.ParentGuid)
+        .Ignore(x => x.EpisodeNumber)
         .RuleFor(x => x.ParentKey, _ => GetUniqueNumber())
         .RuleFor(x => x.Title, f => f.PlexMedia().MediaTitle(PlexMediaType.Episode))
         .RuleFor(x => x.Guid, f => f.PlexMedia().Guid(PlexMediaType.Episode))

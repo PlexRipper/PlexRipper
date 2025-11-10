@@ -93,7 +93,8 @@
             "settings": "Settings",
             "ui": "UI",
             "buttons": "Buttons",
-            "scratchpad": "Scratchpad"
+            "scratchpad": "Scratchpad",
+            "integrations": "Integrations"
         },
         "notifications-drawer": {
             "clear-notifications": "Clear All Notifications",
@@ -345,6 +346,23 @@
             "error-example": "An unexpected error occurred while loading media quality options. Please try again later.",
             "info-example": "This is a random info message about media quality settings. Lorem ipsum dolor sit amet.",
             "warning-example": "Heads up! Something might not be configured correctly. Random check: 42XY-LMN."
+        },
+        "api-key-input-field": {
+            "validation": {
+                "api-key-format": "API key must only contain hexadecimal characters (0-9, A-F).",
+                "api-key-invalid-placeholder": "Invalid or placeholder API key value.",
+                "api-key-is-required": "API key is required",
+                "api-key-length": "API key must be exactly 32 characters long."
+            }
+        },
+        "sonarr-integration": {
+            "connection-status": {
+                "connection-failed": "Could not connect to Sonarr. Ensure the base URL is correct",
+                "invalid-api-key": "Could connect to Sonarr, but the API key was invalid",
+                "success": "Reaparr can connect successfully to Sonarr!",
+                "unknown-connection-status": "Could not determine what went wrong when testing the connection with Sonarr",
+                "url-is-invalid": "The Sonarr base URL is invalid, check again."
+            }
         }
     },
     "confirmation": {
@@ -638,6 +656,20 @@
                         "label": "Disable Animated Background",
                         "text": "The animated background can cause performance issues in the browser. This toggle can be disable the animation and show just a static background.",
                         "title": "Disable the background animation"
+                    }
+                }
+            },
+            "integrations": {
+                "sonarr": {
+                    "api-key-input": {
+                        "label": "Sonarr API Key",
+                        "text": "Go to Sonarr: Settings → General → Security → API Key and copy the API key from there and paste in this field",
+                        "title": "API key from Sonarr"
+                    },
+                    "base-url-input": {
+                        "label": "Sonarr base URL",
+                        "text": "Base address where your Sonarr instance is reachable. Example: http://localhost:8989 or http://sonarr:8989",
+                        "title": "Base URL to Sonarr"
                     }
                 }
             }

@@ -21,7 +21,7 @@ public class RefreshLibraryMediaEndpointUnitTests : BaseUnitTest<RefreshLibraryM
 
         var plexLibrary = IDbContext.PlexLibraries.First();
 
-        mock.SetupCommand(It.IsAny<RefreshLibraryMediaCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.Once());
+        Mock.SetupCommand(It.IsAny<RefreshLibraryMediaCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.Once());
 
         // Act
         var rawResponse = SetupEndpointUnitTest<RefreshLibraryMediaEndpoint>();
@@ -47,7 +47,7 @@ public class RefreshLibraryMediaEndpointUnitTests : BaseUnitTest<RefreshLibraryM
 
         var plexLibrary = IDbContext.PlexLibraries.First();
 
-        mock.SetupCommand(It.IsAny<RefreshLibraryMediaCommand>)
+        Mock.SetupCommand(It.IsAny<RefreshLibraryMediaCommand>)
             .ReturnsAsync(Result.Fail("Failed to refresh library"))
             .Verifiable(Times.Once());
 
@@ -82,7 +82,7 @@ public class RefreshLibraryMediaEndpointUnitTests : BaseUnitTest<RefreshLibraryM
         var plexLibrary = IDbContext.PlexLibraries.First();
         plexLibrary.Type.ShouldBe(libraryType);
 
-        mock.SetupCommand(It.IsAny<RefreshLibraryMediaCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.Once());
+        Mock.SetupCommand(It.IsAny<RefreshLibraryMediaCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.Once());
 
         // Act
         var rawResponse = SetupEndpointUnitTest<RefreshLibraryMediaEndpoint>();

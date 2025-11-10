@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Reaparr.PublicAPI;
-using Reaparr.PublicAPI.SearchTvShow;
 
 namespace PublicApi.UnitTests;
 

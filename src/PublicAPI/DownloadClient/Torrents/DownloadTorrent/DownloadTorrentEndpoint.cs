@@ -59,8 +59,7 @@ public class DownloadTorrentEndpoint : Endpoint<DownloadTorrentEndpointRequest>
         _log.Here().DebugApiCall(HttpContext, req);
 
         // Create minimal torrent
-        var fileInfos = await GetFileNames(req);
-        var fileInfo = fileInfos.FirstOrDefault();
+        var fileInfo = await GetFileInfoAsync(req, ct);
         if (fileInfo is null)
         {
             _log.Here().Error("Could not find file info for {Type} with DataId {DataId}", req.Type, req.DataId);
@@ -108,36 +107,37 @@ public class DownloadTorrentEndpoint : Endpoint<DownloadTorrentEndpointRequest>
         );
     }
 
-    private async Task<List<MediaFileInfo>> GetFileNames(DownloadTorrentEndpointRequest req)
+    private async Task<MediaFileInfo?> GetFileInfoAsync(DownloadTorrentEndpointRequest req, CancellationToken ct)
     {
-        var fileNames = new List<MediaFileInfo>();
         if (req.Type == PlexMediaType.Episode)
         {
-            fileNames = await _dbContext.PlexTvShowEpisodeData.Include(x => x.Parts)
+            return await _dbContext.PlexTvShowEpisodeData
                 .Where(x => x.Id == req.DataId)
                 .SelectMany(x => x.Parts)
-                .Select(x => new MediaFileInfo
+                .Where(p => p.Id == req.PartId || p.PlexId == req.PartPlexId)
+                .Select(p => new MediaFileInfo
                 {
-                    FileName = Path.GetFileName(x.File),
-                    Size = x.Size,
+                    FileName = Path.GetFileName(p.File),
+                    Size = p.Size,
                 })
-                .ToListAsync();
+                .SingleOrDefaultAsync(ct);
         }
 
         if (req.Type == PlexMediaType.Movie)
         {
-            fileNames = await _dbContext.PlexMovieData.Include(x => x.Parts)
+            return await _dbContext.PlexMovieData
                 .Where(x => x.Id == req.DataId)
                 .SelectMany(x => x.Parts)
-                .Select(x => new MediaFileInfo
+                .Where(p => p.Id == req.PartId || p.PlexId == req.PartPlexId)
+                .Select(p => new MediaFileInfo
                 {
-                    FileName = Path.GetFileName(x.File),
-                    Size = x.Size,
+                    FileName = Path.GetFileName(p.File),
+                    Size = p.Size,
                 })
-                .ToListAsync();
+                .SingleOrDefaultAsync(ct);
         }
 
-        return fileNames;
+        return null;
     }
 
     private record MediaFileInfo

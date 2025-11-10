@@ -1,5 +1,6 @@
 using System.Text.Json;
 using FastEndpoints;
+using Reaparr.Data.Contracts;
 
 namespace Reaparr.PublicAPI;
 
@@ -15,6 +16,15 @@ public sealed class DeleteTorrentResponse
 
 public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest, DeleteTorrentResponse>
 {
+    private readonly ILogger _log;
+    private readonly IReaparrDbContext _dbContext;
+
+    public DeleteTorrentEndpoint(ILogger log, IReaparrDbContext dbContext)
+    {
+        _log = log.ForContext<DeleteTorrentEndpoint>();
+        _dbContext = dbContext;
+    }
+    
 	public override void Configure()
 	{
 		Post(PublicApiRoutes.DownloadClient + "/torrents/delete");
@@ -25,6 +35,10 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest, Delet
 
 	public override async Task HandleAsync(DeleteTorrentRequest req, CancellationToken ct)
 	{
+        _log.Here().DebugApiCall(HttpContext, req);
+        
+        _log.Warning("DeleteTorrentEndpoint called but not implemented. Hashes: {Hashes}", string.Join(", ", req.Hashes));
+        
 		HttpContext.Response.ContentType = "application/json";
 		var payload = JsonSerializer.Serialize(new DeleteTorrentResponse { Success = true });
 		await HttpContext.Response.WriteAsync(payload, ct);

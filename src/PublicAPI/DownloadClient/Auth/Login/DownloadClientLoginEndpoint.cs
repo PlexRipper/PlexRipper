@@ -1,5 +1,6 @@
 using FastEndpoints;
 using FluentValidation;
+using Microsoft.AspNetCore.Http;
 using Reaparr.Identity.Contracts;
 using Reaparr.Settings.Contracts;
 
@@ -48,7 +49,7 @@ public class DownloadClientLoginEndpoint : Endpoint<DownloadClientLoginEndpointR
 
     public override async Task HandleAsync(DownloadClientLoginEndpointRequest req, CancellationToken ct)
     {
-         _log.DebugApiCall(HttpContext);
+         _log.Here().DebugApiCall(HttpContext);
 
         var username = req.Username;
         var password = req.Password;
@@ -71,7 +72,16 @@ public class DownloadClientLoginEndpoint : Endpoint<DownloadClientLoginEndpointR
         var session = await CreateSession(username);
 
         // Set SID cookie (qBittorrent compatible)
-        HttpContext.Response.Headers.Append("Set-Cookie", $"SID={session.Sid}; Path=/; HttpOnly");
+        var isHttps = HttpContext.Request.IsHttps;
+        var cookieOptions = new CookieOptions
+        {
+            Path = "/",
+            HttpOnly = true,
+            Secure = isHttps,
+            SameSite = isHttps ? SameSiteMode.None : SameSiteMode.Lax,
+            Expires = session.ExpiresAt
+        };
+        HttpContext.Response.Cookies.Append("SID", session.Sid, cookieOptions);
 
         await Send.StringAsync("Ok.", cancellation: ct);
     }

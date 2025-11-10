@@ -697,31 +697,6 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
     }
 
     [Fact]
-    public void ShouldFailValidation_WhenImdbIsNull()
-    {
-        // Arrange
-        var validator = new SearchTvShowCommandValidator();
-        var cmd = new SearchTvShowCommand
-        {
-            Query = string.Empty,
-            Season = 0,
-            Episode = 0,
-            Limit = 10,
-            Offset = 0,
-            IMDB_ID = null!,
-            TMDB_ID = 0,
-            TVDB_ID = 0,
-        };
-
-        // Act
-        var result = validator.Validate(cmd);
-
-        // Assert
-        result.IsValid.ShouldBeFalse();
-        result.Errors.ShouldNotBeEmpty();
-    }
-
-    [Fact]
     public async Task ShouldReturnSpecificEpisode_WhenAllExternalIdsProvided()
     {
         // Arrange

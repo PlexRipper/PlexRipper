@@ -24,7 +24,7 @@ public class LogoutEndpoint : EndpointWithoutRequest
 
     public override async Task HandleAsync(CancellationToken ct)
     {
-        _log.DebugApiCall(HttpContext);
+        _log.Here().DebugApiCall(HttpContext);
 
         if (HttpContext.Request.Cookies.TryGetValue("SID", out var sid))
         {

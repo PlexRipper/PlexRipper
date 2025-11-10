@@ -110,7 +110,7 @@ public sealed class TorrentsInfoEndpoint : Endpoint<TorrentsInfoEndpointRequest,
         await Send.OkAsync(torrents, ct);
     }
 
-    private static QBittorrentTorrentInfo MapToTorrentInfo(DownloadTaskFileBase file)
+    private QBittorrentTorrentInfo MapToTorrentInfo(DownloadTaskFileBase file)
     {
         // Save path: prefer active download directory, else destination directory
         var savePath = !string.IsNullOrWhiteSpace(file.DownloadDirectory)
@@ -130,13 +130,23 @@ public sealed class TorrentsInfoEndpoint : Endpoint<TorrentsInfoEndpointRequest,
         };
     }
 
-    private static string MapStatusToQbittorrentState(DownloadStatus status) => status switch
+    private string MapStatusToQbittorrentState(DownloadStatus status)
     {
-        DownloadStatus.Downloading or DownloadStatus.DownloadFinished => "downloading",
-        DownloadStatus.Paused or DownloadStatus.MovePaused => "pausedDL",
-        DownloadStatus.Queued => "queuedDL",
-        DownloadStatus.Completed => "stalledUP",
-        DownloadStatus.Error or DownloadStatus.MoveError => "error",
-        _ => "downloading",
-    };
+        switch (status)
+        {
+            case DownloadStatus.Downloading or DownloadStatus.DownloadFinished:
+                return "downloading";
+            case DownloadStatus.Paused or DownloadStatus.MovePaused:
+                return "pausedDL";
+            case DownloadStatus.Queued:
+                return "queuedDL";
+            case DownloadStatus.Completed:
+                return "uploading"; // Completed and seeding
+            case DownloadStatus.Error or DownloadStatus.MoveError:
+                return "error";
+            default:
+                _log.Warning("Unknown DownloadStatus {DownloadStatus} encountered when mapping to qBittorrent state", status);
+                return "unknown";
+        }
+    }
 }

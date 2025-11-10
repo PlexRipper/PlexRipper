@@ -16,13 +16,18 @@ public static class HttpClientModule
                 (sp, client) =>
                 {
                     var settings = sp.GetRequiredService<ISonarrSettings>();
-                    if (settings.SonarrBaseUrl == string.Empty || settings.SonarrApiKey == string.Empty)
-                    {
-                        throw new Exception("BaseUrl and ApiKey cannot be empty for Sonarr HttpClient.");
-                    }
+                    if (string.IsNullOrWhiteSpace(settings.SonarrBaseUrl))
+                        throw new InvalidOperationException("Invalid SonarrBaseUrl: value is null or empty.");
 
-                    if (Uri.TryCreate(settings.SonarrBaseUrl.TrimEnd('/'), UriKind.Absolute, out var baseUri))
-                        client.BaseAddress = baseUri;
+                    if (string.IsNullOrWhiteSpace(settings.SonarrApiKey))
+                        throw new InvalidOperationException("Invalid SonarrApiKey: value is null or empty.");
+
+                    var baseUrl = settings.SonarrBaseUrl.Trim().TrimEnd('/');
+                    if (!Uri.TryCreate(baseUrl, UriKind.Absolute, out var baseUri))
+                        throw new InvalidOperationException(
+                            $"Invalid SonarrBaseUrl: '{settings.SonarrBaseUrl}' is not a valid absolute URI."
+                        );
+                    client.BaseAddress = baseUri;
 
                     client.Timeout = TimeSpan.FromSeconds(15);
                     client.DefaultRequestHeaders.Clear();

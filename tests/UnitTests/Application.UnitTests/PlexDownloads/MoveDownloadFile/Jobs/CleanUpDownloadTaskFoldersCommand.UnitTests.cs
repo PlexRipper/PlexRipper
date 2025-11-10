@@ -39,7 +39,7 @@ public class CreateDirectoryFromFilePathUnitTests : BaseUnitTest<CleanUpDownload
 
         // Act
         var request = new CleanUpDownloadTaskFoldersCommand(downloadTask.ToKey());
-        var result = await _sut.ExecuteAsync(request, CancellationToken);
+        var result = await Sut.ExecuteAsync(request, CancellationToken);
 
         // Assert
         result.ShouldNotBeNull();
@@ -83,16 +83,16 @@ public class CreateDirectoryFromFilePathUnitTests : BaseUnitTest<CleanUpDownload
                 CancellationToken
             );
 
-        mock.Mock<IPath>()
+        Mock.Mock<IPath>()
             .Setup(x => x.GetDirectoryName(It.IsAny<string>()))
             .Returns("/mnt/DATA/ReaparrCache/Downloads/TvShows/Reno 911!/Season 1/");
 
-        mock.Mock<IDirectory>().Setup(x => x.GetFiles(It.IsAny<string>())).Returns([]);
-        mock.Mock<IDirectory>().Setup(x => x.Delete(It.IsAny<string>()));
+        Mock.Mock<IDirectory>().Setup(x => x.GetFiles(It.IsAny<string>())).Returns([]);
+        Mock.Mock<IDirectory>().Setup(x => x.Delete(It.IsAny<string>()));
 
         // Act
         var request = new CleanUpDownloadTaskFoldersCommand(downloadTask.ToKey());
-        var result = await _sut.ExecuteAsync(request, CancellationToken);
+        var result = await Sut.ExecuteAsync(request, CancellationToken);
 
         // Assert
         result.ShouldNotBeNull();
@@ -137,19 +137,19 @@ public class CreateDirectoryFromFilePathUnitTests : BaseUnitTest<CleanUpDownload
                 CancellationToken
             );
 
-        mock.Mock<IPath>()
+        Mock.Mock<IPath>()
             .Setup(x => x.GetDirectoryName(It.IsAny<string>()))
             .Returns("/mnt/DATA/ReaparrCache/Downloads/TvShows/Reno 911!/Season 1/")
             .Verifiable(Times.Once);
 
-        mock.Mock<IDirectory>()
+        Mock.Mock<IDirectory>()
             .Setup(x => x.GetFiles(It.IsAny<string>()))
             .Throws(new UnauthorizedAccessException())
             .Verifiable(Times.Once);
 
         // Act
         var request = new CleanUpDownloadTaskFoldersCommand(downloadTask.ToKey());
-        var result = await _sut.ExecuteAsync(request, CancellationToken);
+        var result = await Sut.ExecuteAsync(request, CancellationToken);
 
         // Assert
         result.ShouldNotBeNull();

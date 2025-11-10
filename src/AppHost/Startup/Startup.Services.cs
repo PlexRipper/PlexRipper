@@ -37,7 +37,7 @@ public static partial class Startup
         services.AddCors(options =>
         {
             options.AddPolicy(
-                CORSConfiguration,
+                CorsConfiguration,
                 builder =>
                 {
                     builder

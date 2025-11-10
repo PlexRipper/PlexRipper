@@ -1,11 +1,9 @@
-using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using FastEndpoints;
 
 namespace Reaparr.Application;
 
-public record SonarrApiCreateDownloadClientCommand() : ICommand<Result<SonarrDownloadContractDTO>>
+public record SonarrApiCreateDownloadClientCommand : ICommand<Result<SonarrDownloadContractDTO>>
 {
     public required bool ForceSave { get; init; }
 

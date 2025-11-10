@@ -31,7 +31,7 @@ public static class DbContextConnections
         SqliteConnection databaseConnection = new(ConnectionString);
         databaseConnection.CreateCollation(
             OrderByNaturalExtensions.CollationName,
-            (x, y) => NaturalComparer.Compare(x, y)
+            (x, y) => _naturalComparer.Compare(x, y)
         );
 
         optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
@@ -49,5 +49,5 @@ public static class DbContextConnections
         );
     }
 
-    private static readonly NaturalSortComparer NaturalComparer = new(StringComparison.InvariantCultureIgnoreCase);
+    private static readonly NaturalSortComparer _naturalComparer = new(StringComparison.InvariantCultureIgnoreCase);
 }

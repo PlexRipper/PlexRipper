@@ -1,5 +1,4 @@
-﻿using System.Text.Json;
-using FastEndpoints;
+﻿using FastEndpoints;
 using Reaparr.Application;
 using Reaparr.Application.Contracts;
 using Reaparr.Settings;

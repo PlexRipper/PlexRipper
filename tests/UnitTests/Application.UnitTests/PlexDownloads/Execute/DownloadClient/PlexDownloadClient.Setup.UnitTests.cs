@@ -14,14 +14,14 @@ public class PlexDownloadClientSetupUnitTests : BaseUnitTest
     {
         //Arrange
         await SetupDatabase(82345);
-        var sut = mock.Create<PlexDownloadClient>(
+        var sut = Mock.Create<PlexDownloadClient>(
             new NamedParameter(
                 "downloadWorkerFactory",
-                (DownloadWorkerTask task) => mock.Create<DownloadWorker>(new NamedParameter("downloadWorkerTask", task))
+                (DownloadWorkerTask task) => Mock.Create<DownloadWorker>(new NamedParameter("downloadWorkerTask", task))
             ),
             new NamedParameter(
                 "clientFactory",
-                (PlexApiClientOptions options) => mock.Create<PlexApiClient>(new NamedParameter("options", options))
+                (PlexApiClientOptions options) => Mock.Create<PlexApiClient>(new NamedParameter("options", options))
             )
         );
 

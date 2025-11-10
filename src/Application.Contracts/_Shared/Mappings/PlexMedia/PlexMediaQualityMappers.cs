@@ -4,7 +4,7 @@ namespace Reaparr.Application.Contracts;
 
 public static class PlexMediaQualityMappers
 {
-    private const int NoMediaDataId = -1;
+    private const int NO_MEDIA_DATA_ID = -1;
 
     #region PlexTvShowMediaQuality
 
@@ -12,8 +12,8 @@ public static class PlexMediaQualityMappers
         new()
         {
             Quality = source.Quality,
-            MediaId = NoMediaDataId,
-            DataId = NoMediaDataId,
+            MediaId = NO_MEDIA_DATA_ID,
+            DataId = NO_MEDIA_DATA_ID,
             MediaDataType = source.Type,
         };
 
@@ -30,7 +30,7 @@ public static class PlexMediaQualityMappers
             Quality = source.Quality,
             MediaDataType = source.Type,
             MediaId = source.PlexTvShowSeasonId,
-            DataId = NoMediaDataId,
+            DataId = NO_MEDIA_DATA_ID,
         };
 
     public static List<PlexMediaQualityDTO> ToDTO(this IEnumerable<PlexTvShowSeasonMediaQuality> source) =>

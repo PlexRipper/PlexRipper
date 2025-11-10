@@ -27,7 +27,7 @@ public static partial class StringExtensions
         "at",
     };
 
-    private static readonly string[] Articles = ["a", "an", "the"];
+    private static readonly string[] _articles = ["a", "an", "the"];
 
     public static string GetActualCasing(this string path)
     {
@@ -165,7 +165,7 @@ public static partial class StringExtensions
 
     private static string RemoveLeadingArticle(string title)
     {
-        foreach (var article in Articles)
+        foreach (var article in _articles)
         {
             var articleWithSpace = article + " ";
             if (title.StartsWith(articleWithSpace, StringComparison.OrdinalIgnoreCase))

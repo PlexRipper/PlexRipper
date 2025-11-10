@@ -3,6 +3,7 @@ using BencodeNET.Torrents;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.PublicAPI;
+// ReSharper disable RedundantAssignment
 
 namespace PublicApi.UnitTests;
 
@@ -18,7 +19,7 @@ public class AddTorrentEndpointUnitTests : BaseUnitTest
         var request = new AddTorrentEndpointRequest { TorrentFile = null };
 
         // Mock the dependencies
-        mock.Mock<ICommandExecutor>()
+        Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<CreateDownloadTasksCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Never);
@@ -39,7 +40,7 @@ public class AddTorrentEndpointUnitTests : BaseUnitTest
         var (torrentFile, torrentFileMock) = CreateMockTorrentFile(validMetadata, "test.torrent");
         var request = new AddTorrentEndpointRequest { TorrentFile = torrentFile };
 
-        mock.Mock<ICommandExecutor>()
+        Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<CreateDownloadTasksCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok());
 
@@ -51,7 +52,7 @@ public class AddTorrentEndpointUnitTests : BaseUnitTest
         endpoint.HttpContext.Response.StatusCode.ShouldBe(200);
 
         // Verify command was called with correct data
-        mock.Mock<ICommandExecutor>()
+        Mock.Mock<ICommandExecutor>()
             .Verify(x => x.Send(It.Is<CreateDownloadTasksCommand>(cmd =>
                 cmd.Request.DownloadMedias.Count == 1 &&
                 cmd.Request.DownloadMedias[0].Type == validMetadata.Type &&
@@ -89,7 +90,7 @@ public class AddTorrentEndpointUnitTests : BaseUnitTest
         var (torrentFile, torrentFileMock) = CreateMockTorrentFile(invalidMetadata, "invalid.torrent");
         var request = new AddTorrentEndpointRequest { TorrentFile = torrentFile };
 
-        mock.Mock<ICommandExecutor>()
+        Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<CreateDownloadTasksCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok());
 
@@ -103,7 +104,7 @@ public class AddTorrentEndpointUnitTests : BaseUnitTest
         endpoint.ValidationFailures.Count.ShouldBeGreaterThan(0);
 
         // Verify command was not called
-        mock.Mock<ICommandExecutor>()
+        Mock.Mock<ICommandExecutor>()
             .Verify(x => x.Send(It.IsAny<CreateDownloadTasksCommand>(), It.IsAny<CancellationToken>()), Times.Never);
 
         // Verify IFormFile mock interactions
@@ -120,7 +121,7 @@ public class AddTorrentEndpointUnitTests : BaseUnitTest
         var request = new AddTorrentEndpointRequest { TorrentFile = torrentFile };
 
         var failureResult = Result.Fail("Command execution failed");
-        mock.Mock<ICommandExecutor>()
+        Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<CreateDownloadTasksCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(failureResult);
 
@@ -132,7 +133,7 @@ public class AddTorrentEndpointUnitTests : BaseUnitTest
         endpoint.HttpContext.Response.StatusCode.ShouldBe(200);
 
         // Verify command was called once
-        mock.Mock<ICommandExecutor>()
+        Mock.Mock<ICommandExecutor>()
             .Verify(x => x.Send(It.IsAny<CreateDownloadTasksCommand>(), It.IsAny<CancellationToken>()), Times.Once);
 
         // Verify IFormFile mock interactions
@@ -211,7 +212,7 @@ public class AddTorrentEndpointUnitTests : BaseUnitTest
     public async Task ShouldSetHashIdOnMovieDownloadTask_WhenTorrentIsMovieType()
     {
         // Arrange
-        var movieMetadata = CreateValidTorrentMetadata(PlexMediaType.Movie);
+        var movieMetadata = CreateValidTorrentMetadata();
         var (torrentFile, torrentFileMock) = CreateMockTorrentFile(movieMetadata, "movie.torrent");
         var request = new AddTorrentEndpointRequest { TorrentFile = torrentFile };
 
@@ -249,7 +250,7 @@ public class AddTorrentEndpointUnitTests : BaseUnitTest
         torrentFileMock = actualTorrentFileMock;
         movieMetadata = actualMetadata;
 
-        mock.Mock<ICommandExecutor>()
+        Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<CreateDownloadTasksCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok());
 
@@ -261,7 +262,7 @@ public class AddTorrentEndpointUnitTests : BaseUnitTest
         endpoint.HttpContext.Response.StatusCode.ShouldBe(200);
 
         // Verify command was called once
-        mock.Mock<ICommandExecutor>()
+        Mock.Mock<ICommandExecutor>()
             .Verify(x => x.Send(It.IsAny<CreateDownloadTasksCommand>(), It.IsAny<CancellationToken>()), Times.Once);
 
         // Verify IFormFile mock interactions
@@ -323,7 +324,7 @@ public class AddTorrentEndpointUnitTests : BaseUnitTest
         torrentFileMock = actualTorrentFileMock;
         episodeMetadata = actualMetadata;
 
-        mock.Mock<ICommandExecutor>()
+        Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<CreateDownloadTasksCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok());
 
@@ -335,7 +336,7 @@ public class AddTorrentEndpointUnitTests : BaseUnitTest
         endpoint.HttpContext.Response.StatusCode.ShouldBe(200);
 
         // Verify command was called once
-        mock.Mock<ICommandExecutor>()
+        Mock.Mock<ICommandExecutor>()
             .Verify(x => x.Send(It.IsAny<CreateDownloadTasksCommand>(), It.IsAny<CancellationToken>()), Times.Once);
 
         // Verify IFormFile mock interactions

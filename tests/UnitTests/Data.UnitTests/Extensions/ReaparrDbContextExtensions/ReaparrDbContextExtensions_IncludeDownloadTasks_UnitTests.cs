@@ -2,9 +2,9 @@
 
 namespace Reaparr.Data.UnitTests;
 
-public class ReaparrDbContextExtensions_IncludeDownloadTasks_UnitTests : BaseUnitTest
+public class ReaparrDbContextExtensionsIncludeDownloadTasksUnitTests : BaseUnitTest
 {
-    public ReaparrDbContextExtensions_IncludeDownloadTasks_UnitTests(ITestOutputHelper output)
+    public ReaparrDbContextExtensionsIncludeDownloadTasksUnitTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]

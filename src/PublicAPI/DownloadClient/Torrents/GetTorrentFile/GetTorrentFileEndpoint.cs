@@ -1,18 +1,15 @@
 using System.Text;
 using FastEndpoints;
-using Reaparr.Data.Contracts;
 
 namespace Reaparr.PublicAPI;
 
 public sealed class GetTorrentFileEndpoint : EndpointWithoutRequest
 {
     private readonly ILogger _log;
-    private readonly IReaparrDbContext _dbContext;
 
-    public GetTorrentFileEndpoint(ILogger logger, IReaparrDbContext dbContext)
+    public GetTorrentFileEndpoint(ILogger logger)
     {
         _log = logger.ForContext<GetTorrentFileEndpoint>();
-        _dbContext = dbContext;
     }
 
     

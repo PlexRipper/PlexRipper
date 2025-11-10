@@ -42,7 +42,7 @@ public abstract class BaseCommandUnitTest<TCommand> : BaseUnitTest
                 $"Handler type '{handlerTypeName}' not found for command: {commandType.FullName}."
             );
 
-        var handler = mock.Create(handlerType);
+        var handler = Mock.Create(handlerType);
 
         // dynamically cast the handler to ICommandHandler<TCommand, TResponse>
         // to avoid needing to know the exact response type at compile time
@@ -73,7 +73,7 @@ public abstract class BaseCommandUnitTest<TCommand> : BaseUnitTest
                 $"Handler type '{handlerTypeName}' not found for command: {commandType.FullName}."
             );
 
-        var handler = mock.Create(handlerType);
+        var handler = Mock.Create(handlerType);
 
         // dynamically cast the handler to ICommandHandler<TCommand, TResponse>
         // to avoid needing to know the exact response type at compile time
@@ -87,6 +87,6 @@ public abstract class BaseCommandUnitTest<TCommand> : BaseUnitTest
     public override void Dispose()
     {
         base.Dispose();
-        mock.Dispose();
+        Mock.Dispose();
     }
 }

@@ -57,21 +57,21 @@ public static class DefaultJsonSerializerOptions
             },
         };
 
-    private static readonly Lazy<JsonSerializerOptions> ConfigStandardField = new(() =>
+    private static readonly Lazy<JsonSerializerOptions> _configStandardField = new(() =>
     {
         var options = CreateBaseOptions();
         options.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
         return options;
     });
 
-    private static readonly Lazy<JsonSerializerOptions> ConfigCapitalizedField = new(() =>
+    private static readonly Lazy<JsonSerializerOptions> _configCapitalizedField = new(() =>
     {
         var options = CreateBaseOptions();
         options.PropertyNamingPolicy = null;
         return options;
     });
 
-    private static readonly Lazy<JsonSerializerOptions> ConfigPlexApiSerializationField = new(() =>
+    private static readonly Lazy<JsonSerializerOptions> _configPlexApiSerializationField = new(() =>
     {
         var options = CreateBaseOptions();
         options.Converters.Clear();
@@ -79,7 +79,7 @@ public static class DefaultJsonSerializerOptions
         return options;
     });
 
-    private static readonly Lazy<JsonSerializerOptions> ConfigManagerOptionsField = new(() =>
+    private static readonly Lazy<JsonSerializerOptions> _configManagerOptionsField = new(() =>
     {
         var options = CreateBaseOptions();
 
@@ -91,11 +91,11 @@ public static class DefaultJsonSerializerOptions
         return options;
     });
 
-    public static JsonSerializerOptions ConfigStandard => ConfigStandardField.Value;
+    public static JsonSerializerOptions ConfigStandard => _configStandardField.Value;
 
-    public static JsonSerializerOptions ConfigCapitalized => ConfigCapitalizedField.Value;
+    public static JsonSerializerOptions ConfigCapitalized => _configCapitalizedField.Value;
 
-    public static JsonSerializerOptions UserSettingsOptions => ConfigManagerOptionsField.Value;
+    public static JsonSerializerOptions UserSettingsOptions => _configManagerOptionsField.Value;
 
-    public static JsonSerializerOptions PlexApiSerialization => ConfigPlexApiSerializationField.Value;
+    public static JsonSerializerOptions PlexApiSerialization => _configPlexApiSerializationField.Value;
 }

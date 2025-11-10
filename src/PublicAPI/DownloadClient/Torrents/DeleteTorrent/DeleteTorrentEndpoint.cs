@@ -1,6 +1,5 @@
 using System.Text.Json;
 using FastEndpoints;
-using Reaparr.Data.Contracts;
 
 namespace Reaparr.PublicAPI;
 
@@ -17,12 +16,10 @@ public sealed class DeleteTorrentResponse
 public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest, DeleteTorrentResponse>
 {
     private readonly ILogger _log;
-    private readonly IReaparrDbContext _dbContext;
 
-    public DeleteTorrentEndpoint(ILogger log, IReaparrDbContext dbContext)
+    public DeleteTorrentEndpoint(ILogger log)
     {
         _log = log.ForContext<DeleteTorrentEndpoint>();
-        _dbContext = dbContext;
     }
     
 	public override void Configure()

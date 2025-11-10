@@ -1,11 +1,9 @@
-using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using FastEndpoints;
 
 namespace Reaparr.Application;
 
-public record SonarrApiCreateIndexerCommand() : ICommand<Result<SonarrIndexerContractDTO>>
+public record SonarrApiCreateIndexerCommand : ICommand<Result<SonarrIndexerContractDTO>>
 {
     public required bool ForceSave { get; init; }
 
@@ -33,10 +31,8 @@ public class SonarrApiCreateIndexerCommandHandler
             var requestUri = new Uri($"/api/v3/indexer?forceSave={forceSave}", UriKind.Relative);
             var json = JsonSerializer.Serialize(command.Resource, DefaultJsonSerializerOptions.ConfigStandard);
 
-            using var httpRequest = new HttpRequestMessage(HttpMethod.Post, requestUri)
-            {
-                Content = new StringContent(json, Encoding.UTF8, "application/json"),
-            };
+            using var httpRequest = new HttpRequestMessage(HttpMethod.Post, requestUri);
+            httpRequest.Content = json.ToStringContent();
 
             var response = await _client.SendAsync(httpRequest, cancellationToken);
             var body = await response.Content.ReadAsStringAsync(cancellationToken);

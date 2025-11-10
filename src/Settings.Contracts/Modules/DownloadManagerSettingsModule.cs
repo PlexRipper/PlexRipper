@@ -6,7 +6,7 @@ public record DownloadManagerSettingsModule
 {
     private int _downloadSegments = 4;
 
-    private bool _keepCompletedInDownloadFolder = false;
+    private bool _keepCompletedInDownloadFolder;
 
     public static DownloadManagerSettingsModule Create() =>
         new() { DownloadSegments = 4, KeepCompletedInDownloadFolder = false };

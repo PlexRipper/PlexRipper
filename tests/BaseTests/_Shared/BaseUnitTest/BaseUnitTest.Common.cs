@@ -11,8 +11,8 @@ namespace Reaparr.BaseTests;
 
 public partial class BaseUnitTest
 {
-    protected readonly ITestOutputHelper _output;
-    protected readonly LogEventLevel _logEventLevel;
+    protected readonly ITestOutputHelper Output;
+    protected readonly LogEventLevel LogEventLevel;
 
     protected readonly ILogger Log;
 
@@ -28,8 +28,8 @@ public partial class BaseUnitTest
     /// <param name="logEventLevel"></param>
     protected BaseUnitTest(ITestOutputHelper output, LogEventLevel logEventLevel = LogEventLevel.Verbose)
     {
-        _output = output;
-        _logEventLevel = logEventLevel;
+        Output = output;
+        LogEventLevel = logEventLevel;
 
         EnvironmentExtensions.EnableUnmaskedLog(true);
 
@@ -38,9 +38,9 @@ public partial class BaseUnitTest
         BogusExtensions.Setup();
 
         var testLogConfig = new TestLogConfig(output);
-        Log = testLogConfig.CreateLogInstance<BaseUnitTest>(_logEventLevel);
+        Log = testLogConfig.CreateLogInstance<BaseUnitTest>(LogEventLevel);
 
-        mock = AutoMock.GetStrict(SetDefaultBuilder);
+        Mock = AutoMock.GetStrict(SetDefaultBuilder);
     }
 
     /// <summary>
@@ -72,12 +72,12 @@ public partial class BaseUnitTest
             ctx.AddTestServices(s =>
             {
                 // All different dependencies that are needed for the endpoint need to be added here. And then they can be mocked in the test.
-                s.AddTransient(_ => mock.Create<ILogger>());
-                s.AddTransient(_ => mock.Create<IReaparrDbContext>());
-                s.AddTransient(_ => mock.Create<IAuthDbContext>());
-                s.AddTransient(_ => mock.Create<ICommandExecutor>());
-                s.AddSingleton(_ => mock.Create<ISchedulerService>());
-                s.AddSingleton(_ => mock.Mock<ISignalRService>().Object);
+                s.AddTransient(_ => Mock.Create<ILogger>());
+                s.AddTransient(_ => Mock.Create<IReaparrDbContext>());
+                s.AddTransient(_ => Mock.Create<IAuthDbContext>());
+                s.AddTransient(_ => Mock.Create<ICommandExecutor>());
+                s.AddSingleton(_ => Mock.Create<ISchedulerService>());
+                s.AddSingleton(_ => Mock.Mock<ISignalRService>().Object);
             });
         });
     }
@@ -94,7 +94,7 @@ public partial class BaseUnitTest
 public class BaseUnitTest<TUnitTestClass> : BaseUnitTest
     where TUnitTestClass : class
 {
-    protected TUnitTestClass _sut => mock.Create<TUnitTestClass>();
+    protected TUnitTestClass Sut => Mock.Create<TUnitTestClass>();
 
     protected BaseUnitTest(ITestOutputHelper output, LogEventLevel logEventLevel = LogEventLevel.Verbose)
         : base(output, logEventLevel) { }
@@ -102,6 +102,6 @@ public class BaseUnitTest<TUnitTestClass> : BaseUnitTest
     public override void Dispose()
     {
         base.Dispose();
-        mock.Dispose();
+        Mock.Dispose();
     }
 }

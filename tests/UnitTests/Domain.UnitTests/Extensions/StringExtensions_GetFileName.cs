@@ -1,8 +1,8 @@
 namespace Reaparr.Domain.UnitTests;
 
-public class StringExtensions_GetFileName : BaseUnitTest
+public class StringExtensionsGetFileName : BaseUnitTest
 {
-    public StringExtensions_GetFileName(ITestOutputHelper output)
+    public StringExtensionsGetFileName(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]

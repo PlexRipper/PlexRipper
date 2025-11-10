@@ -21,12 +21,12 @@ public class FakeApiDataGenerateUnitTests : BaseUnitTest<MockPlexApiServer>
 
         // Act
         var stopWatch = Stopwatch.StartNew();
-        _sut.Setup(handler, options);
+        Sut.Setup(handler, options);
         stopWatch.Stop();
 
         // Assert
         var elapsed = stopWatch.Elapsed;
-        _output.WriteLine($"Elapsed time: {elapsed}");
+        Output.WriteLine($"Elapsed time: {elapsed}");
         elapsed.ShouldBeLessThan(TimeSpan.FromSeconds(5));
     }
 }

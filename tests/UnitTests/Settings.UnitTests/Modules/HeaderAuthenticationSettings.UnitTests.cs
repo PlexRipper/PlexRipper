@@ -1,6 +1,4 @@
 using Reaparr.Settings.Contracts;
-using Shouldly;
-using Xunit;
 
 namespace Reaparr.Settings.UnitTests;
 

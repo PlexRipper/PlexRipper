@@ -3,7 +3,7 @@ using Reaparr.Data.Contracts;
 
 namespace Reaparr.Application;
 
-public record DownloadTaskWorkerLogNotification(IList<DownloadWorkerLog> logs) : IEvent;
+public record DownloadTaskWorkerLogNotification(IList<DownloadWorkerLog> Logs) : IEvent;
 
 public class DownloadTaskWorkerLogNotificationHandler : IEventHandler<DownloadTaskWorkerLogNotification>
 {
@@ -21,7 +21,7 @@ public class DownloadTaskWorkerLogNotificationHandler : IEventHandler<DownloadTa
         CancellationToken cancellationToken
     )
     {
-        var logs = logNotification.logs;
+        var logs = logNotification.Logs;
         if (!logs.Any())
             return;
 

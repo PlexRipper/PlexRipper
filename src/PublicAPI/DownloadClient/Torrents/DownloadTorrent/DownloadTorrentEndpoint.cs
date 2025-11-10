@@ -29,7 +29,7 @@ public class DownloadTorrentEndpoint : Endpoint<DownloadTorrentEndpointRequest>
 {
     private readonly IReaparrDbContext _dbContext;
 
-    private const int StatusPieceLength = 256 * 1024; // 256KB
+    private const int PIECE_LENGTH = 256 * 1024; // 256KB
 
     private readonly ILogger _log;
 
@@ -71,7 +71,7 @@ public class DownloadTorrentEndpoint : Endpoint<DownloadTorrentEndpointRequest>
         }
 
         var fileName = fileInfo.FileName + ".torrent";
-        var numPieces = (int)Math.Ceiling((double)fileInfo.Size / StatusPieceLength);
+        var numPieces = (int)Math.Ceiling((double)fileInfo.Size / PIECE_LENGTH);
 
         // Add extra fields to identify the torrent as a Reaparr status torrent and include metadata
         // that can later be used to trigger a Download command in Reaparr
@@ -88,7 +88,7 @@ public class DownloadTorrentEndpoint : Endpoint<DownloadTorrentEndpointRequest>
         {
             CreationDate = DateTime.UtcNow,
             Pieces = new byte[numPieces * 20], // Empty pieces (20 bytes SHA1 hash each)
-            PieceSize = StatusPieceLength,
+            PieceSize = PIECE_LENGTH,
             Trackers =
             [
                 ["udp://tracker.opentrackr.org:1337/announce"],

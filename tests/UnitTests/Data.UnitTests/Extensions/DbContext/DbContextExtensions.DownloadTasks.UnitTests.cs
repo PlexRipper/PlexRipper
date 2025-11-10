@@ -429,7 +429,7 @@ public class DbContextExtensionsDownloadTasksUnitTests : BaseUnitTest
 
         // Assert
         generic.ShouldNotBeNull();
-        generic!.Id.ShouldBe(movieFile.Id);
+        generic.Id.ShouldBe(movieFile.Id);
         generic.DownloadTaskType.ShouldBe(DownloadTaskType.MovieData);
         generic.PlexServer.ShouldNotBeNull();
         generic.PlexLibrary.ShouldNotBeNull();

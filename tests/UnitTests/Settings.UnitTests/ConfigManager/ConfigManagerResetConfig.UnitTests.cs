@@ -14,17 +14,17 @@ public class ConfigManagerResetConfigUnitTests : BaseUnitTest<ConfigManager>
     public void ShouldReturnOkResult_WhenSettingsAreReset()
     {
         // Arrange
-        mock.Mock<IUserSettings>().Setup(x => x.Reset());
+        Mock.Mock<IUserSettings>().Setup(x => x.Reset());
 
         // Were mocking other methods from ConfigManager, that's why we need to mock it manually here
         var sut = new Mock<ConfigManager>(
             MockBehavior.Strict,
-            mock.Container.Resolve<ILogger>(),
-            mock.Container.Resolve<IPathProvider>(),
-            mock.Container.Resolve<IUserSettings>(),
-            mock.Container.Resolve<IFile>(),
-            mock.Container.Resolve<IPath>(),
-            mock.Container.Resolve<IDirectory>()
+            Mock.Container.Resolve<ILogger>(),
+            Mock.Container.Resolve<IPathProvider>(),
+            Mock.Container.Resolve<IUserSettings>(),
+            Mock.Container.Resolve<IFile>(),
+            Mock.Container.Resolve<IPath>(),
+            Mock.Container.Resolve<IDirectory>()
         );
         sut.Setup(x => x.SaveConfig()).Returns(Result.Ok);
 
@@ -37,6 +37,6 @@ public class ConfigManagerResetConfigUnitTests : BaseUnitTest<ConfigManager>
         // Assert
         resetResult.IsSuccess.ShouldBeTrue();
         sut.Verify(x => x.SaveConfig(), Times.Once);
-        mock.Mock<IUserSettings>().Verify(x => x.Reset(), Times.Once);
+        Mock.Mock<IUserSettings>().Verify(x => x.Reset(), Times.Once);
     }
 }

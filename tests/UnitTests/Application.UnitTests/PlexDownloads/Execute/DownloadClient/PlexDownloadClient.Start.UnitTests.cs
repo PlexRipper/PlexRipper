@@ -46,12 +46,12 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<PlexDownloadClient>
         );
 
         // PlexDownloadClientMocks
-        mock.Mock<IServerSettingsModule>()
+        Mock.Mock<IServerSettingsModule>()
             .Setup(x => x.GetDownloadSpeedLimit(serverMachineIdentifier))
             .Returns(downloadSpeedLimit)
             .Verifiable(Times.Once);
 
-        mock.Mock<IServerSettingsModule>()
+        Mock.Mock<IServerSettingsModule>()
             .Setup(x => x.GetDownloadSpeedLimitObservable(serverMachineIdentifier))
             .Returns(Observable.Return(downloadSpeedLimit))
             .Verifiable(Times.Once);
@@ -67,7 +67,7 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<PlexDownloadClient>
             statusList.Add(task.DownloadStatus);
         }
 
-        mock.Mock<ICommandExecutor>()
+        Mock.Mock<ICommandExecutor>()
             .Setup(m => m.Send(It.IsAny<ICommand<Result>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok())
             .Callback<ICommand<Result>, CancellationToken>(
@@ -84,12 +84,12 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<PlexDownloadClient>
         // DownloadWorkerMocks
         var destinationStream = new MemoryStream();
 
-        mock.SetupCommand(It.IsAny<CreateDownloadFileStreamCommand>)
+        Mock.SetupCommand(It.IsAny<CreateDownloadFileStreamCommand>)
             .ReturnsAsync(Result.Ok<Stream>(destinationStream))
             .Verifiable(Times.Once);
 
         var downloadStream = new ThrottledStream(new MemoryStream(new byte[(int)ByteSize.FromMebiBytes(10).Bytes]));
-        mock.Mock<IPlexApiClient>()
+        Mock.Mock<IPlexApiClient>()
             .Setup(x =>
                 x.DownloadStreamAsync(It.IsAny<HttpRequestMessage>(), It.IsAny<int>(), It.IsAny<CancellationToken>())
             )
@@ -97,14 +97,14 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<PlexDownloadClient>
             .Verifiable(Times.Once);
 
         // Act
-        var sut = mock.Create<PlexDownloadClient>(
+        var sut = Mock.Create<PlexDownloadClient>(
             new NamedParameter(
                 "downloadWorkerFactory",
-                (DownloadWorkerTask task) => mock.Create<DownloadWorker>(new NamedParameter("downloadWorkerTask", task))
+                (DownloadWorkerTask task) => Mock.Create<DownloadWorker>(new NamedParameter("downloadWorkerTask", task))
             ),
             new NamedParameter(
                 "clientFactory",
-                (PlexApiClientOptions options) => mock.Create<PlexApiClient>(new NamedParameter("options", options))
+                (PlexApiClientOptions options) => Mock.Create<PlexApiClient>(new NamedParameter("options", options))
             )
         );
 

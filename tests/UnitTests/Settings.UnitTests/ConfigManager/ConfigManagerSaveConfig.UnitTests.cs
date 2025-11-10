@@ -15,20 +15,20 @@ public class ConfigManagerSaveConfigUnitTests : BaseUnitTest<ConfigManager>
     public void ShouldLoadConfigDuringSetup_WhenConfigFileAlreadyExists()
     {
         // Arrange
-        mock.Mock<IUserSettings>().SetupGet(x => x.SettingsUpdated).Returns(new Subject<UserSettings>());
-        mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_ReaparrSettings.json");
-        mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "/");
-        mock.Mock<IFile>().Setup(x => x.WriteAllText(It.IsAny<string>(), It.IsAny<string>())).Verifiable(Times.Once);
+        Mock.Mock<IUserSettings>().SetupGet(x => x.SettingsUpdated).Returns(new Subject<UserSettings>());
+        Mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_ReaparrSettings.json");
+        Mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "/");
+        Mock.Mock<IFile>().Setup(x => x.WriteAllText(It.IsAny<string>(), It.IsAny<string>())).Verifiable(Times.Once);
 
         // Were mocking other methods from ConfigManager, that's why we need to mock it manually here
         var sut = new Mock<ConfigManager>(
             MockBehavior.Strict,
-            mock.Container.Resolve<ILogger>(),
-            mock.Container.Resolve<IPathProvider>(),
-            mock.Container.Resolve<IUserSettings>(),
-            mock.Container.Resolve<IFile>(),
-            mock.Container.Resolve<IPath>(),
-            mock.Container.Resolve<IDirectory>()
+            Mock.Container.Resolve<ILogger>(),
+            Mock.Container.Resolve<IPathProvider>(),
+            Mock.Container.Resolve<IUserSettings>(),
+            Mock.Container.Resolve<IFile>(),
+            Mock.Container.Resolve<IPath>(),
+            Mock.Container.Resolve<IDirectory>()
         );
         sut.Setup(x => x.SaveConfig()).CallBase();
         sut.Setup(x => x.ConfigFileExists()).Returns(true);

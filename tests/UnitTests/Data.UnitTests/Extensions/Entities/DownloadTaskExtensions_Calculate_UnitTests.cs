@@ -3,9 +3,9 @@ using Reaparr.Data.Contracts;
 
 namespace Reaparr.Data.UnitTests.Entities;
 
-public class DownloadTaskExtensions_Calculate_UnitTests : BaseUnitTest
+public class DownloadTaskExtensionsCalculateUnitTests : BaseUnitTest
 {
-    public DownloadTaskExtensions_Calculate_UnitTests(ITestOutputHelper output)
+    public DownloadTaskExtensionsCalculateUnitTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]

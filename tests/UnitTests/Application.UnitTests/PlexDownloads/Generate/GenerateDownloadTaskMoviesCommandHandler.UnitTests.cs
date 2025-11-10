@@ -5,11 +5,11 @@ using Reaparr.Domain.Validators;
 
 namespace Reaparr.Application.UnitTests;
 
-public class GenerateDownloadTaskMoviesCommandHandler_UnitTests : BaseUnitTest<GenerateDownloadTaskMoviesCommandHandler>
+public class GenerateDownloadTaskMoviesCommandHandlerUnitTests : BaseUnitTest<GenerateDownloadTaskMoviesCommandHandler>
 {
-    private DownloadTaskMovieValidator validator = new();
+    private readonly DownloadTaskMovieValidator _validator = new();
 
-    public GenerateDownloadTaskMoviesCommandHandler_UnitTests(ITestOutputHelper output)
+    public GenerateDownloadTaskMoviesCommandHandlerUnitTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]
@@ -41,7 +41,7 @@ public class GenerateDownloadTaskMoviesCommandHandler_UnitTests : BaseUnitTest<G
 
         // Act
         var command = new GenerateDownloadTaskMoviesCommand(movies);
-        var result = await _sut.ExecuteAsync(command, CancellationToken);
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -52,7 +52,7 @@ public class GenerateDownloadTaskMoviesCommandHandler_UnitTests : BaseUnitTest<G
         foreach (var downloadTaskMovie in plexDownloadTaskMovies)
         {
             downloadTaskMovie.Calculate();
-            var validationResult = await validator.ValidateAsync(downloadTaskMovie, CancellationToken);
+            var validationResult = await _validator.ValidateAsync(downloadTaskMovie, CancellationToken);
 
             // Ignore DownloadDirectory and DestinationDirectory errors as these are set in the DownloadJob
             var validErrors = validationResult.Errors.FindAll(x =>
@@ -93,7 +93,7 @@ public class GenerateDownloadTaskMoviesCommandHandler_UnitTests : BaseUnitTest<G
         // Act
         var request = new CreateDownloadTasksRequest(movies, 99);
         var command = new GenerateDownloadTaskMoviesCommand(request);
-        var result = await _sut.ExecuteAsync(command, CancellationToken);
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -138,7 +138,7 @@ public class GenerateDownloadTaskMoviesCommandHandler_UnitTests : BaseUnitTest<G
 
         // Act
         var command = new GenerateDownloadTaskMoviesCommand(movies);
-        var result = await _sut.ExecuteAsync(command, CancellationToken);
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -153,7 +153,7 @@ public class GenerateDownloadTaskMoviesCommandHandler_UnitTests : BaseUnitTest<G
         foreach (var downloadTaskMovie in plexDownloadTaskMovies)
         {
             downloadTaskMovie.Calculate();
-            var validationResult = await validator.ValidateAsync(downloadTaskMovie, CancellationToken);
+            var validationResult = await _validator.ValidateAsync(downloadTaskMovie, CancellationToken);
 
             // Ignore DownloadDirectory and DestinationDirectory errors as these are set in the DownloadJob
             var validErrors = validationResult.Errors.FindAll(x =>

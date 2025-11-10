@@ -19,11 +19,11 @@ public class PlexApiDataSet : DataSet
         _faker = faker;
     }
 
-    private static readonly string[] Devices = ["Docker Container", "SHIELD Android TV", "PC"];
+    private static readonly string[] _devices = ["Docker Container", "SHIELD Android TV", "PC"];
 
-    private static readonly string[] LibraryTypes = ["movie", "show"];
+    private static readonly string[] _libraryTypes = ["movie", "show"];
 
-    private static readonly string[] PlexVersions =
+    private static readonly string[] _plexVersions =
     [
         "1.30.0.6486-629d58034",
         "1.29.2.6364-6d72b0cf6",
@@ -41,9 +41,9 @@ public class PlexApiDataSet : DataSet
         "1.26.2.5797-5bd057d2b",
     ];
 
-    public string Device => _faker.Random.ArrayElement(Devices);
+    public string Device => _faker.Random.ArrayElement(_devices);
 
-    public string LibraryType => _faker.Random.ArrayElement(LibraryTypes);
+    public string LibraryType => _faker.Random.ArrayElement(_libraryTypes);
 
     public string AccessToken => _faker.Random.Guid().ToString();
 
@@ -51,5 +51,5 @@ public class PlexApiDataSet : DataSet
 
     public string MachineIdentifier => _faker.Random.Guid().ToString();
 
-    public string PlexVersion => _faker.Random.ArrayElement(PlexVersions);
+    public string PlexVersion => _faker.Random.ArrayElement(_plexVersions);
 }

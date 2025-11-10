@@ -68,7 +68,7 @@ public class SetupSonarrDownloadClientCommandHandler
                 var updateResult = await _commandExecutor.Send(
                     new SonarApiUpdateDownloadClientCommand
                     {
-                        Id = currentDownloadClient?.Id ?? -1,
+                        Id = currentDownloadClient.Id,
                         ForceSave = true,
                         Resource = BuildDownloadClientResource(command.ReaparrBaseUri),
                     },

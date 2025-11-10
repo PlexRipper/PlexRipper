@@ -3,6 +3,7 @@ using Reaparr.Environment;
 
 namespace Reaparr.Data;
 
+// ReSharper disable once InconsistentNaming
 public static class ReaparrDBContextSeed
 {
     public static ModelBuilder SeedDatabase(ModelBuilder builder)

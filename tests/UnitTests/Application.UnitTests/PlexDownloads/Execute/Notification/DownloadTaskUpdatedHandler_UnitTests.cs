@@ -3,9 +3,9 @@ using Reaparr.Data.Contracts;
 
 namespace Reaparr.Application.UnitTests;
 
-public class DownloadTaskUpdatedHandler_UnitTests : BaseUnitTest<DownloadTaskUpdatedHandler>
+public class DownloadTaskUpdatedHandlerUnitTests : BaseUnitTest<DownloadTaskUpdatedHandler>
 {
-    public DownloadTaskUpdatedHandler_UnitTests(ITestOutputHelper output)
+    public DownloadTaskUpdatedHandlerUnitTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]
@@ -26,7 +26,7 @@ public class DownloadTaskUpdatedHandler_UnitTests : BaseUnitTest<DownloadTaskUpd
 
         var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync(cancellationToken: CancellationToken);
 
-        mock.Mock<ISignalRService>()
+        Mock.Mock<ISignalRService>()
             .Setup(x =>
                 x.SendDownloadProgressUpdateAsync(It.IsAny<List<DownloadTaskGeneric>>(), It.IsAny<CancellationToken>())
             )
@@ -34,10 +34,10 @@ public class DownloadTaskUpdatedHandler_UnitTests : BaseUnitTest<DownloadTaskUpd
 
         // Act
         var command = new DownloadTaskUpdatedCommand(downloadTasks[0].ToKey());
-        await _sut.ExecuteAsync(command, CancellationToken);
+        await Sut.ExecuteAsync(command, CancellationToken);
 
         // Assert
-        mock.Mock<ISignalRService>()
+        Mock.Mock<ISignalRService>()
             .Verify(
                 x =>
                     x.SendDownloadProgressUpdateAsync(
@@ -58,7 +58,7 @@ public class DownloadTaskUpdatedHandler_UnitTests : BaseUnitTest<DownloadTaskUpd
         var updatedDownloadTask = downloadTasks[0].Children[0];
         await IDbContext.SetDownloadStatus(updatedDownloadTask.ToKey(), DownloadStatus.DownloadFinished);
 
-        mock.Mock<ISignalRService>()
+        Mock.Mock<ISignalRService>()
             .Setup(x =>
                 x.SendDownloadProgressUpdateAsync(It.IsAny<List<DownloadTaskGeneric>>(), It.IsAny<CancellationToken>())
             )
@@ -66,10 +66,10 @@ public class DownloadTaskUpdatedHandler_UnitTests : BaseUnitTest<DownloadTaskUpd
 
         // Act
         var command = new DownloadTaskUpdatedCommand(downloadTasks[0].ToKey());
-        await _sut.ExecuteAsync(command, CancellationToken);
+        await Sut.ExecuteAsync(command, CancellationToken);
 
         // Assert
-        mock.Mock<ISignalRService>()
+        Mock.Mock<ISignalRService>()
             .Verify(
                 x =>
                     x.SendDownloadProgressUpdateAsync(

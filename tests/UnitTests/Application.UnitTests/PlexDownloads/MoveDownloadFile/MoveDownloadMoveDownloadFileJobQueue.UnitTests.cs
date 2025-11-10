@@ -12,13 +12,13 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
     public async Task ShouldNotRunAnotherFileMoveJob_WhenAJobIsAlreadyRunning()
     {
         // Arrange
-        mock.Mock<IMoveDownloadFileScheduler>()
+        Mock.Mock<IMoveDownloadFileScheduler>()
             .Setup(x => x.IsAnyMoveDownloadFileJobRunning())
             .ReturnsAsync(true)
             .Verifiable(Times.Once);
 
         // Act
-        var result = await _sut.CheckMoveDownloadFileJobQueue();
+        var result = await Sut.CheckMoveDownloadFileJobQueue();
 
         // Assert
         result.ShouldNotBeNull();
@@ -31,18 +31,18 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
         await SetupDatabase(9, config => config.PlexServerCount = 1);
 
         // Arrange
-        mock.Mock<IMoveDownloadFileScheduler>()
+        Mock.Mock<IMoveDownloadFileScheduler>()
             .Setup(x => x.IsAnyMoveDownloadFileJobRunning())
             .ReturnsAsync(true)
             .Verifiable(Times.Once);
 
-        mock.Mock<IMoveDownloadFileScheduler>()
+        Mock.Mock<IMoveDownloadFileScheduler>()
             .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()))
             .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Never);
 
         // Act
-        var result = await _sut.CheckMoveDownloadFileJobQueue();
+        var result = await Sut.CheckMoveDownloadFileJobQueue();
 
         // Assert
         result.ShouldNotBeNull();
@@ -67,18 +67,18 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
         downloadTasks.SetDownloadStatus(DownloadStatus.DownloadFinished);
         await dbContext.SaveChangesAsync(CancellationToken);
 
-        mock.Mock<IMoveDownloadFileScheduler>()
+        Mock.Mock<IMoveDownloadFileScheduler>()
             .Setup(x => x.IsAnyMoveDownloadFileJobRunning())
             .ReturnsAsync(false)
             .Verifiable(Times.Once);
 
-        mock.Mock<IMoveDownloadFileScheduler>()
+        Mock.Mock<IMoveDownloadFileScheduler>()
             .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()))
             .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Once);
 
         // Act
-        var result = await _sut.CheckMoveDownloadFileJobQueue();
+        var result = await Sut.CheckMoveDownloadFileJobQueue();
 
         // Assert
         result.ShouldNotBeNull();
@@ -105,18 +105,18 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
         downloadTasks.SetDownloadStatus(DownloadStatus.DownloadFinished);
         await dbContext.SaveChangesAsync(CancellationToken);
 
-        mock.Mock<IMoveDownloadFileScheduler>()
+        Mock.Mock<IMoveDownloadFileScheduler>()
             .Setup(x => x.IsAnyMoveDownloadFileJobRunning())
             .ReturnsAsync(false)
             .Verifiable(Times.Once);
 
-        mock.Mock<IMoveDownloadFileScheduler>()
+        Mock.Mock<IMoveDownloadFileScheduler>()
             .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()))
             .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Once);
 
         // Act
-        var result = await _sut.CheckMoveDownloadFileJobQueue();
+        var result = await Sut.CheckMoveDownloadFileJobQueue();
 
         // Assert
         result.ShouldNotBeNull();

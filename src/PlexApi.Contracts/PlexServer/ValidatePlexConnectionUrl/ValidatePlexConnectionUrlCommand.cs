@@ -1,5 +1,4 @@
 using FastEndpoints;
-using FluentResults;
 
 namespace Reaparr.PlexApi.Contracts;
 

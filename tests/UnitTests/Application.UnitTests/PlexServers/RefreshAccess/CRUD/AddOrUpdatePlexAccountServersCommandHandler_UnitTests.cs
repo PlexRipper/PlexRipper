@@ -2,9 +2,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Reaparr.Application.UnitTests;
 
-public class AddOrUpdatePlexAccountServersCommandHandler_UnitTests : BaseUnitTest
+public class AddOrUpdatePlexAccountServersCommandHandlerUnitTests : BaseUnitTest
 {
-    public AddOrUpdatePlexAccountServersCommandHandler_UnitTests(ITestOutputHelper output)
+    public AddOrUpdatePlexAccountServersCommandHandlerUnitTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]

@@ -29,13 +29,13 @@ public class DownloadWorkerStartUnitTests : BaseUnitTest<DownloadWorker>
         SetupHttpClient();
 
         var destinationStream = new MemoryStream();
-        mock.SetupCommand(It.IsAny<CreateDownloadFileStreamCommand>)
+        Mock.SetupCommand(It.IsAny<CreateDownloadFileStreamCommand>)
             .ReturnsAsync(Result.Ok<Stream>(destinationStream))
             .Verifiable(Times.Once);
 
         var downloadStream = new ThrottledStream(new MemoryStream(new byte[(int)ByteSize.FromMebiBytes(10).Bytes]));
 
-        mock.Mock<IPlexApiClient>()
+        Mock.Mock<IPlexApiClient>()
             .Setup(x =>
                 x.DownloadStreamAsync(It.IsAny<HttpRequestMessage>(), It.IsAny<int>(), It.IsAny<CancellationToken>())
             )
@@ -44,7 +44,7 @@ public class DownloadWorkerStartUnitTests : BaseUnitTest<DownloadWorker>
 
         var downloadWorkerTask = IDbContext.DownloadWorkerTasks.First();
 
-        var sut = mock.Create<DownloadWorker>(new NamedParameter("downloadWorkerTask", downloadWorkerTask));
+        var sut = Mock.Create<DownloadWorker>(new NamedParameter("downloadWorkerTask", downloadWorkerTask));
 
         var updateList = new List<DownloadWorkerTaskProgress>();
         sut.DownloadWorkerTaskUpdate.Subscribe(x => updateList.Add(x));
@@ -84,7 +84,7 @@ public class DownloadWorkerStartUnitTests : BaseUnitTest<DownloadWorker>
         await IDbContext.PlexServerStatuses.Where(x => x.Id > 0).ExecuteDeleteAsync(CancellationToken);
         var downloadWorkerTask = IDbContext.DownloadWorkerTasks.First();
 
-        var sut = mock.Create<DownloadWorker>(new NamedParameter("downloadWorkerTask", downloadWorkerTask));
+        var sut = Mock.Create<DownloadWorker>(new NamedParameter("downloadWorkerTask", downloadWorkerTask));
         var updateList = new List<DownloadWorkerTaskProgress>();
         sut.DownloadWorkerTaskUpdate.Subscribe(x => updateList.Add(x));
 
@@ -114,11 +114,11 @@ public class DownloadWorkerStartUnitTests : BaseUnitTest<DownloadWorker>
 
         SetupHttpClient();
 
-        mock.SetupCommand(It.IsAny<CreateDownloadFileStreamCommand>)
+        Mock.SetupCommand(It.IsAny<CreateDownloadFileStreamCommand>)
             .ReturnsAsync(Result.Ok<Stream>(new MemoryStream()))
             .Verifiable(Times.Once);
 
-        mock.Mock<IPlexApiClient>()
+        Mock.Mock<IPlexApiClient>()
             .Setup(x =>
                 x.DownloadStreamAsync(It.IsAny<HttpRequestMessage>(), It.IsAny<int>(), It.IsAny<CancellationToken>())
             )
@@ -126,7 +126,7 @@ public class DownloadWorkerStartUnitTests : BaseUnitTest<DownloadWorker>
             .Verifiable(Times.AtLeastOnce);
 
         var downloadWorkerTask = IDbContext.DownloadWorkerTasks.First();
-        var sut = mock.Create<DownloadWorker>(new NamedParameter("downloadWorkerTask", downloadWorkerTask));
+        var sut = Mock.Create<DownloadWorker>(new NamedParameter("downloadWorkerTask", downloadWorkerTask));
 
         var updateList = new List<DownloadWorkerTaskProgress>();
         sut.DownloadWorkerTaskUpdate.Subscribe(x => updateList.Add(x));
@@ -158,7 +158,7 @@ public class DownloadWorkerStartUnitTests : BaseUnitTest<DownloadWorker>
 
         SetupHttpClient();
 
-        mock.SetupCommand(It.IsAny<CreateDownloadFileStreamCommand>)
+        Mock.SetupCommand(It.IsAny<CreateDownloadFileStreamCommand>)
             .ReturnsAsync(Result.Ok<Stream>(new MemoryStream()))
             .Verifiable(Times.Once);
 
@@ -186,7 +186,7 @@ public class DownloadWorkerStartUnitTests : BaseUnitTest<DownloadWorker>
                 }
             );
 
-        mock.Mock<IPlexApiClient>()
+        Mock.Mock<IPlexApiClient>()
             .Setup(x =>
                 x.DownloadStreamAsync(It.IsAny<HttpRequestMessage>(), It.IsAny<int>(), It.IsAny<CancellationToken>())
             )
@@ -195,7 +195,7 @@ public class DownloadWorkerStartUnitTests : BaseUnitTest<DownloadWorker>
 
         var downloadWorkerTask = IDbContext.DownloadWorkerTasks.First();
 
-        var sut = mock.Create<DownloadWorker>(new NamedParameter("downloadWorkerTask", downloadWorkerTask));
+        var sut = Mock.Create<DownloadWorker>(new NamedParameter("downloadWorkerTask", downloadWorkerTask));
 
         var updateList = new List<DownloadWorkerTaskProgress>();
         sut.DownloadWorkerTaskUpdate.Subscribe(x => updateList.Add(x));

@@ -14,49 +14,49 @@ public class ConfigManagerSetupUnitTests : BaseUnitTest<ConfigManager>
     public void ShouldLoadConfigDuringSetup_WhenConfigFileAlreadyExists()
     {
         // Arrange
-        mock.Mock<IUserSettings>().SetupGet(x => x.SettingsUpdated).Returns(new Subject<UserSettings>());
-        mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_ReaparrSettings.json");
-        mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "/");
-        mock.Mock<IPathProvider>().SetupGet(x => x.ConfigDirectory).Returns(() => "/TEST_ReaparrSettings.json");
-        mock.Mock<IDirectory>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
-        mock.Mock<IDirectory>()
+        Mock.Mock<IUserSettings>().SetupGet(x => x.SettingsUpdated).Returns(new Subject<UserSettings>());
+        Mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_ReaparrSettings.json");
+        Mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "/");
+        Mock.Mock<IPathProvider>().SetupGet(x => x.ConfigDirectory).Returns(() => "/TEST_ReaparrSettings.json");
+        Mock.Mock<IDirectory>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
+        Mock.Mock<IDirectory>()
             .Setup(x => x.CreateDirectory(It.IsAny<string>()))
-            .Returns(mock.Mock<IDirectoryInfo>().Object)
+            .Returns(Mock.Mock<IDirectoryInfo>().Object)
             .Verifiable(Times.Never);
-        mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
-        mock.Mock<IUserSettings>().Setup(x => x.Reset());
+        Mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
+        Mock.Mock<IUserSettings>().Setup(x => x.Reset());
 
         // Act
-        var resetResult = _sut.Setup();
+        var resetResult = Sut.Setup();
 
         // Assert
         resetResult.IsSuccess.ShouldBeTrue();
 
-        mock.Mock<IUserSettings>().VerifyGet(x => x.SettingsUpdated, Times.Once);
+        Mock.Mock<IUserSettings>().VerifyGet(x => x.SettingsUpdated, Times.Once);
     }
 
     [Fact]
     public void ShouldCreateConfigFile_WhenConfigFileDoesNotExists()
     {
         // Arrange
-        mock.Mock<IUserSettings>().SetupGet(x => x.SettingsUpdated).Returns(new Subject<UserSettings>());
-        mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_ReaparrSettings.json");
-        mock.Mock<IPathProvider>().SetupGet(x => x.ConfigDirectory).Returns(() => "/");
-        mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "/TEST_ReaparrSettings.json");
+        Mock.Mock<IUserSettings>().SetupGet(x => x.SettingsUpdated).Returns(new Subject<UserSettings>());
+        Mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_ReaparrSettings.json");
+        Mock.Mock<IPathProvider>().SetupGet(x => x.ConfigDirectory).Returns(() => "/");
+        Mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "/TEST_ReaparrSettings.json");
 
-        mock.Mock<IFile>().Setup(x => x.WriteAllText(It.IsAny<string>(), It.IsAny<string>())).Verifiable(Times.Once);
+        Mock.Mock<IFile>().Setup(x => x.WriteAllText(It.IsAny<string>(), It.IsAny<string>())).Verifiable(Times.Once);
 
-        mock.Mock<IDirectory>().Setup(x => x.Exists(It.IsAny<string>())).Returns(false);
-        mock.Mock<IDirectory>()
+        Mock.Mock<IDirectory>().Setup(x => x.Exists(It.IsAny<string>())).Returns(false);
+        Mock.Mock<IDirectory>()
             .Setup(x => x.CreateDirectory(It.IsAny<string>()))
             .Returns(new Mock<IDirectoryInfo>().Object);
-        mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(false);
+        Mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(false);
 
         // Act
-        var resetResult = _sut.Setup();
+        var resetResult = Sut.Setup();
 
         // Assert
         resetResult.IsSuccess.ShouldBeTrue();
-        mock.Mock<IUserSettings>().VerifyGet(x => x.SettingsUpdated, Times.Once);
+        Mock.Mock<IUserSettings>().VerifyGet(x => x.SettingsUpdated, Times.Once);
     }
 }

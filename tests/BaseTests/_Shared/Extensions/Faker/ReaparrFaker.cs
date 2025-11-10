@@ -19,7 +19,7 @@ public class ReaparrData : DataSet
         _faker = faker;
     }
 
-    private static readonly List<PlexMediaType> LibraryTypes = [PlexMediaType.Movie, PlexMediaType.TvShow];
+    private static readonly List<PlexMediaType> _libraryTypes = [PlexMediaType.Movie, PlexMediaType.TvShow];
 
-    public PlexMediaType LibraryType => _faker.Random.ListItem(LibraryTypes);
+    public PlexMediaType LibraryType => _faker.Random.ListItem(_libraryTypes);
 }

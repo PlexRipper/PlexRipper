@@ -24,7 +24,7 @@ public static partial class Startup
             );
 
         // This has to always be first
-        app.UseCors(CORSConfiguration);
+        app.UseCors(CorsConfiguration);
 
         app.UseRouting();
 

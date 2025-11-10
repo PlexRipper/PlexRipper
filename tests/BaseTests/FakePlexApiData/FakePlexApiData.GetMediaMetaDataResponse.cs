@@ -102,7 +102,7 @@ public partial class FakePlexApiData
         Seed seed,
         Action<PlexApiDataConfig>? options = null
     ) =>
-        _getLibraryItemsPartFaker
+        _getMediaMetaDataPartFaker
             .UseSeed(seed.Next())
             .FinishWith(
                 (_, x) =>

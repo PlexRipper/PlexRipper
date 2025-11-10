@@ -2,9 +2,9 @@
 
 namespace Reaparr.Application.UnitTests;
 
-public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<DownloadQueue>
+public class DownloadQueueGetNextDownloadTaskUnitTests : BaseUnitTest<DownloadQueue>
 {
-    public DownloadQueue_GetNextDownloadTask_UnitTests(ITestOutputHelper output)
+    public DownloadQueueGetNextDownloadTaskUnitTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]
@@ -15,7 +15,7 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Download
         var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync(cancellationToken: CancellationToken);
 
         // Act
-        var nextDownloadTask = _sut.GetNextDownloadTask(downloadTasks);
+        var nextDownloadTask = Sut.GetNextDownloadTask(downloadTasks);
 
         // Assert
         nextDownloadTask.IsSuccess.ShouldBeTrue();
@@ -36,7 +36,7 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Download
         await IDbContext.SaveChangesAsync(CancellationToken);
 
         // Act
-        var nextDownloadTask = _sut.GetNextDownloadTask(downloadTasks);
+        var nextDownloadTask = Sut.GetNextDownloadTask(downloadTasks);
 
         // Assert
         nextDownloadTask.IsSuccess.ShouldBeTrue();
@@ -60,7 +60,7 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Download
         await IDbContext.SaveChangesAsync(CancellationToken);
 
         // Act
-        var nextDownloadTask = _sut.GetNextDownloadTask(downloadTasks);
+        var nextDownloadTask = Sut.GetNextDownloadTask(downloadTasks);
 
         // Assert
         nextDownloadTask.IsSuccess.ShouldBeTrue();
@@ -82,7 +82,7 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Download
         await IDbContext.SaveChangesAsync(CancellationToken);
 
         // Act
-        var nextDownloadTask = _sut.GetNextDownloadTask(downloadTasks);
+        var nextDownloadTask = Sut.GetNextDownloadTask(downloadTasks);
 
         // Assert
         nextDownloadTask.IsSuccess.ShouldBeFalse();
@@ -102,7 +102,7 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Download
         await IDbContext.SaveChangesAsync(CancellationToken);
 
         // Act
-        var nextDownloadTask = _sut.GetNextDownloadTask(downloadTasks);
+        var nextDownloadTask = Sut.GetNextDownloadTask(downloadTasks);
 
         // Assert
         nextDownloadTask.IsSuccess.ShouldBeTrue();
@@ -128,7 +128,7 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Download
         await IDbContext.SaveChangesAsync(CancellationToken);
 
         // Act
-        var nextDownloadTask = _sut.GetNextDownloadTask(downloadTasks);
+        var nextDownloadTask = Sut.GetNextDownloadTask(downloadTasks);
 
         // Assert
         nextDownloadTask.IsSuccess.ShouldBeFalse();
@@ -152,7 +152,7 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Download
         await IDbContext.SaveChangesAsync(CancellationToken);
 
         // Act
-        var nextDownloadTask = _sut.GetNextDownloadTask(downloadTasks);
+        var nextDownloadTask = Sut.GetNextDownloadTask(downloadTasks);
 
         // Assert
         nextDownloadTask.IsSuccess.ShouldBeTrue();

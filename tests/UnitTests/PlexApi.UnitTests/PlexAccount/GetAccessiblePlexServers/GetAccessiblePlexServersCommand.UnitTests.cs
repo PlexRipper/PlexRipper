@@ -17,7 +17,7 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
 
     private void SetCallMock(GetServerResourcesResponse response1, GetServerResourcesResponse response2)
     {
-        mock.Mock<IPlexApiClientFactory>()
+        Mock.Mock<IPlexApiClientFactory>()
             .Setup(x => x.CreateTvClient(It.IsAny<string>(), It.IsAny<PlexApiClientOptions?>()))
             .Returns<string, PlexApiClientOptions?>(
                 (_, _) =>
@@ -59,7 +59,7 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
 
         // Act
         var command = new GetAccessiblePlexServersCommand(plexAccount.Id);
-        var result = await _sut.ExecuteAsync(command, CancellationToken);
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -74,7 +74,7 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
         var plexAccount = await IDbContext.PlexAccounts.FirstOrDefaultAsync(CancellationToken);
         plexAccount.ShouldNotBeNull();
 
-        mock.Mock<IPlexApiClientFactory>()
+        Mock.Mock<IPlexApiClientFactory>()
             .Setup(x => x.CreateTvClient(It.IsAny<string>(), It.IsAny<PlexApiClientOptions?>()))
             .Returns<string, PlexApiClientOptions?>(
                 (_, _) =>
@@ -114,7 +114,7 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
 
         // Act
         var command = new GetAccessiblePlexServersCommand(plexAccount.Id);
-        var result = await _sut.ExecuteAsync(command, CancellationToken);
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -159,7 +159,7 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
             plexDevice.Connections.Add(testConnection);
         }
 
-        mock.Mock<IServerSettingsModule>()
+        Mock.Mock<IServerSettingsModule>()
             .Setup(x => x.GetIsHidden(It.IsAny<string>()))
             .Returns(false)
             .Verifiable(Times.AtLeastOnce);
@@ -168,7 +168,7 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
 
         // Act
         var command = new GetAccessiblePlexServersCommand(plexAccount.Id);
-        var result = await _sut.ExecuteAsync(command, CancellationToken);
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -187,7 +187,7 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
         var plexAccount = await IDbContext.PlexAccounts.FirstOrDefaultAsync(CancellationToken);
         plexAccount.ShouldNotBeNull();
 
-        mock.Mock<IServerSettingsModule>().Setup(x => x.GetIsHidden(It.IsAny<string>())).Returns(false);
+        Mock.Mock<IServerSettingsModule>().Setup(x => x.GetIsHidden(It.IsAny<string>())).Returns(false);
 
         var response1 = new GetServerResourcesResponse
         {
@@ -221,7 +221,7 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
 
         // Act
         var command = new GetAccessiblePlexServersCommand(plexAccount.Id);
-        var result = await _sut.ExecuteAsync(command, CancellationToken);
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -239,7 +239,7 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
         var plexAccount = await IDbContext.PlexAccounts.FirstOrDefaultAsync(CancellationToken);
         plexAccount.ShouldNotBeNull();
 
-        mock.Mock<IServerSettingsModule>().Setup(x => x.GetIsHidden(It.IsAny<string>())).Returns(false);
+        Mock.Mock<IServerSettingsModule>().Setup(x => x.GetIsHidden(It.IsAny<string>())).Returns(false);
 
         var serverCount = 2;
 
@@ -269,7 +269,7 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
 
         // Act
         var command = new GetAccessiblePlexServersCommand(plexAccount.Id);
-        var result = await _sut.ExecuteAsync(command, CancellationToken);
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -284,7 +284,7 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
         var plexAccount = await IDbContext.PlexAccounts.FirstOrDefaultAsync(CancellationToken);
         plexAccount.ShouldNotBeNull();
 
-        mock.Mock<IServerSettingsModule>().Setup(x => x.GetIsHidden(It.IsAny<string>())).Returns(false);
+        Mock.Mock<IServerSettingsModule>().Setup(x => x.GetIsHidden(It.IsAny<string>())).Returns(false);
 
         var serverCount = 5;
         var response1 = FakePlexApiData.GetServerResourcesResponse(
@@ -310,7 +310,7 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
 
         // Act
         var command = new GetAccessiblePlexServersCommand(plexAccount.Id);
-        var result = await _sut.ExecuteAsync(command, CancellationToken);
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -329,7 +329,7 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
         var plexAccount = await IDbContext.PlexAccounts.FirstOrDefaultAsync(CancellationToken);
         plexAccount.ShouldNotBeNull();
 
-        mock.Mock<IServerSettingsModule>().Setup(x => x.GetIsHidden(It.IsAny<string>())).Returns(false);
+        Mock.Mock<IServerSettingsModule>().Setup(x => x.GetIsHidden(It.IsAny<string>())).Returns(false);
 
         var serverResource1 = FakePlexApiData.GetServerResource(new Seed(939)).Generate(2);
         serverResource1[0].Connections.Clear();
@@ -507,7 +507,7 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
 
         // Act
         var command = new GetAccessiblePlexServersCommand(plexAccount.Id);
-        var result = await _sut.ExecuteAsync(command, CancellationToken);
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

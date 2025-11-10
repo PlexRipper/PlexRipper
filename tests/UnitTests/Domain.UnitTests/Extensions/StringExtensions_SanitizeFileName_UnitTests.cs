@@ -1,8 +1,8 @@
 ﻿namespace Reaparr.Domain.UnitTests;
 
-public class PathSystem_SanitizeFileName_UnitTests : BaseUnitTest
+public class PathSystemSanitizeFileNameUnitTests : BaseUnitTest
 {
-    public PathSystem_SanitizeFileName_UnitTests(ITestOutputHelper output)
+    public PathSystemSanitizeFileNameUnitTests(ITestOutputHelper output)
         : base(output) { }
 
     [Theory]

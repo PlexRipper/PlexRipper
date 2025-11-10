@@ -49,7 +49,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
         var expectedEpisodeTitles = expectedPartFiles.Select(s => Path.GetFileName(s)).ToList();
 
         // Act
-        var result = await _sut.ExecuteAsync(cmd, CancellationToken);
+        var result = await Sut.ExecuteAsync(cmd, CancellationToken);
 
         // Assert
         // Response
@@ -133,7 +133,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
         };
 
         // Act
-        var result = await _sut.ExecuteAsync(cmd, CancellationToken);
+        var result = await Sut.ExecuteAsync(cmd, CancellationToken);
 
         // Assert
         result.ShouldNotBeNull();
@@ -198,7 +198,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
         };
 
         // Act
-        var result = await _sut.ExecuteAsync(cmd, CancellationToken);
+        var result = await Sut.ExecuteAsync(cmd, CancellationToken);
 
         // Assert
         result.ShouldNotBeNull();
@@ -247,7 +247,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
         };
 
         // Act
-        var result = await _sut.ExecuteAsync(cmd, CancellationToken);
+        var result = await Sut.ExecuteAsync(cmd, CancellationToken);
 
         // Assert
         result.ShouldNotBeNull();
@@ -295,7 +295,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
         };
 
         // Act
-        var result = await _sut.ExecuteAsync(cmd, CancellationToken);
+        var result = await Sut.ExecuteAsync(cmd, CancellationToken);
 
         // Assert
         result.ShouldNotBeNull();
@@ -323,7 +323,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
         await IDbContext.PlexTvShowEpisodes.AddAsync(ep, CancellationToken);
         await IDbContext.SaveChangesAsync(CancellationToken);
 
-        var result = await _sut.ExecuteAsync(new SearchTvShowCommand
+        var result = await Sut.ExecuteAsync(new SearchTvShowCommand
         {
             Query = string.Empty,
             Season = 0,
@@ -353,7 +353,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
         await IDbContext.PlexTvShowEpisodes.AddAsync(ep, CancellationToken);
         await IDbContext.SaveChangesAsync(CancellationToken);
 
-        var result = await _sut.ExecuteAsync(new SearchTvShowCommand
+        var result = await Sut.ExecuteAsync(new SearchTvShowCommand
         {
             Query = string.Empty,
             Season = 0,
@@ -407,7 +407,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
             .SumAsync(CancellationToken);
 
         // Act
-        var result = await _sut.ExecuteAsync(cmd, CancellationToken);
+        var result = await Sut.ExecuteAsync(cmd, CancellationToken);
 
         // Assert
         result.ShouldNotBeNull();
@@ -440,7 +440,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
         };
 
         // Act
-        var result = await _sut.ExecuteAsync(cmd, CancellationToken);
+        var result = await Sut.ExecuteAsync(cmd, CancellationToken);
 
         // Assert
         result.Channel.Items.ShouldBeEmpty();
@@ -734,7 +734,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
         };
 
         // Act
-        var result = await _sut.ExecuteAsync(cmd, CancellationToken);
+        var result = await Sut.ExecuteAsync(cmd, CancellationToken);
 
         // Assert
         result.Channel.Items.ShouldNotBeEmpty();

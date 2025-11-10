@@ -49,6 +49,8 @@ public class SetupSonarrIndexerCommandHandler
         if (!_sonarrSettings.IsValidUrl())
             return Result.Fail("Sonarr settings are invalid: BaseUrl is invalid.").LogError();
 
+        _log.Information("Setting up Sonarr indexer '{IndexerName}'...", _indexerName);
+
         // Check for existing indexers
         var getResult = await _commandExecutor.Send(new SonarrApiGetIndexersCommand(), ct);
         if (getResult.IsFailed)
@@ -63,6 +65,7 @@ public class SetupSonarrIndexerCommandHandler
 
         if (existing is not null)
         {
+            _log.Information("Indexer '{IndexerName}' already exists in Sonarr. Updating...", _indexerName);
             // Update existing indexer
             var updateResult = await _commandExecutor.Send(
                 new SonarrApiUpdateIndexerCommand
@@ -77,10 +80,12 @@ public class SetupSonarrIndexerCommandHandler
             if (updateResult.IsFailed)
                 return updateResult.LogError();
 
+            _log.Information("Successfully updated indexer '{IndexerName}' in Sonarr.", _indexerName);
             return Result.Ok(new SetupSonarrIndexerCommandResult { IndexerId = updateResult.Value.Id });
         }
 
         // Create a new indexer
+        _log.Information("Creating new indexer '{IndexerName}' in Sonarr...", _indexerName);
         var createResult = await _commandExecutor.Send(
             new SonarrApiCreateIndexerCommand
             {
@@ -93,6 +98,7 @@ public class SetupSonarrIndexerCommandHandler
         if (createResult.IsFailed)
             return createResult.LogError();
 
+        _log.Information("Successfully created indexer '{IndexerName}' in Sonarr.", _indexerName);
         return Result.Ok(new SetupSonarrIndexerCommandResult { IndexerId = createResult.Value.Id });
     }
 
@@ -165,13 +171,13 @@ public class SetupSonarrIndexerCommandHandler
                             ],
                 },
                 new SonarrIndexerContractFieldDTO { Name = "animeStandardFormatSearch", Value = false },
-                new SonarrIndexerContractFieldDTO { Name = "additionalParameters", Value = (object?)null },
+                new SonarrIndexerContractFieldDTO { Name = "additionalParameters", Value = null },
                 new SonarrIndexerContractFieldDTO { Name = "multiLanguages", Value = new List<string>() },
                 new SonarrIndexerContractFieldDTO { Name = "failDownloads", Value = new List<string>() },
                 new SonarrIndexerContractFieldDTO { Name = "minimumSeeders", Value = 1 },
-                new SonarrIndexerContractFieldDTO { Name = "seedCriteria.seedRatio", Value = (object?)null },
-                new SonarrIndexerContractFieldDTO { Name = "seedCriteria.seedTime", Value = (object?)null },
-                new SonarrIndexerContractFieldDTO { Name = "seedCriteria.seasonPackSeedTime", Value = (object?)null },
+                new SonarrIndexerContractFieldDTO { Name = "seedCriteria.seedRatio", Value = null },
+                new SonarrIndexerContractFieldDTO { Name = "seedCriteria.seedTime", Value = null },
+                new SonarrIndexerContractFieldDTO { Name = "seedCriteria.seasonPackSeedTime", Value = null },
                 new SonarrIndexerContractFieldDTO
                 {
                     Name = "rejectBlocklistedTorrentHashesWhileGrabbing",

@@ -11,10 +11,10 @@ namespace Reaparr.AppHost.UnitTests;
 
 public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthenticationMiddleware>
 {
-    private const string TestHeaderName = "X-Auth-User";
-    private const string TestUsername = "testuser";
-    private const string TestEmail = "test@example.com";
-    private const string TestUserId = "test-user-id";
+    private const string TEST_HEADER_NAME = "X-Auth-User";
+    private const string TEST_USERNAME = "testuser";
+    private const string TEST_EMAIL = "test@example.com";
+    private const string TEST_USER_ID = "test-user-id";
 
     public HeaderAuthenticationMiddlewareUnitTests(ITestOutputHelper output)
         : base(output) { }
@@ -38,7 +38,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         SetupMocks();
 
         // Act
-        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
         await sut.InvokeAsync(context);
 
         // Assert
@@ -51,7 +51,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
     {
         // Arrange
         var context = CreateHttpContext();
-        context.Request.Headers[TestHeaderName] = "";
+        context.Request.Headers[TEST_HEADER_NAME] = "";
         var nextCalled = false;
         var next = new Mock<RequestDelegate>();
         next.Setup(x => x(context))
@@ -64,7 +64,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         SetupMocks();
 
         // Act
-        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
         await sut.InvokeAsync(context);
 
         // Assert
@@ -77,7 +77,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
     {
         // Arrange
         var context = CreateHttpContext();
-        context.Request.Headers[TestHeaderName] = "   ";
+        context.Request.Headers[TEST_HEADER_NAME] = "   ";
         var nextCalled = false;
         var next = new Mock<RequestDelegate>();
         next.Setup(x => x(context))
@@ -90,7 +90,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         SetupMocks();
 
         // Act
-        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
         await sut.InvokeAsync(context);
 
         // Assert
@@ -103,7 +103,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
     {
         // Arrange
         var context = CreateHttpContext();
-        context.Request.Headers[TestHeaderName] = TestUsername;
+        context.Request.Headers[TEST_HEADER_NAME] = TEST_USERNAME;
         var nextCalled = false;
         var next = new Mock<RequestDelegate>();
         next.Setup(x => x(context))
@@ -131,7 +131,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         using var correlatorContext = TestCorrelator.CreateContext();
 
         // Act
-        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
             next.Object));
         await sut.InvokeAsync(context);
 
@@ -148,7 +148,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
     {
         // Arrange
         var context = CreateHttpContext();
-        context.Request.Headers[TestHeaderName] = TestUsername;
+        context.Request.Headers[TEST_HEADER_NAME] = TEST_USERNAME;
         context.User = CreateAuthenticatedUser();
         var nextCalled = false;
         var next = new Mock<RequestDelegate>();
@@ -174,7 +174,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         using var correlatorContext = TestCorrelator.CreateContext();
 
         // Act
-        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
             next.Object));
         await sut.InvokeAsync(context);
 
@@ -206,7 +206,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
     {
         // Arrange
         var context = CreateHttpContext();
-        context.Request.Headers[TestHeaderName] = TestUsername;
+        context.Request.Headers[TEST_HEADER_NAME] = TEST_USERNAME;
         context.Connection.RemoteIpAddress = IPAddress.Parse(requestIp);
 
         var nextCalled = false;
@@ -232,12 +232,12 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         authSettings.HeaderAuthentication = headerAuthSettings;
 
         // Configure UserService mock in AutoMock
-        mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TestUsername)).ReturnsAsync((AppUser?)null);
+        Mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TEST_USERNAME)).ReturnsAsync((AppUser?)null);
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
 
         // Act
-        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
         await sut.InvokeAsync(context);
 
         // Assert
@@ -248,12 +248,12 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         if (shouldBeTrusted)
         {
             // Should attempt authentication
-            mock.Mock<IUserService>().Verify(x => x.FindByNameAsync(TestUsername), Times.Once);
+            Mock.Mock<IUserService>().Verify(x => x.FindByNameAsync(TEST_USERNAME), Times.Once);
         }
         else
         {
             // Should not attempt authentication
-            mock.Mock<IUserService>().Verify(x => x.FindByNameAsync(It.IsAny<string>()), Times.Never);
+            Mock.Mock<IUserService>().Verify(x => x.FindByNameAsync(It.IsAny<string>()), Times.Never);
         }
     }
 
@@ -262,7 +262,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
     {
         // Arrange
         var context = CreateHttpContext();
-        context.Request.Headers[TestHeaderName] = TestUsername;
+        context.Request.Headers[TEST_HEADER_NAME] = TEST_USERNAME;
         context.Connection.RemoteIpAddress = IPAddress.Parse("192.168.1.1");
 
         var nextCalled = false;
@@ -292,7 +292,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         using var correlatorContext = TestCorrelator.CreateContext();
 
         // Act
-        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
             next.Object));
         await sut.InvokeAsync(context);
 
@@ -310,7 +310,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
     {
         // Arrange
         var context = CreateHttpContext();
-        context.Request.Headers[TestHeaderName] = TestUsername;
+        context.Request.Headers[TEST_HEADER_NAME] = TEST_USERNAME;
         context.Connection.RemoteIpAddress = IPAddress.Parse("192.168.1.1");
 
         var nextCalled = false;
@@ -338,7 +338,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
 
         // Act
-        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
         await sut.InvokeAsync(context);
 
         // Assert
@@ -351,7 +351,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
     {
         // Arrange
         var context = CreateHttpContext();
-        context.Request.Headers[TestHeaderName] = TestUsername;
+        context.Request.Headers[TEST_HEADER_NAME] = TEST_USERNAME;
         context.Connection.RemoteIpAddress = null;
 
         var nextCalled = false;
@@ -366,7 +366,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         SetupMocks();
 
         // Act
-        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
         await sut.InvokeAsync(context);
 
         // Assert
@@ -383,7 +383,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
     {
         // Arrange
         var context = CreateHttpContext();
-        context.Request.Headers[TestHeaderName] = TestUsername;
+        context.Request.Headers[TEST_HEADER_NAME] = TEST_USERNAME;
         context.Request.IsHttps = false;
         context.Connection.RemoteIpAddress = IPAddress.Parse("192.168.1.1");
 
@@ -414,7 +414,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         using var correlatorContext = TestCorrelator.CreateContext();
 
         // Act
-        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
             next.Object));
         await sut.InvokeAsync(context);
 
@@ -431,7 +431,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
     {
         // Arrange
         var context = CreateHttpContext();
-        context.Request.Headers[TestHeaderName] = TestUsername;
+        context.Request.Headers[TEST_HEADER_NAME] = TEST_USERNAME;
         context.Request.IsHttps = true;
         context.Connection.RemoteIpAddress = IPAddress.Parse("192.168.1.1");
 
@@ -458,12 +458,12 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         authSettings.HeaderAuthentication = headerAuthSettings;
 
         // Configure UserService mock in AutoMock
-        mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TestUsername)).ReturnsAsync((AppUser?)null);
+        Mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TEST_USERNAME)).ReturnsAsync((AppUser?)null);
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
 
         // Act
-        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
         await sut.InvokeAsync(context);
 
         // Assert
@@ -476,7 +476,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
     {
         // Arrange
         var context = CreateHttpContext();
-        context.Request.Headers[TestHeaderName] = TestUsername;
+        context.Request.Headers[TEST_HEADER_NAME] = TEST_USERNAME;
         context.Request.IsHttps = false;
         context.Connection.RemoteIpAddress = IPAddress.Parse("192.168.1.1");
 
@@ -503,12 +503,12 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         authSettings.HeaderAuthentication = headerAuthSettings;
 
         // Configure UserService mock in AutoMock
-        mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TestUsername)).ReturnsAsync((AppUser?)null);
+        Mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TEST_USERNAME)).ReturnsAsync((AppUser?)null);
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
 
         // Act
-        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
         await sut.InvokeAsync(context);
 
         // Assert
@@ -526,7 +526,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         // Arrange
         var context = CreateHttpContext();
         var longHeaderValue = new string('A', 300); // Exceeds default 256 limit
-        context.Request.Headers[TestHeaderName] = longHeaderValue;
+        context.Request.Headers[TEST_HEADER_NAME] = longHeaderValue;
         context.Connection.RemoteIpAddress = IPAddress.Parse("192.168.1.1");
 
         var nextCalled = false;
@@ -556,7 +556,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         using var correlatorContext = TestCorrelator.CreateContext();
 
         // Act
-        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
             next.Object));
         await sut.InvokeAsync(context);
 
@@ -574,7 +574,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         // Arrange
         var context = CreateHttpContext();
         var validHeaderValue = new string('A', 100); // Within 256 limit
-        context.Request.Headers[TestHeaderName] = validHeaderValue;
+        context.Request.Headers[TEST_HEADER_NAME] = validHeaderValue;
         context.Connection.RemoteIpAddress = IPAddress.Parse("192.168.1.1");
 
         var nextCalled = false;
@@ -600,12 +600,12 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         authSettings.HeaderAuthentication = headerAuthSettings;
 
         // Configure UserService mock in AutoMock
-        mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(validHeaderValue)).ReturnsAsync((AppUser?)null);
+        Mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(validHeaderValue)).ReturnsAsync((AppUser?)null);
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
 
         // Act
-        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
         await sut.InvokeAsync(context);
 
         // Assert
@@ -619,7 +619,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         // Arrange
         var context = CreateHttpContext();
         var longHeaderValue = new string('A', 300);
-        context.Request.Headers[TestHeaderName] = longHeaderValue;
+        context.Request.Headers[TEST_HEADER_NAME] = longHeaderValue;
         context.Connection.RemoteIpAddress = IPAddress.Parse("192.168.1.1");
 
         var nextCalled = false;
@@ -650,7 +650,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         using var correlatorContext = TestCorrelator.CreateContext();
 
         // Act
-        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
             next.Object));
         await sut.InvokeAsync(context);
 
@@ -671,7 +671,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
     {
         // Arrange
         var context = CreateHttpContext();
-        context.Request.Headers[TestHeaderName] = TestUsername;
+        context.Request.Headers[TEST_HEADER_NAME] = TEST_USERNAME;
         context.Connection.RemoteIpAddress = IPAddress.Parse("192.168.1.1");
 
         var nextCalled = false;
@@ -697,14 +697,14 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         authSettings.HeaderAuthentication = headerAuthSettings;
 
         // Configure UserService mock in AutoMock
-        mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TestUsername)).ReturnsAsync((AppUser?)null);
+        Mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TEST_USERNAME)).ReturnsAsync((AppUser?)null);
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
 
         using var correlatorContext = TestCorrelator.CreateContext();
 
         // Act
-        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
             next.Object));
         await sut.InvokeAsync(context);
 
@@ -721,7 +721,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
     {
         // Arrange
         var context = CreateHttpContext();
-        context.Request.Headers[TestHeaderName] = TestEmail;
+        context.Request.Headers[TEST_HEADER_NAME] = TEST_EMAIL;
         context.Connection.RemoteIpAddress = IPAddress.Parse("192.168.1.1");
 
         var nextCalled = false;
@@ -747,14 +747,14 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         authSettings.HeaderAuthentication = headerAuthSettings;
 
         // Configure UserService mock in AutoMock
-        mock.Mock<IUserService>().Setup(x => x.FindByEmailAsync(TestEmail)).ReturnsAsync((AppUser?)null);
+        Mock.Mock<IUserService>().Setup(x => x.FindByEmailAsync(TEST_EMAIL)).ReturnsAsync((AppUser?)null);
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
 
         using var correlatorContext = TestCorrelator.CreateContext();
 
         // Act
-        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
             next.Object));
         await sut.InvokeAsync(context);
 
@@ -771,7 +771,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
     {
         // Arrange
         var context = CreateHttpContext();
-        context.Request.Headers[TestHeaderName] = TestUsername;
+        context.Request.Headers[TEST_HEADER_NAME] = TEST_USERNAME;
         context.Connection.RemoteIpAddress = IPAddress.Parse("192.168.1.1");
 
         var nextCalled = false;
@@ -799,15 +799,15 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         var testUser = CreateTestUser();
 
         // Configure UserService mock in AutoMock
-        mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TestUsername)).ReturnsAsync(testUser);
-        mock.Mock<IUserService>().Setup(x => x.GetRolesAsync(testUser)).ReturnsAsync(["User"]);
+        Mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TEST_USERNAME)).ReturnsAsync(testUser);
+        Mock.Mock<IUserService>().Setup(x => x.GetRolesAsync(testUser)).ReturnsAsync(["User"]);
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
 
         using var correlatorContext = TestCorrelator.CreateContext();
 
         // Act
-        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
             next.Object));
         await sut.InvokeAsync(context);
 
@@ -824,7 +824,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
     {
         // Arrange
         var context = CreateHttpContext();
-        context.Request.Headers[TestHeaderName] = TestEmail;
+        context.Request.Headers[TEST_HEADER_NAME] = TEST_EMAIL;
         context.Connection.RemoteIpAddress = IPAddress.Parse("192.168.1.1");
 
         var nextCalled = false;
@@ -852,15 +852,15 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         var testUser = CreateTestUser();
 
         // Configure UserService mock in AutoMock
-        mock.Mock<IUserService>().Setup(x => x.FindByEmailAsync(TestEmail)).ReturnsAsync(testUser);
-        mock.Mock<IUserService>().Setup(x => x.GetRolesAsync(testUser)).ReturnsAsync(["User"]);
+        Mock.Mock<IUserService>().Setup(x => x.FindByEmailAsync(TEST_EMAIL)).ReturnsAsync(testUser);
+        Mock.Mock<IUserService>().Setup(x => x.GetRolesAsync(testUser)).ReturnsAsync(["User"]);
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
 
         using var correlatorContext = TestCorrelator.CreateContext();
 
         // Act
-        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
             next.Object));
         await sut.InvokeAsync(context);
 
@@ -888,7 +888,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
     {
         // Arrange
         var context = CreateHttpContext();
-        context.Request.Headers[TestHeaderName] = maliciousValue;
+        context.Request.Headers[TEST_HEADER_NAME] = maliciousValue;
         context.Connection.RemoteIpAddress = IPAddress.Parse("192.168.1.1");
 
         var nextCalled = false;
@@ -914,18 +914,18 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         authSettings.HeaderAuthentication = headerAuthSettings;
 
         // Configure UserService mock in AutoMock
-        mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(maliciousValue)).ReturnsAsync((AppUser?)null);
+        Mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(maliciousValue)).ReturnsAsync((AppUser?)null);
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
 
         // Act
-        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
         await sut.InvokeAsync(context);
 
         // Assert
         nextCalled.ShouldBeTrue();
         next.Verify(x => x(context), Times.Once);
-        mock.Mock<IUserService>().Verify(x => x.FindByNameAsync(maliciousValue), Times.Once);
+        Mock.Mock<IUserService>().Verify(x => x.FindByNameAsync(maliciousValue), Times.Once);
     }
 
     [Fact]
@@ -934,7 +934,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         // Arrange
         var context = CreateHttpContext();
         var veryLongValue = new string('A', 10000); // Very long value
-        context.Request.Headers[TestHeaderName] = veryLongValue;
+        context.Request.Headers[TEST_HEADER_NAME] = veryLongValue;
         context.Connection.RemoteIpAddress = IPAddress.Parse("192.168.1.1");
 
         var nextCalled = false;
@@ -962,7 +962,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
 
         // Act
-        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
         await sut.InvokeAsync(context);
 
         // Assert
@@ -975,7 +975,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
     {
         // Arrange
         var context = CreateHttpContext();
-        context.Request.Headers[TestHeaderName] = (string?)null;
+        context.Request.Headers[TEST_HEADER_NAME] = (string?)null;
         context.Connection.RemoteIpAddress = IPAddress.Parse("192.168.1.1");
 
         var nextCalled = false;
@@ -990,7 +990,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         SetupMocks();
 
         // Act
-        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
         await sut.InvokeAsync(context);
 
         // Assert
@@ -1016,7 +1016,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
     {
         // Arrange
         var context = CreateHttpContext();
-        context.Request.Headers[TestHeaderName] = TestUsername;
+        context.Request.Headers[TEST_HEADER_NAME] = TEST_USERNAME;
         context.Connection.RemoteIpAddress = IPAddress.Parse(requestIp);
 
         var nextCalled = false;
@@ -1042,12 +1042,12 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         authSettings.HeaderAuthentication = headerAuthSettings;
 
         // Configure UserService mock in AutoMock
-        mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TestUsername)).ReturnsAsync((AppUser?)null);
+        Mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TEST_USERNAME)).ReturnsAsync((AppUser?)null);
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
 
         // Act
-        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
         await sut.InvokeAsync(context);
 
         // Assert
@@ -1058,12 +1058,12 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         if (shouldBeTrusted)
         {
             // Should attempt authentication
-            mock.Mock<IUserService>().Verify(x => x.FindByNameAsync(TestUsername), Times.Once);
+            Mock.Mock<IUserService>().Verify(x => x.FindByNameAsync(TEST_USERNAME), Times.Once);
         }
         else
         {
             // Should not attempt authentication
-            mock.Mock<IUserService>().Verify(x => x.FindByNameAsync(It.IsAny<string>()), Times.Never);
+            Mock.Mock<IUserService>().Verify(x => x.FindByNameAsync(It.IsAny<string>()), Times.Never);
         }
     }
 
@@ -1076,7 +1076,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
     {
         // Arrange
         var context = CreateHttpContext();
-        context.Request.Headers[TestHeaderName] = TestUsername;
+        context.Request.Headers[TEST_HEADER_NAME] = TEST_USERNAME;
         context.Connection.RemoteIpAddress = IPAddress.Parse("192.168.1.1");
 
         var nextCalled = false;
@@ -1104,22 +1104,22 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         var testUser = CreateTestUser();
 
         // Configure UserService mock in AutoMock
-        mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TestUsername)).ReturnsAsync(testUser);
-        mock.Mock<IUserService>()
+        Mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TEST_USERNAME)).ReturnsAsync(testUser);
+        Mock.Mock<IUserService>()
             .Setup(x => x.GetRolesAsync(testUser))
             .ReturnsAsync(["User", "Admin"]);
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
 
         // Act
-        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
         await sut.InvokeAsync(context);
 
         // Assert
         nextCalled.ShouldBeTrue();
         next.Verify(x => x(context), Times.Once);
-        mock.Mock<IUserService>().Verify(x => x.FindByNameAsync(TestUsername), Times.Once);
-        mock.Mock<IUserService>().Verify(x => x.GetRolesAsync(testUser), Times.Once);
+        Mock.Mock<IUserService>().Verify(x => x.FindByNameAsync(TEST_USERNAME), Times.Once);
+        Mock.Mock<IUserService>().Verify(x => x.GetRolesAsync(testUser), Times.Once);
     }
 
     [Fact]
@@ -1127,7 +1127,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
     {
         // Arrange
         var context = CreateHttpContext();
-        context.Request.Headers[TestHeaderName] = TestUsername;
+        context.Request.Headers[TEST_HEADER_NAME] = TEST_USERNAME;
         context.Connection.RemoteIpAddress = IPAddress.Parse("192.168.1.1");
 
         var nextCalled = false;
@@ -1154,26 +1154,26 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
 
         var testUser = new AppUser
         {
-            Id = TestUserId,
-            UserName = TestUsername,
+            Id = TEST_USER_ID,
+            UserName = TEST_USERNAME,
             Email = null, // No email
         };
 
         // Configure UserService mock in AutoMock
-        mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TestUsername)).ReturnsAsync(testUser);
-        mock.Mock<IUserService>().Setup(x => x.GetRolesAsync(testUser)).ReturnsAsync(["User"]);
+        Mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TEST_USERNAME)).ReturnsAsync(testUser);
+        Mock.Mock<IUserService>().Setup(x => x.GetRolesAsync(testUser)).ReturnsAsync(["User"]);
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
 
         // Act
-        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
         await sut.InvokeAsync(context);
 
         // Assert
         nextCalled.ShouldBeTrue();
         next.Verify(x => x(context), Times.Once);
-        mock.Mock<IUserService>().Verify(x => x.FindByNameAsync(TestUsername), Times.Once);
-        mock.Mock<IUserService>().Verify(x => x.GetRolesAsync(testUser), Times.Once);
+        Mock.Mock<IUserService>().Verify(x => x.FindByNameAsync(TEST_USERNAME), Times.Once);
+        Mock.Mock<IUserService>().Verify(x => x.GetRolesAsync(testUser), Times.Once);
     }
 
     [Fact]
@@ -1181,7 +1181,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
     {
         // Arrange
         var context = CreateHttpContext();
-        context.Request.Headers[TestHeaderName] = TestUsername;
+        context.Request.Headers[TEST_HEADER_NAME] = TEST_USERNAME;
         context.Connection.RemoteIpAddress = IPAddress.Parse("192.168.1.1");
 
         var nextCalled = false;
@@ -1208,26 +1208,26 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
 
         var testUser = new AppUser
         {
-            Id = TestUserId,
-            UserName = TestUsername,
+            Id = TEST_USER_ID,
+            UserName = TEST_USERNAME,
             Email = "", // Empty email
         };
 
         // Configure UserService mock in AutoMock
-        mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TestUsername)).ReturnsAsync(testUser);
-        mock.Mock<IUserService>().Setup(x => x.GetRolesAsync(testUser)).ReturnsAsync(["User"]);
+        Mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TEST_USERNAME)).ReturnsAsync(testUser);
+        Mock.Mock<IUserService>().Setup(x => x.GetRolesAsync(testUser)).ReturnsAsync(["User"]);
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
 
         // Act
-        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
         await sut.InvokeAsync(context);
 
         // Assert
         nextCalled.ShouldBeTrue();
         next.Verify(x => x(context), Times.Once);
-        mock.Mock<IUserService>().Verify(x => x.FindByNameAsync(TestUsername), Times.Once);
-        mock.Mock<IUserService>().Verify(x => x.GetRolesAsync(testUser), Times.Once);
+        Mock.Mock<IUserService>().Verify(x => x.FindByNameAsync(TEST_USERNAME), Times.Once);
+        Mock.Mock<IUserService>().Verify(x => x.GetRolesAsync(testUser), Times.Once);
     }
 
     [Fact]
@@ -1235,7 +1235,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
     {
         // Arrange
         var context = CreateHttpContext();
-        context.Request.Headers[TestHeaderName] = TestUsername;
+        context.Request.Headers[TEST_HEADER_NAME] = TEST_USERNAME;
         context.Connection.RemoteIpAddress = IPAddress.Parse("192.168.1.1");
 
         var nextCalled = false;
@@ -1262,26 +1262,26 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
 
         var testUser = new AppUser
         {
-            Id = TestUserId,
+            Id = TEST_USER_ID,
             UserName = null, // Null username
-            Email = TestEmail,
+            Email = TEST_EMAIL,
         };
 
         // Configure UserService mock in AutoMock
-        mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TestUsername)).ReturnsAsync(testUser);
-        mock.Mock<IUserService>().Setup(x => x.GetRolesAsync(testUser)).ReturnsAsync(["User"]);
+        Mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TEST_USERNAME)).ReturnsAsync(testUser);
+        Mock.Mock<IUserService>().Setup(x => x.GetRolesAsync(testUser)).ReturnsAsync(["User"]);
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
 
         // Act
-        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
         await sut.InvokeAsync(context);
 
         // Assert
         nextCalled.ShouldBeTrue();
         next.Verify(x => x(context), Times.Once);
-        mock.Mock<IUserService>().Verify(x => x.FindByNameAsync(TestUsername), Times.Once);
-        mock.Mock<IUserService>().Verify(x => x.GetRolesAsync(testUser), Times.Once);
+        Mock.Mock<IUserService>().Verify(x => x.FindByNameAsync(TEST_USERNAME), Times.Once);
+        Mock.Mock<IUserService>().Verify(x => x.GetRolesAsync(testUser), Times.Once);
     }
 
     #endregion
@@ -1293,7 +1293,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
     {
         // Arrange
         var context = CreateHttpContext();
-        context.Request.Headers[TestHeaderName] = new StringValues([TestUsername, "malicious_user"]);
+        context.Request.Headers[TEST_HEADER_NAME] = new StringValues([TEST_USERNAME, "malicious_user"]);
         context.Connection.RemoteIpAddress = IPAddress.Parse("192.168.1.1");
 
         var nextCalled = false;
@@ -1319,12 +1319,12 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         authSettings.HeaderAuthentication = headerAuthSettings;
 
         // Configure UserService mock in AutoMock
-        mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TestUsername)).ReturnsAsync((AppUser?)null);
+        Mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TEST_USERNAME)).ReturnsAsync((AppUser?)null);
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
 
         // Act
-        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
         await sut.InvokeAsync(context);
 
         // Assert
@@ -1332,8 +1332,8 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         next.Verify(x => x(context), Times.Once);
 
         // Should use the first value only
-        mock.Mock<IUserService>().Verify(x => x.FindByNameAsync(TestUsername), Times.Once);
-        mock.Mock<IUserService>().Verify(x => x.FindByNameAsync("malicious_user"), Times.Never);
+        Mock.Mock<IUserService>().Verify(x => x.FindByNameAsync(TEST_USERNAME), Times.Once);
+        Mock.Mock<IUserService>().Verify(x => x.FindByNameAsync("malicious_user"), Times.Never);
     }
 
     [Fact]
@@ -1341,7 +1341,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
     {
         // Arrange
         var context = CreateHttpContext();
-        context.Request.Headers[TestHeaderName] = "  " + TestUsername + "  ";
+        context.Request.Headers[TEST_HEADER_NAME] = "  " + TEST_USERNAME + "  ";
         context.Connection.RemoteIpAddress = IPAddress.Parse("192.168.1.1");
 
         var nextCalled = false;
@@ -1367,12 +1367,12 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         authSettings.HeaderAuthentication = headerAuthSettings;
 
         // Configure UserService mock in AutoMock
-        mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TestUsername)).ReturnsAsync((AppUser?)null);
+        Mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TEST_USERNAME)).ReturnsAsync((AppUser?)null);
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
 
         // Act
-        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
         await sut.InvokeAsync(context);
 
         // Assert
@@ -1380,7 +1380,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         next.Verify(x => x(context), Times.Once);
 
         // Should call with trimmed value
-        mock.Mock<IUserService>().Verify(x => x.FindByNameAsync(TestUsername), Times.Once);
+        Mock.Mock<IUserService>().Verify(x => x.FindByNameAsync(TEST_USERNAME), Times.Once);
     }
 
     [Fact]
@@ -1388,7 +1388,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
     {
         // Arrange
         var context = CreateHttpContext();
-        context.Request.Headers[TestHeaderName] = TestUsername;
+        context.Request.Headers[TEST_HEADER_NAME] = TEST_USERNAME;
         context.Connection.RemoteIpAddress = IPAddress.Parse("192.168.1.1");
 
         var nextCalled = false;
@@ -1414,14 +1414,14 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         authSettings.HeaderAuthentication = headerAuthSettings;
 
         // Configure UserService mock in AutoMock
-        mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TestUsername)).ReturnsAsync((AppUser?)null);
+        Mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TEST_USERNAME)).ReturnsAsync((AppUser?)null);
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
 
         using var correlatorContext = TestCorrelator.CreateContext();
 
         // Act
-        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
             next.Object));
         await sut.InvokeAsync(context);
 
@@ -1445,7 +1445,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
     {
         // Arrange
         var context = CreateHttpContext();
-        context.Request.Headers[TestHeaderName] = TestUsername;
+        context.Request.Headers[TEST_HEADER_NAME] = TEST_USERNAME;
         context.Connection.RemoteIpAddress = IPAddress.Parse(requestIp);
 
         var nextCalled = false;
@@ -1471,12 +1471,12 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         authSettings.HeaderAuthentication = headerAuthSettings;
 
         // Configure UserService mock in AutoMock
-        mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TestUsername)).ReturnsAsync((AppUser?)null);
+        Mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TEST_USERNAME)).ReturnsAsync((AppUser?)null);
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
 
         // Act
-        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
         await sut.InvokeAsync(context);
 
         // Assert
@@ -1487,12 +1487,12 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         if (shouldBeTrusted)
         {
             // Should attempt authentication
-            mock.Mock<IUserService>().Verify(x => x.FindByNameAsync(TestUsername), Times.Once);
+            Mock.Mock<IUserService>().Verify(x => x.FindByNameAsync(TEST_USERNAME), Times.Once);
         }
         else
         {
             // Should not attempt authentication
-            mock.Mock<IUserService>().Verify(x => x.FindByNameAsync(It.IsAny<string>()), Times.Never);
+            Mock.Mock<IUserService>().Verify(x => x.FindByNameAsync(It.IsAny<string>()), Times.Never);
         }
     }
 
@@ -1501,7 +1501,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
     {
         // Arrange
         var context = CreateHttpContext();
-        context.Request.Headers[TestHeaderName] = TestUsername;
+        context.Request.Headers[TEST_HEADER_NAME] = TEST_USERNAME;
 
         // Create an IPv4-mapped IPv6 address
         context.Connection.RemoteIpAddress = IPAddress.Parse("192.168.1.1").MapToIPv6();
@@ -1529,12 +1529,12 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         authSettings.HeaderAuthentication = headerAuthSettings;
 
         // Configure UserService mock in AutoMock
-        mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TestUsername)).ReturnsAsync((AppUser?)null);
+        Mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TEST_USERNAME)).ReturnsAsync((AppUser?)null);
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
 
         // Act
-        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
         await sut.InvokeAsync(context);
 
         // Assert
@@ -1551,7 +1551,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
     {
         // Arrange
         var context = CreateHttpContext();
-        context.Request.Headers[TestHeaderName] = TestUsername;
+        context.Request.Headers[TEST_HEADER_NAME] = TEST_USERNAME;
         context.Connection.RemoteIpAddress = IPAddress.Parse(requestIp);
 
         var nextCalled = false;
@@ -1577,12 +1577,12 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         authSettings.HeaderAuthentication = headerAuthSettings;
 
         // Configure UserService mock in AutoMock
-        mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TestUsername)).ReturnsAsync((AppUser?)null);
+        Mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TEST_USERNAME)).ReturnsAsync((AppUser?)null);
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
 
         // Act
-        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
         await sut.InvokeAsync(context);
 
         // Assert
@@ -1593,12 +1593,12 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         if (shouldBeTrusted)
         {
             // Should attempt authentication
-            mock.Mock<IUserService>().Verify(x => x.FindByNameAsync(TestUsername), Times.Once);
+            Mock.Mock<IUserService>().Verify(x => x.FindByNameAsync(TEST_USERNAME), Times.Once);
         }
         else
         {
             // Should not attempt authentication
-            mock.Mock<IUserService>().Verify(x => x.FindByNameAsync(It.IsAny<string>()), Times.Never);
+            Mock.Mock<IUserService>().Verify(x => x.FindByNameAsync(It.IsAny<string>()), Times.Never);
         }
     }
 
@@ -1607,7 +1607,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
     {
         // Arrange
         var context = CreateHttpContext();
-        context.Request.Headers[TestHeaderName] = TestUsername;
+        context.Request.Headers[TEST_HEADER_NAME] = TEST_USERNAME;
         context.Connection.RemoteIpAddress = IPAddress.Parse("192.168.1.1");
 
         var nextCalled = false;
@@ -1635,7 +1635,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
 
         // Act
-        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
         await sut.InvokeAsync(context);
 
         // Assert
@@ -1648,7 +1648,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
     {
         // Arrange
         var context = CreateHttpContext();
-        context.Request.Headers[TestHeaderName] = TestUsername;
+        context.Request.Headers[TEST_HEADER_NAME] = TEST_USERNAME;
         context.Connection.RemoteIpAddress = IPAddress.Parse("192.168.1.1");
 
         var nextCalled = false;
@@ -1676,7 +1676,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
 
         // Act
-        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
         await sut.InvokeAsync(context);
 
         // Assert
@@ -1689,7 +1689,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
     {
         // Arrange
         var context = CreateHttpContext();
-        context.Request.Headers[TestHeaderName] = TestUsername;
+        context.Request.Headers[TEST_HEADER_NAME] = TEST_USERNAME;
         context.Connection.RemoteIpAddress = IPAddress.Parse("192.168.1.1");
 
         var nextCalled = false;
@@ -1717,7 +1717,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
 
         // Act
-        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
         await sut.InvokeAsync(context);
 
         // Assert
@@ -1734,7 +1734,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
     {
         // Arrange
         var context = CreateHttpContext();
-        context.Request.Headers[TestHeaderName] = TestUsername;
+        context.Request.Headers[TEST_HEADER_NAME] = TEST_USERNAME;
         context.Connection.RemoteIpAddress = IPAddress.Parse("192.168.1.1");
 
         var nextCalled = false;
@@ -1769,12 +1769,12 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         authSettings.HeaderAuthentication = headerAuthSettings;
 
         // Configure UserService mock in AutoMock
-        mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TestUsername)).ReturnsAsync((AppUser?)null);
+        Mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TEST_USERNAME)).ReturnsAsync((AppUser?)null);
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
 
         // Act
-        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
         await sut.InvokeAsync(context);
 
         // Assert
@@ -1804,7 +1804,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         authSettings.HeaderAuthentication = headerAuthSettings;
 
         // Configure UserService mock in AutoMock
-        mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TestUsername)).ReturnsAsync((AppUser?)null);
+        Mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TEST_USERNAME)).ReturnsAsync((AppUser?)null);
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
 
@@ -1818,14 +1818,14 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
                 return Task.CompletedTask;
             });
 
-        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
 
         for (var i = 0; i < 10; i++)
         {
             var task = Task.Run(async () =>
             {
                 var context = CreateHttpContext();
-                context.Request.Headers[TestHeaderName] = TestUsername;
+                context.Request.Headers[TEST_HEADER_NAME] = TEST_USERNAME;
                 context.Connection.RemoteIpAddress = IPAddress.Parse("192.168.1.1");
 
                 // Act
@@ -1858,7 +1858,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
     {
         // Arrange
         var context = CreateHttpContext();
-        context.Request.Headers[TestHeaderName] = TestUsername;
+        context.Request.Headers[TEST_HEADER_NAME] = TEST_USERNAME;
         context.Connection.RemoteIpAddress = IPAddress.Parse("192.168.1.1");
 
         var headerAuthSettings = new HeaderAuthenticationSettings
@@ -1875,15 +1875,15 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         authSettings.HeaderAuthentication = headerAuthSettings;
 
         // Configure UserService mock in AutoMock
-        mock.Mock<IUserService>()
-            .Setup(x => x.FindByNameAsync(TestUsername))
+        Mock.Mock<IUserService>()
+            .Setup(x => x.FindByNameAsync(TEST_USERNAME))
             .ThrowsAsync(new InvalidOperationException("Database connection failed"));
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
 
         // Act & Assert
         await Should.ThrowAsync<InvalidOperationException>(async () =>
-            await _sut.InvokeAsync(context));
+            await Sut.InvokeAsync(context));
     }
 
     [Fact]
@@ -1891,7 +1891,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
     {
         // Arrange
         var context = CreateHttpContext();
-        context.Request.Headers[TestHeaderName] = TestUsername;
+        context.Request.Headers[TEST_HEADER_NAME] = TEST_USERNAME;
         context.Connection.RemoteIpAddress = IPAddress.Parse("192.168.1.1");
 
         var headerAuthSettings = new HeaderAuthenticationSettings
@@ -1910,8 +1910,8 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         var testUser = CreateTestUser();
 
         // Configure UserService mock in AutoMock
-        mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TestUsername)).ReturnsAsync(testUser);
-        mock.Mock<IUserService>()
+        Mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TEST_USERNAME)).ReturnsAsync(testUser);
+        Mock.Mock<IUserService>()
             .Setup(x => x.GetRolesAsync(testUser))
             .ThrowsAsync(new InvalidOperationException("Role service unavailable"));
 
@@ -1919,7 +1919,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
 
         // Act & Assert
         await Should.ThrowAsync<InvalidOperationException>(async () =>
-            await _sut.InvokeAsync(context));
+            await Sut.InvokeAsync(context));
     }
 
     #endregion
@@ -1938,7 +1938,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         // Arrange
         var context = CreateHttpContext();
         var headerValue = headerLength >= 0 ? new string('A', headerLength) : string.Empty;
-        context.Request.Headers[TestHeaderName] = headerValue;
+        context.Request.Headers[TEST_HEADER_NAME] = headerValue;
         context.Connection.RemoteIpAddress = IPAddress.Parse("192.168.1.1");
 
         var nextCalled = false;
@@ -1966,13 +1966,13 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         // Configure UserService mock in AutoMock
         if (shouldPass)
         {
-            mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(headerValue)).ReturnsAsync((AppUser?)null);
+            Mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(headerValue)).ReturnsAsync((AppUser?)null);
         }
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
 
         // Act
-        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
         await sut.InvokeAsync(context);
 
         // Assert
@@ -1993,7 +1993,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
     {
         // Arrange
         var context = CreateHttpContext();
-        context.Request.Headers[TestHeaderName] = TestUsername;
+        context.Request.Headers[TEST_HEADER_NAME] = TEST_USERNAME;
         context.Connection.RemoteIpAddress = IPAddress.Parse(testIp);
 
         var nextCalled = false;
@@ -2019,12 +2019,12 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         authSettings.HeaderAuthentication = headerAuthSettings;
 
         // Configure UserService mock in AutoMock
-        mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TestUsername)).ReturnsAsync((AppUser?)null);
+        Mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TEST_USERNAME)).ReturnsAsync((AppUser?)null);
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
 
         // Act
-        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
         await sut.InvokeAsync(context);
 
         // Assert
@@ -2035,12 +2035,12 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         if (shouldBeValid)
         {
             // Should attempt authentication for valid CIDR
-            mock.Mock<IUserService>().Verify(x => x.FindByNameAsync(TestUsername), Times.Once);
+            Mock.Mock<IUserService>().Verify(x => x.FindByNameAsync(TEST_USERNAME), Times.Once);
         }
         else
         {
             // Should not attempt authentication for invalid CIDR
-            mock.Mock<IUserService>().Verify(x => x.FindByNameAsync(It.IsAny<string>()), Times.Never);
+            Mock.Mock<IUserService>().Verify(x => x.FindByNameAsync(It.IsAny<string>()), Times.Never);
         }
     }
 
@@ -2053,7 +2053,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
     {
         // Arrange
         var context = CreateHttpContext();
-        context.Request.Headers[TestHeaderName] = TestUsername;
+        context.Request.Headers[TEST_HEADER_NAME] = TEST_USERNAME;
         context.Request.IsHttps = true;
         context.Connection.RemoteIpAddress = IPAddress.Parse("192.168.1.1");
 
@@ -2085,8 +2085,8 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         var testUser = CreateTestUser();
 
         // Configure UserService mock in AutoMock
-        mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TestUsername)).ReturnsAsync(testUser);
-        mock.Mock<IUserService>()
+        Mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TEST_USERNAME)).ReturnsAsync(testUser);
+        Mock.Mock<IUserService>()
             .Setup(x => x.GetRolesAsync(testUser))
             .ReturnsAsync(["User", "Admin"]);
 
@@ -2095,15 +2095,15 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         using var correlatorContext = TestCorrelator.CreateContext();
 
         // Act
-        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
             next.Object));
         await sut.InvokeAsync(context);
 
         // Assert
         nextCalled.ShouldBeTrue();
         next.Verify(x => x(context), Times.Once);
-        mock.Mock<IUserService>().Verify(x => x.FindByNameAsync(TestUsername), Times.Once);
-        mock.Mock<IUserService>().Verify(x => x.GetRolesAsync(testUser), Times.Once);
+        Mock.Mock<IUserService>().Verify(x => x.FindByNameAsync(TEST_USERNAME), Times.Once);
+        Mock.Mock<IUserService>().Verify(x => x.GetRolesAsync(testUser), Times.Once);
 
         var logEvents = TestCorrelator.GetLogEventsFromCurrentContext();
         logEvents.ShouldContain(e => e.MessageTemplate.Text.Contains("User authenticated via header"));
@@ -2114,7 +2114,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
     {
         // Arrange
         var context = CreateHttpContext();
-        context.Request.Headers[TestHeaderName] = new string('A', 300); // Too long
+        context.Request.Headers[TEST_HEADER_NAME] = new string('A', 300); // Too long
         context.Request.IsHttps = false; // Not HTTPS
         context.Connection.RemoteIpAddress = IPAddress.Parse("8.8.8.8"); // Untrusted IP
 
@@ -2145,7 +2145,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
 
         // Act
-        var sut = mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
         await sut.InvokeAsync(context);
 
         // Assert
@@ -2177,9 +2177,9 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
     {
         return new AppUser
         {
-            Id = TestUserId,
-            UserName = TestUsername,
-            Email = TestEmail,
+            Id = TEST_USER_ID,
+            UserName = TEST_USERNAME,
+            Email = TEST_EMAIL,
         };
     }
 
@@ -2199,23 +2199,23 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         authSettings.HeaderAuthentication = headerAuthSettings;
 
         // Configure AutoMock with the required dependencies
-        mock.Mock<IAuthenticationSettings>().Setup(x => x.HeaderAuthentication).Returns(headerAuthSettings);
+        Mock.Mock<IAuthenticationSettings>().Setup(x => x.HeaderAuthentication).Returns(headerAuthSettings);
 
         // Configure UserService mock in AutoMock
-        mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(It.IsAny<string>())).ReturnsAsync((AppUser?)null);
+        Mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(It.IsAny<string>())).ReturnsAsync((AppUser?)null);
 
         // Configure IdentitySignInService mock in AutoMock
-        mock.Mock<IIdentitySignInService>()
+        Mock.Mock<IIdentitySignInService>()
             .Setup(x => x.SignInAsync(It.IsAny<IEnumerable<Claim>>(), It.IsAny<IEnumerable<string>>()))
             .Returns(Task.CompletedTask);
     }
 
     private void SetupAuthenticationSettings(HeaderAuthenticationSettings headerAuthSettings)
     {
-        mock.Mock<IAuthenticationSettings>().Setup(x => x.HeaderAuthentication).Returns(headerAuthSettings);
+        Mock.Mock<IAuthenticationSettings>().Setup(x => x.HeaderAuthentication).Returns(headerAuthSettings);
 
         // Ensure IIdentitySignInService is always mocked for tests that might reach authentication
-        mock.Mock<IIdentitySignInService>()
+        Mock.Mock<IIdentitySignInService>()
             .Setup(x => x.SignInAsync(It.IsAny<IEnumerable<Claim>>(), It.IsAny<IEnumerable<string>>()))
             .Returns(Task.CompletedTask);
     }

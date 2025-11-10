@@ -19,7 +19,7 @@ public class ValidatePlexCredentialsEndpointUnitTests : BaseUnitTest
         var testAccountResponse = testAccountDTO.ToModel();
         UpdateInitProperty(testAccountResponse, nameof(testAccountResponse.ValidatedAt), DateTime.UtcNow);
 
-        mock.Mock<ICommandExecutor>()
+        Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<PlexSignInCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(
                 Result.Ok(
@@ -74,7 +74,7 @@ public class ValidatePlexCredentialsEndpointUnitTests : BaseUnitTest
         value.PlexId.ShouldBe(testAccountDTO.PlexId);
         value.Uuid.ShouldBe(testAccountDTO.Uuid);
 
-        mock.Mock<ICommandExecutor>()
+        Mock.Mock<ICommandExecutor>()
             .Verify(
                 x =>
                     x.Send(
@@ -96,7 +96,7 @@ public class ValidatePlexCredentialsEndpointUnitTests : BaseUnitTest
         var seed = new Seed(4088);
         var testAccountDTO = FakeData.GetPlexAccount(seed).Generate().ToDTO();
 
-        mock.Mock<ICommandExecutor>()
+        Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<PlexSignInCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(
                 Result.Ok(
@@ -132,7 +132,7 @@ public class ValidatePlexCredentialsEndpointUnitTests : BaseUnitTest
         );
 
         // Assert
-        mock.Mock<ICommandExecutor>()
+        Mock.Mock<ICommandExecutor>()
             .Verify(
                 x =>
                     x.Send(
@@ -150,7 +150,7 @@ public class ValidatePlexCredentialsEndpointUnitTests : BaseUnitTest
         var seed = new Seed(5091);
         var testAccountDTO = FakeData.GetPlexAccount(seed).Generate().ToDTO();
 
-        mock.Mock<ICommandExecutor>()
+        Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<PlexSignInCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(
                 Result.Ok(
@@ -186,7 +186,7 @@ public class ValidatePlexCredentialsEndpointUnitTests : BaseUnitTest
         );
 
         // Assert
-        mock.Mock<ICommandExecutor>()
+        Mock.Mock<ICommandExecutor>()
             .Verify(
                 x =>
                     x.Send(
@@ -222,7 +222,7 @@ public class ValidatePlexCredentialsEndpointUnitTests : BaseUnitTest
             Is2Fa = true,
         };
 
-        mock.Mock<ICommandExecutor>()
+        Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<PlexSignInCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(
                 Result
@@ -263,7 +263,7 @@ public class ValidatePlexCredentialsEndpointUnitTests : BaseUnitTest
         value.Uuid.ShouldBeEmpty();
         value.AuthenticationToken.ShouldBeEmpty();
 
-        mock.Mock<ICommandExecutor>()
+        Mock.Mock<ICommandExecutor>()
             .Verify(x => x.Send(It.IsAny<PlexSignInCommand>(), It.IsAny<CancellationToken>()), Times.Once());
     }
 
@@ -292,7 +292,7 @@ public class ValidatePlexCredentialsEndpointUnitTests : BaseUnitTest
             Is2Fa = false,
         };
 
-        mock.Mock<ICommandExecutor>()
+        Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<PlexSignInCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(
                 Result
@@ -320,7 +320,7 @@ public class ValidatePlexCredentialsEndpointUnitTests : BaseUnitTest
         result.IsSuccess.ShouldBeFalse();
         result.Errors.ShouldNotBeEmpty();
 
-        mock.Mock<ICommandExecutor>()
+        Mock.Mock<ICommandExecutor>()
             .Verify(x => x.Send(It.IsAny<PlexSignInCommand>(), It.IsAny<CancellationToken>()), Times.Once());
     }
 
@@ -331,7 +331,7 @@ public class ValidatePlexCredentialsEndpointUnitTests : BaseUnitTest
         var seed = new Seed(203964);
         var testAccountDTO = FakeData.GetPlexAccount(seed).Generate().ToDTO();
 
-        mock.Mock<ICommandExecutor>()
+        Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<PlexSignInCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Fail("Command execution failed"));
 
@@ -355,7 +355,7 @@ public class ValidatePlexCredentialsEndpointUnitTests : BaseUnitTest
         result.IsSuccess.ShouldBeFalse();
         result.Errors.ShouldNotBeEmpty();
 
-        mock.Mock<ICommandExecutor>()
+        Mock.Mock<ICommandExecutor>()
             .Verify(x => x.Send(It.IsAny<PlexSignInCommand>(), It.IsAny<CancellationToken>()), Times.Once());
     }
 }

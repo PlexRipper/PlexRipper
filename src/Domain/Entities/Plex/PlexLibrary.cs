@@ -102,6 +102,7 @@ public class PlexLibrary : BaseEntity
     /// DB-computed column that holds the total count of media items associated with this <see cref="PlexLibrary"/>.
     /// </summary>
     [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+    // ReSharper disable once UnusedAutoPropertyAccessor.Local // Used by EF Core
     public int MediaCount { get; private set; }
 
     #endregion

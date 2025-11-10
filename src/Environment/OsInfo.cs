@@ -2,6 +2,7 @@
 
 public static class OsInfo
 {
+    // ReSharper disable once InconsistentNaming
     public static OperatingSystemPlatform CurrentOS { get; }
 
     public static bool IsNotWindows => !IsWindows;

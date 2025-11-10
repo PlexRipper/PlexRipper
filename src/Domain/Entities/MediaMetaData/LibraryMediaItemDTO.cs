@@ -1,3 +1,4 @@
+// ReSharper disable InconsistentNaming
 namespace Reaparr.Domain;
 
 public record LibraryMediaItemDTO

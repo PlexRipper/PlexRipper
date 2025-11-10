@@ -16,39 +16,39 @@ public class ConfigManagerLoadConfigUnitTests : BaseUnitTest<ConfigManager>
         // Arrange
         var settingsModel = FakeData.GetSettingsModel(new Seed(89944)).Generate();
         var settingsJson = UserSettingsSerializer.Serialize(settingsModel);
-        mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_ReaparrSettings.json");
-        mock.Mock<IPathProvider>().SetupGet(x => x.ConfigDirectory).Returns(() => "");
-        mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "");
-        mock.Mock<IFile>().Setup(x => x.ReadAllText(It.IsAny<string>())).Returns(() => settingsJson);
-        mock.Mock<IUserSettings>().Setup(x => x.UpdateSettings(It.IsAny<UserSettings>())).Returns(settingsModel);
+        Mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_ReaparrSettings.json");
+        Mock.Mock<IPathProvider>().SetupGet(x => x.ConfigDirectory).Returns(() => "");
+        Mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "");
+        Mock.Mock<IFile>().Setup(x => x.ReadAllText(It.IsAny<string>())).Returns(() => settingsJson);
+        Mock.Mock<IUserSettings>().Setup(x => x.UpdateSettings(It.IsAny<UserSettings>())).Returns(settingsModel);
 
         // Act
-        var loadResult = _sut.LoadConfig();
+        var loadResult = Sut.LoadConfig();
 
         // Assert
         loadResult.IsSuccess.ShouldBeTrue();
-        mock.Mock<IUserSettings>().Verify(x => x.Reset(), Times.Never);
+        Mock.Mock<IUserSettings>().Verify(x => x.Reset(), Times.Never);
     }
 
     [Fact]
     public void ShouldResetSettings_WhenFailingToReadSettingsFromFile()
     {
         // Arrange
-        mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_ReaparrSettings.json");
-        mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "");
-        mock.Mock<IPathProvider>().SetupGet(x => x.ConfigDirectory).Returns(() => "");
-        mock.Mock<IFile>().Setup(x => x.ReadAllText(It.IsAny<string>())).Returns(() => "");
-        mock.Mock<IUserSettings>().Setup(x => x.Reset());
+        Mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_ReaparrSettings.json");
+        Mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "");
+        Mock.Mock<IPathProvider>().SetupGet(x => x.ConfigDirectory).Returns(() => "");
+        Mock.Mock<IFile>().Setup(x => x.ReadAllText(It.IsAny<string>())).Returns(() => "");
+        Mock.Mock<IUserSettings>().Setup(x => x.Reset());
 
         // Were mocking other methods from ConfigManager, that's why we need to mock it manually here
         var sut = new Mock<ConfigManager>(
             MockBehavior.Strict,
-            mock.Container.Resolve<ILogger>(),
-            mock.Container.Resolve<IPathProvider>(),
-            mock.Container.Resolve<IUserSettings>(),
-            mock.Container.Resolve<IFile>(),
-            mock.Container.Resolve<IPath>(),
-            mock.Container.Resolve<IDirectory>()
+            Mock.Container.Resolve<ILogger>(),
+            Mock.Container.Resolve<IPathProvider>(),
+            Mock.Container.Resolve<IUserSettings>(),
+            Mock.Container.Resolve<IFile>(),
+            Mock.Container.Resolve<IPath>(),
+            Mock.Container.Resolve<IDirectory>()
         );
         sut.Setup(x => x.ResetConfig()).Returns(Result.Ok);
         sut.Setup(x => x.LoadConfig()).CallBase();
@@ -65,20 +65,20 @@ public class ConfigManagerLoadConfigUnitTests : BaseUnitTest<ConfigManager>
     public void ShouldResetSettingsWhenUserSettingsCouldNotBeSetFromJsonSerialization_WhenReadingInvalidParsedJsonSettings()
     {
         // Arrange
-        mock.Mock<IFile>().Setup(x => x.ReadAllText(It.IsAny<string>())).Returns(() => "{}");
-        mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_ReaparrSettings.json");
-        mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "/");
-        mock.Mock<IUserSettings>().Setup(x => x.Reset());
+        Mock.Mock<IFile>().Setup(x => x.ReadAllText(It.IsAny<string>())).Returns(() => "{}");
+        Mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_ReaparrSettings.json");
+        Mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "/");
+        Mock.Mock<IUserSettings>().Setup(x => x.Reset());
 
         // Were mocking other methods from ConfigManager, that's why we need to mock it manually here
         var sut = new Mock<ConfigManager>(
             MockBehavior.Strict,
-            mock.Container.Resolve<ILogger>(),
-            mock.Container.Resolve<IPathProvider>(),
-            mock.Container.Resolve<IUserSettings>(),
-            mock.Container.Resolve<IFile>(),
-            mock.Container.Resolve<IPath>(),
-            mock.Container.Resolve<IDirectory>()
+            Mock.Container.Resolve<ILogger>(),
+            Mock.Container.Resolve<IPathProvider>(),
+            Mock.Container.Resolve<IUserSettings>(),
+            Mock.Container.Resolve<IFile>(),
+            Mock.Container.Resolve<IPath>(),
+            Mock.Container.Resolve<IDirectory>()
         );
         sut.Setup(x => x.ResetConfig()).Returns(Result.Ok);
         sut.Setup(x => x.LoadConfig()).CallBase();
@@ -95,20 +95,20 @@ public class ConfigManagerLoadConfigUnitTests : BaseUnitTest<ConfigManager>
     public void ShouldResetSettingsWhenSerializationThrowsException_WhenReadingInvalidJsonSettings()
     {
         // Arrange
-        mock.Mock<IFile>().Setup(x => x.ReadAllText(It.IsAny<string>())).Returns(() => "@#$%^&");
-        mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_ReaparrSettings.json");
-        mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "");
-        mock.Mock<IUserSettings>().Setup(x => x.Reset());
+        Mock.Mock<IFile>().Setup(x => x.ReadAllText(It.IsAny<string>())).Returns(() => "@#$%^&");
+        Mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_ReaparrSettings.json");
+        Mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "");
+        Mock.Mock<IUserSettings>().Setup(x => x.Reset());
 
         // Were mocking other methods from ConfigManager, that's why we need to mock it manually here
         var sut = new Mock<ConfigManager>(
             MockBehavior.Strict,
-            mock.Container.Resolve<ILogger>(),
-            mock.Container.Resolve<IPathProvider>(),
-            mock.Container.Resolve<IUserSettings>(),
-            mock.Container.Resolve<IFile>(),
-            mock.Container.Resolve<IPath>(),
-            mock.Container.Resolve<IDirectory>()
+            Mock.Container.Resolve<ILogger>(),
+            Mock.Container.Resolve<IPathProvider>(),
+            Mock.Container.Resolve<IUserSettings>(),
+            Mock.Container.Resolve<IFile>(),
+            Mock.Container.Resolve<IPath>(),
+            Mock.Container.Resolve<IDirectory>()
         );
         sut.Setup(x => x.ResetConfig()).Returns(Result.Ok);
         sut.Setup(x => x.LoadConfig()).CallBase();

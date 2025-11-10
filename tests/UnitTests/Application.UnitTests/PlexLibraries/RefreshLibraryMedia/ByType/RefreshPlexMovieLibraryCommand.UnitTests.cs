@@ -22,16 +22,16 @@ public class RefreshPlexMovieLibraryCommandUnitTests : BaseUnitTest<RefreshPlexM
             }
         );
         var testLibrary = IDbContext.PlexLibraries.Include(x => x.Movies).First();
-        mock.Mock<IRefreshLibraryProgressReporter>()
+        Mock.Mock<IRefreshLibraryProgressReporter>()
             .Setup(x => x.SendProgress(It.IsAny<RefreshLibraryProgressUpdate>()))
             .Returns(Task.CompletedTask);
 
-        mock.Mock<ICommandExecutor>()
+        Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<SyncPlexMoviesCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok(new CrudMoviesReport()));
 
         // Act
-        var result = await _sut.ExecuteAsync(
+        var result = await Sut.ExecuteAsync(
             new RefreshPlexMovieLibraryCommand(new InsertMediaMetaDataCommandResponse(testLibrary), _ => { }),
             CancellationToken
         );
@@ -41,7 +41,7 @@ public class RefreshPlexMovieLibraryCommandUnitTests : BaseUnitTest<RefreshPlexM
         var updatedLibrary = await IDbContext.PlexLibraries.GetAsync(testLibrary.Id, CancellationToken);
         updatedLibrary.ShouldNotBeNull();
         updatedLibrary.SyncedAt.ShouldNotBeNull();
-        mock.Mock<IRefreshLibraryProgressReporter>()
+        Mock.Mock<IRefreshLibraryProgressReporter>()
             .Verify(x => x.SendProgress(It.IsAny<RefreshLibraryProgressUpdate>()), Times.AtLeastOnce);
     }
 
@@ -60,12 +60,12 @@ public class RefreshPlexMovieLibraryCommandUnitTests : BaseUnitTest<RefreshPlexM
         );
         var testLibrary = IDbContext.PlexLibraries.First();
 
-        mock.Mock<IRefreshLibraryProgressReporter>()
+        Mock.Mock<IRefreshLibraryProgressReporter>()
             .Setup(x => x.SendProgress(It.IsAny<RefreshLibraryProgressUpdate>()))
             .Returns(Task.CompletedTask);
 
         // Act
-        var result = await _sut.ExecuteAsync(
+        var result = await Sut.ExecuteAsync(
             new RefreshPlexMovieLibraryCommand(new InsertMediaMetaDataCommandResponse(testLibrary), _ => { }),
             CancellationToken
         );
@@ -76,7 +76,7 @@ public class RefreshPlexMovieLibraryCommandUnitTests : BaseUnitTest<RefreshPlexM
         updatedLibrary.ShouldNotBeNull();
         updatedLibrary.SyncedAt.ShouldNotBeNull();
 
-        mock.Mock<IRefreshLibraryProgressReporter>()
+        Mock.Mock<IRefreshLibraryProgressReporter>()
             .Verify(x => x.SendProgress(It.IsAny<RefreshLibraryProgressUpdate>()), Times.Exactly(2));
     }
 
@@ -99,16 +99,16 @@ public class RefreshPlexMovieLibraryCommandUnitTests : BaseUnitTest<RefreshPlexM
             movie.MediaSize = 0;
         }
 
-        mock.Mock<IRefreshLibraryProgressReporter>()
+        Mock.Mock<IRefreshLibraryProgressReporter>()
             .Setup(x => x.SendProgress(It.IsAny<RefreshLibraryProgressUpdate>()))
             .Returns(Task.CompletedTask);
 
-        mock.Mock<ICommandExecutor>()
+        Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<SyncPlexMoviesCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok(new CrudMoviesReport()));
 
         // Act
-        var result = await _sut.ExecuteAsync(
+        var result = await Sut.ExecuteAsync(
             new RefreshPlexMovieLibraryCommand(new InsertMediaMetaDataCommandResponse(testLibrary), _ => { }),
             CancellationToken
         );
@@ -119,7 +119,7 @@ public class RefreshPlexMovieLibraryCommandUnitTests : BaseUnitTest<RefreshPlexM
         updatedLibrary.ShouldNotBeNull();
         updatedLibrary.SyncedAt.ShouldNotBeNull();
 
-        mock.Mock<IRefreshLibraryProgressReporter>()
+        Mock.Mock<IRefreshLibraryProgressReporter>()
             .Verify(x => x.SendProgress(It.IsAny<RefreshLibraryProgressUpdate>()), Times.AtLeastOnce);
     }
 
@@ -137,22 +137,22 @@ public class RefreshPlexMovieLibraryCommandUnitTests : BaseUnitTest<RefreshPlexM
             }
         );
         var testLibrary = IDbContext.PlexLibraries.Include(x => x.Movies).First();
-        mock.Mock<IRefreshLibraryProgressReporter>()
+        Mock.Mock<IRefreshLibraryProgressReporter>()
             .Setup(x => x.SendProgress(It.IsAny<RefreshLibraryProgressUpdate>()))
             .Returns(Task.CompletedTask);
-        mock.Mock<ICommandExecutor>()
+        Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<SyncPlexMoviesCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Fail("Failed to sync movies"));
 
         // Act
-        var result = await _sut.ExecuteAsync(
+        var result = await Sut.ExecuteAsync(
             new RefreshPlexMovieLibraryCommand(new InsertMediaMetaDataCommandResponse(testLibrary), _ => { }),
             CancellationToken
         );
 
         // Assert
         result.IsFailed.ShouldBeTrue();
-        mock.Mock<IRefreshLibraryProgressReporter>()
+        Mock.Mock<IRefreshLibraryProgressReporter>()
             .Verify(x => x.SendProgress(It.IsAny<RefreshLibraryProgressUpdate>()), Times.Once);
     }
 }

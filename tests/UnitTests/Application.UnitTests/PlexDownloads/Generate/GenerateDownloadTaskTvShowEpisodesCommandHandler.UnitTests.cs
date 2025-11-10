@@ -8,7 +8,7 @@ namespace Reaparr.Application.UnitTests;
 public class DownloadTaskFactoryGenerateTvShowEpisodesDownloadTasksAsyncUnitTests
     : BaseCommandUnitTest<GenerateDownloadTaskTvShowEpisodesCommand>
 {
-    private DownloadTaskTvShowValidator validator = new();
+    private readonly DownloadTaskTvShowValidator _validator = new();
 
     public DownloadTaskFactoryGenerateTvShowEpisodesDownloadTasksAsyncUnitTests(ITestOutputHelper output)
         : base(output) { }
@@ -82,7 +82,7 @@ public class DownloadTaskFactoryGenerateTvShowEpisodesDownloadTasksAsyncUnitTest
         foreach (var downloadTaskTvShow in downloadTaskTvShows)
         {
             downloadTaskTvShow.Calculate();
-            var validationResult = await validator.ValidateAsync(downloadTaskTvShow, CancellationToken);
+            var validationResult = await _validator.ValidateAsync(downloadTaskTvShow, CancellationToken);
 
             // Ignore DownloadDirectory and DestinationDirectory errors as these are set in the DownloadJob
             var validErrors = validationResult.Errors.FindAll(x =>

@@ -1,12 +1,7 @@
 using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
-using Autofac.Extras.Moq;
-using Reaparr.Application;
-using Reaparr.FileSystem.Contracts;
-using Shouldly;
-using Xunit;
 
-namespace Reaparr.FileSystem.UnitTests;
+namespace Reaparr.Application.UnitTests;
 
 public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWithResumeCommandHandler>
 {
@@ -45,11 +40,11 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
             Progress = p => lastProgress = p,
         };
 
-        var result = await _sut.ExecuteAsync(command, CancellationToken.None);
+        var result = await Sut.ExecuteAsync(command, CancellationToken.None);
 
         result.IsSuccess.ShouldBeTrue();
 
-        var file = mock.Create<IFile>();
+        var file = Mock.Create<IFile>();
         using var targetStream = file.Open(targetPath, FileMode.Open, FileAccess.Read, FileShare.Read);
         var readBack = new byte[targetStream.Length];
         _ = await targetStream.ReadAsync(readBack, 0, readBack.Length, CancellationToken.None);
@@ -86,7 +81,7 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
             Progress = _ => progressCalls++,
         };
 
-        var result = await _sut.ExecuteAsync(command, CancellationToken.None);
+        var result = await Sut.ExecuteAsync(command, CancellationToken.None);
 
         result.IsSuccess.ShouldBeTrue();
         progressCalls.ShouldBeGreaterThanOrEqualTo(3);
@@ -118,10 +113,10 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
             Progress = p => last = p,
         };
 
-        var result = await _sut.ExecuteAsync(command, CancellationToken.None);
+        var result = await Sut.ExecuteAsync(command, CancellationToken.None);
         result.IsSuccess.ShouldBeTrue();
 
-        var file = mock.Create<IFile>();
+        var file = Mock.Create<IFile>();
         using var targetStream = file.Open(targetPath, FileMode.Open, FileAccess.Read, FileShare.Read);
         var readBack = new byte[targetStream.Length];
         _ = await targetStream.ReadAsync(readBack, 0, readBack.Length, CancellationToken.None);
@@ -158,10 +153,10 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
             Progress = _ => { },
         };
 
-        var result = await _sut.ExecuteAsync(command, cts.Token);
+        var result = await Sut.ExecuteAsync(command, cts.Token);
         result.IsSuccess.ShouldBeTrue(); // handler returns Ok even on cancellation
 
-        var file = mock.Create<IFile>();
+        var file = Mock.Create<IFile>();
         using var targetStream = file.Open(targetPath, FileMode.Open, FileAccess.Read, FileShare.Read);
         // Only first chunk (1MB) should have been written before cancellation check breaks
         targetStream.Length.ShouldBeGreaterThan(0);
@@ -197,10 +192,10 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
             },
         };
 
-        var result = await _sut.ExecuteAsync(command, cts.Token);
+        var result = await Sut.ExecuteAsync(command, cts.Token);
         result.IsSuccess.ShouldBeTrue();
 
-        var file = mock.Create<IFile>();
+        var file = Mock.Create<IFile>();
         using var targetStream = file.Open(targetPath, FileMode.Open, FileAccess.Read, FileShare.Read);
         targetStream.Length.ShouldBeLessThan(content.LongLength);
         targetStream.Length.ShouldBeGreaterThanOrEqualTo(1_048_576);
@@ -214,7 +209,7 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
         var content = CreateBytes(1024);
 
         // Do not register a filesystem file; instead, mock IFile to throw on target open
-        var fileMock = mock.Mock<IFile>();
+        var fileMock = Mock.Mock<IFile>();
         fileMock
             .Setup(f => f.Open(targetPath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None))
             .Throws(new UnauthorizedAccessException("no write"));
@@ -230,7 +225,7 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
             Progress = p => last = p,
         };
 
-        var result = await _sut.ExecuteAsync(command, CancellationToken.None);
+        var result = await Sut.ExecuteAsync(command, CancellationToken.None);
         result.IsFailed.ShouldBeTrue();
         last.ShouldBeNull();
     }
@@ -257,7 +252,7 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
             Progress = _ => { },
         };
 
-        var result = await _sut.ExecuteAsync(command, CancellationToken.None);
+        var result = await Sut.ExecuteAsync(command, CancellationToken.None);
         result.IsFailed.ShouldBeTrue();
     }
 
@@ -285,11 +280,11 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
             Progress = _ => progressCalled = true,
         };
 
-        var result = await _sut.ExecuteAsync(command, CancellationToken.None);
+        var result = await Sut.ExecuteAsync(command, CancellationToken.None);
         result.IsSuccess.ShouldBeTrue();
         progressCalled.ShouldBeFalse();
 
-        var file = mock.Create<IFile>();
+        var file = Mock.Create<IFile>();
         using var targetStream = file.Open(targetPath, FileMode.Open, FileAccess.Read, FileShare.Read);
         targetStream.Length.ShouldBe(content.LongLength);
     }
@@ -318,7 +313,7 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
             Progress = _ => progressCalled = true,
         };
 
-        var result = await _sut.ExecuteAsync(command, CancellationToken.None);
+        var result = await Sut.ExecuteAsync(command, CancellationToken.None);
         result.IsSuccess.ShouldBeTrue();
         progressCalled.ShouldBeFalse();
     }
@@ -348,7 +343,7 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
             Progress = p => speeds.Add(p.FileTransferSpeed),
         };
 
-        var result = await _sut.ExecuteAsync(command, CancellationToken.None);
+        var result = await Sut.ExecuteAsync(command, CancellationToken.None);
         result.IsSuccess.ShouldBeTrue();
         speeds.Count.ShouldBeGreaterThan(0);
         speeds.ShouldAllBe(x => x >= 0);
@@ -379,7 +374,7 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
             Progress = p => seenTotals.Add(p.DataTotal),
         };
 
-        var result = await _sut.ExecuteAsync(command, CancellationToken.None);
+        var result = await Sut.ExecuteAsync(command, CancellationToken.None);
         result.IsSuccess.ShouldBeTrue();
         seenTotals.ShouldContain(999_999);
     }
@@ -407,11 +402,11 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
             Progress = _ => { },
         };
 
-        var result = await _sut.ExecuteAsync(command, CancellationToken.None);
+        var result = await Sut.ExecuteAsync(command, CancellationToken.None);
 
         result.IsSuccess.ShouldBeTrue();
 
-        var file = mock.Create<IFile>();
+        var file = Mock.Create<IFile>();
         file.Exists(sourcePath).ShouldBeFalse();
     }
 
@@ -441,11 +436,11 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
             Progress = _ => { },
         };
 
-        var result = await _sut.ExecuteAsync(command, cts.Token);
+        var result = await Sut.ExecuteAsync(command, cts.Token);
 
         result.IsSuccess.ShouldBeTrue();
 
-        var file = mock.Create<IFile>();
+        var file = Mock.Create<IFile>();
         file.Exists(sourcePath).ShouldBeTrue();
     }
 }

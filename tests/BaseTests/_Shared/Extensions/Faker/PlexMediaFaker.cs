@@ -26,7 +26,7 @@ public class PlexMediaDataSet : DataSet
         type switch
         {
             PlexMediaType.Movie => _faker.PickRandomFromDataset(PlexMovieShowTitlesDataset.PlexMovieTitles.Value),
-            PlexMediaType.TvShow => _faker.PickRandomFromDataset(PlexTvShowTitlesDataset.PlexTVShowTitles.Value),
+            PlexMediaType.TvShow => _faker.PickRandomFromDataset(PlexTvShowTitlesDataset.PlexTvShowTitles.Value),
             PlexMediaType.Episode => _faker.PickRandomFromDataset(PlexEpisodeShowTitlesDataset.PlexEpisodeTitles.Value),
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, "PlexMediaType not supported."),
         };
@@ -39,7 +39,7 @@ public class PlexMediaDataSet : DataSet
             DownloadTaskType.MovieData =>
                 $"MovieData - {_faker.PickRandomFromDataset(PlexMovieShowTitlesDataset.PlexMovieTitles.Value)}",
             DownloadTaskType.TvShow =>
-                $"TvShow - {_faker.PickRandomFromDataset(PlexTvShowTitlesDataset.PlexTVShowTitles.Value)}",
+                $"TvShow - {_faker.PickRandomFromDataset(PlexTvShowTitlesDataset.PlexTvShowTitles.Value)}",
             DownloadTaskType.Season => "Season",
             DownloadTaskType.Episode =>
                 $"Episode - {_faker.PickRandomFromDataset(PlexEpisodeShowTitlesDataset.PlexEpisodeTitles.Value)}",

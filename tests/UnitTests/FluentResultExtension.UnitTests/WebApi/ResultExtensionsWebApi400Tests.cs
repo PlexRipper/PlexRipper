@@ -27,10 +27,10 @@ public class ResultExtensionsWebApi400Tests
         var result = new Result().Add400BadRequestError();
 
         // Act
-        var has400error = result.Has400BadRequestError();
+        var has400Error = result.Has400BadRequestError();
 
         // Assert
-        has400error.ShouldBeTrue();
+        has400Error.ShouldBeTrue();
     }
 
     #endregion

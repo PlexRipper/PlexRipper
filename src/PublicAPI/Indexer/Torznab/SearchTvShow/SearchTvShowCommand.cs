@@ -2,7 +2,7 @@ using FastEndpoints;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Data.Contracts;
-using Reaparr.Environment;
+// ReSharper disable InconsistentNaming
 
 namespace Reaparr.PublicAPI.SearchTvShow;
 

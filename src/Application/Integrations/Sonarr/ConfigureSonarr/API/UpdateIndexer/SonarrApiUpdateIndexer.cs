@@ -1,4 +1,3 @@
-using System.Text;
 using System.Text.Json;
 using FastEndpoints;
 using FluentValidation;
@@ -43,10 +42,8 @@ public class SonarrApiUpdateIndexerCommandHandler
             var requestUri = new Uri($"/api/v3/indexer/{command.Id}?forceSave={forceSave}", UriKind.Relative);
             var json = JsonSerializer.Serialize(command.Resource, DefaultJsonSerializerOptions.ConfigStandard);
 
-            using var httpRequest = new HttpRequestMessage(HttpMethod.Put, requestUri)
-            {
-                Content = new StringContent(json, Encoding.UTF8, "application/json"),
-            };
+            using var httpRequest = new HttpRequestMessage(HttpMethod.Put, requestUri);
+            httpRequest.Content = json.ToStringContent();
 
             var response = await _client.SendAsync(httpRequest, cancellationToken);
             var body = await response.Content.ReadAsStringAsync(cancellationToken);

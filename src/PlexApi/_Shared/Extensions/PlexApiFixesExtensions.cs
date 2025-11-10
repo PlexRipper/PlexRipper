@@ -4,8 +4,8 @@ namespace Reaparr.PlexApi;
 
 public static class PlexApiFixesExtensions
 {
-    private static readonly Regex[] CompiledPatterns = new[]
-    {
+    private static readonly Regex[] _compiledPatterns =
+    [
         new Regex(@"(?<!\d)(4320p|8K)(?!\d)", RegexOptions.IgnoreCase | RegexOptions.Compiled),
         new Regex(@"(?<!\d)(2160p|4K)(?!\d)", RegexOptions.IgnoreCase | RegexOptions.Compiled),
         new Regex(@"(?<!\d)1440p(?!\d)", RegexOptions.IgnoreCase | RegexOptions.Compiled),
@@ -16,7 +16,7 @@ public static class PlexApiFixesExtensions
         new Regex(@"(?<!\d)360p(?!\d)", RegexOptions.IgnoreCase | RegexOptions.Compiled),
         new Regex(@"(?<!\d)240p(?!\d)", RegexOptions.IgnoreCase | RegexOptions.Compiled),
         new Regex(@"(?<!\d)144p(?!\d)", RegexOptions.IgnoreCase | RegexOptions.Compiled),
-    };
+    ];
 
     /// <summary>
     /// Sometimes Plex does not return the quality of a media item.
@@ -28,7 +28,7 @@ public static class PlexApiFixesExtensions
     {
         if (string.IsNullOrWhiteSpace(filename))
             return string.Empty;
-        foreach (var regex in CompiledPatterns)
+        foreach (var regex in _compiledPatterns)
         {
             var match = regex.Match(filename);
             if (match.Success)

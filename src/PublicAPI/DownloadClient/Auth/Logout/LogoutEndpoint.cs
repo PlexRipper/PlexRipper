@@ -18,8 +18,8 @@ public class LogoutEndpoint : EndpointWithoutRequest
 
     public LogoutEndpoint(ILogger logger, IAuthDbContext authDbContext)
     {
+        _log = logger.ForContext<LogoutEndpoint>();
         _authDbContext = authDbContext;
-        _log = logger.ForContext<DownloadClientLoginEndpoint>();
     }
 
     public override async Task HandleAsync(CancellationToken ct)

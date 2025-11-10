@@ -9,15 +9,7 @@ public record ConfigureSonarrIntegrationRequest
     public required string ApiKey { get; init; }
 }
 
-public record ConfigureSonarrIntegrationResponse
-{
-    public required int IndexerId { get; init; }
-    public required int DownloadClientId { get; init; }
-    public required string Status { get; init; } // "created" | "updated"
-}
-
-public class ConfigureSonarrIntegrationEndpoint
-    : BaseEndpoint<ConfigureSonarrIntegrationRequest, ConfigureSonarrIntegrationResponse>
+public class ConfigureSonarrIntegrationEndpoint : BaseEndpoint<ConfigureSonarrIntegrationRequest>
 {
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
@@ -34,7 +26,7 @@ public class ConfigureSonarrIntegrationEndpoint
     {
         Post(EndpointPath);
         Description(x =>
-            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<ConfigureSonarrIntegrationResponse>))
+            x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))
                 .Produces(StatusCodes.Status400BadRequest, typeof(BaseResultDTO))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))
         );
@@ -60,7 +52,7 @@ public class ConfigureSonarrIntegrationEndpoint
         var upsertClientResult = await _commandExecutor.Send(new SetupSonarrDownloadClientCommand(reaparrBaseUri), ct);
         if (!upsertClientResult.IsSuccess)
         {
-            await SendFluentResult(upsertClientResult, ct);
+            await SendFluentResult(upsertClientResult.ToResult(), ct);
             return;
         }
 
@@ -75,7 +67,7 @@ public class ConfigureSonarrIntegrationEndpoint
         );
         if (!upsertIndexerResult.IsSuccess)
         {
-            await SendFluentResult(upsertIndexerResult, ct);
+            await SendFluentResult(upsertIndexerResult.ToResult(), ct);
             return;
         }
 

@@ -1,66 +1,8 @@
-using System.Text;
-using System.Text.Json;
 using System.Text.Json.Serialization;
-using FastEndpoints;
 
 namespace Reaparr.Application;
 
-public record SonarrApiCreateDownloadClientCommand() : ICommand<Result<SonarrCreateDownloadClientDTO>>
-{
-    public required bool ForceSave { get; init; }
-
-    public required SonarrCreateDownloadClientDTO Resource { get; init; }
-}
-
-public class SonarApiCreateDownloadClientCommandHandler
-    : ICommandHandler<SonarrApiCreateDownloadClientCommand, Result<SonarrCreateDownloadClientDTO>>
-{
-    private readonly HttpClient _client;
-
-    public SonarApiCreateDownloadClientCommandHandler(IHttpClientFactory httpClientFactory)
-    {
-        _client = httpClientFactory.CreateSonarrHttpClient();
-    }
-
-    public async Task<Result<SonarrCreateDownloadClientDTO>> ExecuteAsync(
-        SonarrApiCreateDownloadClientCommand command,
-        CancellationToken cancellationToken
-    )
-    {
-        try
-        {
-            var forceSave = command.ForceSave ? "true" : "false";
-            var requestUri = new Uri($"/api/v3/downloadclient?forceSave={forceSave}", UriKind.Relative);
-            var json = JsonSerializer.Serialize(command.Resource, DefaultJsonSerializerOptions.ConfigStandard);
-
-            using var httpRequest = new HttpRequestMessage(HttpMethod.Post, requestUri);
-            httpRequest.Content = new StringContent(json, Encoding.UTF8, "application/json");
-
-            var response = await _client.SendAsync(httpRequest, cancellationToken);
-            var body = await response.Content.ReadAsStringAsync(cancellationToken);
-            if (!response.IsSuccessStatusCode)
-            {
-                return Result
-                    .Fail($"Failed to create download client in Sonarr. StatusCode: {response.StatusCode}")
-                    .WithError(body)
-                    .LogError();
-            }
-
-            var created = JsonSerializer.Deserialize<SonarrCreateDownloadClientDTO>(
-                body,
-                DefaultJsonSerializerOptions.ConfigStandard
-            );
-
-            return Result.Ok(created ?? new SonarrCreateDownloadClientDTO());
-        }
-        catch (Exception e)
-        {
-            return Result.Fail(new ExceptionalError(e)).LogError();
-        }
-    }
-}
-
-public sealed class SonarrCreateDownloadClientDTO
+public sealed class SonarrDownloadContractDTO
 {
     [JsonPropertyName("configContract")]
     public string? ConfigContract { get; set; }
@@ -69,7 +11,7 @@ public sealed class SonarrCreateDownloadClientDTO
     public bool Enable { get; set; }
 
     [JsonPropertyName("fields")]
-    public List<SonarrCreateFieldDTO>? Fields { get; set; }
+    public List<SonarrDownloadContractCreateFieldDTO>? Fields { get; set; }
 
     [JsonPropertyName("id")]
     public int Id { get; set; }
@@ -84,7 +26,7 @@ public sealed class SonarrCreateDownloadClientDTO
     public string? InfoLink { get; set; }
 
     [JsonPropertyName("message")]
-    public SonarrCreateDownloadClientMessageDTO? Message { get; set; }
+    public SonarrDownloadContractMessageDTO? Message { get; set; }
 
     [JsonPropertyName("name")]
     public string? Name { get; set; }
@@ -110,7 +52,7 @@ public sealed class SonarrCreateDownloadClientDTO
     public List<int>? Tags { get; set; }
 }
 
-public sealed class SonarrCreateFieldDTO
+public sealed class SonarrDownloadContractCreateFieldDTO
 {
     [JsonPropertyName("advanced")]
     public bool Advanced { get; set; }
@@ -150,7 +92,7 @@ public sealed class SonarrCreateFieldDTO
     public string? Section { get; set; }
 
     [JsonPropertyName("selectOptions")]
-    public List<SonarrCreateSelectOptionDTO>? SelectOptions { get; set; }
+    public List<SonarrDownloadContractSelectOptionDTO>? SelectOptions { get; set; }
 
     [JsonPropertyName("selectOptionsProviderAction")]
     public string? SelectOptionsProviderAction { get; set; }
@@ -165,7 +107,7 @@ public sealed class SonarrCreateFieldDTO
     public object? Value { get; set; }
 }
 
-public sealed class SonarrCreateSelectOptionDTO
+public sealed class SonarrDownloadContractSelectOptionDTO
 {
     [JsonPropertyName("hint")]
     public string? Hint { get; set; }
@@ -180,7 +122,7 @@ public sealed class SonarrCreateSelectOptionDTO
     public int Value { get; set; }
 }
 
-public sealed class SonarrCreateDownloadClientMessageDTO
+public sealed class SonarrDownloadContractMessageDTO
 {
     [JsonPropertyName("message")]
     public string? Message { get; set; }

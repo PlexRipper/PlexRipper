@@ -40,7 +40,7 @@ public record TorznabEndpointRequest
     /// IMDb ID for movie queries (e.g. "tt1234567").
     /// </summary>
     [QueryParam, BindFrom("imdbid")]
-    public string? ImdbId { get; init; } = string.Empty;
+    public string? ImdbId { get; init; }
 
     /// <summary>
     /// TMDb ID for movie queries.
@@ -52,20 +52,20 @@ public record TorznabEndpointRequest
     /// API key provided by the requesting client (Sonarr/Radarr).
     /// </summary>
     [QueryParam, BindFrom("apikey")]
-    public string ApiKey { get; init; } = string.Empty;
+    public string ApiKey { get; init; }
 
     /// <summary>
     /// Max number of results to return.
     /// Sonarr/Radarr will pass this for pagination.
     /// </summary>
     [QueryParam, BindFrom("limit")]
-    public int? Limit { get; init; } = 50;
+    public int? Limit { get; init; }
 
     /// <summary>
     /// Offset of results for pagination.
     /// </summary>
     [QueryParam, BindFrom("offset")]
-    public int? Offset { get; init; } = 0;
+    public int? Offset { get; init; }
 
     /// <summary>
     /// One or more category IDs (comma-separated).
@@ -78,5 +78,5 @@ public record TorznabEndpointRequest
     /// Extended flag (0 = basic, 1 = include extended attributes).
     /// </summary>
     [QueryParam, BindFrom("extended")]
-    public int? Extended { get; init; } = 0;
+    public int? Extended { get; init; }
 }

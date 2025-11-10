@@ -8,7 +8,7 @@ public record SetupSonarrDownloadClientCommand(Uri ReaparrBaseUri)
 
 public record SetupSonarrDownloadClientCommandResult
 {
-    public int DownloadClientId { get; set; }
+    public int DownloadClientId { get; init; }
 }
 
 public class SetupSonarrDownloadClientCommandHandler
@@ -19,7 +19,7 @@ public class SetupSonarrDownloadClientCommandHandler
     private readonly IIntegrationsSettings _integrationsSettings;
     private readonly ISonarrSettings _settings;
 
-    private readonly string DownloadClientName = "Reaparr DownloadClient";
+    private const string DOWNLOAD_CLIENT_NAME = "Reaparr DownloadClient";
 
     public SetupSonarrDownloadClientCommandHandler(
         ILogger log,
@@ -60,7 +60,7 @@ public class SetupSonarrDownloadClientCommandHandler
             var list = result.Value;
 
             var currentDownloadClient = list.FirstOrDefault(d =>
-                string.Equals(d.Name, DownloadClientName, StringComparison.OrdinalIgnoreCase)
+                string.Equals(d.Name, DOWNLOAD_CLIENT_NAME, StringComparison.OrdinalIgnoreCase)
             );
 
             if (currentDownloadClient != null)
@@ -70,37 +70,7 @@ public class SetupSonarrDownloadClientCommandHandler
                     {
                         Id = currentDownloadClient?.Id ?? -1,
                         ForceSave = true,
-                        Resource = new SonarrUpdateDownloadClientDTO
-                        {
-                            Enable = true,
-                            Protocol = "torrent",
-                            Priority = 1,
-                            RemoveCompletedDownloads = true,
-                            RemoveFailedDownloads = true,
-                            Name = DownloadClientName,
-                            Fields =
-                            [
-                                new() { Name = "host", Value = command.ReaparrBaseUri.Host },
-                                new() { Name = "port", Value = command.ReaparrBaseUri.Port },
-                                new() { Name = "useSsl", Value = false },
-                                new() { Name = "urlBase", Value = "/api/public/download-client/" },
-                                new() { Name = "username", Value = _integrationsSettings.DownloadClientUsername },
-                                new() { Name = "password", Value = _integrationsSettings.DownloadClientPassword },
-                                new() { Name = "tvCategory", Value = "tv-sonarr" },
-                                new() { Name = "tvImportedCategory" },
-                                new() { Name = "recentTvPriority", Value = 0 },
-                                new() { Name = "olderTvPriority", Value = 0 },
-                                new() { Name = "initialState", Value = 0 },
-                                new() { Name = "sequentialOrder", Value = false },
-                                new() { Name = "firstAndLast", Value = false },
-                                new() { Name = "contentLayout", Value = 0 },
-                            ],
-                            ImplementationName = "qBittorrent",
-                            Implementation = "QBittorrent",
-                            ConfigContract = "QBittorrentSettings",
-                            InfoLink = "https://wiki.servarr.com/sonarr/supported#qbittorrent",
-                            Id = currentDownloadClient?.Id ?? -1,
-                        },
+                        Resource = BuildDownloadClientResource(command.ReaparrBaseUri),
                     },
                     ct
                 );
@@ -117,37 +87,7 @@ public class SetupSonarrDownloadClientCommandHandler
                 new SonarrApiCreateDownloadClientCommand
                 {
                     ForceSave = false,
-                    Resource = new SonarrCreateDownloadClientDTO
-                    {
-                        Enable = true,
-                        Protocol = "torrent",
-                        Priority = 1,
-                        RemoveCompletedDownloads = true,
-                        RemoveFailedDownloads = true,
-                        Name = DownloadClientName,
-                        Fields =
-                        [
-                            new() { Name = "host", Value = command.ReaparrBaseUri.Host },
-                            new() { Name = "port", Value = command.ReaparrBaseUri.Port },
-                            new() { Name = "useSsl", Value = false },
-                            new() { Name = "urlBase", Value = "/api/public/download-client/" },
-                            new() { Name = "username", Value = _integrationsSettings.DownloadClientUsername },
-                            new() { Name = "password", Value = _integrationsSettings.DownloadClientPassword },
-                            new() { Name = "tvCategory", Value = "tv-sonarr" },
-                            new() { Name = "tvImportedCategory" },
-                            new() { Name = "recentTvPriority", Value = 0 },
-                            new() { Name = "olderTvPriority", Value = 0 },
-                            new() { Name = "initialState", Value = 0 },
-                            new() { Name = "sequentialOrder", Value = false },
-                            new() { Name = "firstAndLast", Value = false },
-                            new() { Name = "contentLayout", Value = 0 },
-                        ],
-                        ImplementationName = "qBittorrent",
-                        Implementation = "QBittorrent",
-                        ConfigContract = "QBittorrentSettings",
-                        InfoLink = "https://wiki.servarr.com/sonarr/supported#qbittorrent",
-                        Tags = new List<int>(),
-                    },
+                    Resource = BuildDownloadClientResource(command.ReaparrBaseUri),
                 },
                 ct
             );
@@ -168,4 +108,36 @@ public class SetupSonarrDownloadClientCommandHandler
             return Result.Fail("HTTP error while communicating with Sonarr.").LogError();
         }
     }
+
+    private SonarrDownloadContractDTO BuildDownloadClientResource(Uri reaparrBaseUri) => new()
+    {
+        Enable = true,
+        Protocol = "torrent",
+        Priority = 1,
+        RemoveCompletedDownloads = true,
+        RemoveFailedDownloads = true,
+        Name = DOWNLOAD_CLIENT_NAME,
+        Fields =
+        [
+            new() { Name = "host", Value = reaparrBaseUri.Host },
+            new() { Name = "port", Value = reaparrBaseUri.Port },
+            new() { Name = "useSsl", Value = false },
+            new() { Name = "urlBase", Value = "/api/public/download-client/" },
+            new() { Name = "username", Value = _integrationsSettings.DownloadClientUsername },
+            new() { Name = "password", Value = _integrationsSettings.DownloadClientPassword },
+            new() { Name = "tvCategory", Value = "tv-sonarr" },
+            new() { Name = "tvImportedCategory" },
+            new() { Name = "recentTvPriority", Value = 0 },
+            new() { Name = "olderTvPriority", Value = 0 },
+            new() { Name = "initialState", Value = 0 },
+            new() { Name = "sequentialOrder", Value = false },
+            new() { Name = "firstAndLast", Value = false },
+            new() { Name = "contentLayout", Value = 0 },
+        ],
+        ImplementationName = "qBittorrent",
+        Implementation = "QBittorrent",
+        ConfigContract = "QBittorrentSettings",
+        InfoLink = "https://wiki.servarr.com/sonarr/supported#qbittorrent",
+        Tags = [],
+    };
 }

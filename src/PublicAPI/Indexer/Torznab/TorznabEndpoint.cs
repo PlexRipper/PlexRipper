@@ -9,7 +9,10 @@ public class TorznabEndpointRequestValidator : Validator<TorznabEndpointRequest>
 {
     public TorznabEndpointRequestValidator()
     {
-        RuleFor(x => x.Type).NotEmpty();
+        RuleFor(x => x.Type)
+            .NotEmpty()
+            .Must(type => new[] { "caps", "search", "tvsearch", "movie" }.Contains(type))
+            .WithMessage("Type must be one of: caps, search, tvsearch, movie");
     }
 }
 
@@ -67,6 +70,10 @@ public sealed class TorznabEndpoint : Endpoint<TorznabEndpointRequest>
                 break;
             case "movie":
                 throw new NotImplementedException();
+            default:
+                _log.Here().Error("Received unknown Torznab request type: {Type}", req.Type);
+                await Send.ErrorsAsync(cancellation: ct);
+                break;
         }
     }
 }

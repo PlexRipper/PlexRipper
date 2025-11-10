@@ -3,7 +3,7 @@
 namespace Reaparr.PublicAPI;
 
 /// <summary>
-/// Used to register all dependencies in Autofac for the Application project.
+/// Used to register all dependencies in Autofac for the PublicAPI project.
 /// </summary>
 public class PublicApiModule : Module
 {

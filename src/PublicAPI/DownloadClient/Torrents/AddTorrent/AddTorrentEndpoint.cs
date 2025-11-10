@@ -5,6 +5,7 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
+using BencodeNET.Exceptions;
 
 namespace Reaparr.PublicAPI;
 
@@ -98,13 +99,43 @@ public class AddTorrentEndpoint : Endpoint<AddTorrentEndpointRequest>
     {
         _log.Here().DebugApiCall(HttpContext, req);
 
-        if (req.TorrentFile is null)
-            return;
-
-        var parser = new BencodeParser();
-        var torrent = parser.Parse<Torrent>(req.TorrentFile.OpenReadStream());
-        var metadata = torrent.ExtraFields.ToTorrentMetadataDTO();
-        var hashId = torrent.GetInfoHash();
+		var parser = new BencodeParser();
+		Torrent torrent;
+		TorrentMetadataDTO metadata;
+		string hashId;
+		try
+		{
+			torrent = parser.Parse<Torrent>(req.TorrentFile!.OpenReadStream());
+			metadata = torrent.ExtraFields.ToTorrentMetadataDTO();
+			hashId = torrent.GetInfoHash();
+		}
+		catch (FormatException ex)
+		{
+			_log.Here()
+				.Warning("[Torrent/Add] Invalid torrent file format for {FileName}: {Error}",
+					req.TorrentFile?.FileName, ex.Message);
+			AddError("torrents", "Invalid torrent file.");
+			await Send.ErrorsAsync(cancellation: ct);
+			return;
+		}
+		catch (BencodeException ex)
+		{
+			_log.Here()
+				.Warning("[Torrent/Add] Invalid torrent file bencode for {FileName}: {Error}",
+					req.TorrentFile?.FileName, ex.Message);
+			AddError("torrents", "Invalid torrent file.");
+			await Send.ErrorsAsync(cancellation: ct);
+			return;
+		}
+		catch (Exception ex)
+		{
+			_log.Here()
+				.Warning("[Torrent/Add] Failed to parse torrent file for {FileName}: {Error}",
+					req.TorrentFile?.FileName, ex.Message);
+			AddError("torrents", "Invalid torrent file.");
+			await Send.ErrorsAsync(cancellation: ct);
+			return;
+		}
 
         // Ensure this is a valid Reaparr torrent file
         var validationResult = await new TorrentMetadataDTOValidator().ValidateAsync(metadata, ct);

@@ -20,7 +20,8 @@ public class AddTorrentEndpointUnitTests : BaseUnitTest
         // Mock the dependencies
         mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<CreateDownloadTasksCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Ok());
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Never);
 
         // Act
         var endpoint = SetupEndpointUnitTest<AddTorrentEndpoint>();
@@ -28,10 +29,6 @@ public class AddTorrentEndpointUnitTests : BaseUnitTest
 
         // Assert
         endpoint.HttpContext.Response.StatusCode.ShouldBe(200);
-
-        // Verify command was not called
-        mock.Mock<ICommandExecutor>()
-            .Verify(x => x.Send(It.IsAny<CreateDownloadTasksCommand>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]

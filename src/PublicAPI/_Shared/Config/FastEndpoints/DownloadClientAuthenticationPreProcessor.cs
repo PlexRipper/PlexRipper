@@ -1,4 +1,5 @@
 using FastEndpoints;
+using Microsoft.EntityFrameworkCore;
 using Reaparr.Identity.Contracts;
 
 namespace Reaparr.PublicAPI;
@@ -13,38 +14,37 @@ public class DownloadClientAuthenticationPreProcessor<TRequest> : IPreProcessor<
         _authDbContext = authDbContext;
     }
 
-    public Task PreProcessAsync(IPreProcessorContext<TRequest> ctx, CancellationToken ct)
+    public async Task PreProcessAsync(IPreProcessorContext<TRequest> ctx, CancellationToken ct)
     {
         var cookies = ctx.HttpContext.Request.Cookies;
         if (!cookies.TryGetValue("SID", out var sid) || string.IsNullOrWhiteSpace(sid))
         {
-            return ctx.HttpContext.Response.SendUnauthorizedAsync(cancellation: ct);
+            await ctx.HttpContext.Response.SendUnauthorizedAsync(cancellation: ct);
+            return;
         }
 
-        if (!IsValidSession(sid))
+        if (!(await IsValidSession(sid, ct)))
         {
-            return ctx.HttpContext.Response.SendUnauthorizedAsync(cancellation: ct);
+            await ctx.HttpContext.Response.SendUnauthorizedAsync(cancellation: ct);
         }
-
-        return Task.CompletedTask;
     }
 
-    public bool IsValidSession(string sid)
+    private async Task<bool> IsValidSession(string sid, CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(sid))
             return false;
 
-        var entity = _authDbContext.DownloadClientSessions.Find(sid);
+        var entity = await _authDbContext.DownloadClientSessions.FirstOrDefaultAsync(x => x.Sid == sid, ct);
         if (entity is null)
             return false;
 
         if (entity.ExpiresAt <= DateTimeOffset.UtcNow)
         {
             _authDbContext.DownloadClientSessions.Remove(entity);
-            _authDbContext.SaveChangesAsync();
+            await _authDbContext.SaveChangesAsync(ct);
             return false;
         }
-        
+
         return true;
     }
 }

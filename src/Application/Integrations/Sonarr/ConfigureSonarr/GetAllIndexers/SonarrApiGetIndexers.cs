@@ -30,6 +30,14 @@ public class SonarrApiGetIndexersCommandHandler
             var response = await _client.SendAsync(httpRequest, cancellationToken);
             var body = await response.Content.ReadAsStringAsync(cancellationToken);
 
+			if (!response.IsSuccessStatusCode)
+			{
+				return Result
+					.Fail($"Failed to get indexers from Sonarr. StatusCode: {response.StatusCode}")
+					.WithError(body)
+					.LogError();
+			}
+
             var list = JsonSerializer.Deserialize<List<IndexerResourceDTO>>(
                 body,
                 DefaultJsonSerializerOptions.ConfigStandard

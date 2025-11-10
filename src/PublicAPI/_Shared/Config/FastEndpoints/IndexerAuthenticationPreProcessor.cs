@@ -6,7 +6,7 @@ namespace Reaparr.PublicAPI;
 public class IndexerAuthenticationPreProcessor<TRequest> : IPreProcessor<TRequest>
 {
     private readonly IIntegrationsSettings _integrationsSettings;
-    private readonly string _indexerApiKey = "apikey";
+    private const string INDEXER_API_KEY = "apikey";
 
     public IndexerAuthenticationPreProcessor(IIntegrationsSettings integrationsSettings)
     {
@@ -15,14 +15,14 @@ public class IndexerAuthenticationPreProcessor<TRequest> : IPreProcessor<TReques
 
     public Task PreProcessAsync(IPreProcessorContext<TRequest> ctx, CancellationToken ct)
     {
-        var apiKey = ctx.HttpContext.Request.Query.TryGetValue(_indexerApiKey, out var queryKey)
+        var apiKey = ctx.HttpContext.Request.Query.TryGetValue(INDEXER_API_KEY, out var queryKey)
             ? queryKey.ToString()
             : null;
 
         if (string.IsNullOrWhiteSpace(apiKey))
         {
-            ctx.ValidationFailures.Add(new($"Missing Query parameter: {_indexerApiKey}",
-                $"The [{_indexerApiKey}] query param needs to be set!"));
+            ctx.ValidationFailures.Add(new($"Missing Query parameter: {INDEXER_API_KEY}",
+                $"The [{INDEXER_API_KEY}] query param needs to be set!"));
             return ctx.HttpContext.Response.SendErrorsAsync(ctx.ValidationFailures, cancellation: ct);
         }
 

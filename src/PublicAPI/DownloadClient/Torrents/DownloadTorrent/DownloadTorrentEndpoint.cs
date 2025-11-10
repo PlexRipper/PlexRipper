@@ -19,6 +19,9 @@ public class DownloadTorrentEndpointRequestValidator : Validator<DownloadTorrent
         RuleFor(x => x.ServerId).GreaterThan(0);
         RuleFor(x => x.Quality).IsInEnum();
         RuleFor(x => x.Type).IsInEnum();
+		RuleFor(x => x)
+			.Must(r => r.PartId > 0 || r.PartPlexId > 0)
+			.WithMessage("Either PartId or PartPlexId must be provided.");
     }
 }
 

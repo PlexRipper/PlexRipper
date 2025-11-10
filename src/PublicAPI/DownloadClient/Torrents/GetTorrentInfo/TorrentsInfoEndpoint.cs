@@ -47,7 +47,7 @@ public record QBittorrentTorrentInfo
     /// Estimated time of arrival (time left) in seconds. -1 if unknown.
     /// </summary>
     [JsonPropertyName("eta")]
-    public int Eta { get; set; }
+    public long Eta { get; set; }
 
     /// <summary>
     /// Current torrent state (e.g. "downloading", "pausedDL", "queuedDL", "stalledDL").
@@ -124,7 +124,7 @@ public sealed class TorrentsInfoEndpoint : Endpoint<TorrentsInfoEndpointRequest,
             Size = file.DataTotal,
             Progress = file.Percentage,
             DlSpeed = file.Speed,
-            Eta = (int)file.TimeRemaining,
+            Eta = file.TimeRemaining,
             State = MapStatusToQbittorrentState(file.DownloadStatus),
             SavePath = savePath,
         };

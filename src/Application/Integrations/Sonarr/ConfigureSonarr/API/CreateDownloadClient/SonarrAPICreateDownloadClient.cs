@@ -34,7 +34,7 @@ public class SonarApiCreateDownloadClientCommandHandler
             var json = JsonSerializer.Serialize(command.Resource, DefaultJsonSerializerOptions.ConfigStandard);
 
             using var httpRequest = new HttpRequestMessage(HttpMethod.Post, requestUri);
-            httpRequest.Content = new StringContent(json, Encoding.UTF8, "application/json");
+            httpRequest.Content = json.ToStringContent();
 
             var response = await _client.SendAsync(httpRequest, cancellationToken);
             var body = await response.Content.ReadAsStringAsync(cancellationToken);

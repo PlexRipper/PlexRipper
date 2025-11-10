@@ -109,8 +109,17 @@ public class SetupSonarrDownloadClientCommandHandler
         }
     }
 
-    private SonarrDownloadContractDTO BuildDownloadClientResource(Uri reaparrBaseUri) =>
-        new()
+    private SonarrDownloadContractDTO BuildDownloadClientResource(Uri reaparrBaseUri)
+    {
+        // Derive urlBase from Reaparr's base URI to include any PathBase and ensure correct trailing segment
+        var basePath = string.IsNullOrEmpty(reaparrBaseUri.AbsolutePath) ? "/" : reaparrBaseUri.AbsolutePath;
+        if (!basePath.EndsWith("/"))
+            basePath += "/";
+        var derivedUrlBase = $"{basePath}api/public/download-client/";
+
+        var useSsl = string.Equals(reaparrBaseUri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase);
+
+        return new SonarrDownloadContractDTO
         {
             Enable = true,
             Protocol = "torrent",
@@ -122,8 +131,8 @@ public class SetupSonarrDownloadClientCommandHandler
             [
                 new() { Name = "host", Value = reaparrBaseUri.Host },
                 new() { Name = "port", Value = reaparrBaseUri.Port },
-                new() { Name = "useSsl", Value = false },
-                new() { Name = "urlBase", Value = "/api/public/download-client/" },
+                new() { Name = "useSsl", Value = useSsl },
+                new() { Name = "urlBase", Value = derivedUrlBase },
                 new() { Name = "username", Value = _integrationsSettings.DownloadClientUsername },
                 new() { Name = "password", Value = _integrationsSettings.DownloadClientPassword },
                 new() { Name = "tvCategory", Value = "tv-sonarr" },
@@ -141,4 +150,5 @@ public class SetupSonarrDownloadClientCommandHandler
             InfoLink = "https://wiki.servarr.com/sonarr/supported#qbittorrent",
             Tags = [],
         };
+    }
 }

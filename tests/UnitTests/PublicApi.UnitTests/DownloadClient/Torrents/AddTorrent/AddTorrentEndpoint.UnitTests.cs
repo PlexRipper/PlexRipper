@@ -186,6 +186,8 @@ public class AddTorrentEndpointUnitTests : BaseUnitTest
         result.Errors.ShouldContain(x => x.PropertyName == nameof(TorrentMetadataDTO.DataId));
         result.Errors.ShouldContain(x => x.PropertyName == nameof(TorrentMetadataDTO.PartId));
         result.Errors.ShouldContain(x => x.PropertyName == nameof(TorrentMetadataDTO.PartPlexId));
+		result.Errors.ShouldContain(x => x.PropertyName == nameof(TorrentMetadataDTO.Type));
+		result.Errors.ShouldContain(x => x.PropertyName == nameof(TorrentMetadataDTO.Quality));
     }
 
     [Fact]

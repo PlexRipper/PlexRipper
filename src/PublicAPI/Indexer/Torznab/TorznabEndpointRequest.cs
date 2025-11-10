@@ -52,7 +52,7 @@ public record TorznabEndpointRequest
     /// API key provided by the requesting client (Sonarr/Radarr).
     /// </summary>
     [QueryParam, BindFrom("apikey")]
-    public string ApiKey { get; init; }
+    public required string ApiKey { get; init; }
 
     /// <summary>
     /// Max number of results to return.

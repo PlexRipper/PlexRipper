@@ -49,6 +49,11 @@ export interface CheckAllConnectionStatusUpdateDTO {
   plexServersWithConnectionIds: Record<string, number[]>;
 }
 
+export interface ConfigureRadarrIntegrationRequest {
+  apiKey: string;
+  url: string;
+}
+
 export interface ConfigureSonarrIntegrationRequest {
   apiKey: string;
   url: string;
@@ -1259,6 +1264,15 @@ export interface ResultDTOOfString {
   value?: string | null;
 }
 
+export interface ResultDTOOfTestConnectionToRadarrEndpointResponse {
+  errors: ErrorDTO[];
+  isSuccess: boolean;
+  /** @format int32 */
+  statusCode: number;
+  successes: SuccessDTO[];
+  value?: TestConnectionToRadarrEndpointResponse | null;
+}
+
 export interface ResultDTOOfTestConnectionToSonarrEndpointResponse {
   errors: ErrorDTO[];
   isSuccess: boolean;
@@ -1399,6 +1413,10 @@ export enum TestConnectionStatus {
   UrlIsInvalid = "UrlIsInvalid",
   ConnectionFailed = "ConnectionFailed",
   InvalidApiKey = "InvalidApiKey",
+}
+
+export interface TestConnectionToRadarrEndpointResponse {
+  result: TestConnectionStatus;
 }
 
 export interface TestConnectionToSonarrEndpointResponse {

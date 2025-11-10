@@ -16,22 +16,15 @@ public static class HttpClientModule
                 SonarrClientName,
                 (sp, client) =>
                 {
-                    var settings = sp.GetRequiredService<ISonarrSettings>();
-                    if (string.IsNullOrWhiteSpace(settings.SonarrBaseUrl))
-                        throw new InvalidOperationException("Invalid SonarrBaseUrl: value is null or empty.");
+                    var settings = sp.GetService<ISonarrSettings>();
+                    if (settings == null || string.IsNullOrWhiteSpace(settings.SonarrBaseUrl))
+                        return;
 
-                    if (string.IsNullOrWhiteSpace(settings.SonarrApiKey))
-                        throw new InvalidOperationException("Invalid SonarrApiKey: value is null or empty.");
+                    if (!Uri.TryCreate(settings.SonarrBaseUrl.Trim().TrimEnd('/'), UriKind.Absolute, out var baseUri))
+                        return;
 
-                    var baseUrl = settings.SonarrBaseUrl.Trim().TrimEnd('/');
-                    if (!Uri.TryCreate(baseUrl, UriKind.Absolute, out var baseUri))
-                        throw new InvalidOperationException(
-                            $"Invalid SonarrBaseUrl: '{settings.SonarrBaseUrl}' is not a valid absolute URI."
-                        );
                     client.BaseAddress = baseUri;
-
                     client.Timeout = TimeSpan.FromSeconds(15);
-                    client.DefaultRequestHeaders.Clear();
                     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
                     if (!string.IsNullOrWhiteSpace(settings.SonarrApiKey))
@@ -41,8 +34,8 @@ public static class HttpClientModule
             .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
     }
 
-    public static HttpClient CreateSonarrHttpClient(this IHttpClientFactory httpClientFactory) =>
-        httpClientFactory.CreateClient(SonarrClientName);
+    public static HttpClient CreateSonarrHttpClient(this IHttpClientFactory factory) =>
+        factory.CreateClient(SonarrClientName);
 
     public static void RegisterRadarrHttpClient(this IServiceCollection services)
     {
@@ -51,22 +44,15 @@ public static class HttpClientModule
                 RadarrClientName,
                 (sp, client) =>
                 {
-                    var settings = sp.GetRequiredService<IRadarrSettings>();
-                    if (string.IsNullOrWhiteSpace(settings.RadarrBaseUrl))
-                        throw new InvalidOperationException("Invalid RadarrBaseUrl: value is null or empty.");
+                    var settings = sp.GetService<IRadarrSettings>();
+                    if (settings == null || string.IsNullOrWhiteSpace(settings.RadarrBaseUrl))
+                        return;
 
-                    if (string.IsNullOrWhiteSpace(settings.RadarrApiKey))
-                        throw new InvalidOperationException("Invalid RadarrApiKey: value is null or empty.");
+                    if (!Uri.TryCreate(settings.RadarrBaseUrl.Trim().TrimEnd('/'), UriKind.Absolute, out var baseUri))
+                        return;
 
-                    var baseUrl = settings.RadarrBaseUrl.Trim().TrimEnd('/');
-                    if (!Uri.TryCreate(baseUrl, UriKind.Absolute, out var baseUri))
-                        throw new InvalidOperationException(
-                            $"Invalid RadarrBaseUrl: '{settings.RadarrBaseUrl}' is not a valid absolute URI."
-                        );
                     client.BaseAddress = baseUri;
-
                     client.Timeout = TimeSpan.FromSeconds(15);
-                    client.DefaultRequestHeaders.Clear();
                     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
                     if (!string.IsNullOrWhiteSpace(settings.RadarrApiKey))
@@ -76,6 +62,6 @@ public static class HttpClientModule
             .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
     }
 
-    public static HttpClient CreateRadarrHttpClient(this IHttpClientFactory httpClientFactory) =>
-        httpClientFactory.CreateClient(RadarrClientName);
+    public static HttpClient CreateRadarrHttpClient(this IHttpClientFactory factory) =>
+        factory.CreateClient(RadarrClientName);
 }

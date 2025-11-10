@@ -10,7 +10,7 @@ public record RadarrSettings : BaseSettingsModule<RadarrSettings>, IRadarrSettin
         new()
         {
             IsConfigured = false,
-            RadarrBaseUrl = string.Empty,
+            RadarrBaseUrl = "http://localhost:7878",
             RadarrApiKey = string.Empty,
         };
 

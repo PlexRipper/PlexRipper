@@ -3,10 +3,10 @@ using FastEndpoints;
 
 namespace Reaparr.Application;
 
-public record RadarrApiGetDownloadClientsCommand : ICommand<Result<List<DownloadClientResourceDTO>>>;
+public record RadarrApiGetDownloadClientsCommand : ICommand<Result<List<RadarrDownloadClientResourceDTO>>>;
 
 public class RadarrApiGetDownloadClientsCommandHandler
-    : ICommandHandler<RadarrApiGetDownloadClientsCommand, Result<List<DownloadClientResourceDTO>>>
+    : ICommandHandler<RadarrApiGetDownloadClientsCommand, Result<List<RadarrDownloadClientResourceDTO>>>
 {
     private readonly HttpClient _client;
 
@@ -15,7 +15,7 @@ public class RadarrApiGetDownloadClientsCommandHandler
         _client = httpClientFactory.CreateRadarrHttpClient();
     }
 
-    public async Task<Result<List<DownloadClientResourceDTO>>> ExecuteAsync(
+    public async Task<Result<List<RadarrDownloadClientResourceDTO>>> ExecuteAsync(
         RadarrApiGetDownloadClientsCommand command,
         CancellationToken cancellationToken
     )
@@ -37,7 +37,7 @@ public class RadarrApiGetDownloadClientsCommandHandler
                     .LogError();
             }
 
-            var list = JsonSerializer.Deserialize<List<DownloadClientResourceDTO>>(
+            var list = JsonSerializer.Deserialize<List<RadarrDownloadClientResourceDTO>>(
                 body,
                 DefaultJsonSerializerOptions.ConfigStandard
             );

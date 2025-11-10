@@ -4,7 +4,7 @@ using FluentValidation;
 
 namespace Reaparr.Application;
 
-public record RadarrApiUpdateDownloadClientCommand : ICommand<Result<RadarrDownloadContractDTO>>
+public record RadarrApiUpdateDownloadClientCommand : ICommand<Result<RadarrDownloadClientResourceDTO>>
 {
     public required int Id { get; init; }
     public required bool ForceSave { get; init; }
@@ -21,7 +21,7 @@ public class RadarrApiUpdateDownloadClientCommandValidator : Validator<RadarrApi
 }
 
 public class RadarrApiUpdateDownloadClientCommandHandler
-    : ICommandHandler<RadarrApiUpdateDownloadClientCommand, Result<RadarrDownloadContractDTO>>
+    : ICommandHandler<RadarrApiUpdateDownloadClientCommand, Result<RadarrDownloadClientResourceDTO>>
 {
     private readonly HttpClient _client;
 
@@ -30,7 +30,7 @@ public class RadarrApiUpdateDownloadClientCommandHandler
         _client = httpClientFactory.CreateRadarrHttpClient();
     }
 
-    public async Task<Result<RadarrDownloadContractDTO>> ExecuteAsync(
+    public async Task<Result<RadarrDownloadClientResourceDTO>> ExecuteAsync(
         RadarrApiUpdateDownloadClientCommand command,
         CancellationToken cancellationToken
     )
@@ -54,12 +54,12 @@ public class RadarrApiUpdateDownloadClientCommandHandler
                     .LogError();
             }
 
-            var updated = JsonSerializer.Deserialize<RadarrDownloadContractDTO>(
+            var updated = JsonSerializer.Deserialize<RadarrDownloadClientResourceDTO>(
                 body,
                 DefaultJsonSerializerOptions.ConfigStandard
             );
 
-            return Result.Ok(updated ?? new RadarrDownloadContractDTO());
+            return Result.Ok(updated ?? new RadarrDownloadClientResourceDTO());
         }
         catch (Exception e)
         {

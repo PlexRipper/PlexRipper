@@ -3,14 +3,14 @@ using FastEndpoints;
 
 namespace Reaparr.Application;
 
-public record RadarrApiCreateDownloadClientCommand : ICommand<Result<RadarrDownloadContractDTO>>
+public record RadarrApiCreateDownloadClientCommand : ICommand<Result<RadarrDownloadClientResourceDTO>>
 {
     public required bool ForceSave { get; init; }
     public required RadarrDownloadContractDTO Resource { get; init; }
 }
 
 public class RadarrApiCreateDownloadClientCommandHandler
-    : ICommandHandler<RadarrApiCreateDownloadClientCommand, Result<RadarrDownloadContractDTO>>
+    : ICommandHandler<RadarrApiCreateDownloadClientCommand, Result<RadarrDownloadClientResourceDTO>>
 {
     private readonly HttpClient _client;
 
@@ -19,7 +19,7 @@ public class RadarrApiCreateDownloadClientCommandHandler
         _client = httpClientFactory.CreateRadarrHttpClient();
     }
 
-    public async Task<Result<RadarrDownloadContractDTO>> ExecuteAsync(
+    public async Task<Result<RadarrDownloadClientResourceDTO>> ExecuteAsync(
         RadarrApiCreateDownloadClientCommand command,
         CancellationToken cancellationToken
     )
@@ -43,12 +43,12 @@ public class RadarrApiCreateDownloadClientCommandHandler
                     .LogError();
             }
 
-            var created = JsonSerializer.Deserialize<RadarrDownloadContractDTO>(
+            var created = JsonSerializer.Deserialize<RadarrDownloadClientResourceDTO>(
                 body,
                 DefaultJsonSerializerOptions.ConfigStandard
             );
 
-            return Result.Ok(created ?? new RadarrDownloadContractDTO());
+            return Result.Ok(created ?? new RadarrDownloadClientResourceDTO());
         }
         catch (Exception e)
         {

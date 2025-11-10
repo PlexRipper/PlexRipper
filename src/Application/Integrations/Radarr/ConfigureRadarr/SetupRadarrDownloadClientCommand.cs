@@ -1,4 +1,5 @@
 using FastEndpoints;
+using Reaparr.PublicAPI.Contracts;
 using Reaparr.Settings.Contracts;
 
 namespace Reaparr.Application;
@@ -135,7 +136,7 @@ public class SetupRadarrDownloadClientCommandHandler
                 new() { Name = "urlBase", Value = derivedUrlBase },
                 new() { Name = "username", Value = _integrationsSettings.DownloadClientUsername },
                 new() { Name = "password", Value = _integrationsSettings.DownloadClientPassword },
-                new() { Name = "movieCategory", Value = "movies-radarr" },
+                new() { Name = "movieCategory", Value = IntegrationDefinitions.RADARR_DEFAULT_CATEGORY },
                 new() { Name = "recentMoviePriority", Value = 0 },
                 new() { Name = "olderMoviePriority", Value = 0 },
                 new() { Name = "initialState", Value = 0 },

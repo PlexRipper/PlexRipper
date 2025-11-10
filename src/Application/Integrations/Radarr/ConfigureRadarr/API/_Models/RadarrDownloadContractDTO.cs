@@ -58,7 +58,7 @@ public sealed class RadarrDownloadContractCreateFieldDTO
     public bool Advanced { get; set; }
 
     [JsonPropertyName("hidden")]
-    public bool Hidden { get; set; }
+    public string? Hidden { get; set; }
 
     [JsonPropertyName("label")]
     public string? Label { get; set; }

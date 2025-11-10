@@ -1,5 +1,6 @@
 using FastEndpoints;
 using Reaparr.Data.Contracts;
+using Reaparr.PublicAPI.Contracts;
 
 namespace Reaparr.PublicAPI.GetAllCategories;
 
@@ -31,7 +32,8 @@ public class GetAllCategoriesEndpoint : EndpointWithoutRequest<object>
         var categories = new Dictionary<string, object>
         {
             // This is the default category and avoids having to implement and track custom categories for Sonarr
-            ["tv-sonarr"] = new { name = "tv-sonarr", savePath = downloadFolder.DirectoryPath },
+            [IntegrationDefinitions.SONARR_DEFAULT_CATEGORY] = new { name = IntegrationDefinitions.SONARR_DEFAULT_CATEGORY, savePath = downloadFolder.DirectoryPath },
+            [IntegrationDefinitions.RADARR_DEFAULT_CATEGORY] = new { name = IntegrationDefinitions.RADARR_DEFAULT_CATEGORY, savePath = downloadFolder.DirectoryPath },
         };
 
         await Send.OkAsync(categories, cancellation: ct);

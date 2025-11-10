@@ -3,14 +3,14 @@ using FastEndpoints;
 
 namespace Reaparr.Application;
 
-public record RadarrApiCreateIndexerCommand : ICommand<Result<RadarrIndexerContractDTO>>
+public record RadarrApiCreateIndexerCommand : ICommand<Result<RadarrIndexerResourceDTO>>
 {
     public required bool ForceSave { get; init; }
     public required RadarrIndexerContractDTO Resource { get; init; }
 }
 
 public class RadarrApiCreateIndexerCommandHandler
-    : ICommandHandler<RadarrApiCreateIndexerCommand, Result<RadarrIndexerContractDTO>>
+    : ICommandHandler<RadarrApiCreateIndexerCommand, Result<RadarrIndexerResourceDTO>>
 {
     private readonly HttpClient _client;
 
@@ -19,7 +19,7 @@ public class RadarrApiCreateIndexerCommandHandler
         _client = httpClientFactory.CreateRadarrHttpClient();
     }
 
-    public async Task<Result<RadarrIndexerContractDTO>> ExecuteAsync(
+    public async Task<Result<RadarrIndexerResourceDTO>> ExecuteAsync(
         RadarrApiCreateIndexerCommand command,
         CancellationToken cancellationToken
     )
@@ -43,12 +43,12 @@ public class RadarrApiCreateIndexerCommandHandler
                     .LogError();
             }
 
-            var created = JsonSerializer.Deserialize<RadarrIndexerContractDTO>(
+            var created = JsonSerializer.Deserialize<RadarrIndexerResourceDTO>(
                 body,
                 DefaultJsonSerializerOptions.ConfigStandard
             );
 
-            return Result.Ok(created ?? new RadarrIndexerContractDTO());
+            return Result.Ok(created ?? new RadarrIndexerResourceDTO());
         }
         catch (Exception e)
         {

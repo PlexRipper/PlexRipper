@@ -3,10 +3,10 @@ using FastEndpoints;
 
 namespace Reaparr.Application;
 
-public record RadarrApiGetIndexersCommand : ICommand<Result<List<RadarrIndexerContractDTO>>>;
+public record RadarrApiGetIndexersCommand : ICommand<Result<List<RadarrIndexerResourceDTO>>>;
 
 public class RadarrApiGetIndexersCommandHandler
-    : ICommandHandler<RadarrApiGetIndexersCommand, Result<List<RadarrIndexerContractDTO>>>
+    : ICommandHandler<RadarrApiGetIndexersCommand, Result<List<RadarrIndexerResourceDTO>>>
 {
     private readonly HttpClient _client;
 
@@ -15,7 +15,7 @@ public class RadarrApiGetIndexersCommandHandler
         _client = httpClientFactory.CreateRadarrHttpClient();
     }
 
-    public async Task<Result<List<RadarrIndexerContractDTO>>> ExecuteAsync(
+    public async Task<Result<List<RadarrIndexerResourceDTO>>> ExecuteAsync(
         RadarrApiGetIndexersCommand command,
         CancellationToken cancellationToken
     )
@@ -37,7 +37,7 @@ public class RadarrApiGetIndexersCommandHandler
                     .LogError();
             }
 
-            var list = JsonSerializer.Deserialize<List<RadarrIndexerContractDTO>>(
+            var list = JsonSerializer.Deserialize<List<RadarrIndexerResourceDTO>>(
                 body,
                 DefaultJsonSerializerOptions.ConfigStandard
             );

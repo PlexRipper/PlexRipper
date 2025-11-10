@@ -1,4 +1,5 @@
 using FastEndpoints;
+using Reaparr.PublicAPI.Contracts;
 using Reaparr.Settings.Contracts;
 
 namespace Reaparr.Application;
@@ -135,7 +136,7 @@ public class SetupSonarrDownloadClientCommandHandler
                 new() { Name = "urlBase", Value = derivedUrlBase },
                 new() { Name = "username", Value = _integrationsSettings.DownloadClientUsername },
                 new() { Name = "password", Value = _integrationsSettings.DownloadClientPassword },
-                new() { Name = "tvCategory", Value = "tv-sonarr" },
+                new() { Name = "tvCategory", Value = IntegrationDefinitions.SONARR_DEFAULT_CATEGORY },
                 new() { Name = "tvImportedCategory" },
                 new() { Name = "recentTvPriority", Value = 0 },
                 new() { Name = "olderTvPriority", Value = 0 },

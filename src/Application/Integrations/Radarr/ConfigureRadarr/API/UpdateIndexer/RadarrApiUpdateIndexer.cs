@@ -4,7 +4,7 @@ using FluentValidation;
 
 namespace Reaparr.Application;
 
-public record RadarrApiUpdateIndexerCommand : ICommand<Result<RadarrIndexerContractDTO>>
+public record RadarrApiUpdateIndexerCommand : ICommand<Result<RadarrIndexerResourceDTO>>
 {
     public required int Id { get; init; }
     public required bool ForceSave { get; init; }
@@ -22,7 +22,7 @@ public class RadarrApiUpdateIndexerCommandValidator : Validator<RadarrApiUpdateI
 }
 
 public class RadarrApiUpdateIndexerCommandHandler
-    : ICommandHandler<RadarrApiUpdateIndexerCommand, Result<RadarrIndexerContractDTO>>
+    : ICommandHandler<RadarrApiUpdateIndexerCommand, Result<RadarrIndexerResourceDTO>>
 {
     private readonly HttpClient _client;
 
@@ -31,7 +31,7 @@ public class RadarrApiUpdateIndexerCommandHandler
         _client = httpClientFactory.CreateRadarrHttpClient();
     }
 
-    public async Task<Result<RadarrIndexerContractDTO>> ExecuteAsync(
+    public async Task<Result<RadarrIndexerResourceDTO>> ExecuteAsync(
         RadarrApiUpdateIndexerCommand command,
         CancellationToken cancellationToken
     )
@@ -55,12 +55,12 @@ public class RadarrApiUpdateIndexerCommandHandler
                     .LogError();
             }
 
-            var updated = JsonSerializer.Deserialize<RadarrIndexerContractDTO>(
+            var updated = JsonSerializer.Deserialize<RadarrIndexerResourceDTO>(
                 body,
                 DefaultJsonSerializerOptions.ConfigStandard
             );
 
-            return Result.Ok(updated ?? new RadarrIndexerContractDTO());
+            return Result.Ok(updated ?? new RadarrIndexerResourceDTO());
         }
         catch (Exception e)
         {

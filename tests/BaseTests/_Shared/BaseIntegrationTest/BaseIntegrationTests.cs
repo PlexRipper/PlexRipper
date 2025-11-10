@@ -10,8 +10,6 @@ public abstract class BaseIntegrationTests
 
     protected CancellationToken CancellationToken => TestContext.Current.CancellationToken;
 
-    protected AutoMock Mock { get; } = AutoMock.GetStrict();
-
     protected BaseIntegrationTests(ITestOutputHelper output, LogEventLevel logLevel = LogEventLevel.Debug)
     {
         EnvironmentExtensions.SetLogLevel(logLevel);

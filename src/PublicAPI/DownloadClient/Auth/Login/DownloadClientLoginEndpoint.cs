@@ -1,10 +1,29 @@
 using FastEndpoints;
+using FluentValidation;
 using Reaparr.Identity.Contracts;
 using Reaparr.Settings.Contracts;
 
 namespace Reaparr.PublicAPI;
 
-public class LoginEndpoint : EndpointWithoutRequest
+public record DownloadClientLoginEndpointRequest
+{
+    [BindFrom("username")]
+    public required string Username { get; init; }
+
+    [BindFrom("password")]
+    public required string Password { get; init; }
+}
+
+public class DownloadClientLoginEndpointRequestValidator : Validator<DownloadClientLoginEndpointRequest>
+{
+    public DownloadClientLoginEndpointRequestValidator()
+    {
+        RuleFor(x => x.Username).NotEmpty();
+        RuleFor(x => x.Password).NotEmpty();
+    }
+}
+
+public class DownloadClientLoginEndpoint : Endpoint<DownloadClientLoginEndpointRequest>
 {
     private readonly ILogger _log;
     private readonly IAuthDbContext _authDbContext;
@@ -12,9 +31,9 @@ public class LoginEndpoint : EndpointWithoutRequest
 
     private static readonly TimeSpan _defaultTtl = TimeSpan.FromMinutes(30);
 
-    public LoginEndpoint(ILogger logger, IAuthDbContext authDbContext, IIntegrationsSettings integrations)
+    public DownloadClientLoginEndpoint(ILogger logger, IAuthDbContext authDbContext, IIntegrationsSettings integrations)
     {
-        _log = logger.ForContext<LoginEndpoint>();
+        _log = logger.ForContext<DownloadClientLoginEndpoint>();
         _authDbContext = authDbContext;
         _integrations = integrations;
     }
@@ -23,17 +42,16 @@ public class LoginEndpoint : EndpointWithoutRequest
     {
         Post(PublicApiRoutes.DownloadClient + "/auth/login");
         Description(x => x.IsDownloadClient());
+        AllowFormData(urlEncoded: true);
         AllowAnonymous();
     }
 
-    public override async Task HandleAsync(CancellationToken ct)
+    public override async Task HandleAsync(DownloadClientLoginEndpointRequest req, CancellationToken ct)
     {
-        _log.DebugApiCall(HttpContext);
+         _log.DebugApiCall(HttpContext);
 
-        // Read application/x-www-form-urlencoded
-        var form = await HttpContext.Request.ReadFormAsync(ct);
-        var username = form["username"].ToString();
-        var password = form["password"].ToString();
+        var username = req.Username;
+        var password = req.Password;
 
         if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
         {

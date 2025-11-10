@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 using Reaparr.Environment;
+using Reaparr.Identity.Contracts;
 using Serilog.Events;
 
 namespace Reaparr.BaseTests;
@@ -73,6 +74,7 @@ public partial class BaseUnitTest
                 // All different dependencies that are needed for the endpoint need to be added here. And then they can be mocked in the test.
                 s.AddTransient(_ => mock.Create<ILogger>());
                 s.AddTransient(_ => mock.Create<IReaparrDbContext>());
+                s.AddTransient(_ => mock.Create<IAuthDbContext>());
                 s.AddTransient(_ => mock.Create<ICommandExecutor>());
                 s.AddSingleton(_ => mock.Create<ISchedulerService>());
                 s.AddSingleton(_ => mock.Mock<ISignalRService>().Object);

@@ -1,7 +1,6 @@
 ﻿using System.Net.Http.Headers;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
-using FastEndpoints;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
@@ -68,16 +67,18 @@ public class BaseContainer : IDisposable
 
     public async Task SignInDownloadClient(HttpClient client)
     {
-        var integrationsSettings = Resolve<IIntegrationsSettings>();
-        var loginRequest = new DownloadClientLoginEndpointRequest
-        {
-            Username = integrationsSettings.DownloadClientUsername,
-            Password = integrationsSettings.DownloadClientPassword,
-        };
+        var settings = Resolve<IIntegrationsSettings>();
 
-        var response = await client.POSTAsync<DownloadClientLoginEndpoint, DownloadClientLoginEndpointRequest>(
-            loginRequest
+        // Needs to be sent as application/x-www-form-urlencoded content
+        // which is not properly supported by FastEndpoints test client
+        var content = new FormUrlEncodedContent(
+            [
+                new KeyValuePair<string, string>("username", settings.DownloadClientUsername),
+                new KeyValuePair<string, string>("password", settings.DownloadClientPassword),
+            ]
         );
+
+        var response = await client.PostAsync(PublicApiRoutes.DownloadClient + "/auth/login", content);
 
         response.IsSuccessStatusCode.ShouldBeTrue("Failed to login the download client test HttpClient.");
     }

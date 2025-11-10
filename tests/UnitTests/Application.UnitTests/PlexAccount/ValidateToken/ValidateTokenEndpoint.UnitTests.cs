@@ -64,7 +64,7 @@ public class ValidatePlexTokenEndpointUnitTests : BaseUnitTest
         value.Is2Fa.ShouldBeFalse();
         value.Email.ShouldBe(testAccountDTO.Email);
         value.Username.ShouldBe(testAccountDTO.Username);
-        value.AuthenticationToken.ShouldNotBeEmpty();
+        value.CustomAuthenticationToken.ShouldNotBeEmpty();
         value.ClientId.ShouldBe(testAccountResponse.ClientId);
         value.Title.ShouldBe(testAccountResponse.Title);
         value.PlexId.ShouldBe(testAccountResponse.PlexId);
@@ -129,7 +129,7 @@ public class ValidatePlexTokenEndpointUnitTests : BaseUnitTest
         value.Title.ShouldBeEmpty();
         value.PlexId.ShouldBe(0);
         value.Uuid.ShouldBeEmpty();
-        value.AuthenticationToken.ShouldBeEmpty();
+        value.CustomAuthenticationToken.ShouldBeEmpty();
 
         mock.Mock<ICommandExecutor>()
             .Verify(x => x.Send(It.IsAny<ValidatePlexTokenCommand>(), It.IsAny<CancellationToken>()), Times.Once());
@@ -187,7 +187,7 @@ public class ValidatePlexTokenEndpointUnitTests : BaseUnitTest
         value.Is2Fa.ShouldBeTrue();
         value.Email.ShouldBe(testAccountDTO.Email);
         value.Username.ShouldBe(testAccountDTO.Username);
-        value.AuthenticationToken.ShouldNotBeEmpty();
+        value.CustomAuthenticationToken.ShouldNotBeEmpty();
 
         mock.Mock<ICommandExecutor>()
             .Verify(x => x.Send(It.IsAny<ValidatePlexTokenCommand>(), It.IsAny<CancellationToken>()), Times.Once());

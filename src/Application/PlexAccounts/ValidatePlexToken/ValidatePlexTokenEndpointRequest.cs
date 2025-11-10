@@ -27,7 +27,7 @@ public class ValidatePlexTokenEndpointResponse
 
     public required string Uuid { get; init; }
 
-    public required string AuthenticationToken { get; init; }
+    public required string CustomAuthenticationToken { get; init; }
 
     public required bool IsValidated { get; init; }
 
@@ -97,7 +97,7 @@ public class ValidatePlexTokenEndpoint
                 Title = string.Empty,
                 PlexId = 0,
                 Uuid = string.Empty,
-                AuthenticationToken = string.Empty,
+                CustomAuthenticationToken = string.Empty,
                 IsValidated = false,
                 ValidatedAt = null,
                 Is2Fa = false,
@@ -123,7 +123,7 @@ public class ValidatePlexTokenEndpoint
                 Title = validateResult.Value.Title,
                 PlexId = validateResult.Value.PlexId,
                 Uuid = validateResult.Value.Uuid,
-                AuthenticationToken = validateResult.Value.AuthenticationToken,
+                CustomAuthenticationToken = validateResult.Value.AuthenticationToken,
                 IsValidated = validateResult.Value.IsValidated,
                 ValidatedAt = validateResult.Value.ValidatedAt,
                 Is2Fa = validateResult.Value.Is2Fa,

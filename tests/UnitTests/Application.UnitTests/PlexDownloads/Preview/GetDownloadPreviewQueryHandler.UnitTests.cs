@@ -14,7 +14,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
         // Arrange
         await SetupDatabase(15140);
 
-        var request = new GetDownloadPreviewQuery(new List<DownloadMediaDTO>());
+        var request = new GetDownloadPreviewQuery([]);
 
         // Act
         var result = await Sut.ExecuteAsync(request, CancellationToken);

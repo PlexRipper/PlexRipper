@@ -101,7 +101,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
         SetupFileSystem(fs =>
         {
             fs.AddFile(downloadFileTask.DownloadFilePath, new MockFileData(content));
-            fs.AddFile(downloadFileTask.DestinationFilePath, new MockFileData(new byte[0]));
+            fs.AddFile(downloadFileTask.DestinationFilePath, new MockFileData([]));
         });
 
         downloadFileTask.DataTotal = content.LongLength;

@@ -78,7 +78,7 @@ public record HeaderAuthenticationSettings
         {
             Enabled = false,
             MappingType = HeaderMappingType.Username,
-            TrustedProxies = new List<string>(),
+            TrustedProxies = [],
             EnableLogging = true,
             MaxHeaderLength = 256,
             RequireHttps = true,

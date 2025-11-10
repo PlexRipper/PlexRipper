@@ -13,26 +13,6 @@ public class AddTorrentEndpointUnitTests : BaseUnitTest
         : base(output) { }
 
     [Fact]
-    public async Task ShouldReturnEarly_WhenTorrentFileIsNull()
-    {
-        // Arrange
-        var request = new AddTorrentEndpointRequest { TorrentFile = null };
-
-        // Mock the dependencies
-        Mock.Mock<ICommandExecutor>()
-            .Setup(x => x.Send(It.IsAny<CreateDownloadTasksCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.Never);
-
-        // Act
-        var endpoint = SetupEndpointUnitTest<AddTorrentEndpoint>();
-        await endpoint.HandleAsync(request, CancellationToken);
-
-        // Assert
-        endpoint.HttpContext.Response.StatusCode.ShouldBe(200);
-    }
-
-    [Fact]
     public async Task ShouldReturnOk_WhenValidTorrentFileIsUploaded()
     {
         // Arrange

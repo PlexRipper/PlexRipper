@@ -27,7 +27,7 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
         {
             fs.AddDirectory("/test");
             fs.AddFile(sourcePath, new MockFileData(content));
-            fs.AddFile(targetPath, new MockFileData(Array.Empty<byte>()));
+            fs.AddFile(targetPath, new MockFileData([]));
         });
 
         MoveFileTransferProgressDTO? lastProgress = null;
@@ -69,7 +69,7 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
         {
             fs.AddDirectory("/test");
             fs.AddFile(sourcePath, new MockFileData(content));
-            fs.AddFile(targetPath, new MockFileData(Array.Empty<byte>()));
+            fs.AddFile(targetPath, new MockFileData([]));
         });
 
         var command = new MoveFileWithResumeCommand
@@ -138,7 +138,7 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
         {
             fs.AddDirectory("/test");
             fs.AddFile(sourcePath, new MockFileData(content));
-            fs.AddFile(targetPath, new MockFileData(Array.Empty<byte>()));
+            fs.AddFile(targetPath, new MockFileData([]));
         });
 
         var cts = new CancellationTokenSource();
@@ -174,7 +174,7 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
         {
             fs.AddDirectory("/test");
             fs.AddFile(sourcePath, new MockFileData(content));
-            fs.AddFile(targetPath, new MockFileData(Array.Empty<byte>()));
+            fs.AddFile(targetPath, new MockFileData([]));
         });
 
         var cts = new CancellationTokenSource();
@@ -240,7 +240,7 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
         SetupFileSystem(fs =>
         {
             fs.AddDirectory("/test");
-            fs.AddFile(targetPath, new MockFileData(new byte[0]));
+            fs.AddFile(targetPath, new MockFileData([]));
         });
 
         var command = new MoveFileWithResumeCommand
@@ -331,7 +331,7 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
         {
             fs.AddDirectory("/test");
             fs.AddFile(sourcePath, new MockFileData(content));
-            fs.AddFile(targetPath, new MockFileData(Array.Empty<byte>()));
+            fs.AddFile(targetPath, new MockFileData([]));
         });
 
         var command = new MoveFileWithResumeCommand
@@ -362,7 +362,7 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
         {
             fs.AddDirectory("/test");
             fs.AddFile(sourcePath, new MockFileData(content));
-            fs.AddFile(targetPath, new MockFileData(Array.Empty<byte>()));
+            fs.AddFile(targetPath, new MockFileData([]));
         });
 
         var command = new MoveFileWithResumeCommand
@@ -390,7 +390,7 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
         {
             fs.AddDirectory("/test");
             fs.AddFile(sourcePath, new MockFileData(content));
-            fs.AddFile(targetPath, new MockFileData(Array.Empty<byte>()));
+            fs.AddFile(targetPath, new MockFileData([]));
         });
 
         var command = new MoveFileWithResumeCommand
@@ -421,7 +421,7 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
         {
             fs.AddDirectory("/test");
             fs.AddFile(sourcePath, new MockFileData(content));
-            fs.AddFile(targetPath, new MockFileData(Array.Empty<byte>()));
+            fs.AddFile(targetPath, new MockFileData([]));
         });
 
         var cts = new CancellationTokenSource();

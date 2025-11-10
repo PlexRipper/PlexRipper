@@ -20,10 +20,9 @@ public class GetCapabilitiesCommandHandler : ICommandHandler<GetCapabilitiesComm
     {
         var response = new TorznabCapsResponseDTO
         {
-            Xmlns = new System.Xml.Serialization.XmlSerializerNamespaces(new[]
-            {
+            Xmlns = new System.Xml.Serialization.XmlSerializerNamespaces([
                 new System.Xml.XmlQualifiedName("torznab", "http://torznab.com/schemas/2015/feed"),
-            }),
+            ]),
             Server = new TorznabServer
             {
                 Version = "1.3",

@@ -17,7 +17,7 @@ public class DownloadQueueCheckDownloadQueueUnitTests : BaseUnitTest<DownloadQue
 
         // Act
         Sut.Setup();
-        var result = await Sut.CheckDownloadQueue(new List<int>());
+        var result = await Sut.CheckDownloadQueue([]);
 
         // Assert
         result.IsFailed.ShouldBeTrue();

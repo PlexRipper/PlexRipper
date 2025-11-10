@@ -82,7 +82,7 @@ public class GetAllBackgroundJobsEndpointUnitTests : BaseUnitTest<GetAllBackgrou
 
         var inspectPlexServerJobUpdatePayload = new InspectPlexServerJobUpdateDTO
         {
-            PlexServerIds = new List<int> { 1, 2, 3, 4, 5 },
+            PlexServerIds = [1, 2, 3, 4, 5],
         };
         var inspectPlexServerJobUpdate = new JobStatusUpdate<string>(
             JobTypes.InspectPlexServerJob,

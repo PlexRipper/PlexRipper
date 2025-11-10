@@ -30,7 +30,8 @@ public static partial class FakeData
             .RuleFor(x => x.DownloadManagerSettings, _ => GetDownloadManagerSettings(seed, options).Generate())
             .RuleFor(x => x.LanguageSettings, _ => GetLanguageSettings(seed, options).Generate())
             .RuleFor(x => x.DebugSettings, _ => GetDebugSettings(seed, options).Generate())
-            .RuleFor(x => x.ServerSettings, _ => GetServerSettings(seed, options).Generate());
+            .RuleFor(x => x.ServerSettings, _ => GetServerSettings(seed, options).Generate())
+            .RuleFor(x => x.IntegrationsSettings, _ => IntegrationsSettings.Create());
     }
 
     public static Faker<AuthenticationModule> GetAuthenticationSettings(Seed seed)

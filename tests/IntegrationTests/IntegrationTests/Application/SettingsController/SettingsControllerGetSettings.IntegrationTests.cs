@@ -30,12 +30,26 @@ public class SettingsControllerGetSettingsIntegrationTests : BaseIntegrationTest
         result.IsSuccess.ShouldBeTrue();
         result.Value.ShouldNotBeNull();
         var settingsModel = result.Value.ToModel();
-        var responseSettings = JsonSerializer.Serialize(settingsModel, DefaultJsonSerializerOptions.ConfigCapitalized);
-        var defaultSettings = JsonSerializer.Serialize(
-            new UserSettings(),
-            DefaultJsonSerializerOptions.ConfigCapitalized
-        );
+        var expected = new UserSettings();
 
-        responseSettings.ShouldBe(defaultSettings);
+        // Assert deterministic modules match defaults
+        settingsModel.AuthenticationSettings.ShouldBeEquivalentTo(expected.AuthenticationSettings);
+        settingsModel.GeneralSettings.ShouldBeEquivalentTo(expected.GeneralSettings);
+        settingsModel.ConfirmationSettings.ShouldBeEquivalentTo(expected.ConfirmationSettings);
+        settingsModel.DateTimeSettings.ShouldBeEquivalentTo(expected.DateTimeSettings);
+        settingsModel.DisplaySettings.ShouldBeEquivalentTo(expected.DisplaySettings);
+        settingsModel.DownloadManagerSettings.ShouldBeEquivalentTo(expected.DownloadManagerSettings);
+        settingsModel.LanguageSettings.ShouldBeEquivalentTo(expected.LanguageSettings);
+        settingsModel.DebugSettings.ShouldBeEquivalentTo(expected.DebugSettings);
+        settingsModel.ServerSettings.ShouldBeEquivalentTo(expected.ServerSettings);
+
+        // IntegrationsSettings has randomized fields; assert invariants and deterministic fields
+        settingsModel.IntegrationsSettings.Sonarr.ShouldBeEquivalentTo(expected.IntegrationsSettings.Sonarr);
+        settingsModel.IntegrationsSettings.Radarr.ShouldBeEquivalentTo(expected.IntegrationsSettings.Radarr);
+        settingsModel.IntegrationsSettings.DownloadClientUsername.ShouldBe(
+            expected.IntegrationsSettings.DownloadClientUsername
+        );
+        Guid.TryParse(settingsModel.IntegrationsSettings.ReaparrApiKey, out _).ShouldBeTrue();
+        settingsModel.IntegrationsSettings.DownloadClientPassword.Length.ShouldBe(32);
     }
 }

@@ -375,6 +375,27 @@
                     "title": "Sonarr-Verbindung einrichten"
                 }
             }
+        },
+        "radarr-integration": {
+            "connection-status": {
+                "connection-failed": "Es konnte keine Verbindung zu Radarr hergestellt werden. Bitte überprüfen Sie, ob die Basis-URL korrekt ist.",
+                "invalid-api-key": "Die Verbindung zu Radarr konnte hergestellt werden, aber der API-Schlüssel war ungültig.",
+                "success": "Reaparr konnte erfolgreich eine Verbindung zu Radarr herstellen!",
+                "unknown-connection-status": "Es konnte nicht festgestellt werden, was beim Testen der Verbindung mit Radarr schiefgelaufen ist.",
+                "url-is-invalid": "Die Radarr-Basis-URL ist ungültig, bitte überprüfen Sie sie erneut."
+            },
+            "configuration-status": {
+                "success": "Radarr wurde erfolgreich für die Zusammenarbeit mit Reaparr konfiguriert."
+            },
+            "nav-bar": {
+                "configure": {
+                    "button": "Radarr-Integration einrichten",
+                    "title": "Radarr-Integration konfigurieren"
+                },
+                "connection": {
+                    "title": "Radarr-Verbindung einrichten"
+                }
+            }
         }
     },
     "confirmation": {
@@ -690,6 +711,26 @@
                     "test-connection": {
                         "text": "Reaparr wird versuchen, mit der angegebenen Basis-URL und dem API-Schlüssel eine Verbindung zur Sonarr-Instanz herzustellen.",
                         "title": "Testen Sie die Verbindung zu Sonarr."
+                    }
+                },
+                "radarr": {
+                    "api-key-input": {
+                        "label": "Radarr API-Schlüssel",
+                        "text": "Gehen Sie in Radarr zu: Einstellungen → Allgemein → Sicherheit → API-Schlüssel, kopieren Sie den API-Schlüssel und fügen Sie ihn in dieses Feld ein.",
+                        "title": "API-Schlüssel von Radarr"
+                    },
+                    "base-url-input": {
+                        "label": "Radarr-Basis-URL",
+                        "text": "Basisadresse, unter der Ihre Radarr-Instanz erreichbar ist. Beispiel: http://localhost:7878 oder http://radarr:7878",
+                        "title": "Basis-URL zu Radarr"
+                    },
+                    "setup-configuration": {
+                        "text": "Reaparr richtet in Radarr einen Indexer und einen Download-Client ein, der es Radarr ermöglicht, Downloads auszulösen.\n\nWeitere Informationen finden Sie im [Sonarr/Radarr-Integrationsleitfaden](https://www.reaparr.rocks/guides/integration/sonarr-radarr).",
+                        "title": "Radarr-Konfiguration einrichten"
+                    },
+                    "test-connection": {
+                        "text": "Reaparr wird versuchen, mit der angegebenen Basis-URL und dem API-Schlüssel eine Verbindung zur Radarr-Instanz herzustellen.",
+                        "title": "Testen Sie die Verbindung zu Radarr."
                     }
                 }
             }

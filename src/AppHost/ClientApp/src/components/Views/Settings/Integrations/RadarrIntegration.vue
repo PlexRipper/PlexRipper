@@ -1,5 +1,5 @@
 <template>
-	<QSection header="Sonarr">
+	<QSection header="Radarr">
 		<q-stepper
 			ref="stepper"
 			v-model="step"
@@ -8,7 +8,7 @@
 			color="primary"
 			flat
 			header-nav>
-			<!-- Setup Sonarr Connection -->
+			<!-- Setup Radarr Connection -->
 			<QStep
 				:done="testSuccess"
 				:error="!testSuccess && testMessage !== ''"
@@ -16,27 +16,27 @@
 				done-color="positive"
 				done-icon="mdi-check"
 				icon="mdi-connection"
-				:title="t('components.sonarr-integration.nav-bar.connection.title')">
+				:title="t('components.radarr-integration.nav-bar.connection.title')">
 				<!-- Base URL -->
 				<HelpRow
 					:col-label="3"
-					:label="t('help.settings.integrations.sonarr.base-url-input.label')"
-					:text="t('help.settings.integrations.sonarr.base-url-input.text')"
-					:title="t('help.settings.integrations.sonarr.base-url-input.title')">
+					:label="t('help.settings.integrations.radarr.base-url-input.label')"
+					:text="t('help.settings.integrations.radarr.base-url-input.text')"
+					:title="t('help.settings.integrations.radarr.base-url-input.title')">
 					<QInput
-						v-model="settingsStore.integrationsSettings.sonarr.sonarrBaseUrl"
-						hint="http://localhost:8989" />
+						v-model="settingsStore.integrationsSettings.radarr.radarrBaseUrl"
+						hint="http://localhost:7878" />
 				</HelpRow>
 				<!-- API Key -->
 				<HelpRow
 					:col-label="3"
-					:label="t('help.settings.integrations.sonarr.api-key-input.label')"
-					:text="t('help.settings.integrations.sonarr.api-key-input.text')"
-					:title="t('help.settings.integrations.sonarr.api-key-input.title')">
+					:label="t('help.settings.integrations.radarr.api-key-input.label')"
+					:text="t('help.settings.integrations.radarr.api-key-input.text')"
+					:title="t('help.settings.integrations.radarr.api-key-input.title')">
 					<ApiKeyInputField
-						v-model="settingsStore.integrationsSettings.sonarr.sonarrApiKey"
+						v-model="settingsStore.integrationsSettings.radarr.radarrApiKey"
 						v-model:has-focus="passwordInputFocus"
-						cy="sonarr-api-key-input"
+						cy="radarr-api-key-input"
 						hint="a02a22a436504e15b7e46764b12825db"
 						show-strength />
 				</HelpRow>
@@ -44,35 +44,35 @@
 				<!-- Test Connection -->
 				<HelpRow
 					:col-label="3"
-					:text="t('help.settings.integrations.sonarr.test-connection.title')"
-					:title="t('help.settings.integrations.sonarr.test-connection.text')"
+					:text="t('help.settings.integrations.radarr.test-connection.title')"
+					:title="t('help.settings.integrations.radarr.test-connection.text')"
 					hide-label>
 					<BaseButton
 						:loading="isTesting"
 						icon="mdi-connection"
 						label="Test Connection"
-						@click="testSonarrConnection" />
+						@click="testRadarrConnection" />
 				</HelpRow>
 			</QStep>
-			<!-- Configure Sonarr Integration -->
+			<!-- Configure Radarr Integration -->
 			<QStep
-				:done="settingsStore.integrationsSettings.sonarr.isConfigured"
+				:done="settingsStore.integrationsSettings.radarr.isConfigured"
 				:name="2"
 				done-color="positive"
 				done-icon="mdi-check"
 				icon="mdi-cog"
-				:title="t('components.sonarr-integration.nav-bar.configure.title')">
-				<!-- Setup Sonarr Integration -->
+				:title="t('components.radarr-integration.nav-bar.configure.title')">
+				<!-- Setup Radarr Integration -->
 				<HelpRow
 					:col-label="3"
-					:text="t('help.settings.integrations.sonarr.setup-configuration.text')"
-					:title="t('help.settings.integrations.sonarr.setup-configuration.title')"
+					:text="t('help.settings.integrations.radarr.setup-configuration.text')"
+					:title="t('help.settings.integrations.radarr.setup-configuration.title')"
 					hide-label>
 					<BaseButton
 						:loading="isConfiguring"
 						icon="mdi-connection"
-						:label="t('components.sonarr-integration.nav-bar.configure.button')"
-						@click="configureSonarrSetup" />
+						:label="t('components.radarr-integration.nav-bar.configure.button')"
+						@click="configureRadarrSetup" />
 				</HelpRow>
 			</QStep>
 		</q-stepper>
@@ -114,39 +114,39 @@ const testMessage = ref('');
 const configuringSuccess = ref(false);
 const configuringMessage = ref('');
 
-function testSonarrConnection() {
-	if (settingsStore.integrationsSettings.sonarr.sonarrBaseUrl === '' || settingsStore.integrationsSettings.sonarr.sonarrApiKey === '') {
+function testRadarrConnection() {
+	if (settingsStore.integrationsSettings.radarr.radarrBaseUrl === '' || settingsStore.integrationsSettings.radarr.radarrApiKey === '') {
 		return;
 	}
 
 	set(isTesting, true);
 	set(testMessage, '');
-	useSubscription(integrationApi.testConnectionToSonarrEndpoint({
-		url: settingsStore.integrationsSettings.sonarr.sonarrBaseUrl,
-		apiKey: settingsStore.integrationsSettings.sonarr.sonarrApiKey,
+	useSubscription(integrationApi.testConnectionToRadarrEndpoint({
+		url: settingsStore.integrationsSettings.radarr.radarrBaseUrl,
+		apiKey: settingsStore.integrationsSettings.radarr.radarrApiKey,
 	}).subscribe(({ isSuccess, value, errors }) => {
 		if (isSuccess) {
 			switch (value?.result) {
 				case TestConnectionStatus.Success:
 					set(testSuccess, true);
-					set(testMessage, t('components.sonarr-integration.connection-status.success'));
-					set(step, settingsStore.integrationsSettings.sonarr.isConfigured ? 3 : 2);
+					set(testMessage, t('components.radarr-integration.connection-status.success'));
+					set(step, settingsStore.integrationsSettings.radarr.isConfigured ? 3 : 2);
 					break;
 				case TestConnectionStatus.InvalidApiKey:
 					set(testSuccess, false);
-					set(testMessage, t('components.sonarr-integration.connection-status.invalid-api-key'));
+					set(testMessage, t('components.radarr-integration.connection-status.invalid-api-key'));
 					break;
 				case TestConnectionStatus.ConnectionFailed:
 					set(testSuccess, false);
-					set(testMessage, t('components.sonarr-integration.connection-status.connection-failed'));
+					set(testMessage, t('components.radarr-integration.connection-status.connection-failed'));
 					break;
 				case TestConnectionStatus.UrlIsInvalid:
 					set(testSuccess, false);
-					set(testMessage, t('components.sonarr-integration.connection-status.url-is-invalid'));
+					set(testMessage, t('components.radarr-integration.connection-status.url-is-invalid'));
 					break;
 				default:
 					set(testSuccess, false);
-					set(testMessage, t('components.sonarr-integration.connection-status.unknown-connection-status'));
+					set(testMessage, t('components.radarr-integration.connection-status.unknown-connection-status'));
 					break;
 			}
 		} else {
@@ -157,17 +157,17 @@ function testSonarrConnection() {
 	}));
 }
 
-function configureSonarrSetup() {
+function configureRadarrSetup() {
 	set(isConfiguring, true);
 	set(testMessage, '');
-	useSubscription(integrationApi.configureSonarrIntegrationEndpoint({
-		url: settingsStore.integrationsSettings.sonarr.sonarrBaseUrl,
-		apiKey: settingsStore.integrationsSettings.sonarr.sonarrApiKey,
+	useSubscription(integrationApi.configureRadarrIntegrationEndpoint({
+		url: settingsStore.integrationsSettings.radarr.radarrBaseUrl,
+		apiKey: settingsStore.integrationsSettings.radarr.radarrApiKey,
 	}).pipe(tap(() => settingsStore.refreshSettings())).subscribe(({ isSuccess, errors }) => {
 		set(configuringSuccess, isSuccess);
 		set(isConfiguring, false);
 		if (isSuccess) {
-			set(configuringMessage, t('components.sonarr-integration.configuration-status.success'));
+			set(configuringMessage, t('components.radarr-integration.configuration-status.success'));
 			set(step, 3);
 		} else {
 			set(configuringMessage, errors.map((x) => x.metadata).join(', '));
@@ -176,10 +176,10 @@ function configureSonarrSetup() {
 }
 
 onBeforeMount(async () => {
-	testSonarrConnection();
-	if (settingsStore.integrationsSettings.sonarr.isConfigured) {
+	testRadarrConnection();
+	if (settingsStore.integrationsSettings.radarr.isConfigured) {
 		set(configuringSuccess, true);
-		set(configuringMessage, t('components.sonarr-integration.configuration-status.success'));
+		set(configuringMessage, t('components.radarr-integration.configuration-status.success'));
 	}
 });
 </script>

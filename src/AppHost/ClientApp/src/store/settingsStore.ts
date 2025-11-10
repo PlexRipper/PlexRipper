@@ -128,9 +128,9 @@ export const useSettingsStore = defineStore('SettingsStore', () => {
 			if (i > -1) {
 				state.serverSettings.data.splice(i, 1, {
 					machineIdentifier,
-					plexServerName: state.serverSettings.data[i].plexServerName,
+					plexServerName: state.serverSettings.data[i]!.plexServerName,
 					downloadSpeedLimit: downloadLimit,
-					hidden: state.serverSettings.data[i].hidden,
+					hidden: state.serverSettings.data[i]!.hidden,
 				});
 			}
 		},

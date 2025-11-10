@@ -60,7 +60,7 @@ export const useServerConnectionStore = defineStore('ServerConnection', () => {
 						if (index === -1) {
 							return res.value;
 						}
-						assign(state.serverConnections[index].latestConnectionStatus, res.value);
+						assign(state.serverConnections[index]!.latestConnectionStatus, res.value);
 					}
 					return res?.value ?? null;
 				}),

@@ -199,14 +199,19 @@ function setSelected(id: number, children: PlexMediaSlimDTO[], value: boolean) {
 }
 
 function onSelection(id: number, payload: ISelection) {
-	const i = get(selected).findIndex((x) => x.indexKey === id);
+	const list = get(selected) ?? [];
+	const i = list.findIndex((x) => x.indexKey === id);
 	if (i === -1) {
-		get(selected).push({ indexKey: id, keys: payload.keys, allSelected: payload.allSelected });
+		list.push({ indexKey: id, keys: payload.keys, allSelected: payload.allSelected });
 		return;
 	}
 
-	get(selected)[i].allSelected = payload.allSelected;
-	get(selected)[i].keys = payload.keys;
+	const item = list[i];
+	if (!item)
+		return;
+
+	item.allSelected = payload.allSelected;
+	item.keys = payload.keys;
 }
 
 // endregion

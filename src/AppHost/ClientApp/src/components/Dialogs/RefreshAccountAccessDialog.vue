@@ -216,7 +216,7 @@ const options = computed((): QIconTooltipData[] =>
 function onOpened(data: RefreshPlexAccountAccessRapportDTO[]) {
 	if (data && data.length > 0) {
 		set(refreshRapports, data);
-		set(tab, data[0].plexAccountId);
+		set(tab, data[0]!.plexAccountId);
 	}
 }
 

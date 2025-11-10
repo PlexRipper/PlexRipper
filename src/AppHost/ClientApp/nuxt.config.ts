@@ -45,7 +45,6 @@ export default defineNuxtConfig({
 			link: [
 				{ rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
 			],
-			noscript: [{ children: 'JavaScript is required' }],
 		},
 	},
 
@@ -62,7 +61,9 @@ export default defineNuxtConfig({
 			isDocker: process.env.IS_DOCKER === 'true' || false,
 		},
 	},
-
+	dir: {
+		public: 'src/public',
+	},
 	srcDir: 'src',
 
 	alias: {

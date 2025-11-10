@@ -20,12 +20,12 @@ const countdown = computed(() => {
 	const [hours, minutes, secondsWithMilliseconds] = props.value.split(':');
 
 	// Further split seconds from milliseconds
-	const [seconds] = secondsWithMilliseconds.split('.');
+	const [seconds] = secondsWithMilliseconds!.split('.');
 
 	// Convert to integers for further calculations if needed
-	const hoursInt = parseInt(hours, 10);
-	const minutesInt = parseInt(minutes, 10);
-	const secondsInt = parseInt(seconds, 10);
+	const hoursInt = parseInt(hours!, 10);
+	const minutesInt = parseInt(minutes!, 10);
+	const secondsInt = parseInt(seconds!, 10);
 
 	const result = '';
 

@@ -70,7 +70,8 @@ export const useAccountDialogStore = defineStore('AccountDialogStore', () => {
 		title: string;
 		plexId: number;
 		uuid: string;
-		authenticationToken: string;
+		authenticationToken?: string;
+		customAuthenticationToken?: string;
 		isValidated: boolean;
 		validatedAt?: string | null;
 		is2Fa: boolean;
@@ -83,6 +84,7 @@ export const useAccountDialogStore = defineStore('AccountDialogStore', () => {
 			plexId: accountData.plexId,
 			uuid: accountData.uuid,
 			authenticationToken: accountData.authenticationToken,
+			customAuthenticationToken: accountData.customAuthenticationToken,
 			isValidated: accountData.isValidated,
 			validatedAt: accountData.validatedAt,
 			is2Fa: accountData.is2Fa,
@@ -221,8 +223,8 @@ export const useAccountDialogStore = defineStore('AccountDialogStore', () => {
 			if (state.isNewAccount) {
 				const accountData = get(getters.getAccountData);
 				return accountStore.createPlexAccount({
-					customAuthenticationToken: accountData.customAuthenticationToken,
-					authenticationToken: accountData.authenticationToken,
+					customAuthenticationToken: accountData.customAuthenticationToken ?? '',
+					authenticationToken: accountData.authenticationToken ?? '',
 					clientId: accountData.clientId,
 					displayName: accountData.displayName,
 					email: accountData.email,

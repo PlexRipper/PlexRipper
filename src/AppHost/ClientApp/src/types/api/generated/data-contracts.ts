@@ -952,8 +952,9 @@ export interface PlexServerStatusDTO {
 }
 
 export interface RadarrSettingsDTO {
-  apiKey: string;
-  baseUrl: string;
+  isConfigured: boolean;
+  radarrApiKey: string;
+  radarrBaseUrl: string;
 }
 
 export enum RefreshDataType {
@@ -1361,6 +1362,7 @@ export interface SettingsModelDTO {
 }
 
 export interface SonarrSettingsDTO {
+  isConfigured: boolean;
   sonarrApiKey: string;
   sonarrBaseUrl: string;
 }

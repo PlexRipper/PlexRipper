@@ -12,7 +12,7 @@
 		<!--	Help text	-->
 		<template #default>
 			<div class="i18n-formatting">
-				{{ helpText ? helpText : missingHelpText }}
+				<VueMarkdown :source="helpText ? helpText : missingHelpText" />
 			</div>
 		</template>
 		<!--	Close action	-->
@@ -31,6 +31,7 @@ import { get, set } from '@vueuse/core';
 import type { IHelp } from '@interfaces';
 import { DialogType } from '@enums';
 import { useI18n } from 'vue-i18n';
+import VueMarkdown from 'vue-markdown-render';
 
 const { t } = useI18n();
 const helpTitle = ref('');

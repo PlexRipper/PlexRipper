@@ -18,6 +18,7 @@
       <ProjectReference Include="..\Data.Contracts\Data.Contracts.csproj" />
       <ProjectReference Include="..\Identity.Contracts\Identity.Contracts.csproj" />
       <ProjectReference Include="..\Domain\Domain.csproj" />
+      <ProjectReference Include="..\PublicAPI.Contracts\PublicAPI.Contracts.csproj" />
       <ProjectReference Include="..\Settings.Contracts\Settings.Contracts.csproj" />
     </ItemGroup>
         <ItemGroup>

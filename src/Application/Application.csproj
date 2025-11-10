@@ -33,6 +33,7 @@
         <ProjectReference Include="..\FileSystem.Contracts\FileSystem.Contracts.csproj" />
         <ProjectReference Include="..\Identity.Contracts\Identity.Contracts.csproj" />
         <ProjectReference Include="..\PlexApi.Contracts\PlexApi.Contracts.csproj" />
+        <ProjectReference Include="..\PublicAPI.Contracts\PublicAPI.Contracts.csproj" />
         <ProjectReference Include="..\Settings.Contracts\Settings.Contracts.csproj" />
         <ProjectReference Include="..\Settings\Settings.csproj" />
     </ItemGroup>

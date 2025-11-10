@@ -46,6 +46,8 @@ export const useSettingsStore = defineStore('SettingsStore', () => {
 		},
 		languageSettings: { language: 'en-US' },
 		integrationsSettings: {
+			downloadClientUsername: '',
+			downloadClientPassword: '',
 			reaparrApiKey: '',
 			sonarr: {
 				sonarrApiKey: '',

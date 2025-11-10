@@ -14,8 +14,8 @@ import type { RequestParams } from "./http-client";
 import { ContentType } from "./http-client";
 
 import type {
+  BaseResultDTO,
   ConfigureSonarrIntegrationRequest,
-  ConfigureSonarrIntegrationResponse,
   TestConnectionToSonarrEndpointResponse,
 } from "./data-contracts";
 
@@ -37,7 +37,7 @@ export class Integration {
     params: RequestParams = {},
   ) =>
     from(
-      Axios.request<ConfigureSonarrIntegrationResponse>({
+      Axios.request<BaseResultDTO>({
         url: `/api/Integration/Sonarr/Configure`,
         method: "POST",
         data: data,
@@ -46,7 +46,7 @@ export class Integration {
         format: "json",
         ...params,
       }),
-    ).pipe(apiCheckPipe<ConfigureSonarrIntegrationResponse>);
+    ).pipe(apiCheckPipe<BaseResultDTO>);
 
   /**
    * No description

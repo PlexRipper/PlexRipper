@@ -54,14 +54,6 @@ export interface ConfigureSonarrIntegrationRequest {
   url: string;
 }
 
-export interface ConfigureSonarrIntegrationResponse {
-  /** @format int32 */
-  downloadClientId: number;
-  /** @format int32 */
-  indexerId: number;
-  status: string;
-}
-
 export interface ConfirmationSettingsDTO {
   askDownloadEpisodeConfirmation: boolean;
   askDownloadMovieConfirmation: boolean;
@@ -427,6 +419,8 @@ export interface InspectPlexServerJobUpdateDTO {
 }
 
 export interface IntegrationsSettingsDTO {
+  downloadClientPassword: string;
+  downloadClientUsername: string;
   radarr: RadarrSettingsDTO;
   reaparrApiKey: string;
   sonarr: SonarrSettingsDTO;
@@ -994,15 +988,6 @@ export interface ResultDTOOfBoolean {
   value: boolean;
 }
 
-export interface ResultDTOOfConfigureSonarrIntegrationResponse {
-  errors: ErrorDTO[];
-  isSuccess: boolean;
-  /** @format int32 */
-  statusCode: number;
-  successes: SuccessDTO[];
-  value?: ConfigureSonarrIntegrationResponse | null;
-}
-
 export interface ResultDTOOfCountResponseDTO {
   errors: ErrorDTO[];
   isSuccess: boolean;
@@ -1505,8 +1490,8 @@ export interface ValidatePlexTokenEndpointRequest {
 
 export interface ValidatePlexTokenEndpointResponse {
   is2Fa: boolean;
-  authenticationToken: string;
   clientId: string;
+  customAuthenticationToken: string;
   email: string;
   isUnAuthorized: boolean;
   isValidated: boolean;

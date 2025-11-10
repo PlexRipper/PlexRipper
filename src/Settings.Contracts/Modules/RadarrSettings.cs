@@ -34,4 +34,11 @@ public record RadarrSettings : BaseSettingsModule<RadarrSettings>, IRadarrSettin
         get => _radarrApiKey;
         set => SetProperty(ref _radarrApiKey, value);
     }
+
+    public bool IsValidUrl() =>
+        !string.IsNullOrWhiteSpace(RadarrBaseUrl)
+        && Uri.TryCreate(RadarrBaseUrl, UriKind.Absolute, out var uriResult)
+        && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
+
+    public bool IsValidApiKey() => !string.IsNullOrWhiteSpace(RadarrApiKey);
 }

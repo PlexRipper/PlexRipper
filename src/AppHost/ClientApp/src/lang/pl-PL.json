@@ -362,6 +362,18 @@
                 "success": "Reaparr pomyślnie nawiązał połączenie z Sonarr!",
                 "unknown-connection-status": "Nie udało się ustalić, co poszło nie tak podczas testowania połączenia z Sonarr",
                 "url-is-invalid": "Bazowy adres URL Sonarr jest nieprawidłowy, sprawdź ponownie."
+            },
+            "configuration-status": {
+                "success": "Sonarr został pomyślnie skonfigurowany do współpracy z Reaparr"
+            },
+            "nav-bar": {
+                "configure": {
+                    "button": "Konfiguracja integracji Sonarr",
+                    "title": "Konfiguruj integrację Sonarr"
+                },
+                "connection": {
+                    "title": "Konfiguracja połączenia Sonarr"
+                }
             }
         }
     },
@@ -670,6 +682,14 @@
                         "label": "Podstawowy adres URL Sonarr",
                         "text": "Adres bazowy, pod którym można uzyskać dostęp do swojej instancji Sonarr. Przykład: http://localhost:8989 lub http://sonarr:8989",
                         "title": "Podstawowy adres URL do Sonarr"
+                    },
+                    "setup-configuration": {
+                        "text": "Reaparr skonfiguruje w Sonarr klienta indeksowania i pobierania, który następnie umożliwi Sonarrowi inicjowanie pobierania.\n\nWięcej informacji można znaleźć w [Przewodniku integracji Sonarr/Radarr](https://www.reaparr.rocks/guides/integration/sonarr-radarr).",
+                        "title": "Konfiguracja Sonarr"
+                    },
+                    "test-connection": {
+                        "text": "Reaparr spróbuje nawiązać połączenie z instancją Sonarr przy użyciu podanego adresu URL bazowego i klucza API.",
+                        "title": "Przetestuj połączenie z Sonarr"
                     }
                 }
             }

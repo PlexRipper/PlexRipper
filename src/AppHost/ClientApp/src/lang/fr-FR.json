@@ -362,6 +362,18 @@
                 "success": "Reaparr peut se connecter avec succès à Sonarr !",
                 "unknown-connection-status": "Impossible de déterminer ce qui s'est mal passé lors du test de connexion avec Sonarr",
                 "url-is-invalid": "L'URL de base de Sonarr est invalide, veuillez vérifier à nouveau."
+            },
+            "configuration-status": {
+                "success": "Sonarr a été configuré avec succès pour fonctionner avec Reaparr"
+            },
+            "nav-bar": {
+                "configure": {
+                    "button": "Configuration de l'intégration Sonarr",
+                    "title": "Configurer l'intégration de Sonarr"
+                },
+                "connection": {
+                    "title": "Configurer la connexion Sonarr"
+                }
             }
         }
     },
@@ -670,6 +682,14 @@
                         "label": "URL de base de Sonarr",
                         "text": "Adresse de base où votre instance Sonarr est accessible. Exemple: http://localhost:8989 ou http://sonarr:8989",
                         "title": "URL de base vers Sonarr"
+                    },
+                    "setup-configuration": {
+                        "text": "Reaparr configure un indexeur et un client de téléchargement dans Sonarr, permettant ainsi à Sonarr de déclencher les téléchargements.\n\nPour plus d'informations, consultez le [Guide d'intégration Sonarr/Radarr](https://www.reaparr.rocks/guides/integration/sonarr-radarr).",
+                        "title": "Configurer Sonarr"
+                    },
+                    "test-connection": {
+                        "text": "Reaparr tentera de se connecter à l'instance Sonarr avec l'URL de base et la clé API fournies.",
+                        "title": "Tester la connexion à Sonarr"
                     }
                 }
             }

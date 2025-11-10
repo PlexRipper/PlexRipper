@@ -50,12 +50,14 @@ export const useSettingsStore = defineStore('SettingsStore', () => {
 			downloadClientPassword: '',
 			reaparrApiKey: '',
 			sonarr: {
+				isConfigured: false,
 				sonarrApiKey: '',
 				sonarrBaseUrl: '',
 			},
 			radarr: {
-				apiKey: '',
-				baseUrl: '',
+				isConfigured: false,
+				radarrApiKey: '',
+				radarrBaseUrl: '',
 			},
 		},
 		serverSettings: {

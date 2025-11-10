@@ -116,14 +116,14 @@ public class TestConnectionToSonarrEndpoint
             return;
         }
 
-		var reason = httpResponse.ReasonPhrase ?? $"HTTP {(int)httpResponse.StatusCode}";
-		var responseBody = await httpResponse.Content.ReadAsStringAsync(ct);
-		if (!string.IsNullOrWhiteSpace(responseBody))
-		{
-			var truncatedBody = responseBody.Length > 512 ? responseBody.Substring(0, 512) + "..." : responseBody;
-			reason = $"{reason} | Body: {truncatedBody}";
-		}
-		await SendFluentResult(Result.Fail(reason).LogError(), ct);
+        var reason = httpResponse.ReasonPhrase ?? $"HTTP {(int)httpResponse.StatusCode}";
+        var responseBody = await httpResponse.Content.ReadAsStringAsync(ct);
+        if (!string.IsNullOrWhiteSpace(responseBody))
+        {
+            var truncatedBody = responseBody.Length > 512 ? responseBody.Substring(0, 512) + "..." : responseBody;
+            reason = $"{reason} | Body: {truncatedBody}";
+        }
+        await SendFluentResult(Result.Fail(reason).LogError(), ct);
     }
 
     private async Task SendTestResult(TestConnectionStatus status, CancellationToken ct)

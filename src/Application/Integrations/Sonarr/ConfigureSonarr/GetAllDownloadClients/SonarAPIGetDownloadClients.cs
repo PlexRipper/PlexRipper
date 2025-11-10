@@ -30,13 +30,13 @@ public class SonarApiGetDownloadClientsCommandHandler
             var response = await _client.SendAsync(httpRequest, cancellationToken);
             var body = await response.Content.ReadAsStringAsync(cancellationToken);
 
-			if (!response.IsSuccessStatusCode)
-			{
-				return Result
-					.Fail($"Failed to get download clients from Sonarr. StatusCode: {response.StatusCode}")
-					.WithError(body)
-					.LogError();
-			}
+            if (!response.IsSuccessStatusCode)
+            {
+                return Result
+                    .Fail($"Failed to get download clients from Sonarr. StatusCode: {response.StatusCode}")
+                    .WithError(body)
+                    .LogError();
+            }
 
             var list = JsonSerializer.Deserialize<List<DownloadClientResourceDTO>>(
                 body,

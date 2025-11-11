@@ -325,7 +325,7 @@ export interface DownloadWorkerLogDTO {
 export interface ErrorDTO {
   message: string;
   metadata: Record<string, any>;
-  reasons: IError[];
+  reasons: ErrorDTO[];
 }
 
 /** the dto used to send an error response to the client */
@@ -411,12 +411,6 @@ export interface GeneratePlexTokenResponse {
   isUnAuthorized: boolean;
   needsVerificationCode: boolean;
   plexAuthToken: string;
-}
-
-/** Definition of an error */
-export interface IError {
-  /** Reasons of the error */
-  reasons?: IError[] | null;
 }
 
 export interface InspectPlexServerJobUpdateDTO {

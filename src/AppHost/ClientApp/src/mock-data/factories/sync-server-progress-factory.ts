@@ -15,7 +15,7 @@ export function generateSyncServerMediaProgress({
 	plexLibraryIds: number[];
 }): SyncServerMediaProgress {
 	const progress = times(plexLibraryIds.length, (i) => generateLibraryProgress({
-		libraryId: plexLibraryIds[i],
+		libraryId: plexLibraryIds[i]!,
 		received: progressIndex * 100,
 		total: 1000,
 	}));

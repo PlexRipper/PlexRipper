@@ -69,7 +69,8 @@ export const useLibraryStore = defineStore('LibraryStore', () => {
 				if (result.isSuccess) {
 					const index = state.libraries.findIndex((x) => x.id === libraryId);
 					if (index > -1) {
-						state.libraries.splice(index, 1, { ...state.libraries[index], defaultDestinationId: folderPathId });
+						const updated = { ...(state.libraries[index] as PlexLibraryDTO), defaultDestinationId: folderPathId } as PlexLibraryDTO;
+						state.libraries.splice(index, 1, updated);
 					}
 				}
 			});

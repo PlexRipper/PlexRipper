@@ -209,7 +209,7 @@ const helpStore = useHelpStore();
 const alertStore = useAlertStore();
 const dialogStore = useDialogStore();
 
-const folderPath = generateDefaultFolderPaths({})[0];
+const folderPath = generateDefaultFolderPaths({})[0]!;
 
 function openDownloadConfirmationDialog(): void {
 	const demo: DownloadMediaDTO[] = [

@@ -44,7 +44,8 @@ export const useNotificationsStore = defineStore('NotificationsStore', () => {
 		hideNotification(id: number): void {
 			const i = state.notifications.findIndex((x) => x.id === id);
 			if (i > -1) {
-				state.notifications.splice(i, i, { ...state.notifications[i], hidden: true });
+				const current = state.notifications[i]!;
+				state.notifications.splice(i, 1, { ...current, hidden: true });
 			}
 			notificationApi
 				.setNotificationVisibilityEndpoint({

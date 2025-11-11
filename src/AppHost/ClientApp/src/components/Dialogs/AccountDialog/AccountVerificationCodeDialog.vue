@@ -66,16 +66,16 @@
 import VOtpInput from 'vue3-otp-input';
 import { set } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
-import type { IError } from '@dto';
 import { DialogType } from '@enums';
 import { useAccountDialogStore, useI18n } from '#imports';
+import type { ErrorDTO } from '@dto';
 
 const { t } = useI18n();
 
 const accountDialogStore = useAccountDialogStore();
 
 const loading = ref(false);
-const errors = ref<IError[]>([]);
+const errors = ref<ErrorDTO[]>([]);
 
 function onComplete() {
 	set(loading, true);

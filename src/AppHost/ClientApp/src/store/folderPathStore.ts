@@ -125,11 +125,13 @@ export const useFolderPathStore = defineStore('FolderPathStore', () => {
 				return folderPathGroups;
 			}
 
+			const defaultPaths = folderPathGroups[0]!.paths;
+
 			// Movie Paths
 			folderPathGroups.push({
 				header: t('components.folder-paths-overview.movie.header'),
 				paths: state.folderPaths.filter(
-					(x) => x.folderType === FolderType.MovieFolder && !folderPathGroups[0].paths.some((y) => y.id === x.id),
+					(x) => x.folderType === FolderType.MovieFolder && !defaultPaths.some((y) => y.id === x.id),
 				),
 				mediaType: PlexMediaType.Movie,
 				folderType: FolderType.MovieFolder,
@@ -142,7 +144,7 @@ export const useFolderPathStore = defineStore('FolderPathStore', () => {
 			folderPathGroups.push({
 				header: t('components.folder-paths-overview.tv-show.header'),
 				paths: state.folderPaths.filter(
-					(x) => x.folderType === FolderType.TvShowFolder && !folderPathGroups[0].paths.some((y) => y.id === x.id),
+					(x) => x.folderType === FolderType.TvShowFolder && !defaultPaths.some((y) => y.id === x.id),
 				),
 				mediaType: PlexMediaType.TvShow,
 				folderType: FolderType.TvShowFolder,

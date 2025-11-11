@@ -1,13 +1,11 @@
-import nuxtConfig from './nuxt.config';
 import { defineConfig } from 'vitest/config';
 import { defineVitestProject } from '@nuxt/test-utils/config';
+import tsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig({
-	resolve: {
-		alias: {
-			...nuxtConfig.alias,
-		},
-	},
+	plugins: [
+		tsconfigPaths(),
+	],
 	test: {
 		projects: [
 			await defineVitestProject({

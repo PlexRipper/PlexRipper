@@ -24,6 +24,7 @@
 
 <script setup lang="ts">
 import { tap } from 'rxjs/operators';
+import { useSubscription } from '@vueuse/rxjs';
 
 const serverStore = useServerStore();
 

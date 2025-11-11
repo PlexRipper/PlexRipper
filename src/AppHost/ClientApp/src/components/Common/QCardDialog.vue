@@ -69,6 +69,7 @@
 <script setup lang="ts" generic="T">
 import { get, set, useElementSize } from '@vueuse/core';
 import { useDialogStore } from '@store';
+import { useSubscription } from '@vueuse/rxjs';
 
 const dialogStore = useDialogStore();
 

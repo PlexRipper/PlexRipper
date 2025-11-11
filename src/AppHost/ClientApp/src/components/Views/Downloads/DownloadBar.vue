@@ -23,6 +23,7 @@
 <script setup lang="ts">
 import { useDownloadStore } from '@store';
 import { DownloadActions } from '@dto';
+import { useSubscription } from '@vueuse/rxjs';
 
 const downloadStore = useDownloadStore();
 

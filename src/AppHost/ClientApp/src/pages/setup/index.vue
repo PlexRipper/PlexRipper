@@ -66,7 +66,8 @@
 import Log from 'consola';
 import { SetupPanelType } from '@enums';
 import { switchMap, tap } from 'rxjs/operators';
-import { useSettingsStore, useRouter, useI18n } from '#imports';
+import { useRouter, useI18n } from '#imports';
+import { useSubscription } from '@vueuse/rxjs';
 
 const { t } = useI18n();
 const router = useRouter();

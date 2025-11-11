@@ -66,7 +66,8 @@
 import { set, useClipboard } from '@vueuse/core';
 import { DialogType } from '@enums';
 import VOtpInput from 'vue3-otp-input';
-import { useAccountDialogStore, useSubscription } from '#imports';
+import { useAccountDialogStore } from '#imports';
+import { useSubscription } from '@vueuse/rxjs';
 
 const accountDialogStore = useAccountDialogStore();
 const { copy } = useClipboard({ legacy: true });

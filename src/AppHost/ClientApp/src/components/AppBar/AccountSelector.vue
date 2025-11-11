@@ -65,7 +65,7 @@
 import { useSettingsStore, useAccountStore, useAuthenticationStore } from '@store';
 import { useI18n } from 'vue-i18n';
 import { tap } from 'rxjs/operators';
-import { useSubscription } from '#imports';
+import { useSubscription } from '@vueuse/rxjs';
 
 const { t } = useI18n();
 const settingsStore = useSettingsStore();

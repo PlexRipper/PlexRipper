@@ -10,12 +10,7 @@ export default defineNuxtConfig({
 		'@primevue/nuxt-module',
 		'@nuxtjs/i18n',
 		'@nuxt/test-utils/module',
-		[
-			'@pinia/nuxt',
-			{
-				autoImports: ['defineStore', 'acceptHMRUpdate'],
-			},
-		],
+		'@pinia/nuxt',
 		'@nuxt/eslint',
 	],
 	ssr: false,
@@ -33,8 +28,7 @@ export default defineNuxtConfig({
 	imports: {
 		dirs: ['store'],
 	},
-	devtools: { enabled: false },
-
+	devtools: { enabled: true },
 	app: {
 		head: {
 			title: 'Reaparr',
@@ -163,6 +157,10 @@ export default defineNuxtConfig({
 		},
 		vueI18n: './config/vueI18n.config.ts',
 		strategy: 'no_prefix',
+	},
+	pinia: {
+		// https://pinia.vuejs.org/ssr/nuxt.html#Auto-imports
+		storesDirs: ['./src/store/**'],
 	},
 	primevue: {
 		importTheme: { from: '@/assets/scss/primevue/reaparr-theme.ts' },

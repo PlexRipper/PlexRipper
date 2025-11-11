@@ -62,6 +62,21 @@ export function generateSettingsModel({
 				};
 			}),
 		},
+		integrationsSettings: {
+			downloadClientUsername: '',
+			downloadClientPassword: '',
+			reaparrApiKey: '',
+			sonarr: {
+				isConfigured: false,
+				sonarrApiKey: '',
+				sonarrBaseUrl: '',
+			},
+			radarr: {
+				isConfigured: false,
+				radarrApiKey: '',
+				radarrBaseUrl: '',
+			},
+		},
 		...partialData,
 	};
 }

@@ -112,17 +112,22 @@ export const useSettingsStore = defineStore('SettingsStore', () => {
 				}),
 			),
 		setSettingsState(settings: SettingsModelDTO) {
-			state.generalSettings = settings.generalSettings;
-			state.debugSettings = settings.debugSettings;
-			state.confirmationSettings = settings.confirmationSettings;
-			state.dateTimeSettings = settings.dateTimeSettings;
-			state.displaySettings = settings.displaySettings;
-			state.downloadManagerSettings = settings.downloadManagerSettings;
-			state.languageSettings = settings.languageSettings;
-			state.serverSettings = settings.serverSettings;
-			state.integrationsSettings = settings.integrationsSettings;
-		},
+			Object.assign(state.generalSettings, settings.generalSettings);
+			Object.assign(state.debugSettings, settings.debugSettings);
+			Object.assign(state.confirmationSettings, settings.confirmationSettings);
+			Object.assign(state.dateTimeSettings, settings.dateTimeSettings);
+			Object.assign(state.displaySettings, settings.displaySettings);
+			Object.assign(state.downloadManagerSettings, settings.downloadManagerSettings);
+			Object.assign(state.languageSettings, settings.languageSettings);
 
+			// Arrays: replace contents, not the array instance
+			state.serverSettings.data.splice(0, state.serverSettings.data.length, ...settings.serverSettings.data);
+
+			// Keep containers stable, then merge deeply
+			Object.assign(state.integrationsSettings, settings.integrationsSettings);
+			Object.assign(state.integrationsSettings.sonarr, settings.integrationsSettings.sonarr);
+			Object.assign(state.integrationsSettings.radarr, settings.integrationsSettings.radarr);
+		},
 		updateDownloadLimit(machineIdentifier: string, downloadLimit: number) {
 			const i = state.serverSettings.data.findIndex((server) => server.machineIdentifier === machineIdentifier);
 			if (i > -1) {

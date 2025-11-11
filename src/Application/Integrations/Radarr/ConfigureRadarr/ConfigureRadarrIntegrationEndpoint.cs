@@ -83,3 +83,4 @@ public class ConfigureRadarrIntegrationEndpoint : BaseEndpoint<ConfigureRadarrIn
         await SendFluentResult(Result.Ok(), ct);
     }
 }
+

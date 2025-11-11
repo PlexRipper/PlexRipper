@@ -122,3 +122,4 @@ public class TestConnectionToRadarrEndpoint
         await SendFluentResult(Result.Ok(new TestConnectionToRadarrEndpointResponse(status)), ct);
     }
 }
+

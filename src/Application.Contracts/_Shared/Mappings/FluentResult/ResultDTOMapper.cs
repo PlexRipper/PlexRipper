@@ -39,7 +39,7 @@ public static class ResultDTOMapper
             .Select(x => new ErrorDTO
             {
                 Message = x.Message,
-                Reasons = x.Reasons,
+                Reasons = x.Reasons.ToErrorDTOs().ToList(),
                 Metadata = x.Metadata,
             })
             .ToList();

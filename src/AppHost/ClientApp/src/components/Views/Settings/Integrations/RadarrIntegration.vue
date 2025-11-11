@@ -15,7 +15,7 @@
 				:name="1"
 				done-color="positive"
 				done-icon="mdi-check"
-				icon="mdi-connection"
+				active-icon="mdi-connection"
 				:title="t('components.radarr-integration.nav-bar.connection.title')">
 				<!-- Base URL -->
 				<HelpRow
@@ -61,6 +61,8 @@
 				done-color="positive"
 				done-icon="mdi-check"
 				icon="mdi-cog"
+				active-icon="mdi-cog"
+				:disable="testSuccess === false"
 				:title="t('components.radarr-integration.nav-bar.configure.title')">
 				<!-- Setup Radarr Integration -->
 				<HelpRow
@@ -80,12 +82,13 @@
 		<QRow>
 			<QCol>
 				<QAlert
-					v-if="configuringMessage"
+					v-if="configuringSuccess !== null"
 					:type="configuringSuccess ? NotificationLevel.Success : NotificationLevel.Error">
-					{{ configuringMessage }}
+					{{ configuringSuccess ? configuringMessage : formatErrorResponse(error) }}
 				</QAlert>
+				<!-- Always returns 200 -->
 				<QAlert
-					v-else-if="testMessage"
+					v-else-if="testSuccess !== null"
 					:type="testSuccess ? NotificationLevel.Success : NotificationLevel.Error">
 					{{ testMessage }}
 				</QAlert>
@@ -99,8 +102,10 @@ import { ref } from 'vue';
 import { set } from '@vueuse/core';
 import { useSettingsStore } from '@store';
 import { integrationApi } from '@api';
-import { NotificationLevel, TestConnectionStatus } from '@dto';
+import { type BaseResultDTO, NotificationLevel, TestConnectionStatus } from '@dto';
 import { tap } from 'rxjs/operators';
+import { useSubscription } from '@vueuse/rxjs';
+import { formatErrorResponse } from '@composables';
 
 const settingsStore = useSettingsStore();
 const { t } = useI18n();
@@ -113,6 +118,7 @@ const testSuccess = ref(false);
 const testMessage = ref('');
 const configuringSuccess = ref(false);
 const configuringMessage = ref('');
+const error = ref<BaseResultDTO | null>(null);
 
 function testRadarrConnection() {
 	if (settingsStore.integrationsSettings.radarr.radarrBaseUrl === '' || settingsStore.integrationsSettings.radarr.radarrApiKey === '') {
@@ -124,9 +130,9 @@ function testRadarrConnection() {
 	useSubscription(integrationApi.testConnectionToRadarrEndpoint({
 		url: settingsStore.integrationsSettings.radarr.radarrBaseUrl,
 		apiKey: settingsStore.integrationsSettings.radarr.radarrApiKey,
-	}).subscribe(({ isSuccess, value, errors }) => {
-		if (isSuccess) {
-			switch (value?.result) {
+	}).subscribe((response) => {
+		if (response.isSuccess) {
+			switch (response.value?.result) {
 				case TestConnectionStatus.Success:
 					set(testSuccess, true);
 					set(testMessage, t('components.radarr-integration.connection-status.success'));
@@ -151,7 +157,7 @@ function testRadarrConnection() {
 			}
 		} else {
 			set(testSuccess, false);
-			set(testMessage, errors.map((x) => x.metadata).join(', '));
+			set(error, response);
 		}
 		set(isTesting, false);
 	}));
@@ -163,14 +169,14 @@ function configureRadarrSetup() {
 	useSubscription(integrationApi.configureRadarrIntegrationEndpoint({
 		url: settingsStore.integrationsSettings.radarr.radarrBaseUrl,
 		apiKey: settingsStore.integrationsSettings.radarr.radarrApiKey,
-	}).pipe(tap(() => settingsStore.refreshSettings())).subscribe(({ isSuccess, errors }) => {
-		set(configuringSuccess, isSuccess);
+	}).pipe(tap(() => settingsStore.refreshSettings())).subscribe((response) => {
+		set(configuringSuccess, response.isSuccess);
 		set(isConfiguring, false);
-		if (isSuccess) {
+		if (response.isSuccess) {
 			set(configuringMessage, t('components.radarr-integration.configuration-status.success'));
 			set(step, 3);
 		} else {
-			set(configuringMessage, errors.map((x) => x.metadata).join(', '));
+			set(error, response);
 		}
 	}));
 }
@@ -183,3 +189,4 @@ onBeforeMount(async () => {
 	}
 });
 </script>
+

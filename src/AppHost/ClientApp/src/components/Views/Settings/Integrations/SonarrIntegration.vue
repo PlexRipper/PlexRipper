@@ -10,12 +10,13 @@
 			header-nav>
 			<!-- Setup Sonarr Connection -->
 			<QStep
-				:done="testSuccess"
+				:done="testSuccess === true"
 				:error="!testSuccess && testMessage !== ''"
 				:name="1"
 				done-color="positive"
 				done-icon="mdi-check"
 				icon="mdi-connection"
+				active-icon="mdi-connection"
 				:title="t('components.sonarr-integration.nav-bar.connection.title')">
 				<!-- Base URL -->
 				<HelpRow
@@ -61,6 +62,8 @@
 				done-color="positive"
 				done-icon="mdi-check"
 				icon="mdi-cog"
+				active-icon="mdi-cog"
+				:disable="testSuccess === false"
 				:title="t('components.sonarr-integration.nav-bar.configure.title')">
 				<!-- Setup Sonarr Integration -->
 				<HelpRow
@@ -80,12 +83,13 @@
 		<QRow>
 			<QCol>
 				<QAlert
-					v-if="configuringMessage"
+					v-if="configuringSuccess !== null"
 					:type="configuringSuccess ? NotificationLevel.Success : NotificationLevel.Error">
-					{{ configuringMessage }}
+					{{ configuringSuccess ? configuringMessage : formatErrorResponse(error) }}
 				</QAlert>
+				<!-- Always returns 200 -->
 				<QAlert
-					v-else-if="testMessage"
+					v-else-if="testSuccess !== null"
 					:type="testSuccess ? NotificationLevel.Success : NotificationLevel.Error">
 					{{ testMessage }}
 				</QAlert>
@@ -99,8 +103,10 @@ import { ref } from 'vue';
 import { set } from '@vueuse/core';
 import { useSettingsStore } from '@store';
 import { integrationApi } from '@api';
-import { NotificationLevel, TestConnectionStatus } from '@dto';
+import { type BaseResultDTO, NotificationLevel, TestConnectionStatus } from '@dto';
 import { tap } from 'rxjs/operators';
+import { formatErrorResponse } from '@/composables';
+import { useSubscription } from '@vueuse/rxjs';
 
 const settingsStore = useSettingsStore();
 const { t } = useI18n();
@@ -109,10 +115,11 @@ const step = ref(1);
 const passwordInputFocus = ref(false);
 const isTesting = ref(false);
 const isConfiguring = ref(false);
-const testSuccess = ref(false);
+const testSuccess = ref<boolean | null>(null);
 const testMessage = ref('');
-const configuringSuccess = ref(false);
-const configuringMessage = ref('');
+const configuringSuccess = ref<boolean | null>(null);
+const configuringMessage = ref<string>('');
+const error = ref<BaseResultDTO | null>(null);
 
 function testSonarrConnection() {
 	if (settingsStore.integrationsSettings.sonarr.sonarrBaseUrl === '' || settingsStore.integrationsSettings.sonarr.sonarrApiKey === '') {
@@ -124,9 +131,9 @@ function testSonarrConnection() {
 	useSubscription(integrationApi.testConnectionToSonarrEndpoint({
 		url: settingsStore.integrationsSettings.sonarr.sonarrBaseUrl,
 		apiKey: settingsStore.integrationsSettings.sonarr.sonarrApiKey,
-	}).subscribe(({ isSuccess, value, errors }) => {
-		if (isSuccess) {
-			switch (value?.result) {
+	}).subscribe((response) => {
+		if (response.isSuccess) {
+			switch (response.value?.result) {
 				case TestConnectionStatus.Success:
 					set(testSuccess, true);
 					set(testMessage, t('components.sonarr-integration.connection-status.success'));
@@ -151,7 +158,7 @@ function testSonarrConnection() {
 			}
 		} else {
 			set(testSuccess, false);
-			set(testMessage, errors.map((x) => x.metadata).join(', '));
+			set(error, response);
 		}
 		set(isTesting, false);
 	}));
@@ -163,14 +170,14 @@ function configureSonarrSetup() {
 	useSubscription(integrationApi.configureSonarrIntegrationEndpoint({
 		url: settingsStore.integrationsSettings.sonarr.sonarrBaseUrl,
 		apiKey: settingsStore.integrationsSettings.sonarr.sonarrApiKey,
-	}).pipe(tap(() => settingsStore.refreshSettings())).subscribe(({ isSuccess, errors }) => {
-		set(configuringSuccess, isSuccess);
+	}).pipe(tap(() => settingsStore.refreshSettings())).subscribe((response) => {
+		set(configuringSuccess, response.isSuccess);
 		set(isConfiguring, false);
-		if (isSuccess) {
+		if (response.isSuccess) {
 			set(configuringMessage, t('components.sonarr-integration.configuration-status.success'));
 			set(step, 3);
 		} else {
-			set(configuringMessage, errors.map((x) => x.metadata).join(', '));
+			set(error, response);
 		}
 	}));
 }

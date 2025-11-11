@@ -16,6 +16,7 @@ import { map, tap } from 'rxjs/operators';
 import { defer, forkJoin, type Observable, of } from 'rxjs';
 import { useLibraryStore, useSettingsStore } from '@store';
 import { getVideoQualityColor, translateVideoQuality } from '@composables';
+import { useSubscription } from '@vueuse/rxjs';
 
 interface IMediaOverviewStoreState {
 	libraryId: number;

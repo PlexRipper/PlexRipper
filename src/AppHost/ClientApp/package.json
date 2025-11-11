@@ -79,7 +79,6 @@
     "cypress": "^15.6.0",
     "cypress-signalr-mock": "^1.6.0",
     "cypress-vite": "^1.8.0",
-    "happy-dom": "^15.11.7",
     "nuxt": "^4.2.1",
     "nuxt-quasar-ui": "^2.1.13",
     "sass": "^1.93.3",

@@ -2,6 +2,7 @@ import Log from 'consola';
 import { defineStore, acceptHMRUpdate } from 'pinia';
 import { of, Subject, type Observable } from 'rxjs';
 import { debounceTime, switchMap, tap } from 'rxjs/operators';
+import { reactive, computed, toRefs } from 'vue';
 import { PlexMediaType, type SettingsModelDTO, ViewMode } from '@dto';
 
 import type { ISetupResult } from '@interfaces';
@@ -183,7 +184,7 @@ export const useSettingsStore = defineStore('SettingsStore', () => {
 		},
 		$reset() {
 			_settingsUpdated.complete();
-			Object.assign(state, cloneDeep(defaultState));
+			actions.setSettingsState(cloneDeep(defaultState));
 		},
 	};
 

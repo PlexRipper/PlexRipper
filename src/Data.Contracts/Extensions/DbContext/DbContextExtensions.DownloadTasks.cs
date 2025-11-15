@@ -474,7 +474,8 @@ public static partial class DbContextExtensions
     public static async Task UpdateDownloadFileTransferProgress(
         this IReaparrDbContext dbContext,
         DownloadTaskKey key,
-        IDownloadFileTransferProgress progress
+        IDownloadFileTransferProgress progress,
+        CancellationToken cancellationToken = default
     )
     {
         switch (key.Type)
@@ -482,19 +483,25 @@ public static partial class DbContextExtensions
             case DownloadTaskType.MovieData:
                 await dbContext
                     .DownloadTaskMovieFile.Where(x => x.Id == key.Id)
-                    .ExecuteUpdateAsync(p =>
-                        p.SetProperty(x => x.FileTransferSpeed, progress.FileTransferSpeed)
-                            .SetProperty(x => x.FileDataTransferred, progress.FileDataTransferred)
-                            .SetProperty(x => x.CurrentFileTransferBytesOffset, progress.CurrentFileTransferBytesOffset)
+                    .ExecuteUpdateAsync(
+                        p =>
+                            p.SetProperty(x => x.FileTransferSpeed, progress.FileTransferSpeed)
+                                .SetProperty(x => x.FileDataTransferred, progress.FileDataTransferred)
+                                .SetProperty(x => x.CurrentFileTransferBytesOffset,
+                                    progress.CurrentFileTransferBytesOffset),
+                        cancellationToken
                     );
                 break;
             case DownloadTaskType.EpisodeData:
                 await dbContext
                     .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == key.Id)
-                    .ExecuteUpdateAsync(p =>
-                        p.SetProperty(x => x.FileTransferSpeed, progress.FileTransferSpeed)
-                            .SetProperty(x => x.FileDataTransferred, progress.FileDataTransferred)
-                            .SetProperty(x => x.CurrentFileTransferBytesOffset, progress.CurrentFileTransferBytesOffset)
+                    .ExecuteUpdateAsync(
+                        p =>
+                            p.SetProperty(x => x.FileTransferSpeed, progress.FileTransferSpeed)
+                                .SetProperty(x => x.FileDataTransferred, progress.FileDataTransferred)
+                                .SetProperty(x => x.CurrentFileTransferBytesOffset,
+                                    progress.CurrentFileTransferBytesOffset),
+                        cancellationToken
                     );
                 break;
             case DownloadTaskType.Movie:
@@ -506,7 +513,7 @@ public static partial class DbContextExtensions
                         "{Name} of type {Type} is not supported in {MethodName}",
                         nameof(DownloadTaskType),
                         key.Type,
-                        nameof(UpdateDownloadProgress)
+                        nameof(UpdateDownloadFileTransferProgress)
                     );
                 return;
             default:

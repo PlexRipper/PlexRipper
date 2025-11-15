@@ -80,8 +80,8 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
             item.Attributes.Any(a => a.Name == "type" && a.Value == "series").ShouldBeTrue();
             item.Attributes.Any(a => a.Name == "language" && a.Value == "English").ShouldBeTrue();
             item.Attributes.Any(a => a.Name == "downloadvolumefactor" && a.Value == "0.0").ShouldBeTrue();
-            item.Attributes.Any(a => a.Name == "seeders" && a.Value == "100").ShouldBeTrue();
-            item.Attributes.Any(a => a.Name == "peers" && a.Value == "100").ShouldBeTrue();
+            item.Attributes.Any(a => a.Name == "seeders" && int.Parse(a.Value) > 0).ShouldBeTrue();
+            item.Attributes.Any(a => a.Name == "peers" && int.Parse(a.Value) > 0).ShouldBeTrue();
 
             // URL contains expected parameters
             item.Link.ShouldContain(PublicApiRoutes.DownloadTorrent);

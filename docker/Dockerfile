@@ -18,7 +18,7 @@ WORKDIR /tmp/ClientApp
 
 ## Copy the package.json and install the dependencies
 COPY ./src/AppHost/ClientApp/package.json ./src/AppHost/ClientApp/bun.lock ./
-RUN bun install --frozen-lockfile
+RUN bun install
 
 ## Copy the project files
 COPY ./src/AppHost/ClientApp/ ./

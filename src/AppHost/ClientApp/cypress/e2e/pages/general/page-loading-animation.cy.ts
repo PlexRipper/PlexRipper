@@ -5,6 +5,6 @@ describe('page load process', () => {
 		});
 
 		cy.visitEmptyPage();
-		cy.get('.page-load-overlay-logo').should('exist');
+		cy.get('#__nuxt-loader').should('exist');
 	});
 });

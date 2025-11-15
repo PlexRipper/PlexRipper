@@ -56,6 +56,7 @@ export default defineNuxtConfig({
 		},
 	},
 	dir: {
+		app: 'app',
 		public: 'src/public',
 	},
 	srcDir: 'src',

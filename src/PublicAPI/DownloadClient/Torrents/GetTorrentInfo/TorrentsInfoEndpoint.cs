@@ -134,19 +134,32 @@ public sealed class TorrentsInfoEndpoint : Endpoint<TorrentsInfoEndpointRequest,
     {
         switch (status)
         {
-            case DownloadStatus.Downloading or DownloadStatus.DownloadFinished:
+            case DownloadStatus.Downloading:
                 return "downloading";
-            case DownloadStatus.Paused or DownloadStatus.MovePaused:
-                return "pausedDL";
             case DownloadStatus.Queued:
                 return "queuedDL";
+            case DownloadStatus.Stopped or DownloadStatus.Paused:
+                return "pausedDL";
             case DownloadStatus.Completed:
                 return "uploading"; // Completed and seeding
-            case DownloadStatus.Error or DownloadStatus.MoveError:
+            case DownloadStatus.Deleted:
+            case DownloadStatus.Error:
+            case DownloadStatus.MoveError:
+            case DownloadStatus.ServerUnreachable:
                 return "error";
+            case DownloadStatus.Moving:
+                return "moving";
+            case DownloadStatus.MovePaused:
+                return "pausedUP";
+            case DownloadStatus.MoveFinished:
+            case DownloadStatus.DownloadFinished:
+                return "completed";
+            case DownloadStatus.Unknown:
             default:
-                _log.Warning("Unknown DownloadStatus {DownloadStatus} encountered when mapping to qBittorrent state", status);
-                return "unknown";
+                _log.Here()
+                    .Warning("Unknown DownloadStatus {DownloadStatus} encountered when mapping to qBittorrent state",
+                        status);
+                return "stalledDL";
         }
     }
 }

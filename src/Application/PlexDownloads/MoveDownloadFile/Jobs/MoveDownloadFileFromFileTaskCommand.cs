@@ -30,6 +30,7 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
     private readonly ICommandExecutor _commandExecutor;
     private readonly IEventPublisher _eventPublisher;
     private readonly IReaparrDbContext _dbContext;
+
     /// <summary>
     /// A separate DbContext instance for progress updates to avoid concurrency issues.
     /// </summary>

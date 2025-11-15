@@ -1,6 +1,9 @@
 import { defineConfig } from 'vitest/config';
 import { defineVitestProject } from '@nuxt/test-utils/config';
 import tsconfigPaths from 'vite-tsconfig-paths';
+import { fileURLToPath } from 'node:url';
+
+const globalSetupFile = fileURLToPath(new URL('./tests/_base/global-auth-setup.ts', import.meta.url));
 
 export default defineConfig({
 	plugins: [
@@ -13,6 +16,7 @@ export default defineConfig({
 					name: 'unit',
 					include: ['tests/unit/**/**/*.{test,spec}.ts'],
 					environment: 'nuxt',
+					setupFiles: [globalSetupFile],
 				},
 			}),
 			await defineVitestProject({
@@ -20,6 +24,7 @@ export default defineConfig({
 					name: 'nuxt',
 					include: ['tests/nuxt/**/**/*.test.ts'],
 					environment: 'nuxt',
+					setupFiles: [globalSetupFile],
 				},
 			}),
 		],

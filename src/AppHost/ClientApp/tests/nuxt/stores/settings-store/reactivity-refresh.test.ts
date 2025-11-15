@@ -128,7 +128,3 @@ describe('SettingsStore.refreshSettings() deep reactivity', () => {
 		expect(radarrSettingsRef).toBe(settingsStore.integrationsSettings.radarr);
 	});
 });
-
-
-
-

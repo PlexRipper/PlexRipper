@@ -1,5 +1,6 @@
 import Log from 'consola';
 import { acceptHMRUpdate, defineStore } from 'pinia';
+import { reactive, computed, toRefs } from 'vue';
 import { map, switchMap, tap } from 'rxjs/operators';
 import type { Observable } from 'rxjs';
 import { of } from 'rxjs';
@@ -55,11 +56,31 @@ export const useDownloadStore = defineStore('DownloadStore', () => {
 			return actions.executeDownloadCommand(action, downloadTaskIds);
 		},
 		executeDownloadCommand(action: DownloadActions, downloadTaskIds: string[]): Observable<BaseResultDTO> {
+			if (downloadTaskIds.length === 0) {
+				Log.error(`No downloadTaskIds provided for action: ${action}`);
+				return of({
+					errors: [],
+					isSuccess: false,
+					statusCode: 400,
+					successes: [],
+				} as BaseResultDTO);
+			}
+
 			const downloadTaskId = downloadTaskIds[0];
 			// TODO verify if we need to re-fetch the download list after each action
+			if (!downloadTaskId && action !== DownloadActions.Clear && action !== DownloadActions.Delete) {
+				Log.error(`No downloadTaskId provided for action: ${action}`);
+				return of({
+					errors: [],
+					isSuccess: false,
+					statusCode: 400,
+					successes: [],
+				} as BaseResultDTO);
+			}
+			const id = downloadTaskId as string;
 			switch (action) {
 				case DownloadActions.Pause:
-					return downloadApi.pauseDownloadTaskEndpoint(downloadTaskId);
+					return downloadApi.pauseDownloadTaskEndpoint(id);
 				case DownloadActions.Clear:
 					return downloadApi
 						.clearCompletedDownloadTasksEndpoint(downloadTaskIds)
@@ -69,11 +90,11 @@ export const useDownloadStore = defineStore('DownloadStore', () => {
 						.deleteDownloadTaskEndpoint(downloadTaskIds)
 						.pipe(switchMap(actions.fetchDownloadList));
 				case DownloadActions.Stop:
-					return downloadApi.stopDownloadTaskEndpoint(downloadTaskId);
+					return downloadApi.stopDownloadTaskEndpoint(id);
 				case DownloadActions.Restart:
-					return downloadApi.restartDownloadTaskEndpoint(downloadTaskId);
+					return downloadApi.restartDownloadTaskEndpoint(id);
 				case DownloadActions.Start:
-					return downloadApi.startDownloadTaskEndpoint(downloadTaskId);
+					return downloadApi.startDownloadTaskEndpoint(id);
 				default:
 					Log.error(`Action: ${action} does not have a assigned command with payload: ${downloadTaskIds}`);
 					return of();
@@ -92,12 +113,15 @@ export const useDownloadStore = defineStore('DownloadStore', () => {
 				return;
 			}
 
+			const existing = state.serverDownloads[i]!;
 			const merged: DownloadProgressDTO[] = values(
-				merge(keyBy(state.serverDownloads[i].downloads, 'id'), keyBy(serverDownloadProgress.downloads, 'id')),
+				merge(keyBy(existing.downloads ?? [], 'id'), keyBy(serverDownloadProgress.downloads ?? [], 'id')),
 			);
 
 			state.serverDownloads.splice(i, 1, {
-				...state.serverDownloads[i],
+				...existing,
+				id: existing.id,
+				downloadableTasksCount: existing.downloadableTasksCount,
 				downloads: merged,
 			});
 		},
@@ -149,9 +173,10 @@ export const useDownloadStore = defineStore('DownloadStore', () => {
 				actions.setupSelection(serverId);
 				i = state.selected.length - 1;
 			}
+			const current = state.selected[i]!;
 			state.selected.splice(i, 1, {
-				...state.selected[i],
-				selection: value ? clone(state.selected[i].allSelection) : {},
+				...current,
+				selection: value ? clone(current.allSelection) : {},
 			});
 		},
 		updateSelectedDownloadTasks(serverId: number, selection: IPTreeTableSelectionKeys): void {
@@ -160,10 +185,11 @@ export const useDownloadStore = defineStore('DownloadStore', () => {
 				actions.setupSelection(serverId);
 				i = state.selected.length - 1;
 			}
+			const current = state.selected[i]!;
 			state.selected.splice(i, 1, {
 				plexServerId: serverId,
-				allSelection: state.selected[i].allSelection,
-				maxSelectionCount: state.selected[i].maxSelectionCount,
+				allSelection: current.allSelection,
+				maxSelectionCount: current.maxSelectionCount,
 				selection,
 			});
 		},

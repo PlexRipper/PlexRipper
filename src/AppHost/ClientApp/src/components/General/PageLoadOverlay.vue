@@ -15,7 +15,7 @@
 </template>
 
 <script setup lang="ts">
-withDefaults(defineProps<{ loading: boolean }>(), {
+withDefaults(defineProps<{ loading?: boolean }>(), {
 	loading: true,
 });
 </script>

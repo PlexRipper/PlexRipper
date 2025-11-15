@@ -1,7 +1,6 @@
 using FastEndpoints;
 using FluentValidation;
 using Reaparr.Application.Contracts;
-using Reaparr.PublicAPI.SearchTvShow;
 
 namespace Reaparr.PublicAPI;
 
@@ -69,7 +68,16 @@ public sealed class TorznabEndpoint : Endpoint<TorznabEndpointRequest>
                 await Send.XmlAsync(searchTvShowResponse, cancellationToken: ct);
                 break;
             case "movie":
-                throw new NotImplementedException();
+                var searchMovieResponse = await _commandExecutor.Send(new SearchMovieCommand
+                {
+                    Query = req.Query ?? string.Empty,
+                    IMDB_ID = req.ImdbId ?? string.Empty,
+                    TMDB_ID = req.TmdbId ?? 0,
+                    Limit = req.Limit ?? 100,
+                    Offset = req.Offset ?? 0,
+                }, ct);
+                await Send.XmlAsync(searchMovieResponse, cancellationToken: ct);
+                break;
             default:
                 _log.Here().Error("Received unknown Torznab request type: {Type}", req.Type);
                 await Send.ErrorsAsync(cancellation: ct);

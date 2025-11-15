@@ -1,5 +1,6 @@
 import Log from 'consola';
 import { acceptHMRUpdate, defineStore } from 'pinia';
+import { reactive, computed, toRefs } from 'vue';
 import type { Observable } from 'rxjs';
 import { of } from 'rxjs';
 import { get } from '@vueuse/core';
@@ -32,9 +33,8 @@ export const useLocalizationStore = defineStore('LocalizationStore', () => {
 				return;
 			}
 
-			// @ts-expect-error - This is a valid assignment, typescript is being retarted here.
+			// @ts-expect-error - This is a valid assignment, TypeScript is being retarted here.
 			state.i18nRef = i18n;
-			Log.info('Localization Options:', get(getters.getLanguageLocaleOptions));
 			actions.changeLanguageLocale(get(i18n.locale));
 		},
 		changeLanguageLocale(isoCode: Locale) {

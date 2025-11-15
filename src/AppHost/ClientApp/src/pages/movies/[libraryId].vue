@@ -1,7 +1,6 @@
 <template>
 	<QPage>
 		<MediaOverview
-
 			:library-id="libraryId"
 			:media-type="PlexMediaType.Movie" />
 	</QPage>
@@ -13,5 +12,5 @@ import { PlexMediaType } from '@dto';
 
 const route = useRoute();
 
-const libraryId = +route.params.libraryId;
+const libraryId = +route.params.libraryId!;
 </script>

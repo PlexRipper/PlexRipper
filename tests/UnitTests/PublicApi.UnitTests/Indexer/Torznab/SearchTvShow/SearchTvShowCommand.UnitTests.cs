@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Reaparr.PublicAPI;
-using Reaparr.PublicAPI.SearchTvShow;
 
 namespace PublicApi.UnitTests;
 
@@ -81,8 +80,8 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
             item.Attributes.Any(a => a.Name == "type" && a.Value == "series").ShouldBeTrue();
             item.Attributes.Any(a => a.Name == "language" && a.Value == "English").ShouldBeTrue();
             item.Attributes.Any(a => a.Name == "downloadvolumefactor" && a.Value == "0.0").ShouldBeTrue();
-            item.Attributes.Any(a => a.Name == "seeders" && a.Value == "100").ShouldBeTrue();
-            item.Attributes.Any(a => a.Name == "peers" && a.Value == "100").ShouldBeTrue();
+            item.Attributes.Any(a => a.Name == "seeders" && int.Parse(a.Value) > 0).ShouldBeTrue();
+            item.Attributes.Any(a => a.Name == "peers" && int.Parse(a.Value) > 0).ShouldBeTrue();
 
             // URL contains expected parameters
             item.Link.ShouldContain(PublicApiRoutes.DownloadTorrent);
@@ -127,7 +126,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
             Episode = episodeNumber,
             Limit = 100,
             Offset = 0,
-            IMDB_ID = imdb,
+            IMDB_ID = imdb.Replace("tt", ""),
             TMDB_ID = 0,
             TVDB_ID = 0,
         };
@@ -728,7 +727,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
             Episode = episodeNumber,
             Limit = 100,
             Offset = 0,
-            IMDB_ID = imdb,
+            IMDB_ID = imdb.Replace("tt", ""),
             TMDB_ID = tmdb,
             TVDB_ID = tvdb,
         };

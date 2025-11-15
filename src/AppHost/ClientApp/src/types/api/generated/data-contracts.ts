@@ -49,6 +49,11 @@ export interface CheckAllConnectionStatusUpdateDTO {
   plexServersWithConnectionIds: Record<string, number[]>;
 }
 
+export interface ConfigureRadarrIntegrationRequest {
+  apiKey: string;
+  url: string;
+}
+
 export interface ConfigureSonarrIntegrationRequest {
   apiKey: string;
   url: string;
@@ -320,7 +325,7 @@ export interface DownloadWorkerLogDTO {
 export interface ErrorDTO {
   message: string;
   metadata: Record<string, any>;
-  reasons: IError[];
+  reasons: ErrorDTO[];
 }
 
 /** the dto used to send an error response to the client */
@@ -406,12 +411,6 @@ export interface GeneratePlexTokenResponse {
   isUnAuthorized: boolean;
   needsVerificationCode: boolean;
   plexAuthToken: string;
-}
-
-/** Definition of an error */
-export interface IError {
-  /** Reasons of the error */
-  reasons?: IError[] | null;
 }
 
 export interface InspectPlexServerJobUpdateDTO {
@@ -952,8 +951,9 @@ export interface PlexServerStatusDTO {
 }
 
 export interface RadarrSettingsDTO {
-  apiKey: string;
-  baseUrl: string;
+  isConfigured: boolean;
+  radarrApiKey: string;
+  radarrBaseUrl: string;
 }
 
 export enum RefreshDataType {
@@ -1258,6 +1258,15 @@ export interface ResultDTOOfString {
   value?: string | null;
 }
 
+export interface ResultDTOOfTestConnectionToRadarrEndpointResponse {
+  errors: ErrorDTO[];
+  isSuccess: boolean;
+  /** @format int32 */
+  statusCode: number;
+  successes: SuccessDTO[];
+  value?: TestConnectionToRadarrEndpointResponse | null;
+}
+
 export interface ResultDTOOfTestConnectionToSonarrEndpointResponse {
   errors: ErrorDTO[];
   isSuccess: boolean;
@@ -1361,6 +1370,7 @@ export interface SettingsModelDTO {
 }
 
 export interface SonarrSettingsDTO {
+  isConfigured: boolean;
   sonarrApiKey: string;
   sonarrBaseUrl: string;
 }
@@ -1397,6 +1407,10 @@ export enum TestConnectionStatus {
   UrlIsInvalid = "UrlIsInvalid",
   ConnectionFailed = "ConnectionFailed",
   InvalidApiKey = "InvalidApiKey",
+}
+
+export interface TestConnectionToRadarrEndpointResponse {
+  result: TestConnectionStatus;
 }
 
 export interface TestConnectionToSonarrEndpointResponse {

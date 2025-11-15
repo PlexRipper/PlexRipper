@@ -1,4 +1,5 @@
-import { acceptHMRUpdate } from 'pinia';
+import { acceptHMRUpdate, defineStore } from 'pinia';
+import { reactive, toRefs } from 'vue';
 import type { Observable } from 'rxjs';
 import { of } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
@@ -69,7 +70,8 @@ export const useLibraryStore = defineStore('LibraryStore', () => {
 				if (result.isSuccess) {
 					const index = state.libraries.findIndex((x) => x.id === libraryId);
 					if (index > -1) {
-						state.libraries.splice(index, 1, { ...state.libraries[index], defaultDestinationId: folderPathId });
+						const updated = { ...(state.libraries[index] as PlexLibraryDTO), defaultDestinationId: folderPathId } as PlexLibraryDTO;
+						state.libraries.splice(index, 1, updated);
 					}
 				}
 			});

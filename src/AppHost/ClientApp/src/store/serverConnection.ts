@@ -1,4 +1,5 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
+import { reactive, computed, toRefs } from 'vue';
 import type { Observable } from 'rxjs';
 import { of } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
@@ -60,7 +61,7 @@ export const useServerConnectionStore = defineStore('ServerConnection', () => {
 						if (index === -1) {
 							return res.value;
 						}
-						assign(state.serverConnections[index].latestConnectionStatus, res.value);
+						assign(state.serverConnections[index]!.latestConnectionStatus, res.value);
 					}
 					return res?.value ?? null;
 				}),

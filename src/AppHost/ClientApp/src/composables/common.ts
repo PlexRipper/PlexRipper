@@ -1,5 +1,5 @@
 import { orderBy } from 'lodash-es';
-import type { PlexServerConnectionDTO } from '@dto';
+import type { BaseResultDTO, PlexServerConnectionDTO } from '@dto';
 
 export function sortPlexServerConnections(connections: PlexServerConnectionDTO[]) {
 	const keysOrder: (keyof PlexServerConnectionDTO)[] = ['local', 'isPlexTvConnection'];
@@ -26,4 +26,20 @@ export function waitForElement(parentElement: HTMLElement | null, selector: stri
 
 export function discordInviteLink() {
 	return 'https://discord.com/invite/Qa3BtxN77g';
+}
+
+export function formatErrorResponse(res: BaseResultDTO | null): string {
+	if (!res) {
+		return '❌ An unknown error occurred.';
+	}
+
+	const header = `❌ Error ${res.statusCode}`;
+	const messages = res.errors.map((err) => {
+		const reasons
+			= err.reasons && err.reasons.length
+				? `\n   ↳ Reasons: ${err.reasons.map((r) => r?.message ?? String(r)).join(', ')}`
+				: '';
+		return `• ${err.message}${reasons}`;
+	});
+	return [header, ...messages].join('\n');
 }

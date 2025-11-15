@@ -1,6 +1,6 @@
 <template>
 	<QPage>
 		<SonarrIntegration />
-		<QSection header="Radarr" />
+		<RadarrIntegration />
 	</QPage>
 </template>

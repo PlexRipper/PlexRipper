@@ -26,7 +26,7 @@ import type { QExpansionListProps } from '@interfaces/components/QExpansionListP
 import { useSettingsStore, useDownloadStore } from '@store';
 import { useI18n } from 'vue-i18n';
 
-withDefaults(defineProps<{ showDrawer: boolean }>(), {
+withDefaults(defineProps<{ showDrawer?: boolean }>(), {
 	showDrawer: false,
 });
 const settingsStore = useSettingsStore();

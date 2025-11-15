@@ -31,10 +31,20 @@ public static class SettingsModelToDTOMapper
         };
 
     public static SonarrSettings ToModel(this SonarrSettingsDTO dto) =>
-        new() { SonarrBaseUrl = dto.SonarrBaseUrl, SonarrApiKey = dto.SonarrApiKey };
+        new()
+        {
+            IsConfigured = dto.IsConfigured,
+            SonarrBaseUrl = dto.SonarrBaseUrl,
+            SonarrApiKey = dto.SonarrApiKey,
+        };
 
     public static RadarrSettings ToModel(this RadarrSettingsDTO dto) =>
-        new() { BaseUrl = dto.BaseUrl, ApiKey = dto.ApiKey };
+        new()
+        {
+            RadarrBaseUrl = dto.RadarrBaseUrl,
+            RadarrApiKey = dto.RadarrApiKey,
+            IsConfigured = dto.IsConfigured,
+        };
 
     public static GeneralSettingsModule ToModel(this GeneralSettingsDTO dto) =>
         new()
@@ -123,10 +133,20 @@ public static class SettingsModelToDTOMapper
         };
 
     public static SonarrSettingsDTO ToDTO(this SonarrSettings module) =>
-        new() { SonarrBaseUrl = module.SonarrBaseUrl, SonarrApiKey = module.SonarrApiKey };
+        new()
+        {
+            SonarrBaseUrl = module.SonarrBaseUrl,
+            SonarrApiKey = module.SonarrApiKey,
+            IsConfigured = module.IsConfigured,
+        };
 
     public static RadarrSettingsDTO ToDTO(this RadarrSettings module) =>
-        new() { BaseUrl = module.BaseUrl, ApiKey = module.ApiKey };
+        new()
+        {
+            RadarrBaseUrl = module.RadarrBaseUrl,
+            RadarrApiKey = module.RadarrApiKey,
+            IsConfigured = module.IsConfigured,
+        };
 
     public static GeneralSettingsDTO ToDTO(this GeneralSettingsModule module) =>
         new()

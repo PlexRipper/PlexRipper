@@ -49,7 +49,7 @@ interface SelectionCheck {
 
 const props = withDefaults(
 	defineProps<{
-		nodes: QTreeViewTableItem[];
+		nodes?: QTreeViewTableItem[];
 		columns: QTreeViewTableHeader[];
 		labelKey?: string;
 		defaultExpandAll?: boolean;

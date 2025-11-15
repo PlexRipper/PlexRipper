@@ -41,7 +41,7 @@ const showApiKey = ref(false);
 
 withDefaults(defineProps<{
 	hideMaskButton?: boolean;
-	cy: string;
+	cy?: string;
 	showStrength?: boolean;
 	minPasswordLength?: number;
 	disableValidation?: boolean;

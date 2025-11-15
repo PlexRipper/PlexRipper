@@ -34,13 +34,8 @@ public class SettingsModule : Module
             .Register(c => c.Resolve<IUserSettings>().IntegrationsSettings)
             .As<IIntegrationsSettings>()
             .SingleInstance();
-        builder
-            .Register(c => c.Resolve<IUserSettings>().IntegrationsSettings.Sonarr)
-            .As<ISonarrSettings>()
-            .SingleInstance();
-        builder
-            .Register(c => c.Resolve<IUserSettings>().IntegrationsSettings.Radarr)
-            .As<IRadarrSettings>()
-            .SingleInstance();
+        // These are non-singleton because they should be re-resolved on each request to get the latest settings
+        builder.Register(c => c.Resolve<IUserSettings>().IntegrationsSettings.Sonarr).As<ISonarrSettings>();
+        builder.Register(c => c.Resolve<IUserSettings>().IntegrationsSettings.Radarr).As<IRadarrSettings>();
     }
 }

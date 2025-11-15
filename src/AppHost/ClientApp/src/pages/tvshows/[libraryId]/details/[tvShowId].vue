@@ -143,8 +143,8 @@ const mediaCountFormatted = computed(() => {
 	return 'unknown media count';
 });
 
-const libraryId = computed(() => +route.params.libraryId);
-const mediaId = computed(() => +route.params.tvShowId);
+const libraryId = computed(() => +(route.params.libraryId as string));
+const mediaId = computed(() => +(route.params.tvShowId as string));
 
 function onAction(event: IMediaOverviewBarActions) {
 	if (event === 'back') {
@@ -153,7 +153,11 @@ function onAction(event: IMediaOverviewBarActions) {
 }
 
 listenMediaOverviewDownloadCommand((command) => {
-	const type: PlexMediaType = command[0].type;
+	const [first] = command;
+	if (!first) {
+		return;
+	}
+	const type: PlexMediaType = first.type;
 	if (settingsStore.isConfirmationEnabled(type)) {
 		dialogStore.openMediaConfirmationDownloadDialog(command);
 	} else {

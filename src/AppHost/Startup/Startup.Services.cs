@@ -13,6 +13,7 @@ using NSwag;
 using NSwag.Generation.Processors.Security;
 using Reaparr.Application;
 using Reaparr.Application.Contracts;
+using Reaparr.Data;
 using Reaparr.Environment;
 using Reaparr.Identity;
 using Reaparr.Identity.Contracts;
@@ -33,6 +34,8 @@ public static partial class Startup
     /// <param name="env"> The <see cref="IWebHostEnvironment"/> instance to configure.</param>
     public static void ConfigureServices(this IServiceCollection services, IWebHostEnvironment env)
     {
+        services.AddDbContextFactory<ReaparrDbContext>();
+
         // This has to always be first
         services.AddCors(options =>
         {
@@ -198,6 +201,7 @@ public static partial class Startup
             });
 
         services.RegisterSonarrHttpClient();
+        services.RegisterRadarrHttpClient();
 
         // Removing all registered IHttpMessageHandlerBuilderFilter instances to disable built-in HttpClient logging
         services.RemoveAll<IHttpMessageHandlerBuilderFilter>();

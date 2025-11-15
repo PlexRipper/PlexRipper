@@ -5,6 +5,7 @@ using AppAny.Quartz.EntityFrameworkCore.Migrations.SQLite;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.DependencyInjection;
 using Reaparr.Data.Contracts;
 using Reaparr.Environment;
 
@@ -172,6 +173,7 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
         DatabaseName = databaseName;
     }
 
+    [ActivatorUtilitiesConstructor]
     public ReaparrDbContext(IPathProvider pathProvider)
         : this(pathProvider.DatabaseName) { }
 

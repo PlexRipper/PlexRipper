@@ -1,5 +1,6 @@
 import { cloneDeep, isEqual, isNumber, orderBy, sortBy, uniqueId } from 'lodash-es';
 import { acceptHMRUpdate, defineStore } from 'pinia';
+import { reactive, computed, toRefs } from 'vue';
 import { get } from '@vueuse/core';
 import {
 	type PlexMediaMetadataDTO,
@@ -16,6 +17,7 @@ import { map, tap } from 'rxjs/operators';
 import { defer, forkJoin, type Observable, of } from 'rxjs';
 import { useLibraryStore, useSettingsStore } from '@store';
 import { getVideoQualityColor, translateVideoQuality } from '@composables';
+import { useSubscription } from '@vueuse/rxjs';
 
 interface IMediaOverviewStoreState {
 	libraryId: number;

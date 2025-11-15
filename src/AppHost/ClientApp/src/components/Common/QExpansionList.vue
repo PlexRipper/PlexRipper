@@ -50,7 +50,7 @@
 <script setup lang="ts">
 import type { QExpansionListProps } from '@interfaces/components/QExpansionListProps';
 
-withDefaults(defineProps<{ items: QExpansionListProps[] }>(), {
+withDefaults(defineProps<{ items?: QExpansionListProps[] }>(), {
 	items: () => [],
 });
 </script>

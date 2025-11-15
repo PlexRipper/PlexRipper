@@ -98,7 +98,7 @@ export function generateDefaultFolderPaths({ config = {} }: { config?: Partial<M
 		defaultFolderPaths.push(
 			generateFolderPath({
 				id: i + 1,
-				type: mediaTypes[i],
+				type: mediaTypes[i] || PlexMediaType.Unknown,
 				partialData: {
 					folderType: folderTypes[i],
 					isDefault: true,

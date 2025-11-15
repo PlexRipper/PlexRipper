@@ -1,11 +1,12 @@
 import Log from 'consola';
 import { acceptHMRUpdate, defineStore } from 'pinia';
+import { reactive, computed, toRefs } from 'vue';
 import { get } from '@vueuse/core';
 import { tap, catchError, switchMap } from 'rxjs/operators';
 import { type Observable, of } from 'rxjs';
 import { DialogType } from '@enums';
 import { plexAccountApi } from '@api';
-import type { IError, PlexAccountDTO } from '@dto';
+import type { ErrorDTO, PlexAccountDTO } from '@dto';
 import type { IAccountDialog } from '@interfaces';
 import { useAccountStore, useDialogStore } from '@store';
 import { cloneDeep } from 'lodash-es';
@@ -20,7 +21,7 @@ interface IAccountDialogStore extends PlexAccountDTO {
 	validateLoading: boolean;
 	savingLoading: boolean;
 	hasValidationErrors: boolean;
-	validationErrors: IError[];
+	validationErrors: ErrorDTO[];
 }
 
 export const useAccountDialogStore = defineStore('AccountDialogStore', () => {

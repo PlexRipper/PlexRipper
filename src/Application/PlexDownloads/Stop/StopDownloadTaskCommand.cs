@@ -76,7 +76,21 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
 
             _log.Here().Debug("Deleting partially downloaded files of {DownloadTaskFullTitle}", downloadTask.FullTitle);
 
-            Result.Try(() => _file.Delete(downloadTask.DownloadFilePath)).LogIfFailed();
+            Result
+                .Try(() =>
+                {
+                    if (_file.Exists(downloadTask.DownloadFilePath))
+                        _file.Delete(downloadTask.DownloadFilePath);
+                    else
+                    {
+                        _log.Warning(
+                            "Partially downloaded file for {DownloadTaskFullTitle} not found at {DownloadFilePath} so it could not be deleted.",
+                            downloadTask.FullTitle,
+                            downloadTask.DownloadFilePath
+                        );
+                    }
+                })
+                .LogIfFailed();
 
             // Delete all worker tasks
             await _dbContext

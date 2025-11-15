@@ -1,4 +1,4 @@
-import { describe, beforeAll, test, expect } from 'vitest';
+import { describe, beforeAll, test, expect, beforeEach } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { subscribeSpyTo, baseSetup } from '@services-test-base';
 import type { ISetupResult } from '@interfaces';

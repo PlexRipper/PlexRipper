@@ -14,8 +14,10 @@ public class IntegrationsSettingsDTO
 
 public class RadarrSettingsDTO
 {
-    public required string BaseUrl { get; init; }
-    public required string ApiKey { get; init; }
+    public required string RadarrBaseUrl { get; init; }
+    public required string RadarrApiKey { get; init; }
+
+    public required bool IsConfigured { get; init; }
 }
 
 public class SonarrSettingsDTO
@@ -23,4 +25,6 @@ public class SonarrSettingsDTO
     public required string SonarrBaseUrl { get; init; }
 
     public required string SonarrApiKey { get; init; }
+
+    public required bool IsConfigured { get; init; }
 }

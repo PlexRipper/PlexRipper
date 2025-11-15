@@ -362,6 +362,39 @@
                 "success": "Reaparr can connect successfully to Sonarr!",
                 "unknown-connection-status": "Could not determine what went wrong when testing the connection with Sonarr",
                 "url-is-invalid": "The Sonarr base URL is invalid, check again."
+            },
+            "configuration-status": {
+                "success": "Sonarr has been successfully configured to work with Reaparr"
+            },
+            "nav-bar": {
+                "configure": {
+                    "button": "Setup Sonarr Integration",
+                    "title": "Configure Sonarr Integration"
+                },
+                "connection": {
+                    "title": "Setup Sonarr Connection"
+                }
+            }
+        },
+        "radarr-integration": {
+            "connection-status": {
+                "connection-failed": "Could not connect to Radarr. Ensure the base URL is correct",
+                "invalid-api-key": "Could connect to Radarr, but the API key was invalid",
+                "success": "Reaparr can connect successfully to Radarr!",
+                "unknown-connection-status": "Could not determine what went wrong when testing the connection with Radarr",
+                "url-is-invalid": "The Radarr base URL is invalid, check again."
+            },
+            "configuration-status": {
+                "success": "Radarr has been successfully configured to work with Reaparr"
+            },
+            "nav-bar": {
+                "configure": {
+                    "button": "Setup Radarr Integration",
+                    "title": "Configure Radarr Integration"
+                },
+                "connection": {
+                    "title": "Setup Radarr Connection"
+                }
             }
         }
     },
@@ -670,6 +703,34 @@
                         "label": "Sonarr base URL",
                         "text": "Base address where your Sonarr instance is reachable. Example: http://localhost:8989 or http://sonarr:8989",
                         "title": "Base URL to Sonarr"
+                    },
+                    "setup-configuration": {
+                        "text": "Reaparr will set up an Indexer and Download client in Sonarr, which is then used to allow Sonarr to trigger downloads.\n\nSee [Sonarr/Radarr Integration Guide](https://www.reaparr.rocks/guides/integration/sonarr-radarr) for more info.",
+                        "title": "Setup Sonarr configuration"
+                    },
+                    "test-connection": {
+                        "text": "Reaparr will attempt to connect to the Sonarr instance with the provided base URL and API key.",
+                        "title": "Test the connection to Sonarr"
+                    }
+                },
+                "radarr": {
+                    "api-key-input": {
+                        "label": "Radarr API Key",
+                        "text": "Go to Radarr: Settings → General → Security → API Key and copy the API key from there and paste in this field",
+                        "title": "API key from Radarr"
+                    },
+                    "base-url-input": {
+                        "label": "Radarr base URL",
+                        "text": "Base address where your Radarr instance is reachable. Example: http://localhost:7878 or http://radarr:7878",
+                        "title": "Base URL to Radarr"
+                    },
+                    "setup-configuration": {
+                        "text": "Reaparr will set up an Indexer and Download client in Radarr, which is then used to allow Radarr to trigger downloads.\n\nSee [Sonarr/Radarr Integration Guide](https://www.reaparr.rocks/guides/integration/sonarr-radarr) for more info.",
+                        "title": "Setup Radarr configuration"
+                    },
+                    "test-connection": {
+                        "text": "Reaparr will attempt to connect to the Radarr instance with the provided base URL and API key.",
+                        "title": "Test the connection to Radarr"
                     }
                 }
             }

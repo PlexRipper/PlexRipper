@@ -29,7 +29,7 @@ const { t } = useI18n();
 
 withDefaults(
 	defineProps<{
-		progress: ServerConnectionCheckStatusProgressDTO | null;
+		progress?: ServerConnectionCheckStatusProgressDTO | null;
 	}>(),
 	{
 		progress: null,

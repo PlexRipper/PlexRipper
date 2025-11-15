@@ -1,12 +1,12 @@
-import { describe, beforeAll, test, expect } from 'vitest';
+import { describe, beforeAll, test, expect, beforeEach } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { subscribeSpyTo, baseSetup, getAxiosMock, baseVars } from '@services-test-base';
-import { PlexAccountPaths } from '@api/api-paths';
-import type { ISetupResult } from '@interfaces';
 import { generateResultDTO } from '@mock';
-import { useAccountStore } from '@store';
+import { FolderPathPaths } from '@api/api-paths';
+import type { ISetupResult } from '@interfaces';
+import { useFolderPathStore } from '@store';
 
-describe('AccountStore.setup()', () => {
+describe('FolderPathStore.setup()', () => {
 	let { mock } = baseVars();
 
 	beforeAll(() => {
@@ -20,16 +20,15 @@ describe('AccountStore.setup()', () => {
 
 	test('Should return success and complete when setup is run', async () => {
 		// Arrange
-		const accountStore = useAccountStore();
-		mock.onGet(PlexAccountPaths.getAllPlexAccountsEndpoint()).reply(200, generateResultDTO([]));
-		const setup$ = accountStore.setup();
+		const folderPathStore = useFolderPathStore();
+		mock.onGet(FolderPathPaths.getAllFolderPathsEndpoint()).reply(200, generateResultDTO([]));
 		const setupResult: ISetupResult = {
 			isSuccess: true,
-			name: 'useAccountStore',
+			name: 'useFolderPathStore',
 		};
 
 		// Act
-		const result = subscribeSpyTo(setup$);
+		const result = subscribeSpyTo(folderPathStore.setup());
 		await result.onComplete();
 
 		// Assert

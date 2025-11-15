@@ -1,0 +1,36 @@
+{
+	"extends": "../tsconfig.json",
+	"compilerOptions": {
+		// Make paths resolve from the ClientApp root when editing tests
+		"baseUrl": "../",
+		// TODO: This is a temp fix for Webstorm not resolving paths correctly in the tests folder. Needs to investigated further.
+		"paths": {
+			"@/*": ["src/*"],
+			"@api": ["src/types/api/index.ts"],
+			"@class/*": ["src/types/class/*"],
+			"@dto": ["src/types/api/generated/data-contracts.ts"],
+			"@api/*": ["src/types/api/*"],
+			"@api-urls": ["src/types/api/api-paths.ts"],
+			"@const/*": ["src/types/const/*"],
+			"@composables/*": ["src/composables/*"],
+			"@props/*": ["src/types/props/*"],
+			"@services-test-base": ["tests/_base/base.ts"],
+			"@store": ["src/store/index.ts"],
+			"@enums/*": ["src/types/enums/*"],
+			"@mock": ["src/mock-data/index.ts"],
+			"@mock/*": ["src/mock-data/*"],
+			"@factories": ["src/mock-data/factories/index.ts"],
+			"@factories/*": ["src/mock-data/factories/*"],
+			"@interfaces": ["src/types/interfaces/index.ts"],
+			"@interfaces/*": ["src/types/interfaces/*"],
+			"@components/*": ["src/components/*"],
+			"@fixtures/*": ["cypress/fixtures/*"]
+		}
+	},
+	"include": [
+		"../src",
+		"./**/*.ts",
+		"./**/*.tsx"
+	]
+}
+

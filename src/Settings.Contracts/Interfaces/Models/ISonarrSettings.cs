@@ -13,6 +13,11 @@ public interface ISonarrSettings
     /// </summary>
     string SonarrApiKey { get; set; }
 
+    /// <summary>
+    /// Indicates whether Sonarr has been configured by Reaparr
+    /// </summary>
+    bool IsConfigured { get; set; }
+
     bool IsValidUrl();
 
     bool IsValidApiKey();

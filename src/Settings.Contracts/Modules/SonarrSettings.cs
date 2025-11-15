@@ -4,9 +4,22 @@ public record SonarrSettings : BaseSettingsModule<SonarrSettings>, ISonarrSettin
 {
     private string _sonarrBaseUrl = string.Empty;
     private string _sonarrApiKey = string.Empty;
+    private bool _isConfigured;
 
     public static SonarrSettings Create() =>
-        new() { SonarrBaseUrl = "http://localhost:8989", SonarrApiKey = string.Empty };
+        new()
+        {
+            IsConfigured = false,
+            SonarrBaseUrl = "http://localhost:8989",
+            SonarrApiKey = string.Empty,
+        };
+
+    /// <inheritdoc/>
+    public required bool IsConfigured
+    {
+        get => _isConfigured;
+        set => SetProperty(ref _isConfigured, value);
+    }
 
     /// <inheritdoc/>
     public required string SonarrBaseUrl

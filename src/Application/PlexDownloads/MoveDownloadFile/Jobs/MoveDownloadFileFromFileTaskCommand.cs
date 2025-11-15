@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.IO.Abstractions;
 using System.Reactive.Subjects;
+using System.Threading.Channels;
 using FastEndpoints;
 using FluentValidation;
 using Reaparr.Application.Contracts;
@@ -29,16 +30,32 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
     private readonly ICommandExecutor _commandExecutor;
     private readonly IEventPublisher _eventPublisher;
     private readonly IReaparrDbContext _dbContext;
+
+    /// <summary>
+    /// A separate DbContext instance for progress updates to avoid concurrency issues.
+    /// </summary>
+    private readonly IReaparrDbContext _dbContextProgress;
     private readonly IFile _file;
     private readonly IDirectory _directory;
     private readonly IPath _path;
     private readonly IDownloadManagerSettings _downloadManagerSettings;
+
+    private readonly Channel<IDownloadFileTransferProgress> _progressChannel =
+        Channel.CreateBounded<IDownloadFileTransferProgress>(
+            new BoundedChannelOptions(1)
+            {
+                SingleReader = true,
+                SingleWriter = true,
+                FullMode = BoundedChannelFullMode.DropOldest,
+            }
+        );
 
     public MoveDownloadFileFromFileTaskCommandHandler(
         ILogger log,
         ICommandExecutor commandExecutor,
         IEventPublisher eventPublisher,
         IReaparrDbContext dbContext,
+        IReaparrDbContextFactory dbContextFactory,
         IFile file,
         IDirectory directory,
         IPath path,
@@ -49,6 +66,7 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
         _commandExecutor = commandExecutor;
         _eventPublisher = eventPublisher;
         _dbContext = dbContext;
+        _dbContextProgress = dbContextFactory.Create();
         _file = file;
         _directory = directory;
         _path = path;
@@ -88,11 +106,16 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
                 {
                     Result.Try(() => _file.Delete(destinationPath)).LogIfFailed();
                 }
+
                 _file.Move(downloadFilePath.RemoveReapTempSuffix(), destinationPath);
 
                 downloadTask.CurrentFileTransferBytesOffset = downloadTask.DataTotal;
                 downloadTask.FileDataTransferred = downloadTask.DataTotal;
-                await _dbContext.UpdateDownloadFileTransferProgress(key, downloadTask.ToFileTransferProgress());
+                await _dbContext.UpdateDownloadFileTransferProgress(
+                    key,
+                    downloadTask.ToFileTransferProgress(),
+                    cancellationToken
+                );
                 moveDownloadFileProgress?.OnNext(downloadTask.ToFileTransferProgress());
 
                 await UpdateDownloadTaskStatus(key, DownloadStatus.MoveFinished);
@@ -111,11 +134,16 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
                 {
                     Result.Try(() => _file.Delete(targetInDownloads)).LogIfFailed();
                 }
+
                 _file.Move(downloadFilePath, targetInDownloads);
 
                 downloadTask.CurrentFileTransferBytesOffset = downloadTask.DataTotal;
                 downloadTask.FileDataTransferred = downloadTask.DataTotal;
-                await _dbContext.UpdateDownloadFileTransferProgress(key, downloadTask.ToFileTransferProgress());
+                await _dbContext.UpdateDownloadFileTransferProgress(
+                    key,
+                    downloadTask.ToFileTransferProgress(),
+                    cancellationToken
+                );
                 moveDownloadFileProgress?.OnNext(downloadTask.ToFileTransferProgress());
 
                 await UpdateDownloadTaskStatus(key, DownloadStatus.MoveFinished);
@@ -169,7 +197,11 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
             // Instant finish on rename
             downloadTask.CurrentFileTransferBytesOffset = downloadTask.DataTotal;
             downloadTask.FileDataTransferred = downloadTask.DataTotal;
-            await _dbContext.UpdateDownloadFileTransferProgress(key, downloadTask.ToFileTransferProgress());
+            await _dbContext.UpdateDownloadFileTransferProgress(
+                key,
+                downloadTask.ToFileTransferProgress(),
+                cancellationToken
+            );
             moveDownloadFileProgress?.OnNext(downloadTask.ToFileTransferProgress());
 
             await UpdateDownloadTaskStatus(key, DownloadStatus.MoveFinished);
@@ -179,7 +211,11 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
             _log.Here().Warning("The file move operation was cancelled for file task {FileTaskId}", key.Id);
 
             await UpdateDownloadTaskStatus(key, DownloadStatus.MovePaused);
-            await _dbContext.UpdateDownloadFileTransferProgress(key, downloadTask.ToFileTransferProgress());
+            await _dbContext.UpdateDownloadFileTransferProgress(
+                key,
+                downloadTask.ToFileTransferProgress(),
+                cancellationToken
+            );
 
             return Result.Ok();
         }
@@ -204,6 +240,29 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
         CancellationToken cancellationToken
     )
     {
+        var consumerTask = Task.Run(
+            async () =>
+            {
+                await foreach (var dto in _progressChannel.Reader.ReadAllAsync(cancellationToken))
+                {
+                    try
+                    {
+                        await _dbContextProgress.UpdateDownloadFileTransferProgress(
+                            key,
+                            dto,
+                            cancellationToken: cancellationToken
+                        );
+                        await _commandExecutor.Send(new DownloadTaskUpdatedCommand(key), cancellationToken);
+                    }
+                    catch (Exception ex)
+                    {
+                        _log.Here().Error(ex, "Error while processing file transfer progress for {FileTaskId}", key.Id);
+                    }
+                }
+            },
+            cancellationToken
+        );
+
         var stopwatch = Stopwatch.StartNew();
 
         void SendProgress(MoveFileTransferProgressDTO progress)
@@ -214,42 +273,34 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
 
             if (stopwatch.ElapsedMilliseconds > 1000)
             {
-                _log.Here().Verbose(downloadTask.ToString());
-
+                _log.Here().Debug(downloadTask.ToString());
                 var fileTransferProgress = downloadTask.ToFileTransferProgress();
-
-                _ = Task.Run(
-                    async () =>
-                    {
-                        try
-                        {
-                            await _dbContext.UpdateDownloadFileTransferProgress(key, fileTransferProgress);
-                            await _commandExecutor.Send(new DownloadTaskUpdatedCommand(key), CancellationToken.None);
-                        }
-                        catch (Exception ex)
-                        {
-                            _log.Here()
-                                .Error(ex, "Error while updating file transfer progress for {FileTaskId}", key.Id);
-                        }
-                    },
-                    cancellationToken
-                );
-
+                _progressChannel.Writer.TryWrite(fileTransferProgress);
                 stopwatch.Restart();
             }
         }
 
-        return await _commandExecutor.Send(
-            new MoveFileWithResumeCommand
-            {
-                SourcePath = sourcePath,
-                TargetPath = targetPath,
-                Progress = SendProgress,
-                CurrentOffset = downloadTask.CurrentFileTransferBytesOffset,
-                DataTotal = downloadTask.DataTotal,
-            },
-            cancellationToken
-        );
+        try
+        {
+            var result = await _commandExecutor.Send(
+                new MoveFileWithResumeCommand
+                {
+                    SourcePath = sourcePath,
+                    TargetPath = targetPath,
+                    Progress = SendProgress,
+                    CurrentOffset = downloadTask.CurrentFileTransferBytesOffset,
+                    DataTotal = downloadTask.DataTotal,
+                },
+                cancellationToken
+            );
+
+            return result;
+        }
+        finally
+        {
+            _progressChannel.Writer.TryComplete();
+            await consumerTask;
+        }
     }
 
     private async Task UpdateDownloadTaskStatus(DownloadTaskKey key, DownloadStatus status)

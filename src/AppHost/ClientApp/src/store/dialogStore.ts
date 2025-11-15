@@ -1,4 +1,5 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
+import { reactive, toRefs } from 'vue';
 import { type Observable, of, Subject } from 'rxjs';
 import { DialogType } from '@enums';
 import type { IAccountDialog, IAlert, IConnectionDialog, IDialogState, IHelp, ISetupResult } from '@interfaces';

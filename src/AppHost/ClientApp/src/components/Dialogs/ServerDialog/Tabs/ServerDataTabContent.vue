@@ -132,8 +132,8 @@ const progress = ref<ServerConnectionCheckStatusProgressDTO[]>([]);
 
 const props = withDefaults(
 	defineProps<{
-		plexServer: PlexServerDTO | null;
-		isVisible: boolean;
+		plexServer?: PlexServerDTO | null;
+		isVisible?: boolean;
 	}>(),
 	{
 		plexServer: null,

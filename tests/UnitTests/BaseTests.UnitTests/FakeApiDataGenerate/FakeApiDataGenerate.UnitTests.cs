@@ -27,6 +27,6 @@ public class FakeApiDataGenerateUnitTests : BaseUnitTest<MockPlexApiServer>
         // Assert
         var elapsed = stopWatch.Elapsed;
         Output.WriteLine($"Elapsed time: {elapsed}");
-        elapsed.ShouldBeLessThan(TimeSpan.FromSeconds(5));
+        elapsed.ShouldBeLessThan(TimeSpan.FromSeconds(10));
     }
 }

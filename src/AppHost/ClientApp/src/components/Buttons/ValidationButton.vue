@@ -15,8 +15,8 @@ import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
 const props = withDefaults(defineProps<{
-	loading: boolean;
-	isValidated: boolean;
+	loading?: boolean;
+	isValidated?: boolean;
 	triggerOnce?: boolean;
 	defaultIcon?: string;
 	cy?: string;

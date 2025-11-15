@@ -29,16 +29,16 @@ public class ReasonDTO : IReason
     public required Dictionary<string, object> Metadata { get; init; }
 }
 
-public class ErrorDTO : IError
+public class ErrorDTO
 {
-    public required List<IError> Reasons { get; init; }
+    public required List<ErrorDTO> Reasons { get; init; }
 
     public required string Message { get; init; }
 
     public required Dictionary<string, object> Metadata { get; init; }
 }
 
-public class SuccessDTO : ISuccess
+public class SuccessDTO
 {
     public required string Message { get; init; }
 

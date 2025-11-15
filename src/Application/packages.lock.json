@@ -1041,6 +1041,9 @@
           "Reaparr.Domain": "[1.0.0, )"
         }
       },
+      "Reaparr.PublicAPI.Contracts": {
+        "type": "Project"
+      },
       "Reaparr.Settings": {
         "type": "Project",
         "dependencies": {

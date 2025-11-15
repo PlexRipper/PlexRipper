@@ -2,9 +2,10 @@ using FastEndpoints;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Data.Contracts;
+
 // ReSharper disable InconsistentNaming
 
-namespace Reaparr.PublicAPI.SearchTvShow;
+namespace Reaparr.PublicAPI;
 
 public record SearchTvShowCommand : ICommand<TorznabMediaSearchResponseDTO>
 {
@@ -133,7 +134,7 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, T
 
         // Otherwise apply filters for a specific episode, adding external ID predicates only when provided
         if (!string.IsNullOrWhiteSpace(command.IMDB_ID))
-            baseQuery = baseQuery.Where(e => e.TvShow!.Guid_IMDB == command.IMDB_ID);
+            baseQuery = baseQuery.Where(e => e.TvShow!.Guid_IMDB == "tt" + command.IMDB_ID);
 
         if (command.TMDB_ID > 0)
             baseQuery = baseQuery.Where(e => e.TvShow!.Guid_TMDB == command.TMDB_ID);
@@ -190,11 +191,11 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, T
                     Type = "application/x-bittorrent",
                 },
             };
-
+            var count = MemeNumberGenerator.GetRandomMemeNumber().ToString();
+            item.Attributes.Add(new TorznabAttr("seeders", count));
+            item.Attributes.Add(new TorznabAttr("peers", count));
             item.Attributes.Add(new TorznabAttr("season", season.SeasonNumber.ToString()));
             item.Attributes.Add(new TorznabAttr("episode", episode.EpisodeNumber.ToString()));
-            item.Attributes.Add(new TorznabAttr("seeders", "100"));
-            item.Attributes.Add(new TorznabAttr("peers", "100"));
             item.Attributes.Add(new TorznabAttr("type", "series"));
             item.Attributes.Add(new TorznabAttr("language", "English"));
             item.Attributes.Add(new TorznabAttr("downloadvolumefactor", "0.0"));

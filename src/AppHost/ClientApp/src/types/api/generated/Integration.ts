@@ -15,7 +15,9 @@ import { ContentType } from "./http-client";
 
 import type {
   BaseResultDTO,
+  ConfigureRadarrIntegrationRequest,
   ConfigureSonarrIntegrationRequest,
+  TestConnectionToRadarrEndpointResponse,
   TestConnectionToSonarrEndpointResponse,
 } from "./data-contracts";
 
@@ -25,6 +27,54 @@ import queryString from "query-string";
 import { from } from "rxjs";
 
 export class Integration {
+  /**
+   * No description
+   * * @tags Integration
+   * @name ConfigureRadarrIntegrationEndpoint
+   * @request POST:/api/Integration/Radarr/Configure
+   * @secure
+   */
+  configureRadarrIntegrationEndpoint = (
+    data: ConfigureRadarrIntegrationRequest,
+    params: RequestParams = {},
+  ) =>
+    from(
+      Axios.request<BaseResultDTO>({
+        url: `/api/Integration/Radarr/Configure`,
+        method: "POST",
+        data: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+    ).pipe(apiCheckPipe<BaseResultDTO>);
+
+  /**
+   * No description
+   * * @tags Integration
+   * @name TestConnectionToRadarrEndpoint
+   * @request GET:/api/Integration/Radarr/TestConnection
+   * @secure
+   */
+  testConnectionToRadarrEndpoint = (
+    query: {
+      apiKey: string;
+      url: string;
+    },
+    params: RequestParams = {},
+  ) =>
+    from(
+      Axios.request<TestConnectionToRadarrEndpointResponse>({
+        url: `/api/Integration/Radarr/TestConnection`,
+        method: "GET",
+        params: query,
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+    ).pipe(apiCheckPipe<TestConnectionToRadarrEndpointResponse>);
+
   /**
    * No description
    * * @tags Integration
@@ -75,6 +125,18 @@ export class Integration {
 }
 
 export class IntegrationPaths {
+  static configureRadarrIntegrationEndpoint = () =>
+    queryString.stringifyUrl({ url: `/api/Integration/Radarr/Configure` });
+
+  static testConnectionToRadarrEndpoint = (query: {
+    apiKey: string;
+    url: string;
+  }) =>
+    queryString.stringifyUrl({
+      url: `/api/Integration/Radarr/TestConnection`,
+      query,
+    });
+
   static configureSonarrIntegrationEndpoint = () =>
     queryString.stringifyUrl({ url: `/api/Integration/Sonarr/Configure` });
 

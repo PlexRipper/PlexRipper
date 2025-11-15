@@ -12,5 +12,7 @@ public class DataModule : Module
         builder.RegisterType<ReaparrDbContext>().As<IReaparrDbContextDatabase>().InstancePerDependency();
 
         builder.RegisterType<ReaparrDbContextManager>().As<IReaparrDbContextManager>().InstancePerDependency();
+        
+        builder.RegisterType<ReaparrDbContextFactory>().As<IReaparrDbContextFactory>().InstancePerDependency();
     }
 }

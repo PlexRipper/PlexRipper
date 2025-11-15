@@ -11,13 +11,12 @@
 			<!-- Setup Sonarr Connection -->
 			<QStep
 				:done="testSuccess === true"
-				:error="!testSuccess && testMessage !== ''"
+				:error="testSuccess === false && testMessage !== ''"
 				:name="1"
-				done-color="positive"
-				done-icon="mdi-check"
-				icon="mdi-connection"
+				:title="t('components.sonarr-integration.nav-bar.connection.title')"
 				active-icon="mdi-connection"
-				:title="t('components.sonarr-integration.nav-bar.connection.title')">
+				done-color="positive"
+				done-icon="mdi-check">
 				<!-- Base URL -->
 				<HelpRow
 					:col-label="3"
@@ -57,14 +56,14 @@
 			</QStep>
 			<!-- Configure Sonarr Integration -->
 			<QStep
+				:disable="testSuccess === false"
 				:done="settingsStore.integrationsSettings.sonarr.isConfigured"
 				:name="2"
+				:title="t('components.sonarr-integration.nav-bar.configure.title')"
+				active-icon="mdi-cog"
 				done-color="positive"
 				done-icon="mdi-check"
-				icon="mdi-cog"
-				active-icon="mdi-cog"
-				:disable="testSuccess === false"
-				:title="t('components.sonarr-integration.nav-bar.configure.title')">
+				icon="mdi-cog">
 				<!-- Setup Sonarr Integration -->
 				<HelpRow
 					:col-label="3"
@@ -105,8 +104,8 @@ import { useSettingsStore } from '@store';
 import { integrationApi } from '@api';
 import { type BaseResultDTO, NotificationLevel, TestConnectionStatus } from '@dto';
 import { tap } from 'rxjs/operators';
-import { formatErrorResponse } from '@/composables';
 import { useSubscription } from '@vueuse/rxjs';
+import { formatErrorResponse } from '@composables';
 
 const settingsStore = useSettingsStore();
 const { t } = useI18n();
@@ -118,7 +117,7 @@ const isConfiguring = ref(false);
 const testSuccess = ref<boolean | null>(null);
 const testMessage = ref('');
 const configuringSuccess = ref<boolean | null>(null);
-const configuringMessage = ref<string>('');
+const configuringMessage = ref('');
 const error = ref<BaseResultDTO | null>(null);
 
 function testSonarrConnection() {
@@ -128,6 +127,7 @@ function testSonarrConnection() {
 
 	set(isTesting, true);
 	set(testMessage, '');
+	set(error, null);
 	useSubscription(integrationApi.testConnectionToSonarrEndpoint({
 		url: settingsStore.integrationsSettings.sonarr.sonarrBaseUrl,
 		apiKey: settingsStore.integrationsSettings.sonarr.sonarrApiKey,
@@ -167,6 +167,7 @@ function testSonarrConnection() {
 function configureSonarrSetup() {
 	set(isConfiguring, true);
 	set(testMessage, '');
+	set(error, null);
 	useSubscription(integrationApi.configureSonarrIntegrationEndpoint({
 		url: settingsStore.integrationsSettings.sonarr.sonarrBaseUrl,
 		apiKey: settingsStore.integrationsSettings.sonarr.sonarrApiKey,

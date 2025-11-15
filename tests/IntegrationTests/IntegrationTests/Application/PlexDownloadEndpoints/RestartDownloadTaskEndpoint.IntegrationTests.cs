@@ -61,7 +61,7 @@ public class RestartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
         );
         downloadTaskDb.ShouldNotBeNull();
 
-        // In CI this is sometimes completed to quickly
+        // In CI this is sometimes completed too quickly
         downloadTaskDb.DownloadStatus.ShouldBeOneOf(DownloadStatus.Queued, DownloadStatus.Completed);
 
         await container.SchedulerService.AwaitScheduler(TestContext.Current.CancellationToken);

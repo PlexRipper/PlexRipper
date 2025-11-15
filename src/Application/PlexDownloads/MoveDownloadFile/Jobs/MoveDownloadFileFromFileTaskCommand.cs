@@ -29,8 +29,10 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IEventPublisher _eventPublisher;
-    private readonly IReaparrDbContextFactory _dbContextFactory;
     private readonly IReaparrDbContext _dbContext;
+    /// <summary>
+    /// A separate DbContext instance for progress updates to avoid concurrency issues.
+    /// </summary>
     private readonly IReaparrDbContext _dbContextProgress;
     private readonly IFile _file;
     private readonly IDirectory _directory;
@@ -51,6 +53,7 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
         ILogger log,
         ICommandExecutor commandExecutor,
         IEventPublisher eventPublisher,
+        IReaparrDbContext dbContext,
         IReaparrDbContextFactory dbContextFactory,
         IFile file,
         IDirectory directory,
@@ -61,8 +64,7 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
         _log = log.ForContext<MoveDownloadFileFromFileTaskCommandHandler>();
         _commandExecutor = commandExecutor;
         _eventPublisher = eventPublisher;
-        _dbContextFactory = dbContextFactory;
-        _dbContext = dbContextFactory.Create();
+        _dbContext = dbContext;
         _dbContextProgress = dbContextFactory.Create();
         _file = file;
         _directory = directory;

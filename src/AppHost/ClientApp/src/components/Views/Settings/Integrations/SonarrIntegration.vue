@@ -194,10 +194,14 @@ function configureSonarrSetup() {
 }
 
 onBeforeMount(async () => {
-	testSonarrConnection();
 	if (settingsStore.integrationsSettings.sonarr.isConfigured) {
+		// Already configured: mark both steps as done and show final step
+		set(testSuccess, true);
 		set(configuringSuccess, true);
 		set(configuringMessage, t('components.sonarr-integration.configuration-status.success'));
+		set(step, 3);
+	} else {
+		testSonarrConnection();
 	}
 });
 </script>

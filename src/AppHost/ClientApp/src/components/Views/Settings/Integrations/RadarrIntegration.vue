@@ -194,10 +194,14 @@ function configureRadarrSetup() {
 }
 
 onBeforeMount(async () => {
-	testRadarrConnection();
 	if (settingsStore.integrationsSettings.radarr.isConfigured) {
+		// Already configured: mark both steps as done and show final step
+		set(testSuccess, true);
 		set(configuringSuccess, true);
 		set(configuringMessage, t('components.radarr-integration.configuration-status.success'));
+		set(step, 3);
+	} else {
+		testRadarrConnection();
 	}
 });
 </script>

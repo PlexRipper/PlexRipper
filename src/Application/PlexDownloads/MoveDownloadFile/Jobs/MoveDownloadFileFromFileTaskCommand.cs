@@ -270,7 +270,7 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
 
             if (stopwatch.ElapsedMilliseconds > 1000)
             {
-                _log.Here().Verbose(downloadTask.ToString());
+                _log.Here().Debug(downloadTask.ToString());
                 var fileTransferProgress = downloadTask.ToFileTransferProgress();
                 _progressChannel.Writer.TryWrite(fileTransferProgress);
                 stopwatch.Restart();

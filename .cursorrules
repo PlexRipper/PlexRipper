@@ -12,7 +12,11 @@ rules: |
   - Always assert against both the endpoint Response and the state of the database after execution.
   - Keep tests deterministic: seed data explicitly, never random.
   - Prefer expressive, scenario-driven test names over generic ones.
-
+  
+  # Front-end unit test rules
+  - All front-end unit tests must use Vitest as the test runner.
+  - Always run Vitest through Bun using `bunx vitest` (never npm, yarn, or pnpm).
+  
   # Organization rules
   - Each production project must have a corresponding UnitTest project with the same name + `.UnitTests` suffix.
     Example: code in `Reaparr.Application` is tested in `Reaparr.Application.UnitTests`.

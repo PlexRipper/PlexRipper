@@ -16,14 +16,10 @@ ENV NUXT_PUBLIC_IS_DOCKER=true
 
 WORKDIR /tmp/ClientApp
 
-## Copy the package.json and install the dependencies
-COPY ./src/AppHost/ClientApp/package.json ./src/AppHost/ClientApp/bun.lock ./
-RUN bun install
-
-## Copy the project files
+## Copy the project files and install the dependencies
 COPY ./src/AppHost/ClientApp/ ./
-RUN bun run generate --fail-on-error
-    
+RUN bun install && bun run generate --fail-on-error
+   
 # Stage 2 - Build the .NET back-end
 FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:9.0 AS back-end
 

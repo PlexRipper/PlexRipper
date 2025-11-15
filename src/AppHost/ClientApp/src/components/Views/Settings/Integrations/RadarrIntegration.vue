@@ -103,7 +103,8 @@ import { set } from '@vueuse/core';
 import { useSettingsStore } from '@store';
 import { integrationApi } from '@api';
 import { type BaseResultDTO, NotificationLevel, TestConnectionStatus } from '@dto';
-import { tap } from 'rxjs/operators';
+import { switchMap } from 'rxjs/operators';
+import { of } from 'rxjs';
 import { useSubscription } from '@vueuse/rxjs';
 import { formatErrorResponse } from '@composables';
 
@@ -175,12 +176,17 @@ function configureRadarrSetup() {
 	useSubscription(integrationApi.configureRadarrIntegrationEndpoint({
 		url: settingsStore.integrationsSettings.radarr.radarrBaseUrl,
 		apiKey: settingsStore.integrationsSettings.radarr.radarrApiKey,
-	}).pipe(tap(() => settingsStore.refreshSettings())).subscribe((response) => {
+	}).pipe(switchMap((response) => {
+		// Wait for refreshSettings to complete before processing the response
+		// This ensures isConfigured is updated before the component checks it
+		return settingsStore.refreshSettings().pipe(switchMap(() => of(response)));
+	})).subscribe((response) => {
 		set(configuringSuccess, response.isSuccess);
 		set(isConfiguring, false);
 		if (response.isSuccess) {
 			set(configuringMessage, t('components.radarr-integration.configuration-status.success'));
-			set(step, 2);
+			// This should overshoot to step 3 to show step 2 as done
+			set(step, 3);
 		} else {
 			set(error, response);
 		}

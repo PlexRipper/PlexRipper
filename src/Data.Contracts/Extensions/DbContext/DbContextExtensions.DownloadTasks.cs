@@ -487,8 +487,10 @@ public static partial class DbContextExtensions
                         p =>
                             p.SetProperty(x => x.FileTransferSpeed, progress.FileTransferSpeed)
                                 .SetProperty(x => x.FileDataTransferred, progress.FileDataTransferred)
-                                .SetProperty(x => x.CurrentFileTransferBytesOffset,
-                                    progress.CurrentFileTransferBytesOffset),
+                                .SetProperty(
+                                    x => x.CurrentFileTransferBytesOffset,
+                                    progress.CurrentFileTransferBytesOffset
+                                ),
                         cancellationToken
                     );
                 break;
@@ -499,8 +501,10 @@ public static partial class DbContextExtensions
                         p =>
                             p.SetProperty(x => x.FileTransferSpeed, progress.FileTransferSpeed)
                                 .SetProperty(x => x.FileDataTransferred, progress.FileDataTransferred)
-                                .SetProperty(x => x.CurrentFileTransferBytesOffset,
-                                    progress.CurrentFileTransferBytesOffset),
+                                .SetProperty(
+                                    x => x.CurrentFileTransferBytesOffset,
+                                    progress.CurrentFileTransferBytesOffset
+                                ),
                         cancellationToken
                     );
                 break;

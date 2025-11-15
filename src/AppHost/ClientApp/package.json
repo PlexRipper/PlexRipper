@@ -24,7 +24,7 @@
     "typecheck": "vue-tsc --noEmit --pretty",
     "typecheck-watch": "vue-tsc --noEmit --watch --pretty",
     "npm-upgrade-packages": "bunx npm-upgrade",
-    "unit-test": "NODE_OPTIONS='--no-webstorage' vitest --config vitest.config.ts run",
+    "unit-test": "vitest --config vitest.config.ts run",
     "unit-test-watch": "vitest --config vitest.config.ts watch",
     "cypress:e2e": "dotenvx run -f .env.cypress -- sh -c 'start-server-and-test \"bun run static-server\" http://localhost:$PORT \"cypress open --e2e --browser firefox\"'",
     "cypress:ci": "dotenvx run -f .env.cypress.ci -- sh -c 'start-server-and-test \"bun run static-server\" http://localhost:$PORT \"cypress run --browser firefox\"'",

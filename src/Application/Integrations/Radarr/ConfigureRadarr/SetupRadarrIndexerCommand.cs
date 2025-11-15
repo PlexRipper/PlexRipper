@@ -72,7 +72,7 @@ public class SetupRadarrIndexerCommandHandler
                 {
                     Id = existing.Id,
                     ForceSave = true,
-                    Resource = BuildIndexerResource(command.ReaparrBaseUri, command.DownloadClientId),
+                    Resource = BuildIndexerResource(command.ReaparrBaseUri, command.DownloadClientId, existing.Id),
                 },
                 ct
             );
@@ -90,7 +90,7 @@ public class SetupRadarrIndexerCommandHandler
             new RadarrApiCreateIndexerCommand
             {
                 ForceSave = true,
-                Resource = BuildIndexerResource(command.ReaparrBaseUri, command.DownloadClientId),
+                Resource = BuildIndexerResource(command.ReaparrBaseUri, command.DownloadClientId, 0),
             },
             ct
         );
@@ -102,12 +102,13 @@ public class SetupRadarrIndexerCommandHandler
         return Result.Ok(new SetupRadarrIndexerCommandResult { IndexerId = createResult.Value.Id });
     }
 
-    private RadarrIndexerContractDTO BuildIndexerResource(Uri reaparrBaseUri, int downloadClientId)
+    private RadarrIndexerContractDTO BuildIndexerResource(Uri reaparrBaseUri, int downloadClientId, int? id = null)
     {
         var baseUrl = reaparrBaseUri.AbsoluteUri.TrimEnd('/') + "/api/public/indexer/";
 
         return new RadarrIndexerContractDTO
         {
+            Id = id ?? 0,
             Name = _indexerName,
             EnableRss = true,
             EnableAutomaticSearch = true,

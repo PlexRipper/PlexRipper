@@ -34,12 +34,18 @@ public class DownloadClientAuthenticationPreProcessor<TRequest> : IPreProcessor<
         {
             _log.Here().Warning("Invalid or expired download client session SID cookie from {UserAgent} for request to '{RequestPath}'",
                 userAgent, requestPath);
-            
-            if (userAgent.Contains("Radarr") || userAgent.Contains("Sonarr"))
+
+            var detectedClient = userAgent.IndexOf("radarr", StringComparison.OrdinalIgnoreCase) >= 0
+                ? "Radarr"
+                : (userAgent.IndexOf("sonarr", StringComparison.OrdinalIgnoreCase) >= 0 ? "Sonarr" : null);
+            if (detectedClient is not null)
             {
-                _log.Here().Information( "Downloading client appears to be Radarr or Sonarr. Sometimes an old SID cookie is cached and restarting Radarr/Sonarr can resolve this issue.");
+                _log.Here().Warning(
+                    "Download client appears to be {Client}. Sometimes an old SID cookie is cached; restarting the client can resolve this. User-Agent: {UserAgent}",
+                    detectedClient,
+                    userAgent);
             }
-            
+
             await ctx.HttpContext.Response.SendUnauthorizedAsync(cancellation: ct);
         }
     }

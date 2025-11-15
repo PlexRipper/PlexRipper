@@ -4,7 +4,7 @@ public interface IRadarrSettings
 {
     /// <summary>
     /// Gets or sets the base URL of the Radarr instance.
-    /// <example>http://localhost:8989</example>
+    /// <example>http://localhost:7878</example>
     /// </summary>
     string RadarrBaseUrl { get; set; }
 

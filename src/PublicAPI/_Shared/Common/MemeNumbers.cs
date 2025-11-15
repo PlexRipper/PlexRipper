@@ -42,7 +42,5 @@ public static class MemeNumberGenerator
         2077, // cyberpunk prophecy
     };
 
-    private static readonly Random _random = new();
-
-    public static int GetRandomMemeNumber() => MemeNumbers[_random.Next(MemeNumbers.Length)];
+    public static int GetRandomMemeNumber() => MemeNumbers[Random.Shared.Next(MemeNumbers.Length)];
 }

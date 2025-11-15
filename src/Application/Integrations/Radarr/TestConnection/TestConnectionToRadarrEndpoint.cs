@@ -81,10 +81,30 @@ public class TestConnectionToRadarrEndpoint
         httpRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         httpRequest.Headers.Add("X-Api-Key", req.ApiKey);
 
-        HttpResponseMessage httpResponse;
         try
         {
-            httpResponse = await _client.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead, ct);
+            using var httpResponse = await _client.SendAsync(
+                httpRequest,
+                HttpCompletionOption.ResponseHeadersRead,
+                ct
+            );
+            if (httpResponse.IsSuccessStatusCode)
+            {
+                await SendTestResult(TestConnectionStatus.Success, ct);
+                return;
+            }
+
+            var statusCode = (int)httpResponse.StatusCode;
+            if (statusCode == 401)
+            {
+                await SendTestResult(TestConnectionStatus.InvalidApiKey, ct);
+                return;
+            }
+
+            var reason = httpResponse.ReasonPhrase ?? $"HTTP {(int)httpResponse.StatusCode}";
+            _log.Here().Warning("Radarr connection test failed: {Reason}", reason);
+            await SendTestResult(TestConnectionStatus.ConnectionFailed, ct);
+            return;
         }
         catch (TaskCanceledException e)
         {
@@ -98,23 +118,6 @@ public class TestConnectionToRadarrEndpoint
             await SendTestResult(TestConnectionStatus.ConnectionFailed, ct);
             return;
         }
-
-        if (httpResponse.IsSuccessStatusCode)
-        {
-            await SendTestResult(TestConnectionStatus.Success, ct);
-            return;
-        }
-
-        var statusCode = (int)httpResponse.StatusCode;
-        if (statusCode == 401)
-        {
-            await SendTestResult(TestConnectionStatus.InvalidApiKey, ct);
-            return;
-        }
-
-        var reason = httpResponse.ReasonPhrase ?? $"HTTP {(int)httpResponse.StatusCode}";
-        _log.Here().Warning("Radarr connection test failed: {Reason}", reason);
-        await SendTestResult(TestConnectionStatus.ConnectionFailed, ct);
     }
 
     private async Task SendTestResult(TestConnectionStatus status, CancellationToken ct)

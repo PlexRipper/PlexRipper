@@ -35,7 +35,7 @@ public static partial class FakeData
             .Ignore(x => x.PlexLibraryId)
             .Ignore(x => x.PlexLibrary)
             .Ignore(x => x.FullBannerUrl)
-            .RuleFor(x => x.Guid_IMDB, f => "imdb://tt" + f.Random.Int(10000, 99999))
+            .RuleFor(x => x.Guid_IMDB, f => "tt" + f.Random.Int(10000, 99999))
             .RuleFor(x => x.Guid_TMDB, f => f.Random.Int(10000, 99999))
             .RuleFor(x => x.Guid_TVDB, f => f.Random.Int(10000, 99999));
     }

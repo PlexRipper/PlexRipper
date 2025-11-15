@@ -1,3 +1,5 @@
+using FastEndpoints;
+using FluentValidation;
 using Reaparr.Application.Contracts;
 using Reaparr.Settings.Contracts;
 
@@ -9,6 +11,16 @@ public record ConfigureSonarrIntegrationRequest
 
     public required string ApiKey { get; init; }
 }
+
+public class ConfigureSonarrIntegrationRequestValidator : Validator<ConfigureSonarrIntegrationRequest>
+{
+    public ConfigureSonarrIntegrationRequestValidator()
+    {
+        RuleFor(x => x.Url).NotEmpty().WithMessage("URL cannot be empty.");
+        RuleFor(x => x.ApiKey).NotEmpty().WithMessage("API Key cannot be empty.");
+    }
+}
+
 
 public class ConfigureSonarrIntegrationEndpoint : BaseEndpoint<ConfigureSonarrIntegrationRequest>
 {
@@ -51,9 +63,12 @@ public class ConfigureSonarrIntegrationEndpoint : BaseEndpoint<ConfigureSonarrIn
 
         if (!Uri.TryCreate(reaparrBase, UriKind.Absolute, out var reaparrBaseUri))
         {
-            await SendFluentResult(Result.Fail("Could not derive Reaparr base URL from request.").LogError(), ct);
+            await SendFluentResult(ResultExtensions.Create400BadRequestResult("Could not derive Reaparr base URL from request.").LogError(), ct);
             return;
         }
+        
+        _sonarrSettings.SonarrBaseUrl =  req.Url.TrimEnd('/');
+        _sonarrSettings.SonarrApiKey = req.ApiKey;
 
         // Upsert download client
         var setupDownloadClient = await _commandExecutor.Send(new SetupSonarrDownloadClientCommand(reaparrBaseUri), ct);

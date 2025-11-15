@@ -48,7 +48,8 @@ public static class HttpClientModule
                     if (settings == null || string.IsNullOrWhiteSpace(settings.RadarrBaseUrl))
                         return;
 
-                    if (!Uri.TryCreate(settings.RadarrBaseUrl.Trim().TrimEnd('/'), UriKind.Absolute, out var baseUri))
+                    var normalizedBaseUrl = settings.RadarrBaseUrl.Trim().TrimEnd('/') + "/";
+                    if (!Uri.TryCreate(normalizedBaseUrl, UriKind.Absolute, out var baseUri))
                         return;
 
                     client.BaseAddress = baseUri;

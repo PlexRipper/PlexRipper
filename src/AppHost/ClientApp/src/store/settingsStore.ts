@@ -3,7 +3,7 @@ import { defineStore, acceptHMRUpdate } from 'pinia';
 import { of, Subject, type Observable } from 'rxjs';
 import { debounceTime, switchMap, tap } from 'rxjs/operators';
 import { reactive, computed, toRefs } from 'vue';
-import { PlexMediaType, type SettingsModelDTO, ViewMode } from '@dto';
+import { type IntegrationsSettingsDTO, PlexMediaType, type SettingsModelDTO, ViewMode } from '@dto';
 
 import type { ISetupResult } from '@interfaces';
 import { settingsApi } from '@api';
@@ -37,28 +37,17 @@ export const useSettingsStore = defineStore('SettingsStore', () => {
 			timeZone: 'UTC',
 		},
 		displaySettings: {
-			movieViewMode: ViewMode.Poster,
-			tvShowViewMode: ViewMode.Poster,
-			allOverviewViewMode: PlexMediaType.TvShow,
+			movieViewMode: ViewMode.Poster, tvShowViewMode: ViewMode.Poster, allOverviewViewMode: PlexMediaType.TvShow,
 		},
 		downloadManagerSettings: {
-			downloadSegments: 4,
-			keepCompletedInDownloadFolder: false,
+			downloadSegments: 4, keepCompletedInDownloadFolder: false,
 		},
 		languageSettings: { language: 'en-US' },
 		integrationsSettings: {
-			downloadClientUsername: '',
-			downloadClientPassword: '',
-			reaparrApiKey: '',
-			sonarr: {
-				isConfigured: false,
-				sonarrApiKey: '',
-				sonarrBaseUrl: '',
-			},
-			radarr: {
-				isConfigured: false,
-				radarrApiKey: '',
-				radarrBaseUrl: '',
+			downloadClientUsername: '', downloadClientPassword: '', reaparrApiKey: '', sonarr: {
+				isConfigured: false, sonarrApiKey: '', sonarrBaseUrl: '',
+			}, radarr: {
+				isConfigured: false, radarrApiKey: '', radarrBaseUrl: '',
 			},
 		},
 		serverSettings: {
@@ -72,47 +61,33 @@ export const useSettingsStore = defineStore('SettingsStore', () => {
 	// Actions
 	const actions = {
 		setup(): Observable<ISetupResult> {
-			return actions.refreshSettings().pipe(
-				tap(() => {
-					// Send the settings to the server when they change
-					_settingsUpdated
-						.pipe(
-							debounceTime(500),
-							tap((settings) => Log.debug('Settings updated', settings)),
-							switchMap((settings) => settingsApi.updateUserSettingsEndpoint(settings)),
-						)
-						.subscribe();
+			return actions.refreshSettings().pipe(tap(() => {
+				// Send the settings to the server when they change
+				_settingsUpdated
+					.pipe(debounceTime(500), tap((settings) => Log.debug('Settings updated', settings)), switchMap((settings) => settingsApi.updateUserSettingsEndpoint(settings)))
+					.subscribe();
 
-					useSettingsStore().$subscribe((mutation, state) => {
-						if (mutation.type) {
-							_settingsUpdated.next(state);
-						}
-					});
-				},
-				),
-				switchMap(() => of({ name: 'useSettingsStore', isSuccess: true })),
-			);
+				useSettingsStore().$subscribe((mutation, state) => {
+					if (mutation.type) {
+						_settingsUpdated.next(state);
+					}
+				});
+			}), switchMap(() => of({ name: 'useSettingsStore', isSuccess: true })));
 		},
 		refreshSettings(): Observable<SettingsModelDTO | null> {
-			return settingsApi.getUserSettingsEndpoint().pipe(
-				switchMap((settingsResult) => of(settingsResult?.value ?? null)),
-				tap((settings) => {
-					if (settings) {
-						actions.setSettingsState(settings);
-					}
-				}),
-			);
+			return settingsApi.getUserSettingsEndpoint().pipe(switchMap((settingsResult) => of(settingsResult?.value ?? null)), tap((settings) => {
+				if (settings) {
+					actions.setSettingsState(settings);
+				}
+			}));
 		},
-		saveSettings: (): Observable<SettingsModelDTO | null> =>
-			settingsApi.updateUserSettingsEndpoint(state).pipe(
-				switchMap((settingsResult) => of(settingsResult?.value ?? null)),
-				tap((settings) => {
-					if (settings) {
-						actions.setSettingsState(settings);
-					}
-				}),
-			),
+		saveSettings: (): Observable<SettingsModelDTO | null> => settingsApi.updateUserSettingsEndpoint(state).pipe(switchMap((settingsResult) => of(settingsResult?.value ?? null)), tap((settings) => {
+			if (settings) {
+				actions.setSettingsState(settings);
+			}
+		})),
 		setSettingsState(settings: SettingsModelDTO) {
+			// Special handling to preserve reactivity of nested objects and arrays
 			Object.assign(state.generalSettings, settings.generalSettings);
 			Object.assign(state.debugSettings, settings.debugSettings);
 			Object.assign(state.confirmationSettings, settings.confirmationSettings);
@@ -125,9 +100,16 @@ export const useSettingsStore = defineStore('SettingsStore', () => {
 			state.serverSettings.data.splice(0, state.serverSettings.data.length, ...settings.serverSettings.data);
 
 			// Keep containers stable, then merge deeply
-			Object.assign(state.integrationsSettings, settings.integrationsSettings);
+			// Update nested objects first to preserve their references
 			Object.assign(state.integrationsSettings.sonarr, settings.integrationsSettings.sonarr);
 			Object.assign(state.integrationsSettings.radarr, settings.integrationsSettings.radarr);
+
+			// Then update top-level properties (excluding sonarr and radarr which are already updated)
+			Object.assign<IntegrationsSettingsDTO, Omit<IntegrationsSettingsDTO, 'radarr' | 'sonarr'>>(state.integrationsSettings, {
+				downloadClientUsername: settings.integrationsSettings.downloadClientUsername,
+				downloadClientPassword: settings.integrationsSettings.downloadClientPassword,
+				reaparrApiKey: settings.integrationsSettings.reaparrApiKey,
+			});
 		},
 		updateDownloadLimit(machineIdentifier: string, downloadLimit: number) {
 			const i = state.serverSettings.data.findIndex((server) => server.machineIdentifier === machineIdentifier);
@@ -155,18 +137,14 @@ export const useSettingsStore = defineStore('SettingsStore', () => {
 		isServerVisible(machineIdentifier: string): boolean {
 			return !(actions.getServerSettings(machineIdentifier)?.hidden ?? false);
 		},
-		getServerSettings: (machineIdentifier?: string) =>
-			machineIdentifier ? state.serverSettings.data.find((user) => user.machineIdentifier === machineIdentifier) : null,
+		getServerSettings: (machineIdentifier?: string) => machineIdentifier ? state.serverSettings.data.find((user) => user.machineIdentifier === machineIdentifier) : null,
 		/**
      * Returns the server name for the given machine identifier.
      * If the debug mode is enabled, the server name will be masked.
      * If there is no custom server name, an empty string will be returned.
      * @param machineIdentifier The machine identifier of the server.
      */
-		getServerName: (machineIdentifier: string) =>
-			getters.shouldMaskServerNames.value
-				? '**MASKED**'
-				: actions.getServerSettings(machineIdentifier)?.plexServerName ?? '',
+		getServerName: (machineIdentifier: string) => getters.shouldMaskServerNames.value ? '**MASKED**' : actions.getServerSettings(machineIdentifier)?.plexServerName ?? '',
 
 		isConfirmationEnabled: (type: PlexMediaType) => {
 			switch (type) {
@@ -195,9 +173,7 @@ export const useSettingsStore = defineStore('SettingsStore', () => {
 		shouldMaskLibraryNames: computed((): boolean => state.debugSettings.debugModeEnabled && state.debugSettings.maskLibraryNames),
 	};
 	return {
-		...toRefs(state),
-		...actions,
-		...getters,
+		...toRefs(state), ...actions, ...getters,
 	};
 });
 

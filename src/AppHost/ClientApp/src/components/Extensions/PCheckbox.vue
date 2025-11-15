@@ -10,7 +10,7 @@
 <script setup lang="ts">
 const props = withDefaults(
 	defineProps<{
-		value: boolean;
+		value?: boolean;
 	}>(),
 	{
 		value: false,

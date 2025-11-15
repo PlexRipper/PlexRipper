@@ -42,7 +42,7 @@ const showPassword = ref(false);
 
 const props = withDefaults(defineProps<{
 	hideMaskButton?: boolean;
-	cy: string;
+	cy?: string;
 	showStrength?: boolean;
 	minPasswordLength?: number;
 	disableValidation?: boolean;

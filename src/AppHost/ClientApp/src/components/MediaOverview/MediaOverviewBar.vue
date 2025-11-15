@@ -125,7 +125,7 @@ const settingsStore = useSettingsStore();
 
 const props = withDefaults(defineProps<{
 	mediaType: PlexMediaType;
-	libraryId: number;
+	libraryId?: number;
 	detailMode?: boolean;
 	mediaDetailItem?: PlexMediaDTO | null;
 	allMediaMode?: boolean;

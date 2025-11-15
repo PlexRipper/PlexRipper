@@ -123,7 +123,7 @@ const defaultOpened = ref(false);
 const { t } = useI18n();
 const props = withDefaults(
 	defineProps<{
-		mediaItem: PlexMediaDTO | null;
+		mediaItem?: PlexMediaDTO | null;
 		loading?: boolean;
 		disableIntersection: boolean;
 		disableHighlight: boolean;

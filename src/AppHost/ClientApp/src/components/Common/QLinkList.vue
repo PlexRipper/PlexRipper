@@ -28,7 +28,7 @@
 
 <script setup lang="ts">
 withDefaults(defineProps<{
-	list: { text: string; link?: string }[];
+	list?: { text: string; link?: string }[];
 	cy?: string;
 }>(), {
 	list: () => [],

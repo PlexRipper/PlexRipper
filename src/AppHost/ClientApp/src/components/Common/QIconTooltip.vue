@@ -15,8 +15,8 @@
 import type { QIconTooltipData } from '@interfaces';
 
 const props = withDefaults(defineProps<{
-	value: number | string;
-	options: QIconTooltipData[]; }>(), {
+	value?: number | string;
+	options?: QIconTooltipData[]; }>(), {
 	value: '',
 	options: () => [],
 });

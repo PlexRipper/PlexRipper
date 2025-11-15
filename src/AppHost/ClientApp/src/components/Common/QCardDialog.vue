@@ -92,7 +92,6 @@ const props = withDefaults(
 		cy?: string;
 	}>(),
 	{
-		name: '',
 		type: undefined,
 		width: '1000px',
 		contentHeight: '0',

@@ -37,7 +37,7 @@ public class DownloadClientAuthenticationPreProcessor<TRequest> : IPreProcessor<
             
             if (userAgent.Contains("Radarr") || userAgent.Contains("Sonarr"))
             {
-                _log.Information( "Downloading client appears to be Radarr or Sonarr. Sometimes an old SID cookie is cached and restarting Radarr/Sonarr can resolve this issue.");
+                _log.Here().Information( "Downloading client appears to be Radarr or Sonarr. Sometimes an old SID cookie is cached and restarting Radarr/Sonarr can resolve this issue.");
             }
             
             await ctx.HttpContext.Response.SendUnauthorizedAsync(cancellation: ct);
@@ -55,6 +55,8 @@ public class DownloadClientAuthenticationPreProcessor<TRequest> : IPreProcessor<
 
         if (entity.ExpiresAt <= DateTimeOffset.UtcNow)
         {
+            _log.Here().Debug("Download client session with SID '{Sid}' has expired at {ExpiresAt} and will be removed.",
+                sid, entity.ExpiresAt);
             _authDbContext.DownloadClientSessions.Remove(entity);
             await _authDbContext.SaveChangesAsync(ct);
             return false;

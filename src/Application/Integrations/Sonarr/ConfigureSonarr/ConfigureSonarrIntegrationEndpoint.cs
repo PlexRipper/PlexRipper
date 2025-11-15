@@ -70,7 +70,7 @@ public class ConfigureSonarrIntegrationEndpoint : BaseEndpoint<ConfigureSonarrIn
             );
             return;
         }
-        
+
         _sonarrSettings.SonarrBaseUrl = req.Url.TrimEnd('/');
         _sonarrSettings.SonarrApiKey = req.ApiKey;
 

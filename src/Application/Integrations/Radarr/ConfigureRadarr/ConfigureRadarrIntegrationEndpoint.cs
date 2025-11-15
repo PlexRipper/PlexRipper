@@ -69,7 +69,7 @@ public class ConfigureRadarrIntegrationEndpoint : BaseEndpoint<ConfigureRadarrIn
             );
             return;
         }
-        
+
         _radarrSettings.RadarrBaseUrl = req.Url.TrimEnd('/');
         _radarrSettings.RadarrApiKey = req.ApiKey;
 

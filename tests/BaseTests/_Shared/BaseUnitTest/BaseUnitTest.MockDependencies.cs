@@ -97,7 +97,7 @@ public partial class BaseUnitTest
                 }
             )
             .As<IReaparrDbContextFactory>()
-            .SingleInstance();
+            .InstancePerDependency();
     }
 
     protected void SetupHttpClient(Action<Mock<HttpMessageHandler>>? action = null)

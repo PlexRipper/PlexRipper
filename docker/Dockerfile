@@ -17,7 +17,7 @@ ENV NUXT_PUBLIC_IS_DOCKER=true
 WORKDIR /tmp/ClientApp
 
 ## Copy the package.json and install the dependencies
-COPY ./src/AppHost/ClientApp/package.json ./src/AppHost/ClientApp/bun.lockb ./
+COPY ./src/AppHost/ClientApp/package.json ./src/AppHost/ClientApp/bun.lock ./
 RUN bun install --frozen-lockfile
 
 ## Copy the project files

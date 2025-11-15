@@ -21,7 +21,6 @@ public class ConfigureSonarrIntegrationRequestValidator : Validator<ConfigureSon
     }
 }
 
-
 public class ConfigureSonarrIntegrationEndpoint : BaseEndpoint<ConfigureSonarrIntegrationRequest>
 {
     private readonly ILogger _log;
@@ -63,11 +62,16 @@ public class ConfigureSonarrIntegrationEndpoint : BaseEndpoint<ConfigureSonarrIn
 
         if (!Uri.TryCreate(reaparrBase, UriKind.Absolute, out var reaparrBaseUri))
         {
-            await SendFluentResult(ResultExtensions.Create400BadRequestResult("Could not derive Reaparr base URL from request.").LogError(), ct);
+            await SendFluentResult(
+                ResultExtensions
+                    .Create400BadRequestResult("Could not derive Reaparr base URL from request.")
+                    .LogError(),
+                ct
+            );
             return;
         }
         
-        _sonarrSettings.SonarrBaseUrl =  req.Url.TrimEnd('/');
+        _sonarrSettings.SonarrBaseUrl = req.Url.TrimEnd('/');
         _sonarrSettings.SonarrApiKey = req.ApiKey;
 
         // Upsert download client

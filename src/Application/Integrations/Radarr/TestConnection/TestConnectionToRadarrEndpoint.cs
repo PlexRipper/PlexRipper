@@ -83,11 +83,7 @@ public class TestConnectionToRadarrEndpoint
 
         try
         {
-            using var httpResponse = await _client.SendAsync(
-                httpRequest,
-                HttpCompletionOption.ResponseHeadersRead,
-                ct
-            );
+            using var httpResponse = await _client.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead, ct);
             if (httpResponse.IsSuccessStatusCode)
             {
                 await SendTestResult(TestConnectionStatus.Success, ct);

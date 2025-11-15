@@ -61,11 +61,16 @@ public class ConfigureRadarrIntegrationEndpoint : BaseEndpoint<ConfigureRadarrIn
 
         if (!Uri.TryCreate(reaparrBase, UriKind.Absolute, out var reaparrBaseUri))
         {
-            await SendFluentResult(ResultExtensions.Create400BadRequestResult("Could not derive Reaparr base URL from request.").LogError(), ct);
+            await SendFluentResult(
+                ResultExtensions
+                    .Create400BadRequestResult("Could not derive Reaparr base URL from request.")
+                    .LogError(),
+                ct
+            );
             return;
         }
         
-        _radarrSettings.RadarrBaseUrl =  req.Url.TrimEnd('/');
+        _radarrSettings.RadarrBaseUrl = req.Url.TrimEnd('/');
         _radarrSettings.RadarrApiKey = req.ApiKey;
 
         // Upsert download client

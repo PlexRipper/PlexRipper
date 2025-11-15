@@ -71,9 +71,9 @@
 					:title="t('help.settings.integrations.radarr.setup-configuration.title')"
 					hide-label>
 					<BaseButton
-						:label="t('components.radarr-integration.nav-bar.configure.button')"
 						:loading="isConfiguring"
 						icon="mdi-connection"
+						:label="t('components.radarr-integration.nav-bar.configure.button')"
 						@click="configureRadarrSetup" />
 				</HelpRow>
 			</QStep>
@@ -126,6 +126,7 @@ function testRadarrConnection() {
 	}
 
 	set(isTesting, true);
+	set(testSuccess, null);
 	set(testMessage, '');
 	set(error, null);
 	useSubscription(integrationApi.testConnectionToRadarrEndpoint({
@@ -137,7 +138,7 @@ function testRadarrConnection() {
 				case TestConnectionStatus.Success:
 					set(testSuccess, true);
 					set(testMessage, t('components.radarr-integration.connection-status.success'));
-					set(step, settingsStore.integrationsSettings.radarr.isConfigured ? 3 : 2);
+					set(step, 2);
 					break;
 				case TestConnectionStatus.InvalidApiKey:
 					set(testSuccess, false);
@@ -158,6 +159,7 @@ function testRadarrConnection() {
 			}
 		} else {
 			set(testSuccess, false);
+			set(testMessage, formatErrorResponse(response));
 			set(error, response);
 		}
 		set(isTesting, false);
@@ -166,6 +168,8 @@ function testRadarrConnection() {
 
 function configureRadarrSetup() {
 	set(isConfiguring, true);
+	set(configuringSuccess, null);
+	set(configuringMessage, '');
 	set(testMessage, '');
 	set(error, null);
 	useSubscription(integrationApi.configureRadarrIntegrationEndpoint({
@@ -176,7 +180,7 @@ function configureRadarrSetup() {
 		set(isConfiguring, false);
 		if (response.isSuccess) {
 			set(configuringMessage, t('components.radarr-integration.configuration-status.success'));
-			set(step, 3);
+			set(step, 2);
 		} else {
 			set(error, response);
 		}

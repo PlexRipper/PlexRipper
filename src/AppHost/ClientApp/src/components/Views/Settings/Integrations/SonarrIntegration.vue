@@ -126,6 +126,7 @@ function testSonarrConnection() {
 	}
 
 	set(isTesting, true);
+	set(testSuccess, null);
 	set(testMessage, '');
 	set(error, null);
 	useSubscription(integrationApi.testConnectionToSonarrEndpoint({
@@ -137,7 +138,7 @@ function testSonarrConnection() {
 				case TestConnectionStatus.Success:
 					set(testSuccess, true);
 					set(testMessage, t('components.sonarr-integration.connection-status.success'));
-					set(step, settingsStore.integrationsSettings.sonarr.isConfigured ? 3 : 2);
+					set(step, 2);
 					break;
 				case TestConnectionStatus.InvalidApiKey:
 					set(testSuccess, false);
@@ -158,6 +159,7 @@ function testSonarrConnection() {
 			}
 		} else {
 			set(testSuccess, false);
+			set(testMessage, formatErrorResponse(response));
 			set(error, response);
 		}
 		set(isTesting, false);
@@ -166,6 +168,8 @@ function testSonarrConnection() {
 
 function configureSonarrSetup() {
 	set(isConfiguring, true);
+	set(configuringSuccess, null);
+	set(configuringMessage, '');
 	set(testMessage, '');
 	set(error, null);
 	useSubscription(integrationApi.configureSonarrIntegrationEndpoint({
@@ -176,7 +180,7 @@ function configureSonarrSetup() {
 		set(isConfiguring, false);
 		if (response.isSuccess) {
 			set(configuringMessage, t('components.sonarr-integration.configuration-status.success'));
-			set(step, 3);
+			set(step, 2);
 		} else {
 			set(error, response);
 		}

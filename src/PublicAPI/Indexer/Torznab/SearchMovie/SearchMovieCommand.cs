@@ -101,7 +101,7 @@ public class SearchMovieCommandHandler : ICommandHandler<SearchMovieCommand, Tor
 
         // Otherwise apply filters only for the provided external IDs
         if (!string.IsNullOrWhiteSpace(command.IMDB_ID))
-            baseQuery = baseQuery.Where(m => m.Guid_IMDB == command.IMDB_ID);
+            baseQuery = baseQuery.Where(m => m.Guid_IMDB == "tt" + command.IMDB_ID);
 
         if (command.TMDB_ID > 0)
             baseQuery = baseQuery.Where(m => m.Guid_TMDB == command.TMDB_ID);

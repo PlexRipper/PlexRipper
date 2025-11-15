@@ -134,7 +134,7 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, T
 
         // Otherwise apply filters for a specific episode, adding external ID predicates only when provided
         if (!string.IsNullOrWhiteSpace(command.IMDB_ID))
-            baseQuery = baseQuery.Where(e => e.TvShow!.Guid_IMDB == command.IMDB_ID);
+            baseQuery = baseQuery.Where(e => e.TvShow!.Guid_IMDB == "tt" + command.IMDB_ID);
 
         if (command.TMDB_ID > 0)
             baseQuery = baseQuery.Where(e => e.TvShow!.Guid_TMDB == command.TMDB_ID);

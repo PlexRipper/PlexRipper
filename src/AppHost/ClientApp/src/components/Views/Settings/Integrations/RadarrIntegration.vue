@@ -10,13 +10,13 @@
 			header-nav>
 			<!-- Setup Radarr Connection -->
 			<QStep
-				:done="testSuccess"
-				:error="!testSuccess && testMessage !== ''"
+				:done="testSuccess === true"
+				:error="testSuccess === false && testMessage !== ''"
 				:name="1"
-				done-color="positive"
-				done-icon="mdi-check"
+				:title="t('components.radarr-integration.nav-bar.connection.title')"
 				active-icon="mdi-connection"
-				:title="t('components.radarr-integration.nav-bar.connection.title')">
+				done-color="positive"
+				done-icon="mdi-check">
 				<!-- Base URL -->
 				<HelpRow
 					:col-label="3"
@@ -56,14 +56,14 @@
 			</QStep>
 			<!-- Configure Radarr Integration -->
 			<QStep
+				:disable="testSuccess === false"
 				:done="settingsStore.integrationsSettings.radarr.isConfigured"
 				:name="2"
+				:title="t('components.radarr-integration.nav-bar.configure.title')"
+				active-icon="mdi-cog"
 				done-color="positive"
 				done-icon="mdi-check"
-				icon="mdi-cog"
-				active-icon="mdi-cog"
-				:disable="testSuccess === false"
-				:title="t('components.radarr-integration.nav-bar.configure.title')">
+				icon="mdi-cog">
 				<!-- Setup Radarr Integration -->
 				<HelpRow
 					:col-label="3"
@@ -71,9 +71,9 @@
 					:title="t('help.settings.integrations.radarr.setup-configuration.title')"
 					hide-label>
 					<BaseButton
+						:label="t('components.radarr-integration.nav-bar.configure.button')"
 						:loading="isConfiguring"
 						icon="mdi-connection"
-						:label="t('components.radarr-integration.nav-bar.configure.button')"
 						@click="configureRadarrSetup" />
 				</HelpRow>
 			</QStep>
@@ -114,9 +114,9 @@ const step = ref(1);
 const passwordInputFocus = ref(false);
 const isTesting = ref(false);
 const isConfiguring = ref(false);
-const testSuccess = ref(false);
+const testSuccess = ref<boolean | null>(null);
 const testMessage = ref('');
-const configuringSuccess = ref(false);
+const configuringSuccess = ref<boolean | null>(null);
 const configuringMessage = ref('');
 const error = ref<BaseResultDTO | null>(null);
 
@@ -127,6 +127,7 @@ function testRadarrConnection() {
 
 	set(isTesting, true);
 	set(testMessage, '');
+	set(error, null);
 	useSubscription(integrationApi.testConnectionToRadarrEndpoint({
 		url: settingsStore.integrationsSettings.radarr.radarrBaseUrl,
 		apiKey: settingsStore.integrationsSettings.radarr.radarrApiKey,
@@ -166,6 +167,7 @@ function testRadarrConnection() {
 function configureRadarrSetup() {
 	set(isConfiguring, true);
 	set(testMessage, '');
+	set(error, null);
 	useSubscription(integrationApi.configureRadarrIntegrationEndpoint({
 		url: settingsStore.integrationsSettings.radarr.radarrBaseUrl,
 		apiKey: settingsStore.integrationsSettings.radarr.radarrApiKey,
@@ -189,7 +191,3 @@ onBeforeMount(async () => {
 	}
 });
 </script>
-
-
-
-

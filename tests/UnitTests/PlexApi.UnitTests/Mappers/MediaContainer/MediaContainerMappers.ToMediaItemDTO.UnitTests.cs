@@ -1,5 +1,10 @@
-using LukeHagar.PlexAPI.SDK.Models.Requests;
 using NodaTime;
+using Guids = LukeHagar.PlexAPI.SDK.Models.Components.Guids;
+using Media = LukeHagar.PlexAPI.SDK.Models.Components.Media;
+using Metadata = LukeHagar.PlexAPI.SDK.Models.Components.Metadata;
+using Part = LukeHagar.PlexAPI.SDK.Models.Components.Part;
+using Stream = LukeHagar.PlexAPI.SDK.Models.Components.Stream;
+using Tag = LukeHagar.PlexAPI.SDK.Models.Components.Tag;
 
 namespace Reaparr.PlexApi.UnitTests
 {
@@ -16,11 +21,11 @@ namespace Reaparr.PlexApi.UnitTests
             var addedAtUnixTime = now.ToUnixTimeSeconds();
             var updatedAtUnixTime = now.AddDays(1).ToUnixTimeSeconds();
 
-            var sourceData = new GetMediaMetaDataMetadata
+            var sourceData = new Metadata
             {
                 RatingKey = "123",
                 Key = "/library/metadata/123",
-                Type = GetMediaMetaDataType.Movie,
+                Type = "movie",
                 Title = "Test Movie",
                 Summary = "Test summary",
                 Year = 2023,
@@ -46,7 +51,7 @@ namespace Reaparr.PlexApi.UnitTests
                 // Collections of nested objects
                 Media =
                 [
-                    new GetMediaMetaDataMedia
+                    new Media
                     {
                         Id = 789,
                         Duration = 5400000,
@@ -65,7 +70,7 @@ namespace Reaparr.PlexApi.UnitTests
                         HasVoiceActivity = true,
                         Part =
                         [
-                            new GetMediaMetaDataPart
+                            new Part
                             {
                                 Id = 101,
                                 Accessible = true,
@@ -80,7 +85,7 @@ namespace Reaparr.PlexApi.UnitTests
                                 AudioProfile = "lc",
                                 Stream =
                                 [
-                                    new GetMediaMetaDataStream
+                                    new Stream
                                     {
                                         Default = true,
                                         Codec = "h264",
@@ -96,19 +101,10 @@ namespace Reaparr.PlexApi.UnitTests
                         ],
                     },
                 ],
-                Genre = [new GetMediaMetaDataGenre { Tag = "Action" }, new GetMediaMetaDataGenre { Tag = "Sci-Fi" }],
-                Country = [new GetMediaMetaDataCountry { Tag = "USA" }],
-                Role = [new GetMediaMetaDataRole { Tag = "Actor Name" }],
-                Ratings =
-                [
-                    new GetMediaMetaDataRatings
-                    {
-                        Image = "imdb://image",
-                        Type = "imdb",
-                        Value = 8.7f,
-                    },
-                ],
-                Guids = [new GetMediaMetaDataGuids { Id = "imdb://tt1234567" }],
+                Genre = [new Tag { TagValue = "Action" }, new Tag { TagValue = "Sci-Fi" }],
+                Country = [new Tag { TagValue = "USA" }],
+                Role = [new Tag { TagValue = "Actor Name" }],
+                Guids = [new Guids { Id = "imdb://tt1234567" }],
             };
 
             // Act
@@ -122,12 +118,12 @@ namespace Reaparr.PlexApi.UnitTests
             result.Summary.ShouldBe(sourceData.Summary);
             result.Year.ShouldBe(sourceData.Year ?? 0);
             result.OriginalTitle.ShouldBe(sourceData.OriginalTitle);
-            result.ChildCount.ShouldBe(sourceData.ChildCount);
+            result.ChildCount.ShouldBe(sourceData.ChildCount ?? 0);
             result.Studio.ShouldBe(sourceData.Studio);
             result.ContentRating.ShouldBe(sourceData.ContentRating);
 
             // Duration is in milliseconds and we want seconds
-            result.Duration.ShouldBe(sourceData.Duration / 1000);
+            result.Duration.ShouldBe((sourceData.Duration ?? 0) / 1000);
 
             result.Thumb.ShouldBe(sourceData.Thumb);
             result.Art.ShouldBe(sourceData.Art);
@@ -151,22 +147,18 @@ namespace Reaparr.PlexApi.UnitTests
             result.ParentTitle.ShouldBe(sourceData.ParentTitle);
             result.ParentGuid.ShouldBe(sourceData.ParentGuid);
             result.ParentRatingKey.ShouldBe(sourceData.ParentRatingKey);
-            result.AudienceRating.ShouldBe(sourceData.AudienceRating);
-            result.Rating.ShouldBe(sourceData.Rating);
+            result.AudienceRating.ShouldBe(sourceData.AudienceRating ?? 0f);
+            result.Rating.ShouldBe(sourceData.Rating ?? 0f);
 
             // Collections
             result.Genre.Count.ShouldBe(sourceData.Genre.Count);
-            result.Genre.First().Name.ShouldBe(sourceData.Genre.First().Tag);
+            result.Genre.First().Name.ShouldBe(sourceData.Genre.First().TagValue);
 
             result.Country.Count.ShouldBe(sourceData.Country.Count);
-            result.Country.First().Name.ShouldBe(sourceData.Country.First().Tag);
+            result.Country.First().Name.ShouldBe(sourceData.Country.First().TagValue);
 
             result.Role.Count.ShouldBe(sourceData.Role.Count);
-            result.Role.First().Name.ShouldBe(sourceData.Role.First().Tag);
-
-            result.Ratings.Count.ShouldBe(sourceData.Ratings.Count);
-            result.Ratings.First().Type.ShouldBe(sourceData.Ratings.First().Type);
-            result.Ratings.First().Value.ShouldBe(sourceData.Ratings.First().Value);
+            result.Role.First().Name.ShouldBe(sourceData.Role.First().TagValue);
 
             result.Guids.Count.ShouldBe(sourceData.Guids.Count);
             result.Guids.First().Id.ShouldBe(sourceData.Guids.First().Id);
@@ -210,11 +202,11 @@ namespace Reaparr.PlexApi.UnitTests
             var addedAtUnixTime = now.ToUnixTimeSeconds();
             var updatedAtUnixTime = now.AddDays(1).ToUnixTimeSeconds();
 
-            var sourceData = new GetMediaMetaDataMetadata
+            var sourceData = new Metadata
             {
                 RatingKey = "456",
                 Key = "/library/metadata/456",
-                Type = GetMediaMetaDataType.TvShow,
+                Type = "show",
                 Title = "Test TV Show",
                 Summary = "Test TV show summary",
                 Year = 2020,
@@ -236,33 +228,10 @@ namespace Reaparr.PlexApi.UnitTests
 
                 // Collections of nested objects
                 Media = [], // TV Shows typically don't have direct media, episodes do
-                Genre = [new GetMediaMetaDataGenre { Tag = "Drama" }, new GetMediaMetaDataGenre { Tag = "Mystery" }],
-                Country = [new GetMediaMetaDataCountry { Tag = "United Kingdom" }],
-                Role =
-                [
-                    new GetMediaMetaDataRole { Tag = "Lead Actor" },
-                    new GetMediaMetaDataRole { Tag = "Supporting Actor" },
-                ],
-                Ratings =
-                [
-                    new GetMediaMetaDataRatings
-                    {
-                        Image = "imdb://image/show",
-                        Type = "imdb",
-                        Value = 9.2f,
-                    },
-                    new GetMediaMetaDataRatings
-                    {
-                        Image = "tmdb://image/show",
-                        Type = "tmdb",
-                        Value = 8.9f,
-                    },
-                ],
-                Guids =
-                [
-                    new GetMediaMetaDataGuids { Id = "imdb://tt7654321" },
-                    new GetMediaMetaDataGuids { Id = "tmdb://12345" },
-                ],
+                Genre = [new Tag { TagValue = "Drama" }, new Tag { TagValue = "Mystery" }],
+                Country = [new Tag { TagValue = "United Kingdom" }],
+                Role = [new Tag { TagValue = "Lead Actor" }, new Tag { TagValue = "Supporting Actor" }],
+                Guids = [new Guids { Id = "imdb://tt7654321" }, new Guids { Id = "tmdb://12345" }],
             };
 
             // Act
@@ -276,7 +245,7 @@ namespace Reaparr.PlexApi.UnitTests
             result.Summary.ShouldBe(sourceData.Summary);
             result.Year.ShouldBe(sourceData.Year ?? 0);
             result.OriginalTitle.ShouldBe(sourceData.OriginalTitle);
-            result.ChildCount.ShouldBe(sourceData.ChildCount);
+            result.ChildCount.ShouldBe(sourceData.ChildCount ?? 0);
             result.Studio.ShouldBe(sourceData.Studio);
             result.ContentRating.ShouldBe(sourceData.ContentRating);
 
@@ -302,26 +271,20 @@ namespace Reaparr.PlexApi.UnitTests
             result.OriginallyAvailableAt.ShouldNotBeNull();
             result.OriginallyAvailableAt.ShouldBe(sourceData.OriginallyAvailableAt.ToString());
 
-            result.AudienceRating.ShouldBe(sourceData.AudienceRating);
-            result.Rating.ShouldBe(sourceData.Rating);
+            result.AudienceRating.ShouldBe(sourceData.AudienceRating ?? 0f);
+            result.Rating.ShouldBe(sourceData.Rating ?? 0f);
 
             // Collections
             result.Genre.Count.ShouldBe(sourceData.Genre.Count);
-            result.Genre.First().Name.ShouldBe(sourceData.Genre.First().Tag);
-            result.Genre.Last().Name.ShouldBe(sourceData.Genre.Last().Tag);
+            result.Genre.First().Name.ShouldBe(sourceData.Genre.First().TagValue);
+            result.Genre.Last().Name.ShouldBe(sourceData.Genre.Last().TagValue);
 
             result.Country.Count.ShouldBe(sourceData.Country.Count);
-            result.Country.First().Name.ShouldBe(sourceData.Country.First().Tag);
+            result.Country.First().Name.ShouldBe(sourceData.Country.First().TagValue);
 
             result.Role.Count.ShouldBe(sourceData.Role.Count);
-            result.Role.First().Name.ShouldBe(sourceData.Role.First().Tag);
-            result.Role.Last().Name.ShouldBe(sourceData.Role.Last().Tag);
-
-            result.Ratings.Count.ShouldBe(sourceData.Ratings.Count);
-            result.Ratings.First().Type.ShouldBe(sourceData.Ratings.First().Type);
-            result.Ratings.First().Value.ShouldBe(sourceData.Ratings.First().Value);
-            result.Ratings.Last().Type.ShouldBe(sourceData.Ratings.Last().Type);
-            result.Ratings.Last().Value.ShouldBe(sourceData.Ratings.Last().Value);
+            result.Role.First().Name.ShouldBe(sourceData.Role.First().TagValue);
+            result.Role.Last().Name.ShouldBe(sourceData.Role.Last().TagValue);
 
             result.Guids.Count.ShouldBe(sourceData.Guids.Count);
             result.Guids.First().Id.ShouldBe(sourceData.Guids.First().Id);

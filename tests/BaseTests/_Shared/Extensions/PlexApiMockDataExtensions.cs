@@ -1,10 +1,10 @@
-using LukeHagar.PlexAPI.SDK.Models.Requests;
+using LukeHagar.PlexAPI.SDK.Models.Components;
 
 namespace Reaparr.BaseTests;
 
 public static class PlexApiMockDataExtensions
 {
-    public static void SetParentValues(this GetMediaMetaDataMetadata destination, GetMediaMetaDataMetadata source)
+    public static void SetParentValues(this Metadata destination, Metadata source)
     {
         destination.ParentKey = source.Key;
         destination.ParentIndex = source.Index;
@@ -14,12 +14,11 @@ public static class PlexApiMockDataExtensions
         destination.ParentThumb = source.Thumb;
     }
 
-    public static void SetGrandparentValues(this GetMediaMetaDataMetadata destination, GetMediaMetaDataMetadata source)
+    public static void SetGrandparentValues(this Metadata destination, Metadata source)
     {
         destination.GrandparentKey = source.Key;
         destination.GrandparentGuid = source.Guid;
         destination.GrandparentRatingKey = source.RatingKey;
-        destination.GrandparentSlug = source.Slug;
         destination.GrandparentTitle = source.Title;
         destination.GrandparentThumb = source.Thumb;
     }

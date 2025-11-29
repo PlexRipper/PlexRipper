@@ -1,38 +1,31 @@
 ﻿using Bogus.Hollywood;
+using LukeHagar.PlexAPI.SDK.Models.Components;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
 using Reaparr.PlexApi;
 using Reaparr.PlexApi.Contracts;
+using Metadata = LukeHagar.PlexAPI.SDK.Models.Components.Metadata;
 
 namespace Reaparr.BaseTests;
 
 public partial class FakePlexApiData
 {
-    private static readonly Faker<GetLibraryItemsPart> _getLibraryItemsPartFaker = new Faker<GetLibraryItemsPart>()
+    private static readonly Faker<Part> _getLibraryItemsPartFaker = new Faker<Part>()
         .StrictMode(true)
-        .RuleFor(l => l.Id, f => f.Random.Number(100000))
+        .RuleFor(l => l.Id, f => f.Random.Long(100000))
         .RuleFor(l => l.Key, f => f.Random.Uuid().ToString())
         .RuleFor(l => l.Duration, f => f.Random.Int(1))
         .RuleFor(l => l.File, f => f.Lorem.Word())
-        .RuleFor(l => l.Size, f => f.Random.Int(1))
-        .RuleFor(
-            l => l.HasThumbnail,
-            // set to null to avoid Unable to cast object of type 'System.Int64' to type 'System.String'.
-            _ => null
-        //f => f.Random.Bool() ? GetLibraryItemsHasThumbnail.True : GetLibraryItemsHasThumbnail.False
-        )
-        .RuleFor(
-            l => l.OptimizedForStreaming,
-            f => GetLibraryItemsLibraryOptimizedForStreaming.CreateBoolean(f.Random.Bool())
-        )
+        .RuleFor(l => l.Size, f => f.Random.Long(1))
+        .RuleFor(l => l.OptimizedForStreaming, f => f.Random.Bool())
         .RuleFor(l => l.Has64bitOffsets, f => f.Random.Bool())
         .RuleFor(l => l.AudioProfile, _ => "dts")
         .RuleFor(l => l.Container, _ => "mkv")
         .RuleFor(l => l.Indexes, _ => "sd")
         .RuleFor(l => l.VideoProfile, _ => "high");
 
-    private static readonly Faker<GetLibraryItemsMedia> _getLibraryItemsMedia = new Faker<GetLibraryItemsMedia>()
+    private static readonly Faker<Media> _getLibraryItemsMedia = new Faker<Media>()
         .StrictMode(true)
-        .RuleFor(l => l.Id, f => f.Random.Number(100000))
+        .RuleFor(l => l.Id, f => f.Random.Long(100000))
         .RuleFor(l => l.Duration, f => f.Random.Int(1))
         .RuleFor(l => l.Bitrate, f => f.Random.Int(1))
         .RuleFor(l => l.Width, f => f.Random.Int(1))
@@ -52,94 +45,70 @@ public partial class FakePlexApiData
             l => l.OptimizedForStreaming,
             // set to null to avoid Unable to cast object of type 'System.Int64' to type 'System.String'.
             _ => null
-        // f =>
-        //     f.Random.Bool()
-        //         ? GetLibraryItemsOptimizedForStreaming.Enable
-        //         : GetLibraryItemsOptimizedForStreaming.Disable
         )
         .RuleFor(l => l.Has64bitOffsets, f => f.Random.Bool())
         .RuleFor(l => l.Part, _ => []); // Generated in FinishWith
 
-    private static readonly Faker<GetLibraryItemsMetadata> _getLibraryItemsMetadata =
-        new Faker<GetLibraryItemsMetadata>()
-            .StrictMode(false)
-            .RuleFor(l => l.RatingKey, f => f.Random.Number(100000).ToString())
-            .RuleFor(l => l.ParentRatingKey, f => f.Random.Number(100000).ToString())
-            .RuleFor(l => l.Key, (_, x) => $"/library/metadata/{x.RatingKey}")
-            .RuleFor(l => l.Type, _ => GetLibraryItemsType.Movie) // Generated in FinishWith
-            .RuleFor(l => l.Guid, _ => string.Empty) // Generated in FinishWith
-            .RuleFor(l => l.Studio, f => f.Movies().Production())
-            .RuleFor(l => l.Title, f => f.Movies().MovieTitle())
-            .RuleFor(l => l.TitleSort, (_, x) => x.Title.ToLower())
-            .RuleFor(l => l.ContentRating, _ => "nl/6")
-            .RuleFor(l => l.Summary, f => f.Movies().MovieOverview())
-            .RuleFor(l => l.Rating, f => f.Random.Double() * 10)
-            .RuleFor(l => l.AudienceRating, f => f.Random.Double() * 10)
-            .RuleFor(l => l.ViewOffset, f => f.Random.Int(1))
-            .RuleFor(l => l.LastViewedAt, _ => 0)
-            .RuleFor(l => l.Year, f => f.Random.Int(0, DateTime.Now.Year))
-            .RuleFor(l => l.AddedAt, f => f.Date.Past().ToUnixLong())
-            .RuleFor(l => l.UpdatedAt, f => f.Date.Recent().ToUnixLong())
-            .RuleFor(l => l.Thumb, (_, x) => $"/library/metadata/{x.RatingKey}/thumb/${x.UpdatedAt}")
-            .RuleFor(l => l.Art, (_, x) => $"/library/metadata/{x.RatingKey}/art/${x.UpdatedAt}")
-            .RuleFor(l => l.Banner, (f, x) => $"/library/metadata/{x.RatingKey}/banner/{f.Random.Int(100000, 1000000)}")
-            .RuleFor(l => l.Theme, (f, x) => $"/library/metadata/{x.RatingKey}/theme/{f.Random.Int(100000, 1000000)}")
-            .RuleFor(l => l.Duration, f => f.Random.Int(1))
-            // set to null to avoid serializing the entire LocalDate object, needs to be long
-            .RuleFor(l => l.OriginallyAvailableAt, _ => null)
-            .RuleFor(l => l.AudienceRatingImage, _ => "rottentomatoes://image.rating.upright")
-            .RuleFor(l => l.Index, f => f.Random.Int(1))
-            .RuleFor(l => l.LeafCount, f => f.Random.Int(1))
-            .RuleFor(l => l.ViewedLeafCount, f => f.Random.Int(1))
-            .RuleFor(l => l.ChildCount, f => f.Random.Int(1, 10))
-            .RuleFor(l => l.ViewCount, _ => default)
-            .RuleFor(l => l.SkipCount, _ => default)
-            .RuleFor(l => l.LastViewedAt, _ => default)
-            .RuleFor(l => l.Media, _ => []); // Generated in FinishWith
+    private static readonly Faker<Metadata> _getLibraryItemsMetadata = new Faker<Metadata>()
+        .StrictMode(false)
+        .RuleFor(l => l.RatingKey, f => f.Random.Number(100000).ToString())
+        .RuleFor(l => l.ParentRatingKey, f => f.Random.Number(100000).ToString())
+        .RuleFor(l => l.Key, (_, x) => $"/library/metadata/{x.RatingKey}")
+        .RuleFor(l => l.Type, _ => "movie") // Generated in FinishWith
+        .RuleFor(l => l.Guid, _ => string.Empty) // Generated in FinishWith
+        .RuleFor(l => l.Studio, f => f.Movies().Production())
+        .RuleFor(l => l.Title, f => f.Movies().MovieTitle())
+        .RuleFor(l => l.TitleSort, (_, x) => x.Title.ToLower())
+        .RuleFor(l => l.ContentRating, _ => "nl/6")
+        .RuleFor(l => l.Summary, f => f.Movies().MovieOverview())
+        .RuleFor(l => l.Rating, f => f.Random.Float() * 10)
+        .RuleFor(l => l.AudienceRating, f => f.Random.Float() * 10)
+        .RuleFor(l => l.ViewOffset, f => f.Random.Int(1))
+        .RuleFor(l => l.LastViewedAt, _ => 0)
+        .RuleFor(l => l.Year, f => f.Random.Int(0, DateTime.Now.Year))
+        .RuleFor(l => l.AddedAt, f => f.Date.Past().ToUnixLong())
+        .RuleFor(l => l.UpdatedAt, f => f.Date.Recent().ToUnixLong())
+        .RuleFor(l => l.Thumb, (_, x) => $"/library/metadata/{x.RatingKey}/thumb/${x.UpdatedAt}")
+        .RuleFor(l => l.Art, (_, x) => $"/library/metadata/{x.RatingKey}/art/${x.UpdatedAt}")
+        .RuleFor(l => l.Banner, (f, x) => $"/library/metadata/{x.RatingKey}/banner/{f.Random.Int(100000, 1000000)}")
+        .RuleFor(l => l.Theme, (f, x) => $"/library/metadata/{x.RatingKey}/theme/{f.Random.Int(100000, 1000000)}")
+        .RuleFor(l => l.Duration, f => f.Random.Int(1))
+        // set to null to avoid serializing the entire LocalDate object, needs to be long
+        .RuleFor(l => l.OriginallyAvailableAt, _ => null)
+        .RuleFor(l => l.AudienceRatingImage, _ => "rottentomatoes://image.rating.upright")
+        .RuleFor(l => l.Index, f => f.Random.Int(1))
+        .RuleFor(l => l.LeafCount, f => f.Random.Int(1))
+        .RuleFor(l => l.ViewedLeafCount, f => f.Random.Int(1))
+        .RuleFor(l => l.ChildCount, f => f.Random.Int(1, 10))
+        .RuleFor(l => l.ViewCount, _ => default)
+        .RuleFor(l => l.Media, _ => []); // Generated in FinishWith
 
     /// <summary>
     /// Generates a fake response for the GetLibraryItemsResponse operation
     /// URL: /library/sections/{sectionKey}/{tag}
     /// </summary>
-    private static readonly Faker<GetLibraryItemsMediaContainer> _getLibraryItemsMediaContainer =
-        new Faker<GetLibraryItemsMediaContainer>()
+    private static readonly Faker<MediaContainerWithMetadataMediaContainer> _getLibraryItemsMediaContainer =
+        new Faker<MediaContainerWithMetadataMediaContainer>()
             .StrictMode(true)
-            .RuleFor(x => x.TotalSize, _ => -1) // Generated in FinishWith
-            .RuleFor(x => x.Offset, _ => 0)
-            .RuleFor(x => x.Content, _ => string.Empty)
-            .RuleFor(x => x.MixedParents, f => f.Random.Bool())
-            .RuleFor(x => x.Meta, _ => null)
-            .RuleFor(x => x.AllowSync, f => f.Random.Bool())
-            .RuleFor(x => x.Art, _ => "/:/resources/unknown-fanart.jpg")
+            .RuleFor(x => x.TotalSize, _ => -1L) // Generated in FinishWith
+            .RuleFor(x => x.Offset, _ => 0L)
             .RuleFor(x => x.Identifier, _ => "com.plexapp.plugins.library")
-            .RuleFor(x => x.LibrarySectionID, _ => -1)
-            .RuleFor(x => x.LibrarySectionTitle, _ => string.Empty)
-            .RuleFor(x => x.LibrarySectionUUID, _ => string.Empty)
-            .RuleFor(x => x.MediaTagPrefix, _ => "/system/bundle/media/flags/")
-            .RuleFor(x => x.MediaTagVersion, f => f.Random.Number(0, 1000000000))
-            .RuleFor(x => x.MediaTagPrefix, _ => "/system/bundle/media/flags/")
-            .RuleFor(x => x.Thumb, _ => "/:/resources/unknown.png")
-            .RuleFor(x => x.Title1, (f, _) => f.Name.FullName())
-            .RuleFor(x => x.Title2, (_, x) => $"All {x.Title1}")
-            .RuleFor(x => x.ViewGroup, _ => string.Empty)
-            .RuleFor(x => x.Nocache, f => f.Random.Bool())
-            .RuleFor(x => x.ViewMode, f => f.Random.Number(100000).ToString())
-            .RuleFor(x => x.Metadata, _ => []) // Generated in FinishWith
-            .RuleFor(x => x.Size, _ => -1); // Generated in FinishWith
+            .Ignore(x => x.Metadata) // Generated in FinishWith
+            .Ignore(x => x.Size); // Generated in FinishWith
 
     /// <summary>
     /// Generates a fake response for the GetLibraryItemsResponse operation
     /// URL: /library/sections/{sectionKey}/{tag}
     /// </summary>
-    public static GetLibraryItemsResponseBody GetPlexLibrarySectionAllResponse(
+    public static MediaContainerWithMetadata GetPlexLibrarySectionAllResponse(
         Seed seed,
-        GetAllLibrariesDirectory library,
+        LibrarySection library,
         int mediaCount = 0,
         Action<PlexApiDataConfig>? options = null
     )
     {
         var config = PlexApiDataConfig.FromOptions(options);
-        var type = library.Type.ToPlexMediaType();
+        var type = library.Type!.ToPlexMediaType();
 
         var totalSize = type switch
         {
@@ -150,19 +119,13 @@ public partial class FakePlexApiData
             _ => throw new ArgumentOutOfRangeException(),
         };
 
-        return new GetLibraryItemsResponseBody
+        return new MediaContainerWithMetadata
         {
             MediaContainer = _getLibraryItemsMediaContainer
                 .UseSeed(seed.Next())
                 .FinishWith(
                     (_, x) =>
                     {
-                        x.LibrarySectionID = long.Parse(library.Key);
-                        x.LibrarySectionTitle = library.Title;
-                        x.LibrarySectionUUID = library.Uuid;
-                        x.ViewGroup = library.Type.Value();
-                        x.Thumb = x.Thumb.Replace("unknown", x.ViewGroup);
-                        x.Art = x.Art.Replace("unknown", x.ViewGroup);
                         x.Metadata = GetLibraryMediaMetadata(seed, type, options).Generate(mediaCount);
                         x.Size = x.Metadata!.Count;
                         x.TotalSize = totalSize;
@@ -172,19 +135,24 @@ public partial class FakePlexApiData
         };
     }
 
-    public static Faker<GetLibraryItemsMetadata> GetLibraryMediaMetadata(
+    public static Faker<Metadata> GetLibraryMediaMetadata(
         Seed seed,
         PlexMediaType type,
         Action<PlexApiDataConfig>? options = null
     )
     {
-        GetLibraryItemsType GetPlexMediaType() =>
+        string GetPlexMediaType() =>
             type switch
             {
-                PlexMediaType.Movie => GetLibraryItemsType.Movie,
-                PlexMediaType.TvShow => GetLibraryItemsType.TvShow,
-                PlexMediaType.Season => GetLibraryItemsType.Season,
-                PlexMediaType.Episode => GetLibraryItemsType.Episode,
+                PlexMediaType.Movie => "movie",
+                PlexMediaType.TvShow => "show",
+                PlexMediaType.Season => "season",
+                PlexMediaType.Episode => "episode",
+                PlexMediaType.Artist => "artist",
+                PlexMediaType.Album => "album",
+                PlexMediaType.Song => "track",
+                PlexMediaType.PhotoAlbum => "photoalbum",
+                PlexMediaType.Photos => "photo",
                 _ => throw new InvalidOperationException($"Invalid PlexMediaType: {type} value."),
             };
 
@@ -200,7 +168,7 @@ public partial class FakePlexApiData
             );
     }
 
-    public static Faker<GetLibraryItemsMedia> GetPlexMedium(Seed seed, Action<PlexApiDataConfig>? options = null)
+    public static Faker<Media> GetPlexMedium(Seed seed, Action<PlexApiDataConfig>? options = null)
     {
         return _getLibraryItemsMedia
             .UseSeed(seed.Next())
@@ -212,6 +180,6 @@ public partial class FakePlexApiData
             );
     }
 
-    public static Faker<GetLibraryItemsPart> GetPlexPart(Seed seed, Action<PlexApiDataConfig>? options = null) =>
+    public static Faker<Part> GetPlexPart(Seed seed, Action<PlexApiDataConfig>? options = null) =>
         _getLibraryItemsPartFaker.UseSeed(seed.Next());
 }

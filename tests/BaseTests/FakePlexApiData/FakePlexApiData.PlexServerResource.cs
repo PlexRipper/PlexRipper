@@ -1,4 +1,4 @@
-﻿using LukeHagar.PlexAPI.SDK.Models.Requests;
+﻿using LukeHagar.PlexAPI.SDK.Models.Components;
 
 namespace Reaparr.BaseTests;
 
@@ -55,7 +55,7 @@ public partial class FakePlexApiData
         return new Faker<Connections>()
             .StrictMode(true)
             .UseSeed(seed.Next())
-            .RuleFor(x => x.Protocol, _ => !https ? Protocol.Http : Protocol.Https)
+            .RuleFor(x => x.Protocol, _ => !https ? PlexDeviceProtocol.Http : PlexDeviceProtocol.Https)
             .RuleFor(x => x.Address, f => f.Internet.Ip())
             .RuleFor(x => x.Port, f => f.Internet.Port())
             .RuleFor(

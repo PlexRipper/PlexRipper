@@ -77,7 +77,7 @@ public class GetLibrarySectionsCommandHandler : ICommandHandler<GetLibrarySectio
                 PlexServerId = plexServerId,
                 DefaultDestination = null,
                 DefaultDestinationId = null,
-                Language = x.Language!,
+                Language = x.Language,
             })
             .ToList();
 

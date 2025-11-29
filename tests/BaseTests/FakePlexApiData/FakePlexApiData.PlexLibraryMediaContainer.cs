@@ -1,14 +1,13 @@
-﻿using LukeHagar.PlexAPI.SDK.Models.Requests;
+﻿using LukeHagar.PlexAPI.SDK.Models.Components;
 using Reaparr.PlexApi;
-using Reaparr.PlexApi.Contracts;
 
 namespace Reaparr.BaseTests;
 
 public partial class FakePlexApiData
 {
-    public static Faker<GetAllLibrariesDirectory> GetLibrariesResponseDirectory(Seed seed, PlexMediaType type)
+    public static Faker<LibrarySection> GetLibrariesResponseDirectory(Seed seed, PlexMediaType type)
     {
-        return new Faker<GetAllLibrariesDirectory>()
+        return new Faker<LibrarySection>()
             .StrictMode(true)
             .UseSeed(seed.Next())
             .RuleFor(x => x.AllowSync, f => f.Random.Bool())
@@ -18,7 +17,7 @@ public partial class FakePlexApiData
             .RuleFor(x => x.Filters, f => f.Random.Bool())
             .RuleFor(x => x.Refreshing, f => f.Random.Bool())
             .RuleFor(x => x.Thumb, _ => "/:/resources/movie.png")
-            .RuleFor(x => x.Type, _ => type.ToGetAllLibrariesType())
+            .RuleFor(x => x.Type, _ => type.ToPlexApiString())
             .RuleFor(x => x.Title, f => f.Company.CompanyName())
             .RuleFor(x => x.Agent, _ => "tv.plex.agents.movie")
             .RuleFor(x => x.Scanner, _ => "Plex Movie")
@@ -30,10 +29,10 @@ public partial class FakePlexApiData
             .RuleFor(x => x.Content, f => f.Random.Bool())
             .RuleFor(x => x.Directory, f => f.Random.Bool())
             .RuleFor(x => x.ContentChangedAt, f => (int)f.Date.Recent().ToUnixLong())
-            .RuleFor(x => x.Hidden, _ => Hidden.ExcludeHomeScreenAndGlobalSearch)
+            .RuleFor(x => x.Hidden, f => f.Random.Bool())
             .RuleFor(
                 x => x.Location,
-                f => [new GetAllLibrariesLocation { Id = f.Random.Number(100000), Path = f.System.DirectoryPath() }]
+                f => [new LibrarySectionLocation { Id = f.Random.Long(100000), Path = f.System.DirectoryPath() }]
             );
     }
 }

@@ -36,7 +36,7 @@ public class GetServerStatusCommandHandler : ICommandHandler<GetServerStatusComm
             }
         );
 
-        var responseResult = await client.Server.GetServerIdentityAsync().ToResponse();
+        var responseResult = await client.General.GetIdentityAsync().ToResponse();
 
         var statusCode = responseResult.IsSuccess
             ? responseResult.Value.StatusCode

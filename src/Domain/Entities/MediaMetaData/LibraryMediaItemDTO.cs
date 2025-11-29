@@ -1,4 +1,7 @@
 // ReSharper disable InconsistentNaming
+
+using System.Diagnostics.CodeAnalysis;
+
 namespace Reaparr.Domain;
 
 public record LibraryMediaItemDTO
@@ -90,6 +93,12 @@ public record MetaDataRatingsDTO
 
 public record MetaDataGuidsDTO
 {
+    [SetsRequiredMembers]
+    public MetaDataGuidsDTO(string id)
+    {
+        Id = id;
+    }
+
     /// <summary>
     /// The GUID value.
     /// </summary>

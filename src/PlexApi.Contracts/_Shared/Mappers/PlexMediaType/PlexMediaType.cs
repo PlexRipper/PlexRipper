@@ -1,6 +1,8 @@
+using LukeHagar.PlexAPI.SDK.Models.Components;
+
 namespace Reaparr.PlexApi.Contracts;
 
-public static partial class PlexMediaTypeMappers
+public static class PlexMediaTypeMappers
 {
     /// <summary>
     /// Converts a PlexMediaType enum value to the corresponding API type enum value.
@@ -71,4 +73,19 @@ public static partial class PlexMediaTypeMappers
             _ => throw new ArgumentOutOfRangeException(nameof(apiType), $"Unknown media type value: {apiType}"),
         };
     }
+
+    public static MediaType ToPlexApiMediaType(this PlexMediaType source) =>
+        source switch
+        {
+            PlexMediaType.Movie => MediaType.Movie,
+            PlexMediaType.TvShow => MediaType.TvShow,
+            PlexMediaType.Season => MediaType.Season,
+            PlexMediaType.Episode => MediaType.Episode,
+            PlexMediaType.Artist => MediaType.Artist,
+            PlexMediaType.Album => MediaType.Album,
+            PlexMediaType.Song => MediaType.Track,
+            PlexMediaType.PhotoAlbum => MediaType.PhotoAlbum,
+            PlexMediaType.Photos => MediaType.Photo,
+            _ => throw new ArgumentOutOfRangeException(nameof(source), source, "Unsupported PlexMediaType"),
+        };
 }

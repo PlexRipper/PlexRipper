@@ -39,7 +39,7 @@ public class PlexSignInCommandHandler : ICommandHandler<PlexSignInCommand, Resul
             .Authentication.PostUsersSignInDataAsync(
                 new PostUsersSignInDataRequest
                 {
-                    ClientID = command.ClientId,
+                    ClientIdentifier = command.ClientId,
                     RequestBody = new PostUsersSignInDataRequestBody
                     {
                         Login = command.Username,

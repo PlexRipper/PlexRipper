@@ -45,7 +45,7 @@ public class GetLibrarySectionsCommandHandler : ICommandHandler<GetLibrarySectio
             new PlexApiClientOptions { ConnectionUrl = connection.Url }
         );
 
-        var response = await client.Library.GetAllLibrariesAsync().ToResponse();
+        var response = await client.Library.GetSectionsAsync().ToResponse();
         if (response.IsFailed)
             return response.ToResult();
 
@@ -65,19 +65,19 @@ public class GetLibrarySectionsCommandHandler : ICommandHandler<GetLibrarySectio
             .Select(x => new PlexLibrary
             {
                 Id = 0,
-                Type = x.Type.ToPlexMediaType(),
-                Title = x.Title,
-                Key = x.Key,
+                Type = x.Type!.ToPlexMediaType(),
+                Title = x.Title!,
+                Key = x.Key!,
                 CreatedAt = DateTimeExtensions.FromUnixTime(x.CreatedAt),
                 UpdatedAt = DateTimeExtensions.FromUnixTime(x.UpdatedAt),
                 ScannedAt = DateTimeExtensions.FromUnixTime(x.ScannedAt),
                 SyncedAt = null,
-                Uuid = x.Uuid,
+                Uuid = x.Uuid!,
                 PlexServer = null,
                 PlexServerId = plexServerId,
                 DefaultDestination = null,
                 DefaultDestinationId = null,
-                Language = x.Language,
+                Language = x.Language!,
             })
             .ToList();
 

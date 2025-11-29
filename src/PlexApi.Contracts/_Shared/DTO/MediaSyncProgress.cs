@@ -4,9 +4,9 @@ public record MediaSyncProgress
 {
     public required PlexMediaType Type { get; init; }
 
-    public required int Total { get; init; }
+    public required long Total { get; init; }
 
-    public required int Received { get; init; }
+    public required long Received { get; init; }
 
     public required TimeSpan TimeRemaining { get; init; } = TimeSpan.Zero;
 

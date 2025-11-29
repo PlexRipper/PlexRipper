@@ -13,14 +13,14 @@ public class PlexApiClientFactory : IPlexApiClientFactory
     }
 
     public IPlexAPI CreateClient(string authToken, PlexApiClientOptions options) =>
-        new PlexAPI(client: _clientFactory(options), serverUrl: options.ConnectionUrl, accessToken: authToken);
+        new PlexAPI(client: _clientFactory(options), serverUrl: options.ConnectionUrl, token: authToken);
 
     public IPlexAPI CreateClient(PlexApiClientOptions options) =>
-        new PlexAPI(client: _clientFactory(options), serverUrl: options.ConnectionUrl, accessToken: string.Empty);
+        new PlexAPI(client: _clientFactory(options), serverUrl: options.ConnectionUrl, token: string.Empty);
 
     public IPlexAPI CreateTvClient(string authToken = "", PlexApiClientOptions? options = null)
     {
         options ??= new PlexApiClientOptions { ConnectionUrl = "https://plex.tv/api/v2" };
-        return new PlexAPI(client: _clientFactory(options), serverUrl: options.ConnectionUrl, accessToken: authToken);
+        return new PlexAPI(client: _clientFactory(options), serverUrl: options.ConnectionUrl, token: authToken);
     }
 }

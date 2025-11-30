@@ -35,18 +35,16 @@ public class ForceLibraryMediaSyncCommandHandler : ICommandHandler<ForceLibraryM
 
     public async Task<Result> ExecuteAsync(ForceLibraryMediaSyncCommand command, CancellationToken ct)
     {
-        var plexServerId = command.PlexServerId;
-        var libraryId = command.LibraryId;
-        var serverName = await _dbContext.GetPlexServerNameById(plexServerId, cancellationToken: ct);
-        var libraryName = await _dbContext.GetPlexLibraryNameById(libraryId, cancellationToken: ct);
+        var serverName = await _dbContext.GetPlexServerNameById(command.PlexServerId, ct);
+        var libraryName = await _dbContext.GetPlexLibraryNameById(command.LibraryId, ct);
 
         _log.Here()
             .Information(
-                "Forcing library sync of library {libraryName} with id {LibraryId} in server {serverName} with id {PlexServerId}",
-                libraryName,
-                libraryId,
+                "Forcing library sync for server {ServerName} with id {PlexServerId}, library {LibraryName} with id {LibraryId}",
                 serverName,
-                plexServerId
+                command.PlexServerId,
+                libraryName,
+                command.LibraryId
             );
 
         // Find currently executing library sync jobs for this server
@@ -55,7 +53,7 @@ public class ForceLibraryMediaSyncCommandHandler : ICommandHandler<ForceLibraryM
             .Where(x =>
                 x.JobInstance is LibrarySyncJob
                 && x.JobDetail.JobDataMap.ContainsKey(LibrarySyncJob.ServerIdParameter)
-                && x.JobDetail.JobDataMap.GetInt(LibrarySyncJob.ServerIdParameter) == plexServerId
+                && x.JobDetail.JobDataMap.GetInt(LibrarySyncJob.ServerIdParameter) == command.PlexServerId
             )
             .ToList();
 
@@ -66,11 +64,14 @@ public class ForceLibraryMediaSyncCommandHandler : ICommandHandler<ForceLibraryM
                 continue;
 
             var executingLibraryId = executingJob.JobDetail.JobDataMap.GetInt(LibrarySyncJob.LibraryIdParameter);
+            var executingLibraryName = await _dbContext.GetPlexLibraryNameById(executingLibraryId, ct);
 
             _log.Here()
                 .Information(
-                    "Interrupting currently executing library sync for server {PlexServerId}, library {ExecutingLibraryId}",
-                    plexServerId,
+                    "Interrupting currently executing library sync for server {ServerName} with id {PlexServerId}, library {ExecutingLibraryName} with id {ExecutingLibraryId}",
+                    serverName,
+                    command.PlexServerId,
+                    executingLibraryName,
                     executingLibraryId
                 );
 
@@ -78,7 +79,7 @@ public class ForceLibraryMediaSyncCommandHandler : ICommandHandler<ForceLibraryM
         }
 
         // Get the target job key
-        var targetJobKey = LibrarySyncJob.GetJobKey(plexServerId, libraryId);
+        var targetJobKey = LibrarySyncJob.GetJobKey(command.PlexServerId, command.LibraryId);
 
         // Delete existing job/trigger if it exists
         if (await _scheduler.CheckExists(targetJobKey, ct))
@@ -86,18 +87,36 @@ public class ForceLibraryMediaSyncCommandHandler : ICommandHandler<ForceLibraryM
             await _scheduler.DeleteJob(targetJobKey, ct);
         }
 
+        // Get all triggers for LibrarySync group to determine max priority
+        var jobGroupMatcher = GroupMatcher<JobKey>.GroupEquals("LibrarySync");
+        var allJobKeys = await _scheduler.GetJobKeys(jobGroupMatcher, ct);
+        var allTriggers = new List<ITrigger>();
+
+        foreach (var jobKey in allJobKeys)
+        {
+            var triggers = await _scheduler.GetTriggersOfJob(jobKey, ct);
+            allTriggers.AddRange(triggers);
+        }
+
+        var maxPriority = allTriggers.Any() ? allTriggers.Max(t => t.Priority) : 0;
+
         // Schedule the target library with highest priority
         var jobDataMap = new JobDataMap
         {
-            [LibrarySyncJob.ServerIdParameter] = plexServerId,
-            [LibrarySyncJob.LibraryIdParameter] = libraryId,
+            [LibrarySyncJob.ServerIdParameter] = command.PlexServerId,
+            [LibrarySyncJob.LibraryIdParameter] = command.LibraryId,
         };
 
-        var job = JobBuilder.Create<LibrarySyncJob>().WithIdentity(targetJobKey).SetJobData(jobDataMap).Build();
+        var job = JobBuilder
+            .Create<LibrarySyncJob>()
+            .WithIdentity(targetJobKey)
+            .SetJobData(jobDataMap)
+            .Build();
 
         var trigger = TriggerBuilder
             .Create()
             .WithIdentity($"{targetJobKey.Name}_trigger", targetJobKey.Group)
+            .WithPriority(maxPriority + 1000) // Much higher priority to ensure it runs next
             .StartNow()
             .Build();
 
@@ -105,11 +124,14 @@ public class ForceLibraryMediaSyncCommandHandler : ICommandHandler<ForceLibraryM
 
         _log.Here()
             .Information(
-                "Rescheduled library sync with highest priority for server {PlexServerId}, library {LibraryId}",
-                plexServerId,
-                libraryId
+                "Rescheduled library sync with highest priority for server {ServerName} with id {PlexServerId}, library {LibraryName} with id {LibraryId}",
+                serverName,
+                command.PlexServerId,
+                libraryName,
+                command.LibraryId
             );
 
         return Result.Ok();
     }
 }
+

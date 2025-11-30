@@ -1,6 +1,7 @@
 using FastEndpoints;
 using FluentValidation;
 using Reaparr.Application.Contracts;
+using Reaparr.BackgroundJobs.Contracts;
 using Reaparr.Data.Contracts;
 
 namespace Reaparr.Application;
@@ -45,7 +46,8 @@ public class RefreshLibraryMediaEndpoint : BaseEndpoint<RefreshLibraryMediaEndpo
     public override async Task HandleAsync(RefreshLibraryMediaEndpointRequest req, CancellationToken ct)
     {
         _log.Here().DebugApiCall(HttpContext, req);
-        var result = await _commandExecutor.Send(new RefreshLibraryMediaCommand(req.PlexLibraryId, _ => { }), ct);
+        var serverId = await _dbContext.GetPlexServerIdFromPlexLibraryId(req.PlexLibraryId);
+        var result = await _commandExecutor.Send(new ForceLibraryMediaSyncCommand(serverId, req.PlexLibraryId), ct);
         if (result.IsFailed)
         {
             await SendFluentResult(result, ct);

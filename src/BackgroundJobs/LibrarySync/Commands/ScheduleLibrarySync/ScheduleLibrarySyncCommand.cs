@@ -90,3 +90,4 @@ public class ScheduleLibrarySyncCommandHandler : ICommandHandler<ScheduleLibrary
         return Result.Ok();
     }
 }
+

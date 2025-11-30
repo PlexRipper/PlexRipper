@@ -10,10 +10,19 @@
     <ItemGroup>
         <ProjectReference Include="..\BackgroundJobs.Contracts\BackgroundJobs.Contracts.csproj" />
         <ProjectReference Include="..\src\Application.Contracts\Application.Contracts.csproj" />
+        <ProjectReference Include="..\src\Data.Contracts\Data.Contracts.csproj" />
         <ProjectReference Include="..\src\Domain\Domain.csproj" />
         <Compile Include="..\src\Domain\GlobalUsings.cs" />
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Quartz" Version="3.15.0" />
+    </ItemGroup>
+    <ItemGroup>
+        <Reference Include="Autofac.Extras.Quartz">
+            <HintPath>..\..\..\..\home\jason\.nuget\packages\autofac.extras.quartz\10.0.0\lib\net8.0\Autofac.Extras.Quartz.dll</HintPath>
+        </Reference>
+        <Reference Include="Microsoft.EntityFrameworkCore">
+            <HintPath>..\..\..\..\home\jason\.nuget\packages\microsoft.entityframeworkcore\9.0.8\lib\net8.0\Microsoft.EntityFrameworkCore.dll</HintPath>
+        </Reference>
     </ItemGroup>
 </Project>

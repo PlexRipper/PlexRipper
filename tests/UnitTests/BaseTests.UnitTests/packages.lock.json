@@ -1825,6 +1825,7 @@
           "Microsoft.Extensions.Http.Polly": "[9.0.8, )",
           "Quartz.Extensions.Hosting": "[3.15.0, )",
           "Reaparr.Application": "[1.0.0, )",
+          "Reaparr.BackgroundJobs": "[1.0.0, )",
           "Reaparr.Data": "[1.0.0, )",
           "Reaparr.FileSystem": "[1.0.0, )",
           "Reaparr.Identity": "[1.0.0, )",
@@ -1847,6 +1848,7 @@
           "Polly.Core": "[8.6.2, )",
           "Quartz.Serialization.SystemTextJson": "[3.15.0, )",
           "Reaparr.Application.Contracts": "[1.0.0, )",
+          "Reaparr.BackgroundJobs.Contracts": "[1.0.0, )",
           "Reaparr.Data.Contracts": "[1.0.0, )",
           "Reaparr.Domain": "[1.0.0, )",
           "Reaparr.FileSystem.Contracts": "[1.0.0, )",
@@ -1858,6 +1860,23 @@
         }
       },
       "Reaparr.Application.Contracts": {
+        "type": "Project",
+        "dependencies": {
+          "Quartz": "[3.15.0, )",
+          "Reaparr.Domain": "[1.0.0, )"
+        }
+      },
+      "Reaparr.BackgroundJobs": {
+        "type": "Project",
+        "dependencies": {
+          "Quartz": "[3.15.0, )",
+          "Reaparr.Application.Contracts": "[1.0.0, )",
+          "Reaparr.BackgroundJobs.Contracts": "[1.0.0, )",
+          "Reaparr.Data.Contracts": "[1.0.0, )",
+          "Reaparr.Domain": "[1.0.0, )"
+        }
+      },
+      "Reaparr.BackgroundJobs.Contracts": {
         "type": "Project",
         "dependencies": {
           "Quartz": "[3.15.0, )",

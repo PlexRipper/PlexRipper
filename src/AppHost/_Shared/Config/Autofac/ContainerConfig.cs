@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using Reaparr.Application;
+using Reaparr.BackgroundJobs;
 using Reaparr.Data;
 using Reaparr.FileSystem;
 using Reaparr.Identity;
@@ -32,6 +33,7 @@ public static class ContainerConfig
         builder.RegisterModule<FileSystemModule>();
         builder.RegisterModule<PlexApiModule>();
         builder.RegisterModule<SettingsModule>();
+        builder.RegisterModule<BackgroundJobsModule>();
 
         // Presentation
         builder.RegisterModule<AppHostModule>();

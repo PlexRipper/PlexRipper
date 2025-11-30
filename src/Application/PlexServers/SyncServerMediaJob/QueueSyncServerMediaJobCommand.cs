@@ -1,6 +1,5 @@
 using FastEndpoints;
 using FluentValidation;
-using Quartz;
 
 namespace Reaparr.Application;
 
@@ -17,47 +16,22 @@ public class QueueSyncServerMediaJobCommandValidator : Validator<QueueSyncServer
 public class QueueSyncServerMediaJobCommandHandler : ICommandHandler<QueueSyncServerMediaJobCommand, Result>
 {
     private readonly ILogger _log;
-    private readonly IScheduler _scheduler;
+    private readonly ICommandExecutor _commandExecutor;
 
-    public QueueSyncServerMediaJobCommandHandler(ILogger log, IScheduler scheduler)
+    public QueueSyncServerMediaJobCommandHandler(ILogger log, ICommandExecutor commandExecutor)
     {
         _log = log.ForContext<QueueSyncServerMediaJobCommandHandler>();
-        _scheduler = scheduler;
+        _commandExecutor = commandExecutor;
     }
 
     public async Task<Result> ExecuteAsync(QueueSyncServerMediaJobCommand command, CancellationToken cancellationToken)
     {
-        if (command.PlexServerId <= 0)
-            return ResultExtensions.IsInvalidId(nameof(command.PlexServerId), command.PlexServerId);
+        _log.Here()
+            .Information("Queueing sync server media job for server with id {PlexServerId}", command.PlexServerId);
 
-        var key = SyncServerMediaJob.GetJobKey(command.PlexServerId);
-        if (await _scheduler.IsJobRunningAsync(key, cancellationToken))
-        {
-            return Result
-                .Fail(
-                    $"A {nameof(SyncServerMediaJob)} with {nameof(PlexServer)} {command.PlexServerId} is already running"
-                )
-                .LogWarning();
-        }
-
-        var job = JobBuilder
-            .Create<SyncServerMediaJob>()
-            .UsingJobData(SyncServerMediaJob.PlexServerIdParameter, command.PlexServerId)
-            .UsingJobData(SyncServerMediaJob.ForceSyncParameter, command.ForceSync)
-            .WithIdentity(key)
-            .Build();
-
-        // Trigger the job to run now
-        var trigger = TriggerBuilder
-            .Create()
-            .WithIdentity($"{key.Name}_trigger", key.Group)
-            .ForJob(job)
-            .StartNow()
-            .Build();
-
-        _log.Here().Information("Sync Server Job for server with id {PlexServerId} has started", command.PlexServerId);
-        await _scheduler.ScheduleJob(job, trigger, cancellationToken);
-
-        return Result.Ok();
+        return await _commandExecutor.Send(
+            new SyncServerMediaJobCommand(command.PlexServerId, command.ForceSync),
+            cancellationToken
+        );
     }
 }

@@ -26,5 +26,8 @@ public enum JobTypes
     [EnumMember(Value = nameof(InspectPlexServerJob))]
     InspectPlexServerJob = 5,
 
+    [EnumMember(Value = nameof(LibrarySyncJob))]
+    LibrarySyncJob = 6,
+
     // Ensure to add new job types to ToJobStatusUpdate in JobExecutionContextExtensions
 }

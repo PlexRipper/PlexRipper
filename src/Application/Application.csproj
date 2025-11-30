@@ -26,6 +26,7 @@
         <PackageReference Include="Quartz.Serialization.SystemTextJson" Version="3.15.0" />
     </ItemGroup>
     <ItemGroup>
+        <ProjectReference Include="..\..\BackgroundJobs.Contracts\BackgroundJobs.Contracts.csproj" />
         <ProjectReference Include="..\Application.Contracts\Application.Contracts.csproj" />
         <ProjectReference Include="..\BackgroundJobs.Contracts\BackgroundJobs.Contracts.csproj" />
         <ProjectReference Include="..\Data.Contracts\Data.Contracts.csproj" />

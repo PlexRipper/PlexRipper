@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <LangVersion>13</LangVersion>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>Reaparr.BackgroundJobs.Contracts</RootNamespace>
+        <AssemblyName>Reaparr.BackgroundJobs.Contracts</AssemblyName>
+    </PropertyGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\src\Domain\Domain.csproj" />
+    </ItemGroup>
+</Project>

@@ -68,19 +68,39 @@ public partial class FakePlexApiData
         .RuleFor(x => x.Role, f => f.Movies().MovieTagline())
         .RuleFor(x => x.Filter, (_, x) => $"actor={x.Id}")
         .RuleFor(x => x.TagKey, f => f.Random.AlphaNumeric(24))
-        .RuleFor(x => x.Thumb, f => f.Image.PicsumUrl());
+        .RuleFor(x => x.Thumb, f => f.Image.PicsumUrl())
+        .RuleFor(x => x.RatingKey, f => f.Random.Number(100000).ToString())
+        .Ignore(x => x.TagKey)
+        .Ignore(x => x.TagType)
+        .Ignore(x => x.Thumb)
+        .Ignore(x => x.Confidence)
+        .Ignore(x => x.Context);
 
     private static readonly Faker<Tag> _getMediaMetaDataGenre = new Faker<Tag>()
         .StrictMode(true)
         .RuleFor(x => x.Id, _ => GetUniqueNumber())
         .RuleFor(x => x.TagValue, f => f.PlexMedia().MediaGenre())
-        .RuleFor(x => x.Filter, (_, x) => $"genre={x.Id}");
+        .RuleFor(x => x.Filter, (_, x) => $"genre={x.Id}")
+        .Ignore(x => x.Role)
+        .Ignore(x => x.RatingKey)
+        .Ignore(x => x.TagKey)
+        .Ignore(x => x.TagType)
+        .Ignore(x => x.Thumb)
+        .Ignore(x => x.Confidence)
+        .Ignore(x => x.Context);
 
     private static readonly Faker<Tag> _getMediaMetaDataCountry = new Faker<Tag>()
         .StrictMode(true)
         .RuleFor(x => x.Id, _ => GetUniqueNumber())
         .RuleFor(x => x.TagValue, f => f.Address.Country())
-        .RuleFor(x => x.Filter, (_, x) => $"country={x.Id}");
+        .RuleFor(x => x.Filter, (_, x) => $"country={x.Id}")
+        .Ignore(x => x.Role)
+        .Ignore(x => x.RatingKey)
+        .Ignore(x => x.TagKey)
+        .Ignore(x => x.TagType)
+        .Ignore(x => x.Thumb)
+        .Ignore(x => x.Confidence)
+        .Ignore(x => x.Context);
 
     private static readonly Faker<Media> _getMediaMetaDataMedia = new Faker<Media>()
         .StrictMode(true)
@@ -106,7 +126,8 @@ public partial class FakePlexApiData
             _ => null
         )
         .RuleFor(l => l.Has64bitOffsets, f => f.Random.Bool())
-        .RuleFor(l => l.Part, _ => []); // Generated in FinishWith
+        .RuleFor(l => l.Part, _ => []) // Generated in FinishWith
+        .Ignore(x => x.AdditionalProperties);
 
     private static readonly Faker<Part> _getMediaMetaDataPartFaker = new Faker<Part>()
         .StrictMode(true)
@@ -123,11 +144,12 @@ public partial class FakePlexApiData
         .RuleFor(l => l.Container, _ => "mkv")
         .RuleFor(l => l.Indexes, _ => "sd")
         .RuleFor(l => l.VideoProfile, _ => "high")
-        .RuleFor(l => l.Stream, _ => []);
+        .RuleFor(l => l.Stream, _ => [])
+        .Ignore(x => x.AdditionalProperties);
 
     private static readonly Faker<Stream> _getMediaMetaDataStreamFaker = new Faker<Stream>()
         .StrictMode(true)
-        .RuleFor(x => x.Id, f => f.Random.Long(1))
+        .RuleFor(x => x.Id, f => f.Random.Number(1000))
         .RuleFor(x => x.StreamType, f => f.PickRandom<StreamType>())
         .RuleFor(x => x.Format, f => f.System.CommonFileExt())
         .RuleFor(x => x.Default, f => f.Random.Bool())
@@ -177,5 +199,7 @@ public partial class FakePlexApiData
         .RuleFor(x => x.CanAutoSync, f => f.Random.Bool())
         .RuleFor(x => x.HearingImpaired, f => f.Random.Bool())
         .RuleFor(x => x.Dub, f => f.Random.Bool())
-        .RuleFor(x => x.Title, f => f.Lorem.Word());
+        .RuleFor(x => x.Title, f => f.Lorem.Word())
+        .Ignore(x => x.StreamIdentifier)
+        .Ignore(x => x.AdditionalProperties);
 }

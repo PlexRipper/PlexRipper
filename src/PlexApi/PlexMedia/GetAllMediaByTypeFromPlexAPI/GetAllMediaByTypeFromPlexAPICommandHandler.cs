@@ -205,7 +205,7 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
 
         var mediaDataList = response.Value?.MediaContainerWithMetadata?.MediaContainer?.Metadata ?? [];
         if (!mediaDataList.Any())
-            return ResultExtensions.IsNull(nameof(response.Value.MediaContainerWithMetadata.MediaContainer)).LogError();
+            return ResultExtensions.IsNull("MediaContainerWithMetadata.MediaContainer.Metadata").LogError();
 
         return Result.Ok(mediaDataList.Select(x => x.ToMediaItemDTO()).ToList());
     }

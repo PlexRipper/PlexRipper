@@ -3,9 +3,9 @@ using Reaparr.PlexApi.Contracts;
 
 namespace Reaparr.PlexApi.UnitTests;
 
-public class PlexMediaTypeMappersToGetLibrarySectionsAllQueryParamTypeUnitTests : BaseUnitTest
+public class PlexMediaTypeMappersToPlexApiMediaTypeUnitTests : BaseUnitTest
 {
-    public PlexMediaTypeMappersToGetLibrarySectionsAllQueryParamTypeUnitTests(ITestOutputHelper output)
+    public PlexMediaTypeMappersToPlexApiMediaTypeUnitTests(ITestOutputHelper output)
         : base(output) { }
 
     [Theory]
@@ -18,10 +18,7 @@ public class PlexMediaTypeMappersToGetLibrarySectionsAllQueryParamTypeUnitTests 
     [InlineData(PlexMediaType.Song, MediaType.Track)]
     [InlineData(PlexMediaType.PhotoAlbum, MediaType.PhotoAlbum)]
     [InlineData(PlexMediaType.Photos, MediaType.Photo)]
-    public void ShouldMatchTheCorrectPlexMediaType_WhenGivenAGetLibrarySectionsAllQueryParamTypeValue(
-        PlexMediaType input,
-        MediaType expected
-    )
+    public void ShouldMapPlexMediaTypeToMediaType(PlexMediaType input, MediaType expected)
     {
         // Act
         input.ToPlexApiMediaType().ShouldBe(expected);

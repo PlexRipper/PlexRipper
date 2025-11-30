@@ -1,8 +1,6 @@
 ﻿using Bogus.Hollywood;
 using LukeHagar.PlexAPI.SDK.Models.Components;
-using LukeHagar.PlexAPI.SDK.Models.Requests;
 using Reaparr.PlexApi;
-using Reaparr.PlexApi.Contracts;
 using Metadata = LukeHagar.PlexAPI.SDK.Models.Components.Metadata;
 
 namespace Reaparr.BaseTests;

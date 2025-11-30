@@ -47,7 +47,6 @@ public partial class FakePlexApiData
         .RuleFor(l => l.ViewedLeafCount, f => f.Random.Int(1))
         .RuleFor(l => l.ChildCount, f => f.Random.Int(1, 10))
         .RuleFor(l => l.ViewCount, _ => default)
-        .RuleFor(l => l.LastViewedAt, _ => default)
         .Ignore(l => l.Media) // Generated in FinishWith
         .Ignore(l => l.Role) // Generated in FinishWith
         .Ignore(l => l.Genre) // Generated in FinishWith
@@ -71,9 +70,7 @@ public partial class FakePlexApiData
         .RuleFor(x => x.TagKey, f => f.Random.AlphaNumeric(24))
         .RuleFor(x => x.Thumb, f => f.Image.PicsumUrl())
         .RuleFor(x => x.RatingKey, f => f.Random.Number(100000).ToString())
-        .Ignore(x => x.TagKey)
         .Ignore(x => x.TagType)
-        .Ignore(x => x.Thumb)
         .Ignore(x => x.Confidence)
         .Ignore(x => x.Context);
 

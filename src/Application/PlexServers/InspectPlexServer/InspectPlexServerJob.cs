@@ -1,5 +1,6 @@
 ﻿using Quartz;
 using Reaparr.Application.Contracts;
+using Reaparr.BackgroundJobs.Contracts;
 using Reaparr.Data.Contracts;
 
 namespace Reaparr.Application;
@@ -94,7 +95,7 @@ public class InspectPlexServerJob : IJob
         );
 
         // Sync library media
-        await _commandExecutor.Send(new QueueSyncServerMediaJobCommand(plexServerId, true), CancellationToken.None);
+        await _commandExecutor.Send(new QueueNextPlexLibraryToSyncCommand(plexServerId), CancellationToken.None);
         return Result.Ok();
     }
 }

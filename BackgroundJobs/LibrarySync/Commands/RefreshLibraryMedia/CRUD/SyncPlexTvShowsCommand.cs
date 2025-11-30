@@ -5,7 +5,7 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Data.Contracts;
 
-namespace Reaparr.Application;
+namespace Reaparr.BackgroundJobs;
 
 /// <summary>
 /// Command to fully synchronize TV show media for a specific Plex library using the

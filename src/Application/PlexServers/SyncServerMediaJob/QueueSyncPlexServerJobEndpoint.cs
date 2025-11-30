@@ -2,6 +2,7 @@ using System.ComponentModel;
 using FastEndpoints;
 using FluentValidation;
 using Reaparr.Application.Contracts;
+using Reaparr.BackgroundJobs.Contracts;
 
 namespace Reaparr.Application;
 
@@ -54,10 +55,7 @@ public class QueueSyncPlexServerJobEndpoint : BaseEndpoint<QueueSyncPlexServerJo
 
     public override async Task HandleAsync(QueueSyncPlexServerJobEndpointRequest req, CancellationToken ct)
     {
-        var result = await _commandExecutor.Send(
-            new QueueSyncServerMediaJobCommand(req.PlexServerId, req.ForceSync),
-            ct
-        );
+        var result = await _commandExecutor.Send(new QueueNextPlexLibraryToSyncCommand(req.PlexServerId), ct);
         await SendFluentResult(result, ct);
     }
 }

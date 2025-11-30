@@ -6,11 +6,6 @@ using Reaparr.Data.Contracts;
 
 namespace Reaparr.BackgroundJobs;
 
-public record QueueNextPlexLibraryToSyncCommand : ICommand<Result>
-{
-    public int PlexServerId { get; set; }
-}
-
 public class QueueNextPlexLibraryToSyncCommandValidator : AbstractValidator<QueueNextPlexLibraryToSyncCommand>
 {
     public QueueNextPlexLibraryToSyncCommandValidator()
@@ -29,8 +24,7 @@ public class QueueNextPlexLibraryToSyncCommandHandler : ICommandHandler<QueueNex
     public QueueNextPlexLibraryToSyncCommandHandler(
         ILogger log,
         IReaparrDbContext dbContext,
-        ICommandExecutor commandExecutor,
- 
+        ICommandExecutor commandExecutor
     )
     {
         _log = log.ForContext<QueueNextPlexLibraryToSyncCommandHandler>();

@@ -5,7 +5,7 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Data.Contracts;
 
-namespace Reaparr.Application;
+namespace Reaparr.BackgroundJobs;
 
 public record SyncPlexMoviesCommand(InsertMediaMetaDataCommandResponse LibraryMetadata)
     : ICommand<Result<CrudMoviesReport>>;

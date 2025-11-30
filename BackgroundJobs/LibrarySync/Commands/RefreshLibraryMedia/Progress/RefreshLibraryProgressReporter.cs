@@ -1,6 +1,6 @@
 using Reaparr.Application.Contracts;
 
-namespace Reaparr.Application;
+namespace Reaparr.BackgroundJobs;
 
 public record RefreshLibraryProgressUpdate
 {

@@ -1,6 +1,6 @@
 using Quartz;
-using Reaparr.Application;
 using Reaparr.Application.Contracts;
+using Reaparr.BackgroundJobs.Contracts;
 
 namespace Reaparr.BackgroundJobs;
 
@@ -31,6 +31,7 @@ public class LibrarySyncJob : IJob
     public async Task Execute(IJobExecutionContext context)
     {
         var dataMap = context.JobDetail.JobDataMap;
+        var cancellationToken = context.CancellationToken;
 
         if (!dataMap.ContainsKey(ServerIdParameter) || !dataMap.ContainsKey(LibraryIdParameter))
         {
@@ -85,7 +86,10 @@ public class LibrarySyncJob : IJob
             _log.Here()
                 .Information("Successfully synced library {LibraryId} for server {ServerId}", libraryId, serverId);
 
-            await _commandExecutor.Send(new QueueNextPlexLibraryToSyncCommand());
+            // Send refresh notification
+            await _signalRService.SendRefreshNotificationAsync(RefreshDataType.PlexLibrary, cancellationToken);
+
+            await _commandExecutor.Send(new QueueNextPlexLibraryToSyncCommand(serverId), cancellationToken);
         }
         catch (OperationCanceledException)
         {

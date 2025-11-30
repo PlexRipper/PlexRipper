@@ -3,7 +3,7 @@ using FluentValidation;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 
-namespace Reaparr.Application;
+namespace Reaparr.BackgroundJobs;
 
 public record RefreshPlexMovieLibraryCommand(
     InsertMediaMetaDataCommandResponse LibraryMetadata,

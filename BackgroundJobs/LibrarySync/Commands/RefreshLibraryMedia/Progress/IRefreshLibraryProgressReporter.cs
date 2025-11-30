@@ -1,4 +1,4 @@
-namespace Reaparr.Application;
+namespace Reaparr.BackgroundJobs;
 
 public interface IRefreshLibraryProgressReporter
 {

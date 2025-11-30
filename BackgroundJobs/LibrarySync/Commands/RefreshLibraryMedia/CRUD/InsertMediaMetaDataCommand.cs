@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Reaparr.Data.Contracts;
 using Reaparr.PlexApi.Contracts;
 
-namespace Reaparr.Application;
+namespace Reaparr.BackgroundJobs;
 
 /// <summary>
 /// Command to insert or update media metadata (actors, genres, and countries) for a <see cref="PlexLibrary"/> into the database.

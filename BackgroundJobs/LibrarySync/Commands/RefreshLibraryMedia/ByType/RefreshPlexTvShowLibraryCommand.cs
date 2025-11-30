@@ -5,7 +5,7 @@ using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 using Reaparr.PlexApi.Contracts;
 
-namespace Reaparr.Application;
+namespace Reaparr.BackgroundJobs;
 
 public record RefreshPlexTvShowLibraryCommand(
     InsertMediaMetaDataCommandResponse LibraryMetadata,

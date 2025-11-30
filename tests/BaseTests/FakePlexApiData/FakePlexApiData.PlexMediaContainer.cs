@@ -15,7 +15,7 @@ public partial class FakePlexApiData
         .RuleFor(l => l.Key, f => f.Random.Uuid().ToString())
         .RuleFor(l => l.Duration, f => f.Random.Int(1))
         .RuleFor(l => l.File, f => f.Lorem.Word())
-        .RuleFor(l => l.Size, f => f.Random.Long(1))
+        .RuleFor(l => l.Size, f => f.Random.Long(100_000_000, 8_589_934_592)) // 100MB to 8GB
         .RuleFor(l => l.OptimizedForStreaming, f => f.Random.Bool())
         .RuleFor(l => l.Has64bitOffsets, f => f.Random.Bool())
         .RuleFor(l => l.AudioProfile, _ => "dts")

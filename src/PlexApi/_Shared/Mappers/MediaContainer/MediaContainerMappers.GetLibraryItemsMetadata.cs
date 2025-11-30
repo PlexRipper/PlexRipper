@@ -23,8 +23,8 @@ public static partial class MediaContainerMappers
             Role = data.Role?.Select(x => x.ToRoleDTO()).ToList() ?? [],
             Studio = data.Studio ?? string.Empty,
             ContentRating = data.ContentRating ?? string.Empty,
-            Index = data.Index ?? -1,
-            ParentIndex = data.ParentIndex ?? -1,
+            Index = data.Index ?? 0,
+            ParentIndex = data.ParentIndex ?? 0,
             // Duration is in milliseconds and we want seconds
             Duration = data.Duration is { } milliseconds ? milliseconds / 1000 : 0,
             Thumb = data.Thumb!,

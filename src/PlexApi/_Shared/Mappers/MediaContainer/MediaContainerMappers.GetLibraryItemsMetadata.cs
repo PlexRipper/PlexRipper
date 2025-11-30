@@ -12,9 +12,9 @@ public static partial class MediaContainerMappers
         return new LibraryMediaItemDTO
         {
             RatingKey = data.RatingKey!,
-            Key = data.Key!,
-            Type = data.Type!.ToPlexMediaType(),
-            Title = data.Title ?? string.Empty,
+            Key = data.Key,
+            Type = data.Type.ToPlexMediaType(),
+            Title = data.Title,
             Summary = data.Summary ?? string.Empty,
             Year = data.Year ?? 0,
             TitleSort = data.Title.ToSortTitle(),
@@ -29,7 +29,7 @@ public static partial class MediaContainerMappers
             Index = data.Index ?? -1,
             ParentIndex = data.ParentIndex ?? -1,
             // Duration is in milliseconds and we want seconds
-            Duration = data.Duration is { } milliseconds ? milliseconds / 1000 : -1,
+            Duration = data.Duration is { } milliseconds ? milliseconds / 1000 : 0,
             Thumb = data.Thumb!,
             Art = data.Art!,
             Theme = data.Theme!,

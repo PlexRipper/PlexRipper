@@ -1,3 +1,5 @@
+using LukeHagar.PlexAPI.SDK.Models.Components;
+
 namespace Reaparr.PlexApi;
 
 public static class PlexMediaTypeToApiTypeExtensions
@@ -33,5 +35,39 @@ public static class PlexMediaTypeToApiTypeExtensions
         }
 
         return (T)Enum.ToObject(typeof(T), enumInt);
+    }
+
+    public static PlexMediaType ToPlexMediaType(this MediaType value)
+    {
+        return value switch
+        {
+            MediaType.Movie => PlexMediaType.Movie,
+            MediaType.TvShow => PlexMediaType.TvShow,
+            MediaType.Season => PlexMediaType.Season,
+            MediaType.Episode => PlexMediaType.Episode,
+            MediaType.Artist => PlexMediaType.Artist,
+            MediaType.Album => PlexMediaType.Album,
+            MediaType.Track => PlexMediaType.Song,
+            MediaType.PhotoAlbum => PlexMediaType.PhotoAlbum,
+            MediaType.Photo => PlexMediaType.Photos,
+            _ => throw new ArgumentOutOfRangeException(nameof(value), value, null),
+        };
+    }
+
+    public static MediaType ToMediaType(this PlexMediaType value)
+    {
+        return value switch
+        {
+            PlexMediaType.Movie => MediaType.Movie,
+            PlexMediaType.TvShow => MediaType.TvShow,
+            PlexMediaType.Season => MediaType.Season,
+            PlexMediaType.Episode => MediaType.Episode,
+            PlexMediaType.Artist => MediaType.Artist,
+            PlexMediaType.Album => MediaType.Album,
+            PlexMediaType.Song => MediaType.Track,
+            PlexMediaType.PhotoAlbum => MediaType.PhotoAlbum,
+            PlexMediaType.Photos => MediaType.Photo,
+            _ => throw new ArgumentOutOfRangeException(nameof(value), value, null),
+        };
     }
 }

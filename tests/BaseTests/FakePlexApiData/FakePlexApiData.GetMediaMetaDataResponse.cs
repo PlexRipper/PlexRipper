@@ -1,6 +1,7 @@
 using System.Net;
 using LukeHagar.PlexAPI.SDK.Models.Components;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
+using Reaparr.PlexApi;
 using Metadata = LukeHagar.PlexAPI.SDK.Models.Components.Metadata;
 
 namespace Reaparr.BaseTests;
@@ -39,7 +40,7 @@ public partial class FakePlexApiData
         Action<PlexApiDataConfig>? options = null
     )
     {
-        var type = library.Type!.ToPlexMediaType();
+        var type = library.Type.ToPlexMediaType();
 
         return new MediaContainerWithMetadata
         {

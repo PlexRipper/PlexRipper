@@ -2,6 +2,7 @@
 using LukeHagar.PlexAPI.SDK.Models.Components;
 using Moq.Contrib.HttpClient;
 using Reaparr.Data.Contracts;
+using Reaparr.PlexApi;
 using Reaparr.PlexApi.Contracts;
 
 namespace Reaparr.BaseTests;
@@ -234,7 +235,7 @@ public class MockPlexApiServer : IMockPlexApiServer
             // Generate media for each library
             foreach (var library in _libraries[server.ClientIdentifier])
             {
-                var type = library.Type!.ToPlexMediaType();
+                var type = library.Type.ToPlexMediaType();
                 var libraryKey = library.Uuid;
 
                 if (type == PlexMediaType.Movie)

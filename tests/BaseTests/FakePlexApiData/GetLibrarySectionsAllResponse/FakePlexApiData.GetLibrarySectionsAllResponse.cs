@@ -22,6 +22,7 @@ public partial class FakePlexApiData
             .UseSeed(seed.Next())
             .RuleFor(x => x.StatusCode, _ => (int)statusCode)
             .RuleFor(x => x.ContentType, _ => ContentType.ApplicationJson)
+            .Ignore(x => x.Headers)
             .RuleFor(
                 x => x.MediaContainerWithMetadata,
                 _ => responseBody ?? GetLibrarySectionsAllResponseBody(seed, library, 100, options)
@@ -51,6 +52,7 @@ public partial class FakePlexApiData
                     {
                         x.Metadata = GetLibrarySectionsAllMetadata(seed, type, options).Generate(mediaCount);
                         x.Size = x.Metadata!.Count;
+                        x.TotalSize = x.Metadata!.Count;
                     }
                 )
                 .Generate(),

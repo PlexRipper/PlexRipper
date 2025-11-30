@@ -19,7 +19,7 @@ public partial class FakePlexApiData
     {
         return new Faker<GetMetadataItemResponse>()
             .StrictMode(true)
-            .UseSeed(seed.Next())
+            .Ignore(x => x.Headers)
             .RuleFor(x => x.StatusCode, _ => (int)statusCode)
             .RuleFor(x => x.ContentType, _ => ContentType.ApplicationJson)
             .RuleFor(
@@ -30,6 +30,7 @@ public partial class FakePlexApiData
                 x => x.RawResponse,
                 (_, res) => GetHttpResponseMessage(statusCode, res.MediaContainerWithMetadata, request)
             )
+            .UseSeed(seed.Next())
             .Generate();
     }
 

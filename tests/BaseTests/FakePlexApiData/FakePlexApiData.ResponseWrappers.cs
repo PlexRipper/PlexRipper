@@ -100,6 +100,9 @@ public partial class FakePlexApiData
                         .Generate(config.LibraryCount())
             )
             .RuleFor(x => x.Size, (_, x) => x.Directory!.Count)
+            .RuleFor(x => x.TotalSize, _ => config.LibraryCount())
+            .Ignore(x => x.Offset)
+            .Ignore(x => x.Identifier)
             .FinishWith(
                 (_, x) =>
                 {
@@ -121,6 +124,7 @@ public partial class FakePlexApiData
             .RuleFor(x => x.ContentType, _ => ContentType.ApplicationJson)
             .RuleFor(x => x.Object, _ => body)
             .RuleFor(x => x.RawResponse, (_, res) => GetHttpResponseMessage(statusCode, res.Object, request))
+            .Ignore(x => x.Headers)
             .Generate();
     }
 
@@ -150,6 +154,7 @@ public partial class FakePlexApiData
                 x => x.RawResponse,
                 (_, res) => GetHttpResponseMessage(statusCode, res.MediaContainerWithMetadata, request)
             )
+            .Ignore(x => x.Headers)
             .Generate();
     }
 

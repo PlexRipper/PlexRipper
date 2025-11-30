@@ -207,7 +207,7 @@ public class MockPlexApiServer : IMockPlexApiServer
         {
             foreach (var connection in _connections[server.ClientIdentifier])
             {
-                var uriBuilder = new UriBuilder(connection.Uri) { Path = "/library/sections" };
+                var uriBuilder = new UriBuilder(connection.Uri) { Path = "/library/sections/all" };
                 handler
                     .SetupRequest(HttpMethod.Get, uriBuilder.Uri)
                     .ReturnsAsync(

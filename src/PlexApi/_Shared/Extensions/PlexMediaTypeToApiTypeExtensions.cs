@@ -70,4 +70,38 @@ public static class PlexMediaTypeToApiTypeExtensions
             _ => throw new ArgumentOutOfRangeException(nameof(value), value, null),
         };
     }
+
+    public static MediaTypeString ToMediaTypeString(this PlexMediaType value)
+    {
+        return value switch
+        {
+            PlexMediaType.Movie => MediaTypeString.Movie,
+            PlexMediaType.TvShow => MediaTypeString.TvShow,
+            PlexMediaType.Season => MediaTypeString.Season,
+            PlexMediaType.Episode => MediaTypeString.Episode,
+            PlexMediaType.Artist => MediaTypeString.Artist,
+            PlexMediaType.Album => MediaTypeString.Album,
+            PlexMediaType.Song => MediaTypeString.Track,
+            PlexMediaType.PhotoAlbum => MediaTypeString.PhotoAlbum,
+            PlexMediaType.Photos => MediaTypeString.Photo,
+            _ => throw new ArgumentOutOfRangeException(nameof(value), value, null),
+        };
+    }
+
+    public static PlexMediaType ToPlexMediaType(this MediaTypeString value)
+    {
+        return value switch
+        {
+            MediaTypeString.Movie => PlexMediaType.Movie,
+            MediaTypeString.TvShow => PlexMediaType.TvShow,
+            MediaTypeString.Season => PlexMediaType.Season,
+            MediaTypeString.Episode => PlexMediaType.Episode,
+            MediaTypeString.Artist => PlexMediaType.Artist,
+            MediaTypeString.Album => PlexMediaType.Album,
+            MediaTypeString.Track => PlexMediaType.Song,
+            MediaTypeString.PhotoAlbum => PlexMediaType.PhotoAlbum,
+            MediaTypeString.Photo => PlexMediaType.Photos,
+            _ => throw new ArgumentOutOfRangeException(nameof(value), value, null),
+        };
+    }
 }

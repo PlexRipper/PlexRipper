@@ -15,7 +15,7 @@ public static class LibrarySectionMappers
             Refreshing = false,
             Thumb = string.Empty,
             Key = source.Key,
-            Type = source.Type.ToMediaType(),
+            Type = source.Type.ToMediaTypeString(),
             Title = source.Title,
             Agent = string.Empty,
             Scanner = string.Empty,

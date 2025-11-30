@@ -10,6 +10,8 @@ namespace Reaparr.PlexApi;
 
 public static class HttpClientExtensions
 {
+    private static readonly ILogger _log = Log.ForContext(typeof(HttpClientExtensions));
+
     /// <summary>
     /// This will convert from SpeakEasy exceptions to the use of FluentResults
     /// </summary>
@@ -29,6 +31,11 @@ public static class HttpClientExtensions
         }
         catch (JsonSerializationException e)
         {
+            return Result.Fail(new ExceptionalError(e)).LogError();
+        }
+        catch (ResponseValidationException e)
+        {
+            _log.Here().Error("Failed response validation: {Body}", e.Body);
             return Result.Fail(new ExceptionalError(e)).LogError();
         }
         catch (Exception e)

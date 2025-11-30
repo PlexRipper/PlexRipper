@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <LangVersion>13</LangVersion>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>Reaparr.BackgroundJobs</RootNamespace>
+        <AssemblyName>Reaparr.BackgroundJobs</AssemblyName>
+    </PropertyGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\BackgroundJobs.Contracts\BackgroundJobs.Contracts.csproj" />
+        <ProjectReference Include="..\Application.Contracts\Application.Contracts.csproj" />
+        <ProjectReference Include="..\Data.Contracts\Data.Contracts.csproj" />
+        <ProjectReference Include="..\Domain\Domain.csproj" />
+        <Compile Include="..\Domain\GlobalUsings.cs" />
+        <ProjectReference Include="..\PlexApi.Contracts\PlexApi.Contracts.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Autofac.Extras.Quartz" Version="10.0.0" />
+        <PackageReference Include="Quartz" Version="3.15.0" />
+    </ItemGroup>
+</Project>

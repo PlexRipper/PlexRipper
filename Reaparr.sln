@@ -111,9 +111,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PublicApi.UnitTests", "test
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LukeHagar.PlexAPI.SDK", "..\plexcsharp\LukeHagar\PlexAPI\SDK\LukeHagar.PlexAPI.SDK.csproj", "{6ADDCFE2-F4D0-456D-AD5E-7BD7EE2EB525}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BackgroundJobs", "BackgroundJobs\BackgroundJobs.csproj", "{09C37A03-C9E4-4C6D-A4B1-269181A8CF8D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BackgroundJobs", "src\BackgroundJobs\BackgroundJobs.csproj", "{09C37A03-C9E4-4C6D-A4B1-269181A8CF8D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BackgroundJobs.Contracts", "BackgroundJobs.Contracts\BackgroundJobs.Contracts.csproj", "{11AE2855-6262-4E2F-95C2-8E429627D8F1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BackgroundJobs.Contracts", "src\BackgroundJobs.Contracts\BackgroundJobs.Contracts.csproj", "{11AE2855-6262-4E2F-95C2-8E429627D8F1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

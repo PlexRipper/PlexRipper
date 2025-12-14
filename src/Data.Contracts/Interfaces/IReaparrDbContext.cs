@@ -74,6 +74,8 @@ public interface IReaparrDbContext : IDisposable
 
     public DbSet<PlexServerStatus> PlexServerStatuses { get; }
 
+    public DbSet<LibrarySyncQueue> LibrarySyncQueues { get; }
+
     #endregion
 
     #endregion

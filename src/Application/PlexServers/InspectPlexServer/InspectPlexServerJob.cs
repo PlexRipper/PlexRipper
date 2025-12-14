@@ -1,4 +1,5 @@
-﻿using Quartz;
+﻿using Microsoft.EntityFrameworkCore;
+using Quartz;
 using Reaparr.Application.Contracts;
 using Reaparr.BackgroundJobs.Contracts;
 using Reaparr.Data.Contracts;
@@ -94,8 +95,14 @@ public class InspectPlexServerJob : IJob
             CancellationToken.None
         );
 
+        var libraryIds = await _dbContext
+            .PlexLibraries.Where(x => x.PlexServerId == plexServerId)
+            .Select(x => x.Id)
+            .ToListAsync(CancellationToken.None);
+
         // Sync library media
-        await _commandExecutor.Send(new QueueNextPlexLibraryToSyncCommand(plexServerId), CancellationToken.None);
+        await _commandExecutor.Send(new QueueLibrarySyncJobCommand(libraryIds), CancellationToken.None);
+
         return Result.Ok();
     }
 }

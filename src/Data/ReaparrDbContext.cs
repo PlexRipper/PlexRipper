@@ -63,6 +63,8 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
 
     public DbSet<PlexServerStatus> PlexServerStatuses { get; set; }
 
+    public DbSet<LibrarySyncQueue> LibrarySyncQueues { get; set; }
+
     public DbSet<DownloadTaskMovie> DownloadTaskMovie { get; set; }
 
     public DbSet<DownloadTaskMovieFile> DownloadTaskMovieFile { get; set; }

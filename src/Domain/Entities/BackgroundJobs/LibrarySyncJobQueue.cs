@@ -3,7 +3,7 @@ namespace Reaparr.Domain;
 /// <summary>
 /// Represents a queue item for syncing a Plex library.
 /// </summary>
-public class LibrarySyncQueue : BaseEntity
+public class LibrarySyncJobQueue : BaseEntity
 {
     #region Properties
 

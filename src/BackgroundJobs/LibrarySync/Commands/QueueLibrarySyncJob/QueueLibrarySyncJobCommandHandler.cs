@@ -41,7 +41,7 @@ public class QueueLibrarySyncJobCommandHandler : ICommandHandler<QueueLibrarySyn
             .ToListAsync(cancellationToken);
 
         var queueItems = queuedLibraries
-            .Select(x => new LibrarySyncQueue
+            .Select(x => new LibrarySyncJobQueue
             {
                 PlexLibraryId = x.Id,
                 PlexServerId = x.PlexServerId,

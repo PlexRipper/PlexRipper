@@ -4,9 +4,9 @@ using Reaparr.Domain;
 
 namespace Reaparr.Data.Configurations;
 
-public class LibrarySyncQueueConfiguration : IEntityTypeConfiguration<LibrarySyncQueue>
+public class LibrarySyncQueueConfiguration : IEntityTypeConfiguration<LibrarySyncJobQueue>
 {
-    public void Configure(EntityTypeBuilder<LibrarySyncQueue> builder)
+    public void Configure(EntityTypeBuilder<LibrarySyncJobQueue> builder)
     {
         builder
             .Property(e => e.Status)

@@ -51,7 +51,7 @@ public class QueueLibrarySyncJobCommandHandler : ICommandHandler<QueueLibrarySyn
             })
             .ToList();
 
-        await _dbContext.LibrarySyncQueues.AddRangeAsync(queueItems, cancellationToken);
+        await _dbContext.LibrarySyncJobQueues.AddRangeAsync(queueItems, cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);
 
         _log.Here().Debug("Queued {Count} libraries for sync.", queueItems.Count);

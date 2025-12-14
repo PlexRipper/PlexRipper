@@ -41,7 +41,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandler : ICommandHandler<CheckQ
     )
     {
         var queuedLibraries = await _dbContext
-            .LibrarySyncQueues.Where(x => x.Status == LibrarySyncQueueStatus.Queued)
+            .LibrarySyncJobQueues.Where(x => x.Status == LibrarySyncQueueStatus.Queued)
             .OrderBy(x => x.Priority)
             .ToListAsync(cancellationToken: cancellationToken);
 

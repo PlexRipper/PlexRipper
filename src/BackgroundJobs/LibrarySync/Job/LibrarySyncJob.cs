@@ -138,7 +138,7 @@ public class LibrarySyncJob : IJob
 
     private async Task UpdateQueueItemAsync(LibrarySyncQueueStatus status, string? errorMessage = null)
     {
-        var query = _dbContext.LibrarySyncQueues.Where(x =>
+        var query = _dbContext.LibrarySyncJobQueues.Where(x =>
             x.PlexServerId == _serverId && x.PlexLibraryId == _libraryId
         );
 

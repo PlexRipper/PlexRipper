@@ -22,13 +22,19 @@ public static class LogManager
         {
             // ReSharper disable once StringLiteralTypo
             case { } s when s.StartsWith("dbug:"):
-                GetLogger().Here().Debug(messageTemplate, memberName, sourceFilePath, sourceLineNumber);
+                GetLogger()
+                    .Here(sourceFilePath, memberName, sourceLineNumber)
+                    .Debug(messageTemplate, memberName, sourceFilePath, sourceLineNumber);
                 break;
             case { } s when s.StartsWith("info:"):
-                GetLogger().Here().Information(messageTemplate, memberName, sourceFilePath, sourceLineNumber);
+                GetLogger()
+                    .Here(sourceFilePath, memberName, sourceLineNumber)
+                    .Information(messageTemplate, memberName, sourceFilePath, sourceLineNumber);
                 break;
             case { } s when s.StartsWith("fail:"):
-                GetLogger().Here().Error(messageTemplate, memberName, sourceFilePath, sourceLineNumber);
+                GetLogger()
+                    .Here(sourceFilePath, memberName, sourceLineNumber)
+                    .Error(messageTemplate, memberName, sourceFilePath, sourceLineNumber);
                 break;
         }
     }

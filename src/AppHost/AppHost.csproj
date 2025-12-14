@@ -37,7 +37,6 @@
         <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="..\..\BackgroundJobs\BackgroundJobs.csproj" />
         <ProjectReference Include="..\Application\Application.csproj" />
         <ProjectReference Include="..\BackgroundJobs\BackgroundJobs.csproj" />
         <ProjectReference Include="..\Data\Data.csproj" />

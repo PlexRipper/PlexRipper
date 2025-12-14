@@ -2,14 +2,10 @@ using FastEndpoints;
 using FluentValidation;
 using Quartz;
 using Quartz.Impl.Matchers;
+using Reaparr.BackgroundJobs.Contracts;
 using Reaparr.Data.Contracts;
 
 namespace Reaparr.BackgroundJobs;
-
-/// <summary>
-/// Command to move a library sync to the front of the queue by canceling the current execution and rescheduling with the highest priority.
-/// </summary>
-public record ForceLibraryMediaSyncCommand(int PlexServerId, int LibraryId) : ICommand<Result>;
 
 public class ForceLibraryMediaSyncCommandValidator : AbstractValidator<ForceLibraryMediaSyncCommand>
 {

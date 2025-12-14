@@ -13,6 +13,7 @@ using NSwag;
 using NSwag.Generation.Processors.Security;
 using Reaparr.Application;
 using Reaparr.Application.Contracts;
+using Reaparr.BackgroundJobs;
 using Reaparr.Data;
 using Reaparr.Environment;
 using Reaparr.Identity;
@@ -68,6 +69,7 @@ public static partial class Startup
             [
                 // Reference the assemblies that contain the FastEndpoints or ICommand implementations
                 Assembly.GetAssembly(typeof(ApplicationModule))!,
+                Assembly.GetAssembly(typeof(BackgroundJobsModule))!,
                 Assembly.GetAssembly(typeof(PlexApiModule))!,
                 Assembly.GetAssembly(typeof(PublicApiModule))!,
             ];

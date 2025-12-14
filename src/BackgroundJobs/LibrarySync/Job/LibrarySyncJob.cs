@@ -26,7 +26,7 @@ public class LibrarySyncJob : IJob
     }
 
     public static JobKey GetJobKey(int serverId, int libraryId) =>
-        new($"LibrarySync_{serverId}_{libraryId}", "LibrarySync");
+        new($"{nameof(JobTypes.LibrarySyncJob)}_{serverId}_{libraryId}", nameof(JobTypes.LibrarySyncJob));
 
     public async Task Execute(IJobExecutionContext context)
     {

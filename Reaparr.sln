@@ -115,6 +115,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BackgroundJobs", "src\Backg
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BackgroundJobs.Contracts", "src\BackgroundJobs.Contracts\BackgroundJobs.Contracts.csproj", "{11AE2855-6262-4E2F-95C2-8E429627D8F1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BackgroundJobs.UnitTests", "tests\UnitTests\BackgroundJobs.UnitTests\BackgroundJobs.UnitTests.csproj", "{926E1DC4-020B-49D7-8183-8C62FF976FEB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -269,6 +271,10 @@ Global
 		{11AE2855-6262-4E2F-95C2-8E429627D8F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{11AE2855-6262-4E2F-95C2-8E429627D8F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{11AE2855-6262-4E2F-95C2-8E429627D8F1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{926E1DC4-020B-49D7-8183-8C62FF976FEB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{926E1DC4-020B-49D7-8183-8C62FF976FEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{926E1DC4-020B-49D7-8183-8C62FF976FEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{926E1DC4-020B-49D7-8183-8C62FF976FEB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -319,6 +325,7 @@ Global
 		{6ADDCFE2-F4D0-456D-AD5E-7BD7EE2EB525} = {EE2CBDBB-0755-4561-8272-FB0F36AF6ACB}
 		{09C37A03-C9E4-4C6D-A4B1-269181A8CF8D} = {6ED356A7-8B47-4613-AD01-C85CF28491BD}
 		{11AE2855-6262-4E2F-95C2-8E429627D8F1} = {6ED356A7-8B47-4613-AD01-C85CF28491BD}
+		{926E1DC4-020B-49D7-8183-8C62FF976FEB} = {BC7C4F2B-5B33-4A5F-9718-3A672B10A312}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B4C02A51-7A0F-40AF-B559-20772614ED60}

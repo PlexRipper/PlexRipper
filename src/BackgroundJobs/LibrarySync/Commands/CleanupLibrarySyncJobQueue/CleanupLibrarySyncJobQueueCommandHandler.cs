@@ -38,17 +38,17 @@ public class CleanupLibrarySyncJobQueueCommandHandler : ICommandHandler<CleanupL
     {
         // Cleanup completed queue items
         await _dbContext
-            .LibrarySyncJobQueues.Where(x => x.Status == LibrarySyncQueueStatus.Completed)
+            .LibrarySyncJobQueues.Where(x => x.Status == LibrarySyncJobStatus.Completed)
             .ExecuteDeleteAsync(cancellationToken: cancellationToken);
 
         // Re-queue failed or processing items
         await _dbContext
             .LibrarySyncJobQueues.Where(x =>
-                x.Status == LibrarySyncQueueStatus.Failed || x.Status == LibrarySyncQueueStatus.Processing
+                x.Status == LibrarySyncJobStatus.Failed || x.Status == LibrarySyncJobStatus.Processing
             )
             .ExecuteUpdateAsync(
                 x =>
-                    x.SetProperty(y => y.Status, LibrarySyncQueueStatus.Queued)
+                    x.SetProperty(y => y.Status, LibrarySyncJobStatus.Queued)
                         .SetProperty(y => y.StartedAt, (DateTime?)null)
                         .SetProperty(y => y.ErrorMessage, (string?)null),
                 cancellationToken: cancellationToken

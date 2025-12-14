@@ -3,6 +3,7 @@ namespace Reaparr.Domain;
 /// <summary>
 /// Represents a queue item for syncing a Plex library.
 /// </summary>
+[Table("BackgroundJobLibrarySyncJobQueues")]
 public class LibrarySyncJobQueue
 {
     #region Properties
@@ -18,7 +19,7 @@ public class LibrarySyncJobQueue
     /// Gets or sets the status of this queue item.
     /// </summary>
     [Column(Order = 2)]
-    public required LibrarySyncQueueStatus Status { get; set; } = LibrarySyncQueueStatus.Queued;
+    public required LibrarySyncJobStatus Status { get; set; } = LibrarySyncJobStatus.Queued;
 
     /// <summary>
     /// Gets or sets when this queue item was created.

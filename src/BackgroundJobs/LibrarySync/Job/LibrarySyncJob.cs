@@ -67,7 +67,7 @@ public class LibrarySyncJob : IJob
                 _libraryId
             );
 
-        await UpdateQueueItemAsync(LibrarySyncQueueStatus.Processing);
+        await UpdateQueueItemAsync(LibrarySyncJobStatus.Processing);
 
         // Jobs should swallow exceptions as otherwise Quartz will keep re-executing it
         // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
@@ -89,7 +89,7 @@ public class LibrarySyncJob : IJob
             {
                 result.LogError();
                 await UpdateQueueItemAsync(
-                    LibrarySyncQueueStatus.Failed,
+                    LibrarySyncJobStatus.Failed,
                     errorMessage: result.Errors.FirstOrDefault()?.Message
                 );
 
@@ -106,7 +106,7 @@ public class LibrarySyncJob : IJob
                 .Information("Successfully synced library {LibraryId} for server {ServerId}", _libraryId, _serverId);
 
             // Mark queue item as completed
-            await UpdateQueueItemAsync(LibrarySyncQueueStatus.Completed);
+            await UpdateQueueItemAsync(LibrarySyncJobStatus.Completed);
 
             await _dbContext.SaveChangesAsync(cancellationToken);
 
@@ -118,7 +118,7 @@ public class LibrarySyncJob : IJob
         }
         catch (OperationCanceledException)
         {
-            await UpdateQueueItemAsync(LibrarySyncQueueStatus.Queued);
+            await UpdateQueueItemAsync(LibrarySyncJobStatus.Queued);
 
             _log.Here()
                 .Information(
@@ -130,13 +130,13 @@ public class LibrarySyncJob : IJob
         }
         catch (Exception e)
         {
-            await UpdateQueueItemAsync(LibrarySyncQueueStatus.Failed, errorMessage: e.Message);
+            await UpdateQueueItemAsync(LibrarySyncJobStatus.Failed, errorMessage: e.Message);
 
             _log.Here().ErrorResult(e);
         }
     }
 
-    private async Task UpdateQueueItemAsync(LibrarySyncQueueStatus status, string? errorMessage = null)
+    private async Task UpdateQueueItemAsync(LibrarySyncJobStatus status, string? errorMessage = null)
     {
         var query = _dbContext.LibrarySyncJobQueues.Where(x =>
             x.PlexServerId == _serverId && x.PlexLibraryId == _libraryId
@@ -144,19 +144,19 @@ public class LibrarySyncJob : IJob
 
         switch (status)
         {
-            case LibrarySyncQueueStatus.Processing:
+            case LibrarySyncJobStatus.Processing:
                 await query.ExecuteUpdateAsync(s =>
                     s.SetProperty(x => x.Status, status).SetProperty(x => x.StartedAt, DateTime.UtcNow)
                 );
                 break;
 
-            case LibrarySyncQueueStatus.Completed:
+            case LibrarySyncJobStatus.Completed:
                 await query.ExecuteUpdateAsync(s =>
                     s.SetProperty(x => x.Status, status).SetProperty(x => x.CompletedAt, DateTime.UtcNow)
                 );
                 break;
 
-            case LibrarySyncQueueStatus.Failed:
+            case LibrarySyncJobStatus.Failed:
                 await query.ExecuteUpdateAsync(s =>
                     s.SetProperty(x => x.Status, status)
                         .SetProperty(x => x.CompletedAt, DateTime.UtcNow)
@@ -164,14 +164,14 @@ public class LibrarySyncJob : IJob
                 );
                 break;
 
-            case LibrarySyncQueueStatus.Queued:
+            case LibrarySyncJobStatus.Queued:
                 await query.ExecuteUpdateAsync(s =>
                     s.SetProperty(x => x.Status, status)
                         .SetProperty(x => x.StartedAt, (DateTime?)null)
                         .SetProperty(x => x.ErrorMessage, (string?)null)
                 );
                 break;
-            case LibrarySyncQueueStatus.Unknown:
+            case LibrarySyncJobStatus.Unknown:
                 throw new ArgumentOutOfRangeException(nameof(status), "Cannot set status to Unknown");
             default:
                 throw new ArgumentOutOfRangeException(nameof(status), status, null);

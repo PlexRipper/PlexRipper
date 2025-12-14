@@ -7,7 +7,7 @@ namespace Reaparr.Domain;
 /// Represents the status of a library sync queue item.
 /// </summary>
 [JsonConverter(typeof(JsonStringEnumConverter))]
-public enum LibrarySyncQueueStatus
+public enum LibrarySyncJobStatus
 {
     /// <summary>
     /// String value was unable to be parsed to this enum.

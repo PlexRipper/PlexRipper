@@ -41,7 +41,8 @@ public class QueueNextPlexLibraryToSyncCommandHandler : ICommandHandler<QueueNex
         var plexServerName = await _dbContext.GetPlexServerNameById(plexServerId, cancellationToken: cancellationToken);
 
         var plexLibraries = await _dbContext
-            .PlexLibraries.Where(x => x.PlexServerId == plexServerId && (x.Outdated || x.SyncedAt == null))
+            .PlexLibraries.Where(x => x.PlexServerId == plexServerId)
+            .ApplyWhere(!command.ForceSync, x => x.Outdated || x.SyncedAt == null)
             .ToListAsync(cancellationToken: cancellationToken);
 
         if (!plexLibraries.Any())

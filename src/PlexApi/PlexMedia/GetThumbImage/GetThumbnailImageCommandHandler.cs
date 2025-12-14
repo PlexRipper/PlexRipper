@@ -34,7 +34,7 @@ public class GetThumbnailImageCommandHandler : ICommandHandler<GetThumbnailImage
             return plexServerConnectionResult.ToResult();
 
         var client = _httpClientFactory.CreateClient();
-        client.Timeout = TimeSpan.FromSeconds(10);
+        client.Timeout = TimeSpan.FromSeconds(30);
 
         var baseUrl = $"{plexServerConnectionResult.Value.Url}/photo/:/transcode";
 

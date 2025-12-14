@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Reaparr.Domain;
 
 namespace Reaparr.Data.Configurations;
 

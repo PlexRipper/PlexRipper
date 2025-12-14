@@ -20,19 +20,12 @@ public class CheckQueuedPlexLibraryToSyncCommandHandler : ICommandHandler<CheckQ
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly IScheduler _scheduler;
-    private readonly ICommandExecutor _commandExecutor;
 
-    public CheckQueuedPlexLibraryToSyncCommandHandler(
-        ILogger log,
-        IReaparrDbContext dbContext,
-        IScheduler scheduler,
-        ICommandExecutor commandExecutor
-    )
+    public CheckQueuedPlexLibraryToSyncCommandHandler(ILogger log, IReaparrDbContext dbContext, IScheduler scheduler)
     {
         _log = log.ForContext<CheckQueuedPlexLibraryToSyncCommandHandler>();
         _dbContext = dbContext;
         _scheduler = scheduler;
-        _commandExecutor = commandExecutor;
     }
 
     public async Task<Result> ExecuteAsync(

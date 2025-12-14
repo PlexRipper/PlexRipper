@@ -30,7 +30,7 @@ public class QueueLibrarySyncJobCommandHandler : ICommandHandler<QueueLibrarySyn
 
     public async Task<Result> ExecuteAsync(QueueLibrarySyncJobCommand command, CancellationToken cancellationToken)
     {
-        var queuedLibraries = await _dbContext
+        var libraries = await _dbContext
             .PlexLibraries.Where(x => command.PlexLibraryIds.Contains(x.Id))
             .Select(x => new
             {
@@ -40,23 +40,46 @@ public class QueueLibrarySyncJobCommandHandler : ICommandHandler<QueueLibrarySyn
             })
             .ToListAsync(cancellationToken);
 
-        var queueItems = queuedLibraries
+        var existingQueues = await _dbContext
+            .LibrarySyncJobQueues.Where(x => command.PlexLibraryIds.Contains(x.PlexLibraryId))
+            .ToListAsync(cancellationToken: cancellationToken);
+
+        if (existingQueues.Any())
+        {
+            _log.Here()
+                .Warning(
+                    "Some libraries are already queued for sync. Existing queue items will be updated if they are completed/failed."
+                );
+
+            var exitingIds = existingQueues
+                .Where(x => x.Status is LibrarySyncJobStatus.Failed or LibrarySyncJobStatus.Completed)
+                .Select(x => x.PlexLibraryId)
+                .ToList();
+
+            await _dbContext.LibrarySyncJobQueues.ResetLibrarySyncJobQueue(exitingIds, token: cancellationToken);
+        }
+
+        var exitingIds2 = existingQueues
+            .Where(x => x.Status is LibrarySyncJobStatus.Queued or LibrarySyncJobStatus.Processing)
+            .Select(x => x.PlexLibraryId)
+            .ToList();
+
+        var itemsToAdd = libraries
+            .Where(x => !exitingIds2.Contains(x.Id))
             .Select(x => new LibrarySyncJobQueue
             {
                 PlexLibraryId = x.Id,
                 PlexServerId = x.PlexServerId,
                 Priority = GetPriority(x.Type),
-                Status = LibrarySyncQueueStatus.Queued,
+                Status = LibrarySyncJobStatus.Queued,
                 CreatedAt = DateTime.UtcNow,
             })
             .ToList();
 
-        await _dbContext.LibrarySyncJobQueues.AddRangeAsync(queueItems, cancellationToken);
+        await _dbContext.LibrarySyncJobQueues.AddRangeAsync(itemsToAdd, cancellationToken);
+
         await _dbContext.SaveChangesAsync(cancellationToken);
 
-        _log.Here().Debug("Queued {Count} libraries for sync.", queueItems.Count);
-
-        // Trigger check for queued library syncs
         await _commandExecutor.Send(new CheckQueuedPlexLibraryToSyncCommand(), cancellationToken);
 
         return Result.Ok();

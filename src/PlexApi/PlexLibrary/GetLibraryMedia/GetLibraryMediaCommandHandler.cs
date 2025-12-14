@@ -37,6 +37,12 @@ public class GetLibraryMediaCommandHandler : ICommandHandler<GetLibraryMediaComm
         // Set the default folder path id for the destination
         updatedPlexLibrary.DefaultDestinationId = updatedPlexLibrary.Type.ToDefaultDestinationFolderId();
 
+        // TODO: Handle other media types (Music, Photos, etc)
+        if (updatedPlexLibrary.Type is not (PlexMediaType.Movie or PlexMediaType.TvShow))
+        {
+            return Result.Ok(new LibraryMetadata(updatedPlexLibrary));
+        }
+
         var mediaListResult = await _commandExecutor.Send(
             new GetAllMediaByTypeFromPlexApiCommand(plexLibrary, plexLibrary.Type, Action: action),
             ct

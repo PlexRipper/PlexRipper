@@ -8,6 +8,9 @@ public class LibrarySyncQueueConfiguration : IEntityTypeConfiguration<LibrarySyn
 {
     public void Configure(EntityTypeBuilder<LibrarySyncJobQueue> builder)
     {
+        // Configure a composite primary key
+        builder.HasKey(x => new { x.PlexServerId, x.PlexLibraryId });
+
         builder
             .Property(e => e.Status)
             .HasMaxLength(50)

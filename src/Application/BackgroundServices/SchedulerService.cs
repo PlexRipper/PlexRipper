@@ -1,6 +1,7 @@
 ﻿using Quartz;
 using Quartz.Impl.Matchers;
 using Reaparr.Application.Contracts;
+using Reaparr.BackgroundJobs.Contracts;
 using Reaparr.Environment;
 
 namespace Reaparr.Application;
@@ -11,6 +12,7 @@ public class SchedulerService : ISchedulerService
 
     private readonly ILogger _log;
     private readonly IScheduler _scheduler;
+    private readonly ICommandExecutor _commandExecutor;
     private readonly IAllJobListener _allJobListener;
     private readonly IDownloadJobListener _downloadJobListener;
 
@@ -21,12 +23,14 @@ public class SchedulerService : ISchedulerService
     public SchedulerService(
         ILogger log,
         IScheduler scheduler,
+        ICommandExecutor commandExecutor,
         IAllJobListener allJobListener,
         IDownloadJobListener downloadJobListener
     )
     {
         _log = log.ForContext<SchedulerService>();
         _scheduler = scheduler;
+        _commandExecutor = commandExecutor;
         _allJobListener = allJobListener;
         _downloadJobListener = downloadJobListener;
     }
@@ -52,7 +56,9 @@ public class SchedulerService : ISchedulerService
 
         if (!EnvironmentExtensions.IsIntegrationTestMode())
         {
-            await SetupPlexServerStatusCheckJob(CancellationToken.None);
+            await SetupPlexServerStatusCheckJob();
+
+            await SetupLibrarySyncJob();
         }
 
         return _scheduler.IsStarted
@@ -106,7 +112,7 @@ public class SchedulerService : ISchedulerService
         await Task.Delay(1000, cancellationToken);
     }
 
-    public async Task SetupPlexServerStatusCheckJob(CancellationToken cancellationToken)
+    private async Task SetupPlexServerStatusCheckJob()
     {
         var key = CheckAllConnectionsStatusByPlexServerJob.GetJobKey();
 
@@ -124,7 +130,14 @@ public class SchedulerService : ISchedulerService
             .WithSimpleSchedule(x => x.WithIntervalInMinutes(10).RepeatForever())
             .Build();
 
-        await _scheduler.ScheduleJob(job, trigger, cancellationToken);
+        await _scheduler.ScheduleJob(job, trigger);
+    }
+
+    private async Task SetupLibrarySyncJob()
+    {
+        await _commandExecutor.Send(new CleanupLibrarySyncJobQueueCommand(), CancellationToken.None);
+
+        await _commandExecutor.Send(new CheckQueuedPlexLibraryToSyncCommand(), CancellationToken.None);
     }
 
     public async Task<List<JobStatusUpdate<string>>> GetRunningJobUpdates() =>

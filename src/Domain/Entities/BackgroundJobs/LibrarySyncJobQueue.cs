@@ -3,7 +3,7 @@ namespace Reaparr.Domain;
 /// <summary>
 /// Represents a queue item for syncing a Plex library.
 /// </summary>
-public class LibrarySyncJobQueue : BaseEntity
+public class LibrarySyncJobQueue
 {
     #region Properties
 
@@ -55,8 +55,9 @@ public class LibrarySyncJobQueue : BaseEntity
 
     /// <summary>
     /// Gets or sets the PlexLibraryId this queue item is for.
+    /// Part of the composite primary key along with PlexServerId.
     /// </summary>
-    [Column(Order = 8)]
+    [Column(Order = 7)]
     public required int PlexLibraryId { get; set; }
 
     /// <summary>
@@ -66,8 +67,9 @@ public class LibrarySyncJobQueue : BaseEntity
 
     /// <summary>
     /// Gets or sets the PlexServerId this queue item belongs to.
+    /// Part of the composite primary key along with PlexLibraryId.
     /// </summary>
-    [Column(Order = 9)]
+    [Column(Order = 8)]
     public required int PlexServerId { get; set; }
 
     #endregion

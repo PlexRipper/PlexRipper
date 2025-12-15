@@ -5,9 +5,9 @@ import type { Observable } from 'rxjs';
 import { ReplaySubject, forkJoin, of } from 'rxjs';
 import { filter, take, switchMap, tap } from 'rxjs/operators';
 import type { ISetupResult } from '@interfaces';
-import type {	CheckAllConnectionStatusUpdateDTO, InspectPlexServerJobUpdateDTO,
-	SyncServerMediaJobUpdateDTO,
-	JobStatusUpdateDTO as ApiJobStatusUpdateDTO,
+import type {
+	CheckAllConnectionStatusUpdateDTO, InspectPlexServerJobUpdateDTO,
+	JobStatusUpdateDTO as ApiJobStatusUpdateDTO, LibrarySyncJobQueueDTO,
 } from '@dto';
 import {
 	JobStatus,
@@ -97,8 +97,8 @@ export const useBackgroundJobsStore = defineStore('BackgroundJobsStore', () => {
 			getters.getJobStatusUpdate(JobTypes.CheckAllConnectionsStatusByPlexServerJob, status),
 		getInspectPlexServerJobUpdate: (status: JobStatus | null = null): Observable<JobStatusUpdateDTO<InspectPlexServerJobUpdateDTO>> =>
 			getters.getJobStatusUpdate(JobTypes.InspectPlexServerJob, status),
-		getSyncServerMediaJobUpdate: (status: JobStatus | null = null): Observable<JobStatusUpdateDTO<SyncServerMediaJobUpdateDTO>> =>
-			getters.getJobStatusUpdate(JobTypes.SyncServerMediaJob, status),
+		getLibrarySyncJobUpdate: (status: JobStatus | null = null): Observable<JobStatusUpdateDTO<LibrarySyncJobQueueDTO>> =>
+			getters.getJobStatusUpdate(JobTypes.LibrarySyncJob, status),
 	};
 
 	return {

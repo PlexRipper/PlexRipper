@@ -50,12 +50,16 @@ export interface CheckAllConnectionStatusUpdateDTO {
 }
 
 export interface ConfigureRadarrIntegrationRequest {
+  /** @minLength 1 */
   apiKey: string;
+  /** @minLength 1 */
   url: string;
 }
 
 export interface ConfigureSonarrIntegrationRequest {
+  /** @minLength 1 */
   apiKey: string;
+  /** @minLength 1 */
   url: string;
 }
 
@@ -444,8 +448,8 @@ export enum JobTypes {
   CheckAllConnectionsStatusByPlexServerJob = "CheckAllConnectionsStatusByPlexServerJob",
   DownloadJob = "DownloadJob",
   MoveDownloadFileJob = "MoveDownloadFileJob",
-  SyncServerMediaJob = "SyncServerMediaJob",
   InspectPlexServerJob = "InspectPlexServerJob",
+  LibrarySyncJob = "LibrarySyncJob",
 }
 
 export interface LanguageSettingsDTO {
@@ -554,6 +558,31 @@ export interface LibraryProgress {
   total: number;
   /** @format int32 */
   totalSteps: number;
+}
+
+export interface LibrarySyncJobQueueDTO {
+  /** @format date-time */
+  completedAt?: string | null;
+  /** @format date-time */
+  createdAt: string;
+  errorMessage?: string | null;
+  /** @format int32 */
+  plexLibraryId: number;
+  /** @format int32 */
+  plexServerId: number;
+  /** @format int32 */
+  priority: number;
+  /** @format date-time */
+  startedAt?: string | null;
+  status: LibrarySyncJobStatus;
+}
+
+export enum LibrarySyncJobStatus {
+  Unknown = "Unknown",
+  Queued = "Queued",
+  Processing = "Processing",
+  Completed = "Completed",
+  Failed = "Failed",
 }
 
 export enum MessageTypes {
@@ -1385,12 +1414,6 @@ export enum StreamType {
 export interface SuccessDTO {
   message: string;
   metadata: Record<string, any>;
-}
-
-export interface SyncServerMediaJobUpdateDTO {
-  forceSync: boolean;
-  /** @format int32 */
-  plexServerId: number;
 }
 
 export interface SyncServerMediaProgress {

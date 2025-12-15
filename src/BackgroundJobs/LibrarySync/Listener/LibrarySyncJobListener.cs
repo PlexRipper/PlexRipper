@@ -1,24 +1,43 @@
 using Microsoft.EntityFrameworkCore;
 using Quartz;
+using Quartz.Impl.Matchers;
 using Reaparr.Application.Contracts;
+using Reaparr.BackgroundJobs.Contracts;
 using Reaparr.Data.Contracts;
 
-namespace Reaparr.BackgroundJobs.Listener;
+namespace Reaparr.BackgroundJobs;
 
-public class LibrarySyncJobListener : IJobListener
+public class LibrarySyncJobListener : ILibrarySyncJobListener
 {
     private readonly IReaparrDbContext _dbContext;
+    private readonly IScheduler _scheduler;
     private readonly ISignalRService _signalRService;
     private readonly ILogger _log;
 
     /// <inheritdoc/>
     public string Name => nameof(LibrarySyncJobListener);
 
-    public LibrarySyncJobListener(ILogger log, IReaparrDbContext dbContext, ISignalRService signalRService)
+    public LibrarySyncJobListener(
+        ILogger log,
+        IReaparrDbContext dbContext,
+        IScheduler scheduler,
+        ISignalRService signalRService
+    )
     {
         _log = log.ForContext<LibrarySyncJobListener>();
         _dbContext = dbContext;
+        _scheduler = scheduler;
         _signalRService = signalRService;
+    }
+
+    public Result Setup()
+    {
+        _scheduler.ListenerManager.AddJobListener(
+            this,
+            GroupMatcher<JobKey>.GroupEquals(nameof(JobTypes.LibrarySyncJob))
+        );
+
+        return Result.Ok();
     }
 
     /// <inheritdoc/>
@@ -55,7 +74,7 @@ public class LibrarySyncJobListener : IJobListener
         // Make sure your trigger and job listeners never throw an exception (use a try-catch) and that they can handle internal problems. Jobs can get stuck after Quartz is unable to determine whether required logic in listener was completed successfully when listener notification failed.
         try
         {
-            _log.Here().Debug("JobToBeExecuted for job: {JobKey}", context.JobDetail.Key.ToString());
+            _log.Here().Debug("JobWasExecuted for job: {JobKey}", context.JobDetail.Key.ToString());
 
             await SendStatusUpdate(context, JobStatus.Completed, cancellationToken);
         }
@@ -89,10 +108,10 @@ public class LibrarySyncJobListener : IJobListener
             cancellationToken: cancellationToken
         );
 
-        var statusUpdate = new JobStatusUpdate<LibrarySyncJobQueue>(
+        var statusUpdate = new JobStatusUpdate<LibrarySyncJobQueueDTO>(
             JobTypes.LibrarySyncJob,
             jobStatus,
-            queue,
+            queue!.ToDTO(),
             context.FireInstanceId,
             context.FireTimeUtc.UtcDateTime
         );

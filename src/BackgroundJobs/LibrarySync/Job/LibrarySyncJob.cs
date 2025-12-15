@@ -144,6 +144,14 @@ public class LibrarySyncJob : IJob
 
         switch (status)
         {
+            case LibrarySyncJobStatus.Queued:
+                await query.ExecuteUpdateAsync(s =>
+                    s.SetProperty(x => x.Status, status)
+                        .SetProperty(x => x.StartedAt, (DateTime?)null)
+                        .SetProperty(x => x.ErrorMessage, (string?)null)
+                );
+                break;
+
             case LibrarySyncJobStatus.Processing:
                 await query.ExecuteUpdateAsync(s =>
                     s.SetProperty(x => x.Status, status).SetProperty(x => x.StartedAt, DateTime.UtcNow)
@@ -164,13 +172,6 @@ public class LibrarySyncJob : IJob
                 );
                 break;
 
-            case LibrarySyncJobStatus.Queued:
-                await query.ExecuteUpdateAsync(s =>
-                    s.SetProperty(x => x.Status, status)
-                        .SetProperty(x => x.StartedAt, (DateTime?)null)
-                        .SetProperty(x => x.ErrorMessage, (string?)null)
-                );
-                break;
             case LibrarySyncJobStatus.Unknown:
                 throw new ArgumentOutOfRangeException(nameof(status), "Cannot set status to Unknown");
             default:

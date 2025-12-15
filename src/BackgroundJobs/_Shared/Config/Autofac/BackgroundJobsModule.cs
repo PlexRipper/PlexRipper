@@ -1,6 +1,7 @@
 using System.Reflection;
 using Autofac;
 using Autofac.Extras.Quartz;
+using Reaparr.BackgroundJobs.Contracts;
 using Module = Autofac.Module;
 
 namespace Reaparr.BackgroundJobs;
@@ -20,5 +21,6 @@ public class BackgroundJobsModule : Module
             .InstancePerDependency();
 
         builder.RegisterModule(new QuartzAutofacJobsModule(assembly));
+        builder.RegisterType<LibrarySyncJobListener>().As<ILibrarySyncJobListener>().SingleInstance();
     }
 }

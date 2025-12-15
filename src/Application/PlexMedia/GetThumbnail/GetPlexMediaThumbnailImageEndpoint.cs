@@ -77,7 +77,7 @@ public class GetPlexMediaThumbnailImageEndpoint : BaseEndpoint<GetPlexMediaThumb
 
     public override async Task HandleAsync(GetPlexMediaThumbnailImageEndpointRequest req, CancellationToken ct)
     {
-        _log.Here().DebugApiCall(HttpContext, req);
+        _log.Here().VerboseApiCall(HttpContext, req);
 
 #pragma warning disable ASP0015
         HttpContext.Response.Headers["Access-Control-Allow-Origin"] = "*";

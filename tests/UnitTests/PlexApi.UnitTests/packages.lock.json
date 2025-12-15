@@ -1868,11 +1868,13 @@
       "Reaparr.BackgroundJobs": {
         "type": "Project",
         "dependencies": {
+          "Autofac.Extras.Quartz": "[10.0.0, )",
           "Quartz": "[3.15.0, )",
           "Reaparr.Application.Contracts": "[1.0.0, )",
           "Reaparr.BackgroundJobs.Contracts": "[1.0.0, )",
           "Reaparr.Data.Contracts": "[1.0.0, )",
-          "Reaparr.Domain": "[1.0.0, )"
+          "Reaparr.Domain": "[1.0.0, )",
+          "Reaparr.PlexApi.Contracts": "[1.0.0, )"
         }
       },
       "Reaparr.BackgroundJobs.Contracts": {

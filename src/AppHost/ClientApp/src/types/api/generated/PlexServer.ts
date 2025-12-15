@@ -177,11 +177,11 @@ export class PlexServer {
   /**
    * No description
    * * @tags Plexserver
-   * @name QueueSyncPlexServerJobEndpoint
+   * @name SyncPlexServerMediaEndpoint
    * @request GET:/api/PlexServer/{PlexServerId}/sync
    * @secure
    */
-  queueSyncPlexServerJobEndpoint = (
+  syncPlexServerMediaEndpoint = (
     plexServerId: number,
     query?: {
       /** @default false */
@@ -248,7 +248,7 @@ export class PlexServerPaths {
       query,
     });
 
-  static queueSyncPlexServerJobEndpoint = (
+  static syncPlexServerMediaEndpoint = (
     plexServerId: number,
     query?: {
       /** @default false */

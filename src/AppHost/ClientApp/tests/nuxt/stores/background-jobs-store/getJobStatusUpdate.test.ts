@@ -1,8 +1,13 @@
-import { beforeAll, describe, expect, test, beforeEach } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, test } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { baseSetup, baseVars, getAxiosMock, subscribeSpyTo } from '@services-test-base';
-import type { InspectPlexServerJobUpdateDTO, SyncServerMediaJobUpdateDTO } from '@dto';
-import { JobStatus, JobTypes } from '@dto';
+import {
+	type InspectPlexServerJobUpdateDTO,
+	JobStatus,
+	JobTypes,
+	type LibrarySyncJobQueueDTO,
+	LibrarySyncJobStatus,
+} from '@dto';
 import { generateJobStatusUpdate } from '@factories';
 import { useBackgroundJobsStore } from '@store';
 import { generateResultDTO } from '@mock';
@@ -47,12 +52,18 @@ describe('BackgroundJobsStore.getJobStatusUpdate()', () => {
 		const backgroundJobsStore = useBackgroundJobsStore();
 
 		const testMsg = generateJobStatusUpdate({
-			jobType: JobTypes.SyncServerMediaJob,
+			jobType: JobTypes.LibrarySyncJob,
 			jobStatus: JobStatus.Started,
 			data: {
+				completedAt: new Date().toISOString(),
+				createdAt: '',
+				errorMessage: '',
+				plexLibraryId: 1,
 				plexServerId: 1,
-				forceSync: false,
-			} as SyncServerMediaJobUpdateDTO,
+				priority: 1,
+				startedAt: new Date().toISOString(),
+				status: LibrarySyncJobStatus.Queued,
+			} as LibrarySyncJobQueueDTO,
 		});
 
 		mock.onGet(BackgroundJobsPaths.getAllBackgroundJobsEndpoint()).reply(200, generateResultDTO([]));
@@ -60,7 +71,7 @@ describe('BackgroundJobsStore.getJobStatusUpdate()', () => {
 		// Act
 		backgroundJobsStore.setup();
 
-		const result = subscribeSpyTo(backgroundJobsStore.getSyncServerMediaJobUpdate(JobStatus.Started));
+		const result = subscribeSpyTo(backgroundJobsStore.getLibrarySyncJobUpdate(JobStatus.Started));
 
 		backgroundJobsStore.setStatusJobUpdate(testMsg);
 

@@ -101,7 +101,7 @@ const menuItems = computed(() => {
 		items.push({
 			label: t('components.background-activity-toggle-button.syncing-media'),
 			icon: 'mdi-server-network',
-			cy: JobTypes.SyncServerMediaJob + 'activity-button',
+			cy: JobTypes.LibrarySyncJob + 'activity-button',
 			action: () => dialogStore.openDialog(DialogType.SyncServerMediaDialog),
 		});
 	}
@@ -126,7 +126,7 @@ onMounted(() => {
 	);
 
 	useSubscription(
-		backgroundJobStore.getSyncServerMediaJobUpdate(JobStatus.Started)
+		backgroundJobStore.getLibrarySyncJobUpdate(JobStatus.Started)
 			.subscribe(({ data }) => {
 				get(syncPlexServerMedia).push(data.plexServerId);
 			}),
@@ -141,7 +141,7 @@ onMounted(() => {
 	);
 
 	useSubscription(
-		backgroundJobStore.getSyncServerMediaJobUpdate(JobStatus.Completed)
+		backgroundJobStore.getLibrarySyncJobUpdate(JobStatus.Completed)
 			.subscribe(({ data }) => {
 				set(syncPlexServerMedia, get(syncPlexServerMedia).filter((x) => x !== data.plexServerId));
 			}),

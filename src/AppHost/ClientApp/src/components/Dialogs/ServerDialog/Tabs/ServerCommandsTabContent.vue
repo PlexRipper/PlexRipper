@@ -45,7 +45,7 @@ function syncServerLibraries(): void {
 	set(syncLoading, true);
 	useSubscription(
 		plexServerApi
-			.queueSyncPlexServerJobEndpoint(props.plexServer.id, {
+			.syncPlexServerMediaEndpoint(props.plexServer.id, {
 				forceSync: true,
 			})
 			.subscribe(() => {

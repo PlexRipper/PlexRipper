@@ -111,22 +111,22 @@
 import Log from 'consola';
 import { get, set } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
-import { type DownloadMediaDTO, type LibraryProgress, PlexMediaType, ViewMode } from '@dto';
+import { type DownloadMediaDTO, type LibraryProgress, LibrarySyncJobStatus, PlexMediaType, ViewMode } from '@dto';
 import { DialogType } from '@enums';
 import type { IMediaOverviewBarActions } from '@interfaces';
 import {
-	useMediaOverviewBarDownloadCommandBus,
-	useMediaOverviewSortBus,
 	listenMediaOverviewDownloadCommand,
 	sendMediaOverviewDownloadCommand,
-	useSignalrStore,
-	useMediaOverviewStore,
-	useSettingsStore,
-	useDownloadStore,
-	useLibraryStore,
-	useServerStore,
 	useDialogStore,
+	useDownloadStore,
 	useI18n,
+	useLibraryStore,
+	useMediaOverviewBarDownloadCommandBus,
+	useMediaOverviewSortBus,
+	useMediaOverviewStore,
+	useServerStore,
+	useSettingsStore,
+	useSignalrStore,
 } from '#imports';
 
 const { t } = useI18n();
@@ -137,6 +137,7 @@ const libraryStore = useLibraryStore();
 const serverStore = useServerStore();
 const dialogStore = useDialogStore();
 const signalRStore = useSignalrStore();
+const backgroundJobsStore = useBackgroundJobsStore();
 
 const isRefreshing = ref(false);
 
@@ -181,11 +182,7 @@ function refreshLibrary() {
 	set(isRefreshing, true);
 	resetProgress(true);
 	useSubscription(
-		libraryStore.reSyncLibrary(mediaOverviewStore.libraryId).subscribe({
-			complete: () => {
-				set(isRefreshing, false);
-			},
-		}),
+		libraryStore.reSyncLibrary(mediaOverviewStore.libraryId).subscribe(),
 	);
 }
 
@@ -266,19 +263,29 @@ onMounted(() => {
 	// Initial data load
 	useSubscription(mediaOverviewStore.requestMedia().subscribe());
 
+	// Library sync job subscription
+	useSubscription(backgroundJobsStore.getLibrarySyncJobUpdate().subscribe((value) => {
+		const queue = value.data;
+		if (queue.plexLibraryId !== mediaOverviewStore.libraryId) {
+			return;
+		}
+
+		if (queue.status === LibrarySyncJobStatus.Processing) {
+			set(isRefreshing, true);
+		}
+
+		if (queue.status === LibrarySyncJobStatus.Completed) {
+			useSubscription(mediaOverviewStore.requestMedia().subscribe(() => {
+				set(isRefreshing, false);
+			}));
+		}
+	}));
+
 	if (!props.allMediaMode) {
+		// Library progress subscription
 		useSubscription(
 			signalRStore.getLibraryProgress(mediaOverviewStore.libraryId)
-				.subscribe((data) => {
-					if (data) {
-						set(libraryProgress, data);
-						set(isRefreshing, data.isRefreshing);
-						if (data.isComplete) {
-							set(isRefreshing, false);
-							useSubscription(mediaOverviewStore.requestMedia().subscribe());
-						}
-					}
-				}),
+				.subscribe((data) => set(libraryProgress, data)),
 		);
 	}
 });

@@ -37,16 +37,6 @@ public static class JobExecutionContextExtensions
                     }
                 );
                 break;
-            case JobTypes.LibrarySyncJob:
-                jsonString = ToJsonString(
-                    new SyncServerMediaJobUpdateDTO
-                    {
-                        // TODO: Make this a ref when this is moved to BackgroundJobs project
-                        PlexServerId = dataMap.GetInt("ServerIdParameter"),
-                        ForceSync = false, // Not applicable for individual library syncs
-                    }
-                );
-                break;
             case JobTypes.InspectPlexServerJob:
                 jsonString = ToJsonString(
                     new InspectPlexServerJobUpdateDTO

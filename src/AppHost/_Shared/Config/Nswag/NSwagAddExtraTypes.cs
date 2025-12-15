@@ -34,7 +34,6 @@ public class NSwagAddExtraTypes : IDocumentProcessor
             // Background job updates
             typeof(CheckAllConnectionStatusUpdateDTO),
             typeof(DownloadJobUpdateDTO),
-            typeof(SyncServerMediaJobUpdateDTO),
             typeof(InspectPlexServerJobUpdateDTO),
             typeof(MoveDownloadFileJobUpdateDTO),
         ];

@@ -88,14 +88,6 @@ public class GetAllBackgroundJobsEndpointUnitTests : BaseUnitTest<GetAllBackgrou
             Guid.NewGuid().ToString()
         );
 
-        var syncServerMediaJobUpdatePayload = new SyncServerMediaJobUpdateDTO { PlexServerId = 1, ForceSync = true };
-        var syncServerMediaJobUpdate = new JobStatusUpdate<string>(
-            JobTypes.SyncServerMediaJob,
-            JobStatus.Started,
-            ToJsonString(syncServerMediaJobUpdatePayload),
-            Guid.NewGuid().ToString()
-        );
-
         var moveDownloadJobUpdatePayload = new MoveDownloadFileJobUpdateDTO
         {
             DownloadTaskId = new DownloadTaskKey
@@ -129,7 +121,6 @@ public class GetAllBackgroundJobsEndpointUnitTests : BaseUnitTest<GetAllBackgrou
         {
             downloadJobUpdate,
             inspectPlexServerJobUpdate,
-            syncServerMediaJobUpdate,
             moveDownloadJobUpdate,
             checkAllConnectionsStatusJobUpdate,
         };
@@ -151,7 +142,6 @@ public class GetAllBackgroundJobsEndpointUnitTests : BaseUnitTest<GetAllBackgrou
         // Validate each job type
         ValidateJobStatusUpdate(responseValue[0], downloadJobUpdate, downloadJobUpdatePayload);
         ValidateJobStatusUpdate(responseValue[1], inspectPlexServerJobUpdate, inspectPlexServerJobUpdatePayload);
-        ValidateJobStatusUpdate(responseValue[2], syncServerMediaJobUpdate, syncServerMediaJobUpdatePayload);
         ValidateJobStatusUpdate(responseValue[3], moveDownloadJobUpdate, moveDownloadJobUpdatePayload);
         ValidateJobStatusUpdate(
             responseValue[4],

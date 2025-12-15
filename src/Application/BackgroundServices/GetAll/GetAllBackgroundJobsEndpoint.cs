@@ -78,13 +78,6 @@ public class GetAllBackgroundJobsEndpoint : BaseEndpoint<GetAllBackgroundJobsEnd
             Guid.NewGuid().ToString()
         );
 
-        var syncServerMediaJobUpdate = new JobStatusUpdate<SyncServerMediaJobUpdateDTO>(
-            JobTypes.SyncServerMediaJob,
-            JobStatus.Started,
-            new SyncServerMediaJobUpdateDTO { PlexServerId = 1, ForceSync = true },
-            Guid.NewGuid().ToString()
-        );
-
         var moveDownloadJobUpdate = new JobStatusUpdate<MoveDownloadFileJobUpdateDTO>(
             JobTypes.MoveDownloadFileJob,
             JobStatus.Completed,
@@ -112,7 +105,6 @@ public class GetAllBackgroundJobsEndpoint : BaseEndpoint<GetAllBackgroundJobsEnd
         [
             downloadJobUpdate.ToDTO(),
             inspectPlexServerJobUpdate.ToDTO(),
-            syncServerMediaJobUpdate.ToDTO(),
             moveDownloadJobUpdate.ToDTO(),
             checkAllConnectionsStatusJobUpdate.ToDTO(),
         ];

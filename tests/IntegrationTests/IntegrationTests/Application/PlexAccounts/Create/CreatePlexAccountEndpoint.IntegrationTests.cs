@@ -126,10 +126,6 @@ public class CreatePlexAccountEndpointIntegrationTests : BaseIntegrationTests
         jobStatusUpdateList[0].Status.ShouldBe(JobStatus.Started);
         jobStatusUpdateList[1].JobType.ShouldBe(JobTypes.InspectPlexServerJob);
         jobStatusUpdateList[1].Status.ShouldBe(JobStatus.Completed);
-        jobStatusUpdateList[2].JobType.ShouldBe(JobTypes.SyncServerMediaJob);
-        jobStatusUpdateList[2].Status.ShouldBe(JobStatus.Started);
-        jobStatusUpdateList[3].JobType.ShouldBe(JobTypes.SyncServerMediaJob);
-        jobStatusUpdateList[3].Status.ShouldBe(JobStatus.Completed);
     }
 
     [Fact]

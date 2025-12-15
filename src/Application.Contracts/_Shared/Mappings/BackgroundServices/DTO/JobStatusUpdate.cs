@@ -2,6 +2,12 @@ namespace Reaparr.Application.Contracts;
 
 public record JobStatusUpdate
 {
+    /// <summary>
+    /// Get the unique Id that identifies this particular firing instance of the
+    /// trigger that triggered this job execution.  It is unique to this
+    /// JobExecutionContext instance as well.
+    /// </summary>
+    ///  <returns>the unique fire instance id</returns>
     public string Id { get; set; }
 
     public DateTime JobStartTime { get; }

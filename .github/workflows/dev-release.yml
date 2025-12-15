@@ -130,7 +130,7 @@ jobs:
             -   name: Install GitHub CLI
                 uses: actions/setup-node@v4
                 with:
-                    node-version: '16' # Ensure a compatible version of Node.js is installed for the gh CLI
+                    node-version: '24'
 
             -   name: Create or Update GitHub Pre-Release
                 run: |

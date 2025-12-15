@@ -39,7 +39,7 @@ public class PlexSignInCommandHandler : ICommandHandler<PlexSignInCommand, Resul
             .Authentication.PostUsersSignInDataAsync(
                 new PostUsersSignInDataRequest
                 {
-                    ClientID = command.ClientId,
+                    ClientIdentifier = command.ClientId,
                     RequestBody = new PostUsersSignInDataRequestBody
                     {
                         Login = command.Username,
@@ -67,7 +67,7 @@ public class PlexSignInCommandHandler : ICommandHandler<PlexSignInCommand, Resul
             ValidatedAt = isValid ? DateTime.UtcNow : null,
 
             Title = x.UserPlexAccount!.Title,
-            Email = x.UserPlexAccount!.Email,
+            Email = x.UserPlexAccount!.Email ?? string.Empty,
             AuthenticationToken = x.UserPlexAccount!.AuthToken,
             Is2Fa = x.UserPlexAccount!.TwoFactorEnabled.GetValueOrDefault(),
         });

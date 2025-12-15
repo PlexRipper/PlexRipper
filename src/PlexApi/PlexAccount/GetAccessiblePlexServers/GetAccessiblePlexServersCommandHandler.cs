@@ -1,4 +1,5 @@
 using FastEndpoints;
+using LukeHagar.PlexAPI.SDK.Models.Components;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
 using Reaparr.Data.Contracts;
 using Reaparr.PlexApi.Contracts;
@@ -120,13 +121,18 @@ public class GetAccessiblePlexServersCommandHandler
             new PlexApiClientOptions { ConnectionUrl = string.Empty, Timeout = 15 }
         );
         var result = await Task.WhenAll(
-            plexTvClient.Plex.GetServerResourcesAsync(clientID: clientId).ToResponse(),
+            plexTvClient
+                .Plex.GetServerResourcesAsync(new GetServerResourcesRequest { ClientIdentifier = clientId })
+                .ToResponse(),
             plexTvClient
                 .Plex.GetServerResourcesAsync(
-                    clientID: clientId,
-                    includeHttps: IncludeHttps.Enable,
-                    includeRelay: IncludeRelay.Enable,
-                    includeIPv6: IncludeIPv6.Enable
+                    new GetServerResourcesRequest()
+                    {
+                        ClientIdentifier = clientId,
+                        IncludeHttps = IncludeHttps.True,
+                        IncludeRelay = IncludeRelay.True,
+                        IncludeIPv6 = IncludeIPv6.True,
+                    }
                 )
                 .ToResponse()
         );

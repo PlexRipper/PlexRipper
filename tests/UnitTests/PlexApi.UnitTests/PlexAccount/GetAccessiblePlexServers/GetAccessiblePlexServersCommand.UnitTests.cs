@@ -1,5 +1,6 @@
 using System.Net;
 using LukeHagar.PlexAPI.SDK;
+using LukeHagar.PlexAPI.SDK.Models.Components;
 using LukeHagar.PlexAPI.SDK.Models.Errors;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
 using Microsoft.EntityFrameworkCore;
@@ -27,13 +28,7 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
 
                     plexApiMockIPlex
                         .SetupSequence(x =>
-                            x.GetServerResourcesAsync(
-                                It.IsAny<string>(),
-                                It.IsAny<IncludeHttps>(),
-                                It.IsAny<IncludeRelay>(),
-                                It.IsAny<IncludeIPv6>(),
-                                It.IsAny<string>()
-                            )
+                            x.GetServerResourcesAsync(It.IsAny<GetServerResourcesRequest>(), It.IsAny<string>())
                         )
                         .ReturnsAsync(response1)
                         .ReturnsAsync(response2);
@@ -88,21 +83,10 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
                     );
                     plexApiMockIPlex
                         .Setup(x =>
-                            x.GetServerResourcesAsync(
-                                It.IsAny<string>(),
-                                It.IsAny<IncludeHttps>(),
-                                It.IsAny<IncludeRelay>(),
-                                It.IsAny<IncludeIPv6>(),
-                                It.IsAny<string>()
-                            )
+                            x.GetServerResourcesAsync(It.IsAny<GetServerResourcesRequest>(), It.IsAny<string>())
                         )
                         .ThrowsAsync(
-                            new SDKException(
-                                "Not authorized to access Plex server",
-                                401,
-                                string.Empty,
-                                response.RawResponse
-                            )
+                            new SDKException("Not authorized to access Plex server", response.RawResponse, string.Empty)
                         );
 
                     plexApiMock.SetupGet(x => x.Plex).Returns(plexApiMockIPlex.Object);
@@ -338,7 +322,7 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
                 [
                     new Connections
                     {
-                        Protocol = Protocol.Http,
+                        Protocol = PlexDeviceProtocol.Http,
                         Address = "192.168.200.95",
                         Port = 32400,
                         Uri = "http://192.168.200.95:32400",
@@ -348,7 +332,7 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
                     },
                     new Connections
                     {
-                        Protocol = Protocol.Https,
+                        Protocol = PlexDeviceProtocol.Https,
                         Address = "www.albertflix.nl",
                         Port = 43324,
                         Uri = "https://www.albertflix.nl:43324",
@@ -358,7 +342,7 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
                     },
                     new Connections
                     {
-                        Protocol = Protocol.Http,
+                        Protocol = PlexDeviceProtocol.Http,
                         Address = "77.170.188.28",
                         Port = 43324,
                         Uri = "http://77.170.188.28:43324",
@@ -375,7 +359,7 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
                 [
                     new Connections
                     {
-                        Protocol = Protocol.Http,
+                        Protocol = PlexDeviceProtocol.Http,
                         Address = "192.168.200.95",
                         Port = 32400,
                         Uri = "http://192.168.200.95:32400",
@@ -385,7 +369,7 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
                     },
                     new Connections
                     {
-                        Protocol = Protocol.Https,
+                        Protocol = PlexDeviceProtocol.Https,
                         Address = "www.albertflix.nl",
                         Port = 43324,
                         Uri = "https://www.albertflix.nl:43324",
@@ -395,7 +379,7 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
                     },
                     new Connections
                     {
-                        Protocol = Protocol.Http,
+                        Protocol = PlexDeviceProtocol.Http,
                         Address = "77.170.188.28",
                         Port = 43324,
                         Uri = "http://77.170.188.28:43324",
@@ -413,7 +397,7 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
                 [
                     new Connections
                     {
-                        Protocol = Protocol.Https,
+                        Protocol = PlexDeviceProtocol.Https,
                         Address = "192.168.201.95",
                         Port = 32400,
                         Uri = "https://192-168-201-95.fc4cf89b047845c0a48b8926677abe46.plex.direct:32400",
@@ -423,7 +407,7 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
                     },
                     new Connections
                     {
-                        Protocol = Protocol.Https,
+                        Protocol = PlexDeviceProtocol.Https,
                         Address = "www.albertflix.nl",
                         Port = 43324,
                         Uri = "https://www.albertflix.nl:43324",
@@ -433,7 +417,7 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
                     },
                     new Connections
                     {
-                        Protocol = Protocol.Https,
+                        Protocol = PlexDeviceProtocol.Https,
                         Address = "177.170.188.28",
                         Port = 43324,
                         Uri = "https://177-170-188-28.fc4cf89b047845c0a48b8926677abe46.plex.direct:43324",
@@ -443,7 +427,7 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
                     },
                     new Connections
                     {
-                        Protocol = Protocol.Https,
+                        Protocol = PlexDeviceProtocol.Https,
                         Address = "139.162.215.184",
                         Port = 8443,
                         Uri = "https://139-162-215-184.fc4cf89b047845c0a48b8926677abe46.plex.direct:8443",
@@ -460,7 +444,7 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
                 [
                     new Connections
                     {
-                        Protocol = Protocol.Https,
+                        Protocol = PlexDeviceProtocol.Https,
                         Address = "192.168.200.95",
                         Port = 32400,
                         Uri = "https://192-168-200-95.fc4cf89b047845c0a48b8926677abe46.plex.direct:32400",
@@ -470,7 +454,7 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
                     },
                     new Connections
                     {
-                        Protocol = Protocol.Https,
+                        Protocol = PlexDeviceProtocol.Https,
                         Address = "www.albertflix.nl",
                         Port = 43324,
                         Uri = "https://www.albertflix.nl:43324",
@@ -480,7 +464,7 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
                     },
                     new Connections
                     {
-                        Protocol = Protocol.Https,
+                        Protocol = PlexDeviceProtocol.Https,
                         Address = "177.170.188.28",
                         Port = 43324,
                         Uri = "https://177-170-188-28.fc4cf89b047845c0a48b8926677abe46.plex.direct:43324",

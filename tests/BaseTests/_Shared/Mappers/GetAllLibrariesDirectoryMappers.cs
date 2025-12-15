@@ -1,12 +1,11 @@
-using LukeHagar.PlexAPI.SDK.Models.Requests;
+using LukeHagar.PlexAPI.SDK.Models.Components;
 using Reaparr.PlexApi;
-using Reaparr.PlexApi.Contracts;
 
 namespace Reaparr.BaseTests;
 
-public static class GetAllLibrariesDirectoryMappers
+public static class LibrarySectionMappers
 {
-    public static GetAllLibrariesDirectory ToPlexApiDTO(this PlexLibrary source) =>
+    public static LibrarySection ToPlexApiDTO(this PlexLibrary source) =>
         new()
         {
             AllowSync = false,
@@ -16,7 +15,7 @@ public static class GetAllLibrariesDirectoryMappers
             Refreshing = false,
             Thumb = string.Empty,
             Key = source.Key,
-            Type = source.Type.ToGetAllLibrariesType(),
+            Type = source.Type.ToMediaTypeString(),
             Title = source.Title,
             Agent = string.Empty,
             Scanner = string.Empty,
@@ -32,6 +31,6 @@ public static class GetAllLibrariesDirectoryMappers
             Location = [],
         };
 
-    public static List<GetAllLibrariesDirectory> ToPlexApiDTO(this List<PlexLibrary> plexLibraries) =>
+    public static List<LibrarySection> ToPlexApiDTO(this List<PlexLibrary> plexLibraries) =>
         plexLibraries.Select(x => x.ToPlexApiDTO()).ToList();
 }

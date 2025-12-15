@@ -15,6 +15,11 @@ runs:
                 key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
                 restore-keys: ${{ runner.os }}-bun-
 
+        -   name: Setup Node.js
+            uses: actions/setup-node@v4
+            with:
+                node-version: '24.10.0'
+
         -   name: Clean install node_modules
             shell: bash
             run: bun install

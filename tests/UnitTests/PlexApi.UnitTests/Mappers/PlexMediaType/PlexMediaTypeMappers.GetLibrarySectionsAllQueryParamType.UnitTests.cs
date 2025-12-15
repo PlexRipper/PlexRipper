@@ -1,29 +1,26 @@
-using LukeHagar.PlexAPI.SDK.Models.Requests;
+using LukeHagar.PlexAPI.SDK.Models.Components;
 using Reaparr.PlexApi.Contracts;
 
 namespace Reaparr.PlexApi.UnitTests;
 
-public class PlexMediaTypeMappersToGetLibrarySectionsAllQueryParamTypeUnitTests : BaseUnitTest
+public class PlexMediaTypeMappersToPlexApiMediaTypeUnitTests : BaseUnitTest
 {
-    public PlexMediaTypeMappersToGetLibrarySectionsAllQueryParamTypeUnitTests(ITestOutputHelper output)
+    public PlexMediaTypeMappersToPlexApiMediaTypeUnitTests(ITestOutputHelper output)
         : base(output) { }
 
     [Theory]
-    [InlineData(PlexMediaType.Movie, GetLibrarySectionsAllQueryParamType.Movie)]
-    [InlineData(PlexMediaType.TvShow, GetLibrarySectionsAllQueryParamType.TvShow)]
-    [InlineData(PlexMediaType.Season, GetLibrarySectionsAllQueryParamType.Season)]
-    [InlineData(PlexMediaType.Episode, GetLibrarySectionsAllQueryParamType.Episode)]
-    [InlineData(PlexMediaType.Artist, GetLibrarySectionsAllQueryParamType.Artist)]
-    [InlineData(PlexMediaType.Album, GetLibrarySectionsAllQueryParamType.Album)]
-    [InlineData(PlexMediaType.Song, GetLibrarySectionsAllQueryParamType.Track)]
-    [InlineData(PlexMediaType.PhotoAlbum, GetLibrarySectionsAllQueryParamType.PhotoAlbum)]
-    [InlineData(PlexMediaType.Photos, GetLibrarySectionsAllQueryParamType.Photo)]
-    public void ShouldMatchTheCorrectPlexMediaType_WhenGivenAGetLibrarySectionsAllQueryParamTypeValue(
-        PlexMediaType input,
-        GetLibrarySectionsAllQueryParamType expected
-    )
+    [InlineData(PlexMediaType.Movie, MediaType.Movie)]
+    [InlineData(PlexMediaType.TvShow, MediaType.TvShow)]
+    [InlineData(PlexMediaType.Season, MediaType.Season)]
+    [InlineData(PlexMediaType.Episode, MediaType.Episode)]
+    [InlineData(PlexMediaType.Artist, MediaType.Artist)]
+    [InlineData(PlexMediaType.Album, MediaType.Album)]
+    [InlineData(PlexMediaType.Song, MediaType.Track)]
+    [InlineData(PlexMediaType.PhotoAlbum, MediaType.PhotoAlbum)]
+    [InlineData(PlexMediaType.Photos, MediaType.Photo)]
+    public void ShouldMapPlexMediaTypeToMediaType(PlexMediaType input, MediaType expected)
     {
         // Act
-        input.ToGetLibrarySectionsAllQueryParamType().ShouldBe(expected);
+        input.ToPlexApiMediaType().ShouldBe(expected);
     }
 }

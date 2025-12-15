@@ -1,5 +1,6 @@
 using FastEndpoints;
 using LukeHagar.PlexAPI.SDK;
+using LukeHagar.PlexAPI.SDK.Models.Components;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
 using Reaparr.Data.Contracts;
 using Reaparr.PlexApi.Contracts;
@@ -118,7 +119,7 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
         PlexMediaType plexMediaType,
         DateTime startTime,
         int index,
-        int totalSize,
+        long totalSize,
         Action<MediaSyncProgress> action
     )
     {
@@ -147,19 +148,19 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
     /// <summary>
     /// Gets the total size of the media in the library.
     /// </summary>
-    private async Task<Result<int>> GetLibraryMediaTotalSize(IPlexAPI client, string libraryKey, PlexMediaType type)
+    private async Task<Result<long>> GetLibraryMediaTotalSize(IPlexAPI client, string libraryKey, PlexMediaType type)
     {
         if (!int.TryParse(libraryKey, out var libraryKeyInt))
             return ResultExtensions.IsInvalidId(nameof(libraryKey), libraryKey).LogError();
 
         var response = await client
-            .Library.GetLibrarySectionsAllAsync(
-                new GetLibrarySectionsAllRequest
+            .Content.ListContentAsync(
+                new ListContentRequest()
                 {
-                    SectionKey = libraryKeyInt,
-                    XPlexContainerSize = 0,
                     XPlexContainerStart = 1,
-                    Type = type.ToGetLibrarySectionsAllQueryParamType(),
+                    XPlexContainerSize = 0,
+                    SectionId = libraryKeyInt.ToString(),
+                    MediaQuery = new MediaQuery() { Type = type.ToPlexApiMediaType() },
                 }
             )
             .ToResponse();
@@ -167,7 +168,7 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
         if (response.IsFailed)
             return response.ToResult();
 
-        return Result.Ok(response.Value?.Object?.MediaContainer?.TotalSize ?? 0);
+        return Result.Ok(response.Value?.MediaContainerWithMetadata!.MediaContainer?.TotalSize ?? 0);
     }
 
     /// <summary>
@@ -186,15 +187,15 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
             return ResultExtensions.IsInvalidId(nameof(libraryKey), libraryKey).LogError();
 
         var response = await client
-            .Library.GetLibrarySectionsAllAsync(
-                new GetLibrarySectionsAllRequest
+            .Content.ListContentAsync(
+                new ListContentRequest()
                 {
-                    Type = type.ToGetLibrarySectionsAllQueryParamType(),
-                    SectionKey = libraryKeyInt,
-                    IncludeMeta = GetLibrarySectionsAllQueryParamIncludeMeta.Disable,
-                    IncludeGuids = QueryParamIncludeGuids.Enable,
                     XPlexContainerStart = startIndex,
                     XPlexContainerSize = batchSize,
+                    SectionId = libraryKeyInt.ToString(),
+                    IncludeGuids = BoolInt.True,
+                    IncludeMeta = BoolInt.False,
+                    MediaQuery = new MediaQuery() { Type = type.ToPlexApiMediaType() },
                 }
             )
             .ToResponse();
@@ -202,9 +203,9 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
         if (response.IsFailed)
             return response.ToResult();
 
-        var mediaDataList = response.Value?.Object?.MediaContainer?.Metadata ?? [];
+        var mediaDataList = response.Value?.MediaContainerWithMetadata?.MediaContainer?.Metadata ?? [];
         if (!mediaDataList.Any())
-            return ResultExtensions.IsNull(nameof(response.Value.Object.MediaContainer)).LogError();
+            return ResultExtensions.IsNull("MediaContainerWithMetadata.MediaContainer.Metadata").LogError();
 
         return Result.Ok(mediaDataList.Select(x => x.ToMediaItemDTO()).ToList());
     }
@@ -218,7 +219,7 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
             return ResultExtensions.IsEmpty(nameof(ratingKeys)).LogError();
 
         var response = await client
-            .Library.GetMediaMetaDataAsync(new GetMediaMetaDataRequest { RatingKey = string.Join(",", ratingKeys) })
+            .Content.GetMetadataItemAsync(new GetMetadataItemRequest { Ids = ratingKeys.ToList() })
             .ToResponse();
 
         if (response.IsFailed)
@@ -232,7 +233,9 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
             return response.ToResult().LogError();
         }
 
-        var metaDataListResult = Result.Try((() => response.Value.Object?.MediaContainer?.Metadata ?? []));
+        var metaDataListResult = Result.Try(
+            (() => response.Value.MediaContainerWithMetadata?.MediaContainer?.Metadata ?? [])
+        );
         if (metaDataListResult.IsFailed)
             return metaDataListResult.LogError();
 

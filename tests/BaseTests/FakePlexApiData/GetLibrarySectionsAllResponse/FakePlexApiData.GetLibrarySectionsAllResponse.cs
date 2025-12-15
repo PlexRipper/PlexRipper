@@ -1,58 +1,65 @@
 using System.Net;
+using LukeHagar.PlexAPI.SDK.Models.Components;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
-using Reaparr.PlexApi.Contracts;
+using Reaparr.PlexApi;
+using Metadata = LukeHagar.PlexAPI.SDK.Models.Components.Metadata;
 
 namespace Reaparr.BaseTests;
 
 public partial class FakePlexApiData
 {
-    public static GetLibrarySectionsAllResponse GetLibrarySectionsAllResponse(
+    public static GetMetadataItemResponse GetLibrarySectionsAllResponse(
         HttpStatusCode statusCode,
         Seed seed,
-        GetAllLibrariesDirectory library,
-        GetLibrarySectionsAllResponseBody? responseBody = null,
+        LibrarySection library,
+        MediaContainerWithMetadata? responseBody = null,
         HttpRequestMessage? request = null,
         Action<PlexApiDataConfig>? options = null
     )
     {
-        return new Faker<GetLibrarySectionsAllResponse>()
+        return new Faker<GetMetadataItemResponse>()
             .StrictMode(true)
             .UseSeed(seed.Next())
             .RuleFor(x => x.StatusCode, _ => (int)statusCode)
             .RuleFor(x => x.ContentType, _ => ContentType.ApplicationJson)
-            .RuleFor(x => x.Object, _ => responseBody ?? GetLibrarySectionsAllResponseBody(seed, library, 100, options))
-            .RuleFor(x => x.RawResponse, (_, res) => GetHttpResponseMessage(statusCode, res.Object, request))
+            .Ignore(x => x.Headers)
+            .RuleFor(
+                x => x.MediaContainerWithMetadata,
+                _ => responseBody ?? GetLibrarySectionsAllResponseBody(seed, library, 100, options)
+            )
+            .RuleFor(
+                x => x.RawResponse,
+                (_, res) => GetHttpResponseMessage(statusCode, res.MediaContainerWithMetadata, request)
+            )
             .Generate();
     }
 
-    public static GetLibrarySectionsAllResponseBody GetLibrarySectionsAllResponseBody(
+    public static MediaContainerWithMetadata GetLibrarySectionsAllResponseBody(
         Seed seed,
-        GetAllLibrariesDirectory library,
+        LibrarySection library,
         int mediaCount = 0,
         Action<PlexApiDataConfig>? options = null
     )
     {
         var type = library.Type.ToPlexMediaType();
 
-        return new GetLibrarySectionsAllResponseBody
+        return new MediaContainerWithMetadata
         {
             MediaContainer = _getLibrarySectionsAllMediaContainer
                 .UseSeed(seed.Next())
                 .FinishWith(
                     (_, x) =>
                     {
-                        x.LibrarySectionID = long.Parse(library.Key);
-                        x.LibrarySectionTitle = library.Title;
-                        x.LibrarySectionUUID = library.Uuid;
                         x.Metadata = GetLibrarySectionsAllMetadata(seed, type, options).Generate(mediaCount);
                         x.Size = x.Metadata!.Count;
+                        x.TotalSize = x.Metadata!.Count;
                     }
                 )
                 .Generate(),
         };
     }
 
-    public static Faker<GetLibrarySectionsAllMetadata> GetLibrarySectionsAllMetadata(
+    public static Faker<Metadata> GetLibrarySectionsAllMetadata(
         Seed seed,
         PlexMediaType type,
         Action<PlexApiDataConfig>? options = null
@@ -63,17 +70,14 @@ public partial class FakePlexApiData
             .FinishWith(
                 (f, x) =>
                 {
-                    x.Type = type.ToGetLibrarySectionsAllLibraryType();
+                    x.Type = type.ToPlexApiString();
                     x.Media = [GetLibrarySectionsAllMedia(seed, options).Generate()];
                     x.Guid = f.PlexMedia().Guid(type);
                 }
             );
     }
 
-    public static Faker<GetLibrarySectionsAllMedia> GetLibrarySectionsAllMedia(
-        Seed seed,
-        Action<PlexApiDataConfig>? options = null
-    )
+    public static Faker<Media> GetLibrarySectionsAllMedia(Seed seed, Action<PlexApiDataConfig>? options = null)
     {
         return _getLibrarySectionsAllMedia
             .UseSeed(seed.Next())
@@ -85,10 +89,7 @@ public partial class FakePlexApiData
             );
     }
 
-    public static Faker<GetLibrarySectionsAllPart> GetLibrarySectionsAllPart(
-        Seed seed,
-        Action<PlexApiDataConfig>? options = null
-    ) =>
+    public static Faker<Part> GetLibrarySectionsAllPart(Seed seed, Action<PlexApiDataConfig>? options = null) =>
         _getLibrarySectionsAllPartFaker
             .UseSeed(seed.Next())
             .FinishWith(

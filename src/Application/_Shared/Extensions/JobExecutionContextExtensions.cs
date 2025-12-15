@@ -58,7 +58,8 @@ public static class JobExecutionContextExtensions
                 break;
 
             default:
-                throw new Exception($"Unknown job type: {jobType}");
+                jsonString = "{}";
+                break;
         }
 
         return new JobStatusUpdate<string>(
@@ -78,7 +79,7 @@ public static class JobExecutionContextExtensions
             catch (Exception e)
             {
                 _log.Here().ErrorResult(e);
-                throw;
+                return "{}";
             }
         }
     }

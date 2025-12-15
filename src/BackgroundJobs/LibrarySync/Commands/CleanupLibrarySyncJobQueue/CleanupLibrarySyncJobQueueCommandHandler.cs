@@ -46,13 +46,7 @@ public class CleanupLibrarySyncJobQueueCommandHandler : ICommandHandler<CleanupL
             .LibrarySyncJobQueues.Where(x =>
                 x.Status == LibrarySyncJobStatus.Failed || x.Status == LibrarySyncJobStatus.Processing
             )
-            .ExecuteUpdateAsync(
-                x =>
-                    x.SetProperty(y => y.Status, LibrarySyncJobStatus.Queued)
-                        .SetProperty(y => y.StartedAt, (DateTime?)null)
-                        .SetProperty(y => y.ErrorMessage, (string?)null),
-                cancellationToken: cancellationToken
-            );
+            .ResetJobsToQueuedAsync(cancellationToken);
 
         _log.Here().Debug("Cleaned up library sync job queue.");
 

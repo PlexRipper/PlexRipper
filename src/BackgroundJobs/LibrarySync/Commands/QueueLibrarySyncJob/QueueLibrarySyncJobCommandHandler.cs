@@ -42,9 +42,7 @@ public class QueueLibrarySyncJobCommandHandler : ICommandHandler<QueueLibrarySyn
 
         if (!libraries.Any())
         {
-            _log.Here()
-                .Warning(
-                    "No libraries found for the provided library IDs. Nothing to queue.");
+            _log.Here().Warning("No libraries found for the provided library IDs. Nothing to queue.");
             return Result.Ok();
         }
 
@@ -65,9 +63,7 @@ public class QueueLibrarySyncJobCommandHandler : ICommandHandler<QueueLibrarySyn
         }
 
         // Get ALL existing library IDs (including those we just reset, which are now Queued)
-        var existingLibraryIds = existingQueues
-            .Select(x => x.PlexLibraryId)
-            .ToHashSet();
+        var existingLibraryIds = existingQueues.Select(x => x.PlexLibraryId).ToHashSet();
 
         // Only log warning if there are items that are queued/processing (not just completed/failed)
         var queuedOrProcessingIds = existingQueues
@@ -80,7 +76,8 @@ public class QueueLibrarySyncJobCommandHandler : ICommandHandler<QueueLibrarySyn
             _log.Here()
                 .Warning(
                     "{Count} libraries are already queued or processing. They will be skipped.",
-                    queuedOrProcessingIds.Count);
+                    queuedOrProcessingIds.Count
+                );
         }
 
         // Add new items (excluding ALL existing ones, including those we just reset)
@@ -101,11 +98,13 @@ public class QueueLibrarySyncJobCommandHandler : ICommandHandler<QueueLibrarySyn
             await _dbContext.LibrarySyncJobQueues.AddRangeAsync(itemsToAdd, cancellationToken);
             await _dbContext.SaveChangesAsync(cancellationToken);
 
-            _log.Here().Debug(
-                "Queued {Count} libraries for sync. Reset {ResetCount} completed/failed items. Skipped {SkippedCount} already queued/processing.",
-                itemsToAdd.Count,
-                itemsToReset.Count,
-                queuedOrProcessingIds.Count);
+            _log.Here()
+                .Debug(
+                    "Queued {Count} libraries for sync. Reset {ResetCount} completed/failed items. Skipped {SkippedCount} already queued/processing.",
+                    itemsToAdd.Count,
+                    itemsToReset.Count,
+                    queuedOrProcessingIds.Count
+                );
         }
 
         await _commandExecutor.Send(new CheckQueuedPlexLibraryToSyncCommand(), cancellationToken);

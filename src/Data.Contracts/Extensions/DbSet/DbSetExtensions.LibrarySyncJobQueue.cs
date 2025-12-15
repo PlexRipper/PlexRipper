@@ -19,13 +19,22 @@ public static partial class DbSetExtensions
                 libraryIds.Contains(x.PlexLibraryId)
                 && (x.Status == LibrarySyncJobStatus.Completed || x.Status == LibrarySyncJobStatus.Failed)
             )
-            .ExecuteUpdateAsync(
-                x =>
-                    x.SetProperty(y => y.Status, LibrarySyncJobStatus.Queued)
-                        .SetProperty(y => y.StartedAt, (DateTime?)null)
-                        .SetProperty(y => y.CompletedAt, (DateTime?)null)
-                        .SetProperty(y => y.ErrorMessage, (string?)null),
-                token
-            );
+            .ResetJobsToQueuedAsync(token);
+    }
+
+    public static async Task<int> ResetJobsToQueuedAsync(
+        this IQueryable<LibrarySyncJobQueue> queryable,
+        CancellationToken token = default
+    )
+    {
+        return await queryable.ExecuteUpdateAsync(
+            x =>
+                x.SetProperty(y => y.Status, LibrarySyncJobStatus.Queued)
+                    .SetProperty(y => y.CreatedAt, DateTime.UtcNow)
+                    .SetProperty(y => y.StartedAt, (DateTime?)null)
+                    .SetProperty(y => y.CompletedAt, (DateTime?)null)
+                    .SetProperty(y => y.ErrorMessage, (string?)null),
+            token
+        );
     }
 }

@@ -114,7 +114,7 @@ public class CreatePlexAccountEndpoint : BaseEndpoint<CreatePlexAccountEndpointR
 
         if (!isAuthTokenMode)
         {
-            // Check if account with the same username already exists
+            // Check if an account with the same username already exists
             var isAvailable = await _dbContext.IsUsernameAvailable(req.Username, ct);
             if (!isAvailable)
             {

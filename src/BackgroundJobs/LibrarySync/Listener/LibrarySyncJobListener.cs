@@ -100,22 +100,46 @@ public class LibrarySyncJobListener : ILibrarySyncJobListener
         CancellationToken cancellationToken
     )
     {
-        var serverId = context.JobDetail.JobDataMap.GetInt(LibrarySyncJob.ServerIdParameter);
-        var libraryId = context.JobDetail.JobDataMap.GetInt(LibrarySyncJob.LibraryIdParameter);
+        try
+        {
+            var serverId = context.JobDetail.JobDataMap.GetInt(LibrarySyncJob.ServerIdParameter);
+            var libraryId = context.JobDetail.JobDataMap.GetInt(LibrarySyncJob.LibraryIdParameter);
 
-        var queue = await _dbContext.LibrarySyncJobQueues.FirstOrDefaultAsync(
-            x => x.PlexServerId == serverId && x.PlexLibraryId == libraryId,
-            cancellationToken: cancellationToken
-        );
+            var queue = await _dbContext.LibrarySyncJobQueues.FirstOrDefaultAsync(
+                x => x.PlexServerId == serverId && x.PlexLibraryId == libraryId,
+                cancellationToken: cancellationToken
+            );
 
-        var statusUpdate = new JobStatusUpdate<LibrarySyncJobQueueDTO>(
-            JobTypes.LibrarySyncJob,
-            jobStatus,
-            queue!.ToDTO(),
-            context.FireInstanceId,
-            context.FireTimeUtc.UtcDateTime
-        );
+            if (queue == null)
+            {
+                _log.Here()
+                    .Warning(
+                        "Queue item not found for server {ServerId}, library {LibraryId} when sending status update",
+                        serverId,
+                        libraryId
+                    );
+                return;
+            }
 
-        await _signalRService.SendJobStatusUpdateAsync(statusUpdate);
+            var statusUpdate = new JobStatusUpdate<LibrarySyncJobQueueDTO>(
+                JobTypes.LibrarySyncJob,
+                jobStatus,
+                queue.ToDTO(),
+                context.FireInstanceId,
+                context.FireTimeUtc.UtcDateTime
+            );
+
+            await _signalRService.SendJobStatusUpdateAsync(statusUpdate);
+        }
+        catch (Exception ex)
+        {
+            _log.Here()
+                .Error(
+                    ex,
+                    "Failed to send status update for job {JobKey} with status {JobStatus}",
+                    context.JobDetail.Key.ToString(),
+                    jobStatus
+                );
+        }
     }
 }

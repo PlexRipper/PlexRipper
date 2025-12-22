@@ -173,9 +173,22 @@ public class LibrarySyncJob : IJob
                 break;
 
             case LibrarySyncJobStatus.Unknown:
-                throw new ArgumentOutOfRangeException(nameof(status), "Cannot set status to Unknown");
+                _log.Here()
+                    .Warning(
+                        "Attempted to set LibrarySyncJobStatus to Unknown for server {ServerId}, library {LibraryId}",
+                        _serverId,
+                        _libraryId
+                    );
+                break;
             default:
-                throw new ArgumentOutOfRangeException(nameof(status), status, null);
+                _log.Here()
+                    .Warning(
+                        "Attempted to set LibrarySyncJobStatus to invalid value {Status} for server {ServerId}, library {LibraryId}",
+                        status,
+                        _serverId,
+                        _libraryId
+                    );
+                break;
         }
     }
 }

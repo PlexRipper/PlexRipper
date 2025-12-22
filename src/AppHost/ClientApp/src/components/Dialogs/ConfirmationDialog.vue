@@ -24,7 +24,7 @@
 				@click="cancel" />
 			<ConfirmButton
 				cy="confirmation-dialog-confirmation-button"
-				:loading="loading"
+				:loading="confirmLoading"
 				@click="confirm" />
 		</template>
 	</QCardDialog>
@@ -32,15 +32,12 @@
 
 <script setup lang="ts">
 import type { DialogType } from '@enums';
-import { set } from '@vueuse/core';
 import { useI18n } from 'vue-i18n';
 import { useDialogStore } from '@store';
 
 const { t } = useI18n();
 
 const dialogStore = useDialogStore();
-
-const loading = ref(false);
 
 const props = withDefaults(defineProps<{
 	name: DialogType;
@@ -50,6 +47,7 @@ const props = withDefaults(defineProps<{
 	confirmLoading?: boolean;
 }>(), {
 	warning: '',
+	confirmLoading: false,
 });
 
 const emit = defineEmits<{
@@ -65,13 +63,9 @@ const confirmationText = computed(() => ({
 function cancel() {
 	emit('cancel');
 	dialogStore.closeDialog(props.name);
-	set(loading, false);
 }
 
 function confirm() {
 	emit('confirm');
-	if (props.confirmLoading) {
-		set(loading, true);
-	}
 }
 </script>

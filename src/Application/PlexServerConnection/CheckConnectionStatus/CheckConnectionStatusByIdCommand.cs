@@ -23,17 +23,20 @@ public class CheckConnectionStatusByIdCommandHandler
     private readonly ISignalRService _signalRService;
     private readonly ICommandExecutor _commandDispatcher;
     private readonly IReaparrDbContext _dbContext;
+    private readonly ILogger _log;
     private PlexServerConnection? _plexServerConnection;
 
     public CheckConnectionStatusByIdCommandHandler(
         IReaparrDbContext dbContext,
         ISignalRService signalRService,
-        ICommandExecutor commandDispatcher
+        ICommandExecutor commandDispatcher,
+        ILogger log
     )
     {
         _dbContext = dbContext;
         _signalRService = signalRService;
         _commandDispatcher = commandDispatcher;
+        _log = log.ForContext<CheckConnectionStatusByIdCommandHandler>();
     }
 
     public async Task<Result<PlexServerStatus>> ExecuteAsync(
@@ -60,7 +63,35 @@ public class CheckConnectionStatusByIdCommandHandler
             new GetServerStatusCommand
             {
                 PlexServerConnectionId = command.PlexServerConnectionId,
-                ProgressAction = Action,
+                ProgressAction = progress =>
+                {
+                    if (_plexServerConnection is not null)
+                    {
+                        _ = Task.Run(
+                            async () =>
+                            {
+                                try
+                                {
+                                    var checkStatusProgress = progress.ToServerConnectionCheckStatusProgress(
+                                        _plexServerConnection
+                                    );
+                                    await _signalRService.SendServerConnectionCheckStatusProgressAsync(
+                                        checkStatusProgress
+                                    );
+                                }
+                                catch (Exception ex)
+                                {
+                                    _log.Here()
+                                        .ErrorResult(
+                                            ex,
+                                            "Error sending server connection check status progress update"
+                                        );
+                                }
+                            },
+                            CancellationToken.None
+                        );
+                    }
+                },
             },
             cancellationToken
         );
@@ -84,18 +115,5 @@ public class CheckConnectionStatusByIdCommandHandler
         }
 
         return serverStatusResult.Value;
-    }
-
-    /// <summary>
-    ///  The call-back action from the httpClient
-    /// </summary>
-    /// <param name="progress"></param>
-    private async void Action(PlexApiClientProgress progress)
-    {
-        if (_plexServerConnection is not null)
-        {
-            var checkStatusProgress = progress.ToServerConnectionCheckStatusProgress(_plexServerConnection);
-            await _signalRService.SendServerConnectionCheckStatusProgressAsync(checkStatusProgress);
-        }
     }
 }

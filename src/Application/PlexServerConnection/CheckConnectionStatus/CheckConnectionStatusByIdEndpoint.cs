@@ -16,12 +16,14 @@ public class CheckConnectionStatusByIdRequestValidator : Validator<CheckConnecti
 
 public class CheckConnectionStatusByIdEndpoint : BaseEndpoint<CheckConnectionStatusByIdRequest, PlexServerStatusDTO>
 {
+    private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
 
     public override string EndpointPath => ApiRoutes.PlexServerConnectionController + "/check/{PlexServerConnectionId}";
 
-    public CheckConnectionStatusByIdEndpoint(ICommandExecutor commandExecutor)
+    public CheckConnectionStatusByIdEndpoint(ILogger log, ICommandExecutor commandExecutor)
     {
+        _log = log.ForContext<CheckConnectionStatusByIdEndpoint>();
         _commandExecutor = commandExecutor;
     }
 
@@ -39,6 +41,7 @@ public class CheckConnectionStatusByIdEndpoint : BaseEndpoint<CheckConnectionSta
 
     public override async Task HandleAsync(CheckConnectionStatusByIdRequest req, CancellationToken ct)
     {
+        _log.DebugApiCall(HttpContext, req);
         var result = await _commandExecutor.Send(new CheckConnectionStatusByIdCommand(req.PlexServerConnectionId), ct);
         if (result.IsFailed)
             await SendFluentResult(result.ToResult(), ct);

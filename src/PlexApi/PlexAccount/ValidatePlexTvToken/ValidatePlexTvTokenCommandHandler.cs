@@ -1,5 +1,6 @@
 using FastEndpoints;
 using FluentValidation;
+using LukeHagar.PlexAPI.SDK.Models.Requests;
 using Reaparr.PlexApi.Contracts;
 
 namespace Reaparr.PlexApi;
@@ -34,7 +35,7 @@ public class ValidatePlexTvTokenCommandHandler
 
         var client = _plexApiClientFactory.CreateTvClient(command.AuthenticationToken);
 
-        var response = await client.Authentication.GetTokenDetailsAsync().ToResponse();
+        var response = await client.Authentication.GetTokenDetailsAsync(new GetTokenDetailsRequest()).ToResponse();
 
         var isValid = response.Value.RawResponse.IsSuccessStatusCode;
         var result = response.ToApiResult(x => new ValidatePlexTokenCommandResult

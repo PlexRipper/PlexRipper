@@ -44,10 +44,7 @@ public class GetAllPlexServerConnectionsEndpoint : BaseEndpointWithoutRequest<Li
             );
 
             if (chosenConnectionResult.IsFailed)
-            {
-                chosenConnectionResult.LogWarning();
                 continue;
-            }
 
             chosenHash.Add(chosenConnectionResult.Value.Id);
         }

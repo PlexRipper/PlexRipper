@@ -33,6 +33,11 @@ public record LibrarySyncJobQueueDTO
     public required DateTime? CompletedAt { get; init; }
 
     /// <summary>
+    /// Indicates whether the Plex server was offline during the sync attempt.
+    /// </summary>
+    public required bool IsServerOffline { get; init; }
+
+    /// <summary>
     /// Error message describing the failure if the job did not complete successfully.
     /// </summary>
     public required string? ErrorMessage { get; init; }

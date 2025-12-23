@@ -12,6 +12,7 @@ public static class LibrarySyncJobQueueMappings
             CreatedAt = source.CreatedAt,
             StartedAt = source.StartedAt,
             CompletedAt = source.CompletedAt,
+            IsServerOffline = source.IsServerOffline,
             ErrorMessage = source.ErrorMessage,
             PlexLibraryId = source.PlexLibraryId,
             PlexServerId = source.PlexServerId,

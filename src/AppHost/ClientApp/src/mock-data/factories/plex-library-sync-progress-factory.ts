@@ -1,30 +1,5 @@
 import { randRecentDate } from '@ngneat/falso';
-import type { LibraryProgress, SyncServerMediaProgress } from '@dto';
-import { times, mean } from 'lodash-es';
-
-export function generateSyncServerMediaProgress({
-	progressIndex = 0,
-	plexServerId,
-	plexLibraryIds,
-}: {
-	/**
-   * The progress of the server
-   */
-	progressIndex: number;
-	plexServerId: number;
-	plexLibraryIds: number[];
-}): SyncServerMediaProgress {
-	const progress = times(plexLibraryIds.length, (i) => generateLibraryProgress({
-		libraryId: plexLibraryIds[i]!,
-		received: progressIndex * 100,
-		total: 1000,
-	}));
-	return {
-		serverId: plexServerId,
-		libraryProgresses: progress,
-		percentage: mean(progress.map((x) => x.percentage)),
-	};
-}
+import { type LibraryProgress, type LibrarySyncJobQueueDTO, LibrarySyncJobStatus } from '@dto';
 
 export function generateLibraryProgress({
 	libraryId,
@@ -58,5 +33,39 @@ export function generateLibraryProgress({
 		timeRemaining: formattedTimeRemaining,
 		step: 1,
 		totalSteps: 1,
+	};
+}
+
+export function generateLibrarySyncJobQueue({
+	plexLibraryId,
+	plexServerId,
+	status = LibrarySyncJobStatus.Queued,
+	priority = 1,
+	isServerOffline = false,
+	errorMessage = null,
+	createdAt,
+	startedAt = null,
+	completedAt = null,
+}: {
+	plexLibraryId: number;
+	plexServerId: number;
+	status?: LibrarySyncJobStatus;
+	priority?: number;
+	isServerOffline?: boolean;
+	errorMessage?: string | null;
+	createdAt?: string;
+	startedAt?: string | null;
+	completedAt?: string | null;
+}): LibrarySyncJobQueueDTO {
+	return {
+		plexLibraryId,
+		plexServerId,
+		status,
+		priority,
+		isServerOffline,
+		errorMessage,
+		createdAt: createdAt ?? new Date().toISOString(),
+		startedAt,
+		completedAt,
 	};
 }

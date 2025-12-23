@@ -566,6 +566,7 @@ export interface LibrarySyncJobQueueDTO {
   /** @format date-time */
   createdAt: string;
   errorMessage?: string | null;
+  isServerOffline: boolean;
   /** @format int32 */
   plexLibraryId: number;
   /** @format int32 */
@@ -591,7 +592,6 @@ export enum MessageTypes {
   ServerDownloadProgress = "ServerDownloadProgress",
   ServerConnectionCheckStatusProgress = "ServerConnectionCheckStatusProgress",
   MoveDownloadFileProgress = "MoveDownloadFileProgress",
-  SyncServerMediaProgress = "SyncServerMediaProgress",
   Notification = "Notification",
   JobStatusUpdate = "JobStatusUpdate",
   RefreshNotification = "RefreshNotification",
@@ -989,6 +989,7 @@ export enum RefreshDataType {
   PlexAccount = "PlexAccount",
   PlexServer = "PlexServer",
   PlexLibrary = "PlexLibrary",
+  PlexLibrarySyncStatus = "PlexLibrarySyncStatus",
   PlexServerConnection = "PlexServerConnection",
 }
 
@@ -1096,6 +1097,15 @@ export interface ResultDTOOfListOfJobStatusUpdateDTO {
   statusCode: number;
   successes: SuccessDTO[];
   value?: JobStatusUpdateDTO[] | null;
+}
+
+export interface ResultDTOOfListOfLibrarySyncJobQueueDTO {
+  errors: ErrorDTO[];
+  isSuccess: boolean;
+  /** @format int32 */
+  statusCode: number;
+  successes: SuccessDTO[];
+  value?: LibrarySyncJobQueueDTO[] | null;
 }
 
 export interface ResultDTOOfListOfNotificationDTO {
@@ -1414,14 +1424,6 @@ export enum StreamType {
 export interface SuccessDTO {
   message: string;
   metadata: Record<string, any>;
-}
-
-export interface SyncServerMediaProgress {
-  libraryProgresses: LibraryProgress[];
-  /** @format decimal */
-  percentage: number;
-  /** @format int32 */
-  serverId: number;
 }
 
 export enum TestConnectionStatus {

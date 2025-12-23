@@ -14,6 +14,7 @@ import type { RequestParams } from "./http-client";
 
 import type {
   BaseResultDTO,
+  LibrarySyncJobQueueDTO,
   PlexLibraryDTO,
   PlexMediaMetadataDTO,
   PlexMediaStatisticsDTO,
@@ -150,6 +151,24 @@ export class PlexLibrary {
   /**
    * No description
    * * @tags Plexlibrary
+   * @name GetLibrarySyncStatusEndpoint
+   * @request GET:/api/PlexLibrary/sync-status
+   * @secure
+   */
+  getLibrarySyncStatusEndpoint = (params: RequestParams = {}) =>
+    from(
+      Axios.request<LibrarySyncJobQueueDTO[]>({
+        url: `/api/PlexLibrary/sync-status`,
+        method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+    ).pipe(apiCheckPipe<LibrarySyncJobQueueDTO[]>);
+
+  /**
+   * No description
+   * * @tags Plexlibrary
    * @name RefreshLibraryMediaEndpoint
    * @request GET:/api/PlexLibrary/refresh/{PlexLibraryId}
    * @secure
@@ -250,6 +269,9 @@ export class PlexLibraryPaths {
       url: `/api/PlexLibrary/${plexLibraryId}/metadata`,
       query,
     });
+
+  static getLibrarySyncStatusEndpoint = () =>
+    queryString.stringifyUrl({ url: `/api/PlexLibrary/sync-status` });
 
   static refreshLibraryMediaEndpoint = (plexLibraryId: number) =>
     queryString.stringifyUrl({

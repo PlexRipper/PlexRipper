@@ -1,7 +1,7 @@
 <template>
 	<!--	Refresh Library Screen	-->
 	<QRow
-		v-if="isRefreshing"
+		v-if="libraryStore.getIsLibrarySyncing(libraryId)"
 		align="start"
 		class="q-pt-xl"
 		cy="refresh-library-container"
@@ -100,7 +100,7 @@
 			<!-- Media Options Dialog -->
 			<MediaOptionsDialog @closed="onOptionsClosed" />
 			<!-- Loading overlay -->
-			<QLoadingOverlay :loading="!isRefreshing && mediaOverviewStore.loading" />
+			<QLoadingOverlay :loading="!libraryStore.getIsLibrarySyncing(libraryId) && mediaOverviewStore.loading" />
 			<!-- Download confirmation dialog	-->
 			<DownloadConfirmation @download="downloadStore.downloadMedia($event)" />
 		</div>
@@ -139,8 +139,6 @@ const dialogStore = useDialogStore();
 const signalRStore = useSignalrStore();
 const backgroundJobsStore = useBackgroundJobsStore();
 
-const isRefreshing = ref(false);
-
 const libraryProgress = ref<LibraryProgress | null>(null);
 
 const props = withDefaults(defineProps<{
@@ -162,8 +160,6 @@ const refreshingText = computed(() => {
 });
 
 function resetProgress(isRefreshingValue: boolean) {
-	set(isRefreshing, isRefreshingValue);
-
 	set(libraryProgress, {
 		id: mediaOverviewStore.libraryId,
 		percentage: 0,
@@ -179,7 +175,6 @@ function resetProgress(isRefreshingValue: boolean) {
 }
 
 function refreshLibrary() {
-	set(isRefreshing, true);
 	resetProgress(true);
 	useSubscription(
 		libraryStore.reSyncLibrary(mediaOverviewStore.libraryId).subscribe(),
@@ -250,7 +245,6 @@ function onOptionsClosed(hasChanged: boolean) {
 
 onMounted(() => {
 	resetProgress(false);
-	set(isRefreshing, false);
 
 	mediaOverviewStore.$patch({
 		libraryId: props.libraryId,
@@ -270,14 +264,8 @@ onMounted(() => {
 			return;
 		}
 
-		if (queue.status === LibrarySyncJobStatus.Processing) {
-			set(isRefreshing, true);
-		}
-
 		if (queue.status === LibrarySyncJobStatus.Completed) {
-			useSubscription(mediaOverviewStore.requestMedia().subscribe(() => {
-				set(isRefreshing, false);
-			}));
+			useSubscription(mediaOverviewStore.requestMedia().subscribe());
 		}
 	}));
 

@@ -15,7 +15,6 @@ import type {
 	NotificationDTO,
 	ServerConnectionCheckStatusProgressDTO,
 	ServerDownloadProgressDTO,
-	SyncServerMediaProgress,
 	ServerDownloadProgressMessagePackDTO,
 } from '@dto';
 import { MessageTypes } from '@dto';
@@ -28,11 +27,9 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 	interface ISignalRStoreState {
 		// Data
 		libraryProgress: LibraryProgress[];
-		syncServerMediaProgress: SyncServerMediaProgress[];
 		serverConnectionCheckStatusProgress: ServerConnectionCheckStatusProgressDTO[];
 		// Subjects
 		libraryProgressSubject: Subject<LibraryProgress[]>;
-		syncServerMediaProgressSubject: Subject<SyncServerMediaProgress[]>;
 		serverConnectionCheckStatusProgressSubject: Subject<ServerConnectionCheckStatusProgressDTO[]>;
 		refreshDataNotificationSubject: Subject<RefreshDataType>;
 	}
@@ -40,12 +37,10 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 	const defaultState: ISignalRStoreState = {
 		// Data
 		libraryProgress: [],
-		syncServerMediaProgress: [],
 		serverConnectionCheckStatusProgress: [],
 
 		// Subjects
 		libraryProgressSubject: new Subject<LibraryProgress[]>(),
-		syncServerMediaProgressSubject: new Subject<SyncServerMediaProgress[]>(),
 		serverConnectionCheckStatusProgressSubject: new Subject<ServerConnectionCheckStatusProgressDTO[]>(),
 		refreshDataNotificationSubject: new Subject<RefreshDataType>(),
 	};
@@ -128,8 +123,6 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 
 		progressHubConnection?.on(MessageTypes.ServerConnectionCheckStatusProgress, (data: ServerConnectionCheckStatusProgressDTO) => updateState<ServerConnectionCheckStatusProgressDTO>('serverConnectionCheckStatusProgress', data, 'plexServerConnectionId'));
 
-		progressHubConnection?.on(MessageTypes.SyncServerMediaProgress, (data: SyncServerMediaProgress) => updateState<SyncServerMediaProgress>('syncServerMediaProgress', data, 'serverId'));
-
 		progressHubConnection?.on(MessageTypes.JobStatusUpdate, (data) => backgroundStore.setStatusJobUpdate(data));
 
 		notificationHubConnection?.on(MessageTypes.Notification, (data: NotificationDTO) => notificationsStore.setNotification(data));
@@ -199,7 +192,6 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 	const getters = {
 		// region Array Progress
 		getAllLibraryProgress: (): Observable<LibraryProgress[]> => state.libraryProgressSubject.asObservable(),
-		getAllSyncServerMediaProgress: (): Observable<SyncServerMediaProgress[]> => state.syncServerMediaProgressSubject.asObservable(),
 		getAllServerConnectionProgress: (): Observable<ServerConnectionCheckStatusProgressDTO[]> => state.serverConnectionCheckStatusProgressSubject.asObservable(), // endregion
 
 		// region Single Progress

@@ -13,13 +13,13 @@ public class LibrarySyncJobQueue
     /// Movies typically have higher priority (lower number) than TV shows.
     /// </summary>
     [Column(Order = 1)]
-    public required int Priority { get; set; }
+    public required int Priority { get; init; }
 
     /// <summary>
     /// Gets or sets the status of this queue item.
     /// </summary>
     [Column(Order = 2)]
-    public required LibrarySyncJobStatus Status { get; set; } = LibrarySyncJobStatus.Queued;
+    public required LibrarySyncJobStatus Status { get; init; } = LibrarySyncJobStatus.Queued;
 
     /// <summary>
     /// Gets or sets when this queue item was created.
@@ -31,19 +31,25 @@ public class LibrarySyncJobQueue
     /// Gets or sets when processing of this queue item started.
     /// </summary>
     [Column(Order = 4)]
-    public DateTime? StartedAt { get; set; }
+    public DateTime? StartedAt { get; init; }
 
     /// <summary>
     /// Gets or sets when processing of this queue item completed (successfully or with error).
     /// </summary>
     [Column(Order = 5)]
-    public DateTime? CompletedAt { get; set; }
+    public DateTime? CompletedAt { get; init; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the Plex server was offline during the sync attempt.
+    /// </summary>
+    [Column(Order = 6)]
+    public bool IsServerOffline { get; init; }
 
     /// <summary>
     /// Gets or sets the error message if the sync failed.
     /// </summary>
-    [Column(Order = 6)]
-    public string? ErrorMessage { get; set; }
+    [Column(Order = 7)]
+    public string? ErrorMessage { get; init; }
 
     #endregion
 
@@ -52,26 +58,26 @@ public class LibrarySyncJobQueue
     /// <summary>
     /// Gets or sets the PlexLibrary this queue item is for.
     /// </summary>
-    public PlexLibrary? PlexLibrary { get; set; }
+    public PlexLibrary? PlexLibrary { get; init; }
 
     /// <summary>
     /// Gets or sets the PlexLibraryId this queue item is for.
     /// Part of the composite primary key along with PlexServerId.
     /// </summary>
     [Column(Order = 7)]
-    public required int PlexLibraryId { get; set; }
+    public required int PlexLibraryId { get; init; }
 
     /// <summary>
     /// Gets or sets the PlexServer this queue item belongs to.
     /// </summary>
-    public PlexServer? PlexServer { get; set; }
+    public PlexServer? PlexServer { get; init; }
 
     /// <summary>
     /// Gets or sets the PlexServerId this queue item belongs to.
     /// Part of the composite primary key along with PlexLibraryId.
     /// </summary>
     [Column(Order = 8)]
-    public required int PlexServerId { get; set; }
+    public required int PlexServerId { get; init; }
 
     #endregion
 }

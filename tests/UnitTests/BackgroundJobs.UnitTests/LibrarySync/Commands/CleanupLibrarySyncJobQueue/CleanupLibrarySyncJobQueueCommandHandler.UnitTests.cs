@@ -1,5 +1,6 @@
 using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
+using Reaparr.Application.Contracts;
 using Reaparr.BackgroundJobs.Contracts;
 
 namespace Reaparr.BackgroundJobs.UnitTests;
@@ -8,6 +9,15 @@ public class CleanupLibrarySyncJobQueueCommandHandlerUnitTests : BaseUnitTest<Cl
 {
     public CleanupLibrarySyncJobQueueCommandHandlerUnitTests(ITestOutputHelper output)
         : base(output) { }
+
+    private void SetupSignalRMock()
+    {
+        Mock.Mock<ISignalRService>()
+            .Setup(x =>
+                x.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>(), It.IsAny<CancellationToken>())
+            )
+            .Returns(Task.CompletedTask);
+    }
 
     [Fact]
     public async Task ShouldDeleteCompletedItems_WhenCompletedItemsExist()
@@ -50,6 +60,7 @@ public class CleanupLibrarySyncJobQueueCommandHandlerUnitTests : BaseUnitTest<Cl
         var saveResult = await dbContext.SaveChangesAsync(CancellationToken);
         saveResult.ShouldBeGreaterThan(0);
 
+        SetupSignalRMock();
         var command = new CleanupLibrarySyncJobQueueCommand();
 
         // Act
@@ -104,6 +115,7 @@ public class CleanupLibrarySyncJobQueueCommandHandlerUnitTests : BaseUnitTest<Cl
             .ToListAsync(CancellationToken);
         savedItems.Count.ShouldBe(1);
 
+        SetupSignalRMock();
         var command = new CleanupLibrarySyncJobQueueCommand();
 
         // Act
@@ -163,6 +175,7 @@ public class CleanupLibrarySyncJobQueueCommandHandlerUnitTests : BaseUnitTest<Cl
             .ToListAsync(CancellationToken);
         savedItems.Count.ShouldBe(1);
 
+        SetupSignalRMock();
         var command = new CleanupLibrarySyncJobQueueCommand();
 
         // Act
@@ -223,6 +236,7 @@ public class CleanupLibrarySyncJobQueueCommandHandlerUnitTests : BaseUnitTest<Cl
         var saveResult = await dbContext.SaveChangesAsync(CancellationToken);
         saveResult.ShouldBeGreaterThan(0);
 
+        SetupSignalRMock();
         var command = new CleanupLibrarySyncJobQueueCommand();
 
         // Act
@@ -254,6 +268,7 @@ public class CleanupLibrarySyncJobQueueCommandHandlerUnitTests : BaseUnitTest<Cl
             }
         );
 
+        SetupSignalRMock();
         var command = new CleanupLibrarySyncJobQueueCommand();
 
         // Act
@@ -333,6 +348,7 @@ public class CleanupLibrarySyncJobQueueCommandHandlerUnitTests : BaseUnitTest<Cl
         var saveResult = await dbContext.SaveChangesAsync(CancellationToken);
         saveResult.ShouldBeGreaterThan(0);
 
+        SetupSignalRMock();
         var command = new CleanupLibrarySyncJobQueueCommand();
 
         // Act

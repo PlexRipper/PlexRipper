@@ -64,7 +64,7 @@ public class LibrarySyncJobQueue
     /// Gets or sets the PlexLibraryId this queue item is for.
     /// Part of the composite primary key along with PlexServerId.
     /// </summary>
-    [Column(Order = 7)]
+    [Column(Order = 8)]
     public required int PlexLibraryId { get; init; }
 
     /// <summary>
@@ -76,7 +76,7 @@ public class LibrarySyncJobQueue
     /// Gets or sets the PlexServerId this queue item belongs to.
     /// Part of the composite primary key along with PlexLibraryId.
     /// </summary>
-    [Column(Order = 8)]
+    [Column(Order = 9)]
     public required int PlexServerId { get; init; }
 
     #endregion

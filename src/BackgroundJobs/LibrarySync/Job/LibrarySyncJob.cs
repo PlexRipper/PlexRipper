@@ -111,7 +111,7 @@ public class LibrarySyncJob : IJob
             await _dbContext.SaveChangesAsync(cancellationToken);
 
             // Send refresh notification
-            await _signalRService.SendRefreshNotificationAsync(RefreshDataType.PlexLibrary, cancellationToken);
+            await _signalRService.SendRefreshNotificationAsync([RefreshDataType.PlexLibrary], cancellationToken);
 
             // Schedule the next library from the queue
             await _commandExecutor.Send(new CheckQueuedPlexLibraryToSyncCommand(), cancellationToken);
@@ -190,5 +190,7 @@ public class LibrarySyncJob : IJob
                     );
                 break;
         }
+
+        await _signalRService.SendRefreshNotificationAsync([RefreshDataType.PlexLibrarySyncStatus]);
     }
 }

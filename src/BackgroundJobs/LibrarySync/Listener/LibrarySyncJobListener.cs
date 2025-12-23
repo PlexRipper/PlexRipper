@@ -9,7 +9,7 @@ namespace Reaparr.BackgroundJobs;
 
 public class LibrarySyncJobListener : ILibrarySyncJobListener
 {
-    private readonly IReaparrDbContext _dbContext;
+    private readonly IReaparrDbContextFactory _dbContextFactory;
     private readonly IScheduler _scheduler;
     private readonly ISignalRService _signalRService;
     private readonly ILogger _log;
@@ -19,13 +19,13 @@ public class LibrarySyncJobListener : ILibrarySyncJobListener
 
     public LibrarySyncJobListener(
         ILogger log,
-        IReaparrDbContext dbContext,
+        IReaparrDbContextFactory dbContextFactory,
         IScheduler scheduler,
         ISignalRService signalRService
     )
     {
         _log = log.ForContext<LibrarySyncJobListener>();
-        _dbContext = dbContext;
+        _dbContextFactory = dbContextFactory;
         _scheduler = scheduler;
         _signalRService = signalRService;
     }
@@ -105,7 +105,8 @@ public class LibrarySyncJobListener : ILibrarySyncJobListener
             var serverId = context.JobDetail.JobDataMap.GetInt(LibrarySyncJob.ServerIdParameter);
             var libraryId = context.JobDetail.JobDataMap.GetInt(LibrarySyncJob.LibraryIdParameter);
 
-            var queue = await _dbContext.LibrarySyncJobQueues.FirstOrDefaultAsync(
+            using var dbContext = await _dbContextFactory.CreateAsync();
+            var queue = await dbContext.LibrarySyncJobQueues.FirstOrDefaultAsync(
                 x => x.PlexServerId == serverId && x.PlexLibraryId == libraryId,
                 cancellationToken: cancellationToken
             );
@@ -130,6 +131,11 @@ public class LibrarySyncJobListener : ILibrarySyncJobListener
             );
 
             await _signalRService.SendJobStatusUpdateAsync(statusUpdate);
+
+            await _signalRService.SendRefreshNotificationAsync(
+                [RefreshDataType.PlexLibrary, RefreshDataType.PlexLibrarySyncStatus],
+                cancellationToken
+            );
         }
         catch (Exception ex)
         {

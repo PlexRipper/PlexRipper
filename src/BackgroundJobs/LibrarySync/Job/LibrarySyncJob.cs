@@ -67,6 +67,21 @@ public class LibrarySyncJob : IJob
                 _libraryId
             );
 
+        // Check if the server is online before starting sync
+        var isServerOnline = await _dbContext.IsServerOnline(_serverId, cancellationToken);
+        if (!isServerOnline)
+        {
+            var serverName = await _dbContext.GetPlexServerNameById(_serverId, cancellationToken);
+            _log.Here()
+                .Warning(
+                    "Server {ServerName} with id {ServerId} is offline, marking queue item and skipping sync",
+                    serverName,
+                    _serverId
+                );
+            await UpdateQueueItemAsync(LibrarySyncJobStatus.Queued, isServerOffline: true);
+            return;
+        }
+
         await UpdateQueueItemAsync(LibrarySyncJobStatus.Processing);
 
         // Jobs should swallow exceptions as otherwise Quartz will keep re-executing it
@@ -88,16 +103,22 @@ public class LibrarySyncJob : IJob
             if (result.IsFailed)
             {
                 result.LogError();
+
+                // Check if failure was due to the server being offline (504 Gateway Timeout)
+                var isServerOffline = result.ToResult().Has504GatewayTimeoutError();
+
                 await UpdateQueueItemAsync(
                     LibrarySyncJobStatus.Failed,
-                    errorMessage: result.Errors.FirstOrDefault()?.Message
+                    errorMessage: result.Errors.FirstOrDefault()?.Message,
+                    isServerOffline: isServerOffline
                 );
 
                 _log.Here()
                     .Warning(
-                        "Library sync failed for server {ServerId}, library {LibraryId}. Queue item marked as failed.",
+                        "Library sync failed for server {ServerId}, library {LibraryId}. Queue item marked as failed. Server offline: {IsServerOffline}",
                         _serverId,
-                        _libraryId
+                        _libraryId,
+                        isServerOffline
                     );
                 return;
             }
@@ -136,7 +157,11 @@ public class LibrarySyncJob : IJob
         }
     }
 
-    private async Task UpdateQueueItemAsync(LibrarySyncJobStatus status, string? errorMessage = null)
+    private async Task UpdateQueueItemAsync(
+        LibrarySyncJobStatus status,
+        string? errorMessage = null,
+        bool isServerOffline = false
+    )
     {
         var query = _dbContext.LibrarySyncJobQueues.Where(x =>
             x.PlexServerId == _serverId && x.PlexLibraryId == _libraryId
@@ -149,18 +174,23 @@ public class LibrarySyncJob : IJob
                     s.SetProperty(x => x.Status, status)
                         .SetProperty(x => x.StartedAt, (DateTime?)null)
                         .SetProperty(x => x.ErrorMessage, (string?)null)
+                        .SetProperty(x => x.IsServerOffline, isServerOffline)
                 );
                 break;
 
             case LibrarySyncJobStatus.Processing:
                 await query.ExecuteUpdateAsync(s =>
-                    s.SetProperty(x => x.Status, status).SetProperty(x => x.StartedAt, DateTime.UtcNow)
+                    s.SetProperty(x => x.Status, status)
+                        .SetProperty(x => x.StartedAt, DateTime.UtcNow)
+                        .SetProperty(x => x.IsServerOffline, false)
                 );
                 break;
 
             case LibrarySyncJobStatus.Completed:
                 await query.ExecuteUpdateAsync(s =>
-                    s.SetProperty(x => x.Status, status).SetProperty(x => x.CompletedAt, DateTime.UtcNow)
+                    s.SetProperty(x => x.Status, status)
+                        .SetProperty(x => x.CompletedAt, DateTime.UtcNow)
+                        .SetProperty(x => x.IsServerOffline, false)
                 );
                 break;
 
@@ -169,6 +199,7 @@ public class LibrarySyncJob : IJob
                     s.SetProperty(x => x.Status, status)
                         .SetProperty(x => x.CompletedAt, DateTime.UtcNow)
                         .SetProperty(x => x.ErrorMessage, errorMessage)
+                        .SetProperty(x => x.IsServerOffline, isServerOffline)
                 );
                 break;
 

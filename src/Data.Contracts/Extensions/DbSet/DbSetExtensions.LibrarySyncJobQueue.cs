@@ -33,7 +33,8 @@ public static partial class DbSetExtensions
                     .SetProperty(y => y.CreatedAt, DateTime.UtcNow)
                     .SetProperty(y => y.StartedAt, (DateTime?)null)
                     .SetProperty(y => y.CompletedAt, (DateTime?)null)
-                    .SetProperty(y => y.ErrorMessage, (string?)null),
+                    .SetProperty(y => y.ErrorMessage, (string?)null)
+                    .SetProperty(y => y.IsServerOffline, false),
             token
         );
     }

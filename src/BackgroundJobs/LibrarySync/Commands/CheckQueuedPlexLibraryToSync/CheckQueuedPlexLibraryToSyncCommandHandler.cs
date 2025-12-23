@@ -46,11 +46,12 @@ public class CheckQueuedPlexLibraryToSyncCommandHandler : ICommandHandler<CheckQ
         }
 
         var totalLibraries = librariesByServer.Sum(g => g.Count());
-        _log.Debug(
-            "Found {Count} queued libraries across {ServerCount} servers to sync",
-            totalLibraries,
-            librariesByServer.Count
-        );
+        _log.Here()
+            .Debug(
+                "Found {Count} queued libraries across {ServerCount} servers to sync",
+                totalLibraries,
+                librariesByServer.Count
+            );
 
         foreach (var serverGroup in librariesByServer)
         {
@@ -123,10 +124,6 @@ public class CheckQueuedPlexLibraryToSyncCommandHandler : ICommandHandler<CheckQ
         await _scheduler.ScheduleJob(job, trigger);
 
         _log.Here()
-            .Debug(
-                "Scheduled library sync job for server {ServerId} and library {LibraryId}",
-                serverId,
-                libraryId
-            );
+            .Debug("Scheduled library sync job for server {ServerId} and library {LibraryId}", serverId, libraryId);
     }
 }

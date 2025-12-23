@@ -83,11 +83,6 @@ public class PlexApiClient : IPlexApiClient
             var curl = _defaultClient.GenerateCurlInString(request);
             _log.Here().Verbose("Request CURL: {RequestUrl}", curl);
         }
-        else if (_log.Here().IsLogLevelDebug())
-        {
-            var curl = _defaultClient.GenerateCurlInString(request);
-            _log.Here().Debug("Request CURL: {RequestUrl}", curl);
-        }
 
         HttpResponseMessage? response = null;
         var requestUri = request.RequestUri?.ToString();
@@ -289,11 +284,12 @@ public class PlexApiClient : IPlexApiClient
         );
     }
 
-    private bool ShouldLog(HttpRequestMessage request)
-    {
-        // Don't log identity requests
-        return !request.RequestUri?.PathAndQuery.Contains("identity", StringComparison.OrdinalIgnoreCase) ?? true;
-    }
+    /// <summary>
+    ///  Don't log identity requests
+    /// </summary>
+    /// <param name="request"></param>
+    private bool ShouldLog(HttpRequestMessage request) =>
+        !request.RequestUri?.PathAndQuery.Contains("identity", StringComparison.OrdinalIgnoreCase) ?? true;
 
     private HttpContent ToJsonResponse(HttpResponseMessage message)
     {

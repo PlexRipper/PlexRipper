@@ -33,16 +33,15 @@ public class CheckQueuedPlexLibraryToSyncCommandHandler : ICommandHandler<CheckQ
         CancellationToken cancellationToken
     )
     {
-        // Group queued libraries by server, ordered by priority within each group
+        // Group queued libraries by server
         var librariesByServer = await _dbContext
             .LibrarySyncJobQueues.Where(x => x.Status == LibrarySyncJobStatus.Queued)
-            .OrderBy(x => x.Priority)
             .GroupBy(x => x.PlexServerId)
             .ToListAsync(cancellationToken: cancellationToken);
 
         if (!librariesByServer.Any())
         {
-            _log.Here().Information("No queued libraries found to sync the media for");
+            _log.Here().Debug("No queued libraries found to sync the media for");
             return Result.Ok();
         }
 
@@ -60,12 +59,10 @@ public class CheckQueuedPlexLibraryToSyncCommandHandler : ICommandHandler<CheckQ
 
             if (!isServerOnline)
             {
-                var serverName = await _dbContext.GetPlexServerNameById(serverId, cancellationToken);
                 _log.Here()
                     .Warning(
-                        "Skipping {Count} library syncs for server {ServerName} with id {ServerId} because it is offline",
+                        "Skipping {Count} library syncs for server {ServerId} because it is offline",
                         serverGroup.Count(),
-                        serverName,
                         serverId
                     );
 
@@ -74,13 +71,24 @@ public class CheckQueuedPlexLibraryToSyncCommandHandler : ICommandHandler<CheckQ
                     .LibrarySyncJobQueues.Where(x =>
                         x.PlexServerId == serverId && x.Status == LibrarySyncJobStatus.Queued
                     )
-                    .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsServerOffline, true), CancellationToken.None);
+                    .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsServerOffline, true), cancellationToken);
 
                 continue;
             }
 
-            var nextLibraryId = serverGroup.First().PlexLibraryId;
-            await ScheduleLibrarySyncJob(serverId, nextLibraryId);
+            var nextLibrary = serverGroup.OrderBy(x => x.Priority).First();
+
+            // Clear the offline flag for the item being scheduled
+            if (nextLibrary.IsServerOffline)
+            {
+                await _dbContext
+                    .LibrarySyncJobQueues.Where(x =>
+                        x.PlexServerId == serverId && x.PlexLibraryId == nextLibrary.PlexLibraryId
+                    )
+                    .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsServerOffline, false), cancellationToken);
+            }
+
+            await ScheduleLibrarySyncJob(serverId, nextLibrary.PlexLibraryId);
         }
 
         return Result.Ok();
@@ -99,7 +107,6 @@ public class CheckQueuedPlexLibraryToSyncCommandHandler : ICommandHandler<CheckQ
                     serverId,
                     libraryId
                 );
-            Result.Ok();
             return;
         }
 
@@ -115,18 +122,11 @@ public class CheckQueuedPlexLibraryToSyncCommandHandler : ICommandHandler<CheckQ
 
         await _scheduler.ScheduleJob(job, trigger);
 
-        var serverName = await _dbContext.GetPlexServerNameById(serverId);
-        var libraryName = await _dbContext.GetPlexLibraryNameById(libraryId);
-
         _log.Here()
             .Debug(
-                "Scheduled library sync job for server {ServerName} with id {ServerId} and library {LibraryName} with {LibraryId}",
-                serverName,
+                "Scheduled library sync job for server {ServerId} and library {LibraryId}",
                 serverId,
-                libraryName,
                 libraryId
             );
-
-        Result.Ok();
     }
 }

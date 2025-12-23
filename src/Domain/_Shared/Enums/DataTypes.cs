@@ -18,6 +18,9 @@ public enum RefreshDataType
     [EnumMember(Value = nameof(PlexLibrary))]
     PlexLibrary = 2,
 
+    [EnumMember(Value = nameof(PlexLibrarySyncStatus))]
+    PlexLibrarySyncStatus = 3,
+
     [EnumMember(Value = nameof(PlexServerConnection))]
-    PlexServerConnection = 3,
+    PlexServerConnection = 4,
 }

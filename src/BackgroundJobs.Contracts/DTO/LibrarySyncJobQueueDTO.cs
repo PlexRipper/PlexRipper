@@ -33,7 +33,7 @@ public record LibrarySyncJobQueueDTO
     public required DateTime? CompletedAt { get; init; }
 
     /// <summary>
-    /// Error message describing the failure, if the job did not complete successfully.
+    /// Error message describing the failure if the job did not complete successfully.
     /// </summary>
     public required string? ErrorMessage { get; init; }
 

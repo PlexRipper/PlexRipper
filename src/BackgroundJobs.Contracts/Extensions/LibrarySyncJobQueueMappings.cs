@@ -1,6 +1,6 @@
-using Reaparr.BackgroundJobs.Contracts;
+using Reaparr.Domain;
 
-namespace Reaparr.BackgroundJobs;
+namespace Reaparr.BackgroundJobs.Contracts;
 
 public static class LibrarySyncJobQueueMappings
 {
@@ -17,3 +17,5 @@ public static class LibrarySyncJobQueueMappings
             PlexServerId = source.PlexServerId,
         };
 }
+
+

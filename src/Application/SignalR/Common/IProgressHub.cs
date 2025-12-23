@@ -15,16 +15,6 @@ public interface IProgressHub
     Task JobStatusUpdate(JobStatusUpdateDTO jobStatusUpdate, CancellationToken cancellationToken = default);
 
     /// <summary>
-    ///  Sends a sync server media progress update to the front-end.
-    /// </summary>
-    /// <param name="syncServerMediaProgress"></param>
-    /// <param name="cancellationToken"> The <see cref="CancellationToken"/> to use.</param>
-    Task SyncServerMediaProgress(
-        SyncServerMediaProgress syncServerMediaProgress,
-        CancellationToken cancellationToken = default
-    );
-
-    /// <summary>
     ///  Sends a server connection check status progress update to the front-end.
     /// </summary>
     /// <param name="serverConnectionCheckStatusProgress"></param>

@@ -19,13 +19,6 @@ public interface ISignalRService
     Task SendNotificationAsync(Notification notification);
 
     /// <summary>
-    ///  Sends a sync server media progress update to the front-end.
-    /// </summary>
-    /// <param name="syncServerMediaProgress"></param>
-    /// <returns></returns>
-    Task SendServerSyncProgressUpdateAsync(SyncServerMediaProgress syncServerMediaProgress);
-
-    /// <summary>
     ///  Sends a download progress update to the front-end.
     /// </summary>
     /// <param name="downloadTasks"></param>

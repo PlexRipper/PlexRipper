@@ -64,12 +64,6 @@ public class SignalRService : ISignalRService
     }
 
     /// <inheritdoc/>
-    public async Task SendServerSyncProgressUpdateAsync(SyncServerMediaProgress syncServerMediaProgress)
-    {
-        await _progressHub.Clients.All.SyncServerMediaProgress(syncServerMediaProgress);
-    }
-
-    /// <inheritdoc/>
     public async Task SendNotificationAsync(Notification notification)
     {
         await _notificationHub.Clients.All.Notification(notification.ToDTO());

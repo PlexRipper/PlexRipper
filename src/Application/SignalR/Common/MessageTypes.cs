@@ -38,26 +38,20 @@ public enum MessageTypes
     MoveDownloadFileProgress = 6,
 
     /// <summary>
-    ///  Sync server media progress message type.
-    /// </summary>
-    [EnumMember(Value = nameof(SyncServerMediaProgress))]
-    SyncServerMediaProgress = 7,
-
-    /// <summary>
     ///  Notification message type.
     /// </summary>
     [EnumMember(Value = nameof(Notification))]
-    Notification = 8,
+    Notification = 7,
 
     /// <summary>
     ///  Job status update message type.
     /// </summary>
     [EnumMember(Value = nameof(JobStatusUpdate))]
-    JobStatusUpdate = 9,
+    JobStatusUpdate = 8,
 
     /// <summary>
     ///  Refresh the notification message type.
     /// </summary>
     [EnumMember(Value = nameof(RefreshNotification))]
-    RefreshNotification = 10,
+    RefreshNotification = 9,
 }

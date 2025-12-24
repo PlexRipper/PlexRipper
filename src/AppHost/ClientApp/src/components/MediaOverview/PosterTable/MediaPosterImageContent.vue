@@ -2,7 +2,7 @@
 	<q-card
 		square
 		flat
-		:class="{ 'media-poster--fallback': fallback }"
+		:class="['media-poster--content', { 'media-poster--fallback': fallback }]"
 		:style="{ height: thumbHeight + 'px', width: thumbWidth + 'px' }">
 		<q-card-section
 			v-if="fallback">
@@ -20,7 +20,8 @@
 				:value="mediaItem.title"
 				bold="bold"
 				align="center"
-				size="h6" />
+				size="h6"
+				class="media-poster--title" />
 			<QText
 				v-if="mediaItem.type === PlexMediaType.TvShow"
 				:value="$t('components.media-poster-image-content.seasons-count', { count: mediaItem.childCount }) "
@@ -98,9 +99,27 @@ const mediaType = computed(() => props.mediaItem?.type ?? PlexMediaType.Unknown)
 @use '@/assets/scss/_mixins.scss';
 
 .media-poster {
+  &--content {
+    overflow: hidden;
+  }
+
   &--fallback {
     @extend .background-sm;
     padding: 0 !important;
+  }
+
+  &--title {
+    // Handle long titles with line-clamp (show up to 4 lines with ellipsis)
+    .q-text {
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      // Break long words/filenames that have no spaces
+      word-break: break-word;
+      overflow-wrap: break-word;
+    }
   }
 
   &--actions {

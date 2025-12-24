@@ -27,8 +27,12 @@
 import { set } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
 import type { PlexServerDTO } from '@dto';
+import { DialogType } from '@enums';
 import { plexServerApi } from '@api';
+import { useDialogStore } from '@store';
 import { ref, onUnmounted } from '#imports';
+
+const dialogStore = useDialogStore();
 
 const props = defineProps<{
 	plexServer: PlexServerDTO | null;
@@ -50,6 +54,8 @@ function syncServerLibraries(): void {
 			})
 			.subscribe(() => {
 				set(syncLoading, false);
+				dialogStore.closeDialog(DialogType.ServerSettingsDialog);
+				dialogStore.openDialog(DialogType.SyncServerMediaDialog);
 			}),
 	);
 }

@@ -38,6 +38,7 @@
 										class="q-mr-sm" />
 									<QMediaTypeIcon
 										v-else
+										:active="node.completed"
 										:loading="node.percentage > 0 && !node.completed"
 										:media-type="node.mediaType" />
 									<!-- Row Title	-->

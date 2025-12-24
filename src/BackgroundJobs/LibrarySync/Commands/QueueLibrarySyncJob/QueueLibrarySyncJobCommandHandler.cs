@@ -30,8 +30,10 @@ public class QueueLibrarySyncJobCommandHandler : ICommandHandler<QueueLibrarySyn
 
     public async Task<Result> ExecuteAsync(QueueLibrarySyncJobCommand command, CancellationToken cancellationToken)
     {
+        // TODO Remove extra where clause once we support other library types
         var libraries = await _dbContext
             .PlexLibraries.Where(x => command.PlexLibraryIds.Contains(x.Id))
+            .Where(x => x.Type == PlexMediaType.Movie || x.Type == PlexMediaType.TvShow)
             .Select(x => new
             {
                 x.Id,

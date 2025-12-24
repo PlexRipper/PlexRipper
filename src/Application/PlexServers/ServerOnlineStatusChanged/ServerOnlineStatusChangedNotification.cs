@@ -21,19 +21,19 @@ public record ServerOnlineStatusChangedNotification : IEvent
 public class ServerOnlineStatusChangedHandler : IEventHandler<ServerOnlineStatusChangedNotification>
 {
     private readonly ILogger _log;
-    private readonly IReaparrDbContext _dbContext;
+    private readonly IReaparrDbContextFactory _dbContextFactory;
     private readonly IDownloadQueue _downloadQueue;
     private readonly ICommandExecutor _commandExecutor;
 
     public ServerOnlineStatusChangedHandler(
         ILogger log,
-        IReaparrDbContext dbContext,
+        IReaparrDbContextFactory dbContextFactory,
         IDownloadQueue downloadQueue,
         ICommandExecutor commandExecutor
     )
     {
         _log = log.ForContext<ServerOnlineStatusChangedHandler>();
-        _dbContext = dbContext;
+        _dbContextFactory = dbContextFactory;
         _downloadQueue = downloadQueue;
         _commandExecutor = commandExecutor;
     }
@@ -45,7 +45,9 @@ public class ServerOnlineStatusChangedHandler : IEventHandler<ServerOnlineStatus
     {
         if (notification.IsOnline)
         {
-            var plexServerName = await _dbContext.GetPlexServerNameById(
+            // Create a new DbContext for this operation to avoid threading issues
+            using var dbContext = await _dbContextFactory.CreateAsync();
+            var plexServerName = await dbContext.GetPlexServerNameById(
                 notification.PlexServerId,
                 cancellationToken: cancellationToken
             );

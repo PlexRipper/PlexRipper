@@ -8,12 +8,12 @@ public record DownloadTaskWorkerLogNotification(IList<DownloadWorkerLog> Logs) :
 public class DownloadTaskWorkerLogNotificationHandler : IEventHandler<DownloadTaskWorkerLogNotification>
 {
     private readonly ILogger _log;
-    private readonly IReaparrDbContext _dbContext;
+    private readonly IReaparrDbContextFactory _dbContextFactory;
 
-    public DownloadTaskWorkerLogNotificationHandler(ILogger log, IReaparrDbContext dbContext)
+    public DownloadTaskWorkerLogNotificationHandler(ILogger log, IReaparrDbContextFactory dbContextFactory)
     {
         _log = log.ForContext<DownloadTaskWorkerLogNotificationHandler>();
-        _dbContext = dbContext;
+        _dbContextFactory = dbContextFactory;
     }
 
     public async Task HandleAsync(
@@ -27,8 +27,10 @@ public class DownloadTaskWorkerLogNotificationHandler : IEventHandler<DownloadTa
 
         try
         {
-            await _dbContext.DownloadWorkerTasksLogs.AddRangeAsync(logs, cancellationToken);
-            await _dbContext.SaveChangesAsync(cancellationToken);
+            // Create a new DbContext for this operation to avoid threading issues
+            using var dbContext = await _dbContextFactory.CreateAsync();
+            await dbContext.DownloadWorkerTasksLogs.AddRangeAsync(logs, cancellationToken);
+            await dbContext.SaveChangesAsync(cancellationToken);
         }
         catch (Exception e)
         {

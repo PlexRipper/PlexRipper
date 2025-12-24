@@ -103,7 +103,7 @@ public class GetPlexMediaThumbnailImageEndpoint : BaseEndpoint<GetPlexMediaThumb
         if (imageResult.IsFailed)
         {
             _log.Here()
-                .Warning("Failed to build Plex image URL: {Error}", imageResult.Errors.FirstOrDefault()?.Message);
+                .Verbose("Failed to build Plex image URL: {Error}", imageResult.Errors.FirstOrDefault()?.Message);
             await SendFluentResult(imageResult.ToResult(), ct);
             return;
         }

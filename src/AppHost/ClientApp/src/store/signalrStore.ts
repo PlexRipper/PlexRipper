@@ -19,7 +19,7 @@ import type {
 } from '@dto';
 import { MessageTypes } from '@dto';
 import type { IRetryPolicy } from '@microsoft/signalr/src/IRetryPolicy';
-import { useDownloadStore, useBackgroundJobsStore, useNotificationsStore } from '@store';
+import { useDownloadStore, useBackgroundJobsStore, useNotificationsStore, useLibraryStore } from '@store';
 import Axios from 'axios';
 import { MessagePackHubProtocol } from '@microsoft/signalr-protocol-msgpack';
 
@@ -42,7 +42,6 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 	};
 
 	const state = reactive<ISignalRStoreState>(cloneDeep(defaultState));
-	const libraryStore = useLibraryStore();
 
 	// Connections
 	let progressHubConnection: HubConnection | null;
@@ -104,6 +103,7 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 		const downloadStore = useDownloadStore();
 		const backgroundStore = useBackgroundJobsStore();
 		const notificationsStore = useNotificationsStore();
+		const libraryStore = useLibraryStore();
 
 		downloadHubConnection?.on(MessageTypes.ServerDownloadProgress, (rawData: ServerDownloadProgressMessagePackDTO) => {
 			Log.debug(rawData);

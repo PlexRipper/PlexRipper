@@ -10,17 +10,21 @@ namespace Reaparr.Application;
 public class DownloadQueue : IDownloadQueue
 {
     private readonly ILogger _log;
-    private readonly IReaparrDbContext _dbContext;
+    private readonly IReaparrDbContextFactory _dbContextFactory;
     private readonly IDownloadTaskScheduler _downloadTaskScheduler;
 
     private readonly Channel<int> _plexServersToCheckChannel = Channel.CreateUnbounded<int>();
 
     private readonly CancellationToken _token = new();
 
-    public DownloadQueue(ILogger log, IReaparrDbContext dbContext, IDownloadTaskScheduler downloadTaskScheduler)
+    public DownloadQueue(
+        ILogger log,
+        IReaparrDbContextFactory dbContextFactory,
+        IDownloadTaskScheduler downloadTaskScheduler
+    )
     {
         _log = log.ForContext<DownloadQueue>();
-        _dbContext = dbContext;
+        _dbContextFactory = dbContextFactory;
         _downloadTaskScheduler = downloadTaskScheduler;
     }
 
@@ -57,10 +61,13 @@ public class DownloadQueue : IDownloadQueue
         if (plexServerId <= 0)
             return ResultExtensions.IsInvalidId(nameof(plexServerId), plexServerId).LogWarning();
 
-        var plexServerName = await _dbContext.GetPlexServerNameById(plexServerId, _token);
+        // Create a new DbContext for this operation to avoid threading issues
+        using var dbContext = await _dbContextFactory.CreateAsync();
+
+        var plexServerName = await dbContext.GetPlexServerNameById(plexServerId, _token);
 
         // Check if the server is online
-        if (!await _dbContext.IsServerOnline(plexServerId, cancellationToken: _token))
+        if (!await dbContext.IsServerOnline(plexServerId, cancellationToken: _token))
         {
             return _log.Here()
                 .WarningResult(
@@ -76,7 +83,7 @@ public class DownloadQueue : IDownloadQueue
                 .LogWarning();
         }
 
-        var downloadTasks = await _dbContext.GetAllDownloadTasksByServerAsync(plexServerId, cancellationToken: _token);
+        var downloadTasks = await dbContext.GetAllDownloadTasksByServerAsync(plexServerId, cancellationToken: _token);
 
         _log.Here()
             .Debug(

@@ -22,18 +22,18 @@ public class CheckConnectionStatusByIdCommandHandler
 {
     private readonly ISignalRService _signalRService;
     private readonly ICommandExecutor _commandDispatcher;
-    private readonly IReaparrDbContext _dbContext;
+    private readonly IReaparrDbContextFactory _dbContextFactory;
     private readonly ILogger _log;
     private PlexServerConnection? _plexServerConnection;
 
     public CheckConnectionStatusByIdCommandHandler(
-        IReaparrDbContext dbContext,
+        IReaparrDbContextFactory dbContextFactory,
         ISignalRService signalRService,
         ICommandExecutor commandDispatcher,
         ILogger log
     )
     {
-        _dbContext = dbContext;
+        _dbContextFactory = dbContextFactory;
         _signalRService = signalRService;
         _commandDispatcher = commandDispatcher;
         _log = log.ForContext<CheckConnectionStatusByIdCommandHandler>();
@@ -44,7 +44,10 @@ public class CheckConnectionStatusByIdCommandHandler
         CancellationToken cancellationToken
     )
     {
-        var plexServerConnection = await _dbContext.PlexServerConnections.GetAsync(
+        // Create a dedicated DbContext for this handler to support parallel execution
+        using var dbContext = await _dbContextFactory.CreateAsync();
+
+        var plexServerConnection = await dbContext.PlexServerConnections.GetAsync(
             command.PlexServerConnectionId,
             cancellationToken
         );
@@ -103,7 +106,7 @@ public class CheckConnectionStatusByIdCommandHandler
         var plexServerStatus = serverStatusResult.Value;
 
         var upsertResult = await Result.Try(() =>
-            _dbContext
+            dbContext
                 .PlexServerStatuses.Upsert(plexServerStatus)
                 .On(x => new { x.PlexServerConnectionId })
                 .RunAsync(cancellationToken)

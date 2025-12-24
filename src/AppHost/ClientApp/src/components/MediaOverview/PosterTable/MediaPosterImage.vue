@@ -113,9 +113,16 @@ function loadThumbnail(mediaItem: PlexMediaSlimDTO) {
 		metaDataKey: mediaItem.metaDataKey,
 		width: useLowQualityPoster ? props.thumbWidth : props.thumbWidth * 1.5,
 		height: useLowQualityPoster ? props.thumbHeight : props.thumbHeight * 1.5,
-	}).subscribe((url) => {
-		set(imageUrl, url);
-		set(loading, false);
+	}).subscribe({
+		next: (url) => {
+			set(imageUrl, url);
+			set(loading, false);
+		},
+		error: () => {
+			// Fallback to empty URL to show fallback image
+			set(imageUrl, '');
+			set(loading, false);
+		},
 	});
 }
 

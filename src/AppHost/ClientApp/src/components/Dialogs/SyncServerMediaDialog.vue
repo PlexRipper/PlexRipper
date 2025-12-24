@@ -68,10 +68,10 @@
 									<!-- Steps Progress -->
 									<QCol>
 										<QText
-											v-if="!isServer(node) && !node.completed"
+											v-if="!isServer(node) && !node.completed && node.progress?.step != null && node.progress?.totalSteps != null"
 											:value="$t('components.media-overview.steps-remaining', {
-												index: node.progress?.step,
-												total: node.progress?.totalSteps,
+												index: node.progress.step,
+												total: node.progress.totalSteps,
 											})"
 											align="center" />
 									</QCol>
@@ -133,7 +133,11 @@ const plexServerIds = ref<number[]>([]);
 const libraryProgressList = computed(() => get(plexServerNodes).flatMap((x) => x.children).flatMap((x) => x.progress));
 
 const totalPercentage = computed(() => {
-	return sum(get(plexServerNodes).map((x) => x.percentage)) / get(plexServerNodes).length;
+	const nodes = get(plexServerNodes);
+	if (nodes.length === 0) {
+		return 0;
+	}
+	return sum(nodes.map((x) => x.percentage)) / nodes.length;
 });
 
 const plexServers = computed(() => serverStore.getServers([...get(plexServerNodes).map((x) => x.id), ...get(plexServerIds)].filter((x, i, a) => a.indexOf(x) == i)));
@@ -163,7 +167,9 @@ const plexServerNodes = computed((): IPlexMediaSyncServerNode[] => {
 	let uniqueIndex = 0;
 
 	return libraryStore.getLibrarySyncQueueGrouped().map((server) => {
-		const percentage = meanBy(server.progress, (x) => x.percentage);
+		const percentage = server.progress.length > 0
+			? meanBy(server.progress, (x) => x.percentage ?? 0)
+			: 0;
 		return {
 			id: server.serverId,
 			index: uniqueIndex++,
@@ -172,15 +178,15 @@ const plexServerNodes = computed((): IPlexMediaSyncServerNode[] => {
 			percentage: percentage,
 			completed: percentage === 100,
 			children: server.progress.map((libraryProgress) => {
-				const library = libraryStore.getLibrary(libraryProgress.id);
+				const library = libraryStore.getLibrary(libraryProgress.plexLibraryId);
 				return {
-					id: libraryProgress.id,
+					id: libraryProgress.plexLibraryId,
 					index: uniqueIndex++,
 					type: 'library',
 					mediaType: library?.type,
-					percentage: libraryProgress.percentage,
+					percentage: libraryProgress.percentage ?? 0,
 					title: library?.title ?? t('general.error.unknown'),
-					completed: libraryProgress.isComplete,
+					completed: libraryProgress.isComplete ?? false,
 					progress: libraryProgress,
 					children: [],
 				};

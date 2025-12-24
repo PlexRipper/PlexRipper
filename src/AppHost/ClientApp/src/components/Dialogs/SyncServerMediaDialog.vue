@@ -130,7 +130,7 @@ const expanded = ref<number[]>([]);
  */
 const plexServerIds = ref<number[]>([]);
 
-const libraryProgressList = computed(() => get(plexServerNodes).flatMap((x) => x.progress));
+const libraryProgressList = computed(() => get(plexServerNodes).flatMap((x) => x.children).flatMap((x) => x.progress));
 
 const totalPercentage = computed(() => {
 	return sum(get(plexServerNodes).map((x) => x.percentage)) / get(plexServerNodes).length;
@@ -195,6 +195,8 @@ function isServer(node: IPlexMediaSyncServerNode): boolean {
 
 function onClosed(): void {
 	set(plexServerIds, []);
+	set(expanded, []);
+	libraryStore.clearCompletedSyncQueues();
 }
 
 interface IPlexMediaSyncServerNode {

@@ -26,26 +26,23 @@ import { MessagePackHubProtocol } from '@microsoft/signalr-protocol-msgpack';
 export const useSignalrStore = defineStore('SignalrStore', () => {
 	interface ISignalRStoreState {
 		// Data
-		libraryProgress: LibraryProgress[];
 		serverConnectionCheckStatusProgress: ServerConnectionCheckStatusProgressDTO[];
 		// Subjects
-		libraryProgressSubject: Subject<LibraryProgress[]>;
 		serverConnectionCheckStatusProgressSubject: Subject<ServerConnectionCheckStatusProgressDTO[]>;
 		refreshDataNotificationSubject: Subject<RefreshDataType>;
 	}
 
 	const defaultState: ISignalRStoreState = {
 		// Data
-		libraryProgress: [],
 		serverConnectionCheckStatusProgress: [],
 
 		// Subjects
-		libraryProgressSubject: new Subject<LibraryProgress[]>(),
 		serverConnectionCheckStatusProgressSubject: new Subject<ServerConnectionCheckStatusProgressDTO[]>(),
 		refreshDataNotificationSubject: new Subject<RefreshDataType>(),
 	};
 
 	const state = reactive<ISignalRStoreState>(cloneDeep(defaultState));
+	const libraryStore = useLibraryStore();
 
 	// Connections
 	let progressHubConnection: HubConnection | null;
@@ -117,9 +114,7 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 			}
 		});
 
-		progressHubConnection?.on(MessageTypes.LibraryProgress, (data: LibraryProgress) => {
-			updateState<LibraryProgress>('libraryProgress', data, 'id');
-		});
+		progressHubConnection?.on(MessageTypes.LibraryProgress, (data: LibraryProgress) => libraryStore.updateLibraryProgress(data));
 
 		progressHubConnection?.on(MessageTypes.ServerConnectionCheckStatusProgress, (data: ServerConnectionCheckStatusProgressDTO) => updateState<ServerConnectionCheckStatusProgressDTO>('serverConnectionCheckStatusProgress', data, 'plexServerConnectionId'));
 
@@ -191,14 +186,10 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 
 	const getters = {
 		// region Array Progress
-		getAllLibraryProgress: (): Observable<LibraryProgress[]> => state.libraryProgressSubject.asObservable(),
 		getAllServerConnectionProgress: (): Observable<ServerConnectionCheckStatusProgressDTO[]> => state.serverConnectionCheckStatusProgressSubject.asObservable(), // endregion
 
 		// region Single Progress
 
-		getLibraryProgress(libraryId: number): Observable<LibraryProgress> {
-			return getters.getAllLibraryProgress().pipe(map((x) => x?.find((x) => x.id === libraryId) ?? null), filter((progress) => !!progress), distinctUntilChanged(isEqual));
-		},
 		getServerConnectionProgressByPlexServerId(plexServerId: number): Observable<ServerConnectionCheckStatusProgressDTO[]> {
 			return getters.getAllServerConnectionProgress().pipe(map((x) => x?.filter((y) => y.plexServerId === plexServerId)), distinctUntilChanged(isEqual));
 		},

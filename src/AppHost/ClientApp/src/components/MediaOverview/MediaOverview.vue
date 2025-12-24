@@ -109,9 +109,9 @@
 
 <script setup lang="ts">
 import Log from 'consola';
-import { get, set } from '@vueuse/core';
+import { get } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
-import { type DownloadMediaDTO, type LibraryProgress, LibrarySyncJobStatus, PlexMediaType, ViewMode } from '@dto';
+import { type DownloadMediaDTO, LibrarySyncJobStatus, PlexMediaType, ViewMode } from '@dto';
 import { DialogType } from '@enums';
 import type { IMediaOverviewBarActions } from '@interfaces';
 import {
@@ -126,7 +126,6 @@ import {
 	useMediaOverviewStore,
 	useServerStore,
 	useSettingsStore,
-	useSignalrStore,
 } from '#imports';
 
 const { t } = useI18n();
@@ -136,10 +135,7 @@ const downloadStore = useDownloadStore();
 const libraryStore = useLibraryStore();
 const serverStore = useServerStore();
 const dialogStore = useDialogStore();
-const signalRStore = useSignalrStore();
 const backgroundJobsStore = useBackgroundJobsStore();
-
-const libraryProgress = ref<LibraryProgress | null>(null);
 
 const props = withDefaults(defineProps<{
 	libraryId: number;
@@ -150,6 +146,7 @@ const props = withDefaults(defineProps<{
 });
 
 const library = computed(() => libraryStore.getLibrary(mediaOverviewStore.libraryId));
+const libraryProgress = computed(() => libraryStore.getLibraryProgress(mediaOverviewStore.libraryId));
 
 const refreshingText = computed(() => {
 	const server = libraryStore.getServerByLibraryId(mediaOverviewStore.libraryId);
@@ -160,7 +157,7 @@ const refreshingText = computed(() => {
 });
 
 function resetProgress(isRefreshingValue: boolean) {
-	set(libraryProgress, {
+	libraryStore.updateLibraryProgress({
 		id: mediaOverviewStore.libraryId,
 		percentage: 0,
 		received: 0,
@@ -268,14 +265,6 @@ onMounted(() => {
 			useSubscription(mediaOverviewStore.requestMedia().subscribe());
 		}
 	}));
-
-	if (!props.allMediaMode) {
-		// Library progress subscription
-		useSubscription(
-			signalRStore.getLibraryProgress(mediaOverviewStore.libraryId)
-				.subscribe((data) => set(libraryProgress, data)),
-		);
-	}
 });
 </script>
 

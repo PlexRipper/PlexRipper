@@ -37,9 +37,6 @@ export const useLibraryStore = defineStore('LibraryStore', () => {
 			// Listen for refresh notifications
 			signalRStore.getRefreshNotification(RefreshDataType.PlexLibrary).pipe(switchMap(() => actions.refreshLibraries())).subscribe();
 			signalRStore.getRefreshNotification(RefreshDataType.PlexLibrarySyncStatus).pipe(switchMap(() => actions.refreshLibrarySyncStatus())).subscribe();
-			signalRStore.getAllLibraryProgress().subscribe((progress) => {
-				state.progress.splice(0, state.progress.length, ...progress);
-			});
 
 			// Listen for library sync job status updates
 			backgroundJobsStore.getLibrarySyncJobUpdate().subscribe((update) => {
@@ -47,8 +44,7 @@ export const useLibraryStore = defineStore('LibraryStore', () => {
 			});
 
 			return forkJoin([actions.refreshLibraries(), actions.refreshLibrarySyncStatus()]).pipe(switchMap(() => of({
-				name: 'useLibraryStore',
-				isSuccess: true,
+				name: 'useLibraryStore', isSuccess: true,
 			})));
 		},
 		updateSyncQueue(queue: LibrarySyncJobQueueDTO): void {
@@ -59,20 +55,30 @@ export const useLibraryStore = defineStore('LibraryStore', () => {
 				state.syncQueues.push(queue);
 			}
 		},
+		updateLibraryProgress(progress: LibraryProgress): void {
+			const index = state.progress.findIndex((x) => x.id === progress.id);
+			if (index > -1) {
+				state.progress.splice(index, 1, progress);
+			} else {
+				state.progress.push(progress);
+			}
+		},
 		refreshLibraries(): Observable<PlexLibraryDTO[]> {
 			return plexLibraryApi.getAllPlexLibrariesEndpoint().pipe(tap(({ isSuccess, value }) => {
 				if (isSuccess) {
 					state.libraries = value ?? [];
 				}
 			}), map(() => get(getters.getLibraries())));
-		}, refreshLibrary(libraryId: number) {
+		},
+		refreshLibrary(libraryId: number) {
 			return plexLibraryApi.getPlexLibraryByIdEndpoint(libraryId).pipe(map(({ isSuccess, value }) => {
 				if (isSuccess && value) {
 					return value;
 				}
 				return null;
 			}), tap((library) => actions.updateLibrary(library)));
-		}, refreshLibrarySyncStatus(): Observable<LibrarySyncJobQueueDTO[]> {
+		},
+		refreshLibrarySyncStatus(): Observable<LibrarySyncJobQueueDTO[]> {
 			return plexLibraryApi.getLibrarySyncStatusEndpoint().pipe(map(({ isSuccess, value }) => {
 				if (isSuccess && value) {
 					return value;
@@ -81,20 +87,21 @@ export const useLibraryStore = defineStore('LibraryStore', () => {
 			}), tap((libraryQueues) => {
 				state.syncQueues.splice(0, state.syncQueues.length, ...libraryQueues);
 			}));
-		}, /**
+		},
+		/**
      * Re-syncs a library by re-requesting all media from the Plex server.
      * @param libraryId
      */
 		reSyncLibrary(libraryId: number): Observable<PlexLibraryDTO | null> {
 			return plexLibraryApi.refreshLibraryMediaEndpoint(libraryId).pipe(tap((library) => actions.updateLibrary(library.value)), switchMap((library): Observable<PlexLibraryDTO | null> => of(getters.getLibrary(library.value?.id ?? 0))));
-		}, updateDefaultDestination(libraryId: number, folderPathId: number): void {
+		},
+		updateDefaultDestination(libraryId: number, folderPathId: number): void {
 			plexLibraryApi.setPlexLibraryDefaultDestinationByIdEndpoint(libraryId, folderPathId).subscribe((result) => {
 				if (result.isSuccess) {
 					const index = state.libraries.findIndex((x) => x.id === libraryId);
 					if (index > -1) {
 						const updated = {
-							...(state.libraries[index] as PlexLibraryDTO),
-							defaultDestinationId: folderPathId,
+							...(state.libraries[index] as PlexLibraryDTO), defaultDestinationId: folderPathId,
 						} as PlexLibraryDTO;
 						state.libraries.splice(index, 1, updated);
 					}
@@ -114,6 +121,35 @@ export const useLibraryStore = defineStore('LibraryStore', () => {
 			state.libraries.push(Object.freeze(library));
 		}, $reset() {
 			Object.assign(state, cloneDeep(defaultState));
+		},
+		/**
+     * Clears completed sync queue items and their associated progress for all servers
+     * where all items for that server are completed.
+     */
+		clearCompletedSyncQueues(): void {
+			// Group queues by server
+			const serverIds = [...new Set(state.syncQueues.map((x) => x.plexServerId))];
+			const libraryIdsToClear: number[] = [];
+			const serverIdsToClear: number[] = [];
+
+			// Find servers where ALL items are completed
+			for (const serverId of serverIds) {
+				const serverQueues = state.syncQueues.filter((x) => x.plexServerId === serverId);
+				if (serverQueues.length > 0 && serverQueues.every((x) => x.status === LibrarySyncJobStatus.Completed)) {
+					serverIdsToClear.push(serverId);
+					libraryIdsToClear.push(...serverQueues.map((x) => x.plexLibraryId));
+				}
+			}
+
+			if (serverIdsToClear.length > 0) {
+				// Remove completed items from the queue
+				const remainingQueues = state.syncQueues.filter((x) => !serverIdsToClear.includes(x.plexServerId));
+				state.syncQueues.splice(0, state.syncQueues.length, ...remainingQueues);
+
+				// Remove progress items for cleared libraries
+				const remainingProgress = state.progress.filter((x) => !libraryIdsToClear.includes(x.id));
+				state.progress.splice(0, state.progress.length, ...remainingProgress);
+			}
 		},
 	};
 	const getters = {
@@ -138,6 +174,9 @@ export const useLibraryStore = defineStore('LibraryStore', () => {
 			}
 			return getters.getLibrary(libraryId)?.title ?? '';
 		},
+		getLibraryProgress: (libraryId: number): LibraryProgress | null => {
+			return state.progress.find((x) => x.id === libraryId) ?? null;
+		},
 		getIsLibrarySyncing: (libraryId: number): boolean => {
 			return state.syncQueues.some((x) => x.plexLibraryId === libraryId && x.status == LibrarySyncJobStatus.Processing);
 		},
@@ -150,8 +189,7 @@ export const useLibraryStore = defineStore('LibraryStore', () => {
 					existing.progress.push(queueWithProgress);
 				} else {
 					acc.push({
-						serverId: queue.plexServerId,
-						progress: [queueWithProgress],
+						serverId: queue.plexServerId, progress: [queueWithProgress],
 					});
 				}
 				return acc;

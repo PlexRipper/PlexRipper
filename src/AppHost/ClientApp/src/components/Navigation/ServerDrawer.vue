@@ -45,7 +45,7 @@
 					<q-item-section avatar>
 						<QMediaTypeIcon
 							:active="library.syncedAt != null"
-							:loading="isLibrarySyncing(library.id)"
+							:loading="libraryStore.getIsLibrarySyncing(library.id)"
 							:media-type="library.type" />
 					</q-item-section>
 					<q-item-section>{{ libraryStore.getLibraryName(library.id) }}</q-item-section>
@@ -91,19 +91,16 @@
 
 <script setup lang="ts">
 import Log from 'consola';
-import { type LibraryProgress, type PlexLibraryDTO, PlexMediaType } from '@dto';
+import { type PlexLibraryDTO, PlexMediaType } from '@dto';
 import { useSubscription } from '@vueuse/rxjs';
-import { get, set } from '@vueuse/core';
 import { tap } from 'rxjs/operators';
 import {
 	useLibraryStore,
 	useServerStore,
-	useSignalrStore,
 	useDialogStore,
 	useServerConnectionStore,
 	useAccountStore,
 } from '@store';
-import QRow from '@components/Common/QRow.vue';
 import { useI18n } from '#imports';
 
 const { t } = useI18n();
@@ -112,17 +109,10 @@ const serverStore = useServerStore();
 const libraryStore = useLibraryStore();
 const dialogStore = useDialogStore();
 const serverConnectionStore = useServerConnectionStore();
-const signalRStore = useSignalrStore();
 const accountStore = useAccountStore();
-
-const libraryProgress = ref<LibraryProgress[]>([]);
 
 function filterLibraries(plexServerId: number): PlexLibraryDTO[] {
 	return libraryStore.getLibrariesByServerId(plexServerId);
-}
-
-function isLibrarySyncing(plexLibraryId: number): boolean {
-	return get(libraryProgress).some((x) => x.id === plexLibraryId && !x.isComplete);
 }
 
 function openMediaPage(library: PlexLibraryDTO): void {
@@ -152,20 +142,9 @@ function openMediaPage(library: PlexLibraryDTO): void {
 
 function runReSyncAccount(): void {
 	useSubscription(
-		accountStore.reSyncAccount(0).pipe(tap((data) => dialogStore.openRefreshPlexAccountAccessDialog(data.value ?? []))).subscribe(() => {
-		}),
+		accountStore.reSyncAccount(0).pipe(tap((data) => dialogStore.openRefreshPlexAccountAccessDialog(data.value ?? []))).subscribe(),
 	);
 }
-
-onMounted(() => {
-	useSubscription(
-		signalRStore
-			.getAllLibraryProgress()
-			.subscribe((data) => {
-				set(libraryProgress, data);
-			}),
-	);
-});
 </script>
 
 <style lang="scss">

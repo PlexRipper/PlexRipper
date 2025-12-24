@@ -12,6 +12,7 @@
 				class="media-poster">
 				<template #default="{ hover }">
 					<q-img
+						:key="mediaItem.id"
 						loading="eager"
 						:src="imageUrl"
 						fit="fill"
@@ -58,6 +59,7 @@
 
 <script setup lang="ts">
 import { set } from '@vueuse/core';
+import type { Subscription } from 'rxjs';
 import type { PlexMediaSlimDTO } from '@dto';
 import type { IMediaActionEmits } from '@interfaces';
 import { useSettingsStore, useMediaStore } from '#imports';
@@ -70,6 +72,7 @@ const props = withDefaults(defineProps<{
 	overlay?: boolean;
 	actions?: boolean;
 	allMediaMode?: boolean;
+	active?: boolean;
 
 	thumbWidth?: number;
 	thumbHeight?: number;
@@ -77,32 +80,57 @@ const props = withDefaults(defineProps<{
 	overlay: false,
 	actions: false,
 	allMediaMode: false,
+	active: true,
 	thumbWidth: 200,
 	thumbHeight: 300,
 });
 const imageUrl = ref('');
 const loading = ref(true);
+let currentSubscription: Subscription | null = null;
 
 defineEmits<IMediaActionEmits>();
 
-onMounted(() => {
-	if (!props.mediaItem?.hasThumb || props.mediaItem.metaDataKey === 0 || props.mediaItem.key === 0) {
+function loadThumbnail(mediaItem: PlexMediaSlimDTO) {
+	// Cancel any pending subscription when media item changes
+	if (currentSubscription) {
+		currentSubscription.unsubscribe();
+		currentSubscription = null;
+	}
+
+	// Reset state for the new item
+	set(loading, true);
+
+	if (!mediaItem?.hasThumb || mediaItem.metaDataKey === 0 || mediaItem.key === 0) {
 		set(imageUrl, '');
 		set(loading, false);
 		return;
 	}
 
 	const useLowQualityPoster = settingsStore.generalSettings.useLowQualityPosterImages;
-	useSubscription(mediaStore.getMediaThumbnailUrl({
-		plexServerId: props.mediaItem.plexServerId,
-		plexKey: props.mediaItem.key.toString(),
-		metaDataKey: props.mediaItem.metaDataKey,
+	currentSubscription = mediaStore.getMediaThumbnailUrl({
+		plexServerId: mediaItem.plexServerId,
+		plexKey: mediaItem.key.toString(),
+		metaDataKey: mediaItem.metaDataKey,
 		width: useLowQualityPoster ? props.thumbWidth : props.thumbWidth * 1.5,
 		height: useLowQualityPoster ? props.thumbHeight : props.thumbHeight * 1.5,
 	}).subscribe((url) => {
 		set(imageUrl, url);
 		set(loading, false);
-	}));
+	});
+}
+
+// Watch for changes in mediaItem or active state (handles RecycleScroller element recycling)
+// Only load thumbnail when the view is active to skip work on off-screen items
+watch([() => props.mediaItem.id, () => props.active], ([, isActive]) => {
+	if (isActive) {
+		loadThumbnail(props.mediaItem);
+	}
+}, { immediate: true });
+
+onUnmounted(() => {
+	if (currentSubscription) {
+		currentSubscription.unsubscribe();
+	}
 });
 </script>
 

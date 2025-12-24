@@ -3,6 +3,7 @@
 		<q-card-section>
 			<MediaPosterImage
 				:media-item="mediaItem"
+				:active="active"
 				:all-media-mode="mediaOverviewStore.allMediaMode"
 				overlay
 				actions
@@ -26,9 +27,12 @@ import { useMediaOverviewStore } from '@store';
 
 const mediaOverviewStore = useMediaOverviewStore();
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
 	mediaItem: PlexMediaSlimDTO;
-}>();
+	active?: boolean;
+}>(), {
+	active: true,
+});
 
 const emit = defineEmits<{
 	(e: 'download', downloadMediaCommands: DownloadMediaDTO[]): void;

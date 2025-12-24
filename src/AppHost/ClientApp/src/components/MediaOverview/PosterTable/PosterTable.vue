@@ -2,7 +2,7 @@
 	<!-- Poster display -->
 	<RecycleScroller
 		id="poster-table"
-		v-slot="{ item, index }"
+		v-slot="{ item, index, active }"
 		ref="recycleScrollerRef"
 		:items="items"
 		:item-size="posterCardHeight"
@@ -14,6 +14,7 @@
 		@resize="onResize">
 		<MediaPoster
 			:media-item="item"
+			:active="active"
 			:data-scroll-index="index"
 			@download="sendMediaOverviewDownloadCommand($event)"
 			@open-media-details="onOpenMediaDetails" />

@@ -39,7 +39,7 @@ public class RefreshLibraryProgressReporter : IRefreshLibraryProgressReporter
         };
 
         var countStep = (decimal)BASE_COUNT_PROGRESS / totalProgressSteps;
-        var index = countStep * update.Step + countStep * update.Percentage;
+        var index = countStep * (update.Step - 1) + countStep * update.Percentage;
 
         var progress = new LibraryProgress
         {

@@ -4,4 +4,6 @@
 	<s:Boolean x:Key="/Default/CodeInspection/NamespaceProvider/NamespaceFoldersToSkip/=librarysync_005Ccommands_005Ccheckqueuedplexlibrarytosync/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/CodeInspection/NamespaceProvider/NamespaceFoldersToSkip/=librarysync_005Ccommands_005Ccleanuplibrarysyncjobqueue/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/CodeInspection/NamespaceProvider/NamespaceFoldersToSkip/=librarysync_005Ccommands_005Cqueuelibrarysyncjob/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/CodeInspection/NamespaceProvider/NamespaceFoldersToSkip/=librarysync_005Ccommands_005Crefreshlibrarymedia/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/CodeInspection/NamespaceProvider/NamespaceFoldersToSkip/=librarysync_005Ccommands_005Crefreshlibrarymedia_005Cprogress/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/CodeInspection/NamespaceProvider/NamespaceFoldersToSkip/=librarysync_005Ccommands_005Cresetfailedlibrarysyncjobs/@EntryIndexedValue">True</s:Boolean></wpf:ResourceDictionary>

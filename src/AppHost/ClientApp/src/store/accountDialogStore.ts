@@ -99,6 +99,8 @@ export const useAccountDialogStore = defineStore('AccountDialogStore', () => {
 				const account = accountStore.getAccount(accountId);
 				if (account) {
 					Object.assign(state, account);
+					// Set auth token mode if the account was registered with a custom token
+					state.isAuthTokenMode = !!account.customAuthenticationToken && account.customAuthenticationToken.length > 0;
 				}
 			}
 		},

@@ -58,11 +58,13 @@
 			<q-tab
 				data-cy="account-dialog-credentials-mode-button"
 				:name="credentialsTab"
-				:label="$t('components.account-form.credentials-tab')" />
+				:label="$t('components.account-form.credentials-tab')"
+				:disable="!accountDialogStore.isNewAccount && !!accountDialogStore.customAuthenticationToken" />
 			<q-tab
 				data-cy="account-dialog-auth-token-mode-button"
 				:name="tokenTab"
-				:label="$t('components.account-form.token-tab')" />
+				:label="$t('components.account-form.token-tab')"
+				:disable="!accountDialogStore.isNewAccount && !accountDialogStore.customAuthenticationToken" />
 		</q-tabs>
 		<q-tab-panels
 			v-model="tab"

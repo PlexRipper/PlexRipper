@@ -1,0 +1,45 @@
+name: 'Post Changelog to Discord'
+inputs:
+    webhook:
+        description: 'The Discord webhook URL for the changelog channel.'
+        required: true
+    version:
+        description: 'The version of the release.'
+        required: true
+    changelog:
+        description: 'The fully formatted changelog content.'
+        required: true
+    is-dev:
+        description: 'Whether the release is a development release.'
+        required: false
+        default: 'false'
+
+runs:
+    using: 'composite'
+    steps:
+        -   name: Post Changelog to Discord (Dev)
+            if: ${{ inputs.is-dev == 'true' }}
+            uses: sarisia/actions-status-discord@v1
+            with:
+                webhook: ${{ inputs.webhook }}
+                nodetail: true
+                title: "📝 Development Release Changelog - ${{ inputs.version }}"
+                color: 0xFF8C00 # Amber / Dev
+                description: |
+                    These are the new changes since the last stable release:
+                    ${{ inputs.changelog }}
+                username: Reaparr
+                avatar_url: "https://raw.githubusercontent.com/Reaparr/Reaparr/refs/heads/dev/export/reaparr/logo/reaparr-full-1024.png"
+
+        -   name: Post Changelog to Discord (Stable)
+            if: ${{ inputs.is-dev != 'true' }}
+            uses: sarisia/actions-status-discord@v1
+            with:
+                webhook: ${{ inputs.webhook }}
+                nodetail: true
+                title: "📝 Stable Release Changelog - ${{ inputs.version }}"
+                color: 0xff0000 # Red / Stable
+                description: ${{ inputs.changelog }}
+                username: Reaparr
+                avatar_url: "https://raw.githubusercontent.com/Reaparr/Reaparr/refs/heads/dev/export/reaparr/logo/reaparr-full-1024.png"
+

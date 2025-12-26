@@ -1,12 +1,11 @@
-name: Publish Docker latest and version tagged image
-# This should only run when a release is created with a version tag
+name: Create Reaparr Stable Release
 on:
     workflow_dispatch:
 
 jobs:
     semantic-release:
         if: github.ref_name == github.event.repository.default_branch
-        name: Semantic Release Process
+        name: Semantic Release (Stable)
         runs-on: ubuntu-latest
         permissions:
             contents: write # to be able to publish a GitHub release
@@ -26,18 +25,32 @@ jobs:
             # This is required to be able to run semantic-release plugins
             -   name: Client App Install
                 uses: ./.github/workflows/steps/client-app-install/
-            -   name: GitHub Release
+            -   name: GitHub Release (Stable)
                 id: get-next-version
                 run: npx --prefix src/AppHost/ClientApp/ semantic-release
                 env:
+                    STABLE_RELEASE: 'true'
                     GH_TOKEN: ${{ secrets.GH_TOKEN }}
                     GIT_AUTHOR_NAME: ${{ vars.GIT_AUTHOR_NAME }}
                     GIT_AUTHOR_EMAIL: ${{ vars.GIT_AUTHOR_EMAIL }}
                     GIT_COMMITTER_NAME: ${{ vars.GIT_COMMITTER_NAME }}
                     GIT_COMMITTER_EMAIL: ${{ vars.GIT_COMMITTER_EMAIL }}
+
+            -   name: Log Release Info
+                run: |
+                    echo "::notice::Release published: ${{ steps.get-next-version.outputs.new-release-published }}"
+                    echo "::notice::Version: ${{ steps.get-next-version.outputs.new-release-version }}"
+
+            -   name: Guard - Fail if no release due
+                if: steps.get-next-version.outputs.new-release-published != 'true'
+                run: |
+                    echo "::error::No release was published. Either no commits since last tag or commits don't trigger a release."
+                    echo "::error::Check that commits follow conventional commit format (feat:, fix:, etc.)"
+                    exit 1
         outputs:
             new-release-published: ${{ steps.get-next-version.outputs.new-release-published }}
             new-release-version: ${{ steps.get-next-version.outputs.new-release-version }}
+            new-release-notes: ${{ steps.get-next-version.outputs.new-release-notes }}
     
     # Build Docker Image
     build-and-publish:
@@ -50,22 +63,6 @@ jobs:
                 uses: actions/checkout@v4
                 with:
                     token: ${{ secrets.GH_TOKEN }}
-                    fetch-depth: 0 # Required due to the way Git works, without it this action won't be able to find any or the correct tags
-
-            -   name: Get latest version tag
-                id: version
-                uses: WyriHaximus/github-action-get-previous-tag@v1
-
-            -   name: Echo last version tag
-                run: echo ${{ steps.version.outputs.tag }}
-
-            -   name: Strip 'v' from version
-                id: strip_v
-                run: |
-                    # Strip the 'v' prefix from the version tag
-                    VERSION_NO_V="${{ steps.version.outputs.tag }}"
-                    VERSION_NO_V="${VERSION_NO_V#v}"
-                    echo "VERSION_NO_V=$VERSION_NO_V" >> $GITHUB_ENV
 
             -   name: Set up Docker Buildx
                 uses: docker/setup-buildx-action@v3
@@ -83,26 +80,35 @@ jobs:
                     images: |
                         name=reaparr/reaparr
                     tags: |
-                        type=semver,pattern={{version}},value=${{ env.VERSION_NO_V }}
+                        type=semver,pattern={{version}},value=${{ needs.semantic-release.outputs.new-release-version }}
+                        type=raw,value=latest
 
             -   name: Build and push
                 uses: docker/build-push-action@v6
                 env:
-                    VERSION: ${{ env.VERSION_NO_V }}
-                    INFORMATIONAL_VERSION: ${{ env.VERSION_NO_V }}
+                    VERSION: ${{ needs.semantic-release.outputs.new-release-version }}
+                    INFORMATIONAL_VERSION: ${{ needs.semantic-release.outputs.new-release-version }}
                 with:
                     push: true
                     tags: ${{ steps.meta.outputs.tags }}
                     labels: ${{ steps.meta.outputs.labels }}
                     build-args: |
-                        VERSION=${{ env.VERSION_NO_V }}
-                        INFORMATIONAL_VERSION=${{ env.VERSION_NO_V }}
+                        VERSION=${{ needs.semantic-release.outputs.new-release-version }}
+                        INFORMATIONAL_VERSION=${{ needs.semantic-release.outputs.new-release-version }}
                     file: docker/Dockerfile
 
             -   name: Notify Discord of Stable Release
                 uses: ./.github/workflows/steps/discord-dev-release-notification/
                 with:
                     webhook: ${{ secrets.DISCORD_RELEASES_CHANNEL_WEBHOOK }}
-                    version: ${{ env.VERSION_NO_V }}
+                    version: ${{ needs.semantic-release.outputs.new-release-version }}
                     is-dev: false
-                    changelog-url: "https://github.com/Reaparr/Reaparr/releases/tag/v${{ env.VERSION_NO_V }}"
+                    changelog-url: "https://github.com/Reaparr/Reaparr/releases/tag/v${{ needs.semantic-release.outputs.new-release-version }}"
+
+            -   name: Post Changelog to Discord
+                uses: ./.github/workflows/steps/discord-changelog-notification/
+                with:
+                    webhook: ${{ secrets.DISCORD_CHANGELOG_CHANNEL_WEBHOOK }}
+                    version: ${{ needs.semantic-release.outputs.new-release-version }}
+                    changelog: ${{ needs.semantic-release.outputs.new-release-notes }}
+                    is-dev: false

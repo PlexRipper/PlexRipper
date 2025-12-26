@@ -8,7 +8,7 @@ using Reaparr.Settings.Contracts;
 
 namespace Reaparr.Application;
 
-public class DownloadJob : IJob, IDisposable
+public class DownloadJob : IJob, IAsyncDisposable
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
@@ -151,7 +151,7 @@ public class DownloadJob : IJob, IDisposable
         }
     }
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
         _log.Here()
             .Warning(
@@ -159,6 +159,8 @@ public class DownloadJob : IJob, IDisposable
                 nameof(DownloadJob),
                 nameof(DownloadTaskGeneric)
             );
+
+        await _plexDownloadClient.DisposeAsync();
     }
 
     private void SetupSubscription(IPlexDownloadClient plexDownloadClient)

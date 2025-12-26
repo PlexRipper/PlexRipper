@@ -424,5 +424,8 @@ public class DownloadWorker : IDisposable
     public void Dispose()
     {
         _httpClient.Dispose();
+        _cancellationTokenSource.Dispose();
+        _downloadWorkerLog.Dispose();
+        _downloadWorkerUpdate.Dispose();
     }
 }

@@ -172,6 +172,14 @@ public class PlexDownloadClient : IAsyncDisposable, IPlexDownloadClient
         _downloadSpeedLimitSubscription?.Dispose();
         _downloadWorkerTaskUpdate?.Dispose();
 
+        // Dispose all download workers to release their HTTP clients, Rx subjects, and other resources
+        foreach (var downloadWorker in _downloadWorkers)
+        {
+            downloadWorker.Dispose();
+        }
+
+        _downloadWorkers.Clear();
+
         _log.Here()
             .Warning("PlexDownloadClient for DownloadTask with Id: {DownloadTaskId} was disposed", DownloadTask?.Id);
     }

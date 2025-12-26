@@ -37,6 +37,7 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
         Mock.Mock<IPlexDownloadClient>()
             .SetupGet(x => x.ListenToDownloadWorkerLog)
             .Returns(new Mock<IObservable<IList<DownloadWorkerLog>>>().Object);
+        Mock.Mock<IPlexDownloadClient>().Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask);
 
         // Act
         await Sut.Execute(Mock.Create<IJobExecutionContext>());
@@ -72,6 +73,7 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
         Mock.Mock<IPlexDownloadClient>()
             .SetupGet(x => x.ListenToDownloadWorkerLog)
             .Returns(new Mock<IObservable<IList<DownloadWorkerLog>>>().Object);
+        Mock.Mock<IPlexDownloadClient>().Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask);
 
         // Act
         await Sut.Execute(Mock.Create<IJobExecutionContext>());

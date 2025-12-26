@@ -162,3 +162,11 @@ jobs:
                     version: ${{ env.VERSION_WITH_DATE }}
                     is-dev: true
                     changelog-url: 'https://github.com/Reaparr/Reaparr/releases/tag/dev-latest'
+
+            -   name: Post Changelog to Discord
+                uses: ./.github/workflows/steps/discord-changelog-notification/
+                with:
+                    webhook: ${{ secrets.DISCORD_CHANGELOG_CHANNEL_WEBHOOK }}
+                    version: ${{ env.VERSION_WITH_DATE }}
+                    changelog: ${{ env.RELEASE_NOTES }}
+                    is-dev: true

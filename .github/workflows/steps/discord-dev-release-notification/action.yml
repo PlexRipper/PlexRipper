@@ -24,8 +24,8 @@ runs:
             with:
                 webhook: ${{ inputs.webhook }}
                 nodetail: true
-                title: "New Reaparr development version has been released!"
-                color: "#0200ff" # Blue
+                title: "A new Reaparr development version has been released!"
+                color: 0x0200ff
                 description: |
                     A new **development** version `${{ inputs.version }}` of Reaparr is now available on Docker!
                     [Development changelog](${{ inputs.changelog-url }})
@@ -40,8 +40,8 @@ runs:
             with:
                 webhook: ${{ inputs.webhook }}
                 nodetail: true
-                title: "New Reaparr version has been released!"
-                color: "#ff0000" # Red
+                title: "A new stable Reaparr version has been released!"
+                color: 0xff0000
                 description: |
                     A new **stable** version `${{ inputs.version }}` of Reaparr is now available on Docker!
                     [Release changelog](${{ inputs.changelog-url }})

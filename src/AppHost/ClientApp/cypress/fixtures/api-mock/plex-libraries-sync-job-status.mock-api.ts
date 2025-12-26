@@ -1,6 +1,6 @@
 import type { BasePageSetupResult } from '@fixtures';
 import { headers } from '@fixtures';
-import { generateResultDTO, type MockConfig, Seed } from '@mock';
+import { generateResultDTO, type MockConfig } from '@mock';
 import { PlexLibraryPaths } from '@api/api-paths';
 import { type LibrarySyncJobQueueDTO, LibrarySyncJobStatus } from '@dto';
 

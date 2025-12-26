@@ -51,35 +51,35 @@ export const useMediaStore = defineStore('MediaStore', () => {
 			if (existing)
 				return of(existing.url);
 
-		return from(
-			Axios.request<Blob | BaseResultDTO>({
-				url: `/api/PlexMedia/thumbnail`,
-				method: 'GET',
-				params: query,
-				responseType: 'blob',
-			}),
-		)
-			.pipe(
-				map((res) => {
-					if (res.status === 200) {
-						return actions.updateMediaUrl({
-							plexServerId: query.plexServerId,
-							plexKey: query.plexKey,
-							metaDataKey: query.metaDataKey,
-							image: res.data as Blob,
-						});
-					}
-					Log.warn('Failed to get media thumbnail image', res);
-					return '';
+			return from(
+				Axios.request<Blob | BaseResultDTO>({
+					url: `/api/PlexMedia/thumbnail`,
+					method: 'GET',
+					params: query,
+					responseType: 'blob',
 				}),
-				catchError((error) => {
+			)
+				.pipe(
+					map((res) => {
+						if (res.status === 200) {
+							return actions.updateMediaUrl({
+								plexServerId: query.plexServerId,
+								plexKey: query.plexKey,
+								metaDataKey: query.metaDataKey,
+								image: res.data as Blob,
+							});
+						}
+						Log.warn('Failed to get media thumbnail image', res);
+						return '';
+					}),
+					catchError((error) => {
 					// Handle network errors, timeouts, 502/504 gateway errors silently
 					// Return empty string to trigger fallback image display
-					Log.debug('Media thumbnail request failed', { query, error: error?.message || error });
-					return of('');
-				}),
-			);
-	},
+						Log.debug('Media thumbnail request failed', { query, error: error?.message || error });
+						return of('');
+					}),
+				);
+		},
 
 		updateMediaUrl({
 			plexServerId,

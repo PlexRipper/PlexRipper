@@ -24,7 +24,7 @@ runs:
                 webhook: ${{ inputs.webhook }}
                 nodetail: true
                 title: "📝 Development Release Changelog - ${{ inputs.version }}"
-                color: 0x0200ff
+                color: 0xFF8C00 # Amber / Dev
                 description: |
                     These are the new changes since the last stable release:
                     ${{ inputs.changelog }}
@@ -38,7 +38,7 @@ runs:
                 webhook: ${{ inputs.webhook }}
                 nodetail: true
                 title: "📝 Stable Release Changelog - ${{ inputs.version }}"
-                color: 0xff0000
+                color: 0xff0000 # Red / Stable
                 description: ${{ inputs.changelog }}
                 username: Reaparr
                 avatar_url: "https://raw.githubusercontent.com/Reaparr/Reaparr/refs/heads/dev/export/reaparr/logo/reaparr-full-1024.png"

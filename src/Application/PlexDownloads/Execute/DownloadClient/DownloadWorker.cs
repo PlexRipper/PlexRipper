@@ -103,7 +103,7 @@ public class DownloadWorker : IDisposable
 
     public Result Start()
     {
-        _log.Here().Debug("Download worker with id: {Id} start for filename: {FileName}", Id, FileName);
+        _log.Here().Debug("Download worker with id: {Id} start for filename: {MediaFileName}", Id, FileName);
 
         DownloadProcessTask = DownloadProcessAsync(_cancellationTokenSource.Token);
 
@@ -207,7 +207,7 @@ public class DownloadWorker : IDisposable
                     {
                         return _log.Here()
                             .ErrorResult(
-                                "Download worker {Id} with {FileName} had an empty download stream",
+                                "Download worker {Id} with {MediaFileName} had an empty download stream",
                                 Id,
                                 FileName
                             );
@@ -270,7 +270,7 @@ public class DownloadWorker : IDisposable
                 {
                     var errorResult = _log.Here()
                         .ErrorResult(
-                            "Download worker with id: {Id} and filename: {FileName} had and empty download stream on start",
+                            "Download worker with id: {Id} and filename: {MediaFileName} had and empty download stream on start",
                             Id,
                             FileName
                         );
@@ -304,7 +304,7 @@ public class DownloadWorker : IDisposable
                 {
                     _log.Here()
                         .Information(
-                            "Download worker {WorkerId} completed downloading segment {FileName} (part {PartIndex})",
+                            "Download worker {WorkerId} completed downloading segment {MediaFileName} (part {PartIndex})",
                             Id,
                             FileName,
                             DownloadWorkerTask.PartIndex
@@ -319,7 +319,7 @@ public class DownloadWorker : IDisposable
         catch (OperationCanceledException)
         {
             SetDownloadWorkerTaskChanged(DownloadStatus.Stopped);
-            _log.Here().Debug("Download worker with id: {Id} and filename: {FileName} was stopped", Id, FileName);
+            _log.Here().Debug("Download worker with id: {Id} and filename: {MediaFileName} was stopped", Id, FileName);
         }
         catch (Exception e)
         {
@@ -345,7 +345,7 @@ public class DownloadWorker : IDisposable
 
         var msg = _log.Here()
             .DebugMsg(
-                "Download worker with id: {Id} and with filename: {FileName} changed status to {Status}",
+                "Download worker with id: {Id} and with filename: {MediaFileName} changed status to {Status}",
                 Id,
                 FileName,
                 status
@@ -358,13 +358,15 @@ public class DownloadWorker : IDisposable
         switch (status)
         {
             case DownloadStatus.Stopped:
-                logMsg = _log.Here().InformationMsg("Download worker {Id} with {FileName} was stopped!", Id, FileName);
+                logMsg = _log.Here()
+                    .InformationMsg("Download worker {Id} with {MediaFileName} was stopped!", Id, FileName);
                 break;
             case DownloadStatus.Error:
-                logMsg = _log.Here().ErrorMsg("Download worker {Id} with {FileName} had an error!", Id, FileName);
+                logMsg = _log.Here().ErrorMsg("Download worker {Id} with {MediaFileName} had an error!", Id, FileName);
                 break;
             case DownloadStatus.DownloadFinished:
-                logMsg = _log.Here().InformationMsg("Download worker {Id} with {FileName} finished!", Id, FileName);
+                logMsg = _log.Here()
+                    .InformationMsg("Download worker {Id} with {MediaFileName} finished!", Id, FileName);
                 break;
             case DownloadStatus.ServerUnreachable:
                 logMsg = _log.Here()

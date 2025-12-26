@@ -126,7 +126,7 @@ public class PlexDownloadClient : IAsyncDisposable, IPlexDownloadClient
         if (_downloadWorkers.Any(x => x.DownloadWorkerTask.DownloadStatus == DownloadStatus.Downloading))
             return Result.Fail("The PlexDownloadClient is already downloading and can not be started.").LogWarning();
 
-        _log.Here().Debug("Start downloading {FileName}", DownloadTask.FileName);
+        _log.Here().Debug("Start downloading {MediaFileName}", DownloadTask.FileName);
         try
         {
             var results = new List<Result>();
@@ -199,7 +199,7 @@ public class PlexDownloadClient : IAsyncDisposable, IPlexDownloadClient
         {
             _log.Here()
                 .Information(
-                    "DownloadTask {DownloadTaskId} ({FileName}) transitioning from {OldStatus} to {NewStatus}",
+                    "DownloadTask {DownloadTaskId} ({MediaFileName}) transitioning from {OldStatus} to {NewStatus}",
                     DownloadTask.Id,
                     DownloadTask.FileName,
                     DownloadStatus,

@@ -78,7 +78,7 @@ public class SchedulerService : ISchedulerService
                 await _scheduler.Interrupt(runningJob.JobDetail.Key);
             }
 
-            // Jobs can be interrupted and later resume from where the left off
+            // Jobs can be interrupted and later resume from where they left off
             await _scheduler.Shutdown(true).WaitAsync(TimeSpan.FromSeconds(15));
         }
 

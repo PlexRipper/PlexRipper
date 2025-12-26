@@ -14,7 +14,6 @@ using NSwag.Generation.Processors.Security;
 using Reaparr.Application;
 using Reaparr.Application.Contracts;
 using Reaparr.BackgroundJobs;
-using Reaparr.Data;
 using Reaparr.Data.Contracts;
 using Reaparr.Environment;
 using Reaparr.Identity;
@@ -36,13 +35,6 @@ public static partial class Startup
     /// <param name="env"> The <see cref="IWebHostEnvironment"/> instance to configure.</param>
     public static void ConfigureServices(this IServiceCollection services, IWebHostEnvironment env)
     {
-        // Register DbContext factory for creating ReaparrDbContext instances
-        // This registers IDbContextFactory<ReaparrDbContext> which can be resolved by Autofac
-        // Connection pooling is handled at the ADO.NET level via Pooling=true in the connection string
-        services.AddDbContextFactory<ReaparrDbContext>(options =>
-            options.DefaultConfiguration(typeof(ReaparrDbContext))
-        );
-
         // This has to always be first
         services.AddCors(options =>
         {

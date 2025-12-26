@@ -175,11 +175,14 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
         DatabaseName = databaseName;
     }
 
+    [ActivatorUtilitiesConstructor]
+    public ReaparrDbContext(IPathProvider pathProvider)
+        : this(pathProvider.DatabaseName) { }
+
     /// <summary>
     /// Constructor for DbContextFactory - accepts pre-configured options.
     /// This is required for AddDbContextFactory to work properly.
     /// </summary>
-    [ActivatorUtilitiesConstructor]
     public ReaparrDbContext(DbContextOptions<ReaparrDbContext> options)
         : base(options)
     {

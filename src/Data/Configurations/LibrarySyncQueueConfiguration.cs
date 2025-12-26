@@ -13,7 +13,7 @@ public class LibrarySyncQueueConfiguration : IEntityTypeConfiguration<LibrarySyn
         builder
             .Property(e => e.Status)
             .HasMaxLength(50)
-            .HasConversion(x => x.ToString(), x => Enum.Parse<LibrarySyncJobStatus>(x))
+            .HasConversion(x => x.ToString(), x => Enum.Parse<LibrarySyncJobStatus>(x, true))
             .IsUnicode(false);
 
         builder

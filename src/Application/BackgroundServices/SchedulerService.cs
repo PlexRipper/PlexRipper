@@ -135,9 +135,15 @@ public class SchedulerService : ISchedulerService
 
     private async Task SetupLibrarySyncJob()
     {
-        await _commandExecutor.Send(new CleanupLibrarySyncJobQueueCommand(), CancellationToken.None);
-
-        await _commandExecutor.Send(new CheckQueuedPlexLibraryToSyncCommand(), CancellationToken.None);
+        try
+        {
+            await _commandExecutor.Send(new CleanupLibrarySyncJobQueueCommand(), CancellationToken.None);
+            await _commandExecutor.Send(new CheckQueuedPlexLibraryToSyncCommand(), CancellationToken.None);
+        }
+        catch (Exception ex)
+        {
+            _log.Here().Error(ex, "Failed to setup library sync job during scheduler initialization");
+        }
     }
 
     public async Task<List<JobStatusUpdate<string>>> GetRunningJobUpdates() =>

@@ -99,7 +99,10 @@ public class QueueLibrarySyncJobCommandHandler : ICommandHandler<QueueLibrarySyn
         {
             await _dbContext.LibrarySyncJobQueues.AddRangeAsync(itemsToAdd, cancellationToken);
             await _dbContext.SaveChangesAsync(cancellationToken);
+        }
 
+        if (itemsToAdd.Any() || itemsToReset.Any())
+        {
             _log.Here()
                 .Debug(
                     "Queued {Count} libraries for sync. Reset {ResetCount} completed/failed items. Skipped {SkippedCount} already queued/processing.",

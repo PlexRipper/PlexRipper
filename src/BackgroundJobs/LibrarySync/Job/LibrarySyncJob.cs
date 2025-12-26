@@ -129,8 +129,6 @@ public class LibrarySyncJob : IJob
             // Mark queue item as completed
             await UpdateQueueItemAsync(LibrarySyncJobStatus.Completed);
 
-            await _dbContext.SaveChangesAsync(cancellationToken);
-
             // Send refresh notification
             await _signalRService.SendRefreshNotificationAsync([RefreshDataType.PlexLibrary], cancellationToken);
 

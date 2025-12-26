@@ -77,17 +77,13 @@ public class CheckQueuedPlexLibraryToSyncCommandHandler : ICommandHandler<CheckQ
                 continue;
             }
 
-            var nextLibrary = serverGroup.OrderBy(x => x.Priority).First();
+            await _dbContext
+                .LibrarySyncJobQueues.Where(x =>
+                    x.PlexServerId == serverId && x.Status == LibrarySyncJobStatus.Queued && x.IsServerOffline
+                )
+                .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsServerOffline, false), cancellationToken);
 
-            // Clear the offline flag for the item being scheduled
-            if (nextLibrary.IsServerOffline)
-            {
-                await _dbContext
-                    .LibrarySyncJobQueues.Where(x =>
-                        x.PlexServerId == serverId && x.PlexLibraryId == nextLibrary.PlexLibraryId
-                    )
-                    .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsServerOffline, false), cancellationToken);
-            }
+            var nextLibrary = serverGroup.OrderBy(x => x.Priority).First();
 
             await ScheduleLibrarySyncJob(serverId, nextLibrary.PlexLibraryId);
         }

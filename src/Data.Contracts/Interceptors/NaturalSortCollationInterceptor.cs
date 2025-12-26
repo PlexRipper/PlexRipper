@@ -12,7 +12,7 @@ namespace Reaparr.Data.Contracts;
 /// </summary>
 public class NaturalSortCollationInterceptor : DbConnectionInterceptor
 {
-    private static readonly NaturalSortComparer Comparer = new(StringComparison.InvariantCultureIgnoreCase);
+    private static readonly NaturalSortComparer _comparer = new(StringComparison.OrdinalIgnoreCase);
 
     public override void ConnectionOpened(DbConnection connection, ConnectionEndEventData eventData)
     {
@@ -34,7 +34,7 @@ public class NaturalSortCollationInterceptor : DbConnectionInterceptor
     {
         if (connection is SqliteConnection sqliteConnection)
         {
-            sqliteConnection.CreateCollation(OrderByNaturalExtensions.CollationName, (x, y) => Comparer.Compare(x, y));
+            sqliteConnection.CreateCollation(OrderByNaturalExtensions.CollationName, (x, y) => _comparer.Compare(x, y));
         }
     }
 }

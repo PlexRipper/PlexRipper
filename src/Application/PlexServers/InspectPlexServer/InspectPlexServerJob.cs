@@ -98,10 +98,10 @@ public class InspectPlexServerJob : IJob
         var libraryIds = await _dbContext
             .PlexLibraries.Where(x => x.PlexServerId == plexServerId)
             .Select(x => x.Id)
-            .ToListAsync(CancellationToken.None);
+            .ToListAsync(cancellationToken);
 
         // Sync library media
-        await _commandExecutor.Send(new QueueLibrarySyncJobCommand(libraryIds), CancellationToken.None);
+        await _commandExecutor.Send(new QueueLibrarySyncJobCommand(libraryIds), cancellationToken);
 
         return Result.Ok();
     }

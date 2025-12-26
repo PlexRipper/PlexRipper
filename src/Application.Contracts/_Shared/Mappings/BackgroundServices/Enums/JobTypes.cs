@@ -21,10 +21,10 @@ public enum JobTypes
     MoveDownloadFileJob = 3,
 
     [EnumMember(Value = nameof(InspectPlexServerJob))]
-    InspectPlexServerJob = 5,
+    InspectPlexServerJob = 4,
 
     [EnumMember(Value = nameof(LibrarySyncJob))]
-    LibrarySyncJob = 6,
+    LibrarySyncJob = 5,
 
     // Ensure to add new job types to ToJobStatusUpdate in JobExecutionContextExtensions
 }

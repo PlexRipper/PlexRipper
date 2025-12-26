@@ -91,8 +91,8 @@ public class LibrarySyncJobListener : ILibrarySyncJobListener
     }
 
     /// <inheritdoc/>
-    public async Task JobExecutionVetoed(IJobExecutionContext context, CancellationToken cancellationToken = new()) =>
-        await Task.CompletedTask;
+    public Task JobExecutionVetoed(IJobExecutionContext context, CancellationToken cancellationToken = new()) =>
+        Task.CompletedTask;
 
     private async Task SendStatusUpdate(
         IJobExecutionContext context,

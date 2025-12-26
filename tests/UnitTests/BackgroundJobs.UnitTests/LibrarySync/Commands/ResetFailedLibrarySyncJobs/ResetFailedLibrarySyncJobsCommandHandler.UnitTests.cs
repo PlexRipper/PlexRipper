@@ -270,7 +270,7 @@ public class ResetFailedLibrarySyncJobsCommandHandlerUnitTests : BaseUnitTest<Re
     }
 
     [Fact]
-    public async Task ShouldCallCheckQueuedCommand_EvenWhenNoFailedJobsExist()
+    public async Task ShouldNotCallCheckQueuedCommand_WhenNoFailedJobsExist()
     {
         // Arrange
         await SetupDatabase(
@@ -295,10 +295,11 @@ public class ResetFailedLibrarySyncJobsCommandHandlerUnitTests : BaseUnitTest<Re
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+        // CheckQueuedCommand should not be called when no jobs were reset
         Mock.Mock<ICommandExecutor>()
             .Verify(
                 x => x.Send(It.IsAny<CheckQueuedPlexLibraryToSyncCommand>(), It.IsAny<CancellationToken>()),
-                Times.Once()
+                Times.Never()
             );
     }
 
@@ -354,7 +355,7 @@ public class ResetFailedLibrarySyncJobsCommandHandlerUnitTests : BaseUnitTest<Re
         updatedItem.CompletedAt.ShouldBeNull();
         updatedItem.ErrorMessage.ShouldBeNull();
         updatedItem.IsServerOffline.ShouldBeFalse();
-        // CreatedAt should be reset to now
-        updatedItem.CreatedAt.ShouldBeGreaterThan(DateTime.UtcNow.AddMinutes(-1));
+        // CreatedAt should be preserved (not reset) to maintain original queue time
+        updatedItem.CreatedAt.ShouldBeLessThan(DateTime.UtcNow.AddHours(-1));
     }
 }

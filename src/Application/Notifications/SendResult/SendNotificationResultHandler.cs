@@ -27,11 +27,18 @@ public class SendNotificationResultHandler : IEventHandler<SendNotificationResul
         {
             // Create a new DbContext for this operation to avoid threading issues
             using var dbContext = await _dbContextFactory.CreateAsync();
+            var createdNotifications = new List<Notification>();
             foreach (var error in notification.Result.Errors)
             {
                 var createdNotification = new Notification(error);
                 await dbContext.Notifications.AddAsync(createdNotification, cancellationToken);
-                await dbContext.SaveChangesAsync(cancellationToken);
+                createdNotifications.Add(createdNotification);
+            }
+
+            await dbContext.SaveChangesAsync(cancellationToken);
+
+            foreach (var createdNotification in createdNotifications)
+            {
                 await _signalRService.SendNotificationAsync(createdNotification);
             }
         }

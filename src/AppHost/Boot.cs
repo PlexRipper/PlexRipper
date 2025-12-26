@@ -72,11 +72,21 @@ public class Boot : IHostedService
             return;
         }
 
-        _downloadQueue.Setup();
+        var downloadQueueSetup = _downloadQueue.Setup();
+        if (downloadQueueSetup.IsFailed)
+        {
+            TerminateApplication();
+            return;
+        }
 
         await _schedulerService.SetupAsync();
 
-        _librarySyncJobListener.Setup();
+        var librarySyncListenerSetup = _librarySyncJobListener.Setup();
+        if (librarySyncListenerSetup.IsFailed)
+        {
+            TerminateApplication();
+            return;
+        }
 
         _log.Here().Information("Finished Initiating boot process");
     }

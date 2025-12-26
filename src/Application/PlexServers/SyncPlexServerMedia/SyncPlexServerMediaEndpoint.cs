@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using FastEndpoints;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
@@ -13,19 +12,7 @@ namespace Reaparr.Application;
 /// </summary>
 public record SyncPlexServerMediaEndpointRequest
 {
-    /// <summary>
-    /// NOTE: This constructor is needed to make the query param optional in the front-end typescript-api generation.
-    /// </summary>
-    public SyncPlexServerMediaEndpointRequest(bool forceSync = false)
-    {
-        ForceSync = forceSync;
-    }
-
     public int PlexServerId { get; init; }
-
-    [QueryParam, BindFrom("forceSync")]
-    [DefaultValue(false)]
-    public bool ForceSync { get; init; }
 }
 
 public class SyncPlexServerMediaEndpointRequestValidator : Validator<SyncPlexServerMediaEndpointRequest>
@@ -52,7 +39,7 @@ public class SyncPlexServerMediaEndpoint : BaseEndpoint<SyncPlexServerMediaEndpo
 
     public override void Configure()
     {
-        Get(EndpointPath);
+        Post(EndpointPath);
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))

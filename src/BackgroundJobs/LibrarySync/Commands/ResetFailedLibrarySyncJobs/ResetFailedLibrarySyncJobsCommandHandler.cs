@@ -52,9 +52,9 @@ public class ResetFailedLibrarySyncJobsCommandHandler : ICommandHandler<ResetFai
                     resetCount,
                     plexServerName
                 );
-        }
 
-        await _commandExecutor.Send(new CheckQueuedPlexLibraryToSyncCommand(), cancellationToken);
+            await _commandExecutor.Send(new CheckQueuedPlexLibraryToSyncCommand(), cancellationToken);
+        }
 
         return Result.Ok();
     }

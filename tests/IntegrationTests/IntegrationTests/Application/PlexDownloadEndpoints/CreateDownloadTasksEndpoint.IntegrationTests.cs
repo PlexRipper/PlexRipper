@@ -42,7 +42,7 @@ public class CreateDownloadTasksEndpointIntegrationTests : BaseIntegrationTests
         var plexMovies = await container.DbContext.PlexMovies.ToListAsync(CancellationToken);
         plexMovies.Count.ShouldBe(
             plexMovieCount,
-            $"PlexMovies count should be 10 failed with database name: {container.DbContext.DatabaseName}"
+            $"PlexMovies count should be {plexMovieCount} failed with database name: {container.DbContext.DatabaseName}"
         );
 
         var dtoList = new List<DownloadMediaDTO>
@@ -69,13 +69,11 @@ public class CreateDownloadTasksEndpointIntegrationTests : BaseIntegrationTests
         testResult.Response.IsSuccessStatusCode.ShouldBeTrue(
             $"Response status code was {testResult.Response.StatusCode}"
         );
-        await Task.Delay(2000, TestContext.Current.CancellationToken);
-        await container.SchedulerService.AwaitScheduler(TestContext.Current.CancellationToken);
-        await Task.Delay(2000, TestContext.Current.CancellationToken);
 
-        // Assert
+        // Assert - verify download tasks were created successfully
         var result = testResult.Result;
         result.IsSuccess.ShouldBeTrue();
+
         var downloadTasksDb = await container.DbContext.GetAllDownloadTasksByServerAsync(
             cancellationToken: CancellationToken
         );

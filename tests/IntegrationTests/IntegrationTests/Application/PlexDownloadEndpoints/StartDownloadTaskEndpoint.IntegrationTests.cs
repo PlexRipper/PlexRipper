@@ -63,8 +63,8 @@ public class StartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
         >(new StartDownloadTaskEndpointRequest(downloadTask.Id));
         testResult.Response.IsSuccessStatusCode.ShouldBeTrue();
 
+        // Wait for the download job to complete
         await container.SchedulerService.AwaitScheduler(CancellationToken);
-        await Task.Delay(2000, TestContext.Current.CancellationToken);
 
         // Assert
         var result = testResult.Result;

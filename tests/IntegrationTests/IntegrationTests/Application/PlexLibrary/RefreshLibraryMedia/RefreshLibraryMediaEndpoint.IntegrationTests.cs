@@ -70,6 +70,9 @@ public class RefreshLibraryMediaEndpointIntegrationTests : BaseIntegrationTests
         result.IsSuccess.ShouldBeTrue();
         testResult.Response.IsSuccessStatusCode.ShouldBeTrue();
 
+        // Wait for the scheduler to finish the library sync job
+        await container.SchedulerService.AwaitScheduler(CancellationToken);
+
         // Verify the library was refreshed
         var dbContext = container.DbContext;
         var refreshedLibrary = await dbContext
@@ -165,6 +168,9 @@ public class RefreshLibraryMediaEndpointIntegrationTests : BaseIntegrationTests
         var result = testResult.Result;
         result.IsSuccess.ShouldBeTrue();
         testResult.Response.IsSuccessStatusCode.ShouldBeTrue();
+
+        // Wait for the scheduler to finish the library sync job
+        await container.SchedulerService.AwaitScheduler(CancellationToken);
 
         // Verify the library was refreshed
         var dbContext = container.DbContext;

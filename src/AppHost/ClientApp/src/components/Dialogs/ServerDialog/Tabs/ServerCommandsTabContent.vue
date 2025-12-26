@@ -49,9 +49,7 @@ function syncServerLibraries(): void {
 	set(syncLoading, true);
 	useSubscription(
 		plexServerApi
-			.syncPlexServerMediaEndpoint(props.plexServer.id, {
-				forceSync: true,
-			})
+			.syncPlexServerMediaEndpoint(props.plexServer.id)
 			.subscribe(() => {
 				set(syncLoading, false);
 				dialogStore.closeDialog(DialogType.ServerSettingsDialog);

@@ -178,22 +178,17 @@ export class PlexServer {
    * No description
    * * @tags Plexserver
    * @name SyncPlexServerMediaEndpoint
-   * @request GET:/api/PlexServer/{PlexServerId}/sync
+   * @request POST:/api/PlexServer/{PlexServerId}/sync
    * @secure
    */
   syncPlexServerMediaEndpoint = (
     plexServerId: number,
-    query?: {
-      /** @default false */
-      forceSync?: boolean;
-    },
     params: RequestParams = {},
   ) =>
     from(
       Axios.request<BaseResultDTO>({
         url: `/api/PlexServer/${plexServerId}/sync`,
-        method: "GET",
-        params: query,
+        method: "POST",
         secure: true,
         format: "json",
         ...params,
@@ -248,15 +243,6 @@ export class PlexServerPaths {
       query,
     });
 
-  static syncPlexServerMediaEndpoint = (
-    plexServerId: number,
-    query?: {
-      /** @default false */
-      forceSync?: boolean;
-    },
-  ) =>
-    queryString.stringifyUrl({
-      url: `/api/PlexServer/${plexServerId}/sync`,
-      query,
-    });
+  static syncPlexServerMediaEndpoint = (plexServerId: number) =>
+    queryString.stringifyUrl({ url: `/api/PlexServer/${plexServerId}/sync` });
 }

@@ -35,9 +35,9 @@ export default {
   // Workaround for semantic-release issue #2503:
   // https://github.com/semantic-release/semantic-release/issues/2503
   // Prerelease-only branches require a "main" release branch to exist.
-  // Adding maintenance branch pattern satisfies this requirement.
+  // The 'main' branch must exist on remote (can be unused/identical to dev).
   branches: [
-    '+([0-9]).x', // Maintenance branches (acts as "main" branch requirement)
+    'main', // Required: main release branch (must exist on remote)
     {
       name: 'dev',
       // false → publish computed version as stable (e.g., 1.5.0)

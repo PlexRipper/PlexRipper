@@ -1,5 +1,14 @@
 import { route } from '@fixtures';
-import { type LibraryProgress, MessageTypes, PlexMediaType } from '@dto';
+import {
+	JobStatus,
+	JobTypes,
+	type LibrarySyncJobQueueDTO,
+	LibrarySyncJobStatus,
+	MessageTypes,
+	PlexMediaType,
+} from '@dto';
+import { generateLibraryProgress, generateLibrarySyncJobQueue } from '@factories';
+import { generateResultDTO } from '@mock';
 import { PlexLibraryPaths } from '@api/api-paths';
 
 describe('Test the refreshing of a PlexLibrary', () => {
@@ -28,27 +37,55 @@ describe('Test the refreshing of a PlexLibrary', () => {
 	it('Should display refreshing of the PlexLibrary when sending the refreshing command', () => {
 		cy.getPageData().then((data) => {
 			const movieLibrary = data.plexLibraries.find((x) => x.type === PlexMediaType.Movie)!;
+			const server = data.plexServers.find((x) => x.id === movieLibrary.plexServerId)!;
 
-			cy.intercept('GET', PlexLibraryPaths.refreshLibraryMediaEndpoint(movieLibrary.id), (req) => {
-				req.reply({
-					statusCode: 200,
-				});
+			cy.intercept('GET', PlexLibraryPaths.refreshLibraryMediaEndpoint(movieLibrary.id), {
+				statusCode: 200,
+				body: generateResultDTO(movieLibrary),
 			});
 			cy.getCy(`media-overview-refresh-library-btn`).click();
 
+			// Start the sync job - this adds an entry to syncQueues with Processing status
+			cy.hubPublishJobStatusUpdate<LibrarySyncJobQueueDTO>(
+				JobTypes.LibrarySyncJob,
+				JobStatus.Started,
+				generateLibrarySyncJobQueue({
+					plexLibraryId: movieLibrary.id,
+					plexServerId: server.id,
+					status: LibrarySyncJobStatus.Processing,
+				}),
+			);
+
+			// Verify the refresh container is visible
+			cy.getCy('refresh-library-container').should('be.visible');
+
+			// Send progress updates
 			for (let i = 0; i < 5; i++) {
-				cy.wait(500).hubPublish('progress', MessageTypes.LibraryProgress, {
-					id: movieLibrary?.id ?? -1,
-					percentage: i * 25,
-					received: i * 25,
-					total: 100,
-					timeStamp: new Date().toISOString(),
-					isRefreshing: true,
-					isComplete: i === 4,
-				} as LibraryProgress);
+				cy.wait(500).hubPublish(
+					'progress',
+					MessageTypes.LibraryProgress,
+					generateLibraryProgress({
+						libraryId: movieLibrary.id,
+						received: i * 25,
+						total: 100,
+					}),
+				);
 				cy.getCy('refresh-library-container').should('be.visible');
 			}
-			cy.getCy('refresh-library-container').should('not.be.exist');
+
+			// Complete the sync job
+			cy.hubPublishJobStatusUpdate<LibrarySyncJobQueueDTO>(
+				JobTypes.LibrarySyncJob,
+				JobStatus.Completed,
+				generateLibrarySyncJobQueue({
+					plexLibraryId: movieLibrary.id,
+					plexServerId: server.id,
+					status: LibrarySyncJobStatus.Completed,
+					completedAt: new Date().toISOString(),
+				}),
+			);
+
+			cy.getCy('refresh-library-container').should('not.exist');
 		});
 	});
 });

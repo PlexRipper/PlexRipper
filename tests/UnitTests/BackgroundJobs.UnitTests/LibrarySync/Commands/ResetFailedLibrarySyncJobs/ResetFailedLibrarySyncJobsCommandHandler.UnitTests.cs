@@ -358,3 +358,4 @@ public class ResetFailedLibrarySyncJobsCommandHandlerUnitTests : BaseUnitTest<Re
         updatedItem.CreatedAt.ShouldBeGreaterThan(DateTime.UtcNow.AddMinutes(-1));
     }
 }
+

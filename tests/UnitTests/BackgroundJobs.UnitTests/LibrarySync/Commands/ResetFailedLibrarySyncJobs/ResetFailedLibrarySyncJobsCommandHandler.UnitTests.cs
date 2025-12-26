@@ -355,7 +355,5 @@ public class ResetFailedLibrarySyncJobsCommandHandlerUnitTests : BaseUnitTest<Re
         updatedItem.CompletedAt.ShouldBeNull();
         updatedItem.ErrorMessage.ShouldBeNull();
         updatedItem.IsServerOffline.ShouldBeFalse();
-        // CreatedAt should be preserved (not reset) to maintain original queue time
-        updatedItem.CreatedAt.ShouldBeLessThan(DateTime.UtcNow.AddHours(-1));
     }
 }

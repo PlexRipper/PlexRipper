@@ -70,6 +70,9 @@ public class CreateDownloadTasksEndpointIntegrationTests : BaseIntegrationTests
             $"Response status code was {testResult.Response.StatusCode}"
         );
 
+        // Wait for the download job to complete
+        await container.SchedulerService.AwaitScheduler(CancellationToken);
+
         // Assert - verify download tasks were created successfully
         var result = testResult.Result;
         result.IsSuccess.ShouldBeTrue();

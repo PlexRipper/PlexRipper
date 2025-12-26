@@ -80,7 +80,6 @@ WORKDIR "/src/src/AppHost"
 ## Build and Publish
 RUN dotnet publish "AppHost.csproj" -c Release -o /app/publish \
     --no-restore \
-    /p:AssemblyVersion=${VERSION} \
     /p:InformationalVersion=${INFORMATIONAL_VERSION} \
     -p:UseAppHost=false
 

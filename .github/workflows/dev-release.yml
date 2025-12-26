@@ -46,9 +46,20 @@ jobs:
             -   name: Client App Install
                 uses: ./.github/workflows/steps/client-app-install/
 
+            -   name: Debug Config
+                run: |
+                    echo "Working directory: $(pwd)"
+                    echo "Config file exists:"
+                    ls -la release.config.mjs || echo "NOT FOUND in root"
+                    echo "---"
+                    echo "Config content:"
+                    cat release.config.mjs || echo "Could not read config"
+                    echo "---"
+                    echo "STABLE_RELEASE env: '$STABLE_RELEASE'"
+
             -   name: Run Semantic Release (DEV Release)
                 id: semantic-release
-                run: npx --prefix src/AppHost/ClientApp/ semantic-release
+                run: npx --prefix src/AppHost/ClientApp/ semantic-release --debug
                 env:
                     # STABLE_RELEASE not set = appends -dev.N suffix to computed version
                     GH_TOKEN: ${{ secrets.GH_TOKEN }}

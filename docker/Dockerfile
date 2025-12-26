@@ -46,6 +46,9 @@ COPY ["src/Application.Contracts/Application.Contracts.csproj", "src/Application
 ### Public API Projects
 COPY ["src/PublicAPI/PublicAPI.csproj", "src/PublicAPI/"]
 COPY ["src/PublicAPI.Contracts/PublicAPI.Contracts.csproj", "src/PublicAPI.Contracts/"]
+### Background Jobs Projects
+COPY ["src/BackgroundJobs/BackgroundJobs.csproj", "src/BackgroundJobs/"]
+COPY ["src/BackgroundJobs.Contracts/BackgroundJobs.Contracts.csproj", "src/BackgroundJobs.Contracts/"]
 
 ## Infrastructure Projects
 ### Data Access

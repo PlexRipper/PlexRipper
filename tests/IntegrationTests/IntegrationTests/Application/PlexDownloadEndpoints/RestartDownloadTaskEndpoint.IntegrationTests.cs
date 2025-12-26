@@ -1,4 +1,5 @@
 ﻿using FastEndpoints;
+using Microsoft.EntityFrameworkCore;
 using Reaparr.Application;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
@@ -32,6 +33,15 @@ public class RestartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
                     x.PlexMovieLibraryCount = 2;
                     x.MovieCount = 10;
                     x.MovieDownloadTasksCount = 1;
+                    x.DownloadWorkerTasks = 4;
+                };
+
+                config.FileSystemOptions = (system, dbContext) =>
+                {
+                    var downloadTask = dbContext.DownloadTaskMovieFile.Include(x => x.DownloadWorkerTasks).First();
+                    downloadTask.DownloadFilePath.ShouldNotBeNullOrEmpty();
+
+                    system.AddFile(downloadTask.DownloadFilePath, FakeData.GetFileMockData(10, 4));
                 };
             }
         );
@@ -61,11 +71,9 @@ public class RestartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
         );
         downloadTaskDb.ShouldNotBeNull();
 
-        // In CI this is sometimes completed too quickly
         downloadTaskDb.DownloadStatus.ShouldBeOneOf(DownloadStatus.Queued, DownloadStatus.Completed);
 
         await container.SchedulerService.AwaitScheduler(TestContext.Current.CancellationToken);
-        await Task.Delay(2000, TestContext.Current.CancellationToken);
 
         // Assert
         var result = testResult.Result;

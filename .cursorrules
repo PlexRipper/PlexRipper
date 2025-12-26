@@ -12,7 +12,12 @@ rules: |
   - Always assert against both the endpoint Response and the state of the database after execution.
   - Keep tests deterministic: seed data explicitly, never random.
   - Prefer expressive, scenario-driven test names over generic ones.
-  
+  - Single Context Instance Pattern: When setting up test data and verifying results, use a single dbContext instance variable instead of calling IDbContext multiple times.
+    Example: `var dbContext = IDbContext;` then use `dbContext` throughout the test to ensure data persistence and visibility.
+  - Ensure all created tests are passing before stopping, either fix the test and if a bug is found in the code then fix that.
+  - Do not use dirty workarounds to make tests pass, ensure the tests is logically correct and or fix the code its testing
+
+    
   # Front-end unit test rules
   - All front-end unit tests must use Vitest as the test runner.
   - Always run Vitest through Bun using `bunx vitest` (never npm, yarn, or pnpm).

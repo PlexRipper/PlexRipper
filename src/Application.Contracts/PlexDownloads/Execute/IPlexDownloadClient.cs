@@ -3,7 +3,7 @@ using Reaparr.Domain;
 
 namespace Reaparr.Application.Contracts;
 
-public interface IPlexDownloadClient
+public interface IPlexDownloadClient : IAsyncDisposable
 {
     DownloadStatus DownloadStatus { get; }
 

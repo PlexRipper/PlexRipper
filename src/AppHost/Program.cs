@@ -64,7 +64,7 @@ public class Program
         }
         catch (Exception e)
         {
-            _log.Here().Fatal("Reaparr crashed due to exception!");
+            _log.Here().Fatal("Reaparr crashed due to an exception!");
             Result.Fail(new ExceptionalError(e)).LogFatal();
             System.Environment.Exit(2);
         }

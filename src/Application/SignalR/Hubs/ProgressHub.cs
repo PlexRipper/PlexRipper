@@ -61,21 +61,6 @@ public class ProgressHub : Hub<IProgressHub>, IProgressHub
     }
 
     /// <inheritdoc/>
-    public async Task SyncServerMediaProgress(
-        SyncServerMediaProgress syncServerMediaProgress,
-        CancellationToken cancellationToken = default
-    )
-    {
-        _log.Here()
-            .Debug(
-                "Sending progress: {MessageTypesNotification} => {@SyncServerProgress}",
-                nameof(MessageTypes.SyncServerMediaProgress),
-                syncServerMediaProgress
-            );
-        await Clients.All.SyncServerMediaProgress(syncServerMediaProgress, cancellationToken);
-    }
-
-    /// <inheritdoc/>
     public async Task ServerConnectionCheckStatusProgress(
         ServerConnectionCheckStatusProgressDTO serverConnectionCheckStatusProgress,
         CancellationToken cancellationToken = default

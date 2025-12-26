@@ -36,7 +36,14 @@ public class SignalRService : ISignalRService
     /// <inheritdoc/>
     public async Task SendLibraryProgressUpdateAsync(LibraryProgress progress)
     {
-        await _progressHub.Clients.All.LibraryProgress(progress);
+        try
+        {
+            await _progressHub.Clients.All.LibraryProgress(progress);
+        }
+        catch (Exception ex)
+        {
+            _log.Here().Warning(ex, "Failed to send library progress update");
+        }
     }
 
     /// <inheritdoc/>
@@ -61,12 +68,6 @@ public class SignalRService : ISignalRService
     public async Task SendServerConnectionCheckStatusProgressAsync(ServerConnectionCheckStatusProgress progress)
     {
         await _progressHub.Clients.All.ServerConnectionCheckStatusProgress(progress.ToDTO());
-    }
-
-    /// <inheritdoc/>
-    public async Task SendServerSyncProgressUpdateAsync(SyncServerMediaProgress syncServerMediaProgress)
-    {
-        await _progressHub.Clients.All.SyncServerMediaProgress(syncServerMediaProgress);
     }
 
     /// <inheritdoc/>

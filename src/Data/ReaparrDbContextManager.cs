@@ -56,7 +56,12 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
                 _log.Here().Information("Database was successfully connected!");
                 _log.Here().Information("Database connected at: {DatabasePath}", DatabasePath);
 
-                return MigrateDatabase();
+                var migrateResult = MigrateDatabase();
+                if (migrateResult.IsFailed)
+                    return migrateResult;
+
+                EnableWalMode();
+                return Result.Ok();
             }
 
             _log.Here()
@@ -69,7 +74,47 @@ public class ReaparrDbContextManager : IReaparrDbContextManager
 
         _log.Here().Warning("Database does not exist, creating a new one now");
 
-        return CreateDatabase();
+        var createResult = CreateDatabase();
+        if (createResult.IsFailed)
+            return createResult;
+
+        EnableWalMode();
+
+        return Result.Ok();
+    }
+
+    /// <summary>
+    /// Enables WAL (Write-Ahead Logging) mode on the SQLite database for better concurrent access.
+    /// WAL mode allows multiple readers while writing is in progress.
+    /// </summary>
+    private void EnableWalMode()
+    {
+        try
+        {
+            using var connection = new Microsoft.Data.Sqlite.SqliteConnection(DbContextConnections.ConnectionString);
+            connection.Open();
+
+            using var walCommand = connection.CreateCommand();
+            walCommand.CommandText = "PRAGMA journal_mode=WAL; PRAGMA synchronous=NORMAL;";
+            var walResult = walCommand.ExecuteScalar()?.ToString();
+
+            if (string.Equals(walResult, "wal", StringComparison.OrdinalIgnoreCase))
+            {
+                _log.Here().Information("SQLite WAL mode enabled for: {DatabasePath}", DatabasePath);
+            }
+            else
+            {
+                _log.Here()
+                    .Warning(
+                        "SQLite WAL mode could not be enabled (current: {JournalMode}). This may cause concurrency issues.",
+                        walResult
+                    );
+            }
+        }
+        catch (Exception e)
+        {
+            _log.Here().Error(e, "Failed to enable SQLite WAL mode");
+        }
     }
 
     public Result ResetDatabase()

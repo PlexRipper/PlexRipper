@@ -68,7 +68,12 @@ public class AllJobListener : IAllJobListener
     {
         var statusUpdate = context.ToJobStatusUpdate(status);
 
-        if (statusUpdate.JobType != JobTypes.CheckAllConnectionsStatusByPlexServerJob)
+        if (
+            statusUpdate.JobType
+            is JobTypes.MoveDownloadFileJob
+                or JobTypes.DownloadJob
+                or JobTypes.InspectPlexServerJob
+        )
         {
             await _signalRService.SendJobStatusUpdateAsync(statusUpdate);
         }

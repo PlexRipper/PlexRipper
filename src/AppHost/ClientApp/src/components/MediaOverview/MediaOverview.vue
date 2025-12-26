@@ -1,7 +1,7 @@
 <template>
 	<!--	Refresh Library Screen	-->
 	<QRow
-		v-if="isRefreshing"
+		v-if="libraryStore.getIsLibrarySyncing(libraryId)"
 		align="start"
 		class="q-pt-xl"
 		cy="refresh-library-container"
@@ -100,7 +100,7 @@
 			<!-- Media Options Dialog -->
 			<MediaOptionsDialog @closed="onOptionsClosed" />
 			<!-- Loading overlay -->
-			<QLoadingOverlay :loading="!isRefreshing && mediaOverviewStore.loading" />
+			<QLoadingOverlay :loading="!libraryStore.getIsLibrarySyncing(libraryId) && mediaOverviewStore.loading" />
 			<!-- Download confirmation dialog	-->
 			<DownloadConfirmation @download="downloadStore.downloadMedia($event)" />
 		</div>
@@ -109,24 +109,23 @@
 
 <script setup lang="ts">
 import Log from 'consola';
-import { get, set } from '@vueuse/core';
+import { get } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
-import { type DownloadMediaDTO, type LibraryProgress, PlexMediaType, ViewMode } from '@dto';
+import { type DownloadMediaDTO, LibrarySyncJobStatus, PlexMediaType, ViewMode } from '@dto';
 import { DialogType } from '@enums';
 import type { IMediaOverviewBarActions } from '@interfaces';
 import {
-	useMediaOverviewBarDownloadCommandBus,
-	useMediaOverviewSortBus,
 	listenMediaOverviewDownloadCommand,
 	sendMediaOverviewDownloadCommand,
-	useSignalrStore,
-	useMediaOverviewStore,
-	useSettingsStore,
-	useDownloadStore,
-	useLibraryStore,
-	useServerStore,
 	useDialogStore,
+	useDownloadStore,
 	useI18n,
+	useLibraryStore,
+	useMediaOverviewBarDownloadCommandBus,
+	useMediaOverviewSortBus,
+	useMediaOverviewStore,
+	useServerStore,
+	useSettingsStore,
 } from '#imports';
 
 const { t } = useI18n();
@@ -136,11 +135,7 @@ const downloadStore = useDownloadStore();
 const libraryStore = useLibraryStore();
 const serverStore = useServerStore();
 const dialogStore = useDialogStore();
-const signalRStore = useSignalrStore();
-
-const isRefreshing = ref(false);
-
-const libraryProgress = ref<LibraryProgress | null>(null);
+const backgroundJobsStore = useBackgroundJobsStore();
 
 const props = withDefaults(defineProps<{
 	libraryId: number;
@@ -151,6 +146,7 @@ const props = withDefaults(defineProps<{
 });
 
 const library = computed(() => libraryStore.getLibrary(mediaOverviewStore.libraryId));
+const libraryProgress = computed(() => libraryStore.getLibraryProgress(mediaOverviewStore.libraryId));
 
 const refreshingText = computed(() => {
 	const server = libraryStore.getServerByLibraryId(mediaOverviewStore.libraryId);
@@ -161,9 +157,7 @@ const refreshingText = computed(() => {
 });
 
 function resetProgress(isRefreshingValue: boolean) {
-	set(isRefreshing, isRefreshingValue);
-
-	set(libraryProgress, {
+	libraryStore.updateLibraryProgress({
 		id: mediaOverviewStore.libraryId,
 		percentage: 0,
 		received: 0,
@@ -178,14 +172,9 @@ function resetProgress(isRefreshingValue: boolean) {
 }
 
 function refreshLibrary() {
-	set(isRefreshing, true);
 	resetProgress(true);
 	useSubscription(
-		libraryStore.reSyncLibrary(mediaOverviewStore.libraryId).subscribe({
-			complete: () => {
-				set(isRefreshing, false);
-			},
-		}),
+		libraryStore.reSyncLibrary(mediaOverviewStore.libraryId).subscribe(),
 	);
 }
 
@@ -253,7 +242,6 @@ function onOptionsClosed(hasChanged: boolean) {
 
 onMounted(() => {
 	resetProgress(false);
-	set(isRefreshing, false);
 
 	mediaOverviewStore.$patch({
 		libraryId: props.libraryId,
@@ -266,21 +254,17 @@ onMounted(() => {
 	// Initial data load
 	useSubscription(mediaOverviewStore.requestMedia().subscribe());
 
-	if (!props.allMediaMode) {
-		useSubscription(
-			signalRStore.getLibraryProgress(mediaOverviewStore.libraryId)
-				.subscribe((data) => {
-					if (data) {
-						set(libraryProgress, data);
-						set(isRefreshing, data.isRefreshing);
-						if (data.isComplete) {
-							set(isRefreshing, false);
-							useSubscription(mediaOverviewStore.requestMedia().subscribe());
-						}
-					}
-				}),
-		);
-	}
+	// Library sync job subscription
+	useSubscription(backgroundJobsStore.getLibrarySyncJobUpdate().subscribe((value) => {
+		const queue = value.data;
+		if (queue.plexLibraryId !== mediaOverviewStore.libraryId) {
+			return;
+		}
+
+		if (queue.status === LibrarySyncJobStatus.Completed) {
+			useSubscription(mediaOverviewStore.requestMedia().subscribe());
+		}
+	}));
 });
 </script>
 

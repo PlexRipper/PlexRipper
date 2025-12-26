@@ -13,11 +13,11 @@ import {
 	setupMockPlexServersEndpoints,
 	setupMockSettingsEndpoints,
 	setupMockSignalREndpoints,
-	setupMockPlexLibraryMetaDataEndpoints,
+	setupMockPlexLibraryMetaDataEndpoints, setupMockPlexLibrarySyncJobStatusEndpoints,
 } from '@fixtures';
 import type {
 	DownloadTaskDTO,
-	FolderPathDTO,
+	FolderPathDTO, LibrarySyncJobQueueDTO,
 	PlexAccountDTO,
 	PlexLibraryDTO, PlexMediaSlimDTO,
 	PlexServerConnectionDTO,
@@ -29,6 +29,7 @@ export class BasePageSetupResult implements IBasePageSetupResult {
 	public plexServers: PlexServerDTO[] = [];
 	public plexServerConnections: PlexServerConnectionDTO[] = [];
 	public plexLibraries: PlexLibraryDTO[] = [];
+	public plexLibrarySyncJobStatuses: LibrarySyncJobQueueDTO[] = [];
 	public plexAccounts: PlexAccountDTO[] = [];
 	public serverDownloadProgress: ServerDownloadProgressDTO[] = [];
 	public detailDownloadTasks: DownloadTaskDTO[] = [];
@@ -59,6 +60,10 @@ export class BasePageSetupResult implements IBasePageSetupResult {
 
 	setupMockPlexLibraryMetaDataEndpoints(config: MockConfig) {
 		return setupMockPlexLibraryMetaDataEndpoints.call(this, config);
+	}
+
+	setupMockPlexLibrarySyncJobStatusEndpoints(config: MockConfig) {
+		return setupMockPlexLibrarySyncJobStatusEndpoints.call(this, config);
 	}
 
 	setupPlexAccountsEndpoints(config: MockConfig) {

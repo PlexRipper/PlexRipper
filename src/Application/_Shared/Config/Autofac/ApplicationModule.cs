@@ -25,11 +25,6 @@ public class ApplicationModule : Module
         builder.RegisterType<DownloadJobListener>().As<IDownloadJobListener>().SingleInstance();
         builder.RegisterType<MoveDownloadJobListener>().As<IMoveDownloadJobListener>().SingleInstance();
 
-        builder
-            .RegisterType<RefreshLibraryProgressReporter>()
-            .As<IRefreshLibraryProgressReporter>()
-            .InstancePerDependency();
-
         // SignalR
         builder.RegisterType<SignalRService>().As<ISignalRService>();
         builder.RegisterType<ProgressHub>().ExternallyOwned();

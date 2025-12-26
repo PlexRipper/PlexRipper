@@ -70,7 +70,7 @@ public class QueueInspectPlexServerJobCommandHandler : ICommandHandler<QueueInsp
             var plexServerName = await _dbContext.GetPlexServerNameById(i, cancellationToken);
             _log.Here()
                 .Error(
-                    "Job {InspectPlexServerJobName} is already running for serverL {PlexServerIdName} with id: {PlexServerId}",
+                    "Job {InspectPlexServerJobName} is already running for server: {PlexServerIdName} with id: {PlexServerId}",
                     nameof(InspectPlexServerJob),
                     plexServerName,
                     i

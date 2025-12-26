@@ -15,37 +15,28 @@ import type {
 	NotificationDTO,
 	ServerConnectionCheckStatusProgressDTO,
 	ServerDownloadProgressDTO,
-	SyncServerMediaProgress,
 	ServerDownloadProgressMessagePackDTO,
 } from '@dto';
 import { MessageTypes } from '@dto';
 import type { IRetryPolicy } from '@microsoft/signalr/src/IRetryPolicy';
-import { useDownloadStore, useBackgroundJobsStore, useNotificationsStore } from '@store';
+import { useDownloadStore, useBackgroundJobsStore, useNotificationsStore, useLibraryStore } from '@store';
 import Axios from 'axios';
 import { MessagePackHubProtocol } from '@microsoft/signalr-protocol-msgpack';
 
 export const useSignalrStore = defineStore('SignalrStore', () => {
 	interface ISignalRStoreState {
 		// Data
-		libraryProgress: LibraryProgress[];
-		syncServerMediaProgress: SyncServerMediaProgress[];
 		serverConnectionCheckStatusProgress: ServerConnectionCheckStatusProgressDTO[];
 		// Subjects
-		libraryProgressSubject: Subject<LibraryProgress[]>;
-		syncServerMediaProgressSubject: Subject<SyncServerMediaProgress[]>;
 		serverConnectionCheckStatusProgressSubject: Subject<ServerConnectionCheckStatusProgressDTO[]>;
 		refreshDataNotificationSubject: Subject<RefreshDataType>;
 	}
 
 	const defaultState: ISignalRStoreState = {
 		// Data
-		libraryProgress: [],
-		syncServerMediaProgress: [],
 		serverConnectionCheckStatusProgress: [],
 
 		// Subjects
-		libraryProgressSubject: new Subject<LibraryProgress[]>(),
-		syncServerMediaProgressSubject: new Subject<SyncServerMediaProgress[]>(),
 		serverConnectionCheckStatusProgressSubject: new Subject<ServerConnectionCheckStatusProgressDTO[]>(),
 		refreshDataNotificationSubject: new Subject<RefreshDataType>(),
 	};
@@ -112,6 +103,7 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 		const downloadStore = useDownloadStore();
 		const backgroundStore = useBackgroundJobsStore();
 		const notificationsStore = useNotificationsStore();
+		const libraryStore = useLibraryStore();
 
 		downloadHubConnection?.on(MessageTypes.ServerDownloadProgress, (rawData: ServerDownloadProgressMessagePackDTO) => {
 			Log.debug(rawData);
@@ -122,13 +114,9 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 			}
 		});
 
-		progressHubConnection?.on(MessageTypes.LibraryProgress, (data: LibraryProgress) => {
-			updateState<LibraryProgress>('libraryProgress', data, 'id');
-		});
+		progressHubConnection?.on(MessageTypes.LibraryProgress, (data: LibraryProgress) => libraryStore.updateLibraryProgress(data));
 
 		progressHubConnection?.on(MessageTypes.ServerConnectionCheckStatusProgress, (data: ServerConnectionCheckStatusProgressDTO) => updateState<ServerConnectionCheckStatusProgressDTO>('serverConnectionCheckStatusProgress', data, 'plexServerConnectionId'));
-
-		progressHubConnection?.on(MessageTypes.SyncServerMediaProgress, (data: SyncServerMediaProgress) => updateState<SyncServerMediaProgress>('syncServerMediaProgress', data, 'serverId'));
 
 		progressHubConnection?.on(MessageTypes.JobStatusUpdate, (data) => backgroundStore.setStatusJobUpdate(data));
 
@@ -198,15 +186,10 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 
 	const getters = {
 		// region Array Progress
-		getAllLibraryProgress: (): Observable<LibraryProgress[]> => state.libraryProgressSubject.asObservable(),
-		getAllSyncServerMediaProgress: (): Observable<SyncServerMediaProgress[]> => state.syncServerMediaProgressSubject.asObservable(),
 		getAllServerConnectionProgress: (): Observable<ServerConnectionCheckStatusProgressDTO[]> => state.serverConnectionCheckStatusProgressSubject.asObservable(), // endregion
 
 		// region Single Progress
 
-		getLibraryProgress(libraryId: number): Observable<LibraryProgress> {
-			return getters.getAllLibraryProgress().pipe(map((x) => x?.find((x) => x.id === libraryId) ?? null), filter((progress) => !!progress), distinctUntilChanged(isEqual));
-		},
 		getServerConnectionProgressByPlexServerId(plexServerId: number): Observable<ServerConnectionCheckStatusProgressDTO[]> {
 			return getters.getAllServerConnectionProgress().pipe(map((x) => x?.filter((y) => y.plexServerId === plexServerId)), distinctUntilChanged(isEqual));
 		},

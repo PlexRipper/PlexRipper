@@ -9,10 +9,12 @@ namespace Reaparr.PlexApi;
 /// </summary>
 public class GetLibraryMediaCommandHandler : ICommandHandler<GetLibraryMediaCommand, Result<LibraryMetadata>>
 {
+    private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
 
-    public GetLibraryMediaCommandHandler(ICommandExecutor commandExecutor)
+    public GetLibraryMediaCommandHandler(ILogger log, ICommandExecutor commandExecutor)
     {
+        _log = log.ForContext<GetLibraryMediaCommandHandler>();
         _commandExecutor = commandExecutor;
     }
 
@@ -29,13 +31,27 @@ public class GetLibraryMediaCommandHandler : ICommandHandler<GetLibraryMediaComm
 
         var updatedPlexLibrary = plexLibraries.Value.Find(x => x.Key == plexLibrary.Key);
         if (updatedPlexLibrary is null)
-            return ResultExtensions.IsNull(nameof(updatedPlexLibrary));
+        {
+            _log.Here()
+                .Error(
+                    "Could not find Plex Library with key {PlexLibraryKey} (Id: {PlexLibraryId}) after refresh. The library has been deleted from the server",
+                    plexLibrary.Key,
+                    plexLibrary.Id
+                );
+            return ResultExtensions.EntityNotFound(nameof(PlexLibrary), plexLibrary.Id);
+        }
 
         updatedPlexLibrary.Id = plexLibrary.Id;
         updatedPlexLibrary.PlexServerId = plexLibrary.PlexServerId;
 
         // Set the default folder path id for the destination
         updatedPlexLibrary.DefaultDestinationId = updatedPlexLibrary.Type.ToDefaultDestinationFolderId();
+
+        // TODO: Handle other media types (Music, Photos, etc)
+        if (updatedPlexLibrary.Type is not (PlexMediaType.Movie or PlexMediaType.TvShow))
+        {
+            return Result.Ok(new LibraryMetadata(updatedPlexLibrary));
+        }
 
         var mediaListResult = await _commandExecutor.Send(
             new GetAllMediaByTypeFromPlexApiCommand(plexLibrary, plexLibrary.Type, Action: action),

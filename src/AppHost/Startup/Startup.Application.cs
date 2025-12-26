@@ -56,7 +56,11 @@ public static partial class Startup
         app.UseAuthentication();
         app.UseAuthorization();
 
-        // Setup FastEndpoints
+        // Enable response caching for downstream caches (must be before FastEndpoints)
+        // Doc: https://fast-endpoints.com/docs/response-caching
+        app.UseResponseCaching();
+
+        // Set up FastEndpoints
         app.UseFastEndpoints(c =>
         {
             c.Endpoints.Configurator = ep =>

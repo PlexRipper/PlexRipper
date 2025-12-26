@@ -2,7 +2,7 @@ import { acceptHMRUpdate, defineStore } from 'pinia';
 import { reactive, toRefs } from 'vue';
 import { from, type Observable } from 'rxjs';
 import { of } from 'rxjs';
-import { map, take } from 'rxjs/operators';
+import { map, take, catchError } from 'rxjs/operators';
 import type { PlexMediaType, PlexMediaDTO, BaseResultDTO } from '@dto';
 import type { ISetupResult } from '@interfaces';
 import { plexMediaApi } from '@api';
@@ -71,7 +71,14 @@ export const useMediaStore = defineStore('MediaStore', () => {
 						}
 						Log.warn('Failed to get media thumbnail image', res);
 						return '';
-					}));
+					}),
+					catchError((error) => {
+					// Handle network errors, timeouts, 502/504 gateway errors silently
+					// Return empty string to trigger fallback image display
+						Log.debug('Media thumbnail request failed', { query, error: error?.message || error });
+						return of('');
+					}),
+				);
 		},
 
 		updateMediaUrl({

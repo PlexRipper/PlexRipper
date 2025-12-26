@@ -13,7 +13,8 @@ using NSwag;
 using NSwag.Generation.Processors.Security;
 using Reaparr.Application;
 using Reaparr.Application.Contracts;
-using Reaparr.Data;
+using Reaparr.BackgroundJobs;
+using Reaparr.Data.Contracts;
 using Reaparr.Environment;
 using Reaparr.Identity;
 using Reaparr.Identity.Contracts;
@@ -34,8 +35,6 @@ public static partial class Startup
     /// <param name="env"> The <see cref="IWebHostEnvironment"/> instance to configure.</param>
     public static void ConfigureServices(this IServiceCollection services, IWebHostEnvironment env)
     {
-        services.AddDbContextFactory<ReaparrDbContext>();
-
         // This has to always be first
         services.AddCors(options =>
         {
@@ -55,11 +54,13 @@ public static partial class Startup
 
         services.AddOptions();
 
+        services.AddMemoryCache();
+
         services.AddHttpContextAccessor();
 
         services.ConfigureAuthenticationServices();
 
-        // Setup FastEndpoints
+        // Set up FastEndpoints
         services.AddFastEndpoints(options =>
         {
             // Manually define the assemblies to scan for FastEndpoints
@@ -68,10 +69,15 @@ public static partial class Startup
             [
                 // Reference the assemblies that contain the FastEndpoints or ICommand implementations
                 Assembly.GetAssembly(typeof(ApplicationModule))!,
+                Assembly.GetAssembly(typeof(BackgroundJobsModule))!,
                 Assembly.GetAssembly(typeof(PlexApiModule))!,
                 Assembly.GetAssembly(typeof(PublicApiModule))!,
             ];
         });
+
+        // Response caching for downstream caches (browsers, proxies, CDNs) add this after FastEndpoints
+        // Doc: https://fast-endpoints.com/docs/response-caching
+        services.AddResponseCaching();
 
         services.AddCommandMiddleware(c => c.Register(typeof(ValidationPipeline<,>)));
 
@@ -202,6 +208,7 @@ public static partial class Startup
 
         services.RegisterSonarrHttpClient();
         services.RegisterRadarrHttpClient();
+        services.RegisterPlexThumbnailHttpClient();
 
         // Removing all registered IHttpMessageHandlerBuilderFilter instances to disable built-in HttpClient logging
         services.RemoveAll<IHttpMessageHandlerBuilderFilter>();

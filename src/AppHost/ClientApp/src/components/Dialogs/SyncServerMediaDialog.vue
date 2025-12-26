@@ -38,6 +38,7 @@
 										class="q-mr-sm" />
 									<QMediaTypeIcon
 										v-else
+										:active="node.completed"
 										:loading="node.percentage > 0 && !node.completed"
 										:media-type="node.mediaType" />
 									<!-- Row Title	-->
@@ -67,10 +68,10 @@
 									<!-- Steps Progress -->
 									<QCol>
 										<QText
-											v-if="!isServer(node) && !node.completed"
+											v-if="!isServer(node) && !node.completed && node.progress?.step != null && node.progress?.totalSteps != null"
 											:value="$t('components.media-overview.steps-remaining', {
-												index: node.progress?.step,
-												total: node.progress?.totalSteps,
+												index: node.progress.step,
+												total: node.progress.totalSteps,
 											})"
 											align="center" />
 									</QCol>
@@ -106,26 +107,22 @@
 </template>
 
 <script setup lang="ts">
-import { useSubscription } from '@vueuse/rxjs';
 import { get, set } from '@vueuse/core';
 import type {
 	LibraryProgress,
-	SyncServerMediaProgress,
 	PlexMediaType,
 } from '@dto';
 import { DialogType } from '@enums';
-import { sum } from 'lodash-es';
+import { sum, meanBy } from 'lodash-es';
 import {
 	useI18n,
 	useServerStore,
-	useSignalrStore,
 	useLibraryStore,
 } from '#imports';
 
 const { t } = useI18n();
 const serverStore = useServerStore();
 const libraryStore = useLibraryStore();
-const syncProgressList = ref<SyncServerMediaProgress[]>([]);
 
 const expanded = ref<number[]>([]);
 /**
@@ -133,13 +130,17 @@ const expanded = ref<number[]>([]);
  */
 const plexServerIds = ref<number[]>([]);
 
-const libraryProgressList = computed(() => get(syncProgressList).flatMap((x) => x.libraryProgresses));
+const libraryProgressList = computed(() => get(plexServerNodes).flatMap((x) => x.children).flatMap((x) => x.progress));
 
 const totalPercentage = computed(() => {
-	return sum(get(syncProgressList).map((x) => x.percentage)) / get(syncProgressList).length;
+	const nodes = get(plexServerNodes);
+	if (nodes.length === 0) {
+		return 0;
+	}
+	return sum(nodes.map((x) => x.percentage)) / nodes.length;
 });
 
-const plexServers = computed(() => serverStore.getServers([...get(syncProgressList).map((x) => x.serverId), ...get(plexServerIds)].filter((x, i, a) => a.indexOf(x) == i)));
+const plexServers = computed(() => serverStore.getServers([...get(plexServerNodes).map((x) => x.id), ...get(plexServerIds)].filter((x, i, a) => a.indexOf(x) == i)));
 
 const getProgressText = computed(() => {
 	if (get(plexServers).length === 0) {
@@ -157,31 +158,35 @@ const getProgressText = computed(() => {
 	}
 
 	return t('components.sync-server-media-dialog.checking-progress', {
-		count: get(libraryProgressList).filter((x) => x.isComplete).length,
+		count: get(libraryProgressList).filter((x) => x?.isComplete).length,
 		total: get(libraryProgressList).length,
 	});
 });
 
 const plexServerNodes = computed((): IPlexMediaSyncServerNode[] => {
 	let uniqueIndex = 0;
-	return get(syncProgressList).map((server) => {
+
+	return libraryStore.getLibrarySyncQueueGrouped().map((server) => {
+		const percentage = server.progress.length > 0
+			? meanBy(server.progress, (x) => x.percentage ?? 0)
+			: 0;
 		return {
 			id: server.serverId,
 			index: uniqueIndex++,
 			type: 'server',
 			title: serverStore.getServerName(server.serverId),
-			percentage: server.percentage,
-			completed: server.percentage === 100,
-			children: server.libraryProgresses.map((libraryProgress) => {
-				const library = libraryStore.getLibrary(libraryProgress.id);
+			percentage: percentage,
+			completed: percentage === 100,
+			children: server.progress.map((libraryProgress) => {
+				const library = libraryStore.getLibrary(libraryProgress.plexLibraryId);
 				return {
-					id: libraryProgress.id,
+					id: libraryProgress.plexLibraryId,
 					index: uniqueIndex++,
 					type: 'library',
 					mediaType: library?.type,
-					percentage: libraryProgress.percentage,
+					percentage: libraryProgress.percentage ?? 0,
 					title: library?.title ?? t('general.error.unknown'),
-					completed: libraryProgress.isComplete,
+					completed: libraryProgress.isComplete ?? false,
 					progress: libraryProgress,
 					children: [],
 				};
@@ -195,19 +200,10 @@ function isServer(node: IPlexMediaSyncServerNode): boolean {
 }
 
 function onClosed(): void {
-	set(syncProgressList, []);
 	set(plexServerIds, []);
+	set(expanded, []);
+	libraryStore.clearCompletedSyncQueues();
 }
-
-onMounted(() => {
-	useSubscription(
-		useSignalrStore()
-			.getAllSyncServerMediaProgress()
-			.subscribe((progress) => {
-				set(syncProgressList, progress);
-			}),
-	);
-});
 
 interface IPlexMediaSyncServerNode {
 	id: number;

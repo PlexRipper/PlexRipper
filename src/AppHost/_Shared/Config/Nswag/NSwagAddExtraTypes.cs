@@ -2,6 +2,7 @@ using NSwag.Generation.Processors;
 using NSwag.Generation.Processors.Contexts;
 using Reaparr.Application;
 using Reaparr.Application.Contracts;
+using Reaparr.BackgroundJobs.Contracts;
 
 namespace Reaparr.AppHost;
 
@@ -25,7 +26,6 @@ public class NSwagAddExtraTypes : IDocumentProcessor
             typeof(DownloadActions),
             typeof(LibraryProgress),
             typeof(NotificationDTO),
-            typeof(SyncServerMediaProgress),
             typeof(ServerDownloadProgressDTO),
             typeof(DownloadProgressDTO),
             typeof(ServerDownloadProgressMessagePackDTO),
@@ -34,9 +34,9 @@ public class NSwagAddExtraTypes : IDocumentProcessor
             // Background job updates
             typeof(CheckAllConnectionStatusUpdateDTO),
             typeof(DownloadJobUpdateDTO),
-            typeof(SyncServerMediaJobUpdateDTO),
             typeof(InspectPlexServerJobUpdateDTO),
             typeof(MoveDownloadFileJobUpdateDTO),
+            typeof(LibrarySyncJobQueueDTO),
         ];
 
         foreach (var type in types.Where(type => !context.SchemaResolver.HasSchema(type, false)))

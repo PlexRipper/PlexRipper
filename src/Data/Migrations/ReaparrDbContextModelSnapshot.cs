@@ -735,6 +735,54 @@ namespace Reaparr.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Reaparr.Domain.LibrarySyncJobQueue", b =>
+                {
+                    b.Property<int>("PlexServerId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(9);
+
+                    b.Property<int>("PlexLibraryId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(8);
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(5);
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(3);
+
+                    b.Property<string>("ErrorMessage")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(7);
+
+                    b.Property<bool>("IsServerOffline")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(6);
+
+                    b.Property<int>("Priority")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(1);
+
+                    b.Property<DateTime?>("StartedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(4);
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(2);
+
+                    b.HasKey("PlexServerId", "PlexLibraryId");
+
+                    b.HasIndex("PlexLibraryId");
+
+                    b.ToTable("BackgroundJobLibrarySyncJobQueues");
+                });
+
             modelBuilder.Entity("Reaparr.Domain.Notification", b =>
                 {
                     b.Property<int>("Id")
@@ -2971,6 +3019,25 @@ namespace Reaparr.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("DownloadTask");
+
+                    b.Navigation("PlexServer");
+                });
+
+            modelBuilder.Entity("Reaparr.Domain.LibrarySyncJobQueue", b =>
+                {
+                    b.HasOne("Reaparr.Domain.PlexLibrary", "PlexLibrary")
+                        .WithMany()
+                        .HasForeignKey("PlexLibraryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Reaparr.Domain.PlexServer", "PlexServer")
+                        .WithMany()
+                        .HasForeignKey("PlexServerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PlexLibrary");
 
                     b.Navigation("PlexServer");
                 });

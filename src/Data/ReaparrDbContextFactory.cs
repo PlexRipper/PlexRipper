@@ -1,18 +1,22 @@
-using Microsoft.EntityFrameworkCore;
 using Reaparr.Data.Contracts;
 
 namespace Reaparr.Data;
 
 public class ReaparrDbContextFactory : IReaparrDbContextFactory
 {
-    private readonly IDbContextFactory<ReaparrDbContext> _factory;
+    private readonly Func<IReaparrDbContext> _factory;
 
-    public ReaparrDbContextFactory(IDbContextFactory<ReaparrDbContext> factory)
+    /// <summary>
+    /// Uses Autofac's Func&lt;T&gt; factory delegation pattern.
+    /// Autofac automatically provides Func&lt;T&gt; for any registered type.
+    /// This ensures test overrides of IReaparrDbContext are respected.
+    /// </summary>
+    public ReaparrDbContextFactory(Func<IReaparrDbContext> factory)
     {
         _factory = factory;
     }
 
-    public IReaparrDbContext Create() => _factory.CreateDbContext();
+    public IReaparrDbContext Create() => _factory();
 
-    public async Task<IReaparrDbContext> CreateAsync() => await _factory.CreateDbContextAsync();
+    public Task<IReaparrDbContext> CreateAsync() => Task.FromResult(_factory());
 }

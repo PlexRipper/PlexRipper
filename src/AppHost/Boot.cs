@@ -1,5 +1,6 @@
 using Reaparr.Application;
 using Reaparr.Application.Contracts;
+using Reaparr.BackgroundJobs.Contracts;
 using Reaparr.Environment;
 
 namespace Reaparr.AppHost;
@@ -19,6 +20,7 @@ public class Boot : IHostedService
     private readonly ISchedulerService _schedulerService;
 
     private readonly IDownloadQueue _downloadQueue;
+    private readonly ILibrarySyncJobListener _librarySyncJobListener;
 
     #endregion
 
@@ -32,7 +34,8 @@ public class Boot : IHostedService
         ICommandExecutor commandExecutor,
         IHostApplicationLifetime appLifetime,
         ISchedulerService schedulerService,
-        IDownloadQueue downloadQueue
+        IDownloadQueue downloadQueue,
+        ILibrarySyncJobListener librarySyncJobListener
     )
     {
         _log = log.ForContext<Boot>();
@@ -40,6 +43,7 @@ public class Boot : IHostedService
         _appLifetime = appLifetime;
         _schedulerService = schedulerService;
         _downloadQueue = downloadQueue;
+        _librarySyncJobListener = librarySyncJobListener;
 
         appLifetime.ApplicationStarted.Register(OnStarted);
         appLifetime.ApplicationStopping.Register(OnStopping);
@@ -68,9 +72,21 @@ public class Boot : IHostedService
             return;
         }
 
-        _downloadQueue.Setup();
+        var downloadQueueSetup = _downloadQueue.Setup();
+        if (downloadQueueSetup.IsFailed)
+        {
+            TerminateApplication();
+            return;
+        }
 
         await _schedulerService.SetupAsync();
+
+        var librarySyncListenerSetup = _librarySyncJobListener.Setup();
+        if (librarySyncListenerSetup.IsFailed)
+        {
+            TerminateApplication();
+            return;
+        }
 
         _log.Here().Information("Finished Initiating boot process");
     }

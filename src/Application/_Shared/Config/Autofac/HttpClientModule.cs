@@ -8,6 +8,7 @@ public static class HttpClientModule
 {
     internal static readonly string SonarrClientName = "Sonarr";
     internal static readonly string RadarrClientName = "Radarr";
+    public static readonly string PlexThumbnailClientName = "PlexThumbnail";
 
     public static void RegisterSonarrHttpClient(this IServiceCollection services)
     {
@@ -65,4 +66,29 @@ public static class HttpClientModule
 
     public static HttpClient CreateRadarrHttpClient(this IHttpClientFactory factory) =>
         factory.CreateClient(RadarrClientName);
+
+    public static void RegisterPlexThumbnailHttpClient(this IServiceCollection services)
+    {
+        services
+            .AddHttpClient(
+                PlexThumbnailClientName,
+                client =>
+                {
+                    client.Timeout = TimeSpan.FromSeconds(30);
+                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("image/jpeg"));
+                }
+            )
+            .ConfigurePrimaryHttpMessageHandler(() =>
+                new SocketsHttpHandler
+                {
+                    PooledConnectionLifetime = TimeSpan.FromMinutes(5),
+                    PooledConnectionIdleTimeout = TimeSpan.FromMinutes(2),
+                    MaxConnectionsPerServer = 10,
+                    SslOptions = new System.Net.Security.SslClientAuthenticationOptions
+                    {
+                        RemoteCertificateValidationCallback = (_, _, _, _) => true,
+                    },
+                }
+            );
+    }
 }

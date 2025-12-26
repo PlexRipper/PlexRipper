@@ -7,19 +7,19 @@ namespace Reaparr.Application;
 public class DownloadJobListener : IDownloadJobListener
 {
     private readonly ILogger _log;
-    private readonly IReaparrDbContext _dbContext;
+    private readonly IReaparrDbContextFactory _dbContextFactory;
     private readonly IEventPublisher _eventPublisher;
     private readonly IMoveDownloadFileQueue _moveDownloadFileQueue;
 
     public DownloadJobListener(
         ILogger log,
-        IReaparrDbContext dbContext,
+        IReaparrDbContextFactory dbContextFactory,
         IEventPublisher eventPublisher,
         IMoveDownloadFileQueue moveDownloadFileQueue
     )
     {
         _log = log.ForContext<DownloadJobListener>();
-        _dbContext = dbContext;
+        _dbContextFactory = dbContextFactory;
         _eventPublisher = eventPublisher;
         _moveDownloadFileQueue = moveDownloadFileQueue;
     }
@@ -45,7 +45,9 @@ public class DownloadJobListener : IDownloadJobListener
                 return;
             }
 
-            var status = await _dbContext.GetDownloadTaskStatusAsync(downloadTaskKey, cancellationToken);
+            // Create a new DbContext for this operation to avoid threading issues
+            using var dbContext = await _dbContextFactory.CreateAsync();
+            var status = await dbContext.GetDownloadTaskStatusAsync(downloadTaskKey, cancellationToken);
             if (status == DownloadStatus.DownloadFinished)
             {
                 _log.Here()

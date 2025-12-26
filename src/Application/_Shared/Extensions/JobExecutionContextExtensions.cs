@@ -14,7 +14,7 @@ public static class JobExecutionContextExtensions
     /// <param name="context"> The <see cref="IJobExecutionContext"/> to convert. </param>
     /// <param name="status"> The Quartz <see cref="JobStatus"/> to set. </param>
     /// <returns></returns>
-    /// <exception cref="Exception"> Thrown when the job type is unknown. </exception>
+    /// <remarks>Some job types handle their own status updates directly via SignalR and will return empty JSON from this method.</remarks>
     public static JobStatusUpdate<string> ToJobStatusUpdate(this IJobExecutionContext context, JobStatus status)
     {
         var key = context.JobDetail.Key;
@@ -34,15 +34,6 @@ public static class JobExecutionContextExtensions
                     new DownloadJobUpdateDTO
                     {
                         Id = dataMap.GetJsonValue<DownloadTaskKey>(DownloadJob.DownloadTaskIdParameter)!,
-                    }
-                );
-                break;
-            case JobTypes.SyncServerMediaJob:
-                jsonString = ToJsonString(
-                    new SyncServerMediaJobUpdateDTO
-                    {
-                        PlexServerId = dataMap.GetIntValue(SyncServerMediaJob.PlexServerIdParameter),
-                        ForceSync = dataMap.GetBooleanValue(SyncServerMediaJob.ForceSyncParameter),
                     }
                 );
                 break;
@@ -66,8 +57,13 @@ public static class JobExecutionContextExtensions
                 );
                 break;
 
+            // NOTE: LibrarySyncJob handles its own status updates via SignalR in LibrarySyncJobListener
+            case JobTypes.LibrarySyncJob:
+                break;
+
             default:
-                throw new Exception($"Unknown job type: {jobType}");
+                jsonString = "{}";
+                break;
         }
 
         return new JobStatusUpdate<string>(
@@ -87,7 +83,7 @@ public static class JobExecutionContextExtensions
             catch (Exception e)
             {
                 _log.Here().ErrorResult(e);
-                throw;
+                return "{}";
             }
         }
     }

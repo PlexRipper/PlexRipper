@@ -8,8 +8,10 @@
 		:item-size="posterCardHeight"
 		:item-secondary-size="posterCardWidth"
 		:grid-items="gridItems"
-		:buffer="posterCardHeight * 5"
+		:buffer="posterCardHeight * 15"
 		key-field="id"
+		list-class="poster-table-list"
+		item-class="poster-table-item"
 		data-cy="poster-table"
 		@resize="onResize">
 		<MediaPoster
@@ -130,5 +132,18 @@ onMounted(() => {
     height: 100%;
     width: 100%;
   }
+}
+
+// Optimize RecycleScroller performance during fast scrolling
+.poster-table-list {
+  // Enable GPU acceleration for the list wrapper
+  will-change: transform;
+}
+
+.poster-table-item {
+  // GPU acceleration for each item view - smoother recycling
+  will-change: transform;
+  // Prevent layout thrashing during scroll
+  contain: layout style paint;
 }
 </style>

@@ -92,8 +92,9 @@ export default {
     [
       '@semantic-release/github',
       {
-        successComment: false,
-        failComment: false,
+        // Disable automatic comments on issues/PRs
+        successCommentCondition: false,
+        failCommentCondition: false,
       },
     ],
   ],

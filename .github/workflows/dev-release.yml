@@ -28,6 +28,15 @@ jobs:
                 with:
                     token: ${{ secrets.GH_TOKEN }}
                     fetch-depth: 0
+                    ref: dev
+
+            -   name: Verify Git State
+                run: |
+                    echo "Current branch: $(git branch --show-current)"
+                    echo "Remote branches:"
+                    git branch -r
+                    echo "Git remote:"
+                    git remote -v
 
             -   name: Setup Node.js
                 uses: actions/setup-node@v4

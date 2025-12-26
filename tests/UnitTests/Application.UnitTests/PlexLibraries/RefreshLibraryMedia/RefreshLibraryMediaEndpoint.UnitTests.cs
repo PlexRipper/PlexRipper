@@ -1,5 +1,5 @@
 using Reaparr.Application.Contracts;
-using Reaparr.BackgroundJobs;
+using Reaparr.BackgroundJobs.Contracts;
 
 namespace Reaparr.Application.UnitTests;
 
@@ -9,7 +9,7 @@ public class RefreshLibraryMediaEndpointUnitTests : BaseUnitTest<RefreshLibraryM
         : base(output) { }
 
     [Fact]
-    public async Task ShouldReturnAPlexLibraryDTO_WhenRefreshedSuccessfully()
+    public async Task ShouldReturnSuccess_WhenLibrarySyncJobQueued()
     {
         // Arrange
         await SetupDatabase(
@@ -22,12 +22,12 @@ public class RefreshLibraryMediaEndpointUnitTests : BaseUnitTest<RefreshLibraryM
 
         var plexLibrary = IDbContext.PlexLibraries.First();
 
-        Mock.SetupCommand(It.IsAny<RefreshLibraryMediaCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.Once());
+        Mock.SetupCommand(It.IsAny<QueueLibrarySyncJobCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.Once());
 
         // Act
         var rawResponse = SetupEndpointUnitTest<RefreshLibraryMediaEndpoint>();
         await rawResponse.HandleAsync(new RefreshLibraryMediaEndpointRequest(plexLibrary.Id), CancellationToken);
-        var resultDTO = rawResponse.Response as ResultDTO<PlexLibraryDTO>;
+        var resultDTO = rawResponse.Response;
 
         // Assert
         resultDTO.ShouldNotBeNull();
@@ -48,7 +48,7 @@ public class RefreshLibraryMediaEndpointUnitTests : BaseUnitTest<RefreshLibraryM
 
         var plexLibrary = IDbContext.PlexLibraries.First();
 
-        Mock.SetupCommand(It.IsAny<RefreshLibraryMediaCommand>)
+        Mock.SetupCommand(It.IsAny<QueueLibrarySyncJobCommand>)
             .ReturnsAsync(Result.Fail("Failed to refresh library"))
             .Verifiable(Times.Once());
 
@@ -83,12 +83,12 @@ public class RefreshLibraryMediaEndpointUnitTests : BaseUnitTest<RefreshLibraryM
         var plexLibrary = IDbContext.PlexLibraries.First();
         plexLibrary.Type.ShouldBe(libraryType);
 
-        Mock.SetupCommand(It.IsAny<RefreshLibraryMediaCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.Once());
+        Mock.SetupCommand(It.IsAny<QueueLibrarySyncJobCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.Once());
 
         // Act
         var rawResponse = SetupEndpointUnitTest<RefreshLibraryMediaEndpoint>();
         await rawResponse.HandleAsync(new RefreshLibraryMediaEndpointRequest(plexLibrary.Id), CancellationToken);
-        var resultDTO = rawResponse.Response as ResultDTO<PlexLibraryDTO>;
+        var resultDTO = rawResponse.Response;
 
         // Assert
         resultDTO.ShouldNotBeNull();

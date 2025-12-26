@@ -142,9 +142,9 @@ public class GetAllBackgroundJobsEndpointUnitTests : BaseUnitTest<GetAllBackgrou
         // Validate each job type
         ValidateJobStatusUpdate(responseValue[0], downloadJobUpdate, downloadJobUpdatePayload);
         ValidateJobStatusUpdate(responseValue[1], inspectPlexServerJobUpdate, inspectPlexServerJobUpdatePayload);
-        ValidateJobStatusUpdate(responseValue[3], moveDownloadJobUpdate, moveDownloadJobUpdatePayload);
+        ValidateJobStatusUpdate(responseValue[2], moveDownloadJobUpdate, moveDownloadJobUpdatePayload);
         ValidateJobStatusUpdate(
-            responseValue[4],
+            responseValue[3],
             checkAllConnectionsStatusJobUpdate,
             checkAllConnectionsStatusJobUpdatePayload
         );

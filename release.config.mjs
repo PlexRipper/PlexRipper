@@ -32,7 +32,12 @@
 const isStableRelease = process.env.STABLE_RELEASE === 'true';
 
 export default {
+  // Workaround for semantic-release issue #2503:
+  // https://github.com/semantic-release/semantic-release/issues/2503
+  // Prerelease-only branches require a "main" release branch to exist.
+  // Adding maintenance branch pattern satisfies this requirement.
   branches: [
+    '+([0-9]).x', // Maintenance branches (acts as "main" branch requirement)
     {
       name: 'dev',
       // false → publish computed version as stable (e.g., 1.5.0)

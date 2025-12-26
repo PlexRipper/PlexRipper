@@ -59,5 +59,3 @@ public class ResetFailedLibrarySyncJobsCommandHandler : ICommandHandler<ResetFai
         return Result.Ok();
     }
 }
-
-

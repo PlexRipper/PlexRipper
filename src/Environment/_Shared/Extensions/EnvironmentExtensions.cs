@@ -88,6 +88,13 @@ public static class EnvironmentExtensions
     public static bool IsDevRelease() => GetVersion().Contains("dev");
 
     /// <summary>
+    /// Returns true if the ASPNETCORE_ENVIRONMENT is set to Development.
+    /// </summary>
+    /// <returns></returns>
+    public static bool IsDevelopmentEnvironment() =>
+        System.Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
+
+    /// <summary>
     /// Gets the process user ID (PUID) from the environment. Returns -1 when not set or invalid.
     /// </summary>
     public static int GetPuid() =>

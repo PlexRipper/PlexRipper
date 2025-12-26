@@ -25,7 +25,13 @@ public static class DbContextConnections
     public static void DefaultConfiguration(this DbContextOptionsBuilder optionsBuilder, Type contextType)
     {
         optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-        optionsBuilder.EnableDetailedErrors();
+
+        if (EnvironmentExtensions.IsDevelopmentEnvironment() || EnvironmentExtensions.IsIntegrationTestMode())
+        {
+            optionsBuilder.EnableDetailedErrors();
+            optionsBuilder.EnableSensitiveDataLogging();
+        }
+
         optionsBuilder.AddInterceptors(_collationInterceptor);
 
         optionsBuilder.UseSqlite(

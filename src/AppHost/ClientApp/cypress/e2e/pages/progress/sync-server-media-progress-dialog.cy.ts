@@ -1,30 +1,44 @@
 import {
 	JobStatus,
 	JobTypes,
-	type LibraryProgress,
 	type LibrarySyncJobQueueDTO,
 	LibrarySyncJobStatus,
 	MessageTypes,
 } from '@dto';
 import { generateLibraryProgress, generateLibrarySyncJobQueue } from '@factories';
+import { generateResultDTO } from '@mock';
+import { PlexLibraryPaths } from '@api/api-paths';
 
 describe('SyncServerMediaDialog', () => {
+	const SERVER_COUNT = 3;
+
 	beforeEach(() => {
 		cy.basePageSetup({
 			plexAccountCount: 1,
-			plexServerCount: 5,
+			plexServerCount: SERVER_COUNT,
+		});
+
+		// Override sync status endpoint to return empty - we'll populate via SignalR
+		cy.intercept('GET', PlexLibraryPaths.getLibrarySyncStatusEndpoint(), {
+			statusCode: 200,
+			body: generateResultDTO([]),
 		});
 
 		cy.visitEmptyPage();
 	});
 
-	it('Should display the SyncServerMediaDialog when opening from the background activity button', () => {
+	it('Should display sync progress for multiple servers, each syncing one library at a time', () => {
 		cy.getPageData().then((data) => {
-			const server = data.plexServers[0]!;
-			const serverLibraries = data.plexLibraries.filter((x) => x.plexServerId === server.id);
+			// Select one library from each server to sync in parallel
+			const librariesToSync = data.plexServers
+				.map((server) => {
+					const serverLibraries = data.plexLibraries.filter((lib) => lib.plexServerId === server.id);
+					return { server, library: serverLibraries[0]! };
+				})
+				.filter(({ library }) => library !== undefined);
 
-			// Start the sync job for each library on this server
-			for (const library of serverLibraries) {
+			// === PHASE 1: Start sync jobs for all servers ===
+			librariesToSync.forEach(({ server, library }) => {
 				cy.hubPublishJobStatusUpdate<LibrarySyncJobQueueDTO>(
 					JobTypes.LibrarySyncJob,
 					JobStatus.Started,
@@ -34,28 +48,62 @@ describe('SyncServerMediaDialog', () => {
 						status: LibrarySyncJobStatus.Processing,
 					}),
 				);
-			}
+			});
 
+			// Open the sync dialog
 			cy.getCy('background-activity-button').click();
-
 			cy.getCy(JobTypes.LibrarySyncJob + 'activity-button').click();
-			cy.getCy('sync-server-media-dialog').should('exist').and('be.visible');
+			cy.getCy('sync-server-media-dialog').should('be.visible');
 
-			// Simulate progress updates
-			for (let i = 0; i <= 10; i++) {
-				const progress: LibraryProgress[] = serverLibraries.map((library) =>
-					generateLibraryProgress({
-						libraryId: library.id,
-						received: i * 100,
-						total: 1000,
-					}),
-				);
+			// === PHASE 2: Verify all servers and libraries are displayed ===
+			cy.getCy('sync-server-media-dialog-server-title')
+				.should('have.length', SERVER_COUNT)
+				.each(($el, index) => {
+					// Verify server names are displayed
+					cy.wrap($el).should('contain.text', librariesToSync[index]!.server.name);
+				});
 
-				cy.wait(500).hubPublish('progress', MessageTypes.LibraryProgress, progress);
-			}
+			cy.getCy('sync-server-media-dialog-library-title')
+				.should('have.length', SERVER_COUNT)
+				.each(($el, index) => {
+					// Verify library titles are displayed
+					cy.wrap($el).should('contain.text', librariesToSync[index]!.library.title);
+				});
 
-			// Complete the sync job for each library
-			for (const library of serverLibraries) {
+			// === PHASE 3: Simulate progress updates from 0% to 100% ===
+			// Send initial 0% progress
+			librariesToSync.forEach(({ library }) => {
+				cy.hubPublish('progress', MessageTypes.LibraryProgress, generateLibraryProgress({
+					libraryId: library.id,
+					received: 0,
+					total: 1000,
+				}));
+			});
+
+			// Verify progress bars exist for each library
+			cy.getCy('sync-server-media-dialog-library-title').each(($el) => {
+				cy.wrap($el)
+					.parents('.q-tree__node-header')
+					.find('.q-linear-progress')
+					.should('exist');
+			});
+
+			// Progress through 25%, 50%, 75%, 100%
+			[250, 500, 750, 1000].forEach((received) => {
+				cy.wait(300).then(() => {
+					librariesToSync.forEach(({ library }) => {
+						cy.hubPublish('progress', MessageTypes.LibraryProgress, generateLibraryProgress({
+							libraryId: library.id,
+							received,
+							total: 1000,
+						}));
+					});
+				});
+			});
+
+			// === PHASE 4: Complete all sync jobs ===
+			cy.wait(300);
+			librariesToSync.forEach(({ server, library }) => {
 				cy.hubPublishJobStatusUpdate<LibrarySyncJobQueueDTO>(
 					JobTypes.LibrarySyncJob,
 					JobStatus.Completed,
@@ -66,10 +114,11 @@ describe('SyncServerMediaDialog', () => {
 						completedAt: new Date().toISOString(),
 					}),
 				);
-			}
+			});
 
-			// cy.getCy('sync-server-media-dialog-hide-btn').click();
-			// cy.getCy('sync-server-media-dialog').should('not.exist');
+			// === PHASE 5: Close dialog ===
+			cy.getCy('sync-server-media-dialog-hide-btn').click();
+			cy.getCy('sync-server-media-dialog').should('not.exist');
 		});
 	});
 });

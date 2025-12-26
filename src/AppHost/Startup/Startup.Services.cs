@@ -62,11 +62,13 @@ public static partial class Startup
 
         services.AddOptions();
 
+        services.AddMemoryCache();
+
         services.AddHttpContextAccessor();
 
         services.ConfigureAuthenticationServices();
 
-        // Setup FastEndpoints
+        // Set up FastEndpoints
         services.AddFastEndpoints(options =>
         {
             // Manually define the assemblies to scan for FastEndpoints
@@ -80,6 +82,10 @@ public static partial class Startup
                 Assembly.GetAssembly(typeof(PublicApiModule))!,
             ];
         });
+
+        // Response caching for downstream caches (browsers, proxies, CDNs) add this after FastEndpoints
+        // Doc: https://fast-endpoints.com/docs/response-caching
+        services.AddResponseCaching();
 
         services.AddCommandMiddleware(c => c.Register(typeof(ValidationPipeline<,>)));
 
@@ -210,6 +216,7 @@ public static partial class Startup
 
         services.RegisterSonarrHttpClient();
         services.RegisterRadarrHttpClient();
+        services.RegisterPlexThumbnailHttpClient();
 
         // Removing all registered IHttpMessageHandlerBuilderFilter instances to disable built-in HttpClient logging
         services.RemoveAll<IHttpMessageHandlerBuilderFilter>();

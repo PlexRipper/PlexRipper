@@ -33,6 +33,12 @@ public static class DbContextConnections
             b =>
             {
                 b.MigrationsAssembly(contextType.Assembly.FullName);
+
+                // Use split queries for multiple collection includes to avoid cartesian explosion.
+                // This resolves: "Compiling a query which loads related collections for more than one
+                // collection navigation... no 'QuerySplittingBehavior' has been configured"
+                // See: https://go.microsoft.com/fwlink/?linkid=2134277
+                b.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
             }
         );
     }

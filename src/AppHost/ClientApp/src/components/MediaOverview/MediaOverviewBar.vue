@@ -170,7 +170,7 @@ function changeView(viewMode: ViewMode) {
 @use '@/assets/scss/mixins';
 
 .media-overview-bar {
-  @extend .default-border;
+  @extend .fade-out-border;
 
   height: $media-overview-bar-height;
 }

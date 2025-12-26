@@ -287,7 +287,6 @@ public class PlexApiClient : IPlexApiClient
     /// <summary>
     ///  Don't log identity requests
     /// </summary>
-    /// <param name="request"></param>
     private bool ShouldLog(HttpRequestMessage request) =>
         !request.RequestUri?.PathAndQuery.Contains("identity", StringComparison.OrdinalIgnoreCase) ?? true;
 

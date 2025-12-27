@@ -134,6 +134,9 @@ public class LibrarySyncJob : IJob
 
             // Schedule the next library from the queue
             await _commandExecutor.Send(new CheckQueuedPlexLibraryToSyncCommand(), cancellationToken);
+
+            // Queue metadata sync for this server to fetch detailed Part/Stream data
+            await _commandExecutor.Send(new QueueMetadataSyncCommand(_serverId), cancellationToken);
         }
         catch (OperationCanceledException)
         {

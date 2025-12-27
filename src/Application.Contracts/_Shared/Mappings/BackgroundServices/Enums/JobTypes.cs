@@ -26,5 +26,8 @@ public enum JobTypes
     [EnumMember(Value = nameof(LibrarySyncJob))]
     LibrarySyncJob = 5,
 
+    [EnumMember(Value = nameof(MetadataSyncJob))]
+    MetadataSyncJob = 6,
+
     // Ensure to add new job types to ToJobStatusUpdate in JobExecutionContextExtensions
 }

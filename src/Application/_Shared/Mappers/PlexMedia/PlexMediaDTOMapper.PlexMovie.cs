@@ -75,8 +75,6 @@ public static partial class PlexMediaDTOMapper
     public static LibraryMediaItemPartDTO ToDTO(this PlexMovieMediaDataPart source) =>
         new()
         {
-            Accessible = source.Accessible,
-            Exists = source.Exists,
             Id = source.PlexId,
             Key = source.Key,
             Indexes = source.Indexes,

@@ -8,7 +8,7 @@ public static partial class MediaContainerMappers
     {
         return new LibraryMediaItemDTO
         {
-            RatingKey = data.RatingKey!,
+            RatingKey = int.TryParse(data.RatingKey!, out var ratingKey) ? ratingKey : -1,
             Key = data.Key,
             Type = data.Type.ToPlexMediaType(),
             Title = data.Title,
@@ -100,8 +100,6 @@ public static partial class MediaContainerMappers
         new()
         {
             Id = part.Id,
-            Accessible = part.Accessible,
-            Exists = part.Exists,
             Key = part.Key,
             Indexes = part.Indexes,
             Duration = part.Duration ?? -1,

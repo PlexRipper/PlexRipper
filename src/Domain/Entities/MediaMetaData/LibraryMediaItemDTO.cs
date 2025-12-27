@@ -6,7 +6,7 @@ namespace Reaparr.Domain;
 
 public record LibraryMediaItemDTO
 {
-    public required string RatingKey { get; init; }
+    public required int RatingKey { get; init; }
 
     public required string Key { get; init; }
 
@@ -236,16 +236,6 @@ public record LibraryMediaItemMediaDTO
 
 public record LibraryMediaItemPartDTO
 {
-    /// <summary>
-    /// Indicates if the part is accessible.
-    /// </summary>
-    public required bool? Accessible { get; init; }
-
-    /// <summary>
-    /// Indicates if the part exists.
-    /// </summary>
-    public required bool? Exists { get; init; }
-
     /// <summary>
     /// Unique part identifier.
     /// </summary>

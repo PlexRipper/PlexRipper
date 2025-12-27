@@ -112,7 +112,7 @@ namespace Reaparr.PlexApi.UnitTests
 
             // Assert
             result.ShouldNotBeNull();
-            result.RatingKey.ShouldBe(sourceData.RatingKey);
+            result.RatingKey.ShouldBe(int.Parse(sourceData.RatingKey));
             result.Key.ShouldBe(sourceData.Key);
             result.Title.ShouldBe(sourceData.Title);
             result.Summary.ShouldBe(sourceData.Summary);
@@ -239,7 +239,7 @@ namespace Reaparr.PlexApi.UnitTests
 
             // Assert
             result.ShouldNotBeNull();
-            result.RatingKey.ShouldBe(sourceData.RatingKey);
+            result.RatingKey.ShouldBe(int.Parse(sourceData.RatingKey));
             result.Key.ShouldBe(sourceData.Key);
             result.Title.ShouldBe(sourceData.Title);
             result.Summary.ShouldBe(sourceData.Summary);

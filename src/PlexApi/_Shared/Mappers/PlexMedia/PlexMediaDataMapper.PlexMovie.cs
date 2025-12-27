@@ -29,7 +29,7 @@ public static partial class PlexMediaDataMapper
             UpdatedAt = source.UpdatedAt,
 
             Type = PlexMediaType.None,
-            Key = int.Parse(source.RatingKey),
+            Key = source.RatingKey,
             MetaDataKey = RetrieveMetaDataKey(source),
             Studio = source.Studio,
             Summary = source.Summary,
@@ -43,7 +43,7 @@ public static partial class PlexMediaDataMapper
             Countries = source.Country.ToPlexCountry(),
             Actors = source.Role.ToPlexActor(),
             Genres = source.Genre.ToPlexGenre(),
-            MediaDataList = source.Media.ToMovieMediaDataList(),
+            MediaDataList = source.Media.ToMovieMediaDataList(source),
 
             // Ignore the following
             FullTitle = string.Empty,
@@ -52,10 +52,15 @@ public static partial class PlexMediaDataMapper
             FullBannerUrl = string.Empty,
         };
 
-    public static ICollection<PlexMovieMediaData> ToMovieMediaDataList(this List<LibraryMediaItemMediaDTO> source) =>
-        source.Select(x => x.ToMovieMediaDataList()).ToList();
+    public static ICollection<PlexMovieMediaData> ToMovieMediaDataList(
+        this List<LibraryMediaItemMediaDTO> source,
+        LibraryMediaItemDTO root
+    ) => source.Select(x => x.ToMovieMediaDataList(root)).ToList();
 
-    public static PlexMovieMediaData ToMovieMediaDataList(this LibraryMediaItemMediaDTO source) =>
+    public static PlexMovieMediaData ToMovieMediaDataList(
+        this LibraryMediaItemMediaDTO source,
+        LibraryMediaItemDTO root
+    ) =>
         new()
         {
             Id = 0,
@@ -75,7 +80,7 @@ public static partial class PlexMediaDataMapper
             VideoProfile = source.VideoProfile,
             AudioProfile = source.AudioProfile,
             HasVoiceActivity = source.HasVoiceActivity,
-            Parts = source.Parts.ToPlexMovieModel(),
+            Parts = source.Parts.ToPlexMovieModel(root),
 
             // Ignore the following
             PlexLibraryId = 0,
@@ -83,16 +88,19 @@ public static partial class PlexMediaDataMapper
             PlexMovieId = 0,
         };
 
-    public static ICollection<PlexMovieMediaDataPart> ToPlexMovieModel(this List<LibraryMediaItemPartDTO> source) =>
-        source.Select(x => x.ToPlexMovieModel()).ToList();
+    public static ICollection<PlexMovieMediaDataPart> ToPlexMovieModel(
+        this List<LibraryMediaItemPartDTO> source,
+        LibraryMediaItemDTO root
+    ) => source.Select(x => x.ToPlexMovieModel(root)).ToList();
 
-    public static PlexMovieMediaDataPart ToPlexMovieModel(this LibraryMediaItemPartDTO source) =>
+    public static PlexMovieMediaDataPart ToPlexMovieModel(
+        this LibraryMediaItemPartDTO source,
+        LibraryMediaItemDTO root
+    ) =>
         new()
         {
             Id = 0,
             PlexId = source.Id,
-            Accessible = source.Accessible,
-            Exists = source.Exists,
             Key = source.Key,
             Indexes = source.Indexes,
             Duration = source.Duration,
@@ -102,12 +110,24 @@ public static partial class PlexMediaDataMapper
             VideoProfile = source.VideoProfile,
             AudioProfile = source.AudioProfile,
             Streams = source.Stream.ToPlexMovieModel(),
+            RatingKey = root.RatingKey,
 
             // Ignore the following
             PlexLibraryId = 0,
             PlexServerId = 0,
             PlexMovieId = 0,
             PlexMovieMediaDataId = 0,
+            UpdatedAt = default,
+            Width = 0,
+            Height = 0,
+            VideoCodec = string.Empty,
+            VideoBitrate = 0,
+            FrameRate = 0,
+            Resolution = string.Empty,
+            Source = string.Empty,
+            ReleaseTitle = string.Empty,
+            Category = 0,
+            HasMetadata = false,
         };
 
     public static ICollection<PlexMovieMediaDataStream> ToPlexMovieModel(this List<LibraryMediaItemStreamDTO> source) =>

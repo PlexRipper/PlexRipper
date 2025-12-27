@@ -8,8 +8,6 @@ public static partial class FakeData
             .StrictMode(true)
             .Ignore(x => x.Id)
             .RuleFor(x => x.PlexId, f => f.Random.Long(1))
-            .RuleFor(x => x.Exists, true)
-            .RuleFor(x => x.Accessible, f => f.Random.Bool())
             .RuleFor(x => x.Key, _ => DownloadFileUrl)
             .RuleFor(x => x.Duration, f => f.Random.Int(50000, 5512400))
             .RuleFor(x => x.AudioProfile, _ => "dts")

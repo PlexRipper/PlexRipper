@@ -9,7 +9,7 @@ public abstract class BasePlexMediaDataPart : BaseEntity
     /// Immutable identifier for the physical media file.
     /// Used as the primary file identity for incremental sync.
     /// </summary>
-    [Column(Order = 0)]
+    [Column(Order = 1)]
     public required long PlexId { get; set; }
 
     /// <summary>
@@ -17,26 +17,26 @@ public abstract class BasePlexMediaDataPart : BaseEntity
     /// Identifies the logical media item (movie / episode) this file belongs to.
     /// <example>"23920"</example>
     /// </summary>
-    [Column(Order = 1)]
+    [Column(Order = 2)]
     public required int RatingKey { get; set; }
 
     /// <summary>
     /// Plex-generated key used to access this specific part.
     /// <example>"/library/parts/47140/1712273142/file.mkv"</example>
     /// </summary>
-    [Column(Order = 2)]
+    [Column(Order = 3)]
     public required string Key { get; set; }
 
     /// <summary>
     /// Duration of the media file in milliseconds.
     /// </summary>
-    [Column(Order = 3)]
+    [Column(Order = 4)]
     public required int Duration { get; set; }
 
-    [Column(Order = 4)]
+    [Column(Order = 5)]
     public required string OriginalFilename { get; set; }
 
-    [Column(Order = 5)]
+    [Column(Order = 6)]
     public required string GeneratedFilename { get; set; }
 
     /// <summary>

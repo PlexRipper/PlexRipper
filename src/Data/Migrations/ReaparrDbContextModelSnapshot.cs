@@ -1458,24 +1458,11 @@ namespace Reaparr.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(0);
 
-                    b.Property<string>("AudioChannels")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("AudioLanguages")
-                        .HasColumnType("TEXT");
+                    b.Property<bool?>("Accessible")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("AudioProfile")
                         .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("BitDepth")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Category")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("ColorSpace")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Container")
@@ -1485,49 +1472,19 @@ namespace Reaparr.Data.Migrations
                     b.Property<int>("Duration")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool?>("Exists")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("File")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<decimal>("FrameRate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("HasAtmos")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("HasForcedSubs")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("HasMetadata")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("HasSdhSubs")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Height")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("Indexes")
                         .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsDolbyVision")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsHdr")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsHdr10")
-                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Key")
                         .IsRequired()
                         .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("LastSyncedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int?>("MaxAudioChannels")
-                        .HasColumnType("INTEGER");
 
                     b.Property<long>("PlexId")
                         .HasColumnType("INTEGER");
@@ -1544,43 +1501,12 @@ namespace Reaparr.Data.Migrations
                     b.Property<int>("PlexServerId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("PrimaryAudioCodec")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("RatingKey")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("ReleaseTitle")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Resolution")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.Property<long>("Size")
                         .HasColumnType("INTEGER");
-
-                    b.Property<int>("Source")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("SubtitleLanguages")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("VideoBitrate")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("VideoCodec")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
 
                     b.Property<string>("VideoProfile")
                         .IsRequired()
                         .HasColumnType("TEXT");
-
-                    b.Property<int>("Width")
-                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -2399,24 +2325,11 @@ namespace Reaparr.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(0);
 
-                    b.Property<string>("AudioChannels")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("AudioLanguages")
-                        .HasColumnType("TEXT");
+                    b.Property<bool?>("Accessible")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("AudioProfile")
                         .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("BitDepth")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Category")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("ColorSpace")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Container")
@@ -2426,49 +2339,19 @@ namespace Reaparr.Data.Migrations
                     b.Property<int>("Duration")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool?>("Exists")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("File")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<decimal>("FrameRate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("HasAtmos")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("HasForcedSubs")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("HasMetadata")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("HasSdhSubs")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Height")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("Indexes")
                         .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsDolbyVision")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsHdr")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsHdr10")
-                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Key")
                         .IsRequired()
                         .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("LastSyncedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int?>("MaxAudioChannels")
-                        .HasColumnType("INTEGER");
 
                     b.Property<long>("PlexId")
                         .HasColumnType("INTEGER");
@@ -2485,43 +2368,12 @@ namespace Reaparr.Data.Migrations
                     b.Property<int>("PlexTvShowEpisodeMediaDataId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("PrimaryAudioCodec")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("RatingKey")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("ReleaseTitle")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Resolution")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.Property<long>("Size")
                         .HasColumnType("INTEGER");
-
-                    b.Property<int>("Source")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("SubtitleLanguages")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("VideoBitrate")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("VideoCodec")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
 
                     b.Property<string>("VideoProfile")
                         .IsRequired()
                         .HasColumnType("TEXT");
-
-                    b.Property<int>("Width")
-                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 

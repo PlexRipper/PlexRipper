@@ -14,17 +14,9 @@ public static class BasePlexMediaDataPartMapper
         var videoStream = streams.FirstOrDefault(s => s.StreamType == StreamType.Video);
         if (videoStream != null)
         {
-            part.BitDepth = videoStream.BitDepth ?? 0;
-            part.ColorSpace = videoStream.ColorSpace;
             part.FrameRate = Convert.ToDecimal(videoStream.FrameRate);
             part.VideoCodec = videoStream.Codec;
             part.Resolution = videoStream.DisplayTitle;
-            // HDR detection
-            part.IsDolbyVision = videoStream.DOVIPresent ?? false;
-            part.IsHdr10 = videoStream.ColorTrc is "smpte2084" or "arib-std-b67" && !part.IsDolbyVision;
-            part.IsHdr = part.IsDolbyVision || part.IsHdr10;
-            part.Width = videoStream.Width ?? 0;
-            part.Height = videoStream.Height ?? 0;
         }
 
         // Extract audio stream info
@@ -42,42 +34,6 @@ public static class BasePlexMediaDataPartMapper
                 8 => "7.1",
                 _ => "Unknown",
             };
-
-            // Max channels across all audio tracks
-            part.MaxAudioChannels = audioStreams.Max(s => s.Channels ?? 0);
-
-            // Atmos detection (usually indicated by codec or extended title)
-            part.HasAtmos = audioStreams.Any(s =>
-                s.ExtendedDisplayTitle.Contains("Atmos", StringComparison.OrdinalIgnoreCase)
-                || s.Title?.Contains("Atmos", StringComparison.OrdinalIgnoreCase) == true
-            );
-
-            // Collect distinct audio languages
-            var audioLanguages = audioStreams
-                .Where(s => !string.IsNullOrEmpty(s.LanguageCode))
-                .Select(s => s.LanguageCode)
-                .Distinct()
-                .ToList();
-            part.AudioLanguages = audioLanguages.Count > 0 ? string.Join(",", audioLanguages) : null;
-        }
-
-        // Extract subtitle stream info
-        var subtitleStreams = streams.Where(s => s.StreamType == StreamType.Subtitle).ToList();
-        if (subtitleStreams.Count > 0)
-        {
-            // Collect distinct subtitle languages
-            var subtitleLanguages = subtitleStreams
-                .Where(s => !string.IsNullOrEmpty(s.LanguageCode))
-                .Select(s => s.LanguageCode)
-                .Distinct()
-                .ToList();
-            part.SubtitleLanguages = subtitleLanguages.Count > 0 ? string.Join(",", subtitleLanguages) : null;
-
-            // SDH/Hearing impaired subs
-            part.HasSdhSubs = subtitleStreams.Any(s => s.HearingImpaired == true);
-
-            // Forced subs
-            part.HasForcedSubs = subtitleStreams.Any(s => s.Forced == true);
         }
 
         part.Source = DetermineSource(part);

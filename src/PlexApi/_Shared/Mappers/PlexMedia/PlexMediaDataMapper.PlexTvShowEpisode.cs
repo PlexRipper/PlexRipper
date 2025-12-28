@@ -103,14 +103,11 @@ public static partial class PlexMediaDataMapper
             Id = 0,
             PlexId = source.Id,
             Key = source.Key,
-            Indexes = source.Indexes,
             Duration = source.Duration,
             File = source.File,
             Size = source.Size,
             RatingKey = root.RatingKey,
             Container = source.Container,
-            VideoProfile = source.VideoProfile,
-            AudioProfile = source.AudioProfile,
             Streams = source.Stream.ToPlexTvShowEpisodeModel(),
 
             // Ignore the following
@@ -119,18 +116,15 @@ public static partial class PlexMediaDataMapper
             PlexTvShowEpisodeId = 0,
             PlexTvShowEpisodeMediaDataId = 0,
             LastSyncedAt = default,
-            Width = 0,
-            Height = 0,
             VideoCodec = string.Empty,
-            VideoBitrate = 0,
             FrameRate = 0,
             Resolution = string.Empty,
             Source = ReleaseSource.None,
-            ReleaseTitle = string.Empty,
-            Category = 0,
             HasMetadata = false,
             PrimaryAudioCodec = string.Empty,
             AudioChannels = string.Empty,
+            OriginalFilename = string.Empty,
+            GeneratedFilename = string.Empty,
         };
 
     public static ICollection<PlexTvShowEpisodeMediaDataStream> ToPlexTvShowEpisodeModel(

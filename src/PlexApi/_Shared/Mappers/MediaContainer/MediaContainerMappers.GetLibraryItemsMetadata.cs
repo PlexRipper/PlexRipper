@@ -102,13 +102,10 @@ public static class MediaContainerMappers
         {
             Id = part.Id,
             Key = part.Key,
-            Indexes = part.Indexes,
             Duration = part.Duration ?? -1,
             File = part.File ?? string.Empty,
             Size = part.Size ?? -1,
             Container = part.Container ?? string.Empty,
-            VideoProfile = part.VideoProfile ?? string.Empty,
-            AudioProfile = part.AudioProfile ?? string.Empty,
             Stream = part.Stream?.Select(x => x.ToItemStreamDTO()).ToList() ?? [],
         };
 

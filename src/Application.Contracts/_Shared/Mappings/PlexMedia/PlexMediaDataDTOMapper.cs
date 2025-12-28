@@ -38,7 +38,6 @@ public static class PlexMediaDataDTOMapper
             File = source.File.GetFileName(),
             Size = source.Size,
             Container = source.Container,
-            VideoProfile = source.VideoProfile,
         };
 
     public static List<PlexMediaDataPartDTO> ToDTO(this List<LibraryMediaItemPartDTO> source) =>

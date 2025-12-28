@@ -68,13 +68,10 @@ public static partial class PlexMediaDTOMapper
         {
             Id = source.PlexId,
             Key = source.Key,
-            Indexes = source.Indexes,
             Duration = source.Duration,
             File = source.File,
             Size = source.Size,
             Container = source.Container,
-            VideoProfile = source.VideoProfile,
-            AudioProfile = source.AudioProfile,
             Stream = source.Streams.ToDTO(),
         };
 

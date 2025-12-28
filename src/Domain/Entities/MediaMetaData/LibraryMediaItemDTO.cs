@@ -246,8 +246,6 @@ public record LibraryMediaItemPartDTO
     /// </summary>
     public required string Key { get; init; }
 
-    public required string? Indexes { get; init; }
-
     /// <summary>
     /// Duration of the part in milliseconds.
     /// </summary>
@@ -267,13 +265,6 @@ public record LibraryMediaItemPartDTO
     /// Container format of the part.
     /// </summary>
     public required string Container { get; init; }
-
-    /// <summary>
-    /// Video profile for the part.
-    /// </summary>
-    public required string VideoProfile { get; init; }
-
-    public required string AudioProfile { get; init; }
 
     /// <summary>
     /// An array of streams for this part.

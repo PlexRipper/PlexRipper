@@ -12,17 +12,10 @@ public abstract class BasePlexMediaDataPart : BaseEntity
     public required long PlexId { get; set; }
 
     /// <summary>
-    /// Plex Metadata.ratingKey.
-    /// Identifies the logical media item (movie / episode) this file belongs to.
-    /// <example>"23920"</example>
-    /// </summary>
-    public required int RatingKey { get; set; }
-
-    /// <summary>
     /// Timestamp of the last metadata update in Plex.
     /// Used to determine whether enrichment or resync is required.
     /// </summary>
-    public required DateTime UpdatedAt { get; set; }
+    public required DateTime LastSyncedAt { get; set; }
 
     /// <summary>
     /// Plex-generated key used to access this specific part.
@@ -127,11 +120,14 @@ public abstract class BasePlexMediaDataPart : BaseEntity
     /// </summary>
     public string? Indexes { get; set; }
 
-    #endregion
+    /// <summary>
+    /// Plex Metadata.ratingKey.
+    /// Identifies the logical media item (movie / episode) this file belongs to.
+    /// <example>"23920"</example>
+    /// </summary>
+    public required int RatingKey { get; set; }
 
-    #region Optional – Filled from SECOND call (/library/metadata/{ratingKey})
-
-    // ---- Video (stream-derived) ----
+    #region Video (stream-derived)
 
     /// <summary>
     /// Bit depth of the primary video stream (e.g. 8 or 10).
@@ -140,7 +136,7 @@ public abstract class BasePlexMediaDataPart : BaseEntity
     public int BitDepth { get; set; }
 
     /// <summary>
-    /// Indicates presence of any HDR format.
+    /// Indicates the presence of any HDR format.
     /// </summary>
     public bool IsHdr { get; set; }
 
@@ -159,7 +155,9 @@ public abstract class BasePlexMediaDataPart : BaseEntity
     /// </summary>
     public string? ColorSpace { get; set; }
 
-    // ---- Audio (capabilities) ----
+    #endregion
+
+    #region Audio stream-derived
 
     /// <summary>
     /// Best available audio codec for the release
@@ -189,7 +187,9 @@ public abstract class BasePlexMediaDataPart : BaseEntity
     /// </summary>
     public string? AudioLanguages { get; set; }
 
-    // ---- Subtitles ----
+    #endregion
+
+    #region Subtitles
 
     /// <summary>
     /// Distinct ISO-639 language codes for all subtitle tracks,
@@ -198,14 +198,16 @@ public abstract class BasePlexMediaDataPart : BaseEntity
     public string? SubtitleLanguages { get; set; }
 
     /// <summary>
-    /// Indicates presence of SDH / hearing-impaired subtitles.
+    /// Indicates the presence of SDH / hearing-impaired subtitles.
     /// </summary>
     public bool HasSdhSubs { get; set; }
 
     /// <summary>
-    /// Indicates presence of forced subtitles.
+    /// Indicates the presence of forced subtitles.
     /// </summary>
     public bool HasForcedSubs { get; set; }
+
+    #endregion
 
     #endregion
 

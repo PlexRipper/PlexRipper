@@ -1,9 +1,6 @@
-using Microsoft.EntityFrameworkCore;
 using Quartz;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
-using Reaparr.PlexApi;
-using Reaparr.PlexApi.Contracts;
 
 namespace Reaparr.BackgroundJobs;
 
@@ -18,13 +15,13 @@ public class MetadataSyncJob : IJob
 
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
-    private readonly IReaparrDbContext _dbContext;
+    private readonly IReaparrDbContextFactory _dbContextFactory;
 
-    public MetadataSyncJob(ILogger log, ICommandExecutor commandExecutor, IReaparrDbContext dbContext)
+    public MetadataSyncJob(ILogger log, ICommandExecutor commandExecutor, IReaparrDbContextFactory dbContextFactory)
     {
         _log = log.ForContext<MetadataSyncJob>();
         _commandExecutor = commandExecutor;
-        _dbContext = dbContext;
+        _dbContextFactory = dbContextFactory;
     }
 
     public static JobKey GetJobKey(int serverId) =>
@@ -43,107 +40,72 @@ public class MetadataSyncJob : IJob
 
         var serverId = dataMap.GetInt(ServerIdParameter);
 
-        _log.Here().Information("Starting metadata sync for server {ServerId}", serverId);
+        // Use short-lived context for initial checks
+        var dbContext = await _dbContextFactory.CreateAsync();
+        var serverName = await dbContext.GetPlexServerNameById(serverId, cancellationToken: ct);
+        var isServerOnline = await dbContext.IsServerOnline(serverId, ct);
+        dbContext.Dispose();
 
-        // Check server online
-        var isServerOnline = await _dbContext.IsServerOnline(serverId, ct);
+        _log.Here().Information("Starting metadata sync for server {ServerName} ({ServerId})", serverName, serverId);
+
         if (!isServerOnline)
         {
-            _log.Here().Warning("Server {ServerId} is offline, skipping metadata sync", serverId);
+            _log.Here()
+                .Warning("Server {ServerName} ({ServerId}) is offline, skipping metadata sync", serverName, serverId);
             return;
         }
 
         try
         {
-            // Get media items needing metadata enrichment (missing Parts)
-            var ratingKeys = await GetRatingKeysNeedingEnrichment(serverId, ct);
-
-            if (ratingKeys.Length == 0)
-            {
-                _log.Here()
-                    .Information("No media items need metadata enrichment for server {ServerId}", serverId);
-                return;
-            }
-
-            _log.Here()
-                .Information(
-                    "Found {Count} media items needing metadata enrichment for server {ServerId}",
-                    ratingKeys.Length,
-                    serverId
-                );
-
-            // Process in batches
-            const int batchSize = 50;
             var processedCount = 0;
 
-            foreach (var batch in ratingKeys.Chunk(batchSize))
+            // Process movies
+            var movieResult = await _commandExecutor.Send(new ProcessMovieMetadataCommand(serverId, serverName), ct);
+            if (movieResult.IsSuccess)
             {
-                ct.ThrowIfCancellationRequested();
+                processedCount += movieResult.Value;
+            }
 
-                var result = await _commandExecutor.Send(
-                    new GetDetailMetadataByRatingKeysCommand(serverId, batch),
-                    ct
-                );
+            // Process episodes
+            var episodeResult = await _commandExecutor.Send(new ProcessEpisodeMetadataCommand(serverId, serverName), ct);
+            if (episodeResult.IsSuccess)
+            {
+                processedCount += episodeResult.Value;
+            }
 
-                if (result.IsFailed)
-                {
-                    _log.Here()
-                        .Warning(
-                            "Failed to fetch metadata batch for server {ServerId}: {Error}",
-                            serverId,
-                            result.Errors.FirstOrDefault()?.Message
-                        );
-                    continue;
-                }
-
-                // TODO: Persist the enriched metadata (Parts/Streams) to database
-                // This will use the existing mappers and bulk insert
-                processedCount += batch.Length;
-
+            if (processedCount == 0)
+            {
                 _log.Here()
-                    .Debug(
-                        "Processed {Processed}/{Total} media items for server {ServerId}",
-                        processedCount,
-                        ratingKeys.Length,
+                    .Information(
+                        "No media items need metadata enrichment for server {ServerName} ({ServerId})",
+                        serverName,
                         serverId
                     );
             }
-
-            _log.Here()
-                .Information(
-                    "Completed metadata sync for server {ServerId}. Processed {Count} items",
-                    serverId,
-                    processedCount
-                );
+            else
+            {
+                _log.Here()
+                    .Information(
+                        "Completed metadata sync for server {ServerName} ({ServerId}). Processed {Count} items",
+                        serverName,
+                        serverId,
+                        processedCount
+                    );
+            }
         }
         catch (OperationCanceledException)
         {
             _log.Here()
-                .Information("Metadata sync for server {ServerId} has been cancelled", serverId);
+                .Information(
+                    "Metadata sync for server {ServerName} ({ServerId}) has been cancelled",
+                    serverName,
+                    serverId
+                );
         }
         catch (Exception e)
         {
-            _log.Here().Error(e, "Failed to sync metadata for server {ServerId}", serverId);
+            _log.Here().Error(e, "Failed to sync metadata for server {ServerName} ({ServerId})", serverName, serverId);
         }
     }
 
-    private async Task<string[]> GetRatingKeysNeedingEnrichment(int serverId, CancellationToken ct)
-    {
-        // Movies without MediaData.Parts - Key is the rating key used by Plex API
-        var movieKeys = await _dbContext
-            .PlexMovies.Where(m => m.PlexServerId == serverId)
-            .Where(m => !m.MediaDataList.Any(md => md.Parts.Any()))
-            .Select(m => m.Key.ToString())
-            .ToArrayAsync(ct);
-
-        // Episodes without MediaData.Parts
-        var episodeKeys = await _dbContext
-            .PlexTvShowEpisodes.Where(e => e.PlexServerId == serverId)
-            .Where(e => !e.MediaDataList.Any(md => md.Parts.Any()))
-            .Select(e => e.Key.ToString())
-            .ToArrayAsync(ct);
-
-        return [.. movieKeys, .. episodeKeys];
-    }
 }
-

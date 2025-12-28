@@ -118,7 +118,7 @@ public static partial class PlexMediaDataMapper
             PlexServerId = 0,
             PlexTvShowEpisodeId = 0,
             PlexTvShowEpisodeMediaDataId = 0,
-            UpdatedAt = default,
+            LastSyncedAt = default,
             Width = 0,
             Height = 0,
             VideoCodec = string.Empty,

@@ -51,12 +51,12 @@ public static class BasePlexMediaDataPartMapper
 
         if (primaryAudio != null)
         {
-            part.PrimaryAudioCodec = primaryAudio.Codec ?? string.Empty;
+            part.AudioCodec = primaryAudio.Codec ?? string.Empty;
             part.AudioChannels = FormatChannels(primaryAudio.Channels);
         }
         else
         {
-            part.PrimaryAudioCodec = string.Empty;
+            part.AudioCodec = string.Empty;
             part.AudioChannels = "Unknown";
         }
 
@@ -490,7 +490,8 @@ public static class BasePlexMediaDataPartMapper
 
         // Detect HDR10/HDR10+
         // Require BT.2020 color primaries and PQ transfer function (SMPTE 2084) for reliable HDR detection
-        var hasBt2020 = colorPrimaries == "bt2020" || colorPrimaries.Contains("bt.2020", StringComparison.OrdinalIgnoreCase);
+        var hasBt2020 =
+            colorPrimaries == "bt2020" || colorPrimaries.Contains("bt.2020", StringComparison.OrdinalIgnoreCase);
         var hasPq = colorTrc == "smpte2084" || colorTrc.Contains("pq", StringComparison.OrdinalIgnoreCase);
         var hasHdrProfile = profile.Contains("hdr", StringComparison.OrdinalIgnoreCase);
         var hasHdr10Plus = profile.Contains("hdr10+", StringComparison.OrdinalIgnoreCase);

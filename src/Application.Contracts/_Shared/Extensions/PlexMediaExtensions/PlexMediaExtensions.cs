@@ -119,7 +119,7 @@ public static class PlexMediaExtensions
                 DownloadSpeed = 0,
                 FileTransferSpeed = 0,
                 FileDataTransferred = 0,
-                FileName = part.File.GetFileName(),
+                FileName = part.GetFileName(),
                 FileLocationUrl = part.Key,
                 Quality = plexMediaData.RawVideoResolution,
                 DirectoryMeta = new DownloadTaskDirectory
@@ -135,8 +135,8 @@ public static class PlexMediaExtensions
                 Parent = null,
                 ParentId = default,
                 DestinationFolderPathId = request.DestinationFolderPathId,
-                FullTitle = $"{plexMovie.FullTitle}/{part.File.GetFileName()}",
-                Title = part.File.GetFileName(),
+                FullTitle = $"{plexMovie.FullTitle}/{part.GetFileName()}",
+                Title = part.GetFileName(),
             })
             .ToList();
     }
@@ -169,7 +169,7 @@ public static class PlexMediaExtensions
                 DownloadSpeed = 0,
                 FileTransferSpeed = 0,
                 FileDataTransferred = 0,
-                FileName = part.File.GetFileName(),
+                FileName = part.GetFileName(),
                 FileLocationUrl = part.Key,
                 Quality = plexMediaData.RawVideoResolution,
                 DirectoryMeta = new DownloadTaskDirectory
@@ -185,8 +185,8 @@ public static class PlexMediaExtensions
                 Parent = null,
                 ParentId = default,
                 DestinationFolderPathId = request.DestinationFolderPathId,
-                FullTitle = $"{plexTvShowEpisode.FullTitle}/{part.File.GetFileName()}",
-                Title = part.File.GetFileName(),
+                FullTitle = $"{plexTvShowEpisode.FullTitle}/{part.GetFileName()}",
+                Title = part.GetFileName(),
             })
             .ToList();
     }

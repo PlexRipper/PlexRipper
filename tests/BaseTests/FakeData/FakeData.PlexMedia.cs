@@ -163,10 +163,6 @@ public static partial class FakeData
         .FinishWith(
             (_, tvShowEpisode) =>
             {
-                foreach (var mediaData in tvShowEpisode.MediaDataList)
-                foreach (var mediaDataPart in mediaData.Parts)
-                    mediaDataPart.File = $"{tvShowEpisode.Title}";
-
                 tvShowEpisode.MediaSize = tvShowEpisode
                     .MediaDataList.SelectMany(x => x.Parts.Select(y => y.Size))
                     .Sum();

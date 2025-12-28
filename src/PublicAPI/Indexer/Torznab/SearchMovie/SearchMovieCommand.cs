@@ -122,7 +122,7 @@ public class SearchMovieCommandHandler : ICommandHandler<SearchMovieCommand, Tor
 
             var item = new TorznabItem
             {
-                Title = Path.GetFileName(part.File),
+                Title = part.GetFileName(),
                 PubDate = movie.AddedAt.ToString("R"),
                 Guid = new TorznabGuid { Value = url },
                 Link = url,
@@ -146,7 +146,7 @@ public class SearchMovieCommandHandler : ICommandHandler<SearchMovieCommand, Tor
             item.Attributes.Add(new TorznabAttr("resolution", part.Resolution));
             item.Attributes.Add(new TorznabAttr("source", part.Source.ToEnumMemberValue()));
             item.Attributes.Add(new TorznabAttr("videoCodec", part.VideoCodec));
-            item.Attributes.Add(new TorznabAttr("audioCodec", part.PrimaryAudioCodec));
+            item.Attributes.Add(new TorznabAttr("audioCodec", part.AudioCodec));
             item.Attributes.Add(new TorznabAttr("audioChannels", part.AudioChannels));
 
             if (EnvironmentExtensions.IsDevelopmentEnvironment())

@@ -78,9 +78,9 @@ public static partial class PlexMediaDTOMapper
             Id = source.PlexId,
             Key = source.Key,
             Duration = source.Duration,
-            File = source.File,
             Size = source.Size,
             Container = source.Container,
+            File = string.Empty,
             Stream = [],
         };
 }

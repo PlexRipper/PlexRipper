@@ -10,7 +10,6 @@ public static partial class FakeData
             .RuleFor(x => x.PlexId, f => f.Random.Long(1))
             .RuleFor(x => x.Key, _ => DownloadFileUrl)
             .RuleFor(x => x.Duration, f => f.Random.Int(50000, 5512400))
-            .RuleFor(x => x.File, _ => "/file.mp4")
             .RuleFor(x => x.Size, _ => 50 * 1024)
             .RuleFor(x => x.Container, f => f.System.FileExt("video/mp4"))
             .Ignore(x => x.PlexServerId)

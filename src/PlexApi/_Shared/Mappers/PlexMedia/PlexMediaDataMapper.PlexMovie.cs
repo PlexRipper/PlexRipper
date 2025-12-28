@@ -103,7 +103,7 @@ public static partial class PlexMediaDataMapper
             PlexId = source.Id,
             Key = source.Key,
             Duration = source.Duration,
-            File = source.File,
+            OriginalFilename = source.File.GetFileName(),
             Size = source.Size,
             Container = source.Container,
             RatingKey = root.RatingKey,
@@ -119,9 +119,8 @@ public static partial class PlexMediaDataMapper
             Resolution = string.Empty,
             Source = ReleaseSource.None,
             HasMetadata = false,
-            PrimaryAudioCodec = string.Empty,
+            AudioCodec = string.Empty,
             AudioChannels = string.Empty,
-            OriginalFilename = string.Empty,
             GeneratedFilename = string.Empty,
         };
 }

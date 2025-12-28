@@ -124,10 +124,12 @@ public static partial class PlexMediaDataMapper
             VideoBitrate = 0,
             FrameRate = 0,
             Resolution = string.Empty,
-            Source = string.Empty,
+            Source = ReleaseSource.None,
             ReleaseTitle = string.Empty,
             Category = 0,
             HasMetadata = false,
+            PrimaryAudioCodec = string.Empty,
+            AudioChannels = string.Empty,
         };
 
     public static ICollection<PlexMovieMediaDataStream> ToPlexMovieModel(this List<LibraryMediaItemStreamDTO> source) =>

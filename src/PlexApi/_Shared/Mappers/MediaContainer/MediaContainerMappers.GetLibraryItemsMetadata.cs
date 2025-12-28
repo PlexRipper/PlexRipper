@@ -1,8 +1,9 @@
 using LukeHagar.PlexAPI.SDK.Models.Components;
+using StreamType = Reaparr.Domain.StreamType;
 
 namespace Reaparr.PlexApi;
 
-public static partial class MediaContainerMappers
+public static class MediaContainerMappers
 {
     public static LibraryMediaItemDTO ToMediaItemDTO(this Metadata data)
     {
@@ -119,9 +120,9 @@ public static partial class MediaContainerMappers
             Id = source.Id,
             StreamType = source.StreamType switch
             {
-                1 => StreamType.Video,
-                2 => StreamType.Audio,
-                3 => StreamType.Subtitle,
+                LukeHagar.PlexAPI.SDK.Models.Components.StreamType.Video => StreamType.Video,
+                LukeHagar.PlexAPI.SDK.Models.Components.StreamType.Audio => StreamType.Audio,
+                LukeHagar.PlexAPI.SDK.Models.Components.StreamType.Subtitle => StreamType.Subtitle,
                 _ => StreamType.Unknown,
             },
             Default = source.Default,

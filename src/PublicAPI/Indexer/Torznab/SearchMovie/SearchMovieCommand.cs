@@ -2,6 +2,7 @@ using FastEndpoints;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Data.Contracts;
+using Reaparr.Environment;
 
 // ReSharper disable InconsistentNaming
 // ReSharper disable ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
@@ -26,18 +27,13 @@ public class SearchMovieCommandValidator : AbstractValidator<SearchMovieCommand>
     public SearchMovieCommandValidator()
     {
         // Basic argument validation
-        RuleFor(x => x.Limit)
-            .GreaterThan(0)
-            .LessThanOrEqualTo(500);
+        RuleFor(x => x.Limit).GreaterThan(0).LessThanOrEqualTo(500);
 
-        RuleFor(x => x.Offset)
-            .GreaterThanOrEqualTo(0);
+        RuleFor(x => x.Offset).GreaterThanOrEqualTo(0);
 
-        RuleFor(x => x.TMDB_ID)
-            .GreaterThanOrEqualTo(0);
+        RuleFor(x => x.TMDB_ID).GreaterThanOrEqualTo(0);
 
-        RuleFor(x => x.IMDB_ID)
-            .NotNull();
+        RuleFor(x => x.IMDB_ID).NotNull();
     }
 }
 
@@ -54,7 +50,8 @@ public class SearchMovieCommandHandler : ICommandHandler<SearchMovieCommand, Tor
 
     public async Task<TorznabMediaSearchResponseDTO> ExecuteAsync(
         SearchMovieCommand command,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var movies = await LoadMoviesAsync(command, cancellationToken);
 
@@ -77,15 +74,10 @@ public class SearchMovieCommandHandler : ICommandHandler<SearchMovieCommand, Tor
         };
     }
 
-    private async Task<List<PlexMovie>> LoadMoviesAsync(
-        SearchMovieCommand command,
-        CancellationToken cancellationToken)
+    private async Task<List<PlexMovie>> LoadMoviesAsync(SearchMovieCommand command, CancellationToken cancellationToken)
     {
         // Base query with required navigation properties for mapping
-        var baseQuery = _dbContext.PlexMovies
-            .Include(x => x.MediaDataList)
-                .ThenInclude(x => x.Parts)
-            .AsQueryable();
+        var baseQuery = _dbContext.PlexMovies.Include(x => x.MediaDataList).ThenInclude(x => x.Parts).AsQueryable();
 
         // If no specific query or external IDs are provided, return a paged list
         var noQueryProvided = string.IsNullOrWhiteSpace(command.Query);
@@ -121,9 +113,12 @@ public class SearchMovieCommandHandler : ICommandHandler<SearchMovieCommand, Tor
         {
             var url = BuildTorrentUrl(movie, mediaData, part);
 
-            _log.Here().Debug(
-                "Generated torrent URL for PlexMovieMediaDataPartId {PlexMovieMediaDataPartId}: {Url}",
-                part.Id, url);
+            _log.Here()
+                .Debug(
+                    "Generated torrent URL for PlexMovieMediaDataPartId {PlexMovieMediaDataPartId}: {Url}",
+                    part.Id,
+                    url
+                );
 
             var item = new TorznabItem
             {
@@ -147,6 +142,21 @@ public class SearchMovieCommandHandler : ICommandHandler<SearchMovieCommand, Tor
             item.Attributes.Add(new TorznabAttr("language", "English"));
             item.Attributes.Add(new TorznabAttr("downloadvolumefactor", "0.0"));
 
+            item.Attributes.Add(new TorznabAttr("category", part.ToTorznabMovieCategory().ToString()));
+            item.Attributes.Add(new TorznabAttr("resolution", part.Resolution));
+            item.Attributes.Add(new TorznabAttr("source", part.Source.ToEnumMemberValue()));
+            item.Attributes.Add(new TorznabAttr("videoCodec", part.VideoCodec));
+            item.Attributes.Add(new TorznabAttr("audioCodec", part.PrimaryAudioCodec));
+            item.Attributes.Add(new TorznabAttr("audioChannels", part.AudioChannels));
+
+            if (EnvironmentExtensions.IsDevelopmentEnvironment())
+            {
+                item.Attributes.Add(new TorznabAttr("debug-plexServerId", part.PlexServerId.ToString()));
+                item.Attributes.Add(new TorznabAttr("debug-plexLibraryId", part.PlexLibraryId.ToString()));
+                item.Attributes.Add(new TorznabAttr("debug-plexId", part.PlexId.ToString()));
+                item.Attributes.Add(new TorznabAttr("debug-ratingKey", part.RatingKey.ToString()));
+            }
+
             if (movie.Guid_TMDB is not null)
                 item.Attributes.Add(new TorznabAttr("tmdbid", movie.Guid_TMDB.Value.ToString()));
 
@@ -157,8 +167,8 @@ public class SearchMovieCommandHandler : ICommandHandler<SearchMovieCommand, Tor
         }
     }
 
-    private static string BuildTorrentUrl(PlexMovie movie, PlexMovieMediaData mediaData, PlexMovieMediaDataPart part)
-        => new TorrentMetadataDTO
+    private static string BuildTorrentUrl(PlexMovie movie, PlexMovieMediaData mediaData, PlexMovieMediaDataPart part) =>
+        new TorrentMetadataDTO
         {
             Type = PlexMediaType.Movie,
             MediaId = movie.Id,
@@ -170,9 +180,3 @@ public class SearchMovieCommandHandler : ICommandHandler<SearchMovieCommand, Tor
             ServerId = part.PlexServerId,
         }.ToUrl();
 }
-
-
-
-
-
-

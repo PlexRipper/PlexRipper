@@ -10,13 +10,9 @@ namespace Reaparr.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "PrimaryAudioChannels",
-                table: "PlexTvShowEpisodeDataParts");
+            migrationBuilder.DropColumn(name: "PrimaryAudioChannels", table: "PlexTvShowEpisodeDataParts");
 
-            migrationBuilder.DropColumn(
-                name: "PrimaryAudioChannels",
-                table: "PlexMovieDataParts");
+            migrationBuilder.DropColumn(name: "PrimaryAudioChannels", table: "PlexMovieDataParts");
 
             migrationBuilder.AlterColumn<int>(
                 name: "Source",
@@ -24,7 +20,8 @@ namespace Reaparr.Data.Migrations
                 type: "INTEGER",
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "TEXT");
+                oldType: "TEXT"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "PrimaryAudioCodec",
@@ -34,14 +31,16 @@ namespace Reaparr.Data.Migrations
                 defaultValue: "",
                 oldClrType: typeof(string),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AddColumn<string>(
                 name: "AudioChannels",
                 table: "PlexTvShowEpisodeDataParts",
                 type: "TEXT",
                 nullable: false,
-                defaultValue: "");
+                defaultValue: ""
+            );
 
             migrationBuilder.AlterColumn<int>(
                 name: "Source",
@@ -49,7 +48,8 @@ namespace Reaparr.Data.Migrations
                 type: "INTEGER",
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "TEXT");
+                oldType: "TEXT"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "PrimaryAudioCodec",
@@ -59,26 +59,24 @@ namespace Reaparr.Data.Migrations
                 defaultValue: "",
                 oldClrType: typeof(string),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AddColumn<string>(
                 name: "AudioChannels",
                 table: "PlexMovieDataParts",
                 type: "TEXT",
                 nullable: false,
-                defaultValue: "");
+                defaultValue: ""
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "AudioChannels",
-                table: "PlexTvShowEpisodeDataParts");
+            migrationBuilder.DropColumn(name: "AudioChannels", table: "PlexTvShowEpisodeDataParts");
 
-            migrationBuilder.DropColumn(
-                name: "AudioChannels",
-                table: "PlexMovieDataParts");
+            migrationBuilder.DropColumn(name: "AudioChannels", table: "PlexMovieDataParts");
 
             migrationBuilder.AlterColumn<string>(
                 name: "Source",
@@ -86,7 +84,8 @@ namespace Reaparr.Data.Migrations
                 type: "TEXT",
                 nullable: false,
                 oldClrType: typeof(int),
-                oldType: "INTEGER");
+                oldType: "INTEGER"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "PrimaryAudioCodec",
@@ -94,13 +93,15 @@ namespace Reaparr.Data.Migrations
                 type: "TEXT",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "TEXT");
+                oldType: "TEXT"
+            );
 
             migrationBuilder.AddColumn<int>(
                 name: "PrimaryAudioChannels",
                 table: "PlexTvShowEpisodeDataParts",
                 type: "INTEGER",
-                nullable: true);
+                nullable: true
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "Source",
@@ -108,7 +109,8 @@ namespace Reaparr.Data.Migrations
                 type: "TEXT",
                 nullable: false,
                 oldClrType: typeof(int),
-                oldType: "INTEGER");
+                oldType: "INTEGER"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "PrimaryAudioCodec",
@@ -116,13 +118,15 @@ namespace Reaparr.Data.Migrations
                 type: "TEXT",
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "TEXT");
+                oldType: "TEXT"
+            );
 
             migrationBuilder.AddColumn<int>(
                 name: "PrimaryAudioChannels",
                 table: "PlexMovieDataParts",
                 type: "INTEGER",
-                nullable: true);
+                nullable: true
+            );
         }
     }
 }

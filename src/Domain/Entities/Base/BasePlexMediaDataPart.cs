@@ -101,7 +101,7 @@ public abstract class BasePlexMediaDataPart : BaseEntity
     /// Derived release source (WEB-DL, BluRay, REMUX).
     /// Determined heuristically from file/container/bitrate.
     /// </summary>
-    public required string Source { get; set; }
+    public required ReleaseSource Source { get; set; }
 
     /// <summary>
     /// Fully normalized release title used by Sonarr/Radarr.
@@ -165,12 +165,12 @@ public abstract class BasePlexMediaDataPart : BaseEntity
     /// Best available audio codec for the release
     /// (e.g. TrueHD, DTS-HD MA, EAC3, AC3, AAC).
     /// </summary>
-    public string? PrimaryAudioCodec { get; set; }
+    public required string PrimaryAudioCodec { get; set; }
 
     /// <summary>
     /// Channel count of the primary audio track.
     /// </summary>
-    public int? PrimaryAudioChannels { get; set; }
+    public required string AudioChannels { get; set; }
 
     /// <summary>
     /// Maximum number of audio channels available
@@ -208,6 +208,7 @@ public abstract class BasePlexMediaDataPart : BaseEntity
     public bool HasForcedSubs { get; set; }
 
     #endregion
+
 
     #region Relationships
 

@@ -341,10 +341,6 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
     private async Task<BulkInsertTvShowsRapport> RemoveMedia(int plexLibraryId, CancellationToken cancellationToken)
     {
         await _dbContext
-            .PlexTvShowEpisodeDataStreams.Where(e => e.PlexLibraryId == plexLibraryId)
-            .ExecuteDeleteAsync(cancellationToken);
-
-        await _dbContext
             .PlexTvShowEpisodeDataParts.Where(e => e.PlexLibraryId == plexLibraryId)
             .ExecuteDeleteAsync(cancellationToken);
 

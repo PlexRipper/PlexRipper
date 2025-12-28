@@ -84,7 +84,6 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
             .Include(x => x.TvShowSeason)
             .Include(x => x.MediaDataList)
             .ThenInclude(x => x.Parts)
-            .ThenInclude(x => x.Streams)
             .Where(x => episodeIds.Contains(x.Id))
             .ToListAsync(ct);
 

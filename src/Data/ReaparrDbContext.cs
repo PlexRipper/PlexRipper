@@ -39,8 +39,6 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
 
     public DbSet<PlexMovieMediaDataPart> PlexMovieDataParts { get; set; }
 
-    public DbSet<PlexMovieMediaDataStream> PlexMovieDataStreams { get; set; }
-
     public DbSet<PlexTvShow> PlexTvShows { get; set; }
 
     public DbSet<PlexTvShowMediaQuality> PlexTvShowMediaQualities { get; set; }
@@ -54,8 +52,6 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
     public DbSet<PlexTvShowEpisodeMediaData> PlexTvShowEpisodeData { get; set; }
 
     public DbSet<PlexTvShowEpisodeMediaDataPart> PlexTvShowEpisodeDataParts { get; set; }
-
-    public DbSet<PlexTvShowEpisodeMediaDataStream> PlexTvShowEpisodeDataStreams { get; set; }
 
     public DbSet<PlexServer> PlexServers { get; set; }
 

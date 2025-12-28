@@ -93,35 +93,6 @@ public static partial class PlexMediaExtensions
             part.PlexServerId = plexServerId;
             part.PlexTvShowEpisodeId = plexTvShowEpisodeId;
             part.PlexTvShowEpisodeMediaDataId = plexTvShowEpisodeMediaDataId;
-            part.Streams.SetRelationshipIds(
-                plexServerId,
-                plexLibraryId,
-                plexTvShowEpisodeId,
-                plexTvShowEpisodeMediaDataId,
-                part.Id
-            );
-        }
-    }
-
-    /// <summary>
-    /// This will set the relationship ids for the download tasks and it's children.
-    /// </summary>
-    public static void SetRelationshipIds(
-        this ICollection<PlexTvShowEpisodeMediaDataStream> streams,
-        int plexServerId,
-        int plexLibraryId,
-        int plexTvShowEpisodeId,
-        int plexTvShowEpisodeMediaDataId,
-        int plexTvShowEpisodeMediaDataPartId
-    )
-    {
-        foreach (var stream in streams)
-        {
-            stream.PlexLibraryId = plexLibraryId;
-            stream.PlexServerId = plexServerId;
-            stream.PlexTvShowEpisodeId = plexTvShowEpisodeId;
-            stream.PlexTvShowEpisodeMediaDataId = plexTvShowEpisodeMediaDataId;
-            stream.PlexTvShowEpisodeMediaDataPartId = plexTvShowEpisodeMediaDataPartId;
         }
     }
 }

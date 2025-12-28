@@ -108,7 +108,6 @@ public static partial class PlexMediaDataMapper
             Size = source.Size,
             RatingKey = root.RatingKey,
             Container = source.Container,
-            Streams = source.Stream.ToPlexTvShowEpisodeModel(),
 
             // Ignore the following
             PlexLibraryId = 0,
@@ -125,68 +124,5 @@ public static partial class PlexMediaDataMapper
             AudioChannels = string.Empty,
             OriginalFilename = string.Empty,
             GeneratedFilename = string.Empty,
-        };
-
-    public static ICollection<PlexTvShowEpisodeMediaDataStream> ToPlexTvShowEpisodeModel(
-        this List<LibraryMediaItemStreamDTO> source
-    ) => source.Select(x => x.ToPlexTvShowEpisodeModel()).ToList();
-
-    public static PlexTvShowEpisodeMediaDataStream ToPlexTvShowEpisodeModel(this LibraryMediaItemStreamDTO source) =>
-        new()
-        {
-            Id = 0,
-            PlexId = source.Id,
-            StreamType = source.StreamType,
-            Default = source.Default,
-            Codec = source.Codec,
-            Index = source.Index,
-            Bitrate = source.Bitrate,
-            Language = source.Language,
-            LanguageTag = source.LanguageTag,
-            LanguageCode = source.LanguageCode,
-            DOVIBLCompatID = source.DOVIBLCompatID,
-            DOVIBLPresent = source.DOVIBLPresent,
-            DOVIELPresent = source.DOVIELPresent,
-            DOVILevel = source.DOVILevel,
-            DOVIPresent = source.DOVIPresent,
-            DOVIProfile = source.DOVIProfile,
-            DOVIRPUPresent = source.DOVIRPUPresent,
-            DOVIVersion = source.DOVIVersion,
-            BitDepth = source.BitDepth,
-            ChromaLocation = source.ChromaLocation,
-            ChromaSubsampling = source.ChromaSubsampling,
-            CodedHeight = source.CodedHeight,
-            CodedWidth = source.CodedWidth,
-            ColorPrimaries = source.ColorPrimaries,
-            ColorRange = source.ColorRange,
-            ColorSpace = source.ColorSpace,
-            ColorTrc = source.ColorTrc,
-            FrameRate = source.FrameRate,
-            Height = source.Height,
-            Level = source.Level,
-            Original = source.Original,
-            HasScalingMatrix = source.HasScalingMatrix,
-            Profile = source.Profile,
-            ScanType = source.ScanType,
-            RefFrames = source.RefFrames,
-            Width = source.Width,
-            DisplayTitle = source.DisplayTitle,
-            ExtendedDisplayTitle = source.ExtendedDisplayTitle,
-            Selected = source.Selected,
-            Forced = source.Forced,
-            Channels = source.Channels,
-            AudioChannelLayout = source.AudioChannelLayout,
-            SamplingRate = source.SamplingRate,
-            CanAutoSync = source.CanAutoSync,
-            HearingImpaired = source.HearingImpaired,
-            Dub = source.Dub,
-            Title = source.Title,
-
-            // Ignore the following
-            PlexLibraryId = 0,
-            PlexServerId = 0,
-            PlexTvShowEpisodeId = 0,
-            PlexTvShowEpisodeMediaDataId = 0,
-            PlexTvShowEpisodeMediaDataPartId = 0,
         };
 }

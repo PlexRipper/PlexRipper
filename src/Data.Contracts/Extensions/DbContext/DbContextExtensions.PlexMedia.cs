@@ -259,22 +259,6 @@ public static partial class DbContextExtensions
                 .ToList();
             await context.BulkInsertAsync(parts, BulkConfigPreset.Default, ct);
 
-            // Add movie media data streams for each part
-            var streams = parts
-                .SelectMany(x =>
-                {
-                    x.Streams.SetRelationshipIds(
-                        x.PlexServerId,
-                        x.PlexLibraryId,
-                        x.PlexMovieId,
-                        x.PlexMovieMediaDataId,
-                        x.Id
-                    );
-                    return x.Streams;
-                })
-                .ToList();
-            await context.BulkInsertAsync(streams, BulkConfigPreset.Default, ct);
-
             return Result.Ok();
         }
         catch (Exception e)

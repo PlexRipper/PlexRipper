@@ -15,5 +15,5 @@ public static partial class DbSetExtensions
         plexMovie.Include(x => x.PlexServer).ThenInclude(x => x!.PlexServerConnections);
 
     public static IQueryable<PlexMovie> IncludeMediaData(this IQueryable<PlexMovie> plexMovie) =>
-        plexMovie.Include(x => x.MediaDataList).ThenInclude(x => x.Parts).ThenInclude(x => x.Streams);
+        plexMovie.Include(x => x.MediaDataList).ThenInclude(x => x.Parts);
 }

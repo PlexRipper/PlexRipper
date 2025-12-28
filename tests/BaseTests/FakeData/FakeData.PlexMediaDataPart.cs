@@ -34,12 +34,8 @@ public static partial class FakeData
             .Ignore(x => x.PlexTvShowEpisodeMediaData);
 
     public static Faker<PlexMovieMediaDataPart> GetPlexMovieMediaDataPart(Seed seed) =>
-        _plexMovieMediaDataPart
-            .RuleFor(x => x.Streams, _ => GetPlexMovieMediaDataStream(seed).Generate(2))
-            .UseSeed(seed.Next());
+        _plexMovieMediaDataPart.UseSeed(seed.Next());
 
     public static Faker<PlexTvShowEpisodeMediaDataPart> GetPlexTvShowEpisodeMediaDataPart(Seed seed) =>
-        _plexTvShowEpisodeMediaDataPart
-            .RuleFor(x => x.Streams, _ => GetPlexTvShowEpisodeMediaDataStream(seed).Generate(2))
-            .UseSeed(seed.Next());
+        _plexTvShowEpisodeMediaDataPart.UseSeed(seed.Next());
 }

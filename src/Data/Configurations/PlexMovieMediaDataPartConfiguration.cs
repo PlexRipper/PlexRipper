@@ -7,12 +7,6 @@ public class PlexMovieMediaDataPartConfiguration : IEntityTypeConfiguration<Plex
 {
     public void Configure(EntityTypeBuilder<PlexMovieMediaDataPart> builder)
     {
-        builder
-            .HasMany(x => x.Streams)
-            .WithOne(x => x.PlexMovieMediaDataPart)
-            .HasForeignKey(x => x.PlexMovieMediaDataPartId)
-            .OnDelete(DeleteBehavior.Cascade);
-
         builder.HasOne(x => x.PlexMovie).WithMany().HasForeignKey(x => x.PlexMovieId).OnDelete(DeleteBehavior.Cascade);
 
         builder

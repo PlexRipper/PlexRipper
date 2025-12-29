@@ -124,13 +124,13 @@ public class ProcessEpisodeMetadataCommandHandler : ICommandHandler<ProcessEpiso
                 foreach (var mediaItem in metadataItem.Media)
                 foreach (var partItem in mediaItem.Parts)
                 {
-                    var partToUpdate = parts.FirstOrDefault(p => p.PlexMediaId == partItem.Id);
+                    var partToUpdate = parts.FirstOrDefault(p => p.PlexPartId == partItem.Id);
 
                     if (partToUpdate is null)
                     {
                         _log.Here()
                             .Warning(
-                                "Part with PlexId {PlexId} (RatingKey {RatingKey}) not found in API response for server {ServerName} ({ServerId})",
+                                "Part with PlexPartId {PlexPartId} (RatingKey {RatingKey}) not found in database for server {ServerName} ({ServerId})",
                                 partItem.Id,
                                 metadataItem.RatingKey,
                                 command.ServerName,

@@ -12,6 +12,7 @@ namespace Reaparr.Application;
 /// </summary>
 public record SyncPlexServerMediaEndpointRequest
 {
+    [RouteParam]
     public int PlexServerId { get; init; }
 }
 
@@ -42,7 +43,8 @@ public class SyncPlexServerMediaEndpoint : BaseEndpoint<SyncPlexServerMediaEndpo
         Post(EndpointPath);
 
         Description(x =>
-            x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))
+            x.Accepts<SyncPlexServerMediaEndpointRequest>()
+                .Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))
                 .Produces(StatusCodes.Status400BadRequest, typeof(BaseResultDTO))
                 .Produces(StatusCodes.Status404NotFound, typeof(BaseResultDTO))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))

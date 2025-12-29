@@ -122,4 +122,28 @@ public class MediaFileNameExtensionsUnitTests : BaseUnitTest
         // Assert
         result.ShouldBe(expected);
     }
+
+    [Theory]
+    [InlineData("The.X-Files.S06E10.Tithonus.x265.HEVC-Qman[UTR].mkv", true)]
+    [InlineData("The.X-Files.S06E20.Three.of.a.Kind.x265.HEVC-Qman[UTR].mkv", true)]
+    [InlineData("The.X-Files.S08E16.Three.Words.x265.HEVC-Qman[UTR].mkv", true)]
+    [InlineData("The.X-Files.S08E14.This.is.Not.Happening.x265.HEVC-Qman[UTR].mkv", true)]
+    [InlineData("The.X-Files.S07E14.Theef.x265.HEVC-Qman[UTR].mkv", true)]
+    [InlineData("The.X-Files.S03E07.The.Walk.x265.HEVC-Qman[UTR].mkv", true)]
+    [InlineData("The.X-Files.S06E19.The.Unnatural.x265.HEVC-Qman[UTR].mkv", true)]
+    [InlineData("The.X-Files.S09E19.The.Truth.x265.HEVC-Qman[UTR].mkv", true)]
+    [InlineData("Spartacus - S01E04 - The Thing in the Pit.mkv", true)]
+    [InlineData("The.X-Files.S07E02.The.Sixth.Extinction.II.Amor.Fati.x265.HEVC-Qman[UTR].mkv", true)]
+    [InlineData("The.X-Files.S07E01.The.Sixth.Extinction.x265.HEVC-Qman[UTR].mkv", true)]
+    [InlineData("The.X-Files.S05E14.The.Red.And.The.Black.x265.HEVC-Qman[UTR].mkv", true)]
+    [InlineData("Spartacus - S01E02 - Sacramentum Gladiatorum.mkv", true)]
+    [InlineData("Spartacus - S02E07 - Sacramentum.mkv", true)]
+    public void ShouldReturnExpectedResult_WhenValidatingTvEpisodeFileName(string fileName, bool expected)
+    {
+        // Act
+        var result = fileName.IsValidMediaFileName();
+
+        // Assert
+        result.ShouldBe(expected);
+    }
 }

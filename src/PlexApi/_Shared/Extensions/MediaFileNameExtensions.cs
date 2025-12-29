@@ -42,9 +42,15 @@ public static partial class MediaFileNameExtensions
 
     /// <summary>
     /// Validates whether a media filename is already in a format sufficient for Sonarr/Radarr parsing,
-    /// indicating it does not require conversion. The filename must contain:
+    /// indicating it does not require conversion.
+    ///
+    /// For TV episodes (with episode identifiers like S01E02):
     /// - At least one letter
-    /// - Identity information (episode identifiers like S01E02, year, or explicit IDs like tmdb/imdb)
+    /// - Episode identifier (S01E02, 1x02, or date-based format) - sufficient on its own
+    ///
+    /// For movies:
+    /// - At least one letter
+    /// - Identity information (year, or explicit IDs like tmdb/imdb)
     /// - A source tag (WEBDL, WEBRip, BluRay, HDTV, DVDRip, Remux, etc.)
     /// - Technical information (resolution, video codec, or audio codec)
     ///
@@ -68,16 +74,21 @@ public static partial class MediaFileNameExtensions
         if (MultiPartRegex().IsMatch(upper) || PartWithRomanOrNumberRegex().IsMatch(upper))
             return true;
 
-        var hasIdentity =
-            EpisodeIdentifierRegex().IsMatch(upper)
-            || YearRegex().IsMatch(fileName)
-            || ExplicitIdRegex().IsMatch(fileName);
+        var hasEpisodeIdentifier = EpisodeIdentifierRegex().IsMatch(upper);
+
+        var hasIdentity = hasEpisodeIdentifier || YearRegex().IsMatch(fileName) || ExplicitIdRegex().IsMatch(fileName);
 
         var hasSource = SourceTagRegex().IsMatch(upper);
 
         var hasTech =
             ResolutionRegex().IsMatch(upper) || VideoCodecRegex().IsMatch(upper) || AudioTokenRegex().IsMatch(upper);
 
+        // For TV episodes (with episode identifiers), source tag is optional
+        // Episode identifier alone is sufficient (very specific and parseable)
+        if (hasEpisodeIdentifier)
+            return true;
+
+        // For movies, require identity + source + tech
         return hasIdentity && hasSource && hasTech;
     }
 }

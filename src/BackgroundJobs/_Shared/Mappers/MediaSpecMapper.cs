@@ -20,6 +20,9 @@ public static class MediaSpecMapper
             case "hevc":
                 return "x265";
             case "mpeg4":
+            case "msmpeg4v1":
+            case "msmpeg4v2":
+            case "msmpeg4v3":
                 return "MPEG-4";
             case "mpeg2video":
             case "mpeg2":

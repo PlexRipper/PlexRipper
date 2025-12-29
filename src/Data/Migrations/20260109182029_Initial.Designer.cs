@@ -11,7 +11,7 @@ using Reaparr.Data;
 namespace Reaparr.Data.Migrations
 {
     [DbContext(typeof(ReaparrDbContext))]
-    [Migration("20260109112804_Initial")]
+    [Migration("20260109182029_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -1375,71 +1375,96 @@ namespace Reaparr.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(0);
 
-                    b.Property<float>("AspectRatio")
-                        .HasColumnType("REAL");
-
-                    b.Property<int>("AudioChannels")
-                        .HasColumnType("INTEGER");
+                    b.Property<int?>("AudioChannels")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(17);
 
                     b.Property<string>("AudioCodec")
                         .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("AudioProfile")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("Bitrate")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(16);
 
                     b.Property<string>("Container")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(9);
 
                     b.Property<int>("Duration")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(5);
 
-                    b.Property<bool>("HasVoiceActivity")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("FrameRate")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(13);
 
-                    b.Property<int>("Height")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("GeneratedFilename")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(7);
 
-                    b.Property<long>("PlexId")
-                        .HasColumnType("INTEGER");
+                    b.Property<bool>("HasMetadata")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(10);
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(4);
+
+                    b.Property<DateTime>("LastSyncedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(11);
+
+                    b.Property<string>("OriginalFilename")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(6);
 
                     b.Property<int>("PlexLibraryId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(18);
+
+                    b.Property<long>("PlexMediaId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(1);
 
                     b.Property<int>("PlexMovieId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<long>("PlexPartId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(2);
+
                     b.Property<int>("PlexServerId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(19);
 
                     b.Property<int>("Quality")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(3);
 
-                    b.Property<string>("RawVideoResolution")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnName("VideoResolution");
+                    b.Property<int>("RatingKey")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(3);
+
+                    b.Property<long>("Size")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(8);
+
+                    b.Property<int>("Source")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(15);
 
                     b.Property<string>("VideoCodec")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(12);
 
-                    b.Property<string>("VideoFrameRate")
+                    b.Property<string>("VideoResolution")
                         .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("VideoProfile")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("Width")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(14);
 
                     b.HasKey("Id");
 
@@ -1452,112 +1477,6 @@ namespace Reaparr.Data.Migrations
                     b.HasIndex("Quality");
 
                     b.ToTable("PlexMovieData");
-                });
-
-            modelBuilder.Entity("Reaparr.Domain.PlexMovieMediaDataPart", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(0);
-
-                    b.Property<string>("AudioChannels")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(16);
-
-                    b.Property<string>("AudioCodec")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(15);
-
-                    b.Property<string>("Container")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(8);
-
-                    b.Property<int>("Duration")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(4);
-
-                    b.Property<decimal>("FrameRate")
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(12);
-
-                    b.Property<string>("GeneratedFilename")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(6);
-
-                    b.Property<bool>("HasMetadata")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(9);
-
-                    b.Property<string>("Key")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(3);
-
-                    b.Property<DateTime>("LastSyncedAt")
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(10);
-
-                    b.Property<string>("OriginalFilename")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(5);
-
-                    b.Property<long>("PlexId")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(1);
-
-                    b.Property<int>("PlexLibraryId")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(17);
-
-                    b.Property<int>("PlexMovieId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("PlexMovieMediaDataId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("PlexServerId")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(18);
-
-                    b.Property<int>("RatingKey")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(2);
-
-                    b.Property<string>("Resolution")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(13);
-
-                    b.Property<long>("Size")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(7);
-
-                    b.Property<int>("Source")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(14);
-
-                    b.Property<string>("VideoCodec")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(11);
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PlexLibraryId");
-
-                    b.HasIndex("PlexMovieId");
-
-                    b.HasIndex("PlexMovieMediaDataId");
-
-                    b.HasIndex("PlexServerId");
-
-                    b.ToTable("PlexMovieDataParts");
                 });
 
             modelBuilder.Entity("Reaparr.Domain.PlexServer", b =>
@@ -2097,44 +2016,67 @@ namespace Reaparr.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(0);
 
-                    b.Property<float>("AspectRatio")
-                        .HasColumnType("REAL");
-
-                    b.Property<int>("AudioChannels")
-                        .HasColumnType("INTEGER");
+                    b.Property<int?>("AudioChannels")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(17);
 
                     b.Property<string>("AudioCodec")
                         .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("AudioProfile")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("Bitrate")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(16);
 
                     b.Property<string>("Container")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(9);
 
                     b.Property<int>("Duration")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(5);
 
-                    b.Property<bool>("HasVoiceActivity")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("FrameRate")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(13);
 
-                    b.Property<int>("Height")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("GeneratedFilename")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(7);
 
-                    b.Property<long>("PlexId")
-                        .HasColumnType("INTEGER");
+                    b.Property<bool>("HasMetadata")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(10);
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(4);
+
+                    b.Property<DateTime>("LastSyncedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(11);
+
+                    b.Property<string>("OriginalFilename")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(6);
 
                     b.Property<int>("PlexLibraryId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(18);
+
+                    b.Property<long>("PlexMediaId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(1);
+
+                    b.Property<long>("PlexPartId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(2);
 
                     b.Property<int>("PlexServerId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(19);
 
                     b.Property<int>("PlexTvShowEpisodeId")
                         .HasColumnType("INTEGER");
@@ -2143,25 +2085,27 @@ namespace Reaparr.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(3);
 
-                    b.Property<string>("RawVideoResolution")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnName("VideoResolution");
+                    b.Property<int>("RatingKey")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(3);
+
+                    b.Property<long>("Size")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(8);
+
+                    b.Property<int>("Source")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(15);
 
                     b.Property<string>("VideoCodec")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(12);
 
-                    b.Property<string>("VideoFrameRate")
+                    b.Property<string>("VideoResolution")
                         .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("VideoProfile")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("Width")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(14);
 
                     b.HasKey("Id");
 
@@ -2174,112 +2118,6 @@ namespace Reaparr.Data.Migrations
                     b.HasIndex("Quality");
 
                     b.ToTable("PlexTvShowEpisodeData");
-                });
-
-            modelBuilder.Entity("Reaparr.Domain.PlexTvShowEpisodeMediaDataPart", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(0);
-
-                    b.Property<string>("AudioChannels")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(16);
-
-                    b.Property<string>("AudioCodec")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(15);
-
-                    b.Property<string>("Container")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(8);
-
-                    b.Property<int>("Duration")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(4);
-
-                    b.Property<decimal>("FrameRate")
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(12);
-
-                    b.Property<string>("GeneratedFilename")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(6);
-
-                    b.Property<bool>("HasMetadata")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(9);
-
-                    b.Property<string>("Key")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(3);
-
-                    b.Property<DateTime>("LastSyncedAt")
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(10);
-
-                    b.Property<string>("OriginalFilename")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(5);
-
-                    b.Property<long>("PlexId")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(1);
-
-                    b.Property<int>("PlexLibraryId")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(17);
-
-                    b.Property<int>("PlexServerId")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(18);
-
-                    b.Property<int>("PlexTvShowEpisodeId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("PlexTvShowEpisodeMediaDataId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("RatingKey")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(2);
-
-                    b.Property<string>("Resolution")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(13);
-
-                    b.Property<long>("Size")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(7);
-
-                    b.Property<int>("Source")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(14);
-
-                    b.Property<string>("VideoCodec")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(11);
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PlexLibraryId");
-
-                    b.HasIndex("PlexServerId");
-
-                    b.HasIndex("PlexTvShowEpisodeId");
-
-                    b.HasIndex("PlexTvShowEpisodeMediaDataId");
-
-                    b.ToTable("PlexTvShowEpisodeDataParts");
                 });
 
             modelBuilder.Entity("Reaparr.Domain.PlexTvShowGenres", b =>
@@ -2955,41 +2793,6 @@ namespace Reaparr.Data.Migrations
                     b.Navigation("PlexServer");
                 });
 
-            modelBuilder.Entity("Reaparr.Domain.PlexMovieMediaDataPart", b =>
-                {
-                    b.HasOne("Reaparr.Domain.PlexLibrary", "PlexLibrary")
-                        .WithMany()
-                        .HasForeignKey("PlexLibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Reaparr.Domain.PlexMovie", "PlexMovie")
-                        .WithMany()
-                        .HasForeignKey("PlexMovieId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Reaparr.Domain.PlexMovieMediaData", "PlexMovieMediaData")
-                        .WithMany("Parts")
-                        .HasForeignKey("PlexMovieMediaDataId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Reaparr.Domain.PlexServer", "PlexServer")
-                        .WithMany()
-                        .HasForeignKey("PlexServerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("PlexLibrary");
-
-                    b.Navigation("PlexMovie");
-
-                    b.Navigation("PlexMovieMediaData");
-
-                    b.Navigation("PlexServer");
-                });
-
             modelBuilder.Entity("Reaparr.Domain.PlexServerConnection", b =>
                 {
                     b.HasOne("Reaparr.Domain.PlexServer", "PlexServer")
@@ -3129,41 +2932,6 @@ namespace Reaparr.Data.Migrations
                     b.Navigation("PlexServer");
 
                     b.Navigation("PlexTvShowEpisode");
-                });
-
-            modelBuilder.Entity("Reaparr.Domain.PlexTvShowEpisodeMediaDataPart", b =>
-                {
-                    b.HasOne("Reaparr.Domain.PlexLibrary", "PlexLibrary")
-                        .WithMany()
-                        .HasForeignKey("PlexLibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Reaparr.Domain.PlexServer", "PlexServer")
-                        .WithMany()
-                        .HasForeignKey("PlexServerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Reaparr.Domain.PlexTvShowEpisode", "PlexTvShowEpisode")
-                        .WithMany()
-                        .HasForeignKey("PlexTvShowEpisodeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Reaparr.Domain.PlexTvShowEpisodeMediaData", "PlexTvShowEpisodeMediaData")
-                        .WithMany("Parts")
-                        .HasForeignKey("PlexTvShowEpisodeMediaDataId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("PlexLibrary");
-
-                    b.Navigation("PlexServer");
-
-                    b.Navigation("PlexTvShowEpisode");
-
-                    b.Navigation("PlexTvShowEpisodeMediaData");
                 });
 
             modelBuilder.Entity("Reaparr.Domain.PlexTvShowGenres", b =>
@@ -3337,11 +3105,6 @@ namespace Reaparr.Data.Migrations
                     b.Navigation("MediaDataList");
                 });
 
-            modelBuilder.Entity("Reaparr.Domain.PlexMovieMediaData", b =>
-                {
-                    b.Navigation("Parts");
-                });
-
             modelBuilder.Entity("Reaparr.Domain.PlexServer", b =>
                 {
                     b.Navigation("PlexAccountServers");
@@ -3368,11 +3131,6 @@ namespace Reaparr.Data.Migrations
             modelBuilder.Entity("Reaparr.Domain.PlexTvShowEpisode", b =>
                 {
                     b.Navigation("MediaDataList");
-                });
-
-            modelBuilder.Entity("Reaparr.Domain.PlexTvShowEpisodeMediaData", b =>
-                {
-                    b.Navigation("Parts");
                 });
 
             modelBuilder.Entity("Reaparr.Domain.PlexTvShowSeason", b =>

@@ -10,9 +10,5 @@ public record PlexMediaDataDTO
 
     public required string VideoCodec { get; init; }
 
-    public required string VideoFrameRate { get; init; }
-
     public required string AudioCodec { get; init; }
-
-    public required int AudioChannels { get; init; }
 }

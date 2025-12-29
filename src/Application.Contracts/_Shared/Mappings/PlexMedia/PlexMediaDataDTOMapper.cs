@@ -12,9 +12,7 @@ public static class PlexMediaDataDTOMapper
             Duration = source.Duration,
             VideoResolution = source.VideoResolution,
             VideoCodec = source.VideoCodec,
-            VideoFrameRate = source.VideoFrameRate,
             AudioCodec = source.AudioCodec,
-            AudioChannels = source.AudioChannels,
         };
 
     #endregion

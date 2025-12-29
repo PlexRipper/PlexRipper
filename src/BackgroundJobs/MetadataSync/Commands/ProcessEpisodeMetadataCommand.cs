@@ -53,7 +53,9 @@ public class ProcessEpisodeMetadataCommandHandler : ICommandHandler<ProcessEpiso
         {
             ratingKeysToProcess = await dbContext
                 .PlexTvShowEpisodeData.AsTracking()
-                .Where(m => m.NeedsGeneratedName && m.PlexServerId == command.ServerId)
+                .Where(m =>
+                    m.NeedsGeneratedName && m.PlexServerId == command.ServerId && m.GeneratedNameSyncedAt == null
+                )
                 .Select(p => p.RatingKey)
                 .Distinct()
                 .Take(MAX_ITEMS_PER_RUN)
@@ -115,7 +117,9 @@ public class ProcessEpisodeMetadataCommandHandler : ICommandHandler<ProcessEpiso
                 // Re-fetch the parts for this batch with tracking enabled
                 var parts = await dbContext
                     .PlexTvShowEpisodeData.AsTracking()
-                    .Where(m => m.NeedsGeneratedName && m.PlexServerId == command.ServerId)
+                    .Where(m =>
+                        m.NeedsGeneratedName && m.PlexServerId == command.ServerId && m.GeneratedNameSyncedAt == null
+                    )
                     .Where(p => batchRatingKeys.Contains(p.RatingKey))
                     .ToListAsync(ct);
 

@@ -82,11 +82,9 @@ public static partial class PlexMediaDataMapper
             Container = source.Container,
             RatingKey = root.RatingKey,
             Quality = mediaItem.VideoResolution.ToVideoQuality(),
-            FrameRate = mediaItem.VideoFrameRate,
             VideoCodec = mediaItem.VideoCodec,
             VideoResolution = mediaItem.VideoResolution,
             AudioCodec = mediaItem.AudioCodec,
-            AudioChannels = mediaItem.AudioChannels,
             NeedsGeneratedName = !fileName.IsValidMediaFileName(),
 
             // Ignore the following

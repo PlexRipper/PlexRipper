@@ -437,7 +437,7 @@ public class DbContextExtensionsPlexServerConnectionUnitTests : BaseUnitTest
 
         // Add a second, non-main account with access to same server
         var nonMain = FakeData.GetPlexAccount(seed).Generate();
-        UpdateInitProperty(nonMain, nameof(PlexAccount.IsMain), false);
+        nonMain.UpdateInitProperty(nameof(PlexAccount.IsMain), false);
         db.PlexAccounts.Add(nonMain);
         await db.SaveChangesAsync(CancellationToken);
 

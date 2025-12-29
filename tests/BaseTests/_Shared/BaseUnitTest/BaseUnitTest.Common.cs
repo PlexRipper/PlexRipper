@@ -1,4 +1,3 @@
-using System.Reflection;
 using FastEndpoints;
 using Microsoft.Extensions.DependencyInjection;
 using Reaparr.Application.Contracts;
@@ -41,27 +40,6 @@ public partial class BaseUnitTest
         Log = testLogConfig.CreateLogInstance<BaseUnitTest>(LogEventLevel);
 
         Mock = AutoMock.GetStrict(SetDefaultBuilder);
-    }
-
-    /// <summary>
-    /// Useful for updating private, protected or init properties on an object.
-    /// </summary>
-    /// <param name="obj"></param>
-    /// <param name="propertyName"></param>
-    /// <param name="newValue"></param>
-    /// <typeparam name="T"></typeparam>
-    /// <exception cref="InvalidOperationException"></exception>
-    protected static void UpdateInitProperty<T>(T obj, string propertyName, object newValue)
-    {
-        var property = obj
-            ?.GetType()
-            .GetProperty(propertyName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-        if (property == null || !property.CanWrite)
-        {
-            throw new InvalidOperationException($"Property '{propertyName}' not found or cannot be written to.");
-        }
-
-        property.SetValue(obj, newValue);
     }
 
     protected T SetupEndpointUnitTest<T>()

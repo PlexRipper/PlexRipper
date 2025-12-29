@@ -1,4 +1,6 @@
-﻿namespace Reaparr.BaseTests;
+﻿using System.Reflection;
+
+namespace Reaparr.BaseTests;
 
 public static partial class FakeData
 {
@@ -57,14 +59,28 @@ public static partial class FakeData
                 movie.FullTitle = $"{movie.Title} ({movie.Year})";
 
                 // TODO:Need quality selector in the case of multiple quality media
-                movie.MediaSize = movie.MediaDataList.First().Size;
+                movie.MediaSize = movie.MediaDataList.Sum(x => x.Size);
             }
         );
 
     public static Faker<PlexMovie> GetPlexMovies(Seed seed, Action<FakeDataConfig>? options = null)
     {
+        var config = FakeDataConfig.FromOptions(options);
+
         return _plexMovie
-            .RuleFor(x => x.MediaDataList, _ => [GetPlexMovieMediaData(seed, options).Generate()])
+            .RuleFor(
+                x => x.MediaDataList,
+                _ => GetPlexMovieMediaData(seed, options).Generate(config.IncludeMultiPartMovies ? 2 : 1)
+            )
+            .FinishWith(
+                (f, movie) =>
+                {
+                    // Ensure all moviesMedia have the same PlexMediaId
+                    var sharedPlexMediaId = f.Random.Long(1, 100000);
+                    foreach (var mediaData in movie.MediaDataList)
+                        mediaData.UpdateInitProperty(nameof(PlexMovieMediaData.PlexMediaId), sharedPlexMediaId);
+                }
+            )
             .UseSeed(seed.Next());
     }
 

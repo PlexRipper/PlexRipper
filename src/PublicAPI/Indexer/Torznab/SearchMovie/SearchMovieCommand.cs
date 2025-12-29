@@ -147,7 +147,6 @@ public class SearchMovieCommandHandler : ICommandHandler<SearchMovieCommand, Tor
             item.Attributes.Add(new TorznabAttr("source", part.Source.ToEnumMemberValue()));
             item.Attributes.Add(new TorznabAttr("videoCodec", part.VideoCodec));
             item.Attributes.Add(new TorznabAttr("audioCodec", part.AudioCodec));
-            item.Attributes.Add(new TorznabAttr("audioChannels", part.AudioChannels));
 
             if (EnvironmentExtensions.IsDevelopmentEnvironment())
             {

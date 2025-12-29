@@ -77,9 +77,10 @@ public abstract class BasePlexMediaDataPart : BaseEntity
 
     /// <summary>
     /// Frame rate of the video stream.
+    /// <example>24p, 30p, 60p</example>
     /// </summary>
     [Column(Order = 12)]
-    public required decimal FrameRate { get; set; }
+    public required string FrameRate { get; set; }
 
     /// <summary>
     /// Normalized resolution label derived from video height
@@ -106,7 +107,7 @@ public abstract class BasePlexMediaDataPart : BaseEntity
     /// Channel count of the primary audio track.
     /// </summary>
     [Column(Order = 16)]
-    public required string AudioChannels { get; set; }
+    public required int? AudioChannels { get; set; }
 
     #endregion
 

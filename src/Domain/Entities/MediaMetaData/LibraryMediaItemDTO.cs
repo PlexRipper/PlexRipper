@@ -228,6 +228,8 @@ public record LibraryMediaItemMediaDTO
     /// </summary>
     public required bool HasVoiceActivity { get; init; }
 
+    public required bool OptimizedForStreaming { get; init; }
+
     /// <summary>
     /// An array of parts for this media item.
     /// </summary>

@@ -95,6 +95,7 @@ public static class MediaContainerMappers
             AudioProfile = media.AudioProfile ?? string.Empty,
             HasVoiceActivity = media.HasVoiceActivity ?? false,
             Parts = media.Part?.Select(x => x.ToItemPartDTO()).ToList() ?? [],
+            OptimizedForStreaming = media.OptimizedForStreaming ?? false,
         };
 
     public static LibraryMediaItemPartDTO ToItemPartDTO(this Part part) =>

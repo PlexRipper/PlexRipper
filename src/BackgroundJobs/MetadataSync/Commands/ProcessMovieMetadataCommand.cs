@@ -121,46 +121,29 @@ public class ProcessMovieMetadataCommandHandler : ICommandHandler<ProcessMovieMe
                     .Where(p => batchRatingKeys.Contains(p.RatingKey))
                     .ToListAsync(ct);
 
-                var ratingKeyGroups = parts.GroupBy(p => p.RatingKey).ToDictionary(g => g.Key, g => g.ToList());
-
                 // Update entities with the enriched metadata
-                foreach (var mediaItem in result.Value)
+                foreach (var metadataItem in result.Value)
+                foreach (var mediaItem in metadataItem.Media)
+                foreach (var partItem in mediaItem.Parts)
                 {
-                    if (!ratingKeyGroups.TryGetValue(mediaItem.RatingKey, out var partsToUpdate))
+                    var partToUpdate = parts.FirstOrDefault(p => p.PlexId == partItem.Id);
+
+                    if (partToUpdate is null)
                     {
+                        _log.Here()
+                            .Warning(
+                                "Part with PlexId {PlexId} (RatingKey {RatingKey}) not found in API response for server {ServerName} ({ServerId})",
+                                partItem.Id,
+                                metadataItem.RatingKey,
+                                command.ServerName,
+                                command.ServerId
+                            );
+                        skippedCount++;
                         continue;
                     }
 
-                    foreach (var part in partsToUpdate)
-                    {
-                        // Find the matching part DTO by PlexId
-                        var partDto = mediaItem.Media.SelectMany(m => m.Parts).FirstOrDefault(p => p.Id == part.PlexId);
-                        if (partDto == null)
-                        {
-                            _log.Here()
-                                .Warning(
-                                    "Part with PlexId {PlexId} (RatingKey {RatingKey}) not found in API response for server {ServerName} ({ServerId})",
-                                    part.PlexId,
-                                    part.RatingKey,
-                                    command.ServerName,
-                                    command.ServerId
-                                );
-                            skippedCount++;
-                            continue;
-                        }
-
-                        part.UpdateStreamMetadata(mediaItem, partDto);
-                        processedCount++;
-                    }
-                }
-
-                // Handle parts for rating keys that weren't returned
-                foreach (var missingRatingKey in missingRatingKeys)
-                {
-                    if (ratingKeyGroups.TryGetValue(missingRatingKey, out var partsToSkip))
-                    {
-                        skippedCount += partsToSkip.Count;
-                    }
+                    partToUpdate.UpdateStreamMetadata(metadataItem, mediaItem, partItem);
+                    processedCount++;
                 }
 
                 await dbContext.SaveChangesAsync(ct);

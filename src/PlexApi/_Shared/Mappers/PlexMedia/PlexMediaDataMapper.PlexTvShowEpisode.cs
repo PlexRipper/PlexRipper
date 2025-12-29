@@ -116,12 +116,12 @@ public static partial class PlexMediaDataMapper
             PlexTvShowEpisodeMediaDataId = 0,
             LastSyncedAt = default,
             VideoCodec = string.Empty,
-            FrameRate = 0,
+            FrameRate = string.Empty,
             Resolution = string.Empty,
             Source = ReleaseSource.None,
             HasMetadata = false,
             AudioCodec = string.Empty,
-            AudioChannels = string.Empty,
+            AudioChannels = null,
             GeneratedFilename = string.Empty,
         };
 }

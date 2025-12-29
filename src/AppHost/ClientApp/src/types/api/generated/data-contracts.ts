@@ -450,93 +450,11 @@ export enum JobTypes {
   MoveDownloadFileJob = "MoveDownloadFileJob",
   InspectPlexServerJob = "InspectPlexServerJob",
   LibrarySyncJob = "LibrarySyncJob",
+  MetadataSyncJob = "MetadataSyncJob",
 }
 
 export interface LanguageSettingsDTO {
   language: string;
-}
-
-export interface LibraryMediaItemPartDTO {
-  accessible?: boolean | null;
-  audioProfile: string;
-  container: string;
-  /** @format int32 */
-  duration: number;
-  exists?: boolean | null;
-  file: string;
-  /** @format int64 */
-  id: number;
-  indexes?: string | null;
-  key: string;
-  /** @format int64 */
-  size: number;
-  stream: LibraryMediaItemStreamDTO[];
-  videoProfile: string;
-}
-
-export interface LibraryMediaItemStreamDTO {
-  audioChannelLayout?: string | null;
-  /** @format int32 */
-  bitDepth?: number | null;
-  /** @format int32 */
-  bitrate: number;
-  canAutoSync?: boolean | null;
-  /** @format int32 */
-  channels?: number | null;
-  chromaLocation?: string | null;
-  chromaSubsampling?: string | null;
-  codec: string;
-  /** @format int32 */
-  codedHeight?: number | null;
-  /** @format int32 */
-  codedWidth?: number | null;
-  colorPrimaries?: string | null;
-  colorRange?: string | null;
-  colorSpace?: string | null;
-  colorTrc?: string | null;
-  default?: boolean | null;
-  displayTitle: string;
-  /** @format int32 */
-  doviLevel?: number | null;
-  doviPresent?: boolean | null;
-  /** @format int32 */
-  doviProfile?: number | null;
-  doviVersion?: string | null;
-  /** @format int32 */
-  doviblCompatID?: number | null;
-  doviblPresent?: boolean | null;
-  dovielPresent?: boolean | null;
-  dovirpuPresent?: boolean | null;
-  dub?: boolean | null;
-  extendedDisplayTitle: string;
-  forced?: boolean | null;
-  /** @format float */
-  frameRate?: number | null;
-  hasScalingMatrix?: boolean | null;
-  hearingImpaired?: boolean | null;
-  /** @format int32 */
-  height?: number | null;
-  /** @format int64 */
-  id: number;
-  /** @format int32 */
-  index?: number | null;
-  language: string;
-  languageCode: string;
-  languageTag: string;
-  /** @format int32 */
-  level?: number | null;
-  original?: boolean | null;
-  profile?: string | null;
-  /** @format int32 */
-  refFrames?: number | null;
-  /** @format int32 */
-  samplingRate?: number | null;
-  scanType?: string | null;
-  selected?: boolean | null;
-  streamType: StreamType;
-  title?: string | null;
-  /** @format int32 */
-  width?: number | null;
 }
 
 export interface LibraryProgress {
@@ -765,25 +683,11 @@ export interface PlexMediaDTO {
 }
 
 export interface PlexMediaDataDTO {
-  /** @format double */
-  aspectRatio: number;
-  /** @format int32 */
-  audioChannels: number;
   audioCodec: string;
-  audioProfile: string;
-  /** @format int32 */
-  bitrate: number;
   /** @format int64 */
   duration: number;
-  /** @format int32 */
-  height: number;
-  parts: LibraryMediaItemPartDTO[];
   videoCodec: string;
-  videoFrameRate: string;
-  videoProfile: string;
   videoResolution: string;
-  /** @format int32 */
-  width: number;
 }
 
 export interface PlexMediaMetadataDTO {
@@ -1412,13 +1316,6 @@ export interface SonarrSettingsDTO {
   isConfigured: boolean;
   sonarrApiKey: string;
   sonarrBaseUrl: string;
-}
-
-export enum StreamType {
-  Unknown = "Unknown",
-  Video = "Video",
-  Audio = "Audio",
-  Subtitle = "Subtitle",
 }
 
 export interface SuccessDTO {

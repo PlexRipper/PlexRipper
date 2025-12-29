@@ -3,90 +3,133 @@ namespace Reaparr.Domain;
 public abstract class BasePlexMediaData : BasePlexMediaQuality
 {
     /// <summary>
-    /// Unique media identifier.
+    /// Plex Part.id.
+    /// Immutable identifier for the physical media file.
+    /// Used as the primary file identity for incremental sync.
     /// </summary>
+    [Column(Order = 1)]
     public required long PlexId { get; set; }
 
     /// <summary>
-    /// Duration of the media in milliseconds.
+    /// Plex Metadata.ratingKey.
+    /// Identifies the logical media item (movie / episode) this file belongs to.
+    /// <example>"23920"</example>
     /// </summary>
+    [Column(Order = 2)]
+    public required int RatingKey { get; set; }
+
+    /// <summary>
+    /// Plex-generated key used to access this specific part.
+    /// <example>"/library/parts/47140/1712273142/file.mkv"</example>
+    /// </summary>
+    [Column(Order = 3)]
+    public required string Key { get; set; }
+
+    /// <summary>
+    /// Duration of the media file in milliseconds.
+    /// </summary>
+    [Column(Order = 4)]
     public required int Duration { get; set; }
 
-    /// <summary>
-    /// Bitrate in bits per second.
-    /// </summary>
-    public required int Bitrate { get; set; }
+    [Column(Order = 5)]
+    public required string OriginalFilename { get; set; }
+
+    [Column(Order = 6)]
+    public required string GeneratedFilename { get; set; }
 
     /// <summary>
-    /// Video width in pixels.
+    /// File size in bytes.
     /// </summary>
-    public required int Width { get; set; }
+    [Column(Order = 7)]
+    public required long Size { get; set; }
 
     /// <summary>
-    /// Video height in pixels.
+    /// Container format of the file (e.g. mkv, mp4, mpegts).
     /// </summary>
-    public required int Height { get; set; }
-
-    /// <summary>
-    /// Aspect ratio of the video.
-    /// </summary>
-    public required float AspectRatio { get; set; }
-
-    /// <summary>
-    /// Number of audio channels.
-    /// </summary>
-    public required int AudioChannels { get; set; }
-
-    /// <summary>
-    /// Audio codec used.
-    /// </summary>
-    public required string AudioCodec { get; set; }
-
-    /// <summary>
-    /// Video codec used.
-    /// </summary>
-    public required string VideoCodec { get; set; }
-
-    /// <summary>
-    /// Video resolution (e.g., 4k).
-    /// </summary>
-    [Column("VideoResolution")]
-    public required string RawVideoResolution { get; set; }
-
-    /// <summary>
-    /// File container type.
-    /// </summary>
+    [Column(Order = 8)]
     public required string Container { get; set; }
 
     /// <summary>
-    /// Frame rate of the video (e.g., 24p).
+    /// Indicates whether full stream-level metadata
+    /// (audio, subtitles, HDR, etc.) has been synced.
     /// </summary>
-    public required string VideoFrameRate { get; set; }
+    [Column(Order = 9)]
+    public required bool HasMetadata { get; set; }
 
     /// <summary>
-    /// Video profile (e.g., main 10).
+    /// Timestamp of the last metadata update in Plex.
+    /// Used to determine whether enrichment or resync is required.
     /// </summary>
-    public required string VideoProfile { get; set; }
+    [Column(Order = 10)]
+    public required DateTime LastSyncedAt { get; set; }
 
     /// <summary>
-    /// Video profile (e.g., main 10).
+    /// Video codec as reported by Plex (e.g. hevc, h264, vc1).
     /// </summary>
-    public required string AudioProfile { get; set; }
+    [Column(Order = 11)]
+    public required string VideoCodec { get; set; }
 
     /// <summary>
-    /// Indicates whether voice activity is detected.
+    /// Frame rate of the video stream.
+    /// <example>24p, 30p, 60p</example>
     /// </summary>
-    public required bool HasVoiceActivity { get; set; }
+    [Column(Order = 12)]
+    public required string FrameRate { get; set; }
+
+    /// <summary>
+    /// Normalized resolution label derived from video height
+    /// (480p / 720p / 1080p / 2160p).
+    /// </summary>
+    [Column(Order = 13)]
+    public required string VideoResolution { get; set; }
+
+    /// <summary>
+    /// Derived release source (WEB-DL, Blu-ray, REMUX).
+    /// Determined heuristically from file/container/bitrate.
+    /// </summary>
+    [Column(Order = 14)]
+    public required ReleaseSource Source { get; set; }
+
+    /// <summary>
+    /// Best available audio codec for the release
+    /// (e.g. TrueHD, DTS-HD MA, EAC3, AC3, AAC).
+    /// </summary>
+    [Column(Order = 15)]
+    public required string AudioCodec { get; set; }
+
+    /// <summary>
+    /// Channel count of the primary audio track.
+    /// </summary>
+    [Column(Order = 16)]
+    public required int? AudioChannels { get; set; }
 
     #region Relationships
 
+    /// <summary>
+    /// Identifier of the Plex library section this part belongs to.
+    /// </summary>
+    [Column(Order = 17)]
     public required int PlexLibraryId { get; set; }
 
+    /// <summary>
+    /// Identifier of the Plex server this part was synced from.
+    /// </summary>
+    [Column(Order = 18)]
     public required int PlexServerId { get; set; }
 
+    /// <summary>
+    /// Navigation property to the Plex library.
+    /// </summary>
+    [Column(Order = 19)]
     public PlexLibrary? PlexLibrary { get; set; }
 
+    /// <summary>
+    /// Navigation property to the Plex server.
+    /// </summary>
+    [Column(Order = 20)]
     public PlexServer? PlexServer { get; init; }
 
     #endregion
+
+    public string GetFileName() => !string.IsNullOrEmpty(GeneratedFilename) ? GeneratedFilename : OriginalFilename;
 }

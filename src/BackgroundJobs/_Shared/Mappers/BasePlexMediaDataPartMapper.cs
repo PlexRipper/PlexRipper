@@ -6,10 +6,9 @@ namespace Reaparr.BackgroundJobs;
 public static class BasePlexMediaDataPartMapper
 {
     /// <summary>
-    /// Updates the metadata properties of a BasePlexMediaDataPart from a LibraryMediaItemDTO and LibraryMediaItemPartDTO.
-    /// Extracts video, audio, and subtitle stream information and sets the corresponding properties.
+    /// Adds the missing stream data to the <see cref="BasePlexMediaDataPart"/> which allows it to be complete for Torznab indexing. It also generates a <see cref="BasePlexMediaDataPart.GeneratedFilename"/> as Sonarr/Radarr require specific name to contain the media specs.
     /// </summary>
-    public static void UpdateMetadataFromDTO(
+    public static void UpdateStreamMetadata(
         this BasePlexMediaDataPart part,
         LibraryMediaItemDTO mediaItem,
         LibraryMediaItemPartDTO partItem
@@ -304,14 +303,14 @@ public static class BasePlexMediaDataPartMapper
         if (hasDiscAudio)
         {
             // Use video bitrate if available, otherwise fallback to media bitrate
-            // Bitrate is in bits per second, convert to kbps
+            // The bitrate is in bits per second, convert to kbps
             var bitrateKbps = videoBitrate > 0 ? videoBitrate / 1000 : mediaBitrate / 1000;
 
             var remuxThresholdKbps = heightValue switch
             {
                 >= 2160 => 40_000, // 4K threshold
                 >= 1080 => 25_000, // 1080p threshold
-                _ => 18_000, // 720p and below threshold
+                _ => 18_000, // 720p and below the threshold
             };
 
             if (bitrateKbps >= remuxThresholdKbps)
@@ -438,7 +437,7 @@ public static class BasePlexMediaDataPartMapper
     private static string FormatSource(ReleaseSource source)
     {
         // Note: Remux is handled as a flag (isRemux), not a source enum value
-        // When remux is detected, source is BluRay with isRemux=true
+        // When remux is detected, a source is BluRay with isRemux=true
         return source switch
         {
             ReleaseSource.BluRay => "BluRay",

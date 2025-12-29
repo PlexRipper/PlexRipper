@@ -147,7 +147,7 @@ public class ProcessEpisodeMetadataCommandHandler : ICommandHandler<ProcessEpiso
                             continue;
                         }
 
-                        part.UpdateMetadataFromDTO(mediaItem, partDto);
+                        part.UpdateStreamMetadata(mediaItem, partDto);
                         processedCount++;
                     }
                 }

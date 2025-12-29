@@ -149,7 +149,7 @@ public class ProcessMovieMetadataCommandHandler : ICommandHandler<ProcessMovieMe
                             continue;
                         }
 
-                        part.UpdateMetadataFromDTO(mediaItem, partDto);
+                        part.UpdateStreamMetadata(mediaItem, partDto);
                         processedCount++;
                     }
                 }

@@ -66,15 +66,17 @@ public static partial class PlexMediaDataMapper
         this LibraryMediaItemPartDTO source,
         LibraryMediaItemMediaDTO mediaItem,
         LibraryMediaItemDTO root
-    ) =>
-        new()
+    )
+    {
+        var fileName = source.File.GetFileName();
+        return new PlexMovieMediaData
         {
             Id = 0,
             PlexMediaId = mediaItem.Id,
             PlexPartId = source.Id,
             Key = source.Key,
             Duration = source.Duration,
-            OriginalFilename = source.File.GetFileName(),
+            OriginalFilename = fileName,
             Source = mediaItem.DetermineReleaseSource(),
             Size = source.Size,
             Container = source.Container,
@@ -85,10 +87,12 @@ public static partial class PlexMediaDataMapper
             VideoResolution = mediaItem.VideoResolution,
             AudioCodec = mediaItem.AudioCodec,
             AudioChannels = mediaItem.AudioChannels,
+            NeedsGeneratedName = !fileName.IsValidMediaFileName(),
 
             // Ignore the following
             PlexLibraryId = 0,
             PlexServerId = 0,
             PlexMovieId = 0,
         };
+    }
 }

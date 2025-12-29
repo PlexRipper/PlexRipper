@@ -67,15 +67,18 @@ public static partial class PlexMediaDataMapper
         this LibraryMediaItemPartDTO source,
         LibraryMediaItemMediaDTO mediaItem,
         LibraryMediaItemDTO root
-    ) =>
-        new()
+    )
+    {
+        var fileName = source.File.GetFileName();
+
+        return new PlexTvShowEpisodeMediaData
         {
             Id = 0,
             PlexMediaId = mediaItem.Id,
             PlexPartId = source.Id,
             Key = source.Key,
             Duration = source.Duration,
-            OriginalFilename = source.File.GetFileName(),
+            OriginalFilename = fileName,
             Size = source.Size,
             Container = source.Container,
             RatingKey = root.RatingKey,
@@ -86,11 +89,12 @@ public static partial class PlexMediaDataMapper
             VideoResolution = mediaItem.VideoResolution,
             AudioCodec = mediaItem.AudioCodec,
             AudioChannels = mediaItem.AudioChannels,
+            NeedsGeneratedName = !fileName.IsValidMediaFileName(),
 
             // Ignore the following
             PlexLibraryId = 0,
             PlexServerId = 0,
             PlexTvShowEpisodeId = 0,
-            GeneratedFilename = string.Empty,
         };
+    }
 }

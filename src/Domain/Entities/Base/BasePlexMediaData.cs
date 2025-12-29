@@ -68,7 +68,7 @@ public abstract class BasePlexMediaData : BasePlexMediaQuality
     /// If the <see cref="OriginalFilename"/> is not a valid name for the purposes of Sonarr/Radarr parsing. Then it requires an additional metadata call to get more media specs in order to generate a better name
     /// </summary>
     [Column(Order = 10)]
-    public bool NeedsGeneratedName { get; set; }
+    public required bool NeedsGeneratedName { get; set; }
 
     /// <summary>
     /// Timestamp of the last metadata update in Plex.

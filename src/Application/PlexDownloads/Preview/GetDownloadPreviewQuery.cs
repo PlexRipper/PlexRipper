@@ -98,7 +98,6 @@ public class GetDownloadPreviewQueryHandler : ICommandHandler<GetDownloadPreview
 
                 var resultWithQualities = await baseQuery
                     .Include(x => x.MediaDataList.Where(y => movieMediaDataIds.Contains(y.Id)))
-                    .ThenInclude(x => x.Parts)
                     .Where(x => movieIdsWithQuality.Contains(x.Id))
                     .ProjectToDownloadPreview()
                     .ToListAsync(cancellationToken);
@@ -112,7 +111,6 @@ public class GetDownloadPreviewQueryHandler : ICommandHandler<GetDownloadPreview
             {
                 var result = await baseQuery
                     .Include(x => x.MediaDataList)
-                    .ThenInclude(x => x.Parts)
                     .Where(x => movieIds.Contains(x.Id))
                     .ProjectToDownloadPreview()
                     .ToListAsync(cancellationToken);
@@ -255,7 +253,6 @@ public class GetDownloadPreviewQueryHandler : ICommandHandler<GetDownloadPreview
 
                 var resultWithQualities = await baseQuery
                     .Include(x => x.MediaDataList.Where(y => episodeMediaDataIds.Contains(y.Id)))
-                    .ThenInclude(x => x.Parts)
                     .Where(x => episodeIdsWithQuality.Contains(x.Id))
                     .ProjectToDownloadPreview()
                     .ToListAsync(cancellationToken);
@@ -269,7 +266,6 @@ public class GetDownloadPreviewQueryHandler : ICommandHandler<GetDownloadPreview
             {
                 var result = await baseQuery
                     .Include(x => x.MediaDataList)
-                    .ThenInclude(x => x.Parts)
                     .Where(x => episodeIds.Contains(x.Id))
                     .ProjectToDownloadPreview()
                     .ToListAsync(cancellationToken);

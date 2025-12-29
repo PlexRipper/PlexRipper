@@ -72,7 +72,7 @@ public static class DownloadPreviewMapper
         {
             Id = source.Id,
             Title = source.Title,
-            Size = source.MediaDataList.Sum(x => x.Parts.Sum(p => p.Size)),
+            Size = source.MediaDataList.Sum(x => x.Size),
             ChildCount = source.ChildCount,
             MediaType = source.Type,
             TvShowId = default,

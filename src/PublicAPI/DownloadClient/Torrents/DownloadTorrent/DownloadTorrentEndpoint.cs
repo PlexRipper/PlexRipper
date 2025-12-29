@@ -108,8 +108,7 @@ public class DownloadTorrentEndpoint : Endpoint<DownloadTorrentEndpointRequest>
         {
             return await _dbContext
                 .PlexTvShowEpisodeData.Where(x => x.Id == req.DataId)
-                .SelectMany(x => x.Parts)
-                .Where(p => p.Id == req.PartId || p.PlexId == req.PartPlexId)
+                .Where(p => p.Id == req.PartId || p.PlexMediaId == req.PartPlexId)
                 .Select(p => new MediaFileInfo { FileName = p.GeneratedFilename, Size = p.Size })
                 .SingleOrDefaultAsync(ct);
         }
@@ -118,8 +117,7 @@ public class DownloadTorrentEndpoint : Endpoint<DownloadTorrentEndpointRequest>
         {
             return await _dbContext
                 .PlexMovieData.Where(x => x.Id == req.DataId)
-                .SelectMany(x => x.Parts)
-                .Where(p => p.Id == req.PartId || p.PlexId == req.PartPlexId)
+                .Where(p => p.Id == req.PartId || p.PlexMediaId == req.PartPlexId)
                 .Select(p => new MediaFileInfo { FileName = p.GeneratedFilename, Size = p.Size })
                 .SingleOrDefaultAsync(ct);
         }

@@ -3,15 +3,15 @@ using System.Text.RegularExpressions;
 
 namespace Reaparr.BackgroundJobs;
 
-public static class BasePlexMediaDataPartMapper
+public static class BasePlexMediaDataMapper
 {
-    private static readonly ILogger _log = new LogConfig().CreateLogInstance(typeof(BasePlexMediaDataPartMapper));
+    private static readonly ILogger _log = new LogConfig().CreateLogInstance(typeof(BasePlexMediaDataMapper));
 
     /// <summary>
-    /// Adds the missing stream data to the <see cref="BasePlexMediaDataPart"/> which allows it to be complete for Torznab indexing. It also generates a <see cref="BasePlexMediaDataPart.GeneratedFilename"/> as Sonarr/Radarr require specific name to contain the media specs.
+    /// Adds the missing stream data to the <see cref="BasePlexMediaData"/> which allows it to be complete for Torznab indexing. It also generates a <see cref="BasePlexMediaData.GeneratedFilename"/> as Sonarr/Radarr require specific name to contain the media specs.
     /// </summary>
     public static void UpdateStreamMetadata(
-        this BasePlexMediaDataPart part,
+        this BasePlexMediaData part,
         LibraryMediaItemDTO metaDataItem,
         LibraryMediaItemMediaDTO mediaItem,
         LibraryMediaItemPartDTO partItem
@@ -33,7 +33,7 @@ public static class BasePlexMediaDataPartMapper
 
         part.FrameRate = mediaItem.VideoFrameRate;
         part.VideoCodec = mediaItem.VideoCodec;
-        part.Resolution = mediaItem.VideoResolution;
+        part.VideoResolution = mediaItem.VideoResolution;
 
         // Extract audio stream info
         var audioStreams = partItem.Stream.Where(s => s.StreamType == StreamType.Audio).ToList();

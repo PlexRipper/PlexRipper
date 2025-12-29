@@ -32,27 +32,6 @@ public static partial class PlexMediaExtensions
             mediaData.PlexLibraryId = plexLibraryId;
             mediaData.PlexServerId = plexServerId;
             mediaData.PlexMovieId = plexMovieId;
-            mediaData.Parts.SetRelationshipIds(plexServerId, plexLibraryId, plexMovieId, mediaData.Id);
-        }
-    }
-
-    /// <summary>
-    /// This will set the relationship ids for the download tasks and it's children.
-    /// </summary>
-    public static void SetRelationshipIds(
-        this ICollection<PlexMovieMediaDataPart> parts,
-        int plexServerId,
-        int plexLibraryId,
-        int plexMovieId,
-        int plexMovieMediaDataId
-    )
-    {
-        foreach (var part in parts)
-        {
-            part.PlexLibraryId = plexLibraryId;
-            part.PlexServerId = plexServerId;
-            part.PlexMovieId = plexMovieId;
-            part.PlexMovieMediaDataId = plexMovieMediaDataId;
         }
     }
 }

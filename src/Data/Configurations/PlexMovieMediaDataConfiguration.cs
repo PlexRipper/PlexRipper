@@ -10,12 +10,6 @@ public class PlexMovieMediaDataConfiguration : IEntityTypeConfiguration<PlexMovi
         builder.HasIndex(x => x.Quality);
 
         builder
-            .HasMany(x => x.Parts)
-            .WithOne(x => x.PlexMovieMediaData)
-            .HasForeignKey(x => x.PlexMovieMediaDataId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        builder
             .HasOne(x => x.PlexMovie)
             .WithMany(x => x.MediaDataList)
             .HasForeignKey(x => x.PlexMovieId)

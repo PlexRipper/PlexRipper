@@ -83,21 +83,6 @@ public static partial class DbContextExtensions
 
             await context.BulkInsertAsync(mediaData, BulkConfigPreset.Default, ct);
 
-            // Insert media data parts for each media data
-            var parts = mediaData
-                .SelectMany(data =>
-                {
-                    data.Parts.SetRelationshipIds(
-                        data.PlexServerId,
-                        data.PlexLibraryId,
-                        data.PlexTvShowEpisodeId,
-                        data.Id
-                    );
-                    return data.Parts;
-                })
-                .ToList();
-            await context.BulkInsertAsync(parts, BulkConfigPreset.Default, ct);
-
             // Add TvShowSeason Qualities for each tv-show
             var seasonQualities = mediaData
                 .Select(x => new PlexTvShowSeasonMediaQuality

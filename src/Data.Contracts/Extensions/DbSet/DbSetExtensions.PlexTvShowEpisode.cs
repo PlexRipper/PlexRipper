@@ -25,5 +25,5 @@ public static partial class DbSetExtensions
 
     public static IQueryable<PlexTvShowEpisode> IncludeMediaData(
         this IQueryable<PlexTvShowEpisode> plexTvShowEpisode
-    ) => plexTvShowEpisode.Include(x => x.MediaDataList).ThenInclude(x => x.Parts);
+    ) => plexTvShowEpisode.Include(x => x.MediaDataList);
 }

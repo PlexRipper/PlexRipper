@@ -10,12 +10,6 @@ public class PlexTvShowEpisodeMediaDataConfiguration : IEntityTypeConfiguration<
         builder.HasIndex(x => x.Quality);
 
         builder
-            .HasMany(x => x.Parts)
-            .WithOne(x => x.PlexTvShowEpisodeMediaData)
-            .HasForeignKey(x => x.PlexTvShowEpisodeMediaDataId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        builder
             .HasOne(x => x.PlexTvShowEpisode)
             .WithMany(x => x.MediaDataList)
             .HasForeignKey(x => x.PlexTvShowEpisodeId)

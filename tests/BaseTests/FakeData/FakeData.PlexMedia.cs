@@ -57,7 +57,7 @@ public static partial class FakeData
                 movie.FullTitle = $"{movie.Title} ({movie.Year})";
 
                 // TODO:Need quality selector in the case of multiple quality media
-                movie.MediaSize = movie.MediaDataList.First().Parts.Sum(x => x.Size);
+                movie.MediaSize = movie.MediaDataList.First().Size;
             }
         );
 
@@ -163,9 +163,7 @@ public static partial class FakeData
         .FinishWith(
             (_, tvShowEpisode) =>
             {
-                tvShowEpisode.MediaSize = tvShowEpisode
-                    .MediaDataList.SelectMany(x => x.Parts.Select(y => y.Size))
-                    .Sum();
+                tvShowEpisode.MediaSize = tvShowEpisode.MediaDataList.Select(x => x.Size).Sum();
             }
         );
 

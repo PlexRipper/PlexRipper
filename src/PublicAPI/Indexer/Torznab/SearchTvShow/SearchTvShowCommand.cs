@@ -116,7 +116,6 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, T
             .Include(x => x.TvShowSeason)
             .Include(x => x.TvShow)
             .Include(e => e.MediaDataList)
-            .ThenInclude(x => x.Parts)
             .AsQueryable();
 
         // If no specific season/episode requested and query is empty, return a paged list
@@ -164,28 +163,27 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, T
         }
 
         foreach (var mediaData in episode.MediaDataList)
-        foreach (var part in mediaData.Parts)
         {
-            var url = BuildTorrentUrl(episode, mediaData, part);
+            var url = BuildTorrentUrl(episode, mediaData);
 
             _log.Here()
                 .Debug(
-                    "Generated torrent URL for PlexTvShowEpisodeMediaDataPartId {PlexTvShowEpisodeMediaDataPartId}: {Url}",
-                    part.Id,
+                    "Generated torrent URL for PlexTvShowEpisodeMediaDataId {PlexTvShowEpisodeMediaDataId}: {Url}",
+                    mediaData.Id,
                     url
                 );
 
             var item = new TorznabItem
             {
-                Title = part.GetFileName(),
+                Title = mediaData.GetFileName(),
                 PubDate = episode.AddedAt.ToString("R"),
                 Guid = new TorznabGuid { Value = url },
                 Link = url,
-                Size = part.Size,
+                Size = mediaData.Size,
                 Enclosure = new TorznabEnclosure
                 {
                     Url = url,
-                    Length = part.Size,
+                    Length = mediaData.Size,
                     Type = "application/x-bittorrent",
                 },
             };
@@ -211,20 +209,16 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, T
         }
     }
 
-    private static string BuildTorrentUrl(
-        PlexTvShowEpisode episode,
-        PlexTvShowEpisodeMediaData mediaData,
-        PlexTvShowEpisodeMediaDataPart part
-    ) =>
+    private static string BuildTorrentUrl(PlexTvShowEpisode episode, PlexTvShowEpisodeMediaData mediaData) =>
         new TorrentMetadataDTO
         {
             Type = PlexMediaType.Episode,
             MediaId = episode.Id,
             DataId = mediaData.Id,
-            PartId = part.Id,
-            PartPlexId = part.PlexId,
+            PartId = mediaData.Id,
+            PartPlexId = mediaData.PlexMediaId,
             Quality = mediaData.Quality,
-            LibraryId = part.PlexLibraryId,
-            ServerId = part.PlexServerId,
+            LibraryId = mediaData.PlexLibraryId,
+            ServerId = mediaData.PlexServerId,
         }.ToUrl();
 }

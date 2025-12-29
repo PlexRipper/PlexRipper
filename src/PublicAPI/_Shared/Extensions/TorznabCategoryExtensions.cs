@@ -8,9 +8,9 @@ public static class TorznabCategoryExtensions
     /// Determine Torznab category for a movie release.
     /// Maps ReleaseSource to appropriate Torznab category based on source type and resolution.
     /// </summary>
-    public static int ToTorznabMovieCategory(this BasePlexMediaDataPart part)
+    public static int ToTorznabMovieCategory(this BasePlexMediaData part)
     {
-        var isUhd = IsUhdResolution(part.Resolution);
+        var isUhd = IsUhdResolution(part.VideoResolution);
 
         return part.Source switch
         {
@@ -19,10 +19,8 @@ public static class TorznabCategoryExtensions
             ReleaseSource.Remux or ReleaseSource.WebDl or ReleaseSource.WebRip or ReleaseSource.HDTV => isUhd
                 ? (int)TorznabCategoryId.Movies_UHD
                 : (int)TorznabCategoryId.Movies_HD,
-            ReleaseSource.None => isUhd
-                ? (int)TorznabCategoryId.Movies_UHD
-                : (int)TorznabCategoryId.Movies,
-            _ => (int)TorznabCategoryId.Movies
+            ReleaseSource.None => isUhd ? (int)TorznabCategoryId.Movies_UHD : (int)TorznabCategoryId.Movies,
+            _ => (int)TorznabCategoryId.Movies,
         };
     }
 
@@ -30,20 +28,20 @@ public static class TorznabCategoryExtensions
     /// Determine Torznab category for a TV episode release.
     /// Maps ReleaseSource to appropriate Torznab category based on source type and resolution.
     /// </summary>
-    public static int ToTorznabEpisodeCategory(this BasePlexMediaDataPart part)
+    public static int ToTorznabEpisodeCategory(this BasePlexMediaData part)
     {
-        var isUhd = IsUhdResolution(part.Resolution);
+        var isUhd = IsUhdResolution(part.VideoResolution);
 
         return part.Source switch
         {
             ReleaseSource.DVD => (int)TorznabCategoryId.TV_SD,
-            ReleaseSource.Remux or ReleaseSource.BluRay or ReleaseSource.WebDl or ReleaseSource.WebRip or ReleaseSource.HDTV => isUhd
-                ? (int)TorznabCategoryId.TV_UHD
-                : (int)TorznabCategoryId.TV_HD,
-            ReleaseSource.None => isUhd
-                ? (int)TorznabCategoryId.TV_UHD
-                : (int)TorznabCategoryId.TV,
-            _ => (int)TorznabCategoryId.TV
+            ReleaseSource.Remux
+            or ReleaseSource.BluRay
+            or ReleaseSource.WebDl
+            or ReleaseSource.WebRip
+            or ReleaseSource.HDTV => isUhd ? (int)TorznabCategoryId.TV_UHD : (int)TorznabCategoryId.TV_HD,
+            ReleaseSource.None => isUhd ? (int)TorznabCategoryId.TV_UHD : (int)TorznabCategoryId.TV,
+            _ => (int)TorznabCategoryId.TV,
         };
     }
 

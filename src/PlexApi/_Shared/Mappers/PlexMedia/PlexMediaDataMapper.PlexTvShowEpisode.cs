@@ -56,72 +56,43 @@ public static partial class PlexMediaDataMapper
     public static ICollection<PlexTvShowEpisodeMediaData> ToEpisodeMediaDataList(
         this List<LibraryMediaItemMediaDTO> source,
         LibraryMediaItemDTO root
-    ) => source.Select(x => x.ToEpisodeMediaDataList(root)).ToList();
+    ) => source.SelectMany(x => x.ToEpisodeMediaDataList(root)).ToList();
 
-    public static PlexTvShowEpisodeMediaData ToEpisodeMediaDataList(
+    public static ICollection<PlexTvShowEpisodeMediaData> ToEpisodeMediaDataList(
         this LibraryMediaItemMediaDTO source,
         LibraryMediaItemDTO root
-    ) =>
-        new()
-        {
-            Id = 0,
-            PlexId = source.Id,
-            Duration = source.Duration,
-            Bitrate = source.Bitrate,
-            Width = source.Width,
-            Height = source.Height,
-            AspectRatio = source.AspectRatio,
-            AudioChannels = source.AudioChannels,
-            AudioCodec = source.AudioCodec,
-            VideoCodec = source.VideoCodec,
-            RawVideoResolution = source.VideoResolution,
-            Quality = source.VideoResolution.ToVideoQuality(),
-            Container = source.Container,
-            VideoFrameRate = source.VideoFrameRate,
-            VideoProfile = source.VideoProfile,
-            AudioProfile = source.AudioProfile,
-            HasVoiceActivity = source.HasVoiceActivity,
-            Parts = source.Parts.ToPlexTvShowEpisodeModel(root),
+    ) => source.Parts.Select(part => part.ToPlexTvShowEpisodeModel(source, root)).ToList();
 
-            // Ignore the following
-            PlexLibraryId = 0,
-            PlexServerId = 0,
-            PlexTvShowEpisodeId = 0,
-        };
-
-    public static ICollection<PlexTvShowEpisodeMediaDataPart> ToPlexTvShowEpisodeModel(
-        this List<LibraryMediaItemPartDTO> source,
-        LibraryMediaItemDTO root
-    ) => source.Select(x => x.ToPlexTvShowEpisodeModel(root)).ToList();
-
-    public static PlexTvShowEpisodeMediaDataPart ToPlexTvShowEpisodeModel(
+    public static PlexTvShowEpisodeMediaData ToPlexTvShowEpisodeModel(
         this LibraryMediaItemPartDTO source,
+        LibraryMediaItemMediaDTO mediaItem,
         LibraryMediaItemDTO root
     ) =>
         new()
         {
             Id = 0,
-            PlexId = source.Id,
+            PlexMediaId = mediaItem.Id,
+            PlexPartId = source.Id,
             Key = source.Key,
             Duration = source.Duration,
             OriginalFilename = source.File.GetFileName(),
             Size = source.Size,
-            RatingKey = root.RatingKey,
             Container = source.Container,
+            RatingKey = root.RatingKey,
+            Quality = mediaItem.VideoResolution.ToVideoQuality(),
+            FrameRate = mediaItem.VideoFrameRate,
+            VideoCodec = mediaItem.VideoCodec,
+            VideoResolution = mediaItem.VideoResolution,
+            AudioCodec = mediaItem.AudioCodec,
+            AudioChannels = mediaItem.AudioChannels,
 
             // Ignore the following
             PlexLibraryId = 0,
             PlexServerId = 0,
             PlexTvShowEpisodeId = 0,
-            PlexTvShowEpisodeMediaDataId = 0,
             LastSyncedAt = default,
-            VideoCodec = string.Empty,
-            FrameRate = string.Empty,
-            Resolution = string.Empty,
             Source = ReleaseSource.None,
             HasMetadata = false,
-            AudioCodec = string.Empty,
-            AudioChannels = null,
             GeneratedFilename = string.Empty,
         };
 }

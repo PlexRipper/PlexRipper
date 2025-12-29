@@ -55,27 +55,17 @@ public static partial class PlexMediaDTOMapper
         new()
         {
             Duration = source.Duration,
-            VideoResolution = source.RawVideoResolution,
-            Width = source.Width,
-            Height = source.Height,
-            Bitrate = source.Bitrate,
+            VideoResolution = source.VideoResolution,
             VideoCodec = source.VideoCodec,
-            VideoFrameRate = source.VideoFrameRate,
-            AspectRatio = source.AspectRatio,
-            VideoProfile = source.VideoProfile,
-            AudioProfile = source.AudioProfile,
+            VideoFrameRate = source.FrameRate,
             AudioCodec = source.AudioCodec,
-            AudioChannels = source.AudioChannels,
-            Parts = source.Parts.ToDTO(),
+            AudioChannels = source.AudioChannels ?? 0,
         };
 
-    public static List<LibraryMediaItemPartDTO> ToDTO(this ICollection<PlexMovieMediaDataPart> source) =>
-        source.Select(x => x.ToDTO()).ToList();
-
-    public static LibraryMediaItemPartDTO ToDTO(this PlexMovieMediaDataPart source) =>
+    public static LibraryMediaItemPartDTO ToPartDTO(this PlexMovieMediaData source) =>
         new()
         {
-            Id = source.PlexId,
+            Id = source.PlexMediaId,
             Key = source.Key,
             Duration = source.Duration,
             Size = source.Size,

@@ -103,7 +103,7 @@ public class GenerateDownloadTaskMoviesCommandHandler : ICommandHandler<Generate
                 }
 
                 // Map movieData to DownloadTaskMovieFile and add to movieDownloadTask
-                movieDownloadTask.Children.AddRange(movieData.MapToDownloadTask(plexMovie, request));
+                movieDownloadTask.Children.Add(movieData.MapToDownloadTask(plexMovie, request));
 
                 movieDownloadTask.Calculate();
 

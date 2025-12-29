@@ -96,52 +96,48 @@ public static class PlexMediaExtensions
             FileDataTransferred = 0,
         };
 
-    public static List<DownloadTaskMovieFile> MapToDownloadTask(
+    public static DownloadTaskMovieFile MapToDownloadTask(
         this PlexMovieMediaData plexMediaData,
         PlexMovie plexMovie,
         CreateDownloadTasksRequest request
-    )
-    {
-        return plexMediaData
-            .Parts.Select(part => new DownloadTaskMovieFile
+    ) =>
+        new()
+        {
+            Id = Guid.Empty,
+            PlexId = plexMediaData.PlexMediaId,
+            HashId = null,
+            DataTotal = plexMediaData.Size,
+            DownloadStatus = DownloadStatus.Queued,
+            CreatedAt = DateTime.UtcNow,
+            PlexServer = null,
+            PlexServerId = plexMovie.PlexServerId,
+            PlexLibrary = null,
+            PlexLibraryId = plexMovie.PlexLibraryId,
+            DataReceived = 0,
+            DownloadSpeed = 0,
+            FileTransferSpeed = 0,
+            FileDataTransferred = 0,
+            FileName = plexMediaData.GetFileName(),
+            FileLocationUrl = plexMediaData.Key,
+            Quality = plexMediaData.VideoResolution,
+            DirectoryMeta = new DownloadTaskDirectory
             {
-                Id = default,
-                PlexId = part.PlexId,
-                HashId = null,
-                DataTotal = part.Size,
-                DownloadStatus = DownloadStatus.Queued,
-                CreatedAt = DateTime.UtcNow,
-                PlexServer = null,
-                PlexServerId = plexMovie.PlexServerId,
-                PlexLibrary = null,
-                PlexLibraryId = plexMovie.PlexLibraryId,
-                DataReceived = 0,
-                DownloadSpeed = 0,
-                FileTransferSpeed = 0,
-                FileDataTransferred = 0,
-                FileName = part.GetFileName(),
-                FileLocationUrl = part.Key,
-                Quality = plexMediaData.RawVideoResolution,
-                DirectoryMeta = new DownloadTaskDirectory
-                {
-                    DownloadRootPath = string.Empty,
-                    DestinationRootPath = request.CustomDestinationFolderPath,
-                    MovieFolder = plexMovie.Title.SanitizeFolderName(),
-                    TvShowFolder = string.Empty,
-                    SeasonFolder = string.Empty,
-                    KeepCompletedInDownloadFolder = false,
-                },
-                DownloadWorkerTasks = [],
-                Parent = null,
-                ParentId = default,
-                DestinationFolderPathId = request.DestinationFolderPathId,
-                FullTitle = $"{plexMovie.FullTitle}/{part.GetFileName()}",
-                Title = part.GetFileName(),
-            })
-            .ToList();
-    }
+                DownloadRootPath = string.Empty,
+                DestinationRootPath = request.CustomDestinationFolderPath,
+                MovieFolder = plexMovie.Title.SanitizeFolderName(),
+                TvShowFolder = string.Empty,
+                SeasonFolder = string.Empty,
+                KeepCompletedInDownloadFolder = false,
+            },
+            DownloadWorkerTasks = [],
+            Parent = null,
+            ParentId = Guid.Empty,
+            DestinationFolderPathId = request.DestinationFolderPathId,
+            FullTitle = $"{plexMovie.FullTitle}/{plexMediaData.GetFileName()}",
+            Title = plexMediaData.GetFileName(),
+        };
 
-    public static List<DownloadTaskTvShowEpisodeFile> MapToDownloadTask(
+    public static DownloadTaskTvShowEpisodeFile MapToDownloadTask(
         this PlexTvShowEpisodeMediaData plexMediaData,
         PlexTvShowEpisode plexTvShowEpisode,
         CreateDownloadTasksRequest request
@@ -152,42 +148,40 @@ public static class PlexMediaExtensions
             throw new NullReferenceException("PlexTvShowEpisode.TvShow or PlexTvShowEpisode.TvShowSeason is null");
         }
 
-        return plexMediaData
-            .Parts.Select(part => new DownloadTaskTvShowEpisodeFile
+        return new DownloadTaskTvShowEpisodeFile
+        {
+            Id = Guid.Empty,
+            PlexId = plexMediaData.PlexMediaId,
+            HashId = null,
+            DataTotal = plexMediaData.Size,
+            DownloadStatus = DownloadStatus.Queued,
+            CreatedAt = DateTime.UtcNow,
+            PlexServer = null,
+            PlexServerId = plexTvShowEpisode.PlexServerId,
+            PlexLibrary = null,
+            PlexLibraryId = plexTvShowEpisode.PlexLibraryId,
+            DataReceived = 0,
+            DownloadSpeed = 0,
+            FileTransferSpeed = 0,
+            FileDataTransferred = 0,
+            FileName = plexMediaData.GetFileName(),
+            FileLocationUrl = plexMediaData.Key,
+            Quality = plexMediaData.VideoResolution,
+            DirectoryMeta = new DownloadTaskDirectory
             {
-                Id = default,
-                PlexId = part.PlexId,
-                HashId = null,
-                DataTotal = part.Size,
-                DownloadStatus = DownloadStatus.Queued,
-                CreatedAt = DateTime.UtcNow,
-                PlexServer = null,
-                PlexServerId = plexTvShowEpisode.PlexServerId,
-                PlexLibrary = null,
-                PlexLibraryId = plexTvShowEpisode.PlexLibraryId,
-                DataReceived = 0,
-                DownloadSpeed = 0,
-                FileTransferSpeed = 0,
-                FileDataTransferred = 0,
-                FileName = part.GetFileName(),
-                FileLocationUrl = part.Key,
-                Quality = plexMediaData.RawVideoResolution,
-                DirectoryMeta = new DownloadTaskDirectory
-                {
-                    DownloadRootPath = string.Empty,
-                    DestinationRootPath = request.CustomDestinationFolderPath,
-                    MovieFolder = string.Empty,
-                    TvShowFolder = plexTvShowEpisode.TvShow.Title.SanitizeFolderName(),
-                    SeasonFolder = plexTvShowEpisode.TvShowSeason.Title.SanitizeFolderName(),
-                    KeepCompletedInDownloadFolder = false,
-                },
-                DownloadWorkerTasks = [],
-                Parent = null,
-                ParentId = default,
-                DestinationFolderPathId = request.DestinationFolderPathId,
-                FullTitle = $"{plexTvShowEpisode.FullTitle}/{part.GetFileName()}",
-                Title = part.GetFileName(),
-            })
-            .ToList();
+                DownloadRootPath = string.Empty,
+                DestinationRootPath = request.CustomDestinationFolderPath,
+                MovieFolder = string.Empty,
+                TvShowFolder = plexTvShowEpisode.TvShow.Title.SanitizeFolderName(),
+                SeasonFolder = plexTvShowEpisode.TvShowSeason.Title.SanitizeFolderName(),
+                KeepCompletedInDownloadFolder = false,
+            },
+            DownloadWorkerTasks = [],
+            Parent = null,
+            ParentId = Guid.Empty,
+            DestinationFolderPathId = request.DestinationFolderPathId,
+            FullTitle = $"{plexTvShowEpisode.FullTitle}/{plexMediaData.GetFileName()}",
+            Title = plexMediaData.GetFileName(),
+        };
     }
 }

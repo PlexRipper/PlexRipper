@@ -13,11 +13,11 @@ public record TorrentMetadataDTO
     public required int MediaId { get; init; }
 
     [QueryParam]
-    public required int DataId { get; init; }  
-    
+    public required int DataId { get; init; }
+
     [QueryParam]
-    public required int PartId { get; init; }   
-    
+    public required int PartId { get; init; }
+
     [QueryParam]
     public required long PartPlexId { get; init; }
 
@@ -42,15 +42,16 @@ public record TorrentMetadataDTO
         return QueryHelpers.AddQueryString(url, Values!);
     }
 
-    public Dictionary<string, string> Values => new()
-    {
-        { nameof(Type), Type.ToString() },
-        { nameof(MediaId), MediaId.ToString() },
-        { nameof(DataId), DataId.ToString() },
-        { nameof(PartId), PartId.ToString() },
-        { nameof(PartPlexId), PartPlexId.ToString() },
-        { nameof(Quality), Quality.ToString() },
-        { nameof(LibraryId), LibraryId.ToString() },
-        { nameof(ServerId), ServerId.ToString() },
-    };
+    public Dictionary<string, string> Values =>
+        new()
+        {
+            { nameof(Type), Type.ToString() },
+            { nameof(MediaId), MediaId.ToString() },
+            { nameof(DataId), DataId.ToString() },
+            { nameof(PartId), PartId.ToString() },
+            { nameof(PartPlexId), PartPlexId.ToString() },
+            { nameof(Quality), Quality.ToString() },
+            { nameof(LibraryId), LibraryId.ToString() },
+            { nameof(ServerId), ServerId.ToString() },
+        };
 }

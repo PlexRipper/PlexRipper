@@ -55,72 +55,43 @@ public static partial class PlexMediaDataMapper
     public static ICollection<PlexMovieMediaData> ToMovieMediaDataList(
         this List<LibraryMediaItemMediaDTO> source,
         LibraryMediaItemDTO root
-    ) => source.Select(x => x.ToMovieMediaDataList(root)).ToList();
+    ) => source.SelectMany(x => x.ToMovieMediaDataList(root)).ToList();
 
-    public static PlexMovieMediaData ToMovieMediaDataList(
+    public static ICollection<PlexMovieMediaData> ToMovieMediaDataList(
         this LibraryMediaItemMediaDTO source,
         LibraryMediaItemDTO root
-    ) =>
-        new()
-        {
-            Id = 0,
-            PlexId = source.Id,
-            Duration = source.Duration,
-            Bitrate = source.Bitrate,
-            Width = source.Width,
-            Height = source.Height,
-            AspectRatio = source.AspectRatio,
-            AudioChannels = source.AudioChannels,
-            AudioCodec = source.AudioCodec,
-            VideoCodec = source.VideoCodec,
-            RawVideoResolution = source.VideoResolution,
-            Quality = source.VideoResolution.ToVideoQuality(),
-            Container = source.Container,
-            VideoFrameRate = source.VideoFrameRate,
-            VideoProfile = source.VideoProfile,
-            AudioProfile = source.AudioProfile,
-            HasVoiceActivity = source.HasVoiceActivity,
-            Parts = source.Parts.ToPlexMovieModel(root),
+    ) => source.Parts.Select(part => part.ToPlexMovieModel(source, root)).ToList();
 
-            // Ignore the following
-            PlexLibraryId = 0,
-            PlexServerId = 0,
-            PlexMovieId = 0,
-        };
-
-    public static ICollection<PlexMovieMediaDataPart> ToPlexMovieModel(
-        this List<LibraryMediaItemPartDTO> source,
-        LibraryMediaItemDTO root
-    ) => source.Select(x => x.ToPlexMovieModel(root)).ToList();
-
-    public static PlexMovieMediaDataPart ToPlexMovieModel(
+    public static PlexMovieMediaData ToPlexMovieModel(
         this LibraryMediaItemPartDTO source,
+        LibraryMediaItemMediaDTO mediaItem,
         LibraryMediaItemDTO root
     ) =>
         new()
         {
             Id = 0,
-            PlexId = source.Id,
+            PlexMediaId = mediaItem.Id,
+            PlexPartId = source.Id,
             Key = source.Key,
             Duration = source.Duration,
             OriginalFilename = source.File.GetFileName(),
             Size = source.Size,
             Container = source.Container,
             RatingKey = root.RatingKey,
+            Quality = mediaItem.VideoResolution.ToVideoQuality(),
+            FrameRate = mediaItem.VideoFrameRate,
+            VideoCodec = mediaItem.VideoCodec,
+            VideoResolution = mediaItem.VideoResolution,
+            AudioCodec = mediaItem.AudioCodec,
+            AudioChannels = mediaItem.AudioChannels,
 
             // Ignore the following
             PlexLibraryId = 0,
             PlexServerId = 0,
             PlexMovieId = 0,
-            PlexMovieMediaDataId = 0,
             LastSyncedAt = default,
-            VideoCodec = string.Empty,
-            FrameRate = string.Empty,
-            Resolution = string.Empty,
             Source = ReleaseSource.None,
             HasMetadata = false,
-            AudioCodec = string.Empty,
-            AudioChannels = null,
             GeneratedFilename = string.Empty,
         };
 }

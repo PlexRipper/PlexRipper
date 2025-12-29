@@ -297,10 +297,6 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
     private async Task RemoveMedia(int plexLibraryId, CancellationToken cancellationToken)
     {
         await _dbContext
-            .PlexMovieDataParts.Where(x => x.PlexLibraryId == plexLibraryId)
-            .ExecuteDeleteAsync(cancellationToken);
-
-        await _dbContext
             .PlexMovieData.Where(x => x.PlexLibraryId == plexLibraryId)
             .ExecuteDeleteAsync(cancellationToken);
 

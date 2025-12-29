@@ -41,11 +41,10 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
         var expectedEpisodeTitles = await IDbContext
             .PlexTvShowEpisodes.AsNoTracking()
             .Include(e => e.MediaDataList)
-            .ThenInclude(md => md.Parts)
             .OrderBy(e => e.Id)
             .Skip(offset)
             .Take(limit)
-            .Select(e => e.MediaDataList.SelectMany(md => md.Parts).Select(p => p.OriginalFilename).First())
+            .Select(e => e.MediaDataList.Select(md => md.OriginalFilename).First())
             .ToListAsync(CancellationToken);
 
         // Act
@@ -152,9 +151,8 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
 
         // Titles should equal the part file name used during mapping
         var expectedTitle = await IDbContext
-            .PlexTvShowEpisodeData.Include(d => d.Parts)
-            .Where(d => d.PlexTvShowEpisodeId == episode.Id)
-            .Select(d => d.Parts.Select(p => p.OriginalFilename).First())
+            .PlexTvShowEpisodeData.Where(d => d.PlexTvShowEpisodeId == episode.Id)
+            .Select(d => d.OriginalFilename)
             .FirstAsync(CancellationToken);
         result.Channel.Items.Select(i => i.Title).Distinct().Single().ShouldBe(expectedTitle);
 
@@ -433,11 +431,10 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
         // Expected total parts across the paged episodes
         var expectedPartCount = await IDbContext
             .PlexTvShowEpisodes.Include(e => e.MediaDataList)
-            .ThenInclude(m => m.Parts)
             .OrderBy(e => e.Id)
             .Skip(offset)
             .Take(limit)
-            .Select(e => e.MediaDataList.SelectMany(md => md.Parts).Count())
+            .Select(e => e.MediaDataList.Count)
             .SumAsync(CancellationToken);
 
         // Act

@@ -1,8 +1,8 @@
 namespace Reaparr.BackgroundJobs.UnitTests;
 
-public class BasePlexMediaDataPartMapperGenerateReleaseNameUnitTests : BaseUnitTest
+public class BasePlexMediaDataMapperGenerateReleaseNameUnitTests : BaseUnitTest
 {
-    public BasePlexMediaDataPartMapperGenerateReleaseNameUnitTests(ITestOutputHelper output)
+    public BasePlexMediaDataMapperGenerateReleaseNameUnitTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]
@@ -26,7 +26,7 @@ public class BasePlexMediaDataPartMapperGenerateReleaseNameUnitTests : BaseUnitT
         var isRemux = false;
 
         // Act
-        var releaseName = BasePlexMediaDataPartMapper.GenerateReleaseName(
+        var releaseName = BasePlexMediaDataMapper.GenerateReleaseName(
             title: mediaItem.Title,
             year: mediaItem.Year,
             videoResolution: media.VideoResolution,

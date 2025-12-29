@@ -52,7 +52,7 @@ public class ProcessEpisodeMetadataCommandHandler : ICommandHandler<ProcessEpiso
         using (var dbContext = await _dbContextFactory.CreateAsync())
         {
             ratingKeysToProcess = await dbContext
-                .PlexTvShowEpisodeDataParts.AsTracking()
+                .PlexTvShowEpisodeData.AsTracking()
                 .Where(m => !m.HasMetadata && m.PlexServerId == command.ServerId)
                 .Select(p => p.RatingKey)
                 .Distinct()
@@ -114,7 +114,7 @@ public class ProcessEpisodeMetadataCommandHandler : ICommandHandler<ProcessEpiso
             {
                 // Re-fetch the parts for this batch with tracking enabled
                 var parts = await dbContext
-                    .PlexTvShowEpisodeDataParts.AsTracking()
+                    .PlexTvShowEpisodeData.AsTracking()
                     .Where(m => !m.HasMetadata && m.PlexServerId == command.ServerId)
                     .Where(p => batchRatingKeys.Contains(p.RatingKey))
                     .ToListAsync(ct);
@@ -124,7 +124,7 @@ public class ProcessEpisodeMetadataCommandHandler : ICommandHandler<ProcessEpiso
                 foreach (var mediaItem in metadataItem.Media)
                 foreach (var partItem in mediaItem.Parts)
                 {
-                    var partToUpdate = parts.FirstOrDefault(p => p.PlexId == partItem.Id);
+                    var partToUpdate = parts.FirstOrDefault(p => p.PlexMediaId == partItem.Id);
 
                     if (partToUpdate is null)
                     {

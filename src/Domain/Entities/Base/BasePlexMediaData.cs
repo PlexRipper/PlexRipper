@@ -65,11 +65,10 @@ public abstract class BasePlexMediaData : BasePlexMediaQuality
     public required string Container { get; init; }
 
     /// <summary>
-    /// Indicates whether full stream-level metadata
-    /// (audio, subtitles, HDR, etc.) has been synced.
+    /// If the <see cref="OriginalFilename"/> is not a valid name for the purposes of Sonarr/Radarr parsing. Then it requires an additional metadata call to get more media specs in order to generate a better name
     /// </summary>
     [Column(Order = 10)]
-    public bool HasMetadata { get; set; }
+    public bool NeedsGeneratedName { get; set; }
 
     /// <summary>
     /// Timestamp of the last metadata update in Plex.

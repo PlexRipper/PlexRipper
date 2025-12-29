@@ -67,7 +67,7 @@ public static class BasePlexMediaDataMapper
             ) ?? string.Empty;
 
         // Mark as enriched
-        mediaDataDb.HasMetadata = true;
+        mediaDataDb.NeedsGeneratedName = true;
         mediaDataDb.LastSyncedAt = DateTime.UtcNow;
     }
 

@@ -17,7 +17,7 @@ public static partial class FakeData
             .RuleFor(x => x.Duration, f => f.Random.Int(50000, 55124400))
             .RuleFor(x => x.Container, f => f.System.FileType())
             .RuleFor(x => x.Source, _ => ReleaseSource.WebDl)
-            .RuleFor(x => x.HasMetadata, _ => false)
+            .RuleFor(x => x.NeedsGeneratedName, _ => false)
             .RuleFor(x => x.LastSyncedAt, _ => DateTime.UtcNow)
             .RuleFor(x => x.OriginalFilename, f => f.System.FileName("video"))
             .RuleFor(x => x.GeneratedFilename, _ => string.Empty)

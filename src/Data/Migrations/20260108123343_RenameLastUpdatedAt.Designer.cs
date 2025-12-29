@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Reaparr.Data;
 
@@ -10,9 +11,11 @@ using Reaparr.Data;
 namespace Reaparr.Data.Migrations
 {
     [DbContext(typeof(ReaparrDbContext))]
-    partial class ReaparrDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260108123343_RenameLastUpdatedAt")]
+    partial class RenameLastUpdatedAt
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1458,10 +1461,6 @@ namespace Reaparr.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(0);
 
-                    b.Property<string>("AudioChannels")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("AudioLanguages")
                         .HasColumnType("TEXT");
 
@@ -1544,8 +1543,10 @@ namespace Reaparr.Data.Migrations
                     b.Property<int>("PlexServerId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int?>("PrimaryAudioChannels")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("PrimaryAudioCodec")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<int>("RatingKey")
@@ -1562,8 +1563,9 @@ namespace Reaparr.Data.Migrations
                     b.Property<long>("Size")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("Source")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("SubtitleLanguages")
                         .HasColumnType("TEXT");
@@ -2399,10 +2401,6 @@ namespace Reaparr.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(0);
 
-                    b.Property<string>("AudioChannels")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("AudioLanguages")
                         .HasColumnType("TEXT");
 
@@ -2485,8 +2483,10 @@ namespace Reaparr.Data.Migrations
                     b.Property<int>("PlexTvShowEpisodeMediaDataId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int?>("PrimaryAudioChannels")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("PrimaryAudioCodec")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<int>("RatingKey")
@@ -2503,8 +2503,9 @@ namespace Reaparr.Data.Migrations
                     b.Property<long>("Size")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("Source")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("SubtitleLanguages")
                         .HasColumnType("TEXT");

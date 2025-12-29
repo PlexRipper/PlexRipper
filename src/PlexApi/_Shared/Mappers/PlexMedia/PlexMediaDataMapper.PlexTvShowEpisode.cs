@@ -80,6 +80,7 @@ public static partial class PlexMediaDataMapper
             Container = source.Container,
             RatingKey = root.RatingKey,
             Quality = mediaItem.VideoResolution.ToVideoQuality(),
+            Source = mediaItem.DetermineReleaseSource(),
             FrameRate = mediaItem.VideoFrameRate,
             VideoCodec = mediaItem.VideoCodec,
             VideoResolution = mediaItem.VideoResolution,
@@ -90,9 +91,6 @@ public static partial class PlexMediaDataMapper
             PlexLibraryId = 0,
             PlexServerId = 0,
             PlexTvShowEpisodeId = 0,
-            LastSyncedAt = default,
-            Source = ReleaseSource.None,
-            HasMetadata = false,
             GeneratedFilename = string.Empty,
         };
 }

@@ -11,7 +11,7 @@ public static class BasePlexMediaDataMapper
     /// Adds the missing stream data to the <see cref="BasePlexMediaData"/> which allows it to be complete for Torznab indexing. It also generates a <see cref="BasePlexMediaData.GeneratedFilename"/> as Sonarr/Radarr require specific name to contain the media specs.
     /// </summary>
     public static void UpdateStreamMetadata(
-        this BasePlexMediaData part,
+        this BasePlexMediaData mediaDataDb,
         LibraryMediaItemDTO metaDataItem,
         LibraryMediaItemMediaDTO mediaItem,
         LibraryMediaItemPartDTO partItem
@@ -25,15 +25,11 @@ public static class BasePlexMediaDataMapper
             _log.Here()
                 .Warning(
                     "Unable to find video stream for partID: {PartId} with filename: {MediaFileName}",
-                    part.Id,
-                    part.OriginalFilename
+                    mediaDataDb.Id,
+                    mediaDataDb.GetFileName
                 );
             return;
         }
-
-        part.FrameRate = mediaItem.VideoFrameRate;
-        part.VideoCodec = mediaItem.VideoCodec;
-        part.VideoResolution = mediaItem.VideoResolution;
 
         // Extract audio stream info
         var audioStreams = partItem.Stream.Where(s => s.StreamType == StreamType.Audio).ToList();
@@ -43,26 +39,11 @@ public static class BasePlexMediaDataMapper
             _log.Here()
                 .Warning(
                     "Unable to find audio stream for partID: {PartId} with filename: {MediaFileName}",
-                    part.Id,
-                    part.OriginalFilename
+                    mediaDataDb.Id,
+                    mediaDataDb.GetFileName
                 );
             return;
         }
-
-        part.AudioCodec = mediaItem.AudioCodec;
-        part.AudioChannels = mediaItem.AudioChannels;
-
-        var (source, isRemux) = DetermineReleaseSource(
-            mediaItem.Container,
-            mediaItem.AudioCodec,
-            mediaItem.AudioProfile,
-            mediaItem.OptimizedForStreaming
-        );
-
-        part.Source = source;
-
-        // Set OriginalFilename from partItem.File (extract filename only, not full path)
-        part.OriginalFilename = partItem.File.GetFileName();
 
         // Map codecs
         var videoCodec = mediaItem.VideoCodec.MapVideoCodec();
@@ -71,7 +52,7 @@ public static class BasePlexMediaDataMapper
         var languageFormat = partItem.Stream.FormatLanguage();
 
         // Generate the release name and set GeneratedFilename
-        part.GeneratedFilename =
+        mediaDataDb.GeneratedFilename =
             GenerateReleaseName(
                 title: metaDataItem.Title,
                 year: metaDataItem.Year,
@@ -81,13 +62,13 @@ public static class BasePlexMediaDataMapper
                 videoStream: videoStream,
                 audioLayout: audioLayout,
                 languageFormat: languageFormat,
-                source: source,
-                isRemux: isRemux
+                source: mediaDataDb.Source,
+                isRemux: mediaDataDb.Source == ReleaseSource.BluRayRemux
             ) ?? string.Empty;
 
         // Mark as enriched
-        part.HasMetadata = true;
-        part.LastSyncedAt = DateTime.UtcNow;
+        mediaDataDb.HasMetadata = true;
+        mediaDataDb.LastSyncedAt = DateTime.UtcNow;
     }
 
     /// <summary>
@@ -144,42 +125,6 @@ public static class BasePlexMediaDataMapper
             releaseName.Append('.').Append(languageFormat);
 
         return releaseName.ToString();
-    }
-
-    private static (ReleaseSource source, bool isRemux) DetermineReleaseSource(
-        string container,
-        string audioCodec,
-        string audioProfile,
-        bool optimizedForStreaming
-    )
-    {
-        var c = container.ToLowerInvariant();
-        var codec = audioCodec.ToLowerInvariant();
-        var profile = audioProfile.ToLowerInvariant();
-
-        // Disc containers
-        if (c is "vob" or "mpg" or "mpeg")
-            return (ReleaseSource.DVD, false);
-
-        if (c is "m2ts" or "bdmv")
-        {
-            var isRemux = codec is "truehd" or "dts-hd ma" or "dts-hd.ma" || (codec == "dca" && profile.Contains("ma"));
-
-            return (ReleaseSource.BluRay, isRemux);
-        }
-
-        // Broadcast
-        if (c is "ts" or "mpegts")
-            return (ReleaseSource.HDTV, false);
-
-        // Web
-        if (c is "mp4" or "mov" or "webm" or "mkv")
-        {
-            return optimizedForStreaming ? (ReleaseSource.WebDl, false) : (ReleaseSource.WebRip, false);
-        }
-
-        // Fallback
-        return (ReleaseSource.WebRip, false);
     }
 
     private static string SanitizeTitle(string title)
@@ -248,7 +193,7 @@ public static class BasePlexMediaDataMapper
         // Do NOT infer from bit depth alone
         var hasHdr = (hasBt2020 && hasPq) || hasHdrProfile;
 
-        // Build tokens in correct order
+        // Build tokens in the correct order
         if (hasDv)
         {
             tokens.Add("DV");

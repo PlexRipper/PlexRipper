@@ -75,6 +75,7 @@ public static partial class PlexMediaDataMapper
             Key = source.Key,
             Duration = source.Duration,
             OriginalFilename = source.File.GetFileName(),
+            Source = mediaItem.DetermineReleaseSource(),
             Size = source.Size,
             Container = source.Container,
             RatingKey = root.RatingKey,
@@ -89,9 +90,5 @@ public static partial class PlexMediaDataMapper
             PlexLibraryId = 0,
             PlexServerId = 0,
             PlexMovieId = 0,
-            LastSyncedAt = default,
-            Source = ReleaseSource.None,
-            HasMetadata = false,
-            GeneratedFilename = string.Empty,
         };
 }

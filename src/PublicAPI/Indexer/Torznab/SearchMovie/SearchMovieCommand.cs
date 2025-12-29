@@ -121,7 +121,7 @@ public class SearchMovieCommandHandler : ICommandHandler<SearchMovieCommand, Tor
 
             var item = new TorznabItem
             {
-                Title = mediaData.GetFileName(),
+                Title = mediaData.GetFileName,
                 PubDate = movie.AddedAt.ToString("R"),
                 Guid = new TorznabGuid { Value = url },
                 Link = url,

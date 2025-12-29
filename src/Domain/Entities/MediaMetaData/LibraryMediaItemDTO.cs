@@ -228,6 +228,11 @@ public record LibraryMediaItemMediaDTO
     /// </summary>
     public required bool HasVoiceActivity { get; init; }
 
+    /// <summary>
+    /// Indicates whether this media file is optimized for direct streaming playback,
+    /// meaning it is encoded and packaged to minimize buffering and avoid transcoding
+    /// (for example, using streaming-friendly codecs, bitrate, and container settings).
+    /// </summary>
     public required bool OptimizedForStreaming { get; init; }
 
     /// <summary>

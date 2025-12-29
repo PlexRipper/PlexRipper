@@ -175,7 +175,7 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, T
 
             var item = new TorznabItem
             {
-                Title = mediaData.GetFileName(),
+                Title = mediaData.GetFileName,
                 PubDate = episode.AddedAt.ToString("R"),
                 Guid = new TorznabGuid { Value = url },
                 Link = url,

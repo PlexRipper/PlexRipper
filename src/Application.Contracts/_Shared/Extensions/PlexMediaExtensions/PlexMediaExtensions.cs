@@ -117,7 +117,7 @@ public static class PlexMediaExtensions
             DownloadSpeed = 0,
             FileTransferSpeed = 0,
             FileDataTransferred = 0,
-            FileName = plexMediaData.GetFileName(),
+            FileName = plexMediaData.GetFileName,
             FileLocationUrl = plexMediaData.Key,
             Quality = plexMediaData.VideoResolution,
             DirectoryMeta = new DownloadTaskDirectory
@@ -133,8 +133,8 @@ public static class PlexMediaExtensions
             Parent = null,
             ParentId = Guid.Empty,
             DestinationFolderPathId = request.DestinationFolderPathId,
-            FullTitle = $"{plexMovie.FullTitle}/{plexMediaData.GetFileName()}",
-            Title = plexMediaData.GetFileName(),
+            FullTitle = $"{plexMovie.FullTitle}/{plexMediaData.GetFileName}",
+            Title = plexMediaData.GetFileName,
         };
 
     public static DownloadTaskTvShowEpisodeFile MapToDownloadTask(
@@ -164,7 +164,7 @@ public static class PlexMediaExtensions
             DownloadSpeed = 0,
             FileTransferSpeed = 0,
             FileDataTransferred = 0,
-            FileName = plexMediaData.GetFileName(),
+            FileName = plexMediaData.GetFileName,
             FileLocationUrl = plexMediaData.Key,
             Quality = plexMediaData.VideoResolution,
             DirectoryMeta = new DownloadTaskDirectory
@@ -180,8 +180,8 @@ public static class PlexMediaExtensions
             Parent = null,
             ParentId = Guid.Empty,
             DestinationFolderPathId = request.DestinationFolderPathId,
-            FullTitle = $"{plexTvShowEpisode.FullTitle}/{plexMediaData.GetFileName()}",
-            Title = plexMediaData.GetFileName(),
+            FullTitle = $"{plexTvShowEpisode.FullTitle}/{plexMediaData.GetFileName}",
+            Title = plexMediaData.GetFileName,
         };
     }
 }

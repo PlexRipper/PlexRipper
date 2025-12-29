@@ -142,13 +142,19 @@ public static class MediaSpecMapper
         }
     }
 
+    /// <summary>
+    /// Maps a <see cref="ReleaseSource"/> to the source token used in generated release filenames
+    /// (e.g. "Blu-ray", "WEB-DL", "WEBRip").
+    ///
+    /// Note that encoding characteristics such as REMUX are intentionally not included here;
+    /// they are expressed as separate filename tokens to match Radarr/Sonarr parsing rules.
+    /// </summary>
     public static string? ToFileNameSpec(this ReleaseSource source)
     {
-        // Note: Remux is handled as a flag (isRemux), not a source enum value
-        // When remux is detected, a source is BluRay with isRemux=true
         switch (source)
         {
             case ReleaseSource.BluRay:
+            case ReleaseSource.BluRayRemux:
                 return "BluRay";
             case ReleaseSource.WebDl:
                 return "WEB-DL";
@@ -158,8 +164,6 @@ public static class MediaSpecMapper
                 return "DVD";
             case ReleaseSource.HDTV:
                 return "HDTV";
-            case ReleaseSource.Remux:
-                return "BluRay"; // Legacy support - should not occur with new logic
             default:
                 _log.Here().Warning("Unrecognized release source: {Source}", source);
                 return null;

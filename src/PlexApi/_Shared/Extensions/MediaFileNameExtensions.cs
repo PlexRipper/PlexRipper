@@ -31,6 +31,12 @@ public static partial class MediaFileNameExtensions
     [GeneratedRegex(@"\b(CD\d+|Part\d+|Disc\d+|DVD\d+)\b", RegexOptions.IgnoreCase)]
     private static partial Regex MultiPartRegex();
 
+    [GeneratedRegex(
+        @"\bpart\s+(I{1,3}|IV|VI{0,3}|IX|XI{0,3}|XIV|XVI{0,3}|XIX|XXI{0,3}|\d+)\b",
+        RegexOptions.IgnoreCase
+    )]
+    private static partial Regex PartWithRomanOrNumberRegex();
+
     [GeneratedRegex(@"[a-zA-Z]")]
     private static partial Regex LetterRegex();
 
@@ -40,7 +46,10 @@ public static partial class MediaFileNameExtensions
     /// - At least one letter
     /// - Identity information (episode identifiers like S01E02, year, or explicit IDs like tmdb/imdb)
     /// - A source tag (WEBDL, WEBRip, BluRay, HDTV, DVDRip, Remux, etc.)
-    /// - Technical information (resolution, video codec, audio codec, or multi-part tokens)
+    /// - Technical information (resolution, video codec, or audio codec)
+    ///
+    /// Exception: Filenames containing multi-part indicators (CD1/CD2, part I/II, Part 1/2, etc.)
+    /// always return true, as a better filename cannot be created for multi-part releases.
     /// </summary>
     /// <param name="fileName">The filename to validate (can be a full path or just the filename)</param>
     /// <returns>True if the filename is already in a parseable format; otherwise, false</returns>
@@ -54,6 +63,11 @@ public static partial class MediaFileNameExtensions
         if (!LetterRegex().IsMatch(fileName))
             return false;
 
+        // Exception: If filename contains multi-part indicators (CD1/CD2, part I/II, Part 1/2, etc.),
+        // always return true as we can never create a better filename for multi-part releases
+        if (MultiPartRegex().IsMatch(upper) || PartWithRomanOrNumberRegex().IsMatch(upper))
+            return true;
+
         var hasIdentity =
             EpisodeIdentifierRegex().IsMatch(upper)
             || YearRegex().IsMatch(fileName)
@@ -62,10 +76,7 @@ public static partial class MediaFileNameExtensions
         var hasSource = SourceTagRegex().IsMatch(upper);
 
         var hasTech =
-            ResolutionRegex().IsMatch(upper)
-            || VideoCodecRegex().IsMatch(upper)
-            || AudioTokenRegex().IsMatch(upper)
-            || MultiPartRegex().IsMatch(upper);
+            ResolutionRegex().IsMatch(upper) || VideoCodecRegex().IsMatch(upper) || AudioTokenRegex().IsMatch(upper);
 
         return hasIdentity && hasSource && hasTech;
     }

@@ -36,7 +36,7 @@ public class MediaFileNameExtensionsUnitTests : BaseUnitTest
     [InlineData("Bruce Almighty (2003) WEBDL-2160p.mkv", true)]
     [InlineData("BURN-E.mkv", false)]
     [InlineData("The Chronicles of Narnia Prince Caspian (2008) Remux-1080p.mkv", true)]
-    [InlineData("The.Chronicles.Of.Narnia.Prince.Caspian.DVDRip.XViD.CD1-PUKKA.avi", false)]
+    [InlineData("The.Chronicles.Of.Narnia.Prince.Caspian.DVDRip.XViD.CD1-PUKKA.avi", true)]
     [InlineData("City of Ember (2008) Bluray-1080p.mkv", true)]
     [InlineData("Coraline (2009) Bluray-2160p.mkv", true)]
     [InlineData("arw-coraline-dvdrip.avi", false)]
@@ -59,9 +59,9 @@ public class MediaFileNameExtensionsUnitTests : BaseUnitTest
     [InlineData("Happy Feet Two (2011) Remux-1080p.mkv", true)]
     [InlineData("Harry Potter and the Chamber of Secrets (2002) Remux-2160p Proper.mkv", true)]
     [InlineData("Hellboy II The Golden Army (2008) WEBDL-2160p.mkv", true)]
-    [InlineData("Hellboy.II.The.Golden.Army.DVDRip.XviD.CD1-DiAMOND.avi", false)]
+    [InlineData("Hellboy.II.The.Golden.Army.DVDRip.XviD.CD1-DiAMOND.avi", true)]
     [InlineData("High School Musical 3 Senior Year (2008) Remux-1080p.mkv", true)]
-    [InlineData("High School Musical 3 DVDRip XViD-PUKKA cd1.avi", false)]
+    [InlineData("High School Musical 3 DVDRip XViD-PUKKA cd1.avi", true)]
     [InlineData("Hocus Pocus 2 (2022) WEBDL-2160p.mkv", true)]
     [InlineData("Home Alone (1990) Bluray-2160p.mkv", true)]
     [InlineData("Home Alone 3 (1997) WEBRip-1080p.mp4", true)]
@@ -70,7 +70,7 @@ public class MediaFileNameExtensionsUnitTests : BaseUnitTest
     [InlineData("How to Train Your Dragon 2 (2014) Bluray-2160p.mkv", true)]
     [InlineData("Ice Age A Mammoth Christmas (2011) Bluray-1080p.mkv", true)]
     [InlineData("The Incredible Hulk (2008) Bluray-2160p.mkv", true)]
-    [InlineData("The.Incredible.Hulk.DVDRip.XviD.CD1-DoNE.avi", false)]
+    [InlineData("The.Incredible.Hulk.DVDRip.XviD.CD1-DoNE.avi", true)]
     [InlineData("The Incredibles (2004) Remux-2160p.mkv", true)]
     [InlineData("Inside Out (2015) Remux-2160p.mkv", true)]
     [InlineData("It's a SpongeBob Christmas! (2012) Bluray-720p.mkv", true)]
@@ -95,7 +95,7 @@ public class MediaFileNameExtensionsUnitTests : BaseUnitTest
     [InlineData("Shrek (2001) Bluray-2160p.mkv", true)]
     [InlineData("Shrek.the.Third.2007.1080p.BluRay.REMUX.AVC.TrueHD.7.1-EPSiLON.mkv", true)]
     [InlineData("Speed Racer (2008) Bluray-1080p.mkv", true)]
-    [InlineData("Speed.Racer.DVDRip.XviD.CD1-ARROW.avi", false)]
+    [InlineData("Speed.Racer.DVDRip.XviD.CD1-ARROW.avi", true)]
     [InlineData(
         "The SpongeBob Movie Sponge on the Run (2020) [imdb-tt4823776][tmdb-400160][WEBDL-2160p][HDR][HDR10][EAC3 Atmos 5.1][h265].mkv",
         true
@@ -103,6 +103,17 @@ public class MediaFileNameExtensionsUnitTests : BaseUnitTest
     [InlineData("vmt-spyool-xvid.avi", false)]
     [InlineData("The Super Mario Bros. Movie (2023) Bluray-2160p Proper.mkv", true)]
     [InlineData("Toy.Story.1995.1080p.BluRay.HEBDUB.Also.English.DTS-ES.x264-ZionHD.mkv", true)]
+    [InlineData("A Year And A Half In The Life of Metallica part I.avi", true)]
+    [InlineData("A Year And A Half In The Life of Metallica part II.avi", true)]
+    [InlineData("239 100 Totally Accurate Accents From Countries All Around The World Part 2.mp4", true)]
+    [InlineData("Some Movie part 1.mp4", true)]
+    [InlineData("Another Movie Part 3.avi", true)]
+    [InlineData("Test Movie part IV.mkv", true)]
+    [InlineData("Ghost in the Shell (ARISE - A.A) - Pyrophoric Cult, Part 1 of 2 (2015 - 1080p JAP Audio).mkv", true)]
+    [InlineData("Harry Potter and the Deathly Hallows Part 2 (2011) WEBDL-1080p.mkv", true)]
+    [InlineData("The Hunger Games Mockingjay - Part 2 (2015) Bluray-1080p.mkv", true)]
+    [InlineData("Rambo First Blood Part II (1985) Bluray-2160p.mkv", true)]
+    [InlineData("A Quiet Place Part II (2021) Remux-2160p Proper.mkv", true)]
     public void ShouldReturnExpectedResult_WhenValidatingMovieFileName(string fileName, bool expected)
     {
         // Act

@@ -14,7 +14,7 @@ public class ReaparrWebApplicationFactory : WebApplicationFactory<Program>
 
     public readonly string MemoryDbName;
 
-    private static readonly ILogger _log = new LogConfig().CreateLogInstance<ReaparrWebApplicationFactory>();
+    private static ILogger _log => LogManager.GetLogger<ReaparrWebApplicationFactory>();
 
     private readonly UnitTestDataConfig _config;
 

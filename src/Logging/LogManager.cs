@@ -33,10 +33,10 @@ public static class LogManager
         }
     }
 
-    public static void SetupLogging(LogEventLevel minimumLogLevel = LogEventLevel.Debug)
+    public static void SetupLogging(LogEventLevel minimumLogLevel = LogEventLevel.Debug, LogConfig? logConfig = null)
     {
         MinimumLogLevel = minimumLogLevel;
-        Log.Logger = new LogConfig().GetLogger(minimumLogLevel);
+        Log.Logger = (logConfig ?? new LogConfig()).GetLogger(minimumLogLevel);
 
         GetLogger().Here().Information("Logging level set to {LogLevel}", MinimumLogLevel);
 

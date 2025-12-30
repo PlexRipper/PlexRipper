@@ -18,7 +18,8 @@ public abstract class BaseIntegrationTests
         // Ensure that the test output helper is set first
         var testLogConfig = new TestLogConfig(output);
 
-        LogManager.SetupLogging(logLevel);
+        // Pass the TestLogConfig to LogManager so all application logs go to test output
+        LogManager.SetupLogging(logLevel, testLogConfig);
         _log = testLogConfig.CreateLogInstance<BaseIntegrationTests>();
 
         BogusExtensions.Setup();

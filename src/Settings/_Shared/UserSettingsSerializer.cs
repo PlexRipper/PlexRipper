@@ -5,7 +5,7 @@ namespace Reaparr.Settings;
 
 public static class UserSettingsSerializer
 {
-    private static readonly ILogger _log = new LogConfig().CreateLogInstance(typeof(UserSettingsSerializer));
+    private static readonly ILogger _log = LogFactory.GetLogger(typeof(UserSettingsSerializer));
 
     public static string Serialize(IUserSettings userSettings)
     {

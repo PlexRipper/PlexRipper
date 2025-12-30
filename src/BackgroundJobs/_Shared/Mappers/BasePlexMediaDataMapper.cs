@@ -5,7 +5,7 @@ namespace Reaparr.BackgroundJobs;
 
 public static class BasePlexMediaDataMapper
 {
-    private static readonly ILogger _log = new LogConfig().CreateLogInstance(typeof(BasePlexMediaDataMapper));
+    private static readonly ILogger _log = LogFactory.GetLogger(typeof(BasePlexMediaDataMapper));
 
     /// <summary>
     /// Adds the missing stream data to the <see cref="BasePlexMediaData"/> which allows it to be complete for Torznab indexing. It also generates a <see cref="BasePlexMediaData.GeneratedFilename"/> as Sonarr/Radarr require specific name to contain the media specs.

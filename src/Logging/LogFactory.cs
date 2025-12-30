@@ -6,7 +6,7 @@ using Serilog.Events;
 
 namespace Reaparr.Logging;
 
-public static class LogManager
+public static class LogFactory
 {
     public static LogEventLevel MinimumLogLevel { get; private set; }
 
@@ -59,6 +59,8 @@ public static class LogManager
     }
 
     public static ILogger GetLogger<T>() => Log.Logger.ForContext<T>();
+
+    public static ILogger GetLogger(Type classType) => Log.Logger.ForContext(classType);
 
     public static ILogger GetLogger() => Log.Logger;
 }

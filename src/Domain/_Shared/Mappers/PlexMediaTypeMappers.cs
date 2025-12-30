@@ -2,7 +2,7 @@ namespace Reaparr.Domain;
 
 public static class PlexMediaTypeMappers
 {
-    private static readonly ILogger _log = new LogConfig().CreateLogInstance(typeof(PlexMediaTypeMappers));
+    private static readonly ILogger _log = LogFactory.GetLogger(typeof(PlexMediaTypeMappers));
 
     /// <summary>
     /// Converts string to <see cref="PlexMediaType"/> by a fast method.

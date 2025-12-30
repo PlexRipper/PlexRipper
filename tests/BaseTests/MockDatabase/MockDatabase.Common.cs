@@ -10,7 +10,7 @@ namespace Reaparr.BaseTests;
 
 public static partial class MockDatabase
 {
-    private static readonly Serilog.ILogger _log = new LogConfig().CreateLogInstance(typeof(MockDatabase));
+    private static readonly Serilog.ILogger _log = LogFactory.GetLogger(typeof(MockDatabase));
 
     /// <summary>
     /// NaturalSortComparer uses InvariantCultureIgnoreCase for deterministic test results.
@@ -235,7 +235,7 @@ public static partial class MockDatabase
         optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
         optionsBuilder.EnableSensitiveDataLogging();
         optionsBuilder.EnableDetailedErrors();
-        optionsBuilder.LogTo(text => LogManager.DbContextLogger(text), LogLevel.Warning);
+        optionsBuilder.LogTo(text => LogFactory.DbContextLogger(text), LogLevel.Warning);
         return new ReaparrDbContext(optionsBuilder.Options, dbName);
     }
 
@@ -253,7 +253,7 @@ public static partial class MockDatabase
         optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
         optionsBuilder.EnableSensitiveDataLogging();
         optionsBuilder.EnableDetailedErrors();
-        optionsBuilder.LogTo(text => LogManager.DbContextLogger(text), LogLevel.Warning);
+        optionsBuilder.LogTo(text => LogFactory.DbContextLogger(text), LogLevel.Warning);
         return new AuthDbContext(optionsBuilder.Options, dbName);
     }
 

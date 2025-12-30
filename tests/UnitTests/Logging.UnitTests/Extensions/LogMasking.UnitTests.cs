@@ -19,11 +19,13 @@ public class LogMaskingUnitTests : BaseUnitTest<LogMaskingUnitTests>
         var originalUnmaskedState = EnvironmentExtensions.IsUnmasked();
         try
         {
-            LogManager.CloseAndFlush();
+            LogFactory.CloseAndFlush();
             EnvironmentExtensions.EnableUnmaskedLog(false);
             EnvironmentExtensions.IsUnmasked().ShouldBeFalse();
 
-            var log = new TestLogConfig(Output).CreateLogInstance<LogMaskingUnitTests>();
+            var testLogConfig = new TestLogConfig(Output);
+            LogFactory.SetupLogging(Serilog.Events.LogEventLevel.Debug, testLogConfig);
+            var log = LogFactory.GetLogger<LogMaskingUnitTests>();
             using (var context = TestCorrelator.CreateContext())
             {
                 // Act
@@ -64,7 +66,7 @@ public class LogMaskingUnitTests : BaseUnitTest<LogMaskingUnitTests>
         finally
         {
             // Always restore the previous state and clean up logger
-            LogManager.CloseAndFlush();
+            LogFactory.CloseAndFlush();
             EnvironmentExtensions.EnableUnmaskedLog(originalUnmaskedState);
         }
     }

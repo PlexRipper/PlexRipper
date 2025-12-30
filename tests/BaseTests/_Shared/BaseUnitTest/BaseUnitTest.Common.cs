@@ -11,7 +11,6 @@ namespace Reaparr.BaseTests;
 public partial class BaseUnitTest
 {
     protected readonly ITestOutputHelper Output;
-    protected readonly LogEventLevel LogEventLevel;
 
     protected readonly ILogger Log;
 
@@ -28,16 +27,16 @@ public partial class BaseUnitTest
     protected BaseUnitTest(ITestOutputHelper output, LogEventLevel logEventLevel = LogEventLevel.Verbose)
     {
         Output = output;
-        LogEventLevel = logEventLevel;
 
         EnvironmentExtensions.EnableUnmaskedLog(true);
 
-        LogManager.SetupLogging(logEventLevel);
+        // Pass the TestLogConfig to LogFactory so all application logs go to test output
+        var testLogConfig = new TestLogConfig(output);
+        LogFactory.SetupLogging(logEventLevel, testLogConfig);
 
         BogusExtensions.Setup();
 
-        var testLogConfig = new TestLogConfig(output);
-        Log = testLogConfig.CreateLogInstance<BaseUnitTest>(LogEventLevel);
+        Log = LogFactory.GetLogger<BaseUnitTest>();
 
         Mock = AutoMock.GetStrict(SetDefaultBuilder);
     }

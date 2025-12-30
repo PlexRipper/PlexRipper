@@ -5,7 +5,7 @@ namespace Reaparr.Domain;
 
 public static class StopWatchExtensions
 {
-    private static readonly ILogger _log = new LogConfig().CreateLogInstance(typeof(StopWatchExtensions));
+    private static readonly ILogger _log = LogFactory.GetLogger(typeof(StopWatchExtensions));
 
     public static void StopAndLog(
         this Stopwatch stopwatch,

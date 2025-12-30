@@ -8,10 +8,7 @@ public class ResultExtensionsLoggingTests : BaseUnitTest
     #region Setup/Teardown
 
     public ResultExtensionsLoggingTests(ITestOutputHelper output)
-        : base(output)
-    {
-        ResultExtensions.SetLogger(Log);
-    }
+        : base(output) { }
 
     #endregion
 

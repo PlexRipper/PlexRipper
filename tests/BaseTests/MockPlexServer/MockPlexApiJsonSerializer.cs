@@ -96,8 +96,10 @@ public class JsonPropertyEnumConverter : JsonConverter
             }
         }
 
-        // Fallback: write the enum's string representation.
-        writer.WriteValue(value.ToString());
+        // For Plex API SDK enums (like StreamType), serialize as integer value
+        // The SDK expects integer values (1, 2, 3) not string values ("Video", "Audio", "Subtitle")
+        var underlyingValue = Convert.ToInt32(value);
+        writer.WriteValue(underlyingValue);
     }
 
     // Reading is not implemented in this converter.

@@ -1,5 +1,4 @@
 using LukeHagar.PlexAPI.SDK.Models.Components;
-using StreamType = Reaparr.Domain.StreamType;
 
 namespace Reaparr.PlexApi;
 
@@ -118,10 +117,10 @@ public static class MediaContainerMappers
             Id = source.Id,
             StreamType = source.StreamType switch
             {
-                LukeHagar.PlexAPI.SDK.Models.Components.StreamType.Video => StreamType.Video,
-                LukeHagar.PlexAPI.SDK.Models.Components.StreamType.Audio => StreamType.Audio,
-                LukeHagar.PlexAPI.SDK.Models.Components.StreamType.Subtitle => StreamType.Subtitle,
-                _ => StreamType.Unknown,
+                LukeHagar.PlexAPI.SDK.Models.Components.StreamType.Video => Domain.StreamType.Video,
+                LukeHagar.PlexAPI.SDK.Models.Components.StreamType.Audio => Domain.StreamType.Audio,
+                LukeHagar.PlexAPI.SDK.Models.Components.StreamType.Subtitle => Domain.StreamType.Subtitle,
+                _ => Domain.StreamType.Unknown,
             },
             Default = source.Default,
             Codec = source.Codec,

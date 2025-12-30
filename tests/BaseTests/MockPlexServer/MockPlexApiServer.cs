@@ -372,8 +372,8 @@ public class MockPlexApiServer : IMockPlexApiServer
                         .ReturnsAsync(
                             (HttpRequestMessage request, CancellationToken _) =>
                             {
-                                var metadataIds = request
-                                    .RequestUri!.AbsolutePath.Split("/library/metadata/")[1]
+                                var urlEncodedIds = request.RequestUri!.AbsolutePath.Split("/library/metadata/")[1];
+                                var metadataIds = Uri.UnescapeDataString(urlEncodedIds)
                                     .Split(',')
                                     .Where(x => !string.IsNullOrWhiteSpace(x))
                                     .Select(int.Parse)

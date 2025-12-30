@@ -36,7 +36,7 @@ public partial class BaseUnitTest
 
         BogusExtensions.Setup();
 
-        Log = LogFactory.GetLogger<BaseUnitTest>();
+        Log = LogFactory.Create<BaseUnitTest>();
 
         Mock = AutoMock.GetStrict(SetDefaultBuilder);
     }

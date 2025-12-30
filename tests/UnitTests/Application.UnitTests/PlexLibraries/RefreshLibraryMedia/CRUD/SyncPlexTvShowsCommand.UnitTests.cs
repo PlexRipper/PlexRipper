@@ -10,7 +10,7 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
     public SyncPlexTvShowsCommandUnitTests(ITestOutputHelper output)
         : base(output)
     {
-        _validator = new SyncPlexTvShowsCommandValidator(LogFactory.GetLogger<SyncPlexTvShowsCommandValidator>());
+        _validator = new SyncPlexTvShowsCommandValidator(LogFactory.Create<SyncPlexTvShowsCommandValidator>());
     }
 
     [Fact]

@@ -20,6 +20,6 @@ public static partial class Startup
         });
 
         // Add services to the container.
-        builder.UseSerilog(LogFactory.GetLogger());
+        builder.UseSerilog(LogFactory.Create());
     }
 }

@@ -4,7 +4,7 @@ namespace Reaparr.BackgroundJobs;
 
 public static class MediaSpecMapper
 {
-    private static readonly ILogger _log = LogFactory.GetLogger(typeof(MediaSpecMapper));
+    private static readonly ILogger _log = LogFactory.Create(typeof(MediaSpecMapper));
 
     public static string MapVideoCodec(this string codec)
     {

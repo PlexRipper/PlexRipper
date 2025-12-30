@@ -20,7 +20,7 @@ public abstract class BaseIntegrationTests
 
         // Pass the TestLogConfig to LogFactory so all application logs go to test output
         LogFactory.SetupLogging(logLevel, testLogConfig);
-        _log = LogFactory.GetLogger<BaseIntegrationTests>();
+        _log = LogFactory.Create<BaseIntegrationTests>();
 
         BogusExtensions.Setup();
     }

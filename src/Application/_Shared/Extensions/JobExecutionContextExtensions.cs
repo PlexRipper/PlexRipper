@@ -6,7 +6,7 @@ namespace Reaparr.Application;
 
 public static class JobExecutionContextExtensions
 {
-    private static readonly ILogger _log = LogFactory.GetLogger(typeof(JobExecutionContextExtensions));
+    private static readonly ILogger _log = LogFactory.Create(typeof(JobExecutionContextExtensions));
 
     /// <summary>
     /// Converts the <see cref="IJobExecutionContext"/> to a <see cref="JobStatusUpdate{T}"/>.

@@ -48,7 +48,7 @@ public partial class BaseUnitTest
 
     private void SetDefaultBuilder(ContainerBuilder builder)
     {
-        builder.Register<ILogger>((_, _) => LogFactory.GetLogger()).SingleInstance();
+        builder.Register<ILogger>((_, _) => LogFactory.Create()).SingleInstance();
 
         // Database context can be set up once and then retrieved by its DB name.
         builder

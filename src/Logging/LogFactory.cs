@@ -22,13 +22,13 @@ public static class LogFactory
         {
             // ReSharper disable once StringLiteralTypo
             case { } s when s.StartsWith("dbug:"):
-                GetLogger().Here(sourceFilePath, memberName, sourceLineNumber).Debug(messageTemplate);
+                Create().Here(sourceFilePath, memberName, sourceLineNumber).Debug(messageTemplate);
                 break;
             case { } s when s.StartsWith("info:"):
-                GetLogger().Here(sourceFilePath, memberName, sourceLineNumber).Information(messageTemplate);
+                Create().Here(sourceFilePath, memberName, sourceLineNumber).Information(messageTemplate);
                 break;
             case { } s when s.StartsWith("fail:"):
-                GetLogger().Here(sourceFilePath, memberName, sourceLineNumber).Error(messageTemplate);
+                Create().Here(sourceFilePath, memberName, sourceLineNumber).Error(messageTemplate);
                 break;
         }
     }
@@ -38,18 +38,18 @@ public static class LogFactory
         MinimumLogLevel = minimumLogLevel;
         Log.Logger = (logConfig ?? new LogConfig()).GetLogger(minimumLogLevel);
 
-        GetLogger().Here().Information("Logging level set to {LogLevel}", MinimumLogLevel);
+        Create().Here().Information("Logging level set to {LogLevel}", MinimumLogLevel);
 
         if (EnvironmentExtensions.IsUnmasked())
         {
-            GetLogger()
+            Create()
                 .Here()
                 .Warning(
                     "Environment variable {UnmaskedKey} has been set to true, which means that sensitive data will be shown in the logs!",
                     EnvironmentExtensions.UnmaskedModeKey
                 );
 
-            GetLogger().Here().Warning("This username should be shown: {Username}", "SomeSecretUsername");
+            Create().Here().Warning("This username should be shown: {Username}", "SomeSecretUsername");
         }
     }
 
@@ -58,9 +58,9 @@ public static class LogFactory
         Log.CloseAndFlush();
     }
 
-    public static ILogger GetLogger<T>() => Log.Logger.ForContext<T>();
+    public static ILogger Create<T>() => Log.Logger.ForContext<T>();
 
-    public static ILogger GetLogger(Type classType) => Log.Logger.ForContext(classType);
+    public static ILogger Create(Type classType) => Log.Logger.ForContext(classType);
 
-    public static ILogger GetLogger() => Log.Logger;
+    public static ILogger Create() => Log.Logger;
 }

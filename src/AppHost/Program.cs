@@ -9,7 +9,7 @@ namespace Reaparr.AppHost;
 /// </summary>
 public class Program
 {
-    private static readonly Serilog.ILogger _log = LogFactory.GetLogger<Program>();
+    private static readonly Serilog.ILogger _log = LogFactory.Create<Program>();
 
     /// <summary>
     ///  The main method entry point for the application.

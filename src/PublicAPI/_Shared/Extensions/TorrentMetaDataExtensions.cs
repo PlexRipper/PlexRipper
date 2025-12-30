@@ -2,7 +2,7 @@ namespace Reaparr.PublicAPI;
 
 public static class TorrentMetaDataExtensions
 {
-    private static readonly ILogger _log = LogFactory.GetLogger(typeof(TorrentMetaDataExtensions));
+    private static readonly ILogger _log = LogFactory.Create(typeof(TorrentMetaDataExtensions));
 
     public static TorrentMetadataDTO ToTorrentMetadataDTO(this BencodeNET.Objects.BDictionary dictionary) =>
         new()

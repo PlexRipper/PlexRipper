@@ -2,7 +2,7 @@
 
 public static class DownloadTaskActions
 {
-    private static readonly ILogger _log = LogFactory.GetLogger(typeof(DownloadTaskActions));
+    private static readonly ILogger _log = LogFactory.Create(typeof(DownloadTaskActions));
 
     private static readonly DownloadStatus[] _anyStatuses =
     [

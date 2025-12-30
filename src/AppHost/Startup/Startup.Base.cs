@@ -2,7 +2,7 @@ namespace Reaparr.AppHost;
 
 public static partial class Startup
 {
-    private static readonly Serilog.ILogger _log = LogFactory.GetLogger(typeof(Startup));
+    private static readonly Serilog.ILogger _log = LogFactory.Create(typeof(Startup));
 
     /// <summary>
     ///  The CORS Configuration name.

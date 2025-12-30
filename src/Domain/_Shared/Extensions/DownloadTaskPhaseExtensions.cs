@@ -2,7 +2,7 @@ namespace Reaparr.Domain;
 
 public static class DownloadTaskPhaseExtensions
 {
-    private static readonly ILogger _log = LogFactory.GetLogger(typeof(DownloadTaskPhaseExtensions));
+    private static readonly ILogger _log = LogFactory.Create(typeof(DownloadTaskPhaseExtensions));
 
     public static DownloadTaskPhase ToDownloadTaskPhase(this DownloadStatus downloadStatus)
     {

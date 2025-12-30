@@ -25,7 +25,7 @@ public class LogMaskingUnitTests : BaseUnitTest<LogMaskingUnitTests>
 
             var testLogConfig = new TestLogConfig(Output);
             LogFactory.SetupLogging(Serilog.Events.LogEventLevel.Debug, testLogConfig);
-            var log = LogFactory.GetLogger<LogMaskingUnitTests>();
+            var log = LogFactory.Create<LogMaskingUnitTests>();
             using (var context = TestCorrelator.CreateContext())
             {
                 // Act

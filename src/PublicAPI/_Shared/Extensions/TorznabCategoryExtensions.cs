@@ -17,9 +17,9 @@ public static class TorznabCategoryExtensions
         {
             ReleaseSource.DVD => (int)TorznabCategoryId.Movies_SD,
 
-            _ when isSd => (int)TorznabCategoryId.Movies_SD,
-
             _ when isUhd => (int)TorznabCategoryId.Movies_UHD,
+
+            _ when isSd => (int)TorznabCategoryId.Movies_SD,
 
             _ => (int)TorznabCategoryId.Movies_HD,
         };

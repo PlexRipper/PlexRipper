@@ -148,11 +148,8 @@ public partial class FakePlexApiData
 
     private static readonly Faker<Stream> _getMediaMetaDataStreamFaker = new Faker<Stream>()
         .StrictMode(true)
-        .RuleFor(x => x.Id, f => f.Random.Number(1000))
-        .RuleFor(
-            x => x.StreamType,
-            f => f.PickRandom(StreamType.Video, StreamType.Audio, StreamType.Subtitle)
-        )
+        .RuleFor(x => x.Id, _ => GetUniqueNumber())
+        .RuleFor(x => x.StreamType, f => f.PickRandom(StreamType.Video, StreamType.Audio, StreamType.Subtitle))
         .RuleFor(x => x.Format, f => f.System.CommonFileExt())
         .RuleFor(x => x.Default, f => f.Random.Bool())
         .RuleFor(x => x.Codec, f => f.Random.Word())

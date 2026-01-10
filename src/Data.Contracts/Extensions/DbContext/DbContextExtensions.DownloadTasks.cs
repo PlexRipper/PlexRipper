@@ -143,8 +143,8 @@ public static partial class DbContextExtensions
                         .DownloadTaskTvShow.Include(x => x.PlexServer)
                         .Include(x => x.PlexLibrary)
                         .Include(x => x.Children)
-                        .ThenInclude(x => x.Children)
-                        .ThenInclude(x => x.Children)
+                            .ThenInclude(x => x.Children)
+                                .ThenInclude(x => x.Children)
                         .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
                     return downloadTaskTvShow?.ToGeneric() ?? null;
 
@@ -154,7 +154,7 @@ public static partial class DbContextExtensions
                         .DownloadTaskTvShowSeason.Include(x => x.PlexServer)
                         .Include(x => x.PlexLibrary)
                         .Include(x => x.Children)
-                        .ThenInclude(x => x.Children)
+                            .ThenInclude(x => x.Children)
                         .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
                     return downloadTaskTvShowSeason?.ToGeneric() ?? null;
 

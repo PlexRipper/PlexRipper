@@ -3,7 +3,6 @@ namespace Reaparr.BaseTests;
 public static class PlexTvShowTitlesDataset
 {
     public static readonly Lazy<HashSet<string>> PlexTvShowTitles = new(() =>
-
         [
             "2gether",
             "3Below: Tales of Arcadia",

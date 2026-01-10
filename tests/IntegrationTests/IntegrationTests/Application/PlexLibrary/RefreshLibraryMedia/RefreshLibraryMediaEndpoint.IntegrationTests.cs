@@ -173,8 +173,8 @@ public class RefreshLibraryMediaEndpointIntegrationTests : BaseIntegrationTests
         var dbContext = container.DbContext;
         var refreshedLibrary = await dbContext
             .PlexLibraries.Include(x => x.TvShows)
-            .ThenInclude(x => x.Seasons)
-            .ThenInclude(x => x.Episodes)
+                .ThenInclude(x => x.Seasons)
+                    .ThenInclude(x => x.Episodes)
             .FirstOrDefaultAsync(x => x.Id == plexLibrary.Id, CancellationToken);
 
         refreshedLibrary.ShouldNotBeNull();

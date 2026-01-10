@@ -71,12 +71,10 @@ public class BaseContainer : IDisposable
 
         // Needs to be sent as application/x-www-form-urlencoded content
         // which is not properly supported by FastEndpoints test client
-        var content = new FormUrlEncodedContent(
-            [
-                new KeyValuePair<string, string>("username", settings.DownloadClientUsername),
-                new KeyValuePair<string, string>("password", settings.DownloadClientPassword),
-            ]
-        );
+        var content = new FormUrlEncodedContent([
+            new KeyValuePair<string, string>("username", settings.DownloadClientUsername),
+            new KeyValuePair<string, string>("password", settings.DownloadClientPassword),
+        ]);
 
         var response = await client.PostAsync(PublicApiRoutes.DownloadClient + "/auth/login", content);
 

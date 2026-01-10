@@ -9,7 +9,6 @@ public static class LanguageFaker
     /// Language names (English names like "English", "French")
     /// </summary>
     public static readonly Lazy<HashSet<string>> LanguageNames = new(() =>
-
         [
             .. CultureInfo
                 .GetCultures(CultureTypes.SpecificCultures | CultureTypes.NeutralCultures)
@@ -22,7 +21,6 @@ public static class LanguageFaker
     /// Language tags (e.g., "en-US", "fr-FR")
     /// </summary>
     public static readonly Lazy<HashSet<string>> LanguageTags = new(() =>
-
         [
             .. CultureInfo
                 .GetCultures(CultureTypes.SpecificCultures | CultureTypes.NeutralCultures)
@@ -36,7 +34,6 @@ public static class LanguageFaker
     /// ISO language codes (e.g., "en", "fr")
     /// </summary>
     public static readonly Lazy<HashSet<string>> LanguageCodes = new(() =>
-
         [
             .. CultureInfo
                 .GetCultures(CultureTypes.SpecificCultures | CultureTypes.NeutralCultures)

@@ -10,9 +10,9 @@ public static partial class DbSetExtensions
             .Include(x => x.PlexServer)
             .Include(x => x.PlexLibrary)
             .Include(x => x.Children.OrderBy(y => y.CreatedAt))
-            .ThenInclude(x => x.PlexServer)
+                .ThenInclude(x => x.PlexServer)
             .Include(x => x.Children.OrderBy(y => y.CreatedAt))
-            .ThenInclude(x => x.PlexLibrary);
+                .ThenInclude(x => x.PlexLibrary);
 
     public static IQueryable<DownloadTaskTvShow> IncludeAll(this IQueryable<DownloadTaskTvShow> downloadTasks) =>
         downloadTasks
@@ -20,25 +20,25 @@ public static partial class DbSetExtensions
             .Include(x => x.PlexLibrary)
             // Include Seasons
             .Include(x => x.Children.OrderBy(y => y.CreatedAt))
-            .ThenInclude(x => x.PlexServer)
+                .ThenInclude(x => x.PlexServer)
             .Include(x => x.Children.OrderBy(y => y.CreatedAt))
-            .ThenInclude(x => x.PlexLibrary)
+                .ThenInclude(x => x.PlexLibrary)
             // Include Episodes
             .Include(x => x.Children)
-            .ThenInclude(x => x.Children.OrderBy(y => y.CreatedAt))
-            .ThenInclude(x => x.PlexServer)
+                .ThenInclude(x => x.Children.OrderBy(y => y.CreatedAt))
+                    .ThenInclude(x => x.PlexServer)
             .Include(x => x.Children)
-            .ThenInclude(x => x.Children.OrderBy(y => y.CreatedAt))
-            .ThenInclude(x => x.PlexLibrary)
+                .ThenInclude(x => x.Children.OrderBy(y => y.CreatedAt))
+                    .ThenInclude(x => x.PlexLibrary)
             // Include Files
             .Include(x => x.Children)
-            .ThenInclude(x => x.Children)
-            .ThenInclude(x => x.Children.OrderBy(y => y.CreatedAt))
-            .ThenInclude(x => x.PlexServer)
+                .ThenInclude(x => x.Children)
+                    .ThenInclude(x => x.Children.OrderBy(y => y.CreatedAt))
+                        .ThenInclude(x => x.PlexServer)
             .Include(x => x.Children)
-            .ThenInclude(x => x.Children)
-            .ThenInclude(x => x.Children.OrderBy(y => y.CreatedAt))
-            .ThenInclude(x => x.PlexLibrary);
+                .ThenInclude(x => x.Children)
+                    .ThenInclude(x => x.Children.OrderBy(y => y.CreatedAt))
+                        .ThenInclude(x => x.PlexLibrary);
 
     public static IQueryable<DownloadTaskTvShowSeason> IncludeAll(
         this IQueryable<DownloadTaskTvShowSeason> downloadTasks
@@ -46,18 +46,18 @@ public static partial class DbSetExtensions
         downloadTasks
             // Include Episodes
             .Include(x => x.Children.OrderBy(y => y.CreatedAt))
-            .ThenInclude(x => x.Children.OrderBy(y => y.CreatedAt))
-            .ThenInclude(x => x.PlexServer)
+                .ThenInclude(x => x.Children.OrderBy(y => y.CreatedAt))
+                    .ThenInclude(x => x.PlexServer)
             .Include(x => x.Children.OrderBy(y => y.CreatedAt))
-            .ThenInclude(x => x.Children.OrderBy(y => y.CreatedAt))
-            .ThenInclude(x => x.PlexLibrary)
+                .ThenInclude(x => x.Children.OrderBy(y => y.CreatedAt))
+                    .ThenInclude(x => x.PlexLibrary)
             // Include Files
             .Include(x => x.Children)
-            .ThenInclude(x => x.Children.OrderBy(y => y.CreatedAt))
-            .ThenInclude(x => x.PlexServer)
+                .ThenInclude(x => x.Children.OrderBy(y => y.CreatedAt))
+                    .ThenInclude(x => x.PlexServer)
             .Include(x => x.Children)
-            .ThenInclude(x => x.Children.OrderBy(y => y.CreatedAt))
-            .ThenInclude(x => x.PlexLibrary);
+                .ThenInclude(x => x.Children.OrderBy(y => y.CreatedAt))
+                    .ThenInclude(x => x.PlexLibrary);
 
     public static IQueryable<DownloadTaskTvShowEpisode> IncludeAll(
         this IQueryable<DownloadTaskTvShowEpisode> downloadTasks
@@ -65,7 +65,7 @@ public static partial class DbSetExtensions
         downloadTasks
             // Include Files
             .Include(x => x.Children.OrderBy(y => y.CreatedAt))
-            .ThenInclude(x => x.PlexServer)
+                .ThenInclude(x => x.PlexServer)
             .Include(x => x.Children.OrderBy(y => y.CreatedAt))
-            .ThenInclude(x => x.PlexLibrary);
+                .ThenInclude(x => x.PlexLibrary);
 }

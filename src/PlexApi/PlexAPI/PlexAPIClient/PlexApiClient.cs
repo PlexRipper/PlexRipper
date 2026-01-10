@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text.Json;
 using HttpClientToCurl;
+using HttpClientToCurl.Extensions;
 using Polly;
 using Polly.Timeout;
 using Polly.Wrap;

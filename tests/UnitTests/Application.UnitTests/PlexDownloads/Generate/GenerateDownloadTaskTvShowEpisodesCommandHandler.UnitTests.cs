@@ -44,7 +44,7 @@ public class DownloadTaskFactoryGenerateTvShowEpisodesDownloadTasksAsyncUnitTest
 
         var plexTvShows = await IDbContext
             .PlexTvShows.Include(x => x.Seasons)
-            .ThenInclude(x => x.Episodes)
+                .ThenInclude(x => x.Episodes)
             .ToListAsync(CancellationToken);
 
         var plexEpisodes = plexTvShows.SelectMany(x => x.Seasons).SelectMany(x => x.Episodes).ToList();
@@ -166,7 +166,7 @@ public class DownloadTaskFactoryGenerateTvShowEpisodesDownloadTasksAsyncUnitTest
 
         var plexTvShows = await IDbContext
             .PlexTvShows.Include(x => x.Seasons)
-            .ThenInclude(x => x.Episodes)
+                .ThenInclude(x => x.Episodes)
             .ToListAsync(CancellationToken);
 
         var plexEpisodes = plexTvShows.SelectMany(x => x.Seasons).SelectMany(x => x.Episodes).ToList();
@@ -214,7 +214,7 @@ public class DownloadTaskFactoryGenerateTvShowEpisodesDownloadTasksAsyncUnitTest
 
         var plexTvShows = await IDbContext
             .PlexTvShows.Include(x => x.Seasons)
-            .ThenInclude(x => x.Episodes)
+                .ThenInclude(x => x.Episodes)
             .ToListAsync(CancellationToken);
 
         var plexEpisodes = plexTvShows.SelectMany(x => x.Seasons).SelectMany(x => x.Episodes).ToList();
@@ -342,7 +342,7 @@ public class DownloadTaskFactoryGenerateTvShowEpisodesDownloadTasksAsyncUnitTest
 
         var plexTvShows = await IDbContext
             .PlexTvShows.Include(x => x.Seasons)
-            .ThenInclude(x => x.Episodes)
+                .ThenInclude(x => x.Episodes)
             .ToListAsync(CancellationToken);
 
         plexTvShows.Count.ShouldBe(3);
@@ -409,7 +409,7 @@ public class DownloadTaskFactoryGenerateTvShowEpisodesDownloadTasksAsyncUnitTest
 
         var plexTvShows = await IDbContext
             .PlexTvShows.Include(x => x.Seasons)
-            .ThenInclude(x => x.Episodes)
+                .ThenInclude(x => x.Episodes)
             .ToListAsync(CancellationToken);
         var plexMovies = await IDbContext.PlexMovies.ToListAsync(CancellationToken);
 
@@ -472,7 +472,7 @@ public class DownloadTaskFactoryGenerateTvShowEpisodesDownloadTasksAsyncUnitTest
 
         var plexTvShows = await IDbContext
             .PlexTvShows.Include(x => x.Seasons)
-            .ThenInclude(x => x.Episodes)
+                .ThenInclude(x => x.Episodes)
             .ToListAsync(CancellationToken);
 
         var plexEpisodes = plexTvShows.SelectMany(x => x.Seasons).SelectMany(x => x.Episodes).ToList();
@@ -550,7 +550,7 @@ public class DownloadTaskFactoryGenerateTvShowEpisodesDownloadTasksAsyncUnitTest
 
         var plexTvShows = await IDbContext
             .PlexTvShows.Include(x => x.Seasons)
-            .ThenInclude(x => x.Episodes)
+                .ThenInclude(x => x.Episodes)
             .ToListAsync(CancellationToken);
 
         var plexEpisodes = plexTvShows.SelectMany(x => x.Seasons).SelectMany(x => x.Episodes).ToList();

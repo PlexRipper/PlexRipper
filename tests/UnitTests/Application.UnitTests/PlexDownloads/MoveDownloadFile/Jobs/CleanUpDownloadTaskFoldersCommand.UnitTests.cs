@@ -162,12 +162,10 @@ public class CleanUpDownloadTaskFoldersCommandUnitTests : BaseUnitTest<CleanUpDo
 
         Mock.Mock<IDirectory>()
             .Setup(x => x.GetFileSystemEntries(It.IsAny<string>()))
-            .Returns(
-                [
-                    "/mnt/DATA/ReaparrCache/Downloads/TvShows/Reno 911!/Season 1/Reno 911! - S01E01.mkv",
-                    "/mnt/DATA/ReaparrCache/Downloads/TvShows/Reno 911!/Season 1/Reno 911! - S01E02.mkv",
-                ]
-            )
+            .Returns([
+                "/mnt/DATA/ReaparrCache/Downloads/TvShows/Reno 911!/Season 1/Reno 911! - S01E01.mkv",
+                "/mnt/DATA/ReaparrCache/Downloads/TvShows/Reno 911!/Season 1/Reno 911! - S01E02.mkv",
+            ])
             .Verifiable(Times.Exactly(2));
 
         Mock.Mock<IDirectory>().Setup(x => x.Delete(It.IsAny<string>())).Verifiable(Times.Never);

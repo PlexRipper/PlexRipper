@@ -16,7 +16,7 @@ public record ServerDownloadProgressMessagePackDTO
     public required int DownloadableTasksCount { get; init; }
 
     [MessagePack.Key(2)]
-    public required List<DownloadProgressMessagePackDTO> Downloads { get; init; } = [];
+    public required List<DownloadProgressMessagePackDTO> Downloads { get; init; }
 }
 
 [MessagePackObject]
@@ -52,5 +52,5 @@ public record DownloadProgressMessagePackDTO
     public required long TimeRemaining { get; init; }
 
     [MessagePack.Key(9)]
-    public required List<DownloadProgressMessagePackDTO> Children { get; init; } = [];
+    public required List<DownloadProgressMessagePackDTO> Children { get; init; }
 }

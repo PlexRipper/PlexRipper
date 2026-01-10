@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Reaparr.Data.Configurations;
@@ -8,13 +8,15 @@ public class PlexTvShowConfiguration : IEntityTypeConfiguration<PlexTvShow>
     public void Configure(EntityTypeBuilder<PlexTvShow> builder)
     {
         builder.HasIndex(x => x.SortIndex);
+        builder.HasIndex(x => new { x.PlexLibraryId, x.SortIndex });
 
         builder
             .HasMany(x => x.Actors)
             .WithMany(x => x.PlexTvShowActors)
             .UsingEntity<PlexTvShowActors>(
                 l => l.HasOne<PlexActor>().WithMany().HasForeignKey(e => e.PlexActorId),
-                r => r.HasOne<PlexTvShow>().WithMany().HasForeignKey(e => e.PlexTvShowId)
+                r => r.HasOne<PlexTvShow>().WithMany().HasForeignKey(e => e.PlexTvShowId),
+                j => j.HasIndex(e => new { e.PlexActorId, e.PlexTvShowId })
             );
 
         builder
@@ -22,7 +24,8 @@ public class PlexTvShowConfiguration : IEntityTypeConfiguration<PlexTvShow>
             .WithMany(x => x.PlexTvShowGenres)
             .UsingEntity<PlexTvShowGenres>(
                 l => l.HasOne<PlexGenre>().WithMany().HasForeignKey(e => e.GenresId),
-                r => r.HasOne<PlexTvShow>().WithMany().HasForeignKey(e => e.PlexTvShowId)
+                r => r.HasOne<PlexTvShow>().WithMany().HasForeignKey(e => e.PlexTvShowId),
+                j => j.HasIndex(e => new { e.GenresId, e.PlexTvShowId })
             );
 
         builder
@@ -30,7 +33,8 @@ public class PlexTvShowConfiguration : IEntityTypeConfiguration<PlexTvShow>
             .WithMany(x => x.PlexTvShowCountries)
             .UsingEntity<PlexTvShowCountries>(
                 l => l.HasOne<PlexCountry>().WithMany().HasForeignKey(e => e.CountryId),
-                r => r.HasOne<PlexTvShow>().WithMany().HasForeignKey(e => e.PlexTvShowId)
+                r => r.HasOne<PlexTvShow>().WithMany().HasForeignKey(e => e.PlexTvShowId),
+                j => j.HasIndex(e => new { e.CountryId, e.PlexTvShowId })
             );
 
         builder

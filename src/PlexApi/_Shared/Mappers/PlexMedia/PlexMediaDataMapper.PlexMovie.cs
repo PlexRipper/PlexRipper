@@ -81,7 +81,7 @@ public static partial class PlexMediaDataMapper
             Size = source.Size,
             Container = source.Container,
             RatingKey = root.RatingKey,
-            Quality = mediaItem.VideoResolution.ToVideoQuality(),
+            Quality = mediaItem.VideoResolution,
             VideoCodec = mediaItem.VideoCodec,
             VideoResolution = mediaItem.VideoResolution,
             AudioCodec = mediaItem.AudioCodec,

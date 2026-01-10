@@ -78,7 +78,7 @@ public static class BasePlexMediaDataMapper
     public static string? GenerateReleaseName(
         string title,
         int year,
-        string videoResolution,
+        VideoQuality videoResolution,
         string videoCodec,
         string audioCodec,
         LibraryMediaItemStreamDTO videoStream,
@@ -99,7 +99,7 @@ public static class BasePlexMediaDataMapper
         var releaseName = new StringBuilder();
         releaseName.Append(sanitizedTitle);
         releaseName.Append('.').Append(year);
-        releaseName.Append('.').Append(videoResolution);
+        releaseName.Append('.').Append(videoResolution.ToResolutionLabel());
 
         if (source.ToFileNameSpec() is not null)
             releaseName.Append('.').Append(source.ToFileNameSpec());

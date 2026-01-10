@@ -46,21 +46,19 @@ public static class TorznabCategoryExtensions
         };
     }
 
-    private static bool IsUhdResolution(string resolution)
-    {
-        if (string.IsNullOrWhiteSpace(resolution))
-            return false;
+    private static bool IsUhdResolution(VideoQuality resolution) =>
+        resolution switch
+        {
+            VideoQuality.UHD_4K => true,
+            VideoQuality.UHD_8K => true,
+            _ => false,
+        };
 
-        var lower = resolution.ToLowerInvariant();
-        return lower.Contains("2160") || lower.Contains("4k") || lower.Contains("uhd");
-    }
-
-    private static bool IsSdResolution(string resolution)
-    {
-        if (string.IsNullOrWhiteSpace(resolution))
-            return false;
-
-        var lower = resolution.ToLowerInvariant();
-        return lower.Contains("480") || lower.Contains("576") || lower.Contains("sd");
-    }
+    private static bool IsSdResolution(VideoQuality resolution) =>
+        resolution switch
+        {
+            VideoQuality.SD => true,
+            VideoQuality.DVD => true,
+            _ => false,
+        };
 }

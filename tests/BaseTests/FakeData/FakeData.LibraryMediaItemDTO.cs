@@ -365,7 +365,10 @@ public static partial class FakeData
             .RuleFor(x => x.AudioChannels, f => f.PickRandom(2, 5, 6, 7, 8))
             .RuleFor(x => x.AudioCodec, f => f.PickRandom("ac3", "dca", "aac", "eac3", "truehd"))
             .RuleFor(x => x.VideoCodec, f => f.PickRandom("h264", "hevc", "mpeg2video"))
-            .RuleFor(x => x.VideoResolution, f => f.PickRandom("sd", "720p", "1080p", "4k"))
+            .RuleFor(
+                x => x.VideoResolution,
+                f => f.PickRandom(VideoQuality.SD, VideoQuality.HD, VideoQuality.FullHD, VideoQuality.UHD_4K)
+            )
             .RuleFor(x => x.Container, f => f.PickRandom("mp4", "mkv", "avi", "m4v"))
             .RuleFor(x => x.VideoFrameRate, f => f.PickRandom("24p", "25p", "30p", "50p", "60p"))
             .RuleFor(x => x.VideoProfile, f => f.PickRandom("baseline", "main", "high", "high 10"))

@@ -43,7 +43,7 @@ public class BasePlexMediaDataMapperGenerateReleaseNameUnitTests : BaseUnitTest
         releaseName.ShouldNotBeNull();
         releaseName.ShouldNotBeEmpty();
         releaseName.ShouldContain(mediaItem.Year.ToString());
-        releaseName.ShouldContain(media.VideoResolution);
+        releaseName.ShouldContain(media.VideoResolution.ToResolutionLabel());
         releaseName.ShouldContain(videoCodec);
         releaseName.ShouldContain(audioCodec);
         releaseName.ShouldContain(audioLayout);

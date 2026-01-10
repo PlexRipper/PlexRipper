@@ -142,7 +142,7 @@ public class SearchMovieCommandHandler : ICommandHandler<SearchMovieCommand, Tor
             item.Attributes.Add(new TorznabAttr("downloadvolumefactor", "0.0"));
 
             item.Attributes.Add(new TorznabAttr("category", mediaData.ToTorznabMovieCategory().ToString()));
-            item.Attributes.Add(new TorznabAttr("resolution", mediaData.VideoResolution));
+            item.Attributes.Add(new TorznabAttr("resolution", mediaData.VideoResolution.ToResolutionLabel()));
             item.Attributes.Add(new TorznabAttr("source", mediaData.Source.ToEnumMemberValue()));
             item.Attributes.Add(new TorznabAttr("videoCodec", mediaData.VideoCodec));
             item.Attributes.Add(new TorznabAttr("audioCodec", mediaData.AudioCodec));

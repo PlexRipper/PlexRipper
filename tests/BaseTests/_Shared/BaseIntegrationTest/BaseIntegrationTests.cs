@@ -38,6 +38,10 @@ public abstract class BaseIntegrationTests
 
             await Task.Delay(delayMs);
         }
+
+        throw new TimeoutException(
+            $"Database condition was not met after {maxRetries} retries (total wait: {maxRetries * delayMs}ms)"
+        );
     }
 
     protected Task<BaseContainer> CreateContainer(int seed, Action<UnitTestDataConfig>? options = null) =>

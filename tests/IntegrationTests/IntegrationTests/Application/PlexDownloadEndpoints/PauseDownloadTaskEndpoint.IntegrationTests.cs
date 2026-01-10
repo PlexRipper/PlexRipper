@@ -72,7 +72,9 @@ public class PauseDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
         await WaitForDatabaseConditionAsync(
             () =>
             {
-                var task = container.DbContext.DownloadTaskMovieFile.FirstOrDefault(x => x.Id == childDownloadTask.Id);
+                var task = container
+                    .DbContext.DownloadTaskMovieFile.AsNoTracking()
+                    .FirstOrDefault(x => x.Id == childDownloadTask.Id);
                 return task?.DownloadStatus == DownloadStatus.Downloading;
             },
             maxRetries: 20,
@@ -97,18 +99,20 @@ public class PauseDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
         await WaitForDatabaseConditionAsync(
             () =>
             {
-                var task = container.DbContext.DownloadTaskMovieFile.FirstOrDefault(x => x.Id == childDownloadTask.Id);
+                var task = container
+                    .DbContext.DownloadTaskMovieFile.AsNoTracking()
+                    .FirstOrDefault(x => x.Id == childDownloadTask.Id);
                 return task?.DownloadStatus == DownloadStatus.Paused;
             },
-            maxRetries: 20,
+            maxRetries: 30,
             delayMs: 500
         );
 
-        // Assert
-        var downloadTaskDb = await container.DbContext.GetDownloadTaskAsync(
-            childDownloadTask.Id,
-            cancellationToken: CancellationToken
-        );
+        // Assert - use AsNoTracking to ensure fresh data from database
+        var downloadTaskDb = await container
+            .DbContext.DownloadTaskMovieFile.AsNoTracking()
+            .Include(x => x.DownloadWorkerTasks)
+            .FirstOrDefaultAsync(x => x.Id == childDownloadTask.Id, CancellationToken);
         downloadTaskDb.ShouldNotBeNull();
         downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.Paused);
     }

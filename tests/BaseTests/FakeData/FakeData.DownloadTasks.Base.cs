@@ -45,7 +45,10 @@ public static partial class FakeData
             .Ignore(x => x.FileDataTransferred)
             .Ignore(x => x.CurrentFileTransferBytesOffset)
             .Ignore(x => x.DestinationFolderPathId)
-            .RuleFor(x => x.Quality, f => f.PickRandom("sd", "720p", "1080p", "2160p"))
+            .RuleFor(
+                x => x.Quality,
+                f => f.PickRandom(VideoQuality.SD, VideoQuality.HD, VideoQuality.FullHD, VideoQuality.UHD_4K)
+            )
             .RuleFor(
                 x => x.FileName,
                 (_, x) => $"{x.MediaType.ToPlexMediaTypeString()}-{x.Title.SanitizeFolderName()}.[{x.Quality}].file.mp4"

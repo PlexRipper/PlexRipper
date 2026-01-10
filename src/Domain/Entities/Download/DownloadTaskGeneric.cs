@@ -39,7 +39,7 @@ public record DownloadTaskGeneric : IDownloadTaskProgress, IDownloadFileTransfer
     /// </summary>
     public required string DownloadDirectory { get; init; }
 
-    public required string Quality { get; set; }
+    public required VideoQuality Quality { get; set; }
 
     /// <summary>
     /// Gets or sets the destination directory appended to the MediaPath e.g: [DestinationPath]/[TvShow]/[Season]/ or  [DestinationPath]/[Movie]/.

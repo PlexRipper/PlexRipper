@@ -174,7 +174,7 @@ public static partial class FakeData
     {
         var baseFaker = new Faker<LibraryMediaItemStreamDTO>()
             .StrictMode(true)
-            .RuleFor(x => x.Id, f => f.Random.Long(1, 100000))
+            .RuleFor(x => x.Id, _ => GetUniqueNumber())
             .RuleFor(x => x.StreamType, _ => streamType)
             .RuleFor(x => x.Default, f => f.Random.Bool())
             .RuleFor(x => x.Codec, f => GetCodecForStreamType(f, streamType))
@@ -313,7 +313,7 @@ public static partial class FakeData
     private static readonly Faker<LibraryMediaItemPartDTO> _libraryMediaItemPartDTO =
         new Faker<LibraryMediaItemPartDTO>()
             .StrictMode(true)
-            .RuleFor(x => x.Id, f => f.Random.Long(1, 100000))
+            .RuleFor(x => x.Id, f => GetUniqueNumber())
             .RuleFor(
                 x => x.Key,
                 f => $"/library/parts/{f.Random.Int(100000, 999999)}/{f.Random.Int(100000000, 999999999)}/file.mp4"
@@ -330,7 +330,6 @@ public static partial class FakeData
     )
     {
         var config = FakeDataConfig.FromOptions(options);
-        var streamCount = config.IncludeMultiPartMovies ? 5 : 3; // video, audio, subtitle
 
         return _libraryMediaItemPartDTO
             .RuleFor(
@@ -357,7 +356,7 @@ public static partial class FakeData
     private static readonly Faker<LibraryMediaItemMediaDTO> _libraryMediaItemMediaDTO =
         new Faker<LibraryMediaItemMediaDTO>()
             .StrictMode(true)
-            .RuleFor(x => x.Id, f => f.Random.Long(1, 100000))
+            .RuleFor(x => x.Id, f => GetUniqueNumber())
             .RuleFor(x => x.Duration, f => f.Random.Int(50000, 55124400))
             .RuleFor(x => x.Bitrate, f => f.Random.Int(1000000, 50000000))
             .RuleFor(x => x.Width, f => f.PickRandom(640, 1280, 1920, 3840))

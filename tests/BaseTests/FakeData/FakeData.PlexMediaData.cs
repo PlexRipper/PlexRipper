@@ -7,8 +7,8 @@ public static partial class FakeData
         faker
             .StrictMode(true)
             .Ignore(x => x.Id)
-            .RuleFor(x => x.PlexMediaId, f => f.Random.Long(1))
-            .RuleFor(x => x.PlexPartId, f => f.Random.Long(1))
+            .RuleFor(x => x.PlexMediaId, _ => GetUniqueNumber())
+            .RuleFor(x => x.PlexPartId, _ => GetUniqueNumber())
             .RuleFor(x => x.VideoCodec, f => f.System.FileType())
             .RuleFor(x => x.AudioCodec, _ => "dca")
             .RuleFor(x => x.VideoResolution, f => f.PickRandom("sd", "720p", "1080p"))

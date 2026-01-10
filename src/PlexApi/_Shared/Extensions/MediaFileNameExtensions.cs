@@ -7,7 +7,7 @@ public static partial class MediaFileNameExtensions
     [GeneratedRegex(@"(S\d+E\d+|S\d{2,}E\d{2,}|\d+x\d+|\d{4}[-.\s]\d{2}[-.\s]\d{2})", RegexOptions.IgnoreCase)]
     private static partial Regex EpisodeIdentifierRegex();
 
-    [GeneratedRegex(@"\b(19\d{2}|20\d{2}|20[3-9]\d)\b")]
+    [GeneratedRegex(@"\b(19\d{2}|20\d{2})\b")]
     private static partial Regex YearRegex();
 
     [GeneratedRegex(@"(?:\{|\[)?(?:tmdb|imdb)[-:](\d+|tt\d+)(?:\}|\])?|tt\d{7,}", RegexOptions.IgnoreCase)]

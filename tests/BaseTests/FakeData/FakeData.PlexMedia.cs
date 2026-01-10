@@ -73,10 +73,10 @@ public static partial class FakeData
                 _ => GetPlexMovieMediaData(seed, options).Generate(config.IncludeMultiPartMovies ? 2 : 1)
             )
             .FinishWith(
-                (f, movie) =>
+                (_, movie) =>
                 {
                     // Ensure all moviesMedia have the same PlexMediaId
-                    var sharedPlexMediaId = f.Random.Long(1, 100000);
+                    var sharedPlexMediaId = GetUniqueNumber();
                     foreach (var mediaData in movie.MediaDataList)
                         mediaData.UpdateInitProperty(nameof(PlexMovieMediaData.PlexMediaId), sharedPlexMediaId);
                 }

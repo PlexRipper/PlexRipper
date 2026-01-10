@@ -81,7 +81,12 @@ public class CleanUpDownloadTaskFoldersHandler : ICommandHandler<CleanUpDownload
 
         if (!entriesResult.Value.Any())
         {
-            _directory.Delete(parentDirectory);
+            var deleteResult = Result.Try(() => _directory.Delete(parentDirectory));
+            if (deleteResult.IsFailed)
+            {
+                return deleteResult.ToResult().LogError();
+            }
+
             return Result.Ok();
         }
 

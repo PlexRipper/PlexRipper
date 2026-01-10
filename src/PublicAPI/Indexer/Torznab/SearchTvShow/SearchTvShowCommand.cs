@@ -2,6 +2,7 @@ using FastEndpoints;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Data.Contracts;
+using Reaparr.Domain;
 
 // ReSharper disable InconsistentNaming
 
@@ -118,14 +119,16 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, T
             .Include(e => e.MediaDataList)
             .AsQueryable();
 
-        // If no specific season/episode requested and query is empty, return a paged list
-        if (command is { Season: 0, Episode: 0 } && string.IsNullOrEmpty(command.Query))
+        var hasSeasonOrEpisode = command.Season > 0 || command.Episode > 0;
+
+        if (!string.IsNullOrWhiteSpace(command.Query))
         {
-            return await baseQuery
-                .OrderBy(e => e.Id) // deterministic paging
-                .Skip(command.Offset)
-                .Take(command.Limit)
-                .ToListAsync(cancellationToken);
+            var searchTitle = command.Query.ToSearchTitle();
+            if (string.IsNullOrWhiteSpace(searchTitle))
+                return [];
+
+            var likeQuery = $"{searchTitle}%";
+            baseQuery = baseQuery.Where(e => EF.Functions.Like(e.TvShow!.SearchTitle, likeQuery));
         }
 
         // Otherwise apply filters for a specific episode, adding external ID predicates only when provided
@@ -138,9 +141,21 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, T
         if (command.TVDB_ID > 0)
             baseQuery = baseQuery.Where(e => e.TvShow!.Guid_TVDB == command.TVDB_ID);
 
-        baseQuery = baseQuery
-            .Where(e => e.TvShowSeason!.SeasonNumber == command.Season)
-            .Where(e => e.EpisodeNumber == command.Episode);
+        if (hasSeasonOrEpisode)
+        {
+            baseQuery = baseQuery
+                .Where(e => e.TvShowSeason!.SeasonNumber == command.Season)
+                .Where(e => e.EpisodeNumber == command.Episode);
+        }
+
+        if (!hasSeasonOrEpisode)
+        {
+            return await baseQuery
+                .OrderBy(e => e.Id) // deterministic paging
+                .Skip(command.Offset)
+                .Take(command.Limit)
+                .ToListAsync(cancellationToken);
+        }
 
         return await baseQuery.OrderBy(e => e.Id).ToListAsync(cancellationToken);
     }

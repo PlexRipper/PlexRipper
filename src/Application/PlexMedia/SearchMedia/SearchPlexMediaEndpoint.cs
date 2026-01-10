@@ -45,14 +45,16 @@ public class SearchPlexMediaEndpoint : BaseEndpoint<SearchPlexMediaRequest, Resu
     {
         var q = req.Query.ToSearchTitle();
 
+        var likeQuery = $"{q}%";
+
         // Search for TV Shows and Movies
         var tvShowSearchResults = _dbContext
-            .PlexTvShows.Where(p => p.SearchTitle.Contains(q))
+            .PlexTvShows.Where(p => EF.Functions.Like(p.SearchTitle, likeQuery))
             .ProjectToMediaSlimDTO()
             .ToListAsync(ct);
 
         var movieSearchResults = _dbContext
-            .PlexMovies.Where(p => p.SearchTitle.Contains(q))
+            .PlexMovies.Where(p => EF.Functions.Like(p.SearchTitle, likeQuery))
             .ProjectToMediaSlimDTO()
             .ToListAsync(ct);
 

@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Reaparr.Data.Configurations;
@@ -10,6 +10,8 @@ public class PlexTvShowEpisodeConfiguration : IEntityTypeConfiguration<PlexTvSho
         builder.HasIndex(x => x.SortIndex);
         builder.HasIndex(x => new { x.TvShowSeasonId, x.SortIndex });
         builder.HasIndex(x => new { x.TvShowId, x.SortIndex });
+
+        builder.HasIndex(x => new { x.Key, x.PlexServerId });
 
         builder
             .HasMany(x => x.MediaDataList)

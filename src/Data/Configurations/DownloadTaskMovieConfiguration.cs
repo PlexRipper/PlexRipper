@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Reaparr.Data.Configurations;
@@ -7,6 +7,8 @@ public class DownloadTaskMovieConfiguration : IEntityTypeConfiguration<DownloadT
 {
     public void Configure(EntityTypeBuilder<DownloadTaskMovie> builder)
     {
+        builder.HasIndex(x => x.DownloadStatus);
+
         builder
             .HasMany(x => x.Children)
             .WithOne(x => x.Parent)

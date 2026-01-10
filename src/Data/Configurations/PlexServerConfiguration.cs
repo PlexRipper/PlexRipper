@@ -7,6 +7,9 @@ public class PlexServerConfiguration : IEntityTypeConfiguration<PlexServer>
 {
     public void Configure(EntityTypeBuilder<PlexServer> builder)
     {
+        builder.HasIndex(x => x.IsEnabled);
+        builder.HasIndex(x => x.MachineIdentifier);
+
         builder
             .HasMany(x => x.PlexLibraries)
             .WithOne(x => x.PlexServer)

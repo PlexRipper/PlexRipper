@@ -7,6 +7,8 @@ public class DownloadTaskEpisodeConfiguration : IEntityTypeConfiguration<Downloa
 {
     public void Configure(EntityTypeBuilder<DownloadTaskTvShowEpisode> builder)
     {
+        builder.HasIndex(x => x.DownloadStatus);
+
         builder
             .HasMany(x => x.Children)
             .WithOne(x => x.Parent)

@@ -10,6 +10,8 @@ public class DownloadTaskFileBaseConfiguration : IEntityTypeConfiguration<Downlo
     {
         builder.UseTpcMappingStrategy();
 
+        builder.HasIndex(x => x.DownloadStatus);
+
         builder
             .HasMany(x => x.DownloadWorkerTasks)
             .WithOne(x => x.DownloadTask)

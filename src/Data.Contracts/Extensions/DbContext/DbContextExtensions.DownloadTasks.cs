@@ -41,15 +41,24 @@ public static partial class DbContextExtensions
         if (guid == Guid.Empty)
             return null;
 
-        return await dbContext
-            .DownloadTaskTvShow.Where(x => x.Id == guid)
-            .ProjectToKey()
-            .Concat(dbContext.DownloadTaskTvShowSeason.Where(x => x.Id == guid).ProjectToKey())
-            .Concat(dbContext.DownloadTaskTvShowEpisode.Where(x => x.Id == guid).ProjectToKey())
-            .Concat(dbContext.DownloadTaskTvShowEpisodeFile.Where(x => x.Id == guid).ProjectToKey())
-            .Concat(dbContext.DownloadTaskMovie.Where(x => x.Id == guid).ProjectToKey())
-            .Concat(dbContext.DownloadTaskMovieFile.Where(x => x.Id == guid).ProjectToKey())
-            .FirstOrDefaultAsync(cancellationToken);
+        var queries = new List<IQueryable<DownloadTaskKey>>
+        {
+            dbContext.DownloadTaskTvShow.ProjectToKey(),
+            dbContext.DownloadTaskTvShowSeason.ProjectToKey(),
+            dbContext.DownloadTaskTvShowEpisode.ProjectToKey(),
+            dbContext.DownloadTaskTvShowEpisodeFile.ProjectToKey(),
+            dbContext.DownloadTaskMovie.ProjectToKey(),
+            dbContext.DownloadTaskMovieFile.ProjectToKey(),
+        };
+
+        foreach (var query in queries)
+        {
+            var downloadTaskKey = await query.FirstOrDefaultAsync(x => x.Id == guid, cancellationToken);
+            if (downloadTaskKey is not null)
+                return downloadTaskKey;
+        }
+
+        return null;
     }
 
     public static async Task<DownloadTaskType> GetDownloadTaskTypeAsync(
@@ -583,42 +592,9 @@ public static partial class DbContextExtensions
     )
     {
         var keys = await dbContext.GetDownloadableChildTaskKeys(key, cancellationToken);
-        if (keys.Count == 0)
-            return [];
 
-        var movieFileIds = keys.Where(x => x.Type is DownloadTaskType.MovieData or DownloadTaskType.MoviePart)
-            .Select(x => x.Id)
-            .ToList();
-        var episodeFileIds = keys.Where(x => x.Type is DownloadTaskType.EpisodeData or DownloadTaskType.EpisodePart)
-            .Select(x => x.Id)
-            .ToList();
+        var results = await Task.WhenAll(keys.Select(x => dbContext.GetDownloadTaskAsync(x, cancellationToken)));
 
-        var movieFilesTask =
-            movieFileIds.Count == 0
-                ? Task.FromResult(new List<DownloadTaskMovieFile>())
-                : dbContext
-                    .DownloadTaskMovieFile.Include(x => x.PlexServer)
-                    .Include(x => x.PlexLibrary)
-                    .Include(x => x.DownloadWorkerTasks)
-                    .Where(x => movieFileIds.Contains(x.Id))
-                    .ToListAsync(cancellationToken);
-
-        var episodeFilesTask =
-            episodeFileIds.Count == 0
-                ? Task.FromResult(new List<DownloadTaskTvShowEpisodeFile>())
-                : dbContext
-                    .DownloadTaskTvShowEpisodeFile.Include(x => x.PlexServer)
-                    .Include(x => x.PlexLibrary)
-                    .Include(x => x.DownloadWorkerTasks)
-                    .Where(x => episodeFileIds.Contains(x.Id))
-                    .ToListAsync(cancellationToken);
-
-        await Task.WhenAll(movieFilesTask, episodeFilesTask);
-
-        var results = new List<DownloadTaskGeneric>(movieFilesTask.Result.Count + episodeFilesTask.Result.Count);
-        results.AddRange(movieFilesTask.Result.Select(x => x.ToGeneric()));
-        results.AddRange(episodeFilesTask.Result.Select(x => x.ToGeneric()));
-
-        return results;
+        return results.Where(x => x != null).ToList()!;
     }
 }

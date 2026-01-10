@@ -1,7 +1,3 @@
-# CLAUDE.md
-
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
 ## Project Overview
 
 Reaparr is a cross-platform Plex media downloader with a .NET 9.0 backend (FastEndpoints) and Nuxt 4/Vue 3 frontend. It features multi-threaded download management, SignalR real-time updates, and Plex API integration.

@@ -181,7 +181,7 @@ public static class MediaSpecMapper
     {
         var audioStreams = streams.Where(s => s.StreamType == StreamType.Audio).ToList();
 
-        if (streams.Count == 0)
+        if (audioStreams.Count == 0)
             return string.Empty;
 
         // Extract all non-English language codes

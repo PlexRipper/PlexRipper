@@ -111,12 +111,12 @@ public static class BasePlexMediaDataMapper
         if (hdrTokens.Count > 0)
         {
             foreach (var token in hdrTokens)
-                releaseName.Append('.' + token);
+                releaseName.Append('.').Append(token);
         }
 
         // Only include video codec for non-REMUX releases
         if (!isRemux)
-            releaseName.Append('.' + videoCodec);
+            releaseName.Append('.').Append(videoCodec);
 
         releaseName.Append('.').Append(audioCodec);
         releaseName.Append('.').Append(audioLayout);

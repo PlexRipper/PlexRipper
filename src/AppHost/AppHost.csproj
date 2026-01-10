@@ -30,11 +30,11 @@
         </PackageReference>
         <PackageReference Include="FastEndpoints.Security" Version="7.0.1" />
         <PackageReference Include="FastEndpoints.Swagger" Version="7.0.1" />
-        <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="9.0.10" />
-        <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="9.0.8" />
-        <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="9.0.8" />
+        <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="10.0.1" />
+        <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="10.0.1" />
+        <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="10.0.1" />
         <PackageReference Include="Quartz.Extensions.Hosting" Version="3.15.0" />
-        <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+        <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\Application\Application.csproj" />

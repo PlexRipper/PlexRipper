@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Reaparr.Data.Configurations;
@@ -42,6 +42,8 @@ public class PlexLibraryConfiguration : IEntityTypeConfiguration<PlexLibrary>
             .WithMany(x => x.PlexLibraries)
             .HasForeignKey(x => x.DefaultDestinationId)
             .OnDelete(DeleteBehavior.SetNull);
+
+        builder.HasIndex(x => new { x.PlexServerId, x.Uuid }).IsUnique();
 
         builder.Property(c => c.Title).UseCollation(OrderByNaturalExtensions.CollationName);
 

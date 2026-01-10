@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Reaparr.Data.Configurations;
@@ -8,6 +8,7 @@ public class DownloadTaskTvShowConfiguration : IEntityTypeConfiguration<Download
     public void Configure(EntityTypeBuilder<DownloadTaskTvShow> builder)
     {
         builder.HasIndex(x => x.DownloadStatus);
+        builder.HasIndex(x => new { x.PlexServerId, x.PlexId });
 
         builder
             .HasMany(x => x.Children)

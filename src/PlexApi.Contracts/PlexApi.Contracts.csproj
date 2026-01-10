@@ -15,7 +15,7 @@
         <ProjectReference Include="..\Domain\Domain.csproj" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="CSharpier.MsBuild" Version="1.1.1">
+        <PackageReference Include="CSharpier.MsBuild" Version="1.2.5">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>

@@ -13,11 +13,11 @@
         <ProjectReference Include="..\Logging\Logging.csproj" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="CSharpier.MsBuild" Version="1.1.1">
+        <PackageReference Include="CSharpier.MsBuild" Version="1.2.5">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="FastEndpoints.Security" Version="7.0.1" />
+        <PackageReference Include="FastEndpoints.Security" Version="7.1.1" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.1">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

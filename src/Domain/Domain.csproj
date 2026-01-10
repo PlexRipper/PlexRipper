@@ -12,17 +12,16 @@
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="ByteSize" Version="2.1.2" />
-        <PackageReference Include="CSharpier.MsBuild" Version="1.1.1">
+        <PackageReference Include="CSharpier.MsBuild" Version="1.2.5">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="FastEndpoints" Version="7.0.1" />
-        <PackageReference Include="JetBrains.Annotations" Version="2025.2.0" />
-        <PackageReference Include="NaturalSort.Extension" Version="4.3.0" />
+        <PackageReference Include="FastEndpoints" Version="7.1.1" />
+        <PackageReference Include="JetBrains.Annotations" Version="2025.2.4" />
+        <PackageReference Include="NaturalSort.Extension" Version="4.4.1" />
         <PackageReference Include="PasswordGenerator" Version="2.1.0" />
         <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
-        <PackageReference Include="System.Reactive" Version="6.0.1" />
-        <PackageReference Include="System.Text.Json" Version="10.0.1" />
+        <PackageReference Include="System.Reactive" Version="6.1.0" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\FluentResultExtensions\FluentResultExtensions.csproj" />

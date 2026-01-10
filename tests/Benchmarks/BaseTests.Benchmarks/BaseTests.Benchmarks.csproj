@@ -22,9 +22,9 @@
         <Prefer32Bit>false</Prefer32Bit>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="BenchmarkDotNet" Version="0.15.2" />
-        <PackageReference Include="BenchmarkDotNet.Diagnostics.dotTrace" Version="0.15.2" />
-        <PackageReference Include="CSharpier.MsBuild" Version="1.1.1">
+        <PackageReference Include="BenchmarkDotNet" Version="0.15.8" />
+        <PackageReference Include="BenchmarkDotNet.Diagnostics.dotTrace" Version="0.15.8" />
+        <PackageReference Include="CSharpier.MsBuild" Version="1.2.5">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>

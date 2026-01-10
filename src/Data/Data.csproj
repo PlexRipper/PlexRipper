@@ -12,8 +12,8 @@
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="AppAny.Quartz.EntityFrameworkCore.Migrations.SQLite" Version="0.5.1" />
-        <PackageReference Include="Autofac" Version="8.4.0" />
-        <PackageReference Include="CSharpier.MsBuild" Version="1.1.1">
+        <PackageReference Include="Autofac" Version="9.0.0" />
+        <PackageReference Include="CSharpier.MsBuild" Version="1.2.5">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>

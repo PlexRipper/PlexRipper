@@ -4,9 +4,9 @@
     "net10.0": {
       "CSharpier.MsBuild": {
         "type": "Direct",
-        "requested": "[1.1.1, )",
-        "resolved": "1.1.1",
-        "contentHash": "XXfwF9m9c/TSKsqOqZjn6aNAmzx/mkVcZfORpWfZVr/GJ8p5FhPlUhgh8bLHTcJ5rei63tQxlW0fG/l0nZk7IQ=="
+        "requested": "[1.2.5, )",
+        "resolved": "1.2.5",
+        "contentHash": "U9csejWXDk/ZXZpigcu22KAOINQj7qNujeJFj0HsHOqKzuW9xX+eaCFFHrfjOdIDQYzslQAe9e6Gt9HGMRC/aA=="
       },
       "Serilog": {
         "type": "Direct",

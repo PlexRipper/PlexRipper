@@ -8,9 +8,9 @@
         <RootNamespace>Reaparr.PublicAPI</RootNamespace>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="Autofac" Version="8.4.0" />
+        <PackageReference Include="Autofac" Version="9.0.0" />
         <PackageReference Include="BencodeNET" Version="5.0.0" />
-        <PackageReference Include="FastEndpoints" Version="7.0.1" />
+        <PackageReference Include="FastEndpoints" Version="7.1.1" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\Data.Contracts\Data.Contracts.csproj" />

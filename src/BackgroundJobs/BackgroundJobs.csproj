@@ -16,7 +16,7 @@
         <ProjectReference Include="..\PlexApi.Contracts\PlexApi.Contracts.csproj" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Autofac.Extras.Quartz" Version="10.0.0" />
-        <PackageReference Include="Quartz" Version="3.15.0" />
+        <PackageReference Include="Jason.Landbridge.Autofac.Extras.Quartz" Version="9.0.3" />
+        <PackageReference Include="Quartz" Version="3.15.1" />
     </ItemGroup>
 </Project>

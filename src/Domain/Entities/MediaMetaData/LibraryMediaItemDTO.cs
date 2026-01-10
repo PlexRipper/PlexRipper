@@ -6,7 +6,7 @@ namespace Reaparr.Domain;
 
 public record LibraryMediaItemDTO
 {
-    public required string RatingKey { get; init; }
+    public required int RatingKey { get; init; }
 
     public required string Key { get; init; }
 
@@ -229,6 +229,13 @@ public record LibraryMediaItemMediaDTO
     public required bool HasVoiceActivity { get; init; }
 
     /// <summary>
+    /// Indicates whether this media file is optimized for direct streaming playback,
+    /// meaning it is encoded and packaged to minimize buffering and avoid transcoding
+    /// (for example, using streaming-friendly codecs, bitrate, and container settings).
+    /// </summary>
+    public required bool OptimizedForStreaming { get; init; }
+
+    /// <summary>
     /// An array of parts for this media item.
     /// </summary>
     public required List<LibraryMediaItemPartDTO> Parts { get; init; }
@@ -236,16 +243,6 @@ public record LibraryMediaItemMediaDTO
 
 public record LibraryMediaItemPartDTO
 {
-    /// <summary>
-    /// Indicates if the part is accessible.
-    /// </summary>
-    public required bool? Accessible { get; init; }
-
-    /// <summary>
-    /// Indicates if the part exists.
-    /// </summary>
-    public required bool? Exists { get; init; }
-
     /// <summary>
     /// Unique part identifier.
     /// </summary>
@@ -255,8 +252,6 @@ public record LibraryMediaItemPartDTO
     /// Key to access this part.
     /// </summary>
     public required string Key { get; init; }
-
-    public required string? Indexes { get; init; }
 
     /// <summary>
     /// Duration of the part in milliseconds.
@@ -277,13 +272,6 @@ public record LibraryMediaItemPartDTO
     /// Container format of the part.
     /// </summary>
     public required string Container { get; init; }
-
-    /// <summary>
-    /// Video profile for the part.
-    /// </summary>
-    public required string VideoProfile { get; init; }
-
-    public required string AudioProfile { get; init; }
 
     /// <summary>
     /// An array of streams for this part.

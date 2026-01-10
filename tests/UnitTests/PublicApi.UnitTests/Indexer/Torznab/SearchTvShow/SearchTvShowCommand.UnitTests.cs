@@ -5,20 +5,24 @@ namespace PublicApi.UnitTests;
 
 public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHandler>
 {
-    public SearchTvShowCommandUnitTests(ITestOutputHelper output) : base(output) { }
+    public SearchTvShowCommandUnitTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public async Task ShouldReturnPagedEpisodes_WhenNoFiltersProvided()
     {
         // Arrange
-        await SetupDatabase(1001, config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexTvShowLibraryCount = 1;
-            config.TvShowCount = 1;
-            config.TvShowSeasonCount = 1;
-            config.TvShowEpisodeCount = 5;
-        });
+        await SetupDatabase(
+            1001,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexTvShowLibraryCount = 1;
+                config.TvShowCount = 1;
+                config.TvShowSeasonCount = 1;
+                config.TvShowEpisodeCount = 5;
+            }
+        );
 
         var offset = 1;
         var limit = 3;
@@ -34,18 +38,16 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
             TVDB_ID = 0,
         };
 
-        var expectedPartFiles = await IDbContext.PlexTvShowEpisodes
-            .AsNoTracking()
+        var expectedEpisodeTitles = await IDbContext
+            .PlexTvShowEpisodes.AsNoTracking()
             .Include(e => e.MediaDataList)
-            .ThenInclude(md => md.Parts)
             .OrderBy(e => e.Id)
             .Skip(offset)
             .Take(limit)
-            .Select(e => e.MediaDataList.SelectMany(md => md.Parts).Select(p => p.File).First())
+            .Select(
+                e => e.MediaDataList.OrderBy(md => md.PlexPartId).Select(md => md.GetFileName).First()
+            )
             .ToListAsync(CancellationToken);
-        
-        // ReSharper disable once ConvertClosureToMethodGroup
-        var expectedEpisodeTitles = expectedPartFiles.Select(s => Path.GetFileName(s)).ToList();
 
         // Act
         var result = await Sut.ExecuteAsync(cmd, CancellationToken);
@@ -100,17 +102,20 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
     public async Task ShouldReturnSpecificEpisode_WhenFilteredByImdbSeasonAndEpisode()
     {
         // Arrange
-        await SetupDatabase(2002, config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexTvShowLibraryCount = 1;
-            config.TvShowCount = 1;
-            config.TvShowSeasonCount = 1;
-            config.TvShowEpisodeCount = 2;
-        });
+        await SetupDatabase(
+            2002,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexTvShowLibraryCount = 1;
+                config.TvShowCount = 1;
+                config.TvShowSeasonCount = 1;
+                config.TvShowEpisodeCount = 2;
+            }
+        );
 
-        var episode = await IDbContext.PlexTvShowEpisodes
-            .Include(e => e.TvShowSeason)
+        var episode = await IDbContext
+            .PlexTvShowEpisodes.Include(e => e.TvShowSeason)
             .Include(e => e.TvShow)
             .OrderBy(e => e.Id)
             .FirstAsync(CancellationToken);
@@ -138,18 +143,19 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
         result.ShouldNotBeNull();
         result.Channel.Items.ShouldNotBeEmpty();
         // All returned items should correspond to the selected episode
-        result.Channel.Items.All(i => i.Attributes.Any(a => a.Name == "season" && a.Value == seasonNumber.ToString()))
+        result
+            .Channel.Items.All(i => i.Attributes.Any(a => a.Name == "season" && a.Value == seasonNumber.ToString()))
             .ShouldBeTrue();
-        result.Channel.Items.All(i => i.Attributes.Any(a => a.Name == "episode" && a.Value == episodeNumber.ToString()))
+        result
+            .Channel.Items.All(i => i.Attributes.Any(a => a.Name == "episode" && a.Value == episodeNumber.ToString()))
             .ShouldBeTrue();
-        result.Channel.Items.All(i => i.Attributes.Any(a => a.Name == "imdb" && a.Value == imdb))
-            .ShouldBeTrue();
+        result.Channel.Items.All(i => i.Attributes.Any(a => a.Name == "imdb" && a.Value == imdb)).ShouldBeTrue();
 
         // Titles should equal the part file name used during mapping
-        var expectedTitle = await IDbContext.PlexTvShowEpisodeData
-            .Include(d => d.Parts)
-            .Where(d => d.PlexTvShowEpisodeId == episode.Id)
-            .Select(d => d.Parts.Select(p => Path.GetFileName(p.File)).First())
+        var expectedTitle = await IDbContext
+            .PlexTvShowEpisodeData.Where(d => d.PlexTvShowEpisodeId == episode.Id)
+            .OrderBy(d => d.PlexPartId)
+            .Select(d => d.GetFileName)
             .FirstAsync(CancellationToken);
         result.Channel.Items.Select(i => i.Title).Distinct().Single().ShouldBe(expectedTitle);
 
@@ -165,17 +171,20 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
     public async Task ShouldReturnSpecificEpisode_WhenFilteredByTmdbSeasonAndEpisode()
     {
         // Arrange
-        await SetupDatabase(2103, config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexTvShowLibraryCount = 1;
-            config.TvShowCount = 1;
-            config.TvShowSeasonCount = 1;
-            config.TvShowEpisodeCount = 2;
-        });
+        await SetupDatabase(
+            2103,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexTvShowLibraryCount = 1;
+                config.TvShowCount = 1;
+                config.TvShowSeasonCount = 1;
+                config.TvShowEpisodeCount = 2;
+            }
+        );
 
-        var episode = await IDbContext.PlexTvShowEpisodes
-            .Include(e => e.TvShowSeason)
+        var episode = await IDbContext
+            .PlexTvShowEpisodes.Include(e => e.TvShowSeason)
             .Include(e => e.TvShow)
             .OrderBy(e => e.Id)
             .FirstAsync(CancellationToken);
@@ -202,11 +211,14 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
         // Assert
         result.ShouldNotBeNull();
         result.Channel.Items.ShouldNotBeEmpty();
-        result.Channel.Items.All(i => i.Attributes.Any(a => a.Name == "season" && a.Value == seasonNumber.ToString()))
+        result
+            .Channel.Items.All(i => i.Attributes.Any(a => a.Name == "season" && a.Value == seasonNumber.ToString()))
             .ShouldBeTrue();
-        result.Channel.Items.All(i => i.Attributes.Any(a => a.Name == "episode" && a.Value == episodeNumber.ToString()))
+        result
+            .Channel.Items.All(i => i.Attributes.Any(a => a.Name == "episode" && a.Value == episodeNumber.ToString()))
             .ShouldBeTrue();
-        result.Channel.Items.All(i => i.Attributes.Any(a => a.Name == "tmdbid" && a.Value == tmdb.ToString()))
+        result
+            .Channel.Items.All(i => i.Attributes.Any(a => a.Name == "tmdbid" && a.Value == tmdb.ToString()))
             .ShouldBeTrue();
     }
 
@@ -214,17 +226,20 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
     public async Task ShouldReturnSpecificEpisode_WhenFilteredByTvdbSeasonAndEpisode()
     {
         // Arrange
-        await SetupDatabase(2204, config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexTvShowLibraryCount = 1;
-            config.TvShowCount = 1;
-            config.TvShowSeasonCount = 1;
-            config.TvShowEpisodeCount = 2;
-        });
+        await SetupDatabase(
+            2204,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexTvShowLibraryCount = 1;
+                config.TvShowCount = 1;
+                config.TvShowSeasonCount = 1;
+                config.TvShowEpisodeCount = 2;
+            }
+        );
 
-        var episode = await IDbContext.PlexTvShowEpisodes
-            .Include(e => e.TvShowSeason)
+        var episode = await IDbContext
+            .PlexTvShowEpisodes.Include(e => e.TvShowSeason)
             .Include(e => e.TvShow)
             .OrderBy(e => e.Id)
             .FirstAsync(CancellationToken);
@@ -251,11 +266,14 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
         // Assert
         result.ShouldNotBeNull();
         result.Channel.Items.ShouldNotBeEmpty();
-        result.Channel.Items.All(i => i.Attributes.Any(a => a.Name == "season" && a.Value == seasonNumber.ToString()))
+        result
+            .Channel.Items.All(i => i.Attributes.Any(a => a.Name == "season" && a.Value == seasonNumber.ToString()))
             .ShouldBeTrue();
-        result.Channel.Items.All(i => i.Attributes.Any(a => a.Name == "episode" && a.Value == episodeNumber.ToString()))
+        result
+            .Channel.Items.All(i => i.Attributes.Any(a => a.Name == "episode" && a.Value == episodeNumber.ToString()))
             .ShouldBeTrue();
-        result.Channel.Items.All(i => i.Attributes.Any(a => a.Name == "tvdbid" && a.Value == tvdb.ToString()))
+        result
+            .Channel.Items.All(i => i.Attributes.Any(a => a.Name == "tvdbid" && a.Value == tvdb.ToString()))
             .ShouldBeTrue();
     }
 
@@ -263,14 +281,17 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
     public async Task ShouldSkipItems_WhenEpisodeMissingRelations()
     {
         // Arrange: empty DB first, then add an orphan episode with media
-        await SetupDatabase(3003, config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexTvShowLibraryCount = 1;
-            config.TvShowCount = 0;
-            config.TvShowSeasonCount = 0;
-            config.TvShowEpisodeCount = 0;
-        });
+        await SetupDatabase(
+            3003,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexTvShowLibraryCount = 1;
+                config.TvShowCount = 0;
+                config.TvShowSeasonCount = 0;
+                config.TvShowEpisodeCount = 0;
+            }
+        );
 
         // Manually add an episode without TvShow/TvShowSeason
         var orphan = FakeData.GetPlexTvShowEpisode(new Seed(3003)).Generate();
@@ -310,11 +331,14 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
     public async Task ShouldSkipItem_WhenEpisodeMissingOnlyTvShow()
     {
         // Arrange
-        await SetupDatabase(3004, config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexTvShowLibraryCount = 1;
-        });
+        await SetupDatabase(
+            3004,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexTvShowLibraryCount = 1;
+            }
+        );
 
         var ep = FakeData.GetPlexTvShowEpisode(new Seed(3004)).Generate();
         ep.TvShow = null;
@@ -322,17 +346,20 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
         await IDbContext.PlexTvShowEpisodes.AddAsync(ep, CancellationToken);
         await IDbContext.SaveChangesAsync(CancellationToken);
 
-        var result = await Sut.ExecuteAsync(new SearchTvShowCommand
-        {
-            Query = string.Empty,
-            Season = 0,
-            Episode = 0,
-            Limit = 10,
-            Offset = 0,
-            IMDB_ID = string.Empty,
-            TMDB_ID = 0,
-            TVDB_ID = 0,
-        }, CancellationToken);
+        var result = await Sut.ExecuteAsync(
+            new SearchTvShowCommand
+            {
+                Query = string.Empty,
+                Season = 0,
+                Episode = 0,
+                Limit = 10,
+                Offset = 0,
+                IMDB_ID = string.Empty,
+                TMDB_ID = 0,
+                TVDB_ID = 0,
+            },
+            CancellationToken
+        );
 
         result.Channel.Items.ShouldBeEmpty();
     }
@@ -341,28 +368,34 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
     public async Task ShouldSkipItem_WhenEpisodeMissingOnlySeason()
     {
         // Arrange
-        await SetupDatabase(3005, config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexTvShowLibraryCount = 1;
-        });
+        await SetupDatabase(
+            3005,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexTvShowLibraryCount = 1;
+            }
+        );
 
         var ep = FakeData.GetPlexTvShowEpisode(new Seed(3005)).Generate();
         ep.TvShowSeason = null;
         await IDbContext.PlexTvShowEpisodes.AddAsync(ep, CancellationToken);
         await IDbContext.SaveChangesAsync(CancellationToken);
 
-        var result = await Sut.ExecuteAsync(new SearchTvShowCommand
-        {
-            Query = string.Empty,
-            Season = 0,
-            Episode = 0,
-            Limit = 10,
-            Offset = 0,
-            IMDB_ID = string.Empty,
-            TMDB_ID = 0,
-            TVDB_ID = 0,
-        }, CancellationToken);
+        var result = await Sut.ExecuteAsync(
+            new SearchTvShowCommand
+            {
+                Query = string.Empty,
+                Season = 0,
+                Episode = 0,
+                Limit = 10,
+                Offset = 0,
+                IMDB_ID = string.Empty,
+                TMDB_ID = 0,
+                TVDB_ID = 0,
+            },
+            CancellationToken
+        );
 
         result.Channel.Items.ShouldBeEmpty();
     }
@@ -371,15 +404,18 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
     public async Task ShouldCreateMultipleItemsPerEpisode_WhenMultiPartEpisodesEnabled()
     {
         // Arrange
-        await SetupDatabase(3106, config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexTvShowLibraryCount = 1;
-            config.TvShowCount = 1;
-            config.TvShowSeasonCount = 1;
-            config.TvShowEpisodeCount = 3;
-            config.IncludeMultiPartEpisodes = true;
-        });
+        await SetupDatabase(
+            3106,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexTvShowLibraryCount = 1;
+                config.TvShowCount = 1;
+                config.TvShowSeasonCount = 1;
+                config.TvShowEpisodeCount = 3;
+                config.IncludeMultiPartEpisodes = true;
+            }
+        );
 
         var offset = 0;
         var limit = 2;
@@ -396,13 +432,12 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
         };
 
         // Expected total parts across the paged episodes
-        var expectedPartCount = await IDbContext.PlexTvShowEpisodes
-            .Include(e => e.MediaDataList)
-            .ThenInclude(m => m.Parts)
+        var expectedPartCount = await IDbContext
+            .PlexTvShowEpisodes.Include(e => e.MediaDataList)
             .OrderBy(e => e.Id)
             .Skip(offset)
             .Take(limit)
-            .Select(e => e.MediaDataList.SelectMany(md => md.Parts).Count())
+            .Select(e => e.MediaDataList.Count)
             .SumAsync(CancellationToken);
 
         // Act
@@ -417,14 +452,17 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
     public async Task ShouldReturnEmpty_WhenQueryProvidedWithoutSeasonEpisode()
     {
         // Arrange
-        await SetupDatabase(3207, config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexTvShowLibraryCount = 1;
-            config.TvShowCount = 1;
-            config.TvShowSeasonCount = 1;
-            config.TvShowEpisodeCount = 2;
-        });
+        await SetupDatabase(
+            3207,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexTvShowLibraryCount = 1;
+                config.TvShowCount = 1;
+                config.TvShowSeasonCount = 1;
+                config.TvShowEpisodeCount = 2;
+            }
+        );
 
         var cmd = new SearchTvShowCommand
         {
@@ -699,17 +737,20 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
     public async Task ShouldReturnSpecificEpisode_WhenAllExternalIdsProvided()
     {
         // Arrange
-        await SetupDatabase(3308, config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexTvShowLibraryCount = 1;
-            config.TvShowCount = 1;
-            config.TvShowSeasonCount = 1;
-            config.TvShowEpisodeCount = 2;
-        });
+        await SetupDatabase(
+            3308,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexTvShowLibraryCount = 1;
+                config.TvShowCount = 1;
+                config.TvShowSeasonCount = 1;
+                config.TvShowEpisodeCount = 2;
+            }
+        );
 
-        var episode = await IDbContext.PlexTvShowEpisodes
-            .Include(e => e.TvShowSeason)
+        var episode = await IDbContext
+            .PlexTvShowEpisodes.Include(e => e.TvShowSeason)
             .Include(e => e.TvShow)
             .OrderBy(e => e.Id)
             .FirstAsync(CancellationToken);
@@ -738,9 +779,11 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
         // Assert
         result.Channel.Items.ShouldNotBeEmpty();
         result.Channel.Items.All(i => i.Attributes.Any(a => a.Name == "imdb" && a.Value == imdb)).ShouldBeTrue();
-        result.Channel.Items.All(i => i.Attributes.Any(a => a.Name == "tmdbid" && a.Value == tmdb.ToString())).ShouldBeTrue();
-        result.Channel.Items.All(i => i.Attributes.Any(a => a.Name == "tvdbid" && a.Value == tvdb.ToString())).ShouldBeTrue();
+        result
+            .Channel.Items.All(i => i.Attributes.Any(a => a.Name == "tmdbid" && a.Value == tmdb.ToString()))
+            .ShouldBeTrue();
+        result
+            .Channel.Items.All(i => i.Attributes.Any(a => a.Name == "tvdbid" && a.Value == tvdb.ToString()))
+            .ShouldBeTrue();
     }
 }
-
-

@@ -8,7 +8,7 @@ namespace Reaparr.Application.Contracts;
 
 public static class JobDataMapExtensions
 {
-    private static readonly ILogger _log = new LogConfig().CreateLogInstance(typeof(JobDataMapExtensions));
+    private static readonly ILogger _log = LogFactory.Create(typeof(JobDataMapExtensions));
 
     public static List<int> GetIntListValue(this JobDataMap dataMap, string parameterName)
     {

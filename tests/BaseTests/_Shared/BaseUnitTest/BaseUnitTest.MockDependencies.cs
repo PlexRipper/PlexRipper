@@ -48,16 +48,7 @@ public partial class BaseUnitTest
 
     private void SetDefaultBuilder(ContainerBuilder builder)
     {
-        builder
-            .Register<ILogger>(
-                (_, _) =>
-                {
-                    var logConfig = new TestLogConfig(Output);
-                    LogManager.SetupLogging(LogEventLevel); //TODO might need to be removed if LogManager
-                    return logConfig.GetLogger(LogEventLevel);
-                }
-            )
-            .SingleInstance();
+        builder.Register<ILogger>((_, _) => LogFactory.Create()).SingleInstance();
 
         // Database context can be set up once and then retrieved by its DB name.
         builder

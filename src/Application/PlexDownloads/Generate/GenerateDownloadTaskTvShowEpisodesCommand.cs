@@ -83,8 +83,6 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
             .Include(x => x.TvShow)
             .Include(x => x.TvShowSeason)
             .Include(x => x.MediaDataList)
-            .ThenInclude(x => x.Parts)
-            .ThenInclude(x => x.Streams)
             .Where(x => episodeIds.Contains(x.Id))
             .ToListAsync(ct);
 
@@ -225,12 +223,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
         // Map episodeData to DownloadTaskTvShowEpisodeFile and add to episodeDownloadTask
         var downloadFiles = episodeData.MapToDownloadTask(tvShowEpisode, request);
 
-        if (!downloadFiles.Any())
-        {
-            return Result.Fail($"No download files generated for episode {tvShowEpisode.Key} ({tvShowEpisode.Title})");
-        }
-
-        episodeDownloadTask.Children.AddRange(downloadFiles);
+        episodeDownloadTask.Children.Add(downloadFiles);
         _dbContext.DownloadTaskTvShowEpisodeFile.AddRange(downloadFiles);
 
         return Result.Ok();

@@ -8,7 +8,7 @@ namespace Reaparr.Data.Contracts;
 
 public static partial class DbContextExtensions
 {
-    private static readonly ILogger _log = new LogConfig().CreateLogInstance(typeof(DbContextExtensions));
+    private static readonly ILogger _log = LogFactory.Create(typeof(DbContextExtensions));
 
     public static async Task<Result<PlexServerConnection>> ChoosePlexServerConnection(
         this IReaparrDbContext dbContext,

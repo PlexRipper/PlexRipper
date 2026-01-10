@@ -1,40 +1,43 @@
-using Microsoft.EntityFrameworkCore;
-using Reaparr.PublicAPI;
 using BencodeNET.Parsing;
 using BencodeNET.Torrents;
+using Microsoft.EntityFrameworkCore;
+using Reaparr.PublicAPI;
 
 namespace PublicApi.UnitTests;
 
 public class DownloadTorrentEndpointUnitTests : BaseUnitTest
 {
-    public DownloadTorrentEndpointUnitTests(ITestOutputHelper output) : base(output) { }
+    public DownloadTorrentEndpointUnitTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public async Task ShouldReturnValidTorrent_WhenEpisodeExists()
     {
         // Arrange – seed an episode with media data/part
-        await SetupDatabase(1001, config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexMovieLibraryCount = 1;
-            config.PlexTvShowLibraryCount = 1;
-            config.TvShowCount = 10;
-            config.TvShowSeasonCount = 3;
-            config.TvShowEpisodeCount = 5;
-        });
+        await SetupDatabase(
+            1001,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 1;
+                config.PlexTvShowLibraryCount = 1;
+                config.TvShowCount = 10;
+                config.TvShowSeasonCount = 3;
+                config.TvShowEpisodeCount = 5;
+            }
+        );
 
         var server = await IDbContext.PlexServers.FirstAsync(CancellationToken);
         var library = await IDbContext.PlexLibraries.FirstAsync(CancellationToken);
-        var episodeData = await IDbContext.PlexTvShowEpisodeData.Include(x => x.Parts).FirstAsync(CancellationToken);
-        var part = episodeData.Parts.First();
+        var episodeData = await IDbContext.PlexTvShowEpisodeData.FirstAsync(CancellationToken);
 
         var req = new DownloadTorrentEndpointRequest
         {
             Type = PlexMediaType.Episode,
             MediaId = episodeData.PlexTvShowEpisodeId,
             DataId = episodeData.Id,
-            PartId = part.Id,
-            PartPlexId = part.PlexId,
+            PartId = episodeData.Id,
+            PartPlexId = episodeData.PlexMediaId,
             Quality = VideoQuality.HD,
             LibraryId = library.Id,
             ServerId = server.Id,
@@ -79,24 +82,26 @@ public class DownloadTorrentEndpointUnitTests : BaseUnitTest
     public async Task ShouldReturnValidTorrent_WhenMovieExists()
     {
         // Arrange – seed a movie with media data/part
-        await SetupDatabase(1002, config =>
-        {
-            config.PlexServerCount = 1;
-            config.MovieCount = 1;
-        });
+        await SetupDatabase(
+            1002,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.MovieCount = 1;
+            }
+        );
 
         var server = await IDbContext.PlexServers.FirstAsync(CancellationToken);
         var library = await IDbContext.PlexLibraries.FirstAsync(CancellationToken);
-        var movieData = await IDbContext.PlexMovieData.Include(x => x.Parts).FirstAsync(CancellationToken);
-        var part = movieData.Parts.First();
+        var movieData = await IDbContext.PlexMovieData.FirstAsync(CancellationToken);
 
         var req = new DownloadTorrentEndpointRequest
         {
             Type = PlexMediaType.Movie,
             MediaId = movieData.PlexMovieId,
             DataId = movieData.Id,
-            PartId = part.Id,
-            PartPlexId = part.PlexId,
+            PartId = movieData.Id,
+            PartPlexId = movieData.PlexMediaId,
             Quality = VideoQuality.HD,
             LibraryId = library.Id,
             ServerId = server.Id,
@@ -141,14 +146,17 @@ public class DownloadTorrentEndpointUnitTests : BaseUnitTest
     public async Task ShouldReturnNotFound_WhenNoMatchingMediaFound()
     {
         // Arrange – database with server/library but no matching data id
-        await SetupDatabase(1003, config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexMovieLibraryCount = 1;
-            config.PlexTvShowLibraryCount = 1;
-            config.MovieCount = 0;
-            config.TvShowCount = 0;
-        });
+        await SetupDatabase(
+            1003,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 1;
+                config.PlexTvShowLibraryCount = 1;
+                config.MovieCount = 0;
+                config.TvShowCount = 0;
+            }
+        );
 
         var server = await IDbContext.PlexServers.FirstAsync(CancellationToken);
         var library = await IDbContext.PlexLibraries.FirstAsync(CancellationToken);

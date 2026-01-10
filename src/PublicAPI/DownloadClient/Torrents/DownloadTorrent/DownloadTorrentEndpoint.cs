@@ -19,9 +19,9 @@ public class DownloadTorrentEndpointRequestValidator : Validator<DownloadTorrent
         RuleFor(x => x.ServerId).GreaterThan(0);
         RuleFor(x => x.Quality).IsInEnum();
         RuleFor(x => x.Type).IsInEnum();
-		RuleFor(x => x)
-			.Must(r => r.PartId > 0 || r.PartPlexId > 0)
-			.WithMessage("Either PartId or PartPlexId must be provided.");
+        RuleFor(x => x)
+            .Must(r => r.PartId > 0 || r.PartPlexId > 0)
+            .WithMessage("Either PartId or PartPlexId must be provided.");
     }
 }
 
@@ -49,10 +49,11 @@ public class DownloadTorrentEndpoint : Endpoint<DownloadTorrentEndpointRequest>
             x.Description =
                 "Generates a minimal torrent file that will be used with Reaparr as a DownloadClient to trigger a download in Reaparr. This torrent cannot be used in normal DownloadClients!";
         });
-        Description(x => x
-            .Produces(StatusCodes.Status200OK, contentType: "application/x-bittorrent")
-            .Produces(StatusCodes.Status400BadRequest));
-        
+        Description(x =>
+            x.Produces(StatusCodes.Status200OK, contentType: "application/x-bittorrent")
+                .Produces(StatusCodes.Status400BadRequest)
+        );
+
         AllowAnonymous();
         PreProcessor<DownloadClientAuthenticationPreProcessor<DownloadTorrentEndpointRequest>>();
     }
@@ -93,50 +94,31 @@ public class DownloadTorrentEndpoint : Endpoint<DownloadTorrentEndpointRequest>
             [
                 ["udp://tracker.opentrackr.org:1337/announce"],
             ],
-            File = new SingleFileInfo
-            {
-                FileName = fileName,
-                FileSize = fileInfo.Size,
-            },
+            File = new SingleFileInfo { FileName = fileName, FileSize = fileInfo.Size },
             ExtraFields = extraFields,
         };
 
         // Return the torrent file
-        await Send.BytesAsync(
-            torrent.EncodeAsBytes(),
-            fileName,
-            "application/x-bittorrent",
-            cancellation: ct
-        );
+        await Send.BytesAsync(torrent.EncodeAsBytes(), fileName, "application/x-bittorrent", cancellation: ct);
     }
 
     private async Task<MediaFileInfo?> GetFileInfoAsync(DownloadTorrentEndpointRequest req, CancellationToken ct)
     {
         if (req.Type == PlexMediaType.Episode)
         {
-            return await _dbContext.PlexTvShowEpisodeData
-                .Where(x => x.Id == req.DataId)
-                .SelectMany(x => x.Parts)
-                .Where(p => p.Id == req.PartId || p.PlexId == req.PartPlexId)
-                .Select(p => new MediaFileInfo
-                {
-                    FileName = Path.GetFileName(p.File),
-                    Size = p.Size,
-                })
+            return await _dbContext
+                .PlexTvShowEpisodeData.Where(x => x.Id == req.DataId)
+                .Where(p => p.Id == req.PartId || p.PlexMediaId == req.PartPlexId)
+                .Select(p => new MediaFileInfo { FileName = p.GetFileName, Size = p.Size })
                 .SingleOrDefaultAsync(ct);
         }
 
         if (req.Type == PlexMediaType.Movie)
         {
-            return await _dbContext.PlexMovieData
-                .Where(x => x.Id == req.DataId)
-                .SelectMany(x => x.Parts)
-                .Where(p => p.Id == req.PartId || p.PlexId == req.PartPlexId)
-                .Select(p => new MediaFileInfo
-                {
-                    FileName = Path.GetFileName(p.File),
-                    Size = p.Size,
-                })
+            return await _dbContext
+                .PlexMovieData.Where(x => x.Id == req.DataId)
+                .Where(p => p.Id == req.PartId || p.PlexMediaId == req.PartPlexId)
+                .Select(p => new MediaFileInfo { FileName = p.GetFileName, Size = p.Size })
                 .SingleOrDefaultAsync(ct);
         }
 

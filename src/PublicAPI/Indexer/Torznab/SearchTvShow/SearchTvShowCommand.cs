@@ -31,46 +31,41 @@ public class SearchTvShowCommandValidator : AbstractValidator<SearchTvShowComman
     public SearchTvShowCommandValidator()
     {
         // Basic argument validation
-        RuleFor(x => x.Limit)
-            .GreaterThan(0)
-            .LessThanOrEqualTo(500);
+        RuleFor(x => x.Limit).GreaterThan(0).LessThanOrEqualTo(500);
 
-        RuleFor(x => x.Offset)
-            .GreaterThanOrEqualTo(0);
+        RuleFor(x => x.Offset).GreaterThanOrEqualTo(0);
 
-        RuleFor(x => x.Season)
-            .GreaterThanOrEqualTo(0);
+        RuleFor(x => x.Season).GreaterThanOrEqualTo(0);
 
-        RuleFor(x => x.Episode)
-            .GreaterThanOrEqualTo(0);
+        RuleFor(x => x.Episode).GreaterThanOrEqualTo(0);
 
-        RuleFor(x => x.TMDB_ID)
-            .GreaterThanOrEqualTo(0);
+        RuleFor(x => x.TMDB_ID).GreaterThanOrEqualTo(0);
 
-        RuleFor(x => x.TVDB_ID)
-            .GreaterThanOrEqualTo(0);
+        RuleFor(x => x.TVDB_ID).GreaterThanOrEqualTo(0);
 
-        RuleFor(x => x.IMDB_ID)
-            .NotNull();
+        RuleFor(x => x.IMDB_ID).NotNull();
 
         // When targeting a specific episode, season and episode must both be provided
-        When(x => x.Season > 0 || x.Episode > 0, () =>
-        {
-            RuleFor(x => x.Season)
-                .GreaterThan(0);
+        When(
+            x => x.Season > 0 || x.Episode > 0,
+            () =>
+            {
+                RuleFor(x => x.Season).GreaterThan(0);
 
-            RuleFor(x => x.Episode)
-                .GreaterThan(0);
+                RuleFor(x => x.Episode).GreaterThan(0);
 
-            // And at least one external ID must be provided to identify the show
-            RuleFor(x => x)
-                .Must(HasAnyExternalId)
-                .WithMessage("Provide at least one of IMDB_ID, TMDB_ID, or TVDB_ID when Season/Episode are specified.");
-        });
+                // And at least one external ID must be provided to identify the show
+                RuleFor(x => x)
+                    .Must(HasAnyExternalId)
+                    .WithMessage(
+                        "Provide at least one of IMDB_ID, TMDB_ID, or TVDB_ID when Season/Episode are specified."
+                    );
+            }
+        );
     }
 
-    private static bool HasAnyExternalId(SearchTvShowCommand cmd)
-        => !string.IsNullOrWhiteSpace(cmd.IMDB_ID) || cmd.TMDB_ID > 0 || cmd.TVDB_ID > 0;
+    private static bool HasAnyExternalId(SearchTvShowCommand cmd) =>
+        !string.IsNullOrWhiteSpace(cmd.IMDB_ID) || cmd.TMDB_ID > 0 || cmd.TVDB_ID > 0;
 }
 
 public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, TorznabMediaSearchResponseDTO>
@@ -86,7 +81,8 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, T
 
     public async Task<TorznabMediaSearchResponseDTO> ExecuteAsync(
         SearchTvShowCommand command,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var episodes = await LoadEpisodesAsync(command, cancellationToken);
 
@@ -111,15 +107,15 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, T
 
     private async Task<List<PlexTvShowEpisode>> LoadEpisodesAsync(
         SearchTvShowCommand command,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         // Base query with required navigation properties for mapping
-        var baseQuery = _dbContext.PlexTvShowEpisodes
-            .AsNoTracking()
+        var baseQuery = _dbContext
+            .PlexTvShowEpisodes.AsNoTracking()
             .Include(x => x.TvShowSeason)
             .Include(x => x.TvShow)
             .Include(e => e.MediaDataList)
-                .ThenInclude(x => x.Parts)
             .AsQueryable();
 
         // If no specific season/episode requested and query is empty, return a paged list
@@ -146,9 +142,7 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, T
             .Where(e => e.TvShowSeason!.SeasonNumber == command.Season)
             .Where(e => e.EpisodeNumber == command.Episode);
 
-        return await baseQuery
-            .OrderBy(e => e.Id)
-            .ToListAsync(cancellationToken);
+        return await baseQuery.OrderBy(e => e.Id).ToListAsync(cancellationToken);
     }
 
     private IEnumerable<TorznabItem> MapEpisodeToItems(PlexTvShowEpisode episode)
@@ -169,25 +163,27 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, T
         }
 
         foreach (var mediaData in episode.MediaDataList)
-        foreach (var part in mediaData.Parts)
         {
-            var url = BuildTorrentUrl(episode, mediaData, part);
+            var url = BuildTorrentUrl(episode, mediaData);
 
-            _log.Here().Debug(
-                "Generated torrent URL for PlexTvShowEpisodeMediaDataPartId {PlexTvShowEpisodeMediaDataPartId}: {Url}",
-                part.Id, url);
+            _log.Here()
+                .Debug(
+                    "Generated torrent URL for PlexTvShowEpisodeMediaDataId {PlexTvShowEpisodeMediaDataId}: {Url}",
+                    mediaData.Id,
+                    url
+                );
 
             var item = new TorznabItem
             {
-                Title = Path.GetFileName(part.File),
+                Title = mediaData.GetFileName,
                 PubDate = episode.AddedAt.ToString("R"),
                 Guid = new TorznabGuid { Value = url },
                 Link = url,
-                Size = part.Size,
+                Size = mediaData.Size,
                 Enclosure = new TorznabEnclosure
                 {
                     Url = url,
-                    Length = part.Size,
+                    Length = mediaData.Size,
                     Type = "application/x-bittorrent",
                 },
             };
@@ -213,16 +209,16 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, T
         }
     }
 
-    private static string BuildTorrentUrl(PlexTvShowEpisode episode, PlexTvShowEpisodeMediaData mediaData, PlexTvShowEpisodeMediaDataPart part)
-        => new TorrentMetadataDTO
+    private static string BuildTorrentUrl(PlexTvShowEpisode episode, PlexTvShowEpisodeMediaData mediaData) =>
+        new TorrentMetadataDTO
         {
             Type = PlexMediaType.Episode,
             MediaId = episode.Id,
             DataId = mediaData.Id,
-            PartId = part.Id,
-            PartPlexId = part.PlexId,
+            PartId = mediaData.Id,
+            PartPlexId = mediaData.PlexMediaId,
             Quality = mediaData.Quality,
-            LibraryId = part.PlexLibraryId,
-            ServerId = part.PlexServerId,
+            LibraryId = mediaData.PlexLibraryId,
+            ServerId = mediaData.PlexServerId,
         }.ToUrl();
 }

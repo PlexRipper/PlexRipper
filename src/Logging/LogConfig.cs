@@ -13,7 +13,9 @@ namespace Reaparr.Logging;
 public class LogConfig
 {
     public static string FileName => nameof(FileName);
+
     public static string FilePath => nameof(FilePath);
+
     public static string MethodName => nameof(MethodName);
 
     public static string LineNumber => nameof(LineNumber);
@@ -84,16 +86,4 @@ public class LogConfig
             )
             .MinimumLevel.Is(minimumLogLevel)
             .CreateLogger();
-
-    public ILogger CreateLogInstance<T>()
-        where T : class => GetLogger().ForContext<T>();
-
-    public ILogger CreateLogInstance<T>(LogEventLevel minimumLogLevel)
-        where T : class => GetLogger(minimumLogLevel).ForContext<T>();
-
-    /// <summary>
-    /// Returns a new typed <see cref="ILogger"/> instance.
-    /// </summary>
-    /// <returns></returns>
-    public ILogger CreateLogInstance(Type classType) => GetLogger().ForContext(classType);
 }

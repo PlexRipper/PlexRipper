@@ -58,7 +58,7 @@ public class DbContextExtensionsPlexAccountUnitTests : BaseUnitTest
         var server = db.PlexServers.First();
 
         var nonMain = FakeData.GetPlexAccount(seed).Generate();
-        UpdateInitProperty(nonMain, nameof(PlexAccount.IsMain), false);
+        nonMain.UpdateInitProperty(nameof(PlexAccount.IsMain), false);
         db.PlexAccounts.Add(nonMain);
         await db.SaveChangesAsync(CancellationToken);
 

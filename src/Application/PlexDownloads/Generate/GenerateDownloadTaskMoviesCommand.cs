@@ -102,8 +102,15 @@ public class GenerateDownloadTaskMoviesCommandHandler : ICommandHandler<Generate
                     continue;
                 }
 
-                // Map movieData to DownloadTaskMovieFile and add to movieDownloadTask
-                movieDownloadTask.Children.AddRange(movieData.MapToDownloadTask(plexMovie, request));
+                // Get all parts for the selected media (multi-part movies have multiple parts with the same PlexMediaId)
+                var allPartsForSelectedMedia = plexMovie
+                    .MediaDataList.Where(x => x.PlexMediaId == movieData.PlexMediaId)
+                    .ToList();
+
+                // Map all parts to DownloadTaskMovieFile and add to movieDownloadTask
+                movieDownloadTask.Children.AddRange(
+                    allPartsForSelectedMedia.Select(x => x.MapToDownloadTask(plexMovie, request))
+                );
 
                 movieDownloadTask.Calculate();
 

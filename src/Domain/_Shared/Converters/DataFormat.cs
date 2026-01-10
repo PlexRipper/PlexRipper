@@ -6,7 +6,7 @@ public static class DataFormat
 {
     private static readonly NumberFormatInfo _numberFormat = NumberFormatInfo.InvariantInfo;
 
-    private static readonly ILogger _log = new LogConfig().CreateLogInstance(typeof(DataFormat));
+    private static readonly ILogger _log = LogFactory.Create(typeof(DataFormat));
 
     /// <summary>
     /// Format file size or downloaded size string.

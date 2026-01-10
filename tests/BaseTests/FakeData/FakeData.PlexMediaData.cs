@@ -7,22 +7,22 @@ public static partial class FakeData
         faker
             .StrictMode(true)
             .Ignore(x => x.Id)
-            .RuleFor(x => x.PlexId, f => f.Random.Long(1))
-            .RuleFor(x => x.Bitrate, f => f.Random.Int(1900, 2030))
-            .RuleFor(x => x.Width, f => f.Random.Int(240, 10000))
-            .RuleFor(x => x.Height, f => f.Random.Int(240, 10000))
-            .RuleFor(x => x.VideoFrameRate, _ => "24p")
-            .RuleFor(x => x.VideoProfile, _ => "high")
-            .RuleFor(x => x.AudioCodec, _ => "dca")
-            .RuleFor(x => x.AudioProfile, _ => "dts")
-            .RuleFor(x => x.AspectRatio, f => f.Random.Float(1, 2))
+            .RuleFor(x => x.PlexMediaId, _ => GetUniqueNumber())
+            .RuleFor(x => x.PlexPartId, _ => GetUniqueNumber())
             .RuleFor(x => x.VideoCodec, f => f.System.FileType())
-            .RuleFor(x => x.AudioChannels, f => f.Random.Int(2, 5))
-            .RuleFor(x => x.RawVideoResolution, f => f.PickRandom("sd", "720p", "1080p"))
-            .RuleFor(x => x.Quality, (_, x) => x.RawVideoResolution.ToVideoQuality())
+            .RuleFor(x => x.AudioCodec, _ => "dca")
+            .RuleFor(x => x.VideoResolution, f => f.PickRandom("sd", "720p", "1080p"))
+            .RuleFor(x => x.Quality, (_, x) => x.VideoResolution.ToVideoQuality())
             .RuleFor(x => x.Duration, f => f.Random.Int(50000, 55124400))
             .RuleFor(x => x.Container, f => f.System.FileType())
-            .RuleFor(x => x.HasVoiceActivity, f => f.Random.Bool())
+            .RuleFor(x => x.Source, _ => ReleaseSource.WebDl)
+            .RuleFor(x => x.NeedsGeneratedName, _ => false)
+            .RuleFor(x => x.GeneratedNameSyncedAt, _ => DateTime.UtcNow)
+            .RuleFor(x => x.OriginalFilename, f => f.System.FileName("video"))
+            .RuleFor(x => x.GeneratedFilename, _ => string.Empty)
+            .RuleFor(x => x.RatingKey, f => f.Random.Int(1, 100000))
+            .RuleFor(x => x.Key, _ => DownloadFileUrl)
+            .RuleFor(x => x.Size, _ => 50 * 1024)
             .Ignore(x => x.PlexServerId)
             .Ignore(x => x.PlexServer)
             .Ignore(x => x.PlexLibraryId)
@@ -42,9 +42,7 @@ public static partial class FakeData
     public static Faker<PlexMovieMediaData> GetPlexMovieMediaData(Seed seed, Action<FakeDataConfig>? options = null)
     {
         var config = FakeDataConfig.FromOptions(options);
-        return _plexMovieMediaData
-            .RuleFor(x => x.Parts, _ => GetPlexMovieMediaDataPart(seed).Generate(config.IncludeMultiPartMovies ? 2 : 1))
-            .UseSeed(seed.Next());
+        return _plexMovieMediaData.UseSeed(seed.Next());
     }
 
     public static Faker<PlexTvShowEpisodeMediaData> GetPlexTvShowEpisodeMediaData(
@@ -53,11 +51,6 @@ public static partial class FakeData
     )
     {
         var config = FakeDataConfig.FromOptions(options);
-        return _plexTvShowEpisodeMediaData
-            .RuleFor(
-                x => x.Parts,
-                _ => GetPlexTvShowEpisodeMediaDataPart(seed).Generate(config.IncludeMultiPartEpisodes ? 2 : 1)
-            )
-            .UseSeed(seed.Next());
+        return _plexTvShowEpisodeMediaData.UseSeed(seed.Next());
     }
 }

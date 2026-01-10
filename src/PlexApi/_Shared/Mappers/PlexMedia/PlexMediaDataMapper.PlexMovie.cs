@@ -29,7 +29,7 @@ public static partial class PlexMediaDataMapper
             UpdatedAt = source.UpdatedAt,
 
             Type = PlexMediaType.None,
-            Key = int.Parse(source.RatingKey),
+            Key = source.RatingKey,
             MetaDataKey = RetrieveMetaDataKey(source),
             Studio = source.Studio,
             Summary = source.Summary,
@@ -43,7 +43,7 @@ public static partial class PlexMediaDataMapper
             Countries = source.Country.ToPlexCountry(),
             Actors = source.Role.ToPlexActor(),
             Genres = source.Genre.ToPlexGenre(),
-            MediaDataList = source.Media.ToMovieMediaDataList(),
+            MediaDataList = source.Media.ToMovieMediaDataList(source),
 
             // Ignore the following
             FullTitle = string.Empty,
@@ -52,123 +52,45 @@ public static partial class PlexMediaDataMapper
             FullBannerUrl = string.Empty,
         };
 
-    public static ICollection<PlexMovieMediaData> ToMovieMediaDataList(this List<LibraryMediaItemMediaDTO> source) =>
-        source.Select(x => x.ToMovieMediaDataList()).ToList();
+    public static ICollection<PlexMovieMediaData> ToMovieMediaDataList(
+        this List<LibraryMediaItemMediaDTO> source,
+        LibraryMediaItemDTO root
+    ) => source.SelectMany(x => x.ToMovieMediaDataList(root)).ToList();
 
-    public static PlexMovieMediaData ToMovieMediaDataList(this LibraryMediaItemMediaDTO source) =>
-        new()
+    public static ICollection<PlexMovieMediaData> ToMovieMediaDataList(
+        this LibraryMediaItemMediaDTO source,
+        LibraryMediaItemDTO root
+    ) => source.Parts.Select(part => part.ToPlexMovieModel(source, root)).ToList();
+
+    public static PlexMovieMediaData ToPlexMovieModel(
+        this LibraryMediaItemPartDTO source,
+        LibraryMediaItemMediaDTO mediaItem,
+        LibraryMediaItemDTO root
+    )
+    {
+        var fileName = source.File.GetFileName();
+        return new PlexMovieMediaData
         {
             Id = 0,
-            PlexId = source.Id,
-            Duration = source.Duration,
-            Bitrate = source.Bitrate,
-            Width = source.Width,
-            Height = source.Height,
-            AspectRatio = source.AspectRatio,
-            AudioChannels = source.AudioChannels,
-            AudioCodec = source.AudioCodec,
-            VideoCodec = source.VideoCodec,
-            RawVideoResolution = source.VideoResolution,
-            Quality = source.VideoResolution.ToVideoQuality(),
-            Container = source.Container,
-            VideoFrameRate = source.VideoFrameRate,
-            VideoProfile = source.VideoProfile,
-            AudioProfile = source.AudioProfile,
-            HasVoiceActivity = source.HasVoiceActivity,
-            Parts = source.Parts.ToPlexMovieModel(),
-
-            // Ignore the following
-            PlexLibraryId = 0,
-            PlexServerId = 0,
-            PlexMovieId = 0,
-        };
-
-    public static ICollection<PlexMovieMediaDataPart> ToPlexMovieModel(this List<LibraryMediaItemPartDTO> source) =>
-        source.Select(x => x.ToPlexMovieModel()).ToList();
-
-    public static PlexMovieMediaDataPart ToPlexMovieModel(this LibraryMediaItemPartDTO source) =>
-        new()
-        {
-            Id = 0,
-            PlexId = source.Id,
-            Accessible = source.Accessible,
-            Exists = source.Exists,
+            PlexMediaId = mediaItem.Id,
+            PlexPartId = source.Id,
             Key = source.Key,
-            Indexes = source.Indexes,
             Duration = source.Duration,
-            File = source.File,
+            OriginalFilename = fileName,
+            Source = mediaItem.DetermineReleaseSource(),
             Size = source.Size,
             Container = source.Container,
-            VideoProfile = source.VideoProfile,
-            AudioProfile = source.AudioProfile,
-            Streams = source.Stream.ToPlexMovieModel(),
+            RatingKey = root.RatingKey,
+            Quality = mediaItem.VideoResolution.ToVideoQuality(),
+            VideoCodec = mediaItem.VideoCodec,
+            VideoResolution = mediaItem.VideoResolution,
+            AudioCodec = mediaItem.AudioCodec,
+            NeedsGeneratedName = !fileName.IsValidMediaFileName(),
 
             // Ignore the following
             PlexLibraryId = 0,
             PlexServerId = 0,
             PlexMovieId = 0,
-            PlexMovieMediaDataId = 0,
         };
-
-    public static ICollection<PlexMovieMediaDataStream> ToPlexMovieModel(this List<LibraryMediaItemStreamDTO> source) =>
-        source.Select(x => x.ToPlexMovieModel()).ToList();
-
-    public static PlexMovieMediaDataStream ToPlexMovieModel(this LibraryMediaItemStreamDTO source) =>
-        new()
-        {
-            Id = 0,
-            PlexId = source.Id,
-            StreamType = source.StreamType,
-            Default = source.Default,
-            Codec = source.Codec,
-            Index = source.Index,
-            Bitrate = source.Bitrate,
-            Language = source.Language,
-            LanguageTag = source.LanguageTag,
-            LanguageCode = source.LanguageCode,
-            DOVIBLCompatID = source.DOVIBLCompatID,
-            DOVIBLPresent = source.DOVIBLPresent,
-            DOVIELPresent = source.DOVIELPresent,
-            DOVILevel = source.DOVILevel,
-            DOVIPresent = source.DOVIPresent,
-            DOVIProfile = source.DOVIProfile,
-            DOVIRPUPresent = source.DOVIRPUPresent,
-            DOVIVersion = source.DOVIVersion,
-            BitDepth = source.BitDepth,
-            ChromaLocation = source.ChromaLocation,
-            ChromaSubsampling = source.ChromaSubsampling,
-            CodedHeight = source.CodedHeight,
-            CodedWidth = source.CodedWidth,
-            ColorPrimaries = source.ColorPrimaries,
-            ColorRange = source.ColorRange,
-            ColorSpace = source.ColorSpace,
-            ColorTrc = source.ColorTrc,
-            FrameRate = source.FrameRate,
-            Height = source.Height,
-            Level = source.Level,
-            Original = source.Original,
-            HasScalingMatrix = source.HasScalingMatrix,
-            Profile = source.Profile,
-            ScanType = source.ScanType,
-            RefFrames = source.RefFrames,
-            Width = source.Width,
-            DisplayTitle = source.DisplayTitle,
-            ExtendedDisplayTitle = source.ExtendedDisplayTitle,
-            Selected = source.Selected,
-            Forced = source.Forced,
-            Channels = source.Channels,
-            AudioChannelLayout = source.AudioChannelLayout,
-            SamplingRate = source.SamplingRate,
-            CanAutoSync = source.CanAutoSync,
-            HearingImpaired = source.HearingImpaired,
-            Dub = source.Dub,
-            Title = source.Title,
-
-            // Ignore the following
-            PlexLibraryId = 0,
-            PlexServerId = 0,
-            PlexMovieId = 0,
-            PlexMovieMediaDataId = 0,
-            PlexMovieMediaDataPartId = 0,
-        };
+    }
 }

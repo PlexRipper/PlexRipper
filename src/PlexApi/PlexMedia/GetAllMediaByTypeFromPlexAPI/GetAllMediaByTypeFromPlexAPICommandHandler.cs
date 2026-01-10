@@ -209,36 +209,4 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
 
         return Result.Ok(mediaDataList.Select(x => x.ToMediaItemDTO()).ToList());
     }
-
-    public async Task<Result<List<LibraryMediaItemDTO>>> GetDetailMetadataByRatingKeysAsync(
-        IPlexAPI client,
-        string[] ratingKeys
-    )
-    {
-        if (ratingKeys.Length == 0)
-            return ResultExtensions.IsEmpty(nameof(ratingKeys)).LogError();
-
-        var response = await client
-            .Content.GetMetadataItemAsync(new GetMetadataItemRequest { Ids = ratingKeys.ToList() })
-            .ToResponse();
-
-        if (response.IsFailed)
-        {
-            _log.Here()
-                .Error(
-                    "Failed to get metadata for rating keys: {RatingKeys}. Error: {Error}",
-                    string.Join(",", ratingKeys),
-                    response.Errors
-                );
-            return response.ToResult().LogError();
-        }
-
-        var metaDataListResult = Result.Try(
-            (() => response.Value.MediaContainerWithMetadata?.MediaContainer?.Metadata ?? [])
-        );
-        if (metaDataListResult.IsFailed)
-            return metaDataListResult.LogError();
-
-        return Result.Ok(metaDataListResult.Value.Select(x => x.ToMediaItemDTO()).ToList());
-    }
 }

@@ -3,6 +3,7 @@ using LukeHagar.PlexAPI.SDK.Models.Components;
 using NodaTime;
 using Reaparr.PlexApi;
 using Stream = LukeHagar.PlexAPI.SDK.Models.Components.Stream;
+using StreamType = LukeHagar.PlexAPI.SDK.Models.Components.StreamType;
 
 namespace Reaparr.BaseTests;
 
@@ -63,7 +64,7 @@ public partial class FakePlexApiData
 
     private static readonly Faker<Media> _getLibrarySectionsAllMedia = new Faker<Media>()
         .StrictMode(true)
-        .RuleFor(l => l.Id, f => f.Random.Long(100000))
+        .RuleFor(l => l.Id, f => GetUniqueNumber())
         .RuleFor(l => l.Duration, f => f.Random.Int(1))
         .RuleFor(l => l.Bitrate, f => f.Random.Int(1))
         .RuleFor(l => l.Width, f => f.Random.Int(1))
@@ -88,7 +89,7 @@ public partial class FakePlexApiData
 
     private static readonly Faker<Part> _getLibrarySectionsAllPartFaker = new Faker<Part>()
         .StrictMode(true)
-        .RuleFor(l => l.Id, f => f.Random.Long(100000))
+        .RuleFor(l => l.Id, f => GetUniqueNumber())
         .RuleFor(l => l.Key, f => f.Random.Uuid().ToString())
         .RuleFor(l => l.Duration, f => f.Random.Int(1))
         .RuleFor(l => l.File, f => f.Lorem.Word())
@@ -105,8 +106,8 @@ public partial class FakePlexApiData
 
     private static readonly Faker<Stream> _getLibrarySectionsAllStreamFaker = new Faker<Stream>()
         .StrictMode(true)
-        .RuleFor(x => x.Id, f => f.Random.Long(1))
-        .RuleFor(x => x.StreamType, f => f.Random.Long(1, 3)) // 1: Video, 2: Audio, 3: Subtitle
+        .RuleFor(x => x.Id, f => GetUniqueNumber())
+        .RuleFor(x => x.StreamType, f => f.PickRandom<StreamType>())
         .RuleFor(x => x.Format, f => f.System.CommonFileExt())
         .RuleFor(x => x.Default, f => f.Random.Bool())
         .RuleFor(x => x.Codec, f => f.Random.Word())

@@ -13,7 +13,7 @@ public partial class FakePlexApiData
         return new Faker<PostUsersSignInDataUserPlexAccount>()
             .StrictMode(true)
             .UseSeed(seed.Next())
-            .RuleFor(x => x.Id, f => f.Random.Number(99999999))
+            .RuleFor(x => x.Id, _ => GetUniqueNumber())
             .RuleFor(x => x.Uuid, f => f.Random.Guid().ToString())
             .RuleFor(x => x.Username, f => f.Internet.UserName())
             .RuleFor(x => x.Title, f => f.Internet.UserName())

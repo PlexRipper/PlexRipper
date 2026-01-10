@@ -17,7 +17,7 @@ public partial class FakeData
             .RuleFor(x => x.IsEnabled, _ => true)
             .RuleFor(x => x.IsValidated, _ => true)
             .RuleFor(x => x.ValidatedAt, f => f.Date.Recent())
-            .RuleFor(x => x.PlexId, f => f.Random.Long(1, 10000))
+            .RuleFor(x => x.PlexId, f => GetUniqueNumber())
             .RuleFor(x => x.Uuid, f => f.Random.Guid().ToString())
             .RuleFor(x => x.ClientId, f => f.Random.Guid().ToString())
             .RuleFor(x => x.Title, f => f.Internet.UserName())

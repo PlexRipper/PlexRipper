@@ -277,7 +277,7 @@ public class DownloadTaskFactoryGenerateTvShowEpisodesDownloadTasksAsyncUnitTest
         tvShowDownloadTask.ShouldNotBeNull();
 
         // Copy tv-show key over to the download task
-        UpdateInitProperty(tvShowDownloadTask, nameof(tvShowDownloadTask.PlexId), plexTvShow.Key);
+        tvShowDownloadTask.UpdateInitProperty(nameof(tvShowDownloadTask.PlexId), plexTvShow.Key);
 
         // Copy season key over to the download task
         var season = plexTvShow.Seasons.FirstOrDefault();
@@ -285,14 +285,14 @@ public class DownloadTaskFactoryGenerateTvShowEpisodesDownloadTasksAsyncUnitTest
         season.ShouldNotBeNull();
         seasonDownloadTask.ShouldNotBeNull();
 
-        UpdateInitProperty(seasonDownloadTask, nameof(seasonDownloadTask.PlexId), season.Key);
+        seasonDownloadTask.UpdateInitProperty(nameof(seasonDownloadTask.PlexId), season.Key);
 
         // Copy episode key over to the download task
         var episode = season.Episodes.FirstOrDefault();
         var episodeDownloadTask = seasonDownloadTask.Children.FirstOrDefault();
         episode.ShouldNotBeNull();
         episodeDownloadTask.ShouldNotBeNull();
-        UpdateInitProperty(episodeDownloadTask, nameof(episodeDownloadTask.PlexId), episode.Key);
+        episodeDownloadTask.UpdateInitProperty(nameof(episodeDownloadTask.PlexId), episode.Key);
 
         await dbContext.SaveChangesAsync(CancellationToken);
 

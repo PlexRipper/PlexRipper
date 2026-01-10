@@ -9,7 +9,7 @@ namespace Reaparr.AppHost;
 /// </summary>
 public class Program
 {
-    private static readonly Serilog.ILogger _log = new LogConfig().CreateLogInstance(typeof(Program));
+    private static readonly Serilog.ILogger _log = LogFactory.Create<Program>();
 
     /// <summary>
     ///  The main method entry point for the application.
@@ -21,7 +21,9 @@ public class Program
         {
             _log.Here().Information("Starting Reaparr!");
 
-            LogManager.SetupLogging(EnvironmentExtensions.GetLogLevel());
+            // Skip logger setup in integration test mode to preserve test logger
+            if (!EnvironmentExtensions.IsIntegrationTestMode())
+                LogFactory.SetupLogging(EnvironmentExtensions.GetLogLevel());
             FluentResultConfiguration.Setup();
 
             _log.Here()
@@ -71,7 +73,7 @@ public class Program
         finally
         {
             // Ensure to flush and stop internal timers/threads before application-exit (Avoid segmentation fault on Linux)
-            LogManager.CloseAndFlush();
+            LogFactory.CloseAndFlush();
         }
     }
 

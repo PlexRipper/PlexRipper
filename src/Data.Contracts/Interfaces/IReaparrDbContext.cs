@@ -40,10 +40,6 @@ public interface IReaparrDbContext : IDisposable
 
     public DbSet<PlexMovieMediaData> PlexMovieData { get; }
 
-    public DbSet<PlexMovieMediaDataPart> PlexMovieDataParts { get; }
-
-    public DbSet<PlexMovieMediaDataStream> PlexMovieDataStreams { get; }
-
     #endregion
 
     #region PlexTvShow
@@ -59,10 +55,6 @@ public interface IReaparrDbContext : IDisposable
     public DbSet<PlexTvShowEpisode> PlexTvShowEpisodes { get; }
 
     public DbSet<PlexTvShowEpisodeMediaData> PlexTvShowEpisodeData { get; }
-
-    public DbSet<PlexTvShowEpisodeMediaDataPart> PlexTvShowEpisodeDataParts { get; }
-
-    public DbSet<PlexTvShowEpisodeMediaDataStream> PlexTvShowEpisodeDataStreams { get; }
 
     #endregion
 

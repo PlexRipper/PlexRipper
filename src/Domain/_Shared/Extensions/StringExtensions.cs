@@ -48,6 +48,17 @@ public static partial class StringExtensions
         return Path.Combine(GetProperCapitalization(dirInfo), fileName);
     }
 
+    public static string CapitalizeFirst(this string text)
+    {
+        if (string.IsNullOrEmpty(text))
+            return text;
+
+        if (text.Length == 1)
+            return text.ToUpperInvariant();
+
+        return char.ToUpperInvariant(text[0]) + text[1..];
+    }
+
     public static string GeneratePassword(
         int passwordLength = 16,
         bool includeLowercase = true,

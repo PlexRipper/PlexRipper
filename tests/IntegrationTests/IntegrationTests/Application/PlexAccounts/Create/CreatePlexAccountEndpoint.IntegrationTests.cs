@@ -82,7 +82,10 @@ public class CreatePlexAccountEndpointIntegrationTests : BaseIntegrationTests
         await WaitForDatabaseConditionAsync(
             () =>
             {
-                var account = container.DbContext.PlexAccounts.Include(x => x.PlexAccountLibraries).FirstOrDefault();
+                var account = container
+                    .DbContext.PlexAccounts.AsNoTracking()
+                    .Include(x => x.PlexAccountLibraries)
+                    .FirstOrDefault();
                 return account?.PlexAccountLibraries.Count == libraryCount;
             },
             maxRetries: 30, // Increased to 30 retries (15 seconds total)

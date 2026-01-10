@@ -1,4 +1,3 @@
-using System.Reflection;
 using FastEndpoints;
 using Microsoft.Extensions.DependencyInjection;
 using Reaparr.Application.Contracts;
@@ -12,7 +11,6 @@ namespace Reaparr.BaseTests;
 public partial class BaseUnitTest
 {
     protected readonly ITestOutputHelper Output;
-    protected readonly LogEventLevel LogEventLevel;
 
     protected readonly ILogger Log;
 
@@ -29,39 +27,18 @@ public partial class BaseUnitTest
     protected BaseUnitTest(ITestOutputHelper output, LogEventLevel logEventLevel = LogEventLevel.Verbose)
     {
         Output = output;
-        LogEventLevel = logEventLevel;
 
         EnvironmentExtensions.EnableUnmaskedLog(true);
 
-        LogManager.SetupLogging(logEventLevel);
+        // Pass the TestLogConfig to LogFactory so all application logs go to test output
+        var testLogConfig = new TestLogConfig(output);
+        LogFactory.SetupLogging(logEventLevel, testLogConfig);
 
         BogusExtensions.Setup();
 
-        var testLogConfig = new TestLogConfig(output);
-        Log = testLogConfig.CreateLogInstance<BaseUnitTest>(LogEventLevel);
+        Log = LogFactory.Create<BaseUnitTest>();
 
         Mock = AutoMock.GetStrict(SetDefaultBuilder);
-    }
-
-    /// <summary>
-    /// Useful for updating private, protected or init properties on an object.
-    /// </summary>
-    /// <param name="obj"></param>
-    /// <param name="propertyName"></param>
-    /// <param name="newValue"></param>
-    /// <typeparam name="T"></typeparam>
-    /// <exception cref="InvalidOperationException"></exception>
-    protected static void UpdateInitProperty<T>(T obj, string propertyName, object newValue)
-    {
-        var property = obj
-            ?.GetType()
-            .GetProperty(propertyName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-        if (property == null || !property.CanWrite)
-        {
-            throw new InvalidOperationException($"Property '{propertyName}' not found or cannot be written to.");
-        }
-
-        property.SetValue(obj, newValue);
     }
 
     protected T SetupEndpointUnitTest<T>()

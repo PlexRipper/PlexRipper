@@ -82,4 +82,38 @@ public static partial class PlexMediaDataMapper
 
         return parentKey;
     }
+
+    private static ReleaseSource DetermineReleaseSource(this LibraryMediaItemMediaDTO mediaData)
+    {
+        var container = mediaData.Container.ToLowerInvariant();
+        var audioCodec = mediaData.AudioCodec.ToLowerInvariant();
+        var audioProfile = mediaData.AudioProfile.ToLowerInvariant();
+
+        // DVD
+        if (container is "vob" or "mpg" or "mpeg")
+            return ReleaseSource.DVD;
+
+        // Blu-ray (container-level)
+        if (container is "m2ts" or "bdmv")
+        {
+            var isLosslessAudio =
+                audioCodec is "truehd" or "dts-hd ma" or "dts-hd.ma"
+                || (audioCodec == "dca" && audioProfile.Contains("ma"));
+
+            return isLosslessAudio ? ReleaseSource.BluRayRemux : ReleaseSource.BluRay;
+        }
+
+        // HDTV / broadcast
+        if (container is "ts" or "mpegts")
+            return ReleaseSource.HDTV;
+
+        // Web-based containers
+        if (container is "mp4" or "mov" or "webm" or "mkv")
+        {
+            return mediaData.OptimizedForStreaming ? ReleaseSource.WebDl : ReleaseSource.WebRip;
+        }
+
+        // Fallback
+        return ReleaseSource.WebRip;
+    }
 }

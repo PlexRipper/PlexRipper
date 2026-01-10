@@ -17,7 +17,7 @@ public class ValidatePlexCredentialsEndpointUnitTests : BaseUnitTest
         var testAccountDTO = FakeData.GetPlexAccount(seed).Generate().ToDTO();
 
         var testAccountResponse = testAccountDTO.ToModel();
-        UpdateInitProperty(testAccountResponse, nameof(testAccountResponse.ValidatedAt), DateTime.UtcNow);
+        testAccountResponse.UpdateInitProperty(nameof(testAccountResponse.ValidatedAt), DateTime.UtcNow);
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<PlexSignInCommand>(), It.IsAny<CancellationToken>()))

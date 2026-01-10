@@ -9,10 +9,5 @@ namespace FluentResults;
 
 public static partial class ResultExtensions
 {
-    private static ILogger _log = new LogConfig().CreateLogInstance(typeof(ResultExtensions));
-
-    public static void SetLogger(ILogger log)
-    {
-        _log = log.ForContext(typeof(ResultExtensions));
-    }
+    private static readonly ILogger _log = LogFactory.Create(typeof(ResultExtensions));
 }

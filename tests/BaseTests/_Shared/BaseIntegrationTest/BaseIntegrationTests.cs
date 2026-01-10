@@ -18,8 +18,9 @@ public abstract class BaseIntegrationTests
         // Ensure that the test output helper is set first
         var testLogConfig = new TestLogConfig(output);
 
-        LogManager.SetupLogging(logLevel);
-        _log = testLogConfig.CreateLogInstance<BaseIntegrationTests>();
+        // Pass the TestLogConfig to LogFactory so all application logs go to test output
+        LogFactory.SetupLogging(logLevel, testLogConfig);
+        _log = LogFactory.Create<BaseIntegrationTests>();
 
         BogusExtensions.Setup();
     }
@@ -37,6 +38,10 @@ public abstract class BaseIntegrationTests
 
             await Task.Delay(delayMs);
         }
+
+        throw new TimeoutException(
+            $"Database condition was not met after {maxRetries} retries (total wait: {maxRetries * delayMs}ms)"
+        );
     }
 
     protected Task<BaseContainer> CreateContainer(int seed, Action<UnitTestDataConfig>? options = null) =>

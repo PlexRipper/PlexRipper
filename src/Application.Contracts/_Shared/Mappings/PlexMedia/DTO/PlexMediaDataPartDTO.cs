@@ -11,6 +11,4 @@ public class PlexMediaDataPartDTO
     public required long Size { get; init; }
 
     public required string Container { get; init; }
-
-    public required string VideoProfile { get; init; }
 }

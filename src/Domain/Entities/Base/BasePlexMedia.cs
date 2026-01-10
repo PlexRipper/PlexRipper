@@ -107,7 +107,6 @@ public class BasePlexMedia : BaseEntity
     /// <summary>
     /// Gets or sets the full title path
     /// E.g. tvShow/Season/Episode
-    /// TODO, might be better to remove this and make a getter for it.
     /// </summary>
     [Column(Order = 22)]
     public required string FullTitle { get; set; } = string.Empty;

@@ -100,19 +100,16 @@ public class TestConnectionToRadarrEndpoint
             var reason = httpResponse.ReasonPhrase ?? $"HTTP {(int)httpResponse.StatusCode}";
             _log.Here().Warning("Radarr connection test failed: {Reason}", reason);
             await SendTestResult(TestConnectionStatus.ConnectionFailed, ct);
-            return;
         }
         catch (TaskCanceledException e)
         {
             _log.Here().Error(e, "HTTP request to Radarr instance failed.");
             await SendTestResult(TestConnectionStatus.ConnectionFailed, ct);
-            return;
         }
         catch (HttpRequestException e)
         {
             _log.Here().Error(e, "HTTP request to Radarr instance failed.");
             await SendTestResult(TestConnectionStatus.ConnectionFailed, ct);
-            return;
         }
     }
 

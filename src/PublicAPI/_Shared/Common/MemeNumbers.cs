@@ -2,8 +2,8 @@ namespace Reaparr.PublicAPI;
 
 public static class MemeNumberGenerator
 {
-    private static readonly int[] MemeNumbers =
-    {
+    private static readonly int[] _memeNumbers =
+    [
         7, // lucky number
         13, // bad luck
         21, // blackjack or meme age
@@ -40,7 +40,7 @@ public static class MemeNumberGenerator
         5150, // insane
         2020, // cursed year
         2077, // cyberpunk prophecy
-    };
+    ];
 
-    public static int GetRandomMemeNumber() => MemeNumbers[Random.Shared.Next(MemeNumbers.Length)];
+    public static int GetRandomMemeNumber() => _memeNumbers[Random.Shared.Next(_memeNumbers.Length)];
 }

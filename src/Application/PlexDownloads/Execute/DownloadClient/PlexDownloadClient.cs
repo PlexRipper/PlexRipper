@@ -10,7 +10,7 @@ namespace Reaparr.Application;
 /// The PlexDownloadClient handles a single <see cref="DownloadTaskGeneric"/> at a time and
 /// manages the <see cref="DownloadWorker"/>s responsible for the multi-threaded downloading.
 /// </summary>
-public class PlexDownloadClient : IAsyncDisposable, IPlexDownloadClient
+public class PlexDownloadClient : IPlexDownloadClient
 {
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;

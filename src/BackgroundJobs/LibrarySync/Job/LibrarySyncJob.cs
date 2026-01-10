@@ -3,7 +3,6 @@ using Quartz;
 using Reaparr.Application.Contracts;
 using Reaparr.BackgroundJobs.Contracts;
 using Reaparr.Data.Contracts;
-using Reaparr.Domain;
 
 namespace Reaparr.BackgroundJobs;
 

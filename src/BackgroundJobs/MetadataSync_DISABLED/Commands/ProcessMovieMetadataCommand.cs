@@ -1,9 +1,7 @@
 using FastEndpoints;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
-using Reaparr.Domain;
 using Reaparr.PlexApi.Contracts;
 
 namespace Reaparr.BackgroundJobs;

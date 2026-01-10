@@ -1,5 +1,3 @@
-using Reaparr.Domain;
-
 namespace Reaparr.PublicAPI;
 
 public static class TorznabCategoryExtensions

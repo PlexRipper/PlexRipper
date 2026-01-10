@@ -39,18 +39,11 @@ public static partial class FakeData
             .Ignore(x => x.PlexTvShowEpisodeId)
             .Ignore(x => x.PlexTvShowEpisode);
 
-    public static Faker<PlexMovieMediaData> GetPlexMovieMediaData(Seed seed, Action<FakeDataConfig>? options = null)
-    {
-        var config = FakeDataConfig.FromOptions(options);
-        return _plexMovieMediaData.UseSeed(seed.Next());
-    }
+    public static Faker<PlexMovieMediaData> GetPlexMovieMediaData(Seed seed, Action<FakeDataConfig>? options = null) =>
+        _plexMovieMediaData.UseSeed(seed.Next());
 
     public static Faker<PlexTvShowEpisodeMediaData> GetPlexTvShowEpisodeMediaData(
         Seed seed,
         Action<FakeDataConfig>? options = null
-    )
-    {
-        var config = FakeDataConfig.FromOptions(options);
-        return _plexTvShowEpisodeMediaData.UseSeed(seed.Next());
-    }
+    ) => _plexTvShowEpisodeMediaData.UseSeed(seed.Next());
 }

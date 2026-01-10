@@ -103,7 +103,7 @@ public partial class FakePlexApiData
 
     private static readonly Faker<Media> _getMediaMetaDataMedia = new Faker<Media>()
         .StrictMode(true)
-        .RuleFor(l => l.Id, f => GetUniqueNumber())
+        .RuleFor(l => l.Id, _ => GetUniqueNumber())
         .RuleFor(l => l.Duration, f => f.Random.Int(1))
         .RuleFor(l => l.Bitrate, f => f.Random.Int(1))
         .RuleFor(l => l.Width, f => f.Random.Int(1))
@@ -130,7 +130,7 @@ public partial class FakePlexApiData
 
     private static readonly Faker<Part> _getMediaMetaDataPartFaker = new Faker<Part>()
         .StrictMode(true)
-        .RuleFor(l => l.Id, f => GetUniqueNumber())
+        .RuleFor(l => l.Id, _ => GetUniqueNumber())
         .RuleFor(l => l.Key, f => f.Random.Uuid().ToString())
         .RuleFor(l => l.Duration, f => f.Random.Int(1))
         .RuleFor(l => l.File, f => f.Lorem.Word())

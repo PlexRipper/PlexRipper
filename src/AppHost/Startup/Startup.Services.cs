@@ -14,7 +14,6 @@ using NSwag.Generation.Processors.Security;
 using Reaparr.Application;
 using Reaparr.Application.Contracts;
 using Reaparr.BackgroundJobs;
-using Reaparr.Data.Contracts;
 using Reaparr.Environment;
 using Reaparr.Identity;
 using Reaparr.Identity.Contracts;

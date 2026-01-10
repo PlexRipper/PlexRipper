@@ -4,9 +4,9 @@
     "net10.0": {
       "coverlet.collector": {
         "type": "Direct",
-        "requested": "[6.0.2, )",
-        "resolved": "6.0.2",
-        "contentHash": "bJShQ6uWRTQ100ZeyiMqcFlhP7WJ+bCuabUs885dJiBEzMsJMSFr7BOyeCw4rgvQokteGi5rKQTlkhfQPUXg2A=="
+        "requested": "[6.0.4, )",
+        "resolved": "6.0.4",
+        "contentHash": "lkhqpF8Pu2Y7IiN7OntbsTtdbpR1syMsm2F3IgX6ootA4ffRqWL5jF7XipHuZQTdVuWG/gVAAcf8mjk8Tz0xPg=="
       },
       "Microsoft.NET.Test.Sdk": {
         "type": "Direct",
@@ -1471,7 +1471,7 @@
           "FastEndpoints.Swagger": "[7.1.1, )",
           "Jason.Landbridge.Autofac.Extras.Quartz": "[9.0.3, )",
           "MessagePack": "[3.1.4, )",
-          "Polly": "[8.6.2, )",
+          "Polly": "[8.6.5, )",
           "Polly.Core": "[8.6.5, )",
           "Quartz.Serialization.SystemTextJson": "[3.15.1, )",
           "Reaparr.Application.Contracts": "[1.0.0, )",

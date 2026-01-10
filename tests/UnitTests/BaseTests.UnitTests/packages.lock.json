@@ -1477,7 +1477,7 @@
           "FastEndpoints.Swagger": "[7.1.1, )",
           "Jason.Landbridge.Autofac.Extras.Quartz": "[9.0.3, )",
           "MessagePack": "[3.1.4, )",
-          "Polly": "[8.6.2, )",
+          "Polly": "[8.6.5, )",
           "Polly.Core": "[8.6.5, )",
           "Quartz.Serialization.SystemTextJson": "[3.15.1, )",
           "Reaparr.Application.Contracts": "[1.0.0, )",

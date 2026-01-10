@@ -21,7 +21,7 @@ COPY ./src/AppHost/ClientApp/ ./
 RUN bun install && bun run generate --fail-on-error
    
 # Stage 2 - Build the .NET back-end
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:9.0 AS back-end
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0 AS back-end
 
 ARG VERSION
 ARG INFORMATIONAL_VERSION
@@ -84,7 +84,7 @@ RUN dotnet publish "AppHost.csproj" -c Release -o /app/publish \
     -p:UseAppHost=false
 
 # Stage 3 - Runtime Image
-FROM mcr.microsoft.com/dotnet/aspnet:9.0-alpine AS dotnet-runtime
+FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine AS dotnet-runtime
 
 # Stage 4 - Final Image with s6-overlay
 FROM ghcr.io/linuxserver/baseimage-alpine:3.20 AS final

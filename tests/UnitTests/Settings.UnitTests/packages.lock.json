@@ -1,7 +1,7 @@
 {
   "version": 1,
   "dependencies": {
-    "net9.0": {
+    "net10.0": {
       "CSharpier.MsBuild": {
         "type": "Direct",
         "requested": "[1.1.1, )",
@@ -186,7 +186,7 @@
         "contentHash": "oi25/gBEoUtAYEL5hGBtMmHkn+m1/bpZ6yH+mHFmFGb63hTarN8079mV9Vcpzr7bolUwC5d/Cxug8mSZdrXvxg==",
         "dependencies": {
           "FastEndpoints": "7.0.1",
-          "Microsoft.AspNetCore.Authentication.JwtBearer": "9.0.7"
+          "Microsoft.AspNetCore.Authentication.JwtBearer": "10.0.0-preview.6.25358.103"
         }
       },
       "FastEndpoints.Swagger": {
@@ -204,7 +204,7 @@
         "contentHash": "AJfLPbpBRdqtONQxmNnsvxmJnqtk8oQmcwbYBb2BnQPCy5VLXFkUu4zffyXOaQRcrqQH9I5kX9jgZ/EnJA2J9w==",
         "dependencies": {
           "Bogus": "35.6.3",
-          "Microsoft.AspNetCore.Mvc.Testing": "9.0.7",
+          "Microsoft.AspNetCore.Mvc.Testing": "10.0.0-preview.6.25358.103",
           "xunit.v3.extensibility.core": "3.0.0"
         }
       },
@@ -270,8 +270,8 @@
       },
       "Microsoft.AspNetCore.Authentication.JwtBearer": {
         "type": "Transitive",
-        "resolved": "9.0.7",
-        "contentHash": "lloN3XvIgXmdocfghzfszOHJb45OYR3fgOg/h536o+zNB2SmP3JrqeOieCBZ7sipgGcgbxP0boA+loVhdsJxWg==",
+        "resolved": "10.0.0-preview.6.25358.103",
+        "contentHash": "KKdxeVmZaVhaAmcKRFG2J5qbo3NwwbzmO1LGzM6LLm4UMcy8yOvI33mmrriLwa2xgguYt9RAk2zBgcpDBbohPw==",
         "dependencies": {
           "Microsoft.IdentityModel.Protocols.OpenIdConnect": "8.0.1"
         }

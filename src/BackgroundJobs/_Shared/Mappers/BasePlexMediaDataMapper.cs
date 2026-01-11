@@ -84,7 +84,13 @@ public static class BasePlexMediaDataMapper
         var releaseName = new StringBuilder();
         releaseName.Append(sanitizedTitle);
         releaseName.Append('.').Append(year);
-        releaseName.Append('.').Append(videoResolution.ToResolutionLabel());
+
+        // Only append resolution label if it's not empty
+        var resolutionLabel = videoResolution.ToResolutionLabel();
+        if (!string.IsNullOrWhiteSpace(resolutionLabel))
+        {
+            releaseName.Append('.').Append(resolutionLabel);
+        }
 
         if (source.ToFileNameSpec() is not null)
             releaseName.Append('.').Append(source.ToFileNameSpec());

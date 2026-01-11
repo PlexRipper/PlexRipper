@@ -52,9 +52,7 @@ public class CleanUpDownloadTaskFoldersUnitTests : BaseUnitTest<CleanUpDownloadT
 
         Mock.Mock<IDirectory>().Setup(x => x.Exists(It.IsAny<string>())).Returns(false).Verifiable(Times.Exactly(2));
 
-        Mock.Mock<IDirectory>()
-            .Setup(x => x.GetFileSystemEntries(It.IsAny<string>()))
-            .Verifiable(Times.Never);
+        Mock.Mock<IDirectory>().Setup(x => x.GetFileSystemEntries(It.IsAny<string>())).Verifiable(Times.Never);
 
         Mock.Mock<IDirectory>().Setup(x => x.Delete(It.IsAny<string>())).Verifiable(Times.Never);
 

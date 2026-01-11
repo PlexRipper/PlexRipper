@@ -39,7 +39,8 @@ public class DownloadTaskScheduler : IDownloadTaskScheduler
 
     public async Task<Result> StopDownloadTaskJob(
         DownloadTaskKey downloadTaskKey,
-        CancellationToken cancellationToken = default
+        CancellationToken cancellationToken = default,
+        bool waitForCompletion = true
     )
     {
         if (!downloadTaskKey.IsValid)
@@ -59,7 +60,10 @@ public class DownloadTaskScheduler : IDownloadTaskScheduler
         if (!stopResult)
             return Result.Fail($"Failed to stop {nameof(DownloadTaskGeneric)} with id {downloadTaskKey}").LogError();
 
-        await AwaitDownloadTaskJob(downloadTaskKey.Id, cancellationToken);
+        if (waitForCompletion)
+        {
+            await AwaitDownloadTaskJob(downloadTaskKey.Id, cancellationToken);
+        }
 
         return Result.Ok();
     }
@@ -70,7 +74,7 @@ public class DownloadTaskScheduler : IDownloadTaskScheduler
         if (!await _scheduler.IsJobRunning(jobKey))
             return;
 
-        await _scheduler.AwaitJobRunning(jobKey, cancellationToken);
+        await _scheduler.AwaitJobRunning(jobKey, cancellationToken, timeoutSeconds: 30);
     }
 
     public Task<bool> IsDownloading(DownloadTaskKey downloadTaskKey, CancellationToken cancellationToken = default)

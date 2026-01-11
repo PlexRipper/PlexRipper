@@ -31,18 +31,31 @@ public static class ISchedulerExtensions
     public static async Task AwaitJobRunning(
         this IScheduler scheduler,
         JobKey key,
-        CancellationToken cancellationToken = default
+        CancellationToken cancellationToken = default,
+        int timeoutSeconds = 30
     )
     {
-        while (!cancellationToken.IsCancellationRequested)
-        {
-            // Give it some time to start, keep 500ms between checks
-            await Task.Delay(500, cancellationToken);
-            var jobs = await scheduler.GetCurrentlyExecutingJobs(cancellationToken);
-            if (!jobs.Any(x => Equals(x.JobDetail.Key, key)))
-                break;
+        using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(timeoutSeconds));
+        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token);
 
-            await Task.Delay(500, cancellationToken);
+        try
+        {
+            while (!linkedCts.Token.IsCancellationRequested)
+            {
+                // Give it some time to start, keep 500ms between checks
+                await Task.Delay(500, linkedCts.Token);
+                var jobs = await scheduler.GetCurrentlyExecutingJobs(linkedCts.Token);
+                if (!jobs.Any(x => Equals(x.JobDetail.Key, key)))
+                    break;
+
+                await Task.Delay(500, linkedCts.Token);
+            }
+        }
+        catch (OperationCanceledException)
+            when (timeoutCts.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
+        {
+            // Timeout occurred, but we'll exit gracefully without throwing
+            // The job may still be running, but we don't want to block indefinitely
         }
     }
 

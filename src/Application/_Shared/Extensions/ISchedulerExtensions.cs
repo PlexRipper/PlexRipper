@@ -51,12 +51,10 @@ public static class ISchedulerExtensions
 
         try
         {
-            const int pollIntervalMs = 500;
+            const int pollIntervalMs = 200;
 
             while (!linkedCts.Token.IsCancellationRequested)
             {
-                await Task.Delay(pollIntervalMs, linkedCts.Token);
-
                 var executingJobs = await scheduler.GetCurrentlyExecutingJobs(linkedCts.Token);
                 var isJobStillRunning = executingJobs.Any(x => Equals(x.JobDetail.Key, key));
 

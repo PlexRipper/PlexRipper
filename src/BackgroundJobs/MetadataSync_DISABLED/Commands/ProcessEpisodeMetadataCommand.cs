@@ -52,8 +52,7 @@ public class ProcessEpisodeMetadataCommandHandler : ICommandHandler<ProcessEpiso
         using (var dbContext = await _dbContextFactory.CreateAsync())
         {
             ratingKeysToProcess = await dbContext
-                .PlexTvShowEpisodeData
-                .Where(m =>
+                .PlexTvShowEpisodeData.Where(m =>
                     m.NeedsGeneratedName && m.PlexServerId == command.ServerId && m.GeneratedNameSyncedAt == null
                 )
                 .Select(p => p.RatingKey)

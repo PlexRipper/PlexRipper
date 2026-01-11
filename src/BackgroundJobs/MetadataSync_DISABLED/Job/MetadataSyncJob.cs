@@ -67,7 +67,10 @@ public class MetadataSyncJob : IJob
             }
 
             // Process episodes
-            var episodeResult = await _commandExecutor.Send(new ProcessEpisodeMetadataCommand(serverId, serverName), ct);
+            var episodeResult = await _commandExecutor.Send(
+                new ProcessEpisodeMetadataCommand(serverId, serverName),
+                ct
+            );
             if (episodeResult.IsSuccess)
             {
                 processedCount += episodeResult.Value;
@@ -107,5 +110,4 @@ public class MetadataSyncJob : IJob
             _log.Here().Error(e, "Failed to sync metadata for server {ServerName} ({ServerId})", serverName, serverId);
         }
     }
-
 }

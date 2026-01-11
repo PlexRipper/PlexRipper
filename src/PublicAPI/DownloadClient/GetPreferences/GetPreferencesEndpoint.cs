@@ -8,7 +8,7 @@ public class GetPreferencesEndpoint : EndpointWithoutRequest<object>
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
-    public GetPreferencesEndpoint(ILogger logger,IReaparrDbContext dbContext)
+    public GetPreferencesEndpoint(ILogger logger, IReaparrDbContext dbContext)
     {
         _log = logger.ForContext<GetPreferencesEndpoint>();
         _dbContext = dbContext;
@@ -27,7 +27,7 @@ public class GetPreferencesEndpoint : EndpointWithoutRequest<object>
         _log.Here().DebugApiCall(HttpContext);
 
         var downloadFolder = await _dbContext.GetDownloadFolder();
-        
+
         // Normally qBittorrent returns a big JSON with settings
         // You only need a minimal subset that Sonarr expects
         var prefs = new

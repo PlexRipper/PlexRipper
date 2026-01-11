@@ -48,7 +48,7 @@ public class DownloadClientLoginEndpoint : Endpoint<DownloadClientLoginEndpointR
 
     public override async Task HandleAsync(DownloadClientLoginEndpointRequest req, CancellationToken ct)
     {
-         _log.Here().DebugApiCall(HttpContext);
+        _log.Here().DebugApiCall(HttpContext);
 
         var username = req.Username;
         var password = req.Password;
@@ -60,8 +60,10 @@ public class DownloadClientLoginEndpoint : Endpoint<DownloadClientLoginEndpointR
         }
 
         // Validate against IntegrationSettings
-        if (!string.Equals(username, _integrations.DownloadClientUsername, StringComparison.Ordinal) ||
-            !string.Equals(password, _integrations.DownloadClientPassword, StringComparison.Ordinal))
+        if (
+            !string.Equals(username, _integrations.DownloadClientUsername, StringComparison.Ordinal)
+            || !string.Equals(password, _integrations.DownloadClientPassword, StringComparison.Ordinal)
+        )
         {
             await Send.UnauthorizedAsync(ct);
             return;
@@ -78,7 +80,7 @@ public class DownloadClientLoginEndpoint : Endpoint<DownloadClientLoginEndpointR
             HttpOnly = true,
             Secure = isHttps,
             SameSite = isHttps ? SameSiteMode.None : SameSiteMode.Lax,
-            Expires = session.ExpiresAt
+            Expires = session.ExpiresAt,
         };
         HttpContext.Response.Cookies.Append("SID", session.Sid, cookieOptions);
 

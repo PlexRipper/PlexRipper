@@ -15,7 +15,7 @@ public record TorznabCapsResponseDTO
     public TorznabLimits Limits { get; set; } = new();
 
     [XmlElement("searching")]
-    public TorznabSearching? Searching { get; set; } = new();   
+    public TorznabSearching? Searching { get; set; } = new();
 
     [XmlArray("categories")]
     [XmlArrayItem("category")]
@@ -67,17 +67,14 @@ public record TorznabSearch
 
 public record TorznabCategory
 {
-    public TorznabCategory()
-    {
-        
-    }
-    
+    public TorznabCategory() { }
+
     public TorznabCategory(int id, string name)
     {
         Id = id;
         Name = name;
     }
-    
+
     [XmlAttribute("id")]
     public int Id { get; set; }
 

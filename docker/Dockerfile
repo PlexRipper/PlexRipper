@@ -122,15 +122,7 @@ COPY docker/etc/ /etc/
 
 ### This fixes the permissions on the config directory and Reaparr crashes if it can't write to it
 COPY docker/10-config /etc/fix-attrs.d/10-config
-
-## Set version label
-LABEL company="Reaparr" \
-    maintainer="reaparr@protonmail.com" \
-    org.opencontainers.image.authors="Reaparr" \
-    org.opencontainers.image.vendor="Reaparr" \
-    org.opencontainers.image.version="${VERSION}" \
-    org.opencontainers.image.revision="${INFORMATIONAL_VERSION}"
-      
+     
 EXPOSE ${PORT}
 VOLUME /Config /Downloads /Movies /TvShows
 

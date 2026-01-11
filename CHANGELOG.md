@@ -1,5 +1,34 @@
 Reaparr Changelog
 
+# [0.35.0-dev.2](https://github.com/Reaparr/Reaparr/compare/v0.35.0-dev.1...v0.35.0-dev.2) (2026-01-11)
+
+
+### Bug Fixes
+
+* **WebAPI:** Add timeout protection to prevent indefinite blocking on pause operations ([0b24bbf](https://github.com/Reaparr/Reaparr/commit/0b24bbf39ebb5972f3f55bea40c8087aaeba1d69))
+* **WebAPI:** Avoid failing when cleanup directory has files ([06d1820](https://github.com/Reaparr/Reaparr/commit/06d1820a06d1baca3a4b8e4aff7e5779a67920db))
+* **WebAPI:** Fixed the SyncServerMedia command not working to sync all media with a server ([2f624f4](https://github.com/Reaparr/Reaparr/commit/2f624f411382c9d160d4705d80bc662e3d486b8c))
+
+
+### Features
+
+* **WebAPI:** Add media filename validation extension methods to ensure Sonarr/Radarr can parse filenames correctly ([649420f](https://github.com/Reaparr/Reaparr/commit/649420f8fb5b66d15ce58fbac9865e62a34ee689))
+* **WebAPI:** Upgrade target framework to net10.0 across projects ([85d0801](https://github.com/Reaparr/Reaparr/commit/85d0801aba97ad4095c7ff339e08464ea5666a09))
+
+
+### Performance Improvements
+
+* **WebAPI:** Add indexes for SearchTitle to enhance query performance ([9770486](https://github.com/Reaparr/Reaparr/commit/9770486ecd6ee15919a6b919de89b7d9357d9109))
+* **WebAPI:** Add indexes to improve query performance for download tasks ([d5165d4](https://github.com/Reaparr/Reaparr/commit/d5165d4be584e17666a3a935c4639e1d0bdffce2))
+* **WebAPI:** Added more indexes to the database for heavy queries ([d3326c6](https://github.com/Reaparr/Reaparr/commit/d3326c60e4b9eb92f451decb8ed05c67d9923e45))
+* **WebAPI:** Increased database query and storage performance by adding indexes and storing less at the same time ([7aa2559](https://github.com/Reaparr/Reaparr/commit/7aa2559f3176e20433a92c36b44b3fc457aae1ef))
+* **WebAPI:** Major rewrite in the way movie and episode data is stored, which should save a lot of database filesize ([3f1c5e5](https://github.com/Reaparr/Reaparr/commit/3f1c5e5c7ae53b6a466c1f6776701dd56b8fdaa4))
+
+
+### Reverts
+
+* Revert "build(WebAPI): Revert last dev EF migrations" ([8f41e18](https://github.com/Reaparr/Reaparr/commit/8f41e181af2331a367d3d1429f68aaf887b71d7d))
+
 # [0.35.0-dev.1](https://github.com/Reaparr/Reaparr/compare/v0.34.0...v0.35.0-dev.1) (2025-12-26)
 
 

@@ -51,7 +51,8 @@ public static partial class FakeData
             )
             .RuleFor(
                 x => x.FileName,
-                (_, x) => $"{x.MediaType.ToPlexMediaTypeString()}-{x.Title.SanitizeFolderName()}.[{x.Quality}].file.mp4"
+                (_, x) =>
+                    $"{x.MediaType.ToPlexMediaTypeString()}-{x.Title.SanitizeFolderName()}.[{x.Quality.ToResolutionLabel()}].file.mp4"
             )
             .RuleFor(x => x.FileLocationUrl, _ => DownloadFileUrl)
             .RuleFor(

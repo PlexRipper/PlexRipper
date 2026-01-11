@@ -29,7 +29,7 @@ public class GetAllPlexServerConnectionsEndpoint : BaseEndpointWithoutRequest<Li
     {
         var plexServers = await _dbContext
             .PlexServers.Include(x => x.PlexServerConnections)
-            .ThenInclude(x => x.LatestConnectionStatus)
+                .ThenInclude(x => x.LatestConnectionStatus)
             .Where(x => x.IsEnabled)
             .ToListAsync(ct);
 

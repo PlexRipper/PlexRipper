@@ -83,7 +83,7 @@ public static partial class DbContextExtensions
         var plexAccount = await dbContext
             .PlexAccounts.AsNoTracking()
             .Include(x => x.PlexAccountServers)
-            .ThenInclude(x => x.PlexServer)
+                .ThenInclude(x => x.PlexServer)
             .FirstOrDefaultAsync(x => x.Id == plexAccountId, cancellationToken);
 
         if (plexAccount == null)
@@ -118,6 +118,7 @@ public static partial class DbContextExtensions
         return await dbContext
                 .PlexAccounts.Where(x => x.Id == plexAccountId)
                 .Select(x => x.DisplayName)
-                .FirstOrDefaultAsync(cancellationToken) ?? "MISSING DISPLAY NAME";
+                .FirstOrDefaultAsync(cancellationToken)
+            ?? "MISSING DISPLAY NAME";
     }
 }

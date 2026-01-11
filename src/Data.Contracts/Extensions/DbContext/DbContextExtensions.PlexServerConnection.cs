@@ -22,7 +22,7 @@ public static partial class DbContextExtensions
         var plexServer = await dbContext
             .PlexServers.AsNoTracking()
             .Include(x => x.PlexServerConnections)
-            .ThenInclude(x => x.LatestConnectionStatus)
+                .ThenInclude(x => x.LatestConnectionStatus)
             .FirstOrDefaultAsync(x => x.Id == plexServerId, cancellationToken);
 
         if (plexServer is null)

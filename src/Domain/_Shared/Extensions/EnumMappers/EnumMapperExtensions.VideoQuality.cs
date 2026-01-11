@@ -60,4 +60,12 @@ public static partial class EnumMapperExtensions
 
         return _videoQualityMap.GetValueOrDefault(value.Trim(), VideoQuality.Unknown);
     }
+
+    public static string ToResolutionLabel(this VideoQuality value) =>
+        value switch
+        {
+            VideoQuality.None => string.Empty,
+            VideoQuality.Unknown => string.Empty,
+            _ => $"{(int)value}p",
+        };
 }

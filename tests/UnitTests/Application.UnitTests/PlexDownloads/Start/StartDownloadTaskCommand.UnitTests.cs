@@ -42,8 +42,8 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
         var tvShowDownloadTasks = await dbContext
             .DownloadTaskTvShow.AsTracking()
             .Include(x => x.Children)
-            .ThenInclude(x => x.Children)
-            .ThenInclude(x => x.Children)
+                .ThenInclude(x => x.Children)
+                    .ThenInclude(x => x.Children)
             .ToListAsync(CancellationToken);
 
         var alreadyMergingTask = tvShowDownloadTasks.First();
@@ -91,8 +91,8 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
         var tvShowDownloadTasks = await dbContext
             .DownloadTaskTvShow.AsTracking()
             .Include(x => x.Children)
-            .ThenInclude(x => x.Children)
-            .ThenInclude(x => x.Children)
+                .ThenInclude(x => x.Children)
+                    .ThenInclude(x => x.Children)
             .ToListAsync(CancellationToken);
 
         tvShowDownloadTasks.SetDownloadStatus(DownloadStatus.Completed);
@@ -160,8 +160,8 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
         var tvShowDownloadTasks = await dbContext
             .DownloadTaskTvShow.AsTracking()
             .Include(x => x.Children)
-            .ThenInclude(x => x.Children)
-            .ThenInclude(x => x.Children)
+                .ThenInclude(x => x.Children)
+                    .ThenInclude(x => x.Children)
             .ToListAsync(CancellationToken.None);
 
         tvShowDownloadTasks.SetDownloadStatus(DownloadStatus.Completed);

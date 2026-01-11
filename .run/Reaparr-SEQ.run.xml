@@ -1,31 +1,37 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Reaparr-SEQ" type="docker-deploy" factoryName="docker-image" server-name="Docker">
-    <deployment type="docker-image">
-      <settings>
-        <option name="imageTag" value="datalust/seq:latest" />
-        <option name="containerName" value="Reaparr-SEQ" />
-        <option name="envVars">
-          <list>
-            <DockerEnvVarImpl>
-              <option name="name" value="ACCEPT_EULA" />
-              <option name="value" value="Y" />
-            </DockerEnvVarImpl>
-            <DockerEnvVarImpl>
-              <option name="name" value="SEQ_PASSWORD" />
-              <option name="value" value="jason" />
-            </DockerEnvVarImpl>
-          </list>
-        </option>
-        <option name="portBindings">
-          <list>
-            <DockerPortBindingImpl>
-              <option name="containerPort" value="80" />
-              <option name="hostPort" value="5341" />
-            </DockerPortBindingImpl>
-          </list>
-        </option>
-      </settings>
-    </deployment>
-    <method v="2" />
-  </configuration>
+    <configuration
+        default="false"
+        name="Reaparr-SEQ"
+        type="docker-deploy"
+        factoryName="docker-image"
+        server-name="Docker"
+    >
+        <deployment type="docker-image">
+            <settings>
+                <option name="imageTag" value="datalust/seq:latest" />
+                <option name="containerName" value="Reaparr-SEQ" />
+                <option name="envVars">
+                    <list>
+                        <DockerEnvVarImpl>
+                            <option name="name" value="ACCEPT_EULA" />
+                            <option name="value" value="Y" />
+                        </DockerEnvVarImpl>
+                        <DockerEnvVarImpl>
+                            <option name="name" value="SEQ_PASSWORD" />
+                            <option name="value" value="jason" />
+                        </DockerEnvVarImpl>
+                    </list>
+                </option>
+                <option name="portBindings">
+                    <list>
+                        <DockerPortBindingImpl>
+                            <option name="containerPort" value="80" />
+                            <option name="hostPort" value="5341" />
+                        </DockerPortBindingImpl>
+                    </list>
+                </option>
+            </settings>
+        </deployment>
+        <method v="2" />
+    </configuration>
 </component>

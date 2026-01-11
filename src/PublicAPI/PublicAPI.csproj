@@ -1,30 +1,27 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
     <PropertyGroup>
-        <TargetFramework>net9.0</TargetFramework>
-        <LangVersion>13</LangVersion>
+        <TargetFramework>net10.0</TargetFramework>
+        <LangVersion>14</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <AssemblyName>Reaparr.PublicAPI</AssemblyName>
         <RootNamespace>Reaparr.PublicAPI</RootNamespace>
     </PropertyGroup>
-
     <ItemGroup>
-        <PackageReference Include="Autofac" Version="8.4.0" />
+        <PackageReference Include="Autofac" Version="9.0.0" />
         <PackageReference Include="BencodeNET" Version="5.0.0" />
-        <PackageReference Include="FastEndpoints" Version="7.0.1" />
+        <PackageReference Include="FastEndpoints" Version="7.1.1" />
     </ItemGroup>
-        <ItemGroup>
-      <ProjectReference Include="..\Data.Contracts\Data.Contracts.csproj" />
-      <ProjectReference Include="..\Identity.Contracts\Identity.Contracts.csproj" />
-      <ProjectReference Include="..\Domain\Domain.csproj" />
-      <ProjectReference Include="..\PublicAPI.Contracts\PublicAPI.Contracts.csproj" />
-      <ProjectReference Include="..\Settings.Contracts\Settings.Contracts.csproj" />
+    <ItemGroup>
+        <ProjectReference Include="..\Data.Contracts\Data.Contracts.csproj" />
+        <ProjectReference Include="..\Identity.Contracts\Identity.Contracts.csproj" />
+        <ProjectReference Include="..\Domain\Domain.csproj" />
+        <ProjectReference Include="..\PublicAPI.Contracts\PublicAPI.Contracts.csproj" />
+        <ProjectReference Include="..\Settings.Contracts\Settings.Contracts.csproj" />
     </ItemGroup>
-        <ItemGroup>
-          <Compile Include="..\Domain\GlobalUsings.cs">
+    <ItemGroup>
+        <Compile Include="..\Domain\GlobalUsings.cs">
             <Link>GlobalUsings.cs</Link>
-          </Compile>
-        </ItemGroup>
-
+        </Compile>
+    </ItemGroup>
 </Project>

@@ -199,9 +199,9 @@ public record LibraryMediaItemMediaDTO
     public required string VideoCodec { get; init; }
 
     /// <summary>
-    /// Video resolution (e.g., 4k).
+    /// Video resolution derived from Plex metadata.
     /// </summary>
-    public required string VideoResolution { get; init; }
+    public required VideoQuality VideoResolution { get; init; }
 
     /// <summary>
     /// File container type.

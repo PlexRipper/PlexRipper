@@ -28,13 +28,16 @@ public class LogoutEndpoint : EndpointWithoutRequest
 
         if (HttpContext.Request.Cookies.TryGetValue("SID", out var sid))
         {
-            await _authDbContext.DownloadClientSessions.Where(x => x.Sid == sid)
+            await _authDbContext
+                .DownloadClientSessions.Where(x => x.Sid == sid)
                 .ExecuteDeleteAsync(cancellationToken: ct);
         }
 
         // Clear cookie by setting expired SID
-        HttpContext.Response.Headers.Append("Set-Cookie",
-            "SID=; Path=/; HttpOnly; Expires=Thu, 01 Jan 1970 00:00:00 GMT");
+        HttpContext.Response.Headers.Append(
+            "Set-Cookie",
+            "SID=; Path=/; HttpOnly; Expires=Thu, 01 Jan 1970 00:00:00 GMT"
+        );
 
         await Send.StringAsync("Ok.", cancellation: ct);
     }

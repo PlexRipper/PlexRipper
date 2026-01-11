@@ -85,7 +85,8 @@ public class FakeDataDownloadTasksUnitTests : BaseUnitTest
         movieFileTask.CreatedAt.ShouldNotBe(default);
         movieFileTask.FileName.ShouldNotBeNullOrEmpty();
         movieFileTask.FileLocationUrl.ShouldNotBeNullOrEmpty();
-        movieFileTask.Quality.ShouldNotBeNullOrEmpty();
+        movieFileTask.Quality.ShouldNotBe(VideoQuality.None);
+        movieFileTask.Quality.ShouldNotBe(VideoQuality.Unknown);
         movieFileTask.DataTotal.ShouldBeGreaterThan(0);
         movieFileTask.DirectoryMeta.ShouldNotBeNull();
         movieFileTask.DirectoryMeta.DownloadRootPath.ShouldNotBeNullOrEmpty();

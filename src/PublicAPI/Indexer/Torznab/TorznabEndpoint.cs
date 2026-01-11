@@ -54,28 +54,34 @@ public sealed class TorznabEndpoint : Endpoint<TorznabEndpointRequest>
             case "search":
                 throw new NotImplementedException();
             case "tvsearch":
-                var searchTvShowResponse = await _commandExecutor.Send(new SearchTvShowCommand
-                {
-                    Query = req.Query ?? string.Empty,
-                    Season = req.Season ?? 0,
-                    Episode = req.Episode ?? 0,
-                    TVDB_ID = req.TvdbId ?? 0,
-                    IMDB_ID = req.ImdbId ?? string.Empty,
-                    TMDB_ID = req.TmdbId ?? 0,
-                    Limit = req.Limit ?? 100,
-                    Offset = req.Offset ?? 0,
-                }, ct);
+                var searchTvShowResponse = await _commandExecutor.Send(
+                    new SearchTvShowCommand
+                    {
+                        Query = req.Query ?? string.Empty,
+                        Season = req.Season ?? 0,
+                        Episode = req.Episode ?? 0,
+                        TVDB_ID = req.TvdbId ?? 0,
+                        IMDB_ID = req.ImdbId ?? string.Empty,
+                        TMDB_ID = req.TmdbId ?? 0,
+                        Limit = req.Limit ?? 100,
+                        Offset = req.Offset ?? 0,
+                    },
+                    ct
+                );
                 await Send.XmlAsync(searchTvShowResponse, cancellationToken: ct);
                 break;
             case "movie":
-                var searchMovieResponse = await _commandExecutor.Send(new SearchMovieCommand
-                {
-                    Query = req.Query ?? string.Empty,
-                    IMDB_ID = req.ImdbId ?? string.Empty,
-                    TMDB_ID = req.TmdbId ?? 0,
-                    Limit = req.Limit ?? 100,
-                    Offset = req.Offset ?? 0,
-                }, ct);
+                var searchMovieResponse = await _commandExecutor.Send(
+                    new SearchMovieCommand
+                    {
+                        Query = req.Query ?? string.Empty,
+                        IMDB_ID = req.ImdbId ?? string.Empty,
+                        TMDB_ID = req.TmdbId ?? 0,
+                        Limit = req.Limit ?? 100,
+                        Offset = req.Offset ?? 0,
+                    },
+                    ct
+                );
                 await Send.XmlAsync(searchMovieResponse, cancellationToken: ct);
                 break;
             default:

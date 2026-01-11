@@ -1,4 +1,4 @@
-﻿using FluentResults;
+using FluentResults;
 using Reaparr.Domain;
 
 namespace Reaparr.Application.Contracts;
@@ -7,7 +7,11 @@ public interface IDownloadTaskScheduler
 {
     Task<Result> StartDownloadTaskJob(DownloadTaskKey downloadTaskKey);
 
-    Task<Result> StopDownloadTaskJob(DownloadTaskKey downloadTaskKey, CancellationToken cancellationToken = default);
+    Task<Result> StopDownloadTaskJob(
+        DownloadTaskKey downloadTaskKey,
+        CancellationToken cancellationToken = default,
+        bool waitForCompletion = true
+    );
 
     Task<bool> IsDownloading(DownloadTaskKey downloadTaskKey, CancellationToken cancellationToken = default);
 

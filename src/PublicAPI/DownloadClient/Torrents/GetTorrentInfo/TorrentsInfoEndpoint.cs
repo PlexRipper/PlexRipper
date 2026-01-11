@@ -87,14 +87,12 @@ public sealed class TorrentsInfoEndpoint : Endpoint<TorrentsInfoEndpointRequest,
 
         // Query all download tasks that have a HashId (Sonarr/Radarr tracking id)
         var episodeFilesTask = _dbContext
-            .DownloadTaskTvShowEpisodeFile
-            .Where(x => x.HashId != null)
+            .DownloadTaskTvShowEpisodeFile.Where(x => x.HashId != null)
             .Include(x => x.Parent)
             .ToListAsync(ct);
 
         var movieFilesTask = _dbContext
-            .DownloadTaskMovieFile
-            .Where(x => x.HashId != null)
+            .DownloadTaskMovieFile.Where(x => x.HashId != null)
             .Include(x => x.Parent)
             .ToListAsync(ct);
 
@@ -157,8 +155,10 @@ public sealed class TorrentsInfoEndpoint : Endpoint<TorrentsInfoEndpointRequest,
             case DownloadStatus.Unknown:
             default:
                 _log.Here()
-                    .Warning("Unknown DownloadStatus {DownloadStatus} encountered when mapping to qBittorrent state",
-                        status);
+                    .Warning(
+                        "Unknown DownloadStatus {DownloadStatus} encountered when mapping to qBittorrent state",
+                        status
+                    );
                 return "stalledDL";
         }
     }

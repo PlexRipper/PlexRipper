@@ -28,21 +28,47 @@ public static class ISchedulerExtensions
         }
     }
 
+    /// <summary>
+    /// Waits for a job to complete execution with a configurable timeout.
+    /// </summary>
+    /// <param name="scheduler">The Quartz scheduler instance.</param>
+    /// <param name="key">The job key to monitor.</param>
+    /// <param name="cancellationToken">External cancellation token.</param>
+    /// <param name="timeoutSeconds">Maximum seconds to wait before returning (default 30).</param>
+    /// <remarks>
+    /// If the timeout expires, the method returns gracefully without throwing.
+    /// The job may continue running in the background after timeout.
+    /// </remarks>
     public static async Task AwaitJobRunning(
         this IScheduler scheduler,
         JobKey key,
-        CancellationToken cancellationToken = default
+        CancellationToken cancellationToken = default,
+        int timeoutSeconds = 30
     )
     {
-        while (!cancellationToken.IsCancellationRequested)
-        {
-            // Give it some time to start, keep 500ms between checks
-            await Task.Delay(500, cancellationToken);
-            var jobs = await scheduler.GetCurrentlyExecutingJobs(cancellationToken);
-            if (!jobs.Any(x => Equals(x.JobDetail.Key, key)))
-                break;
+        using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(timeoutSeconds));
+        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token);
 
-            await Task.Delay(500, cancellationToken);
+        try
+        {
+            const int pollIntervalMs = 200;
+
+            while (!linkedCts.Token.IsCancellationRequested)
+            {
+                var executingJobs = await scheduler.GetCurrentlyExecutingJobs(linkedCts.Token);
+                var isJobStillRunning = executingJobs.Any(x => Equals(x.JobDetail.Key, key));
+
+                if (!isJobStillRunning)
+                    return;
+
+                await Task.Delay(pollIntervalMs, linkedCts.Token);
+            }
+        }
+        catch (OperationCanceledException)
+            when (timeoutCts.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
+        {
+            // Timeout expired - exit gracefully without throwing
+            // The job may still be running in the background
         }
     }
 

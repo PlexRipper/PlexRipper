@@ -97,9 +97,9 @@ public class CreatePlexAccountEndpointIntegrationTests : BaseIntegrationTests
 
         var plexAccountDb = container
             .DbContext.PlexAccounts.Include(x => x.PlexAccountLibraries)
-            .ThenInclude(x => x.PlexLibrary)
+                .ThenInclude(x => x.PlexLibrary)
             .Include(x => x.PlexAccountServers)
-            .ThenInclude(x => x.PlexServer)
+                .ThenInclude(x => x.PlexServer)
             .FirstOrDefault();
 
         plexAccountDb.ShouldNotBeNull();

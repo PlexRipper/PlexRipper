@@ -25,17 +25,29 @@ public class IndexerAuthenticationPreProcessor<TRequest> : IPreProcessor<TReques
 
         if (string.IsNullOrWhiteSpace(apiKey))
         {
-            _log.Here().Warning("Missing indexer API key from {UserAgent} for request to '{RequestPath}'",
-                userAgent, requestPath);
-            ctx.ValidationFailures.Add(new($"Missing Query parameter: {INDEXER_API_KEY}",
-                $"The [{INDEXER_API_KEY}] query param needs to be set!"));
+            _log.Here()
+                .Warning(
+                    "Missing indexer API key from {UserAgent} for request to '{RequestPath}'",
+                    userAgent,
+                    requestPath
+                );
+            ctx.ValidationFailures.Add(
+                new(
+                    $"Missing Query parameter: {INDEXER_API_KEY}",
+                    $"The [{INDEXER_API_KEY}] query param needs to be set!"
+                )
+            );
             return ctx.HttpContext.Response.SendErrorsAsync(ctx.ValidationFailures, cancellation: ct);
         }
 
         if (apiKey != _integrationsSettings.ReaparrApiKey)
         {
-            _log.Here().Warning("Invalid indexer API key from {UserAgent} for request to '{RequestPath}'",
-                userAgent, requestPath);
+            _log.Here()
+                .Warning(
+                    "Invalid indexer API key from {UserAgent} for request to '{RequestPath}'",
+                    userAgent,
+                    requestPath
+                );
             return ctx.HttpContext.Response.SendUnauthorizedAsync(cancellation: ct);
         }
 

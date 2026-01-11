@@ -27,11 +27,11 @@ public abstract class BasePlexMediaData : BasePlexMediaQuality
     public required int RatingKey { get; init; }
 
     /// <summary>
-    /// Normalized resolution label derived from video height
-    /// (480p / 720p / 1080p / 2160p).
+    /// Normalized resolution derived from video height.
+    /// Stored as an integer for efficient sorting and comparison.
     /// </summary>
     [Column(Order = 4)]
-    public required string VideoResolution { get; init; }
+    public required VideoQuality VideoResolution { get; init; }
 
     /// <summary>
     /// The original filename of the media file as reported by Plex.

@@ -7,6 +7,8 @@ public class DownloadTaskSeasonConfiguration : IEntityTypeConfiguration<Download
 {
     public void Configure(EntityTypeBuilder<DownloadTaskTvShowSeason> builder)
     {
+        builder.HasIndex(x => x.DownloadStatus);
+
         builder
             .HasMany(x => x.Children)
             .WithOne(x => x.Parent)

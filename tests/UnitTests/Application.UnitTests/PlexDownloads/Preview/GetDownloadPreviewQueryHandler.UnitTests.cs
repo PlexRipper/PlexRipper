@@ -42,7 +42,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
 
         var tvShows = await IDbContext
             .PlexTvShows.Include(x => x.Seasons)
-            .ThenInclude(x => x.Episodes)
+                .ThenInclude(x => x.Episodes)
             .AsNoTracking()
             .ToListAsync(cancellationToken: TestContext.Current.CancellationToken);
 
@@ -856,7 +856,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
 
         var tvShows = await IDbContext
             .PlexTvShows.Include(x => x.Seasons)
-            .ThenInclude(x => x.Episodes)
+                .ThenInclude(x => x.Episodes)
             .AsNoTracking()
             .ToListAsync(cancellationToken: TestContext.Current.CancellationToken);
 

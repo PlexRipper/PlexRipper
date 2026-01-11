@@ -48,7 +48,7 @@ public class ValidatePlexTvTokenCommandHandler
             ValidatedAt = isValid ? DateTime.UtcNow : null,
 
             Title = x.UserPlexAccount!.Title,
-            Email = x.UserPlexAccount!.Email ?? string.Empty,
+            Email = x.UserPlexAccount!.Email,
             AuthenticationToken = x.UserPlexAccount!.AuthToken,
             Is2Fa = x.UserPlexAccount!.TwoFactorEnabled.GetValueOrDefault(),
         });

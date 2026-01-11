@@ -14,10 +14,8 @@ public record TorznabMediaSearchResponseDTO
 
     // Declare namespaces so XmlSerializer knows about "torznab"
     [XmlNamespaceDeclarations]
-    public XmlSerializerNamespaces Xmlns { get; set; } = new(
-    [
-        new XmlQualifiedName("torznab", "http://torznab.com/schemas/2015/feed"),
-    ]);
+    public XmlSerializerNamespaces Xmlns { get; set; } =
+        new([new XmlQualifiedName("torznab", "http://torznab.com/schemas/2015/feed")]);
 }
 
 public record TorznabChannel
@@ -29,8 +27,8 @@ public record TorznabChannel
     public string Description { get; set; } = "TV search results";
 
     [XmlElement("language")]
-    public string Language { get; set; } = "en-us";   
-    
+    public string Language { get; set; } = "en-us";
+
     [XmlElement("category")]
     public string Category { get; set; } = "search";
 
@@ -58,7 +56,7 @@ public record TorznabItem
     // Instead of torznab:attr, map to namespace
     [XmlElement("attr", Namespace = "http://torznab.com/schemas/2015/feed")]
     public List<TorznabAttr> Attributes { get; set; } = new();
-    
+
     [XmlElement("enclosure")]
     public TorznabEnclosure Enclosure { get; set; } = new();
 }

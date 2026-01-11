@@ -45,14 +45,26 @@ public class SearchPlexMediaEndpoint : BaseEndpoint<SearchPlexMediaRequest, Resu
     {
         var q = req.Query.ToSearchTitle();
 
+        // Early return if query is null, empty, or whitespace
+        if (string.IsNullOrWhiteSpace(q))
+        {
+            await SendFluentResult(Result.Ok(new List<PlexMediaSlimDTO>()), ct);
+            return;
+        }
+
+        // Escape SQL LIKE wildcard characters (% and _) to treat them literally
+        var escapedQuery = q.Replace("\\", "\\\\").Replace("%", "\\%").Replace("_", "\\_");
+
+        var likeQuery = $"{escapedQuery}%";
+
         // Search for TV Shows and Movies
         var tvShowSearchResults = _dbContext
-            .PlexTvShows.Where(p => p.SearchTitle.Contains(q))
+            .PlexTvShows.Where(p => EF.Functions.Like(p.SearchTitle, likeQuery, "\\"))
             .ProjectToMediaSlimDTO()
             .ToListAsync(ct);
 
         var movieSearchResults = _dbContext
-            .PlexMovies.Where(p => p.SearchTitle.Contains(q))
+            .PlexMovies.Where(p => EF.Functions.Like(p.SearchTitle, likeQuery, "\\"))
             .ProjectToMediaSlimDTO()
             .ToListAsync(ct);
 

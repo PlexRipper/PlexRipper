@@ -91,6 +91,16 @@ public class SearchMovieCommandHandler : ICommandHandler<SearchMovieCommand, Tor
                 .ToListAsync(cancellationToken);
         }
 
+        if (!noQueryProvided)
+        {
+            var searchTitle = command.Query.ToSearchTitle();
+            if (string.IsNullOrWhiteSpace(searchTitle))
+                return [];
+
+            var likeQuery = $"{searchTitle}%";
+            baseQuery = baseQuery.Where(m => EF.Functions.Like(m.SearchTitle, likeQuery));
+        }
+
         // Otherwise apply filters only for the provided external IDs
         if (!string.IsNullOrWhiteSpace(command.IMDB_ID))
             baseQuery = baseQuery.Where(m => m.Guid_IMDB == "tt" + command.IMDB_ID);
@@ -98,7 +108,6 @@ public class SearchMovieCommandHandler : ICommandHandler<SearchMovieCommand, Tor
         if (command.TMDB_ID > 0)
             baseQuery = baseQuery.Where(m => m.Guid_TMDB == command.TMDB_ID);
 
-        // Do not apply free-text filtering for now to mirror the TV search behavior.
         return await baseQuery
             .OrderBy(m => m.Id)
             .Skip(command.Offset)
@@ -142,7 +151,7 @@ public class SearchMovieCommandHandler : ICommandHandler<SearchMovieCommand, Tor
             item.Attributes.Add(new TorznabAttr("downloadvolumefactor", "0.0"));
 
             item.Attributes.Add(new TorznabAttr("category", mediaData.ToTorznabMovieCategory().ToString()));
-            item.Attributes.Add(new TorznabAttr("resolution", mediaData.VideoResolution));
+            item.Attributes.Add(new TorznabAttr("resolution", mediaData.VideoResolution.ToResolutionLabel()));
             item.Attributes.Add(new TorznabAttr("source", mediaData.Source.ToEnumMemberValue()));
             item.Attributes.Add(new TorznabAttr("videoCodec", mediaData.VideoCodec));
             item.Attributes.Add(new TorznabAttr("audioCodec", mediaData.AudioCodec));

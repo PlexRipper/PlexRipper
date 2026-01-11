@@ -349,7 +349,7 @@ public class MockPlexApiServer : IMockPlexApiServer
                                 }
 
                                 responseBody.MediaContainer!.Size = responseBody.MediaContainer.Metadata!.Count;
-                                responseBody.MediaContainer!.TotalSize = (long?)fullList.Count;
+                                responseBody.MediaContainer!.TotalSize = fullList.Count;
 
                                 return FakePlexApiData
                                     .GetLibrarySectionsAllResponse(

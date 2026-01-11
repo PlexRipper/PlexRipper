@@ -864,7 +864,7 @@ namespace Reaparr.Data.Migrations
                     FileLocationUrl = table.Column<string>(type: "TEXT", nullable: false),
                     HashId = table.Column<string>(type: "TEXT", nullable: true),
                     FullTitle = table.Column<string>(type: "TEXT", nullable: false),
-                    Quality = table.Column<string>(type: "TEXT", nullable: false),
+                    Quality = table.Column<int>(type: "INTEGER", nullable: false),
                     DirectoryMeta = table.Column<string>(type: "TEXT", nullable: false),
                     DownloadSpeed = table.Column<long>(type: "INTEGER", nullable: false),
                     FileTransferSpeed = table.Column<long>(type: "INTEGER", nullable: false),
@@ -996,23 +996,21 @@ namespace Reaparr.Data.Migrations
                     PlexPartId = table.Column<long>(type: "INTEGER", nullable: false),
                     Quality = table.Column<int>(type: "INTEGER", nullable: false),
                     RatingKey = table.Column<int>(type: "INTEGER", nullable: false),
-                    Key = table.Column<string>(type: "TEXT", nullable: false),
-                    Duration = table.Column<int>(type: "INTEGER", nullable: false),
+                    VideoResolution = table.Column<int>(type: "INTEGER", nullable: false),
                     OriginalFilename = table.Column<string>(type: "TEXT", nullable: false),
-                    GeneratedFilename = table.Column<string>(type: "TEXT", nullable: false),
-                    Size = table.Column<long>(type: "INTEGER", nullable: false),
+                    GeneratedFilename = table.Column<string>(type: "TEXT", nullable: true),
                     Container = table.Column<string>(type: "TEXT", nullable: false),
-                    HasMetadata = table.Column<bool>(type: "INTEGER", nullable: false),
-                    LastSyncedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    VideoCodec = table.Column<string>(type: "TEXT", nullable: false),
-                    FrameRate = table.Column<string>(type: "TEXT", nullable: false),
-                    VideoResolution = table.Column<string>(type: "TEXT", nullable: false),
+                    Duration = table.Column<int>(type: "INTEGER", nullable: false),
+                    Size = table.Column<long>(type: "INTEGER", nullable: false),
+                    Key = table.Column<string>(type: "TEXT", nullable: false),
                     Source = table.Column<int>(type: "INTEGER", nullable: false),
+                    VideoCodec = table.Column<string>(type: "TEXT", nullable: false),
                     AudioCodec = table.Column<string>(type: "TEXT", nullable: false),
-                    AudioChannels = table.Column<int>(type: "INTEGER", nullable: true),
+                    NeedsGeneratedName = table.Column<bool>(type: "INTEGER", nullable: false),
+                    GeneratedNameSyncedAt = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    PlexMovieId = table.Column<int>(type: "INTEGER", nullable: false),
                     PlexLibraryId = table.Column<int>(type: "INTEGER", nullable: false),
-                    PlexServerId = table.Column<int>(type: "INTEGER", nullable: false),
-                    PlexMovieId = table.Column<int>(type: "INTEGER", nullable: false)
+                    PlexServerId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1371,7 +1369,7 @@ namespace Reaparr.Data.Migrations
                     FileLocationUrl = table.Column<string>(type: "TEXT", nullable: false),
                     HashId = table.Column<string>(type: "TEXT", nullable: true),
                     FullTitle = table.Column<string>(type: "TEXT", nullable: false),
-                    Quality = table.Column<string>(type: "TEXT", nullable: false),
+                    Quality = table.Column<int>(type: "INTEGER", nullable: false),
                     DirectoryMeta = table.Column<string>(type: "TEXT", nullable: false),
                     DownloadSpeed = table.Column<long>(type: "INTEGER", nullable: false),
                     FileTransferSpeed = table.Column<long>(type: "INTEGER", nullable: false),
@@ -1415,23 +1413,21 @@ namespace Reaparr.Data.Migrations
                     PlexPartId = table.Column<long>(type: "INTEGER", nullable: false),
                     Quality = table.Column<int>(type: "INTEGER", nullable: false),
                     RatingKey = table.Column<int>(type: "INTEGER", nullable: false),
-                    Key = table.Column<string>(type: "TEXT", nullable: false),
-                    Duration = table.Column<int>(type: "INTEGER", nullable: false),
+                    VideoResolution = table.Column<int>(type: "INTEGER", nullable: false),
                     OriginalFilename = table.Column<string>(type: "TEXT", nullable: false),
-                    GeneratedFilename = table.Column<string>(type: "TEXT", nullable: false),
-                    Size = table.Column<long>(type: "INTEGER", nullable: false),
+                    GeneratedFilename = table.Column<string>(type: "TEXT", nullable: true),
                     Container = table.Column<string>(type: "TEXT", nullable: false),
-                    HasMetadata = table.Column<bool>(type: "INTEGER", nullable: false),
-                    LastSyncedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    VideoCodec = table.Column<string>(type: "TEXT", nullable: false),
-                    FrameRate = table.Column<string>(type: "TEXT", nullable: false),
-                    VideoResolution = table.Column<string>(type: "TEXT", nullable: false),
+                    Duration = table.Column<int>(type: "INTEGER", nullable: false),
+                    Size = table.Column<long>(type: "INTEGER", nullable: false),
+                    Key = table.Column<string>(type: "TEXT", nullable: false),
                     Source = table.Column<int>(type: "INTEGER", nullable: false),
+                    VideoCodec = table.Column<string>(type: "TEXT", nullable: false),
                     AudioCodec = table.Column<string>(type: "TEXT", nullable: false),
-                    AudioChannels = table.Column<int>(type: "INTEGER", nullable: true),
+                    NeedsGeneratedName = table.Column<bool>(type: "INTEGER", nullable: false),
+                    GeneratedNameSyncedAt = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    PlexTvShowEpisodeId = table.Column<int>(type: "INTEGER", nullable: false),
                     PlexLibraryId = table.Column<int>(type: "INTEGER", nullable: false),
-                    PlexServerId = table.Column<int>(type: "INTEGER", nullable: false),
-                    PlexTvShowEpisodeId = table.Column<int>(type: "INTEGER", nullable: false)
+                    PlexServerId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1479,6 +1475,11 @@ namespace Reaparr.Data.Migrations
                 column: "PlexLibraryId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_DownloadTaskMovie_DownloadStatus",
+                table: "DownloadTaskMovie",
+                column: "DownloadStatus");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_DownloadTaskMovie_PlexLibraryId",
                 table: "DownloadTaskMovie",
                 column: "PlexLibraryId");
@@ -1487,6 +1488,16 @@ namespace Reaparr.Data.Migrations
                 name: "IX_DownloadTaskMovie_PlexServerId",
                 table: "DownloadTaskMovie",
                 column: "PlexServerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DownloadTaskMovieFile_DownloadStatus",
+                table: "DownloadTaskMovieFile",
+                column: "DownloadStatus");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DownloadTaskMovieFile_HashId",
+                table: "DownloadTaskMovieFile",
+                column: "HashId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_DownloadTaskMovieFile_ParentId",
@@ -1499,9 +1510,19 @@ namespace Reaparr.Data.Migrations
                 column: "PlexLibraryId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_DownloadTaskMovieFile_PlexLibraryId_PlexServerId_Key",
+                table: "DownloadTaskMovieFile",
+                columns: new[] { "PlexLibraryId", "PlexServerId", "Key" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_DownloadTaskMovieFile_PlexServerId",
                 table: "DownloadTaskMovieFile",
                 column: "PlexServerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DownloadTaskTvShow_DownloadStatus",
+                table: "DownloadTaskTvShow",
+                column: "DownloadStatus");
 
             migrationBuilder.CreateIndex(
                 name: "IX_DownloadTaskTvShow_PlexLibraryId",
@@ -1512,6 +1533,16 @@ namespace Reaparr.Data.Migrations
                 name: "IX_DownloadTaskTvShow_PlexServerId",
                 table: "DownloadTaskTvShow",
                 column: "PlexServerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DownloadTaskTvShow_PlexServerId_Key",
+                table: "DownloadTaskTvShow",
+                columns: new[] { "PlexServerId", "Key" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DownloadTaskTvShowEpisode_DownloadStatus",
+                table: "DownloadTaskTvShowEpisode",
+                column: "DownloadStatus");
 
             migrationBuilder.CreateIndex(
                 name: "IX_DownloadTaskTvShowEpisode_ParentId",
@@ -1529,6 +1560,16 @@ namespace Reaparr.Data.Migrations
                 column: "PlexServerId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_DownloadTaskTvShowEpisodeFile_DownloadStatus",
+                table: "DownloadTaskTvShowEpisodeFile",
+                column: "DownloadStatus");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DownloadTaskTvShowEpisodeFile_HashId",
+                table: "DownloadTaskTvShowEpisodeFile",
+                column: "HashId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_DownloadTaskTvShowEpisodeFile_ParentId",
                 table: "DownloadTaskTvShowEpisodeFile",
                 column: "ParentId");
@@ -1539,9 +1580,19 @@ namespace Reaparr.Data.Migrations
                 column: "PlexLibraryId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_DownloadTaskTvShowEpisodeFile_PlexLibraryId_PlexServerId_Key",
+                table: "DownloadTaskTvShowEpisodeFile",
+                columns: new[] { "PlexLibraryId", "PlexServerId", "Key" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_DownloadTaskTvShowEpisodeFile_PlexServerId",
                 table: "DownloadTaskTvShowEpisodeFile",
                 column: "PlexServerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DownloadTaskTvShowSeason_DownloadStatus",
+                table: "DownloadTaskTvShowSeason",
+                column: "DownloadStatus");
 
             migrationBuilder.CreateIndex(
                 name: "IX_DownloadTaskTvShowSeason_ParentId",
@@ -1584,6 +1635,12 @@ namespace Reaparr.Data.Migrations
                 column: "PlexServerId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_PlexAccounts_Uuid",
+                table: "PlexAccounts",
+                column: "Uuid",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_PlexAccountServers_PlexServerId",
                 table: "PlexAccountServers",
                 column: "PlexServerId");
@@ -1612,9 +1669,10 @@ namespace Reaparr.Data.Migrations
                 column: "DefaultDestinationId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PlexLibraries_PlexServerId",
+                name: "IX_PlexLibraries_PlexServerId_Uuid",
                 table: "PlexLibraries",
-                column: "PlexServerId");
+                columns: new[] { "PlexServerId", "Uuid" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexLibraryActors_PlexLibraryId",
@@ -1632,9 +1690,14 @@ namespace Reaparr.Data.Migrations
                 column: "PlexLibraryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PlexMovie_PlexLibraryId",
+                name: "IX_PlexMovie_Key_PlexServerId",
                 table: "PlexMovie",
-                column: "PlexLibraryId");
+                columns: new[] { "Key", "PlexServerId" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlexMovie_PlexLibraryId_SortIndex",
+                table: "PlexMovie",
+                columns: new[] { "PlexLibraryId", "SortIndex" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexMovie_PlexServerId",
@@ -1642,14 +1705,29 @@ namespace Reaparr.Data.Migrations
                 column: "PlexServerId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_PlexMovie_SearchTitle",
+                table: "PlexMovie",
+                column: "SearchTitle");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_PlexMovie_SortIndex",
                 table: "PlexMovie",
                 column: "SortIndex");
 
             migrationBuilder.CreateIndex(
+                name: "IX_PlexMovieActors_PlexActorId_PlexMovieId",
+                table: "PlexMovieActors",
+                columns: new[] { "PlexActorId", "PlexMovieId" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_PlexMovieActors_PlexMovieId",
                 table: "PlexMovieActors",
                 column: "PlexMovieId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlexMovieCountries_CountryId_PlexMovieId",
+                table: "PlexMovieCountries",
+                columns: new[] { "CountryId", "PlexMovieId" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexMovieCountries_PlexMovieId",
@@ -1662,9 +1740,9 @@ namespace Reaparr.Data.Migrations
                 column: "PlexLibraryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PlexMovieData_PlexMovieId",
+                name: "IX_PlexMovieData_PlexMovieId_Quality",
                 table: "PlexMovieData",
-                column: "PlexMovieId");
+                columns: new[] { "PlexMovieId", "Quality" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexMovieData_PlexServerId",
@@ -1677,6 +1755,16 @@ namespace Reaparr.Data.Migrations
                 column: "Quality");
 
             migrationBuilder.CreateIndex(
+                name: "IX_PlexMovieData_RatingKey",
+                table: "PlexMovieData",
+                column: "RatingKey");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlexMovieGenres_GenresId_PlexMovieId",
+                table: "PlexMovieGenres",
+                columns: new[] { "GenresId", "PlexMovieId" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_PlexMovieGenres_PlexMovieId",
                 table: "PlexMovieGenres",
                 column: "PlexMovieId");
@@ -1687,20 +1775,36 @@ namespace Reaparr.Data.Migrations
                 column: "PlexServerId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_PlexServers_MachineIdentifier",
+                table: "PlexServers",
+                column: "MachineIdentifier",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_PlexServerStatuses_PlexServerConnectionId",
                 table: "PlexServerStatuses",
                 column: "PlexServerConnectionId",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_PlexServerStatuses_PlexServerId",
+                name: "IX_PlexServerStatuses_PlexServerId_IsSuccessful",
                 table: "PlexServerStatuses",
-                column: "PlexServerId");
+                columns: new[] { "PlexServerId", "IsSuccessful" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlexTvShowActors_PlexActorId_PlexTvShowId",
+                table: "PlexTvShowActors",
+                columns: new[] { "PlexActorId", "PlexTvShowId" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexTvShowActors_PlexTvShowId",
                 table: "PlexTvShowActors",
                 column: "PlexTvShowId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlexTvShowCountries_CountryId_PlexTvShowId",
+                table: "PlexTvShowCountries",
+                columns: new[] { "CountryId", "PlexTvShowId" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexTvShowCountries_PlexTvShowId",
@@ -1718,14 +1822,24 @@ namespace Reaparr.Data.Migrations
                 column: "PlexServerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PlexTvShowEpisodeData_PlexTvShowEpisodeId",
+                name: "IX_PlexTvShowEpisodeData_PlexTvShowEpisodeId_Quality",
                 table: "PlexTvShowEpisodeData",
-                column: "PlexTvShowEpisodeId");
+                columns: new[] { "PlexTvShowEpisodeId", "Quality" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexTvShowEpisodeData_Quality",
                 table: "PlexTvShowEpisodeData",
                 column: "Quality");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlexTvShowEpisodeData_RatingKey",
+                table: "PlexTvShowEpisodeData",
+                column: "RatingKey");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlexTvShowEpisodes_Key_PlexServerId",
+                table: "PlexTvShowEpisodes",
+                columns: new[] { "Key", "PlexServerId" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexTvShowEpisodes_PlexLibraryId",
@@ -1743,14 +1857,19 @@ namespace Reaparr.Data.Migrations
                 column: "SortIndex");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PlexTvShowEpisodes_TvShowId",
+                name: "IX_PlexTvShowEpisodes_TvShowId_SortIndex",
                 table: "PlexTvShowEpisodes",
-                column: "TvShowId");
+                columns: new[] { "TvShowId", "SortIndex" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_PlexTvShowEpisodes_TvShowSeasonId",
+                name: "IX_PlexTvShowEpisodes_TvShowSeasonId_SortIndex",
                 table: "PlexTvShowEpisodes",
-                column: "TvShowSeasonId");
+                columns: new[] { "TvShowSeasonId", "SortIndex" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlexTvShowGenres_GenresId_PlexTvShowId",
+                table: "PlexTvShowGenres",
+                columns: new[] { "GenresId", "PlexTvShowId" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexTvShowGenres_PlexTvShowId",
@@ -1768,9 +1887,14 @@ namespace Reaparr.Data.Migrations
                 column: "PlexTvShowId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PlexTvShows_PlexLibraryId",
+                name: "IX_PlexTvShows_Key_PlexServerId",
                 table: "PlexTvShows",
-                column: "PlexLibraryId");
+                columns: new[] { "Key", "PlexServerId" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlexTvShows_PlexLibraryId_SortIndex",
+                table: "PlexTvShows",
+                columns: new[] { "PlexLibraryId", "SortIndex" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexTvShows_PlexServerId",
@@ -1778,24 +1902,29 @@ namespace Reaparr.Data.Migrations
                 column: "PlexServerId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_PlexTvShows_SearchTitle",
+                table: "PlexTvShows",
+                column: "SearchTitle");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_PlexTvShows_SortIndex",
                 table: "PlexTvShows",
                 column: "SortIndex");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PlexTvShowSeason_PlexLibraryId",
+                name: "IX_PlexTvShowSeason_Key_PlexServerId",
                 table: "PlexTvShowSeason",
-                column: "PlexLibraryId");
+                columns: new[] { "Key", "PlexServerId" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlexTvShowSeason_PlexLibraryId_SortIndex",
+                table: "PlexTvShowSeason",
+                columns: new[] { "PlexLibraryId", "SortIndex" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexTvShowSeason_PlexServerId",
                 table: "PlexTvShowSeason",
                 column: "PlexServerId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PlexTvShowSeason_SortIndex",
-                table: "PlexTvShowSeason",
-                column: "SortIndex");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexTvShowSeason_TvShowId",

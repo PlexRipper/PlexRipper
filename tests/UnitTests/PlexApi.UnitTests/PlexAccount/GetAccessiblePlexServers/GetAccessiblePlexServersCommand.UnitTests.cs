@@ -318,162 +318,154 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
         var serverResource1 = FakePlexApiData.GetServerResource(new Seed(939)).Generate(2);
         serverResource1[0].Connections.Clear();
         serverResource1[0]
-            .Connections.AddRange(
-                [
-                    new Connections
-                    {
-                        Protocol = PlexDeviceProtocol.Http,
-                        Address = "192.168.200.95",
-                        Port = 32400,
-                        Uri = "http://192.168.200.95:32400",
-                        Local = true,
-                        Relay = false,
-                        IPv6 = false,
-                    },
-                    new Connections
-                    {
-                        Protocol = PlexDeviceProtocol.Https,
-                        Address = "www.albertflix.nl",
-                        Port = 43324,
-                        Uri = "https://www.albertflix.nl:43324",
-                        Local = false,
-                        Relay = false,
-                        IPv6 = false,
-                    },
-                    new Connections
-                    {
-                        Protocol = PlexDeviceProtocol.Http,
-                        Address = "77.170.188.28",
-                        Port = 43324,
-                        Uri = "http://77.170.188.28:43324",
-                        Local = false,
-                        Relay = false,
-                        IPv6 = false,
-                    },
-                ]
-            );
+            .Connections.AddRange([
+                new Connections
+                {
+                    Protocol = PlexDeviceProtocol.Http,
+                    Address = "192.168.200.95",
+                    Port = 32400,
+                    Uri = "http://192.168.200.95:32400",
+                    Local = true,
+                    Relay = false,
+                    IPv6 = false,
+                },
+                new Connections
+                {
+                    Protocol = PlexDeviceProtocol.Https,
+                    Address = "www.albertflix.nl",
+                    Port = 43324,
+                    Uri = "https://www.albertflix.nl:43324",
+                    Local = false,
+                    Relay = false,
+                    IPv6 = false,
+                },
+                new Connections
+                {
+                    Protocol = PlexDeviceProtocol.Http,
+                    Address = "77.170.188.28",
+                    Port = 43324,
+                    Uri = "http://77.170.188.28:43324",
+                    Local = false,
+                    Relay = false,
+                    IPv6 = false,
+                },
+            ]);
         serverResource1[1].Provides = "client,player";
         serverResource1[1].Connections.Clear();
         serverResource1[1]
-            .Connections.AddRange(
-                [
-                    new Connections
-                    {
-                        Protocol = PlexDeviceProtocol.Http,
-                        Address = "192.168.200.95",
-                        Port = 32400,
-                        Uri = "http://192.168.200.95:32400",
-                        Local = true,
-                        Relay = false,
-                        IPv6 = false,
-                    },
-                    new Connections
-                    {
-                        Protocol = PlexDeviceProtocol.Https,
-                        Address = "www.albertflix.nl",
-                        Port = 43324,
-                        Uri = "https://www.albertflix.nl:43324",
-                        Local = false,
-                        Relay = false,
-                        IPv6 = false,
-                    },
-                    new Connections
-                    {
-                        Protocol = PlexDeviceProtocol.Http,
-                        Address = "77.170.188.28",
-                        Port = 43324,
-                        Uri = "http://77.170.188.28:43324",
-                        Local = false,
-                        Relay = false,
-                        IPv6 = false,
-                    },
-                ]
-            );
+            .Connections.AddRange([
+                new Connections
+                {
+                    Protocol = PlexDeviceProtocol.Http,
+                    Address = "192.168.200.95",
+                    Port = 32400,
+                    Uri = "http://192.168.200.95:32400",
+                    Local = true,
+                    Relay = false,
+                    IPv6 = false,
+                },
+                new Connections
+                {
+                    Protocol = PlexDeviceProtocol.Https,
+                    Address = "www.albertflix.nl",
+                    Port = 43324,
+                    Uri = "https://www.albertflix.nl:43324",
+                    Local = false,
+                    Relay = false,
+                    IPv6 = false,
+                },
+                new Connections
+                {
+                    Protocol = PlexDeviceProtocol.Http,
+                    Address = "77.170.188.28",
+                    Port = 43324,
+                    Uri = "http://77.170.188.28:43324",
+                    Local = false,
+                    Relay = false,
+                    IPv6 = false,
+                },
+            ]);
 
         var serverResource2 = FakePlexApiData.GetServerResource(new Seed(939)).Generate(2);
         serverResource2[0].Connections.Clear();
         serverResource2[0]
-            .Connections.AddRange(
-                [
-                    new Connections
-                    {
-                        Protocol = PlexDeviceProtocol.Https,
-                        Address = "192.168.201.95",
-                        Port = 32400,
-                        Uri = "https://192-168-201-95.fc4cf89b047845c0a48b8926677abe46.plex.direct:32400",
-                        Local = true,
-                        Relay = false,
-                        IPv6 = false,
-                    },
-                    new Connections
-                    {
-                        Protocol = PlexDeviceProtocol.Https,
-                        Address = "www.albertflix.nl",
-                        Port = 43324,
-                        Uri = "https://www.albertflix.nl:43324",
-                        Local = false,
-                        Relay = false,
-                        IPv6 = false,
-                    },
-                    new Connections
-                    {
-                        Protocol = PlexDeviceProtocol.Https,
-                        Address = "177.170.188.28",
-                        Port = 43324,
-                        Uri = "https://177-170-188-28.fc4cf89b047845c0a48b8926677abe46.plex.direct:43324",
-                        Local = false,
-                        Relay = false,
-                        IPv6 = false,
-                    },
-                    new Connections
-                    {
-                        Protocol = PlexDeviceProtocol.Https,
-                        Address = "139.162.215.184",
-                        Port = 8443,
-                        Uri = "https://139-162-215-184.fc4cf89b047845c0a48b8926677abe46.plex.direct:8443",
-                        Local = false,
-                        Relay = true,
-                        IPv6 = false,
-                    },
-                ]
-            );
+            .Connections.AddRange([
+                new Connections
+                {
+                    Protocol = PlexDeviceProtocol.Https,
+                    Address = "192.168.201.95",
+                    Port = 32400,
+                    Uri = "https://192-168-201-95.fc4cf89b047845c0a48b8926677abe46.plex.direct:32400",
+                    Local = true,
+                    Relay = false,
+                    IPv6 = false,
+                },
+                new Connections
+                {
+                    Protocol = PlexDeviceProtocol.Https,
+                    Address = "www.albertflix.nl",
+                    Port = 43324,
+                    Uri = "https://www.albertflix.nl:43324",
+                    Local = false,
+                    Relay = false,
+                    IPv6 = false,
+                },
+                new Connections
+                {
+                    Protocol = PlexDeviceProtocol.Https,
+                    Address = "177.170.188.28",
+                    Port = 43324,
+                    Uri = "https://177-170-188-28.fc4cf89b047845c0a48b8926677abe46.plex.direct:43324",
+                    Local = false,
+                    Relay = false,
+                    IPv6 = false,
+                },
+                new Connections
+                {
+                    Protocol = PlexDeviceProtocol.Https,
+                    Address = "139.162.215.184",
+                    Port = 8443,
+                    Uri = "https://139-162-215-184.fc4cf89b047845c0a48b8926677abe46.plex.direct:8443",
+                    Local = false,
+                    Relay = true,
+                    IPv6 = false,
+                },
+            ]);
         serverResource2[1].Provides = "client,player";
         serverResource2[1].Connections.Clear();
         serverResource2[1]
-            .Connections.AddRange(
-                [
-                    new Connections
-                    {
-                        Protocol = PlexDeviceProtocol.Https,
-                        Address = "192.168.200.95",
-                        Port = 32400,
-                        Uri = "https://192-168-200-95.fc4cf89b047845c0a48b8926677abe46.plex.direct:32400",
-                        Local = true,
-                        Relay = false,
-                        IPv6 = false,
-                    },
-                    new Connections
-                    {
-                        Protocol = PlexDeviceProtocol.Https,
-                        Address = "www.albertflix.nl",
-                        Port = 43324,
-                        Uri = "https://www.albertflix.nl:43324",
-                        Local = false,
-                        Relay = false,
-                        IPv6 = false,
-                    },
-                    new Connections
-                    {
-                        Protocol = PlexDeviceProtocol.Https,
-                        Address = "177.170.188.28",
-                        Port = 43324,
-                        Uri = "https://177-170-188-28.fc4cf89b047845c0a48b8926677abe46.plex.direct:43324",
-                        Local = false,
-                        Relay = false,
-                        IPv6 = false,
-                    },
-                ]
-            );
+            .Connections.AddRange([
+                new Connections
+                {
+                    Protocol = PlexDeviceProtocol.Https,
+                    Address = "192.168.200.95",
+                    Port = 32400,
+                    Uri = "https://192-168-200-95.fc4cf89b047845c0a48b8926677abe46.plex.direct:32400",
+                    Local = true,
+                    Relay = false,
+                    IPv6 = false,
+                },
+                new Connections
+                {
+                    Protocol = PlexDeviceProtocol.Https,
+                    Address = "www.albertflix.nl",
+                    Port = 43324,
+                    Uri = "https://www.albertflix.nl:43324",
+                    Local = false,
+                    Relay = false,
+                    IPv6 = false,
+                },
+                new Connections
+                {
+                    Protocol = PlexDeviceProtocol.Https,
+                    Address = "177.170.188.28",
+                    Port = 43324,
+                    Uri = "https://177-170-188-28.fc4cf89b047845c0a48b8926677abe46.plex.direct:43324",
+                    Local = false,
+                    Relay = false,
+                    IPv6 = false,
+                },
+            ]);
 
         var response1 = FakePlexApiData.GetServerResourcesResponse(
             HttpStatusCode.OK,

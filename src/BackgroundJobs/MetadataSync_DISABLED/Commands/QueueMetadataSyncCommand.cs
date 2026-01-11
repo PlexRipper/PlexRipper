@@ -36,8 +36,7 @@ public class QueueMetadataSyncCommandHandler : ICommandHandler<QueueMetadataSync
         // Don't queue if already running/scheduled
         if (await _scheduler.CheckExists(jobKey, ct))
         {
-            _log.Here()
-                .Debug("MetadataSyncJob already scheduled for server {ServerId}", command.ServerId);
+            _log.Here().Debug("MetadataSyncJob already scheduled for server {ServerId}", command.ServerId);
             return Result.Ok();
         }
 
@@ -47,11 +46,7 @@ public class QueueMetadataSyncCommandHandler : ICommandHandler<QueueMetadataSync
             .UsingJobData(MetadataSyncJob.ServerIdParameter, command.ServerId)
             .Build();
 
-        var trigger = TriggerBuilder
-            .Create()
-            .WithIdentity($"{jobKey.Name}_trigger", jobKey.Group)
-            .StartNow()
-            .Build();
+        var trigger = TriggerBuilder.Create().WithIdentity($"{jobKey.Name}_trigger", jobKey.Group).StartNow().Build();
 
         await _scheduler.ScheduleJob(job, trigger, ct);
 
@@ -60,4 +55,3 @@ public class QueueMetadataSyncCommandHandler : ICommandHandler<QueueMetadataSync
         return Result.Ok();
     }
 }
-

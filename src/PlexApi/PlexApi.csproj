@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net9.0</TargetFramework>
-        <LangVersion>13</LangVersion>
+        <TargetFramework>net10.0</TargetFramework>
+        <LangVersion>14</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
         <RootNamespace>Reaparr.PlexApi</RootNamespace>
         <AssemblyName>Reaparr.PlexApi</AssemblyName>
@@ -12,14 +12,14 @@
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="Autofac" Version="8.4.0" />
-        <PackageReference Include="CSharpier.MsBuild" Version="1.1.1">
+        <PackageReference Include="Autofac" Version="9.0.0" />
+        <PackageReference Include="CSharpier.MsBuild" Version="1.2.5">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="FastEndpoints" Version="7.0.1" />
-        <PackageReference Include="HttpClientToCurl" Version="2.0.6" />
-        <PackageReference Include="Polly" Version="8.6.2" />
+        <PackageReference Include="FastEndpoints" Version="7.1.1" />
+        <PackageReference Include="HttpClientToCurl" Version="2.1.1" />
+        <PackageReference Include="Polly" Version="8.6.5" />
     </ItemGroup>
     <ItemGroup>
         <Compile Include="..\Domain\GlobalUsings.cs" />

@@ -1,6 +1,4 @@
-﻿using System.Reflection;
-
-namespace Reaparr.BaseTests;
+﻿namespace Reaparr.BaseTests;
 
 public static partial class FakeData
 {

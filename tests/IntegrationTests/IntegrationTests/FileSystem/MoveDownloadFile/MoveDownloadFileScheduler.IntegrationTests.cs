@@ -39,7 +39,7 @@ public class MoveDownloadFileSchedulerIntegrationTests : BaseIntegrationTests
         var downloadTasks = dbContext
             .DownloadTaskMovie.AsTracking()
             .Include(x => x.Children)
-            .ThenInclude(x => x.DownloadWorkerTasks)
+                .ThenInclude(x => x.DownloadWorkerTasks)
             .ToList();
         downloadTasks.ShouldNotBeNull();
 

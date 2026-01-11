@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Reaparr.Data.Configurations;
@@ -7,6 +7,8 @@ public class PlexServerConfiguration : IEntityTypeConfiguration<PlexServer>
 {
     public void Configure(EntityTypeBuilder<PlexServer> builder)
     {
+        builder.HasIndex(x => x.MachineIdentifier).IsUnique();
+
         builder
             .HasMany(x => x.PlexLibraries)
             .WithOne(x => x.PlexServer)

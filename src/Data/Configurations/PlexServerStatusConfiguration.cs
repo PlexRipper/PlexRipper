@@ -14,5 +14,7 @@ public class PlexServerStatusConfiguration : IEntityTypeConfiguration<PlexServer
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasIndex(e => e.PlexServerConnectionId).IsUnique();
+
+        builder.HasIndex(x => new { x.PlexServerId, x.IsSuccessful });
     }
 }

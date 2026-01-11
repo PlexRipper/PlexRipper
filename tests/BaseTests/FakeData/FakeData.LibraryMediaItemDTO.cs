@@ -49,7 +49,6 @@ public static partial class FakeData
         PlexMediaType? mediaType = null
     )
     {
-        var config = FakeDataConfig.FromOptions(options);
         var typeToUse = mediaType ?? PlexMediaType.Movie;
 
         return _libraryMediaItemDTO
@@ -71,7 +70,7 @@ public static partial class FakeData
             )
             .RuleFor(
                 x => x.ParentRatingKey,
-                (f, x) => x.Type == PlexMediaType.Episode ? GetUniqueNumber().ToString() : string.Empty
+                (_, x) => x.Type == PlexMediaType.Episode ? GetUniqueNumber().ToString() : string.Empty
             )
             .RuleFor(x => x.Ratings, f => GetMetaDataRatingsDTO(seed).Generate(f.Random.Int(1, 3)))
             .RuleFor(x => x.Guids, f => GetMetaDataGuidsDTO(seed).Generate(f.Random.Int(1, 4)))
@@ -313,7 +312,7 @@ public static partial class FakeData
     private static readonly Faker<LibraryMediaItemPartDTO> _libraryMediaItemPartDTO =
         new Faker<LibraryMediaItemPartDTO>()
             .StrictMode(true)
-            .RuleFor(x => x.Id, f => GetUniqueNumber())
+            .RuleFor(x => x.Id, _ => GetUniqueNumber())
             .RuleFor(
                 x => x.Key,
                 f => $"/library/parts/{f.Random.Int(100000, 999999)}/{f.Random.Int(100000000, 999999999)}/file.mp4"
@@ -327,11 +326,8 @@ public static partial class FakeData
     public static Faker<LibraryMediaItemPartDTO> GetLibraryMediaItemPartDTO(
         Seed seed,
         Action<FakeDataConfig>? options = null
-    )
-    {
-        var config = FakeDataConfig.FromOptions(options);
-
-        return _libraryMediaItemPartDTO
+    ) =>
+        _libraryMediaItemPartDTO
             .RuleFor(
                 x => x.Stream,
                 f =>
@@ -347,7 +343,6 @@ public static partial class FakeData
                 }
             )
             .UseSeed(seed.Next());
-    }
 
     #endregion
 
@@ -356,7 +351,7 @@ public static partial class FakeData
     private static readonly Faker<LibraryMediaItemMediaDTO> _libraryMediaItemMediaDTO =
         new Faker<LibraryMediaItemMediaDTO>()
             .StrictMode(true)
-            .RuleFor(x => x.Id, f => GetUniqueNumber())
+            .RuleFor(x => x.Id, _ => GetUniqueNumber())
             .RuleFor(x => x.Duration, f => f.Random.Int(50000, 55124400))
             .RuleFor(x => x.Bitrate, f => f.Random.Int(1000000, 50000000))
             .RuleFor(x => x.Width, f => f.PickRandom(640, 1280, 1920, 3840))
@@ -365,7 +360,10 @@ public static partial class FakeData
             .RuleFor(x => x.AudioChannels, f => f.PickRandom(2, 5, 6, 7, 8))
             .RuleFor(x => x.AudioCodec, f => f.PickRandom("ac3", "dca", "aac", "eac3", "truehd"))
             .RuleFor(x => x.VideoCodec, f => f.PickRandom("h264", "hevc", "mpeg2video"))
-            .RuleFor(x => x.VideoResolution, f => f.PickRandom("sd", "720p", "1080p", "4k"))
+            .RuleFor(
+                x => x.VideoResolution,
+                f => f.PickRandom(VideoQuality.SD, VideoQuality.HD, VideoQuality.FullHD, VideoQuality.UHD_4K)
+            )
             .RuleFor(x => x.Container, f => f.PickRandom("mp4", "mkv", "avi", "m4v"))
             .RuleFor(x => x.VideoFrameRate, f => f.PickRandom("24p", "25p", "30p", "50p", "60p"))
             .RuleFor(x => x.VideoProfile, f => f.PickRandom("baseline", "main", "high", "high 10"))

@@ -248,15 +248,13 @@ public class ResultExtensionsLoggingTests : BaseUnitTest
             // Arrange
             var result = Result.Fail("Test Error #1");
 
-            result.AddNestedErrors(
-                [
-                    new Error("Error #1"),
-                    new Error("Error #2"),
-                    new Error("Error #3"),
-                    new Error("Error #4"),
-                    new Error("Error #5"),
-                ]
-            );
+            result.AddNestedErrors([
+                new Error("Error #1"),
+                new Error("Error #2"),
+                new Error("Error #3"),
+                new Error("Error #4"),
+                new Error("Error #5"),
+            ]);
 
             // Act
             result.LogError();

@@ -3,7 +3,6 @@ namespace Reaparr.BaseTests;
 public class PlexMediaGenreDataset
 {
     public static readonly Lazy<HashSet<string>> PlexMediaGenres = new(() =>
-
         [
             "Action",
             "Adventure",

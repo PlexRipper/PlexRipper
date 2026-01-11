@@ -131,8 +131,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         using var correlatorContext = TestCorrelator.CreateContext();
 
         // Act
-        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
-            next.Object));
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
         await sut.InvokeAsync(context);
 
         // Assert
@@ -174,8 +173,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         using var correlatorContext = TestCorrelator.CreateContext();
 
         // Act
-        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
-            next.Object));
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
         await sut.InvokeAsync(context);
 
         // Assert
@@ -202,7 +200,8 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
     public async Task ShouldValidateTrustedProxy_WhenRequestFromDifferentIPs(
         string requestIp,
         string trustedProxy,
-        bool shouldBeTrusted)
+        bool shouldBeTrusted
+    )
     {
         // Arrange
         var context = CreateHttpContext();
@@ -292,8 +291,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         using var correlatorContext = TestCorrelator.CreateContext();
 
         // Act
-        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
-            next.Object));
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
         await sut.InvokeAsync(context);
 
         // Assert
@@ -302,7 +300,8 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
 
         var logEvents = TestCorrelator.GetLogEventsFromCurrentContext();
         logEvents.ShouldContain(e =>
-            e.MessageTemplate.Text.Contains("Request with header authentication token from untrusted IP"));
+            e.MessageTemplate.Text.Contains("Request with header authentication token from untrusted IP")
+        );
     }
 
     [Fact]
@@ -414,8 +413,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         using var correlatorContext = TestCorrelator.CreateContext();
 
         // Act
-        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
-            next.Object));
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
         await sut.InvokeAsync(context);
 
         // Assert
@@ -556,8 +554,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         using var correlatorContext = TestCorrelator.CreateContext();
 
         // Act
-        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
-            next.Object));
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
         await sut.InvokeAsync(context);
 
         // Assert
@@ -650,8 +647,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         using var correlatorContext = TestCorrelator.CreateContext();
 
         // Act
-        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
-            next.Object));
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
         await sut.InvokeAsync(context);
 
         // Assert
@@ -704,8 +700,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         using var correlatorContext = TestCorrelator.CreateContext();
 
         // Act
-        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
-            next.Object));
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
         await sut.InvokeAsync(context);
 
         // Assert
@@ -754,8 +749,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         using var correlatorContext = TestCorrelator.CreateContext();
 
         // Act
-        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
-            next.Object));
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
         await sut.InvokeAsync(context);
 
         // Assert
@@ -807,8 +801,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         using var correlatorContext = TestCorrelator.CreateContext();
 
         // Act
-        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
-            next.Object));
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
         await sut.InvokeAsync(context);
 
         // Assert
@@ -860,8 +853,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         using var correlatorContext = TestCorrelator.CreateContext();
 
         // Act
-        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
-            next.Object));
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
         await sut.InvokeAsync(context);
 
         // Assert
@@ -1012,7 +1004,8 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
     public async Task ShouldHandleIPv6Addresses_WhenValidIPv6AddressesProvided(
         string requestIp,
         string trustedProxy,
-        bool shouldBeTrusted)
+        bool shouldBeTrusted
+    )
     {
         // Arrange
         var context = CreateHttpContext();
@@ -1105,9 +1098,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
 
         // Configure UserService mock in AutoMock
         Mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TEST_USERNAME)).ReturnsAsync(testUser);
-        Mock.Mock<IUserService>()
-            .Setup(x => x.GetRolesAsync(testUser))
-            .ReturnsAsync(["User", "Admin"]);
+        Mock.Mock<IUserService>().Setup(x => x.GetRolesAsync(testUser)).ReturnsAsync(["User", "Admin"]);
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
 
@@ -1421,8 +1412,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         using var correlatorContext = TestCorrelator.CreateContext();
 
         // Act
-        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
-            next.Object));
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
         await sut.InvokeAsync(context);
 
         // Assert
@@ -1441,7 +1431,8 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
     public async Task ShouldHandleGlobalCidrRange_WhenGlobalRangeIsConfigured(
         string cidrRange,
         string requestIp,
-        bool shouldBeTrusted)
+        bool shouldBeTrusted
+    )
     {
         // Arrange
         var context = CreateHttpContext();
@@ -1822,21 +1813,24 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
 
         for (var i = 0; i < 10; i++)
         {
-            var task = Task.Run(async () =>
-            {
-                var context = CreateHttpContext();
-                context.Request.Headers[TEST_HEADER_NAME] = TEST_USERNAME;
-                context.Connection.RemoteIpAddress = IPAddress.Parse("192.168.1.1");
-
-                // Act
-                await sut.InvokeAsync(context);
-
-                // Assert
-                lock (results)
+            var task = Task.Run(
+                async () =>
                 {
-                    results.Add(nextCalled);
-                }
-            }, TestContext.Current.CancellationToken);
+                    var context = CreateHttpContext();
+                    context.Request.Headers[TEST_HEADER_NAME] = TEST_USERNAME;
+                    context.Connection.RemoteIpAddress = IPAddress.Parse("192.168.1.1");
+
+                    // Act
+                    await sut.InvokeAsync(context);
+
+                    // Assert
+                    lock (results)
+                    {
+                        results.Add(nextCalled);
+                    }
+                },
+                TestContext.Current.CancellationToken
+            );
 
             tasks.Add(task);
         }
@@ -1882,8 +1876,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
 
         // Act & Assert
-        await Should.ThrowAsync<InvalidOperationException>(async () =>
-            await Sut.InvokeAsync(context));
+        await Should.ThrowAsync<InvalidOperationException>(async () => await Sut.InvokeAsync(context));
     }
 
     [Fact]
@@ -1918,8 +1911,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
 
         // Act & Assert
-        await Should.ThrowAsync<InvalidOperationException>(async () =>
-            await Sut.InvokeAsync(context));
+        await Should.ThrowAsync<InvalidOperationException>(async () => await Sut.InvokeAsync(context));
     }
 
     #endregion
@@ -1933,7 +1925,8 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
     [InlineData(0, false)] // Zero length
     public async Task ShouldValidateHeaderLengthBoundaries_WhenHeaderLengthIsAtBoundaries(
         int headerLength,
-        bool shouldPass)
+        bool shouldPass
+    )
     {
         // Arrange
         var context = CreateHttpContext();
@@ -1989,7 +1982,8 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
     public async Task ShouldValidateCidrBoundaries_WhenCidrIsAtBoundaries(
         string cidrRange,
         string testIp,
-        bool shouldBeValid)
+        bool shouldBeValid
+    )
     {
         // Arrange
         var context = CreateHttpContext();
@@ -2086,17 +2080,14 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
 
         // Configure UserService mock in AutoMock
         Mock.Mock<IUserService>().Setup(x => x.FindByNameAsync(TEST_USERNAME)).ReturnsAsync(testUser);
-        Mock.Mock<IUserService>()
-            .Setup(x => x.GetRolesAsync(testUser))
-            .ReturnsAsync(["User", "Admin"]);
+        Mock.Mock<IUserService>().Setup(x => x.GetRolesAsync(testUser)).ReturnsAsync(["User", "Admin"]);
 
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
 
         using var correlatorContext = TestCorrelator.CreateContext();
 
         // Act
-        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate),
-            next.Object));
+        var sut = Mock.Create<HeaderAuthenticationMiddleware>(new TypedParameter(typeof(RequestDelegate), next.Object));
         await sut.InvokeAsync(context);
 
         // Assert

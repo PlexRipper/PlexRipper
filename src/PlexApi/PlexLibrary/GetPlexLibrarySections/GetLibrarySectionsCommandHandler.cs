@@ -72,7 +72,7 @@ public class GetLibrarySectionsCommandHandler : ICommandHandler<GetLibrarySectio
                 UpdatedAt = DateTimeExtensions.FromUnixTime(x.UpdatedAt),
                 ScannedAt = DateTimeExtensions.FromUnixTime(x.ScannedAt),
                 SyncedAt = null,
-                Uuid = x.Uuid!,
+                Uuid = x.Uuid,
                 PlexServer = null,
                 PlexServerId = plexServerId,
                 DefaultDestination = null,

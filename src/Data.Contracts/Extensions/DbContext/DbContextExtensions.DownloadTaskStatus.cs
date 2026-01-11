@@ -41,14 +41,15 @@ public static partial class DbContextExtensions
                         var downloadTask = await dbContext
                             .DownloadTaskTvShow.AsTracking()
                             .Include(x => x.Children)
-                            .ThenInclude(x => x.Children)
-                            .ThenInclude(x => x.Children)
+                                .ThenInclude(x => x.Children)
+                                    .ThenInclude(x => x.Children)
                             .GetAsync(parentKey.Id, cancellationToken);
                         var downloadStatusList =
                             downloadTask
                                 ?.Children.SelectMany(x => x.Children.SelectMany(y => y.Children))
                                 .Select(x => x.DownloadStatus)
-                                .ToList() ?? [];
+                                .ToList()
+                            ?? [];
                         Update(downloadTask, downloadStatusList);
                         break;
                     }
@@ -57,7 +58,7 @@ public static partial class DbContextExtensions
                         var downloadTask = await dbContext
                             .DownloadTaskTvShowSeason.AsTracking()
                             .Include(x => x.Children)
-                            .ThenInclude(x => x.Children)
+                                .ThenInclude(x => x.Children)
                             .GetAsync(parentKey.Id, cancellationToken);
                         var downloadStatusList =
                             downloadTask?.Children.SelectMany(x => x.Children).Select(x => x.DownloadStatus).ToList()

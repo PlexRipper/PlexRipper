@@ -17,7 +17,7 @@ namespace Reaparr.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .UseCollation("NATURALSORT")
-                .HasAnnotation("ProductVersion", "9.0.8");
+                .HasAnnotation("ProductVersion", "10.0.1");
 
             modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzBlobTrigger", b =>
                 {
@@ -892,6 +892,9 @@ namespace Reaparr.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Uuid")
+                        .IsUnique();
+
                     b.ToTable("PlexAccounts");
                 });
 
@@ -1119,7 +1122,8 @@ namespace Reaparr.Data.Migrations
 
                     b.HasIndex("DefaultDestinationId");
 
-                    b.HasIndex("PlexServerId");
+                    b.HasIndex("PlexServerId", "Uuid")
+                        .IsUnique();
 
                     b.ToTable("PlexLibraries");
                 });
@@ -1293,11 +1297,15 @@ namespace Reaparr.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PlexLibraryId");
-
                     b.HasIndex("PlexServerId");
 
+                    b.HasIndex("SearchTitle");
+
                     b.HasIndex("SortIndex");
+
+                    b.HasIndex("Key", "PlexServerId");
+
+                    b.HasIndex("PlexLibraryId", "SortIndex");
 
                     b.ToTable("PlexMovie");
                 });
@@ -1320,6 +1328,8 @@ namespace Reaparr.Data.Migrations
 
                     b.HasIndex("PlexMovieId");
 
+                    b.HasIndex("PlexActorId", "PlexMovieId");
+
                     b.ToTable("PlexMovieActors");
                 });
 
@@ -1341,6 +1351,8 @@ namespace Reaparr.Data.Migrations
 
                     b.HasIndex("PlexMovieId");
 
+                    b.HasIndex("CountryId", "PlexMovieId");
+
                     b.ToTable("PlexMovieCountries");
                 });
 
@@ -1361,6 +1373,8 @@ namespace Reaparr.Data.Migrations
                     b.HasKey("GenresId", "PlexMovieId");
 
                     b.HasIndex("PlexMovieId");
+
+                    b.HasIndex("GenresId", "PlexMovieId");
 
                     b.ToTable("PlexMovieGenres");
                 });
@@ -1446,20 +1460,21 @@ namespace Reaparr.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnOrder(12);
 
-                    b.Property<string>("VideoResolution")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
+                    b.Property<int>("VideoResolution")
+                        .HasColumnType("INTEGER")
                         .HasColumnOrder(4);
 
                     b.HasKey("Id");
 
                     b.HasIndex("PlexLibraryId");
 
-                    b.HasIndex("PlexMovieId");
-
                     b.HasIndex("PlexServerId");
 
                     b.HasIndex("Quality");
+
+                    b.HasIndex("RatingKey");
+
+                    b.HasIndex("PlexMovieId", "Quality");
 
                     b.ToTable("PlexMovieData");
                 });
@@ -1575,6 +1590,9 @@ namespace Reaparr.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("MachineIdentifier")
+                        .IsUnique();
+
                     b.ToTable("PlexServers");
                 });
 
@@ -1671,7 +1689,7 @@ namespace Reaparr.Data.Migrations
                     b.HasIndex("PlexServerConnectionId")
                         .IsUnique();
 
-                    b.HasIndex("PlexServerId");
+                    b.HasIndex("PlexServerId", "IsSuccessful");
 
                     b.ToTable("PlexServerStatuses");
                 });
@@ -1797,11 +1815,15 @@ namespace Reaparr.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PlexLibraryId");
-
                     b.HasIndex("PlexServerId");
 
+                    b.HasIndex("SearchTitle");
+
                     b.HasIndex("SortIndex");
+
+                    b.HasIndex("Key", "PlexServerId");
+
+                    b.HasIndex("PlexLibraryId", "SortIndex");
 
                     b.ToTable("PlexTvShows");
                 });
@@ -1824,6 +1846,8 @@ namespace Reaparr.Data.Migrations
 
                     b.HasIndex("PlexTvShowId");
 
+                    b.HasIndex("PlexActorId", "PlexTvShowId");
+
                     b.ToTable("PlexTvShowActors");
                 });
 
@@ -1844,6 +1868,8 @@ namespace Reaparr.Data.Migrations
                     b.HasKey("CountryId", "PlexTvShowId");
 
                     b.HasIndex("PlexTvShowId");
+
+                    b.HasIndex("CountryId", "PlexTvShowId");
 
                     b.ToTable("PlexTvShowCountries");
                 });
@@ -1987,9 +2013,11 @@ namespace Reaparr.Data.Migrations
 
                     b.HasIndex("SortIndex");
 
-                    b.HasIndex("TvShowId");
+                    b.HasIndex("Key", "PlexServerId");
 
-                    b.HasIndex("TvShowSeasonId");
+                    b.HasIndex("TvShowId", "SortIndex");
+
+                    b.HasIndex("TvShowSeasonId", "SortIndex");
 
                     b.ToTable("PlexTvShowEpisodes");
                 });
@@ -2075,9 +2103,8 @@ namespace Reaparr.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnOrder(12);
 
-                    b.Property<string>("VideoResolution")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
+                    b.Property<int>("VideoResolution")
+                        .HasColumnType("INTEGER")
                         .HasColumnOrder(4);
 
                     b.HasKey("Id");
@@ -2086,9 +2113,11 @@ namespace Reaparr.Data.Migrations
 
                     b.HasIndex("PlexServerId");
 
-                    b.HasIndex("PlexTvShowEpisodeId");
-
                     b.HasIndex("Quality");
+
+                    b.HasIndex("RatingKey");
+
+                    b.HasIndex("PlexTvShowEpisodeId", "Quality");
 
                     b.ToTable("PlexTvShowEpisodeData");
                 });
@@ -2110,6 +2139,8 @@ namespace Reaparr.Data.Migrations
                     b.HasKey("GenresId", "PlexTvShowId");
 
                     b.HasIndex("PlexTvShowId");
+
+                    b.HasIndex("GenresId", "PlexTvShowId");
 
                     b.ToTable("PlexTvShowGenres");
                 });
@@ -2272,13 +2303,13 @@ namespace Reaparr.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PlexLibraryId");
-
                     b.HasIndex("PlexServerId");
 
-                    b.HasIndex("SortIndex");
-
                     b.HasIndex("TvShowId");
+
+                    b.HasIndex("Key", "PlexServerId");
+
+                    b.HasIndex("PlexLibraryId", "SortIndex");
 
                     b.ToTable("PlexTvShowSeason");
                 });
@@ -2362,10 +2393,11 @@ namespace Reaparr.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnOrder(13);
 
-                    b.Property<string>("Quality")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
+                    b.Property<int>("Quality")
+                        .HasColumnType("INTEGER")
                         .HasColumnOrder(15);
+
+                    b.HasIndex("DownloadStatus");
 
                     b.ToTable((string)null);
                 });
@@ -2388,7 +2420,11 @@ namespace Reaparr.Data.Migrations
                     b.Property<Guid>("ParentId")
                         .HasColumnType("TEXT");
 
+                    b.HasIndex("HashId");
+
                     b.HasIndex("ParentId");
+
+                    b.HasIndex("PlexLibraryId", "PlexServerId", "PlexId");
 
                     b.ToTable("DownloadTaskMovieFile");
                 });
@@ -2400,7 +2436,11 @@ namespace Reaparr.Data.Migrations
                     b.Property<Guid>("ParentId")
                         .HasColumnType("TEXT");
 
+                    b.HasIndex("HashId");
+
                     b.HasIndex("ParentId");
+
+                    b.HasIndex("PlexLibraryId", "PlexServerId", "PlexId");
 
                     b.ToTable("DownloadTaskTvShowEpisodeFile");
                 });
@@ -2409,12 +2449,18 @@ namespace Reaparr.Data.Migrations
                 {
                     b.HasBaseType("Reaparr.Domain.DownloadTaskParentBase");
 
+                    b.HasIndex("DownloadStatus");
+
                     b.ToTable("DownloadTaskMovie");
                 });
 
             modelBuilder.Entity("Reaparr.Domain.DownloadTaskTvShow", b =>
                 {
                     b.HasBaseType("Reaparr.Domain.DownloadTaskParentBase");
+
+                    b.HasIndex("DownloadStatus");
+
+                    b.HasIndex("PlexServerId", "PlexId");
 
                     b.ToTable("DownloadTaskTvShow");
                 });
@@ -2425,6 +2471,8 @@ namespace Reaparr.Data.Migrations
 
                     b.Property<Guid>("ParentId")
                         .HasColumnType("TEXT");
+
+                    b.HasIndex("DownloadStatus");
 
                     b.HasIndex("ParentId");
 
@@ -2437,6 +2485,8 @@ namespace Reaparr.Data.Migrations
 
                     b.Property<Guid>("ParentId")
                         .HasColumnType("TEXT");
+
+                    b.HasIndex("DownloadStatus");
 
                     b.HasIndex("ParentId");
 

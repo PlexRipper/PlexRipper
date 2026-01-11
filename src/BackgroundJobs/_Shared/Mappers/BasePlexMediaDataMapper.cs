@@ -31,20 +31,6 @@ public static class BasePlexMediaDataMapper
             return;
         }
 
-        // Extract audio stream info
-        var audioStreams = partItem.Stream.Where(s => s.StreamType == StreamType.Audio).ToList();
-        var primaryAudio = audioStreams.FirstOrDefault(s => s.Default == true) ?? audioStreams.First();
-        if (primaryAudio is null)
-        {
-            _log.Here()
-                .Warning(
-                    "Unable to find audio stream for partID: {PartId} with filename: {MediaFileName}",
-                    mediaDataDb.Id,
-                    mediaDataDb.GetFileName
-                );
-            return;
-        }
-
         // Map codecs
         var videoCodec = mediaItem.VideoCodec.MapVideoCodec();
         var audioCodec = mediaItem.AudioCodec.MapAudioCodec(mediaItem.AudioProfile);
@@ -52,19 +38,18 @@ public static class BasePlexMediaDataMapper
         var languageFormat = partItem.Stream.FormatLanguage();
 
         // Generate the release name and set GeneratedFilename
-        mediaDataDb.GeneratedFilename =
-            GenerateReleaseName(
-                title: metaDataItem.Title,
-                year: metaDataItem.Year,
-                videoResolution: mediaItem.VideoResolution,
-                videoCodec: videoCodec,
-                audioCodec: audioCodec,
-                videoStream: videoStream,
-                audioLayout: audioLayout,
-                languageFormat: languageFormat,
-                source: mediaDataDb.Source,
-                isRemux: mediaDataDb.Source == ReleaseSource.BluRayRemux
-            ) ?? string.Empty;
+        mediaDataDb.GeneratedFilename = GenerateReleaseName(
+            title: metaDataItem.Title,
+            year: metaDataItem.Year,
+            videoResolution: mediaItem.VideoResolution,
+            videoCodec: videoCodec,
+            audioCodec: audioCodec,
+            videoStream: videoStream,
+            audioLayout: audioLayout,
+            languageFormat: languageFormat,
+            source: mediaDataDb.Source,
+            isRemux: mediaDataDb.Source == ReleaseSource.BluRayRemux
+        );
 
         // Mark as enriched
         mediaDataDb.NeedsGeneratedName = false;
@@ -75,10 +60,10 @@ public static class BasePlexMediaDataMapper
     /// Generates a Radarr/Sonarr-compatible scene-style release name from Plex movie metadata.
     /// Format: Title.Year.Resolution.Source.[REMUX].VideoCodec.AudioCodec.Channels[.Language]
     /// </summary>
-    public static string? GenerateReleaseName(
+    public static string GenerateReleaseName(
         string title,
         int year,
-        string videoResolution,
+        VideoQuality videoResolution,
         string videoCodec,
         string audioCodec,
         LibraryMediaItemStreamDTO videoStream,
@@ -99,7 +84,13 @@ public static class BasePlexMediaDataMapper
         var releaseName = new StringBuilder();
         releaseName.Append(sanitizedTitle);
         releaseName.Append('.').Append(year);
-        releaseName.Append('.').Append(videoResolution);
+
+        // Only append resolution label if it's not empty
+        var resolutionLabel = videoResolution.ToResolutionLabel();
+        if (!string.IsNullOrWhiteSpace(resolutionLabel))
+        {
+            releaseName.Append('.').Append(resolutionLabel);
+        }
 
         if (source.ToFileNameSpec() is not null)
             releaseName.Append('.').Append(source.ToFileNameSpec());

@@ -1,7 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Reaparr.BackgroundJobs;
 using Reaparr.BackgroundJobs.Contracts;
-using Reaparr.Domain;
 
 namespace Reaparr.BackgroundJobs.UnitTests;
 
@@ -277,7 +275,7 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
             }
         );
 
-        // Use a library that's already created as a Movie type from SetupDatabase
+        // Use a library already created as a Movie type from SetupDatabase
         var library = IDbContext.PlexLibraries.First(x => x.Type == PlexMediaType.Movie);
 
         Mock.Mock<ICommandExecutor>()
@@ -308,7 +306,7 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
             }
         );
 
-        // Library is already created as TvShow type from SetupDatabase config
+        // Library is already created as a TvShow type from SetupDatabase config
         var library = IDbContext.PlexLibraries.First(x => x.Type == PlexMediaType.TvShow);
 
         Mock.Mock<ICommandExecutor>()
@@ -354,7 +352,7 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
         result.IsSuccess.ShouldBeTrue();
         Mock.Mock<ICommandExecutor>()
             .Verify(
-                x => x.Send(It.Is<CheckQueuedPlexLibraryToSyncCommand>(c => c != null), It.IsAny<CancellationToken>()),
+                x => x.Send(It.IsAny<CheckQueuedPlexLibraryToSyncCommand>(), It.IsAny<CancellationToken>()),
                 Times.Once()
             );
     }

@@ -17,12 +17,14 @@ public class CleanUpDownloadTaskFoldersValidator : AbstractValidator<CleanUpDown
 
 public class CleanUpDownloadTaskFoldersHandler : ICommandHandler<CleanUpDownloadTaskFoldersCommand, Result>
 {
+    private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly IPath _path;
     private readonly IDirectory _directory;
 
-    public CleanUpDownloadTaskFoldersHandler(IReaparrDbContext dbContext, IPath path, IDirectory directory)
+    public CleanUpDownloadTaskFoldersHandler(ILogger log, IReaparrDbContext dbContext, IPath path, IDirectory directory)
     {
+        _log = log.ForContext<CleanUpDownloadTaskFoldersHandler>();
         _dbContext = dbContext;
         _path = path;
         _directory = directory;
@@ -68,20 +70,34 @@ public class CleanUpDownloadTaskFoldersHandler : ICommandHandler<CleanUpDownload
 
         var parentDirectory = directoryNameResult.Value;
 
-        var files = Result.Try(() => _directory.GetFiles(parentDirectory).ToList());
-        if (files.IsFailed)
+        if (!_directory.Exists(parentDirectory))
+            return Result.Ok();
+
+        var entriesResult = Result.Try(() => _directory.GetFileSystemEntries(parentDirectory).ToList());
+        if (entriesResult.IsFailed)
         {
-            return files.ToResult().LogError();
+            return entriesResult.ToResult().LogError();
         }
 
-        if (!files.Value.Any())
+        if (!entriesResult.Value.Any())
         {
-            _directory.Delete(parentDirectory);
+            var deleteResult = Result.Try(() => _directory.Delete(parentDirectory));
+            if (deleteResult.IsFailed)
+            {
+                return deleteResult.ToResult().LogError();
+            }
+
             return Result.Ok();
         }
 
-        return Result
-            .Fail($"Could not delete directory path: {filePath} because the path contains files: {files}")
-            .LogError();
+        var entries = string.Join(", ", entriesResult.Value.Select(entry => _path.GetFileName(entry)));
+        _log.Here()
+            .Debug(
+                "Skipping delete for {DirectoryPath} because it still contains: {DirectoryEntries}",
+                parentDirectory,
+                entries
+            );
+
+        return Result.Ok();
     }
 }

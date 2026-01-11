@@ -23,7 +23,7 @@ public abstract class DownloadTaskFileBase : DownloadTaskBase, IDownloadTaskProg
     /// Gets or sets get or sets the media quality of this <see cref="DownloadTaskGeneric"/>.
     /// </summary>
     [Column(Order = 15)]
-    public required string Quality { get; init; }
+    public required VideoQuality Quality { get; init; }
 
     [Column(Order = 16)]
     public required DownloadTaskDirectory DirectoryMeta { get; init; }

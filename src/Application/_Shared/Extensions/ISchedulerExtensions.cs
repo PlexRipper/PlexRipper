@@ -39,7 +39,7 @@ public static class ISchedulerExtensions
     /// If the timeout expires, the method returns gracefully without throwing.
     /// The job may continue running in the background after timeout.
     /// </remarks>
-    public static async Task AwaitJobRunning(
+    public static async Task AwaitJobCompletion(
         this IScheduler scheduler,
         JobKey key,
         CancellationToken cancellationToken = default,

@@ -1,0 +1,45 @@
+name: 'Docker Metadata'
+description: 'Generate Docker metadata (labels and tags) using docker/metadata-action'
+inputs:
+    version:
+        description: 'Version tag'
+        required: true
+    informational_version:
+        description: 'Informational version (revision)'
+        required: true
+    tags:
+        description: 'Optional tags to generate (multi-line format for docker/metadata-action)'
+        required: false
+        default: ''
+runs:
+    using: 'composite'
+    steps:
+        - name: Generate Docker metadata
+          id: metadata
+          uses: docker/metadata-action@v5
+          with:
+              images: reaparr/reaparr
+              tags: ${{ inputs.tags }}
+              labels: |
+                org.opencontainers.image.title=Reaparr
+                org.opencontainers.image.description=Plex downloader that brings content from any server to yours!
+                org.opencontainers.image.version=${{ inputs.version }}
+                org.opencontainers.image.revision=${{ inputs.informational_version }}
+                org.opencontainers.image.created={{date 'RFC3339'}}
+                org.opencontainers.image.source=https://github.com/Reaparr/Reaparr
+                org.opencontainers.image.url=https://github.com/Reaparr/Reaparr
+                org.opencontainers.image.licenses=GPL-3.0-only
+                org.opencontainers.image.vendor=Reaparr
+                org.opencontainers.image.authors=Reaparr <reaparr@protonmail.com>
+        - name: Set outputs
+          shell: bash
+          run: |
+            echo "labels=${{ steps.metadata.outputs.labels }}" >> $GITHUB_OUTPUT
+            echo "tags=${{ steps.metadata.outputs.tags }}" >> $GITHUB_OUTPUT
+outputs:
+    labels:
+        description: 'Generated labels (for use in docker/build-push-action or index-annotations)'
+        value: ${{ steps.metadata.outputs.labels }}
+    tags:
+        description: 'Generated tags (for use in docker/manifest-create-action)'
+        value: ${{ steps.metadata.outputs.tags }}

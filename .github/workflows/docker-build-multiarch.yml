@@ -1,0 +1,127 @@
+name: Docker Multi-Arch Build
+
+# Reusable workflow that builds both amd64 and arm64 images natively
+# Can be called with push=true (for releases) or push=false (for testing)
+
+on:
+    workflow_call:
+        inputs:
+            version:
+                description: 'Version tag for the Docker image'
+                required: true
+                type: string
+            informational_version:
+                description: 'Informational version'
+                required: true
+                type: string
+            push:
+                description: 'Push images and create manifests'
+                required: false
+                type: boolean
+                default: false
+            tags:
+                description: 'dev or latest'
+                required: false
+                type: string
+                default: 'dev'
+
+jobs:
+    # Build both architectures natively in parallel
+    build-images:
+        name: Build ${{ matrix.arch }} Image
+        strategy:
+            matrix:
+                include:
+                    - arch: amd64
+                      runner: ubuntu-latest
+                    - arch: arm64
+                      runner: ubuntu-24.04-arm
+        runs-on: ${{ matrix.runner }}
+        permissions:
+            contents: read
+            packages: write
+            id-token: write
+        steps:
+            - name: Checkout source code
+              uses: actions/checkout@v6
+
+            - name: Set up Docker Buildx
+              uses: docker/setup-buildx-action@v3
+
+            - name: Login to Docker Hub
+              if: inputs.push
+              uses: docker/login-action@v3
+              with:
+                  username: ${{ secrets.DOCKER_USERNAME }}
+                  password: ${{ secrets.DOCKER_PASSWORD }}
+
+            - name: Generate Docker metadata
+              id: metadata
+              uses: ./.github/workflows/steps/docker-metadata
+              with:
+                  version: ${{ inputs.version }}
+                  informational_version: ${{ inputs.informational_version }}
+                  tags: |
+                    type=raw,value=${{ inputs.version }}-${{ matrix.arch }}
+                  
+            - name: Build ${{ matrix.arch }} image
+              id: build
+              uses: docker/build-push-action@v6
+              with:
+                  context: .
+                  file: docker/Dockerfile
+                  platforms: linux/${{ matrix.arch }}
+                  push: ${{ inputs.push }}
+                  tags: reaparr/reaparr:${{ inputs.version }}-${{ matrix.arch }}
+                  labels: ${{ steps.metadata.outputs.labels }}
+                  build-args: |
+                      VERSION=${{ inputs.version }}
+                      INFORMATIONAL_VERSION=${{ inputs.informational_version }}
+                      BUILDPLATFORM=linux/${{ matrix.arch }}
+                      TARGETPLATFORM=linux/${{ matrix.arch }}
+                  cache-from: |
+                      type=registry,ref=reaparr/reaparr:buildcache-${{ matrix.arch }}
+                      type=registry,ref=reaparr/reaparr:${{ inputs.version }}-${{ matrix.arch }}
+                  load: ${{ !inputs.push }}
+
+    # Create multi-arch manifests (only if push=true)
+    create-manifest:
+        name: Create Multi-Arch Manifest
+        if: inputs.push
+        needs: [build-images]
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            packages: write
+            id-token: write
+        steps:
+            - name: Set up Docker Buildx
+              uses: docker/setup-buildx-action@v3
+
+            - name: Login to Docker Hub
+              uses: docker/login-action@v3
+              with:
+                  username: ${{ secrets.DOCKER_USERNAME }}
+                  password: ${{ secrets.DOCKER_PASSWORD }}
+
+            - name: Generate Docker metadata
+              id: metadata
+              uses: ./.github/workflows/steps/docker-metadata
+              with:
+                  version: ${{ inputs.version }}
+                  informational_version: ${{ inputs.informational_version }}
+                  tags: |
+                    type=raw,value=${{ inputs.tags }}
+                    type=raw,value=${{ inputs.version }}
+
+            - name: Create multi-arch manifest
+              id: manifest
+              uses: int128/docker-manifest-create-action@v2
+              with:
+                  push: true
+                  tags: ${{ steps.metadata.outputs.tags }}
+                  sources: |
+                    reaparr/reaparr:${{ inputs.version }}-amd64
+                    reaparr/reaparr:${{ inputs.version }}-arm64
+                  index-annotations: ${{ steps.metadata.outputs.labels }}
+

@@ -60,50 +60,27 @@ jobs:
             new-release-version: ${{ steps.get-next-version.outputs.new-release-version }}
             new-release-notes: ${{ steps.get-next-version.outputs.new-release-notes }}
     
-    # Build Docker Image
+    # Build and publish multi-arch Docker images
     build-and-publish:
+        name: Build and Publish Docker Images
         if: needs.semantic-release.outputs.new-release-published == 'true'
-        needs: [ semantic-release ]
+        needs: [semantic-release]
+        uses: ./.github/workflows/docker-build-multiarch.yml
+        secrets: inherit
+        with:
+            push: true
+            version: ${{ needs.semantic-release.outputs.new-release-version }}
+            informational_version: ${{ needs.semantic-release.outputs.new-release-version }}
+            tags: "latest"
+
+    # Notifications (depends on build-and-publish)
+    notify-discord:
+        name: Notify Discord
+        needs: [semantic-release, build-and-publish]
         runs-on: ubuntu-latest
-        name: Build and Publish On Latest / Tagged Docker Image
         steps:
             -   name: Checkout source code
                 uses: actions/checkout@v4
-                with:
-                    token: ${{ secrets.GH_TOKEN }}
-
-            -   name: Set up Docker Buildx
-                uses: docker/setup-buildx-action@v3
-
-            -   name: Login to Docker Hub
-                uses: docker/login-action@v3
-                with:
-                    username: ${{ secrets.DOCKER_USERNAME }}
-                    password: ${{ secrets.DOCKER_PASSWORD }}
-
-            -   name: Docker meta
-                id: meta
-                uses: docker/metadata-action@v5
-                with:
-                    images: |
-                        name=reaparr/reaparr
-                    tags: |
-                        type=semver,pattern={{version}},value=${{ needs.semantic-release.outputs.new-release-version }}
-                        type=raw,value=latest
-
-            -   name: Build and push
-                uses: docker/build-push-action@v6
-                env:
-                    VERSION: ${{ needs.semantic-release.outputs.new-release-version }}
-                    INFORMATIONAL_VERSION: ${{ needs.semantic-release.outputs.new-release-version }}
-                with:
-                    push: true
-                    tags: ${{ steps.meta.outputs.tags }}
-                    labels: ${{ steps.meta.outputs.labels }}
-                    build-args: |
-                        VERSION=${{ needs.semantic-release.outputs.new-release-version }}
-                        INFORMATIONAL_VERSION=${{ needs.semantic-release.outputs.new-release-version }}
-                    file: docker/Dockerfile
 
             -   name: Notify Discord of Stable Release
                 uses: ./.github/workflows/steps/discord-dev-release-notification/

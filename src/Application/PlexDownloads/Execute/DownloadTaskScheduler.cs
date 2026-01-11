@@ -74,7 +74,7 @@ public class DownloadTaskScheduler : IDownloadTaskScheduler
         if (!await _scheduler.IsJobRunning(jobKey))
             return;
 
-        await _scheduler.AwaitJobRunning(jobKey, cancellationToken, timeoutSeconds: 30);
+        await _scheduler.AwaitJobCompletion(jobKey, cancellationToken, timeoutSeconds: 30);
     }
 
     public Task<bool> IsDownloading(DownloadTaskKey downloadTaskKey, CancellationToken cancellationToken = default)

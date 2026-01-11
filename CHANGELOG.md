@@ -14,6 +14,13 @@ Reaparr Changelog
 
 * **WebAPI:** ARM Support to auto build and publish in the pipeline ([377aed4](https://github.com/Reaparr/Reaparr/commit/377aed41e09989e0d8a18dda7cdbf7bec76b5391))
 
+# [0.35.0-dev.3](https://github.com/Reaparr/Reaparr/compare/v0.35.0-dev.2...v0.35.0-dev.3) (2026-01-11)
+
+
+### Features
+
+* **WebAPI:** ARM Support to auto build and publish in the pipeline ([377aed4](https://github.com/Reaparr/Reaparr/commit/377aed41e09989e0d8a18dda7cdbf7bec76b5391))
+
 # [0.35.0-dev.2](https://github.com/Reaparr/Reaparr/compare/v0.35.0-dev.1...v0.35.0-dev.2) (2026-01-11)
 
 

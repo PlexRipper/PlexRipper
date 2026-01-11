@@ -352,7 +352,7 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
         result.IsSuccess.ShouldBeTrue();
         Mock.Mock<ICommandExecutor>()
             .Verify(
-                x => x.Send(It.Is<CheckQueuedPlexLibraryToSyncCommand>(c => true), It.IsAny<CancellationToken>()),
+                x => x.Send(It.IsAny<CheckQueuedPlexLibraryToSyncCommand>(), It.IsAny<CancellationToken>()),
                 Times.Once()
             );
     }

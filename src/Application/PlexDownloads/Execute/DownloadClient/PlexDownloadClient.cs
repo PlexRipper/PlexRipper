@@ -257,8 +257,10 @@ public class PlexDownloadClient : IPlexDownloadClient
                         _log.Here().ErrorResult(ex);
                         _downloadWorkerTaskUpdateCompletionSource.SetException(ex);
                     }
-
-                    _downloadWorkerTaskUpdateCompletionSource.SetResult(true);
+                    else
+                    {
+                        _downloadWorkerTaskUpdateCompletionSource.SetResult(true);
+                    }
                 },
                 () => _downloadWorkerTaskUpdateCompletionSource.SetResult(true)
             );
@@ -280,8 +282,10 @@ public class PlexDownloadClient : IPlexDownloadClient
                     _log.Here().ErrorResult(ex);
                     _downloadWorkerLogCompletionSource.SetException(ex);
                 }
-
-                _downloadWorkerLogCompletionSource.SetResult(true);
+                else
+                {
+                    _downloadWorkerLogCompletionSource.SetResult(true);
+                }
             },
             () => _downloadWorkerLogCompletionSource.SetResult(true)
         );

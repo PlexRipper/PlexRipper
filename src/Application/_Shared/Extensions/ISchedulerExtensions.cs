@@ -52,21 +52,22 @@ public static class ISchedulerExtensions
         try
         {
             const int pollIntervalMs = 500;
-            
+
             while (!linkedCts.Token.IsCancellationRequested)
             {
                 await Task.Delay(pollIntervalMs, linkedCts.Token);
-                
+
                 var executingJobs = await scheduler.GetCurrentlyExecutingJobs(linkedCts.Token);
                 var isJobStillRunning = executingJobs.Any(x => Equals(x.JobDetail.Key, key));
-                
+
                 if (!isJobStillRunning)
                     return;
 
                 await Task.Delay(pollIntervalMs, linkedCts.Token);
             }
         }
-        catch (OperationCanceledException) when (timeoutCts.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
+        catch (OperationCanceledException)
+            when (timeoutCts.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
         {
             // Timeout expired - exit gracefully without throwing
             // The job may still be running in the background

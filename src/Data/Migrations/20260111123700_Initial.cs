@@ -1775,14 +1775,10 @@ namespace Reaparr.Data.Migrations
                 column: "PlexServerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PlexServers_IsEnabled",
-                table: "PlexServers",
-                column: "IsEnabled");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_PlexServers_MachineIdentifier",
                 table: "PlexServers",
-                column: "MachineIdentifier");
+                column: "MachineIdentifier",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexServerStatuses_PlexServerConnectionId",
@@ -1921,9 +1917,9 @@ namespace Reaparr.Data.Migrations
                 columns: new[] { "Key", "PlexServerId" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_PlexTvShowSeason_PlexLibraryId",
+                name: "IX_PlexTvShowSeason_PlexLibraryId_SortIndex",
                 table: "PlexTvShowSeason",
-                column: "PlexLibraryId");
+                columns: new[] { "PlexLibraryId", "SortIndex" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexTvShowSeason_PlexServerId",
@@ -1931,14 +1927,9 @@ namespace Reaparr.Data.Migrations
                 column: "PlexServerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PlexTvShowSeason_SortIndex",
+                name: "IX_PlexTvShowSeason_TvShowId",
                 table: "PlexTvShowSeason",
-                column: "SortIndex");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PlexTvShowSeason_TvShowId_SortIndex",
-                table: "PlexTvShowSeason",
-                columns: new[] { "TvShowId", "SortIndex" });
+                column: "TvShowId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexTvShowSeasonMediaQualities_PlexLibraryId",

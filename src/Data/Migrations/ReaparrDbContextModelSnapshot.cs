@@ -17,7 +17,7 @@ namespace Reaparr.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .UseCollation("NATURALSORT")
-                .HasAnnotation("ProductVersion", "9.0.8");
+                .HasAnnotation("ProductVersion", "10.0.1");
 
             modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzBlobTrigger", b =>
                 {
@@ -1590,9 +1590,8 @@ namespace Reaparr.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("IsEnabled");
-
-                    b.HasIndex("MachineIdentifier");
+                    b.HasIndex("MachineIdentifier")
+                        .IsUnique();
 
                     b.ToTable("PlexServers");
                 });
@@ -2304,15 +2303,13 @@ namespace Reaparr.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PlexLibraryId");
-
                     b.HasIndex("PlexServerId");
 
-                    b.HasIndex("SortIndex");
+                    b.HasIndex("TvShowId");
 
                     b.HasIndex("Key", "PlexServerId");
 
-                    b.HasIndex("TvShowId", "SortIndex");
+                    b.HasIndex("PlexLibraryId", "SortIndex");
 
                     b.ToTable("PlexTvShowSeason");
                 });

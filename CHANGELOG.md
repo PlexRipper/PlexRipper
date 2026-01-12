@@ -1,5 +1,12 @@
 Reaparr Changelog
 
+# [0.35.0-dev.4](https://github.com/Reaparr/Reaparr/compare/v0.35.0-dev.3...v0.35.0-dev.4) (2026-01-12)
+
+
+### Bug Fixes
+
+* **WebAPI:** Remove USER directive to fix s6-overlay ARM startup error ([b5f3ce1](https://github.com/Reaparr/Reaparr/commit/b5f3ce1eec1f25d0273ee46f4e7f52e56624634b))
+
 # [0.35.0-dev.3](https://github.com/Reaparr/Reaparr/compare/v0.35.0-dev.2...v0.35.0-dev.3) (2026-01-11)
 
 

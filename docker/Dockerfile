@@ -126,9 +126,8 @@ COPY docker/10-config /etc/fix-attrs.d/10-config
 EXPOSE ${PORT}
 VOLUME /Config /Downloads /Movies /TvShows
 
-# Use the non-root 'abc' user provided by linuxserver baseimage for security.
-# The s6 service script already execs the app as 'abc' (see s6-setuidgid abc).
-USER abc
+# Note: Container starts as root to allow s6-overlay initialization.
+# The s6 service script drops privileges and runs the app as 'abc' user (see s6-setuidgid abc in run script).
 
 # Set the entrypoint to use s6-overlay
 ENTRYPOINT ["/init"]

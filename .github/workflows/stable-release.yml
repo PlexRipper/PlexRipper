@@ -2,6 +2,10 @@ name: Create Reaparr Stable Release
 on:
     workflow_dispatch:
 
+concurrency:
+    group: stable-release
+    cancel-in-progress: false
+
 jobs:
     semantic-release:
         # Only allow stable releases from the dev branch

@@ -71,6 +71,7 @@ export default {
         },
       },
     ],
+    ['semantic-release-export-data'],
     [
       '@semantic-release/changelog',
       {
@@ -93,7 +94,6 @@ export default {
           'chore(release): Bump version to ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}',
       },
     ],
-    ['semantic-release-export-data'],
     [
       '@semantic-release/github',
       {

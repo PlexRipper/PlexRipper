@@ -8,7 +8,7 @@ import type { HubConnection, IHttpConnectionOptions } from '@microsoft/signalr';
 import { HttpTransportType, HubConnectionBuilder, HubConnectionState, LogLevel } from '@microsoft/signalr';
 import { useCypressSignalRMock } from 'cypress-signalr-mock';
 import { isEqual, cloneDeep, isArray } from 'lodash-es';
-import type { ISetupResult } from '@interfaces';
+import { StoreNames, type ISetupResult } from '@interfaces';
 import type {
 	RefreshDataType,
 	LibraryProgress,
@@ -23,7 +23,7 @@ import { useDownloadStore, useBackgroundJobsStore, useNotificationsStore, useLib
 import Axios from 'axios';
 import { MessagePackHubProtocol } from '@microsoft/signalr-protocol-msgpack';
 
-export const useSignalrStore = defineStore('SignalrStore', () => {
+export const useSignalrStore = defineStore(StoreNames.SignalrStore, () => {
 	interface ISignalRStoreState {
 		// Data
 		serverConnectionCheckStatusProgress: ServerConnectionCheckStatusProgressDTO[];
@@ -93,7 +93,7 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 				setupSubscriptions();
 
 				await Promise.all([startDownloadHubConnection(), startProgressHubConnection(), startNotificationHubConnection()]);
-			})()).pipe(switchMap(() => of({ name: 'useSignalrStore', isSuccess: true })), take(1));
+			})()).pipe(switchMap(() => of({ name: StoreNames.SignalrStore, isSuccess: true })), take(1));
 		}, $reset() {
 			Object.assign(state, cloneDeep(defaultState));
 		},

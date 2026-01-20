@@ -2,7 +2,7 @@ import { acceptHMRUpdate, defineStore } from 'pinia';
 import { reactive, toRefs } from 'vue';
 import { type Observable, of, Subject } from 'rxjs';
 import { DialogType } from '@enums';
-import type { IAccountDialog, IAlert, IConnectionDialog, IDialogState, IHelp, ISetupResult } from '@interfaces';
+import { StoreNames, type IAccountDialog, type IAlert, type IConnectionDialog, type IDialogState, type IHelp, type ISetupResult } from '@interfaces';
 import type {
 	CheckAllConnectionStatusUpdateDTO,
 	DownloadMediaDTO,
@@ -15,7 +15,7 @@ interface IDialogStoreState {
 	dialogUpdate: Subject<IDialogState>;
 }
 
-export const useDialogStore = defineStore('DialogStore', () => {
+export const useDialogStore = defineStore(StoreNames.DialogStore, () => {
 	const defaultState: IDialogStoreState = {
 		dialogUpdate: new Subject<IDialogState>(),
 	};
@@ -24,7 +24,7 @@ export const useDialogStore = defineStore('DialogStore', () => {
 
 	const actions = {
 		setup(): Observable<ISetupResult> {
-			return of({ name: 'useDialogStore', isSuccess: true });
+			return of({ name: StoreNames.DialogStore, isSuccess: true });
 		},
 		closeDialog(name: DialogType): void {
 			state.dialogUpdate.next({ name, state: false, data: {} as unknown });

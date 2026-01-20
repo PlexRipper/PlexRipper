@@ -2,7 +2,7 @@ import { acceptHMRUpdate, defineStore } from 'pinia';
 import { reactive, computed, toRefs } from 'vue';
 import type { Observable } from 'rxjs';
 import { of, Subject } from 'rxjs';
-import type { ISetupResult, IAlert } from '@interfaces';
+import { StoreNames, type ISetupResult, type IAlert } from '@interfaces';
 import { cloneDeep } from 'lodash-es';
 
 interface IAlertStoreState {
@@ -10,7 +10,7 @@ interface IAlertStoreState {
 	alertDialogObservable: Subject<IAlert[]>;
 }
 
-export const useAlertStore = defineStore('AlertStore', () => {
+export const useAlertStore = defineStore(StoreNames.AlertStore, () => {
 	const defaultState: IAlertStoreState = {
 		alerts: [],
 		alertDialogObservable: new Subject<IAlert[]>(),
@@ -19,7 +19,7 @@ export const useAlertStore = defineStore('AlertStore', () => {
 
 	const actions = {
 		setup(): Observable<ISetupResult> {
-			return of({ name: 'useAlertStore', isSuccess: true });
+			return of({ name: StoreNames.AlertStore, isSuccess: true });
 		},
 		showAlert(alert: IAlert): void {
 			const newAlert = { ...alert, id: Date.now() };

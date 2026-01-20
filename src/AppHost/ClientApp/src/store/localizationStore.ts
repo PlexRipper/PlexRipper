@@ -4,7 +4,7 @@ import { reactive, computed, toRefs } from 'vue';
 import type { Observable } from 'rxjs';
 import { of } from 'rxjs';
 import { get } from '@vueuse/core';
-import type { ISetupResult, I18nObjectType, ILocaleConfig } from '@interfaces';
+import { StoreNames, type ISetupResult, type I18nObjectType, type ILocaleConfig } from '@interfaces';
 import { useSettingsStore } from '@store';
 import { cloneDeep } from 'lodash-es';
 import type { LocaleObject } from '@nuxtjs/i18n';
@@ -14,7 +14,7 @@ interface ILocalizationStoreState {
 	i18nRef: I18nObjectType;
 }
 
-export const useLocalizationStore = defineStore('LocalizationStore', () => {
+export const useLocalizationStore = defineStore(StoreNames.LocalizationStore, () => {
 	// State
 	const defaultState: ILocalizationStoreState = {
 		i18nRef: {} as I18nObjectType,
@@ -25,7 +25,7 @@ export const useLocalizationStore = defineStore('LocalizationStore', () => {
 	// Actions
 	const actions = {
 		setup(): Observable<ISetupResult> {
-			return of({ name: 'useLocalizationStore', isSuccess: true });
+			return of({ name: StoreNames.LocalizationStore, isSuccess: true });
 		},
 		setI18nObject(i18n?: I18nObjectType) {
 			if (!i18n) {

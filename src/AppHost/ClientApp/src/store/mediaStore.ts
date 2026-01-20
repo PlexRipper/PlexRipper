@@ -4,7 +4,7 @@ import { from, type Observable } from 'rxjs';
 import { of } from 'rxjs';
 import { map, take, catchError } from 'rxjs/operators';
 import type { PlexMediaType, PlexMediaDTO, BaseResultDTO } from '@dto';
-import type { ISetupResult } from '@interfaces';
+import { StoreNames, type ISetupResult } from '@interfaces';
 import { plexMediaApi } from '@api';
 import { cloneDeep } from 'lodash-es';
 import Log from 'consola';
@@ -21,7 +21,7 @@ interface IObjectUrl {
 	url: string;
 }
 
-export const useMediaStore = defineStore('MediaStore', () => {
+export const useMediaStore = defineStore(StoreNames.MediaStore, () => {
 	const defaultState: IMediaUrlStoreState = {
 		mediaUrls: [],
 	};
@@ -30,7 +30,7 @@ export const useMediaStore = defineStore('MediaStore', () => {
 
 	const actions = {
 		setup(): Observable<ISetupResult> {
-			return of({ name: 'useMediaStore', isSuccess: true }).pipe(take(1));
+			return of({ name: StoreNames.MediaStore, isSuccess: true }).pipe(take(1));
 		},
 		getMediaDataDetailById(mediaId: number, mediaType: PlexMediaType): Observable<PlexMediaDTO> {
 			return plexMediaApi

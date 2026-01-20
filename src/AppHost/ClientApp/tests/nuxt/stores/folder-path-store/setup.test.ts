@@ -3,7 +3,7 @@ import { createPinia, setActivePinia } from 'pinia';
 import { subscribeSpyTo, baseSetup, getAxiosMock, baseVars } from '@services-test-base';
 import { generateResultDTO } from '@mock';
 import { FolderPathPaths } from '@api/api-paths';
-import type { ISetupResult } from '@interfaces';
+import { StoreNames, type ISetupResult } from '@interfaces';
 import { useFolderPathStore } from '@store';
 
 describe('FolderPathStore.setup()', () => {
@@ -24,7 +24,7 @@ describe('FolderPathStore.setup()', () => {
 		mock.onGet(FolderPathPaths.getAllFolderPathsEndpoint()).reply(200, generateResultDTO([]));
 		const setupResult: ISetupResult = {
 			isSuccess: true,
-			name: 'useFolderPathStore',
+			name: StoreNames.FolderPathStore,
 		};
 
 		// Act

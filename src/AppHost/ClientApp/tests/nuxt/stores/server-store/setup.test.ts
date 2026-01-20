@@ -3,7 +3,7 @@ import { createPinia, setActivePinia } from 'pinia';
 import { subscribeSpyTo, baseSetup, baseVars, getAxiosMock } from '@services-test-base';
 import { PlexServerPaths } from '@api/api-paths';
 import { generatePlexServers, generateResultDTO } from '@mock';
-import type { ISetupResult } from '@interfaces';
+import { StoreNames, type ISetupResult } from '@interfaces';
 import { useServerStore } from '@store';
 
 describe('ServerStore.setup()', () => {
@@ -29,7 +29,7 @@ describe('ServerStore.setup()', () => {
 		mock.onGet(PlexServerPaths.getAllPlexServersEndpoint()).reply(200, generateResultDTO(plexServers));
 		const setupResult: ISetupResult = {
 			isSuccess: true,
-			name: 'useServerStore',
+			name: StoreNames.ServerStore,
 		};
 
 		// Act

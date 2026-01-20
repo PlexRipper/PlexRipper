@@ -1,7 +1,7 @@
 import { describe, beforeAll, test, expect, beforeEach } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { subscribeSpyTo, baseSetup } from '@services-test-base';
-import type { ISetupResult } from '@interfaces';
+import { StoreNames, type ISetupResult } from '@interfaces';
 import { useBackgroundJobsStore } from '@store';
 
 describe('BackgroundJobsStore.setup()', () => {
@@ -18,7 +18,7 @@ describe('BackgroundJobsStore.setup()', () => {
 		const backgroundJobsStore = useBackgroundJobsStore();
 		const setupResult: ISetupResult = {
 			isSuccess: true,
-			name: 'useBackgroundJobsStore',
+			name: StoreNames.BackgroundJobsStore,
 		};
 
 		// Act

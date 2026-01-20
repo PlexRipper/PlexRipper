@@ -7,7 +7,7 @@ import { cloneDeep } from 'lodash-es';
 import { type BaseResultDTO, TestConnectionStatus } from '@dto';
 import { integrationApi } from '@api';
 import { useSettingsStore } from '@store';
-import type { ISetupResult } from '@interfaces';
+import { StoreNames, type ISetupResult } from '@interfaces';
 
 interface IIntegrationStoreState {
 	sonarr: IIntegrationState;
@@ -24,7 +24,7 @@ interface IIntegrationState {
 	error: BaseResultDTO | null;
 }
 
-export const useIntegrationStore = defineStore('IntegrationStore', () => {
+export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () => {
 	const defaultState: IIntegrationStoreState = {
 		sonarr: {
 			step: 1,
@@ -117,14 +117,14 @@ export const useIntegrationStore = defineStore('IntegrationStore', () => {
 
 			// If no integrations are configured, return success immediately
 			if (testObservables.length === 0) {
-				return of({ name: 'useIntegrationStore', isSuccess: true });
+				return of({ name: StoreNames.IntegrationStore, isSuccess: true });
 			}
 
 			// Test all configured integrations in parallel
 			return forkJoin(testObservables).pipe(
 				switchMap((results) => {
 					const allSuccess = results.every((r) => r.isSuccess);
-					return of({ name: 'useIntegrationStore', isSuccess: allSuccess });
+					return of({ name: StoreNames.IntegrationStore, isSuccess: allSuccess });
 				}),
 			);
 		},

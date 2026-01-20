@@ -5,7 +5,7 @@ import { forkJoin, of } from 'rxjs';
 import { switchMap, tap } from 'rxjs/operators';
 import type { CreatePlexAccountEndpointRequest, PlexAccountDTO } from '@dto';
 import { RefreshDataType } from '@dto';
-import type { ISetupResult } from '@interfaces';
+import { StoreNames, type ISetupResult } from '@interfaces';
 import { plexAccountApi } from '@api';
 import { useLibraryStore, useServerStore, useSignalrStore } from '@store';
 import { cloneDeep } from 'lodash-es';
@@ -15,7 +15,7 @@ interface IAccountStoreState {
 	accessSyncLoading: boolean;
 }
 
-export const useAccountStore = defineStore('AccountStore', () => {
+export const useAccountStore = defineStore(StoreNames.AccountStore, () => {
 	const defaultState = {
 		accessSyncLoading: false,
 		accounts: [],
@@ -32,7 +32,7 @@ export const useAccountStore = defineStore('AccountStore', () => {
 			// Listen for refresh notifications
 			signalRStore.getRefreshNotification(RefreshDataType.PlexAccount).pipe(switchMap(() => actions.refreshAccounts())).subscribe();
 
-			return actions.refreshAccounts().pipe(switchMap(() => of({ name: 'useAccountStore', isSuccess: true })));
+			return actions.refreshAccounts().pipe(switchMap(() => of({ name: StoreNames.AccountStore, isSuccess: true })));
 		},
 		refreshAccounts() {
 			return plexAccountApi.getAllPlexAccountsEndpoint().pipe(

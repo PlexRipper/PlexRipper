@@ -1,1 +1,1 @@
-export * from './ISetupResult';
+export { StoreNames, type ISetupResult } from './ISetupResult';

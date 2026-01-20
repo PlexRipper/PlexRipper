@@ -1,7 +1,7 @@
 import Log from 'consola';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { reactive, computed, toRefs } from 'vue';
-import type { ISetupResult } from '@interfaces';
+import { StoreNames, type ISetupResult } from '@interfaces';
 import type { Observable } from 'rxjs';
 import { authenticationApi } from '@api';
 import { catchError, of } from 'rxjs';
@@ -9,7 +9,7 @@ import { tap, switchMap } from 'rxjs/operators';
 import { useGlobalStore } from '@store';
 import { get } from '@vueuse/core';
 
-export const useAuthenticationStore = defineStore('AuthenticationStore', () => {
+export const useAuthenticationStore = defineStore(StoreNames.AuthenticationStore, () => {
 	const state = reactive<{
 		isLoggedIn: boolean;
 		isDefaultCredentials: boolean;
@@ -35,7 +35,7 @@ export const useAuthenticationStore = defineStore('AuthenticationStore', () => {
 	const actions = {
 		setup(): Observable<ISetupResult> {
 			return actions.status().pipe(switchMap(() => of({
-				name: 'useAuthenticationStore',
+				name: StoreNames.AuthenticationStore,
 				isSuccess: state.isLoggedIn ?? false,
 			})));
 		},

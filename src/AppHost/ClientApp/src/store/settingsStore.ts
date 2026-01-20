@@ -5,11 +5,11 @@ import { debounceTime, switchMap, tap } from 'rxjs/operators';
 import { reactive, computed, toRefs } from 'vue';
 import { type IntegrationsSettingsDTO, PlexMediaType, type SettingsModelDTO, ViewMode } from '@dto';
 
-import type { ISetupResult } from '@interfaces';
+import { StoreNames, type ISetupResult } from '@interfaces';
 import { settingsApi } from '@api';
 import { cloneDeep } from 'lodash-es';
 
-export const useSettingsStore = defineStore('SettingsStore', () => {
+export const useSettingsStore = defineStore(StoreNames.SettingsStore, () => {
 	// State
 	const defaultState: SettingsModelDTO = {
 		generalSettings: {
@@ -72,7 +72,7 @@ export const useSettingsStore = defineStore('SettingsStore', () => {
 						_settingsUpdated.next(state);
 					}
 				});
-			}), switchMap(() => of({ name: 'useSettingsStore', isSuccess: true })));
+			}), switchMap(() => of({ name: StoreNames.SettingsStore, isSuccess: true })));
 		},
 		refreshSettings(): Observable<SettingsModelDTO | null> {
 			return settingsApi.getUserSettingsEndpoint().pipe(switchMap((settingsResult) => of(settingsResult?.value ?? null)), tap((settings) => {

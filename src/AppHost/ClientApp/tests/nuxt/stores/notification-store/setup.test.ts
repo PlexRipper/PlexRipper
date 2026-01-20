@@ -3,7 +3,7 @@ import { createPinia, setActivePinia } from 'pinia';
 import { subscribeSpyTo, baseSetup, getAxiosMock, baseVars } from '@services-test-base';
 import { generateResultDTO } from '@mock';
 import { NotificationPaths } from '@api/api-paths';
-import type { ISetupResult } from '@interfaces';
+import { StoreNames, type ISetupResult } from '@interfaces';
 import { useNotificationsStore } from '@store';
 
 describe('NotificationService.setup()', () => {
@@ -26,7 +26,7 @@ describe('NotificationService.setup()', () => {
 		const setup$ = notificationsStore.setup();
 		const setupResult: ISetupResult = {
 			isSuccess: true,
-			name: 'useNotificationsStore',
+			name: StoreNames.NotificationsStore,
 		};
 
 		// Act

@@ -1,7 +1,7 @@
 import { describe, beforeAll, test, expect } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { subscribeSpyTo, baseSetup, baseVars } from '@services-test-base';
-import type { ISetupResult } from '@interfaces';
+import { StoreNames, type ISetupResult } from '@interfaces';
 import { useAlertStore } from '@store';
 
 describe('AlertStore.setup()', () => {
@@ -17,7 +17,7 @@ describe('AlertStore.setup()', () => {
 		const alertStore = useAlertStore();
 		const setupResult: ISetupResult = {
 			isSuccess: true,
-			name: 'useAlertStore',
+			name: StoreNames.AlertStore,
 		};
 
 		// Act

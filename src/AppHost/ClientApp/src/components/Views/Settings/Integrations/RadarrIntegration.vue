@@ -50,6 +50,7 @@
 					hide-label>
 					<BaseButton
 						:loading="integrationStore.radarr.isTesting"
+						:disabled="!integrationStore.isRadarrConnectionValid"
 						icon="mdi-connection"
 						label="Test Connection"
 						cy="test-radarr-connection-button"

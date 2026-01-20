@@ -1,5 +1,5 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import { reactive, toRefs } from 'vue';
+import { reactive, toRefs, computed } from 'vue';
 import { switchMap, tap, catchError } from 'rxjs/operators';
 import { type Observable, of, forkJoin } from 'rxjs';
 import { cloneDeep } from 'lodash-es';
@@ -47,6 +47,24 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 
 	const state = reactive<IIntegrationStoreState>(cloneDeep(defaultState));
 	const settingsStore = useSettingsStore();
+
+	// Validation helpers
+	const isValidUrl = (url: string | undefined | null): boolean => {
+		if (!url?.trim()) return false;
+		try {
+			new URL(url.trim());
+			return true;
+		} catch {
+			return false;
+		}
+	};
+
+	const isValidApiKey = (apiKey: string | undefined | null): boolean => {
+		if (!apiKey?.trim()) return false;
+		const trimmedKey = apiKey.trim();
+		// API key should be 32 characters and hexadecimal
+		return trimmedKey.length === 32 && /^[a-f0-9]+$/i.test(trimmedKey);
+	};
 
 	// Actions
 	const actions = {
@@ -231,9 +249,22 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 		},
 	};
 
+	// Getters
+	const getters = {
+		isRadarrConnectionValid: computed(() => {
+			const { radarrBaseUrl, radarrApiKey } = settingsStore.integrationsSettings.radarr;
+			return isValidUrl(radarrBaseUrl) && isValidApiKey(radarrApiKey);
+		}),
+		isSonarrConnectionValid: computed(() => {
+			const { sonarrBaseUrl, sonarrApiKey } = settingsStore.integrationsSettings.sonarr;
+			return isValidUrl(sonarrBaseUrl) && isValidApiKey(sonarrApiKey);
+		}),
+	};
+
 	return {
 		...toRefs(state),
 		...actions,
+		...getters,
 	};
 });
 

@@ -50,6 +50,7 @@
 					hide-label>
 					<BaseButton
 						:loading="integrationStore.sonarr.isTesting"
+						:disabled="!integrationStore.isSonarrConnectionValid"
 						icon="mdi-connection"
 						label="Test Connection"
 						cy="test-sonarr-connection-button"

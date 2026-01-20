@@ -2,7 +2,7 @@ import { route } from '@fixtures';
 import type { SettingsModelDTO } from '@dto';
 import { TestConnectionStatus } from '@dto';
 import { IntegrationPaths } from '@api/generated/Integration';
-import { generateFailedResultDTO, generateResultDTO } from '@mock';
+import { generateResultDTO } from '@mock';
 
 describe('Configure Integrations Workflow', () => {
 	beforeEach(() => {

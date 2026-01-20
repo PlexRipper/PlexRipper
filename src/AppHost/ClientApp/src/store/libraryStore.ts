@@ -7,7 +7,7 @@ import { get } from '@vueuse/core';
 import {
 	type LibraryProgress, type LibrarySyncJobQueueDTO, LibrarySyncJobStatus, type PlexLibraryDTO, type PlexServerDTO,
 } from '@dto';
-import type { ISetupResult } from '@interfaces';
+import { StoreNames, type ISetupResult } from '@interfaces';
 import { plexLibraryApi } from '@api';
 import { RefreshDataType } from '@dto';
 import { useBackgroundJobsStore, useServerStore, useSettingsStore, useSignalrStore } from '@store';
@@ -20,7 +20,7 @@ interface ILibraryStoreState {
 	progress: LibraryProgress[];
 }
 
-export const useLibraryStore = defineStore('LibraryStore', () => {
+export const useLibraryStore = defineStore(StoreNames.LibraryStore, () => {
 	const defaultState: ILibraryStoreState = {
 		libraries: [], syncQueues: [], progress: [],
 	};
@@ -44,7 +44,7 @@ export const useLibraryStore = defineStore('LibraryStore', () => {
 			});
 
 			return forkJoin([actions.refreshLibraries(), actions.refreshLibrarySyncStatus()]).pipe(switchMap(() => of({
-				name: 'useLibraryStore', isSuccess: true,
+				name: StoreNames.LibraryStore, isSuccess: true,
 			})));
 		},
 		updateSyncQueue(queue: LibrarySyncJobQueueDTO): void {

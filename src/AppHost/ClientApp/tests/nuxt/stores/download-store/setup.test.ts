@@ -3,7 +3,7 @@ import { createPinia, setActivePinia } from 'pinia';
 import { subscribeSpyTo, baseSetup, getAxiosMock, baseVars } from '@services-test-base';
 import { generateResultDTO } from '@mock';
 import { DownloadPaths } from '@api/api-paths';
-import type { ISetupResult } from '@interfaces';
+import { StoreNames, type ISetupResult } from '@interfaces';
 import { useDownloadStore } from '@store';
 
 describe('DownloadStore.setup()', () => {
@@ -25,7 +25,7 @@ describe('DownloadStore.setup()', () => {
 		mock.onGet(DownloadPaths.getDownloadTaskByGuidEndpoint('*')).reply(200, generateResultDTO([]));
 		const setupResult: ISetupResult = {
 			isSuccess: true,
-			name: 'useDownloadStore',
+			name: StoreNames.DownloadStore,
 		};
 
 		// Act

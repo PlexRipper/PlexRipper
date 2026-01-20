@@ -7,7 +7,7 @@ import { type Observable, of } from 'rxjs';
 import { DialogType } from '@enums';
 import { plexAccountApi } from '@api';
 import type { ErrorDTO, PlexAccountDTO } from '@dto';
-import type { IAccountDialog } from '@interfaces';
+import { StoreNames, type IAccountDialog } from '@interfaces';
 import { useAccountStore, useDialogStore } from '@store';
 import { cloneDeep } from 'lodash-es';
 
@@ -24,7 +24,7 @@ interface IAccountDialogStore extends PlexAccountDTO {
 	validationErrors: ErrorDTO[];
 }
 
-export const useAccountDialogStore = defineStore('AccountDialogStore', () => {
+export const useAccountDialogStore = defineStore(StoreNames.AccountDialogStore, () => {
 	const defaultState: IAccountDialogStore = {
 		id: 0,
 		isEnabled: true,

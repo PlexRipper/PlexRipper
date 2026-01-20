@@ -4,7 +4,7 @@ import { reactive } from 'vue';
 import type { Observable } from 'rxjs';
 import { ReplaySubject, forkJoin, of } from 'rxjs';
 import { filter, take, switchMap, tap } from 'rxjs/operators';
-import type { ISetupResult } from '@interfaces';
+import { StoreNames, type ISetupResult } from '@interfaces';
 import type {
 	CheckAllConnectionStatusUpdateDTO, InspectPlexServerJobUpdateDTO,
 	JobStatusUpdateDTO as ApiJobStatusUpdateDTO, LibrarySyncJobQueueDTO,
@@ -21,7 +21,7 @@ interface IBackgroundJobsStore {
 	jobStatusObservable: ReplaySubject<JobStatusUpdateDTO>;
 }
 
-export const useBackgroundJobsStore = defineStore('BackgroundJobsStore', () => {
+export const useBackgroundJobsStore = defineStore(StoreNames.BackgroundJobsStore, () => {
 	// State
 	const defaultState: IBackgroundJobsStore = {
 		jobStatusObservable: new ReplaySubject<JobStatusUpdateDTO>(),
@@ -65,7 +65,7 @@ export const useBackgroundJobsStore = defineStore('BackgroundJobsStore', () => {
 						actions.setStatusJobUpdate(update);
 					}
 				}),
-				switchMap(() => of({ name: 'useBackgroundJobsStore', isSuccess: true }),
+				switchMap(() => of({ name: StoreNames.BackgroundJobsStore, isSuccess: true }),
 				), take(1));
 		},
 

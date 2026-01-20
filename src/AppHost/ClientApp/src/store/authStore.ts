@@ -1,25 +1,28 @@
 import Log from 'consola';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { reactive, computed, toRefs } from 'vue';
-import type { ISetupResult } from '@interfaces';
+import { StoreNames, type ISetupResult } from '@interfaces';
 import type { Observable } from 'rxjs';
 import { authenticationApi } from '@api';
 import { catchError, of } from 'rxjs';
 import { tap, switchMap } from 'rxjs/operators';
 import { useGlobalStore } from '@store';
 import { get } from '@vueuse/core';
+import { cloneDeep } from 'lodash-es';
 
-export const useAuthenticationStore = defineStore('AuthenticationStore', () => {
-	const state = reactive<{
-		isLoggedIn: boolean;
-		isDefaultCredentials: boolean;
-		currentUsername: string;
-		username: string;
-		currentPassword: string;
-		password: string;
-		isPasswordValid: boolean;
-		confirmPassword: string;
-	}>({
+interface IAuthenticationStoreState {
+	isLoggedIn: boolean;
+	isDefaultCredentials: boolean;
+	currentUsername: string;
+	username: string;
+	currentPassword: string;
+	password: string;
+	isPasswordValid: boolean;
+	confirmPassword: string;
+}
+
+export const useAuthenticationStore = defineStore(StoreNames.AuthenticationStore, () => {
+	const defaultState = {
 		isLoggedIn: false,
 		isDefaultCredentials: true,
 		currentUsername: '',
@@ -28,14 +31,16 @@ export const useAuthenticationStore = defineStore('AuthenticationStore', () => {
 		password: '',
 		confirmPassword: '',
 		isPasswordValid: false,
-	});
+	};
+
+	const state = reactive<IAuthenticationStoreState>(cloneDeep(defaultState));
 
 	const globalStore = useGlobalStore();
 
 	const actions = {
 		setup(): Observable<ISetupResult> {
 			return actions.status().pipe(switchMap(() => of({
-				name: 'useAuthenticationStore',
+				name: StoreNames.AuthenticationStore,
 				isSuccess: state.isLoggedIn ?? false,
 			})));
 		},
@@ -105,11 +110,7 @@ export const useAuthenticationStore = defineStore('AuthenticationStore', () => {
 				return of(err);
 			})),
 		$reset: () => {
-			state.currentUsername = '';
-			state.username = '';
-			state.currentPassword = '';
-			state.password = '';
-			state.confirmPassword = '';
+			Object.assign(state, cloneDeep(defaultState));
 		},
 	};
 	const getters = {

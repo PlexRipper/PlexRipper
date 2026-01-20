@@ -1,6 +1,6 @@
 import { describe, beforeAll, test, expect } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
-import type { ISetupResult } from '@interfaces';
+import { StoreNames, type ISetupResult } from '@interfaces';
 import { useMediaStore } from '@store';
 import { subscribeSpyTo, baseSetup } from '~~/tests/_base/base';
 
@@ -15,7 +15,7 @@ describe('MediaStore.setup()', () => {
 		const mediaStore = useMediaStore();
 		const setupResult: ISetupResult = {
 			isSuccess: true,
-			name: 'useMediaStore',
+			name: StoreNames.MediaStore,
 		};
 
 		// Act

@@ -13,6 +13,10 @@ on:
             - 'release.config.mjs'
             - 'README.md'
 
+concurrency:
+    group: dev-release
+    cancel-in-progress: false
+
 jobs:
     # Semantic Release for Dev Prereleases
     semantic-release:

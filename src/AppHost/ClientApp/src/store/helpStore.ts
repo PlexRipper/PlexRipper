@@ -2,7 +2,7 @@ import { acceptHMRUpdate, defineStore } from 'pinia';
 import { reactive, computed, toRefs } from 'vue';
 import type { Observable } from 'rxjs';
 import { of, Subject } from 'rxjs';
-import type { IHelp, ISetupResult } from '@interfaces';
+import { StoreNames, type IHelp, type ISetupResult } from '@interfaces';
 import { cloneDeep } from 'lodash-es';
 
 interface IHelpStoreState {
@@ -10,7 +10,7 @@ interface IHelpStoreState {
 	helpDialogObservable: Subject<IHelp>;
 }
 
-export const useHelpStore = defineStore('HelpStore', () => {
+export const useHelpStore = defineStore(StoreNames.HelpStore, () => {
 	const defaultState: IHelpStoreState = {
 		helpIdDialog: { label: '', title: '', text: '' },
 		helpDialogObservable: new Subject<IHelp>(),
@@ -20,7 +20,7 @@ export const useHelpStore = defineStore('HelpStore', () => {
 
 	const actions = {
 		setup(): Observable<ISetupResult> {
-			return of({ name: 'useHelpStore', isSuccess: true });
+			return of({ name: StoreNames.HelpStore, isSuccess: true });
 		},
 		openHelpDialog(help: IHelp): void {
 			if (!help) {

@@ -2,7 +2,7 @@ import { describe, beforeAll, test, expect, beforeEach } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { subscribeSpyTo, baseSetup, getAxiosMock, baseVars } from '@services-test-base';
 import { PlexAccountPaths } from '@api/api-paths';
-import type { ISetupResult } from '@interfaces';
+import { StoreNames, type ISetupResult } from '@interfaces';
 import { generateResultDTO } from '@mock';
 import { useAccountStore } from '@store';
 
@@ -25,7 +25,7 @@ describe('AccountStore.setup()', () => {
 		const setup$ = accountStore.setup();
 		const setupResult: ISetupResult = {
 			isSuccess: true,
-			name: 'useAccountStore',
+			name: StoreNames.AccountStore,
 		};
 
 		// Act

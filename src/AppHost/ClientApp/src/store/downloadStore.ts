@@ -15,7 +15,7 @@ import {
 	type PlexServerDTO,
 	type ServerDownloadProgressDTO,
 } from '@dto';
-import type { IDownloadsSelection, IPTreeTableSelectionKeys, ISetupResult } from '@interfaces';
+import { StoreNames, type IDownloadsSelection, type IPTreeTableSelectionKeys, type ISetupResult } from '@interfaces';
 import { downloadApi } from '@api';
 import { useServerStore } from '@store';
 
@@ -24,7 +24,7 @@ interface IDownloadsStoreState {
 	selected: IDownloadsSelection[];
 }
 
-export const useDownloadStore = defineStore('DownloadStore', () => {
+export const useDownloadStore = defineStore(StoreNames.DownloadStore, () => {
 	const defaultState: IDownloadsStoreState = {
 		serverDownloads: [],
 		selected: [],
@@ -37,7 +37,7 @@ export const useDownloadStore = defineStore('DownloadStore', () => {
 	// Actions
 	const actions = {
 		setup(): Observable<ISetupResult> {
-			return actions.fetchDownloadList().pipe(switchMap(() => of({ name: 'useDownloadStore', isSuccess: true })));
+			return actions.fetchDownloadList().pipe(switchMap(() => of({ name: StoreNames.DownloadStore, isSuccess: true })));
 		},
 		/**
      * Fetch the download list from the API.

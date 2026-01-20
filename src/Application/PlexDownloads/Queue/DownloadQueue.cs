@@ -1,4 +1,4 @@
-﻿using System.Threading.Channels;
+using System.Threading.Channels;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 
@@ -76,14 +76,17 @@ public class DownloadQueue : IDownloadQueue
                 );
         }
 
-        if (await _downloadTaskScheduler.IsServerDownloading(plexServerId))
+        var downloadTasks = await dbContext.GetAllDownloadTasksByServerAsync(plexServerId, cancellationToken: _token);
+
+        var hasDownloadingTask = downloadTasks.Any(x => x.DownloadStatus == DownloadStatus.Downloading);
+
+        // This avoids race condition where job is finishing but still registered in Quartz
+        if (hasDownloadingTask && await _downloadTaskScheduler.IsServerDownloading(plexServerId))
         {
             return Result
                 .Fail("Cannot select the next download task because server is already downloading one.")
                 .LogWarning();
         }
-
-        var downloadTasks = await dbContext.GetAllDownloadTasksByServerAsync(plexServerId, cancellationToken: _token);
 
         _log.Here()
             .Debug(

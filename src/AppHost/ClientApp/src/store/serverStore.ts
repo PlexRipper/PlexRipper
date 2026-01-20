@@ -4,7 +4,7 @@ import type { Observable } from 'rxjs';
 import { of } from 'rxjs';
 import { switchMap, tap, map } from 'rxjs/operators';
 import type { PlexServerDTO } from '@dto';
-import type { ISetupResult } from '@interfaces';
+import { StoreNames, type ISetupResult } from '@interfaces';
 import { plexServerApi } from '@api';
 import { RefreshDataType } from '@dto';
 import { cloneDeep, orderBy } from 'lodash-es';
@@ -14,7 +14,7 @@ interface IServerStoreState {
 	servers: PlexServerDTO[];
 }
 
-export const useServerStore = defineStore('ServerStore', () => {
+export const useServerStore = defineStore(StoreNames.ServerStore, () => {
 	const defaultState: IServerStoreState = {
 		servers: [],
 	};
@@ -32,7 +32,7 @@ export const useServerStore = defineStore('ServerStore', () => {
 			// Listen for refresh notifications
 			signalRStore.getRefreshNotification(RefreshDataType.PlexServer).pipe(switchMap(() => actions.refreshPlexServers())).subscribe();
 
-			return actions.refreshPlexServers().pipe(switchMap(() => of({ name: 'useServerStore', isSuccess: true })));
+			return actions.refreshPlexServers().pipe(switchMap(() => of({ name: StoreNames.ServerStore, isSuccess: true })));
 		},
 		refreshPlexServer(serverId: number) {
 			return plexServerApi.getPlexServerByIdEndpoint(serverId).pipe(

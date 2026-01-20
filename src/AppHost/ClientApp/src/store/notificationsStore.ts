@@ -4,7 +4,7 @@ import { switchMap, tap } from 'rxjs/operators';
 import type { Observable } from 'rxjs';
 import { of } from 'rxjs';
 import type { NotificationDTO } from '@dto';
-import type { ISetupResult } from '@interfaces';
+import { StoreNames, type ISetupResult } from '@interfaces';
 import { notificationApi } from '@api';
 import { cloneDeep } from 'lodash-es';
 
@@ -12,7 +12,7 @@ interface INotificationStoreState {
 	notifications: NotificationDTO[];
 }
 
-export const useNotificationsStore = defineStore('NotificationsStore', () => {
+export const useNotificationsStore = defineStore(StoreNames.NotificationsStore, () => {
 	const defaultState: INotificationStoreState = {
 		notifications: [],
 	};
@@ -24,7 +24,7 @@ export const useNotificationsStore = defineStore('NotificationsStore', () => {
 			return actions.fetchNotifications().pipe(
 				switchMap(() =>
 					of({
-						name: 'useNotificationsStore',
+						name: StoreNames.NotificationsStore,
 						isSuccess: true,
 					}),
 				),

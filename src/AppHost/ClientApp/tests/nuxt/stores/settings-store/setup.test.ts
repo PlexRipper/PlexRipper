@@ -2,7 +2,7 @@ import { describe, beforeAll, beforeEach, test, expect } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { subscribeSpyTo, baseSetup, baseVars, getAxiosMock } from '@services-test-base';
 import { generateResultDTO, generateSettingsModel } from '@mock';
-import type { ISetupResult } from '@interfaces';
+import { StoreNames, type ISetupResult } from '@interfaces';
 import { SettingsPaths } from '@api-urls';
 import { useSettingsStore } from '@store';
 
@@ -25,7 +25,7 @@ describe('SettingsStore.setup()', () => {
 		mock.onGet(SettingsPaths.getUserSettingsEndpoint()).reply(200, generateResultDTO(generateSettingsModel({ config })));
 		const setupResult: ISetupResult = {
 			isSuccess: true,
-			name: 'useSettingsStore',
+			name: StoreNames.SettingsStore,
 		};
 
 		// Act

@@ -8,6 +8,7 @@ export * from './downloadStore';
 export * from './folderPathStore';
 export * from './globalStore';
 export * from './helpStore';
+export * from './integrationStore';
 export * from './libraryStore';
 export * from './localizationStore';
 export * from './mediaOverviewStore';

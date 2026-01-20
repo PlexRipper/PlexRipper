@@ -10,7 +10,7 @@ import type {
 	PlexServerStatusDTO,
 	UpdatePlexServerConnectionEndpointRequest,
 } from '@dto';
-import type { ISetupResult } from '@interfaces';
+import { StoreNames, type ISetupResult } from '@interfaces';
 import { plexServerApi, plexServerConnectionApi } from '@api';
 import { RefreshDataType } from '@dto';
 import { sortPlexServerConnections } from '@composables/common';
@@ -21,7 +21,7 @@ interface IServerConnectionStoreState {
 	serverConnections: PlexServerConnectionDTO[];
 }
 
-export const useServerConnectionStore = defineStore('ServerConnection', () => {
+export const useServerConnectionStore = defineStore(StoreNames.ServerConnectionStore, () => {
 	const defaultState: IServerConnectionStoreState = {
 		serverConnections: [],
 	};
@@ -41,7 +41,7 @@ export const useServerConnectionStore = defineStore('ServerConnection', () => {
 
 			return actions
 				.refreshPlexServerConnections()
-				.pipe(switchMap(() => of({ name: useServerConnectionStore.name, isSuccess: true })));
+				.pipe(switchMap(() => of({ name: StoreNames.ServerConnectionStore, isSuccess: true })));
 		},
 		refreshPlexServerConnections(): Observable<PlexServerConnectionDTO[]> {
 			return plexServerConnectionApi.getAllPlexServerConnectionsEndpoint().pipe(

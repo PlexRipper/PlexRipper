@@ -1,7 +1,7 @@
 import { describe, beforeAll, test, expect, beforeEach } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { useSignalrStore } from '@store';
-import type { ISetupResult } from '@interfaces';
+import { StoreNames, type ISetupResult } from '@interfaces';
 import { subscribeSpyTo, baseSetup } from '~~/tests/_base/base';
 
 describe('SignalrStore.setup()', () => {
@@ -19,7 +19,7 @@ describe('SignalrStore.setup()', () => {
 
 		const setupResult: ISetupResult = {
 			isSuccess: true,
-			name: 'useSignalrStore',
+			name: StoreNames.SignalrStore,
 		};
 
 		// Act

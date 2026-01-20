@@ -5,7 +5,7 @@ import { switchMap, tap, map } from 'rxjs/operators';
 import type { Observable } from 'rxjs';
 import { of, throwError } from 'rxjs';
 import { type FolderPathDTO, FolderType, PlexMediaType } from '@dto';
-import type { ISetupResult, IFolderPathGroup } from '@interfaces';
+import { StoreNames, type ISetupResult, type IFolderPathGroup } from '@interfaces';
 import { folderPathApi } from '@api';
 import { useI18n } from 'vue-i18n';
 import { cloneDeep } from 'lodash-es';
@@ -14,7 +14,7 @@ interface IFolderPathStoreState {
 	folderPaths: FolderPathDTO[];
 }
 
-export const useFolderPathStore = defineStore('FolderPathStore', () => {
+export const useFolderPathStore = defineStore(StoreNames.FolderPathStore, () => {
 	const defaultState: IFolderPathStoreState = {
 		folderPaths: [],
 	};
@@ -31,7 +31,7 @@ export const useFolderPathStore = defineStore('FolderPathStore', () => {
 	// Actions
 	const actions = {
 		setup(): Observable<ISetupResult> {
-			return actions.refreshFolderPaths().pipe(switchMap(() => of({ name: 'useFolderPathStore', isSuccess: true })));
+			return actions.refreshFolderPaths().pipe(switchMap(() => of({ name: StoreNames.FolderPathStore, isSuccess: true })));
 		},
 		refreshFolderPaths() {
 			return folderPathApi.getAllFolderPathsEndpoint().pipe(

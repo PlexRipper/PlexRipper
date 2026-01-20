@@ -11,7 +11,7 @@ import {
 	ViewMode,
 } from '@dto';
 import type { IMediaOverviewSort } from '@composables/event-bus';
-import type { IMetaDataMediaFilter, ISelection } from '@interfaces';
+import { StoreNames, type IMetaDataMediaFilter, type ISelection } from '@interfaces';
 import { plexLibraryApi, plexMediaApi } from '@api';
 import { map, tap } from 'rxjs/operators';
 import { defer, forkJoin, type Observable, of } from 'rxjs';
@@ -43,7 +43,7 @@ interface IMediaOverviewStoreState {
 	metadataList: PlexMediaMetadataDTO;
 }
 
-export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
+export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, () => {
 	const defaultState: IMediaOverviewStoreState = {
 		libraryId: 0,
 		items: [],

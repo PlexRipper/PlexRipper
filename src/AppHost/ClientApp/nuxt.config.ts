@@ -173,6 +173,7 @@ export default defineNuxtConfig({
 		config: {
 			dark: true,
 		},
+		plugins: ['Notify'],
 		extras: {
 			// string | null: Auto-import roboto font. https://quasar.dev/style/typography#default-font
 			font: 'roboto-font', // string[]: Auto-import webfont icons. Usage: https://quasar.dev/vue-components/icon#webfont-usage

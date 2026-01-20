@@ -8,18 +8,21 @@ import { catchError, of } from 'rxjs';
 import { tap, switchMap } from 'rxjs/operators';
 import { useGlobalStore } from '@store';
 import { get } from '@vueuse/core';
+import { cloneDeep } from 'lodash-es';
+
+interface IAuthenticationStoreState {
+	isLoggedIn: boolean;
+	isDefaultCredentials: boolean;
+	currentUsername: string;
+	username: string;
+	currentPassword: string;
+	password: string;
+	isPasswordValid: boolean;
+	confirmPassword: string;
+}
 
 export const useAuthenticationStore = defineStore(StoreNames.AuthenticationStore, () => {
-	const state = reactive<{
-		isLoggedIn: boolean;
-		isDefaultCredentials: boolean;
-		currentUsername: string;
-		username: string;
-		currentPassword: string;
-		password: string;
-		isPasswordValid: boolean;
-		confirmPassword: string;
-	}>({
+	const defaultState = {
 		isLoggedIn: false,
 		isDefaultCredentials: true,
 		currentUsername: '',
@@ -28,7 +31,9 @@ export const useAuthenticationStore = defineStore(StoreNames.AuthenticationStore
 		password: '',
 		confirmPassword: '',
 		isPasswordValid: false,
-	});
+	};
+
+	const state = reactive<IAuthenticationStoreState>(cloneDeep(defaultState));
 
 	const globalStore = useGlobalStore();
 
@@ -105,11 +110,7 @@ export const useAuthenticationStore = defineStore(StoreNames.AuthenticationStore
 				return of(err);
 			})),
 		$reset: () => {
-			state.currentUsername = '';
-			state.username = '';
-			state.currentPassword = '';
-			state.password = '';
-			state.confirmPassword = '';
+			Object.assign(state, cloneDeep(defaultState));
 		},
 	};
 	const getters = {

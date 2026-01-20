@@ -5,7 +5,7 @@ import type { Subject, Observable } from 'rxjs';
 import { catchError, ReplaySubject, forkJoin, of } from 'rxjs';
 import { switchMap, tap } from 'rxjs/operators';
 import type IAppConfig from '@class/IAppConfig';
-import type { ISetupResult } from '@interfaces';
+import { StoreNames, type ISetupResult } from '@interfaces';
 import {
 	useAccountStore,
 	useAlertStore,
@@ -33,7 +33,7 @@ interface IAppConfigStoreState {
 	pageReadyObservable: Subject<boolean>;
 }
 
-export const useGlobalStore = defineStore('GlobalStore', () => {
+export const useGlobalStore = defineStore(StoreNames.GlobalStore, () => {
 	const defaultState: IAppConfigStoreState = {
 		version: '?',
 		config: {} as IAppConfig,
@@ -50,55 +50,51 @@ export const useGlobalStore = defineStore('GlobalStore', () => {
 
 			return actions.setup();
 		},
-		setup() {
+		setup(): Observable<ISetupResult[]> {
 			return useAuthenticationStore().setup().pipe(
 				tap(() => state.pageReadyObservable.next(false)),
-				switchMap((authResult): Observable<ISetupResult[]> => {
+				switchMap((authResult: ISetupResult): Observable<ISetupResult[]> => {
 					if (!authResult.isSuccess) {
 						state.pageReadyObservable.next(true);
 						return of([authResult]);
 					}
-					return forkJoin([
-						useAccountStore().setup(),
-						useAlertStore().setup(),
-						useBackgroundJobsStore().setup(),
-						useDialogStore().setup(),
-						useDownloadStore().setup(),
-						useFolderPathStore().setup(),
-						useHelpStore().setup(),
-						useLibraryStore().setup(),
-						useLocalizationStore().setup(),
-						useMediaStore().setup(),
-						useNotificationsStore().setup(),
-						useServerConnectionStore().setup(),
-						useServerStore().setup(),
-						useSettingsStore().setup(),
-						useSignalrStore().setup(),
-					]).pipe(
-						switchMap((results) => {
-							// Run integration store setup after settings are loaded
-							return useIntegrationStore().setup().pipe(
-								switchMap((integrationResult) => of([...results, integrationResult])),
-							);
-						}),
+
+					return actions.setupDependencies().pipe(
+						tap(() => state.pageReadyObservable.next(true)),
+						switchMap((results) => of([authResult, ...results])),
 					);
 				}),
 				catchError((error) => {
 					if (error === 'Unauthorized') {
-						return of([{ name: 'PageSetup', isSuccess: true }]);
+						return of([{ name: StoreNames.PageSetup, isSuccess: true }]);
 					}
 					Log.error('Page Setup has failed:', error);
-					return of([{ name: 'PageSetup', isSuccess: false }]);
+					return of([{ name: StoreNames.PageSetup, isSuccess: false }]);
 				}),
-				tap((results) => {
-					state.pageReadyObservable.next(true);
-					if (results.some((result) => !result.isSuccess)) {
-						for (const result of results) {
-							if (!result.isSuccess) {
-								Log.error(`Service ${result.name} has a failed setup process`, result);
-							}
-						}
-					}
+			);
+		},
+		setupDependencies(): Observable<ISetupResult[]> {
+			return forkJoin([
+				useAccountStore().setup(),
+				useAlertStore().setup(),
+				useBackgroundJobsStore().setup(),
+				useDialogStore().setup(),
+				useDownloadStore().setup(),
+				useFolderPathStore().setup(),
+				useHelpStore().setup(),
+				useLibraryStore().setup(),
+				useLocalizationStore().setup(),
+				useMediaStore().setup(),
+				useNotificationsStore().setup(),
+				useServerConnectionStore().setup(),
+				useServerStore().setup(),
+				useSettingsStore().setup(),
+				useSignalrStore().setup(),
+			]).pipe(
+				switchMap((results) => {
+					return useIntegrationStore().setup().pipe(
+						switchMap((integrationResult) => of([...results, integrationResult])),
+					);
 				}),
 			);
 		},

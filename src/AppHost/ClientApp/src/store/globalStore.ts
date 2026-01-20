@@ -14,6 +14,7 @@ import {
 	useDownloadStore,
 	useFolderPathStore,
 	useHelpStore,
+	useIntegrationStore,
 	useLibraryStore,
 	useLocalizationStore,
 	useMediaStore,
@@ -73,7 +74,14 @@ export const useGlobalStore = defineStore('GlobalStore', () => {
 						useServerStore().setup(),
 						useSettingsStore().setup(),
 						useSignalrStore().setup(),
-					]);
+					]).pipe(
+						switchMap((results) => {
+							// Run integration store setup after settings are loaded
+							return useIntegrationStore().setup().pipe(
+								switchMap((integrationResult) => of([...results, integrationResult])),
+							);
+						}),
+					);
 				}),
 				catchError((error) => {
 					if (error === 'Unauthorized') {
@@ -120,6 +128,7 @@ export const useGlobalStore = defineStore('GlobalStore', () => {
 			useServerStore().$reset();
 			useSettingsStore().$reset();
 			useSignalrStore().$reset();
+			useIntegrationStore().$reset();
 		},
 	};
 	const getters = {

@@ -2,7 +2,7 @@
 	<QSection header="Sonarr">
 		<q-stepper
 			ref="stepper"
-			v-model="step"
+			v-model="integrationStore.sonarr.step"
 			alternative-labels
 			animated
 			color="primary"
@@ -10,8 +10,8 @@
 			header-nav>
 			<!-- Setup Sonarr Connection -->
 			<QStep
-				:done="testSuccess === true"
-				:error="testSuccess === false && testMessage !== ''"
+				:done="integrationStore.sonarr.testSuccess === true"
+				:error="integrationStore.sonarr.testSuccess === false && integrationStore.sonarr.testStatus !== null"
 				:name="1"
 				:title="t('components.sonarr-integration.nav-bar.connection.title')"
 				active-icon="mdi-connection"
@@ -48,7 +48,7 @@
 					:title="t('help.settings.integrations.sonarr.test-connection.text')"
 					hide-label>
 					<BaseButton
-						:loading="isTesting"
+						:loading="integrationStore.sonarr.isTesting"
 						icon="mdi-connection"
 						label="Test Connection"
 						@click="testSonarrConnection" />
@@ -56,7 +56,7 @@
 			</QStep>
 			<!-- Configure Sonarr Integration -->
 			<QStep
-				:disable="testSuccess === false"
+				:disable="integrationStore.sonarr.testSuccess === false"
 				:done="settingsStore.integrationsSettings.sonarr.isConfigured"
 				:name="2"
 				:title="t('components.sonarr-integration.nav-bar.configure.title')"
@@ -71,7 +71,7 @@
 					:title="t('help.settings.integrations.sonarr.setup-configuration.title')"
 					hide-label>
 					<BaseButton
-						:loading="isConfiguring"
+						:loading="integrationStore.sonarr.isConfiguring"
 						icon="mdi-connection"
 						:label="t('components.sonarr-integration.nav-bar.configure.button')"
 						@click="configureSonarrSetup" />
@@ -82,15 +82,15 @@
 		<QRow>
 			<QCol>
 				<QAlert
-					v-if="configuringSuccess !== null"
-					:type="configuringSuccess ? NotificationLevel.Success : NotificationLevel.Error">
-					{{ configuringSuccess ? configuringMessage : formatErrorResponse(error) }}
+					v-if="integrationStore.sonarr.configuringSuccess !== null"
+					:type="integrationStore.sonarr.configuringSuccess ? NotificationLevel.Success : NotificationLevel.Error">
+					{{ integrationStore.sonarr.configuringSuccess ? t('components.sonarr-integration.configuration-status.success') : formatErrorResponse(integrationStore.sonarr.error) }}
 				</QAlert>
 				<!-- Always returns 200 -->
 				<QAlert
-					v-else-if="testSuccess !== null"
-					:type="testSuccess ? NotificationLevel.Success : NotificationLevel.Error">
-					{{ testMessage }}
+					v-else-if="integrationStore.sonarr.testSuccess !== null"
+					:type="integrationStore.sonarr.testSuccess ? NotificationLevel.Success : NotificationLevel.Error">
+					{{ getTestStatusMessage() }}
 				</QAlert>
 			</QCol>
 		</QRow>
@@ -99,109 +99,53 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue';
-import { set } from '@vueuse/core';
-import { useSettingsStore } from '@store';
-import { integrationApi } from '@api';
-import { type BaseResultDTO, NotificationLevel, TestConnectionStatus } from '@dto';
-import { switchMap } from 'rxjs/operators';
-import { of } from 'rxjs';
-import { useSubscription } from '@vueuse/rxjs';
+import { useSettingsStore, useIntegrationStore } from '@store';
+import { NotificationLevel, TestConnectionStatus } from '@dto';
 import { formatErrorResponse } from '@composables';
 
 const settingsStore = useSettingsStore();
+const integrationStore = useIntegrationStore();
 const { t } = useI18n();
 
-const step = ref(1);
 const passwordInputFocus = ref(false);
-const isTesting = ref(false);
-const isConfiguring = ref(false);
-const testSuccess = ref<boolean | null>(null);
-const testMessage = ref('');
-const configuringSuccess = ref<boolean | null>(null);
-const configuringMessage = ref('');
-const error = ref<BaseResultDTO | null>(null);
 
 function testSonarrConnection() {
-	if (settingsStore.integrationsSettings.sonarr.sonarrBaseUrl === '' || settingsStore.integrationsSettings.sonarr.sonarrApiKey === '') {
-		return;
-	}
-
-	set(isTesting, true);
-	set(testSuccess, null);
-	set(testMessage, '');
-	set(error, null);
-	useSubscription(integrationApi.testConnectionToSonarrEndpoint({
-		url: settingsStore.integrationsSettings.sonarr.sonarrBaseUrl,
-		apiKey: settingsStore.integrationsSettings.sonarr.sonarrApiKey,
-	}).subscribe((response) => {
-		if (response.isSuccess) {
-			switch (response.value?.result) {
-				case TestConnectionStatus.Success:
-					set(testSuccess, true);
-					set(testMessage, t('components.sonarr-integration.connection-status.success'));
-					set(step, 2);
-					break;
-				case TestConnectionStatus.InvalidApiKey:
-					set(testSuccess, false);
-					set(testMessage, t('components.sonarr-integration.connection-status.invalid-api-key'));
-					break;
-				case TestConnectionStatus.ConnectionFailed:
-					set(testSuccess, false);
-					set(testMessage, t('components.sonarr-integration.connection-status.connection-failed'));
-					break;
-				case TestConnectionStatus.UrlIsInvalid:
-					set(testSuccess, false);
-					set(testMessage, t('components.sonarr-integration.connection-status.url-is-invalid'));
-					break;
-				default:
-					set(testSuccess, false);
-					set(testMessage, t('components.sonarr-integration.connection-status.unknown-connection-status'));
-					break;
-			}
-		} else {
-			set(testSuccess, false);
-			set(testMessage, formatErrorResponse(response));
-			set(error, response);
-		}
-		set(isTesting, false);
-	}));
+	integrationStore.testConnection(
+		'sonarr',
+		settingsStore.integrationsSettings.sonarr.sonarrBaseUrl,
+		settingsStore.integrationsSettings.sonarr.sonarrApiKey,
+	);
 }
 
 function configureSonarrSetup() {
-	set(isConfiguring, true);
-	set(configuringSuccess, null);
-	set(configuringMessage, '');
-	set(testMessage, '');
-	set(error, null);
-	useSubscription(integrationApi.configureSonarrIntegrationEndpoint({
-		url: settingsStore.integrationsSettings.sonarr.sonarrBaseUrl,
-		apiKey: settingsStore.integrationsSettings.sonarr.sonarrApiKey,
-	}).pipe(switchMap((response) => {
-		// Wait for refreshSettings to complete before processing the response
-		// This ensures isConfigured is updated before the component checks it
-		return settingsStore.refreshSettings().pipe(switchMap(() => of(response)));
-	})).subscribe((response) => {
-		set(configuringSuccess, response.isSuccess);
-		set(isConfiguring, false);
-		if (response.isSuccess) {
-			set(configuringMessage, t('components.sonarr-integration.configuration-status.success'));
-			// This should overshoot to step 3 to show step 2 as done
-			set(step, 3);
-		} else {
-			set(error, response);
-		}
-	}));
+	integrationStore.configureIntegration(
+		'sonarr',
+		settingsStore.integrationsSettings.sonarr.sonarrBaseUrl,
+		settingsStore.integrationsSettings.sonarr.sonarrApiKey,
+	);
 }
 
-onBeforeMount(async () => {
-	if (settingsStore.integrationsSettings.sonarr.isConfigured) {
-		// Already configured: mark both steps as done and show final step
-		set(testSuccess, true);
-		set(configuringSuccess, true);
-		set(configuringMessage, t('components.sonarr-integration.configuration-status.success'));
-		set(step, 3);
-	} else {
-		testSonarrConnection();
+function getTestStatusMessage(): string {
+	const status = integrationStore.sonarr.testStatus;
+
+	if (!status) {
+		return integrationStore.sonarr.error
+			? formatErrorResponse(integrationStore.sonarr.error)
+			: '';
 	}
-});
+
+	switch (status) {
+		case TestConnectionStatus.Success:
+			return t('components.sonarr-integration.connection-status.success');
+		case TestConnectionStatus.InvalidApiKey:
+			return t('components.sonarr-integration.connection-status.invalid-api-key');
+		case TestConnectionStatus.ConnectionFailed:
+			return t('components.sonarr-integration.connection-status.connection-failed');
+		case TestConnectionStatus.UrlIsInvalid:
+			return t('components.sonarr-integration.connection-status.url-is-invalid');
+		case TestConnectionStatus.Unknown:
+		default:
+			return t('components.sonarr-integration.connection-status.unknown-connection-status');
+	}
+}
 </script>

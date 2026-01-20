@@ -357,7 +357,7 @@
         },
         "sonarr-integration": {
             "connection-status": {
-                "connection-failed": "Es konnte keine Verbindung zu Sonarr hergestellt werden. Bitte überprüfen Sie, ob die Basis-URL korrekt ist.",
+                "connection-failed": "Es konnte keine Verbindung zu Sonarr hergestellt werden. Bitte stellen Sie sicher, dass Sonarr online und erreichbar ist!",
                 "invalid-api-key": "Die Verbindung zu Sonarr konnte hergestellt werden, aber der API-Schlüssel war ungültig.",
                 "success": "Reaparr konnte erfolgreich eine Verbindung zu Sonarr herstellen!",
                 "unknown-connection-status": "Es konnte nicht festgestellt werden, was beim Testen der Verbindung mit Sonarr schiefgelaufen ist.",
@@ -378,7 +378,7 @@
         },
         "radarr-integration": {
             "connection-status": {
-                "connection-failed": "Es konnte keine Verbindung zu Radarr hergestellt werden. Bitte überprüfen Sie, ob die Basis-URL korrekt ist.",
+                "connection-failed": "Es konnte keine Verbindung zu Radarr hergestellt werden. Bitte stellen Sie sicher, dass Radarr online und erreichbar ist!",
                 "invalid-api-key": "Die Verbindung zu Radarr konnte hergestellt werden, aber der API-Schlüssel war ungültig.",
                 "success": "Reaparr konnte erfolgreich eine Verbindung zu Radarr herstellen!",
                 "unknown-connection-status": "Es konnte nicht festgestellt werden, was beim Testen der Verbindung mit Radarr schiefgelaufen ist.",

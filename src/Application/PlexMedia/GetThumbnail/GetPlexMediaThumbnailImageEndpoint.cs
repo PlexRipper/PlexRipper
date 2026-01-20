@@ -1,4 +1,5 @@
 using System.Net.Mime;
+using System.Net.Sockets;
 using FastEndpoints;
 using FluentValidation;
 using Microsoft.AspNetCore.WebUtilities;
@@ -172,28 +173,91 @@ public sealed class GetPlexMediaThumbnailImageEndpoint : BaseEndpoint<GetPlexMed
 
         var url = QueryHelpers.AddQueryString(baseUrl, query);
 
-        // Use ResponseHeadersRead to start streaming immediately without buffering
-        using var response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, ct);
-        if (!response.IsSuccessStatusCode)
+        try
         {
-            _log.Here().Verbose("Failed to fetch Plex thumbnail from {Url}", url);
-            await SendFluentResult(Result.Fail("Failed to fetch image").Add502BadGatewayError(), ct);
-            return;
+            // Use ResponseHeadersRead to start streaming immediately without buffering
+            using var response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, ct);
+            if (!response.IsSuccessStatusCode)
+            {
+                _log.Here()
+                    .Verbose(
+                        "Failed to fetch Plex thumbnail from {Url} - Status: {StatusCode}",
+                        url,
+                        response.StatusCode
+                    );
+                await SendFluentResult(Result.Fail("Failed to fetch image").Add502BadGatewayError(), ct);
+                return;
+            }
+
+            var contentType = response.Content.Headers.ContentType?.ToString() ?? "image/jpeg";
+            var contentLength = response.Content.Headers.ContentLength;
+
+            if (contentLength.HasValue)
+            {
+                HttpContext.Response.ContentLength = contentLength.Value;
+            }
+
+            HttpContext.Response.ContentType = contentType;
+
+            // Stream directly to response without buffering
+            await using var stream = await response.Content.ReadAsStreamAsync(ct);
+            await stream.CopyToAsync(HttpContext.Response.Body, ct);
         }
-
-        var contentType = response.Content.Headers.ContentType?.ToString() ?? "image/jpeg";
-        var contentLength = response.Content.Headers.ContentLength;
-
-        if (contentLength.HasValue)
+        catch (HttpRequestException ex)
         {
-            HttpContext.Response.ContentLength = contentLength.Value;
+            // Check if this is a connection refused error (server offline) - use Warning instead of Error
+            var isConnectionRefused =
+                ex.InnerException is SocketException socketEx
+                && (socketEx.ErrorCode == 111 || socketEx.ErrorCode == 10061);
+
+            if (isConnectionRefused)
+            {
+                _log.Here()
+                    .Warning(
+                        "Connection refused while fetching Plex thumbnail for server {PlexServerId} (key {PlexKey}). Server appears to be offline.",
+                        plexServerId,
+                        req.PlexKey
+                    );
+            }
+            else
+            {
+                _log.Here()
+                    .Warning(
+                        ex,
+                        "HTTP request failed while fetching Plex thumbnail for server {PlexServerId} (key {PlexKey}). URL: {Url}",
+                        plexServerId,
+                        req.PlexKey,
+                        url
+                    );
+            }
+
+            await SendFluentResult(Result.Fail("Failed to connect to Plex server").Add502BadGatewayError(), ct);
         }
-
-        HttpContext.Response.ContentType = contentType;
-
-        // Stream directly to response without buffering
-        await using var stream = await response.Content.ReadAsStreamAsync(ct);
-        await stream.CopyToAsync(HttpContext.Response.Body, ct);
+        catch (TaskCanceledException ex) when (!ct.IsCancellationRequested)
+        {
+            // Timeout occurred (not user cancellation)
+            _log.Here()
+                .Warning(
+                    ex,
+                    "Timeout fetching Plex thumbnail for server {PlexServerId} (key {PlexKey}). URL: {Url}",
+                    plexServerId,
+                    req.PlexKey,
+                    url
+                );
+            await SendFluentResult(Result.Fail("Request timeout").Add502BadGatewayError(), ct);
+        }
+        catch (IOException ex)
+        {
+            // SSL handshake failures and other I/O errors - typically due to unreachable/misconfigured servers
+            _log.Here()
+                .Warning(
+                    "I/O error while fetching Plex thumbnail for server {PlexServerId} (key {PlexKey}). {ErrorMessage}",
+                    plexServerId,
+                    req.PlexKey,
+                    ex.Message
+                );
+            await SendFluentResult(Result.Fail("Network error while fetching image").Add502BadGatewayError(), ct);
+        }
     }
 
     private async Task<Result<string>> GetCachedTokenAsync(int plexServerId, CancellationToken ct)

@@ -1,4 +1,5 @@
 using System.Net.Http.Headers;
+using System.Security.Authentication;
 using Microsoft.Extensions.DependencyInjection;
 using Reaparr.Settings.Contracts;
 
@@ -74,7 +75,7 @@ public static class HttpClientModule
                 PlexThumbnailClientName,
                 client =>
                 {
-                    client.Timeout = TimeSpan.FromSeconds(30);
+                    client.Timeout = TimeSpan.FromSeconds(45);
                     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("image/jpeg"));
                 }
             )
@@ -87,7 +88,11 @@ public static class HttpClientModule
                     SslOptions = new System.Net.Security.SslClientAuthenticationOptions
                     {
                         RemoteCertificateValidationCallback = (_, _, _, _) => true,
+                        // Enable all TLS versions to maximize compatibility
+                        EnabledSslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13,
                     },
+                    // Increase connect timeout to handle slow connections
+                    ConnectTimeout = TimeSpan.FromSeconds(15),
                 }
             );
     }

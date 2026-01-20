@@ -25,7 +25,8 @@
 					:title="t('help.settings.integrations.radarr.base-url-input.title')">
 					<QInput
 						v-model="settingsStore.integrationsSettings.radarr.radarrBaseUrl"
-						hint="http://localhost:7878" />
+						hint="http://localhost:7878"
+						data-cy="radarr-base-url-input" />
 				</HelpRow>
 				<!-- API Key -->
 				<HelpRow
@@ -51,6 +52,7 @@
 						:loading="integrationStore.radarr.isTesting"
 						icon="mdi-connection"
 						label="Test Connection"
+						cy="test-radarr-connection-button"
 						@click="testRadarrConnection" />
 				</HelpRow>
 			</QStep>
@@ -74,6 +76,7 @@
 						:loading="integrationStore.radarr.isConfiguring"
 						icon="mdi-connection"
 						:label="t('components.radarr-integration.nav-bar.configure.button')"
+						cy="configure-radarr-button"
 						@click="configureRadarrSetup" />
 				</HelpRow>
 			</QStep>
@@ -83,12 +86,14 @@
 			<QCol>
 				<QAlert
 					v-if="integrationStore.radarr.configuringSuccess !== null"
-					:type="integrationStore.radarr.configuringSuccess ? NotificationLevel.Success : NotificationLevel.Error">
+					:type="integrationStore.radarr.configuringSuccess ? NotificationLevel.Success : NotificationLevel.Error"
+					cy="test-radarr-configuration-status-alert">
 					{{ integrationStore.radarr.configuringSuccess ? t('components.radarr-integration.configuration-status.success') : formatErrorResponse(integrationStore.radarr.error) }}
 				</QAlert>
 				<!-- Always returns 200 -->
 				<QAlert
 					v-else-if="integrationStore.radarr.testSuccess !== null"
+					cy="test-radarr-connection-status-alert"
 					:type="integrationStore.radarr.testSuccess ? NotificationLevel.Success : NotificationLevel.Error">
 					{{ getTestStatusMessage() }}
 				</QAlert>
@@ -110,19 +115,11 @@ const { t } = useI18n();
 const passwordInputFocus = ref(false);
 
 function testRadarrConnection() {
-	integrationStore.testConnection(
-		'radarr',
-		settingsStore.integrationsSettings.radarr.radarrBaseUrl,
-		settingsStore.integrationsSettings.radarr.radarrApiKey,
-	);
+	useSubscription(integrationStore.testConnectionToRadarr().subscribe());
 }
 
 function configureRadarrSetup() {
-	integrationStore.configureIntegration(
-		'radarr',
-		settingsStore.integrationsSettings.radarr.radarrBaseUrl,
-		settingsStore.integrationsSettings.radarr.radarrApiKey,
-	);
+	useSubscription(integrationStore.configureRadarrIntegration().subscribe());
 }
 
 function getTestStatusMessage(): string {

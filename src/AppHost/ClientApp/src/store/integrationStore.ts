@@ -2,7 +2,6 @@ import { acceptHMRUpdate, defineStore } from 'pinia';
 import { reactive, toRefs } from 'vue';
 import { switchMap, tap, catchError } from 'rxjs/operators';
 import { type Observable, of, forkJoin } from 'rxjs';
-import { useSubscription } from '@vueuse/rxjs';
 import { cloneDeep } from 'lodash-es';
 import { type BaseResultDTO, TestConnectionStatus } from '@dto';
 import { integrationApi } from '@api';
@@ -129,71 +128,100 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 			);
 		},
 
-		testConnection(integrationType: 'sonarr' | 'radarr', url: string, apiKey: string) {
-			if (url === '' || apiKey === '') {
-				return;
-			}
+		testConnectionToSonarr() {
+			state.sonarr.isTesting = true;
+			state.sonarr.testSuccess = null;
+			state.sonarr.testStatus = null;
+			state.sonarr.error = null;
 
-			const integrationState = state[integrationType];
-
-			integrationState.isTesting = true;
-			integrationState.testSuccess = null;
-			integrationState.testStatus = null;
-			integrationState.error = null;
-
-			const testEndpoint = integrationType === 'sonarr'
-				? integrationApi.testConnectionToSonarrEndpoint
-				: integrationApi.testConnectionToRadarrEndpoint;
-
-			useSubscription(testEndpoint({
-				url,
-				apiKey,
-			}).subscribe((response) => {
+			return integrationApi.testConnectionToSonarrEndpoint({
+				url: settingsStore.integrationsSettings.sonarr.sonarrBaseUrl,
+				apiKey: settingsStore.integrationsSettings.sonarr.sonarrApiKey,
+			}).pipe(tap((response) => {
 				if (response.isSuccess) {
 					const status = response.value?.result ?? TestConnectionStatus.Unknown;
-					integrationState.testStatus = status;
+					state.sonarr.testStatus = status;
 
 					if (status === TestConnectionStatus.Success) {
-						integrationState.testSuccess = true;
-						integrationState.step = 2;
+						state.sonarr.testSuccess = true;
+						state.sonarr.step = 2;
 					} else {
-						integrationState.testSuccess = false;
+						state.sonarr.testSuccess = false;
 					}
 				} else {
-					integrationState.testSuccess = false;
-					integrationState.testStatus = null;
-					integrationState.error = response;
+					state.sonarr.testSuccess = false;
+					state.sonarr.testStatus = null;
+					state.sonarr.error = response;
 				}
-				integrationState.isTesting = false;
+				state.sonarr.isTesting = false;
 			}));
 		},
 
-		configureIntegration(integrationType: 'sonarr' | 'radarr', url: string, apiKey: string) {
-			const integrationState = state[integrationType];
+		testConnectionToRadarr() {
+			state.radarr.isTesting = true;
+			state.radarr.testSuccess = null;
+			state.radarr.testStatus = null;
+			state.radarr.error = null;
 
-			integrationState.isConfiguring = true;
-			integrationState.configuringSuccess = null;
-			integrationState.error = null;
+			return integrationApi.testConnectionToRadarrEndpoint({
+				url: settingsStore.integrationsSettings.radarr.radarrBaseUrl,
+				apiKey: settingsStore.integrationsSettings.radarr.radarrApiKey,
+			}).pipe(tap((response) => {
+				if (response.isSuccess) {
+					const status = response.value?.result ?? TestConnectionStatus.Unknown;
+					state.radarr.testStatus = status;
 
-			const configureEndpoint = integrationType === 'sonarr'
-				? integrationApi.configureSonarrIntegrationEndpoint
-				: integrationApi.configureRadarrIntegrationEndpoint;
+					if (status === TestConnectionStatus.Success) {
+						state.radarr.testSuccess = true;
+						state.radarr.step = 2;
+					} else {
+						state.radarr.testSuccess = false;
+					}
+				} else {
+					state.radarr.testSuccess = false;
+					state.radarr.testStatus = null;
+					state.radarr.error = response;
+				}
+				state.radarr.isTesting = false;
+			}));
+		},
 
-			useSubscription(configureEndpoint({
-				url,
-				apiKey,
-			}).pipe(switchMap((response) => {
-				// Wait for refreshSettings to complete before processing the response
-				// This ensures isConfigured is updated before the component checks it
-				return settingsStore.refreshSettings().pipe(switchMap(() => of(response)));
-			})).subscribe((response) => {
-				integrationState.configuringSuccess = response.isSuccess;
-				integrationState.isConfiguring = false;
+		configureSonarrIntegration() {
+			state.sonarr.isConfiguring = true;
+			state.sonarr.configuringSuccess = null;
+			state.sonarr.error = null;
+
+			return integrationApi.configureSonarrIntegrationEndpoint({
+				url: settingsStore.integrationsSettings.sonarr.sonarrBaseUrl,
+				apiKey: settingsStore.integrationsSettings.sonarr.sonarrApiKey,
+			}).pipe(tap((response) => {
+				state.sonarr.configuringSuccess = response.isSuccess;
+				state.sonarr.isConfiguring = false;
 				if (response.isSuccess) {
 					// This should overshoot to step 3 to show step 2 as done
-					integrationState.step = 3;
+					state.sonarr.step = 3;
 				} else {
-					integrationState.error = response;
+					state.sonarr.error = response;
+				}
+			}));
+		},
+
+		configureRadarrIntegration() {
+			state.radarr.isConfiguring = true;
+			state.radarr.configuringSuccess = null;
+			state.radarr.error = null;
+
+			return integrationApi.configureRadarrIntegrationEndpoint({
+				url: settingsStore.integrationsSettings.radarr.radarrBaseUrl,
+				apiKey: settingsStore.integrationsSettings.radarr.radarrApiKey,
+			}).pipe(tap((response) => {
+				state.radarr.configuringSuccess = response.isSuccess;
+				state.radarr.isConfiguring = false;
+				if (response.isSuccess) {
+					// This should overshoot to step 3 to show step 2 as done
+					state.radarr.step = 3;
+				} else {
+					state.radarr.error = response;
 				}
 			}));
 		},

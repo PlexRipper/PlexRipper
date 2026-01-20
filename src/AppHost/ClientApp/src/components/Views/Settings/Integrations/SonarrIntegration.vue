@@ -25,7 +25,8 @@
 					:title="t('help.settings.integrations.sonarr.base-url-input.title')">
 					<QInput
 						v-model="settingsStore.integrationsSettings.sonarr.sonarrBaseUrl"
-						hint="http://localhost:8989" />
+						hint="http://localhost:8989"
+						data-cy="sonarr-base-url-input" />
 				</HelpRow>
 				<!-- API Key -->
 				<HelpRow
@@ -51,6 +52,7 @@
 						:loading="integrationStore.sonarr.isTesting"
 						icon="mdi-connection"
 						label="Test Connection"
+						cy="test-sonarr-connection-button"
 						@click="testSonarrConnection" />
 				</HelpRow>
 			</QStep>
@@ -74,6 +76,7 @@
 						:loading="integrationStore.sonarr.isConfiguring"
 						icon="mdi-connection"
 						:label="t('components.sonarr-integration.nav-bar.configure.button')"
+						cy="configure-sonarr-button"
 						@click="configureSonarrSetup" />
 				</HelpRow>
 			</QStep>
@@ -83,13 +86,15 @@
 			<QCol>
 				<QAlert
 					v-if="integrationStore.sonarr.configuringSuccess !== null"
+					cy="test-sonarr-configuration-status-alert"
 					:type="integrationStore.sonarr.configuringSuccess ? NotificationLevel.Success : NotificationLevel.Error">
 					{{ integrationStore.sonarr.configuringSuccess ? t('components.sonarr-integration.configuration-status.success') : formatErrorResponse(integrationStore.sonarr.error) }}
 				</QAlert>
 				<!-- Always returns 200 -->
 				<QAlert
 					v-else-if="integrationStore.sonarr.testSuccess !== null"
-					:type="integrationStore.sonarr.testSuccess ? NotificationLevel.Success : NotificationLevel.Error">
+					:type="integrationStore.sonarr.testSuccess ? NotificationLevel.Success : NotificationLevel.Error"
+					cy="test-sonarr-connection-status-alert">
 					{{ getTestStatusMessage() }}
 				</QAlert>
 			</QCol>
@@ -110,19 +115,11 @@ const { t } = useI18n();
 const passwordInputFocus = ref(false);
 
 function testSonarrConnection() {
-	integrationStore.testConnection(
-		'sonarr',
-		settingsStore.integrationsSettings.sonarr.sonarrBaseUrl,
-		settingsStore.integrationsSettings.sonarr.sonarrApiKey,
-	);
+	useSubscription(integrationStore.testConnectionToSonarr().subscribe());
 }
 
 function configureSonarrSetup() {
-	integrationStore.configureIntegration(
-		'sonarr',
-		settingsStore.integrationsSettings.sonarr.sonarrBaseUrl,
-		settingsStore.integrationsSettings.sonarr.sonarrApiKey,
-	);
+	useSubscription(integrationStore.configureSonarrIntegration().subscribe());
 }
 
 function getTestStatusMessage(): string {

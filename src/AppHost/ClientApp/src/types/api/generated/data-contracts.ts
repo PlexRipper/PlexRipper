@@ -687,7 +687,7 @@ export interface PlexMediaDataDTO {
   /** @format int64 */
   duration: number;
   videoCodec: string;
-  videoResolution: string;
+  videoResolution: VideoQuality;
 }
 
 export interface PlexMediaMetadataDTO {

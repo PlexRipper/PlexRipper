@@ -32,10 +32,29 @@ public class DownloadQueueCheckDownloadQueueUnitTests : BaseUnitTest<DownloadQue
             config =>
             {
                 config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 1;
+                config.MovieCount = 1;
+                config.MovieDownloadTasksCount = 1;
             }
         );
 
         // Arrange
+        // Set up a task that's actually downloading in the database
+        var dbContext = IDbContext;
+        var downloadTasks = await dbContext
+            .DownloadTaskMovie.AsTracking()
+            .Where(x => x.PlexServerId == 1)
+            .IncludeAll()
+            .ToListAsync(CancellationToken);
+
+        var firstMovieDownloadTask = downloadTasks[0];
+        await dbContext
+            .DownloadTaskMovieFile.Where(x => x.Id == firstMovieDownloadTask.Children.First().Id)
+            .ExecuteUpdateAsync(
+                p => p.SetProperty(x => x.DownloadStatus, DownloadStatus.Downloading),
+                CancellationToken
+            );
+
         Mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>())).ReturnOk();
         Mock.Mock<IDownloadTaskScheduler>().Setup(x => x.IsServerDownloading(It.IsAny<int>())).ReturnsAsync(true);
 
@@ -176,5 +195,117 @@ public class DownloadQueueCheckDownloadQueueUnitTests : BaseUnitTest<DownloadQue
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Value.Id.ShouldBe(downloadTasks[0].Children[0].Children[0].Children[0].Id);
+    }
+
+    [Fact]
+    public async Task ShouldStartNextDownloadTask_WhenJobIsStillRunningButDatabaseStatusIsDownloadFinished()
+    {
+        // Arrange
+        // This test simulates the race condition where a download job has finished and updated
+        // the database status to DownloadFinished, but the Quartz job is still in the process
+        // of cleaning up and hasn't been removed from the scheduler yet.
+        await SetupDatabase(
+            88234,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 1;
+                config.MovieCount = 3;
+                config.MovieDownloadTasksCount = 3;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var downloadTasks = await dbContext
+            .DownloadTaskMovie.AsTracking()
+            .Where(x => x.PlexServerId == 1)
+            .IncludeAll()
+            .ToListAsync(CancellationToken);
+
+        // Set the first task to DownloadFinished (simulating a just-completed download)
+        // We set this on the file-level task (child) which is what actually gets downloaded
+        var firstMovieDownloadTask = downloadTasks[0];
+        var firstFileTaskId = firstMovieDownloadTask.Children.First().Id;
+        await dbContext
+            .DownloadTaskMovieFile.Where(x => x.Id == firstFileTaskId)
+            .ExecuteUpdateAsync(
+                p => p.SetProperty(x => x.DownloadStatus, DownloadStatus.DownloadFinished),
+                CancellationToken
+            );
+
+        // Mock the scheduler to return true (job still running - race condition)
+        Mock.Mock<IDownloadTaskScheduler>().Setup(x => x.IsServerDownloading(It.IsAny<int>())).ReturnsAsync(true);
+
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>()))
+            .ReturnOk()
+            .Verifiable(Times.Once);
+
+        // Act
+        var result = await Sut.CheckDownloadQueueServer(1);
+
+        // Assert
+        // Should succeed and start the next queued task (any queued task that's not the finished one)
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldNotBeNull();
+        result.Value.Id.ShouldNotBe(firstFileTaskId);
+        result.Value.DownloadStatus.ShouldBe(DownloadStatus.Queued);
+
+        // Verify that StartDownloadTaskJob was called
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Verify(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task ShouldNotStartNextDownloadTask_WhenJobIsStillRunningAndDatabaseStatusIsDownloading()
+    {
+        // Arrange
+        // This test verifies that we still block when a task is actively downloading
+        await SetupDatabase(
+            66451,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 1;
+                config.MovieCount = 3;
+                config.MovieDownloadTasksCount = 3;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var downloadTasks = await dbContext
+            .DownloadTaskMovie.AsTracking()
+            .Where(x => x.PlexServerId == 1)
+            .IncludeAll()
+            .ToListAsync(CancellationToken);
+
+        // Set the first task to Downloading (actively downloading)
+        var firstMovieDownloadTask = downloadTasks[0];
+        await dbContext
+            .DownloadTaskMovieFile.Where(x => x.Id == firstMovieDownloadTask.Children.First().Id)
+            .ExecuteUpdateAsync(
+                p => p.SetProperty(x => x.DownloadStatus, DownloadStatus.Downloading),
+                CancellationToken
+            );
+
+        // Mock the scheduler to return true (job is running)
+        Mock.Mock<IDownloadTaskScheduler>().Setup(x => x.IsServerDownloading(It.IsAny<int>())).ReturnsAsync(true);
+
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>()))
+            .ReturnOk()
+            .Verifiable(Times.Never);
+
+        // Act
+        var result = await Sut.CheckDownloadQueueServer(1);
+
+        // Assert
+        // Should fail because there's an active download
+        result.IsFailed.ShouldBeTrue();
+        result.Errors.Count.ShouldBeGreaterThan(0);
+
+        // Verify that StartDownloadTaskJob was NOT called
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Verify(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>()), Times.Never);
     }
 }

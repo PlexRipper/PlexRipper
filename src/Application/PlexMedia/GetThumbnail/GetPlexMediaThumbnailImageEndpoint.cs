@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Caching.Memory;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
+using Reaparr.Environment;
 
 namespace Reaparr.Application;
 
@@ -182,7 +183,7 @@ public sealed class GetPlexMediaThumbnailImageEndpoint : BaseEndpoint<GetPlexMed
                 _log.Here()
                     .Verbose(
                         "Failed to fetch Plex thumbnail from {Url} - Status: {StatusCode}",
-                        url,
+                        SanitizeUrl(url),
                         response.StatusCode
                     );
                 await SendFluentResult(Result.Fail("Failed to fetch image").Add502BadGatewayError(), ct);
@@ -227,7 +228,7 @@ public sealed class GetPlexMediaThumbnailImageEndpoint : BaseEndpoint<GetPlexMed
                         "HTTP request failed while fetching Plex thumbnail for server {PlexServerId} (key {PlexKey}). URL: {Url}",
                         plexServerId,
                         req.PlexKey,
-                        url
+                        SanitizeUrl(url)
                     );
             }
 
@@ -242,7 +243,7 @@ public sealed class GetPlexMediaThumbnailImageEndpoint : BaseEndpoint<GetPlexMed
                     "Timeout fetching Plex thumbnail for server {PlexServerId} (key {PlexKey}). URL: {Url}",
                     plexServerId,
                     req.PlexKey,
-                    url
+                    SanitizeUrl(url)
                 );
             await SendFluentResult(Result.Fail("Request timeout").Add502BadGatewayError(), ct);
         }
@@ -300,5 +301,20 @@ public sealed class GetPlexMediaThumbnailImageEndpoint : BaseEndpoint<GetPlexMed
         }
 
         return connectionResult;
+    }
+
+    /// <summary>
+    /// Sanitizes a URL by removing query string parameters to prevent logging sensitive tokens
+    /// </summary>
+    private static string SanitizeUrl(string url)
+    {
+        if (EnvironmentExtensions.IsUnmasked())
+            return url;
+
+        if (string.IsNullOrEmpty(url))
+            return url;
+
+        var questionMarkIndex = url.IndexOf('?');
+        return questionMarkIndex >= 0 ? url[..questionMarkIndex] : url;
     }
 }

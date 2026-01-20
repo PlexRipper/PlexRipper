@@ -88,7 +88,7 @@ public static class HttpClientModule
                     SslOptions = new System.Net.Security.SslClientAuthenticationOptions
                     {
                         RemoteCertificateValidationCallback = (_, _, _, _) => true,
-                        // Enable all TLS versions to maximize compatibility
+                        // Enable TLS 1.2 and TLS 1.3 for secure connections
                         EnabledSslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13,
                     },
                     // Increase connect timeout to handle slow connections

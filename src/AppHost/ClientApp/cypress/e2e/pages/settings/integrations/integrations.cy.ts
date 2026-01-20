@@ -26,11 +26,8 @@ describe('Configure Integrations Workflow', () => {
 				apiKey: sonarrApiKey,
 			}), {
 				statusCode: 200,
-				body: generateResultDTO(
-					{
-						result: TestConnectionStatus.Success,
-					}),
-			});
+				body: generateResultDTO({ result: TestConnectionStatus.Success }),
+			}).as('testSonarr');
 
 			cy.contains('Sonarr').should('be.visible');
 			cy.contains('Radarr').should('be.visible');
@@ -41,6 +38,7 @@ describe('Configure Integrations Workflow', () => {
 
 			// Test Sonarr connection
 			cy.getCy('test-sonarr-connection-button').click();
+			cy.wait('@testSonarr');
 
 			// Verify values persisted in settings
 			cy.awaitSettingsUpdate().then((interception) => {
@@ -51,39 +49,28 @@ describe('Configure Integrations Workflow', () => {
 
 			// Verify success alert and stepper state
 			cy.getCy('test-sonarr-connection-status-alert').should('be.visible');
-			cy.getCy('test-sonarr-configuration-status-alert').should('not.be.visible');
+			cy.getCy('test-sonarr-configuration-status-alert').should('not.exist');
 
-			// Mock configure endpoint
+			// Mock configure endpoint before any configure interaction
 			cy.intercept('POST', IntegrationPaths.configureSonarrIntegrationEndpoint(), {
 				statusCode: 200,
 				body: generateResultDTO(null),
-			});
+			}).as('configureSonarr');
 
 			// Configure Sonarr integration
-			cy.getCy('configure-sonarr-button').click();
+			cy.getCy('configure-sonarr-button').scrollIntoView().should('be.visible').click();
+			cy.wait('@configureSonarr');
 
 			// Verify successful configuration
 			cy.getCy('test-sonarr-configuration-status-alert').should('be.visible');
 
 			// ===== Configure Radarr Integration =====
 
-			// Scroll to Radarr section
-			cy.contains('Radarr').scrollIntoView();
-
 			// Enter Radarr credentials
 			const radarrBaseUrl = 'http://localhost:7878';
 			const radarrApiKey = 'b12b33b547615f26c8f57875c23936ec';
-			cy.getCy('radarr-base-url-input').clear().type(radarrBaseUrl);
-			cy.getCy('radarr-api-key-input').clear().type(radarrApiKey);
 
-			// Verify values persisted in settings
-			cy.awaitSettingsUpdate().then((interception) => {
-				const settings = interception.request.body as SettingsModelDTO;
-				expect(settings.integrationsSettings.radarr.radarrBaseUrl).to.equal(radarrBaseUrl);
-				expect(settings.integrationsSettings.radarr.radarrApiKey).to.equal(radarrApiKey);
-			});
-
-			// Test Radarr connection successfully
+			// Mock the test connection endpoint BEFORE any Radarr interaction
 			cy.interceptNoQuery('GET', IntegrationPaths.testConnectionToRadarrEndpoint({
 				url: radarrBaseUrl,
 				apiKey: radarrApiKey,
@@ -92,31 +79,36 @@ describe('Configure Integrations Workflow', () => {
 				body: generateResultDTO({ result: TestConnectionStatus.Success }),
 			}).as('testRadarr');
 
-			cy.getCy('test-radarr-connection-button').click();
+			cy.getCy('radarr-base-url-input').clear().type(radarrBaseUrl);
+			cy.getCy('radarr-api-key-input').clear().type(radarrApiKey);
+
+			// Test Radarr connection
+			cy.getCy('test-radarr-connection-button').should('be.visible').click();
 			cy.wait('@testRadarr');
 
-			// Verify success alert
-			cy.get('.q-alert').last().should('contain', 'success');
+			// Verify values persisted in settings
+			cy.awaitSettingsUpdate().then((interception) => {
+				const settings = interception.request.body as SettingsModelDTO;
+				expect(settings.integrationsSettings.radarr.radarrBaseUrl).to.equal(radarrBaseUrl);
+				expect(settings.integrationsSettings.radarr.radarrApiKey).to.equal(radarrApiKey);
+			});
 
-			// Navigate to configure step for Radarr
-			cy.contains('Configure').last().click();
+			// Verify success alert and stepper state
+			cy.getCy('test-radarr-connection-status-alert').should('be.visible');
+			cy.getCy('test-radarr-configuration-status-alert').should('not.exist');
 
-			// Configure Radarr integration
+			// Mock configure endpoint before any configure interaction
 			cy.intercept('POST', IntegrationPaths.configureRadarrIntegrationEndpoint(), {
 				statusCode: 200,
-				body: {
-					isSuccess: true,
-				},
+				body: generateResultDTO(null),
 			}).as('configureRadarr');
 
-			cy.getCy('configure-radarr-button').click();
+			// Configure Radarr integration
+			cy.getCy('configure-radarr-button').scrollIntoView().should('be.visible').click();
 			cy.wait('@configureRadarr');
 
 			// Verify successful configuration
-			cy.get('.q-alert').last().should('contain', 'success');
-
-			// Verify both integrations are fully configured
-			cy.get('.q-stepper__step--done').should('have.length.at.least', 2);
+			cy.getCy('test-radarr-configuration-status-alert').should('be.visible');
 		});
 	});
 

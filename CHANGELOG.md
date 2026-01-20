@@ -1,5 +1,23 @@
 Reaparr Changelog
 
+# [0.35.0-dev.5](https://github.com/Reaparr/Reaparr/compare/v0.35.0-dev.4...v0.35.0-dev.5) (2026-01-20)
+
+
+### Bug Fixes
+
+* **Web-UI:** Disable the test connection button if the input fields are invalid ([e111548](https://github.com/Reaparr/Reaparr/commit/e111548521332b7b9bc22dfb0db2bff0bc7d9d77))
+* **Web-UI:** Fixed an issue where logging out would redirect to the setup page ([ce3423a](https://github.com/Reaparr/Reaparr/commit/ce3423adbb706f4dca9ee09c66f72e71f34309bf))
+* **WebAPI:** Fixed the discord message containing the changelog be du… ([#515](https://github.com/Reaparr/Reaparr/issues/515)) ([c78475f](https://github.com/Reaparr/Reaparr/commit/c78475fca28366e4eb1d1f40254f443fe5bfe669))
+* **WebAPI:** Fixed the discord message containing the changelog be dupplicated ([a0f1a0f](https://github.com/Reaparr/Reaparr/commit/a0f1a0fa1ecec75063c47de2e9ffb34bcd01dacb))
+* **WebAPI:** Improve error handling for Plex thumbnail fetching ([2b6b677](https://github.com/Reaparr/Reaparr/commit/2b6b677c190e3c199d5ade79a1953b127117c869))
+* **WebAPI:** Possible fix for downloads getting stuck and not progressing due to race conditions ([ee9ab02](https://github.com/Reaparr/Reaparr/commit/ee9ab02f25668eb5972806f5bb0233bc443df13a))
+* **WebAPI:** Remove duplicate changelog entries ([c3e6551](https://github.com/Reaparr/Reaparr/commit/c3e6551547edb35bf889459a4f9938f6cd8063ca))
+
+
+### Features
+
+* **Web-UI:** Added error handling when Sonarr/Radarr is not connectable ([26cc448](https://github.com/Reaparr/Reaparr/commit/26cc448c9f7ab7428be21dd3c0b1b57a6c403786))
+
 # [0.35.0-dev.4](https://github.com/Reaparr/Reaparr/compare/v0.35.0-dev.3...v0.35.0-dev.4) (2026-01-12)
 
 

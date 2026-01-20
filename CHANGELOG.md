@@ -1,5 +1,80 @@
 Reaparr Changelog
 
+# [0.35.0](https://github.com/Reaparr/Reaparr/compare/v0.34.0...v0.35.0) (2026-01-20)
+
+
+### Bug Fixes
+
+* **WebAPI:** Add timeout protection to prevent indefinite blocking on pause operations ([0b24bbf](https://github.com/Reaparr/Reaparr/commit/0b24bbf39ebb5972f3f55bea40c8087aaeba1d69))
+* **WebAPI:** Added a temporary fix for validating an account token, i… ([#500](https://github.com/Reaparr/Reaparr/issues/500)) ([c22efe1](https://github.com/Reaparr/Reaparr/commit/c22efe1dda7aff2813140a9ba235d4133f4cb973))
+* **WebAPI:** Added a temporary fix for validating an account token, it requires a larger Plex API SDK update ([afb6778](https://github.com/Reaparr/Reaparr/commit/afb6778f2a86570871a429be87ac201c39299843))
+* **WebAPI:** Avoid failing when cleanup directory has files ([06d1820](https://github.com/Reaparr/Reaparr/commit/06d1820a06d1baca3a4b8e4aff7e5779a67920db))
+* **Web-UI:** Disable the test connection button if the input fields are invalid ([e111548](https://github.com/Reaparr/Reaparr/commit/e111548521332b7b9bc22dfb0db2bff0bc7d9d77))
+* **deps:** downgrade [@vueuse](https://github.com/vueuse) packages to version 13.x ([9e0c95a](https://github.com/Reaparr/Reaparr/commit/9e0c95a9227a9c5471cc6c3adf9861d27ca1dd97))
+* **Web-UI:** Fix flashy UI changes when refreshing a library ([3c5ea7b](https://github.com/Reaparr/Reaparr/commit/3c5ea7bbe25682ef03b34b0384806d89ecae6d1a))
+* **WebAPI:** Fix threading issues with the dbcontext in handlers ([372b922](https://github.com/Reaparr/Reaparr/commit/372b92241c3d52419531ad81fdd6c4ce411a8478))
+* **WebAPI:** Fixed a bug where an auth token would validate but return a 400 bad request ([0b24793](https://github.com/Reaparr/Reaparr/commit/0b247932c3fc961cadc2960afedfddab9a77b976))
+* **WebAPI:** Fixed an exception where during the progres update of a file transfer it would crash due to multiple threads using a DbContext ([e54a27f](https://github.com/Reaparr/Reaparr/commit/e54a27f78ad2e0b20e23e022cf62a523a6356054))
+* **Web-UI:** Fixed an issue where logging out would redirect to the setup page ([ce3423a](https://github.com/Reaparr/Reaparr/commit/ce3423adbb706f4dca9ee09c66f72e71f34309bf))
+* **Web-UI:** Fixed an issue where some alerts had missing colors ([19b9850](https://github.com/Reaparr/Reaparr/commit/19b9850c5c70cef6ac03e4765d7243b7ebace411))
+* **WebAPI:** Fixed an issue where the library sync progress would go above 100% ([df213b8](https://github.com/Reaparr/Reaparr/commit/df213b8302e960c8934eb688d9db877f55e268b4))
+* **Web-UI:** Fixed an issue where the poster image title would go out of bounds when to long ([1c99c16](https://github.com/Reaparr/Reaparr/commit/1c99c16282f799012f77b6040e41ba410f19c8b7))
+* **Web-UI:** Fixed an issue where the poster image would not show the fallback when loading fails ([e45393d](https://github.com/Reaparr/Reaparr/commit/e45393ddd57de0e20643de6b7d6a416f42fdc64b))
+* **Web-UI:** Fixed an issue where the poster image would repeat after scrolling far enough on the wrong titles ([5170a9e](https://github.com/Reaparr/Reaparr/commit/5170a9eb3bf8b0c0fef04431cea9588d25f44abc))
+* **Web-UI:** Fixed an issue where you could not save a Plex account by using a token ([af1aa56](https://github.com/Reaparr/Reaparr/commit/af1aa563ec169740a183700c4cde926a651c70b8))
+* **WebAPI:** Fixed crash issues due to incorrect multi-threaded use of the dbcontext ([82727ab](https://github.com/Reaparr/Reaparr/commit/82727ab7a5656488b05e66cf7b7bbde1e1b17798))
+* **Web-UI:** Fixed the confirmation button on the delete account dialog not showing the loading icon when it's busy ([ec9ed9f](https://github.com/Reaparr/Reaparr/commit/ec9ed9f3e94cb8063db80d906cde88f6fc76a37f))
+* **WebAPI:** Fixed the discord message containing the changelog be du… ([#515](https://github.com/Reaparr/Reaparr/issues/515)) ([c78475f](https://github.com/Reaparr/Reaparr/commit/c78475fca28366e4eb1d1f40254f443fe5bfe669))
+* **WebAPI:** Fixed the discord message containing the changelog be dupplicated ([a0f1a0f](https://github.com/Reaparr/Reaparr/commit/a0f1a0fa1ecec75063c47de2e9ffb34bcd01dacb))
+* **WebAPI:** Fixed the SyncServerMedia command not working to sync all media with a server ([2f624f4](https://github.com/Reaparr/Reaparr/commit/2f624f411382c9d160d4705d80bc662e3d486b8c))
+* **WebAPI:** Improve error handling for Plex thumbnail fetching ([2b6b677](https://github.com/Reaparr/Reaparr/commit/2b6b677c190e3c199d5ade79a1953b127117c869))
+* **WebAPI:** Increase HTTP client timeout for thumbnail image requests ([e70bfe3](https://github.com/Reaparr/Reaparr/commit/e70bfe3e2703938a630bcc5cf4a5d6504d5eb33b))
+* **Web-UI:** Open on the correct auth tab and disable switching in edit mode in the Account Dialog ([81950ab](https://github.com/Reaparr/Reaparr/commit/81950abb2e86a324377e568bb3155869b0a4b2fc))
+* **WebAPI:** Possible fix for downloads getting stuck and not progressing due to race conditions ([ee9ab02](https://github.com/Reaparr/Reaparr/commit/ee9ab02f25668eb5972806f5bb0233bc443df13a))
+* **WebAPI:** Remove duplicate changelog entries ([c3e6551](https://github.com/Reaparr/Reaparr/commit/c3e6551547edb35bf889459a4f9938f6cd8063ca))
+* **WebAPI:** Remove USER directive to fix s6-overlay ARM startup error ([b5f3ce1](https://github.com/Reaparr/Reaparr/commit/b5f3ce1eec1f25d0273ee46f4e7f52e56624634b))
+* **WebAPI:** resolve memory leak in download client disposal ([a99cdae](https://github.com/Reaparr/Reaparr/commit/a99cdae13f5669e4b7dbc31a44199c119cfe87cf))
+* **WebAPI:** resolve SQLite ConnectionError[20004] during concurrent database access ([eb916e2](https://github.com/Reaparr/Reaparr/commit/eb916e220b01cb48700227a4171ae9a6c98fb673))
+* **WebAPI:** use split queries to prevent cartesian explosion in collection includes ([d859772](https://github.com/Reaparr/Reaparr/commit/d8597721ff1c2bbb7286979654262ccaa6a2f0de))
+
+
+### Features
+
+* **WebAPI:** add dev prerelease support with semantic-release ([bb9b9ed](https://github.com/Reaparr/Reaparr/commit/bb9b9edc93a0a1786eb9020a7dbea4134a322a81))
+* **WebAPI:** Add media filename validation extension methods to ensure Sonarr/Radarr can parse filenames correctly ([649420f](https://github.com/Reaparr/Reaparr/commit/649420f8fb5b66d15ce58fbac9865e62a34ee689))
+* **Web-UI:** Add Radarr integration setup and connection features ([014ef2d](https://github.com/Reaparr/Reaparr/commit/014ef2d98e752696b24262787b2ef8262afad94d))
+* **WebAPI:** Added apiKey authentication to the torznab indexer ([2ee560e](https://github.com/Reaparr/Reaparr/commit/2ee560e7d70b53ae25fcdcf6b403d8a1e7d458aa))
+* **WebAPI:** Added changelog discord notification ([#508](https://github.com/Reaparr/Reaparr/issues/508)) ([1e0c69d](https://github.com/Reaparr/Reaparr/commit/1e0c69d61e1d856f2be2d2dfe31b722e91b6c723))
+* **WebAPI:** Added changelog discord notification ([a73a0db](https://github.com/Reaparr/Reaparr/commit/a73a0db67db531af16c05f5adb02c4da34035f52))
+* **Web-UI:** Added error handling when Sonarr/Radarr is not connectable ([26cc448](https://github.com/Reaparr/Reaparr/commit/26cc448c9f7ab7428be21dd3c0b1b57a6c403786))
+* **WebAPI:** Added session based authentication to the Downloadclient that mimics QBittorrent ([904dfd1](https://github.com/Reaparr/Reaparr/commit/904dfd1ea92b57401f2f694a15051df1d20a06cc))
+* **Web-UI:** Allow markdown to be rendered in the help dialog boxes to improve formatting and adding links ([b98b946](https://github.com/Reaparr/Reaparr/commit/b98b9464f607390e9dbfcad08a710423fe923582))
+* **WebAPI:** ARM Support to auto build and publish in the pipeline ([377aed4](https://github.com/Reaparr/Reaparr/commit/377aed41e09989e0d8a18dda7cdbf7bec76b5391))
+* **WebAPI:** Implement persistent auth session management for DownloadClient ([fba5e53](https://github.com/Reaparr/Reaparr/commit/fba5e5399637bc04984ddb0db8237bd842f3b5ae))
+* **Web-UI:** Links in help text now open a new tab ([7309d2b](https://github.com/Reaparr/Reaparr/commit/7309d2bafff6bae4ac2d918e6f07cc2d7b375ff9))
+* **Web-UI:** QOL: When executing Resync Server command, it will no close the dialog and open the correct sync dialog ([abd6703](https://github.com/Reaparr/Reaparr/commit/abd6703e378fb316c619a18e9e82f4f97f41e0dc))
+* **Web-UI:** Removed the thick red bar around the media overview bar to a sleek small gray line to be consistent with the rest of the look ([5221d26](https://github.com/Reaparr/Reaparr/commit/5221d26cc028fa225d3974cba577f580ce705e2f))
+* **Web-UI:** Sonarr can now be fully automatically configured from the integration page! ([e0da625](https://github.com/Reaparr/Reaparr/commit/e0da6252fcd4f3285ffb83311235210de1d1eb59))
+* **WebAPI:** Upgrade target framework to net10.0 across projects ([85d0801](https://github.com/Reaparr/Reaparr/commit/85d0801aba97ad4095c7ff339e08464ea5666a09))
+
+
+### Performance Improvements
+
+* **WebAPI:** Add indexes for SearchTitle to enhance query performance ([9770486](https://github.com/Reaparr/Reaparr/commit/9770486ecd6ee15919a6b919de89b7d9357d9109))
+* **WebAPI:** Add indexes to improve query performance for download tasks ([d5165d4](https://github.com/Reaparr/Reaparr/commit/d5165d4be584e17666a3a935c4639e1d0bdffce2))
+* **Environment:** add IsDevelopmentEnvironment helper and enable sensitive data logging in dev/test ([03afac0](https://github.com/Reaparr/Reaparr/commit/03afac0c201a6276f5b7b0e59eee47589a35a472))
+* **Web-UI:** Added an optimization of using the GPU when scrolling fast across media posters ([e62b641](https://github.com/Reaparr/Reaparr/commit/e62b641f0ebc4b91ddfd3b9c8029e917d0ffa0a4))
+* **WebAPI:** Added more indexes to the database for heavy queries ([d3326c6](https://github.com/Reaparr/Reaparr/commit/d3326c60e4b9eb92f451decb8ed05c67d9923e45))
+* **WebAPI:** Hugely improved the performance of loading thumbnail for media posters, this will make navigating much smoother ([3e86fdd](https://github.com/Reaparr/Reaparr/commit/3e86fdd602e03f423ee41073f2b0f7657e38efc4))
+* **WebAPI:** Increased database query and storage performance by adding indexes and storing less at the same time ([7aa2559](https://github.com/Reaparr/Reaparr/commit/7aa2559f3176e20433a92c36b44b3fc457aae1ef))
+* **WebAPI:** Major rewrite in the way movie and episode data is stored, which should save a lot of database filesize ([3f1c5e5](https://github.com/Reaparr/Reaparr/commit/3f1c5e5c7ae53b6a466c1f6776701dd56b8fdaa4))
+
+
+### Reverts
+
+* Revert "build(WebAPI): Revert last dev EF migrations" ([8f41e18](https://github.com/Reaparr/Reaparr/commit/8f41e181af2331a367d3d1429f68aaf887b71d7d))
+* Revert "refactor(WebAPI): Add LibrarySyncJobQueue migration and update model snapshot" ([e4770d6](https://github.com/Reaparr/Reaparr/commit/e4770d6c4dbae582be9fc8ab62ee312fe096055f))
+
 # [0.35.0-dev.5](https://github.com/Reaparr/Reaparr/compare/v0.35.0-dev.4...v0.35.0-dev.5) (2026-01-20)
 
 

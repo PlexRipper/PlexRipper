@@ -1587,6 +1587,7 @@
         "type": "Project",
         "dependencies": {
           "Autofac": "[8.2.0, )",
+          "Reaparr.Application.Contracts": "[1.0.0, )",
           "Reaparr.External.Contracts": "[1.0.0, )"
         }
       },

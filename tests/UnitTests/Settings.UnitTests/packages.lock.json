@@ -1454,6 +1454,7 @@
           "Reaparr.Application": "[1.0.0, )",
           "Reaparr.BackgroundJobs": "[1.0.0, )",
           "Reaparr.Data": "[1.0.0, )",
+          "Reaparr.External": "[1.0.0, )",
           "Reaparr.FileSystem": "[1.0.0, )",
           "Reaparr.Identity": "[1.0.0, )",
           "Reaparr.PlexApi": "[1.0.0, )",
@@ -1477,6 +1478,7 @@
           "Reaparr.BackgroundJobs.Contracts": "[1.0.0, )",
           "Reaparr.Data.Contracts": "[1.0.0, )",
           "Reaparr.Domain": "[1.0.0, )",
+          "Reaparr.External.Contracts": "[1.0.0, )",
           "Reaparr.FileSystem.Contracts": "[1.0.0, )",
           "Reaparr.Identity.Contracts": "[1.0.0, )",
           "Reaparr.PlexApi.Contracts": "[1.0.0, )",
@@ -1570,6 +1572,16 @@
         "dependencies": {
           "Serilog": "[4.3.0, )"
         }
+      },
+      "Reaparr.External": {
+        "type": "Project",
+        "dependencies": {
+          "Autofac": "[8.2.0, )",
+          "Reaparr.External.Contracts": "[1.0.0, )"
+        }
+      },
+      "Reaparr.External.Contracts": {
+        "type": "Project"
       },
       "Reaparr.FileSystem": {
         "type": "Project",

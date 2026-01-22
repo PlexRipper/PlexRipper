@@ -584,6 +584,9 @@
           "Serilog": "[4.3.0, )"
         }
       },
+      "Reaparr.External.Contracts": {
+        "type": "Project"
+      },
       "Reaparr.FileSystem.Contracts": {
         "type": "Project",
         "dependencies": {

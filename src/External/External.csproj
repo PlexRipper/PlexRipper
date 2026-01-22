@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <LangVersion>14</LangVersion>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <AssemblyName>Reaparr.External</AssemblyName>
+        <RootNamespace>Reaparr.External</RootNamespace>
+    </PropertyGroup>
+    <ItemGroup>
+        <None
+            Include="dash-mpd-cli\binary\**\*"
+            CopyToOutputDirectory="PreserveNewest"
+            CopyToPublishDirectory="Always"
+        />
+    </ItemGroup>
+</Project>

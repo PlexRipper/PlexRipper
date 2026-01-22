@@ -15,10 +15,15 @@
         />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Autofac" Version="8.2.0" />
+        <PackageReference Include="Autofac" Version="9.0.0" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\Application.Contracts\Application.Contracts.csproj" />
         <ProjectReference Include="..\External.Contracts\External.Contracts.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+        <Compile Include="..\Domain\GlobalUsings.cs">
+            <Link>GlobalUsings.cs</Link>
+        </Compile>
     </ItemGroup>
 </Project>

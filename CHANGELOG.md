@@ -1,5 +1,13 @@
 Reaparr Changelog
 
+## [0.35.1-dev.1](https://github.com/Reaparr/Reaparr/compare/v0.35.0...v0.35.1-dev.1) (2026-01-24)
+
+
+### Bug Fixes
+
+* **WebAPI:** Add download parameter to download URL, this might in some cases fix an empty download response ([#516](https://github.com/Reaparr/Reaparr/issues/516)) ([1eb56b9](https://github.com/Reaparr/Reaparr/commit/1eb56b902d3ac8b1a1c5692daebd49c5dfdb1059))
+* **WebAPI:** Add download parameter to download URL, this might in some cases fix an empty download response ([73d4d80](https://github.com/Reaparr/Reaparr/commit/73d4d803e40e8045131ed24389ac02d62c3ba5ed))
+
 # [0.35.0](https://github.com/Reaparr/Reaparr/compare/v0.34.0...v0.35.0) (2026-01-20)
 
 

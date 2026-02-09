@@ -17,6 +17,7 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="FastEndpoints" Version="7.1.1" />
+        <PackageReference Include="Flurl" Version="4.0.0" />
         <PackageReference Include="JetBrains.Annotations" Version="2025.2.4" />
         <PackageReference Include="NaturalSort.Extension" Version="4.4.1" />
         <PackageReference Include="PasswordGenerator" Version="2.1.0" />

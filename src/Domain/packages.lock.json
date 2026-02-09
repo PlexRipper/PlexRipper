@@ -25,6 +25,12 @@
           "FluentValidation": "12.1.0"
         }
       },
+      "Flurl": {
+        "type": "Direct",
+        "requested": "[4.0.0, )",
+        "resolved": "4.0.0",
+        "contentHash": "rpts69yYgvJqg6PPgqShBQEZ4aNzWQqWpWppcT0oDWxDCIsBqiod4pj6LQZdhk+1OozLFagemldMRACdHF3CsA=="
+      },
       "JetBrains.Annotations": {
         "type": "Direct",
         "requested": "[2025.2.4, )",

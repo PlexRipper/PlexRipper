@@ -35,7 +35,7 @@ public static partial class PlexMediaDTOMapper
                     MediaId = source.Id,
                 })
                 .ToList(),
-            Key = source.Key,
+            Key = source.RatingKey,
             HasArt = source.HasArt,
             HasTheme = source.HasTheme,
             Studio = source.Studio,

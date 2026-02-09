@@ -24,7 +24,7 @@ public class DbContextExtensionsPlexMediaUnitTests : BaseUnitTest
 
         // Act
         var result = await IDbContext.GetPlexMediaByMediaKeyAsync(
-            movie.Key,
+            movie.RatingKey,
             movie.PlexServerId,
             PlexMediaType.Movie,
             CancellationToken
@@ -52,7 +52,7 @@ public class DbContextExtensionsPlexMediaUnitTests : BaseUnitTest
 
         // Act
         var result = await IDbContext.GetPlexMediaByMediaKeyAsync(
-            tvShow.Key,
+            tvShow.RatingKey,
             tvShow.PlexServerId,
             PlexMediaType.TvShow,
             CancellationToken

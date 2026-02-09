@@ -100,11 +100,11 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
                 .Debug(
                     "Processing episode \"{EpisodeTitle}\" with key: {EpisodeKey} from season \"{SeasonTitle}\" with key: {SeasonKey} of show \"{TvShowTitle}\" with key: {ShowKey}",
                     tvShowEpisode.Title,
-                    tvShowEpisode.Key,
+                    tvShowEpisode.RatingKey,
                     plexSeason.Title,
-                    plexSeason.Key,
+                    plexSeason.RatingKey,
                     plexTvShow.Title,
-                    plexTvShow.Key
+                    plexTvShow.RatingKey
                 );
 
             // Get or create Tv-show download tasks
@@ -119,11 +119,12 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
 
             // Get or create episode download task
             var episodeDownloadTask = downloadTaskTvShowSeason.Children.FirstOrDefault(x =>
-                x.PlexId == tvShowEpisode.Key
+                x.PlexId == tvShowEpisode.RatingKey
             );
             if (episodeDownloadTask is null)
             {
-                _log.Here().Debug("Creating new episode download task for episode {EpisodeKey}", tvShowEpisode.Key);
+                _log.Here()
+                    .Debug("Creating new episode download task for episode {EpisodeKey}", tvShowEpisode.RatingKey);
                 episodeDownloadTask = tvShowEpisode.MapToDownloadTask();
                 episodeDownloadTask.ParentId = downloadTaskTvShowSeason.Id;
                 downloadTaskTvShowSeason.Children.Add(episodeDownloadTask);
@@ -134,7 +135,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
                 _log.Here()
                     .Debug(
                         "Found existing episode download task for episode {EpisodeKey} with ID {EpisodeId}",
-                        tvShowEpisode.Key,
+                        tvShowEpisode.RatingKey,
                         episodeDownloadTask.Id
                     );
             }
@@ -143,7 +144,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
             var downloadMediaDto = downloadMediaList.FirstOrDefault(x => x.MediaIds.Contains(tvShowEpisode.Id));
             if (downloadMediaDto is null)
             {
-                _log.Here().Warning("No download media DTO found for episode {EpisodeKey}", tvShowEpisode.Key);
+                _log.Here().Warning("No download media DTO found for episode {EpisodeKey}", tvShowEpisode.RatingKey);
                 continue;
             }
 
@@ -162,14 +163,14 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
     )
     {
         // Check if the tvShowDownloadTask has already been created this run
-        var downloadTaskTvShow = _tvShowDownloads.FirstOrDefault(x => x.PlexId == plexTvShow.Key);
+        var downloadTaskTvShow = _tvShowDownloads.FirstOrDefault(x => x.PlexId == plexTvShow.RatingKey);
 
         // Check if the tvShowDownloadTask has already been created in the database
         if (downloadTaskTvShow is null)
         {
             downloadTaskTvShow = await _dbContext.GetDownloadTaskTvShowByMediaKeyQuery(
                 plexTvShow.PlexServerId,
-                plexTvShow.Key,
+                plexTvShow.RatingKey,
                 ct
             );
             if (downloadTaskTvShow is not null)
@@ -193,7 +194,9 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
     )
     {
         // Check if the SeasonDownloadTask has already been created
-        var downloadTaskTvShowSeason = downloadTaskTvShow.Children.FirstOrDefault(x => x.PlexId == plexSeason.Key);
+        var downloadTaskTvShowSeason = downloadTaskTvShow.Children.FirstOrDefault(x =>
+            x.PlexId == plexSeason.RatingKey
+        );
 
         if (downloadTaskTvShowSeason is null)
         {
@@ -216,8 +219,10 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
         var episodeData = SelectEpisodeQuality(tvShowEpisode, downloadMediaDto);
         if (episodeData is null)
         {
-            _log.Here().Error("Failed to select quality for episode {EpisodeKey}", tvShowEpisode.Key);
-            return Result.Fail($"No suitable quality found for episode {tvShowEpisode.Key} ({tvShowEpisode.Title})");
+            _log.Here().Error("Failed to select quality for episode {EpisodeKey}", tvShowEpisode.RatingKey);
+            return Result.Fail(
+                $"No suitable quality found for episode {tvShowEpisode.RatingKey} ({tvShowEpisode.Title})"
+            );
         }
 
         // Map episodeData to DownloadTaskTvShowEpisodeFile and add to episodeDownloadTask
@@ -243,7 +248,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
     {
         if (!tvShowEpisode.MediaDataList.Any())
         {
-            _log.Here().Warning("Episode {EpisodeKey} has no media data available", tvShowEpisode.Key);
+            _log.Here().Warning("Episode {EpisodeKey} has no media data available", tvShowEpisode.RatingKey);
             return null;
         }
 
@@ -258,7 +263,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
                     .Debug(
                         "Selected requested quality {Quality} for episode {EpisodeKey} ({EpisodeTitle}) (DataId: {DataId})",
                         requestedQuality.Quality,
-                        tvShowEpisode.Key,
+                        tvShowEpisode.RatingKey,
                         tvShowEpisode.Title,
                         requestedQuality.DataId
                     );
@@ -274,7 +279,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
                 .Debug(
                     "Selected best available quality {Quality} for episode {EpisodeKey} ({EpisodeTitle}) (DataId: {DataId})",
                     bestQuality.Quality,
-                    tvShowEpisode.Key,
+                    tvShowEpisode.RatingKey,
                     tvShowEpisode.Title,
                     bestQuality.Id
                 );
@@ -284,7 +289,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
             _log.Here()
                 .Error(
                     "No suitable quality found for episode {EpisodeKey} ({EpisodeTitle}) (ID: {EpisodeId}) from {AvailableCount} media data options",
-                    tvShowEpisode.Key,
+                    tvShowEpisode.RatingKey,
                     tvShowEpisode.Title,
                     tvShowEpisode.Id,
                     tvShowEpisode.MediaDataList.Count

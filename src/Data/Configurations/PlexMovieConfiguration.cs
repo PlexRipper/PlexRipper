@@ -11,7 +11,7 @@ public class PlexMovieConfiguration : IEntityTypeConfiguration<PlexMovie>
         builder.HasIndex(x => new { x.PlexLibraryId, x.SortIndex });
         builder.HasIndex(x => x.SearchTitle);
 
-        builder.HasIndex(x => new { x.Key, x.PlexServerId });
+        builder.HasIndex(x => new { Key = x.RatingKey, x.PlexServerId });
 
         builder
             .HasMany(x => x.MediaDataList)

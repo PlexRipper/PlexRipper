@@ -34,7 +34,7 @@ public static class PlexMediaSlimDTOMapper
                     MediaId = source.Id,
                 })
                 .ToList(),
-            Key = source.Key,
+            Key = source.RatingKey,
             MetaDataKey = source.MetaDataKey,
             PlexToken = string.Empty,
         };
@@ -66,7 +66,7 @@ public static class PlexMediaSlimDTOMapper
             PlexLibraryId = source.PlexLibraryId,
             PlexServerId = source.PlexServerId,
             Type = source.Type,
-            Key = source.Key,
+            Key = source.RatingKey,
             MetaDataKey = source.MetaDataKey,
             HasThumb = source.HasThumb,
             Qualities = source.Qualities.ToDTO(),
@@ -95,7 +95,7 @@ public static class PlexMediaSlimDTOMapper
             PlexServerId = source.PlexServerId,
             Type = source.Type,
             HasThumb = source.HasThumb,
-            Key = source.Key,
+            Key = source.RatingKey,
             MetaDataKey = source.MetaDataKey,
             PlexToken = string.Empty,
             Qualities = source.MediaDataList.ToPlexMediaQuality(),

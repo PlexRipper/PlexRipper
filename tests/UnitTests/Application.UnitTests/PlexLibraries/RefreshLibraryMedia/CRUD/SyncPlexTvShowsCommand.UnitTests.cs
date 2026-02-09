@@ -249,7 +249,7 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
             // Create updated TvShows based on the Key
             if (i is >= 10 and < 30)
             {
-                newTvShows[i].Key = tvShowsDb[i].Key;
+                newTvShows[i].RatingKey = tvShowsDb[i].RatingKey;
                 newTvShows[i].UpdatedAt = DateTime.Now;
             }
 
@@ -271,7 +271,7 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
         plexTvShows.Count.ShouldBe(40);
         foreach (var plexTvShow in newTvShows)
         {
-            var findResult = plexTvShows.Find(x => x.Key == plexTvShow.Key);
+            var findResult = plexTvShows.Find(x => x.RatingKey == plexTvShow.RatingKey);
             findResult.ShouldNotBeNull();
             findResult.Title.Contains("TEST").ShouldBeTrue();
         }
@@ -290,10 +290,12 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
         var dbSeasons = dbPlexTvShows.SelectMany(x => x.Seasons).ToList();
         var dbEpisodes = dbSeasons.SelectMany(x => x.Episodes).ToList();
 
-        dbPlexTvShows.All(x => newTvShows.Any(y => y.Key == x.Key)).ShouldBeTrue();
-        dbSeasons.All(x => newTvShows.SelectMany(y => y.Seasons).Any(y => y.Key == x.Key)).ShouldBeTrue();
+        dbPlexTvShows.All(x => newTvShows.Any(y => y.RatingKey == x.RatingKey)).ShouldBeTrue();
+        dbSeasons.All(x => newTvShows.SelectMany(y => y.Seasons).Any(y => y.RatingKey == x.RatingKey)).ShouldBeTrue();
         dbEpisodes
-            .All(x => newTvShows.SelectMany(y => y.Seasons.SelectMany(z => z.Episodes)).Any(y => y.Key == x.Key))
+            .All(x =>
+                newTvShows.SelectMany(y => y.Seasons.SelectMany(z => z.Episodes)).Any(y => y.RatingKey == x.RatingKey)
+            )
             .ShouldBeTrue();
     }
 

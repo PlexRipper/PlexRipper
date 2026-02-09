@@ -81,7 +81,7 @@ public class GenerateDownloadTaskTvShowSeasonsCommandHandler
                 // Check if the tvShowDownloadTask has already been created
                 var downloadTaskTvShow = await _dbContext.GetDownloadTaskTvShowByMediaKeyQuery(
                     season.PlexServerId,
-                    season.TvShow!.Key,
+                    season.TvShow!.RatingKey,
                     cancellationToken
                 );
                 if (downloadTaskTvShow is null)
@@ -94,7 +94,7 @@ public class GenerateDownloadTaskTvShowSeasonsCommandHandler
 
                 // Check if the SeasonDownloadTask has already been created
                 var downloadTaskTvShowSeason = downloadTaskTvShow.Children.FirstOrDefault(x =>
-                    x.PlexServerId == plexServer.Id && x.PlexId == season.Key
+                    x.PlexServerId == plexServer.Id && x.PlexId == season.RatingKey
                 );
                 if (downloadTaskTvShowSeason is null)
                 {

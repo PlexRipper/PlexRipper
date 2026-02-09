@@ -21,7 +21,7 @@ public static partial class DbContextExtensions
             case PlexMediaType.Movie:
             {
                 var entity = await dbContext.PlexMovies.FirstOrDefaultAsync(
-                    x => x.Key == plexMediaKey && x.PlexServerId == plexServerId,
+                    x => x.RatingKey == plexMediaKey && x.PlexServerId == plexServerId,
                     cancellationToken
                 );
                 if (entity is not null)
@@ -32,7 +32,7 @@ public static partial class DbContextExtensions
             case PlexMediaType.TvShow:
             {
                 var entity = await dbContext.PlexTvShows.FirstOrDefaultAsync(
-                    x => x.Key == plexMediaKey && x.PlexServerId == plexServerId,
+                    x => x.RatingKey == plexMediaKey && x.PlexServerId == plexServerId,
                     cancellationToken
                 );
                 if (entity is not null)
@@ -43,7 +43,7 @@ public static partial class DbContextExtensions
             case PlexMediaType.Season:
             {
                 var entity = await dbContext.PlexTvShowSeason.FirstOrDefaultAsync(
-                    x => x.Key == plexMediaKey && x.PlexServerId == plexServerId,
+                    x => x.RatingKey == plexMediaKey && x.PlexServerId == plexServerId,
                     cancellationToken
                 );
                 if (entity is not null)
@@ -54,7 +54,7 @@ public static partial class DbContextExtensions
             case PlexMediaType.Episode:
             {
                 var entity = await dbContext.PlexTvShowEpisodes.FirstOrDefaultAsync(
-                    x => x.Key == plexMediaKey && x.PlexServerId == plexServerId,
+                    x => x.RatingKey == plexMediaKey && x.PlexServerId == plexServerId,
                     cancellationToken
                 );
                 if (entity is not null)

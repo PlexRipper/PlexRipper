@@ -29,7 +29,7 @@ public static partial class PlexMediaDataMapper
             UpdatedAt = source.UpdatedAt,
 
             Type = PlexMediaType.None,
-            Key = source.RatingKey,
+            RatingKey = source.RatingKey,
             MetaDataKey = RetrieveMetaDataKey(source),
             Studio = source.Studio,
             Summary = source.Summary,

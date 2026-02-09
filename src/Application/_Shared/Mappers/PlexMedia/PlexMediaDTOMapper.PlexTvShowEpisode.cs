@@ -26,7 +26,7 @@ public static partial class PlexMediaDTOMapper
             Type = source.Type,
             HasThumb = source.HasThumb,
             Qualities = source.MediaDataList.ToPlexMediaQuality(),
-            Key = source.Key,
+            Key = source.RatingKey,
             HasArt = source.HasArt,
             HasTheme = source.HasTheme,
             Studio = source.Studio,

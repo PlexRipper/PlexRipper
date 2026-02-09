@@ -8,7 +8,7 @@ public static class PlexMediaExtensions
         new()
         {
             Id = default,
-            PlexId = plexMovie.Key,
+            PlexId = plexMovie.RatingKey,
             DataTotal = 0,
             DownloadStatus = DownloadStatus.Queued,
             CreatedAt = DateTime.UtcNow,
@@ -30,7 +30,7 @@ public static class PlexMediaExtensions
         new()
         {
             Id = default,
-            PlexId = plexTvShow.Key,
+            PlexId = plexTvShow.RatingKey,
             DataTotal = 0,
             DownloadStatus = DownloadStatus.Queued,
             CreatedAt = DateTime.UtcNow,
@@ -52,7 +52,7 @@ public static class PlexMediaExtensions
         new()
         {
             Id = default,
-            PlexId = plexTvShowSeason.Key,
+            PlexId = plexTvShowSeason.RatingKey,
             DataTotal = 0,
             DownloadStatus = DownloadStatus.Queued,
             CreatedAt = DateTime.UtcNow,
@@ -76,7 +76,7 @@ public static class PlexMediaExtensions
         new()
         {
             Id = default,
-            PlexId = plexTvShowEpisode.Key,
+            PlexId = plexTvShowEpisode.RatingKey,
             DataTotal = 0,
             DownloadStatus = DownloadStatus.Queued,
             CreatedAt = DateTime.UtcNow,

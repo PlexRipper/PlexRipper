@@ -10,7 +10,7 @@ public static partial class FakeData
         return faker
             .StrictMode(true)
             .Ignore(x => x.Id)
-            .RuleFor(x => x.Key, _ => GetUniqueNumber())
+            .RuleFor(x => x.RatingKey, _ => GetUniqueNumber())
             .Ignore(x => x.Title)
             .RuleFor(x => x.FullTitle, (_, x) => $"{x.Title} ({x.Year})")
             .RuleFor(x => x.Year, f => f.Random.Int(1900, 2030))
@@ -100,7 +100,7 @@ public static partial class FakeData
                 foreach (var (season, seasonIndex) in tvShow.Seasons.Select((season, index) => (season, index)))
                 {
                     season.Title = $"{tvShow.Title} {seasonIndex + 1:D2}";
-                    season.ParentKey = tvShow.Key;
+                    season.ParentKey = tvShow.RatingKey;
                     season.ParentGuid = tvShow.Guid;
                     season.FullTitle = $"{tvShow.Title}/{season.Title}";
                     season.SeasonNumber = seasonIndex + 1;
@@ -111,7 +111,7 @@ public static partial class FakeData
                     {
                         var originalTitle = episode.Title;
                         episode.Title = $"S{seasonIndex + 1:D2}E{episodeIndex + 1:D2} - {originalTitle}";
-                        episode.ParentKey = season.Key;
+                        episode.ParentKey = season.RatingKey;
                         episode.ParentGuid = season.Guid;
                         episode.FullTitle = $"{tvShow.Title}/{season.Title}/{episode.Title}";
                         episode.EpisodeNumber = episodeIndex + 1;

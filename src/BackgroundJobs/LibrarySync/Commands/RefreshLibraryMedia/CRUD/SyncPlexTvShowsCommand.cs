@@ -45,7 +45,7 @@ public class SyncPlexTvShowsCommandValidator : AbstractValidator<SyncPlexTvShows
         RuleForEach(x => x.LibraryMetadata.PlexLibrary.TvShows)
             .ChildRules(tvShow =>
             {
-                tvShow.RuleFor(x => x.Key).GreaterThan(0);
+                tvShow.RuleFor(x => x.RatingKey).GreaterThan(0);
                 tvShow.RuleFor(y => y.PlexLibraryId).GreaterThan(0);
                 tvShow.RuleFor(y => y.PlexServerId).GreaterThan(0);
                 tvShow.RuleForEach(y => y.Seasons).NotNull();
@@ -55,7 +55,7 @@ public class SyncPlexTvShowsCommandValidator : AbstractValidator<SyncPlexTvShows
                     .RuleForEach(y => y.Seasons)
                     .ChildRules(season =>
                     {
-                        season.RuleFor(a => a.Key).GreaterThan(0);
+                        season.RuleFor(a => a.RatingKey).GreaterThan(0);
                         season.RuleFor(y => y.PlexLibraryId).GreaterThan(0);
                         season.RuleFor(y => y.PlexServerId).GreaterThan(0);
 
@@ -65,7 +65,7 @@ public class SyncPlexTvShowsCommandValidator : AbstractValidator<SyncPlexTvShows
                             .RuleForEach(a => a.Episodes)
                             .ChildRules(episode =>
                             {
-                                episode.RuleFor(c => c.Key).GreaterThan(0);
+                                episode.RuleFor(c => c.RatingKey).GreaterThan(0);
                                 season.RuleFor(y => y.PlexLibraryId).GreaterThan(0);
                                 season.RuleFor(y => y.PlexServerId).GreaterThan(0);
                             });

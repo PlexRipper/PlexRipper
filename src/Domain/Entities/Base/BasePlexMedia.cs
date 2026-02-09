@@ -13,7 +13,7 @@ public class BasePlexMedia : BaseEntity
     /// e.g: 28550, 1723, 21898.
     /// </summary>
     [Column(Order = 1)]
-    public required int Key { get; set; }
+    public required int RatingKey { get; set; }
 
     [Column(Order = 2)]
     public required string Title { get; set; }
@@ -161,7 +161,7 @@ public class BasePlexMedia : BaseEntity
     public virtual PlexMediaType Type { get; init; }
 
     [NotMapped]
-    public string MetaDataUrl => $"/library/metadata/{Key}";
+    public string MetaDataUrl => $"/library/metadata/{RatingKey}";
 
     [NotMapped]
     public string ThumbUrl => HasThumb ? $"{MetaDataUrl}/thumb/{MetaDataKey}" : string.Empty;

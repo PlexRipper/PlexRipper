@@ -16,7 +16,7 @@ public static class DownloadTaskGenericMapper
         var generic = new DownloadTaskGeneric
         {
             Id = downloadTaskMovie.Id,
-            RatingKey = downloadTaskMovie.RatingKey,
+            RatingKey = downloadTaskMovie.PlexApiRatingKey,
             Title = downloadTaskMovie.Title,
             FullTitle = downloadTaskMovie.FullTitle,
             MediaType = downloadTaskMovie.MediaType,
@@ -58,7 +58,7 @@ public static class DownloadTaskGenericMapper
         var downloadTaskGeneric = new DownloadTaskGeneric
         {
             Id = file.Id,
-            RatingKey = file.RatingKey,
+            RatingKey = file.PlexApiRatingKey,
             Title = file.Title,
             FullTitle = file.FullTitle,
             MediaType = file.MediaType,
@@ -100,7 +100,7 @@ public static class DownloadTaskGenericMapper
         var generic = new DownloadTaskGeneric
         {
             Id = downloadTaskTvShow.Id,
-            RatingKey = downloadTaskTvShow.RatingKey,
+            RatingKey = downloadTaskTvShow.PlexApiRatingKey,
             Title = downloadTaskTvShow.Title,
             FullTitle = downloadTaskTvShow.FullTitle,
             MediaType = downloadTaskTvShow.MediaType,
@@ -145,7 +145,7 @@ public static class DownloadTaskGenericMapper
         var generic = new DownloadTaskGeneric
         {
             Id = downloadTaskTvShowSeason.Id,
-            RatingKey = downloadTaskTvShowSeason.RatingKey,
+            RatingKey = downloadTaskTvShowSeason.PlexApiRatingKey,
             Title = downloadTaskTvShowSeason.Title,
             FullTitle = downloadTaskTvShowSeason.FullTitle,
             MediaType = downloadTaskTvShowSeason.MediaType,
@@ -190,7 +190,7 @@ public static class DownloadTaskGenericMapper
         var generic = new DownloadTaskGeneric
         {
             Id = downloadTaskTvShowEpisode.Id,
-            RatingKey = downloadTaskTvShowEpisode.RatingKey,
+            RatingKey = downloadTaskTvShowEpisode.PlexApiRatingKey,
             Title = downloadTaskTvShowEpisode.Title,
             FullTitle = downloadTaskTvShowEpisode.FullTitle,
             MediaType = downloadTaskTvShowEpisode.MediaType,
@@ -231,7 +231,7 @@ public static class DownloadTaskGenericMapper
         new()
         {
             Id = file.Id,
-            RatingKey = file.RatingKey,
+            RatingKey = file.PlexApiRatingKey,
             Title = file.Title,
             FullTitle = file.FullTitle,
             MediaType = file.MediaType,

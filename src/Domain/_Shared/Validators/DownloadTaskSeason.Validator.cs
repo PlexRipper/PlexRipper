@@ -7,7 +7,7 @@ public class DownloadTaskSeasonValidator : AbstractValidator<DownloadTaskTvShowS
     public DownloadTaskSeasonValidator()
     {
         RuleFor(x => x.Id).NotEqual(Guid.Empty);
-        RuleFor(x => x.RatingKey).GreaterThan(0);
+        RuleFor(x => x.PlexApiRatingKey).GreaterThan(0);
         RuleFor(x => x.Title).NotEmpty();
         RuleFor(x => x.FullTitle).NotEmpty();
         RuleFor(x => x.Year).GreaterThan(0);

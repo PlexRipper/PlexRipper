@@ -8,14 +8,9 @@ runs:
     using: 'composite'
     steps:
         -   name: Setup .NET SDK
-            uses: actions/setup-dotnet@v4
-            with:
-                dotnet-version: 9.x.x
-                cache: true
-                cache-dependency-path: |
-                    **/*.csproj
-                    **/global.json
-
+        - uses: fast-actions/setup-dotnet@v1
+          with:
+              sdk-version: '10.x'
         -   name: Restore dependencies
             shell: bash
             run: dotnet restore ${{ inputs.project-path }} --locked-mode

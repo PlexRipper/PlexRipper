@@ -74,14 +74,14 @@ public static partial class PlexMediaDataMapper
         return new PlexTvShowEpisodeMediaData
         {
             Id = 0,
-            PlexMediaId = mediaItem.Id,
-            PlexPartId = source.Id,
+            PlexApiMediaId = mediaItem.Id,
+            PlexApiPartId = source.Id,
             Key = source.Key,
             Duration = source.Duration,
             OriginalFilename = fileName,
             Size = source.Size,
             Container = source.Container,
-            RatingKey = root.RatingKey,
+            PlexApiRatingKey = root.RatingKey,
             Quality = mediaItem.VideoResolution,
             Source = mediaItem.DetermineReleaseSource(),
             VideoCodec = mediaItem.VideoCodec,

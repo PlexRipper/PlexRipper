@@ -104,9 +104,9 @@ public static class PlexMediaExtensions
         new()
         {
             Id = Guid.Empty,
-            PlexApiRatingKey = plexMediaData.RatingKey,
-            PlexApiMediaId = plexMediaData.PlexMediaId,
-            PlexApiPartId = plexMediaData.PlexPartId,
+            PlexApiRatingKey = plexMediaData.PlexApiRatingKey,
+            PlexApiMediaId = plexMediaData.PlexApiMediaId,
+            PlexApiPartId = plexMediaData.PlexApiPartId,
             HashId = null,
             DataTotal = plexMediaData.Size,
             DownloadStatus = DownloadStatus.Queued,
@@ -153,9 +153,9 @@ public static class PlexMediaExtensions
         return new DownloadTaskTvShowEpisodeFile
         {
             Id = Guid.Empty,
-            PlexApiRatingKey = plexMediaData.RatingKey,
-            PlexApiMediaId = plexMediaData.PlexMediaId,
-            PlexApiPartId = plexMediaData.PlexPartId,
+            PlexApiRatingKey = plexMediaData.PlexApiRatingKey,
+            PlexApiMediaId = plexMediaData.PlexApiMediaId,
+            PlexApiPartId = plexMediaData.PlexApiPartId,
             HashId = null,
             DataTotal = plexMediaData.Size,
             DownloadStatus = DownloadStatus.Queued,

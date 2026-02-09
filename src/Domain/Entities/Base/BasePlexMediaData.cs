@@ -6,13 +6,13 @@ public abstract class BasePlexMediaData : BasePlexMediaQuality
     /// Plex Media.id.
     /// </summary>
     [Column(Order = 1)]
-    public required long PlexMediaId { get; init; }
+    public required long PlexApiMediaId { get; init; }
 
     /// <summary>
     /// Plex Media.Part.id.
     /// </summary>
     [Column(Order = 2)]
-    public required int PlexPartId { get; init; }
+    public required int PlexApiPartId { get; init; }
 
     /// <summary>
     /// Plex Metadata.ratingKey.
@@ -20,7 +20,7 @@ public abstract class BasePlexMediaData : BasePlexMediaQuality
     /// <example>"23920"</example>
     /// </summary>
     [Column(Order = 3)]
-    public required int RatingKey { get; init; }
+    public required int PlexApiRatingKey { get; init; }
 
     /// <summary>
     /// Normalized resolution derived from video height.

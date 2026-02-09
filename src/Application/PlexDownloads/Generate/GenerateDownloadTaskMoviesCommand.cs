@@ -104,7 +104,7 @@ public class GenerateDownloadTaskMoviesCommandHandler : ICommandHandler<Generate
 
                 // Get all parts for the selected media (multi-part movies have multiple parts with the same PlexMediaId)
                 var allPartsForSelectedMedia = plexMovie
-                    .MediaDataList.Where(x => x.PlexMediaId == movieData.PlexMediaId)
+                    .MediaDataList.Where(x => x.PlexApiMediaId == movieData.PlexApiMediaId)
                     .ToList();
 
                 // Map all parts to DownloadTaskMovieFile and add to movieDownloadTask

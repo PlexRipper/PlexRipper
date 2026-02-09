@@ -180,7 +180,7 @@ namespace Reaparr.PlexApi.UnitTests
             var part = media.Parts.First();
             var sourcePart = sourceMedia.Part!.First();
 
-            part.Id.ShouldBe(sourcePart.Id);
+            part.Id.ShouldBe(Convert.ToInt32(sourcePart.Id));
             part.Key.ShouldBe(sourcePart.Key);
             part.File.ShouldBe(sourcePart.File);
 

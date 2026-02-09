@@ -59,16 +59,4 @@ public static partial class PlexMediaDTOMapper
             VideoCodec = source.VideoCodec,
             AudioCodec = source.AudioCodec,
         };
-
-    public static LibraryMediaItemPartDTO ToPartDTO(this PlexMovieMediaData source) =>
-        new()
-        {
-            Id = source.PlexMediaId,
-            Key = source.Key,
-            Duration = source.Duration,
-            Size = source.Size,
-            Container = source.Container,
-            File = string.Empty,
-            Stream = [],
-        };
 }

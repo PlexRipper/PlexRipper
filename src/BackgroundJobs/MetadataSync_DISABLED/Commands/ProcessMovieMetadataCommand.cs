@@ -56,7 +56,7 @@ public class ProcessMovieMetadataCommandHandler : ICommandHandler<ProcessMovieMe
                 .Where(m =>
                     m.NeedsGeneratedName && m.PlexServerId == command.ServerId && m.GeneratedNameSyncedAt == null
                 )
-                .Select(p => p.RatingKey)
+                .Select(p => p.PlexApiRatingKey)
                 .Distinct()
                 .Take(MAX_ITEMS_PER_RUN)
                 .ToListAsync(ct);
@@ -120,7 +120,7 @@ public class ProcessMovieMetadataCommandHandler : ICommandHandler<ProcessMovieMe
                     .Where(m =>
                         m.NeedsGeneratedName && m.PlexServerId == command.ServerId && m.GeneratedNameSyncedAt == null
                     )
-                    .Where(p => batchRatingKeys.Contains(p.RatingKey))
+                    .Where(p => batchRatingKeys.Contains(p.PlexApiRatingKey))
                     .ToListAsync(ct);
 
                 // Update entities with the enriched metadata
@@ -128,7 +128,7 @@ public class ProcessMovieMetadataCommandHandler : ICommandHandler<ProcessMovieMe
                 foreach (var mediaItem in metadataItem.Media)
                 foreach (var partItem in mediaItem.Parts)
                 {
-                    var partToUpdate = parts.FirstOrDefault(p => p.PlexPartId == partItem.Id);
+                    var partToUpdate = parts.FirstOrDefault(p => p.PlexApiPartId == partItem.Id);
 
                     if (partToUpdate is null)
                     {

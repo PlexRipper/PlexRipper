@@ -101,7 +101,7 @@ public static class MediaContainerMappers
     public static LibraryMediaItemPartDTO ToItemPartDTO(this Part part) =>
         new()
         {
-            Id = part.Id,
+            Id = Convert.ToInt32(part.Id),
             Key = part.Key,
             Duration = part.Duration ?? -1,
             File = part.File ?? string.Empty,

@@ -20,7 +20,7 @@ public class DownloadTorrentEndpointRequestValidator : Validator<DownloadTorrent
         RuleFor(x => x.Quality).IsInEnum();
         RuleFor(x => x.Type).IsInEnum();
         RuleFor(x => x)
-            .Must(r => r.PartId > 0 || r.PartPlexId > 0)
+            .Must(r => r.PartId > 0 || r.PlexApiPartId > 0)
             .WithMessage("Either PartId or PartPlexId must be provided.");
     }
 }
@@ -107,8 +107,8 @@ public class DownloadTorrentEndpoint : Endpoint<DownloadTorrentEndpointRequest>
         if (req.Type == PlexMediaType.Episode)
         {
             return await _dbContext
-                .PlexTvShowEpisodeData.Where(x => x.Id == req.DataId)
-                .Where(p => p.Id == req.PartId || p.PlexMediaId == req.PartPlexId)
+                .PlexTvShowEpisodeData
+                .Where(p => p.Id == req.PartId || p.PlexApiPartId == req.PlexApiPartId)
                 .Select(p => new MediaFileInfo { FileName = p.GetFileName, Size = p.Size })
                 .SingleOrDefaultAsync(ct);
         }
@@ -116,8 +116,8 @@ public class DownloadTorrentEndpoint : Endpoint<DownloadTorrentEndpointRequest>
         if (req.Type == PlexMediaType.Movie)
         {
             return await _dbContext
-                .PlexMovieData.Where(x => x.Id == req.DataId)
-                .Where(p => p.Id == req.PartId || p.PlexMediaId == req.PartPlexId)
+                .PlexMovieData
+                .Where(p => p.Id == req.PartId || p.PlexApiPartId == req.PlexApiPartId)
                 .Select(p => new MediaFileInfo { FileName = p.GetFileName, Size = p.Size })
                 .SingleOrDefaultAsync(ct);
         }

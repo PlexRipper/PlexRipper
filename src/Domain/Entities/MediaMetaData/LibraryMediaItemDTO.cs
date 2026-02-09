@@ -246,7 +246,7 @@ public record LibraryMediaItemPartDTO
     /// <summary>
     /// Unique part identifier.
     /// </summary>
-    public required long Id { get; init; }
+    public required int Id { get; init; }
 
     /// <summary>
     /// Key to access this part.

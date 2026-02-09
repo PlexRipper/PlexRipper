@@ -76,7 +76,7 @@ public static partial class FakeData
                     // Ensure all moviesMedia have the same PlexMediaId
                     var sharedPlexMediaId = GetUniqueNumber();
                     foreach (var mediaData in movie.MediaDataList)
-                        mediaData.UpdateInitProperty(nameof(PlexMovieMediaData.PlexMediaId), sharedPlexMediaId);
+                        mediaData.UpdateInitProperty(nameof(PlexMovieMediaData.PlexApiMediaId), sharedPlexMediaId);
                 }
             )
             .UseSeed(seed.Next());

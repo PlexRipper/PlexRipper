@@ -160,8 +160,8 @@ public class SearchMovieCommandHandler : ICommandHandler<SearchMovieCommand, Tor
             {
                 item.Attributes.Add(new TorznabAttr("debug-plexServerId", mediaData.PlexServerId.ToString()));
                 item.Attributes.Add(new TorznabAttr("debug-plexLibraryId", mediaData.PlexLibraryId.ToString()));
-                item.Attributes.Add(new TorznabAttr("debug-plexId", mediaData.PlexMediaId.ToString()));
-                item.Attributes.Add(new TorznabAttr("debug-ratingKey", mediaData.RatingKey.ToString()));
+                item.Attributes.Add(new TorznabAttr("debug-plexApiMediaId", mediaData.PlexApiMediaId.ToString()));
+                item.Attributes.Add(new TorznabAttr("debug-ratingKey", mediaData.PlexApiRatingKey.ToString()));
             }
 
             if (movie.Guid_TMDB is not null)
@@ -181,7 +181,7 @@ public class SearchMovieCommandHandler : ICommandHandler<SearchMovieCommand, Tor
             MediaId = movie.Id,
             DataId = mediaData.Id,
             PartId = mediaData.Id, // TODO: Media and Parts are merged in the same DB table, PartId can be removed
-            PartPlexId = mediaData.PlexPartId,
+            PlexApiPartId = mediaData.PlexApiPartId,
             Quality = mediaData.Quality,
             LibraryId = mediaData.PlexLibraryId,
             ServerId = mediaData.PlexServerId,

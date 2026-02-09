@@ -34,8 +34,8 @@ public static class PlexMediaSlimDTOMapper
                     MediaId = source.Id,
                 })
                 .ToList(),
-            Key = source.RatingKey,
-            MetaDataKey = source.MetaDataKey,
+            PlexApiRatingKey = source.PlexApiRatingKey,
+            PlexApiMetaDataKey = source.PlexApiMetaDataKey,
             PlexToken = string.Empty,
         };
 
@@ -66,8 +66,8 @@ public static class PlexMediaSlimDTOMapper
             PlexLibraryId = source.PlexLibraryId,
             PlexServerId = source.PlexServerId,
             Type = source.Type,
-            Key = source.RatingKey,
-            MetaDataKey = source.MetaDataKey,
+            PlexApiRatingKey = source.PlexApiRatingKey,
+            PlexApiMetaDataKey = source.PlexApiMetaDataKey,
             HasThumb = source.HasThumb,
             Qualities = source.Qualities.ToDTO(),
             PlexToken = string.Empty,
@@ -95,8 +95,8 @@ public static class PlexMediaSlimDTOMapper
             PlexServerId = source.PlexServerId,
             Type = source.Type,
             HasThumb = source.HasThumb,
-            Key = source.RatingKey,
-            MetaDataKey = source.MetaDataKey,
+            PlexApiRatingKey = source.PlexApiRatingKey,
+            PlexApiMetaDataKey = source.PlexApiMetaDataKey,
             PlexToken = string.Empty,
             Qualities = source.MediaDataList.ToPlexMediaQuality(),
         };

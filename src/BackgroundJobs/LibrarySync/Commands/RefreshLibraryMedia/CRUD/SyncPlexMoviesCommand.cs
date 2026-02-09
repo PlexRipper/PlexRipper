@@ -22,7 +22,7 @@ public class SyncPlexMoviesCommandValidator : AbstractValidator<SyncPlexMoviesCo
 
         RuleFor(x => x.LibraryMetadata.PlexLibrary.Movies).NotNull();
         RuleForEach(x => x.LibraryMetadata.PlexLibrary.Movies)
-            .ChildRules(movie => movie.RuleFor(x => x.RatingKey).GreaterThan(0));
+            .ChildRules(movie => movie.RuleFor(x => x.PlexApiRatingKey).GreaterThan(0));
 
         RuleFor(x => x.LibraryMetadata.PlexActors).NotNull();
         RuleFor(x => x.LibraryMetadata.PlexGenres).NotNull();

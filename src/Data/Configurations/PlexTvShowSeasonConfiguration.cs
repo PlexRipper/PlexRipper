@@ -9,7 +9,7 @@ public class PlexTvShowSeasonConfiguration : IEntityTypeConfiguration<PlexTvShow
     {
         builder.HasIndex(x => new { x.PlexLibraryId, x.SortIndex });
 
-        builder.HasIndex(x => new { Key = x.RatingKey, x.PlexServerId });
+        builder.HasIndex(x => new { x.PlexApiRatingKey, x.PlexServerId });
 
         builder
             .HasMany(x => x.Qualities)

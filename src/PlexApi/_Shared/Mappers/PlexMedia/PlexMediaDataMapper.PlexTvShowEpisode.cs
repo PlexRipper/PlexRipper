@@ -34,8 +34,8 @@ public static partial class PlexMediaDataMapper
             ParentKey = source.GetParentKey(),
 
             Type = PlexMediaType.None,
-            RatingKey = source.RatingKey,
-            MetaDataKey = RetrieveMetaDataKey(source),
+            PlexApiRatingKey = source.RatingKey,
+            PlexApiMetaDataKey = RetrieveMetaDataKey(source),
             Studio = source.Studio,
             Summary = source.Summary,
             ContentRating = source.ContentRating,

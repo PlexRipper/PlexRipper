@@ -37,7 +37,7 @@ public static partial class PlexMediaDTOMapper
             Type = source.Type,
             HasThumb = source.HasThumb,
             Qualities = source.Qualities.SortByQuality().ToDTO(),
-            Key = source.RatingKey,
+            PlexApiRatingKey = source.PlexApiRatingKey,
             HasArt = source.HasArt,
             HasTheme = source.HasTheme,
             Studio = source.Studio,
@@ -46,7 +46,7 @@ public static partial class PlexMediaDTOMapper
             Rating = source.Rating,
             OriginallyAvailableAt = source.OriginallyAvailableAt,
             Children = source.Episodes.Select(x => x.ToDTO(plexToken)).ToList(),
-            MetaDataKey = source.MetaDataKey,
+            PlexApiMetaDataKey = source.PlexApiMetaDataKey,
             PlexToken = plexToken,
         };
 }

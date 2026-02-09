@@ -10,7 +10,7 @@ public static partial class FakeData
         return faker
             .StrictMode(true)
             .Ignore(x => x.Id)
-            .RuleFor(x => x.RatingKey, _ => GetUniqueNumber())
+            .RuleFor(x => x.PlexApiRatingKey, _ => GetUniqueNumber())
             .Ignore(x => x.Title)
             .RuleFor(x => x.FullTitle, (_, x) => $"{x.Title} ({x.Year})")
             .RuleFor(x => x.Year, f => f.Random.Int(1900, 2030))
@@ -18,7 +18,7 @@ public static partial class FakeData
             .RuleFor(x => x.SearchTitle, (_, x) => x.Title.ToSearchTitle())
             .RuleFor(x => x.Duration, f => f.Random.Int(1000, 3000000))
             .RuleFor(x => x.MediaSize, f => f.Random.Long(1000, 30000000))
-            .RuleFor(x => x.MetaDataKey, f => f.Random.Int(1, 10000))
+            .RuleFor(x => x.PlexApiMetaDataKey, f => f.Random.Int(1, 10000))
             .RuleFor(x => x.HasThumb, f => f.Random.Bool())
             .RuleFor(x => x.HasArt, f => f.Random.Bool())
             .RuleFor(x => x.HasTheme, f => f.Random.Bool())
@@ -100,7 +100,7 @@ public static partial class FakeData
                 foreach (var (season, seasonIndex) in tvShow.Seasons.Select((season, index) => (season, index)))
                 {
                     season.Title = $"{tvShow.Title} {seasonIndex + 1:D2}";
-                    season.ParentKey = tvShow.RatingKey;
+                    season.ParentKey = tvShow.PlexApiRatingKey;
                     season.ParentGuid = tvShow.Guid;
                     season.FullTitle = $"{tvShow.Title}/{season.Title}";
                     season.SeasonNumber = seasonIndex + 1;
@@ -111,7 +111,7 @@ public static partial class FakeData
                     {
                         var originalTitle = episode.Title;
                         episode.Title = $"S{seasonIndex + 1:D2}E{episodeIndex + 1:D2} - {originalTitle}";
-                        episode.ParentKey = season.RatingKey;
+                        episode.ParentKey = season.PlexApiRatingKey;
                         episode.ParentGuid = season.Guid;
                         episode.FullTitle = $"{tvShow.Title}/{season.Title}/{episode.Title}";
                         episode.EpisodeNumber = episodeIndex + 1;

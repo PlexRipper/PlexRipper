@@ -80,7 +80,7 @@ public class GenerateDownloadTaskTvShowsCommandHandler : ICommandHandler<Generat
                 // Check if the tvShowDownloadTask has already been created
                 var downloadTaskTvShow = await _dbContext.GetDownloadTaskTvShowByMediaKeyQuery(
                     tvShow.PlexServerId,
-                    tvShow.RatingKey,
+                    tvShow.PlexApiRatingKey,
                     cancellationToken
                 );
 

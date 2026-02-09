@@ -8,9 +8,9 @@ namespace Reaparr.Data.Contracts;
 
 public static partial class DbContextExtensions
 {
-    public static async Task<Result<int>> GetPlexMediaByMediaKeyAsync(
+    public static async Task<Result<int>> GetPlexMediaByRatingKeyAsync(
         this IReaparrDbContext dbContext,
-        int plexMediaKey,
+        int plexApiRatingKey,
         int plexServerId,
         PlexMediaType mediaType,
         CancellationToken cancellationToken = default
@@ -21,7 +21,7 @@ public static partial class DbContextExtensions
             case PlexMediaType.Movie:
             {
                 var entity = await dbContext.PlexMovies.FirstOrDefaultAsync(
-                    x => x.RatingKey == plexMediaKey && x.PlexServerId == plexServerId,
+                    x => x.PlexApiRatingKey == plexApiRatingKey && x.PlexServerId == plexServerId,
                     cancellationToken
                 );
                 if (entity is not null)
@@ -32,7 +32,7 @@ public static partial class DbContextExtensions
             case PlexMediaType.TvShow:
             {
                 var entity = await dbContext.PlexTvShows.FirstOrDefaultAsync(
-                    x => x.RatingKey == plexMediaKey && x.PlexServerId == plexServerId,
+                    x => x.PlexApiRatingKey == plexApiRatingKey && x.PlexServerId == plexServerId,
                     cancellationToken
                 );
                 if (entity is not null)
@@ -43,7 +43,7 @@ public static partial class DbContextExtensions
             case PlexMediaType.Season:
             {
                 var entity = await dbContext.PlexTvShowSeason.FirstOrDefaultAsync(
-                    x => x.RatingKey == plexMediaKey && x.PlexServerId == plexServerId,
+                    x => x.PlexApiRatingKey == plexApiRatingKey && x.PlexServerId == plexServerId,
                     cancellationToken
                 );
                 if (entity is not null)
@@ -54,7 +54,7 @@ public static partial class DbContextExtensions
             case PlexMediaType.Episode:
             {
                 var entity = await dbContext.PlexTvShowEpisodes.FirstOrDefaultAsync(
-                    x => x.RatingKey == plexMediaKey && x.PlexServerId == plexServerId,
+                    x => x.PlexApiRatingKey == plexApiRatingKey && x.PlexServerId == plexServerId,
                     cancellationToken
                 );
                 if (entity is not null)
@@ -67,7 +67,7 @@ public static partial class DbContextExtensions
         }
 
         return Result.Fail(
-            $"Couldn't find a plexMediaId with key {plexMediaKey}, plexServerId {plexServerId} with type {mediaType}"
+            $"Couldn't find a plexMediaId with key {plexApiRatingKey}, plexServerId {plexServerId} with type {mediaType}"
         );
     }
 

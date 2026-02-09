@@ -205,7 +205,7 @@ public class AddTorrentEndpoint : Endpoint<AddTorrentEndpointRequest>
                     .DownloadTaskTvShowEpisodeFile.Where(x =>
                         x.PlexLibraryId == metaData.LibraryId
                         && x.PlexServerId == metaData.ServerId
-                        && x.PlexId == metaData.PartPlexId
+                        && x.PartId == metaData.PartPlexId
                     )
                     .ExecuteUpdateAsync(p => p.SetProperty(x => x.HashId, hashId));
                 break;
@@ -214,7 +214,7 @@ public class AddTorrentEndpoint : Endpoint<AddTorrentEndpointRequest>
                     .DownloadTaskMovieFile.Where(x =>
                         x.PlexLibraryId == metaData.LibraryId
                         && x.PlexServerId == metaData.ServerId
-                        && x.PlexId == metaData.PartPlexId
+                        && x.PartId == metaData.PartPlexId
                     )
                     .ExecuteUpdateAsync(p => p.SetProperty(x => x.HashId, hashId));
                 break;

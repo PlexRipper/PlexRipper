@@ -4,19 +4,15 @@ public abstract class BasePlexMediaData : BasePlexMediaQuality
 {
     /// <summary>
     /// Plex Media.id.
-    /// Immutable identifier for the physical media file.
-    /// Used as the primary file identity for incremental sync.
     /// </summary>
     [Column(Order = 1)]
     public required long PlexMediaId { get; init; }
 
     /// <summary>
-    /// Plex Part.id.
-    /// Immutable identifier for the physical media file.
-    /// Used as the primary file identity for incremental sync.
+    /// Plex Media.Part.id.
     /// </summary>
     [Column(Order = 2)]
-    public required long PlexPartId { get; init; }
+    public required int PlexPartId { get; init; }
 
     /// <summary>
     /// Plex Metadata.ratingKey.

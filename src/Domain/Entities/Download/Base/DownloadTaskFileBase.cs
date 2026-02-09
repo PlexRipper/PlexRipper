@@ -2,6 +2,16 @@ namespace Reaparr.Domain;
 
 public abstract class DownloadTaskFileBase : DownloadTaskBase, IDownloadTaskProgress, IDownloadFileTransferProgress
 {
+    /// <summary>
+    /// Gets or sets the identifier of the Metadata.Media.Id of the media being downloaded.
+    /// </summary>
+    public required long MediaId { get; init; }
+
+    /// <summary>
+    /// Gets or sets the identifier of the Metadata.Media.Part.Id of the media being downloaded.
+    /// </summary>
+    public required long PartId { get; init; }
+
     [Column(Order = 11)]
     public required string FileName { get; set; }
 

@@ -19,7 +19,7 @@ public class FakeDataDownloadTasksUnitTests : BaseUnitTest
 
         // Assert
         movieTask.ShouldNotBeNull();
-        movieTask.PlexId.ShouldBeGreaterThan(0);
+        movieTask.RatingKey.ShouldBeGreaterThan(0);
         movieTask.Title.ShouldNotBeNullOrEmpty();
         movieTask.FullTitle.ShouldNotBeNullOrEmpty();
         movieTask.FullTitle.ShouldContain("Movie");
@@ -78,7 +78,7 @@ public class FakeDataDownloadTasksUnitTests : BaseUnitTest
 
         // Assert
         movieFileTask.ShouldNotBeNull();
-        movieFileTask.PlexId.ShouldBeGreaterThan(0);
+        movieFileTask.RatingKey.ShouldBeGreaterThan(0);
         movieFileTask.Title.ShouldNotBeNullOrEmpty();
         movieFileTask.FullTitle.ShouldNotBeNullOrEmpty();
         movieFileTask.DownloadStatus.ShouldBe(DownloadStatus.Queued);
@@ -107,7 +107,7 @@ public class FakeDataDownloadTasksUnitTests : BaseUnitTest
 
         // Assert
         tvShowTask.ShouldNotBeNull();
-        tvShowTask.PlexId.ShouldBeGreaterThan(0);
+        tvShowTask.RatingKey.ShouldBeGreaterThan(0);
         tvShowTask.Title.ShouldNotBeNullOrEmpty();
         tvShowTask.FullTitle.ShouldNotBeNullOrEmpty();
         tvShowTask.DownloadStatus.ShouldBe(DownloadStatus.Queued);

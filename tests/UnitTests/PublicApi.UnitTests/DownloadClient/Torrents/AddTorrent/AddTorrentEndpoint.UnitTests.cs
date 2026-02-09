@@ -225,7 +225,7 @@ public class AddTorrentEndpointUnitTests : BaseUnitTest
             MediaId = 1,
             DataId = 1,
             PartId = 1,
-            PartPlexId = movieFile.PlexId,
+            PartPlexId = movieFile.PartId,
             Quality = VideoQuality.HD,
             LibraryId = library.Id,
             ServerId = server.Id,
@@ -263,7 +263,7 @@ public class AddTorrentEndpointUnitTests : BaseUnitTest
             x =>
                 x.PlexLibraryId == movieMetadata.LibraryId
                 && x.PlexServerId == movieMetadata.ServerId
-                && x.PlexId == movieMetadata.PartPlexId,
+                && x.PartId == movieMetadata.PartPlexId,
             CancellationToken
         );
 
@@ -305,7 +305,7 @@ public class AddTorrentEndpointUnitTests : BaseUnitTest
             MediaId = 1,
             DataId = 1,
             PartId = 1,
-            PartPlexId = episodeFile.PlexId,
+            PartPlexId = episodeFile.PartId,
             Quality = VideoQuality.HD,
             LibraryId = library.Id,
             ServerId = server.Id,
@@ -343,7 +343,7 @@ public class AddTorrentEndpointUnitTests : BaseUnitTest
             x =>
                 x.PlexLibraryId == episodeMetadata.LibraryId
                 && x.PlexServerId == episodeMetadata.ServerId
-                && x.PlexId == episodeMetadata.PartPlexId,
+                && x.PartId == episodeMetadata.PartPlexId,
             CancellationToken
         );
 

@@ -8,7 +8,7 @@ public class DownloadTaskTvShowConfiguration : IEntityTypeConfiguration<Download
     public void Configure(EntityTypeBuilder<DownloadTaskTvShow> builder)
     {
         builder.HasIndex(x => x.DownloadStatus);
-        builder.HasIndex(x => new { x.PlexServerId, x.PlexId });
+        builder.HasIndex(x => new { x.PlexServerId, x.RatingKey });
 
         builder
             .HasMany(x => x.Children)

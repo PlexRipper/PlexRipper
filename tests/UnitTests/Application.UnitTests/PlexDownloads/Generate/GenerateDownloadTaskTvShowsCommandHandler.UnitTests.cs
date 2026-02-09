@@ -54,7 +54,7 @@ public class GenerateDownloadTaskTvShowsCommandHandlerUnitTests
         foreach (var downloadTaskTvShow in downloadTaskTvShows)
         {
             downloadTaskTvShow.Id.ShouldNotBe(Guid.Empty);
-            downloadTaskTvShow.MediaKey.ShouldBeGreaterThan(0);
+            downloadTaskTvShow.RatingKey.ShouldBeGreaterThan(0);
             downloadTaskTvShow.Title.ShouldNotBeEmpty();
             downloadTaskTvShow.FullTitle.ShouldNotBeEmpty();
             downloadTaskTvShow.DownloadStatus.ShouldBe(DownloadStatus.Queued);

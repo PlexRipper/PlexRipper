@@ -11,7 +11,7 @@ public class DownloadTaskMovieFileConfiguration : IEntityTypeConfiguration<Downl
         {
             x.PlexLibraryId,
             x.PlexServerId,
-            x.PlexId,
+            x.RatingKey,
         });
         builder.HasIndex(x => x.HashId);
 

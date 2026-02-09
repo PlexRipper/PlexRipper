@@ -180,8 +180,8 @@ public class SearchMovieCommandHandler : ICommandHandler<SearchMovieCommand, Tor
             Type = PlexMediaType.Movie,
             MediaId = movie.Id,
             DataId = mediaData.Id,
-            PartId = mediaData.Id,
-            PartPlexId = mediaData.PlexMediaId,
+            PartId = mediaData.Id, // TODO: Media and Parts are merged in the same DB table, PartId can be removed
+            PartPlexId = mediaData.PlexPartId,
             Quality = mediaData.Quality,
             LibraryId = mediaData.PlexLibraryId,
             ServerId = mediaData.PlexServerId,

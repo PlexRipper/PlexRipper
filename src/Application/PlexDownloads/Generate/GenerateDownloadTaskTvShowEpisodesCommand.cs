@@ -119,7 +119,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
 
             // Get or create episode download task
             var episodeDownloadTask = downloadTaskTvShowSeason.Children.FirstOrDefault(x =>
-                x.PlexId == tvShowEpisode.RatingKey
+                x.RatingKey == tvShowEpisode.RatingKey
             );
             if (episodeDownloadTask is null)
             {
@@ -163,7 +163,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
     )
     {
         // Check if the tvShowDownloadTask has already been created this run
-        var downloadTaskTvShow = _tvShowDownloads.FirstOrDefault(x => x.PlexId == plexTvShow.RatingKey);
+        var downloadTaskTvShow = _tvShowDownloads.FirstOrDefault(x => x.RatingKey == plexTvShow.RatingKey);
 
         // Check if the tvShowDownloadTask has already been created in the database
         if (downloadTaskTvShow is null)
@@ -195,7 +195,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
     {
         // Check if the SeasonDownloadTask has already been created
         var downloadTaskTvShowSeason = downloadTaskTvShow.Children.FirstOrDefault(x =>
-            x.PlexId == plexSeason.RatingKey
+            x.RatingKey == plexSeason.RatingKey
         );
 
         if (downloadTaskTvShowSeason is null)

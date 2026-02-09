@@ -10,7 +10,7 @@ public static class DownloadTaskGenericToDTOMapper
         new()
         {
             Id = downloadTask.Id,
-            Key = downloadTask.MediaKey,
+            RatingKey = downloadTask.RatingKey,
             Title = downloadTask.Title,
             FullTitle = downloadTask.FullTitle,
             MediaType = downloadTask.MediaType,

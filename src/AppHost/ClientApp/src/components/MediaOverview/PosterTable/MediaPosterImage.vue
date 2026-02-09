@@ -100,7 +100,7 @@ function loadThumbnail(mediaItem: PlexMediaSlimDTO) {
 	// Reset state for the new item
 	set(loading, true);
 
-	if (!mediaItem?.hasThumb || mediaItem.metaDataKey === 0 || mediaItem.key === 0) {
+	if (!mediaItem?.hasThumb || mediaItem.plexApiMetaDataKey === 0 || mediaItem.plexApiRatingKey === 0) {
 		set(imageUrl, '');
 		set(loading, false);
 		return;
@@ -109,8 +109,8 @@ function loadThumbnail(mediaItem: PlexMediaSlimDTO) {
 	const useLowQualityPoster = settingsStore.generalSettings.useLowQualityPosterImages;
 	currentSubscription = mediaStore.getMediaThumbnailUrl({
 		plexServerId: mediaItem.plexServerId,
-		plexKey: mediaItem.key.toString(),
-		metaDataKey: mediaItem.metaDataKey,
+		plexKey: mediaItem.plexApiRatingKey.toString(),
+		metaDataKey: mediaItem.plexApiMetaDataKey,
 		width: useLowQualityPoster ? props.thumbWidth : props.thumbWidth * 1.5,
 		height: useLowQualityPoster ? props.thumbHeight : props.thumbHeight * 1.5,
 	}).subscribe({
@@ -119,7 +119,7 @@ function loadThumbnail(mediaItem: PlexMediaSlimDTO) {
 			set(loading, false);
 		},
 		error: () => {
-			// Fallback to empty URL to show fallback image
+			// Fallback to empty URL to show a fallback image
 			set(imageUrl, '');
 			set(loading, false);
 		},

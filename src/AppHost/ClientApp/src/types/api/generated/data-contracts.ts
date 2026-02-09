@@ -275,8 +275,6 @@ export interface DownloadTaskDTO {
   fullTitle: string;
   /** @format guid */
   id: string;
-  /** @format int64 */
-  key: number;
   mediaType: PlexMediaType;
   /** @format guid */
   parentId: string;
@@ -286,6 +284,8 @@ export interface DownloadTaskDTO {
   plexLibraryId: number;
   /** @format int32 */
   plexServerId: number;
+  /** @format int64 */
+  ratingKey: number;
   status: DownloadStatus;
   /** @format int64 */
   timeRemaining: number;
@@ -648,15 +648,15 @@ export interface PlexMediaDTO {
   hasThumb: boolean;
   /** @format int32 */
   id: number;
-  /** @format int32 */
-  key: number;
   mediaData: PlexMediaDataDTO[];
   /** @format int64 */
   mediaSize: number;
-  /** @format int32 */
-  metaDataKey: number;
   /** @format date-time */
   originallyAvailableAt?: string | null;
+  /** @format int32 */
+  plexApiMetaDataKey: number;
+  /** @format int32 */
+  plexApiRatingKey: number;
   /** @format int32 */
   plexLibraryId: number;
   /** @format int32 */
@@ -728,12 +728,12 @@ export interface PlexMediaSlimDTO {
   hasThumb: boolean;
   /** @format int32 */
   id: number;
-  /** @format int32 */
-  key: number;
   /** @format int64 */
   mediaSize: number;
   /** @format int32 */
-  metaDataKey: number;
+  plexApiMetaDataKey: number;
+  /** @format int32 */
+  plexApiRatingKey: number;
   /** @format int32 */
   plexLibraryId: number;
   /** @format int32 */

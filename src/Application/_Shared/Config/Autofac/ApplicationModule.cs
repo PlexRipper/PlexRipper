@@ -18,7 +18,16 @@ public class ApplicationModule : Module
         builder.RegisterType<MoveDownloadFileJobScheduler>().As<IMoveDownloadFileScheduler>().SingleInstance();
         builder.RegisterType<MoveDownloadFileJobQueue>().As<IMoveDownloadFileQueue>().SingleInstance();
         builder.RegisterType<DownloadWorker>().InstancePerDependency();
-        builder.RegisterType<PlexDownloadClient>().As<IPlexDownloadClient>().InstancePerDependency();
+
+        builder
+            .RegisterType<DashPlexDownloadClient>()
+            .Keyed<IPlexDownloadClient>(PlexDownloadClientType.Dash)
+            .InstancePerDependency();
+
+        builder
+            .RegisterType<PlexDownloadClient>()
+            .Keyed<IPlexDownloadClient>(PlexDownloadClientType.Direct)
+            .InstancePerDependency();
 
         builder.RegisterType<SchedulerService>().As<ISchedulerService>().SingleInstance();
         builder.RegisterType<AllJobListener>().As<IAllJobListener>().SingleInstance();

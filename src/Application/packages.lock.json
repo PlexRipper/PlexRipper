@@ -591,7 +591,10 @@
         }
       },
       "Reaparr.External.Contracts": {
-        "type": "Project"
+        "type": "Project",
+        "dependencies": {
+          "System.Reactive": "[6.1.0, )"
+        }
       },
       "Reaparr.FileSystem.Contracts": {
         "type": "Project",

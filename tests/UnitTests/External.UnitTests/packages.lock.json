@@ -8,6 +8,12 @@
         "resolved": "6.0.4",
         "contentHash": "lkhqpF8Pu2Y7IiN7OntbsTtdbpR1syMsm2F3IgX6ootA4ffRqWL5jF7XipHuZQTdVuWG/gVAAcf8mjk8Tz0xPg=="
       },
+      "CSharpier.MsBuild": {
+        "type": "Direct",
+        "requested": "[1.2.5, )",
+        "resolved": "1.2.5",
+        "contentHash": "U9csejWXDk/ZXZpigcu22KAOINQj7qNujeJFj0HsHOqKzuW9xX+eaCFFHrfjOdIDQYzslQAe9e6Gt9HGMRC/aA=="
+      },
       "Microsoft.NET.Test.Sdk": {
         "type": "Direct",
         "requested": "[18.0.1, )",
@@ -18,15 +24,11 @@
           "Microsoft.TestPlatform.TestHost": "18.0.1"
         }
       },
-      "Serilog.Sinks.TestCorrelator": {
+      "System.Reactive": {
         "type": "Direct",
-        "requested": "[4.0.0, )",
-        "resolved": "4.0.0",
-        "contentHash": "jGedEvMtohtUTmRix+P4aR7bsz9h+LqCIrF9oBPz90Q68r2pCeXkipWD3dvLopTFsNWSJDHlZpkosPy/xFUshg==",
-        "dependencies": {
-          "Serilog": "3.1.1",
-          "System.Reactive": "6.0.1"
-        }
+        "requested": "[6.1.0, )",
+        "resolved": "6.1.0",
+        "contentHash": "M5cCC1ZMkZr9jbSQGTHnVkb5TDN67qWCV7AP8TAHdGkvDlu0puT5NzemESNn9+HkYIDpWpocP68/i+/ame2/2w=="
       },
       "xunit.runner.visualstudio": {
         "type": "Direct",
@@ -1250,6 +1252,15 @@
           "Serilog.Sinks.File": "6.0.0"
         }
       },
+      "Serilog.Sinks.TestCorrelator": {
+        "type": "Transitive",
+        "resolved": "4.0.0",
+        "contentHash": "jGedEvMtohtUTmRix+P4aR7bsz9h+LqCIrF9oBPz90Q68r2pCeXkipWD3dvLopTFsNWSJDHlZpkosPy/xFUshg==",
+        "dependencies": {
+          "Serilog": "3.1.1",
+          "System.Reactive": "6.0.1"
+        }
+      },
       "Shouldly": {
         "type": "Transitive",
         "resolved": "4.3.0",
@@ -1326,11 +1337,6 @@
         "dependencies": {
           "System.CodeDom": "6.0.0"
         }
-      },
-      "System.Reactive": {
-        "type": "Transitive",
-        "resolved": "6.1.0",
-        "contentHash": "M5cCC1ZMkZr9jbSQGTHnVkb5TDN67qWCV7AP8TAHdGkvDlu0puT5NzemESNn9+HkYIDpWpocP68/i+/ame2/2w=="
       },
       "System.Security.Cryptography.Pkcs": {
         "type": "Transitive",
@@ -1533,15 +1539,6 @@
           "Moq.Contrib.HttpClient": "[1.4.0, )",
           "Reaparr.AppHost": "[1.0.0, )",
           "Shouldly": "[4.3.0, )",
-          "TestableIO.System.IO.Abstractions.TestingHelpers": "[22.1.0, )",
-          "xunit.v3": "[3.2.1, )"
-        }
-      },
-      "Reaparr.BaseTests.UnitTests": {
-        "type": "Project",
-        "dependencies": {
-          "Microsoft.NET.Test.Sdk": "[18.0.1, )",
-          "Reaparr.BaseTests": "[1.0.0, )",
           "TestableIO.System.IO.Abstractions.TestingHelpers": "[22.1.0, )",
           "xunit.v3": "[3.2.1, )"
         }

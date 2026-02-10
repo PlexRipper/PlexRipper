@@ -1576,11 +1576,15 @@
         "dependencies": {
           "Autofac": "[9.0.0, )",
           "Reaparr.Application.Contracts": "[1.0.0, )",
-          "Reaparr.External.Contracts": "[1.0.0, )"
+          "Reaparr.External.Contracts": "[1.0.0, )",
+          "System.Reactive": "[6.1.0, )"
         }
       },
       "Reaparr.External.Contracts": {
-        "type": "Project"
+        "type": "Project",
+        "dependencies": {
+          "System.Reactive": "[6.1.0, )"
+        }
       },
       "Reaparr.FileSystem": {
         "type": "Project",

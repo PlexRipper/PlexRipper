@@ -16,6 +16,7 @@
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Autofac" Version="9.0.0" />
+        <PackageReference Include="System.IO.Abstractions" Version="22.1.0" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\Application.Contracts\Application.Contracts.csproj" />

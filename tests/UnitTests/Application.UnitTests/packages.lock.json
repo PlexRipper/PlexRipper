@@ -1585,7 +1585,7 @@
           "Autofac": "[9.0.0, )",
           "Reaparr.Application.Contracts": "[1.0.0, )",
           "Reaparr.External.Contracts": "[1.0.0, )",
-          "System.Reactive": "[6.1.0, )"
+          "System.IO.Abstractions": "[22.1.0, )"
         }
       },
       "Reaparr.External.Contracts": {

@@ -264,7 +264,6 @@ public class DashPlexDownloadClient : IPlexDownloadClient
                 Quality = "best",
                 EnvironmentVariables = new Dictionary<string, string>
                 {
-                    ["RUST_LOG"] = "dash_mpd=trace",
                     ["TMPDIR"] = DownloadTask.DownloadDirectory,
                     ["TMP"] = DownloadTask.DownloadDirectory,
                 },

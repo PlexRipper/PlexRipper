@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using Reaparr.External.Contracts;
 
 namespace Reaparr.External;
@@ -29,8 +30,8 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
         if (!File.Exists(_binaryPath))
         {
             throw new FileNotFoundException(
-                $"dash-mpd-cli binary not found at: {_binaryPath}. " +
-                $"Ensure the binary is included in the build output.",
+                $"dash-mpd-cli binary not found at: {_binaryPath}. "
+                    + $"Ensure the binary is included in the build output.",
                 _binaryPath
             );
         }
@@ -60,6 +61,11 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
     /// Event raised when standard error data is received.
     /// </summary>
     public event DataReceivedEventHandler? ErrorDataReceived;
+
+    /// <summary>
+    /// Event raised when download progress is updated.
+    /// </summary>
+    public event EventHandler<DownloadProgressEventArgs>? ProgressUpdated;
 
     /// <summary>
     /// Starts the dash-mpd-cli process with the specified arguments.
@@ -99,7 +105,7 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
             RedirectStandardError = true,
             RedirectStandardInput = false,
             CreateNoWindow = true,
-            WorkingDirectory = options.WorkingDirectory ?? Environment.CurrentDirectory,
+            WorkingDirectory = options.WorkingDirectory ?? System.Environment.CurrentDirectory,
         };
 
         // Add custom environment variables if specified
@@ -153,7 +159,10 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
         CancellationToken cancellationToken = default
     )
     {
-        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _cancellationTokenSource.Token);
+        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(
+            cancellationToken,
+            _cancellationTokenSource.Token
+        );
 
         if (!Start(mpdUrl, outputPath, options))
         {
@@ -258,11 +267,31 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
 
     private void OnOutputDataReceived(object sender, DataReceivedEventArgs e)
     {
+        if (!string.IsNullOrWhiteSpace(e.Data))
+        {
+            // Try to parse progress information
+            var progress = TryParseProgress(e.Data);
+            if (progress != null)
+            {
+                ProgressUpdated?.Invoke(this, progress);
+            }
+        }
+
         OutputDataReceived?.Invoke(sender, e);
     }
 
     private void OnErrorDataReceived(object sender, DataReceivedEventArgs e)
     {
+        if (!string.IsNullOrWhiteSpace(e.Data))
+        {
+            // dash-mpd-cli may output progress to stderr as well
+            var progress = TryParseProgress(e.Data);
+            if (progress != null)
+            {
+                ProgressUpdated?.Invoke(this, progress);
+            }
+        }
+
         ErrorDataReceived?.Invoke(sender, e);
     }
 
@@ -313,16 +342,143 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
             }
         }
 
-        // Proxy
+        // Proxy configuration
         if (!string.IsNullOrWhiteSpace(options.Proxy))
         {
             args.Append($" --proxy \"{options.Proxy}\"");
+        }
+
+        if (options.NoProxy)
+        {
+            args.Append(" --no-proxy");
+        }
+
+        // Bandwidth control
+        if (!string.IsNullOrWhiteSpace(options.LimitRate))
+        {
+            args.Append($" --limit-rate {options.LimitRate}");
+        }
+
+        // Authentication
+        if (!string.IsNullOrWhiteSpace(options.AuthUsername))
+        {
+            args.Append($" --auth-username \"{options.AuthUsername}\"");
+        }
+
+        if (!string.IsNullOrWhiteSpace(options.AuthPassword))
+        {
+            args.Append($" --auth-password \"{options.AuthPassword}\"");
+        }
+
+        if (!string.IsNullOrWhiteSpace(options.AuthBearer))
+        {
+            args.Append($" --auth-bearer \"{options.AuthBearer}\"");
+        }
+
+        // Advanced options
+        if (options.EnableLiveStreams)
+        {
+            args.Append(" --enable-live-streams");
+        }
+
+        if (options.SleepRequests.HasValue)
+        {
+            args.Append($" --sleep-requests {options.SleepRequests.Value}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(options.CookiesFromBrowser))
+        {
+            args.Append($" --cookies-from-browser {options.CookiesFromBrowser}");
+        }
+
+        // Decryption (DRM)
+        if (options.DecryptionKeys != null)
+        {
+            foreach (var key in options.DecryptionKeys)
+            {
+                args.Append($" --key \"{key}\"");
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(options.DecryptionApplication))
+        {
+            args.Append($" --decryption-application {options.DecryptionApplication}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(options.Mp4DecryptLocation))
+        {
+            args.Append($" --mp4decrypt-location \"{options.Mp4DecryptLocation}\"");
+        }
+
+        if (!string.IsNullOrWhiteSpace(options.ShakaPackagerLocation))
+        {
+            args.Append($" --shaka-packager-location \"{options.ShakaPackagerLocation}\"");
+        }
+
+        // Muxing
+        if (options.MuxerPreference != null)
+        {
+            foreach (var (container, preference) in options.MuxerPreference)
+            {
+                args.Append($" --muxer-preference {container}:{preference}");
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(options.FfmpegLocation))
+        {
+            args.Append($" --ffmpeg-location \"{options.FfmpegLocation}\"");
+        }
+
+        if (!string.IsNullOrWhiteSpace(options.VlcLocation))
+        {
+            args.Append($" --vlc-location \"{options.VlcLocation}\"");
+        }
+
+        if (!string.IsNullOrWhiteSpace(options.MkvmergeLocation))
+        {
+            args.Append($" --mkvmerge-location \"{options.MkvmergeLocation}\"");
+        }
+
+        if (!string.IsNullOrWhiteSpace(options.Mp4BoxLocation))
+        {
+            args.Append($" --mp4box-location \"{options.Mp4BoxLocation}\"");
         }
 
         // Quality selection
         if (!string.IsNullOrWhiteSpace(options.Quality))
         {
             args.Append($" --quality \"{options.Quality}\"");
+        }
+
+        if (options.PreferVideoHeight.HasValue)
+        {
+            args.Append($" --prefer-video-height {options.PreferVideoHeight.Value}");
+        }
+
+        if (options.PreferVideoWidth.HasValue)
+        {
+            args.Append($" --prefer-video-width {options.PreferVideoWidth.Value}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(options.AudioLanguage))
+        {
+            args.Append($" --prefer-language \"{options.AudioLanguage}\"");
+        }
+
+        // Other options
+        if (!string.IsNullOrWhiteSpace(options.DropElements))
+        {
+            args.Append($" --drop-elements \"{options.DropElements}\"");
+        }
+
+        if (!string.IsNullOrWhiteSpace(options.XsltStylesheet))
+        {
+            args.Append($" --xslt-stylesheet \"{options.XsltStylesheet}\"");
+        }
+
+        if (options.NoPeriodConcatenation)
+        {
+            args.Append(" --no-period-concatenation");
         }
 
         // Additional custom arguments
@@ -337,6 +493,110 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
         return args.ToString();
     }
 
+    /// <summary>
+    /// Attempts to parse progress information from dash-mpd-cli output.
+    /// Supports various output formats from the tool.
+    /// </summary>
+    /// <param name="output">The output line to parse.</param>
+    /// <returns>Progress information if successfully parsed, null otherwise.</returns>
+    private static DownloadProgressEventArgs? TryParseProgress(string output)
+    {
+        if (string.IsNullOrWhiteSpace(output))
+        {
+            return null;
+        }
+
+        // Pattern 1: Percentage-based progress (e.g., "Progress: 45.2%")
+        var percentMatch = Regex.Match(output, @"(\d+\.?\d*)%", RegexOptions.IgnoreCase);
+        if (percentMatch.Success && double.TryParse(percentMatch.Groups[1].Value, out var percent))
+        {
+            return new DownloadProgressEventArgs { PercentComplete = percent, RawOutput = output };
+        }
+
+        // Pattern 2: Downloaded bytes (e.g., "Downloaded 1.5GB / 3.0GB")
+        var bytesMatch = Regex.Match(
+            output,
+            @"(\d+\.?\d*)\s*(KB|MB|GB|TB)?\s*\/\s*(\d+\.?\d*)\s*(KB|MB|GB|TB)?",
+            RegexOptions.IgnoreCase
+        );
+        if (bytesMatch.Success)
+        {
+            var downloaded = ParseSize(bytesMatch.Groups[1].Value, bytesMatch.Groups[2].Value);
+            var total = ParseSize(bytesMatch.Groups[3].Value, bytesMatch.Groups[4].Value);
+
+            if (downloaded > 0 && total > 0)
+            {
+                var percentComplete = (double)downloaded / total * 100.0;
+                return new DownloadProgressEventArgs
+                {
+                    PercentComplete = percentComplete,
+                    BytesDownloaded = downloaded,
+                    TotalBytes = total,
+                    RawOutput = output,
+                };
+            }
+        }
+
+        // Pattern 3: Speed information (e.g., "Speed: 2.5 MB/s" or "1.2MB/s")
+        var speedMatch = Regex.Match(output, @"(\d+\.?\d*)\s*(KB|MB|GB)\/s", RegexOptions.IgnoreCase);
+        if (speedMatch.Success)
+        {
+            var speed = ParseSize(speedMatch.Groups[1].Value, speedMatch.Groups[2].Value);
+            return new DownloadProgressEventArgs { BytesPerSecond = speed, RawOutput = output };
+        }
+
+        // Pattern 4: ETA/Time remaining (e.g., "ETA: 2m 30s" or "Remaining: 00:05:30")
+        var etaMatch = Regex.Match(
+            output,
+            @"(?:ETA|Remaining):\s*(?:(\d+)h\s*)?(?:(\d+)m\s*)?(?:(\d+)s?)?|(\d{2}):(\d{2}):(\d{2})",
+            RegexOptions.IgnoreCase
+        );
+        if (etaMatch.Success)
+        {
+            int seconds = 0;
+            if (!string.IsNullOrEmpty(etaMatch.Groups[4].Value)) // HH:MM:SS format
+            {
+                seconds =
+                    int.Parse(etaMatch.Groups[4].Value) * 3600
+                    + int.Parse(etaMatch.Groups[5].Value) * 60
+                    + int.Parse(etaMatch.Groups[6].Value);
+            }
+            else // Individual components
+            {
+                if (!string.IsNullOrEmpty(etaMatch.Groups[1].Value))
+                    seconds += int.Parse(etaMatch.Groups[1].Value) * 3600;
+                if (!string.IsNullOrEmpty(etaMatch.Groups[2].Value))
+                    seconds += int.Parse(etaMatch.Groups[2].Value) * 60;
+                if (!string.IsNullOrEmpty(etaMatch.Groups[3].Value))
+                    seconds += int.Parse(etaMatch.Groups[3].Value);
+            }
+
+            return new DownloadProgressEventArgs { EstimatedSecondsRemaining = seconds, RawOutput = output };
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Parses a size value with optional unit (KB, MB, GB, TB) and returns bytes.
+    /// </summary>
+    private static long ParseSize(string value, string unit)
+    {
+        if (!double.TryParse(value, out var size))
+        {
+            return 0;
+        }
+
+        return unit.ToUpperInvariant() switch
+        {
+            "TB" => (long)(size * 1024 * 1024 * 1024 * 1024),
+            "GB" => (long)(size * 1024 * 1024 * 1024),
+            "MB" => (long)(size * 1024 * 1024),
+            "KB" => (long)(size * 1024),
+            _ => (long)size,
+        };
+    }
+
     private static string GetDefaultBinaryPath()
     {
         var assemblyDir = AppContext.BaseDirectory;
@@ -347,9 +607,9 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
             Architecture.X64 => "dash-mpd-cli-linux-amd64",
             Architecture.Arm64 => "dash-mpd-cli-linux-aarch64",
             _ => throw new PlatformNotSupportedException(
-                $"Unsupported architecture: {RuntimeInformation.OSArchitecture}. " +
-                $"Only x64 and ARM64 are supported."
-            )
+                $"Unsupported architecture: {RuntimeInformation.OSArchitecture}. "
+                    + $"Only x64 and ARM64 are supported."
+            ),
         };
 
         var binaryPath = Path.Combine(binaryDir, binaryName);
@@ -362,10 +622,7 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
                 try
                 {
                     // Set execute permissions (equivalent to chmod +x)
-                    var fileInfo = new UnixFileInfo(binaryPath);
-                    fileInfo.FileAccessPermissions |= FileAccessPermissions.UserExecute |
-                                                       FileAccessPermissions.GroupExecute |
-                                                       FileAccessPermissions.OtherExecute;
+                    EnsureExecutePermissions(binaryPath);
                 }
                 catch
                 {
@@ -377,46 +634,32 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
 
         return binaryPath;
     }
-}
 
-/// <summary>
-/// Unix file information helper for setting file permissions on Linux/macOS.
-/// </summary>
-internal class UnixFileInfo
-{
-    private readonly string _path;
-
-    public UnixFileInfo(string path)
+    /// <summary>
+    /// Ensures the specified file has execute permissions on Unix systems.
+    /// </summary>
+    private static void EnsureExecutePermissions(string filePath)
     {
-        _path = path;
-    }
-
-    public FileAccessPermissions FileAccessPermissions
-    {
-        get => throw new NotImplementedException("Reading permissions not implemented");
-        set
+        var chmod = new Process
         {
-            // Use chmod system call via Process
-            var chmod = new Process
+            StartInfo = new ProcessStartInfo
             {
-                StartInfo = new ProcessStartInfo
-                {
-                    FileName = "chmod",
-                    Arguments = $"+x \"{_path}\"",
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                }
-            };
-            chmod.Start();
-            chmod.WaitForExit();
+                FileName = "chmod",
+                Arguments = $"+x \"{filePath}\"",
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardError = true,
+                RedirectStandardOutput = true,
+            },
+        };
+
+        chmod.Start();
+        chmod.WaitForExit();
+
+        if (chmod.ExitCode != 0)
+        {
+            var error = chmod.StandardError.ReadToEnd();
+            throw new InvalidOperationException($"Failed to set execute permissions: {error}");
         }
     }
-}
-
-[Flags]
-internal enum FileAccessPermissions
-{
-    UserExecute = 0x40,
-    GroupExecute = 0x08,
-    OtherExecute = 0x01,
 }

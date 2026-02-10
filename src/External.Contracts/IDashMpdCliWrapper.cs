@@ -33,6 +33,11 @@ public interface IDashMpdCliWrapper : IAsyncDisposable, IDisposable
     event DataReceivedEventHandler? ErrorDataReceived;
 
     /// <summary>
+    /// Event raised when download progress is updated.
+    /// </summary>
+    event EventHandler<DownloadProgressEventArgs>? ProgressUpdated;
+
+    /// <summary>
     /// Starts the dash-mpd-cli process with the specified arguments.
     /// </summary>
     /// <param name="mpdUrl">The URL of the MPD manifest to download.</param>
@@ -80,6 +85,11 @@ public class DashMpdCliOptions
     public string? Proxy { get; set; }
 
     /// <summary>
+    /// Gets or sets whether to disable system proxy.
+    /// </summary>
+    public bool NoProxy { get; set; }
+
+    /// <summary>
     /// Gets or sets the quality/resolution preference (e.g., "best", "worst", "1080p").
     /// </summary>
     public string? Quality { get; set; }
@@ -108,4 +118,178 @@ public class DashMpdCliOptions
     /// Gets or sets additional command-line arguments to pass to dash-mpd-cli.
     /// </summary>
     public string? AdditionalArguments { get; set; }
+
+    #region Bandwidth Control
+
+    /// <summary>
+    /// Gets or sets network bandwidth throttling (e.g., "500K", "2M").
+    /// </summary>
+    public string? LimitRate { get; set; }
+
+    #endregion
+
+    #region Authentication
+
+    /// <summary>
+    /// Gets or sets HTTP Basic authentication username.
+    /// </summary>
+    public string? AuthUsername { get; set; }
+
+    /// <summary>
+    /// Gets or sets HTTP Basic authentication password.
+    /// </summary>
+    public string? AuthPassword { get; set; }
+
+    /// <summary>
+    /// Gets or sets Bearer token for authentication.
+    /// </summary>
+    public string? AuthBearer { get; set; }
+
+    #endregion
+
+    #region Advanced Options
+
+    /// <summary>
+    /// Gets or sets whether to enable pseudo-live stream support.
+    /// </summary>
+    public bool EnableLiveStreams { get; set; }
+
+    /// <summary>
+    /// Gets or sets sleep duration in milliseconds between requests.
+    /// </summary>
+    public int? SleepRequests { get; set; }
+
+    /// <summary>
+    /// Gets or sets browser name to extract cookies from (e.g., "firefox", "chrome", "edge", "safari").
+    /// </summary>
+    public string? CookiesFromBrowser { get; set; }
+
+    #endregion
+
+    #region Decryption (DRM)
+
+    /// <summary>
+    /// Gets or sets decryption keys for DRM-protected content.
+    /// </summary>
+    public List<string>? DecryptionKeys { get; set; }
+
+    /// <summary>
+    /// Gets or sets the decryption application to use ("mp4decrypt" or "shaka-packager").
+    /// </summary>
+    public string? DecryptionApplication { get; set; }
+
+    /// <summary>
+    /// Gets or sets custom path to mp4decrypt binary.
+    /// </summary>
+    public string? Mp4DecryptLocation { get; set; }
+
+    /// <summary>
+    /// Gets or sets custom path to shaka-packager binary.
+    /// </summary>
+    public string? ShakaPackagerLocation { get; set; }
+
+    #endregion
+
+    #region Muxing
+
+    /// <summary>
+    /// Gets or sets muxer preference mapping for different container formats (e.g., "mp4:ffmpeg,vlc").
+    /// </summary>
+    public Dictionary<string, string>? MuxerPreference { get; set; }
+
+    /// <summary>
+    /// Gets or sets custom path to ffmpeg binary.
+    /// </summary>
+    public string? FfmpegLocation { get; set; }
+
+    /// <summary>
+    /// Gets or sets custom path to VLC binary.
+    /// </summary>
+    public string? VlcLocation { get; set; }
+
+    /// <summary>
+    /// Gets or sets custom path to mkvmerge binary.
+    /// </summary>
+    public string? MkvmergeLocation { get; set; }
+
+    /// <summary>
+    /// Gets or sets custom path to MP4Box binary.
+    /// </summary>
+    public string? Mp4BoxLocation { get; set; }
+
+    #endregion
+
+    #region Quality Selection
+
+    /// <summary>
+    /// Gets or sets preferred video height in pixels (e.g., 1080).
+    /// </summary>
+    public int? PreferVideoHeight { get; set; }
+
+    /// <summary>
+    /// Gets or sets preferred video width in pixels (e.g., 1920).
+    /// </summary>
+    public int? PreferVideoWidth { get; set; }
+
+    /// <summary>
+    /// Gets or sets preferred audio language code (e.g., "en", "fr").
+    /// </summary>
+    public string? AudioLanguage { get; set; }
+
+    #endregion
+
+    #region Other
+
+    /// <summary>
+    /// Gets or sets XPath expression to drop elements from MPD manifest.
+    /// </summary>
+    public string? DropElements { get; set; }
+
+    /// <summary>
+    /// Gets or sets path to XSLT stylesheet for MPD manifest rewriting.
+    /// </summary>
+    public string? XsltStylesheet { get; set; }
+
+    /// <summary>
+    /// Gets or sets whether to disable concatenation of multi-period content.
+    /// </summary>
+    public bool NoPeriodConcatenation { get; set; }
+
+    #endregion
+}
+
+/// <summary>
+/// Event arguments for download progress updates.
+/// </summary>
+public class DownloadProgressEventArgs : EventArgs
+{
+    /// <summary>
+    /// Gets the percentage of download completed (0-100).
+    /// </summary>
+    public double PercentComplete { get; init; }
+
+    /// <summary>
+    /// Gets the number of bytes downloaded.
+    /// </summary>
+    public long BytesDownloaded { get; init; }
+
+    /// <summary>
+    /// Gets the total number of bytes to download (may be 0 if unknown).
+    /// </summary>
+    public long TotalBytes { get; init; }
+
+    /// <summary>
+    /// Gets the download speed in bytes per second.
+    /// </summary>
+    public long BytesPerSecond { get; init; }
+
+    /// <summary>
+    /// Gets the estimated time remaining in seconds (may be 0 if unknown).
+    /// </summary>
+    public int EstimatedSecondsRemaining { get; init; }
+
+    /// <summary>
+    /// Gets the raw output line that was parsed.
+    /// </summary>
+    public string RawOutput { get; init; } = string.Empty;
 }

@@ -103,7 +103,7 @@ public class DownloadJob : IJob, IAsyncDisposable
             downloadTask = result.Value;
 
             // Determine which download client to use based on the download task
-            var clientType = PlexDownloadClientType.Dash;
+            var clientType = PlexDownloadClientType.Direct;
             _log.Here()
                 .Information(
                     "Creating {ClientType} download client for {DownloadTaskFullTitle}",

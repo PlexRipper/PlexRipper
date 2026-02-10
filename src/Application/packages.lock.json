@@ -593,6 +593,7 @@
       "Reaparr.External.Contracts": {
         "type": "Project",
         "dependencies": {
+          "Reaparr.Domain": "[1.0.0, )",
           "System.Reactive": "[6.1.0, )"
         }
       },

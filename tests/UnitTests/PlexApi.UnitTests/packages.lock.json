@@ -110,6 +110,11 @@
           "System.Diagnostics.EventLog": "6.0.0"
         }
       },
+      "CliWrap": {
+        "type": "Transitive",
+        "resolved": "3.10.0",
+        "contentHash": "Igph39WNImUFqQrpTeBDPafcCnM1u/8IooZHqMRF/5JdV5H78p+AbZkeYY1Nkz1WlbI/Gt2Hq/3rYh55jxRF9Q=="
+      },
       "DiffEngine": {
         "type": "Transitive",
         "resolved": "11.3.0",
@@ -1589,6 +1594,7 @@
         "type": "Project",
         "dependencies": {
           "Autofac": "[9.0.0, )",
+          "CliWrap": "[3.10.0, )",
           "Reaparr.Application.Contracts": "[1.0.0, )",
           "Reaparr.External.Contracts": "[1.0.0, )",
           "System.IO.Abstractions": "[22.1.0, )"

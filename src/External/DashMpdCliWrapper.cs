@@ -1,4 +1,7 @@
 using System.Diagnostics;
+using System.IO.Abstractions;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -12,22 +15,29 @@ namespace Reaparr.External;
 /// </summary>
 public class DashMpdCliWrapper : IDashMpdCliWrapper
 {
+    private readonly IFile _fileSystem;
+    private readonly ILogger _log;
     private Process? _process;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
     private readonly TaskCompletionSource<int> _processExitSource = new();
     private readonly string _binaryPath;
 
+    private Subject<string> _stdoutSubject = new();
+    private Subject<string> _stderrSubject = new();
+    private Subject<DashDownloadProgress> _progressSubject = new();
+
     /// <summary>
     /// Initializes a new instance of the <see cref="DashMpdCliWrapper"/> class.
     /// </summary>
-    /// <param name="customBinaryPath">Optional custom path to dash-mpd-cli binary. If null, auto-detects based on platform.</param>
     /// <exception cref="PlatformNotSupportedException">Thrown when the current platform is not supported.</exception>
     /// <exception cref="FileNotFoundException">Thrown when the binary is not found at the expected location.</exception>
-    public DashMpdCliWrapper(string? customBinaryPath = null)
+    public DashMpdCliWrapper(ILogger logger, IFile fileSystem)
     {
-        _binaryPath = customBinaryPath ?? GetDefaultBinaryPath();
+        _log = logger.ForContext<DashMpdCliWrapper>();
+        _fileSystem = fileSystem;
+        _binaryPath = GetDefaultBinaryPath();
 
-        if (!File.Exists(_binaryPath))
+        if (!_fileSystem.Exists(_binaryPath))
         {
             throw new FileNotFoundException(
                 $"dash-mpd-cli binary not found at: {_binaryPath}. "
@@ -53,19 +63,19 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
     public Task<int> ProcessExitTask => _processExitSource.Task;
 
     /// <summary>
-    /// Event raised when standard output data is received.
+    /// Observable stream of standard output lines (including ANSI codes and carriage returns).
     /// </summary>
-    public event DataReceivedEventHandler? OutputDataReceived;
+    public IObservable<string> StandardOutput => _stdoutSubject.AsObservable();
 
     /// <summary>
-    /// Event raised when standard error data is received.
+    /// Observable stream of standard error lines.
     /// </summary>
-    public event DataReceivedEventHandler? ErrorDataReceived;
+    public IObservable<string> StandardError => _stderrSubject.AsObservable();
 
     /// <summary>
-    /// Event raised when download progress is updated.
+    /// Observable stream of parsed download progress updates.
     /// </summary>
-    public event EventHandler<DownloadProgressEventArgs>? ProgressUpdated;
+    public IObservable<DashDownloadProgress> Progress => _progressSubject.AsObservable();
 
     /// <summary>
     /// Starts the dash-mpd-cli process with the specified arguments.
@@ -75,26 +85,27 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
     /// <param name="options">Optional configuration options for the download.</param>
     /// <returns>True if the process started successfully, false otherwise.</returns>
     /// <exception cref="InvalidOperationException">Thrown when attempting to start while a process is already running.</exception>
-    public bool Start(string mpdUrl, string outputPath, DashMpdCliOptions? options = null)
+    public Result Start(string mpdUrl, string outputPath, DashMpdCliOptions? options = null)
     {
         if (IsRunning)
-        {
-            throw new InvalidOperationException("Cannot start dash-mpd-cli: process is already running.");
-        }
+            return _log.Here().ErrorResult("Cannot start dash-mpd-cli: process is already running.");
 
         if (string.IsNullOrWhiteSpace(mpdUrl))
-        {
-            throw new ArgumentException("MPD URL cannot be null or empty.", nameof(mpdUrl));
-        }
+            return _log.Here().ErrorResult("MPD URL cannot be null or empty");
 
         if (string.IsNullOrWhiteSpace(outputPath))
-        {
-            throw new ArgumentException("Output path cannot be null or empty.", nameof(outputPath));
-        }
+            return _log.Here().ErrorResult("Output path cannot be null or empty");
 
         options ??= new DashMpdCliOptions();
 
         var arguments = BuildArguments(mpdUrl, outputPath, options);
+
+        _log.Here().Information("Starting dash-mpd-cli: {BinaryPath} {Arguments}", _binaryPath, arguments);
+        _log.Here()
+            .Debug(
+                "Working directory: {WorkingDirectory}",
+                options.WorkingDirectory ?? System.Environment.CurrentDirectory
+            );
 
         var startInfo = new ProcessStartInfo
         {
@@ -114,6 +125,7 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
             foreach (var (key, value) in options.EnvironmentVariables)
             {
                 startInfo.Environment[key] = value;
+                _log.Here().Debug("Environment variable: {Key}={Value}", key, value);
             }
         }
 
@@ -122,7 +134,6 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
             _process = new Process { StartInfo = startInfo, EnableRaisingEvents = true };
 
             // Wire up event handlers
-            _process.OutputDataReceived += OnOutputDataReceived;
             _process.ErrorDataReceived += OnErrorDataReceived;
             _process.Exited += OnProcessExited;
 
@@ -130,15 +141,23 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
 
             if (started)
             {
-                // Begin asynchronous reading of output streams
-                _process.BeginOutputReadLine();
+                _log.Here().Information("dash-mpd-cli process started successfully with PID {ProcessId}", _process.Id);
+
+                // Start reading stderr with line-based reading (errors are typically line-based)
                 _process.BeginErrorReadLine();
+                
+                // Start reading stdout with custom reader to capture carriage return updates
+                _ = Task.Run(async () => await ReadStdoutWithCarriageReturnSupport());
+
+                _log.Here().Debug("Began asynchronous reading of output streams with carriage return support");
+                return Result.Ok();
             }
 
-            return started;
+            return _log.Here().ErrorResult("Failed to start dash-mpd-cli process");
         }
-        catch
+        catch (Exception ex)
         {
+            _log.Here().Error(ex, "Exception while starting dash-mpd-cli process");
             CleanupProcess();
             throw;
         }
@@ -152,7 +171,7 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
     /// <param name="options">Optional configuration options for the download.</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     /// <returns>The exit code of the process.</returns>
-    public async Task<int> ExecuteAsync(
+    public async Task<Result> ExecuteAsync(
         string mpdUrl,
         string outputPath,
         DashMpdCliOptions? options = null,
@@ -164,16 +183,16 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
             _cancellationTokenSource.Token
         );
 
-        if (!Start(mpdUrl, outputPath, options))
-        {
-            throw new InvalidOperationException("Failed to start dash-mpd-cli process.");
-        }
+        var startResult = Start(mpdUrl, outputPath, options);
+
+        if (startResult.IsFailed)
+            return startResult;
 
         try
         {
-            // Wait for process to exit or cancellation
-            var exitCode = await ProcessExitTask.WaitAsync(linkedCts.Token);
-            return exitCode;
+            // Wait for the process to exit or cancellation
+            await ProcessExitTask.WaitAsync(linkedCts.Token);
+            return Result.Ok();
         }
         catch (OperationCanceledException)
         {
@@ -191,15 +210,13 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
     public async Task StopAsync(TimeSpan? timeout = null)
     {
         if (!IsRunning)
-        {
             return;
-        }
 
         timeout ??= TimeSpan.FromSeconds(5);
 
         try
         {
-            // Attempt graceful shutdown by closing input
+            // Attempt a graceful shutdown by closing input
             if (_process?.StandardInput.BaseStream.CanWrite == true)
             {
                 await _process.StandardInput.BaseStream.FlushAsync();
@@ -265,54 +282,184 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
         GC.SuppressFinalize(this);
     }
 
-    private void OnOutputDataReceived(object sender, DataReceivedEventArgs e)
+    /// <summary>
+    /// Reads stdout stream and splits on both newlines and carriage returns to capture progress updates.
+    /// </summary>
+    private async Task ReadStdoutWithCarriageReturnSupport()
     {
-        if (!string.IsNullOrWhiteSpace(e.Data))
+        if (_process?.StandardOutput == null)
         {
-            // Try to parse progress information
-            var progress = TryParseProgress(e.Data);
-            if (progress != null)
-            {
-                ProgressUpdated?.Invoke(this, progress);
-            }
+            _log.Here().Warning("Process stdout is null, cannot read output");
+            return;
         }
 
-        OutputDataReceived?.Invoke(sender, e);
+        try
+        {
+            var buffer = new char[4096];
+            var lineBuilder = new StringBuilder();
+
+            while (!_process.HasExited)
+            {
+                var charsRead = await _process.StandardOutput.ReadAsync(buffer, 0, buffer.Length);
+                
+                if (charsRead == 0)
+                    break;
+
+                for (int i = 0; i < charsRead; i++)
+                {
+                    var ch = buffer[i];
+
+                    if (ch == '\n')
+                    {
+                        // Newline - emit the line and clear buffer
+                        var line = lineBuilder.ToString();
+                        if (!string.IsNullOrEmpty(line))
+                        {
+                            EmitStdoutLine(line);
+                        }
+                        lineBuilder.Clear();
+                    }
+                    else if (ch == '\r')
+                    {
+                        // Carriage return - emit the current line (progress update) and clear
+                        var line = lineBuilder.ToString();
+                        if (!string.IsNullOrEmpty(line))
+                        {
+                            EmitStdoutLine(line);
+                        }
+                        lineBuilder.Clear();
+                    }
+                    else
+                    {
+                        lineBuilder.Append(ch);
+                    }
+                }
+            }
+
+            // Emit any remaining content
+            if (lineBuilder.Length > 0)
+            {
+                EmitStdoutLine(lineBuilder.ToString());
+            }
+
+            _log.Here().Debug("Finished reading stdout stream");
+        }
+        catch (Exception ex)
+        {
+            _log.Here().Error(ex, "Error reading stdout stream");
+            _stdoutSubject?.OnError(ex);
+        }
+    }
+
+    /// <summary>
+    /// Emits a line to the stdout subject and attempts to parse progress.
+    /// </summary>
+    private void EmitStdoutLine(string line)
+    {
+        try
+        {
+            // Push to stdout observable
+            _stdoutSubject?.OnNext(line);
+
+            // Try to parse progress information
+            var progress = TryParseProgress(line);
+            if (progress != null)
+            {
+                _log.Here().Verbose("Parsed progress: {Percent}%, {Speed}MB/s, {Step}", 
+                    progress.PercentComplete, progress.DownloadSpeedMBps, progress.CurrentStep);
+                _progressSubject?.OnNext(progress);
+            }
+        }
+        catch (Exception ex)
+        {
+            _log.Here().Warning(ex, "Error emitting stdout line: {Line}", line);
+        }
     }
 
     private void OnErrorDataReceived(object sender, DataReceivedEventArgs e)
     {
-        if (!string.IsNullOrWhiteSpace(e.Data))
+        if (e.Data != null)
         {
-            // dash-mpd-cli may output progress to stderr as well
-            var progress = TryParseProgress(e.Data);
-            if (progress != null)
+            try
             {
-                ProgressUpdated?.Invoke(this, progress);
+                _log.Here().Error("stderr: {Data}", e.Data);
+
+                // Push all error output to stderr observable
+                _stderrSubject.OnNext(e.Data);
+
+                // dash-mpd-cli may output progress to stderr as well
+                var progress = TryParseProgress(e.Data);
+                if (progress != null)
+                {
+                    _log.Here().Verbose("Parsed progress from stderr: {Percent}%", progress.PercentComplete);
+                    _progressSubject.OnNext(progress);
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.Here().Warning(ex, "Error processing stderr data: {Data}", e.Data);
             }
         }
-
-        ErrorDataReceived?.Invoke(sender, e);
     }
 
     private void OnProcessExited(object? sender, EventArgs e)
     {
+        var exitCode = _process?.ExitCode ?? -1;
+
+        _log.Here().Information("dash-mpd-cli process exited with code {ExitCode}", exitCode);
+
         if (_process != null)
         {
-            _processExitSource.TrySetResult(_process.ExitCode);
+            _processExitSource.TrySetResult(exitCode);
+        }
+
+        // Complete all observables when process exits
+        try
+        {
+            _stdoutSubject?.OnCompleted();
+            _stderrSubject?.OnCompleted();
+            _progressSubject?.OnCompleted();
+            _log.Here().Debug("All observable subjects completed");
+        }
+        catch (Exception ex)
+        {
+            _log.Here().Warning(ex, "Error completing observable subjects");
         }
     }
 
     private void CleanupProcess()
     {
+        _log.Here().Debug("Cleaning up dash-mpd-cli process");
+
         if (_process != null)
         {
-            _process.OutputDataReceived -= OnOutputDataReceived;
-            _process.ErrorDataReceived -= OnErrorDataReceived;
-            _process.Exited -= OnProcessExited;
+            try
+            {
+                _process.ErrorDataReceived -= OnErrorDataReceived;
+                _process.Exited -= OnProcessExited;
 
-            _process.Dispose();
-            _process = null;
+                _process.Dispose();
+                _process = null;
+                _log.Here().Debug("Process disposed successfully");
+            }
+            catch (Exception ex)
+            {
+                _log.Here().Warning(ex, "Error disposing process");
+            }
+        }
+
+        // Dispose subjects (OnCompleted should have been called already in OnProcessExited)
+        try
+        {
+            _stdoutSubject?.Dispose();
+            _stderrSubject?.Dispose();
+            _progressSubject?.Dispose();
+
+            _log.Here().Debug("All subjects disposed successfully");
+        }
+        catch (Exception ex)
+        {
+            _log.Here().Warning(ex, "Error disposing subjects");
         }
     }
 
@@ -495,109 +642,153 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
 
     /// <summary>
     /// Attempts to parse progress information from dash-mpd-cli output.
-    /// Supports various output formats from the tool.
+    /// Parses the format: [elapsed time] [percentage] [step description] [speed]
     /// </summary>
     /// <param name="output">The output line to parse.</param>
     /// <returns>Progress information if successfully parsed, null otherwise.</returns>
-    private static DownloadProgressEventArgs? TryParseProgress(string output)
+    private static DashDownloadProgress? TryParseProgress(string output)
     {
         if (string.IsNullOrWhiteSpace(output))
         {
             return null;
         }
 
-        // Pattern 1: Percentage-based progress (e.g., "Progress: 45.2%")
-        var percentMatch = Regex.Match(output, @"(\d+\.?\d*)%", RegexOptions.IgnoreCase);
-        if (percentMatch.Success && double.TryParse(percentMatch.Groups[1].Value, out var percent))
+        // Try to extract percentage - this is the key indicator of progress
+        var percentMatch = Regex.Match(output, @"(\d+\.?\d*)%");
+        if (!percentMatch.Success || !double.TryParse(percentMatch.Groups[1].Value, out var percentage))
         {
-            return new DownloadProgressEventArgs { PercentComplete = percent, RawOutput = output };
+            return null;
         }
 
-        // Pattern 2: Downloaded bytes (e.g., "Downloaded 1.5GB / 3.0GB")
-        var bytesMatch = Regex.Match(
-            output,
-            @"(\d+\.?\d*)\s*(KB|MB|GB|TB)?\s*\/\s*(\d+\.?\d*)\s*(KB|MB|GB|TB)?",
-            RegexOptions.IgnoreCase
-        );
-        if (bytesMatch.Success)
-        {
-            var downloaded = ParseSize(bytesMatch.Groups[1].Value, bytesMatch.Groups[2].Value);
-            var total = ParseSize(bytesMatch.Groups[3].Value, bytesMatch.Groups[4].Value);
+        var progress = new DashDownloadProgress { PercentComplete = percentage, RawOutput = output };
 
-            if (downloaded > 0 && total > 0)
-            {
-                var percentComplete = (double)downloaded / total * 100.0;
-                return new DownloadProgressEventArgs
-                {
-                    PercentComplete = percentComplete,
-                    BytesDownloaded = downloaded,
-                    TotalBytes = total,
-                    RawOutput = output,
-                };
-            }
+        // Extract elapsed time - supports formats like "1m 30s", "00:01:30", "90s"
+        var elapsedTime = TryParseElapsedTime(output);
+        if (elapsedTime.HasValue)
+        {
+            progress = progress with { ElapsedTime = elapsedTime.Value };
         }
 
-        // Pattern 3: Speed information (e.g., "Speed: 2.5 MB/s" or "1.2MB/s")
-        var speedMatch = Regex.Match(output, @"(\d+\.?\d*)\s*(KB|MB|GB)\/s", RegexOptions.IgnoreCase);
-        if (speedMatch.Success)
+        // Extract download speed - supports formats like "2.5 MB/s", "1500 KB/s"
+        var speedMBps = TryParseSpeed(output);
+        if (speedMBps.HasValue)
         {
-            var speed = ParseSize(speedMatch.Groups[1].Value, speedMatch.Groups[2].Value);
-            return new DownloadProgressEventArgs { BytesPerSecond = speed, RawOutput = output };
+            progress = progress with { DownloadSpeedMBps = speedMBps.Value };
         }
 
-        // Pattern 4: ETA/Time remaining (e.g., "ETA: 2m 30s" or "Remaining: 00:05:30")
-        var etaMatch = Regex.Match(
-            output,
-            @"(?:ETA|Remaining):\s*(?:(\d+)h\s*)?(?:(\d+)m\s*)?(?:(\d+)s?)?|(\d{2}):(\d{2}):(\d{2})",
-            RegexOptions.IgnoreCase
-        );
-        if (etaMatch.Success)
+        // Extract step/description - text between time and speed indicators
+        var step = TryParseCurrentStep(output);
+        if (!string.IsNullOrEmpty(step))
         {
-            int seconds = 0;
-            if (!string.IsNullOrEmpty(etaMatch.Groups[4].Value)) // HH:MM:SS format
-            {
-                seconds =
-                    int.Parse(etaMatch.Groups[4].Value) * 3600
-                    + int.Parse(etaMatch.Groups[5].Value) * 60
-                    + int.Parse(etaMatch.Groups[6].Value);
-            }
-            else // Individual components
-            {
-                if (!string.IsNullOrEmpty(etaMatch.Groups[1].Value))
-                    seconds += int.Parse(etaMatch.Groups[1].Value) * 3600;
-                if (!string.IsNullOrEmpty(etaMatch.Groups[2].Value))
-                    seconds += int.Parse(etaMatch.Groups[2].Value) * 60;
-                if (!string.IsNullOrEmpty(etaMatch.Groups[3].Value))
-                    seconds += int.Parse(etaMatch.Groups[3].Value);
-            }
+            progress = progress with { CurrentStep = step };
+        }
 
-            return new DownloadProgressEventArgs { EstimatedSecondsRemaining = seconds, RawOutput = output };
+        return progress;
+    }
+
+    /// <summary>
+    /// Parses elapsed time from various formats: "1m 30s", "00:01:30", "90s", etc.
+    /// </summary>
+    private static TimeSpan? TryParseElapsedTime(string output)
+    {
+        // Format: HH:MM:SS or MM:SS
+        var timeMatch = Regex.Match(output, @"(\d{1,2}):(\d{2})(?::(\d{2}))?");
+        if (timeMatch.Success)
+        {
+            var hours = timeMatch.Groups[3].Success ? int.Parse(timeMatch.Groups[1].Value) : 0;
+            var minutes = timeMatch.Groups[3].Success
+                ? int.Parse(timeMatch.Groups[2].Value)
+                : int.Parse(timeMatch.Groups[1].Value);
+            var seconds = timeMatch.Groups[3].Success
+                ? int.Parse(timeMatch.Groups[3].Value)
+                : int.Parse(timeMatch.Groups[2].Value);
+
+            return new TimeSpan(hours, minutes, seconds);
+        }
+
+        // Format: "1h 30m 45s", "30m 45s", "45s"
+        var componentMatch = Regex.Match(output, @"(?:(\d+)h\s*)?(?:(\d+)m\s*)?(?:(\d+)s)?");
+        if (
+            componentMatch.Success
+            && (
+                componentMatch.Groups[1].Success || componentMatch.Groups[2].Success || componentMatch.Groups[3].Success
+            )
+        )
+        {
+            var hours = componentMatch.Groups[1].Success ? int.Parse(componentMatch.Groups[1].Value) : 0;
+            var minutes = componentMatch.Groups[2].Success ? int.Parse(componentMatch.Groups[2].Value) : 0;
+            var seconds = componentMatch.Groups[3].Success ? int.Parse(componentMatch.Groups[3].Value) : 0;
+
+            return new TimeSpan(hours, minutes, seconds);
         }
 
         return null;
     }
 
     /// <summary>
-    /// Parses a size value with optional unit (KB, MB, GB, TB) and returns bytes.
+    /// Parses download speed and converts to MB/s.
     /// </summary>
-    private static long ParseSize(string value, string unit)
+    private static double? TryParseSpeed(string output)
     {
-        if (!double.TryParse(value, out var size))
+        var speedMatch = Regex.Match(output, @"(\d+\.?\d*)\s*(KB|MB|GB|kb|mb|gb)\/s", RegexOptions.IgnoreCase);
+        if (speedMatch.Success && double.TryParse(speedMatch.Groups[1].Value, out var speed))
         {
-            return 0;
+            var unit = speedMatch.Groups[2].Value.ToUpperInvariant();
+            return unit switch
+            {
+                "GB" => speed * 1024.0,
+                "MB" => speed,
+                "KB" => speed / 1024.0,
+                _ => speed,
+            };
         }
 
-        return unit.ToUpperInvariant() switch
-        {
-            "TB" => (long)(size * 1024 * 1024 * 1024 * 1024),
-            "GB" => (long)(size * 1024 * 1024 * 1024),
-            "MB" => (long)(size * 1024 * 1024),
-            "KB" => (long)(size * 1024),
-            _ => (long)size,
-        };
+        return null;
     }
 
-    private static string GetDefaultBinaryPath()
+    /// <summary>
+    /// Extracts the current step/operation description from the output.
+    /// </summary>
+    private static string TryParseCurrentStep(string output)
+    {
+        // Look for common step indicators
+        var keywords = new[]
+        {
+            "Fetching",
+            "Downloading",
+            "Muxing",
+            "Decrypting",
+            "Processing",
+            "Merging",
+            "Converting",
+            "Extracting",
+            "Parsing",
+            "Analyzing",
+            "Preparing",
+        };
+
+        foreach (var keyword in keywords)
+        {
+            var index = output.IndexOf(keyword, StringComparison.OrdinalIgnoreCase);
+            if (index >= 0)
+            {
+                // Extract a reasonable portion after the keyword
+                var stepText = output[index..];
+                // Take until we hit percentage or speed indicator
+                var endMatch = Regex.Match(stepText, @"(\d+\.?\d*%|\d+\.?\d*\s*[KMG]B\/s)");
+                if (endMatch.Success)
+                {
+                    stepText = stepText[..endMatch.Index].Trim();
+                }
+
+                return stepText.Length > 0 && stepText.Length < 100 ? stepText : keyword;
+            }
+        }
+
+        return string.Empty;
+    }
+
+    private string GetDefaultBinaryPath()
     {
         var assemblyDir = AppContext.BaseDirectory;
         var binaryDir = Path.Combine(assemblyDir, "dash-mpd-cli", "binary");
@@ -617,7 +808,7 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
         // Ensure binary has execute permissions on Unix systems
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
-            if (File.Exists(binaryPath))
+            if (_fileSystem.Exists(binaryPath))
             {
                 try
                 {

@@ -38,12 +38,12 @@ public record DashMpdCliOptions
     /// <summary>
     /// Gets or sets the working directory for the process.
     /// </summary>
-    public string? WorkingDirectory { get; set; }
+    public required string WorkingDirectory { get; init; }
 
     /// <summary>
     /// Gets or sets custom environment variables for the process.
     /// </summary>
-    public Dictionary<string, string>? EnvironmentVariables { get; set; }
+    public Dictionary<string, string> EnvironmentVariables { get; set; } = new();
 
     /// <summary>
     /// Gets or sets additional command-line arguments to pass to dash-mpd-cli.

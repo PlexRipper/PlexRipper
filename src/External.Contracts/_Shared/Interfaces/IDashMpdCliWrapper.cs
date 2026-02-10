@@ -41,8 +41,9 @@ public interface IDashMpdCliWrapper : IAsyncDisposable, IDisposable
     /// <param name="mpdUrl">The URL of the MPD manifest to download.</param>
     /// <param name="outputPath">The output file path where the downloaded media will be saved.</param>
     /// <param name="options">Optional configuration options for the download.</param>
-    /// <returns>True if the process started successfully, false otherwise.</returns>
-    Result Start(string mpdUrl, string outputPath, DashMpdCliOptions? options = null);
+    /// <returns>Result.Ok if the process started successfully, false otherwise.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when attempting to start while a process is already running.</exception>
+    Result Start(string mpdUrl, string outputPath, DashMpdCliOptions options);
 
     /// <summary>
     /// Executes the dash-mpd-cli process and waits for it to complete.

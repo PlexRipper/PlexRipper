@@ -5,7 +5,6 @@ using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 using Reaparr.External.Contracts;
 using Reaparr.Settings.Contracts;
-using DataReceivedEventArgs = System.Diagnostics.DataReceivedEventArgs;
 
 namespace Reaparr.Application;
 
@@ -22,18 +21,28 @@ public class DashPlexDownloadClient : IPlexDownloadClient
     private readonly ICommandExecutor _commandExecutor;
     private readonly IServerSettingsModule _serverSettings;
 
-    private readonly Subject<IList<DownloadWorkerLog>> _downloadWorkerLog = new();
-    private readonly TaskCompletionSource<object> _downloadProcessCompletion = new();
+    private readonly Subject<IList<DownloadWorkerLog>> _downloadWorkerLogSubject = new();
+    private readonly TaskCompletionSource<object> _downloadProcessCompletionSource = new();
+    private readonly TaskCompletionSource<object> _progressSubscriptionCompletionSource = new();
+    private readonly TaskCompletionSource<object> _logSubscriptionCompletionSource = new();
     private readonly CancellationTokenSource _cancellationTokenSource = new();
 
     private IDisposable? _downloadSpeedLimitSubscription;
+    private IDisposable? _progressSubscription;
+    private IDisposable? _logSubscription;
+
     private string? _downloadUrl;
     private string? _outputPath;
 
-    private long _lastBytesDownloaded;
-    private long _lastTotalBytes;
     private long _lastSpeed;
     private DateTime _lastProgressUpdate = DateTime.UtcNow;
+    private DownloadTaskKey _downloadTaskKey = new DownloadTaskKey
+    {
+        Type = DownloadTaskType.None,
+        Id = Guid.Empty,
+        PlexServerId = 0,
+        PlexLibraryId = 0,
+    };
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DashPlexDownloadClient"/> class.
@@ -68,9 +77,16 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         }
     }
 
-    public IObservable<IList<DownloadWorkerLog>> ListenToDownloadWorkerLog => _downloadWorkerLog.AsObservable();
+    public IObservable<IList<DownloadWorkerLog>> ListenToDownloadWorkerLog { get; private set; } =
+        Observable.Empty<IList<DownloadWorkerLog>>();
 
-    public Task DownloadProcessTask => _downloadProcessCompletion.Task;
+    public Task DownloadProcessTask =>
+        Task.WhenAll(
+            _dashWrapper.ProcessExitTask,
+            _downloadProcessCompletionSource.Task,
+            _progressSubscriptionCompletionSource.Task,
+            _logSubscriptionCompletionSource.Task
+        );
 
     /// <summary>
     /// Setup this DashPlexDownloadClient to prepare for the download process.
@@ -86,6 +102,7 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         }
 
         DownloadTask = downloadTask;
+        _downloadTaskKey = downloadTaskKey;
 
         // Get the download URL from the Plex server
         var downloadUrlResult = await _commandExecutor.Send(
@@ -121,13 +138,11 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         // Dispose the stream immediately - we just needed to create the directory
         await directoryResult.Value.DisposeAsync();
 
-        // Wire up event handlers
-        _dashWrapper.OutputDataReceived += OnOutputDataReceived;
-        _dashWrapper.ErrorDataReceived += OnErrorDataReceived;
-        _dashWrapper.ProgressUpdated += OnProgressUpdated;
-
         // Set up a download speed limit watcher
         await SetupDownloadLimitWatcher(DownloadTask);
+
+        // Set up subscriptions to observables
+        SetupSubscriptions();
 
         // Set up process exit handling
         _ = MonitorProcessExitAsync();
@@ -138,29 +153,103 @@ public class DashPlexDownloadClient : IPlexDownloadClient
     }
 
     /// <summary>
+    /// Sets up subscriptions to the dash-mpd-cli wrapper observables.
+    /// </summary>
+    private void SetupSubscriptions()
+    {
+        _log.Here().Debug("Setting up observable subscriptions");
+
+        // Progress subscription with error handling and completion tracking
+        _progressSubscription = _dashWrapper
+            .Progress.Sample(TimeSpan.FromMilliseconds(500))
+            .Select(async data => await OnProgressUpdate(data))
+            .Subscribe(
+                _ => { },
+                onError: ex =>
+                {
+                    if (ex.GetType() != typeof(OperationCanceledException))
+                    {
+                        _log.Here().ErrorResult(ex);
+                        _progressSubscriptionCompletionSource.TrySetException(ex);
+                    }
+                    else
+                    {
+                        _log.Here().Debug("Progress subscription cancelled");
+                        _progressSubscriptionCompletionSource.TrySetResult(true);
+                    }
+                },
+                onCompleted: () =>
+                {
+                    _log.Here().Debug("Progress observable completed");
+                    _progressSubscriptionCompletionSource.TrySetResult(true);
+                }
+            );
+
+        // Log subscription - combine stdout and stderr with buffering
+        ListenToDownloadWorkerLog = Observable
+            .Merge(
+                _dashWrapper.StandardOutput.Select(line => CreateLogEntry(line, NotificationLevel.Information)),
+                _dashWrapper.StandardError.Select(line => CreateLogEntry(line, NotificationLevel.Error))
+            )
+            .Buffer(TimeSpan.FromSeconds(1))
+            .Where(logs => logs.Any())
+            .Select(logs => (IList<DownloadWorkerLog>)logs.ToList())
+            .AsObservable();
+
+        _logSubscription = ListenToDownloadWorkerLog.Subscribe(
+            onNext: logs => _downloadWorkerLogSubject.OnNext(logs),
+            onError: ex =>
+            {
+                if (ex.GetType() != typeof(OperationCanceledException))
+                {
+                    _log.Here().ErrorResult(ex);
+                    _logSubscriptionCompletionSource.TrySetException(ex);
+                }
+                else
+                {
+                    _log.Here().Debug("Log subscription cancelled");
+                    _logSubscriptionCompletionSource.TrySetResult(true);
+                }
+            },
+            onCompleted: () =>
+            {
+                _log.Here().Debug("Log observable completed");
+                _logSubscriptionCompletionSource.TrySetResult(true);
+            }
+        );
+
+        _log.Here().Information("Observable subscriptions setup completed");
+    }
+
+    /// <summary>
+    /// Creates a download worker log entry from a raw output line.
+    /// </summary>
+    private DownloadWorkerLog CreateLogEntry(string data, NotificationLevel level) =>
+        new()
+        {
+            DownloadWorkerTaskId = DownloadTask?.DownloadWorkerTasks.FirstOrDefault()?.Id ?? 0,
+            CreatedAt = DateTime.UtcNow,
+            Message = level == NotificationLevel.Error ? $"ERROR: {data}" : data,
+            DownloadTaskId = DownloadTask?.Id ?? Guid.Empty,
+            LogLevel = level,
+        };
+
+    /// <summary>
     /// Starts the download process using dash-mpd-cli.
     /// </summary>
     public Result Start()
     {
         if (DownloadTask is null)
-        {
             return Result.Fail("The DashPlexDownloadClient has not been setup yet.").LogError();
-        }
 
         if (_dashWrapper.IsRunning)
-        {
             return Result.Fail("The DashPlexDownloadClient is already downloading and cannot be started.").LogWarning();
-        }
 
         if (string.IsNullOrWhiteSpace(_downloadUrl))
-        {
             return Result.Fail("Download URL is not available.").LogError();
-        }
 
         if (string.IsNullOrWhiteSpace(_outputPath))
-        {
             return Result.Fail("Output path is not configured.").LogError();
-        }
 
         _log.Here().Debug("Starting DASH download for {MediaFileName}", DownloadTask.FileName);
 
@@ -169,19 +258,22 @@ public class DashPlexDownloadClient : IPlexDownloadClient
             // Configure dash-mpd-cli options
             var options = new DashMpdCliOptions
             {
-                Quiet = false, // We need output for progress tracking
+                Quiet = false,
                 Verbose = true,
                 WorkingDirectory = DownloadTask.DownloadDirectory,
                 Quality = "best",
+                EnvironmentVariables = new Dictionary<string, string>
+                {
+                    ["RUST_LOG"] = "dash_mpd=trace",
+                    ["TMPDIR"] = DownloadTask.DownloadDirectory,
+                    ["TMP"] = DownloadTask.DownloadDirectory,
+                },
             };
 
             // Start the download process
-            var started = _dashWrapper.Start(_downloadUrl, _outputPath, options);
-
-            if (!started)
-            {
-                return Result.Fail("Failed to start dash-mpd-cli process.").LogError();
-            }
+            var startedResult = _dashWrapper.Start(_downloadUrl, _outputPath, options);
+            if (startedResult.IsFailed)
+                return startedResult;
 
             // Update status to downloading
             DownloadStatus = DownloadStatus.Downloading;
@@ -216,13 +308,16 @@ public class DashPlexDownloadClient : IPlexDownloadClient
             if (DownloadTask != null)
             {
                 DownloadStatus = DownloadStatus.Paused;
-                await _dbContext.SetDownloadStatus(DownloadTask.ToKey(), DownloadStatus);
-                await _commandExecutor.Send(new DownloadTaskUpdatedCommand(DownloadTask.ToKey()));
+                await _dbContext.SetDownloadStatus(_downloadTaskKey, DownloadStatus);
+                await _commandExecutor.Send(new DownloadTaskUpdatedCommand(_downloadTaskKey));
             }
 
+            // Wait for all tasks to complete
+            await Task.WhenAll(_progressSubscriptionCompletionSource.Task, _logSubscriptionCompletionSource.Task);
+
             // Complete observables
-            _downloadWorkerLog.OnCompleted();
-            _downloadProcessCompletion.TrySetResult(true);
+            _downloadWorkerLogSubject.OnCompleted();
+            _downloadProcessCompletionSource.TrySetResult(true);
 
             return Result.Ok();
         }
@@ -240,16 +335,16 @@ public class DashPlexDownloadClient : IPlexDownloadClient
     {
         _log.Here().Debug("Disposing DashPlexDownloadClient for {DownloadTaskId}", DownloadTask?.Id);
 
-        // Unsubscribe from events
-        _dashWrapper.OutputDataReceived -= OnOutputDataReceived;
-        _dashWrapper.ErrorDataReceived -= OnErrorDataReceived;
-        _dashWrapper.ProgressUpdated -= OnProgressUpdated;
+        // Wait for download process to complete
+        await DownloadProcessTask;
 
         // Dispose subscriptions
+        _progressSubscription?.Dispose();
+        _logSubscription?.Dispose();
         _downloadSpeedLimitSubscription?.Dispose();
 
         // Dispose subjects
-        _downloadWorkerLog.Dispose();
+        _downloadWorkerLogSubject.Dispose();
 
         // Ensure process is stopped
         if (_dashWrapper.IsRunning)
@@ -260,98 +355,48 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         await _dashWrapper.DisposeAsync();
         _cancellationTokenSource.Dispose();
 
+        _log.Here()
+            .Warning(
+                "DashPlexDownloadClient for DownloadTask with Id: {DownloadTaskId} was disposed",
+                DownloadTask?.Id
+            );
+
         GC.SuppressFinalize(this);
     }
 
-    private void OnOutputDataReceived(object? sender, DataReceivedEventArgs e)
+    private async Task OnProgressUpdate(DashDownloadProgress progress)
     {
-        if (!string.IsNullOrWhiteSpace(e.Data))
-        {
-            _log.Here().Debug("[dash-mpd-cli] {Output}", e.Data);
+        // Convert speed from MB/s to bytes/s for storage
+        var speedBytesPerSecond = (long)(progress.DownloadSpeedMBps * 1024 * 1024);
 
-            // Create log entry
-            var logEntry = new DownloadWorkerLog
-            {
-                DownloadWorkerTaskId = DownloadTask?.DownloadWorkerTasks.FirstOrDefault()?.Id ?? 0,
-                CreatedAt = DateTime.UtcNow,
-                Message = e.Data,
-                DownloadTaskId = DownloadTask!.Id,
-                LogLevel = NotificationLevel.Information,
-            };
-
-            _downloadWorkerLog.OnNext([logEntry]);
-        }
-    }
-
-    private void OnErrorDataReceived(object? sender, DataReceivedEventArgs e)
-    {
-        if (!string.IsNullOrWhiteSpace(e.Data))
-        {
-            _log.Here().Warning("[dash-mpd-cli ERROR] {Error}", e.Data);
-
-            // Create log entry for errors
-            var logEntry = new DownloadWorkerLog
-            {
-                DownloadWorkerTaskId = DownloadTask?.DownloadWorkerTasks.FirstOrDefault()?.Id ?? 0,
-                CreatedAt = DateTime.UtcNow,
-                Message = $"ERROR: {e.Data}",
-                DownloadTaskId = DownloadTask!.Id,
-                LogLevel = NotificationLevel.Error,
-            };
-
-            _downloadWorkerLog.OnNext([logEntry]);
-        }
-    }
-
-    private void OnProgressUpdated(object? sender, DownloadProgressEventArgs e)
-    {
-        if (DownloadTask == null)
-            return;
-
-        // Update local tracking
-        if (e.BytesDownloaded > 0)
-            _lastBytesDownloaded = e.BytesDownloaded;
-
-        if (e.TotalBytes > 0)
-            _lastTotalBytes = e.TotalBytes;
-
-        if (e.BytesPerSecond > 0)
-            _lastSpeed = e.BytesPerSecond;
-
-        // Throttle database updates to every 500ms
-        if ((DateTime.UtcNow - _lastProgressUpdate).TotalMilliseconds < 500)
-            return;
+        if (speedBytesPerSecond > 0)
+            _lastSpeed = speedBytesPerSecond;
 
         _lastProgressUpdate = DateTime.UtcNow;
 
         // Update download task progress
-        DownloadTask.DataReceived = _lastBytesDownloaded;
-        if (_lastTotalBytes > 0)
-            DownloadTask.DataTotal = _lastTotalBytes;
-        DownloadTask.DownloadSpeed = _lastSpeed;
-
+        // Note: DashDownloadProgress doesn't provide BytesDownloaded/TotalBytes directly
+        // We'll use the percentage and speed information that's available
+        DownloadTask?.DownloadSpeed = _lastSpeed;
         // Update database asynchronously
-        _ = Task.Run(async () =>
+        try
         {
-            try
-            {
-                await _dbContext.UpdateDownloadProgress(DownloadTask.ToKey(), DownloadTask);
-                await _commandExecutor.Send(new DownloadTaskUpdatedCommand(DownloadTask.ToKey()));
+            await _dbContext.UpdateDownloadProgress(_downloadTaskKey, DownloadTask!);
+            await _commandExecutor.Send(new DownloadTaskUpdatedCommand(_downloadTaskKey));
 
-                _log.Here()
-                    .Verbose(
-                        "Progress: {Percent}% - {Downloaded}/{Total} - {Speed}/s",
-                        e.PercentComplete,
-                        DataFormat.FormatSizeString(_lastBytesDownloaded),
-                        DataFormat.FormatSizeString(_lastTotalBytes),
-                        DataFormat.FormatSpeedString(_lastSpeed)
-                    );
-            }
-            catch (Exception ex)
-            {
-                _log.Here().Warning(ex, "Failed to update download progress");
-            }
-        });
+            // _log.Here()
+            //     .Debug(
+            //         "Progress: {Percent}% - {ElapsedTime} - {Step} - {Speed} MB/s",
+            //         progress.PercentComplete,
+            //         progress.ElapsedTime,
+            //         progress.CurrentStep,
+            //         progress.DownloadSpeedMBps
+            //     );
+        }
+        catch (Exception ex)
+        {
+            _log.Here().Warning(ex, "Failed to update download progress");
+        }
     }
 
     private async Task MonitorProcessExitAsync()
@@ -374,28 +419,28 @@ public class DashPlexDownloadClient : IPlexDownloadClient
             {
                 // Download completed successfully
                 DownloadStatus = DownloadStatus.Completed;
-                await _dbContext.SetDownloadStatus(DownloadTask.ToKey(), DownloadStatus);
+                await _dbContext.SetDownloadStatus(_downloadTaskKey, DownloadStatus);
             }
             else
             {
                 // Download failed
                 DownloadStatus = DownloadStatus.Error;
-                await _dbContext.SetDownloadStatus(DownloadTask.ToKey(), DownloadStatus);
+                await _dbContext.SetDownloadStatus(_downloadTaskKey, DownloadStatus);
 
                 _log.Here()
                     .Error("Download failed for {FileName} with exit code {ExitCode}", DownloadTask.FileName, exitCode);
             }
 
-            await _commandExecutor.Send(new DownloadTaskUpdatedCommand(DownloadTask.ToKey()));
+            await _commandExecutor.Send(new DownloadTaskUpdatedCommand(_downloadTaskKey));
 
             // Complete the download process
-            _downloadWorkerLog.OnCompleted();
-            _downloadProcessCompletion.TrySetResult(true);
+            _downloadWorkerLogSubject.OnCompleted();
+            _downloadProcessCompletionSource.TrySetResult(true);
         }
         catch (Exception ex)
         {
             _log.Here().ErrorResult(ex);
-            _downloadProcessCompletion.TrySetException(ex);
+            _downloadProcessCompletionSource.TrySetException(ex);
         }
     }
 

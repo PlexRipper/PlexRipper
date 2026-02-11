@@ -36,6 +36,9 @@ export default defineNuxtConfig({
 				{ src: 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js' },
 				{ src: 'https://cdn.jsdelivr.net/npm/vanta/dist/vanta.waves.min.js' },
 			],
+			// .dark added to ensure PrimeVue uses the dark mode styling
+			htmlAttrs: { class: 'dark' },
+			meta: [{ name: 'color-scheme', content: 'dark' }],
 			link: [
 				{ rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
 			],

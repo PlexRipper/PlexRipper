@@ -575,16 +575,6 @@
                         "text": "Włączenie trybu debugowania spowoduje wyświetlenie większej ilości informacji niż zwykle w różnych obszarach interfejsu użytkownika.",
                         "title": "Tryb debugowania",
                         "label": "Tryb debugowania"
-                    },
-                    "mask-plex-libraries": {
-                        "label": "Ukryj nazwy bibliotek Plex",
-                        "text": "To ukryje nazwy bibliotek Plex w interfejsie użytkownika. Jest to przydatne podczas robienia anonimowych zrzutów ekranu.",
-                        "title": "Ukryj nazwy bibliotek Plex"
-                    },
-                    "mask-plex-servers": {
-                        "label": "Ukryj nazwy serwerów Plex",
-                        "text": "To ukryje nazwy serwerów Plex w interfejsie użytkownika. Jest to przydatne podczas robienia anonimowych zrzutów ekranu.",
-                        "title": "Ukryj nazwy serwerów Plex"
                     }
                 },
                 "reset-db": {
@@ -600,39 +590,24 @@
                     }
                 }
             },
-            "accounts": {
-                "app-username": {
-                    "text": "Wprowadź nazwę użytkownika, której będziesz używać do logowania się do Reaparr.",
-                    "title": "Nazwa użytkownika Reaparr",
-                    "label": "Nazwa użytkownika"
-                },
-                "app-confirm-password": {
-                    "label": "Potwierdź hasło"
-                },
-                "app-password": {
-                    "label": "Hasło",
-                    "text": "Wprowadź hasło, którego będziesz używać do bezpiecznego logowania się do Reaparr.",
-                    "title": "Hasło Reaparr"
-                }
-            },
-            "paths": {
-                "download-folder": {
-                    "label": "Ścieżka pobierania",
-                    "text": "Ścieżka, do której zostaną pobrane wszystkie pliki w kilku częściach, a następnie połączone w jedną całość w folderze docelowym.",
-                    "title": "Ścieżka pobierania"
-                },
-                "movie-folder": {
-                    "label": "Ścieżka Filmów",
-                    "text": "Domyślna ścieżka filmów w przypadku, gdy nie wybrano niestandardowego miejsca docelowego.",
-                    "title": "Ścieżka Filmów"
-                },
-                "tv-show-folder": {
-                    "label": "Ścieżka Seriali",
-                    "text": "Domyślna ścieżka seriali w przypadku, gdy nie wybrano żadnego niestandardowego miejsca docelowego.",
-                    "title": "Ścieżka Seriali"
-                }
-            },
             "ui": {
+                "general-settings": {
+                    "mask-plex-libraries": {
+                        "label": "Ukryj nazwy bibliotek Plex",
+                        "text": "To ukryje nazwy bibliotek Plex w interfejsie użytkownika. Jest to przydatne podczas robienia anonimowych zrzutów ekranu.",
+                        "title": "Ukryj nazwy bibliotek Plex"
+                    },
+                    "mask-plex-servers": {
+                        "label": "Ukryj nazwy serwerów Plex",
+                        "text": "To ukryje nazwy serwerów Plex w interfejsie użytkownika. Jest to przydatne podczas robienia anonimowych zrzutów ekranu.",
+                        "title": "Ukryj nazwy serwerów Plex"
+                    },
+                    "toggle-animated-background": {
+                        "label": "Wyłącz animowane tło",
+                        "text": "Animowane tło może powodować problemy z wydajnością w przeglądarce. Ten przełącznik może wyłączyć animację i pokazać tylko statyczne tło.",
+                        "title": "Wyłącz animację tła"
+                    }
+                },
                 "confirmation-settings": {
                     "download-episode-confirmation": {
                         "label": "Potwierdzenie pobrania odcinka",
@@ -683,13 +658,38 @@
                         "text": "Spowoduje to zmianę języka na prawie wszystko. Tekst taki jak błędy raczej nie zostanie przetłumaczony. Wszelkie poprawki tłumaczeń lub nowe języki są bardzo mile widziane, sprawdź www.reaparr.rocks, aby uzyskać informacje na temat dodawania nowych języków.",
                         "title": "Wybierz preferowany język"
                     }
+                }
+            },
+            "accounts": {
+                "app-username": {
+                    "text": "Wprowadź nazwę użytkownika, której będziesz używać do logowania się do Reaparr.",
+                    "title": "Nazwa użytkownika Reaparr",
+                    "label": "Nazwa użytkownika"
                 },
-                "general-settings": {
-                    "toggle-animated-background": {
-                        "label": "Wyłącz animowane tło",
-                        "text": "Animowane tło może powodować problemy z wydajnością w przeglądarce. Ten przełącznik może wyłączyć animację i pokazać tylko statyczne tło.",
-                        "title": "Wyłącz animację tła"
-                    }
+                "app-confirm-password": {
+                    "label": "Potwierdź hasło"
+                },
+                "app-password": {
+                    "label": "Hasło",
+                    "text": "Wprowadź hasło, którego będziesz używać do bezpiecznego logowania się do Reaparr.",
+                    "title": "Hasło Reaparr"
+                }
+            },
+            "paths": {
+                "download-folder": {
+                    "label": "Ścieżka pobierania",
+                    "text": "Ścieżka, do której zostaną pobrane wszystkie pliki w kilku częściach, a następnie połączone w jedną całość w folderze docelowym.",
+                    "title": "Ścieżka pobierania"
+                },
+                "movie-folder": {
+                    "label": "Ścieżka Filmów",
+                    "text": "Domyślna ścieżka filmów w przypadku, gdy nie wybrano niestandardowego miejsca docelowego.",
+                    "title": "Ścieżka Filmów"
+                },
+                "tv-show-folder": {
+                    "label": "Ścieżka Seriali",
+                    "text": "Domyślna ścieżka seriali w przypadku, gdy nie wybrano żadnego niestandardowego miejsca docelowego.",
+                    "title": "Ścieżka Seriali"
                 }
             },
             "integrations": {

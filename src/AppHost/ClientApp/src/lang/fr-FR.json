@@ -575,16 +575,6 @@
                         "text": "L'activation du mode de débogage affichera plus d'informations que d'habitude dans diverses zones de l'interface utilisateur.",
                         "title": "Mode débogage",
                         "label": "Mode débogage"
-                    },
-                    "mask-plex-libraries": {
-                        "label": "Masquer les noms de bibliothèque Plex",
-                        "text": "Cela masquera les noms des bibliothèques Plex dans l'interface utilisateur. Ceci est utile lors de la prise de captures d'écran anonymes",
-                        "title": "Masquer les noms de bibliothèque Plex"
-                    },
-                    "mask-plex-servers": {
-                        "label": "Masquer les noms de serveur Plex",
-                        "text": "Cela masquera les noms des serveurs Plex dans l'interface utilisateur. Ceci est utile lors de la prise de captures d'écran anonymes.",
-                        "title": "Masquer les noms de serveur Plex"
                     }
                 },
                 "reset-db": {
@@ -600,39 +590,24 @@
                     }
                 }
             },
-            "accounts": {
-                "app-username": {
-                    "text": "Entrez le nom d'utilisateur que vous utiliserez pour vous connecter à Reaparr.",
-                    "title": "Nom d'utilisateur Reaparr",
-                    "label": "Nom d'utilisateur"
-                },
-                "app-confirm-password": {
-                    "label": "Confirmez le mot de passe"
-                },
-                "app-password": {
-                    "label": "Mot de passe",
-                    "text": "Entrez le mot de passe que vous utiliserez pour vous connecter en toute sécurité à Reaparr.",
-                    "title": "Mot de passe Reaparr"
-                }
-            },
-            "paths": {
-                "download-folder": {
-                    "label": "Dossier de téléchargement",
-                    "text": "Le dossier où tout les fichiers vont être téléchargé en plusieurs parties avant d'être réassemblé en un seul dans le dossier de destination.",
-                    "title": "Dossier de téléchargement"
-                },
-                "movie-folder": {
-                    "label": "Dossier des film",
-                    "text": "Le dossier par défaut des films quant aucun dossier personnalisé n'a été sélectionné.",
-                    "title": "Dossier des film"
-                },
-                "tv-show-folder": {
-                    "label": "Dossier des série",
-                    "text": "Le dossier par défaut des séries quant aucun dossier personnalisé n'a été sélectionné.",
-                    "title": "Dossier des série"
-                }
-            },
             "ui": {
+                "general-settings": {
+                    "mask-plex-libraries": {
+                        "label": "Masquer les noms de bibliothèque Plex",
+                        "text": "Cela masquera les noms des bibliothèques Plex dans l'interface utilisateur. Ceci est utile lors de la prise de captures d'écran anonymes",
+                        "title": "Masquer les noms de bibliothèque Plex"
+                    },
+                    "mask-plex-servers": {
+                        "label": "Masquer les noms de serveur Plex",
+                        "text": "Cela masquera les noms des serveurs Plex dans l'interface utilisateur. Ceci est utile lors de la prise de captures d'écran anonymes.",
+                        "title": "Masquer les noms de serveur Plex"
+                    },
+                    "toggle-animated-background": {
+                        "label": "Désactiver l'arrière-plan animé",
+                        "text": "L'arrière-plan animé peut entraîner des problèmes de performances dans le navigateur. Cette bascule peut désactiver l'animation et afficher uniquement un arrière-plan statique.",
+                        "title": "Désactiver l'animation d'arrière-plan"
+                    }
+                },
                 "confirmation-settings": {
                     "download-episode-confirmation": {
                         "label": "Demander confirmation du téléchargement de l'épisode",
@@ -683,13 +658,38 @@
                         "text": "Cela changera la langue de presque tout. Il est peu probable que des textes tels que des erreurs soient traduits. Toutes les corrections de traduction ou de nouvelles langues sont grandement appréciées, consultez www.reaparr.rocks pour plus d'informations sur la façon dont vous pouvez ajouter de nouvelles langues.",
                         "title": "Choisissez votre langue préférée"
                     }
+                }
+            },
+            "accounts": {
+                "app-username": {
+                    "text": "Entrez le nom d'utilisateur que vous utiliserez pour vous connecter à Reaparr.",
+                    "title": "Nom d'utilisateur Reaparr",
+                    "label": "Nom d'utilisateur"
                 },
-                "general-settings": {
-                    "toggle-animated-background": {
-                        "label": "Désactiver l'arrière-plan animé",
-                        "text": "L'arrière-plan animé peut entraîner des problèmes de performances dans le navigateur. Cette bascule peut désactiver l'animation et afficher uniquement un arrière-plan statique.",
-                        "title": "Désactiver l'animation d'arrière-plan"
-                    }
+                "app-confirm-password": {
+                    "label": "Confirmez le mot de passe"
+                },
+                "app-password": {
+                    "label": "Mot de passe",
+                    "text": "Entrez le mot de passe que vous utiliserez pour vous connecter en toute sécurité à Reaparr.",
+                    "title": "Mot de passe Reaparr"
+                }
+            },
+            "paths": {
+                "download-folder": {
+                    "label": "Dossier de téléchargement",
+                    "text": "Le dossier où tout les fichiers vont être téléchargé en plusieurs parties avant d'être réassemblé en un seul dans le dossier de destination.",
+                    "title": "Dossier de téléchargement"
+                },
+                "movie-folder": {
+                    "label": "Dossier des film",
+                    "text": "Le dossier par défaut des films quant aucun dossier personnalisé n'a été sélectionné.",
+                    "title": "Dossier des film"
+                },
+                "tv-show-folder": {
+                    "label": "Dossier des série",
+                    "text": "Le dossier par défaut des séries quant aucun dossier personnalisé n'a été sélectionné.",
+                    "title": "Dossier des série"
                 }
             },
             "integrations": {

@@ -575,16 +575,6 @@
                         "text": "Enabling debug mode will display more information than usual in various area of the user interface.",
                         "title": "Debug Mode",
                         "label": "Debug Mode"
-                    },
-                    "mask-plex-libraries": {
-                        "label": "Mask Plex Library Names",
-                        "text": "This will mask the names of Plex libraries in the UI. This is useful when taking anonymous screenshots ",
-                        "title": "Mask Plex Library Names"
-                    },
-                    "mask-plex-servers": {
-                        "label": "Mask Plex Server Names",
-                        "text": "This will mask the names of Plex servers in the UI. This is useful when taking anonymous screenshots.",
-                        "title": "Mask Plex Server Names"
                     }
                 },
                 "reset-db": {
@@ -600,39 +590,24 @@
                     }
                 }
             },
-            "accounts": {
-                "app-username": {
-                    "text": "Enter the username you will use to log in to Reaparr.",
-                    "title": "Reaparr Username",
-                    "label": "Username"
-                },
-                "app-confirm-password": {
-                    "label": "Confirm Password"
-                },
-                "app-password": {
-                    "label": "Password",
-                    "text": "Enter the password you will use to securely log in to Reaparr.",
-                    "title": "Reaparr Password"
-                }
-            },
-            "paths": {
-                "download-folder": {
-                    "label": "Download Path",
-                    "text": "The path all files will be downloaded to in multiple parts before being merged into one in their destination folder.",
-                    "title": "Download Path"
-                },
-                "movie-folder": {
-                    "label": "Movie Path",
-                    "text": "The default path of Movies when no custom destination has been selected.",
-                    "title": "Movie Path"
-                },
-                "tv-show-folder": {
-                    "label": "TV-Show Path",
-                    "text": "The default path of TV-Show when no custom destination has been selected.",
-                    "title": "TV-Show Path"
-                }
-            },
             "ui": {
+                "general-settings": {
+                    "mask-plex-libraries": {
+                        "label": "Mask Plex Library Names",
+                        "text": "This will mask the names of Plex libraries in the UI. This is useful when taking anonymous screenshots ",
+                        "title": "Mask Plex Library Names"
+                    },
+                    "mask-plex-servers": {
+                        "label": "Mask Plex Server Names",
+                        "text": "This will mask the names of Plex servers in the UI. This is useful when taking anonymous screenshots.",
+                        "title": "Mask Plex Server Names"
+                    },
+                    "toggle-animated-background": {
+                        "label": "Disable Animated Background",
+                        "text": "The animated background can cause performance issues in the browser. This toggle can be disable the animation and show just a static background.",
+                        "title": "Disable the background animation"
+                    }
+                },
                 "confirmation-settings": {
                     "download-episode-confirmation": {
                         "label": "Ask Download Episode Confirmation",
@@ -683,13 +658,38 @@
                         "text": "This will change the language to almost everything. Text such as errors are unlikely to be translated. Any translation fixes or new languages are greatly appreciated, check www.reaparr.rocks for information on how you can add new languages.",
                         "title": "Pick your preferred language"
                     }
+                }
+            },
+            "accounts": {
+                "app-username": {
+                    "text": "Enter the username you will use to log in to Reaparr.",
+                    "title": "Reaparr Username",
+                    "label": "Username"
                 },
-                "general-settings": {
-                    "toggle-animated-background": {
-                        "label": "Disable Animated Background",
-                        "text": "The animated background can cause performance issues in the browser. This toggle can be disable the animation and show just a static background.",
-                        "title": "Disable the background animation"
-                    }
+                "app-confirm-password": {
+                    "label": "Confirm Password"
+                },
+                "app-password": {
+                    "label": "Password",
+                    "text": "Enter the password you will use to securely log in to Reaparr.",
+                    "title": "Reaparr Password"
+                }
+            },
+            "paths": {
+                "download-folder": {
+                    "label": "Download Path",
+                    "text": "The path all files will be downloaded to in multiple parts before being merged into one in their destination folder.",
+                    "title": "Download Path"
+                },
+                "movie-folder": {
+                    "label": "Movie Path",
+                    "text": "The default path of Movies when no custom destination has been selected.",
+                    "title": "Movie Path"
+                },
+                "tv-show-folder": {
+                    "label": "TV-Show Path",
+                    "text": "The default path of TV-Show when no custom destination has been selected.",
+                    "title": "TV-Show Path"
                 }
             },
             "integrations": {

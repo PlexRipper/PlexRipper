@@ -13,18 +13,18 @@
 			</HelpRow>
 			<!--	Mask Plex Server Names	-->
 			<HelpRow
-				:label="$t('help.settings.advanced.debug-section.mask-plex-servers.label')"
-				:title="$t('help.settings.advanced.debug-section.mask-plex-servers.title')"
-				:text="$t('help.settings.advanced.debug-section.mask-plex-servers.text')">
+				:label="$t('help.settings.ui.general-settings.mask-plex-servers.label')"
+				:title="$t('help.settings.ui.general-settings.mask-plex-servers.title')"
+				:text="$t('help.settings.ui.general-settings.mask-plex-servers.text')">
 				<q-toggle
 					v-model:model-value="settingsStore.debugSettings.maskServerNames"
 					size="lg" />
 			</HelpRow>
 			<!--	Mask Plex Library Names	-->
 			<HelpRow
-				:label="$t('help.settings.advanced.debug-section.mask-plex-libraries.label')"
-				:title="$t('help.settings.advanced.debug-section.mask-plex-libraries.title')"
-				:text="$t('help.settings.advanced.debug-section.mask-plex-libraries.text')">
+				:label="$t('help.settings.ui.general-settings.mask-plex-libraries.label')"
+				:title="$t('help.settings.ui.general-settings.mask-plex-libraries.title')"
+				:text="$t('help.settings.ui.general-settings.mask-plex-libraries.text')">
 				<q-toggle
 					v-model:model-value="settingsStore.debugSettings.maskLibraryNames"
 					size="lg" />

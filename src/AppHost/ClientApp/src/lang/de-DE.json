@@ -575,16 +575,6 @@
                         "text": "Wenn Sie den Debug-Modus aktivieren, werden in verschiedenen Bereichen der Benutzeroberfläche mehr Informationen als gewöhnlich angezeigt.",
                         "title": "Debug-Modus",
                         "label": "Debug-Modus"
-                    },
-                    "mask-plex-libraries": {
-                        "label": "Plex-Bibliotheksnamen maskieren",
-                        "text": "Dadurch werden die Namen der Plex-Bibliotheken in der Benutzeroberfläche maskiert. Dies ist nützlich, wenn Sie anonyme Screenshots erstellen",
-                        "title": "Plex-Bibliotheksnamen maskieren"
-                    },
-                    "mask-plex-servers": {
-                        "label": "Maskieren Sie Plex-Servernamen",
-                        "text": "Dadurch werden die Namen der Plex-Server in der Benutzeroberfläche maskiert. Dies ist nützlich, wenn Sie anonyme Screenshots erstellen.",
-                        "title": "Maskieren Sie Plex-Servernamen"
                     }
                 },
                 "reset-db": {
@@ -600,39 +590,24 @@
                     }
                 }
             },
-            "accounts": {
-                "app-username": {
-                    "text": "Geben Sie den Benutzernamen ein, mit dem Sie sich bei Reaparr anmelden.",
-                    "title": "Reaparr-Benutzername",
-                    "label": "Nutzername"
-                },
-                "app-confirm-password": {
-                    "label": "Bestätige das Passwort"
-                },
-                "app-password": {
-                    "label": "Passwort",
-                    "text": "Geben Sie das Kennwort ein, mit dem Sie sich sicher bei Reaparr anmelden.",
-                    "title": "Reaparr-Passwort"
-                }
-            },
-            "paths": {
-                "download-folder": {
-                    "label": "Download Pfad",
-                    "text": "In diesen Pfad werden alle teile eines Downloads heruntergeladen und zusammengeführt bevor sie in das Zielverzeichnis verschoben werden.",
-                    "title": "Download Pfad"
-                },
-                "movie-folder": {
-                    "label": "Filme Pfad",
-                    "text": "Standartpfad für Filme wenn kein individueller Pfad angegeben wurde.",
-                    "title": "Filme Pfad"
-                },
-                "tv-show-folder": {
-                    "label": "Serien Pfad",
-                    "text": "Standartpfad für Serien wenn kein individueller Pfad angegeben wurde.",
-                    "title": "Serien Pfad"
-                }
-            },
             "ui": {
+                "general-settings": {
+                    "mask-plex-libraries": {
+                        "label": "Plex-Bibliotheksnamen maskieren",
+                        "text": "Dadurch werden die Namen der Plex-Bibliotheken in der Benutzeroberfläche maskiert. Dies ist nützlich, wenn Sie anonyme Screenshots erstellen",
+                        "title": "Plex-Bibliotheksnamen maskieren"
+                    },
+                    "mask-plex-servers": {
+                        "label": "Maskieren Sie Plex-Servernamen",
+                        "text": "Dadurch werden die Namen der Plex-Server in der Benutzeroberfläche maskiert. Dies ist nützlich, wenn Sie anonyme Screenshots erstellen.",
+                        "title": "Maskieren Sie Plex-Servernamen"
+                    },
+                    "toggle-animated-background": {
+                        "label": "Deaktivieren Sie den animierten Hintergrund",
+                        "text": "Der animierte Hintergrund kann zu Leistungsproblemen im Browser führen. Mit diesem Schalter kann die Animation deaktiviert und nur ein statischer Hintergrund angezeigt werden.",
+                        "title": "Deaktivieren Sie die Hintergrundanimation"
+                    }
+                },
                 "confirmation-settings": {
                     "download-episode-confirmation": {
                         "label": "Frage nach Bestätigung für Folgen Download",
@@ -683,13 +658,38 @@
                         "text": "Dies wird die Sprache für fast alles ändern. Text wie Fehler werden wahrscheinlich nicht übersetzt. Übersetzungskorrekturen oder neue Sprachen sind sehr willkommen, besuchen Sie www.reaparr.rocks für Informationen darüber, wie Sie neue Sprachen hinzufügen können.",
                         "title": "Wählen Sie Ihre bevorzugte Sprache"
                     }
+                }
+            },
+            "accounts": {
+                "app-username": {
+                    "text": "Geben Sie den Benutzernamen ein, mit dem Sie sich bei Reaparr anmelden.",
+                    "title": "Reaparr-Benutzername",
+                    "label": "Nutzername"
                 },
-                "general-settings": {
-                    "toggle-animated-background": {
-                        "label": "Deaktivieren Sie den animierten Hintergrund",
-                        "text": "Der animierte Hintergrund kann zu Leistungsproblemen im Browser führen. Mit diesem Schalter kann die Animation deaktiviert und nur ein statischer Hintergrund angezeigt werden.",
-                        "title": "Deaktivieren Sie die Hintergrundanimation"
-                    }
+                "app-confirm-password": {
+                    "label": "Bestätige das Passwort"
+                },
+                "app-password": {
+                    "label": "Passwort",
+                    "text": "Geben Sie das Kennwort ein, mit dem Sie sich sicher bei Reaparr anmelden.",
+                    "title": "Reaparr-Passwort"
+                }
+            },
+            "paths": {
+                "download-folder": {
+                    "label": "Download Pfad",
+                    "text": "In diesen Pfad werden alle teile eines Downloads heruntergeladen und zusammengeführt bevor sie in das Zielverzeichnis verschoben werden.",
+                    "title": "Download Pfad"
+                },
+                "movie-folder": {
+                    "label": "Filme Pfad",
+                    "text": "Standartpfad für Filme wenn kein individueller Pfad angegeben wurde.",
+                    "title": "Filme Pfad"
+                },
+                "tv-show-folder": {
+                    "label": "Serien Pfad",
+                    "text": "Standartpfad für Serien wenn kein individueller Pfad angegeben wurde.",
+                    "title": "Serien Pfad"
                 }
             },
             "integrations": {

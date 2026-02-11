@@ -8,12 +8,12 @@ public record DashMpdCliOptions
     /// <summary>
     ///  Gets or sets the URL of the MPD manifest to download.
     /// </summary>
-    public required string MpdUrl { get; set; }
+    public required string MpdUrl { get; init; }
 
     /// <summary>
     /// Gets or sets the output file path where the downloaded media will be saved.
     /// </summary>
-    public required string Output { get; set; }
+    public required string Output { get; init; }
 
     /// <summary>
     /// Gets or sets custom HTTP headers to include in requests.

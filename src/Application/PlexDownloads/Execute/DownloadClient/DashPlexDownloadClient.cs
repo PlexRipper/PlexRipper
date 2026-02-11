@@ -151,9 +151,6 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         if (DownloadTask is null)
             return Result.Fail("The DashPlexDownloadClient has not been setup yet.").LogError();
 
-        if (_dashWrapper.IsRunning)
-            return Result.Fail("The DashPlexDownloadClient is already downloading and cannot be started.").LogWarning();
-
         if (string.IsNullOrWhiteSpace(_downloadUrl))
             return Result.Fail("Download URL is not available.").LogError();
 
@@ -165,7 +162,7 @@ public class DashPlexDownloadClient : IPlexDownloadClient
             var options = new DashMpdCliOptions
             {
                 MpdUrl = _downloadUrl,
-                Output = DownloadTask.DownloadDirectory,
+                Output = Path.Combine(DownloadTask.DownloadDirectory, DownloadTask.FileName),
                 WorkingDirectory = DownloadTask.DownloadDirectory,
                 Quiet = false,
                 Verbose = true,
@@ -321,6 +318,8 @@ public class DashPlexDownloadClient : IPlexDownloadClient
     {
         _log.Here().Debug("Disposing DashPlexDownloadClient for {DownloadTaskId}", DownloadTask?.Id);
 
+        await _dashWrapper.StopAsync();
+
         // Wait for download process to complete
         await DownloadProcessTask;
 
@@ -332,12 +331,6 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         // Dispose subjects
         _downloadWorkerLogSubject.Dispose();
 
-        // Ensure process is stopped
-        if (_dashWrapper.IsRunning)
-        {
-            await _dashWrapper.StopAsync();
-        }
-
         await _dashWrapper.DisposeAsync();
         _cancellationTokenSource.Dispose();
 
@@ -346,8 +339,6 @@ public class DashPlexDownloadClient : IPlexDownloadClient
                 "DashPlexDownloadClient for DownloadTask with Id: {DownloadTaskId} was disposed",
                 DownloadTask?.Id
             );
-
-        GC.SuppressFinalize(this);
     }
 
     private async Task OnProgressUpdate(DashDownloadProgress progress)

@@ -6,11 +6,6 @@ namespace Reaparr.External.Contracts;
 public interface IDashMpdCliWrapper : IAsyncDisposable
 {
     /// <summary>
-    /// Gets whether the process is currently running.
-    /// </summary>
-    bool IsRunning { get; }
-
-    /// <summary>
     /// Gets the exit code of the process (only valid after process has exited).
     /// </summary>
     int? ExitCode { get; }

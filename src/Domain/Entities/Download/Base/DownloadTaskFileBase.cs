@@ -4,8 +4,8 @@ public abstract class DownloadTaskFileBase : DownloadTaskBase, IDownloadTaskProg
 {
     /// <summary>
     /// Gets or sets the identifier of the "Metadata.Media.Id" of the media being downloaded.
-    /// <remarks> This is coming from the Plex API and is used to identify the specific media part/file that is being downloaded.</remarks>
     /// </summary>
+    /// <remarks> This is coming from the Plex API and is used to identify the specific media that is being downloaded.</remarks>
     public required int PlexApiMediaId { get; init; }
 
     /// <summary>

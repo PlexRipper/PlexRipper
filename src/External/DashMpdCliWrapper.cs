@@ -52,11 +52,6 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
     }
 
     /// <summary>
-    /// Gets whether the process is currently running.
-    /// </summary>
-    public bool IsRunning => _processExitSource.Task.Status == TaskStatus.Running;
-
-    /// <summary>
     /// Gets the exit code of the process (only valid after process has exited).
     /// </summary>
     public int? ExitCode => _exitCode;
@@ -84,9 +79,6 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
     /// <inheritdoc/>
     public async Task<Result> StartAsync(DashMpdCliOptions options)
     {
-        if (IsRunning)
-            return _log.Here().ErrorResult("Cannot start dash-mpd-cli: process is already running.");
-
         if (string.IsNullOrWhiteSpace(options.MpdUrl))
             return _log.Here().ErrorResult("MPD URL cannot be null or empty");
 
@@ -631,52 +623,6 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
             ),
         };
 
-        var binaryPath = Path.Combine(binaryDir, binaryName);
-
-        // Ensure binary has execute permissions on Unix systems
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-        {
-            if (_fileSystem.Exists(binaryPath))
-            {
-                try
-                {
-                    // Set execute permissions (equivalent to chmod +x)
-                    EnsureExecutePermissions(binaryPath);
-                }
-                catch
-                {
-                    // If setting permissions fails, continue anyway
-                    // The binary might already have execute permissions
-                }
-            }
-        }
-
-        return binaryPath;
-    }
-
-    /// <summary>
-    /// Ensures the specified file has execute permissions on Unix systems.
-    /// Uses CliWrap to execute chmod for cleaner implementation.
-    /// </summary>
-    private void EnsureExecutePermissions(string filePath)
-    {
-        try
-        {
-            var result = Cli.Wrap("chmod")
-                .WithArguments($"+x \"{filePath}\"")
-                .WithValidation(CommandResultValidation.None)
-                .ExecuteAsync()
-                .GetAwaiter()
-                .GetResult();
-
-            if (result.ExitCode != 0)
-            {
-                _log.Here().Warning("Failed to set execute permissions with exit code {ExitCode}", result.ExitCode);
-            }
-        }
-        catch (Exception ex)
-        {
-            _log.Here().Warning(ex, "Exception while setting execute permissions");
-        }
+        return Path.Combine(binaryDir, binaryName);
     }
 }

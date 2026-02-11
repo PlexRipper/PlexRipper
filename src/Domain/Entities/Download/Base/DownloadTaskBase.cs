@@ -9,7 +9,7 @@ public abstract class DownloadTaskBase : BaseEntityGuid
     /// <example> /library/metadata/[RatingKey]/ =>  /library/metadata/529367/</example>
     /// <remarks> This is coming from the Plex API and is used to identify the specific media that is being downloaded.</remarks>
     [Column(Order = 1)]
-    public required long PlexApiRatingKey { get; init; }
+    public required int PlexApiRatingKey { get; init; }
 
     /// <summary>
     /// Gets or sets the media display title.

@@ -32,7 +32,6 @@ public record TorrentMetadataDTO
 
     /// <summary>
     /// The Plex rating key (external ID) for the media part from the Plex API.
-    /// Uses long to accommodate Plex's large identifier values.
     /// </summary>
     [QueryParam]
     public required int PlexApiPartId { get; init; }

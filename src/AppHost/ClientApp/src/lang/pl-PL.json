@@ -454,7 +454,17 @@
             "download": "Pobierz",
             "refresh": "Odśwież",
             "view": "Widok",
-            "media-options": "Opcje"
+            "media-options": "Opcje",
+            "sort": "Sortuj"
+        },
+        "sort": {
+            "clear": "Wyczyść sortowanie",
+            "title": "Tytuł",
+            "year": "Rok",
+            "added-at": "Dodano",
+            "updated-at": "Zaktualizowano",
+            "duration": "Czas trwania",
+            "size": "Rozmiar"
         },
         "units": {
             "per-second": "/s"

@@ -454,7 +454,17 @@
             "download": "Download",
             "refresh": "Refresh",
             "view": "View",
-            "media-options": "Options"
+            "media-options": "Options",
+            "sort": "Sort"
+        },
+        "sort": {
+            "clear": "Clear Sort",
+            "title": "Title",
+            "year": "Year",
+            "added-at": "Added",
+            "updated-at": "Updated",
+            "duration": "Duration",
+            "size": "Size"
         },
         "units": {
             "per-second": "/s"

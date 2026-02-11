@@ -454,7 +454,17 @@
             "download": "Télécharger",
             "refresh": "Rafraîchir",
             "view": "Voir",
-            "media-options": "Possibilités"
+            "media-options": "Possibilités",
+            "sort": "Trier"
+        },
+        "sort": {
+            "clear": "Effacer le tri",
+            "title": "Titre",
+            "year": "Année",
+            "added-at": "Ajouté",
+            "updated-at": "Mis à jour",
+            "duration": "Durée",
+            "size": "Taille"
         },
         "units": {
             "per-second": "/s"

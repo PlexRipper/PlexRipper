@@ -11,6 +11,7 @@ import {
 	ViewMode,
 } from '@dto';
 import type { IMediaOverviewSort } from '@composables/event-bus';
+import { SortDirection } from '@enums';
 import { StoreNames, type IMetaDataMediaFilter, type ISelection } from '@interfaces';
 import { plexLibraryApi, plexMediaApi } from '@api';
 import { map, tap } from 'rxjs/operators';
@@ -278,30 +279,25 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			state.filterQuery = '';
 		},
 		sortMedia(event: IMediaOverviewSort) {
-			const newSortedState = [...state.sortedState];
-			const index = newSortedState.findIndex((x) => x.field === event.field);
-			if (index > -1) {
-				newSortedState.splice(index, 1);
-			}
-			if (event.sort) {
-				newSortedState.unshift(event);
-			}
+			// Single-sort: the new event fully replaces any existing sort
+			const newSortedState: IMediaOverviewSort[] = event.sort !== SortDirection.NoSort ? [event] : [];
 
 			// Prevent unnecessary sorting
 			if (isEqual(state.sortedState, newSortedState)) {
 				return;
 			}
-			const lodashFormat = newSortedState.map((x) => {
-				return {
-					field: x.field,
-					sort: x.sort !== 'no-sort' ? x.sort : false,
-				};
-			});
+
+			if (newSortedState.length === 0) {
+				state.sortedItems = [];
+				state.sortedState = [];
+				return;
+			}
+
 			state.sortedItems = Object.freeze(
 				orderBy(
-					state.items, // Items to sort
-					lodashFormat.map((x) => x.field), // Sort by field
-					lodashFormat.map((x) => x.sort), // Sort by sort, asc or desc
+					state.items,
+					[event.field as keyof PlexMediaSlimDTO],
+					[event.sort as SortDirection.Asc | SortDirection.Desc],
 				),
 			);
 			state.sortedState = newSortedState;
@@ -314,6 +310,9 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 	const getters = {
 		hasSelectedMedia: computed((): boolean => {
 			return state.selection.keys.length > 0;
+		}),
+		getActiveSort: computed((): IMediaOverviewSort | null => {
+			return state.sortedState.length > 0 ? state.sortedState[0] ?? null : null;
 		}),
 		hasNoSearchResults: computed((): boolean => {
 			return state.filterQuery != '' && get(getters.getMediaItems).length === 0;

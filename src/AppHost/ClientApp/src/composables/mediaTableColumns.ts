@@ -1,5 +1,6 @@
 import type { QTreeViewTableHeader } from '@props';
 import { useI18n } from '#build/imports';
+import { MediaSortField, SortDirection } from '@enums';
 
 export const getMediaTableColumns = (): QTreeViewTableHeader[] => {
 	const { t } = useI18n();
@@ -10,16 +11,16 @@ export const getMediaTableColumns = (): QTreeViewTableHeader[] => {
 			field: 'sortIndex',
 			align: 'left',
 			type: 'index',
-			sortOrder: 'asc',
+			sortOrder: SortDirection.Asc,
 			sortable: true,
 		},
 		{
 			label: t('components.media-list.columns.title'),
 			field: 'title',
-			sortField: 'sortIndex',
+			sortField: MediaSortField.Index,
 			type: 'title',
 			align: 'left',
-			sortOrder: 'asc',
+			sortOrder: SortDirection.Asc,
 			sortable: true,
 			required: true,
 		},

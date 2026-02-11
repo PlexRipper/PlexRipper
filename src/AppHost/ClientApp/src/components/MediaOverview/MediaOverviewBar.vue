@@ -53,6 +53,51 @@
 			icon="mdi-select-marker"
 			@click="$emit('action', 'selection-dialog')" />
 
+		<!--	Sort button	-->
+		<VerticalButton
+			v-if="!mediaOverviewStore.allMediaMode && !detailMode"
+			:height="barHeight"
+			:icon="activeSortIcon"
+			:label="$t('general.commands.sort')"
+			:width="verticalButtonWidth"
+			:color="mediaOverviewStore.sortedState.length > 0 ? 'positive' : undefined"
+			cy="media-overview-sort-btn">
+			<q-menu
+				anchor="bottom left"
+				auto-close
+				self="top left">
+				<q-list>
+					<!--	Clear Sort	-->
+					<q-item
+						v-if="mediaOverviewStore.sortedState.length > 0"
+						clickable
+						cy="sort-clear-btn"
+						@click="mediaOverviewStore.clearSort()">
+						<q-item-section avatar>
+							<q-icon name="mdi-sort-variant-remove" />
+						</q-item-section>
+						<q-item-section>{{ $t('general.sort.clear') }}</q-item-section>
+					</q-item>
+					<q-separator v-if="mediaOverviewStore.sortedState.length > 0" />
+					<!--	Sort options	-->
+					<q-item
+						v-for="option in sortOptions"
+						:key="option.field"
+						:data-cy="`sort-option-${option.field}-btn`"
+						clickable
+						style="min-width: 200px"
+						@click="handleSort(option.field)">
+						<q-item-section avatar>
+							<q-icon
+								v-if="getSortState(option.field)"
+								:name="getSortState(option.field) === 'asc' ? 'mdi-arrow-up' : 'mdi-arrow-down'" />
+						</q-item-section>
+						<q-item-section>{{ option.label }}</q-item-section>
+					</q-item>
+				</q-list>
+			</q-menu>
+		</VerticalButton>
+
 		<!--	Refresh library button	-->
 		<VerticalButton
 			v-if="!mediaOverviewStore.allMediaMode && !detailMode"
@@ -111,15 +156,18 @@
 <script lang="ts" setup>
 import { ViewMode } from '@dto';
 import type { PlexMediaDTO, PlexMediaType } from '@dto';
+import { MediaSortField, SortDirection } from '@enums';
 import type { IMediaOverviewBarActions, IViewOptions } from '@interfaces';
 import {
 	useMediaOverviewBarDownloadCommandBus,
+	useMediaOverviewSortBus,
 	useMediaOverviewStore,
 	useSettingsStore,
 } from '#imports';
 
 const mediaOverviewStore = useMediaOverviewStore();
 const downloadCommandBus = useMediaOverviewBarDownloadCommandBus();
+const sortBus = useMediaOverviewSortBus();
 
 const settingsStore = useSettingsStore();
 
@@ -145,6 +193,49 @@ const verticalButtonWidth = ref(120);
 function isSelected(viewMode: ViewMode) {
 	return mediaOverviewStore.getMediaViewMode === viewMode;
 }
+
+interface ISortOption {
+	field: MediaSortField;
+	label: string;
+}
+
+const { t } = useI18n();
+
+const sortOptions = computed((): ISortOption[] => [
+	{ field: MediaSortField.Title, label: t('general.sort.title') },
+	{ field: MediaSortField.Year, label: t('general.sort.year') },
+	{ field: MediaSortField.AddedAt, label: t('general.sort.added-at') },
+	{ field: MediaSortField.UpdatedAt, label: t('general.sort.updated-at') },
+	{ field: MediaSortField.Duration, label: t('general.sort.duration') },
+	{ field: MediaSortField.MediaSize, label: t('general.sort.size') },
+]);
+
+function getSortState(field: MediaSortField): SortDirection | null {
+	const entry = mediaOverviewStore.sortedState.find((x) => x.field === field);
+	if (!entry || entry.sort === SortDirection.NoSort) {
+		return null;
+	}
+	return entry.sort as SortDirection.Asc | SortDirection.Desc;
+}
+
+function handleSort(field: MediaSortField) {
+	const current = getSortState(field);
+	if (!current) {
+		sortBus.emit({ field, sort: SortDirection.Asc });
+	} else if (current === SortDirection.Asc) {
+		sortBus.emit({ field, sort: SortDirection.Desc });
+	} else {
+		sortBus.emit({ field, sort: SortDirection.NoSort });
+	}
+}
+
+const activeSortIcon = computed((): string => {
+	if (mediaOverviewStore.sortedState.length === 0) {
+		return 'mdi-sort';
+	}
+	const primary = mediaOverviewStore.sortedState[0];
+	return primary?.sort === SortDirection.Asc ? 'mdi-sort-ascending' : 'mdi-sort-descending';
+});
 
 const viewOptions = computed((): IViewOptions[] => {
 	return [

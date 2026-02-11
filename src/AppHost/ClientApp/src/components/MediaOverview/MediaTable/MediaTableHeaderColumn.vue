@@ -12,8 +12,8 @@
 <script setup lang="ts">
 import { get, set } from '@vueuse/core';
 import type { IMediaOverviewSort } from '@composables/event-bus';
+import { MediaSortField, SortDirection } from '@enums';
 import type { QTreeViewTableHeader } from '@props';
-import type { PlexMediaSlimDTO } from '@dto';
 import { useMediaOverviewStore } from '@store';
 
 const mediaOverviewStore = useMediaOverviewStore();
@@ -23,8 +23,8 @@ const props = defineProps<{
 }>();
 
 const sorted = ref<IMediaOverviewSort>({
-	sort: props.column.sortOrder ?? 'no-sort',
-	field: (props.column.sortField ?? props.column.field) as keyof PlexMediaSlimDTO,
+	sort: props.column.sortOrder ?? SortDirection.NoSort,
+	field: props.column.sortField ?? MediaSortField.Index,
 });
 
 defineEmits<{
@@ -33,11 +33,11 @@ defineEmits<{
 
 const icon = computed(() => {
 	switch (get(sorted).sort) {
-		case 'asc':
+		case SortDirection.Asc:
 			return 'mdi-arrow-up';
-		case 'desc':
+		case SortDirection.Desc:
 			return 'mdi-arrow-down';
-		case 'no-sort':
+		case SortDirection.NoSort:
 			return '';
 		default:
 			return 'mdi-arrow-up';
@@ -46,21 +46,21 @@ const icon = computed(() => {
 
 function onClick() {
 	const newSort: IMediaOverviewSort = {
-		sort: get(sorted)?.sort ?? 'no-sort',
-		field: (props.column.sortField ?? props.column.field) as keyof PlexMediaSlimDTO,
+		sort: get(sorted)?.sort ?? SortDirection.NoSort,
+		field: (props.column.sortField ?? props.column.field) as MediaSortField,
 	};
 	switch (newSort.sort) {
-		case 'asc':
-			newSort.sort = 'desc';
+		case SortDirection.Asc:
+			newSort.sort = SortDirection.Desc;
 			break;
-		case 'desc':
-			newSort.sort = 'asc';
+		case SortDirection.Desc:
+			newSort.sort = SortDirection.Asc;
 			break;
-		case 'no-sort':
-			newSort.sort = 'asc';
+		case SortDirection.NoSort:
+			newSort.sort = SortDirection.Asc;
 			break;
 		default:
-			newSort.sort = 'no-sort';
+			newSort.sort = SortDirection.NoSort;
 			break;
 	}
 	set(sorted, newSort);
@@ -69,8 +69,8 @@ function onClick() {
 
 onBeforeMount(() => {
 	set(sorted, {
-		field: props.column.sortField ?? props.column.field,
-		sort: 'asc',
+		field: (props.column.sortField ?? props.column.field) as MediaSortField,
+		sort: SortDirection.Asc,
 	});
 });
 </script>

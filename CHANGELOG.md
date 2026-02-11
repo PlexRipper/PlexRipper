@@ -1,5 +1,13 @@
 Reaparr Changelog
 
+# [0.36.0-dev.1](https://github.com/Reaparr/Reaparr/compare/v0.35.1-dev.1...v0.36.0-dev.1) (2026-02-11)
+
+
+### Features
+
+* **WebAPI:** Added an optional stream downloader method which will automatically attempt to download a file when direct file download fails ([5ae2728](https://github.com/Reaparr/Reaparr/commit/5ae272811b55db26227237fba778763e6c362b7a))
+* **WebAPI:** Implement DashMpdCliWrapper for MPEG-DASH media downloads ([a3e555d](https://github.com/Reaparr/Reaparr/commit/a3e555d77f24d3ab792320dde91d7eae315e59b0))
+
 ## [0.35.1-dev.1](https://github.com/Reaparr/Reaparr/compare/v0.35.0...v0.35.1-dev.1) (2026-01-24)
 
 

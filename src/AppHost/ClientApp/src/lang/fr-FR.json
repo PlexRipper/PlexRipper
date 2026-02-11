@@ -821,7 +821,8 @@
                     "header": "Général"
                 },
                 "un-hide-servers-section": {
-                    "header": "Afficher les serveurs Plex"
+                    "header": "Afficher les serveurs Plex",
+                    "no-servers-hidden": "Aucun serveur Plex n'est actuellement masqué. Pour masquer un serveur, accédez aux Paramètres du serveur et cliquez sur Masquer. Les serveurs masqués apparaîtront alors ici, et vous pourrez les afficher."
                 }
             }
         },

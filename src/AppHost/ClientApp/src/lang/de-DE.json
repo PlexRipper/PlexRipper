@@ -821,7 +821,8 @@
                     "header": "Allgemeines"
                 },
                 "un-hide-servers-section": {
-                    "header": "Plex-Server einblenden"
+                    "header": "Plex-Server einblenden",
+                    "no-servers-hidden": "Aktuell sind keine Plex-Server ausgeblendet. Um einen Server auszublenden, gehen Sie zu den Servereinstellungen und klicken Sie auf „Ausblenden“. Alle ausgeblendeten Server werden dort angezeigt und können wieder eingeblendet werden."
                 }
             }
         },

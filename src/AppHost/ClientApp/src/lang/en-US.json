@@ -821,7 +821,8 @@
                     "header": "General"
                 },
                 "un-hide-servers-section": {
-                    "header": "Unhide Plex Servers"
+                    "header": "Unhide Plex Servers",
+                    "no-servers-hidden": "No Plex servers are currently hidden. To hide a server, go to Server Settings and click Hide. Any hidden servers will appear here, where you can unhide them."
                 }
             }
         },

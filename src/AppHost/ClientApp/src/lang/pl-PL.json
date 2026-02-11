@@ -821,7 +821,8 @@
                     "header": "Ogólne"
                 },
                 "un-hide-servers-section": {
-                    "header": "Pokaż serwery Plex"
+                    "header": "Pokaż serwery Plex",
+                    "no-servers-hidden": "Obecnie żaden serwer Plex nie jest ukryty. Aby ukryć serwer, przejdź do Ustawień serwera i kliknij Ukryj. Wszystkie ukryte serwery pojawią się tutaj, gdzie możesz je wyświetlić."
                 }
             }
         },

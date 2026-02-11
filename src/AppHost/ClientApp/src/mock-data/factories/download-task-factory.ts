@@ -66,7 +66,7 @@ export function generateDownloadTask({
 		fileLocationUrl: randUrl(),
 		fileName: randFileName(),
 		fullTitle: title,
-		key: randNumber({ min: 1, max: 1000000 }),
+		ratingKey: randNumber({ min: 1, max: 1000000 }),
 		parentId: randUuid(),
 		plexLibraryId: 0,
 		plexServerId: 0,

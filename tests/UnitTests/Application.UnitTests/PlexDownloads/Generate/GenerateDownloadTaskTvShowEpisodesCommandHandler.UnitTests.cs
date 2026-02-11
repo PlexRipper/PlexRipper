@@ -277,7 +277,7 @@ public class DownloadTaskFactoryGenerateTvShowEpisodesDownloadTasksAsyncUnitTest
         tvShowDownloadTask.ShouldNotBeNull();
 
         // Copy tv-show key over to the download task
-        tvShowDownloadTask.UpdateInitProperty(nameof(tvShowDownloadTask.PlexId), plexTvShow.Key);
+        tvShowDownloadTask.UpdateInitProperty(nameof(tvShowDownloadTask.PlexApiRatingKey), plexTvShow.PlexApiRatingKey);
 
         // Copy season key over to the download task
         var season = plexTvShow.Seasons.FirstOrDefault();
@@ -285,14 +285,14 @@ public class DownloadTaskFactoryGenerateTvShowEpisodesDownloadTasksAsyncUnitTest
         season.ShouldNotBeNull();
         seasonDownloadTask.ShouldNotBeNull();
 
-        seasonDownloadTask.UpdateInitProperty(nameof(seasonDownloadTask.PlexId), season.Key);
+        seasonDownloadTask.UpdateInitProperty(nameof(seasonDownloadTask.PlexApiRatingKey), season.PlexApiRatingKey);
 
         // Copy episode key over to the download task
         var episode = season.Episodes.FirstOrDefault();
         var episodeDownloadTask = seasonDownloadTask.Children.FirstOrDefault();
         episode.ShouldNotBeNull();
         episodeDownloadTask.ShouldNotBeNull();
-        episodeDownloadTask.UpdateInitProperty(nameof(episodeDownloadTask.PlexId), episode.Key);
+        episodeDownloadTask.UpdateInitProperty(nameof(episodeDownloadTask.PlexApiRatingKey), episode.PlexApiRatingKey);
 
         await dbContext.SaveChangesAsync(CancellationToken);
 
@@ -323,7 +323,7 @@ public class DownloadTaskFactoryGenerateTvShowEpisodesDownloadTasksAsyncUnitTest
         var downloadTaskEpisodes = await dbContext.DownloadTaskTvShowEpisode.ToListAsync(CancellationToken);
 
         // Verify the existing episode download task still exists
-        downloadTaskEpisodes.ShouldContain(x => x.PlexId == episodeDownloadTask.PlexId);
+        downloadTaskEpisodes.ShouldContain(x => x.PlexApiRatingKey == episodeDownloadTask.PlexApiRatingKey);
     }
 
     [Fact]

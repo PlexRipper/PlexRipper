@@ -2,6 +2,18 @@ namespace Reaparr.Domain;
 
 public abstract class DownloadTaskFileBase : DownloadTaskBase, IDownloadTaskProgress, IDownloadFileTransferProgress
 {
+    /// <summary>
+    /// Gets or sets the identifier of the "Metadata.Media.Id" of the media being downloaded.
+    /// </summary>
+    /// <remarks> This is coming from the Plex API and is used to identify the specific media that is being downloaded.</remarks>
+    public required int PlexApiMediaId { get; init; }
+
+    /// <summary>
+    /// Gets or sets the identifier of the "Metadata.Media.Part.Id" of the media being downloaded.
+    /// <remarks> This is coming from the Plex API and is used to identify the specific media part/file that is being downloaded.</remarks>
+    /// </summary>
+    public required int PlexApiPartId { get; init; }
+
     [Column(Order = 11)]
     public required string FileName { get; set; }
 

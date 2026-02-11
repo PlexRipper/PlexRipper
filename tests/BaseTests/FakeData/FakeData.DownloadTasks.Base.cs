@@ -10,7 +10,7 @@ public static partial class FakeData
         return faker
             .StrictMode(true)
             .Ignore(x => x.Id)
-            .RuleFor(x => x.PlexId, _ => GetUniqueNumber())
+            .RuleFor(x => x.PlexApiRatingKey, _ => GetUniqueNumber())
             .RuleFor(x => x.Title, f => f.PlexMedia().MediaTitle(downloadTaskType))
             .RuleFor(x => x.FullTitle, (_, x) => x.Title)
             .RuleFor(x => x.DownloadStatus, _ => DownloadStatus.Queued)
@@ -45,6 +45,8 @@ public static partial class FakeData
             .Ignore(x => x.FileDataTransferred)
             .Ignore(x => x.CurrentFileTransferBytesOffset)
             .Ignore(x => x.DestinationFolderPathId)
+            .RuleFor(x => x.PlexApiMediaId, _ => GetUniqueNumber())
+            .RuleFor(x => x.PlexApiPartId, _ => GetUniqueNumber())
             .RuleFor(
                 x => x.Quality,
                 f => f.PickRandom(VideoQuality.SD, VideoQuality.HD, VideoQuality.FullHD, VideoQuality.UHD_4K)

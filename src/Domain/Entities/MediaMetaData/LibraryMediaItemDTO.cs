@@ -156,7 +156,7 @@ public record LibraryMediaItemMediaDTO
     /// <summary>
     /// Unique media identifier.
     /// </summary>
-    public required long Id { get; init; }
+    public required int Id { get; init; }
 
     /// <summary>
     /// Duration of the media in milliseconds.
@@ -246,7 +246,7 @@ public record LibraryMediaItemPartDTO
     /// <summary>
     /// Unique part identifier.
     /// </summary>
-    public required long Id { get; init; }
+    public required int Id { get; init; }
 
     /// <summary>
     /// Key to access this part.
@@ -284,7 +284,7 @@ public record LibraryMediaItemStreamDTO
     /// <summary>
     /// Unique stream identifier.
     /// </summary>
-    public required long Id { get; init; }
+    public required int Id { get; init; }
 
     /// <summary>
     /// Stream type (1=video, 2=audio, 3=subtitle).

@@ -10,13 +10,13 @@ public record PlexMediaSlimDTO
     /// Unique key identifying this item by the Plex Api. This is used by the PlexServers to differentiate between media items.
     /// e.g: 28550, 1723, 21898.
     /// </summary>
-    public required int Key { get; set; }
+    public required int PlexApiRatingKey { get; set; }
 
     /// <summary>
     /// Gets or sets the key used to retrieve thumbnails, art or banners.
-    /// E.g. /library/metadata/[Key]/art/[MetadataKey] =>  /library/metadata/529367/art/1593898227.
+    /// E.g. /library/metadata/[PlexApiRatingKey]/art/[PlexApiMetaDataKey] =>  /library/metadata/529367/art/1593898227.
     /// </summary>
-    public required int MetaDataKey { get; init; }
+    public required int PlexApiMetaDataKey { get; init; }
 
     public required string Title { get; init; } = string.Empty;
 

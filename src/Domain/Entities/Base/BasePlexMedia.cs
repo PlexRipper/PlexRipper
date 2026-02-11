@@ -13,7 +13,7 @@ public class BasePlexMedia : BaseEntity
     /// e.g: 28550, 1723, 21898.
     /// </summary>
     [Column(Order = 1)]
-    public required int Key { get; set; }
+    public required int PlexApiRatingKey { get; set; }
 
     [Column(Order = 2)]
     public required string Title { get; set; }
@@ -47,7 +47,7 @@ public class BasePlexMedia : BaseEntity
     /// E.g. /library/metadata/[Key]/art/[MetadataKey] =>  /library/metadata/529367/art/1593898227.
     /// </summary>
     [Column(Order = 8)]
-    public required int MetaDataKey { get; init; }
+    public required int PlexApiMetaDataKey { get; init; }
 
     [Column(Order = 9)]
     public required string Studio { get; init; } = string.Empty;
@@ -161,19 +161,19 @@ public class BasePlexMedia : BaseEntity
     public virtual PlexMediaType Type { get; init; }
 
     [NotMapped]
-    public string MetaDataUrl => $"/library/metadata/{Key}";
+    public string MetaDataUrl => $"/library/metadata/{PlexApiRatingKey}";
 
     [NotMapped]
-    public string ThumbUrl => HasThumb ? $"{MetaDataUrl}/thumb/{MetaDataKey}" : string.Empty;
+    public string ThumbUrl => HasThumb ? $"{MetaDataUrl}/thumb/{PlexApiMetaDataKey}" : string.Empty;
 
     [NotMapped]
     public string FullBannerUrl { get; init; } = string.Empty;
 
     [NotMapped]
-    public string ArtUrl => HasArt ? $"{MetaDataUrl}/art/{MetaDataKey}" : string.Empty;
+    public string ArtUrl => HasArt ? $"{MetaDataUrl}/art/{PlexApiMetaDataKey}" : string.Empty;
 
     [NotMapped]
-    public string ThemeUrl => HasTheme ? $"{MetaDataUrl}/theme/{MetaDataKey}" : string.Empty;
+    public string ThemeUrl => HasTheme ? $"{MetaDataUrl}/theme/{PlexApiMetaDataKey}" : string.Empty;
 
     #endregion
 }

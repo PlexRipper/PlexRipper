@@ -168,7 +168,7 @@ namespace Reaparr.PlexApi.UnitTests
             var media = result.Media.First();
             var sourceMedia = sourceData.Media.First();
 
-            media.Id.ShouldBe(sourceMedia.Id);
+            media.Id.ShouldBe(Convert.ToInt32(sourceMedia.Id));
             media.Duration.ShouldBe(sourceMedia.Duration!.Value);
             media.Bitrate.ShouldBe(sourceMedia.Bitrate!.Value);
             media.Width.ShouldBe(sourceMedia.Width!.Value);
@@ -180,7 +180,7 @@ namespace Reaparr.PlexApi.UnitTests
             var part = media.Parts.First();
             var sourcePart = sourceMedia.Part!.First();
 
-            part.Id.ShouldBe(sourcePart.Id);
+            part.Id.ShouldBe(Convert.ToInt32(sourcePart.Id));
             part.Key.ShouldBe(sourcePart.Key);
             part.File.ShouldBe(sourcePart.File);
 

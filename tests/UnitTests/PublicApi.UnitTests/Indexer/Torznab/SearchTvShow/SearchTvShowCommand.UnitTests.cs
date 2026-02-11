@@ -44,7 +44,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
             .OrderBy(e => e.Id)
             .Skip(offset)
             .Take(limit)
-            .Select(e => e.MediaDataList.OrderBy(md => md.PlexPartId).Select(md => md.GetFileName).First())
+            .Select(e => e.MediaDataList.OrderBy(md => md.PlexApiPartId).Select(md => md.GetFileName).First())
             .ToListAsync(CancellationToken);
 
         // Act
@@ -89,7 +89,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
             item.Link.ShouldContain("MediaId=");
             item.Link.ShouldContain("DataId=");
             item.Link.ShouldContain("PartId=");
-            item.Link.ShouldContain("PartPlexId=");
+            item.Link.ShouldContain("PlexApiPartId=");
             item.Link.ShouldContain("Quality=");
             item.Link.ShouldContain("LibraryId=");
             item.Link.ShouldContain("ServerId=");
@@ -152,7 +152,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
         // Titles should equal the part file name used during mapping
         var expectedTitle = await IDbContext
             .PlexTvShowEpisodeData.Where(d => d.PlexTvShowEpisodeId == episode.Id)
-            .OrderBy(d => d.PlexPartId)
+            .OrderBy(d => d.PlexApiPartId)
             .Select(d => d.GetFileName)
             .FirstAsync(CancellationToken);
         result.Channel.Items.Select(i => i.Title).Distinct().Single().ShouldBe(expectedTitle);

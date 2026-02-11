@@ -3,28 +3,31 @@ namespace Reaparr.Domain;
 public abstract class BasePlexMediaData : BasePlexMediaQuality
 {
     /// <summary>
-    /// Plex Media.id.
-    /// Immutable identifier for the physical media file.
-    /// Used as the primary file identity for incremental sync.
+    /// Unique identifier for the logical media item (movie/episode) in Plex.
+    /// Maps to Plex API's Metadata.ratingKey field.
+    /// Used to reference the parent media entity regardless of which version/quality is selected.
+    /// <example>23920</example>
     /// </summary>
     [Column(Order = 1)]
-    public required long PlexMediaId { get; init; }
+    public required int PlexApiRatingKey { get; init; }
 
     /// <summary>
-    /// Plex Part.id.
-    /// Immutable identifier for the physical media file.
-    /// Used as the primary file identity for incremental sync.
+    /// Unique identifier for a specific media version/quality within a Plex item.
+    /// Maps to Plex API's Metadata.Media.id field.
+    /// A single movie/episode can have multiple Media entries (e.g., 1080p, 4K versions).
+    /// <example>47892</example>
     /// </summary>
     [Column(Order = 2)]
-    public required long PlexPartId { get; init; }
+    public required int PlexApiMediaId { get; init; }
 
     /// <summary>
-    /// Plex Metadata.ratingKey.
-    /// Identifies the logical media item (movie / episode) this file belongs to.
-    /// <example>"23920"</example>
+    /// Unique identifier for a specific file part within a media version.
+    /// Maps to Plex API's Metadata.Media.Part.id field.
+    /// Multi-part files (e.g., CD1/CD2) have separate Part entries under the same Media.
+    /// <example>51204</example>
     /// </summary>
     [Column(Order = 3)]
-    public required int RatingKey { get; init; }
+    public required int PlexApiPartId { get; init; }
 
     /// <summary>
     /// Normalized resolution derived from video height.

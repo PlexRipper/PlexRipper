@@ -49,7 +49,9 @@ public class TorrentMetadataDTOValidator : Validator<TorrentMetadataDTO>
 
         RuleFor(x => x.PartId).GreaterThan(0).WithMessage("PartId must be greater than 0.");
 
-        RuleFor(x => x.PartPlexId).GreaterThan(0).WithMessage("PartPlexId must be greater than 0.");
+        RuleFor(x => x.PlexApiPartId)
+            .GreaterThan(0)
+            .WithMessage($"{nameof(TorrentMetadataDTO.PlexApiPartId)} must be greater than 0.");
 
         RuleFor(x => x.Type).IsInEnum().WithMessage("Type must be a valid PlexMediaType value.");
 
@@ -205,7 +207,7 @@ public class AddTorrentEndpoint : Endpoint<AddTorrentEndpointRequest>
                     .DownloadTaskTvShowEpisodeFile.Where(x =>
                         x.PlexLibraryId == metaData.LibraryId
                         && x.PlexServerId == metaData.ServerId
-                        && x.PlexId == metaData.PartPlexId
+                        && x.PlexApiPartId == metaData.PlexApiPartId
                     )
                     .ExecuteUpdateAsync(p => p.SetProperty(x => x.HashId, hashId));
                 break;
@@ -214,7 +216,7 @@ public class AddTorrentEndpoint : Endpoint<AddTorrentEndpointRequest>
                     .DownloadTaskMovieFile.Where(x =>
                         x.PlexLibraryId == metaData.LibraryId
                         && x.PlexServerId == metaData.ServerId
-                        && x.PlexId == metaData.PartPlexId
+                        && x.PlexApiPartId == metaData.PlexApiPartId
                     )
                     .ExecuteUpdateAsync(p => p.SetProperty(x => x.HashId, hashId));
                 break;

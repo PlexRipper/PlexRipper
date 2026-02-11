@@ -23,8 +23,8 @@ public class DbContextExtensionsPlexMediaUnitTests : BaseUnitTest
         var movie = IDbContext.PlexMovies.First();
 
         // Act
-        var result = await IDbContext.GetPlexMediaByMediaKeyAsync(
-            movie.Key,
+        var result = await IDbContext.GetPlexMediaByRatingKeyAsync(
+            movie.PlexApiRatingKey,
             movie.PlexServerId,
             PlexMediaType.Movie,
             CancellationToken
@@ -51,8 +51,8 @@ public class DbContextExtensionsPlexMediaUnitTests : BaseUnitTest
         var tvShow = IDbContext.PlexTvShows.First();
 
         // Act
-        var result = await IDbContext.GetPlexMediaByMediaKeyAsync(
-            tvShow.Key,
+        var result = await IDbContext.GetPlexMediaByRatingKeyAsync(
+            tvShow.PlexApiRatingKey,
             tvShow.PlexServerId,
             PlexMediaType.TvShow,
             CancellationToken
@@ -77,7 +77,7 @@ public class DbContextExtensionsPlexMediaUnitTests : BaseUnitTest
         );
 
         // Act
-        var result = await IDbContext.GetPlexMediaByMediaKeyAsync(9999, 1, PlexMediaType.Movie, CancellationToken);
+        var result = await IDbContext.GetPlexMediaByRatingKeyAsync(9999, 1, PlexMediaType.Movie, CancellationToken);
 
         // Assert
         result.IsFailed.ShouldBeTrue();

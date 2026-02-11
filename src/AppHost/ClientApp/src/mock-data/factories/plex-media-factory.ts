@@ -28,8 +28,8 @@ function generatePlexMediaSlim({
 	const title = randMovie();
 	const media: PlexMediaSlimDTO = {
 		id,
-		key: randNumber({ min: 1, max: 1000000 }),
-		metaDataKey: randNumber({ min: 1, max: 1000000 }),
+		plexApiRatingKey: randNumber({ min: 1, max: 1000000 }),
+		plexApiMetaDataKey: randNumber({ min: 1, max: 1000000 }),
 		plexToken: randUuid(),
 		childCount: 0,
 		grandChildCount: 0,

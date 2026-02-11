@@ -11,7 +11,7 @@ public class PlexTvShowEpisodeConfiguration : IEntityTypeConfiguration<PlexTvSho
         builder.HasIndex(x => new { x.TvShowSeasonId, x.SortIndex });
         builder.HasIndex(x => new { x.TvShowId, x.SortIndex });
 
-        builder.HasIndex(x => new { x.Key, x.PlexServerId });
+        builder.HasIndex(x => new { x.PlexApiRatingKey, x.PlexServerId });
 
         builder
             .HasMany(x => x.MediaDataList)

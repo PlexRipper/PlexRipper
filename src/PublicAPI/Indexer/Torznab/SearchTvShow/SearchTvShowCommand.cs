@@ -229,8 +229,8 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, T
             Type = PlexMediaType.Episode,
             MediaId = episode.Id,
             DataId = mediaData.Id,
-            PartId = mediaData.Id,
-            PartPlexId = mediaData.PlexMediaId,
+            PartId = mediaData.Id, // TODO: Media and Parts are merged in the same DB table, PartId can be removed
+            PlexApiPartId = mediaData.PlexApiPartId,
             Quality = mediaData.Quality,
             LibraryId = mediaData.PlexLibraryId,
             ServerId = mediaData.PlexServerId,

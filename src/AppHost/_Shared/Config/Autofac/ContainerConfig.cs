@@ -1,7 +1,8 @@
-﻿using Autofac;
+using Autofac;
 using Reaparr.Application;
 using Reaparr.BackgroundJobs;
 using Reaparr.Data;
+using Reaparr.External;
 using Reaparr.FileSystem;
 using Reaparr.Identity;
 using Reaparr.PlexApi;
@@ -30,6 +31,7 @@ public static class ContainerConfig
         // Infrastructure
         builder.RegisterModule<DataModule>();
         builder.RegisterModule<IdentityModule>();
+        builder.RegisterModule<ExternalModule>();
         builder.RegisterModule<FileSystemModule>();
         builder.RegisterModule<PlexApiModule>();
         builder.RegisterModule<SettingsModule>();

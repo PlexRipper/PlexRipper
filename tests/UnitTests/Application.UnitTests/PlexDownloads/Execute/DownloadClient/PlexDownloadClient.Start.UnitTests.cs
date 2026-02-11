@@ -110,7 +110,7 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<PlexDownloadClient>
 
         await sut.Setup(downloadTask.ToKey(), CancellationToken);
 
-        var startResult = sut.Start();
+        var startResult = await sut.Start();
 
         // Wait for the process to complete
         await sut.DownloadProcessTask;

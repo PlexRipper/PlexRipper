@@ -69,7 +69,7 @@ public class AddTorrentEndpointUnitTests : BaseUnitTest
             MediaId = 0, // Invalid - should be > 0
             DataId = -1, // Invalid - should be > 0
             PartId = 0, // Invalid - should be > 0
-            PartPlexId = 0, // Invalid - should be > 0
+            PlexApiPartId = 0, // Invalid - should be > 0
             Quality = VideoQuality.HD,
             LibraryId = 0, // Invalid - should be > 0
             ServerId = 0, // Invalid - should be > 0
@@ -155,7 +155,7 @@ public class AddTorrentEndpointUnitTests : BaseUnitTest
             MediaId = 0,
             DataId = 0,
             PartId = 0,
-            PartPlexId = 0,
+            PlexApiPartId = 0,
             Quality = (VideoQuality)999, // Invalid enum value
             LibraryId = 0,
             ServerId = 0,
@@ -174,7 +174,7 @@ public class AddTorrentEndpointUnitTests : BaseUnitTest
         result.Errors.ShouldContain(x => x.PropertyName == nameof(TorrentMetadataDTO.MediaId));
         result.Errors.ShouldContain(x => x.PropertyName == nameof(TorrentMetadataDTO.DataId));
         result.Errors.ShouldContain(x => x.PropertyName == nameof(TorrentMetadataDTO.PartId));
-        result.Errors.ShouldContain(x => x.PropertyName == nameof(TorrentMetadataDTO.PartPlexId));
+        result.Errors.ShouldContain(x => x.PropertyName == nameof(TorrentMetadataDTO.PlexApiPartId));
         result.Errors.ShouldContain(x => x.PropertyName == nameof(TorrentMetadataDTO.Type));
         result.Errors.ShouldContain(x => x.PropertyName == nameof(TorrentMetadataDTO.Quality));
     }
@@ -225,7 +225,7 @@ public class AddTorrentEndpointUnitTests : BaseUnitTest
             MediaId = 1,
             DataId = 1,
             PartId = 1,
-            PartPlexId = movieFile.PlexId,
+            PlexApiPartId = movieFile.PlexApiPartId,
             Quality = VideoQuality.HD,
             LibraryId = library.Id,
             ServerId = server.Id,
@@ -263,7 +263,7 @@ public class AddTorrentEndpointUnitTests : BaseUnitTest
             x =>
                 x.PlexLibraryId == movieMetadata.LibraryId
                 && x.PlexServerId == movieMetadata.ServerId
-                && x.PlexId == movieMetadata.PartPlexId,
+                && x.PlexApiPartId == movieMetadata.PlexApiPartId,
             CancellationToken
         );
 
@@ -305,7 +305,7 @@ public class AddTorrentEndpointUnitTests : BaseUnitTest
             MediaId = 1,
             DataId = 1,
             PartId = 1,
-            PartPlexId = episodeFile.PlexId,
+            PlexApiPartId = episodeFile.PlexApiPartId,
             Quality = VideoQuality.HD,
             LibraryId = library.Id,
             ServerId = server.Id,
@@ -343,7 +343,7 @@ public class AddTorrentEndpointUnitTests : BaseUnitTest
             x =>
                 x.PlexLibraryId == episodeMetadata.LibraryId
                 && x.PlexServerId == episodeMetadata.ServerId
-                && x.PlexId == episodeMetadata.PartPlexId,
+                && x.PlexApiPartId == episodeMetadata.PlexApiPartId,
             CancellationToken
         );
 
@@ -359,7 +359,7 @@ public class AddTorrentEndpointUnitTests : BaseUnitTest
             MediaId = 1,
             DataId = 1,
             PartId = 1,
-            PartPlexId = 12345,
+            PlexApiPartId = 12345,
             Quality = VideoQuality.HD,
             LibraryId = 1,
             ServerId = 1,
@@ -381,7 +381,7 @@ public class AddTorrentEndpointUnitTests : BaseUnitTest
             [nameof(TorrentMetadataDTO.MediaId)] = new BString(metadata.MediaId.ToString()),
             [nameof(TorrentMetadataDTO.DataId)] = new BString(metadata.DataId.ToString()),
             [nameof(TorrentMetadataDTO.PartId)] = new BString(metadata.PartId.ToString()),
-            [nameof(TorrentMetadataDTO.PartPlexId)] = new BString(metadata.PartPlexId.ToString()),
+            [nameof(TorrentMetadataDTO.PlexApiPartId)] = new BString(metadata.PlexApiPartId.ToString()),
             [nameof(TorrentMetadataDTO.Quality)] = new BString(metadata.Quality.ToString()),
             [nameof(TorrentMetadataDTO.LibraryId)] = new BString(metadata.LibraryId.ToString()),
             [nameof(TorrentMetadataDTO.ServerId)] = new BString(metadata.ServerId.ToString()),

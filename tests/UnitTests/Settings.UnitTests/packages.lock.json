@@ -104,6 +104,11 @@
           "System.Diagnostics.EventLog": "6.0.0"
         }
       },
+      "CliWrap": {
+        "type": "Transitive",
+        "resolved": "3.10.0",
+        "contentHash": "Igph39WNImUFqQrpTeBDPafcCnM1u/8IooZHqMRF/5JdV5H78p+AbZkeYY1Nkz1WlbI/Gt2Hq/3rYh55jxRF9Q=="
+      },
       "DiffEngine": {
         "type": "Transitive",
         "resolved": "11.3.0",
@@ -201,6 +206,11 @@
         "type": "Transitive",
         "resolved": "12.1.1",
         "contentHash": "EPpkIe1yh1a0OXyC100oOA8WMbZvqUu5plwhvYcb7oSELfyUZzfxV48BLhvs3kKo4NwG7MGLNgy1RJiYtT8Dpw=="
+      },
+      "Flurl": {
+        "type": "Transitive",
+        "resolved": "4.0.0",
+        "contentHash": "rpts69yYgvJqg6PPgqShBQEZ4aNzWQqWpWppcT0oDWxDCIsBqiod4pj6LQZdhk+1OozLFagemldMRACdHF3CsA=="
       },
       "HttpClientToCurl": {
         "type": "Transitive",
@@ -1454,6 +1464,7 @@
           "Reaparr.Application": "[1.0.0, )",
           "Reaparr.BackgroundJobs": "[1.0.0, )",
           "Reaparr.Data": "[1.0.0, )",
+          "Reaparr.External": "[1.0.0, )",
           "Reaparr.FileSystem": "[1.0.0, )",
           "Reaparr.Identity": "[1.0.0, )",
           "Reaparr.PlexApi": "[1.0.0, )",
@@ -1477,6 +1488,7 @@
           "Reaparr.BackgroundJobs.Contracts": "[1.0.0, )",
           "Reaparr.Data.Contracts": "[1.0.0, )",
           "Reaparr.Domain": "[1.0.0, )",
+          "Reaparr.External.Contracts": "[1.0.0, )",
           "Reaparr.FileSystem.Contracts": "[1.0.0, )",
           "Reaparr.Identity.Contracts": "[1.0.0, )",
           "Reaparr.PlexApi.Contracts": "[1.0.0, )",
@@ -1557,6 +1569,7 @@
         "dependencies": {
           "ByteSize": "[2.1.2, )",
           "FastEndpoints": "[7.1.1, )",
+          "Flurl": "[4.0.0, )",
           "JetBrains.Annotations": "[2025.2.4, )",
           "NaturalSort.Extension": "[4.4.1, )",
           "PasswordGenerator": "[2.1.0, )",
@@ -1569,6 +1582,23 @@
         "type": "Project",
         "dependencies": {
           "Serilog": "[4.3.0, )"
+        }
+      },
+      "Reaparr.External": {
+        "type": "Project",
+        "dependencies": {
+          "Autofac": "[9.0.0, )",
+          "CliWrap": "[3.10.0, )",
+          "Reaparr.Application.Contracts": "[1.0.0, )",
+          "Reaparr.External.Contracts": "[1.0.0, )",
+          "System.IO.Abstractions": "[22.1.0, )"
+        }
+      },
+      "Reaparr.External.Contracts": {
+        "type": "Project",
+        "dependencies": {
+          "Reaparr.Domain": "[1.0.0, )",
+          "System.Reactive": "[6.1.0, )"
         }
       },
       "Reaparr.FileSystem": {

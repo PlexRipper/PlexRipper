@@ -8,7 +8,7 @@ public static class PlexMediaExtensions
         new()
         {
             Id = default,
-            PlexId = plexMovie.Key,
+            PlexApiRatingKey = plexMovie.PlexApiRatingKey,
             DataTotal = 0,
             DownloadStatus = DownloadStatus.Queued,
             CreatedAt = DateTime.UtcNow,
@@ -30,7 +30,7 @@ public static class PlexMediaExtensions
         new()
         {
             Id = default,
-            PlexId = plexTvShow.Key,
+            PlexApiRatingKey = plexTvShow.PlexApiRatingKey,
             DataTotal = 0,
             DownloadStatus = DownloadStatus.Queued,
             CreatedAt = DateTime.UtcNow,
@@ -52,7 +52,7 @@ public static class PlexMediaExtensions
         new()
         {
             Id = default,
-            PlexId = plexTvShowSeason.Key,
+            PlexApiRatingKey = plexTvShowSeason.PlexApiRatingKey,
             DataTotal = 0,
             DownloadStatus = DownloadStatus.Queued,
             CreatedAt = DateTime.UtcNow,
@@ -76,7 +76,7 @@ public static class PlexMediaExtensions
         new()
         {
             Id = default,
-            PlexId = plexTvShowEpisode.Key,
+            PlexApiRatingKey = plexTvShowEpisode.PlexApiRatingKey,
             DataTotal = 0,
             DownloadStatus = DownloadStatus.Queued,
             CreatedAt = DateTime.UtcNow,
@@ -104,7 +104,9 @@ public static class PlexMediaExtensions
         new()
         {
             Id = Guid.Empty,
-            PlexId = plexMediaData.PlexMediaId,
+            PlexApiRatingKey = plexMediaData.PlexApiRatingKey,
+            PlexApiMediaId = plexMediaData.PlexApiMediaId,
+            PlexApiPartId = plexMediaData.PlexApiPartId,
             HashId = null,
             DataTotal = plexMediaData.Size,
             DownloadStatus = DownloadStatus.Queued,
@@ -151,7 +153,9 @@ public static class PlexMediaExtensions
         return new DownloadTaskTvShowEpisodeFile
         {
             Id = Guid.Empty,
-            PlexId = plexMediaData.PlexMediaId,
+            PlexApiRatingKey = plexMediaData.PlexApiRatingKey,
+            PlexApiMediaId = plexMediaData.PlexApiMediaId,
+            PlexApiPartId = plexMediaData.PlexApiPartId,
             HashId = null,
             DataTotal = plexMediaData.Size,
             DownloadStatus = DownloadStatus.Queued,

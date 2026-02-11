@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <AssemblyName>Reaparr.External.Contracts</AssemblyName>
+        <RootNamespace>Reaparr.External.Contracts</RootNamespace>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="System.Reactive" Version="6.1.0" />
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Domain\Domain.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+        <Compile Include="..\Domain\GlobalUsings.cs">
+            <Link>GlobalUsings.cs</Link>
+        </Compile>
+    </ItemGroup>
+</Project>

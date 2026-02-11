@@ -11,7 +11,7 @@ public class DownloadTaskEpisodeFileConfiguration : IEntityTypeConfiguration<Dow
         {
             x.PlexLibraryId,
             x.PlexServerId,
-            x.PlexId,
+            x.PlexApiRatingKey,
         });
         builder.HasIndex(x => x.HashId);
 

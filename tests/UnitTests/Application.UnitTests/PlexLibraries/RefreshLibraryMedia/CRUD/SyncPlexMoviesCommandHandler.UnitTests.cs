@@ -84,7 +84,7 @@ public class SyncPlexMoviesCommandHandlerUnitTests : BaseUnitTest<SyncPlexMovies
         var plexMoviesDb = IDbContext.PlexMovies.ToList();
         plexMoviesDb.Count.ShouldBe(30);
         foreach (var plexMovie in library.Movies)
-            plexMoviesDb.Find(x => x.Key == plexMovie.Key).ShouldNotBeNull();
+            plexMoviesDb.Find(x => x.PlexApiRatingKey == plexMovie.PlexApiRatingKey).ShouldNotBeNull();
     }
 
     [Fact]
@@ -114,7 +114,7 @@ public class SyncPlexMoviesCommandHandlerUnitTests : BaseUnitTest<SyncPlexMovies
             // Create updated movies based on the Key
             if (i is >= 10 and < 30)
             {
-                newMovies[i].Key = moviesDb[i].Key;
+                newMovies[i].PlexApiRatingKey = moviesDb[i].PlexApiRatingKey;
                 newMovies[i].UpdatedAt = DateTime.Now;
             }
 
@@ -141,7 +141,7 @@ public class SyncPlexMoviesCommandHandlerUnitTests : BaseUnitTest<SyncPlexMovies
         plexMoviesDb.Count.ShouldBe(40);
         foreach (var plexMovie in newMovies)
         {
-            var findResult = plexMoviesDb.Find(x => x.Key == plexMovie.Key);
+            var findResult = plexMoviesDb.Find(x => x.PlexApiRatingKey == plexMovie.PlexApiRatingKey);
             findResult.ShouldNotBeNull();
             findResult.Title.Contains("TEST").ShouldBeTrue();
         }

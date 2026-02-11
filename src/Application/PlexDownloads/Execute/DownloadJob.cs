@@ -1,5 +1,6 @@
 ﻿using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
+using Autofac.Features.Indexed;
 using Microsoft.EntityFrameworkCore;
 using Quartz;
 using Reaparr.Application.Contracts;
@@ -15,7 +16,9 @@ public class DownloadJob : IJob, IAsyncDisposable
     private readonly ICommandExecutor _commandExecutor;
     private readonly IEventPublisher _eventPublisher;
     private readonly IDownloadManagerSettings _downloadManagerSettings;
-    private readonly IPlexDownloadClient _plexDownloadClient;
+    private readonly IIndex<PlexDownloadClientType, IPlexDownloadClient> _plexDownloadClientFactory;
+
+    private IPlexDownloadClient? _plexDownloadClient;
 
     public DownloadJob(
         ILogger log,
@@ -23,7 +26,7 @@ public class DownloadJob : IJob, IAsyncDisposable
         ICommandExecutor commandExecutor,
         IEventPublisher eventPublisher,
         IDownloadManagerSettings downloadManagerSettings,
-        IPlexDownloadClient plexDownloadClient
+        IIndex<PlexDownloadClientType, IPlexDownloadClient> plexDownloadClientFactory
     )
     {
         _log = log.ForContext<DownloadJob>();
@@ -31,7 +34,7 @@ public class DownloadJob : IJob, IAsyncDisposable
         _commandExecutor = commandExecutor;
         _eventPublisher = eventPublisher;
         _downloadManagerSettings = downloadManagerSettings;
-        _plexDownloadClient = plexDownloadClient;
+        _plexDownloadClientFactory = plexDownloadClientFactory;
     }
 
     public static string DownloadTaskIdParameter => "DownloadTaskId";
@@ -99,7 +102,17 @@ public class DownloadJob : IJob, IAsyncDisposable
 
             downloadTask = result.Value;
 
-            _log.Here().Debug("Creating Download client for {DownloadTaskFullTitle}", downloadTask.FullTitle);
+            // TODO Make this dynamic once stream downloadclient is working, the alternative stream will be used if the direct download fails
+            var clientType = PlexDownloadClientType.Direct;
+            _log.Here()
+                .Information(
+                    "Creating {ClientType} download client for {DownloadTaskFullTitle}",
+                    clientType,
+                    downloadTask.FullTitle
+                );
+
+            _plexDownloadClient = _plexDownloadClientFactory[clientType];
+
             var downloadClientResult = await _plexDownloadClient.Setup(downloadTask.ToKey(), token);
             if (downloadClientResult.IsFailed)
             {
@@ -109,7 +122,7 @@ public class DownloadJob : IJob, IAsyncDisposable
 
             SetupSubscription(_plexDownloadClient);
 
-            var startResult = _plexDownloadClient.Start();
+            var startResult = await _plexDownloadClient.Start();
             if (startResult.IsFailed)
             {
                 await _eventPublisher.PublishAsync(new SendNotificationResult(startResult), token);
@@ -160,7 +173,10 @@ public class DownloadJob : IJob, IAsyncDisposable
                 nameof(DownloadTaskGeneric)
             );
 
-        await _plexDownloadClient.DisposeAsync();
+        if (_plexDownloadClient != null)
+        {
+            await _plexDownloadClient.DisposeAsync();
+        }
     }
 
     private void SetupSubscription(IPlexDownloadClient plexDownloadClient)

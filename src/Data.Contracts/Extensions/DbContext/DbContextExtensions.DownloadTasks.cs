@@ -352,17 +352,20 @@ public static partial class DbContextExtensions
         return downloadTasks;
     }
 
-    public static Task<DownloadTaskTvShow?> GetDownloadTaskTvShowByMediaKeyQuery(
+    public static Task<DownloadTaskTvShow?> GetDownloadTaskTvShowByRatingKeyQuery(
         this IReaparrDbContext dbContext,
         int plexServerId,
-        int mediaKey,
+        int ratingKey,
         CancellationToken cancellationToken = default
     )
     {
         return dbContext
             .DownloadTaskTvShow.AsTracking()
             .IncludeAll()
-            .FirstOrDefaultAsync(x => x.PlexServerId == plexServerId && x.PlexId == mediaKey, cancellationToken);
+            .FirstOrDefaultAsync(
+                x => x.PlexServerId == plexServerId && x.PlexApiRatingKey == ratingKey,
+                cancellationToken
+            );
     }
 
     public static async Task UpdateDownloadProgress(

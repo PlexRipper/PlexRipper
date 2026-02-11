@@ -1,3 +1,5 @@
+using Flurl;
+
 namespace Reaparr.Domain;
 
 /// <summary>
@@ -64,7 +66,7 @@ public class PlexServerConnection : BaseEntity
     public bool IsHttps => Protocol.Equals("https", StringComparison.OrdinalIgnoreCase);
 
     public string GetDownloadUrl(string fileLocationUrl, string token) =>
-        $"{Url}{fileLocationUrl}?X-Plex-Token={token}&download=1";
+        Url.AppendPathSegment(fileLocationUrl).SetQueryParam("X-Plex-Token", token).SetQueryParam("download", 1);
 
     public PlexConnectionTypes Type
     {

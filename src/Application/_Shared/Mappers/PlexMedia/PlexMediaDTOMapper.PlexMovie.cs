@@ -35,7 +35,7 @@ public static partial class PlexMediaDTOMapper
                     MediaId = source.Id,
                 })
                 .ToList(),
-            Key = source.Key,
+            PlexApiRatingKey = source.PlexApiRatingKey,
             HasArt = source.HasArt,
             HasTheme = source.HasTheme,
             Studio = source.Studio,
@@ -44,7 +44,7 @@ public static partial class PlexMediaDTOMapper
             Rating = source.Rating,
             OriginallyAvailableAt = source.OriginallyAvailableAt,
             Children = [],
-            MetaDataKey = source.MetaDataKey,
+            PlexApiMetaDataKey = source.PlexApiMetaDataKey,
             PlexToken = plexToken,
         };
 
@@ -58,17 +58,5 @@ public static partial class PlexMediaDTOMapper
             VideoResolution = source.VideoResolution,
             VideoCodec = source.VideoCodec,
             AudioCodec = source.AudioCodec,
-        };
-
-    public static LibraryMediaItemPartDTO ToPartDTO(this PlexMovieMediaData source) =>
-        new()
-        {
-            Id = source.PlexMediaId,
-            Key = source.Key,
-            Duration = source.Duration,
-            Size = source.Size,
-            Container = source.Container,
-            File = string.Empty,
-            Stream = [],
         };
 }

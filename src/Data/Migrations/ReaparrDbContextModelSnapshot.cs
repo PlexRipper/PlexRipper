@@ -485,9 +485,8 @@ namespace Reaparr.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnOrder(14);
 
-                    b.Property<long>("PlexId")
+                    b.Property<long>("PlexApiRatingKey")
                         .HasColumnType("INTEGER")
-                        .HasColumnName("Key")
                         .HasColumnOrder(1);
 
                     b.Property<int>("PlexLibraryId")
@@ -1237,21 +1236,21 @@ namespace Reaparr.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(18);
 
-                    b.Property<int>("Key")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(1);
-
                     b.Property<long>("MediaSize")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(7);
 
-                    b.Property<int>("MetaDataKey")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(8);
-
                     b.Property<DateTime?>("OriginallyAvailableAt")
                         .HasColumnType("TEXT")
                         .HasColumnOrder(16);
+
+                    b.Property<int>("PlexApiMetaDataKey")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(8);
+
+                    b.Property<int>("PlexApiRatingKey")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(1);
 
                     b.Property<int>("PlexLibraryId")
                         .HasColumnType("INTEGER");
@@ -1303,7 +1302,7 @@ namespace Reaparr.Data.Migrations
 
                     b.HasIndex("SortIndex");
 
-                    b.HasIndex("Key", "PlexServerId");
+                    b.HasIndex("PlexApiRatingKey", "PlexServerId");
 
                     b.HasIndex("PlexLibraryId", "SortIndex");
 
@@ -1422,28 +1421,28 @@ namespace Reaparr.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnOrder(5);
 
-                    b.Property<int>("PlexLibraryId")
-                        .HasColumnType("INTEGER");
+                    b.Property<long>("PlexApiMediaId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(2);
 
-                    b.Property<long>("PlexMediaId")
+                    b.Property<int>("PlexApiPartId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(3);
+
+                    b.Property<int>("PlexApiRatingKey")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(1);
 
-                    b.Property<int>("PlexMovieId")
+                    b.Property<int>("PlexLibraryId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<long>("PlexPartId")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(2);
+                    b.Property<int>("PlexMovieId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("PlexServerId")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("Quality")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(3);
-
-                    b.Property<int>("RatingKey")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(3);
 
@@ -1466,13 +1465,13 @@ namespace Reaparr.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("PlexApiRatingKey");
+
                     b.HasIndex("PlexLibraryId");
 
                     b.HasIndex("PlexServerId");
 
                     b.HasIndex("Quality");
-
-                    b.HasIndex("RatingKey");
 
                     b.HasIndex("PlexMovieId", "Quality");
 
@@ -1755,21 +1754,21 @@ namespace Reaparr.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(18);
 
-                    b.Property<int>("Key")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(1);
-
                     b.Property<long>("MediaSize")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(7);
 
-                    b.Property<int>("MetaDataKey")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(8);
-
                     b.Property<DateTime?>("OriginallyAvailableAt")
                         .HasColumnType("TEXT")
                         .HasColumnOrder(16);
+
+                    b.Property<int>("PlexApiMetaDataKey")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(8);
+
+                    b.Property<int>("PlexApiRatingKey")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(1);
 
                     b.Property<int>("PlexLibraryId")
                         .HasColumnType("INTEGER");
@@ -1821,7 +1820,7 @@ namespace Reaparr.Data.Migrations
 
                     b.HasIndex("SortIndex");
 
-                    b.HasIndex("Key", "PlexServerId");
+                    b.HasIndex("PlexApiRatingKey", "PlexServerId");
 
                     b.HasIndex("PlexLibraryId", "SortIndex");
 
@@ -1935,17 +1934,9 @@ namespace Reaparr.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(18);
 
-                    b.Property<int>("Key")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(1);
-
                     b.Property<long>("MediaSize")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(7);
-
-                    b.Property<int>("MetaDataKey")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(8);
 
                     b.Property<DateTime?>("OriginallyAvailableAt")
                         .HasColumnType("TEXT")
@@ -1956,6 +1947,14 @@ namespace Reaparr.Data.Migrations
 
                     b.Property<int>("ParentKey")
                         .HasColumnType("INTEGER");
+
+                    b.Property<int>("PlexApiMetaDataKey")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(8);
+
+                    b.Property<int>("PlexApiRatingKey")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(1);
 
                     b.Property<int>("PlexLibraryId")
                         .HasColumnType("INTEGER");
@@ -2013,7 +2012,7 @@ namespace Reaparr.Data.Migrations
 
                     b.HasIndex("SortIndex");
 
-                    b.HasIndex("Key", "PlexServerId");
+                    b.HasIndex("PlexApiRatingKey", "PlexServerId");
 
                     b.HasIndex("TvShowId", "SortIndex");
 
@@ -2065,16 +2064,20 @@ namespace Reaparr.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnOrder(5);
 
-                    b.Property<int>("PlexLibraryId")
-                        .HasColumnType("INTEGER");
+                    b.Property<long>("PlexApiMediaId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(2);
 
-                    b.Property<long>("PlexMediaId")
+                    b.Property<int>("PlexApiPartId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(3);
+
+                    b.Property<int>("PlexApiRatingKey")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(1);
 
-                    b.Property<long>("PlexPartId")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(2);
+                    b.Property<int>("PlexLibraryId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("PlexServerId")
                         .HasColumnType("INTEGER");
@@ -2083,10 +2086,6 @@ namespace Reaparr.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("Quality")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(3);
-
-                    b.Property<int>("RatingKey")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(3);
 
@@ -2109,13 +2108,13 @@ namespace Reaparr.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("PlexApiRatingKey");
+
                     b.HasIndex("PlexLibraryId");
 
                     b.HasIndex("PlexServerId");
 
                     b.HasIndex("Quality");
-
-                    b.HasIndex("RatingKey");
 
                     b.HasIndex("PlexTvShowEpisodeId", "Quality");
 
@@ -2231,17 +2230,9 @@ namespace Reaparr.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(18);
 
-                    b.Property<int>("Key")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(1);
-
                     b.Property<long>("MediaSize")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(7);
-
-                    b.Property<int>("MetaDataKey")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(8);
 
                     b.Property<DateTime?>("OriginallyAvailableAt")
                         .HasColumnType("TEXT")
@@ -2252,6 +2243,14 @@ namespace Reaparr.Data.Migrations
 
                     b.Property<int>("ParentKey")
                         .HasColumnType("INTEGER");
+
+                    b.Property<int>("PlexApiMetaDataKey")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(8);
+
+                    b.Property<int>("PlexApiRatingKey")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(1);
 
                     b.Property<int>("PlexLibraryId")
                         .HasColumnType("INTEGER");
@@ -2307,7 +2306,7 @@ namespace Reaparr.Data.Migrations
 
                     b.HasIndex("TvShowId");
 
-                    b.HasIndex("Key", "PlexServerId");
+                    b.HasIndex("PlexApiRatingKey", "PlexServerId");
 
                     b.HasIndex("PlexLibraryId", "SortIndex");
 
@@ -2393,6 +2392,12 @@ namespace Reaparr.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnOrder(13);
 
+                    b.Property<long>("PlexApiMediaId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("PlexApiPartId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("Quality")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(15);
@@ -2424,7 +2429,7 @@ namespace Reaparr.Data.Migrations
 
                     b.HasIndex("ParentId");
 
-                    b.HasIndex("PlexLibraryId", "PlexServerId", "PlexId");
+                    b.HasIndex("PlexLibraryId", "PlexServerId", "PlexApiRatingKey");
 
                     b.ToTable("DownloadTaskMovieFile");
                 });
@@ -2440,7 +2445,7 @@ namespace Reaparr.Data.Migrations
 
                     b.HasIndex("ParentId");
 
-                    b.HasIndex("PlexLibraryId", "PlexServerId", "PlexId");
+                    b.HasIndex("PlexLibraryId", "PlexServerId", "PlexApiRatingKey");
 
                     b.ToTable("DownloadTaskTvShowEpisodeFile");
                 });
@@ -2460,7 +2465,7 @@ namespace Reaparr.Data.Migrations
 
                     b.HasIndex("DownloadStatus");
 
-                    b.HasIndex("PlexServerId", "PlexId");
+                    b.HasIndex("PlexServerId", "PlexApiRatingKey");
 
                     b.ToTable("DownloadTaskTvShow");
                 });

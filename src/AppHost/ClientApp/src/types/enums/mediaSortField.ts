@@ -1,11 +1,10 @@
 export enum MediaSortField {
-	Title = 'title',
+	Title = 'sortIndex', // This is sort index by title
 	Year = 'year',
 	AddedAt = 'addedAt',
 	UpdatedAt = 'updatedAt',
 	Duration = 'duration',
 	MediaSize = 'mediaSize',
-	Index = 'sortIndex',
 	Quality = 'quality',
 }
 

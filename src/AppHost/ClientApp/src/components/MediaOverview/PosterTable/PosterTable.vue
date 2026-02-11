@@ -109,16 +109,6 @@ onMounted(() => {
 			return;
 		}
 
-		// For title-based navigation (no sort or title sort) the scroll dict is built
-		// against the default unsorted order, so we must clear any active sort first.
-		// For all other sort fields (year, quality, duration, etc.) the scroll dict is
-		// built from the already-sorted list, so the sort must be preserved.
-		const activeSortField = mediaOverviewStore.getActiveSort?.field ?? null;
-		const isTitleNavigation = activeSortField === null || activeSortField === MediaSortField.Title;
-		if (isTitleNavigation) {
-			mediaOverviewStore.clearSort();
-		}
-
 		const index = mediaOverviewStore.scrollDict[letter] ?? 0;
 		set(scrolledIndex, index);
 		set(autoScrollEnabled, true);

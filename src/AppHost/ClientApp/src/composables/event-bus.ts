@@ -9,10 +9,6 @@ export interface IMediaOverviewSort {
 	sort: SortDirection;
 }
 
-export function useMediaOverviewSortBus(): UseEventBusReturn<IMediaOverviewSort, unknown> {
-	return useEventBus<IMediaOverviewSort>('mediaOverviewSort');
-}
-
 // region General
 export interface IMediaOverviewCommands {
 	command: 'scrollTo' | 'download' | 'open-details';

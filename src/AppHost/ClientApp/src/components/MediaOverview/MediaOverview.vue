@@ -122,7 +122,6 @@ import {
 	useI18n,
 	useLibraryStore,
 	useMediaOverviewBarDownloadCommandBus,
-	useMediaOverviewSortBus,
 	useMediaOverviewStore,
 	useServerStore,
 	useSettingsStore,
@@ -210,10 +209,6 @@ useMediaOverviewBarDownloadCommandBus().on(() => {
 	sendMediaOverviewDownloadCommand([downloadCommand]);
 });
 
-useMediaOverviewSortBus().on((event) => {
-	mediaOverviewStore.sortMedia(event);
-});
-
 function onAction(event: IMediaOverviewBarActions) {
 	switch (event) {
 		case 'back':
@@ -250,6 +245,7 @@ onMounted(() => {
 	});
 
 	mediaOverviewStore.clearMetaDataFilter();
+	mediaOverviewStore.clearSort();
 
 	// Initial data load
 	useSubscription(mediaOverviewStore.requestMedia().subscribe());

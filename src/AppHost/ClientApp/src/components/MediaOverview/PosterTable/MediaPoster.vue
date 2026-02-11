@@ -11,33 +11,33 @@
 					@download="onDownload"
 					@open-media-details="$emit('open-media-details', mediaItem)" />
 				<!--	Sort value overlay	-->
-				<div
-					v-if="activeSort"
-					class="media-poster-sort-overlay">
-					<QFileSize
-						v-if="activeSort.field === MediaSortField.MediaSize"
-						:size="mediaItem.mediaSize"
-						align="center" />
-					<QDuration
-						v-else-if="activeSort.field === MediaSortField.Duration"
-						:value="mediaItem.duration"
-						align="center"
-						short />
-					<QDateTime
-						v-else-if="activeSort.field === MediaSortField.AddedAt"
-						:text="mediaItem.addedAt"
-						align="center"
-						short-date />
-					<QDateTime
-						v-else-if="activeSort.field === MediaSortField.UpdatedAt"
-						:text="mediaItem.updatedAt ?? ''"
-						align="center"
-						short-date />
-					<QText
-						v-else-if="activeSort.field === MediaSortField.Year"
-						:value="String(mediaItem.year)"
-						align="center" />
-				</div>
+				<template v-if="mediaOverviewStore.getIsSorted">
+					<div class="media-poster-sort-overlay">
+						<QFileSize
+							v-if="mediaOverviewStore.getActiveSort.field === MediaSortField.MediaSize"
+							:size="mediaItem.mediaSize"
+							align="center" />
+						<QDuration
+							v-else-if="mediaOverviewStore.getActiveSort.field === MediaSortField.Duration"
+							:value="mediaItem.duration"
+							align="center"
+							short />
+						<QDateTime
+							v-else-if="mediaOverviewStore.getActiveSort.field === MediaSortField.AddedAt"
+							:text="mediaItem.addedAt"
+							align="center"
+							short-date />
+						<QDateTime
+							v-else-if="mediaOverviewStore.getActiveSort.field === MediaSortField.UpdatedAt"
+							:text="mediaItem.updatedAt ?? ''"
+							align="center"
+							short-date />
+						<QText
+							v-else-if="mediaOverviewStore.getActiveSort.field === MediaSortField.Year"
+							:value="mediaItem.year"
+							align="center" />
+					</div>
+				</template>
 			</div>
 			<!--	Quality bar	-->
 			<MediaQuality
@@ -72,7 +72,6 @@ const emit = defineEmits<{
 
 const loading = ref(false);
 const mediaType = computed(() => props.mediaItem?.type ?? PlexMediaType.Unknown);
-const activeSort = computed(() => mediaOverviewStore.getActiveSort);
 
 function onDownload(mediaQualities: PlexMediaQualityDTO[]) {
 	const downloadCommand: DownloadMediaDTO = {

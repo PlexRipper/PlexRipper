@@ -24,7 +24,7 @@ const props = defineProps<{
 
 const sorted = ref<IMediaOverviewSort>({
 	sort: props.column.sortOrder ?? SortDirection.NoSort,
-	field: props.column.sortField ?? MediaSortField.Index,
+	field: props.column.sortField ?? MediaSortField.Title,
 });
 
 defineEmits<{

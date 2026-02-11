@@ -25,8 +25,7 @@ runs:
                 nodetail: true
                 title: "📝 Development Release Changelog - ${{ inputs.version }}"
                 color: 0xFF8C00 # Amber / Dev
-                description: |
-                    ${{ inputs.changelog }}
+                description: ${{ inputs.changelog }}
                 username: Reaparr
                 avatar_url: "https://raw.githubusercontent.com/Reaparr/Reaparr/refs/heads/dev/export/reaparr/logo/reaparr-full-1024.png"
 

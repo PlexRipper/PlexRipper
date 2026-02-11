@@ -1,6 +1,6 @@
 namespace Reaparr.Settings.Contracts;
 
-public interface ISonarrSettings
+public interface ISonarrSettings : IBaseSettingsModule<SonarrSettings>
 {
     /// <summary>
     /// Gets or sets the base URL of the Sonarr instance.

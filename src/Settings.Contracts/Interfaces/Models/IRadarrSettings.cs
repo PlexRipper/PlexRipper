@@ -1,6 +1,6 @@
 namespace Reaparr.Settings.Contracts;
 
-public interface IRadarrSettings
+public interface IRadarrSettings : IBaseSettingsModule<RadarrSettings>
 {
     /// <summary>
     /// Gets or sets the base URL of the Radarr instance.

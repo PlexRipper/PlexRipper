@@ -1,6 +1,9 @@
-﻿namespace Reaparr.Settings.Contracts;
+namespace Reaparr.Settings.Contracts;
 
-public record DebugSettingsModule : BaseSettingsModule<DebugSettingsModule>, IDebugSettings
+public record DebugSettingsModule
+    : BaseSettingsModule<DebugSettingsModule>,
+        IBaseSettingsModule<DebugSettingsModule>,
+        IDebugSettings
 {
     private bool _debugModeEnabled;
     private bool _maskServerNames;

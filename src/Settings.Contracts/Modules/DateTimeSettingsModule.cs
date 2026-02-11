@@ -1,6 +1,9 @@
-﻿namespace Reaparr.Settings.Contracts;
+namespace Reaparr.Settings.Contracts;
 
-public record DateTimeSettingsModule : BaseSettingsModule<DateTimeSettingsModule>, IDateTimeSettings
+public record DateTimeSettingsModule
+    : BaseSettingsModule<DateTimeSettingsModule>,
+        IBaseSettingsModule<DateTimeSettingsModule>,
+        IDateTimeSettings
 {
     private string _shortDateFormat = "dd/MM/yyyy";
     private string _longDateFormat = "EEEE, dd MMMM yyyy";

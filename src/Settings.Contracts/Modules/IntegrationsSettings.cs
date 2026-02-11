@@ -1,6 +1,9 @@
 namespace Reaparr.Settings.Contracts;
 
-public record IntegrationsSettings : BaseSettingsModule<IntegrationsSettings>, IIntegrationsSettings
+public record IntegrationsSettings
+    : BaseSettingsModule<IntegrationsSettings>,
+        IBaseSettingsModule<IntegrationsSettings>,
+        IIntegrationsSettings
 {
     private string _reaparrApiKey = string.Empty;
     private string _downloadClientUsername = string.Empty;

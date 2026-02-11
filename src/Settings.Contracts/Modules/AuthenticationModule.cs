@@ -1,6 +1,9 @@
 namespace Reaparr.Settings.Contracts;
 
-public record AuthenticationModule : BaseSettingsModule<AuthenticationModule>, IAuthenticationSettings
+public record AuthenticationModule
+    : BaseSettingsModule<AuthenticationModule>,
+        IBaseSettingsModule<AuthenticationModule>,
+        IAuthenticationSettings
 {
     private bool _resetCredentials;
     private HeaderAuthenticationSettings _headerAuthentication = HeaderAuthenticationSettings.Create();

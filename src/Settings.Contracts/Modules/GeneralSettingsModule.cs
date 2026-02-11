@@ -1,6 +1,9 @@
-﻿namespace Reaparr.Settings.Contracts;
+namespace Reaparr.Settings.Contracts;
 
-public record GeneralSettingsModule : BaseSettingsModule<GeneralSettingsModule>, IGeneralSettings
+public record GeneralSettingsModule
+    : BaseSettingsModule<GeneralSettingsModule>,
+        IBaseSettingsModule<GeneralSettingsModule>,
+        IGeneralSettings
 {
     private bool _firstTimeSetup = true;
     private int _activeAccountId;

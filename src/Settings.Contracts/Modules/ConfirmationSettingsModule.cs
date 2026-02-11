@@ -1,6 +1,9 @@
-﻿namespace Reaparr.Settings.Contracts;
+namespace Reaparr.Settings.Contracts;
 
-public record ConfirmationSettingsModule : BaseSettingsModule<ConfirmationSettingsModule>, IConfirmationSettings
+public record ConfirmationSettingsModule
+    : BaseSettingsModule<ConfirmationSettingsModule>,
+        IBaseSettingsModule<ConfirmationSettingsModule>,
+        IConfirmationSettings
 {
     private bool _askDownloadMovieConfirmation = true;
     private bool _askDownloadTvShowConfirmation = true;

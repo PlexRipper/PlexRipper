@@ -7,6 +7,7 @@ namespace Reaparr.Settings.Contracts;
 /// </summary>
 public record HeaderAuthenticationSettings
     : BaseSettingsModule<HeaderAuthenticationSettings>,
+        IBaseSettingsModule<HeaderAuthenticationSettings>,
         IHeaderAuthenticationSettings
 {
     private bool _enabled;

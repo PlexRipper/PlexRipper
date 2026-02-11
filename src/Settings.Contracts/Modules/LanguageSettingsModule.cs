@@ -1,6 +1,9 @@
-﻿namespace Reaparr.Settings.Contracts;
+namespace Reaparr.Settings.Contracts;
 
-public record LanguageSettingsModule : BaseSettingsModule<LanguageSettingsModule>, ILanguageSettings
+public record LanguageSettingsModule
+    : BaseSettingsModule<LanguageSettingsModule>,
+        IBaseSettingsModule<LanguageSettingsModule>,
+        ILanguageSettings
 {
     private string _language = "en-US";
 

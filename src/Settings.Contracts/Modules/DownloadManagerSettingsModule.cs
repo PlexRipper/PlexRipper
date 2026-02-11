@@ -1,7 +1,8 @@
-﻿namespace Reaparr.Settings.Contracts;
+namespace Reaparr.Settings.Contracts;
 
 public record DownloadManagerSettingsModule
     : BaseSettingsModule<DownloadManagerSettingsModule>,
+        IBaseSettingsModule<DownloadManagerSettingsModule>,
         IDownloadManagerSettings
 {
     private int _downloadSegments = 4;

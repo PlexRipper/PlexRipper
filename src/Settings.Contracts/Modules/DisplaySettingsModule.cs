@@ -1,8 +1,11 @@
-﻿using Reaparr.Domain;
+using Reaparr.Domain;
 
 namespace Reaparr.Settings.Contracts;
 
-public record DisplaySettingsModule : BaseSettingsModule<DisplaySettingsModule>, IDisplaySettings
+public record DisplaySettingsModule
+    : BaseSettingsModule<DisplaySettingsModule>,
+        IBaseSettingsModule<DisplaySettingsModule>,
+        IDisplaySettings
 {
     private ViewMode _tvShowViewMode = ViewMode.Poster;
     private ViewMode _movieViewMode = ViewMode.Poster;

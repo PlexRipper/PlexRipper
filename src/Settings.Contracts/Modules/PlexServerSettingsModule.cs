@@ -1,8 +1,11 @@
-﻿using System.Reactive.Linq;
+using System.Reactive.Linq;
 
 namespace Reaparr.Settings.Contracts;
 
-public record PlexServerSettingsModule : BaseSettingsModule<PlexServerSettingsModule>, IServerSettingsModule
+public record PlexServerSettingsModule
+    : BaseSettingsModule<PlexServerSettingsModule>,
+        IBaseSettingsModule<PlexServerSettingsModule>,
+        IServerSettingsModule
 {
     public required List<PlexServerSettingItemModule> Data { get; init; } = [];
 

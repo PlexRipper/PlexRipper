@@ -18,7 +18,9 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
 {
     private readonly IFile _fileSystem;
     private readonly ILogger _log;
-    private readonly CancellationTokenSource _cancellationTokenSource = new();
+    private readonly CancellationTokenSource _forcefulCts = new();
+    private readonly CancellationTokenSource _gracefulCts = new();
+
     private readonly TaskCompletionSource<int> _processExitSource = new();
     private readonly string _binaryPath;
 
@@ -26,9 +28,7 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
     private readonly Subject<string> _stderrSubject = new();
     private readonly Subject<DashDownloadProgress> _progressSubject = new();
 
-    private Task? _executionTask;
     private int? _exitCode;
-    private string _mpdUrl;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DashMpdCliWrapper"/> class.
@@ -54,7 +54,7 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
     /// <summary>
     /// Gets whether the process is currently running.
     /// </summary>
-    public bool IsRunning => _executionTask != null && !_executionTask.IsCompleted;
+    public bool IsRunning => _processExitSource.Task.Status == TaskStatus.Running;
 
     /// <summary>
     /// Gets the exit code of the process (only valid after process has exited).
@@ -82,19 +82,18 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
     public IObservable<DashDownloadProgress> Progress => _progressSubject.AsObservable();
 
     /// <inheritdoc/>
-    public Result Start(string mpdUrl, string outputPath, DashMpdCliOptions options)
+    public async Task<Result> StartAsync(DashMpdCliOptions options)
     {
         if (IsRunning)
             return _log.Here().ErrorResult("Cannot start dash-mpd-cli: process is already running.");
 
-        if (string.IsNullOrWhiteSpace(mpdUrl))
+        if (string.IsNullOrWhiteSpace(options.MpdUrl))
             return _log.Here().ErrorResult("MPD URL cannot be null or empty");
 
-        if (string.IsNullOrWhiteSpace(outputPath))
+        if (string.IsNullOrWhiteSpace(options.Output))
             return _log.Here().ErrorResult("Output path cannot be null or empty");
 
-        _mpdUrl = mpdUrl;
-        var arguments = BuildArguments(mpdUrl, outputPath, options);
+        var arguments = BuildArguments(options.MpdUrl, options.Output, options);
 
         _log.Here().Information("Starting dash-mpd-cli: {BinaryPath} {Arguments}", _binaryPath, arguments);
         _log.Here().Debug("Working directory: {WorkingDirectory}", options.WorkingDirectory);
@@ -103,17 +102,52 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
         {
             var envVars = options.EnvironmentVariables.ToDictionary(kvp => kvp.Key, string? (kvp) => kvp.Value);
 
-            // Build the command using CliWrap's fluent API
-            var command = Cli.Wrap("script")
-                .WithArguments($"-qec \"{_binaryPath} {arguments}\" /dev/null")
-                .WithWorkingDirectory(options.WorkingDirectory)
-                .WithEnvironmentVariables(envVars);
-
             foreach (var (key, value) in options.EnvironmentVariables)
                 _log.Here().Verbose("Environment variable: {Key}={Value}", key, value);
 
+            // Build the command using CliWrap's fluent API
+            var command = Cli.Wrap(_binaryPath)
+                .WithArguments(arguments)
+                .WithWorkingDirectory(options.WorkingDirectory)
+                .WithEnvironmentVariables(envVars);
+
+            command
+                .Observe()
+                .Subscribe(
+                    @event =>
+                    {
+                        switch (@event)
+                        {
+                            case StartedCommandEvent started:
+                                _log.Here()
+                                    .Information(
+                                        "dash-mpd-cli process started successfully with PID {ProcessId}",
+                                        started.ProcessId
+                                    );
+                                break;
+
+                            case StandardOutputCommandEvent stdOut:
+                                HandleStdoutLine(stdOut.Text);
+                                break;
+
+                            case StandardErrorCommandEvent stdErr:
+                                HandleStderrLine(stdErr.Text);
+                                break;
+
+                            case ExitedCommandEvent exited:
+                                _exitCode = exited.ExitCode;
+                                _log.Here()
+                                    .Information("dash-mpd-cli process exited with code {ExitCode}", exited.ExitCode);
+                                _processExitSource.TrySetResult(exited.ExitCode);
+                                CompleteObservables();
+                                break;
+                        }
+                    },
+                    err => _log.Here().Error(err, "Error during dash-mpd-cli execution")
+                );
+
             // Start the execution task that processes the event stream
-            _executionTask = Task.Run(async () => await ExecuteCommandAsync(command));
+            await command.ExecuteAsync(_forcefulCts.Token, _gracefulCts.Token);
 
             _log.Here().Debug("dash-mpd-cli execution started with CliWrap");
             return Result.Ok();
@@ -127,62 +161,6 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
     }
 
     /// <summary>
-    /// Executes the command and processes its event stream.
-    /// </summary>
-    private async Task ExecuteCommandAsync(Command command)
-    {
-        try
-        {
-            await foreach (var cmdEvent in command.ListenAsync(_cancellationTokenSource.Token))
-            {
-                switch (cmdEvent)
-                {
-                    case StartedCommandEvent started:
-                        _log.Here()
-                            .Information(
-                                "dash-mpd-cli process started successfully with PID {ProcessId}",
-                                started.ProcessId
-                            );
-                        break;
-
-                    case StandardOutputCommandEvent stdOut:
-                        HandleStdoutLine(stdOut.Text);
-                        break;
-
-                    case StandardErrorCommandEvent stdErr:
-                        HandleStderrLine(stdErr.Text);
-                        break;
-
-                    case ExitedCommandEvent exited:
-                        _exitCode = exited.ExitCode;
-                        _log.Here().Information("dash-mpd-cli process exited with code {ExitCode}", exited.ExitCode);
-                        _processExitSource.TrySetResult(exited.ExitCode);
-                        break;
-                }
-            }
-
-            // Complete all observables when stream ends
-            CompleteObservables();
-        }
-        catch (OperationCanceledException)
-        {
-            _log.Here().Information("dash-mpd-cli process execution was cancelled");
-            CompleteObservables();
-        }
-        catch (Exception ex)
-        {
-            _log.Here().Error(ex, "Error during dash-mpd-cli execution");
-
-            // Propagate errors to observables
-            _stdoutSubject.OnError(ex);
-            _stderrSubject.OnError(ex);
-            _progressSubject.OnError(ex);
-
-            _processExitSource.TrySetException(ex);
-        }
-    }
-
-    /// <summary>
     /// Handles a stdout line and emits it to observables.
     /// </summary>
     private void HandleStdoutLine(string line)
@@ -192,8 +170,6 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
             if (string.IsNullOrEmpty(line))
                 return;
 
-            line = line.Replace(_mpdUrl, "");
-
             // Push to stdout observable
             _stdoutSubject.OnNext(line);
             _log.Here().Debug("{Data}", line);
@@ -202,13 +178,13 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
             var progress = TryParseProgress(line);
             if (progress != null)
             {
-                // _log.Here()
-                //     .Debug(
-                //         "Parsed progress: {Percent}%, {Speed}MB/s, {Step}",
-                //         progress.PercentComplete,
-                //         progress.DownloadSpeedMBps,
-                //         progress.CurrentStep
-                //     );
+                _log.Here()
+                    .Debug(
+                        "Parsed progress: {Percent}%, {Speed}MB/s, {Step}",
+                        progress.PercentComplete,
+                        progress.DownloadSpeedMBps,
+                        progress.CurrentStep
+                    );
                 _progressSubject.OnNext(progress);
             }
             else
@@ -268,7 +244,6 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
             _stdoutSubject.OnCompleted();
             _stderrSubject.OnCompleted();
             _progressSubject.OnCompleted();
-            _log.Here().Debug("All observable subjects completed");
         }
         catch (Exception ex)
         {
@@ -277,99 +252,14 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
     }
 
     /// <summary>
-    /// Executes the dash-mpd-cli process and waits for it to complete.
-    /// </summary>
-    /// <param name="mpdUrl">The URL of the MPD manifest to download.</param>
-    /// <param name="outputPath">The output file path where the downloaded media will be saved.</param>
-    /// <param name="options">Optional configuration options for the download.</param>
-    /// <param name="cancellationToken">Token to cancel the operation.</param>
-    /// <returns>The exit code of the process.</returns>
-    public async Task<Result> ExecuteAsync(
-        string mpdUrl,
-        string outputPath,
-        DashMpdCliOptions? options = null,
-        CancellationToken cancellationToken = default
-    )
-    {
-        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(
-            cancellationToken,
-            _cancellationTokenSource.Token
-        );
-
-        // Register cancellation callback
-        await using var registration = linkedCts.Token.Register(() =>
-        {
-            if (!_cancellationTokenSource.IsCancellationRequested)
-            {
-                _cancellationTokenSource.Cancel();
-            }
-        });
-
-        var startResult = Start(mpdUrl, outputPath, options);
-
-        if (startResult.IsFailed)
-            return startResult;
-
-        try
-        {
-            // Wait for the process to exit or cancellation
-            await ProcessExitTask.WaitAsync(linkedCts.Token);
-            return Result.Ok();
-        }
-        catch (OperationCanceledException)
-        {
-            _log.Here().Information("ExecuteAsync cancelled, stopping process");
-            // Cancellation is already handled by CliWrap through the cancellation token
-            throw;
-        }
-    }
-
-    /// <summary>
     /// Stops the running process gracefully, or forcefully if it doesn't respond.
     /// </summary>
-    /// <param name="timeout">Maximum time to wait for graceful shutdown before forcing termination. Default is 5 seconds.</param>
     /// <returns>A task that completes when the process has stopped.</returns>
-    public async Task StopAsync(TimeSpan? timeout = null)
+    public async Task StopAsync()
     {
-        if (!IsRunning)
-            return;
-
-        timeout ??= TimeSpan.FromSeconds(5);
-
-        try
-        {
-            _log.Here().Information("Stopping dash-mpd-cli process");
-
-            // Cancel the execution (CliWrap will handle graceful cancellation)
-            await _cancellationTokenSource.CancelAsync();
-
-            // Wait for graceful exit with timeout
-            var exitTask = ProcessExitTask;
-            var timeoutTask = Task.Delay(timeout.Value);
-            var completedTask = await Task.WhenAny(exitTask, timeoutTask);
-
-            if (completedTask == exitTask)
-            {
-                _log.Here().Debug("dash-mpd-cli process stopped gracefully");
-            }
-            else
-            {
-                _log.Here().Warning("dash-mpd-cli process did not stop within timeout, may be forcefully terminated");
-            }
-        }
-        catch (Exception ex)
-        {
-            _log.Here().Warning(ex, "Error during StopAsync");
-        }
-    }
-
-    /// <summary>
-    /// Disposes of the wrapper and ensures the process is terminated.
-    /// </summary>
-    public void Dispose()
-    {
-        DisposeAsync().AsTask().GetAwaiter().GetResult();
-        GC.SuppressFinalize(this);
+        _log.Here().Information("Stopping dash-mpd-cli process");
+        await _gracefulCts.CancelAsync();
+        _forcefulCts.CancelAfter(TimeSpan.FromSeconds(10));
     }
 
     /// <summary>
@@ -377,23 +267,9 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
     /// </summary>
     public async ValueTask DisposeAsync()
     {
-        if (IsRunning)
-        {
-            await StopAsync();
-        }
+        await StopAsync();
 
         CleanupProcess();
-
-        try
-        {
-            await _cancellationTokenSource.CancelAsync();
-        }
-        catch
-        {
-            // Ignore cancellation errors during disposal
-        }
-
-        _cancellationTokenSource.Dispose();
     }
 
     private void CleanupProcess()

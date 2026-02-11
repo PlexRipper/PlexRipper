@@ -168,7 +168,7 @@ namespace Reaparr.PlexApi.UnitTests
             var media = result.Media.First();
             var sourceMedia = sourceData.Media.First();
 
-            media.Id.ShouldBe(sourceMedia.Id);
+            media.Id.ShouldBe(Convert.ToInt32(sourceMedia.Id));
             media.Duration.ShouldBe(sourceMedia.Duration!.Value);
             media.Bitrate.ShouldBe(sourceMedia.Bitrate!.Value);
             media.Width.ShouldBe(sourceMedia.Width!.Value);

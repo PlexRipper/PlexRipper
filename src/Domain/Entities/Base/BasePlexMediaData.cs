@@ -18,7 +18,7 @@ public abstract class BasePlexMediaData : BasePlexMediaQuality
     /// <example>47892</example>
     /// </summary>
     [Column(Order = 2)]
-    public required long PlexApiMediaId { get; init; }
+    public required int PlexApiMediaId { get; init; }
 
     /// <summary>
     /// Unique identifier for a specific file part within a media version.

@@ -174,7 +174,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
         // Check if the tvShowDownloadTask has already been created in the database
         if (downloadTaskTvShow is null)
         {
-            downloadTaskTvShow = await _dbContext.GetDownloadTaskTvShowByMediaKeyQuery(
+            downloadTaskTvShow = await _dbContext.GetDownloadTaskTvShowByRatingKeyQuery(
                 plexTvShow.PlexServerId,
                 plexTvShow.PlexApiRatingKey,
                 ct

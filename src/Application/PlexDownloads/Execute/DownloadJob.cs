@@ -102,7 +102,7 @@ public class DownloadJob : IJob, IAsyncDisposable
 
             downloadTask = result.Value;
 
-            // Determine which download client to use based on the download task
+            // TODO Make this dynamic once stream downloadclient is working, the alternative stream will be used if the direct download fails
             var clientType = PlexDownloadClientType.Direct;
             _log.Here()
                 .Information(
@@ -122,7 +122,7 @@ public class DownloadJob : IJob, IAsyncDisposable
 
             SetupSubscription(_plexDownloadClient);
 
-            var startResult = _plexDownloadClient.Start();
+            var startResult = await _plexDownloadClient.Start();
             if (startResult.IsFailed)
             {
                 await _eventPublisher.PublishAsync(new SendNotificationResult(startResult), token);

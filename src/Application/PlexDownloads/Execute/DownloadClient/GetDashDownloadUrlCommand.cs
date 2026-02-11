@@ -18,6 +18,7 @@ public class GetDashDownloadUrlCommandValidator : AbstractValidator<GetDashDownl
     public GetDashDownloadUrlCommandValidator()
     {
         RuleFor(x => x).NotNull();
+        RuleFor(x => x.DownloadTaskKey).NotNull();
         RuleFor(x => x.DownloadTaskKey.IsValid).Equal(true);
         RuleFor(x => x.MetaDataPath).NotEmpty();
         RuleFor(x => x.MetaDataPath).Must(x => x.Contains("/library/metadata/"));
@@ -190,7 +191,7 @@ public class GetDashDownloadUrlCommandHandler : ICommandHandler<GetDashDownloadU
             .SetQueryParam("X-Plex-Features", "external-media,indirect-media,hub-style-list")
             .SetQueryParam("X-Plex-Model", "standalone")
             .SetQueryParam("X-Plex-Device", "Linux")
-            .SetQueryParam("X-Plex-Device-Name", "Firefox")
+            .SetQueryParam("X-Plex-Device-Name", "Firefox") // TODO Change to a platform like nvidia shield with more codec capabilities?
             .SetQueryParam("X-Plex-Token", token)
             .SetQueryParam("X-Plex-Language", "en")
             .SetQueryParam("X-Plex-Session-Id", playbackSessionId)

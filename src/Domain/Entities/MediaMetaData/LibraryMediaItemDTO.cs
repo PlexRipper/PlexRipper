@@ -156,7 +156,7 @@ public record LibraryMediaItemMediaDTO
     /// <summary>
     /// Unique media identifier.
     /// </summary>
-    public required long Id { get; init; }
+    public required int Id { get; init; }
 
     /// <summary>
     /// Duration of the media in milliseconds.

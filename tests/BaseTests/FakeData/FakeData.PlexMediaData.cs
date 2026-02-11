@@ -20,7 +20,7 @@ public static partial class FakeData
             .RuleFor(x => x.GeneratedNameSyncedAt, _ => DateTime.UtcNow)
             .RuleFor(x => x.OriginalFilename, f => f.System.FileName("video"))
             .RuleFor(x => x.GeneratedFilename, _ => string.Empty)
-            .RuleFor(x => x.PlexApiRatingKey, f => f.Random.Int(1, 100000))
+            .RuleFor(x => x.PlexApiRatingKey, _ => GetUniqueNumber())
             .RuleFor(x => x.Key, _ => DownloadFileUrl)
             .RuleFor(x => x.Size, _ => 50 * 1024)
             .Ignore(x => x.PlexServerId)

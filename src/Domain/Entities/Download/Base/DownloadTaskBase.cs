@@ -5,9 +5,9 @@ public abstract class DownloadTaskBase : BaseEntityGuid
     /// <summary>
     /// Gets or sets the unique identifier used by the Plex Api to keep track of media.
     /// This is only unique on that specific server.
-    /// <remarks> This is coming from the Plex API and is used to identify the specific media that is being downloaded.</remarks>
-    /// <example> /library/metadata/[RatingKey]/ =>  /library/metadata/529367/</example>
     /// </summary>
+    /// <example> /library/metadata/[RatingKey]/ =>  /library/metadata/529367/</example>
+    /// <remarks> This is coming from the Plex API and is used to identify the specific media that is being downloaded.</remarks>
     [Column(Order = 1)]
     public required long PlexApiRatingKey { get; init; }
 

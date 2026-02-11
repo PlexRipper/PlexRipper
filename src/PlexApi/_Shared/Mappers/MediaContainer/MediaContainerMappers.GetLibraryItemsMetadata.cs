@@ -77,7 +77,7 @@ public static class MediaContainerMappers
     public static LibraryMediaItemMediaDTO ToItemMediaDTO(this Media media) =>
         new()
         {
-            Id = media.Id,
+            Id = Convert.ToInt32(media.Id),
             Duration = media.Duration ?? 0,
             Bitrate = media.Bitrate ?? 0,
             Width = media.Width ?? 0,

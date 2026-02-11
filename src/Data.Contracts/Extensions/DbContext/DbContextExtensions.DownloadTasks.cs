@@ -352,7 +352,7 @@ public static partial class DbContextExtensions
         return downloadTasks;
     }
 
-    public static Task<DownloadTaskTvShow?> GetDownloadTaskTvShowByMediaKeyQuery(
+    public static Task<DownloadTaskTvShow?> GetDownloadTaskTvShowByRatingKeyQuery(
         this IReaparrDbContext dbContext,
         int plexServerId,
         int ratingKey,

@@ -125,7 +125,7 @@ public static partial class DbContextExtensions
         this IReaparrDbContext dbContext,
         int plexServerId,
         CancellationToken cancellationToken = default
-    ) => GetPlexServerTokenAsync(dbContext, plexServerId, 0, cancellationToken);
+    ) => dbContext.GetPlexServerTokenAsync(plexServerId, 0, cancellationToken);
 
     /// <summary>
     ///  Returns the authentication token needed to authenticate communication with the <see cref="PlexServer" />.

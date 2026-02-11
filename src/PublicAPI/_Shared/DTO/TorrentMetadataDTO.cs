@@ -35,7 +35,7 @@ public record TorrentMetadataDTO
     /// Uses long to accommodate Plex's large identifier values.
     /// </summary>
     [QueryParam]
-    public required long PlexApiPartId { get; init; }
+    public required int PlexApiPartId { get; init; }
 
     /// <summary>
     /// The desired video quality for the torrent download.

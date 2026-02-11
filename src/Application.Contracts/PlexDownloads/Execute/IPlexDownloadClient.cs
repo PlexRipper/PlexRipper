@@ -26,7 +26,7 @@ public interface IPlexDownloadClient : IAsyncDisposable
     /// Starts the download workers for the <see cref="DownloadTaskGeneric"/> given during setup.
     /// </summary>
     /// <returns>Is successful.</returns>
-    Result Start();
+    Task<Result> Start();
 
     Task<Result> StopAsync();
 }

@@ -32,7 +32,7 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
         Mock.Mock<IJobExecutionContext>().SetupGet(x => x.JobDetail.JobDataMap).Returns(new JobDataMap(dict));
         Mock.Mock<IJobExecutionContext>().SetupGet(x => x.CancellationToken).Returns(CancellationToken);
         Mock.Mock<IPlexDownloadClient>().Setup(x => x.Setup(It.IsAny<DownloadTaskKey>(), CancellationToken)).ReturnOk();
-        Mock.Mock<IPlexDownloadClient>().Setup(x => x.Start()).Returns(Result.Ok());
+        Mock.Mock<IPlexDownloadClient>().Setup(x => x.Start()).ReturnsAsync(Result.Ok());
         Mock.Mock<IPlexDownloadClient>().SetupGet(x => x.DownloadProcessTask).Returns(Task.CompletedTask);
         Mock.Mock<IPlexDownloadClient>()
             .SetupGet(x => x.ListenToDownloadWorkerLog)
@@ -68,7 +68,7 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
         Mock.Mock<IJobExecutionContext>().SetupGet(x => x.JobDetail.JobDataMap).Returns(new JobDataMap(dict));
         Mock.Mock<IJobExecutionContext>().SetupGet(x => x.CancellationToken).Returns(CancellationToken);
         Mock.Mock<IPlexDownloadClient>().Setup(x => x.Setup(It.IsAny<DownloadTaskKey>(), CancellationToken)).ReturnOk();
-        Mock.Mock<IPlexDownloadClient>().Setup(x => x.Start()).Returns(Result.Ok());
+        Mock.Mock<IPlexDownloadClient>().Setup(x => x.Start()).ReturnsAsync(Result.Ok());
         Mock.Mock<IPlexDownloadClient>().SetupGet(x => x.DownloadProcessTask).Returns(Task.CompletedTask);
         Mock.Mock<IPlexDownloadClient>()
             .SetupGet(x => x.ListenToDownloadWorkerLog)

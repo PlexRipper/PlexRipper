@@ -6,6 +6,16 @@ namespace Reaparr.External.Contracts;
 public record DashMpdCliOptions
 {
     /// <summary>
+    ///  Gets or sets the URL of the MPD manifest to download.
+    /// </summary>
+    public required string MpdUrl { get; set; }
+
+    /// <summary>
+    /// Gets or sets the output file path where the downloaded media will be saved.
+    /// </summary>
+    public required string Output { get; set; }
+
+    /// <summary>
     /// Gets or sets custom HTTP headers to include in requests.
     /// </summary>
     public Dictionary<string, string>? Headers { get; set; }

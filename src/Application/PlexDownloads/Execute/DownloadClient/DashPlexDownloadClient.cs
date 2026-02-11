@@ -1,3 +1,4 @@
+using System.IO.Abstractions;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using Flurl;
@@ -20,6 +21,7 @@ public class DashPlexDownloadClient : IPlexDownloadClient
     private readonly IDashMpdCliWrapper _dashWrapper;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IServerSettingsModule _serverSettings;
+    private readonly IDirectory _directory;
 
     private readonly Subject<IList<DownloadWorkerLog>> _downloadWorkerLogSubject = new();
     private readonly TaskCompletionSource<object> _downloadProcessCompletionSource = new();
@@ -32,7 +34,6 @@ public class DashPlexDownloadClient : IPlexDownloadClient
     private IDisposable? _logSubscription;
 
     private string? _downloadUrl;
-    private string? _outputPath;
 
     private long _lastSpeed;
     private DateTime _lastProgressUpdate = DateTime.UtcNow;
@@ -52,7 +53,8 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         IReaparrDbContext dbContext,
         IDashMpdCliWrapper dashWrapper,
         ICommandExecutor commandExecutor,
-        IServerSettingsModule serverSettings
+        IServerSettingsModule serverSettings,
+        IDirectory directory
     )
     {
         _log = log.ForContext<DashPlexDownloadClient>();
@@ -60,6 +62,7 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         _dashWrapper = dashWrapper;
         _commandExecutor = commandExecutor;
         _serverSettings = serverSettings;
+        _directory = directory;
     }
 
     /// <summary>
@@ -121,22 +124,10 @@ public class DashPlexDownloadClient : IPlexDownloadClient
 
         _log.Here().Debug("DashPlexDownloadClient setup started for URL {DownloadURL}", _downloadUrl);
 
-        // Build output path
-        _outputPath = Path.Combine(DownloadTask.DownloadDirectory, DownloadTask.FileName);
-
         // Ensure the download directory exists
-        var directoryResult = await _commandExecutor.Send(
-            new CreateDownloadFileStreamCommand(DownloadTask.DownloadDirectory, DownloadTask.FileName, 0),
-            cancellationToken
-        );
-
-        if (directoryResult.IsFailed)
-        {
-            return directoryResult.ToResult().LogError();
-        }
-
-        // Dispose the stream immediately - we just needed to create the directory
-        await directoryResult.Value.DisposeAsync();
+        var createDirectoryResult = Result.Try(() => _directory.CreateDirectory(DownloadTask.DownloadDirectory));
+        if (createDirectoryResult.IsFailed)
+            return createDirectoryResult.ToResult();
 
         // Set up a download speed limit watcher
         await SetupDownloadLimitWatcher(DownloadTask);
@@ -153,6 +144,59 @@ public class DashPlexDownloadClient : IPlexDownloadClient
     }
 
     /// <summary>
+    /// Starts the download process using dash-mpd-cli.
+    /// </summary>
+    public async Task<Result> Start()
+    {
+        if (DownloadTask is null)
+            return Result.Fail("The DashPlexDownloadClient has not been setup yet.").LogError();
+
+        if (_dashWrapper.IsRunning)
+            return Result.Fail("The DashPlexDownloadClient is already downloading and cannot be started.").LogWarning();
+
+        if (string.IsNullOrWhiteSpace(_downloadUrl))
+            return Result.Fail("Download URL is not available.").LogError();
+
+        _log.Here().Debug("Starting DASH download for {MediaFileName}", DownloadTask.FileName);
+
+        try
+        {
+            // Configure dash-mpd-cli options
+            var options = new DashMpdCliOptions
+            {
+                MpdUrl = _downloadUrl,
+                Output = DownloadTask.DownloadDirectory,
+                WorkingDirectory = DownloadTask.DownloadDirectory,
+                Quiet = false,
+                Verbose = true,
+                Quality = "best",
+                EnvironmentVariables = new Dictionary<string, string>
+                {
+                    ["TMPDIR"] = DownloadTask.DownloadDirectory,
+                    ["TMP"] = DownloadTask.DownloadDirectory,
+                },
+            };
+
+            // Start the download process
+            var startedResult = await _dashWrapper.StartAsync(options);
+            if (startedResult.IsFailed)
+                return startedResult;
+
+            // Update status to downloading
+            DownloadStatus = DownloadStatus.Downloading;
+            await _dbContext.SetDownloadStatus(DownloadTask.ToKey(), DownloadStatus);
+
+            return Result.Ok();
+        }
+        catch (Exception ex)
+        {
+            return Result
+                .Fail(new ExceptionalError($"Could not start download for {DownloadTask.FileName}", ex))
+                .LogError();
+        }
+    }
+
+    /// <summary>
     /// Sets up subscriptions to the dash-mpd-cli wrapper observables.
     /// </summary>
     private void SetupSubscriptions()
@@ -162,12 +206,12 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         // Progress subscription with error handling and completion tracking
         _progressSubscription = _dashWrapper
             .Progress.Sample(TimeSpan.FromMilliseconds(500))
-            .Select(async data => await OnProgressUpdate(data))
+            .SelectMany(data => Observable.FromAsync(() => OnProgressUpdate(data)))
             .Subscribe(
                 _ => { },
                 onError: ex =>
                 {
-                    if (ex.GetType() != typeof(OperationCanceledException))
+                    if (ex is not OperationCanceledException)
                     {
                         _log.Here().ErrorResult(ex);
                         _progressSubscriptionCompletionSource.TrySetException(ex);
@@ -200,7 +244,7 @@ public class DashPlexDownloadClient : IPlexDownloadClient
             onNext: logs => _downloadWorkerLogSubject.OnNext(logs),
             onError: ex =>
             {
-                if (ex.GetType() != typeof(OperationCanceledException))
+                if (ex is not OperationCanceledException)
                 {
                     _log.Here().ErrorResult(ex);
                     _logSubscriptionCompletionSource.TrySetException(ex);
@@ -235,60 +279,6 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         };
 
     /// <summary>
-    /// Starts the download process using dash-mpd-cli.
-    /// </summary>
-    public Result Start()
-    {
-        if (DownloadTask is null)
-            return Result.Fail("The DashPlexDownloadClient has not been setup yet.").LogError();
-
-        if (_dashWrapper.IsRunning)
-            return Result.Fail("The DashPlexDownloadClient is already downloading and cannot be started.").LogWarning();
-
-        if (string.IsNullOrWhiteSpace(_downloadUrl))
-            return Result.Fail("Download URL is not available.").LogError();
-
-        if (string.IsNullOrWhiteSpace(_outputPath))
-            return Result.Fail("Output path is not configured.").LogError();
-
-        _log.Here().Debug("Starting DASH download for {MediaFileName}", DownloadTask.FileName);
-
-        try
-        {
-            // Configure dash-mpd-cli options
-            var options = new DashMpdCliOptions
-            {
-                Quiet = false,
-                Verbose = true,
-                WorkingDirectory = DownloadTask.DownloadDirectory,
-                Quality = "best",
-                EnvironmentVariables = new Dictionary<string, string>
-                {
-                    ["TMPDIR"] = DownloadTask.DownloadDirectory,
-                    ["TMP"] = DownloadTask.DownloadDirectory,
-                },
-            };
-
-            // Start the download process
-            var startedResult = _dashWrapper.Start(_downloadUrl, _outputPath, options);
-            if (startedResult.IsFailed)
-                return startedResult;
-
-            // Update status to downloading
-            DownloadStatus = DownloadStatus.Downloading;
-            _ = _dbContext.SetDownloadStatus(DownloadTask.ToKey(), DownloadStatus);
-
-            return Result.Ok();
-        }
-        catch (Exception ex)
-        {
-            return Result
-                .Fail(new ExceptionalError($"Could not start download for {DownloadTask.FileName}", ex))
-                .LogError();
-        }
-    }
-
-    /// <summary>
     /// Stops the download process.
     /// </summary>
     public async Task<Result> StopAsync()
@@ -299,10 +289,7 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         {
             await _cancellationTokenSource.CancelAsync();
 
-            if (_dashWrapper.IsRunning)
-            {
-                await _dashWrapper.StopAsync(TimeSpan.FromSeconds(10));
-            }
+            await _dashWrapper.StopAsync();
 
             if (DownloadTask != null)
             {

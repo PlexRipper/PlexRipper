@@ -14,7 +14,7 @@ public record PlexMediaSlimDTO
 
     /// <summary>
     /// Gets or sets the key used to retrieve thumbnails, art or banners.
-    /// E.g. /library/metadata/[Key]/art/[PlexApiMetaDataKey] =>  /library/metadata/529367/art/1593898227.
+    /// E.g. /library/metadata/[PlexApiRatingKey]/art/[PlexApiMetaDataKey] =>  /library/metadata/529367/art/1593898227.
     /// </summary>
     public required int PlexApiMetaDataKey { get; init; }
 

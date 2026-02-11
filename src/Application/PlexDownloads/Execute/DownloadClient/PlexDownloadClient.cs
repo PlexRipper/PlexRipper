@@ -118,7 +118,7 @@ public class PlexDownloadClient : IPlexDownloadClient
     /// Starts the download workers for the <see cref="DownloadTaskGeneric"/> given during setup.
     /// </summary>
     /// <returns>Is successful.</returns>
-    public Result Start()
+    public async Task<Result> Start()
     {
         if (DownloadTask is null)
             return Result.Fail("The PlexDownloadClient has not been setup yet.").LogError();
@@ -127,6 +127,9 @@ public class PlexDownloadClient : IPlexDownloadClient
             return Result.Fail("The PlexDownloadClient is already downloading and can not be started.").LogWarning();
 
         _log.Here().Debug("Start downloading {MediaFileName}", DownloadTask.FileName);
+
+        await Task.CompletedTask;
+
         try
         {
             var results = new List<Result>();

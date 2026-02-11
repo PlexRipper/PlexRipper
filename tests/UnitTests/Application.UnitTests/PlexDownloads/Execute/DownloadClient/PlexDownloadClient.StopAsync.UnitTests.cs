@@ -109,7 +109,7 @@ public class PlexDownloadClientStopAsyncUnitTests : BaseUnitTest<PlexDownloadCli
 
         await sut.Setup(downloadTask.ToKey(), CancellationToken);
 
-        var startResult = sut.Start();
+        var startResult = await sut.Start();
         await Task.Delay(1500, TestContext.Current.CancellationToken);
         var stopResult = await sut.StopAsync();
 

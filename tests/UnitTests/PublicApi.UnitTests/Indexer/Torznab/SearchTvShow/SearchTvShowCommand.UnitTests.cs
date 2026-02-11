@@ -89,7 +89,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
             item.Link.ShouldContain("MediaId=");
             item.Link.ShouldContain("DataId=");
             item.Link.ShouldContain("PartId=");
-            item.Link.ShouldContain("PartPlexId=");
+            item.Link.ShouldContain("PlexApiPartId=");
             item.Link.ShouldContain("Quality=");
             item.Link.ShouldContain("LibraryId=");
             item.Link.ShouldContain("ServerId=");

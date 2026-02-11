@@ -328,7 +328,7 @@ public class DbContextExtensionsDownloadTasksUnitTests : BaseUnitTest
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        result.Value.ShouldBe($"{conn.Url}{fileLocationUrl}?X-Plex-Token={access.AuthToken}");
+        result.Value.ShouldBe($"{conn.Url}{fileLocationUrl}?X-Plex-Token={access.AuthToken}&download=1");
     }
 
     [Fact]

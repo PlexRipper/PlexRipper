@@ -36,18 +36,17 @@ public static class PlexMediaSlimDTOMapper
                 .ToList(),
             PlexApiRatingKey = source.PlexApiRatingKey,
             PlexApiMetaDataKey = source.PlexApiMetaDataKey,
-            PlexToken = string.Empty,
         };
 
     public static IQueryable<PlexMediaSlimDTO> ProjectToMediaSlimDTO(this IQueryable<PlexMovie> source) =>
-        source.Select(x => ToSlimDTO(x));
+        source.Select(x => x.ToSlimDTO());
 
     #endregion
 
     #region PlexTvShow
 
     public static IQueryable<PlexMediaSlimDTO> ProjectToMediaSlimDTO(this IQueryable<PlexTvShow> source) =>
-        source.Select(x => ToSlimDTOMapper(x));
+        source.Select(x => x.ToSlimDTOMapper());
 
     public static PlexMediaSlimDTO ToSlimDTOMapper(this PlexTvShow source) =>
         new()
@@ -70,7 +69,6 @@ public static class PlexMediaSlimDTOMapper
             PlexApiMetaDataKey = source.PlexApiMetaDataKey,
             HasThumb = source.HasThumb,
             Qualities = source.Qualities.ToDTO(),
-            PlexToken = string.Empty,
         };
 
     #endregion
@@ -97,12 +95,8 @@ public static class PlexMediaSlimDTOMapper
             HasThumb = source.HasThumb,
             PlexApiRatingKey = source.PlexApiRatingKey,
             PlexApiMetaDataKey = source.PlexApiMetaDataKey,
-            PlexToken = string.Empty,
             Qualities = source.MediaDataList.ToPlexMediaQuality(),
         };
-
-    public static IQueryable<PlexMediaSlimDTO> ProjectToMediaSlimDTO(this IQueryable<PlexTvShowEpisode> source) =>
-        source.Select(x => ToSlimDTO(x));
 
     #endregion
 

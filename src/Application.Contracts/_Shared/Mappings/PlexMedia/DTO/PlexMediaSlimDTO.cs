@@ -49,10 +49,5 @@ public record PlexMediaSlimDTO
 
     public required bool HasThumb { get; set; }
 
-    /// <summary>
-    /// The token used to authenticate with the Plex server to retrieve the thumbnail.
-    /// </summary>
-    public required string PlexToken { get; set; } = string.Empty;
-
     public required List<PlexMediaQualityDTO> Qualities { get; init; } = [];
 }

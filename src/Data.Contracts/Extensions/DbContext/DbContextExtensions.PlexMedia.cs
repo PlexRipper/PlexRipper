@@ -186,24 +186,11 @@ public static partial class DbContextExtensions
             plexMediaSlimDtos = plexMediaSlimDtos.OrderByNatural(x => x.SearchTitle).ToList();
 
         // Add token to retrieve thumbnail in front-end
-        var serverIds = plexMediaSlimDtos.Select(x => x.PlexServerId).Distinct().ToList();
-        var tokensCache = await dbContext
-            .PlexAccountServers.Where(x => serverIds.Contains(x.PlexServerId))
-            .Where(x => x.PlexAccount != null)
-            .Select(x => new { x.PlexServerId, Token = x.PlexAccount!.AuthenticationToken })
-            .Distinct()
-            .ToDictionaryAsync(x => x.PlexServerId, x => x.Token, ct);
-
         for (var i = 0; i < plexMediaSlimDtos.Count; i++)
         {
             var slimDTO = plexMediaSlimDtos[i];
 
             slimDTO.SortIndex = i + 1;
-
-            if (tokensCache.TryGetValue(slimDTO.PlexServerId, out var token))
-            {
-                slimDTO.PlexToken = token;
-            }
         }
 
         // If the plexLibraryId is set, we don't need to sort the list again

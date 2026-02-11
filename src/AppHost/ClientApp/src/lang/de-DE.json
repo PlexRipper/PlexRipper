@@ -715,6 +715,10 @@
                         "text": "Basisadresse, unter der Ihre Sonarr-Instanz erreichbar ist. Beispiel: http://localhost:8989 oder http://sonarr:8989",
                         "title": "Basis-URL zu Sonarr"
                     },
+                    "clear-configuration": {
+                        "text": "Reaparr wird versuchen, mit der angegebenen Basis-URL und dem API-Schlüssel eine Verbindung zur Radarr-Instanz herzustellen.",
+                        "title": "Clear Sonarr-Konfiguration"
+                    },
                     "setup-configuration": {
                         "text": "Reaparr richtet in Sonarr einen Indexer und einen Download-Client ein, der es Sonarr ermöglicht, Downloads auszulösen.\n\nWeitere Informationen finden Sie im [Sonarr/Radarr-Integrationsleitfaden](https://www.reaparr.rocks/guides/integration/sonarr-radarr).",
                         "title": "Sonarr-Konfiguration einrichten"
@@ -734,6 +738,10 @@
                         "label": "Radarr-Basis-URL",
                         "text": "Basisadresse, unter der Ihre Radarr-Instanz erreichbar ist. Beispiel: http://localhost:7878 oder http://radarr:7878",
                         "title": "Basis-URL zu Radarr"
+                    },
+                    "clear-configuration": {
+                        "text": "Löscht die Radarr-Konfiguration aus Reaparr und setzt die Eingaben für Basis-URL und API-Schlüssel zurück.",
+                        "title": "Clear Radarr-Konfiguration"
                     },
                     "setup-configuration": {
                         "text": "Reaparr richtet in Radarr einen Indexer und einen Download-Client ein, der es Radarr ermöglicht, Downloads auszulösen.\n\nWeitere Informationen finden Sie im [Sonarr/Radarr-Integrationsleitfaden](https://www.reaparr.rocks/guides/integration/sonarr-radarr).",

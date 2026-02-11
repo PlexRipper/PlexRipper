@@ -244,6 +244,14 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 			}));
 		},
 
+		clearRadarrConfiguration() {
+			return integrationApi.clearRadarrConfigurationEndpoint().pipe(switchMap((x) => settingsStore.refreshSettings()));
+		},
+
+		clearSonarrConfiguration() {
+			return integrationApi.clearSonarrConfigurationEndpoint().pipe(switchMap((x) => settingsStore.refreshSettings()));
+		},
+
 		$reset() {
 			Object.assign(state, cloneDeep(defaultState));
 		},

@@ -56,6 +56,19 @@
 						cy="test-radarr-connection-button"
 						@click="testRadarrConnection" />
 				</HelpRow>
+				<!-- Clear Configuration -->
+				<HelpRow
+					:col-label="3"
+					:text="t('help.settings.integrations.radarr.clear-configuration.text')"
+					:title="t('help.settings.integrations.radarr.clear-configuration.title')"
+					hide-label>
+					<BaseButton
+						color="negative"
+						icon="mdi-trash-can-outline"
+						label="Clear Configuration"
+						cy="clear-radarr-configuration-button"
+						@click="clearRadarrConfiguration" />
+				</HelpRow>
 			</QStep>
 			<!-- Configure Radarr Integration -->
 			<QStep
@@ -117,6 +130,10 @@ const passwordInputFocus = ref(false);
 
 function testRadarrConnection() {
 	useSubscription(integrationStore.testConnectionToRadarr().subscribe());
+}
+
+function clearRadarrConfiguration() {
+	useSubscription(integrationStore.clearRadarrConfiguration().subscribe());
 }
 
 function configureRadarrSetup() {

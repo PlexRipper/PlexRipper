@@ -715,6 +715,10 @@
                         "text": "Adresse de base où votre instance Sonarr est accessible. Exemple: http://localhost:8989 ou http://sonarr:8989",
                         "title": "URL de base vers Sonarr"
                     },
+                    "clear-configuration": {
+                        "text": "Efface la configuration Sonarr de Reaparr et réinitialise l'URL de base et la clé API.",
+                        "title": "Effacer la configuration de Sonarr"
+                    },
                     "setup-configuration": {
                         "text": "Reaparr configure un indexeur et un client de téléchargement dans Sonarr, permettant ainsi à Sonarr de déclencher les téléchargements.\n\nPour plus d'informations, consultez le [Guide d'intégration Sonarr/Radarr](https://www.reaparr.rocks/guides/integration/sonarr-radarr).",
                         "title": "Configurer Sonarr"
@@ -734,6 +738,10 @@
                         "label": "URL de base de Radarr",
                         "text": "Adresse de base où votre instance Radarr est accessible. Exemple: http://localhost:7878 ou http://radarr:7878",
                         "title": "URL de base vers Radarr"
+                    },
+                    "clear-configuration": {
+                        "text": "Efface la configuration Radarr de Reaparr et réinitialise l'URL de base et la clé API.",
+                        "title": "Configuration Clear Radarr"
                     },
                     "setup-configuration": {
                         "text": "Reaparr configure un indexeur et un client de téléchargement dans Radarr, permettant ainsi à Radarr de déclencher les téléchargements.\n\nPour plus d'informations, consultez le [Guide d'intégration Sonarr/Radarr](https://www.reaparr.rocks/guides/integration/sonarr-radarr).",

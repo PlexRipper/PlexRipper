@@ -67,6 +67,10 @@ COPY ["src/PlexApi.Contracts/PlexApi.Contracts.csproj", "src/PlexApi.Contracts/"
 COPY ["src/Settings/Settings.csproj", "src/Settings/"]
 COPY ["src/Settings.Contracts/Settings.Contracts.csproj", "src/Settings.Contracts/"]
 
+## External Projects
+COPY ["src/External/External.csproj", "src/External/"]
+COPY ["src/External.Contracts/External.Contracts.csproj", "src/External.Contracts/"]
+
 ## AppHost Projects
 COPY ["src/AppHost/AppHost.csproj", "src/AppHost/"]
 

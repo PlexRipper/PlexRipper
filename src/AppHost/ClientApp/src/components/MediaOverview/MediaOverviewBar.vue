@@ -208,6 +208,7 @@ const sortOptions = computed((): ISortOption[] => [
 	{ field: MediaSortField.UpdatedAt, label: t('general.sort.updated-at') },
 	{ field: MediaSortField.Duration, label: t('general.sort.duration') },
 	{ field: MediaSortField.MediaSize, label: t('general.sort.size') },
+	{ field: MediaSortField.Quality, label: t('general.sort.quality') },
 ]);
 
 function getSortState(field: MediaSortField): SortDirection | null {
@@ -220,13 +221,8 @@ function getSortState(field: MediaSortField): SortDirection | null {
 
 function handleSort(field: MediaSortField) {
 	const current = getSortState(field);
-	if (!current) {
-		sortBus.emit({ field, sort: SortDirection.Asc });
-	} else if (current === SortDirection.Asc) {
-		sortBus.emit({ field, sort: SortDirection.Desc });
-	} else {
-		sortBus.emit({ field, sort: SortDirection.NoSort });
-	}
+	const next = current === SortDirection.Asc ? SortDirection.Desc : SortDirection.Asc;
+	sortBus.emit({ field, sort: next });
 }
 
 const activeSortIcon = computed((): string => {

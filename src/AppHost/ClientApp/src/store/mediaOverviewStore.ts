@@ -1,4 +1,5 @@
 import { cloneDeep, isEqual, isNumber, orderBy, sortBy, uniqueId } from 'lodash-es';
+import { format } from 'date-fns';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { reactive, computed, toRefs } from 'vue';
 import { get } from '@vueuse/core';
@@ -11,13 +12,13 @@ import {
 	ViewMode,
 } from '@dto';
 import type { IMediaOverviewSort } from '@composables/event-bus';
-import { SortDirection } from '@enums';
+import { MediaSortField, SortDirection } from '@enums';
 import { StoreNames, type IMetaDataMediaFilter, type ISelection } from '@interfaces';
 import { plexLibraryApi, plexMediaApi } from '@api';
 import { map, tap } from 'rxjs/operators';
 import { defer, forkJoin, type Observable, of } from 'rxjs';
 import { useLibraryStore, useSettingsStore } from '@store';
-import { getVideoQualityColor, translateVideoQuality } from '@composables';
+import { getHighestQualityRank, getVideoQualityColor, translateVideoQuality, getHighestQuality } from '@composables';
 import { useSubscription } from '@vueuse/rxjs';
 
 interface IMediaOverviewStoreState {
@@ -233,21 +234,92 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			useSubscription(actions.requestMedia().subscribe());
 		},
 		setFirstLetterIndex() {
-			// Create scroll indexes for each letter
 			state.scrollDict = {};
-			state.scrollDict['#'] = 0;
-			// Check for occurrence of title with alphabetic character
-			const sortTitles = get(getters.getMediaItems).map((x) => x.title[0]?.toLowerCase() ?? '#');
-			let lastIndex = 0;
-			const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.toLowerCase();
+			const items = get(getters.getMediaItems);
+			const activeSort = state.sortedState[0] ?? null;
+			const field = activeSort?.field ?? null;
+			const direction = activeSort?.sort ?? SortDirection.Asc;
 
-			for (const letter of alphabet) {
-				lastIndex = sortTitles.findIndex((x, idx) => idx >= lastIndex && x === letter);
-				if (lastIndex > -1) {
-					state.scrollDict[letter] = lastIndex;
+			if (field === MediaSortField.Year) {
+				// Group by individual year in the order they appear in the sorted list
+				const seen = new Set<string>();
+				for (let i = 0; i < items.length; i++) {
+					const year = String(items[i]!.year ?? '#');
+					if (!seen.has(year)) {
+						seen.add(year);
+						state.scrollDict[year] = i;
+					}
+				}
+			} else if (field === MediaSortField.Quality) {
+				// Group by quality label in the order they appear in the sorted list
+				const seen = new Set<string>();
+				for (let i = 0; i < items.length; i++) {
+					const label = translateVideoQuality(getHighestQuality(items[i]!));
+					if (!seen.has(label)) {
+						seen.add(label);
+						state.scrollDict[label] = i;
+					}
+				}
+			} else if (field === MediaSortField.Duration) {
+				// Group by 10-minute buckets (e.g. "0–10 min", "10–20 min")
+				// Only buckets that contain actual items are included, in sorted order
+				const seen = new Set<string>();
+				for (let i = 0; i < items.length; i++) {
+					const seconds = items[i]!.duration ?? 0;
+					const bucketStart = Math.floor(seconds / 600) * 10;
+					const label = `${bucketStart}–${bucketStart + 10} min`;
+					if (!seen.has(label)) {
+						seen.add(label);
+						state.scrollDict[label] = i;
+					}
+				}
+			} else if (field === MediaSortField.AddedAt || field === MediaSortField.UpdatedAt) {
+				// Group by month + year (e.g. "Apr 2025")
+				const seen = new Set<string>();
+				for (let i = 0; i < items.length; i++) {
+					const raw = items[i]![field as 'addedAt' | 'updatedAt'];
+					if (!raw) {
+						continue;
+					}
+					const label = format(new Date(raw), 'MMM yyyy');
+					if (!seen.has(label)) {
+						seen.add(label);
+						state.scrollDict[label] = i;
+					}
+				}
+			} else if (field === MediaSortField.MediaSize) {
+				// Group by 1 GB buckets (e.g. "0–1 GB", "1–2 GB")
+				// Only buckets present in the data are included, in sorted order
+				const GB = 1_073_741_824;
+				const seen = new Set<string>();
+				for (let i = 0; i < items.length; i++) {
+					const bytes = items[i]!.mediaSize ?? 0;
+					const bucketStart = Math.floor(bytes / GB);
+					const label = `${bucketStart}–${bucketStart + 1} GB`;
+					if (!seen.has(label)) {
+						seen.add(label);
+						state.scrollDict[label] = i;
+					}
+				}
+			} else {
+				// Title / default (sortIndex) navigation — scan items in their current order
+				// and record the first occurrence of each initial letter.
+				// Only letters that actually have matching items are included.
+				const seen = new Set<string>();
+				for (let i = 0; i < items.length; i++) {
+					const char = items[i]!.title[0]?.toUpperCase() ?? '#';
+					const key = /[A-Z]/.test(char) ? char : '#';
+					if (!seen.has(key)) {
+						seen.add(key);
+						state.scrollDict[key] = i;
+					}
 				}
 			}
-			state.scrollAlphabet = Object.keys(state.scrollDict);
+
+			// Keys are inserted in sorted-list order; reverse for desc so the nav
+			// visually matches the top-to-bottom order of the poster grid.
+			const keys = Object.keys(state.scrollDict);
+			state.scrollAlphabet = direction === SortDirection.Desc ? keys.reverse() : keys;
 		},
 		setSelection(selection: ISelection) {
 			state.selection = selection;
@@ -293,13 +365,22 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 				return;
 			}
 
-			state.sortedItems = Object.freeze(
-				orderBy(
-					state.items,
-					[event.field as keyof PlexMediaSlimDTO],
-					[event.sort as SortDirection.Asc | SortDirection.Desc],
-				),
-			);
+			const direction = event.sort as SortDirection.Asc | SortDirection.Desc;
+
+			// Quality is not a direct field on PlexMediaSlimDTO; sort by derived rank
+			if (event.field === MediaSortField.Quality) {
+				state.sortedItems = Object.freeze(
+					orderBy(state.items, [(item) => getHighestQualityRank(item)], [direction]),
+				);
+			} else {
+				state.sortedItems = Object.freeze(
+					orderBy(
+						state.items,
+						[event.field as keyof PlexMediaSlimDTO],
+						[direction],
+					),
+				);
+			}
 			state.sortedState = newSortedState;
 		},
 		$reset() {

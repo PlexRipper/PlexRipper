@@ -8,6 +8,7 @@
 				:label="letter"
 				flat
 				square
+				no-wrap
 				:data-cy="`letter-${letter}-alphabet-navigation-btn`"
 				@click="sendMediaOverviewScrollToCommand(letter)" />
 		</div>
@@ -22,6 +23,7 @@ const mediaOverviewStore = useMediaOverviewStore();
 
 <style lang="scss">
 @use '@/assets/scss/_mixins.scss';
+@use '@/assets/scss/variables' as *;
 
 .alphabet-navigation-container {
   display: flex;
@@ -30,13 +32,19 @@ const mediaOverviewStore = useMediaOverviewStore();
   align-self: stretch;
   justify-content: center;
   flex: 0 0 30px;
+  max-height: $page-height-minus-app-bar-minus-media-overview-bar;
 
   .alphabet-navigation {
     display: flex;
     justify-content: space-around;
     flex: 0 0 100%;
     flex-direction: column;
-    overflow: hidden;
+    overflow-y: auto;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
 
     .navigation-btn {
       @extend .fade-out-border;

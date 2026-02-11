@@ -464,7 +464,8 @@
             "added-at": "Dodano",
             "updated-at": "Zaktualizowano",
             "duration": "Czas trwania",
-            "size": "Rozmiar"
+            "size": "Rozmiar",
+            "quality": "Jakość"
         },
         "units": {
             "per-second": "/s"

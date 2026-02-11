@@ -6,6 +6,7 @@ export enum MediaSortField {
 	Duration = 'duration',
 	MediaSize = 'mediaSize',
 	Index = 'sortIndex',
+	Quality = 'quality',
 }
 
 export enum SortDirection {

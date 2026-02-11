@@ -464,7 +464,8 @@
             "added-at": "Added",
             "updated-at": "Updated",
             "duration": "Duration",
-            "size": "Size"
+            "size": "Size",
+            "quality": "Quality"
         },
         "units": {
             "per-second": "/s"

@@ -33,6 +33,7 @@ import type { PlexMediaType, PlexMediaSlimDTO } from '@dto';
 import { listenMediaOverviewScrollToCommand, sendMediaOverviewDownloadCommand } from '@composables/event-bus';
 import { triggerBoxHighlight } from '@composables/animations';
 import { waitForElement } from '@composables';
+import { MediaSortField } from '@enums';
 import { useRouter, useMediaOverviewStore } from '#imports';
 
 const mediaOverviewStore = useMediaOverviewStore();
@@ -107,8 +108,16 @@ onMounted(() => {
 			Log.error('Could not find container with reference: ', get(posterTableRef));
 			return;
 		}
-		// We have to revert to normal title sort otherwise the index will be wrong
-		mediaOverviewStore.clearSort();
+
+		// For title-based navigation (no sort or title sort) the scroll dict is built
+		// against the default unsorted order, so we must clear any active sort first.
+		// For all other sort fields (year, quality, duration, etc.) the scroll dict is
+		// built from the already-sorted list, so the sort must be preserved.
+		const activeSortField = mediaOverviewStore.getActiveSort?.field ?? null;
+		const isTitleNavigation = activeSortField === null || activeSortField === MediaSortField.Title;
+		if (isTitleNavigation) {
+			mediaOverviewStore.clearSort();
+		}
 
 		const index = mediaOverviewStore.scrollDict[letter] ?? 0;
 		set(scrolledIndex, index);

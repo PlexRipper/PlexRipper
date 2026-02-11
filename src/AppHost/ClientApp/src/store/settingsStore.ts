@@ -138,14 +138,6 @@ export const useSettingsStore = defineStore(StoreNames.SettingsStore, () => {
 			return !(actions.getServerSettings(machineIdentifier)?.hidden ?? false);
 		},
 		getServerSettings: (machineIdentifier?: string) => machineIdentifier ? state.serverSettings.data.find((user) => user.machineIdentifier === machineIdentifier) : null,
-		/**
-     * Returns the server name for the given machine identifier.
-     * If the debug mode is enabled, the server name will be masked.
-     * If there is no custom server name, an empty string will be returned.
-     * @param machineIdentifier The machine identifier of the server.
-     */
-		getServerName: (machineIdentifier: string) => getters.shouldMaskServerNames.value ? '**MASKED**' : actions.getServerSettings(machineIdentifier)?.plexServerName ?? '',
-
 		isConfirmationEnabled: (type: PlexMediaType) => {
 			switch (type) {
 				case PlexMediaType.Movie:
@@ -169,8 +161,8 @@ export const useSettingsStore = defineStore(StoreNames.SettingsStore, () => {
 	// Getters
 	const getters = {
 		debugMode: computed((): boolean => state.debugSettings.debugModeEnabled),
-		shouldMaskServerNames: computed((): boolean => state.debugSettings.debugModeEnabled && state.debugSettings.maskServerNames),
-		shouldMaskLibraryNames: computed((): boolean => state.debugSettings.debugModeEnabled && state.debugSettings.maskLibraryNames),
+		shouldMaskServerNames: computed((): boolean => state.debugSettings.maskServerNames),
+		shouldMaskLibraryNames: computed((): boolean => state.debugSettings.maskLibraryNames),
 	};
 	return {
 		...toRefs(state), ...actions, ...getters,

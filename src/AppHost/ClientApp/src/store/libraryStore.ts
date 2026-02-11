@@ -169,7 +169,7 @@ export const useLibraryStore = defineStore(StoreNames.LibraryStore, () => {
 			return null;
 		},
 		getLibraryName: (libraryId: number): string => {
-			if (settingsStore.shouldMaskServerNames) {
+			if (settingsStore.shouldMaskLibraryNames) {
 				return '**MASKED**';
 			}
 			return getters.getLibrary(libraryId)?.title ?? '';

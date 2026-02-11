@@ -81,16 +81,7 @@ export const useServerStore = defineStore(StoreNames.ServerStore, () => {
 	// Getters
 	const getters = {
 		getServer: (serverId: number): PlexServerDTO | null => {
-			const server = state.servers.find((x) => x.id === serverId);
-			if (!server) {
-				return null;
-			}
-
-			const customName = settingsStore.getServerName(server.machineIdentifier);
-			if (customName !== '') {
-				server.name = customName;
-			}
-			return server;
+			return state.servers.find((x) => x.id === serverId) ?? null;
 		},
 		getServers: (serverIds: number[] = []): PlexServerDTO[] => {
 			if (serverIds.length === 0) {
@@ -106,9 +97,18 @@ export const useServerStore = defineStore(StoreNames.ServerStore, () => {
 			getters.getServers().filter((x) => !settingsStore.isServerVisible(x.machineIdentifier)),
 		),
 		getServerName: (serverId: number): string => {
+			if (settingsStore.shouldMaskServerNames) {
+				return '**MASKED**';
+			}
+
 			const server = getters.getServer(serverId);
 			if (!server) {
 				return '**UNKNOWN**';
+			}
+
+			const customName = settingsStore.getServerSettings(server.machineIdentifier)?.plexServerName ?? '';
+			if (customName !== '') {
+				return customName;
 			}
 
 			return server.name;

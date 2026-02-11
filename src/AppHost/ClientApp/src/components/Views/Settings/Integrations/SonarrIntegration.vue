@@ -45,8 +45,8 @@
 				<!-- Test Connection -->
 				<HelpRow
 					:col-label="3"
-					:text="t('help.settings.integrations.sonarr.test-connection.title')"
-					:title="t('help.settings.integrations.sonarr.test-connection.text')"
+					:text="t('help.settings.integrations.sonarr.test-connection.text')"
+					:title="t('help.settings.integrations.sonarr.test-connection.title')"
 					hide-label>
 					<BaseButton
 						:loading="integrationStore.sonarr.isTesting"

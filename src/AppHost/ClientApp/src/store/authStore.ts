@@ -118,12 +118,18 @@ export const useAuthenticationStore = defineStore(StoreNames.AuthenticationStore
 		hasPasswordChanged: computed(() => state.currentPassword !== state.password),
 		equalPassword: computed(() => get(getters.hasPasswordChanged) && state.password === state.confirmPassword),
 		canUpdateCredentials: computed(() => {
-			if (get(getters.hasUsernameChanged)) {
-				return true;
+			const usernameValid = !!state.username && state.username.length >= 8;
+			const hasChanges = get(getters.hasUsernameChanged) || get(getters.hasPasswordChanged);
+
+			if (!usernameValid || !hasChanges) {
+				return false;
 			}
+
 			if (get(getters.hasPasswordChanged)) {
-				return state.password == state.confirmPassword;
+				return state.isPasswordValid && state.password === state.confirmPassword;
 			}
+
+			return true;
 		}),
 	};
 	return {

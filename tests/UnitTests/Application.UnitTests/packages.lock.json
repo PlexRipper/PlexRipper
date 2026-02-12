@@ -1671,6 +1671,7 @@
           "FastEndpoints": "[7.1.1, )",
           "HttpClientToCurl": "[2.1.1, )",
           "Polly": "[8.6.5, )",
+          "Reaparr.BackgroundJobs.Contracts": "[1.0.0, )",
           "Reaparr.Data.Contracts": "[1.0.0, )",
           "Reaparr.PlexApi.Contracts": "[1.0.0, )",
           "Reaparr.Settings.Contracts": "[1.0.0, )"

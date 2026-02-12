@@ -8,5 +8,5 @@ namespace Reaparr.PlexApi.Contracts;
 /// <param name="PlexLibrary"> The <see cref="PlexLibrary"/> to fetch the episodes from.</param>
 /// <param name="Action"> Progress action callback to notify of connection attempt progress.</param>
 /// <returns></returns>
-public record GetAllMediaEpisodesCommand(PlexLibrary PlexLibrary, Action<MediaSyncProgress> Action)
+public record GetAllMediaEpisodesCommand(PlexLibrary PlexLibrary, Func<MediaSyncProgress, Task> Action)
     : ICommand<Result<List<PlexTvShowEpisode>>>;

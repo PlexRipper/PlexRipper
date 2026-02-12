@@ -63,8 +63,8 @@ public class RefreshPlexTvShowLibraryCommandHandler
             var rawSeasonDataResult = await _commandExecutor.Send(
                 new GetAllMediaSeasonsCommand(
                     plexLibrary,
-                    progress =>
-                        _progressReporter.SendProgress(
+                    async progress =>
+                        await _progressReporter.SendProgress(
                             new RefreshLibraryProgressUpdate
                             {
                                 Action = command.Action,
@@ -86,8 +86,8 @@ public class RefreshPlexTvShowLibraryCommandHandler
             var rawEpisodesDataResult = await _commandExecutor.Send(
                 new GetAllMediaEpisodesCommand(
                     plexLibrary,
-                    progress =>
-                        _progressReporter.SendProgress(
+                    async progress =>
+                        await _progressReporter.SendProgress(
                             new RefreshLibraryProgressUpdate
                             {
                                 Action = command.Action,

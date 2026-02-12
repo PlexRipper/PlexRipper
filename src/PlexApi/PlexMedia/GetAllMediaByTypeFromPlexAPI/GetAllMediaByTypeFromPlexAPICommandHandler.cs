@@ -10,7 +10,7 @@ namespace Reaparr.PlexApi;
 public record GetAllMediaByTypeFromPlexApiCommand(
     PlexLibrary PlexLibrary,
     PlexMediaType MediaType,
-    Action<MediaSyncProgress> Action,
+    Func<MediaSyncProgress, Task> Action,
     int BatchSize = 1000
 ) : ICommand<Result<List<LibraryMediaItemDTO>>>;
 
@@ -102,7 +102,7 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
             progressIndex += rawMediaList.Count;
 
             mediaList.AddRange(rawMediaList);
-            SendProgress(mediaType, startTime, progressIndex, totalSize, action);
+            await SendProgress(mediaType, startTime, progressIndex, totalSize, action);
         }
 
         _log.Here()
@@ -115,12 +115,12 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
         return Result.Ok(mediaList);
     }
 
-    private void SendProgress(
+    private async Task SendProgress(
         PlexMediaType plexMediaType,
         DateTime startTime,
         int index,
         long totalSize,
-        Action<MediaSyncProgress> action
+        Func<MediaSyncProgress, Task> action
     )
     {
         // Estimate remaining time
@@ -134,7 +134,7 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
         }
 
         // Report progress
-        action.Invoke(
+        await action(
             new MediaSyncProgress
             {
                 Type = plexMediaType,

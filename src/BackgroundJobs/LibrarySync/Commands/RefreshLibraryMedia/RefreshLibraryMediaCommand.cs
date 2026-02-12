@@ -1,4 +1,4 @@
-﻿using FastEndpoints;
+using FastEndpoints;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
@@ -57,8 +57,8 @@ public class RefreshLibraryMediaCommandHandler : ICommandHandler<RefreshLibraryM
         var syncLibraryMediaResult = await _commandExecutor.Send(
             new GetLibraryMediaCommand(
                 plexLibrary,
-                progress =>
-                    _progressReporter.SendProgress(
+                async progress =>
+                    await _progressReporter.SendProgress(
                         new RefreshLibraryProgressUpdate
                         {
                             PlexLibraryType = plexLibrary.Type,

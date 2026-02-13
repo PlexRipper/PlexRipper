@@ -45,15 +45,16 @@ describe('Display media collection on the Library detail page', () => {
 
 				const movies = data.mediaData.find((x) => x.libraryId === movieLibrary.id)?.media ?? [];
 				const sortTitles = movies.map((x) => x.title[0]?.toLowerCase() ?? '#');
-				for (const letter of 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.toLowerCase()) {
+				cy.get('[data-cy$="alphabet-navigation-btn"]').each(($btn) => {
+					const dataCy = $btn.attr('data-cy') ?? '';
+					const letter = dataCy.replace('letter-', '').replace('-alphabet-navigation-btn', '');
 					const index = sortTitles.indexOf(letter);
 					if (index > -1) {
 						cy.log(`Navigating to letter: ${letter} at index: ${index}`);
-						cy.getCy(`letter-${letter}-alphabet-navigation-btn`, { timeout: 10000 }).should('be.visible');
-						cy.getCy(`letter-${letter}-alphabet-navigation-btn`, { timeout: 10000 }).click();
+						cy.wrap($btn).should('be.visible').click();
 						cy.get(`[data-scroll-index="${index}"]`, { timeout: 10000 }).should('be.visible');
 					}
-				}
+				});
 			});
 	});
 });

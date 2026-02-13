@@ -2,15 +2,15 @@
 	<div class="alphabet-navigation-container">
 		<div class="alphabet-navigation">
 			<q-btn
-				v-for="letter in mediaOverviewStore.scrollAlphabet"
-				:key="letter"
+				v-for="value in mediaOverviewStore.scrollAlphabet"
+				:key="value"
 				class="navigation-btn"
-				:label="letter"
+				:label="value"
 				flat
 				square
 				no-wrap
-				:data-cy="`letter-${letter}-alphabet-navigation-btn`"
-				@click="sendMediaOverviewScrollToCommand(letter)" />
+				:data-cy="`letter-${value}-alphabet-navigation-btn`"
+				@click="sendMediaOverviewScrollToCommand(value)" />
 		</div>
 	</div>
 </template>

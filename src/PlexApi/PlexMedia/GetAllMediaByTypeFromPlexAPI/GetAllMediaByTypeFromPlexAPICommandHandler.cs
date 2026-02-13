@@ -127,7 +127,7 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
     {
         // Estimate remaining time
         var elapsedTime = DateTime.UtcNow - startTime;
-        var progress = (double)index / (totalSize * 2); // Adjusted for 2x getting the same media
+        var progress = (double)index / totalSize;
         var remainingTime = TimeSpan.Zero;
         if (progress > 0)
         {
@@ -141,7 +141,7 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
             new LibraryProgressItem
             {
                 MediaType = plexMediaType,
-                Received = Math.Clamp(index / 2, 0, totalSize),
+                Received = Math.Clamp(index, 0, totalSize),
                 Total = totalSize,
                 TimeRemaining = remainingTime,
             }

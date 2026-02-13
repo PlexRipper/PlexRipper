@@ -9,7 +9,7 @@ public record LibraryProgress
 
     public required PlexMediaType PlexLibraryType { get; init; }
 
-    public required IReadOnlyList<LibraryProgressItem> Items { get; init; }
+    public required IList<LibraryProgressItem> Items { get; init; }
 
     public IReadOnlyList<IError> Errors { get; init; } = [];
 

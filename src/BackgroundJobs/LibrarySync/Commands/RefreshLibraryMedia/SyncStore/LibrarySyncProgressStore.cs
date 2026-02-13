@@ -28,6 +28,42 @@ public class LibrarySyncProgressStore : ILibrarySyncProgressStore
             Items = [],
         };
 
+        if (type == PlexMediaType.Movie)
+        {
+            progress.Items.Add(
+                new LibraryProgressItem
+                {
+                    MediaType = PlexMediaType.Movie,
+                    Received = 0,
+                    Total = 0,
+                    TimeRemaining = TimeSpan.Zero,
+                }
+            );
+        }
+
+        if (type == PlexMediaType.TvShow)
+        {
+            foreach (
+                var mediaType in new List<PlexMediaType>
+                {
+                    PlexMediaType.TvShow,
+                    PlexMediaType.Season,
+                    PlexMediaType.Episode,
+                }
+            )
+            {
+                progress.Items.Add(
+                    new LibraryProgressItem
+                    {
+                        MediaType = mediaType,
+                        Received = 0,
+                        Total = 0,
+                        TimeRemaining = TimeSpan.Zero,
+                    }
+                );
+            }
+        }
+
         _store[plexLibraryId] = progress;
 
         // Send initial progress update to clients

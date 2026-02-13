@@ -59,6 +59,6 @@ public class MoveDownloadFileSchedulerIntegrationTests : BaseIntegrationTests
         downloadTaskDb.ShouldNotBeNull();
         downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.Completed);
 
-        container.MockSignalRService.ServerDownloadProgressList.Count.ShouldBeGreaterThanOrEqualTo(3);
+        container.MockDownloadHubService.ServerDownloadProgressList.Count.ShouldBeGreaterThanOrEqualTo(3);
     }
 }

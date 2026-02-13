@@ -1,4 +1,4 @@
-﻿using System.Net.Http.Headers;
+using System.Net.Http.Headers;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -10,6 +10,7 @@ using Reaparr.Environment;
 using Reaparr.FileSystem.Contracts;
 using Reaparr.PublicAPI;
 using Reaparr.Settings.Contracts;
+using Reaparr.SignalR.Contracts;
 
 namespace Reaparr.BaseTests;
 
@@ -93,7 +94,12 @@ public class BaseContainer : IDisposable
 
     public IMoveDownloadFileScheduler MoveDownloadFileScheduler => Resolve<IMoveDownloadFileScheduler>();
 
-    public MockSignalRService MockSignalRService => (MockSignalRService)Resolve<ISignalRService>();
+    public MockDownloadHubService MockDownloadHubService => (MockDownloadHubService)Resolve<IDownloadHubService>();
+
+    public MockProgressHubService MockProgressHubService => (MockProgressHubService)Resolve<IProgressHubService>();
+
+    public MockNotificationHubService MockNotificationHubService =>
+        (MockNotificationHubService)Resolve<INotificationHubService>();
 
     public IServerSettingsModule GetServerSettings => Resolve<IServerSettingsModule>();
 
@@ -137,7 +143,7 @@ public class BaseContainer : IDisposable
             // Check SignalR events (non-blocking with short timeout)
             try
             {
-                if (MockSignalRService.ServerDownloadProgressList.TryTake(out var progress, 100, cancellationToken))
+                if (MockDownloadHubService.ServerDownloadProgressList.TryTake(out var progress, 100, cancellationToken))
                 {
                     var matchingDownload = FindDownloadById(progress.Downloads, downloadTaskId);
                     if (matchingDownload != null && targetStatuses.Contains(matchingDownload.Status))
@@ -227,7 +233,7 @@ public class BaseContainer : IDisposable
         {
             while (!cts.Token.IsCancellationRequested && completedTasks.Count < downloadTaskIds.Length)
             {
-                if (MockSignalRService.ServerDownloadProgressList.TryTake(out var progress, 100, cts.Token))
+                if (MockDownloadHubService.ServerDownloadProgressList.TryTake(out var progress, 100, cts.Token))
                 {
                     foreach (var taskId in downloadTaskIds.Where(id => !completedTasks.Contains(id)))
                     {

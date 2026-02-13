@@ -1,20 +1,21 @@
 using Quartz;
 using Reaparr.Application.Contracts;
+using Reaparr.SignalR.Contracts;
 
 namespace Reaparr.Application;
 
 public class AllJobListener : IAllJobListener
 {
-    private readonly ISignalRService _signalRService;
+    private readonly IProgressHubService _progressHubService;
     private readonly ILogger _log;
 
     public string Name => nameof(AllJobListener);
 
-    public AllJobListener(ILogger log, ISignalRService signalRService)
+    public AllJobListener(ILogger log, IProgressHubService progressHubService)
     {
         _log = log.ForContext<AllJobListener>();
 
-        _signalRService = signalRService;
+        _progressHubService = progressHubService;
     }
 
     public async Task JobToBeExecuted(IJobExecutionContext context, CancellationToken cancellationToken = new())
@@ -75,7 +76,7 @@ public class AllJobListener : IAllJobListener
                 or JobTypes.InspectPlexServerJob
         )
         {
-            await _signalRService.SendJobStatusUpdateAsync(statusUpdate);
+            await _progressHubService.SendJobStatusUpdateAsync(statusUpdate);
         }
     }
 }

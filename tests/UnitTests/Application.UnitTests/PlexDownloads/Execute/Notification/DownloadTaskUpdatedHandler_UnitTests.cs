@@ -1,5 +1,6 @@
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
+using Reaparr.SignalR.Contracts;
 
 namespace Reaparr.Application.UnitTests;
 
@@ -26,7 +27,7 @@ public class DownloadTaskUpdatedHandlerUnitTests : BaseUnitTest<DownloadTaskUpda
 
         var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync(cancellationToken: CancellationToken);
 
-        Mock.Mock<ISignalRService>()
+        Mock.Mock<IDownloadHubService>()
             .Setup(x =>
                 x.SendDownloadProgressUpdateAsync(It.IsAny<List<DownloadTaskGeneric>>(), It.IsAny<CancellationToken>())
             )
@@ -37,7 +38,7 @@ public class DownloadTaskUpdatedHandlerUnitTests : BaseUnitTest<DownloadTaskUpda
         await Sut.ExecuteAsync(command, CancellationToken);
 
         // Assert
-        Mock.Mock<ISignalRService>()
+        Mock.Mock<IDownloadHubService>()
             .Verify(
                 x =>
                     x.SendDownloadProgressUpdateAsync(
@@ -58,7 +59,7 @@ public class DownloadTaskUpdatedHandlerUnitTests : BaseUnitTest<DownloadTaskUpda
         var updatedDownloadTask = downloadTasks[0].Children[0];
         await IDbContext.SetDownloadStatus(updatedDownloadTask.ToKey(), DownloadStatus.DownloadFinished);
 
-        Mock.Mock<ISignalRService>()
+        Mock.Mock<IDownloadHubService>()
             .Setup(x =>
                 x.SendDownloadProgressUpdateAsync(It.IsAny<List<DownloadTaskGeneric>>(), It.IsAny<CancellationToken>())
             )
@@ -69,7 +70,7 @@ public class DownloadTaskUpdatedHandlerUnitTests : BaseUnitTest<DownloadTaskUpda
         await Sut.ExecuteAsync(command, CancellationToken);
 
         // Assert
-        Mock.Mock<ISignalRService>()
+        Mock.Mock<IDownloadHubService>()
             .Verify(
                 x =>
                     x.SendDownloadProgressUpdateAsync(

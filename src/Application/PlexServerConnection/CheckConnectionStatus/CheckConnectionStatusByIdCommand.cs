@@ -1,9 +1,9 @@
 using FastEndpoints;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 using Reaparr.PlexApi.Contracts;
+using Reaparr.SignalR.Contracts;
 
 namespace Reaparr.Application;
 
@@ -20,7 +20,7 @@ public class CheckConnectionStatusByIdCommandValidator : AbstractValidator<Check
 public class CheckConnectionStatusByIdCommandHandler
     : ICommandHandler<CheckConnectionStatusByIdCommand, Result<PlexServerStatus>>
 {
-    private readonly ISignalRService _signalRService;
+    private readonly IProgressHubService _progressHubService;
     private readonly ICommandExecutor _commandDispatcher;
     private readonly IReaparrDbContextFactory _dbContextFactory;
     private readonly ILogger _log;
@@ -28,13 +28,13 @@ public class CheckConnectionStatusByIdCommandHandler
 
     public CheckConnectionStatusByIdCommandHandler(
         IReaparrDbContextFactory dbContextFactory,
-        ISignalRService signalRService,
+        IProgressHubService progressHubService,
         ICommandExecutor commandDispatcher,
         ILogger log
     )
     {
         _dbContextFactory = dbContextFactory;
-        _signalRService = signalRService;
+        _progressHubService = progressHubService;
         _commandDispatcher = commandDispatcher;
         _log = log.ForContext<CheckConnectionStatusByIdCommandHandler>();
     }
@@ -78,7 +78,7 @@ public class CheckConnectionStatusByIdCommandHandler
                                     var checkStatusProgress = progress.ToServerConnectionCheckStatusProgress(
                                         _plexServerConnection
                                     );
-                                    await _signalRService.SendServerConnectionCheckStatusProgressAsync(
+                                    await _progressHubService.SendServerConnectionCheckStatusProgressAsync(
                                         checkStatusProgress
                                     );
                                 }

@@ -1,6 +1,6 @@
 using FastEndpoints;
-using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
+using Reaparr.SignalR.Contracts;
 
 namespace Reaparr.Application;
 
@@ -9,12 +9,12 @@ public record DownloadTaskUpdatedCommand(DownloadTaskKey Key) : ICommand<Result>
 public class DownloadTaskUpdatedHandler : ICommandHandler<DownloadTaskUpdatedCommand, Result>
 {
     private readonly IReaparrDbContext _dbContext;
-    private readonly ISignalRService _signalRService;
+    private readonly IDownloadHubService _downloadHubService;
 
-    public DownloadTaskUpdatedHandler(IReaparrDbContext dbContext, ISignalRService signalRService)
+    public DownloadTaskUpdatedHandler(IReaparrDbContext dbContext, IDownloadHubService downloadHubService)
     {
         _dbContext = dbContext;
-        _signalRService = signalRService;
+        _downloadHubService = downloadHubService;
     }
 
     public async Task<Result> ExecuteAsync(DownloadTaskUpdatedCommand command, CancellationToken cancellationToken)
@@ -30,7 +30,7 @@ public class DownloadTaskUpdatedHandler : ICommandHandler<DownloadTaskUpdatedCom
         );
 
         // Update the front-end with the download progress
-        await _signalRService.SendDownloadProgressUpdateAsync(downloadTasks, cancellationToken);
+        await _downloadHubService.SendDownloadProgressUpdateAsync(downloadTasks, cancellationToken);
 
         var changedDownloadTask = await _dbContext.GetDownloadTaskAsync(command.Key, cancellationToken);
         if (changedDownloadTask is null)

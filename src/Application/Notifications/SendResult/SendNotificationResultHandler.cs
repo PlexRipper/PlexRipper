@@ -1,6 +1,7 @@
 using FastEndpoints;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
+using Reaparr.SignalR.Contracts;
 
 namespace Reaparr.Application;
 
@@ -8,17 +9,17 @@ public class SendNotificationResultHandler : IEventHandler<SendNotificationResul
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContextFactory _dbContextFactory;
-    private readonly ISignalRService _signalRService;
+    private readonly INotificationHubService _notificationHubService;
 
     public SendNotificationResultHandler(
         ILogger log,
         IReaparrDbContextFactory dbContextFactory,
-        ISignalRService signalRService
+        INotificationHubService notificationHubService
     )
     {
         _log = log.ForContext<SendNotificationResultHandler>();
         _dbContextFactory = dbContextFactory;
-        _signalRService = signalRService;
+        _notificationHubService = notificationHubService;
     }
 
     public async Task HandleAsync(SendNotificationResult notification, CancellationToken cancellationToken)
@@ -39,7 +40,7 @@ public class SendNotificationResultHandler : IEventHandler<SendNotificationResul
 
             foreach (var createdNotification in createdNotifications)
             {
-                await _signalRService.SendNotificationAsync(createdNotification);
+                await _notificationHubService.SendNotificationAsync(createdNotification);
             }
         }
         else

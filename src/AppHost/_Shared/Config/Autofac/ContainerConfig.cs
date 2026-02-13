@@ -8,6 +8,7 @@ using Reaparr.Identity;
 using Reaparr.PlexApi;
 using Reaparr.PublicAPI;
 using Reaparr.Settings.Config;
+using Reaparr.SignalR;
 
 namespace Reaparr.AppHost;
 
@@ -36,6 +37,7 @@ public static class ContainerConfig
         builder.RegisterModule<PlexApiModule>();
         builder.RegisterModule<SettingsModule>();
         builder.RegisterModule<BackgroundJobsModule>();
+        builder.RegisterModule<SignalrModule>();
 
         // Presentation
         builder.RegisterModule<AppHostModule>();

@@ -1,8 +1,8 @@
 using FastEndpoints;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
+using Reaparr.SignalR.Contracts;
 
 namespace Reaparr.Application;
 
@@ -30,21 +30,21 @@ public class CheckAllConnectionsStatusByPlexServerHandler
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IEventPublisher _eventPublisher;
-    private readonly ISignalRService _signalRService;
+    private readonly INotificationHubService _notificationHubService;
 
     public CheckAllConnectionsStatusByPlexServerHandler(
         ILogger log,
         IReaparrDbContext dbContext,
         ICommandExecutor commandExecutor,
         IEventPublisher eventPublisher,
-        ISignalRService signalRService
+        INotificationHubService notificationHubService
     )
     {
         _log = log.ForContext<CheckAllConnectionsStatusByPlexServerHandler>();
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;
         _eventPublisher = eventPublisher;
-        _signalRService = signalRService;
+        _notificationHubService = notificationHubService;
     }
 
     public async Task<Result<List<PlexServerStatus>>> ExecuteAsync(
@@ -88,7 +88,10 @@ public class CheckAllConnectionsStatusByPlexServerHandler
         var tasksResult = await Task.WhenAll(connectionTasks);
         var combinedResults = Result.Merge(tasksResult);
 
-        await _signalRService.SendRefreshNotificationAsync([RefreshDataType.PlexServerConnection], cancellationToken);
+        await _notificationHubService.SendRefreshNotificationAsync(
+            [RefreshDataType.PlexServerConnection],
+            cancellationToken
+        );
 
         // Compare previous and current online status
         var currentOnlineStatus = tasksResult.Any(statusResult => statusResult.ValueOrDefault?.IsSuccessful != null);

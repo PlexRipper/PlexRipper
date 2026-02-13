@@ -1,8 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Quartz;
 using Reaparr.Application.Contracts;
 using Reaparr.BackgroundJobs.Contracts;
 using Reaparr.Data.Contracts;
+using Reaparr.SignalR.Contracts;
 
 namespace Reaparr.Application;
 
@@ -14,7 +15,7 @@ public class InspectPlexServerJob : IJob
     public static string PlexServerIdsParameter => "plexServerIds";
 
     private readonly IReaparrDbContext _dbContext;
-    private readonly ISignalRService _signalRService;
+    private readonly INotificationHubService _notificationHubService;
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
 
@@ -24,13 +25,13 @@ public class InspectPlexServerJob : IJob
         ILogger log,
         ICommandExecutor commandExecutor,
         IReaparrDbContext dbContext,
-        ISignalRService signalRService
+        INotificationHubService notificationHubService
     )
     {
         _log = log.ForContext<InspectPlexServerJob>();
         _commandExecutor = commandExecutor;
         _dbContext = dbContext;
-        _signalRService = signalRService;
+        _notificationHubService = notificationHubService;
     }
 
     public async Task Execute(IJobExecutionContext context)
@@ -56,7 +57,7 @@ public class InspectPlexServerJob : IJob
                     new CheckAllConnectionsStatusByPlexServerCommand(plexServerId),
                     cancellationToken
                 );
-                await _signalRService.SendRefreshNotificationAsync(
+                await _notificationHubService.SendRefreshNotificationAsync(
                     [RefreshDataType.PlexServerConnection],
                     cancellationToken
                 );
@@ -90,7 +91,7 @@ public class InspectPlexServerJob : IJob
         await _commandExecutor.Send(new RefreshLibraryAccessCommand(plexAccountId, plexServerId), cancellationToken);
 
         // Notify front-end
-        await _signalRService.SendRefreshNotificationAsync(
+        await _notificationHubService.SendRefreshNotificationAsync(
             [RefreshDataType.PlexAccount, RefreshDataType.PlexLibrary],
             CancellationToken.None
         );

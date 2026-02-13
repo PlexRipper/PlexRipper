@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Reaparr.Application.Contracts;
+using Reaparr.SignalR.Contracts;
 
 namespace Reaparr.Application.UnitTests;
 
@@ -106,7 +106,7 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
 
         await dbContext.SaveChangesAsync(CancellationToken);
 
-        Mock.Mock<ISignalRService>()
+        Mock.Mock<INotificationHubService>()
             .Setup(m =>
                 m.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>(), It.IsAny<CancellationToken>())
             )
@@ -175,7 +175,7 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
 
         await dbContext.SaveChangesAsync(CancellationToken);
 
-        Mock.Mock<ISignalRService>()
+        Mock.Mock<INotificationHubService>()
             .Setup(m =>
                 m.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>(), It.IsAny<CancellationToken>())
             )

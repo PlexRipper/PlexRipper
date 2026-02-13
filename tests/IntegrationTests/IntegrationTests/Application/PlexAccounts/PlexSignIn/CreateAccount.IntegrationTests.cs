@@ -119,7 +119,7 @@ public class CreateAccountIntegrationTests : BaseIntegrationTests
         container.DbContext.PlexServers.ToList().Count.ShouldBe(serverCount);
 
         var serverCountDb = container.DbContext.PlexServers.Count();
-        var jobStatusUpdateList = container.MockSignalRService.JobStatusUpdateList.ToList();
+        var jobStatusUpdateList = container.MockProgressHubService.JobStatusUpdateList.ToList();
 
         plexAccountDb.PlexServers.Count.ShouldBe(serverCount);
         serverCountDb.ShouldBe(serverCount);

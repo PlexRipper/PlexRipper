@@ -15,10 +15,7 @@ public class BackgroundJobsModule : Module
     protected override void Load(ContainerBuilder builder)
     {
         var assembly = Assembly.GetExecutingAssembly();
-        builder
-            .RegisterType<RefreshLibraryProgressReporter>()
-            .As<IRefreshLibraryProgressReporter>()
-            .InstancePerDependency();
+        builder.RegisterType<LibrarySyncProgressStore>().As<ILibrarySyncProgressStore>().SingleInstance();
 
         builder.RegisterModule(new QuartzAutofacJobsModule(assembly));
         builder.RegisterType<LibrarySyncJobListener>().As<ILibrarySyncJobListener>().SingleInstance();

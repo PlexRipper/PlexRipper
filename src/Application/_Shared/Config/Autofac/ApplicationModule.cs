@@ -1,4 +1,4 @@
-﻿using Autofac;
+using Autofac;
 using Reaparr.Application.Contracts;
 using Reaparr.FileSystem.Contracts;
 using Module = Autofac.Module;
@@ -33,11 +33,5 @@ public class ApplicationModule : Module
         builder.RegisterType<AllJobListener>().As<IAllJobListener>().SingleInstance();
         builder.RegisterType<DownloadJobListener>().As<IDownloadJobListener>().SingleInstance();
         builder.RegisterType<MoveDownloadJobListener>().As<IMoveDownloadJobListener>().SingleInstance();
-
-        // SignalR
-        builder.RegisterType<SignalRService>().As<ISignalRService>();
-        builder.RegisterType<ProgressHub>().ExternallyOwned();
-        builder.RegisterType<DownloadHub>().ExternallyOwned();
-        builder.RegisterType<NotificationHub>().ExternallyOwned();
     }
 }

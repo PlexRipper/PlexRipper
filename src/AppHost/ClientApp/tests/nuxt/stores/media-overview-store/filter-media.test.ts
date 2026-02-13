@@ -123,7 +123,7 @@ describe('MediaOverviewStore - Filter / Search', () => {
 		await loadMovies(store, 20);
 
 		// Apply sort
-		store.toggleSortMedia('year' as any);
+		store.toggleSortMedia('year');
 
 		// Get a search term from an actual item
 		const target = store.items[0]!;

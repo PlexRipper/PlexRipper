@@ -18,7 +18,7 @@ public record LibrarySyncProgressDTO
 
     public DateTime TimeStamp { get; } = DateTime.UtcNow;
 
-    public string ErrorText { get; init; } = string.Empty;
+    public required IReadOnlyList<IError> Errors { get; set; }
 
     /// <summary>
     /// Gets a value indicating whether the <see cref="PlexLibrary"/> has finished refreshing.

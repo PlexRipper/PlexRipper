@@ -73,13 +73,6 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
             await _dbContext.BulkInsertPlexMoviesAsync(plexMovies, plexServerId, plexLibraryId, ct: cancellationToken);
             _report.CreatedMovies = plexMovies.Count;
 
-            var plexLibrary = await _dbContext
-                .PlexLibraries.AsTracking()
-                .FirstOrDefaultAsync(x => x.Id == plexLibraryId, cancellationToken);
-
-            if (plexLibrary == null)
-                return ResultExtensions.EntityNotFound(nameof(plexLibrary), plexLibraryId).LogError();
-
             var mediaSize = plexMovies.Sum(x => x.MediaSize);
             await _dbContext.SetMovieMediaMetrics(plexLibraryId, plexMovies.Count, mediaSize);
 
@@ -91,8 +84,6 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
                 cancellationToken
             );
 
-            var actorsCount = syncActorResult.Value;
-
             var syncGenreResult = await SyncMovieGenres(
                 plexMovies,
                 command.LibraryMetadata.PlexGenres,
@@ -101,8 +92,6 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
                 cancellationToken
             );
 
-            var genresCount = syncGenreResult.Value;
-
             var syncCountriesResult = await SyncMovieCountries(
                 plexMovies,
                 command.LibraryMetadata.PlexCountries,
@@ -110,10 +99,6 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
                 libraryName,
                 cancellationToken
             );
-
-            var countriesCount = syncCountriesResult.Value;
-
-            await _dbContext.SetLibraryMetaData(plexLibraryId, actorsCount, genresCount, countriesCount);
 
             var mergeResult = Result.Merge(syncActorResult, syncGenreResult, syncCountriesResult);
             if (mergeResult.IsFailed)

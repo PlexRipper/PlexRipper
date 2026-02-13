@@ -76,12 +76,16 @@ public class InsertMediaMetaDataCommandHandler
         var countries = command.LibraryMetadata.Countries;
 
         var syncGenresResult = await InsertGenres(genres);
-        var syncCountriesResult = await InsertCountries(countries);
-        var syncRolesResult = await InsertPlexActors(roles);
+        if (syncGenresResult.IsFailed)
+            return syncGenresResult.ToResult();
 
-        var results = Result.Merge(syncGenresResult, syncCountriesResult, syncRolesResult);
-        if (results.IsFailed)
-            return results;
+        var syncCountriesResult = await InsertCountries(countries);
+        if (syncCountriesResult.IsFailed)
+            return syncCountriesResult.ToResult();
+
+        var syncRolesResult = await InsertPlexActors(roles);
+        if (syncRolesResult.IsFailed)
+            return syncRolesResult.ToResult();
 
         return Result.Ok(
             new InsertMediaMetaDataCommandResponse(command.LibraryMetadata.Library)

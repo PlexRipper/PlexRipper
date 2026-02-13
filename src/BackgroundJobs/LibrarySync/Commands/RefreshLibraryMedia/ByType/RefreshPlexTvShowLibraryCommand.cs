@@ -76,7 +76,7 @@ public class RefreshPlexTvShowLibraryCommandHandler
             );
             if (rawEpisodesDataResult.IsFailed)
             {
-                await _librarySyncProgressStore.UpdateErrorAsync(plexLibraryId, rawSeasonDataResult.ToResult());
+                await _librarySyncProgressStore.UpdateErrorAsync(plexLibraryId, rawEpisodesDataResult.ToResult());
                 return rawEpisodesDataResult.ToResult();
             }
 
@@ -114,6 +114,38 @@ public class RefreshPlexTvShowLibraryCommandHandler
                     plexLibrary.Title,
                     stopwatch.Elapsed.TotalSeconds
                 );
+
+            var rapport = syncResult.Value;
+            await _librarySyncProgressStore.UpdateItemAsync(
+                plexLibraryId,
+                new LibraryProgressItem
+                {
+                    MediaType = PlexMediaType.TvShow,
+                    Received = rapport.CreatedTvShows,
+                    Total = rapport.CreatedTvShows,
+                    TimeRemaining = TimeSpan.Zero,
+                }
+            );
+            await _librarySyncProgressStore.UpdateItemAsync(
+                plexLibraryId,
+                new LibraryProgressItem
+                {
+                    MediaType = PlexMediaType.Season,
+                    Received = rapport.CreatedSeasons,
+                    Total = rapport.CreatedSeasons,
+                    TimeRemaining = TimeSpan.Zero,
+                }
+            );
+            await _librarySyncProgressStore.UpdateItemAsync(
+                plexLibraryId,
+                new LibraryProgressItem
+                {
+                    MediaType = PlexMediaType.Episode,
+                    Received = rapport.CreatedEpisodes,
+                    Total = rapport.CreatedEpisodes,
+                    TimeRemaining = TimeSpan.Zero,
+                }
+            );
         }
         else
         {

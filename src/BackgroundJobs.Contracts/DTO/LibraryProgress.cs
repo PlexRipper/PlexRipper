@@ -1,3 +1,4 @@
+using FluentResults;
 using Reaparr.Domain;
 
 namespace Reaparr.BackgroundJobs.Contracts;
@@ -8,9 +9,11 @@ public record LibraryProgress
 
     public required PlexMediaType PlexLibraryType { get; init; }
 
-    public required TimeSpan TimeRemaining { get; set; }
-
     public required IReadOnlyList<LibraryProgressItem> Items { get; init; }
+
+    public IReadOnlyList<IError> Errors { get; set; }
+
+    public TimeSpan TimeRemaining => Items.Aggregate(TimeSpan.Zero, (acc, i) => acc + i.TimeRemaining);
 
     public int Received => Items.Sum(i => i.Received);
 
@@ -19,8 +22,6 @@ public record LibraryProgress
     public decimal Percentage => DataFormat.GetPercentage(Received, Total);
 
     public DateTime TimeStamp { get; } = DateTime.UtcNow;
-
-    public string ErrorText { get; init; } = string.Empty;
 
     /// <summary>
     /// Gets a value indicating whether the <see cref="PlexLibrary"/> has finished refreshing.

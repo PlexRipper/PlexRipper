@@ -94,7 +94,7 @@ public class RefreshPlexMovieLibraryCommandHandler
                 plexLibrary.Id
             );
 
-        // Report movies as not yet synced on failure
+        // Report movies as successfully synced
         await _librarySyncProgressStore.UpdateItemAsync(
             plexLibrary.Id,
             new LibraryProgressItem

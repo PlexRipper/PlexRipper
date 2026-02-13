@@ -12,6 +12,4 @@ public interface ILibrarySyncProgressStore
     Task UpdateItemAsync(int plexLibraryId, LibraryProgressItem item);
 
     Task UpdateErrorAsync(int plexLibraryId, Result errorResult);
-
-    void Remove(int plexLibraryId);
 }

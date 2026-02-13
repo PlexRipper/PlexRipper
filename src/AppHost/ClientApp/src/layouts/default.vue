@@ -106,9 +106,17 @@ onMounted(() => {
 	useSubscription(
 		globalStore.getPageSetupReady.subscribe({
 			next: (ready) => {
-				set(pageApiLoading, !ready);
 				if (ready) {
 					Log.debug('PageSetup API calls have finished');
+					if (authStore.isLoggedIn && route.fullPath.includes('login')) {
+						// Keep the overlay up through the router transition — page:finish will clear pageLoading,
+						// and we clear pageApiLoading only after the navigation resolves so there is no flash.
+						router.push('/').finally(() => set(pageApiLoading, false));
+					} else {
+						set(pageApiLoading, false);
+					}
+				} else {
+					set(pageApiLoading, true);
 				}
 			},
 			error: (err) => {

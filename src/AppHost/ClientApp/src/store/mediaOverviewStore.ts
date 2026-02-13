@@ -91,7 +91,6 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 
 	const settingsStore = useSettingsStore();
 	const libraryStore = useLibraryStore();
-	const { t } = useI18n();
 
 	const actions = {
 		refreshMetaData() {
@@ -438,9 +437,13 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			return state.sortedState;
 		}),
 		getIsSorted: computed((): boolean => {
+			if (state.sortedState.sort === SortDirection.NoSort) {
+				return false;
+			}
 			return !(state.sortedState.field === MediaSortField.Title && state.sortedState.sort === SortDirection.Asc);
 		}),
 		getSortOptions: computed((): ISortOption[] => {
+			const { t } = useI18n();
 			const options: ISortOption[] = [
 				{ field: MediaSortField.Title, label: t('general.sort.title'), direction: SortDirection.NoSort },
 				{ field: MediaSortField.Year, label: t('general.sort.year'), direction: SortDirection.NoSort },

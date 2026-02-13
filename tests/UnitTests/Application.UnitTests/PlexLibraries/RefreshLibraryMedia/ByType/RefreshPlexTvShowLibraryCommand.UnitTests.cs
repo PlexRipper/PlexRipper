@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using Reaparr.Application.Contracts;
 using Reaparr.BackgroundJobs;
+using Reaparr.BackgroundJobs.Contracts;
 using Reaparr.Data.Contracts;
 using Reaparr.PlexApi.Contracts;
 
@@ -25,8 +27,8 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
         );
         var testLibrary = IDbContext.PlexLibraries.Include(x => x.TvShows).First();
 
-        Mock.Mock<IRefreshLibraryProgressReporter>()
-            .Setup(x => x.SendProgress(It.IsAny<RefreshLibraryProgressUpdate>()))
+        Mock.Mock<ILibrarySyncProgressStore>()
+            .Setup(x => x.UpdateItemAsync(It.IsAny<int>(), It.IsAny<LibraryProgressItem>()))
             .Returns(Task.CompletedTask);
 
         var seasonsList = FakeData.GetPlexTvShowSeason(seed).Generate(6);
@@ -59,7 +61,7 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
 
         // Act
         var result = await Sut.ExecuteAsync(
-            new RefreshPlexTvShowLibraryCommand(new InsertMediaMetaDataCommandResponse(testLibrary), _ => { }),
+            new RefreshPlexTvShowLibraryCommand(new InsertMediaMetaDataCommandResponse(testLibrary)),
             CancellationToken
         );
 
@@ -68,8 +70,76 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
         var updatedLibrary = await IDbContext.PlexLibraries.GetAsync(testLibrary.Id, CancellationToken);
         updatedLibrary.ShouldNotBeNull();
         updatedLibrary.SyncedAt.ShouldNotBeNull();
-        Mock.Mock<IRefreshLibraryProgressReporter>()
-            .Verify(x => x.SendProgress(It.IsAny<RefreshLibraryProgressUpdate>()), Times.AtLeastOnce);
+        Mock.Mock<ILibrarySyncProgressStore>()
+            .Verify(x => x.UpdateItemAsync(It.IsAny<int>(), It.IsAny<LibraryProgressItem>()), Times.AtLeastOnce());
+    }
+
+    [Fact]
+    public async Task ShouldSendProgressWithSeasonAndEpisodeItems_WhenTvShowsExist()
+    {
+        // Arrange
+        var seed = await SetupDatabase(
+            9423,
+            config =>
+            {
+                config.TvShowCount = 3;
+                config.TvShowSeasonCount = 2;
+                config.TvShowEpisodeCount = 5;
+            }
+        );
+        var testLibrary = IDbContext.PlexLibraries.Include(x => x.TvShows).First();
+        var capturedItems = new List<LibraryProgressItem>();
+
+        Mock.Mock<ILibrarySyncProgressStore>()
+            .Setup(x => x.UpdateItemAsync(It.IsAny<int>(), It.IsAny<LibraryProgressItem>()))
+            .Callback<int, LibraryProgressItem>((_, item) => capturedItems.Add(item))
+            .Returns(Task.CompletedTask);
+
+        var seasonsList = FakeData.GetPlexTvShowSeason(seed).Generate(6);
+        var episodesList = new List<PlexTvShowEpisode>();
+
+        foreach (var season in seasonsList)
+        {
+            var episodes = FakeData.GetPlexTvShowEpisode(seed).Generate(30);
+            foreach (var episode in episodes)
+            {
+                episode.ParentGuid = season.Guid;
+                episode.MediaSize = 150000000;
+                episode.Duration = 1800;
+            }
+
+            episodesList.AddRange(episodes);
+        }
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<GetAllMediaSeasonsCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok(seasonsList));
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<GetAllMediaEpisodesCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok(episodesList));
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<SyncPlexTvShowsCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok(new BulkInsertTvShowsRapport()));
+
+        // Act
+        await Sut.ExecuteAsync(
+            new RefreshPlexTvShowLibraryCommand(new InsertMediaMetaDataCommandResponse(testLibrary)),
+            CancellationToken
+        );
+
+        // Assert
+        capturedItems.ShouldNotBeEmpty();
+
+        // At least one captured item must be a TvShow
+        capturedItems.ShouldContain(i => i.MediaType == PlexMediaType.TvShow);
+
+        // At least one captured item must be a Season (from phase 2+)
+        capturedItems.ShouldContain(i => i.MediaType == PlexMediaType.Season);
+
+        // At least one captured item must be an Episode (from phase 3+)
+        capturedItems.ShouldContain(i => i.MediaType == PlexMediaType.Episode);
     }
 
     [Fact]
@@ -89,7 +159,7 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
 
         // Act
         var result = await Sut.ExecuteAsync(
-            new RefreshPlexTvShowLibraryCommand(new InsertMediaMetaDataCommandResponse(testLibrary), _ => { }),
+            new RefreshPlexTvShowLibraryCommand(new InsertMediaMetaDataCommandResponse(testLibrary)),
             CancellationToken
         );
 
@@ -115,7 +185,7 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
 
         // Act
         var result = await Sut.ExecuteAsync(
-            new RefreshPlexTvShowLibraryCommand(new InsertMediaMetaDataCommandResponse(testLibrary), _ => { }),
+            new RefreshPlexTvShowLibraryCommand(new InsertMediaMetaDataCommandResponse(testLibrary)),
             CancellationToken
         );
 
@@ -139,8 +209,9 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
         );
         var testLibrary = IDbContext.PlexLibraries.Include(x => x.TvShows).First();
 
-        Mock.Mock<IRefreshLibraryProgressReporter>()
-            .Setup(x => x.SendProgress(It.IsAny<RefreshLibraryProgressUpdate>()));
+        Mock.Mock<ILibrarySyncProgressStore>()
+            .Setup(x => x.UpdateItemAsync(It.IsAny<int>(), It.IsAny<LibraryProgressItem>()))
+            .Returns(Task.CompletedTask);
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<GetAllMediaSeasonsCommand>(), It.IsAny<CancellationToken>()))
@@ -148,7 +219,7 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
 
         // Act
         var result = await Sut.ExecuteAsync(
-            new RefreshPlexTvShowLibraryCommand(new InsertMediaMetaDataCommandResponse(testLibrary), _ => { }),
+            new RefreshPlexTvShowLibraryCommand(new InsertMediaMetaDataCommandResponse(testLibrary)),
             CancellationToken
         );
 
@@ -172,8 +243,9 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
         );
         var testLibrary = IDbContext.PlexLibraries.Include(x => x.TvShows).First();
 
-        Mock.Mock<IRefreshLibraryProgressReporter>()
-            .Setup(x => x.SendProgress(It.IsAny<RefreshLibraryProgressUpdate>()));
+        Mock.Mock<ILibrarySyncProgressStore>()
+            .Setup(x => x.UpdateItemAsync(It.IsAny<int>(), It.IsAny<LibraryProgressItem>()))
+            .Returns(Task.CompletedTask);
 
         var seasonsList = FakeData.GetPlexTvShowSeason(seed).Generate(6);
 
@@ -187,7 +259,7 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
 
         // Act
         var result = await Sut.ExecuteAsync(
-            new RefreshPlexTvShowLibraryCommand(new InsertMediaMetaDataCommandResponse(testLibrary), _ => { }),
+            new RefreshPlexTvShowLibraryCommand(new InsertMediaMetaDataCommandResponse(testLibrary)),
             CancellationToken
         );
 
@@ -209,8 +281,8 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
         );
         var testLibrary = IDbContext.PlexLibraries.Include(x => x.TvShows).First();
 
-        Mock.Mock<IRefreshLibraryProgressReporter>()
-            .Setup(x => x.SendProgress(It.IsAny<RefreshLibraryProgressUpdate>()))
+        Mock.Mock<ILibrarySyncProgressStore>()
+            .Setup(x => x.UpdateItemAsync(It.IsAny<int>(), It.IsAny<LibraryProgressItem>()))
             .Returns(Task.CompletedTask);
 
         var seasonsList = FakeData.GetPlexTvShowSeason(seed).Generate(6);
@@ -243,7 +315,7 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
 
         // Act
         var result = await Sut.ExecuteAsync(
-            new RefreshPlexTvShowLibraryCommand(new InsertMediaMetaDataCommandResponse(testLibrary), _ => { }),
+            new RefreshPlexTvShowLibraryCommand(new InsertMediaMetaDataCommandResponse(testLibrary)),
             CancellationToken
         );
 

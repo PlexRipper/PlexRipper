@@ -55,7 +55,7 @@ public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLi
         );
 
         // Act
-        var command = new RefreshLibraryMediaCommand(PlexLibraryId: 1, Action: _ => { });
+        var command = new RefreshLibraryMediaCommand(PlexLibraryId: 1);
         var result = await TestHandlerExecuteAsync<PlexLibrary>(command);
 
         // Assert
@@ -73,7 +73,7 @@ public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLi
 
         Mock.SetupCommand(It.IsAny<GetLibraryMediaCommand>).ReturnsAsync(Result.Fail<LibraryMetadata>("Sync failed"));
 
-        var command = new RefreshLibraryMediaCommand(plexLibrary.Id, _ => { });
+        var command = new RefreshLibraryMediaCommand(plexLibrary.Id);
 
         // Act
         var result = await TestHandlerExecuteAsync<PlexLibrary>(command);
@@ -101,36 +101,17 @@ public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLi
 
         var updatedLibrary = await GetUpdatedLibrary(seed, libraryType);
 
-        Mock.Mock<IRefreshLibraryProgressReporter>()
-            .Setup(x => x.SendProgress(It.IsAny<RefreshLibraryProgressUpdate>()))
-            .Returns(Task.CompletedTask);
-
         Mock.SetupCommand(It.IsAny<GetLibraryMediaCommand>)
             .ReturnsAsync(
                 (ICommand<Result<LibraryMetadata>> command, CancellationToken _) =>
-                {
-                    if (command is GetLibraryMediaCommand getLibraryMediaCommand)
-                    {
-                        getLibraryMediaCommand.Action.Invoke(
-                            new MediaSyncProgress
-                            {
-                                Type = libraryType,
-                                Received = updatedLibrary.MediaCount,
-                                Total = updatedLibrary.MediaCount,
-                                TimeRemaining = TimeSpan.Zero,
-                            }
-                        );
-                    }
-
-                    return Result.Ok(
+                    Result.Ok(
                         new LibraryMetadata(updatedLibrary)
                         {
                             Countries = [],
                             Genres = [],
                             Actors = [],
                         }
-                    );
-                }
+                    )
             );
         Mock.SetupCommand(It.IsAny<InsertMediaMetaDataCommand>)
             .ReturnsAsync(Result.Ok(new InsertMediaMetaDataCommandResponse(updatedLibrary)));
@@ -148,7 +129,7 @@ public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLi
         }
 
         // Act
-        var command = new RefreshLibraryMediaCommand(updatedLibrary.Id, _ => { });
+        var command = new RefreshLibraryMediaCommand(updatedLibrary.Id);
         var result = await TestHandlerExecuteAsync<PlexLibrary>(command);
 
         // Assert
@@ -159,9 +140,6 @@ public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLi
             .FirstOrDefaultAsync(CancellationToken);
         dbLibrary.ShouldNotBeNull();
         dbLibrary.SyncedAt.ShouldNotBeNull();
-
-        Mock.Mock<IRefreshLibraryProgressReporter>()
-            .Verify(x => x.SendProgress(It.IsAny<RefreshLibraryProgressUpdate>()), Times.AtLeastOnce);
     }
 
     [Fact]
@@ -179,9 +157,6 @@ public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLi
         var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync(CancellationToken);
         plexLibrary.ShouldNotBeNull();
 
-        Mock.Mock<IRefreshLibraryProgressReporter>()
-            .Setup(x => x.SendProgress(It.IsAny<RefreshLibraryProgressUpdate>()));
-
         Mock.SetupCommand(It.IsAny<GetLibraryMediaCommand>).ReturnsAsync(Result.Ok(new LibraryMetadata(plexLibrary)));
 
         Mock.SetupCommand(It.IsAny<InsertMediaMetaDataCommand>)
@@ -190,7 +165,9 @@ public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLi
             .ReturnsAsync(Result.Fail("Metadata sync failed"));
 
         // Act
-        var command = new RefreshLibraryMediaCommand(plexLibrary.Id, _ => { });
+        var command = new RefreshLibraryMediaCommand(plexLibrary.Id);
+
+        // Act
         var result = await TestHandlerExecuteAsync<PlexLibrary>(command);
 
         // Assert
@@ -212,9 +189,6 @@ public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLi
         );
         var updatedLibrary = await GetUpdatedLibrary(seed, PlexMediaType.Movie);
 
-        Mock.Mock<IRefreshLibraryProgressReporter>()
-            .Setup(x => x.SendProgress(It.IsAny<RefreshLibraryProgressUpdate>()));
-
         Mock.SetupCommand(It.IsAny<InsertMediaMetaDataCommand>)
             .ReturnsAsync(Result.Ok(new InsertMediaMetaDataCommandResponse(updatedLibrary)));
         Mock.SetupCommand(It.IsAny<GetLibraryMediaCommand>)
@@ -225,7 +199,7 @@ public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLi
         Mock.SetupCommand(It.IsAny<RefreshPlexMovieLibraryCommand>)
             .ReturnsAsync(Result.Fail<PlexLibrary>("Movie command failed"));
 
-        var command = new RefreshLibraryMediaCommand(updatedLibrary.Id, _ => { });
+        var command = new RefreshLibraryMediaCommand(updatedLibrary.Id);
 
         // Act
         var result = await TestHandlerExecuteAsync<PlexLibrary>(command);
@@ -249,9 +223,6 @@ public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLi
         );
         var updatedLibrary = await GetUpdatedLibrary(seed, PlexMediaType.TvShow);
 
-        Mock.Mock<IRefreshLibraryProgressReporter>()
-            .Setup(x => x.SendProgress(It.IsAny<RefreshLibraryProgressUpdate>()));
-
         Mock.SetupCommand(It.IsAny<GetLibraryMediaCommand>)
             .ReturnsAsync(Result.Ok(new LibraryMetadata(updatedLibrary)));
 
@@ -262,7 +233,7 @@ public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLi
         Mock.SetupCommand(It.IsAny<RefreshPlexTvShowLibraryCommand>)
             .ReturnsAsync(Result.Fail<PlexLibrary>("TV Show command failed"));
 
-        var command = new RefreshLibraryMediaCommand(updatedLibrary.Id, _ => { });
+        var command = new RefreshLibraryMediaCommand(updatedLibrary.Id);
 
         // Act
         var result = await TestHandlerExecuteAsync<PlexLibrary>(command);

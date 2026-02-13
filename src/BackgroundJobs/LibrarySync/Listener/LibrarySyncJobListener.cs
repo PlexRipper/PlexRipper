@@ -4,6 +4,7 @@ using Quartz.Impl.Matchers;
 using Reaparr.Application.Contracts;
 using Reaparr.BackgroundJobs.Contracts;
 using Reaparr.Data.Contracts;
+using Reaparr.SignalR.Contracts;
 
 namespace Reaparr.BackgroundJobs;
 
@@ -11,7 +12,8 @@ public class LibrarySyncJobListener : ILibrarySyncJobListener
 {
     private readonly IReaparrDbContextFactory _dbContextFactory;
     private readonly IScheduler _scheduler;
-    private readonly ISignalRService _signalRService;
+    private readonly IProgressHubService _progressHubService;
+    private readonly INotificationHubService _notificationHubService;
     private readonly ILogger _log;
 
     /// <inheritdoc/>
@@ -21,13 +23,15 @@ public class LibrarySyncJobListener : ILibrarySyncJobListener
         ILogger log,
         IReaparrDbContextFactory dbContextFactory,
         IScheduler scheduler,
-        ISignalRService signalRService
+        IProgressHubService progressHubService,
+        INotificationHubService notificationHubService
     )
     {
         _log = log.ForContext<LibrarySyncJobListener>();
         _dbContextFactory = dbContextFactory;
         _scheduler = scheduler;
-        _signalRService = signalRService;
+        _progressHubService = progressHubService;
+        _notificationHubService = notificationHubService;
     }
 
     public Result Setup()
@@ -130,9 +134,9 @@ public class LibrarySyncJobListener : ILibrarySyncJobListener
                 context.FireTimeUtc.UtcDateTime
             );
 
-            await _signalRService.SendJobStatusUpdateAsync(statusUpdate);
+            await _progressHubService.SendJobStatusUpdateAsync(statusUpdate);
 
-            await _signalRService.SendRefreshNotificationAsync(
+            await _notificationHubService.SendRefreshNotificationAsync(
                 [RefreshDataType.PlexLibrary, RefreshDataType.PlexLibrarySyncStatus],
                 cancellationToken
             );

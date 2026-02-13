@@ -3,6 +3,7 @@ using Quartz;
 using Reaparr.Application.Contracts;
 using Reaparr.BackgroundJobs.Contracts;
 using Reaparr.Data.Contracts;
+using Reaparr.SignalR.Contracts;
 
 namespace Reaparr.BackgroundJobs;
 
@@ -18,7 +19,7 @@ public class LibrarySyncJob : IJob
 
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
-    private readonly ISignalRService _signalRService;
+    private readonly INotificationHubService _notificationHubService;
     private readonly IReaparrDbContext _dbContext;
     private int _serverId;
     private int _libraryId;
@@ -26,13 +27,13 @@ public class LibrarySyncJob : IJob
     public LibrarySyncJob(
         ILogger log,
         ICommandExecutor commandExecutor,
-        ISignalRService signalRService,
+        INotificationHubService notificationHubService,
         IReaparrDbContext dbContext
     )
     {
         _log = log.ForContext<LibrarySyncJob>();
         _commandExecutor = commandExecutor;
-        _signalRService = signalRService;
+        _notificationHubService = notificationHubService;
         _dbContext = dbContext;
     }
 
@@ -87,15 +88,9 @@ public class LibrarySyncJob : IJob
         // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
         try
         {
-            // Create a progress action that sends individual library progress updates
-            var progress = new Action<LibraryProgress>(libraryProgress =>
-            {
-                _signalRService.SendLibraryProgressUpdateAsync(libraryProgress);
-            });
-
             // Execute the library sync command
             var result = await _commandExecutor.Send(
-                new RefreshLibraryMediaCommand(_libraryId, progress),
+                new RefreshLibraryMediaCommand(_libraryId),
                 context.CancellationToken
             );
 
@@ -129,7 +124,10 @@ public class LibrarySyncJob : IJob
             await UpdateQueueItemAsync(LibrarySyncJobStatus.Completed);
 
             // Send refresh notification
-            await _signalRService.SendRefreshNotificationAsync([RefreshDataType.PlexLibrary], cancellationToken);
+            await _notificationHubService.SendRefreshNotificationAsync(
+                [RefreshDataType.PlexLibrary],
+                cancellationToken
+            );
 
             // Schedule the next library from the queue
             await _commandExecutor.Send(new CheckQueuedPlexLibraryToSyncCommand(), cancellationToken);
@@ -219,6 +217,6 @@ public class LibrarySyncJob : IJob
                 break;
         }
 
-        await _signalRService.SendRefreshNotificationAsync([RefreshDataType.PlexLibrarySyncStatus]);
+        await _notificationHubService.SendRefreshNotificationAsync([RefreshDataType.PlexLibrarySyncStatus]);
     }
 }

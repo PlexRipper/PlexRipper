@@ -3,6 +3,7 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
+using Reaparr.SignalR.Contracts;
 
 namespace Reaparr.Application;
 
@@ -22,7 +23,7 @@ public class RefreshPlexAccountAccessEndpoint
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
-    private readonly ISignalRService _signalRService;
+    private readonly INotificationHubService _notificationHubService;
     private List<RefreshPlexAccountAccessRapportDTO> _list = new();
 
     public override string EndpointPath => ApiRoutes.PlexAccountController + "/refresh/{PlexAccountId}";
@@ -31,13 +32,13 @@ public class RefreshPlexAccountAccessEndpoint
         ILogger log,
         IReaparrDbContext dbContext,
         ICommandExecutor commandExecutor,
-        ISignalRService signalRService
+        INotificationHubService notificationHubService
     )
     {
         _log = log.ForContext<RefreshPlexAccountAccessEndpoint>();
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;
-        _signalRService = signalRService;
+        _notificationHubService = notificationHubService;
     }
 
     public override void Configure()
@@ -143,7 +144,7 @@ public class RefreshPlexAccountAccessEndpoint
         }
 
         // Send notifications to the client to refresh the PlexServerConnection data
-        await _signalRService.SendRefreshNotificationAsync(
+        await _notificationHubService.SendRefreshNotificationAsync(
             [RefreshDataType.PlexAccount, RefreshDataType.PlexServer, RefreshDataType.PlexServerConnection],
             CancellationToken.None
         );

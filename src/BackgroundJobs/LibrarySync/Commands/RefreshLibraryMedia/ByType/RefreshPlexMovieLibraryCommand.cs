@@ -1,14 +1,13 @@
 using FastEndpoints;
 using FluentValidation;
 using Reaparr.Application.Contracts;
+using Reaparr.BackgroundJobs.Contracts;
 using Reaparr.Data.Contracts;
 
 namespace Reaparr.BackgroundJobs;
 
-public record RefreshPlexMovieLibraryCommand(
-    InsertMediaMetaDataCommandResponse LibraryMetadata,
-    Action<LibraryProgress> Action
-) : ICommand<Result<PlexLibrary>>;
+public record RefreshPlexMovieLibraryCommand(InsertMediaMetaDataCommandResponse LibraryMetadata)
+    : ICommand<Result<PlexLibrary>>;
 
 public class RefreshPlexMovieLibraryCommandValidator : AbstractValidator<RefreshPlexMovieLibraryCommand>
 {
@@ -26,19 +25,19 @@ public class RefreshPlexMovieLibraryCommandHandler
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IReaparrDbContext _dbContext;
-    private readonly IRefreshLibraryProgressReporter _progressReporter;
+    private readonly ILibrarySyncProgressStore _librarySyncProgressStore;
 
     public RefreshPlexMovieLibraryCommandHandler(
         ILogger log,
-        ICommandExecutor commandExecutor,
         IReaparrDbContext dbContext,
-        IRefreshLibraryProgressReporter progressReporter
+        ILibrarySyncProgressStore librarySyncProgressStore,
+        ICommandExecutor commandExecutor
     )
     {
         _log = log.ForContext<RefreshPlexMovieLibraryCommandHandler>();
         _commandExecutor = commandExecutor;
         _dbContext = dbContext;
-        _progressReporter = progressReporter;
+        _librarySyncProgressStore = librarySyncProgressStore;
     }
 
     public async Task<Result<PlexLibrary>> ExecuteAsync(
@@ -48,6 +47,7 @@ public class RefreshPlexMovieLibraryCommandHandler
     {
         var plexLibrary = command.LibraryMetadata.PlexLibrary;
         var plexLibraryId = command.LibraryMetadata.PlexLibraryId;
+        var movieCount = plexLibrary.Movies.Count;
 
         if (plexLibrary.Movies.Any())
         {
@@ -59,16 +59,18 @@ public class RefreshPlexMovieLibraryCommandHandler
                 new SyncPlexMoviesCommand(command.LibraryMetadata),
                 cancellationToken
             );
+
             if (syncResult.IsFailed)
             {
-                await _progressReporter.SendProgress(
-                    new RefreshLibraryProgressUpdate
+                // Report movies as not yet synced on failure
+                await _librarySyncProgressStore.UpdateItemAsync(
+                    plexLibrary.Id,
+                    new LibraryProgressItem
                     {
-                        Action = command.Action,
-                        PlexLibraryType = PlexMediaType.Movie,
-                        PlexLibraryId = plexLibrary.Id,
-                        Step = 1,
-                        Percentage = 1,
+                        MediaType = PlexMediaType.Movie,
+                        Received = 0,
+                        Total = movieCount,
+                        TimeRemaining = TimeSpan.Zero,
                     }
                 );
 
@@ -85,18 +87,6 @@ public class RefreshPlexMovieLibraryCommandHandler
                 );
         }
 
-        // Phase 2 of 3: PlexLibrary media data was parsed successfully.
-        await _progressReporter.SendProgress(
-            new RefreshLibraryProgressUpdate
-            {
-                Action = command.Action,
-                PlexLibraryType = PlexMediaType.Movie,
-                PlexLibraryId = plexLibrary.Id,
-                Step = 2,
-                Percentage = 1,
-            }
-        );
-
         _log.Here()
             .Information(
                 "Successfully refreshed library {PlexLibraryName} with id: {PlexLibraryId}",
@@ -104,15 +94,15 @@ public class RefreshPlexMovieLibraryCommandHandler
                 plexLibrary.Id
             );
 
-        // Phase 3 of 3: Movies have been successfully updated in the database.
-        await _progressReporter.SendProgress(
-            new RefreshLibraryProgressUpdate
+        // Report movies as not yet synced on failure
+        await _librarySyncProgressStore.UpdateItemAsync(
+            plexLibrary.Id,
+            new LibraryProgressItem
             {
-                Action = command.Action,
-                PlexLibraryType = PlexMediaType.Movie,
-                PlexLibraryId = plexLibrary.Id,
-                Step = 3,
-                Percentage = 1,
+                MediaType = PlexMediaType.Movie,
+                Received = movieCount,
+                Total = movieCount,
+                TimeRemaining = TimeSpan.Zero,
             }
         );
 

@@ -180,9 +180,15 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
         result.IsFailed.ShouldBeTrue();
         result.Errors.First().Message.ShouldContain("PlexLibrary is not of type TvShow");
         Mock.Mock<ILibrarySyncProgressStore>()
-            .Verify(x => x.UpdateItemAsync(It.IsAny<int>(), It.IsAny<LibraryProgressItem>(), It.IsAny<CancellationToken>()), Times.Never());
+            .Verify(
+                x => x.UpdateItemAsync(It.IsAny<int>(), It.IsAny<LibraryProgressItem>(), It.IsAny<CancellationToken>()),
+                Times.Never()
+            );
         Mock.Mock<ILibrarySyncProgressStore>()
-            .Verify(x => x.UpdateErrorAsync(It.IsAny<int>(), It.IsAny<Result>(), It.IsAny<CancellationToken>()), Times.Never());
+            .Verify(
+                x => x.UpdateErrorAsync(It.IsAny<int>(), It.IsAny<Result>(), It.IsAny<CancellationToken>()),
+                Times.Never()
+            );
     }
 
     [Fact]
@@ -213,9 +219,15 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
         updatedLibrary.ShouldNotBeNull();
         updatedLibrary.SyncedAt.ShouldNotBeNull();
         Mock.Mock<ILibrarySyncProgressStore>()
-            .Verify(x => x.UpdateItemAsync(It.IsAny<int>(), It.IsAny<LibraryProgressItem>(), It.IsAny<CancellationToken>()), Times.Never());
+            .Verify(
+                x => x.UpdateItemAsync(It.IsAny<int>(), It.IsAny<LibraryProgressItem>(), It.IsAny<CancellationToken>()),
+                Times.Never()
+            );
         Mock.Mock<ILibrarySyncProgressStore>()
-            .Verify(x => x.UpdateErrorAsync(It.IsAny<int>(), It.IsAny<Result>(), It.IsAny<CancellationToken>()), Times.Never());
+            .Verify(
+                x => x.UpdateErrorAsync(It.IsAny<int>(), It.IsAny<Result>(), It.IsAny<CancellationToken>()),
+                Times.Never()
+            );
         Mock.Mock<ICommandExecutor>()
             .Verify(x => x.Send(It.IsAny<GetAllMediaSeasonsCommand>(), It.IsAny<CancellationToken>()), Times.Never());
         Mock.Mock<ICommandExecutor>()

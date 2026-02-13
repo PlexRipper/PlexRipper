@@ -8,8 +8,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\Application.Contracts\Application.Contracts.csproj" />
-        <ProjectReference Include="..\..\SignalR.Contracts\SignalR.Contracts\SignalR.Contracts.csproj" />
+        <ProjectReference Include="..\Application.Contracts\Application.Contracts.csproj" />
+        <ProjectReference Include="..\SignalR.Contracts\SignalR.Contracts.csproj" />
     </ItemGroup>
 
     <ItemGroup>
@@ -18,7 +18,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Compile Include="..\..\Domain\GlobalUsings.cs">
+        <Compile Include="..\Domain\GlobalUsings.cs">
             <Link>GlobalUsings.cs</Link>
         </Compile>
     </ItemGroup>

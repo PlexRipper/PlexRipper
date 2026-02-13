@@ -126,7 +126,6 @@ public class RefreshPlexTvShowLibraryCommandHandler
                     stopwatch.Elapsed.TotalSeconds
                 );
 
-            var rapport = syncResult.Value;
             var totalTvShows = plexLibrary.TvShows.Count;
             var totalSeasons = plexLibrary.TvShows.Sum(x => x.ChildCount);
             var totalEpisodes = plexLibrary.TvShows.Sum(x => x.GrandChildCount);

@@ -36,7 +36,7 @@
         <ProjectReference Include="..\PublicAPI.Contracts\PublicAPI.Contracts.csproj" />
         <ProjectReference Include="..\Settings.Contracts\Settings.Contracts.csproj" />
         <ProjectReference Include="..\Settings\Settings.csproj" />
-        <ProjectReference Include="..\SignalR.Contracts\SignalR.Contracts\SignalR.Contracts.csproj" />
+        <ProjectReference Include="..\SignalR.Contracts\SignalR.Contracts.csproj" />
     </ItemGroup>
     <ItemGroup>
         <FrameworkReference Include="Microsoft.AspNetCore.App" />

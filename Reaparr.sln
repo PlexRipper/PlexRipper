@@ -126,9 +126,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "External.UnitTests", "tests
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Communication", "Communication", "{080CB02C-1532-4779-AB9F-45C3C5FC6F05}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SignalR", "src\SignalR\SignalR\SignalR.csproj", "{613C8379-89CC-4CD7-9D00-35B8A7FAE64E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SignalR", "src\SignalR\SignalR.csproj", "{613C8379-89CC-4CD7-9D00-35B8A7FAE64E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SignalR.Contracts", "src\SignalR.Contracts\SignalR.Contracts\SignalR.Contracts.csproj", "{21DF3254-3107-49D7-A644-AF876896F733}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SignalR.Contracts", "src\SignalR.Contracts\SignalR.Contracts.csproj", "{21DF3254-3107-49D7-A644-AF876896F733}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

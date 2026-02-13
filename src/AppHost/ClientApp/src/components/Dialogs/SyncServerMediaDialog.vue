@@ -65,16 +65,6 @@
 								<QRow
 									no-wrap
 									justify="end">
-									<!-- Steps Progress -->
-									<QCol>
-										<QText
-											v-if="!isServer(node) && !node.completed && node.progress?.step != null && node.progress?.totalSteps != null"
-											:value="$t('components.media-overview.steps-remaining', {
-												index: node.progress.step,
-												total: node.progress.totalSteps,
-											})"
-											align="center" />
-									</QCol>
 									<!-- Time Remaining -->
 									<QCol>
 										<QCountdown

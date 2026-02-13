@@ -4,7 +4,6 @@ using Autofac;
 using Autofac.Extras.Quartz;
 using ByteSizeLib;
 using Reaparr.Application;
-using Reaparr.Application.Contracts;
 using Reaparr.Data;
 using Reaparr.Data.Contracts;
 using Reaparr.Environment;

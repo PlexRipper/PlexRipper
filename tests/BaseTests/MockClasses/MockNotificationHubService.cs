@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-using Reaparr.Application.Contracts;
 using Reaparr.SignalR.Contracts;
 
 namespace Reaparr.BaseTests;

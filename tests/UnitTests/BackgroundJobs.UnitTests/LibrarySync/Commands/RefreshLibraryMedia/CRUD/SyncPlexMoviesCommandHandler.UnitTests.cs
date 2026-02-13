@@ -1,5 +1,3 @@
-using Reaparr.BackgroundJobs;
-
 namespace Reaparr.BackgroundJobs.UnitTests;
 
 public class SyncPlexMoviesCommandHandlerUnitTests : BaseUnitTest<SyncPlexMoviesCommandHandler>

@@ -1,6 +1,6 @@
 namespace Reaparr.Settings.Contracts;
 
-public record RadarrSettings : BaseSettingsModule<RadarrSettings>, IBaseSettingsModule<RadarrSettings>, IRadarrSettings
+public record RadarrSettings : BaseSettingsModule<RadarrSettings>, IRadarrSettings
 {
     private string _radarrBaseUrl = string.Empty;
     private string _radarrApiKey = string.Empty;

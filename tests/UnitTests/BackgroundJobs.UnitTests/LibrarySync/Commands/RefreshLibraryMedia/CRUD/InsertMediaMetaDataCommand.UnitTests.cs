@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Reaparr.BackgroundJobs;
 using Reaparr.PlexApi.Contracts;
 
 namespace Reaparr.BackgroundJobs.UnitTests;

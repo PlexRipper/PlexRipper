@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Quartz;
 using Quartz.Impl.Matchers;
-using Reaparr.Application.Contracts;
 using Reaparr.BackgroundJobs.Contracts;
 using Reaparr.Data.Contracts;
 using Reaparr.SignalR.Contracts;

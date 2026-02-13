@@ -1,7 +1,6 @@
 using System.IO.Abstractions;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using Flurl;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 using Reaparr.External.Contracts;
@@ -36,7 +35,6 @@ public class DashPlexDownloadClient : IPlexDownloadClient
     private string? _downloadUrl;
 
     private long _lastSpeed;
-    private DateTime _lastProgressUpdate = DateTime.UtcNow;
     private DownloadTaskKey _downloadTaskKey = new DownloadTaskKey
     {
         Type = DownloadTaskType.None,
@@ -348,8 +346,6 @@ public class DashPlexDownloadClient : IPlexDownloadClient
 
         if (speedBytesPerSecond > 0)
             _lastSpeed = speedBytesPerSecond;
-
-        _lastProgressUpdate = DateTime.UtcNow;
 
         // Update download task progress
         // Note: DashDownloadProgress doesn't provide BytesDownloaded/TotalBytes directly

@@ -74,7 +74,7 @@ public class LibrarySyncProgressStore : ILibrarySyncProgressStore
             (_, existing) => existing with { Errors = errorResult.Errors }
         );
 
-        await SendProgressUpdateAsync(plexLibraryId!);
+        await SendProgressUpdateAsync(plexLibraryId);
 
         _store.TryRemove(plexLibraryId, out _);
     }

@@ -1,6 +1,6 @@
 namespace Reaparr.Settings.Contracts;
 
-public record SonarrSettings : BaseSettingsModule<SonarrSettings>, IBaseSettingsModule<SonarrSettings>, ISonarrSettings
+public record SonarrSettings : BaseSettingsModule<SonarrSettings>, ISonarrSettings
 {
     private string _sonarrBaseUrl = string.Empty;
     private string _sonarrApiKey = string.Empty;

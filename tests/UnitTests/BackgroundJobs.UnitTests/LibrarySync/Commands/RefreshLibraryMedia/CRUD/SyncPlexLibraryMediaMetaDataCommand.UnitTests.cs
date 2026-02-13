@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Reaparr.BackgroundJobs;
 
 namespace Reaparr.BackgroundJobs.UnitTests;
 

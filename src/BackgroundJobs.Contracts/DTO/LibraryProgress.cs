@@ -11,7 +11,7 @@ public record LibraryProgress
 
     public required IReadOnlyList<LibraryProgressItem> Items { get; init; }
 
-    public IReadOnlyList<IError> Errors { get; set; }
+    public IReadOnlyList<IError> Errors { get; init; } = [];
 
     public TimeSpan TimeRemaining => Items.Aggregate(TimeSpan.Zero, (acc, i) => acc + i.TimeRemaining);
 

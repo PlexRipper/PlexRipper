@@ -98,7 +98,11 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
         UseTempDB = true,
     };
 
-    public SyncPlexTvShowsCommandHandler(ILogger log, IReaparrDbContext dbContext, IReaparrDbContextFactory dbContextFactory)
+    public SyncPlexTvShowsCommandHandler(
+        ILogger log,
+        IReaparrDbContext dbContext,
+        IReaparrDbContextFactory dbContextFactory
+    )
     {
         _log = log.ForContext<SyncPlexTvShowsCommandHandler>();
         _dbContext = dbContext;
@@ -170,7 +174,7 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
             var countryDict = command.LibraryMetadata.PlexCountries;
             var actorDict = command.LibraryMetadata.PlexActors;
 
-            var results = await Task.WhenAll(
+            ResultBase[] results = await Task.WhenAll(
                 SyncTvShowGenres(plexTvShows, genreDict, plexLibraryId, plexLibraryName, cancellationToken),
                 SyncTvShowCountries(plexTvShows, countryDict, plexLibraryId, plexLibraryName, cancellationToken),
                 SyncTvShowActors(plexTvShows, actorDict, plexLibraryId, plexLibraryName, cancellationToken)

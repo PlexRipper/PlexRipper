@@ -16,7 +16,6 @@ namespace Reaparr.External;
 /// </summary>
 public class DashMpdCliWrapper : IDashMpdCliWrapper
 {
-    private readonly IFile _fileSystem;
     private readonly ILogger _log;
     private readonly CancellationTokenSource _forcefulCts = new();
     private readonly CancellationTokenSource _gracefulCts = new();
@@ -38,10 +37,9 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
     public DashMpdCliWrapper(ILogger logger, IFile fileSystem)
     {
         _log = logger.ForContext<DashMpdCliWrapper>();
-        _fileSystem = fileSystem;
         _binaryPath = GetDefaultBinaryPath();
 
-        if (!_fileSystem.Exists(_binaryPath))
+        if (!fileSystem.Exists(_binaryPath))
         {
             throw new FileNotFoundException(
                 $"dash-mpd-cli binary not found at: {_binaryPath}. "

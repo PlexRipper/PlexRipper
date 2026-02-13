@@ -5,7 +5,6 @@ using FastEndpoints;
 using Moq.Contrib.HttpClient;
 using Moq.Language.Flow;
 using Newtonsoft.Json;
-using Reaparr.Application.Contracts;
 using Reaparr.SignalR.Contracts;
 
 namespace Reaparr.BaseTests;

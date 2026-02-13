@@ -1,4 +1,3 @@
-using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 using Reaparr.SignalR.Contracts;
 

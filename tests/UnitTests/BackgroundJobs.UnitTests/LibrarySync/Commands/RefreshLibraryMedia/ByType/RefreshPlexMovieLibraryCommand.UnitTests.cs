@@ -1,6 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Reaparr.Application.Contracts;
-using Reaparr.BackgroundJobs;
 using Reaparr.BackgroundJobs.Contracts;
 using Reaparr.Data.Contracts;
 

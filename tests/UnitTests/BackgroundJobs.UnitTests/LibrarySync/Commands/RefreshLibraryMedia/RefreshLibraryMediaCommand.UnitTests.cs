@@ -1,6 +1,5 @@
 using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
-using Reaparr.BackgroundJobs;
 using Reaparr.PlexApi.Contracts;
 
 namespace Reaparr.BackgroundJobs.UnitTests;
@@ -103,7 +102,7 @@ public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLi
 
         Mock.SetupCommand(It.IsAny<GetLibraryMediaCommand>)
             .ReturnsAsync(
-                (ICommand<Result<LibraryMetadata>> command, CancellationToken _) =>
+                (ICommand<Result<LibraryMetadata>> _, CancellationToken _) =>
                     Result.Ok(
                         new LibraryMetadata(updatedLibrary)
                         {

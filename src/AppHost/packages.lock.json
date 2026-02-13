@@ -951,6 +951,7 @@
         "dependencies": {
           "Autofac": "[9.0.0, )",
           "MessagePack": "[3.1.4, )",
+          "Reaparr.Application.Contracts": "[1.0.0, )",
           "Reaparr.SignalR.Contracts": "[1.0.0, )"
         }
       },

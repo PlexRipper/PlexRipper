@@ -4,7 +4,7 @@ using Reaparr.BackgroundJobs;
 using Reaparr.BackgroundJobs.Contracts;
 using Reaparr.Data.Contracts;
 
-namespace Reaparr.Application.UnitTests;
+namespace Reaparr.BackgroundJobs.UnitTests;
 
 public class RefreshPlexMovieLibraryCommandUnitTests : BaseUnitTest<RefreshPlexMovieLibraryCommandHandler>
 {

@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Reaparr.BackgroundJobs;
 using Reaparr.PlexApi.Contracts;
 
-namespace Reaparr.Application.UnitTests;
+namespace Reaparr.BackgroundJobs.UnitTests;
 
 public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLibraryMediaCommand>
 {

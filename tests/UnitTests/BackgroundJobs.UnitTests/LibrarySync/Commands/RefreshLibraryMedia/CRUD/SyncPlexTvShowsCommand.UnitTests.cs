@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Reaparr.BackgroundJobs;
 
-namespace Reaparr.Application.UnitTests;
+namespace Reaparr.BackgroundJobs.UnitTests;
 
 public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsCommandHandler>
 {

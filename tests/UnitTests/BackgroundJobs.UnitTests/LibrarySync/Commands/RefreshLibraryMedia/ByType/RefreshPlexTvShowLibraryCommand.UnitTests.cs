@@ -5,7 +5,7 @@ using Reaparr.BackgroundJobs.Contracts;
 using Reaparr.Data.Contracts;
 using Reaparr.PlexApi.Contracts;
 
-namespace Reaparr.Application.UnitTests;
+namespace Reaparr.BackgroundJobs.UnitTests;
 
 public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlexTvShowLibraryCommandHandler>
 {
@@ -210,7 +210,7 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
         var testLibrary = IDbContext.PlexLibraries.Include(x => x.TvShows).First();
 
         Mock.Mock<ILibrarySyncProgressStore>()
-            .Setup(x => x.UpdateItemAsync(It.IsAny<int>(), It.IsAny<LibraryProgressItem>()))
+            .Setup(x => x.UpdateErrorAsync(It.IsAny<int>(), It.IsAny<Result>()))
             .Returns(Task.CompletedTask);
 
         Mock.Mock<ICommandExecutor>()
@@ -226,6 +226,8 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
         // Assert
         result.IsFailed.ShouldBeTrue();
         result.Errors.First().Message.ShouldContain("Failed to get seasons");
+        Mock.Mock<ILibrarySyncProgressStore>()
+            .Verify(x => x.UpdateErrorAsync(It.IsAny<int>(), It.IsAny<Result>()), Times.Once());
     }
 
     [Fact]
@@ -244,7 +246,7 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
         var testLibrary = IDbContext.PlexLibraries.Include(x => x.TvShows).First();
 
         Mock.Mock<ILibrarySyncProgressStore>()
-            .Setup(x => x.UpdateItemAsync(It.IsAny<int>(), It.IsAny<LibraryProgressItem>()))
+            .Setup(x => x.UpdateErrorAsync(It.IsAny<int>(), It.IsAny<Result>()))
             .Returns(Task.CompletedTask);
 
         var seasonsList = FakeData.GetPlexTvShowSeason(seed).Generate(6);
@@ -266,6 +268,8 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
         // Assert
         result.IsFailed.ShouldBeTrue();
         result.Errors.First().Message.ShouldContain("Failed to get episodes");
+        Mock.Mock<ILibrarySyncProgressStore>()
+            .Verify(x => x.UpdateErrorAsync(It.IsAny<int>(), It.IsAny<Result>()), Times.Once());
     }
 
     [Fact]
@@ -282,7 +286,7 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
         var testLibrary = IDbContext.PlexLibraries.Include(x => x.TvShows).First();
 
         Mock.Mock<ILibrarySyncProgressStore>()
-            .Setup(x => x.UpdateItemAsync(It.IsAny<int>(), It.IsAny<LibraryProgressItem>()))
+            .Setup(x => x.UpdateErrorAsync(It.IsAny<int>(), It.IsAny<Result>()))
             .Returns(Task.CompletedTask);
 
         var seasonsList = FakeData.GetPlexTvShowSeason(seed).Generate(6);
@@ -322,5 +326,7 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
         // Assert
         result.IsFailed.ShouldBeTrue();
         result.Errors.First().Message.ShouldContain("Failed to sync TV shows");
+        Mock.Mock<ILibrarySyncProgressStore>()
+            .Verify(x => x.UpdateErrorAsync(It.IsAny<int>(), It.IsAny<Result>()), Times.Once());
     }
 }

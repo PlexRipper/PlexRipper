@@ -25,7 +25,6 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
         // Assert
         capturedDto.ShouldNotBeNull();
         capturedDto.PlexLibraryId.ShouldBe(1);
-        capturedDto.PlexLibraryType.ShouldBe(PlexMediaType.Movie);
         capturedDto.Items.ShouldBeEmpty();
 
         Mock.Mock<IProgressHubService>()

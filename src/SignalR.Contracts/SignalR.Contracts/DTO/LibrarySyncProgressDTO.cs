@@ -4,8 +4,6 @@ public record LibrarySyncProgressDTO
 {
     public required int PlexLibraryId { get; init; }
 
-    public required PlexMediaType PlexLibraryType { get; init; }
-
     public required TimeSpan TimeRemaining { get; set; }
 
     public required IReadOnlyList<LibrarySyncProgressItemDTO> Items { get; init; }

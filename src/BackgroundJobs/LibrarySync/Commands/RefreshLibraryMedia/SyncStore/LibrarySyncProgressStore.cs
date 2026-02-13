@@ -95,7 +95,6 @@ public class LibrarySyncProgressStore : ILibrarySyncProgressStore
         var dto = new LibrarySyncProgressDTO
         {
             PlexLibraryId = progress.PlexLibraryId,
-            PlexLibraryType = progress.PlexLibraryType,
             TimeRemaining = progress.TimeRemaining,
             Items = progress
                 .Items.Select(x => new LibrarySyncProgressItemDTO

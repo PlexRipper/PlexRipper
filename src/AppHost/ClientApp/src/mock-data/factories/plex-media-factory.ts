@@ -30,7 +30,6 @@ function generatePlexMediaSlim({
 		id,
 		plexApiRatingKey: randNumber({ min: 1, max: 1000000 }),
 		plexApiMetaDataKey: randNumber({ min: 1, max: 1000000 }),
-		plexToken: randUuid(),
 		childCount: 0,
 		grandChildCount: 0,
 		duration: randNumber({ min: 1900, max: 2023 }),

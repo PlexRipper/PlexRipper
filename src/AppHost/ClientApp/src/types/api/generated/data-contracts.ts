@@ -417,6 +417,12 @@ export interface GeneratePlexTokenResponse {
   plexAuthToken: string;
 }
 
+/** Definition of an error */
+export interface IError {
+  /** Reasons of the error */
+  reasons?: IError[] | null;
+}
+
 export interface InspectPlexServerJobUpdateDTO {
   plexServerIds: number[];
 }
@@ -457,27 +463,6 @@ export interface LanguageSettingsDTO {
   language: string;
 }
 
-export interface LibraryProgress {
-  /** @format int32 */
-  id: number;
-  isComplete: boolean;
-  isRefreshing: boolean;
-  /** @format decimal */
-  percentage: number;
-  /** @format int32 */
-  received: number;
-  /** @format int32 */
-  step: number;
-  /** @format duration */
-  timeRemaining: string;
-  /** @format date-time */
-  timeStamp: string;
-  /** @format int32 */
-  total: number;
-  /** @format int32 */
-  totalSteps: number;
-}
-
 export interface LibrarySyncJobQueueDTO {
   /** @format date-time */
   completedAt?: string | null;
@@ -502,6 +487,37 @@ export enum LibrarySyncJobStatus {
   Processing = "Processing",
   Completed = "Completed",
   Failed = "Failed",
+}
+
+export interface LibrarySyncProgressDTO {
+  errors: IError[];
+  isComplete: boolean;
+  items: LibrarySyncProgressItemDTO[];
+  /** @format decimal */
+  percentage: number;
+  /** @format int32 */
+  plexLibraryId: number;
+  /** @format int32 */
+  received: number;
+  /** @format duration */
+  timeRemaining: string;
+  /** @format date-time */
+  timeStamp: string;
+  /** @format int32 */
+  total: number;
+}
+
+export interface LibrarySyncProgressItemDTO {
+  isComplete: boolean;
+  mediaType: PlexMediaType;
+  /** @format decimal */
+  percentage: number;
+  /** @format int32 */
+  received: number;
+  /** @format duration */
+  timeRemaining: string;
+  /** @format int32 */
+  total: number;
 }
 
 export enum MessageTypes {

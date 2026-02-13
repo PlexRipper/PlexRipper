@@ -5,7 +5,7 @@ import { of } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
 import { get } from '@vueuse/core';
 import {
-	type LibraryProgress, type LibrarySyncJobQueueDTO, LibrarySyncJobStatus, type PlexLibraryDTO, type PlexServerDTO,
+	type LibrarySyncProgressDTO, type LibrarySyncJobQueueDTO, LibrarySyncJobStatus, type PlexLibraryDTO, type PlexServerDTO,
 } from '@dto';
 import { StoreNames, type ISetupResult } from '@interfaces';
 import { plexLibraryApi } from '@api';
@@ -17,7 +17,7 @@ import Log from 'consola';
 interface ILibraryStoreState {
 	libraries: PlexLibraryDTO[];
 	syncQueues: LibrarySyncJobQueueDTO[];
-	progress: LibraryProgress[];
+	progress: LibrarySyncProgressDTO[];
 }
 
 export const useLibraryStore = defineStore(StoreNames.LibraryStore, () => {
@@ -55,8 +55,8 @@ export const useLibraryStore = defineStore(StoreNames.LibraryStore, () => {
 				state.syncQueues.push(queue);
 			}
 		},
-		updateLibraryProgress(progress: LibraryProgress): void {
-			const index = state.progress.findIndex((x) => x.id === progress.id);
+		updateLibraryProgress(progress: LibrarySyncProgressDTO): void {
+			const index = state.progress.findIndex((x) => x.plexLibraryId === progress.plexLibraryId);
 			if (index > -1) {
 				state.progress.splice(index, 1, progress);
 			} else {
@@ -147,7 +147,7 @@ export const useLibraryStore = defineStore(StoreNames.LibraryStore, () => {
 				state.syncQueues.splice(0, state.syncQueues.length, ...remainingQueues);
 
 				// Remove progress items for cleared libraries
-				const remainingProgress = state.progress.filter((x) => !libraryIdsToClear.includes(x.id));
+				const remainingProgress = state.progress.filter((x) => !libraryIdsToClear.includes(x.plexLibraryId));
 				state.progress.splice(0, state.progress.length, ...remainingProgress);
 			}
 		},
@@ -174,16 +174,16 @@ export const useLibraryStore = defineStore(StoreNames.LibraryStore, () => {
 			}
 			return getters.getLibrary(libraryId)?.title ?? '';
 		},
-		getLibraryProgress: (libraryId: number): LibraryProgress | null => {
-			return state.progress.find((x) => x.id === libraryId) ?? null;
+		getLibraryProgress: (libraryId: number): LibrarySyncProgressDTO | null => {
+			return state.progress.find((x) => x.plexLibraryId === libraryId) ?? null;
 		},
 		getIsLibrarySyncing: (libraryId: number): boolean => {
 			return state.syncQueues.some((x) => x.plexLibraryId === libraryId && x.status == LibrarySyncJobStatus.Processing);
 		},
 		getLibrarySyncQueueGrouped: (): ILibrarySyncProgress[] => {
 			return state.syncQueues.reduce<ILibrarySyncProgress[]>((acc, queue) => {
-				const progress = state.progress.find((p) => p.id === queue.plexLibraryId);
-				const queueWithProgress = { ...queue, ...progress } as LibrarySyncJobQueueDTO & LibraryProgress;
+				const progress = state.progress.find((p) => p.plexLibraryId === queue.plexLibraryId);
+				const queueWithProgress = { ...queue, ...progress } as LibrarySyncJobQueueDTO & LibrarySyncProgressDTO;
 				const existing = acc.find((x) => x.serverId === queue.plexServerId);
 				if (existing) {
 					existing.progress.push(queueWithProgress);
@@ -207,5 +207,5 @@ if (import.meta.hot) {
 
 interface ILibrarySyncProgress {
 	serverId: number;
-	progress: (LibrarySyncJobQueueDTO & LibraryProgress)[];
+	progress: (LibrarySyncJobQueueDTO & LibrarySyncProgressDTO)[];
 }

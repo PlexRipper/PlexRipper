@@ -11,7 +11,7 @@ import { isEqual, cloneDeep, isArray } from 'lodash-es';
 import { StoreNames, type ISetupResult } from '@interfaces';
 import type {
 	RefreshDataType,
-	LibraryProgress,
+	LibrarySyncProgressDTO,
 	NotificationDTO,
 	ServerConnectionCheckStatusProgressDTO,
 	ServerDownloadProgressDTO,
@@ -114,7 +114,7 @@ export const useSignalrStore = defineStore(StoreNames.SignalrStore, () => {
 			}
 		});
 
-		progressHubConnection?.on(MessageTypes.LibraryProgress, (data: LibraryProgress) => libraryStore.updateLibraryProgress(data));
+		progressHubConnection?.on(MessageTypes.LibraryProgress, (data: LibrarySyncProgressDTO) => libraryStore.updateLibraryProgress(data));
 
 		progressHubConnection?.on(MessageTypes.ServerConnectionCheckStatusProgress, (data: ServerConnectionCheckStatusProgressDTO) => updateState<ServerConnectionCheckStatusProgressDTO>('serverConnectionCheckStatusProgress', data, 'plexServerConnectionId'));
 

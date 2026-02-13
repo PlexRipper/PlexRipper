@@ -109,7 +109,7 @@
 <script setup lang="ts">
 import { get, set } from '@vueuse/core';
 import type {
-	LibraryProgress,
+	LibrarySyncProgressDTO,
 	PlexMediaType,
 } from '@dto';
 import { DialogType } from '@enums';
@@ -212,7 +212,7 @@ interface IPlexMediaSyncServerNode {
 	type: 'server' | 'library';
 	percentage: number;
 	completed: boolean;
-	progress?: LibraryProgress;
+	progress?: LibrarySyncProgressDTO;
 	mediaType?: PlexMediaType;
 	children: IPlexMediaSyncServerNode[];
 }

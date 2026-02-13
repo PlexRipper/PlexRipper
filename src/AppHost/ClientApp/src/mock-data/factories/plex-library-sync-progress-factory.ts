@@ -1,39 +1,64 @@
 import { randRecentDate } from '@ngneat/falso';
-import { type LibraryProgress, type LibrarySyncJobQueueDTO, LibrarySyncJobStatus } from '@dto';
+import {	LibrarySyncJobStatus } from '@dto';
 
-export function generateLibraryProgress({
+import type {
+	LibrarySyncJobQueueDTO,
+	LibrarySyncProgressDTO,
+	LibrarySyncProgressItemDTO,
+	PlexMediaType } from '@dto';
+
+export function generateLibrarySyncProgress({
 	libraryId,
 	received,
 	total,
+	items,
 }: {
 	libraryId: number;
+	type: PlexMediaType;
 	received: number;
 	total: number;
-}): LibraryProgress {
+	items: LibrarySyncProgressItemDTO[];
+}): LibrarySyncProgressDTO {
 	const percentage = Math.round((received / total) * 100);
 	const remainingPercentage = 100 - percentage;
 	const timeRemainingInSeconds = Math.round(remainingPercentage / 10);
 
-	// Convert the remaining seconds into HH:MM:SS format
-	const hours = Math.floor(timeRemainingInSeconds / 3600);
-	const minutes = Math.floor((timeRemainingInSeconds % 3600) / 60);
-	const seconds = timeRemainingInSeconds % 60;
-
-	// Format the time as HH:MM:SS
-	const formattedTimeRemaining = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-
 	return {
-		id: libraryId,
+		plexLibraryId: libraryId,
 		received,
 		total,
 		isComplete: received === total,
-		isRefreshing: received !== total,
 		timeStamp: randRecentDate().toISOString(),
 		percentage,
-		timeRemaining: formattedTimeRemaining,
-		step: 1,
-		totalSteps: 1,
+		timeRemaining: generateTimeRemaining(timeRemainingInSeconds * 1000),
+		items: items,
+		errors: [],
 	};
+}
+
+export function generateTimeRemaining(remainingMs: number): string {
+	const remainingSecs = Math.floor(remainingMs / 1000);
+	const hours = Math.floor(remainingSecs / 3600).toString().padStart(2, '0');
+	const minutes = Math.floor((remainingSecs % 3600) / 60).toString().padStart(2, '0');
+	const seconds = (remainingSecs % 60).toString().padStart(2, '0');
+	return `${hours}:${minutes}:${seconds}`;
+}
+
+export function generateLibrarySyncProgressItem(mediaType: PlexMediaType, partial: Partial<LibrarySyncProgressItemDTO> = {}): LibrarySyncProgressItemDTO {
+	const dto: LibrarySyncProgressItemDTO = {
+		mediaType,
+		isComplete: false,
+		received: 0,
+		percentage: 0,
+		timeRemaining: '00:00:00',
+		total: 0,
+		...partial,
+	};
+
+	dto.percentage = Math.round((dto.received / dto.total) * 100);
+	dto.isComplete = dto.received === dto.total;
+
+	return dto;
 }
 
 export function generateLibrarySyncJobQueue({

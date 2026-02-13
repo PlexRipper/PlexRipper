@@ -5,12 +5,6 @@ public record DateTimeSettingsModule
         IBaseSettingsModule<DateTimeSettingsModule>,
         IDateTimeSettings
 {
-    private string _shortDateFormat = "dd/MM/yyyy";
-    private string _longDateFormat = "EEEE, dd MMMM yyyy";
-    private string _timeFormat = "HH:mm:ss";
-    private string _timeZone = "UTC";
-    private bool _showRelativeDates = true;
-
     public static DateTimeSettingsModule Create() =>
         new()
         {
@@ -23,31 +17,31 @@ public record DateTimeSettingsModule
 
     public required string ShortDateFormat
     {
-        get => _shortDateFormat;
-        set => SetProperty(ref _shortDateFormat, value);
-    }
+        get;
+        set => SetProperty(ref field, value);
+    } = "dd/MM/yyyy";
 
     public required string LongDateFormat
     {
-        get => _longDateFormat;
-        set => SetProperty(ref _longDateFormat, value);
-    }
+        get;
+        set => SetProperty(ref field, value);
+    } = "EEEE, dd MMMM yyyy";
 
     public required string TimeFormat
     {
-        get => _timeFormat;
-        set => SetProperty(ref _timeFormat, value);
-    }
+        get;
+        set => SetProperty(ref field, value);
+    } = "HH:mm:ss";
 
     public required string TimeZone
     {
-        get => _timeZone;
-        set => SetProperty(ref _timeZone, value);
-    }
+        get;
+        set => SetProperty(ref field, value);
+    } = "UTC";
 
     public required bool ShowRelativeDates
     {
-        get => _showRelativeDates;
-        set => SetProperty(ref _showRelativeDates, value);
-    }
+        get;
+        set => SetProperty(ref field, value);
+    } = true;
 }

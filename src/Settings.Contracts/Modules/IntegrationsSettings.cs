@@ -5,12 +5,6 @@ public record IntegrationsSettings
         IBaseSettingsModule<IntegrationsSettings>,
         IIntegrationsSettings
 {
-    private string _reaparrApiKey = string.Empty;
-    private string _downloadClientUsername = string.Empty;
-    private string _downloadClientPassword = string.Empty;
-    private SonarrSettings _sonarr = SonarrSettings.Create();
-    private RadarrSettings _radarr = RadarrSettings.Create();
-
     public static IntegrationsSettings Create() =>
         new()
         {
@@ -24,35 +18,35 @@ public record IntegrationsSettings
     /// <inheritdoc/>
     public required string ReaparrApiKey
     {
-        get => _reaparrApiKey;
-        set => SetProperty(ref _reaparrApiKey, value);
-    }
+        get;
+        set => SetProperty(ref field, value);
+    } = string.Empty;
 
     /// <inheritdoc/>
     public required string DownloadClientUsername
     {
-        get => _downloadClientUsername;
-        set => SetProperty(ref _downloadClientUsername, value);
-    }
+        get;
+        set => SetProperty(ref field, value);
+    } = string.Empty;
 
     /// <inheritdoc/>
     public required string DownloadClientPassword
     {
-        get => _downloadClientPassword;
-        set => SetProperty(ref _downloadClientPassword, value);
-    }
+        get;
+        set => SetProperty(ref field, value);
+    } = string.Empty;
 
     /// <inheritdoc/>
     public required SonarrSettings Sonarr
     {
-        get => _sonarr;
-        set => SetProperty(ref _sonarr, value);
-    }
+        get;
+        set => SetProperty(ref field, value);
+    } = SonarrSettings.Create();
 
     /// <inheritdoc/>
     public required RadarrSettings Radarr
     {
-        get => _radarr;
-        set => SetProperty(ref _radarr, value);
-    }
+        get;
+        set => SetProperty(ref field, value);
+    } = RadarrSettings.Create();
 }

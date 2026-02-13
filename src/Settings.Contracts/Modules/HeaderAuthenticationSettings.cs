@@ -10,20 +10,13 @@ public record HeaderAuthenticationSettings
         IBaseSettingsModule<HeaderAuthenticationSettings>,
         IHeaderAuthenticationSettings
 {
-    private bool _enabled;
-    private HeaderMappingType _mappingType = HeaderMappingType.Username;
-    private List<string> _trustedProxies = [];
-    private bool _enableLogging = true;
-    private int _maxHeaderLength = 256;
-    private bool _requireHttps = true;
-
     /// <summary>
     /// Whether header-based authentication is enabled
     /// </summary>
     public required bool Enabled
     {
-        get => _enabled;
-        set => SetProperty(ref _enabled, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     /// <summary>
@@ -31,45 +24,45 @@ public record HeaderAuthenticationSettings
     /// </summary>
     public required HeaderMappingType MappingType
     {
-        get => _mappingType;
-        set => SetProperty(ref _mappingType, value);
-    }
+        get;
+        set => SetProperty(ref field, value);
+    } = HeaderMappingType.Username;
 
     /// <summary>
     /// List of trusted proxy IP addresses or CIDR ranges
     /// </summary>
     public required List<string> TrustedProxies
     {
-        get => _trustedProxies;
-        set => SetProperty(ref _trustedProxies, value);
-    }
+        get;
+        set => SetProperty(ref field, value);
+    } = [];
 
     /// <summary>
     /// Whether to log header-based authentication attempts
     /// </summary>
     public required bool EnableLogging
     {
-        get => _enableLogging;
-        set => SetProperty(ref _enableLogging, value);
-    }
+        get;
+        set => SetProperty(ref field, value);
+    } = true;
 
     /// <summary>
     /// Maximum length for header values to prevent abuse
     /// </summary>
     public required int MaxHeaderLength
     {
-        get => _maxHeaderLength;
-        set => SetProperty(ref _maxHeaderLength, value);
-    }
+        get;
+        set => SetProperty(ref field, value);
+    } = 256;
 
     /// <summary>
     /// Whether to require HTTPS for header-based authentication
     /// </summary>
     public required bool RequireHttps
     {
-        get => _requireHttps;
-        set => SetProperty(ref _requireHttps, value);
-    }
+        get;
+        set => SetProperty(ref field, value);
+    } = true;
 
     /// <summary>
     /// Creates a new instance with default values

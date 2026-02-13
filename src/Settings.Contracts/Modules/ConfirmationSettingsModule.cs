@@ -5,11 +5,6 @@ public record ConfirmationSettingsModule
         IBaseSettingsModule<ConfirmationSettingsModule>,
         IConfirmationSettings
 {
-    private bool _askDownloadMovieConfirmation = true;
-    private bool _askDownloadTvShowConfirmation = true;
-    private bool _askDownloadSeasonConfirmation = true;
-    private bool _askDownloadEpisodeConfirmation = true;
-
     public static ConfirmationSettingsModule Create() =>
         new()
         {
@@ -24,34 +19,34 @@ public record ConfirmationSettingsModule
     /// </summary>
     public required bool AskDownloadMovieConfirmation
     {
-        get => _askDownloadMovieConfirmation;
-        set => SetProperty(ref _askDownloadMovieConfirmation, value);
-    }
+        get;
+        set => SetProperty(ref field, value);
+    } = true;
 
     /// <summary>
     /// Indicates whether to ask for confirmation before downloading a TV show.
     /// </summary>
     public required bool AskDownloadTvShowConfirmation
     {
-        get => _askDownloadTvShowConfirmation;
-        set => SetProperty(ref _askDownloadTvShowConfirmation, value);
-    }
+        get;
+        set => SetProperty(ref field, value);
+    } = true;
 
     /// <summary>
     /// Indicates whether to ask for confirmation before downloading a season.
     /// </summary>
     public required bool AskDownloadSeasonConfirmation
     {
-        get => _askDownloadSeasonConfirmation;
-        set => SetProperty(ref _askDownloadSeasonConfirmation, value);
-    }
+        get;
+        set => SetProperty(ref field, value);
+    } = true;
 
     /// <summary>
     /// Indicates whether to ask for confirmation before downloading an episode.
     /// </summary>
     public required bool AskDownloadEpisodeConfirmation
     {
-        get => _askDownloadEpisodeConfirmation;
-        set => SetProperty(ref _askDownloadEpisodeConfirmation, value);
-    }
+        get;
+        set => SetProperty(ref field, value);
+    } = true;
 }

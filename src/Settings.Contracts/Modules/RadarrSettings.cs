@@ -2,10 +2,6 @@ namespace Reaparr.Settings.Contracts;
 
 public record RadarrSettings : BaseSettingsModule<RadarrSettings>, IRadarrSettings
 {
-    private string _radarrBaseUrl = string.Empty;
-    private string _radarrApiKey = string.Empty;
-    private bool _isConfigured;
-
     public static RadarrSettings Create() =>
         new()
         {
@@ -17,23 +13,23 @@ public record RadarrSettings : BaseSettingsModule<RadarrSettings>, IRadarrSettin
     /// <inheritdoc/>
     public required bool IsConfigured
     {
-        get => _isConfigured;
-        set => SetProperty(ref _isConfigured, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     /// <inheritdoc/>
     public required string RadarrBaseUrl
     {
-        get => _radarrBaseUrl;
-        set => SetProperty(ref _radarrBaseUrl, value);
-    }
+        get;
+        set => SetProperty(ref field, value);
+    } = string.Empty;
 
     /// <inheritdoc/>
     public required string RadarrApiKey
     {
-        get => _radarrApiKey;
-        set => SetProperty(ref _radarrApiKey, value);
-    }
+        get;
+        set => SetProperty(ref field, value);
+    } = string.Empty;
 
     public bool IsValidUrl() =>
         !string.IsNullOrWhiteSpace(RadarrBaseUrl)

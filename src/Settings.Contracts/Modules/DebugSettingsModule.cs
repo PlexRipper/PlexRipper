@@ -5,10 +5,6 @@ public record DebugSettingsModule
         IBaseSettingsModule<DebugSettingsModule>,
         IDebugSettings
 {
-    private bool _debugModeEnabled;
-    private bool _maskServerNames;
-    private bool _maskLibraryNames;
-
     public static DebugSettingsModule Create() =>
         new()
         {
@@ -19,19 +15,19 @@ public record DebugSettingsModule
 
     public required bool DebugModeEnabled
     {
-        get => _debugModeEnabled;
-        set => SetProperty(ref _debugModeEnabled, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public required bool MaskServerNames
     {
-        get => _maskServerNames;
-        set => SetProperty(ref _maskServerNames, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public required bool MaskLibraryNames
     {
-        get => _maskLibraryNames;
-        set => SetProperty(ref _maskLibraryNames, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 }

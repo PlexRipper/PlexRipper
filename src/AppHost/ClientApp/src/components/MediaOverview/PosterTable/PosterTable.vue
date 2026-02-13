@@ -33,7 +33,6 @@ import type { PlexMediaType, PlexMediaSlimDTO } from '@dto';
 import { listenMediaOverviewScrollToCommand, sendMediaOverviewDownloadCommand } from '@composables/event-bus';
 import { triggerBoxHighlight } from '@composables/animations';
 import { waitForElement } from '@composables';
-import { MediaSortField } from '@enums';
 import { useRouter, useMediaOverviewStore } from '#imports';
 
 const mediaOverviewStore = useMediaOverviewStore();

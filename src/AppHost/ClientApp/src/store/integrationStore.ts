@@ -245,11 +245,11 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 		},
 
 		clearRadarrConfiguration() {
-			return integrationApi.clearRadarrConfigurationEndpoint().pipe(switchMap((x) => settingsStore.refreshSettings()));
+			return integrationApi.clearRadarrConfigurationEndpoint().pipe(switchMap(() => settingsStore.refreshSettings()));
 		},
 
 		clearSonarrConfiguration() {
-			return integrationApi.clearSonarrConfigurationEndpoint().pipe(switchMap((x) => settingsStore.refreshSettings()));
+			return integrationApi.clearSonarrConfigurationEndpoint().pipe(switchMap(() => settingsStore.refreshSettings()));
 		},
 
 		$reset() {

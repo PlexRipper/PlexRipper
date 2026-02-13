@@ -78,7 +78,6 @@
             "could-not-display": "Impossible de trouver une bibliothèque disponible.",
             "no-data": "La bibliothèque a été synchronisée mais ne contient aucun média.",
             "library-not-yet-synced": "Les données multimédias de la bibliothèque n'ont pas encore été synchronisées. Veuillez patienter ou actualiser maintenant.",
-            "steps-remaining": "Étape {index} sur {total}:",
             "no-search-results": "Aucun média contenant \"{query}\" n'a été trouvé",
             "no-media-items-available": "Aucun élément multimédia trouvé!",
             "no-filter-results": "Aucun résultat multimédia ne correspond aux paramètres de filtre actuels. Veuillez ajuster ou réinitialiser vos filtres pour afficher les résultats disponibles."

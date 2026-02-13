@@ -78,7 +78,6 @@
             "could-not-display": "Nie można wyświetlić tej biblioteki.",
             "no-data": "Biblioteka została zsynchronizowana, ale nie zawiera żadnych multimediów.",
             "library-not-yet-synced": "Dane multimediów bibliotecznych nie zostały jeszcze zsynchronizowane. Proszę czekać lub odświeżyć teraz.",
-            "steps-remaining": "Krok {index} z {total}:",
             "no-search-results": "Nie znaleziono nośników zawierających „{query}”",
             "no-media-items-available": "Nie znaleziono żadnych elementów multimedialnych!",
             "no-filter-results": "Brak wyników wyszukiwania multimediów zgodnych z aktualnymi ustawieniami filtra. Dostosuj lub zresetuj filtry, aby wyświetlić dostępne wyniki."

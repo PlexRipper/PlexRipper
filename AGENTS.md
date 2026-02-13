@@ -177,3 +177,41 @@ Examples:
 * Backend: FastEndpoints, EF Core, Autofac, Quartz, Polly, Serilog, SignalR
 * Frontend: Nuxt 4, Vue 3, Pinia, Quasar, PrimeVue, Axios
 * Testing: xUnit, Shouldly, Moq, Bogus, Vitest, Cypress
+
+## Known implementation details
+
+### BackgroundJobs test project
+* `BackgroundJobs.UnitTests` references only `BackgroundJobs` and `BaseTests`. Types from `PlexApi.Contracts` are available transitively through `BackgroundJobs`.
+* `BackgroundJobs.UnitTests` does NOT reference `Application` or `Application.Contracts` directly. Tests for handlers that live in `BackgroundJobs` must go in `BackgroundJobs.UnitTests`, not `Application.UnitTests`.
+
+### EF Core / SQLite transactions
+* `ExecuteBulkAsync` in `ReaparrDbContext` already wraps every bulk operation in its own `BeginTransactionAsync`. Do NOT add outer transactions around `RemoveMedia` + `BulkInsert` call chains — SQLite does not support nested transactions and tests will fail with "connection is already in a transaction".
+
+### IReaparrDbContextFactory
+* Registered as `InstancePerDependency` in Autofac (`DataModule.cs`). Uses a `Func<IReaparrDbContext>` factory delegation that Autofac auto-provides.
+* When a command fans out parallel work (e.g. `Task.WhenAll`), each parallel branch must resolve its own `IReaparrDbContext` via `IReaparrDbContextFactory.Create()` to avoid EF Core thread-safety violations.
+* Test mock is pre-wired in `BaseUnitTest.MockDependencies.cs` via `factoryMock.Setup(x => x.Create()).Returns(...)`.
+
+### LibrarySyncProgressStore
+* `UpdateItemAsync` upserts by `MediaType` (adds if not present, replaces if it is). It does NOT auto-remove completed items.
+* `SendProgressUpdateAsync` is `Task`-returning (not `Task<LibraryProgress?>`).
+* `LibraryProgress.TimeRemaining` is a computed property — do not try to assign it.
+* When mocking `ILibrarySyncProgressStore` in tests, always set up **both** `UpdateItemAsync` and `UpdateErrorAsync` to avoid `Strict` mock exceptions. Success paths call `UpdateItemAsync`; failure paths call `UpdateErrorAsync`.
+
+### RefreshPlexTvShowLibraryCommandHandler progress broadcasting
+* On the success path, `UpdateItemAsync` is called 3× — once each for `PlexMediaType.TvShow`, `PlexMediaType.Season`, and `PlexMediaType.Episode` — using counts from `BulkInsertTvShowsRapport`.
+* On any failure path, `UpdateErrorAsync` is called once.
+
+### BackgroundJobs test location (BackgroundJobs commands also tested in BackgroundJobs.UnitTests)
+* Commands whose handlers live under `src/BackgroundJobs/` must be tested in `tests/UnitTests/BackgroundJobs.UnitTests/`, mirroring the same folder structure as the SUT.
+* Do not place BackgroundJobs handler tests in `Application.UnitTests` even if the command record is defined in `Application.Contracts`.
+
+## Agent self-update rule
+
+After completing any non-trivial task, update this file with new findings:
+* Undocumented implementation constraints discovered (e.g. transaction limits, threading rules).
+* Corrections to previously wrong assumptions.
+* Patterns that were ambiguous and are now resolved.
+* Any "gotcha" that caused a bug or wasted time.
+
+Keep entries concise and actionable. Remove entries that are no longer accurate.

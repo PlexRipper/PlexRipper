@@ -7,6 +7,8 @@ public class MockProgressHubService : IProgressHubService
 {
     private readonly ILogger _log;
 
+    public BlockingCollection<LibrarySyncProgressDTO> LibraryProgressUpdateList { get; } = new();
+
     public BlockingCollection<JobStatusUpdateDTO> JobStatusUpdateList { get; } = new();
 
     public MockProgressHubService(ILogger log)
@@ -17,7 +19,12 @@ public class MockProgressHubService : IProgressHubService
     public Task SendLibraryProgressUpdateAsync(
         LibrarySyncProgressDTO progress,
         CancellationToken cancellationToken = default
-    ) => Task.CompletedTask;
+    )
+    {
+        LibraryProgressUpdateList.Add(progress, cancellationToken);
+        _log.Here().Verbose("{ClassName} => {@LibraryProgress}", nameof(MockProgressHubService), progress);
+        return Task.CompletedTask;
+    }
 
     public Task SendServerConnectionCheckStatusProgressAsync(
         ServerConnectionCheckStatusProgress progress,

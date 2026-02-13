@@ -79,7 +79,7 @@ public class LibrarySyncProgressStore : ILibrarySyncProgressStore
         _store[plexLibraryId] = progress;
 
         // Send initial progress update to clients
-        await SendProgressUpdateAsync(progress);
+        await SendProgressUpdateAsync(progress, cancellationToken);
     }
 
     public async Task UpdateItemAsync(
@@ -115,7 +115,7 @@ public class LibrarySyncProgressStore : ILibrarySyncProgressStore
             }
         );
 
-        await SendProgressUpdateAsync(plexLibraryId);
+        await SendProgressUpdateAsync(plexLibraryId, cancellationToken);
     }
 
     public async Task UpdateErrorAsync(
@@ -130,12 +130,12 @@ public class LibrarySyncProgressStore : ILibrarySyncProgressStore
             (_, existing) => existing with { Errors = errorResult.Errors }
         );
 
-        await SendProgressUpdateAsync(updated);
+        await SendProgressUpdateAsync(updated, cancellationToken);
 
         _store.TryRemove(plexLibraryId, out _);
     }
 
-    private async Task SendProgressUpdateAsync(int plexLibraryId)
+    private async Task SendProgressUpdateAsync(int plexLibraryId, CancellationToken cancellationToken = default)
     {
         if (!_store.TryGetValue(plexLibraryId, out var progress))
         {
@@ -148,10 +148,10 @@ public class LibrarySyncProgressStore : ILibrarySyncProgressStore
             return;
         }
 
-        await SendProgressUpdateAsync(progress);
+        await SendProgressUpdateAsync(progress, cancellationToken);
     }
 
-    private async Task SendProgressUpdateAsync(LibraryProgress progress)
+    private async Task SendProgressUpdateAsync(LibraryProgress progress, CancellationToken cancellationToken = default)
     {
         var dto = new LibrarySyncProgressDTO
         {
@@ -169,6 +169,6 @@ public class LibrarySyncProgressStore : ILibrarySyncProgressStore
             Errors = progress.Errors,
         };
 
-        await _progressHubService.SendLibraryProgressUpdateAsync(dto);
+        await _progressHubService.SendLibraryProgressUpdateAsync(dto, cancellationToken);
     }
 }

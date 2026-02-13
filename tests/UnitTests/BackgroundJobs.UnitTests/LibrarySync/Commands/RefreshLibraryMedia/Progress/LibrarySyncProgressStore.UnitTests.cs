@@ -236,7 +236,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
     }
 
     [Fact]
-    public async Task ShouldSendProgressTwice_WhenUpdateItemAsyncCalledTwice()
+    public async Task ShouldSendProgressThreeTimes_WhenStartAndTwoUpdateItemAsyncCalled()
     {
         // Arrange
         Mock.Mock<IProgressHubService>()

@@ -9,20 +9,29 @@ namespace Reaparr.SignalR;
 /// </summary>
 public class NotificationHubService : INotificationHubService
 {
+    private readonly ILogger _log;
     private readonly IHubContext<NotificationHub, INotificationHub> _hub;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="NotificationHubService"/> class.
     /// </summary>
-    public NotificationHubService(IHubContext<NotificationHub, INotificationHub> hub)
+    public NotificationHubService(ILogger log, IHubContext<NotificationHub, INotificationHub> hub)
     {
+        _log = log.ForContext<NotificationHubService>();
         _hub = hub;
     }
 
     /// <inheritdoc/>
     public async Task SendNotificationAsync(Notification notification, CancellationToken cancellationToken = default)
     {
-        await _hub.Clients.All.Notification(notification.ToDTO(), cancellationToken);
+        try
+        {
+            await _hub.Clients.All.Notification(notification.ToDTO(), cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _log.Here().Warning(ex, "Failed to send notification");
+        }
     }
 
     /// <inheritdoc/>
@@ -31,7 +40,14 @@ public class NotificationHubService : INotificationHubService
         CancellationToken cancellationToken = default
     )
     {
-        await _hub.Clients.All.RefreshNotification(dataType, cancellationToken);
+        try
+        {
+            await _hub.Clients.All.RefreshNotification(dataType, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _log.Here().Warning(ex, "Failed to send refresh notification");
+        }
     }
 
     /// <inheritdoc/>

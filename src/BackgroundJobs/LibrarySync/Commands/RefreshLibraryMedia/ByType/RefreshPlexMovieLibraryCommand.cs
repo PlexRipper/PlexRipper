@@ -76,6 +76,26 @@ public class RefreshPlexMovieLibraryCommandHandler
 
                 return syncResult.ToResult().LogError();
             }
+
+            _log.Here()
+                .Information(
+                    "Successfully refreshed library {PlexLibraryName} with id: {PlexLibraryId}",
+                    plexLibrary.Title,
+                    plexLibrary.Id
+                );
+
+            // Report movies as successfully synced
+            await _librarySyncProgressStore.UpdateItemAsync(
+                plexLibraryId,
+                new LibraryProgressItem
+                {
+                    MediaType = PlexMediaType.Movie,
+                    Received = movieCount,
+                    Total = movieCount,
+                    TimeRemaining = TimeSpan.Zero,
+                },
+                cancellationToken
+            );
         }
         else
         {
@@ -86,26 +106,6 @@ public class RefreshPlexMovieLibraryCommandHandler
                     plexLibrary.Id
                 );
         }
-
-        _log.Here()
-            .Information(
-                "Successfully refreshed library {PlexLibraryName} with id: {PlexLibraryId}",
-                plexLibrary.Title,
-                plexLibrary.Id
-            );
-
-        // Report movies as successfully synced
-        await _librarySyncProgressStore.UpdateItemAsync(
-            plexLibraryId,
-            new LibraryProgressItem
-            {
-                MediaType = PlexMediaType.Movie,
-                Received = movieCount,
-                Total = movieCount,
-                TimeRemaining = TimeSpan.Zero,
-            },
-            cancellationToken
-        );
 
         // Refresh the PlexLibrary from the database to ensure we have the latest data
         var plexLibraryDb = await _dbContext.PlexLibraries.GetAsync(plexLibraryId, cancellationToken);

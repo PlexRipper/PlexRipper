@@ -4,7 +4,7 @@ public record LibrarySyncProgressDTO
 {
     public required int PlexLibraryId { get; init; }
 
-    public required TimeSpan TimeRemaining { get; set; }
+    public required TimeSpan TimeRemaining { get; init; }
 
     public required IReadOnlyList<LibrarySyncProgressItemDTO> Items { get; init; }
 
@@ -16,7 +16,7 @@ public record LibrarySyncProgressDTO
 
     public DateTime TimeStamp { get; } = DateTime.UtcNow;
 
-    public required IReadOnlyList<IError> Errors { get; set; }
+    public required IReadOnlyList<IError> Errors { get; init; }
 
     /// <summary>
     /// Gets a value indicating whether the <see cref="LibrarySyncProgressDTO"/> has finished refreshing.

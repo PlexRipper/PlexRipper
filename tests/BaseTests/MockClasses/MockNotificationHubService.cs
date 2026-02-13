@@ -7,6 +7,8 @@ public class MockNotificationHubService : INotificationHubService
 {
     private readonly ILogger _log;
 
+    public BlockingCollection<Notification> NotificationList { get; } = new();
+
     public BlockingCollection<RefreshDataType> RefreshNotificationList { get; } = new();
 
     public MockNotificationHubService(ILogger log)
@@ -14,8 +16,12 @@ public class MockNotificationHubService : INotificationHubService
         _log = log.ForContext<MockNotificationHubService>();
     }
 
-    public Task SendNotificationAsync(Notification notification, CancellationToken cancellationToken = default) =>
-        Task.CompletedTask;
+    public Task SendNotificationAsync(Notification notification, CancellationToken cancellationToken = default)
+    {
+        NotificationList.Add(notification, cancellationToken);
+        _log.Here().Verbose("{ClassName} => {@Notification}", nameof(MockNotificationHubService), notification);
+        return Task.CompletedTask;
+    }
 
     public Task SendRefreshNotificationAsync(RefreshDataType dataType, CancellationToken cancellationToken = default)
     {

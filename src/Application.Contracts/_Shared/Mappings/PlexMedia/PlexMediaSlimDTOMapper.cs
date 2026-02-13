@@ -65,8 +65,7 @@ public static class PlexMediaSlimDTOMapper
             HasThumb = x.HasThumb,
             PlexApiRatingKey = x.PlexApiRatingKey,
             PlexApiMetaDataKey = x.PlexApiMetaDataKey,
-            Qualities = x
-                .Qualities.ToList()
+            Qualities = x.Qualities
                 .Select(q => new PlexMediaQualityDTO
                 {
                     Quality = q.Quality,

@@ -25,8 +25,11 @@ public class MockDownloadHubService : IDownloadHubService
         if (!update.Any())
             return Task.CompletedTask;
 
-        ServerDownloadProgressList.Add(update.First(), cancellationToken);
-        _log.Here().Verbose("{ClassName} => {@DownloadTaskDto}", nameof(MockDownloadHubService), update.First());
+        foreach (var dto in update)
+        {
+            ServerDownloadProgressList.Add(dto, cancellationToken);
+            _log.Here().Verbose("{ClassName} => {@DownloadTaskDto}", nameof(MockDownloadHubService), dto);
+        }
 
         return Task.CompletedTask;
     }

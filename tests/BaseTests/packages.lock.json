@@ -1504,7 +1504,8 @@
           "Reaparr.PlexApi.Contracts": "[1.0.0, )",
           "Reaparr.PublicAPI.Contracts": "[1.0.0, )",
           "Reaparr.Settings": "[1.0.0, )",
-          "Reaparr.Settings.Contracts": "[1.0.0, )"
+          "Reaparr.Settings.Contracts": "[1.0.0, )",
+          "Reaparr.SignalR.Contracts": "[1.0.0, )"
         }
       },
       "Reaparr.Application.Contracts": {
@@ -1523,7 +1524,8 @@
           "Reaparr.BackgroundJobs.Contracts": "[1.0.0, )",
           "Reaparr.Data.Contracts": "[1.0.0, )",
           "Reaparr.Domain": "[1.0.0, )",
-          "Reaparr.PlexApi.Contracts": "[1.0.0, )"
+          "Reaparr.PlexApi.Contracts": "[1.0.0, )",
+          "Reaparr.SignalR.Contracts": "[1.0.0, )"
         }
       },
       "Reaparr.BackgroundJobs.Contracts": {

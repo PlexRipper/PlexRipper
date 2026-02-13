@@ -635,6 +635,15 @@
         "dependencies": {
           "Reaparr.Domain": "[1.0.0, )"
         }
+      },
+      "Reaparr.SignalR.Contracts": {
+        "type": "Project",
+        "dependencies": {
+          "Reaparr.Domain": "[1.0.0, )",
+          "Reaparr.Environment": "[1.0.0, )",
+          "Reaparr.FluentResultExtensions": "[1.0.0, )",
+          "Reaparr.Logging": "[1.0.0, )"
+        }
       }
     }
   }

@@ -12,7 +12,7 @@ import { generateResultDTO } from '@mock';
 import { PlexLibraryPaths } from '@api/api-paths';
 
 describe('Test the refreshing of a PlexLibrary', () => {
-	xit('Should display refreshing of the PlexLibrary when sending the refreshing command', () => {
+	it('Should display refreshing of the PlexLibrary when sending the refreshing command', () => {
 		cy.basePageSetup({
 			plexAccountCount: 1,
 			plexServerCount: 1,

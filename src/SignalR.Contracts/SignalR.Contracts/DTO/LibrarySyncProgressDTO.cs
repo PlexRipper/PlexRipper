@@ -19,10 +19,10 @@ public record LibrarySyncProgressDTO
     public required IReadOnlyList<IError> Errors { get; set; }
 
     /// <summary>
-    /// Gets a value indicating whether the <see cref="PlexLibrary"/> has finished refreshing.
+    /// Gets a value indicating whether the <see cref="LibrarySyncProgressDTO"/> has finished refreshing.
     /// All items must be complete for the overall progress to be considered complete.
     /// </summary>
-    public bool IsComplete => Items.All(i => i.IsComplete);
+    public bool IsComplete => Items.Any() && Items.All(i => i.IsComplete);
 }
 
 public record LibrarySyncProgressItemDTO
@@ -37,5 +37,5 @@ public record LibrarySyncProgressItemDTO
 
     public decimal Percentage => DataFormat.GetPercentage(Received, Total);
 
-    public bool IsComplete => Received >= Total;
+    public bool IsComplete => Total > 0 && Received >= Total;
 }

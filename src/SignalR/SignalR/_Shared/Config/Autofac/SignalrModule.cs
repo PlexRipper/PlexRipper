@@ -4,7 +4,7 @@ using Reaparr.SignalR.Contracts;
 namespace Reaparr.SignalR;
 
 /// <summary>
-/// Used to register all dependencies in Autofac for the Application project.
+/// Used to register all Autofac dependencies for the SignalR project.
 /// </summary>
 public class SignalrModule : Module
 {
@@ -12,9 +12,9 @@ public class SignalrModule : Module
     protected override void Load(ContainerBuilder builder)
     {
         // SignalR
-        builder.RegisterType<ProgressHubService>().As<IProgressHubService>();
-        builder.RegisterType<DownloadHubService>().As<IDownloadHubService>();
-        builder.RegisterType<NotificationHubService>().As<INotificationHubService>();
+        builder.RegisterType<ProgressHubService>().As<IProgressHubService>().SingleInstance();
+        builder.RegisterType<DownloadHubService>().As<IDownloadHubService>().SingleInstance();
+        builder.RegisterType<NotificationHubService>().As<INotificationHubService>().SingleInstance();
         builder.RegisterType<ProgressHub>().ExternallyOwned();
         builder.RegisterType<DownloadHub>().ExternallyOwned();
         builder.RegisterType<NotificationHub>().ExternallyOwned();

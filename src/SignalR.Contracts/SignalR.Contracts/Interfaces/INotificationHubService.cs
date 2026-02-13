@@ -5,7 +5,7 @@ public interface INotificationHubService
     /// <summary>
     /// Sends a notification to the front-end.
     /// </summary>
-    Task SendNotificationAsync(Notification notification);
+    Task SendNotificationAsync(Notification notification, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Sends a refresh data notification to the front-end.

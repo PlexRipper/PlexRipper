@@ -12,7 +12,8 @@ public record LibraryProgressItem
 
     public required TimeSpan TimeRemaining { get; init; }
 
-    public decimal Percentage => DataFormat.GetPercentage(Received, Total);
+    public decimal Percentage =>
+        Total == 0 ? 100 : Math.Min(Math.Max(DataFormat.GetPercentage(Received, Total), 0), 100);
 
-    public bool IsComplete => Received >= Total;
+    public bool IsComplete => Total > 0 && Received >= Total;
 }

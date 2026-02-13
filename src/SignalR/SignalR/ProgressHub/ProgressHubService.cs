@@ -21,11 +21,14 @@ public class ProgressHubService : IProgressHubService
     }
 
     /// <inheritdoc/>
-    public async Task SendLibraryProgressUpdateAsync(LibrarySyncProgressDTO progress)
+    public async Task SendLibraryProgressUpdateAsync(
+        LibrarySyncProgressDTO progress,
+        CancellationToken cancellationToken = default
+    )
     {
         try
         {
-            await _hub.Clients.All.LibraryProgress(progress);
+            await _hub.Clients.All.LibraryProgress(progress, cancellationToken);
         }
         catch (Exception ex)
         {
@@ -34,15 +37,35 @@ public class ProgressHubService : IProgressHubService
     }
 
     /// <inheritdoc/>
-    public async Task SendServerConnectionCheckStatusProgressAsync(ServerConnectionCheckStatusProgress progress)
+    public async Task SendServerConnectionCheckStatusProgressAsync(
+        ServerConnectionCheckStatusProgress progress,
+        CancellationToken cancellationToken = default
+    )
     {
-        await _hub.Clients.All.ServerConnectionCheckStatusProgress(progress.ToDTO());
+        try
+        {
+            await _hub.Clients.All.ServerConnectionCheckStatusProgress(progress.ToDTO(), cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _log.Here().Warning(ex, "Failed to send server connection check status progress");
+        }
     }
 
     /// <inheritdoc/>
-    public async Task SendJobStatusUpdateAsync<T>(JobStatusUpdate<T> jobStatusUpdate)
+    public async Task SendJobStatusUpdateAsync<T>(
+        JobStatusUpdate<T> jobStatusUpdate,
+        CancellationToken cancellationToken = default
+    )
         where T : class
     {
-        await _hub.Clients.All.JobStatusUpdate(jobStatusUpdate.ToDTO());
+        try
+        {
+            await _hub.Clients.All.JobStatusUpdate(jobStatusUpdate.ToDTO(), cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _log.Here().Warning(ex, "Failed to send job status update");
+        }
     }
 }

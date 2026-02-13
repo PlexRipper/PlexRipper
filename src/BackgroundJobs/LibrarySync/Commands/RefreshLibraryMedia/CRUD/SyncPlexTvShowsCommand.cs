@@ -88,15 +88,16 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
     private readonly IReaparrDbContext _dbContext;
     private readonly IReaparrDbContextFactory _dbContextFactory;
 
-    private readonly BulkConfig? _config = new()
-    {
-        BatchSize = 1000,
-        SetOutputIdentity = true,
-        PreserveInsertOrder = true,
-        CalculateStats = true,
-        EnableStreaming = true,
-        UseTempDB = true,
-    };
+    private static BulkConfig CreateBulkConfig() =>
+        new()
+        {
+            BatchSize = 1000,
+            SetOutputIdentity = true,
+            PreserveInsertOrder = true,
+            CalculateStats = true,
+            EnableStreaming = true,
+            UseTempDB = true,
+        };
 
     public SyncPlexTvShowsCommandHandler(
         ILogger log,
@@ -240,7 +241,7 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
 
         var distinctGenres = plexTvShowGenres.DistinctBy(x => new { x.PlexTvShowId, x.GenresId }).ToList();
         var insertResult = await Result.Try(() =>
-            dbContext.BulkInsertAsync(distinctGenres, _config, cancellationToken)
+            dbContext.BulkInsertAsync(distinctGenres, CreateBulkConfig(), cancellationToken)
         );
         await dbContext
             .PlexLibraries.Where(x => x.Id == plexLibraryId)
@@ -290,7 +291,7 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
         var distinctCountries = plexTvShowCountries.DistinctBy(x => new { x.PlexTvShowId, x.CountryId }).ToList();
 
         var insertResult = await Result.Try(() =>
-            dbContext.BulkInsertAsync(distinctCountries, _config, cancellationToken)
+            dbContext.BulkInsertAsync(distinctCountries, CreateBulkConfig(), cancellationToken)
         );
 
         await dbContext
@@ -340,7 +341,7 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
 
         var distinctActors = plexTvShowRoles.DistinctBy(x => new { x.PlexTvShowId, RolesId = x.PlexActorId }).ToList();
         var insertResult = await Result.Try(() =>
-            dbContext.BulkInsertAsync(distinctActors, _config, cancellationToken)
+            dbContext.BulkInsertAsync(distinctActors, CreateBulkConfig(), cancellationToken)
         );
         await dbContext
             .PlexLibraries.Where(x => x.Id == plexLibraryId)

@@ -63,14 +63,15 @@ public class RefreshPlexMovieLibraryCommandHandler
             {
                 // Report movies as not yet synced on failure
                 await _librarySyncProgressStore.UpdateItemAsync(
-                    plexLibrary.Id,
+                    plexLibraryId,
                     new LibraryProgressItem
                     {
                         MediaType = PlexMediaType.Movie,
                         Received = 0,
                         Total = movieCount,
                         TimeRemaining = TimeSpan.Zero,
-                    }
+                    },
+                    cancellationToken
                 );
 
                 return syncResult.ToResult().LogError();
@@ -95,14 +96,15 @@ public class RefreshPlexMovieLibraryCommandHandler
 
         // Report movies as successfully synced
         await _librarySyncProgressStore.UpdateItemAsync(
-            plexLibrary.Id,
+            plexLibraryId,
             new LibraryProgressItem
             {
                 MediaType = PlexMediaType.Movie,
                 Received = movieCount,
                 Total = movieCount,
                 TimeRemaining = TimeSpan.Zero,
-            }
+            },
+            cancellationToken
         );
 
         // Refresh the PlexLibrary from the database to ensure we have the latest data

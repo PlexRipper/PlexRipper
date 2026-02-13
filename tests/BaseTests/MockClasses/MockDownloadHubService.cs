@@ -22,6 +22,9 @@ public class MockDownloadHubService : IDownloadHubService
     {
         var update = downloadTasks.ToServerDownloadProgressDTOList();
 
+        if (!update.Any())
+            return Task.CompletedTask;
+
         ServerDownloadProgressList.Add(update.First(), cancellationToken);
         _log.Here().Verbose("{ClassName} => {@DownloadTaskDto}", nameof(MockDownloadHubService), update.First());
 

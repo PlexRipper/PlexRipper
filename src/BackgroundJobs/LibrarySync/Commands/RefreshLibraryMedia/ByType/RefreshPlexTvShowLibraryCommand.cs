@@ -64,7 +64,7 @@ public class RefreshPlexTvShowLibraryCommandHandler
 
             if (rawSeasonDataResult.IsFailed)
             {
-                await _librarySyncProgressStore.UpdateErrorAsync(plexLibraryId, rawSeasonDataResult.ToResult());
+                await _librarySyncProgressStore.UpdateErrorAsync(plexLibraryId, rawSeasonDataResult.ToResult(), cancellationToken);
                 return rawSeasonDataResult.ToResult();
             }
 
@@ -75,7 +75,7 @@ public class RefreshPlexTvShowLibraryCommandHandler
             );
             if (rawEpisodesDataResult.IsFailed)
             {
-                await _librarySyncProgressStore.UpdateErrorAsync(plexLibraryId, rawEpisodesDataResult.ToResult());
+                await _librarySyncProgressStore.UpdateErrorAsync(plexLibraryId, rawEpisodesDataResult.ToResult(), cancellationToken);
                 return rawEpisodesDataResult.ToResult();
             }
 
@@ -103,7 +103,7 @@ public class RefreshPlexTvShowLibraryCommandHandler
             );
             if (syncResult.IsFailed)
             {
-                await _librarySyncProgressStore.UpdateErrorAsync(plexLibraryId, syncResult.ToResult());
+                await _librarySyncProgressStore.UpdateErrorAsync(plexLibraryId, syncResult.ToResult(), cancellationToken);
                 return syncResult.ToResult().LogError();
             }
 
@@ -115,15 +115,19 @@ public class RefreshPlexTvShowLibraryCommandHandler
                 );
 
             var rapport = syncResult.Value;
+            var totalTvShows = plexLibrary.TvShows.Count;
+            var totalSeasons = plexLibrary.TvShows.Sum(x => x.ChildCount);
+            var totalEpisodes = plexLibrary.TvShows.Sum(x => x.GrandChildCount);
             await _librarySyncProgressStore.UpdateItemAsync(
                 plexLibraryId,
                 new LibraryProgressItem
                 {
                     MediaType = PlexMediaType.TvShow,
                     Received = rapport.CreatedTvShows,
-                    Total = rapport.CreatedTvShows,
+                    Total = totalTvShows,
                     TimeRemaining = TimeSpan.Zero,
-                }
+                },
+                cancellationToken
             );
             await _librarySyncProgressStore.UpdateItemAsync(
                 plexLibraryId,
@@ -131,9 +135,10 @@ public class RefreshPlexTvShowLibraryCommandHandler
                 {
                     MediaType = PlexMediaType.Season,
                     Received = rapport.CreatedSeasons,
-                    Total = rapport.CreatedSeasons,
+                    Total = totalSeasons,
                     TimeRemaining = TimeSpan.Zero,
-                }
+                },
+                cancellationToken
             );
             await _librarySyncProgressStore.UpdateItemAsync(
                 plexLibraryId,
@@ -141,9 +146,10 @@ public class RefreshPlexTvShowLibraryCommandHandler
                 {
                     MediaType = PlexMediaType.Episode,
                     Received = rapport.CreatedEpisodes,
-                    Total = rapport.CreatedEpisodes,
+                    Total = totalEpisodes,
                     TimeRemaining = TimeSpan.Zero,
-                }
+                },
+                cancellationToken
             );
         }
         else

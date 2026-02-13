@@ -133,7 +133,7 @@ public class LibrarySyncJobListener : ILibrarySyncJobListener
                 context.FireTimeUtc.UtcDateTime
             );
 
-            await _progressHubService.SendJobStatusUpdateAsync(statusUpdate);
+            await _progressHubService.SendJobStatusUpdateAsync(statusUpdate, cancellationToken);
 
             await _notificationHubService.SendRefreshNotificationAsync(
                 [RefreshDataType.PlexLibrary, RefreshDataType.PlexLibrarySyncStatus],

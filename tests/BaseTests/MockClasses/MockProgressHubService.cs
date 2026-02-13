@@ -14,12 +14,20 @@ public class MockProgressHubService : IProgressHubService
         _log = log.ForContext<MockProgressHubService>();
     }
 
-    public Task SendLibraryProgressUpdateAsync(LibrarySyncProgressDTO progress) => Task.CompletedTask;
+    public Task SendLibraryProgressUpdateAsync(
+        LibrarySyncProgressDTO progress,
+        CancellationToken cancellationToken = default
+    ) => Task.CompletedTask;
 
-    public Task SendServerConnectionCheckStatusProgressAsync(ServerConnectionCheckStatusProgress progress) =>
-        Task.CompletedTask;
+    public Task SendServerConnectionCheckStatusProgressAsync(
+        ServerConnectionCheckStatusProgress progress,
+        CancellationToken cancellationToken = default
+    ) => Task.CompletedTask;
 
-    public Task SendJobStatusUpdateAsync<T>(JobStatusUpdate<T> jobStatusUpdate)
+    public Task SendJobStatusUpdateAsync<T>(
+        JobStatusUpdate<T> jobStatusUpdate,
+        CancellationToken cancellationToken = default
+    )
         where T : class
     {
         JobStatusUpdateList.Add(jobStatusUpdate.ToDTO());

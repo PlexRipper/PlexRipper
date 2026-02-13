@@ -14,7 +14,8 @@ public class MockNotificationHubService : INotificationHubService
         _log = log.ForContext<MockNotificationHubService>();
     }
 
-    public Task SendNotificationAsync(Notification notification) => Task.CompletedTask;
+    public Task SendNotificationAsync(Notification notification, CancellationToken cancellationToken = default) =>
+        Task.CompletedTask;
 
     public Task SendRefreshNotificationAsync(RefreshDataType dataType, CancellationToken cancellationToken = default)
     {

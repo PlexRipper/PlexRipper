@@ -9,7 +9,7 @@ public record LibraryProgress
 
     public required PlexMediaType PlexLibraryType { get; init; }
 
-    public required IList<LibraryProgressItem> Items { get; init; }
+    public required IReadOnlyList<LibraryProgressItem> Items { get; init; }
 
     public IReadOnlyList<IError> Errors { get; init; } = [];
 
@@ -24,8 +24,8 @@ public record LibraryProgress
     public DateTime TimeStamp { get; } = DateTime.UtcNow;
 
     /// <summary>
-    /// Gets a value indicating whether the <see cref="PlexLibrary"/> has finished refreshing.
+    /// Gets a value indicating whether the <see cref="LibraryProgress"/> has finished refreshing.
     /// All items must be complete for the overall progress to be considered complete.
     /// </summary>
-    public bool IsComplete => Items.All(i => i.IsComplete);
+    public bool IsComplete => Items.Any() && Items.All(i => i.IsComplete);
 }

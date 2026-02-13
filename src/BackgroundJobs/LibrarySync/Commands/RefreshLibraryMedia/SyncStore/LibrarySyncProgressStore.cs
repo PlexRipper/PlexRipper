@@ -19,58 +19,74 @@ public class LibrarySyncProgressStore : ILibrarySyncProgressStore
     public LibraryProgress? Get(int plexLibraryId) =>
         _store.TryGetValue(plexLibraryId, out var progress) ? progress : null;
 
-    public async Task StartAsync(int plexLibraryId, PlexMediaType type)
+    public async Task StartAsync(int plexLibraryId, PlexMediaType type, CancellationToken cancellationToken = default)
     {
-        var progress = new LibraryProgress
-        {
-            PlexLibraryId = plexLibraryId,
-            PlexLibraryType = type,
-            Items = [],
-        };
+        IReadOnlyList<LibraryProgressItem> items;
 
         if (type == PlexMediaType.Movie)
         {
-            progress.Items.Add(
+            items =
+            [
                 new LibraryProgressItem
                 {
                     MediaType = PlexMediaType.Movie,
                     Received = 0,
                     Total = 0,
                     TimeRemaining = TimeSpan.Zero,
-                }
-            );
+                },
+            ];
+        }
+        else if (type == PlexMediaType.TvShow)
+        {
+            items =
+            [
+                new LibraryProgressItem
+                {
+                    MediaType = PlexMediaType.TvShow,
+                    Received = 0,
+                    Total = 0,
+                    TimeRemaining = TimeSpan.Zero,
+                },
+                new LibraryProgressItem
+                {
+                    MediaType = PlexMediaType.Season,
+                    Received = 0,
+                    Total = 0,
+                    TimeRemaining = TimeSpan.Zero,
+                },
+                new LibraryProgressItem
+                {
+                    MediaType = PlexMediaType.Episode,
+                    Received = 0,
+                    Total = 0,
+                    TimeRemaining = TimeSpan.Zero,
+                },
+            ];
+        }
+        else
+        {
+            _log.Here().Warning("Unsupported PlexMediaType {PlexMediaType} for library {PlexLibraryId}", type, plexLibraryId);
+            return;
         }
 
-        if (type == PlexMediaType.TvShow)
+        var progress = new LibraryProgress
         {
-            foreach (
-                var mediaType in new List<PlexMediaType>
-                {
-                    PlexMediaType.TvShow,
-                    PlexMediaType.Season,
-                    PlexMediaType.Episode,
-                }
-            )
-            {
-                progress.Items.Add(
-                    new LibraryProgressItem
-                    {
-                        MediaType = mediaType,
-                        Received = 0,
-                        Total = 0,
-                        TimeRemaining = TimeSpan.Zero,
-                    }
-                );
-            }
-        }
+            PlexLibraryId = plexLibraryId,
+            PlexLibraryType = type,
+            Items = items,
+        };
 
         _store[plexLibraryId] = progress;
 
         // Send initial progress update to clients
-        await SendProgressUpdateAsync(plexLibraryId);
+        await SendProgressUpdateAsync(progress);
     }
 
-    public async Task UpdateItemAsync(int plexLibraryId, LibraryProgressItem item)
+    public async Task UpdateItemAsync(
+        int plexLibraryId,
+        LibraryProgressItem item,
+        CancellationToken cancellationToken = default
+    )
     {
         _store.AddOrUpdate(
             plexLibraryId,
@@ -102,15 +118,19 @@ public class LibrarySyncProgressStore : ILibrarySyncProgressStore
         await SendProgressUpdateAsync(plexLibraryId);
     }
 
-    public async Task UpdateErrorAsync(int plexLibraryId, Result errorResult)
+    public async Task UpdateErrorAsync(
+        int plexLibraryId,
+        Result errorResult,
+        CancellationToken cancellationToken = default
+    )
     {
-        _store.AddOrUpdate(
+        var updated = _store.AddOrUpdate(
             plexLibraryId,
             _ => throw new InvalidOperationException("Library not initialized."),
             (_, existing) => existing with { Errors = errorResult.Errors }
         );
 
-        await SendProgressUpdateAsync(plexLibraryId);
+        await SendProgressUpdateAsync(updated);
 
         _store.TryRemove(plexLibraryId, out _);
     }
@@ -128,6 +148,11 @@ public class LibrarySyncProgressStore : ILibrarySyncProgressStore
             return;
         }
 
+        await SendProgressUpdateAsync(progress);
+    }
+
+    private async Task SendProgressUpdateAsync(LibraryProgress progress)
+    {
         var dto = new LibrarySyncProgressDTO
         {
             PlexLibraryId = progress.PlexLibraryId,

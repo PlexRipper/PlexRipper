@@ -34,8 +34,11 @@ public class DownloadHubService : IDownloadHubService
             return;
         }
 
-        var messagePack = update.First().ToMessagePack();
-
-        await _hub.Clients.All.ServerDownloadProgress(messagePack, cancellationToken);
+        foreach (var dto in update)
+        {
+            var messagePack = dto.ToMessagePack();
+            _log.Here().Verbose("{ClassName} => {@ServerDownloadProgressDTO}", nameof(DownloadHubService), dto);
+            await _hub.Clients.All.ServerDownloadProgress(messagePack, cancellationToken);
+        }
     }
 }

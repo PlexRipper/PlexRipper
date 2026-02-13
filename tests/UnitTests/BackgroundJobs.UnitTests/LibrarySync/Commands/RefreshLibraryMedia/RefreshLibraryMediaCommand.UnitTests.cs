@@ -165,8 +165,6 @@ public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLi
 
         // Act
         var command = new RefreshLibraryMediaCommand(plexLibrary.Id);
-
-        // Act
         var result = await TestHandlerExecuteAsync<PlexLibrary>(command);
 
         // Assert

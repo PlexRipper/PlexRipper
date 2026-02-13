@@ -77,11 +77,11 @@ public class LibrarySyncJob : IJob
                     serverName,
                     _serverId
                 );
-            await UpdateQueueItemAsync(LibrarySyncJobStatus.Queued, isServerOffline: true);
+            await UpdateQueueItemAsync(LibrarySyncJobStatus.Queued, cancellationToken, isServerOffline: true);
             return;
         }
 
-        await UpdateQueueItemAsync(LibrarySyncJobStatus.Processing);
+        await UpdateQueueItemAsync(LibrarySyncJobStatus.Processing, cancellationToken);
 
         // Jobs should swallow exceptions as otherwise Quartz will keep re-executing it
         // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
@@ -102,6 +102,7 @@ public class LibrarySyncJob : IJob
 
                 await UpdateQueueItemAsync(
                     LibrarySyncJobStatus.Failed,
+                    cancellationToken,
                     errorMessage: result.Errors.FirstOrDefault()?.Message,
                     isServerOffline: isServerOffline
                 );
@@ -120,7 +121,7 @@ public class LibrarySyncJob : IJob
                 .Information("Successfully synced library {LibraryId} for server {ServerId}", _libraryId, _serverId);
 
             // Mark queue item as completed
-            await UpdateQueueItemAsync(LibrarySyncJobStatus.Completed);
+            await UpdateQueueItemAsync(LibrarySyncJobStatus.Completed, cancellationToken);
 
             // Send refresh notification
             await _notificationHubService.SendRefreshNotificationAsync(
@@ -133,7 +134,7 @@ public class LibrarySyncJob : IJob
         }
         catch (OperationCanceledException)
         {
-            await UpdateQueueItemAsync(LibrarySyncJobStatus.Queued);
+            await UpdateQueueItemAsync(LibrarySyncJobStatus.Queued, CancellationToken.None);
 
             _log.Here()
                 .Information(
@@ -145,7 +146,7 @@ public class LibrarySyncJob : IJob
         }
         catch (Exception e)
         {
-            await UpdateQueueItemAsync(LibrarySyncJobStatus.Failed, errorMessage: e.Message);
+            await UpdateQueueItemAsync(LibrarySyncJobStatus.Failed, CancellationToken.None, errorMessage: e.Message);
 
             _log.Here().ErrorResult(e);
         }
@@ -153,6 +154,7 @@ public class LibrarySyncJob : IJob
 
     private async Task UpdateQueueItemAsync(
         LibrarySyncJobStatus status,
+        CancellationToken cancellationToken,
         string? errorMessage = null,
         bool isServerOffline = false
     )
@@ -216,6 +218,6 @@ public class LibrarySyncJob : IJob
                 break;
         }
 
-        await _notificationHubService.SendRefreshNotificationAsync([RefreshDataType.PlexLibrarySyncStatus]);
+        await _notificationHubService.SendRefreshNotificationAsync([RefreshDataType.PlexLibrarySyncStatus], cancellationToken);
     }
 }

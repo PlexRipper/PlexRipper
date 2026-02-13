@@ -58,10 +58,10 @@ public class GetLibraryMediaCommandHandler : ICommandHandler<GetLibraryMediaComm
         if (updatedPlexLibrary.Type is not (PlexMediaType.Movie or PlexMediaType.TvShow))
             return Result.Ok(new LibraryMetadata(updatedPlexLibrary));
 
-        await _librarySyncProgressStore.StartAsync(updatedPlexLibrary.Id, plexLibrary.Type);
+        await _librarySyncProgressStore.StartAsync(updatedPlexLibrary.Id, updatedPlexLibrary.Type, ct);
 
         var mediaListResult = await _commandExecutor.Send(
-            new GetAllMediaByTypeFromPlexApiCommand(plexLibrary, plexLibrary.Type),
+            new GetAllMediaByTypeFromPlexApiCommand(updatedPlexLibrary, updatedPlexLibrary.Type),
             ct
         );
 

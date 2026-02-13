@@ -144,7 +144,8 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
                 Received = Math.Clamp(index, 0, totalSize),
                 Total = totalSize,
                 TimeRemaining = remainingTime,
-            }
+            },
+            CancellationToken.None
         );
     }
 
@@ -171,8 +172,9 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
         if (response.IsFailed)
             return response.ToResult();
 
-        var value = response.Value?.MediaContainerWithMetadata?.MediaContainer?.TotalSize;
-        return Result.Ok(Convert.ToInt32(value ?? 0));
+        var rawValue = response.Value?.MediaContainerWithMetadata?.MediaContainer?.TotalSize ?? 0;
+        var safeValue = (int)Math.Max(0, Math.Min(rawValue, int.MaxValue));
+        return Result.Ok(safeValue);
     }
 
     /// <summary>

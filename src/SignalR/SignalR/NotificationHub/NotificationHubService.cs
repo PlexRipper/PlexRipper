@@ -20,9 +20,9 @@ public class NotificationHubService : INotificationHubService
     }
 
     /// <inheritdoc/>
-    public async Task SendNotificationAsync(Notification notification)
+    public async Task SendNotificationAsync(Notification notification, CancellationToken cancellationToken = default)
     {
-        await _hub.Clients.All.Notification(notification.ToDTO());
+        await _hub.Clients.All.Notification(notification.ToDTO(), cancellationToken);
     }
 
     /// <inheritdoc/>
@@ -40,7 +40,6 @@ public class NotificationHubService : INotificationHubService
         CancellationToken cancellationToken = default
     )
     {
-        foreach (var dataType in dataTypes)
-            await SendRefreshNotificationAsync(dataType, cancellationToken);
+        await Task.WhenAll(dataTypes.Select(dataType => SendRefreshNotificationAsync(dataType, cancellationToken)));
     }
 }

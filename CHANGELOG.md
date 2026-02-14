@@ -1,5 +1,38 @@
 Reaparr Changelog
 
+# [0.36.0-dev.2](https://github.com/Reaparr/Reaparr/compare/v0.36.0-dev.1...v0.36.0-dev.2) (2026-02-14)
+
+
+### Bug Fixes
+
+* **WebAPI:** Await SignalR progress callbacks to prevent dropped notifications during library sync ([772dc39](https://github.com/Reaparr/Reaparr/commit/772dc3986921ced94093a8eacd8dc4fe79a47465))
+* **Web-UI:** Correct order of title and text in Radarr and Sonarr connection help rows ([0e4bb9b](https://github.com/Reaparr/Reaparr/commit/0e4bb9bcfe4269f89ea37f1a83f9bf96e3daba8f))
+* **Web-UI:** Fix getIsSorted returning true for NoSort state and add mediaOverviewStore unit tests ([7028ca4](https://github.com/Reaparr/Reaparr/commit/7028ca4f433a42fe7d219405b4e41bf213aff4f7))
+* **Web-UI:** Fixed an visual issue where in Brave/Microsoft Edge the download speed limit and download table would be white instead of the correct color. Also improved the checkboxes on the download table ([f8a3da1](https://github.com/Reaparr/Reaparr/commit/f8a3da1caf4cc41562874f7106b4b29be4a0d6c1))
+* **WebAPI:** Fixed dupplicate changelog description in Discord notifications ([d2a9e71](https://github.com/Reaparr/Reaparr/commit/d2a9e71d0baf051724d886b14d1a543330dc9348))
+* **Web-UI:** Fixed the login screen flashing for a split second after logging in, now the transition is smooth ([ed164e4](https://github.com/Reaparr/Reaparr/commit/ed164e4ee0a4a84b8e5322d15d70ac91f9f298f3))
+* **Web-UI:** Fixed the mask server name and mask library names settings not working ([46dc2a2](https://github.com/Reaparr/Reaparr/commit/46dc2a2d117543edce08ff850872cade0158426a))
+* **Web-UI:** Validate username and password before allowing credential updates ([75bcb34](https://github.com/Reaparr/Reaparr/commit/75bcb34b05c140b869ec986e0439ddb0f5e4d0d9))
+
+
+### Features
+
+* **WebAPI:** Add clear configuration endpoints for Radarr and Sonarr integrations ([801a873](https://github.com/Reaparr/Reaparr/commit/801a873537b804de191aed614461b61713ac4587))
+* **WebAPI:** Add Reset method to settings modules via IBaseSettingsModule static abstract interface ([6c2526d](https://github.com/Reaparr/Reaparr/commit/6c2526d4b69547f4a36384b05f847f5ee6244df7))
+* **Web-UI:** Add sorting functionality to media poster overview ([87f57ed](https://github.com/Reaparr/Reaparr/commit/87f57ed3d1db4f2822efe203aa0615caac9517d5))
+* **Web-UI:** Added a background animation toggle button to the setup page to quickly disable the animated background ([f7a8117](https://github.com/Reaparr/Reaparr/commit/f7a8117516d8f78e4599b6cbf0ac166efbfb862f))
+* **Web-UI:** Added a clear config button to the Sonarr and Radarr integration settings page ([0265e13](https://github.com/Reaparr/Reaparr/commit/0265e13ecb6d9cc21a369ff41ff1c5ab05c4425b))
+* **Web-UI:** Added an info alert under the "Unhide Plex Servers" section when no servers are hidden yet ([8b73bf4](https://github.com/Reaparr/Reaparr/commit/8b73bf4275e200a6fca9f034bbd5cb227ec703b1))
+* **Web-UI:** Added the sorting to the main media view on the homepage and some cleanup ([7ca7fad](https://github.com/Reaparr/Reaparr/commit/7ca7fad966788077641a811883cc428e76fc5fee))
+* **Web-UI:** Improved the letter navigation on the poster overview page to change depending on what sorting you're using ([86cdc16](https://github.com/Reaparr/Reaparr/commit/86cdc160f565b7c6c1478a21bef94912dd93357b))
+* **Web-UI:** Improved the media sync display with more progress bars ([edf1c58](https://github.com/Reaparr/Reaparr/commit/edf1c58a35c7b16ded613c03d0457888d8ba4849))
+* **Web-UI:** Moved the MaskServerNames and MaskLibraryNames settings to the UI => General page ([2ea8059](https://github.com/Reaparr/Reaparr/commit/2ea80595cf257e23b7d17b6cda6b819d2d3b01ff))
+
+
+### Performance Improvements
+
+* **WebAPI:** Remove PlexToken from Media DTOs, this should save some bandwith and make navigating media faster ([924246b](https://github.com/Reaparr/Reaparr/commit/924246beb2bd75e1eecf95fd67ea070366ac7d8d))
+
 # [0.36.0-dev.1](https://github.com/Reaparr/Reaparr/compare/v0.35.1-dev.1...v0.36.0-dev.1) (2026-02-11)
 
 

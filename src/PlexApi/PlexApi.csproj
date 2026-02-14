@@ -23,6 +23,7 @@
     </ItemGroup>
     <ItemGroup>
         <Compile Include="..\Domain\GlobalUsings.cs" />
+        <ProjectReference Include="..\BackgroundJobs.Contracts\BackgroundJobs.Contracts.csproj" />
         <ProjectReference Include="..\Data.Contracts\Data.Contracts.csproj" />
         <ProjectReference Include="..\PlexApi.Contracts\PlexApi.Contracts.csproj" />
         <Compile Remove="Common\OpenPlexApiFactory.cs" />

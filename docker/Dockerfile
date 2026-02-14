@@ -66,6 +66,9 @@ COPY ["src/PlexApi.Contracts/PlexApi.Contracts.csproj", "src/PlexApi.Contracts/"
 ### Settings
 COPY ["src/Settings/Settings.csproj", "src/Settings/"]
 COPY ["src/Settings.Contracts/Settings.Contracts.csproj", "src/Settings.Contracts/"]
+### SignalR
+COPY ["src/SignalR/SignalR.csproj", "src/SignalR/"]
+COPY ["src/SignalR.Contracts/SignalR.Contracts.csproj", "src/SignalR.Contracts/"]
 
 ## External Projects
 COPY ["src/External/External.csproj", "src/External/"]

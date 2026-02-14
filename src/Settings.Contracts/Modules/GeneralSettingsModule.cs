@@ -1,16 +1,10 @@
-﻿namespace Reaparr.Settings.Contracts;
+namespace Reaparr.Settings.Contracts;
 
-public record GeneralSettingsModule : BaseSettingsModule<GeneralSettingsModule>, IGeneralSettings
+public record GeneralSettingsModule
+    : BaseSettingsModule<GeneralSettingsModule>,
+        IBaseSettingsModule<GeneralSettingsModule>,
+        IGeneralSettings
 {
-    private bool _firstTimeSetup = true;
-    private int _activeAccountId;
-    private bool _disableAnimatedBackground;
-    private bool _hideMediaFromOfflineServers;
-    private bool _hideMediaFromOwnedServers;
-    private bool _useLowQualityPosterImages;
-    private bool _hasBeenInvitedToDiscord;
-    private bool _hasAgreedToDisclaimer;
-
     public static GeneralSettingsModule Create() =>
         new()
         {
@@ -25,49 +19,49 @@ public record GeneralSettingsModule : BaseSettingsModule<GeneralSettingsModule>,
 
     public required bool FirstTimeSetup
     {
-        get => _firstTimeSetup;
-        set => SetProperty(ref _firstTimeSetup, value);
-    }
+        get;
+        set => SetProperty(ref field, value);
+    } = true;
 
     public required int ActiveAccountId
     {
-        get => _activeAccountId;
-        set => SetProperty(ref _activeAccountId, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public required bool DisableAnimatedBackground
     {
-        get => _disableAnimatedBackground;
-        set => SetProperty(ref _disableAnimatedBackground, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public required bool HideMediaFromOfflineServers
     {
-        get => _hideMediaFromOfflineServers;
-        set => SetProperty(ref _hideMediaFromOfflineServers, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public required bool HideMediaFromOwnedServers
     {
-        get => _hideMediaFromOwnedServers;
-        set => SetProperty(ref _hideMediaFromOwnedServers, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public required bool UseLowQualityPosterImages
     {
-        get => _useLowQualityPosterImages;
-        set => SetProperty(ref _useLowQualityPosterImages, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public required bool HasBeenInvitedToDiscord
     {
-        get => _hasBeenInvitedToDiscord;
-        set => SetProperty(ref _hasBeenInvitedToDiscord, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public bool HasAgreedToDisclaimer
     {
-        get => _hasAgreedToDisclaimer;
-        set => SetProperty(ref _hasAgreedToDisclaimer, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 }

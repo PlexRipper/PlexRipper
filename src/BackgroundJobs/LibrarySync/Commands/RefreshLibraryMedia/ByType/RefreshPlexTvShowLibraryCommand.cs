@@ -1,16 +1,14 @@
 using System.Diagnostics;
 using FastEndpoints;
 using FluentValidation;
-using Reaparr.Application.Contracts;
+using Reaparr.BackgroundJobs.Contracts;
 using Reaparr.Data.Contracts;
 using Reaparr.PlexApi.Contracts;
 
 namespace Reaparr.BackgroundJobs;
 
-public record RefreshPlexTvShowLibraryCommand(
-    InsertMediaMetaDataCommandResponse LibraryMetadata,
-    Action<LibraryProgress> Action
-) : ICommand<Result<PlexLibrary>>;
+public record RefreshPlexTvShowLibraryCommand(InsertMediaMetaDataCommandResponse LibraryMetadata)
+    : ICommand<Result<PlexLibrary>>;
 
 public class RefreshPlexTvShowLibraryCommandValidator : AbstractValidator<RefreshPlexTvShowLibraryCommand>
 {
@@ -28,20 +26,19 @@ public class RefreshPlexTvShowLibraryCommandHandler
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IReaparrDbContext _dbContext;
-    private readonly IRefreshLibraryProgressReporter _progressReporter;
+    private readonly ILibrarySyncProgressStore _librarySyncProgressStore;
 
     public RefreshPlexTvShowLibraryCommandHandler(
         ILogger log,
         ICommandExecutor commandExecutor,
         IReaparrDbContext dbContext,
-        IRefreshLibraryProgressReporter progressReporter
+        ILibrarySyncProgressStore librarySyncProgressStore
     )
     {
         _log = log.ForContext<RefreshPlexTvShowLibraryCommandHandler>();
         _commandExecutor = commandExecutor;
         _dbContext = dbContext;
-        _commandExecutor = commandExecutor;
-        _progressReporter = progressReporter;
+        _librarySyncProgressStore = librarySyncProgressStore;
     }
 
     public async Task<Result<PlexLibrary>> ExecuteAsync(
@@ -61,48 +58,34 @@ public class RefreshPlexTvShowLibraryCommandHandler
 
             // Phase 2 of 5: Season data was retrieved successfully.
             var rawSeasonDataResult = await _commandExecutor.Send(
-                new GetAllMediaSeasonsCommand(
-                    plexLibrary,
-                    progress =>
-                        _progressReporter.SendProgress(
-                            new RefreshLibraryProgressUpdate
-                            {
-                                Action = command.Action,
-                                PlexLibraryType = PlexMediaType.TvShow,
-                                PlexLibraryId = plexLibraryId,
-                                Step = 2,
-                                Percentage = progress.Percentage,
-                                TimeRemaining = progress.TimeRemaining,
-                            }
-                        )
-                ),
+                new GetAllMediaSeasonsCommand(plexLibrary),
                 cancellationToken
             );
 
             if (rawSeasonDataResult.IsFailed)
+            {
+                await _librarySyncProgressStore.UpdateErrorAsync(
+                    plexLibraryId,
+                    rawSeasonDataResult.ToResult(),
+                    cancellationToken
+                );
                 return rawSeasonDataResult.ToResult();
+            }
 
             // Phase 3 of 5: Episode data was retrieved successfully.
             var rawEpisodesDataResult = await _commandExecutor.Send(
-                new GetAllMediaEpisodesCommand(
-                    plexLibrary,
-                    progress =>
-                        _progressReporter.SendProgress(
-                            new RefreshLibraryProgressUpdate
-                            {
-                                Action = command.Action,
-                                PlexLibraryType = PlexMediaType.TvShow,
-                                PlexLibraryId = plexLibraryId,
-                                Step = 3,
-                                Percentage = progress.Percentage,
-                                TimeRemaining = progress.TimeRemaining,
-                            }
-                        )
-                ),
+                new GetAllMediaEpisodesCommand(plexLibrary),
                 cancellationToken
             );
             if (rawEpisodesDataResult.IsFailed)
+            {
+                await _librarySyncProgressStore.UpdateErrorAsync(
+                    plexLibraryId,
+                    rawEpisodesDataResult.ToResult(),
+                    cancellationToken
+                );
                 return rawEpisodesDataResult.ToResult();
+            }
 
             _log.Here()
                 .Information("Merging all data received from PlexApi for library {PlexLibraryName}", plexLibrary.Name);
@@ -119,38 +102,20 @@ public class RefreshPlexTvShowLibraryCommandHandler
             var rawSeasonData = rawSeasonDataResult.Value;
             var rawEpisodesData = rawEpisodesDataResult.Value;
 
-            // Phase 4 of 5: PlexLibrary media data was parsed successfully.
             BuildTvShowTree(plexLibrary, plexLibrary.TvShows, rawSeasonData, rawEpisodesData);
 
-            await _progressReporter.SendProgress(
-                new RefreshLibraryProgressUpdate
-                {
-                    Action = command.Action,
-                    PlexLibraryType = PlexMediaType.TvShow,
-                    PlexLibraryId = plexLibrary.Id,
-                    Step = 4,
-                    Percentage = 1,
-                }
-            );
-
-            // Update the MetaData of this library
+            // Write all the tv-show, season and episode to the database
             var syncResult = await _commandExecutor.Send(
                 new SyncPlexTvShowsCommand(command.LibraryMetadata),
                 cancellationToken
             );
             if (syncResult.IsFailed)
             {
-                await _progressReporter.SendProgress(
-                    new RefreshLibraryProgressUpdate
-                    {
-                        Action = command.Action,
-                        PlexLibraryType = PlexMediaType.TvShow,
-                        PlexLibraryId = plexLibrary.Id,
-                        Step = 5,
-                        Percentage = 1,
-                    }
+                await _librarySyncProgressStore.UpdateErrorAsync(
+                    plexLibraryId,
+                    syncResult.ToResult(),
+                    cancellationToken
                 );
-
                 return syncResult.ToResult().LogError();
             }
 
@@ -161,16 +126,41 @@ public class RefreshPlexTvShowLibraryCommandHandler
                     stopwatch.Elapsed.TotalSeconds
                 );
 
-            // Phase 5 of 5: Database has been successfully updated with new library data.
-            await _progressReporter.SendProgress(
-                new RefreshLibraryProgressUpdate
+            var totalTvShows = plexLibrary.TvShows.Count;
+            var totalSeasons = plexLibrary.TvShows.Sum(x => x.ChildCount);
+            var totalEpisodes = plexLibrary.TvShows.Sum(x => x.GrandChildCount);
+            await _librarySyncProgressStore.UpdateItemAsync(
+                plexLibraryId,
+                new LibraryProgressItem
                 {
-                    Action = command.Action,
-                    PlexLibraryType = PlexMediaType.TvShow,
-                    PlexLibraryId = plexLibrary.Id,
-                    Step = 5,
-                    Percentage = 1,
-                }
+                    MediaType = PlexMediaType.TvShow,
+                    Received = totalTvShows,
+                    Total = totalTvShows,
+                    TimeRemaining = TimeSpan.Zero,
+                },
+                cancellationToken
+            );
+            await _librarySyncProgressStore.UpdateItemAsync(
+                plexLibraryId,
+                new LibraryProgressItem
+                {
+                    MediaType = PlexMediaType.Season,
+                    Received = totalSeasons,
+                    Total = totalSeasons,
+                    TimeRemaining = TimeSpan.Zero,
+                },
+                cancellationToken
+            );
+            await _librarySyncProgressStore.UpdateItemAsync(
+                plexLibraryId,
+                new LibraryProgressItem
+                {
+                    MediaType = PlexMediaType.Episode,
+                    Received = totalEpisodes,
+                    Total = totalEpisodes,
+                    TimeRemaining = TimeSpan.Zero,
+                },
+                cancellationToken
             );
         }
         else

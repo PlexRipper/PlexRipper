@@ -1,14 +1,44 @@
 <template>
 	<q-card flat>
 		<q-card-section>
-			<MediaPosterImage
-				:media-item="mediaItem"
-				:active="active"
-				:all-media-mode="mediaOverviewStore.allMediaMode"
-				overlay
-				actions
-				@download="onDownload"
-				@open-media-details="$emit('open-media-details', mediaItem)" />
+			<div class="media-poster-image-wrapper">
+				<MediaPosterImage
+					:media-item="mediaItem"
+					:active="active"
+					:all-media-mode="mediaOverviewStore.allMediaMode"
+					overlay
+					actions
+					@download="onDownload"
+					@open-media-details="$emit('open-media-details', mediaItem)" />
+				<!--	Sort value overlay	-->
+				<template v-if="mediaOverviewStore.getIsSorted">
+					<div class="media-poster-sort-overlay">
+						<QFileSize
+							v-if="mediaOverviewStore.getActiveSort.field === MediaSortField.MediaSize"
+							:size="mediaItem.mediaSize"
+							align="center" />
+						<QDuration
+							v-else-if="mediaOverviewStore.getActiveSort.field === MediaSortField.Duration"
+							:value="mediaItem.duration"
+							align="center"
+							short />
+						<QDateTime
+							v-else-if="mediaOverviewStore.getActiveSort.field === MediaSortField.AddedAt"
+							:text="mediaItem.addedAt"
+							align="center"
+							short-date />
+						<QDateTime
+							v-else-if="mediaOverviewStore.getActiveSort.field === MediaSortField.UpdatedAt"
+							:text="mediaItem.updatedAt ?? ''"
+							align="center"
+							short-date />
+						<QText
+							v-else-if="mediaOverviewStore.getActiveSort.field === MediaSortField.Year"
+							:value="mediaItem.year"
+							align="center" />
+					</div>
+				</template>
+			</div>
 			<!--	Quality bar	-->
 			<MediaQuality
 				class="media-poster-quality-bar"
@@ -23,6 +53,7 @@
 <script setup lang="ts">
 import { get } from '@vueuse/core';
 import { type DownloadMediaDTO, type PlexMediaQualityDTO, type PlexMediaSlimDTO, PlexMediaType } from '@dto';
+import { MediaSortField } from '@enums';
 import { useMediaOverviewStore } from '@store';
 
 const mediaOverviewStore = useMediaOverviewStore();
@@ -60,5 +91,27 @@ function onDownload(mediaQualities: PlexMediaQualityDTO[]) {
 
 .media-poster-quality-bar {
   @extend .background-sm;
+}
+
+.media-poster-image-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.media-poster-sort-overlay {
+  @extend .background-lg;
+
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 4px 8px;
+  text-align: center;
+  color: #fff;
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>

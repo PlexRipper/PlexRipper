@@ -14,16 +14,39 @@
 				circular-mode
 				:indeterminate="libraryProgress?.percentage == 0"
 				class="q-my-lg" />
-			<template v-if="libraryProgress?.percentage != 0">
-				<QText
-					:value="$t('components.media-overview.steps-remaining', {
-						index: libraryProgress?.step,
-						total: libraryProgress?.totalSteps,
-					})"
-					align="center" />
+			<div>
 				<QCountdown
+					class="q-my-md"
 					:value="libraryProgress?.timeRemaining ?? ''" />
-			</template>
+				<QRow justify="around">
+					<QCol cols="6">
+						<QRow
+							v-for="item in libraryProgress?.items"
+							:key="item.mediaType"
+							gutter="sm"
+							justify="between"
+							class="library-media-sync-progress-row q-my-sm">
+							<QCol cols="auto">
+								<QMediaTypeIcon
+									class="q-pr-sm"
+									:media-type="item.mediaType"
+									:size="20" />
+							</QCol>
+							<QCol>
+								<QProgressBar
+									:value="item.percentage"
+									:cy="`library-media-sync-progress-row-${item.mediaType}-progress-bar`" />
+							</QCol>
+							<QCol cols="1">
+								<QText
+									:value="`${item.received}/${item.total}`"
+									align="right"
+									:cy="`library-media-sync-progress-row-${item.mediaType}-count`" />
+							</QCol>
+						</QRow>
+					</QCol>
+				</QRow>
+			</div>
 		</QCol>
 	</QRow>
 	<template v-else>
@@ -122,7 +145,6 @@ import {
 	useI18n,
 	useLibraryStore,
 	useMediaOverviewBarDownloadCommandBus,
-	useMediaOverviewSortBus,
 	useMediaOverviewStore,
 	useServerStore,
 	useSettingsStore,
@@ -156,23 +178,22 @@ const refreshingText = computed(() => {
 	});
 });
 
-function resetProgress(isRefreshingValue: boolean) {
+function resetProgress() {
 	libraryStore.updateLibraryProgress({
-		id: mediaOverviewStore.libraryId,
+		plexLibraryId: mediaOverviewStore.libraryId,
 		percentage: 0,
 		received: 0,
 		total: 0,
-		isRefreshing: isRefreshingValue,
 		isComplete: false,
 		timeStamp: '',
 		timeRemaining: '',
-		step: 0,
-		totalSteps: 0,
+		items: [],
+		errors: [],
 	});
 }
 
 function refreshLibrary() {
-	resetProgress(true);
+	resetProgress();
 	useSubscription(
 		libraryStore.reSyncLibrary(mediaOverviewStore.libraryId).subscribe(),
 	);
@@ -210,10 +231,6 @@ useMediaOverviewBarDownloadCommandBus().on(() => {
 	sendMediaOverviewDownloadCommand([downloadCommand]);
 });
 
-useMediaOverviewSortBus().on((event) => {
-	mediaOverviewStore.sortMedia(event);
-});
-
 function onAction(event: IMediaOverviewBarActions) {
 	switch (event) {
 		case 'back':
@@ -241,7 +258,7 @@ function onOptionsClosed(hasChanged: boolean) {
 }
 
 onMounted(() => {
-	resetProgress(false);
+	resetProgress();
 
 	mediaOverviewStore.$patch({
 		libraryId: props.libraryId,
@@ -250,6 +267,7 @@ onMounted(() => {
 	});
 
 	mediaOverviewStore.clearMetaDataFilter();
+	mediaOverviewStore.clearSort();
 
 	// Initial data load
 	useSubscription(mediaOverviewStore.requestMedia().subscribe());
@@ -276,5 +294,19 @@ onMounted(() => {
 .detail-view-container {
   width: 100%;
   overflow: hidden;
+}
+
+.progress-table {
+  margin: 0 auto;
+  border-collapse: collapse;
+
+  td {
+    vertical-align: middle;
+    white-space: nowrap;
+  }
+
+  .progress-bar-cell {
+    width: 250px;
+  }
 }
 </style>

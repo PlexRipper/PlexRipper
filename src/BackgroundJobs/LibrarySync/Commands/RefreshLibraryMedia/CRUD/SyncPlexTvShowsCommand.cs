@@ -86,21 +86,28 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
+    private readonly IReaparrDbContextFactory _dbContextFactory;
 
-    private readonly BulkConfig? _config = new()
-    {
-        BatchSize = 1000,
-        SetOutputIdentity = true,
-        PreserveInsertOrder = true,
-        CalculateStats = true,
-        EnableStreaming = true,
-        UseTempDB = true,
-    };
+    private static BulkConfig CreateBulkConfig() =>
+        new()
+        {
+            BatchSize = 1000,
+            SetOutputIdentity = true,
+            PreserveInsertOrder = true,
+            CalculateStats = true,
+            EnableStreaming = true,
+            UseTempDB = true,
+        };
 
-    public SyncPlexTvShowsCommandHandler(ILogger log, IReaparrDbContext dbContext)
+    public SyncPlexTvShowsCommandHandler(
+        ILogger log,
+        IReaparrDbContext dbContext,
+        IReaparrDbContextFactory dbContextFactory
+    )
     {
         _log = log.ForContext<SyncPlexTvShowsCommandHandler>();
         _dbContext = dbContext;
+        _dbContextFactory = dbContextFactory;
     }
 
     public async Task<Result<BulkInsertTvShowsRapport>> ExecuteAsync(
@@ -148,8 +155,6 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
             }
 
             var bulkInsertRapport = bulkInsertRapportResult.Value;
-
-            // Map the removed media counts to the bulk insert rapport
             bulkInsertRapport.DeletedTvShows = removeRapport.DeletedTvShows;
             bulkInsertRapport.DeletedSeasons = removeRapport.DeletedSeasons;
             bulkInsertRapport.DeletedEpisodes = removeRapport.DeletedEpisodes;
@@ -164,16 +169,21 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
                 mediaSize
             );
 
-            // Sync metadata such as Countries, Roles and Genre
+            // Sync metadata such as Countries, Roles and Genre using separate DbContext instances
+            // to avoid EF Core DbContext thread-safety issues when running in parallel.
             var genreDict = command.LibraryMetadata.PlexGenres;
             var countryDict = command.LibraryMetadata.PlexCountries;
             var actorDict = command.LibraryMetadata.PlexActors;
 
-            await Task.WhenAll(
+            ResultBase[] results = await Task.WhenAll(
                 SyncTvShowGenres(plexTvShows, genreDict, plexLibraryId, plexLibraryName, cancellationToken),
                 SyncTvShowCountries(plexTvShows, countryDict, plexLibraryId, plexLibraryName, cancellationToken),
                 SyncTvShowActors(plexTvShows, actorDict, plexLibraryId, plexLibraryName, cancellationToken)
             );
+
+            var mergeResult = Result.Merge(results);
+            if (mergeResult.IsFailed)
+                return mergeResult.LogError();
 
             stopWatch.Stop();
 
@@ -203,6 +213,8 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
         CancellationToken cancellationToken
     )
     {
+        using var dbContext = await _dbContextFactory.CreateAsync();
+
         _log.Here()
             .Debug(
                 "Starting syncing of TV show genres for library: {LibraryName} with id: {LibraryId}",
@@ -211,7 +223,7 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
             );
         var stopWatch = Stopwatch.StartNew();
 
-        await _dbContext
+        await dbContext
             .PlexTvShowGenres.Where(x => x.PlexLibraryId == plexLibraryId)
             .ExecuteDeleteAsync(cancellationToken);
 
@@ -229,9 +241,9 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
 
         var distinctGenres = plexTvShowGenres.DistinctBy(x => new { x.PlexTvShowId, x.GenresId }).ToList();
         var insertResult = await Result.Try(() =>
-            _dbContext.BulkInsertAsync(distinctGenres, _config, cancellationToken)
+            dbContext.BulkInsertAsync(distinctGenres, CreateBulkConfig(), cancellationToken)
         );
-        await _dbContext
+        await dbContext
             .PlexLibraries.Where(x => x.Id == plexLibraryId)
             .ExecuteUpdateAsync(p => p.SetProperty(x => x.GenresCount, distinctGenres.Count), cancellationToken);
 
@@ -250,6 +262,8 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
         CancellationToken cancellationToken
     )
     {
+        using var dbContext = await _dbContextFactory.CreateAsync();
+
         _log.Here()
             .Debug(
                 "Starting syncing of TV show countries for library: {LibraryName} with id: {LibraryId}",
@@ -258,7 +272,7 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
             );
         var stopWatch = Stopwatch.StartNew();
 
-        await _dbContext
+        await dbContext
             .PlexTvShowCountries.Where(x => x.PlexLibraryId == plexLibraryId)
             .ExecuteDeleteAsync(cancellationToken);
 
@@ -277,10 +291,10 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
         var distinctCountries = plexTvShowCountries.DistinctBy(x => new { x.PlexTvShowId, x.CountryId }).ToList();
 
         var insertResult = await Result.Try(() =>
-            _dbContext.BulkInsertAsync(distinctCountries, _config, CancellationToken.None)
+            dbContext.BulkInsertAsync(distinctCountries, CreateBulkConfig(), cancellationToken)
         );
 
-        await _dbContext
+        await dbContext
             .PlexLibraries.Where(x => x.Id == plexLibraryId)
             .ExecuteUpdateAsync(p => p.SetProperty(x => x.CountriesCount, distinctCountries.Count), cancellationToken);
 
@@ -299,6 +313,8 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
         CancellationToken cancellationToken
     )
     {
+        using var dbContext = await _dbContextFactory.CreateAsync();
+
         _log.Here()
             .Debug(
                 "Starting syncing of TV show actors for library: {LibraryName} with id: {LibraryId}",
@@ -307,7 +323,7 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
             );
         var stopWatch = Stopwatch.StartNew();
 
-        await _dbContext
+        await dbContext
             .PlexTvShowActors.Where(x => x.PlexLibraryId == plexLibraryId)
             .ExecuteDeleteAsync(cancellationToken);
 
@@ -325,9 +341,9 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
 
         var distinctActors = plexTvShowRoles.DistinctBy(x => new { x.PlexTvShowId, RolesId = x.PlexActorId }).ToList();
         var insertResult = await Result.Try(() =>
-            _dbContext.BulkInsertAsync(distinctActors, _config, cancellationToken)
+            dbContext.BulkInsertAsync(distinctActors, CreateBulkConfig(), cancellationToken)
         );
-        await _dbContext
+        await dbContext
             .PlexLibraries.Where(x => x.Id == plexLibraryId)
             .ExecuteUpdateAsync(p => p.SetProperty(x => x.ActorsCount, distinctActors.Count), cancellationToken);
 

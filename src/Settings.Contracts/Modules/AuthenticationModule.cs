@@ -1,21 +1,21 @@
 namespace Reaparr.Settings.Contracts;
 
-public record AuthenticationModule : BaseSettingsModule<AuthenticationModule>, IAuthenticationSettings
+public record AuthenticationModule
+    : BaseSettingsModule<AuthenticationModule>,
+        IBaseSettingsModule<AuthenticationModule>,
+        IAuthenticationSettings
 {
-    private bool _resetCredentials;
-    private HeaderAuthenticationSettings _headerAuthentication = HeaderAuthenticationSettings.Create();
-
     public required bool ResetCredentials
     {
-        get => _resetCredentials;
-        set => SetProperty(ref _resetCredentials, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public required HeaderAuthenticationSettings HeaderAuthentication
     {
-        get => _headerAuthentication;
-        set => SetProperty(ref _headerAuthentication, value);
-    }
+        get;
+        set => SetProperty(ref field, value);
+    } = HeaderAuthenticationSettings.Create();
 
     /// <summary>
     /// When true, will reset the Reaparr app credentials and then set to false again.

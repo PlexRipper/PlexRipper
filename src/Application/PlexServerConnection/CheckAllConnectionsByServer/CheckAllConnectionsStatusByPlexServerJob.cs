@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Quartz;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
+using Reaparr.SignalR.Contracts;
 
 namespace Reaparr.Application;
 
@@ -14,7 +15,7 @@ public class CheckAllConnectionsStatusByPlexServerJob : IJob
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
-    private readonly ISignalRService _signalRService;
+    private readonly IProgressHubService _progressHubService;
 
     public static JobKey GetJobKey() =>
         new(nameof(CheckAllConnectionsStatusByPlexServerJob), nameof(CheckAllConnectionsStatusByPlexServerJob));
@@ -23,13 +24,13 @@ public class CheckAllConnectionsStatusByPlexServerJob : IJob
         ILogger log,
         IReaparrDbContext dbContext,
         ICommandExecutor commandExecutor,
-        ISignalRService signalRService
+        IProgressHubService progressHubService
     )
     {
         _log = log.ForContext<CheckAllConnectionsStatusByPlexServerJob>();
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;
-        _signalRService = signalRService;
+        _progressHubService = progressHubService;
     }
 
     public async Task Execute(IJobExecutionContext context)
@@ -60,7 +61,7 @@ public class CheckAllConnectionsStatusByPlexServerJob : IJob
                 }
             );
 
-            await _signalRService.SendJobStatusUpdateAsync(update);
+            await _progressHubService.SendJobStatusUpdateAsync(update);
 
             await Task.WhenAll(
                 plexServers.Select(async plexServer =>
@@ -73,7 +74,7 @@ public class CheckAllConnectionsStatusByPlexServerJob : IJob
 
             // Send completed job status update
             update.Status = JobStatus.Completed;
-            await _signalRService.SendJobStatusUpdateAsync(update);
+            await _progressHubService.SendJobStatusUpdateAsync(update);
 
             _log.Here()
                 .Debug(

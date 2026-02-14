@@ -80,6 +80,8 @@ export function generatePlexLibrariesFromPlexServers({
 	config?: Partial<MockConfig>;
 	seed: Seed;
 }): PlexLibraryDTO[] {
+	const validConfig = checkConfig(config);
+
 	return plexServers
 		.map((x) => {
 			return [
@@ -88,12 +90,21 @@ export function generatePlexLibrariesFromPlexServers({
 					type: PlexMediaType.Movie,
 					config,
 					plexServerId: x.id,
+					partialData: {
+						count: validConfig.movieCount,
+					},
+
 				}),
 				...generatePlexLibraries({
 					seed,
 					type: PlexMediaType.TvShow,
 					config,
 					plexServerId: x.id,
+					partialData: {
+						count: validConfig.tvShowCount,
+						seasonCount: validConfig.tvShowCount * validConfig.seasonCount,
+						episodeCount: validConfig.tvShowCount * validConfig.seasonCount * validConfig.episodeCount,
+					},
 				}),
 			];
 		})

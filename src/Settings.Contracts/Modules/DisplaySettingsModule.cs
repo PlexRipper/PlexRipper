@@ -1,13 +1,12 @@
-﻿using Reaparr.Domain;
+using Reaparr.Domain;
 
 namespace Reaparr.Settings.Contracts;
 
-public record DisplaySettingsModule : BaseSettingsModule<DisplaySettingsModule>, IDisplaySettings
+public record DisplaySettingsModule
+    : BaseSettingsModule<DisplaySettingsModule>,
+        IBaseSettingsModule<DisplaySettingsModule>,
+        IDisplaySettings
 {
-    private ViewMode _tvShowViewMode = ViewMode.Poster;
-    private ViewMode _movieViewMode = ViewMode.Poster;
-    private PlexMediaType _allOverviewViewMode = PlexMediaType.Movie;
-
     public static DisplaySettingsModule Create() =>
         new()
         {
@@ -18,19 +17,19 @@ public record DisplaySettingsModule : BaseSettingsModule<DisplaySettingsModule>,
 
     public required ViewMode TvShowViewMode
     {
-        get => _tvShowViewMode;
-        set => SetProperty(ref _tvShowViewMode, value);
-    }
+        get;
+        set => SetProperty(ref field, value);
+    } = ViewMode.Poster;
 
     public required ViewMode MovieViewMode
     {
-        get => _movieViewMode;
-        set => SetProperty(ref _movieViewMode, value);
-    }
+        get;
+        set => SetProperty(ref field, value);
+    } = ViewMode.Poster;
 
     public required PlexMediaType AllOverviewViewMode
     {
-        get => _allOverviewViewMode;
-        set => SetProperty(ref _allOverviewViewMode, value);
-    }
+        get;
+        set => SetProperty(ref field, value);
+    } = PlexMediaType.Movie;
 }

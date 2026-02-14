@@ -1,25 +1,22 @@
-﻿namespace Reaparr.Settings.Contracts;
+namespace Reaparr.Settings.Contracts;
 
 public record DownloadManagerSettingsModule
     : BaseSettingsModule<DownloadManagerSettingsModule>,
+        IBaseSettingsModule<DownloadManagerSettingsModule>,
         IDownloadManagerSettings
 {
-    private int _downloadSegments = 4;
-
-    private bool _keepCompletedInDownloadFolder;
-
     public static DownloadManagerSettingsModule Create() =>
         new() { DownloadSegments = 4, KeepCompletedInDownloadFolder = false };
 
     public required int DownloadSegments
     {
-        get => _downloadSegments;
-        set => SetProperty(ref _downloadSegments, value);
-    }
+        get;
+        set => SetProperty(ref field, value);
+    } = 4;
 
     public required bool KeepCompletedInDownloadFolder
     {
-        get => _keepCompletedInDownloadFolder;
-        set => SetProperty(ref _keepCompletedInDownloadFolder, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 }

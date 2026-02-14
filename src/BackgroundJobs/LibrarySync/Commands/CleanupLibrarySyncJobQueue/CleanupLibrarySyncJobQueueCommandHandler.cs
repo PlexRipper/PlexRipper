@@ -1,9 +1,9 @@
 using FastEndpoints;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using Reaparr.Application.Contracts;
 using Reaparr.BackgroundJobs.Contracts;
 using Reaparr.Data.Contracts;
+using Reaparr.SignalR.Contracts;
 
 namespace Reaparr.BackgroundJobs;
 
@@ -19,17 +19,17 @@ public class CleanupLibrarySyncJobQueueCommandHandler : ICommandHandler<CleanupL
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
-    private readonly ISignalRService _signalRService;
+    private readonly INotificationHubService _notificationHubService;
 
     public CleanupLibrarySyncJobQueueCommandHandler(
         ILogger log,
         IReaparrDbContext dbContext,
-        ISignalRService signalRService
+        INotificationHubService notificationHubService
     )
     {
         _log = log.ForContext<CleanupLibrarySyncJobQueueCommandHandler>();
         _dbContext = dbContext;
-        _signalRService = signalRService;
+        _notificationHubService = notificationHubService;
     }
 
     public async Task<Result> ExecuteAsync(
@@ -49,7 +49,10 @@ public class CleanupLibrarySyncJobQueueCommandHandler : ICommandHandler<CleanupL
             )
             .ResetJobsToQueuedAsync(cancellationToken);
 
-        await _signalRService.SendRefreshNotificationAsync([RefreshDataType.PlexLibrarySyncStatus], cancellationToken);
+        await _notificationHubService.SendRefreshNotificationAsync(
+            [RefreshDataType.PlexLibrarySyncStatus],
+            cancellationToken
+        );
 
         _log.Here().Debug("Cleaned up library sync job queue.");
 

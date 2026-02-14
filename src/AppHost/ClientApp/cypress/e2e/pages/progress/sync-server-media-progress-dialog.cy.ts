@@ -4,8 +4,9 @@ import {
 	type LibrarySyncJobQueueDTO,
 	LibrarySyncJobStatus,
 	MessageTypes,
+	PlexMediaType,
 } from '@dto';
-import { generateLibraryProgress, generateLibrarySyncJobQueue } from '@factories';
+import { generateLibrarySyncProgress, generateLibrarySyncJobQueue, generateLibrarySyncProgressItem } from '@factories';
 import { generateResultDTO } from '@mock';
 import { PlexLibraryPaths } from '@api/api-paths';
 
@@ -73,10 +74,12 @@ describe('SyncServerMediaDialog', () => {
 			// === PHASE 3: Simulate progress updates from 0% to 100% ===
 			// Send initial 0% progress
 			librariesToSync.forEach(({ library }) => {
-				cy.hubPublish('progress', MessageTypes.LibraryProgress, generateLibraryProgress({
+				cy.hubPublish('progress', MessageTypes.LibraryProgress, generateLibrarySyncProgress({
+					type: PlexMediaType.Movie,
 					libraryId: library.id,
 					received: 0,
 					total: 1000,
+					items: [generateLibrarySyncProgressItem(PlexMediaType.Movie, { received: 0, total: 1000 })],
 				}));
 			});
 
@@ -92,10 +95,12 @@ describe('SyncServerMediaDialog', () => {
 			[250, 500, 750, 1000].forEach((received) => {
 				cy.wait(300).then(() => {
 					librariesToSync.forEach(({ library }) => {
-						cy.hubPublish('progress', MessageTypes.LibraryProgress, generateLibraryProgress({
+						cy.hubPublish('progress', MessageTypes.LibraryProgress, generateLibrarySyncProgress({
+							type: PlexMediaType.Movie,
 							libraryId: library.id,
 							received,
 							total: 1000,
+							items: [generateLibrarySyncProgressItem(PlexMediaType.Movie, { received, total: 1000 })],
 						}));
 					});
 				});

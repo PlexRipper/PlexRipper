@@ -30,6 +30,24 @@ export class Integration {
   /**
    * No description
    * * @tags Integration
+   * @name ClearRadarrConfigurationEndpoint
+   * @request DELETE:/api/Integration/Radarr/Configuration
+   * @secure
+   */
+  clearRadarrConfigurationEndpoint = (params: RequestParams = {}) =>
+    from(
+      Axios.request<BaseResultDTO>({
+        url: `/api/Integration/Radarr/Configuration`,
+        method: "DELETE",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+    ).pipe(apiCheckPipe<BaseResultDTO>);
+
+  /**
+   * No description
+   * * @tags Integration
    * @name ConfigureRadarrIntegrationEndpoint
    * @request POST:/api/Integration/Radarr/Configure
    * @secure
@@ -74,6 +92,24 @@ export class Integration {
         ...params,
       }),
     ).pipe(apiCheckPipe<TestConnectionToRadarrEndpointResponse>);
+
+  /**
+   * No description
+   * * @tags Integration
+   * @name ClearSonarrConfigurationEndpoint
+   * @request DELETE:/api/Integration/Sonarr/Configuration
+   * @secure
+   */
+  clearSonarrConfigurationEndpoint = (params: RequestParams = {}) =>
+    from(
+      Axios.request<BaseResultDTO>({
+        url: `/api/Integration/Sonarr/Configuration`,
+        method: "DELETE",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+    ).pipe(apiCheckPipe<BaseResultDTO>);
 
   /**
    * No description
@@ -125,6 +161,9 @@ export class Integration {
 }
 
 export class IntegrationPaths {
+  static clearRadarrConfigurationEndpoint = () =>
+    queryString.stringifyUrl({ url: `/api/Integration/Radarr/Configuration` });
+
   static configureRadarrIntegrationEndpoint = () =>
     queryString.stringifyUrl({ url: `/api/Integration/Radarr/Configure` });
 
@@ -136,6 +175,9 @@ export class IntegrationPaths {
       url: `/api/Integration/Radarr/TestConnection`,
       query,
     });
+
+  static clearSonarrConfigurationEndpoint = () =>
+    queryString.stringifyUrl({ url: `/api/Integration/Sonarr/Configuration` });
 
   static configureSonarrIntegrationEndpoint = () =>
     queryString.stringifyUrl({ url: `/api/Integration/Sonarr/Configure` });

@@ -107,8 +107,6 @@ onMounted(() => {
 			Log.error('Could not find container with reference: ', get(posterTableRef));
 			return;
 		}
-		// We have to revert to normal title sort otherwise the index will be wrong
-		mediaOverviewStore.clearSort();
 
 		const index = mediaOverviewStore.scrollDict[letter] ?? 0;
 		set(scrolledIndex, index);

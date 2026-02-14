@@ -8,11 +8,14 @@
 			justify="between"
 			align="center"
 			class="q-my-md">
-			<!-- Language Selector -->
+			<!-- Language Selector + Background Toggle -->
 			<QCol cols="2">
-				<LanguageSelect
-					class="q-ml-md"
-					dense />
+				<QRow no-wrap>
+					<LanguageSelect
+						class="q-ml-md"
+						dense />
+					<AnimatedBackgroundToggleButton class="q-ml-sm" />
+				</QRow>
 			</QCol>
 			<!-- Navigation buttons -->
 			<QCol>

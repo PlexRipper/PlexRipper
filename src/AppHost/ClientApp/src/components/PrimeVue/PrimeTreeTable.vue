@@ -1,23 +1,23 @@
 <template>
 	<TreeTable
+		:page-link-size="10"
+		:paginator="true"
+		:row-hover="true"
+		:rows="10"
+		:rows-per-page-options="[10, 25, 50, 100]"
+		:selection-keys="selected"
 		:value="nodes"
 		auto-layout
-		:selection-keys="selected"
-		selection-mode="checkbox"
-		:paginator="true"
-		:rows="10"
-		scrollable
-		scroll-height="flex"
 		paginator-position="both"
-		:page-link-size="10"
-		:row-hover="true"
+		scroll-height="flex"
+		scrollable
+		selection-mode="checkbox"
 		size="small"
-		:rows-per-page-options="[10, 25, 50, 100]"
 		@update:selection-keys="onSelectionChange">
 		<Column
+			expander
 			field="title"
-			header="Title"
-			expander>
+			header="Title">
 			<template #header>
 				<QCheckbox
 					:model-value="headerSelected"
@@ -26,8 +26,8 @@
 			<template #body="{ node }: { node: IDownloadTableNode }">
 				<QMediaTypeIcon
 					v-if="node.mediaType"
-					:size="26"
-					:media-type="node.mediaType" />
+					:media-type="node.mediaType"
+					:size="26" />
 				<QText
 					:cy="`column-title-${node.id}`"
 					:value="node.title" />
@@ -81,9 +81,9 @@
 			style="max-width: 10rem">
 			<template #body="{ node }: { node: IDownloadTableNode }">
 				<QDuration
-					short
 					:cy="`column-timeRemaining-${node.id}`"
-					:value="node.timeRemaining" />
+					:value="node.timeRemaining"
+					short />
 			</template>
 		</Column>
 		<Column
@@ -109,11 +109,11 @@
 						<IconSquareButton
 							v-for="action in node.actions"
 							:key="`${node.id}-${kebabCase(action.type)}`"
-							dense
-							:disabled="action.disabled"
-							:loading="action.loading"
 							:cy="`column-actions-${kebabCase(action.type)}-${node.id}`"
+							:disabled="action.disabled"
 							:icon="toButtonIcon(action.type)"
+							:loading="action.loading"
+							dense
 							@click.stop="
 								$emit('action', {
 									action: action.type,
@@ -127,7 +127,7 @@
 	</TreeTable>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import type { TreeTableSelectionKeys } from 'primevue/treetable';
 import type { QTreeViewTableHeader } from '@props';
 import type { IDownloadTableNode, IPTreeTableSelectionKeys } from '@interfaces';
@@ -191,6 +191,8 @@ const emits = defineEmits<{
 </script>
 
 <style lang="scss">
+@use '@/assets/scss/variables' as *;
+
 .p-treetable {
   table {
     white-space: nowrap;
@@ -221,13 +223,55 @@ const emits = defineEmits<{
     }
   }
 
-  .p-checkbox-box {
-    &.p-highlight {
-      border-color: red;
+  .p-checkbox {
+    .p-checkbox-box {
+      border-width: 2px;
+      border-color: rgba(255, 255, 255, 0.69);
+      border-radius: 0.125rem;
+
+    }
+
+    &[data-p-checked="false"][data-p-partialchecked="false"]:hover {
+      .p-checkbox-box {
+        border-color: $primary;
+      }
     }
 
     .p-checkbox-icon {
-      color: white;
+      display: none !important;
+    }
+
+    // CHECKED: Quasar checkmark
+    &[data-p-checked="true"] {
+      .p-checkbox-box {
+        border-color: transparent;
+
+        &::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background-color: currentColor;
+          -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='%23000' stroke-width='3' stroke-linecap='round' stroke-linejoin='round' d='M1.73 12.91 8.1 19.28 22.79 4.59'/%3E%3C/svg%3E") no-repeat center / 70% 70%;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='%23000' stroke-width='3' stroke-linecap='round' stroke-linejoin='round' d='M1.73 12.91 8.1 19.28 22.79 4.59'/%3E%3C/svg%3E") no-repeat center / 70% 70%;
+        }
+      }
+    }
+
+    // PARTIAL: Quasar indeterminate bar
+    &[data-p-partialchecked="true"] {
+      .p-checkbox-box {
+        border-color: transparent;
+        background-color: var(--p-checkbox-checked-background);
+
+        &::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background-color: currentColor;
+          -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 14H20V10H4Z'/%3E%3C/svg%3E") no-repeat center / 75% 75%;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 14H20V10H4Z'/%3E%3C/svg%3E") no-repeat center / 75% 75%;
+        }
+      }
     }
   }
 

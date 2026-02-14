@@ -14,6 +14,7 @@
         <ProjectReference Include="..\Domain\Domain.csproj" />
         <Compile Include="..\Domain\GlobalUsings.cs" />
         <ProjectReference Include="..\PlexApi.Contracts\PlexApi.Contracts.csproj" />
+        <ProjectReference Include="..\SignalR.Contracts\SignalR.Contracts.csproj" />
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Jason.Landbridge.Autofac.Extras.Quartz" Version="9.0.3" />

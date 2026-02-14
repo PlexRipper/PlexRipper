@@ -3,6 +3,7 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
+using Reaparr.SignalR.Contracts;
 
 namespace Reaparr.Application;
 
@@ -20,15 +21,19 @@ public class DeletePlexAccountByIdEndpoint : BaseEndpoint<DeletePlexAccountByIdR
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
-    private readonly ISignalRService _signalRService;
+    private readonly INotificationHubService _notificationHubService;
 
     public override string EndpointPath => ApiRoutes.PlexAccountController + "/{PlexAccountId}";
 
-    public DeletePlexAccountByIdEndpoint(ILogger log, IReaparrDbContext dbContext, ISignalRService signalRService)
+    public DeletePlexAccountByIdEndpoint(
+        ILogger log,
+        IReaparrDbContext dbContext,
+        INotificationHubService notificationHubService
+    )
     {
         _log = log.ForContext<DeletePlexAccountByIdEndpoint>();
         _dbContext = dbContext;
-        _signalRService = signalRService;
+        _notificationHubService = notificationHubService;
     }
 
     public override void Configure()
@@ -83,7 +88,7 @@ public class DeletePlexAccountByIdEndpoint : BaseEndpoint<DeletePlexAccountByIdR
                 deletedLibrariesCount
             );
 
-        await _signalRService.SendRefreshNotificationAsync(
+        await _notificationHubService.SendRefreshNotificationAsync(
             [
                 RefreshDataType.PlexAccount,
                 RefreshDataType.PlexServer,

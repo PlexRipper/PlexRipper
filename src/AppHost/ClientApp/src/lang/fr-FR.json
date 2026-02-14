@@ -78,7 +78,6 @@
             "could-not-display": "Impossible de trouver une bibliothèque disponible.",
             "no-data": "La bibliothèque a été synchronisée mais ne contient aucun média.",
             "library-not-yet-synced": "Les données multimédias de la bibliothèque n'ont pas encore été synchronisées. Veuillez patienter ou actualiser maintenant.",
-            "steps-remaining": "Étape {index} sur {total}:",
             "no-search-results": "Aucun média contenant \"{query}\" n'a été trouvé",
             "no-media-items-available": "Aucun élément multimédia trouvé!",
             "no-filter-results": "Aucun résultat multimédia ne correspond aux paramètres de filtre actuels. Veuillez ajuster ou réinitialiser vos filtres pour afficher les résultats disponibles."
@@ -454,7 +453,18 @@
             "download": "Télécharger",
             "refresh": "Rafraîchir",
             "view": "Voir",
-            "media-options": "Possibilités"
+            "media-options": "Possibilités",
+            "sort": "Trier"
+        },
+        "sort": {
+            "clear": "Effacer le tri",
+            "title": "Titre",
+            "year": "Année",
+            "added-at": "Ajouté",
+            "updated-at": "Mis à jour",
+            "duration": "Durée",
+            "size": "Taille",
+            "quality": "Qualité"
         },
         "units": {
             "per-second": "/s"
@@ -575,16 +585,6 @@
                         "text": "L'activation du mode de débogage affichera plus d'informations que d'habitude dans diverses zones de l'interface utilisateur.",
                         "title": "Mode débogage",
                         "label": "Mode débogage"
-                    },
-                    "mask-plex-libraries": {
-                        "label": "Masquer les noms de bibliothèque Plex",
-                        "text": "Cela masquera les noms des bibliothèques Plex dans l'interface utilisateur. Ceci est utile lors de la prise de captures d'écran anonymes",
-                        "title": "Masquer les noms de bibliothèque Plex"
-                    },
-                    "mask-plex-servers": {
-                        "label": "Masquer les noms de serveur Plex",
-                        "text": "Cela masquera les noms des serveurs Plex dans l'interface utilisateur. Ceci est utile lors de la prise de captures d'écran anonymes.",
-                        "title": "Masquer les noms de serveur Plex"
                     }
                 },
                 "reset-db": {
@@ -600,39 +600,24 @@
                     }
                 }
             },
-            "accounts": {
-                "app-username": {
-                    "text": "Entrez le nom d'utilisateur que vous utiliserez pour vous connecter à Reaparr.",
-                    "title": "Nom d'utilisateur Reaparr",
-                    "label": "Nom d'utilisateur"
-                },
-                "app-confirm-password": {
-                    "label": "Confirmez le mot de passe"
-                },
-                "app-password": {
-                    "label": "Mot de passe",
-                    "text": "Entrez le mot de passe que vous utiliserez pour vous connecter en toute sécurité à Reaparr.",
-                    "title": "Mot de passe Reaparr"
-                }
-            },
-            "paths": {
-                "download-folder": {
-                    "label": "Dossier de téléchargement",
-                    "text": "Le dossier où tout les fichiers vont être téléchargé en plusieurs parties avant d'être réassemblé en un seul dans le dossier de destination.",
-                    "title": "Dossier de téléchargement"
-                },
-                "movie-folder": {
-                    "label": "Dossier des film",
-                    "text": "Le dossier par défaut des films quant aucun dossier personnalisé n'a été sélectionné.",
-                    "title": "Dossier des film"
-                },
-                "tv-show-folder": {
-                    "label": "Dossier des série",
-                    "text": "Le dossier par défaut des séries quant aucun dossier personnalisé n'a été sélectionné.",
-                    "title": "Dossier des série"
-                }
-            },
             "ui": {
+                "general-settings": {
+                    "mask-plex-libraries": {
+                        "label": "Masquer les noms de bibliothèque Plex",
+                        "text": "Cela masquera les noms des bibliothèques Plex dans l'interface utilisateur. Ceci est utile lors de la prise de captures d'écran anonymes",
+                        "title": "Masquer les noms de bibliothèque Plex"
+                    },
+                    "mask-plex-servers": {
+                        "label": "Masquer les noms de serveur Plex",
+                        "text": "Cela masquera les noms des serveurs Plex dans l'interface utilisateur. Ceci est utile lors de la prise de captures d'écran anonymes.",
+                        "title": "Masquer les noms de serveur Plex"
+                    },
+                    "toggle-animated-background": {
+                        "label": "Désactiver l'arrière-plan animé",
+                        "text": "L'arrière-plan animé peut entraîner des problèmes de performances dans le navigateur. Cette bascule peut désactiver l'animation et afficher uniquement un arrière-plan statique.",
+                        "title": "Désactiver l'animation d'arrière-plan"
+                    }
+                },
                 "confirmation-settings": {
                     "download-episode-confirmation": {
                         "label": "Demander confirmation du téléchargement de l'épisode",
@@ -683,13 +668,38 @@
                         "text": "Cela changera la langue de presque tout. Il est peu probable que des textes tels que des erreurs soient traduits. Toutes les corrections de traduction ou de nouvelles langues sont grandement appréciées, consultez www.reaparr.rocks pour plus d'informations sur la façon dont vous pouvez ajouter de nouvelles langues.",
                         "title": "Choisissez votre langue préférée"
                     }
+                }
+            },
+            "accounts": {
+                "app-username": {
+                    "text": "Entrez le nom d'utilisateur que vous utiliserez pour vous connecter à Reaparr.",
+                    "title": "Nom d'utilisateur Reaparr",
+                    "label": "Nom d'utilisateur"
                 },
-                "general-settings": {
-                    "toggle-animated-background": {
-                        "label": "Désactiver l'arrière-plan animé",
-                        "text": "L'arrière-plan animé peut entraîner des problèmes de performances dans le navigateur. Cette bascule peut désactiver l'animation et afficher uniquement un arrière-plan statique.",
-                        "title": "Désactiver l'animation d'arrière-plan"
-                    }
+                "app-confirm-password": {
+                    "label": "Confirmez le mot de passe"
+                },
+                "app-password": {
+                    "label": "Mot de passe",
+                    "text": "Entrez le mot de passe que vous utiliserez pour vous connecter en toute sécurité à Reaparr.",
+                    "title": "Mot de passe Reaparr"
+                }
+            },
+            "paths": {
+                "download-folder": {
+                    "label": "Dossier de téléchargement",
+                    "text": "Le dossier où tout les fichiers vont être téléchargé en plusieurs parties avant d'être réassemblé en un seul dans le dossier de destination.",
+                    "title": "Dossier de téléchargement"
+                },
+                "movie-folder": {
+                    "label": "Dossier des film",
+                    "text": "Le dossier par défaut des films quant aucun dossier personnalisé n'a été sélectionné.",
+                    "title": "Dossier des film"
+                },
+                "tv-show-folder": {
+                    "label": "Dossier des série",
+                    "text": "Le dossier par défaut des séries quant aucun dossier personnalisé n'a été sélectionné.",
+                    "title": "Dossier des série"
                 }
             },
             "integrations": {
@@ -703,6 +713,10 @@
                         "label": "URL de base de Sonarr",
                         "text": "Adresse de base où votre instance Sonarr est accessible. Exemple: http://localhost:8989 ou http://sonarr:8989",
                         "title": "URL de base vers Sonarr"
+                    },
+                    "clear-configuration": {
+                        "text": "Efface la configuration Sonarr de Reaparr et réinitialise l'URL de base et la clé API.",
+                        "title": "Effacer la configuration de Sonarr"
                     },
                     "setup-configuration": {
                         "text": "Reaparr configure un indexeur et un client de téléchargement dans Sonarr, permettant ainsi à Sonarr de déclencher les téléchargements.\n\nPour plus d'informations, consultez le [Guide d'intégration Sonarr/Radarr](https://www.reaparr.rocks/guides/integration/sonarr-radarr).",
@@ -723,6 +737,10 @@
                         "label": "URL de base de Radarr",
                         "text": "Adresse de base où votre instance Radarr est accessible. Exemple: http://localhost:7878 ou http://radarr:7878",
                         "title": "URL de base vers Radarr"
+                    },
+                    "clear-configuration": {
+                        "text": "Efface la configuration Radarr de Reaparr et réinitialise l'URL de base et la clé API.",
+                        "title": "Configuration Clear Radarr"
                     },
                     "setup-configuration": {
                         "text": "Reaparr configure un indexeur et un client de téléchargement dans Radarr, permettant ainsi à Radarr de déclencher les téléchargements.\n\nPour plus d'informations, consultez le [Guide d'intégration Sonarr/Radarr](https://www.reaparr.rocks/guides/integration/sonarr-radarr).",
@@ -810,7 +828,8 @@
                     "header": "Général"
                 },
                 "un-hide-servers-section": {
-                    "header": "Afficher les serveurs Plex"
+                    "header": "Afficher les serveurs Plex",
+                    "no-servers-hidden": "Aucun serveur Plex n'est actuellement masqué. Pour masquer un serveur, accédez aux Paramètres du serveur et cliquez sur Masquer. Les serveurs masqués apparaîtront alors ici, et vous pourrez les afficher."
                 }
             }
         },

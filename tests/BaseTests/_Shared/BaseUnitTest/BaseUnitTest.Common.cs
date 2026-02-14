@@ -4,6 +4,7 @@ using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 using Reaparr.Environment;
 using Reaparr.Identity.Contracts;
+using Reaparr.SignalR.Contracts;
 using Serilog.Events;
 
 namespace Reaparr.BaseTests;
@@ -54,7 +55,9 @@ public partial class BaseUnitTest
                 s.AddTransient(_ => Mock.Create<IAuthDbContext>());
                 s.AddTransient(_ => Mock.Create<ICommandExecutor>());
                 s.AddSingleton(_ => Mock.Create<ISchedulerService>());
-                s.AddSingleton(_ => Mock.Mock<ISignalRService>().Object);
+                s.AddSingleton(_ => Mock.Mock<IProgressHubService>().Object);
+                s.AddSingleton(_ => Mock.Mock<IDownloadHubService>().Object);
+                s.AddSingleton(_ => Mock.Mock<INotificationHubService>().Object);
             });
         });
     }

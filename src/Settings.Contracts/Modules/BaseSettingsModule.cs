@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace Reaparr.Settings.Contracts;
 
-public record BaseSettingsModule<TModel>
+public abstract record BaseSettingsModule<TModel>
     where TModel : class
 {
     protected BaseSettingsModule()

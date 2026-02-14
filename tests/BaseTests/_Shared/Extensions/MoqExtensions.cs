@@ -5,7 +5,7 @@ using FastEndpoints;
 using Moq.Contrib.HttpClient;
 using Moq.Language.Flow;
 using Newtonsoft.Json;
-using Reaparr.Application.Contracts;
+using Reaparr.SignalR.Contracts;
 
 namespace Reaparr.BaseTests;
 
@@ -35,9 +35,12 @@ public static class MoqExtensions
         return result;
     }
 
-    public static IReturnsResult<ISignalRService> SendRefreshNotification(this AutoMock mock, bool isVerifiable = false)
+    public static IReturnsResult<INotificationHubService> SendRefreshNotification(
+        this AutoMock mock,
+        bool isVerifiable = false
+    )
     {
-        var result = mock.Mock<ISignalRService>()
+        var result = mock.Mock<INotificationHubService>()
             .Setup(m =>
                 m.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>(), It.IsAny<CancellationToken>())
             )

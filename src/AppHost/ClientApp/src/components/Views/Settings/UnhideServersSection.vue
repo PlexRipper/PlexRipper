@@ -19,6 +19,11 @@
 				</q-item-section>
 			</q-item>
 		</q-list>
+		<QAlert
+			v-else
+			type="info">
+			{{ t('pages.settings.ui.un-hide-servers-section.no-servers-hidden') }}
+		</QAlert>
 	</QSection>
 </template>
 
@@ -27,6 +32,7 @@ import { tap } from 'rxjs/operators';
 import { useSubscription } from '@vueuse/rxjs';
 
 const serverStore = useServerStore();
+const { t } = useI18n();
 
 function onServerUnHide(plexServerId: number): void {
 	useSubscription(

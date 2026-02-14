@@ -76,8 +76,6 @@ export const useAuthenticationStore = defineStore(StoreNames.AuthenticationStore
 				}));
 		},
 		login(username: string, password: string, rememberMe: boolean): Observable<number> {
-			const router = useRouter();
-
 			const data = new FormData();
 			data.append('username', username);
 			data.append('password', password);
@@ -88,7 +86,7 @@ export const useAuthenticationStore = defineStore(StoreNames.AuthenticationStore
 				if (res.isSuccess) {
 					Log.info('User logged in');
 					state.isLoggedIn = true;
-					return globalStore.setup().pipe(tap(() => router.push('/')), switchMap(() => of(res.statusCode)));
+					return globalStore.setup().pipe(switchMap(() => of(res.statusCode)));
 				}
 				Log.error('User login failed');
 				state.isLoggedIn = false;
@@ -118,12 +116,18 @@ export const useAuthenticationStore = defineStore(StoreNames.AuthenticationStore
 		hasPasswordChanged: computed(() => state.currentPassword !== state.password),
 		equalPassword: computed(() => get(getters.hasPasswordChanged) && state.password === state.confirmPassword),
 		canUpdateCredentials: computed(() => {
-			if (get(getters.hasUsernameChanged)) {
-				return true;
+			const usernameValid = !!state.username && state.username.length >= 8;
+			const hasChanges = get(getters.hasUsernameChanged) || get(getters.hasPasswordChanged);
+
+			if (!usernameValid || !hasChanges) {
+				return false;
 			}
+
 			if (get(getters.hasPasswordChanged)) {
-				return state.password == state.confirmPassword;
+				return state.isPasswordValid && state.password === state.confirmPassword;
 			}
+
+			return true;
 		}),
 	};
 	return {

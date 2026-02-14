@@ -4,7 +4,7 @@ namespace Reaparr.Application;
 
 public static partial class PlexMediaDTOMapper
 {
-    public static PlexMediaDTO ToDTO(this PlexTvShowEpisode source, string plexToken) =>
+    public static PlexMediaDTO ToDTO(this PlexTvShowEpisode source) =>
         new()
         {
             Id = source.Id,
@@ -36,7 +36,6 @@ public static partial class PlexMediaDTOMapper
             OriginallyAvailableAt = source.OriginallyAvailableAt,
             Children = [],
             PlexApiMetaDataKey = source.PlexApiMetaDataKey,
-            PlexToken = plexToken,
         };
 
     public static List<PlexMediaDataDTO> ToDTO(this ICollection<PlexTvShowEpisodeMediaData> source) =>

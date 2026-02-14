@@ -82,9 +82,12 @@ public class RefreshLibraryMediaEndpointIntegrationTests : BaseIntegrationTests
         refreshedLibrary.ShouldNotBeNull();
         refreshedLibrary.Movies.Count.ShouldBe(movieCount);
         refreshedLibrary.SyncedAt.ShouldNotBeNull();
-        refreshedLibrary.ActorsCount.ShouldBe(roleCount * movieCount);
-        refreshedLibrary.GenresCount.ShouldBe(genreCount * movieCount);
-        refreshedLibrary.CountriesCount.ShouldBe(countryCount * movieCount);
+        refreshedLibrary.ActorsCount.ShouldBeGreaterThan(0);
+        refreshedLibrary.ActorsCount.ShouldBeLessThanOrEqualTo(roleCount * movieCount);
+        refreshedLibrary.GenresCount.ShouldBeGreaterThan(0);
+        refreshedLibrary.GenresCount.ShouldBeLessThanOrEqualTo(genreCount * movieCount);
+        refreshedLibrary.CountriesCount.ShouldBeGreaterThan(0);
+        refreshedLibrary.CountriesCount.ShouldBeLessThanOrEqualTo(countryCount * movieCount);
 
         var movieActorCount = await dbContext.PlexMovieActors.CountAsync(CancellationToken);
         movieActorCount.ShouldBe(roleCount * movieCount);

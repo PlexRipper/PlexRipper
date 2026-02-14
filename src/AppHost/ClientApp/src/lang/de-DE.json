@@ -78,7 +78,6 @@
             "could-not-display": "Kann die Mediathek nicht anzeigen",
             "no-data": "Die Bibliothek wurde synchronisiert, enthält aber keine Medien.",
             "library-not-yet-synced": "Die Mediendaten der Bibliothek wurden noch nicht synchronisiert. Bitte warten Sie oder aktualisieren Sie jetzt.",
-            "steps-remaining": "Schritt {index} von {total}:",
             "no-search-results": "Es wurden keine Medien gefunden, die \"{query}\" enthalten.",
             "no-media-items-available": "Keine Medienelemente gefunden!",
             "no-filter-results": "Keine Medienergebnisse entsprechen den aktuellen Filtereinstellungen. Bitte passen Sie Ihre Filter an oder setzen Sie sie zurück, um die verfügbaren Ergebnisse anzuzeigen"
@@ -454,7 +453,18 @@
             "download": "Herunterladen",
             "refresh": "Aktualisierung",
             "view": "Sicht",
-            "media-options": "Optionen"
+            "media-options": "Optionen",
+            "sort": "Sortieren"
+        },
+        "sort": {
+            "clear": "Sortierung aufheben",
+            "title": "Titel",
+            "year": "Jahr",
+            "added-at": "Hinzugefügt",
+            "updated-at": "Aktualisiert",
+            "duration": "Dauer",
+            "size": "Größe",
+            "quality": "Qualität"
         },
         "units": {
             "per-second": "/s"
@@ -575,16 +585,6 @@
                         "text": "Wenn Sie den Debug-Modus aktivieren, werden in verschiedenen Bereichen der Benutzeroberfläche mehr Informationen als gewöhnlich angezeigt.",
                         "title": "Debug-Modus",
                         "label": "Debug-Modus"
-                    },
-                    "mask-plex-libraries": {
-                        "label": "Plex-Bibliotheksnamen maskieren",
-                        "text": "Dadurch werden die Namen der Plex-Bibliotheken in der Benutzeroberfläche maskiert. Dies ist nützlich, wenn Sie anonyme Screenshots erstellen",
-                        "title": "Plex-Bibliotheksnamen maskieren"
-                    },
-                    "mask-plex-servers": {
-                        "label": "Maskieren Sie Plex-Servernamen",
-                        "text": "Dadurch werden die Namen der Plex-Server in der Benutzeroberfläche maskiert. Dies ist nützlich, wenn Sie anonyme Screenshots erstellen.",
-                        "title": "Maskieren Sie Plex-Servernamen"
                     }
                 },
                 "reset-db": {
@@ -600,39 +600,24 @@
                     }
                 }
             },
-            "accounts": {
-                "app-username": {
-                    "text": "Geben Sie den Benutzernamen ein, mit dem Sie sich bei Reaparr anmelden.",
-                    "title": "Reaparr-Benutzername",
-                    "label": "Nutzername"
-                },
-                "app-confirm-password": {
-                    "label": "Bestätige das Passwort"
-                },
-                "app-password": {
-                    "label": "Passwort",
-                    "text": "Geben Sie das Kennwort ein, mit dem Sie sich sicher bei Reaparr anmelden.",
-                    "title": "Reaparr-Passwort"
-                }
-            },
-            "paths": {
-                "download-folder": {
-                    "label": "Download Pfad",
-                    "text": "In diesen Pfad werden alle teile eines Downloads heruntergeladen und zusammengeführt bevor sie in das Zielverzeichnis verschoben werden.",
-                    "title": "Download Pfad"
-                },
-                "movie-folder": {
-                    "label": "Filme Pfad",
-                    "text": "Standartpfad für Filme wenn kein individueller Pfad angegeben wurde.",
-                    "title": "Filme Pfad"
-                },
-                "tv-show-folder": {
-                    "label": "Serien Pfad",
-                    "text": "Standartpfad für Serien wenn kein individueller Pfad angegeben wurde.",
-                    "title": "Serien Pfad"
-                }
-            },
             "ui": {
+                "general-settings": {
+                    "mask-plex-libraries": {
+                        "label": "Plex-Bibliotheksnamen maskieren",
+                        "text": "Dadurch werden die Namen der Plex-Bibliotheken in der Benutzeroberfläche maskiert. Dies ist nützlich, wenn Sie anonyme Screenshots erstellen",
+                        "title": "Plex-Bibliotheksnamen maskieren"
+                    },
+                    "mask-plex-servers": {
+                        "label": "Maskieren Sie Plex-Servernamen",
+                        "text": "Dadurch werden die Namen der Plex-Server in der Benutzeroberfläche maskiert. Dies ist nützlich, wenn Sie anonyme Screenshots erstellen.",
+                        "title": "Maskieren Sie Plex-Servernamen"
+                    },
+                    "toggle-animated-background": {
+                        "label": "Deaktivieren Sie den animierten Hintergrund",
+                        "text": "Der animierte Hintergrund kann zu Leistungsproblemen im Browser führen. Mit diesem Schalter kann die Animation deaktiviert und nur ein statischer Hintergrund angezeigt werden.",
+                        "title": "Deaktivieren Sie die Hintergrundanimation"
+                    }
+                },
                 "confirmation-settings": {
                     "download-episode-confirmation": {
                         "label": "Frage nach Bestätigung für Folgen Download",
@@ -683,13 +668,38 @@
                         "text": "Dies wird die Sprache für fast alles ändern. Text wie Fehler werden wahrscheinlich nicht übersetzt. Übersetzungskorrekturen oder neue Sprachen sind sehr willkommen, besuchen Sie www.reaparr.rocks für Informationen darüber, wie Sie neue Sprachen hinzufügen können.",
                         "title": "Wählen Sie Ihre bevorzugte Sprache"
                     }
+                }
+            },
+            "accounts": {
+                "app-username": {
+                    "text": "Geben Sie den Benutzernamen ein, mit dem Sie sich bei Reaparr anmelden.",
+                    "title": "Reaparr-Benutzername",
+                    "label": "Nutzername"
                 },
-                "general-settings": {
-                    "toggle-animated-background": {
-                        "label": "Deaktivieren Sie den animierten Hintergrund",
-                        "text": "Der animierte Hintergrund kann zu Leistungsproblemen im Browser führen. Mit diesem Schalter kann die Animation deaktiviert und nur ein statischer Hintergrund angezeigt werden.",
-                        "title": "Deaktivieren Sie die Hintergrundanimation"
-                    }
+                "app-confirm-password": {
+                    "label": "Bestätige das Passwort"
+                },
+                "app-password": {
+                    "label": "Passwort",
+                    "text": "Geben Sie das Kennwort ein, mit dem Sie sich sicher bei Reaparr anmelden.",
+                    "title": "Reaparr-Passwort"
+                }
+            },
+            "paths": {
+                "download-folder": {
+                    "label": "Download Pfad",
+                    "text": "In diesen Pfad werden alle teile eines Downloads heruntergeladen und zusammengeführt bevor sie in das Zielverzeichnis verschoben werden.",
+                    "title": "Download Pfad"
+                },
+                "movie-folder": {
+                    "label": "Filme Pfad",
+                    "text": "Standartpfad für Filme wenn kein individueller Pfad angegeben wurde.",
+                    "title": "Filme Pfad"
+                },
+                "tv-show-folder": {
+                    "label": "Serien Pfad",
+                    "text": "Standartpfad für Serien wenn kein individueller Pfad angegeben wurde.",
+                    "title": "Serien Pfad"
                 }
             },
             "integrations": {
@@ -703,6 +713,10 @@
                         "label": "Sonarr-Basis-URL",
                         "text": "Basisadresse, unter der Ihre Sonarr-Instanz erreichbar ist. Beispiel: http://localhost:8989 oder http://sonarr:8989",
                         "title": "Basis-URL zu Sonarr"
+                    },
+                    "clear-configuration": {
+                        "text": "Reaparr wird versuchen, mit der angegebenen Basis-URL und dem API-Schlüssel eine Verbindung zur Radarr-Instanz herzustellen.",
+                        "title": "Clear Sonarr-Konfiguration"
                     },
                     "setup-configuration": {
                         "text": "Reaparr richtet in Sonarr einen Indexer und einen Download-Client ein, der es Sonarr ermöglicht, Downloads auszulösen.\n\nWeitere Informationen finden Sie im [Sonarr/Radarr-Integrationsleitfaden](https://www.reaparr.rocks/guides/integration/sonarr-radarr).",
@@ -723,6 +737,10 @@
                         "label": "Radarr-Basis-URL",
                         "text": "Basisadresse, unter der Ihre Radarr-Instanz erreichbar ist. Beispiel: http://localhost:7878 oder http://radarr:7878",
                         "title": "Basis-URL zu Radarr"
+                    },
+                    "clear-configuration": {
+                        "text": "Löscht die Radarr-Konfiguration aus Reaparr und setzt die Eingaben für Basis-URL und API-Schlüssel zurück.",
+                        "title": "Clear Radarr-Konfiguration"
                     },
                     "setup-configuration": {
                         "text": "Reaparr richtet in Radarr einen Indexer und einen Download-Client ein, der es Radarr ermöglicht, Downloads auszulösen.\n\nWeitere Informationen finden Sie im [Sonarr/Radarr-Integrationsleitfaden](https://www.reaparr.rocks/guides/integration/sonarr-radarr).",
@@ -810,7 +828,8 @@
                     "header": "Allgemeines"
                 },
                 "un-hide-servers-section": {
-                    "header": "Plex-Server einblenden"
+                    "header": "Plex-Server einblenden",
+                    "no-servers-hidden": "Aktuell sind keine Plex-Server ausgeblendet. Um einen Server auszublenden, gehen Sie zu den Servereinstellungen und klicken Sie auf „Ausblenden“. Alle ausgeblendeten Server werden dort angezeigt und können wieder eingeblendet werden."
                 }
             }
         },

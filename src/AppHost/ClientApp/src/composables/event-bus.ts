@@ -1,15 +1,12 @@
 import { useEventBus, type UseEventBusReturn } from '@vueuse/core';
-import type { DownloadMediaDTO, PlexMediaSlimDTO } from '@dto';
+import type { DownloadMediaDTO } from '@dto';
+import type { MediaSortField, SortDirection } from '@enums';
 
 // region MediaOverview
 
 export interface IMediaOverviewSort {
-	field: keyof PlexMediaSlimDTO;
-	sort: 'asc' | 'desc' | 'no-sort';
-}
-
-export function useMediaOverviewSortBus(): UseEventBusReturn<IMediaOverviewSort, unknown> {
-	return useEventBus<IMediaOverviewSort>('mediaOverviewSort');
+	field: MediaSortField;
+	sort: SortDirection;
 }
 
 // region General

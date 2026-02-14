@@ -18,7 +18,7 @@ public static class HttpClientModule
                 SonarrClientName,
                 (sp, client) =>
                 {
-                    var settings = sp.GetService<ISonarrSettings>();
+                    var settings = (ISonarrSettings?)sp.GetService(typeof(ISonarrSettings));
                     if (settings == null || string.IsNullOrWhiteSpace(settings.SonarrBaseUrl))
                         return;
 
@@ -46,7 +46,7 @@ public static class HttpClientModule
                 RadarrClientName,
                 (sp, client) =>
                 {
-                    var settings = sp.GetService<IRadarrSettings>();
+                    var settings = (IRadarrSettings?)sp.GetService(typeof(IRadarrSettings));
                     if (settings == null || string.IsNullOrWhiteSpace(settings.RadarrBaseUrl))
                         return;
 

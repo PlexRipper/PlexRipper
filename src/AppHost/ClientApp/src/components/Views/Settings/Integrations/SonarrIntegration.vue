@@ -45,8 +45,8 @@
 				<!-- Test Connection -->
 				<HelpRow
 					:col-label="3"
-					:text="t('help.settings.integrations.sonarr.test-connection.title')"
-					:title="t('help.settings.integrations.sonarr.test-connection.text')"
+					:text="t('help.settings.integrations.sonarr.test-connection.text')"
+					:title="t('help.settings.integrations.sonarr.test-connection.title')"
 					hide-label>
 					<BaseButton
 						:loading="integrationStore.sonarr.isTesting"
@@ -55,6 +55,19 @@
 						label="Test Connection"
 						cy="test-sonarr-connection-button"
 						@click="testSonarrConnection" />
+				</HelpRow>
+				<!-- Clear Configuration -->
+				<HelpRow
+					:col-label="3"
+					:text="t('help.settings.integrations.sonarr.clear-configuration.text')"
+					:title="t('help.settings.integrations.sonarr.clear-configuration.title')"
+					hide-label>
+					<BaseButton
+						color="negative"
+						icon="mdi-trash-can-outline"
+						label="Clear Configuration"
+						cy="clear-sonarr-configuration-button"
+						@click="clearSonarrConfiguration" />
 				</HelpRow>
 			</QStep>
 			<!-- Configure Sonarr Integration -->
@@ -117,6 +130,10 @@ const passwordInputFocus = ref(false);
 
 function testSonarrConnection() {
 	useSubscription(integrationStore.testConnectionToSonarr().subscribe());
+}
+
+function clearSonarrConfiguration() {
+	useSubscription(integrationStore.clearSonarrConfiguration().subscribe());
 }
 
 function configureSonarrSetup() {

@@ -53,6 +53,51 @@
 			icon="mdi-select-marker"
 			@click="$emit('action', 'selection-dialog')" />
 
+		<!--	Sort button	-->
+		<VerticalButton
+			v-if="!detailMode"
+			:height="barHeight"
+			:icon="activeSortIcon"
+			:label="$t('general.commands.sort')"
+			:width="verticalButtonWidth"
+			:color="mediaOverviewStore.getIsSorted ? 'positive' : undefined"
+			cy="media-overview-sort-btn">
+			<q-menu
+				anchor="bottom left"
+				auto-close
+				self="top left">
+				<q-list>
+					<!--	Clear Sort	-->
+					<q-item
+						v-if="mediaOverviewStore.getIsSorted"
+						clickable
+						cy="sort-clear-btn"
+						@click="mediaOverviewStore.clearSort()">
+						<q-item-section avatar>
+							<q-icon name="mdi-sort-variant-remove" />
+						</q-item-section>
+						<q-item-section>{{ $t('general.sort.clear') }}</q-item-section>
+					</q-item>
+					<q-separator v-if="mediaOverviewStore.getIsSorted" />
+					<!--	Sort options	-->
+					<q-item
+						v-for="option in mediaOverviewStore.getSortOptions"
+						:key="option.field"
+						:data-cy="`sort-option-${option.field}-btn`"
+						clickable
+						style="min-width: 200px"
+						@click="mediaOverviewStore.toggleSortMedia(option.field)">
+						<q-item-section avatar>
+							<q-icon
+								v-if="option.direction !== SortDirection.NoSort"
+								:name="option.direction === SortDirection.Asc ? 'mdi-arrow-up' : 'mdi-arrow-down'" />
+						</q-item-section>
+						<q-item-section>{{ option.label }}</q-item-section>
+					</q-item>
+				</q-list>
+			</q-menu>
+		</VerticalButton>
+
 		<!--	Refresh library button	-->
 		<VerticalButton
 			v-if="!mediaOverviewStore.allMediaMode && !detailMode"
@@ -109,14 +154,11 @@
 </template>
 
 <script lang="ts" setup>
-import { ViewMode } from '@dto';
 import type { PlexMediaDTO, PlexMediaType } from '@dto';
+import { ViewMode } from '@dto';
+import { SortDirection } from '@enums';
 import type { IMediaOverviewBarActions, IViewOptions } from '@interfaces';
-import {
-	useMediaOverviewBarDownloadCommandBus,
-	useMediaOverviewStore,
-	useSettingsStore,
-} from '#imports';
+import { useMediaOverviewBarDownloadCommandBus, useMediaOverviewStore, useSettingsStore } from '#imports';
 
 const mediaOverviewStore = useMediaOverviewStore();
 const downloadCommandBus = useMediaOverviewBarDownloadCommandBus();
@@ -145,6 +187,14 @@ const verticalButtonWidth = ref(120);
 function isSelected(viewMode: ViewMode) {
 	return mediaOverviewStore.getMediaViewMode === viewMode;
 }
+
+const activeSortIcon = computed((): string => {
+	if (!mediaOverviewStore.getIsSorted) {
+		return 'mdi-sort';
+	}
+	const sort = mediaOverviewStore.getActiveSort.sort;
+	return sort === SortDirection.Asc ? 'mdi-sort-descending' : 'mdi-sort-ascending';
+});
 
 const viewOptions = computed((): IViewOptions[] => {
 	return [

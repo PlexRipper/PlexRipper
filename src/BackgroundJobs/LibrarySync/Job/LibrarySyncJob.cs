@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Quartz;
-using Reaparr.Application.Contracts;
 using Reaparr.BackgroundJobs.Contracts;
 using Reaparr.Data.Contracts;
+using Reaparr.SignalR.Contracts;
 
 namespace Reaparr.BackgroundJobs;
 
@@ -18,7 +18,7 @@ public class LibrarySyncJob : IJob
 
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
-    private readonly ISignalRService _signalRService;
+    private readonly INotificationHubService _notificationHubService;
     private readonly IReaparrDbContext _dbContext;
     private int _serverId;
     private int _libraryId;
@@ -26,13 +26,13 @@ public class LibrarySyncJob : IJob
     public LibrarySyncJob(
         ILogger log,
         ICommandExecutor commandExecutor,
-        ISignalRService signalRService,
+        INotificationHubService notificationHubService,
         IReaparrDbContext dbContext
     )
     {
         _log = log.ForContext<LibrarySyncJob>();
         _commandExecutor = commandExecutor;
-        _signalRService = signalRService;
+        _notificationHubService = notificationHubService;
         _dbContext = dbContext;
     }
 
@@ -77,25 +77,19 @@ public class LibrarySyncJob : IJob
                     serverName,
                     _serverId
                 );
-            await UpdateQueueItemAsync(LibrarySyncJobStatus.Queued, isServerOffline: true);
+            await UpdateQueueItemAsync(LibrarySyncJobStatus.Queued, cancellationToken, isServerOffline: true);
             return;
         }
 
-        await UpdateQueueItemAsync(LibrarySyncJobStatus.Processing);
+        await UpdateQueueItemAsync(LibrarySyncJobStatus.Processing, cancellationToken);
 
         // Jobs should swallow exceptions as otherwise Quartz will keep re-executing it
         // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
         try
         {
-            // Create a progress action that sends individual library progress updates
-            var progress = new Action<LibraryProgress>(libraryProgress =>
-            {
-                _signalRService.SendLibraryProgressUpdateAsync(libraryProgress);
-            });
-
             // Execute the library sync command
             var result = await _commandExecutor.Send(
-                new RefreshLibraryMediaCommand(_libraryId, progress),
+                new RefreshLibraryMediaCommand(_libraryId),
                 context.CancellationToken
             );
 
@@ -108,6 +102,7 @@ public class LibrarySyncJob : IJob
 
                 await UpdateQueueItemAsync(
                     LibrarySyncJobStatus.Failed,
+                    cancellationToken,
                     errorMessage: result.Errors.FirstOrDefault()?.Message,
                     isServerOffline: isServerOffline
                 );
@@ -126,17 +121,20 @@ public class LibrarySyncJob : IJob
                 .Information("Successfully synced library {LibraryId} for server {ServerId}", _libraryId, _serverId);
 
             // Mark queue item as completed
-            await UpdateQueueItemAsync(LibrarySyncJobStatus.Completed);
+            await UpdateQueueItemAsync(LibrarySyncJobStatus.Completed, cancellationToken);
 
             // Send refresh notification
-            await _signalRService.SendRefreshNotificationAsync([RefreshDataType.PlexLibrary], cancellationToken);
+            await _notificationHubService.SendRefreshNotificationAsync(
+                [RefreshDataType.PlexLibrary],
+                cancellationToken
+            );
 
             // Schedule the next library from the queue
             await _commandExecutor.Send(new CheckQueuedPlexLibraryToSyncCommand(), cancellationToken);
         }
         catch (OperationCanceledException)
         {
-            await UpdateQueueItemAsync(LibrarySyncJobStatus.Queued);
+            await UpdateQueueItemAsync(LibrarySyncJobStatus.Queued, CancellationToken.None);
 
             _log.Here()
                 .Information(
@@ -148,7 +146,7 @@ public class LibrarySyncJob : IJob
         }
         catch (Exception e)
         {
-            await UpdateQueueItemAsync(LibrarySyncJobStatus.Failed, errorMessage: e.Message);
+            await UpdateQueueItemAsync(LibrarySyncJobStatus.Failed, CancellationToken.None, errorMessage: e.Message);
 
             _log.Here().ErrorResult(e);
         }
@@ -156,6 +154,7 @@ public class LibrarySyncJob : IJob
 
     private async Task UpdateQueueItemAsync(
         LibrarySyncJobStatus status,
+        CancellationToken cancellationToken,
         string? errorMessage = null,
         bool isServerOffline = false
     )
@@ -219,6 +218,6 @@ public class LibrarySyncJob : IJob
                 break;
         }
 
-        await _signalRService.SendRefreshNotificationAsync([RefreshDataType.PlexLibrarySyncStatus]);
+        await _notificationHubService.SendRefreshNotificationAsync([RefreshDataType.PlexLibrarySyncStatus], cancellationToken);
     }
 }

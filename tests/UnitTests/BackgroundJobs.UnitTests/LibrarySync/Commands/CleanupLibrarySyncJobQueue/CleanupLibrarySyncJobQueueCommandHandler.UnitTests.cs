@@ -1,7 +1,7 @@
 using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
-using Reaparr.Application.Contracts;
 using Reaparr.BackgroundJobs.Contracts;
+using Reaparr.SignalR.Contracts;
 
 namespace Reaparr.BackgroundJobs.UnitTests;
 
@@ -12,7 +12,7 @@ public class CleanupLibrarySyncJobQueueCommandHandlerUnitTests : BaseUnitTest<Cl
 
     private void SetupSignalRMock()
     {
-        Mock.Mock<ISignalRService>()
+        Mock.Mock<INotificationHubService>()
             .Setup(x =>
                 x.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>(), It.IsAny<CancellationToken>())
             )

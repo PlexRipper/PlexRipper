@@ -1477,6 +1477,7 @@
           "Reaparr.PlexApi": "[1.0.0, )",
           "Reaparr.PublicAPI": "[1.0.0, )",
           "Reaparr.Settings": "[1.0.0, )",
+          "Reaparr.SignalR": "[1.0.0, )",
           "Serilog.AspNetCore": "[10.0.0, )"
         }
       },
@@ -1487,7 +1488,6 @@
           "FastEndpoints.Security": "[7.1.1, )",
           "FastEndpoints.Swagger": "[7.1.1, )",
           "Jason.Landbridge.Autofac.Extras.Quartz": "[9.0.3, )",
-          "MessagePack": "[3.1.4, )",
           "Polly": "[8.6.5, )",
           "Polly.Core": "[8.6.5, )",
           "Quartz.Serialization.SystemTextJson": "[3.15.1, )",
@@ -1501,7 +1501,8 @@
           "Reaparr.PlexApi.Contracts": "[1.0.0, )",
           "Reaparr.PublicAPI.Contracts": "[1.0.0, )",
           "Reaparr.Settings": "[1.0.0, )",
-          "Reaparr.Settings.Contracts": "[1.0.0, )"
+          "Reaparr.Settings.Contracts": "[1.0.0, )",
+          "Reaparr.SignalR.Contracts": "[1.0.0, )"
         }
       },
       "Reaparr.Application.Contracts": {
@@ -1520,7 +1521,8 @@
           "Reaparr.BackgroundJobs.Contracts": "[1.0.0, )",
           "Reaparr.Data.Contracts": "[1.0.0, )",
           "Reaparr.Domain": "[1.0.0, )",
-          "Reaparr.PlexApi.Contracts": "[1.0.0, )"
+          "Reaparr.PlexApi.Contracts": "[1.0.0, )",
+          "Reaparr.SignalR.Contracts": "[1.0.0, )"
         }
       },
       "Reaparr.BackgroundJobs.Contracts": {
@@ -1678,6 +1680,7 @@
           "FastEndpoints": "[7.1.1, )",
           "HttpClientToCurl": "[2.1.1, )",
           "Polly": "[8.6.5, )",
+          "Reaparr.BackgroundJobs.Contracts": "[1.0.0, )",
           "Reaparr.Data.Contracts": "[1.0.0, )",
           "Reaparr.PlexApi.Contracts": "[1.0.0, )",
           "Reaparr.Settings.Contracts": "[1.0.0, )"
@@ -1719,6 +1722,24 @@
         "type": "Project",
         "dependencies": {
           "Reaparr.Domain": "[1.0.0, )"
+        }
+      },
+      "Reaparr.SignalR": {
+        "type": "Project",
+        "dependencies": {
+          "Autofac": "[9.0.0, )",
+          "MessagePack": "[3.1.4, )",
+          "Reaparr.Application.Contracts": "[1.0.0, )",
+          "Reaparr.SignalR.Contracts": "[1.0.0, )"
+        }
+      },
+      "Reaparr.SignalR.Contracts": {
+        "type": "Project",
+        "dependencies": {
+          "Reaparr.Domain": "[1.0.0, )",
+          "Reaparr.Environment": "[1.0.0, )",
+          "Reaparr.FluentResultExtensions": "[1.0.0, )",
+          "Reaparr.Logging": "[1.0.0, )"
         }
       }
     }

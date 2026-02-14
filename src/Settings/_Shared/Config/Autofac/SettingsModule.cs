@@ -1,4 +1,4 @@
-﻿using Autofac;
+using Autofac;
 using Reaparr.Settings.Contracts;
 using Module = Autofac.Module;
 
@@ -35,7 +35,8 @@ public class SettingsModule : Module
             .As<IIntegrationsSettings>()
             .SingleInstance();
         // These are non-singleton because they should be re-resolved on each request to get the latest settings
-        builder.Register(c => c.Resolve<IUserSettings>().IntegrationsSettings.Sonarr).As<ISonarrSettings>();
-        builder.Register(c => c.Resolve<IUserSettings>().IntegrationsSettings.Radarr).As<IRadarrSettings>();
+        // Note: Using non-generic As() form here due to static member constraints on these interfaces
+        builder.Register(c => c.Resolve<IUserSettings>().IntegrationsSettings.Sonarr).As(typeof(ISonarrSettings));
+        builder.Register(c => c.Resolve<IUserSettings>().IntegrationsSettings.Radarr).As(typeof(IRadarrSettings));
     }
 }

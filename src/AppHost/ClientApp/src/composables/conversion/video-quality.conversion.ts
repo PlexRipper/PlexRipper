@@ -1,4 +1,43 @@
 import { VideoQuality } from '@dto';
+import type { PlexMediaSlimDTO } from '@dto';
+
+/**
+ * Numeric rank for VideoQuality values — higher is better.
+ * Used for sorting and navigation grouping.
+ */
+export const videoQualityRank: Record<VideoQuality, number> = {
+	[VideoQuality.Unknown]: 0,
+	[VideoQuality.None]: 0,
+	[VideoQuality.SubSD144P]: 1,
+	[VideoQuality.SubSDCIF]: 2,
+	[VideoQuality.NHD]: 3,
+	[VideoQuality.SD]: 4,
+	[VideoQuality.DVD]: 5,
+	[VideoQuality.HD]: 6,
+	[VideoQuality.FullHD]: 7,
+	[VideoQuality.QHD]: 8,
+	[VideoQuality.UHD_4K]: 9,
+	[VideoQuality.UHD_8K]: 10,
+};
+
+/** Returns the highest VideoQuality from a media item's qualities array. */
+export function getHighestQuality(item: PlexMediaSlimDTO): VideoQuality {
+	if (!item.qualities?.length) {
+		return VideoQuality.Unknown;
+	}
+	let best: VideoQuality = VideoQuality.Unknown;
+	for (const q of item.qualities) {
+		if (videoQualityRank[q.quality] > videoQualityRank[best]) {
+			best = q.quality;
+		}
+	}
+	return best;
+}
+
+/** Returns the numeric rank of the highest quality in a media item. */
+export function getHighestQualityRank(item: PlexMediaSlimDTO): number {
+	return videoQualityRank[getHighestQuality(item)];
+}
 
 const qualityColorMap: Record<VideoQuality, string> = {
 	[VideoQuality.None]: 'black',

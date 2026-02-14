@@ -2,10 +2,6 @@ namespace Reaparr.Settings.Contracts;
 
 public record SonarrSettings : BaseSettingsModule<SonarrSettings>, ISonarrSettings
 {
-    private string _sonarrBaseUrl = string.Empty;
-    private string _sonarrApiKey = string.Empty;
-    private bool _isConfigured;
-
     public static SonarrSettings Create() =>
         new()
         {
@@ -17,23 +13,23 @@ public record SonarrSettings : BaseSettingsModule<SonarrSettings>, ISonarrSettin
     /// <inheritdoc/>
     public required bool IsConfigured
     {
-        get => _isConfigured;
-        set => SetProperty(ref _isConfigured, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     /// <inheritdoc/>
     public required string SonarrBaseUrl
     {
-        get => _sonarrBaseUrl;
-        set => SetProperty(ref _sonarrBaseUrl, value);
-    }
+        get;
+        set => SetProperty(ref field, value);
+    } = string.Empty;
 
     /// <inheritdoc/>
     public required string SonarrApiKey
     {
-        get => _sonarrApiKey;
-        set => SetProperty(ref _sonarrApiKey, value);
-    }
+        get;
+        set => SetProperty(ref field, value);
+    } = string.Empty;
 
     public bool IsValidUrl() =>
         !string.IsNullOrWhiteSpace(SonarrBaseUrl)

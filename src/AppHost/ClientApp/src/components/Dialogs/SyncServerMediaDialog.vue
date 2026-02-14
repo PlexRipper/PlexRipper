@@ -65,16 +65,6 @@
 								<QRow
 									no-wrap
 									justify="end">
-									<!-- Steps Progress -->
-									<QCol>
-										<QText
-											v-if="!isServer(node) && !node.completed && node.progress?.step != null && node.progress?.totalSteps != null"
-											:value="$t('components.media-overview.steps-remaining', {
-												index: node.progress.step,
-												total: node.progress.totalSteps,
-											})"
-											align="center" />
-									</QCol>
 									<!-- Time Remaining -->
 									<QCol>
 										<QCountdown
@@ -109,7 +99,7 @@
 <script setup lang="ts">
 import { get, set } from '@vueuse/core';
 import type {
-	LibraryProgress,
+	LibrarySyncProgressDTO,
 	PlexMediaType,
 } from '@dto';
 import { DialogType } from '@enums';
@@ -212,7 +202,7 @@ interface IPlexMediaSyncServerNode {
 	type: 'server' | 'library';
 	percentage: number;
 	completed: boolean;
-	progress?: LibraryProgress;
+	progress?: LibrarySyncProgressDTO;
 	mediaType?: PlexMediaType;
 	children: IPlexMediaSyncServerNode[];
 }

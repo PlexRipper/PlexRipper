@@ -1,0 +1,592 @@
+using FastEndpoints;
+using Microsoft.EntityFrameworkCore;
+using Reaparr.BackgroundJobs.Contracts;
+using Reaparr.Data.Contracts;
+using Reaparr.PlexApi.Contracts;
+
+namespace Reaparr.BackgroundJobs.UnitTests;
+
+public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlexTvShowLibraryCommandHandler>
+{
+    public RefreshPlexTvShowLibraryCommandUnitTests(ITestOutputHelper output)
+        : base(output) { }
+
+    private void SetupProgressStoreMocks(List<LibraryProgressItem>? capturedItems = null)
+    {
+        Mock.Mock<ILibrarySyncProgressStore>()
+            .Setup(x =>
+                x.UpdateItemAsync(It.IsAny<int>(), It.IsAny<LibraryProgressItem>(), It.IsAny<CancellationToken>())
+            )
+            .Callback<int, LibraryProgressItem, CancellationToken>((_, item, _) => capturedItems?.Add(item))
+            .Returns(Task.CompletedTask);
+
+        Mock.Mock<ILibrarySyncProgressStore>()
+            .Setup(x => x.UpdateErrorAsync(It.IsAny<int>(), It.IsAny<Result>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+    }
+
+    private (List<PlexTvShowSeason> Seasons, List<PlexTvShowEpisode> Episodes) BuildSeasonsAndEpisodes(
+        Seed seed,
+        int seasonCount = 6,
+        int episodesPerSeason = 30
+    )
+    {
+        var seasons = FakeData.GetPlexTvShowSeason(seed).Generate(seasonCount);
+        var episodes = new List<PlexTvShowEpisode>();
+        foreach (var season in seasons)
+        {
+            var eps = FakeData.GetPlexTvShowEpisode(seed).Generate(episodesPerSeason);
+            foreach (var ep in eps)
+            {
+                ep.ParentGuid = season.Guid;
+                ep.MediaSize = 150_000_000;
+                ep.Duration = 1800;
+            }
+
+            episodes.AddRange(eps);
+        }
+
+        return (seasons, episodes);
+    }
+
+    private void SetupCommandExecutorForMedia(List<PlexTvShowSeason> seasons, List<PlexTvShowEpisode> episodes)
+    {
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<GetAllMediaSeasonsCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok(seasons));
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<GetAllMediaEpisodesCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok(episodes));
+    }
+
+    private void SetupSyncCommandSuccess(BulkInsertTvShowsRapport? rapport = null)
+    {
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<SyncPlexTvShowsCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok(rapport ?? new BulkInsertTvShowsRapport()));
+    }
+
+    private void SetupSyncCommandCapture(
+        Action<SyncPlexTvShowsCommand> capture,
+        BulkInsertTvShowsRapport? rapport = null
+    )
+    {
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<SyncPlexTvShowsCommand>(), It.IsAny<CancellationToken>()))
+            .Callback<ICommand<Result<BulkInsertTvShowsRapport>>, CancellationToken>(
+                (cmd, _) => capture((SyncPlexTvShowsCommand)cmd)
+            )
+            .ReturnsAsync(Result.Ok(rapport ?? new BulkInsertTvShowsRapport()));
+    }
+
+    [Fact]
+    public async Task ShouldSuccessfullyRefreshLibraryAndUpdateSyncedAt_WhenTvShowsExist()
+    {
+        // Arrange
+        var seed = await SetupDatabase(
+            9423,
+            config =>
+            {
+                config.TvShowCount = 3;
+                config.TvShowSeasonCount = 2;
+                config.TvShowEpisodeCount = 5;
+            }
+        );
+        var dbContext = IDbContext;
+        var testLibrary = dbContext.PlexLibraries.Include(x => x.TvShows).First();
+
+        SetupProgressStoreMocks();
+
+        var (seasons, episodes) = BuildSeasonsAndEpisodes(seed);
+        SetupCommandExecutorForMedia(seasons, episodes);
+        SetupSyncCommandSuccess();
+
+        // Act
+        var result = await Sut.ExecuteAsync(
+            new RefreshPlexTvShowLibraryCommand(new InsertMediaMetaDataCommandResponse(testLibrary)),
+            CancellationToken
+        );
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        var updatedLibrary = await dbContext.PlexLibraries.GetAsync(testLibrary.Id, CancellationToken);
+        updatedLibrary.ShouldNotBeNull();
+        updatedLibrary.SyncedAt.ShouldNotBeNull();
+        Mock.Mock<ILibrarySyncProgressStore>()
+            .Verify(
+                x => x.UpdateItemAsync(It.IsAny<int>(), It.IsAny<LibraryProgressItem>(), It.IsAny<CancellationToken>()),
+                Times.Exactly(3)
+            );
+    }
+
+    [Fact]
+    public async Task ShouldSendProgressWithSeasonAndEpisodeItems_WhenTvShowsExist()
+    {
+        // Arrange
+        var seed = await SetupDatabase(
+            9423,
+            config =>
+            {
+                config.TvShowCount = 3;
+                config.TvShowSeasonCount = 2;
+                config.TvShowEpisodeCount = 5;
+            }
+        );
+        var testLibrary = IDbContext.PlexLibraries.Include(x => x.TvShows).First();
+        var capturedItems = new List<LibraryProgressItem>();
+
+        SetupProgressStoreMocks(capturedItems);
+
+        var (seasons, episodes) = BuildSeasonsAndEpisodes(seed);
+        SetupCommandExecutorForMedia(seasons, episodes);
+        SetupSyncCommandSuccess();
+
+        // Act
+        await Sut.ExecuteAsync(
+            new RefreshPlexTvShowLibraryCommand(new InsertMediaMetaDataCommandResponse(testLibrary)),
+            CancellationToken
+        );
+
+        // Assert
+        capturedItems.ShouldNotBeEmpty();
+        capturedItems.ShouldContain(i => i.MediaType == PlexMediaType.TvShow);
+        capturedItems.ShouldContain(i => i.MediaType == PlexMediaType.Season);
+        capturedItems.ShouldContain(i => i.MediaType == PlexMediaType.Episode);
+    }
+
+    [Fact]
+    public async Task ShouldReturnFailure_WhenLibraryIsNotTvShowType()
+    {
+        // Arrange
+        await SetupDatabase(
+            9424,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexTvShowLibraryCount = 1;
+                config.MovieCount = 1;
+            }
+        );
+        var testLibrary = IDbContext.PlexLibraries.First();
+
+        // Act
+        var result = await Sut.ExecuteAsync(
+            new RefreshPlexTvShowLibraryCommand(new InsertMediaMetaDataCommandResponse(testLibrary)),
+            CancellationToken
+        );
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        result.Errors.First().Message.ShouldContain("PlexLibrary is not of type TvShow");
+        Mock.Mock<ILibrarySyncProgressStore>()
+            .Verify(
+                x => x.UpdateItemAsync(It.IsAny<int>(), It.IsAny<LibraryProgressItem>(), It.IsAny<CancellationToken>()),
+                Times.Never()
+            );
+        Mock.Mock<ILibrarySyncProgressStore>()
+            .Verify(
+                x => x.UpdateErrorAsync(It.IsAny<int>(), It.IsAny<Result>(), It.IsAny<CancellationToken>()),
+                Times.Never()
+            );
+    }
+
+    [Fact]
+    public async Task ShouldStillUpdateLibraryAndLogWarning_WhenNoTvShowsExist()
+    {
+        // Arrange
+        await SetupDatabase(
+            9425,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexTvShowLibraryCount = 1;
+                config.TvShowCount = 0;
+            }
+        );
+        var dbContext = IDbContext;
+        var testLibrary = dbContext.PlexLibraries.First();
+
+        // Act
+        var result = await Sut.ExecuteAsync(
+            new RefreshPlexTvShowLibraryCommand(new InsertMediaMetaDataCommandResponse(testLibrary)),
+            CancellationToken
+        );
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        var updatedLibrary = await dbContext.PlexLibraries.GetAsync(testLibrary.Id, CancellationToken);
+        updatedLibrary.ShouldNotBeNull();
+        updatedLibrary.SyncedAt.ShouldNotBeNull();
+        Mock.Mock<ILibrarySyncProgressStore>()
+            .Verify(
+                x => x.UpdateItemAsync(It.IsAny<int>(), It.IsAny<LibraryProgressItem>(), It.IsAny<CancellationToken>()),
+                Times.Never()
+            );
+        Mock.Mock<ILibrarySyncProgressStore>()
+            .Verify(
+                x => x.UpdateErrorAsync(It.IsAny<int>(), It.IsAny<Result>(), It.IsAny<CancellationToken>()),
+                Times.Never()
+            );
+        Mock.Mock<ICommandExecutor>()
+            .Verify(x => x.Send(It.IsAny<GetAllMediaSeasonsCommand>(), It.IsAny<CancellationToken>()), Times.Never());
+        Mock.Mock<ICommandExecutor>()
+            .Verify(x => x.Send(It.IsAny<GetAllMediaEpisodesCommand>(), It.IsAny<CancellationToken>()), Times.Never());
+        Mock.Mock<ICommandExecutor>()
+            .Verify(x => x.Send(It.IsAny<SyncPlexTvShowsCommand>(), It.IsAny<CancellationToken>()), Times.Never());
+    }
+
+    [Fact]
+    public async Task ShouldReturnFailure_WhenGetAllMediaSeasonsCommandFails()
+    {
+        // Arrange
+        await SetupDatabase(
+            9426,
+            config =>
+            {
+                config.TvShowCount = 3;
+            }
+        );
+        var testLibrary = IDbContext.PlexLibraries.Include(x => x.TvShows).First();
+
+        SetupProgressStoreMocks();
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<GetAllMediaSeasonsCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Fail("Failed to get seasons"));
+
+        // Act
+        var result = await Sut.ExecuteAsync(
+            new RefreshPlexTvShowLibraryCommand(new InsertMediaMetaDataCommandResponse(testLibrary)),
+            CancellationToken
+        );
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        result.Errors.First().Message.ShouldContain("Failed to get seasons");
+        Mock.Mock<ILibrarySyncProgressStore>()
+            .Verify(
+                x => x.UpdateErrorAsync(It.IsAny<int>(), It.IsAny<Result>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
+    }
+
+    [Fact]
+    public async Task ShouldReturnFailure_WhenGetAllMediaEpisodesCommandFails()
+    {
+        // Arrange
+        var seed = await SetupDatabase(
+            9427,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexTvShowLibraryCount = 1;
+                config.TvShowCount = 3;
+            }
+        );
+        var testLibrary = IDbContext.PlexLibraries.Include(x => x.TvShows).First();
+
+        SetupProgressStoreMocks();
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<GetAllMediaSeasonsCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok(FakeData.GetPlexTvShowSeason(seed).Generate(6)));
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<GetAllMediaEpisodesCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Fail("Failed to get episodes"));
+
+        // Act
+        var result = await Sut.ExecuteAsync(
+            new RefreshPlexTvShowLibraryCommand(new InsertMediaMetaDataCommandResponse(testLibrary)),
+            CancellationToken
+        );
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        result.Errors.First().Message.ShouldContain("Failed to get episodes");
+        Mock.Mock<ILibrarySyncProgressStore>()
+            .Verify(
+                x => x.UpdateErrorAsync(It.IsAny<int>(), It.IsAny<Result>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
+    }
+
+    [Fact]
+    public async Task ShouldReturnFailure_WhenSyncPlexTvShowsCommandFails()
+    {
+        // Arrange
+        var seed = await SetupDatabase(
+            9428,
+            config =>
+            {
+                config.TvShowCount = 3;
+            }
+        );
+        var testLibrary = IDbContext.PlexLibraries.Include(x => x.TvShows).First();
+
+        SetupProgressStoreMocks();
+
+        var (seasons, episodes) = BuildSeasonsAndEpisodes(seed);
+        SetupCommandExecutorForMedia(seasons, episodes);
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<SyncPlexTvShowsCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Fail("Failed to sync TV shows"));
+
+        // Act
+        var result = await Sut.ExecuteAsync(
+            new RefreshPlexTvShowLibraryCommand(new InsertMediaMetaDataCommandResponse(testLibrary)),
+            CancellationToken
+        );
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        result.Errors.First().Message.ShouldContain("Failed to sync TV shows");
+        Mock.Mock<ILibrarySyncProgressStore>()
+            .Verify(
+                x => x.UpdateErrorAsync(It.IsAny<int>(), It.IsAny<Result>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
+    }
+
+    // ── Filter: null ParentGuid ────────────────────────────────────────────
+
+    [Fact]
+    public async Task ShouldFilterOutSeasonsWithNullParentGuid_WhenBuildingTree()
+    {
+        // Arrange
+        var seed = await SetupDatabase(
+            11001,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexTvShowLibraryCount = 1;
+                config.TvShowCount = 1;
+            }
+        );
+        var testLibrary = IDbContext.PlexLibraries.Include(x => x.TvShows).First();
+
+        SetupProgressStoreMocks();
+
+        var validSeason = FakeData.GetPlexTvShowSeason(seed).Generate(1).First();
+        validSeason.ParentGuid = testLibrary.TvShows.First().Guid;
+
+        var invalidSeason = FakeData.GetPlexTvShowSeason(seed).Generate(1).First();
+        invalidSeason.ParentGuid = null; // should be filtered out
+
+        SetupCommandExecutorForMedia([validSeason, invalidSeason], validSeason.Episodes.ToList());
+
+        SyncPlexTvShowsCommand? capturedCommand = null;
+        SetupSyncCommandCapture(cmd => capturedCommand = cmd);
+
+        // Act
+        var result = await Sut.ExecuteAsync(
+            new RefreshPlexTvShowLibraryCommand(new InsertMediaMetaDataCommandResponse(testLibrary)),
+            CancellationToken
+        );
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        capturedCommand.ShouldNotBeNull();
+        var tvShow = capturedCommand.LibraryMetadata.PlexLibrary.TvShows.First();
+        // Only the valid season (with ParentGuid set) should be assigned to the show
+        tvShow.Seasons.ShouldHaveSingleItem();
+        tvShow.Seasons.First().Guid.ShouldBe(validSeason.Guid);
+    }
+
+    [Fact]
+    public async Task ShouldFilterOutEpisodesWithNullParentGuid_WhenBuildingTree()
+    {
+        // Arrange
+        var seed = await SetupDatabase(
+            11002,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexTvShowLibraryCount = 1;
+                config.TvShowCount = 1;
+            }
+        );
+        var testLibrary = IDbContext.PlexLibraries.Include(x => x.TvShows).First();
+
+        SetupProgressStoreMocks();
+
+        var season = FakeData.GetPlexTvShowSeason(seed).Generate(1).First();
+        season.ParentGuid = testLibrary.TvShows.First().Guid;
+
+        var validEpisode = FakeData.GetPlexTvShowEpisode(seed).Generate(1).First();
+        validEpisode.ParentGuid = season.Guid;
+
+        var invalidEpisode = FakeData.GetPlexTvShowEpisode(seed).Generate(1).First();
+        invalidEpisode.ParentGuid = null; // should be filtered out
+
+        SetupCommandExecutorForMedia([season], [validEpisode, invalidEpisode]);
+
+        SyncPlexTvShowsCommand? capturedCommand = null;
+        SetupSyncCommandCapture(cmd => capturedCommand = cmd);
+
+        // Act
+        var result = await Sut.ExecuteAsync(
+            new RefreshPlexTvShowLibraryCommand(new InsertMediaMetaDataCommandResponse(testLibrary)),
+            CancellationToken
+        );
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        capturedCommand.ShouldNotBeNull();
+        var tvShowSeason = capturedCommand.LibraryMetadata.PlexLibrary.TvShows.First().Seasons.First();
+        // Only the valid episode (with ParentGuid set) should be assigned to the season
+        tvShowSeason.Episodes.ShouldHaveSingleItem();
+        tvShowSeason.Episodes.First().Guid.ShouldBe(validEpisode.Guid);
+    }
+
+    // ── BuildTvShowTree: orphaned seasons ─────────────────────────────────
+
+    [Fact]
+    public async Task ShouldIgnoreOrphanedSeasons_WhenParentTvShowDoesNotExist()
+    {
+        // Arrange
+        var seed = await SetupDatabase(
+            11003,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexTvShowLibraryCount = 1;
+                config.TvShowCount = 1;
+            }
+        );
+        var testLibrary = IDbContext.PlexLibraries.Include(x => x.TvShows).First();
+
+        SetupProgressStoreMocks();
+
+        // Season whose ParentGuid does not match any TV show in the library
+        var orphanedSeason = FakeData.GetPlexTvShowSeason(seed).Generate(1).First();
+        orphanedSeason.ParentGuid = "plex://show/orphaned-guid-that-matches-nothing";
+
+        SetupCommandExecutorForMedia([orphanedSeason], []);
+
+        SyncPlexTvShowsCommand? capturedCommand = null;
+        SetupSyncCommandCapture(cmd => capturedCommand = cmd);
+
+        // Act
+        var result = await Sut.ExecuteAsync(
+            new RefreshPlexTvShowLibraryCommand(new InsertMediaMetaDataCommandResponse(testLibrary)),
+            CancellationToken
+        );
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        capturedCommand.ShouldNotBeNull();
+        // The TV show should have no seasons assigned (orphan was ignored)
+        capturedCommand.LibraryMetadata.PlexLibrary.TvShows.First().Seasons.ShouldBeEmpty();
+    }
+
+    // ── BuildTvShowTree: aggregation ──────────────────────────────────────
+
+    [Fact]
+    public async Task ShouldAggregateMediaSizeAndDurationFromEpisodes_WhenBuildingTree()
+    {
+        // Arrange
+        var seed = await SetupDatabase(
+            11004,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexTvShowLibraryCount = 1;
+                config.TvShowCount = 1;
+            }
+        );
+        var testLibrary = IDbContext.PlexLibraries.Include(x => x.TvShows).First();
+
+        SetupProgressStoreMocks();
+
+        var season = FakeData.GetPlexTvShowSeason(seed).Generate(1).First();
+        season.ParentGuid = testLibrary.TvShows.First().Guid;
+        season.Episodes.Clear();
+
+        const long episodeSize = 100_000_000L;
+        const int episodeDuration = 3600;
+
+        var ep1 = FakeData.GetPlexTvShowEpisode(seed).Generate(1).First();
+        ep1.ParentGuid = season.Guid;
+        ep1.MediaSize = episodeSize;
+        ep1.Duration = episodeDuration;
+
+        var ep2 = FakeData.GetPlexTvShowEpisode(seed).Generate(1).First();
+        ep2.ParentGuid = season.Guid;
+        ep2.MediaSize = episodeSize;
+        ep2.Duration = episodeDuration;
+
+        SetupCommandExecutorForMedia([season], [ep1, ep2]);
+
+        SyncPlexTvShowsCommand? capturedCommand = null;
+        SetupSyncCommandCapture(cmd => capturedCommand = cmd);
+
+        // Act
+        var result = await Sut.ExecuteAsync(
+            new RefreshPlexTvShowLibraryCommand(new InsertMediaMetaDataCommandResponse(testLibrary)),
+            CancellationToken
+        );
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        capturedCommand.ShouldNotBeNull();
+
+        var tvShow = capturedCommand.LibraryMetadata.PlexLibrary.TvShows.First();
+        var builtSeason = tvShow.Seasons.First();
+
+        builtSeason.Episodes.Count.ShouldBe(2);
+        builtSeason.MediaSize.ShouldBe(episodeSize * 2);
+        builtSeason.Duration.ShouldBe(episodeDuration * 2);
+        builtSeason.ChildCount.ShouldBe(2);
+
+        tvShow.MediaSize.ShouldBe(episodeSize * 2);
+        tvShow.GrandChildCount.ShouldBe(2);
+    }
+
+    // ── BuildTvShowTree: sort indices ─────────────────────────────────────
+
+    [Fact]
+    public async Task ShouldAssignAscendingSortIndices_WhenBuildingTree()
+    {
+        // Arrange
+        var seed = await SetupDatabase(
+            11005,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexTvShowLibraryCount = 1;
+                config.TvShowCount = 3;
+            }
+        );
+        var testLibrary = IDbContext.PlexLibraries.Include(x => x.TvShows).First();
+
+        SetupProgressStoreMocks();
+
+        var seasons = testLibrary
+            .TvShows.Select(tvShow =>
+            {
+                var season = FakeData.GetPlexTvShowSeason(seed).Generate(1).First();
+                season.ParentGuid = tvShow.Guid;
+                season.Episodes.Clear();
+                return season;
+            })
+            .ToList();
+
+        SetupCommandExecutorForMedia(seasons, []);
+
+        SyncPlexTvShowsCommand? capturedCommand = null;
+        SetupSyncCommandCapture(cmd => capturedCommand = cmd);
+
+        // Act
+        var result = await Sut.ExecuteAsync(
+            new RefreshPlexTvShowLibraryCommand(new InsertMediaMetaDataCommandResponse(testLibrary)),
+            CancellationToken
+        );
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        capturedCommand.ShouldNotBeNull();
+
+        var tvShows = capturedCommand.LibraryMetadata.PlexLibrary.TvShows.ToList();
+        for (var i = 0; i < tvShows.Count; i++)
+            tvShows[i].SortIndex.ShouldBe(i + 1);
+    }
+}

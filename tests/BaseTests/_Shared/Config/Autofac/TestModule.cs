@@ -4,13 +4,13 @@ using Autofac;
 using Autofac.Extras.Quartz;
 using ByteSizeLib;
 using Reaparr.Application;
-using Reaparr.Application.Contracts;
 using Reaparr.Data;
 using Reaparr.Data.Contracts;
 using Reaparr.Environment;
 using Reaparr.Identity;
 using Reaparr.Identity.Contracts;
 using Reaparr.Settings.Contracts;
+using Reaparr.SignalR.Contracts;
 
 namespace Reaparr.BaseTests;
 
@@ -46,7 +46,9 @@ public class TestModule : Module
             .InstancePerDependency();
 
         builder.RegisterType<MockConfigManager>().As<IConfigManager>().SingleInstance();
-        builder.RegisterType<MockSignalRService>().As<ISignalRService>().SingleInstance();
+        builder.RegisterType<MockProgressHubService>().As<IProgressHubService>().SingleInstance();
+        builder.RegisterType<MockDownloadHubService>().As<IDownloadHubService>().SingleInstance();
+        builder.RegisterType<MockNotificationHubService>().As<INotificationHubService>().SingleInstance();
         builder.RegisterType<MockPlexApiServer>().As<IMockPlexApiServer>().SingleInstance();
 
         SetMockedDependencies(builder);

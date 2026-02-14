@@ -4,18 +4,18 @@ namespace Reaparr.Application;
 
 public static partial class PlexMediaDTOMapper
 {
-    public static PlexMediaDTO ToDTO(this PlexTvShowSeason plexTvShowSeason, string plexToken)
+    public static PlexMediaDTO ToDTO(this PlexTvShowSeason plexTvShowSeason)
     {
-        var dto = plexTvShowSeason.ToDTOMapper(plexToken);
+        var dto = plexTvShowSeason.ToDTOMapper();
         dto.Children = [];
 
         foreach (var episode in plexTvShowSeason.Episodes)
-            dto.Children.Add(episode.ToDTO(plexToken));
+            dto.Children.Add(episode.ToDTO());
 
         return dto;
     }
 
-    private static PlexMediaDTO ToDTOMapper(this PlexTvShowSeason source, string plexToken) =>
+    private static PlexMediaDTO ToDTOMapper(this PlexTvShowSeason source) =>
         new()
         {
             Id = source.Id,
@@ -45,8 +45,7 @@ public static partial class PlexMediaDTOMapper
             ContentRating = source.ContentRating,
             Rating = source.Rating,
             OriginallyAvailableAt = source.OriginallyAvailableAt,
-            Children = source.Episodes.Select(x => x.ToDTO(plexToken)).ToList(),
+            Children = [],
             PlexApiMetaDataKey = source.PlexApiMetaDataKey,
-            PlexToken = plexToken,
         };
 }

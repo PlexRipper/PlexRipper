@@ -15,8 +15,10 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
         LibrarySyncProgressDTO? capturedDto = null;
 
         Mock.Mock<IProgressHubService>()
-            .Setup(x => x.SendLibraryProgressUpdateAsync(It.IsAny<LibrarySyncProgressDTO>()))
-            .Callback<LibrarySyncProgressDTO>(dto => capturedDto = dto)
+            .Setup(x =>
+                x.SendLibraryProgressUpdateAsync(It.IsAny<LibrarySyncProgressDTO>(), It.IsAny<CancellationToken>())
+            )
+            .Callback<LibrarySyncProgressDTO, CancellationToken>((dto, _) => capturedDto = dto)
             .Returns(Task.CompletedTask);
 
         // Act
@@ -29,7 +31,11 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
         capturedDto.Items[0].MediaType.ShouldBe(PlexMediaType.Movie);
 
         Mock.Mock<IProgressHubService>()
-            .Verify(x => x.SendLibraryProgressUpdateAsync(It.IsAny<LibrarySyncProgressDTO>()), Times.Once());
+            .Verify(
+                x =>
+                    x.SendLibraryProgressUpdateAsync(It.IsAny<LibrarySyncProgressDTO>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
     }
 
     [Fact]
@@ -39,8 +45,10 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
         LibrarySyncProgressDTO? capturedDto = null;
 
         Mock.Mock<IProgressHubService>()
-            .Setup(x => x.SendLibraryProgressUpdateAsync(It.IsAny<LibrarySyncProgressDTO>()))
-            .Callback<LibrarySyncProgressDTO>(dto => capturedDto = dto)
+            .Setup(x =>
+                x.SendLibraryProgressUpdateAsync(It.IsAny<LibrarySyncProgressDTO>(), It.IsAny<CancellationToken>())
+            )
+            .Callback<LibrarySyncProgressDTO, CancellationToken>((dto, _) => capturedDto = dto)
             .Returns(Task.CompletedTask);
 
         await Sut.StartAsync(1, PlexMediaType.Movie, TestContext.Current.CancellationToken);
@@ -64,7 +72,11 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
         capturedDto.Items[0].Total.ShouldBe(200);
 
         Mock.Mock<IProgressHubService>()
-            .Verify(x => x.SendLibraryProgressUpdateAsync(It.IsAny<LibrarySyncProgressDTO>()), Times.Exactly(2));
+            .Verify(
+                x =>
+                    x.SendLibraryProgressUpdateAsync(It.IsAny<LibrarySyncProgressDTO>(), It.IsAny<CancellationToken>()),
+                Times.Exactly(2)
+            );
     }
 
     [Fact]
@@ -74,8 +86,10 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
         LibrarySyncProgressDTO? capturedDto = null;
 
         Mock.Mock<IProgressHubService>()
-            .Setup(x => x.SendLibraryProgressUpdateAsync(It.IsAny<LibrarySyncProgressDTO>()))
-            .Callback<LibrarySyncProgressDTO>(dto => capturedDto = dto)
+            .Setup(x =>
+                x.SendLibraryProgressUpdateAsync(It.IsAny<LibrarySyncProgressDTO>(), It.IsAny<CancellationToken>())
+            )
+            .Callback<LibrarySyncProgressDTO, CancellationToken>((dto, _) => capturedDto = dto)
             .Returns(Task.CompletedTask);
 
         await Sut.StartAsync(2, PlexMediaType.TvShow, TestContext.Current.CancellationToken);
@@ -121,7 +135,11 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
         capturedDto.Total.ShouldBe(550); // 10 + 40 + 500
 
         Mock.Mock<IProgressHubService>()
-            .Verify(x => x.SendLibraryProgressUpdateAsync(It.IsAny<LibrarySyncProgressDTO>()), Times.Exactly(4));
+            .Verify(
+                x =>
+                    x.SendLibraryProgressUpdateAsync(It.IsAny<LibrarySyncProgressDTO>(), It.IsAny<CancellationToken>()),
+                Times.Exactly(4)
+            );
     }
 
     [Fact]
@@ -131,8 +149,10 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
         LibrarySyncProgressDTO? capturedDto = null;
 
         Mock.Mock<IProgressHubService>()
-            .Setup(x => x.SendLibraryProgressUpdateAsync(It.IsAny<LibrarySyncProgressDTO>()))
-            .Callback<LibrarySyncProgressDTO>(dto => capturedDto = dto)
+            .Setup(x =>
+                x.SendLibraryProgressUpdateAsync(It.IsAny<LibrarySyncProgressDTO>(), It.IsAny<CancellationToken>())
+            )
+            .Callback<LibrarySyncProgressDTO, CancellationToken>((dto, _) => capturedDto = dto)
             .Returns(Task.CompletedTask);
 
         await Sut.StartAsync(3, PlexMediaType.TvShow, TestContext.Current.CancellationToken);
@@ -177,7 +197,11 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
         capturedDto.Received.ShouldBe(capturedDto.Total);
 
         Mock.Mock<IProgressHubService>()
-            .Verify(x => x.SendLibraryProgressUpdateAsync(It.IsAny<LibrarySyncProgressDTO>()), Times.Exactly(4));
+            .Verify(
+                x =>
+                    x.SendLibraryProgressUpdateAsync(It.IsAny<LibrarySyncProgressDTO>(), It.IsAny<CancellationToken>()),
+                Times.Exactly(4)
+            );
     }
 
     [Fact]
@@ -187,8 +211,10 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
         LibrarySyncProgressDTO? capturedDto = null;
 
         Mock.Mock<IProgressHubService>()
-            .Setup(x => x.SendLibraryProgressUpdateAsync(It.IsAny<LibrarySyncProgressDTO>()))
-            .Callback<LibrarySyncProgressDTO>(dto => capturedDto = dto)
+            .Setup(x =>
+                x.SendLibraryProgressUpdateAsync(It.IsAny<LibrarySyncProgressDTO>(), It.IsAny<CancellationToken>())
+            )
+            .Callback<LibrarySyncProgressDTO, CancellationToken>((dto, _) => capturedDto = dto)
             .Returns(Task.CompletedTask);
 
         await Sut.StartAsync(4, PlexMediaType.TvShow, TestContext.Current.CancellationToken);
@@ -232,7 +258,11 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
         capturedDto.IsComplete.ShouldBeFalse();
 
         Mock.Mock<IProgressHubService>()
-            .Verify(x => x.SendLibraryProgressUpdateAsync(It.IsAny<LibrarySyncProgressDTO>()), Times.Exactly(4));
+            .Verify(
+                x =>
+                    x.SendLibraryProgressUpdateAsync(It.IsAny<LibrarySyncProgressDTO>(), It.IsAny<CancellationToken>()),
+                Times.Exactly(4)
+            );
     }
 
     [Fact]
@@ -240,7 +270,9 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
     {
         // Arrange
         Mock.Mock<IProgressHubService>()
-            .Setup(x => x.SendLibraryProgressUpdateAsync(It.IsAny<LibrarySyncProgressDTO>()))
+            .Setup(x =>
+                x.SendLibraryProgressUpdateAsync(It.IsAny<LibrarySyncProgressDTO>(), It.IsAny<CancellationToken>())
+            )
             .Returns(Task.CompletedTask);
 
         await Sut.StartAsync(5, PlexMediaType.TvShow, TestContext.Current.CancellationToken);
@@ -267,7 +299,11 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
 
         // Assert — 1 from StartAsync + 2 from UpdateItemAsync
         Mock.Mock<IProgressHubService>()
-            .Verify(x => x.SendLibraryProgressUpdateAsync(It.IsAny<LibrarySyncProgressDTO>()), Times.Exactly(3));
+            .Verify(
+                x =>
+                    x.SendLibraryProgressUpdateAsync(It.IsAny<LibrarySyncProgressDTO>(), It.IsAny<CancellationToken>()),
+                Times.Exactly(3)
+            );
     }
 
     [Fact]
@@ -277,8 +313,10 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
         LibrarySyncProgressDTO? capturedDto = null;
 
         Mock.Mock<IProgressHubService>()
-            .Setup(x => x.SendLibraryProgressUpdateAsync(It.IsAny<LibrarySyncProgressDTO>()))
-            .Callback<LibrarySyncProgressDTO>(dto => capturedDto = dto)
+            .Setup(x =>
+                x.SendLibraryProgressUpdateAsync(It.IsAny<LibrarySyncProgressDTO>(), It.IsAny<CancellationToken>())
+            )
+            .Callback<LibrarySyncProgressDTO, CancellationToken>((dto, _) => capturedDto = dto)
             .Returns(Task.CompletedTask);
 
         const int plexLibraryId = 42;
@@ -301,6 +339,10 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
         capturedDto.PlexLibraryId.ShouldBe(plexLibraryId);
 
         Mock.Mock<IProgressHubService>()
-            .Verify(x => x.SendLibraryProgressUpdateAsync(It.IsAny<LibrarySyncProgressDTO>()), Times.Exactly(2));
+            .Verify(
+                x =>
+                    x.SendLibraryProgressUpdateAsync(It.IsAny<LibrarySyncProgressDTO>(), It.IsAny<CancellationToken>()),
+                Times.Exactly(2)
+            );
     }
 }

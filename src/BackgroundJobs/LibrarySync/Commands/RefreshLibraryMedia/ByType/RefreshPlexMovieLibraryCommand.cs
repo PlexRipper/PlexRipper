@@ -105,6 +105,20 @@ public class RefreshPlexMovieLibraryCommandHandler
                     plexLibrary.Title,
                     plexLibrary.Id
                 );
+
+            await _librarySyncProgressStore.UpdateItemAsync(
+                plexLibraryId,
+                new LibraryProgressItem
+                {
+                    MediaType = PlexMediaType.Movie,
+                    Received = 0,
+                    Total = 0,
+                    TimeRemaining = TimeSpan.Zero,
+                },
+                cancellationToken
+            );
+
+            await _dbContext.SetMovieMediaMetrics(plexLibraryId, 0, 0);
         }
 
         // Refresh the PlexLibrary from the database to ensure we have the latest data

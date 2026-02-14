@@ -126,7 +126,7 @@ public static partial class DbContextExtensions
                 if (filter.ActorId > 0)
                     query = query.Include(x => x.Actors);
 
-                plexMediaSlimDtos = await query
+                var movies = await query
                     .Include(x => x.MediaDataList)
                     .ApplyWhere(plexLibraryId > 0, x => x.PlexLibraryId == plexLibraryId)
                     .ApplyWhere(plexLibraryId == 0, x => allowedPlexLibraryIds.Contains(x.PlexLibraryId))
@@ -140,8 +140,9 @@ public static partial class DbContextExtensions
                     .ApplyOrderBy(plexLibraryId > 0, x => x.SortIndex)
                     .ApplySkip(filter.Skip)
                     .ApplyTake(filter.Take)
-                    .ProjectToMediaSlimDTO()
                     .ToListAsync(ct);
+
+                plexMediaSlimDtos = movies.Select(x => x.ToSlimDTO()).ToList();
 
                 break;
             }
@@ -158,7 +159,7 @@ public static partial class DbContextExtensions
                 if (filter.ActorId > 0)
                     query = query.Include(x => x.Actors);
 
-                plexMediaSlimDtos = await query
+                var tvShows = await query
                     .Include(x => x.Qualities)
                     .ApplyWhere(plexLibraryId > 0, x => x.PlexLibraryId == plexLibraryId)
                     .ApplyWhere(plexLibraryId == 0, x => allowedPlexLibraryIds.Contains(x.PlexLibraryId))
@@ -172,8 +173,9 @@ public static partial class DbContextExtensions
                     .ApplyOrderBy(plexLibraryId > 0, x => x.SortIndex)
                     .ApplySkip(filter.Skip)
                     .ApplyTake(filter.Take)
-                    .ProjectToMediaSlimDTO()
                     .ToListAsync(ct);
+
+                plexMediaSlimDtos = tvShows.Select(x => x.ToSlimDTOMapper()).ToList();
                 break;
             }
             default:

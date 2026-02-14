@@ -607,6 +607,11 @@
                         "text": "This will mask the names of Plex libraries in the UI. This is useful when taking anonymous screenshots ",
                         "title": "Mask Plex Library Names"
                     },
+                    "mask-plex-accounts": {
+                        "label": "Mask Plex Account Names",
+                        "text": "This will mask the names of Plex accounts in the UI. This is useful when taking anonymous screenshots.",
+                        "title": "Mask Plex Account Names"
+                    },
                     "mask-plex-servers": {
                         "label": "Mask Plex Server Names",
                         "text": "This will mask the names of Plex servers in the UI. This is useful when taking anonymous screenshots.",

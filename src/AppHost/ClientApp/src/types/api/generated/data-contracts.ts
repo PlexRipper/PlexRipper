@@ -142,6 +142,7 @@ export interface DateTimeSettingsDTO {
 
 export interface DebugSettingsDTO {
   debugModeEnabled: boolean;
+  maskAccountNames: boolean;
   maskLibraryNames: boolean;
   maskServerNames: boolean;
 }

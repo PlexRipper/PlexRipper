@@ -607,6 +607,11 @@
                         "text": "Cela masquera les noms des bibliothèques Plex dans l'interface utilisateur. Ceci est utile lors de la prise de captures d'écran anonymes",
                         "title": "Masquer les noms de bibliothèque Plex"
                     },
+                    "mask-plex-accounts": {
+                        "label": "Masquer les noms de compte Plex",
+                        "text": "Cela masquera les noms des serveurs Plex dans l'interface utilisateur. Ceci est utile lors de la prise de captures d'écran anonymes.",
+                        "title": "Masquer les noms de compte Plex"
+                    },
                     "mask-plex-servers": {
                         "label": "Masquer les noms de serveur Plex",
                         "text": "Cela masquera les noms des serveurs Plex dans l'interface utilisateur. Ceci est utile lors de la prise de captures d'écran anonymes.",

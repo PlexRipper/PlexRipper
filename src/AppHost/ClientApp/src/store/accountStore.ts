@@ -7,7 +7,7 @@ import type { CreatePlexAccountEndpointRequest, PlexAccountDTO } from '@dto';
 import { RefreshDataType } from '@dto';
 import { StoreNames, type ISetupResult } from '@interfaces';
 import { plexAccountApi } from '@api';
-import { useLibraryStore, useServerStore, useSignalrStore } from '@store';
+import { useLibraryStore, useServerStore, useSettingsStore, useSignalrStore } from '@store';
 import { cloneDeep } from 'lodash-es';
 
 interface IAccountStoreState {
@@ -23,6 +23,7 @@ export const useAccountStore = defineStore(StoreNames.AccountStore, () => {
 
 	const state = reactive<IAccountStoreState>(cloneDeep(defaultState));
 
+	const settingsStore = useSettingsStore();
 	const serverStore = useServerStore();
 	const libraryStore = useLibraryStore();
 	const signalRStore = useSignalrStore();
@@ -78,6 +79,35 @@ export const useAccountStore = defineStore(StoreNames.AccountStore, () => {
 		},
 		getAccount(id: number): PlexAccountDTO | undefined {
 			return state.accounts.find((x) => x.id === id);
+		},
+		getAccountDisplayName(id: number): string {
+			if (settingsStore.shouldMaskAccountNames) {
+				return '**MASKED**';
+			}
+
+			const account = actions.getAccount(id);
+			if (!account) {
+				return '**UNKNOWN**';
+			}
+
+			const customName = account.displayName ?? '';
+			if (customName !== '') {
+				return customName;
+			}
+
+			return account.email;
+		},
+		getAccountUserName(id: number): string {
+			if (settingsStore.shouldMaskAccountNames) {
+				return '**MASKED**';
+			}
+
+			const account = actions.getAccount(id);
+			if (!account) {
+				return '**UNKNOWN**';
+			}
+
+			return account.username;
 		},
 		/**
      * Checks if there is any account that has access to the server

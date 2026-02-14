@@ -607,6 +607,11 @@
                         "text": "To ukryje nazwy bibliotek Plex w interfejsie użytkownika. Jest to przydatne podczas robienia anonimowych zrzutów ekranu.",
                         "title": "Ukryj nazwy bibliotek Plex"
                     },
+                    "mask-plex-accounts": {
+                        "label": "Ukryj nazwy serwerów Plex",
+                        "text": "Spowoduje to zamaskowanie nazw kont Plex w interfejsie użytkownika. Jest to przydatne podczas robienia anonimowych zrzutów ekranu.",
+                        "title": "Maskuj nazwy kont Plex"
+                    },
                     "mask-plex-servers": {
                         "label": "Ukryj nazwy serwerów Plex",
                         "text": "To ukryje nazwy serwerów Plex w interfejsie użytkownika. Jest to przydatne podczas robienia anonimowych zrzutów ekranu.",

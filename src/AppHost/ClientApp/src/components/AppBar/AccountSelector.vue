@@ -86,9 +86,9 @@ const accountsDisplay = computed(() => {
 			.map((x) => {
 				return {
 					id: x.id,
-					displayName: x.displayName,
+					displayName: accountStore.getAccountDisplayName(x.id),
 					loading: accountStore.accessSyncLoading,
-					username: x.username,
+					username: accountStore.getAccountUserName(x.id),
 				};
 			}),
 	];

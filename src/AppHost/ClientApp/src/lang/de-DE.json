@@ -607,6 +607,11 @@
                         "text": "Dadurch werden die Namen der Plex-Bibliotheken in der Benutzeroberfläche maskiert. Dies ist nützlich, wenn Sie anonyme Screenshots erstellen",
                         "title": "Plex-Bibliotheksnamen maskieren"
                     },
+                    "mask-plex-accounts": {
+                        "label": "Plex-Kontonamen maskieren",
+                        "text": "Dadurch werden die Namen der Plex-Konten in der Benutzeroberfläche ausgeblendet. Dies ist nützlich, wenn anonyme Screenshots erstellt werden.",
+                        "title": "Plex-Kontonamen maskieren"
+                    },
                     "mask-plex-servers": {
                         "label": "Maskieren Sie Plex-Servernamen",
                         "text": "Dadurch werden die Namen der Plex-Server in der Benutzeroberfläche maskiert. Dies ist nützlich, wenn Sie anonyme Screenshots erstellen.",

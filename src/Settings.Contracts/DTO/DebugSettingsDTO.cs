@@ -7,4 +7,6 @@ public class DebugSettingsDTO : IDebugSettings
     public required bool MaskServerNames { get; set; }
 
     public required bool MaskLibraryNames { get; set; }
+
+    public required bool MaskAccountNames { get; set; }
 }

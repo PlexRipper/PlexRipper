@@ -94,7 +94,7 @@ const hasHelpPage = computed(() => {
 .help-row {
 
   &-label {
-    white-space: nowrap;
+    white-space: normal;
   }
 
   &-icon {

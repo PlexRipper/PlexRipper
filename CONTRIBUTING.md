@@ -372,6 +372,17 @@ All host paths must exist and be writable by the `PUID`/`PGID` user.
 
 ---
 
+## AI Tools
+
+AI coding assistants (e.g. Claude Code, Cursor, Copilot) are supported and encouraged. To help them work effectively with this codebase, two instruction files are maintained at the repository root:
+
+- **`AGENTS.md`** — machine-readable project conventions covering architecture, testing rules, mocking patterns, naming conventions, known implementation constraints, and a self-update rule for agents to record new findings after completing tasks.
+- **`CLAUDE.md`** — Claude Code entry point; currently delegates to `AGENTS.md` via `@AGENTS.md`.
+
+When using an AI assistant, point it at these files so it picks up the project's conventions automatically. If you discover a new constraint or gotcha while working, update `AGENTS.md` with a concise, actionable entry — this benefits both human contributors and future AI-assisted sessions.
+
+---
+
 ## Code Conventions
 
 - **Small, focused changes.** Prefer minimal diffs. Do not clean up surrounding code that was not related to the task.
@@ -389,13 +400,19 @@ All host paths must exist and be writable by the `PUID`/`PGID` user.
 Format:
 
 ```
-<type>(WebAPI): <Imperative message>
+<type>(<scope>): <Imperative message>
 ```
 
-- The scope is always `WebAPI`.
 - Message is imperative, present tense.
 - Capitalize the first word after the colon.
 - No trailing punctuation.
+
+### Scopes
+
+| Scope | When to use |
+|-------|-------------|
+| `WebAPI` | Backend (.NET) changes |
+| `Web-UI` | Frontend (Nuxt/Vue) changes |
 
 ### Types
 
@@ -418,6 +435,9 @@ feat(WebAPI): Add Sonarr integration endpoint
 fix(WebAPI): Resolve null reference in download workflow
 refactor(WebAPI): Simplify cache handling in library sync
 test(WebAPI): Add unit tests for ClearCompletedDownloadTasksEndpoint
+feat(Web-UI): Add Sonarr integration settings page
+fix(Web-UI): Resolve download progress bar flickering
+style(Web-UI): Align table column spacing in downloads view
 ```
 
 ---

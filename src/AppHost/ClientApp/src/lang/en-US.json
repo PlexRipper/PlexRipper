@@ -373,7 +373,8 @@
                 "connection": {
                     "title": "Setup Sonarr Connection"
                 }
-            }
+            },
+            "title": "Sonarr Integration"
         },
         "radarr-integration": {
             "connection-status": {
@@ -394,7 +395,8 @@
                 "connection": {
                     "title": "Setup Radarr Connection"
                 }
-            }
+            },
+            "title": "Radarr Integration"
         }
     },
     "confirmation": {
@@ -575,7 +577,7 @@
                         "title": "Download Segments"
                     },
                     "keep-in-downloads": {
-                        "label": "Do not move the completed downloads to destination folders",
+                        "label": "Do not move completed downloads to destination folders",
                         "title": "Do not move the completed downloads to destination folders",
                         "text": "If enabled, completed downloads will remain in the download folder and will not be moved to the destination folder."
                     }

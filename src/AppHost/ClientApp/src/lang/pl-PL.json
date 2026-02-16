@@ -373,7 +373,8 @@
                 "connection": {
                     "title": "Konfiguracja połączenia Sonarr"
                 }
-            }
+            },
+            "title": "Integracja Sonarr"
         },
         "radarr-integration": {
             "connection-status": {
@@ -394,7 +395,8 @@
                 "connection": {
                     "title": "Konfiguracja połączenia Radarr"
                 }
-            }
+            },
+            "title": "Integracja Radar"
         }
     },
     "confirmation": {

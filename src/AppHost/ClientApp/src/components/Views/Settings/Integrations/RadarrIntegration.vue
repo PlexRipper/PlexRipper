@@ -1,5 +1,5 @@
 <template>
-	<QSection header="Radarr">
+	<QSection :header="t('components.radarr-integration.title')">
 		<q-stepper
 			ref="stepper"
 			v-model="integrationStore.radarr.step"

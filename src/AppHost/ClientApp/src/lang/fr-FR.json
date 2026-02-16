@@ -373,7 +373,8 @@
                 "connection": {
                     "title": "Configurer la connexion Sonarr"
                 }
-            }
+            },
+            "title": "Intégration Sonarr"
         },
         "radarr-integration": {
             "connection-status": {
@@ -394,7 +395,8 @@
                 "connection": {
                     "title": "Configurer la connexion Radarr"
                 }
-            }
+            },
+            "title": "Intégration Radarr"
         }
     },
     "confirmation": {
@@ -575,7 +577,7 @@
                         "title": "Télécharger par Segments"
                     },
                     "keep-in-downloads": {
-                        "label": "Ne déplacez pas les téléchargements terminés vers les dossiers de destination",
+                        "label": "Ne déplacez pas les téléchargements terminés vers les dossiers de destination.",
                         "title": "Ne déplacez pas les téléchargements terminés vers les dossiers de destination",
                         "text": "Si cette option est activée, les téléchargements terminés resteront dans le dossier de téléchargement et ne seront pas déplacés vers le dossier de destination."
                     }

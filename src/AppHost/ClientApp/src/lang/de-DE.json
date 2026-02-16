@@ -373,7 +373,8 @@
                 "connection": {
                     "title": "Sonarr-Verbindung einrichten"
                 }
-            }
+            },
+            "title": "Sonarr-Integration"
         },
         "radarr-integration": {
             "connection-status": {
@@ -394,7 +395,8 @@
                 "connection": {
                     "title": "Radarr-Verbindung einrichten"
                 }
-            }
+            },
+            "title": "Radarr-Integration"
         }
     },
     "confirmation": {
@@ -575,7 +577,7 @@
                         "title": "Download Teile"
                     },
                     "keep-in-downloads": {
-                        "label": "Verschieben Sie die abgeschlossenen Downloads nicht in Zielordner",
+                        "label": "Verschieben Sie abgeschlossene Downloads nicht in Zielordner.",
                         "title": "Verschieben Sie die abgeschlossenen Downloads nicht in Zielordner",
                         "text": "Wenn aktiviert, verbleiben abgeschlossene Downloads im Download-Ordner und werden nicht in den Zielordner verschoben."
                     }

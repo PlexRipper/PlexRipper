@@ -7,8 +7,11 @@
 
 <h4 align="center">A cross-platform Plex media downloader that seamlessly adds media from other Plex servers to your
 own!</h4>
+<h4 align="center"><a href="https://www.reaparr.rocks/screenshots">Screenshots</a></h4>
 
-<h5 align="center"><i>This tool is not affiliated with, endorsed by, or associated with Plex Inc.</i></h5>
+
+<h4 align="center">Visit <a href="https://www.reaparr.rocks/">www.reaparr.rocks</a> for more information!</h4>
+
 <h4 align="center">
 ⭐ Star us on <a href="https://github.com/Reaparr/Reaparr/">GitHub</a>
 and <a href="https://hub.docker.com/r/reaparr/reaparr">DockerHub</a> — it motivates us a lot and helps to pay the
@@ -31,54 +34,6 @@ Discord</a> for expert tips, updates, and a helpful community!</h4>
             </a>
 </p>
 
-<p align="center">
-	<strong>
-		<a href="https://www.reaparr.rocks/">Website</a> • <a href="#key-features">Features</a> • <a href="#what-is-reaparr">What is Reaparr?</a> • <a href="#installation">Installation</a>
-	</strong>
-</p>
-
-## Key Features
-
-- Intuitive interface for seamless media management and downloads!
-- A gorgeous, intuitive user interface designed for ease of use!
-- Works anywhere Docker runs — PCs, servers, and beyond!
-- Connect multiple accounts to organize and download content effortlessly!
-- Scalable, multi-threaded, and resilient download manager to handle huge libraries!
-- Packed with quality of life features and more!
-
-## What is Reaparr?
-
-Reaparr is an independent media management tool designed to help users organize and interact with their personal media
-libraries. It is not affiliated with, endorsed by, or associated with Plex Inc. or any other media platform.
-
-Users are solely responsible for ensuring compliance with Plex’s Terms of Service and applicable laws in their
-jurisdiction. Reaparr does not bypass security measures or access features requiring a valid Plex Pass subscription.
-
-Reaparr is intended for personal use only. Users must:
-
-- Have explicit ownership or permission to access and download content.
-- Avoid using Reaparr to infringe upon copyrights or violate platform terms.
-- Use Reaparr responsibly, ensuring it does not overload or disrupt server operations.
-
-Prohibited activities include:
-
-- Downloading content from servers without proper authorization.
-- Circumventing restrictions tied to paid subscriptions, such as Plex Pass.
-- Using the tool for any purpose that violates local copyright or intellectual property laws.
-
-## Installation
-
-Follow one of these guides depending on your platform:
-<ul>
-    <li><a href="https://www.reaparr.rocks/guides/installation/docker">Docker</a></li>
-    <li><a href="https://www.reaparr.rocks/guides/installation/unraid">Unraid</a></li>
-    <li><a href="https://www.reaparr.rocks/guides/installation/windows">Windows</a></li>
-    <li><a href="https://www.reaparr.rocks/guides/installation/linux">Linux</a></li>
-    <li><a href="https://www.reaparr.rocks/guides/installation/macos">MacOS</a></li>
-    <li><a href="https://www.reaparr.rocks/guides/installation/synology">Synology</a></li>
-</ul>
-
-#### Visit [www.reaparr.rocks](https://www.reaparr.rocks/) for more information!
 
 ## Project Status
 
@@ -120,24 +75,6 @@ Follow one of these guides depending on your platform:
         </td>
     </tr>
 </table>
-
-## Sponsors
-
-<p>Huge thank you to <a href="http://www.jetbrains.com/"><img src="https://raw.githubusercontent.com/reaparr/reaparr/dev/export/jetbrains/jetbrains.svg" alt="Jetbrains" width="32"> JetBrains </a> for supporting open source projects and providing us with free licenses of their great tools!</p>
-
-Reaparr very contentedly uses the following tools:
-
-<a href="http://www.jetbrains.com/resharper/"><img src="https://raw.githubusercontent.com/reaparr/reaparr/dev/export/jetbrains/resharper.svg" alt="Jetbrains Resharper" width="32">
-Resharper </a>
-
-<a href="http://www.jetbrains.com/webstorm/"><img src="https://raw.githubusercontent.com/reaparr/reaparr/dev/export/jetbrains/webstorm.svg" alt="Jetbrains WebStorm" width="32">
-WebStorm </a>
-
-<a href="http://www.jetbrains.com/rider/"><img src="https://raw.githubusercontent.com/reaparr/reaparr/dev/export/jetbrains/rider.svg" alt="Jetbrains Rider" width="32">
-Rider </a>
-
-<a href="http://www.jetbrains.com/profiler/"><img src="https://raw.githubusercontent.com/reaparr/reaparr/dev/export/jetbrains/dottrace.svg" alt="Jetbrains DotTrace" width="32">
-DotTrace </a>
 
 
 

@@ -537,7 +537,7 @@
             },
             "username": {
                 "label": "Username",
-                "text": "The username of your Plex account",
+                "text": "The username of your Plex account.\n\n**Note:** Plex uses your **email address** as username. If your username is not working, see the [FAQ](https://www.plexripper.rocks/faq#i-tried-to-use-my-username-to-set-up-my-plex-account-in-plex-ripper-but-its-not-working) for help.",
                 "title": "Username"
             }
         },

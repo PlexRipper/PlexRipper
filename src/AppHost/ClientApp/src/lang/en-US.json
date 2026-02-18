@@ -1,7 +1,6 @@
 {
     "components": {
         "account-card": {
-            "no-account-name": "Add Account Display Name",
             "invalid-account": "Account object was invalid"
         },
         "account-dialog": {

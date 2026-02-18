@@ -1,7 +1,6 @@
 {
     "components": {
         "account-card": {
-            "no-account-name": "Ajouter un surnom à ce compte",
             "invalid-account": "L'objet de compte n'était pas valide"
         },
         "account-dialog": {

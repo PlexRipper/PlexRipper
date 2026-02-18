@@ -1,7 +1,6 @@
 {
     "components": {
         "account-card": {
-            "no-account-name": "Konto Anzeigenamen hinzufügen",
             "invalid-account": "Das Kontoobjekt war ungültig"
         },
         "account-dialog": {

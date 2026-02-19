@@ -39,9 +39,17 @@
 							</QCol>
 							<QCol cols="1">
 								<QText
+									v-if="item.received > 0 && item.total > 0"
 									:value="`${item.received}/${item.total}`"
 									align="right"
 									:cy="`library-media-sync-progress-row-${item.mediaType}-count`" />
+							</QCol>
+						</QRow>
+						<QRow
+							v-if="(libraryProgress?.percentage ?? 0) >= 100"
+							justify="around">
+							<QCol cols="auto">
+								<QText value="Updating database with all new data, please wait" />
 							</QCol>
 						</QRow>
 					</QCol>

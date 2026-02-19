@@ -1,6 +1,7 @@
 <template>
 	<q-linear-progress
 		:value="value / 100"
+		:indeterminate="indeterminate"
 		:data-cy="cy">
 		<div class="absolute-full flex flex-center q-progress-bar-text">
 			<strong>{{ n(value / 100, 'percent') }}</strong>
@@ -11,6 +12,7 @@
 <script setup lang="ts">
 defineProps<{
 	value: number;
+	indeterminate?: boolean;
 	cy?: string;
 }>();
 

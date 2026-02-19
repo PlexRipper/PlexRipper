@@ -162,6 +162,8 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
     public Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default) =>
         Database.BeginTransactionAsync(cancellationToken);
 
+    public void ClearChangeTracker() => this.ChangeTracker.Clear();
+
     public ReaparrDbContext(string databaseName)
     {
         DatabaseName = databaseName;

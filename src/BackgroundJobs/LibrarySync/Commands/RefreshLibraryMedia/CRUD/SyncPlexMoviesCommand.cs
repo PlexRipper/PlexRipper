@@ -107,15 +107,7 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
                 return mergeResult.LogError();
             }
 
-            stopWatch.Stop();
-
-            _log.Here()
-                .Information(
-                    "Finished media syncing plexLibrary: {PlexLibraryName} with id: {PlexLibraryId} in {TotalMilliseconds} milliseconds",
-                    libraryName,
-                    plexLibraryId,
-                    stopWatch.Elapsed.TotalMilliseconds
-                );
+            stopWatch.StopAndLog($"Finished media syncing plexLibrary: {libraryName} with id: {plexLibraryId}");
 
             _log.Here().Debug(_report.ToString());
 

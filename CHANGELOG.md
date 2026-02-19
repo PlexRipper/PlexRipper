@@ -1,5 +1,23 @@
 Reaparr Changelog
 
+# [0.36.0-dev.3](https://github.com/Reaparr/Reaparr/compare/v0.36.0-dev.2...v0.36.0-dev.3) (2026-02-19)
+
+
+### Bug Fixes
+
+* **Web-UI:** Adjust help row label white-space property ([f11e062](https://github.com/Reaparr/Reaparr/commit/f11e06206adbd397219430c6a257dcc6241ebc08))
+* **Web-UI:** fix gap below poster image wrapper when fallback is shown ([d45533e](https://github.com/Reaparr/Reaparr/commit/d45533e63d9f9b9d4f207148e4f131b9d25524bb))
+* **Web-UI:** remove unused i18n key 'account-card.no-account-name' ([b1109a8](https://github.com/Reaparr/Reaparr/commit/b1109a85ecdd4c1ed59cbfcca97bc48f22903d60))
+
+
+### Features
+
+* **Web-UI:** Add FAQ link to username help text in account dialog ([c6a27c8](https://github.com/Reaparr/Reaparr/commit/c6a27c8b79574db366a9bdf3066228160fad66a9))
+* **Web-UI:** Add option to mask Plex account names under Settings => General => Mask Account Names ([e4d8f3d](https://github.com/Reaparr/Reaparr/commit/e4d8f3dad2ecebd2a7090cdc18d63b4a06bbb774))
+* **Web-UI:** Add titles for Sonarr and Radarr integrations title header in multiple languages ([67d46d6](https://github.com/Reaparr/Reaparr/commit/67d46d6b37b1903fd56da6bcda41754c7d0d8cae))
+* **WebAPI:** Added a maskAccountNames toggle to the Reaparr settings file ([90053aa](https://github.com/Reaparr/Reaparr/commit/90053aad4526d5b36658ed9a469d1333d15f2b19))
+* **WebAPI:** Added a maskAccountNames toggle to the Reaparr settings… ([#520](https://github.com/Reaparr/Reaparr/issues/520)) ([4361839](https://github.com/Reaparr/Reaparr/commit/43618393551c9e08b07c4ad687020485ffada2ba))
+
 # [0.36.0-dev.2](https://github.com/Reaparr/Reaparr/compare/v0.36.0-dev.1...v0.36.0-dev.2) (2026-02-14)
 
 

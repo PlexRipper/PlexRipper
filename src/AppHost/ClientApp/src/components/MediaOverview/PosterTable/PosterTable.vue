@@ -4,6 +4,7 @@
 		id="poster-table"
 		v-slot="{ item, index, active }"
 		ref="recycleScrollerRef"
+		:style="{ paddingLeft: `${gridPaddingLeft}px` }"
 		:items="items"
 		:item-size="posterCardHeight"
 		:item-secondary-size="posterCardWidth"
@@ -43,6 +44,7 @@ const posterTableRef = computed(() => document.getElementById('poster-table') ??
 const posterCardWidth = ref(200 + 32);
 const posterCardHeight = ref(340 + 32);
 const gridItems = ref(10);
+const gridPaddingLeft = ref(0);
 const scrolledIndex = ref(0);
 const router = useRouter();
 
@@ -54,7 +56,9 @@ defineProps<{
 
 function onResize() {
 	const { width } = useElementBounding(posterTableRef);
-	set(gridItems, Math.floor(get(width) / get(posterCardWidth)));
+	const cols = Math.floor(get(width) / get(posterCardWidth));
+	set(gridItems, cols);
+	set(gridPaddingLeft, (get(width) - cols * get(posterCardWidth)) / 2);
 	// This is the last step of the lifecycle, so we can safely scroll to the last viewed item
 	nextTick(() => onPageReady());
 }

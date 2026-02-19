@@ -185,15 +185,7 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
             if (mergeResult.IsFailed)
                 return mergeResult.LogError();
 
-            stopWatch.Stop();
-
-            _log.Here()
-                .Information(
-                    "Finished media syncing plexLibrary: {PlexLibraryName} with id: {PlexLibraryId} in {TotalMilliseconds} milliseconds",
-                    plexLibraryName,
-                    plexLibraryId,
-                    stopWatch.Elapsed.TotalMilliseconds
-                );
+            stopWatch.StopAndLog($"Finished media syncing plexLibrary: {plexLibraryName} with id: {plexLibraryId}");
 
             _log.Here().Debug(bulkInsertRapport.ToString());
 

@@ -23,10 +23,8 @@ import type {
   ValidatePlexServerConnectionEndpointRequest,
 } from "./data-contracts";
 
-import { apiCheckPipe } from "@api/base";
-import Axios from "axios";
+import { apiCheckPipe, axiosObservable } from "@api/base";
 import queryString from "query-string";
-import { from } from "rxjs";
 
 export class PlexServerConnection {
   /**
@@ -40,15 +38,13 @@ export class PlexServerConnection {
     plexServerId: number,
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<PlexServerStatusDTO[]>({
-        url: `/api/PlexServerConnection/check/by-server/${plexServerId}`,
-        method: "GET",
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<PlexServerStatusDTO[]>);
+    axiosObservable<PlexServerStatusDTO[]>({
+      url: `/api/PlexServerConnection/check/by-server/${plexServerId}`,
+      method: "GET",
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<PlexServerStatusDTO[]>);
 
   /**
    * No description
@@ -61,15 +57,13 @@ export class PlexServerConnection {
     plexServerConnectionId: number,
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<PlexServerStatusDTO>({
-        url: `/api/PlexServerConnection/check/${plexServerConnectionId}`,
-        method: "GET",
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<PlexServerStatusDTO>);
+    axiosObservable<PlexServerStatusDTO>({
+      url: `/api/PlexServerConnection/check/${plexServerConnectionId}`,
+      method: "GET",
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<PlexServerStatusDTO>);
 
   /**
    * No description
@@ -82,17 +76,15 @@ export class PlexServerConnection {
     data: CreatePlexServerConnectionEndpointRequest,
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<PlexServerConnectionDTO>({
-        url: `/api/PlexServerConnection`,
-        method: "POST",
-        data: data,
-        secure: true,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<PlexServerConnectionDTO>);
+    axiosObservable<PlexServerConnectionDTO>({
+      url: `/api/PlexServerConnection`,
+      method: "POST",
+      data: data,
+      secure: true,
+      type: ContentType.Json,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<PlexServerConnectionDTO>);
 
   /**
    * No description
@@ -102,15 +94,13 @@ export class PlexServerConnection {
    * @secure
    */
   getAllPlexServerConnectionsEndpoint = (params: RequestParams = {}) =>
-    from(
-      Axios.request<PlexServerConnectionDTO[]>({
-        url: `/api/PlexServerConnection`,
-        method: "GET",
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<PlexServerConnectionDTO[]>);
+    axiosObservable<PlexServerConnectionDTO[]>({
+      url: `/api/PlexServerConnection`,
+      method: "GET",
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<PlexServerConnectionDTO[]>);
 
   /**
    * No description
@@ -123,17 +113,15 @@ export class PlexServerConnection {
     data: UpdatePlexServerConnectionEndpointRequest,
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<PlexServerConnectionDTO>({
-        url: `/api/PlexServerConnection`,
-        method: "PATCH",
-        data: data,
-        secure: true,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<PlexServerConnectionDTO>);
+    axiosObservable<PlexServerConnectionDTO>({
+      url: `/api/PlexServerConnection`,
+      method: "PATCH",
+      data: data,
+      secure: true,
+      type: ContentType.Json,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<PlexServerConnectionDTO>);
 
   /**
    * No description
@@ -146,15 +134,13 @@ export class PlexServerConnection {
     plexServerConnectionId: number,
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<BaseResultDTO>({
-        url: `/api/PlexServerConnection/${plexServerConnectionId}`,
-        method: "DELETE",
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<BaseResultDTO>);
+    axiosObservable<BaseResultDTO>({
+      url: `/api/PlexServerConnection/${plexServerConnectionId}`,
+      method: "DELETE",
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<BaseResultDTO>);
 
   /**
    * No description
@@ -167,15 +153,13 @@ export class PlexServerConnection {
     plexServerConnectionId: number,
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<PlexServerConnectionDTO>({
-        url: `/api/PlexServerConnection/${plexServerConnectionId}`,
-        method: "GET",
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<PlexServerConnectionDTO>);
+    axiosObservable<PlexServerConnectionDTO>({
+      url: `/api/PlexServerConnection/${plexServerConnectionId}`,
+      method: "GET",
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<PlexServerConnectionDTO>);
 
   /**
    * No description
@@ -188,17 +172,15 @@ export class PlexServerConnection {
     data: ValidatePlexServerConnectionEndpointRequest,
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<ServerIdentityDTO>({
-        url: `/api/PlexServerConnection/validate`,
-        method: "POST",
-        data: data,
-        secure: true,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<ServerIdentityDTO>);
+    axiosObservable<ServerIdentityDTO>({
+      url: `/api/PlexServerConnection/validate`,
+      method: "POST",
+      data: data,
+      secure: true,
+      type: ContentType.Json,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<ServerIdentityDTO>);
 }
 
 export class PlexServerConnectionPaths {

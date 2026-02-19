@@ -21,10 +21,8 @@ import type {
   UserClaimsDTO,
 } from "./data-contracts";
 
-import { apiCheckPipe } from "@api/base";
-import Axios from "axios";
+import { apiCheckPipe, axiosObservable } from "@api/base";
 import queryString from "query-string";
-import { from } from "rxjs";
 
 export class Authentication {
   /**
@@ -35,15 +33,13 @@ export class Authentication {
    * @secure
    */
   authenticationStatusEndpoint = (params: RequestParams = {}) =>
-    from(
-      Axios.request<UserClaimsDTO>({
-        url: `/api/Authentication/status`,
-        method: "GET",
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<UserClaimsDTO>);
+    axiosObservable<UserClaimsDTO>({
+      url: `/api/Authentication/status`,
+      method: "GET",
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<UserClaimsDTO>);
 
   /**
    * No description
@@ -54,15 +50,13 @@ export class Authentication {
    * @secure
    */
   getAppCredentials = (params: RequestParams = {}) =>
-    from(
-      Axios.request<AppCredentialsDTO>({
-        url: `/api/Authentication`,
-        method: "GET",
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<AppCredentialsDTO>);
+    axiosObservable<AppCredentialsDTO>({
+      url: `/api/Authentication`,
+      method: "GET",
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<AppCredentialsDTO>);
 
   /**
    * No description
@@ -76,17 +70,15 @@ export class Authentication {
     data: UpdateCredentialsEndpointRequest,
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<BaseResultDTO>({
-        url: `/api/Authentication`,
-        method: "PUT",
-        data: data,
-        secure: true,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<BaseResultDTO>);
+    axiosObservable<BaseResultDTO>({
+      url: `/api/Authentication`,
+      method: "PUT",
+      data: data,
+      secure: true,
+      type: ContentType.Json,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<BaseResultDTO>);
 
   /**
    * @description Logs in a user.
@@ -100,17 +92,15 @@ export class Authentication {
     data: AppUserLoginEndpointRequest,
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<BaseResultDTO>({
-        url: `/api/Authentication/login`,
-        method: "POST",
-        data: data,
-        secure: true,
-        type: ContentType.FormData,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<BaseResultDTO>);
+    axiosObservable<BaseResultDTO>({
+      url: `/api/Authentication/login`,
+      method: "POST",
+      data: data,
+      secure: true,
+      type: ContentType.FormData,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<BaseResultDTO>);
 
   /**
    * No description
@@ -120,15 +110,13 @@ export class Authentication {
    * @secure
    */
   appUserLogOutEndpoint = (params: RequestParams = {}) =>
-    from(
-      Axios.request<String>({
-        url: `/api/Authentication/logout`,
-        method: "POST",
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<String>);
+    axiosObservable<String>({
+      url: `/api/Authentication/logout`,
+      method: "POST",
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<String>);
 }
 
 export class AuthenticationPaths {

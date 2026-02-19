@@ -25,10 +25,8 @@ import type {
   ServerDownloadProgressDTO,
 } from "./data-contracts";
 
-import { apiCheckPipe } from "@api/base";
-import Axios from "axios";
+import { apiCheckPipe, axiosObservable } from "@api/base";
 import queryString from "query-string";
-import { from } from "rxjs";
 
 export class Download {
   /**
@@ -42,17 +40,15 @@ export class Download {
     data: string[],
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<CountResponseDTO>({
-        url: `/api/Download/clear`,
-        method: "POST",
-        data: data,
-        secure: true,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<CountResponseDTO>);
+    axiosObservable<CountResponseDTO>({
+      url: `/api/Download/clear`,
+      method: "POST",
+      data: data,
+      secure: true,
+      type: ContentType.Json,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<CountResponseDTO>);
 
   /**
    * No description
@@ -65,17 +61,15 @@ export class Download {
     data: CreateDownloadTasksRequest,
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<BaseResultDTO>({
-        url: `/api/Download/create`,
-        method: "POST",
-        data: data,
-        secure: true,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<BaseResultDTO>);
+    axiosObservable<BaseResultDTO>({
+      url: `/api/Download/create`,
+      method: "POST",
+      data: data,
+      secure: true,
+      type: ContentType.Json,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<BaseResultDTO>);
 
   /**
    * No description
@@ -85,17 +79,15 @@ export class Download {
    * @secure
    */
   deleteDownloadTaskEndpoint = (data: string[], params: RequestParams = {}) =>
-    from(
-      Axios.request<BaseResultDTO>({
-        url: `/api/Download/delete`,
-        method: "DELETE",
-        data: data,
-        secure: true,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<BaseResultDTO>);
+    axiosObservable<BaseResultDTO>({
+      url: `/api/Download/delete`,
+      method: "DELETE",
+      data: data,
+      secure: true,
+      type: ContentType.Json,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<BaseResultDTO>);
 
   /**
    * No description
@@ -112,16 +104,14 @@ export class Download {
     },
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<DownloadTaskDTO>({
-        url: `/api/Download/detail/${downloadTaskGuid}`,
-        method: "GET",
-        params: query,
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<DownloadTaskDTO>);
+    axiosObservable<DownloadTaskDTO>({
+      url: `/api/Download/detail/${downloadTaskGuid}`,
+      method: "GET",
+      params: query,
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<DownloadTaskDTO>);
 
   /**
    * No description
@@ -131,15 +121,13 @@ export class Download {
    * @secure
    */
   getAllDownloadTasksEndpoint = (params: RequestParams = {}) =>
-    from(
-      Axios.request<ServerDownloadProgressDTO[]>({
-        url: `/api/Download`,
-        method: "GET",
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<ServerDownloadProgressDTO[]>);
+    axiosObservable<ServerDownloadProgressDTO[]>({
+      url: `/api/Download`,
+      method: "GET",
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<ServerDownloadProgressDTO[]>);
 
   /**
    * No description
@@ -152,15 +140,13 @@ export class Download {
     downloadTaskGuid: string,
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<DownloadWorkerLogDTO[]>({
-        url: `/api/Download/logs/${downloadTaskGuid}`,
-        method: "GET",
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<DownloadWorkerLogDTO[]>);
+    axiosObservable<DownloadWorkerLogDTO[]>({
+      url: `/api/Download/logs/${downloadTaskGuid}`,
+      method: "GET",
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<DownloadWorkerLogDTO[]>);
 
   /**
    * No description
@@ -173,15 +159,13 @@ export class Download {
     downloadTaskGuid: string,
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<BaseResultDTO>({
-        url: `/api/Download/pause/${downloadTaskGuid}`,
-        method: "GET",
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<BaseResultDTO>);
+    axiosObservable<BaseResultDTO>({
+      url: `/api/Download/pause/${downloadTaskGuid}`,
+      method: "GET",
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<BaseResultDTO>);
 
   /**
    * No description
@@ -194,17 +178,15 @@ export class Download {
     data: DownloadMediaDTO[],
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<DownloadPreviewContainerDTO>({
-        url: `/api/Download/preview`,
-        method: "POST",
-        data: data,
-        secure: true,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<DownloadPreviewContainerDTO>);
+    axiosObservable<DownloadPreviewContainerDTO>({
+      url: `/api/Download/preview`,
+      method: "POST",
+      data: data,
+      secure: true,
+      type: ContentType.Json,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<DownloadPreviewContainerDTO>);
 
   /**
    * No description
@@ -217,15 +199,13 @@ export class Download {
     downloadTaskGuid: string,
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<BaseResultDTO>({
-        url: `/api/Download/restart/${downloadTaskGuid}`,
-        method: "GET",
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<BaseResultDTO>);
+    axiosObservable<BaseResultDTO>({
+      url: `/api/Download/restart/${downloadTaskGuid}`,
+      method: "GET",
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<BaseResultDTO>);
 
   /**
    * No description
@@ -238,15 +218,13 @@ export class Download {
     downloadTaskGuid: string,
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<BaseResultDTO>({
-        url: `/api/Download/start/${downloadTaskGuid}`,
-        method: "GET",
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<BaseResultDTO>);
+    axiosObservable<BaseResultDTO>({
+      url: `/api/Download/start/${downloadTaskGuid}`,
+      method: "GET",
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<BaseResultDTO>);
 
   /**
    * No description
@@ -259,15 +237,13 @@ export class Download {
     downloadTaskGuid: string,
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<BaseResultDTO>({
-        url: `/api/Download/stop/${downloadTaskGuid}`,
-        method: "GET",
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<BaseResultDTO>);
+    axiosObservable<BaseResultDTO>({
+      url: `/api/Download/stop/${downloadTaskGuid}`,
+      method: "GET",
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<BaseResultDTO>);
 }
 
 export class DownloadPaths {

@@ -5,7 +5,6 @@ import type { AxiosRequestConfig, AxiosResponse } from 'axios';
 import Axios from 'axios';
 import type { BaseResultDTO, ErrorDTO } from '@dto';
 import type { ResultDTO } from '@interfaces';
-import { catchError, of } from 'rxjs';
 
 export function axiosObservable<T>(config: AxiosRequestConfig): Observable<AxiosResponse<T>> {
 	return new Observable<AxiosResponse<T>>((subscriber) => {

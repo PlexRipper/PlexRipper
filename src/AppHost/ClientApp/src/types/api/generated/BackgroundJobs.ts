@@ -14,10 +14,8 @@ import type { RequestParams } from "./http-client";
 
 import type { JobStatusUpdateDTO } from "./data-contracts";
 
-import { apiCheckPipe } from "@api/base";
-import Axios from "axios";
+import { apiCheckPipe, axiosObservable } from "@api/base";
 import queryString from "query-string";
-import { from } from "rxjs";
 
 export class BackgroundJobs {
   /**
@@ -34,16 +32,14 @@ export class BackgroundJobs {
     },
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<JobStatusUpdateDTO[]>({
-        url: `/api/BackgroundJobs`,
-        method: "GET",
-        params: query,
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<JobStatusUpdateDTO[]>);
+    axiosObservable<JobStatusUpdateDTO[]>({
+      url: `/api/BackgroundJobs`,
+      method: "GET",
+      params: query,
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<JobStatusUpdateDTO[]>);
 }
 
 export class BackgroundJobsPaths {

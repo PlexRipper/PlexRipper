@@ -15,10 +15,8 @@ import { ContentType } from './http-client'
 import type { <%~ dataContracts.join(", ") %> } from "./<%~ config.fileNames.dataContracts %>"
 <% } %>
 
-import Axios from 'axios';
 import queryString from 'query-string';
-import { Observable, from } from 'rxjs';
-import { apiCheckPipe } from '@api/base';
+import { apiCheckPipe, axiosObservable } from '@api/base';
 
 export class <%= apiClassName %> {
 

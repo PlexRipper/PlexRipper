@@ -1,7 +1,6 @@
 {
     "components": {
         "account-card": {
-            "no-account-name": "Ajouter un surnom à ce compte",
             "invalid-account": "L'objet de compte n'était pas valide"
         },
         "account-dialog": {
@@ -373,7 +372,8 @@
                 "connection": {
                     "title": "Configurer la connexion Sonarr"
                 }
-            }
+            },
+            "title": "Intégration Sonarr"
         },
         "radarr-integration": {
             "connection-status": {
@@ -394,7 +394,8 @@
                 "connection": {
                     "title": "Configurer la connexion Radarr"
                 }
-            }
+            },
+            "title": "Intégration Radarr"
         }
     },
     "confirmation": {
@@ -536,7 +537,7 @@
             },
             "username": {
                 "label": "Nom",
-                "text": "Le nom de l'utilisateur Plex",
+                "text": "Le nom de l'utilisateur Plex.\n\n**Remarque :** Plex utilise votre **adresse e-mail** comme nom d'utilisateur. Si votre nom d'utilisateur ne fonctionne pas, consultez la [FAQ](https://www.plexripper.rocks/faq#i-tried-to-use-my-username-to-set-up-my-plex-account-in-plex-ripper-but-its-not-working) pour obtenir de l'aide.",
                 "title": "Nom"
             }
         },
@@ -575,7 +576,7 @@
                         "title": "Télécharger par Segments"
                     },
                     "keep-in-downloads": {
-                        "label": "Ne déplacez pas les téléchargements terminés vers les dossiers de destination",
+                        "label": "Ne déplacez pas les téléchargements terminés vers les dossiers de destination.",
                         "title": "Ne déplacez pas les téléchargements terminés vers les dossiers de destination",
                         "text": "Si cette option est activée, les téléchargements terminés resteront dans le dossier de téléchargement et ne seront pas déplacés vers le dossier de destination."
                     }
@@ -606,6 +607,11 @@
                         "label": "Masquer les noms de bibliothèque Plex",
                         "text": "Cela masquera les noms des bibliothèques Plex dans l'interface utilisateur. Ceci est utile lors de la prise de captures d'écran anonymes",
                         "title": "Masquer les noms de bibliothèque Plex"
+                    },
+                    "mask-plex-accounts": {
+                        "label": "Masquer les noms de compte Plex",
+                        "text": "Cela masquera les noms des serveurs Plex dans l'interface utilisateur. Ceci est utile lors de la prise de captures d'écran anonymes.",
+                        "title": "Masquer les noms de compte Plex"
                     },
                     "mask-plex-servers": {
                         "label": "Masquer les noms de serveur Plex",

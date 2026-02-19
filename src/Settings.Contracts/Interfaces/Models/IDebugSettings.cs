@@ -10,5 +10,7 @@ public interface IDebugSettings
 
     bool MaskLibraryNames { get; set; }
 
+    bool MaskAccountNames { get; set; }
+
     #endregion
 }

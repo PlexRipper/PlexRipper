@@ -1,5 +1,5 @@
 <template>
-	<QSection header="Sonarr">
+	<QSection :header="t('components.sonarr-integration.title')">
 		<q-stepper
 			ref="stepper"
 			v-model="integrationStore.sonarr.step"

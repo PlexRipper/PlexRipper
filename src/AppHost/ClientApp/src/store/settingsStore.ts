@@ -22,7 +22,12 @@ export const useSettingsStore = defineStore(StoreNames.SettingsStore, () => {
 			hasBeenInvitedToDiscord: false,
 			hasAgreedToDisclaimer: false,
 		},
-		debugSettings: { debugModeEnabled: false, maskLibraryNames: false, maskServerNames: false },
+		debugSettings: {
+			debugModeEnabled: false,
+			maskLibraryNames: false,
+			maskServerNames: false,
+			maskAccountNames: false,
+		},
 		confirmationSettings: {
 			askDownloadEpisodeConfirmation: true,
 			askDownloadMovieConfirmation: true,
@@ -163,6 +168,7 @@ export const useSettingsStore = defineStore(StoreNames.SettingsStore, () => {
 		debugMode: computed((): boolean => state.debugSettings.debugModeEnabled),
 		shouldMaskServerNames: computed((): boolean => state.debugSettings.maskServerNames),
 		shouldMaskLibraryNames: computed((): boolean => state.debugSettings.maskLibraryNames),
+		shouldMaskAccountNames: computed((): boolean => state.debugSettings.maskAccountNames),
 	};
 	return {
 		...toRefs(state), ...actions, ...getters,

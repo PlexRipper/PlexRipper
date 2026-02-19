@@ -28,7 +28,7 @@ export default defineNuxtConfig({
 	imports: {
 		dirs: ['store'],
 	},
-	devtools: { enabled: true },
+	devtools: { enabled: false },
 	app: {
 		head: {
 			title: 'Reaparr',

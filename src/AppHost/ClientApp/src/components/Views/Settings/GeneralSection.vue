@@ -11,6 +11,15 @@
 					size="lg"
 					data-cy="toggle-animated-background" />
 			</HelpRow>
+			<!--	Mask Plex Account Names	-->
+			<HelpRow
+				:label="$t('help.settings.ui.general-settings.mask-plex-accounts.label')"
+				:title="$t('help.settings.ui.general-settings.mask-plex-accounts.title')"
+				:text="$t('help.settings.ui.general-settings.mask-plex-accounts.text')">
+				<q-toggle
+					v-model:model-value="settingsStore.debugSettings.maskAccountNames"
+					size="lg" />
+			</HelpRow>
 			<!--	Mask Plex Server Names	-->
 			<HelpRow
 				:label="$t('help.settings.ui.general-settings.mask-plex-servers.label')"

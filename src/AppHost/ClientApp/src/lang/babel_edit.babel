@@ -4503,6 +4503,29 @@
 											</folder_node>
 										</children>
 									</folder_node>
+									<concept_node>
+										<name>title</name>
+										<description/>
+										<comment/>
+										<translations>
+											<translation>
+												<language>de-DE</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>en-US</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
+										</translations>
+									</concept_node>
 								</children>
 							</folder_node>
 							<folder_node>
@@ -5528,6 +5551,29 @@
 											</folder_node>
 										</children>
 									</folder_node>
+									<concept_node>
+										<name>title</name>
+										<description/>
+										<comment/>
+										<translations>
+											<translation>
+												<language>de-DE</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>en-US</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
+										</translations>
+									</concept_node>
 								</children>
 							</folder_node>
 							<folder_node>
@@ -11237,6 +11283,80 @@
 											<folder_node>
 												<name>general-settings</name>
 												<children>
+													<folder_node>
+														<name>mask-plex-accounts</name>
+														<children>
+															<concept_node>
+																<name>label</name>
+																<description/>
+																<comment/>
+																<translations>
+																	<translation>
+																		<language>de-DE</language>
+																		<approved>false</approved>
+																	</translation>
+																	<translation>
+																		<language>en-US</language>
+																		<approved>false</approved>
+																	</translation>
+																	<translation>
+																		<language>fr-FR</language>
+																		<approved>false</approved>
+																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
+																		<approved>false</approved>
+																	</translation>
+																</translations>
+															</concept_node>
+															<concept_node>
+																<name>text</name>
+																<description/>
+																<comment/>
+																<translations>
+																	<translation>
+																		<language>de-DE</language>
+																		<approved>false</approved>
+																	</translation>
+																	<translation>
+																		<language>en-US</language>
+																		<approved>false</approved>
+																	</translation>
+																	<translation>
+																		<language>fr-FR</language>
+																		<approved>false</approved>
+																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
+																		<approved>false</approved>
+																	</translation>
+																</translations>
+															</concept_node>
+															<concept_node>
+																<name>title</name>
+																<description/>
+																<comment/>
+																<translations>
+																	<translation>
+																		<language>de-DE</language>
+																		<approved>false</approved>
+																	</translation>
+																	<translation>
+																		<language>en-US</language>
+																		<approved>false</approved>
+																	</translation>
+																	<translation>
+																		<language>fr-FR</language>
+																		<approved>false</approved>
+																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
+																		<approved>false</approved>
+																	</translation>
+																</translations>
+															</concept_node>
+														</children>
+													</folder_node>
 													<folder_node>
 														<name>mask-plex-libraries</name>
 														<children>

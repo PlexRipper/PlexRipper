@@ -6,7 +6,7 @@
 		:data-cy="`account-card-id-${account.id}`"
 		@click="$emit('open-dialog', account)">
 		<q-card-section v-if="!isNew">
-			{{ account ? account.displayName : t('components.account-card.no-account-name') }}
+			{{ accountStore.getAccountDisplayName(account.id) }}
 		</q-card-section>
 		<q-card-section>
 			<!-- Validation Chip -->
@@ -53,8 +53,10 @@
 
 <script setup lang="ts">
 import type { PlexAccountDTO } from '@dto';
+import { useAccountStore } from '@store';
 
 const { t } = useI18n();
+const accountStore = useAccountStore();
 
 const props = defineProps<{
 	account?: PlexAccountDTO;

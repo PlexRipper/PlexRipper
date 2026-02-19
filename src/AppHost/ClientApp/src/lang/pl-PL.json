@@ -1,7 +1,6 @@
 {
     "components": {
         "account-card": {
-            "no-account-name": "Dodaj nazwę wyświetlania konta",
             "invalid-account": "Obiekt konta był nieprawidłowy"
         },
         "account-dialog": {
@@ -373,7 +372,8 @@
                 "connection": {
                     "title": "Konfiguracja połączenia Sonarr"
                 }
-            }
+            },
+            "title": "Integracja Sonarr"
         },
         "radarr-integration": {
             "connection-status": {
@@ -394,7 +394,8 @@
                 "connection": {
                     "title": "Konfiguracja połączenia Radarr"
                 }
-            }
+            },
+            "title": "Integracja Radar"
         }
     },
     "confirmation": {
@@ -536,7 +537,7 @@
             },
             "username": {
                 "label": "Nazwa użytkownika",
-                "text": "Nazwa użytkownika twojego konta Plex",
+                "text": "Nazwa użytkownika twojego konta Plex.\n\n**Uwaga:** Plex używa **adresu e-mail** jako nazwy użytkownika. Jeśli nazwa użytkownika nie działa, zajrzyj do [FAQ](https://www.plexripper.rocks/faq#i-tried-to-use-my-username-to-set-up-my-plex-account-in-plex-ripper-but-its-not-working) po pomoc.",
                 "title": "Nazwa użytkownika"
             }
         },
@@ -606,6 +607,11 @@
                         "label": "Ukryj nazwy bibliotek Plex",
                         "text": "To ukryje nazwy bibliotek Plex w interfejsie użytkownika. Jest to przydatne podczas robienia anonimowych zrzutów ekranu.",
                         "title": "Ukryj nazwy bibliotek Plex"
+                    },
+                    "mask-plex-accounts": {
+                        "label": "Ukryj nazwy serwerów Plex",
+                        "text": "Spowoduje to zamaskowanie nazw kont Plex w interfejsie użytkownika. Jest to przydatne podczas robienia anonimowych zrzutów ekranu.",
+                        "title": "Maskuj nazwy kont Plex"
                     },
                     "mask-plex-servers": {
                         "label": "Ukryj nazwy serwerów Plex",

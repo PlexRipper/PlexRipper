@@ -102,6 +102,7 @@ public static class SettingsModelToDTOMapper
             DebugModeEnabled = dto.DebugModeEnabled,
             MaskServerNames = dto.MaskServerNames,
             MaskLibraryNames = dto.MaskLibraryNames,
+            MaskAccountNames = dto.MaskAccountNames,
         };
 
     #endregion
@@ -205,6 +206,7 @@ public static class SettingsModelToDTOMapper
             DebugModeEnabled = module.DebugModeEnabled,
             MaskServerNames = module.MaskServerNames,
             MaskLibraryNames = module.MaskLibraryNames,
+            MaskAccountNames = module.MaskAccountNames,
         };
 
     #endregion

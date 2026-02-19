@@ -1,7 +1,6 @@
 {
     "components": {
         "account-card": {
-            "no-account-name": "Konto Anzeigenamen hinzufügen",
             "invalid-account": "Das Kontoobjekt war ungültig"
         },
         "account-dialog": {
@@ -373,7 +372,8 @@
                 "connection": {
                     "title": "Sonarr-Verbindung einrichten"
                 }
-            }
+            },
+            "title": "Sonarr-Integration"
         },
         "radarr-integration": {
             "connection-status": {
@@ -394,7 +394,8 @@
                 "connection": {
                     "title": "Radarr-Verbindung einrichten"
                 }
-            }
+            },
+            "title": "Radarr-Integration"
         }
     },
     "confirmation": {
@@ -536,7 +537,7 @@
             },
             "username": {
                 "label": "Benutzername",
-                "text": "Der Benutzername des Plex Kontos",
+                "text": "Der Benutzername des Plex Kontos.\n\n**Hinweis:** Plex verwendet deine **E-Mail-Adresse** als Benutzernamen. Falls dein Benutzername nicht funktioniert, siehe die [FAQ](https://www.plexripper.rocks/faq#i-tried-to-use-my-username-to-set-up-my-plex-account-in-plex-ripper-but-its-not-working) für Hilfe.",
                 "title": "Benutzername"
             }
         },
@@ -575,7 +576,7 @@
                         "title": "Download Teile"
                     },
                     "keep-in-downloads": {
-                        "label": "Verschieben Sie die abgeschlossenen Downloads nicht in Zielordner",
+                        "label": "Verschieben Sie abgeschlossene Downloads nicht in Zielordner.",
                         "title": "Verschieben Sie die abgeschlossenen Downloads nicht in Zielordner",
                         "text": "Wenn aktiviert, verbleiben abgeschlossene Downloads im Download-Ordner und werden nicht in den Zielordner verschoben."
                     }
@@ -606,6 +607,11 @@
                         "label": "Plex-Bibliotheksnamen maskieren",
                         "text": "Dadurch werden die Namen der Plex-Bibliotheken in der Benutzeroberfläche maskiert. Dies ist nützlich, wenn Sie anonyme Screenshots erstellen",
                         "title": "Plex-Bibliotheksnamen maskieren"
+                    },
+                    "mask-plex-accounts": {
+                        "label": "Plex-Kontonamen maskieren",
+                        "text": "Dadurch werden die Namen der Plex-Konten in der Benutzeroberfläche ausgeblendet. Dies ist nützlich, wenn anonyme Screenshots erstellt werden.",
+                        "title": "Plex-Kontonamen maskieren"
                     },
                     "mask-plex-servers": {
                         "label": "Maskieren Sie Plex-Servernamen",

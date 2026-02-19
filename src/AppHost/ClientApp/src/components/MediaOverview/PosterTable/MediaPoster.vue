@@ -95,7 +95,7 @@ function onDownload(mediaQualities: PlexMediaQualityDTO[]) {
 
 .media-poster-image-wrapper {
   position: relative;
-  display: inline-block;
+  display: block;
   width: 100%;
 }
 

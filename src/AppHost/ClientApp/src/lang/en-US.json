@@ -1,7 +1,6 @@
 {
     "components": {
         "account-card": {
-            "no-account-name": "Add Account Display Name",
             "invalid-account": "Account object was invalid"
         },
         "account-dialog": {
@@ -373,7 +372,8 @@
                 "connection": {
                     "title": "Setup Sonarr Connection"
                 }
-            }
+            },
+            "title": "Sonarr Integration"
         },
         "radarr-integration": {
             "connection-status": {
@@ -394,7 +394,8 @@
                 "connection": {
                     "title": "Setup Radarr Connection"
                 }
-            }
+            },
+            "title": "Radarr Integration"
         }
     },
     "confirmation": {
@@ -536,7 +537,7 @@
             },
             "username": {
                 "label": "Username",
-                "text": "The username of your Plex account",
+                "text": "The username of your Plex account.\n\n**Note:** Plex uses your **email address** as username. If your username is not working, see the [FAQ](https://www.plexripper.rocks/faq#i-tried-to-use-my-username-to-set-up-my-plex-account-in-plex-ripper-but-its-not-working) for help.",
                 "title": "Username"
             }
         },
@@ -575,7 +576,7 @@
                         "title": "Download Segments"
                     },
                     "keep-in-downloads": {
-                        "label": "Do not move the completed downloads to destination folders",
+                        "label": "Do not move completed downloads to destination folders",
                         "title": "Do not move the completed downloads to destination folders",
                         "text": "If enabled, completed downloads will remain in the download folder and will not be moved to the destination folder."
                     }
@@ -606,6 +607,11 @@
                         "label": "Mask Plex Library Names",
                         "text": "This will mask the names of Plex libraries in the UI. This is useful when taking anonymous screenshots ",
                         "title": "Mask Plex Library Names"
+                    },
+                    "mask-plex-accounts": {
+                        "label": "Mask Plex Account Names",
+                        "text": "This will mask the names of Plex accounts in the UI. This is useful when taking anonymous screenshots.",
+                        "title": "Mask Plex Account Names"
                     },
                     "mask-plex-servers": {
                         "label": "Mask Plex Server Names",

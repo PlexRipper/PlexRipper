@@ -11,6 +11,7 @@ public record DebugSettingsModule
             DebugModeEnabled = false,
             MaskServerNames = false,
             MaskLibraryNames = false,
+            MaskAccountNames = false,
         };
 
     public required bool DebugModeEnabled
@@ -26,6 +27,12 @@ public record DebugSettingsModule
     }
 
     public required bool MaskLibraryNames
+    {
+        get;
+        set => SetProperty(ref field, value);
+    }
+
+    public required bool MaskAccountNames
     {
         get;
         set => SetProperty(ref field, value);

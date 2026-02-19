@@ -16,8 +16,8 @@ import type { IMediaOverviewSort } from '@composables/event-bus';
 import { MediaSortField, SortDirection } from '@enums';
 import { type IMetaDataMediaFilter, type ISelection, type ISortOption, StoreNames } from '@interfaces';
 import { plexLibraryApi, plexMediaApi } from '@api';
-import { map, tap } from 'rxjs/operators';
-import { defer, forkJoin, type Observable, of } from 'rxjs';
+import { map, tap, takeUntil } from 'rxjs/operators';
+import { defer, forkJoin, type Observable, of, Subject } from 'rxjs';
 import { useLibraryStore, useSettingsStore } from '@store';
 import { getHighestQuality, getHighestQualityRank, getVideoQualityColor, translateVideoQuality } from '@composables';
 import { useSubscription } from '@vueuse/rxjs';
@@ -92,13 +92,42 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 	const settingsStore = useSettingsStore();
 	const libraryStore = useLibraryStore();
 
+	// Subject to cancel in-flight requests when switching libraries
+	const cancelSubject$ = new Subject<void>();
+
 	const actions = {
+		cancelPendingRequests() {
+			Log.debug('Cancelling pending media requests');
+			cancelSubject$.next();
+			state.loading = false;
+		},
+		initializeLibrary(libraryId: number, mediaType: PlexMediaType): Observable<PlexMediaStatisticsDTO | null> {
+			Log.debug('Initializing library', { libraryId, mediaType });
+
+			// Cancel any in-flight requests first
+			actions.cancelPendingRequests();
+
+			// Update state
+			state.libraryId = libraryId;
+			state.mediaType = mediaType;
+			state.isDetailView = false;
+
+			// Clear filters and sorting
+			actions.clearMetaDataFilter();
+			actions.clearSort();
+
+			// Load data for the library
+			return actions.requestMedia();
+		},
 		refreshMetaData() {
-			return plexLibraryApi.getLibraryMediaMetadata(state.libraryId, { mediaType: state.mediaType }).pipe(tap((result) => {
-				if (result.isSuccess && result.value) {
-					return state.metadataList = result.value;
-				}
-			}));
+			return plexLibraryApi.getLibraryMediaMetadata(state.libraryId, { mediaType: state.mediaType }).pipe(
+				takeUntil(cancelSubject$),
+				tap((result) => {
+					if (result.isSuccess && result.value) {
+						return state.metadataList = result.value;
+					}
+				}),
+			);
 		},
 		refreshAllLibraryMediaByType(page: number = 0, size: number = 100): Observable<PlexMediaStatisticsDTO | null> {
 			return plexMediaApi.getAllMediaByTypeEndpoint({
@@ -108,12 +137,15 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 				filterOwnedMedia: settingsStore.generalSettings.hideMediaFromOwnedServers,
 				filterOfflineMedia: settingsStore.generalSettings.hideMediaFromOfflineServers,
 				...state.metadata,
-			}).pipe(map(({ isSuccess, value }): PlexMediaStatisticsDTO | null => {
-				if (isSuccess && value) {
-					return value;
-				}
-				return null;
-			}));
+			}).pipe(
+				takeUntil(cancelSubject$),
+				map(({ isSuccess, value }): PlexMediaStatisticsDTO | null => {
+					if (isSuccess && value) {
+						return value;
+					}
+					return null;
+				}),
+			);
 		},
 		refreshLibraryMedia(page: number = 0, size: number = 100): Observable<PlexMediaStatisticsDTO | null> {
 			return plexLibraryApi.getPlexLibraryMediaEndpoint(state.libraryId, {
@@ -122,15 +154,19 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 				filterOfflineMedia: false,
 				filterOwnedMedia: false,
 				...state.metadata,
-			}).pipe(map(({ isSuccess, value }): PlexMediaStatisticsDTO | null => {
-				if (isSuccess && value) {
-					return value;
-				}
-				return null;
-			}));
+			}).pipe(
+				takeUntil(cancelSubject$),
+				map(({ isSuccess, value }): PlexMediaStatisticsDTO | null => {
+					if (isSuccess && value) {
+						return value;
+					}
+					return null;
+				}),
+			);
 		},
 		requestMedia(): Observable<PlexMediaStatisticsDTO | null> {
 			if (state.loading) {
+				Log.debug('Request already in progress, skipping');
 				return of(null);
 			}
 
@@ -138,6 +174,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			const size = 0;
 
 			state.loading = true;
+			Log.debug('Starting media request', { libraryId: state.libraryId, mediaType: state.mediaType });
 
 			return forkJoin([
 				actions.refreshMetaData(),
@@ -145,7 +182,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 					state.libraryId > 0
 						? libraryStore.refreshLibrary(state.libraryId)
 						: of(null),
-				),
+				).pipe(takeUntil(cancelSubject$)),
 				defer(() =>
 					state.libraryId === 0
 						? actions.refreshAllLibraryMediaByType(page, size)
@@ -157,8 +194,25 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 					}),
 				),
 			]).pipe(
+				takeUntil(cancelSubject$),
 				map(([_, __, media]) => media),
-				tap(() => state.loading = false),
+				tap({
+					next: () => {
+						state.loading = false;
+						Log.debug('Media request completed successfully');
+					},
+					error: (err) => {
+						state.loading = false;
+						Log.error('Media request failed', err);
+					},
+					complete: () => {
+						// Handle cancellation
+						if (state.loading) {
+							state.loading = false;
+							Log.debug('Media request was cancelled');
+						}
+					},
+				}),
 			);
 		},
 		setMedia(data: PlexMediaStatisticsDTO | null, mediaType: PlexMediaType) {

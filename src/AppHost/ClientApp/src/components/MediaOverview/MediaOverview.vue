@@ -260,25 +260,17 @@ function onAction(event: IMediaOverviewBarActions) {
 
 function onOptionsClosed(hasChanged: boolean) {
 	if (hasChanged) {
-		useSubscription(
-			mediaOverviewStore.requestMedia().subscribe());
+		useSubscription(mediaOverviewStore.requestMedia().subscribe());
 	}
 }
 
 onMounted(() => {
 	resetProgress();
 
-	mediaOverviewStore.$patch({
-		libraryId: props.libraryId,
-		mediaType: props.mediaType,
-		isDetailView: false,
-	});
-
-	mediaOverviewStore.clearMetaDataFilter();
-	mediaOverviewStore.clearSort();
-
-	// Initial data load
-	useSubscription(mediaOverviewStore.requestMedia().subscribe());
+	// Initialize the library in the store
+	useSubscription(
+		mediaOverviewStore.initializeLibrary(props.libraryId, props.mediaType).subscribe(),
+	);
 
 	// Library sync job subscription
 	useSubscription(backgroundJobsStore.getLibrarySyncJobUpdate().subscribe((value) => {
@@ -291,6 +283,19 @@ onMounted(() => {
 			useSubscription(mediaOverviewStore.requestMedia().subscribe());
 		}
 	}));
+});
+
+// Watch for prop changes when switching libraries
+watch([() => props.libraryId, () => props.mediaType], ([newLibraryId, newMediaType], [oldLibraryId, oldMediaType]) => {
+	// Only reinitialize if the props actually changed
+	if (newLibraryId !== oldLibraryId || newMediaType !== oldMediaType) {
+		resetProgress();
+
+		// Reinitialize the library in the store (this will cancel any in-flight requests)
+		useSubscription(
+			mediaOverviewStore.initializeLibrary(newLibraryId, newMediaType).subscribe(),
+		);
+	}
 });
 </script>
 

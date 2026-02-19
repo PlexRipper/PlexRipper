@@ -23,6 +23,7 @@ public class PlexDownloadClient : IPlexDownloadClient
 
     private IDisposable? _downloadSpeedLimitSubscription;
     private IDisposable? _downloadWorkerTaskUpdate;
+    private IDisposable? _downloadWorkerCombinedConnection;
 
     private readonly TaskCompletionSource<object> _downloadWorkerTaskUpdateCompletionSource = new();
     private readonly TaskCompletionSource<object> _downloadWorkerLogCompletionSource = new();
@@ -174,6 +175,7 @@ public class PlexDownloadClient : IPlexDownloadClient
 
         _downloadSpeedLimitSubscription?.Dispose();
         _downloadWorkerTaskUpdate?.Dispose();
+        _downloadWorkerCombinedConnection?.Dispose();
 
         // Dispose all download workers to release their HTTP clients, Rx subjects, and other resources
         foreach (var downloadWorker in _downloadWorkers)
@@ -245,12 +247,14 @@ public class PlexDownloadClient : IPlexDownloadClient
             return;
         }
 
-        // On download worker update
-        _downloadWorkerTaskUpdate = _downloadWorkers
-            .Select(x => x.DownloadWorkerTaskUpdate)
-            .CombineLatest()
+        // On download worker update.
+        var combined = _downloadWorkers.Select(x => x.DownloadWorkerTaskUpdate).CombineLatest().Publish();
+
+        _downloadWorkerTaskUpdate = combined
             .Sample(TimeSpan.FromMilliseconds(500))
-            .SelectMany(async data => await OnDownloadWorkerTaskUpdate(data).ToObservable())
+            .Merge(combined.TakeLast(1))
+            .Select(data => Observable.FromAsync(() => OnDownloadWorkerTaskUpdate(data)))
+            .Concat()
             .Subscribe(
                 _ => { },
                 ex =>
@@ -267,6 +271,8 @@ public class PlexDownloadClient : IPlexDownloadClient
                 },
                 () => _downloadWorkerTaskUpdateCompletionSource.SetResult(true)
             );
+
+        _downloadWorkerCombinedConnection = combined.Connect();
 
         // Download Worker Log subscription
         ListenToDownloadWorkerLog = _downloadWorkers

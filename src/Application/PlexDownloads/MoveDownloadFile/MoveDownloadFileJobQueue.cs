@@ -26,7 +26,10 @@ public class MoveDownloadFileJobQueue : IMoveDownloadFileQueue
     public async Task<Result> CheckMoveDownloadFileJobQueue()
     {
         if (await _moveDownloadFileScheduler.IsAnyMoveDownloadFileJobRunning())
-            return Result.Fail("A MoveDownloadFileJob is already running, skipping queue check").LogInformation();
+        {
+            _log.Here().Debug("A MoveDownloadFileJob is already running, skipping queue check");
+            return Result.Ok();
+        }
 
         // Create a new DbContext for this operation to avoid threading issues
         using var dbContext = await _dbContextFactory.CreateAsync();
@@ -43,7 +46,10 @@ public class MoveDownloadFileJobQueue : IMoveDownloadFileQueue
                 .FirstOrDefaultAsync();
 
         if (key is null)
-            return _log.Here().ErrorResult("No DownloadTask found to either merge or move");
+        {
+            _log.Here().Debug("No DownloadTask with status DownloadFinished found, nothing to move");
+            return Result.Ok();
+        }
 
         var startResult = await _moveDownloadFileScheduler.StartMoveDownloadFileJob(key);
         return startResult.IsSuccess ? Result.Ok() : startResult;

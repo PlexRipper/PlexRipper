@@ -206,6 +206,43 @@ Examples:
 * Commands whose handlers live under `src/BackgroundJobs/` must be tested in `tests/UnitTests/BackgroundJobs.UnitTests/`, mirroring the same folder structure as the SUT.
 * Do not place BackgroundJobs handler tests in `Application.UnitTests` even if the command record is defined in `Application.Contracts`.
 
+Add the following section near the end of the document (for example, after **Build and Development Commands** or before **Working style**):
+
+---
+
+## Performance rules during gaming (Arch Linux)
+
+When building or testing .NET projects while gaming on Arch Linux, the game must always have priority over build processes to prevent FPS drops and stutter.
+
+### Required build command during active gameplay
+
+Always use:
+
+```bash
+ionice -c2 -n7 nice -n 15 taskset -c 0-3 dotnet build -m:2
+```
+
+This enforces:
+
+* Reduced CPU priority (`nice -n 15`)
+* Lowest best-effort I/O priority (`ionice -c2 -n7`)
+* Limited parallelism (`-m:2`)
+* CPU core pinning (`taskset -c 0-3`)
+
+Never run `dotnet build` or `dotnet test` at default priority during gameplay.
+
+### Optional (if game still lags)
+
+Increase priority of the running game process (`GameThread`):
+
+```bash
+sudo renice -n -5 -p $(pidof GameThread)
+```
+
+This raises the scheduler priority of the game thread.
+
+No other processes should be reniced unless explicitly required.
+
 ## Agent self-update rule
 
 After completing any non-trivial task, update this file with new findings:
@@ -215,3 +252,17 @@ After completing any non-trivial task, update this file with new findings:
 * Any "gotcha" that caused a bug or wasted time.
 
 Keep entries concise and actionable. Remove entries that are no longer accurate.
+
+### PlexDownloadClient — .Sample() drops final emission (race condition)
+* `CombineLatest().Sample(500ms)` silently drops the last `DownloadFinished` emission when `OnCompleted()` fires within the 500ms window. This leaves the DB status at `Downloading`, preventing `DownloadJobListener` from triggering the move queue.
+* Fixed by: `Publish()` + `.Sample(500ms).Merge(combined.TakeLast(1))` + `.Select(...).Concat()` to guarantee the final status is always processed and DB writes are serialized.
+* `_downloadWorkerCombinedConnection` (the `IConnectableObservable.Connect()` disposable) must be stored and disposed in `DisposeAsync()`.
+
+### MoveDownloadFileJobQueue — "no task found" is not an error
+* When no `DownloadFinished` task exists, the queue returns `Result.Fail` — this is normal (nothing ready yet). Logging it as `ErrorResult` flooded logs. Changed to `Debug` log + plain `Result.Fail`.
+* The move queue is self-stopping: it only runs when explicitly triggered by `DownloadJobListener` or `MoveDownloadJobListener`. If both are broken or miss a trigger, downloads stay stuck in `DownloadFinished` forever. The `.Sample()` fix above is the primary defence.
+
+### MoveDownloadFileJob / MoveDownloadJobListener test patterns
+* `IJobExecutionContext` is mocked via `Mock.Mock<IJobExecutionContext>().SetupGet(x => x.JobDetail.JobDataMap).Returns(new JobDataMap(dict))`.
+* `MoveDownloadFileJob` tests must pre-set the DB status to `MoveFinished` before calling `Execute()` to simulate the command handler having run (since `MoveDownloadFileFromFileTaskCommand` is mocked).
+* `MoveDownloadJobListener` must call `CheckMoveDownloadFileJobQueue()` even when `jobException` is non-null — Quartz fires listeners on all completions.

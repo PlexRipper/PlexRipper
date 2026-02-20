@@ -62,9 +62,7 @@
 			<!--	Overview bar	-->
 			<MediaOverviewBar
 				:detail-mode="false"
-				:all-media-mode="allMediaMode"
 				:library-id="libraryId"
-				:media-type="mediaOverviewStore.mediaType"
 				@action="onAction" />
 		</div>
 		<div class="media-overview-content">
@@ -76,7 +74,7 @@
 						<QCol>
 							<template v-if="mediaOverviewStore.getMediaViewMode === ViewMode.Table">
 								<MediaTable
-									:disable-hover-click="mediaType !== PlexMediaType.TvShow"
+									:disable-hover-click="mediaOverviewStore.getMediaType !== PlexMediaType.TvShow"
 									:rows="mediaOverviewStore.getMediaItems"
 									is-scrollable />
 							</template>
@@ -86,7 +84,7 @@
 								<PosterTable
 									:items="mediaOverviewStore.getMediaItems"
 									:library-id="libraryId"
-									:media-type="mediaType" />
+									:media-type="mediaOverviewStore.getMediaType" />
 							</template>
 						</QCol>
 						<!-- Alphabet Navigation -->
@@ -167,13 +165,9 @@ const serverStore = useServerStore();
 const dialogStore = useDialogStore();
 const backgroundJobsStore = useBackgroundJobsStore();
 
-const props = withDefaults(defineProps<{
+const props = defineProps<{
 	libraryId: number;
-	mediaType: PlexMediaType;
-	allMediaMode?: boolean;
-}>(), {
-	allMediaMode: false,
-});
+}>();
 
 const library = computed(() => libraryStore.getLibrary(mediaOverviewStore.libraryId));
 const libraryProgress = computed(() => libraryStore.getLibraryProgress(mediaOverviewStore.libraryId));
@@ -216,7 +210,7 @@ listenMediaOverviewDownloadCommand((command) => {
 	Log.info('MediaOverview => Received download command', command);
 	// Only show if there is more than 1 selection
 	if (command.length > 0 && command.some((x) => x.mediaIds.length > 0)) {
-		if (settingsStore.isConfirmationEnabled(props.mediaType)) {
+		if (settingsStore.isConfirmationEnabled(mediaOverviewStore.getMediaType)) {
 			dialogStore.openMediaConfirmationDownloadDialog(command);
 		} else {
 			downloadStore.downloadMedia({
@@ -233,7 +227,7 @@ useMediaOverviewBarDownloadCommandBus().on(() => {
 		plexServerId: libraryStore.getServerByLibraryId(mediaOverviewStore.libraryId)?.id ?? 0,
 		plexLibraryId: mediaOverviewStore.libraryId,
 		mediaIds: mediaOverviewStore.selection.keys,
-		type: props.mediaType,
+		type: mediaOverviewStore.getMediaType,
 		qualities: [],
 	};
 	sendMediaOverviewDownloadCommand([downloadCommand]);
@@ -269,7 +263,7 @@ onMounted(() => {
 
 	// Initialize the library in the store
 	useSubscription(
-		mediaOverviewStore.initializeLibrary(props.libraryId, props.mediaType).subscribe(),
+		mediaOverviewStore.initializeLibrary(props.libraryId).subscribe(),
 	);
 
 	// Library sync job subscription
@@ -283,19 +277,6 @@ onMounted(() => {
 			useSubscription(mediaOverviewStore.requestMedia().subscribe());
 		}
 	}));
-});
-
-// Watch for prop changes when switching libraries
-watch([() => props.libraryId, () => props.mediaType], ([newLibraryId, newMediaType], [oldLibraryId, oldMediaType]) => {
-	// Only reinitialize if the props actually changed
-	if (newLibraryId !== oldLibraryId || newMediaType !== oldMediaType) {
-		resetProgress();
-
-		// Reinitialize the library in the store (this will cancel any in-flight requests)
-		useSubscription(
-			mediaOverviewStore.initializeLibrary(newLibraryId, newMediaType).subscribe(),
-		);
-	}
 });
 </script>
 

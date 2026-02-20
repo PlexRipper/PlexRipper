@@ -1,15 +1,11 @@
 <template>
 	<QPage>
-		<MediaOverview
-			:all-media-mode="false"
-			:library-id="libraryId"
-			:media-type="PlexMediaType.TvShow" />
+		<MediaOverview :library-id="libraryId" />
 	</QPage>
 </template>
 
 <script setup lang="ts">
 import { useRoute } from 'vue-router';
-import { PlexMediaType } from '@dto';
 import { definePageMeta } from '#imports';
 
 definePageMeta({

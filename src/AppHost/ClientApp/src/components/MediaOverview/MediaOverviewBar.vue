@@ -23,8 +23,6 @@
 					<MediaOverviewBarHeader
 						:library-id="libraryId"
 						:detail-mode="detailMode"
-						:media-type="mediaType"
-						:all-media-mode="allMediaMode"
 						:media-detail-item="mediaDetailItem" />
 				</QCol>
 				<!-- Search Bar -->
@@ -165,16 +163,13 @@ const downloadCommandBus = useMediaOverviewBarDownloadCommandBus();
 
 const settingsStore = useSettingsStore();
 
-const props = withDefaults(defineProps<{
-	mediaType: PlexMediaType;
+withDefaults(defineProps<{
 	libraryId?: number;
 	detailMode?: boolean;
 	mediaDetailItem?: PlexMediaDTO | null;
-	allMediaMode?: boolean;
 }>(), {
 	libraryId: 0,
 	detailMode: false,
-	allMediaMode: false,
 });
 
 defineEmits<{
@@ -211,7 +206,7 @@ const viewOptions = computed((): IViewOptions[] => {
 
 function changeView(viewMode: ViewMode) {
 	mediaOverviewStore.clearSort();
-	settingsStore.updateDisplayMode(props.mediaType, viewMode);
+	settingsStore.updateDisplayMode(mediaOverviewStore.getMediaType, viewMode);
 }
 </script>
 

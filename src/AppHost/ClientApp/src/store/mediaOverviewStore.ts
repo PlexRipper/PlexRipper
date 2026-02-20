@@ -33,7 +33,6 @@ interface IMediaOverviewStoreState {
 	scrollAlphabet: string[];
 	selection: ISelection;
 	downloadButtonVisible: boolean;
-	mediaType: PlexMediaType;
 	filterQuery: string;
 	lastMediaItemViewed: PlexMediaSlimDTO | null;
 	loading: boolean;
@@ -58,7 +57,6 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 		scrollAlphabet: [],
 		selection: { keys: [], allSelected: false, indexKey: 0 },
 		downloadButtonVisible: false,
-		mediaType: PlexMediaType.None,
 		filterQuery: '',
 		lastMediaItemViewed: null,
 		loading: false,
@@ -101,16 +99,15 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			cancelSubject$.next();
 			state.loading = false;
 		},
-		initializeLibrary(libraryId: number, mediaType: PlexMediaType): Observable<PlexMediaStatisticsDTO | null> {
-			Log.debug('Initializing library', { libraryId, mediaType });
-
+		initializeLibrary(libraryId: number): Observable<PlexMediaStatisticsDTO | null> {
 			// Cancel any in-flight requests first
 			actions.cancelPendingRequests();
 
 			// Update state
 			state.libraryId = libraryId;
-			state.mediaType = mediaType;
 			state.isDetailView = false;
+
+			Log.debug('Initializing library', { libraryId, mediaType: get(getters.getMediaType) });
 
 			// Clear filters and sorting
 			actions.clearMetaDataFilter();
@@ -120,7 +117,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			return actions.requestMedia();
 		},
 		refreshMetaData() {
-			return plexLibraryApi.getLibraryMediaMetadata(state.libraryId, { mediaType: state.mediaType }).pipe(
+			return plexLibraryApi.getLibraryMediaMetadata(state.libraryId, { mediaType: get(getters.getMediaType) }).pipe(
 				takeUntil(cancelSubject$),
 				tap((result) => {
 					if (result.isSuccess && result.value) {
@@ -131,7 +128,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 		},
 		refreshAllLibraryMediaByType(page: number = 0, size: number = 100): Observable<PlexMediaStatisticsDTO | null> {
 			return plexMediaApi.getAllMediaByTypeEndpoint({
-				mediaType: state.mediaType,
+				mediaType: get(getters.getMediaType),
 				page,
 				size,
 				filterOwnedMedia: settingsStore.generalSettings.hideMediaFromOwnedServers,
@@ -174,7 +171,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			const size = 0;
 
 			state.loading = true;
-			Log.debug('Starting media request', { libraryId: state.libraryId, mediaType: state.mediaType });
+			Log.debug('Starting media request', { libraryId: state.libraryId, mediaType: get(getters.getMediaType) });
 
 			return forkJoin([
 				actions.refreshMetaData(),
@@ -189,7 +186,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 						: actions.refreshLibraryMedia(page, size),
 				).pipe(
 					tap((data) => {
-						actions.setMedia(data, state.mediaType);
+						actions.setMedia(data);
 						actions.sortMedia(state.sortedState);
 					}),
 				),
@@ -215,11 +212,10 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 				}),
 			);
 		},
-		setMedia(data: PlexMediaStatisticsDTO | null, mediaType: PlexMediaType) {
+		setMedia(data: PlexMediaStatisticsDTO | null) {
 			if (data) {
 				state.items = Object.freeze(data.mediaList);
 				state.itemsLength = data.mediaCount;
-				state.mediaType = mediaType;
 
 				state.allMovieCount = data.movieCount;
 				state.allTvShowCount = data.tvShowCount;
@@ -229,7 +225,6 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			} else {
 				state.items = Object.freeze([]);
 				state.itemsLength = 0;
-				state.mediaType = mediaType;
 
 				state.allMovieCount = 0;
 				state.allTvShowCount = 0;
@@ -286,7 +281,6 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			};
 		},
 		changeAllMediaOverviewType(mediaType: PlexMediaType) {
-			state.mediaType = mediaType;
 			settingsStore.displaySettings.allOverviewViewMode = mediaType;
 			useSubscription(actions.requestMedia().subscribe());
 		},
@@ -461,7 +455,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			}
 		}),
 		getMediaViewMode: computed((): ViewMode => {
-			switch (state.mediaType) {
+			switch (get(getters.getMediaType)) {
 				case PlexMediaType.Movie:
 					return settingsStore.displaySettings.movieViewMode;
 				case PlexMediaType.TvShow:
@@ -490,6 +484,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 		getActiveSort: computed((): IMediaOverviewSort => {
 			return state.sortedState;
 		}),
+		getMediaType: computed((): PlexMediaType => state.libraryId === 0 ? settingsStore.displaySettings.allOverviewViewMode : libraryStore.getLibrary(state.libraryId)?.type ?? PlexMediaType.None),
 		getIsSorted: computed((): boolean => {
 			if (state.sortedState.sort === SortDirection.NoSort) {
 				return false;

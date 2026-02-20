@@ -1,14 +1,6 @@
 <template>
 	<QPage>
-		<MediaOverview
-			:library-id="0"
-			all-media-mode
-			:media-type="settingsStore.displaySettings.allOverviewViewMode" />
+		<!-- All media mode -->
+		<MediaOverview :library-id="0" />
 	</QPage>
 </template>
-
-<script setup lang="ts">
-import { useSettingsStore } from '@store';
-
-const settingsStore = useSettingsStore();
-</script>

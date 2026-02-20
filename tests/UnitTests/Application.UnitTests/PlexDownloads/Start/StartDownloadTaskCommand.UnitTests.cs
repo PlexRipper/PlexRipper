@@ -63,6 +63,10 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
         result.IsSuccess.ShouldBeTrue();
         Mock.Mock<IDownloadTaskScheduler>()
             .Verify(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>()), Times.Never);
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .Verify(x => x.IsDownloadFileMoving(It.IsAny<DownloadTaskKey>()), Times.Once);
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Once);
     }
 
     [Fact]
@@ -104,6 +108,10 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
         result.IsSuccess.ShouldBeTrue();
         Mock.Mock<IDownloadTaskScheduler>()
             .Verify(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>()), Times.Never);
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .Verify(x => x.IsDownloadFileMoving(It.IsAny<DownloadTaskKey>()), Times.Once);
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Once);
     }
 
     [Fact]

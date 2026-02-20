@@ -42,6 +42,9 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
         // Assert: returns success — "nothing to move" is not an error, just a no-op
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
+        Mock.Mock<IMoveDownloadFileScheduler>().Verify(x => x.IsAnyMoveDownloadFileJobRunning(), Times.Once);
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Never);
     }
 
     [Fact]
@@ -78,6 +81,9 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
         // Assert
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
+        Mock.Mock<IMoveDownloadFileScheduler>().Verify(x => x.IsAnyMoveDownloadFileJobRunning(), Times.Once);
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Once);
     }
 
     [Fact]
@@ -116,6 +122,9 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
         // Assert
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
+        Mock.Mock<IMoveDownloadFileScheduler>().Verify(x => x.IsAnyMoveDownloadFileJobRunning(), Times.Once);
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Once);
     }
 
     [Fact]
@@ -153,6 +162,9 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
         // Assert: one job is started (either the MoveError retry or the DownloadFinished task)
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
+        Mock.Mock<IMoveDownloadFileScheduler>().Verify(x => x.IsAnyMoveDownloadFileJobRunning(), Times.Once);
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Once);
     }
 
     [Fact]
@@ -170,6 +182,7 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
         // Assert: already running is not an error, just a no-op
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
+        Mock.Mock<IMoveDownloadFileScheduler>().Verify(x => x.IsAnyMoveDownloadFileJobRunning(), Times.Once);
     }
 
     [Fact]
@@ -180,7 +193,7 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
         // Arrange
         Mock.Mock<IMoveDownloadFileScheduler>()
             .Setup(x => x.IsAnyMoveDownloadFileJobRunning())
-            .ReturnsAsync(true)
+            .ReturnsAsync(false)
             .Verifiable(Times.Once);
 
         Mock.Mock<IMoveDownloadFileScheduler>()
@@ -191,9 +204,12 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
         // Act
         var result = await Sut.CheckMoveDownloadFileJobQueue();
 
-        // Assert: already running is not an error, job is skipped as a no-op
+        // Assert: no task available is not an error, job is never started
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
+        Mock.Mock<IMoveDownloadFileScheduler>().Verify(x => x.IsAnyMoveDownloadFileJobRunning(), Times.Once);
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Never);
     }
 
     [Fact]
@@ -230,6 +246,9 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
         // Assert
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
+        Mock.Mock<IMoveDownloadFileScheduler>().Verify(x => x.IsAnyMoveDownloadFileJobRunning(), Times.Once);
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Once);
     }
 
     [Fact]
@@ -268,5 +287,8 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
         // Assert
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
+        Mock.Mock<IMoveDownloadFileScheduler>().Verify(x => x.IsAnyMoveDownloadFileJobRunning(), Times.Once);
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Once);
     }
 }

@@ -90,7 +90,7 @@ public class GetAllMediaByTypeEndpoint : BaseEndpoint<GetAllMediaByTypeRequest, 
             ct: ct
         );
 
-        stopWatch.StopAndLog($"GetAllMediaByTypeEndpoint - Retrieved media of type {req.MediaType} with filter: {req}");
+        stopWatch.StopAndLog($"GetAllMediaByTypeEndpoint - Retrieved media with filter: {req}");
 
         if (mediaListResult.IsFailed)
         {

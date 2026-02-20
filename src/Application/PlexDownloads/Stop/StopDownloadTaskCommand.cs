@@ -4,6 +4,7 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
+using Reaparr.FileSystem.Contracts;
 
 namespace Reaparr.Application;
 
@@ -29,13 +30,15 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
     private readonly ICommandExecutor _commandExecutor;
     private readonly IFile _file;
     private readonly IDownloadTaskScheduler _downloadTaskScheduler;
+    private readonly IMoveDownloadFileScheduler _moveDownloadFileScheduler;
 
     public StopDownloadTaskCommandHandler(
         ILogger log,
         IReaparrDbContext dbContext,
         ICommandExecutor commandExecutor,
         IFile file,
-        IDownloadTaskScheduler downloadTaskScheduler
+        IDownloadTaskScheduler downloadTaskScheduler,
+        IMoveDownloadFileScheduler moveDownloadFileScheduler
     )
     {
         _log = log.ForContext<StopDownloadTaskCommandHandler>();
@@ -43,6 +46,7 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
         _commandExecutor = commandExecutor;
         _file = file;
         _downloadTaskScheduler = downloadTaskScheduler;
+        _moveDownloadFileScheduler = moveDownloadFileScheduler;
     }
 
     public async Task<Result> ExecuteAsync(StopDownloadTaskCommand command, CancellationToken cancellationToken)
@@ -72,6 +76,13 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
                     // Since this command is done per server, we can abort since there will at most be 1 download task downloading at a time and if that fails we can't continue
                     return stopResult.LogError();
                 }
+            }
+
+            if (await _moveDownloadFileScheduler.IsDownloadFileMoving(downloadTaskKey))
+            {
+                var stopMoveResult = await _moveDownloadFileScheduler.StopMoveDownloadFileJob(downloadTaskKey);
+                if (stopMoveResult.IsFailed)
+                    stopMoveResult.LogError();
             }
 
             // Only delete the download file and worker tasks when still in the download phase.

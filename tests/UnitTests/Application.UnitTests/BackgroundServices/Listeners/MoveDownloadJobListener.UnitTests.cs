@@ -63,6 +63,7 @@ public class MoveDownloadJobListenerUnitTests : BaseUnitTest<MoveDownloadJobList
 
         // Assert
         await act.ShouldNotThrowAsync();
+        Mock.Mock<IMoveDownloadFileQueue>().Verify(x => x.CheckMoveDownloadFileJobQueue(), Times.Once);
     }
 
     [Fact]

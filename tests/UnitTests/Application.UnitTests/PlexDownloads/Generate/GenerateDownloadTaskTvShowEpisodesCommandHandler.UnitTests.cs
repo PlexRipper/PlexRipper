@@ -5,12 +5,12 @@ using Reaparr.Domain.Validators;
 
 namespace Reaparr.Application.UnitTests;
 
-public class DownloadTaskFactoryGenerateTvShowEpisodesDownloadTasksAsyncUnitTests
+public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
     : BaseCommandUnitTest<GenerateDownloadTaskTvShowEpisodesCommand>
 {
     private readonly DownloadTaskTvShowValidator _validator = new();
 
-    public DownloadTaskFactoryGenerateTvShowEpisodesDownloadTasksAsyncUnitTests(ITestOutputHelper output)
+    public GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]

@@ -74,15 +74,15 @@ public class InsertMediaMetaDataCommandHandler
         var genres = command.LibraryMetadata.Genres;
         var countries = command.LibraryMetadata.Countries;
 
-        var syncGenresResult = await InsertGenres(genres);
+        var syncGenresResult = await InsertGenres(genres, ct);
         if (syncGenresResult.IsFailed)
             return syncGenresResult.ToResult();
 
-        var syncCountriesResult = await InsertCountries(countries);
+        var syncCountriesResult = await InsertCountries(countries, ct);
         if (syncCountriesResult.IsFailed)
             return syncCountriesResult.ToResult();
 
-        var syncRolesResult = await InsertPlexActors(roles);
+        var syncRolesResult = await InsertPlexActors(roles, ct);
         if (syncRolesResult.IsFailed)
             return syncRolesResult.ToResult();
 
@@ -97,7 +97,8 @@ public class InsertMediaMetaDataCommandHandler
     }
 
     private async Task<Result<Dictionary<string, PlexActor>>> InsertPlexActors(
-        IReadOnlyCollection<LibraryMediaItemRoleDTO> sourceList
+        IReadOnlyCollection<LibraryMediaItemRoleDTO> sourceList,
+        CancellationToken ct
     )
     {
         var stopWatch = Stopwatch.StartNew();
@@ -134,7 +135,7 @@ public class InsertMediaMetaDataCommandHandler
                 .PlexActors.AsNoTracking()
                 .Where(a => chunk.Contains(a.Key))
                 .Select(a => new { a.Key, a.Id })
-                .ToListAsync();
+                .ToListAsync(ct);
             foreach (var a in found)
                 existingIdByKey[a.Key] = a.Id;
         }
@@ -154,7 +155,7 @@ public class InsertMediaMetaDataCommandHandler
             foreach (var chunk in toInsert.Chunk(chunkSize))
             {
                 _dbContext.PlexActors.AddRange(chunk);
-                await _dbContext.SaveChangesAsync();
+                await _dbContext.SaveChangesAsync(ct);
                 _dbContext.ClearChangeTracker();
             }
         });
@@ -178,7 +179,7 @@ public class InsertMediaMetaDataCommandHandler
                 .PlexActors.AsNoTracking()
                 .Where(x => keys.Contains(x.Key))
                 .Select(a => new { a.Key, a.Id })
-                .ToListAsync();
+                .ToListAsync(ct);
             foreach (var a in found)
                 existingIdByKey[a.Key] = a.Id;
         }
@@ -188,7 +189,16 @@ public class InsertMediaMetaDataCommandHandler
         foreach (var actor in newPlexActors)
         {
             if (!existingIdByKey.TryGetValue(actor.Key, out var id))
+            {
+                _log.Here()
+                    .Warning(
+                        "{NameOfPlexActor} with key {ActorKey} not found in DB after insert (sourceList count: {SourceCount}); skipping",
+                        nameof(PlexActor),
+                        actor.Key,
+                        sourceList.Count
+                    );
                 continue;
+            }
 
             actor.Id = id;
             result[actor.Key] = actor;
@@ -200,7 +210,8 @@ public class InsertMediaMetaDataCommandHandler
     }
 
     private async Task<Result<Dictionary<string, PlexGenre>>> InsertGenres(
-        IReadOnlyCollection<LibraryMediaItemGenreDTO> sourceList
+        IReadOnlyCollection<LibraryMediaItemGenreDTO> sourceList,
+        CancellationToken ct
     )
     {
         var stopWatch = Stopwatch.StartNew();
@@ -226,19 +237,30 @@ public class InsertMediaMetaDataCommandHandler
         _log.Here()
             .Debug("Inserting {Count} {NameOfPlexGenre} after deduplication", newPlexGenres.Count, nameof(PlexGenre));
 
+        const int chunkSize = 500;
+
+        var incomingKeys = newPlexGenres.Select(x => x.Key).ToList();
+        var existingKeys = new HashSet<string>(newPlexGenres.Count);
+        foreach (var chunk in incomingKeys.Chunk(chunkSize))
+        {
+            var found = await _dbContext
+                .PlexGenres.AsNoTracking()
+                .Where(g => chunk.Contains(g.Key))
+                .Select(g => g.Key)
+                .ToListAsync(ct);
+            foreach (var k in found)
+                existingKeys.Add(k);
+        }
+
+        var toInsert = newPlexGenres.Where(g => !existingKeys.Contains(g.Key)).ToList();
+
         var insertResult = await Result.Try(async Task () =>
         {
-            var incomingGenreKeys = newPlexGenres.Select(x => x.Key).ToHashSet();
-            var existingGenreKeys = _dbContext
-                .PlexGenres.Where(c => incomingGenreKeys.Contains(c.Key))
-                .Select(c => c.Key)
-                .ToHashSet();
-
-            var toInsert = newPlexGenres.Where(c => !existingGenreKeys.Contains(c.Key)).ToList();
-            if (toInsert.Any())
+            foreach (var chunk in toInsert.Chunk(chunkSize))
             {
-                _dbContext.PlexGenres.AddRange(toInsert);
-                await _dbContext.SaveChangesAsync();
+                _dbContext.PlexGenres.AddRange(chunk);
+                await _dbContext.SaveChangesAsync(ct);
+                _dbContext.ClearChangeTracker();
             }
         });
 
@@ -254,8 +276,16 @@ public class InsertMediaMetaDataCommandHandler
         }
 
         // Query the database to get entities with proper IDs (SQLite limitation workaround)
-        var newPlexGenreKeys = newPlexGenres.Select(x => x.Key).ToHashSet();
-        var plexGenresWithIds = await _dbContext.PlexGenres.Where(x => newPlexGenreKeys.Contains(x.Key)).ToListAsync();
+        var newPlexGenreKeys = newPlexGenres.Select(x => x.Key).ToList();
+        var plexGenresWithIds = new List<PlexGenre>(newPlexGenres.Count);
+        foreach (var chunk in newPlexGenreKeys.Chunk(chunkSize))
+        {
+            var found = await _dbContext
+                .PlexGenres.Where(x => chunk.Contains(x.Key))
+                .ToListAsync(ct);
+            plexGenresWithIds.AddRange(found);
+        }
+
         var resultDict = plexGenresWithIds.ToHashKeyDictionary(sourceList);
 
         stopWatch.StopAndLog($"Finished inserting {newPlexGenres.Count} {nameof(PlexGenre)}");
@@ -264,7 +294,8 @@ public class InsertMediaMetaDataCommandHandler
     }
 
     private async Task<Result<Dictionary<string, PlexCountry>>> InsertCountries(
-        IReadOnlyCollection<LibraryMediaItemCountryDTO> sourceList
+        IReadOnlyCollection<LibraryMediaItemCountryDTO> sourceList,
+        CancellationToken ct
     )
     {
         var stopWatch = Stopwatch.StartNew();
@@ -293,19 +324,30 @@ public class InsertMediaMetaDataCommandHandler
                 nameof(PlexCountry)
             );
 
+        const int chunkSize = 500;
+
+        var incomingKeys = newPlexCountries.Select(x => x.Key).ToList();
+        var existingKeys = new HashSet<string>(newPlexCountries.Count);
+        foreach (var chunk in incomingKeys.Chunk(chunkSize))
+        {
+            var found = await _dbContext
+                .PlexCountries.AsNoTracking()
+                .Where(c => chunk.Contains(c.Key))
+                .Select(c => c.Key)
+                .ToListAsync(ct);
+            foreach (var k in found)
+                existingKeys.Add(k);
+        }
+
+        var toInsert = newPlexCountries.Where(c => !existingKeys.Contains(c.Key)).ToList();
+
         var insertResult = await Result.Try(async Task () =>
         {
-            var incomingCountryKeys = newPlexCountries.Select(x => x.Key).ToHashSet();
-            var existingCountryKeys = _dbContext
-                .PlexCountries.Where(c => incomingCountryKeys.Contains(c.Key))
-                .Select(c => c.Key)
-                .ToHashSet();
-
-            var toInsert = newPlexCountries.Where(c => !existingCountryKeys.Contains(c.Key)).ToList();
-            if (toInsert.Any())
+            foreach (var chunk in toInsert.Chunk(chunkSize))
             {
-                _dbContext.PlexCountries.AddRange(toInsert);
-                await _dbContext.SaveChangesAsync();
+                _dbContext.PlexCountries.AddRange(chunk);
+                await _dbContext.SaveChangesAsync(ct);
+                _dbContext.ClearChangeTracker();
             }
         });
 
@@ -321,12 +363,19 @@ public class InsertMediaMetaDataCommandHandler
         }
 
         // Query the database to get entities with proper IDs (SQLite limitation workaround)
-        var countryHashSet = newPlexCountries.Select(x => x.Key).ToHashSet();
-        newPlexCountries = await _dbContext.PlexCountries.Where(x => countryHashSet.Contains(x.Key)).ToListAsync();
+        var countryKeys = newPlexCountries.Select(x => x.Key).ToList();
+        var plexCountriesWithIds = new List<PlexCountry>(newPlexCountries.Count);
+        foreach (var chunk in countryKeys.Chunk(chunkSize))
+        {
+            var found = await _dbContext
+                .PlexCountries.Where(x => chunk.Contains(x.Key))
+                .ToListAsync(ct);
+            plexCountriesWithIds.AddRange(found);
+        }
 
-        var resultDict = newPlexCountries.ToHashKeyDictionary(sourceList);
+        var resultDict = plexCountriesWithIds.ToHashKeyDictionary(sourceList);
 
-        stopWatch.StopAndLog($"Finished inserting {newPlexCountries.Count} {nameof(PlexCountry)}");
+        stopWatch.StopAndLog($"Finished inserting {plexCountriesWithIds.Count} {nameof(PlexCountry)}");
 
         return Result.Ok(resultDict);
     }

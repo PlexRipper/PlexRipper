@@ -40,12 +40,14 @@ public class MoveDownloadFileJobQueue : IMoveDownloadFileQueue
                 .DownloadTaskMovieFile.Where(x =>
                     x.DownloadStatus == DownloadStatus.DownloadFinished || x.DownloadStatus == DownloadStatus.MoveError
                 )
+                .OrderByDescending(x => x.DownloadStatus == DownloadStatus.DownloadFinished)
                 .Select(x => x.ToKey())
                 .FirstOrDefaultAsync()
             ?? await dbContext
                 .DownloadTaskTvShowEpisodeFile.Where(x =>
                     x.DownloadStatus == DownloadStatus.DownloadFinished || x.DownloadStatus == DownloadStatus.MoveError
                 )
+                .OrderByDescending(x => x.DownloadStatus == DownloadStatus.DownloadFinished)
                 .Select(x => x.ToKey())
                 .FirstOrDefaultAsync();
 

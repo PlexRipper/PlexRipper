@@ -114,8 +114,11 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
         // Assert
         result.IsSuccess.ShouldBeTrue();
         Mock.Mock<IFile>().Verify(x => x.Delete(It.IsAny<string>()), Times.Never);
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Verify(x => x.IsDownloading(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()), Times.Once);
+        Mock.VerifyEventPublished(It.IsAny<DownloadTaskUpdatedCommand>, Times.Once);
 
-        var downloadTasks = await IDbContext.GetDownloadableChildTasks(movieTask.ToKey(), CancellationToken);
+        var downloadTasks = await dbContext.GetDownloadableChildTasks(movieTask.ToKey(), CancellationToken);
         foreach (var downloadTaskDb in downloadTasks)
             downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.Stopped);
     }

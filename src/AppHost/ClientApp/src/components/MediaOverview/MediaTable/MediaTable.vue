@@ -62,6 +62,7 @@ const mediaTableColumns = getMediaTableColumns();
 const qTableRef = ref<HTMLElement | null>(null);
 const scrollTargetElement = ref<HTMLElement | null>(null);
 const autoScrollEnabled = ref(false);
+const pendingHighlightIndex = ref<number | null>(null);
 
 const props = withDefaults(
 	defineProps<{
@@ -95,6 +96,23 @@ const rowVirtualizer = useVirtualizer(
 		estimateSize: () => ROW_HEIGHT,
 		overscan: 10,
 		getItemKey: (index: number) => props.rows[index]?.id ?? index,
+		onChange: (_instance: unknown, sync: boolean) => {
+			// sync=false means TanStack has finished its scroll-triggered re-render
+			if (sync)
+				return;
+			const index = get(pendingHighlightIndex);
+			if (index === null)
+				return;
+			const container = get(qTableRef);
+			if (!container)
+				return;
+			const element: HTMLElement | null = container.querySelector(`[data-scroll-index="${index}"]`) ?? null;
+			if (!element)
+				return;
+			set(pendingHighlightIndex, null);
+			set(scrollTargetElement, element);
+			triggerBoxHighlight(element);
+		},
 	})),
 );
 
@@ -122,24 +140,8 @@ function scrollToIndex(index: number) {
 	}
 
 	set(autoScrollEnabled, true);
+	set(pendingHighlightIndex, index);
 	get(rowVirtualizer).scrollToIndex(index, { align: 'start' });
-
-	// Wait for the virtual row to be rendered, then highlight it
-	nextTick(() => {
-		const element: HTMLElement | null = container.querySelector(`[data-scroll-index="${index}"]`) ?? null;
-		if (!element) {
-			Log.error(`Could not find scroll target element`, `[data-scroll-index="${index}"]`);
-			return;
-		}
-		set(scrollTargetElement, element);
-
-		const elementRect = element.getBoundingClientRect();
-		if (elementRect.bottom >= 0 && elementRect.top <= window.innerHeight) {
-			triggerBoxHighlight(element);
-		} else {
-			element.scrollIntoView({ block: 'start', behavior: 'smooth' });
-		}
-	});
 }
 
 onMounted(() => {
@@ -150,15 +152,8 @@ onMounted(() => {
 	}
 
 	// Listen for scroll to letter command
-	listenMediaOverviewScrollToCommand((letter) => {
-		if (!get(qTableRef)) {
-			Log.error('qTableRef is null');
-			return;
-		}
-
-		mediaOverviewStore.clearSort();
-		const index = mediaOverviewStore.scrollDict[letter] ? mediaOverviewStore.scrollDict[letter] : 0;
-		scrollToIndex(index);
+	listenMediaOverviewScrollToCommand((scrollIndex) => {
+		scrollToIndex(scrollIndex - 1);
 	});
 });
 </script>

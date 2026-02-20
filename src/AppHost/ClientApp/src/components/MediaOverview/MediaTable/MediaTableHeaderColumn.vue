@@ -32,7 +32,11 @@ defineEmits<{
 }>();
 
 const icon = computed(() => {
-	switch (get(sorted).sort) {
+	if (get(mediaOverviewStore.getActiveSort).field !== props.column.field) {
+		return '';
+	}
+
+	switch (get(mediaOverviewStore.getActiveSort).sort) {
 		case SortDirection.Asc:
 			return 'mdi-arrow-up';
 		case SortDirection.Desc:

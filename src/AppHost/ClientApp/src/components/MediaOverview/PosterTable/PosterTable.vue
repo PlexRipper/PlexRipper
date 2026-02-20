@@ -6,7 +6,7 @@
 		:style="{ paddingLeft: `${gridPaddingLeft}px` }"
 		data-cy="poster-table">
 		<!-- Total height spacer — required by TanStack Virtual to define the scrollable area -->
-		<div :style="{ height: `${rowVirtualizer.getTotalSize()}px`, position: 'relative' }">
+		<div :style="{ height: `${safeTotalSize}px`, position: 'relative' }">
 			<!-- Only virtual rows are rendered, positioned absolutely via translateY -->
 			<div
 				v-for="virtualRow in rowVirtualizer.getVirtualItems()"
@@ -36,7 +36,7 @@
 import Log from 'consola';
 import { useVirtualizer } from '@tanstack/vue-virtual';
 
-import { get, set } from '@vueuse/core';
+import { get, set, useElementBounding } from '@vueuse/core';
 import type { PlexMediaType, PlexMediaSlimDTO } from '@dto';
 import { listenMediaOverviewScrollToCommand, sendMediaOverviewDownloadCommand } from '@composables/event-bus';
 import { triggerBoxHighlight } from '@composables/animations';
@@ -77,6 +77,11 @@ const rowVirtualizer = useVirtualizer(
 	})),
 );
 
+// Firefox and Chrome silently clamp CSS element heights at ~33.5M px, causing a blank render.
+// This guard ensures the spacer div never exceeds that limit regardless of item count or column count.
+const BROWSER_MAX_CSS_HEIGHT = 33_000_000;
+const safeTotalSize = computed(() => Math.min(rowVirtualizer.value.getTotalSize(), BROWSER_MAX_CSS_HEIGHT));
+
 // Returns the items belonging to a given row index
 function getRowItems(rowIndex: number): PlexMediaSlimDTO[] {
 	const cols = get(gridItems);
@@ -90,14 +95,16 @@ function getItemFlatIndex(rowIndex: number, item: PlexMediaSlimDTO): number {
 	return rowIndex * cols + rowItems.indexOf(item);
 }
 
+// useElementBounding must be called at setup level so its ResizeObserver is wired correctly.
+// Calling it inside watchEffect/watch creates a new instance each time with width=0, which
+// causes rowCount = ceil(N/1) = N rows and getTotalSize() to exceed browser CSS height limits.
+const { width: containerWidth } = useElementBounding(scrollContainerRef);
+
 // Recalculate columns and padding whenever container width changes
-watchEffect(() => {
-	const el = get(scrollContainerRef);
-	if (!el) return;
-	const { width } = useElementBounding(scrollContainerRef);
-	const cols = Math.max(1, Math.floor(get(width) / get(posterCardWidth)));
+watch(containerWidth, (width) => {
+	const cols = Math.max(1, Math.floor(width / get(posterCardWidth)));
 	set(gridItems, cols);
-	set(gridPaddingLeft, (get(width) - cols * get(posterCardWidth)) / 2);
+	set(gridPaddingLeft, (width - cols * get(posterCardWidth)) / 2);
 	nextTick(() => onPageReady());
 });
 

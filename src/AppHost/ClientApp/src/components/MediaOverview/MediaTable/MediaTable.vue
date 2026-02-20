@@ -153,7 +153,7 @@ onMounted(() => {
 
 	// Listen for scroll to letter command
 	listenMediaOverviewScrollToCommand((scrollIndex) => {
-		scrollToIndex(scrollIndex - 1);
+		scrollToIndex(scrollIndex);
 	});
 });
 </script>

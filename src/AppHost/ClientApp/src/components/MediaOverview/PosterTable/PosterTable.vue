@@ -10,7 +10,7 @@
 			<!-- Only virtual rows are rendered, positioned absolutely via translateY -->
 			<div
 				v-for="virtualRow in rowVirtualizer.getVirtualItems()"
-				:key="virtualRow.key"
+				:key="virtualRow.index"
 				:style="{
 					position: 'absolute',
 					top: 0,
@@ -145,14 +145,18 @@ function scrollToIndex(index: number) {
 
 onMounted(() => {
 	// Listen for scroll to letter command
-	listenMediaOverviewScrollToCommand((letter) => {
+	listenMediaOverviewScrollToCommand((scrollIndex) => {
 		if (!get(scrollContainerRef)) {
 			Log.error('Could not find container with reference: ', get(scrollContainerRef));
 			return;
 		}
 
-		const index = mediaOverviewStore.scrollDict[letter] ?? 0;
-		scrollToIndex(index);
+		if (scrollIndex < 0 || scrollIndex >= props.items.length) {
+			Log.warn(`Scroll index ${scrollIndex} is out of bounds for items length ${props.items.length}`);
+			return;
+		}
+
+		scrollToIndex(scrollIndex);
 	});
 });
 </script>

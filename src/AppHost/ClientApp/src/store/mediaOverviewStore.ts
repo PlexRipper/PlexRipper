@@ -29,8 +29,7 @@ interface IMediaOverviewStoreState {
 	sortedItems: Readonly<PlexMediaSlimDTO[]>;
 	itemsLength: number;
 	sortedState: IMediaOverviewSort;
-	scrollDict: Record<string, number>;
-	scrollAlphabet: string[];
+	scrollDict: Map<string, number>;
 	selection: ISelection;
 	downloadButtonVisible: boolean;
 	filterQuery: string;
@@ -53,8 +52,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 		sortedItems: [],
 		itemsLength: 0,
 		sortedState: { field: MediaSortField.Title, sort: SortDirection.Asc },
-		scrollDict: { '#': 0 },
-		scrollAlphabet: [],
+		scrollDict: new Map<string, number>([['#', 0]]),
 		selection: { keys: [], allSelected: false, indexKey: 0 },
 		downloadButtonVisible: false,
 		filterQuery: '',
@@ -353,13 +351,9 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 				return [...hash, ...letters];
 			}
 
-			state.scrollAlphabet = isTitle
-				? sortAlphaKeys(keys, direction)
-				: direction === SortDirection.Desc
-					? [...keys].reverse()
-					: keys;
+			const sortedKeys = isTitle ? sortAlphaKeys(keys, direction) : keys;
 
-			state.scrollDict = Object.fromEntries(indexByKey);
+			state.scrollDict = new Map(sortedKeys.map((k) => [k, indexByKey.get(k)!]));
 		},
 		setSelection(selection: ISelection) {
 			state.selection = selection;

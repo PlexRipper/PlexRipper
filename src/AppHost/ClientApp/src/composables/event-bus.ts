@@ -12,7 +12,7 @@ export interface IMediaOverviewSort {
 // region General
 export interface IMediaOverviewCommands {
 	command: 'scrollTo' | 'download' | 'open-details';
-	scrollToLetter?: string;
+	scrollIndex?: number;
 	downloadMediaCommands?: DownloadMediaDTO[];
 	mediaId?: number;
 }
@@ -30,17 +30,17 @@ export function useMediaOverviewCommandsBus(): UseEventBusReturn<IMediaOverviewC
 
 // region  ScrollTo command
 
-export function sendMediaOverviewScrollToCommand(letter: string): void {
+export function sendMediaOverviewScrollToCommand(scrollIndex: number): void {
 	useMediaOverviewCommandsBus().emit({
 		command: 'scrollTo',
-		scrollToLetter: letter,
+		scrollIndex: scrollIndex,
 	});
 }
 
-export function listenMediaOverviewScrollToCommand(action: (letter: string) => void): void {
-	useMediaOverviewCommandsBus().on(({ command, scrollToLetter }) => {
+export function listenMediaOverviewScrollToCommand(action: (scrollIndex: number) => void): void {
+	useMediaOverviewCommandsBus().on(({ command, scrollIndex }) => {
 		if (command === 'scrollTo') {
-			action(scrollToLetter ?? '');
+			action(scrollIndex ?? -1);
 		}
 	});
 }

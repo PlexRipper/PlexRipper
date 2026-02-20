@@ -13,46 +13,41 @@
 			ref="qTableRef"
 			:class="['media-table--content', isScrollable ? 'scroll' : '']"
 			data-cy="media-table-scroll">
-			<template v-if="disableIntersection">
-				<MediaTableRow
-					v-for="(row, index) in rows"
-					:key="index"
-					:index="index"
-					:data-cy="`media-table-row-${index}`"
-					:columns="mediaTableColumns"
-					:row="row"
-					selectable
-					:selected="isSelected(row.id)"
-					:disable-highlight="disableHighlight"
-					:disable-hover-click="disableHoverClick"
-					@selected="updateSelectedRow(row.id, $event)" />
-			</template>
-			<template v-else>
-				<q-intersection
-					v-for="(row, index) in rows"
-					:key="row.id"
-					:once="disableIntersection"
+			<!-- Total height spacer — required by TanStack Virtual to define the scrollable area -->
+			<div :style="{ height: `${safeTotalSize}px`, position: 'relative' }">
+				<!-- Only virtual rows are rendered, positioned absolutely via translateY -->
+				<div
+					v-for="virtualRow in rowVirtualizer.getVirtualItems()"
+					:key="virtualRow.key"
+					:style="{
+						position: 'absolute',
+						top: 0,
+						left: 0,
+						width: '100%',
+						transform: `translateY(${virtualRow.start}px)`,
+					}"
 					class="media-table--intersection highlight-border-box"
-					:data-scroll-index="index">
+					:data-scroll-index="virtualRow.index">
 					<MediaTableRow
-						:index="index"
-						:data-cy="`media-table-row-${index}`"
+						:index="virtualRow.index"
+						:data-cy="`media-table-row-${virtualRow.index}`"
 						:columns="mediaTableColumns"
-						:row="row"
+						:row="rows[virtualRow.index]"
 						selectable
-						:selected="isSelected(row.id)"
+						:selected="isSelected(rows[virtualRow.index].id)"
 						:disable-highlight="disableHighlight"
 						:disable-hover-click="disableHoverClick"
-						@selected="updateSelectedRow(row.id, $event)" />
-				</q-intersection>
-			</template>
+						@selected="updateSelectedRow(rows[virtualRow.index].id, $event)" />
+				</div>
+			</div>
 		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
 import Log from 'consola';
-import { get, set, useScroll } from '@vueuse/core';
+import { useVirtualizer } from '@tanstack/vue-virtual';
+import { get, set } from '@vueuse/core';
 import type { PlexMediaSlimDTO } from '@dto';
 import type { ISelection } from '@interfaces';
 import {
@@ -68,18 +63,16 @@ const qTableRef = ref<HTMLElement | null>(null);
 const scrollTargetElement = ref<HTMLElement | null>(null);
 const autoScrollEnabled = ref(false);
 
-withDefaults(
+const props = withDefaults(
 	defineProps<{
 		rows: Readonly<PlexMediaSlimDTO[]>;
 		disableHoverClick?: boolean;
 		disableHighlight?: boolean;
-		disableIntersection?: boolean;
 		isScrollable?: boolean;
 	}>(),
 	{
 		disableHoverClick: false,
 		disableHighlight: false,
-		disableIntersection: false,
 		isScrollable: true,
 	},
 );
@@ -87,6 +80,25 @@ withDefaults(
 defineEmits<{
 	(e: 'row-click', payload: PlexMediaSlimDTO): void;
 }>();
+
+// Row height matches $media-table-row-height in _variables.scss
+const ROW_HEIGHT = 42;
+
+// Firefox and Chrome silently clamp CSS element heights at ~33.5M px, causing a blank render.
+// This guard ensures the spacer div never exceeds that limit regardless of item count.
+const BROWSER_MAX_CSS_HEIGHT = 33_000_000;
+
+const rowVirtualizer = useVirtualizer(
+	computed(() => ({
+		count: props.rows.length,
+		getScrollElement: () => get(qTableRef),
+		estimateSize: () => ROW_HEIGHT,
+		overscan: 10,
+		getItemKey: (index: number) => props.rows[index]?.id ?? index,
+	})),
+);
+
+const safeTotalSize = computed(() => Math.min(rowVirtualizer.value.getTotalSize(), BROWSER_MAX_CSS_HEIGHT));
 
 function isSelected(mediaId: number) {
 	return (mediaOverviewStore.selection?.keys ?? []).includes(mediaId);
@@ -103,26 +115,31 @@ function updateSelectedRow(mediaId: number, state: boolean) {
 }
 
 function scrollToIndex(index: number) {
-	// noinspection TypeScriptValidateTypes
-	const element: HTMLElement | null = get(qTableRef)?.querySelector(`[data-scroll-index="${index}"]`) ?? null;
-	if (!element) {
-		Log.error(`Could not find scroll target element`, `[data-scroll-index="${index}"]`);
+	const container = get(qTableRef);
+	if (!container) {
+		Log.error(`Could not find scroll container reference`);
 		return;
 	}
 
-	set(scrollTargetElement, element);
 	set(autoScrollEnabled, true);
+	get(rowVirtualizer).scrollToIndex(index, { align: 'start' });
 
-	const elementRect = get(scrollTargetElement)?.getBoundingClientRect();
-	// Scroll if not visible
-	if ((elementRect?.bottom ?? 0) >= 0 && (elementRect?.top ?? 0) <= window.innerHeight) {
-		triggerBoxHighlight(element);
-	} else {
-		get(scrollTargetElement)?.scrollIntoView({
-			block: 'start',
-			behavior: 'smooth',
-		});
-	}
+	// Wait for the virtual row to be rendered, then highlight it
+	nextTick(() => {
+		const element: HTMLElement | null = container.querySelector(`[data-scroll-index="${index}"]`) ?? null;
+		if (!element) {
+			Log.error(`Could not find scroll target element`, `[data-scroll-index="${index}"]`);
+			return;
+		}
+		set(scrollTargetElement, element);
+
+		const elementRect = element.getBoundingClientRect();
+		if (elementRect.bottom >= 0 && elementRect.top <= window.innerHeight) {
+			triggerBoxHighlight(element);
+		} else {
+			element.scrollIntoView({ block: 'start', behavior: 'smooth' });
+		}
+	});
 }
 
 onMounted(() => {
@@ -139,22 +156,9 @@ onMounted(() => {
 			return;
 		}
 
-		// We have to revert to normal title sort otherwise the index will be wrong
 		mediaOverviewStore.clearSort();
 		const index = mediaOverviewStore.scrollDict[letter] ? mediaOverviewStore.scrollDict[letter] : 0;
-
 		scrollToIndex(index);
-	});
-	// Setup stopped scrolling event listener
-	useScroll(get(qTableRef), {
-		onStop() {
-			// Don't highlight if the user scrolls manually
-			if (!get(autoScrollEnabled)) {
-				return;
-			}
-			set(autoScrollEnabled, false);
-			triggerBoxHighlight(get(scrollTargetElement));
-		},
 	});
 });
 </script>

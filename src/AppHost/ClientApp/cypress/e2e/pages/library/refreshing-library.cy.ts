@@ -178,7 +178,7 @@ describe('Test the refreshing of a PlexLibrary', () => {
 			const tvShowCount = tvShowLibrary.count;
 			const seasonCount = tvShowLibrary.seasonCount;
 			const episodeCount = tvShowLibrary.episodeCount;
-			const totalCount = tvShowCount * seasonCount * episodeCount;
+			const totalCount = episodeCount;
 
 			// Stage 1: TvShows progress from 0% to 100%, Seasons and Episodes not yet started
 			for (let i = 1; i <= steps; i++) {

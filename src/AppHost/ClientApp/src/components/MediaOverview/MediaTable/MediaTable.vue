@@ -18,7 +18,7 @@
 				<!-- Only virtual rows are rendered, positioned absolutely via translateY -->
 				<div
 					v-for="virtualRow in rowVirtualizer.getVirtualItems()"
-					:key="virtualRow.key"
+					:key="String(virtualRow.key)"
 					:style="{
 						position: 'absolute',
 						top: 0,
@@ -32,12 +32,12 @@
 						:index="virtualRow.index"
 						:data-cy="`media-table-row-${virtualRow.index}`"
 						:columns="mediaTableColumns"
-						:row="rows[virtualRow.index]"
+						:row="rows[virtualRow.index]!"
 						selectable
-						:selected="isSelected(rows[virtualRow.index].id)"
+						:selected="isSelected(rows[virtualRow.index]!.id)"
 						:disable-highlight="disableHighlight"
 						:disable-hover-click="disableHoverClick"
-						@selected="updateSelectedRow(rows[virtualRow.index].id, $event)" />
+						@selected="updateSelectedRow(rows[virtualRow.index]!.id, $event)" />
 				</div>
 			</div>
 		</div>

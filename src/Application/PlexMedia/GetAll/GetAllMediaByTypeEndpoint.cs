@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using FastEndpoints;
 using FluentValidation;
 using Reaparr.Application.Contracts;
@@ -65,6 +66,9 @@ public class GetAllMediaByTypeEndpoint : BaseEndpoint<GetAllMediaByTypeRequest, 
     public override async Task HandleAsync(GetAllMediaByTypeRequest req, CancellationToken ct)
     {
         _log.Here().DebugApiCall(HttpContext, req);
+
+        var stopWatch = Stopwatch.StartNew();
+
         // When 0, just take everything
         var take = req.Size <= 0 ? 0 : req.Size;
         var skip = req.Page * req.Size;
@@ -85,6 +89,8 @@ public class GetAllMediaByTypeEndpoint : BaseEndpoint<GetAllMediaByTypeRequest, 
             },
             ct: ct
         );
+
+        stopWatch.StopAndLog($"GetAllMediaByTypeEndpoint - Retrieved media of type {req.MediaType} with filter: {req}");
 
         if (mediaListResult.IsFailed)
         {

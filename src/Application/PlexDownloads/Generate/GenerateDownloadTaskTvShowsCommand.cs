@@ -109,7 +109,11 @@ public class GenerateDownloadTaskTvShowsCommandHandler : ICommandHandler<Generat
             // Create seasons downloadTasks
             await _commandExecutor.Send(
                 new GenerateDownloadTaskTvShowSeasonsCommand(
-                    new CreateDownloadTasksRequest(seasonsIds, command.Request.DestinationFolderPathId)
+                    new CreateDownloadTasksRequest(
+                        seasonsIds,
+                        command.Request.DestinationFolderPathId,
+                        command.Request.CustomDestinationFolderPath
+                    )
                 ),
                 cancellationToken
             );

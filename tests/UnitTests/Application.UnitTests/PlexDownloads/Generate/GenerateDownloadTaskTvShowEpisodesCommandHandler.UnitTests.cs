@@ -509,6 +509,58 @@ public class DownloadTaskFactoryGenerateTvShowEpisodesDownloadTasksAsyncUnitTest
     }
 
     [Fact]
+    public async Task ShouldSetCustomDestinationFolderPath_WhenRequestContainsCustomDestinationFolderPath()
+    {
+        // Arrange
+        await SetupDatabase(
+            89013,
+            config =>
+            {
+                config.TvShowCount = 1;
+                config.TvShowSeasonCount = 1;
+                config.TvShowEpisodeCount = 2;
+            }
+        );
+
+        var plexTvShows = await IDbContext
+            .PlexTvShows.Include(x => x.Seasons)
+                .ThenInclude(x => x.Episodes)
+            .ToListAsync(CancellationToken);
+
+        var plexEpisodes = plexTvShows.SelectMany(x => x.Seasons).SelectMany(x => x.Episodes).ToList();
+        plexEpisodes.Count.ShouldBe(2);
+
+        const string customPath = "/custom/destination/path";
+
+        var downloadMediaDtos = new List<DownloadMediaDTO>
+        {
+            new()
+            {
+                Type = PlexMediaType.Episode,
+                MediaIds = plexEpisodes.Select(x => x.Id).ToList(),
+                PlexServerId = 1,
+                PlexLibraryId = 1,
+                Qualities = [],
+            },
+        };
+
+        // Act
+        var request = new CreateDownloadTasksRequest(downloadMediaDtos, null, customPath);
+        var command = new GenerateDownloadTaskTvShowEpisodesCommand(request);
+        var result = await TestHandlerExecuteAsync(command);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue(result.ToString());
+        var downloadTaskEpisodeFiles = await IDbContext.DownloadTaskTvShowEpisodeFile.ToListAsync(CancellationToken);
+        downloadTaskEpisodeFiles.Count.ShouldBe(2);
+
+        foreach (var episodeFile in downloadTaskEpisodeFiles)
+        {
+            episodeFile.DirectoryMeta.DestinationRootPath.ShouldBe(customPath);
+        }
+    }
+
+    [Fact]
     public async Task ShouldHaveFailedResult_WhenEmptyMediaIdsList()
     {
         // Arrange

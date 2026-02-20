@@ -282,16 +282,23 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			settingsStore.displaySettings.allOverviewViewMode = mediaType;
 			useSubscription(actions.requestMedia().subscribe());
 		},
+		// This function calculates the scroll navigation options based on the current media items and active sorting.
 		setMediaIndexNavigationOptions() {
+			// These media items are already correctly sorted based on the active sort, so we can use them to determine the index positions for each key
 			const items = get(getters.getMediaItems);
 			const activeSort = get(getters.getActiveSort);
 			const field = activeSort.field;
-			const direction = activeSort.sort;
 
-			const GB = 1_073_741_824;
+			// GB = 1,000,000,000 bytes (not 1,073,741,824) to align with Plex's media size formatting which uses decimal units
+			const GB = 1_000_000_000;
 
 			const keySelector: (item: PlexMediaSlimDTO) => string | null = (() => {
 				switch (field) {
+					case MediaSortField.Title:
+						return (it) => {
+							const first = it.title?.trim().charAt(0) ?? '';
+							return /^[A-Za-z]$/.test(first) ? first.toUpperCase() : '#';
+						};
 					case MediaSortField.Year:
 						return (it) => String(it.year ?? '#');
 
@@ -332,26 +339,24 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 				}
 			})();
 
+			// Items are already sorted — iterating in order naturally yields keys in the correct sequence
 			const indexByKey = new Map<string, number>();
 			for (let i = 0; i < items.length; i++) {
 				const key = keySelector(items[i]!);
-				if (key == null) continue; // skip items without a usable key (e.g. no date)
-				if (!indexByKey.has(key)) indexByKey.set(key, i);
+				if (key == null)
+					continue; // skip items without a usable key (e.g. no date)
+				if (!indexByKey.has(key))
+					indexByKey.set(key, i);
 			}
 
-			const keys = Array.from(indexByKey.keys());
-
-			// Title nav should be alphabetical, not insertion order
-			const isTitle = field === MediaSortField.Title; // this is 'sortIndex' in your enum
-
-			function sortAlphaKeys(keys: string[], direction: SortDirection) {
+			const sortedKeys = (() => {
+				const keys = [...indexByKey.keys()];
+				if (field !== MediaSortField.Title) return keys;
 				const hash = keys.includes('#') ? ['#'] : [];
 				const letters = keys.filter((k) => k !== '#').sort((a, b) => a.localeCompare(b));
-				if (direction === SortDirection.Desc) letters.reverse();
+				if (activeSort.sort === SortDirection.Desc) letters.reverse();
 				return [...hash, ...letters];
-			}
-
-			const sortedKeys = isTitle ? sortAlphaKeys(keys, direction) : keys;
+			})();
 
 			state.scrollDict = new Map(sortedKeys.map((k) => [k, indexByKey.get(k)!]));
 		},

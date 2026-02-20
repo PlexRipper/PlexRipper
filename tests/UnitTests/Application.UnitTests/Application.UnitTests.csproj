@@ -25,6 +25,7 @@
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\..\..\src\Application\Application.csproj" />
+        <ProjectReference Include="..\..\..\src\FileSystem.Contracts\FileSystem.Contracts.csproj" />
         <ProjectReference Include="..\..\BaseTests\BaseTests.csproj" />
     </ItemGroup>
     <ItemGroup>

@@ -74,28 +74,35 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
                 }
             }
 
-            _log.Here().Debug("Deleting partially downloaded files of {DownloadTaskFullTitle}", downloadTask.FullTitle);
+            // Only delete the download file and worker tasks when still in the download phase.
+            // Tasks in the file-transfer phase (DownloadFinished, Moving, MoveError, etc.) already have
+            // a fully-downloaded file on disk that should be preserved for the move operation.
+            if (downloadTask.DownloadTaskPhase == DownloadTaskPhase.Downloading)
+            {
+                _log.Here()
+                    .Debug("Deleting partially downloaded files of {DownloadTaskFullTitle}", downloadTask.FullTitle);
 
-            Result
-                .Try(() =>
-                {
-                    if (_file.Exists(downloadTask.DownloadFilePath))
-                        _file.Delete(downloadTask.DownloadFilePath);
-                    else
+                Result
+                    .Try(() =>
                     {
-                        _log.Warning(
-                            "Partially downloaded file for {DownloadTaskFullTitle} not found at {DownloadFilePath} so it could not be deleted.",
-                            downloadTask.FullTitle,
-                            downloadTask.DownloadFilePath
-                        );
-                    }
-                })
-                .LogIfFailed();
+                        if (_file.Exists(downloadTask.DownloadFilePath))
+                            _file.Delete(downloadTask.DownloadFilePath);
+                        else
+                        {
+                            _log.Warning(
+                                "Partially downloaded file for {DownloadTaskFullTitle} not found at {DownloadFilePath} so it could not be deleted.",
+                                downloadTask.FullTitle,
+                                downloadTask.DownloadFilePath
+                            );
+                        }
+                    })
+                    .LogIfFailed();
 
-            // Delete all worker tasks
-            await _dbContext
-                .DownloadWorkerTasks.Where(x => x.DownloadTaskId == downloadTaskKey.Id)
-                .ExecuteDeleteAsync(cancellationToken);
+                // Delete all worker tasks
+                await _dbContext
+                    .DownloadWorkerTasks.Where(x => x.DownloadTaskId == downloadTaskKey.Id)
+                    .ExecuteDeleteAsync(cancellationToken);
+            }
 
             // Reset the download progress
             await _dbContext.ResetDownloadTaskProgress(downloadTaskKey, DownloadStatus.Stopped, cancellationToken);

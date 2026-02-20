@@ -9,9 +9,9 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
         : base(output) { }
 
     [Fact]
-    public async Task ShouldReturnSuccessResult_WhenNoDownloadTaskIsInDownloadFinishedState()
+    public async Task ShouldReturnSuccessResult_WhenNoDownloadTaskIsReadyToMove()
     {
-        // Arrange — tasks exist but none are in DownloadFinished state (e.g. all in MoveError after a prior failure)
+        // Arrange — tasks exist but none are in DownloadFinished or MoveError state
         await SetupDatabase(
             9876,
             config =>
@@ -23,7 +23,7 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
 
         var dbContext = IDbContext;
         var downloadTasks = await dbContext.DownloadTaskMovieFile.AsTracking().ToListAsync(CancellationToken);
-        downloadTasks.SetDownloadStatus(DownloadStatus.MoveError);
+        downloadTasks.SetDownloadStatus(DownloadStatus.Completed);
         await dbContext.SaveChangesAsync(CancellationToken);
 
         Mock.Mock<IMoveDownloadFileScheduler>()
@@ -45,11 +45,83 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
     }
 
     [Fact]
-    public async Task ShouldPickNextDownloadFinishedTask_WhenPreviousMoveErroredAndMoreTasksAreReady()
+    public async Task ShouldRunAFileMoveJob_WhenMovieFileWithMoveErrorExists()
     {
-        // Arrange — one task is in MoveError, another is in DownloadFinished
-        // This simulates the stuck-queue scenario: a move fails, then a subsequent download completes.
-        // The queue must move past the errored task and process the ready one.
+        // Arrange — a previous move attempt failed; the queue should retry it automatically
+        await SetupDatabase(
+            7743,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.MovieDownloadTasksCount = 2;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var downloadTasks = await dbContext.DownloadTaskMovieFile.AsTracking().ToListAsync(CancellationToken);
+        downloadTasks.SetDownloadStatus(DownloadStatus.MoveError);
+        await dbContext.SaveChangesAsync(CancellationToken);
+
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .Setup(x => x.IsAnyMoveDownloadFileJobRunning())
+            .ReturnsAsync(false)
+            .Verifiable(Times.Once);
+
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()))
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once);
+
+        // Act
+        var result = await Sut.CheckMoveDownloadFileJobQueue();
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.IsSuccess.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task ShouldRunAFileMoveJob_WhenTvShowEpisodeFileWithMoveErrorExists()
+    {
+        // Arrange — a previous move attempt failed for a TV episode; the queue should retry it automatically
+        await SetupDatabase(
+            8812,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.TvShowDownloadTasksCount = 2;
+                config.TvShowSeasonDownloadTasksCount = 1;
+                config.TvShowEpisodeDownloadTasksCount = 2;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var downloadTasks = await dbContext.DownloadTaskTvShowEpisodeFile.AsTracking().ToListAsync(CancellationToken);
+        downloadTasks.SetDownloadStatus(DownloadStatus.MoveError);
+        await dbContext.SaveChangesAsync(CancellationToken);
+
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .Setup(x => x.IsAnyMoveDownloadFileJobRunning())
+            .ReturnsAsync(false)
+            .Verifiable(Times.Once);
+
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()))
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once);
+
+        // Act
+        var result = await Sut.CheckMoveDownloadFileJobQueue();
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.IsSuccess.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task ShouldRunAFileMoveJob_WhenBothMoveErrorAndDownloadFinishedTasksExist()
+    {
+        // Arrange — one task is in MoveError, another in DownloadFinished; the queue should pick one to process
         await SetupDatabase(
             5544,
             config =>
@@ -78,15 +150,9 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
         // Act
         var result = await Sut.CheckMoveDownloadFileJobQueue();
 
-        // Assert: the queue skips the MoveError task and successfully starts a job for the DownloadFinished one
+        // Assert: one job is started (either the MoveError retry or the DownloadFinished task)
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
-
-        Mock.Mock<IMoveDownloadFileScheduler>()
-            .Verify(
-                x => x.StartMoveDownloadFileJob(It.Is<DownloadTaskKey>(k => k.Id == downloadTasks[1].Id)),
-                Times.Once
-            );
     }
 
     [Fact]

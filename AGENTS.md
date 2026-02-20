@@ -259,8 +259,13 @@ Keep entries concise and actionable. Remove entries that are no longer accurate.
 * `_downloadWorkerCombinedConnection` (the `IConnectableObservable.Connect()` disposable) must be stored and disposed in `DisposeAsync()`.
 
 ### MoveDownloadFileJobQueue — "no task found" is not an error
-* When no `DownloadFinished` task exists, the queue returns `Result.Fail` — this is normal (nothing ready yet). Logging it as `ErrorResult` flooded logs. Changed to `Debug` log + plain `Result.Fail`.
+* When no ready-to-move task exists, the queue returns `Result.Ok()` — nothing ready yet is not an error.
+* The queue now picks up both `DownloadFinished` and `MoveError` tasks. A `MoveError` task is automatically retried on the next `MoveDownloadJobListener` trigger.
 * The move queue is self-stopping: it only runs when explicitly triggered by `DownloadJobListener` or `MoveDownloadJobListener`. If both are broken or miss a trigger, downloads stay stuck in `DownloadFinished` forever. The `.Sample()` fix above is the primary defence.
+
+### DownloadFinished maps to FileTransfer phase (not Downloading)
+* `DownloadStatus.DownloadFinished` maps to `DownloadTaskPhase.FileTransfer` so that `StartDownloadTaskCommandHandler` triggers `StartMoveDownloadFileJob` instead of a re-download.
+* `StopDownloadTaskCommandHandler` only deletes the downloaded file and worker tasks when `DownloadTaskPhase == Downloading`. Tasks in `FileTransfer` phase (DownloadFinished, Moving, MoveError, etc.) preserve the downloaded file on disk.
 
 ### MoveDownloadFileJob / MoveDownloadJobListener test patterns
 * `IJobExecutionContext` is mocked via `Mock.Mock<IJobExecutionContext>().SetupGet(x => x.JobDetail.JobDataMap).Returns(new JobDataMap(dict))`.

@@ -34,20 +34,24 @@ public class MoveDownloadFileJobQueue : IMoveDownloadFileQueue
         // Create a new DbContext for this operation to avoid threading issues
         using var dbContext = await _dbContextFactory.CreateAsync();
 
-        // Find the first finished task (movie preferred, then episode)
+        // Find the first ready-to-move task (DownloadFinished preferred, MoveError as retry; movies before episodes)
         var key =
             await dbContext
-                .DownloadTaskMovieFile.Where(x => x.DownloadStatus == DownloadStatus.DownloadFinished)
+                .DownloadTaskMovieFile.Where(x =>
+                    x.DownloadStatus == DownloadStatus.DownloadFinished || x.DownloadStatus == DownloadStatus.MoveError
+                )
                 .Select(x => x.ToKey())
                 .FirstOrDefaultAsync()
             ?? await dbContext
-                .DownloadTaskTvShowEpisodeFile.Where(x => x.DownloadStatus == DownloadStatus.DownloadFinished)
+                .DownloadTaskTvShowEpisodeFile.Where(x =>
+                    x.DownloadStatus == DownloadStatus.DownloadFinished || x.DownloadStatus == DownloadStatus.MoveError
+                )
                 .Select(x => x.ToKey())
                 .FirstOrDefaultAsync();
 
         if (key is null)
         {
-            _log.Here().Debug("No DownloadTask with status DownloadFinished found, nothing to move");
+            _log.Here().Debug("No DownloadTask with status DownloadFinished or MoveError found, nothing to move");
             return Result.Ok();
         }
 

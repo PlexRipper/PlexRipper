@@ -90,6 +90,37 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
     }
 
     [Fact]
+    public async Task ShouldNotDeleteDownloadFile_WhenTaskIsInFileTransferPhase()
+    {
+        // Arrange — task is in MoveError (FileTransfer phase); the downloaded file must not be deleted
+        await SetupDatabase(90426, config => config.MovieDownloadTasksCount = 1);
+
+        var dbContext = IDbContext;
+        var movieDownloadTasks = await dbContext.DownloadTaskMovieFile.AsTracking().ToListAsync(CancellationToken);
+        movieDownloadTasks.SetDownloadStatus(DownloadStatus.MoveError);
+        await dbContext.SaveChangesAsync(CancellationToken);
+
+        var movieTask = await dbContext.DownloadTaskMovie.FirstAsync(CancellationToken);
+
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.IsDownloading(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
+        Mock.Mock<IFile>().Setup(x => x.Delete(It.IsAny<string>())).Verifiable(Times.Never);
+        Mock.SetupCommand(It.IsAny<DownloadTaskUpdatedCommand>).ReturnsAsync(Result.Ok());
+
+        // Act
+        var result = await Sut.ExecuteAsync(new StopDownloadTaskCommand(movieTask.Id), CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        Mock.Mock<IFile>().Verify(x => x.Delete(It.IsAny<string>()), Times.Never);
+
+        var downloadTasks = await IDbContext.GetDownloadableChildTasks(movieTask.ToKey(), CancellationToken);
+        foreach (var downloadTaskDb in downloadTasks)
+            downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.Stopped);
+    }
+
+    [Fact]
     public async Task ShouldHaveSetTvShowDownloadTasksToStop_WhenAtLeastOneValidIdIsGiven()
     {
         // Arrange

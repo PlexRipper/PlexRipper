@@ -84,7 +84,6 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 	};
 
 	const state = reactive<IMediaOverviewStoreState>(cloneDeep(defaultState));
-	const { t } = useI18n({ useScope: 'global' });
 	const settingsStore = useSettingsStore();
 	const libraryStore = useLibraryStore();
 
@@ -492,7 +491,8 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			}
 			return !(state.sortedState.field === MediaSortField.Title && state.sortedState.sort === SortDirection.Asc);
 		}),
-		getSortOptions: computed((): ISortOption[] => {
+		getSortOptions: (): ISortOption[] => {
+			const { t } = useI18n({ useScope: 'global' });
 			const options: ISortOption[] = [
 				{ field: MediaSortField.Title, label: t('general.sort.title'), direction: SortDirection.NoSort },
 				{ field: MediaSortField.Year, label: t('general.sort.year'), direction: SortDirection.NoSort },
@@ -510,7 +510,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			}
 
 			return options;
-		}),
+		},
 		getGenres: computed(() => sortBy(state.metadataList.genres, (x) => x.name)),
 		getRoles: computed(() => sortBy(state.metadataList.roles, (x) => x.name)),
 		getCountries: computed(() => sortBy(state.metadataList.countries, (x) => x.name)),

@@ -79,7 +79,7 @@
 					<q-separator v-if="mediaOverviewStore.getIsSorted" />
 					<!--	Sort options	-->
 					<q-item
-						v-for="option in mediaOverviewStore.getSortOptions"
+						v-for="option in mediaOverviewStore.getSortOptions()"
 						:key="option.field"
 						:data-cy="`sort-option-${option.field}-btn`"
 						clickable

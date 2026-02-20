@@ -109,7 +109,7 @@ export const useLibraryStore = defineStore(StoreNames.LibraryStore, () => {
 			});
 		}, updateLibrary(library?: PlexLibraryDTO | null): void {
 			if (!library) {
-				Log.error('Library was invalid, cannot update store.');
+				Log.error('Library was invalid, cannot update store.', library);
 				return;
 			}
 			const i = state.libraries.findIndex((x) => x.id === library.id);

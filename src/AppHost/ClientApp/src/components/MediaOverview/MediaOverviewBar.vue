@@ -152,7 +152,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { PlexMediaDTO, PlexMediaType } from '@dto';
+import type { PlexMediaDTO } from '@dto';
 import { ViewMode } from '@dto';
 import { SortDirection } from '@enums';
 import type { IMediaOverviewBarActions, IViewOptions } from '@interfaces';

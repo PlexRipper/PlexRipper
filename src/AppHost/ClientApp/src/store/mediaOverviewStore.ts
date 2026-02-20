@@ -417,6 +417,8 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			}
 
 			state.sortedState = event;
+
+			actions.setMediaIndexNavigationOptions();
 		},
 		$reset() {
 			Object.assign(state, cloneDeep(defaultState));
@@ -554,8 +556,6 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			return result;
 		}),
 	};
-
-	watch(getters.getMediaItems, () => actions.setMediaIndexNavigationOptions());
 
 	return {
 		...toRefs(state),

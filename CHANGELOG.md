@@ -1,5 +1,36 @@
 Reaparr Changelog
 
+# [0.36.0-dev.4](https://github.com/Reaparr/Reaparr/compare/v0.36.0-dev.3...v0.36.0-dev.4) (2026-02-21)
+
+
+### Bug Fixes
+
+* **WebAPI:** Allow retrying stuck DownloadFinished and MoveError tasks via Start action ([9ed9977](https://github.com/Reaparr/Reaparr/commit/9ed9977e6c5f58d9b01a9634894f034c9a2a3cd7))
+* **Web-UI:** Fix useI18n called in invalid composition context in MediaOverviewStore ([e756260](https://github.com/Reaparr/Reaparr/commit/e756260643a6249879f4d3d07b732b5887d976eb))
+* **Web-UI:** Fixed a bug where the scroll index was incorrect for alternatives sorts such as year, updatedAt etc ([525ce3e](https://github.com/Reaparr/Reaparr/commit/525ce3e1a4fb6dcef6db706c4723a6ac0c9cf810))
+* **Web-UI:** Fixed a bug where the scroll index was incorrect size ([354de4a](https://github.com/Reaparr/Reaparr/commit/354de4a5de790dff4b428520003097f454cfd409))
+* **Web-UI:** Fixed an issue where the Posters would not be centered on the screen depending on the window size ([36f0e5b](https://github.com/Reaparr/Reaparr/commit/36f0e5b2db045fb9272f5b4e281bd40c24d697b0))
+* **WebAPI:** Fixed an issue where the syncing of a huge Plex library 100.000+ movies would hang and silently crash ([4bb1d47](https://github.com/Reaparr/Reaparr/commit/4bb1d4734a0e36b760cc2e4081d8e07eec72dedb))
+* **Web-UI:** Fixed the poster table not rendering when there are more than 250.000 posters being loaded ([3c451b1](https://github.com/Reaparr/Reaparr/commit/3c451b1bac4d19f739b5248e8ebbdcaee96370dd))
+* **Web-UI:** Fixed the scroll navigation not working for the table view ([6d0e031](https://github.com/Reaparr/Reaparr/commit/6d0e03154666d09dafd8f92bbc4bf38b286c4711))
+* **Web-UI:** Fixed the sorting icons in the media table view ([22596d6](https://github.com/Reaparr/Reaparr/commit/22596d68a52452732cdd627b812f868f5980f5b2))
+* **WebAPI:** Possible bug fix for DownloadTask getting stuck on DownloadFinished ([d9c50fd](https://github.com/Reaparr/Reaparr/commit/d9c50fd97fe3f6c6869d234c736974247d146d2c))
+* **Web-UI:** Prevent media requests from freezing when rapidly switching libraries ([c2f1070](https://github.com/Reaparr/Reaparr/commit/c2f1070216872b01430f5f80fe83f2b1c143af44))
+* **WebAPI:** Propagate CustomDestinationFolderPath through TV show download task hierarchy ([037e5d2](https://github.com/Reaparr/Reaparr/commit/037e5d2241a0a2b8bd62650dfe9883e01986c6b7))
+* **Web-UI:** Show error dialog when Plex token validation fails with invalid/expired token ([c22e908](https://github.com/Reaparr/Reaparr/commit/c22e9080586d540a82c426b211e86eca1b48559a)), closes [#531](https://github.com/Reaparr/Reaparr/issues/531)
+
+
+### Features
+
+* **WebAPI:** Add request cancellation middleware to suppress client-aborted exceptions ([2abd96f](https://github.com/Reaparr/Reaparr/commit/2abd96f99bb9ba326f2535a8e3ed18ea1ea27908))
+* **Web-UI:** Added a cool effect to the active item in the Library list to show which one is selected now ([d236c6e](https://github.com/Reaparr/Reaparr/commit/d236c6e671e547f5cf64aa3c747d981d87add8b9))
+* **Web-UI:** Converted the MediaTable with just rows to a new table framework ([378efff](https://github.com/Reaparr/Reaparr/commit/378efff9783ccc877e4078b5b40c85e2bc14b326))
+
+
+### Performance Improvements
+
+* **Web-UI:** Massive performance improvement on rendering the media posters in the media overview. This is especially noticeable on the homepage! ([5c21b3a](https://github.com/Reaparr/Reaparr/commit/5c21b3ad915c29aec62214685f211ad9d83d7047))
+
 # [0.36.0-dev.3](https://github.com/Reaparr/Reaparr/compare/v0.36.0-dev.2...v0.36.0-dev.3) (2026-02-19)
 
 

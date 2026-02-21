@@ -14,8 +14,7 @@ public class MoveDownloadJobListenerUnitTests : BaseUnitTest<MoveDownloadJobList
         // Arrange
         Mock.Mock<IMoveDownloadFileQueue>()
             .Setup(x => x.CheckMoveDownloadFileJobQueue())
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.Once);
+            .ReturnsAsync(Result.Ok());
 
         Mock.Mock<IJobExecutionContext>().SetupGet(x => x.JobDetail).Returns(Mock.Mock<IJobDetail>().Object);
 
@@ -33,8 +32,7 @@ public class MoveDownloadJobListenerUnitTests : BaseUnitTest<MoveDownloadJobList
         // The listener must still trigger the queue so remaining DownloadFinished tasks are not stuck
         Mock.Mock<IMoveDownloadFileQueue>()
             .Setup(x => x.CheckMoveDownloadFileJobQueue())
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.Once);
+            .ReturnsAsync(Result.Ok());
 
         Mock.Mock<IJobExecutionContext>().SetupGet(x => x.JobDetail).Returns(Mock.Mock<IJobDetail>().Object);
 
@@ -53,8 +51,7 @@ public class MoveDownloadJobListenerUnitTests : BaseUnitTest<MoveDownloadJobList
         // Arrange — listener must never throw (Quartz requirement)
         Mock.Mock<IMoveDownloadFileQueue>()
             .Setup(x => x.CheckMoveDownloadFileJobQueue())
-            .ThrowsAsync(new InvalidOperationException("Unexpected error"))
-            .Verifiable(Times.Once);
+            .ThrowsAsync(new InvalidOperationException("Unexpected error"));
 
         Mock.Mock<IJobExecutionContext>().SetupGet(x => x.JobDetail).Returns(Mock.Mock<IJobDetail>().Object);
 

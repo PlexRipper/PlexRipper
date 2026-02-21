@@ -50,6 +50,14 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
         // Assert
         result.IsFailed.ShouldBeTrue();
         result.Has404NotFoundError().ShouldNotBe(true);
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Verify(x => x.IsDownloading(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()), Times.Once);
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Verify(x => x.StopDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()), Times.Once);
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .Verify(x => x.IsDownloadFileMoving(It.IsAny<DownloadTaskKey>()), Times.Never);
+        Mock.Mock<IFile>().Verify(x => x.Delete(It.IsAny<string>()), Times.Never);
+        Mock.VerifyEventPublished(It.IsAny<DownloadTaskUpdatedCommand>, Times.Never);
     }
 
     [Fact]
@@ -81,6 +89,8 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Verify(x => x.IsDownloading(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()), Times.Once);
         Mock.Mock<IDownloadTaskScheduler>()
             .Verify(x => x.StopDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()), Times.Once);
         Mock.Mock<IMoveDownloadFileScheduler>()
@@ -190,6 +200,8 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Verify(x => x.IsDownloading(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()), Times.Exactly(4));
         Mock.Mock<IDownloadTaskScheduler>()
             .Verify(x => x.StopDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()), Times.Once);
         Mock.Mock<IMoveDownloadFileScheduler>()

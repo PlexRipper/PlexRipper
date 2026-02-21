@@ -200,9 +200,9 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
     [Fact]
     public async Task ShouldNotRunFileMoveJob_WhenNoDownloadTaskIsAvailable()
     {
+        // Arrange
         await SetupDatabase(9, config => config.PlexServerCount = 1);
 
-        // Arrange
         Mock.Mock<IMoveDownloadFileScheduler>()
             .Setup(x => x.IsAnyMoveDownloadFileJobRunning())
             .ReturnsAsync(false)

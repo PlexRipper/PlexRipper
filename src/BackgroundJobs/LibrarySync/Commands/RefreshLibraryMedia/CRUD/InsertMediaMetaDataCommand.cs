@@ -156,6 +156,8 @@ public class InsertMediaMetaDataCommandHandler
             {
                 _dbContext.PlexActors.AddRange(chunk);
                 await _dbContext.SaveChangesAsync(ct);
+                foreach (var a in chunk)
+                    existingIdByKey[a.Key] = a.Id;
                 _dbContext.ClearChangeTracker();
             }
         });
@@ -169,19 +171,6 @@ public class InsertMediaMetaDataCommandHandler
                     stopWatch.Elapsed.TotalSeconds
                 );
             return insertResult.LogError();
-        }
-
-        // Fetch IDs for newly inserted actors and merge with already-known IDs
-        foreach (var chunk in toInsert.Chunk(CHUNK_SIZE))
-        {
-            var keys = chunk.Select(a => a.Key).ToArray();
-            var found = await _dbContext
-                .PlexActors.AsNoTracking()
-                .Where(x => keys.Contains(x.Key))
-                .Select(a => new { a.Key, a.Id })
-                .ToListAsync(ct);
-            foreach (var a in found)
-                existingIdByKey[a.Key] = a.Id;
         }
 
         // Build result dictionary from merged Id map — avoids re-fetching all actors from DB
@@ -204,9 +193,12 @@ public class InsertMediaMetaDataCommandHandler
             result[actor.Key] = actor;
         }
 
-        stopWatch.StopAndLog($"Finished inserting {sourceList.Count} {nameof(PlexActor)} for library");
+        // Build the final dictionary keyed by the source DTO hash keys
+        var resultDict = result.Values.ToList().ToHashKeyDictionary(sourceList);
 
-        return Result.Ok(result);
+        stopWatch.StopAndLog($"Finished inserting {newPlexActors.Count} {nameof(PlexActor)} for library");
+
+        return Result.Ok(resultDict);
     }
 
     private async Task<Result<Dictionary<string, PlexGenre>>> InsertGenres(
@@ -250,6 +242,14 @@ public class InsertMediaMetaDataCommandHandler
                 existingIdByKey[g.Key] = g.Id;
         }
 
+        _log.Here()
+            .Debug(
+                "Found {ExistingCount} existing {NameOfPlexGenre}, will insert {NewCount}",
+                existingIdByKey.Count,
+                nameof(PlexGenre),
+                newPlexGenres.Count - existingIdByKey.Count
+            );
+
         var toInsert = newPlexGenres.Where(g => !existingIdByKey.ContainsKey(g.Key)).ToList();
 
         var insertResult = await Result.Try(async Task () =>
@@ -258,6 +258,8 @@ public class InsertMediaMetaDataCommandHandler
             {
                 _dbContext.PlexGenres.AddRange(chunk);
                 await _dbContext.SaveChangesAsync(ct);
+                foreach (var g in chunk)
+                    existingIdByKey[g.Key] = g.Id;
                 _dbContext.ClearChangeTracker();
             }
         });
@@ -271,19 +273,6 @@ public class InsertMediaMetaDataCommandHandler
                     stopWatch.Elapsed.TotalSeconds
                 );
             return insertResult.LogError();
-        }
-
-        // Fetch IDs for newly inserted genres and merge with already-known IDs
-        foreach (var chunk in toInsert.Chunk(CHUNK_SIZE))
-        {
-            var keys = chunk.Select(g => g.Key).ToArray();
-            var found = await _dbContext
-                .PlexGenres.AsNoTracking()
-                .Where(x => keys.Contains(x.Key))
-                .Select(g => new { g.Key, g.Id })
-                .ToListAsync(ct);
-            foreach (var g in found)
-                existingIdByKey[g.Key] = g.Id;
         }
 
         // Build result dictionary from merged Id map — avoids re-fetching all genres from DB
@@ -357,6 +346,14 @@ public class InsertMediaMetaDataCommandHandler
                 existingIdByKey[c.Key] = c.Id;
         }
 
+        _log.Here()
+            .Debug(
+                "Found {ExistingCount} existing {NameOfPlexCountry}, will insert {NewCount}",
+                existingIdByKey.Count,
+                nameof(PlexCountry),
+                newPlexCountries.Count - existingIdByKey.Count
+            );
+
         var toInsert = newPlexCountries.Where(c => !existingIdByKey.ContainsKey(c.Key)).ToList();
 
         var insertResult = await Result.Try(async Task () =>
@@ -365,6 +362,8 @@ public class InsertMediaMetaDataCommandHandler
             {
                 _dbContext.PlexCountries.AddRange(chunk);
                 await _dbContext.SaveChangesAsync(ct);
+                foreach (var c in chunk)
+                    existingIdByKey[c.Key] = c.Id;
                 _dbContext.ClearChangeTracker();
             }
         });
@@ -378,19 +377,6 @@ public class InsertMediaMetaDataCommandHandler
                     stopWatch.Elapsed.TotalSeconds
                 );
             return insertResult.LogError();
-        }
-
-        // Fetch IDs for newly inserted countries and merge with already-known IDs
-        foreach (var chunk in toInsert.Chunk(CHUNK_SIZE))
-        {
-            var keys = chunk.Select(c => c.Key).ToArray();
-            var found = await _dbContext
-                .PlexCountries.AsNoTracking()
-                .Where(x => keys.Contains(x.Key))
-                .Select(c => new { c.Key, c.Id })
-                .ToListAsync(ct);
-            foreach (var c in found)
-                existingIdByKey[c.Key] = c.Id;
         }
 
         // Build result dictionary from merged Id map — avoids re-fetching all countries from DB

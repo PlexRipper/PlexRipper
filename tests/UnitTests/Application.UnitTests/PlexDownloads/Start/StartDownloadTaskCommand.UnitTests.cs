@@ -45,16 +45,14 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
 
         Mock.Mock<IMoveDownloadFileScheduler>()
             .Setup(x => x.IsDownloadFileMoving(It.IsAny<DownloadTaskKey>()))
-            .ReturnsAsync(false)
-            .Verifiable(Times.Once);
+            .ReturnsAsync(false);
 
         Mock.Mock<IMoveDownloadFileScheduler>()
             .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()))
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.Once);
+            .ReturnsAsync(Result.Ok());
 
-        Mock.SetupCommand(It.IsAny<DownloadTaskUpdatedCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.Once);
-        Mock.PublishEvent(It.IsAny<CheckDownloadQueueEvent>).Returns(Task.CompletedTask).Verifiable(Times.Once);
+        Mock.SetupCommand(It.IsAny<DownloadTaskUpdatedCommand>).ReturnsAsync(Result.Ok());
+        Mock.PublishEvent(It.IsAny<CheckDownloadQueueEvent>).Returns(Task.CompletedTask);
 
         // Act
         var result = await Sut.ExecuteAsync(new StartDownloadTaskCommand(movieTask.Id), CancellationToken);
@@ -64,11 +62,11 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
         Mock.Mock<IDownloadTaskScheduler>()
             .Verify(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>()), Times.Never);
         Mock.Mock<IMoveDownloadFileScheduler>()
-            .Verify(x => x.IsDownloadFileMoving(It.IsAny<DownloadTaskKey>()), Times.Once);
+            .Verify(x => x.IsDownloadFileMoving(It.IsAny<DownloadTaskKey>()), Times.Once());
         Mock.Mock<IMoveDownloadFileScheduler>()
-            .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Once);
-        Mock.VerifyEventPublished(It.IsAny<DownloadTaskUpdatedCommand>, Times.Once);
-        Mock.VerifyEventPublished(It.IsAny<CheckDownloadQueueEvent>, Times.Once);
+            .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Once());
+        Mock.VerifyEventPublished(It.IsAny<DownloadTaskUpdatedCommand>, Times.Once());
+        Mock.VerifyEventPublished(It.IsAny<CheckDownloadQueueEvent>, Times.Once());
     }
 
     [Fact]
@@ -92,16 +90,14 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
 
         Mock.Mock<IMoveDownloadFileScheduler>()
             .Setup(x => x.IsDownloadFileMoving(It.IsAny<DownloadTaskKey>()))
-            .ReturnsAsync(false)
-            .Verifiable(Times.Once);
+            .ReturnsAsync(false);
 
         Mock.Mock<IMoveDownloadFileScheduler>()
             .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()))
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.Once);
+            .ReturnsAsync(Result.Ok());
 
-        Mock.SetupCommand(It.IsAny<DownloadTaskUpdatedCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.Once);
-        Mock.PublishEvent(It.IsAny<CheckDownloadQueueEvent>).Returns(Task.CompletedTask).Verifiable(Times.Once);
+        Mock.SetupCommand(It.IsAny<DownloadTaskUpdatedCommand>).ReturnsAsync(Result.Ok());
+        Mock.PublishEvent(It.IsAny<CheckDownloadQueueEvent>).Returns(Task.CompletedTask);
 
         // Act
         var result = await Sut.ExecuteAsync(new StartDownloadTaskCommand(movieTask.Id), CancellationToken);
@@ -111,11 +107,11 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
         Mock.Mock<IDownloadTaskScheduler>()
             .Verify(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>()), Times.Never);
         Mock.Mock<IMoveDownloadFileScheduler>()
-            .Verify(x => x.IsDownloadFileMoving(It.IsAny<DownloadTaskKey>()), Times.Once);
+            .Verify(x => x.IsDownloadFileMoving(It.IsAny<DownloadTaskKey>()), Times.Once());
         Mock.Mock<IMoveDownloadFileScheduler>()
-            .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Once);
-        Mock.VerifyEventPublished(It.IsAny<DownloadTaskUpdatedCommand>, Times.Once);
-        Mock.VerifyEventPublished(It.IsAny<CheckDownloadQueueEvent>, Times.Once);
+            .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Once());
+        Mock.VerifyEventPublished(It.IsAny<DownloadTaskUpdatedCommand>, Times.Once());
+        Mock.VerifyEventPublished(It.IsAny<CheckDownloadQueueEvent>, Times.Once());
     }
 
     [Fact]

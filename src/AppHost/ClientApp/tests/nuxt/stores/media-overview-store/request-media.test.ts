@@ -56,7 +56,6 @@ describe('MediaOverviewStore.requestMedia()', () => {
 		// Assert
 		expect(result.receivedComplete()).toEqual(true);
 		expect(mediaOverviewStore.scrollDict).not.deep.equal({ '#': 0 });
-		expect(mediaOverviewStore.scrollAlphabet.length).to.be.greaterThanOrEqual(5);
 		expect(mediaOverviewStore.allMovieCount).toEqual(movies.movieCount);
 		expect(mediaOverviewStore.allTvShowCount).toEqual(movies.tvShowCount);
 		expect(mediaOverviewStore.allSeasonCount).toEqual(movies.seasonCount);

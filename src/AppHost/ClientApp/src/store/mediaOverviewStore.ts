@@ -16,8 +16,8 @@ import type { IMediaOverviewSort } from '@composables/event-bus';
 import { MediaSortField, SortDirection } from '@enums';
 import { type IMetaDataMediaFilter, type ISelection, type ISortOption, StoreNames } from '@interfaces';
 import { plexLibraryApi, plexMediaApi } from '@api';
-import { map, tap } from 'rxjs/operators';
-import { defer, forkJoin, type Observable, of } from 'rxjs';
+import { map, tap, takeUntil } from 'rxjs/operators';
+import { defer, forkJoin, type Observable, of, Subject } from 'rxjs';
 import { useLibraryStore, useSettingsStore } from '@store';
 import { getHighestQuality, getHighestQualityRank, getVideoQualityColor, translateVideoQuality } from '@composables';
 import { useSubscription } from '@vueuse/rxjs';
@@ -29,11 +29,9 @@ interface IMediaOverviewStoreState {
 	sortedItems: Readonly<PlexMediaSlimDTO[]>;
 	itemsLength: number;
 	sortedState: IMediaOverviewSort;
-	scrollDict: Record<string, number>;
-	scrollAlphabet: string[];
+	scrollDict: Map<string, number>;
 	selection: ISelection;
 	downloadButtonVisible: boolean;
-	mediaType: PlexMediaType;
 	filterQuery: string;
 	lastMediaItemViewed: PlexMediaSlimDTO | null;
 	loading: boolean;
@@ -54,11 +52,9 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 		sortedItems: [],
 		itemsLength: 0,
 		sortedState: { field: MediaSortField.Title, sort: SortDirection.Asc },
-		scrollDict: { '#': 0 },
-		scrollAlphabet: [],
+		scrollDict: new Map<string, number>([['#', 0]]),
 		selection: { keys: [], allSelected: false, indexKey: 0 },
 		downloadButtonVisible: false,
-		mediaType: PlexMediaType.None,
 		filterQuery: '',
 		lastMediaItemViewed: null,
 		loading: false,
@@ -88,32 +84,62 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 	};
 
 	const state = reactive<IMediaOverviewStoreState>(cloneDeep(defaultState));
-
 	const settingsStore = useSettingsStore();
 	const libraryStore = useLibraryStore();
 
+	// Subject to cancel in-flight requests when switching libraries
+	const cancelSubject$ = new Subject<void>();
+
 	const actions = {
+		cancelPendingRequests() {
+			Log.debug('Cancelling pending media requests');
+			cancelSubject$.next();
+			state.loading = false;
+		},
+		initializeLibrary(libraryId: number): Observable<PlexMediaStatisticsDTO | null> {
+			// Cancel any in-flight requests first
+			actions.cancelPendingRequests();
+
+			// Update state
+			state.libraryId = libraryId;
+			state.isDetailView = false;
+
+			Log.debug('Initializing library', { libraryId, mediaType: get(getters.getMediaType) });
+
+			// Clear filters and sorting
+			actions.clearMetaDataFilter();
+			actions.clearSort();
+
+			// Load data for the library
+			return actions.requestMedia();
+		},
 		refreshMetaData() {
-			return plexLibraryApi.getLibraryMediaMetadata(state.libraryId, { mediaType: state.mediaType }).pipe(tap((result) => {
-				if (result.isSuccess && result.value) {
-					return state.metadataList = result.value;
-				}
-			}));
+			return plexLibraryApi.getLibraryMediaMetadata(state.libraryId, { mediaType: get(getters.getMediaType) }).pipe(
+				takeUntil(cancelSubject$),
+				tap((result) => {
+					if (result.isSuccess && result.value) {
+						return state.metadataList = result.value;
+					}
+				}),
+			);
 		},
 		refreshAllLibraryMediaByType(page: number = 0, size: number = 100): Observable<PlexMediaStatisticsDTO | null> {
 			return plexMediaApi.getAllMediaByTypeEndpoint({
-				mediaType: state.mediaType,
+				mediaType: get(getters.getMediaType),
 				page,
 				size,
 				filterOwnedMedia: settingsStore.generalSettings.hideMediaFromOwnedServers,
 				filterOfflineMedia: settingsStore.generalSettings.hideMediaFromOfflineServers,
 				...state.metadata,
-			}).pipe(map(({ isSuccess, value }): PlexMediaStatisticsDTO | null => {
-				if (isSuccess && value) {
-					return value;
-				}
-				return null;
-			}));
+			}).pipe(
+				takeUntil(cancelSubject$),
+				map(({ isSuccess, value }): PlexMediaStatisticsDTO | null => {
+					if (isSuccess && value) {
+						return value;
+					}
+					return null;
+				}),
+			);
 		},
 		refreshLibraryMedia(page: number = 0, size: number = 100): Observable<PlexMediaStatisticsDTO | null> {
 			return plexLibraryApi.getPlexLibraryMediaEndpoint(state.libraryId, {
@@ -122,15 +148,19 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 				filterOfflineMedia: false,
 				filterOwnedMedia: false,
 				...state.metadata,
-			}).pipe(map(({ isSuccess, value }): PlexMediaStatisticsDTO | null => {
-				if (isSuccess && value) {
-					return value;
-				}
-				return null;
-			}));
+			}).pipe(
+				takeUntil(cancelSubject$),
+				map(({ isSuccess, value }): PlexMediaStatisticsDTO | null => {
+					if (isSuccess && value) {
+						return value;
+					}
+					return null;
+				}),
+			);
 		},
 		requestMedia(): Observable<PlexMediaStatisticsDTO | null> {
 			if (state.loading) {
+				Log.debug('Request already in progress, skipping');
 				return of(null);
 			}
 
@@ -138,6 +168,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			const size = 0;
 
 			state.loading = true;
+			Log.debug('Starting media request', { libraryId: state.libraryId, mediaType: get(getters.getMediaType) });
 
 			return forkJoin([
 				actions.refreshMetaData(),
@@ -145,27 +176,43 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 					state.libraryId > 0
 						? libraryStore.refreshLibrary(state.libraryId)
 						: of(null),
-				),
+				).pipe(takeUntil(cancelSubject$)),
 				defer(() =>
 					state.libraryId === 0
 						? actions.refreshAllLibraryMediaByType(page, size)
 						: actions.refreshLibraryMedia(page, size),
 				).pipe(
 					tap((data) => {
-						actions.setMedia(data, state.mediaType);
+						actions.setMedia(data);
 						actions.sortMedia(state.sortedState);
 					}),
 				),
 			]).pipe(
+				takeUntil(cancelSubject$),
 				map(([_, __, media]) => media),
-				tap(() => state.loading = false),
+				tap({
+					next: () => {
+						state.loading = false;
+						Log.debug('Media request completed successfully');
+					},
+					error: (err) => {
+						state.loading = false;
+						Log.error('Media request failed', err);
+					},
+					complete: () => {
+						// Handle cancellation
+						if (state.loading) {
+							state.loading = false;
+							Log.debug('Media request was cancelled');
+						}
+					},
+				}),
 			);
 		},
-		setMedia(data: PlexMediaStatisticsDTO | null, mediaType: PlexMediaType) {
+		setMedia(data: PlexMediaStatisticsDTO | null) {
 			if (data) {
 				state.items = Object.freeze(data.mediaList);
 				state.itemsLength = data.mediaCount;
-				state.mediaType = mediaType;
 
 				state.allMovieCount = data.movieCount;
 				state.allTvShowCount = data.tvShowCount;
@@ -175,7 +222,6 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			} else {
 				state.items = Object.freeze([]);
 				state.itemsLength = 0;
-				state.mediaType = mediaType;
 
 				state.allMovieCount = 0;
 				state.allTvShowCount = 0;
@@ -232,20 +278,26 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			};
 		},
 		changeAllMediaOverviewType(mediaType: PlexMediaType) {
-			state.mediaType = mediaType;
 			settingsStore.displaySettings.allOverviewViewMode = mediaType;
 			useSubscription(actions.requestMedia().subscribe());
 		},
+		// This function calculates the scroll navigation options based on the current media items and active sorting.
 		setMediaIndexNavigationOptions() {
+			// These media items are already correctly sorted based on the active sort, so we can use them to determine the index positions for each key
 			const items = get(getters.getMediaItems);
 			const activeSort = get(getters.getActiveSort);
 			const field = activeSort.field;
-			const direction = activeSort.sort;
 
-			const GB = 1_073_741_824;
+			// GB = 1,000,000,000 bytes (not 1,073,741,824) to align with Plex's media size formatting which uses decimal units
+			const GB = 1_000_000_000;
 
 			const keySelector: (item: PlexMediaSlimDTO) => string | null = (() => {
 				switch (field) {
+					case MediaSortField.Title:
+						return (it) => {
+							const first = it.title?.trim().charAt(0) ?? '';
+							return /^[A-Za-z]$/.test(first) ? first.toUpperCase() : '#';
+						};
 					case MediaSortField.Year:
 						return (it) => String(it.year ?? '#');
 
@@ -286,32 +338,26 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 				}
 			})();
 
+			// Items are already sorted — iterating in order naturally yields keys in the correct sequence
 			const indexByKey = new Map<string, number>();
 			for (let i = 0; i < items.length; i++) {
 				const key = keySelector(items[i]!);
-				if (key == null) continue; // skip items without a usable key (e.g. no date)
-				if (!indexByKey.has(key)) indexByKey.set(key, i);
+				if (key == null)
+					continue; // skip items without a usable key (e.g. no date)
+				if (!indexByKey.has(key))
+					indexByKey.set(key, i);
 			}
 
-			const keys = Array.from(indexByKey.keys());
-
-			// Title nav should be alphabetical, not insertion order
-			const isTitle = field === MediaSortField.Title; // this is 'sortIndex' in your enum
-
-			function sortAlphaKeys(keys: string[], direction: SortDirection) {
+			const sortedKeys = (() => {
+				const keys = [...indexByKey.keys()];
+				if (field !== MediaSortField.Title) return keys;
 				const hash = keys.includes('#') ? ['#'] : [];
 				const letters = keys.filter((k) => k !== '#').sort((a, b) => a.localeCompare(b));
-				if (direction === SortDirection.Desc) letters.reverse();
+				if (activeSort.sort === SortDirection.Desc) letters.reverse();
 				return [...hash, ...letters];
-			}
+			})();
 
-			state.scrollAlphabet = isTitle
-				? sortAlphaKeys(keys, direction)
-				: direction === SortDirection.Desc
-					? [...keys].reverse()
-					: keys;
-
-			state.scrollDict = Object.fromEntries(indexByKey);
+			state.scrollDict = new Map(sortedKeys.map((k) => [k, indexByKey.get(k)!]));
 		},
 		setSelection(selection: ISelection) {
 			state.selection = selection;
@@ -370,6 +416,8 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			}
 
 			state.sortedState = event;
+
+			actions.setMediaIndexNavigationOptions();
 		},
 		$reset() {
 			Object.assign(state, cloneDeep(defaultState));
@@ -407,7 +455,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			}
 		}),
 		getMediaViewMode: computed((): ViewMode => {
-			switch (state.mediaType) {
+			switch (get(getters.getMediaType)) {
 				case PlexMediaType.Movie:
 					return settingsStore.displaySettings.movieViewMode;
 				case PlexMediaType.TvShow:
@@ -436,14 +484,15 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 		getActiveSort: computed((): IMediaOverviewSort => {
 			return state.sortedState;
 		}),
+		getMediaType: computed((): PlexMediaType => state.libraryId === 0 ? settingsStore.displaySettings.allOverviewViewMode : libraryStore.getLibrary(state.libraryId)?.type ?? PlexMediaType.None),
 		getIsSorted: computed((): boolean => {
 			if (state.sortedState.sort === SortDirection.NoSort) {
 				return false;
 			}
 			return !(state.sortedState.field === MediaSortField.Title && state.sortedState.sort === SortDirection.Asc);
 		}),
-		getSortOptions: computed((): ISortOption[] => {
-			const { t } = useI18n();
+		getSortOptions: (): ISortOption[] => {
+			const { t } = useI18n({ useScope: 'global' });
 			const options: ISortOption[] = [
 				{ field: MediaSortField.Title, label: t('general.sort.title'), direction: SortDirection.NoSort },
 				{ field: MediaSortField.Year, label: t('general.sort.year'), direction: SortDirection.NoSort },
@@ -461,7 +510,7 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			}
 
 			return options;
-		}),
+		},
 		getGenres: computed(() => sortBy(state.metadataList.genres, (x) => x.name)),
 		getRoles: computed(() => sortBy(state.metadataList.roles, (x) => x.name)),
 		getCountries: computed(() => sortBy(state.metadataList.countries, (x) => x.name)),
@@ -506,8 +555,6 @@ export const useMediaOverviewStore = defineStore(StoreNames.MediaOverviewStore, 
 			return result;
 		}),
 	};
-
-	watch(getters.getMediaItems, () => actions.setMediaIndexNavigationOptions());
 
 	return {
 		...toRefs(state),

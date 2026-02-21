@@ -21,10 +21,8 @@ import type {
   TestConnectionToSonarrEndpointResponse,
 } from "./data-contracts";
 
-import { apiCheckPipe } from "@api/base";
-import Axios from "axios";
+import { apiCheckPipe, axiosObservable } from "@api/base";
 import queryString from "query-string";
-import { from } from "rxjs";
 
 export class Integration {
   /**
@@ -35,15 +33,13 @@ export class Integration {
    * @secure
    */
   clearRadarrConfigurationEndpoint = (params: RequestParams = {}) =>
-    from(
-      Axios.request<BaseResultDTO>({
-        url: `/api/Integration/Radarr/Configuration`,
-        method: "DELETE",
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<BaseResultDTO>);
+    axiosObservable<BaseResultDTO>({
+      url: `/api/Integration/Radarr/Configuration`,
+      method: "DELETE",
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<BaseResultDTO>);
 
   /**
    * No description
@@ -56,17 +52,15 @@ export class Integration {
     data: ConfigureRadarrIntegrationRequest,
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<BaseResultDTO>({
-        url: `/api/Integration/Radarr/Configure`,
-        method: "POST",
-        data: data,
-        secure: true,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<BaseResultDTO>);
+    axiosObservable<BaseResultDTO>({
+      url: `/api/Integration/Radarr/Configure`,
+      method: "POST",
+      data: data,
+      secure: true,
+      type: ContentType.Json,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<BaseResultDTO>);
 
   /**
    * No description
@@ -82,16 +76,14 @@ export class Integration {
     },
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<TestConnectionToRadarrEndpointResponse>({
-        url: `/api/Integration/Radarr/TestConnection`,
-        method: "GET",
-        params: query,
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<TestConnectionToRadarrEndpointResponse>);
+    axiosObservable<TestConnectionToRadarrEndpointResponse>({
+      url: `/api/Integration/Radarr/TestConnection`,
+      method: "GET",
+      params: query,
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<TestConnectionToRadarrEndpointResponse>);
 
   /**
    * No description
@@ -101,15 +93,13 @@ export class Integration {
    * @secure
    */
   clearSonarrConfigurationEndpoint = (params: RequestParams = {}) =>
-    from(
-      Axios.request<BaseResultDTO>({
-        url: `/api/Integration/Sonarr/Configuration`,
-        method: "DELETE",
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<BaseResultDTO>);
+    axiosObservable<BaseResultDTO>({
+      url: `/api/Integration/Sonarr/Configuration`,
+      method: "DELETE",
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<BaseResultDTO>);
 
   /**
    * No description
@@ -122,17 +112,15 @@ export class Integration {
     data: ConfigureSonarrIntegrationRequest,
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<BaseResultDTO>({
-        url: `/api/Integration/Sonarr/Configure`,
-        method: "POST",
-        data: data,
-        secure: true,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<BaseResultDTO>);
+    axiosObservable<BaseResultDTO>({
+      url: `/api/Integration/Sonarr/Configure`,
+      method: "POST",
+      data: data,
+      secure: true,
+      type: ContentType.Json,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<BaseResultDTO>);
 
   /**
    * No description
@@ -148,16 +136,14 @@ export class Integration {
     },
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<TestConnectionToSonarrEndpointResponse>({
-        url: `/api/Integration/Sonarr/TestConnection`,
-        method: "GET",
-        params: query,
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<TestConnectionToSonarrEndpointResponse>);
+    axiosObservable<TestConnectionToSonarrEndpointResponse>({
+      url: `/api/Integration/Sonarr/TestConnection`,
+      method: "GET",
+      params: query,
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<TestConnectionToSonarrEndpointResponse>);
 }
 
 export class IntegrationPaths {

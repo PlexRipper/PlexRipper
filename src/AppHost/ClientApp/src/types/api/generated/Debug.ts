@@ -14,10 +14,8 @@ import type { RequestParams } from "./http-client";
 
 import type { PlexMediaType } from "./data-contracts";
 
-import { apiCheckPipe } from "@api/base";
-import Axios from "axios";
+import { apiCheckPipe, axiosObservable } from "@api/base";
 import queryString from "query-string";
-import { from } from "rxjs";
 
 export class Debug {
   /**
@@ -35,16 +33,14 @@ export class Debug {
     },
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<String[]>({
-        url: `/api/Debug/unique-media-titles`,
-        method: "GET",
-        params: query,
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<String[]>);
+    axiosObservable<String[]>({
+      url: `/api/Debug/unique-media-titles`,
+      method: "GET",
+      params: query,
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<String[]>);
 }
 
 export class DebugPaths {

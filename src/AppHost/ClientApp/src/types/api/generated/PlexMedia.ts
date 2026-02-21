@@ -20,10 +20,8 @@ import type {
   VideoQuality,
 } from "./data-contracts";
 
-import { apiCheckPipe } from "@api/base";
-import Axios from "axios";
+import { apiCheckPipe, axiosObservable } from "@api/base";
 import queryString from "query-string";
-import { from } from "rxjs";
 
 export class PlexMedia {
   /**
@@ -70,16 +68,14 @@ export class PlexMedia {
     },
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<PlexMediaStatisticsDTO>({
-        url: `/api/PlexMedia`,
-        method: "GET",
-        params: query,
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<PlexMediaStatisticsDTO>);
+    axiosObservable<PlexMediaStatisticsDTO>({
+      url: `/api/PlexMedia`,
+      method: "GET",
+      params: query,
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<PlexMediaStatisticsDTO>);
 
   /**
    * No description
@@ -95,16 +91,14 @@ export class PlexMedia {
     },
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<PlexMediaDTO>({
-        url: `/api/PlexMedia/detail/${plexMediaId}`,
-        method: "GET",
-        params: query,
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<PlexMediaDTO>);
+    axiosObservable<PlexMediaDTO>({
+      url: `/api/PlexMedia/detail/${plexMediaId}`,
+      method: "GET",
+      params: query,
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<PlexMediaDTO>);
 
   /**
    * @description Proxies image bytes from Plex servers with CORS headers.
@@ -144,16 +138,14 @@ export class PlexMedia {
     },
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<Blob>({
-        url: `/api/PlexMedia/thumbnail`,
-        method: "GET",
-        params: query,
-        secure: true,
-        format: "blob",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<Blob>);
+    axiosObservable<Blob>({
+      url: `/api/PlexMedia/thumbnail`,
+      method: "GET",
+      params: query,
+      secure: true,
+      responseType: "blob",
+      ...params,
+    }).pipe(apiCheckPipe<Blob>);
 
   /**
    * No description
@@ -168,16 +160,14 @@ export class PlexMedia {
     },
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<PlexMediaSlimDTO[]>({
-        url: `/api/PlexMedia/search`,
-        method: "GET",
-        params: query,
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<PlexMediaSlimDTO[]>);
+    axiosObservable<PlexMediaSlimDTO[]>({
+      url: `/api/PlexMedia/search`,
+      method: "GET",
+      params: query,
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<PlexMediaSlimDTO[]>);
 }
 
 export class PlexMediaPaths {

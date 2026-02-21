@@ -30,14 +30,16 @@ jobs:
         if: always() && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
         runs-on: ubuntu-latest
         outputs:
-            should_run: ${{ steps.check_changes.outputs.should_run }}
+            should_run: ${{ steps.check_changes.outputs.frontend }}
         steps:
             -   uses: actions/checkout@v4
-                with:
-                    fetch-depth: 0
             -   name: Check if front-end has changed
                 id: check_changes
-                uses: ./.github/workflows/steps/skip-if-no-frontend-change
+                uses: dorny/paths-filter@v3
+                with:
+                    filters: |
+                        frontend:
+                            - 'src/AppHost/ClientApp/**'
 
     # Check if back-end has changed
     Check-Backend-Changes:
@@ -45,14 +47,18 @@ jobs:
         if: always() && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
         runs-on: ubuntu-latest
         outputs:
-            should_run: ${{ steps.check_changes.outputs.should_run }}
+            should_run: ${{ steps.check_changes.outputs.backend }}
         steps:
             -   uses: actions/checkout@v4
-                with:
-                    fetch-depth: 0
             -   name: Check if back-end has changed
                 id: check_changes
-                uses: ./.github/workflows/steps/skip-if-no-backend-change
+                uses: dorny/paths-filter@v3
+                with:
+                    filters: |
+                        backend:
+                            - 'src/**'
+                            - '!src/AppHost/ClientApp/**'
+                            - 'tests/**'
 
     # Front-End-Type-Check:
     Front-End-Type-Check:
@@ -147,12 +153,20 @@ jobs:
             fail-fast: false
             matrix:
                 include:
+                    - test_project: tests/UnitTests/AppHost.UnitTests/AppHost.UnitTests.csproj
+                      project_name: AppHost.UnitTests    
                     - test_project: tests/UnitTests/Application.UnitTests/Application.UnitTests.csproj
                       project_name: Application.UnitTests
+                    - test_project: tests/UnitTests/BackgroundJobs.UnitTests/BackgroundJobs.UnitTests.csproj
+                      project_name: BackgroundJobs.UnitTests
+                    - test_project: tests/UnitTests/BaseTests.UnitTests/BaseTests.UnitTests.csproj
+                      project_name: BaseTests.UnitTests
                     - test_project: tests/UnitTests/Data.UnitTests/Data.UnitTests.csproj
                       project_name: Data.UnitTests
                     - test_project: tests/UnitTests/Domain.UnitTests/Domain.UnitTests.csproj
                       project_name: Domain.UnitTests
+                    - test_project: tests/UnitTests/External.UnitTests/External.UnitTests.csproj
+                      project_name: External.UnitTests
                     - test_project: tests/UnitTests/FileSystem.UnitTests/FileSystem.UnitTests.csproj
                       project_name: FileSystem.UnitTests
                     - test_project: tests/UnitTests/FluentResultExtension.UnitTests/FluentResultExtension.UnitTests.csproj
@@ -161,6 +175,8 @@ jobs:
                       project_name: Logging.UnitTests
                     - test_project: tests/UnitTests/PlexApi.UnitTests/PlexApi.UnitTests.csproj
                       project_name: PlexApi.UnitTests
+                    - test_project: tests/UnitTests/PublicApi.UnitTests/PublicApi.UnitTests.csproj
+                      project_name: PublicApi.UnitTests
                     - test_project: tests/UnitTests/Settings.UnitTests/Settings.UnitTests.csproj
                       project_name: Settings.UnitTests
 
@@ -277,7 +293,11 @@ jobs:
     # Ensure Docker images can be built without errors (both amd64 and arm64)
     Test-Docker-Build:
         needs: [Check-Frontend-Changes, Check-Backend-Changes, Back-End-Unit-Tests, Back-End-Integration-Tests, Front-End-Type-Check, Front-End-Unit-Tests, Front-End-Eslint-Check, Front-End-Integration-Tests, Check-PR-Status]
-        if: always() && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
+        if: |
+            always() &&
+            (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch') &&
+            !contains(needs.*.result, 'failure') &&
+            !contains(needs.*.result, 'cancelled')
         uses: ./.github/workflows/docker-build-multiarch.yml
         with:
             push: false

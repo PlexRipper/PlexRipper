@@ -1,10 +1,34 @@
 import Log from 'consola';
-import type { Observable } from 'rxjs';
+import { Observable, catchError, of } from 'rxjs';
 import { map, take } from 'rxjs/operators';
-import type { AxiosResponse } from 'axios';
+import type { AxiosRequestConfig, AxiosResponse } from 'axios';
+import Axios from 'axios';
 import type { BaseResultDTO, ErrorDTO } from '@dto';
 import type { ResultDTO } from '@interfaces';
-import { catchError, of } from 'rxjs';
+
+export function axiosObservable<T>(config: AxiosRequestConfig): Observable<AxiosResponse<T>> {
+	return new Observable<AxiosResponse<T>>((subscriber) => {
+		const controller = new AbortController();
+
+		Axios.request<T>({
+			...config,
+			signal: controller.signal,
+		})
+			.then((res) => {
+				subscriber.next(res);
+				subscriber.complete();
+			})
+			.catch((err) => {
+				if (err?.code === 'ERR_CANCELED') {
+					subscriber.complete();
+				} else {
+					subscriber.error(err);
+				}
+			});
+
+		return () => controller.abort();
+	});
+}
 
 export function apiCheckPipe<T extends object = BaseResultDTO>(
 	source$: Observable<AxiosResponse<T>>,

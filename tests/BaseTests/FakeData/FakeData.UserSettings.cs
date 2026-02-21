@@ -127,7 +127,8 @@ public static partial class FakeData
             .UseSeed(seed.Next())
             .RuleFor(x => x.DebugModeEnabled, f => f.Random.Bool())
             .RuleFor(x => x.MaskServerNames, f => f.Random.Bool())
-            .RuleFor(x => x.MaskLibraryNames, f => f.Random.Bool());
+            .RuleFor(x => x.MaskLibraryNames, f => f.Random.Bool())
+            .RuleFor(x => x.MaskAccountNames, f => f.Random.Bool());
     }
 
     public static Faker<PlexServerSettingsModule> GetServerSettings(

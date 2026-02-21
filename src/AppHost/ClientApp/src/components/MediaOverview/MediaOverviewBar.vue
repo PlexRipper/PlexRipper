@@ -23,8 +23,6 @@
 					<MediaOverviewBarHeader
 						:library-id="libraryId"
 						:detail-mode="detailMode"
-						:media-type="mediaType"
-						:all-media-mode="allMediaMode"
 						:media-detail-item="mediaDetailItem" />
 				</QCol>
 				<!-- Search Bar -->
@@ -81,7 +79,7 @@
 					<q-separator v-if="mediaOverviewStore.getIsSorted" />
 					<!--	Sort options	-->
 					<q-item
-						v-for="option in mediaOverviewStore.getSortOptions"
+						v-for="option in mediaOverviewStore.getSortOptions()"
 						:key="option.field"
 						:data-cy="`sort-option-${option.field}-btn`"
 						clickable
@@ -154,7 +152,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { PlexMediaDTO, PlexMediaType } from '@dto';
+import type { PlexMediaDTO } from '@dto';
 import { ViewMode } from '@dto';
 import { SortDirection } from '@enums';
 import type { IMediaOverviewBarActions, IViewOptions } from '@interfaces';
@@ -165,16 +163,13 @@ const downloadCommandBus = useMediaOverviewBarDownloadCommandBus();
 
 const settingsStore = useSettingsStore();
 
-const props = withDefaults(defineProps<{
-	mediaType: PlexMediaType;
+withDefaults(defineProps<{
 	libraryId?: number;
 	detailMode?: boolean;
 	mediaDetailItem?: PlexMediaDTO | null;
-	allMediaMode?: boolean;
 }>(), {
 	libraryId: 0,
 	detailMode: false,
-	allMediaMode: false,
 });
 
 defineEmits<{
@@ -211,7 +206,7 @@ const viewOptions = computed((): IViewOptions[] => {
 
 function changeView(viewMode: ViewMode) {
 	mediaOverviewStore.clearSort();
-	settingsStore.updateDisplayMode(props.mediaType, viewMode);
+	settingsStore.updateDisplayMode(mediaOverviewStore.getMediaType, viewMode);
 }
 </script>
 

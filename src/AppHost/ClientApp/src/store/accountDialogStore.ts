@@ -121,14 +121,10 @@ export const useAccountDialogStore = defineStore(StoreNames.AccountDialogStore, 
 					// Always reset loading state
 					state.validateLoading = false;
 
-					if (!isSuccess || !value) {
-						Log.error('Token validation failed', errors);
-						return;
-					}
-
-					if (!isSuccess || value?.isUnAuthorized) {
+					if (!isSuccess || !value || value?.isUnAuthorized) {
 						state.isValidated = false;
 						state.hasValidationErrors = true;
+						Log.error('Token validation failed', errors);
 						dialogStore.openDialog(DialogType.AccountTokenValidateDialog);
 						return;
 					}
@@ -150,6 +146,7 @@ export const useAccountDialogStore = defineStore(StoreNames.AccountDialogStore, 
 					state.isValidated = false;
 					state.hasValidationErrors = true;
 					Log.error('Token validation failed', error);
+					dialogStore.openDialog(DialogType.AccountTokenValidateDialog);
 					return of({ value: null, isSuccess: false });
 				}),
 			);

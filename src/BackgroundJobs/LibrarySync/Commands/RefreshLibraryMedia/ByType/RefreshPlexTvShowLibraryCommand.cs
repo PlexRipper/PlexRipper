@@ -121,9 +121,9 @@ public class RefreshPlexTvShowLibraryCommandHandler
 
             _log.Here()
                 .Debug(
-                    "Finished updating all media in the database for library {PlexLibraryName} in {ElapsedSeconds:F2} seconds",
+                    "Finished updating all media in the database for library {PlexLibraryName} in {Elapsed}",
                     plexLibrary.Title,
-                    stopwatch.Elapsed.TotalSeconds
+                    stopwatch.Elapsed.ToFormattedString()
                 );
 
             var totalTvShows = plexLibrary.TvShows.Count;

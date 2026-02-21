@@ -22,10 +22,8 @@ import type {
   VideoQuality,
 } from "./data-contracts";
 
-import { apiCheckPipe } from "@api/base";
-import Axios from "axios";
+import { apiCheckPipe, axiosObservable } from "@api/base";
 import queryString from "query-string";
-import { from } from "rxjs";
 
 export class PlexLibrary {
   /**
@@ -39,15 +37,13 @@ export class PlexLibrary {
     plexLibraryId: number,
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<PlexLibraryDTO>({
-        url: `/api/PlexLibrary/${plexLibraryId}`,
-        method: "GET",
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<PlexLibraryDTO>);
+    axiosObservable<PlexLibraryDTO>({
+      url: `/api/PlexLibrary/${plexLibraryId}`,
+      method: "GET",
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<PlexLibraryDTO>);
 
   /**
    * No description
@@ -57,15 +53,13 @@ export class PlexLibrary {
    * @secure
    */
   getAllPlexLibrariesEndpoint = (params: RequestParams = {}) =>
-    from(
-      Axios.request<PlexLibraryDTO[]>({
-        url: `/api/PlexLibrary`,
-        method: "GET",
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<PlexLibraryDTO[]>);
+    axiosObservable<PlexLibraryDTO[]>({
+      url: `/api/PlexLibrary`,
+      method: "GET",
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<PlexLibraryDTO[]>);
 
   /**
    * No description
@@ -111,16 +105,14 @@ export class PlexLibrary {
     },
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<PlexMediaStatisticsDTO>({
-        url: `/api/PlexLibrary/${plexLibraryId}/media`,
-        method: "GET",
-        params: query,
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<PlexMediaStatisticsDTO>);
+    axiosObservable<PlexMediaStatisticsDTO>({
+      url: `/api/PlexLibrary/${plexLibraryId}/media`,
+      method: "GET",
+      params: query,
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<PlexMediaStatisticsDTO>);
 
   /**
    * No description
@@ -137,16 +129,14 @@ export class PlexLibrary {
     },
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<PlexMediaMetadataDTO>({
-        url: `/api/PlexLibrary/${plexLibraryId}/metadata`,
-        method: "GET",
-        params: query,
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<PlexMediaMetadataDTO>);
+    axiosObservable<PlexMediaMetadataDTO>({
+      url: `/api/PlexLibrary/${plexLibraryId}/metadata`,
+      method: "GET",
+      params: query,
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<PlexMediaMetadataDTO>);
 
   /**
    * No description
@@ -156,15 +146,13 @@ export class PlexLibrary {
    * @secure
    */
   getLibrarySyncStatusEndpoint = (params: RequestParams = {}) =>
-    from(
-      Axios.request<LibrarySyncJobQueueDTO[]>({
-        url: `/api/PlexLibrary/sync-status`,
-        method: "GET",
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<LibrarySyncJobQueueDTO[]>);
+    axiosObservable<LibrarySyncJobQueueDTO[]>({
+      url: `/api/PlexLibrary/sync-status`,
+      method: "GET",
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<LibrarySyncJobQueueDTO[]>);
 
   /**
    * No description
@@ -177,15 +165,13 @@ export class PlexLibrary {
     plexLibraryId: number,
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<PlexLibraryDTO>({
-        url: `/api/PlexLibrary/refresh/${plexLibraryId}`,
-        method: "GET",
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<PlexLibraryDTO>);
+    axiosObservable<PlexLibraryDTO>({
+      url: `/api/PlexLibrary/refresh/${plexLibraryId}`,
+      method: "GET",
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<PlexLibraryDTO>);
 
   /**
    * No description
@@ -199,15 +185,13 @@ export class PlexLibrary {
     folderPathId: number,
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<BaseResultDTO>({
-        url: `/api/PlexLibrary/${plexLibraryId}/default/destination/${folderPathId}`,
-        method: "GET",
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<BaseResultDTO>);
+    axiosObservable<BaseResultDTO>({
+      url: `/api/PlexLibrary/${plexLibraryId}/default/destination/${folderPathId}`,
+      method: "GET",
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<BaseResultDTO>);
 }
 
 export class PlexLibraryPaths {

@@ -157,4 +157,6 @@ public interface IReaparrDbContext : IDisposable
     public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 
     public Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken);
+
+    void ClearChangeTracker();
 }

@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using EFCore.BulkExtensions;
 using FastEndpoints;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
@@ -57,6 +56,8 @@ public record InsertMediaMetaDataCommandResponse
 public class InsertMediaMetaDataCommandHandler
     : ICommandHandler<InsertMediaMetaDataCommand, Result<InsertMediaMetaDataCommandResponse>>
 {
+    private const int CHUNK_SIZE = 500;
+
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
 
@@ -75,15 +76,15 @@ public class InsertMediaMetaDataCommandHandler
         var genres = command.LibraryMetadata.Genres;
         var countries = command.LibraryMetadata.Countries;
 
-        var syncGenresResult = await InsertGenres(genres);
+        var syncGenresResult = await InsertGenres(genres, ct);
         if (syncGenresResult.IsFailed)
             return syncGenresResult.ToResult();
 
-        var syncCountriesResult = await InsertCountries(countries);
+        var syncCountriesResult = await InsertCountries(countries, ct);
         if (syncCountriesResult.IsFailed)
             return syncCountriesResult.ToResult();
 
-        var syncRolesResult = await InsertPlexActors(roles);
+        var syncRolesResult = await InsertPlexActors(roles, ct);
         if (syncRolesResult.IsFailed)
             return syncRolesResult.ToResult();
 
@@ -98,37 +99,77 @@ public class InsertMediaMetaDataCommandHandler
     }
 
     private async Task<Result<Dictionary<string, PlexActor>>> InsertPlexActors(
-        IReadOnlyCollection<LibraryMediaItemRoleDTO> sourceList
+        IReadOnlyCollection<LibraryMediaItemRoleDTO> sourceList,
+        CancellationToken ct
     )
     {
         var stopWatch = Stopwatch.StartNew();
 
-        _log.Here().Debug("Started inserting {Count} {NameOfPlexActor}", sourceList.Count, nameof(PlexActor));
+        _log.Here()
+            .Debug(
+                "Started inserting {RawCount} {NameOfPlexActor} (pre-filtered/grouped)",
+                sourceList.Count,
+                nameof(PlexActor)
+            );
 
         var newPlexActors = sourceList
             .Where(x => !string.IsNullOrEmpty(x.Key) && !string.IsNullOrEmpty(x.Name))
             .DistinctBy(x => x.Key)
             .Select(x => x.ToPlexActor())
             .ToList();
-        if (!newPlexActors.Any())
+        if (newPlexActors.Count == 0)
         {
             _log.Here().Debug("No {PlexActorName} to insert", nameof(PlexActor));
             return Result.Ok(new Dictionary<string, PlexActor>());
         }
 
-        var result = await Result.Try(() =>
-            _dbContext.BulkInsertOrUpdateAsync(
-                newPlexActors,
-                new BulkConfig
-                {
-                    SetOutputIdentity = false,
-                    UpdateByProperties = [nameof(PlexActor.Key)],
-                    UseTempDB = true,
-                }
-            )
-        );
+        _log.Here()
+            .Debug("Inserting {Count} {NameOfPlexActor} after deduplication", newPlexActors.Count, nameof(PlexActor));
 
-        if (result.IsFailed)
+        // Chunk the existingKeys query to avoid hitting SQLite IN-clause parameter limits
+        var incomingKeys = newPlexActors.Select(x => x.Key).ToList();
+        var existingIdByKey = new Dictionary<string, int>(newPlexActors.Count);
+        foreach (var chunk in incomingKeys.Chunk(CHUNK_SIZE))
+        {
+            var found = await _dbContext
+                .PlexActors.AsNoTracking()
+                .Where(a => chunk.Contains(a.Key))
+                .Select(a => new { a.Key, a.Id })
+                .ToListAsync(ct);
+            foreach (var a in found)
+                existingIdByKey[a.Key] = a.Id;
+        }
+
+        _log.Here()
+            .Debug(
+                "{ExistingCount} {NameOfPlexActor} already exist in DB, inserting {NewCount} new",
+                existingIdByKey.Count,
+                nameof(PlexActor),
+                newPlexActors.Count - existingIdByKey.Count
+            );
+
+        var toInsert = newPlexActors.Where(a => !existingIdByKey.ContainsKey(a.Key)).ToList();
+
+        var insertResult = await Result.Try(async Task () =>
+        {
+            try
+            {
+                foreach (var chunk in toInsert.Chunk(CHUNK_SIZE))
+                {
+                    _dbContext.PlexActors.AddRange(chunk);
+                    await _dbContext.SaveChangesAsync(ct);
+                    foreach (var a in chunk)
+                        existingIdByKey[a.Key] = a.Id;
+                    _dbContext.ClearChangeTracker();
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+        });
+
+        if (insertResult.IsFailed)
         {
             _log.Here()
                 .Error(
@@ -136,59 +177,104 @@ public class InsertMediaMetaDataCommandHandler
                     nameof(PlexActor),
                     stopWatch.Elapsed.TotalSeconds
                 );
-            return result.LogError();
+            return insertResult.LogError();
         }
 
-        // Query the database to get entities with proper IDs (SQLite limitation workaround)
-        var newPlexActorKeys = newPlexActors.Select(x => x.Key).ToHashSet();
-        newPlexActors = await _dbContext.PlexActors.Where(x => newPlexActorKeys.Contains(x.Key)).ToListAsync();
+        // Build result dictionary from merged Id map — avoids re-fetching all actors from DB
+        var result = new Dictionary<string, PlexActor>(newPlexActors.Count);
+        foreach (var actor in newPlexActors)
+        {
+            if (!existingIdByKey.TryGetValue(actor.Key, out var id))
+            {
+                _log.Here()
+                    .Warning(
+                        "{NameOfPlexActor} with key {ActorKey} not found in DB after insert (sourceList count: {SourceCount}); skipping",
+                        nameof(PlexActor),
+                        actor.Key,
+                        sourceList.Count
+                    );
+                continue;
+            }
 
-        var plexActorsWithIds = newPlexActors.ToHashKeyDictionary(sourceList);
+            actor.Id = id;
+            result[actor.Key] = actor;
+        }
 
-        stopWatch.Stop();
+        // Build the final dictionary keyed by the source DTO hash keys
+        var resultDict = result.Values.ToList().ToHashKeyDictionary(sourceList);
 
-        _log.Here()
-            .Debug(
-                "Finished inserting {Count} {NameOfPlexActor} for library {ElapsedSeconds:F2} seconds",
-                sourceList.Count,
-                nameof(PlexActor),
-                stopWatch.Elapsed.TotalSeconds
-            );
-        return Result.Ok(plexActorsWithIds);
+        stopWatch.StopAndLog($"Finished inserting {newPlexActors.Count} {nameof(PlexActor)} for library");
+
+        return Result.Ok(resultDict);
     }
 
     private async Task<Result<Dictionary<string, PlexGenre>>> InsertGenres(
-        IReadOnlyCollection<LibraryMediaItemGenreDTO> sourceList
+        IReadOnlyCollection<LibraryMediaItemGenreDTO> sourceList,
+        CancellationToken ct
     )
     {
         var stopWatch = Stopwatch.StartNew();
 
-        _log.Here().Debug("Started inserting {Count} {NameOfPlexGenre}", sourceList.Count, nameof(PlexGenre));
+        _log.Here()
+            .Debug(
+                "Started inserting {RawCount} {NameOfPlexGenre} (pre-filtered/grouped)",
+                sourceList.Count,
+                nameof(PlexGenre)
+            );
 
         // Distinct by Genre Name because PlexId is not globally unique across all Plex servers
         var newPlexGenres = sourceList
             .Where(x => !string.IsNullOrEmpty(x.Key) && !string.IsNullOrEmpty(x.Name))
             .DistinctBy(x => x.Key)
             .ToPlexGenre();
-        if (!newPlexGenres.Any())
+        if (newPlexGenres.Count == 0)
         {
             _log.Here().Debug("No {NameOfPlexGenre} to insert ", nameof(PlexGenre));
             return Result.Ok(new Dictionary<string, PlexGenre>());
         }
 
+        _log.Here()
+            .Debug("Inserting {Count} {NameOfPlexGenre} after deduplication", newPlexGenres.Count, nameof(PlexGenre));
+
+        var incomingKeys = newPlexGenres.Select(x => x.Key).ToList();
+        var existingIdByKey = new Dictionary<string, int>(newPlexGenres.Count);
+        foreach (var chunk in incomingKeys.Chunk(CHUNK_SIZE))
+        {
+            var found = await _dbContext
+                .PlexGenres.AsNoTracking()
+                .Where(g => chunk.Contains(g.Key))
+                .Select(g => new { g.Key, g.Id })
+                .ToListAsync(ct);
+            foreach (var g in found)
+                existingIdByKey[g.Key] = g.Id;
+        }
+
+        _log.Here()
+            .Debug(
+                "Found {ExistingCount} existing {NameOfPlexGenre}, will insert {NewCount}",
+                existingIdByKey.Count,
+                nameof(PlexGenre),
+                newPlexGenres.Count - existingIdByKey.Count
+            );
+
+        var toInsert = newPlexGenres.Where(g => !existingIdByKey.ContainsKey(g.Key)).ToList();
+
         var insertResult = await Result.Try(async Task () =>
         {
-            var incomingGenreKeys = newPlexGenres.Select(x => x.Key).ToHashSet();
-            var existingGenreKeys = _dbContext
-                .PlexGenres.Where(c => incomingGenreKeys.Contains(c.Key))
-                .Select(c => c.Key)
-                .ToHashSet();
-
-            var toInsert = newPlexGenres.Where(c => !existingGenreKeys.Contains(c.Key)).ToList();
-            if (toInsert.Any())
+            try
             {
-                _dbContext.PlexGenres.AddRange(toInsert);
-                await _dbContext.SaveChangesAsync();
+                foreach (var chunk in toInsert.Chunk(CHUNK_SIZE))
+                {
+                    _dbContext.PlexGenres.AddRange(chunk);
+                    await _dbContext.SaveChangesAsync(ct);
+                    foreach (var g in chunk)
+                        existingIdByKey[g.Key] = g.Id;
+                    _dbContext.ClearChangeTracker();
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
         });
 
@@ -203,54 +289,103 @@ public class InsertMediaMetaDataCommandHandler
             return insertResult.LogError();
         }
 
-        // Query the database to get entities with proper IDs (SQLite limitation workaround)
-        var newPlexGenreKeys = newPlexGenres.Select(x => x.Key).ToHashSet();
-        var plexGenresWithIds = await _dbContext.PlexGenres.Where(x => newPlexGenreKeys.Contains(x.Key)).ToListAsync();
-        var resultDict = plexGenresWithIds.ToHashKeyDictionary(sourceList);
+        // Build result dictionary from merged Id map — avoids re-fetching all genres from DB
+        var result = new Dictionary<string, PlexGenre>(newPlexGenres.Count);
+        foreach (var genre in newPlexGenres)
+        {
+            if (!existingIdByKey.TryGetValue(genre.Key, out var id))
+            {
+                _log.Here()
+                    .Warning(
+                        "{NameOfPlexGenre} with key {GenreKey} not found in DB after insert; skipping",
+                        nameof(PlexGenre),
+                        genre.Key
+                    );
+                continue;
+            }
 
-        stopWatch.Stop();
+            genre.Id = id;
+            result[genre.Key] = genre;
+        }
 
-        _log.Here()
-            .Debug(
-                "Finished inserting {Count} {NameOfPlexGenre} in {ElapsedSeconds:F2} seconds",
-                newPlexGenres.Count,
-                nameof(PlexGenre),
-                stopWatch.Elapsed.TotalSeconds
-            );
+        // Build the final dictionary keyed by the source DTO hash keys
+        var resultDict = result.Values.ToList().ToHashKeyDictionary(sourceList);
+
+        stopWatch.StopAndLog($"Finished inserting {newPlexGenres.Count} {nameof(PlexGenre)}");
+
         return Result.Ok(resultDict);
     }
 
     private async Task<Result<Dictionary<string, PlexCountry>>> InsertCountries(
-        IReadOnlyCollection<LibraryMediaItemCountryDTO> sourceList
+        IReadOnlyCollection<LibraryMediaItemCountryDTO> sourceList,
+        CancellationToken ct
     )
     {
         var stopWatch = Stopwatch.StartNew();
 
-        _log.Here().Debug("Started inserting {Count} {NameOfPlexCountry}", sourceList.Count, nameof(PlexCountry));
+        _log.Here()
+            .Debug(
+                "Started inserting {RawCount} {NameOfPlexCountry} (pre-filtered/grouped)",
+                sourceList.Count,
+                nameof(PlexCountry)
+            );
 
         var newPlexCountries = sourceList
             .Where(x => !string.IsNullOrEmpty(x.Key) && !string.IsNullOrEmpty(x.Name))
             .DistinctBy(x => x.Key)
             .ToPlexCountry();
-        if (!newPlexCountries.Any())
+        if (newPlexCountries.Count == 0)
         {
             _log.Here().Debug("No {NameOfPlexCountry} to insert", nameof(PlexCountry));
             return Result.Ok(new Dictionary<string, PlexCountry>());
         }
 
+        _log.Here()
+            .Debug(
+                "Inserting {Count} {NameOfPlexCountry} after deduplication",
+                newPlexCountries.Count,
+                nameof(PlexCountry)
+            );
+
+        var incomingKeys = newPlexCountries.Select(x => x.Key).ToList();
+        var existingIdByKey = new Dictionary<string, int>(newPlexCountries.Count);
+        foreach (var chunk in incomingKeys.Chunk(CHUNK_SIZE))
+        {
+            var found = await _dbContext
+                .PlexCountries.AsNoTracking()
+                .Where(c => chunk.Contains(c.Key))
+                .Select(c => new { c.Key, c.Id })
+                .ToListAsync(ct);
+            foreach (var c in found)
+                existingIdByKey[c.Key] = c.Id;
+        }
+
+        _log.Here()
+            .Debug(
+                "Found {ExistingCount} existing {NameOfPlexCountry}, will insert {NewCount}",
+                existingIdByKey.Count,
+                nameof(PlexCountry),
+                newPlexCountries.Count - existingIdByKey.Count
+            );
+
+        var toInsert = newPlexCountries.Where(c => !existingIdByKey.ContainsKey(c.Key)).ToList();
+
         var insertResult = await Result.Try(async Task () =>
         {
-            var incomingCountryKeys = newPlexCountries.Select(x => x.Key).ToHashSet();
-            var existingCountryKeys = _dbContext
-                .PlexCountries.Where(c => incomingCountryKeys.Contains(c.Key))
-                .Select(c => c.Key)
-                .ToHashSet();
-
-            var toInsert = newPlexCountries.Where(c => !existingCountryKeys.Contains(c.Key)).ToList();
-            if (toInsert.Any())
+            try
             {
-                _dbContext.PlexCountries.AddRange(toInsert);
-                await _dbContext.SaveChangesAsync();
+                foreach (var chunk in toInsert.Chunk(CHUNK_SIZE))
+                {
+                    _dbContext.PlexCountries.AddRange(chunk);
+                    await _dbContext.SaveChangesAsync(ct);
+                    foreach (var c in chunk)
+                        existingIdByKey[c.Key] = c.Id;
+                    _dbContext.ClearChangeTracker();
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
         });
 
@@ -265,21 +400,30 @@ public class InsertMediaMetaDataCommandHandler
             return insertResult.LogError();
         }
 
-        // Query the database to get entities with proper IDs (SQLite limitation workaround)
-        var countryHashSet = newPlexCountries.Select(x => x.Key).ToHashSet();
-        newPlexCountries = await _dbContext.PlexCountries.Where(x => countryHashSet.Contains(x.Key)).ToListAsync();
+        // Build result dictionary from merged Id map — avoids re-fetching all countries from DB
+        var result = new Dictionary<string, PlexCountry>(newPlexCountries.Count);
+        foreach (var country in newPlexCountries)
+        {
+            if (!existingIdByKey.TryGetValue(country.Key, out var id))
+            {
+                _log.Here()
+                    .Warning(
+                        "{NameOfPlexCountry} with key {CountryKey} not found in DB after insert; skipping",
+                        nameof(PlexCountry),
+                        country.Key
+                    );
+                continue;
+            }
 
-        var resultDict = newPlexCountries.ToHashKeyDictionary(sourceList);
+            country.Id = id;
+            result[country.Key] = country;
+        }
 
-        stopWatch.Stop();
+        // Build the final dictionary keyed by the source DTO hash keys
+        var resultDict = result.Values.ToList().ToHashKeyDictionary(sourceList);
 
-        _log.Here()
-            .Debug(
-                "Finished inserting {Count} {NameOfPlexCountry} in {ElapsedSeconds:F2} seconds",
-                newPlexCountries.Count,
-                nameof(PlexCountry),
-                stopWatch.Elapsed.TotalSeconds
-            );
+        stopWatch.StopAndLog($"Finished inserting {newPlexCountries.Count} {nameof(PlexCountry)}");
+
         return Result.Ok(resultDict);
     }
 }

@@ -25,10 +25,8 @@ import type {
   ValidatePlexTokenEndpointResponse,
 } from "./data-contracts";
 
-import { apiCheckPipe } from "@api/base";
-import Axios from "axios";
+import { apiCheckPipe, axiosObservable } from "@api/base";
 import queryString from "query-string";
-import { from } from "rxjs";
 
 export class PlexAccount {
   /**
@@ -42,17 +40,15 @@ export class PlexAccount {
     data: CreatePlexAccountEndpointRequest,
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<PlexAccountDTO>({
-        url: `/api/PlexAccount`,
-        method: "POST",
-        data: data,
-        secure: true,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<PlexAccountDTO>);
+    axiosObservable<PlexAccountDTO>({
+      url: `/api/PlexAccount`,
+      method: "POST",
+      data: data,
+      secure: true,
+      type: ContentType.Json,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<PlexAccountDTO>);
 
   /**
    * No description
@@ -68,16 +64,14 @@ export class PlexAccount {
     },
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<PlexAccountDTO[]>({
-        url: `/api/PlexAccount`,
-        method: "GET",
-        params: query,
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<PlexAccountDTO[]>);
+    axiosObservable<PlexAccountDTO[]>({
+      url: `/api/PlexAccount`,
+      method: "GET",
+      params: query,
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<PlexAccountDTO[]>);
 
   /**
    * No description
@@ -90,17 +84,15 @@ export class PlexAccount {
     data: PlexAccountDTO,
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<PlexAccountDTO>({
-        url: `/api/PlexAccount`,
-        method: "PUT",
-        data: data,
-        secure: true,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<PlexAccountDTO>);
+    axiosObservable<PlexAccountDTO>({
+      url: `/api/PlexAccount`,
+      method: "PUT",
+      data: data,
+      secure: true,
+      type: ContentType.Json,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<PlexAccountDTO>);
 
   /**
    * No description
@@ -113,15 +105,13 @@ export class PlexAccount {
     plexAccountId: number,
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<BaseResultDTO>({
-        url: `/api/PlexAccount/${plexAccountId}`,
-        method: "DELETE",
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<BaseResultDTO>);
+    axiosObservable<BaseResultDTO>({
+      url: `/api/PlexAccount/${plexAccountId}`,
+      method: "DELETE",
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<BaseResultDTO>);
 
   /**
    * No description
@@ -134,15 +124,13 @@ export class PlexAccount {
     plexAccountId: number,
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<PlexAccountDTO>({
-        url: `/api/PlexAccount/${plexAccountId}`,
-        method: "GET",
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<PlexAccountDTO>);
+    axiosObservable<PlexAccountDTO>({
+      url: `/api/PlexAccount/${plexAccountId}`,
+      method: "GET",
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<PlexAccountDTO>);
 
   /**
    * No description
@@ -159,16 +147,14 @@ export class PlexAccount {
     },
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<GeneratePlexTokenResponse>({
-        url: `/api/PlexAccount/generate-token/${plexAccountId}`,
-        method: "GET",
-        params: query,
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<GeneratePlexTokenResponse>);
+    axiosObservable<GeneratePlexTokenResponse>({
+      url: `/api/PlexAccount/generate-token/${plexAccountId}`,
+      method: "GET",
+      params: query,
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<GeneratePlexTokenResponse>);
 
   /**
    * No description
@@ -183,16 +169,14 @@ export class PlexAccount {
     },
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<Boolean>({
-        url: `/api/PlexAccount/check`,
-        method: "GET",
-        params: query,
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<Boolean>);
+    axiosObservable<Boolean>({
+      url: `/api/PlexAccount/check`,
+      method: "GET",
+      params: query,
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<Boolean>);
 
   /**
    * No description
@@ -205,15 +189,13 @@ export class PlexAccount {
     plexAccountId: number,
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<RefreshPlexAccountAccessRapportDTO[]>({
-        url: `/api/PlexAccount/refresh/${plexAccountId}`,
-        method: "GET",
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<RefreshPlexAccountAccessRapportDTO[]>);
+    axiosObservable<RefreshPlexAccountAccessRapportDTO[]>({
+      url: `/api/PlexAccount/refresh/${plexAccountId}`,
+      method: "GET",
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<RefreshPlexAccountAccessRapportDTO[]>);
 
   /**
    * No description
@@ -226,17 +208,15 @@ export class PlexAccount {
     data: ValidatePlexCredentialsEndpointRequest,
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<ValidatePlexCredentialsDTO>({
-        url: `/api/PlexAccount/validate/credentials`,
-        method: "POST",
-        data: data,
-        secure: true,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<ValidatePlexCredentialsDTO>);
+    axiosObservable<ValidatePlexCredentialsDTO>({
+      url: `/api/PlexAccount/validate/credentials`,
+      method: "POST",
+      data: data,
+      secure: true,
+      type: ContentType.Json,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<ValidatePlexCredentialsDTO>);
 
   /**
    * No description
@@ -249,17 +229,15 @@ export class PlexAccount {
     data: ValidatePlexTokenEndpointRequest,
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<ValidatePlexTokenEndpointResponse>({
-        url: `/api/PlexAccount/validate/token`,
-        method: "POST",
-        data: data,
-        secure: true,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<ValidatePlexTokenEndpointResponse>);
+    axiosObservable<ValidatePlexTokenEndpointResponse>({
+      url: `/api/PlexAccount/validate/token`,
+      method: "POST",
+      data: data,
+      secure: true,
+      type: ContentType.Json,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<ValidatePlexTokenEndpointResponse>);
 }
 
 export class PlexAccountPaths {

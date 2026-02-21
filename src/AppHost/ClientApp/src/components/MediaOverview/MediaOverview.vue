@@ -39,9 +39,17 @@
 							</QCol>
 							<QCol cols="1">
 								<QText
+									v-if="item.received > 0 && item.total > 0"
 									:value="`${item.received}/${item.total}`"
 									align="right"
 									:cy="`library-media-sync-progress-row-${item.mediaType}-count`" />
+							</QCol>
+						</QRow>
+						<QRow
+							v-if="(libraryProgress?.percentage ?? 0) >= 100"
+							justify="around">
+							<QCol cols="auto">
+								<QText value="Updating database with all new data, please wait" />
 							</QCol>
 						</QRow>
 					</QCol>
@@ -54,9 +62,7 @@
 			<!--	Overview bar	-->
 			<MediaOverviewBar
 				:detail-mode="false"
-				:all-media-mode="allMediaMode"
 				:library-id="libraryId"
-				:media-type="mediaOverviewStore.mediaType"
 				@action="onAction" />
 		</div>
 		<div class="media-overview-content">
@@ -68,7 +74,7 @@
 						<QCol>
 							<template v-if="mediaOverviewStore.getMediaViewMode === ViewMode.Table">
 								<MediaTable
-									:disable-hover-click="mediaType !== PlexMediaType.TvShow"
+									:disable-hover-click="mediaOverviewStore.getMediaType !== PlexMediaType.TvShow"
 									:rows="mediaOverviewStore.getMediaItems"
 									is-scrollable />
 							</template>
@@ -78,7 +84,7 @@
 								<PosterTable
 									:items="mediaOverviewStore.getMediaItems"
 									:library-id="libraryId"
-									:media-type="mediaType" />
+									:media-type="mediaOverviewStore.getMediaType" />
 							</template>
 						</QCol>
 						<!-- Alphabet Navigation -->
@@ -159,13 +165,9 @@ const serverStore = useServerStore();
 const dialogStore = useDialogStore();
 const backgroundJobsStore = useBackgroundJobsStore();
 
-const props = withDefaults(defineProps<{
+const props = defineProps<{
 	libraryId: number;
-	mediaType: PlexMediaType;
-	allMediaMode?: boolean;
-}>(), {
-	allMediaMode: false,
-});
+}>();
 
 const library = computed(() => libraryStore.getLibrary(mediaOverviewStore.libraryId));
 const libraryProgress = computed(() => libraryStore.getLibraryProgress(mediaOverviewStore.libraryId));
@@ -208,7 +210,7 @@ listenMediaOverviewDownloadCommand((command) => {
 	Log.info('MediaOverview => Received download command', command);
 	// Only show if there is more than 1 selection
 	if (command.length > 0 && command.some((x) => x.mediaIds.length > 0)) {
-		if (settingsStore.isConfirmationEnabled(props.mediaType)) {
+		if (settingsStore.isConfirmationEnabled(mediaOverviewStore.getMediaType)) {
 			dialogStore.openMediaConfirmationDownloadDialog(command);
 		} else {
 			downloadStore.downloadMedia({
@@ -225,7 +227,7 @@ useMediaOverviewBarDownloadCommandBus().on(() => {
 		plexServerId: libraryStore.getServerByLibraryId(mediaOverviewStore.libraryId)?.id ?? 0,
 		plexLibraryId: mediaOverviewStore.libraryId,
 		mediaIds: mediaOverviewStore.selection.keys,
-		type: props.mediaType,
+		type: mediaOverviewStore.getMediaType,
 		qualities: [],
 	};
 	sendMediaOverviewDownloadCommand([downloadCommand]);
@@ -252,25 +254,17 @@ function onAction(event: IMediaOverviewBarActions) {
 
 function onOptionsClosed(hasChanged: boolean) {
 	if (hasChanged) {
-		useSubscription(
-			mediaOverviewStore.requestMedia().subscribe());
+		useSubscription(mediaOverviewStore.requestMedia().subscribe());
 	}
 }
 
 onMounted(() => {
 	resetProgress();
 
-	mediaOverviewStore.$patch({
-		libraryId: props.libraryId,
-		mediaType: props.mediaType,
-		isDetailView: false,
-	});
-
-	mediaOverviewStore.clearMetaDataFilter();
-	mediaOverviewStore.clearSort();
-
-	// Initial data load
-	useSubscription(mediaOverviewStore.requestMedia().subscribe());
+	// Initialize the library in the store
+	useSubscription(
+		mediaOverviewStore.initializeLibrary(props.libraryId).subscribe(),
+	);
 
 	// Library sync job subscription
 	useSubscription(backgroundJobsStore.getLibrarySyncJobUpdate().subscribe((value) => {

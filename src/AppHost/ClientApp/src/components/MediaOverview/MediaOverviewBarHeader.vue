@@ -2,10 +2,10 @@
 	<q-list class="no-background">
 		<q-item
 			v-ripple
-			:clickable="allMediaMode">
+			:clickable="mediaOverviewStore.allMediaMode">
 			<q-item-section avatar>
 				<QMediaTypeIcon
-					:media-type="mediaType"
+					:media-type="mediaOverviewStore.getMediaType"
 					:size="36" />
 			</q-item-section>
 			<q-item-section>
@@ -15,7 +15,7 @@
 					{{ library ? libraryStore.getLibraryName(library.id) : $t('general.commands.unknown') }}
 				</q-item-label>
 				<q-item-label v-else>
-					{{ mediaTypeToAllText(mediaType) }}
+					{{ mediaTypeToAllText(mediaOverviewStore.getMediaType) }}
 				</q-item-label>
 				<q-item-label
 					v-if="!mediaOverviewStore.loading && hasMedia"
@@ -24,13 +24,13 @@
 				</q-item-label>
 			</q-item-section>
 			<q-menu
-				v-if="allMediaMode"
+				v-if="mediaOverviewStore.allMediaMode"
 				anchor="bottom left"
 				auto-close
 				self="top left">
 				<q-list>
 					<q-item
-						v-for="(type, i) in [PlexMediaType.Movie, PlexMediaType.TvShow].filter(x => x !== mediaType)"
+						v-for="(type, i) in [PlexMediaType.Movie, PlexMediaType.TvShow].filter(x => x !== mediaOverviewStore.getMediaType)"
 						:key="i"
 						v-ripple
 						clickable
@@ -65,9 +65,7 @@ const localizationStore = useLocalizationStore();
 const mediaOverviewStore = useMediaOverviewStore();
 
 const props = withDefaults(defineProps<{
-	mediaType: PlexMediaType;
 	libraryId?: number;
-	allMediaMode: boolean;
 	detailMode?: boolean;
 	mediaDetailItem?: PlexMediaDTO | null;
 
@@ -102,11 +100,11 @@ const mediaMetaData = computed(() => {
 });
 
 const hasMedia = computed(() => {
-	if (props.mediaType === PlexMediaType.Movie) {
+	if (mediaOverviewStore.getMediaType === PlexMediaType.Movie) {
 		return mediaMetaData.value.movieCount > 0;
 	}
 
-	if (props.mediaType === PlexMediaType.TvShow) {
+	if (mediaOverviewStore.getMediaType === PlexMediaType.TvShow) {
 		return mediaMetaData.value.tvShowCount > 0;
 	}
 
@@ -120,7 +118,7 @@ function formatted({ movieCount, tvShowCount, seasonCount, episodeCount, fileSiz
 	episodeCount: number;
 	fileSize: number;
 }): string {
-	switch (props.mediaType) {
+	switch (mediaOverviewStore.getMediaType) {
 		case PlexMediaType.Movie:
 			return t('components.media-overview-bar-header.movies-metadata', {
 				movieCount,
@@ -134,7 +132,7 @@ function formatted({ movieCount, tvShowCount, seasonCount, episodeCount, fileSiz
 				fileSize: toFileSize(fileSize),
 			});
 		default:
-			return `Media type ${props.mediaType} is not supported in the media count`;
+			return `Media type ${mediaOverviewStore.getMediaType} is not supported in the media count`;
 	}
 }
 

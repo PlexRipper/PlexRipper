@@ -122,7 +122,11 @@ public class GenerateDownloadTaskTvShowSeasonsCommandHandler
         // Create episodes downloadTasks
         await _command.Send(
             new GenerateDownloadTaskTvShowEpisodesCommand(
-                new CreateDownloadTasksRequest(episodesIds, command.Request.DestinationFolderPathId)
+                new CreateDownloadTasksRequest(
+                    episodesIds,
+                    command.Request.DestinationFolderPathId,
+                    command.Request.CustomDestinationFolderPath
+                )
             ),
             cancellationToken
         );

@@ -14,10 +14,8 @@ import type { RequestParams } from "./http-client";
 
 import type { BaseResultDTO, PlexServerDTO } from "./data-contracts";
 
-import { apiCheckPipe } from "@api/base";
-import Axios from "axios";
+import { apiCheckPipe, axiosObservable } from "@api/base";
 import queryString from "query-string";
-import { from } from "rxjs";
 
 export class PlexServer {
   /**
@@ -32,15 +30,13 @@ export class PlexServer {
     plexServerConnectionId: number,
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<BaseResultDTO>({
-        url: `/api/PlexServer/${plexServerId}/preferred-connection/${plexServerConnectionId}`,
-        method: "GET",
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<BaseResultDTO>);
+    axiosObservable<BaseResultDTO>({
+      url: `/api/PlexServer/${plexServerId}/preferred-connection/${plexServerConnectionId}`,
+      method: "GET",
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<BaseResultDTO>);
 
   /**
    * No description
@@ -53,15 +49,13 @@ export class PlexServer {
     plexServerId: number,
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<PlexServerDTO>({
-        url: `/api/PlexServer/${plexServerId}`,
-        method: "GET",
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<PlexServerDTO>);
+    axiosObservable<PlexServerDTO>({
+      url: `/api/PlexServer/${plexServerId}`,
+      method: "GET",
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<PlexServerDTO>);
 
   /**
    * @description  Retrieves all the PlexServers, without PlexLibraries but with all its connections currently in the database.
@@ -72,15 +66,13 @@ export class PlexServer {
    * @secure
    */
   getAllPlexServersEndpoint = (params: RequestParams = {}) =>
-    from(
-      Axios.request<PlexServerDTO[]>({
-        url: `/api/PlexServer`,
-        method: "GET",
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<PlexServerDTO[]>);
+    axiosObservable<PlexServerDTO[]>({
+      url: `/api/PlexServer`,
+      method: "GET",
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<PlexServerDTO[]>);
 
   /**
    * No description
@@ -93,15 +85,13 @@ export class PlexServer {
     plexServerId: number,
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<BaseResultDTO>({
-        url: `/api/PlexServer/${plexServerId}/inspect`,
-        method: "GET",
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<BaseResultDTO>);
+    axiosObservable<BaseResultDTO>({
+      url: `/api/PlexServer/${plexServerId}/inspect`,
+      method: "GET",
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<BaseResultDTO>);
 
   /**
    * No description
@@ -114,15 +104,13 @@ export class PlexServer {
     plexServerId: number,
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<PlexServerDTO>({
-        url: `/api/PlexServer/${plexServerId}/refresh`,
-        method: "GET",
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<PlexServerDTO>);
+    axiosObservable<PlexServerDTO>({
+      url: `/api/PlexServer/${plexServerId}/refresh`,
+      method: "GET",
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<PlexServerDTO>);
 
   /**
    * No description
@@ -138,16 +126,14 @@ export class PlexServer {
     },
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<BaseResultDTO>({
-        url: `/api/PlexServer/${plexServerId}/set-server-alias`,
-        method: "GET",
-        params: query,
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<BaseResultDTO>);
+    axiosObservable<BaseResultDTO>({
+      url: `/api/PlexServer/${plexServerId}/set-server-alias`,
+      method: "GET",
+      params: query,
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<BaseResultDTO>);
 
   /**
    * No description
@@ -163,16 +149,14 @@ export class PlexServer {
     },
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<BaseResultDTO>({
-        url: `/api/PlexServer/${plexServerId}/set-server-hidden`,
-        method: "GET",
-        params: query,
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<BaseResultDTO>);
+    axiosObservable<BaseResultDTO>({
+      url: `/api/PlexServer/${plexServerId}/set-server-hidden`,
+      method: "GET",
+      params: query,
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<BaseResultDTO>);
 
   /**
    * No description
@@ -185,15 +169,13 @@ export class PlexServer {
     plexServerId: number,
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<BaseResultDTO>({
-        url: `/api/PlexServer/${plexServerId}/sync`,
-        method: "POST",
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<BaseResultDTO>);
+    axiosObservable<BaseResultDTO>({
+      url: `/api/PlexServer/${plexServerId}/sync`,
+      method: "POST",
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<BaseResultDTO>);
 }
 
 export class PlexServerPaths {

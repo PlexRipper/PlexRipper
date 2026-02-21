@@ -40,6 +40,7 @@
 					:key="y"
 					v-ripple
 					clickable
+					:class="{ 'active-library-item': isActiveLibrary(library.id) }"
 					active-class="text-orange"
 					@click="openMediaPage(library)">
 					<q-item-section avatar>
@@ -48,7 +49,11 @@
 							:loading="libraryStore.getIsLibrarySyncing(library.id)"
 							:media-type="library.type" />
 					</q-item-section>
-					<q-item-section>{{ libraryStore.getLibraryName(library.id) }}</q-item-section>
+					<q-item-section>
+						<span :class="{ 'active-library-text': isActiveLibrary(library.id) }">
+							{{ libraryStore.getLibraryName(library.id) }}
+						</span>
+					</q-item-section>
 				</q-item>
 			</q-list>
 			<!-- No libraries available -->
@@ -105,11 +110,18 @@ import { useI18n } from '#imports';
 
 const { t } = useI18n();
 const router = useRouter();
+const route = useRoute();
 const serverStore = useServerStore();
 const libraryStore = useLibraryStore();
 const dialogStore = useDialogStore();
 const serverConnectionStore = useServerConnectionStore();
 const accountStore = useAccountStore();
+
+// Check if a library is currently active based on route
+function isActiveLibrary(libraryId: number): boolean {
+	const currentLibraryId = route.params.libraryId;
+	return currentLibraryId !== undefined && Number(currentLibraryId) === libraryId;
+}
 
 function filterLibraries(plexServerId: number): PlexLibraryDTO[] {
 	return libraryStore.getLibrariesByServerId(plexServerId);
@@ -175,5 +187,62 @@ function runReSyncAccount(): void {
 .ps {
   height: 100%;
   width: 100%;
+}
+
+// Active library item styles with glowing effect
+.active-library-item {
+  position: relative;
+  background: linear-gradient(90deg, rgba(211, 47, 47, 0.15), rgba(229, 115, 115, 0.15)) !important;
+  border-left: 4px solid #d32f2f !important;
+  animation: glow-pulse 2s ease-in-out infinite;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg,
+      transparent,
+      rgba(211, 47, 47, 0.2),
+      transparent
+    );
+    animation: shimmer 3s ease-in-out infinite;
+    pointer-events: none;
+  }
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: inset 4px 0 20px rgba(211, 47, 47, 0.4),
+                0 0 15px rgba(211, 47, 47, 0.2);
+  }
+  50% {
+    box-shadow: inset 4px 0 30px rgba(229, 115, 115, 0.5),
+                0 0 20px rgba(229, 115, 115, 0.3);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes text-glow {
+  0%, 100% {
+    text-shadow: 0 0 8px rgba(239, 154, 154, 0.6),
+                 0 0 12px rgba(211, 47, 47, 0.4);
+  }
+  50% {
+    text-shadow: 0 0 12px rgba(239, 154, 154, 0.8),
+                 0 0 18px rgba(239, 154, 154, 0.6),
+                 0 0 24px rgba(211, 47, 47, 0.4);
+  }
 }
 </style>

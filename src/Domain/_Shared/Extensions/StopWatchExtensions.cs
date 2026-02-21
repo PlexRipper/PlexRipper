@@ -19,14 +19,10 @@ public static class StopWatchExtensions
         if (prefix.Length > 0)
         {
             _log.Here(sourceFilePath, memberName, sourceLineNumber)
-                .Debug(
-                    "{Prefix} - Execution Time: took {ElapsedMilliseconds} ms",
-                    prefix,
-                    stopwatch.ElapsedMilliseconds
-                );
+                .Debug("{Prefix} - Execution Time: took {ElapsedTime}", prefix, stopwatch.Elapsed.ToFormattedString());
             return;
         }
 
-        _log.Here().Debug("Execution Time: took {ElapsedMilliseconds} ms", stopwatch.ElapsedMilliseconds);
+        _log.Here().Debug("Execution Time: took {ElapsedTime}", stopwatch.Elapsed.ToFormattedString());
     }
 }

@@ -20,10 +20,8 @@ import type {
   SetNotificationVisibilityEndpointRequest,
 } from "./data-contracts";
 
-import { apiCheckPipe } from "@api/base";
-import Axios from "axios";
+import { apiCheckPipe, axiosObservable } from "@api/base";
 import queryString from "query-string";
-import { from } from "rxjs";
 
 export class Notification {
   /**
@@ -34,15 +32,13 @@ export class Notification {
    * @secure
    */
   clearAllNotificationsEndpoint = (params: RequestParams = {}) =>
-    from(
-      Axios.request<CountResponseDTO>({
-        url: `/api/Notification/clear`,
-        method: "DELETE",
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<CountResponseDTO>);
+    axiosObservable<CountResponseDTO>({
+      url: `/api/Notification/clear`,
+      method: "DELETE",
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<CountResponseDTO>);
 
   /**
    * No description
@@ -52,15 +48,13 @@ export class Notification {
    * @secure
    */
   getAllNotificationsEndpoint = (params: RequestParams = {}) =>
-    from(
-      Axios.request<NotificationDTO[]>({
-        url: `/api/Notification`,
-        method: "GET",
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<NotificationDTO[]>);
+    axiosObservable<NotificationDTO[]>({
+      url: `/api/Notification`,
+      method: "GET",
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<NotificationDTO[]>);
 
   /**
    * No description
@@ -73,17 +67,15 @@ export class Notification {
     data: SetNotificationVisibilityEndpointRequest,
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<BaseResultDTO>({
-        url: `/api/Notification`,
-        method: "PATCH",
-        data: data,
-        secure: true,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<BaseResultDTO>);
+    axiosObservable<BaseResultDTO>({
+      url: `/api/Notification`,
+      method: "PATCH",
+      data: data,
+      secure: true,
+      type: ContentType.Json,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<BaseResultDTO>);
 }
 
 export class NotificationPaths {

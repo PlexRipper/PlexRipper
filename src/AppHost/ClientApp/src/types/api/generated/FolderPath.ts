@@ -19,10 +19,8 @@ import type {
   FolderPathDTO,
 } from "./data-contracts";
 
-import { apiCheckPipe } from "@api/base";
-import Axios from "axios";
+import { apiCheckPipe, axiosObservable } from "@api/base";
 import queryString from "query-string";
-import { from } from "rxjs";
 
 export class FolderPath {
   /**
@@ -36,17 +34,15 @@ export class FolderPath {
     data: FolderPathDTO,
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<FolderPathDTO>({
-        url: `/api/FolderPath`,
-        method: "POST",
-        data: data,
-        secure: true,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<FolderPathDTO>);
+    axiosObservable<FolderPathDTO>({
+      url: `/api/FolderPath`,
+      method: "POST",
+      data: data,
+      secure: true,
+      type: ContentType.Json,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<FolderPathDTO>);
 
   /**
    * No description
@@ -56,15 +52,13 @@ export class FolderPath {
    * @secure
    */
   getAllFolderPathsEndpoint = (params: RequestParams = {}) =>
-    from(
-      Axios.request<FolderPathDTO[]>({
-        url: `/api/FolderPath`,
-        method: "GET",
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<FolderPathDTO[]>);
+    axiosObservable<FolderPathDTO[]>({
+      url: `/api/FolderPath`,
+      method: "GET",
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<FolderPathDTO[]>);
 
   /**
    * No description
@@ -77,17 +71,15 @@ export class FolderPath {
     data: FolderPathDTO,
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<FolderPathDTO>({
-        url: `/api/FolderPath`,
-        method: "PUT",
-        data: data,
-        secure: true,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<FolderPathDTO>);
+    axiosObservable<FolderPathDTO>({
+      url: `/api/FolderPath`,
+      method: "PUT",
+      data: data,
+      secure: true,
+      type: ContentType.Json,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<FolderPathDTO>);
 
   /**
    * No description
@@ -97,15 +89,13 @@ export class FolderPath {
    * @secure
    */
   deleteFolderPathEndpoint = (id: number, params: RequestParams = {}) =>
-    from(
-      Axios.request<BaseResultDTO>({
-        url: `/api/FolderPath/${id}`,
-        method: "DELETE",
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<BaseResultDTO>);
+    axiosObservable<BaseResultDTO>({
+      url: `/api/FolderPath/${id}`,
+      method: "DELETE",
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<BaseResultDTO>);
 
   /**
    * No description
@@ -122,16 +112,14 @@ export class FolderPath {
     },
     params: RequestParams = {},
   ) =>
-    from(
-      Axios.request<FileSystemDTO>({
-        url: `/api/FolderPath/directory`,
-        method: "GET",
-        params: query,
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<FileSystemDTO>);
+    axiosObservable<FileSystemDTO>({
+      url: `/api/FolderPath/directory`,
+      method: "GET",
+      params: query,
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<FileSystemDTO>);
 }
 
 export class FolderPathPaths {

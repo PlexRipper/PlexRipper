@@ -38,6 +38,7 @@
     "@microsoft/signalr-protocol-msgpack": "^9.0.6",
     "@pinia/nuxt": "^0.11.3",
     "@primeuix/themes": "^2.0.3",
+    "@tanstack/vue-virtual": "^3.13.18",
     "@vueuse/rxjs": "^13.0.0",
     "axios": "^1.13.2",
     "caniuse-lite": "^1.0.30001754",
@@ -52,7 +53,6 @@
     "rxjs": "^7.8.2",
     "vue": "^3.5.24",
     "vue-markdown-render": "^2.3.0",
-    "vue-virtual-scroller": "^2.0.0-beta.8",
     "vue3-otp-input": "^0.5.40"
   },
   "devDependencies": {

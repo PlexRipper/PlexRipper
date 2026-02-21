@@ -26,24 +26,36 @@ public class MoveDownloadFileJobQueue : IMoveDownloadFileQueue
     public async Task<Result> CheckMoveDownloadFileJobQueue()
     {
         if (await _moveDownloadFileScheduler.IsAnyMoveDownloadFileJobRunning())
-            return Result.Fail("A MoveDownloadFileJob is already running, skipping queue check").LogInformation();
+        {
+            _log.Here().Debug("A MoveDownloadFileJob is already running, skipping queue check");
+            return Result.Ok();
+        }
 
         // Create a new DbContext for this operation to avoid threading issues
         using var dbContext = await _dbContextFactory.CreateAsync();
 
-        // Find the first finished task (movie preferred, then episode)
+        // Find the first ready-to-move task (DownloadFinished preferred, MoveError as retry; movies before episodes)
         var key =
             await dbContext
-                .DownloadTaskMovieFile.Where(x => x.DownloadStatus == DownloadStatus.DownloadFinished)
+                .DownloadTaskMovieFile.Where(x =>
+                    x.DownloadStatus == DownloadStatus.DownloadFinished || x.DownloadStatus == DownloadStatus.MoveError
+                )
+                .OrderByDescending(x => x.DownloadStatus == DownloadStatus.DownloadFinished)
                 .Select(x => x.ToKey())
                 .FirstOrDefaultAsync()
             ?? await dbContext
-                .DownloadTaskTvShowEpisodeFile.Where(x => x.DownloadStatus == DownloadStatus.DownloadFinished)
+                .DownloadTaskTvShowEpisodeFile.Where(x =>
+                    x.DownloadStatus == DownloadStatus.DownloadFinished || x.DownloadStatus == DownloadStatus.MoveError
+                )
+                .OrderByDescending(x => x.DownloadStatus == DownloadStatus.DownloadFinished)
                 .Select(x => x.ToKey())
                 .FirstOrDefaultAsync();
 
         if (key is null)
-            return _log.Here().ErrorResult("No DownloadTask found to either merge or move");
+        {
+            _log.Here().Debug("No DownloadTask with status DownloadFinished or MoveError found, nothing to move");
+            return Result.Ok();
+        }
 
         var startResult = await _moveDownloadFileScheduler.StartMoveDownloadFileJob(key);
         return startResult.IsSuccess ? Result.Ok() : startResult;

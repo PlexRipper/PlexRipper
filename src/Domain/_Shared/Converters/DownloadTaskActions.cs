@@ -40,6 +40,9 @@ public static class DownloadTaskActions
                 actions.Add(DownloadActions.Stop);
                 break;
             case DownloadStatus.DownloadFinished:
+                actions.Add(DownloadActions.Start);
+                actions.Add(DownloadActions.Delete);
+                break;
             case DownloadStatus.MoveFinished:
                 actions.Add(DownloadActions.Delete);
                 break;
@@ -62,7 +65,11 @@ public static class DownloadTaskActions
                 actions.Add(DownloadActions.Stop);
                 break;
             case DownloadStatus.Error:
+                actions.Add(DownloadActions.Restart);
+                actions.Add(DownloadActions.Delete);
+                break;
             case DownloadStatus.MoveError:
+                actions.Add(DownloadActions.Start);
                 actions.Add(DownloadActions.Restart);
                 actions.Add(DownloadActions.Delete);
                 break;

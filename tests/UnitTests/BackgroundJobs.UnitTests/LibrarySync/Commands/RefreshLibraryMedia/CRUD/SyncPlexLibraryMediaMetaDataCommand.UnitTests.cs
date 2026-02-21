@@ -61,7 +61,7 @@ public class SyncPlexLibraryMediaMetaDataCommandUnitTests : BaseCommandUnitTest<
         await dbContext.PlexActors.AddRangeAsync(plexActors, CancellationToken);
         await dbContext.SaveChangesAsync(CancellationToken);
 
-        var plexActorDict = plexActors.ToHashKeyDictionary(mediaItemActorRoles);
+        var plexActorDict = plexActors.ToDictionary(x => x.Key);
 
         // Create initial PlexLibraryRoles
         var initialPlexLibraryActors = plexActorDict
@@ -81,7 +81,7 @@ public class SyncPlexLibraryMediaMetaDataCommandUnitTests : BaseCommandUnitTest<
         var command = new SyncPlexLibraryMediaMetaDataCommand(
             LibraryMetadata: new InsertMediaMetaDataCommandResponse(plexLibrary)
             {
-                PlexActors = newPlexActors.ToHashKeyDictionary(newPlexApiActors),
+                PlexActors = newPlexActors.ToDictionary(x => x.Key),
             }
         );
         var result = await TestHandlerExecuteAsync(command);
@@ -147,9 +147,9 @@ public class SyncPlexLibraryMediaMetaDataCommandUnitTests : BaseCommandUnitTest<
         var command = new SyncPlexLibraryMediaMetaDataCommand(
             LibraryMetadata: new InsertMediaMetaDataCommandResponse(plexLibrary)
             {
-                PlexActors = plexActors.ToHashKeyDictionary(actorRoles),
-                PlexGenres = plexGenres.ToHashKeyDictionary(genreItems),
-                PlexCountries = plexCountries.ToHashKeyDictionary(countryItems),
+                PlexActors = plexActors.ToDictionary(x => x.Key),
+                PlexGenres = plexGenres.ToDictionary(x => x.Key),
+                PlexCountries = plexCountries.ToDictionary(x => x.Key),
             }
         );
         var result = await TestHandlerExecuteAsync(command);
@@ -214,7 +214,7 @@ public class SyncPlexLibraryMediaMetaDataCommandUnitTests : BaseCommandUnitTest<
 
         // Create initial relationship data
         var initialPlexLibraryActors = plexActors
-            .ToHashKeyDictionary(actorRoles)
+            .ToDictionary(x => x.Key)
             .Select((x) => new PlexLibraryActors(plexLibrary.Id, x.Value.Id))
             .ToList();
         await dbContext.PlexLibraryActors.AddRangeAsync(initialPlexLibraryActors, CancellationToken);

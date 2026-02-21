@@ -25,30 +25,8 @@ public class SyncPlexLibraryMediaMetaDataCommandValidator : Validator<SyncPlexLi
         RuleFor(x => x.LibraryMetadata).NotNull();
         RuleFor(x => x.LibraryMetadata.PlexLibraryId).GreaterThan(0);
         RuleFor(x => x.LibraryMetadata.PlexActors).NotNull();
-        RuleForEach(x => x.LibraryMetadata.PlexActors)
-            .ChildRules(y =>
-            {
-                y.RuleFor(z => z.Value.Id).GreaterThan(0);
-                y.RuleFor(z => z.Value.Key).NotEmpty();
-            });
-
         RuleFor(x => x.LibraryMetadata.PlexGenres).NotNull();
-        RuleForEach(x => x.LibraryMetadata.PlexGenres)
-            .ChildRules(y =>
-            {
-                y.RuleFor(z => z.Value.Id).GreaterThan(0);
-                y.RuleFor(z => z.Value.Name).NotEmpty();
-                y.RuleFor(z => z.Value.Key).NotEmpty();
-            });
-
         RuleFor(x => x.LibraryMetadata.PlexCountries).NotNull();
-        RuleForEach(x => x.LibraryMetadata.PlexCountries)
-            .ChildRules(y =>
-            {
-                y.RuleFor(z => z.Value.Id).GreaterThan(0);
-                y.RuleFor(z => z.Value.Name).NotEmpty();
-                y.RuleFor(z => z.Value.Key).NotEmpty();
-            });
     }
 }
 
@@ -74,26 +52,54 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
     {
         var libraryId = command.LibraryMetadata.PlexLibraryId;
 
+        _log.Here().Debug("[SyncMetaData] ExecuteAsync entered for libraryId {LibraryId}", libraryId);
+
         // First, verify the library exists
+        _log.Here().Debug("[SyncMetaData] Fetching library {LibraryId} from DB", libraryId);
         var library = await _dbContext.PlexLibraries.GetAsync(libraryId, cancellationToken: ct);
         if (library == null)
             return ResultExtensions.EntityNotFound(nameof(PlexLibrary), libraryId);
 
+        _log.Here().Debug("[SyncMetaData] Library found, fetching name");
         var roles = command.LibraryMetadata.PlexActors;
         var genres = command.LibraryMetadata.PlexGenres;
         var countries = command.LibraryMetadata.PlexCountries;
 
         var libraryName = await _dbContext.GetPlexLibraryNameById(libraryId, ct);
+        _log.Here()
+            .Debug(
+                "[SyncMetaData] Got library name '{LibraryName}'. Actors={ActorCount}, Genres={GenreCount}, Countries={CountryCount}",
+                libraryName,
+                roles.Count,
+                genres.Count,
+                countries.Count
+            );
 
+        _log.Here().Debug("[SyncMetaData] Starting SyncGenres");
         var syncGenresResult = await SyncGenres(genres, libraryId, libraryName);
+        _log.Here().Debug("[SyncMetaData] SyncGenres done. IsFailed={IsFailed}", syncGenresResult.IsFailed);
+
+        _log.Here().Debug("[SyncMetaData] Starting SyncCountries");
         var syncCountriesResult = await SyncCountries(countries, libraryId, libraryName);
+        _log.Here().Debug("[SyncMetaData] SyncCountries done. IsFailed={IsFailed}", syncCountriesResult.IsFailed);
+
+        _log.Here().Debug("[SyncMetaData] Starting SyncRoles");
         var syncRolesResult = await SyncRoles(roles, libraryId, libraryName);
+        _log.Here().Debug("[SyncMetaData] SyncRoles done. IsFailed={IsFailed}", syncRolesResult.IsFailed);
 
         var actorsCount = syncRolesResult.ValueOrDefault;
         var genresCount = syncGenresResult.ValueOrDefault;
         var countriesCount = syncCountriesResult.ValueOrDefault;
 
+        _log.Here()
+            .Debug(
+                "[SyncMetaData] Calling SetLibraryMetaData: actors={ActorCount}, genres={GenreCount}, countries={CountryCount}",
+                actorsCount,
+                genresCount,
+                countriesCount
+            );
         await _dbContext.SetLibraryMetaData(libraryId, actorsCount, genresCount, countriesCount);
+        _log.Here().Debug("[SyncMetaData] SetLibraryMetaData done");
 
         return Result.Merge(syncGenresResult, syncCountriesResult, syncRolesResult).ToResult();
     }
@@ -141,10 +147,12 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
             .Select(x => new PlexLibraryActors(libraryId: libraryId, plexActorId: x.Value.Id))
             .ToList();
 
+        _log.Here().Debug("[SyncMetaData] BulkInsertAsync actors starting ({Count} rows)", newActors.Count);
         var insertResult = await Result.Try(
             () => _dbContext.BulkInsertAsync(newActors, _bulkInsertConfig),
             e => new ExceptionalError(e)
         );
+        _log.Here().Debug("[SyncMetaData] BulkInsertAsync actors done. IsFailed={IsFailed}", insertResult.IsFailed);
 
         stopWatch.Stop();
 
@@ -211,10 +219,12 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
 
         // Reinsert genres for the library
         var newGenres = sourceDict.Select(x => new PlexLibraryGenres(libraryId, x.Value.Id)).ToList();
+        _log.Here().Debug("[SyncMetaData] BulkInsertAsync genres starting ({Count} rows)", newGenres.Count);
         var insertResult = await Result.Try(
             () => _dbContext.BulkInsertAsync(newGenres, _bulkInsertConfig),
             e => new ExceptionalError(e)
         );
+        _log.Here().Debug("[SyncMetaData] BulkInsertAsync genres done. IsFailed={IsFailed}", insertResult.IsFailed);
 
         stopWatch.Stop();
 
@@ -280,10 +290,12 @@ public class SyncPlexLibraryMediaMetaDataCommandHandler : ICommandHandler<SyncPl
 
         // Reinsert countries for the library
         var newCountries = sourceDict.Select(x => new PlexLibraryCountries(libraryId, x.Value.Id)).ToList();
+        _log.Here().Debug("[SyncMetaData] BulkInsertAsync countries starting ({Count} rows)", newCountries.Count);
         var insertResult = await Result.Try(
             () => _dbContext.BulkInsertAsync(newCountries, _bulkInsertConfig),
             e => new ExceptionalError(e)
         );
+        _log.Here().Debug("[SyncMetaData] BulkInsertAsync countries done. IsFailed={IsFailed}", insertResult.IsFailed);
 
         stopWatch.Stop();
 

@@ -13,9 +13,35 @@ describe('Add Plex account to Reaparr', () => {
 		cy.visit(route('/settings/accounts'));
 	});
 
+	it('Should not show the generate token button when the plex account was created with a token', () => {
+		cy.basePageSetup({
+			plexAccountCount: 1,
+			plexServerCount: 5,
+			override: {
+				plexAccounts: (plexAccounts) => {
+					plexAccounts[0]!.customAuthenticationToken = 'some-custom-auth-token';
+					plexAccounts[0]!.authenticationToken = '';
+					plexAccounts[0]!.username = '';
+					plexAccounts[0]!.password = '';
+					return plexAccounts;
+				},
+			},
+		});
+
+		cy.visit(route('/settings/accounts'));
+
+		cy.getPageData().then(({ plexAccounts }) => {
+			const account: PlexAccountDTO = plexAccounts[0]!;
+
+			cy.getCy('account-card-id-' + account.id).click();
+
+			cy.getCy('account-dialog-generate-token-button').should('not.exist');
+		});
+	});
+
 	it('Should generate and copy a plex token when the plex account has an username and password', () => {
 		cy.getPageData().then(({ plexAccounts }) => {
-			const account: PlexAccountDTO = plexAccounts[0];
+			const account: PlexAccountDTO = plexAccounts[0]!;
 
 			cy.getCy('account-card-id-' + account.id).click();
 
@@ -34,7 +60,7 @@ describe('Add Plex account to Reaparr', () => {
 
 	it('Should generate and copy a plex token when the plex account has an username, password and is 2FA', () => {
 		cy.getPageData().then(({ plexAccounts }) => {
-			const account: PlexAccountDTO = plexAccounts[0];
+			const account: PlexAccountDTO = plexAccounts[0]!;
 
 			cy.getCy('account-card-id-' + account.id).click();
 
@@ -65,7 +91,7 @@ describe('Add Plex account to Reaparr', () => {
 			cy.getCy('2fa-code-verification-input')
 				.find('[data-test="single-input"]')
 				.each((el, i) => {
-					cy.wrap(el).type('123456'[i]);
+					cy.wrap(el).type('123456'[i]!);
 				});
 
 			cy.getCy('generate-token-dialog-token-input').should('have.value', 'some-plex-api-token');

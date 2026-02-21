@@ -229,9 +229,10 @@ describe('Add Plex account to Reaparr', () => {
 					uuid: account.uuid,
 					validatedAt: account.validatedAt,
 				},
-			});
+			}).as('validateFailed');
 
 			cy.getCy('account-dialog-validate-button').click();
+			cy.wait('@validateFailed');
 
 			// Verify validation dialog appears with error
 			cy.getCy('auth-token-validation-dialog').should('be.visible');
@@ -255,10 +256,11 @@ describe('Add Plex account to Reaparr', () => {
 					uuid: account.uuid,
 					validatedAt: account.validatedAt,
 				},
-			});
+			}).as('validateSuccess');
 
 			cy.getCy('account-form-auth-token-input').type('fix');
 			cy.getCy('account-dialog-validate-button').click();
+			cy.wait('@validateSuccess');
 			cy.getCy('auth-token-validation-dialog').should('be.visible');
 
 			cy.getCy('auth-token-validation-dialog-hide-button').click();

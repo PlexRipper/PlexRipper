@@ -259,6 +259,7 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
         // Assert: the scheduler failure is propagated back to the caller
         result.ShouldNotBeNull();
         result.IsFailed.ShouldBeTrue();
+        result.Errors.ShouldBe(startResult.Errors);
         Mock.Mock<IMoveDownloadFileScheduler>().Verify(x => x.IsAnyMoveDownloadFileJobRunning(), Times.Once);
         Mock.Mock<IMoveDownloadFileScheduler>()
             .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Once);
@@ -301,6 +302,58 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
         Mock.Mock<IMoveDownloadFileScheduler>().Verify(x => x.IsAnyMoveDownloadFileJobRunning(), Times.Once);
         Mock.Mock<IMoveDownloadFileScheduler>()
             .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task ShouldPreferMovieFileOverTvEpisodeFile_WhenBothAreEligibleToMove()
+    {
+        // Arrange — both a movie and a TV episode are DownloadFinished; the SUT must pick the movie
+        await SetupDatabase(
+            1122,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.MovieDownloadTasksCount = 1;
+                config.TvShowDownloadTasksCount = 1;
+                config.TvShowSeasonDownloadTasksCount = 1;
+                config.TvShowEpisodeDownloadTasksCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var movieFileTasks = await dbContext.DownloadTaskMovieFile.AsTracking().ToListAsync(CancellationToken);
+        movieFileTasks.SetDownloadStatus(DownloadStatus.DownloadFinished);
+        var episodeFileTasks = await dbContext
+            .DownloadTaskTvShowEpisodeFile.AsTracking()
+            .ToListAsync(CancellationToken);
+        episodeFileTasks.SetDownloadStatus(DownloadStatus.DownloadFinished);
+        await dbContext.SaveChangesAsync(CancellationToken);
+
+        var expectedKey = movieFileTasks.First().ToKey();
+
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .Setup(x => x.IsAnyMoveDownloadFileJobRunning())
+            .ReturnsAsync(false)
+            .Verifiable(Times.Once);
+
+        DownloadTaskKey? capturedKey = null;
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()))
+            .Callback<DownloadTaskKey>(k => capturedKey = k)
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once);
+
+        // Act
+        var result = await Sut.CheckMoveDownloadFileJobQueue();
+
+        // Assert: the movie file is preferred over the TV episode file
+        result.ShouldNotBeNull();
+        result.IsSuccess.ShouldBeTrue();
+        Mock.Mock<IMoveDownloadFileScheduler>().Verify(x => x.IsAnyMoveDownloadFileJobRunning(), Times.Once);
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Once);
+        capturedKey.ShouldNotBeNull();
+        capturedKey.ShouldBe(expectedKey);
     }
 
     [Fact]

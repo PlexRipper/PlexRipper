@@ -17,10 +17,11 @@ public class MoveDownloadJobListenerUnitTests : BaseUnitTest<MoveDownloadJobList
         Mock.Mock<IJobExecutionContext>().SetupGet(x => x.JobDetail).Returns(Mock.Mock<IJobDetail>().Object);
 
         // Act
-        await Sut.JobWasExecuted(Mock.Create<IJobExecutionContext>(), null, CancellationToken);
+        await Sut.JobWasExecuted(Mock.Mock<IJobExecutionContext>().Object, null, CancellationToken);
 
         // Assert
         Mock.Mock<IMoveDownloadFileQueue>().Verify(x => x.CheckMoveDownloadFileJobQueue(), Times.Once);
+        Mock.Mock<IJobExecutionContext>().VerifyGet(x => x.JobDetail, Times.Never());
     }
 
     [Fact]
@@ -35,10 +36,11 @@ public class MoveDownloadJobListenerUnitTests : BaseUnitTest<MoveDownloadJobList
         var jobException = new JobExecutionException("Move failed");
 
         // Act
-        await Sut.JobWasExecuted(Mock.Create<IJobExecutionContext>(), jobException, CancellationToken);
+        await Sut.JobWasExecuted(Mock.Mock<IJobExecutionContext>().Object, jobException, CancellationToken);
 
         // Assert: queue check is called regardless of whether the job threw an exception
         Mock.Mock<IMoveDownloadFileQueue>().Verify(x => x.CheckMoveDownloadFileJobQueue(), Times.Once);
+        Mock.Mock<IJobExecutionContext>().VerifyGet(x => x.JobDetail, Times.Never());
     }
 
     [Fact]
@@ -52,23 +54,26 @@ public class MoveDownloadJobListenerUnitTests : BaseUnitTest<MoveDownloadJobList
         Mock.Mock<IJobExecutionContext>().SetupGet(x => x.JobDetail).Returns(Mock.Mock<IJobDetail>().Object);
 
         // Act
-        var act = async () => await Sut.JobWasExecuted(Mock.Create<IJobExecutionContext>(), null, CancellationToken);
+        var act = async () =>
+            await Sut.JobWasExecuted(Mock.Mock<IJobExecutionContext>().Object, null, CancellationToken);
 
         // Assert
         await act.ShouldNotThrowAsync();
         Mock.Mock<IMoveDownloadFileQueue>().Verify(x => x.CheckMoveDownloadFileJobQueue(), Times.Once);
+        Mock.Mock<IJobExecutionContext>().VerifyGet(x => x.JobDetail, Times.Once());
     }
 
     [Fact]
-    public async Task ShouldReturnCompleted_WhenJobToBeExecutedIsCalled()
+    public async Task ShouldNotCheckQueue_WhenJobToBeExecutedIsCalled()
     {
         // Arrange
         Mock.Mock<IJobExecutionContext>().SetupGet(x => x.JobDetail).Returns(Mock.Mock<IJobDetail>().Object);
 
         // Act
-        await Sut.JobToBeExecuted(Mock.Create<IJobExecutionContext>(), CancellationToken);
+        await Sut.JobToBeExecuted(Mock.Mock<IJobExecutionContext>().Object, CancellationToken);
 
         // Assert — JobToBeExecuted is a no-op; the queue must never be triggered here
         Mock.Mock<IMoveDownloadFileQueue>().Verify(x => x.CheckMoveDownloadFileJobQueue(), Times.Never);
+        Mock.Mock<IJobExecutionContext>().VerifyGet(x => x.JobDetail, Times.Never());
     }
 }

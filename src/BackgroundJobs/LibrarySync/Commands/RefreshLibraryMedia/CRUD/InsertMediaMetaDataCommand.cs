@@ -152,13 +152,20 @@ public class InsertMediaMetaDataCommandHandler
 
         var insertResult = await Result.Try(async Task () =>
         {
-            foreach (var chunk in toInsert.Chunk(CHUNK_SIZE))
+            try
             {
-                _dbContext.PlexActors.AddRange(chunk);
-                await _dbContext.SaveChangesAsync(ct);
-                foreach (var a in chunk)
-                    existingIdByKey[a.Key] = a.Id;
-                _dbContext.ClearChangeTracker();
+                foreach (var chunk in toInsert.Chunk(CHUNK_SIZE))
+                {
+                    _dbContext.PlexActors.AddRange(chunk);
+                    await _dbContext.SaveChangesAsync(ct);
+                    foreach (var a in chunk)
+                        existingIdByKey[a.Key] = a.Id;
+                    _dbContext.ClearChangeTracker();
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
         });
 
@@ -254,13 +261,20 @@ public class InsertMediaMetaDataCommandHandler
 
         var insertResult = await Result.Try(async Task () =>
         {
-            foreach (var chunk in toInsert.Chunk(CHUNK_SIZE))
+            try
             {
-                _dbContext.PlexGenres.AddRange(chunk);
-                await _dbContext.SaveChangesAsync(ct);
-                foreach (var g in chunk)
-                    existingIdByKey[g.Key] = g.Id;
-                _dbContext.ClearChangeTracker();
+                foreach (var chunk in toInsert.Chunk(CHUNK_SIZE))
+                {
+                    _dbContext.PlexGenres.AddRange(chunk);
+                    await _dbContext.SaveChangesAsync(ct);
+                    foreach (var g in chunk)
+                        existingIdByKey[g.Key] = g.Id;
+                    _dbContext.ClearChangeTracker();
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
         });
 
@@ -358,13 +372,20 @@ public class InsertMediaMetaDataCommandHandler
 
         var insertResult = await Result.Try(async Task () =>
         {
-            foreach (var chunk in toInsert.Chunk(CHUNK_SIZE))
+            try
             {
-                _dbContext.PlexCountries.AddRange(chunk);
-                await _dbContext.SaveChangesAsync(ct);
-                foreach (var c in chunk)
-                    existingIdByKey[c.Key] = c.Id;
-                _dbContext.ClearChangeTracker();
+                foreach (var chunk in toInsert.Chunk(CHUNK_SIZE))
+                {
+                    _dbContext.PlexCountries.AddRange(chunk);
+                    await _dbContext.SaveChangesAsync(ct);
+                    foreach (var c in chunk)
+                        existingIdByKey[c.Key] = c.Id;
+                    _dbContext.ClearChangeTracker();
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
         });
 
@@ -398,6 +419,7 @@ public class InsertMediaMetaDataCommandHandler
             result[country.Key] = country;
         }
 
+        // Build the final dictionary keyed by the source DTO hash keys
         var resultDict = result.Values.ToList().ToHashKeyDictionary(sourceList);
 
         stopWatch.StopAndLog($"Finished inserting {newPlexCountries.Count} {nameof(PlexCountry)}");

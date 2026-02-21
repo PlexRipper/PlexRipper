@@ -82,7 +82,7 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
             {
                 var stopMoveResult = await _moveDownloadFileScheduler.StopMoveDownloadFileJob(downloadTaskKey);
                 if (stopMoveResult.IsFailed)
-                    stopMoveResult.LogError();
+                    return stopMoveResult.LogError();
             }
 
             // Only delete the download file and worker tasks when still in the download phase.

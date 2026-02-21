@@ -67,13 +67,15 @@ public class MoveDownloadJobListenerUnitTests : BaseUnitTest<MoveDownloadJobList
     }
 
     [Fact]
-    public Task ShouldReturnCompleted_WhenJobToBeExecutedIsCalled()
+    public async Task ShouldReturnCompleted_WhenJobToBeExecutedIsCalled()
     {
         // Arrange
         Mock.Mock<IJobExecutionContext>().SetupGet(x => x.JobDetail).Returns(Mock.Mock<IJobDetail>().Object);
 
-        // Act & Assert — no-op, must not throw
-        var act = async () => await Sut.JobToBeExecuted(Mock.Create<IJobExecutionContext>(), CancellationToken);
-        return act.ShouldNotThrowAsync();
+        // Act
+        await Sut.JobToBeExecuted(Mock.Create<IJobExecutionContext>(), CancellationToken);
+
+        // Assert — JobToBeExecuted is a no-op; the queue must never be triggered here
+        Mock.Mock<IMoveDownloadFileQueue>().Verify(x => x.CheckMoveDownloadFileJobQueue(), Times.Never);
     }
 }

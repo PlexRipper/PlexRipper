@@ -522,7 +522,9 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
             }
         );
 
-        var plexTvShows = await IDbContext
+        var dbContext = IDbContext;
+
+        var plexTvShows = await dbContext
             .PlexTvShows.Include(x => x.Seasons)
                 .ThenInclude(x => x.Episodes)
             .ToListAsync(CancellationToken);
@@ -551,7 +553,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
 
         // Assert
         result.IsSuccess.ShouldBeTrue(result.ToString());
-        var downloadTaskEpisodeFiles = await IDbContext.DownloadTaskTvShowEpisodeFile.ToListAsync(CancellationToken);
+        var downloadTaskEpisodeFiles = await dbContext.DownloadTaskTvShowEpisodeFile.ToListAsync(CancellationToken);
         downloadTaskEpisodeFiles.Count.ShouldBe(2);
 
         foreach (var episodeFile in downloadTaskEpisodeFiles)

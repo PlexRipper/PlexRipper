@@ -293,7 +293,11 @@ jobs:
     # Ensure Docker images can be built without errors (both amd64 and arm64)
     Test-Docker-Build:
         needs: [Check-Frontend-Changes, Check-Backend-Changes, Back-End-Unit-Tests, Back-End-Integration-Tests, Front-End-Type-Check, Front-End-Unit-Tests, Front-End-Eslint-Check, Front-End-Integration-Tests, Check-PR-Status]
-        if: always() && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
+        if: |
+            always() &&
+            (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch') &&
+            !contains(needs.*.result, 'failure') &&
+            !contains(needs.*.result, 'cancelled')
         uses: ./.github/workflows/docker-build-multiarch.yml
         with:
             push: false

@@ -12,9 +12,7 @@ public class MoveDownloadJobListenerUnitTests : BaseUnitTest<MoveDownloadJobList
     public async Task ShouldCheckMoveQueue_AfterJobExecuted()
     {
         // Arrange
-        Mock.Mock<IMoveDownloadFileQueue>()
-            .Setup(x => x.CheckMoveDownloadFileJobQueue())
-            .ReturnsAsync(Result.Ok());
+        Mock.Mock<IMoveDownloadFileQueue>().Setup(x => x.CheckMoveDownloadFileJobQueue()).ReturnsAsync(Result.Ok());
 
         Mock.Mock<IJobExecutionContext>().SetupGet(x => x.JobDetail).Returns(Mock.Mock<IJobDetail>().Object);
 
@@ -30,9 +28,7 @@ public class MoveDownloadJobListenerUnitTests : BaseUnitTest<MoveDownloadJobList
     {
         // Arrange — simulate the scenario where a move job ended in error
         // The listener must still trigger the queue so remaining DownloadFinished tasks are not stuck
-        Mock.Mock<IMoveDownloadFileQueue>()
-            .Setup(x => x.CheckMoveDownloadFileJobQueue())
-            .ReturnsAsync(Result.Ok());
+        Mock.Mock<IMoveDownloadFileQueue>().Setup(x => x.CheckMoveDownloadFileJobQueue()).ReturnsAsync(Result.Ok());
 
         Mock.Mock<IJobExecutionContext>().SetupGet(x => x.JobDetail).Returns(Mock.Mock<IJobDetail>().Object);
 

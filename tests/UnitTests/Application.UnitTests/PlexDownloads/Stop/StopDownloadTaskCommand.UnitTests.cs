@@ -82,11 +82,12 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
         );
 
         var dbContext = IDbContext;
-        var movieFileTasks = await dbContext.DownloadTaskMovieFile.ToListAsync(CancellationToken);
+        var allMovieFileTasks = await dbContext.DownloadTaskMovieFile.ToListAsync(CancellationToken);
+        var movieFileTasks = allMovieFileTasks.Where(f => f.ParentId == movieDownloadTasks.First().Id).ToList();
 
         SetupFileSystem(fs =>
         {
-            foreach (var fileTask in movieFileTasks)
+            foreach (var fileTask in allMovieFileTasks)
                 fs.AddFile(fileTask.DownloadFilePath, new MockFileData([]));
         });
 
@@ -120,8 +121,12 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
         Mock.VerifyEventPublished(It.IsAny<DownloadTaskUpdatedCommand>, Times.Once);
 
         var file = Mock.Create<IFile>();
+        Output.WriteLine($"movieFileTasks count: {movieFileTasks.Count}");
         foreach (var fileTask in movieFileTasks)
+        {
+            Output.WriteLine($"Checking: {fileTask.DownloadFilePath} exists={file.Exists(fileTask.DownloadFilePath)}");
             file.Exists(fileTask.DownloadFilePath).ShouldBeFalse();
+        }
 
         var downloadTasks = await IDbContext.GetDownloadableChildTasks(
             movieDownloadTasks.First().ToKey(),
@@ -251,10 +256,10 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
             .Verify(x => x.StopMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Never);
         Mock.VerifyEventPublished(It.IsAny<DownloadTaskUpdatedCommand>, Times.Exactly(4));
 
-        // The first episode file (IsDownloading=true → Downloading phase) should be deleted; others are in default Queued phase
+        // The first episode file the handler processes (IsDownloading=true) should be deleted; others are in default Queued phase
         var file = Mock.Create<IFile>();
-        var firstEpisodeFileTask = episodeFileTasks.First();
-        file.Exists(firstEpisodeFileTask.DownloadFilePath).ShouldBeFalse();
+        var firstProcessedFileTask = episodeFileTasks.First(f => f.Id == downloadableTasks.First().Id);
+        file.Exists(firstProcessedFileTask.DownloadFilePath).ShouldBeFalse();
 
         var downloadTasks = await IDbContext.GetDownloadableChildTasks(
             tvShowDownloadTasks.First().ToKey(),

@@ -85,10 +85,13 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
                     return stopMoveResult.LogError();
             }
 
-            // Only delete the download file and worker tasks when still in the download phase.
+            // Only delete the download file and worker tasks when NOT in the file-transfer or completed phase.
             // Tasks in the file-transfer phase (DownloadFinished, Moving, MoveError, etc.) already have
             // a fully-downloaded file on disk that should be preserved for the move operation.
-            if (downloadTask.DownloadTaskPhase == DownloadTaskPhase.Downloading)
+            if (
+                downloadTask.DownloadTaskPhase != DownloadTaskPhase.FileTransfer
+                && downloadTask.DownloadTaskPhase != DownloadTaskPhase.Completed
+            )
             {
                 _log.Here()
                     .Debug("Deleting partially downloaded files of {DownloadTaskFullTitle}", downloadTask.FullTitle);

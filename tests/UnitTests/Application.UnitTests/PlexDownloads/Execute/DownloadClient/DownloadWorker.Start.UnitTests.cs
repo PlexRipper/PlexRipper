@@ -164,8 +164,8 @@ public class DownloadWorkerStartUnitTests : BaseUnitTest<DownloadWorker>
             .Verifiable(Times.Once);
 
         var mockStream = new Mock<Stream>();
-        var realStream = new MemoryStream(new byte[(int)ByteSize.FromMebiBytes(40).Bytes]);
-        var callbackIndex = 0;
+        var realStream = new MemoryStream(new byte[(int)ByteSize.FromMebiBytes(10).Bytes]);
+        var hasThrown = false;
         mockStream
             .Setup(x =>
                 x.ReadAsync(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>())
@@ -173,9 +173,9 @@ public class DownloadWorkerStartUnitTests : BaseUnitTest<DownloadWorker>
             .Returns(
                 (byte[] buffer, int offset, int count, CancellationToken cancellationToken) =>
                 {
-                    callbackIndex++;
-                    if (callbackIndex % 2 == 0)
+                    if (!hasThrown)
                     {
+                        hasThrown = true;
                         throw new HttpIOException(
                             HttpRequestError.InvalidResponse,
                             $"The response ended prematurely, with at least {(int)realStream.Length} additional bytes expected.",

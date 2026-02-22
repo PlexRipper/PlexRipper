@@ -95,6 +95,9 @@ export const useLibraryStore = defineStore(StoreNames.LibraryStore, () => {
 		reSyncLibrary(libraryId: number): Observable<PlexLibraryDTO | null> {
 			return plexLibraryApi.refreshLibraryMediaEndpoint(libraryId).pipe(tap((library) => actions.updateLibrary(library.value)), switchMap((library): Observable<PlexLibraryDTO | null> => of(getters.getLibrary(library.value?.id ?? 0))));
 		},
+		cancelLibrarySync(libraryId: number) {
+			return plexLibraryApi.cancelLibrarySyncEndpoint(libraryId);
+		},
 		updateDefaultDestination(libraryId: number, folderPathId: number): void {
 			plexLibraryApi.setPlexLibraryDefaultDestinationByIdEndpoint(libraryId, folderPathId).subscribe((result) => {
 				if (result.isSuccess) {

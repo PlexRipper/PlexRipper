@@ -1,62 +1,8 @@
 <template>
 	<!--	Refresh Library Screen	-->
-	<QRow
+	<MediaOverviewRefresh
 		v-if="libraryStore.getIsLibrarySyncing(libraryId)"
-		align="start"
-		class="q-pt-xl"
-		cy="refresh-library-container"
-		full-height>
-		<QCol
-			text-align="center">
-			<ProgressComponent
-				:percentage="libraryProgress?.percentage ?? -1"
-				:text="refreshingText"
-				circular-mode
-				:indeterminate="libraryProgress?.percentage == 0"
-				class="q-my-lg" />
-			<div>
-				<QCountdown
-					class="q-my-md"
-					:value="libraryProgress?.timeRemaining ?? ''" />
-				<QRow justify="around">
-					<QCol cols="6">
-						<QRow
-							v-for="item in libraryProgress?.items"
-							:key="item.mediaType"
-							gutter="sm"
-							justify="between"
-							class="library-media-sync-progress-row q-my-sm">
-							<QCol cols="auto">
-								<QMediaTypeIcon
-									class="q-pr-sm"
-									:media-type="item.mediaType"
-									:size="20" />
-							</QCol>
-							<QCol>
-								<QProgressBar
-									:value="item.percentage"
-									:cy="`library-media-sync-progress-row-${item.mediaType}-progress-bar`" />
-							</QCol>
-							<QCol cols="1">
-								<QText
-									v-if="item.received > 0 && item.total > 0"
-									:value="`${item.received}/${item.total}`"
-									align="right"
-									:cy="`library-media-sync-progress-row-${item.mediaType}-count`" />
-							</QCol>
-						</QRow>
-						<QRow
-							v-if="(libraryProgress?.percentage ?? 0) >= 100"
-							justify="around">
-							<QCol cols="auto">
-								<QText value="Updating database with all new data, please wait" />
-							</QCol>
-						</QRow>
-					</QCol>
-				</QRow>
-			</div>
-		</QCol>
-	</QRow>
+		:library-id="libraryId" />
 	<template v-else>
 		<div class="media-overview-bar">
 			<!--	Overview bar	-->
@@ -109,7 +55,7 @@
 								<template v-else-if="mediaOverviewStore.hasNoFilterResults">
 									{{ t('components.media-overview.no-filter-results') }}
 								</template>
-								<template v-else-if="library?.syncedAt === null">
+								<template v-else-if="libraryStore.getLibrary(libraryId)?.syncedAt === null">
 									{{ t('components.media-overview.library-not-yet-synced') }}
 								</template>
 								<template v-else-if="!mediaOverviewStore.itemsLength">
@@ -138,7 +84,6 @@
 
 <script setup lang="ts">
 import Log from 'consola';
-import { get } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
 import { type DownloadMediaDTO, LibrarySyncJobStatus, PlexMediaType, ViewMode } from '@dto';
 import { DialogType } from '@enums';
@@ -152,7 +97,6 @@ import {
 	useLibraryStore,
 	useMediaOverviewBarDownloadCommandBus,
 	useMediaOverviewStore,
-	useServerStore,
 	useSettingsStore,
 } from '#imports';
 
@@ -161,24 +105,12 @@ const settingsStore = useSettingsStore();
 const mediaOverviewStore = useMediaOverviewStore();
 const downloadStore = useDownloadStore();
 const libraryStore = useLibraryStore();
-const serverStore = useServerStore();
 const dialogStore = useDialogStore();
 const backgroundJobsStore = useBackgroundJobsStore();
 
 const props = defineProps<{
 	libraryId: number;
 }>();
-
-const library = computed(() => libraryStore.getLibrary(mediaOverviewStore.libraryId));
-const libraryProgress = computed(() => libraryStore.getLibraryProgress(mediaOverviewStore.libraryId));
-
-const refreshingText = computed(() => {
-	const server = libraryStore.getServerByLibraryId(mediaOverviewStore.libraryId);
-	return t('components.media-overview.is-refreshing', {
-		library: get(library) ? libraryStore.getLibraryName(mediaOverviewStore.libraryId) : t('general.commands.unknown'),
-		server: server ? serverStore.getServerName(server.id) : t('general.commands.unknown'),
-	});
-});
 
 function resetProgress() {
 	libraryStore.updateLibraryProgress({

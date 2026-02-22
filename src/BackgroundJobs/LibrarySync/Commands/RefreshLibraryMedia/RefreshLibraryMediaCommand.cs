@@ -49,7 +49,7 @@ public class RefreshLibraryMediaCommandHandler : ICommandHandler<RefreshLibraryM
         );
 
         if (syncLibraryMediaResult.IsFailed)
-            return syncLibraryMediaResult.LogError();
+            return syncLibraryMediaResult.ToResult();
 
         // Phase 2: Insert the new / unique media metadata into the database
         var insertPlexLibraryMediaMetaDataResult = await Result.Try(() =>

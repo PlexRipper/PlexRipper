@@ -105,6 +105,11 @@ public class GetAllMediaByTypeFromPlexApiCommandHandler
 
             mediaList.AddRange(rawMediaList);
             await SendProgress(plexLibrary.Id, mediaType, startTime, progressIndex, totalSize);
+
+            if (ct.IsCancellationRequested)
+            {
+                return ResultExtensions.TaskIsCancelled(nameof(GetAllMediaByTypeFromPlexApiCommand)).LogInformation();
+            }
         }
 
         _log.Here()

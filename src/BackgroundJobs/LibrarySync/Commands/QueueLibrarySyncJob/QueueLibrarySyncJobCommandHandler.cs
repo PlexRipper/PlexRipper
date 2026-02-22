@@ -54,7 +54,12 @@ public class QueueLibrarySyncJobCommandHandler : ICommandHandler<QueueLibrarySyn
 
         // Get IDs of items to reset (completed/failed)
         var itemsToReset = existingQueues
-            .Where(x => x.Status is LibrarySyncJobStatus.Failed or LibrarySyncJobStatus.Completed)
+            .Where(x =>
+                x.Status
+                    is LibrarySyncJobStatus.Failed
+                        or LibrarySyncJobStatus.Cancelled
+                        or LibrarySyncJobStatus.Completed
+            )
             .Select(x => x.PlexLibraryId)
             .ToList();
 

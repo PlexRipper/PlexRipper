@@ -73,7 +73,20 @@ public static partial class ResultExtensions
 
     #region Check
 
-    public static bool HasException(this Result result) => result.HasError<ExceptionalError>();
+
+    extension(Result result)
+    {
+        public bool HasException => result.HasError<ExceptionalError>();
+
+        public bool IsCancelled =>
+            result.Errors.OfType<ExceptionalError>().Any(e => e.Exception is OperationCanceledException);
+    }
+
+    extension<T>(Result<T> result)
+    {
+        public bool IsCancelled =>
+            result.Errors.OfType<ExceptionalError>().Any(e => e.Exception is OperationCanceledException);
+    }
 
     #endregion
 }

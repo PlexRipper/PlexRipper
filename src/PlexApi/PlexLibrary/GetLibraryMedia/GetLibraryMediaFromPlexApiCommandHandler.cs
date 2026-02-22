@@ -9,29 +9,35 @@ namespace Reaparr.PlexApi;
 /// This service is an extra layer of abstraction to convert incoming DTO's from the PlexAPI to workable entities.
 /// This was done in order to keep all PlexApi related DTO's in the infrastructure layer.
 /// </summary>
-public class GetLibraryMediaCommandHandler : ICommandHandler<GetLibraryMediaCommand, Result<LibraryMetadata>>
+public class GetLibraryMediaFromPlexApiCommandHandler
+    : ICommandHandler<GetLibraryMediaFromPlexApiCommand, Result<LibraryMetadata>>
 {
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
     private readonly ILibrarySyncProgressStore _librarySyncProgressStore;
 
-    public GetLibraryMediaCommandHandler(
+    public GetLibraryMediaFromPlexApiCommandHandler(
         ILogger log,
         ICommandExecutor commandExecutor,
         ILibrarySyncProgressStore librarySyncProgressStore
     )
     {
-        _log = log.ForContext<GetLibraryMediaCommandHandler>();
+        _log = log.ForContext<GetLibraryMediaFromPlexApiCommandHandler>();
         _commandExecutor = commandExecutor;
         _librarySyncProgressStore = librarySyncProgressStore;
     }
 
-    public async Task<Result<LibraryMetadata>> ExecuteAsync(GetLibraryMediaCommand command, CancellationToken ct)
+    public async Task<Result<LibraryMetadata>> ExecuteAsync(
+        GetLibraryMediaFromPlexApiCommand fromPlexApiCommand,
+        CancellationToken ct
+    )
     {
-        var plexLibrary = command.PlexLibrary;
+        var plexLibrary = fromPlexApiCommand.PlexLibrary;
 
         // Retrieve an updated version of the PlexLibrary
-        var plexLibraries = await _commandExecutor.Send(new GetLibrarySectionsCommand(plexLibrary.PlexServerId), ct);
+        var plexLibraries = await Result.Try(() =>
+            _commandExecutor.Send(new GetLibrarySectionsCommand(plexLibrary.PlexServerId), ct)
+        );
 
         if (plexLibraries.IsFailed)
             return plexLibraries.ToResult();
@@ -60,9 +66,11 @@ public class GetLibraryMediaCommandHandler : ICommandHandler<GetLibraryMediaComm
 
         await _librarySyncProgressStore.StartAsync(updatedPlexLibrary.Id, updatedPlexLibrary.Type, ct);
 
-        var mediaListResult = await _commandExecutor.Send(
-            new GetAllMediaByTypeFromPlexApiCommand(updatedPlexLibrary, updatedPlexLibrary.Type),
-            ct
+        var mediaListResult = await Result.Try(() =>
+            _commandExecutor.Send(
+                new GetAllMediaByTypeFromPlexApiCommand(updatedPlexLibrary, updatedPlexLibrary.Type),
+                ct
+            )
         );
 
         if (mediaListResult.IsFailed)

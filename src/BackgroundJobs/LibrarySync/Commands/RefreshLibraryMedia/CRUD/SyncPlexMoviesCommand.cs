@@ -7,6 +7,10 @@ using Reaparr.Data.Contracts;
 
 namespace Reaparr.BackgroundJobs;
 
+/// <summary>
+/// Syncs the PlexMovies of a PlexLibrary by first deleting all existing media and then reinserting the new media.
+/// In addition to syncing the PlexMovies, also syncs the related entities such as actors, genres and countries.
+/// </summary>
 public record SyncPlexMoviesCommand(InsertMediaMetaDataCommandResponse LibraryMetadata)
     : ICommand<Result<CrudMoviesReport>>;
 
@@ -52,71 +56,80 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
         CancellationToken cancellationToken
     )
     {
-        try
+        var plexLibraryId = command.LibraryMetadata.PlexLibraryId;
+        var plexServerId = command.LibraryMetadata.PlexLibrary.PlexServerId;
+
+        var libraryName = await _dbContext.GetPlexLibraryNameById(plexLibraryId, cancellationToken);
+
+        _log.Here()
+            .Debug(
+                "Starting syncing of movies in library: {PlexLibraryName} with id: {PlexLibraryId} by first removing all media and then reinserting it",
+                libraryName,
+                plexLibraryId
+            );
+
+        var stopWatch = Stopwatch.StartNew();
+
+        // Point of no return: once RemoveMedia starts, old data is gone.
+        // Always run to completion regardless of cancellation to avoid partial deletions.
+        await RemoveMedia(plexLibraryId, CancellationToken.None);
+
+        var plexMovies = command.LibraryMetadata.PlexLibrary.Movies.ToList();
+        var insertResult = await Result.Try(() =>
+            _dbContext.BulkInsertPlexMoviesAsync(plexMovies, plexServerId, plexLibraryId, ct: cancellationToken)
+        );
+        if (insertResult.IsCancelled)
         {
-            var plexLibraryId = command.LibraryMetadata.PlexLibraryId;
-            var plexServerId = command.LibraryMetadata.PlexLibrary.PlexServerId;
-            var libraryName = await _dbContext.GetPlexLibraryNameById(plexLibraryId, cancellationToken);
-
-            _log.Here()
-                .Debug(
-                    "Starting syncing of movies in library: {PlexLibraryName} with id: {PlexLibraryId} by first removing all media and then reinserting it",
-                    libraryName,
-                    plexLibraryId
-                );
-
-            var stopWatch = Stopwatch.StartNew();
-
-            await RemoveMedia(plexLibraryId, cancellationToken);
-
-            var plexMovies = command.LibraryMetadata.PlexLibrary.Movies.ToList();
-            await _dbContext.BulkInsertPlexMoviesAsync(plexMovies, plexServerId, plexLibraryId, ct: cancellationToken);
-            _report.CreatedMovies = plexMovies.Count;
-
-            var mediaSize = plexMovies.Sum(x => x.MediaSize);
-            await _dbContext.SetMovieMediaMetrics(plexLibraryId, plexMovies.Count, mediaSize);
-
-            var syncActorResult = await SyncMovieActors(
-                plexMovies,
-                command.LibraryMetadata.PlexActors,
-                plexLibraryId,
+            _log.Information(
+                "Insertion of movies was cancelled for library: {PlexLibraryName} with id: {PlexLibraryId}. Old media data has already been removed and cannot be restored. Cancellation was requested: {CancellationRequested}",
                 libraryName,
-                cancellationToken
-            );
-
-            var syncGenreResult = await SyncMovieGenres(
-                plexMovies,
-                command.LibraryMetadata.PlexGenres,
                 plexLibraryId,
-                libraryName,
-                cancellationToken
+                cancellationToken.IsCancellationRequested
             );
-
-            var syncCountriesResult = await SyncMovieCountries(
-                plexMovies,
-                command.LibraryMetadata.PlexCountries,
-                plexLibraryId,
-                libraryName,
-                cancellationToken
-            );
-
-            var mergeResult = Result.Merge(syncActorResult, syncGenreResult, syncCountriesResult);
-            if (mergeResult.IsFailed)
-            {
-                _log.Here().Error("Failed to sync movie metadata: {Error}", mergeResult.Errors);
-                return mergeResult.LogError();
-            }
-
-            stopWatch.StopAndLog($"Finished media syncing plexLibrary: {libraryName} with id: {plexLibraryId}");
-
-            _log.Here().Debug(_report.ToString());
-
-            return Result.Ok(_report);
+            await RemoveMedia(plexLibraryId, CancellationToken.None);
+            return insertResult;
         }
-        catch (Exception e)
+
+        _report.CreatedMovies = plexMovies.Count;
+
+        var mediaSize = plexMovies.Sum(x => x.MediaSize);
+        await _dbContext.SetMovieMediaMetrics(plexLibraryId, plexMovies.Count, mediaSize);
+
+        var syncCountriesResult = await SyncMovieCountries(
+            plexMovies,
+            command.LibraryMetadata.PlexCountries,
+            plexLibraryId,
+            libraryName,
+            cancellationToken
+        );
+
+        var syncGenreResult = await SyncMovieGenres(
+            plexMovies,
+            command.LibraryMetadata.PlexGenres,
+            plexLibraryId,
+            libraryName,
+            cancellationToken
+        );
+
+        var syncActorResult = await SyncMovieActors(
+            plexMovies,
+            command.LibraryMetadata.PlexActors,
+            plexLibraryId,
+            libraryName,
+            cancellationToken
+        );
+
+        var mergeResult = Result.Merge(syncActorResult, syncGenreResult, syncCountriesResult);
+        if (mergeResult.IsFailed)
         {
-            return Result.Fail(new ExceptionalError(e)).LogError();
+            return mergeResult.LogError();
         }
+
+        stopWatch.StopAndLog($"Finished media syncing plexLibrary: {libraryName} with id: {plexLibraryId}");
+
+        _log.Here().Debug(_report.ToString());
+
+        return Result.Ok(_report);
     }
 
     private async Task<Result<int>> SyncMovieActors(

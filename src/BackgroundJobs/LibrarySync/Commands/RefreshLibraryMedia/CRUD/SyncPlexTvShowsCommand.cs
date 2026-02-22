@@ -8,25 +8,9 @@ using Reaparr.Data.Contracts;
 namespace Reaparr.BackgroundJobs;
 
 /// <summary>
-/// Command to fully synchronize TV show media for a specific Plex library using the
-/// provided metadata. This is a destructive replace operation that:
-/// - Removes all existing TV show media (shows, seasons, episodes) and related data for the library
-/// - Bulk-inserts the TV shows from <paramref name="LibraryMetadata"/>
-/// - Updates library media metrics (created counts and total media size)
-/// - Rebuilds TV show relations for genres, countries, and actors based on the supplied dictionaries
-/// The operation uses high-throughput bulk operations (EFCore.BulkExtensions) and logs progress
-/// and timings for observability. Validation ensures a consistent library and server context
-/// and a well-formed hierarchy of shows → seasons → episodes before executing.
+/// Syncs the PlexTvShows of a PlexLibrary by first deleting all existing media and then reinserting the new media.
+/// In addition to syncing the PlexTvShows, also syncs the related entities such as actors, genres and countries.
 /// </summary>
-/// <param name="LibraryMetadata">
-/// Aggregated payload containing the target <c>PlexLibrary</c> (with <c>TvShows</c>) and the
-/// lookup dictionaries for <c>PlexGenres</c>, <c>PlexCountries</c>, and <c>PlexActors</c> used to
-/// map per-show keys to persistent ids.
-/// </param>
-/// <returns>
-/// A <see cref="Result{T}"/> wrapping <see cref="BulkInsertTvShowsRapport"/> with counts of created and
-/// deleted shows, seasons, and episodes, reflecting the effects of the synchronization.
-/// </returns>
 public record SyncPlexTvShowsCommand(InsertMediaMetaDataCommandResponse LibraryMetadata)
     : ICommand<Result<BulkInsertTvShowsRapport>>;
 
@@ -115,86 +99,76 @@ public class SyncPlexTvShowsCommandHandler : ICommandHandler<SyncPlexTvShowsComm
         CancellationToken cancellationToken
     )
     {
-        try
+        var plexLibraryId = command.LibraryMetadata.PlexLibraryId;
+
+        var plexLibraryName = await _dbContext.GetPlexLibraryNameById(
+            plexLibraryId,
+            cancellationToken: cancellationToken
+        );
+        var plexServerId = await _dbContext.GetPlexServerIdFromPlexLibraryId(plexLibraryId);
+
+        if (string.IsNullOrWhiteSpace(plexLibraryName))
+            return ResultExtensions.EntityNotFound(nameof(command.LibraryMetadata.PlexLibrary), plexLibraryId);
+
+        _log.Here()
+            .Debug(
+                "Starting syncing of tv shows in library: {PlexLibraryName} with id:  {PlexLibraryId} by first removing all media and then reinserting it",
+                plexLibraryName,
+                plexLibraryId
+            );
+
+        var stopWatch = Stopwatch.StartNew();
+
+        var removeRapport = await RemoveMedia(plexLibraryId, CancellationToken.None);
+
+        var plexTvShows = command.LibraryMetadata.PlexLibrary.TvShows.ToList();
+
+        var bulkInsertRapportResult = await Result.Try(() =>
+            _dbContext.BulkInsertPlexTvShowsAsync(plexTvShows, plexServerId, plexLibraryId, cancellationToken)
+        );
+
+        if (bulkInsertRapportResult.IsFailed)
         {
-            var plexLibraryId = command.LibraryMetadata.PlexLibraryId;
-
-            var plexLibraryName = await _dbContext.GetPlexLibraryNameById(
-                plexLibraryId,
-                cancellationToken: cancellationToken
-            );
-            var plexServerId = await _dbContext.GetPlexServerIdFromPlexLibraryId(plexLibraryId);
-
-            if (string.IsNullOrWhiteSpace(plexLibraryName))
-                return ResultExtensions.EntityNotFound(nameof(command.LibraryMetadata.PlexLibrary), plexLibraryId);
-
-            _log.Here()
-                .Debug(
-                    "Starting syncing of tv shows in library: {PlexLibraryName} with id:  {PlexLibraryId} by first removing all media and then reinserting it",
-                    plexLibraryName,
-                    plexLibraryId
-                );
-
-            var stopWatch = Stopwatch.StartNew();
-
-            var removeRapport = await RemoveMedia(plexLibraryId, cancellationToken);
-
-            var plexTvShows = command.LibraryMetadata.PlexLibrary.TvShows.ToList();
-
-            var bulkInsertRapportResult = await _dbContext.BulkInsertPlexTvShowsAsync(
-                plexTvShows,
-                plexServerId,
-                plexLibraryId,
-                cancellationToken
-            );
-
-            if (bulkInsertRapportResult.IsFailed)
-            {
-                stopWatch.Stop();
-                return bulkInsertRapportResult.LogError();
-            }
-
-            var bulkInsertRapport = bulkInsertRapportResult.Value;
-            bulkInsertRapport.DeletedTvShows = removeRapport.DeletedTvShows;
-            bulkInsertRapport.DeletedSeasons = removeRapport.DeletedSeasons;
-            bulkInsertRapport.DeletedEpisodes = removeRapport.DeletedEpisodes;
-
-            // Update counts in PlexLibrary
-            var mediaSize = plexTvShows.Sum(x => x.MediaSize);
-            await _dbContext.SetTvShowMediaMetrics(
-                plexLibraryId,
-                bulkInsertRapport.CreatedTvShows,
-                bulkInsertRapport.CreatedSeasons,
-                bulkInsertRapport.CreatedEpisodes,
-                mediaSize
-            );
-
-            // Sync metadata such as Countries, Roles and Genre using separate DbContext instances
-            // to avoid EF Core DbContext thread-safety issues when running in parallel.
-            var genreDict = command.LibraryMetadata.PlexGenres;
-            var countryDict = command.LibraryMetadata.PlexCountries;
-            var actorDict = command.LibraryMetadata.PlexActors;
-
-            ResultBase[] results = await Task.WhenAll(
-                SyncTvShowGenres(plexTvShows, genreDict, plexLibraryId, plexLibraryName, cancellationToken),
-                SyncTvShowCountries(plexTvShows, countryDict, plexLibraryId, plexLibraryName, cancellationToken),
-                SyncTvShowActors(plexTvShows, actorDict, plexLibraryId, plexLibraryName, cancellationToken)
-            );
-
-            var mergeResult = Result.Merge(results);
-            if (mergeResult.IsFailed)
-                return mergeResult.LogError();
-
-            stopWatch.StopAndLog($"Finished media syncing plexLibrary: {plexLibraryName} with id: {plexLibraryId}");
-
-            _log.Here().Debug(bulkInsertRapport.ToString());
-
-            return Result.Ok(bulkInsertRapport);
+            stopWatch.Stop();
+            return bulkInsertRapportResult.LogError();
         }
-        catch (Exception e)
-        {
-            return Result.Fail(new ExceptionalError(e)).LogError();
-        }
+
+        var bulkInsertRapport = bulkInsertRapportResult.Value;
+        bulkInsertRapport.DeletedTvShows = removeRapport.DeletedTvShows;
+        bulkInsertRapport.DeletedSeasons = removeRapport.DeletedSeasons;
+        bulkInsertRapport.DeletedEpisodes = removeRapport.DeletedEpisodes;
+
+        // Update counts in PlexLibrary
+        var mediaSize = plexTvShows.Sum(x => x.MediaSize);
+        await _dbContext.SetTvShowMediaMetrics(
+            plexLibraryId,
+            bulkInsertRapport.CreatedTvShows,
+            bulkInsertRapport.CreatedSeasons,
+            bulkInsertRapport.CreatedEpisodes,
+            mediaSize
+        );
+
+        // Sync metadata such as Countries, Roles and Genre using separate DbContext instances
+        // to avoid EF Core DbContext thread-safety issues when running in parallel.
+        var genreDict = command.LibraryMetadata.PlexGenres;
+        var countryDict = command.LibraryMetadata.PlexCountries;
+        var actorDict = command.LibraryMetadata.PlexActors;
+
+        ResultBase[] results = await Task.WhenAll(
+            SyncTvShowGenres(plexTvShows, genreDict, plexLibraryId, plexLibraryName, cancellationToken),
+            SyncTvShowCountries(plexTvShows, countryDict, plexLibraryId, plexLibraryName, cancellationToken),
+            SyncTvShowActors(plexTvShows, actorDict, plexLibraryId, plexLibraryName, cancellationToken)
+        );
+
+        var mergeResult = Result.Merge(results);
+        if (mergeResult.IsFailed)
+            return mergeResult.LogError();
+
+        stopWatch.StopAndLog($"Finished media syncing plexLibrary: {plexLibraryName} with id: {plexLibraryId}");
+
+        _log.Here().Debug(bulkInsertRapport.ToString());
+
+        return Result.Ok(bulkInsertRapport);
     }
 
     private async Task<Result> SyncTvShowGenres(

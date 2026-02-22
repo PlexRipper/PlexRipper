@@ -1,5 +1,21 @@
 Reaparr Changelog
 
+# [0.36.0-dev.5](https://github.com/Reaparr/Reaparr/compare/v0.36.0-dev.4...v0.36.0-dev.5) (2026-02-22)
+
+
+### Bug Fixes
+
+* **BackgroundJobs:** Dispatch CheckQueuedPlexLibraryToSyncCommand when server is offline ([f57ad23](https://github.com/Reaparr/Reaparr/commit/f57ad2391bec3f092af9c183598df336d1e7c9eb))
+* **Application:** Fix flaky DownloadWorker retry test due to Polly backoff accumulation ([d16bf1d](https://github.com/Reaparr/Reaparr/commit/d16bf1d2612911dae6e4ff2e78b2a6d78bfb4573))
+* **WebAPI:** Fix O(n×m) hang in ToHashKeyDictionary during library sync ([#533](https://github.com/Reaparr/Reaparr/issues/533)) ([76687fc](https://github.com/Reaparr/Reaparr/commit/76687fce3d12bb1c464963b78e207eb61aa0057d))
+* **WebAPI:** Fix O(n×m) hang in ToHashKeyDictionary during library sync ([87b6904](https://github.com/Reaparr/Reaparr/commit/87b6904c389a7c7f8f77be7225bbf09122693d73))
+
+
+### Features
+
+* **Web-UI:** Added cancel button to the MediaOverview screen when refreshing ([2d94b82](https://github.com/Reaparr/Reaparr/commit/2d94b823d80e52b692f78152cca3c5b2cb55291e))
+* **WebAPI:** The LibrarySync process can now be cancelled from the MediaOverview refresh screen ([5ef3dee](https://github.com/Reaparr/Reaparr/commit/5ef3dee4fd3ecffbe86f8ee61d493914a2183dac))
+
 # [0.36.0-dev.4](https://github.com/Reaparr/Reaparr/compare/v0.36.0-dev.3...v0.36.0-dev.4) (2026-02-21)
 
 

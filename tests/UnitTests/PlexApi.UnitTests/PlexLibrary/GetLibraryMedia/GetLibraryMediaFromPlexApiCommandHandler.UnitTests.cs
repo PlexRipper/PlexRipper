@@ -71,6 +71,16 @@ public class GetLibraryMediaFromPlexApiCommandHandlerUnitTests : BaseUnitTest<Ge
                 x => x.StartAsync(It.IsAny<int>(), It.IsAny<PlexMediaType>(), It.IsAny<CancellationToken>()),
                 Times.Never()
             );
+        Mock.Mock<ILibrarySyncProgressStore>()
+            .Verify(
+                x => x.UpdateErrorAsync(It.IsAny<int>(), It.IsAny<Result>(), It.IsAny<CancellationToken>()),
+                Times.Never()
+            );
+        Mock.Mock<ILibrarySyncProgressStore>()
+            .Verify(
+                x => x.UpdateItemAsync(It.IsAny<int>(), It.IsAny<LibraryProgressItem>(), It.IsAny<CancellationToken>()),
+                Times.Never()
+            );
     }
 
     [Fact]
@@ -198,6 +208,16 @@ public class GetLibraryMediaFromPlexApiCommandHandlerUnitTests : BaseUnitTest<Ge
                 x => x.StartAsync(plexLibrary.Id, PlexMediaType.Movie, It.IsAny<CancellationToken>()),
                 Times.Once()
             );
+        Mock.Mock<ILibrarySyncProgressStore>()
+            .Verify(
+                x => x.UpdateErrorAsync(It.IsAny<int>(), It.IsAny<Result>(), It.IsAny<CancellationToken>()),
+                Times.Never()
+            );
+        Mock.Mock<ILibrarySyncProgressStore>()
+            .Verify(
+                x => x.UpdateItemAsync(It.IsAny<int>(), It.IsAny<LibraryProgressItem>(), It.IsAny<CancellationToken>()),
+                Times.Never()
+            );
     }
 
     [Theory]
@@ -290,6 +310,17 @@ public class GetLibraryMediaFromPlexApiCommandHandlerUnitTests : BaseUnitTest<Ge
         result.IsSuccess.ShouldBeTrue();
         result.Value.Library.Id.ShouldBe(plexLibrary.Id);
         result.Value.Library.PlexServerId.ShouldBe(plexLibrary.PlexServerId);
+
+        Mock.Mock<ILibrarySyncProgressStore>()
+            .Verify(
+                x => x.StartAsync(plexLibrary.Id, PlexMediaType.Movie, It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
+        Mock.Mock<ILibrarySyncProgressStore>()
+            .Verify(
+                x => x.UpdateErrorAsync(It.IsAny<int>(), It.IsAny<Result>(), It.IsAny<CancellationToken>()),
+                Times.Never()
+            );
     }
 
     [Fact]
@@ -324,5 +355,16 @@ public class GetLibraryMediaFromPlexApiCommandHandlerUnitTests : BaseUnitTest<Ge
 
         var expectedTitles = mediaItems.OrderByNatural(x => x.TitleSort).Select(x => x.Title).ToList();
         movies.Select(x => x.Title).ShouldBe(expectedTitles);
+
+        Mock.Mock<ILibrarySyncProgressStore>()
+            .Verify(
+                x => x.StartAsync(plexLibrary.Id, PlexMediaType.Movie, It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
+        Mock.Mock<ILibrarySyncProgressStore>()
+            .Verify(
+                x => x.UpdateErrorAsync(It.IsAny<int>(), It.IsAny<Result>(), It.IsAny<CancellationToken>()),
+                Times.Never()
+            );
     }
 }

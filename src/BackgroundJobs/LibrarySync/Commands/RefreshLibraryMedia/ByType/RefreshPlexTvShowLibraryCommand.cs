@@ -16,13 +16,19 @@ public class RefreshPlexTvShowLibraryCommandValidator : AbstractValidator<Refres
     {
         RuleFor(x => x.LibraryMetadata).NotNull();
         RuleFor(x => x.LibraryMetadata.PlexLibrary).NotNull();
-        RuleFor(x => x.LibraryMetadata.PlexLibrary.Type)
-            .Equal(PlexMediaType.TvShow)
-            .WithMessage("PlexLibrary must be of type TvShow to continue with the refresh process.");
-        RuleFor(x => x.LibraryMetadata.PlexLibrary.TvShows).NotNull();
-        RuleFor(x => x.LibraryMetadata.PlexLibrary.TvShows.Count)
-            .GreaterThan(0)
-            .WithMessage("PlexLibrary must contain TV shows to continue with the refresh process.");
+        When(
+            x => x.LibraryMetadata?.PlexLibrary != null,
+            () =>
+            {
+                RuleFor(x => x.LibraryMetadata.PlexLibrary.Type)
+                    .Equal(PlexMediaType.TvShow)
+                    .WithMessage("PlexLibrary must be of type TvShow to continue with the refresh process.");
+                RuleFor(x => x.LibraryMetadata.PlexLibrary.TvShows).NotNull();
+                RuleFor(x => x.LibraryMetadata.PlexLibrary.TvShows.Count)
+                    .GreaterThan(0)
+                    .WithMessage("PlexLibrary must contain TV shows to continue with the refresh process.");
+            }
+        );
         RuleFor(x => x.LibraryMetadata.PlexLibraryId).GreaterThan(0);
     }
 }

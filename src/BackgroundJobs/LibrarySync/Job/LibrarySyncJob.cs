@@ -87,9 +87,7 @@ public class LibrarySyncJob : IJob
         // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
 
         // Execute the library sync command
-        var result = await Result.Try(() =>
-            _commandExecutor.Send(new RefreshLibraryMediaCommand(_libraryId), context.CancellationToken)
-        );
+        var result = await _commandExecutor.Send(new RefreshLibraryMediaCommand(_libraryId), context.CancellationToken);
 
         if (result.IsCancelled)
         {
@@ -123,7 +121,6 @@ public class LibrarySyncJob : IJob
                 errorMessage: result.Errors.FirstOrDefault()?.Message,
                 isServerOffline: isServerOffline
             );
-            return;
         }
         else
         {

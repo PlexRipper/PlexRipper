@@ -90,6 +90,19 @@ public class SyncPlexMoviesCommandHandler : ICommandHandler<SyncPlexMoviesComman
             return insertResult;
         }
 
+        if (insertResult.IsFailed)
+        {
+            _log.Here()
+                .Error(
+                    "Failed to insert movies for library: {PlexLibraryName} with id: {PlexLibraryId}. Error: {Error}",
+                    libraryName,
+                    plexLibraryId,
+                    insertResult.Errors
+                );
+            await RemoveMedia(plexLibraryId, CancellationToken.None);
+            return insertResult;
+        }
+
         _report.CreatedMovies = plexMovies.Count;
 
         var mediaSize = plexMovies.Sum(x => x.MediaSize);

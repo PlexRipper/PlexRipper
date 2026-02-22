@@ -44,26 +44,23 @@ public class RefreshLibraryMediaCommandHandler : ICommandHandler<RefreshLibraryM
             return ResultExtensions.EntityNotFound(nameof(plexLibrary), command.PlexLibraryId);
 
         // Phase 1: Retrieve top-level media belonging to this PlexLibrary
-        var syncLibraryMediaResult = await Result.Try(() =>
-            _commandExecutor.Send(new GetLibraryMediaFromPlexApiCommand(plexLibrary), ct)
-        );
+        var syncLibraryMediaResult = await _commandExecutor.Send(new GetLibraryMediaFromPlexApiCommand(plexLibrary), ct);
 
         if (syncLibraryMediaResult.IsFailed)
             return syncLibraryMediaResult.ToResult();
 
         // Phase 2: Insert the new / unique media metadata into the database
-        var insertPlexLibraryMediaMetaDataResult = await Result.Try(() =>
-            _commandExecutor.Send(new InsertMediaMetaDataCommand(syncLibraryMediaResult.Value), ct)
+        var insertPlexLibraryMediaMetaDataResult = await _commandExecutor.Send(
+            new InsertMediaMetaDataCommand(syncLibraryMediaResult.Value),
+            ct
         );
         if (insertPlexLibraryMediaMetaDataResult.IsFailed)
             return insertPlexLibraryMediaMetaDataResult.LogError();
 
         // Phase 3: Add relations to the metadata such as Country, Actors and Genres for the library
-        var syncPlexLibraryMediaMetaDataResult = await Result.Try(() =>
-            _commandExecutor.Send(
-                new SyncPlexLibraryMediaMetaDataCommand(insertPlexLibraryMediaMetaDataResult.Value),
-                ct
-            )
+        var syncPlexLibraryMediaMetaDataResult = await _commandExecutor.Send(
+            new SyncPlexLibraryMediaMetaDataCommand(insertPlexLibraryMediaMetaDataResult.Value),
+            ct
         );
 
         if (syncPlexLibraryMediaMetaDataResult.IsFailed)

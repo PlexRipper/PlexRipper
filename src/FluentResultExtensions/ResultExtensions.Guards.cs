@@ -69,11 +69,27 @@ public static partial class ResultExtensions
     public static Result EntityNotFound(string entityType, Guid guid) =>
         Create404NotFoundResult($"The entity of type {entityType} with id {guid} could not be found");
 
+    public static Result TaskIsCancelled(string taskName) =>
+        Result.Fail(new ExceptionalError(new OperationCanceledException($"The task {taskName} was cancelled")));
+
     #endregion
 
     #region Check
 
-    public static bool HasException(this Result result) => result.HasError<ExceptionalError>();
+
+    extension(Result result)
+    {
+        public bool HasException => result.HasError<ExceptionalError>();
+
+        public bool IsCancelled =>
+            result.Errors.OfType<ExceptionalError>().Any(e => e.Exception is OperationCanceledException);
+    }
+
+    extension<T>(Result<T> result)
+    {
+        public bool IsCancelled =>
+            result.Errors.OfType<ExceptionalError>().Any(e => e.Exception is OperationCanceledException);
+    }
 
     #endregion
 }

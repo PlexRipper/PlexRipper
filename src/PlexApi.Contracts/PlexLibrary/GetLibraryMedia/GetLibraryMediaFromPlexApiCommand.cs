@@ -7,4 +7,4 @@ namespace Reaparr.PlexApi.Contracts;
 /// This service is an extra layer of abstraction to convert incoming DTO's from the PlexAPI to workable entities.
 /// This was done in order to keep all PlexApi related DTO's in the infrastructure layer.
 /// </summary>
-public record GetLibraryMediaCommand(PlexLibrary PlexLibrary) : ICommand<Result<LibraryMetadata>>;
+public record GetLibraryMediaFromPlexApiCommand(PlexLibrary PlexLibrary) : ICommand<Result<LibraryMetadata>>;

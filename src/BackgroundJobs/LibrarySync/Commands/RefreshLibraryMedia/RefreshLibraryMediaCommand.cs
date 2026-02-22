@@ -44,10 +44,10 @@ public class RefreshLibraryMediaCommandHandler : ICommandHandler<RefreshLibraryM
             return ResultExtensions.EntityNotFound(nameof(plexLibrary), command.PlexLibraryId);
 
         // Phase 1: Retrieve top-level media belonging to this PlexLibrary
-        var syncLibraryMediaResult = await _commandExecutor.Send(new GetLibraryMediaCommand(plexLibrary), ct);
+        var syncLibraryMediaResult = await _commandExecutor.Send(new GetLibraryMediaFromPlexApiCommand(plexLibrary), ct);
 
         if (syncLibraryMediaResult.IsFailed)
-            return syncLibraryMediaResult.LogError();
+            return syncLibraryMediaResult.ToResult();
 
         // Phase 2: Insert the new / unique media metadata into the database
         var insertPlexLibraryMediaMetaDataResult = await _commandExecutor.Send(

@@ -488,6 +488,7 @@ export enum LibrarySyncJobStatus {
   Processing = "Processing",
   Completed = "Completed",
   Failed = "Failed",
+  Cancelled = "Cancelled",
 }
 
 export interface LibrarySyncProgressDTO {

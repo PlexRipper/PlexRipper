@@ -76,18 +76,25 @@ public class InsertMediaMetaDataCommandHandler
         var genres = command.LibraryMetadata.Genres;
         var countries = command.LibraryMetadata.Countries;
 
+        _log.Here().Debug("[InsertMetaData] Starting InsertGenres ({Count} items)", genres.Count);
         var syncGenresResult = await InsertGenres(genres, ct);
+        _log.Here().Debug("[InsertMetaData] InsertGenres done. IsFailed={IsFailed}", syncGenresResult.IsFailed);
         if (syncGenresResult.IsFailed)
             return syncGenresResult.ToResult();
 
+        _log.Here().Debug("[InsertMetaData] Starting InsertCountries ({Count} items)", countries.Count);
         var syncCountriesResult = await InsertCountries(countries, ct);
+        _log.Here().Debug("[InsertMetaData] InsertCountries done. IsFailed={IsFailed}", syncCountriesResult.IsFailed);
         if (syncCountriesResult.IsFailed)
             return syncCountriesResult.ToResult();
 
+        _log.Here().Debug("[InsertMetaData] Starting InsertPlexActors ({Count} items)", roles.Count);
         var syncRolesResult = await InsertPlexActors(roles, ct);
+        _log.Here().Debug("[InsertMetaData] InsertPlexActors done. IsFailed={IsFailed}", syncRolesResult.IsFailed);
         if (syncRolesResult.IsFailed)
             return syncRolesResult.ToResult();
 
+        _log.Here().Debug("[InsertMetaData] Building response object");
         return Result.Ok(
             new InsertMediaMetaDataCommandResponse(command.LibraryMetadata.Library)
             {
@@ -129,6 +136,11 @@ public class InsertMediaMetaDataCommandHandler
         // Chunk the existingKeys query to avoid hitting SQLite IN-clause parameter limits
         var incomingKeys = newPlexActors.Select(x => x.Key).ToList();
         var existingIdByKey = new Dictionary<string, int>(newPlexActors.Count);
+        _log.Here()
+            .Debug(
+                "[InsertMetaData] Starting {ChunkCount} DB chunk queries for actors",
+                (incomingKeys.Count + CHUNK_SIZE - 1) / CHUNK_SIZE
+            );
         foreach (var chunk in incomingKeys.Chunk(CHUNK_SIZE))
         {
             var found = await _dbContext
@@ -139,6 +151,7 @@ public class InsertMediaMetaDataCommandHandler
             foreach (var a in found)
                 existingIdByKey[a.Key] = a.Id;
         }
+        _log.Here().Debug("[InsertMetaData] DB chunk queries for actors done");
 
         _log.Here()
             .Debug(
@@ -152,20 +165,13 @@ public class InsertMediaMetaDataCommandHandler
 
         var insertResult = await Result.Try(async Task () =>
         {
-            try
+            foreach (var chunk in toInsert.Chunk(CHUNK_SIZE))
             {
-                foreach (var chunk in toInsert.Chunk(CHUNK_SIZE))
-                {
-                    _dbContext.PlexActors.AddRange(chunk);
-                    await _dbContext.SaveChangesAsync(ct);
-                    foreach (var a in chunk)
-                        existingIdByKey[a.Key] = a.Id;
-                    _dbContext.ClearChangeTracker();
-                }
-            }
-            catch (OperationCanceledException)
-            {
-                throw;
+                _dbContext.PlexActors.AddRange(chunk);
+                await _dbContext.SaveChangesAsync(ct);
+                foreach (var a in chunk)
+                    existingIdByKey[a.Key] = a.Id;
+                _dbContext.ClearChangeTracker();
             }
         });
 
@@ -179,6 +185,13 @@ public class InsertMediaMetaDataCommandHandler
                 );
             return insertResult.LogError();
         }
+
+        _log.Here()
+            .Debug(
+                "Finished inserting new {NameOfPlexActor}, now building result dictionary with {TotalCount} total",
+                nameof(PlexActor),
+                existingIdByKey.Count
+            );
 
         // Build result dictionary from merged Id map — avoids re-fetching all actors from DB
         var result = new Dictionary<string, PlexActor>(newPlexActors.Count);
@@ -200,12 +213,9 @@ public class InsertMediaMetaDataCommandHandler
             result[actor.Key] = actor;
         }
 
-        // Build the final dictionary keyed by the source DTO hash keys
-        var resultDict = result.Values.ToList().ToHashKeyDictionary(sourceList);
-
         stopWatch.StopAndLog($"Finished inserting {newPlexActors.Count} {nameof(PlexActor)} for library");
 
-        return Result.Ok(resultDict);
+        return Result.Ok(result);
     }
 
     private async Task<Result<Dictionary<string, PlexGenre>>> InsertGenres(
@@ -261,20 +271,13 @@ public class InsertMediaMetaDataCommandHandler
 
         var insertResult = await Result.Try(async Task () =>
         {
-            try
+            foreach (var chunk in toInsert.Chunk(CHUNK_SIZE))
             {
-                foreach (var chunk in toInsert.Chunk(CHUNK_SIZE))
-                {
-                    _dbContext.PlexGenres.AddRange(chunk);
-                    await _dbContext.SaveChangesAsync(ct);
-                    foreach (var g in chunk)
-                        existingIdByKey[g.Key] = g.Id;
-                    _dbContext.ClearChangeTracker();
-                }
-            }
-            catch (OperationCanceledException)
-            {
-                throw;
+                _dbContext.PlexGenres.AddRange(chunk);
+                await _dbContext.SaveChangesAsync(ct);
+                foreach (var g in chunk)
+                    existingIdByKey[g.Key] = g.Id;
+                _dbContext.ClearChangeTracker();
             }
         });
 
@@ -308,12 +311,9 @@ public class InsertMediaMetaDataCommandHandler
             result[genre.Key] = genre;
         }
 
-        // Build the final dictionary keyed by the source DTO hash keys
-        var resultDict = result.Values.ToList().ToHashKeyDictionary(sourceList);
-
         stopWatch.StopAndLog($"Finished inserting {newPlexGenres.Count} {nameof(PlexGenre)}");
 
-        return Result.Ok(resultDict);
+        return Result.Ok(result);
     }
 
     private async Task<Result<Dictionary<string, PlexCountry>>> InsertCountries(
@@ -372,20 +372,13 @@ public class InsertMediaMetaDataCommandHandler
 
         var insertResult = await Result.Try(async Task () =>
         {
-            try
+            foreach (var chunk in toInsert.Chunk(CHUNK_SIZE))
             {
-                foreach (var chunk in toInsert.Chunk(CHUNK_SIZE))
-                {
-                    _dbContext.PlexCountries.AddRange(chunk);
-                    await _dbContext.SaveChangesAsync(ct);
-                    foreach (var c in chunk)
-                        existingIdByKey[c.Key] = c.Id;
-                    _dbContext.ClearChangeTracker();
-                }
-            }
-            catch (OperationCanceledException)
-            {
-                throw;
+                _dbContext.PlexCountries.AddRange(chunk);
+                await _dbContext.SaveChangesAsync(ct);
+                foreach (var c in chunk)
+                    existingIdByKey[c.Key] = c.Id;
+                _dbContext.ClearChangeTracker();
             }
         });
 
@@ -419,11 +412,8 @@ public class InsertMediaMetaDataCommandHandler
             result[country.Key] = country;
         }
 
-        // Build the final dictionary keyed by the source DTO hash keys
-        var resultDict = result.Values.ToList().ToHashKeyDictionary(sourceList);
-
         stopWatch.StopAndLog($"Finished inserting {newPlexCountries.Count} {nameof(PlexCountry)}");
 
-        return Result.Ok(resultDict);
+        return Result.Ok(result);
     }
 }

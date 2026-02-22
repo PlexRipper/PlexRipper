@@ -2,7 +2,6 @@ using FluentResults;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Domain;
-using Reaparr.Logging;
 
 namespace Reaparr.Data.Contracts;
 
@@ -210,17 +209,17 @@ public static partial class DbContextExtensions
         CancellationToken ct = default
     )
     {
-        try
+        if (!plexMovies.Any())
+            return Result.Fail("No movies to insert").LogWarning();
+
+        if (plexServerId == 0)
+            return ResultExtensions.IsZero(nameof(plexServerId));
+
+        if (plexLibraryId == 0)
+            return ResultExtensions.IsZero(nameof(plexLibraryId));
+
+        return await Result.Try(async Task () =>
         {
-            if (!plexMovies.Any())
-                return Result.Fail("No movies to insert").LogWarning();
-
-            if (plexServerId == 0)
-                return ResultExtensions.IsZero(nameof(plexServerId));
-
-            if (plexLibraryId == 0)
-                return ResultExtensions.IsZero(nameof(plexLibraryId));
-
             plexMovies.SetRelationshipIds(plexServerId, plexLibraryId);
 
             await context.BulkInsertAsync(plexMovies, BulkConfigPreset.Default, ct);
@@ -235,18 +234,6 @@ public static partial class DbContextExtensions
                 .ToList();
 
             await context.BulkInsertAsync(mediaData, BulkConfigPreset.Default, ct);
-
-            return Result.Ok();
-        }
-        catch (Exception e)
-        {
-            _log.Here()
-                .Error(
-                    "Error while bulk inserting plex movies with serverId: {PlexServerId} and libraryId: {PlexLibraryId}",
-                    plexServerId,
-                    plexLibraryId
-                );
-            return Result.Fail(new ExceptionalError(e)).LogError();
-        }
+        });
     }
 }

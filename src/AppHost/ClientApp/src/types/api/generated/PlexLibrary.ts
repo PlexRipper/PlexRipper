@@ -29,6 +29,25 @@ export class PlexLibrary {
   /**
    * No description
    * * @tags Plexlibrary
+   * @name CancelLibrarySyncEndpoint
+   * @request DELETE:/api/PlexLibrary/cancel/{PlexLibraryId}
+   * @secure
+   */
+  cancelLibrarySyncEndpoint = (
+    plexLibraryId: number,
+    params: RequestParams = {},
+  ) =>
+    axiosObservable<BaseResultDTO>({
+      url: `/api/PlexLibrary/cancel/${plexLibraryId}`,
+      method: "DELETE",
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<BaseResultDTO>);
+
+  /**
+   * No description
+   * * @tags Plexlibrary
    * @name GetPlexLibraryByIdEndpoint
    * @request GET:/api/PlexLibrary/{PlexLibraryId}
    * @secure
@@ -195,6 +214,11 @@ export class PlexLibrary {
 }
 
 export class PlexLibraryPaths {
+  static cancelLibrarySyncEndpoint = (plexLibraryId: number) =>
+    queryString.stringifyUrl({
+      url: `/api/PlexLibrary/cancel/${plexLibraryId}`,
+    });
+
   static getPlexLibraryByIdEndpoint = (plexLibraryId: number) =>
     queryString.stringifyUrl({ url: `/api/PlexLibrary/${plexLibraryId}` });
 

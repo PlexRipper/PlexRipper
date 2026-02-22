@@ -17,7 +17,11 @@ public static partial class DbSetExtensions
         return await dbSet
             .Where(x =>
                 libraryIds.Contains(x.PlexLibraryId)
-                && (x.Status == LibrarySyncJobStatus.Completed || x.Status == LibrarySyncJobStatus.Failed)
+                && (
+                    x.Status == LibrarySyncJobStatus.Cancelled
+                    || x.Status == LibrarySyncJobStatus.Failed
+                    || x.Status == LibrarySyncJobStatus.Completed
+                )
             )
             .ResetJobsToQueuedAsync(token);
     }

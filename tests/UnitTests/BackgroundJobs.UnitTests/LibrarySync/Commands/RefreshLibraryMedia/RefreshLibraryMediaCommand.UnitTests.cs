@@ -70,7 +70,8 @@ public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLi
         var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync(CancellationToken);
         plexLibrary.ShouldNotBeNull();
 
-        Mock.SetupCommand(It.IsAny<GetLibraryMediaCommand>).ReturnsAsync(Result.Fail<LibraryMetadata>("Sync failed"));
+        Mock.SetupCommand(It.IsAny<GetLibraryMediaFromPlexApiCommand>)
+            .ReturnsAsync(Result.Fail<LibraryMetadata>("Sync failed"));
 
         var command = new RefreshLibraryMediaCommand(plexLibrary.Id);
 
@@ -100,7 +101,7 @@ public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLi
 
         var updatedLibrary = await GetUpdatedLibrary(seed, libraryType);
 
-        Mock.SetupCommand(It.IsAny<GetLibraryMediaCommand>)
+        Mock.SetupCommand(It.IsAny<GetLibraryMediaFromPlexApiCommand>)
             .ReturnsAsync(
                 (ICommand<Result<LibraryMetadata>> _, CancellationToken _) =>
                     Result.Ok(
@@ -156,7 +157,8 @@ public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLi
         var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync(CancellationToken);
         plexLibrary.ShouldNotBeNull();
 
-        Mock.SetupCommand(It.IsAny<GetLibraryMediaCommand>).ReturnsAsync(Result.Ok(new LibraryMetadata(plexLibrary)));
+        Mock.SetupCommand(It.IsAny<GetLibraryMediaFromPlexApiCommand>)
+            .ReturnsAsync(Result.Ok(new LibraryMetadata(plexLibrary)));
 
         Mock.SetupCommand(It.IsAny<InsertMediaMetaDataCommand>)
             .ReturnsAsync(Result.Ok(new InsertMediaMetaDataCommandResponse(plexLibrary)));
@@ -188,7 +190,7 @@ public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLi
 
         Mock.SetupCommand(It.IsAny<InsertMediaMetaDataCommand>)
             .ReturnsAsync(Result.Ok(new InsertMediaMetaDataCommandResponse(updatedLibrary)));
-        Mock.SetupCommand(It.IsAny<GetLibraryMediaCommand>)
+        Mock.SetupCommand(It.IsAny<GetLibraryMediaFromPlexApiCommand>)
             .ReturnsAsync(Result.Ok(new LibraryMetadata(updatedLibrary)));
 
         Mock.SetupCommand(It.IsAny<SyncPlexLibraryMediaMetaDataCommand>).ReturnsAsync(Result.Ok());
@@ -220,7 +222,7 @@ public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLi
         );
         var updatedLibrary = await GetUpdatedLibrary(seed, PlexMediaType.TvShow);
 
-        Mock.SetupCommand(It.IsAny<GetLibraryMediaCommand>)
+        Mock.SetupCommand(It.IsAny<GetLibraryMediaFromPlexApiCommand>)
             .ReturnsAsync(Result.Ok(new LibraryMetadata(updatedLibrary)));
 
         Mock.SetupCommand(It.IsAny<InsertMediaMetaDataCommand>)

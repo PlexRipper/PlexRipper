@@ -1,4 +1,5 @@
 using FluentResults;
+using FluentValidation;
 using Microsoft.Extensions.Logging;
 using Reaparr.Logging;
 
@@ -11,7 +12,17 @@ public static class FluentResultConfiguration
         Result.Setup(cfg =>
         {
             cfg.Logger = new FluentResultLogger();
-            cfg.DefaultTryCatchHandler = exception => new ExceptionalError(exception);
+
+            cfg.DefaultTryCatchHandler = exception =>
+            {
+                if (exception is OperationCanceledException canceledException)
+                    return new ExceptionalError("Operation was cancelled", canceledException);
+
+                if (exception is ValidationException validationException)
+                    return new ExceptionalError("Validation failed", validationException);
+
+                return new ExceptionalError(exception);
+            };
         });
     }
 }

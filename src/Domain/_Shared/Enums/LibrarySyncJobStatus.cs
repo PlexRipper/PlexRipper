@@ -38,4 +38,10 @@ public enum LibrarySyncJobStatus
     /// </summary>
     [EnumMember(Value = nameof(Failed))]
     Failed = 4,
+
+    /// <summary>
+    /// Library sync was cancelled.
+    /// </summary>
+    [EnumMember(Value = nameof(Cancelled))]
+    Cancelled = 5,
 }

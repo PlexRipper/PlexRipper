@@ -87,7 +87,9 @@ public class LibrarySyncJob : IJob
             // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
 
             // Execute the library sync command
-            var result = await _commandExecutor.Send(new RefreshLibraryMediaCommand(_libraryId), context.CancellationToken);
+            var result = await Result.Try(() =>
+                _commandExecutor.Send(new RefreshLibraryMediaCommand(_libraryId), context.CancellationToken)
+            );
 
             if (result.IsCancelled)
             {
@@ -125,7 +127,11 @@ public class LibrarySyncJob : IJob
             else
             {
                 _log.Here()
-                    .Information("Successfully synced library {LibraryId} for server {ServerId}", _libraryId, _serverId);
+                    .Information(
+                        "Successfully synced library {LibraryId} for server {ServerId}",
+                        _libraryId,
+                        _serverId
+                    );
 
                 // Mark queue item as completed
                 await UpdateQueueItemAsync(LibrarySyncJobStatus.Completed);

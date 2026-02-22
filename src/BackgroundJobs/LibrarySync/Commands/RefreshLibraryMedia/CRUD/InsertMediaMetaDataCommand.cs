@@ -165,20 +165,13 @@ public class InsertMediaMetaDataCommandHandler
 
         var insertResult = await Result.Try(async Task () =>
         {
-            try
+            foreach (var chunk in toInsert.Chunk(CHUNK_SIZE))
             {
-                foreach (var chunk in toInsert.Chunk(CHUNK_SIZE))
-                {
-                    _dbContext.PlexActors.AddRange(chunk);
-                    await _dbContext.SaveChangesAsync(ct);
-                    foreach (var a in chunk)
-                        existingIdByKey[a.Key] = a.Id;
-                    _dbContext.ClearChangeTracker();
-                }
-            }
-            catch (OperationCanceledException)
-            {
-                throw;
+                _dbContext.PlexActors.AddRange(chunk);
+                await _dbContext.SaveChangesAsync(ct);
+                foreach (var a in chunk)
+                    existingIdByKey[a.Key] = a.Id;
+                _dbContext.ClearChangeTracker();
             }
         });
 
@@ -195,10 +188,9 @@ public class InsertMediaMetaDataCommandHandler
 
         _log.Here()
             .Debug(
-                "Finished inserting new {NameOfPlexActor}, now building result dictionary with {TotalCount} total {NameOfPlexActor}",
+                "Finished inserting new {NameOfPlexActor}, now building result dictionary with {TotalCount} total",
                 nameof(PlexActor),
-                existingIdByKey.Count,
-                nameof(PlexActor)
+                existingIdByKey.Count
             );
 
         // Build result dictionary from merged Id map — avoids re-fetching all actors from DB
@@ -279,20 +271,13 @@ public class InsertMediaMetaDataCommandHandler
 
         var insertResult = await Result.Try(async Task () =>
         {
-            try
+            foreach (var chunk in toInsert.Chunk(CHUNK_SIZE))
             {
-                foreach (var chunk in toInsert.Chunk(CHUNK_SIZE))
-                {
-                    _dbContext.PlexGenres.AddRange(chunk);
-                    await _dbContext.SaveChangesAsync(ct);
-                    foreach (var g in chunk)
-                        existingIdByKey[g.Key] = g.Id;
-                    _dbContext.ClearChangeTracker();
-                }
-            }
-            catch (OperationCanceledException)
-            {
-                throw;
+                _dbContext.PlexGenres.AddRange(chunk);
+                await _dbContext.SaveChangesAsync(ct);
+                foreach (var g in chunk)
+                    existingIdByKey[g.Key] = g.Id;
+                _dbContext.ClearChangeTracker();
             }
         });
 
@@ -387,20 +372,13 @@ public class InsertMediaMetaDataCommandHandler
 
         var insertResult = await Result.Try(async Task () =>
         {
-            try
+            foreach (var chunk in toInsert.Chunk(CHUNK_SIZE))
             {
-                foreach (var chunk in toInsert.Chunk(CHUNK_SIZE))
-                {
-                    _dbContext.PlexCountries.AddRange(chunk);
-                    await _dbContext.SaveChangesAsync(ct);
-                    foreach (var c in chunk)
-                        existingIdByKey[c.Key] = c.Id;
-                    _dbContext.ClearChangeTracker();
-                }
-            }
-            catch (OperationCanceledException)
-            {
-                throw;
+                _dbContext.PlexCountries.AddRange(chunk);
+                await _dbContext.SaveChangesAsync(ct);
+                foreach (var c in chunk)
+                    existingIdByKey[c.Key] = c.Id;
+                _dbContext.ClearChangeTracker();
             }
         });
 

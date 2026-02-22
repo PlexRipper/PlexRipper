@@ -1,36 +1,42 @@
-## Project Overview
+## Project summary
+Reaparr is a cross-platform Plex media downloader:
+- Backend: .NET 10, FastEndpoints, EF Core, Autofac, Quartz, SignalR (MessagePack), Serilog, Polly
+- Frontend: Nuxt 4 / Vue 3, Pinia, Quasar, PrimeVue
+- Testing: xUnit, Shouldly, Moq, Bogus; Vitest, Cypress
+- Frontend package manager: **Bun only** (no npm/yarn/pnpm)
 
-Reaparr is a cross-platform Plex media downloader with a .NET 9.0 backend (FastEndpoints) and Nuxt 4/Vue 3 frontend. It features multi-threaded download management, SignalR real-time updates, and Plex API integration.
+## Commands
 
-## Build and Development Commands
-
-### Backend (.NET)
-
+### Backend
 ```bash
 dotnet build Reaparr.sln
 dotnet run --project src/AppHost
-````
-
-### Frontend (Nuxt/Vue)
-
-Uses Bun (not npm/yarn/pnpm). Run all commands from `src/AppHost/ClientApp/`.
-
-```bash
-bun run dev           # Start dev server
-bun run build         # Build for production
-bun run lint          # ESLint validation
-bun run lint:fix      # Auto-fix linting
-bun run typecheck     # TypeScript validation
-bun run generate-ts   # Generated the OpenAPI endpoints and definitions in src/AppHost/ClientApp/src/types/api/generated 
 ```
 
-### Testing
+### Frontend (run from `src/AppHost/ClientApp/`)
+
+```bash
+bun run dev
+bun run build
+bun run lint
+bun run lint:fix
+bun run typecheck
+bun run generate-ts
+```
+
+### Tests
 
 Backend:
 
 ```bash
 dotnet test tests/UnitTests/Application.UnitTests/Application.UnitTests.csproj
 dotnet test tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj
+```
+
+To run a specific unit test project (replace `<Project>` with e.g. `BackgroundJobs`):
+
+```bash
+dotnet test tests/UnitTests/<Project>.UnitTests/<Project>.UnitTests.csproj
 ```
 
 Frontend (from `src/AppHost/ClientApp/`):
@@ -46,228 +52,317 @@ bun run cypress:ci
 docker compose -f docker/docker-compose.yml up
 ```
 
-## Architecture
+## Architecture (high-signal)
 
-### Solution Structure
+Solution layout:
 
 ```
 src/
-├── Domain/
-├── Application/
-├── Application.Contracts/
-├── Data/
-├── Data.Contracts/
-├── PlexApi/
-├── PlexApi.Contracts/
-├── BackgroundJobs/
-├── BackgroundJobs.Contracts/
-├── FileSystem/
-├── Settings/
-├── Identity/
-├── Logging/
-└── AppHost/
-    └── ClientApp/
+  Domain/
+  Application/
+  Application.Contracts/
+  Data/
+  Data.Contracts/
+  PlexApi/
+  PlexApi.Contracts/
+  BackgroundJobs/
+  BackgroundJobs.Contracts/
+  External/
+  External.Contracts/
+  FileSystem/
+  FileSystem.Contracts/
+  FluentResultExtensions/
+  PublicAPI/
+  PublicAPI.Contracts/
+  Settings/
+  Settings.Contracts/
+  Identity/
+  Identity.Contracts/
+  SignalR/
+  SignalR.Contracts/
+  Logging/
+  Environment/
+  AppHost/
+    ClientApp/
 ```
 
-### Key Patterns
+Test projects (under `tests/UnitTests/`): Application, BackgroundJobs, Data, Domain, External, FileSystem, FluentResultExtension, Logging, PlexApi, PublicApi, Settings, plus BaseTests (shared helpers).
 
-* FastEndpoints: endpoints inherit `Endpoint<TRequest, TResponse>`.
-* CQRS: Commands/Queries with FluentResults for success/failure.
-* DI: Autofac container.
-* Real-time: SignalR hubs with MessagePack compression.
-* Background jobs: Quartz scheduler.
+Core patterns:
 
-## Working style
+* FastEndpoints: `BaseEndpoint<TRequest, TResponse>` (project-local base, not `Endpoint<,>` directly)
+* CQRS: command/query records implementing `ICommand<Result<T>>`, handlers implementing `ICommandHandler<TCommand, TResult>`, dispatched via `ICommandExecutor`
+* DI: Autofac modules (`*Module : Module`) registered in `AppHost/_Shared/Config/Autofac/ContainerConfig.cs`
+* Realtime: SignalR typed hubs + MessagePack; broadcast via `IHubContext<THub, TClientInterface>.Clients.All`
+* Jobs: Quartz `IJob` with `[DisallowConcurrentExecution]`; jobs use `JobDataMap` for parameters, dispatch via `ICommandExecutor`, and must never throw (swallow and log)
 
-* Prefer small, focused changes with minimal diff.
-* Follow existing patterns in the codebase; avoid new abstractions unless necessary.
-* Keep behavior deterministic and reproducible (especially tests).
-* Do not “paper over” problems with hacks; fix root causes.
-* When uncertain, inspect existing implementations/tests for precedent before inventing a new approach or ask questions
+## Code patterns (reference before writing new code)
 
-## Repository conventions
+### FastEndpoints
 
-* Respect existing formatting and analyzer settings (EditorConfig, formatters, linters).
-* Match existing naming, folder layout, and dependency injection patterns.
-* Avoid breaking public APIs without coordinated changes.
+```csharp
+public class MyEndpoint : BaseEndpoint<MyRequest, MyResponse>
+{
+    public override string EndpointPath => ApiRoutes.SomeGroup + "/Action";
 
-## Testing rules (C#)
+    public override void Configure()
+    {
+        Get(EndpointPath); // or Post, Put, Delete
+        Description(x => x
+            .Produces(StatusCodes.Status200OK, typeof(ResultDTO<MyResponse>))
+            .Produces(StatusCodes.Status400BadRequest, typeof(BaseResultDTO)));
+    }
 
-* Write tests using xUnit with `[Fact]` attributes.
-* Use `async Task` test methods whenever async operations are involved.
-* Use Shouldly for assertions (`ShouldBeTrue`, `ShouldNotBeNull`, `ShouldBeEmpty`, etc.).
-* Follow Arrange–Act–Assert with clear comments.
-* Name test methods: `ShouldExpectedBehavior_WhenCondition`.
-* Use `BaseUnitTest<TEndpoint>` base class for endpoints when available.
-* Use `SetupDatabase(seed, config => { ... })` to seed EF Core test data.
-* Use `IDbContext` for database queries and mutations.
-* When testing endpoints, use `SetupEndpointUnitTest<TEndpoint>()` and call `HandleAsync`.
-* Always assert against both the endpoint `Response` and the state of the database after execution.
-* Keep tests deterministic: seed data explicitly, never random.
-* Prefer expressive, scenario-driven test names over generic ones.
-* Single Context Instance Pattern: when setting up data and verifying results, use a single `dbContext` variable rather than re-accessing `IDbContext` multiple times.
-  Example: `var dbContext = IDbContext;` then reuse `dbContext` throughout the test.
-* Ensure created tests are passing before stopping; if a bug is found in production code, fix it.
-* Do not use dirty workarounds to make tests pass; ensure the test is logically correct and/or fix the code being tested.
+    public override async Task HandleAsync(MyRequest req, CancellationToken ct)
+    {
+        _log.Here().DebugApiCall(HttpContext, req);
+        var result = await _commandExecutor.Send(new MyCommand(req.Id), ct);
+        await SendFluentResult(result, ct);
+    }
+}
+```
 
-## Front-end unit test rules
+### CQRS command
 
-* All front-end unit tests must use Vitest as the test runner.
-* Always run Vitest through Bun using `bunx vitest` (never npm/yarn/pnpm).
-* Run from `src/AppHost/ClientApp/`.
+```csharp
+public record MyCommand(int Id) : ICommand<Result<MyData>>;
+
+public class MyCommandHandler : ICommandHandler<MyCommand, Result<MyData>>
+{
+    public async Task<Result<MyData>> ExecuteAsync(MyCommand request, CancellationToken ct)
+    {
+        try
+        {
+            // ...
+            return Result.Ok(data);
+        }
+        catch (Exception ex)
+        {
+            return Result.Fail(new ExceptionalError(ex)).LogError();
+        }
+    }
+}
+```
+
+### Autofac modules
+
+Each project registers its own types in a `*Module : Module`. Lifetimes:
+- `InstancePerDependency()` – default for handlers, DbContext, factory
+- `SingleInstance()` – stateful services (e.g. `SchedulerService`)
+- Keyed registrations (`Keyed<IInterface>(enumValue)`) for factory-selected implementations
+
+### SignalR broadcasting
+
+```csharp
+// Inject IHubContext<THub, TClientInterface>
+await _hub.Clients.All.SomeMethod(dto, cancellationToken);
+// Exceptions are caught and logged; never re-thrown
+```
+
+### Quartz jobs
+
+```csharp
+[DisallowConcurrentExecution]
+public class MyJob : IJob
+{
+    public static JobKey GetJobKey(int id) => new($"MyJob_{id}", nameof(JobTypes.MyJob));
+
+    public async Task Execute(IJobExecutionContext context)
+    {
+        var ct = context.CancellationToken;
+        var id = context.JobDetail.JobDataMap.GetInt("Id");
+        var result = await Result.Try(() => _commandExecutor.Send(new MyCommand(id), ct));
+        // check result.IsCancelled, result.IsFailed — never throw
+    }
+}
+```
+
+## Formatting / style
+
+EditorConfig enforces:
+- Indent: 4 spaces, no tabs
+- Max line length: 120
+- Line endings: LF, encoding: UTF-8
+- `var` preferred everywhere in C#
+- Private constants: `ALL_UPPER_CASE`
+- Private static readonly fields: `_camelCase`
+- Modifier order: `public private protected internal new static abstract virtual sealed readonly override extern unsafe volatile async required`
+
+## Change discipline
+
+* Prefer small, focused diffs.
+* Follow existing patterns; introduce new abstractions only if they remove duplication or reduce complexity.
+* Keep behavior deterministic (especially tests).
+* Fix root causes; do not add hacks to "quiet" symptoms.
+* If uncertain: search the codebase for precedent and align with existing approach.
+
+## Repo conventions
+
+* Respect formatting/analyzers (EditorConfig/linters/formatters).
+* Match existing naming and folder layout.
+* Avoid breaking public APIs unless coordinated.
+
+## Test rules (C#)
+
+Frameworks:
+
+* xUnit `[Fact]`, `async Task` when async
+* Shouldly assertions
+* Moq for verification
+
+Required structure:
+
+* Arrange–Act–Assert (comments allowed, keep short)
+* Deterministic seeds only (no random data)
+* Assert both result success/failure and relevant database state after execution
+
+Helpers (expected usage):
+
+* Inherit `BaseUnitTest<TSUT>` — provides `Sut`, `IDbContext`, `Mock`, `CancellationToken`
+* Seed via `await SetupDatabase(seed, config => { ... })`
+* Query/mutate DB via `IDbContext`; reuse single instance per test (`var dbContext = IDbContext;`)
+* Mock resolution: `Mock.Mock<IFoo>()` returns the registered mock
+
+Quality gates:
+
+* Do not add "dirty" workarounds to make tests pass; fix the code or fix the test logic.
+* Verify mock calls explicitly (`Times.Once()` / `Times.Never()`), no unverified mocks.
+
+## Frontend unit test rules
+
+* Vitest only
+* Run via Bun: `bunx vitest`
+* Run from `src/AppHost/ClientApp/`
 
 ## Test organization rules
 
-* Each production project must have a corresponding UnitTest project with the same name + `.UnitTests` suffix.
-  Example: `Reaparr.Application` → `Reaparr.Application.UnitTests`.
-* Tests must be placed in the corresponding `*.UnitTests` project of the SUT.
-* Within that project, follow the same folder structure as the SUT for files only, not for namespaces.
-* The namespace of every test class must be exactly the project namespace + `.UnitTests` (no subfolders in namespace).
-  Example: all tests in `Reaparr.Application.UnitTests` use `namespace Reaparr.Application.UnitTests;`.
-* Each unit test file is named after the SUT file with `.UnitTests.cs` appended.
-  Example: `ClearCompletedDownloadTasksEndpoint.cs` → `ClearCompletedDownloadTasksEndpoint.UnitTests.cs`.
-* Never use underscores in test file names.
-* Test class name matches the file name without the `.cs` extension.
-  Example: `ClearCompletedDownloadTasksEndpoint.UnitTests`.
+Project mapping:
 
-## File system interaction rules
+* Each production project has a corresponding `*.UnitTests` project.
 
-* If the SUT interacts with the file system, use `SetupFileSystem` from the `BaseUnitTest` class with `MockFileSystem`.
-* Do not manually mock `System.IO.Abstractions` interfaces in test files.
+Placement:
 
-## Test data generation rules
+* Tests live in the `*.UnitTests` project matching the SUT project.
+* Handler location determines test project, not command record location.
 
-* Use existing functionality from the `tests/BaseTests` project for generating test data.
-* Prefer provided Faker-based builders and helpers rather than creating random data inline.
-* Never instantiate Bogus/Faker directly inside tests unless wrapped by a helper in `BaseTests`.
-* If new patterns are needed, extend the `BaseTests` project, not individual test files.
+Folders and namespaces:
 
-## Mocking rules (AutoMoq + Moq)
+* Folder structure mirrors SUT for files only.
+* Namespace is exactly `<SUTProjectNamespace>.UnitTests` (no folder-based namespace nesting).
 
-* Use AutoMock to automatically create mocks for dependencies.
-* Always verify mocks with explicit invocation counts using Moq’s Verify API.
-  Example: `mock.Verify(x => x.Method(), Times.Once());`
-* If a dependency should not be called, explicitly assert with `Times.Never()`.
-* Do not leave mocks unverified; every mock must be asserted for calls or asserted that no calls occurred.
-* Prefer `Times.Once()` or `Times.Never()` over vague call expectations.
+Naming:
 
-## Commit message format
+* Test file name: `<SutFileName>.UnitTests.cs` (no underscores)
+* Test class name: `<SutFileName>UnitTests` (no dot, matches file name without `.cs`)
+* Test method name: `ShouldExpectedBehavior_WhenCondition`
+
+## File system tests
+
+* If SUT touches file system: use `SetupFileSystem` (MockFileSystem)
+* Do not manually mock `System.IO.Abstractions` interfaces in test files
+
+## Test data rules
+
+* Use builders/helpers from `tests/BaseTests`
+* Prefer existing Faker-based builders
+* Do not instantiate Bogus/Faker directly inside tests unless via BaseTests helper
+* If a new pattern is needed: extend `BaseTests`, not individual tests
+
+## Commit messages
+
+Format:
 
 ```
 <type>(WebAPI): <Imperative Message>
 ```
 
-* Types: `feat`, `fix`, `refactor`, `perf`, `test`, `docs`, `build`, `chore`, `style`
-* Always use `WebAPI` scope.
-* Imperative, present tense, capitalize after colon, no trailing punctuation.
+Types: `feat`, `fix`, `refactor`, `perf`, `test`, `docs`, `build`, `chore`, `style`
+Rules: imperative present tense, capitalize after colon, no trailing punctuation
 
-Examples:
+Never add AI attribution trailers (e.g. `Co-Authored-By: Claude ...`). Commit messages are plain text only.
 
-* `feat(WebAPI): Add authentication endpoint`
-* `fix(WebAPI): Resolve null reference in download workflow`
-* `refactor(WebAPI): Simplify cache handling`
+## Branching
 
-## Branches
-
-* `dev`: main development branch (target for PRs)
+* `dev` is the integration branch (PR target)
 * Feature branches merge into `dev`
 
-## Key dependencies
+## Known constraints / gotchas (keep updated)
 
-* Backend: FastEndpoints, EF Core, Autofac, Quartz, Polly, Serilog, SignalR
-* Frontend: Nuxt 4, Vue 3, Pinia, Quasar, PrimeVue, Axios
-* Testing: xUnit, Shouldly, Moq, Bogus, Vitest, Cypress
+### BackgroundJobs.UnitTests referencing rules
 
-## Known implementation details
+* `BackgroundJobs.UnitTests` references only `BackgroundJobs` and `BaseTests`
+* Types from `PlexApi.Contracts` are available transitively
+* Do not reference `Application` / `Application.Contracts` directly from `BackgroundJobs.UnitTests`
+* If handler lives under `src/BackgroundJobs/`, tests belong in `tests/UnitTests/BackgroundJobs.UnitTests/` (even if command record is in `Application.Contracts`)
 
-### BackgroundJobs test project
-* `BackgroundJobs.UnitTests` references only `BackgroundJobs` and `BaseTests`. Types from `PlexApi.Contracts` are available transitively through `BackgroundJobs`.
-* `BackgroundJobs.UnitTests` does NOT reference `Application` or `Application.Contracts` directly. Tests for handlers that live in `BackgroundJobs` must go in `BackgroundJobs.UnitTests`, not `Application.UnitTests`.
+### EF Core / SQLite bulk transactions
 
-### EF Core / SQLite transactions
-* `ExecuteBulkAsync` in `ReaparrDbContext` already wraps every bulk operation in its own `BeginTransactionAsync`. Do NOT add outer transactions around `RemoveMedia` + `BulkInsert` call chains — SQLite does not support nested transactions and tests will fail with "connection is already in a transaction".
+* `ExecuteBulkAsync` in `ReaparrDbContext` wraps each bulk op in its own `BeginTransactionAsync`
+* Do **not** add outer transactions around `RemoveMedia` + `BulkInsert` chains
+* SQLite nested transactions will fail ("connection is already in a transaction")
 
-### IReaparrDbContextFactory
-* Registered as `InstancePerDependency` in Autofac (`DataModule.cs`). Uses a `Func<IReaparrDbContext>` factory delegation that Autofac auto-provides.
-* When a command fans out parallel work (e.g. `Task.WhenAll`), each parallel branch must resolve its own `IReaparrDbContext` via `IReaparrDbContextFactory.Create()` to avoid EF Core thread-safety violations.
-* Test mock is pre-wired in `BaseUnitTest.MockDependencies.cs` via `factoryMock.Setup(x => x.Create()).Returns(...)`.
+### IReaparrDbContextFactory threading rule
 
-### LibrarySyncProgressStore
-* `UpdateItemAsync` upserts by `MediaType` (adds if not present, replaces if it is). It does NOT auto-remove completed items.
-* `SendProgressUpdateAsync` is `Task`-returning (not `Task<LibraryProgress?>`).
-* `LibraryProgress.TimeRemaining` is a computed property — do not try to assign it.
-* When mocking `ILibrarySyncProgressStore` in tests, always set up **both** `UpdateItemAsync` and `UpdateErrorAsync` to avoid `Strict` mock exceptions. Success paths call `UpdateItemAsync`; failure paths call `UpdateErrorAsync`.
+* Registered `InstancePerDependency` via Autofac
+* Parallel fan-out (`Task.WhenAll`) requires each branch to resolve its own DbContext:
+
+    * use `IReaparrDbContextFactory.Create()` per branch (sync) or `CreateAsync()` (async)
+* Base test mock is prewired in `BaseUnitTest.MockDependencies.cs`:
+
+    * both `Create()` and `CreateAsync()` are set up; do not re-mock them in test files
+
+### LibrarySyncProgressStore behavior
+
+* `UpdateItemAsync` upserts by `MediaType`; it does not remove completed items
+* `SendProgressUpdateAsync` is private; the public surface is `UpdateItemAsync` / `UpdateErrorAsync` / `StartAsync`
+* `LibraryProgress.TimeRemaining` is a computed property; do not assign it
+* Strict mocks: set up both `UpdateItemAsync` and `UpdateErrorAsync` to avoid `MockException`
 
 ### RefreshPlexTvShowLibraryCommandHandler progress broadcasting
-* On the success path, `UpdateItemAsync` is called 3× — once each for `PlexMediaType.TvShow`, `PlexMediaType.Season`, and `PlexMediaType.Episode` — using counts from `BulkInsertTvShowsRapport`.
-* On any failure path, `UpdateErrorAsync` is called once.
 
-### BackgroundJobs test location (BackgroundJobs commands also tested in BackgroundJobs.UnitTests)
-* Commands whose handlers live under `src/BackgroundJobs/` must be tested in `tests/UnitTests/BackgroundJobs.UnitTests/`, mirroring the same folder structure as the SUT.
-* Do not place BackgroundJobs handler tests in `Application.UnitTests` even if the command record is defined in `Application.Contracts`.
+* Success path: `UpdateItemAsync` called 3× (TvShow/Season/Episode) using counts from `BulkInsertTvShowsRapport`
+* Failure path: `UpdateErrorAsync` called once
 
-Add the following section near the end of the document (for example, after **Build and Development Commands** or before **Working style**):
+### Quartz job rules
 
----
+* Jobs implement `IJob` and must be decorated with `[DisallowConcurrentExecution]` unless fan-out is intentional
+* Jobs must never throw — catch results and log; Quartz will reschedule on unhandled exceptions
+* Parameters pass through `JobDataMap` (string keys defined as `public const string` on the job class)
+* Use `Result.Try(...)` to wrap `_commandExecutor.Send(...)` and check `IsCancelled` before `IsFailed`
+* `context.CancellationToken` carries the Quartz shutdown signal — pass it through to all async calls
+
+### FluentResults usage
+
+* Return `Result.Ok(value)` or `Result.Fail(new ExceptionalError(ex)).LogError()`
+* Propagate failures with `return failedResult.ToResult()`
+* Check `Has504GatewayTimeoutError()` for Plex connectivity failures
+* Never return `null` where a `Result` is expected
 
 ## Performance rules during gaming (Arch Linux)
 
-When building or testing .NET projects while gaming on Arch Linux, the game must always have priority over build processes to prevent FPS drops and stutter.
+During gameplay, game performance has priority over builds/tests.
 
-### Required build command during active gameplay
-
-Always use:
+Required build command while gaming:
 
 ```bash
 ionice -c2 -n7 nice -n 15 taskset -c 0-3 dotnet build -m:2
 ```
 
-This enforces:
-
-* Reduced CPU priority (`nice -n 15`)
-* Lowest best-effort I/O priority (`ionice -c2 -n7`)
-* Limited parallelism (`-m:2`)
-* CPU core pinning (`taskset -c 0-3`)
-
-Never run `dotnet build` or `dotnet test` at default priority during gameplay.
-
-### Optional (if game still lags)
-
-Increase priority of the running game process (`GameThread`):
+Optional if still lagging (raise game process priority):
 
 ```bash
 sudo renice -n -5 -p $(pidof GameThread)
 ```
 
-This raises the scheduler priority of the game thread.
-
-No other processes should be reniced unless explicitly required.
+Do not renice other processes unless explicitly required.
 
 ## Agent self-update rule
 
-After completing any non-trivial task, update this file with new findings:
-* Undocumented implementation constraints discovered (e.g. transaction limits, threading rules).
-* Corrections to previously wrong assumptions.
-* Patterns that were ambiguous and are now resolved.
-* Any "gotcha" that caused a bug or wasted time.
+After any non-trivial change, update this file with:
 
-Keep entries concise and actionable. Remove entries that are no longer accurate.
+* newly discovered constraints (transactions, threading, ordering)
+* corrections to wrong assumptions
+* resolved ambiguities and "gotchas"
+* removals of outdated rules
 
-### PlexDownloadClient — .Sample() drops final emission (race condition)
-* `CombineLatest().Sample(500ms)` silently drops the last `DownloadFinished` emission when `OnCompleted()` fires within the 500ms window. This leaves the DB status at `Downloading`, preventing `DownloadJobListener` from triggering the move queue.
-* Fixed by: `Publish()` + `.Sample(500ms).Merge(combined.TakeLast(1))` + `.Select(...).Concat()` to guarantee the final status is always processed and DB writes are serialized.
-* `_downloadWorkerCombinedConnection` (the `IConnectableObservable.Connect()` disposable) must be stored and disposed in `DisposeAsync()`.
-
-### MoveDownloadFileJobQueue — "no task found" is not an error
-* When no ready-to-move task exists, the queue returns `Result.Ok()` — nothing ready yet is not an error.
-* The queue now picks up both `DownloadFinished` and `MoveError` tasks. A `MoveError` task is automatically retried on the next `MoveDownloadJobListener` trigger.
-* The move queue is self-stopping: it only runs when explicitly triggered by `DownloadJobListener` or `MoveDownloadJobListener`. If both are broken or miss a trigger, downloads stay stuck in `DownloadFinished` forever. The `.Sample()` fix above is the primary defence.
-
-### DownloadFinished maps to FileTransfer phase (not Downloading)
-* `DownloadStatus.DownloadFinished` maps to `DownloadTaskPhase.FileTransfer` so that `StartDownloadTaskCommandHandler` triggers `StartMoveDownloadFileJob` instead of a re-download.
-* `StopDownloadTaskCommandHandler` only deletes the downloaded file and worker tasks when `DownloadTaskPhase == Downloading`. Tasks in `FileTransfer` phase (DownloadFinished, Moving, MoveError, etc.) preserve the downloaded file on disk.
-
-### MoveDownloadFileJob / MoveDownloadJobListener test patterns
-* `IJobExecutionContext` is mocked via `Mock.Mock<IJobExecutionContext>().SetupGet(x => x.JobDetail.JobDataMap).Returns(new JobDataMap(dict))`.
-* `MoveDownloadFileJob` tests must pre-set the DB status to `MoveFinished` before calling `Execute()` to simulate the command handler having run (since `MoveDownloadFileFromFileTaskCommand` is mocked).
-* `MoveDownloadJobListener` must call `CheckMoveDownloadFileJobQueue()` even when `jobException` is non-null — Quartz fires listeners on all completions.
+Keep additions short, concrete, and testable. Prefer rules that prevent repeat failures.

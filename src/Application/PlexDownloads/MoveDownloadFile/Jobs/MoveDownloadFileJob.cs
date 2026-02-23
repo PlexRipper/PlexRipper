@@ -45,7 +45,21 @@ public class MoveDownloadFileJob : IJob
                     downloadTaskKey.Id
                 );
 
-            var result = await _commandExecutor.Send(new MoveDownloadFileFromFileTaskCommand(downloadTaskKey), ct);
+            var result = await Result.Try(() =>
+                _commandExecutor.Send(new MoveDownloadFileFromFileTaskCommand(downloadTaskKey), ct)
+            );
+
+            if (result.IsCancelled)
+            {
+                _log.Here()
+                    .Warning(
+                        "{NameOfMoveDownloadJob} for {NameOfFileTaskId} with id: {FileTaskId} was cancelled",
+                        nameof(MoveDownloadFileJob),
+                        nameof(downloadTaskKey),
+                        downloadTaskKey.Id
+                    );
+                return;
+            }
 
             if (result.IsFailed)
             {

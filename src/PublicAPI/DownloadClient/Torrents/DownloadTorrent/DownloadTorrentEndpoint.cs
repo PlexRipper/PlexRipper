@@ -20,8 +20,8 @@ public class DownloadTorrentEndpointRequestValidator : Validator<DownloadTorrent
         RuleFor(x => x.Quality).IsInEnum();
         RuleFor(x => x.Type).IsInEnum();
         RuleFor(x => x)
-            .Must(r => r.PartId > 0 || r.PlexApiPartId > 0)
-            .WithMessage($"Either PartId or {nameof(TorrentMetadataDTO.PlexApiPartId)} must be provided.");
+            .Must(r => r.PartId > 0 && r.PlexApiPartId > 0)
+            .WithMessage($"Both PartId and {nameof(TorrentMetadataDTO.PlexApiPartId)} must be provided.");
     }
 }
 

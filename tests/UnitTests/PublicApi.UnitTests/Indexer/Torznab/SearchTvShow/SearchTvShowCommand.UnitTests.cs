@@ -293,13 +293,14 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
         );
 
         // Manually add an episode without TvShow/TvShowSeason
+        var dbContext = IDbContext;
         var orphan = FakeData.GetPlexTvShowEpisode(new Seed(3003)).Generate();
         orphan.TvShow = null;
         orphan.TvShowSeason = null;
-        await IDbContext.PlexTvShowEpisodes.AddAsync(orphan, CancellationToken);
-        await IDbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.PlexTvShowEpisodes.AddAsync(orphan, CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
-        var initialItemCount = await IDbContext.PlexTvShowEpisodes.CountAsync(CancellationToken);
+        var initialItemCount = await dbContext.PlexTvShowEpisodes.CountAsync(CancellationToken);
 
         var cmd = new SearchTvShowCommand
         {
@@ -322,7 +323,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
         result.Channel.Items.ShouldBeEmpty();
 
         // Database state unchanged in counts
-        var finalCount = await IDbContext.PlexTvShowEpisodes.CountAsync(CancellationToken);
+        var finalCount = await dbContext.PlexTvShowEpisodes.CountAsync(CancellationToken);
         finalCount.ShouldBe(initialItemCount);
     }
 
@@ -339,11 +340,12 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
             }
         );
 
+        var dbContext = IDbContext;
         var ep = FakeData.GetPlexTvShowEpisode(new Seed(3004)).Generate();
         ep.TvShow = null;
         // Keep season so only TvShow missing
-        await IDbContext.PlexTvShowEpisodes.AddAsync(ep, CancellationToken);
-        await IDbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.PlexTvShowEpisodes.AddAsync(ep, CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var result = await Sut.ExecuteAsync(
             new SearchTvShowCommand
@@ -376,10 +378,11 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
             }
         );
 
+        var dbContext = IDbContext;
         var ep = FakeData.GetPlexTvShowEpisode(new Seed(3005)).Generate();
         ep.TvShowSeason = null;
-        await IDbContext.PlexTvShowEpisodes.AddAsync(ep, CancellationToken);
-        await IDbContext.SaveChangesAsync(CancellationToken);
+        await dbContext.PlexTvShowEpisodes.AddAsync(ep, CancellationToken);
+        await dbContext.SaveChangesAsync(CancellationToken);
 
         var result = await Sut.ExecuteAsync(
             new SearchTvShowCommand

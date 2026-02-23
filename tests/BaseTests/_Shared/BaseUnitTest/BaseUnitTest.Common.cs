@@ -53,6 +53,7 @@ public partial class BaseUnitTest
                 s.AddTransient(_ => Mock.Create<ILogger>());
                 s.AddTransient(_ => Mock.Create<IReaparrDbContext>());
                 s.AddTransient(_ => Mock.Create<IAuthDbContext>());
+                s.AddTransient(_ => Mock.Create<IAuthDbContextFactory>());
                 s.AddTransient(_ => Mock.Create<ICommandExecutor>());
                 s.AddSingleton(_ => Mock.Create<ISchedulerService>());
                 s.AddSingleton(_ => Mock.Mock<IProgressHubService>().Object);

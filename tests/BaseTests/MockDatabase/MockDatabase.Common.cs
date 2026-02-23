@@ -207,8 +207,7 @@ public static partial class MockDatabase
 
     #region Public
 
-    public static string GetMemoryDatabaseName() =>
-        $"memory_database_{Random.Shared.Next(1, int.MaxValue)}_{Random.Shared.Next(int.MaxValue)}";
+    public static string GetMemoryDatabaseName() => $"memory_database_{Guid.NewGuid():N}";
 
     /// <summary>
     /// Creates an in-memory database only to be used for unit and integration testing.

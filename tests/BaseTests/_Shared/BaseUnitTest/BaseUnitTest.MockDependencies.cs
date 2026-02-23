@@ -89,6 +89,25 @@ public partial class BaseUnitTest
             )
             .As<IReaparrDbContextFactory>()
             .InstancePerDependency();
+
+        builder
+            .Register(
+                (_, _) =>
+                {
+                    var factoryMock = new Mock<IAuthDbContextFactory>(MockBehavior.Strict);
+                    factoryMock
+                        .Setup(x => x.Create())
+                        .Returns(() => MockDatabase.GetMemoryAuthDbContext(_databaseName));
+                    factoryMock
+                        .Setup(x => x.CreateAsync())
+                        .Returns(() =>
+                            Task.FromResult<IAuthDbContext>(MockDatabase.GetMemoryAuthDbContext(_databaseName))
+                        );
+                    return factoryMock.Object;
+                }
+            )
+            .As<IAuthDbContextFactory>()
+            .InstancePerDependency();
     }
 
     protected void SetupHttpClient(Action<Mock<HttpMessageHandler>>? action = null)

@@ -75,7 +75,7 @@ public class LogConfig
 
     public virtual Logger GetLogger(LogEventLevel minimumLogLevel = LogEventLevel.Debug) =>
         GetBaseConfiguration()
-            .WriteTo.Seq("http://localhost:5341")
+            .WriteTo.Seq(EnvironmentExtensions.GetSeqUrl())
             .WriteTo.File(
                 _newTemplate,
                 Path.Combine(PathProvider.LogsDirectory, "log.txt"),

@@ -20,6 +20,8 @@ public static class EnvironmentExtensions
 
     private const string AUTH_HEADER_TOKEN_NAME = "AUTH_HEADER_TOKEN";
 
+    private const string SEQ_URL = "SEQ_URL";
+
     private static readonly string _trueValue = Convert.ToString(true);
 
     /// <summary>
@@ -120,6 +122,8 @@ public static class EnvironmentExtensions
         )
             ? port
             : 5000;
+
+    public static string GetSeqUrl() => System.Environment.GetEnvironmentVariable(SEQ_URL) ?? "http://localhost:5341";
 
     /// <summary>
     /// Sets the <c>LOG_LEVEL</c> environment variable to the specified level (upper-cased).

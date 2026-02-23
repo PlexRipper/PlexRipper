@@ -15,6 +15,7 @@
       <env name="PUID" value="1000" />
       <env name="UNMASKED" value="true" />
       <env name="VERSION" value="9.9.9" />
+      <env name="SEQ_URL" value="http://localhost:5341" />
     </envs>
     <option name="ENV_FILE_PATHS" value="" />
     <option name="REDIRECT_INPUT_PATH" value="" />

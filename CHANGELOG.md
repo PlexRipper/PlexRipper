@@ -1,5 +1,22 @@
 Reaparr Changelog
 
+# [0.36.0-dev.6](https://github.com/Reaparr/Reaparr/compare/v0.36.0-dev.5...v0.36.0-dev.6) (2026-02-23)
+
+
+### Bug Fixes
+
+* **WebAPI:** Fix concurrent DbContext threading issue in DownloadClientAuthenticationPreProcessor ([ec44af6](https://github.com/Reaparr/Reaparr/commit/ec44af63fd94500ede344d144dd3ecc9d1209b94))
+* **Tests:** Fix flaky SQLite in-memory database teardown in BaseUnitTest ([fe91cc2](https://github.com/Reaparr/Reaparr/commit/fe91cc20053e8fa641ec0eef9b720ffc59b679ea))
+* **WebAPI:** Fix SingleOrDefault exception when OR query matches multiple media data rows ([69caa82](https://github.com/Reaparr/Reaparr/commit/69caa8215faa8bb4538f2b6be0113dead8932bcb))
+* **WebAPI:** Fixed Reaparr not being able to set the DownloadClient in Sonarr and Radarr ([ab53a06](https://github.com/Reaparr/Reaparr/commit/ab53a06cc15551992719284ec4050874165b6679))
+* **Web-UI:** Refresh settings after Sonarr/Radarr integration configure to mark step 2 as done ([38a6782](https://github.com/Reaparr/Reaparr/commit/38a67823bc4613fc4d464c2307440f43610fc01e))
+* **WebAPI:** Remove the limitations of 1 file that can be moved at the time, this would lead to a mess of unmoved finished tasks ([43452b0](https://github.com/Reaparr/Reaparr/commit/43452b033a82596b04578fae81ab7cbca38283d7))
+
+
+### Features
+
+* **WebAPI:** Support SEQ logging container for an external loggin source ([9e3f23a](https://github.com/Reaparr/Reaparr/commit/9e3f23aad1c9824ef7e2f18d5087cb98c9dbbdbb))
+
 # [0.36.0-dev.5](https://github.com/Reaparr/Reaparr/compare/v0.36.0-dev.4...v0.36.0-dev.5) (2026-02-22)
 
 

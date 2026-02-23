@@ -123,6 +123,10 @@ public static class EnvironmentExtensions
             ? port
             : 5000;
 
+    /// <summary>
+    /// Sets the SEQ_URL environment variable to the specified URL.
+    /// Note: This is used for development and testing purposes to redirect logs to a hosted Docker instance of Seq.
+    /// </summary>
     public static string GetSeqUrl() => System.Environment.GetEnvironmentVariable(SEQ_URL) ?? "http://localhost:5341";
 
     /// <summary>

@@ -1,5 +1,6 @@
 using Reaparr.Data;
 using Reaparr.Data.Contracts;
+using Reaparr.Identity;
 using Reaparr.Identity.Contracts;
 
 namespace Reaparr.BaseTests;
@@ -7,6 +8,11 @@ namespace Reaparr.BaseTests;
 public partial class BaseUnitTest : IDisposable
 {
     private string _databaseName = string.Empty;
+
+    // Held alive to keep the SQLite shared-cache in-memory database alive for the test duration.
+    // SQLite destroys an in-memory database when all connections to it are closed.
+    private ReaparrDbContext? _setupReaparrDbContext;
+    private AuthDbContext? _setupAuthDbContext;
 
     protected bool IsDatabaseSetup;
 
@@ -64,7 +70,12 @@ public partial class BaseUnitTest : IDisposable
     {
         // Database context can be set up once and then retrieved by its DB name.
         _databaseName = MockDatabase.GetMemoryDatabaseName();
-        await MockDatabase.GetMemoryDbContext(_databaseName).Setup(seed, options);
+        var (reaparrContext, authContext) = MockDatabase.GetMemoryDbContext(_databaseName);
+        // Hold references to keep the SQLite shared-cache in-memory connections open.
+        // SQLite destroys the in-memory database when all connections close.
+        _setupReaparrDbContext = reaparrContext;
+        _setupAuthDbContext = authContext;
+        await (reaparrContext, authContext).Setup(seed, options);
         IsDatabaseSetup = true;
         return seed;
     }

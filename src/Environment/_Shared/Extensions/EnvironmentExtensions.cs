@@ -20,6 +20,8 @@ public static class EnvironmentExtensions
 
     private const string AUTH_HEADER_TOKEN_NAME = "AUTH_HEADER_TOKEN";
 
+    private const string SEQ_URL = "SEQ_URL";
+
     private static readonly string _trueValue = Convert.ToString(true);
 
     /// <summary>
@@ -120,6 +122,12 @@ public static class EnvironmentExtensions
         )
             ? port
             : 5000;
+
+    /// <summary>
+    /// Sets the SEQ_URL environment variable to the specified URL.
+    /// Note: This is used for development and testing purposes to redirect logs to a hosted Docker instance of Seq.
+    /// </summary>
+    public static string GetSeqUrl() => System.Environment.GetEnvironmentVariable(SEQ_URL) ?? "http://localhost:5341";
 
     /// <summary>
     /// Sets the <c>LOG_LEVEL</c> environment variable to the specified level (upper-cased).

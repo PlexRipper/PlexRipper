@@ -212,16 +212,19 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 			return integrationApi.configureSonarrIntegrationEndpoint({
 				url: settingsStore.integrationsSettings.sonarr.sonarrBaseUrl,
 				apiKey: settingsStore.integrationsSettings.sonarr.sonarrApiKey,
-			}).pipe(tap((response) => {
-				state.sonarr.configuringSuccess = response.isSuccess;
-				state.sonarr.isConfiguring = false;
-				if (response.isSuccess) {
-					// This should overshoot to step 3 to show step 2 as done
-					state.sonarr.step = 3;
-				} else {
-					state.sonarr.error = response;
-				}
-			}));
+			}).pipe(
+				tap((response) => {
+					state.sonarr.configuringSuccess = response.isSuccess;
+					state.sonarr.isConfiguring = false;
+					if (response.isSuccess) {
+						// This should overshoot to step 3 to show step 2 as done
+						state.sonarr.step = 3;
+					} else {
+						state.sonarr.error = response;
+					}
+				}),
+				switchMap((response) => response.isSuccess ? settingsStore.refreshSettings() : of(response)),
+			);
 		},
 
 		configureRadarrIntegration() {
@@ -232,16 +235,19 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 			return integrationApi.configureRadarrIntegrationEndpoint({
 				url: settingsStore.integrationsSettings.radarr.radarrBaseUrl,
 				apiKey: settingsStore.integrationsSettings.radarr.radarrApiKey,
-			}).pipe(tap((response) => {
-				state.radarr.configuringSuccess = response.isSuccess;
-				state.radarr.isConfiguring = false;
-				if (response.isSuccess) {
-					// This should overshoot to step 3 to show step 2 as done
-					state.radarr.step = 3;
-				} else {
-					state.radarr.error = response;
-				}
-			}));
+			}).pipe(
+				tap((response) => {
+					state.radarr.configuringSuccess = response.isSuccess;
+					state.radarr.isConfiguring = false;
+					if (response.isSuccess) {
+						// This should overshoot to step 3 to show step 2 as done
+						state.radarr.step = 3;
+					} else {
+						state.radarr.error = response;
+					}
+				}),
+				switchMap((response) => response.isSuccess ? settingsStore.refreshSettings() : of(response)),
+			);
 		},
 
 		clearRadarrConfiguration() {

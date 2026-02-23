@@ -53,6 +53,7 @@ public partial class BaseUnitTest
                 s.AddTransient(_ => Mock.Create<ILogger>());
                 s.AddTransient(_ => Mock.Create<IReaparrDbContext>());
                 s.AddTransient(_ => Mock.Create<IAuthDbContext>());
+                s.AddTransient(_ => Mock.Create<IAuthDbContextFactory>());
                 s.AddTransient(_ => Mock.Create<ICommandExecutor>());
                 s.AddSingleton(_ => Mock.Create<ISchedulerService>());
                 s.AddSingleton(_ => Mock.Mock<IProgressHubService>().Object);
@@ -66,7 +67,9 @@ public partial class BaseUnitTest
     {
         if (IsDatabaseSetup)
         {
-            MockDatabase.GetMemoryReaparrDbContext(_databaseName).EnsureDeleted();
+            _setupReaparrDbContext?.EnsureDeleted();
+            _setupReaparrDbContext?.Dispose();
+            _setupAuthDbContext?.Dispose();
         }
     }
 }

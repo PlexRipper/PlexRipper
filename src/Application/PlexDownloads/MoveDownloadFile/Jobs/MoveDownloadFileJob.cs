@@ -4,6 +4,7 @@ using Reaparr.Data.Contracts;
 
 namespace Reaparr.Application;
 
+[DisallowConcurrentExecution]
 public class MoveDownloadFileJob : IJob
 {
     private readonly ILogger _log;
@@ -44,11 +45,25 @@ public class MoveDownloadFileJob : IJob
                     downloadTaskKey.Id
                 );
 
-            var result = await _commandExecutor.Send(new MoveDownloadFileFromFileTaskCommand(downloadTaskKey), ct);
+            var result = await Result.Try(() =>
+                _commandExecutor.Send(new MoveDownloadFileFromFileTaskCommand(downloadTaskKey), ct)
+            );
+
+            if (result.IsCancelled)
+            {
+                _log.Here()
+                    .Warning(
+                        "{NameOfMoveDownloadJob} for {NameOfFileTaskId} with id: {FileTaskId} was cancelled",
+                        nameof(MoveDownloadFileJob),
+                        nameof(downloadTaskKey),
+                        downloadTaskKey.Id
+                    );
+                return;
+            }
 
             if (result.IsFailed)
             {
-                _log.Here().Error("Failed to merge all files for {DownloadTaskKey}", downloadTaskKey);
+                _log.Here().Error("Failed to move all files for {DownloadTaskKey}", downloadTaskKey);
                 return;
             }
 

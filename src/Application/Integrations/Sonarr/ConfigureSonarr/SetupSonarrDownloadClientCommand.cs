@@ -119,7 +119,6 @@ public class SetupSonarrDownloadClientCommandHandler
         var derivedUrlBase = $"{basePath}api/public/download-client/";
 
         var useSsl = string.Equals(reaparrBaseUri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase);
-        var port = reaparrBaseUri.Port == -1 ? (useSsl ? 443 : 80) : reaparrBaseUri.Port;
 
         return new SonarrDownloadContractDTO
         {
@@ -132,7 +131,7 @@ public class SetupSonarrDownloadClientCommandHandler
             Fields =
             [
                 new() { Name = "host", Value = reaparrBaseUri.Host },
-                new() { Name = "port", Value = port },
+                new() { Name = "port", Value = reaparrBaseUri.Port },
                 new() { Name = "useSsl", Value = useSsl },
                 new() { Name = "urlBase", Value = derivedUrlBase },
                 new() { Name = "username", Value = _integrationsSettings.DownloadClientUsername },

@@ -13,10 +13,12 @@ public record SonarrApiCreateDownloadClientCommand : ICommand<Result<SonarrDownl
 public class SonarApiCreateDownloadClientCommandHandler
     : ICommandHandler<SonarrApiCreateDownloadClientCommand, Result<SonarrDownloadContractDTO>>
 {
+    private readonly ILogger _logger;
     private readonly HttpClient _client;
 
-    public SonarApiCreateDownloadClientCommandHandler(IHttpClientFactory httpClientFactory)
+    public SonarApiCreateDownloadClientCommandHandler(ILogger logger, IHttpClientFactory httpClientFactory)
     {
+        _logger = logger.ForContext<SonarApiCreateDownloadClientCommandHandler>();
         _client = httpClientFactory.CreateSonarrHttpClient();
     }
 
@@ -30,6 +32,11 @@ public class SonarApiCreateDownloadClientCommandHandler
             var forceSave = command.ForceSave ? "true" : "false";
             var requestUri = new Uri($"/api/v3/downloadclient?forceSave={forceSave}", UriKind.Relative);
             var json = JsonSerializer.Serialize(command.Resource, DefaultJsonSerializerOptions.ConfigStandard);
+
+            _logger
+                .Here()
+                .Debug("Creating Sonarr download client with name {DownloadClientName}", command.Resource.Name);
+            _logger.Here().Debug(json);
 
             using var httpRequest = new HttpRequestMessage(HttpMethod.Post, requestUri);
             httpRequest.Content = json.ToStringContent();

@@ -5,17 +5,18 @@ namespace Reaparr.Application;
 
 public record RadarrApiCreateDownloadClientCommand : ICommand<Result<RadarrDownloadClientResourceDTO>>
 {
-    public required bool ForceSave { get; init; }
     public required RadarrDownloadContractDTO Resource { get; init; }
 }
 
 public class RadarrApiCreateDownloadClientCommandHandler
     : ICommandHandler<RadarrApiCreateDownloadClientCommand, Result<RadarrDownloadClientResourceDTO>>
 {
+    private readonly ILogger _log;
     private readonly HttpClient _client;
 
-    public RadarrApiCreateDownloadClientCommandHandler(IHttpClientFactory httpClientFactory)
+    public RadarrApiCreateDownloadClientCommandHandler(ILogger logger, IHttpClientFactory httpClientFactory)
     {
+        _log = logger.ForContext<RadarrApiCreateDownloadClientCommandHandler>();
         _client = httpClientFactory.CreateRadarrHttpClient();
     }
 
@@ -26,9 +27,10 @@ public class RadarrApiCreateDownloadClientCommandHandler
     {
         try
         {
-            var forceSave = command.ForceSave ? "true" : "false";
-            var requestUri = new Uri($"/api/v3/downloadclient?forceSave={forceSave}", UriKind.Relative);
+            var requestUri = new Uri($"/api/v3/downloadclient", UriKind.Relative);
             var json = JsonSerializer.Serialize(command.Resource, DefaultJsonSerializerOptions.ConfigStandard);
+            _log.Here().Debug("Creating Radarr download client with name {DownloadClientName}", command.Resource.Name);
+            _log.Here().Debug(json);
 
             using var httpRequest = new HttpRequestMessage(HttpMethod.Post, requestUri);
             httpRequest.Content = json.ToStringContent();

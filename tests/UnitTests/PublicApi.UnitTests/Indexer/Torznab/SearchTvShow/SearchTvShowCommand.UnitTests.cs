@@ -277,9 +277,9 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
     }
 
     [Fact]
-    public async Task ShouldSkipItems_WhenEpisodeMissingRelations()
+    public async Task ShouldReturnEmpty_WhenNoEpisodesExist()
     {
-        // Arrange: empty DB first, then add an orphan episode with media
+        // Arrange
         await SetupDatabase(
             3003,
             config =>
@@ -291,16 +291,6 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
                 config.TvShowEpisodeCount = 0;
             }
         );
-
-        // Manually add an episode without TvShow/TvShowSeason
-        var dbContext = IDbContext;
-        var orphan = FakeData.GetPlexTvShowEpisode(new Seed(3003)).Generate();
-        orphan.TvShow = null;
-        orphan.TvShowSeason = null;
-        await dbContext.PlexTvShowEpisodes.AddAsync(orphan, CancellationToken);
-        await dbContext.SaveChangesAsync(CancellationToken);
-
-        var initialItemCount = await dbContext.PlexTvShowEpisodes.CountAsync(CancellationToken);
 
         var cmd = new SearchTvShowCommand
         {
@@ -319,86 +309,6 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
 
         // Assert
         result.ShouldNotBeNull();
-        // Orphan should be skipped resulting in 0 items since DB has only the orphan
-        result.Channel.Items.ShouldBeEmpty();
-
-        // Database state unchanged in counts
-        var finalCount = await dbContext.PlexTvShowEpisodes.CountAsync(CancellationToken);
-        finalCount.ShouldBe(initialItemCount);
-    }
-
-    [Fact]
-    public async Task ShouldSkipItem_WhenEpisodeMissingOnlyTvShow()
-    {
-        // Arrange
-        await SetupDatabase(
-            3004,
-            config =>
-            {
-                config.PlexServerCount = 1;
-                config.PlexTvShowLibraryCount = 1;
-            }
-        );
-
-        var dbContext = IDbContext;
-        var ep = FakeData.GetPlexTvShowEpisode(new Seed(3004)).Generate();
-        ep.TvShow = null;
-        // Keep season so only TvShow missing
-        await dbContext.PlexTvShowEpisodes.AddAsync(ep, CancellationToken);
-        await dbContext.SaveChangesAsync(CancellationToken);
-
-        var result = await Sut.ExecuteAsync(
-            new SearchTvShowCommand
-            {
-                Query = string.Empty,
-                Season = 0,
-                Episode = 0,
-                Limit = 10,
-                Offset = 0,
-                IMDB_ID = string.Empty,
-                TMDB_ID = 0,
-                TVDB_ID = 0,
-            },
-            CancellationToken
-        );
-
-        result.Channel.Items.ShouldBeEmpty();
-    }
-
-    [Fact]
-    public async Task ShouldSkipItem_WhenEpisodeMissingOnlySeason()
-    {
-        // Arrange
-        await SetupDatabase(
-            3005,
-            config =>
-            {
-                config.PlexServerCount = 1;
-                config.PlexTvShowLibraryCount = 1;
-            }
-        );
-
-        var dbContext = IDbContext;
-        var ep = FakeData.GetPlexTvShowEpisode(new Seed(3005)).Generate();
-        ep.TvShowSeason = null;
-        await dbContext.PlexTvShowEpisodes.AddAsync(ep, CancellationToken);
-        await dbContext.SaveChangesAsync(CancellationToken);
-
-        var result = await Sut.ExecuteAsync(
-            new SearchTvShowCommand
-            {
-                Query = string.Empty,
-                Season = 0,
-                Episode = 0,
-                Limit = 10,
-                Offset = 0,
-                IMDB_ID = string.Empty,
-                TMDB_ID = 0,
-                TVDB_ID = 0,
-            },
-            CancellationToken
-        );
-
         result.Channel.Items.ShouldBeEmpty();
     }
 

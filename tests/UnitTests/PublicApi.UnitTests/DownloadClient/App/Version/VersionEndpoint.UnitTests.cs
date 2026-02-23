@@ -1,15 +1,16 @@
 using System.Text;
+using Reaparr.Data.Contracts;
 using Reaparr.PublicAPI;
 
 namespace PublicApi.UnitTests;
 
-public class VersionEndpointUnitTests : BaseUnitTest
+public class VersionEndpointUnitTests : BaseUnitTest<VersionEndpoint>
 {
     public VersionEndpointUnitTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]
-    public async Task ShouldReturnVersionString_ThatCanBeParsedAfterTrimmingPrefix()
+    public async Task ShouldReturnVersionString_WhenPrefixTrimmed()
     {
         // Arrange
         var ep = SetupEndpointUnitTest<VersionEndpoint>();
@@ -30,5 +31,8 @@ public class VersionEndpointUnitTests : BaseUnitTest
         var trimmed = body.TrimStart('v');
         var parsed = Version.Parse(trimmed);
         parsed.ShouldNotBeNull();
+
+        Mock.Mock<IReaparrDbContext>()
+            .Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
     }
 }

@@ -3,13 +3,13 @@ using Reaparr.PublicAPI;
 
 namespace PublicApi.UnitTests;
 
-public class WebApiVersionEndpointUnitTests : BaseUnitTest
+public class WebApiVersionEndpointUnitTests : BaseUnitTest<WebApiVersionEndpoint>
 {
     public WebApiVersionEndpointUnitTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]
-    public async Task ShouldReturnWebApiVersionString_ThatCanBeParsedAsVersion()
+    public async Task ShouldReturnWebApiVersionString_WhenBodyParsed()
     {
         // Arrange
         var ep = SetupEndpointUnitTest<WebApiVersionEndpoint>();

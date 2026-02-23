@@ -181,10 +181,16 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
             .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Never);
 
+        Mock.Mock<IMoveDownloadFileQueue>()
+            .Setup(x => x.CheckMoveDownloadFileJobQueue())
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Never);
+
         // Act — should not throw (Quartz jobs must swallow exceptions)
         var act = async () => await Sut.Execute(Mock.Create<IJobExecutionContext>());
 
         // Assert
         await act.ShouldNotThrowAsync();
+        Mock.Mock<IMoveDownloadFileQueue>().Verify();
     }
 }

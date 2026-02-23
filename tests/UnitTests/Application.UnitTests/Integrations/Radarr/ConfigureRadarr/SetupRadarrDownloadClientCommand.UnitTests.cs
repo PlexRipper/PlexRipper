@@ -1,4 +1,5 @@
 using Autofac;
+using FastEndpoints;
 using Reaparr.Settings.Contracts;
 
 namespace Reaparr.Application.UnitTests;
@@ -47,6 +48,19 @@ public class SetupRadarrDownloadClientCommandUnitTests : BaseUnitTest<SetupRadar
 
         // Assert
         result.IsFailed.ShouldBeTrue();
+        var commandExecutorMock = Mock.Mock<ICommandExecutor>();
+        commandExecutorMock.Verify(
+            x =>
+                x.Send(
+                    It.IsAny<ICommand<Result<List<RadarrDownloadClientResourceDTO>>>>(),
+                    It.IsAny<CancellationToken>()
+                ),
+            Times.Never
+        );
+        commandExecutorMock.Verify(
+            x => x.Send(It.IsAny<ICommand<Result<RadarrDownloadClientResourceDTO>>>(), It.IsAny<CancellationToken>()),
+            Times.Never
+        );
     }
 
     [Fact]
@@ -63,6 +77,19 @@ public class SetupRadarrDownloadClientCommandUnitTests : BaseUnitTest<SetupRadar
 
         // Assert
         result.IsFailed.ShouldBeTrue();
+        var commandExecutorMock = Mock.Mock<ICommandExecutor>();
+        commandExecutorMock.Verify(
+            x =>
+                x.Send(
+                    It.IsAny<ICommand<Result<List<RadarrDownloadClientResourceDTO>>>>(),
+                    It.IsAny<CancellationToken>()
+                ),
+            Times.Never
+        );
+        commandExecutorMock.Verify(
+            x => x.Send(It.IsAny<ICommand<Result<RadarrDownloadClientResourceDTO>>>(), It.IsAny<CancellationToken>()),
+            Times.Never
+        );
     }
 
     [Fact]

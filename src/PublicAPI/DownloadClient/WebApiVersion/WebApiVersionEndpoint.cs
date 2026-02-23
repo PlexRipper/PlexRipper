@@ -8,7 +8,7 @@ public class WebApiVersionEndpoint : EndpointWithoutRequest<string>
 
     public WebApiVersionEndpoint(ILogger logger)
     {
-        _log = logger.ForContext<VersionEndpoint>();
+        _log = logger.ForContext<WebApiVersionEndpoint>();
     }
 
     public override void Configure()

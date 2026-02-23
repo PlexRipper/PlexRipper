@@ -39,7 +39,7 @@ public class RadarrApiUpdateDownloadClientCommandHandler
         try
         {
             var forceSave = command.ForceSave ? "true" : "false";
-            var requestPath = $"api/v3/downloadclient/{command.Id}".SetQueryParam("forceSave", forceSave);
+            var requestPath = $"api/v3/downloadclient/{command.Id}".SetQueryParam("forceSave", forceSave).ToString();
             var requestUri = new Uri(requestPath, UriKind.Relative);
             var json = JsonSerializer.Serialize(command.Resource, DefaultJsonSerializerOptions.ConfigStandard);
 

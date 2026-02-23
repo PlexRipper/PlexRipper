@@ -49,6 +49,13 @@ public class SetupSonarrDownloadClientCommandHandler
         )
             return Result.Fail("Sonarr BaseUrl is invalid.").LogError();
 
+        _log.Here()
+            .Debug(
+                "Setting up Sonarr download client. SonarrBaseUrl: {SonarrBaseUrl}, ReaparrBaseUrl: {ReaparrBaseUrl}",
+                sonarrBaseUri,
+                command.ReaparrBaseUri
+            );
+
         try
         {
             var result = await _commandExecutor.Send(new SonarApiGetDownloadClientsCommand(), ct);

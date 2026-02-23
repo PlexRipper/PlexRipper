@@ -1,6 +1,7 @@
 using System.Text.Json;
 using FastEndpoints;
 using FluentValidation;
+using Flurl;
 
 namespace Reaparr.Application;
 
@@ -38,7 +39,8 @@ public class RadarrApiUpdateDownloadClientCommandHandler
         try
         {
             var forceSave = command.ForceSave ? "true" : "false";
-            var requestUri = new Uri($"api/v3/downloadclient/{command.Id}?forceSave={forceSave}", UriKind.Relative);
+            var requestPath = $"api/v3/downloadclient/{command.Id}".SetQueryParam("forceSave", forceSave);
+            var requestUri = new Uri(requestPath, UriKind.Relative);
             var json = JsonSerializer.Serialize(command.Resource, DefaultJsonSerializerOptions.ConfigStandard);
 
             using var httpRequest = new HttpRequestMessage(HttpMethod.Put, requestUri);

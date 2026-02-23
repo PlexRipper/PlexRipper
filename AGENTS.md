@@ -331,12 +331,32 @@ Never add AI attribution trailers (e.g. `Co-Authored-By: Claude ...`). Commit me
 * Use `Result.Try(...)` to wrap `_commandExecutor.Send(...)` and check `IsCancelled` before `IsFailed`
 * `context.CancellationToken` carries the Quartz shutdown signal — pass it through to all async calls
 
+### Settings interfaces with static abstract members
+
+* `ISonarrSettings`, `IRadarrSettings` (and similar) extend `IBaseSettingsModule<T>` which declares `static abstract TModel Create()`
+* Moq cannot mock these interfaces — attempting `Mock.Mock<ISonarrSettings>()` produces a CS8920 compiler error
+* Pattern: inject concrete `SonarrSettings` / `RadarrSettings` record instances via `TypedParameter` when calling `Mock.Create<THandler>(...)`:
+
+    ```csharp
+    var sut = Mock.Create<MyHandler>(
+        new TypedParameter(typeof(ISonarrSettings), new SonarrSettings { ... }),
+        new TypedParameter(typeof(IIntegrationsSettings), IntegrationsSettings.Create())
+    );
+    ```
+
+* Add `using Autofac;` to the test file to get `TypedParameter`
+
 ### FluentResults usage
 
 * Return `Result.Ok(value)` or `Result.Fail(new ExceptionalError(ex)).LogError()`
 * Propagate failures with `return failedResult.ToResult()`
 * Check `Has504GatewayTimeoutError()` for Plex connectivity failures
 * Never return `null` where a `Result` is expected
+
+### Download client API compatibility
+
+* `/api/v2/*` is rewritten to `/api/public/download-client/api/v2/*` in `Startup.Application` for qBittorrent-style clients
+* `/torrents/createCategory` is handled as a no-op 200 OK to satisfy qBittorrent clients
 
 ## Performance rules during gaming (Arch Linux)
 

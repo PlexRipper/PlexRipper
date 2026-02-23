@@ -49,6 +49,13 @@ public class SetupRadarrDownloadClientCommandHandler
         )
             return Result.Fail("Radarr BaseUrl is invalid.").LogError();
 
+        _log.Here()
+            .Debug(
+                "Setting up Radarr download client. RadarrBaseUrl: {RadarrBaseUrl}, ReaparrBaseUrl: {ReaparrBaseUrl}",
+                radarrBaseUri,
+                command.ReaparrBaseUri
+            );
+
         try
         {
             var result = await _commandExecutor.Send(new RadarrApiGetDownloadClientsCommand(), ct);
@@ -111,7 +118,6 @@ public class SetupRadarrDownloadClientCommandHandler
 
     private RadarrDownloadContractDTO BuildDownloadClientResource(Uri reaparrBaseUri)
     {
-        // Derive urlBase from Reaparr's base URI to include any PathBase and ensure correct trailing segment
         var basePath = string.IsNullOrEmpty(reaparrBaseUri.AbsolutePath) ? "/" : reaparrBaseUri.AbsolutePath;
         if (!basePath.EndsWith("/"))
             basePath += "/";

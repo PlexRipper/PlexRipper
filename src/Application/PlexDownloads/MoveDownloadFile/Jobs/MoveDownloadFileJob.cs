@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Quartz;
+using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 
 namespace Reaparr.Application;
@@ -10,12 +11,19 @@ public class MoveDownloadFileJob : IJob
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IReaparrDbContext _dbContext;
+    private readonly IMoveDownloadFileQueue _moveDownloadFileQueue;
 
-    public MoveDownloadFileJob(ILogger log, ICommandExecutor commandExecutor, IReaparrDbContext dbContext)
+    public MoveDownloadFileJob(
+        ILogger log,
+        ICommandExecutor commandExecutor,
+        IReaparrDbContext dbContext,
+        IMoveDownloadFileQueue moveDownloadFileQueue
+    )
     {
         _log = log.ForContext<MoveDownloadFileJob>();
         _commandExecutor = commandExecutor;
         _dbContext = dbContext;
+        _moveDownloadFileQueue = moveDownloadFileQueue;
     }
 
     public static string DownloadTaskIdParameter => "DownloadTaskId";
@@ -35,62 +43,163 @@ public class MoveDownloadFileJob : IJob
             return;
         }
 
-        try
+        async Task QueueNextAsync()
+        {
+            var queueResult = await Result.Try(() => _moveDownloadFileQueue.CheckMoveDownloadFileJobQueue());
+            if (queueResult.IsFailed)
+            {
+                queueResult.LogError();
+            }
+        }
+
+        _log.Here()
+            .Information(
+                "Executing job: {NameOfMoveDownloadJob} for {NameOfFileTaskId} with id: {FileTaskId}",
+                nameof(MoveDownloadFileJob),
+                nameof(downloadTaskKey),
+                downloadTaskKey.Id
+            );
+
+        var moveResult = await Result.Try(() =>
+            _commandExecutor.Send(new MoveDownloadFileFromFileTaskCommand(downloadTaskKey), ct)
+        );
+
+        if (moveResult.IsCancelled)
         {
             _log.Here()
-                .Information(
-                    "Executing job: {NameOfMoveDownloadJob} for {NameOfFileTaskId} with id: {FileTaskId}",
+                .Warning(
+                    "{NameOfMoveDownloadJob} for {NameOfFileTaskId} with id: {FileTaskId} was cancelled",
                     nameof(MoveDownloadFileJob),
                     nameof(downloadTaskKey),
                     downloadTaskKey.Id
                 );
-
-            var result = await Result.Try(() =>
-                _commandExecutor.Send(new MoveDownloadFileFromFileTaskCommand(downloadTaskKey), ct)
-            );
-
-            if (result.IsCancelled)
-            {
-                _log.Here()
-                    .Warning(
-                        "{NameOfMoveDownloadJob} for {NameOfFileTaskId} with id: {FileTaskId} was cancelled",
-                        nameof(MoveDownloadFileJob),
-                        nameof(downloadTaskKey),
-                        downloadTaskKey.Id
-                    );
-                return;
-            }
-
-            if (result.IsFailed)
-            {
-                _log.Here().Error("Failed to move all files for {DownloadTaskKey}", downloadTaskKey);
-                return;
-            }
-
-            var downloadTask = await _dbContext.GetDownloadTaskFileAsync(downloadTaskKey, ct);
-
-            if (downloadTask!.DownloadStatus is DownloadStatus.MoveFinished)
-            {
-                await _dbContext.SetDownloadStatus(downloadTaskKey, DownloadStatus.Completed);
-
-                // Clean up the DownloadWorkerTasks
-                await _commandExecutor.Send(new CleanUpDownloadTaskFoldersCommand(downloadTaskKey), ct);
-
-                await _dbContext
-                    .DownloadWorkerTasks.Where(x => x.DownloadTaskId == downloadTask.Id)
-                    .ExecuteDeleteAsync(ct);
-
-                await _commandExecutor.Send(new DownloadTaskUpdatedCommand(downloadTaskKey), ct);
-            }
+            await QueueNextAsync();
+            return;
         }
-        catch (TaskCanceledException)
+
+        if (moveResult.IsFailed)
+        {
+            _log.Here().Error("Failed to move all files for {DownloadTaskKey}", downloadTaskKey);
+            await QueueNextAsync();
+            return;
+        }
+
+        var downloadTaskResult = await Result.Try(() => _dbContext.GetDownloadTaskFileAsync(downloadTaskKey, ct));
+        if (downloadTaskResult.IsCancelled)
         {
             _log.Here()
                 .Warning("{JobName} for {DownloadTaskKey} was cancelled", nameof(MoveDownloadFileJob), downloadTaskKey);
+            await QueueNextAsync();
+            return;
         }
-        catch (Exception e)
+
+        if (downloadTaskResult.IsFailed)
         {
-            _log.Here().ErrorResult(e);
+            downloadTaskResult.LogError();
+            await QueueNextAsync();
+            return;
         }
+
+        var downloadTask = downloadTaskResult.Value;
+        if (downloadTask is null)
+        {
+            ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), downloadTaskKey.Id).LogError();
+            await QueueNextAsync();
+            return;
+        }
+
+        if (downloadTask.DownloadStatus is DownloadStatus.MoveFinished)
+        {
+            var updateStatusResult = await Result.Try(() =>
+                _dbContext.SetDownloadStatus(downloadTaskKey, DownloadStatus.Completed)
+            );
+            if (updateStatusResult.IsCancelled)
+            {
+                _log.Here()
+                    .Warning(
+                        "{JobName} for {DownloadTaskKey} was cancelled",
+                        nameof(MoveDownloadFileJob),
+                        downloadTaskKey
+                    );
+                await QueueNextAsync();
+                return;
+            }
+
+            if (updateStatusResult.IsFailed)
+            {
+                updateStatusResult.LogError();
+                await QueueNextAsync();
+                return;
+            }
+
+            // Clean up the DownloadWorkerTasks
+            var cleanupResult = await Result.Try(() =>
+                _commandExecutor.Send(new CleanUpDownloadTaskFoldersCommand(downloadTaskKey), ct)
+            );
+            if (cleanupResult.IsCancelled)
+            {
+                _log.Here()
+                    .Warning(
+                        "{JobName} for {DownloadTaskKey} was cancelled",
+                        nameof(MoveDownloadFileJob),
+                        downloadTaskKey
+                    );
+                await QueueNextAsync();
+                return;
+            }
+
+            if (cleanupResult.IsFailed)
+            {
+                cleanupResult.LogError();
+                await QueueNextAsync();
+                return;
+            }
+
+            var deleteWorkerTasksResult = await Result.Try(() =>
+                _dbContext.DownloadWorkerTasks.Where(x => x.DownloadTaskId == downloadTask.Id).ExecuteDeleteAsync(ct)
+            );
+            if (deleteWorkerTasksResult.IsCancelled)
+            {
+                _log.Here()
+                    .Warning(
+                        "{JobName} for {DownloadTaskKey} was cancelled",
+                        nameof(MoveDownloadFileJob),
+                        downloadTaskKey
+                    );
+                await QueueNextAsync();
+                return;
+            }
+
+            if (deleteWorkerTasksResult.IsFailed)
+            {
+                deleteWorkerTasksResult.LogError();
+                await QueueNextAsync();
+                return;
+            }
+
+            var updatedResult = await Result.Try(() =>
+                _commandExecutor.Send(new DownloadTaskUpdatedCommand(downloadTaskKey), ct)
+            );
+            if (updatedResult.IsCancelled)
+            {
+                _log.Here()
+                    .Warning(
+                        "{JobName} for {DownloadTaskKey} was cancelled",
+                        nameof(MoveDownloadFileJob),
+                        downloadTaskKey
+                    );
+                await QueueNextAsync();
+                return;
+            }
+
+            if (updatedResult.IsFailed)
+            {
+                updatedResult.LogError();
+                await QueueNextAsync();
+                return;
+            }
+        }
+
+        await QueueNextAsync();
     }
 }

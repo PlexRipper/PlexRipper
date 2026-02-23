@@ -346,6 +346,11 @@ Never add AI attribution trailers (e.g. `Co-Authored-By: Claude ...`). Commit me
 
 * Add `using Autofac;` to the test file to get `TypedParameter`
 
+### Endpoint unit test DbContext
+
+* `SetupEndpointUnitTest<T>()` registers `IReaparrDbContext` as a real in-memory context, not a Moq mock
+* Avoid `Mock.Mock<IReaparrDbContext>()` in endpoint tests unless you explicitly register a mock
+
 ### FluentResults usage
 
 * Return `Result.Ok(value)` or `Result.Fail(new ExceptionalError(ex)).LogError()`

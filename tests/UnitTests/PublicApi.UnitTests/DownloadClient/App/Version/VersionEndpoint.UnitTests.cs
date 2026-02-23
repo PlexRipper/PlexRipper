@@ -1,5 +1,4 @@
 using System.Text;
-using Reaparr.Data.Contracts;
 using Reaparr.PublicAPI;
 
 namespace PublicApi.UnitTests;
@@ -32,7 +31,6 @@ public class VersionEndpointUnitTests : BaseUnitTest<VersionEndpoint>
         var parsed = Version.Parse(trimmed);
         parsed.ShouldNotBeNull();
 
-        Mock.Mock<IReaparrDbContext>()
-            .Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
+        // No persistence expected in this endpoint.
     }
 }

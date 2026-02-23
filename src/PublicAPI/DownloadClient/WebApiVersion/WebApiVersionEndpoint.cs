@@ -4,6 +4,13 @@ namespace Reaparr.PublicAPI;
 
 public class WebApiVersionEndpoint : EndpointWithoutRequest<string>
 {
+    private readonly ILogger _log;
+
+    public WebApiVersionEndpoint(ILogger logger)
+    {
+        _log = logger.ForContext<VersionEndpoint>();
+    }
+
     public override void Configure()
     {
         Get(PublicApiRoutes.DownloadClient + "/app/webapiVersion");
@@ -13,6 +20,8 @@ public class WebApiVersionEndpoint : EndpointWithoutRequest<string>
 
     public override async Task HandleAsync(CancellationToken ct)
     {
-        await Send.StringAsync("2.8.3", cancellation: ct);
+        _log.Here().DebugApiCall(HttpContext);
+
+        await Send.StringAsync("2.11.4", cancellation: ct);
     }
 }

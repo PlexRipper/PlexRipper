@@ -4,6 +4,13 @@ namespace Reaparr.PublicAPI;
 
 public class VersionEndpoint : EndpointWithoutRequest<string>
 {
+    private readonly ILogger _log;
+
+    public VersionEndpoint(ILogger logger)
+    {
+        _log = logger.ForContext<VersionEndpoint>();
+    }
+
     public override void Configure()
     {
         Get(PublicApiRoutes.DownloadClient + "/app/version");
@@ -13,6 +20,8 @@ public class VersionEndpoint : EndpointWithoutRequest<string>
 
     public override async Task HandleAsync(CancellationToken ct)
     {
-        await Send.StringAsync("v5.1.0", cancellation: ct);
+        _log.Here().DebugApiCall(HttpContext);
+
+        await Send.StringAsync("v5.1.4", cancellation: ct);
     }
 }

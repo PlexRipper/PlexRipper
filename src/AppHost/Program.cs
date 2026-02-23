@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.HttpOverrides;
 using Reaparr.Application;
 using Reaparr.Environment;
 using Reaparr.FluentResultExtensions;
@@ -44,6 +45,14 @@ public class Program
 
             builder.Services.ConfigureServices(builder.Environment);
 
+            // Trust proxy-forwarded scheme/IP because TLS terminates upstream; without this, Request.Scheme stays http.
+            builder.Services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+                options.KnownIPNetworks.Clear();
+                options.KnownProxies.Clear();
+            });
+
             var app = builder.Build();
 
             var configResult = app.SetupConfigFile();
@@ -59,6 +68,9 @@ public class Program
                 FailedToStart(configureDatabase);
                 return;
             }
+
+            // TLS is terminated upstream; without forwarded headers, Request.Scheme stays http and base URLs are wrong.
+            app.UseForwardedHeaders();
 
             app.ConfigureApplication(app.Environment);
 

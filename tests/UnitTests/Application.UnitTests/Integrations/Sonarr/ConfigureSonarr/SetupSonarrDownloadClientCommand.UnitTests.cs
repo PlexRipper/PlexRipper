@@ -1,5 +1,4 @@
 using Autofac;
-using Reaparr.PublicAPI.Contracts;
 using Reaparr.Settings.Contracts;
 
 namespace Reaparr.Application.UnitTests;

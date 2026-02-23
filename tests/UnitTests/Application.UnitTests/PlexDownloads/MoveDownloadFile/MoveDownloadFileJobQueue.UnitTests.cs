@@ -295,6 +295,64 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
     }
 
     [Fact]
+    public async Task ShouldPreferDownloadFinishedOverMoveError_WhenMoveErrorIsOlder()
+    {
+        // Arrange — DownloadFinished should win even if MoveError is older
+        await SetupDatabase(
+            7788,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.MovieDownloadTasksCount = 1;
+                config.TvShowDownloadTasksCount = 1;
+                config.TvShowSeasonDownloadTasksCount = 1;
+                config.TvShowEpisodeDownloadTasksCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var movieFileTasks = await dbContext.DownloadTaskMovieFile.AsTracking().ToListAsync(CancellationToken);
+        movieFileTasks.SetDownloadStatus(DownloadStatus.MoveError);
+        var episodeFileTasks = await dbContext
+            .DownloadTaskTvShowEpisodeFile.AsTracking()
+            .ToListAsync(CancellationToken);
+        episodeFileTasks.SetDownloadStatus(DownloadStatus.DownloadFinished);
+        await dbContext.SaveChangesAsync(CancellationToken);
+
+        var now = DateTime.UtcNow;
+        await dbContext
+            .DownloadTaskMovieFile.Where(x => x.Id == movieFileTasks.First().Id)
+            .ExecuteUpdateAsync(s => s.SetProperty(x => x.CreatedAt, now), cancellationToken: CancellationToken);
+        await dbContext
+            .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == episodeFileTasks.First().Id)
+            .ExecuteUpdateAsync(
+                s => s.SetProperty(x => x.CreatedAt, now.AddMinutes(10)),
+                cancellationToken: CancellationToken
+            );
+        await dbContext.SaveChangesAsync(CancellationToken);
+
+        var expectedKey = episodeFileTasks.First().ToKey();
+
+        DownloadTaskKey? capturedKey = null;
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .Setup(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()))
+            .Callback<DownloadTaskKey>(k => capturedKey = k)
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once);
+
+        // Act
+        var result = await Sut.CheckMoveDownloadFileJobQueue();
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.IsSuccess.ShouldBeTrue();
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Once);
+        capturedKey.ShouldNotBeNull();
+        capturedKey.ShouldBe(expectedKey);
+    }
+
+    [Fact]
     public async Task ShouldRunAFileMoveJob_WhenDownloadTaskTvShowEpisodeFileWithDownloadFinishedExist()
     {
         // Arrange

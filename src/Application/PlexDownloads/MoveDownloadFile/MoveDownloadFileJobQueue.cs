@@ -35,7 +35,10 @@ public class MoveDownloadFileJobQueue : IMoveDownloadFileQueue
             )
             .Select(x => new
             {
-                Key = x.ToKey(),
+                x.Id,
+                x.PlexServerId,
+                x.PlexLibraryId,
+                Type = DownloadTaskType.MovieData,
                 x.CreatedAt,
                 IsDownloadFinished = x.DownloadStatus == DownloadStatus.DownloadFinished,
             });
@@ -46,7 +49,10 @@ public class MoveDownloadFileJobQueue : IMoveDownloadFileQueue
             )
             .Select(x => new
             {
-                Key = x.ToKey(),
+                x.Id,
+                x.PlexServerId,
+                x.PlexLibraryId,
+                Type = DownloadTaskType.EpisodeData,
                 x.CreatedAt,
                 IsDownloadFinished = x.DownloadStatus == DownloadStatus.DownloadFinished,
             });
@@ -55,7 +61,13 @@ public class MoveDownloadFileJobQueue : IMoveDownloadFileQueue
             .Concat(episodeCandidates)
             .OrderByDescending(x => x.IsDownloadFinished)
             .ThenBy(x => x.CreatedAt)
-            .Select(x => x.Key)
+            .Select(x => new DownloadTaskKey
+            {
+                Id = x.Id,
+                PlexServerId = x.PlexServerId,
+                PlexLibraryId = x.PlexLibraryId,
+                Type = x.Type,
+            })
             .FirstOrDefaultAsync();
 
         if (key is null)

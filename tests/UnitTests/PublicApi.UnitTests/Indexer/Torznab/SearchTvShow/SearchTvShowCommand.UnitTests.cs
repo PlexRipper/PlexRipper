@@ -112,7 +112,8 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
             }
         );
 
-        var episode = await IDbContext
+        var dbContext = IDbContext;
+        var episode = await dbContext
             .PlexTvShowEpisodes.Include(e => e.TvShowSeason)
             .Include(e => e.TvShow)
             .OrderBy(e => e.Id)
@@ -150,7 +151,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
         result.Channel.Items.All(i => i.Attributes.Any(a => a.Name == "imdb" && a.Value == imdb)).ShouldBeTrue();
 
         // Titles should equal the part file name used during mapping
-        var expectedTitle = await IDbContext
+        var expectedTitle = await dbContext
             .PlexTvShowEpisodeData.Where(d => d.PlexTvShowEpisodeId == episode.Id)
             .OrderBy(d => d.PlexApiPartId)
             .Select(d => d.GetFileName)
@@ -161,7 +162,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
         result.Channel.Items.All(i => i.Link.Contains(PublicApiRoutes.DownloadTorrent)).ShouldBeTrue();
 
         // Database state (no mutations expected)
-        var episodeExists = await IDbContext.PlexTvShowEpisodes.AnyAsync(e => e.Id == episode.Id, CancellationToken);
+        var episodeExists = await dbContext.PlexTvShowEpisodes.AnyAsync(e => e.Id == episode.Id, CancellationToken);
         episodeExists.ShouldBeTrue();
     }
 

@@ -68,6 +68,8 @@ public partial class BaseUnitTest
         if (IsDatabaseSetup)
         {
             MockDatabase.GetMemoryReaparrDbContext(_databaseName).EnsureDeleted();
+            _setupReaparrDbContext?.Dispose();
+            _setupAuthDbContext?.Dispose();
         }
     }
 }

@@ -358,6 +358,10 @@ Never add AI attribution trailers (e.g. `Co-Authored-By: Claude ...`). Commit me
 * `/api/v2/*` is rewritten to `/api/public/download-client/api/v2/*` in `Startup.Application` for qBittorrent-style clients
 * `/torrents/createCategory` is handled as a no-op 200 OK to satisfy qBittorrent clients
 
+### Move download queue chaining
+
+* `MoveDownloadFileJob` should call `IMoveDownloadFileQueue` directly to chain moves; avoid BackgroundJobs wrapper handlers
+
 ## Performance rules during gaming (Arch Linux)
 
 During gameplay, game performance has priority over builds/tests.

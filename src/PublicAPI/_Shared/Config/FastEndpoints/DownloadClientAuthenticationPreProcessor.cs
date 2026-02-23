@@ -7,12 +7,12 @@ namespace Reaparr.PublicAPI;
 public class DownloadClientAuthenticationPreProcessor<TRequest> : IPreProcessor<TRequest>
 {
     private readonly ILogger _log;
-    private readonly IAuthDbContext _authDbContext;
+    private readonly IAuthDbContextFactory _authDbContextFactory;
 
-    public DownloadClientAuthenticationPreProcessor(ILogger log, IAuthDbContext authDbContext)
+    public DownloadClientAuthenticationPreProcessor(ILogger log, IAuthDbContextFactory authDbContextFactory)
     {
         _log = log.ForContext<DownloadClientAuthenticationPreProcessor<TRequest>>();
-        _authDbContext = authDbContext;
+        _authDbContextFactory = authDbContextFactory;
     }
 
     public async Task PreProcessAsync(IPreProcessorContext<TRequest> ctx, CancellationToken ct)
@@ -64,7 +64,9 @@ public class DownloadClientAuthenticationPreProcessor<TRequest> : IPreProcessor<
         if (string.IsNullOrWhiteSpace(sid))
             return false;
 
-        var entity = await _authDbContext.DownloadClientSessions.FirstOrDefaultAsync(x => x.Sid == sid, ct);
+        using var authDbContext = await _authDbContextFactory.CreateAsync();
+
+        var entity = await authDbContext.DownloadClientSessions.FirstOrDefaultAsync(x => x.Sid == sid, ct);
         if (entity is null)
             return false;
 
@@ -76,8 +78,8 @@ public class DownloadClientAuthenticationPreProcessor<TRequest> : IPreProcessor<
                     sid,
                     entity.ExpiresAt
                 );
-            _authDbContext.DownloadClientSessions.Remove(entity);
-            await _authDbContext.SaveChangesAsync(ct);
+            authDbContext.DownloadClientSessions.Remove(entity);
+            await authDbContext.SaveChangesAsync(ct);
             return false;
         }
 

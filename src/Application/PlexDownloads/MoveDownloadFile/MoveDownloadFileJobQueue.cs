@@ -25,12 +25,6 @@ public class MoveDownloadFileJobQueue : IMoveDownloadFileQueue
     /// <inheritdoc/>
     public async Task<Result> CheckMoveDownloadFileJobQueue()
     {
-        if (await _moveDownloadFileScheduler.IsAnyMoveDownloadFileJobRunning())
-        {
-            _log.Here().Debug("A MoveDownloadFileJob is already running, skipping queue check");
-            return Result.Ok();
-        }
-
         // Create a new DbContext for this operation to avoid threading issues
         using var dbContext = await _dbContextFactory.CreateAsync();
 

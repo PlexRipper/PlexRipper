@@ -48,7 +48,7 @@ public class MoveDownloadFileJob : IJob
 
             if (result.IsFailed)
             {
-                _log.Here().Error("Failed to merge all files for {DownloadTaskKey}", downloadTaskKey);
+                _log.Here().Error("Failed to move all files for {DownloadTaskKey}", downloadTaskKey);
                 return;
             }
 

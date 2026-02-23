@@ -1,7 +1,7 @@
 using System.Text;
 using Reaparr.PublicAPI;
 
-namespace PublicApi.UnitTests;
+namespace Reaparr.PublicAPI.UnitTests;
 
 public class WebApiVersionEndpointUnitTests : BaseUnitTest<WebApiVersionEndpoint>
 {

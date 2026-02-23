@@ -93,6 +93,32 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
 
         if (string.IsNullOrWhiteSpace(downloadFilePath) || !_file.Exists(downloadFilePath))
         {
+            var movedInDownloadsPath = downloadFilePath.RemoveReapTempSuffix();
+            var destinationExists = !string.IsNullOrWhiteSpace(destinationPath) && _file.Exists(destinationPath);
+            var movedInDownloadsExists =
+                !string.IsNullOrWhiteSpace(movedInDownloadsPath) && _file.Exists(movedInDownloadsPath);
+
+            if (destinationExists || movedInDownloadsExists)
+            {
+                _log.Here()
+                    .Warning(
+                        "Source file was missing for {DownloadTaskId}, but a completed file already exists. Treating move as finished.",
+                        key.Id
+                    );
+
+                downloadTask.CurrentFileTransferBytesOffset = downloadTask.DataTotal;
+                downloadTask.FileDataTransferred = downloadTask.DataTotal;
+                await _dbContext.UpdateDownloadFileTransferProgress(
+                    key,
+                    downloadTask.ToFileTransferProgress(),
+                    cancellationToken
+                );
+                moveDownloadFileProgress?.OnNext(downloadTask.ToFileTransferProgress());
+
+                await UpdateDownloadTaskStatus(key, DownloadStatus.MoveFinished);
+                return Result.Ok();
+            }
+
             var result = Result.Fail($"Source file does not exist and cannot be moved: {downloadFilePath}").LogError();
             return await ErrorDownloadTask(key, result);
         }

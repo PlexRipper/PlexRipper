@@ -58,7 +58,7 @@ public record TorrentMetadataDTO
     {
         var url = new UriBuilder
         {
-            Host = "localhost",
+            Host = "localhost", // TODO this should be configurable in case Reaparr is not running on the same machine as the client consuming this URL or behind a reverse proxy
             Port = EnvironmentExtensions.GetPort,
             Path = PublicApiRoutes.DownloadTorrent,
         }.ToString();

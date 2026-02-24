@@ -93,7 +93,10 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
 
         if (string.IsNullOrWhiteSpace(downloadFilePath) || !_file.Exists(downloadFilePath))
         {
-            var movedInDownloadsPath = downloadFilePath.RemoveReapTempSuffix();
+            string? movedInDownloadsPath = null;
+            if (!string.IsNullOrWhiteSpace(downloadFilePath))
+                movedInDownloadsPath = downloadFilePath.RemoveReapTempSuffix();
+
             var destinationExists = !string.IsNullOrWhiteSpace(destinationPath) && _file.Exists(destinationPath);
             var movedInDownloadsExists =
                 !string.IsNullOrWhiteSpace(movedInDownloadsPath) && _file.Exists(movedInDownloadsPath);

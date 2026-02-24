@@ -51,7 +51,6 @@ public static class DefaultJsonSerializerOptions
             PropertyNameCaseInsensitive = true,
             Converters = { new JsonStringEnumConverter() },
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-            WriteIndented = true,
             TypeInfoResolver = new DefaultJsonTypeInfoResolver
             {
                 Modifiers = { InterceptNullSetter, DisableThrowingExceptionsWhenRequiredPropertyIsMissing },

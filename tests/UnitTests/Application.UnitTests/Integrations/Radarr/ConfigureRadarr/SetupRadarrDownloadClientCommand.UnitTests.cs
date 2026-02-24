@@ -110,6 +110,9 @@ public class SetupRadarrDownloadClientCommandUnitTests : BaseUnitTest<SetupRadar
             .ReturnsAsync(Result.Fail("Radarr unreachable"))
             .Verifiable(Times.Once);
 
+        Mock.SetupCommand(It.IsAny<RadarrApiCreateDownloadClientCommand>).Verifiable(Times.Never);
+        Mock.SetupCommand(It.IsAny<RadarrApiUpdateDownloadClientCommand>).Verifiable(Times.Never);
+
         var sut = CreateSut(ValidSettings(), ValidIntegrationsSettings(), ValidNetworkSettings());
 
         // Act
@@ -183,6 +186,8 @@ public class SetupRadarrDownloadClientCommandUnitTests : BaseUnitTest<SetupRadar
         Mock.SetupCommand(It.IsAny<RadarrApiCreateDownloadClientCommand>)
             .ReturnsAsync(Result.Fail("Create failed"))
             .Verifiable(Times.Once);
+
+        Mock.SetupCommand(It.IsAny<RadarrApiUpdateDownloadClientCommand>).Verifiable(Times.Never);
 
         var sut = CreateSut(ValidSettings(), ValidIntegrationsSettings(), ValidNetworkSettings());
 

@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Reaparr.Application;
 using Reaparr.Application.Contracts;
 
-namespace Reaparr.Application.UnitTests.ClearCompleted;
+namespace Reaparr.Application.UnitTests;
 
 public class ClearCompletedDownloadTasksEndpointUnitTests : BaseUnitTest<ClearCompletedDownloadTasksEndpoint>
 {
@@ -37,7 +37,7 @@ public class ClearCompletedDownloadTasksEndpointUnitTests : BaseUnitTest<ClearCo
             .Setup(x => x.Send(It.IsAny<ClearCompletedDownloadTasksCommand>(), It.IsAny<CancellationToken>()))
             .Returns(
                 (ClearCompletedDownloadTasksCommand command, CancellationToken ct) =>
-                    new ClearCompletedDownloadTasksCommandHandler(IDbContext).ExecuteAsync(command, ct)
+                    new ClearCompletedDownloadTasksCommandHandler(dbContext).ExecuteAsync(command, ct)
             );
 
         // Act
@@ -49,10 +49,15 @@ public class ClearCompletedDownloadTasksEndpointUnitTests : BaseUnitTest<ClearCo
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
 
-        var downloadTasksDb = await IDbContext.DownloadTaskMovie.ToListAsync(CancellationToken);
-        var downloadTasksFileDb = await IDbContext.DownloadTaskMovieFile.ToListAsync(CancellationToken);
+        var downloadTasksDb = await dbContext.DownloadTaskMovie.ToListAsync(CancellationToken);
+        var downloadTasksFileDb = await dbContext.DownloadTaskMovieFile.ToListAsync(CancellationToken);
         downloadTasksDb.Count.ShouldBe(5);
         downloadTasksFileDb.Count.ShouldBe(5);
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<ClearCompletedDownloadTasksCommand>(), It.IsAny<CancellationToken>()),
+                Times.Once
+            );
     }
 
     [Fact]
@@ -83,7 +88,7 @@ public class ClearCompletedDownloadTasksEndpointUnitTests : BaseUnitTest<ClearCo
             .Setup(x => x.Send(It.IsAny<ClearCompletedDownloadTasksCommand>(), It.IsAny<CancellationToken>()))
             .Returns(
                 (ClearCompletedDownloadTasksCommand command, CancellationToken ct) =>
-                    new ClearCompletedDownloadTasksCommandHandler(IDbContext).ExecuteAsync(command, ct)
+                    new ClearCompletedDownloadTasksCommandHandler(dbContext).ExecuteAsync(command, ct)
             );
 
         // Act
@@ -94,11 +99,14 @@ public class ClearCompletedDownloadTasksEndpointUnitTests : BaseUnitTest<ClearCo
         // Assert
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
-        dbContext = IDbContext;
-
         var downloadTasksDb = await dbContext.DownloadTaskMovie.ToListAsync(CancellationToken);
         var downloadTasksFileDb = await dbContext.DownloadTaskMovieFile.ToListAsync(CancellationToken);
         downloadTasksDb.ShouldBeEmpty();
         downloadTasksFileDb.ShouldBeEmpty();
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<ClearCompletedDownloadTasksCommand>(), It.IsAny<CancellationToken>()),
+                Times.Once
+            );
     }
 }

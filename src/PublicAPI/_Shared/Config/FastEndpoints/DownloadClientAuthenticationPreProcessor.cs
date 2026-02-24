@@ -71,11 +71,7 @@ public class DownloadClientAuthenticationPreProcessor<TRequest> : IPreProcessor<
             SameSite = isHttps ? SameSiteMode.None : SameSiteMode.Lax,
             Expires = DateTimeOffset.UnixEpoch,
         };
-        httpContext.Response.Cookies.Append("SID", string.Empty, options);
-        httpContext.Response.Headers.Append(
-            "Set-Cookie",
-            "SID=; Path=/; HttpOnly; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT"
-        );
+        httpContext.Response.Cookies.Delete("SID", options);
     }
 
     private async Task<bool> IsValidSession(string sid, CancellationToken ct)

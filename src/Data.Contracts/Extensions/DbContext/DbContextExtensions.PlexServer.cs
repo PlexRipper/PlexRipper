@@ -44,7 +44,8 @@ public static partial class DbContextExtensions
     )
     {
         return await dbContext
-            .PlexServerStatuses.Where(x => x.IsSuccessful)
+            .PlexServerStatuses.AsNoTracking()
+            .Where(x => x.IsSuccessful)
             .Select(x => x.PlexServerId)
             .Distinct()
             .ToListAsync(cancellationToken);

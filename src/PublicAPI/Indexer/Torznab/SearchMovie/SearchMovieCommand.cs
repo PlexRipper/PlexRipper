@@ -131,7 +131,7 @@ public class SearchMovieCommandHandler : ICommandHandler<SearchMovieCommand, Tor
 
     private IEnumerable<TorznabItem> MapMovieToItems(PlexMovie movie)
     {
-        foreach (var mediaData in movie.MediaDataList)
+        foreach (var mediaData in movie.MediaDataList.OrderBy(md => md.PlexApiPartId))
         {
             var torrentMetadata = new TorrentMetadataDTO
             {

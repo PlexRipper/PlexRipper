@@ -102,6 +102,9 @@ public class SetupSonarrDownloadClientCommandUnitTests : BaseUnitTest<SetupSonar
             .ReturnsAsync(Result.Fail("Sonarr unreachable"))
             .Verifiable(Times.Once);
 
+        Mock.SetupCommand(It.IsAny<SonarrApiCreateDownloadClientCommand>).Verifiable(Times.Never);
+        Mock.SetupCommand(It.IsAny<SonarApiUpdateDownloadClientCommand>).Verifiable(Times.Never);
+
         var sut = CreateSut(ValidSettings(), ValidIntegrationsSettings(), ValidNetworkSettings());
 
         // Act
@@ -175,6 +178,8 @@ public class SetupSonarrDownloadClientCommandUnitTests : BaseUnitTest<SetupSonar
         Mock.SetupCommand(It.IsAny<SonarrApiCreateDownloadClientCommand>)
             .ReturnsAsync(Result.Fail("Create failed"))
             .Verifiable(Times.Once);
+
+        Mock.SetupCommand(It.IsAny<SonarApiUpdateDownloadClientCommand>).Verifiable(Times.Never);
 
         var sut = CreateSut(ValidSettings(), ValidIntegrationsSettings(), ValidNetworkSettings());
 

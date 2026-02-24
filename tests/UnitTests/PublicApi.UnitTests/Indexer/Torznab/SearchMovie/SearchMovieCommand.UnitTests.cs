@@ -43,7 +43,7 @@ public class SearchMovieCommandUnitTests : BaseUnitTest<SearchMovieCommandHandle
             .OrderBy(m => m.Id)
             .Skip(offset)
             .Take(limit)
-            .Select(m => m.MediaDataList.OrderBy(md => md.PlexApiPartId).Select(md => md.GetFileName).First())
+            .SelectMany(m => m.MediaDataList.OrderBy(md => md.PlexApiPartId).Select(md => md.GetFileName))
             .ToListAsync(CancellationToken);
 
         // Act

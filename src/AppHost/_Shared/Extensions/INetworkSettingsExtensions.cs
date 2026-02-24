@@ -46,15 +46,6 @@ public static class INetworkSettingsExtensions
         if (!networkSettings.TrustProxyHeaders)
             return options;
 
-        // Warn when trusting headers without an allowlist; defaults will be used.
-        if (networkSettings.AllowedProxyIps.Count == 0)
-        {
-            _log.Here()
-                .Warning(
-                    "TrustProxyHeaders is enabled but no AllowedProxyIps configured. Trusting only default proxies."
-                );
-        }
-
         // Enable forwarded headers used by proxies to report client connection data.
         options.ForwardedHeaders =
             ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;

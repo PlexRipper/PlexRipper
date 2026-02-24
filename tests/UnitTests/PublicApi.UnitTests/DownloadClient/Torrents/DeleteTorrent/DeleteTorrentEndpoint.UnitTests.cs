@@ -3,7 +3,7 @@ using Reaparr.Application.Contracts;
 
 namespace Reaparr.PublicAPI.UnitTests;
 
-public class DeleteTorrentEndpointUnitTests : BaseUnitTest
+public class DeleteTorrentEndpointUnitTests : BaseUnitTest<DeleteTorrentEndpoint>
 {
     public DeleteTorrentEndpointUnitTests(ITestOutputHelper output)
         : base(output) { }
@@ -40,10 +40,10 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest
 
         // Assert
         endpoint.HttpContext.Response.StatusCode.ShouldBe(200);
-        var deletedMovieFile = await dbContext
+        var deletedMovieFileForCasing = await dbContext
             .DownloadTaskMovieFile.Where(x => x.Id == movieFile.Id)
             .SingleOrDefaultAsync(CancellationToken);
-        deletedMovieFile.ShouldBeNull();
+        deletedMovieFileForCasing.ShouldBeNull();
         Mock.Mock<ICommandExecutor>()
             .Verify(x => x.Send(It.IsAny<StopDownloadTaskCommand>(), It.IsAny<CancellationToken>()), Times.Never);
     }
@@ -68,7 +68,8 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest
         await dbContext
             .DownloadTaskMovieFile.Where(x => x.Id == movieFile.Id)
             .ExecuteUpdateAsync(
-                x => x.SetProperty(p => p.HashId, hashId).SetProperty(p => p.DownloadStatus, DownloadStatus.Downloading),
+                x =>
+                    x.SetProperty(p => p.HashId, hashId).SetProperty(p => p.DownloadStatus, DownloadStatus.Downloading),
                 CancellationToken
             );
 
@@ -93,10 +94,11 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest
                     ),
                 Times.Once
             );
-        var deletedMovieFile = await dbContext
-            .DownloadTaskMovieFile.Where(x => x.Id == movieFile.Id)
-            .SingleOrDefaultAsync(CancellationToken);
-        deletedMovieFile.ShouldBeNull();
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<ClearCompletedDownloadTasksCommand>(), It.IsAny<CancellationToken>()),
+                Times.Never
+            );
     }
 
     [Fact]
@@ -119,7 +121,8 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest
         await dbContext
             .DownloadTaskMovieFile.Where(x => x.Id == movieFile.Id)
             .ExecuteUpdateAsync(
-                x => x.SetProperty(p => p.HashId, hashId).SetProperty(p => p.DownloadStatus, DownloadStatus.Downloading),
+                x =>
+                    x.SetProperty(p => p.HashId, hashId).SetProperty(p => p.DownloadStatus, DownloadStatus.Downloading),
                 CancellationToken
             );
 
@@ -127,7 +130,7 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest
             .Setup(x => x.Send(It.IsAny<StopDownloadTaskCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok());
 
-        var request = new DeleteTorrentRequest { DeleteFiles = true, Hashes = null, HashesRaw = hashId };
+        var request = new DeleteTorrentRequest { Hashes = null, HashesRaw = hashId };
 
         // Act
         var endpoint = SetupEndpointUnitTest<DeleteTorrentEndpoint>();
@@ -148,6 +151,11 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest
             .DownloadTaskMovieFile.Where(x => x.Id == movieFile.Id)
             .SingleOrDefaultAsync(CancellationToken);
         deletedMovieFile.ShouldBeNull();
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<ClearCompletedDownloadTasksCommand>(), It.IsAny<CancellationToken>()),
+                Times.Never
+            );
     }
 
     [Fact]
@@ -198,5 +206,9 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest
                     ),
                 Times.Once
             );
+        var deletedMovieFileForCasing = await dbContext
+            .DownloadTaskMovieFile.Where(x => x.Id == movieFile.Id)
+            .SingleOrDefaultAsync(CancellationToken);
+        deletedMovieFileForCasing.ShouldBeNull();
     }
 }

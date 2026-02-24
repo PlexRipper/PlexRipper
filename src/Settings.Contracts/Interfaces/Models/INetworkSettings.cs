@@ -36,12 +36,12 @@ public interface INetworkSettings
     string ForwardedPathHeader { get; set; }
 
     /// <summary>
-    /// Derived base URL used by Reaparr, including reverse proxy settings.
+    /// System.Uri typed base URL used by Reaparr for programmatic/HTTP operations.
     /// </summary>
     Uri Uri { get; }
 
     /// <summary>
-    /// Derived base URL used by Reaparr, including reverse proxy settings.
+    /// String representation of the derived base URL for display or configuration.
     /// </summary>
     string Url { get; }
 }

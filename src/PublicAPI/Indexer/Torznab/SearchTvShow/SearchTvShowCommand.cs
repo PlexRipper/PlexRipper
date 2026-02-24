@@ -130,8 +130,6 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, T
             .Where(x => onlineServerIds.Contains(x.PlexServerId))
             .AsQueryable();
 
-        baseQuery = baseQuery.Where(e => onlineServerIds.Contains(e.PlexServerId));
-
         var hasSeasonOrEpisode = command.Season > 0 || command.Episode > 0;
 
         if (!string.IsNullOrWhiteSpace(command.Query))

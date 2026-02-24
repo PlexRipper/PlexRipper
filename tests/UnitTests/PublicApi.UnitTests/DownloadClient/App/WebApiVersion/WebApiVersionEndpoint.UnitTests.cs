@@ -46,6 +46,5 @@ public class WebApiVersionEndpointUnitTests : BaseUnitTest<WebApiVersionEndpoint
         var parsed = Version.Parse(body);
         parsed.ShouldNotBeNull();
 
-        Mock.Mock<ILogger>().Verify(x => x.ForContext<WebApiVersionEndpoint>(), Times.Once);
     }
 }

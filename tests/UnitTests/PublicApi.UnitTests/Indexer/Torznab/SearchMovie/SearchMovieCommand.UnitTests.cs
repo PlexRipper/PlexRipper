@@ -37,14 +37,17 @@ public class SearchMovieCommandUnitTests : BaseUnitTest<SearchMovieCommandHandle
             TMDB_ID = 0,
         };
 
-        var expectedMovieTitles = await IDbContext
+        var movies = await IDbContext
             .PlexMovies.AsNoTracking()
             .Include(m => m.MediaDataList)
             .OrderBy(m => m.Id)
             .Skip(offset)
             .Take(limit)
-            .SelectMany(m => m.MediaDataList.OrderBy(md => md.PlexApiPartId).Select(md => md.GetFileName))
             .ToListAsync(CancellationToken);
+
+        var expectedMovieTitles = movies
+            .SelectMany(m => m.MediaDataList.OrderBy(md => md.PlexApiPartId).Select(md => md.GetFileName))
+            .ToList();
 
         // Act
         var result = await Sut.ExecuteAsync(cmd, CancellationToken);

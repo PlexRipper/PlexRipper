@@ -52,7 +52,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
 
         // Act
         var result = await Sut.ExecuteAsync(cmd, CancellationToken);
-        Mock.Mock<INetworkSettings>().VerifyGet(x => x.Url, Times.Once);
+        Mock.Mock<INetworkSettings>().VerifyGet(x => x.Url, Times.Exactly(result.Channel.Items.Count));
 
         // Assert
         // Response

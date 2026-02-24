@@ -599,6 +599,38 @@
                         "text": "Will navigate to the Reaparr setup page.",
                         "title": "Go To Setup Page"
                     }
+                },
+                "network-section": {
+                    "reverse-proxy-url": {
+                        "label": "Reverse Proxy URL",
+                        "text": "Optional. Public base URL used when Reaparr is accessed through a reverse proxy (e.g. https://reaparr.example.com). Leave empty to keep localhost.",
+                        "title": "Public URL for Reverse Proxy"
+                    },
+                    "base-path": {
+                        "label": "Base Path",
+                        "text": "Optional. Path prefix configured in your proxy (e.g. /reaparr). Leave empty if the proxy routes from the root.",
+                        "title": "Proxy Path Prefix"
+                    },
+                    "trust-proxy-headers": {
+                        "label": "Trust Proxy Headers",
+                        "text": "Required when TLS terminates at the proxy. Enables trusting X-Forwarded-* headers so Reaparr can build correct URLs. Requires restart.",
+                        "title": "Use Forwarded Headers"
+                    },
+                    "allowed-proxy-ips": {
+                        "label": "Allowed Proxy IPs",
+                        "text": "Optional but recommended when Trust Proxy Headers is enabled. Comma or newline separated IPs/CIDR ranges. Requires restart.",
+                        "title": "Proxy IP Allowlist"
+                    },
+                    "forwarded-host-header": {
+                        "label": "Forwarded Host Header",
+                        "text": "Optional. Custom header name that contains the original host (default: X-Forwarded-Host). Requires restart.",
+                        "title": "Forwarded Host Header Name"
+                    },
+                    "forwarded-path-header": {
+                        "label": "Forwarded Path Header",
+                        "text": "Optional. Custom header name that contains the original path prefix (default: X-Forwarded-Prefix). Requires restart.",
+                        "title": "Forwarded Path Header Name"
+                    }
                 }
             },
             "ui": {
@@ -815,6 +847,17 @@
                 },
                 "debug": {
                     "header": "Debug Settings"
+                },
+                "network": {
+                    "header": "Network & Reverse Proxy",
+                    "hints": {
+                        "reverse-proxy-url": "Example: https://reaparr.example.com (optional)",
+                        "base-path": "Example: /reaparr (optional)",
+                        "trust-proxy-headers": "Requires restart",
+                        "allowed-proxy-ips": "Example: 192.168.1.10, 10.0.0.0/24 (requires restart)",
+                        "forwarded-host-header": "Default: X-Forwarded-Host (requires restart)",
+                        "forwarded-path-header": "Default: X-Forwarded-Prefix (requires restart)"
+                    }
                 },
                 "setup": {
                     "header": "Reaparr Setup"

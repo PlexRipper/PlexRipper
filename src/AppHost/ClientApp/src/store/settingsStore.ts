@@ -58,6 +58,15 @@ export const useSettingsStore = defineStore(StoreNames.SettingsStore, () => {
 		serverSettings: {
 			data: [],
 		},
+		networkSettings: {
+			reverseProxyUrl: '',
+			basePath: '',
+			trustProxyHeaders: false,
+			allowedProxyIps: [],
+			forwardedHostHeader: '',
+			forwardedPathHeader: '',
+			url: '',
+		},
 	};
 
 	const state = reactive<SettingsModelDTO>(cloneDeep(defaultState));
@@ -103,6 +112,11 @@ export const useSettingsStore = defineStore(StoreNames.SettingsStore, () => {
 
 			// Arrays: replace contents, not the array instance
 			state.serverSettings.data.splice(0, state.serverSettings.data.length, ...settings.serverSettings.data);
+			state.networkSettings.allowedProxyIps.splice(
+				0,
+				state.networkSettings.allowedProxyIps.length,
+				...settings.networkSettings.allowedProxyIps,
+			);
 
 			// Keep containers stable, then merge deeply
 			// Update nested objects first to preserve their references
@@ -114,6 +128,14 @@ export const useSettingsStore = defineStore(StoreNames.SettingsStore, () => {
 				downloadClientUsername: settings.integrationsSettings.downloadClientUsername,
 				downloadClientPassword: settings.integrationsSettings.downloadClientPassword,
 				reaparrApiKey: settings.integrationsSettings.reaparrApiKey,
+			});
+			Object.assign(state.networkSettings, {
+				reverseProxyUrl: settings.networkSettings.reverseProxyUrl,
+				basePath: settings.networkSettings.basePath,
+				trustProxyHeaders: settings.networkSettings.trustProxyHeaders,
+				forwardedHostHeader: settings.networkSettings.forwardedHostHeader,
+				forwardedPathHeader: settings.networkSettings.forwardedPathHeader,
+				url: settings.networkSettings.url,
 			});
 		},
 		updateDownloadLimit(machineIdentifier: string, downloadLimit: number) {

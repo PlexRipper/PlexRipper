@@ -1,5 +1,30 @@
 Reaparr Changelog
 
+# [0.36.0-dev.7](https://github.com/Reaparr/Reaparr/compare/v0.36.0-dev.6...v0.36.0-dev.7) (2026-02-24)
+
+
+### Bug Fixes
+
+* **WebAPI:** Align qBittorrent download client integration ([9e14ac8](https://github.com/Reaparr/Reaparr/commit/9e14ac891f28ce2efc0eb6c70dfff3e64db274e8))
+* **WebAPI:** Align qBittorrent v2 polling payloads ([87e5404](https://github.com/Reaparr/Reaparr/commit/87e54041b4aa97a0508500c3acb25a7685d2070c))
+* **WebAPI:** Delete download tasks after torrent delete ([23dffc3](https://github.com/Reaparr/Reaparr/commit/23dffc3786215b70d5d4cadaba277fe2b13d6734))
+* **WebAPI:** Ensured the Sonarr/Radarr setup integration uses the ReverseProxy settings and works when Reaparr is behind a reverse proxy ([6e6e287](https://github.com/Reaparr/Reaparr/commit/6e6e2873cd11c664537db152c1f3c94b4645b0f0))
+* **WebAPI:** Fixed an annoying issue where DownloadTasks would stay stuck on DownloadFinished, now Reaparr will correct itself and finish moving everything ([dbe116a](https://github.com/Reaparr/Reaparr/commit/dbe116a0d85d039cfbd63bbd1a795157731c0c40))
+* **WebAPI:** Fixed an annoying issue where Sonarr/Radarr would hold onto an expired cookie which meant it couldn't connect, now it will refresh automatically on expired authentication ([5201c41](https://github.com/Reaparr/Reaparr/commit/5201c414fc814262a2cff1ddc5fd7573178dfd51))
+* **WebAPI:** Fixed an issue where the hoster domainname of Reaparr was not forwarder correctly when setting up Sonarr/Radarr ([d0a588b](https://github.com/Reaparr/Reaparr/commit/d0a588bf1fbd49278a252a6ca259c4a50bd04d4f))
+* **WebAPI:** Fixed downloads through Sonarr/Radarr not kept in the downloads folder ([eb013e7](https://github.com/Reaparr/Reaparr/commit/eb013e7ec9894c8480394de99755957476a01ba1))
+* **WebAPI:** Fixed incorrect download urls being generated for Radarr/Sonarr, missing the DownloadTorrent path ([4c1818c](https://github.com/Reaparr/Reaparr/commit/4c1818c980d616e726e64bc2fd43618ed267ff2c))
+* **WebAPI:** Fixed Sonarr/Radarr not being able to delete or remove a downloadtask in progress ([807c56e](https://github.com/Reaparr/Reaparr/commit/807c56e0d167f598af50a867b7075907b30f8c30))
+* **WebAPI:** Fixed the indexer returning results from offline servers, this is now always only online servers ([3e204f8](https://github.com/Reaparr/Reaparr/commit/3e204f8112e857e82b4b3bc3fbaf8ba964e99a44))
+* **WebAPI:** Fixed the missing intermediate download path when sending progress to Sonarr/Radarr, and corrected the percentage count ([0ae4b04](https://github.com/Reaparr/Reaparr/commit/0ae4b04395094c507e32894fef1deced9577a077))
+* **WebAPI:** Keep download move queue advancing ([d53e5cb](https://github.com/Reaparr/Reaparr/commit/d53e5cb75d742d50b8a1ca6fe0cc777f78bf7d73))
+
+
+### Features
+
+* **Web-UI:** Added options under Settings => Advanced => Network and Reverse Proxy to set up Reaparr behind a reverse proxy ([c716df2](https://github.com/Reaparr/Reaparr/commit/c716df253a6967305a9b08ba1c8180efc0877771))
+* **WebAPI:** Added reverse proxy settings to the settings storage ([5e4b86b](https://github.com/Reaparr/Reaparr/commit/5e4b86b92f4b36b076e0f04abc36967ea388af81))
+
 # [0.36.0-dev.6](https://github.com/Reaparr/Reaparr/compare/v0.36.0-dev.5...v0.36.0-dev.6) (2026-02-23)
 
 

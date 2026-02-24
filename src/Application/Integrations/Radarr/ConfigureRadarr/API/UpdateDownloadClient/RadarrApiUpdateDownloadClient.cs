@@ -45,9 +45,7 @@ public class RadarrApiUpdateDownloadClientCommandHandler
             var requestUri = new Uri(requestPath, UriKind.Relative);
             var json = JsonSerializer.Serialize(command.Resource, DefaultJsonSerializerOptions.ConfigStandard);
 
-            _log
-                .Here()
-                .Debug("Updating Radarr download client with name {DownloadClientName}", command.Resource.Name);
+            _log.Here().Debug("Updating Radarr download client with name {DownloadClientName}", command.Resource.Name);
             _log.Here().Debug("Request URI: {RequestUri}, Payload: {Payload}", requestUri, json);
 
             using var httpRequest = new HttpRequestMessage(HttpMethod.Put, requestUri);

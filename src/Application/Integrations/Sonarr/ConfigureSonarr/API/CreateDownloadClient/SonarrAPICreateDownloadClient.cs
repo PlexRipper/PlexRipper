@@ -36,9 +36,7 @@ public class SonarApiCreateDownloadClientCommandHandler
             _logger
                 .Here()
                 .Debug("Creating Sonarr download client with name {DownloadClientName}", command.Resource.Name);
-            _logger
-                .Here()
-                .Debug("Request URI: {RequestUri}, Payload: {Payload}", requestUri, json);
+            _logger.Here().Debug("Request URI: {RequestUri}, Payload: {Payload}", requestUri, json);
 
             using var httpRequest = new HttpRequestMessage(HttpMethod.Post, requestUri);
             httpRequest.Content = json.ToStringContent();

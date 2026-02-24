@@ -1,4 +1,5 @@
 using FastEndpoints;
+using Flurl;
 using Reaparr.PublicAPI.Contracts;
 using Reaparr.Settings.Contracts;
 
@@ -121,7 +122,7 @@ public class SetupRadarrDownloadClientCommandHandler
     private RadarrDownloadContractDTO BuildDownloadClientResource(Uri reaparrBaseUri)
     {
         var useSsl = string.Equals(reaparrBaseUri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase);
-
+        string urlBase = _networkSettings.BasePath.AppendPathSegment("api/public/download-client");
         return new RadarrDownloadContractDTO
         {
             Enable = true,
@@ -135,7 +136,7 @@ public class SetupRadarrDownloadClientCommandHandler
                 new() { Name = "host", Value = reaparrBaseUri.Host },
                 new() { Name = "port", Value = reaparrBaseUri.Port },
                 new() { Name = "useSsl", Value = useSsl },
-                new() { Name = "urlBase", Value = "/api/public/download-client/" },
+                new() { Name = "urlBase", Value = urlBase },
                 new() { Name = "username", Value = _integrationsSettings.DownloadClientUsername },
                 new() { Name = "password", Value = _integrationsSettings.DownloadClientPassword },
                 new() { Name = "movieCategory", Value = IntegrationDefinitions.RADARR_DEFAULT_CATEGORY },

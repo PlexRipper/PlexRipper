@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using Reaparr.Application;
+using Reaparr.Application.Contracts;
 
 namespace Reaparr.Application.UnitTests.ClearCompleted;
 
@@ -30,6 +32,13 @@ public class ClearCompletedDownloadTasksEndpointUnitTests : BaseUnitTest<ClearCo
 
         downloadTasks.SetDownloadStatus(DownloadStatus.Completed);
         await dbContext.SaveChangesAsync(CancellationToken);
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<ClearCompletedDownloadTasksCommand>(), It.IsAny<CancellationToken>()))
+            .Returns(
+                (ClearCompletedDownloadTasksCommand command, CancellationToken ct) =>
+                    new ClearCompletedDownloadTasksCommandHandler(IDbContext).ExecuteAsync(command, ct)
+            );
 
         // Act
         var ep = SetupEndpointUnitTest<ClearCompletedDownloadTasksEndpoint>();
@@ -69,6 +78,13 @@ public class ClearCompletedDownloadTasksEndpointUnitTests : BaseUnitTest<ClearCo
 
         downloadTasks.SetDownloadStatus(DownloadStatus.Completed);
         await dbContext.SaveChangesAsync(CancellationToken);
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<ClearCompletedDownloadTasksCommand>(), It.IsAny<CancellationToken>()))
+            .Returns(
+                (ClearCompletedDownloadTasksCommand command, CancellationToken ct) =>
+                    new ClearCompletedDownloadTasksCommandHandler(IDbContext).ExecuteAsync(command, ct)
+            );
 
         // Act
         var ep = SetupEndpointUnitTest<ClearCompletedDownloadTasksEndpoint>();

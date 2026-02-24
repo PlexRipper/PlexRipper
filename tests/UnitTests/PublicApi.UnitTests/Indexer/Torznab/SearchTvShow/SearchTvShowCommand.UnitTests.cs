@@ -1,12 +1,15 @@
 using Microsoft.EntityFrameworkCore;
-using Reaparr.PublicAPI;
+using Reaparr.Settings.Contracts;
 
-namespace PublicApi.UnitTests;
+namespace Reaparr.PublicAPI.UnitTests;
 
 public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHandler>
 {
     public SearchTvShowCommandUnitTests(ITestOutputHelper output)
-        : base(output) { }
+        : base(output)
+    {
+        Mock.Mock<INetworkSettings>().SetupGet(x => x.Url).Returns("http://localhost");
+    }
 
     [Fact]
     public async Task ShouldReturnPagedEpisodes_WhenNoFiltersProvided()

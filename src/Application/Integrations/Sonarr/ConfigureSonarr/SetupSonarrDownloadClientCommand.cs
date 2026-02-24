@@ -1,4 +1,5 @@
 using FastEndpoints;
+using Flurl;
 using Reaparr.PublicAPI.Contracts;
 using Reaparr.Settings.Contracts;
 
@@ -122,6 +123,7 @@ public class SetupSonarrDownloadClientCommandHandler
     private SonarrDownloadContractDTO BuildDownloadClientResource(Uri reaparrBaseUri)
     {
         var useSsl = string.Equals(reaparrBaseUri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase);
+        string urlBase = _networkSettings.BasePath.AppendPathSegment("api/public/download-client");
 
         return new SonarrDownloadContractDTO
         {
@@ -136,7 +138,7 @@ public class SetupSonarrDownloadClientCommandHandler
                 new() { Name = "host", Value = reaparrBaseUri.Host },
                 new() { Name = "port", Value = reaparrBaseUri.Port },
                 new() { Name = "useSsl", Value = useSsl },
-                new() { Name = "urlBase", Value = "/api/public/download-client/" },
+                new() { Name = "urlBase", Value = urlBase },
                 new() { Name = "username", Value = _integrationsSettings.DownloadClientUsername },
                 new() { Name = "password", Value = _integrationsSettings.DownloadClientPassword },
                 new() { Name = "tvCategory", Value = IntegrationDefinitions.SONARR_DEFAULT_CATEGORY },

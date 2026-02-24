@@ -114,13 +114,23 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, T
         CancellationToken cancellationToken
     )
     {
+        var onlineServerIds = await _dbContext.GetOnlineServerIds(cancellationToken: cancellationToken);
+        if (!onlineServerIds.Any())
+        {
+            _log.Here().Warning("No online Plex servers found, returning empty search results.");
+            return [];
+        }
+
         // Base query with required navigation properties for mapping
         var baseQuery = _dbContext
             .PlexTvShowEpisodes.AsNoTracking()
             .Include(x => x.TvShowSeason)
             .Include(x => x.TvShow)
             .Include(e => e.MediaDataList)
+            .Where(x => onlineServerIds.Contains(x.PlexServerId))
             .AsQueryable();
+
+        baseQuery = baseQuery.Where(e => onlineServerIds.Contains(e.PlexServerId));
 
         var hasSeasonOrEpisode = command.Season > 0 || command.Episode > 0;
 

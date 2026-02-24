@@ -80,8 +80,18 @@ public class SearchMovieCommandHandler : ICommandHandler<SearchMovieCommand, Tor
 
     private async Task<List<PlexMovie>> LoadMoviesAsync(SearchMovieCommand command, CancellationToken cancellationToken)
     {
+        var onlineServerIds = await _dbContext.GetOnlineServerIds(cancellationToken: cancellationToken);
+        if (!onlineServerIds.Any())
+        {
+            _log.Here().Warning("No online Plex servers found, returning empty search results.");
+            return [];
+        }
+
         // Base query with required navigation properties for mapping
-        var baseQuery = _dbContext.PlexMovies.Include(x => x.MediaDataList).AsQueryable();
+        var baseQuery = _dbContext
+            .PlexMovies.Include(x => x.MediaDataList)
+            .Where(x => onlineServerIds.Contains(x.PlexServerId))
+            .AsQueryable();
 
         // If no specific query or external IDs are provided, return a paged list
         var noQueryProvided = string.IsNullOrWhiteSpace(command.Query);

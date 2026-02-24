@@ -99,7 +99,8 @@ public static class PlexMediaExtensions
     public static DownloadTaskMovieFile MapToDownloadTask(
         this PlexMovieMediaData plexMediaData,
         PlexMovie plexMovie,
-        CreateDownloadTasksRequest request
+        CreateDownloadTasksRequest request,
+        bool keepCompletedInDownloadFolder
     ) =>
         new()
         {
@@ -129,7 +130,7 @@ public static class PlexMediaExtensions
                 MovieFolder = plexMovie.Title.SanitizeFolderName(),
                 TvShowFolder = string.Empty,
                 SeasonFolder = string.Empty,
-                KeepCompletedInDownloadFolder = false,
+                KeepCompletedInDownloadFolder = keepCompletedInDownloadFolder,
             },
             DownloadWorkerTasks = [],
             Parent = null,
@@ -142,7 +143,8 @@ public static class PlexMediaExtensions
     public static DownloadTaskTvShowEpisodeFile MapToDownloadTask(
         this PlexTvShowEpisodeMediaData plexMediaData,
         PlexTvShowEpisode plexTvShowEpisode,
-        CreateDownloadTasksRequest request
+        CreateDownloadTasksRequest request,
+        bool keepCompletedInDownloadFolder
     )
     {
         if (plexTvShowEpisode.TvShow is null || plexTvShowEpisode.TvShowSeason is null)
@@ -178,7 +180,7 @@ public static class PlexMediaExtensions
                 MovieFolder = string.Empty,
                 TvShowFolder = plexTvShowEpisode.TvShow.Title.SanitizeFolderName(),
                 SeasonFolder = plexTvShowEpisode.TvShowSeason.Title.SanitizeFolderName(),
-                KeepCompletedInDownloadFolder = false,
+                KeepCompletedInDownloadFolder = keepCompletedInDownloadFolder,
             },
             DownloadWorkerTasks = [],
             Parent = null,

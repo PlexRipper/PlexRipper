@@ -176,6 +176,7 @@ public class AddTorrentEndpoint : Endpoint<AddTorrentEndpointRequest>
                 Type = metadata.Type,
                 PlexServerId = metadata.ServerId,
                 PlexLibraryId = metadata.LibraryId,
+                KeepCompletedInDownloadFolder = true,
             },
         ];
         var createResult = await _commandExecutor.Send(new CreateDownloadTasksCommand(list), ct);
@@ -237,4 +238,5 @@ public class AddTorrentEndpoint : Endpoint<AddTorrentEndpointRequest>
         else
             _log.Debug("Set HashId on {Count} DownloadTasks for torrent with MetaData: {MetaData}", count, metaData);
     }
+
 }

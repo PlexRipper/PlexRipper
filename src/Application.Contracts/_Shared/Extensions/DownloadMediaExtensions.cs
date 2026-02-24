@@ -31,6 +31,9 @@ public static class DownloadMediaExtensions
                         .FindAll(x => x.PlexServerId == plexServerId)
                         .SelectMany(x => x.Qualities)
                         .ToList(),
+                    KeepCompletedInDownloadFolder = typedList
+                        .FindAll(x => x.PlexServerId == plexServerId)
+                        .Any(x => x.KeepCompletedInDownloadFolder),
                 }
             );
 
@@ -53,6 +56,7 @@ public static class DownloadMediaExtensions
                 MediaIds = group.SelectMany(x => x.MediaIds).Distinct().ToList(),
                 Type = group.Key.Type,
                 Qualities = group.SelectMany(x => x.Qualities).ToList(),
+                KeepCompletedInDownloadFolder = group.Any(x => x.KeepCompletedInDownloadFolder),
             })
             .ToList();
     }

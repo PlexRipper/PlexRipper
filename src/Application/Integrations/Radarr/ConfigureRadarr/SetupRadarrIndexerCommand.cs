@@ -106,7 +106,7 @@ public class SetupRadarrIndexerCommandHandler
 
     private RadarrIndexerContractDTO BuildIndexerResource(int downloadClientId, int? id = null)
     {
-        var baseUrl = _networkSettings.Url.AppendPathSegment("/api/public/indexer/");
+        var baseUrl = _networkSettings.Url.AppendPathSegment("/api/public/indexer/").ToString();
 
         return new RadarrIndexerContractDTO
         {

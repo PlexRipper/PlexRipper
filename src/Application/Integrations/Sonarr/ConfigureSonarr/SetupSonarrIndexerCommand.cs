@@ -106,7 +106,7 @@ public class SetupSonarrIndexerCommandHandler
 
     private SonarrIndexerContractDTO BuildIndexerResource(int downloadClientId)
     {
-        var baseUrl = _networkSettings.Url.AppendPathSegment("/api/public/indexer/");
+        var baseUrl = _networkSettings.Url.AppendPathSegment("/api/public/indexer/").ToString();
 
         return new SonarrIndexerContractDTO
         {

@@ -39,9 +39,9 @@ describe('GlobalStore.getConfigReady()', () => {
 		mock.onGet(PlexAccountPaths.getAllPlexAccountsEndpoint()).reply(200, generateResultDTO([]));
 		mock.onGet(FolderPathPaths.getAllFolderPathsEndpoint()).reply(200, generateResultDTO([]));
 		mock.onGet(PlexLibraryPaths.getAllPlexLibrariesEndpoint()).reply(200, generateResultDTO([]));
+		mock.onGet(PlexLibraryPaths.getLibrarySyncStatusEndpoint()).reply(200, generateResultDTO([]));
 		mock.onGet(NotificationPaths.getAllNotificationsEndpoint()).reply(200, generateResultDTO([]));
 		mock.onGet(PlexServerPaths.getAllPlexServersEndpoint()).reply(200, generateResultDTO(generatePlexServers({ config })));
-		mock.onGet(PlexServerPaths.getAllPlexServersEndpoint()).reply(200, generateResultDTO(generateSettingsModel({ config })));
 		mock.onGet(PlexServerConnectionPaths.getAllPlexServerConnectionsEndpoint()).reply(200, generateResultDTO([]));
 		mock.onGet(SettingsPaths.getUserSettingsEndpoint()).reply(200, generateResultDTO(generateSettingsModel({ config })));
 

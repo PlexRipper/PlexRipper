@@ -23,6 +23,7 @@ export function generateSettingsModel({
 		},
 		debugSettings: {
 			debugModeEnabled: false,
+			maskAccountNames: false,
 			maskLibraryNames: false,
 			maskServerNames: false,
 		},
@@ -33,6 +34,7 @@ export function generateSettingsModel({
 		},
 		downloadManagerSettings: {
 			downloadSegments: 4,
+			keepCompletedInDownloadFolder: false,
 		},
 		languageSettings: {
 			language: 'en-US',
@@ -59,8 +61,18 @@ export function generateSettingsModel({
 					machineIdentifier: x.machineIdentifier,
 					plexServerName: '',
 					downloadSpeedLimit: 0,
+					hidden: false,
 				};
 			}),
+		},
+		networkSettings: {
+			reverseProxyUrl: '',
+			basePath: '',
+			trustProxyHeaders: false,
+			allowedProxyIps: [],
+			forwardedHostHeader: '',
+			forwardedPathHeader: '',
+			url: '',
 		},
 		integrationsSettings: {
 			downloadClientUsername: '',

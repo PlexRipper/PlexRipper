@@ -57,10 +57,7 @@ public class ConfigureRadarrIntegrationEndpoint : BaseEndpoint<ConfigureRadarrIn
         _radarrSettings.RadarrApiKey = req.ApiKey;
 
         // Upsert download client
-        var setupDownloadClient = await _commandExecutor.Send(
-            new SetupRadarrDownloadClientCommand(),
-            ct
-        );
+        var setupDownloadClient = await _commandExecutor.Send(new SetupRadarrDownloadClientCommand(), ct);
         if (!setupDownloadClient.IsSuccess)
         {
             _radarrSettings.IsConfigured = false;
@@ -70,10 +67,7 @@ public class ConfigureRadarrIntegrationEndpoint : BaseEndpoint<ConfigureRadarrIn
 
         // Upsert indexer, linking to the client
         var setupIndexerClient = await _commandExecutor.Send(
-            new SetupRadarrIndexerCommand
-            {
-                DownloadClientId = setupDownloadClient.Value.DownloadClientId,
-            },
+            new SetupRadarrIndexerCommand { DownloadClientId = setupDownloadClient.Value.DownloadClientId },
             ct
         );
         if (!setupIndexerClient.IsSuccess)

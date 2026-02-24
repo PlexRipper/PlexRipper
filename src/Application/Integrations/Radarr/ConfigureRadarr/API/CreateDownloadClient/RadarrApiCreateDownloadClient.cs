@@ -30,6 +30,7 @@ public class RadarrApiCreateDownloadClientCommandHandler
             var requestUri = new Uri($"/api/v3/downloadclient", UriKind.Relative);
             var json = JsonSerializer.Serialize(command.Resource, DefaultJsonSerializerOptions.ConfigStandard);
             _log.Here().Debug("Creating Radarr download client with name {DownloadClientName}", command.Resource.Name);
+            _log.Here().Debug("Request URI: {RequestUri}, Payload: {Payload}", requestUri, json);
 
             using var httpRequest = new HttpRequestMessage(HttpMethod.Post, requestUri);
             httpRequest.Content = json.ToStringContent();

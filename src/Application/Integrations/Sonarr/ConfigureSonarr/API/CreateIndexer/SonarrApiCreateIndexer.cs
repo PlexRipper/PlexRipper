@@ -13,10 +13,12 @@ public record SonarrApiCreateIndexerCommand : ICommand<Result<SonarrIndexerContr
 public class SonarrApiCreateIndexerCommandHandler
     : ICommandHandler<SonarrApiCreateIndexerCommand, Result<SonarrIndexerContractDTO>>
 {
+    private readonly ILogger _log;
     private readonly HttpClient _client;
 
-    public SonarrApiCreateIndexerCommandHandler(IHttpClientFactory httpClientFactory)
+    public SonarrApiCreateIndexerCommandHandler(ILogger logger, IHttpClientFactory httpClientFactory)
     {
+        _log = logger.ForContext<SonarrApiCreateIndexerCommandHandler>();
         _client = httpClientFactory.CreateSonarrHttpClient();
     }
 
@@ -30,6 +32,9 @@ public class SonarrApiCreateIndexerCommandHandler
             var forceSave = command.ForceSave ? "true" : "false";
             var requestUri = new Uri($"/api/v3/indexer?forceSave={forceSave}", UriKind.Relative);
             var json = JsonSerializer.Serialize(command.Resource, DefaultJsonSerializerOptions.ConfigStandard);
+
+            _log.Here().Debug("Creating Sonarr indexer with name {IndexerName}", command.Resource.Name);
+            _log.Here().Debug("Request URI: {RequestUri}, Payload: {Payload}", requestUri, json);
 
             using var httpRequest = new HttpRequestMessage(HttpMethod.Post, requestUri);
             httpRequest.Content = json.ToStringContent();

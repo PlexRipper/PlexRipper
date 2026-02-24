@@ -24,10 +24,12 @@ public class SonarrApiUpdateIndexerCommandValidator : Validator<SonarrApiUpdateI
 public class SonarrApiUpdateIndexerCommandHandler
     : ICommandHandler<SonarrApiUpdateIndexerCommand, Result<SonarrIndexerContractDTO>>
 {
+    private readonly ILogger _log;
     private readonly HttpClient _client;
 
-    public SonarrApiUpdateIndexerCommandHandler(IHttpClientFactory httpClientFactory)
+    public SonarrApiUpdateIndexerCommandHandler(ILogger logger, IHttpClientFactory httpClientFactory)
     {
+        _log = logger.ForContext<SonarrApiUpdateIndexerCommandHandler>();
         _client = httpClientFactory.CreateSonarrHttpClient();
     }
 
@@ -41,6 +43,9 @@ public class SonarrApiUpdateIndexerCommandHandler
             var forceSave = command.ForceSave ? "true" : "false";
             var requestUri = new Uri($"/api/v3/indexer/{command.Id}?forceSave={forceSave}", UriKind.Relative);
             var json = JsonSerializer.Serialize(command.Resource, DefaultJsonSerializerOptions.ConfigStandard);
+
+            _log.Here().Debug("Updating Sonarr indexer with name {IndexerName}", command.Resource.Name);
+            _log.Here().Debug("Request URI: {RequestUri}, Payload: {Payload}", requestUri, json);
 
             using var httpRequest = new HttpRequestMessage(HttpMethod.Put, requestUri);
             httpRequest.Content = json.ToStringContent();

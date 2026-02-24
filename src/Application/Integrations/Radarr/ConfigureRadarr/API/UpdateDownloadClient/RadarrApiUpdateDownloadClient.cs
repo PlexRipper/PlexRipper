@@ -24,10 +24,12 @@ public class RadarrApiUpdateDownloadClientCommandValidator : Validator<RadarrApi
 public class RadarrApiUpdateDownloadClientCommandHandler
     : ICommandHandler<RadarrApiUpdateDownloadClientCommand, Result<RadarrDownloadClientResourceDTO>>
 {
+    private readonly ILogger _log;
     private readonly HttpClient _client;
 
-    public RadarrApiUpdateDownloadClientCommandHandler(IHttpClientFactory httpClientFactory)
+    public RadarrApiUpdateDownloadClientCommandHandler(ILogger logger, IHttpClientFactory httpClientFactory)
     {
+        _log = logger.ForContext<RadarrApiUpdateDownloadClientCommandHandler>();
         _client = httpClientFactory.CreateRadarrHttpClient();
     }
 
@@ -42,6 +44,11 @@ public class RadarrApiUpdateDownloadClientCommandHandler
             var requestPath = $"api/v3/downloadclient/{command.Id}".SetQueryParam("forceSave", forceSave).ToString();
             var requestUri = new Uri(requestPath, UriKind.Relative);
             var json = JsonSerializer.Serialize(command.Resource, DefaultJsonSerializerOptions.ConfigStandard);
+
+            _log
+                .Here()
+                .Debug("Updating Radarr download client with name {DownloadClientName}", command.Resource.Name);
+            _log.Here().Debug("Request URI: {RequestUri}, Payload: {Payload}", requestUri, json);
 
             using var httpRequest = new HttpRequestMessage(HttpMethod.Put, requestUri);
             httpRequest.Content = json.ToStringContent();

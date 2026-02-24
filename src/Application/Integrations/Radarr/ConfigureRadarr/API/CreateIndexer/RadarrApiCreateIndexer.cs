@@ -12,10 +12,12 @@ public record RadarrApiCreateIndexerCommand : ICommand<Result<RadarrIndexerResou
 public class RadarrApiCreateIndexerCommandHandler
     : ICommandHandler<RadarrApiCreateIndexerCommand, Result<RadarrIndexerResourceDTO>>
 {
+    private readonly ILogger _log;
     private readonly HttpClient _client;
 
-    public RadarrApiCreateIndexerCommandHandler(IHttpClientFactory httpClientFactory)
+    public RadarrApiCreateIndexerCommandHandler(ILogger logger, IHttpClientFactory httpClientFactory)
     {
+        _log = logger.ForContext<RadarrApiCreateIndexerCommandHandler>();
         _client = httpClientFactory.CreateRadarrHttpClient();
     }
 
@@ -29,6 +31,9 @@ public class RadarrApiCreateIndexerCommandHandler
             var forceSave = command.ForceSave ? "true" : "false";
             var requestUri = new Uri($"/api/v3/indexer?forceSave={forceSave}", UriKind.Relative);
             var json = JsonSerializer.Serialize(command.Resource, DefaultJsonSerializerOptions.ConfigStandard);
+
+            _log.Here().Debug("Creating Radarr indexer with name {IndexerName}", command.Resource.Name);
+            _log.Here().Debug("Request URI: {RequestUri}, Payload: {Payload}", requestUri, json);
 
             using var httpRequest = new HttpRequestMessage(HttpMethod.Post, requestUri);
             httpRequest.Content = json.ToStringContent();

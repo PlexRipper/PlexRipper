@@ -60,6 +60,12 @@ public record QBittorrentTorrentInfo
     /// </summary>
     [JsonPropertyName("save_path")]
     public string SavePath { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Absolute path to the torrent content on disk.
+    /// </summary>
+    [JsonPropertyName("content_path")]
+    public string ContentPath { get; set; } = string.Empty;
 }
 
 public sealed class TorrentsInfoEndpoint : Endpoint<TorrentsInfoEndpointRequest, List<QBittorrentTorrentInfo>>
@@ -120,11 +126,12 @@ public sealed class TorrentsInfoEndpoint : Endpoint<TorrentsInfoEndpointRequest,
             Hash = file.HashId!,
             Name = file.FileName,
             Size = file.DataTotal,
-            Progress = file.Percentage,
+            Progress = Math.Clamp(file.Percentage / 100m, 0, 1),
             DlSpeed = file.Speed,
             Eta = file.TimeRemaining,
             State = MapStatusToQbittorrentState(file.DownloadStatus),
             SavePath = savePath,
+            ContentPath = Path.Combine(savePath, file.FileName),
         };
     }
 

@@ -4,8 +4,7 @@ using Reaparr.Settings.Contracts;
 
 namespace Reaparr.Application;
 
-public record SetupRadarrDownloadClientCommand(Uri ReaparrBaseUri)
-    : ICommand<Result<SetupRadarrDownloadClientCommandResult>>;
+public record SetupRadarrDownloadClientCommand : ICommand<Result<SetupRadarrDownloadClientCommandResult>>;
 
 public record SetupRadarrDownloadClientCommandResult
 {
@@ -19,6 +18,7 @@ public class SetupRadarrDownloadClientCommandHandler
     private readonly ICommandExecutor _commandExecutor;
     private readonly IIntegrationsSettings _integrationsSettings;
     private readonly IRadarrSettings _settings;
+    private readonly INetworkSettings _networkSettings;
 
     private const string DOWNLOAD_CLIENT_NAME = "Reaparr DownloadClient";
 
@@ -26,13 +26,15 @@ public class SetupRadarrDownloadClientCommandHandler
         ILogger log,
         ICommandExecutor commandExecutor,
         IIntegrationsSettings integrationsSettings,
-        IRadarrSettings settings
+        IRadarrSettings settings,
+        INetworkSettings networkSettings
     )
     {
         _log = log.ForContext<SetupRadarrDownloadClientCommandHandler>();
         _commandExecutor = commandExecutor;
         _integrationsSettings = integrationsSettings;
         _settings = settings;
+        _networkSettings = networkSettings;
     }
 
     public async Task<Result<SetupRadarrDownloadClientCommandResult>> ExecuteAsync(
@@ -53,7 +55,7 @@ public class SetupRadarrDownloadClientCommandHandler
             .Debug(
                 "Setting up Radarr download client. RadarrBaseUrl: {RadarrBaseUrl}, ReaparrBaseUrl: {ReaparrBaseUrl}",
                 radarrBaseUri,
-                command.ReaparrBaseUri
+                _networkSettings.Url
             );
 
         try
@@ -78,7 +80,7 @@ public class SetupRadarrDownloadClientCommandHandler
                     {
                         Id = currentDownloadClient.Id,
                         ForceSave = true,
-                        Resource = BuildDownloadClientResource(command.ReaparrBaseUri),
+                        Resource = BuildDownloadClientResource(_networkSettings.Uri),
                     },
                     ct
                 );
@@ -94,7 +96,7 @@ public class SetupRadarrDownloadClientCommandHandler
             var createResult = await _commandExecutor.Send(
                 new RadarrApiCreateDownloadClientCommand
                 {
-                    Resource = BuildDownloadClientResource(command.ReaparrBaseUri),
+                    Resource = BuildDownloadClientResource(_networkSettings.Uri),
                 },
                 ct
             );
@@ -118,11 +120,6 @@ public class SetupRadarrDownloadClientCommandHandler
 
     private RadarrDownloadContractDTO BuildDownloadClientResource(Uri reaparrBaseUri)
     {
-        var basePath = string.IsNullOrEmpty(reaparrBaseUri.AbsolutePath) ? "/" : reaparrBaseUri.AbsolutePath;
-        if (!basePath.EndsWith("/"))
-            basePath += "/";
-        var derivedUrlBase = $"{basePath}api/public/download-client/";
-
         var useSsl = string.Equals(reaparrBaseUri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase);
 
         return new RadarrDownloadContractDTO
@@ -138,7 +135,7 @@ public class SetupRadarrDownloadClientCommandHandler
                 new() { Name = "host", Value = reaparrBaseUri.Host },
                 new() { Name = "port", Value = reaparrBaseUri.Port },
                 new() { Name = "useSsl", Value = useSsl },
-                new() { Name = "urlBase", Value = derivedUrlBase },
+                new() { Name = "urlBase", Value = "/api/public/download-client/" },
                 new() { Name = "username", Value = _integrationsSettings.DownloadClientUsername },
                 new() { Name = "password", Value = _integrationsSettings.DownloadClientPassword },
                 new() { Name = "movieCategory", Value = IntegrationDefinitions.RADARR_DEFAULT_CATEGORY },

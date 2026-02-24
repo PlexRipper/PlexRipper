@@ -54,28 +54,11 @@ public class ConfigureSonarrIntegrationEndpoint : BaseEndpoint<ConfigureSonarrIn
     {
         _log.Here().DebugApiCall(HttpContext, req);
 
-        // derive Reaparr base URL from the current request
-        var reqScheme = HttpContext.Request.Scheme;
-        var reqHost = HttpContext.Request.Host.Value;
-        var pathBase = HttpContext.Request.PathBase.HasValue ? HttpContext.Request.PathBase.Value : string.Empty;
-        var reaparrBase = $"{reqScheme}://{reqHost}{pathBase}".TrimEnd('/');
-
-        if (!Uri.TryCreate(reaparrBase, UriKind.Absolute, out var reaparrBaseUri))
-        {
-            await SendFluentResult(
-                ResultExtensions
-                    .Create400BadRequestResult("Could not derive Reaparr base URL from request.")
-                    .LogError(),
-                ct
-            );
-            return;
-        }
-
         _sonarrSettings.SonarrBaseUrl = req.Url.TrimEnd('/');
         _sonarrSettings.SonarrApiKey = req.ApiKey;
 
         // Upsert download client
-        var setupDownloadClient = await _commandExecutor.Send(new SetupSonarrDownloadClientCommand(reaparrBaseUri), ct);
+        var setupDownloadClient = await _commandExecutor.Send(new SetupSonarrDownloadClientCommand(), ct);
         if (!setupDownloadClient.IsSuccess)
         {
             _sonarrSettings.IsConfigured = false;
@@ -87,7 +70,6 @@ public class ConfigureSonarrIntegrationEndpoint : BaseEndpoint<ConfigureSonarrIn
         var setupIndexerClient = await _commandExecutor.Send(
             new SetupSonarrIndexerCommand
             {
-                ReaparrBaseUri = reaparrBaseUri,
                 DownloadClientId = setupDownloadClient.Value.DownloadClientId,
             },
             ct

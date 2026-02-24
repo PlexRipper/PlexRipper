@@ -4,8 +4,7 @@ using Reaparr.Settings.Contracts;
 
 namespace Reaparr.Application;
 
-public record SetupSonarrDownloadClientCommand(Uri ReaparrBaseUri)
-    : ICommand<Result<SetupSonarrDownloadClientCommandResult>>;
+public record SetupSonarrDownloadClientCommand : ICommand<Result<SetupSonarrDownloadClientCommandResult>>;
 
 public record SetupSonarrDownloadClientCommandResult
 {
@@ -19,6 +18,7 @@ public class SetupSonarrDownloadClientCommandHandler
     private readonly ICommandExecutor _commandExecutor;
     private readonly IIntegrationsSettings _integrationsSettings;
     private readonly ISonarrSettings _settings;
+    private readonly INetworkSettings _networkSettings;
 
     private const string DOWNLOAD_CLIENT_NAME = "Reaparr DownloadClient";
 
@@ -26,13 +26,15 @@ public class SetupSonarrDownloadClientCommandHandler
         ILogger log,
         ICommandExecutor commandExecutor,
         IIntegrationsSettings integrationsSettings,
-        ISonarrSettings settings
+        ISonarrSettings settings,
+        INetworkSettings networkSettings
     )
     {
         _log = log.ForContext<SetupSonarrDownloadClientCommandHandler>();
         _commandExecutor = commandExecutor;
         _integrationsSettings = integrationsSettings;
         _settings = settings;
+        _networkSettings = networkSettings;
     }
 
     public async Task<Result<SetupSonarrDownloadClientCommandResult>> ExecuteAsync(
@@ -53,7 +55,7 @@ public class SetupSonarrDownloadClientCommandHandler
             .Debug(
                 "Setting up Sonarr download client. SonarrBaseUrl: {SonarrBaseUrl}, ReaparrBaseUrl: {ReaparrBaseUrl}",
                 sonarrBaseUri,
-                command.ReaparrBaseUri
+                _networkSettings.Url
             );
 
         try
@@ -78,7 +80,7 @@ public class SetupSonarrDownloadClientCommandHandler
                     {
                         Id = currentDownloadClient.Id,
                         ForceSave = true,
-                        Resource = BuildDownloadClientResource(command.ReaparrBaseUri),
+                        Resource = BuildDownloadClientResource(_networkSettings.Uri),
                     },
                     ct
                 );
@@ -95,7 +97,7 @@ public class SetupSonarrDownloadClientCommandHandler
                 new SonarrApiCreateDownloadClientCommand
                 {
                     ForceSave = false,
-                    Resource = BuildDownloadClientResource(command.ReaparrBaseUri),
+                    Resource = BuildDownloadClientResource(_networkSettings.Uri),
                 },
                 ct
             );
@@ -119,12 +121,6 @@ public class SetupSonarrDownloadClientCommandHandler
 
     private SonarrDownloadContractDTO BuildDownloadClientResource(Uri reaparrBaseUri)
     {
-        // Derive urlBase from Reaparr's base URI to include any PathBase and ensure correct trailing segment
-        var basePath = string.IsNullOrEmpty(reaparrBaseUri.AbsolutePath) ? "/" : reaparrBaseUri.AbsolutePath;
-        if (!basePath.EndsWith("/"))
-            basePath += "/";
-        var derivedUrlBase = $"{basePath}api/public/download-client/";
-
         var useSsl = string.Equals(reaparrBaseUri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase);
 
         return new SonarrDownloadContractDTO
@@ -140,7 +136,7 @@ public class SetupSonarrDownloadClientCommandHandler
                 new() { Name = "host", Value = reaparrBaseUri.Host },
                 new() { Name = "port", Value = reaparrBaseUri.Port },
                 new() { Name = "useSsl", Value = useSsl },
-                new() { Name = "urlBase", Value = derivedUrlBase },
+                new() { Name = "urlBase", Value = "/api/public/download-client/" },
                 new() { Name = "username", Value = _integrationsSettings.DownloadClientUsername },
                 new() { Name = "password", Value = _integrationsSettings.DownloadClientPassword },
                 new() { Name = "tvCategory", Value = IntegrationDefinitions.SONARR_DEFAULT_CATEGORY },

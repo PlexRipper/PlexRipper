@@ -36,7 +36,12 @@ public interface INetworkSettings
     string ForwardedPathHeader { get; set; }
 
     /// <summary>
-    /// Returns the base URL using reverse proxy settings or localhost when unset.
+    /// Derived base URL used by Reaparr, including reverse proxy settings.
+    /// </summary>
+    Uri Uri { get; }
+
+    /// <summary>
+    /// Derived base URL used by Reaparr, including reverse proxy settings.
     /// </summary>
     string Url { get; }
 }

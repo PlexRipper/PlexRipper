@@ -1,12 +1,11 @@
 using FastEndpoints;
+using Flurl;
 using Reaparr.Settings.Contracts;
 
 namespace Reaparr.Application;
 
 public record SetupRadarrIndexerCommand : ICommand<Result<SetupRadarrIndexerCommandResult>>
 {
-    public required Uri ReaparrBaseUri { get; init; }
-
     public required int DownloadClientId { get; init; }
 }
 
@@ -22,6 +21,7 @@ public class SetupRadarrIndexerCommandHandler
     private readonly ICommandExecutor _commandExecutor;
     private readonly IRadarrSettings _radarrSettings;
     private readonly IIntegrationsSettings _integrationsSettings;
+    private readonly INetworkSettings _networkSettings;
 
     private readonly string _indexerName = "Reaparr";
 
@@ -29,13 +29,15 @@ public class SetupRadarrIndexerCommandHandler
         ILogger log,
         ICommandExecutor commandExecutor,
         IRadarrSettings radarrSettings,
-        IIntegrationsSettings integrationsSettings
+        IIntegrationsSettings integrationsSettings,
+        INetworkSettings networkSettings
     )
     {
         _log = log.ForContext<SetupRadarrIndexerCommandHandler>();
         _commandExecutor = commandExecutor;
         _radarrSettings = radarrSettings;
         _integrationsSettings = integrationsSettings;
+        _networkSettings = networkSettings;
     }
 
     public async Task<Result<SetupRadarrIndexerCommandResult>> ExecuteAsync(
@@ -72,7 +74,7 @@ public class SetupRadarrIndexerCommandHandler
                 {
                     Id = existing.Id,
                     ForceSave = true,
-                    Resource = BuildIndexerResource(command.ReaparrBaseUri, command.DownloadClientId, existing.Id),
+                    Resource = BuildIndexerResource(command.DownloadClientId, existing.Id),
                 },
                 ct
             );
@@ -90,7 +92,7 @@ public class SetupRadarrIndexerCommandHandler
             new RadarrApiCreateIndexerCommand
             {
                 ForceSave = true,
-                Resource = BuildIndexerResource(command.ReaparrBaseUri, command.DownloadClientId, 0),
+                Resource = BuildIndexerResource(command.DownloadClientId, 0),
             },
             ct
         );
@@ -102,9 +104,9 @@ public class SetupRadarrIndexerCommandHandler
         return Result.Ok(new SetupRadarrIndexerCommandResult { IndexerId = createResult.Value.Id });
     }
 
-    private RadarrIndexerContractDTO BuildIndexerResource(Uri reaparrBaseUri, int downloadClientId, int? id = null)
+    private RadarrIndexerContractDTO BuildIndexerResource(int downloadClientId, int? id = null)
     {
-        var baseUrl = reaparrBaseUri.AbsoluteUri.TrimEnd('/') + "/api/public/indexer/";
+        var baseUrl = _networkSettings.Url.AppendPathSegment("/api/public/indexer/");
 
         return new RadarrIndexerContractDTO
         {

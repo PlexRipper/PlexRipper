@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Flurl;
 using Reaparr.Environment;
 
@@ -17,6 +18,10 @@ public class NetworkSettingsDTO : INetworkSettings
 
     public required string ForwardedPathHeader { get; set; }
 
+    [JsonIgnore]
+    public Uri Uri => new(Url);
+
+    [JsonIgnore]
     public string Url
     {
         get

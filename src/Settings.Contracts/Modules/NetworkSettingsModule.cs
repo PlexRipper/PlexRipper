@@ -55,6 +55,8 @@ public record NetworkSettingsModule
         set => SetProperty(ref field, value);
     } = string.Empty;
 
+    public Uri Uri => new(Url);
+
     public string Url
     {
         get

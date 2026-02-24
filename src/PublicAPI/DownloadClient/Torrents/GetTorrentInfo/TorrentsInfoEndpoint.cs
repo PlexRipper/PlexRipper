@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using FastEndpoints;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Data.Contracts;
 using Reaparr.PublicAPI.Contracts;
@@ -13,6 +14,21 @@ public record TorrentsInfoEndpointRequest
 
     [QueryParam, BindFrom("hashes")]
     public string? Hashes { get; init; }
+}
+
+public sealed class TorrentsInfoEndpointRequestValidator : Validator<TorrentsInfoEndpointRequest>
+{
+    public TorrentsInfoEndpointRequestValidator()
+    {
+        RuleFor(x => x.Hashes)
+            .Must(hashes =>
+                string.IsNullOrWhiteSpace(hashes)
+                || string.Equals(hashes, "all", StringComparison.OrdinalIgnoreCase)
+                || hashes.Split('|', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Length
+                    > 0
+            )
+            .WithMessage("Hashes must be 'all' or a pipe-delimited list of hashes.");
+    }
 }
 
 public record QBittorrentTorrentInfo

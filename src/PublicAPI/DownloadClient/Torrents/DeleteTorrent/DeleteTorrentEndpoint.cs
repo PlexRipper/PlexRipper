@@ -1,4 +1,5 @@
 using FastEndpoints;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
@@ -15,6 +16,30 @@ public sealed class DeleteTorrentRequest
 
     [FormField, BindFrom("deleteFiles")]
     public bool? DeleteFiles { get; init; }
+}
+
+public sealed class DeleteTorrentRequestValidator : Validator<DeleteTorrentRequest>
+{
+    public DeleteTorrentRequestValidator()
+    {
+        RuleForEach(x => x.Hashes)
+            .Must(hash => !string.IsNullOrWhiteSpace(hash))
+            .When(x => x.Hashes is { Count: > 0 })
+            .WithMessage("Hashes must not be empty.");
+
+        RuleFor(x => x.HashesRaw)
+            .Must(raw =>
+                string.IsNullOrWhiteSpace(raw)
+                || string.Equals(raw, "all", StringComparison.OrdinalIgnoreCase)
+                || raw.Split(
+                        ['|', ',', ';', ' ', '\t', '\r', '\n'],
+                        StringSplitOptions.RemoveEmptyEntries
+                    )
+                    .Length
+                    > 0
+            )
+            .WithMessage("Hashes must be 'all' or a delimited list of hashes.");
+    }
 }
 
 public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest>

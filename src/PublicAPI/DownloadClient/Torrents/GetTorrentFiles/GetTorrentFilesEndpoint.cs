@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using FastEndpoints;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Data.Contracts;
 
@@ -9,6 +10,14 @@ public sealed record GetTorrentFilesRequest
 {
     [QueryParam, BindFrom("hash")]
     public required string Hash { get; init; }
+}
+
+public sealed class GetTorrentFilesRequestValidator : Validator<GetTorrentFilesRequest>
+{
+    public GetTorrentFilesRequestValidator()
+    {
+        RuleFor(x => x.Hash).NotEmpty().WithMessage("Hash is required.");
+    }
 }
 
 public sealed record QBittorrentTorrentFile

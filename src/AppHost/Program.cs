@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Reaparr.Application;
 using Reaparr.Environment;
 using Reaparr.FluentResultExtensions;
+using Reaparr.Settings.Contracts;
 
 namespace Reaparr.AppHost;
 
@@ -46,18 +47,6 @@ public class Program
 
             builder.Services.ConfigureServices(builder.Environment);
 
-            // Trust proxy-forwarded scheme/IP because TLS terminates upstream.
-            // Without this middleware, Request.Scheme remains "http"
-            // since Kestrel only sees the internal HTTP connection.
-            builder.Services.Configure<ForwardedHeadersOptions>(options =>
-            {
-                options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-
-                // Required when running behind non-local reverse proxies (Docker, HAProxy, etc.)
-                options.KnownIPNetworks.Clear();
-                options.KnownProxies.Clear();
-            });
-
             var app = builder.Build();
 
             var configResult = app.SetupConfigFile();
@@ -74,8 +63,7 @@ public class Program
                 return;
             }
 
-            // TLS is terminated upstream; without forwarded headers, Request.Scheme stays http and base URLs are wrong.
-            app.UseForwardedHeaders();
+            app.ApplyForwardedHeaders();
 
             app.ConfigureApplication(app.Environment);
 

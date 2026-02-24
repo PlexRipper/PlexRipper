@@ -1,6 +1,7 @@
 using System.Text.Json;
 using FastEndpoints;
 using FluentValidation;
+using Flurl;
 
 namespace Reaparr.Application;
 
@@ -23,10 +24,12 @@ public class RadarrApiUpdateDownloadClientCommandValidator : Validator<RadarrApi
 public class RadarrApiUpdateDownloadClientCommandHandler
     : ICommandHandler<RadarrApiUpdateDownloadClientCommand, Result<RadarrDownloadClientResourceDTO>>
 {
+    private readonly ILogger _log;
     private readonly HttpClient _client;
 
-    public RadarrApiUpdateDownloadClientCommandHandler(IHttpClientFactory httpClientFactory)
+    public RadarrApiUpdateDownloadClientCommandHandler(ILogger logger, IHttpClientFactory httpClientFactory)
     {
+        _log = logger.ForContext<RadarrApiUpdateDownloadClientCommandHandler>();
         _client = httpClientFactory.CreateRadarrHttpClient();
     }
 
@@ -38,8 +41,12 @@ public class RadarrApiUpdateDownloadClientCommandHandler
         try
         {
             var forceSave = command.ForceSave ? "true" : "false";
-            var requestUri = new Uri($"api/v3/downloadclient/{command.Id}?forceSave={forceSave}", UriKind.Relative);
+            var requestPath = $"api/v3/downloadclient/{command.Id}".SetQueryParam("forceSave", forceSave).ToString();
+            var requestUri = new Uri(requestPath, UriKind.Relative);
             var json = JsonSerializer.Serialize(command.Resource, DefaultJsonSerializerOptions.ConfigStandard);
+
+            _log.Here().Debug("Updating Radarr download client with name {DownloadClientName}", command.Resource.Name);
+            _log.Here().Debug("Request URI: {RequestUri}, Payload: {Payload}", requestUri, json);
 
             using var httpRequest = new HttpRequestMessage(HttpMethod.Put, requestUri);
             httpRequest.Content = json.ToStringContent();

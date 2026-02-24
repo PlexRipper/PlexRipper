@@ -66,6 +66,13 @@ export function getAxiosMock() {
 		statusCode: 200,
 		value: [],
 	});
+	mock.onGet('/api/PlexLibrary/sync-status').reply(200, {
+		isSuccess: true,
+		errors: [],
+		successes: [],
+		statusCode: 200,
+		value: [],
+	});
 
 	return mock;
 }

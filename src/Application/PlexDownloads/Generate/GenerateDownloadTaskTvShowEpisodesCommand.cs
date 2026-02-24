@@ -232,7 +232,11 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
         }
 
         // Map episodeData to DownloadTaskTvShowEpisodeFile and add to episodeDownloadTask
-        var downloadFiles = episodeData.MapToDownloadTask(tvShowEpisode, request);
+        var downloadFiles = episodeData.MapToDownloadTask(
+            tvShowEpisode,
+            request,
+            downloadMediaDto.KeepCompletedInDownloadFolder
+        );
 
         episodeDownloadTask.Children.Add(downloadFiles);
         _dbContext.DownloadTaskTvShowEpisodeFile.AddRange(downloadFiles);

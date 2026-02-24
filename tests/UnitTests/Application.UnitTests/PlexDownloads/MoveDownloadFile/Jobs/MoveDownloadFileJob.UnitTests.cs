@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Quartz;
+using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 
 namespace Reaparr.Application.UnitTests;
@@ -46,6 +47,11 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
 
         Mock.SetupCommand(It.IsAny<DownloadTaskUpdatedCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.Once);
 
+        Mock.Mock<IMoveDownloadFileQueue>()
+            .Setup(x => x.CheckMoveDownloadFileJobQueue())
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once);
+
         // Simulate the command handler setting MoveFinished status in the DB
         await dbContext.SetDownloadStatus(downloadTask.ToKey(), DownloadStatus.MoveFinished);
 
@@ -87,6 +93,11 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
             .Verifiable(Times.Never);
 
         Mock.SetupCommand(It.IsAny<DownloadTaskUpdatedCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.Never);
+
+        Mock.Mock<IMoveDownloadFileQueue>()
+            .Setup(x => x.CheckMoveDownloadFileJobQueue())
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once);
 
         var context = SetupJobContext(downloadTask.ToKey());
 
@@ -135,6 +146,11 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
 
         Mock.SetupCommand(It.IsAny<DownloadTaskUpdatedCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.Once);
 
+        Mock.Mock<IMoveDownloadFileQueue>()
+            .Setup(x => x.CheckMoveDownloadFileJobQueue())
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once);
+
         await dbContext.SetDownloadStatus(downloadTask.ToKey(), DownloadStatus.MoveFinished);
 
         var context = SetupJobContext(downloadTask.ToKey());
@@ -165,10 +181,16 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
             .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Never);
 
+        Mock.Mock<IMoveDownloadFileQueue>()
+            .Setup(x => x.CheckMoveDownloadFileJobQueue())
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Never);
+
         // Act — should not throw (Quartz jobs must swallow exceptions)
         var act = async () => await Sut.Execute(Mock.Create<IJobExecutionContext>());
 
         // Assert
         await act.ShouldNotThrowAsync();
+        Mock.Mock<IMoveDownloadFileQueue>().Verify();
     }
 }

@@ -943,7 +943,8 @@
       "Reaparr.Settings.Contracts": {
         "type": "Project",
         "dependencies": {
-          "Reaparr.Domain": "[1.0.0, )"
+          "Reaparr.Domain": "[1.0.0, )",
+          "Reaparr.Environment": "[1.0.0, )"
         }
       },
       "Reaparr.SignalR": {

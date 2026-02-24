@@ -1,8 +1,10 @@
 using FastEndpoints;
 using FluentValidation;
+using Flurl;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Data.Contracts;
 using Reaparr.Environment;
+using Reaparr.Settings.Contracts;
 
 // ReSharper disable InconsistentNaming
 // ReSharper disable ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
@@ -41,11 +43,13 @@ public class SearchMovieCommandHandler : ICommandHandler<SearchMovieCommand, Tor
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
+    private readonly INetworkSettings _networkSettings;
 
-    public SearchMovieCommandHandler(ILogger log, IReaparrDbContext dbContext)
+    public SearchMovieCommandHandler(ILogger log, IReaparrDbContext dbContext, INetworkSettings networkSettings)
     {
         _log = log.ForContext<SearchMovieCommandHandler>();
         _dbContext = dbContext;
+        _networkSettings = networkSettings;
     }
 
     public async Task<TorznabMediaSearchResponseDTO> ExecuteAsync(
@@ -76,8 +80,18 @@ public class SearchMovieCommandHandler : ICommandHandler<SearchMovieCommand, Tor
 
     private async Task<List<PlexMovie>> LoadMoviesAsync(SearchMovieCommand command, CancellationToken cancellationToken)
     {
+        var onlineServerIds = await _dbContext.GetOnlineServerIds(cancellationToken: cancellationToken);
+        if (!onlineServerIds.Any())
+        {
+            _log.Here().Warning("No online Plex servers found, returning empty search results.");
+            return [];
+        }
+
         // Base query with required navigation properties for mapping
-        var baseQuery = _dbContext.PlexMovies.Include(x => x.MediaDataList).AsQueryable();
+        var baseQuery = _dbContext
+            .PlexMovies.Include(x => x.MediaDataList)
+            .Where(x => onlineServerIds.Contains(x.PlexServerId))
+            .AsQueryable();
 
         // If no specific query or external IDs are provided, return a paged list
         var noQueryProvided = string.IsNullOrWhiteSpace(command.Query);
@@ -117,27 +131,43 @@ public class SearchMovieCommandHandler : ICommandHandler<SearchMovieCommand, Tor
 
     private IEnumerable<TorznabItem> MapMovieToItems(PlexMovie movie)
     {
-        foreach (var mediaData in movie.MediaDataList)
+        foreach (var mediaData in movie.MediaDataList.OrderBy(md => md.PlexApiPartId))
         {
-            var url = BuildTorrentUrl(movie, mediaData);
+            var torrentMetadata = new TorrentMetadataDTO
+            {
+                Type = PlexMediaType.Movie,
+                MediaId = movie.Id,
+                DataId = mediaData.Id,
+                PartId = mediaData.Id, // TODO: Media and Parts are merged in the same DB table, PartId can be removed
+                PlexApiPartId = mediaData.PlexApiPartId,
+                Quality = mediaData.Quality,
+                LibraryId = mediaData.PlexLibraryId,
+                ServerId = mediaData.PlexServerId,
+            };
+
+            // FORCE this to be a string, and not an implicit URL type by Flurl
+            // ReSharper disable once SuggestVarOrType_BuiltInTypes
+            string torrentDownloadUrl = _networkSettings
+                .Url.AppendPathSegment(PublicApiRoutes.DownloadTorrent)
+                .SetQueryParams(torrentMetadata.Values);
 
             _log.Here()
                 .Debug(
                     "Generated torrent URL for PlexMovieMediaDataId {PlexMovieMediaDataId}: {Url}",
                     mediaData.Id,
-                    url
+                    torrentDownloadUrl
                 );
 
             var item = new TorznabItem
             {
                 Title = mediaData.GetFileName,
                 PubDate = movie.AddedAt.ToString("R"),
-                Guid = new TorznabGuid { Value = url },
-                Link = url,
+                Guid = new TorznabGuid { Value = torrentDownloadUrl },
+                Link = torrentDownloadUrl,
                 Size = mediaData.Size,
                 Enclosure = new TorznabEnclosure
                 {
-                    Url = url,
+                    Url = torrentDownloadUrl,
                     Length = mediaData.Size,
                     Type = "application/x-bittorrent",
                 },
@@ -173,17 +203,4 @@ public class SearchMovieCommandHandler : ICommandHandler<SearchMovieCommand, Tor
             yield return item;
         }
     }
-
-    private static string BuildTorrentUrl(PlexMovie movie, PlexMovieMediaData mediaData) =>
-        new TorrentMetadataDTO
-        {
-            Type = PlexMediaType.Movie,
-            MediaId = movie.Id,
-            DataId = mediaData.Id,
-            PartId = mediaData.Id, // TODO: Media and Parts are merged in the same DB table, PartId can be removed
-            PlexApiPartId = mediaData.PlexApiPartId,
-            Quality = mediaData.Quality,
-            LibraryId = mediaData.PlexLibraryId,
-            ServerId = mediaData.PlexServerId,
-        }.ToUrl();
 }

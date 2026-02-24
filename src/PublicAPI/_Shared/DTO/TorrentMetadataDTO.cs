@@ -1,6 +1,4 @@
 using FastEndpoints;
-using Microsoft.AspNetCore.WebUtilities;
-using Reaparr.Environment;
 
 namespace Reaparr.PublicAPI;
 
@@ -53,18 +51,6 @@ public record TorrentMetadataDTO
     /// </summary>
     [QueryParam]
     public required int ServerId { get; init; }
-
-    public string ToUrl()
-    {
-        var url = new UriBuilder
-        {
-            Host = "localhost",
-            Port = EnvironmentExtensions.GetPort,
-            Path = PublicApiRoutes.DownloadTorrent,
-        }.ToString();
-
-        return QueryHelpers.AddQueryString(url, Values!);
-    }
 
     public Dictionary<string, string> Values =>
         new()

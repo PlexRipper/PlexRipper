@@ -35,6 +35,15 @@ public class GetPreferencesEndpoint : EndpointWithoutRequest<object>
             // must exist, Sonarr checks these
             save_path = downloadFolder.DirectoryPath,
             temp_path_enabled = false,
+            max_ratio_enabled = false,
+            max_ratio = 0,
+            max_seeding_time_enabled = false,
+            max_seeding_time = 0,
+            max_inactive_seeding_time_enabled = false,
+            max_inactive_seeding_time = 0,
+            max_ratio_act = 0,
+            queueing_enabled = true,
+            dht = true,
         };
 
         await Send.OkAsync(prefs, cancellation: ct);

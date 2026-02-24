@@ -109,7 +109,9 @@ public class GenerateDownloadTaskMoviesCommandHandler : ICommandHandler<Generate
 
                 // Map all parts to DownloadTaskMovieFile and add to movieDownloadTask
                 movieDownloadTask.Children.AddRange(
-                    allPartsForSelectedMedia.Select(x => x.MapToDownloadTask(plexMovie, request))
+                    allPartsForSelectedMedia.Select(x =>
+                        x.MapToDownloadTask(plexMovie, request, downloadMediaDto.KeepCompletedInDownloadFolder)
+                    )
                 );
 
                 movieDownloadTask.Calculate();

@@ -16,6 +16,7 @@ const plexAccountMatcher = /\/api\/PlexAccount$/;
 const downloadMatcher = /\/api\/Download$/;
 const folderPathMatcher = /\/api\/FolderPath$/;
 const plexLibraryMatcher = /\/api\/PlexLibrary$/;
+const plexLibrarySyncStatusMatcher = /\/api\/PlexLibrary\/sync-status$/;
 const notificationMatcher = /\/api\/Notification$/;
 const plexServerConnectionMatcher = /\/api\/PlexServerConnection$/;
 const plexServerMatcher = /\/api\/PlexServer$/;
@@ -34,6 +35,7 @@ mock.onGet(plexAccountMatcher).reply(200, ok([]));
 mock.onGet(downloadMatcher).reply(200, ok([]));
 mock.onGet(folderPathMatcher).reply(200, ok([]));
 mock.onGet(plexLibraryMatcher).reply(200, ok([]));
+mock.onGet(plexLibrarySyncStatusMatcher).reply(200, ok([]));
 mock.onGet(notificationMatcher).reply(200, ok([]));
 mock.onGet(plexServerConnectionMatcher).reply(200, ok([]));
 mock.onGet(plexServerMatcher).reply(200, ok([]));
@@ -50,7 +52,12 @@ mock.onGet(settingsMatcher).reply(200, ok({
 		hasBeenInvitedToDiscord: false,
 		hasAgreedToDisclaimer: false,
 	},
-	debugSettings: { debugModeEnabled: false, maskLibraryNames: false, maskServerNames: false },
+	debugSettings: {
+		debugModeEnabled: false,
+		maskAccountNames: false,
+		maskLibraryNames: false,
+		maskServerNames: false,
+	},
 	confirmationSettings: {
 		askDownloadEpisodeConfirmation: true,
 		askDownloadMovieConfirmation: true,
@@ -79,6 +86,15 @@ mock.onGet(settingsMatcher).reply(200, ok({
 		radarr: { isConfigured: false, radarrApiKey: '', radarrBaseUrl: '' },
 	},
 	serverSettings: { data: [] },
+	networkSettings: {
+		reverseProxyUrl: '',
+		basePath: '',
+		trustProxyHeaders: false,
+		allowedProxyIps: [],
+		forwardedHostHeader: '',
+		forwardedPathHeader: '',
+		url: '',
+	},
 }));
 
 export {}; // ensure this file is treated as a module

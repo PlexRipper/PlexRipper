@@ -1,12 +1,11 @@
 using FastEndpoints;
+using Flurl;
 using Reaparr.Settings.Contracts;
 
 namespace Reaparr.Application;
 
 public record SetupSonarrIndexerCommand : ICommand<Result<SetupSonarrIndexerCommandResult>>
 {
-    public required Uri ReaparrBaseUri { get; init; }
-
     public required int DownloadClientId { get; init; }
 }
 
@@ -22,6 +21,7 @@ public class SetupSonarrIndexerCommandHandler
     private readonly ICommandExecutor _commandExecutor;
     private readonly ISonarrSettings _sonarrSettings;
     private readonly IIntegrationsSettings _integrationsSettings;
+    private readonly INetworkSettings _networkSettings;
 
     private readonly string _indexerName = "Reaparr";
 
@@ -29,13 +29,15 @@ public class SetupSonarrIndexerCommandHandler
         ILogger log,
         ICommandExecutor commandExecutor,
         ISonarrSettings sonarrSettings,
-        IIntegrationsSettings integrationsSettings
+        IIntegrationsSettings integrationsSettings,
+        INetworkSettings networkSettings
     )
     {
         _log = log.ForContext<SetupSonarrIndexerCommandHandler>();
         _commandExecutor = commandExecutor;
         _sonarrSettings = sonarrSettings;
         _integrationsSettings = integrationsSettings;
+        _networkSettings = networkSettings;
     }
 
     public async Task<Result<SetupSonarrIndexerCommandResult>> ExecuteAsync(
@@ -72,7 +74,7 @@ public class SetupSonarrIndexerCommandHandler
                 {
                     Id = existing.Id,
                     ForceSave = true,
-                    Resource = BuildIndexerResource(command.ReaparrBaseUri, command.DownloadClientId),
+                    Resource = BuildIndexerResource(command.DownloadClientId),
                 },
                 ct
             );
@@ -90,7 +92,7 @@ public class SetupSonarrIndexerCommandHandler
             new SonarrApiCreateIndexerCommand
             {
                 ForceSave = true,
-                Resource = BuildIndexerResource(command.ReaparrBaseUri, command.DownloadClientId),
+                Resource = BuildIndexerResource(command.DownloadClientId),
             },
             ct
         );
@@ -102,9 +104,11 @@ public class SetupSonarrIndexerCommandHandler
         return Result.Ok(new SetupSonarrIndexerCommandResult { IndexerId = createResult.Value.Id });
     }
 
-    private SonarrIndexerContractDTO BuildIndexerResource(Uri reaparrBaseUri, int downloadClientId)
+    private SonarrIndexerContractDTO BuildIndexerResource(int downloadClientId)
     {
-        var baseUrl = reaparrBaseUri.AbsoluteUri.TrimEnd('/') + "/api/public/indexer/";
+        // FORCE this to be a string, and not an implicit URL type by Flurl
+        // ReSharper disable once SuggestVarOrType_BuiltInTypes
+        string baseUrl = _networkSettings.Url.AppendPathSegment("api/public/indexer");
 
         return new SonarrIndexerContractDTO
         {

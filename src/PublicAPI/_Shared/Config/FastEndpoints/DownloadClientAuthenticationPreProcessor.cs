@@ -28,12 +28,13 @@ public class DownloadClientAuthenticationPreProcessor<TRequest> : IPreProcessor<
                     userAgent,
                     requestPath
                 );
-            await ctx.HttpContext.Response.SendUnauthorizedAsync(cancellation: ct);
+            await ctx.HttpContext.Response.SendForbiddenAsync(cancellation: ct);
             return;
         }
 
         if (!(await IsValidSession(sid, ct)))
         {
+            ExpireSidCookie(ctx.HttpContext);
             _log.Here()
                 .Warning(
                     "Invalid or expired download client session SID cookie from {UserAgent} for request to '{RequestPath}'",
@@ -55,8 +56,22 @@ public class DownloadClientAuthenticationPreProcessor<TRequest> : IPreProcessor<
                     );
             }
 
-            await ctx.HttpContext.Response.SendUnauthorizedAsync(cancellation: ct);
+            await ctx.HttpContext.Response.SendForbiddenAsync(cancellation: ct);
         }
+    }
+
+    private static void ExpireSidCookie(HttpContext httpContext)
+    {
+        var isHttps = httpContext.Request.IsHttps;
+        var options = new CookieOptions
+        {
+            Path = "/",
+            HttpOnly = true,
+            Secure = isHttps,
+            SameSite = isHttps ? SameSiteMode.None : SameSiteMode.Lax,
+            Expires = DateTimeOffset.UnixEpoch,
+        };
+        httpContext.Response.Cookies.Delete("SID", options);
     }
 
     private async Task<bool> IsValidSession(string sid, CancellationToken ct)

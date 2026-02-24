@@ -29,6 +29,7 @@ public class SettingsModule : Module
         builder.Register(c => c.Resolve<IUserSettings>().LanguageSettings).As<ILanguageSettings>().SingleInstance();
         builder.Register(c => c.Resolve<IUserSettings>().DebugSettings).As<IDebugSettings>().SingleInstance();
         builder.Register(c => c.Resolve<IUserSettings>().ServerSettings).As<IServerSettingsModule>().SingleInstance();
+        builder.Register(c => c.Resolve<IUserSettings>().NetworkSettings).As<INetworkSettings>().SingleInstance();
 
         builder
             .Register(c => c.Resolve<IUserSettings>().IntegrationsSettings)

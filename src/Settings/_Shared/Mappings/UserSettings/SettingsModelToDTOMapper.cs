@@ -18,6 +18,7 @@ public static class SettingsModelToDTOMapper
             LanguageSettings = dto.LanguageSettings.ToModel(),
             DebugSettings = dto.DebugSettings.ToModel(),
             ServerSettings = dto.ServerSettings.ToModel(),
+            NetworkSettings = dto.NetworkSettings.ToModel(),
         };
 
     public static IntegrationsSettings ToModel(this IntegrationsSettingsDTO dto) =>
@@ -96,6 +97,17 @@ public static class SettingsModelToDTOMapper
 
     public static PlexServerSettingsModule ToModel(this ServerSettingsDTO dto) => new() { Data = dto.Data };
 
+    public static NetworkSettingsModule ToModel(this NetworkSettingsDTO dto) =>
+        new()
+        {
+            ReverseProxyUrl = dto.ReverseProxyUrl,
+            BasePath = dto.BasePath,
+            TrustProxyHeaders = dto.TrustProxyHeaders,
+            AllowedProxyIps = dto.AllowedProxyIps,
+            ForwardedHostHeader = dto.ForwardedHostHeader,
+            ForwardedPathHeader = dto.ForwardedPathHeader,
+        };
+
     public static DebugSettingsModule ToModel(this DebugSettingsDTO dto) =>
         new()
         {
@@ -121,6 +133,7 @@ public static class SettingsModelToDTOMapper
             DownloadManagerSettings = model.DownloadManagerSettings.ToDTO(),
             LanguageSettings = model.LanguageSettings.ToDTO(),
             ServerSettings = model.ServerSettings.ToDTO(),
+            NetworkSettings = model.NetworkSettings.ToDTO(),
         };
 
     public static IntegrationsSettingsDTO ToDTO(this IntegrationsSettings module) =>
@@ -199,6 +212,17 @@ public static class SettingsModelToDTOMapper
         };
 
     public static ServerSettingsDTO ToDTO(this PlexServerSettingsModule module) => new() { Data = module.Data };
+
+    public static NetworkSettingsDTO ToDTO(this NetworkSettingsModule module) =>
+        new()
+        {
+            ReverseProxyUrl = module.ReverseProxyUrl,
+            BasePath = module.BasePath,
+            TrustProxyHeaders = module.TrustProxyHeaders,
+            AllowedProxyIps = module.AllowedProxyIps,
+            ForwardedHostHeader = module.ForwardedHostHeader,
+            ForwardedPathHeader = module.ForwardedPathHeader,
+        };
 
     public static DebugSettingsDTO ToDTO(this DebugSettingsModule module) =>
         new()

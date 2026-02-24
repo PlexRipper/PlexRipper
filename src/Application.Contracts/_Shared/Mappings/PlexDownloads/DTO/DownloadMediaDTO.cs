@@ -13,4 +13,6 @@ public record DownloadMediaDTO
     public required int PlexServerId { get; init; }
 
     public required int PlexLibraryId { get; init; }
+
+    public bool KeepCompletedInDownloadFolder { get; init; }
 }

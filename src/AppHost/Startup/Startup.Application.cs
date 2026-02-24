@@ -31,6 +31,18 @@ public static partial class Startup
         // This has to always be first
         app.UseCors(CorsConfiguration);
 
+        app.Use(
+            async (ctx, next) =>
+            {
+                if (ctx.Request.Path.StartsWithSegments("/api/v2", out var remaining))
+                {
+                    ctx.Request.Path = PublicApiRoutes.DownloadClient + remaining;
+                }
+
+                await next();
+            }
+        );
+
         app.UseRouting();
 
         if (!EnvironmentExtensions.IsIntegrationTestMode())

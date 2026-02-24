@@ -1,7 +1,5 @@
 using FastEndpoints;
-using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
-using Reaparr.Data.Contracts;
 
 namespace Reaparr.Application;
 
@@ -11,13 +9,13 @@ namespace Reaparr.Application;
 /// <returns>Is successful.</returns>
 public class ClearCompletedDownloadTasksEndpoint : BaseEndpoint<List<Guid>, ResultDTO<CountResponseDTO>>
 {
-    private readonly IReaparrDbContext _dbContext;
+    private readonly ICommandExecutor _commandExecutor;
 
     public override string EndpointPath => ApiRoutes.DownloadController + "/clear";
 
-    public ClearCompletedDownloadTasksEndpoint(IReaparrDbContext dbContext)
+    public ClearCompletedDownloadTasksEndpoint(ICommandExecutor commandExecutor)
     {
-        _dbContext = dbContext;
+        _commandExecutor = commandExecutor;
     }
 
     public override void Configure()
@@ -30,119 +28,13 @@ public class ClearCompletedDownloadTasksEndpoint : BaseEndpoint<List<Guid>, Resu
 
     public override async Task HandleAsync(List<Guid> downloadTaskIds, CancellationToken ct)
     {
-        var hasDownloadTaskIds = downloadTaskIds.Any();
-
-        int totalRowsDeleted;
-        if (hasDownloadTaskIds)
-            totalRowsDeleted = await ClearByGuids(downloadTaskIds, ct);
-        else
-            totalRowsDeleted = await ClearAllCompleted(ct);
-
-        await SendFluentResult(Result.Ok(new CountResponseDTO(totalRowsDeleted)), ct);
-    }
-
-    private async Task<int> ClearByGuids(List<Guid> downloadTaskIds, CancellationToken ct)
-    {
-        var totalRowsDeleted = 0;
-
-        foreach (var downloadTaskId in downloadTaskIds)
+        var result = await _commandExecutor.Send(new ClearCompletedDownloadTasksCommand(downloadTaskIds), ct);
+        if (result.IsFailed)
         {
-            var rowsDeleted = await _dbContext
-                .DownloadTaskMovie.Where(x => x.Id == downloadTaskId && x.DownloadStatus == DownloadStatus.Completed)
-                .ExecuteDeleteAsync(ct);
-
-            if (rowsDeleted > 0)
-            {
-                totalRowsDeleted += rowsDeleted;
-                continue;
-            }
-
-            rowsDeleted = await _dbContext
-                .DownloadTaskMovieFile.Where(x =>
-                    x.Id == downloadTaskId && x.DownloadStatus == DownloadStatus.Completed
-                )
-                .ExecuteDeleteAsync(ct);
-
-            if (rowsDeleted > 0)
-            {
-                totalRowsDeleted += rowsDeleted;
-                continue;
-            }
-
-            rowsDeleted = await _dbContext
-                .DownloadTaskTvShow.Where(x => x.Id == downloadTaskId && x.DownloadStatus == DownloadStatus.Completed)
-                .ExecuteDeleteAsync(ct);
-
-            if (rowsDeleted > 0)
-            {
-                totalRowsDeleted += rowsDeleted;
-                continue;
-            }
-
-            rowsDeleted = await _dbContext
-                .DownloadTaskTvShowSeason.Where(x =>
-                    x.Id == downloadTaskId && x.DownloadStatus == DownloadStatus.Completed
-                )
-                .ExecuteDeleteAsync(ct);
-
-            if (rowsDeleted > 0)
-            {
-                totalRowsDeleted += rowsDeleted;
-                continue;
-            }
-
-            rowsDeleted = await _dbContext
-                .DownloadTaskTvShowEpisode.Where(x =>
-                    x.Id == downloadTaskId && x.DownloadStatus == DownloadStatus.Completed
-                )
-                .ExecuteDeleteAsync(ct);
-
-            if (rowsDeleted > 0)
-            {
-                totalRowsDeleted += rowsDeleted;
-                continue;
-            }
-
-            rowsDeleted = await _dbContext
-                .DownloadTaskTvShowEpisodeFile.Where(x =>
-                    x.Id == downloadTaskId && x.DownloadStatus == DownloadStatus.Completed
-                )
-                .ExecuteDeleteAsync(ct);
-
-            totalRowsDeleted += rowsDeleted;
+            await SendFluentResult(result.ToResult(), ct);
+            return;
         }
 
-        return totalRowsDeleted;
-    }
-
-    public async Task<int> ClearAllCompleted(CancellationToken ct)
-    {
-        var totalRowsDeleted = 0;
-
-        totalRowsDeleted += await _dbContext
-            .DownloadTaskMovie.Where(x => x.DownloadStatus == DownloadStatus.Completed)
-            .ExecuteDeleteAsync(ct);
-
-        totalRowsDeleted += await _dbContext
-            .DownloadTaskMovieFile.Where(x => x.DownloadStatus == DownloadStatus.Completed)
-            .ExecuteDeleteAsync(ct);
-
-        totalRowsDeleted += await _dbContext
-            .DownloadTaskTvShow.Where(x => x.DownloadStatus == DownloadStatus.Completed)
-            .ExecuteDeleteAsync(ct);
-
-        totalRowsDeleted += await _dbContext
-            .DownloadTaskTvShowSeason.Where(x => x.DownloadStatus == DownloadStatus.Completed)
-            .ExecuteDeleteAsync(ct);
-
-        totalRowsDeleted += await _dbContext
-            .DownloadTaskTvShowEpisode.Where(x => x.DownloadStatus == DownloadStatus.Completed)
-            .ExecuteDeleteAsync(ct);
-
-        totalRowsDeleted += await _dbContext
-            .DownloadTaskTvShowEpisodeFile.Where(x => x.DownloadStatus == DownloadStatus.Completed)
-            .ExecuteDeleteAsync(ct);
-
-        return totalRowsDeleted;
+        await SendFluentResult(Result.Ok(new CountResponseDTO(result.Value)), ct);
     }
 }

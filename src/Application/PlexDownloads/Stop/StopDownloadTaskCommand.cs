@@ -8,13 +8,6 @@ using Reaparr.FileSystem.Contracts;
 
 namespace Reaparr.Application;
 
-/// <summary>
-/// Stops and disposes of the PlexDownloadClient executing the <see cref="DownloadTaskGeneric"/> if it is downloading.
-/// </summary>
-/// <param name="DownloadTaskGuid">The id of the <see cref="DownloadTaskGeneric"/> to stop.</param>
-/// <returns>If successful a list of the DownloadTasks that were stopped.</returns>
-public record StopDownloadTaskCommand(Guid DownloadTaskGuid) : ICommand<Result>;
-
 public class StopDownloadTaskCommandValidator : AbstractValidator<StopDownloadTaskCommand>
 {
     public StopDownloadTaskCommandValidator()
@@ -89,7 +82,8 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
             // Tasks in the file-transfer phase (DownloadFinished, Moving, MoveError, etc.) already have
             // a fully-downloaded file on disk that should be preserved for the move operation.
             if (
-                downloadTask.DownloadTaskPhase != DownloadTaskPhase.FileTransfer
+                command.DeleteFiles
+                && downloadTask.DownloadTaskPhase != DownloadTaskPhase.FileTransfer
                 && downloadTask.DownloadTaskPhase != DownloadTaskPhase.Completed
             )
             {

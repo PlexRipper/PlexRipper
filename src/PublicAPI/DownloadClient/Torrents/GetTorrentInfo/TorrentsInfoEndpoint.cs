@@ -1,14 +1,34 @@
 using System.Text.Json.Serialization;
 using FastEndpoints;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Data.Contracts;
+using Reaparr.PublicAPI.Contracts;
 
 namespace Reaparr.PublicAPI;
 
 public record TorrentsInfoEndpointRequest
 {
     [QueryParam, BindFrom("category")]
-    public required string Category { get; init; }
+    public string? Category { get; init; }
+
+    [QueryParam, BindFrom("hashes")]
+    public string? Hashes { get; init; }
+}
+
+public sealed class TorrentsInfoEndpointRequestValidator : Validator<TorrentsInfoEndpointRequest>
+{
+    public TorrentsInfoEndpointRequestValidator()
+    {
+        RuleFor(x => x.Hashes)
+            .Must(hashes =>
+                string.IsNullOrWhiteSpace(hashes)
+                || string.Equals(hashes, "all", StringComparison.OrdinalIgnoreCase)
+                || hashes.Split('|', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Length
+                    > 0
+            )
+            .WithMessage("Hashes must be 'all' or a pipe-delimited list of hashes.");
+    }
 }
 
 public record QBittorrentTorrentInfo
@@ -60,17 +80,47 @@ public record QBittorrentTorrentInfo
     /// </summary>
     [JsonPropertyName("save_path")]
     public string SavePath { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Absolute path to the torrent content on disk.
+    /// </summary>
+    [JsonPropertyName("content_path")]
+    public string ContentPath { get; set; } = string.Empty;
+
+    [JsonPropertyName("category")]
+    public string Category { get; set; } = string.Empty;
+
+    [JsonPropertyName("label")]
+    public string Label { get; set; } = string.Empty;
+
+    [JsonPropertyName("ratio")]
+    public float Ratio { get; set; }
+
+    [JsonPropertyName("ratio_limit")]
+    public float RatioLimit { get; set; } = -2;
+
+    [JsonPropertyName("seeding_time")]
+    public long? SeedingTime { get; set; }
+
+    [JsonPropertyName("seeding_time_limit")]
+    public long SeedingTimeLimit { get; set; } = -2;
+
+    [JsonPropertyName("inactive_seeding_time_limit")]
+    public long InactiveSeedingTimeLimit { get; set; } = -2;
+
+    [JsonPropertyName("last_activity")]
+    public long LastActivity { get; set; }
 }
 
 public sealed class TorrentsInfoEndpoint : Endpoint<TorrentsInfoEndpointRequest, List<QBittorrentTorrentInfo>>
 {
-    private readonly IReaparrDbContext _dbContext;
+    private readonly IReaparrDbContextFactory _dbContextFactory;
     private readonly ILogger _log;
 
-    public TorrentsInfoEndpoint(ILogger logger, IReaparrDbContext dbContext)
+    public TorrentsInfoEndpoint(ILogger logger, IReaparrDbContextFactory dbContextFactory)
     {
         _log = logger.ForContext<TorrentsInfoEndpoint>();
-        _dbContext = dbContext;
+        _dbContextFactory = dbContextFactory;
     }
 
     public override void Configure()
@@ -85,21 +135,33 @@ public sealed class TorrentsInfoEndpoint : Endpoint<TorrentsInfoEndpointRequest,
     {
         _log.Here().DebugApiCall(HttpContext);
 
+        var hashesFilter = ParseHashes(req.Hashes);
+        var categoryFilter = NormalizeCategory(req.Category);
+
         // Query all download tasks that have a HashId (Sonarr/Radarr tracking id)
-        var episodeFilesTask = _dbContext
+        using var episodeDbContext = await _dbContextFactory.CreateAsync();
+        using var movieDbContext = await _dbContextFactory.CreateAsync();
+
+        var episodeFilesTask = episodeDbContext
             .DownloadTaskTvShowEpisodeFile.Where(x => x.HashId != null)
             .Include(x => x.Parent)
             .ToListAsync(ct);
 
-        var movieFilesTask = _dbContext
+        var movieFilesTask = movieDbContext
             .DownloadTaskMovieFile.Where(x => x.HashId != null)
             .Include(x => x.Parent)
             .ToListAsync(ct);
 
         await Task.WhenAll(episodeFilesTask, movieFilesTask);
 
-        var episodeInfos = episodeFilesTask.Result.Select(MapToTorrentInfo).ToList();
-        var movieInfos = movieFilesTask.Result.Select(MapToTorrentInfo).ToList();
+        var episodeInfos = episodeFilesTask
+            .Result.Where(x => MatchesFilters(x, hashesFilter, categoryFilter))
+            .Select(MapToTorrentInfo)
+            .ToList();
+        var movieInfos = movieFilesTask
+            .Result.Where(x => MatchesFilters(x, hashesFilter, categoryFilter))
+            .Select(MapToTorrentInfo)
+            .ToList();
 
         var torrents = new List<QBittorrentTorrentInfo>(episodeInfos.Count + movieInfos.Count);
         torrents.AddRange(episodeInfos);
@@ -115,17 +177,78 @@ public sealed class TorrentsInfoEndpoint : Endpoint<TorrentsInfoEndpointRequest,
             ? file.DownloadDirectory
             : (file.DestinationDirectory);
 
+        var category = ResolveCategory(file);
+
         return new QBittorrentTorrentInfo
         {
             Hash = file.HashId!,
             Name = file.FileName,
             Size = file.DataTotal,
-            Progress = file.Percentage,
+            Progress = Math.Clamp(file.Percentage / 100m, 0, 1),
             DlSpeed = file.Speed,
             Eta = file.TimeRemaining,
             State = MapStatusToQbittorrentState(file.DownloadStatus),
             SavePath = savePath,
+            ContentPath = Path.Combine(savePath, file.FileName),
+            Category = category,
+            Label = category,
+            Ratio = 0,
+            RatioLimit = -2,
+            SeedingTime = null,
+            SeedingTimeLimit = -2,
+            InactiveSeedingTimeLimit = -2,
+            LastActivity = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
         };
+    }
+
+    private static string ResolveCategory(DownloadTaskFileBase file)
+    {
+        return file.MediaType switch
+        {
+            PlexMediaType.Movie => IntegrationDefinitions.RADARR_DEFAULT_CATEGORY,
+            PlexMediaType.Episode => IntegrationDefinitions.SONARR_DEFAULT_CATEGORY,
+            _ => string.Empty,
+        };
+    }
+
+    private static HashSet<string>? ParseHashes(string? hashes)
+    {
+        if (string.IsNullOrWhiteSpace(hashes))
+            return null;
+
+        if (string.Equals(hashes, "all", StringComparison.OrdinalIgnoreCase))
+            return null;
+
+        var parsed = hashes
+            .Split('|', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Select(x => x.ToLowerInvariant())
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        return parsed.Count == 0 ? null : parsed;
+    }
+
+    private static string? NormalizeCategory(string? category)
+    {
+        if (string.IsNullOrWhiteSpace(category))
+            return null;
+
+        if (string.Equals(category, "all", StringComparison.OrdinalIgnoreCase))
+            return null;
+
+        return category;
+    }
+
+    private static bool MatchesFilters(DownloadTaskFileBase file, HashSet<string>? hashesFilter, string? categoryFilter)
+    {
+        if (hashesFilter is not null && !hashesFilter.Contains(file.HashId ?? string.Empty))
+            return false;
+
+        if (categoryFilter is null)
+            return true;
+
+        var category = ResolveCategory(file);
+        return string.Equals(category, categoryFilter, StringComparison.OrdinalIgnoreCase);
     }
 
     private string MapStatusToQbittorrentState(DownloadStatus status)

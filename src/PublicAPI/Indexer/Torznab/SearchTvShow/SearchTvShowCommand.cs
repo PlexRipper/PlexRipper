@@ -1,7 +1,9 @@
 using FastEndpoints;
 using FluentValidation;
+using Flurl;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Data.Contracts;
+using Reaparr.Settings.Contracts;
 
 // ReSharper disable InconsistentNaming
 
@@ -72,11 +74,13 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, T
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
+    private readonly INetworkSettings _networkSettings;
 
-    public SearchTvShowCommandHandler(ILogger log, IReaparrDbContext dbContext)
+    public SearchTvShowCommandHandler(ILogger log, IReaparrDbContext dbContext, INetworkSettings networkSettings)
     {
         _log = log.ForContext<SearchTvShowCommandHandler>();
         _dbContext = dbContext;
+        _networkSettings = networkSettings;
     }
 
     public async Task<TorznabMediaSearchResponseDTO> ExecuteAsync(
@@ -110,12 +114,20 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, T
         CancellationToken cancellationToken
     )
     {
+        var onlineServerIds = await _dbContext.GetOnlineServerIds(cancellationToken: cancellationToken);
+        if (!onlineServerIds.Any())
+        {
+            _log.Here().Warning("No online Plex servers found, returning empty search results.");
+            return [];
+        }
+
         // Base query with required navigation properties for mapping
         var baseQuery = _dbContext
             .PlexTvShowEpisodes.AsNoTracking()
             .Include(x => x.TvShowSeason)
             .Include(x => x.TvShow)
             .Include(e => e.MediaDataList)
+            .Where(x => onlineServerIds.Contains(x.PlexServerId))
             .AsQueryable();
 
         var hasSeasonOrEpisode = command.Season > 0 || command.Episode > 0;
@@ -178,25 +190,41 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, T
 
         foreach (var mediaData in episode.MediaDataList)
         {
-            var url = BuildTorrentUrl(episode, mediaData);
+            var torrentMetadata = new TorrentMetadataDTO
+            {
+                Type = PlexMediaType.Episode,
+                MediaId = episode.Id,
+                DataId = mediaData.Id,
+                PartId = mediaData.Id, // TODO: Media and Parts are merged in the same DB table, PartId can be removed
+                PlexApiPartId = mediaData.PlexApiPartId,
+                Quality = mediaData.Quality,
+                LibraryId = mediaData.PlexLibraryId,
+                ServerId = mediaData.PlexServerId,
+            };
+
+            // FORCE this to be a string, and not an implicit URL type by Flurl
+            // ReSharper disable once SuggestVarOrType_BuiltInTypes
+            string torrentDownloadUrl = _networkSettings
+                .Url.AppendPathSegment(PublicApiRoutes.DownloadTorrent)
+                .SetQueryParams(torrentMetadata.Values);
 
             _log.Here()
                 .Debug(
                     "Generated torrent URL for PlexTvShowEpisodeMediaDataId {PlexTvShowEpisodeMediaDataId}: {Url}",
                     mediaData.Id,
-                    url
+                    torrentDownloadUrl
                 );
 
             var item = new TorznabItem
             {
                 Title = mediaData.GetFileName,
                 PubDate = episode.AddedAt.ToString("R"),
-                Guid = new TorznabGuid { Value = url },
-                Link = url,
+                Guid = new TorznabGuid { Value = torrentDownloadUrl },
+                Link = torrentDownloadUrl,
                 Size = mediaData.Size,
                 Enclosure = new TorznabEnclosure
                 {
-                    Url = url,
+                    Url = torrentDownloadUrl,
                     Length = mediaData.Size,
                     Type = "application/x-bittorrent",
                 },
@@ -222,17 +250,4 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, T
             yield return item;
         }
     }
-
-    private static string BuildTorrentUrl(PlexTvShowEpisode episode, PlexTvShowEpisodeMediaData mediaData) =>
-        new TorrentMetadataDTO
-        {
-            Type = PlexMediaType.Episode,
-            MediaId = episode.Id,
-            DataId = mediaData.Id,
-            PartId = mediaData.Id, // TODO: Media and Parts are merged in the same DB table, PartId can be removed
-            PlexApiPartId = mediaData.PlexApiPartId,
-            Quality = mediaData.Quality,
-            LibraryId = mediaData.PlexLibraryId,
-            ServerId = mediaData.PlexServerId,
-        }.ToUrl();
 }

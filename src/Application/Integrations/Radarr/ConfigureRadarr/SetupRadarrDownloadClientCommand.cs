@@ -1,11 +1,11 @@
 using FastEndpoints;
+using Flurl;
 using Reaparr.PublicAPI.Contracts;
 using Reaparr.Settings.Contracts;
 
 namespace Reaparr.Application;
 
-public record SetupRadarrDownloadClientCommand(Uri ReaparrBaseUri)
-    : ICommand<Result<SetupRadarrDownloadClientCommandResult>>;
+public record SetupRadarrDownloadClientCommand : ICommand<Result<SetupRadarrDownloadClientCommandResult>>;
 
 public record SetupRadarrDownloadClientCommandResult
 {
@@ -19,6 +19,7 @@ public class SetupRadarrDownloadClientCommandHandler
     private readonly ICommandExecutor _commandExecutor;
     private readonly IIntegrationsSettings _integrationsSettings;
     private readonly IRadarrSettings _settings;
+    private readonly INetworkSettings _networkSettings;
 
     private const string DOWNLOAD_CLIENT_NAME = "Reaparr DownloadClient";
 
@@ -26,13 +27,15 @@ public class SetupRadarrDownloadClientCommandHandler
         ILogger log,
         ICommandExecutor commandExecutor,
         IIntegrationsSettings integrationsSettings,
-        IRadarrSettings settings
+        IRadarrSettings settings,
+        INetworkSettings networkSettings
     )
     {
         _log = log.ForContext<SetupRadarrDownloadClientCommandHandler>();
         _commandExecutor = commandExecutor;
         _integrationsSettings = integrationsSettings;
         _settings = settings;
+        _networkSettings = networkSettings;
     }
 
     public async Task<Result<SetupRadarrDownloadClientCommandResult>> ExecuteAsync(
@@ -48,6 +51,13 @@ public class SetupRadarrDownloadClientCommandHandler
             || (radarrBaseUri.Scheme != Uri.UriSchemeHttp && radarrBaseUri.Scheme != Uri.UriSchemeHttps)
         )
             return Result.Fail("Radarr BaseUrl is invalid.").LogError();
+
+        _log.Here()
+            .Debug(
+                "Setting up Radarr download client. RadarrBaseUrl: {RadarrBaseUrl}, ReaparrBaseUrl: {ReaparrBaseUrl}",
+                radarrBaseUri,
+                _networkSettings.Url
+            );
 
         try
         {
@@ -71,7 +81,7 @@ public class SetupRadarrDownloadClientCommandHandler
                     {
                         Id = currentDownloadClient.Id,
                         ForceSave = true,
-                        Resource = BuildDownloadClientResource(command.ReaparrBaseUri),
+                        Resource = BuildDownloadClientResource(_networkSettings.Uri),
                     },
                     ct
                 );
@@ -87,8 +97,7 @@ public class SetupRadarrDownloadClientCommandHandler
             var createResult = await _commandExecutor.Send(
                 new RadarrApiCreateDownloadClientCommand
                 {
-                    ForceSave = false,
-                    Resource = BuildDownloadClientResource(command.ReaparrBaseUri),
+                    Resource = BuildDownloadClientResource(_networkSettings.Uri),
                 },
                 ct
             );
@@ -112,15 +121,8 @@ public class SetupRadarrDownloadClientCommandHandler
 
     private RadarrDownloadContractDTO BuildDownloadClientResource(Uri reaparrBaseUri)
     {
-        // Derive urlBase from Reaparr's base URI to include any PathBase and ensure correct trailing segment
-        var basePath = string.IsNullOrEmpty(reaparrBaseUri.AbsolutePath) ? "/" : reaparrBaseUri.AbsolutePath;
-        if (!basePath.EndsWith("/"))
-            basePath += "/";
-        var derivedUrlBase = $"{basePath}api/public/download-client/";
-
         var useSsl = string.Equals(reaparrBaseUri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase);
-        var port = reaparrBaseUri.Port == -1 ? (useSsl ? 443 : 80) : reaparrBaseUri.Port;
-
+        string urlBase = _networkSettings.BasePath.AppendPathSegment("api/public/download-client");
         return new RadarrDownloadContractDTO
         {
             Enable = true,
@@ -132,9 +134,9 @@ public class SetupRadarrDownloadClientCommandHandler
             Fields =
             [
                 new() { Name = "host", Value = reaparrBaseUri.Host },
-                new() { Name = "port", Value = port },
+                new() { Name = "port", Value = reaparrBaseUri.Port },
                 new() { Name = "useSsl", Value = useSsl },
-                new() { Name = "urlBase", Value = derivedUrlBase },
+                new() { Name = "urlBase", Value = urlBase },
                 new() { Name = "username", Value = _integrationsSettings.DownloadClientUsername },
                 new() { Name = "password", Value = _integrationsSettings.DownloadClientPassword },
                 new() { Name = "movieCategory", Value = IntegrationDefinitions.RADARR_DEFAULT_CATEGORY },

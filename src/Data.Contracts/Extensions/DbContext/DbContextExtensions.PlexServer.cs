@@ -37,4 +37,17 @@ public static partial class DbContextExtensions
             .PlexServerStatuses.Where(x => x.PlexServerId == plexServerId && x.IsSuccessful)
             .AnyAsync(cancellationToken);
     }
+
+    public static async Task<List<int>> GetOnlineServerIds(
+        this IReaparrDbContext dbContext,
+        CancellationToken cancellationToken = default
+    )
+    {
+        return await dbContext
+            .PlexServerStatuses.AsNoTracking()
+            .Where(x => x.IsSuccessful)
+            .Select(x => x.PlexServerId)
+            .Distinct()
+            .ToListAsync(cancellationToken);
+    }
 }

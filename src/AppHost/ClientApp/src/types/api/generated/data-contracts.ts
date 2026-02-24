@@ -537,6 +537,16 @@ export interface MoveDownloadFileJobUpdateDTO {
   id: DownloadTaskKey;
 }
 
+export interface NetworkSettingsDTO {
+  allowedProxyIps: string[];
+  basePath: string;
+  forwardedHostHeader: string;
+  forwardedPathHeader: string;
+  reverseProxyUrl: string;
+  trustProxyHeaders: boolean;
+  url: string;
+}
+
 export interface NotificationDTO {
   /** @format date-time */
   createdAt: string;
@@ -1325,6 +1335,7 @@ export interface SettingsModelDTO {
   generalSettings: GeneralSettingsDTO;
   integrationsSettings: IntegrationsSettingsDTO;
   languageSettings: LanguageSettingsDTO;
+  networkSettings: NetworkSettingsDTO;
   serverSettings: ServerSettingsDTO;
 }
 

@@ -26,6 +26,7 @@ public class UpdateUserSettingsEndpointRequestValidator : Validator<UpdateUserSe
         RuleFor(x => x.SettingsModelDto!.GeneralSettings).NotNull();
         RuleFor(x => x.SettingsModelDto!.LanguageSettings).NotNull();
         RuleFor(x => x.SettingsModelDto!.ServerSettings).NotNull();
+        RuleFor(x => x.SettingsModelDto!.NetworkSettings).NotNull();
     }
 }
 

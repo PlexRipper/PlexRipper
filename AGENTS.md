@@ -279,6 +279,8 @@ Format:
 Types: `feat`, `fix`, `refactor`, `perf`, `test`, `docs`, `build`, `chore`, `style`
 Rules: imperative present tense, capitalize after colon, no trailing punctuation
 
+For front-end commits, use `feat(Web-UI)` etc. to specify the project and for back-end commits, use `feat(WebAPI)` etc. to specify the project.
+
 Never add AI attribution trailers (e.g. `Co-Authored-By: Claude ...`). Commit messages are plain text only.
 
 ## Branching
@@ -318,10 +320,67 @@ Never add AI attribution trailers (e.g. `Co-Authored-By: Claude ...`). Commit me
 * `LibraryProgress.TimeRemaining` is a computed property; do not assign it
 * Strict mocks: set up both `UpdateItemAsync` and `UpdateErrorAsync` to avoid `MockException`
 
-### RefreshPlexTvShowLibraryCommandHandler progress broadcasting
+### Creating a Command/Handler pair
 
-* Success path: `UpdateItemAsync` called 3× (TvShow/Season/Episode) using counts from `BulkInsertTvShowsRapport`
-* Failure path: `UpdateErrorAsync` called once
+Required structure and rules:
+
+* Command is a record implementing `ICommand<Result<T>>` or `ICommand<Result>`.
+* Always add a FluentValidation validator for the command; validate nulls and guard against invalid parameters.
+* Always inject a logger into the handler (`ILogger<YourHandler>`).
+* Prefer `var` for locals and keep constructor assignments explicit.
+* Use `Result.Ok(...)` / `Result.Fail(new ExceptionalError(ex)).LogError()` and never return `null`.
+
+Template (use as baseline, adjust properties and rules to the command):
+
+```csharp
+using FastEndpoints;
+using FluentValidation;
+using Microsoft.Extensions.Logging;
+
+public record $NAME$Command(string Request) : ICommand<Result<$RETURNTYPE$>>;
+
+public class $NAME$CommandValidator : AbstractValidator<$NAME$Command>
+{
+    public $NAME$CommandValidator()
+    {
+        RuleFor(x => x).NotNull();
+        RuleFor(x => x.Request).NotEmpty().MaximumLength(2000);
+        // Add more rules here...
+    }
+}
+
+public class $NAME$CommandHandler : ICommandHandler<$NAME$Command, Result<$RETURNTYPE$>>
+{
+    private readonly ICommandExecutor _commandExecutor;
+    private readonly ILogger<$NAME$CommandHandler> _log;
+
+    public $NAME$CommandHandler(
+        ICommandExecutor commandExecutor,
+        ILogger logger)
+    {
+        _commandExecutor = commandExecutor;
+        _log = logger.ForContext<$NAME$CommandHandler>;
+    }
+
+    public async Task<Result<$RETURNTYPE$>> ExecuteAsync($NAME$Command command, CancellationToken cancellationToken)
+    {
+        return await Result.Try(async () =>
+        {
+            var request = command.Request;
+
+            // TODO: implement handling logic here
+
+            return Result.Ok($RETURNTYPE$.Ok());
+        });
+    }
+}
+```
+
+### Result.Try boundary rule
+
+* Use `Result.Try(...)` at the outer handler boundary instead of `try/catch`.
+* Keep `Result.Try` wrapping to the top-level handler method to prevent nested result-wrapping.
+* Inner helpers should return `Result` / `Result<T>` directly; do not wrap them in `Result.Try` again.
 
 ### Quartz job rules
 
@@ -331,12 +390,62 @@ Never add AI attribution trailers (e.g. `Co-Authored-By: Claude ...`). Commit me
 * Use `Result.Try(...)` to wrap `_commandExecutor.Send(...)` and check `IsCancelled` before `IsFailed`
 * `context.CancellationToken` carries the Quartz shutdown signal — pass it through to all async calls
 
+### Settings interfaces with static abstract members
+
+* `ISonarrSettings`, `IRadarrSettings` (and similar) extend `IBaseSettingsModule<T>` which declares `static abstract TModel Create()`
+* Moq cannot mock these interfaces — attempting `Mock.Mock<ISonarrSettings>()` produces a CS8920 compiler error
+* Pattern: inject concrete `SonarrSettings` / `RadarrSettings` record instances via `TypedParameter` when calling `Mock.Create<THandler>(...)`:
+
+    ```csharp
+    var sut = Mock.Create<MyHandler>(
+        new TypedParameter(typeof(ISonarrSettings), new SonarrSettings { ... }),
+        new TypedParameter(typeof(IIntegrationsSettings), IntegrationsSettings.Create())
+    );
+    ```
+
+* Add `using Autofac;` to the test file to get `TypedParameter`
+
+### Endpoint unit test DbContext
+
+* `SetupEndpointUnitTest<T>()` registers `IReaparrDbContext` as a real in-memory context, not a Moq mock
+* Avoid `Mock.Mock<IReaparrDbContext>()` in endpoint tests unless you explicitly register a mock
+
 ### FluentResults usage
 
 * Return `Result.Ok(value)` or `Result.Fail(new ExceptionalError(ex)).LogError()`
 * Propagate failures with `return failedResult.ToResult()`
 * Check `Has504GatewayTimeoutError()` for Plex connectivity failures
 * Never return `null` where a `Result` is expected
+* `Result<T>.LogError()` returns a non-generic `Result`; avoid it when the caller needs `Result<T>`
+
+### Download client API compatibility
+
+* `/api/v2/*` is rewritten to `/api/public/download-client/api/v2/*` in `Startup.Application` for qBittorrent-style clients
+* `/torrents/createCategory` is handled as a no-op 200 OK to satisfy qBittorrent clients
+* When rejecting invalid/expired download client sessions, expire the `SID` cookie so clients re-auth without restarts
+* Use 403 (not 401) for invalid download client sessions so Radarr re-auths reliably
+
+### Move download queue chaining
+
+* `MoveDownloadFileJob` should call `IMoveDownloadFileQueue` directly to chain moves; avoid BackgroundJobs wrapper handlers
+
+### Sonarr/Radarr indexer payloads
+
+* Indexer field `value` entries must be primitive JSON values; normalize `Uri`/`Flurl.Url` to strings before serialization
+
+### URL/URI construction
+
+* When constructing URLs or URIs, always use Flurl
+
+### PublicAPI torznab unit tests
+
+* PublicAPI torznab handlers read `INetworkSettings.Url`; strict unit tests must set up this property on the mock
+
+### qBittorrent download client responses
+
+* `torrents/info` progress must be normalized to 0..1 (qBittorrent API expects ratio, not 0..100 percentage)
+* `/torrents/files` must return JSON (even if empty); Radarr errors on HTML/404 responses
+* `/torrents/delete` should stop in-progress tasks via `StopDownloadTaskCommand` and delete matched tasks from the database
 
 ## Performance rules during gaming (Arch Linux)
 

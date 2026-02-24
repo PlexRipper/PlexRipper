@@ -24,10 +24,12 @@ public class SonarApiUpdateDownloadClientCommandValidator : Validator<SonarApiUp
 public class SonarApiUpdateDownloadClientCommandHandler
     : ICommandHandler<SonarApiUpdateDownloadClientCommand, Result<SonarrDownloadContractDTO>>
 {
+    private readonly ILogger _log;
     private readonly HttpClient _client;
 
-    public SonarApiUpdateDownloadClientCommandHandler(IHttpClientFactory httpClientFactory)
+    public SonarApiUpdateDownloadClientCommandHandler(ILogger logger, IHttpClientFactory httpClientFactory)
     {
+        _log = logger.ForContext<SonarApiUpdateDownloadClientCommandHandler>();
         _client = httpClientFactory.CreateSonarrHttpClient();
     }
 
@@ -41,6 +43,9 @@ public class SonarApiUpdateDownloadClientCommandHandler
             var forceSave = command.ForceSave ? "true" : "false";
             var requestUri = new Uri($"/api/v3/downloadclient/{command.Id}?forceSave={forceSave}", UriKind.Relative);
             var json = JsonSerializer.Serialize(command.Resource, DefaultJsonSerializerOptions.ConfigStandard);
+
+            _log.Here().Debug("Updating Sonarr download client with name {DownloadClientName}", command.Resource.Name);
+            _log.Here().Debug("Request URI: {RequestUri}, Payload: {Payload}", requestUri, json);
 
             using var httpRequest = new HttpRequestMessage(HttpMethod.Put, requestUri);
             httpRequest.Content = json.ToStringContent();

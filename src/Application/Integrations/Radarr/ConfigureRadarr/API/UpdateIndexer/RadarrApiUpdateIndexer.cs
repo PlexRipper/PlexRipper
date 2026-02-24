@@ -24,10 +24,12 @@ public class RadarrApiUpdateIndexerCommandValidator : Validator<RadarrApiUpdateI
 public class RadarrApiUpdateIndexerCommandHandler
     : ICommandHandler<RadarrApiUpdateIndexerCommand, Result<RadarrIndexerResourceDTO>>
 {
+    private readonly ILogger _log;
     private readonly HttpClient _client;
 
-    public RadarrApiUpdateIndexerCommandHandler(IHttpClientFactory httpClientFactory)
+    public RadarrApiUpdateIndexerCommandHandler(ILogger logger, IHttpClientFactory httpClientFactory)
     {
+        _log = logger.ForContext<RadarrApiUpdateIndexerCommandHandler>();
         _client = httpClientFactory.CreateRadarrHttpClient();
     }
 
@@ -41,6 +43,9 @@ public class RadarrApiUpdateIndexerCommandHandler
             var forceSave = command.ForceSave ? "true" : "false";
             var requestUri = new Uri($"/api/v3/indexer/{command.Id}?forceSave={forceSave}", UriKind.Relative);
             var json = JsonSerializer.Serialize(command.Resource, DefaultJsonSerializerOptions.ConfigStandard);
+
+            _log.Here().Debug("Updating Radarr indexer with name {IndexerName}", command.Resource.Name);
+            _log.Here().Debug("Request URI: {RequestUri}, Payload: {Payload}", requestUri, json);
 
             using var httpRequest = new HttpRequestMessage(HttpMethod.Put, requestUri);
             httpRequest.Content = json.ToStringContent();

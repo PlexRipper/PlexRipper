@@ -28,22 +28,47 @@ public class MoveDownloadFileJobQueue : IMoveDownloadFileQueue
         // Create a new DbContext for this operation to avoid threading issues
         using var dbContext = await _dbContextFactory.CreateAsync();
 
-        // Find the first ready-to-move task (DownloadFinished preferred, MoveError as retry; movies before episodes)
-        var key =
-            await dbContext
-                .DownloadTaskMovieFile.Where(x =>
-                    x.DownloadStatus == DownloadStatus.DownloadFinished || x.DownloadStatus == DownloadStatus.MoveError
-                )
-                .OrderByDescending(x => x.DownloadStatus == DownloadStatus.DownloadFinished)
-                .Select(x => x.ToKey())
-                .FirstOrDefaultAsync()
-            ?? await dbContext
-                .DownloadTaskTvShowEpisodeFile.Where(x =>
-                    x.DownloadStatus == DownloadStatus.DownloadFinished || x.DownloadStatus == DownloadStatus.MoveError
-                )
-                .OrderByDescending(x => x.DownloadStatus == DownloadStatus.DownloadFinished)
-                .Select(x => x.ToKey())
-                .FirstOrDefaultAsync();
+        // Find the oldest ready-to-move task (DownloadFinished preferred, MoveError as retry)
+        var movieCandidates = dbContext
+            .DownloadTaskMovieFile.Where(x =>
+                x.DownloadStatus == DownloadStatus.DownloadFinished || x.DownloadStatus == DownloadStatus.MoveError
+            )
+            .Select(x => new
+            {
+                x.Id,
+                x.PlexServerId,
+                x.PlexLibraryId,
+                Type = DownloadTaskType.MovieData,
+                x.CreatedAt,
+                IsDownloadFinished = x.DownloadStatus == DownloadStatus.DownloadFinished,
+            });
+
+        var episodeCandidates = dbContext
+            .DownloadTaskTvShowEpisodeFile.Where(x =>
+                x.DownloadStatus == DownloadStatus.DownloadFinished || x.DownloadStatus == DownloadStatus.MoveError
+            )
+            .Select(x => new
+            {
+                x.Id,
+                x.PlexServerId,
+                x.PlexLibraryId,
+                Type = DownloadTaskType.EpisodeData,
+                x.CreatedAt,
+                IsDownloadFinished = x.DownloadStatus == DownloadStatus.DownloadFinished,
+            });
+
+        var key = await movieCandidates
+            .Concat(episodeCandidates)
+            .OrderByDescending(x => x.IsDownloadFinished)
+            .ThenBy(x => x.CreatedAt)
+            .Select(x => new DownloadTaskKey
+            {
+                Id = x.Id,
+                PlexServerId = x.PlexServerId,
+                PlexLibraryId = x.PlexLibraryId,
+                Type = x.Type,
+            })
+            .FirstOrDefaultAsync();
 
         if (key is null)
         {

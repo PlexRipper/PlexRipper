@@ -40,6 +40,10 @@
               <option name="containerPath" value="/Destination" />
               <option name="hostPath" value="$PROJECT_DIR$/../../DATA/DockerCache/Radarr/Destination" />
             </DockerVolumeBindingImpl>
+            <DockerVolumeBindingImpl>
+              <option name="containerPath" value="/Downloads" />
+              <option name="hostPath" value="$PROJECT_DIR$/../../DATA/ReaparrCache/Downloads" />
+            </DockerVolumeBindingImpl>
           </list>
         </option>
       </settings>

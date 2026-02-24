@@ -1,9 +1,24 @@
 using System.Text;
 using FastEndpoints;
+using FluentValidation;
 
 namespace Reaparr.PublicAPI;
 
-public sealed class GetTorrentFileEndpoint : EndpointWithoutRequest
+public sealed record GetTorrentFileRequest
+{
+    [RouteParam]
+    public required string Hash { get; init; }
+}
+
+public sealed class GetTorrentFileRequestValidator : Validator<GetTorrentFileRequest>
+{
+    public GetTorrentFileRequestValidator()
+    {
+        RuleFor(x => x.Hash).NotEmpty().WithMessage("Hash is required.");
+    }
+}
+
+public sealed class GetTorrentFileEndpoint : Endpoint<GetTorrentFileRequest>
 {
     private readonly ILogger _log;
 
@@ -17,12 +32,12 @@ public sealed class GetTorrentFileEndpoint : EndpointWithoutRequest
         Get(PublicApiRoutes.DownloadClient + "/torrents/file/{hash}.torrent");
         Description(x => x.IsDownloadClient());
         AllowAnonymous();
-        PreProcessor<DownloadClientAuthenticationPreProcessor<EmptyRequest>>();
+        PreProcessor<DownloadClientAuthenticationPreProcessor<GetTorrentFileRequest>>();
     }
 
-    public override async Task HandleAsync(CancellationToken ct)
+    public override async Task HandleAsync(GetTorrentFileRequest req, CancellationToken ct)
     {
-        _log.Here().DebugApiCall(HttpContext);
+        _log.Here().DebugApiCall(HttpContext, req);
 
         _log.Warning("GetTorrentFileEndpoint called but not implemented.");
 

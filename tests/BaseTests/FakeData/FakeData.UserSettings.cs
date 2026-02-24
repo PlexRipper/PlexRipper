@@ -31,6 +31,7 @@ public static partial class FakeData
             .RuleFor(x => x.LanguageSettings, _ => GetLanguageSettings(seed, options).Generate())
             .RuleFor(x => x.DebugSettings, _ => GetDebugSettings(seed, options).Generate())
             .RuleFor(x => x.ServerSettings, _ => GetServerSettings(seed, options).Generate())
+            .RuleFor(x => x.NetworkSettings, _ => GetNetworkSettings(seed, options).Generate())
             .RuleFor(x => x.IntegrationsSettings, _ => IntegrationsSettings.Create());
     }
 
@@ -161,5 +162,18 @@ public static partial class FakeData
             .Ignore(x => x.PlexServerName)
             .RuleFor(x => x.DownloadSpeedLimit, _ => config.DownloadSpeedLimitInKib)
             .RuleFor(x => x.Hidden, _ => false);
+    }
+
+    public static Faker<NetworkSettingsModule> GetNetworkSettings(Seed seed, Action<UnitTestDataConfig>? options = null)
+    {
+        return new Faker<NetworkSettingsModule>()
+            .StrictMode(true)
+            .UseSeed(seed.Next())
+            .RuleFor(x => x.ReverseProxyUrl, _ => string.Empty)
+            .RuleFor(x => x.BasePath, _ => string.Empty)
+            .RuleFor(x => x.TrustProxyHeaders, f => f.Random.Bool())
+            .RuleFor(x => x.AllowedProxyIps, _ => [])
+            .RuleFor(x => x.ForwardedHostHeader, _ => string.Empty)
+            .RuleFor(x => x.ForwardedPathHeader, _ => string.Empty);
     }
 }

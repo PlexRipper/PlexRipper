@@ -61,15 +61,34 @@ public record NetworkSettingsModule
     {
         get
         {
+            // We explicitly convert to Uri and then to AbsoluteUri to ensure
+            // this property always returns a pure string.
+            //
+            // Flurl defines implicit conversions between string and Url.
+            // If we return a Flurl.Url (even indirectly), serializers may treat
+            // it as an object and serialize its internal properties (scheme, host, etc.)
+            // instead of a simple URL string.
+            //
+            // By converting to Uri and using AbsoluteUri, we guarantee:
+            //  - No Flurl.Url instance leaks outside this property
+            //  - No implicit operator ambiguity
+            //  - Safe and predictable JSON serialization
             if (
                 !string.IsNullOrWhiteSpace(ReverseProxyUrl)
                 && Uri.TryCreate(ReverseProxyUrl, UriKind.Absolute, out var reverseProxyUri)
             )
             {
-                return reverseProxyUri.AppendPathSegment(BasePath).ToString();
+                return new Url(reverseProxyUri).AppendPathSegment(BasePath).ToUri().AbsoluteUri;
             }
 
-            return new UriBuilder { Host = "localhost", Port = EnvironmentExtensions.GetPort }.ToString();
+            return new UriBuilder
+            {
+                Scheme = "http",
+                Host = "localhost",
+                Port = EnvironmentExtensions.GetPort,
+            }
+                .Uri
+                .AbsoluteUri;
         }
     }
 }

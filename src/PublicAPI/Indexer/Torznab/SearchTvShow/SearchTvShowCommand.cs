@@ -193,7 +193,10 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, T
                 LibraryId = mediaData.PlexLibraryId,
                 ServerId = mediaData.PlexServerId,
             };
-            var torrentDownloadUrl = _networkSettings.Url.SetQueryParams(torrentMetadata.Values).ToString();
+
+            // FORCE this to be a string, and not an implicit URL type by Flurl
+            // ReSharper disable once SuggestVarOrType_BuiltInTypes
+            string torrentDownloadUrl = _networkSettings.Url.SetQueryParams(torrentMetadata.Values);
 
             _log.Here()
                 .Debug(

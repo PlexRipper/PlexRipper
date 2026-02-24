@@ -106,7 +106,9 @@ public class SetupRadarrIndexerCommandHandler
 
     private RadarrIndexerContractDTO BuildIndexerResource(int downloadClientId, int? id = null)
     {
-        var baseUrl = _networkSettings.Url.AppendPathSegment("/api/public/indexer/").ToString();
+        // FORCE this to be a string, and not an implicit URL type by Flurl
+        // ReSharper disable once SuggestVarOrType_BuiltInTypes
+        string baseUrl = _networkSettings.Url.AppendPathSegment("api/public/indexer");
 
         return new RadarrIndexerContractDTO
         {

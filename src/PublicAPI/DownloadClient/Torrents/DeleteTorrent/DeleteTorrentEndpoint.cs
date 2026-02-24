@@ -104,16 +104,12 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest>
             return;
         }
 
-        var completedTaskIds = new HashSet<Guid>();
+        var allTaskIds = new HashSet<Guid>();
         var downloadingTaskIds = new HashSet<Guid>();
 
         foreach (var downloadTask in downloadTasks)
         {
-            if (downloadTask.Status == DownloadStatus.Completed)
-            {
-                completedTaskIds.Add(downloadTask.Id);
-                continue;
-            }
+            allTaskIds.Add(downloadTask.Id);
 
             if (IsDownloadingStatus(downloadTask.Status))
                 downloadingTaskIds.Add(downloadTask.Id);
@@ -133,8 +129,8 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest>
             }
         }
 
-        if (completedTaskIds.Count > 0)
-            await ClearCompleted(completedTaskIds.ToList(), ct);
+        if (allTaskIds.Count > 0)
+            await DeleteDownloadTasks(allTaskIds.ToList(), ct);
 
         await Send.StringAsync("Ok.", cancellation: ct);
     }
@@ -146,6 +142,16 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest>
         {
             _log.Here().Warning("Failed to clear completed download tasks: {Errors}", clearResult.Errors);
         }
+    }
+
+    private async Task DeleteDownloadTasks(List<Guid> downloadTaskIds, CancellationToken ct)
+    {
+        await _dbContext.DownloadTaskMovie.Where(x => downloadTaskIds.Contains(x.Id)).ExecuteDeleteAsync(ct);
+        await _dbContext.DownloadTaskMovieFile.Where(x => downloadTaskIds.Contains(x.Id)).ExecuteDeleteAsync(ct);
+        await _dbContext.DownloadTaskTvShow.Where(x => downloadTaskIds.Contains(x.Id)).ExecuteDeleteAsync(ct);
+        await _dbContext.DownloadTaskTvShowSeason.Where(x => downloadTaskIds.Contains(x.Id)).ExecuteDeleteAsync(ct);
+        await _dbContext.DownloadTaskTvShowEpisode.Where(x => downloadTaskIds.Contains(x.Id)).ExecuteDeleteAsync(ct);
+        await _dbContext.DownloadTaskTvShowEpisodeFile.Where(x => downloadTaskIds.Contains(x.Id)).ExecuteDeleteAsync(ct);
     }
 
     private static bool IsDownloadingStatus(DownloadStatus status) =>

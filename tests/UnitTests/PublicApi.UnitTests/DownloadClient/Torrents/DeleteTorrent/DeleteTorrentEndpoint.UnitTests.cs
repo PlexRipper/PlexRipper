@@ -9,7 +9,7 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest
         : base(output) { }
 
     [Fact]
-    public async Task ShouldClearCompletedDownloadTask_WhenHashIdMatches()
+    public async Task ShouldDeleteDownloadTask_WhenHashIdMatches()
     {
         // Arrange
         await SetupDatabase(
@@ -32,10 +32,6 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest
                 CancellationToken
             );
 
-        Mock.Mock<ICommandExecutor>()
-            .Setup(x => x.Send(It.IsAny<ClearCompletedDownloadTasksCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Ok(1));
-
         var request = new DeleteTorrentRequest { Hashes = [hashId] };
 
         // Act
@@ -44,17 +40,10 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest
 
         // Assert
         endpoint.HttpContext.Response.StatusCode.ShouldBe(200);
-        Mock.Mock<ICommandExecutor>()
-            .Verify(
-                x =>
-                    x.Send(
-                        It.Is<ClearCompletedDownloadTasksCommand>(cmd =>
-                            cmd.DownloadTaskIds.Count == 1 && cmd.DownloadTaskIds[0] == movieFile.Id
-                        ),
-                        It.IsAny<CancellationToken>()
-                    ),
-                Times.Once
-            );
+        var deletedMovieFile = await dbContext
+            .DownloadTaskMovieFile.Where(x => x.Id == movieFile.Id)
+            .SingleOrDefaultAsync(CancellationToken);
+        deletedMovieFile.ShouldBeNull();
         Mock.Mock<ICommandExecutor>()
             .Verify(x => x.Send(It.IsAny<StopDownloadTaskCommand>(), It.IsAny<CancellationToken>()), Times.Never);
     }
@@ -104,11 +93,10 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest
                     ),
                 Times.Once
             );
-        Mock.Mock<ICommandExecutor>()
-            .Verify(
-                x => x.Send(It.IsAny<ClearCompletedDownloadTasksCommand>(), It.IsAny<CancellationToken>()),
-                Times.Never
-            );
+        var deletedMovieFile = await dbContext
+            .DownloadTaskMovieFile.Where(x => x.Id == movieFile.Id)
+            .SingleOrDefaultAsync(CancellationToken);
+        deletedMovieFile.ShouldBeNull();
     }
 
     [Fact]
@@ -156,6 +144,10 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest
                     ),
                 Times.Once
             );
+        var deletedMovieFile = await dbContext
+            .DownloadTaskMovieFile.Where(x => x.Id == movieFile.Id)
+            .SingleOrDefaultAsync(CancellationToken);
+        deletedMovieFile.ShouldBeNull();
     }
 
     [Fact]

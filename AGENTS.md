@@ -377,6 +377,16 @@ Never add AI attribution trailers (e.g. `Co-Authored-By: Claude ...`). Commit me
 
 * When constructing URLs or URIs, always use Flurl
 
+### PublicAPI torznab unit tests
+
+* PublicAPI torznab handlers read `INetworkSettings.Url`; strict unit tests must set up this property on the mock
+
+### qBittorrent download client responses
+
+* `torrents/info` progress must be normalized to 0..1 (qBittorrent API expects ratio, not 0..100 percentage)
+* `/torrents/files` must return JSON (even if empty); Radarr errors on HTML/404 responses
+* `/torrents/delete` should stop in-progress tasks via `StopDownloadTaskCommand` and delete matched tasks from the database
+
 ## Performance rules during gaming (Arch Linux)
 
 During gameplay, game performance has priority over builds/tests.

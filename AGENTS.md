@@ -367,6 +367,10 @@ Never add AI attribution trailers (e.g. `Co-Authored-By: Claude ...`). Commit me
 
 * `MoveDownloadFileJob` should call `IMoveDownloadFileQueue` directly to chain moves; avoid BackgroundJobs wrapper handlers
 
+### URL/URI construction
+
+* When constructing URLs or URIs, always use Flurl
+
 ## Performance rules during gaming (Arch Linux)
 
 During gameplay, game performance has priority over builds/tests.

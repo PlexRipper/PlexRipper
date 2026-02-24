@@ -11,22 +11,34 @@ public static partial class LogExtensions
 
     public static void VerboseApiCall(this ILogger log, HttpContext context, object? request = null)
     {
-        log.Verbose(
-            "{Method}: {EndpointPath} with {Request}",
-            context.Request.Method,
-            context.Request.GetDisplayUrl(),
-            request
-        );
+        if (request is not null)
+        {
+            log.Verbose(
+                "{Method}: {EndpointPath} with {Request}",
+                context.Request.Method,
+                context.Request.GetDisplayUrl(),
+                request
+            );
+            return;
+        }
+
+        log.Verbose("{Method}: {EndpointPath}", context.Request.Method, context.Request.GetDisplayUrl());
     }
 
     public static void DebugApiCall(this ILogger log, HttpContext context, object? request = null)
     {
-        log.Debug(
-            "{Method}: {EndpointPath} with {Request}",
-            context.Request.Method,
-            context.Request.GetDisplayUrl(),
-            request
-        );
+        if (request is not null)
+        {
+            log.Debug(
+                "{Method}: {EndpointPath} with {Request}",
+                context.Request.Method,
+                context.Request.GetDisplayUrl(),
+                request
+            );
+            return;
+        }
+
+        log.Debug("{Method}: {EndpointPath}", context.Request.Method, context.Request.GetDisplayUrl());
     }
 
     [MessageTemplateFormatMethod("messageTemplate")]

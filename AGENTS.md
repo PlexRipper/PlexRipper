@@ -362,10 +362,16 @@ Never add AI attribution trailers (e.g. `Co-Authored-By: Claude ...`). Commit me
 
 * `/api/v2/*` is rewritten to `/api/public/download-client/api/v2/*` in `Startup.Application` for qBittorrent-style clients
 * `/torrents/createCategory` is handled as a no-op 200 OK to satisfy qBittorrent clients
+* When rejecting invalid/expired download client sessions, expire the `SID` cookie so clients re-auth without restarts
+* Use 403 (not 401) for invalid download client sessions so Radarr re-auths reliably
 
 ### Move download queue chaining
 
 * `MoveDownloadFileJob` should call `IMoveDownloadFileQueue` directly to chain moves; avoid BackgroundJobs wrapper handlers
+
+### Sonarr/Radarr indexer payloads
+
+* Indexer field `value` entries must be primitive JSON values; normalize `Uri`/`Flurl.Url` to strings before serialization
 
 ### URL/URI construction
 

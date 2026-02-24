@@ -18,5 +18,7 @@ public class SettingsModelDTO
 
     public required ServerSettingsDTO ServerSettings { get; init; }
 
+    public required NetworkSettingsDTO NetworkSettings { get; init; }
+
     public required IntegrationsSettingsDTO IntegrationsSettings { get; init; }
 }

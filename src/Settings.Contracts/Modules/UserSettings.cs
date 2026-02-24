@@ -61,6 +61,12 @@ public class UserSettings : IUserSettings
         init => _serverSettings = value;
     }
 
+    public NetworkSettingsModule NetworkSettings
+    {
+        get => _networkSettings;
+        init => _networkSettings = value;
+    }
+
     public IntegrationsSettings IntegrationsSettings
     {
         get => _integrationsSettings;
@@ -77,6 +83,7 @@ public class UserSettings : IUserSettings
     private LanguageSettingsModule _languageSettings = LanguageSettingsModule.Create();
     private DebugSettingsModule _debugSettings = DebugSettingsModule.Create();
     private PlexServerSettingsModule _serverSettings = PlexServerSettingsModule.Create();
+    private NetworkSettingsModule _networkSettings = NetworkSettingsModule.Create();
     private AuthenticationModule _authenticationSettings = AuthenticationModule.Create();
     private IntegrationsSettings _integrationsSettings = IntegrationsSettings.Create();
 
@@ -96,6 +103,7 @@ public class UserSettings : IUserSettings
                 DebugSettings.HasChanged.Select(_ => 1),
                 LanguageSettings.HasChanged.Select(_ => 1),
                 ServerSettings.HasChanged.Select(_ => 1),
+                NetworkSettings.HasChanged.Select(_ => 1),
                 AuthenticationSettings.HasChanged.Select(_ => 1),
                 IntegrationsSettings.HasChanged.Select(_ => 1)
             )
@@ -116,6 +124,7 @@ public class UserSettings : IUserSettings
         _languageSettings = LanguageSettingsModule.Create();
         _debugSettings = DebugSettingsModule.Create();
         _serverSettings = PlexServerSettingsModule.Create();
+        _networkSettings = NetworkSettingsModule.Create();
         _authenticationSettings = AuthenticationModule.Create();
         _integrationsSettings = IntegrationsSettings.Create();
     }
@@ -130,6 +139,7 @@ public class UserSettings : IUserSettings
         _debugSettings.Update(sourceSettings.DebugSettings);
         _languageSettings.Update(sourceSettings.LanguageSettings);
         _serverSettings.Update(sourceSettings.ServerSettings);
+        _networkSettings.Update(sourceSettings.NetworkSettings);
         _authenticationSettings.Update(sourceSettings.AuthenticationSettings);
         _integrationsSettings.Update(sourceSettings.IntegrationsSettings);
 

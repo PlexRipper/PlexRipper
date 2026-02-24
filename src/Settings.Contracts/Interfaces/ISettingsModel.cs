@@ -18,6 +18,8 @@ public interface ISettingsModel
 
     PlexServerSettingsModule ServerSettings { get; init; }
 
+    NetworkSettingsModule NetworkSettings { get; init; }
+
     DebugSettingsModule DebugSettings { get; init; }
 
     IntegrationsSettings IntegrationsSettings { get; init; }

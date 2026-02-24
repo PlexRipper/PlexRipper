@@ -196,7 +196,9 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, T
 
             // FORCE this to be a string, and not an implicit URL type by Flurl
             // ReSharper disable once SuggestVarOrType_BuiltInTypes
-            string torrentDownloadUrl = _networkSettings.Url.SetQueryParams(torrentMetadata.Values);
+            string torrentDownloadUrl = _networkSettings
+                .Url.AppendPathSegment(PublicApiRoutes.DownloadTorrent)
+                .SetQueryParams(torrentMetadata.Values);
 
             _log.Here()
                 .Debug(

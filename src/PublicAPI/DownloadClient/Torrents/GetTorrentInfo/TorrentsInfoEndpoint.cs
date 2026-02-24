@@ -98,13 +98,13 @@ public record QBittorrentTorrentInfo
 
 public sealed class TorrentsInfoEndpoint : Endpoint<TorrentsInfoEndpointRequest, List<QBittorrentTorrentInfo>>
 {
-    private readonly IReaparrDbContext _dbContext;
+    private readonly IReaparrDbContextFactory _dbContextFactory;
     private readonly ILogger _log;
 
-    public TorrentsInfoEndpoint(ILogger logger, IReaparrDbContext dbContext)
+    public TorrentsInfoEndpoint(ILogger logger, IReaparrDbContextFactory dbContextFactory)
     {
         _log = logger.ForContext<TorrentsInfoEndpoint>();
-        _dbContext = dbContext;
+        _dbContextFactory = dbContextFactory;
     }
 
     public override void Configure()
@@ -123,24 +123,27 @@ public sealed class TorrentsInfoEndpoint : Endpoint<TorrentsInfoEndpointRequest,
         var categoryFilter = NormalizeCategory(req.Category);
 
         // Query all download tasks that have a HashId (Sonarr/Radarr tracking id)
-        var episodeFilesTask = _dbContext
+        using var episodeDbContext = await _dbContextFactory.CreateAsync();
+        using var movieDbContext = await _dbContextFactory.CreateAsync();
+
+        var episodeFilesTask = episodeDbContext
             .DownloadTaskTvShowEpisodeFile.Where(x => x.HashId != null)
             .Include(x => x.Parent)
             .ToListAsync(ct);
 
-        var movieFilesTask = _dbContext
+        var movieFilesTask = movieDbContext
             .DownloadTaskMovieFile.Where(x => x.HashId != null)
             .Include(x => x.Parent)
             .ToListAsync(ct);
 
         await Task.WhenAll(episodeFilesTask, movieFilesTask);
 
-        var episodeInfos = episodeFilesTask.Result
-            .Where(x => MatchesFilters(x, hashesFilter, categoryFilter))
+        var episodeInfos = episodeFilesTask
+            .Result.Where(x => MatchesFilters(x, hashesFilter, categoryFilter))
             .Select(MapToTorrentInfo)
             .ToList();
-        var movieInfos = movieFilesTask.Result
-            .Where(x => MatchesFilters(x, hashesFilter, categoryFilter))
+        var movieInfos = movieFilesTask
+            .Result.Where(x => MatchesFilters(x, hashesFilter, categoryFilter))
             .Select(MapToTorrentInfo)
             .ToList();
 

@@ -45,6 +45,8 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest>
     {
         _log.Here().DebugApiCall(HttpContext, req);
 
+        var deleteFiles = req.DeleteFiles ?? true;
+
         var hashes = new List<string>();
         if (req.Hashes?.Count > 0)
             hashes.AddRange(req.Hashes);
@@ -71,9 +73,7 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest>
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
 
-        var normalizedHashes = distinctHashes
-            .Select(hash => hash.ToLowerInvariant())
-            .ToList();
+        var normalizedHashes = distinctHashes.Select(hash => hash.ToLowerInvariant()).ToList();
 
         if (normalizedHashes.Count == 0)
         {
@@ -82,16 +82,12 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest>
         }
 
         var movieTasksTask = _dbContext
-            .DownloadTaskMovieFile.Where(x =>
-                x.HashId != null && normalizedHashes.Contains(x.HashId.ToLower())
-            )
+            .DownloadTaskMovieFile.Where(x => x.HashId != null && normalizedHashes.Contains(x.HashId.ToLower()))
             .Select(x => new DownloadTaskLookup(x.Id, x.DownloadStatus))
             .ToListAsync(ct);
 
         var episodeTasksTask = _dbContext
-            .DownloadTaskTvShowEpisodeFile.Where(x =>
-                x.HashId != null && normalizedHashes.Contains(x.HashId.ToLower())
-            )
+            .DownloadTaskTvShowEpisodeFile.Where(x => x.HashId != null && normalizedHashes.Contains(x.HashId.ToLower()))
             .Select(x => new DownloadTaskLookup(x.Id, x.DownloadStatus))
             .ToListAsync(ct);
 
@@ -117,7 +113,7 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest>
 
         foreach (var downloadTaskId in downloadingTaskIds)
         {
-            var stopResult = await _commandExecutor.Send(new StopDownloadTaskCommand(downloadTaskId), ct);
+            var stopResult = await _commandExecutor.Send(new StopDownloadTaskCommand(downloadTaskId, deleteFiles), ct);
             if (stopResult.IsFailed)
             {
                 _log.Here()
@@ -151,7 +147,9 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest>
         await _dbContext.DownloadTaskTvShow.Where(x => downloadTaskIds.Contains(x.Id)).ExecuteDeleteAsync(ct);
         await _dbContext.DownloadTaskTvShowSeason.Where(x => downloadTaskIds.Contains(x.Id)).ExecuteDeleteAsync(ct);
         await _dbContext.DownloadTaskTvShowEpisode.Where(x => downloadTaskIds.Contains(x.Id)).ExecuteDeleteAsync(ct);
-        await _dbContext.DownloadTaskTvShowEpisodeFile.Where(x => downloadTaskIds.Contains(x.Id)).ExecuteDeleteAsync(ct);
+        await _dbContext
+            .DownloadTaskTvShowEpisodeFile.Where(x => downloadTaskIds.Contains(x.Id))
+            .ExecuteDeleteAsync(ct);
     }
 
     private static bool IsDownloadingStatus(DownloadStatus status) =>

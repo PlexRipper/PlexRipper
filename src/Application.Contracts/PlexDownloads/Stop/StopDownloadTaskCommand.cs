@@ -8,5 +8,5 @@ namespace Reaparr.Application.Contracts;
 /// Stops and disposes of the PlexDownloadClient executing the <see cref="DownloadTaskGeneric"/> if it is downloading.
 /// </summary>
 /// <param name="DownloadTaskGuid">The id of the <see cref="DownloadTaskGeneric"/> to stop.</param>
-/// <returns>If successful a list of the DownloadTasks that were stopped.</returns>
-public record StopDownloadTaskCommand(Guid DownloadTaskGuid) : ICommand<Result>;
+/// <param name="DeleteFiles">When true, deletes partially downloaded files.</param>
+public record StopDownloadTaskCommand(Guid DownloadTaskGuid, bool DeleteFiles = true) : ICommand<Result>;

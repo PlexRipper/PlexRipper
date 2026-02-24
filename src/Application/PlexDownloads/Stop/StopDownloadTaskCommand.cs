@@ -82,7 +82,8 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
             // Tasks in the file-transfer phase (DownloadFinished, Moving, MoveError, etc.) already have
             // a fully-downloaded file on disk that should be preserved for the move operation.
             if (
-                downloadTask.DownloadTaskPhase != DownloadTaskPhase.FileTransfer
+                command.DeleteFiles
+                && downloadTask.DownloadTaskPhase != DownloadTaskPhase.FileTransfer
                 && downloadTask.DownloadTaskPhase != DownloadTaskPhase.Completed
             )
             {

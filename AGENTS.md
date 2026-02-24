@@ -279,6 +279,8 @@ Format:
 Types: `feat`, `fix`, `refactor`, `perf`, `test`, `docs`, `build`, `chore`, `style`
 Rules: imperative present tense, capitalize after colon, no trailing punctuation
 
+For front-end commits, use `feat(Web-UI)` etc. to specify the project and for back-end commits, use `feat(WebAPI)` etc. to specify the project.
+
 Never add AI attribution trailers (e.g. `Co-Authored-By: Claude ...`). Commit messages are plain text only.
 
 ## Branching
@@ -318,10 +320,67 @@ Never add AI attribution trailers (e.g. `Co-Authored-By: Claude ...`). Commit me
 * `LibraryProgress.TimeRemaining` is a computed property; do not assign it
 * Strict mocks: set up both `UpdateItemAsync` and `UpdateErrorAsync` to avoid `MockException`
 
-### RefreshPlexTvShowLibraryCommandHandler progress broadcasting
+### Creating a Command/Handler pair
 
-* Success path: `UpdateItemAsync` called 3× (TvShow/Season/Episode) using counts from `BulkInsertTvShowsRapport`
-* Failure path: `UpdateErrorAsync` called once
+Required structure and rules:
+
+* Command is a record implementing `ICommand<Result<T>>` or `ICommand<Result>`.
+* Always add a FluentValidation validator for the command; validate nulls and guard against invalid parameters.
+* Always inject a logger into the handler (`ILogger<YourHandler>`).
+* Prefer `var` for locals and keep constructor assignments explicit.
+* Use `Result.Ok(...)` / `Result.Fail(new ExceptionalError(ex)).LogError()` and never return `null`.
+
+Template (use as baseline, adjust properties and rules to the command):
+
+```csharp
+using FastEndpoints;
+using FluentValidation;
+using Microsoft.Extensions.Logging;
+
+public record $NAME$Command(string Request) : ICommand<Result<$RETURNTYPE$>>;
+
+public class $NAME$CommandValidator : AbstractValidator<$NAME$Command>
+{
+    public $NAME$CommandValidator()
+    {
+        RuleFor(x => x).NotNull();
+        RuleFor(x => x.Request).NotEmpty().MaximumLength(2000);
+        // Add more rules here...
+    }
+}
+
+public class $NAME$CommandHandler : ICommandHandler<$NAME$Command, Result<$RETURNTYPE$>>
+{
+    private readonly ICommandExecutor _commandExecutor;
+    private readonly ILogger<$NAME$CommandHandler> _log;
+
+    public $NAME$CommandHandler(
+        ICommandExecutor commandExecutor,
+        ILogger logger)
+    {
+        _commandExecutor = commandExecutor;
+        _log = logger.ForContext<$NAME$CommandHandler>;
+    }
+
+    public async Task<Result<$RETURNTYPE$>> ExecuteAsync($NAME$Command command, CancellationToken cancellationToken)
+    {
+        return await Result.Try(async () =>
+        {
+            var request = command.Request;
+
+            // TODO: implement handling logic here
+
+            return Result.Ok($RETURNTYPE$.Ok());
+        });
+    }
+}
+```
+
+### Result.Try boundary rule
+
+* Use `Result.Try(...)` at the outer handler boundary instead of `try/catch`.
+* Keep `Result.Try` wrapping to the top-level handler method to prevent nested result-wrapping.
+* Inner helpers should return `Result` / `Result<T>` directly; do not wrap them in `Result.Try` again.
 
 ### Quartz job rules
 
@@ -357,6 +416,7 @@ Never add AI attribution trailers (e.g. `Co-Authored-By: Claude ...`). Commit me
 * Propagate failures with `return failedResult.ToResult()`
 * Check `Has504GatewayTimeoutError()` for Plex connectivity failures
 * Never return `null` where a `Result` is expected
+* `Result<T>.LogError()` returns a non-generic `Result`; avoid it when the caller needs `Result<T>`
 
 ### Download client API compatibility
 

@@ -1,5 +1,6 @@
 using FastEndpoints;
 using FluentValidation;
+using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 
 namespace Reaparr.Application;

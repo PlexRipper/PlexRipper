@@ -109,4 +109,8 @@ public static class DataFormat
 
     public static long GetTimeRemaining(long bytesRemaining, double downloadSpeed) =>
         downloadSpeed <= 0 ? 0 : Convert.ToInt64(Math.Floor(bytesRemaining / downloadSpeed));
+
+    public static double ToMegabytes(this long bytes) => bytes / 1_048_576D;
+
+    public static double ToMegabytes(this double bytes) => bytes / 1_048_576D;
 }

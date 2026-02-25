@@ -16,7 +16,7 @@ namespace Reaparr.Application;
 public class DashPlexDownloadClient : IPlexDownloadClient
 {
     private readonly ILogger _log;
-    private readonly IReaparrDbContext _dbContext;
+    private readonly IReaparrDbContextFactory _dbContextFactory;
     private readonly IDashMpdCliWrapper _dashWrapper;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IServerSettingsModule _serverSettings;
@@ -34,7 +34,6 @@ public class DashPlexDownloadClient : IPlexDownloadClient
 
     private string? _downloadUrl;
 
-    private long _lastSpeed;
     private DownloadTaskKey _downloadTaskKey = new DownloadTaskKey
     {
         Type = DownloadTaskType.None,
@@ -48,7 +47,7 @@ public class DashPlexDownloadClient : IPlexDownloadClient
     /// </summary>
     public DashPlexDownloadClient(
         ILogger log,
-        IReaparrDbContext dbContext,
+        IReaparrDbContextFactory dbContextFactory,
         IDashMpdCliWrapper dashWrapper,
         ICommandExecutor commandExecutor,
         IServerSettingsModule serverSettings,
@@ -56,7 +55,7 @@ public class DashPlexDownloadClient : IPlexDownloadClient
     )
     {
         _log = log.ForContext<DashPlexDownloadClient>();
-        _dbContext = dbContext;
+        _dbContextFactory = dbContextFactory;
         _dashWrapper = dashWrapper;
         _commandExecutor = commandExecutor;
         _serverSettings = serverSettings;
@@ -94,7 +93,8 @@ public class DashPlexDownloadClient : IPlexDownloadClient
     /// </summary>
     public async Task<Result> Setup(DownloadTaskKey downloadTaskKey, CancellationToken cancellationToken = default)
     {
-        var downloadTask = await _dbContext.GetDownloadTaskAsync(downloadTaskKey, cancellationToken);
+        var dbContext = _dbContextFactory.Create();
+        var downloadTask = await dbContext.GetDownloadTaskAsync(downloadTaskKey, cancellationToken);
         if (downloadTask is null)
         {
             return ResultExtensions
@@ -178,7 +178,7 @@ public class DashPlexDownloadClient : IPlexDownloadClient
 
             // Update status to downloading
             DownloadStatus = DownloadStatus.Downloading;
-            await _dbContext.SetDownloadStatus(DownloadTask.ToKey(), DownloadStatus);
+            await _dbContextFactory.Create().SetDownloadStatus(DownloadTask.ToKey(), DownloadStatus);
 
             return Result.Ok();
         }
@@ -200,7 +200,8 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         // Progress subscription with error handling and completion tracking
         _progressSubscription = _dashWrapper
             .Progress.Sample(TimeSpan.FromMilliseconds(500))
-            .SelectMany(data => Observable.FromAsync(() => OnProgressUpdate(data)))
+            .Select(data => Observable.FromAsync(() => OnProgressUpdate(data)))
+            .Concat()
             .Subscribe(
                 _ => { },
                 onError: ex =>
@@ -224,11 +225,8 @@ public class DashPlexDownloadClient : IPlexDownloadClient
             );
 
         // Log subscription - combine stdout and stderr with buffering
-        ListenToDownloadWorkerLog = Observable
-            .Merge(
-                _dashWrapper.StandardOutput.Select(line => CreateLogEntry(line, NotificationLevel.Information)),
-                _dashWrapper.StandardError.Select(line => CreateLogEntry(line, NotificationLevel.Error))
-            )
+        ListenToDownloadWorkerLog = _dashWrapper
+            .StandardOutput.Select(line => CreateLogEntry(line, NotificationLevel.Information))
             .Buffer(TimeSpan.FromSeconds(1))
             .Where(logs => logs.Any())
             .Select(logs => (IList<DownloadWorkerLog>)logs.ToList())
@@ -288,7 +286,7 @@ public class DashPlexDownloadClient : IPlexDownloadClient
             if (DownloadTask != null)
             {
                 DownloadStatus = DownloadStatus.Paused;
-                await _dbContext.SetDownloadStatus(_downloadTaskKey, DownloadStatus);
+                await _dbContextFactory.Create().SetDownloadStatus(_downloadTaskKey, DownloadStatus);
                 await _commandExecutor.Send(new DownloadTaskUpdatedCommand(_downloadTaskKey));
             }
 
@@ -340,30 +338,29 @@ public class DashPlexDownloadClient : IPlexDownloadClient
 
     private async Task OnProgressUpdate(DashDownloadProgress progress)
     {
-        // Convert speed from MB/s to bytes/s for storage
-        var speedBytesPerSecond = (long)(progress.DownloadSpeedMBps * 1024 * 1024);
+        if (DownloadTask is null)
+        {
+            return;
+        }
 
-        if (speedBytesPerSecond > 0)
-            _lastSpeed = speedBytesPerSecond;
+        DownloadTask.DownloadSpeed = progress.DownloadSpeedInBytes;
+        DownloadTask.DataReceived = progress.DownloadedBytes;
+        DownloadTask.DataTotal =
+            progress.Percent > 0 ? progress.DownloadedBytes * 100 / progress.Percent : progress.TotalBytes;
 
-        // Update download task progress
-        // Note: DashDownloadProgress doesn't provide BytesDownloaded/TotalBytes directly
-        // We'll use the percentage and speed information that's available
-        DownloadTask?.DownloadSpeed = _lastSpeed;
-        // Update database asynchronously
         try
         {
-            await _dbContext.UpdateDownloadProgress(_downloadTaskKey, DownloadTask!);
+            await _dbContextFactory.Create().UpdateDownloadProgress(_downloadTaskKey, DownloadTask!);
             await _commandExecutor.Send(new DownloadTaskUpdatedCommand(_downloadTaskKey));
 
-            // _log.Here()
-            //     .Debug(
-            //         "Progress: {Percent}% - {ElapsedTime} - {Step} - {Speed} MB/s",
-            //         progress.PercentComplete,
-            //         progress.ElapsedTime,
-            //         progress.CurrentStep,
-            //         progress.DownloadSpeedMBps
-            //     );
+            _log.Here()
+                .Debug(
+                    "Progress: {Percent}% - {DownloadSpeed} MB/s - {DataReceived} / {DataTotal} ",
+                    DownloadTask.Percentage,
+                    DownloadTask.DownloadSpeed.ToMegabytes(),
+                    DownloadTask.DataReceived,
+                    DownloadTask.DataTotal
+                );
         }
         catch (Exception ex)
         {
@@ -391,13 +388,13 @@ public class DashPlexDownloadClient : IPlexDownloadClient
             {
                 // Download completed successfully
                 DownloadStatus = DownloadStatus.Completed;
-                await _dbContext.SetDownloadStatus(_downloadTaskKey, DownloadStatus);
+                await _dbContextFactory.Create().SetDownloadStatus(_downloadTaskKey, DownloadStatus);
             }
             else
             {
                 // Download failed
                 DownloadStatus = DownloadStatus.Error;
-                await _dbContext.SetDownloadStatus(_downloadTaskKey, DownloadStatus);
+                await _dbContextFactory.Create().SetDownloadStatus(_downloadTaskKey, DownloadStatus);
 
                 _log.Here()
                     .Error("Download failed for {FileName} with exit code {ExitCode}", DownloadTask.FileName, exitCode);
@@ -418,7 +415,9 @@ public class DashPlexDownloadClient : IPlexDownloadClient
 
     private async Task SetupDownloadLimitWatcher(DownloadTaskGeneric downloadTask)
     {
-        var serverMachineIdentifier = await _dbContext.GetPlexServerMachineIdentifierById(downloadTask.PlexServerId);
+        var serverMachineIdentifier = await _dbContextFactory
+            .Create()
+            .GetPlexServerMachineIdentifierById(downloadTask.PlexServerId);
 
         var downloadSpeedLimit = _serverSettings.GetDownloadSpeedLimit(serverMachineIdentifier);
 

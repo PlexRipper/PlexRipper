@@ -11,16 +11,16 @@ public sealed record DashProgressEvent
     public int Percent { get; init; }
 
     [JsonPropertyName("bandwidth")]
-    public int Bandwidth { get; init; }
+    public long Bandwidth { get; init; }
 
     [JsonPropertyName("eta_seconds")]
     public int EtaSeconds { get; init; }
 
     [JsonPropertyName("downloaded_bytes")]
-    public int DownloadedBytes { get; init; }
+    public long DownloadedBytes { get; init; }
 
     [JsonPropertyName("total_bytes")]
-    public int TotalBytes { get; init; }
+    public long TotalBytes { get; init; }
 
     [JsonPropertyName("message")]
     public string Message { get; init; } = string.Empty;

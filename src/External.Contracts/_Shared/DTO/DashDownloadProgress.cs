@@ -10,7 +10,7 @@ public record DashDownloadProgress
     /// <summary>
     /// Gets the percentage of download completed (0-100).
     /// </summary>
-    public required int PercentComplete { get; init; }
+    public required int Percent { get; init; }
 
     /// <summary>
     /// Gets the current download step or operation description.
@@ -20,7 +20,11 @@ public record DashDownloadProgress
     /// <summary>
     /// Gets the download speed in megabytes per second.
     /// </summary>
-    public required double DownloadSpeedMBps { get; init; }
+    public required long DownloadSpeedInBytes { get; init; }
+
+    public required long DownloadedBytes { get; init; }
+
+    public required long TotalBytes { get; init; }
 
     /// <summary>
     /// Gets the raw output line that was parsed.

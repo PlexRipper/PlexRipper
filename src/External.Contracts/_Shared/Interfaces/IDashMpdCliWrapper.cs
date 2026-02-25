@@ -21,11 +21,6 @@ public interface IDashMpdCliWrapper : IAsyncDisposable
     IObservable<string> StandardOutput { get; }
 
     /// <summary>
-    /// Observable stream of standard error lines.
-    /// </summary>
-    IObservable<string> StandardError { get; }
-
-    /// <summary>
     /// Observable stream of parsed download progress updates.
     /// </summary>
     IObservable<DashDownloadProgress> Progress { get; }

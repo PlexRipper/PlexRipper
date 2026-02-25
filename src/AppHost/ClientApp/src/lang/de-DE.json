@@ -552,6 +552,11 @@
                     "label": "Download-Geschwindigkeitsbegrenzung",
                     "text": "Dadurch wird die Downloadgeschwindigkeit für diesen Plex-Server in Kilobyte pro Sekunde begrenzt. Wenn Sie diesen Wert auf 0 setzen, wird die Begrenzung deaktiviert.",
                     "title": "Download-Geschwindigkeitsbegrenzung"
+                },
+                "allow-stream-downloader": {
+                    "label": "Stream-Downloader erlauben",
+                    "text": "Wenn aktiviert, verwendet Reaparr den Stream-Downloader für diesen Plex-Server.",
+                    "title": "Stream-Downloader erlauben"
                 }
             },
             "server-commands": {

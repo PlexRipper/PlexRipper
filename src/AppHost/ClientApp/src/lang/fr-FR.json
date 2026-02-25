@@ -552,6 +552,11 @@
                     "label": "Télécharger la limite de vitesse",
                     "text": "Cela limitera la vitesse de téléchargement de ce serveur Plex en kilo-octets par seconde. La définition de cette valeur sur 0 désactivera la limite.",
                     "title": "Télécharger la limite de vitesse"
+                },
+                "allow-stream-downloader": {
+                    "label": "Autoriser le téléchargeur de flux",
+                    "text": "Lorsqu'il est activé, Reaparr utilisera le téléchargeur de flux pour ce serveur Plex.",
+                    "title": "Autoriser le téléchargeur de flux"
                 }
             },
             "server-commands": {

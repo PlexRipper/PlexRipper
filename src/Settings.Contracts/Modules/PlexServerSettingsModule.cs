@@ -33,6 +33,9 @@ public record PlexServerSettingsModule
     public bool GetIsHidden(string machineIdentifier) =>
         FindOrAddServerSettingsModel(machineIdentifier)?.Hidden ?? false;
 
+    public bool GetAllowStreamDownloader(string machineIdentifier) =>
+        FindOrAddServerSettingsModel(machineIdentifier)?.AllowStreamDownloader ?? false;
+
     public void SetDownloadSpeedLimit(string machineIdentifier, int downloadSpeedLimit = 0)
     {
         var model = FindOrAddServerSettingsModel(machineIdentifier);

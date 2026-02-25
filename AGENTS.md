@@ -447,6 +447,10 @@ public class $NAME$CommandHandler : ICommandHandler<$NAME$Command, Result<$RETUR
 * `/torrents/files` must return JSON (even if empty); Radarr errors on HTML/404 responses
 * `/torrents/delete` should stop in-progress tasks via `StopDownloadTaskCommand` and delete matched tasks from the database
 
+### dash-mpd-cli progress output
+
+* `dash-mpd-cli` emits NDJSON with fields like `type`, `percent`, `bandwidth`, `message`; parse with JSON deserialization and only handle `type="progress"`
+
 ## Performance rules during gaming (Arch Linux)
 
 During gameplay, game performance has priority over builds/tests.

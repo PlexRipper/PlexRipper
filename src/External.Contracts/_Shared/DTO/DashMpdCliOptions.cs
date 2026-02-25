@@ -43,7 +43,7 @@ public record DashMpdCliOptions
     /// <summary>
     /// Gets or sets whether to enable verbose output.
     /// </summary>
-    public bool Verbose { get; set; }
+    public bool Verbose { get; set; } = false;
 
     /// <summary>
     /// Gets or sets the working directory for the process.

@@ -8,7 +8,11 @@
         <RootNamespace>Reaparr.External</RootNamespace>
     </PropertyGroup>
     <ItemGroup>
-        <None Include="dash-mpd-cli\binary\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="Always" />
+        <None
+            Include="dash-mpd-cli\binary\**\*"
+            CopyToOutputDirectory="PreserveNewest"
+            CopyToPublishDirectory="Always"
+        />
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Autofac" Version="9.0.0" />

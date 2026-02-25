@@ -5,15 +5,12 @@ namespace Reaparr.External.Contracts;
 /// </summary>
 public record DashDownloadProgress
 {
-    /// <summary>
-    /// Gets the elapsed time since download started.
-    /// </summary>
-    public TimeSpan ElapsedTime { get; init; }
+    public required TimeSpan ETA { get; init; }
 
     /// <summary>
     /// Gets the percentage of download completed (0-100).
     /// </summary>
-    public double PercentComplete { get; init; }
+    public required int PercentComplete { get; init; }
 
     /// <summary>
     /// Gets the current download step or operation description.
@@ -23,10 +20,10 @@ public record DashDownloadProgress
     /// <summary>
     /// Gets the download speed in megabytes per second.
     /// </summary>
-    public double DownloadSpeedMBps { get; init; }
+    public required double DownloadSpeedMBps { get; init; }
 
     /// <summary>
     /// Gets the raw output line that was parsed.
     /// </summary>
-    public string RawOutput { get; init; } = string.Empty;
+    public required string RawOutput { get; init; } = string.Empty;
 }

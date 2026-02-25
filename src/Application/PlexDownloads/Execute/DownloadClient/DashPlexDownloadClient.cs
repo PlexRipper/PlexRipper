@@ -163,7 +163,6 @@ public class DashPlexDownloadClient : IPlexDownloadClient
                 Output = Path.Combine(DownloadTask.DownloadDirectory, DownloadTask.FileName),
                 WorkingDirectory = DownloadTask.DownloadDirectory,
                 Quiet = false,
-                Verbose = true,
                 Quality = "best",
                 EnvironmentVariables = new Dictionary<string, string>
                 {

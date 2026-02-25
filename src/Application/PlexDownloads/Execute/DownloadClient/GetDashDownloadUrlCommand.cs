@@ -220,7 +220,7 @@ public class GetDashDownloadUrlCommandHandler : ICommandHandler<GetDashDownloadU
             .SetQueryParam("mediaBufferSize", 102400)
             .SetQueryParam("session", session)
             .SetQueryParam("subtitles", "burn")
-            .SetQueryParam("videoResolution", "3840x2160") // Request 1080p output
+            .SetQueryParam("videoResolution", "3840x2160") // Request 4K/UHD output
             .SetQueryParam("videoQuality", 100) // Highest quality setting
             .SetQueryParam("Accept-Language", "en")
             .SetQueryParam("X-Plex-Session-Identifier", sessionIdentifier)

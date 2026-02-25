@@ -1,3 +1,4 @@
+using System.Net.Security;
 using System.Reflection;
 using System.Security.Authentication;
 using System.Text.Json.Serialization;
@@ -203,9 +204,9 @@ public static partial class Startup
             .ConfigurePrimaryHttpMessageHandler(() =>
                 new SocketsHttpHandler
                 {
-                    SslOptions = new System.Net.Security.SslClientAuthenticationOptions
+                    SslOptions = new SslClientAuthenticationOptions
                     {
-                        EnabledSslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13,
+                        EnabledSslProtocols = SslProtocols.None,
                     },
                 }
             );

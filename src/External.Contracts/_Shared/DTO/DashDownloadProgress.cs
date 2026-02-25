@@ -18,7 +18,7 @@ public record DashDownloadProgress
     public string CurrentStep { get; init; } = string.Empty;
 
     /// <summary>
-    /// Gets the download speed in megabytes per second.
+    /// Gets the download speed in bytes per second.
     /// </summary>
     public required long DownloadSpeedInBytes { get; init; }
 

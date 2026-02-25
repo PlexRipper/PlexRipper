@@ -5,12 +5,12 @@ namespace Reaparr.External;
 
 public static class DashMpdCliOptionsExtensions
 {
-    public static string ToBuildArguments(this DashMpdCliOptions options, string mpdUrl, string outputPath)
+    public static string ToBuildArguments(this DashMpdCliOptions options)
     {
         var args = new StringBuilder();
 
         // Output file
-        args.Append($"--output \"{outputPath}\"");
+        args.Append($"--output \"{Escape(options.Output)}\"");
 
         // Verbosity
         if (options.Quiet)
@@ -27,14 +27,14 @@ public static class DashMpdCliOptionsExtensions
         {
             foreach (var (key, value) in options.Headers)
             {
-                args.Append($" --add-header \"{key}: {value}\"");
+                args.Append($" --add-header \"{Escape(key)}: {Escape(value)}\"");
             }
         }
 
         // Proxy configuration
         if (!string.IsNullOrWhiteSpace(options.Proxy))
         {
-            args.Append($" --proxy \"{options.Proxy}\"");
+            args.Append($" --proxy \"{Escape(options.Proxy)}\"");
         }
 
         if (options.NoProxy)
@@ -51,17 +51,17 @@ public static class DashMpdCliOptionsExtensions
         // Authentication
         if (!string.IsNullOrWhiteSpace(options.AuthUsername))
         {
-            args.Append($" --auth-username \"{options.AuthUsername}\"");
+            args.Append($" --auth-username \"{Escape(options.AuthUsername)}\"");
         }
 
         if (!string.IsNullOrWhiteSpace(options.AuthPassword))
         {
-            args.Append($" --auth-password \"{options.AuthPassword}\"");
+            args.Append($" --auth-password \"{Escape(options.AuthPassword)}\"");
         }
 
         if (!string.IsNullOrWhiteSpace(options.AuthBearer))
         {
-            args.Append($" --auth-bearer \"{options.AuthBearer}\"");
+            args.Append($" --auth-bearer \"{Escape(options.AuthBearer)}\"");
         }
 
         // Advanced options
@@ -77,31 +77,31 @@ public static class DashMpdCliOptionsExtensions
 
         if (!string.IsNullOrWhiteSpace(options.CookiesFromBrowser))
         {
-            args.Append($" --cookies-from-browser {options.CookiesFromBrowser}");
+            args.Append($" --cookies-from-browser \"{Escape(options.CookiesFromBrowser)}\"");
         }
 
         // Decryption (DRM)
         if (options.DecryptionKeys != null)
         {
-            foreach (var key in options.DecryptionKeys)
+            foreach (var key in options.DecryptionKeys.Where(k => !string.IsNullOrWhiteSpace(k)))
             {
-                args.Append($" --key \"{key}\"");
+                args.Append($" --key \"{Escape(key)}\"");
             }
         }
 
         if (!string.IsNullOrWhiteSpace(options.DecryptionApplication))
         {
-            args.Append($" --decryption-application {options.DecryptionApplication}");
+            args.Append($" --decryption-application \"{Escape(options.DecryptionApplication)}\"");
         }
 
         if (!string.IsNullOrWhiteSpace(options.Mp4DecryptLocation))
         {
-            args.Append($" --mp4decrypt-location \"{options.Mp4DecryptLocation}\"");
+            args.Append($" --mp4decrypt-location \"{Escape(options.Mp4DecryptLocation)}\"");
         }
 
         if (!string.IsNullOrWhiteSpace(options.ShakaPackagerLocation))
         {
-            args.Append($" --shaka-packager-location \"{options.ShakaPackagerLocation}\"");
+            args.Append($" --shaka-packager-location \"{Escape(options.ShakaPackagerLocation)}\"");
         }
 
         // Muxing
@@ -109,34 +109,34 @@ public static class DashMpdCliOptionsExtensions
         {
             foreach (var (container, preference) in options.MuxerPreference)
             {
-                args.Append($" --muxer-preference {container}:{preference}");
+                args.Append($" --muxer-preference \"{Escape(container)}:{Escape(preference)}\"");
             }
         }
 
         if (!string.IsNullOrWhiteSpace(options.FfmpegLocation))
         {
-            args.Append($" --ffmpeg-location \"{options.FfmpegLocation}\"");
+            args.Append($" --ffmpeg-location \"{Escape(options.FfmpegLocation)}\"");
         }
 
         if (!string.IsNullOrWhiteSpace(options.VlcLocation))
         {
-            args.Append($" --vlc-location \"{options.VlcLocation}\"");
+            args.Append($" --vlc-location \"{Escape(options.VlcLocation)}\"");
         }
 
         if (!string.IsNullOrWhiteSpace(options.MkvmergeLocation))
         {
-            args.Append($" --mkvmerge-location \"{options.MkvmergeLocation}\"");
+            args.Append($" --mkvmerge-location \"{Escape(options.MkvmergeLocation)}\"");
         }
 
         if (!string.IsNullOrWhiteSpace(options.Mp4BoxLocation))
         {
-            args.Append($" --mp4box-location \"{options.Mp4BoxLocation}\"");
+            args.Append($" --mp4box-location \"{Escape(options.Mp4BoxLocation)}\"");
         }
 
         // Quality selection
         if (!string.IsNullOrWhiteSpace(options.Quality))
         {
-            args.Append($" --quality \"{options.Quality}\"");
+            args.Append($" --quality \"{Escape(options.Quality)}\"");
         }
 
         if (options.PreferVideoHeight.HasValue)
@@ -151,18 +151,18 @@ public static class DashMpdCliOptionsExtensions
 
         if (!string.IsNullOrWhiteSpace(options.AudioLanguage))
         {
-            args.Append($" --prefer-language \"{options.AudioLanguage}\"");
+            args.Append($" --prefer-language \"{Escape(options.AudioLanguage)}\"");
         }
 
         // Other options
         if (!string.IsNullOrWhiteSpace(options.DropElements))
         {
-            args.Append($" --drop-elements \"{options.DropElements}\"");
+            args.Append($" --drop-elements \"{Escape(options.DropElements)}\"");
         }
 
         if (!string.IsNullOrWhiteSpace(options.XsltStylesheet))
         {
-            args.Append($" --xslt-stylesheet \"{options.XsltStylesheet}\"");
+            args.Append($" --xslt-stylesheet \"{Escape(options.XsltStylesheet)}\"");
         }
 
         if (options.NoPeriodConcatenation)
@@ -180,8 +180,10 @@ public static class DashMpdCliOptionsExtensions
         args.Append(" --progress=json");
 
         // MPD URL (must be last)
-        args.Append($" \"{mpdUrl}\"");
+        args.Append($" \"{Escape(options.MpdUrl)}\"");
 
         return args.ToString();
     }
+
+    private static string Escape(string value) => value.Replace("\"", "\\\"");
 }

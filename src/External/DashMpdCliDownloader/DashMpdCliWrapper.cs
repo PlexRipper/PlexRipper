@@ -16,6 +16,7 @@ namespace Reaparr.External;
 public class DashMpdCliWrapper : IDashMpdCliWrapper
 {
     private readonly ILogger _log;
+    private readonly IFile _fileSystem;
     private readonly CancellationTokenSource _forcefulCts = new();
     private readonly CancellationTokenSource _gracefulCts = new();
 
@@ -31,20 +32,11 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
     /// Initializes a new instance of the <see cref="DashMpdCliWrapper"/> class.
     /// </summary>
     /// <exception cref="PlatformNotSupportedException">Thrown when the current platform is not supported.</exception>
-    /// <exception cref="FileNotFoundException">Thrown when the binary is not found at the expected location.</exception>
     public DashMpdCliWrapper(ILogger logger, IFile fileSystem)
     {
         _log = logger.ForContext<DashMpdCliWrapper>();
+        _fileSystem = fileSystem;
         _binaryPath = GetDefaultBinaryPath();
-
-        if (!fileSystem.Exists(_binaryPath))
-        {
-            throw new FileNotFoundException(
-                $"dash-mpd-cli binary not found at: {_binaryPath}. "
-                    + $"Ensure the binary is included in the build output.",
-                _binaryPath
-            );
-        }
     }
 
     /// <summary>
@@ -70,13 +62,18 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
     /// <inheritdoc/>
     public Task<Result> StartAsync(DashMpdCliOptions options)
     {
+        if (!_fileSystem.Exists(_binaryPath))
+            return Task.FromResult(
+                _log.Here().ErrorResult($"dash-mpd-cli binary not found at: {_binaryPath}. Ensure the binary is included in the build output.")
+            );
+
         if (string.IsNullOrWhiteSpace(options.MpdUrl))
             return Task.FromResult(_log.Here().ErrorResult("MPD URL cannot be null or empty"));
 
         if (string.IsNullOrWhiteSpace(options.Output))
             return Task.FromResult(_log.Here().ErrorResult("Output path cannot be null or empty"));
 
-        var arguments = options.ToBuildArguments(options.MpdUrl, options.Output);
+        var arguments = options.ToBuildArguments();
 
         _log.Here().Information("Starting dash-mpd-cli: {BinaryPath} {Arguments}", _binaryPath, arguments);
         _log.Here().Debug("Working directory: {WorkingDirectory}", options.WorkingDirectory);
@@ -186,6 +183,7 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
 
     /// <summary>
     /// Stops the running process gracefully, or forcefully if it doesn't respond.
+    /// Also completes <see cref="ProcessExitTask"/> so callers don't hang if the event loop never started.
     /// </summary>
     /// <returns>A task that completes when the process has stopped.</returns>
     public async Task StopAsync()
@@ -193,6 +191,7 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
         _log.Here().Information("Stopping dash-mpd-cli process");
         await _gracefulCts.CancelAsync();
         _forcefulCts.CancelAfter(TimeSpan.FromSeconds(10));
+        _processExitSource.TrySetResult(_exitCode ?? -1);
     }
 
     /// <summary>

@@ -357,7 +357,7 @@ public class DashPlexDownloadClient : IPlexDownloadClient
                 .Debug(
                     "Progress: {Percent}% - {DownloadSpeed} MB/s - {DataReceived} / {DataTotal} ",
                     DownloadTask.Percentage,
-                    DownloadTask.DownloadSpeed.ToMegabytes(),
+                    DownloadTask.DownloadSpeed.ToMebibytes(),
                     DownloadTask.DataReceived,
                     DownloadTask.DataTotal
                 );

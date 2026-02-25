@@ -1,6 +1,8 @@
 import { DownloadActions, type DownloadMediaDTO, DownloadStatus, type PlexMediaDTO, type PlexMediaSlimDTO } from '@dto';
+import { useSettingsStore } from '@store';
 
 export function toDownloadMedia(mediaItem: PlexMediaDTO | PlexMediaSlimDTO): DownloadMediaDTO[] {
+	const settingsStore = useSettingsStore();
 	return [
 		{
 			mediaIds: [mediaItem.id],
@@ -8,6 +10,7 @@ export function toDownloadMedia(mediaItem: PlexMediaDTO | PlexMediaSlimDTO): Dow
 			plexServerId: mediaItem.plexServerId,
 			plexLibraryId: mediaItem.plexLibraryId,
 			qualities: mediaItem.qualities,
+			keepCompletedInDownloadFolder: settingsStore.downloadManagerSettings.keepCompletedInDownloadFolder,
 		},
 	];
 }

@@ -161,6 +161,7 @@ useMediaOverviewBarDownloadCommandBus().on(() => {
 		mediaIds: mediaOverviewStore.selection.keys,
 		type: mediaOverviewStore.getMediaType,
 		qualities: [],
+		keepCompletedInDownloadFolder: settingsStore.downloadManagerSettings.keepCompletedInDownloadFolder,
 	};
 	sendMediaOverviewDownloadCommand([downloadCommand]);
 });

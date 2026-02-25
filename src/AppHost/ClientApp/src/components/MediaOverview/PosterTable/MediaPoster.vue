@@ -54,9 +54,10 @@
 import { get } from '@vueuse/core';
 import { type DownloadMediaDTO, type PlexMediaQualityDTO, type PlexMediaSlimDTO, PlexMediaType } from '@dto';
 import { MediaSortField } from '@enums';
-import { useMediaOverviewStore } from '@store';
+import { useMediaOverviewStore, useSettingsStore } from '@store';
 
 const mediaOverviewStore = useMediaOverviewStore();
+const settingsStore = useSettingsStore();
 
 const props = withDefaults(defineProps<{
 	mediaItem: PlexMediaSlimDTO;
@@ -80,6 +81,7 @@ function onDownload(mediaQualities: PlexMediaQualityDTO[]) {
 		plexLibraryId: props.mediaItem.plexLibraryId,
 		plexServerId: props.mediaItem.plexServerId,
 		qualities: mediaQualities,
+		keepCompletedInDownloadFolder: settingsStore.downloadManagerSettings.keepCompletedInDownloadFolder,
 	};
 
 	emit('download', [downloadCommand]);

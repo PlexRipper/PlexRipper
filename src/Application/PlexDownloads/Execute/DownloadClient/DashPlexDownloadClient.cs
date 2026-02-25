@@ -384,17 +384,19 @@ public class DashPlexDownloadClient : IPlexDownloadClient
                     DownloadTask.FileName
                 );
 
+            using var dbContext = await _dbContextFactory.CreateAsync();
             if (exitCode == 0)
             {
-                // Download completed successfully
-                DownloadStatus = DownloadStatus.Completed;
-                await _dbContextFactory.Create().SetDownloadStatus(_downloadTaskKey, DownloadStatus);
+                // Download completed successfully - set DownloadFinished so DownloadJobListener
+                // triggers the file move pipeline before transitioning to Completed
+                DownloadStatus = DownloadStatus.DownloadFinished;
+                await dbContext.SetDownloadStatus(_downloadTaskKey, DownloadStatus);
             }
             else
             {
                 // Download failed
                 DownloadStatus = DownloadStatus.Error;
-                await _dbContextFactory.Create().SetDownloadStatus(_downloadTaskKey, DownloadStatus);
+                await dbContext.SetDownloadStatus(_downloadTaskKey, DownloadStatus);
 
                 _log.Here()
                     .Error("Download failed for {FileName} with exit code {ExitCode}", DownloadTask.FileName, exitCode);

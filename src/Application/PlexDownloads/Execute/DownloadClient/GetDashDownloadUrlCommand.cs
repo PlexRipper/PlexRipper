@@ -116,16 +116,57 @@ public class GetDashDownloadUrlCommandHandler : ICommandHandler<GetDashDownloadU
             }
 
             // Log the decision code for debugging
-            var mdeDecisionCode = mediaContainer.Attribute("mdeDecisionCode")?.Value ?? "unknown";
-            var mdeDecisionText = mediaContainer.Attribute("mdeDecisionText")?.Value ?? "unknown";
+            var generalDecisionCode = mediaContainer.Attribute("generalDecisionCode")?.Value ?? "unknown";
+            var generalDecisionText = mediaContainer.Attribute("generalDecisionText")?.Value ?? "unknown";
+            var transcodeDecisionCode = mediaContainer.Attribute("transcodeDecisionCode")?.Value ?? "unknown";
+            var transcodeDecisionText = mediaContainer.Attribute("transcodeDecisionText")?.Value ?? "unknown";
+
             _log.Here()
                 .Information(
-                    "Decision returned: code={Code}, text={Text}, session={Session}, sessionId={SessionId}",
-                    mdeDecisionCode,
-                    mdeDecisionText,
+                    "Decision returned: generalCode={GeneralCode}, generalText={GeneralText}, "
+                        + "transcodeCode={TranscodeCode}, transcodeText={TranscodeText}, "
+                        + "session={Session}, sessionId={SessionId}",
+                    generalDecisionCode,
+                    generalDecisionText,
+                    transcodeDecisionCode,
+                    transcodeDecisionText,
                     session,
                     sessionIdentifier
                 );
+
+            // Verify we got direct stream (copy) for source quality
+            var video = doc.Root?.Descendants("Stream").FirstOrDefault(s => s.Attribute("streamType")?.Value == "1");
+            var audio = doc.Root?.Descendants("Stream").FirstOrDefault(s => s.Attribute("streamType")?.Value == "2");
+
+            var videoDecision = video?.Attribute("decision")?.Value ?? "unknown";
+            var audioDecision = audio?.Attribute("decision")?.Value ?? "unknown";
+
+            _log.Here()
+                .Information(
+                    "Stream decisions - Video: {VideoDecision}, Audio: {AudioDecision}",
+                    videoDecision,
+                    audioDecision
+                );
+
+            if (videoDecision != "copy")
+            {
+                _log.Here()
+                    .Warning(
+                        "Video is being transcoded instead of direct streamed. "
+                            + "Quality may be degraded. Decision: {Decision}",
+                        videoDecision
+                    );
+            }
+
+            if (audioDecision != "copy")
+            {
+                _log.Here()
+                    .Warning(
+                        "Audio is being transcoded instead of direct streamed. "
+                            + "Quality may be degraded. Decision: {Decision}",
+                        audioDecision
+                    );
+            }
         }
         catch (Exception ex)
         {
@@ -166,32 +207,35 @@ public class GetDashDownloadUrlCommandHandler : ICommandHandler<GetDashDownloadU
             .SetQueryParam("partIndex", 0)
             .SetQueryParam("protocol", "dash")
             .SetQueryParam("fastSeek", 1)
-            .SetQueryParam("directPlay", 0) // Force streaming mode (required for start.mpd)
-            .SetQueryParam("directStream", 0) // Changed: 0 forces transcode, 1 attempts direct stream
+            .SetQueryParam("directPlay", 0) // Must be 0 for DASH streaming pipeline
+            .SetQueryParam("directStream", 1) // 1 = copy streams without re-encoding (source quality)
             .SetQueryParam("subtitleSize", 100)
             .SetQueryParam("audioBoost", 100)
-            .SetQueryParam("location", "wan") // Changed: wan allows remote transcoding
-            .SetQueryParam("maxVideoBitrate", 20000) // High bitrate cap for best quality
+            .SetQueryParam("location", "lan") // lan bypasses remote bandwidth caps
+            .SetQueryParam("maxVideoBitrate", 200000) // 200 Mbps = effectively unlimited
             .SetQueryParam("addDebugOverlay", 0)
             .SetQueryParam("autoAdjustQuality", 0)
-            .SetQueryParam("directStreamAudio", 0) // Allow audio transcode (TrueHD → AAC for DASH)
+            .SetQueryParam("directStreamAudio", 1) // 1 = copy audio without re-encoding
             .SetQueryParam("autoAdjustSubtitle", 1)
             .SetQueryParam("mediaBufferSize", 102400)
             .SetQueryParam("session", session)
             .SetQueryParam("subtitles", "burn")
+            .SetQueryParam("videoResolution", "3840x2160") // Request 1080p output
+            .SetQueryParam("videoQuality", 100) // Highest quality setting
             .SetQueryParam("Accept-Language", "en")
             .SetQueryParam("X-Plex-Session-Identifier", sessionIdentifier)
             .SetQueryParam("X-Plex-Client-Profile-Extra", CLIENT_PROFILE_EXTRA)
             .SetQueryParam("X-Plex-Incomplete-Segments", 1)
             .SetQueryParam("X-Plex-Product", "Plex Web")
-            .SetQueryParam("X-Plex-Version", "4.157.0")
+            .SetQueryParam("X-Plex-Version", "4.158.0")
             .SetQueryParam("X-Plex-Client-Identifier", _clientIdentifier)
             .SetQueryParam("X-Plex-Platform", "Firefox")
             .SetQueryParam("X-Plex-Platform-Version", "147.0")
             .SetQueryParam("X-Plex-Features", "external-media,indirect-media,hub-style-list")
             .SetQueryParam("X-Plex-Model", "standalone")
             .SetQueryParam("X-Plex-Device", "Linux")
-            .SetQueryParam("X-Plex-Device-Name", "Firefox") // TODO Change to a platform like nvidia shield with more codec capabilities?
+            .SetQueryParam("X-Plex-Device-Name", "Firefox")
+            .SetQueryParam("X-Plex-Device-Screen-Resolution", "3840x2160,3840x2160") // Prevents downscaling
             .SetQueryParam("X-Plex-Token", token)
             .SetQueryParam("X-Plex-Language", "en")
             .SetQueryParam("X-Plex-Session-Id", playbackSessionId)

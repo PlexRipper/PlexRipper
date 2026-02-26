@@ -16,7 +16,8 @@ namespace Reaparr.External;
 public class DashMpdCliWrapper : IDashMpdCliWrapper
 {
     private readonly ILogger _log;
-    private readonly IFile _fileSystem;
+    private readonly IFile _file;
+    private readonly IDirectory _directory;
     private readonly CancellationTokenSource _forcefulCts = new();
     private readonly CancellationTokenSource _gracefulCts = new();
 
@@ -27,15 +28,17 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
     private readonly Subject<DashDownloadProgress> _progressSubject = new();
 
     private int? _exitCode;
+    private string? _workingDirectory;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DashMpdCliWrapper"/> class.
     /// </summary>
     /// <exception cref="PlatformNotSupportedException">Thrown when the current platform is not supported.</exception>
-    public DashMpdCliWrapper(ILogger logger, IFile fileSystem)
+    public DashMpdCliWrapper(ILogger logger, IFile file, IDirectory directory)
     {
         _log = logger.ForContext<DashMpdCliWrapper>();
-        _fileSystem = fileSystem;
+        _file = file;
+        _directory = directory;
         _binaryPath = GetDefaultBinaryPath();
     }
 
@@ -62,7 +65,7 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
     /// <inheritdoc/>
     public Task<Result> StartAsync(DashMpdCliOptions options)
     {
-        if (!_fileSystem.Exists(_binaryPath))
+        if (!_file.Exists(_binaryPath))
             return Task.FromResult(
                 _log.Here().ErrorResult($"dash-mpd-cli binary not found at: {_binaryPath}. Ensure the binary is included in the build output.")
             );
@@ -82,6 +85,8 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
 
         foreach (var (key, value) in options.EnvironmentVariables)
             _log.Here().Verbose("Environment variable: {Key}={Value}", key, value);
+
+        _workingDirectory = options.WorkingDirectory;
 
         var command = Cli.Wrap(_binaryPath)
             .WithValidation(CommandResultValidation.None)
@@ -158,6 +163,7 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
         }
         finally
         {
+            CleanupTempFiles();
             CompleteObservables();
         }
     }
@@ -180,6 +186,25 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
         else
         {
             _log.Here().Debug("{Data}", line);
+        }
+    }
+
+    private void CleanupTempFiles()
+    {
+        if (string.IsNullOrEmpty(_workingDirectory))
+            return;
+
+        try
+        {
+            foreach (var file in _directory.GetFiles(_workingDirectory, "dashmpd-*"))
+            {
+                _file.Delete(file);
+                _log.Here().Debug("Deleted dash-mpd-cli temp file: {File}", file);
+            }
+        }
+        catch (Exception ex)
+        {
+            _log.Here().Warning(ex, "Failed to clean up dash-mpd-cli temp files in {WorkingDirectory}", _workingDirectory);
         }
     }
 

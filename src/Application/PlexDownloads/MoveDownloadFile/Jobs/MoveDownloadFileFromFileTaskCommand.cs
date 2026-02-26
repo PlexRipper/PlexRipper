@@ -101,11 +101,11 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
             var movedInDownloadsExists =
                 !string.IsNullOrWhiteSpace(movedInDownloadsPath) && _file.Exists(movedInDownloadsPath);
 
-            if (destinationExists || movedInDownloadsExists)
+            if (destinationExists)
             {
                 _log.Here()
                     .Warning(
-                        "Source file was missing for {DownloadTaskId}, but a completed file already exists. Treating move as finished.",
+                        "Source file was missing for {DownloadTaskId}, but a completed file already exists at destination. Treating move as finished.",
                         key.Id
                     );
 
@@ -122,8 +122,45 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
                 return Result.Ok();
             }
 
-            var result = Result.Fail($"Source file does not exist and cannot be moved: {downloadFilePath}").LogError();
-            return await ErrorDownloadTask(key, result);
+            if (movedInDownloadsExists)
+            {
+                if (ShouldKeepInDownloads(downloadTask))
+                {
+                    _log.Here()
+                        .Warning(
+                            "Source file was missing for {DownloadTaskId}, but renamed file exists in downloads and keep-in-downloads is set. Treating move as finished.",
+                            key.Id
+                        );
+
+                    downloadTask.CurrentFileTransferBytesOffset = downloadTask.DataTotal;
+                    downloadTask.FileDataTransferred = downloadTask.DataTotal;
+                    await _dbContext.UpdateDownloadFileTransferProgress(
+                        key,
+                        downloadTask.ToFileTransferProgress(),
+                        cancellationToken
+                    );
+                    moveDownloadFileProgress?.OnNext(downloadTask.ToFileTransferProgress());
+
+                    await UpdateDownloadTaskStatus(key, DownloadStatus.MoveFinished);
+                    return Result.Ok();
+                }
+
+                // The .reaptemp rename already happened but the file was not moved to the destination yet.
+                // Resume the move using the renamed file as the source.
+                _log.Here()
+                    .Warning(
+                        "Source .reaptemp file was missing for {DownloadTaskId} but renamed file exists in downloads. Resuming move to destination.",
+                        key.Id
+                    );
+                downloadFilePath = movedInDownloadsPath!;
+            }
+            else
+            {
+                var result = Result
+                    .Fail($"Source file does not exist and cannot be moved: {downloadFilePath}")
+                    .LogError();
+                return await ErrorDownloadTask(key, result);
+            }
         }
 
         try

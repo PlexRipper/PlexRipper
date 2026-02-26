@@ -1,5 +1,20 @@
 Reaparr Changelog
 
+# [0.37.0-dev.1](https://github.com/Reaparr/Reaparr/compare/v0.36.0...v0.37.0-dev.1) (2026-02-26)
+
+
+### Bug Fixes
+
+* **WebAPI:** Add missing AllowStreamDownloader Bogus rule in FakeData ([5a97f72](https://github.com/Reaparr/Reaparr/commit/5a97f728e93eb5752b282a3aca8dfe1e3b4fcaaa))
+* **WebAPI:** Fixed a bug that prevented completed downloads from moving to their destination if aborted ([12b56f4](https://github.com/Reaparr/Reaparr/commit/12b56f45ec74c72ff7d20f4f74391b16918a0470))
+* **WebAPI:** Replace HttpClientHandler with SocketsHttpHandler for proper TLS negotiation ([b584aa3](https://github.com/Reaparr/Reaparr/commit/b584aa343e3561f9e03fcfcb8c58a65a1abece67))
+
+
+### Features
+
+* **Web-UI:** Added a toggle to enable the stream downloader ([7930cad](https://github.com/Reaparr/Reaparr/commit/7930cad12d7360ca04eb192dfbee201d1c4bb116))
+* **WebAPI:** Wire up stream downloader selection and fallback in DownloadJob ([102d755](https://github.com/Reaparr/Reaparr/commit/102d75570c32e69465eec4008bea7750cb0b2c78))
+
 # [0.36.0](https://github.com/Reaparr/Reaparr/compare/v0.35.0...v0.36.0) (2026-02-24)
 
 

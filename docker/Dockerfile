@@ -111,7 +111,9 @@ ENV DOTNET_URLS=http://+:${PORT}
 ENV S6_SERVICES_GRACETIME=15000
 
 # Install dependencies
-RUN apk add --no-cache bash icu-libs krb5-libs libgcc libintl libssl3 libstdc++ zlib
+RUN apk add --no-cache bash icu-libs krb5-libs libgcc libintl libssl3 libstdc++ zlib \
+    # dash-mpd-cli helpers
+    ffmpeg mkvtoolnix
 
 ## Copy .NET runtime from official image
 COPY --from=dotnet-runtime /usr/share/dotnet /usr/share/dotnet

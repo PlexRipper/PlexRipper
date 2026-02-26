@@ -9,6 +9,7 @@ public record PlexServerSettingItemModule : BaseSettingsModule<PlexServerSetting
             MachineIdentifier = machineIdentifier,
             DownloadSpeedLimit = 0,
             Hidden = false,
+            AllowStreamDownloader = false,
         };
 
     // TODO:Update this name when the Server name is updated
@@ -27,6 +28,12 @@ public record PlexServerSettingItemModule : BaseSettingsModule<PlexServerSetting
     }
 
     public required bool Hidden
+    {
+        get;
+        set => SetProperty(ref field, value);
+    }
+
+    public required bool AllowStreamDownloader
     {
         get;
         set => SetProperty(ref field, value);

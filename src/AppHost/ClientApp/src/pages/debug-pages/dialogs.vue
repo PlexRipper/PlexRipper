@@ -219,6 +219,7 @@ function openDownloadConfirmationDialog(): void {
 			mediaIds: [24, 25, 26, 27, 28],
 			type: PlexMediaType.TvShow,
 			qualities: [],
+			keepCompletedInDownloadFolder: false,
 		},
 	];
 	dialogStore.openMediaConfirmationDownloadDialog(demo);

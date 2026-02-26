@@ -16,6 +16,7 @@ public class DownloadJob : IJob, IAsyncDisposable
     private readonly ICommandExecutor _commandExecutor;
     private readonly IEventPublisher _eventPublisher;
     private readonly IDownloadManagerSettings _downloadManagerSettings;
+    private readonly IServerSettingsModule _serverSettingsModule;
     private readonly IIndex<PlexDownloadClientType, IPlexDownloadClient> _plexDownloadClientFactory;
 
     private IPlexDownloadClient? _plexDownloadClient;
@@ -26,6 +27,7 @@ public class DownloadJob : IJob, IAsyncDisposable
         ICommandExecutor commandExecutor,
         IEventPublisher eventPublisher,
         IDownloadManagerSettings downloadManagerSettings,
+        IServerSettingsModule serverSettingsModule,
         IIndex<PlexDownloadClientType, IPlexDownloadClient> plexDownloadClientFactory
     )
     {
@@ -34,6 +36,7 @@ public class DownloadJob : IJob, IAsyncDisposable
         _commandExecutor = commandExecutor;
         _eventPublisher = eventPublisher;
         _downloadManagerSettings = downloadManagerSettings;
+        _serverSettingsModule = serverSettingsModule;
         _plexDownloadClientFactory = plexDownloadClientFactory;
     }
 
@@ -102,8 +105,10 @@ public class DownloadJob : IJob, IAsyncDisposable
 
             downloadTask = result.Value;
 
-            // TODO Make this dynamic once stream downloadclient is working, the alternative stream will be used if the direct download fails
-            var clientType = PlexDownloadClientType.Direct;
+            var machineId = await _dbContext.GetPlexServerMachineIdentifierById(downloadTask.PlexServerId, token);
+            var clientType = _serverSettingsModule.GetAllowStreamDownloader(machineId)
+                ? PlexDownloadClientType.Dash
+                : PlexDownloadClientType.Direct;
             _log.Here()
                 .Information(
                     "Creating {ClientType} download client for {DownloadTaskFullTitle}",
@@ -112,7 +117,6 @@ public class DownloadJob : IJob, IAsyncDisposable
                 );
 
             _plexDownloadClient = _plexDownloadClientFactory[clientType];
-
             var downloadClientResult = await _plexDownloadClient.Setup(downloadTask.ToKey(), token);
             if (downloadClientResult.IsFailed)
             {

@@ -65,7 +65,6 @@ export const useSettingsStore = defineStore(StoreNames.SettingsStore, () => {
 			allowedProxyIps: [],
 			forwardedHostHeader: '',
 			forwardedPathHeader: '',
-			url: '',
 		},
 	};
 
@@ -135,17 +134,23 @@ export const useSettingsStore = defineStore(StoreNames.SettingsStore, () => {
 				trustProxyHeaders: settings.networkSettings.trustProxyHeaders,
 				forwardedHostHeader: settings.networkSettings.forwardedHostHeader,
 				forwardedPathHeader: settings.networkSettings.forwardedPathHeader,
-				url: settings.networkSettings.url,
 			});
 		},
 		updateDownloadLimit(machineIdentifier: string, downloadLimit: number) {
 			const i = state.serverSettings.data.findIndex((server) => server.machineIdentifier === machineIdentifier);
 			if (i > -1) {
 				state.serverSettings.data.splice(i, 1, {
-					machineIdentifier,
-					plexServerName: state.serverSettings.data[i]!.plexServerName,
+					...state.serverSettings.data[i]!,
 					downloadSpeedLimit: downloadLimit,
-					hidden: state.serverSettings.data[i]!.hidden,
+				});
+			}
+		},
+		updateAllowStreamDownloader(machineIdentifier: string, allowStreamDownloader: boolean) {
+			const i = state.serverSettings.data.findIndex((server) => server.machineIdentifier === machineIdentifier);
+			if (i > -1) {
+				state.serverSettings.data.splice(i, 1, {
+					...state.serverSettings.data[i]!,
+					allowStreamDownloader,
 				});
 			}
 		},

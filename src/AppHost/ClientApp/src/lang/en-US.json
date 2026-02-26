@@ -552,6 +552,11 @@
                     "label": "Download Speed Limit",
                     "text": "This will limit the download speed for this Plex server in kilobytes per second. Setting this value to 0 will disable the limit. ",
                     "title": "Download Speed Limit"
+                },
+                "allow-stream-downloader": {
+                    "label": "Allow Stream Downloader",
+                    "text": "When enabled, Reaparr will use the stream downloader for this Plex server.",
+                    "title": "Allow Stream Downloader"
                 }
             },
             "server-commands": {

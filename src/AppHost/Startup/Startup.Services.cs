@@ -1,4 +1,6 @@
+using System.Net.Security;
 using System.Reflection;
+using System.Security.Authentication;
 using System.Text.Json.Serialization;
 using FastEndpoints;
 using FastEndpoints.Security;
@@ -199,11 +201,12 @@ public static partial class Startup
 
         services
             .AddHttpClient("")
-            .ConfigurePrimaryHttpMessageHandler(_ => new HttpClientHandler
-            {
-                // TODO: Disable SSL Check, might be bad
-                ServerCertificateCustomValidationCallback = (_, _, _, _) => true,
-            });
+            .ConfigurePrimaryHttpMessageHandler(() =>
+                new SocketsHttpHandler
+                {
+                    SslOptions = new SslClientAuthenticationOptions { EnabledSslProtocols = SslProtocols.None },
+                }
+            );
 
         services.RegisterSonarrHttpClient();
         services.RegisterRadarrHttpClient();

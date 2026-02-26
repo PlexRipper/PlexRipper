@@ -552,6 +552,11 @@
                     "label": "Limit prędkości pobierania",
                     "text": "To ograniczy prędkość pobierania dla tego serwera Plex w kilobajtach na sekundę. Ustawienie tej wartości na 0 wyłączy limit.",
                     "title": "Limit prędkości pobierania"
+                },
+                "allow-stream-downloader": {
+                    "label": "Zezwól na pobieranie strumieniowe",
+                    "text": "Po włączeniu Reaparr będzie używać pobierania strumieniowego dla tego serwera Plex.",
+                    "title": "Zezwól na pobieranie strumieniowe"
                 }
             },
             "server-commands": {

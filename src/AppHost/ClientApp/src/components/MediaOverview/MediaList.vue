@@ -115,9 +115,11 @@ import {
 	toDownloadMedia,
 	sendMediaOverviewDownloadCommand,
 	useMediaOverviewStore,
+	useSettingsStore,
 } from '#imports';
 
 const mediaOverviewStore = useMediaOverviewStore();
+const settingsStore = useSettingsStore();
 
 const defaultOpened = ref(false);
 const { t } = useI18n();
@@ -260,6 +262,7 @@ useMediaOverviewBarDownloadCommandBus().on(() => {
 			plexLibraryId: mediaItem.plexLibraryId,
 			plexServerId: mediaItem.plexServerId,
 			qualities: mediaItem.qualities,
+			keepCompletedInDownloadFolder: settingsStore.downloadManagerSettings.keepCompletedInDownloadFolder,
 		});
 	}
 
@@ -270,6 +273,7 @@ useMediaOverviewBarDownloadCommandBus().on(() => {
 			plexLibraryId: mediaItem.plexLibraryId,
 			plexServerId: mediaItem.plexServerId,
 			qualities: mediaItem.qualities,
+			keepCompletedInDownloadFolder: settingsStore.downloadManagerSettings.keepCompletedInDownloadFolder,
 		});
 	}
 

@@ -174,6 +174,7 @@ export interface DownloadManagerSettingsDTO {
 }
 
 export interface DownloadMediaDTO {
+  keepCompletedInDownloadFolder: boolean;
   mediaIds: number[];
   /** @format int32 */
   plexLibraryId: number;
@@ -544,7 +545,6 @@ export interface NetworkSettingsDTO {
   forwardedPathHeader: string;
   reverseProxyUrl: string;
   trustProxyHeaders: boolean;
-  url: string;
 }
 
 export interface NotificationDTO {
@@ -887,6 +887,7 @@ export interface PlexServerDTO {
 }
 
 export interface PlexServerSettingItemModule {
+  allowStreamDownloader: boolean;
   /** @format int32 */
   downloadSpeedLimit: number;
   hidden: boolean;

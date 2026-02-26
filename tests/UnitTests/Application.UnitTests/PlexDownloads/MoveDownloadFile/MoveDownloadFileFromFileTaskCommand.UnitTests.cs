@@ -368,6 +368,140 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
     }
 
     [Fact]
+    public async Task ShouldResumeMove_WhenReapTempFileIsMissingButRenamedFileExistsInDownloads()
+    {
+        // Arrange
+        // Simulates the crash/restart scenario: .reaptemp was renamed but the file was never
+        // moved to the destination. The handler should fall through and move the file instead
+        // of incorrectly declaring the move finished.
+        await SetupDatabase(
+            556677,
+            config =>
+            {
+                config.TvShowDownloadTasksCount = 1;
+                config.TvShowSeasonDownloadTasksCount = 1;
+                config.TvShowEpisodeDownloadTasksCount = 1;
+                config.DownloadWorkerTasks = 2;
+            }
+        );
+
+        var downloadFileTask = await IDbContext
+            .DownloadTaskTvShowEpisodeFile.Include(x => x.DownloadWorkerTasks)
+            .FirstOrDefaultAsync(CancellationToken);
+        downloadFileTask.ShouldNotBeNull();
+
+        var renamedInDownloadsPath = downloadFileTask.DownloadFilePath.RemoveReapTempSuffix();
+
+        var content = new byte[2 * 1024 * 1024];
+        new Random(42).NextBytes(content);
+
+        SetupFileSystem(fs =>
+        {
+            // .reaptemp file is gone, only the renamed file exists — not yet at destination
+            fs.AddFile(renamedInDownloadsPath, new MockFileData(content));
+        });
+
+        downloadFileTask.DataTotal = content.LongLength;
+        await IDbContext.SaveChangesAsync(CancellationToken);
+
+        Mock.Mock<IDownloadManagerSettings>()
+            .Setup(x => x.KeepCompletedInDownloadFolder)
+            .Returns(false)
+            .Verifiable(Times.AtLeastOnce);
+
+        Mock.Mock<IEventPublisher>()
+            .Setup(m => m.PublishAsync(It.IsAny<SendNotificationResult>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Never);
+
+        Mock.SetupCommand(It.IsAny<DownloadTaskUpdatedCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.AtLeastOnce);
+        Mock.SetupCommand(It.IsAny<MoveFileWithResumeCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.Once);
+
+        var progress = new Subject<IDownloadFileTransferProgress>();
+
+        // Act
+        var result = await Sut.ExecuteAsync(
+            new MoveDownloadFileFromFileTaskCommand(downloadFileTask.ToKey(), progress),
+            CancellationToken
+        );
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+
+        var after = await IDbContext.GetDownloadTaskFileAsync(downloadFileTask.ToKey(), CancellationToken);
+        after.ShouldNotBeNull();
+        after.DownloadStatus.ShouldBe(DownloadStatus.MoveFinished);
+        after.FileDataTransferred.ShouldBe(after.DataTotal);
+        after.CurrentFileTransferBytesOffset.ShouldBe(after.DataTotal);
+    }
+
+    [Fact]
+    public async Task ShouldTreatMoveAsFinished_WhenReapTempFileIsMissingAndRenamedFileExistsInDownloadsWithKeepInDownloads()
+    {
+        // Arrange
+        // Simulates the same crash/restart scenario but with keep-in-downloads enabled.
+        // The renamed file in downloads is the final resting place, so move is finished.
+        await SetupDatabase(
+            667788,
+            config =>
+            {
+                config.TvShowDownloadTasksCount = 1;
+                config.TvShowSeasonDownloadTasksCount = 1;
+                config.TvShowEpisodeDownloadTasksCount = 1;
+                config.DownloadWorkerTasks = 2;
+            }
+        );
+
+        var downloadFileTask = await IDbContext
+            .DownloadTaskTvShowEpisodeFile.Include(x => x.DownloadWorkerTasks)
+            .FirstOrDefaultAsync(CancellationToken);
+        downloadFileTask.ShouldNotBeNull();
+
+        var renamedInDownloadsPath = downloadFileTask.DownloadFilePath.RemoveReapTempSuffix();
+
+        var content = new byte[2 * 1024 * 1024];
+        new Random(43).NextBytes(content);
+
+        SetupFileSystem(fs =>
+        {
+            fs.AddFile(renamedInDownloadsPath, new MockFileData(content));
+        });
+
+        downloadFileTask.DataTotal = content.LongLength;
+        await IDbContext.SaveChangesAsync(CancellationToken);
+
+        Mock.Mock<IDownloadManagerSettings>()
+            .Setup(x => x.KeepCompletedInDownloadFolder)
+            .Returns(true)
+            .Verifiable(Times.AtLeastOnce);
+
+        Mock.Mock<IEventPublisher>()
+            .Setup(m => m.PublishAsync(It.IsAny<SendNotificationResult>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Never);
+
+        Mock.SetupCommand(It.IsAny<DownloadTaskUpdatedCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.AtLeastOnce);
+        Mock.SetupCommand(It.IsAny<MoveFileWithResumeCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.Never);
+
+        var progress = new Subject<IDownloadFileTransferProgress>();
+
+        // Act
+        var result = await Sut.ExecuteAsync(
+            new MoveDownloadFileFromFileTaskCommand(downloadFileTask.ToKey(), progress),
+            CancellationToken
+        );
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+
+        var after = await IDbContext.GetDownloadTaskFileAsync(downloadFileTask.ToKey(), CancellationToken);
+        after.ShouldNotBeNull();
+        after.DownloadStatus.ShouldBe(DownloadStatus.MoveFinished);
+        after.FileDataTransferred.ShouldBe(after.DataTotal);
+        after.CurrentFileTransferBytesOffset.ShouldBe(after.DataTotal);
+    }
+
+    [Fact]
     public async Task ShouldReturnFailedResultAndPublishNotification_WhenMoveWithResumeFails()
     {
         // Arrange

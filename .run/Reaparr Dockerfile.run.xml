@@ -15,11 +15,14 @@
             </DockerEnvVarImpl>
           </list>
         </option>
-        <option name="buildOnly" value="true" />
         <option name="containerName" value="ReaparrDev" />
         <option name="contextFolderPath" value="." />
         <option name="envVars">
           <list>
+            <DockerEnvVarImpl>
+              <option name="name" value="LOG_LEVEL" />
+              <option name="value" value="DEBUG" />
+            </DockerEnvVarImpl>
             <DockerEnvVarImpl>
               <option name="name" value="PGID" />
               <option name="value" value="1000" />
@@ -31,10 +34,6 @@
             <DockerEnvVarImpl>
               <option name="name" value="UNMASKED" />
               <option name="value" value="true" />
-            </DockerEnvVarImpl>
-            <DockerEnvVarImpl>
-              <option name="name" value="LOG_LEVEL" />
-              <option name="value" value="VERBOSE" />
             </DockerEnvVarImpl>
           </list>
         </option>

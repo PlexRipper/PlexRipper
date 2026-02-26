@@ -91,10 +91,10 @@ RUN dotnet publish "AppHost.csproj" -c Release -o /app/publish \
     -p:UseAppHost=false
 
 # Stage 3 - Runtime Image
-FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine AS dotnet-runtime
+FROM mcr.microsoft.com/dotnet/aspnet:10.0-noble AS dotnet-runtime
 
 # Stage 4 - Final Image with s6-overlay
-FROM ghcr.io/linuxserver/baseimage-alpine:3.20 AS final
+FROM ghcr.io/linuxserver/baseimage-ubuntu:noble AS final
 
 ARG VERSION
 ARG INFORMATIONAL_VERSION
@@ -111,9 +111,11 @@ ENV DOTNET_URLS=http://+:${PORT}
 ENV S6_SERVICES_GRACETIME=15000
 
 # Install dependencies
-RUN apk add --no-cache bash icu-libs krb5-libs libgcc libintl libssl3 libstdc++ zlib \
-    # dash-mpd-cli helpers
-    ffmpeg mkvtoolnix
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        libicu74 libkrb5-3 libgcc-s1 libssl3t64 libstdc++6 zlib1g \
+        ffmpeg mkvtoolnix && \
+    rm -rf /var/lib/apt/lists/*
 
 ## Copy .NET runtime from official image
 COPY --from=dotnet-runtime /usr/share/dotnet /usr/share/dotnet

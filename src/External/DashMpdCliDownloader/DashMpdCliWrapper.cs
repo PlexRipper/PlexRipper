@@ -99,6 +99,8 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
     {
         using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(_forcefulCts.Token, _gracefulCts.Token);
 
+        var processStarted = false;
+
         try
         {
             await foreach (var cmdEvent in command.ListenAsync(linkedCts.Token))
@@ -106,15 +108,16 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
                 switch (cmdEvent)
                 {
                     case StartedCommandEvent started:
+                        processStarted = true;
                         _log.Here().Information("dash-mpd-cli process started with PID {ProcessId}", started.ProcessId);
                         break;
 
-                    // By convention for “data output” (what you want to pipe into another program or save to a file).
+                    // By convention for "data output" (what you want to pipe into another program or save to a file).
                     case StandardOutputCommandEvent stdOut:
                         HandleStdoutLine(stdOut.Text);
                         break;
 
-                    // By convention “diagnostics” (logs, warnings, progress bars, info messages) happen in stderr
+                    // By convention "diagnostics" (logs, warnings, progress bars, info messages) happen in stderr
                     case StandardErrorCommandEvent stdErr:
                         HandleStdoutLine(stdErr.Text);
                         break;
@@ -135,7 +138,22 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
         }
         catch (Exception ex)
         {
-            _log.Here().Error(ex, "dash-mpd-cli event loop faulted");
+            if (!processStarted)
+            {
+                _log.Here()
+                    .Error(
+                        ex,
+                        "dash-mpd-cli failed to start. Binary: {BinaryPath}. "
+                            + "Possible causes: missing glibc (binary is glibc-linked, not musl), "
+                            + "working directory does not exist, or insufficient execute permissions.",
+                        _binaryPath
+                    );
+            }
+            else
+            {
+                _log.Here().Error(ex, "dash-mpd-cli event loop faulted after process started");
+            }
+
             _processExitSource.TrySetException(ex);
         }
         finally

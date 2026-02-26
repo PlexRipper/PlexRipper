@@ -204,10 +204,7 @@ public static partial class Startup
             .ConfigurePrimaryHttpMessageHandler(() =>
                 new SocketsHttpHandler
                 {
-                    SslOptions = new SslClientAuthenticationOptions
-                    {
-                        EnabledSslProtocols = SslProtocols.None,
-                    },
+                    SslOptions = new SslClientAuthenticationOptions { EnabledSslProtocols = SslProtocols.None },
                 }
             );
 

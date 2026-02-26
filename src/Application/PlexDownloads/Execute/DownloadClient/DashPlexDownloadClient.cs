@@ -93,7 +93,7 @@ public class DashPlexDownloadClient : IPlexDownloadClient
     /// </summary>
     public async Task<Result> Setup(DownloadTaskKey downloadTaskKey, CancellationToken cancellationToken = default)
     {
-        var dbContext = _dbContextFactory.Create();
+        using var dbContext = _dbContextFactory.Create();
         var downloadTask = await dbContext.GetDownloadTaskAsync(downloadTaskKey, cancellationToken);
         if (downloadTask is null)
         {
@@ -154,40 +154,46 @@ public class DashPlexDownloadClient : IPlexDownloadClient
 
         _log.Here().Debug("Starting DASH download for {MediaFileName}", DownloadTask.FileName);
 
-        try
+        // Ensure working directory exists immediately before launching the process
+        var ensureDirResult = Result.Try(() => _directory.CreateDirectory(DownloadTask.DownloadDirectory));
+        if (ensureDirResult.IsFailed)
         {
-            // Configure dash-mpd-cli options
-            var options = new DashMpdCliOptions
+            _log.Here()
+                .Error(
+                    "Cannot create download directory {DownloadDirectory} for {FileName}. "
+                        + "Ensure the volume is mounted and the path is accessible.",
+                    DownloadTask.DownloadDirectory,
+                    DownloadTask.FileName
+                );
+            return ensureDirResult.ToResult();
+        }
+
+        // Configure dash-mpd-cli options
+        var options = new DashMpdCliOptions
+        {
+            MpdUrl = _downloadUrl,
+            Output = Path.Combine(DownloadTask.DownloadDirectory, DownloadTask.FileName),
+            WorkingDirectory = DownloadTask.DownloadDirectory,
+            Quiet = false,
+            Quality = "best",
+            EnvironmentVariables = new Dictionary<string, string>
             {
-                MpdUrl = _downloadUrl,
-                Output = Path.Combine(DownloadTask.DownloadDirectory, DownloadTask.FileName),
-                WorkingDirectory = DownloadTask.DownloadDirectory,
-                Quiet = false,
-                Quality = "best",
-                EnvironmentVariables = new Dictionary<string, string>
-                {
-                    ["TMPDIR"] = DownloadTask.DownloadDirectory,
-                    ["TMP"] = DownloadTask.DownloadDirectory,
-                },
-            };
+                ["TMPDIR"] = DownloadTask.DownloadDirectory,
+                ["TMP"] = DownloadTask.DownloadDirectory,
+            },
+        };
 
-            // Start the download process
-            var startedResult = await _dashWrapper.StartAsync(options);
-            if (startedResult.IsFailed)
-                return startedResult;
+        // Start the download process
+        var startedResult = await _dashWrapper.StartAsync(options);
+        if (startedResult.IsFailed)
+            return startedResult;
 
-            // Update status to downloading
-            DownloadStatus = DownloadStatus.Downloading;
-            await _dbContextFactory.Create().SetDownloadStatus(DownloadTask.ToKey(), DownloadStatus);
+        // Update status to downloading
+        DownloadStatus = DownloadStatus.Downloading;
+        using var dbContext = await _dbContextFactory.CreateAsync();
+        await dbContext.SetDownloadStatus(DownloadTask.ToKey(), DownloadStatus);
 
-            return Result.Ok();
-        }
-        catch (Exception ex)
-        {
-            return Result
-                .Fail(new ExceptionalError($"Could not start download for {DownloadTask.FileName}", ex))
-                .LogError();
-        }
+        return Result.Ok();
     }
 
     /// <summary>
@@ -286,7 +292,8 @@ public class DashPlexDownloadClient : IPlexDownloadClient
             if (DownloadTask != null)
             {
                 DownloadStatus = DownloadStatus.Paused;
-                await _dbContextFactory.Create().SetDownloadStatus(_downloadTaskKey, DownloadStatus);
+                using var dbContext = _dbContextFactory.Create();
+                await dbContext.SetDownloadStatus(_downloadTaskKey, DownloadStatus);
                 await _commandExecutor.Send(new DownloadTaskUpdatedCommand(_downloadTaskKey));
             }
 
@@ -350,7 +357,8 @@ public class DashPlexDownloadClient : IPlexDownloadClient
 
         try
         {
-            await _dbContextFactory.Create().UpdateDownloadProgress(_downloadTaskKey, DownloadTask!);
+            using var dbContext = _dbContextFactory.Create();
+            await dbContext.UpdateDownloadProgress(_downloadTaskKey, DownloadTask!);
             await _commandExecutor.Send(new DownloadTaskUpdatedCommand(_downloadTaskKey));
 
             _log.Here()
@@ -417,9 +425,8 @@ public class DashPlexDownloadClient : IPlexDownloadClient
 
     private async Task SetupDownloadLimitWatcher(DownloadTaskGeneric downloadTask)
     {
-        var serverMachineIdentifier = await _dbContextFactory
-            .Create()
-            .GetPlexServerMachineIdentifierById(downloadTask.PlexServerId);
+        using var dbContext = _dbContextFactory.Create();
+        var serverMachineIdentifier = await dbContext.GetPlexServerMachineIdentifierById(downloadTask.PlexServerId);
 
         var downloadSpeedLimit = _serverSettings.GetDownloadSpeedLimit(serverMachineIdentifier);
 

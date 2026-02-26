@@ -45,7 +45,7 @@ public static class DashMpdCliOptionsExtensions
         // Bandwidth control
         if (!string.IsNullOrWhiteSpace(options.LimitRate))
         {
-            args.Append($" --limit-rate {options.LimitRate}");
+            args.Append($" --limit-rate \"{Escape(options.LimitRate)}\"");
         }
 
         // Authentication
@@ -170,14 +170,14 @@ public static class DashMpdCliOptionsExtensions
             args.Append(" --no-period-concatenation");
         }
 
+        // Always use NDJSON output (must be set before AdditionalArguments so it cannot be overridden)
+        args.Append(" --progress=json");
+
         // Additional custom arguments
         if (!string.IsNullOrWhiteSpace(options.AdditionalArguments))
         {
             args.Append($" {options.AdditionalArguments}");
         }
-
-        // Always use NDJSON output
-        args.Append(" --progress=json");
 
         // MPD URL (must be last)
         args.Append($" \"{Escape(options.MpdUrl)}\"");

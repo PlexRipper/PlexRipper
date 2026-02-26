@@ -135,8 +135,12 @@ public class GetDashDownloadUrlCommandHandler : ICommandHandler<GetDashDownloadU
                 );
 
             // Verify we got direct stream (copy) for source quality
-            var video = doc.Root?.Descendants("Stream").FirstOrDefault(s => s.Attribute("streamType")?.Value == "1");
-            var audio = doc.Root?.Descendants("Stream").FirstOrDefault(s => s.Attribute("streamType")?.Value == "2");
+            var video = mediaContainer
+                .Descendants("Stream")
+                .FirstOrDefault(s => s.Attribute("streamType")?.Value == "1");
+            var audio = mediaContainer
+                .Descendants("Stream")
+                .FirstOrDefault(s => s.Attribute("streamType")?.Value == "2");
 
             var videoDecision = video?.Attribute("decision")?.Value ?? "unknown";
             var audioDecision = audio?.Attribute("decision")?.Value ?? "unknown";
@@ -219,7 +223,7 @@ public class GetDashDownloadUrlCommandHandler : ICommandHandler<GetDashDownloadU
             .SetQueryParam("autoAdjustSubtitle", 1)
             .SetQueryParam("mediaBufferSize", 102400)
             .SetQueryParam("session", session)
-            .SetQueryParam("subtitles", "burn")
+            .SetQueryParam("subtitles", "none")
             .SetQueryParam("videoResolution", "3840x2160") // Request 4K/UHD output
             .SetQueryParam("videoQuality", 100) // Highest quality setting
             .SetQueryParam("Accept-Language", "en")

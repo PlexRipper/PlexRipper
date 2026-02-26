@@ -118,19 +118,6 @@ public class DownloadJob : IJob, IAsyncDisposable
 
             _plexDownloadClient = _plexDownloadClientFactory[clientType];
             var downloadClientResult = await _plexDownloadClient.Setup(downloadTask.ToKey(), token);
-
-            if (downloadClientResult.IsFailed && clientType == PlexDownloadClientType.Dash)
-            {
-                _log.Here()
-                    .Warning(
-                        "Dash download client setup failed for {DownloadTaskFullTitle}, falling back to Direct client",
-                        downloadTask.FullTitle
-                    );
-                await _plexDownloadClient.DisposeAsync();
-                _plexDownloadClient = _plexDownloadClientFactory[PlexDownloadClientType.Direct];
-                downloadClientResult = await _plexDownloadClient.Setup(downloadTask.ToKey(), token);
-            }
-
             if (downloadClientResult.IsFailed)
             {
                 downloadClientResult.LogError();

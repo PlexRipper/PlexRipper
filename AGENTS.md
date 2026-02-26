@@ -451,6 +451,13 @@ public class $NAME$CommandHandler : ICommandHandler<$NAME$Command, Result<$RETUR
 
 * `dash-mpd-cli` emits NDJSON with fields like `type`, `percent`, `bandwidth`, `message`; parse with JSON deserialization and only handle `type="progress"`
 
+### dash-mpd-cli glibc dependency
+
+* The bundled `dash-mpd-cli` binaries (`src/External/dash-mpd-cli/binary/`) are dynamically linked against glibc and require glibc >= 2.38 (`__isoc23_*` symbols introduced in glibc 2.38)
+* The Docker final image uses `baseimage-ubuntu:noble` (Ubuntu 24.04, glibc 2.39) — glibc is available natively, no shims needed
+* If upgrading `dash-mpd-cli` to a newer version, check whether the binary is still glibc-linked (`file` + `readelf -d`) and whether a higher glibc version is required
+* Both binaries must be tracked as executable in git (`100755`): run `git update-index --chmod=+x` if a new binary is added as non-executable
+
 ## Performance rules during gaming (Arch Linux)
 
 During gameplay, game performance has priority over builds/tests.

@@ -94,7 +94,15 @@ export const useSignalrStore = defineStore(StoreNames.SignalrStore, () => {
 
 				await Promise.all([startDownloadHubConnection(), startProgressHubConnection(), startNotificationHubConnection()]);
 			})()).pipe(switchMap(() => of({ name: StoreNames.SignalrStore, isSuccess: true })), take(1));
-		}, $reset() {
+		},
+		clearServerConnectionCheckStatusProgress(plexServerConnectionId: number): void {
+			removeStateItem<ServerConnectionCheckStatusProgressDTO>(
+				'serverConnectionCheckStatusProgress',
+				{ plexServerConnectionId } as ServerConnectionCheckStatusProgressDTO,
+				'plexServerConnectionId',
+			);
+		},
+		$reset() {
 			Object.assign(state, cloneDeep(defaultState));
 		},
 	};
@@ -152,6 +160,36 @@ export const useSignalrStore = defineStore(StoreNames.SignalrStore, () => {
 				(state[propertyName] as Array<T>).splice(i, 1, item);
 			} else {
 				(state[propertyName] as Array<T>).push(item);
+			}
+		}
+
+		// Trigger Subject to send current state
+		(state[propertyName + 'Subject'] as Subject<Array<T>>).next(state[propertyName] as Array<T>);
+	}
+
+	function removeStateItem<T>(propertyName: keyof ISignalRStoreState, itemToRemove: T, idName: keyof T): void {
+		if (!state[propertyName]) {
+			Log.error(`Failed to get ISignalRStoreState property name: ${propertyName}`);
+			return;
+		}
+
+		if (isArray(itemToRemove)) {
+			for (const item of itemToRemove) {
+				remove(item);
+			}
+		} else {
+			remove(itemToRemove);
+		}
+
+		function remove(item: T): void {
+			if (!item[idName]) {
+				Log.error(`Failed to find the correct id property in ${propertyName} with idName: ${String(idName)}`, item);
+				return;
+			}
+
+			const i = (state[propertyName] as Array<T>).findIndex((x) => x[idName] === item[idName]);
+			if (i > -1) {
+				(state[propertyName] as Array<T>).splice(i, 1);
 			}
 		}
 

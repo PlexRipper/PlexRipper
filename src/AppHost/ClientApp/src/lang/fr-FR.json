@@ -127,7 +127,8 @@
                 "server-connections": {
                     "header": "Connexions au serveur",
                     "section-header": "Sélectionnez la connexion serveur préférée :",
-                    "add-connection-button": "Ajouter une connexion"
+                    "add-connection-button": "Ajouter une connexion",
+                    "check-all-connections": "Vérifier toutes les connexions"
                 },
                 "server-data": {
                     "headers": {

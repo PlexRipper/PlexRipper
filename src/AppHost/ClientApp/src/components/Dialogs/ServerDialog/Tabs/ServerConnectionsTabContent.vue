@@ -1,7 +1,23 @@
 <template>
-	<QText size="h5">
-		{{ $t('components.server-dialog.tabs.server-connections.section-header') }}
-	</QText>
+	<QRow
+		class="q-mb-md"
+		justify="between">
+		<QCol cols="auto">
+			<QText size="h5">
+				{{ $t('components.server-dialog.tabs.server-connections.section-header') }}
+			</QText>
+		</QCol>
+		<QCol cols="auto">
+			<IconButton
+				icon="mdi-cloud-sync"
+				:loading="checkAllLoading"
+				:cy="'check-all-connections-btn'"
+				tooltip-text="Check all Connections"
+				class="q-mr-md"
+				@click="checkAllConnections" />
+		</QCol>
+	</QRow>
+
 	<q-list>
 		<!-- Plex Connections -->
 		<ServerConnectionDisplayRow
@@ -30,6 +46,7 @@
 </template>
 
 <script setup lang="ts">
+import { useSubscription } from '@vueuse/rxjs';
 import type { PlexServerConnectionDTO } from '@dto';
 import { useServerConnectionStore, useDialogStore } from '@store';
 
@@ -41,6 +58,10 @@ const props = defineProps<{
 	isVisible: boolean;
 }>();
 
+const checkAllLoading = computed(() =>
+	serverConnectionStore.isAnyConnectionLoadingForServer(props.plexServerId),
+);
+
 const connections = computed((): {
 	plexApiConnections: PlexServerConnectionDTO[];
 	customConnections: PlexServerConnectionDTO[];
@@ -51,4 +72,10 @@ const connections = computed((): {
 		plexApiConnections: allConnections.filter((x) => !x.isCustom),
 	};
 });
+
+function checkAllConnections(): void {
+	useSubscription(
+		serverConnectionStore.checkServerStatus(props.plexServerId).subscribe(),
+	);
+}
 </script>

@@ -40,14 +40,14 @@ public class TestConnectionToSonarrEndpoint
     : BaseEndpoint<TestConnectionToSonarrEndpointRequest, TestConnectionToSonarrEndpointResponse>
 {
     private readonly ILogger _log;
-    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly HttpClient _client;
 
     public override string EndpointPath => ApiRoutes.IntegrationController + "/Sonarr/TestConnection";
 
     public TestConnectionToSonarrEndpoint(ILogger log, IHttpClientFactory httpClientFactory)
     {
         _log = log.ForContext<TestConnectionToSonarrEndpoint>();
-        _httpClientFactory = httpClientFactory;
+        _client = httpClientFactory.CreateSonarrHttpClient();
     }
 
     public override void Configure()
@@ -63,9 +63,6 @@ public class TestConnectionToSonarrEndpoint
     public override async Task HandleAsync(TestConnectionToSonarrEndpointRequest req, CancellationToken ct)
     {
         _log.Here().DebugApiCall(HttpContext, req);
-
-        var client = _httpClientFactory.CreateClient();
-        client.Timeout = TimeSpan.FromSeconds(5);
 
         var baseUrl = req.Url.TrimEnd('/');
 
@@ -85,45 +82,38 @@ public class TestConnectionToSonarrEndpoint
         httpRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         httpRequest.Headers.Add("X-Api-Key", req.ApiKey);
 
-        HttpResponseMessage httpResponse;
-        try
+        var result = await Result.Try(async Task () =>
         {
-            httpResponse = await client.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead, ct);
-        }
-        catch (TaskCanceledException e)
+            using var httpResponse = await _client.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead, ct);
+            if (httpResponse.IsSuccessStatusCode)
+            {
+                await SendTestResult(TestConnectionStatus.Success, ct);
+                return;
+            }
+
+            var statusCode = (int)httpResponse.StatusCode;
+            if (statusCode == 401)
+            {
+                await SendTestResult(TestConnectionStatus.InvalidApiKey, ct);
+            }
+
+            var reason = httpResponse.ReasonPhrase ?? $"HTTP {(int)httpResponse.StatusCode}";
+            _log.Here().Warning("Sonarr connection test failed: {Reason}", reason);
+            await SendTestResult(TestConnectionStatus.ConnectionFailed, ct);
+        });
+
+        if (result.IsCancelled)
         {
-            _log.Here().Error(e, "HTTP request to Sonarr instance failed.");
+            _log.Here().Error("HTTP request to Sonarr instance was cancelled.");
             await SendTestResult(TestConnectionStatus.ConnectionFailed, ct);
             return;
         }
-        catch (HttpRequestException e)
+
+        if (result.IsFailed)
         {
-            _log.Here().Error(e, "HTTP request to Sonarr instance failed.");
+            _log.Here().Error("HTTP request to Sonarr instance failed.");
             await SendTestResult(TestConnectionStatus.ConnectionFailed, ct);
-            return;
         }
-
-        if (httpResponse.IsSuccessStatusCode)
-        {
-            await SendTestResult(TestConnectionStatus.Success, ct);
-            return;
-        }
-
-        var statusCode = (int)httpResponse.StatusCode;
-        if (statusCode == 401)
-        {
-            await SendTestResult(TestConnectionStatus.InvalidApiKey, ct);
-            return;
-        }
-
-        var reason = httpResponse.ReasonPhrase ?? $"HTTP {(int)httpResponse.StatusCode}";
-        var responseBody = await httpResponse.Content.ReadAsStringAsync(ct);
-        if (!string.IsNullOrWhiteSpace(responseBody))
-        {
-            var truncatedBody = responseBody.Length > 512 ? responseBody.Substring(0, 512) + "..." : responseBody;
-            reason = $"{reason} | Body: {truncatedBody}";
-        }
-        await SendFluentResult(Result.Fail(reason).LogError(), ct);
     }
 
     private async Task SendTestResult(TestConnectionStatus status, CancellationToken ct)

@@ -81,7 +81,7 @@ public class TestConnectionToRadarrEndpoint
         httpRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         httpRequest.Headers.Add("X-Api-Key", req.ApiKey);
 
-        try
+        var result = await Result.Try(async Task () =>
         {
             using var httpResponse = await _client.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead, ct);
             if (httpResponse.IsSuccessStatusCode)
@@ -100,15 +100,18 @@ public class TestConnectionToRadarrEndpoint
             var reason = httpResponse.ReasonPhrase ?? $"HTTP {(int)httpResponse.StatusCode}";
             _log.Here().Warning("Radarr connection test failed: {Reason}", reason);
             await SendTestResult(TestConnectionStatus.ConnectionFailed, ct);
-        }
-        catch (TaskCanceledException e)
+        });
+
+        if (result.IsCancelled)
         {
-            _log.Here().Error(e, "HTTP request to Radarr instance failed.");
+            _log.Here().Error("HTTP request to Radarr instance was cancelled.");
             await SendTestResult(TestConnectionStatus.ConnectionFailed, ct);
+            return;
         }
-        catch (HttpRequestException e)
+
+        if (result.IsFailed)
         {
-            _log.Here().Error(e, "HTTP request to Radarr instance failed.");
+            _log.Here().Error("HTTP request to Radarr instance failed.");
             await SendTestResult(TestConnectionStatus.ConnectionFailed, ct);
         }
     }

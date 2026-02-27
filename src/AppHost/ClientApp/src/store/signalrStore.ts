@@ -1,7 +1,7 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { reactive, toRefs } from 'vue';
 import type { Observable } from 'rxjs';
-import { from, of, Subject } from 'rxjs';
+import { from, of, tap, Subject } from 'rxjs';
 import { distinctUntilChanged, filter, map, switchMap, take } from 'rxjs/operators';
 import Log from 'consola';
 import type { HubConnection, IHttpConnectionOptions } from '@microsoft/signalr';
@@ -194,7 +194,7 @@ export const useSignalrStore = defineStore(StoreNames.SignalrStore, () => {
 			return getters.getAllServerConnectionProgress().pipe(map((x) => x?.filter((y) => y.plexServerId === plexServerId)), distinctUntilChanged(isEqual));
 		},
 		getRefreshNotification(filterOn: RefreshDataType): Observable<RefreshDataType> {
-			return state.refreshDataNotificationSubject.asObservable().pipe(filter((x) => x === filterOn));
+			return state.refreshDataNotificationSubject.asObservable().pipe(filter((x) => x === filterOn), tap(() => Log.debug('Refreshing ' + filterOn)));
 		}, // endregion
 	};
 	return {

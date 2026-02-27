@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Net.Http.Headers;
 using FastEndpoints;
 using FluentValidation;
+using Flurl;
 using Reaparr.Application.Contracts;
 
 namespace Reaparr.Application;
@@ -30,9 +31,22 @@ public class TestConnectionToSonarrEndpointRequestValidator : Validator<TestConn
 {
     public TestConnectionToSonarrEndpointRequestValidator()
     {
-        RuleFor(x => x.Url).NotEmpty().WithMessage("URL cannot be empty.");
+        RuleFor(x => x.Url).NotEmpty().WithMessage("Provided Sonarr URL cannot be empty.");
+        RuleFor(x => x.Url).Must(BeValidUrl).WithMessage("Provided Sonarr URL must be a valid http/https URL.");
+        RuleFor(x => x.ApiKey).NotEmpty().WithMessage("Provided Sonarr API Key cannot be empty.");
+    }
 
-        RuleFor(x => x.ApiKey).NotEmpty().WithMessage("API Key cannot be empty.");
+    private static bool BeValidUrl(string url)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+        {
+            return false;
+        }
+
+        var trimmed = url.TrimEnd('/');
+
+        return Uri.TryCreate(trimmed, UriKind.Absolute, out var uriResult)
+            && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
     }
 }
 
@@ -66,19 +80,9 @@ public class TestConnectionToSonarrEndpoint
 
         var baseUrl = req.Url.TrimEnd('/');
 
-        if (
-            !Uri.TryCreate(baseUrl, UriKind.Absolute, out var uriResult)
-            || (uriResult.Scheme != Uri.UriSchemeHttp && uriResult.Scheme != Uri.UriSchemeHttps)
-        )
-        {
-            _log.Here().Warning("Provided Sonarr URL is invalid: {Url}", req.Url);
-            await SendTestResult(TestConnectionStatus.UrlIsInvalid, ct);
-            return;
-        }
+        var url = new Url(baseUrl).AppendPathSegments("api", "v3", "system", "status");
 
-        var url = $"{baseUrl}/api/v3/system/status";
-
-        using var httpRequest = new HttpRequestMessage(System.Net.Http.HttpMethod.Get, url);
+        using var httpRequest = new HttpRequestMessage(System.Net.Http.HttpMethod.Get, url.ToString());
         httpRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         httpRequest.Headers.Add("X-Api-Key", req.ApiKey);
 
@@ -111,7 +115,7 @@ public class TestConnectionToSonarrEndpoint
 
         if (result.IsFailed)
         {
-            _log.Here().Error("HTTP request to Sonarr instance failed.");
+            _log.Here().Error("HTTP request to Sonarr instance failed, could be offline");
             await SendTestResult(TestConnectionStatus.ConnectionFailed, ct);
         }
     }

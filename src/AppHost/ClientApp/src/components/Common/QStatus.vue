@@ -8,18 +8,18 @@
 		class="status-indicator"
 		:[status]="true"
 		pulse
-		data-cy="status-indicator-online" />
+		:data-cy="`status-indicator-online-${cy}`" />
 	<span
 		v-else
 		v-bind="$attrs"
 		class="status-indicator"
-		data-cy="status-indicator-offline"
+		:data-cy="`status-indicator-offline-${cy}`"
 		:[status]="true" />
 </template>
 
 <script setup lang="ts">
 // Stolen from: https://www.npmjs.com/package/vue-status-indicator
-const props = defineProps<{ value: boolean }>();
+const props = defineProps<{ value: boolean; cy?: string }>();
 
 const status = computed(() => {
 	return props.value ? 'positive' : 'negative';

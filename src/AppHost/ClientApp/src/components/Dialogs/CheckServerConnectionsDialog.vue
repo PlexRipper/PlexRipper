@@ -9,6 +9,8 @@
 			<ProgressComponent
 				class="q-ma-md"
 				circular-mode
+				data-cy="check-server-connection-dialog-progress"
+				:data-completed="totalPercentage === 100"
 				:percentage="totalPercentage"
 				:completed="totalPercentage === 100"
 				:text="getProgressText"
@@ -34,9 +36,11 @@
 										v-if="isServer(node)"
 										name="mdi-server"
 										size="28px"
+										:data-cy="`check-server-connection-dialog-server-icon-${node.id}`"
 										class="q-mr-sm" />
 									<QConnectionIcon
 										v-else
+										:cy="`check-server-connection-dialog-connection-icon-${node.id}`"
 										:type="node.connectionType" />
 									<!-- Plex Server Connection Url	-->
 									<span
@@ -48,8 +52,8 @@
 										]"
 										:data-cy="
 											isServer(node)
-												? 'check-server-connections-dialog-server-title'
-												: 'check-server-connections-dialog-connection-title'
+												? `check-server-connections-dialog-server-title-${node.id}`
+												: `check-server-connections-dialog-connection-title-${node.id}`
 										">
 										{{ node.title }}
 									</span>
@@ -66,28 +70,33 @@
 									<QCol cols="3">
 										<QSpinnerRadio
 											v-if="!node.completed"
+											:data-cy="`check-server-connections-dialog-${node.id}`"
 											color="red"
 											size="2em" />
 										<QStatus
 											v-else
+											:cy="node.id.toString()"
 											:value="node.connectionSuccessful" />
 									</QCol>
 									<!-- Plex Server Connection Progress	-->
 									<QCol cols="9">
-										<template v-if="isServer(node) && node.completed">
+										<template v-if="isServer(node) && (node.connectionSuccessful || node.completed)">
 											<!-- No Plex Server Connection -->
 											<span
 												v-if="node.noConnections"
+												:data-cy="`check-server-connections-dialog-result-text-no-connections-${node.id}`"
 												:class="{ 'text-weight-bold': node.type === 'server' }">
 												{{ t('components.check-server-connections-dialog.no-connections') }}
 											</span>
 											<span
 												v-else-if="node.connectionSuccessful"
+												:data-cy="`check-server-connections-dialog-result-text-success-${node.id}`"
 												:class="{ 'text-weight-bold': node.type === 'server' }">
 												{{ t('components.check-server-connections-dialog.server-connectable') }}
 											</span>
 											<span
-												v-else
+												v-else-if="node.completed"
+												:data-cy="`check-server-connections-dialog-result-text-completed-${node.id}`"
 												:class="{ 'text-weight-bold': node.type === 'server' }">
 												{{ t('components.check-server-connections-dialog.server-un-connectable') }}
 											</span>
@@ -216,9 +225,10 @@ const plexServerNodes = computed((): IPlexServerNode[] => {
 			type: 'server',
 			title: serverStore.getServerName(server.id),
 			completed: serverHasProgress
-				? (hasConnections ? (hasSuccessfulConnection || !hasInProgressConnections) : true)
+				? (hasConnections ? !hasInProgressConnections : true)
 				: false,
 			connectionSuccessful: hasSuccessfulConnection,
+			hasInProgressConnections,
 			noConnections: !hasConnections,
 			children: mappedConnections,
 		};
@@ -294,6 +304,7 @@ interface IPlexServerNode {
 	connectionSuccessful: boolean;
 	progress?: ServerConnectionCheckStatusProgressDTO;
 	noConnections?: boolean;
+	hasInProgressConnections?: boolean;
 	local?: boolean;
 	connectionType?: PlexConnectionTypes;
 	children: IPlexServerNode[];

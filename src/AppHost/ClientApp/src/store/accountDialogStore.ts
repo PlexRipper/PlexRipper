@@ -131,6 +131,10 @@ export const useAccountDialogStore = defineStore(StoreNames.AccountDialogStore, 
 
 					// Update state with validated token data
 					updateStateWithAccountData(value);
+
+					if (value.isValidated && !state.displayName && value.email) {
+						state.displayName = value.email;
+					}
 					state.hasValidationErrors = false;
 
 					// Account was validated successfully

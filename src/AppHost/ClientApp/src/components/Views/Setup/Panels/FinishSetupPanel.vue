@@ -36,7 +36,7 @@ const list = ref([{
 	text: t('pages.setup.finished.list.item-2'),
 },
 {
-	link: 'https://www.reaparr.rocks/contributing/translating',
+	link: 'https://www.reaparr.rocks/docs/contributing/translating',
 	text: t('pages.setup.finished.list.item-3'),
 },
 {

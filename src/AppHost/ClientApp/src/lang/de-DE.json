@@ -539,7 +539,7 @@
             },
             "username": {
                 "label": "Benutzername",
-                "text": "Der Benutzername des Plex Kontos.\n\n**Hinweis:** Plex verwendet deine **E-Mail-Adresse** als Benutzernamen. Falls dein Benutzername nicht funktioniert, siehe die [FAQ](https://www.plexripper.rocks/faq#i-tried-to-use-my-username-to-set-up-my-plex-account-in-plex-ripper-but-its-not-working) für Hilfe.",
+                "text": "Der Benutzername des Plex Kontos.\n\n**Hinweis:** Plex verwendet deine **E-Mail-Adresse** als Benutzernamen. Falls dein Benutzername nicht funktioniert, siehe die [FAQ](https://www.reaparr.rocks/docs/faq#username-setup) für Hilfe.",
                 "title": "Benutzername"
             }
         },
@@ -764,7 +764,7 @@
                         "title": "Clear Sonarr-Konfiguration"
                     },
                     "setup-configuration": {
-                        "text": "Reaparr richtet in Sonarr einen Indexer und einen Download-Client ein, der es Sonarr ermöglicht, Downloads auszulösen.\n\nWeitere Informationen finden Sie im [Sonarr/Radarr-Integrationsleitfaden](https://www.reaparr.rocks/guides/integration/sonarr-radarr).",
+                        "text": "Reaparr richtet in Sonarr einen Indexer und einen Download-Client ein, der es Sonarr ermöglicht, Downloads auszulösen.\n\nWeitere Informationen finden Sie im [Sonarr/Radarr-Integrationsleitfaden](https://www.reaparr.rocks/docs/integration/sonarr-radarr).",
                         "title": "Sonarr-Konfiguration einrichten"
                     },
                     "test-connection": {
@@ -788,7 +788,7 @@
                         "title": "Clear Radarr-Konfiguration"
                     },
                     "setup-configuration": {
-                        "text": "Reaparr richtet in Radarr einen Indexer und einen Download-Client ein, der es Radarr ermöglicht, Downloads auszulösen.\n\nWeitere Informationen finden Sie im [Sonarr/Radarr-Integrationsleitfaden](https://www.reaparr.rocks/guides/integration/sonarr-radarr).",
+                        "text": "Reaparr richtet in Radarr einen Indexer und einen Download-Client ein, der es Radarr ermöglicht, Downloads auszulösen.\n\nWeitere Informationen finden Sie im [Sonarr/Radarr-Integrationsleitfaden](https://www.reaparr.rocks/docs/integration/sonarr-radarr).",
                         "title": "Radarr-Konfiguration einrichten"
                     },
                     "test-connection": {

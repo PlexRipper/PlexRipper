@@ -539,7 +539,7 @@
             },
             "username": {
                 "label": "Username",
-                "text": "The username of your Plex account.\n\n**Note:** Plex uses your **email address** as username. If your username is not working, see the [FAQ](https://www.plexripper.rocks/faq#i-tried-to-use-my-username-to-set-up-my-plex-account-in-plex-ripper-but-its-not-working) for help.",
+                "text": "The username of your Plex account.\n\n**Note:** Plex uses your **email address** as username. If your username is not working, see the [FAQ](https://www.reaparr.rocks/docs/faq#username-setup) for help.",
                 "title": "Username"
             }
         },
@@ -764,7 +764,7 @@
                         "title": "Clear Sonarr configuration"
                     },
                     "setup-configuration": {
-                        "text": "Reaparr will set up an Indexer and Download client in Sonarr, which is then used to allow Sonarr to trigger downloads.\n\nSee [Sonarr/Radarr Integration Guide](https://www.reaparr.rocks/guides/integration/sonarr-radarr) for more info.",
+                        "text": "Reaparr will set up an Indexer and Download client in Sonarr, which is then used to allow Sonarr to trigger downloads.\n\nSee [Sonarr/Radarr Integration Guide](https://www.reaparr.rocks/docs/integration/sonarr-radarr) for more info.",
                         "title": "Setup Sonarr configuration"
                     },
                     "test-connection": {
@@ -788,7 +788,7 @@
                         "title": "Clear Radarr configuration"
                     },
                     "setup-configuration": {
-                        "text": "Reaparr will set up an Indexer and Download client in Radarr, which is then used to allow Radarr to trigger downloads.\n\nSee [Sonarr/Radarr Integration Guide](https://www.reaparr.rocks/guides/integration/sonarr-radarr) for more info.",
+                        "text": "Reaparr will set up an Indexer and Download client in Radarr, which is then used to allow Radarr to trigger downloads.\n\nSee [Sonarr/Radarr Integration Guide](https://www.reaparr.rocks/docs/integration/sonarr-radarr) for more info.",
                         "title": "Setup Radarr configuration"
                     },
                     "test-connection": {

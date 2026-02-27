@@ -539,7 +539,7 @@
             },
             "username": {
                 "label": "Nazwa użytkownika",
-                "text": "Nazwa użytkownika twojego konta Plex.\n\n**Uwaga:** Plex używa **adresu e-mail** jako nazwy użytkownika. Jeśli nazwa użytkownika nie działa, zajrzyj do [FAQ](https://www.plexripper.rocks/faq#i-tried-to-use-my-username-to-set-up-my-plex-account-in-plex-ripper-but-its-not-working) po pomoc.",
+                "text": "Nazwa użytkownika twojego konta Plex.\n\n**Uwaga:** Plex używa **adresu e-mail** jako nazwy użytkownika. Jeśli nazwa użytkownika nie działa, zajrzyj do [FAQ](https://www.reaparr.rocks/docs/faq#username-setup) po pomoc.",
                 "title": "Nazwa użytkownika"
             }
         },
@@ -764,7 +764,7 @@
                         "title": "Wyczyść konfigurację Sonarr"
                     },
                     "setup-configuration": {
-                        "text": "Reaparr skonfiguruje w Sonarr klienta indeksowania i pobierania, który następnie umożliwi Sonarrowi inicjowanie pobierania.\n\nWięcej informacji można znaleźć w [Przewodniku integracji Sonarr/Radarr](https://www.reaparr.rocks/guides/integration/sonarr-radarr).",
+                        "text": "Reaparr skonfiguruje w Sonarr klienta indeksowania i pobierania, który następnie umożliwi Sonarrowi inicjowanie pobierania.\n\nWięcej informacji można znaleźć w [Przewodniku integracji Sonarr/Radarr](https://www.reaparr.rocks/docs/integration/sonarr-radarr).",
                         "title": "Konfiguracja Sonarr"
                     },
                     "test-connection": {
@@ -788,7 +788,7 @@
                         "title": "Wyczyść konfigurację Radar"
                     },
                     "setup-configuration": {
-                        "text": "Reaparr skonfiguruje w Radarr klienta indeksowania i pobierania, który następnie umożliwi Radarrowi inicjowanie pobierania.\n\nWięcej informacji można znaleźć w [Przewodniku integracji Sonarr/Radarr](https://www.reaparr.rocks/guides/integration/sonarr-radarr).",
+                        "text": "Reaparr skonfiguruje w Radarr klienta indeksowania i pobierania, który następnie umożliwi Radarrowi inicjowanie pobierania.\n\nWięcej informacji można znaleźć w [Przewodniku integracji Sonarr/Radarr](https://www.reaparr.rocks/docs/integration/sonarr-radarr).",
                         "title": "Konfiguracja Radarr"
                     },
                     "test-connection": {

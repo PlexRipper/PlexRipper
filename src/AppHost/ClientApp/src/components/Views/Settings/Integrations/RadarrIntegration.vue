@@ -1,5 +1,10 @@
 <template>
 	<QSection :header="t('components.radarr-integration.title')">
+		<QAlert
+			type="info"
+			to="/settings/advanced#reverse-proxy-settings">
+			{{ t('components.radarr-integration.reverse-proxy-alert') }}
+		</QAlert>
 		<q-stepper
 			ref="stepper"
 			v-model="integrationStore.radarr.step"

@@ -354,6 +354,7 @@
             }
         },
         "sonarr-integration": {
+            "reverse-proxy-alert": "Si vous utilisez un proxy inverse, configurez-le dans les paramètres réseau avant de configurer l'intégration Sonarr.",
             "connection-status": {
                 "connection-failed": "Impossible de se connecter à Sonarr. Assurez-vous que Sonarr est en ligne et accessible!",
                 "invalid-api-key": "Connexion à Sonarr impossible, mais la clé API était invalide.",
@@ -376,6 +377,7 @@
             "title": "Intégration Sonarr"
         },
         "radarr-integration": {
+            "reverse-proxy-alert": "Si vous utilisez un proxy inverse, configurez-le dans les paramètres réseau avant de configurer l'intégration Radarr.",
             "connection-status": {
                 "connection-failed": "Impossible de se connecter à Radarr. Assurez-vous que Radarr est en ligne et accessible!",
                 "invalid-api-key": "Connexion à Radarr possible, mais la clé API était invalide.",

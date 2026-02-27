@@ -202,6 +202,12 @@ EditorConfig enforces:
 * Match existing naming and folder layout.
 * Avoid breaking public APIs unless coordinated.
 
+## Skills usage
+
+* Always detect and auto-load any applicable skills before acting on a task (global requirement).
+* If multiple skills apply, load all relevant ones and follow their guidance unless it conflicts with higher-priority instructions.
+* When skills are loaded, explicitly mention which skills were loaded and used in the response.
+
 ## Test rules (C#)
 
 Frameworks:
@@ -319,6 +325,10 @@ Never add AI attribution trailers (e.g. `Co-Authored-By: Claude ...`). Commit me
 * `SendProgressUpdateAsync` is private; the public surface is `UpdateItemAsync` / `UpdateErrorAsync` / `StartAsync`
 * `LibraryProgress.TimeRemaining` is a computed property; do not assign it
 * Strict mocks: set up both `UpdateItemAsync` and `UpdateErrorAsync` to avoid `MockException`
+
+### Server connection progress UI
+
+* `useSignalrStore` exposes `serverConnectionCheckStatusProgress` via store state; UI can read it directly for inline status updates without manual subscriptions
 
 ### Creating a Command/Handler pair
 

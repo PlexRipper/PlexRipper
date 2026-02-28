@@ -1,6 +1,7 @@
 {
   "managed": {
-    "reaparr-backend-unit-tests": "symlink"
+    "reaparr-backend-unit-tests": "symlink",
+    "reaparr-command-handler-patterns": "symlink"
   },
-  "updated_at": "2026-02-28T13:59:06.046291849+01:00"
+  "updated_at": "2026-02-28T14:43:41.348315887+01:00"
 }

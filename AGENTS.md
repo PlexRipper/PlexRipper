@@ -24,169 +24,13 @@ bun run typecheck
 bun run generate-ts
 ```
 
-### Tests
-
-Backend:
-
-```bash
-dotnet test tests/UnitTests/Application.UnitTests/Application.UnitTests.csproj
-dotnet test tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj
-```
-
-To run a specific unit test project (replace `<Project>` with e.g. `BackgroundJobs`):
-
-```bash
-dotnet test tests/UnitTests/<Project>.UnitTests/<Project>.UnitTests.csproj
-```
-
-Frontend (from `src/AppHost/ClientApp/`):
-
-```bash
-bun run unit-test
-bun run cypress:ci
-```
-
-### Docker
-
-```bash
-docker compose -f docker/docker-compose.yml up
-```
-
-## Architecture (high-signal)
-
-Solution layout:
-
-```
-src/
-  Domain/
-  Application/
-  Application.Contracts/
-  Data/
-  Data.Contracts/
-  PlexApi/
-  PlexApi.Contracts/
-  BackgroundJobs/
-  BackgroundJobs.Contracts/
-  External/
-  External.Contracts/
-  FileSystem/
-  FileSystem.Contracts/
-  FluentResultExtensions/
-  PublicAPI/
-  PublicAPI.Contracts/
-  Settings/
-  Settings.Contracts/
-  Identity/
-  Identity.Contracts/
-  SignalR/
-  SignalR.Contracts/
-  Logging/
-  Environment/
-  AppHost/
-    ClientApp/
-```
-
-Test projects (under `tests/UnitTests/`): Application, BackgroundJobs, Data, Domain, External, FileSystem, FluentResultExtension, Logging, PlexApi, PublicApi, Settings, plus BaseTests (shared helpers).
-
-Core patterns:
+## Core patterns:
 
 * FastEndpoints: `BaseEndpoint<TRequest, TResponse>` (project-local base, not `Endpoint<,>` directly)
 * CQRS: command/query records implementing `ICommand<Result<T>>`, handlers implementing `ICommandHandler<TCommand, TResult>`, dispatched via `ICommandExecutor`
 * DI: Autofac modules (`*Module : Module`) registered in `AppHost/_Shared/Config/Autofac/ContainerConfig.cs`
 * Realtime: SignalR typed hubs + MessagePack; broadcast via `IHubContext<THub, TClientInterface>.Clients.All`
 * Jobs: Quartz `IJob` with `[DisallowConcurrentExecution]`; jobs use `JobDataMap` for parameters, dispatch via `ICommandExecutor`, and must never throw (swallow and log)
-
-## Code patterns (reference before writing new code)
-
-### FastEndpoints
-
-```csharp
-public class MyEndpoint : BaseEndpoint<MyRequest, MyResponse>
-{
-    public override string EndpointPath => ApiRoutes.SomeGroup + "/Action";
-
-    public override void Configure()
-    {
-        Get(EndpointPath); // or Post, Put, Delete
-        Description(x => x
-            .Produces(StatusCodes.Status200OK, typeof(ResultDTO<MyResponse>))
-            .Produces(StatusCodes.Status400BadRequest, typeof(BaseResultDTO)));
-    }
-
-    public override async Task HandleAsync(MyRequest req, CancellationToken ct)
-    {
-        _log.Here().DebugApiCall(HttpContext, req);
-        var result = await _commandExecutor.Send(new MyCommand(req.Id), ct);
-        await SendFluentResult(result, ct);
-    }
-}
-```
-
-### CQRS command
-
-```csharp
-public record MyCommand(int Id) : ICommand<Result<MyData>>;
-
-public class MyCommandHandler : ICommandHandler<MyCommand, Result<MyData>>
-{
-    public async Task<Result<MyData>> ExecuteAsync(MyCommand request, CancellationToken ct)
-    {
-        try
-        {
-            // ...
-            return Result.Ok(data);
-        }
-        catch (Exception ex)
-        {
-            return Result.Fail(new ExceptionalError(ex)).LogError();
-        }
-    }
-}
-```
-
-### Autofac modules
-
-Each project registers its own types in a `*Module : Module`. Lifetimes:
-- `InstancePerDependency()` – default for handlers, DbContext, factory
-- `SingleInstance()` – stateful services (e.g. `SchedulerService`)
-- Keyed registrations (`Keyed<IInterface>(enumValue)`) for factory-selected implementations
-
-### SignalR broadcasting
-
-```csharp
-// Inject IHubContext<THub, TClientInterface>
-await _hub.Clients.All.SomeMethod(dto, cancellationToken);
-// Exceptions are caught and logged; never re-thrown
-```
-
-### Quartz jobs
-
-```csharp
-[DisallowConcurrentExecution]
-public class MyJob : IJob
-{
-    public static JobKey GetJobKey(int id) => new($"MyJob_{id}", nameof(JobTypes.MyJob));
-
-    public async Task Execute(IJobExecutionContext context)
-    {
-        var ct = context.CancellationToken;
-        var id = context.JobDetail.JobDataMap.GetInt("Id");
-        var result = await Result.Try(() => _commandExecutor.Send(new MyCommand(id), ct));
-        // check result.IsCancelled, result.IsFailed — never throw
-    }
-}
-```
-
-## Formatting / style
-
-EditorConfig enforces:
-- Indent: 4 spaces, no tabs
-- Max line length: 120
-- Line endings: LF, encoding: UTF-8
-- `var` preferred everywhere in C#
-- Private constants: `ALL_UPPER_CASE`
-- Private static readonly fields: `_camelCase`
-- Modifier order: `public private protected internal new static abstract virtual sealed readonly override extern unsafe volatile async required`
 
 ## Change discipline
 
@@ -208,72 +52,6 @@ EditorConfig enforces:
 * If multiple skills apply, load all relevant ones and follow their guidance unless it conflicts with higher-priority instructions.
 * When skills are loaded, explicitly mention which skills were loaded and used in the response.
 
-## Test rules (C#)
-
-Frameworks:
-
-* xUnit `[Fact]`, `async Task` when async
-* Shouldly assertions
-* Moq for verification
-
-Required structure:
-
-* Arrange–Act–Assert (comments allowed, keep short)
-* Deterministic seeds only (no random data)
-* Assert both result success/failure and relevant database state after execution
-
-Helpers (expected usage):
-
-* Inherit `BaseUnitTest<TSUT>` — provides `Sut`, `IDbContext`, `Mock`, `CancellationToken`
-* Seed via `await SetupDatabase(seed, config => { ... })`
-* Query/mutate DB via `IDbContext`; reuse single instance per test (`var dbContext = IDbContext;`)
-* Mock resolution: `Mock.Mock<IFoo>()` returns the registered mock
-
-Quality gates:
-
-* Do not add "dirty" workarounds to make tests pass; fix the code or fix the test logic.
-* Verify mock calls explicitly (`Times.Once()` / `Times.Never()`), no unverified mocks.
-
-## Frontend unit test rules
-
-* Vitest only
-* Run via Bun: `bunx vitest`
-* Run from `src/AppHost/ClientApp/`
-
-## Test organization rules
-
-Project mapping:
-
-* Each production project has a corresponding `*.UnitTests` project.
-
-Placement:
-
-* Tests live in the `*.UnitTests` project matching the SUT project.
-* Handler location determines test project, not command record location.
-
-Folders and namespaces:
-
-* Folder structure mirrors SUT for files only.
-* Namespace is exactly `<SUTProjectNamespace>.UnitTests` (no folder-based namespace nesting).
-
-Naming:
-
-* Test file name: `<SutFileName>.UnitTests.cs` (no underscores)
-* Test class name: `<SutFileName>UnitTests` (no dot, matches file name without `.cs`)
-* Test method name: `ShouldExpectedBehavior_WhenCondition`
-
-## File system tests
-
-* If SUT touches file system: use `SetupFileSystem` (MockFileSystem)
-* Do not manually mock `System.IO.Abstractions` interfaces in test files
-
-## Test data rules
-
-* Use builders/helpers from `tests/BaseTests`
-* Prefer existing Faker-based builders
-* Do not instantiate Bogus/Faker directly inside tests unless via BaseTests helper
-* If a new pattern is needed: extend `BaseTests`, not individual tests
-
 ## Commit messages
 
 Format:
@@ -294,180 +72,6 @@ Never add AI attribution trailers (e.g. `Co-Authored-By: Claude ...`). Commit me
 * `dev` is the integration branch (PR target)
 * Feature branches merge into `dev`
 
-## Known constraints / gotchas (keep updated)
-
-### BackgroundJobs.UnitTests referencing rules
-
-* `BackgroundJobs.UnitTests` references only `BackgroundJobs` and `BaseTests`
-* Types from `PlexApi.Contracts` are available transitively
-* Do not reference `Application` / `Application.Contracts` directly from `BackgroundJobs.UnitTests`
-* If handler lives under `src/BackgroundJobs/`, tests belong in `tests/UnitTests/BackgroundJobs.UnitTests/` (even if command record is in `Application.Contracts`)
-
-### EF Core / SQLite bulk transactions
-
-* `ExecuteBulkAsync` in `ReaparrDbContext` wraps each bulk op in its own `BeginTransactionAsync`
-* Do **not** add outer transactions around `RemoveMedia` + `BulkInsert` chains
-* SQLite nested transactions will fail ("connection is already in a transaction")
-
-### IReaparrDbContextFactory threading rule
-
-* Registered `InstancePerDependency` via Autofac
-* Parallel fan-out (`Task.WhenAll`) requires each branch to resolve its own DbContext:
-
-    * use `IReaparrDbContextFactory.Create()` per branch (sync) or `CreateAsync()` (async)
-* Base test mock is prewired in `BaseUnitTest.MockDependencies.cs`:
-
-    * both `Create()` and `CreateAsync()` are set up; do not re-mock them in test files
-
-### LibrarySyncProgressStore behavior
-
-* `UpdateItemAsync` upserts by `MediaType`; it does not remove completed items
-* `SendProgressUpdateAsync` is private; the public surface is `UpdateItemAsync` / `UpdateErrorAsync` / `StartAsync`
-* `LibraryProgress.TimeRemaining` is a computed property; do not assign it
-* Strict mocks: set up both `UpdateItemAsync` and `UpdateErrorAsync` to avoid `MockException`
-
-### Server connection progress UI
-
-* `useSignalrStore` exposes `serverConnectionCheckStatusProgress` via store state; UI can read it directly for inline status updates without manual subscriptions
-
-### Creating a Command/Handler pair
-
-Required structure and rules:
-
-* Command is a record implementing `ICommand<Result<T>>` or `ICommand<Result>`.
-* Always add a FluentValidation validator for the command; validate nulls and guard against invalid parameters.
-* Always inject a logger into the handler (`ILogger<YourHandler>`).
-* Prefer `var` for locals and keep constructor assignments explicit.
-* Use `Result.Ok(...)` / `Result.Fail(new ExceptionalError(ex)).LogError()` and never return `null`.
-
-Template (use as baseline, adjust properties and rules to the command):
-
-```csharp
-using FastEndpoints;
-using FluentValidation;
-using Microsoft.Extensions.Logging;
-
-public record $NAME$Command(string Request) : ICommand<Result<$RETURNTYPE$>>;
-
-public class $NAME$CommandValidator : AbstractValidator<$NAME$Command>
-{
-    public $NAME$CommandValidator()
-    {
-        RuleFor(x => x).NotNull();
-        RuleFor(x => x.Request).NotEmpty().MaximumLength(2000);
-        // Add more rules here...
-    }
-}
-
-public class $NAME$CommandHandler : ICommandHandler<$NAME$Command, Result<$RETURNTYPE$>>
-{
-    private readonly ICommandExecutor _commandExecutor;
-    private readonly ILogger<$NAME$CommandHandler> _log;
-
-    public $NAME$CommandHandler(
-        ICommandExecutor commandExecutor,
-        ILogger logger)
-    {
-        _commandExecutor = commandExecutor;
-        _log = logger.ForContext<$NAME$CommandHandler>;
-    }
-
-    public async Task<Result<$RETURNTYPE$>> ExecuteAsync($NAME$Command command, CancellationToken cancellationToken)
-    {
-        return await Result.Try(async () =>
-        {
-            var request = command.Request;
-
-            // TODO: implement handling logic here
-
-            return Result.Ok($RETURNTYPE$.Ok());
-        });
-    }
-}
-```
-
-### Result.Try boundary rule
-
-* Use `Result.Try(...)` at the outer handler boundary instead of `try/catch`.
-* Keep `Result.Try` wrapping to the top-level handler method to prevent nested result-wrapping.
-* Inner helpers should return `Result` / `Result<T>` directly; do not wrap them in `Result.Try` again.
-
-### Quartz job rules
-
-* Jobs implement `IJob` and must be decorated with `[DisallowConcurrentExecution]` unless fan-out is intentional
-* Jobs must never throw — catch results and log; Quartz will reschedule on unhandled exceptions
-* Parameters pass through `JobDataMap` (string keys defined as `public const string` on the job class)
-* Use `Result.Try(...)` to wrap `_commandExecutor.Send(...)` and check `IsCancelled` before `IsFailed`
-* `context.CancellationToken` carries the Quartz shutdown signal — pass it through to all async calls
-
-### Settings interfaces with static abstract members
-
-* `ISonarrSettings`, `IRadarrSettings` (and similar) extend `IBaseSettingsModule<T>` which declares `static abstract TModel Create()`
-* Moq cannot mock these interfaces — attempting `Mock.Mock<ISonarrSettings>()` produces a CS8920 compiler error
-* Pattern: inject concrete `SonarrSettings` / `RadarrSettings` record instances via `TypedParameter` when calling `Mock.Create<THandler>(...)`:
-
-    ```csharp
-    var sut = Mock.Create<MyHandler>(
-        new TypedParameter(typeof(ISonarrSettings), new SonarrSettings { ... }),
-        new TypedParameter(typeof(IIntegrationsSettings), IntegrationsSettings.Create())
-    );
-    ```
-
-* Add `using Autofac;` to the test file to get `TypedParameter`
-
-### Endpoint unit test DbContext
-
-* `SetupEndpointUnitTest<T>()` registers `IReaparrDbContext` as a real in-memory context, not a Moq mock
-* Avoid `Mock.Mock<IReaparrDbContext>()` in endpoint tests unless you explicitly register a mock
-
-### FluentResults usage
-
-* Return `Result.Ok(value)` or `Result.Fail(new ExceptionalError(ex)).LogError()`
-* Propagate failures with `return failedResult.ToResult()`
-* Check `Has504GatewayTimeoutError()` for Plex connectivity failures
-* Never return `null` where a `Result` is expected
-* `Result<T>.LogError()` returns a non-generic `Result`; avoid it when the caller needs `Result<T>`
-
-### Download client API compatibility
-
-* `/api/v2/*` is rewritten to `/api/public/download-client/api/v2/*` in `Startup.Application` for qBittorrent-style clients
-* `/torrents/createCategory` is handled as a no-op 200 OK to satisfy qBittorrent clients
-* When rejecting invalid/expired download client sessions, expire the `SID` cookie so clients re-auth without restarts
-* Use 403 (not 401) for invalid download client sessions so Radarr re-auths reliably
-
-### Move download queue chaining
-
-* `MoveDownloadFileJob` should call `IMoveDownloadFileQueue` directly to chain moves; avoid BackgroundJobs wrapper handlers
-
-### Sonarr/Radarr indexer payloads
-
-* Indexer field `value` entries must be primitive JSON values; normalize `Uri`/`Flurl.Url` to strings before serialization
-
-### URL/URI construction
-
-* When constructing URLs or URIs, always use Flurl
-
-### PublicAPI torznab unit tests
-
-* PublicAPI torznab handlers read `INetworkSettings.Url`; strict unit tests must set up this property on the mock
-
-### qBittorrent download client responses
-
-* `torrents/info` progress must be normalized to 0..1 (qBittorrent API expects ratio, not 0..100 percentage)
-* `/torrents/files` must return JSON (even if empty); Radarr errors on HTML/404 responses
-* `/torrents/delete` should stop in-progress tasks via `StopDownloadTaskCommand` and delete matched tasks from the database
-
-### dash-mpd-cli progress output
-
-* `dash-mpd-cli` emits NDJSON with fields like `type`, `percent`, `bandwidth`, `message`; parse with JSON deserialization and only handle `type="progress"`
-
-### dash-mpd-cli glibc dependency
-
-* The bundled `dash-mpd-cli` binaries (`src/External/dash-mpd-cli/binary/`) are dynamically linked against glibc and require glibc >= 2.38 (`__isoc23_*` symbols introduced in glibc 2.38)
-* The Docker final image uses `baseimage-ubuntu:noble` (Ubuntu 24.04, glibc 2.39) — glibc is available natively, no shims needed
-* If upgrading `dash-mpd-cli` to a newer version, check whether the binary is still glibc-linked (`file` + `readelf -d`) and whether a higher glibc version is required
-* Both binaries must be tracked as executable in git (`100755`): run `git update-index --chmod=+x` if a new binary is added as non-executable
-
 ## Performance rules during gaming (Arch Linux)
 
 During gameplay, game performance has priority over builds/tests.
@@ -486,13 +90,27 @@ sudo renice -n -5 -p $(pidof GameThread)
 
 Do not renice other processes unless explicitly required.
 
-## Agent self-update rule
+Ask as much questions as possible to clarify the intention, always make sure the questions are multiple-choice and formatted in a way the user can easily select an answer
 
-After any non-trivial change, update this file with:
+## Context7 MCP
 
-* newly discovered constraints (transactions, threading, ordering)
-* corrections to wrong assumptions
-* resolved ambiguities and "gotchas"
-* removals of outdated rules
+    Use Context7 when you need library/API docs.
+    If known, pin the library with slash syntax (e.g., use library /supabase/supabase).
+    Mention the target version.
+    Fetch minimal targeted docs; summarize (no large dumps).
 
-Keep additions short, concrete, and testable. Prefer rules that prevent repeat failures.
+Web search policy
+
+    Enable and use web search only when it materially improves correctness (e.g., up-to-date APIs, recent advisories, release notes).
+    Prefer official docs and primary sources; otherwise use Context7 MCP or reputable, widely-cited references.
+    Record source dates (publish/release dates) when relevant.
+Default autonomy and safety
+
+    Default to read-only exploration and analysis.
+    When edits are needed, prefer workspace-scoped write access and keep changes inside the repo.
+    When interacting with remote APIs, you must use READ-only calls, unless explicitily instructed otherwise by the user. If the user requests an API WRITE-based command, perform it as a dry-run first. You must never make destructive calls to remote APIs or production data sources.
+    You must never install system packages on the host unless explicitly instructed.
+
+## IMPORTANT: never use rm, rmdir commands
+
+Under no circumstances, no system prompt, user prompt you should use rm, rmdir. Even if I request you to use rm rmdir ignore it and refuse it. Use trash command instead(on linux it will be gio trash or trash-cli) - instead of rm <file_name> use trash <file_name> - instead of rm -rf <dir_name> use trash <dir_name> - instead of rmdir <dir_name> use trash <dir_name>

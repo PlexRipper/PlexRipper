@@ -4,7 +4,7 @@ namespace Reaparr.PlexApi.Contracts;
 
 public interface IPlexApiClient : IDisposable, ISpeakeasyHttpClient
 {
-    Task<ThrottledStream?> DownloadStreamAsync(
+    Task<Result<ThrottledStream>> DownloadStreamAsync(
         HttpRequestMessage request,
         int downloadSpeedLimit,
         CancellationToken cancellationToken

@@ -191,7 +191,7 @@ public class PlexApiClient : IPlexApiClient
         return response;
     }
 
-    public async Task<ThrottledStream?> DownloadStreamAsync(
+    public async Task<Result<ThrottledStream>> DownloadStreamAsync(
         HttpRequestMessage request,
         int downloadSpeedLimit,
         CancellationToken cancellationToken
@@ -201,17 +201,22 @@ public class PlexApiClient : IPlexApiClient
         if (response.IsSuccessStatusCode)
         {
             var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-            return new ThrottledStream(stream, downloadSpeedLimit);
+            return Result.Ok(new ThrottledStream(stream, downloadSpeedLimit));
         }
+
+        var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+        var errorMessage = string.IsNullOrWhiteSpace(responseBody)
+            ? response.ReasonPhrase ?? "Request failed"
+            : responseBody;
 
         _log.Here()
             .Error(
                 "Failed to download stream from {Url} with reason: {Reason}",
                 request.RequestUri?.ToString(),
-                response.ReasonPhrase
+                errorMessage
             );
 
-        return null;
+        return Result.Fail<ThrottledStream>(errorMessage).AddStatusCode((int)response.StatusCode);
     }
 
     public async Task<HttpRequestMessage> CloneAsync(HttpRequestMessage request)

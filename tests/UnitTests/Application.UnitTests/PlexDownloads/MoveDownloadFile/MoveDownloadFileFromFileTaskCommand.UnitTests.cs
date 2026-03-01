@@ -30,9 +30,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
             }
         );
 
-        var downloadTask = await IDbContext
-            .DownloadTaskTvShowEpisodeFile.Include(x => x.DownloadWorkerTasks)
-            .FirstOrDefaultAsync(CancellationToken);
+        var downloadTask = await IDbContext.DownloadTaskTvShowEpisodeFile.FirstOrDefaultAsync(CancellationToken);
         downloadTask.ShouldNotBeNull();
 
         var progress = new Subject<IDownloadFileTransferProgress>();
@@ -69,9 +67,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
             }
         );
 
-        var downloadFileTask = await IDbContext
-            .DownloadTaskTvShowEpisodeFile.Include(x => x.DownloadWorkerTasks)
-            .FirstOrDefaultAsync(CancellationToken);
+        var downloadFileTask = await IDbContext.DownloadTaskTvShowEpisodeFile.FirstOrDefaultAsync(CancellationToken);
         downloadFileTask.ShouldNotBeNull();
 
         var fileSizeInMb = 10;
@@ -156,7 +152,6 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
         var dbContext = IDbContext;
         var downloadFileTask = await dbContext
             .DownloadTaskTvShowEpisodeFile.AsTracking()
-            .Include(x => x.DownloadWorkerTasks)
             .FirstOrDefaultAsync(CancellationToken);
         downloadFileTask.ShouldNotBeNull();
 
@@ -220,9 +215,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
             }
         );
 
-        var downloadFileTask = await IDbContext
-            .DownloadTaskTvShowEpisodeFile.Include(x => x.DownloadWorkerTasks)
-            .FirstOrDefaultAsync(CancellationToken);
+        var downloadFileTask = await IDbContext.DownloadTaskTvShowEpisodeFile.FirstOrDefaultAsync(CancellationToken);
         downloadFileTask.ShouldNotBeNull();
 
         var progress = new Subject<IDownloadFileTransferProgress>();
@@ -335,9 +328,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
             }
         );
 
-        var downloadFileTask = await IDbContext
-            .DownloadTaskTvShowEpisodeFile.Include(x => x.DownloadWorkerTasks)
-            .FirstOrDefaultAsync(CancellationToken);
+        var downloadFileTask = await IDbContext.DownloadTaskTvShowEpisodeFile.FirstOrDefaultAsync(CancellationToken);
         downloadFileTask.ShouldNotBeNull();
 
         var progress = new Subject<IDownloadFileTransferProgress>();
@@ -385,9 +376,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
             }
         );
 
-        var downloadFileTask = await IDbContext
-            .DownloadTaskTvShowEpisodeFile.Include(x => x.DownloadWorkerTasks)
-            .FirstOrDefaultAsync(CancellationToken);
+        var downloadFileTask = await IDbContext.DownloadTaskTvShowEpisodeFile.FirstOrDefaultAsync(CancellationToken);
         downloadFileTask.ShouldNotBeNull();
 
         var renamedInDownloadsPath = downloadFileTask.DownloadFilePath.RemoveReapTempSuffix();
@@ -452,9 +441,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
             }
         );
 
-        var downloadFileTask = await IDbContext
-            .DownloadTaskTvShowEpisodeFile.Include(x => x.DownloadWorkerTasks)
-            .FirstOrDefaultAsync(CancellationToken);
+        var downloadFileTask = await IDbContext.DownloadTaskTvShowEpisodeFile.FirstOrDefaultAsync(CancellationToken);
         downloadFileTask.ShouldNotBeNull();
 
         var renamedInDownloadsPath = downloadFileTask.DownloadFilePath.RemoveReapTempSuffix();
@@ -516,9 +503,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
             }
         );
 
-        var downloadFileTask = await IDbContext
-            .DownloadTaskTvShowEpisodeFile.Include(x => x.DownloadWorkerTasks)
-            .FirstOrDefaultAsync(CancellationToken);
+        var downloadFileTask = await IDbContext.DownloadTaskTvShowEpisodeFile.FirstOrDefaultAsync(CancellationToken);
         downloadFileTask.ShouldNotBeNull();
 
         var progress = new Subject<IDownloadFileTransferProgress>();

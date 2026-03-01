@@ -38,7 +38,7 @@ public class RestartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
 
                 config.FileSystemOptions = (system, dbContext) =>
                 {
-                    var downloadTask = dbContext.DownloadTaskMovieFile.Include(x => x.DownloadWorkerTasks).First();
+                    var downloadTask = dbContext.DownloadTaskMovieFile.First();
                     downloadTask.DownloadFilePath.ShouldNotBeNullOrEmpty();
 
                     system.AddFile(downloadTask.DownloadFilePath, FakeData.GetFileMockData(10, 4));

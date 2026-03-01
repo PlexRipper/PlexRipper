@@ -32,10 +32,7 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<PlexDownloadClient>
         var downloadSpeedLimit = 1000;
         var dbContext = IDbContext;
         var downloadTask = await dbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
-        await dbContext.DownloadWorkerTasks.AddRangeAsync(
-            downloadTask.GenerateDownloadWorkerTasks(1),
-            CancellationToken
-        );
+
         await dbContext.SaveChangesAsync(CancellationToken);
 
         // Get the actual machine identifier from the database

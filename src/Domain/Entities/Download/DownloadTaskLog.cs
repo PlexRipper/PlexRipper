@@ -3,7 +3,7 @@
 /// <summary>
 /// A log entry for the <see cref="DownloadWorkerTask">download worker</see>.
 /// </summary>
-public class DownloadWorkerLog : BaseEntity
+public class DownloadTaskLog : BaseEntity
 {
     #region Properties
 

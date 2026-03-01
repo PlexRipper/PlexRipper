@@ -40,7 +40,7 @@ public class PauseDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
 
                 config.FileSystemOptions = (system, dbContext) =>
                 {
-                    var downloadTask = dbContext.DownloadTaskMovieFile.Include(x => x.DownloadWorkerTasks).First();
+                    var downloadTask = dbContext.DownloadTaskMovieFile.First();
                     downloadTask.DownloadFilePath.ShouldNotBeNullOrEmpty();
 
                     system.AddFile(downloadTask.DownloadFilePath, FakeData.GetFileMockData(50, 4));
@@ -111,7 +111,6 @@ public class PauseDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
         // Assert - use AsNoTracking to ensure fresh data from database
         var downloadTaskDb = await container
             .DbContext.DownloadTaskMovieFile.AsNoTracking()
-            .Include(x => x.DownloadWorkerTasks)
             .FirstOrDefaultAsync(x => x.Id == childDownloadTask.Id, CancellationToken);
         downloadTaskDb.ShouldNotBeNull();
         downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.Paused);

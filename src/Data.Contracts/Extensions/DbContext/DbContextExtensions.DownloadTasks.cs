@@ -142,7 +142,6 @@ public static partial class DbContextExtensions
                     var downloadTaskMovieFile = await dbContext
                         .DownloadTaskMovieFile.Include(x => x.PlexServer)
                         .Include(x => x.PlexLibrary)
-                        .Include(x => x.DownloadWorkerTasks)
                         .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
                     return downloadTaskMovieFile?.ToGeneric() ?? null;
 
@@ -182,7 +181,6 @@ public static partial class DbContextExtensions
                     var downloadTaskTvShowEpisodeFile = await dbContext
                         .DownloadTaskTvShowEpisodeFile.Include(x => x.PlexServer)
                         .Include(x => x.PlexLibrary)
-                        .Include(x => x.DownloadWorkerTasks)
                         .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
                     return downloadTaskTvShowEpisodeFile?.ToGeneric() ?? null;
 
@@ -302,7 +300,6 @@ public static partial class DbContextExtensions
                 return await dbContext
                     .DownloadTaskMovieFile.Include(x => x.PlexServer)
                     .Include(x => x.PlexLibrary)
-                    .Include(x => x.DownloadWorkerTasks)
                     .FirstOrDefaultAsync(x => x.Id == key.Id, cancellationToken);
 
             // DownloadTaskType.EpisodeData
@@ -311,7 +308,6 @@ public static partial class DbContextExtensions
                 return await dbContext
                     .DownloadTaskTvShowEpisodeFile.Include(x => x.PlexServer)
                     .Include(x => x.PlexLibrary)
-                    .Include(x => x.DownloadWorkerTasks)
                     .FirstOrDefaultAsync(x => x.Id == key.Id, cancellationToken);
             default:
                 return null;
@@ -533,35 +529,6 @@ public static partial class DbContextExtensions
             default:
                 throw new ArgumentOutOfRangeException();
         }
-    }
-
-    public static async Task UpdateDownloadWorkerProgress(
-        this IReaparrDbContext dbContext,
-        IList<DownloadWorkerTaskProgress> updates,
-        CancellationToken cancellationToken = default
-    )
-    {
-        var updatesDict = updates.ToDictionary(x => x.Id);
-
-        // Fetch relevant tasks in one query and apply updates
-        var downloadWorkerTasks = await dbContext
-            .DownloadWorkerTasks.AsTracking()
-            .Where(x => updatesDict.Keys.Contains(x.Id))
-            .ToListAsync(cancellationToken);
-
-        foreach (var downloadWorkerTask in downloadWorkerTasks)
-        {
-            // Apply updates directly using the dictionary
-            if (updatesDict.TryGetValue(downloadWorkerTask.Id, out var update))
-            {
-                downloadWorkerTask.DownloadStatus = update.Status;
-                downloadWorkerTask.ElapsedTime = update.ElapsedTime;
-                downloadWorkerTask.BytesReceived = update.DataReceived;
-                downloadWorkerTask.DownloadSpeed = update.DownloadSpeed;
-            }
-        }
-
-        await dbContext.SaveChangesAsync(cancellationToken);
     }
 
     public static async Task<List<DownloadTaskKey>> GetDownloadableChildTaskKeys(

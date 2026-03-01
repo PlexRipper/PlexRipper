@@ -112,61 +112,6 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
     }
 
     [Fact]
-    public async Task ShouldDeleteDownloadWorkerTasks_WhenMoveSucceeds()
-    {
-        // Arrange
-        await SetupDatabase(
-            11003,
-            config =>
-            {
-                config.MovieDownloadTasksCount = 1;
-                config.DownloadWorkerTasks = 4;
-            }
-        );
-
-        var dbContext = IDbContext;
-        var downloadTask = await dbContext
-            .DownloadTaskMovieFile.AsTracking()
-            .Include(x => x.DownloadWorkerTasks)
-            .FirstAsync(CancellationToken);
-        downloadTask.DownloadStatus = DownloadStatus.DownloadFinished;
-        await dbContext.SaveChangesAsync(CancellationToken);
-
-        var workerTaskCount = await IDbContext.DownloadWorkerTasks.CountAsync(
-            x => x.DownloadTaskId == downloadTask.Id,
-            CancellationToken
-        );
-        workerTaskCount.ShouldBe(4);
-
-        Mock.SetupCommand(It.IsAny<MoveDownloadFileFromFileTaskCommand>)
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.Once);
-
-        Mock.SetupCommand(It.IsAny<CleanUpDownloadTaskFoldersCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.Once);
-
-        Mock.SetupCommand(It.IsAny<DownloadTaskUpdatedCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.Once);
-
-        Mock.Mock<IMoveDownloadFileQueue>()
-            .Setup(x => x.CheckMoveDownloadFileJobQueue())
-            .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.Once);
-
-        await dbContext.SetDownloadStatus(downloadTask.ToKey(), DownloadStatus.MoveFinished);
-
-        var context = SetupJobContext(downloadTask.ToKey());
-
-        // Act
-        await Sut.Execute(context);
-
-        // Assert
-        var remainingWorkerTasks = await IDbContext.DownloadWorkerTasks.CountAsync(
-            x => x.DownloadTaskId == downloadTask.Id,
-            CancellationToken
-        );
-        remainingWorkerTasks.ShouldBe(0);
-    }
-
-    [Fact]
     public async Task ShouldNotThrow_WhenDownloadTaskKeyIsNull()
     {
         // Arrange

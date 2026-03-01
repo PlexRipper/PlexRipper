@@ -3,7 +3,7 @@ using Reaparr.Data.Contracts;
 
 namespace Reaparr.Application;
 
-public record DownloadTaskWorkerLogNotification(IList<DownloadWorkerLog> Logs) : IEvent;
+public record DownloadTaskWorkerLogNotification(IList<DownloadTaskLog> Logs) : IEvent;
 
 public class DownloadTaskWorkerLogNotificationHandler : IEventHandler<DownloadTaskWorkerLogNotification>
 {
@@ -29,7 +29,7 @@ public class DownloadTaskWorkerLogNotificationHandler : IEventHandler<DownloadTa
         {
             // Create a new DbContext for this operation to avoid threading issues
             using var dbContext = await _dbContextFactory.CreateAsync();
-            await dbContext.DownloadWorkerTasksLogs.AddRangeAsync(logs, cancellationToken);
+            await dbContext.DownloadTasksLogs.AddRangeAsync(logs, cancellationToken);
             await dbContext.SaveChangesAsync(cancellationToken);
         }
         catch (Exception e)

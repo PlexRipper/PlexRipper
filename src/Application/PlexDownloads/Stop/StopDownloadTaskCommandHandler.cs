@@ -100,11 +100,6 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
                         }
                     })
                     .LogIfFailed();
-
-                // Delete all worker tasks
-                await _dbContext
-                    .DownloadWorkerTasks.Where(x => x.DownloadTaskId == downloadTaskKey.Id)
-                    .ExecuteDeleteAsync(cancellationToken);
             }
 
             // Reset the download progress

@@ -12,12 +12,6 @@ public class DownloadTaskFileBaseConfiguration : IEntityTypeConfiguration<Downlo
 
         builder.HasIndex(x => x.DownloadStatus);
 
-        builder
-            .HasMany(x => x.DownloadWorkerTasks)
-            .WithOne(x => x.DownloadTask)
-            .HasForeignKey(x => x.DownloadTaskId)
-            .OnDelete(DeleteBehavior.Cascade);
-
         // TODO:This can be removed once the EF Core issue is fixed: https://github.com/dotnet/efcore/issues/28443
         builder
             .Property(b => b.DirectoryMeta)

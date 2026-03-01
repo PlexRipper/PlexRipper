@@ -155,28 +155,6 @@ public class MoveDownloadFileJob : IJob
                 return;
             }
 
-            var deleteWorkerTasksResult = await Result.Try(() =>
-                _dbContext.DownloadWorkerTasks.Where(x => x.DownloadTaskId == downloadTask.Id).ExecuteDeleteAsync(ct)
-            );
-            if (deleteWorkerTasksResult.IsCancelled)
-            {
-                _log.Here()
-                    .Warning(
-                        "{JobName} for {DownloadTaskKey} was cancelled",
-                        nameof(MoveDownloadFileJob),
-                        downloadTaskKey
-                    );
-                await QueueNextAsync();
-                return;
-            }
-
-            if (deleteWorkerTasksResult.IsFailed)
-            {
-                deleteWorkerTasksResult.LogError();
-                await QueueNextAsync();
-                return;
-            }
-
             var updatedResult = await Result.Try(() =>
                 _commandExecutor.Send(new DownloadTaskUpdatedCommand(downloadTaskKey), ct)
             );

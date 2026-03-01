@@ -263,8 +263,8 @@ public class PlexDownloadClient : IPlexDownloadClient
     {
         using var dbContext = await _dbContextFactory.CreateAsync();
 
-        await dbContext.DownloadWorkerTasksLogs.AddAsync(
-            new DownloadWorkerLog
+        await dbContext.DownloadTasksLogs.AddAsync(
+            new DownloadTaskLog
             {
                 Message = message,
                 LogLevel = logLevel,

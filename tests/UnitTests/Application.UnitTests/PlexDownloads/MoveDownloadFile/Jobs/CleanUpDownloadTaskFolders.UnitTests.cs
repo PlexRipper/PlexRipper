@@ -24,26 +24,8 @@ public class CleanUpDownloadTaskFoldersUnitTests : BaseUnitTest<CleanUpDownloadT
         );
 
         var dbContext = IDbContext;
-        var downloadTask = await dbContext
-            .DownloadTaskTvShowEpisodeFile.Include(x => x.DownloadWorkerTasks)
-            .FirstOrDefaultAsync(CancellationToken);
+        var downloadTask = await dbContext.DownloadTaskTvShowEpisodeFile.FirstOrDefaultAsync(CancellationToken);
         downloadTask.ShouldNotBeNull();
-
-        var downloadWorkerTaskIds = downloadTask.DownloadWorkerTasks.Select(x => x.Id).ToList();
-        await dbContext
-            .DownloadWorkerTasks.Where(x => downloadWorkerTaskIds.Contains(x.Id))
-            .ExecuteUpdateAsync(
-                p =>
-                    p.SetProperty(
-                            x => x.DownloadDirectory,
-                            "/mnt/DATA/ReaparrCache/Downloads/TvShows/Reno 911!/Season 1"
-                        )
-                        .SetProperty(
-                            x => x.FileName,
-                            "Reno 911! - S01E01 - How We Do It in Reno (Pilot) WEBDL-1080p.part1.mkv"
-                        ),
-                CancellationToken
-            );
 
         Mock.Mock<IPath>()
             .Setup(x => x.GetDirectoryName(It.IsAny<string>()))
@@ -83,18 +65,8 @@ public class CleanUpDownloadTaskFoldersUnitTests : BaseUnitTest<CleanUpDownloadT
         );
 
         var dbContext = IDbContext;
-        var downloadTask = await dbContext
-            .DownloadTaskTvShowEpisodeFile.Include(x => x.DownloadWorkerTasks)
-            .FirstOrDefaultAsync(CancellationToken);
+        var downloadTask = await dbContext.DownloadTaskTvShowEpisodeFile.FirstOrDefaultAsync(CancellationToken);
         downloadTask.ShouldNotBeNull();
-
-        var downloadWorkerTaskIds = downloadTask.DownloadWorkerTasks.Select(x => x.Id).ToList();
-        await dbContext
-            .DownloadWorkerTasks.Where(x => downloadWorkerTaskIds.Contains(x.Id))
-            .ExecuteUpdateAsync(
-                p => p.SetProperty(x => x.DownloadDirectory, "").SetProperty(x => x.FileName, ""),
-                CancellationToken
-            );
 
         // Act
         var request = new CleanUpDownloadTaskFoldersCommand(downloadTask.ToKey());
@@ -121,26 +93,8 @@ public class CleanUpDownloadTaskFoldersUnitTests : BaseUnitTest<CleanUpDownloadT
         );
 
         var dbContext = IDbContext;
-        var downloadTask = await dbContext
-            .DownloadTaskTvShowEpisodeFile.Include(x => x.DownloadWorkerTasks)
-            .FirstOrDefaultAsync(CancellationToken);
+        var downloadTask = await dbContext.DownloadTaskTvShowEpisodeFile.FirstOrDefaultAsync(CancellationToken);
         downloadTask.ShouldNotBeNull();
-
-        var downloadWorkerTaskIds = downloadTask.DownloadWorkerTasks.Select(x => x.Id).ToList();
-        await dbContext
-            .DownloadWorkerTasks.Where(x => downloadWorkerTaskIds.Contains(x.Id))
-            .ExecuteUpdateAsync(
-                p =>
-                    p.SetProperty(
-                            x => x.DownloadDirectory,
-                            "/mnt/DATA/ReaparrCache/Downloads/TvShows/Reno 911!/Season 1"
-                        )
-                        .SetProperty(
-                            x => x.FileName,
-                            "Reno 911! - S01E01 - How We Do It in Reno (Pilot) WEBDL-1080p.part1.mkv"
-                        ),
-                CancellationToken
-            );
 
         Mock.Mock<IPath>()
             .Setup(x => x.GetDirectoryName(It.IsAny<string>()))
@@ -186,26 +140,8 @@ public class CleanUpDownloadTaskFoldersUnitTests : BaseUnitTest<CleanUpDownloadT
         );
 
         var dbContext = IDbContext;
-        var downloadTask = await dbContext
-            .DownloadTaskTvShowEpisodeFile.Include(x => x.DownloadWorkerTasks)
-            .FirstOrDefaultAsync(CancellationToken);
+        var downloadTask = await dbContext.DownloadTaskTvShowEpisodeFile.FirstOrDefaultAsync(CancellationToken);
         downloadTask.ShouldNotBeNull();
-
-        var downloadWorkerTaskIds = downloadTask.DownloadWorkerTasks.Select(x => x.Id).ToList();
-        await dbContext
-            .DownloadWorkerTasks.Where(x => downloadWorkerTaskIds.Contains(x.Id))
-            .ExecuteUpdateAsync(
-                p =>
-                    p.SetProperty(
-                            x => x.DownloadDirectory,
-                            "/mnt/DATA/ReaparrCache/Downloads/TvShows/Reno 911!/Season 1"
-                        )
-                        .SetProperty(
-                            x => x.FileName,
-                            "Reno 911! - S01E01 - How We Do It in Reno (Pilot) WEBDL-1080p.part1.mkv"
-                        ),
-                CancellationToken
-            );
 
         Mock.Mock<IPath>()
             .Setup(x => x.GetDirectoryName(It.IsAny<string>()))
@@ -256,27 +192,8 @@ public class CleanUpDownloadTaskFoldersUnitTests : BaseUnitTest<CleanUpDownloadT
         );
 
         var dbContext = IDbContext;
-        var downloadTask = await dbContext
-            .DownloadTaskTvShowEpisodeFile.Include(x => x.DownloadWorkerTasks)
-            .FirstOrDefaultAsync(CancellationToken);
+        var downloadTask = await dbContext.DownloadTaskTvShowEpisodeFile.FirstOrDefaultAsync(CancellationToken);
         downloadTask.ShouldNotBeNull();
-        downloadTask.DownloadWorkerTasks.ShouldNotBeEmpty();
-
-        var downloadWorkerTaskIds = downloadTask.DownloadWorkerTasks.Select(x => x.Id).ToList();
-        await dbContext
-            .DownloadWorkerTasks.Where(x => downloadWorkerTaskIds.Contains(x.Id))
-            .ExecuteUpdateAsync(
-                p =>
-                    p.SetProperty(
-                            x => x.DownloadDirectory,
-                            "/mnt/DATA/ReaparrCache/Downloads/TvShows/Reno 911!/Season 1"
-                        )
-                        .SetProperty(
-                            x => x.FileName,
-                            "Reno 911! - S01E01 - How We Do It in Reno (Pilot) WEBDL-1080p.part1.mkv"
-                        ),
-                CancellationToken
-            );
 
         Mock.Mock<IPath>()
             .Setup(x => x.GetDirectoryName(It.IsAny<string>()))

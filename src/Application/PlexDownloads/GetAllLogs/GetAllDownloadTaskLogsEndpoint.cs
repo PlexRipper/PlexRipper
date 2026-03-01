@@ -57,7 +57,7 @@ public class GetDownloadTaskLogsByDownloadTaskIdEndpoint
         var downloadWorkerIds = childTasks.Select(x => x.Id).ToList();
 
         var logs = await _dbContext
-            .DownloadWorkerTasksLogs.Where(x => downloadWorkerIds.Contains(x.DownloadTaskId))
+            .DownloadTasksLogs.Where(x => downloadWorkerIds.Contains(x.DownloadTaskId))
             .ToListAsync(ct);
 
         await SendFluentResult(Result.Ok(logs), x => x.ToDTO(), ct);

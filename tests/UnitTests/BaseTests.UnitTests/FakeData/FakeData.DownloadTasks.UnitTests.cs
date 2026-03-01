@@ -166,9 +166,6 @@ public class FakeDataDownloadTasksUnitTests : BaseUnitTest
                     episodeFile.DirectoryMeta.ShouldNotBeNull();
                     episodeFile.DirectoryMeta.TvShowFolder.ShouldBe(tvShowTask.Title);
                     episodeFile.DirectoryMeta.SeasonFolder.ShouldBe(season.Title);
-
-                    episodeFile.DownloadWorkerTasks.ShouldNotBeNull();
-                    episodeFile.DownloadWorkerTasks.Count.ShouldBe(config.DownloadWorkerTasks);
                 }
             }
         }

@@ -22,7 +22,7 @@ public class DashPlexDownloadClient : IPlexDownloadClient
     private readonly IServerSettingsModule _serverSettings;
     private readonly IDirectory _directory;
 
-    private readonly Subject<IList<DownloadWorkerLog>> _downloadWorkerLogSubject = new();
+    private readonly Subject<IList<DownloadTaskLog>> _downloadWorkerLogSubject = new();
     private readonly TaskCompletionSource<object> _downloadProcessCompletionSource = new();
     private readonly TaskCompletionSource<object> _progressSubscriptionCompletionSource = new();
     private readonly TaskCompletionSource<object> _logSubscriptionCompletionSource = new();
@@ -77,8 +77,8 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         }
     }
 
-    public IObservable<IList<DownloadWorkerLog>> ListenToDownloadWorkerLog { get; private set; } =
-        Observable.Empty<IList<DownloadWorkerLog>>();
+    public IObservable<IList<DownloadTaskLog>> ListenToDownloadWorkerLog { get; private set; } =
+        Observable.Empty<IList<DownloadTaskLog>>();
 
     public Task DownloadProcessTask =>
         Task.WhenAll(
@@ -235,7 +235,7 @@ public class DashPlexDownloadClient : IPlexDownloadClient
             .StandardOutput.Select(line => CreateLogEntry(line, NotificationLevel.Information))
             .Buffer(TimeSpan.FromSeconds(1))
             .Where(logs => logs.Any())
-            .Select(logs => (IList<DownloadWorkerLog>)logs.ToList())
+            .Select(logs => (IList<DownloadTaskLog>)logs.ToList())
             .AsObservable();
 
         _logSubscription = ListenToDownloadWorkerLog.Subscribe(
@@ -266,7 +266,7 @@ public class DashPlexDownloadClient : IPlexDownloadClient
     /// <summary>
     /// Creates a download worker log entry from a raw output line.
     /// </summary>
-    private DownloadWorkerLog CreateLogEntry(string data, NotificationLevel level) =>
+    private DownloadTaskLog CreateLogEntry(string data, NotificationLevel level) =>
         new()
         {
             CreatedAt = DateTime.UtcNow,

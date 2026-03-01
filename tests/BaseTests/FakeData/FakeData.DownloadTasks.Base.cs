@@ -69,7 +69,6 @@ public static partial class FakeData
                         SeasonFolder = string.Empty,
                         KeepCompletedInDownloadFolder = false,
                     }
-            )
-            .Ignore(x => x.DownloadWorkerTasks);
+            );
     }
 }

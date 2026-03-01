@@ -7,6 +7,11 @@ public static class DownloadTaskActions
     private static readonly DownloadStatus[] _anyStatuses =
     [
         DownloadStatus.ServerUnreachable,
+        DownloadStatus.AuthError,
+        DownloadStatus.StorageError,
+        DownloadStatus.SourceUnavailable,
+        DownloadStatus.DownloadClientError,
+        DownloadStatus.IntegrityError,
         DownloadStatus.Error,
         DownloadStatus.MoveError,
         DownloadStatus.Paused,
@@ -65,6 +70,16 @@ public static class DownloadTaskActions
                 actions.Add(DownloadActions.Stop);
                 break;
             case DownloadStatus.Error:
+                actions.Add(DownloadActions.Restart);
+                actions.Add(DownloadActions.Delete);
+                break;
+            case DownloadStatus.AuthError:
+                actions.Add(DownloadActions.Delete);
+                break;
+            case DownloadStatus.StorageError:
+            case DownloadStatus.SourceUnavailable:
+            case DownloadStatus.DownloadClientError:
+            case DownloadStatus.IntegrityError:
                 actions.Add(DownloadActions.Restart);
                 actions.Add(DownloadActions.Delete);
                 break;

@@ -378,6 +378,7 @@ public static partial class DbContextExtensions
         switch (key.Type)
         {
             case DownloadTaskType.MovieData:
+            case DownloadTaskType.MoviePart:
                 await dbContext
                     .DownloadTaskMovieFile.Where(x => x.Id == key.Id)
                     .ExecuteUpdateAsync(
@@ -389,6 +390,7 @@ public static partial class DbContextExtensions
                     );
                 break;
             case DownloadTaskType.EpisodeData:
+            case DownloadTaskType.EpisodePart:
                 await dbContext
                     .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == key.Id)
                     .ExecuteUpdateAsync(
@@ -577,7 +579,7 @@ public static partial class DbContextExtensions
             if (!tasks.Any())
                 return;
 
-            foreach (var task in tasks)
+            foreach (var task in tasks.OrderByNatural(x => x.FullTitle))
             {
                 if (task.IsDownloadable)
                     keys.Add(task.ToKey());

@@ -38,6 +38,15 @@ public static partial class DbContextExtensions
             .AnyAsync(cancellationToken);
     }
 
+    public static async Task<bool> IsDownloadsPausedByUser(this IReaparrDbContext dbContext, int plexServerId)
+    {
+        return await dbContext
+            .PlexServers.AsNoTracking()
+            .Where(x => x.Id == plexServerId)
+            .Select(x => x.IsDownloadsPausedByUser)
+            .FirstOrDefaultAsync(CancellationToken.None);
+    }
+
     public static async Task<List<int>> GetOnlineServerIds(
         this IReaparrDbContext dbContext,
         CancellationToken cancellationToken = default

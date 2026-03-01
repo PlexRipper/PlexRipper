@@ -111,6 +111,118 @@ public class DownloadQueueGetNextDownloadTaskUnitTests : BaseUnitTest<DownloadQu
     }
 
     [Fact]
+    public async Task ShouldPrioritizeServerUnreachableOverQueued()
+    {
+        // Arrange
+        await SetupDatabase(71452, config => config.MovieDownloadTasksCount = 3);
+
+        var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync(
+            asTracking: true,
+            cancellationToken: CancellationToken
+        );
+
+        var queuedTask = downloadTasks[0].Children[0];
+        queuedTask.SetDownloadStatus(DownloadStatus.Queued);
+
+        var serverUnreachableTask = downloadTasks[1].Children[0];
+        serverUnreachableTask.SetDownloadStatus(DownloadStatus.ServerUnreachable);
+
+        await IDbContext.SaveChangesAsync(CancellationToken);
+
+        // Act
+        var nextDownloadTask = Sut.GetNextDownloadTask(downloadTasks);
+
+        // Assert
+        nextDownloadTask.IsSuccess.ShouldBeTrue();
+        nextDownloadTask.Value.Id.ShouldBe(serverUnreachableTask.Id);
+    }
+
+    [Fact]
+    public async Task ShouldSelectServerUnreachableTask_WhenQueuedTaskExists()
+    {
+        // Arrange
+        await SetupDatabase(51422, config => config.MovieDownloadTasksCount = 2);
+
+        var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync(
+            asTracking: true,
+            cancellationToken: CancellationToken
+        );
+
+        var serverUnreachableTask = downloadTasks[0].Children[0];
+        serverUnreachableTask.SetDownloadStatus(DownloadStatus.ServerUnreachable);
+        downloadTasks[0].SetDownloadStatus(DownloadStatus.ServerUnreachable);
+
+        var queuedTask = downloadTasks[1].Children[0];
+        queuedTask.SetDownloadStatus(DownloadStatus.Queued);
+        downloadTasks[1].SetDownloadStatus(DownloadStatus.Queued);
+
+        await IDbContext.SaveChangesAsync(CancellationToken);
+
+        // Act
+        var nextDownloadTask = Sut.GetNextDownloadTask(downloadTasks);
+
+        // Assert
+        nextDownloadTask.IsSuccess.ShouldBeTrue();
+        nextDownloadTask.Value.Id.ShouldBe(serverUnreachableTask.Id);
+    }
+
+    [Fact]
+    public async Task ShouldSelectServerUnreachableTask_WhenRetryMetadataWouldPreviouslyBlock()
+    {
+        // Arrange
+        await SetupDatabase(51423, config => config.MovieDownloadTasksCount = 2);
+
+        var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync(
+            asTracking: true,
+            cancellationToken: CancellationToken
+        );
+
+        var serverUnreachableTask = downloadTasks[0].Children[0];
+        serverUnreachableTask.SetDownloadStatus(DownloadStatus.ServerUnreachable);
+        downloadTasks[0].SetDownloadStatus(DownloadStatus.ServerUnreachable);
+
+        var queuedTask = downloadTasks[1].Children[0];
+        queuedTask.SetDownloadStatus(DownloadStatus.Queued);
+        downloadTasks[1].SetDownloadStatus(DownloadStatus.Queued);
+
+        await IDbContext.SaveChangesAsync(CancellationToken);
+
+        // Act
+        var nextDownloadTask = Sut.GetNextDownloadTask(downloadTasks);
+
+        // Assert
+        nextDownloadTask.IsSuccess.ShouldBeTrue();
+        nextDownloadTask.Value.Id.ShouldBe(serverUnreachableTask.Id);
+    }
+
+    [Fact]
+    public async Task ShouldHaveNoNextDownloadTask_WhenAllArePaused()
+    {
+        // Arrange
+        await SetupDatabase(61827, config => config.MovieDownloadTasksCount = 2);
+
+        var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync(
+            asTracking: true,
+            cancellationToken: CancellationToken
+        );
+
+        foreach (var downloadTask in downloadTasks)
+        {
+            downloadTask.SetDownloadStatus(DownloadStatus.Paused);
+            foreach (var child in downloadTask.Children)
+                child.SetDownloadStatus(DownloadStatus.Paused);
+        }
+
+        await IDbContext.SaveChangesAsync(CancellationToken);
+
+        // Act
+        var nextDownloadTask = Sut.GetNextDownloadTask(downloadTasks);
+
+        // Assert
+        nextDownloadTask.IsSuccess.ShouldBeFalse();
+    }
+
+    [Fact]
     public async Task ShouldHaveNoNextDownloadTask_WhenMovingAndDownloadFinished()
     {
         // Arrange

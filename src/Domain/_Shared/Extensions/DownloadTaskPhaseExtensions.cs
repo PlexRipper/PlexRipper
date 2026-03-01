@@ -17,6 +17,11 @@ public static class DownloadTaskPhaseExtensions
             case DownloadStatus.Stopped:
             case DownloadStatus.Deleted:
             case DownloadStatus.ServerUnreachable:
+            case DownloadStatus.AuthError:
+            case DownloadStatus.StorageError:
+            case DownloadStatus.SourceUnavailable:
+            case DownloadStatus.DownloadClientError:
+            case DownloadStatus.IntegrityError:
                 return DownloadTaskPhase.Downloading;
 
             case DownloadStatus.DownloadFinished:

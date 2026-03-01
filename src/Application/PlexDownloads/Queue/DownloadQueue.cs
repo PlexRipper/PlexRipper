@@ -66,6 +66,16 @@ public class DownloadQueue : IDownloadQueue
 
         var plexServerName = await dbContext.GetPlexServerNameById(plexServerId, _token);
 
+        if (await dbContext.IsDownloadsPausedByUser(plexServerId))
+        {
+            _log.Here()
+                .Information(
+                    "Skipping download queue check because PlexServer {PlexServerName} is paused by user.",
+                    plexServerName
+                );
+            return Result.Ok();
+        }
+
         // Check if the server is online
         if (!await dbContext.IsServerOnline(plexServerId, cancellationToken: _token))
         {

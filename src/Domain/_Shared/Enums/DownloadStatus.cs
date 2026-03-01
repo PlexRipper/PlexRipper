@@ -28,7 +28,7 @@ public enum DownloadStatus
     Queued = 2,
 
     /// <summary>
-    /// Download Task is downloading data from the server.
+    /// Download Task has finished downloading data from the server.
     /// </summary>
     [EnumMember(Value = nameof(Downloading))]
     Downloading = 3,
@@ -40,56 +40,86 @@ public enum DownloadStatus
     DownloadFinished = 4,
 
     /// <summary>
-    /// Download is paused.
-    /// </summary>
-    [EnumMember(Value = nameof(Paused))]
-    Paused = 5,
-
-    /// <summary>
-    /// Download is paused.
-    /// </summary>
-    [EnumMember(Value = nameof(Stopped))]
-    Stopped = 6,
-
-    /// <summary>
-    /// Download is deleted.
-    /// </summary>
-    [EnumMember(Value = nameof(Deleted))]
-    Deleted = 7,
-
-    /// <summary>
     /// Download file is being moved.
     /// </summary>
     [EnumMember(Value = nameof(Moving))]
-    Moving = 9,
+    Moving = 5,
 
     /// <summary>
-    /// Download file has been moved.
+    /// Download file is paused during move.
     /// </summary>
     [EnumMember(Value = nameof(MovePaused))]
-    MovePaused = 11,
+    MovePaused = 6,
 
     /// <summary>
     /// Download file has been moved.
     /// </summary>
     [EnumMember(Value = nameof(MoveFinished))]
-    MoveFinished = 13,
+    MoveFinished = 7,
 
     /// <summary>
     /// Download is completed.
     /// </summary>
     [EnumMember(Value = nameof(Completed))]
-    Completed = 14,
+    Completed = 8,
+
+    /// <summary>
+    /// Download is paused.
+    /// </summary>
+    [EnumMember(Value = nameof(Paused))]
+    Paused = 9,
+
+    /// <summary>
+    /// Download is paused.
+    /// </summary>
+    [EnumMember(Value = nameof(Stopped))]
+    Stopped = 10,
+
+    /// <summary>
+    /// Download is deleted.
+    /// </summary>
+    [EnumMember(Value = nameof(Deleted))]
+    Deleted = 11,
 
     /// <summary>
     /// The server is offline.
     /// </summary>
     [EnumMember(Value = nameof(ServerUnreachable))]
-    ServerUnreachable = 15,
+    ServerUnreachable = 12,
 
     /// <summary>
-    /// The server is offline.
+    /// Authentication failed and user action is required.
+    /// </summary>
+    [EnumMember(Value = nameof(AuthError))]
+    AuthError = 13,
+
+    /// <summary>
+    /// Storage could not be accessed or is full.
+    /// </summary>
+    [EnumMember(Value = nameof(StorageError))]
+    StorageError = 14,
+
+    /// <summary>
+    /// The media source is unavailable.
+    /// </summary>
+    [EnumMember(Value = nameof(SourceUnavailable))]
+    SourceUnavailable = 15,
+
+    /// <summary>
+    /// The download client failed.
+    /// </summary>
+    [EnumMember(Value = nameof(DownloadClientError))]
+    DownloadClientError = 16,
+
+    /// <summary>
+    /// Download integrity verification failed.
+    /// </summary>
+    [EnumMember(Value = nameof(IntegrityError))]
+    IntegrityError = 17,
+
+    /// <summary>
+    /// The move operation failed.
     /// </summary>
     [EnumMember(Value = nameof(MoveError))]
-    MoveError = 16,
+    MoveError = 18,
 }

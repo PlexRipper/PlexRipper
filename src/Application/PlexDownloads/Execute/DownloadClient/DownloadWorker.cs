@@ -197,22 +197,24 @@ public class DownloadWorker : IDisposable
                 var result = await _retryPolicy.ExecuteAsync(async () =>
                 {
                     // Download the data
-                    responseStream ??= await _httpClient.DownloadStreamAsync(
+                    var streamResult = await _httpClient.DownloadStreamAsync(
                         request,
                         _downloadSpeedLimit,
                         cancellationToken
                     );
 
-                    if (responseStream is null)
+                    if (streamResult.IsFailed)
                     {
-                        return _log.Here()
+                        _log.Here()
                             .ErrorResult(
-                                "Download worker {Id} with {MediaFileName} had an empty download stream",
+                                "Download worker {Id} with {MediaFileName} could not create a download stream, you might not have download permission from the server owner.",
                                 Id,
                                 FileName
                             );
+                        return streamResult.ToResult();
                     }
 
+                    responseStream = streamResult.Value;
                     responseStream.SetThrottleSpeed(_downloadSpeedLimit);
 
                     var readResult = await Result.Try(() =>
@@ -354,33 +356,25 @@ public class DownloadWorker : IDisposable
 
         SendDownloadWorkerLog(status.ToNotificationLevel(), msg);
 
-        string? logMsg = null;
-        switch (status)
+        var logMsg = status switch
         {
-            case DownloadStatus.Stopped:
-                logMsg = _log.Here()
-                    .InformationMsg("Download worker {Id} with {MediaFileName} was stopped!", Id, FileName);
-                break;
-            case DownloadStatus.Error:
-                logMsg = _log.Here().ErrorMsg("Download worker {Id} with {MediaFileName} had an error!", Id, FileName);
-                break;
-            case DownloadStatus.DownloadFinished:
-                logMsg = _log.Here()
-                    .InformationMsg("Download worker {Id} with {MediaFileName} finished!", Id, FileName);
-                break;
-            case DownloadStatus.ServerUnreachable:
-                logMsg = _log.Here()
-                    .ErrorMsg(
-                        "The server {PlexServerName} is unreachable!",
-                        DownloadWorkerTask.PlexServer?.Name ?? "Unknown"
-                    );
-                break;
-        }
+            DownloadStatus.Stopped => _log.Here()
+                .InformationMsg("Download worker {Id} with {MediaFileName} was stopped!", Id, FileName),
+            DownloadStatus.Error => _log.Here()
+                .ErrorMsg("Download worker {Id} with {MediaFileName} had an error!", Id, FileName),
+            DownloadStatus.AuthError => _log.Here()
+                .ErrorMsg("Download worker {Id} with {MediaFileName} failed authorization!", Id, FileName),
+            DownloadStatus.DownloadFinished => _log.Here()
+                .InformationMsg("Download worker {Id} with {MediaFileName} finished!", Id, FileName),
+            DownloadStatus.ServerUnreachable => _log.Here()
+                .ErrorMsg(
+                    "The server {PlexServerName} is unreachable!",
+                    DownloadWorkerTask.PlexServer?.Name ?? "Unknown"
+                ),
+            _ => _log.Here().ErrorMsg("Status is not handled: {Status}", status),
+        };
 
-        if (logMsg != null)
-        {
-            SendDownloadWorkerLog(status.ToNotificationLevel(), logMsg);
-        }
+        SendDownloadWorkerLog(status.ToNotificationLevel(), logMsg);
 
         if (errorResult != null)
         {

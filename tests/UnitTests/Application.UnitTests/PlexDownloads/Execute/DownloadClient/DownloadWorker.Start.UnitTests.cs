@@ -1,3 +1,5 @@
+using System.Linq;
+using System.Net;
 using Autofac;
 using ByteSizeLib;
 using Microsoft.EntityFrameworkCore;
@@ -39,7 +41,7 @@ public class DownloadWorkerStartUnitTests : BaseUnitTest<DownloadWorker>
             .Setup(x =>
                 x.DownloadStreamAsync(It.IsAny<HttpRequestMessage>(), It.IsAny<int>(), It.IsAny<CancellationToken>())
             )
-            .ReturnsAsync(downloadStream)
+            .ReturnsAsync(Result.Ok(downloadStream))
             .Verifiable(Times.Once);
 
         var downloadWorkerTask = IDbContext.DownloadWorkerTasks.First();
@@ -123,7 +125,7 @@ public class DownloadWorkerStartUnitTests : BaseUnitTest<DownloadWorker>
             .Setup(x =>
                 x.DownloadStreamAsync(It.IsAny<HttpRequestMessage>(), It.IsAny<int>(), It.IsAny<CancellationToken>())
             )
-            .ReturnsAsync(() => null)
+            .ReturnsAsync(Result.Fail<ThrottledStream>("Download stream is empty"))
             .Verifiable(Times.AtLeastOnce);
 
         var downloadWorkerTask = IDbContext.DownloadWorkerTasks.First();
@@ -191,7 +193,7 @@ public class DownloadWorkerStartUnitTests : BaseUnitTest<DownloadWorker>
             .Setup(x =>
                 x.DownloadStreamAsync(It.IsAny<HttpRequestMessage>(), It.IsAny<int>(), It.IsAny<CancellationToken>())
             )
-            .ReturnsAsync(new ThrottledStream(mockStream.Object))
+            .ReturnsAsync(Result.Ok(new ThrottledStream(mockStream.Object)))
             .Verifiable(Times.Once);
 
         var downloadWorkerTask = IDbContext.DownloadWorkerTasks.First();
@@ -212,5 +214,57 @@ public class DownloadWorkerStartUnitTests : BaseUnitTest<DownloadWorker>
             updateList[i].Status.ShouldBe(DownloadStatus.Downloading);
 
         updateList.Last().Status.ShouldBe(DownloadStatus.DownloadFinished);
+    }
+
+    [Fact]
+    public async Task ShouldSetAuthErrorAndPersistMetadata_WhenDownloadStreamReturnsAuthFailure()
+    {
+        // Arrange
+        await SetupDatabase(
+            65411,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
+                config.MovieDownloadTasksCount = 1;
+                config.DownloadWorkerTasks = 1;
+                config.DownloadFileSizeInMb = 10;
+            }
+        );
+
+        SetupHttpClient();
+
+        Mock.SetupCommand(It.IsAny<CreateDownloadFileStreamCommand>)
+            .ReturnsAsync(Result.Ok<Stream>(new MemoryStream()))
+            .Verifiable(Times.Once);
+
+        Mock.Mock<IPlexApiClient>()
+            .Setup(x =>
+                x.DownloadStreamAsync(It.IsAny<HttpRequestMessage>(), It.IsAny<int>(), It.IsAny<CancellationToken>())
+            )
+            .ReturnsAsync(
+                Result
+                    .Fail<ThrottledStream>("Access removed")
+                    .AddStatusCode((int)HttpStatusCode.Forbidden, "Access removed")
+            )
+            .Verifiable(Times.AtLeastOnce);
+
+        var downloadWorkerTask = IDbContext.DownloadWorkerTasks.First();
+        var sut = Mock.Create<DownloadWorker>(new NamedParameter("downloadWorkerTask", downloadWorkerTask));
+
+        var updateList = new List<DownloadWorkerTaskProgress>();
+        sut.DownloadWorkerTaskUpdate.Subscribe(x => updateList.Add(x));
+
+        // Act
+        var result = sut.Start();
+        await sut.DownloadProcessTask;
+
+        // Assert
+        result.ShouldNotBeNull();
+        updateList.Count.ShouldBeGreaterThan(0);
+        updateList.Last().Status.ShouldBe(DownloadStatus.AuthError);
+        updateList.Any(x => x.Status == DownloadStatus.ServerUnreachable).ShouldBeFalse();
+
+        var updatedTask = await IDbContext.DownloadTaskMovieFile.AsNoTracking().FirstAsync(CancellationToken);
     }
 }

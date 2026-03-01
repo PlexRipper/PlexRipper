@@ -200,11 +200,12 @@ public class PlexApiClient : IPlexApiClient
         var response = await SendAsync(request);
         if (response.IsSuccessStatusCode)
         {
-            var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-            return Result.Ok(new ThrottledStream(stream, downloadSpeedLimit));
+            return await Result.Try(async Task<ThrottledStream> () =>
+                new ThrottledStream(await response.Content.ReadAsStreamAsync(cancellationToken), downloadSpeedLimit)
+            );
         }
 
-        var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+        var responseBody = await response.Content.ReadAsStringAsync(CancellationToken.None);
         var errorMessage = string.IsNullOrWhiteSpace(responseBody)
             ? response.ReasonPhrase ?? "Request failed"
             : responseBody;

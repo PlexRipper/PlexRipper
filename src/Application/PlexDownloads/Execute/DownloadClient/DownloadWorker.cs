@@ -133,70 +133,78 @@ public class DownloadWorker : IDisposable
     {
         Stream? destinationStream = null;
         ThrottledStream? responseStream = null;
+        // Retrieve Download URL
+        var downloadUrlResult = await _dbContext.GetDownloadUrl(
+            DownloadWorkerTask.PlexServerId,
+            DownloadWorkerTask.FileLocationUrl,
+            cancellationToken
+        );
+
+        if (downloadUrlResult.IsCancelled)
+        {
+            SetDownloadWorkerTaskChanged(DownloadStatus.Paused);
+            return;
+        }
+
+        if (downloadUrlResult.IsFailed)
+        {
+            SetDownloadWorkerTaskChanged(DownloadStatus.ServerUnreachable);
+            return;
+        }
+
+        SetDownloadWorkerTaskChanged(DownloadStatus.Downloading);
+
+        var downloadUrl = downloadUrlResult.Value;
+
+        // Prepare destination stream
+        var fileStreamResult = await _commandExecutor.Send(
+            new CreateDownloadFileStreamCommand(
+                DownloadWorkerTask.DownloadDirectory,
+                FileName,
+                DownloadWorkerTask.DataTotal
+            ),
+            CancellationToken.None
+        );
+        if (fileStreamResult.IsFailed)
+        {
+            var result = _log.Here()
+                .ErrorResult("Could not create a download destination filestream for DownloadWorker with id: {Id}", Id);
+
+            SetDownloadWorkerTaskChanged(
+                DownloadStatus.StorageError,
+                Result.Merge(result, fileStreamResult).ToResult()
+            );
+            return;
+        }
+
+        destinationStream = fileStreamResult.Value;
+
+        // Position the destination stream at the absolute byte offset for this segment
+        // Support resume by advancing with BytesReceived from the segment start
+        destinationStream.Position = DownloadWorkerTask.StartByte + DownloadWorkerTask.BytesReceived;
+
+        // Create download HttpRequestMessage with range header
+        var request = new HttpRequestMessage(HttpMethod.Get, downloadUrl);
+        request.Headers.Add(
+            "Range",
+            new RangeHeaderValue(DownloadWorkerTask.CurrentByte, DownloadWorkerTask.EndByte).ToString()
+        );
+
+        // Buffer is based on: https://stackoverflow.com/a/39355385/8205497
+        var buffer = new byte[(long)ByteSize.FromMebiBytes(4).Bytes];
+
+        var loopIndex = 0;
+        var emptyStreamResponse = 0;
+        var stopwatch = Stopwatch.StartNew(); // Start timing for speed calculation
+        var previousBytesReceived = 0; // Track bytes received at the last speed calculation
+
         try
         {
-            // Retrieve Download URL
-            var downloadUrlResult = await _dbContext.GetDownloadUrl(
-                DownloadWorkerTask.PlexServerId,
-                DownloadWorkerTask.FileLocationUrl,
-                cancellationToken
-            );
-
-            if (downloadUrlResult.IsFailed)
-            {
-                SetDownloadWorkerTaskChanged(DownloadStatus.ServerUnreachable);
-                return;
-            }
-
-            var downloadUrl = downloadUrlResult.Value;
-
-            // Prepare destination stream
-            var fileStreamResult = await _commandExecutor.Send(
-                new CreateDownloadFileStreamCommand(
-                    DownloadWorkerTask.DownloadDirectory,
-                    FileName,
-                    DownloadWorkerTask.DataTotal
-                ),
-                CancellationToken.None
-            );
-            if (fileStreamResult.IsFailed)
-            {
-                var result = _log.Here()
-                    .ErrorResult(
-                        "Could not create a download destination filestream for DownloadWorker with id: {Id}",
-                        Id
-                    );
-
-                SetDownloadWorkerTaskChanged(DownloadStatus.Error, Result.Merge(result, fileStreamResult).ToResult());
-                return;
-            }
-
-            destinationStream = fileStreamResult.Value;
-
-            // Position the destination stream at the absolute byte offset for this segment
-            // Support resume by advancing with BytesReceived from the segment start
-            destinationStream.Position = DownloadWorkerTask.StartByte + DownloadWorkerTask.BytesReceived;
-
-            // Create download HttpRequestMessage with range header
-            var request = new HttpRequestMessage(HttpMethod.Get, downloadUrl);
-            request.Headers.Add(
-                "Range",
-                new RangeHeaderValue(DownloadWorkerTask.CurrentByte, DownloadWorkerTask.EndByte).ToString()
-            );
-
-            // Buffer is based on: https://stackoverflow.com/a/39355385/8205497
-            var buffer = new byte[(long)ByteSize.FromMebiBytes(4).Bytes];
-
-            var loopIndex = 0;
-            var emptyStreamResponse = 0;
-            var stopwatch = Stopwatch.StartNew(); // Start timing for speed calculation
-            var previousBytesReceived = 0; // Track bytes received at the last speed calculation
-
             while (true)
             {
                 var result = await _retryPolicy.ExecuteAsync(async () =>
                 {
-                    // Download the data
+                    // Create Download stream
                     var streamResult = await _httpClient.DownloadStreamAsync(
                         request,
                         _downloadSpeedLimit,
@@ -221,10 +229,8 @@ public class DownloadWorker : IDisposable
                         responseStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken)
                     );
 
-                    if (readResult.IsFailed)
-                    {
-                        return readResult;
-                    }
+                    if (readResult.IsFailed || readResult.IsCancelled)
+                        return readResult.LogError();
 
                     var read = readResult.Value;
 
@@ -358,6 +364,8 @@ public class DownloadWorker : IDisposable
 
         var logMsg = status switch
         {
+            DownloadStatus.Downloading => _log.Here()
+                .InformationMsg("Download worker {Id} with {MediaFileName} has started downloading!", Id, FileName),
             DownloadStatus.Stopped => _log.Here()
                 .InformationMsg("Download worker {Id} with {MediaFileName} was stopped!", Id, FileName),
             DownloadStatus.Error => _log.Here()

@@ -138,6 +138,7 @@ public static class PlexMediaExtensions
             FullTitle = $"{plexMovie.FullTitle}/{plexMediaData.GetFileName}",
             Title = plexMediaData.GetFileName,
             DirectDownloadSnapshot = null,
+            DownloadClientType = PlexDownloadClientType.Direct,
         };
 
     public static DownloadTaskTvShowEpisodeFile MapToDownloadTask(
@@ -188,6 +189,7 @@ public static class PlexMediaExtensions
             FullTitle = $"{plexTvShowEpisode.FullTitle}/{plexMediaData.GetFileName}",
             Title = plexMediaData.GetFileName,
             DirectDownloadSnapshot = null,
+            DownloadClientType = PlexDownloadClientType.Direct,
         };
     }
 }

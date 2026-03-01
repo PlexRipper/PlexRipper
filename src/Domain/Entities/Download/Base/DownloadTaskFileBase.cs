@@ -63,6 +63,8 @@ public abstract class DownloadTaskFileBase : DownloadTaskBase, IDownloadTaskProg
     [Column(Order = 19)]
     public required DirectDownloadSnapshot? DirectDownloadSnapshot { get; set; }
 
+    public required PlexDownloadClientType DownloadClientType { get; set; } = PlexDownloadClientType.Direct;
+
     #endregion
 
     #region File Transfer Progress

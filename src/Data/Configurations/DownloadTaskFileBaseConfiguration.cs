@@ -28,5 +28,12 @@ public class DownloadTaskFileBaseConfiguration : IEntityTypeConfiguration<Downlo
                 x => JsonSerializer.Deserialize<DirectDownloadSnapshot>(x, DefaultJsonSerializerOptions.ConfigStandard)!
             )
             .IsUnicode();
+
+        builder
+            .Property(b => b.DownloadClientType)
+            .HasMaxLength(10)
+            .HasConversion(x => x.ToPlexDownloadClientTypeString(), x => x.ToPlexDownloadClientType())
+            .HasDefaultValue(PlexDownloadClientType.Direct)
+            .IsUnicode(false);
     }
 }

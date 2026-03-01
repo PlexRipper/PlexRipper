@@ -61,6 +61,7 @@ public static class PlexServerMapper
             PublicAddress = source.PublicAddress,
             PreferredConnectionId = source.PreferredConnectionId,
             IsEnabled = source.IsEnabled,
+            IsDownloadsPausedByUser = false,
             Home = source.Home,
             Synced = source.Synced,
             Relay = source.Relay,

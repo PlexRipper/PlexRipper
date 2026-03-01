@@ -85,6 +85,9 @@ public class PlexServer : BaseEntity
     [Column(Order = 15)]
     public required bool IsEnabled { get; set; } = true;
 
+    [Column(Order = 16)]
+    public required bool IsDownloadsPausedByUser { get; set; }
+
     [Column(Order = 17)]
     public required bool Home { get; init; }
 

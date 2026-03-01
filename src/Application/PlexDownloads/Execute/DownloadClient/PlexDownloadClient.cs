@@ -1,91 +1,59 @@
+using System.ComponentModel;
+using System.IO.Abstractions;
 using System.Reactive.Linq;
+using Downloader;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 using Reaparr.Settings.Contracts;
 
 namespace Reaparr.Application;
 
-/// <summary>
-/// The PlexDownloadClient handles a single <see cref="DownloadTaskGeneric"/> at a time and
-/// manages the <see cref="DownloadWorker"/>s responsible for the multithreaded downloading.
-/// </summary>
 public class PlexDownloadClient : IPlexDownloadClient
 {
     private readonly ILogger _log;
-    private readonly ICommandExecutor _commandExecutor;
     private readonly IReaparrDbContext _dbContext;
-    private readonly Func<DownloadWorkerTask, DownloadWorker> _downloadWorkerFactory;
-
-    private readonly List<DownloadWorker> _downloadWorkers = [];
-
+    private readonly IReaparrDbContextFactory _dbContextFactory;
+    private readonly ICommandExecutor _commandExecutor;
     private readonly IServerSettingsModule _serverSettings;
+    private readonly IPath _path;
 
-    private IDisposable? _downloadSpeedLimitSubscription;
-    private IDisposable? _downloadWorkerTaskUpdate;
-    private IDisposable? _downloadWorkerCombinedConnection;
+    private DownloadTaskKey? _downloadTaskKey;
+    private string _filename = string.Empty;
 
-    private readonly TaskCompletionSource<object> _downloadWorkerTaskUpdateCompletionSource = new();
-    private readonly TaskCompletionSource<object> _downloadWorkerLogCompletionSource = new();
+    private IDownloadService _downloader = new DownloadService();
+    private readonly DownloadConfiguration _configuration = new()
+    {
+        DownloadFileExtension = FilePathExtensions.TEMP_DOWNLOAD_FILE_SUFFIX,
+    };
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="PlexDownloadClient"/> class.
-    /// </summary>
-    /// <param name="log"></param>
-    /// <param name="commandExecutor"></param>
-    /// <param name="dbContext"></param>
-    /// <param name="downloadWorkerFactory"></param>
-    /// <param name="serverSettings"></param>
     public PlexDownloadClient(
         ILogger log,
+        IReaparrDbContextFactory dbContextFactory,
         ICommandExecutor commandExecutor,
-        IReaparrDbContext dbContext,
-        Func<DownloadWorkerTask, DownloadWorker> downloadWorkerFactory,
-        IServerSettingsModule serverSettings
+        IDownloadManagerSettings downloadManagerSettings,
+        IServerSettingsModule serverSettings,
+        IPath path
     )
     {
         _log = log.ForContext<PlexDownloadClient>();
+        _dbContextFactory = dbContextFactory;
         _commandExecutor = commandExecutor;
-        _dbContext = dbContext;
-        _downloadWorkerFactory = downloadWorkerFactory;
+        _dbContext = dbContextFactory.Create();
         _serverSettings = serverSettings;
+        _path = path;
+
+        var downloadSegments = downloadManagerSettings.DownloadSegments;
+
+        // Number of file parts, default is 1
+        _configuration.ChunkCount = downloadSegments;
+        _configuration.ParallelCount = downloadSegments;
+        _configuration.ParallelDownload = downloadSegments > 1;
     }
 
-    /// <summary>
-    /// Gets the Task that completes when all download workers have finished.
-    /// </summary>
-    public Task DownloadProcessTask =>
-        Task.WhenAll(
-            _downloadWorkers
-                .Select(x => x.DownloadProcessTask)
-                .Concat([_downloadWorkerTaskUpdateCompletionSource.Task, _downloadWorkerLogCompletionSource.Task])
-        );
-
-    public DownloadStatus DownloadStatus
+    /// <inheritdoc/>
+    public async Task<Result> Start(DownloadTaskKey downloadTaskKey, CancellationToken cancellationToken = default)
     {
-        get => DownloadTask?.DownloadStatus ?? DownloadStatus.Unknown;
-        private set
-        {
-            if (DownloadTask != null)
-                DownloadTask.DownloadStatus = value;
-        }
-    }
-
-    /// <summary>
-    /// Gets the <see cref="DownloadTaskGeneric"/> that is currently being executed.
-    /// </summary>
-    public DownloadTaskGeneric? DownloadTask { get; internal set; }
-
-    public IObservable<IList<DownloadWorkerLog>> ListenToDownloadWorkerLog { get; private set; } =
-        Observable.Empty<IList<DownloadWorkerLog>>();
-
-    /// <summary>
-    /// Setup this <see cref="PlexDownloadClient"/> to prepare for the download process.
-    /// This needs to be called before any other action can be taken.
-    /// Note: adding this in the constructor prevents us from returning a <see cref="Result"/>.
-    /// </summary>
-    /// <returns></returns>
-    public async Task<Result> Setup(DownloadTaskKey downloadTaskKey, CancellationToken cancellationToken = default)
-    {
+        _downloadTaskKey = downloadTaskKey;
         var downloadTask = await _dbContext.GetDownloadTaskAsync(downloadTaskKey, cancellationToken);
         if (downloadTask is null)
         {
@@ -94,208 +62,177 @@ public class PlexDownloadClient : IPlexDownloadClient
                 .LogWarning();
         }
 
-        DownloadTask = downloadTask;
-
-        if (!DownloadTask.DownloadWorkerTasks.Any())
-        {
-            return ResultExtensions
-                .IsEmpty($"{nameof(DownloadTaskGeneric)}.{nameof(DownloadTask.DownloadWorkerTasks)}")
-                .LogWarning();
-        }
-
-        _downloadWorkers.AddRange(
-            DownloadTask.DownloadWorkerTasks.Select(downloadWorkerTask => _downloadWorkerFactory(downloadWorkerTask))
+        var downloadUrlResult = await _dbContext.GetDownloadUrl(
+            downloadTask.PlexServerId,
+            downloadTask.FileLocationUrl,
+            CancellationToken.None
         );
 
-        await SetupDownloadLimitWatcher(DownloadTask);
+        if (downloadUrlResult.IsFailed)
+            return downloadUrlResult.ToResult();
 
-        SetupSubscriptions();
+        var downloadUrl = downloadUrlResult.Value;
+
+        // Prepare destination stream
+        var fileStreamResult = await _commandExecutor.Send(
+            new CreateDownloadFileStreamCommand(
+                downloadTask.DownloadDirectory,
+                downloadTask.FileName,
+                downloadTask.DataTotal
+            ),
+            CancellationToken.None
+        );
+
+        if (fileStreamResult.IsFailed)
+            return fileStreamResult.ToResult();
+
+        var fileStream = fileStreamResult.Value;
+        _filename = downloadTask.FileName;
+        var filePath = _path.Combine(downloadTask.DownloadDirectory, downloadTask.FileName);
+
+        _downloader = new DownloadService(_configuration);
+
+        await SetupDownloadListeners(downloadTaskKey);
+
+        await _downloader.DownloadFileTaskAsync(downloadUrl, filePath, cancellationToken);
 
         return Result.Ok();
     }
 
-    /// <summary>
-    /// Starts the download workers for the <see cref="DownloadTaskGeneric"/> given during setup.
-    /// </summary>
-    /// <returns>Is successful.</returns>
-    public async Task<Result> Start()
-    {
-        if (DownloadTask is null)
-            return Result.Fail("The PlexDownloadClient has not been setup yet.").LogError();
-
-        if (_downloadWorkers.Any(x => x.DownloadWorkerTask.DownloadStatus == DownloadStatus.Downloading))
-            return Result.Fail("The PlexDownloadClient is already downloading and can not be started.").LogWarning();
-
-        _log.Here().Debug("Start downloading {MediaFileName}", DownloadTask.FileName);
-
-        await Task.CompletedTask;
-
-        try
-        {
-            var results = new List<Result>();
-            foreach (var downloadWorker in _downloadWorkers)
-            {
-                var startResult = downloadWorker.Start();
-                if (startResult.IsFailed)
-                    startResult.LogError();
-
-                results.Add(startResult);
-            }
-
-            return results.Merge();
-        }
-        catch (Exception e)
-        {
-            return Result.Fail(new ExceptionalError($"Could not download {DownloadTask.FileName}", e)).LogError();
-        }
-    }
-
+    /// <inheritdoc/>
     public async Task<Result> StopAsync()
     {
-        _log.Here().Information("Stop downloading {DownloadTaskFileName}", DownloadTask?.FileName);
-
-        await Task.WhenAll(_downloadWorkers.Select(x => x.StopAsync()));
-
-        // We Await the DownloadProcessTask to ensure that the DownloadWorkerUpdates are completed
-        await DownloadProcessTask;
-
-        await _downloadWorkerTaskUpdateCompletionSource.Task;
-        await _downloadWorkerLogCompletionSource.Task;
+        await _downloader.CancelTaskAsync();
 
         return Result.Ok();
     }
 
-    /// <summary>
-    /// Releases the unmanaged resources used by the HttpClient and optionally disposes of the managed resources.
-    /// </summary>
-    public async ValueTask DisposeAsync()
+    private async Task SetupDownloadListeners(DownloadTaskKey key)
     {
-        await DownloadProcessTask;
+        // Setup DownloadLimit Subscription
+        var serverMachineIdentifier = await _dbContext.GetPlexServerMachineIdentifierById(key.PlexServerId);
+        _serverSettings
+            .GetDownloadSpeedLimitObservable(serverMachineIdentifier)
+            .Subscribe(value =>
+            {
+                _configuration.MaximumBytesPerSecond = Math.Max(0, value) * 1024;
+            });
 
-        _downloadSpeedLimitSubscription?.Dispose();
-        _downloadWorkerTaskUpdate?.Dispose();
-        _downloadWorkerCombinedConnection?.Dispose();
+        // Setup DownloadStarted Subscription
+        Observable
+            .FromEventPattern<DownloadStartedEventArgs>(
+                h => _downloader.DownloadStarted += h,
+                h => _downloader.DownloadStarted -= h
+            )
+            .Select(x => x.EventArgs)
+            .Select(args =>
+                Observable.FromAsync(async _ =>
+                {
+                    await SetDownloadStatusAsync(Domain.DownloadStatus.Downloading);
+                })
+            )
+            .Concat()
+            .Subscribe();
 
-        // Dispose all download workers to release their HTTP clients, Rx subjects, and other resources
-        foreach (var downloadWorker in _downloadWorkers)
-        {
-            downloadWorker.Dispose();
-        }
+        // Setup DownloadProgressChanged Subscription
+        Observable
+            .FromEventPattern<DownloadProgressChangedEventArgs>(
+                h => _downloader.DownloadProgressChanged += h,
+                h => _downloader.DownloadProgressChanged -= h
+            )
+            .Select(x => x.EventArgs)
+            .Sample(TimeSpan.FromMilliseconds(500))
+            .Select(args =>
+                Observable.FromAsync(async ct =>
+                {
+                    using var dbContext = _dbContextFactory.CreateAsync();
+                    var progress = new DownloadTaskProgress
+                    {
+                        DataTotal = args.TotalBytesToReceive,
+                        Percentage = Convert.ToDecimal(args.ProgressPercentage),
+                        DataReceived = args.ReceivedBytesSize,
+                        DownloadSpeed = Convert.ToInt64(args.AverageBytesPerSecondSpeed),
+                    };
 
-        _downloadWorkers.Clear();
+                    await _dbContext.UpdateDownloadProgress(key, progress, cancellationToken: ct);
+
+                    _log.Here()
+                        .Debug(
+                            "[DownloadTaskProgress {MediaFileName} - {Percentage}% - {Speed} - {DataReceived} / {DataTotal} - {TimeRemaining}]",
+                            _filename,
+                            progress.Percentage.ToString("F2"),
+                            DataFormat.FormatSpeedString(progress.DownloadSpeed),
+                            progress.DataReceived,
+                            progress.DataTotal,
+                            DataFormat.GetTimeRemaining(
+                                progress.DataTotal - progress.DataReceived,
+                                progress.DownloadSpeed
+                            )
+                        );
+
+                    await _commandExecutor.Send(new DownloadTaskUpdatedCommand(key), CancellationToken.None);
+                })
+            )
+            .Concat()
+            .Subscribe();
+
+        Observable
+            .FromEventPattern<AsyncCompletedEventArgs>(
+                h => _downloader.DownloadFileCompleted += h,
+                h => _downloader.DownloadFileCompleted -= h
+            )
+            .Select(x => x.EventArgs)
+            .Select(args =>
+                Observable.FromAsync(async ct =>
+                {
+                    using var dbContext = _dbContextFactory.CreateAsync();
+                    if (!args.Cancelled)
+                    {
+                        await SetDownloadStatusAsync(Domain.DownloadStatus.DownloadFinished);
+                    }
+                })
+            )
+            .Concat()
+            .Subscribe();
+    }
+
+    private async Task SetDownloadStatusAsync(Domain.DownloadStatus status, Result? errorResult = null)
+    {
+        using var dbContext = await _dbContextFactory.CreateAsync();
 
         _log.Here()
-            .Warning("PlexDownloadClient for DownloadTask with Id: {DownloadTaskId} was disposed", DownloadTask?.Id);
-    }
-
-    private async Task OnDownloadWorkerTaskUpdate(IList<DownloadWorkerTaskProgress> downloadWorkerUpdates)
-    {
-        if (DownloadTask is null || !downloadWorkerUpdates.Any())
-            return;
-
-        DownloadTask.DataReceived = downloadWorkerUpdates.Sum(x => x.DataReceived);
-        DownloadTask.DownloadSpeed = downloadWorkerUpdates.Sum(x => x.DownloadSpeed);
-
-        var newStatus = DownloadTaskActions.Aggregate(downloadWorkerUpdates.Select(x => x.Status).ToList());
-
-        // Log state transitions
-        if (DownloadStatus != newStatus)
-        {
-            _log.Here()
-                .Information(
-                    "DownloadTask {DownloadTaskId} ({MediaFileName}) transitioning from {OldStatus} to {NewStatus}",
-                    DownloadTask.Id,
-                    DownloadTask.FileName,
-                    DownloadStatus,
-                    newStatus
-                );
-        }
-
-        DownloadStatus = newStatus;
-
-        await _dbContext.UpdateDownloadWorkerProgress(downloadWorkerUpdates);
-        await _dbContext.UpdateDownloadProgress(DownloadTask.ToKey(), DownloadTask);
-        await _dbContext.SetDownloadStatus(DownloadTask.ToKey(), DownloadStatus);
-
-        await _commandExecutor.Send(new DownloadTaskUpdatedCommand(DownloadTask.ToKey()));
-
-        _log.Here().Verbose("{@DownloadTask}", DownloadTask.ToString());
-    }
-
-    private async Task SetupDownloadLimitWatcher(DownloadTaskGeneric downloadTask)
-    {
-        void SetDownloadSpeedLimit(int downloadSpeedLimitInKb)
-        {
-            foreach (var downloadWorker in _downloadWorkers)
-                downloadWorker.SetDownloadSpeedLimit(downloadSpeedLimitInKb / _downloadWorkers.Count);
-        }
-
-        var serverMachineIdentifier = await _dbContext.GetPlexServerMachineIdentifierById(downloadTask.PlexServerId);
-
-        SetDownloadSpeedLimit(_serverSettings.GetDownloadSpeedLimit(serverMachineIdentifier));
-        _downloadSpeedLimitSubscription = _serverSettings
-            .GetDownloadSpeedLimitObservable(serverMachineIdentifier)
-            .Subscribe(SetDownloadSpeedLimit);
-    }
-
-    private void SetupSubscriptions()
-    {
-        if (!_downloadWorkers.Any())
-        {
-            _log.Here().Warning("No download workers have been made yet, cannot setup subscriptions");
-            return;
-        }
-
-        // On download worker update.
-        var combined = _downloadWorkers.Select(x => x.DownloadWorkerTaskUpdate).CombineLatest().Publish();
-
-        _downloadWorkerTaskUpdate = combined
-            .Sample(TimeSpan.FromMilliseconds(500))
-            .Merge(combined.TakeLast(1))
-            .Select(data => Observable.FromAsync(() => OnDownloadWorkerTaskUpdate(data)))
-            .Concat()
-            .Subscribe(
-                _ => { },
-                ex =>
-                {
-                    if (ex.GetType() != typeof(OperationCanceledException))
-                    {
-                        _log.Here().ErrorResult(ex);
-                        _downloadWorkerTaskUpdateCompletionSource.SetException(ex);
-                    }
-                    else
-                    {
-                        _downloadWorkerTaskUpdateCompletionSource.SetResult(true);
-                    }
-                },
-                () => _downloadWorkerTaskUpdateCompletionSource.SetResult(true)
+            .Information(
+                "DownloadTask {DownloadTaskId} ({MediaFileName}) transitioning  to {NewStatus}",
+                _downloadTaskKey!.Id,
+                _filename,
+                status
             );
 
-        _downloadWorkerCombinedConnection = combined.Connect();
+        await dbContext.SetDownloadStatus(_downloadTaskKey, status);
+        await _commandExecutor.Send(new DownloadTaskUpdatedCommand(_downloadTaskKey), CancellationToken.None);
 
-        // Download Worker Log subscription
-        ListenToDownloadWorkerLog = _downloadWorkers
-            .Select(x => x.DownloadWorkerLog)
-            .Merge()
-            .Buffer(TimeSpan.FromSeconds(1))
-            .AsObservable();
+        await SendDownloadClientLog(status.ToNotificationLevel(), status, $"Download {status}: {_filename}");
 
-        // Complete the DownloadTask when this completes
-        ListenToDownloadWorkerLog.Subscribe(
-            _ => { },
-            ex =>
-            {
-                if (ex.GetType() != typeof(OperationCanceledException))
-                {
-                    _log.Here().ErrorResult(ex);
-                    _downloadWorkerLogCompletionSource.SetException(ex);
-                }
-                else
-                {
-                    _downloadWorkerLogCompletionSource.SetResult(true);
-                }
-            },
-            () => _downloadWorkerLogCompletionSource.SetResult(true)
-        );
+        if (errorResult is not null)
+            await SendDownloadClientLog(NotificationLevel.Error, status, errorResult.ToString());
     }
+
+    private async Task SendDownloadClientLog(NotificationLevel logLevel, Domain.DownloadStatus status, string message)
+    {
+        using var dbContext = await _dbContextFactory.CreateAsync();
+
+        await dbContext.DownloadWorkerTasksLogs.AddAsync(
+            new DownloadWorkerLog
+            {
+                Message = message,
+                LogLevel = logLevel,
+                CreatedAt = DateTime.UtcNow,
+                Status = status,
+                DownloadTaskId = _downloadTaskKey!.Id,
+            }
+        );
+        await dbContext.SaveChangesAsync(CancellationToken.None);
+    }
+
+    public async ValueTask DisposeAsync() { }
 }

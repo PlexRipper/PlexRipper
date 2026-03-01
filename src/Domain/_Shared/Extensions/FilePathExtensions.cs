@@ -2,7 +2,7 @@ namespace Reaparr.Domain;
 
 public static class FilePathExtensions
 {
-    private const string TEMP_DOWNLOAD_FILE_SUFFIX = ".reaptemp";
+    public const string TEMP_DOWNLOAD_FILE_SUFFIX = ".reaptemp";
 
     public static string AddReaparrTempSuffixToFileName(this string fileName) =>
         $"{Path.GetFileNameWithoutExtension(fileName)}{Path.GetExtension(fileName)}{TEMP_DOWNLOAD_FILE_SUFFIX}";

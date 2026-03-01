@@ -8,37 +8,35 @@ public class DownloadWorkerLog : BaseEntity
     #region Properties
 
     /// <summary>
-    /// Gets the date and time when the log entry was created.
-    /// </summary>
-    [Column(Order = 1)]
-    public required DateTime CreatedAt { get; init; }
-
-    /// <summary>
     /// Gets the message of the log entry.
     /// </summary>
-    [Column(Order = 2)]
-    public required string Message { get; init; }
+    [Column(Order = 1)]
+    public required DownloadStatus Status { get; init; }
 
     /// <summary>
     /// Gets the log level of the log entry.
     /// </summary>
-    [Column(Order = 3)]
+    [Column(Order = 2)]
     public required NotificationLevel LogLevel { get; init; }
 
+    /// <summary>
+    /// Gets the message of the log entry.
+    /// </summary>
+    [Column(Order = 3)]
+    public required string Message { get; init; }
+
+    /// <summary>
+    /// Gets the date and time when the log entry was created.
+    /// </summary>
+    [Column(Order = 4)]
+    public required DateTime CreatedAt { get; init; }
     #endregion
 
     #region Relationships
 
     /// <summary>
-    ///  Gets the <see cref="DownloadWorkerTask">DownloadWorkerTask</see> that the log entry belongs to.
+    /// Gets the <see cref="DownloadTaskGeneric"/> this log belongs too
     /// </summary>
-    public DownloadWorkerTask? DownloadWorkerTask { get; init; }
-
-    /// <summary>
-    ///  Gets the id of the <see cref="DownloadWorkerTask">DownloadWorkerTask</see> that the log entry belongs to.
-    /// </summary>
-    public required int DownloadWorkerTaskId { get; init; }
-
     public required Guid DownloadTaskId { get; init; }
 
     #endregion

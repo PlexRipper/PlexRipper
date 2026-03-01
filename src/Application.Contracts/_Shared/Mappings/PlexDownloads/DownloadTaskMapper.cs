@@ -40,8 +40,8 @@ public static class DownloadTaskGenericToDTOMapper
             CreatedAt = downloadTask.CreatedAt,
             Message = downloadTask.Message,
             LogLevel = downloadTask.LogLevel,
-            DownloadWorkerTaskId = downloadTask.DownloadWorkerTaskId,
             DownloadTaskId = downloadTask.DownloadTaskId,
+            Status = downloadTask.Status,
         };
 
     public static List<DownloadWorkerLogDTO> ToDTO(this List<DownloadWorkerLog> logs) =>

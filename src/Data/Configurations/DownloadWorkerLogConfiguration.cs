@@ -12,5 +12,11 @@ public class DownloadWorkerLogConfiguration : IEntityTypeConfiguration<DownloadW
             .HasMaxLength(20)
             .HasConversion(x => x.ToNotificationLevelString(), x => x.ToNotificationLevel())
             .IsUnicode(false);
+
+        builder
+            .Property(b => b.Status)
+            .HasMaxLength(20)
+            .HasConversion(x => x.ToDownloadStatusString(), x => x.ToDownloadStatus())
+            .IsUnicode(false);
     }
 }

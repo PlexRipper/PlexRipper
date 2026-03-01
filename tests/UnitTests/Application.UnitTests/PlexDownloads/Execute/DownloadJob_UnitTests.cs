@@ -31,12 +31,9 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
         };
         Mock.Mock<IJobExecutionContext>().SetupGet(x => x.JobDetail.JobDataMap).Returns(new JobDataMap(dict));
         Mock.Mock<IJobExecutionContext>().SetupGet(x => x.CancellationToken).Returns(CancellationToken);
-        Mock.Mock<IPlexDownloadClient>().Setup(x => x.Setup(It.IsAny<DownloadTaskKey>(), CancellationToken)).ReturnOk();
-        Mock.Mock<IPlexDownloadClient>().Setup(x => x.Start()).ReturnsAsync(Result.Ok());
-        Mock.Mock<IPlexDownloadClient>().SetupGet(x => x.DownloadProcessTask).Returns(Task.CompletedTask);
         Mock.Mock<IPlexDownloadClient>()
-            .SetupGet(x => x.ListenToDownloadWorkerLog)
-            .Returns(new Mock<IObservable<IList<DownloadWorkerLog>>>().Object);
+            .Setup(x => x.Start(It.IsAny<DownloadTaskKey>(), CancellationToken))
+            .ReturnsAsync(Result.Ok());
         Mock.Mock<IPlexDownloadClient>().Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask);
 
         // Act
@@ -67,12 +64,9 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
         };
         Mock.Mock<IJobExecutionContext>().SetupGet(x => x.JobDetail.JobDataMap).Returns(new JobDataMap(dict));
         Mock.Mock<IJobExecutionContext>().SetupGet(x => x.CancellationToken).Returns(CancellationToken);
-        Mock.Mock<IPlexDownloadClient>().Setup(x => x.Setup(It.IsAny<DownloadTaskKey>(), CancellationToken)).ReturnOk();
-        Mock.Mock<IPlexDownloadClient>().Setup(x => x.Start()).ReturnsAsync(Result.Ok());
-        Mock.Mock<IPlexDownloadClient>().SetupGet(x => x.DownloadProcessTask).Returns(Task.CompletedTask);
         Mock.Mock<IPlexDownloadClient>()
-            .SetupGet(x => x.ListenToDownloadWorkerLog)
-            .Returns(new Mock<IObservable<IList<DownloadWorkerLog>>>().Object);
+            .Setup(x => x.Start(It.IsAny<DownloadTaskKey>(), CancellationToken))
+            .ReturnsAsync(Result.Ok());
         Mock.Mock<IPlexDownloadClient>().Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask);
 
         // Act

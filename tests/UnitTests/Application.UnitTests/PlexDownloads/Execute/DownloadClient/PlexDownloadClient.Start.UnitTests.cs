@@ -1,12 +1,12 @@
-﻿using System.Reactive.Linq;
+using System.ComponentModel;
+using System.Reactive.Linq;
 using Autofac;
-using ByteSizeLib;
+using Downloader;
 using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Data.Contracts;
-using Reaparr.PlexApi;
-using Reaparr.PlexApi.Contracts;
 using Reaparr.Settings.Contracts;
+using DomainDownloadStatus = Reaparr.Domain.DownloadStatus;
 
 namespace Reaparr.Application.UnitTests;
 
@@ -29,7 +29,6 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<PlexDownloadClient>
             }
         );
 
-        SetupHttpClient(x => x.SetupDownloadFile(10));
         var downloadSpeedLimit = 1000;
         var dbContext = IDbContext;
         var downloadTask = await dbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
@@ -57,7 +56,7 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<PlexDownloadClient>
             .Verifiable(Times.Once);
 
         var updateList = new List<IDownloadTaskProgress>();
-        var statusList = new List<DownloadStatus>();
+        var statusList = new List<DomainDownloadStatus>();
 
         async Task AddDownloadTaskUpdateAsync(DownloadTaskUpdatedCommand command)
         {
@@ -81,44 +80,48 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<PlexDownloadClient>
             )
             .Verifiable(Times.AtLeastOnce);
 
-        // DownloadWorkerMocks
-        var destinationStream = new MemoryStream();
+        var downloadServiceMock = new Mock<IDownloadService>();
+        downloadServiceMock.Setup(x => x.Clear()).Returns(Task.CompletedTask);
+        downloadServiceMock
+            .Setup(x => x.DownloadFileTaskAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Returns<string, string, CancellationToken>(
+                async (_, _, _) =>
+                {
+                    downloadServiceMock.Raise(
+                        x => x.DownloadProgressChanged += null,
+                        downloadServiceMock.Object,
+                        new DownloadProgressChangedEventArgs("Main")
+                        {
+                            TotalBytesToReceive = 10 * 1024,
+                            ReceivedBytesSize = 10 * 1024,
+                            BytesPerSecondSpeed = 1024,
+                        }
+                    );
 
-        Mock.SetupCommand(It.IsAny<CreateDownloadFileStreamCommand>)
-            .ReturnsAsync(Result.Ok<Stream>(destinationStream))
-            .Verifiable(Times.Once);
+                    downloadServiceMock.Raise(
+                        x => x.DownloadFileCompleted += null,
+                        downloadServiceMock.Object,
+                        new AsyncCompletedEventArgs(null, false, null)
+                    );
 
-        var downloadStream = new ThrottledStream(new MemoryStream(new byte[(int)ByteSize.FromMebiBytes(10).Bytes]));
-        Mock.Mock<IPlexApiClient>()
-            .Setup(x =>
-                x.DownloadStreamAsync(It.IsAny<HttpRequestMessage>(), It.IsAny<int>(), It.IsAny<CancellationToken>())
-            )
-            .ReturnsAsync(Result.Ok(downloadStream))
-            .Verifiable(Times.Once);
+                    await Task.CompletedTask;
+                }
+            );
 
         // Act
         var sut = Mock.Create<PlexDownloadClient>(
             new NamedParameter(
-                "downloadWorkerFactory",
-                (DownloadWorkerTask task) => Mock.Create<DownloadWorker>(new NamedParameter("downloadWorkerTask", task))
-            ),
-            new NamedParameter(
-                "clientFactory",
-                (PlexApiClientOptions options) => Mock.Create<PlexApiClient>(new NamedParameter("options", options))
+                "downloadServiceFactory",
+                (Func<DownloadConfiguration, IDownloadService>)(_ => downloadServiceMock.Object)
             )
         );
 
-        await sut.Setup(downloadTask.ToKey(), CancellationToken);
-
-        var startResult = await sut.Start();
-
-        // Wait for the process to complete
-        await sut.DownloadProcessTask;
+        var startResult = await sut.Start(downloadTask.ToKey(), CancellationToken);
 
         // Assert
         startResult.IsSuccess.ShouldBeTrue();
-        updateList.Count.ShouldBeGreaterThanOrEqualTo(4);
-        statusList.Count.ShouldBeGreaterThanOrEqualTo(4);
-        statusList.Last().ShouldBe(DownloadStatus.DownloadFinished);
+        updateList.Count.ShouldBeGreaterThanOrEqualTo(1);
+        statusList.Count.ShouldBeGreaterThanOrEqualTo(1);
+        statusList.Last().ShouldBe(DomainDownloadStatus.DownloadFinished);
     }
 }

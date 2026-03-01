@@ -1,12 +1,12 @@
-﻿using System.Reactive.Linq;
+using System.ComponentModel;
+using System.Reactive.Linq;
 using Autofac;
-using ByteSizeLib;
+using Downloader;
 using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Data.Contracts;
-using Reaparr.PlexApi;
-using Reaparr.PlexApi.Contracts;
 using Reaparr.Settings.Contracts;
+using DomainDownloadStatus = Reaparr.Domain.DownloadStatus;
 
 namespace Reaparr.Application.UnitTests;
 
@@ -29,7 +29,6 @@ public class PlexDownloadClientStopAsyncUnitTests : BaseUnitTest<PlexDownloadCli
             }
         );
 
-        SetupHttpClient(x => x.SetupDownloadFile(100));
         var downloadSpeedLimit = 1000;
         var dbContext = IDbContext;
         var downloadTask = await dbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
@@ -57,7 +56,7 @@ public class PlexDownloadClientStopAsyncUnitTests : BaseUnitTest<PlexDownloadCli
             .Verifiable(Times.Once);
 
         var updateList = new List<IDownloadTaskProgress>();
-        var statusList = new List<DownloadStatus>();
+        var statusList = new List<DomainDownloadStatus>();
 
         async Task AddDownloadTaskUpdateAsync(DownloadTaskUpdatedCommand command)
         {
@@ -81,40 +80,52 @@ public class PlexDownloadClientStopAsyncUnitTests : BaseUnitTest<PlexDownloadCli
             )
             .Verifiable(Times.AtLeastOnce);
 
-        // DownloadWorkerMocks
-        var destinationStream = new MemoryStream();
-        Mock.SetupCommand(It.IsAny<CreateDownloadFileStreamCommand>)
-            .ReturnsAsync(Result.Ok<Stream>(destinationStream))
-            .Verifiable(Times.Once);
+        var downloadServiceMock = new Mock<IDownloadService>();
+        downloadServiceMock.Setup(x => x.Clear()).Returns(Task.CompletedTask);
+        downloadServiceMock
+            .Setup(x => x.DownloadFileTaskAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Returns<string, string, CancellationToken>(
+                async (_, _, cancellationToken) =>
+                {
+                    downloadServiceMock.Raise(
+                        x => x.DownloadProgressChanged += null,
+                        downloadServiceMock.Object,
+                        new DownloadProgressChangedEventArgs("Main")
+                        {
+                            TotalBytesToReceive = 100 * 1024,
+                            ReceivedBytesSize = 10 * 1024,
+                            BytesPerSecondSpeed = 1024,
+                        }
+                    );
 
-        var downloadStream = new ThrottledStream(new MemoryStream(new byte[(int)ByteSize.FromMebiBytes(10).Bytes]));
-        Mock.Mock<IPlexApiClient>()
-            .Setup(x =>
-                x.DownloadStreamAsync(It.IsAny<HttpRequestMessage>(), It.IsAny<int>(), It.IsAny<CancellationToken>())
-            )
-            .ReturnsAsync(Result.Ok(downloadStream))
-            .Verifiable(Times.Once);
+                    try
+                    {
+                        await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        // Expected when StopAsync is called.
+                    }
+
+                    downloadServiceMock.Raise(
+                        x => x.DownloadFileCompleted += null,
+                        downloadServiceMock.Object,
+                        new AsyncCompletedEventArgs(null, true, null)
+                    );
+                }
+            );
 
         // Act
         var sut = Mock.Create<PlexDownloadClient>(
             new NamedParameter(
-                "downloadWorkerFactory",
-                (DownloadWorkerTask task) => Mock.Create<DownloadWorker>(new NamedParameter("downloadWorkerTask", task))
-            ),
-            new NamedParameter(
-                "clientFactory",
-                (PlexApiClientOptions options) => Mock.Create<PlexApiClient>(new NamedParameter("options", options))
+                "downloadServiceFactory",
+                (Func<DownloadConfiguration, IDownloadService>)(_ => downloadServiceMock.Object)
             )
         );
 
-        await sut.Setup(downloadTask.ToKey(), CancellationToken);
-
-        var startResult = await sut.Start();
+        var startResult = await sut.Start(downloadTask.ToKey(), CancellationToken);
         await Task.Delay(1500, TestContext.Current.CancellationToken);
         var stopResult = await sut.StopAsync();
-
-        // Wait for the process to complete
-        await sut.DownloadProcessTask;
 
         // Assert
         startResult.IsSuccess.ShouldBeTrue();
@@ -123,6 +134,6 @@ public class PlexDownloadClientStopAsyncUnitTests : BaseUnitTest<PlexDownloadCli
         updateList.Count.ShouldBeGreaterThanOrEqualTo(2);
         statusList.Count.ShouldBeGreaterThanOrEqualTo(2);
 
-        statusList.Last().ShouldBe(DownloadStatus.Stopped);
+        statusList.Last().ShouldBe(DomainDownloadStatus.Stopped);
     }
 }

@@ -419,7 +419,7 @@ public class DownloadWorker : IDisposable
                 Message = message,
                 LogLevel = logLevel,
                 CreatedAt = DateTime.UtcNow,
-                DownloadWorkerTaskId = DownloadWorkerTask.Id,
+                Status = DownloadStatus.DownloadFinished,
                 DownloadTaskId = DownloadWorkerTask.DownloadTaskId,
             }
         );

@@ -5,14 +5,9 @@ namespace Reaparr.Application.Contracts;
 public record DownloadWorkerLogDTO
 {
     /// <summary>
-    /// Gets the date and time when the log entry was created.
-    /// </summary>
-    public required DateTime CreatedAt { get; init; }
-
-    /// <summary>
     /// Gets the message of the log entry.
     /// </summary>
-    public required string Message { get; init; }
+    public required DownloadStatus Status { get; init; }
 
     /// <summary>
     /// Gets the log level of the log entry.
@@ -20,9 +15,17 @@ public record DownloadWorkerLogDTO
     public required NotificationLevel LogLevel { get; init; }
 
     /// <summary>
-    ///  Gets the id of the <see cref="DownloadWorkerTask">DownloadWorkerTask</see> that the log entry belongs to.
+    /// Gets the message of the log entry.
     /// </summary>
-    public required int DownloadWorkerTaskId { get; init; }
+    public required string Message { get; init; }
 
+    /// <summary>
+    /// Gets the date and time when the log entry was created.
+    /// </summary>
+    public required DateTime CreatedAt { get; init; }
+
+    /// <summary>
+    /// Gets the <see cref="DownloadTaskGeneric"/> this log belongs too
+    /// </summary>
     public required Guid DownloadTaskId { get; init; }
 }

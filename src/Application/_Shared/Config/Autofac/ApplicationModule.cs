@@ -1,4 +1,5 @@
 using Autofac;
+using Downloader;
 using Reaparr.Application.Contracts;
 using Reaparr.FileSystem.Contracts;
 using Module = Autofac.Module;
@@ -20,14 +21,16 @@ public class ApplicationModule : Module
         builder.RegisterType<DownloadWorker>().InstancePerDependency();
 
         builder
-            .RegisterType<DashPlexDownloadClient>()
-            .Keyed<IPlexDownloadClient>(PlexDownloadClientType.Dash)
-            .InstancePerDependency();
-
-        builder
             .RegisterType<PlexDownloadClient>()
             .Keyed<IPlexDownloadClient>(PlexDownloadClientType.Direct)
             .InstancePerDependency();
+
+        builder.RegisterType<DownloadService>().As<IDownloadService>().InstancePerDependency();
+
+        // builder
+        //     .RegisterType<DashPlexDownloadClient>()
+        //     .Keyed<IPlexDownloadClient>(PlexDownloadClientType.Dash)
+        //     .InstancePerDependency();
 
         builder.RegisterType<SchedulerService>().As<ISchedulerService>().SingleInstance();
         builder.RegisterType<AllJobListener>().As<IAllJobListener>().SingleInstance();

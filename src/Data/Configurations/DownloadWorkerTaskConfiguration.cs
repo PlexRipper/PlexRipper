@@ -8,12 +8,6 @@ public class DownloadWorkerTaskConfiguration : IEntityTypeConfiguration<Download
     public void Configure(EntityTypeBuilder<DownloadWorkerTask> builder)
     {
         builder
-            .HasMany(x => x.DownloadWorkerTaskLogs)
-            .WithOne(x => x.DownloadWorkerTask)
-            .HasForeignKey(x => x.DownloadWorkerTaskId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        builder
             .Property(b => b.DownloadStatus)
             .HasMaxLength(20)
             .HasConversion(x => x.ToDownloadStatusString(), x => x.ToDownloadStatus())

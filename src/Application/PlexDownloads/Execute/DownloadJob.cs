@@ -93,16 +93,6 @@ public class DownloadJob : IJob, IAsyncDisposable
                 return;
             }
 
-            // Create the multiple download worker tasks which will split up the work
-            if (!downloadTask.DownloadWorkerTasks.Any())
-            {
-                var parts = _downloadManagerSettings.DownloadSegments;
-                downloadTask.DownloadWorkerTasks = downloadTask.GenerateDownloadWorkerTasks(parts);
-                await _dbContext.DownloadWorkerTasks.AddRangeAsync(downloadTask.DownloadWorkerTasks, token);
-                await _dbContext.SaveChangesAsync(token);
-                _log.Here().Debug("Generated DownloadWorkerTasks for {DownloadTaskFullTitle}", downloadTask.FullTitle);
-            }
-
             downloadTask = result.Value;
 
             var machineId = await _dbContext.GetPlexServerMachineIdentifierById(downloadTask.PlexServerId, token);
@@ -117,27 +107,10 @@ public class DownloadJob : IJob, IAsyncDisposable
                 );
 
             _plexDownloadClient = _plexDownloadClientFactory[clientType];
-            var downloadClientResult = await _plexDownloadClient.Setup(downloadTask.ToKey(), token);
-            if (downloadClientResult.IsFailed)
-            {
-                downloadClientResult.LogError();
-                return;
-            }
 
-            SetupSubscription(_plexDownloadClient);
+            var startResult = await _plexDownloadClient.Start(downloadTask.ToKey(), token);
 
-            var startResult = await _plexDownloadClient.Start();
-            if (startResult.IsFailed)
-            {
-                await _eventPublisher.PublishAsync(new SendNotificationResult(startResult), token);
-                return;
-            }
-
-            try
-            {
-                await _plexDownloadClient.DownloadProcessTask.WaitAsync(token);
-            }
-            catch (TaskCanceledException)
+            if (startResult.IsCancelled)
             {
                 _log.Here()
                     .Information(
@@ -150,6 +123,11 @@ public class DownloadJob : IJob, IAsyncDisposable
 
                 await _dbContext.SetDownloadStatus(downloadTaskKey, DownloadStatus.Paused);
                 await _commandExecutor.Send(new DownloadTaskUpdatedCommand(downloadTaskKey), token);
+            }
+
+            if (startResult.IsFailed)
+            {
+                await _eventPublisher.PublishAsync(new SendNotificationResult(startResult), token);
             }
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
@@ -180,30 +158,6 @@ public class DownloadJob : IJob, IAsyncDisposable
         if (_plexDownloadClient != null)
         {
             await _plexDownloadClient.DisposeAsync();
-        }
-    }
-
-    private void SetupSubscription(IPlexDownloadClient plexDownloadClient)
-    {
-        plexDownloadClient
-            .ListenToDownloadWorkerLog.Select(logs => Observable.Defer(() => CreateLog(logs).ToObservable()))
-            .Concat()
-            .Subscribe();
-    }
-
-    private async Task CreateLog(IList<DownloadWorkerLog> logs)
-    {
-        if (!logs.Any())
-            return;
-
-        try
-        {
-            await _dbContext.DownloadWorkerTasksLogs.AddRangeAsync(logs);
-            await _dbContext.SaveChangesAsync(CancellationToken.None);
-        }
-        catch (Exception ex) when (ex is not OperationCanceledException)
-        {
-            _log.Here().ErrorResult(ex);
         }
     }
 

@@ -485,7 +485,7 @@ namespace Reaparr.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnOrder(14);
 
-                    b.Property<int>("PlexApiRatingKey")
+                    b.Property<long>("PlexApiRatingKey")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(1);
 
@@ -1348,7 +1348,7 @@ namespace Reaparr.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnOrder(5);
 
-                    b.Property<int>("PlexApiMediaId")
+                    b.Property<long>("PlexApiMediaId")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(2);
 
@@ -1432,10 +1432,6 @@ namespace Reaparr.Data.Migrations
                     b.Property<bool>("HttpsRequired")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(21);
-
-                    b.Property<bool>("IsDownloadsPausedByUser")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(16);
 
                     b.Property<bool>("IsEnabled")
                         .HasColumnType("INTEGER")
@@ -1995,7 +1991,7 @@ namespace Reaparr.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnOrder(5);
 
-                    b.Property<int>("PlexApiMediaId")
+                    b.Property<long>("PlexApiMediaId")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(2);
 
@@ -2323,10 +2319,10 @@ namespace Reaparr.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnOrder(13);
 
-                    b.Property<int>("PlexApiMediaId")
+                    b.Property<long>("PlexApiMediaId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("PlexApiPartId")
+                    b.Property<long>("PlexApiPartId")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("Quality")

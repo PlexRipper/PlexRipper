@@ -29,7 +29,6 @@ public class PausePlexServerDownloadsCommandUnitTests : BaseUnitTest<PausePlexSe
         var plexServerId = (await IDbContext.PlexServers.FirstAsync(CancellationToken)).Id;
 
         var movieFile = await IDbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
-        var episodeFile = await IDbContext.DownloadTaskTvShowEpisodeFile.FirstAsync(CancellationToken);
 
         await IDbContext
             .DownloadTaskMovieFile.Where(x => x.Id == movieFile.Id)
@@ -38,24 +37,12 @@ public class PausePlexServerDownloadsCommandUnitTests : BaseUnitTest<PausePlexSe
                 CancellationToken
             );
 
-        await IDbContext
-            .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == episodeFile.Id)
-            .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, DownloadStatus.Moving), CancellationToken);
-
         var downloadingKey = movieFile.ToKey();
-        var movingKey = episodeFile.ToKey();
 
         Mock.Mock<IDownloadTaskScheduler>()
             .Setup(x => x.GetCurrentlyDownloadingKeysByServer(plexServerId))
             .ReturnsAsync([downloadingKey]);
-        Mock.Mock<IDownloadTaskScheduler>()
-            .Setup(x => x.StopDownloadTaskJob(downloadingKey, It.IsAny<CancellationToken>()))
-            .ReturnOk();
-
-        Mock.Mock<IMoveDownloadFileScheduler>()
-            .Setup(x => x.IsDownloadFileMoving(It.IsAny<DownloadTaskKey>()))
-            .ReturnsAsync(true);
-        Mock.Mock<IMoveDownloadFileScheduler>().Setup(x => x.StopMoveDownloadFileJob(movingKey)).ReturnOk();
+        Mock.SetupCommand(It.IsAny<PauseDownloadTaskCommand>).ReturnsAsync(Result.Ok());
 
         // Act
         var result = await Sut.ExecuteAsync(new PausePlexServerDownloadsCommand(plexServerId), CancellationToken);
@@ -67,17 +54,14 @@ public class PausePlexServerDownloadsCommandUnitTests : BaseUnitTest<PausePlexSe
         server.ShouldNotBeNull();
         server!.IsDownloadsPausedByUser.ShouldBeTrue();
 
-        var updatedMovieFile = await IDbContext.DownloadTaskMovieFile.GetAsync(movieFile.Id, CancellationToken);
-        var updatedEpisodeFile = await IDbContext.DownloadTaskTvShowEpisodeFile.GetAsync(
-            episodeFile.Id,
-            CancellationToken
-        );
-
-        updatedMovieFile!.DownloadStatus.ShouldBe(DownloadStatus.Paused);
-        updatedEpisodeFile!.DownloadStatus.ShouldBe(DownloadStatus.MovePaused);
-
-        Mock.Mock<IDownloadTaskScheduler>()
-            .Verify(x => x.StopDownloadTaskJob(downloadingKey, It.IsAny<CancellationToken>()), Times.Once);
-        Mock.Mock<IMoveDownloadFileScheduler>().Verify(x => x.StopMoveDownloadFileJob(movingKey), Times.Once);
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x =>
+                    x.Send(
+                        It.Is<PauseDownloadTaskCommand>(c => c.DownloadTaskGuid == downloadingKey.Id),
+                        CancellationToken
+                    ),
+                Times.Once()
+            );
     }
 }

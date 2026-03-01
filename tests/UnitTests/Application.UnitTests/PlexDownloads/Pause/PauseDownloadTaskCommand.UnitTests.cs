@@ -1,6 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
+using Reaparr.FileSystem.Contracts;
 
 namespace Reaparr.Application.UnitTests;
 
@@ -126,5 +127,92 @@ public class DownloadCommandsPauseDownloadTasksAsyncUnitTests : BaseUnitTest<Pau
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task ShouldPauseDownloadingAndMovingTasks_WhenMultipleChildrenAreActive()
+    {
+        // Arrange
+        await SetupDatabase(
+            45112,
+            config =>
+            {
+                config.TvShowDownloadTasksCount = 1;
+                config.TvShowSeasonDownloadTasksCount = 1;
+                config.TvShowEpisodeDownloadTasksCount = 3;
+            }
+        );
+
+        var tvShowDownloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync(
+            cancellationToken: CancellationToken
+        );
+        var testDownloadTask = tvShowDownloadTasks.First().ToKey();
+        var fileTasks = await IDbContext
+            .DownloadTaskTvShowEpisodeFile.AsNoTracking()
+            .Where(x => x.PlexServerId == testDownloadTask.PlexServerId)
+            .OrderBy(x => x.FullTitle)
+            .ToListAsync(CancellationToken);
+
+        fileTasks.Count.ShouldBeGreaterThan(1);
+        var downloadingKey = fileTasks[0].ToKey();
+        var movingKey = fileTasks[1].ToKey();
+
+        await IDbContext
+            .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == downloadingKey.Id)
+            .ExecuteUpdateAsync(
+                p => p.SetProperty(x => x.DownloadStatus, DownloadStatus.Downloading),
+                CancellationToken
+            );
+        await IDbContext
+            .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == movingKey.Id)
+            .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, DownloadStatus.Moving), CancellationToken);
+
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x =>
+                x.IsDownloading(
+                    It.Is<DownloadTaskKey>(key => key.Id == downloadingKey.Id),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(true);
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x =>
+                x.IsDownloading(
+                    It.Is<DownloadTaskKey>(key => key.Id != downloadingKey.Id),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(false);
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.StopDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
+            .ReturnOk();
+
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .Setup(x => x.IsDownloadFileMoving(It.Is<DownloadTaskKey>(key => key.Id == movingKey.Id)))
+            .ReturnsAsync(true);
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .Setup(x => x.IsDownloadFileMoving(It.Is<DownloadTaskKey>(key => key.Id != movingKey.Id)))
+            .ReturnsAsync(false);
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .Setup(x => x.StopMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()))
+            .ReturnOk();
+
+        // Act
+        var result = await Sut.ExecuteAsync(new PauseDownloadTaskCommand(testDownloadTask.Id), CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Verify(x => x.StopDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()), Times.Once);
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .Verify(x => x.StopMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Once);
+
+        var downloadingTask = await IDbContext.GetDownloadTaskFileAsync(downloadingKey, CancellationToken);
+        downloadingTask.ShouldNotBeNull();
+        downloadingTask!.DownloadStatus.ShouldBe(DownloadStatus.Paused);
+
+        var movingTask = await IDbContext.GetDownloadTaskFileAsync(movingKey, CancellationToken);
+        movingTask.ShouldNotBeNull();
+        movingTask!.DownloadStatus.ShouldBe(DownloadStatus.MovePaused);
     }
 }

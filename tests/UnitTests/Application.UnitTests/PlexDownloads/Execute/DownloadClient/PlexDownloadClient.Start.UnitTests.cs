@@ -93,7 +93,7 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<PlexDownloadClient>
             .Setup(x =>
                 x.DownloadStreamAsync(It.IsAny<HttpRequestMessage>(), It.IsAny<int>(), It.IsAny<CancellationToken>())
             )
-            .ReturnsAsync(downloadStream)
+            .ReturnsAsync(Result.Ok(downloadStream))
             .Verifiable(Times.Once);
 
         // Act

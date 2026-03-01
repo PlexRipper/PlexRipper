@@ -92,7 +92,7 @@ public class PlexDownloadClientStopAsyncUnitTests : BaseUnitTest<PlexDownloadCli
             .Setup(x =>
                 x.DownloadStreamAsync(It.IsAny<HttpRequestMessage>(), It.IsAny<int>(), It.IsAny<CancellationToken>())
             )
-            .ReturnsAsync(downloadStream)
+            .ReturnsAsync(Result.Ok(downloadStream))
             .Verifiable(Times.Once);
 
         // Act

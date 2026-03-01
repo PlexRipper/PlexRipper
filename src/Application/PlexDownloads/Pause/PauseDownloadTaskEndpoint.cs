@@ -32,8 +32,7 @@ public class PauseDownloadTaskEndpoint : BaseEndpoint<PauseDownloadTaskEndpointR
 
     public override void Configure()
     {
-        // TODO state is changed - use POST / PUT
-        Get(EndpointPath);
+        Put(EndpointPath);
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))

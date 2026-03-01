@@ -7,7 +7,7 @@ using Reaparr.FileSystem.Contracts;
 namespace Reaparr.Application;
 
 /// <summary>
-/// Pauses and disposes of the PlexDownloadClient executing the <see cref="DownloadTaskGeneric"/> if it is downloading.
+/// Pauses and disposes of the PlexDownloadClient executing the <see cref="DownloadTaskGeneric"/> if it is downloading or pauses the FileTransfer
 /// </summary>
 /// <param name="DownloadTaskGuid">The id of the <see cref="DownloadTaskGeneric"/> to Pause.</param>
 /// <returns>If successful a list of the DownloadTasks that were Paused.</returns>
@@ -60,15 +60,30 @@ public class PauseDownloadTaskCommandHandler : ICommandHandler<PauseDownloadTask
             _log.Here()
                 .Information("Pausing DownloadTask with id {DownloadTaskTitle} from downloading", downloadTask.Title);
 
-            if (await _downloadTaskScheduler.IsDownloading(downloadTaskKey, cancellationToken))
+            if (downloadTask.DownloadTaskPhase == DownloadTaskPhase.Completed)
+                continue;
+
+            if (downloadTask.DownloadTaskPhase == DownloadTaskPhase.FileTransfer)
             {
-                return await _downloadTaskScheduler.StopDownloadTaskJob(downloadTaskKey, cancellationToken);
+                if (await _moveDownloadFileScheduler.IsDownloadFileMoving(downloadTaskKey))
+                {
+                    var stopMoveResult = await _moveDownloadFileScheduler.StopMoveDownloadFileJob(downloadTaskKey);
+                    if (stopMoveResult.IsFailed)
+                        return stopMoveResult.LogError();
+                }
+
+                await _dbContext.SetDownloadStatus(downloadTaskKey, DownloadStatus.MovePaused);
+                continue;
             }
 
-            if (await _moveDownloadFileScheduler.IsDownloadFileMoving(downloadTaskKey))
+            if (await _downloadTaskScheduler.IsDownloading(downloadTaskKey, cancellationToken))
             {
-                await _moveDownloadFileScheduler.StopMoveDownloadFileJob(downloadTaskKey);
+                var stopResult = await _downloadTaskScheduler.StopDownloadTaskJob(downloadTaskKey, cancellationToken);
+                if (stopResult.IsFailed)
+                    return stopResult.LogError();
             }
+
+            await _dbContext.SetDownloadStatus(downloadTaskKey, DownloadStatus.Paused);
         }
 
         return Result.Ok();

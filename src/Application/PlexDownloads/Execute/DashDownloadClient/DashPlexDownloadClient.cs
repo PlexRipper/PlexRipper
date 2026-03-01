@@ -144,7 +144,7 @@ public class DashPlexDownloadClient : IPlexDownloadClient
     /// <summary>
     /// Starts the download process using dash-mpd-cli.
     /// </summary>
-    public async Task<Result> Start()
+    public async Task<Result> Start(DownloadTaskKey downloadTaskKey, CancellationToken cancellationToken = default)
     {
         if (DownloadTask is null)
             return Result.Fail("The DashPlexDownloadClient has not been setup yet.").LogError();
@@ -269,11 +269,11 @@ public class DashPlexDownloadClient : IPlexDownloadClient
     private DownloadWorkerLog CreateLogEntry(string data, NotificationLevel level) =>
         new()
         {
-            DownloadWorkerTaskId = DownloadTask?.DownloadWorkerTasks.FirstOrDefault()?.Id ?? 0,
             CreatedAt = DateTime.UtcNow,
             Message = level == NotificationLevel.Error ? $"ERROR: {data}" : data,
             DownloadTaskId = DownloadTask?.Id ?? Guid.Empty,
             LogLevel = level,
+            Status = DownloadStatus,
         };
 
     /// <summary>
@@ -311,36 +311,6 @@ public class DashPlexDownloadClient : IPlexDownloadClient
             _log.Here().ErrorResult(ex);
             return Result.Fail(new ExceptionalError("Failed to stop download", ex));
         }
-    }
-
-    /// <summary>
-    /// Disposes of resources.
-    /// </summary>
-    public async ValueTask DisposeAsync()
-    {
-        _log.Here().Debug("Disposing DashPlexDownloadClient for {DownloadTaskId}", DownloadTask?.Id);
-
-        await _dashWrapper.StopAsync();
-
-        // Wait for download process to complete
-        await DownloadProcessTask;
-
-        // Dispose subscriptions
-        _progressSubscription?.Dispose();
-        _logSubscription?.Dispose();
-        _downloadSpeedLimitSubscription?.Dispose();
-
-        // Dispose subjects
-        _downloadWorkerLogSubject.Dispose();
-
-        await _dashWrapper.DisposeAsync();
-        _cancellationTokenSource.Dispose();
-
-        _log.Here()
-            .Warning(
-                "DashPlexDownloadClient for DownloadTask with Id: {DownloadTaskId} was disposed",
-                DownloadTask?.Id
-            );
     }
 
     private async Task OnProgressUpdate(DashDownloadProgress progress)
@@ -446,5 +416,37 @@ public class DashPlexDownloadClient : IPlexDownloadClient
                 _log.Here().Debug("Download speed limit changed to {Limit} KB/s", limit);
                 // TODO: Implement runtime speed limit changes if dash-mpd-cli supports it
             });
+    }
+
+    public void Dispose() { }
+
+    /// <summary>
+    /// Disposes of resources.
+    /// </summary>
+    public async ValueTask DisposeAsync()
+    {
+        _log.Here().Debug("Disposing DashPlexDownloadClient for {DownloadTaskId}", DownloadTask?.Id);
+
+        await _dashWrapper.StopAsync();
+
+        // Wait for download process to complete
+        await DownloadProcessTask;
+
+        // Dispose subscriptions
+        _progressSubscription?.Dispose();
+        _logSubscription?.Dispose();
+        _downloadSpeedLimitSubscription?.Dispose();
+
+        // Dispose subjects
+        _downloadWorkerLogSubject.Dispose();
+
+        await _dashWrapper.DisposeAsync();
+        _cancellationTokenSource.Dispose();
+
+        _log.Here()
+            .Warning(
+                "DashPlexDownloadClient for DownloadTask with Id: {DownloadTaskId} was disposed",
+                DownloadTask?.Id
+            );
     }
 }

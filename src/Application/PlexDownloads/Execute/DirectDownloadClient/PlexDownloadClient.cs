@@ -215,7 +215,7 @@ public class PlexDownloadClient : IPlexDownloadClient
                 .Select(args =>
                     Observable.FromAsync(async ct =>
                     {
-                        _log.Here().Debug("The UserState at time of completion: {UserState}", args.UserState);
+                        _log.Here().Debug("The UserState at time of completion: {@UserState}", args.UserState);
                         if (args.Error != null)
                         {
                             await SetDownloadStatusAsync(
@@ -284,4 +284,6 @@ public class PlexDownloadClient : IPlexDownloadClient
         _subscriptions.Dispose();
         _destroy.Dispose();
     }
+
+    public async ValueTask DisposeAsync() => await Task.CompletedTask;
 }

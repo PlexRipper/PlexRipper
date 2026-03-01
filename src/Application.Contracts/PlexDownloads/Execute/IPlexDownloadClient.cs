@@ -3,7 +3,7 @@ using Reaparr.Domain;
 
 namespace Reaparr.Application.Contracts;
 
-public interface IPlexDownloadClient : IDisposable
+public interface IPlexDownloadClient : IDisposable, IAsyncDisposable
 {
     /// <summary>
     /// Starts the download workers for the <see cref="DownloadTaskGeneric"/> given during setup.

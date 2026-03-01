@@ -1,6 +1,9 @@
 using System.ComponentModel;
 using System.IO.Abstractions;
+using System.Reactive;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using Downloader;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
@@ -25,6 +28,9 @@ public class PlexDownloadClient : IPlexDownloadClient
     {
         DownloadFileExtension = FilePathExtensions.TEMP_DOWNLOAD_FILE_SUFFIX,
     };
+
+    private readonly CompositeDisposable _subscriptions = new();
+    private readonly Subject<Unit> _destroy = new();
 
     public PlexDownloadClient(
         ILogger log,
@@ -54,7 +60,7 @@ public class PlexDownloadClient : IPlexDownloadClient
     public async Task<Result> Start(DownloadTaskKey downloadTaskKey, CancellationToken cancellationToken = default)
     {
         _downloadTaskKey = downloadTaskKey;
-        var downloadTask = await _dbContext.GetDownloadTaskAsync(downloadTaskKey, cancellationToken);
+        var downloadTask = await _dbContext.GetDownloadTaskFileAsync(downloadTaskKey, cancellationToken);
         if (downloadTask is null)
         {
             return ResultExtensions
@@ -86,7 +92,7 @@ public class PlexDownloadClient : IPlexDownloadClient
         if (fileStreamResult.IsFailed)
             return fileStreamResult.ToResult();
 
-        var fileStream = fileStreamResult.Value;
+        await using var fileStream = fileStreamResult.Value;
         _filename = downloadTask.FileName;
         var filePath = _path.Combine(downloadTask.DownloadDirectory, downloadTask.FileName);
 
@@ -94,7 +100,16 @@ public class PlexDownloadClient : IPlexDownloadClient
 
         await SetupDownloadListeners(downloadTaskKey);
 
-        await _downloader.DownloadFileTaskAsync(downloadUrl, filePath, cancellationToken);
+        if (downloadTask.DirectDownloadSnapshot is not null)
+        {
+            var progress = downloadTask.DirectDownloadSnapshot.ToDownloadPackage();
+            progress.Urls = [downloadUrl];
+            await _downloader.DownloadFileTaskAsync(progress, cancellationToken);
+        }
+        else
+        {
+            await _downloader.DownloadFileTaskAsync(downloadUrl, filePath, cancellationToken);
+        }
 
         return Result.Ok();
     }
@@ -111,89 +126,116 @@ public class PlexDownloadClient : IPlexDownloadClient
     {
         // Setup DownloadLimit Subscription
         var serverMachineIdentifier = await _dbContext.GetPlexServerMachineIdentifierById(key.PlexServerId);
-        _serverSettings
-            .GetDownloadSpeedLimitObservable(serverMachineIdentifier)
-            .Subscribe(value =>
-            {
-                _configuration.MaximumBytesPerSecond = Math.Max(0, value) * 1024;
-            });
+        _subscriptions.Add(
+            _serverSettings
+                .GetDownloadSpeedLimitObservable(serverMachineIdentifier)
+                .TakeUntil(_destroy)
+                .Subscribe(value =>
+                {
+                    _configuration.MaximumBytesPerSecond = Math.Max(0, value) * 1024;
+                })
+        );
 
         // Setup DownloadStarted Subscription
-        Observable
-            .FromEventPattern<DownloadStartedEventArgs>(
-                h => _downloader.DownloadStarted += h,
-                h => _downloader.DownloadStarted -= h
-            )
-            .Select(x => x.EventArgs)
-            .Select(args =>
-                Observable.FromAsync(async _ =>
-                {
-                    await SetDownloadStatusAsync(Domain.DownloadStatus.Downloading);
-                })
-            )
-            .Concat()
-            .Subscribe();
+        _subscriptions.Add(
+            Observable
+                .FromEventPattern<DownloadStartedEventArgs>(
+                    h => _downloader.DownloadStarted += h,
+                    h => _downloader.DownloadStarted -= h
+                )
+                .Select(x => x.EventArgs)
+                .TakeUntil(_destroy)
+                .Select(args =>
+                    Observable.FromAsync(async _ =>
+                    {
+                        await SetDownloadStatusAsync(Domain.DownloadStatus.Downloading);
+                    })
+                )
+                .Concat()
+                .Subscribe()
+        );
 
         // Setup DownloadProgressChanged Subscription
-        Observable
-            .FromEventPattern<DownloadProgressChangedEventArgs>(
-                h => _downloader.DownloadProgressChanged += h,
-                h => _downloader.DownloadProgressChanged -= h
-            )
-            .Select(x => x.EventArgs)
-            .Sample(TimeSpan.FromMilliseconds(500))
-            .Select(args =>
-                Observable.FromAsync(async ct =>
-                {
-                    using var dbContext = _dbContextFactory.CreateAsync();
-                    var progress = new DownloadTaskProgress
+        _subscriptions.Add(
+            Observable
+                .FromEventPattern<DownloadProgressChangedEventArgs>(
+                    h => _downloader.DownloadProgressChanged += h,
+                    h => _downloader.DownloadProgressChanged -= h
+                )
+                .Select(x => x.EventArgs)
+                .Sample(TimeSpan.FromMilliseconds(500))
+                .TakeUntil(_destroy)
+                .Select(args =>
+                    Observable.FromAsync(async ct =>
                     {
-                        DataTotal = args.TotalBytesToReceive,
-                        Percentage = Convert.ToDecimal(args.ProgressPercentage),
-                        DataReceived = args.ReceivedBytesSize,
-                        DownloadSpeed = Convert.ToInt64(args.AverageBytesPerSecondSpeed),
-                    };
+                        using var dbContext = await _dbContextFactory.CreateAsync();
+                        var progress = new DownloadTaskProgress
+                        {
+                            DataTotal = args.TotalBytesToReceive,
+                            Percentage = Convert.ToDecimal(args.ProgressPercentage),
+                            DataReceived = args.ReceivedBytesSize,
+                            DownloadSpeed = Convert.ToInt64(args.AverageBytesPerSecondSpeed),
+                        };
 
-                    await _dbContext.UpdateDownloadProgress(key, progress, cancellationToken: ct);
+                        await dbContext.UpdateDownloadProgress(key, progress, _downloader.Package.ToSnapshot(), ct);
 
-                    _log.Here()
-                        .Debug(
-                            "[DownloadTaskProgress {MediaFileName} - {Percentage}% - {Speed} - {DataReceived} / {DataTotal} - {TimeRemaining}]",
-                            _filename,
-                            progress.Percentage.ToString("F2"),
-                            DataFormat.FormatSpeedString(progress.DownloadSpeed),
-                            progress.DataReceived,
-                            progress.DataTotal,
-                            DataFormat.GetTimeRemaining(
-                                progress.DataTotal - progress.DataReceived,
-                                progress.DownloadSpeed
-                            )
-                        );
+                        _log.Here()
+                            .Debug(
+                                "[DownloadTaskProgress {MediaFileName} - {Percentage}% - {Speed} - {DataReceived} / {DataTotal} - {TimeRemaining}]",
+                                _filename,
+                                progress.Percentage.ToString("F2"),
+                                DataFormat.FormatSpeedString(progress.DownloadSpeed),
+                                progress.DataReceived,
+                                progress.DataTotal,
+                                TimeSpan
+                                    .FromSeconds(
+                                        DataFormat.GetTimeRemaining(
+                                            progress.DataTotal - progress.DataReceived,
+                                            progress.DownloadSpeed
+                                        )
+                                    )
+                                    .ToFormattedString()
+                            );
 
-                    await _commandExecutor.Send(new DownloadTaskUpdatedCommand(key), CancellationToken.None);
-                })
-            )
-            .Concat()
-            .Subscribe();
+                        await _commandExecutor.Send(new DownloadTaskUpdatedCommand(key), CancellationToken.None);
+                    })
+                )
+                .Concat()
+                .Subscribe()
+        );
 
-        Observable
-            .FromEventPattern<AsyncCompletedEventArgs>(
-                h => _downloader.DownloadFileCompleted += h,
-                h => _downloader.DownloadFileCompleted -= h
-            )
-            .Select(x => x.EventArgs)
-            .Select(args =>
-                Observable.FromAsync(async ct =>
-                {
-                    using var dbContext = _dbContextFactory.CreateAsync();
-                    if (!args.Cancelled)
+        _subscriptions.Add(
+            Observable
+                .FromEventPattern<AsyncCompletedEventArgs>(
+                    h => _downloader.DownloadFileCompleted += h,
+                    h => _downloader.DownloadFileCompleted -= h
+                )
+                .Select(x => x.EventArgs)
+                .TakeUntil(_destroy)
+                .Select(args =>
+                    Observable.FromAsync(async ct =>
                     {
-                        await SetDownloadStatusAsync(Domain.DownloadStatus.DownloadFinished);
-                    }
-                })
-            )
-            .Concat()
-            .Subscribe();
+                        _log.Here().Debug("The UserState at time of completion: {UserState}", args.UserState);
+                        if (args.Error != null)
+                        {
+                            await SetDownloadStatusAsync(
+                                Domain.DownloadStatus.DownloadFinished,
+                                Result.Fail(new ExceptionalError(args.Error))
+                            );
+                        }
+                        if (!args.Cancelled)
+                        {
+                            await SetDownloadStatusAsync(Domain.DownloadStatus.DownloadFinished);
+                        }
+                        else
+                        {
+                            await SetDownloadStatusAsync(Domain.DownloadStatus.Paused);
+                        }
+                    })
+                )
+                .Concat()
+                .Subscribe()
+        );
     }
 
     private async Task SetDownloadStatusAsync(Domain.DownloadStatus status, Result? errorResult = null)
@@ -202,7 +244,7 @@ public class PlexDownloadClient : IPlexDownloadClient
 
         _log.Here()
             .Information(
-                "DownloadTask {DownloadTaskId} ({MediaFileName}) transitioning  to {NewStatus}",
+                "DownloadTask {DownloadTaskId} ({MediaFileName}) transitioning to {NewStatus}",
                 _downloadTaskKey!.Id,
                 _filename,
                 status
@@ -234,5 +276,12 @@ public class PlexDownloadClient : IPlexDownloadClient
         await dbContext.SaveChangesAsync(CancellationToken.None);
     }
 
-    public async ValueTask DisposeAsync() { }
+    public void Dispose()
+    {
+        // signals completion to all streams
+        _destroy.OnNext(Unit.Default);
+        _destroy.OnCompleted();
+        _subscriptions.Dispose();
+        _destroy.Dispose();
+    }
 }

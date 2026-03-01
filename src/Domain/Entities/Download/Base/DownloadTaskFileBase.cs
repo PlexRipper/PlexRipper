@@ -60,6 +60,9 @@ public abstract class DownloadTaskFileBase : DownloadTaskBase, IDownloadTaskProg
     [Column(Order = 18)]
     public required long DownloadSpeed { get; set; }
 
+    [Column(Order = 19)]
+    public required DirectDownloadSnapshot? DirectDownloadSnapshot { get; set; }
+
     #endregion
 
     #region File Transfer Progress

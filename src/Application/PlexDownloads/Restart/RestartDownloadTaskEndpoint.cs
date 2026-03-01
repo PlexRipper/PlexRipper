@@ -21,11 +21,11 @@ public class RestartDownloadTaskEndpoint(ICommandExecutor commandExecutor)
 
     public override void Configure()
     {
-        // TODO state is changed - use POST / PUT
-        Get(EndpointPath);
+        Put(EndpointPath);
 
         Description(x =>
-            x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))
+            x.Accepts<RestartDownloadTaskEndpointRequest>()
+                .Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))
                 .Produces(StatusCodes.Status400BadRequest, typeof(BaseResultDTO))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))
         );

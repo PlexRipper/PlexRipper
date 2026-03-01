@@ -2,53 +2,55 @@
 
 public class PlexServerDTO
 {
-    public required int Id { get; set; }
+    public required int Id { get; init; }
 
-    public required string Name { get; set; }
+    public required string Name { get; init; }
 
-    public required long OwnerId { get; set; }
+    public required long OwnerId { get; init; }
 
-    public required string PlexServerOwnerUsername { get; set; }
+    public required string PlexServerOwnerUsername { get; init; }
 
-    public required string Device { get; set; }
+    public required string Device { get; init; }
 
-    public required string Platform { get; set; }
+    public required string Platform { get; init; }
 
-    public required string PlatformVersion { get; set; }
+    public required string PlatformVersion { get; init; }
 
-    public required string Product { get; set; }
+    public required string Product { get; init; }
 
-    public required string ProductVersion { get; set; }
+    public required string ProductVersion { get; init; }
 
-    public required string Provides { get; set; }
+    public required string Provides { get; init; }
 
-    public required DateTime CreatedAt { get; set; }
+    public required DateTime CreatedAt { get; init; }
 
-    public required DateTime LastSeenAt { get; set; }
+    public required DateTime LastSeenAt { get; init; }
 
-    public required string MachineIdentifier { get; set; }
+    public required string MachineIdentifier { get; init; }
 
-    public required string PublicAddress { get; set; }
+    public required string PublicAddress { get; init; }
 
-    public required int PreferredConnectionId { get; set; }
+    public required int PreferredConnectionId { get; init; }
 
-    public required bool Owned { get; set; }
+    public required bool Owned { get; init; }
 
-    public required bool Home { get; set; }
+    public required bool Home { get; init; }
 
-    public required bool IsEnabled { get; set; }
+    public required bool IsEnabled { get; init; }
 
-    public required bool Synced { get; set; }
+    public required bool Synced { get; init; }
 
-    public required bool Relay { get; set; }
+    public required bool Relay { get; init; }
 
-    public required bool Presence { get; set; }
+    public required bool Presence { get; init; }
 
-    public required bool HttpsRequired { get; set; }
+    public required bool HttpsRequired { get; init; }
 
-    public required bool PublicAddressMatches { get; set; }
+    public required bool PublicAddressMatches { get; init; }
 
-    public required bool DnsRebindingProtection { get; set; }
+    public required bool DnsRebindingProtection { get; init; }
 
-    public required bool NatLoopbackSupported { get; set; }
+    public required bool NatLoopbackSupported { get; init; }
+
+    public required bool IsDownloadsPausedByUser { get; init; }
 }

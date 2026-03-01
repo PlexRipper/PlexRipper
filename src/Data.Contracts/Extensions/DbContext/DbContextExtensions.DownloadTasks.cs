@@ -372,6 +372,7 @@ public static partial class DbContextExtensions
         this IReaparrDbContext dbContext,
         DownloadTaskKey key,
         IDownloadTaskProgress progress,
+        DirectDownloadSnapshot? snapshot = null,
         CancellationToken cancellationToken = default
     )
     {
@@ -385,7 +386,8 @@ public static partial class DbContextExtensions
                         p =>
                             p.SetProperty(x => x.DownloadSpeed, progress.DownloadSpeed)
                                 .SetProperty(x => x.DataReceived, progress.DataReceived)
-                                .SetProperty(x => x.DataTotal, progress.DataTotal),
+                                .SetProperty(x => x.DataTotal, progress.DataTotal)
+                                .SetProperty(x => x.DirectDownloadSnapshot, snapshot),
                         cancellationToken
                     );
                 break;
@@ -397,7 +399,8 @@ public static partial class DbContextExtensions
                         p =>
                             p.SetProperty(x => x.DownloadSpeed, progress.DownloadSpeed)
                                 .SetProperty(x => x.DataReceived, progress.DataReceived)
-                                .SetProperty(x => x.DataTotal, progress.DataTotal),
+                                .SetProperty(x => x.DataTotal, progress.DataTotal)
+                                .SetProperty(x => x.DirectDownloadSnapshot, snapshot),
                         cancellationToken
                     );
                 break;
@@ -437,6 +440,7 @@ public static partial class DbContextExtensions
                                 .SetProperty(x => x.FileTransferSpeed, 0)
                                 .SetProperty(x => x.FileDataTransferred, 0)
                                 .SetProperty(x => x.CurrentFileTransferBytesOffset, 0)
+                                .SetProperty(x => x.DirectDownloadSnapshot, (DirectDownloadSnapshot?)null)
                                 .SetProperty(x => x.DownloadStatus, downloadStatus),
                         cancellationToken
                     );
@@ -451,6 +455,7 @@ public static partial class DbContextExtensions
                                 .SetProperty(x => x.FileTransferSpeed, 0)
                                 .SetProperty(x => x.FileDataTransferred, 0)
                                 .SetProperty(x => x.CurrentFileTransferBytesOffset, 0)
+                                .SetProperty(x => x.DirectDownloadSnapshot, (DirectDownloadSnapshot?)null)
                                 .SetProperty(x => x.DownloadStatus, downloadStatus),
                         cancellationToken
                     );

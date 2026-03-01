@@ -26,5 +26,13 @@ public class DownloadTaskFileBaseConfiguration : IEntityTypeConfiguration<Downlo
                 x => JsonSerializer.Deserialize<DownloadTaskDirectory>(x, DefaultJsonSerializerOptions.ConfigStandard)!
             )
             .IsUnicode();
+
+        builder
+            .Property(b => b.DirectDownloadSnapshot)
+            .HasConversion(
+                x => JsonSerializer.Serialize(x, DefaultJsonSerializerOptions.ConfigStandard),
+                x => JsonSerializer.Deserialize<DirectDownloadSnapshot>(x, DefaultJsonSerializerOptions.ConfigStandard)!
+            )
+            .IsUnicode();
     }
 }

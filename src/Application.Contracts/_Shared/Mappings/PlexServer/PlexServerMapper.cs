@@ -33,6 +33,7 @@ public static class PlexServerMapper
             PublicAddressMatches = source.PublicAddressMatches,
             DnsRebindingProtection = source.DnsRebindingProtection,
             NatLoopbackSupported = source.NatLoopbackSupported,
+            IsDownloadsPausedByUser = source.IsDownloadsPausedByUser,
             Owned = source.PlexAccountServers.Any(x => x.IsServerOwned),
         };
 

@@ -9,7 +9,7 @@ using Reaparr.Settings.Contracts;
 
 namespace Reaparr.Application;
 
-public class DownloadJob : IJob, IAsyncDisposable
+public class DownloadJob : IJob
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
@@ -18,8 +18,6 @@ public class DownloadJob : IJob, IAsyncDisposable
     private readonly IDownloadManagerSettings _downloadManagerSettings;
     private readonly IServerSettingsModule _serverSettingsModule;
     private readonly IIndex<PlexDownloadClientType, IPlexDownloadClient> _plexDownloadClientFactory;
-
-    private IPlexDownloadClient? _plexDownloadClient;
 
     public DownloadJob(
         ILogger log,
@@ -106,9 +104,9 @@ public class DownloadJob : IJob, IAsyncDisposable
                     downloadTask.FullTitle
                 );
 
-            _plexDownloadClient = _plexDownloadClientFactory[clientType];
+            using var plexDownloadClient = _plexDownloadClientFactory[clientType];
 
-            var startResult = await _plexDownloadClient.Start(downloadTask.ToKey(), token);
+            var startResult = await plexDownloadClient.Start(downloadTask.ToKey(), token);
 
             if (startResult.IsCancelled)
             {
@@ -119,7 +117,7 @@ public class DownloadJob : IJob, IAsyncDisposable
                         nameof(downloadTaskKey),
                         downloadTaskKey
                     );
-                await _plexDownloadClient.StopAsync();
+                await plexDownloadClient.StopAsync();
 
                 await _dbContext.SetDownloadStatus(downloadTaskKey, DownloadStatus.Paused);
                 await _commandExecutor.Send(new DownloadTaskUpdatedCommand(downloadTaskKey), token);
@@ -143,21 +141,6 @@ public class DownloadJob : IJob, IAsyncDisposable
                     nameof(DownloadTaskGeneric),
                     downloadTaskKey
                 );
-        }
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        _log.Here()
-            .Warning(
-                "Disposing job: {DownloadJobName} for {DownloadTaskName}",
-                nameof(DownloadJob),
-                nameof(DownloadTaskGeneric)
-            );
-
-        if (_plexDownloadClient != null)
-        {
-            await _plexDownloadClient.DisposeAsync();
         }
     }
 

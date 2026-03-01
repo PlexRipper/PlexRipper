@@ -34,7 +34,6 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
         Mock.Mock<IPlexDownloadClient>()
             .Setup(x => x.Start(It.IsAny<DownloadTaskKey>(), CancellationToken))
             .ReturnsAsync(Result.Ok());
-        Mock.Mock<IPlexDownloadClient>().Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask);
 
         // Act
         await Sut.Execute(Mock.Create<IJobExecutionContext>());
@@ -67,7 +66,6 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
         Mock.Mock<IPlexDownloadClient>()
             .Setup(x => x.Start(It.IsAny<DownloadTaskKey>(), CancellationToken))
             .ReturnsAsync(Result.Ok());
-        Mock.Mock<IPlexDownloadClient>().Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask);
 
         // Act
         await Sut.Execute(Mock.Create<IJobExecutionContext>());

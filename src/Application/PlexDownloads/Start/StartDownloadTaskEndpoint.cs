@@ -27,11 +27,11 @@ public class StartDownloadTaskEndpoint : BaseEndpoint<StartDownloadTaskEndpointR
 
     public override void Configure()
     {
-        // TODO state is changed - use POST / PUT
-        Get(EndpointPath);
+        Put(EndpointPath);
 
         Description(x =>
-            x.Produces(StatusCodes.Status202Accepted, typeof(BaseResultDTO))
+            x.Accepts<StartDownloadTaskEndpointRequest>()
+                .Produces(StatusCodes.Status202Accepted, typeof(BaseResultDTO))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))
         );
     }

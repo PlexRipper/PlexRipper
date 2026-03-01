@@ -35,7 +35,8 @@ public class PauseDownloadTaskEndpoint : BaseEndpoint<PauseDownloadTaskEndpointR
         Put(EndpointPath);
 
         Description(x =>
-            x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))
+            x.Accepts<PauseDownloadTaskEndpointRequest>()
+                .Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))
                 .Produces(StatusCodes.Status400BadRequest, typeof(BaseResultDTO))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))
         );

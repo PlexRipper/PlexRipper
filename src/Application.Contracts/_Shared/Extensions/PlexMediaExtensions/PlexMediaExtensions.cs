@@ -138,6 +138,7 @@ public static class PlexMediaExtensions
             DestinationFolderPathId = request.DestinationFolderPathId,
             FullTitle = $"{plexMovie.FullTitle}/{plexMediaData.GetFileName}",
             Title = plexMediaData.GetFileName,
+            DirectDownloadSnapshot = null,
         };
 
     public static DownloadTaskTvShowEpisodeFile MapToDownloadTask(
@@ -188,6 +189,7 @@ public static class PlexMediaExtensions
             DestinationFolderPathId = request.DestinationFolderPathId,
             FullTitle = $"{plexTvShowEpisode.FullTitle}/{plexMediaData.GetFileName}",
             Title = plexMediaData.GetFileName,
+            DirectDownloadSnapshot = null,
         };
     }
 }

@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 using Reaparr.FileSystem.Contracts;
@@ -22,6 +22,37 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
         // Assert
         result.IsFailed.ShouldBeTrue();
         result.Has404NotFoundError().ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task ShouldHaveFailedResult_WhenServerIsPausedByUser()
+    {
+        // Arrange
+        await SetupDatabase(
+            55109,
+            x =>
+            {
+                x.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var movieTask = await dbContext.DownloadTaskMovie.FirstAsync(CancellationToken);
+        await dbContext
+            .PlexServers.Where(x => x.Id == movieTask.PlexServerId)
+            .ExecuteUpdateAsync(p => p.SetProperty(x => x.IsDownloadsPausedByUser, true), CancellationToken);
+
+        // Act
+        var result = await Sut.ExecuteAsync(new StartDownloadTaskCommand(movieTask.Id), CancellationToken);
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Verify(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>()), Times.Never());
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Never());
+        Mock.VerifyEventPublished(It.IsAny<DownloadTaskUpdatedCommand>, Times.Never());
+        Mock.VerifyEventPublished(It.IsAny<CheckDownloadQueueEvent>, Times.Never());
     }
 
     [Fact]
@@ -188,9 +219,21 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
         tvShowDownloadTasks.SetDownloadStatus(DownloadStatus.Completed);
         var lastDownloadTask = tvShowDownloadTasks.Last();
         lastDownloadTask.SetDownloadStatus(DownloadStatus.Queued);
-        var downloadingTask = lastDownloadTask.Children.First().Children.First().Children.First();
-        downloadingTask.DownloadStatus = DownloadStatus.Downloading;
         await dbContext.SaveChangesAsync(CancellationToken);
+
+        var orderedDownloadTasks = await IDbContext.GetDownloadableChildTasks(
+            lastDownloadTask.ToKey(),
+            CancellationToken
+        );
+        orderedDownloadTasks.Count.ShouldBeGreaterThan(0);
+        var downloadingTask = orderedDownloadTasks.First();
+
+        await IDbContext
+            .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == downloadingTask.Id)
+            .ExecuteUpdateAsync(
+                p => p.SetProperty(x => x.DownloadStatus, DownloadStatus.Downloading),
+                CancellationToken
+            );
 
         Mock.Mock<IDownloadTaskScheduler>()
             .Setup(x => x.GetCurrentlyDownloadingKeysByServer(It.IsAny<int>()))
@@ -215,16 +258,8 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
         result.IsSuccess.ShouldBeTrue();
 
         var downloadTasks = await IDbContext.GetDownloadableChildTasks(lastDownloadTask.ToKey(), CancellationToken);
-        for (var i = 0; i < downloadTasks.Count; i++)
-        {
-            if (i > 0)
-            {
-                downloadTasks[i].DownloadStatus.ShouldBe(DownloadStatus.Queued);
-                continue;
-            }
-
-            downloadTasks[i].DownloadStatus.ShouldBe(DownloadStatus.Downloading);
-        }
+        downloadTasks.Count(x => x.DownloadStatus == DownloadStatus.Downloading).ShouldBe(1);
+        downloadTasks.Count(x => x.DownloadStatus == DownloadStatus.Queued).ShouldBe(downloadTasks.Count - 1);
 
         // Verify that the downloading task was not paused as we are starting one that is already downloading
         Mock.VerifyEventPublished(It.IsAny<PauseDownloadTaskCommand>, Times.Never());
@@ -257,11 +292,21 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
         tvShowDownloadTasks.SetDownloadStatus(DownloadStatus.Completed);
         var lastDownloadTask = tvShowDownloadTasks.Last();
         lastDownloadTask.SetDownloadStatus(DownloadStatus.Queued);
-
-        var downloadingTask = lastDownloadTask.Children.ElementAt(0).Children.ElementAt(1).Children.ElementAt(0);
-
-        downloadingTask.DownloadStatus = DownloadStatus.Downloading;
         await dbContext.SaveChangesAsync(CancellationToken);
+
+        var orderedDownloadTasks = await IDbContext.GetDownloadableChildTasks(
+            lastDownloadTask.ToKey(),
+            CancellationToken
+        );
+        orderedDownloadTasks.Count.ShouldBeGreaterThan(1);
+        var downloadingTask = orderedDownloadTasks[1];
+
+        await IDbContext
+            .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == downloadingTask.Id)
+            .ExecuteUpdateAsync(
+                p => p.SetProperty(x => x.DownloadStatus, DownloadStatus.Downloading),
+                CancellationToken
+            );
 
         Mock.Mock<IDownloadTaskScheduler>()
             .Setup(x => x.GetCurrentlyDownloadingKeysByServer(It.IsAny<int>()))
@@ -295,16 +340,8 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
         result.IsSuccess.ShouldBeTrue();
 
         var downloadTasks = await IDbContext.GetDownloadableChildTasks(lastDownloadTask.ToKey(), CancellationToken);
-        for (var i = 0; i < downloadTasks.Count; i++)
-        {
-            if (i > 0)
-            {
-                downloadTasks[i].DownloadStatus.ShouldBe(DownloadStatus.Queued);
-                continue;
-            }
-
-            downloadTasks[i].DownloadStatus.ShouldBe(DownloadStatus.Downloading);
-        }
+        downloadTasks.Count(x => x.DownloadStatus == DownloadStatus.Downloading).ShouldBe(1);
+        downloadTasks.Count(x => x.DownloadStatus == DownloadStatus.Queued).ShouldBe(downloadTasks.Count - 1);
 
         // Verify that the downloading task was not paused as we are starting one that is already downloading
         Mock.VerifyEventPublished(It.IsAny<PauseDownloadTaskCommand>, Times.Once());

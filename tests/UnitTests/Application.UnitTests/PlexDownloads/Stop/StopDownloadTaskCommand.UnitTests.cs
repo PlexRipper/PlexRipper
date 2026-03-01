@@ -137,9 +137,9 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
     }
 
     [Fact]
-    public async Task ShouldNotDeleteDownloadFile_WhenTaskIsInFileTransferPhase()
+    public async Task ShouldDeleteDownloadFile_WhenTaskIsInFileTransferPhase()
     {
-        // Arrange — task is in MoveError (FileTransfer phase); the downloaded file must not be deleted
+        // Arrange — task is in MoveError (FileTransfer phase); stopping deletes temp files
         await SetupDatabase(90426, config => config.MovieDownloadTasksCount = 1);
 
         var dbContext = IDbContext;
@@ -181,10 +181,10 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
             .Verify(x => x.StopMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Never);
         Mock.VerifyEventPublished(It.IsAny<DownloadTaskUpdatedCommand>, Times.Once);
 
-        // The downloaded file must still exist — FileTransfer-phase tasks preserve it
+        // The downloaded file should be deleted on stop
         var file = Mock.Create<IFile>();
         foreach (var fileTask in movieDownloadFileTasks)
-            file.Exists(fileTask.DownloadFilePath).ShouldBeTrue();
+            file.Exists(fileTask.DownloadFilePath).ShouldBeFalse();
 
         var downloadTasks = await dbContext.GetDownloadableChildTasks(movieTask.ToKey(), CancellationToken);
         foreach (var downloadTaskDb in downloadTasks)

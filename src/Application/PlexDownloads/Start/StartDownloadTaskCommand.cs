@@ -55,6 +55,11 @@ public class StartDownloadTaskCommandHandler : ICommandHandler<StartDownloadTask
         if (nextDownloadTask is null)
             return ResultExtensions.EntityNotFound(nameof(DownloadTaskFileBase), nextDownloadTaskKey.Id).LogError();
 
+        if (await _dbContext.IsDownloadsPausedByUser(nextDownloadTaskKey.PlexServerId, cancellationToken))
+        {
+            return Result.Fail("Download tasks cannot be started while the server is paused by the user").LogWarning();
+        }
+
         // Start the download task depending on the phase
         switch (nextDownloadTask.DownloadTaskPhase)
         {

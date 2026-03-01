@@ -118,6 +118,8 @@ public static partial class FakeData
                     }
                 }
 
+                tvShow.ChildCount = tvShow.Seasons.Count;
+                tvShow.GrandChildCount = tvShow.Seasons.Sum(season => season.Episodes.Count);
                 tvShow.MediaSize = tvShow.Seasons.Sum(season => season.MediaSize);
             }
         );

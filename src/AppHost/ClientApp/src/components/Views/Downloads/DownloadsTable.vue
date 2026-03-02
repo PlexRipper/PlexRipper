@@ -11,7 +11,8 @@
 					cols="auto"
 					style="white-space: nowrap">
 					<ServerDownloadStatus
-						v-if="false"
+						:plex-server-id="plexServer.id"
+						:is-downloads-paused-by-user="plexServer.isDownloadsPausedByUser"
 						style="display: inline-block" />
 				</QCol>
 				<QCol />
@@ -19,6 +20,12 @@
 				<QCol cols="auto">
 					<QStatus :value="serverConnectionStore.isServerConnected(plexServer.id)" />
 					<span class="title q-ml-md">{{ serverStore.getServerName(plexServer.id) }}</span>
+					<QBadge
+						v-if="plexServer.isDownloadsPausedByUser"
+						class="q-ml-sm"
+						color="warning"
+						text-color="black"
+						:label="t('components.server-download-status.pause')" />
 				</QCol>
 				<QCol class="q-py-none" />
 			</QRow>
@@ -27,6 +34,7 @@
 			<PrimeTreeTable
 				:nodes="nodes"
 				:columns="getDownloadTableColumns"
+				:data-key="'id' as keyof DownloadProgressDTO"
 				:header-selected="downloadStore.getHeaderSelection(plexServer.id)"
 				:selected="downloadStore.getSelectedDownloadTasks(plexServer.id)"
 				:max-selection-count="downloadStore.getDownloadSelection(plexServer.id)?.maxSelectionCount"
@@ -79,7 +87,6 @@ function mapToTreeNodes(value: DownloadProgressDTO[]): IDownloadTableNode[] {
 	return value?.map((node) => {
 		return {
 			...node,
-			key: node.id,
 			label: node.title,
 			children: mapToTreeNodes(node.children),
 			actions: toDownloadActions(node.status).map((action) => ({
@@ -154,14 +161,15 @@ function onTableAction({ action, data }: { action: DownloadActions; data: IDownl
 
 	if (action === DownloadActions.Details) {
 		dialogStore.openDownloadTaskDetailsDialog(data.id);
-	} else {
-		const newIds = getAllIds([data]);
-		get(loadingIds).push(...newIds.map((id) => ({ id, action })));
-
-		useSubscription(downloadStore.executeDownloadCommand(action, ids).subscribe(() => {
-			set(loadingIds, get(loadingIds).filter((x) => !newIds.includes(x.id)));
-		}));
+		return;
 	}
+
+	const newIds = getAllIds([data]);
+	get(loadingIds).push(...newIds.map((id) => ({ id, action })));
+
+	useSubscription(downloadStore.executeDownloadCommand(action, ids).subscribe(() => {
+		set(loadingIds, get(loadingIds).filter((x) => !newIds.includes(x.id)));
+	}));
 }
 
 function getAllIds(nodes: IDownloadTableNode[]): string[] {

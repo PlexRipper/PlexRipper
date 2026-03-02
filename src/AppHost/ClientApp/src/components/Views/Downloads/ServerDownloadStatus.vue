@@ -9,39 +9,24 @@
 </template>
 
 <script setup lang="ts">
-import { DownloadStatus } from '@dto';
+import { useSubscription } from '@vueuse/rxjs';
+import { useServerStore } from '@store';
+
+const props = defineProps<{
+	plexServerId: number;
+	isDownloadsPausedByUser: boolean;
+}>();
 
 const { t } = useI18n();
-const serverStatus = ref<DownloadStatus>(DownloadStatus.Paused);
+const serverStore = useServerStore();
 
-const getButtonIcon = computed(() => {
-	if (serverStatus.value === DownloadStatus.Paused) {
-		return 'mdi-play';
-	}
+const getButtonIcon = computed(() => (props.isDownloadsPausedByUser ? 'mdi-play' : 'mdi-pause'));
 
-	if (serverStatus.value === DownloadStatus.Downloading) {
-		return 'mdi-pause';
-	}
-
-	return 'mdi-question';
-});
-
-const getButtonText = computed(() => {
-	if (serverStatus.value === DownloadStatus.Paused) {
-		return t('components.server-download-status.start');
-	}
-
-	if (serverStatus.value === DownloadStatus.Downloading) {
-		return t('components.server-download-status.pause');
-	}
-	return '';
-});
+const getButtonText = computed(() =>
+	props.isDownloadsPausedByUser ? t('components.server-download-status.start') : t('components.server-download-status.pause'),
+);
 
 function changeStatus(): void {
-	if (serverStatus.value === DownloadStatus.Paused) {
-		serverStatus.value = DownloadStatus.Downloading;
-	} else if (serverStatus.value === DownloadStatus.Downloading) {
-		serverStatus.value = DownloadStatus.Paused;
-	}
+	useSubscription(serverStore.setServerPaused(props.plexServerId, !props.isDownloadsPausedByUser).subscribe());
 }
 </script>

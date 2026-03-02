@@ -245,14 +245,19 @@ export enum DownloadStatus {
   Queued = "Queued",
   Downloading = "Downloading",
   DownloadFinished = "DownloadFinished",
-  Paused = "Paused",
-  Stopped = "Stopped",
-  Deleted = "Deleted",
   Moving = "Moving",
   MovePaused = "MovePaused",
   MoveFinished = "MoveFinished",
   Completed = "Completed",
+  Paused = "Paused",
+  Stopped = "Stopped",
+  Deleted = "Deleted",
   ServerUnreachable = "ServerUnreachable",
+  AuthError = "AuthError",
+  StorageError = "StorageError",
+  SourceUnavailable = "SourceUnavailable",
+  DownloadClientError = "DownloadClientError",
+  IntegrityError = "IntegrityError",
   MoveError = "MoveError",
 }
 
@@ -322,10 +327,9 @@ export interface DownloadWorkerLogDTO {
   createdAt: string;
   /** @format guid */
   downloadTaskId: string;
-  /** @format int32 */
-  downloadWorkerTaskId: number;
   logLevel: NotificationLevel;
   message: string;
+  status: DownloadStatus;
 }
 
 export interface ErrorDTO {
@@ -862,6 +866,7 @@ export interface PlexServerDTO {
   httpsRequired: boolean;
   /** @format int32 */
   id: number;
+  isDownloadsPausedByUser: boolean;
   isEnabled: boolean;
   /** @format date-time */
   lastSeenAt: string;

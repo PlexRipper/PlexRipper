@@ -152,7 +152,7 @@ export class Download {
    * No description
    * * @tags Download
    * @name PauseDownloadTaskEndpoint
-   * @request GET:/api/Download/pause/{DownloadTaskGuid}
+   * @request PUT:/api/Download/pause/{DownloadTaskGuid}
    * @secure
    */
   pauseDownloadTaskEndpoint = (
@@ -161,7 +161,7 @@ export class Download {
   ) =>
     axiosObservable<BaseResultDTO>({
       url: `/api/Download/pause/${downloadTaskGuid}`,
-      method: "GET",
+      method: "PUT",
       secure: true,
       responseType: "json",
       ...params,
@@ -192,7 +192,7 @@ export class Download {
    * No description
    * * @tags Download
    * @name RestartDownloadTaskEndpoint
-   * @request GET:/api/Download/restart/{DownloadTaskGuid}
+   * @request PUT:/api/Download/restart/{DownloadTaskGuid}
    * @secure
    */
   restartDownloadTaskEndpoint = (
@@ -201,7 +201,7 @@ export class Download {
   ) =>
     axiosObservable<BaseResultDTO>({
       url: `/api/Download/restart/${downloadTaskGuid}`,
-      method: "GET",
+      method: "PUT",
       secure: true,
       responseType: "json",
       ...params,
@@ -211,7 +211,7 @@ export class Download {
    * No description
    * * @tags Download
    * @name StartDownloadTaskEndpoint
-   * @request GET:/api/Download/start/{DownloadTaskGuid}
+   * @request PUT:/api/Download/start/{DownloadTaskGuid}
    * @secure
    */
   startDownloadTaskEndpoint = (
@@ -220,7 +220,7 @@ export class Download {
   ) =>
     axiosObservable<BaseResultDTO>({
       url: `/api/Download/start/${downloadTaskGuid}`,
-      method: "GET",
+      method: "PUT",
       secure: true,
       responseType: "json",
       ...params,

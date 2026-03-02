@@ -482,6 +482,11 @@
         },
         "download-status": {
             "error": "Błąd",
+            "auth-error": "Auth Error",
+            "storage-error": "Storage Error",
+            "source-unavailable": "Source Unavailable",
+            "download-client-error": "Download Client Error",
+            "integrity-error": "Integrity Error",
             "server-unreachable": "Serwer niedostępny",
             "unknown": "Nieznany",
             "queued": "W kolejce",

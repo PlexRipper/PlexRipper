@@ -115,6 +115,44 @@ export class PlexServer {
   /**
    * No description
    * * @tags Plexserver
+   * @name PausePlexServerDownloadsEndpoint
+   * @request PUT:/api/PlexServer/server/pause/{PlexServerId}
+   * @secure
+   */
+  pausePlexServerDownloadsEndpoint = (
+    plexServerId: number,
+    params: RequestParams = {},
+  ) =>
+    axiosObservable<BaseResultDTO>({
+      url: `/api/PlexServer/server/pause/${plexServerId}`,
+      method: "PUT",
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<BaseResultDTO>);
+
+  /**
+   * No description
+   * * @tags Plexserver
+   * @name ResumePlexServerDownloadsEndpoint
+   * @request PUT:/api/PlexServer/server/resume/{PlexServerId}
+   * @secure
+   */
+  resumePlexServerDownloadsEndpoint = (
+    plexServerId: number,
+    params: RequestParams = {},
+  ) =>
+    axiosObservable<BaseResultDTO>({
+      url: `/api/PlexServer/server/resume/${plexServerId}`,
+      method: "PUT",
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<BaseResultDTO>);
+
+  /**
+   * No description
+   * * @tags Plexserver
    * @name SetServerAlias
    * @request GET:/api/PlexServer/{PlexServerId}/set-server-alias
    * @secure
@@ -201,6 +239,16 @@ export class PlexServerPaths {
   static refreshPlexServerConnectionsEndpoint = (plexServerId: number) =>
     queryString.stringifyUrl({
       url: `/api/PlexServer/${plexServerId}/refresh`,
+    });
+
+  static pausePlexServerDownloadsEndpoint = (plexServerId: number) =>
+    queryString.stringifyUrl({
+      url: `/api/PlexServer/server/pause/${plexServerId}`,
+    });
+
+  static resumePlexServerDownloadsEndpoint = (plexServerId: number) =>
+    queryString.stringifyUrl({
+      url: `/api/PlexServer/server/resume/${plexServerId}`,
     });
 
   static setServerAlias = (

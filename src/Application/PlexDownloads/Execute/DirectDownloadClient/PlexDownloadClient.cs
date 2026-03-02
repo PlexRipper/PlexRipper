@@ -32,6 +32,7 @@ public class PlexDownloadClient : IPlexDownloadClient
 
     private readonly CompositeDisposable _subscriptions = new();
     private readonly Subject<Unit> _destroy = new();
+    private int _isDisposed;
 
     public PlexDownloadClient(
         ILogger log,
@@ -303,7 +304,8 @@ public class PlexDownloadClient : IPlexDownloadClient
 
     public async ValueTask DisposeAsync()
     {
-        await Task.Delay(1000);
+        if (Interlocked.Exchange(ref _isDisposed, 1) == 1)
+            return;
 
         // signals completion to all streams
         _destroy.OnNext(Unit.Default);

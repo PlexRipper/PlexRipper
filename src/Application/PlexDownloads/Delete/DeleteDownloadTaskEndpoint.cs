@@ -82,6 +82,8 @@ public class DeleteDownloadTaskEndpoint : BaseEndpoint<DeleteDownloadTaskEndpoin
             .DownloadTaskTvShowEpisodeFile.Where(x => req.DownloadTaskIds.Contains(x.Id))
             .ExecuteDeleteAsync(ct);
 
+        await _dbContext.DeleteOrphanedParentTasksAsync(ct);
+
         await SendFluentResult(Result.Ok(), ct);
     }
 }

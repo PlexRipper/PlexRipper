@@ -1,9 +1,7 @@
 using FastEndpoints;
-using FluentResults;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
-using Reaparr.Domain;
 
 namespace Reaparr.Application;
 
@@ -100,6 +98,8 @@ public class ClearCompletedDownloadTasksCommandHandler
             totalRowsDeleted += rowsDeleted;
         }
 
+        totalRowsDeleted += await _dbContext.DeleteOrphanedParentTasksAsync(ct);
+
         return totalRowsDeleted;
     }
 
@@ -130,6 +130,8 @@ public class ClearCompletedDownloadTasksCommandHandler
         totalRowsDeleted += await _dbContext
             .DownloadTaskTvShowEpisodeFile.Where(x => x.DownloadStatus == DownloadStatus.Completed)
             .ExecuteDeleteAsync(ct);
+
+        totalRowsDeleted += await _dbContext.DeleteOrphanedParentTasksAsync(ct);
 
         return totalRowsDeleted;
     }

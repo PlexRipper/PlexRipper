@@ -574,4 +574,27 @@ public static partial class DbContextExtensions
 
         return results.Where(x => x != null).ToList()!;
     }
+
+    public static async Task<int> DeleteOrphanedParentTasksAsync(this IReaparrDbContext dbContext, CancellationToken ct)
+    {
+        var totalRowsDeleted = 0;
+
+        totalRowsDeleted += await dbContext
+            .DownloadTaskMovie.Where(x => !dbContext.DownloadTaskMovieFile.Any(y => y.ParentId == x.Id))
+            .ExecuteDeleteAsync(ct);
+
+        totalRowsDeleted += await dbContext
+            .DownloadTaskTvShowEpisode.Where(x => !dbContext.DownloadTaskTvShowEpisodeFile.Any(y => y.ParentId == x.Id))
+            .ExecuteDeleteAsync(ct);
+
+        totalRowsDeleted += await dbContext
+            .DownloadTaskTvShowSeason.Where(x => !dbContext.DownloadTaskTvShowEpisode.Any(y => y.ParentId == x.Id))
+            .ExecuteDeleteAsync(ct);
+
+        totalRowsDeleted += await dbContext
+            .DownloadTaskTvShow.Where(x => !dbContext.DownloadTaskTvShowSeason.Any(y => y.ParentId == x.Id))
+            .ExecuteDeleteAsync(ct);
+
+        return totalRowsDeleted;
+    }
 }

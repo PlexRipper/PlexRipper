@@ -18,7 +18,7 @@ public class GetDownloadTaskLogsByDownloadTaskIdRequestValidator : Validator<Get
 }
 
 public class GetDownloadTaskLogsByDownloadTaskIdEndpoint
-    : BaseEndpoint<GetDownloadTaskLogsByDownloadTaskIdRequest, List<DownloadWorkerLogDTO>>
+    : BaseEndpoint<GetDownloadTaskLogsByDownloadTaskIdRequest, List<DownloadTaskLogDTO>>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
@@ -36,7 +36,7 @@ public class GetDownloadTaskLogsByDownloadTaskIdEndpoint
         Get(EndpointPath);
 
         Description(x =>
-            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<DownloadWorkerLogDTO>>))
+            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<DownloadTaskLogDTO>>))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))
         );
     }
@@ -54,10 +54,10 @@ public class GetDownloadTaskLogsByDownloadTaskIdEndpoint
 
         var childTasks = await _dbContext.GetDownloadableChildTasks(key, ct);
 
-        var downloadWorkerIds = childTasks.Select(x => x.Id).ToList();
+        var downloadTaskIds = childTasks.Select(x => x.Id).ToList();
 
         var logs = await _dbContext
-            .DownloadTasksLogs.Where(x => downloadWorkerIds.Contains(x.DownloadTaskId))
+            .DownloadTasksLogs.Where(x => downloadTaskIds.Contains(x.DownloadTaskId))
             .ToListAsync(ct);
 
         await SendFluentResult(Result.Ok(logs), x => x.ToDTO(), ct);

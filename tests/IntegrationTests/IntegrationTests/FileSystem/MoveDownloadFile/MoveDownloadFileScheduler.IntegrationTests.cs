@@ -22,7 +22,6 @@ public class MoveDownloadFileSchedulerIntegrationTests : BaseIntegrationTests
                     x.PlexMovieLibraryCount = 3;
                     x.MovieCount = 1;
                     x.MovieDownloadTasksCount = 1;
-                    x.DownloadWorkerTasks = 4;
                     x.DownloadFileSizeInMb = 10;
                 };
 

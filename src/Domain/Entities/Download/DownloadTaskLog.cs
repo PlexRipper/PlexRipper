@@ -1,7 +1,7 @@
 ﻿namespace Reaparr.Domain;
 
 /// <summary>
-/// A log entry for the <see cref="DownloadWorkerTask">download worker</see>.
+/// A log entry for the <see cref="DownloadTaskGeneric">download worker</see>.
 /// </summary>
 public class DownloadTaskLog : BaseEntity
 {

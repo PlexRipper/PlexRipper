@@ -132,7 +132,7 @@ public class MoveDownloadFileJob : IJob
                 return;
             }
 
-            // Clean up the DownloadWorkerTasks
+            // Clean up the Download task folders
             var cleanupResult = await Result.Try(() =>
                 _commandExecutor.Send(new CleanUpDownloadTaskFoldersCommand(downloadTaskKey), ct)
             );

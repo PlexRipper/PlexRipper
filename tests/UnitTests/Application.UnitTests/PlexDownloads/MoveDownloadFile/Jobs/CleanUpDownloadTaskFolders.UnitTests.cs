@@ -19,7 +19,6 @@ public class CleanUpDownloadTaskFoldersUnitTests : BaseUnitTest<CleanUpDownloadT
                 config.TvShowDownloadTasksCount = 1;
                 config.TvShowSeasonDownloadTasksCount = 1;
                 config.TvShowEpisodeDownloadTasksCount = 1;
-                config.DownloadWorkerTasks = 4;
             }
         );
 
@@ -60,7 +59,6 @@ public class CleanUpDownloadTaskFoldersUnitTests : BaseUnitTest<CleanUpDownloadT
                 config.TvShowDownloadTasksCount = 1;
                 config.TvShowSeasonDownloadTasksCount = 1;
                 config.TvShowEpisodeDownloadTasksCount = 1;
-                config.DownloadWorkerTasks = 4;
             }
         );
 
@@ -88,7 +86,6 @@ public class CleanUpDownloadTaskFoldersUnitTests : BaseUnitTest<CleanUpDownloadT
                 config.TvShowDownloadTasksCount = 1;
                 config.TvShowSeasonDownloadTasksCount = 1;
                 config.TvShowEpisodeDownloadTasksCount = 1;
-                config.DownloadWorkerTasks = 4;
             }
         );
 
@@ -135,7 +132,6 @@ public class CleanUpDownloadTaskFoldersUnitTests : BaseUnitTest<CleanUpDownloadT
                 config.TvShowDownloadTasksCount = 1;
                 config.TvShowSeasonDownloadTasksCount = 1;
                 config.TvShowEpisodeDownloadTasksCount = 1;
-                config.DownloadWorkerTasks = 4;
             }
         );
 
@@ -187,7 +183,6 @@ public class CleanUpDownloadTaskFoldersUnitTests : BaseUnitTest<CleanUpDownloadT
                 config.TvShowDownloadTasksCount = 1;
                 config.TvShowSeasonDownloadTasksCount = 1;
                 config.TvShowEpisodeDownloadTasksCount = 1;
-                config.DownloadWorkerTasks = 4;
             }
         );
 

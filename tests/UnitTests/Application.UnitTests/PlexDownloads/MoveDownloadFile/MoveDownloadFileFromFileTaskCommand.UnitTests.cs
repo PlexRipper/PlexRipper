@@ -26,7 +26,6 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
                 config.TvShowDownloadTasksCount = 1;
                 config.TvShowSeasonDownloadTasksCount = 1;
                 config.TvShowEpisodeDownloadTasksCount = 1;
-                config.DownloadWorkerTasks = 1;
             }
         );
 
@@ -63,7 +62,6 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
                 config.TvShowDownloadTasksCount = 1;
                 config.TvShowSeasonDownloadTasksCount = 1;
                 config.TvShowEpisodeDownloadTasksCount = 1;
-                config.DownloadWorkerTasks = 4;
             }
         );
 
@@ -145,7 +143,6 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
                 config.TvShowDownloadTasksCount = 1;
                 config.TvShowSeasonDownloadTasksCount = 1;
                 config.TvShowEpisodeDownloadTasksCount = 1;
-                config.DownloadWorkerTasks = 4;
             }
         );
 
@@ -211,7 +208,6 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
                 config.TvShowDownloadTasksCount = 1;
                 config.TvShowSeasonDownloadTasksCount = 1;
                 config.TvShowEpisodeDownloadTasksCount = 1;
-                config.DownloadWorkerTasks = 3;
             }
         );
 
@@ -275,7 +271,6 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
                 config.TvShowDownloadTasksCount = 1;
                 config.TvShowSeasonDownloadTasksCount = 1;
                 config.TvShowEpisodeDownloadTasksCount = 1;
-                config.DownloadWorkerTasks = 1;
             }
         );
 
@@ -324,7 +319,6 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
                 config.TvShowDownloadTasksCount = 1;
                 config.TvShowSeasonDownloadTasksCount = 1;
                 config.TvShowEpisodeDownloadTasksCount = 1;
-                config.DownloadWorkerTasks = 2;
             }
         );
 
@@ -372,7 +366,6 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
                 config.TvShowDownloadTasksCount = 1;
                 config.TvShowSeasonDownloadTasksCount = 1;
                 config.TvShowEpisodeDownloadTasksCount = 1;
-                config.DownloadWorkerTasks = 2;
             }
         );
 
@@ -437,7 +430,6 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
                 config.TvShowDownloadTasksCount = 1;
                 config.TvShowSeasonDownloadTasksCount = 1;
                 config.TvShowEpisodeDownloadTasksCount = 1;
-                config.DownloadWorkerTasks = 2;
             }
         );
 
@@ -499,7 +491,6 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
                 config.TvShowDownloadTasksCount = 1;
                 config.TvShowSeasonDownloadTasksCount = 1;
                 config.TvShowEpisodeDownloadTasksCount = 1;
-                config.DownloadWorkerTasks = 3;
             }
         );
 

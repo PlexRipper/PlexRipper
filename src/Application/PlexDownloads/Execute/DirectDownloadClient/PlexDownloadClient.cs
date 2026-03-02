@@ -222,7 +222,7 @@ public class PlexDownloadClient : IPlexDownloadClient
                 .Select(args =>
                     Observable.FromAsync(async ct =>
                     {
-                        _log.Here().Debug("The UserState at time of completion: {@UserState}", args.UserState);
+                        _log.Here().Verbose("The UserState at time of completion: {@UserState}", args.UserState);
                         if (args.Error != null)
                         {
                             await SetDownloadStatusAsync(

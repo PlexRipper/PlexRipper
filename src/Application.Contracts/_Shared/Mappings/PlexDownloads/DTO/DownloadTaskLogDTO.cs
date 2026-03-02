@@ -2,7 +2,7 @@ using Reaparr.Domain;
 
 namespace Reaparr.Application.Contracts;
 
-public record DownloadWorkerLogDTO
+public record DownloadTaskLogDTO
 {
     /// <summary>
     /// Gets the message of the log entry.

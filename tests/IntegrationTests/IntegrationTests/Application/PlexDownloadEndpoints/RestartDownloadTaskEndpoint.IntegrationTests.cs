@@ -33,7 +33,6 @@ public class RestartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
                     x.PlexMovieLibraryCount = 2;
                     x.MovieCount = 10;
                     x.MovieDownloadTasksCount = 1;
-                    x.DownloadWorkerTasks = 4;
                 };
 
                 config.FileSystemOptions = (system, dbContext) =>

@@ -4,6 +4,7 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using ByteSizeLib;
 using Downloader;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
@@ -145,7 +146,7 @@ public class PlexDownloadClient : IPlexDownloadClient
                 )
                 .Select(x => x.EventArgs)
                 .TakeUntil(_destroy)
-                .Select(args =>
+                .Select(_ =>
                     Observable.FromAsync(async _ =>
                     {
                         await SetDownloadStatusAsync(Domain.DownloadStatus.Downloading);
@@ -166,7 +167,7 @@ public class PlexDownloadClient : IPlexDownloadClient
                 .Sample(TimeSpan.FromMilliseconds(500))
                 .TakeUntil(_destroy)
                 .Select(args =>
-                    Observable.FromAsync(async ct =>
+                    Observable.FromAsync(async _ =>
                     {
                         using var dbContext = await _dbContextFactory.CreateAsync();
                         var progress = new DownloadTaskProgress
@@ -174,10 +175,15 @@ public class PlexDownloadClient : IPlexDownloadClient
                             DataTotal = args.TotalBytesToReceive,
                             Percentage = Convert.ToDecimal(args.ProgressPercentage),
                             DataReceived = args.ReceivedBytesSize,
-                            DownloadSpeed = Convert.ToInt64(args.AverageBytesPerSecondSpeed),
+                            DownloadSpeed = Convert.ToInt64(args.BytesPerSecondSpeed),
                         };
 
-                        await dbContext.UpdateDownloadProgress(key, progress, _downloader.Package.ToSnapshot(), ct);
+                        await dbContext.UpdateDownloadProgress(
+                            key,
+                            progress,
+                            _downloader.Package.ToSnapshot(),
+                            CancellationToken.None
+                        );
 
                         _log.Here()
                             .Debug(
@@ -185,8 +191,8 @@ public class PlexDownloadClient : IPlexDownloadClient
                                 _filename,
                                 progress.Percentage.ToString("F2"),
                                 DataFormat.FormatSpeedString(progress.DownloadSpeed),
-                                progress.DataReceived,
-                                progress.DataTotal,
+                                ByteSize.FromBytes(progress.DataReceived).ToString("MB"),
+                                ByteSize.FromBytes(progress.DataTotal).ToString("MB"),
                                 TimeSpan
                                     .FromSeconds(
                                         DataFormat.GetTimeRemaining(
@@ -219,12 +225,31 @@ public class PlexDownloadClient : IPlexDownloadClient
                         if (args.Error != null)
                         {
                             await SetDownloadStatusAsync(
-                                Domain.DownloadStatus.DownloadFinished,
+                                Domain.DownloadStatus.Error,
                                 Result.Fail(new ExceptionalError(args.Error))
                             );
                         }
+
                         if (!args.Cancelled)
                         {
+                            using var dbContext = await _dbContextFactory.CreateAsync();
+
+                            var data = (DownloadPackage?)args.UserState;
+                            var progress = new DownloadTaskProgress
+                            {
+                                DataTotal = data?.TotalFileSize ?? -1,
+                                Percentage = Convert.ToDecimal(data?.SaveProgress),
+                                DataReceived = data?.ReceivedBytesSize ?? -1,
+                                DownloadSpeed = 0,
+                            };
+
+                            await dbContext.UpdateDownloadProgress(
+                                key,
+                                progress,
+                                _downloader.Package.ToSnapshot(),
+                                CancellationToken.None
+                            );
+
                             await SetDownloadStatusAsync(Domain.DownloadStatus.DownloadFinished);
                         }
                         else
@@ -276,14 +301,14 @@ public class PlexDownloadClient : IPlexDownloadClient
         await dbContext.SaveChangesAsync(CancellationToken.None);
     }
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
+        await Task.Delay(1000);
+
         // signals completion to all streams
         _destroy.OnNext(Unit.Default);
         _destroy.OnCompleted();
         _subscriptions.Dispose();
         _destroy.Dispose();
     }
-
-    public async ValueTask DisposeAsync() => await Task.CompletedTask;
 }

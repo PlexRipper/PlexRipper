@@ -104,7 +104,7 @@ public class DownloadJob : IJob
                     downloadTask.FullTitle
                 );
 
-            using var plexDownloadClient = _plexDownloadClientFactory[clientType];
+            await using var plexDownloadClient = _plexDownloadClientFactory[clientType];
 
             var startResult = await plexDownloadClient.Start(downloadTask.ToKey(), token);
 

@@ -268,6 +268,123 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
     }
 
     [Fact]
+    public async Task ShouldStartPausedEpisode_WhenStartingPausedTvShowTask()
+    {
+        // Arrange
+        await SetupDatabase(
+            44821,
+            x =>
+            {
+                x.TvShowDownloadTasksCount = 1;
+                x.TvShowSeasonDownloadTasksCount = 1;
+                x.TvShowEpisodeCount = 3;
+            }
+        );
+
+        var tvShow = await IDbContext.DownloadTaskTvShow.AsNoTracking().FirstAsync(CancellationToken);
+        var orderedChildTasks = await IDbContext.GetDownloadableChildTasks(tvShow.ToKey(), CancellationToken);
+
+        orderedChildTasks.Count.ShouldBeGreaterThan(1);
+        var queuedTask = orderedChildTasks[0];
+        var pausedTask = orderedChildTasks[1];
+
+        await IDbContext
+            .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == queuedTask.Id)
+            .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, DownloadStatus.Queued), CancellationToken);
+        await IDbContext
+            .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == pausedTask.Id)
+            .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, DownloadStatus.Paused), CancellationToken);
+
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.IsDownloading(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>()))
+            .ReturnsAsync(Result.Ok());
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.GetCurrentlyDownloadingKeysByServer(It.IsAny<int>()))
+            .ReturnsAsync([]);
+
+        Mock.SetupCommand(It.IsAny<DownloadTaskUpdatedCommand>).ReturnsAsync(Result.Ok());
+        Mock.PublishEvent(It.IsAny<CheckDownloadQueueEvent>).Returns(Task.CompletedTask);
+
+        // Act
+        var result = await Sut.ExecuteAsync(new StartDownloadTaskCommand(tvShow.Id), CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Verify(x => x.StartDownloadTaskJob(It.Is<DownloadTaskKey>(k => k.Id == pausedTask.Id)), Times.Once());
+    }
+
+    [Fact]
+    public async Task ShouldStartFirstPausedEpisodeAndQueueOtherPausedEpisodes_WhenStartingTvShowTask()
+    {
+        // Arrange
+        await SetupDatabase(
+            44822,
+            x =>
+            {
+                x.TvShowDownloadTasksCount = 1;
+                x.TvShowSeasonDownloadTasksCount = 1;
+                x.TvShowEpisodeCount = 3;
+            }
+        );
+
+        var tvShow = await IDbContext.DownloadTaskTvShow.AsNoTracking().FirstAsync(CancellationToken);
+        var orderedChildTasks = await IDbContext.GetDownloadableChildTasks(tvShow.ToKey(), CancellationToken);
+
+        orderedChildTasks.Count.ShouldBeGreaterThan(2);
+        var firstPausedTask = orderedChildTasks[0];
+        var secondPausedTask = orderedChildTasks[1];
+
+        await IDbContext
+            .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == firstPausedTask.Id)
+            .ExecuteUpdateAsync(
+                p =>
+                    p.SetProperty(x => x.DownloadStatus, DownloadStatus.Paused).SetProperty(x => x.DownloadSpeed, 1111),
+                CancellationToken
+            );
+        await IDbContext
+            .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == secondPausedTask.Id)
+            .ExecuteUpdateAsync(
+                p =>
+                    p.SetProperty(x => x.DownloadStatus, DownloadStatus.Paused).SetProperty(x => x.DownloadSpeed, 9999),
+                CancellationToken
+            );
+
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.IsDownloading(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>()))
+            .ReturnsAsync(Result.Ok());
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.GetCurrentlyDownloadingKeysByServer(It.IsAny<int>()))
+            .ReturnsAsync([]);
+
+        Mock.SetupCommand(It.IsAny<DownloadTaskUpdatedCommand>).ReturnsAsync(Result.Ok());
+        Mock.PublishEvent(It.IsAny<CheckDownloadQueueEvent>).Returns(Task.CompletedTask);
+
+        // Act
+        var result = await Sut.ExecuteAsync(new StartDownloadTaskCommand(tvShow.Id), CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Verify(x => x.StartDownloadTaskJob(It.Is<DownloadTaskKey>(k => k.Id == firstPausedTask.Id)), Times.Once());
+
+        var firstTask = await IDbContext.GetDownloadTaskFileAsync(firstPausedTask.ToKey(), CancellationToken);
+        firstTask.ShouldNotBeNull();
+        firstTask!.DownloadStatus.ShouldBe(DownloadStatus.Downloading);
+
+        var secondTask = await IDbContext.GetDownloadTaskFileAsync(secondPausedTask.ToKey(), CancellationToken);
+        secondTask.ShouldNotBeNull();
+        secondTask!.DownloadStatus.ShouldBe(DownloadStatus.Queued);
+        secondTask.DownloadSpeed.ShouldBe(0);
+    }
+
+    [Fact]
     public async Task ShouldPauseTheActiveDownloads_WhenAnotherDownloadTaskIsStarted()
     {
         // Arrange

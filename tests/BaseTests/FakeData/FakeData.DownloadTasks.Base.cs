@@ -69,6 +69,8 @@ public static partial class FakeData
                         SeasonFolder = string.Empty,
                         KeepCompletedInDownloadFolder = false,
                     }
-            );
+            )
+            .RuleFor(x => x.DirectDownloadSnapshot, _ => null)
+            .RuleFor(x => x.DownloadClientType, _ => PlexDownloadClientType.Direct);
     }
 }

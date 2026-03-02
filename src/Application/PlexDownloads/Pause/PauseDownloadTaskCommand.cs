@@ -65,23 +65,23 @@ public class PauseDownloadTaskCommandHandler : ICommandHandler<PauseDownloadTask
 
             if (downloadTask.DownloadTaskPhase == DownloadTaskPhase.FileTransfer)
             {
-                if (await _moveDownloadFileScheduler.IsDownloadFileMoving(downloadTaskKey))
-                {
-                    var stopMoveResult = await _moveDownloadFileScheduler.StopMoveDownloadFileJob(downloadTaskKey);
-                    if (stopMoveResult.IsFailed)
-                        return stopMoveResult.LogError();
-                }
+                if (!await _moveDownloadFileScheduler.IsDownloadFileMoving(downloadTaskKey))
+                    continue;
+
+                var stopMoveResult = await _moveDownloadFileScheduler.StopMoveDownloadFileJob(downloadTaskKey);
+                if (stopMoveResult.IsFailed)
+                    return stopMoveResult.LogError();
 
                 await _dbContext.SetDownloadStatus(downloadTaskKey, DownloadStatus.MovePaused);
                 continue;
             }
 
-            if (await _downloadTaskScheduler.IsDownloading(downloadTaskKey, cancellationToken))
-            {
-                var stopResult = await _downloadTaskScheduler.StopDownloadTaskJob(downloadTaskKey, cancellationToken);
-                if (stopResult.IsFailed)
-                    return stopResult.LogError();
-            }
+            if (!await _downloadTaskScheduler.IsDownloading(downloadTaskKey, cancellationToken))
+                continue;
+
+            var stopResult = await _downloadTaskScheduler.StopDownloadTaskJob(downloadTaskKey, cancellationToken);
+            if (stopResult.IsFailed)
+                return stopResult.LogError();
 
             await _dbContext.SetDownloadStatus(downloadTaskKey, DownloadStatus.Paused);
         }

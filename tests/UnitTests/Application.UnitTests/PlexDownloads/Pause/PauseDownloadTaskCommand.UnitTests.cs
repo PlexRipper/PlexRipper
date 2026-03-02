@@ -102,20 +102,31 @@ public class DownloadCommandsPauseDownloadTasksAsyncUnitTests : BaseUnitTest<Pau
         var testDownloadTask = tvShowDownloadTasks.First().ToKey();
         var downloadableTasks = await IDbContext.GetDownloadableChildTaskKeys(testDownloadTask, CancellationToken);
 
-        downloadableTasks.Count.ShouldBe(4);
+        downloadableTasks.Count.ShouldBeGreaterThan(0);
+        var downloadingKey = downloadableTasks.First();
 
         await IDbContext
-            .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == downloadableTasks.First().Id)
+            .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == downloadingKey.Id)
             .ExecuteUpdateAsync(
                 p => p.SetProperty(x => x.DownloadStatus, DownloadStatus.Downloading),
                 CancellationToken
             );
 
         Mock.Mock<IDownloadTaskScheduler>()
-            .SetupSequence(x => x.IsDownloading(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(true)
-            .ReturnsAsync(false)
-            .ReturnsAsync(false)
+            .Setup(x =>
+                x.IsDownloading(
+                    It.Is<DownloadTaskKey>(key => key.Id == downloadingKey.Id),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(true);
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x =>
+                x.IsDownloading(
+                    It.Is<DownloadTaskKey>(key => key.Id != downloadingKey.Id),
+                    It.IsAny<CancellationToken>()
+                )
+            )
             .ReturnsAsync(false);
         Mock.Mock<IDownloadTaskScheduler>()
             .Setup(x => x.StopDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
@@ -153,19 +164,27 @@ public class DownloadCommandsPauseDownloadTasksAsyncUnitTests : BaseUnitTest<Pau
             .OrderBy(x => x.FullTitle)
             .ToListAsync(CancellationToken);
 
-        fileTasks.Count.ShouldBeGreaterThan(1);
+        fileTasks.Count.ShouldBeGreaterThan(2);
         var downloadingKey = fileTasks[0].ToKey();
         var movingKey = fileTasks[1].ToKey();
+        var inactiveKey = fileTasks[2].ToKey();
 
         await IDbContext
             .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == downloadingKey.Id)
             .ExecuteUpdateAsync(
-                p => p.SetProperty(x => x.DownloadStatus, DownloadStatus.Downloading),
+                p =>
+                    p.SetProperty(x => x.DownloadStatus, DownloadStatus.Downloading)
+                        .SetProperty(x => x.DownloadSpeed, 1234),
                 CancellationToken
             );
         await IDbContext
             .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == movingKey.Id)
-            .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, DownloadStatus.Moving), CancellationToken);
+            .ExecuteUpdateAsync(
+                p =>
+                    p.SetProperty(x => x.DownloadStatus, DownloadStatus.Moving)
+                        .SetProperty(x => x.FileTransferSpeed, 4321),
+                CancellationToken
+            );
 
         Mock.Mock<IDownloadTaskScheduler>()
             .Setup(x =>
@@ -210,9 +229,15 @@ public class DownloadCommandsPauseDownloadTasksAsyncUnitTests : BaseUnitTest<Pau
         var downloadingTask = await IDbContext.GetDownloadTaskFileAsync(downloadingKey, CancellationToken);
         downloadingTask.ShouldNotBeNull();
         downloadingTask!.DownloadStatus.ShouldBe(DownloadStatus.Paused);
+        downloadingTask.DownloadSpeed.ShouldBe(0);
 
         var movingTask = await IDbContext.GetDownloadTaskFileAsync(movingKey, CancellationToken);
         movingTask.ShouldNotBeNull();
         movingTask!.DownloadStatus.ShouldBe(DownloadStatus.MovePaused);
+        movingTask.FileTransferSpeed.ShouldBe(0);
+
+        var inactiveTask = await IDbContext.GetDownloadTaskFileAsync(inactiveKey, CancellationToken);
+        inactiveTask.ShouldNotBeNull();
+        inactiveTask!.DownloadStatus.ShouldBe(DownloadStatus.Queued);
     }
 }

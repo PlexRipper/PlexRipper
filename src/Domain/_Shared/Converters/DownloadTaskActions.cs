@@ -14,10 +14,10 @@ public static class DownloadTaskActions
         DownloadStatus.IntegrityError,
         DownloadStatus.Error,
         DownloadStatus.MoveError,
+        DownloadStatus.Downloading,
         DownloadStatus.Paused,
         DownloadStatus.MovePaused,
         DownloadStatus.Stopped,
-        DownloadStatus.Downloading,
         DownloadStatus.Queued,
         DownloadStatus.Moving,
         DownloadStatus.MoveFinished,
@@ -74,10 +74,16 @@ public static class DownloadTaskActions
                 actions.Add(DownloadActions.Delete);
                 break;
             case DownloadStatus.AuthError:
+                actions.Add(DownloadActions.Start);
                 actions.Add(DownloadActions.Delete);
                 break;
             case DownloadStatus.StorageError:
+                actions.Add(DownloadActions.Start);
+                actions.Add(DownloadActions.Delete);
+                break;
             case DownloadStatus.SourceUnavailable:
+                actions.Add(DownloadActions.Delete);
+                break;
             case DownloadStatus.DownloadClientError:
             case DownloadStatus.IntegrityError:
                 actions.Add(DownloadActions.Restart);

@@ -45,15 +45,15 @@ public class StartDownloadTaskCommandHandler : ICommandHandler<StartDownloadTask
         if (key is null)
             return ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), command.DownloadTaskGuid).LogError();
 
-        // TODO: Improve performance by fetching ALL download tasks in one query
-        var downloadableChildTaskKeys = await _dbContext.GetDownloadableChildTaskKeys(key, cancellationToken);
-        if (!downloadableChildTaskKeys.Any())
-            return ResultExtensions.IsEmpty(nameof(downloadableChildTaskKeys)).LogWarning();
+        var downloadableChildTasks = await _dbContext.GetDownloadableChildTasks(key, cancellationToken);
+        if (!downloadableChildTasks.Any())
+            return ResultExtensions.IsEmpty(nameof(downloadableChildTasks)).LogWarning();
 
-        var nextDownloadTaskKey = downloadableChildTaskKeys.First();
-        var nextDownloadTask = await _dbContext.GetDownloadTaskFileAsync(nextDownloadTaskKey, cancellationToken);
-        if (nextDownloadTask is null)
-            return ResultExtensions.EntityNotFound(nameof(DownloadTaskFileBase), nextDownloadTaskKey.Id).LogError();
+        var nextDownloadTask = downloadableChildTasks.FirstOrDefault(x =>
+            x.DownloadStatus == DownloadStatus.Paused || x.DownloadStatus == DownloadStatus.MovePaused
+        );
+        nextDownloadTask ??= downloadableChildTasks.First();
+        var nextDownloadTaskKey = nextDownloadTask.ToKey();
 
         if (await _dbContext.IsDownloadsPausedByUser(nextDownloadTaskKey.PlexServerId))
         {

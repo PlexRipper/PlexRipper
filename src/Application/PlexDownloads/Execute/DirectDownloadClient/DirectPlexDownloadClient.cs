@@ -92,11 +92,13 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
         );
 
         if (fileStreamResult.IsFailed)
+        {
+            await SetDownloadStatusAsync(Domain.DownloadStatus.StorageError, fileStreamResult.ToResult());
             return fileStreamResult.ToResult();
+        }
 
         await using var fileStream = fileStreamResult.Value;
         _filename = downloadTask.FileName;
-        var filePath = _path.Combine(downloadTask.DownloadDirectory, downloadTask.FileName);
 
         _downloader = new DownloadService(_configuration);
 
@@ -104,13 +106,18 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
 
         if (downloadTask.DirectDownloadSnapshot is not null)
         {
+            await SendDownloadClientLog(
+                NotificationLevel.Information,
+                Domain.DownloadStatus.Downloading,
+                $"Resuming {_filename} download from pause"
+            );
             var progress = downloadTask.DirectDownloadSnapshot.ToDownloadPackage();
-            progress.Urls = [downloadUrl];
+            progress.Urls = [downloadUrl]; // Ensure we use the latest connection string
             await _downloader.DownloadFileTaskAsync(progress, cancellationToken);
         }
         else
         {
-            await _downloader.DownloadFileTaskAsync(downloadUrl, filePath, cancellationToken);
+            await _downloader.DownloadFileTaskAsync(downloadUrl, downloadTask.DownloadFilePath, cancellationToken);
         }
 
         return Result.Ok();
@@ -119,8 +126,23 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
     /// <inheritdoc/>
     public async Task<Result> StopAsync()
     {
+        _log.Here()
+            .Debug(
+                "DownloadTask {DownloadTaskId} ({MediaFileName}) has been requested to stop.",
+                _downloadTaskKey!.Id,
+                _filename
+            );
+
         await _downloader.CancelTaskAsync();
 
+        var stopMsg = _log.Here()
+            .InformationMsg(
+                "DownloadTask {DownloadTaskId} ({MediaFileName}) was stopped.",
+                _downloadTaskKey!.Id,
+                _filename
+            );
+
+        await SendDownloadClientLog(NotificationLevel.Information, Domain.DownloadStatus.Stopped, stopMsg);
         return Result.Ok();
     }
 
@@ -186,8 +208,8 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                             CancellationToken.None
                         );
 
-                        _log.Here()
-                            .Debug(
+                        var progressMsg = _log.Here()
+                            .DebugMsg(
                                 "[DownloadTaskProgress {MediaFileName} - {Percentage}% - {Speed} - {DataReceived} / {DataTotal} - {TimeRemaining}]",
                                 _filename,
                                 progress.Percentage.ToString("F2"),
@@ -205,6 +227,12 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                             );
 
                         await _commandExecutor.Send(new DownloadTaskUpdatedCommand(key), CancellationToken.None);
+
+                        await SendDownloadClientLog(
+                            NotificationLevel.Debug,
+                            Domain.DownloadStatus.Downloading,
+                            progressMsg
+                        );
                     })
                 )
                 .Concat()
@@ -269,7 +297,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
         using var dbContext = await _dbContextFactory.CreateAsync();
 
         _log.Here()
-            .Information(
+            .InformationMsg(
                 "DownloadTask {DownloadTaskId} ({MediaFileName}) transitioning to {NewStatus}",
                 _downloadTaskKey!.Id,
                 _filename,
@@ -279,7 +307,11 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
         await dbContext.SetDownloadStatus(_downloadTaskKey, status);
         await _commandExecutor.Send(new DownloadTaskUpdatedCommand(_downloadTaskKey), CancellationToken.None);
 
-        await SendDownloadClientLog(status.ToNotificationLevel(), status, $"Download {status}: {_filename}");
+        await SendDownloadClientLog(
+            status.ToNotificationLevel(),
+            status,
+            $"Download {_filename} transitioned to status: {status}"
+        );
 
         if (errorResult is not null)
             await SendDownloadClientLog(NotificationLevel.Error, status, errorResult.ToString());
@@ -288,18 +320,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
     private async Task SendDownloadClientLog(NotificationLevel logLevel, Domain.DownloadStatus status, string message)
     {
         using var dbContext = await _dbContextFactory.CreateAsync();
-
-        await dbContext.DownloadTasksLogs.AddAsync(
-            new DownloadTaskLog
-            {
-                Message = message,
-                LogLevel = logLevel,
-                CreatedAt = DateTime.UtcNow,
-                Status = status,
-                DownloadTaskId = _downloadTaskKey!.Id,
-            }
-        );
-        await dbContext.SaveChangesAsync(CancellationToken.None);
+        await dbContext.CreateDownloadClientLog(_downloadTaskKey!, logLevel, status, message);
     }
 
     public async ValueTask DisposeAsync()

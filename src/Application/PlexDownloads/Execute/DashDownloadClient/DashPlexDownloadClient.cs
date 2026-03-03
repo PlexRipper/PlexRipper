@@ -269,11 +269,11 @@ public class DashPlexDownloadClient : IPlexDownloadClient
     private DownloadTaskLog CreateLogEntry(string data, NotificationLevel level) =>
         new()
         {
-            CreatedAt = DateTime.UtcNow,
             Message = level == NotificationLevel.Error ? $"ERROR: {data}" : data,
             DownloadTaskId = DownloadTask?.Id ?? Guid.Empty,
             LogLevel = level,
             Status = DownloadStatus,
+            CreatedAt = DateTime.UtcNow,
         };
 
     /// <summary>

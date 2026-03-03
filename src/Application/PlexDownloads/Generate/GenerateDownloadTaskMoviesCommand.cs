@@ -126,6 +126,23 @@ public class GenerateDownloadTaskMoviesCommandHandler : ICommandHandler<Generate
 
         await _dbContext.SaveChangesAsync(cancellationToken);
 
+        var logs = new List<DownloadTaskLog>();
+        foreach (var downloadTaskMovie in downloadTasks)
+        {
+            logs.AddRange(
+                downloadTaskMovie.Children.Select(downloadTaskMovieFile => new DownloadTaskLog
+                {
+                    Status = DownloadStatus.Queued,
+                    LogLevel = NotificationLevel.Information,
+                    Message = $"DownloadTask {downloadTaskMovieFile.FileName} was queued for downloading",
+                    DownloadTaskId = downloadTaskMovieFile.Id,
+                    CreatedAt = DateTime.UtcNow,
+                })
+            );
+        }
+
+        await _dbContext.CreateDownloadClientLogs(logs);
+
         return Result.Ok();
     }
 

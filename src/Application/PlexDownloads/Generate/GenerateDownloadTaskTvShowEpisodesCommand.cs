@@ -167,15 +167,20 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
             return saveResult.LogError();
         }
 
-        var logs = new List<DownloadTaskLog>();
+        var logs = new List<DownloadTaskTvShowEpisodeFileLog>();
 
         logs.AddRange(
-            downloadTasks.Select(downloadTaskTvShowEpisodeFile => new DownloadTaskLog
+            downloadTasks.Select(downloadTaskTvShowEpisodeFile => new DownloadTaskTvShowEpisodeFileLog
             {
                 Status = DownloadStatus.Queued,
                 LogLevel = NotificationLevel.Information,
                 Message = $"DownloadTask {downloadTaskTvShowEpisodeFile.FileName} was queued for downloading",
-                DownloadTaskId = downloadTaskTvShowEpisodeFile.Id,
+                DownloadTaskFileId = downloadTaskTvShowEpisodeFile.Id,
+                DownloadTaskTvShowEpisodeId = downloadTaskTvShowEpisodeFile.ParentId,
+                DownloadTaskTvShowSeasonId =
+                    downloadTaskTvShowEpisodeFile.Parent?.Parent?.Id ?? throw new ArgumentNullException(),
+                DownloadTaskTvShowId =
+                    downloadTaskTvShowEpisodeFile.Parent?.Parent?.Parent?.Id ?? throw new ArgumentNullException(),
                 CreatedAt = DateTime.UtcNow,
             })
         );

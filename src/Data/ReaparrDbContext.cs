@@ -17,8 +17,6 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
 {
     public DbSet<PlexAccount> PlexAccounts { get; set; }
 
-    public DbSet<DownloadTaskLog> DownloadTasksLogs { get; set; }
-
     public DbSet<FolderPath> FolderPaths { get; set; }
 
     public DbSet<Notification> Notifications { get; set; }
@@ -59,6 +57,8 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
 
     public DbSet<DownloadTaskMovieFile> DownloadTaskMovieFile { get; set; }
 
+    public DbSet<DownloadTaskMovieFileLog> DownloadTaskMovieFileLogs { get; set; }
+
     public DbSet<DownloadTaskTvShow> DownloadTaskTvShow { get; set; }
 
     public DbSet<DownloadTaskTvShowSeason> DownloadTaskTvShowSeason { get; set; }
@@ -66,6 +66,8 @@ public sealed class ReaparrDbContext : DbContext, IReaparrDbContext, IReaparrDbC
     public DbSet<DownloadTaskTvShowEpisode> DownloadTaskTvShowEpisode { get; set; }
 
     public DbSet<DownloadTaskTvShowEpisodeFile> DownloadTaskTvShowEpisodeFile { get; set; }
+
+    public DbSet<DownloadTaskTvShowEpisodeFileLog> DownloadTaskTvShowEpisodeFileLogs { get; set; }
 
     public DbSet<PlexAccountServer> PlexAccountServers { get; set; }
 

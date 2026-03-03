@@ -34,17 +34,17 @@ public static class DownloadTaskGenericToDTOMapper
             Children = downloadTask.Children.Select(x => x.ToDTO(downloadUrl)).ToList(),
         };
 
-    public static DownloadTaskLogDTO ToDTO(this DownloadTaskLog downloadTask) =>
+    public static DownloadTaskLogDTO ToDTO(this DownloadTaskLogBase downloadTask) =>
         new()
         {
+            Id = downloadTask.Id,
             CreatedAt = downloadTask.CreatedAt,
             Message = downloadTask.Message,
             LogLevel = downloadTask.LogLevel,
-            DownloadTaskId = downloadTask.DownloadTaskId,
             Status = downloadTask.Status,
         };
 
-    public static List<DownloadTaskLogDTO> ToDTO(this List<DownloadTaskLog> logs) =>
+    public static List<DownloadTaskLogDTO> ToDTO(this List<DownloadTaskLogBase> logs) =>
         logs.Select(x => x.ToDTO()).ToList();
 
     #endregion

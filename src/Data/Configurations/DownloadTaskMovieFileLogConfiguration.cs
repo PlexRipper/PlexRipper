@@ -3,9 +3,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Reaparr.Data.Configurations;
 
-public class DownloadTaskLogConfiguration : IEntityTypeConfiguration<DownloadTaskLog>
+public class DownloadTaskLogConfiguration : IEntityTypeConfiguration<DownloadTaskMovieFileLog>
 {
-    public void Configure(EntityTypeBuilder<DownloadTaskLog> builder)
+    public void Configure(EntityTypeBuilder<DownloadTaskMovieFileLog> builder)
     {
         builder
             .Property(b => b.LogLevel)

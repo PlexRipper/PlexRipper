@@ -1,9 +1,51 @@
+using FluentResults;
+using Microsoft.EntityFrameworkCore;
 using Reaparr.Domain;
 
 namespace Reaparr.Data.Contracts;
 
 public static partial class DbContextExtensions
 {
+    public static async Task<Result<List<DownloadTaskLogBase>>> GetDownloadTaskLogsAsync(
+        this IReaparrDbContext dbContext,
+        DownloadTaskKey downloadTaskKey,
+        CancellationToken ct
+    ) =>
+        downloadTaskKey.Type switch
+        {
+            DownloadTaskType.Movie => await Result.Try(async Task () =>
+                await dbContext
+                    .DownloadTaskMovieFileLogs.Where(x => x.DownloadTaskMovieId == downloadTaskKey.Id)
+                    .ToListAsync(ct)
+            ),
+            DownloadTaskType.MoviePart or DownloadTaskType.MovieData => await Result.Try(async Task () =>
+                await dbContext
+                    .DownloadTaskMovieFileLogs.Where(x => x.DownloadTaskFileId == downloadTaskKey.Id)
+                    .ToListAsync(ct)
+            ),
+            DownloadTaskType.TvShow => await Result.Try(async Task () =>
+                await dbContext
+                    .DownloadTaskTvShowEpisodeFileLogs.Where(x => x.DownloadTaskTvShowId == downloadTaskKey.Id)
+                    .ToListAsync(ct)
+            ),
+            DownloadTaskType.Season => await Result.Try(async Task () =>
+                await dbContext
+                    .DownloadTaskTvShowEpisodeFileLogs.Where(x => x.DownloadTaskTvShowSeasonId == downloadTaskKey.Id)
+                    .ToListAsync(ct)
+            ),
+            DownloadTaskType.Episode => await Result.Try(async Task () =>
+                await dbContext
+                    .DownloadTaskTvShowEpisodeFileLogs.Where(x => x.DownloadTaskTvShowEpisodeId == downloadTaskKey.Id)
+                    .ToListAsync(ct)
+            ),
+            DownloadTaskType.EpisodeData or DownloadTaskType.EpisodePart => await Result.Try(async Task () =>
+                await dbContext
+                    .DownloadTaskTvShowEpisodeFileLogs.Where(x => x.DownloadTaskFileId == downloadTaskKey.Id)
+                    .ToListAsync(ct)
+            ),
+            _ => Result.Fail($"DownloadTaskLog of type {downloadTaskKey.Type} not implemented"),
+        };
+
     public static async Task CreateDownloadClientLog(
         this IReaparrDbContext dbContext,
         DownloadTaskKey downloadTaskKey,
@@ -12,22 +54,70 @@ public static partial class DbContextExtensions
         string message
     )
     {
-        await dbContext.DownloadTasksLogs.AddAsync(
-            new DownloadTaskLog
-            {
-                Message = message,
-                LogLevel = logLevel,
-                Status = status,
-                DownloadTaskId = downloadTaskKey.Id,
-                CreatedAt = DateTime.UtcNow,
-            }
-        );
+        if (downloadTaskKey.Type is DownloadTaskType.MovieData or DownloadTaskType.MoviePart)
+        {
+            var parentId = await dbContext
+                .DownloadTaskMovieFile.Where(x => x.Id == downloadTaskKey.Id)
+                .Select(x => x.ParentId)
+                .FirstOrDefaultAsync();
+            dbContext.DownloadTaskMovieFileLogs.Add(
+                new DownloadTaskMovieFileLog
+                {
+                    Message = message,
+                    LogLevel = logLevel,
+                    Status = status,
+                    DownloadTaskFileId = downloadTaskKey.Id,
+                    DownloadTaskMovieId = parentId,
+                    CreatedAt = DateTime.UtcNow,
+                }
+            );
+        }
+
+        if (downloadTaskKey.Type is DownloadTaskType.EpisodeData or DownloadTaskType.EpisodePart)
+        {
+            var ids = await dbContext
+                .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == downloadTaskKey.Id)
+                .Select(x => new
+                {
+                    EpisodeId = x.ParentId,
+                    SeasonId = x.Parent!.ParentId,
+                    TvShowId = x.Parent.Parent!.ParentId,
+                })
+                .FirstOrDefaultAsync();
+
+            dbContext.DownloadTaskTvShowEpisodeFileLogs.Add(
+                new DownloadTaskTvShowEpisodeFileLog
+                {
+                    Message = message,
+                    LogLevel = logLevel,
+                    Status = status,
+                    DownloadTaskFileId = downloadTaskKey.Id,
+                    DownloadTaskTvShowEpisodeId = ids?.EpisodeId ?? Guid.Empty,
+                    DownloadTaskTvShowSeasonId = ids?.SeasonId ?? Guid.Empty,
+                    DownloadTaskTvShowId = ids?.TvShowId ?? Guid.Empty,
+                    CreatedAt = DateTime.UtcNow,
+                }
+            );
+        }
+
         await dbContext.SaveChangesAsync(CancellationToken.None);
     }
 
-    public static async Task CreateDownloadClientLogs(this IReaparrDbContext dbContext, List<DownloadTaskLog> logs)
+    public static async Task CreateDownloadClientLogs(
+        this IReaparrDbContext dbContext,
+        List<DownloadTaskMovieFileLog> logs
+    )
     {
-        dbContext.DownloadTasksLogs.AddRange(logs);
+        dbContext.DownloadTaskMovieFileLogs.AddRange(logs);
+        await dbContext.SaveChangesAsync(CancellationToken.None);
+    }
+
+    public static async Task CreateDownloadClientLogs(
+        this IReaparrDbContext dbContext,
+        List<DownloadTaskTvShowEpisodeFileLog> logs
+    )
+    {
+        dbContext.DownloadTaskTvShowEpisodeFileLogs.AddRange(logs);
         await dbContext.SaveChangesAsync(CancellationToken.None);
     }
 }

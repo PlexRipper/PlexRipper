@@ -3,7 +3,7 @@
 /// <summary>
 /// A log entry for the <see cref="DownloadTaskGeneric">download worker</see>.
 /// </summary>
-public class DownloadTaskLog : BaseEntity
+public abstract class DownloadTaskLogBase : BaseEntity
 {
     #region Properties
 
@@ -30,14 +30,5 @@ public class DownloadTaskLog : BaseEntity
     /// </summary>
     [Column(Order = 4)]
     public required DateTime CreatedAt { get; init; }
-    #endregion
-
-    #region Relationships
-
-    /// <summary>
-    /// Gets the <see cref="DownloadTaskGeneric"/> this log belongs too
-    /// </summary>
-    public required Guid DownloadTaskId { get; init; }
-
     #endregion
 }

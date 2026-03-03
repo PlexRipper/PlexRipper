@@ -21,7 +21,7 @@ public record DownloadTaskKey
 
     public bool IsValid => Id != Guid.Empty && PlexServerId > 0 && PlexLibraryId > 0 && Type != DownloadTaskType.None;
 
-    // TODO:add title when creating the key
+    // TODO: add title when creating the key?
 
     public virtual bool Equals(DownloadTaskKey? other)
     {

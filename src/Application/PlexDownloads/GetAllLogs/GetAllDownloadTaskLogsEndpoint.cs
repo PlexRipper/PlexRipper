@@ -52,14 +52,8 @@ public class GetDownloadTaskLogsByDownloadTaskIdEndpoint
             return;
         }
 
-        var childTasks = await _dbContext.GetDownloadableChildTasks(key, ct);
+        var logsResult = await _dbContext.GetDownloadTaskLogsAsync(key, ct);
 
-        var downloadTaskIds = childTasks.Select(x => x.Id).ToList();
-
-        var logs = await _dbContext
-            .DownloadTasksLogs.Where(x => downloadTaskIds.Contains(x.DownloadTaskId))
-            .ToListAsync(ct);
-
-        await SendFluentResult(Result.Ok(logs), x => x.ToDTO(), ct);
+        await SendFluentResult(logsResult, x => x.ToDTO(), ct);
     }
 }

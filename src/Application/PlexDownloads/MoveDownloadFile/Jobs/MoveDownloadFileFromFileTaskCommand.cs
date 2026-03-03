@@ -40,6 +40,8 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
     private readonly IPath _path;
     private readonly IDownloadManagerSettings _downloadManagerSettings;
 
+    private string _filename = string.Empty;
+
     private readonly Channel<IDownloadFileTransferProgress> _progressChannel =
         Channel.CreateBounded<IDownloadFileTransferProgress>(
             new BoundedChannelOptions(1)
@@ -88,6 +90,7 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
         // Resolve paths
         var downloadFilePath = downloadTask.DownloadFilePath;
         var destinationPath = downloadTask.DestinationFilePath;
+        _filename = _path.GetFileName(downloadTask.DownloadFilePath);
 
         _log.Here().Debug("Starting file move process for {DownloadFilePath}", downloadFilePath);
 
@@ -372,13 +375,24 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
     private async Task UpdateDownloadTaskStatus(DownloadTaskKey key, DownloadStatus status)
     {
         await _dbContext.SetDownloadStatus(key, status);
-
+        await _dbContext.CreateDownloadClientLog(
+            key,
+            NotificationLevel.Information,
+            status,
+            $"DownloadTask {key.Id} ({_filename}) has transitioned to {status}"
+        );
         await _commandExecutor.Send(new DownloadTaskUpdatedCommand(key));
     }
 
     private async Task<Result> ErrorDownloadTask(DownloadTaskKey key, Result result)
     {
         await _dbContext.SetDownloadStatus(key, DownloadStatus.MoveError);
+        await _dbContext.CreateDownloadClientLog(
+            key,
+            NotificationLevel.Error,
+            DownloadStatus.MoveError,
+            result.ToString()
+        );
 
         await _commandExecutor.Send(new DownloadTaskUpdatedCommand(key));
 

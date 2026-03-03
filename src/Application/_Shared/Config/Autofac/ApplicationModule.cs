@@ -20,7 +20,7 @@ public class ApplicationModule : Module
         builder.RegisterType<MoveDownloadFileJobQueue>().As<IMoveDownloadFileQueue>().SingleInstance();
 
         builder
-            .RegisterType<PlexDownloadClient>()
+            .RegisterType<DirectPlexDownloadClient>()
             .Keyed<IPlexDownloadClient>(PlexDownloadClientType.Direct)
             .InstancePerDependency();
 

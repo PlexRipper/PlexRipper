@@ -10,7 +10,7 @@ using DomainDownloadStatus = Reaparr.Domain.DownloadStatus;
 
 namespace Reaparr.Application.UnitTests;
 
-public class PlexDownloadClientStartUnitTests : BaseUnitTest<PlexDownloadClient>
+public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadClient>
 {
     public PlexDownloadClientStartUnitTests(ITestOutputHelper output)
         : base(output) { }
@@ -106,7 +106,7 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<PlexDownloadClient>
             );
 
         // Act
-        var sut = Mock.Create<PlexDownloadClient>(
+        var sut = Mock.Create<DirectPlexDownloadClient>(
             new NamedParameter(
                 "downloadServiceFactory",
                 (Func<DownloadConfiguration, IDownloadService>)(_ => downloadServiceMock.Object)

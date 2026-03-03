@@ -12,7 +12,7 @@ using Reaparr.Settings.Contracts;
 
 namespace Reaparr.Application;
 
-public class PlexDownloadClient : IPlexDownloadClient
+public class DirectPlexDownloadClient : IPlexDownloadClient
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
@@ -34,7 +34,7 @@ public class PlexDownloadClient : IPlexDownloadClient
     private readonly Subject<Unit> _destroy = new();
     private int _isDisposed;
 
-    public PlexDownloadClient(
+    public DirectPlexDownloadClient(
         ILogger log,
         IReaparrDbContextFactory dbContextFactory,
         ICommandExecutor commandExecutor,
@@ -43,7 +43,7 @@ public class PlexDownloadClient : IPlexDownloadClient
         IPath path
     )
     {
-        _log = log.ForContext<PlexDownloadClient>();
+        _log = log.ForContext<DirectPlexDownloadClient>();
         _dbContextFactory = dbContextFactory;
         _commandExecutor = commandExecutor;
         _dbContext = dbContextFactory.Create();

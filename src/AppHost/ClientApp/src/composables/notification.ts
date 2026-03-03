@@ -11,3 +11,12 @@ export function showErrorNotification(message: string) {
 		],
 	});
 }
+
+export function showSuccessNotification(message: string) {
+	Notify.create({
+		type: 'positive',
+		message,
+		progress: true,
+		timeout: 2000,
+	});
+}

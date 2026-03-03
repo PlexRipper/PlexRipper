@@ -48,13 +48,18 @@ public sealed class TorznabEndpoint : Endpoint<TorznabEndpointRequest>
         switch (req.Type)
         {
             case "caps":
-                var response = await _commandExecutor.Send(new GetCapabilitiesCommand(), ct);
-                await Send.XmlAsync(response, cancellationToken: ct);
+                var capsResult = await _commandExecutor.Send(new GetCapabilitiesCommand(), ct);
+                if (capsResult.IsFailed)
+                {
+                    await Send.ErrorsAsync(cancellation: ct);
+                    break;
+                }
+                await Send.XmlAsync(capsResult.Value, cancellationToken: ct);
                 break;
             case "search":
                 throw new NotImplementedException();
             case "tvsearch":
-                var searchTvShowResponse = await _commandExecutor.Send(
+                var tvSearchResult = await _commandExecutor.Send(
                     new SearchTvShowCommand
                     {
                         Query = req.Query ?? string.Empty,
@@ -68,10 +73,15 @@ public sealed class TorznabEndpoint : Endpoint<TorznabEndpointRequest>
                     },
                     ct
                 );
-                await Send.XmlAsync(searchTvShowResponse, cancellationToken: ct);
+                if (tvSearchResult.IsFailed)
+                {
+                    await Send.ErrorsAsync(cancellation: ct);
+                    break;
+                }
+                await Send.XmlAsync(tvSearchResult.Value, cancellationToken: ct);
                 break;
             case "movie":
-                var searchMovieResponse = await _commandExecutor.Send(
+                var movieSearchResult = await _commandExecutor.Send(
                     new SearchMovieCommand
                     {
                         Query = req.Query ?? string.Empty,
@@ -82,7 +92,12 @@ public sealed class TorznabEndpoint : Endpoint<TorznabEndpointRequest>
                     },
                     ct
                 );
-                await Send.XmlAsync(searchMovieResponse, cancellationToken: ct);
+                if (movieSearchResult.IsFailed)
+                {
+                    await Send.ErrorsAsync(cancellation: ct);
+                    break;
+                }
+                await Send.XmlAsync(movieSearchResult.Value, cancellationToken: ct);
                 break;
             default:
                 _log.Here().Error("Received unknown Torznab request type: {Type}", req.Type);

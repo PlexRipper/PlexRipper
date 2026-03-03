@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace Reaparr.PublicAPI;
 
-public record GetCapabilitiesCommand : ICommand<TorznabCapsResponseDTO>;
+public record GetCapabilitiesCommand : ICommand<Result<TorznabCapsResponseDTO>>;
 
 public class GetCapabilitiesCommandValidator : AbstractValidator<GetCapabilitiesCommand>
 {
@@ -13,9 +13,9 @@ public class GetCapabilitiesCommandValidator : AbstractValidator<GetCapabilities
     }
 }
 
-public class GetCapabilitiesCommandHandler : ICommandHandler<GetCapabilitiesCommand, TorznabCapsResponseDTO>
+public class GetCapabilitiesCommandHandler : ICommandHandler<GetCapabilitiesCommand, Result<TorznabCapsResponseDTO>>
 {
-    public async Task<TorznabCapsResponseDTO> ExecuteAsync(
+    public async Task<Result<TorznabCapsResponseDTO>> ExecuteAsync(
         GetCapabilitiesCommand command,
         CancellationToken cancellationToken
     )
@@ -75,6 +75,6 @@ public class GetCapabilitiesCommandHandler : ICommandHandler<GetCapabilitiesComm
 
         await Task.CompletedTask;
 
-        return response;
+        return Result.Ok(response);
     }
 }

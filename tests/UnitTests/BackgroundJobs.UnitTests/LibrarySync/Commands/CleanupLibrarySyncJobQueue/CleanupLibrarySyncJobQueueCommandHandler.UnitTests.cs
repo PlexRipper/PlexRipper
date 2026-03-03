@@ -279,7 +279,7 @@ public class CleanupLibrarySyncJobQueueCommandHandlerUnitTests : BaseUnitTest<Cl
         var items = await IDbContext.LibrarySyncJobQueues.ToListAsync(CancellationToken);
         items.ShouldBeEmpty();
         Mock.Mock<ICommandExecutor>()
-            .Verify(x => x.Send(It.IsAny<ICommand>(), It.IsAny<CancellationToken>()), Times.Never());
+            .Verify(x => x.Send(It.IsAny<ICommand<Result>>(), It.IsAny<CancellationToken>()), Times.Never());
     }
 
     [Fact]

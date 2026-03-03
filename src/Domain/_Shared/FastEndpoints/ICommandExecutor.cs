@@ -4,5 +4,6 @@ namespace Reaparr.Domain;
 
 public interface ICommandExecutor
 {
-    Task<TResult> Send<TResult>(ICommand<TResult> command, CancellationToken ct = default);
+    Task<TResult> Send<TResult>(ICommand<TResult> command, CancellationToken ct = default)
+        where TResult : ResultBase, new();
 }

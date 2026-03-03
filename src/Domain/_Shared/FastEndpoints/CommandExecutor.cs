@@ -12,15 +12,28 @@ public class CommandExecutor : ICommandExecutor
     }
 
     public async Task<TResult> Send<TResult>(ICommand<TResult> command, CancellationToken ct = default)
+        where TResult : ResultBase, new()
     {
         try
         {
             return await command.ExecuteAsync(ct);
         }
+        catch (OperationCanceledException) when (ct.IsCancellationRequested)
+        {
+            return CreateFailedResult<TResult>(new OperationCanceledException("The command was cancelled"));
+        }
         catch (Exception e)
         {
             _log.Here().ErrorResult(e);
-            throw;
+            return CreateFailedResult<TResult>(e);
         }
+    }
+
+    private static TResult CreateFailedResult<TResult>(Exception e)
+        where TResult : ResultBase, new()
+    {
+        var result = new TResult();
+        result.Reasons.Add(new ExceptionalError(e));
+        return result;
     }
 }

@@ -11,7 +11,7 @@ using Reaparr.Settings.Contracts;
 
 namespace Reaparr.PublicAPI;
 
-public record SearchMovieCommand : ICommand<TorznabMediaSearchResponseDTO>
+public record SearchMovieCommand : ICommand<Result<TorznabMediaSearchResponseDTO>>
 {
     public required string Query { get; init; }
 
@@ -39,7 +39,7 @@ public class SearchMovieCommandValidator : AbstractValidator<SearchMovieCommand>
     }
 }
 
-public class SearchMovieCommandHandler : ICommandHandler<SearchMovieCommand, TorznabMediaSearchResponseDTO>
+public class SearchMovieCommandHandler : ICommandHandler<SearchMovieCommand, Result<TorznabMediaSearchResponseDTO>>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
@@ -52,7 +52,7 @@ public class SearchMovieCommandHandler : ICommandHandler<SearchMovieCommand, Tor
         _networkSettings = networkSettings;
     }
 
-    public async Task<TorznabMediaSearchResponseDTO> ExecuteAsync(
+    public async Task<Result<TorznabMediaSearchResponseDTO>> ExecuteAsync(
         SearchMovieCommand command,
         CancellationToken cancellationToken
     )
@@ -65,17 +65,19 @@ public class SearchMovieCommandHandler : ICommandHandler<SearchMovieCommand, Tor
             items.AddRange(MapMovieToItems(movie));
         }
 
-        return new TorznabMediaSearchResponseDTO
-        {
-            Channel = new TorznabChannel
+        return Result.Ok(
+            new TorznabMediaSearchResponseDTO
             {
-                Title = "Reaparr Indexer",
-                Description = $"Movie Search results for {command.Query}",
-                Language = "en-us",
-                Category = "search",
-                Items = items,
-            },
-        };
+                Channel = new TorznabChannel
+                {
+                    Title = "Reaparr Indexer",
+                    Description = $"Movie Search results for {command.Query}",
+                    Language = "en-us",
+                    Category = "search",
+                    Items = items,
+                },
+            }
+        );
     }
 
     private async Task<List<PlexMovie>> LoadMoviesAsync(SearchMovieCommand command, CancellationToken cancellationToken)

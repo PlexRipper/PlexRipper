@@ -20,8 +20,8 @@ import type {
   DownloadMediaDTO,
   DownloadPreviewContainerDTO,
   DownloadTaskDTO,
+  DownloadTaskLogDTO,
   DownloadTaskType,
-  DownloadWorkerLogDTO,
   ServerDownloadProgressDTO,
 } from "./data-contracts";
 
@@ -140,13 +140,13 @@ export class Download {
     downloadTaskGuid: string,
     params: RequestParams = {},
   ) =>
-    axiosObservable<DownloadWorkerLogDTO[]>({
+    axiosObservable<DownloadTaskLogDTO[]>({
       url: `/api/Download/logs/${downloadTaskGuid}`,
       method: "GET",
       secure: true,
       responseType: "json",
       ...params,
-    }).pipe(apiCheckPipe<DownloadWorkerLogDTO[]>);
+    }).pipe(apiCheckPipe<DownloadTaskLogDTO[]>);
 
   /**
    * No description

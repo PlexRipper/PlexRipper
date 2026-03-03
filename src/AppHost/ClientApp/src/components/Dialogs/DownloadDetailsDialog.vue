@@ -166,7 +166,7 @@
 
 <script lang="ts" setup>
 import { set, get } from '@vueuse/core';
-import type { DownloadTaskDTO, DownloadWorkerLogDTO, ErrorDTO } from '@dto';
+import type { DownloadTaskDTO, DownloadTaskLogDTO, ErrorDTO } from '@dto';
 import { downloadApi } from '@api';
 import Convert from '@class/Convert';
 import { DialogType } from '@enums';
@@ -179,7 +179,7 @@ const loading = ref(true);
 const logsLoading = ref(false);
 const downloadTaskId = ref<string>('');
 const downloadTask = ref<DownloadTaskDTO>();
-const logs = ref<DownloadWorkerLogDTO[]>([]);
+const logs = ref<DownloadTaskLogDTO[]>([]);
 const logRefreshTimer = useIntervalFn(() => refreshLogs(), 1000);
 
 const errors = ref<ErrorDTO[]>([]);

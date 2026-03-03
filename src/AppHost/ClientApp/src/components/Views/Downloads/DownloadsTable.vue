@@ -143,7 +143,7 @@ const getDownloadTableColumns: QTreeViewTableHeader[] = [
 		label: t('components.downloads-table.columns.percentage'),
 		field: 'percentage',
 		type: 'percentage',
-		align: 'center',
+		align: 'right',
 		width: 120,
 	},
 	{
@@ -151,7 +151,7 @@ const getDownloadTableColumns: QTreeViewTableHeader[] = [
 		field: 'actions',
 		type: 'actions',
 		width: 200,
-		align: 'center',
+		align: 'right',
 		sortable: false,
 	},
 ];

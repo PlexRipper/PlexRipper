@@ -310,6 +310,16 @@ export interface DownloadTaskKey {
   type: DownloadTaskType;
 }
 
+export interface DownloadTaskLogDTO {
+  /** @format date-time */
+  createdAt: string;
+  /** @format guid */
+  downloadTaskId: string;
+  logLevel: NotificationLevel;
+  message: string;
+  status: DownloadStatus;
+}
+
 export enum DownloadTaskType {
   None = "None",
   Movie = "Movie",
@@ -320,16 +330,6 @@ export enum DownloadTaskType {
   Episode = "Episode",
   EpisodeData = "EpisodeData",
   EpisodePart = "EpisodePart",
-}
-
-export interface DownloadWorkerLogDTO {
-  /** @format date-time */
-  createdAt: string;
-  /** @format guid */
-  downloadTaskId: string;
-  logLevel: NotificationLevel;
-  message: string;
-  status: DownloadStatus;
 }
 
 export interface ErrorDTO {
@@ -1008,13 +1008,13 @@ export interface ResultDTOOfGeneratePlexTokenResponse {
   value?: GeneratePlexTokenResponse | null;
 }
 
-export interface ResultDTOOfListOfDownloadWorkerLogDTO {
+export interface ResultDTOOfListOfDownloadTaskLogDTO {
   errors: ErrorDTO[];
   isSuccess: boolean;
   /** @format int32 */
   statusCode: number;
   successes: SuccessDTO[];
-  value?: DownloadWorkerLogDTO[] | null;
+  value?: DownloadTaskLogDTO[] | null;
 }
 
 export interface ResultDTOOfListOfFolderPathDTO {

@@ -192,7 +192,7 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
     }
 
     [Fact]
-    public async Task ShouldHaveSetTvShowDownloadTasksToStop_WhenAtLeastOneValidIdIsGiven()
+    public async Task ShouldOnlyStopActiveTvShowChildren_WhenStoppingTvShow()
     {
         // Arrange
         await SetupDatabase(
@@ -254,7 +254,7 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
             .Verify(x => x.IsDownloadFileMoving(It.IsAny<DownloadTaskKey>()), Times.Exactly(4));
         Mock.Mock<IMoveDownloadFileScheduler>()
             .Verify(x => x.StopMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Never);
-        Mock.VerifyEventPublished(It.IsAny<DownloadTaskUpdatedCommand>, Times.Exactly(4));
+        Mock.VerifyEventPublished(It.IsAny<DownloadTaskUpdatedCommand>, Times.Once);
 
         // The first episode file the handler processes (IsDownloading=true) should be deleted; others are in default Queued phase
         var file = Mock.Create<IFile>();
@@ -265,7 +265,81 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
             tvShowDownloadTasks.First().ToKey(),
             CancellationToken
         );
-        foreach (var downloadTaskDb in downloadTasks)
-            downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.Stopped);
+
+        var stoppedTaskIds = downloadTasks
+            .Where(x => x.DownloadStatus == DownloadStatus.Stopped)
+            .Select(x => x.Id)
+            .ToList();
+        stoppedTaskIds.Count.ShouldBe(1);
+        stoppedTaskIds.ShouldContain(downloadableTasks.First().Id);
+
+        downloadTasks
+            .Where(x => x.Id != downloadableTasks.First().Id)
+            .All(x => x.DownloadStatus == DownloadStatus.Queued)
+            .ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task ShouldOnlyStopActiveSeasonChildren_WhenStoppingSeason()
+    {
+        // Arrange
+        await SetupDatabase(
+            52814,
+            config =>
+            {
+                config.TvShowDownloadTasksCount = 1;
+                config.TvShowSeasonDownloadTasksCount = 1;
+                config.TvShowEpisodeDownloadTasksCount = 2;
+            }
+        );
+
+        var seasonTask = await IDbContext.DownloadTaskTvShowSeason.FirstAsync(CancellationToken);
+        var seasonChildTasks = await IDbContext.GetDownloadableChildTaskKeys(seasonTask.ToKey(), CancellationToken);
+
+        seasonChildTasks.Count.ShouldBe(2);
+
+        var dbContext = IDbContext;
+        var episodeFileTasks = await dbContext.DownloadTaskTvShowEpisodeFile.ToListAsync(CancellationToken);
+
+        SetupFileSystem(fs =>
+        {
+            foreach (var fileTask in episodeFileTasks)
+                fs.AddFile(fileTask.DownloadFilePath, new MockFileData([]));
+        });
+
+        Mock.Mock<IDownloadTaskScheduler>()
+            .SetupSequence(x => x.IsDownloading(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true)
+            .ReturnsAsync(false);
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.StopDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
+            .ReturnOk();
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .Setup(x => x.IsDownloadFileMoving(It.IsAny<DownloadTaskKey>()))
+            .ReturnsAsync(false);
+        Mock.SetupCommand(It.IsAny<DownloadTaskUpdatedCommand>).ReturnsAsync(Result.Ok());
+
+        // Act
+        var result = await Sut.ExecuteAsync(new StopDownloadTaskCommand(seasonTask.Id), CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Verify(x => x.IsDownloading(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Verify(x => x.StopDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()), Times.Once);
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .Verify(x => x.IsDownloadFileMoving(It.IsAny<DownloadTaskKey>()), Times.Exactly(2));
+        Mock.VerifyEventPublished(It.IsAny<DownloadTaskUpdatedCommand>, Times.Once);
+
+        var file = Mock.Create<IFile>();
+        var firstProcessedFileTask = episodeFileTasks.First(f => f.Id == seasonChildTasks.First().Id);
+        var secondProcessedFileTask = episodeFileTasks.First(f => f.Id == seasonChildTasks.Last().Id);
+        file.Exists(firstProcessedFileTask.DownloadFilePath).ShouldBeFalse();
+        file.Exists(secondProcessedFileTask.DownloadFilePath).ShouldBeTrue();
+
+        var downloadTasks = await IDbContext.GetDownloadableChildTasks(seasonTask.ToKey(), CancellationToken);
+        downloadTasks.First(x => x.Id == seasonChildTasks.First().Id).DownloadStatus.ShouldBe(DownloadStatus.Stopped);
+        downloadTasks.First(x => x.Id == seasonChildTasks.Last().Id).DownloadStatus.ShouldBe(DownloadStatus.Queued);
     }
 }

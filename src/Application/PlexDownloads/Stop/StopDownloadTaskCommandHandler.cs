@@ -50,6 +50,7 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
             return ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), command.DownloadTaskGuid).LogError();
 
         var downloadTasks = await _dbContext.GetDownloadableChildTaskKeys(key, cancellationToken);
+        var stopOnlyActiveChildren = key.Type is DownloadTaskType.TvShow or DownloadTaskType.Season;
 
         foreach (var downloadTaskKey in downloadTasks)
         {
@@ -60,23 +61,59 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
                 continue;
             }
 
-            _log.Here().Information("Stopping {DownloadTaskFullTitle} from downloading", downloadTask.FullTitle);
-
-            if (await _downloadTaskScheduler.IsDownloading(downloadTaskKey, cancellationToken))
+            if (stopOnlyActiveChildren)
             {
-                var stopResult = await _downloadTaskScheduler.StopDownloadTaskJob(downloadTaskKey, cancellationToken);
-                if (stopResult.IsFailed)
+                var isDownloading = await _downloadTaskScheduler.IsDownloading(downloadTaskKey, cancellationToken);
+                var isMoving = await _moveDownloadFileScheduler.IsDownloadFileMoving(downloadTaskKey);
+
+                if (!isDownloading && !isMoving)
+                    continue;
+
+                _log.Here().Information("Stopping {DownloadTaskFullTitle} from downloading", downloadTask.FullTitle);
+
+                if (isDownloading)
                 {
-                    // Since this command is done per server, we can abort since there will at most be 1 download task downloading at a time and if that fails we can't continue
-                    return stopResult.LogError();
+                    var stopResult = await _downloadTaskScheduler.StopDownloadTaskJob(
+                        downloadTaskKey,
+                        cancellationToken
+                    );
+                    if (stopResult.IsFailed)
+                    {
+                        // Since this command is done per server, we can abort since there will at most be 1 download task downloading at a time and if that fails we can't continue
+                        return stopResult.LogError();
+                    }
+                }
+
+                if (isMoving)
+                {
+                    var stopMoveResult = await _moveDownloadFileScheduler.StopMoveDownloadFileJob(downloadTaskKey);
+                    if (stopMoveResult.IsFailed)
+                        return stopMoveResult.LogError();
                 }
             }
-
-            if (await _moveDownloadFileScheduler.IsDownloadFileMoving(downloadTaskKey))
+            else
             {
-                var stopMoveResult = await _moveDownloadFileScheduler.StopMoveDownloadFileJob(downloadTaskKey);
-                if (stopMoveResult.IsFailed)
-                    return stopMoveResult.LogError();
+                _log.Here().Information("Stopping {DownloadTaskFullTitle} from downloading", downloadTask.FullTitle);
+
+                if (await _downloadTaskScheduler.IsDownloading(downloadTaskKey, cancellationToken))
+                {
+                    var stopResult = await _downloadTaskScheduler.StopDownloadTaskJob(
+                        downloadTaskKey,
+                        cancellationToken
+                    );
+                    if (stopResult.IsFailed)
+                    {
+                        // Since this command is done per server, we can abort since there will at most be 1 download task downloading at a time and if that fails we can't continue
+                        return stopResult.LogError();
+                    }
+                }
+
+                if (await _moveDownloadFileScheduler.IsDownloadFileMoving(downloadTaskKey))
+                {
+                    var stopMoveResult = await _moveDownloadFileScheduler.StopMoveDownloadFileJob(downloadTaskKey);
+                    if (stopMoveResult.IsFailed)
+                        return stopMoveResult.LogError();
+                }
             }
 
             // Only delete the download file and worker tasks when NOT in the completed phase.

@@ -52,8 +52,29 @@ public class StartDownloadTaskCommandHandler : ICommandHandler<StartDownloadTask
         var nextDownloadTask = downloadableChildTasks.FirstOrDefault(x =>
             x.DownloadStatus == DownloadStatus.Paused || x.DownloadStatus == DownloadStatus.MovePaused
         );
+        nextDownloadTask ??= downloadableChildTasks.FirstOrDefault(x =>
+            x.DownloadTaskPhase != DownloadTaskPhase.Completed
+        );
         nextDownloadTask ??= downloadableChildTasks.First();
         var nextDownloadTaskKey = nextDownloadTask.ToKey();
+
+        if (key.Type is DownloadTaskType.TvShow or DownloadTaskType.Season)
+        {
+            var statusesToQueue = nextDownloadTask.DownloadStatus switch
+            {
+                DownloadStatus.Paused => new[] { DownloadStatus.Paused, DownloadStatus.MovePaused },
+                DownloadStatus.MovePaused => new[] { DownloadStatus.Paused, DownloadStatus.MovePaused },
+                DownloadStatus.Stopped => new[] { DownloadStatus.Stopped },
+                _ => [],
+            };
+
+            foreach (
+                var waitingTask in downloadableChildTasks.Where(x =>
+                    x.Id != nextDownloadTask.Id && statusesToQueue.Contains(x.DownloadStatus)
+                )
+            )
+                await _dbContext.SetDownloadStatus(waitingTask.ToKey(), DownloadStatus.Queued);
+        }
 
         if (await _dbContext.IsDownloadsPausedByUser(nextDownloadTaskKey.PlexServerId))
         {

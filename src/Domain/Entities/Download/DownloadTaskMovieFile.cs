@@ -8,6 +8,8 @@ public class DownloadTaskMovieFile : DownloadTaskFileBase
 
     public required Guid ParentId { get; init; }
 
+    public List<DownloadTaskMovieFileLog> Logs { get; init; } = new();
+
     #endregion
 
     #region Helpers

@@ -8,7 +8,7 @@ public class DownloadTaskTvShowEpisodeFileLogConfiguration : IEntityTypeConfigur
     public void Configure(EntityTypeBuilder<DownloadTaskTvShowEpisodeFileLog> builder)
     {
         builder
-            .Property(b => b.LogLevel)
+            .Property(x => x.LogLevel)
             .HasMaxLength(20)
             .HasConversion(x => x.ToNotificationLevelString(), x => x.ToNotificationLevel())
             .HasDefaultValue(NotificationLevel.None)
@@ -16,11 +16,17 @@ public class DownloadTaskTvShowEpisodeFileLogConfiguration : IEntityTypeConfigur
             .IsUnicode(false);
 
         builder
-            .Property(b => b.Status)
+            .Property(x => x.Status)
             .HasMaxLength(20)
             .HasConversion(x => x.ToDownloadStatusString(), x => x.ToDownloadStatus())
             .HasDefaultValue(DownloadStatus.Unknown)
             .HasSentinel(DownloadStatus.Unknown)
             .IsUnicode(false);
+
+        builder
+            .HasOne(x => x.DownloadTaskFile)
+            .WithMany(x => x.Logs)
+            .HasForeignKey(x => x.DownloadTaskFileId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

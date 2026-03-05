@@ -10,7 +10,7 @@ public class DownloadTaskMovieFileLog : DownloadTaskLogBase
     [Column(Order = 5)]
     public required Guid DownloadTaskFileId { get; init; }
 
-    public DownloadTaskMovieFile? DownloadTask { get; init; }
+    public DownloadTaskMovieFile? DownloadTaskFile { get; init; }
 
     /// <summary>
     /// Gets the <see cref="DownloadTaskGeneric"/> this log belongs too

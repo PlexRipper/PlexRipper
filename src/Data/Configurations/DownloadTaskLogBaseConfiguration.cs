@@ -8,5 +8,7 @@ public class DownloadTaskLogBaseConfiguration : IEntityTypeConfiguration<Downloa
     public void Configure(EntityTypeBuilder<DownloadTaskLogBase> builder)
     {
         builder.UseTpcMappingStrategy();
+
+        builder.Property(x => x.Id).ValueGeneratedOnAdd();
     }
 }

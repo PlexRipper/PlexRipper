@@ -10,7 +10,7 @@ public class DownloadTaskTvShowEpisodeFileLog : DownloadTaskLogBase
     [Column(Order = 5)]
     public required Guid DownloadTaskFileId { get; init; }
 
-    public DownloadTaskTvShowEpisodeFile? DownloadTask { get; init; }
+    public DownloadTaskTvShowEpisodeFile? DownloadTaskFile { get; init; }
 
     /// <summary>
     /// Gets the <see cref="DownloadTaskTvShowEpisode"/> this log belongs too

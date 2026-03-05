@@ -4,6 +4,7 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Runtime.CompilerServices;
 using ByteSizeLib;
 using Downloader;
 using Reaparr.Application.Contracts;
@@ -208,33 +209,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                             CancellationToken.None
                         );
 
-                        var progressMsg = _log.Here()
-                            .DebugMsg(
-                                "[DownloadTaskProgress {MediaFileName} - {Percentage}% - {Speed} - {DataReceived} / {DataTotal} - {TimeRemaining}]",
-                                _filename,
-                                progress.Percentage.ToString("F2"),
-                                DataFormat.FormatSpeedString(progress.DownloadSpeed),
-                                ByteSize.FromBytes(progress.DataReceived).ToString("MB"),
-                                ByteSize.FromBytes(progress.DataTotal).ToString("MB"),
-                                TimeSpan
-                                    .FromSeconds(
-                                        DataFormat.GetTimeRemaining(
-                                            progress.DataTotal - progress.DataReceived,
-                                            progress.DownloadSpeed
-                                        )
-                                    )
-                                    .ToFormattedString()
-                            );
-
-                        await SendDownloadClientLog(
-                            NotificationLevel.Debug,
-                            Domain.DownloadStatus.Downloading,
-                            progressMsg
-                        );
-
-                        // Mark Download as completed
-                        if (progress.Percentage == 100)
-                            await SetDownloadStatusAsync(Domain.DownloadStatus.DownloadFinished);
+                        await SendProgressLog(progress);
 
                         await _commandExecutor.Send(new DownloadTaskUpdatedCommand(key), CancellationToken.None);
                     })
@@ -254,13 +229,41 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                 .Select(args =>
                     Observable.FromAsync(async _ =>
                     {
-                        _log.Here().Verbose("The UserState at time of completion: {@UserState}", args.UserState);
+                        var package = args.UserState as DownloadPackage;
+                        _log.Here().Debug("The UserState at time of completion: {@Package}", package);
                         if (args.Cancelled)
                         {
                             await SetDownloadStatusAsync(Domain.DownloadStatus.Paused);
                             return;
                         }
 
+                        // Download completed successfully
+                        if (!args.Cancelled)
+                        {
+                            using var dbContext = await _dbContextFactory.CreateAsync();
+                            var progress = new DownloadTaskProgress
+                            {
+                                DataTotal = package!.TotalFileSize,
+                                Percentage = 100,
+                                DataReceived = package.ReceivedBytesSize,
+                                DownloadSpeed = 0,
+                            };
+
+                            await dbContext.UpdateDownloadProgress(
+                                key,
+                                progress,
+                                package.ToSnapshot(),
+                                CancellationToken.None
+                            );
+
+                            await SendProgressLog(progress);
+
+                            await SetDownloadStatusAsync(Domain.DownloadStatus.DownloadFinished);
+                            await _commandExecutor.Send(new DownloadTaskUpdatedCommand(key), CancellationToken.None);
+                            return;
+                        }
+
+                        // Download Errored
                         if (args.Error != null)
                         {
                             await SetDownloadStatusAsync(
@@ -273,6 +276,31 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                 .Concat()
                 .Subscribe()
         );
+    }
+
+    private async Task SendProgressLog(
+        DownloadTaskProgress progress,
+        [CallerFilePath] string sourceFilePath = "",
+        [CallerMemberName] string memberName = "",
+        [CallerLineNumber] int sourceLineNumber = 0
+    )
+    {
+        var progressMsg = _log.Here()
+            .DebugMsg(
+                "[DownloadTaskProgress {MediaFileName} - {Percentage}% - {Speed} - {DataReceived} / {DataTotal} - {TimeRemaining}]",
+                _filename,
+                progress.Percentage.ToString("F2"),
+                DataFormat.FormatSpeedString(progress.DownloadSpeed),
+                ByteSize.FromBytes(progress.DataReceived).ToString("MB"),
+                ByteSize.FromBytes(progress.DataTotal).ToString("MB"),
+                TimeSpan
+                    .FromSeconds(
+                        DataFormat.GetTimeRemaining(progress.DataTotal - progress.DataReceived, progress.DownloadSpeed)
+                    )
+                    .ToFormattedString()
+            );
+
+        await SendDownloadClientLog(NotificationLevel.Debug, Domain.DownloadStatus.Downloading, progressMsg);
     }
 
     private async Task SetDownloadStatusAsync(Domain.DownloadStatus status, Result? errorResult = null)

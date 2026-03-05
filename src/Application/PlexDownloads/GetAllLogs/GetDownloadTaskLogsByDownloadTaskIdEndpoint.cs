@@ -58,7 +58,7 @@ public class GetDownloadTaskLogsByDownloadTaskIdEndpoint
 
     public override async Task HandleAsync(GetDownloadTaskLogsByDownloadTaskIdRequest req, CancellationToken ct)
     {
-        _log.Here().DebugApiCall(HttpContext, req);
+        _log.Here().VerboseApiCall(HttpContext, req);
 
         var key = new DownloadTaskKey
         {
@@ -67,14 +67,10 @@ public class GetDownloadTaskLogsByDownloadTaskIdEndpoint
             PlexServerId = req.PlexServerId,
             PlexLibraryId = req.PlexLibraryId,
         };
-        var stopWatch = new Stopwatch();
+
         var logsResult = await _dbContext.GetDownloadTaskLogsAsync(key, ct);
 
         logsResult.LogIfFailed();
-
-        stopWatch.StopAndLog(
-            $"Retrieving DownloadTask logs for {req.DownloadTaskId} with type {req.Type} and library {req.PlexLibraryId}"
-        );
 
         await SendFluentResult(logsResult, x => x.Select(log => log.ToDTO()).ToList(), ct);
     }

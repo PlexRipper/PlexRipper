@@ -255,17 +255,18 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                     Observable.FromAsync(async _ =>
                     {
                         _log.Here().Verbose("The UserState at time of completion: {@UserState}", args.UserState);
+                        if (args.Cancelled)
+                        {
+                            await SetDownloadStatusAsync(Domain.DownloadStatus.Paused);
+                            return;
+                        }
+
                         if (args.Error != null)
                         {
                             await SetDownloadStatusAsync(
                                 Domain.DownloadStatus.Error,
                                 Result.Fail(new ExceptionalError(args.Error))
                             );
-                        }
-
-                        if (args.Cancelled)
-                        {
-                            await SetDownloadStatusAsync(Domain.DownloadStatus.Paused);
                         }
                     })
                 )

@@ -72,7 +72,13 @@ public class PauseDownloadTaskCommandHandler : ICommandHandler<PauseDownloadTask
                 if (stopMoveResult.IsFailed)
                     return stopMoveResult.LogError();
 
-                await _dbContext.SetDownloadStatus(downloadTaskKey, DownloadStatus.MovePaused);
+                var resetMoveProgressResult = await _dbContext.ResetDownloadTaskProgress(
+                    downloadTaskKey,
+                    DownloadStatus.MovePaused,
+                    cancellationToken
+                );
+                if (resetMoveProgressResult.IsFailed)
+                    return resetMoveProgressResult.LogError();
                 continue;
             }
 
@@ -83,7 +89,13 @@ public class PauseDownloadTaskCommandHandler : ICommandHandler<PauseDownloadTask
             if (stopResult.IsFailed)
                 return stopResult.LogError();
 
-            await _dbContext.SetDownloadStatus(downloadTaskKey, DownloadStatus.Paused);
+            var resetDownloadProgressResult = await _dbContext.ResetDownloadTaskProgress(
+                downloadTaskKey,
+                DownloadStatus.Paused,
+                cancellationToken
+            );
+            if (resetDownloadProgressResult.IsFailed)
+                return resetDownloadProgressResult.LogError();
         }
 
         return Result.Ok();

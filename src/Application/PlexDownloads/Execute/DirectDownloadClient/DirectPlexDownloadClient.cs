@@ -24,13 +24,11 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
     private DownloadTaskKey? _downloadTaskKey;
     private string _filename = string.Empty;
 
-    private IDownloadService _downloader = new DownloadService();
+    private readonly IDownloadService _downloader;
     private readonly DownloadConfiguration _configuration = new()
     {
         DownloadFileExtension = FilePathExtensions.TEMP_DOWNLOAD_FILE_SUFFIX,
     };
-
-    private readonly Func<DownloadConfiguration, IDownloadService> _downloadServiceFactory;
 
     private readonly CompositeDisposable _subscriptions = new();
     private readonly Subject<Unit> _destroy = new();
@@ -42,7 +40,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
         ICommandExecutor commandExecutor,
         IDownloadManagerSettings downloadManagerSettings,
         IServerSettingsModule serverSettings,
-        Func<DownloadConfiguration, IDownloadService>? downloadServiceFactory = null
+        Func<DownloadConfiguration, IDownloadService> downloadServiceFactory
     )
     {
         _log = log.ForContext<DirectPlexDownloadClient>();
@@ -50,7 +48,6 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
         _commandExecutor = commandExecutor;
         _dbContext = dbContextFactory.Create();
         _serverSettings = serverSettings;
-        _downloadServiceFactory = downloadServiceFactory ?? (config => new DownloadService(config));
 
         var downloadSegments = downloadManagerSettings.DownloadSegments;
 
@@ -58,6 +55,8 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
         _configuration.ChunkCount = downloadSegments;
         _configuration.ParallelCount = downloadSegments;
         _configuration.ParallelDownload = downloadSegments > 1;
+
+        _downloader = downloadServiceFactory(_configuration);
     }
 
     /// <inheritdoc/>
@@ -101,8 +100,6 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
 
         await using var fileStream = fileStreamResult.Value;
         _filename = downloadTask.FileName;
-
-        _downloader = _downloadServiceFactory(_configuration);
 
         await SetupDownloadListeners(downloadTaskKey);
 

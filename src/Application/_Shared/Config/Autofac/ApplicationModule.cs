@@ -24,7 +24,11 @@ public class ApplicationModule : Module
             .Keyed<IPlexDownloadClient>(PlexDownloadClientType.Direct)
             .InstancePerDependency();
 
-        builder.RegisterType<DownloadService>().As<IDownloadService>().InstancePerDependency();
+        builder
+            .Register<Func<DownloadConfiguration, IDownloadService>>(_ =>
+                config => new DownloadService(config, loggerFactory: null) // no internal library logging should happen
+            )
+            .InstancePerDependency();
 
         // builder
         //     .RegisterType<DashPlexDownloadClient>()

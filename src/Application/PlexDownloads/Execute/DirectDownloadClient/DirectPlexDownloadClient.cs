@@ -20,7 +20,6 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
     private readonly IReaparrDbContextFactory _dbContextFactory;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IServerSettingsModule _serverSettings;
-    private readonly IPath _path;
 
     private DownloadTaskKey? _downloadTaskKey;
     private string _filename = string.Empty;
@@ -40,8 +39,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
         IReaparrDbContextFactory dbContextFactory,
         ICommandExecutor commandExecutor,
         IDownloadManagerSettings downloadManagerSettings,
-        IServerSettingsModule serverSettings,
-        IPath path
+        IServerSettingsModule serverSettings
     )
     {
         _log = log.ForContext<DirectPlexDownloadClient>();
@@ -49,7 +47,6 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
         _commandExecutor = commandExecutor;
         _dbContext = dbContextFactory.Create();
         _serverSettings = serverSettings;
-        _path = path;
 
         var downloadSegments = downloadManagerSettings.DownloadSegments;
 

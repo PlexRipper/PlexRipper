@@ -13,37 +13,45 @@ public static partial class DbContextExtensions
     ) =>
         downloadTaskKey.Type switch
         {
-            DownloadTaskType.Movie => await Result.Try(async Task () =>
+            DownloadTaskType.Movie => await Result.Try(async Task<List<DownloadTaskLogBase>> () =>
                 await dbContext
                     .DownloadTaskMovieFileLogs.Where(x => x.DownloadTaskMovieId == downloadTaskKey.Id)
+                    .Select(x => (DownloadTaskLogBase)x)
                     .ToListAsync(ct)
             ),
-            DownloadTaskType.MoviePart or DownloadTaskType.MovieData => await Result.Try(async Task () =>
-                await dbContext
-                    .DownloadTaskMovieFileLogs.Where(x => x.DownloadTaskFileId == downloadTaskKey.Id)
-                    .ToListAsync(ct)
+            DownloadTaskType.MoviePart or DownloadTaskType.MovieData => await Result.Try(
+                async Task<List<DownloadTaskLogBase>> () =>
+                    await dbContext
+                        .DownloadTaskMovieFileLogs.Where(x => x.DownloadTaskFileId == downloadTaskKey.Id)
+                        .Select(x => (DownloadTaskLogBase)x)
+                        .ToListAsync(ct)
             ),
-            DownloadTaskType.TvShow => await Result.Try(async Task () =>
+            DownloadTaskType.TvShow => await Result.Try(async Task<List<DownloadTaskLogBase>> () =>
                 await dbContext
                     .DownloadTaskTvShowEpisodeFileLogs.Where(x => x.DownloadTaskTvShowId == downloadTaskKey.Id)
+                    .Select(x => (DownloadTaskLogBase)x)
                     .ToListAsync(ct)
             ),
-            DownloadTaskType.Season => await Result.Try(async Task () =>
+            DownloadTaskType.Season => await Result.Try(async Task<List<DownloadTaskLogBase>> () =>
                 await dbContext
                     .DownloadTaskTvShowEpisodeFileLogs.Where(x => x.DownloadTaskTvShowSeasonId == downloadTaskKey.Id)
+                    .Select(x => (DownloadTaskLogBase)x)
                     .ToListAsync(ct)
             ),
-            DownloadTaskType.Episode => await Result.Try(async Task () =>
+            DownloadTaskType.Episode => await Result.Try(async Task<List<DownloadTaskLogBase>> () =>
                 await dbContext
                     .DownloadTaskTvShowEpisodeFileLogs.Where(x => x.DownloadTaskTvShowEpisodeId == downloadTaskKey.Id)
+                    .Select(x => (DownloadTaskLogBase)x)
                     .ToListAsync(ct)
             ),
-            DownloadTaskType.EpisodeData or DownloadTaskType.EpisodePart => await Result.Try(async Task () =>
-                await dbContext
-                    .DownloadTaskTvShowEpisodeFileLogs.Where(x => x.DownloadTaskFileId == downloadTaskKey.Id)
-                    .ToListAsync(ct)
+            DownloadTaskType.EpisodeData or DownloadTaskType.EpisodePart => await Result.Try(
+                async Task<List<DownloadTaskLogBase>> () =>
+                    await dbContext
+                        .DownloadTaskTvShowEpisodeFileLogs.Where(x => x.DownloadTaskFileId == downloadTaskKey.Id)
+                        .Select(x => (DownloadTaskLogBase)x)
+                        .ToListAsync(ct)
             ),
-            _ => Result.Fail($"DownloadTaskLog of type {downloadTaskKey.Type} not implemented"),
+            _ => Result.Fail($"DownloadTaskLog of type {downloadTaskKey.Type} not implemented").LogError(),
         };
 
     public static async Task CreateDownloadClientLog(

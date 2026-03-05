@@ -1,19 +1,34 @@
+using System.Diagnostics;
 using FastEndpoints;
 using FluentValidation;
-using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 
 namespace Reaparr.Application;
 
-public record GetDownloadTaskLogsByDownloadTaskIdRequest(Guid DownloadTaskGuid);
+public record GetDownloadTaskLogsByDownloadTaskIdRequest
+{
+    [RouteParam, BindFrom("DownloadTaskGuid")]
+    public required Guid DownloadTaskId { get; init; }
+
+    [QueryParam, BindFrom("type")]
+    public required DownloadTaskType Type { get; init; }
+
+    [QueryParam, BindFrom("plexServerId")]
+    public required int PlexServerId { get; init; }
+
+    [QueryParam, BindFrom("plexLibraryId")]
+    public required int PlexLibraryId { get; init; }
+}
 
 public class GetDownloadTaskLogsByDownloadTaskIdRequestValidator : Validator<GetDownloadTaskLogsByDownloadTaskIdRequest>
 {
     public GetDownloadTaskLogsByDownloadTaskIdRequestValidator()
     {
-        RuleFor(x => x.DownloadTaskGuid).NotEmpty();
-        RuleFor(x => x.DownloadTaskGuid).NotEqual(Guid.Empty);
+        RuleFor(x => x.DownloadTaskId).NotEmpty();
+        RuleFor(x => x.Type).NotEqual(DownloadTaskType.None);
+        RuleFor(x => x.PlexServerId).GreaterThan(0);
+        RuleFor(x => x.PlexLibraryId).GreaterThan(0);
     }
 }
 
@@ -44,16 +59,23 @@ public class GetDownloadTaskLogsByDownloadTaskIdEndpoint
     public override async Task HandleAsync(GetDownloadTaskLogsByDownloadTaskIdRequest req, CancellationToken ct)
     {
         _log.Here().DebugApiCall(HttpContext, req);
-        var key = await _dbContext.GetDownloadTaskKeyAsync(req.DownloadTaskGuid, ct);
-        if (key is null)
-        {
-            var result = ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), req.DownloadTaskGuid);
-            await SendFluentResult(result, ct);
-            return;
-        }
 
+        var key = new DownloadTaskKey
+        {
+            Type = req.Type,
+            Id = req.DownloadTaskId,
+            PlexServerId = req.PlexServerId,
+            PlexLibraryId = req.PlexLibraryId,
+        };
+        var stopWatch = new Stopwatch();
         var logsResult = await _dbContext.GetDownloadTaskLogsAsync(key, ct);
 
-        await SendFluentResult(logsResult, x => x.ToDTO(), ct);
+        logsResult.LogIfFailed();
+
+        stopWatch.StopAndLog(
+            $"Retrieving DownloadTask logs for {req.DownloadTaskId} with type {req.Type} and library {req.PlexLibraryId}"
+        );
+
+        await SendFluentResult(logsResult, x => x.Select(log => log.ToDTO()).ToList(), ct);
     }
 }

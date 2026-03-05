@@ -197,7 +197,8 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                             DataTotal = args.TotalBytesToReceive,
                             Percentage = Convert.ToDecimal(args.ProgressPercentage),
                             DataReceived = args.ReceivedBytesSize,
-                            DownloadSpeed = args.ProgressPercentage < 1 ? Convert.ToInt64(args.BytesPerSecondSpeed) : 0,
+                            DownloadSpeed =
+                                args.ProgressPercentage < 100 ? Convert.ToInt64(args.BytesPerSecondSpeed) : 0,
                         };
 
                         await dbContext.UpdateDownloadProgress(

@@ -9,7 +9,16 @@
 				icon="mdi-content-copy"
 				round
 				@click="copyLogs">
-				<q-tooltip>Copy all logs</q-tooltip>
+				<q-tooltip>{{ t('components.download-details-dialog.logs.copy-all') }}</q-tooltip>
+			</q-btn>
+			<!-- Delete Logs -->
+			<q-btn
+				dense
+				flat
+				icon="mdi-delete-sweep"
+				round
+				@click="deleteLogs">
+				<q-tooltip>{{ t('components.download-details-dialog.logs.delete-all') }}</q-tooltip>
 			</q-btn>
 			<!-- Log Sort -->
 			<q-btn
@@ -18,7 +27,7 @@
 				flat
 				round
 				@click="sortAsc = !sortAsc">
-				<q-tooltip>{{ sortAsc ? 'Oldest first' : 'Newest first' }}</q-tooltip>
+				<q-tooltip>{{ sortAsc ? t('components.download-details-dialog.logs.sort-oldest-first') : t('components.download-details-dialog.logs.sort-newest-first') }}</q-tooltip>
 			</q-btn>
 			<!-- Log Filter -->
 			<q-btn
@@ -26,7 +35,7 @@
 				flat
 				icon="mdi-filter-outline"
 				round>
-				<q-tooltip>Filter by log level</q-tooltip>
+				<q-tooltip>{{ t('components.download-details-dialog.logs.filter-by-level') }}</q-tooltip>
 				<q-menu auto-close>
 					<q-list dense>
 						<q-item
@@ -47,7 +56,7 @@
 									:name="Convert.logLevelToIcon(level)"
 									size="xs" />
 							</q-item-section>
-							<q-item-section>{{ level }}</q-item-section>
+							<q-item-section>{{ logLevelLabels[level] }}</q-item-section>
 						</q-item>
 					</q-list>
 				</q-menu>
@@ -89,15 +98,17 @@
 import { get, set, useClipboard } from '@vueuse/core';
 import { format } from 'date-fns';
 import { downloadApi } from '@api';
-import type { DownloadTaskLogDTO } from '@dto';
+import type { DownloadTaskDTO, DownloadTaskLogDTO } from '@dto';
 import { NotificationLevel } from '@dto';
 import Convert from '@class/Convert';
 import { translateDownloadStatus, showSuccessNotification } from '@composables';
 
+const { t } = useI18n();
 const { copy } = useClipboard({ legacy: true });
 
 const props = defineProps<{
 	downloadTaskId: string;
+	downloadTask?: DownloadTaskDTO;
 }>();
 
 const sortAsc = ref(true);
@@ -107,6 +118,17 @@ const logsLoading = ref(false);
 const logRefreshTimer = useIntervalFn(() => refreshLogs(), 1000);
 
 const allLevels = Object.values(NotificationLevel).filter((v) => v !== NotificationLevel.None && v !== NotificationLevel.Verbose);
+
+const logLevelLabels = computed<Record<NotificationLevel, string>>(() => ({
+	[NotificationLevel.None]: '',
+	[NotificationLevel.Verbose]: '',
+	[NotificationLevel.Debug]: t('components.download-details-dialog.logs.levels.debug'),
+	[NotificationLevel.Information]: t('components.download-details-dialog.logs.levels.information'),
+	[NotificationLevel.Success]: t('components.download-details-dialog.logs.levels.success'),
+	[NotificationLevel.Warning]: t('components.download-details-dialog.logs.levels.warning'),
+	[NotificationLevel.Error]: t('components.download-details-dialog.logs.levels.error'),
+	[NotificationLevel.Fatal]: t('components.download-details-dialog.logs.levels.fatal'),
+}));
 
 const filteredLogs = computed(() => {
 	const filtered = get(logs).filter((item) => get(activeFilters).includes(item.logLevel));
@@ -121,7 +143,29 @@ function copyLogs() {
 		.map((item) => `[${format(new Date(item.createdAt), 'yyyy-MM-dd HH:mm:ss')}] [${item.logLevel}] ${item.message}`)
 		.join('\n');
 	copy(text);
-	showSuccessNotification('Logs copied to clipboard');
+	showSuccessNotification(t('components.download-details-dialog.logs.copied-to-clipboard'));
+}
+
+function deleteLogs() {
+	if (!get(props.downloadTaskId) || !props.downloadTask) {
+		return;
+	}
+
+	set(logsLoading, true);
+	logRefreshTimer.pause();
+
+	useSubscription(
+		downloadApi.deleteAllDownloadTaskLogsByDownloadTaskIdEndpoint(get(props.downloadTaskId), {
+			type: props.downloadTask.downloadTaskType,
+			plexLibraryId: props.downloadTask.plexLibraryId,
+			plexServerId: props.downloadTask.plexServerId,
+		}).subscribe(() => {
+			set(logs, []);
+			showSuccessNotification(t('components.download-details-dialog.logs.deleted'));
+			set(logsLoading, false);
+			logRefreshTimer.resume();
+		}),
+	);
 }
 
 function toggleLevel(level: NotificationLevel) {
@@ -147,7 +191,11 @@ function refreshLogs() {
 	logRefreshTimer.pause();
 
 	useSubscription(
-		downloadApi.getDownloadTaskLogsByDownloadTaskIdEndpoint(get(props.downloadTaskId)).subscribe((data) => {
+		downloadApi.getDownloadTaskLogsByDownloadTaskIdEndpoint(get(props.downloadTaskId), {
+			type: props.downloadTask!.downloadTaskType,
+			plexLibraryId: props.downloadTask!.plexLibraryId,
+			plexServerId: props.downloadTask!.plexServerId,
+		}).subscribe((data) => {
 			if (data.isSuccess && data.value) {
 				set(logs, [...data.value]);
 			}
@@ -183,26 +231,17 @@ defineExpose({ reset });
 }
 
 .q-timeline {
-  padding-left: 12px;
+      padding-left: 0.5rem;
 
   .q-timeline__entry--icon {
     .q-timeline__dot {
-      width: 16px;
 
       &::before {
         display: none;
       }
 
-      &::after {
-        top: 22px;
-        left: 7px;
-      }
-
       .q-icon {
-        font-size: 16px;
-        height: 16px;
-        line-height: 16px;
-        top: 4px;
+        font-size: 1.5rem;
         color: currentColor;
       }
     }

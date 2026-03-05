@@ -69,7 +69,9 @@
 						<q-tab-panel
 							data-cy="download-details-dialog-tab-content-2"
 							name="logs">
-							<DownloadDetailsDialogLogsTabContent :download-task-id="downloadTaskId" />
+							<DownloadDetailsDialogLogsTabContent
+								:download-task="downloadTask"
+								:download-task-id="downloadTaskId" />
 						</q-tab-panel>
 					</q-tab-panels>
 				</div>

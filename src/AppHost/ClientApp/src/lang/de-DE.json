@@ -70,6 +70,23 @@
             "invalid-download-task": {
                 "body": "Fehler beim Abrufen der Details für diese Download-Aufgabe:",
                 "title": "Die Download-Aufgabe konnte nicht abgerufen werden"
+            },
+            "logs": {
+                "copy-all": "Alle Logs kopieren",
+                "delete-all": "Alle Logs löschen",
+                "sort-oldest-first": "Älteste zuerst",
+                "sort-newest-first": "Neueste zuerst",
+                "filter-by-level": "Nach Log-Level filtern",
+                "copied-to-clipboard": "Logs in die Zwischenablage kopiert",
+                "deleted": "Logs gelöscht",
+                "levels": {
+                    "debug": "Debug",
+                    "information": "Information",
+                    "success": "Erfolg",
+                    "warning": "Warnung",
+                    "error": "Fehler",
+                    "fatal": "Fatal"
+                }
             }
         },
         "media-overview": {

@@ -313,8 +313,8 @@ export interface DownloadTaskKey {
 export interface DownloadTaskLogDTO {
   /** @format date-time */
   createdAt: string;
-  /** @format guid */
-  downloadTaskId: string;
+  /** @format int32 */
+  id: number;
   logLevel: NotificationLevel;
   message: string;
   status: DownloadStatus;
@@ -1006,6 +1006,16 @@ export interface ResultDTOOfGeneratePlexTokenResponse {
   statusCode: number;
   successes: SuccessDTO[];
   value?: GeneratePlexTokenResponse | null;
+}
+
+export interface ResultDTOOfInt32 {
+  errors: ErrorDTO[];
+  isSuccess: boolean;
+  /** @format int32 */
+  statusCode: number;
+  successes: SuccessDTO[];
+  /** @format int32 */
+  value: number;
 }
 
 export interface ResultDTOOfListOfDownloadTaskLogDTO {

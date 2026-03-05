@@ -70,6 +70,23 @@
             "invalid-download-task": {
                 "body": "Erreur lors de la récupération des détails de cette tâche de téléchargement :",
                 "title": "La tâche de téléchargement n'a pas pu être récupérée"
+            },
+            "logs": {
+                "copy-all": "Copier tous les journaux",
+                "delete-all": "Supprimer tous les journaux",
+                "sort-oldest-first": "Plus anciens d'abord",
+                "sort-newest-first": "Plus récents d'abord",
+                "filter-by-level": "Filtrer par niveau de journal",
+                "copied-to-clipboard": "Journaux copiés dans le presse-papiers",
+                "deleted": "Journaux supprimés",
+                "levels": {
+                    "debug": "Débogage",
+                    "information": "Information",
+                    "success": "Succès",
+                    "warning": "Avertissement",
+                    "error": "Erreur",
+                    "fatal": "Fatal"
+                }
             }
         },
         "media-overview": {

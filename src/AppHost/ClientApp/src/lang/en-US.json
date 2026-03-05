@@ -70,6 +70,23 @@
             "invalid-download-task": {
                 "body": "Error while retrieving the details for this download task:",
                 "title": "The download task could not be retrieved"
+            },
+            "logs": {
+                "copy-all": "Copy all logs",
+                "delete-all": "Delete all logs",
+                "sort-oldest-first": "Oldest first",
+                "sort-newest-first": "Newest first",
+                "filter-by-level": "Filter by log level",
+                "copied-to-clipboard": "Logs copied to clipboard",
+                "deleted": "Logs deleted",
+                "levels": {
+                    "debug": "Debug",
+                    "information": "Information",
+                    "success": "Success",
+                    "warning": "Warning",
+                    "error": "Error",
+                    "fatal": "Fatal"
+                }
             }
         },
         "media-overview": {

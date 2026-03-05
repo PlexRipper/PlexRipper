@@ -70,6 +70,23 @@
             "invalid-download-task": {
                 "body": "Błąd podczas pobierania szczegółów dla tego zadania pobierania:",
                 "title": "Nie można pobrać zadania pobierania"
+            },
+            "logs": {
+                "copy-all": "Kopiuj wszystkie logi",
+                "delete-all": "Usuń wszystkie logi",
+                "sort-oldest-first": "Najstarsze najpierw",
+                "sort-newest-first": "Najnowsze najpierw",
+                "filter-by-level": "Filtruj według poziomu logów",
+                "copied-to-clipboard": "Logi skopiowano do schowka",
+                "deleted": "Logi usunięto",
+                "levels": {
+                    "debug": "Debugowanie",
+                    "information": "Informacja",
+                    "success": "Sukces",
+                    "warning": "Ostrzeżenie",
+                    "error": "Błąd",
+                    "fatal": "Krytyczny"
+                }
             }
         },
         "media-overview": {

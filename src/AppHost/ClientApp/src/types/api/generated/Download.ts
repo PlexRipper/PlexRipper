@@ -92,6 +92,60 @@ export class Download {
   /**
    * No description
    * * @tags Download
+   * @name DeleteAllDownloadTaskLogsByDownloadTaskIdEndpoint
+   * @request DELETE:/api/Download/logs/{DownloadTaskGuid}
+   * @secure
+   */
+  deleteAllDownloadTaskLogsByDownloadTaskIdEndpoint = (
+    downloadTaskGuid: string,
+    query: {
+      /** @format int32 */
+      plexLibraryId: number;
+      /** @format int32 */
+      plexServerId: number;
+      type: DownloadTaskType;
+    },
+    params: RequestParams = {},
+  ) =>
+    axiosObservable<number>({
+      url: `/api/Download/logs/${downloadTaskGuid}`,
+      method: "DELETE",
+      params: query,
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<number>);
+
+  /**
+   * No description
+   * * @tags Download
+   * @name GetDownloadTaskLogsByDownloadTaskIdEndpoint
+   * @request GET:/api/Download/logs/{DownloadTaskGuid}
+   * @secure
+   */
+  getDownloadTaskLogsByDownloadTaskIdEndpoint = (
+    downloadTaskGuid: string,
+    query: {
+      /** @format int32 */
+      plexLibraryId: number;
+      /** @format int32 */
+      plexServerId: number;
+      type: DownloadTaskType;
+    },
+    params: RequestParams = {},
+  ) =>
+    axiosObservable<DownloadTaskLogDTO[]>({
+      url: `/api/Download/logs/${downloadTaskGuid}`,
+      method: "GET",
+      params: query,
+      secure: true,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<DownloadTaskLogDTO[]>);
+
+  /**
+   * No description
+   * * @tags Download
    * @name GetDownloadTaskByGuidEndpoint
    * @request GET:/api/Download/detail/{DownloadTaskGuid}
    * @secure
@@ -128,25 +182,6 @@ export class Download {
       responseType: "json",
       ...params,
     }).pipe(apiCheckPipe<ServerDownloadProgressDTO[]>);
-
-  /**
-   * No description
-   * * @tags Download
-   * @name GetDownloadTaskLogsByDownloadTaskIdEndpoint
-   * @request GET:/api/Download/logs/{DownloadTaskGuid}
-   * @secure
-   */
-  getDownloadTaskLogsByDownloadTaskIdEndpoint = (
-    downloadTaskGuid: string,
-    params: RequestParams = {},
-  ) =>
-    axiosObservable<DownloadTaskLogDTO[]>({
-      url: `/api/Download/logs/${downloadTaskGuid}`,
-      method: "GET",
-      secure: true,
-      responseType: "json",
-      ...params,
-    }).pipe(apiCheckPipe<DownloadTaskLogDTO[]>);
 
   /**
    * No description
@@ -256,6 +291,36 @@ export class DownloadPaths {
   static deleteDownloadTaskEndpoint = () =>
     queryString.stringifyUrl({ url: `/api/Download/delete` });
 
+  static deleteAllDownloadTaskLogsByDownloadTaskIdEndpoint = (
+    downloadTaskGuid: string,
+    query: {
+      /** @format int32 */
+      plexLibraryId: number;
+      /** @format int32 */
+      plexServerId: number;
+      type: DownloadTaskType;
+    },
+  ) =>
+    queryString.stringifyUrl({
+      url: `/api/Download/logs/${downloadTaskGuid}`,
+      query,
+    });
+
+  static getDownloadTaskLogsByDownloadTaskIdEndpoint = (
+    downloadTaskGuid: string,
+    query: {
+      /** @format int32 */
+      plexLibraryId: number;
+      /** @format int32 */
+      plexServerId: number;
+      type: DownloadTaskType;
+    },
+  ) =>
+    queryString.stringifyUrl({
+      url: `/api/Download/logs/${downloadTaskGuid}`,
+      query,
+    });
+
   static getDownloadTaskByGuidEndpoint = (
     downloadTaskGuid: string,
     query?: {
@@ -270,11 +335,6 @@ export class DownloadPaths {
 
   static getAllDownloadTasksEndpoint = () =>
     queryString.stringifyUrl({ url: `/api/Download` });
-
-  static getDownloadTaskLogsByDownloadTaskIdEndpoint = (
-    downloadTaskGuid: string,
-  ) =>
-    queryString.stringifyUrl({ url: `/api/Download/logs/${downloadTaskGuid}` });
 
   static pauseDownloadTaskEndpoint = (downloadTaskGuid: string) =>
     queryString.stringifyUrl({

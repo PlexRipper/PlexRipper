@@ -19,6 +19,7 @@ public static partial class EnumMapperExtensions
         ["ServerUnreachable"] = DownloadStatus.ServerUnreachable,
         ["MoveError"] = DownloadStatus.MoveError,
         ["AuthError"] = DownloadStatus.AuthError,
+        ["StorageError"] = DownloadStatus.StorageError,
     };
 
     /// <summary>
@@ -61,6 +62,7 @@ public static partial class EnumMapperExtensions
             DownloadStatus.ServerUnreachable => "ServerUnreachable",
             DownloadStatus.MoveError => "MoveError",
             DownloadStatus.AuthError => "AuthError",
+            DownloadStatus.StorageError => "StorageError",
             _ => DefaultException(),
         };
 

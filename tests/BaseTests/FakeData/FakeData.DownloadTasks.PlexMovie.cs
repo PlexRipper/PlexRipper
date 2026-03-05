@@ -42,7 +42,8 @@ public static partial class FakeData
     private static readonly Faker<DownloadTaskMovieFile> _downloadTaskMovieFile = new Faker<DownloadTaskMovieFile>()
         .ApplyDownloadTaskFileBase(DownloadTaskType.MovieData)
         .Ignore(x => x.Parent)
-        .Ignore(x => x.ParentId);
+        .Ignore(x => x.ParentId)
+        .Ignore(x => x.Logs);
 
     public static Faker<DownloadTaskMovieFile> GetDownloadTaskMovieFile(
         Seed seed,

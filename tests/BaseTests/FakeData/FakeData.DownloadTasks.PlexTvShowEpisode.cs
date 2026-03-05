@@ -45,7 +45,8 @@ public static partial class FakeData
         new Faker<DownloadTaskTvShowEpisodeFile>()
             .ApplyDownloadTaskFileBase(DownloadTaskType.EpisodeData)
             .Ignore(x => x.Parent)
-            .Ignore(x => x.ParentId);
+            .Ignore(x => x.ParentId)
+            .Ignore(x => x.Logs);
 
     public static Faker<DownloadTaskTvShowEpisodeFile> GetDownloadTaskTvShowEpisodeFile(
         Seed seed,

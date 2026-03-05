@@ -30,6 +30,8 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
         DownloadFileExtension = FilePathExtensions.TEMP_DOWNLOAD_FILE_SUFFIX,
     };
 
+    private readonly Func<DownloadConfiguration, IDownloadService> _downloadServiceFactory;
+
     private readonly CompositeDisposable _subscriptions = new();
     private readonly Subject<Unit> _destroy = new();
     private int _isDisposed;
@@ -39,7 +41,8 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
         IReaparrDbContextFactory dbContextFactory,
         ICommandExecutor commandExecutor,
         IDownloadManagerSettings downloadManagerSettings,
-        IServerSettingsModule serverSettings
+        IServerSettingsModule serverSettings,
+        Func<DownloadConfiguration, IDownloadService>? downloadServiceFactory = null
     )
     {
         _log = log.ForContext<DirectPlexDownloadClient>();
@@ -47,6 +50,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
         _commandExecutor = commandExecutor;
         _dbContext = dbContextFactory.Create();
         _serverSettings = serverSettings;
+        _downloadServiceFactory = downloadServiceFactory ?? (config => new DownloadService(config));
 
         var downloadSegments = downloadManagerSettings.DownloadSegments;
 
@@ -98,7 +102,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
         await using var fileStream = fileStreamResult.Value;
         _filename = downloadTask.FileName;
 
-        _downloader = new DownloadService(_configuration);
+        _downloader = _downloadServiceFactory(_configuration);
 
         await SetupDownloadListeners(downloadTaskKey);
 

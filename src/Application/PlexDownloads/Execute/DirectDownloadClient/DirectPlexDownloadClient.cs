@@ -168,7 +168,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                     h => _downloader.DownloadStarted -= h
                 )
                 .Select(x => x.EventArgs)
-                .TakeUntil(_destroy)
+                .Take(1)
                 .Select(_ =>
                     Observable.FromAsync(async _ =>
                     {
@@ -188,7 +188,6 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                 )
                 .Select(x => x.EventArgs)
                 .Sample(TimeSpan.FromMilliseconds(500))
-                .TakeUntil(_destroy)
                 .Select(args =>
                     Observable.FromAsync(async _ =>
                     {
@@ -198,7 +197,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                             DataTotal = args.TotalBytesToReceive,
                             Percentage = Convert.ToDecimal(args.ProgressPercentage),
                             DataReceived = args.ReceivedBytesSize,
-                            DownloadSpeed = Convert.ToInt64(args.BytesPerSecondSpeed),
+                            DownloadSpeed = args.ProgressPercentage < 1 ? Convert.ToInt64(args.BytesPerSecondSpeed) : 0,
                         };
 
                         await dbContext.UpdateDownloadProgress(
@@ -226,13 +225,17 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                                     .ToFormattedString()
                             );
 
-                        await _commandExecutor.Send(new DownloadTaskUpdatedCommand(key), CancellationToken.None);
-
                         await SendDownloadClientLog(
                             NotificationLevel.Debug,
                             Domain.DownloadStatus.Downloading,
                             progressMsg
                         );
+
+                        // Mark Download as completed
+                        if (progress.Percentage == 100)
+                            await SetDownloadStatusAsync(Domain.DownloadStatus.DownloadFinished);
+
+                        await _commandExecutor.Send(new DownloadTaskUpdatedCommand(key), CancellationToken.None);
                     })
                 )
                 .Concat()
@@ -246,9 +249,9 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                     h => _downloader.DownloadFileCompleted -= h
                 )
                 .Select(x => x.EventArgs)
-                .TakeUntil(_destroy)
+                .Take(1)
                 .Select(args =>
-                    Observable.FromAsync(async ct =>
+                    Observable.FromAsync(async _ =>
                     {
                         _log.Here().Verbose("The UserState at time of completion: {@UserState}", args.UserState);
                         if (args.Error != null)
@@ -259,29 +262,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                             );
                         }
 
-                        if (!args.Cancelled)
-                        {
-                            using var dbContext = await _dbContextFactory.CreateAsync();
-
-                            var data = (DownloadPackage?)args.UserState;
-                            var progress = new DownloadTaskProgress
-                            {
-                                DataTotal = data?.TotalFileSize ?? -1,
-                                Percentage = Convert.ToDecimal(data?.SaveProgress),
-                                DataReceived = data?.ReceivedBytesSize ?? -1,
-                                DownloadSpeed = 0,
-                            };
-
-                            await dbContext.UpdateDownloadProgress(
-                                key,
-                                progress,
-                                _downloader.Package.ToSnapshot(),
-                                CancellationToken.None
-                            );
-
-                            await SetDownloadStatusAsync(Domain.DownloadStatus.DownloadFinished);
-                        }
-                        else
+                        if (args.Cancelled)
                         {
                             await SetDownloadStatusAsync(Domain.DownloadStatus.Paused);
                         }

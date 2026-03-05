@@ -54,6 +54,46 @@ public static partial class DbContextExtensions
             _ => Result.Fail($"DownloadTaskLog of type {downloadTaskKey.Type} not implemented").LogError(),
         };
 
+    public static async Task<Result<int>> DeleteDownloadTaskLogsAsync(
+        this IReaparrDbContext dbContext,
+        DownloadTaskKey downloadTaskKey,
+        CancellationToken ct
+    ) =>
+        downloadTaskKey.Type switch
+        {
+            DownloadTaskType.Movie => await Result.Try(() =>
+                dbContext
+                    .DownloadTaskMovieFileLogs.Where(x => x.DownloadTaskMovieId == downloadTaskKey.Id)
+                    .ExecuteDeleteAsync(ct)
+            ),
+            DownloadTaskType.MoviePart or DownloadTaskType.MovieData => await Result.Try(() =>
+                dbContext
+                    .DownloadTaskMovieFileLogs.Where(x => x.DownloadTaskFileId == downloadTaskKey.Id)
+                    .ExecuteDeleteAsync(ct)
+            ),
+            DownloadTaskType.TvShow => await Result.Try(() =>
+                dbContext
+                    .DownloadTaskTvShowEpisodeFileLogs.Where(x => x.DownloadTaskTvShowId == downloadTaskKey.Id)
+                    .ExecuteDeleteAsync(ct)
+            ),
+            DownloadTaskType.Season => await Result.Try(() =>
+                dbContext
+                    .DownloadTaskTvShowEpisodeFileLogs.Where(x => x.DownloadTaskTvShowSeasonId == downloadTaskKey.Id)
+                    .ExecuteDeleteAsync(ct)
+            ),
+            DownloadTaskType.Episode => await Result.Try(() =>
+                dbContext
+                    .DownloadTaskTvShowEpisodeFileLogs.Where(x => x.DownloadTaskTvShowEpisodeId == downloadTaskKey.Id)
+                    .ExecuteDeleteAsync(ct)
+            ),
+            DownloadTaskType.EpisodeData or DownloadTaskType.EpisodePart => await Result.Try(() =>
+                dbContext
+                    .DownloadTaskTvShowEpisodeFileLogs.Where(x => x.DownloadTaskFileId == downloadTaskKey.Id)
+                    .ExecuteDeleteAsync(ct)
+            ),
+            _ => Result.Fail($"DownloadTaskLog of type {downloadTaskKey.Type} not implemented").LogError(),
+        };
+
     public static async Task CreateDownloadClientLog(
         this IReaparrDbContext dbContext,
         DownloadTaskKey downloadTaskKey,

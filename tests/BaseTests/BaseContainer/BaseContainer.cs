@@ -56,8 +56,8 @@ public class BaseContainer : IDisposable
         var memoryDbName = MockDatabase.GetMemoryDatabaseName();
 
         // Create isolated filesystem
+        EnvironmentExtensions.SetDevelopmentRootPath(IntegrationTestFileSystemSandbox.GetSandboxFolder(memoryDbName));
         var testFileSystemRootPath = IntegrationTestFileSystemSandbox.Create(memoryDbName, log);
-        EnvironmentExtensions.SetDevelopmentRootPath(testFileSystemRootPath);
 
         var config = UnitTestDataConfig.FromOptions(options);
 
@@ -331,25 +331,33 @@ public class BaseContainer : IDisposable
                 .Error("Failed to delete database: {DatabaseName}, Error: {ExceptionMessage}", dbName, ex.Message);
         }
 
-        // var cleanupResult = Result.Try(() =>
-        // {
-        //     if (Directory.Exists(TestFileSystemRootPath))
-        //     {
-        //         Directory.Delete(TestFileSystemRootPath, recursive: true);
-        //         _log.Here()
-        //             .Information(
-        //                 "Deleted test filesystem sandbox for container {DatabaseName}: {Path}",
-        //                 dbName,
-        //                 TestFileSystemRootPath
-        //             );
-        //     }
-        // });
-        //
-        // if (cleanupResult.IsFailed)
-        // {
-        //     _log.Here().Error("Failed to delete test filesystem sandbox for container {DatabaseName}", dbName);
-        //     cleanupResult.LogError();
-        // }
+        var cleanupResult = Result.Try(() =>
+        {
+            var expectedSandboxRoot = Path.GetFullPath(IntegrationTestFileSystemSandbox.GetSandboxFolder(dbName));
+            var pathToDelete = Path.GetFullPath(TestFileSystemRootPath);
+
+            if (!pathToDelete.StartsWith(expectedSandboxRoot, StringComparison.Ordinal))
+                throw new InvalidOperationException(
+                    $"Refusing to delete '{pathToDelete}': path is not inside the expected sandbox root '{expectedSandboxRoot}'."
+                );
+
+            if (Directory.Exists(pathToDelete))
+            {
+                Directory.Delete(pathToDelete, recursive: true);
+                _log.Here()
+                    .Information(
+                        "Deleted test filesystem sandbox for container {DatabaseName}: {Path}",
+                        dbName,
+                        pathToDelete
+                    );
+            }
+        });
+
+        if (cleanupResult.IsFailed)
+        {
+            _log.Here().Error("Failed to delete test filesystem sandbox for container {DatabaseName}", dbName);
+            cleanupResult.LogError();
+        }
 
         _log.Here().Information("Disposing factory for container {DatabaseName}", dbName);
         _factory.Dispose();

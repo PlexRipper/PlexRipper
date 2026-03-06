@@ -40,7 +40,10 @@ public class RestartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
                     var downloadTask = dbContext.DownloadTaskMovieFile.First();
                     downloadTask.DownloadFilePath.ShouldNotBeNullOrEmpty();
 
-                    system.AddFile(downloadTask.DownloadFilePath, FakeData.GetFileMockData(10, 4));
+                    var directoryPath = system.Path.GetDirectoryName(downloadTask.DownloadFilePath);
+                    directoryPath.ShouldNotBeNullOrEmpty();
+                    system.Directory.CreateDirectory(directoryPath);
+                    system.File.WriteAllBytes(downloadTask.DownloadFilePath, FakeData.GetDownloadFile(10.0 / 4.0));
                 };
             }
         );
@@ -55,7 +58,7 @@ public class RestartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
         // Act
         var client = container.GetApiClient();
         await client.SignIn();
-        var testResult = await client.GETAsync<
+        var testResult = await client.PUTAsync<
             RestartDownloadTaskEndpoint,
             RestartDownloadTaskEndpointRequest,
             BaseResultDTO

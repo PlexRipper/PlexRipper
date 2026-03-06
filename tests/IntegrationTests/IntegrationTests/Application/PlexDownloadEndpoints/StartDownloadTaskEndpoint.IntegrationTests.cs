@@ -40,7 +40,10 @@ public class StartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
                     var downloadTask = dbContext.DownloadTaskMovieFile.First();
                     downloadTask.DownloadFilePath.ShouldNotBeNullOrEmpty();
 
-                    system.AddFile(downloadTask.DownloadFilePath, FakeData.GetFileMockData(10, 4));
+                    var directoryPath = system.Path.GetDirectoryName(downloadTask.DownloadFilePath);
+                    directoryPath.ShouldNotBeNullOrEmpty();
+                    system.Directory.CreateDirectory(directoryPath);
+                    system.File.WriteAllBytes(downloadTask.DownloadFilePath, FakeData.GetDownloadFile(10.0 / 4.0));
                 };
             }
         );
@@ -55,14 +58,16 @@ public class StartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
         var client = container.GetApiClient();
         await client.SignIn();
 
-        var testResult = await client.GETAsync<
+        var testResult = await client.PUTAsync<
             StartDownloadTaskEndpoint,
             StartDownloadTaskEndpointRequest,
             BaseResultDTO
         >(new StartDownloadTaskEndpointRequest(downloadTask.Id));
-        testResult.Response.IsSuccessStatusCode.ShouldBeTrue();
+        testResult.Response.IsSuccessStatusCode.ShouldBeTrue(
+            await testResult.Response.Content.ReadAsStringAsync(CancellationToken)
+        );
 
-        // Wait for the download job to complete
+        // Wait for scheduler activity after start request
         await container.SchedulerService.AwaitScheduler(CancellationToken);
 
         // Assert

@@ -1,8 +1,6 @@
 ﻿using System.IO.Abstractions;
-using System.IO.Abstractions.TestingHelpers;
 using Autofac;
 using Autofac.Extras.Quartz;
-using ByteSizeLib;
 using Reaparr.Application;
 using Reaparr.Data;
 using Reaparr.Data.Contracts;
@@ -45,7 +43,6 @@ public class TestModule : Module
             .As<IAuthDbContext>()
             .InstancePerDependency();
 
-        builder.RegisterType<MockConfigManager>().As<IConfigManager>().SingleInstance();
         builder.RegisterType<MockProgressHubService>().As<IProgressHubService>().SingleInstance();
         builder.RegisterType<MockDownloadHubService>().As<IDownloadHubService>().SingleInstance();
         builder.RegisterType<MockNotificationHubService>().As<INotificationHubService>().SingleInstance();
@@ -100,39 +97,5 @@ public class TestModule : Module
 
         if (Config.MockConfigManager is not null)
             builder.RegisterInstance(Config.MockConfigManager).As<IConfigManager>();
-
-        // Note: This has to stay outside of scope otherwise Config.FileSystemOptions is not applied when dependency injected
-        var fileSystem = new MockFileSystem();
-        builder
-            .Register<MockFileSystem>(ctx =>
-            {
-                fileSystem.AddDrive(
-                    "/",
-                    new MockDriveData
-                    {
-                        IsReady = true,
-                        DriveType = DriveType.Fixed,
-                        AvailableFreeSpace = (long)ByteSize.FromGigaBytes(1000).Bytes,
-                    }
-                );
-                fileSystem.AddDirectory(PathProvider.ConfigDirectory);
-                fileSystem.AddDirectory(PathProvider.DefaultDownloadsDestinationFolder);
-                fileSystem.AddDirectory(PathProvider.DefaultMovieDestinationFolder);
-                fileSystem.AddDirectory(PathProvider.DefaultTvShowsDestinationFolder);
-                fileSystem.AddDirectory(PathProvider.DefaultMusicDestinationFolder);
-                fileSystem.AddDirectory(PathProvider.DefaultPhotosDestinationFolder);
-                fileSystem.AddDirectory(PathProvider.DefaultOtherDestinationFolder);
-                fileSystem.AddDirectory(PathProvider.DefaultGamesDestinationFolder);
-
-                var dbContext = ctx.Resolve<IReaparrDbContext>();
-                if (Config.FileSystemOptions is not null)
-                {
-                    Config.FileSystemOptions.Invoke(fileSystem, dbContext);
-                }
-
-                return fileSystem;
-            })
-            .As<IFileSystem>()
-            .SingleInstance();
     }
 }

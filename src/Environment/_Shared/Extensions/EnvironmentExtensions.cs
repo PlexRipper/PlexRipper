@@ -137,6 +137,9 @@ public static class EnvironmentExtensions
         System.Environment.SetEnvironmentVariable(LOG_LEVEL_KEY, logLevel.ToString().ToUpper());
     }
 
+    public static void SetDevelopmentRootPath(string path) =>
+        System.Environment.SetEnvironmentVariable(DEVELOPMENT_ROOT_PATH_KEY, path);
+
     /// <summary>
     /// Enables or disables integration test mode by setting <c>IntegrationTestMode</c>.
     /// </summary>

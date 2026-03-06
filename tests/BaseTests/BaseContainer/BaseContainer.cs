@@ -1,3 +1,4 @@
+using System.IO.Abstractions;
 using System.Net.Http.Headers;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
@@ -67,6 +68,13 @@ public class BaseContainer : IDisposable
         await MockDatabase.GetMemoryDbContext(memoryDbName).Setup(seed, config.DatabaseOptions);
 
         var container = new BaseContainer(log, seed, memoryDbName, testFileSystemRootPath, options);
+
+        if (config.FileSystemOptions is not null)
+        {
+            var fileSystem = container.Resolve<IFileSystem>();
+            var dbContext = container.Resolve<IReaparrDbContext>();
+            config.FileSystemOptions.Invoke(fileSystem, dbContext);
+        }
 
         if (config.DownloadSpeedLimitInKib > 0)
             await container.SetDownloadSpeedLimit(options);

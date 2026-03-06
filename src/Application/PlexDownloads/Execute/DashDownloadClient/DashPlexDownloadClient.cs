@@ -30,6 +30,7 @@ public class DashPlexDownloadClient : IPlexDownloadClient
 
     private readonly CompositeDisposable _subscriptions = new();
     private readonly Subject<Unit> _destroy = new();
+    private bool _disposed;
 
     public DashPlexDownloadClient(
         ILogger log,
@@ -108,6 +109,7 @@ public class DashPlexDownloadClient : IPlexDownloadClient
             return startResult;
         }
 
+        await SetDownloadStatusAsync(DownloadStatus.DownloadFinished);
         return Result.Ok();
     }
 
@@ -253,6 +255,10 @@ public class DashPlexDownloadClient : IPlexDownloadClient
 
     public async ValueTask DisposeAsync()
     {
+        if (_disposed)
+            return;
+
+        _disposed = true;
         _destroy.OnNext(Unit.Default);
         _destroy.OnCompleted();
         _subscriptions.Dispose();

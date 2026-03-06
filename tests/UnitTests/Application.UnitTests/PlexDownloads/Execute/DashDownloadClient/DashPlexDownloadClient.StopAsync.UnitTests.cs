@@ -75,10 +75,10 @@ public class DashPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DashPlexDow
         dashWrapperMock.Setup(x => x.StartAsync(It.IsAny<DashMpdCliOptions>())).ReturnsAsync(Result.Ok());
         dashWrapperMock
             .Setup(x => x.StopAsync())
-            .Returns(() =>
+            .ReturnsAsync(() =>
             {
                 exitTcs.TrySetResult(143);
-                return Task.CompletedTask;
+                return Result.Ok();
             });
         dashWrapperMock.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask);
 
@@ -129,10 +129,10 @@ public class DashPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DashPlexDow
         dashWrapperMock.Setup(x => x.StartAsync(It.IsAny<DashMpdCliOptions>())).ReturnsAsync(Result.Ok());
         dashWrapperMock
             .Setup(x => x.StopAsync())
-            .Returns(() =>
+            .ReturnsAsync(() =>
             {
                 exitTcs.TrySetResult(143);
-                return Task.CompletedTask;
+                return Result.Ok();
             });
         dashWrapperMock.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask);
 

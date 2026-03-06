@@ -203,7 +203,6 @@ public class DashPlexDownloadClientStartUnitTests : BaseUnitTest<DashPlexDownloa
         SetupSpeedLimit(serverMachineIdentifier, 0);
         SetupCommandExecutor();
 
-        var exitTcs = new TaskCompletionSource<int>();
         var progressSubject = new Subject<DashDownloadProgress>();
         var outputSubject = new Subject<string>();
 
@@ -212,27 +211,23 @@ public class DashPlexDownloadClientStartUnitTests : BaseUnitTest<DashPlexDownloa
         dashWrapperMock.Setup(x => x.StandardOutput).Returns(outputSubject.AsObservable());
         dashWrapperMock
             .Setup(x => x.StartAsync(It.IsAny<DashMpdCliOptions>()))
-            .Returns(() =>
+            .Returns(async () =>
             {
-                _ = Task.Run(async () =>
-                {
-                    progressSubject.OnNext(
-                        new DashDownloadProgress
-                        {
-                            ETA = TimeSpan.FromSeconds(1),
-                            Percent = 50,
-                            DownloadedBytes = downloadTask.DataTotal / 2,
-                            TotalBytes = downloadTask.DataTotal,
-                            DownloadSpeedInBytes = 1024,
-                            RawOutput = "{}",
-                        }
-                    );
+                progressSubject.OnNext(
+                    new DashDownloadProgress
+                    {
+                        ETA = TimeSpan.FromSeconds(1),
+                        Percent = 50,
+                        DownloadedBytes = downloadTask.DataTotal / 2,
+                        TotalBytes = downloadTask.DataTotal,
+                        DownloadSpeedInBytes = 1024,
+                        RawOutput = "{}",
+                    }
+                );
 
-                    await Task.Delay(700);
-                    exitTcs.TrySetResult(0);
-                });
-
-                return Task.FromResult(Result.Ok());
+                // Allow the Rx Sample(500ms) window to elapse and the handler to persist progress
+                await Task.Delay(700, TestContext.Current.CancellationToken);
+                return Result.Ok();
             });
         dashWrapperMock.Setup(x => x.StopAsync()).ReturnsAsync(Result.Ok());
         dashWrapperMock.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask);

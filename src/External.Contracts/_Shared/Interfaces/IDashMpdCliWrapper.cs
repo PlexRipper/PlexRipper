@@ -6,16 +6,6 @@ namespace Reaparr.External.Contracts;
 public interface IDashMpdCliWrapper : IAsyncDisposable
 {
     /// <summary>
-    /// Gets the exit code of the process (only valid after process has exited).
-    /// </summary>
-    int? ExitCode { get; }
-
-    /// <summary>
-    /// Gets the task that completes when the process exits.
-    /// </summary>
-    Task<int> ProcessExitTask { get; }
-
-    /// <summary>
     /// Observable stream of standard output lines (including ANSI codes and carriage returns).
     /// </summary>
     IObservable<string> StandardOutput { get; }
@@ -37,5 +27,5 @@ public interface IDashMpdCliWrapper : IAsyncDisposable
     /// Stops the running process gracefully or forcefully if it doesn't respond.
     /// </summary>
     /// <returns>A task that completes when the process has stopped.</returns>
-    Task StopAsync();
+    Task<Result> StopAsync();
 }

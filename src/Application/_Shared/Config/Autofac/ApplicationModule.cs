@@ -30,10 +30,10 @@ public class ApplicationModule : Module
             )
             .InstancePerDependency();
 
-        // builder
-        //     .RegisterType<DashPlexDownloadClient>()
-        //     .Keyed<IPlexDownloadClient>(PlexDownloadClientType.Dash)
-        //     .InstancePerDependency();
+        builder
+            .RegisterType<DashPlexDownloadClient>()
+            .Keyed<IPlexDownloadClient>(PlexDownloadClientType.Dash)
+            .InstancePerDependency();
 
         builder.RegisterType<SchedulerService>().As<ISchedulerService>().SingleInstance();
         builder.RegisterType<AllJobListener>().As<IAllJobListener>().SingleInstance();

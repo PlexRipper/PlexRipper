@@ -13,7 +13,6 @@ public class StopDownloadTaskCommandValidator : AbstractValidator<StopDownloadTa
     public StopDownloadTaskCommandValidator()
     {
         RuleFor(x => x.DownloadTaskGuid).NotEmpty();
-        RuleFor(x => x.DeleteFiles).NotNull();
     }
 }
 

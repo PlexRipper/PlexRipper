@@ -65,12 +65,12 @@ public class PauseDownloadTaskCommandHandler : ICommandHandler<PauseDownloadTask
 
             if (downloadTask.DownloadTaskPhase == DownloadTaskPhase.FileTransfer)
             {
-                if (!await _moveDownloadFileScheduler.IsDownloadFileMoving(downloadTaskKey))
-                    continue;
-
-                var stopMoveResult = await _moveDownloadFileScheduler.StopMoveDownloadFileJob(downloadTaskKey);
-                if (stopMoveResult.IsFailed)
-                    return stopMoveResult.LogError();
+                if (await _moveDownloadFileScheduler.IsDownloadFileMoving(downloadTaskKey))
+                {
+                    var stopMoveResult = await _moveDownloadFileScheduler.StopMoveDownloadFileJob(downloadTaskKey);
+                    if (stopMoveResult.IsFailed)
+                        return stopMoveResult.LogError();
+                }
 
                 var resetMoveProgressResult = await _dbContext.ResetDownloadTaskProgress(
                     downloadTaskKey,

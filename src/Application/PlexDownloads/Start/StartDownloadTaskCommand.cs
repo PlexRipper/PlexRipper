@@ -58,6 +58,11 @@ public class StartDownloadTaskCommandHandler : ICommandHandler<StartDownloadTask
         nextDownloadTask ??= downloadableChildTasks.First();
         var nextDownloadTaskKey = nextDownloadTask.ToKey();
 
+        if (await _dbContext.IsDownloadsPausedByUser(nextDownloadTaskKey.PlexServerId))
+        {
+            return Result.Fail("Download tasks cannot be started while the server is paused by the user").LogWarning();
+        }
+
         if (key.Type is DownloadTaskType.TvShow or DownloadTaskType.Season)
         {
             var statusesToQueue = nextDownloadTask.DownloadStatus switch
@@ -74,11 +79,6 @@ public class StartDownloadTaskCommandHandler : ICommandHandler<StartDownloadTask
                 )
             )
                 await _dbContext.SetDownloadStatus(waitingTask.ToKey(), DownloadStatus.Queued);
-        }
-
-        if (await _dbContext.IsDownloadsPausedByUser(nextDownloadTaskKey.PlexServerId))
-        {
-            return Result.Fail("Download tasks cannot be started while the server is paused by the user").LogWarning();
         }
 
         // Start the download task depending on the phase

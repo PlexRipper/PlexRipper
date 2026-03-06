@@ -49,7 +49,7 @@ public static partial class EnumMapperExtensions
         {
             _log.Here()
                 .Error(
-                    "Failed to convert string {Value} to type {NameOfPlexDownloadClientType)}",
+                    "Failed to convert enum {Value} of type {NameOfPlexDownloadClientType} to string",
                     value,
                     nameof(PlexDownloadClientType)
                 );

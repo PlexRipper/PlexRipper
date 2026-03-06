@@ -1,14 +1,14 @@
 ﻿namespace Reaparr.Domain;
 
 /// <summary>
-/// A log entry for the <see cref="DownloadTaskGeneric">download worker</see>.
+/// A log entry for child classes of the <see cref="DownloadTaskFileBase"/>.
 /// </summary>
 public abstract class DownloadTaskLogBase : BaseEntity
 {
     #region Properties
 
     /// <summary>
-    /// Gets the message of the log entry.
+    /// Gets the status of the log entry.
     /// </summary>
     [Column(Order = 1)]
     public required DownloadStatus Status { get; init; }

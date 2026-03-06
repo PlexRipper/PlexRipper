@@ -26,7 +26,7 @@ public class MoveDownloadFileJob : IJob
         _moveDownloadFileQueue = moveDownloadFileQueue;
     }
 
-    public static string DownloadTaskIdParameter => "DownloadTaskId";
+    public const string DownloadTaskIdParameter = "DownloadTaskId";
 
     public static JobKey GetJobKey(Guid id) => new($"{DownloadTaskIdParameter}_{id}", nameof(MoveDownloadFileJob));
 

@@ -5,7 +5,7 @@ public class DownloadTaskMovieFileLog : DownloadTaskLogBase
     #region Relationships
 
     /// <summary>
-    /// Gets the <see cref="DownloadTaskGeneric"/> this log belongs too
+    /// Gets the <see cref="DownloadTaskMovieFile"/> this log belongs to.
     /// </summary>
     [Column(Order = 5)]
     public required Guid DownloadTaskFileId { get; init; }
@@ -13,7 +13,7 @@ public class DownloadTaskMovieFileLog : DownloadTaskLogBase
     public DownloadTaskMovieFile? DownloadTaskFile { get; init; }
 
     /// <summary>
-    /// Gets the <see cref="DownloadTaskGeneric"/> this log belongs too
+    /// Gets the <see cref="DownloadTaskMovie"/> this log belongs to.
     /// </summary>
     [Column(Order = 6)]
     public required Guid DownloadTaskMovieId { get; init; }

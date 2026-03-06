@@ -3,8 +3,6 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
-using Reaparr.Domain;
-using Reaparr.FileSystem.Contracts;
 
 namespace Reaparr.Application;
 
@@ -24,21 +22,18 @@ public class PausePlexServerDownloadsCommandHandler : ICommandHandler<PausePlexS
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IDownloadTaskScheduler _downloadTaskScheduler;
-    private readonly IMoveDownloadFileScheduler _moveDownloadFileScheduler;
 
     public PausePlexServerDownloadsCommandHandler(
         ILogger log,
         IReaparrDbContext dbContext,
         ICommandExecutor commandExecutor,
-        IDownloadTaskScheduler downloadTaskScheduler,
-        IMoveDownloadFileScheduler moveDownloadFileScheduler
+        IDownloadTaskScheduler downloadTaskScheduler
     )
     {
         _log = log.ForContext<PausePlexServerDownloadsCommandHandler>();
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;
         _downloadTaskScheduler = downloadTaskScheduler;
-        _moveDownloadFileScheduler = moveDownloadFileScheduler;
     }
 
     public async Task<Result> ExecuteAsync(PausePlexServerDownloadsCommand command, CancellationToken cancellationToken)

@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Microsoft.AspNetCore.Http;
 using Serilog;
 using Serilog.Core;
@@ -6,6 +7,8 @@ namespace Reaparr.Logging;
 
 public static partial class LogExtensions
 {
+    private static readonly ConcurrentDictionary<Type, bool> _destructureCache = new();
+
     private static string GetDisplayUrl(this HttpRequest request) => $"{request.Scheme}://{request.Host}{request.Path}";
 
     public static void VerboseApiCall(this ILogger log, HttpContext context, object? request = null)
@@ -86,18 +89,23 @@ public static partial class LogExtensions
     private static bool ShouldDestructureRequest(object request)
     {
         var requestType = request.GetType();
+        return _destructureCache.GetOrAdd(
+            requestType,
+            static t =>
+            {
+                // Moq/Castle proxy types frequently include deep/cyclic members and are unsafe to destructure.
+                if (string.Equals(t.Assembly.GetName().Name, "DynamicProxyGenAssembly2", StringComparison.Ordinal))
+                    return false;
 
-        // Moq/Castle proxy types frequently include deep/cyclic members and are unsafe to destructure.
-        if (string.Equals(requestType.Assembly.GetName().Name, "DynamicProxyGenAssembly2", StringComparison.Ordinal))
-            return false;
+                if (t.Namespace?.StartsWith("Castle.Proxies", StringComparison.Ordinal) == true)
+                    return false;
 
-        if (requestType.Namespace?.StartsWith("Castle.Proxies", StringComparison.Ordinal) == true)
-            return false;
+                if (IsPotentiallyUnsafeForDestructuring(t, new HashSet<Type>()))
+                    return false;
 
-        if (IsPotentiallyUnsafeForDestructuring(requestType, new HashSet<Type>()))
-            return false;
-
-        return true;
+                return true;
+            }
+        );
     }
 
     private static bool IsPotentiallyUnsafeForDestructuring(Type type, HashSet<Type> visitedTypes)

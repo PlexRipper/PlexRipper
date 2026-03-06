@@ -381,6 +381,7 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
             status,
             $"DownloadTask {key.Id} ({_filename}) has transitioned to {status}"
         );
+
         await _commandExecutor.Send(new DownloadTaskUpdatedCommand(key));
     }
 

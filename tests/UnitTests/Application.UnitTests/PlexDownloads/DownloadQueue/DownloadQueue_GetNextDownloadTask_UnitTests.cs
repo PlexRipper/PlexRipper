@@ -111,7 +111,7 @@ public class DownloadQueueGetNextDownloadTaskUnitTests : BaseUnitTest<DownloadQu
     }
 
     [Fact]
-    public async Task ShouldPrioritizeServerUnreachableOverQueued()
+    public async Task ShouldPrioritizeServerUnreachable_WhenQueuedAndServerUnreachableExist()
     {
         // Arrange
         await SetupDatabase(71452, config => config.MovieDownloadTasksCount = 3);

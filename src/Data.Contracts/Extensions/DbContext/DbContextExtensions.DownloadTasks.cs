@@ -427,6 +427,7 @@ public static partial class DbContextExtensions
         switch (key.Type)
         {
             case DownloadTaskType.MovieData:
+            case DownloadTaskType.MoviePart:
                 await dbContext
                     .DownloadTaskMovieFile.Where(x => x.Id == key.Id)
                     .ExecuteUpdateAsync(
@@ -442,6 +443,7 @@ public static partial class DbContextExtensions
                     );
                 break;
             case DownloadTaskType.EpisodeData:
+            case DownloadTaskType.EpisodePart:
                 await dbContext
                     .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == key.Id)
                     .ExecuteUpdateAsync(
@@ -468,8 +470,6 @@ public static partial class DbContextExtensions
                         nameof(ResetDownloadTaskProgress)
                     );
             case DownloadTaskType.None:
-            case DownloadTaskType.MoviePart:
-            case DownloadTaskType.EpisodePart:
             default:
                 return Result.Fail($"Unsupported DownloadTaskType {key.Type}").LogError();
         }

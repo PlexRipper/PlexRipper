@@ -156,7 +156,10 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
             // Process episode media data
             var processResult = ProcessEpisodeMediaData(tvShowEpisode, episodeDownloadTask, downloadMediaDto, request);
             if (processResult.IsFailed)
+            {
                 processResult.LogError();
+                continue;
+            }
 
             downloadTasks.Add(processResult.Value);
         }

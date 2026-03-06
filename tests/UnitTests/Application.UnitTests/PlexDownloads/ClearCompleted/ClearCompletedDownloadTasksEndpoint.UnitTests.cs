@@ -163,5 +163,10 @@ public class ClearCompletedDownloadTasksEndpointUnitTests : BaseUnitTest<ClearCo
         (await dbContext.DownloadTaskTvShowSeason.ToListAsync(CancellationToken)).ShouldBeEmpty();
         (await dbContext.DownloadTaskTvShowEpisode.ToListAsync(CancellationToken)).ShouldBeEmpty();
         (await dbContext.DownloadTaskTvShowEpisodeFile.ToListAsync(CancellationToken)).ShouldBeEmpty();
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<ClearCompletedDownloadTasksCommand>(), It.IsAny<CancellationToken>()),
+                Times.Once
+            );
     }
 }

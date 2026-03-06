@@ -10,7 +10,7 @@ public record DownloadTaskLogDTO
     public required int Id { get; init; }
 
     /// <summary>
-    /// Gets the message of the log entry.
+    /// Gets the status of the download task.
     /// </summary>
     public required DownloadStatus Status { get; init; }
 

@@ -9,6 +9,7 @@ using Reaparr.Settings.Contracts;
 
 namespace Reaparr.Application;
 
+[DisallowConcurrentExecution]
 public class DownloadJob : IJob
 {
     private readonly ILogger _log;
@@ -122,8 +123,7 @@ public class DownloadJob : IJob
                 await _dbContext.SetDownloadStatus(downloadTaskKey, DownloadStatus.Paused);
                 await _commandExecutor.Send(new DownloadTaskUpdatedCommand(downloadTaskKey), token);
             }
-
-            if (startResult.IsFailed)
+            else if (startResult.IsFailed)
             {
                 await _eventPublisher.PublishAsync(new SendNotificationResult(startResult), token);
             }

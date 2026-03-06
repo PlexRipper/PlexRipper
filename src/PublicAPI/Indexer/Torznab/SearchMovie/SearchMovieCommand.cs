@@ -19,7 +19,7 @@ public record SearchMovieCommand : ICommand<Result<TorznabMediaSearchResponseDTO
 
     public required int Offset { get; init; }
 
-    public required string IMDB_ID { get; init; }
+    public string? IMDB_ID { get; init; }
 
     public required int TMDB_ID { get; init; }
 }
@@ -35,7 +35,6 @@ public class SearchMovieCommandValidator : AbstractValidator<SearchMovieCommand>
 
         RuleFor(x => x.TMDB_ID).GreaterThanOrEqualTo(0);
 
-        RuleFor(x => x.IMDB_ID).NotNull();
     }
 }
 

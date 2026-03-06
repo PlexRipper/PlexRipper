@@ -27,7 +27,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
     private readonly IDownloadService _downloader;
     private readonly DownloadConfiguration _configuration = new()
     {
-        DownloadFileExtension = FilePathExtensions.TEMP_DOWNLOAD_FILE_SUFFIX,
+        DownloadFileExtension = FilePathExtensions.TempDownloadFileSuffix,
     };
 
     private readonly CompositeDisposable _subscriptions = new();
@@ -74,7 +74,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
         var downloadUrlResult = await _dbContext.GetDownloadUrl(
             downloadTask.PlexServerId,
             downloadTask.FileLocationUrl,
-            CancellationToken.None
+            cancellationToken
         );
 
         if (downloadUrlResult.IsFailed)
@@ -89,7 +89,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                 downloadTask.FileName,
                 downloadTask.DataTotal
             ),
-            CancellationToken.None
+            cancellationToken
         );
 
         if (fileStreamResult.IsFailed)
@@ -125,10 +125,13 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
     /// <inheritdoc/>
     public async Task<Result> StopAsync()
     {
+        if (_downloadTaskKey is null)
+            return Result.Ok();
+
         _log.Here()
             .Debug(
                 "DownloadTask {DownloadTaskId} ({MediaFileName}) has been requested to stop.",
-                _downloadTaskKey!.Id,
+                _downloadTaskKey.Id,
                 _filename
             );
 
@@ -137,7 +140,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
         var stopMsg = _log.Here()
             .InformationMsg(
                 "DownloadTask {DownloadTaskId} ({MediaFileName}) was stopped.",
-                _downloadTaskKey!.Id,
+                _downloadTaskKey.Id,
                 _filename
             );
 
@@ -235,40 +238,36 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                             return;
                         }
 
-                        // Download completed successfully
-                        if (!args.Cancelled)
-                        {
-                            using var dbContext = await _dbContextFactory.CreateAsync();
-                            var progress = new DownloadTaskProgress
-                            {
-                                DataTotal = package!.TotalFileSize,
-                                Percentage = 100,
-                                DataReceived = package.ReceivedBytesSize,
-                                DownloadSpeed = 0,
-                            };
-
-                            await dbContext.UpdateDownloadProgress(
-                                key,
-                                progress,
-                                package.ToSnapshot(),
-                                CancellationToken.None
-                            );
-
-                            await SendProgressLog(progress);
-
-                            await SetDownloadStatusAsync(Domain.DownloadStatus.DownloadFinished);
-                            await _commandExecutor.Send(new DownloadTaskUpdatedCommand(key), CancellationToken.None);
-                            return;
-                        }
-
-                        // Download Errored
                         if (args.Error != null)
                         {
                             await SetDownloadStatusAsync(
                                 Domain.DownloadStatus.Error,
                                 Result.Fail(new ExceptionalError(args.Error))
                             );
+                            return;
                         }
+
+                        // Download completed successfully
+                        using var dbContext = await _dbContextFactory.CreateAsync();
+                        var progress = new DownloadTaskProgress
+                        {
+                            DataTotal = package!.TotalFileSize,
+                            Percentage = 100,
+                            DataReceived = package.ReceivedBytesSize,
+                            DownloadSpeed = 0,
+                        };
+
+                        await dbContext.UpdateDownloadProgress(
+                            key,
+                            progress,
+                            package.ToSnapshot(),
+                            CancellationToken.None
+                        );
+
+                        await SendProgressLog(progress);
+
+                        await SetDownloadStatusAsync(Domain.DownloadStatus.DownloadFinished);
+                        await _commandExecutor.Send(new DownloadTaskUpdatedCommand(key), CancellationToken.None);
                     })
                 )
                 .Concat()

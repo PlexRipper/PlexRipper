@@ -15,7 +15,7 @@ public class GetCapabilitiesCommandValidator : AbstractValidator<GetCapabilities
 
 public class GetCapabilitiesCommandHandler : ICommandHandler<GetCapabilitiesCommand, Result<TorznabCapsResponseDTO>>
 {
-    public async Task<Result<TorznabCapsResponseDTO>> ExecuteAsync(
+    public Task<Result<TorznabCapsResponseDTO>> ExecuteAsync(
         GetCapabilitiesCommand command,
         CancellationToken cancellationToken
     )
@@ -73,8 +73,6 @@ public class GetCapabilitiesCommandHandler : ICommandHandler<GetCapabilitiesComm
             ],
         };
 
-        await Task.CompletedTask;
-
-        return Result.Ok(response);
+        return Task.FromResult(Result.Ok(response));
     }
 }

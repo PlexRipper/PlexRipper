@@ -460,7 +460,7 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
             Urls = ["http://old-plex-url/file.mkv"],
             TotalFileSize = downloadTask.DataTotal,
             FileName = downloadTask.FileName,
-            DownloadingFileExtension = FilePathExtensions.TEMP_DOWNLOAD_FILE_SUFFIX,
+            DownloadingFileExtension = FilePathExtensions.TempDownloadFileSuffix,
             Chunks =
             [
                 new DirectDownloadSnapshotChunk

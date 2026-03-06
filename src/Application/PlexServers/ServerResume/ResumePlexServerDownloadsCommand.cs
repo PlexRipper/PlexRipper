@@ -44,11 +44,19 @@ public class ResumePlexServerDownloadsCommandHandler : ICommandHandler<ResumePle
 
         _log.Here().Information("Unpausing PlexServer with id: {PlexServerId}", command.PlexServerId);
 
-        await _dbContext
-            .PlexServers.Where(x => x.Id == command.PlexServerId)
-            .ExecuteUpdateAsync(p => p.SetProperty(x => x.IsDownloadsPausedByUser, false), cancellationToken);
+        var updateResult = await Result.Try(() =>
+            _dbContext
+                .PlexServers.Where(x => x.Id == command.PlexServerId)
+                .ExecuteUpdateAsync(p => p.SetProperty(x => x.IsDownloadsPausedByUser, false), cancellationToken)
+        );
+        if (updateResult.IsFailed)
+            return updateResult.ToResult().LogError();
 
-        await _eventPublisher.PublishAsync(new CheckDownloadQueueEvent(command.PlexServerId), cancellationToken);
+        var publishResult = await Result.Try(() =>
+            _eventPublisher.PublishAsync(new CheckDownloadQueueEvent(command.PlexServerId), cancellationToken)
+        );
+        if (publishResult.IsFailed)
+            return publishResult.LogError();
 
         return Result.Ok();
     }

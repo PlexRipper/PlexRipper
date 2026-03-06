@@ -10,7 +10,7 @@ public class ResumePlexServerDownloadsCommandUnitTests : BaseUnitTest<ResumePlex
         : base(output) { }
 
     [Fact]
-    public async Task ShouldResumeServerAndTriggerQueue()
+    public async Task ShouldResumeServerAndTriggerQueue_WhenServerIsPausedByUser()
     {
         // Arrange
         await SetupDatabase(9811);

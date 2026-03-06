@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Reaparr.Data.Configurations;
 
-public class DownloadTaskLogConfiguration : IEntityTypeConfiguration<DownloadTaskMovieFileLog>
+public class DownloadTaskMovieFileLogConfiguration : IEntityTypeConfiguration<DownloadTaskMovieFileLog>
 {
     public void Configure(EntityTypeBuilder<DownloadTaskMovieFileLog> builder)
     {

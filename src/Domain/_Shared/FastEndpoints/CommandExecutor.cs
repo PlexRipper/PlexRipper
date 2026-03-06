@@ -18,9 +18,9 @@ public class CommandExecutor : ICommandExecutor
         {
             return await command.ExecuteAsync(ct);
         }
-        catch (OperationCanceledException) when (ct.IsCancellationRequested)
+        catch (OperationCanceledException e) when (ct.IsCancellationRequested)
         {
-            return CreateFailedResult<TResult>(new OperationCanceledException("The command was cancelled"));
+            return CreateFailedResult<TResult>(e);
         }
         catch (Exception e)
         {

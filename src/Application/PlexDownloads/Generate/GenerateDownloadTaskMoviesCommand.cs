@@ -122,9 +122,8 @@ public class GenerateDownloadTaskMoviesCommandHandler : ICommandHandler<Generate
             downloadTasks.SetRelationshipIds(plexServer.Id, plexLibrary.Id);
 
             _dbContext.DownloadTaskMovie.AddRange(downloadTasks);
+            await _dbContext.SaveChangesAsync(cancellationToken);
         }
-
-        await _dbContext.SaveChangesAsync(cancellationToken);
 
         var logs = new List<DownloadTaskMovieFileLog>();
         foreach (var downloadTaskMovie in downloadTasks)

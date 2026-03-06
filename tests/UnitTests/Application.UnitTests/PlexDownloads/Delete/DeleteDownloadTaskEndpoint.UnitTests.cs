@@ -1,14 +1,9 @@
-using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Reaparr.Application.Contracts;
-using Reaparr.Data.Contracts;
-using Reaparr.Identity.Contracts;
-using Reaparr.SignalR.Contracts;
 
 namespace Reaparr.Application.UnitTests;
 
-public class DeleteDownloadTaskEndpointUnitTests : BaseUnitTest
+public class DeleteDownloadTaskEndpointUnitTests : BaseUnitTest<DeleteDownloadTaskEndpoint>
 {
     public DeleteDownloadTaskEndpointUnitTests(ITestOutputHelper output)
         : base(output) { }
@@ -39,23 +34,7 @@ public class DeleteDownloadTaskEndpointUnitTests : BaseUnitTest
             .ReturnsAsync(false);
 
         // Act
-        var ep = Factory.Create<DeleteDownloadTaskEndpoint>(ctx =>
-        {
-            ctx.AddTestServices(s =>
-            {
-                s.AddTransient(_ => Mock.Create<ILogger>());
-                s.AddTransient(_ => Mock.Create<IReaparrDbContext>());
-                s.AddTransient(_ => Mock.Create<IAuthDbContext>());
-                s.AddTransient(_ => Mock.Create<IAuthDbContextFactory>());
-                s.AddTransient(_ => Mock.Mock<ICommandExecutor>().Object);
-                s.AddSingleton(_ => Mock.Create<ISchedulerService>());
-                s.AddSingleton(_ => Mock.Mock<IProgressHubService>().Object);
-                s.AddSingleton(_ => Mock.Mock<IDownloadHubService>().Object);
-                s.AddSingleton(_ => Mock.Mock<INotificationHubService>().Object);
-                s.AddTransient(_ => Mock.Mock<IDownloadTaskScheduler>().Object);
-            });
-        });
-
+        var ep = SetupEndpointUnitTest<DeleteDownloadTaskEndpoint>();
         await ep.HandleAsync(
             new DeleteDownloadTaskEndpointRequest { DownloadTaskIds = [episodeFileId] },
             CancellationToken
@@ -68,5 +47,13 @@ public class DeleteDownloadTaskEndpointUnitTests : BaseUnitTest
         (await dbContext.DownloadTaskTvShowSeason.ToListAsync(CancellationToken)).ShouldBeEmpty();
         (await dbContext.DownloadTaskTvShowEpisode.ToListAsync(CancellationToken)).ShouldBeEmpty();
         (await dbContext.DownloadTaskTvShowEpisodeFile.ToListAsync(CancellationToken)).ShouldBeEmpty();
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Verify(x => x.IsDownloading(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()), Times.Once);
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Verify(
+                x =>
+                    x.StopDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>(), It.IsAny<bool>()),
+                Times.Never
+            );
     }
 }

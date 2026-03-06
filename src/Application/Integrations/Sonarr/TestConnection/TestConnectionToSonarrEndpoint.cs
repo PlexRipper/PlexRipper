@@ -99,6 +99,7 @@ public class TestConnectionToSonarrEndpoint
             if (statusCode == 401)
             {
                 await SendTestResult(TestConnectionStatus.InvalidApiKey, ct);
+                return;
             }
 
             var reason = httpResponse.ReasonPhrase ?? $"HTTP {(int)httpResponse.StatusCode}";

@@ -98,7 +98,7 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
 
     private async Task<Result> RunEventLoopAsync(Command command, CancellationToken cancellationToken)
     {
-        var listenResult = await Result.Try(async Task<IAsyncEnumerable<CommandEvent>> () =>
+        var listenResult = await Result.Try((Func<Task>)(async () =>
         {
             await foreach (var cmdEvent in command.ListenAsync(cancellationToken))
             {
@@ -124,9 +124,7 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
                         break;
                 }
             }
-
-            return Result.Ok();
-        });
+        }));
 
         var cleanUpResult = Result.Try(() =>
         {
@@ -149,7 +147,7 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
             }
         });
 
-        return listenResult.ToResult();
+        return Result.Merge(listenResult, cleanUpResult);
     }
 
     private void HandleStdoutLine(string line)

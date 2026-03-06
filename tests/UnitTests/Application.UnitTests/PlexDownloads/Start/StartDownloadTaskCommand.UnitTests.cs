@@ -720,4 +720,279 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
         Mock.VerifyEventPublished(It.IsAny<DownloadTaskUpdatedCommand>, Times.Once());
         Mock.VerifyEventPublished(It.IsAny<CheckDownloadQueueEvent>, Times.Once());
     }
+
+    [Fact]
+    public async Task ShouldHaveFailedResult_WhenNoDownloadableChildTasksExist()
+    {
+        // Arrange — seed two movies; delete all file tasks of the first so its downloadable child list is empty
+        await SetupDatabase(
+            11101,
+            x =>
+            {
+                x.MovieDownloadTasksCount = 2;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var movieTasks = await dbContext.DownloadTaskMovie.ToListAsync(CancellationToken);
+        movieTasks.Count.ShouldBeGreaterThanOrEqualTo(2);
+
+        var firstMovieId = movieTasks[0].Id;
+        await dbContext
+            .DownloadTaskMovieFile.Where(x => x.ParentId == firstMovieId)
+            .ExecuteDeleteAsync(CancellationToken);
+
+        // Act
+        var result = await Sut.ExecuteAsync(new StartDownloadTaskCommand(firstMovieId), CancellationToken);
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Verify(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>()), Times.Never());
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Never());
+        Mock.VerifyEventPublished(It.IsAny<DownloadTaskUpdatedCommand>, Times.Never());
+        Mock.VerifyEventPublished(It.IsAny<CheckDownloadQueueEvent>, Times.Never());
+    }
+
+    [Fact]
+    public async Task ShouldHaveFailedResult_WhenSelectedChildIsInCompletedPhase()
+    {
+        // Arrange
+        await SetupDatabase(
+            11102,
+            x =>
+            {
+                x.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var movieFileTasks = await dbContext.DownloadTaskMovieFile.AsTracking().ToListAsync(CancellationToken);
+        movieFileTasks.SetDownloadStatus(DownloadStatus.Completed);
+        await dbContext.SaveChangesAsync(CancellationToken);
+
+        var movieTask = await dbContext.DownloadTaskMovie.FirstAsync(CancellationToken);
+
+        // Act
+        var result = await Sut.ExecuteAsync(new StartDownloadTaskCommand(movieTask.Id), CancellationToken);
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Verify(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>()), Times.Never());
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Never());
+        Mock.VerifyEventPublished(It.IsAny<DownloadTaskUpdatedCommand>, Times.Never());
+        Mock.VerifyEventPublished(It.IsAny<CheckDownloadQueueEvent>, Times.Never());
+    }
+
+    [Fact]
+    public async Task ShouldHaveFailedResult_WhenStartDownloadTaskJobFails()
+    {
+        // Arrange
+        await SetupDatabase(
+            11103,
+            x =>
+            {
+                x.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var movieTask = await IDbContext.DownloadTaskMovie.FirstAsync(CancellationToken);
+
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.IsDownloading(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>()))
+            .ReturnsAsync(Result.Fail("Scheduler error"));
+
+        // Act
+        var result = await Sut.ExecuteAsync(new StartDownloadTaskCommand(movieTask.Id), CancellationToken);
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Verify(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>()), Times.Once());
+        Mock.VerifyEventPublished(It.IsAny<DownloadTaskUpdatedCommand>, Times.Never());
+        Mock.VerifyEventPublished(It.IsAny<CheckDownloadQueueEvent>, Times.Never());
+    }
+
+    [Fact]
+    public async Task ShouldSkipStartDownloadJob_WhenTaskIsAlreadyDownloading()
+    {
+        // Arrange
+        await SetupDatabase(
+            11104,
+            x =>
+            {
+                x.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var movieFileTasks = await dbContext.DownloadTaskMovieFile.AsTracking().ToListAsync(CancellationToken);
+        movieFileTasks.SetDownloadStatus(DownloadStatus.Downloading);
+        await dbContext.SaveChangesAsync(CancellationToken);
+
+        var movieTask = await dbContext.DownloadTaskMovie.FirstAsync(CancellationToken);
+
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.IsDownloading(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+
+        Mock.SetupCommand(It.IsAny<DownloadTaskUpdatedCommand>).ReturnsAsync(Result.Ok());
+        Mock.PublishEvent(It.IsAny<CheckDownloadQueueEvent>).Returns(Task.CompletedTask);
+
+        // Act
+        var result = await Sut.ExecuteAsync(new StartDownloadTaskCommand(movieTask.Id), CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Verify(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>()), Times.Never());
+        Mock.VerifyEventPublished(It.IsAny<DownloadTaskUpdatedCommand>, Times.Once());
+        Mock.VerifyEventPublished(It.IsAny<CheckDownloadQueueEvent>, Times.Once());
+    }
+
+    [Fact]
+    public async Task ShouldSkipStartMoveJob_WhenFileIsAlreadyMoving()
+    {
+        // Arrange
+        await SetupDatabase(
+            11105,
+            x =>
+            {
+                x.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var movieFileTasks = await dbContext.DownloadTaskMovieFile.AsTracking().ToListAsync(CancellationToken);
+        movieFileTasks.SetDownloadStatus(DownloadStatus.Moving);
+        await dbContext.SaveChangesAsync(CancellationToken);
+
+        var movieTask = await dbContext.DownloadTaskMovie.FirstAsync(CancellationToken);
+
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .Setup(x => x.IsDownloadFileMoving(It.IsAny<DownloadTaskKey>()))
+            .ReturnsAsync(true);
+
+        Mock.SetupCommand(It.IsAny<DownloadTaskUpdatedCommand>).ReturnsAsync(Result.Ok());
+        Mock.PublishEvent(It.IsAny<CheckDownloadQueueEvent>).Returns(Task.CompletedTask);
+
+        // Act
+        var result = await Sut.ExecuteAsync(new StartDownloadTaskCommand(movieTask.Id), CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Never());
+        Mock.VerifyEventPublished(It.IsAny<DownloadTaskUpdatedCommand>, Times.Once());
+        Mock.VerifyEventPublished(It.IsAny<CheckDownloadQueueEvent>, Times.Once());
+    }
+
+    [Fact]
+    public async Task ShouldStartDownloadJob_WhenMovieTaskIsPaused()
+    {
+        // Arrange
+        await SetupDatabase(
+            11106,
+            x =>
+            {
+                x.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var movieFileTasks = await dbContext.DownloadTaskMovieFile.AsTracking().ToListAsync(CancellationToken);
+        movieFileTasks.SetDownloadStatus(DownloadStatus.Paused);
+        await dbContext.SaveChangesAsync(CancellationToken);
+
+        var movieTask = await dbContext.DownloadTaskMovie.FirstAsync(CancellationToken);
+
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.IsDownloading(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>()))
+            .ReturnsAsync(Result.Ok());
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.GetCurrentlyDownloadingKeysByServer(It.IsAny<int>()))
+            .ReturnsAsync([]);
+
+        Mock.SetupCommand(It.IsAny<DownloadTaskUpdatedCommand>).ReturnsAsync(Result.Ok());
+        Mock.PublishEvent(It.IsAny<CheckDownloadQueueEvent>).Returns(Task.CompletedTask);
+
+        // Act
+        var result = await Sut.ExecuteAsync(new StartDownloadTaskCommand(movieTask.Id), CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        // Movie tasks have no sibling-queuing side-effects; the single file task starts directly
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Verify(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>()), Times.Once());
+        Mock.VerifyEventPublished(It.IsAny<PauseDownloadTaskCommand>, Times.Never());
+        Mock.VerifyEventPublished(It.IsAny<DownloadTaskUpdatedCommand>, Times.Once());
+        Mock.VerifyEventPublished(It.IsAny<CheckDownloadQueueEvent>, Times.Once());
+    }
+
+    [Fact]
+    public async Task ShouldQueuePausedSiblings_WhenStartingTvShowWithBothPausedAndMovePausedChildren()
+    {
+        // Arrange — first child is Paused (Downloading phase), second is MovePaused (FileTransfer phase)
+        // The handler should pick the first Paused/MovePaused child and queue the rest
+        await SetupDatabase(
+            11107,
+            x =>
+            {
+                x.TvShowDownloadTasksCount = 1;
+                x.TvShowSeasonDownloadTasksCount = 1;
+                x.TvShowEpisodeCount = 3;
+            }
+        );
+
+        var tvShow = await IDbContext.DownloadTaskTvShow.AsNoTracking().FirstAsync(CancellationToken);
+        var orderedChildTasks = await IDbContext.GetDownloadableChildTasks(tvShow.ToKey(), CancellationToken);
+        orderedChildTasks.Count.ShouldBeGreaterThan(1);
+
+        var firstPausedTask = orderedChildTasks[0];
+        var secondPausedTask = orderedChildTasks[1];
+
+        await IDbContext
+            .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == firstPausedTask.Id)
+            .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, DownloadStatus.Paused), CancellationToken);
+        await IDbContext
+            .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == secondPausedTask.Id)
+            .ExecuteUpdateAsync(
+                p => p.SetProperty(x => x.DownloadStatus, DownloadStatus.MovePaused),
+                CancellationToken
+            );
+
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.IsDownloading(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>()))
+            .ReturnsAsync(Result.Ok());
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.GetCurrentlyDownloadingKeysByServer(It.IsAny<int>()))
+            .ReturnsAsync([]);
+
+        Mock.SetupCommand(It.IsAny<DownloadTaskUpdatedCommand>).ReturnsAsync(Result.Ok());
+        Mock.PublishEvent(It.IsAny<CheckDownloadQueueEvent>).Returns(Task.CompletedTask);
+
+        // Act
+        var result = await Sut.ExecuteAsync(new StartDownloadTaskCommand(tvShow.Id), CancellationToken);
+
+        // Assert: first Paused task is started; MovePaused sibling is queued
+        result.IsSuccess.ShouldBeTrue();
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Verify(x => x.StartDownloadTaskJob(It.Is<DownloadTaskKey>(k => k.Id == firstPausedTask.Id)), Times.Once());
+
+        var secondTask = await IDbContext.GetDownloadTaskFileAsync(secondPausedTask.ToKey(), CancellationToken);
+        secondTask.ShouldNotBeNull();
+        secondTask!.DownloadStatus.ShouldBe(DownloadStatus.Queued);
+    }
 }

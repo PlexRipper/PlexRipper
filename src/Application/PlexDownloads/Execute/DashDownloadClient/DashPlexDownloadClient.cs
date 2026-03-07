@@ -266,5 +266,6 @@ public class DashPlexDownloadClient : IPlexDownloadClient
 
         await _dashWrapper.StopAsync();
         await _dashWrapper.DisposeAsync();
+        _dbContext.Dispose();
     }
 }

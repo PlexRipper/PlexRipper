@@ -2,6 +2,7 @@ using System.IO.Abstractions;
 using System.Reactive.Linq;
 using Autofac;
 using FastEndpoints;
+using Reaparr.Data.Contracts;
 using Reaparr.External.Contracts;
 
 namespace Reaparr.Application.UnitTests;
@@ -64,5 +65,28 @@ public class DashPlexDownloadClientDisposeAsyncUnitTests : BaseUnitTest<DashPlex
 
         dashWrapperMock.Verify(x => x.StopAsync(), Times.Once);
         dashWrapperMock.Verify(x => x.DisposeAsync(), Times.Once);
+    }
+
+    [Fact]
+    public async Task ShouldDisposeDbContext_WhenDisposeAsyncIsCalled()
+    {
+        var dbContextMock = new Mock<IReaparrDbContext>();
+        dbContextMock.Setup(x => x.Dispose()).Verifiable(Times.Once);
+
+        var dbContextFactoryMock = new Mock<IReaparrDbContextFactory>();
+        dbContextFactoryMock.Setup(x => x.Create()).Returns(dbContextMock.Object);
+
+        var dashWrapperMock = new Mock<IDashMpdCliWrapper>();
+        dashWrapperMock.Setup(x => x.StopAsync()).ReturnsAsync(Result.Ok());
+        dashWrapperMock.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask);
+
+        var sut = Mock.Create<DashPlexDownloadClient>(
+            new NamedParameter("dbContextFactory", dbContextFactoryMock.Object),
+            new NamedParameter("dashWrapper", dashWrapperMock.Object)
+        );
+
+        await sut.DisposeAsync();
+
+        dbContextMock.Verify();
     }
 }

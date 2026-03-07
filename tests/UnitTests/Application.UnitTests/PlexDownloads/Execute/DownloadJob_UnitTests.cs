@@ -1,4 +1,6 @@
 using System.Text.Json;
+using Autofac;
+using Autofac.Features.Indexed;
 using Microsoft.EntityFrameworkCore;
 using Quartz;
 using Reaparr.Application.Contracts;
@@ -53,5 +55,47 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
 
         downloadTaskResult.DownloadDirectory.ShouldContain(downloadFolder.DirectoryPath);
         downloadTaskResult.DestinationDirectory.ShouldContain(destinationFolder.DirectoryPath);
+    }
+
+    [Fact]
+    public async Task ShouldDisposeDownloadClient_WhenJobExecutionCompletes()
+    {
+        // Arrange
+        await SetupDatabase(
+            39395,
+            config =>
+            {
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var testDownloadTask = IDbContext.DownloadTaskMovieFile.First();
+        IDictionary<string, object> dict = new Dictionary<string, object>
+        {
+            { DownloadJob.DownloadTaskIdParameter, JsonSerializer.Serialize(testDownloadTask.ToKey()) },
+        };
+
+        Mock.Mock<IJobExecutionContext>().SetupGet(x => x.JobDetail.JobDataMap).Returns(new JobDataMap(dict));
+        Mock.Mock<IJobExecutionContext>().SetupGet(x => x.CancellationToken).Returns(CancellationToken);
+        Mock.Mock<IServerSettingsModule>().Setup(x => x.GetAllowStreamDownloader(It.IsAny<string>())).Returns(false);
+
+        var downloadClientMock = Mock.Mock<IPlexDownloadClient>();
+        downloadClientMock
+            .Setup(x => x.Start(It.IsAny<DownloadTaskKey>(), CancellationToken))
+            .ReturnsAsync(Result.Ok());
+        downloadClientMock.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask).Verifiable(Times.Once);
+
+        var downloadClientIndexMock = new Mock<IIndex<PlexDownloadClientType, IPlexDownloadClient>>();
+        downloadClientIndexMock.Setup(x => x[It.IsAny<PlexDownloadClientType>()]).Returns(downloadClientMock.Object);
+
+        var sut = Mock.Create<DownloadJob>(
+            new NamedParameter("plexDownloadClientFactory", downloadClientIndexMock.Object)
+        );
+
+        // Act
+        await sut.Execute(Mock.Create<IJobExecutionContext>());
+
+        // Assert
+        downloadClientMock.Verify();
     }
 }

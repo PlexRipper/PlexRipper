@@ -3,6 +3,7 @@ using System.Reactive.Linq;
 using Autofac;
 using Downloader;
 using FastEndpoints;
+using Reaparr.Data.Contracts;
 using Reaparr.Settings.Contracts;
 
 namespace Reaparr.Application.UnitTests;
@@ -65,5 +66,25 @@ public class DirectPlexDownloadClientDisposeAsyncUnitTests : BaseUnitTest<Direct
 
         // Assert
         await act.ShouldNotThrowAsync();
+    }
+
+    [Fact]
+    public async Task ShouldDisposeDbContext_WhenDisposeAsyncIsCalled()
+    {
+        Mock.Mock<IDownloadManagerSettings>().Setup(x => x.DownloadSegments).Returns(1);
+
+        var dbContextMock = new Mock<IReaparrDbContext>();
+        dbContextMock.Setup(x => x.Dispose()).Verifiable(Times.Once);
+
+        var dbContextFactoryMock = new Mock<IReaparrDbContextFactory>();
+        dbContextFactoryMock.Setup(x => x.Create()).Returns(dbContextMock.Object);
+
+        var sut = Mock.Create<DirectPlexDownloadClient>(
+            new NamedParameter("dbContextFactory", dbContextFactoryMock.Object)
+        );
+
+        await sut.DisposeAsync();
+
+        dbContextMock.Verify();
     }
 }

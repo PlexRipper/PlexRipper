@@ -342,5 +342,16 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
         _destroy.OnCompleted();
         _subscriptions.Dispose();
         _destroy.Dispose();
+
+        if (_downloader is IAsyncDisposable asyncDisposableDownloader)
+        {
+            await asyncDisposableDownloader.DisposeAsync();
+        }
+        else if (_downloader is IDisposable disposableDownloader)
+        {
+            disposableDownloader.Dispose();
+        }
+
+        _dbContext.Dispose();
     }
 }

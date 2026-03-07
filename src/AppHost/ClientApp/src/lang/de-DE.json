@@ -158,8 +158,6 @@
                         "platform": "Plattform:"
                     },
                     "header": "Server Daten",
-                    "all-connections-failed": "Beim Herstellen einer Verbindung zum Server sind alle Verbindungen fehlgeschlagen. Der Server ist höchstwahrscheinlich offline ...",
-                    "at-least-one-connection-successful": "Mindestens eine Verbindung war erfolgreich, was bedeutet, dass mit dem Server eine Verbindung hergestellt werden kann!",
                     "values": {
                         "platform-version": "{platform} ({platformVersion})",
                         "product-version": "{product} ({productVersion})"
@@ -447,7 +445,6 @@
             "add-alert": "benachrichtigung hinzufügen",
             "back": "zurück",
             "cancel": "abbrechen",
-            "check-server-status": "Server Status überprüfen",
             "close": "schließen",
             "confirm": "bestätigen",
             "delete": "löschen",

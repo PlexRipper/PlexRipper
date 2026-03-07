@@ -12,7 +12,7 @@
 				icon="mdi-cloud-sync"
 				:loading="checkAllLoading"
 				:cy="'check-all-connections-btn'"
-				tooltip-text="Check all Connections"
+				:tooltip-text="$t('components.server-dialog.tabs.server-connections.check-all-connections')"
 				class="q-mr-md"
 				@click="checkAllConnections" />
 		</QCol>

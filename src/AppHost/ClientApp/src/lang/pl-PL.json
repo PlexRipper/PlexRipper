@@ -158,8 +158,6 @@
                         "platform": "Platforma:"
                     },
                     "header": "Dane serwera",
-                    "all-connections-failed": "Wszystkie połączenia nie powiodły się podczas próby połączenia z serwerem, serwer najprawdopodobniej jest offline...",
-                    "at-least-one-connection-successful": "Co najmniej jedno połączenie zakończyło się sukcesem, co oznacza, że serwer może być połączony!",
                     "values": {
                         "platform-version": "{platform} ({platformVersion})",
                         "product-version": "{product} ({productVersion})"
@@ -447,7 +445,6 @@
             "add-alert": "Dodaj alert",
             "back": "Wróć",
             "cancel": "Anuluj",
-            "check-server-status": "Sprawdź status serwera",
             "close": "Zamknij",
             "confirm": "Potwierdź",
             "delete": "Usuń",

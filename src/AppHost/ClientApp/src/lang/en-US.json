@@ -158,8 +158,6 @@
                         "platform": "Platform:"
                     },
                     "header": "Server Data",
-                    "all-connections-failed": "All connections failed when used to connect to the server, the server is most likely offline...",
-                    "at-least-one-connection-successful": "At least one connection was successful, which means the server can be connected to!",
                     "values": {
                         "platform-version": "{platform} ({platformVersion})",
                         "product-version": "{product} ({productVersion})"
@@ -447,7 +445,6 @@
             "add-alert": "Add Alert",
             "back": "Back",
             "cancel": "Cancel",
-            "check-server-status": "Check server status",
             "close": "Close",
             "confirm": "Confirm",
             "delete": "Delete",

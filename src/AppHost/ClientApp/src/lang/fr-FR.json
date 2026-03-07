@@ -158,8 +158,6 @@
                         "platform": "Plate-forme:"
                     },
                     "header": "Donnée Serveur",
-                    "all-connections-failed": "Toutes les connexions ont échoué lorsqu'elles sont utilisées pour se connecter au serveur, le serveur est probablement hors ligne...",
-                    "at-least-one-connection-successful": "Au moins une connexion a réussi, ce qui signifie que le serveur peut être connecté !",
                     "values": {
                         "platform-version": "{platform} ({platformVersion})",
                         "product-version": "{product} ({productVersion})"
@@ -447,7 +445,6 @@
             "add-alert": "Ajouter une Alert",
             "back": "Retour",
             "cancel": "Annuler",
-            "check-server-status": "Vérifier le statut du serveur",
             "close": "Fermé",
             "confirm": "Confirmer",
             "delete": "Supprimer",

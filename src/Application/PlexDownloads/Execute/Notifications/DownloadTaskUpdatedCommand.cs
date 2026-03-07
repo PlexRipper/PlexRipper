@@ -26,7 +26,7 @@ public class DownloadTaskUpdatedHandler : ICommandHandler<DownloadTaskUpdatedCom
             // Ensure the up-to-date download status is written to the database as the DownloadQueue depends on that status to pick a new DownloadTask
             await _dbContext.DetermineDownloadStatus(command.Key, cancellationToken);
 
-            var downloadTasks = await _dbContext.GetAllDownloadTasksByServerAsync(
+            var downloadTasks = await _dbContext.GetDownloadProgressTasksByServerAsync(
                 plexServerId,
                 cancellationToken: cancellationToken
             );

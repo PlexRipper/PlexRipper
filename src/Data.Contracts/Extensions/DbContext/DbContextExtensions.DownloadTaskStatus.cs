@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Domain;
 using Reaparr.Logging;
@@ -22,63 +21,134 @@ public static partial class DbContextExtensions
         try
         {
             var parentKey = key;
-            while (parentKey != null)
+            while (parentKey is not null)
             {
                 switch (parentKey.Type)
                 {
                     case DownloadTaskType.Movie:
                     {
-                        var downloadTask = await dbContext
-                            .DownloadTaskMovie.AsTracking()
-                            .Include(x => x.Children)
-                            .GetAsync(parentKey.Id, cancellationToken);
-                        var downloadStatusList = downloadTask?.Children.Select(x => x.DownloadStatus).ToList() ?? [];
-                        Update(downloadTask, downloadStatusList);
+                        var childStatuses = await dbContext
+                            .DownloadTaskMovieFile.Where(x => x.ParentId == parentKey.Id)
+                            .Select(x => x.DownloadStatus)
+                            .ToListAsync(cancellationToken);
+                        var newStatus = DownloadTaskActions.Aggregate(childStatuses);
+
+                        await dbContext
+                            .DownloadTaskMovie.Where(x => x.Id == parentKey.Id && x.DownloadStatus != newStatus)
+                            .ExecuteUpdateAsync(
+                                p => p.SetProperty(x => x.DownloadStatus, newStatus),
+                                cancellationToken
+                            );
+
+                        parentKey = null;
                         break;
                     }
                     case DownloadTaskType.TvShow:
                     {
-                        var downloadTask = await dbContext
-                            .DownloadTaskTvShow.AsTracking()
-                            .Include(x => x.Children)
-                                .ThenInclude(x => x.Children)
-                                    .ThenInclude(x => x.Children)
-                            .GetAsync(parentKey.Id, cancellationToken);
-                        var downloadStatusList =
-                            downloadTask
-                                ?.Children.SelectMany(x => x.Children.SelectMany(y => y.Children))
-                                .Select(x => x.DownloadStatus)
-                                .ToList()
-                            ?? [];
-                        Update(downloadTask, downloadStatusList);
+                        var childStatuses = await dbContext
+                            .DownloadTaskTvShowSeason.Where(x => x.ParentId == parentKey.Id)
+                            .Select(x => x.DownloadStatus)
+                            .ToListAsync(cancellationToken);
+                        var newStatus = DownloadTaskActions.Aggregate(childStatuses);
+
+                        await dbContext
+                            .DownloadTaskTvShow.Where(x => x.Id == parentKey.Id && x.DownloadStatus != newStatus)
+                            .ExecuteUpdateAsync(
+                                p => p.SetProperty(x => x.DownloadStatus, newStatus),
+                                cancellationToken
+                            );
+
+                        parentKey = null;
                         break;
                     }
                     case DownloadTaskType.Season:
                     {
-                        var downloadTask = await dbContext
-                            .DownloadTaskTvShowSeason.AsTracking()
-                            .Include(x => x.Children)
-                                .ThenInclude(x => x.Children)
-                            .GetAsync(parentKey.Id, cancellationToken);
-                        var downloadStatusList =
-                            downloadTask?.Children.SelectMany(x => x.Children).Select(x => x.DownloadStatus).ToList()
-                            ?? [];
-                        Update(downloadTask, downloadStatusList);
+                        var season = await dbContext
+                            .DownloadTaskTvShowSeason.Where(x => x.Id == parentKey.Id)
+                            .Select(x => new
+                            {
+                                x.Id,
+                                x.ParentId,
+                                x.PlexServerId,
+                                x.PlexLibraryId,
+                            })
+                            .FirstOrDefaultAsync(cancellationToken);
+
+                        if (season is null)
+                        {
+                            parentKey = null;
+                            break;
+                        }
+
+                        var childStatuses = await dbContext
+                            .DownloadTaskTvShowEpisode.Where(x => x.ParentId == season.Id)
+                            .Select(x => x.DownloadStatus)
+                            .ToListAsync(cancellationToken);
+                        var newStatus = DownloadTaskActions.Aggregate(childStatuses);
+
+                        await dbContext
+                            .DownloadTaskTvShowSeason.Where(x => x.Id == season.Id && x.DownloadStatus != newStatus)
+                            .ExecuteUpdateAsync(
+                                p => p.SetProperty(x => x.DownloadStatus, newStatus),
+                                cancellationToken
+                            );
+
+                        parentKey = new DownloadTaskKey
+                        {
+                            Type = DownloadTaskType.TvShow,
+                            Id = season.ParentId,
+                            PlexServerId = season.PlexServerId,
+                            PlexLibraryId = season.PlexLibraryId,
+                        };
+
                         break;
                     }
                     case DownloadTaskType.Episode:
                     {
-                        var downloadTask = await dbContext
-                            .DownloadTaskTvShowEpisode.AsTracking()
-                            .Include(x => x.Children)
-                            .GetAsync(parentKey.Id, cancellationToken);
-                        var downloadStatusList = downloadTask?.Children.Select(x => x.DownloadStatus).ToList() ?? [];
-                        Update(downloadTask, downloadStatusList);
+                        var episode = await dbContext
+                            .DownloadTaskTvShowEpisode.Where(x => x.Id == parentKey.Id)
+                            .Select(x => new
+                            {
+                                x.Id,
+                                x.ParentId,
+                                x.PlexServerId,
+                                x.PlexLibraryId,
+                            })
+                            .FirstOrDefaultAsync(cancellationToken);
+
+                        if (episode is null)
+                        {
+                            parentKey = null;
+                            break;
+                        }
+
+                        var childStatuses = await dbContext
+                            .DownloadTaskTvShowEpisodeFile.Where(x => x.ParentId == episode.Id)
+                            .Select(x => x.DownloadStatus)
+                            .ToListAsync(cancellationToken);
+                        var newStatus = DownloadTaskActions.Aggregate(childStatuses);
+
+                        await dbContext
+                            .DownloadTaskTvShowEpisode.Where(x => x.Id == episode.Id && x.DownloadStatus != newStatus)
+                            .ExecuteUpdateAsync(
+                                p => p.SetProperty(x => x.DownloadStatus, newStatus),
+                                cancellationToken
+                            );
+
+                        parentKey = new DownloadTaskKey
+                        {
+                            Type = DownloadTaskType.Season,
+                            Id = episode.ParentId,
+                            PlexServerId = episode.PlexServerId,
+                            PlexLibraryId = episode.PlexLibraryId,
+                        };
+
                         break;
                     }
 
                     // The DownloadStatus here is determined by PlexDownloadClient and the MoveDownloadFileJob
                     case DownloadTaskType.MovieData:
+                    case DownloadTaskType.MoviePart:
                     {
                         parentKey = await dbContext
                             // ReSharper disable once AccessToModifiedClosure
@@ -90,6 +160,7 @@ public static partial class DbContextExtensions
 
                     // The DownloadStatus here is determined by PlexDownloadClient and the MoveDownloadFileJob
                     case DownloadTaskType.EpisodeData:
+                    case DownloadTaskType.EpisodePart:
                     {
                         parentKey = await dbContext
                             // ReSharper disable once AccessToModifiedClosure
@@ -105,31 +176,9 @@ public static partial class DbContextExtensions
                                 parentKey.Type,
                                 nameof(DetermineDownloadStatus)
                             );
+                        parentKey = null;
                         break;
                 }
-            }
-
-            await dbContext.SaveChangesAsync(cancellationToken);
-            return;
-
-            [SuppressMessage("ReSharper", "AccessToModifiedClosure")]
-            void Update(DownloadTaskBase? downloadTaskBase, List<DownloadStatus> downloadStatusList)
-            {
-                if (downloadTaskBase == null)
-                {
-                    _log.Here()
-                        .Error(
-                            "DownloadTaskBase is null in {DetermineDownloadStatus}",
-                            nameof(DetermineDownloadStatus)
-                        );
-                    return;
-                }
-
-                var newStatus = DownloadTaskActions.Aggregate(downloadStatusList);
-                if (downloadTaskBase.DownloadStatus != newStatus)
-                    downloadTaskBase.DownloadStatus = newStatus;
-
-                parentKey = downloadTaskBase.ToParentKey();
             }
         }
         catch (Exception ex) when (ex is not OperationCanceledException)

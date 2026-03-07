@@ -779,6 +779,64 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
     }
 
     [Fact]
+    public async Task ShouldPersistTotalDataReceived_WhenCompletionEventHasZeroReceivedBytes()
+    {
+        // Arrange
+        await SetupDatabase(
+            88889,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var downloadTask = await dbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+        var serverMachineIdentifier = await dbContext.GetPlexServerMachineIdentifierById(
+            downloadTask.PlexServerId,
+            CancellationToken
+        );
+
+        SetupSpeedLimitMocks(serverMachineIdentifier);
+        SetupCommandExecutor();
+
+        var completionPackage = MakeDownloadPackage(downloadTask.DataTotal);
+
+        var downloadServiceMock = new Mock<IDownloadService>();
+        downloadServiceMock.Setup(x => x.Clear()).Returns(Task.CompletedTask);
+        downloadServiceMock.Setup(x => x.CancelTaskAsync()).Returns(Task.CompletedTask);
+        downloadServiceMock.Setup(x => x.Package).Returns(completionPackage);
+        downloadServiceMock
+            .Setup(x => x.DownloadFileTaskAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Returns<string, string, CancellationToken>(
+                (_, _, _) =>
+                {
+                    downloadServiceMock.Raise(
+                        x => x.DownloadFileCompleted += null,
+                        downloadServiceMock.Object,
+                        new AsyncCompletedEventArgs(null, false, completionPackage)
+                    );
+                    return Task.CompletedTask;
+                }
+            );
+
+        // Act
+        var sut = CreateSut(downloadServiceMock);
+        var result = await sut.Start(downloadTask.ToKey(), CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+
+        var persisted = await IDbContext.DownloadTaskMovieFile.FirstAsync(
+            x => x.Id == downloadTask.Id,
+            CancellationToken
+        );
+        persisted.DataReceived.ShouldBe(downloadTask.DataTotal);
+    }
+
+    [Fact]
     public async Task ShouldSetPausedStatus_WhenDownloadFileCompletedEventIsCancelled()
     {
         // Arrange

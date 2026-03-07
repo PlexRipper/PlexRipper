@@ -254,7 +254,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                         {
                             DataTotal = package!.TotalFileSize,
                             Percentage = 100,
-                            DataReceived = package.ReceivedBytesSize,
+                            DataReceived = Math.Max(package.ReceivedBytesSize, package.TotalFileSize),
                             DownloadSpeed = 0,
                         };
 

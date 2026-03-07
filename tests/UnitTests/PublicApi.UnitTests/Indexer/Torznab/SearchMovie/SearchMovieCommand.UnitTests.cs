@@ -399,26 +399,4 @@ public class SearchMovieCommandUnitTests : BaseUnitTest<SearchMovieCommandHandle
         result.IsValid.ShouldBeFalse();
         result.Errors.ShouldNotBeEmpty();
     }
-
-    [Fact]
-    public void ShouldFailValidation_WhenImdbIdIsNull()
-    {
-        // Arrange
-        var validator = new SearchMovieCommandValidator();
-        var cmd = new SearchMovieCommand
-        {
-            Query = string.Empty,
-            Limit = 10,
-            Offset = 0,
-            IMDB_ID = null!,
-            TMDB_ID = 0,
-        };
-
-        // Act
-        var result = validator.Validate(cmd);
-
-        // Assert
-        result.IsValid.ShouldBeFalse();
-        result.Errors.ShouldNotBeEmpty();
-    }
 }

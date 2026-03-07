@@ -354,336 +354,242 @@ public static partial class DbContextExtensions
         CancellationToken cancellationToken = default
     )
     {
-        var movies = await dbContext
+        var isFilteredByServer = plexServerId > 0;
+
+        var rows = await dbContext
             .DownloadTaskMovie.AsNoTracking()
-            .Where(x => plexServerId <= 0 || x.PlexServerId == plexServerId)
-            .Select(x => new
+            .Where(x => !isFilteredByServer || x.PlexServerId == plexServerId)
+            .Select(x => new DownloadProgressRow
             {
-                x.Id,
-                x.PlexApiRatingKey,
-                x.Title,
-                x.DownloadStatus,
-                x.CreatedAt,
-                x.PlexServerId,
-                x.PlexLibraryId,
-            })
-            .ToListAsync(cancellationToken);
-
-        var movieFiles = await dbContext
-            .DownloadTaskMovieFile.AsNoTracking()
-            .Where(x => plexServerId <= 0 || x.PlexServerId == plexServerId)
-            .Select(x => new
-            {
-                x.Id,
-                x.ParentId,
-                x.PlexApiRatingKey,
-                x.Title,
-                x.DownloadStatus,
-                x.CreatedAt,
-                x.PlexServerId,
-                x.PlexLibraryId,
-                x.DataReceived,
-                x.DataTotal,
-                x.DownloadSpeed,
-                x.FileTransferSpeed,
-                x.FileDataTransferred,
-            })
-            .ToListAsync(cancellationToken);
-
-        var tvShows = await dbContext
-            .DownloadTaskTvShow.AsNoTracking()
-            .Where(x => plexServerId <= 0 || x.PlexServerId == plexServerId)
-            .Select(x => new
-            {
-                x.Id,
-                x.PlexApiRatingKey,
-                x.Title,
-                x.DownloadStatus,
-                x.CreatedAt,
-                x.PlexServerId,
-                x.PlexLibraryId,
-            })
-            .ToListAsync(cancellationToken);
-
-        var seasons = await dbContext
-            .DownloadTaskTvShowSeason.AsNoTracking()
-            .Where(x => plexServerId <= 0 || x.PlexServerId == plexServerId)
-            .Select(x => new
-            {
-                x.Id,
-                x.ParentId,
-                x.PlexApiRatingKey,
-                x.Title,
-                x.DownloadStatus,
-                x.CreatedAt,
-                x.PlexServerId,
-                x.PlexLibraryId,
-            })
-            .ToListAsync(cancellationToken);
-
-        var episodes = await dbContext
-            .DownloadTaskTvShowEpisode.AsNoTracking()
-            .Where(x => plexServerId <= 0 || x.PlexServerId == plexServerId)
-            .Select(x => new
-            {
-                x.Id,
-                x.ParentId,
-                x.PlexApiRatingKey,
-                x.Title,
-                x.DownloadStatus,
-                x.CreatedAt,
-                x.PlexServerId,
-                x.PlexLibraryId,
-            })
-            .ToListAsync(cancellationToken);
-
-        var episodeFiles = await dbContext
-            .DownloadTaskTvShowEpisodeFile.AsNoTracking()
-            .Where(x => plexServerId <= 0 || x.PlexServerId == plexServerId)
-            .Select(x => new
-            {
-                x.Id,
-                x.ParentId,
-                x.PlexApiRatingKey,
-                x.Title,
-                x.DownloadStatus,
-                x.CreatedAt,
-                x.PlexServerId,
-                x.PlexLibraryId,
-                x.DataReceived,
-                x.DataTotal,
-                x.DownloadSpeed,
-                x.FileTransferSpeed,
-                x.FileDataTransferred,
-            })
-            .ToListAsync(cancellationToken);
-
-        var movieFilesByParent = movieFiles.ToLookup(x => x.ParentId);
-        var seasonsByParent = seasons.ToLookup(x => x.ParentId);
-        var episodesByParent = episodes.ToLookup(x => x.ParentId);
-        var episodeFilesByParent = episodeFiles.ToLookup(x => x.ParentId);
-
-        var downloadTasks = new List<DownloadTaskGeneric>();
-
-        foreach (var movie in movies.OrderBy(x => x.CreatedAt))
-        {
-            var children = movieFilesByParent[movie.Id]
-                .OrderBy(x => x.CreatedAt)
-                .Select(file =>
-                    CreateFileNode(
-                        file.Id,
-                        file.ParentId,
-                        file.PlexApiRatingKey,
-                        file.Title,
-                        PlexMediaType.Movie,
-                        DownloadTaskType.MovieData,
-                        file.DownloadStatus,
-                        file.CreatedAt,
-                        file.PlexServerId,
-                        file.PlexLibraryId,
-                        file.DataReceived,
-                        file.DataTotal,
-                        file.DownloadSpeed,
-                        file.FileTransferSpeed,
-                        file.FileDataTransferred
-                    )
-                )
-                .ToList();
-
-            var movieTask = CreateParentNode(
-                movie.Id,
-                movie.PlexApiRatingKey,
-                movie.Title,
-                PlexMediaType.Movie,
-                DownloadTaskType.Movie,
-                movie.DownloadStatus,
-                movie.CreatedAt,
-                movie.PlexServerId,
-                movie.PlexLibraryId,
-                children
-            );
-
-            movieTask.Calculate();
-            downloadTasks.Add(movieTask);
-        }
-
-        foreach (var tvShow in tvShows.OrderBy(x => x.CreatedAt))
-        {
-            var tvShowSeasons = seasonsByParent[tvShow.Id]
-                .OrderBy(x => x.CreatedAt)
-                .Select(season =>
-                {
-                    var seasonEpisodes = episodesByParent[season.Id]
-                        .OrderBy(x => x.CreatedAt)
-                        .Select(episode =>
-                        {
-                            var files = episodeFilesByParent[episode.Id]
-                                .OrderBy(x => x.CreatedAt)
-                                .Select(file =>
-                                    CreateFileNode(
-                                        file.Id,
-                                        file.ParentId,
-                                        file.PlexApiRatingKey,
-                                        file.Title,
-                                        PlexMediaType.Episode,
-                                        DownloadTaskType.EpisodeData,
-                                        file.DownloadStatus,
-                                        file.CreatedAt,
-                                        file.PlexServerId,
-                                        file.PlexLibraryId,
-                                        file.DataReceived,
-                                        file.DataTotal,
-                                        file.DownloadSpeed,
-                                        file.FileTransferSpeed,
-                                        file.FileDataTransferred
-                                    )
-                                )
-                                .ToList();
-
-                            return CreateParentNode(
-                                episode.Id,
-                                episode.PlexApiRatingKey,
-                                episode.Title,
-                                PlexMediaType.Episode,
-                                DownloadTaskType.Episode,
-                                episode.DownloadStatus,
-                                episode.CreatedAt,
-                                episode.PlexServerId,
-                                episode.PlexLibraryId,
-                                files,
-                                episode.ParentId
-                            );
-                        })
-                        .ToList();
-
-                    var seasonTask = CreateParentNode(
-                        season.Id,
-                        season.PlexApiRatingKey,
-                        season.Title,
-                        PlexMediaType.Season,
-                        DownloadTaskType.Season,
-                        season.DownloadStatus,
-                        season.CreatedAt,
-                        season.PlexServerId,
-                        season.PlexLibraryId,
-                        seasonEpisodes,
-                        season.ParentId
-                    );
-
-                    seasonTask.Calculate();
-                    return seasonTask;
-                })
-                .ToList();
-
-            var tvShowTask = CreateParentNode(
-                tvShow.Id,
-                tvShow.PlexApiRatingKey,
-                tvShow.Title,
-                PlexMediaType.TvShow,
-                DownloadTaskType.TvShow,
-                tvShow.DownloadStatus,
-                tvShow.CreatedAt,
-                tvShow.PlexServerId,
-                tvShow.PlexLibraryId,
-                tvShowSeasons
-            );
-
-            tvShowTask.Calculate();
-            downloadTasks.Add(tvShowTask);
-        }
-
-        downloadTasks.Sort((x, y) => DateTime.Compare(x.CreatedAt, y.CreatedAt));
-        return downloadTasks;
-
-        static DownloadTaskGeneric CreateParentNode(
-            Guid id,
-            int ratingKey,
-            string title,
-            PlexMediaType mediaType,
-            DownloadTaskType taskType,
-            DownloadStatus status,
-            DateTime createdAt,
-            int plexServerId,
-            int plexLibraryId,
-            List<DownloadTaskGeneric> children,
-            Guid parentId = default
-        ) =>
-            new()
-            {
-                Id = id,
-                RatingKey = ratingKey,
-                Title = title,
-                FullTitle = string.Empty,
-                MediaType = mediaType,
-                DownloadTaskType = taskType,
-                DownloadStatus = status,
-                CreatedAt = createdAt,
-                FileName = string.Empty,
-                IsDownloadable = false,
-                DownloadDirectory = string.Empty,
-                Quality = VideoQuality.None,
-                DestinationDirectory = string.Empty,
-                FileLocationUrl = string.Empty,
+                Id = x.Id,
+                ParentId = null,
+                PlexApiRatingKey = x.PlexApiRatingKey,
+                Title = x.Title,
+                FullTitle = x.FullTitle,
+                MediaType = PlexMediaType.Movie,
+                DownloadTaskType = DownloadTaskType.Movie,
+                DownloadStatus = x.DownloadStatus,
+                CreatedAt = x.CreatedAt,
+                PlexServerId = x.PlexServerId,
+                PlexLibraryId = x.PlexLibraryId,
                 DataReceived = 0,
                 DataTotal = 0,
                 DownloadSpeed = 0,
                 FileTransferSpeed = 0,
                 FileDataTransferred = 0,
-                CurrentFileTransferBytesOffset = 0,
-                Children = children,
-                ParentId = parentId,
-                PlexServer = null,
-                PlexServerId = plexServerId,
-                PlexLibrary = null,
-                PlexLibraryId = plexLibraryId,
-            };
+            })
+            .Concat(
+                dbContext
+                    .DownloadTaskMovieFile.AsNoTracking()
+                    .Where(x => !isFilteredByServer || x.PlexServerId == plexServerId)
+                    .Select(x => new DownloadProgressRow
+                    {
+                        Id = x.Id,
+                        ParentId = x.ParentId,
+                        PlexApiRatingKey = x.PlexApiRatingKey,
+                        Title = x.Title,
+                        FullTitle = x.FullTitle,
+                        MediaType = PlexMediaType.Movie,
+                        DownloadTaskType = DownloadTaskType.MovieData,
+                        DownloadStatus = x.DownloadStatus,
+                        CreatedAt = x.CreatedAt,
+                        PlexServerId = x.PlexServerId,
+                        PlexLibraryId = x.PlexLibraryId,
+                        DataReceived = x.DataReceived,
+                        DataTotal = x.DataTotal,
+                        DownloadSpeed = x.DownloadSpeed,
+                        FileTransferSpeed = x.FileTransferSpeed,
+                        FileDataTransferred = x.FileDataTransferred,
+                    })
+            )
+            .Concat(
+                dbContext
+                    .DownloadTaskTvShow.AsNoTracking()
+                    .Where(x => !isFilteredByServer || x.PlexServerId == plexServerId)
+                    .Select(x => new DownloadProgressRow
+                    {
+                        Id = x.Id,
+                        ParentId = null,
+                        PlexApiRatingKey = x.PlexApiRatingKey,
+                        Title = x.Title,
+                        FullTitle = x.FullTitle,
+                        MediaType = PlexMediaType.TvShow,
+                        DownloadTaskType = DownloadTaskType.TvShow,
+                        DownloadStatus = x.DownloadStatus,
+                        CreatedAt = x.CreatedAt,
+                        PlexServerId = x.PlexServerId,
+                        PlexLibraryId = x.PlexLibraryId,
+                        DataReceived = 0,
+                        DataTotal = 0,
+                        DownloadSpeed = 0,
+                        FileTransferSpeed = 0,
+                        FileDataTransferred = 0,
+                    })
+            )
+            .Concat(
+                dbContext
+                    .DownloadTaskTvShowSeason.AsNoTracking()
+                    .Where(x => !isFilteredByServer || x.PlexServerId == plexServerId)
+                    .Select(x => new DownloadProgressRow
+                    {
+                        Id = x.Id,
+                        ParentId = x.ParentId,
+                        PlexApiRatingKey = x.PlexApiRatingKey,
+                        Title = x.Title,
+                        FullTitle = x.FullTitle,
+                        MediaType = PlexMediaType.Season,
+                        DownloadTaskType = DownloadTaskType.Season,
+                        DownloadStatus = x.DownloadStatus,
+                        CreatedAt = x.CreatedAt,
+                        PlexServerId = x.PlexServerId,
+                        PlexLibraryId = x.PlexLibraryId,
+                        DataReceived = 0,
+                        DataTotal = 0,
+                        DownloadSpeed = 0,
+                        FileTransferSpeed = 0,
+                        FileDataTransferred = 0,
+                    })
+            )
+            .Concat(
+                dbContext
+                    .DownloadTaskTvShowEpisode.AsNoTracking()
+                    .Where(x => !isFilteredByServer || x.PlexServerId == plexServerId)
+                    .Select(x => new DownloadProgressRow
+                    {
+                        Id = x.Id,
+                        ParentId = x.ParentId,
+                        PlexApiRatingKey = x.PlexApiRatingKey,
+                        Title = x.Title,
+                        FullTitle = x.FullTitle,
+                        MediaType = PlexMediaType.Episode,
+                        DownloadTaskType = DownloadTaskType.Episode,
+                        DownloadStatus = x.DownloadStatus,
+                        CreatedAt = x.CreatedAt,
+                        PlexServerId = x.PlexServerId,
+                        PlexLibraryId = x.PlexLibraryId,
+                        DataReceived = 0,
+                        DataTotal = 0,
+                        DownloadSpeed = 0,
+                        FileTransferSpeed = 0,
+                        FileDataTransferred = 0,
+                    })
+            )
+            .Concat(
+                dbContext
+                    .DownloadTaskTvShowEpisodeFile.AsNoTracking()
+                    .Where(x => !isFilteredByServer || x.PlexServerId == plexServerId)
+                    .Select(x => new DownloadProgressRow
+                    {
+                        Id = x.Id,
+                        ParentId = x.ParentId,
+                        PlexApiRatingKey = x.PlexApiRatingKey,
+                        Title = x.Title,
+                        FullTitle = x.FullTitle,
+                        MediaType = PlexMediaType.Episode,
+                        DownloadTaskType = DownloadTaskType.EpisodeData,
+                        DownloadStatus = x.DownloadStatus,
+                        CreatedAt = x.CreatedAt,
+                        PlexServerId = x.PlexServerId,
+                        PlexLibraryId = x.PlexLibraryId,
+                        DataReceived = x.DataReceived,
+                        DataTotal = x.DataTotal,
+                        DownloadSpeed = x.DownloadSpeed,
+                        FileTransferSpeed = x.FileTransferSpeed,
+                        FileDataTransferred = x.FileDataTransferred,
+                    })
+            )
+            .OrderBy(x => x.CreatedAt)
+            .ToListAsync(cancellationToken);
 
-        static DownloadTaskGeneric CreateFileNode(
-            Guid id,
-            Guid parentId,
-            int ratingKey,
-            string title,
-            PlexMediaType mediaType,
-            DownloadTaskType taskType,
-            DownloadStatus status,
-            DateTime createdAt,
-            int plexServerId,
-            int plexLibraryId,
-            long dataReceived,
-            long dataTotal,
-            long downloadSpeed,
-            long fileTransferSpeed,
-            long fileDataTransferred
-        ) =>
+        if (rows.Count == 0)
+            return [];
+
+        var byId = rows.ToDictionary(x => x.Id, CreateNode);
+        foreach (var row in rows.Where(x => x.ParentId.HasValue))
+        {
+            if (!byId.TryGetValue(row.ParentId!.Value, out var parent))
+                continue;
+
+            parent.Children.Add(byId[row.Id]);
+        }
+
+        var roots = rows.Where(x => !x.ParentId.HasValue).Select(x => byId[x.Id]).OrderBy(x => x.CreatedAt).ToList();
+
+        foreach (var root in roots)
+            root.Calculate();
+
+        return roots;
+
+        static DownloadTaskGeneric CreateNode(DownloadProgressRow row) =>
             new()
             {
-                Id = id,
-                RatingKey = ratingKey,
-                Title = title,
-                FullTitle = string.Empty,
-                MediaType = mediaType,
-                DownloadTaskType = taskType,
-                DownloadStatus = status,
-                CreatedAt = createdAt,
+                Id = row.Id,
+                RatingKey = row.PlexApiRatingKey,
+                Title = row.Title,
+                FullTitle = row.FullTitle,
+                MediaType = row.MediaType,
+                DownloadTaskType = row.DownloadTaskType,
+                DownloadStatus = row.DownloadStatus,
+                CreatedAt = row.CreatedAt,
                 FileName = string.Empty,
-                IsDownloadable = true,
+                IsDownloadable =
+                    row.ParentId.HasValue
+                    && (
+                        row.DownloadTaskType == DownloadTaskType.MovieData
+                        || row.DownloadTaskType == DownloadTaskType.EpisodeData
+                    ),
                 DownloadDirectory = string.Empty,
                 Quality = VideoQuality.None,
                 DestinationDirectory = string.Empty,
                 FileLocationUrl = string.Empty,
-                DataReceived = dataReceived,
-                DataTotal = dataTotal,
-                DownloadSpeed = downloadSpeed,
-                FileTransferSpeed = fileTransferSpeed,
-                FileDataTransferred = fileDataTransferred,
+                DataReceived = row.DataReceived,
+                DataTotal = row.DataTotal,
+                DownloadSpeed = row.DownloadSpeed,
+                FileTransferSpeed = row.FileTransferSpeed,
+                FileDataTransferred = row.FileDataTransferred,
                 CurrentFileTransferBytesOffset = 0,
                 Children = [],
-                ParentId = parentId,
+                ParentId = row.ParentId ?? Guid.Empty,
                 PlexServer = null,
-                PlexServerId = plexServerId,
+                PlexServerId = row.PlexServerId,
                 PlexLibrary = null,
-                PlexLibraryId = plexLibraryId,
+                PlexLibraryId = row.PlexLibraryId,
             };
+    }
+
+    private sealed class DownloadProgressRow
+    {
+        public required Guid Id { get; init; }
+
+        public required Guid? ParentId { get; init; }
+
+        public required int PlexApiRatingKey { get; init; }
+
+        public required string Title { get; init; }
+
+        public required string FullTitle { get; init; }
+
+        public required PlexMediaType MediaType { get; init; }
+
+        public required DownloadTaskType DownloadTaskType { get; init; }
+
+        public required DownloadStatus DownloadStatus { get; init; }
+
+        public required DateTime CreatedAt { get; init; }
+
+        public required int PlexServerId { get; init; }
+
+        public required int PlexLibraryId { get; init; }
+
+        public required long DataReceived { get; init; }
+
+        public required long DataTotal { get; init; }
+
+        public required long DownloadSpeed { get; init; }
+
+        public required long FileTransferSpeed { get; init; }
+
+        public required long FileDataTransferred { get; init; }
     }
 
     public static Task<DownloadTaskTvShow?> GetDownloadTaskTvShowByRatingKeyQuery(

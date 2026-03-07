@@ -86,7 +86,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
         var fileStreamResult = await _commandExecutor.Send(
             new CreateDownloadFileStreamCommand(
                 downloadTask.DownloadDirectory,
-                downloadTask.FileName,
+                Path.GetFileName(downloadTask.DownloadFilePath),
                 downloadTask.DataTotal
             ),
             cancellationToken
@@ -116,7 +116,8 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
         }
         else
         {
-            await _downloader.DownloadFileTaskAsync(downloadUrl, downloadTask.DownloadFilePath, cancellationToken);
+            var downloaderTargetPath = Path.Combine(downloadTask.DownloadDirectory, downloadTask.FileName);
+            await _downloader.DownloadFileTaskAsync(downloadUrl, downloaderTargetPath, cancellationToken);
         }
 
         return Result.Ok();

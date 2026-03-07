@@ -159,6 +159,123 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
     }
 
     [Fact]
+    public async Task ShouldCreateDownloadStreamUsingTempFileName_WhenStartingDownload()
+    {
+        // Arrange
+        await SetupDatabase(
+            82346,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var downloadTask = await dbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+        var serverMachineIdentifier = await dbContext.GetPlexServerMachineIdentifierById(
+            downloadTask.PlexServerId,
+            CancellationToken
+        );
+
+        SetupSpeedLimitMocks(serverMachineIdentifier);
+
+        CreateDownloadFileStreamCommand? createStreamCommand = null;
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(m => m.Send(It.IsAny<ICommand<Result<Stream>>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok(Stream.Null))
+            .Callback<ICommand<Result<Stream>>, CancellationToken>(
+                (command, _) => createStreamCommand = command as CreateDownloadFileStreamCommand
+            );
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(m => m.Send(It.IsAny<ICommand<Result>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok());
+
+        // Act
+        var sut = CreateSut(BuildSuccessDownloadServiceMock());
+        var startResult = await sut.Start(downloadTask.ToKey(), CancellationToken);
+
+        // Assert
+        startResult.IsSuccess.ShouldBeTrue();
+        createStreamCommand.ShouldNotBeNull();
+
+        var expectedTempFileName = Path.GetFileName(downloadTask.DownloadFilePath);
+        createStreamCommand!.FileName.ShouldBe(expectedTempFileName);
+        createStreamCommand.FileName.ShouldNotBe(downloadTask.FileName);
+    }
+
+    [Fact]
+    public async Task ShouldStartDownloaderWithFinalPath_WhenTempExtensionIsConfigured()
+    {
+        // Arrange
+        await SetupDatabase(
+            82347,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var downloadTask = await dbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+        var serverMachineIdentifier = await dbContext.GetPlexServerMachineIdentifierById(
+            downloadTask.PlexServerId,
+            CancellationToken
+        );
+
+        SetupSpeedLimitMocks(serverMachineIdentifier);
+        SetupCommandExecutor();
+
+        var package = MakeDownloadPackage(downloadTask.DataTotal);
+        var downloadServiceMock = new Mock<IDownloadService>();
+        downloadServiceMock.Setup(x => x.Clear()).Returns(Task.CompletedTask);
+        downloadServiceMock.Setup(x => x.CancelTaskAsync()).Returns(Task.CompletedTask);
+        downloadServiceMock.Setup(x => x.Package).Returns(package);
+
+        downloadServiceMock
+            .Setup(x => x.DownloadFileTaskAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Returns<string, string, CancellationToken>(
+                (_, _, _) =>
+                {
+                    downloadServiceMock.Raise(
+                        x => x.DownloadFileCompleted += null,
+                        downloadServiceMock.Object,
+                        new AsyncCompletedEventArgs(null, false, package)
+                    );
+                    return Task.CompletedTask;
+                }
+            );
+
+        var sut = CreateSut(downloadServiceMock);
+
+        // Act
+        var result = await sut.Start(downloadTask.ToKey(), CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+
+        var expectedFinalPath = Path.Combine(downloadTask.DownloadDirectory, downloadTask.FileName);
+        downloadServiceMock.Verify(
+            x => x.DownloadFileTaskAsync(It.IsAny<string>(), expectedFinalPath, It.IsAny<CancellationToken>()),
+            Times.Once
+        );
+        downloadServiceMock.Verify(
+            x =>
+                x.DownloadFileTaskAsync(
+                    It.IsAny<string>(),
+                    downloadTask.DownloadFilePath,
+                    It.IsAny<CancellationToken>()
+                ),
+            Times.Never
+        );
+    }
+
+    [Fact]
     public async Task ShouldReturnEntityNotFoundError_WhenDownloadTaskKeyDoesNotExist()
     {
         // Arrange

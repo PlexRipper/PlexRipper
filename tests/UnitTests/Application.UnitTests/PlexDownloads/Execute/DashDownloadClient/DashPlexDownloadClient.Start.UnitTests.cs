@@ -244,4 +244,55 @@ public class DashPlexDownloadClientStartUnitTests : BaseUnitTest<DashPlexDownloa
         updatedTask.DataReceived.ShouldBeGreaterThan(0);
         updatedTask.DownloadSpeed.ShouldBeGreaterThanOrEqualTo(0);
     }
+
+    [Fact]
+    public async Task ShouldCreateDashOutputUsingFinalFileName_NotTempPath()
+    {
+        await SetupDatabase(
+            12005,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var downloadTask = await IDbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+        var serverMachineIdentifier = await IDbContext.GetPlexServerMachineIdentifierById(
+            downloadTask.PlexServerId,
+            CancellationToken
+        );
+
+        SetupSpeedLimit(serverMachineIdentifier, 0);
+        SetupCommandExecutor();
+
+        var progressSubject = new Subject<DashDownloadProgress>();
+        var outputSubject = new Subject<string>();
+        DashMpdCliOptions? capturedOptions = null;
+
+        var dashWrapperMock = new Mock<IDashMpdCliWrapper>();
+        dashWrapperMock.Setup(x => x.Progress).Returns(progressSubject.AsObservable());
+        dashWrapperMock.Setup(x => x.StandardOutput).Returns(outputSubject.AsObservable());
+        dashWrapperMock
+            .Setup(x => x.StartAsync(It.IsAny<DashMpdCliOptions>()))
+            .Returns<DashMpdCliOptions>(options =>
+            {
+                capturedOptions = options;
+                return Task.FromResult(Result.Ok());
+            });
+        dashWrapperMock.Setup(x => x.StopAsync()).ReturnsAsync(Result.Ok());
+        dashWrapperMock.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask);
+
+        var sut = CreateSut(dashWrapperMock);
+
+        var result = await sut.Start(downloadTask.ToKey(), CancellationToken);
+
+        result.IsSuccess.ShouldBeTrue();
+        capturedOptions.ShouldNotBeNull();
+
+        var expectedFinalPath = Path.Combine(downloadTask.DownloadDirectory, downloadTask.FileName);
+        capturedOptions!.Output.ShouldBe(expectedFinalPath);
+        capturedOptions.Output.ShouldNotBe(downloadTask.DownloadFilePath);
+    }
 }

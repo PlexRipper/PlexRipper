@@ -443,4 +443,40 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
         var file = Mock.Create<IFile>();
         file.Exists(sourcePath).ShouldBeTrue();
     }
+
+    [Fact]
+    public async Task ExecuteAsync_DeleteSourceFails_ReturnsFailed()
+    {
+        var sourcePath = "/test/source-delete-fail.bin";
+        var targetPath = "/test/target-delete-fail.bin";
+
+        var sourceContent = CreateBytes(1024);
+        var sourceStream = FakeData.GetFileSystemStream();
+        sourceStream.Write(sourceContent, 0, sourceContent.Length);
+        sourceStream.Seek(0, SeekOrigin.Begin);
+        var targetStream = FakeData.GetFileSystemStream();
+
+        var fileMock = Mock.Mock<IFile>();
+        fileMock
+            .Setup(f => f.Open(targetPath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite))
+            .Returns(targetStream);
+        fileMock
+            .Setup(f => f.Open(sourcePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            .Returns(sourceStream);
+        fileMock.Setup(f => f.Exists(sourcePath)).Returns(true);
+        fileMock.Setup(f => f.Delete(sourcePath)).Throws(new IOException("delete failed"));
+
+        var command = new MoveFileWithResumeCommand
+        {
+            SourcePath = sourcePath,
+            TargetPath = targetPath,
+            CurrentOffset = 0,
+            DataTotal = sourceContent.LongLength,
+            Progress = _ => { },
+        };
+
+        var result = await Sut.ExecuteAsync(command, CancellationToken.None);
+
+        result.IsFailed.ShouldBeTrue();
+    }
 }

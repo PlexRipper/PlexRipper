@@ -83,56 +83,62 @@ public class MoveFileWithResumeCommandHandler : ICommandHandler<MoveFileWithResu
         if (inputStreamResult.IsFailed)
             return inputStreamResult.ToResult();
 
-        await using Stream? writeStream = writeStreamResult.Value;
-        await using Stream? readStream = inputStreamResult.Value;
-
-        // Resume if needed
-        if (currentOffset > 0)
+        await using (Stream? writeStream = writeStreamResult.Value)
+        await using (Stream? readStream = inputStreamResult.Value)
         {
-            readStream.Seek(currentOffset, SeekOrigin.Begin);
-            writeStream.Seek(currentOffset, SeekOrigin.Begin);
-        }
-
-        var stopwatch = Stopwatch.StartNew();
-        var previousDataTransferred = 0L;
-
-        var buffer = new byte[_bufferSize];
-        int bytesRead;
-        while ((bytesRead = await readStream.ReadAsync(buffer, 0, buffer.Length, CancellationToken.None)) > 0)
-        {
-            await writeStream.WriteAsync(buffer, 0, bytesRead, CancellationToken.None);
-
-            currentOffset += bytesRead;
-            previousDataTransferred += bytesRead;
-
-            moveDownloadFileProgres(
-                new MoveFileTransferProgressDTO
-                {
-                    Transferred = currentOffset,
-                    DataTotal = dataTotal,
-                    FileTransferSpeed = DataFormat.GetTransferSpeed(
-                        previousDataTransferred,
-                        stopwatch.Elapsed.TotalSeconds
-                    ),
-                }
-            );
-
-            if (cancellationToken.IsCancellationRequested)
+            // Resume if needed
+            if (currentOffset > 0)
             {
-                _log.Here()
-                    .Warning(
-                        "User Cancellation requested during file move form {SourcePath} to {TargetPath}",
-                        sourcePath,
-                        targetPath
-                    );
-                break;
+                readStream.Seek(currentOffset, SeekOrigin.Begin);
+                writeStream.Seek(currentOffset, SeekOrigin.Begin);
+            }
+
+            var stopwatch = Stopwatch.StartNew();
+            var previousDataTransferred = 0L;
+
+            var buffer = new byte[_bufferSize];
+            int bytesRead;
+            while ((bytesRead = await readStream.ReadAsync(buffer, 0, buffer.Length, CancellationToken.None)) > 0)
+            {
+                await writeStream.WriteAsync(buffer, 0, bytesRead, CancellationToken.None);
+
+                currentOffset += bytesRead;
+                previousDataTransferred += bytesRead;
+
+                moveDownloadFileProgres(
+                    new MoveFileTransferProgressDTO
+                    {
+                        Transferred = currentOffset,
+                        DataTotal = dataTotal,
+                        FileTransferSpeed = DataFormat.GetTransferSpeed(
+                            previousDataTransferred,
+                            stopwatch.Elapsed.TotalSeconds
+                        ),
+                    }
+                );
+
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    _log.Here()
+                        .Warning(
+                            "User Cancellation requested during file move form {SourcePath} to {TargetPath}",
+                            sourcePath,
+                            targetPath
+                        );
+                    break;
+                }
             }
         }
 
-        // Only after a successful completion, delete the source file if it still exists
         if (!cancellationToken.IsCancellationRequested && _file.Exists(sourcePath))
         {
-            Result.Try(() => _file.Delete(sourcePath)).LogIfFailed();
+            var deleteSourceResult = Result.Try(() => _file.Delete(sourcePath));
+            if (deleteSourceResult.IsFailed)
+            {
+                return deleteSourceResult
+                    .WithError($"Failed to delete source file after move: {sourcePath}")
+                    .LogError();
+            }
         }
 
         return Result.Ok();

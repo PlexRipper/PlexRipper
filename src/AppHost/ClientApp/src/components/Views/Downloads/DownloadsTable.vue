@@ -87,6 +87,7 @@ function mapToTreeNodes(value: DownloadProgressDTO[]): IDownloadTableNode[] {
 	return value?.map((node) => {
 		return {
 			...node,
+			key: node.id,
 			label: node.title,
 			children: mapToTreeNodes(node.children),
 			actions: toDownloadActions(node.status).map((action) => ({

@@ -1,6 +1,7 @@
 using System.IO.Abstractions;
 using FastEndpoints;
 using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 using Reaparr.Data.Contracts;
 
 namespace Reaparr.Application;
@@ -45,6 +46,18 @@ public class CleanUpDownloadTaskFoldersHandler : ICommandHandler<CleanUpDownload
         if (string.IsNullOrEmpty(filePath))
             return ResultExtensions.IsEmpty(nameof(filePath)).LogError();
 
+        var hasOtherActiveTasksInDirectory = await HasOtherActiveTasksInDirectory(downloadTask, cancellationToken);
+        if (hasOtherActiveTasksInDirectory)
+        {
+            _log.Here()
+                .Debug(
+                    "Skipping cleanup for {DownloadTaskKey} because other active tasks still use {DownloadDirectory}",
+                    downloadTaskKey,
+                    downloadTask.DownloadDirectory
+                );
+            return Result.Ok();
+        }
+
         // This deletes the Season or movie folder
         var result = DeleteDirectoryFromFilePath(filePath);
         if (result.IsFailed)
@@ -59,6 +72,35 @@ public class CleanUpDownloadTaskFoldersHandler : ICommandHandler<CleanUpDownload
         }
 
         return Result.Ok();
+    }
+
+    private async Task<bool> HasOtherActiveTasksInDirectory(
+        DownloadTaskFileBase downloadTask,
+        CancellationToken cancellationToken
+    )
+    {
+        var movieTasks = await _dbContext
+            .DownloadTaskMovieFile.AsNoTracking()
+            .Where(x =>
+                x.Id != downloadTask.Id
+                && x.DownloadStatus != DownloadStatus.Completed
+                && x.DownloadStatus != DownloadStatus.Deleted
+            )
+            .ToListAsync(cancellationToken);
+
+        if (movieTasks.Any(x => x.DownloadDirectory == downloadTask.DownloadDirectory))
+            return true;
+
+        var tvEpisodeTasks = await _dbContext
+            .DownloadTaskTvShowEpisodeFile.AsNoTracking()
+            .Where(x =>
+                x.Id != downloadTask.Id
+                && x.DownloadStatus != DownloadStatus.Completed
+                && x.DownloadStatus != DownloadStatus.Deleted
+            )
+            .ToListAsync(cancellationToken);
+
+        return tvEpisodeTasks.Any(x => x.DownloadDirectory == downloadTask.DownloadDirectory);
     }
 
     private Result DeleteDirectoryFromFilePath(string filePath)

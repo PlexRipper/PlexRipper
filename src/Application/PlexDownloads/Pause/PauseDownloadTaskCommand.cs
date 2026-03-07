@@ -82,12 +82,12 @@ public class PauseDownloadTaskCommandHandler : ICommandHandler<PauseDownloadTask
                 continue;
             }
 
-            if (await _downloadTaskScheduler.IsDownloading(downloadTaskKey, cancellationToken))
-            {
-                var stopResult = await _downloadTaskScheduler.StopDownloadTaskJob(downloadTaskKey, cancellationToken);
-                if (stopResult.IsFailed)
-                    return stopResult.LogError();
-            }
+            if (!await _downloadTaskScheduler.IsDownloading(downloadTaskKey, cancellationToken))
+                continue;
+
+            var stopResult = await _downloadTaskScheduler.StopDownloadTaskJob(downloadTaskKey, cancellationToken);
+            if (stopResult.IsFailed)
+                return stopResult.LogError();
 
             var resetDownloadProgressResult = await _dbContext.ResetDownloadTaskProgress(
                 downloadTaskKey,

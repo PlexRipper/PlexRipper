@@ -23,6 +23,7 @@ public static partial class EnumMapperExtensions
         ["DownloadClientError"] = DownloadStatus.DownloadClientError,
         ["IntegrityError"] = DownloadStatus.IntegrityError,
         ["SourceUnavailable"] = DownloadStatus.SourceUnavailable,
+        ["Restarting"] = DownloadStatus.Restarting,
     };
 
     /// <summary>
@@ -69,6 +70,7 @@ public static partial class EnumMapperExtensions
             DownloadStatus.DownloadClientError => "DownloadClientError",
             DownloadStatus.IntegrityError => "IntegrityError",
             DownloadStatus.SourceUnavailable => "SourceUnavailable",
+            DownloadStatus.Restarting => "Restarting",
             _ => DefaultException(),
         };
 

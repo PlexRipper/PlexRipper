@@ -59,6 +59,13 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
             if (stopResult.IsFailed)
                 return stopResult.LogError();
 
+            await _dbContext.CreateDownloadClientLog(
+                downloadTaskKey,
+                NotificationLevel.Information,
+                DownloadStatus.Restarting,
+                $"DownloadTask {downloadTaskKey.Id} ({downloadTask.FileName}) is restarting"
+            );
+
             await _dbContext.SetDownloadStatus(childKey, DownloadStatus.Queued);
 
             await _commandExecutor.Send(new DownloadTaskUpdatedCommand(childKey), cancellationToken);

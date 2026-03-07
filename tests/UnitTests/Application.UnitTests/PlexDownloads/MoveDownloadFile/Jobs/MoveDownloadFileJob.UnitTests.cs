@@ -112,6 +112,59 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
     }
 
     [Fact]
+    public async Task ShouldReturnHundredPercent_WhenCompletedAndDataReceivedIsZero()
+    {
+        // Regression: after MoveFinished -> Completed the percentage must stay at 100 and never
+        // fall back to DataReceived / DataTotal, which can be 0 for externally-managed downloads.
+        // Arrange
+        await SetupDatabase(
+            11003,
+            config =>
+            {
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var downloadTask = await dbContext.DownloadTaskMovieFile.AsTracking().FirstAsync(CancellationToken);
+
+        // Simulate a task whose download bytes were not tracked (e.g. external client) but whose
+        // file transfer has fully completed.
+        downloadTask.DataReceived = 0;
+        downloadTask.DataTotal = 100_000_000;
+        downloadTask.FileDataTransferred = downloadTask.DataTotal;
+        downloadTask.CurrentFileTransferBytesOffset = downloadTask.DataTotal;
+        downloadTask.DownloadStatus = DownloadStatus.MoveFinished;
+        await dbContext.SaveChangesAsync(CancellationToken);
+
+        Mock.SetupCommand(It.IsAny<MoveDownloadFileFromFileTaskCommand>)
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once);
+
+        Mock.SetupCommand(It.IsAny<CleanUpDownloadTaskFoldersCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.Once);
+
+        Mock.SetupCommand(It.IsAny<DownloadTaskUpdatedCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.Once);
+
+        Mock.Mock<IMoveDownloadFileQueue>()
+            .Setup(x => x.CheckMoveDownloadFileJobQueue())
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once);
+
+        var context = SetupJobContext(downloadTask.ToKey());
+
+        // Act
+        await Sut.Execute(context);
+
+        // Assert
+        var after = await IDbContext.GetDownloadTaskFileAsync(downloadTask.ToKey(), CancellationToken);
+        after.ShouldNotBeNull();
+        after.DownloadStatus.ShouldBe(DownloadStatus.Completed);
+        after.DataReceived.ShouldBe(0L); // confirm download bytes remain at 0
+        after.FileDataTransferred.ShouldBe(after.DataTotal); // confirm transfer bytes still full
+        after.Percentage.ShouldBe(100m); // must be 100, never reset to 0
+    }
+
+    [Fact]
     public async Task ShouldNotThrow_WhenDownloadTaskKeyIsNull()
     {
         // Arrange

@@ -584,4 +584,88 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
         foreach (var t in downloadTasksAfter)
             t.DownloadStatus.ShouldBe(DownloadStatus.Stopped);
     }
+
+    [Fact]
+    public async Task ShouldNotResetProgress_WhenFileTaskIsCompleted()
+    {
+        // Regression: stopping a parent whose file child is already Completed must not
+        // zero out DataReceived, FileDataTransferred or CurrentFileTransferBytesOffset.
+        // Arrange
+        await SetupDatabase(73001, config => config.MovieDownloadTasksCount = 1);
+        var dbContext = IDbContext;
+        var fileTask = await dbContext.DownloadTaskMovieFile.AsTracking().FirstAsync(CancellationToken);
+        var movieTask = await dbContext.DownloadTaskMovie.FirstAsync(CancellationToken);
+
+        fileTask.DownloadStatus = DownloadStatus.Completed;
+        fileTask.DataTotal = 300_000_000;
+        fileTask.DataReceived = 300_000_000;
+        fileTask.FileDataTransferred = 300_000_000;
+        fileTask.CurrentFileTransferBytesOffset = 300_000_000;
+        await dbContext.SaveChangesAsync(CancellationToken);
+
+        SetupFileSystem();
+
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.IsDownloading(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .Setup(x => x.IsDownloadFileMoving(It.IsAny<DownloadTaskKey>()))
+            .ReturnsAsync(false);
+        Mock.SetupCommand(It.IsAny<DownloadTaskUpdatedCommand>).ReturnsAsync(Result.Ok());
+
+        // Act
+        var result = await Sut.ExecuteAsync(new StopDownloadTaskCommand(movieTask.Id), CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+
+        var after = await IDbContext.GetDownloadTaskFileAsync(fileTask.ToKey(), CancellationToken);
+        after.ShouldNotBeNull();
+        after.DownloadStatus.ShouldBe(DownloadStatus.Completed); // status must not change
+        after.DataReceived.ShouldBe(300_000_000L); // download bytes must not reset
+        after.FileDataTransferred.ShouldBe(300_000_000L); // transfer bytes must not reset
+        after.CurrentFileTransferBytesOffset.ShouldBe(300_000_000L); // offset must not reset
+    }
+
+    [Fact]
+    public async Task ShouldNotResetProgress_WhenFileTaskIsMoveFinished()
+    {
+        // Regression: stopping a parent whose file child is MoveFinished (move done but
+        // Completed not yet written) must not zero DataReceived or the transfer fields.
+        // Arrange
+        await SetupDatabase(73002, config => config.MovieDownloadTasksCount = 1);
+        var dbContext = IDbContext;
+        var fileTask = await dbContext.DownloadTaskMovieFile.AsTracking().FirstAsync(CancellationToken);
+        var movieTask = await dbContext.DownloadTaskMovie.FirstAsync(CancellationToken);
+
+        fileTask.DownloadStatus = DownloadStatus.MoveFinished;
+        fileTask.DataTotal = 200_000_000;
+        fileTask.DataReceived = 200_000_000;
+        fileTask.FileDataTransferred = 200_000_000;
+        fileTask.CurrentFileTransferBytesOffset = 200_000_000;
+        await dbContext.SaveChangesAsync(CancellationToken);
+
+        SetupFileSystem(fs => fs.AddFile(fileTask.DownloadFilePath, new MockFileData([])));
+
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.IsDownloading(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .Setup(x => x.IsDownloadFileMoving(It.IsAny<DownloadTaskKey>()))
+            .ReturnsAsync(false);
+        Mock.SetupCommand(It.IsAny<DownloadTaskUpdatedCommand>).ReturnsAsync(Result.Ok());
+
+        // Act
+        var result = await Sut.ExecuteAsync(new StopDownloadTaskCommand(movieTask.Id), CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+
+        var after = await IDbContext.GetDownloadTaskFileAsync(fileTask.ToKey(), CancellationToken);
+        after.ShouldNotBeNull();
+        after.DownloadStatus.ShouldBe(DownloadStatus.MoveFinished); // status must not change
+        after.DataReceived.ShouldBe(200_000_000L);
+        after.FileDataTransferred.ShouldBe(200_000_000L);
+        after.CurrentFileTransferBytesOffset.ShouldBe(200_000_000L);
+    }
 }

@@ -49,7 +49,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
         _dbContext = dbContextFactory.Create();
         _serverSettings = serverSettings;
 
-        var downloadSegments = downloadManagerSettings.DownloadSegments;
+        var downloadSegments = Math.Max(1, downloadManagerSettings.DownloadSegments);
 
         // Number of file parts, default is 1
         _configuration.ChunkCount = downloadSegments;
@@ -242,7 +242,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                         {
                             await SetDownloadStatusAsync(
                                 Domain.DownloadStatus.Error,
-                                Result.Fail(new ExceptionalError(args.Error))
+                                Result.Fail(new ExceptionalError(args.Error)).LogError()
                             );
                             return;
                         }
@@ -282,7 +282,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
         [CallerLineNumber] int sourceLineNumber = 0
     )
     {
-        var progressMsg = _log.Here()
+        var progressMsg = _log.Here(sourceFilePath, memberName, sourceLineNumber)
             .DebugMsg(
                 "[DownloadTaskProgress {MediaFileName} - {Percentage}% - {Speed} - {DataReceived} / {DataTotal} - {TimeRemaining}]",
                 _filename,

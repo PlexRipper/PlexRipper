@@ -122,4 +122,10 @@ public enum DownloadStatus
     /// </summary>
     [EnumMember(Value = nameof(MoveError))]
     MoveError = 18,
+
+    /// <summary>
+    /// The DownloadTask is in the process of restarting
+    /// </summary>
+    [EnumMember(Value = nameof(Restarting))]
+    Restarting = 19,
 }

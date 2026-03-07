@@ -138,10 +138,22 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
                     .LogIfFailed();
             }
 
-            // Reset the download progress
-            await _dbContext.ResetDownloadTaskProgress(downloadTaskKey, DownloadStatus.Stopped, cancellationToken);
+            // Completed and MoveFinished tasks must not have their progress reset:
+            // the file is already at the destination and the progress fields represent
+            // the historical record of a finished download. Only statuses that represent
+            // an in-progress or error state should be reset to Stopped.
+            if (
+                downloadTask.DownloadStatus == DownloadStatus.Completed
+                || downloadTask.DownloadStatus == DownloadStatus.MoveFinished
+            )
+            {
+                await _commandExecutor.Send(new DownloadTaskUpdatedCommand(downloadTaskKey), cancellationToken);
+                continue;
+            }
 
-            // TODO: delete file tasks but first check if already merging
+            // Reset the download progress
+            _log.Here().Debug($"Resetting download progress for {downloadTaskKey.Id} ({downloadTask.FileName})");
+            await _dbContext.ResetDownloadTaskProgress(downloadTaskKey, DownloadStatus.Stopped, cancellationToken);
 
             await _commandExecutor.Send(new DownloadTaskUpdatedCommand(downloadTaskKey), cancellationToken);
         }

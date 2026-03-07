@@ -240,4 +240,110 @@ public class DownloadCommandsPauseDownloadTasksAsyncUnitTests : BaseUnitTest<Pau
         inactiveTask.ShouldNotBeNull();
         inactiveTask!.DownloadStatus.ShouldBe(DownloadStatus.Queued);
     }
+
+    [Fact]
+    public async Task ShouldNotResetProgressOrStatus_WhenFileTaskIsMoveFinished()
+    {
+        // Regression: a MoveFinished task must be skipped by the pause handler.
+        // Previously, ResetDownloadTaskProgress zeroed DataReceived, FileDataTransferred,
+        // and CurrentFileTransferBytesOffset, causing the progress to visually reset to 0%
+        // while the file was already fully moved to its destination.
+        // Arrange
+        await SetupDatabase(
+            57001,
+            config =>
+            {
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var fileTask = await dbContext.DownloadTaskMovieFile.AsTracking().FirstAsync(CancellationToken);
+        var parentTask = await dbContext.DownloadTaskMovie.AsTracking().FirstAsync(CancellationToken);
+
+        // Seed a fully-moved state
+        fileTask.DownloadStatus = DownloadStatus.MoveFinished;
+        fileTask.DataTotal = 500_000_000;
+        fileTask.DataReceived = 500_000_000;
+        fileTask.FileDataTransferred = 500_000_000;
+        fileTask.CurrentFileTransferBytesOffset = 500_000_000;
+        await dbContext.SaveChangesAsync(CancellationToken);
+
+        // These should never be called for a MoveFinished task
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .Setup(x => x.IsDownloadFileMoving(It.IsAny<DownloadTaskKey>()))
+            .ReturnsAsync(false)
+            .Verifiable(Times.Never);
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .Setup(x => x.StopMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()))
+            .ReturnOk()
+            .Verifiable(Times.Never);
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.IsDownloading(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
+
+        // Act
+        var result = await Sut.ExecuteAsync(new PauseDownloadTaskCommand(parentTask.Id), CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+
+        var after = await IDbContext.GetDownloadTaskFileAsync(fileTask.ToKey(), CancellationToken);
+        after.ShouldNotBeNull();
+        after.DownloadStatus.ShouldBe(DownloadStatus.MoveFinished); // status must not change
+        after.FileDataTransferred.ShouldBe(500_000_000L); // transfer bytes must not reset
+        after.CurrentFileTransferBytesOffset.ShouldBe(500_000_000L); // offset must not reset
+        after.DataReceived.ShouldBe(500_000_000L); // download bytes must not reset
+
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .Verify(x => x.StopMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ShouldNotResetProgressOrStatus_WhenFileTaskIsDownloadFinished()
+    {
+        // Regression: a DownloadFinished task (waiting for the move job) must be skipped
+        // by the pause handler. Previously it was treated as a FileTransfer task and had
+        // ResetDownloadTaskProgress called, zeroing DataReceived and related fields.
+        // Arrange
+        await SetupDatabase(
+            57002,
+            config =>
+            {
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var fileTask = await dbContext.DownloadTaskMovieFile.AsTracking().FirstAsync(CancellationToken);
+        var parentTask = await dbContext.DownloadTaskMovie.AsTracking().FirstAsync(CancellationToken);
+
+        fileTask.DownloadStatus = DownloadStatus.DownloadFinished;
+        fileTask.DataTotal = 400_000_000;
+        fileTask.DataReceived = 400_000_000;
+        fileTask.FileDataTransferred = 0;
+        fileTask.CurrentFileTransferBytesOffset = 0;
+        await dbContext.SaveChangesAsync(CancellationToken);
+
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .Setup(x => x.IsDownloadFileMoving(It.IsAny<DownloadTaskKey>()))
+            .ReturnsAsync(false);
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.IsDownloading(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
+
+        // Act
+        var result = await Sut.ExecuteAsync(new PauseDownloadTaskCommand(parentTask.Id), CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+
+        var after = await IDbContext.GetDownloadTaskFileAsync(fileTask.ToKey(), CancellationToken);
+        after.ShouldNotBeNull();
+        after.DownloadStatus.ShouldBe(DownloadStatus.DownloadFinished); // status must not change
+        after.DataReceived.ShouldBe(400_000_000L); // download bytes must not reset
+
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .Verify(x => x.StopMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Never);
+    }
 }

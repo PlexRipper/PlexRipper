@@ -63,6 +63,16 @@ public class PauseDownloadTaskCommandHandler : ICommandHandler<PauseDownloadTask
             if (downloadTask.DownloadTaskPhase == DownloadTaskPhase.Completed)
                 continue;
 
+            // A finished move must never be reset — the file is already at the destination.
+            // MoveDownloadFileJob will transition it to Completed; pausing here would corrupt progress.
+            if (downloadTask.DownloadStatus == DownloadStatus.MoveFinished)
+                continue;
+
+            // DownloadFinished means the file is ready to move but the move job has not started yet.
+            // There is nothing to stop or reset here; leave it for the move queue to pick up.
+            if (downloadTask.DownloadStatus == DownloadStatus.DownloadFinished)
+                continue;
+
             if (downloadTask.DownloadTaskPhase == DownloadTaskPhase.FileTransfer)
             {
                 if (await _moveDownloadFileScheduler.IsDownloadFileMoving(downloadTaskKey))

@@ -166,3 +166,5 @@ fabric.properties
 
 # opencode AI tool config
 config.json
+
+.test-artifacts

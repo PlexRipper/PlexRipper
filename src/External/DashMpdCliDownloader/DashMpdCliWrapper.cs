@@ -18,9 +18,8 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
     private readonly ILogger _log;
     private readonly IFile _file;
     private readonly IDirectory _directory;
-    private readonly CancellationTokenSource _forcefulCts = new();
     private readonly CancellationTokenSource _gracefulCts = new();
-    private readonly CancellationTokenSource _linkedCts;
+    private readonly CancellationTokenSource _forcefulCts = new();
     private readonly string _binaryPath;
 
     private readonly Subject<string> _stdoutSubject = new();
@@ -39,7 +38,6 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
         _file = file;
         _directory = directory;
         _binaryPath = GetDefaultBinaryPath();
-        _linkedCts = CancellationTokenSource.CreateLinkedTokenSource(_forcefulCts.Token, _gracefulCts.Token);
     }
 
     /// <summary>
@@ -93,7 +91,7 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
             .WithWorkingDirectory(options.WorkingDirectory)
             .WithEnvironmentVariables(envVars);
 
-        return await RunEventLoopAsync(command, _linkedCts.Token);
+        return await RunEventLoopAsync(command, _gracefulCts.Token);
     }
 
     private async Task<Result> RunEventLoopAsync(Command command, CancellationToken cancellationToken)
@@ -172,7 +170,7 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
     }
 
     /// <summary>
-    /// Stops the running process gracefully, or forcefully if it doesn't respond.
+    /// Stops the running process gracefully, then forcefully if it does not exit within the grace period.
     /// </summary>
     /// <returns>A task that completes when the process has stopped.</returns>
     public async Task<Result> StopAsync()
@@ -190,6 +188,19 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
     {
         try
         {
+            if (!_gracefulCts.IsCancellationRequested)
+                await _gracefulCts.CancelAsync();
+
+            if (!_forcefulCts.IsCancellationRequested)
+                await _forcefulCts.CancelAsync();
+        }
+        catch (Exception ex)
+        {
+            _log.Here().Warning(ex, "Error cancelling tokens during dispose");
+        }
+
+        try
+        {
             _stdoutSubject.OnCompleted();
             _progressSubject.OnCompleted();
 
@@ -200,6 +211,9 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
         {
             _log.Here().Warning(ex, "Error disposing subjects");
         }
+
+        _gracefulCts.Dispose();
+        _forcefulCts.Dispose();
     }
 
     /// <summary>

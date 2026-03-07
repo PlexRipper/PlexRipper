@@ -137,6 +137,10 @@ public static class EnvironmentExtensions
         System.Environment.SetEnvironmentVariable(LOG_LEVEL_KEY, logLevel.ToString().ToUpper());
     }
 
+    /// <summary>
+    /// Sets the <c>DEVELOPMENT_ROOT_PATH</c> environment variable to the specified path.
+    /// </summary>
+    /// <param name="path">The development root path to set as <c>DEVELOPMENT_ROOT_PATH_KEY</c>.</param>
     public static void SetDevelopmentRootPath(string path) =>
         System.Environment.SetEnvironmentVariable(DEVELOPMENT_ROOT_PATH_KEY, path);
 

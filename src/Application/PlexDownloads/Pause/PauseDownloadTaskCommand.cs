@@ -57,9 +57,6 @@ public class PauseDownloadTaskCommandHandler : ICommandHandler<PauseDownloadTask
                 continue;
             }
 
-            _log.Here()
-                .Information("Pausing DownloadTask with id {DownloadTaskTitle} from downloading", downloadTask.Title);
-
             if (downloadTask.DownloadTaskPhase == DownloadTaskPhase.Completed)
                 continue;
 
@@ -73,9 +70,13 @@ public class PauseDownloadTaskCommandHandler : ICommandHandler<PauseDownloadTask
             if (downloadTask.DownloadStatus == DownloadStatus.DownloadFinished)
                 continue;
 
+            _log.Here()
+                .Information("Pausing DownloadTask with id {DownloadTaskTitle} from downloading", downloadTask.Title);
+
             if (downloadTask.DownloadTaskPhase == DownloadTaskPhase.FileTransfer)
             {
-                if (await _moveDownloadFileScheduler.IsDownloadFileMoving(downloadTaskKey))
+                var isMoving = await _moveDownloadFileScheduler.IsDownloadFileMoving(downloadTaskKey);
+                if (isMoving)
                 {
                     var stopMoveResult = await _moveDownloadFileScheduler.StopMoveDownloadFileJob(downloadTaskKey);
                     if (stopMoveResult.IsFailed)
@@ -92,20 +93,15 @@ public class PauseDownloadTaskCommandHandler : ICommandHandler<PauseDownloadTask
                 continue;
             }
 
-            if (!await _downloadTaskScheduler.IsDownloading(downloadTaskKey, cancellationToken))
+            var isDownloading = await _downloadTaskScheduler.IsDownloading(downloadTaskKey, cancellationToken);
+            if (!isDownloading)
                 continue;
 
             var stopResult = await _downloadTaskScheduler.StopDownloadTaskJob(downloadTaskKey, cancellationToken);
             if (stopResult.IsFailed)
                 return stopResult.LogError();
 
-            var resetDownloadProgressResult = await _dbContext.ResetDownloadTaskProgress(
-                downloadTaskKey,
-                DownloadStatus.Paused,
-                cancellationToken
-            );
-            if (resetDownloadProgressResult.IsFailed)
-                return resetDownloadProgressResult.LogError();
+            await _dbContext.SetDownloadStatus(downloadTaskKey, DownloadStatus.Paused);
         }
 
         return Result.Ok();

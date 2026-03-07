@@ -229,7 +229,7 @@ public class DownloadCommandsPauseDownloadTasksAsyncUnitTests : BaseUnitTest<Pau
         var downloadingTask = await IDbContext.GetDownloadTaskFileAsync(downloadingKey, CancellationToken);
         downloadingTask.ShouldNotBeNull();
         downloadingTask!.DownloadStatus.ShouldBe(DownloadStatus.Paused);
-        downloadingTask.DownloadSpeed.ShouldBe(0);
+        downloadingTask.DownloadSpeed.ShouldBe(1234);
 
         var movingTask = await IDbContext.GetDownloadTaskFileAsync(movingKey, CancellationToken);
         movingTask.ShouldNotBeNull();
@@ -345,5 +345,69 @@ public class DownloadCommandsPauseDownloadTasksAsyncUnitTests : BaseUnitTest<Pau
 
         Mock.Mock<IMoveDownloadFileScheduler>()
             .Verify(x => x.StopMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ShouldPreserveDirectDownloadSnapshot_WhenPausingDownloadingTask()
+    {
+        // Arrange
+        await SetupDatabase(57003, config => config.MovieDownloadTasksCount = 1);
+
+        var dbContext = IDbContext;
+        var fileTask = await dbContext.DownloadTaskMovieFile.AsTracking().FirstAsync(CancellationToken);
+        var parentTask = await dbContext.DownloadTaskMovie.AsTracking().FirstAsync(CancellationToken);
+
+        var snapshot = new DirectDownloadSnapshot
+        {
+            SaveProgress = 51.2,
+            Status = 2,
+            Urls = ["https://example.test/file.mkv"],
+            TotalFileSize = 1_000_000,
+            FileName = fileTask.FileName,
+            DownloadingFileExtension = ".reaptemp",
+            IsSupportDownloadInRange = true,
+            Chunks =
+            [
+                new DirectDownloadSnapshotChunk
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Start = 0,
+                    End = 499_999,
+                    Position = 123_456,
+                    MaxTryAgainOnFailure = 3,
+                    Timeout = 1000,
+                },
+            ],
+        };
+
+        fileTask.DownloadStatus = DownloadStatus.Downloading;
+        fileTask.DataReceived = 123_456;
+        fileTask.DownloadSpeed = 999;
+        fileTask.DirectDownloadSnapshot = snapshot;
+        await dbContext.SaveChangesAsync(CancellationToken);
+
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.IsDownloading(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.StopDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
+            .ReturnOk();
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .Setup(x => x.IsDownloadFileMoving(It.IsAny<DownloadTaskKey>()))
+            .ReturnsAsync(false);
+
+        // Act
+        var result = await Sut.ExecuteAsync(new PauseDownloadTaskCommand(parentTask.Id), CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+
+        var after = await IDbContext.GetDownloadTaskFileAsync(fileTask.ToKey(), CancellationToken);
+        after.ShouldNotBeNull();
+        after.DownloadStatus.ShouldBe(DownloadStatus.Paused);
+        after.DataReceived.ShouldBe(123_456L);
+        after.DirectDownloadSnapshot.ShouldNotBeNull();
+        after.DirectDownloadSnapshot!.SaveProgress.ShouldBe(snapshot.SaveProgress);
+        after.DirectDownloadSnapshot.Chunks.Count.ShouldBe(1);
     }
 }

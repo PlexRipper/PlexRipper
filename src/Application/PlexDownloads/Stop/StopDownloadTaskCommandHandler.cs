@@ -1,7 +1,6 @@
 using System.IO.Abstractions;
 using FastEndpoints;
 using FluentValidation;
-using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 using Reaparr.FileSystem.Contracts;
@@ -49,6 +48,10 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
             return ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), command.DownloadTaskGuid).LogError();
 
         var downloadTasks = await _dbContext.GetDownloadableChildTaskKeys(key, cancellationToken);
+
+        // For TvShow/Season, only stop children that are actively running — others may still
+        // be queued and must not have their partial files or state disturbed. For Movie/Episode
+        // the parent maps 1-to-1 with its file tasks, so always stop regardless of activity.
         var stopOnlyActiveChildren = key.Type is DownloadTaskType.TvShow or DownloadTaskType.Season;
 
         foreach (var downloadTaskKey in downloadTasks)
@@ -60,62 +63,34 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
                 continue;
             }
 
-            if (stopOnlyActiveChildren)
+            var isDownloading = await _downloadTaskScheduler.IsDownloading(downloadTaskKey, cancellationToken);
+            var isMoving = await _moveDownloadFileScheduler.IsDownloadFileMoving(downloadTaskKey);
+
+            if (stopOnlyActiveChildren && !isDownloading && !isMoving)
+                continue;
+
+            _log.Here().Information("Stopping {DownloadTaskFullTitle}", downloadTask.FullTitle);
+
+            if (isDownloading)
             {
-                var isDownloading = await _downloadTaskScheduler.IsDownloading(downloadTaskKey, cancellationToken);
-                var isMoving = await _moveDownloadFileScheduler.IsDownloadFileMoving(downloadTaskKey);
-
-                if (!isDownloading && !isMoving)
-                    continue;
-
-                _log.Here().Information("Stopping {DownloadTaskFullTitle} from downloading", downloadTask.FullTitle);
-
-                if (isDownloading)
+                var stopResult = await _downloadTaskScheduler.StopDownloadTaskJob(downloadTaskKey, cancellationToken);
+                if (stopResult.IsFailed)
                 {
-                    var stopResult = await _downloadTaskScheduler.StopDownloadTaskJob(
-                        downloadTaskKey,
-                        cancellationToken
-                    );
-                    if (stopResult.IsFailed)
-                    {
-                        // Since this command is done per server, we can abort since there will at most be 1 download task downloading at a time and if that fails we can't continue
-                        return stopResult.LogError();
-                    }
-                }
-
-                if (isMoving)
-                {
-                    var stopMoveResult = await _moveDownloadFileScheduler.StopMoveDownloadFileJob(downloadTaskKey);
-                    if (stopMoveResult.IsFailed)
-                        return stopMoveResult.LogError();
-                }
-            }
-            else
-            {
-                _log.Here().Information("Stopping {DownloadTaskFullTitle} from downloading", downloadTask.FullTitle);
-
-                if (await _downloadTaskScheduler.IsDownloading(downloadTaskKey, cancellationToken))
-                {
-                    var stopResult = await _downloadTaskScheduler.StopDownloadTaskJob(
-                        downloadTaskKey,
-                        cancellationToken
-                    );
-                    if (stopResult.IsFailed)
-                    {
-                        // Since this command is done per server, we can abort since there will at most be 1 download task downloading at a time and if that fails we can't continue
-                        return stopResult.LogError();
-                    }
-                }
-
-                if (await _moveDownloadFileScheduler.IsDownloadFileMoving(downloadTaskKey))
-                {
-                    var stopMoveResult = await _moveDownloadFileScheduler.StopMoveDownloadFileJob(downloadTaskKey);
-                    if (stopMoveResult.IsFailed)
-                        return stopMoveResult.LogError();
+                    // At most one download task runs per server; if stopping it fails there is
+                    // nothing left to stop safely, so abort.
+                    return stopResult.LogError();
                 }
             }
 
-            // Only delete the download file and worker tasks when NOT in the completed phase.
+            if (isMoving)
+            {
+                var stopMoveResult = await _moveDownloadFileScheduler.StopMoveDownloadFileJob(downloadTaskKey);
+                if (stopMoveResult.IsFailed)
+                    return stopMoveResult.LogError();
+            }
+
+            // Only delete the download file when NOT in the completed phase (file is already
+            // at its destination directory in that case).
             if (command.DeleteFiles && downloadTask.DownloadTaskPhase != DownloadTaskPhase.Completed)
             {
                 _log.Here()
@@ -138,20 +113,6 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
                     .LogIfFailed();
             }
 
-            // Completed and MoveFinished tasks must not have their progress reset:
-            // the file is already at the destination and the progress fields represent
-            // the historical record of a finished download. Only statuses that represent
-            // an in-progress or error state should be reset to Stopped.
-            if (
-                downloadTask.DownloadStatus == DownloadStatus.Completed
-                || downloadTask.DownloadStatus == DownloadStatus.MoveFinished
-            )
-            {
-                await _commandExecutor.Send(new DownloadTaskUpdatedCommand(downloadTaskKey), cancellationToken);
-                continue;
-            }
-
-            // Reset the download progress
             _log.Here().Debug($"Resetting download progress for {downloadTaskKey.Id} ({downloadTask.FileName})");
 
             await _dbContext.ResetDownloadTaskProgress(downloadTaskKey, DownloadStatus.Stopped, cancellationToken);

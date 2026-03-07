@@ -153,6 +153,7 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
 
             // Reset the download progress
             _log.Here().Debug($"Resetting download progress for {downloadTaskKey.Id} ({downloadTask.FileName})");
+
             await _dbContext.ResetDownloadTaskProgress(downloadTaskKey, DownloadStatus.Stopped, cancellationToken);
 
             await _commandExecutor.Send(new DownloadTaskUpdatedCommand(downloadTaskKey), cancellationToken);

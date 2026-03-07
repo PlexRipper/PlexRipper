@@ -312,7 +312,7 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
 
             _log.Here()
                 .Debug(
-                    "Starting resumable move for {DownloadTaskId}: {SourcePath} -> {DestinationPath} (offset: {Offset} bytes)",
+                    "Starting move for {DownloadTaskId}: {SourcePath} -> {DestinationPath} (offset: {Offset} bytes)",
                     key.Id,
                     downloadFilePath,
                     destinationPath,

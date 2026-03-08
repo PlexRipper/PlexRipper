@@ -110,7 +110,7 @@
 			:body-style="getColumnBodyStyle('actions')">
 			<template #body="{ node }: { node: IDownloadTableNode }">
 				<QRow
-					justify="end"
+					justify="start"
 					no-wrap>
 					<QCol cols="auto">
 						<!-- Item Actions -->

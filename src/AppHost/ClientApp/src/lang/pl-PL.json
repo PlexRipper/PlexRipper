@@ -79,6 +79,11 @@
                 "filter-by-level": "Filtruj według poziomu logów",
                 "copied-to-clipboard": "Logi skopiowano do schowka",
                 "deleted": "Logi usunięto",
+                "no-logs": "Nie znaleziono logów dla tego zadania pobierania.",
+                "delete-confirmation": {
+                    "title": "Usuń wszystkie logi",
+                    "text": "Czy na pewno chcesz usunąć wszystkie logi dla tego zadania pobierania?"
+                },
                 "levels": {
                     "debug": "Debugowanie",
                     "information": "Informacja",
@@ -513,7 +518,8 @@
             "completed": "Zakończony",
             "move-error": "Błąd przenoszenia",
             "move-finished": "Przenoszenie zakończone",
-            "move-paused": "Przenoszenie wstrzymane"
+            "move-paused": "Przenoszenie wstrzymane",
+            "restarting": "Ponowne uruchamianie"
         },
         "video-quality": {
             "quality-1-unknown": "Unknown",

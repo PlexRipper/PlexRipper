@@ -43,6 +43,8 @@ export function translateDownloadStatus(status: DownloadStatus) {
 			return t('general.download-status.move-finished');
 		case DownloadStatus.MoveError:
 			return t('general.download-status.move-error');
+		case DownloadStatus.Restarting:
+			return t('general.download-status.restarting');
 		default:
 			return t('general.error.unknown');
 	}

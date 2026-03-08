@@ -79,6 +79,11 @@
                 "filter-by-level": "Filter by log level",
                 "copied-to-clipboard": "Logs copied to clipboard",
                 "deleted": "Logs deleted",
+                "no-logs": "No logs found for this download task.",
+                "delete-confirmation": {
+                    "title": "Delete all logs",
+                    "text": "Are you sure you want to delete all logs for this download task?"
+                },
                 "levels": {
                     "debug": "Debug",
                     "information": "Information",
@@ -513,7 +518,8 @@
             "completed": "Completed",
             "move-error": "Move Error",
             "move-finished": "Moving Finished",
-            "move-paused": "Moving Paused"
+            "move-paused": "Moving Paused",
+            "restarting": "Restarting"
         },
         "video-quality": {
             "quality-1-unknown": "Unknown",

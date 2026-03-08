@@ -79,6 +79,11 @@
                 "filter-by-level": "Nach Log-Level filtern",
                 "copied-to-clipboard": "Logs in die Zwischenablage kopiert",
                 "deleted": "Logs gelöscht",
+                "no-logs": "Keine Logs für diese Download-Aufgabe gefunden.",
+                "delete-confirmation": {
+                    "title": "Alle Logs löschen",
+                    "text": "Sind Sie sicher, dass Sie alle Logs für diese Download-Aufgabe löschen möchten?"
+                },
                 "levels": {
                     "debug": "Debug",
                     "information": "Information",
@@ -513,7 +518,8 @@
             "completed": "Vollendet",
             "move-error": "Verschiebe Fehler",
             "move-finished": "Verschieben abgeschlossen",
-            "move-paused": "Verschieben pausiert"
+            "move-paused": "Verschieben pausiert",
+            "restarting": "Neustart"
         },
         "video-quality": {
             "quality-1-unknown": "Unknown",

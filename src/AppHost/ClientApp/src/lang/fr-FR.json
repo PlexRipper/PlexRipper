@@ -79,6 +79,11 @@
                 "filter-by-level": "Filtrer par niveau de journal",
                 "copied-to-clipboard": "Journaux copiés dans le presse-papiers",
                 "deleted": "Journaux supprimés",
+                "no-logs": "Aucun journal trouvé pour cette tâche de téléchargement.",
+                "delete-confirmation": {
+                    "title": "Supprimer tous les journaux",
+                    "text": "Êtes-vous sûr de vouloir supprimer tous les journaux de cette tâche de téléchargement ?"
+                },
                 "levels": {
                     "debug": "Débogage",
                     "information": "Information",
@@ -513,7 +518,8 @@
             "completed": "Complété",
             "move-error": "Erreur de déplacement",
             "move-finished": "Déplacement terminé",
-            "move-paused": "Déplacement en pause"
+            "move-paused": "Déplacement en pause",
+            "restarting": "Redémarrage"
         },
         "video-quality": {
             "quality-1-unknown": "Unknown",

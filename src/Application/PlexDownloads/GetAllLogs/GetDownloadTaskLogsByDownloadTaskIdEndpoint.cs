@@ -19,6 +19,14 @@ public record GetDownloadTaskLogsByDownloadTaskIdRequest
 
     [QueryParam, BindFrom("plexLibraryId")]
     public required int PlexLibraryId { get; init; }
+
+    /// <summary>Only return logs with Id greater than this value. Used for incremental polling.</summary>
+    [QueryParam, BindFrom("sinceId")]
+    public int? SinceId { get; init; }
+
+    /// <summary>Maximum number of logs to return. When null, returns all matching logs.</summary>
+    [QueryParam, BindFrom("take")]
+    public int? Take { get; init; }
 }
 
 public class GetDownloadTaskLogsByDownloadTaskIdRequestValidator : Validator<GetDownloadTaskLogsByDownloadTaskIdRequest>
@@ -68,7 +76,7 @@ public class GetDownloadTaskLogsByDownloadTaskIdEndpoint
             PlexLibraryId = req.PlexLibraryId,
         };
 
-        var logsResult = await _dbContext.GetDownloadTaskLogsAsync(key, ct);
+        var logsResult = await _dbContext.GetDownloadTaskLogsAsync(key, req.SinceId, req.Take, ct);
 
         logsResult.LogIfFailed();
 

@@ -9,7 +9,7 @@ namespace Reaparr.Application;
 
 /// <summary>
 /// Coordinates download task update ingestion and dispatches optimized patch updates to the front-end.
-/// It handles immediate status changes and buffered progress updates with a 1-second flush cadence.
+/// It handles immediate status changes, an immediate first-progress broadcast, and buffered progress updates with a 1-second flush cadence.
 /// </summary>
 public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpdateDispatcher
 {
@@ -21,8 +21,10 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
     private readonly ConcurrentDictionary<int, long> _sequenceByServer;
     private readonly ConcurrentDictionary<Guid, ProgressScopeKey> _scopeByNodeId;
     private readonly ConcurrentDictionary<Guid, DownloadTaskProgress> _lastProgressLogByNodeId;
-    private const long ProgressLogDataThresholdBytes = 1024 * 1024;
-    private const decimal ProgressLogPercentageThreshold = 1m;
+    private readonly ConcurrentDictionary<Guid, byte> _seenProgressNodes;
+    private readonly Channel<BufferedProgressUpdate> _firstProgressChannel;
+    private const long PROGRESS_LOG_DATA_THRESHOLD_BYTES = 1024 * 1024;
+    private const decimal PROGRESS_LOG_PERCENTAGE_THRESHOLD = 1m;
 
     /// <summary>
     /// Creates a new dispatcher instance.
@@ -44,6 +46,10 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
         _sequenceByServer = new ConcurrentDictionary<int, long>();
         _scopeByNodeId = new ConcurrentDictionary<Guid, ProgressScopeKey>();
         _lastProgressLogByNodeId = new ConcurrentDictionary<Guid, DownloadTaskProgress>();
+        _seenProgressNodes = new ConcurrentDictionary<Guid, byte>();
+        _firstProgressChannel = Channel.CreateUnbounded<BufferedProgressUpdate>(
+            new UnboundedChannelOptions { SingleReader = true, SingleWriter = false }
+        );
     }
 
     /// <inheritdoc />
@@ -141,6 +147,11 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
             };
 
             _progressByScope.AddOrUpdate(scope, _ => update, (_, __) => update);
+
+            // On the first progress event for this node, bypass the periodic flush so the
+            // front-end receives data immediately instead of waiting up to 1 second.
+            if (_seenProgressNodes.TryAdd(key.Id, 0))
+                _firstProgressChannel.Writer.TryWrite(update);
         });
     }
 
@@ -149,7 +160,8 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
     /// </summary>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var immediateTask = ProcessStatusQueueAsync(stoppingToken);
+        var immediateStatusTask = ProcessStatusQueueAsync(stoppingToken);
+        var immediateProgressTask = ProcessImmediateProgressAsync(stoppingToken);
         var periodicTimer = new PeriodicTimer(TimeSpan.FromSeconds(1));
 
         var result = await Result.Try(async Task () =>
@@ -167,7 +179,9 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
 
         periodicTimer.Dispose();
         _statusChannel.Writer.TryComplete();
-        await immediateTask;
+        _firstProgressChannel.Writer.TryComplete();
+        await immediateStatusTask;
+        await immediateProgressTask;
     }
 
     /// <summary>
@@ -210,6 +224,41 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
         {
             result.LogIfFailed();
         }
+    }
+
+    /// <summary>
+    /// Persists and immediately broadcasts the first progress event for each node, bypassing the periodic flush cadence.
+    /// </summary>
+    private async Task ProcessImmediateProgressAsync(CancellationToken stoppingToken)
+    {
+        var result = await Result.Try(async Task () =>
+        {
+            await foreach (var update in _firstProgressChannel.Reader.ReadAllAsync(stoppingToken))
+            {
+                if (update.Progress is null)
+                    continue;
+
+                var flushResult = await Result.Try(async Task () =>
+                {
+                    using var dbContext = await _dbContextFactory.CreateAsync();
+                    await dbContext.UpdateDownloadProgress(update.Key, update.Progress, update.Snapshot, stoppingToken);
+
+                    var scope = await ResolveScopeAsync(dbContext, update.Key, stoppingToken);
+                    if (scope is null)
+                        return;
+
+                    var sendResult = await SendPatchAsync(scope, [update.NodeId], stoppingToken, dbContext);
+                    if (sendResult.IsFailed)
+                        sendResult.LogError();
+                });
+
+                if (flushResult.IsFailed)
+                    flushResult.LogError();
+            }
+        });
+
+        if (result.IsFailed && !result.IsCancelled)
+            result.LogIfFailed();
     }
 
     /// <summary>
@@ -503,7 +552,8 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
 
         var dataDelta = Math.Abs(progress.DataReceived - previous.DataReceived);
         var percentageDelta = Math.Abs(progress.Percentage - previous.Percentage);
-        var shouldLog = dataDelta >= ProgressLogDataThresholdBytes || percentageDelta >= ProgressLogPercentageThreshold;
+        var shouldLog =
+            dataDelta >= PROGRESS_LOG_DATA_THRESHOLD_BYTES || percentageDelta >= PROGRESS_LOG_PERCENTAGE_THRESHOLD;
 
         if (shouldLog)
             _lastProgressLogByNodeId[nodeId] = progress;
@@ -516,6 +566,7 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
         if (newStatus is DownloadStatus.Queued or DownloadStatus.Restarting or DownloadStatus.Downloading)
         {
             _lastProgressLogByNodeId.TryRemove(nodeId, out _);
+            _seenProgressNodes.TryRemove(nodeId, out _);
         }
     }
 

@@ -41,8 +41,8 @@ public class ApplicationModule : Module
         builder.RegisterType<DownloadJobListener>().As<IDownloadJobListener>().SingleInstance();
         builder.RegisterType<MoveDownloadJobListener>().As<IMoveDownloadJobListener>().SingleInstance();
         builder
-            .RegisterType<DownloadPatchBroadcaster>()
-            .As<IDownloadPatchBroadcaster>()
+            .RegisterType<DownloadTaskUpdateDispatcher>()
+            .As<IDownloadTaskUpdateDispatcher>()
             .As<IHostedService>()
             .SingleInstance();
     }

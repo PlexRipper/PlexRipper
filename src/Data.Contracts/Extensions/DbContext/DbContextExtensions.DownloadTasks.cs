@@ -998,4 +998,67 @@ public static partial class DbContextExtensions
 
         return rootTasks;
     }
+
+    public static async Task<(Guid ParentId, DownloadStatus Status)?> GetDownloadPatchMetaAsync(
+        this IReaparrDbContext dbContext,
+        DownloadTaskKey key,
+        CancellationToken cancellationToken = default
+    )
+    {
+        switch (key.Type)
+        {
+            case DownloadTaskType.Movie:
+            {
+                var data = await dbContext
+                    .DownloadTaskMovie.Where(x => x.Id == key.Id)
+                    .Select(x => new { x.DownloadStatus })
+                    .FirstOrDefaultAsync(cancellationToken);
+                return data is null ? null : (Guid.Empty, data.DownloadStatus);
+            }
+            case DownloadTaskType.MovieData:
+            case DownloadTaskType.MoviePart:
+            {
+                var data = await dbContext
+                    .DownloadTaskMovieFile.Where(x => x.Id == key.Id)
+                    .Select(x => new { x.ParentId, x.DownloadStatus })
+                    .FirstOrDefaultAsync(cancellationToken);
+                return data is null ? null : (data.ParentId, data.DownloadStatus);
+            }
+            case DownloadTaskType.TvShow:
+            {
+                var data = await dbContext
+                    .DownloadTaskTvShow.Where(x => x.Id == key.Id)
+                    .Select(x => new { x.DownloadStatus })
+                    .FirstOrDefaultAsync(cancellationToken);
+                return data is null ? null : (Guid.Empty, data.DownloadStatus);
+            }
+            case DownloadTaskType.Season:
+            {
+                var data = await dbContext
+                    .DownloadTaskTvShowSeason.Where(x => x.Id == key.Id)
+                    .Select(x => new { x.ParentId, x.DownloadStatus })
+                    .FirstOrDefaultAsync(cancellationToken);
+                return data is null ? null : (data.ParentId, data.DownloadStatus);
+            }
+            case DownloadTaskType.Episode:
+            {
+                var data = await dbContext
+                    .DownloadTaskTvShowEpisode.Where(x => x.Id == key.Id)
+                    .Select(x => new { x.ParentId, x.DownloadStatus })
+                    .FirstOrDefaultAsync(cancellationToken);
+                return data is null ? null : (data.ParentId, data.DownloadStatus);
+            }
+            case DownloadTaskType.EpisodeData:
+            case DownloadTaskType.EpisodePart:
+            {
+                var data = await dbContext
+                    .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == key.Id)
+                    .Select(x => new { x.ParentId, x.DownloadStatus })
+                    .FirstOrDefaultAsync(cancellationToken);
+                return data is null ? null : (data.ParentId, data.DownloadStatus);
+            }
+            default:
+                return null;
+        }
+    }
 }

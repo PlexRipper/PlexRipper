@@ -29,6 +29,7 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IEventPublisher _eventPublisher;
+    private readonly IDownloadTaskUpdateDispatcher _downloadTaskUpdateDispatcher;
     private readonly IReaparrDbContext _dbContext;
 
     /// <summary>
@@ -56,6 +57,7 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
         ILogger log,
         ICommandExecutor commandExecutor,
         IEventPublisher eventPublisher,
+        IDownloadTaskUpdateDispatcher downloadTaskUpdateDispatcher,
         IReaparrDbContext dbContext,
         IReaparrDbContextFactory dbContextFactory,
         IFile file,
@@ -67,6 +69,7 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
         _log = log.ForContext<MoveDownloadFileFromFileTaskCommandHandler>();
         _commandExecutor = commandExecutor;
         _eventPublisher = eventPublisher;
+        _downloadTaskUpdateDispatcher = downloadTaskUpdateDispatcher;
         _dbContext = dbContext;
         _dbContextProgress = dbContextFactory.Create();
         _file = file;
@@ -390,7 +393,6 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
                             dto,
                             cancellationToken: cancellationToken
                         );
-                        await _commandExecutor.Send(new DownloadTaskUpdatedCommand(key), cancellationToken);
                     }
                     catch (Exception ex)
                     {
@@ -443,28 +445,24 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
 
     private async Task UpdateDownloadTaskStatus(DownloadTaskKey key, DownloadStatus status)
     {
-        await _dbContext.SetDownloadStatus(key, status);
+        await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(key, status);
         await _dbContext.CreateDownloadClientLog(
             key,
             NotificationLevel.Information,
             status,
             $"DownloadTask {key.Id} ({_filename}) has transitioned to {status}"
         );
-
-        await _commandExecutor.Send(new DownloadTaskUpdatedCommand(key));
     }
 
     private async Task<Result> ErrorDownloadTask(DownloadTaskKey key, Result result)
     {
-        await _dbContext.SetDownloadStatus(key, DownloadStatus.MoveError);
+        await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(key, DownloadStatus.MoveError);
         await _dbContext.CreateDownloadClientLog(
             key,
             NotificationLevel.Error,
             DownloadStatus.MoveError,
             result.ToString()
         );
-
-        await _commandExecutor.Send(new DownloadTaskUpdatedCommand(key));
 
         await _eventPublisher.PublishAsync(new SendNotificationResult(result), CancellationToken.None);
 

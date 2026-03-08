@@ -22,6 +22,7 @@ public class DashPlexDownloadClient : IPlexDownloadClient
     private readonly IReaparrDbContextFactory _dbContextFactory;
     private readonly IDashMpdCliWrapper _dashWrapper;
     private readonly ICommandExecutor _commandExecutor;
+    private readonly IDownloadTaskUpdateDispatcher _downloadTaskUpdateDispatcher;
     private readonly IServerSettingsModule _serverSettings;
     private readonly IDirectory _directory;
 
@@ -37,6 +38,7 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         IReaparrDbContextFactory dbContextFactory,
         IDashMpdCliWrapper dashWrapper,
         ICommandExecutor commandExecutor,
+        IDownloadTaskUpdateDispatcher downloadTaskUpdateDispatcher,
         IServerSettingsModule serverSettings,
         IDirectory directory
     )
@@ -45,6 +47,7 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         _dbContextFactory = dbContextFactory;
         _dashWrapper = dashWrapper;
         _commandExecutor = commandExecutor;
+        _downloadTaskUpdateDispatcher = downloadTaskUpdateDispatcher;
         _serverSettings = serverSettings;
         _directory = directory;
         _dbContext = dbContextFactory.Create();
@@ -180,8 +183,6 @@ public class DashPlexDownloadClient : IPlexDownloadClient
 
     private async Task HandleProgressChanged(DownloadTaskKey key, DashDownloadProgress progress)
     {
-        using var dbContext = await _dbContextFactory.CreateAsync();
-
         var dataTotal = progress.TotalBytes;
         if (dataTotal <= 0 && progress.Percent > 0)
             dataTotal = progress.DownloadedBytes * 100 / progress.Percent;
@@ -194,13 +195,11 @@ public class DashPlexDownloadClient : IPlexDownloadClient
             DownloadSpeed = progress.Percent < 100 ? progress.DownloadSpeedInBytes : 0,
         };
 
-        await dbContext.UpdateDownloadProgress(key, progressUpdate, cancellationToken: CancellationToken.None);
+        _downloadTaskUpdateDispatcher.OnProgressUpdated(key, progressUpdate);
         await SendProgressLog(progressUpdate);
 
         if (progressUpdate.Percentage == 100)
             await SetDownloadStatusAsync(DownloadStatus.DownloadFinished);
-
-        await _commandExecutor.Send(new DownloadTaskUpdatedCommand(key), CancellationToken.None);
     }
 
     private async Task SendProgressLog(DownloadTaskProgress progress)
@@ -221,8 +220,6 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         if (_downloadTaskKey is null)
             return;
 
-        using var dbContext = await _dbContextFactory.CreateAsync();
-
         _log.Here()
             .InformationMsg(
                 "DownloadTask {DownloadTaskId} ({MediaFileName}) transitioning to {NewStatus}",
@@ -231,8 +228,7 @@ public class DashPlexDownloadClient : IPlexDownloadClient
                 status
             );
 
-        await dbContext.SetDownloadStatus(_downloadTaskKey, status);
-        await _commandExecutor.Send(new DownloadTaskUpdatedCommand(_downloadTaskKey), CancellationToken.None);
+        await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(_downloadTaskKey, status, CancellationToken.None);
 
         await SendDownloadClientLog(
             status.ToNotificationLevel(),

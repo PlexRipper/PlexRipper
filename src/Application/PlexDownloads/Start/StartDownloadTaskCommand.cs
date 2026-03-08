@@ -20,6 +20,7 @@ public class StartDownloadTaskCommandHandler : ICommandHandler<StartDownloadTask
 {
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
+    private readonly IDownloadTaskUpdateDispatcher _downloadTaskUpdateDispatcher;
     private readonly IEventPublisher _eventPublisher;
     private readonly IDownloadTaskScheduler _downloadTaskScheduler;
     private readonly IMoveDownloadFileScheduler _moveDownloadFileScheduler;
@@ -27,6 +28,7 @@ public class StartDownloadTaskCommandHandler : ICommandHandler<StartDownloadTask
     public StartDownloadTaskCommandHandler(
         IReaparrDbContext dbContext,
         ICommandExecutor commandExecutor,
+        IDownloadTaskUpdateDispatcher downloadTaskUpdateDispatcher,
         IEventPublisher eventPublisher,
         IDownloadTaskScheduler downloadTaskScheduler,
         IMoveDownloadFileScheduler moveDownloadFileScheduler
@@ -34,6 +36,7 @@ public class StartDownloadTaskCommandHandler : ICommandHandler<StartDownloadTask
     {
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;
+        _downloadTaskUpdateDispatcher = downloadTaskUpdateDispatcher;
         _eventPublisher = eventPublisher;
         _downloadTaskScheduler = downloadTaskScheduler;
         _moveDownloadFileScheduler = moveDownloadFileScheduler;
@@ -78,7 +81,11 @@ public class StartDownloadTaskCommandHandler : ICommandHandler<StartDownloadTask
                     x.Id != nextDownloadTask.Id && statusesToQueue.Contains(x.DownloadStatus)
                 )
             )
-                await _dbContext.SetDownloadStatus(waitingTask.ToKey(), DownloadStatus.Queued);
+                await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
+                    waitingTask.ToKey(),
+                    DownloadStatus.Queued,
+                    cancellationToken
+                );
         }
 
         // Start the download task depending on the phase
@@ -91,9 +98,6 @@ public class StartDownloadTaskCommandHandler : ICommandHandler<StartDownloadTask
                     var startResult = await _downloadTaskScheduler.StartDownloadTaskJob(nextDownloadTaskKey);
                     if (startResult.IsFailed)
                         return startResult.LogError();
-
-                    // TODO: - This should be done in the DownloadJob
-                    await _dbContext.SetDownloadStatus(nextDownloadTaskKey, DownloadStatus.Downloading);
 
                     var activeDownloadKeys = await _downloadTaskScheduler.GetCurrentlyDownloadingKeysByServer(
                         key.PlexServerId
@@ -125,8 +129,6 @@ public class StartDownloadTaskCommandHandler : ICommandHandler<StartDownloadTask
                     $"{nextDownloadTask.DownloadTaskPhase} is not a valid DownloadTaskPhase enum value"
                 );
         }
-
-        await _commandExecutor.Send(new DownloadTaskUpdatedCommand(key), cancellationToken);
 
         await _eventPublisher.PublishAsync(new CheckDownloadQueueEvent(key.PlexServerId), cancellationToken);
 

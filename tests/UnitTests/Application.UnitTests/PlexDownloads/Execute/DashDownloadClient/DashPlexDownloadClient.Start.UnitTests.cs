@@ -30,10 +30,7 @@ public class DashPlexDownloadClientStartUnitTests : BaseUnitTest<DashPlexDownloa
         );
     }
 
-    private void SetupCommandExecutor(
-        Result<string>? getUrlResult = null,
-        Func<DownloadTaskUpdatedCommand, Task>? onUpdate = null
-    )
+    private void SetupCommandExecutor(Result<string>? getUrlResult = null)
     {
         Mock.Mock<ICommandExecutor>()
             .Setup(m => m.Send(It.IsAny<ICommand<Result<string>>>(), It.IsAny<CancellationToken>()))
@@ -41,14 +38,7 @@ public class DashPlexDownloadClientStartUnitTests : BaseUnitTest<DashPlexDownloa
 
         Mock.Mock<ICommandExecutor>()
             .Setup(m => m.Send(It.IsAny<ICommand<Result>>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Ok())
-            .Callback<ICommand<Result>, CancellationToken>(
-                (command, _) =>
-                {
-                    if (command is DownloadTaskUpdatedCommand notification)
-                        onUpdate?.Invoke(notification).GetAwaiter().GetResult();
-                }
-            );
+            .ReturnsAsync(Result.Ok());
     }
 
     private void SetupSpeedLimit(string serverMachineIdentifier, int speedLimit = 2000)

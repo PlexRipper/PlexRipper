@@ -19,6 +19,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
     private readonly IReaparrDbContext _dbContext;
     private readonly IReaparrDbContextFactory _dbContextFactory;
     private readonly ICommandExecutor _commandExecutor;
+    private readonly IDownloadTaskUpdateDispatcher _downloadTaskUpdateDispatcher;
     private readonly IServerSettingsModule _serverSettings;
 
     private DownloadTaskKey? _downloadTaskKey;
@@ -38,6 +39,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
         ILogger log,
         IReaparrDbContextFactory dbContextFactory,
         ICommandExecutor commandExecutor,
+        IDownloadTaskUpdateDispatcher downloadTaskUpdateDispatcher,
         IDownloadManagerSettings downloadManagerSettings,
         IServerSettingsModule serverSettings,
         Func<DownloadConfiguration, IDownloadService> downloadServiceFactory
@@ -46,6 +48,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
         _log = log.ForContext<DirectPlexDownloadClient>();
         _dbContextFactory = dbContextFactory;
         _commandExecutor = commandExecutor;
+        _downloadTaskUpdateDispatcher = downloadTaskUpdateDispatcher;
         _dbContext = dbContextFactory.Create();
         _serverSettings = serverSettings;
 
@@ -83,6 +86,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
         var downloadUrl = downloadUrlResult.Value;
 
         // Prepare destination stream
+        // TODO this should be replaced with just making and ensuring the destination path exist, doesn't need a stream
         var fileStreamResult = await _commandExecutor.Send(
             new CreateDownloadFileStreamCommand(
                 downloadTask.DownloadDirectory,
@@ -190,11 +194,10 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                     h => _downloader.DownloadProgressChanged -= h
                 )
                 .Select(x => x.EventArgs)
-                .Sample(TimeSpan.FromMilliseconds(500))
+                .Sample(TimeSpan.FromMilliseconds(100))
                 .Select(args =>
                     Observable.FromAsync(async _ =>
                     {
-                        using var dbContext = await _dbContextFactory.CreateAsync();
                         var progress = new DownloadTaskProgress
                         {
                             DataTotal = args.TotalBytesToReceive,
@@ -204,16 +207,13 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                                 args.ProgressPercentage < 100 ? Convert.ToInt64(args.BytesPerSecondSpeed) : 0,
                         };
 
-                        await dbContext.UpdateDownloadProgress(
+                        _downloadTaskUpdateDispatcher.OnProgressUpdated(
                             key,
                             progress,
-                            _downloader.Package.ToSnapshot(),
-                            CancellationToken.None
+                            _downloader.Package.ToSnapshot()
                         );
 
                         await SendProgressLog(progress);
-
-                        await _commandExecutor.Send(new DownloadTaskUpdatedCommand(key), CancellationToken.None);
                     })
                 )
                 .Concat()
@@ -249,7 +249,6 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                         }
 
                         // Download completed successfully
-                        using var dbContext = await _dbContextFactory.CreateAsync();
                         var progress = new DownloadTaskProgress
                         {
                             DataTotal = package!.TotalFileSize,
@@ -258,17 +257,11 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                             DownloadSpeed = 0,
                         };
 
-                        await dbContext.UpdateDownloadProgress(
-                            key,
-                            progress,
-                            package.ToSnapshot(),
-                            CancellationToken.None
-                        );
+                        _downloadTaskUpdateDispatcher.OnProgressUpdated(key, progress, package.ToSnapshot());
 
                         await SendProgressLog(progress);
 
                         await SetDownloadStatusAsync(Domain.DownloadStatus.DownloadFinished);
-                        await _commandExecutor.Send(new DownloadTaskUpdatedCommand(key), CancellationToken.None);
                     })
                 )
                 .Concat()
@@ -303,8 +296,6 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
 
     private async Task SetDownloadStatusAsync(Domain.DownloadStatus status, Result? errorResult = null)
     {
-        using var dbContext = await _dbContextFactory.CreateAsync();
-
         _log.Here()
             .InformationMsg(
                 "DownloadTask {DownloadTaskId} ({MediaFileName}) transitioning to {NewStatus}",
@@ -313,8 +304,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                 status
             );
 
-        await dbContext.SetDownloadStatus(_downloadTaskKey, status);
-        await _commandExecutor.Send(new DownloadTaskUpdatedCommand(_downloadTaskKey), CancellationToken.None);
+        await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(_downloadTaskKey, status, CancellationToken.None);
 
         await SendDownloadClientLog(
             status.ToNotificationLevel(),

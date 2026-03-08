@@ -19,7 +19,7 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
-    private readonly ICommandExecutor _commandExecutor;
+    private readonly IDownloadTaskUpdateDispatcher _downloadTaskUpdateDispatcher;
     private readonly IFile _file;
     private readonly IDownloadTaskScheduler _downloadTaskScheduler;
     private readonly IMoveDownloadFileScheduler _moveDownloadFileScheduler;
@@ -27,7 +27,7 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
     public StopDownloadTaskCommandHandler(
         ILogger log,
         IReaparrDbContext dbContext,
-        ICommandExecutor commandExecutor,
+        IDownloadTaskUpdateDispatcher downloadTaskUpdateDispatcher,
         IFile file,
         IDownloadTaskScheduler downloadTaskScheduler,
         IMoveDownloadFileScheduler moveDownloadFileScheduler
@@ -35,7 +35,7 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
     {
         _log = log.ForContext<StopDownloadTaskCommandHandler>();
         _dbContext = dbContext;
-        _commandExecutor = commandExecutor;
+        _downloadTaskUpdateDispatcher = downloadTaskUpdateDispatcher;
         _file = file;
         _downloadTaskScheduler = downloadTaskScheduler;
         _moveDownloadFileScheduler = moveDownloadFileScheduler;
@@ -116,8 +116,11 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
             _log.Here().Debug($"Resetting download progress for {downloadTaskKey.Id} ({downloadTask.FileName})");
 
             await _dbContext.ResetDownloadTaskProgress(downloadTaskKey, DownloadStatus.Stopped, cancellationToken);
-
-            await _commandExecutor.Send(new DownloadTaskUpdatedCommand(downloadTaskKey), cancellationToken);
+            await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
+                downloadTaskKey,
+                DownloadStatus.Stopped,
+                cancellationToken
+            );
         }
 
         return Result.Ok();

@@ -24,16 +24,19 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
 {
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
+    private readonly IDownloadTaskUpdateDispatcher _downloadTaskUpdateDispatcher;
     private readonly IEventPublisher _eventPublisher;
 
     public RestartDownloadTaskCommandHandler(
         IReaparrDbContext dbContext,
         ICommandExecutor commandExecutor,
+        IDownloadTaskUpdateDispatcher downloadTaskUpdateDispatcher,
         IEventPublisher eventPublisher
     )
     {
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;
+        _downloadTaskUpdateDispatcher = downloadTaskUpdateDispatcher;
         _eventPublisher = eventPublisher;
     }
 
@@ -66,9 +69,11 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
                 $"DownloadTask {downloadTaskKey.Id} ({downloadTask.FileName}) is restarting"
             );
 
-            await _dbContext.SetDownloadStatus(childKey, DownloadStatus.Queued);
-
-            await _commandExecutor.Send(new DownloadTaskUpdatedCommand(childKey), cancellationToken);
+            await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
+                childKey,
+                DownloadStatus.Queued,
+                cancellationToken
+            );
         }
 
         await _eventPublisher.PublishAsync(

@@ -14,27 +14,24 @@ public class DownloadJob : IJob
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
-    private readonly ICommandExecutor _commandExecutor;
+    private readonly IDownloadTaskUpdateDispatcher _downloadTaskUpdateDispatcher;
     private readonly IEventPublisher _eventPublisher;
-    private readonly IDownloadManagerSettings _downloadManagerSettings;
     private readonly IServerSettingsModule _serverSettingsModule;
     private readonly IIndex<PlexDownloadClientType, IPlexDownloadClient> _plexDownloadClientFactory;
 
     public DownloadJob(
         ILogger log,
         IReaparrDbContext dbContext,
-        ICommandExecutor commandExecutor,
+        IDownloadTaskUpdateDispatcher downloadTaskUpdateDispatcher,
         IEventPublisher eventPublisher,
-        IDownloadManagerSettings downloadManagerSettings,
         IServerSettingsModule serverSettingsModule,
         IIndex<PlexDownloadClientType, IPlexDownloadClient> plexDownloadClientFactory
     )
     {
         _log = log.ForContext<DownloadJob>();
         _dbContext = dbContext;
-        _commandExecutor = commandExecutor;
+        _downloadTaskUpdateDispatcher = downloadTaskUpdateDispatcher;
         _eventPublisher = eventPublisher;
-        _downloadManagerSettings = downloadManagerSettings;
         _serverSettingsModule = serverSettingsModule;
         _plexDownloadClientFactory = plexDownloadClientFactory;
     }
@@ -120,8 +117,7 @@ public class DownloadJob : IJob
                     );
                 await plexDownloadClient.StopAsync();
 
-                await _dbContext.SetDownloadStatus(downloadTaskKey, DownloadStatus.Paused);
-                await _commandExecutor.Send(new DownloadTaskUpdatedCommand(downloadTaskKey), token);
+                await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(downloadTaskKey, DownloadStatus.Paused, token);
             }
             else if (startResult.IsFailed)
             {

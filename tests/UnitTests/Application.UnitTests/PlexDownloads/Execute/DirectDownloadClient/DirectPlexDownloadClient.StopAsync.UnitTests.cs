@@ -27,7 +27,7 @@ public class DirectPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DirectPle
             )
         );
 
-    private void SetupCommandExecutor(Func<DownloadTaskUpdatedCommand, Task>? onUpdate = null)
+    private void SetupCommandExecutor()
     {
         // CreateDownloadFileStreamCommand returns Result<Stream>
         Mock.Mock<ICommandExecutor>()
@@ -36,14 +36,7 @@ public class DirectPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DirectPle
 
         Mock.Mock<ICommandExecutor>()
             .Setup(m => m.Send(It.IsAny<ICommand<Result>>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Ok())
-            .Callback<ICommand<Result>, CancellationToken>(
-                (command, _) =>
-                {
-                    if (command is DownloadTaskUpdatedCommand notification)
-                        onUpdate?.Invoke(notification).GetAwaiter().GetResult();
-                }
-            );
+            .ReturnsAsync(Result.Ok());
     }
 
     private void SetupSpeedLimitMocks(string serverMachineIdentifier, int speedLimit = 1000)
@@ -125,14 +118,7 @@ public class DirectPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DirectPle
 
         SetupSpeedLimitMocks(serverMachineIdentifier);
 
-        var statusList = new List<DomainDownloadStatus>();
-
-        SetupCommandExecutor(async command =>
-        {
-            var task = await IDbContext.GetDownloadTaskAsync(command.Key);
-            if (task is not null)
-                statusList.Add(task.DownloadStatus);
-        });
+        SetupCommandExecutor();
 
         var (downloadServiceMock, _) = BuildInProgressDownloadServiceMock();
 
@@ -150,9 +136,6 @@ public class DirectPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DirectPle
         // Assert
         startResult.IsSuccess.ShouldBeTrue();
         stopResult.IsSuccess.ShouldBeTrue();
-
-        // After stop, the DownloadFileCompleted handler fires with Cancelled=true → sets Paused
-        statusList.ShouldContain(DomainDownloadStatus.Paused);
 
         var finalStatus = await IDbContext
             .DownloadTaskMovieFile.Where(x => x.Id == downloadTask.Id)

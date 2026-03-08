@@ -76,7 +76,7 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
             )
         );
 
-    private void SetupCommandExecutor(Func<DownloadTaskUpdatedCommand, Task>? onUpdate = null)
+    private void SetupCommandExecutor()
     {
         // CreateDownloadFileStreamCommand returns Result<Stream>
         Mock.Mock<ICommandExecutor>()
@@ -85,14 +85,7 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
 
         Mock.Mock<ICommandExecutor>()
             .Setup(m => m.Send(It.IsAny<ICommand<Result>>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Ok())
-            .Callback<ICommand<Result>, CancellationToken>(
-                (command, _) =>
-                {
-                    if (command is DownloadTaskUpdatedCommand notification)
-                        onUpdate?.Invoke(notification).GetAwaiter().GetResult();
-                }
-            );
+            .ReturnsAsync(Result.Ok());
     }
 
     private void SetupSpeedLimitMocks(string serverMachineIdentifier, int speedLimit = 1000)
@@ -136,16 +129,7 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
 
         SetupSpeedLimitMocks(serverMachineIdentifier);
 
-        var updateList = new List<IDownloadTaskProgress>();
-        var statusList = new List<DomainDownloadStatus>();
-
-        SetupCommandExecutor(async command =>
-        {
-            var task = await IDbContext.GetDownloadTaskAsync(command.Key);
-            task.ShouldNotBeNull();
-            updateList.Add(task);
-            statusList.Add(task.DownloadStatus);
-        });
+        SetupCommandExecutor();
 
         // Act
         var sut = CreateSut(BuildSuccessDownloadServiceMock());
@@ -153,9 +137,11 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
 
         // Assert
         startResult.IsSuccess.ShouldBeTrue();
-        updateList.Count.ShouldBeGreaterThanOrEqualTo(1);
-        statusList.Count.ShouldBeGreaterThanOrEqualTo(1);
-        statusList.Last().ShouldBe(DomainDownloadStatus.DownloadFinished);
+        var finalStatus = await IDbContext
+            .DownloadTaskMovieFile.Where(x => x.Id == downloadTask.Id)
+            .Select(x => x.DownloadStatus)
+            .FirstOrDefaultAsync(CancellationToken);
+        finalStatus.ShouldBe(DomainDownloadStatus.DownloadFinished);
     }
 
     [Fact]
@@ -420,14 +406,7 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
 
         SetupSpeedLimitMocks(serverMachineIdentifier);
 
-        var statusList = new List<DomainDownloadStatus>();
-
-        SetupCommandExecutor(async command =>
-        {
-            var task = await IDbContext.GetDownloadTaskAsync(command.Key);
-            if (task is not null)
-                statusList.Add(task.DownloadStatus);
-        });
+        SetupCommandExecutor();
 
         var dlPackage = MakeDownloadPackage(10 * 1024);
         var downloadServiceMock = new Mock<IDownloadService>();
@@ -471,8 +450,11 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
 
         // Assert
         startResult.IsSuccess.ShouldBeTrue();
-        statusList.ShouldContain(DomainDownloadStatus.Downloading);
-        statusList.Last().ShouldBe(DomainDownloadStatus.DownloadFinished);
+        var finalStatus = await IDbContext
+            .DownloadTaskMovieFile.Where(x => x.Id == downloadTask.Id)
+            .Select(x => x.DownloadStatus)
+            .FirstOrDefaultAsync(CancellationToken);
+        finalStatus.ShouldBe(DomainDownloadStatus.DownloadFinished);
     }
 
     [Fact]
@@ -754,14 +736,7 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
 
         SetupSpeedLimitMocks(serverMachineIdentifier);
 
-        var statusList = new List<DomainDownloadStatus>();
-
-        SetupCommandExecutor(async command =>
-        {
-            var task = await IDbContext.GetDownloadTaskAsync(command.Key);
-            if (task is not null)
-                statusList.Add(task.DownloadStatus);
-        });
+        SetupCommandExecutor();
 
         // Act
         var sut = CreateSut(BuildSuccessDownloadServiceMock());
@@ -769,8 +744,6 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        statusList.ShouldContain(DomainDownloadStatus.DownloadFinished);
-
         var finalStatus = await IDbContext
             .DownloadTaskMovieFile.Where(x => x.Id == downloadTask.Id)
             .Select(x => x.DownloadStatus)
@@ -859,14 +832,7 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
 
         SetupSpeedLimitMocks(serverMachineIdentifier);
 
-        var statusList = new List<DomainDownloadStatus>();
-
-        SetupCommandExecutor(async command =>
-        {
-            var task = await IDbContext.GetDownloadTaskAsync(command.Key);
-            if (task is not null)
-                statusList.Add(task.DownloadStatus);
-        });
+        SetupCommandExecutor();
 
         // DownloadFileCompleted with Cancelled=true simulates an explicit cancellation/pause
         var downloadServiceMock = new Mock<IDownloadService>();

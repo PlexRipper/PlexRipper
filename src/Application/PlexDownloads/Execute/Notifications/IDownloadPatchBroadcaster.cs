@@ -2,21 +2,23 @@ using Reaparr.Domain;
 
 namespace Reaparr.Application;
 
-public interface IDownloadPatchBroadcaster
+public interface IDownloadTaskUpdateDispatcher
 {
-    bool TryMarkStatusChanged(Guid nodeId, DownloadStatus status);
-
-    Task MarkProgressDirtyAsync(
-        int plexServerId,
-        DownloadTaskKey rootKey,
-        Guid changedNodeId,
+    /// <summary>
+    /// Handles a download status change by persisting status updates and scheduling immediate/periodic patch updates.
+    /// </summary>
+    Task<Result> OnStatusChangedAsync(
+        DownloadTaskKey key,
+        DownloadStatus newStatus,
         CancellationToken cancellationToken = default
     );
 
-    Task PublishImmediateStatusPatchAsync(
-        int plexServerId,
-        DownloadTaskKey rootKey,
-        IReadOnlyCollection<Guid> changedNodeIds,
-        CancellationToken cancellationToken = default
+    /// <summary>
+    /// Buffers a progress update for periodic persistence and patch dispatch.
+    /// </summary>
+    Result OnProgressUpdated(
+        DownloadTaskKey key,
+        DownloadTaskProgress progress,
+        DirectDownloadSnapshot? snapshot = null
     );
 }

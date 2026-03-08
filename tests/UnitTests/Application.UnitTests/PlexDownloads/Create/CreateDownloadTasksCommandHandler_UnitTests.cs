@@ -69,9 +69,21 @@ public class CreateDownloadTasksCommandHandlerUnitTests : BaseUnitTest<CreateDow
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        Mock.VerifyEventPublished(It.IsAny<GenerateDownloadTaskMoviesCommand>, Times.Once);
-        Mock.VerifyEventPublished(It.IsAny<GenerateDownloadTaskTvShowsCommand>, Times.Once);
-        Mock.VerifyEventPublished(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>, Times.Once);
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<GenerateDownloadTaskMoviesCommand>(), It.IsAny<CancellationToken>()),
+                Times.Once
+            );
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<GenerateDownloadTaskTvShowsCommand>(), It.IsAny<CancellationToken>()),
+                Times.Once
+            );
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>(), It.IsAny<CancellationToken>()),
+                Times.Once
+            );
         Mock.VerifyNotification(It.IsAny<CheckDownloadQueueEvent>, Times.Once);
     }
 
@@ -120,9 +132,21 @@ public class CreateDownloadTasksCommandHandlerUnitTests : BaseUnitTest<CreateDow
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        Mock.VerifyEventPublished(It.IsAny<GenerateDownloadTaskMoviesCommand>, Times.Once);
-        Mock.VerifyEventPublished(It.IsAny<GenerateDownloadTaskTvShowsCommand>, Times.Once);
-        Mock.VerifyEventPublished(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>, Times.Never);
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<GenerateDownloadTaskMoviesCommand>(), It.IsAny<CancellationToken>()),
+                Times.Once
+            );
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<GenerateDownloadTaskTvShowsCommand>(), It.IsAny<CancellationToken>()),
+                Times.Once
+            );
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>(), It.IsAny<CancellationToken>()),
+                Times.Never
+            );
         Mock.VerifyNotification(It.IsAny<CheckDownloadQueueEvent>, Times.Once);
     }
 
@@ -145,9 +169,21 @@ public class CreateDownloadTasksCommandHandlerUnitTests : BaseUnitTest<CreateDow
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        Mock.VerifyEventPublished(It.IsAny<GenerateDownloadTaskMoviesCommand>, Times.Never);
-        Mock.VerifyEventPublished(It.IsAny<GenerateDownloadTaskTvShowsCommand>, Times.Never);
-        Mock.VerifyEventPublished(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>, Times.Never);
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<GenerateDownloadTaskMoviesCommand>(), It.IsAny<CancellationToken>()),
+                Times.Never
+            );
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<GenerateDownloadTaskTvShowsCommand>(), It.IsAny<CancellationToken>()),
+                Times.Never
+            );
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>(), It.IsAny<CancellationToken>()),
+                Times.Never
+            );
         Mock.VerifyNotification(It.IsAny<CheckDownloadQueueEvent>, Times.Never);
     }
 }

@@ -27,18 +27,21 @@ public class PauseDownloadTaskCommandHandler : ICommandHandler<PauseDownloadTask
     private readonly IReaparrDbContext _dbContext;
     private readonly IDownloadTaskScheduler _downloadTaskScheduler;
     private readonly IMoveDownloadFileScheduler _moveDownloadFileScheduler;
+    private readonly IDownloadTaskUpdateDispatcher _downloadTaskUpdateDispatcher;
 
     public PauseDownloadTaskCommandHandler(
         ILogger log,
         IReaparrDbContext dbContext,
         IDownloadTaskScheduler downloadTaskScheduler,
-        IMoveDownloadFileScheduler moveDownloadFileScheduler
+        IMoveDownloadFileScheduler moveDownloadFileScheduler,
+        IDownloadTaskUpdateDispatcher downloadTaskUpdateDispatcher
     )
     {
         _log = log.ForContext<PauseDownloadTaskCommandHandler>();
         _dbContext = dbContext;
         _downloadTaskScheduler = downloadTaskScheduler;
         _moveDownloadFileScheduler = moveDownloadFileScheduler;
+        _downloadTaskUpdateDispatcher = downloadTaskUpdateDispatcher;
     }
 
     public async Task<Result> ExecuteAsync(PauseDownloadTaskCommand command, CancellationToken cancellationToken)
@@ -101,7 +104,13 @@ public class PauseDownloadTaskCommandHandler : ICommandHandler<PauseDownloadTask
             if (stopResult.IsFailed)
                 return stopResult.LogError();
 
-            await _dbContext.SetDownloadStatus(downloadTaskKey, DownloadStatus.Paused);
+            var statusUpdateResult = await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
+                downloadTaskKey,
+                DownloadStatus.Paused,
+                cancellationToken
+            );
+            if (statusUpdateResult.IsFailed)
+                return statusUpdateResult.LogError();
         }
 
         return Result.Ok();

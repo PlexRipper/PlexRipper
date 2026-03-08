@@ -942,63 +942,6 @@ public static partial class DbContextExtensions
         }
     }
 
-    public static async Task<List<DownloadTaskGeneric>> GetDownloadProgressRootTasksAsync(
-        this IReaparrDbContext dbContext,
-        IReadOnlyCollection<DownloadTaskKey> rootKeys,
-        CancellationToken cancellationToken = default
-    )
-    {
-        if (rootKeys.Count == 0)
-            return [];
-
-        var movieRootIds = rootKeys.Where(x => x.Type == DownloadTaskType.Movie).Select(x => x.Id).Distinct().ToList();
-        var tvShowRootIds = rootKeys
-            .Where(x => x.Type == DownloadTaskType.TvShow)
-            .Select(x => x.Id)
-            .Distinct()
-            .ToList();
-
-        var rootTasks = new List<DownloadTaskGeneric>();
-
-        if (movieRootIds.Count > 0)
-        {
-            var movieRoots = await dbContext
-                .DownloadTaskMovie.AsNoTracking()
-                .AsSplitQuery()
-                .Where(x => movieRootIds.Contains(x.Id))
-                .Include(x => x.Children)
-                .ToListAsync(cancellationToken);
-
-            foreach (var movie in movieRoots)
-            {
-                var generic = movie.ToGeneric();
-                generic.Calculate();
-                rootTasks.Add(generic);
-            }
-        }
-
-        if (tvShowRootIds.Count > 0)
-        {
-            var tvShowRoots = await dbContext
-                .DownloadTaskTvShow.AsNoTracking()
-                .AsSplitQuery()
-                .Where(x => tvShowRootIds.Contains(x.Id))
-                .Include(x => x.Children)
-                    .ThenInclude(x => x.Children)
-                        .ThenInclude(x => x.Children)
-                .ToListAsync(cancellationToken);
-
-            foreach (var show in tvShowRoots)
-            {
-                var generic = show.ToGeneric();
-                generic.Calculate();
-                rootTasks.Add(generic);
-            }
-        }
-
-        return rootTasks;
-    }
-
     public static async Task<(Guid ParentId, DownloadStatus Status)?> GetDownloadPatchMetaAsync(
         this IReaparrDbContext dbContext,
         DownloadTaskKey key,

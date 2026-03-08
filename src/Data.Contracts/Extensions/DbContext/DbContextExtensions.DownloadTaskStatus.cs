@@ -19,6 +19,8 @@ public static partial class DbContextExtensions
     )
     {
         var changedKeys = new List<DownloadTaskKey>();
+        var serverId = key.PlexServerId;
+        var libraryId = key.PlexLibraryId;
 
         try
         {
@@ -71,31 +73,25 @@ public static partial class DbContextExtensions
                     }
                     case DownloadTaskType.Season:
                     {
-                        var season = await dbContext
+                        var showId = await dbContext
                             .DownloadTaskTvShowSeason.Where(x => x.Id == parentKey.Id)
-                            .Select(x => new
-                            {
-                                x.Id,
-                                x.ParentId,
-                                x.PlexServerId,
-                                x.PlexLibraryId,
-                            })
+                            .Select(x => (Guid?)x.ParentId)
                             .FirstOrDefaultAsync(cancellationToken);
 
-                        if (season is null)
+                        if (showId is null)
                         {
                             parentKey = null;
                             break;
                         }
 
                         var childStatuses = await dbContext
-                            .DownloadTaskTvShowEpisode.Where(x => x.ParentId == season.Id)
+                            .DownloadTaskTvShowEpisode.Where(x => x.ParentId == parentKey.Id)
                             .Select(x => x.DownloadStatus)
                             .ToListAsync(cancellationToken);
                         var newStatus = DownloadTaskActions.Aggregate(childStatuses);
 
                         var changedCount = await dbContext
-                            .DownloadTaskTvShowSeason.Where(x => x.Id == season.Id && x.DownloadStatus != newStatus)
+                            .DownloadTaskTvShowSeason.Where(x => x.Id == parentKey.Id && x.DownloadStatus != newStatus)
                             .ExecuteUpdateAsync(
                                 p => p.SetProperty(x => x.DownloadStatus, newStatus),
                                 cancellationToken
@@ -107,40 +103,34 @@ public static partial class DbContextExtensions
                         parentKey = new DownloadTaskKey
                         {
                             Type = DownloadTaskType.TvShow,
-                            Id = season.ParentId,
-                            PlexServerId = season.PlexServerId,
-                            PlexLibraryId = season.PlexLibraryId,
+                            Id = showId.Value,
+                            PlexServerId = serverId,
+                            PlexLibraryId = libraryId,
                         };
 
                         break;
                     }
                     case DownloadTaskType.Episode:
                     {
-                        var episode = await dbContext
+                        var seasonId = await dbContext
                             .DownloadTaskTvShowEpisode.Where(x => x.Id == parentKey.Id)
-                            .Select(x => new
-                            {
-                                x.Id,
-                                x.ParentId,
-                                x.PlexServerId,
-                                x.PlexLibraryId,
-                            })
+                            .Select(x => (Guid?)x.ParentId)
                             .FirstOrDefaultAsync(cancellationToken);
 
-                        if (episode is null)
+                        if (seasonId is null)
                         {
                             parentKey = null;
                             break;
                         }
 
                         var childStatuses = await dbContext
-                            .DownloadTaskTvShowEpisodeFile.Where(x => x.ParentId == episode.Id)
+                            .DownloadTaskTvShowEpisodeFile.Where(x => x.ParentId == parentKey.Id)
                             .Select(x => x.DownloadStatus)
                             .ToListAsync(cancellationToken);
                         var newStatus = DownloadTaskActions.Aggregate(childStatuses);
 
                         var changedCount = await dbContext
-                            .DownloadTaskTvShowEpisode.Where(x => x.Id == episode.Id && x.DownloadStatus != newStatus)
+                            .DownloadTaskTvShowEpisode.Where(x => x.Id == parentKey.Id && x.DownloadStatus != newStatus)
                             .ExecuteUpdateAsync(
                                 p => p.SetProperty(x => x.DownloadStatus, newStatus),
                                 cancellationToken
@@ -152,9 +142,9 @@ public static partial class DbContextExtensions
                         parentKey = new DownloadTaskKey
                         {
                             Type = DownloadTaskType.Season,
-                            Id = episode.ParentId,
-                            PlexServerId = episode.PlexServerId,
-                            PlexLibraryId = episode.PlexLibraryId,
+                            Id = seasonId.Value,
+                            PlexServerId = serverId,
+                            PlexLibraryId = libraryId,
                         };
 
                         break;

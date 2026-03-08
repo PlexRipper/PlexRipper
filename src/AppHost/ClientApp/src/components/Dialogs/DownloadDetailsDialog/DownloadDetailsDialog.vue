@@ -116,7 +116,7 @@ function fetchLogs() {
 			take: 50,
 		}).subscribe((data) => {
 			if (data.isSuccess && data.value) {
-				set(logs, [...data.value]);
+				set(logs, [...data.value].sort((a, b) => b.id - a.id));
 			}
 		}),
 	);

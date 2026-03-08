@@ -78,11 +78,15 @@
 			</template>
 			<template v-else>
 				<!-- Total height spacer — required by TanStack Virtual -->
-				<div :style="{ height: `${virtualizer.getTotalSize()}px`, position: 'relative' }">
+				<div
+					class="log-container"
+					:style="{ height: `${virtualizer.getTotalSize()}px`, position: 'relative' }">
 					<div
 						v-for="row in virtualizer.getVirtualItems()"
 						:key="String(row.key)"
 						:ref="el => measureRow(el as Element | null, row)"
+						:class="['log-row-shell', 'log-row-shell--timeline', { 'log-row-shell--last': row.index === filteredLogs.length - 1 }]"
+						:data-index="row.index"
 						:style="{
 							position: 'absolute',
 							top: 0,
@@ -91,20 +95,31 @@
 							transform: `translateY(${row.start}px)`,
 						}">
 						<QTimeline
-							class="log-timeline"
-							color="grey-6"
-							layout="dense">
+							:class="['log-timeline', { 'log-timeline--last': row.index === filteredLogs.length - 1 }]"
+							layout="dense"
+							side="right">
 							<QTimelineEntry
+								class="log-timeline-entry"
+								:class="{ 'log-timeline-entry--fresh': isFreshLog(getLogAtIndex(row.index).id) }"
 								:color="Convert.logLevelToColor(getLogAtIndex(row.index).logLevel)"
 								:icon="Convert.logLevelToIcon(getLogAtIndex(row.index).logLevel)"
-								:title="translateDownloadStatus(getLogAtIndex(row.index).status)">
+								:title="translateDownloadStatus(getLogAtIndex(row.index).status)"
+								@click="copyLogEntry(getLogAtIndex(row.index))">
 								<template #subtitle>
-									<QDateTime
-										:text="getLogAtIndex(row.index).createdAt"
-										short-date
-										time />
+									<div class="log-timeline-entry__subtitle-row">
+										<QDateTime
+											:text="getLogAtIndex(row.index).createdAt"
+											short-date
+											time />
+										<q-icon
+											class="log-timeline-entry__copy-icon"
+											name="mdi-content-copy"
+											size="sm" />
+									</div>
 								</template>
-								<QText :value="getLogAtIndex(row.index).message" />
+								<div class="log-timeline-entry__body">
+									<QText :value="getLogAtIndex(row.index).message" />
+								</div>
 							</QTimelineEntry>
 						</QTimeline>
 					</div>
@@ -145,6 +160,7 @@ import { DialogType } from '@enums';
 import { useDialogStore } from '@store';
 
 const INITIAL_TAKE = 50;
+const NEW_LOG_ANIMATION_MS = 2200;
 
 const { t } = useI18n();
 const { copy } = useClipboard({ legacy: true });
@@ -167,6 +183,7 @@ const activeFilters = ref<NotificationLevel[]>([...Object.values(NotificationLev
 const logs = ref<DownloadTaskLogDTO[]>([]);
 const logsLoading = ref(false);
 const highestSeenId = ref<number | undefined>(undefined);
+const freshLogIds = ref<number[]>([]);
 const logRefreshTimer = useIntervalFn(() => refreshLogs(), 1000, { immediate: false });
 
 // Sync initial logs from parent pre-fetch (first 50)
@@ -216,6 +233,21 @@ function getLogAtIndex(index: number) {
 	return filteredLogs.value[index]!;
 }
 
+function isFreshLog(id: number) {
+	return freshLogIds.value.includes(id);
+}
+
+function trackFreshLogs(ids: number[]) {
+	if (ids.length === 0) {
+		return;
+	}
+
+	set(freshLogIds, [...new Set([...freshLogIds.value, ...ids])]);
+	window.setTimeout(() => {
+		set(freshLogIds, freshLogIds.value.filter((id) => !ids.includes(id)));
+	}, NEW_LOG_ANIMATION_MS);
+}
+
 function measureRow(el: Element | null, _row: VirtualItem) {
 	if (el) {
 		get(virtualizer).measureElement(el);
@@ -230,10 +262,19 @@ function toggleSort() {
 
 function copyLogs() {
 	const text = get(logs)
-		.map((item) => `[${format(new Date(item.createdAt), 'yyyy-MM-dd HH:mm:ss')}] [${item.logLevel}] ${item.message}`)
+		.map((item) => formatLogCopyText(item))
 		.join('\n');
 	copy(text);
 	showSuccessNotification(t('components.download-details-dialog.logs.copied-to-clipboard'));
+}
+
+function copyLogEntry(item: DownloadTaskLogDTO) {
+	copy(formatLogCopyText(item));
+	showSuccessNotification(t('components.download-details-dialog.logs.entry-copied-to-clipboard'));
+}
+
+function formatLogCopyText(item: DownloadTaskLogDTO) {
+	return `[${format(new Date(item.createdAt), 'yyyy-MM-dd HH:mm:ss')}] [${item.logLevel}] ${item.message}`;
 }
 
 function deleteLogs() {
@@ -271,7 +312,7 @@ function toggleLevel(level: NotificationLevel) {
 }
 
 function reset() {
-	set(sortAsc, true);
+	set(sortAsc, false);
 	set(activeFilters, [...Object.values(NotificationLevel).filter((v) => v !== NotificationLevel.None)]);
 }
 
@@ -295,6 +336,9 @@ function refreshLogs() {
 			take,
 		}).subscribe((data) => {
 			if (data.isSuccess && data.value && data.value.length > 0) {
+				if (sinceId !== undefined) {
+					trackFreshLogs(data.value.map((l) => l.id));
+				}
 				set(logs, [...get(logs), ...data.value]);
 				const maxId = Math.max(...data.value.map((l) => l.id));
 				set(highestSeenId, Math.max(get(highestSeenId) ?? 0, maxId));
@@ -317,6 +361,7 @@ onMounted(() => {
 onUnmounted(() => {
 	logRefreshTimer.pause();
 	set(logs, []);
+	set(freshLogIds, []);
 	set(highestSeenId, undefined);
 });
 
@@ -344,23 +389,115 @@ defineExpose({ reset });
   min-height: 0;
   max-width: 100%;
   overflow-y: auto;
-  overflow-x: hidden;
+
+  .log-container {
+    margin: 0px 1rem;
+  }
+}
+
+.log-row-shell {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.log-row-shell--timeline {
+  .q-timeline {
+    margin: 0;
+  }
 }
 
 .log-timeline {
-  padding-left: 0.5rem;
+  width: 100%;
 
-  .q-timeline__entry--icon {
-    .q-timeline__dot {
-      &::before {
-        display: none;
-      }
+  .q-timeline__entry--icon .q-timeline__dot {
+    left: -16px;
+  }
+}
 
-      .q-icon {
-        font-size: 1.5rem;
-        color: currentColor;
-      }
+.log-timeline .q-timeline__entry:last-child .q-timeline__dot::after {
+  content: '';
+}
+
+.log-timeline--last .q-timeline__entry:last-child .q-timeline__dot::after {
+  content: none;
+}
+
+.log-timeline-entry {
+  cursor: copy;
+
+  .q-timeline__dot {
+    width: 47px;
+
+    &::before {
+      display: none;
     }
+
+    &::after {
+      top: 56px;
+      left: 22px;
+    }
+
+    .q-icon {
+      color: currentColor;
+      font-size: 2.0rem;
+      height: 56px;
+      line-height: 56px;
+    }
+  }
+
+  .q-timeline__subtitle {
+    padding-top: 12px;
+  }
+
+  .q-timeline__content {
+    position: relative;
+    padding-left: 20px;
+    padding-bottom: 24px;
+  }
+
+  &:hover .log-timeline-entry__copy-icon {
+    opacity: 1;
+  }
+}
+
+.log-timeline-entry--fresh {
+  animation: log-entry-pulse 2.2s cubic-bezier(0.16, 1, 0.3, 1);
+
+  .q-timeline__content,
+  .q-timeline__dot,
+  .q-timeline__subtitle {
+    animation: log-entry-pulse 2.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+}
+
+.log-timeline-entry__subtitle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.log-timeline-entry__copy-icon {
+  opacity: 0;
+  transition: opacity 0.18s ease;
+  flex-shrink: 0;
+}
+
+@keyframes log-entry-pulse {
+  0% {
+    opacity: 0.72;
+    transform: translateY(4px);
+  }
+
+  45% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 </style>

@@ -32,14 +32,14 @@
 			<tr v-if="downloadTask.downloadUrl">
 				<td>{{ t('components.download-details-dialog.overview.download-url') }}</td>
 				<td data-cy="download-details-dialog-download-url">
-					<QRow
-						class="no-wrap"
-						no-gutters>
-						<QCol>{{ downloadTask.downloadUrl }}</QCol>
-						<QCol cols="auto">
+					<div class="download-url-row">
+						<span class="download-url-text">
+							{{ downloadTask.downloadUrl }}
+						</span>
+						<div class="download-url-action">
 							<ExternalLinkButton :href="downloadTask.downloadUrl" />
-						</QCol>
-					</QRow>
+						</div>
+					</div>
 				</td>
 			</tr>
 		</tbody>
@@ -66,3 +66,31 @@ defineProps<{
 	errors: ErrorDTO[];
 }>();
 </script>
+
+<style lang="scss">
+.section-table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.download-url-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: flex-start;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.download-url-text {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.download-url-action {
+  flex-shrink: 0;
+}
+</style>

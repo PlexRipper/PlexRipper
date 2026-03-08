@@ -114,7 +114,8 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
             .Setup(x =>
                 x.OnStatusChangedAsync(
                     It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<Domain.DownloadStatus>(),
+                    It.IsAny<Result?>(),
                     It.IsAny<CancellationToken>()
                 )
             )
@@ -175,7 +176,17 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
             .Setup(x =>
                 x.OnStatusChangedAsync(
                     It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<Domain.DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<Domain.DownloadStatus>(),
+                    It.IsAny<Result>(),
                     It.IsAny<CancellationToken>()
                 )
             )
@@ -242,7 +253,17 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
             .Setup(x =>
                 x.OnStatusChangedAsync(
                     It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<Domain.DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<Domain.DownloadStatus>(),
+                    It.IsAny<Result?>(),
                     It.IsAny<CancellationToken>()
                 )
             )
@@ -328,7 +349,7 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
             .Setup(x =>
                 x.OnStatusChangedAsync(
                     It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<Domain.DownloadStatus>(),
                     It.IsAny<CancellationToken>()
                 )
             )
@@ -381,7 +402,7 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
             .Setup(x =>
                 x.OnStatusChangedAsync(
                     It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<Domain.DownloadStatus>(),
                     It.IsAny<CancellationToken>()
                 )
             )
@@ -437,7 +458,17 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
             .Setup(x =>
                 x.OnStatusChangedAsync(
                     It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<Domain.DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<Domain.DownloadStatus>(),
+                    It.IsAny<Result?>(),
                     It.IsAny<CancellationToken>()
                 )
             )
@@ -494,6 +525,7 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
                     x.OnStatusChangedAsync(
                         It.IsAny<DownloadTaskKey>(),
                         DomainDownloadStatus.StorageError,
+                        It.IsAny<Result>(),
                         It.IsAny<CancellationToken>()
                     ),
                 Times.Once()
@@ -508,7 +540,7 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
             .Setup(x =>
                 x.OnStatusChangedAsync(
                     It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<Domain.DownloadStatus>(),
                     It.IsAny<CancellationToken>()
                 )
             )
@@ -605,7 +637,7 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
             .Setup(x =>
                 x.OnStatusChangedAsync(
                     It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<Domain.DownloadStatus>(),
                     It.IsAny<CancellationToken>()
                 )
             )
@@ -700,7 +732,7 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
             .Setup(x =>
                 x.OnStatusChangedAsync(
                     It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<Domain.DownloadStatus>(),
                     It.IsAny<CancellationToken>()
                 )
             )
@@ -817,7 +849,7 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
             .Setup(x =>
                 x.OnStatusChangedAsync(
                     It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<Domain.DownloadStatus>(),
                     It.IsAny<CancellationToken>()
                 )
             )
@@ -915,7 +947,7 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
             .Setup(x =>
                 x.OnStatusChangedAsync(
                     It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<Domain.DownloadStatus>(),
                     It.IsAny<CancellationToken>()
                 )
             )
@@ -976,7 +1008,7 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
             .Setup(x =>
                 x.OnStatusChangedAsync(
                     It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<Domain.DownloadStatus>(),
                     It.IsAny<CancellationToken>()
                 )
             )
@@ -1052,7 +1084,7 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
             .Setup(x =>
                 x.OnStatusChangedAsync(
                     It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<Domain.DownloadStatus>(),
                     It.IsAny<CancellationToken>()
                 )
             )

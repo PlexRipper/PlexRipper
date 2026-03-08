@@ -47,6 +47,14 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
         DownloadTaskKey key,
         DownloadStatus newStatus,
         CancellationToken cancellationToken = default
+    ) => await OnStatusChangedAsync(key, newStatus, null, cancellationToken);
+
+    /// <inheritdoc />
+    public async Task<Result> OnStatusChangedAsync(
+        DownloadTaskKey key,
+        DownloadStatus newStatus,
+        Result? errorResult,
+        CancellationToken cancellationToken = default
     )
     {
         var result = await Result.Try(async Task () =>
@@ -58,6 +66,7 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
             if (hasStatusChanged)
             {
                 await SetDownloadStatusAsync(dbContext, key, newStatus, cancellationToken);
+                await LogStatusChangeAsync(dbContext, key, newStatus, cancellationToken);
             }
 
             var changedParentKeys = await DetermineDownloadStatusAsync(dbContext, key, cancellationToken);
@@ -81,6 +90,16 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
                 _ => BufferedProgressUpdate.FromStatus(key),
                 (_, current) => current with { NodeId = key.Id, Key = key }
             );
+
+            if (errorResult is not null)
+            {
+                await dbContext.CreateDownloadClientLog(
+                    key,
+                    NotificationLevel.Error,
+                    newStatus,
+                    errorResult.ToString()
+                );
+            }
         });
 
         if (result.IsFailed)
@@ -406,6 +425,67 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
                     $"{key.Type} is not supported in {nameof(SetDownloadStatusAsync)}"
                 );
         }
+    }
+
+    private async Task LogStatusChangeAsync(
+        IReaparrDbContext dbContext,
+        DownloadTaskKey key,
+        DownloadStatus status,
+        CancellationToken cancellationToken
+    )
+    {
+        var mediaFileName = await GetTaskDisplayNameAsync(dbContext, key, cancellationToken) ?? key.Id.ToString();
+
+        _log.Here()
+            .InformationMsg(
+                "DownloadTask {DownloadTaskId} ({MediaFileName}) transitioning to {NewStatus}",
+                key.Id,
+                mediaFileName,
+                status
+            );
+
+        await dbContext.CreateDownloadClientLog(
+            key,
+            status.ToNotificationLevel(),
+            status,
+            $"Download {mediaFileName} transitioned to status: {status}"
+        );
+    }
+
+    private static async Task<string?> GetTaskDisplayNameAsync(
+        IReaparrDbContext dbContext,
+        DownloadTaskKey key,
+        CancellationToken cancellationToken
+    )
+    {
+        return key.Type switch
+        {
+            DownloadTaskType.Movie => await dbContext
+                .DownloadTaskMovie.Where(x => x.Id == key.Id)
+                .Select(x => x.Title)
+                .FirstOrDefaultAsync(cancellationToken),
+            DownloadTaskType.MovieData or DownloadTaskType.MoviePart => await dbContext
+                .DownloadTaskMovieFile.Where(x => x.Id == key.Id)
+                .Select(x => x.FileName)
+                .FirstOrDefaultAsync(cancellationToken),
+            DownloadTaskType.TvShow => await dbContext
+                .DownloadTaskTvShow.Where(x => x.Id == key.Id)
+                .Select(x => x.Title)
+                .FirstOrDefaultAsync(cancellationToken),
+            DownloadTaskType.Season => await dbContext
+                .DownloadTaskTvShowSeason.Where(x => x.Id == key.Id)
+                .Select(x => x.Title)
+                .FirstOrDefaultAsync(cancellationToken),
+            DownloadTaskType.Episode => await dbContext
+                .DownloadTaskTvShowEpisode.Where(x => x.Id == key.Id)
+                .Select(x => x.Title)
+                .FirstOrDefaultAsync(cancellationToken),
+            DownloadTaskType.EpisodeData or DownloadTaskType.EpisodePart => await dbContext
+                .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == key.Id)
+                .Select(x => x.FileName)
+                .FirstOrDefaultAsync(cancellationToken),
+            _ => null,
+        };
     }
 
     private async Task<List<DownloadTaskKey>> DetermineDownloadStatusAsync(

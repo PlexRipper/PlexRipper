@@ -296,24 +296,22 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
 
     private async Task SetDownloadStatusAsync(Domain.DownloadStatus status, Result? errorResult = null)
     {
-        _log.Here()
-            .InformationMsg(
-                "DownloadTask {DownloadTaskId} ({MediaFileName}) transitioning to {NewStatus}",
-                _downloadTaskKey!.Id,
-                _filename,
-                status
+        if (_downloadTaskKey is null)
+            return;
+
+        if (errorResult is null)
+        {
+            await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(_downloadTaskKey, status, CancellationToken.None);
+        }
+        else
+        {
+            await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
+                _downloadTaskKey,
+                status,
+                errorResult,
+                CancellationToken.None
             );
-
-        await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(_downloadTaskKey, status, CancellationToken.None);
-
-        await SendDownloadClientLog(
-            status.ToNotificationLevel(),
-            status,
-            $"Download {_filename} transitioned to status: {status}"
-        );
-
-        if (errorResult is not null)
-            await SendDownloadClientLog(NotificationLevel.Error, status, errorResult.ToString());
+        }
     }
 
     private async Task SendDownloadClientLog(NotificationLevel logLevel, Domain.DownloadStatus status, string message)

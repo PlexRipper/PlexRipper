@@ -220,24 +220,12 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         if (_downloadTaskKey is null)
             return;
 
-        _log.Here()
-            .InformationMsg(
-                "DownloadTask {DownloadTaskId} ({MediaFileName}) transitioning to {NewStatus}",
-                _downloadTaskKey!.Id,
-                _filename,
-                status
-            );
-
-        await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(_downloadTaskKey, status, CancellationToken.None);
-
-        await SendDownloadClientLog(
-            status.ToNotificationLevel(),
+        await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
+            _downloadTaskKey,
             status,
-            $"Download {_filename} transitioned to status: {status}"
+            errorResult,
+            CancellationToken.None
         );
-
-        if (errorResult is not null)
-            await SendDownloadClientLog(NotificationLevel.Error, status, errorResult.ToString());
     }
 
     private async Task SendDownloadClientLog(NotificationLevel logLevel, DownloadStatus status, string message)

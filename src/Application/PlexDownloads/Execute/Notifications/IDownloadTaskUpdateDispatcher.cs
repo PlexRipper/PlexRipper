@@ -14,6 +14,16 @@ public interface IDownloadTaskUpdateDispatcher
     );
 
     /// <summary>
+    /// Handles a download status change and appends an optional error log entry.
+    /// </summary>
+    Task<Result> OnStatusChangedAsync(
+        DownloadTaskKey key,
+        DownloadStatus newStatus,
+        Result? errorResult,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <summary>
     /// Buffers a progress update for periodic persistence and patch dispatch.
     /// </summary>
     Result OnProgressUpdated(

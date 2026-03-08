@@ -197,29 +197,20 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                 )
                 .Select(x => x.EventArgs)
                 .Sample(TimeSpan.FromMilliseconds(100))
-                .Select(args =>
-                    Observable.FromAsync(async _ =>
+                .Subscribe(args =>
+                {
+                    var progress = new DownloadTaskProgress
                     {
-                        var progress = new DownloadTaskProgress
-                        {
-                            DataTotal = args.TotalBytesToReceive,
-                            Percentage = Convert.ToDecimal(args.ProgressPercentage),
-                            DataReceived = args.ReceivedBytesSize,
-                            DownloadSpeed =
-                                args.ProgressPercentage < 100 ? Convert.ToInt64(args.BytesPerSecondSpeed) : 0,
-                        };
+                        DataTotal = args.TotalBytesToReceive,
+                        Percentage = Convert.ToDecimal(args.ProgressPercentage),
+                        DataReceived = args.ReceivedBytesSize,
+                        DownloadSpeed =
+                            args.ProgressPercentage < 100 ? Convert.ToInt64(args.BytesPerSecondSpeed) : 0,
+                    };
 
-                        _downloadTaskUpdateDispatcher.OnProgressUpdated(
-                            key,
-                            progress,
-                            _downloader.Package.ToSnapshot()
-                        );
-
-                        await SendProgressLog(progress);
-                    })
-                )
-                .Concat()
-                .Subscribe()
+                    _downloadTaskUpdateDispatcher.OnProgressUpdated(key, progress, _downloader.Package.ToSnapshot());
+                    _ = SendProgressLog(progress);
+                })
         );
 
         _subscriptions.Add(
@@ -307,19 +298,12 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
         if (_downloadTaskKey is null)
             return;
 
-        if (errorResult is null)
-        {
-            await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(_downloadTaskKey, status, CancellationToken.None);
-        }
-        else
-        {
-            await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
-                _downloadTaskKey,
-                status,
-                errorResult,
-                CancellationToken.None
-            );
-        }
+        await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
+            _downloadTaskKey,
+            status,
+            errorResult,
+            CancellationToken.None
+        );
     }
 
     private async Task SendDownloadClientLog(NotificationLevel logLevel, Domain.DownloadStatus status, string message)

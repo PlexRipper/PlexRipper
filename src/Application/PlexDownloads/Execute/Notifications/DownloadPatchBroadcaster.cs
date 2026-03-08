@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Threading.Channels;
+using ByteSizeLib;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Reaparr.Data.Contracts;
@@ -534,12 +535,22 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
 
         var mediaFileName = await GetTaskDisplayNameAsync(dbContext, key, cancellationToken) ?? key.Id.ToString();
 
-        await dbContext.CreateDownloadClientLog(
-            key,
-            NotificationLevel.Debug,
-            DownloadStatus.Downloading,
-            $"Progress update for {mediaFileName}: {progress.Percentage:F2}% ({progress.DataReceived}/{progress.DataTotal} bytes) at {progress.DownloadSpeed} B/s"
-        );
+        var progressMsg = _log.Here()
+            .DebugMsg(
+                "[DownloadTaskProgress {MediaFileName} - {Percentage}% - {Speed} - {DataReceived} / {DataTotal} - {TimeRemaining}]",
+                mediaFileName,
+                progress.Percentage.ToString("F2"),
+                DataFormat.FormatSpeedString(progress.DownloadSpeed),
+                ByteSize.FromBytes(progress.DataReceived).ToString("MB"),
+                ByteSize.FromBytes(progress.DataTotal).ToString("MB"),
+                TimeSpan
+                    .FromSeconds(
+                        DataFormat.GetTimeRemaining(progress.DataTotal - progress.DataReceived, progress.DownloadSpeed)
+                    )
+                    .ToFormattedString()
+            );
+
+        await dbContext.CreateDownloadClientLog(key, NotificationLevel.Debug, DownloadStatus.Downloading, progressMsg);
     }
 
     private bool ShouldPersistProgressDebug(Guid nodeId, DownloadTaskProgress progress)

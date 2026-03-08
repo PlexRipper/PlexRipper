@@ -1,6 +1,5 @@
 using FastEndpoints;
 using Reaparr.Data.Contracts;
-using Reaparr.SignalR.Contracts;
 
 namespace Reaparr.Application;
 
@@ -9,12 +8,12 @@ public record DownloadTaskUpdatedCommand(DownloadTaskKey Key) : ICommand<Result>
 public class DownloadTaskUpdatedHandler : ICommandHandler<DownloadTaskUpdatedCommand, Result>
 {
     private readonly IReaparrDbContext _dbContext;
-    private readonly IDownloadHubService _downloadHubService;
+    private readonly IDownloadPatchBroadcaster _downloadPatchBroadcaster;
 
-    public DownloadTaskUpdatedHandler(IReaparrDbContext dbContext, IDownloadHubService downloadHubService)
+    public DownloadTaskUpdatedHandler(IReaparrDbContext dbContext, IDownloadPatchBroadcaster downloadPatchBroadcaster)
     {
         _dbContext = dbContext;
-        _downloadHubService = downloadHubService;
+        _downloadPatchBroadcaster = downloadPatchBroadcaster;
     }
 
     public async Task<Result> ExecuteAsync(DownloadTaskUpdatedCommand command, CancellationToken cancellationToken)
@@ -24,15 +23,35 @@ public class DownloadTaskUpdatedHandler : ICommandHandler<DownloadTaskUpdatedCom
             var plexServerId = command.Key.PlexServerId;
 
             // Ensure the up-to-date download status is written to the database as the DownloadQueue depends on that status to pick a new DownloadTask
-            await _dbContext.DetermineDownloadStatus(command.Key, cancellationToken);
+            var changedParentKeys = await _dbContext.DetermineDownloadStatus(command.Key, cancellationToken);
+            var rootKey = await _dbContext.GetRootDownloadTaskKeyAsync(command.Key, cancellationToken);
+            var currentStatus = await _dbContext.GetDownloadStatusAsync(command.Key, cancellationToken);
 
-            var downloadTasks = await _dbContext.GetDownloadProgressTasksByServerAsync(
+            if (rootKey is null)
+                return Result.Ok();
+
+            var changedNodeIds = changedParentKeys.Select(x => x.Id).Append(command.Key.Id).Distinct().ToList();
+
+            var isStatusChanged =
+                currentStatus.HasValue
+                && _downloadPatchBroadcaster.TryMarkStatusChanged(command.Key.Id, currentStatus.Value);
+
+            await _downloadPatchBroadcaster.MarkProgressDirtyAsync(
                 plexServerId,
-                cancellationToken: cancellationToken
+                rootKey,
+                command.Key.Id,
+                cancellationToken
             );
 
-            // Update the front-end with the download progress
-            await _downloadHubService.SendDownloadProgressUpdateAsync(downloadTasks, cancellationToken);
+            if (changedParentKeys.Count > 0 || isStatusChanged)
+            {
+                await _downloadPatchBroadcaster.PublishImmediateStatusPatchAsync(
+                    plexServerId,
+                    rootKey,
+                    changedNodeIds,
+                    cancellationToken
+                );
+            }
 
             return Result.Ok();
         }

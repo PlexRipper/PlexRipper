@@ -1,5 +1,4 @@
 using Reaparr.Data.Contracts;
-using Reaparr.SignalR.Contracts;
 
 namespace Reaparr.Application.UnitTests;
 
@@ -9,7 +8,7 @@ public class DownloadTaskUpdatedHandlerUnitTests : BaseUnitTest<DownloadTaskUpda
         : base(output) { }
 
     [Fact]
-    public async Task ShouldSendDownloadTasksWithSignalR_WhenDownloadTaskUpdatedHasBeenCalled()
+    public async Task ShouldQueueProgressUpdate_WhenDownloadTaskUpdatedHasBeenCalled()
     {
         // Arrange
         await SetupDatabase(
@@ -26,22 +25,35 @@ public class DownloadTaskUpdatedHandlerUnitTests : BaseUnitTest<DownloadTaskUpda
 
         var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync(cancellationToken: CancellationToken);
 
-        Mock.Mock<IDownloadHubService>()
+        Mock.Mock<IDownloadPatchBroadcaster>()
+            .Setup(x => x.TryMarkStatusChanged(It.IsAny<Guid>(), It.IsAny<DownloadStatus>()))
+            .Returns(false)
+            .Verifiable(Times.Once);
+
+        Mock.Mock<IDownloadPatchBroadcaster>()
             .Setup(x =>
-                x.SendDownloadProgressUpdateAsync(It.IsAny<List<DownloadTaskGeneric>>(), It.IsAny<CancellationToken>())
+                x.MarkProgressDirtyAsync(
+                    It.IsAny<int>(),
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<Guid>(),
+                    It.IsAny<CancellationToken>()
+                )
             )
-            .Returns(Task.CompletedTask);
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once);
 
         // Act
         var command = new DownloadTaskUpdatedCommand(downloadTasks[0].ToKey());
         await Sut.ExecuteAsync(command, CancellationToken);
 
         // Assert
-        Mock.Mock<IDownloadHubService>()
+        Mock.Mock<IDownloadPatchBroadcaster>()
             .Verify(
                 x =>
-                    x.SendDownloadProgressUpdateAsync(
-                        It.IsAny<List<DownloadTaskGeneric>>(),
+                    x.MarkProgressDirtyAsync(
+                        It.IsAny<int>(),
+                        It.IsAny<DownloadTaskKey>(),
+                        It.IsAny<Guid>(),
                         It.IsAny<CancellationToken>()
                     ),
                 Times.Once
@@ -49,7 +61,7 @@ public class DownloadTaskUpdatedHandlerUnitTests : BaseUnitTest<DownloadTaskUpda
     }
 
     [Fact]
-    public async Task ShouldStartMoveDownloadJobAndDownloadQueue_WhenDownloadTaskHasFinished()
+    public async Task ShouldQueueImmediateStatusPatch_WhenDownloadTaskStatusChanged()
     {
         // Arrange
         await SetupDatabase(81983, config => config.MovieDownloadTasksCount = 5);
@@ -58,9 +70,29 @@ public class DownloadTaskUpdatedHandlerUnitTests : BaseUnitTest<DownloadTaskUpda
         var updatedDownloadTask = downloadTasks[0].Children[0];
         await IDbContext.SetDownloadStatus(updatedDownloadTask.ToKey(), DownloadStatus.DownloadFinished);
 
-        Mock.Mock<IDownloadHubService>()
+        Mock.Mock<IDownloadPatchBroadcaster>()
+            .Setup(x => x.TryMarkStatusChanged(It.IsAny<Guid>(), It.IsAny<DownloadStatus>()))
+            .Returns(true);
+
+        Mock.Mock<IDownloadPatchBroadcaster>()
             .Setup(x =>
-                x.SendDownloadProgressUpdateAsync(It.IsAny<List<DownloadTaskGeneric>>(), It.IsAny<CancellationToken>())
+                x.PublishImmediateStatusPatchAsync(
+                    It.IsAny<int>(),
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<IReadOnlyCollection<Guid>>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Returns(Task.CompletedTask);
+
+        Mock.Mock<IDownloadPatchBroadcaster>()
+            .Setup(x =>
+                x.MarkProgressDirtyAsync(
+                    It.IsAny<int>(),
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<Guid>(),
+                    It.IsAny<CancellationToken>()
+                )
             )
             .Returns(Task.CompletedTask);
 
@@ -69,11 +101,13 @@ public class DownloadTaskUpdatedHandlerUnitTests : BaseUnitTest<DownloadTaskUpda
         await Sut.ExecuteAsync(command, CancellationToken);
 
         // Assert
-        Mock.Mock<IDownloadHubService>()
+        Mock.Mock<IDownloadPatchBroadcaster>()
             .Verify(
                 x =>
-                    x.SendDownloadProgressUpdateAsync(
-                        It.IsAny<List<DownloadTaskGeneric>>(),
+                    x.PublishImmediateStatusPatchAsync(
+                        It.IsAny<int>(),
+                        It.IsAny<DownloadTaskKey>(),
+                        It.IsAny<IReadOnlyCollection<Guid>>(),
                         It.IsAny<CancellationToken>()
                     ),
                 Times.Once

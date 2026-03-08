@@ -61,6 +61,21 @@ public class DownloadHub : Hub<IDownloadHub>, IDownloadHub
     }
 
     /// <inheritdoc/>
+    public async Task DownloadPatch(
+        DownloadPatchMessagePackDTO messagePackDTO,
+        CancellationToken cancellationToken = default
+    )
+    {
+        _log.Here()
+            .Debug(
+                "Sending progress: {MessageTypesNotification} => {@DownloadPatchMessagePackDTO}",
+                nameof(MessageTypes.DownloadPatch),
+                messagePackDTO
+            );
+        await Clients.All.DownloadPatch(messagePackDTO, cancellationToken);
+    }
+
+    /// <inheritdoc/>
     public async Task DownloadTaskUpdate(DownloadTaskDTO downloadTask, CancellationToken cancellationToken = default)
     {
         _log.Here()

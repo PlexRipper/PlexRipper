@@ -1,4 +1,5 @@
 ﻿using Reaparr.Application.Contracts;
+using Reaparr.SignalR.Contracts;
 
 namespace Reaparr.Application.UnitTests;
 
@@ -18,6 +19,12 @@ public class CreateDownloadTasksCommandHandlerUnitTests : BaseUnitTest<CreateDow
             .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Once);
         Mock.PublishEvent(It.IsAny<CheckDownloadQueueEvent>).Returns(Task.CompletedTask);
+        Mock.Mock<INotificationHubService>()
+            .Setup(x =>
+                x.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>(), It.IsAny<CancellationToken>())
+            )
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once);
 
         var downloadMediaDtos = new List<DownloadMediaDTO>
         {
@@ -79,6 +86,12 @@ public class CreateDownloadTasksCommandHandlerUnitTests : BaseUnitTest<CreateDow
             .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Never);
         Mock.PublishEvent(It.IsAny<CheckDownloadQueueEvent>).Returns(Task.CompletedTask);
+        Mock.Mock<INotificationHubService>()
+            .Setup(x =>
+                x.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>(), It.IsAny<CancellationToken>())
+            )
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once);
 
         var downloadMediaDtos = new List<DownloadMediaDTO>
         {

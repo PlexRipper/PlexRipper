@@ -23,4 +23,7 @@ public enum RefreshDataType
 
     [EnumMember(Value = nameof(PlexServerConnection))]
     PlexServerConnection = 4,
+
+    [EnumMember(Value = nameof(DownloadTasks))]
+    DownloadTasks = 5,
 }

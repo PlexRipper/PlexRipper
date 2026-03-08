@@ -99,12 +99,19 @@
 							layout="dense"
 							side="right">
 							<QTimelineEntry
+								:id="`download-log-entry-${getLogAtIndex(row.index).id}`"
 								class="log-timeline-entry"
 								:class="{ 'log-timeline-entry--fresh': isFreshLog(getLogAtIndex(row.index).id) }"
 								:color="Convert.logLevelToColor(getLogAtIndex(row.index).logLevel)"
 								:icon="Convert.logLevelToIcon(getLogAtIndex(row.index).logLevel)"
 								:title="translateDownloadStatus(getLogAtIndex(row.index).status)"
 								@click="copyLogEntry(getLogAtIndex(row.index))">
+								<q-tooltip
+									class="log-level-tooltip"
+									persistent
+									:target="logIconTooltipTarget(getLogAtIndex(row.index).id)">
+									{{ logLevelLabels[getLogAtIndex(row.index).logLevel] }}
+								</q-tooltip>
 								<template #subtitle>
 									<div class="log-timeline-entry__subtitle-row">
 										<QDateTime
@@ -275,6 +282,10 @@ function copyLogEntry(item: DownloadTaskLogDTO) {
 
 function formatLogCopyText(item: DownloadTaskLogDTO) {
 	return `[${format(new Date(item.createdAt), 'yyyy-MM-dd HH:mm:ss')}] [${item.logLevel}] ${item.message}`;
+}
+
+function logIconTooltipTarget(logId: number) {
+	return `#download-log-entry-${logId} .q-timeline__dot .q-icon`;
 }
 
 function deleteLogs() {

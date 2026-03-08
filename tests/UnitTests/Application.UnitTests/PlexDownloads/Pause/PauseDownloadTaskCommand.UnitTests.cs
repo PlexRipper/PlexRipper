@@ -37,7 +37,6 @@ public class DownloadCommandsPauseDownloadTasksAsyncUnitTests : BaseUnitTest<Pau
         Mock.Mock<IDownloadTaskScheduler>()
             .Setup(x => x.StopDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Fail("Error"));
-        Mock.SetupCommand(It.IsAny<DownloadTaskUpdatedCommand>).ReturnsAsync(Result.Ok());
 
         // Act
         var result = await Sut.ExecuteAsync(

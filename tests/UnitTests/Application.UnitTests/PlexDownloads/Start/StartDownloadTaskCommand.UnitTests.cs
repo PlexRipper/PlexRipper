@@ -51,7 +51,16 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
             .Verify(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>()), Times.Never());
         Mock.Mock<IMoveDownloadFileScheduler>()
             .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Never());
-        Mock.VerifyEventPublished(It.IsAny<DownloadTaskUpdatedCommand>, Times.Never());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        It.IsAny<DownloadStatus>(),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Never()
+            );
         Mock.VerifyEventPublished(It.IsAny<CheckDownloadQueueEvent>, Times.Never());
     }
 
@@ -95,7 +104,16 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
             .Verify(x => x.IsDownloadFileMoving(It.IsAny<DownloadTaskKey>()), Times.Once());
         Mock.Mock<IMoveDownloadFileScheduler>()
             .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Once());
-        Mock.VerifyEventPublished(It.IsAny<DownloadTaskUpdatedCommand>, Times.Never());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        It.IsAny<DownloadStatus>(),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Never()
+            );
         Mock.VerifyEventPublished(It.IsAny<CheckDownloadQueueEvent>, Times.Once());
     }
 
@@ -139,7 +157,16 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
             .Verify(x => x.IsDownloadFileMoving(It.IsAny<DownloadTaskKey>()), Times.Once());
         Mock.Mock<IMoveDownloadFileScheduler>()
             .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Once());
-        Mock.VerifyEventPublished(It.IsAny<DownloadTaskUpdatedCommand>, Times.Never());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        It.IsAny<DownloadStatus>(),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Never()
+            );
         Mock.VerifyEventPublished(It.IsAny<CheckDownloadQueueEvent>, Times.Once());
     }
 
@@ -259,7 +286,16 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
 
         // Verify that the downloading task was not paused as we are starting one that is already downloading
         Mock.VerifyEventPublished(It.IsAny<PauseDownloadTaskCommand>, Times.Never());
-        Mock.VerifyEventPublished(It.IsAny<DownloadTaskUpdatedCommand>, Times.Once());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        It.IsAny<DownloadStatus>(),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Never()
+            );
         Mock.VerifyEventPublished(It.IsAny<CheckDownloadQueueEvent>, Times.Once());
     }
 
@@ -273,7 +309,7 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
             {
                 x.TvShowDownloadTasksCount = 1;
                 x.TvShowSeasonDownloadTasksCount = 1;
-                x.TvShowEpisodeCount = 3;
+                x.TvShowEpisodeCount = 5;
             }
         );
 
@@ -370,7 +406,7 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
 
         var firstTask = await IDbContext.GetDownloadTaskFileAsync(firstPausedTask.ToKey(), CancellationToken);
         firstTask.ShouldNotBeNull();
-        firstTask!.DownloadStatus.ShouldBe(DownloadStatus.Downloading);
+        firstTask!.DownloadStatus.ShouldBe(DownloadStatus.Paused);
 
         var secondTask = await IDbContext.GetDownloadTaskFileAsync(secondPausedTask.ToKey(), CancellationToken);
         secondTask.ShouldNotBeNull();
@@ -431,7 +467,7 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
 
         var firstTask = await IDbContext.GetDownloadTaskFileAsync(firstStoppedTask.ToKey(), CancellationToken);
         firstTask.ShouldNotBeNull();
-        firstTask!.DownloadStatus.ShouldBe(DownloadStatus.Downloading);
+        firstTask!.DownloadStatus.ShouldBe(DownloadStatus.Stopped);
 
         var secondTask = await IDbContext.GetDownloadTaskFileAsync(secondStoppedTask.ToKey(), CancellationToken);
         secondTask.ShouldNotBeNull();
@@ -491,7 +527,7 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
 
         var firstTask = await IDbContext.GetDownloadTaskFileAsync(firstStoppedTask.ToKey(), CancellationToken);
         firstTask.ShouldNotBeNull();
-        firstTask!.DownloadStatus.ShouldBe(DownloadStatus.Downloading);
+        firstTask!.DownloadStatus.ShouldBe(DownloadStatus.Stopped);
 
         var secondTask = await IDbContext.GetDownloadTaskFileAsync(secondStoppedTask.ToKey(), CancellationToken);
         secondTask.ShouldNotBeNull();
@@ -555,9 +591,7 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
             );
 
         var downloadTasksAfterStart = await IDbContext.GetDownloadableChildTasks(tvShow.ToKey(), CancellationToken);
-        downloadTasksAfterStart
-            .First(x => x.Id == firstStoppedTask.Id)
-            .DownloadStatus.ShouldBe(DownloadStatus.Downloading);
+        downloadTasksAfterStart.First(x => x.Id == firstStoppedTask.Id).DownloadStatus.ShouldBe(DownloadStatus.Stopped);
 
         foreach (var stoppedTaskId in otherStoppedTaskIds)
             downloadTasksAfterStart.First(x => x.Id == stoppedTaskId).DownloadStatus.ShouldBe(DownloadStatus.Queued);
@@ -623,7 +657,7 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
 
         var downloadTasksAfterStart = await IDbContext.GetDownloadableChildTasks(tvShow.ToKey(), CancellationToken);
         downloadTasksAfterStart.First(x => x.Id == completedTask.Id).DownloadStatus.ShouldBe(DownloadStatus.Completed);
-        downloadTasksAfterStart.First(x => x.Id == taskToStart.Id).DownloadStatus.ShouldBe(DownloadStatus.Downloading);
+        downloadTasksAfterStart.First(x => x.Id == taskToStart.Id).DownloadStatus.ShouldBe(DownloadStatus.Stopped);
 
         foreach (var stoppedTaskId in otherStoppedTaskIds)
             downloadTasksAfterStart.First(x => x.Id == stoppedTaskId).DownloadStatus.ShouldBe(DownloadStatus.Queued);
@@ -701,13 +735,22 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
         result.IsSuccess.ShouldBeTrue();
 
         var downloadTasks = await IDbContext.GetDownloadableChildTasks(lastDownloadTask.ToKey(), CancellationToken);
-        downloadTasks.Count(x => x.DownloadStatus == DownloadStatus.Downloading).ShouldBe(1);
-        downloadTasks.Count(x => x.DownloadStatus == DownloadStatus.Queued).ShouldBe(downloadTasks.Count - 1);
+        downloadTasks.Count(x => x.DownloadStatus == DownloadStatus.Downloading).ShouldBe(0);
+        downloadTasks.Count(x => x.DownloadStatus == DownloadStatus.Queued).ShouldBe(downloadTasks.Count);
 
         // Verify that the downloading task was not paused as we are starting one that is already downloading
         Mock.Mock<ICommandExecutor>()
             .Verify(x => x.Send(It.IsAny<PauseDownloadTaskCommand>(), It.IsAny<CancellationToken>()), Times.Once());
-        Mock.VerifyEventPublished(It.IsAny<DownloadTaskUpdatedCommand>, Times.Once());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        It.IsAny<DownloadStatus>(),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Never()
+            );
         Mock.VerifyEventPublished(It.IsAny<CheckDownloadQueueEvent>, Times.Once());
     }
 
@@ -741,7 +784,16 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
             .Verify(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>()), Times.Never());
         Mock.Mock<IMoveDownloadFileScheduler>()
             .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Never());
-        Mock.VerifyEventPublished(It.IsAny<DownloadTaskUpdatedCommand>, Times.Never());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        It.IsAny<DownloadStatus>(),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Never()
+            );
         Mock.VerifyEventPublished(It.IsAny<CheckDownloadQueueEvent>, Times.Never());
     }
 
@@ -773,7 +825,16 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
             .Verify(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>()), Times.Never());
         Mock.Mock<IMoveDownloadFileScheduler>()
             .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Never());
-        Mock.VerifyEventPublished(It.IsAny<DownloadTaskUpdatedCommand>, Times.Never());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        It.IsAny<DownloadStatus>(),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Never()
+            );
         Mock.VerifyEventPublished(It.IsAny<CheckDownloadQueueEvent>, Times.Never());
     }
 
@@ -805,7 +866,16 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
         result.IsFailed.ShouldBeTrue();
         Mock.Mock<IDownloadTaskScheduler>()
             .Verify(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>()), Times.Once());
-        Mock.VerifyEventPublished(It.IsAny<DownloadTaskUpdatedCommand>, Times.Never());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        It.IsAny<DownloadStatus>(),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Never()
+            );
         Mock.VerifyEventPublished(It.IsAny<CheckDownloadQueueEvent>, Times.Never());
     }
 
@@ -841,7 +911,16 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
         result.IsSuccess.ShouldBeTrue();
         Mock.Mock<IDownloadTaskScheduler>()
             .Verify(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>()), Times.Never());
-        Mock.VerifyEventPublished(It.IsAny<DownloadTaskUpdatedCommand>, Times.Never());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        It.IsAny<DownloadStatus>(),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Never()
+            );
         Mock.VerifyEventPublished(It.IsAny<CheckDownloadQueueEvent>, Times.Once());
     }
 
@@ -877,7 +956,16 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
         result.IsSuccess.ShouldBeTrue();
         Mock.Mock<IMoveDownloadFileScheduler>()
             .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Never());
-        Mock.VerifyEventPublished(It.IsAny<DownloadTaskUpdatedCommand>, Times.Never());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        It.IsAny<DownloadStatus>(),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Never()
+            );
         Mock.VerifyEventPublished(It.IsAny<CheckDownloadQueueEvent>, Times.Once());
     }
 
@@ -921,7 +1009,16 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
         Mock.Mock<IDownloadTaskScheduler>()
             .Verify(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>()), Times.Once());
         Mock.VerifyEventPublished(It.IsAny<PauseDownloadTaskCommand>, Times.Never());
-        Mock.VerifyEventPublished(It.IsAny<DownloadTaskUpdatedCommand>, Times.Once());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        It.IsAny<DownloadStatus>(),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Never()
+            );
         Mock.VerifyEventPublished(It.IsAny<CheckDownloadQueueEvent>, Times.Once());
     }
 

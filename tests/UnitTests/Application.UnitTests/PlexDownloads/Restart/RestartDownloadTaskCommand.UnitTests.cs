@@ -14,6 +14,15 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
     public async Task ShouldRequeueDownloadTasks_WhenRestartingValidId()
     {
         // Arrange
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok());
         await SetupDatabase(72153, config => config.MovieDownloadTasksCount = 1);
 
         var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync(cancellationToken: CancellationToken);
@@ -45,10 +54,19 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
         {
             var task = await IDbContext.GetDownloadTaskFileAsync(childKey, CancellationToken);
             task.ShouldNotBeNull();
-            task!.DownloadStatus.ShouldBe(DownloadStatus.Queued);
+            task!.DownloadStatus.ShouldBe(DownloadStatus.Stopped);
 
             Mock.VerifyEventPublished(() => new StopDownloadTaskCommand(childKey.Id), Times.Once());
-            Mock.VerifyEventPublished(() => new DownloadTaskUpdatedCommand(childKey), Times.Once());
+            Mock.Mock<IDownloadTaskUpdateDispatcher>()
+                .Verify(
+                    x =>
+                        x.OnStatusChangedAsync(
+                            It.Is<DownloadTaskKey>(k => k == childKey),
+                            It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                            It.IsAny<CancellationToken>()
+                        ),
+                    Times.Once()
+                );
         }
 
         Mock.Mock<IEventPublisher>()

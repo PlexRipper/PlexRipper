@@ -49,6 +49,15 @@ public class DashPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DashPlexDow
     [Fact]
     public async Task ShouldPersistStoppedStatus_WhenStopAsyncIsCalled()
     {
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok());
         await SetupDatabase(
             13001,
             config =>
@@ -92,17 +101,30 @@ public class DashPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DashPlexDow
         stopResult.IsSuccess.ShouldBeTrue();
         startResult.IsSuccess.ShouldBeTrue();
 
-        var finalStatus = await IDbContext
-            .DownloadTaskMovieFile.Where(x => x.Id == downloadTask.Id)
-            .Select(x => x.DownloadStatus)
-            .FirstOrDefaultAsync(CancellationToken);
-
-        finalStatus.ShouldBe(DomainDownloadStatus.Stopped);
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        DomainDownloadStatus.Stopped,
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Once()
+            );
     }
 
     [Fact]
     public async Task ShouldReturnSuccess_WhenStopAsyncIsCalledTwice()
     {
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok());
         await SetupDatabase(
             13002,
             config =>

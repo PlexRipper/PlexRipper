@@ -110,6 +110,24 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
     public async Task ShouldReturnSuccessResult_WhenSetupAndStartedSuccessfully()
     {
         // Arrange
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnProgressUpdated(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadTaskProgress>(),
+                    It.IsAny<DirectDownloadSnapshot?>()
+                )
+            )
+            .Returns(Result.Ok());
         await SetupDatabase(
             82345,
             config =>
@@ -137,17 +155,40 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
 
         // Assert
         startResult.IsSuccess.ShouldBeTrue();
-        var finalStatus = await IDbContext
-            .DownloadTaskMovieFile.Where(x => x.Id == downloadTask.Id)
-            .Select(x => x.DownloadStatus)
-            .FirstOrDefaultAsync(CancellationToken);
-        finalStatus.ShouldBe(DomainDownloadStatus.DownloadFinished);
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        DomainDownloadStatus.DownloadFinished,
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Once()
+            );
     }
 
     [Fact]
     public async Task ShouldCreateDownloadStreamUsingTempFileName_WhenStartingDownload()
     {
         // Arrange
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnProgressUpdated(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadTaskProgress>(),
+                    It.IsAny<DirectDownloadSnapshot?>()
+                )
+            )
+            .Returns(Result.Ok());
         await SetupDatabase(
             82346,
             config =>
@@ -197,6 +238,24 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
     public async Task ShouldStartDownloaderWithFinalPath_WhenTempExtensionIsConfigured()
     {
         // Arrange
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnProgressUpdated(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadTaskProgress>(),
+                    It.IsAny<DirectDownloadSnapshot?>()
+                )
+            )
+            .Returns(Result.Ok());
         await SetupDatabase(
             82347,
             config =>
@@ -265,6 +324,24 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
     public async Task ShouldReturnEntityNotFoundError_WhenDownloadTaskKeyDoesNotExist()
     {
         // Arrange
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnProgressUpdated(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadTaskProgress>(),
+                    It.IsAny<DirectDownloadSnapshot?>()
+                )
+            )
+            .Returns(Result.Ok());
         await SetupDatabase(
             11111,
             config =>
@@ -300,6 +377,24 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
     public async Task ShouldReturnFailedResult_WhenGetDownloadUrlFailsDueToNoServerConnections()
     {
         // Arrange
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnProgressUpdated(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadTaskProgress>(),
+                    It.IsAny<DirectDownloadSnapshot?>()
+                )
+            )
+            .Returns(Result.Ok());
         await SetupDatabase(
             22222,
             config =>
@@ -338,6 +433,24 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
     public async Task ShouldReturnFailedResultAndPersistStorageError_WhenCreateFileStreamFails()
     {
         // Arrange
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnProgressUpdated(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadTaskProgress>(),
+                    It.IsAny<DirectDownloadSnapshot?>()
+                )
+            )
+            .Returns(Result.Ok());
         await SetupDatabase(
             33333,
             config =>
@@ -375,18 +488,40 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
         result.IsFailed.ShouldBeTrue();
         result.Errors.ShouldNotBeEmpty();
 
-        // StorageError status must be persisted in DB
-        var finalStatus = await IDbContext
-            .DownloadTaskMovieFile.Where(x => x.Id == downloadTask.Id)
-            .Select(x => x.DownloadStatus)
-            .FirstOrDefaultAsync(CancellationToken);
-        finalStatus.ShouldBe(DomainDownloadStatus.StorageError);
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        DomainDownloadStatus.StorageError,
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Once()
+            );
     }
 
     [Fact]
     public async Task ShouldTransitionThroughDownloadingStatus_WhenDownloadStartedEventFires()
     {
         // Arrange
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnProgressUpdated(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadTaskProgress>(),
+                    It.IsAny<DirectDownloadSnapshot?>()
+                )
+            )
+            .Returns(Result.Ok());
         await SetupDatabase(
             44444,
             config =>
@@ -450,17 +585,40 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
 
         // Assert
         startResult.IsSuccess.ShouldBeTrue();
-        var finalStatus = await IDbContext
-            .DownloadTaskMovieFile.Where(x => x.Id == downloadTask.Id)
-            .Select(x => x.DownloadStatus)
-            .FirstOrDefaultAsync(CancellationToken);
-        finalStatus.ShouldBe(DomainDownloadStatus.DownloadFinished);
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        DomainDownloadStatus.DownloadFinished,
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Once()
+            );
     }
 
     [Fact]
     public async Task ShouldApplySpeedLimitFromObservable_WhenSpeedLimitObservableEmitsValue()
     {
         // Arrange
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnProgressUpdated(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadTaskProgress>(),
+                    It.IsAny<DirectDownloadSnapshot?>()
+                )
+            )
+            .Returns(Result.Ok());
         await SetupDatabase(
             55555,
             config =>
@@ -538,6 +696,24 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
     public async Task ShouldCallResumeOverload_WhenDirectDownloadSnapshotExists()
     {
         // Arrange
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnProgressUpdated(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadTaskProgress>(),
+                    It.IsAny<DirectDownloadSnapshot?>()
+                )
+            )
+            .Returns(Result.Ok());
         await SetupDatabase(
             66666,
             config =>
@@ -637,6 +813,24 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
     public async Task ShouldPersistProgressSnapshot_WhenDownloadProgressChanges()
     {
         // Arrange
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnProgressUpdated(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadTaskProgress>(),
+                    It.IsAny<DirectDownloadSnapshot?>()
+                )
+            )
+            .Returns(Result.Ok());
         await SetupDatabase(
             77777,
             config =>
@@ -717,6 +911,24 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
     public async Task ShouldPersistDownloadFinishedStatusInDatabase_WhenDownloadCompletesSuccessfully()
     {
         // Arrange
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnProgressUpdated(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadTaskProgress>(),
+                    It.IsAny<DirectDownloadSnapshot?>()
+                )
+            )
+            .Returns(Result.Ok());
         await SetupDatabase(
             88888,
             config =>
@@ -744,17 +956,40 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        var finalStatus = await IDbContext
-            .DownloadTaskMovieFile.Where(x => x.Id == downloadTask.Id)
-            .Select(x => x.DownloadStatus)
-            .FirstOrDefaultAsync(CancellationToken);
-        finalStatus.ShouldBe(DomainDownloadStatus.DownloadFinished);
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        DomainDownloadStatus.DownloadFinished,
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Once()
+            );
     }
 
     [Fact]
     public async Task ShouldPersistTotalDataReceived_WhenCompletionEventHasZeroReceivedBytes()
     {
         // Arrange
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnProgressUpdated(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadTaskProgress>(),
+                    It.IsAny<DirectDownloadSnapshot?>()
+                )
+            )
+            .Returns(Result.Ok());
         await SetupDatabase(
             88889,
             config =>
@@ -813,6 +1048,24 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
     public async Task ShouldSetPausedStatus_WhenDownloadFileCompletedEventIsCancelled()
     {
         // Arrange
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnProgressUpdated(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadTaskProgress>(),
+                    It.IsAny<DirectDownloadSnapshot?>()
+                )
+            )
+            .Returns(Result.Ok());
         await SetupDatabase(
             99991,
             config =>
@@ -859,10 +1112,15 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
         // Assert
         result.IsSuccess.ShouldBeTrue();
 
-        var finalStatus = await IDbContext
-            .DownloadTaskMovieFile.Where(x => x.Id == downloadTask.Id)
-            .Select(x => x.DownloadStatus)
-            .FirstOrDefaultAsync(CancellationToken);
-        finalStatus.ShouldBe(DomainDownloadStatus.Paused);
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        DomainDownloadStatus.Paused,
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Once()
+            );
     }
 }

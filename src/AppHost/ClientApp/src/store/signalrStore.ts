@@ -10,14 +10,15 @@ import { useCypressSignalRMock } from 'cypress-signalr-mock';
 import { isEqual, cloneDeep, isArray } from 'lodash-es';
 import { StoreNames, type ISetupResult } from '@interfaces';
 import type {
-	RefreshDataType,
+	DownloadPatchMessagePackDTO,
+	DownloadPatchDTO,
 	LibrarySyncProgressDTO,
 	NotificationDTO,
 	ServerConnectionCheckStatusProgressDTO,
 	ServerDownloadProgressDTO,
 	ServerDownloadProgressMessagePackDTO,
 } from '@dto';
-import { MessageTypes } from '@dto';
+import { RefreshDataType, MessageTypes } from '@dto';
 import type { IRetryPolicy } from '@microsoft/signalr/src/IRetryPolicy';
 import { useDownloadStore, useBackgroundJobsStore, useNotificationsStore, useLibraryStore } from '@store';
 import Axios from 'axios';
@@ -122,6 +123,17 @@ export const useSignalrStore = defineStore(StoreNames.SignalrStore, () => {
 			}
 		});
 
+		downloadHubConnection?.on(MessageTypes.DownloadPatch, (rawData: DownloadPatchMessagePackDTO) => {
+			if (Array.isArray(rawData)) {
+				const patch = toDownloadPatchDTO(rawData as unknown as any[]);
+				if (patch)
+					downloadStore.updateDownloadPatch(patch);
+				return;
+			}
+
+			downloadStore.updateDownloadPatch(rawData as unknown as DownloadPatchMessagePackDTO);
+		});
+
 		progressHubConnection?.on(MessageTypes.LibraryProgress, (data: LibrarySyncProgressDTO) => libraryStore.updateLibraryProgress(data));
 
 		progressHubConnection?.on(MessageTypes.ServerConnectionCheckStatusProgress, (data: ServerConnectionCheckStatusProgressDTO) => updateState<ServerConnectionCheckStatusProgressDTO>('serverConnectionCheckStatusProgress', data, 'plexServerConnectionId'));
@@ -131,6 +143,9 @@ export const useSignalrStore = defineStore(StoreNames.SignalrStore, () => {
 		notificationHubConnection?.on(MessageTypes.Notification, (data: NotificationDTO) => notificationsStore.setNotification(data));
 
 		notificationHubConnection?.on(MessageTypes.RefreshNotification, (data: RefreshDataType) => {
+			if (data === RefreshDataType.DownloadTasks) {
+				downloadStore.fetchDownloadList().subscribe();
+			}
 			state.refreshDataNotificationSubject.next(data);
 		});
 	}
@@ -268,5 +283,31 @@ function toServerDownloadProgressDTO(arr: ServerDownloadProgressMessagePackDTO):
 
 	return {
 		id: arr[0], downloadableTasksCount: arr[1], downloads: Array.isArray(arr[2]) ? arr[2].map(mapDownload) : [],
+	};
+}
+
+function toDownloadPatchDTO(arr: any[]): DownloadPatchMessagePackDTO | null {
+	if (!Array.isArray(arr))
+		return null;
+
+	const upsertsRaw = Array.isArray(arr[2]) ? arr[2] : [];
+	const upserts: DownloadPatchDTO[] = upsertsRaw
+		.filter(Array.isArray)
+		.map((item) => ({
+			id: item[0],
+			parentId: item[1],
+			status: item[2],
+			percentage: Number(item[3]),
+			dataReceived: item[4],
+			dataTotal: item[5],
+			downloadSpeed: item[6],
+			timeRemaining: item[7],
+		}));
+
+	return {
+		serverId: arr[0],
+		sequence: arr[1],
+		upserts,
+		deletedIds: Array.isArray(arr[3]) ? arr[3] : [],
 	};
 }

@@ -184,6 +184,51 @@ export interface DownloadMediaDTO {
   type: PlexMediaType;
 }
 
+export interface DownloadPatchDTO {
+  /** @format int64 */
+  dataReceived: number;
+  /** @format int64 */
+  dataTotal: number;
+  /** @format int64 */
+  downloadSpeed: number;
+  /** @format guid */
+  id: string;
+  /** @format guid */
+  parentId: string;
+  /** @format decimal */
+  percentage: number;
+  status: DownloadStatus;
+  /** @format int64 */
+  timeRemaining: number;
+}
+
+export interface DownloadPatchEntryMessagePackDTO {
+  /** @format int64 */
+  dataReceived: number;
+  /** @format int64 */
+  dataTotal: number;
+  /** @format int64 */
+  downloadSpeed: number;
+  /** @format guid */
+  id: string;
+  /** @format guid */
+  parentId: string;
+  /** @format decimal */
+  percentage: number;
+  status: DownloadStatus;
+  /** @format int64 */
+  timeRemaining: number;
+}
+
+export interface DownloadPatchMessagePackDTO {
+  deletedIds: string[];
+  /** @format int64 */
+  sequence: number;
+  /** @format int32 */
+  serverId: number;
+  upserts: DownloadPatchEntryMessagePackDTO[];
+}
+
 export interface DownloadPreviewContainerDTO {
   expanded: Record<string, boolean>;
   previews: DownloadPreviewDTO[];
@@ -259,6 +304,7 @@ export enum DownloadStatus {
   DownloadClientError = "DownloadClientError",
   IntegrityError = "IntegrityError",
   MoveError = "MoveError",
+  Restarting = "Restarting",
 }
 
 export interface DownloadTaskDTO {
@@ -531,6 +577,7 @@ export enum MessageTypes {
   LibraryProgress = "LibraryProgress",
   DownloadTaskUpdate = "DownloadTaskUpdate",
   ServerDownloadProgress = "ServerDownloadProgress",
+  DownloadPatch = "DownloadPatch",
   ServerConnectionCheckStatusProgress = "ServerConnectionCheckStatusProgress",
   MoveDownloadFileProgress = "MoveDownloadFileProgress",
   Notification = "Notification",
@@ -927,6 +974,7 @@ export enum RefreshDataType {
   PlexLibrary = "PlexLibrary",
   PlexLibrarySyncStatus = "PlexLibrarySyncStatus",
   PlexServerConnection = "PlexServerConnection",
+  DownloadTasks = "DownloadTasks",
 }
 
 export interface RefreshPlexAccountAccessRapportDTO {

@@ -20,6 +20,9 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
     private readonly ConcurrentDictionary<ProgressScopeKey, BufferedProgressUpdate> _progressByScope;
     private readonly ConcurrentDictionary<int, long> _sequenceByServer;
     private readonly ConcurrentDictionary<Guid, ProgressScopeKey> _scopeByNodeId;
+    private readonly ConcurrentDictionary<Guid, DownloadTaskProgress> _lastProgressLogByNodeId;
+    private const long ProgressLogDataThresholdBytes = 1024 * 1024;
+    private const decimal ProgressLogPercentageThreshold = 1m;
 
     /// <summary>
     /// Creates a new dispatcher instance.
@@ -40,6 +43,7 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
         _progressByScope = new ConcurrentDictionary<ProgressScopeKey, BufferedProgressUpdate>();
         _sequenceByServer = new ConcurrentDictionary<int, long>();
         _scopeByNodeId = new ConcurrentDictionary<Guid, ProgressScopeKey>();
+        _lastProgressLogByNodeId = new ConcurrentDictionary<Guid, DownloadTaskProgress>();
     }
 
     /// <inheritdoc />
@@ -67,6 +71,16 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
             {
                 await SetDownloadStatusAsync(dbContext, key, newStatus, cancellationToken);
                 await LogStatusChangeAsync(dbContext, key, newStatus, cancellationToken);
+                ResetProgressJourneyTrackingIfNeeded(key.Id, newStatus);
+            }
+            else
+            {
+                await dbContext.CreateDownloadClientLog(
+                    key,
+                    NotificationLevel.Debug,
+                    newStatus,
+                    $"Status change request ignored because task is already in status: {newStatus}"
+                );
             }
 
             var changedParentKeys = await DetermineDownloadStatusAsync(dbContext, key, cancellationToken);
@@ -221,6 +235,13 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
                         bufferedProgress.Key,
                         bufferedProgress.Progress,
                         bufferedProgress.Snapshot,
+                        cancellationToken
+                    );
+
+                    await LogProgressJourneyAsync(
+                        dbContext,
+                        bufferedProgress.Key,
+                        bufferedProgress.Progress,
                         cancellationToken
                     );
                 }
@@ -450,6 +471,52 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
             status,
             $"Download {mediaFileName} transitioned to status: {status}"
         );
+    }
+
+    private async Task LogProgressJourneyAsync(
+        IReaparrDbContext dbContext,
+        DownloadTaskKey key,
+        DownloadTaskProgress progress,
+        CancellationToken cancellationToken
+    )
+    {
+        if (!ShouldPersistProgressDebug(key.Id, progress))
+            return;
+
+        var mediaFileName = await GetTaskDisplayNameAsync(dbContext, key, cancellationToken) ?? key.Id.ToString();
+
+        await dbContext.CreateDownloadClientLog(
+            key,
+            NotificationLevel.Debug,
+            DownloadStatus.Downloading,
+            $"Progress update for {mediaFileName}: {progress.Percentage:F2}% ({progress.DataReceived}/{progress.DataTotal} bytes) at {progress.DownloadSpeed} B/s"
+        );
+    }
+
+    private bool ShouldPersistProgressDebug(Guid nodeId, DownloadTaskProgress progress)
+    {
+        if (!_lastProgressLogByNodeId.TryGetValue(nodeId, out var previous))
+        {
+            _lastProgressLogByNodeId[nodeId] = progress;
+            return true;
+        }
+
+        var dataDelta = Math.Abs(progress.DataReceived - previous.DataReceived);
+        var percentageDelta = Math.Abs(progress.Percentage - previous.Percentage);
+        var shouldLog = dataDelta >= ProgressLogDataThresholdBytes || percentageDelta >= ProgressLogPercentageThreshold;
+
+        if (shouldLog)
+            _lastProgressLogByNodeId[nodeId] = progress;
+
+        return shouldLog;
+    }
+
+    private void ResetProgressJourneyTrackingIfNeeded(Guid nodeId, DownloadStatus newStatus)
+    {
+        if (newStatus is DownloadStatus.Queued or DownloadStatus.Restarting or DownloadStatus.Downloading)
+        {
+            _lastProgressLogByNodeId.TryRemove(nodeId, out _);
+        }
     }
 
     private static async Task<string?> GetTaskDisplayNameAsync(

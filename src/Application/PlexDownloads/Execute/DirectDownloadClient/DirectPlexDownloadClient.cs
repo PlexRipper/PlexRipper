@@ -34,6 +34,8 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
     private readonly CompositeDisposable _subscriptions = new();
     private readonly Subject<Unit> _destroy = new();
     private int _isDisposed;
+    private long _lastLoggedDataReceived = -1;
+    private decimal _lastLoggedPercentage = -1;
 
     public DirectPlexDownloadClient(
         ILogger log,
@@ -276,6 +278,12 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
         [CallerLineNumber] int sourceLineNumber = 0
     )
     {
+        if (_lastLoggedDataReceived == progress.DataReceived && _lastLoggedPercentage == progress.Percentage)
+            return;
+
+        _lastLoggedDataReceived = progress.DataReceived;
+        _lastLoggedPercentage = progress.Percentage;
+
         var progressMsg = _log.Here(sourceFilePath, memberName, sourceLineNumber)
             .DebugMsg(
                 "[DownloadTaskProgress {MediaFileName} - {Percentage}% - {Speed} - {DataReceived} / {DataTotal} - {TimeRemaining}]",

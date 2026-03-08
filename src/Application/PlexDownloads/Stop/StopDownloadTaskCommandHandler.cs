@@ -67,7 +67,15 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
             var isMoving = await _moveDownloadFileScheduler.IsDownloadFileMoving(downloadTaskKey);
 
             if (stopOnlyActiveChildren && !isDownloading && !isMoving)
+            {
+                await _dbContext.CreateDownloadClientLog(
+                    downloadTaskKey,
+                    NotificationLevel.Debug,
+                    downloadTask.DownloadStatus,
+                    $"Stop requested but skipped because task is not active (status: {downloadTask.DownloadStatus})"
+                );
                 continue;
+            }
 
             _log.Here().Information("Stopping {DownloadTaskFullTitle}", downloadTask.FullTitle);
 

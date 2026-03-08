@@ -48,6 +48,13 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
 
         var childKeys = await _dbContext.GetDownloadableChildTaskKeys(downloadTaskKey, cancellationToken);
 
+        await _dbContext.CreateDownloadClientLog(
+            downloadTaskKey,
+            NotificationLevel.Information,
+            DownloadStatus.Restarting,
+            $"Restart requested for download task group {downloadTaskKey.Id}. {childKeys.Count} child task(s) will be processed."
+        );
+
         foreach (var childKey in childKeys)
         {
             var downloadTask = await _dbContext.GetDownloadTaskAsync(childKey, cancellationToken);
@@ -63,10 +70,10 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
                 return stopResult.LogError();
 
             await _dbContext.CreateDownloadClientLog(
-                downloadTaskKey,
+                childKey,
                 NotificationLevel.Information,
                 DownloadStatus.Restarting,
-                $"DownloadTask {downloadTaskKey.Id} ({downloadTask.FileName}) is restarting"
+                $"Restart workflow: stop completed for child task {childKey.Id} ({downloadTask.FileName}), preparing to queue."
             );
 
             await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
@@ -74,11 +81,25 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
                 DownloadStatus.Queued,
                 cancellationToken
             );
+
+            await _dbContext.CreateDownloadClientLog(
+                childKey,
+                NotificationLevel.Information,
+                DownloadStatus.Queued,
+                $"Restart workflow: child task {childKey.Id} ({downloadTask.FileName}) queued again."
+            );
         }
 
         await _eventPublisher.PublishAsync(
             new CheckDownloadQueueEvent(downloadTaskKey.PlexServerId),
             cancellationToken
+        );
+
+        await _dbContext.CreateDownloadClientLog(
+            downloadTaskKey,
+            NotificationLevel.Information,
+            DownloadStatus.Queued,
+            $"Restart workflow complete for group {downloadTaskKey.Id}; queue check published."
         );
 
         return Result.Ok();

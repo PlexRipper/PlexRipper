@@ -311,6 +311,12 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
             }
 
             // Update status before moving
+            await _dbContext.CreateDownloadClientLog(
+                key,
+                NotificationLevel.Information,
+                DownloadStatus.Moving,
+                $"Preparing to move download file from '{downloadFilePath}' to '{destinationPath}'"
+            );
             await UpdateDownloadTaskStatus(key, DownloadStatus.Moving);
 
             _log.Here()
@@ -446,23 +452,11 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
     private async Task UpdateDownloadTaskStatus(DownloadTaskKey key, DownloadStatus status)
     {
         await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(key, status);
-        await _dbContext.CreateDownloadClientLog(
-            key,
-            NotificationLevel.Information,
-            status,
-            $"DownloadTask {key.Id} ({_filename}) has transitioned to {status}"
-        );
     }
 
     private async Task<Result> ErrorDownloadTask(DownloadTaskKey key, Result result)
     {
-        await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(key, DownloadStatus.MoveError);
-        await _dbContext.CreateDownloadClientLog(
-            key,
-            NotificationLevel.Error,
-            DownloadStatus.MoveError,
-            result.ToString()
-        );
+        await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(key, DownloadStatus.MoveError, result);
 
         await _eventPublisher.PublishAsync(new SendNotificationResult(result), CancellationToken.None);
 

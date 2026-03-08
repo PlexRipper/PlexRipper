@@ -66,6 +66,13 @@ public class StartDownloadTaskCommandHandler : ICommandHandler<StartDownloadTask
             return Result.Fail("Download tasks cannot be started while the server is paused by the user").LogWarning();
         }
 
+        await _dbContext.CreateDownloadClientLog(
+            nextDownloadTaskKey,
+            NotificationLevel.Information,
+            DownloadStatus.Queued,
+            $"Start requested for download task {nextDownloadTaskKey.Id} ({nextDownloadTask.FileName})"
+        );
+
         if (key.Type is DownloadTaskType.TvShow or DownloadTaskType.Season)
         {
             var statusesToQueue = nextDownloadTask.DownloadStatus switch

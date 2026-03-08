@@ -78,6 +78,8 @@
                 "sort-newest-first": "Plus récents d'abord",
                 "filter-by-level": "Filtrer par niveau de journal",
                 "copied-to-clipboard": "Journaux copiés dans le presse-papiers",
+                "entry-copied-to-clipboard": "Entrée de journal copiée dans le presse-papiers",
+                "copy-entry": "Copier l'entrée de journal",
                 "deleted": "Journaux supprimés",
                 "no-logs": "Aucun journal trouvé pour cette tâche de téléchargement.",
                 "delete-confirmation": {

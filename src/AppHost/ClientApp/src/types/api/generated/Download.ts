@@ -130,6 +130,10 @@ export class Download {
       plexLibraryId: number;
       /** @format int32 */
       plexServerId: number;
+      /** @format int32 */
+      sinceId?: number | null;
+      /** @format int32 */
+      take?: number | null;
       type: DownloadTaskType;
     },
     params: RequestParams = {},
@@ -313,6 +317,10 @@ export class DownloadPaths {
       plexLibraryId: number;
       /** @format int32 */
       plexServerId: number;
+      /** @format int32 */
+      sinceId?: number | null;
+      /** @format int32 */
+      take?: number | null;
       type: DownloadTaskType;
     },
   ) =>

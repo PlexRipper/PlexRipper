@@ -78,6 +78,8 @@
                 "sort-newest-first": "Neueste zuerst",
                 "filter-by-level": "Nach Log-Level filtern",
                 "copied-to-clipboard": "Logs in die Zwischenablage kopiert",
+                "entry-copied-to-clipboard": "Log-Eintrag in die Zwischenablage kopiert",
+                "copy-entry": "Log-Eintrag kopieren",
                 "deleted": "Logs gelöscht",
                 "no-logs": "Keine Logs für diese Download-Aufgabe gefunden.",
                 "delete-confirmation": {

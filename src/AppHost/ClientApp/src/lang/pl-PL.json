@@ -78,6 +78,8 @@
                 "sort-newest-first": "Najnowsze najpierw",
                 "filter-by-level": "Filtruj według poziomu logów",
                 "copied-to-clipboard": "Logi skopiowano do schowka",
+                "entry-copied-to-clipboard": "Wpis logu skopiowano do schowka",
+                "copy-entry": "Kopiuj wpis logu",
                 "deleted": "Logi usunięto",
                 "no-logs": "Nie znaleziono logów dla tego zadania pobierania.",
                 "delete-confirmation": {

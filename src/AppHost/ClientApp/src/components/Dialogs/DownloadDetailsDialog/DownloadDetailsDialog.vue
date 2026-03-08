@@ -53,6 +53,7 @@
 					<q-tab-panels
 						v-model="tabIndex"
 						animated
+						keep-alive
 						transition-next="slide-up"
 						transition-prev="slide-down"
 						vertical>
@@ -71,7 +72,10 @@
 							name="logs">
 							<DownloadDetailsDialogLogsTabContent
 								:download-task="downloadTask"
-								:download-task-id="downloadTaskId" />
+								:download-task-id="downloadTaskId"
+								:initial-logs="logs"
+								@logs-deleted="handleLogsDeleted"
+								@logs-refreshed="handleLogsRefreshed" />
 						</q-tab-panel>
 					</q-tab-panels>
 				</div>
@@ -82,7 +86,7 @@
 
 <script lang="ts" setup>
 import { set, get } from '@vueuse/core';
-import type { DownloadTaskDTO, ErrorDTO } from '@dto';
+import type { DownloadTaskDTO, DownloadTaskLogDTO, ErrorDTO } from '@dto';
 import { downloadApi } from '@api';
 import { DialogType } from '@enums';
 
@@ -95,6 +99,29 @@ const downloadTask = ref<DownloadTaskDTO>();
 
 const errors = ref<ErrorDTO[]>([]);
 
+const logs = ref<DownloadTaskLogDTO[]>([]);
+
+function fetchLogs() {
+	const task = get(downloadTask);
+	const taskId = get(downloadTaskId);
+	if (!taskId || !task) {
+		return;
+	}
+
+	useSubscription(
+		downloadApi.getDownloadTaskLogsByDownloadTaskIdEndpoint(taskId, {
+			type: task.downloadTaskType,
+			plexLibraryId: task.plexLibraryId,
+			plexServerId: task.plexServerId,
+			take: 50,
+		}).subscribe((data) => {
+			if (data.isSuccess && data.value) {
+				set(logs, [...data.value]);
+			}
+		}),
+	);
+}
+
 function onOpen(event: string) {
 	set(loading, true);
 	set(downloadTaskId, event);
@@ -102,6 +129,7 @@ function onOpen(event: string) {
 	useSubscription(downloadApi.getDownloadTaskByGuidEndpoint(get(downloadTaskId)).subscribe((data) => {
 		if (data.isSuccess && data.value) {
 			set(downloadTask, data.value);
+			fetchLogs();
 		} else {
 			set(errors, data?.errors ?? []);
 		}
@@ -115,12 +143,22 @@ function onClose() {
 	set(errors, []);
 	set(loading, true);
 	set(tabIndex, 'overview');
+	set(logs, []);
+}
+
+function handleLogsDeleted() {
+	set(logs, []);
+}
+
+function handleLogsRefreshed(updated: DownloadTaskLogDTO[]) {
+	set(logs, updated);
 }
 </script>
 
 <style lang="scss">
 .layout-container {
   height: 100%;
+  min-height: 0;
   display: grid;
   grid-template-columns: repeat(8, 1fr);
   grid-template-rows: repeat(1, 1fr);
@@ -129,14 +167,24 @@ function onClose() {
 
   .tabs {
     grid-column: span 1 / span 1;
+    min-height: 0;
   }
 
   .panels {
     grid-column: span 7 / span 7;
     display: flex;
+    min-height: 0;
 
     .q-tab-panels {
+      display: flex;
       flex-grow: 1;
+      min-height: 0;
+    }
+
+    .q-panel,
+    .q-tab-panel {
+      height: 100%;
+      min-height: 0;
     }
   }
 }

@@ -78,6 +78,8 @@
                 "sort-newest-first": "Newest first",
                 "filter-by-level": "Filter by log level",
                 "copied-to-clipboard": "Logs copied to clipboard",
+                "entry-copied-to-clipboard": "Log entry copied to clipboard",
+                "copy-entry": "Copy log entry",
                 "deleted": "Logs deleted",
                 "no-logs": "No logs found for this download task.",
                 "delete-confirmation": {

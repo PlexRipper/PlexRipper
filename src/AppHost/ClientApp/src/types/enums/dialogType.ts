@@ -10,6 +10,7 @@ export enum DialogType {
 	DirectoryBrowserDialog = 'directory-browser-dialog',
 	DiscordServerInviteDialog = 'discord-server-invite-dialog',
 	DownloadDetailsDialog = 'download-details-dialog',
+	DownloadDetailsDeleteLogsConfirmationDialog = 'download-details-delete-logs-confirmation-dialog',
 	HelpInfoDialog = 'help-info-dialog',
 	MediaDownloadConfirmationDialog = 'media-download-confirmation-dialog',
 	MediaSelectionDialog = 'media-selection-dialog',

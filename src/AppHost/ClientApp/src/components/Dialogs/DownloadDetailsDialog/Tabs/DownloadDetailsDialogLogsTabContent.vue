@@ -2,7 +2,7 @@
 	<div class="logs-panel">
 		<!-- Logs Toolbar -->
 		<q-toolbar
-			class="q-px-none q-pb-xs">
+			class="logs-toolbar q-px-none q-pb-xs">
 			<!-- Log Copy -->
 			<q-btn
 				dense
@@ -53,7 +53,6 @@
 					</q-list>
 				</q-menu>
 			</q-btn>
-			<!-- Spacer -->
 			<q-toolbar-title />
 			<!-- Delete Logs -->
 			<q-btn
@@ -79,13 +78,14 @@
 			<template v-else>
 				<!-- Total height spacer — required by TanStack Virtual -->
 				<div
-					class="log-container"
-					:style="{ height: `${virtualizer.getTotalSize()}px`, position: 'relative' }">
+					class="logs-virtual-spacer"
+					:style="{ height: `${virtualizer.getTotalSize()}px` }">
 					<div
 						v-for="row in virtualizer.getVirtualItems()"
 						:key="String(row.key)"
 						:ref="el => measureRow(el as Element | null, row)"
-						:class="['log-row-shell', 'log-row-shell--timeline', { 'log-row-shell--last': row.index === filteredLogs.length - 1 }]"
+						class="log-row"
+						:data-last="row.index === filteredLogs.length - 1"
 						:data-index="row.index"
 						:style="{
 							position: 'absolute',
@@ -95,7 +95,7 @@
 							transform: `translateY(${row.start}px)`,
 						}">
 						<QTimeline
-							:class="['log-timeline', { 'log-timeline--last': row.index === filteredLogs.length - 1 }]"
+							class="log-timeline"
 							layout="dense"
 							side="right">
 							<QTimelineEntry
@@ -369,19 +369,34 @@ defineExpose({ reset });
 </script>
 
 <style lang="scss">
-// The tab panel adds 16px padding — strip it so the logs panel owns its own spacing
+:root {
+  --logs-horizontal-padding: 8px;
+  --logs-content-gutter: 1rem;
+  --logs-dot-size: 47px;
+  --logs-dot-tail-offset-top: 56px;
+  --logs-dot-tail-offset-left: 22px;
+  --logs-icon-size: 2rem;
+  --logs-copy-fade-ms: 180ms;
+  --logs-fresh-pulse-ms: 2200ms;
+  --logs-fresh-pulse-ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 .q-tab-panel:has(.logs-panel) {
-  padding: 0;
-  height: 100%;
   min-height: 0;
+  height: 100%;
+  padding: 0;
 }
 
 .logs-panel {
   display: flex;
   flex-direction: column;
-  height: 100%;
   min-height: 0;
-  padding: 0 8px;
+  height: 100%;
+  padding-inline: var(--logs-horizontal-padding);
+}
+
+.logs-toolbar {
+  flex: 0 0 auto;
 }
 
 .logs-scroll-container {
@@ -395,20 +410,18 @@ defineExpose({ reset });
   }
 }
 
-.log-row-shell {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+.logs-virtual-spacer {
+  position: relative;
+  margin-inline: var(--logs-content-gutter);
 }
 
-.log-row-shell--timeline {
-  .q-timeline {
-    margin: 0;
-  }
+.log-row {
+  inset-inline: 0;
 }
 
 .log-timeline {
   width: 100%;
+  margin: 0;
 
   .q-timeline__entry--icon .q-timeline__dot {
     left: -16px;
@@ -419,28 +432,29 @@ defineExpose({ reset });
   content: '';
 }
 
-.log-timeline--last .q-timeline__entry:last-child .q-timeline__dot::after {
+.log-row[data-last='true'] .q-timeline__entry:last-child .q-timeline__dot::after {
   content: none;
 }
 
 .log-timeline-entry {
   cursor: copy;
+  margin: 0;
 
   .q-timeline__dot {
-    width: 47px;
+    width: var(--logs-dot-size);
 
     &::before {
       display: none;
     }
 
     &::after {
-      top: 56px;
-      left: 22px;
+      top: var(--logs-dot-tail-offset-top);
+      left: var(--logs-dot-tail-offset-left);
     }
 
     .q-icon {
       color: currentColor;
-      font-size: 2.0rem;
+      font-size: var(--logs-icon-size);
       height: 56px;
       line-height: 56px;
     }
@@ -452,7 +466,6 @@ defineExpose({ reset });
 
   .q-timeline__content {
     position: relative;
-    padding-left: 20px;
     padding-bottom: 24px;
   }
 
@@ -462,12 +475,12 @@ defineExpose({ reset });
 }
 
 .log-timeline-entry--fresh {
-  animation: log-entry-pulse 2.2s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: log-entry-pulse var(--logs-fresh-pulse-ms) var(--logs-fresh-pulse-ease);
 
   .q-timeline__content,
   .q-timeline__dot,
   .q-timeline__subtitle {
-    animation: log-entry-pulse 2.2s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: log-entry-pulse var(--logs-fresh-pulse-ms) var(--logs-fresh-pulse-ease);
   }
 }
 
@@ -480,8 +493,19 @@ defineExpose({ reset });
 
 .log-timeline-entry__copy-icon {
   opacity: 0;
-  transition: opacity 0.18s ease;
+  transition: opacity var(--logs-copy-fade-ms) ease;
   flex-shrink: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .log-timeline-entry--fresh,
+  .log-timeline-entry--fresh .q-timeline__content,
+  .log-timeline-entry--fresh .q-timeline__dot,
+  .log-timeline-entry--fresh .q-timeline__subtitle,
+  .log-timeline-entry__copy-icon {
+    animation: none;
+    transition: none;
+  }
 }
 
 @keyframes log-entry-pulse {

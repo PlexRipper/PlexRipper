@@ -1,4 +1,6 @@
 using Autofac;
+using Downloader;
+using Microsoft.Extensions.Hosting;
 using Reaparr.Application.Contracts;
 using Reaparr.FileSystem.Contracts;
 using Module = Autofac.Module;
@@ -17,21 +19,31 @@ public class ApplicationModule : Module
         builder.RegisterType<DownloadTaskScheduler>().As<IDownloadTaskScheduler>().SingleInstance();
         builder.RegisterType<MoveDownloadFileJobScheduler>().As<IMoveDownloadFileScheduler>().SingleInstance();
         builder.RegisterType<MoveDownloadFileJobQueue>().As<IMoveDownloadFileQueue>().SingleInstance();
-        builder.RegisterType<DownloadWorker>().InstancePerDependency();
+
+        builder
+            .RegisterType<DirectPlexDownloadClient>()
+            .Keyed<IPlexDownloadClient>(PlexDownloadClientType.Direct)
+            .InstancePerDependency();
+
+        builder
+            .Register<Func<DownloadConfiguration, IDownloadService>>(_ =>
+                config => new DownloadService(config, loggerFactory: null) // no internal library logging should happen
+            )
+            .InstancePerDependency();
 
         builder
             .RegisterType<DashPlexDownloadClient>()
             .Keyed<IPlexDownloadClient>(PlexDownloadClientType.Dash)
             .InstancePerDependency();
 
-        builder
-            .RegisterType<PlexDownloadClient>()
-            .Keyed<IPlexDownloadClient>(PlexDownloadClientType.Direct)
-            .InstancePerDependency();
-
         builder.RegisterType<SchedulerService>().As<ISchedulerService>().SingleInstance();
         builder.RegisterType<AllJobListener>().As<IAllJobListener>().SingleInstance();
         builder.RegisterType<DownloadJobListener>().As<IDownloadJobListener>().SingleInstance();
         builder.RegisterType<MoveDownloadJobListener>().As<IMoveDownloadJobListener>().SingleInstance();
+        builder
+            .RegisterType<DownloadTaskUpdateDispatcher>()
+            .As<IDownloadTaskUpdateDispatcher>()
+            .As<IHostedService>()
+            .SingleInstance();
     }
 }

@@ -19,31 +19,12 @@ public class CleanUpDownloadTaskFoldersUnitTests : BaseUnitTest<CleanUpDownloadT
                 config.TvShowDownloadTasksCount = 1;
                 config.TvShowSeasonDownloadTasksCount = 1;
                 config.TvShowEpisodeDownloadTasksCount = 1;
-                config.DownloadWorkerTasks = 4;
             }
         );
 
         var dbContext = IDbContext;
-        var downloadTask = await dbContext
-            .DownloadTaskTvShowEpisodeFile.Include(x => x.DownloadWorkerTasks)
-            .FirstOrDefaultAsync(CancellationToken);
+        var downloadTask = await dbContext.DownloadTaskTvShowEpisodeFile.FirstOrDefaultAsync(CancellationToken);
         downloadTask.ShouldNotBeNull();
-
-        var downloadWorkerTaskIds = downloadTask.DownloadWorkerTasks.Select(x => x.Id).ToList();
-        await dbContext
-            .DownloadWorkerTasks.Where(x => downloadWorkerTaskIds.Contains(x.Id))
-            .ExecuteUpdateAsync(
-                p =>
-                    p.SetProperty(
-                            x => x.DownloadDirectory,
-                            "/mnt/DATA/ReaparrCache/Downloads/TvShows/Reno 911!/Season 1"
-                        )
-                        .SetProperty(
-                            x => x.FileName,
-                            "Reno 911! - S01E01 - How We Do It in Reno (Pilot) WEBDL-1080p.part1.mkv"
-                        ),
-                CancellationToken
-            );
 
         Mock.Mock<IPath>()
             .Setup(x => x.GetDirectoryName(It.IsAny<string>()))
@@ -78,23 +59,12 @@ public class CleanUpDownloadTaskFoldersUnitTests : BaseUnitTest<CleanUpDownloadT
                 config.TvShowDownloadTasksCount = 1;
                 config.TvShowSeasonDownloadTasksCount = 1;
                 config.TvShowEpisodeDownloadTasksCount = 1;
-                config.DownloadWorkerTasks = 4;
             }
         );
 
         var dbContext = IDbContext;
-        var downloadTask = await dbContext
-            .DownloadTaskTvShowEpisodeFile.Include(x => x.DownloadWorkerTasks)
-            .FirstOrDefaultAsync(CancellationToken);
+        var downloadTask = await dbContext.DownloadTaskTvShowEpisodeFile.FirstOrDefaultAsync(CancellationToken);
         downloadTask.ShouldNotBeNull();
-
-        var downloadWorkerTaskIds = downloadTask.DownloadWorkerTasks.Select(x => x.Id).ToList();
-        await dbContext
-            .DownloadWorkerTasks.Where(x => downloadWorkerTaskIds.Contains(x.Id))
-            .ExecuteUpdateAsync(
-                p => p.SetProperty(x => x.DownloadDirectory, "").SetProperty(x => x.FileName, ""),
-                CancellationToken
-            );
 
         // Act
         var request = new CleanUpDownloadTaskFoldersCommand(downloadTask.ToKey());
@@ -116,31 +86,12 @@ public class CleanUpDownloadTaskFoldersUnitTests : BaseUnitTest<CleanUpDownloadT
                 config.TvShowDownloadTasksCount = 1;
                 config.TvShowSeasonDownloadTasksCount = 1;
                 config.TvShowEpisodeDownloadTasksCount = 1;
-                config.DownloadWorkerTasks = 4;
             }
         );
 
         var dbContext = IDbContext;
-        var downloadTask = await dbContext
-            .DownloadTaskTvShowEpisodeFile.Include(x => x.DownloadWorkerTasks)
-            .FirstOrDefaultAsync(CancellationToken);
+        var downloadTask = await dbContext.DownloadTaskTvShowEpisodeFile.FirstOrDefaultAsync(CancellationToken);
         downloadTask.ShouldNotBeNull();
-
-        var downloadWorkerTaskIds = downloadTask.DownloadWorkerTasks.Select(x => x.Id).ToList();
-        await dbContext
-            .DownloadWorkerTasks.Where(x => downloadWorkerTaskIds.Contains(x.Id))
-            .ExecuteUpdateAsync(
-                p =>
-                    p.SetProperty(
-                            x => x.DownloadDirectory,
-                            "/mnt/DATA/ReaparrCache/Downloads/TvShows/Reno 911!/Season 1"
-                        )
-                        .SetProperty(
-                            x => x.FileName,
-                            "Reno 911! - S01E01 - How We Do It in Reno (Pilot) WEBDL-1080p.part1.mkv"
-                        ),
-                CancellationToken
-            );
 
         Mock.Mock<IPath>()
             .Setup(x => x.GetDirectoryName(It.IsAny<string>()))
@@ -181,31 +132,12 @@ public class CleanUpDownloadTaskFoldersUnitTests : BaseUnitTest<CleanUpDownloadT
                 config.TvShowDownloadTasksCount = 1;
                 config.TvShowSeasonDownloadTasksCount = 1;
                 config.TvShowEpisodeDownloadTasksCount = 1;
-                config.DownloadWorkerTasks = 4;
             }
         );
 
         var dbContext = IDbContext;
-        var downloadTask = await dbContext
-            .DownloadTaskTvShowEpisodeFile.Include(x => x.DownloadWorkerTasks)
-            .FirstOrDefaultAsync(CancellationToken);
+        var downloadTask = await dbContext.DownloadTaskTvShowEpisodeFile.FirstOrDefaultAsync(CancellationToken);
         downloadTask.ShouldNotBeNull();
-
-        var downloadWorkerTaskIds = downloadTask.DownloadWorkerTasks.Select(x => x.Id).ToList();
-        await dbContext
-            .DownloadWorkerTasks.Where(x => downloadWorkerTaskIds.Contains(x.Id))
-            .ExecuteUpdateAsync(
-                p =>
-                    p.SetProperty(
-                            x => x.DownloadDirectory,
-                            "/mnt/DATA/ReaparrCache/Downloads/TvShows/Reno 911!/Season 1"
-                        )
-                        .SetProperty(
-                            x => x.FileName,
-                            "Reno 911! - S01E01 - How We Do It in Reno (Pilot) WEBDL-1080p.part1.mkv"
-                        ),
-                CancellationToken
-            );
 
         Mock.Mock<IPath>()
             .Setup(x => x.GetDirectoryName(It.IsAny<string>()))
@@ -251,32 +183,12 @@ public class CleanUpDownloadTaskFoldersUnitTests : BaseUnitTest<CleanUpDownloadT
                 config.TvShowDownloadTasksCount = 1;
                 config.TvShowSeasonDownloadTasksCount = 1;
                 config.TvShowEpisodeDownloadTasksCount = 1;
-                config.DownloadWorkerTasks = 4;
             }
         );
 
         var dbContext = IDbContext;
-        var downloadTask = await dbContext
-            .DownloadTaskTvShowEpisodeFile.Include(x => x.DownloadWorkerTasks)
-            .FirstOrDefaultAsync(CancellationToken);
+        var downloadTask = await dbContext.DownloadTaskTvShowEpisodeFile.FirstOrDefaultAsync(CancellationToken);
         downloadTask.ShouldNotBeNull();
-        downloadTask.DownloadWorkerTasks.ShouldNotBeEmpty();
-
-        var downloadWorkerTaskIds = downloadTask.DownloadWorkerTasks.Select(x => x.Id).ToList();
-        await dbContext
-            .DownloadWorkerTasks.Where(x => downloadWorkerTaskIds.Contains(x.Id))
-            .ExecuteUpdateAsync(
-                p =>
-                    p.SetProperty(
-                            x => x.DownloadDirectory,
-                            "/mnt/DATA/ReaparrCache/Downloads/TvShows/Reno 911!/Season 1"
-                        )
-                        .SetProperty(
-                            x => x.FileName,
-                            "Reno 911! - S01E01 - How We Do It in Reno (Pilot) WEBDL-1080p.part1.mkv"
-                        ),
-                CancellationToken
-            );
 
         Mock.Mock<IPath>()
             .Setup(x => x.GetDirectoryName(It.IsAny<string>()))
@@ -300,5 +212,41 @@ public class CleanUpDownloadTaskFoldersUnitTests : BaseUnitTest<CleanUpDownloadT
         result.HasException<UnauthorizedAccessException>().ShouldBeTrue();
         Mock.Mock<IPath>().Verify();
         Mock.Mock<IDirectory>().Verify();
+    }
+
+    [Fact]
+    public async Task ShouldSkipDirectoryCleanup_WhenAnotherTaskInSameDirectoryIsStillActive()
+    {
+        // Arrange
+        await SetupDatabase(
+            25001,
+            config =>
+            {
+                config.TvShowDownloadTasksCount = 1;
+                config.TvShowSeasonDownloadTasksCount = 1;
+                config.TvShowEpisodeDownloadTasksCount = 2;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var fileTasks = await dbContext.DownloadTaskTvShowEpisodeFile.OrderBy(x => x.Id).ToListAsync(CancellationToken);
+        fileTasks.Count.ShouldBeGreaterThanOrEqualTo(2);
+
+        var completedTask = fileTasks[0];
+        var activeSiblingTask = fileTasks[1];
+
+        completedTask.DownloadStatus = DownloadStatus.Completed;
+        activeSiblingTask.DownloadStatus = DownloadStatus.Queued;
+        await dbContext.SaveChangesAsync(CancellationToken);
+
+        // Act
+        var request = new CleanUpDownloadTaskFoldersCommand(completedTask.ToKey());
+        var result = await Sut.ExecuteAsync(request, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        Mock.Mock<IPath>().Verify(x => x.GetDirectoryName(It.IsAny<string>()), Times.Never);
+        Mock.Mock<IDirectory>().Verify(x => x.GetFileSystemEntries(It.IsAny<string>()), Times.Never);
+        Mock.Mock<IDirectory>().Verify(x => x.Delete(It.IsAny<string>()), Times.Never);
     }
 }

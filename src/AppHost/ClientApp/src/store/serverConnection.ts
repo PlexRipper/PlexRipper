@@ -2,7 +2,7 @@ import { acceptHMRUpdate, defineStore } from 'pinia';
 import { reactive, computed, toRefs } from 'vue';
 import type { Observable } from 'rxjs';
 import { of } from 'rxjs';
-import { map, switchMap, tap } from 'rxjs/operators';
+import { finalize, map, switchMap, tap } from 'rxjs/operators';
 import { get } from '@vueuse/core';
 import type {
 	CreatePlexServerConnectionEndpointRequest,
@@ -19,11 +19,13 @@ import { assign, cloneDeep } from 'lodash-es';
 
 interface IServerConnectionStoreState {
 	serverConnections: PlexServerConnectionDTO[];
+	connectionLoadingById: Record<number, boolean>;
 }
 
 export const useServerConnectionStore = defineStore(StoreNames.ServerConnectionStore, () => {
 	const defaultState: IServerConnectionStoreState = {
 		serverConnections: [],
+		connectionLoadingById: {},
 	};
 
 	const state = reactive<IServerConnectionStoreState>(cloneDeep(defaultState));
@@ -32,6 +34,16 @@ export const useServerConnectionStore = defineStore(StoreNames.ServerConnectionS
 	const serverStore = useServerStore();
 
 	const actions = {
+		setConnectionLoading(connectionId: number, isLoading: boolean) {
+			state.connectionLoadingById[connectionId] = isLoading;
+		},
+		setConnectionsLoadingForServer(plexServerId: number, isLoading: boolean) {
+			state.serverConnections
+				.filter((connection) => connection.plexServerId === plexServerId)
+				.forEach((connection) => {
+					state.connectionLoadingById[connection.id] = isLoading;
+				});
+		},
 		setup(): Observable<ISetupResult> {
 			// Listen for refresh notifications
 			signalRStore
@@ -54,6 +66,8 @@ export const useServerConnectionStore = defineStore(StoreNames.ServerConnectionS
 			);
 		},
 		checkServerConnection(plexServerConnectionId: number): Observable<PlexServerStatusDTO | null> {
+			signalRStore.clearServerConnectionCheckStatusProgress(plexServerConnectionId);
+			actions.setConnectionLoading(plexServerConnectionId, true);
 			return plexServerConnectionApi.checkConnectionStatusByIdEndpoint(plexServerConnectionId).pipe(
 				map((res) => {
 					if (res.isSuccess && res.value) {
@@ -65,6 +79,7 @@ export const useServerConnectionStore = defineStore(StoreNames.ServerConnectionS
 					}
 					return res?.value ?? null;
 				}),
+				finalize(() => actions.setConnectionLoading(plexServerConnectionId, false)),
 			);
 		},
 		/**
@@ -72,9 +87,11 @@ export const useServerConnectionStore = defineStore(StoreNames.ServerConnectionS
      * @param plexServerId
      */
 		checkServerStatus(plexServerId: number) {
+			actions.setConnectionsLoadingForServer(plexServerId, true);
 			return plexServerConnectionApi.checkAllConnectionsStatusByPlexServerEndpoint(plexServerId).pipe(
 				map((x) => x?.value ?? []),
 				switchMap(() => actions.refreshPlexServerConnections()),
+				finalize(() => actions.setConnectionsLoadingForServer(plexServerId, false)),
 			);
 		},
 		checkServerConnectionUrl: (connectionUrl: string) =>
@@ -111,10 +128,6 @@ export const useServerConnectionStore = defineStore(StoreNames.ServerConnectionS
 					}
 				}),
 			),
-		chooseServerConnection: (plexServerId: number): PlexServerConnectionDTO | null =>
-			state.serverConnections.find(
-				(x) => x.plexServerId === plexServerId && x.chosenConnection,
-			) ?? null,
 		setPreferredPlexServerConnection: (plexServerId: number, connectionId: number) =>
 			plexServerApi
 				.setPreferredPlexServerConnectionEndpoint(plexServerId, connectionId)
@@ -129,6 +142,11 @@ export const useServerConnectionStore = defineStore(StoreNames.ServerConnectionS
 				state.serverConnections.filter((connection) => (plexServerId > 0 ? connection.plexServerId === plexServerId : false)),
 			),
 		getServerConnection: (connectionId: number) => state.serverConnections.find((x) => x.id === connectionId),
+		getConnectionLoading: (connectionId: number) => state.connectionLoadingById[connectionId] ?? false,
+		isAnyConnectionLoadingForServer: (plexServerId: number) =>
+			state.serverConnections
+				.filter((connection) => connection.plexServerId === plexServerId)
+				.some((connection) => state.connectionLoadingById[connection.id] ?? false),
 		getServerConnections: computed((): PlexServerConnectionDTO[] => state.serverConnections),
 		isServerConnected: (plexServerId = 0) =>
 			state.serverConnections

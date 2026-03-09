@@ -70,6 +70,7 @@ public static partial class FakeData
                         KeepCompletedInDownloadFolder = false,
                     }
             )
-            .Ignore(x => x.DownloadWorkerTasks);
+            .RuleFor(x => x.DirectDownloadSnapshot, _ => null)
+            .RuleFor(x => x.DownloadClientType, _ => PlexDownloadClientType.Direct);
     }
 }

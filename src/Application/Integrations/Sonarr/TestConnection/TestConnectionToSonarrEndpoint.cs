@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Net.Http.Headers;
 using FastEndpoints;
 using FluentValidation;
+using Flurl;
 using Reaparr.Application.Contracts;
 
 namespace Reaparr.Application;
@@ -30,9 +31,22 @@ public class TestConnectionToSonarrEndpointRequestValidator : Validator<TestConn
 {
     public TestConnectionToSonarrEndpointRequestValidator()
     {
-        RuleFor(x => x.Url).NotEmpty().WithMessage("URL cannot be empty.");
+        RuleFor(x => x.Url).NotEmpty().WithMessage("Provided Sonarr URL cannot be empty.");
+        RuleFor(x => x.Url).Must(BeValidUrl).WithMessage("Provided Sonarr URL must be a valid http/https URL.");
+        RuleFor(x => x.ApiKey).NotEmpty().WithMessage("Provided Sonarr API Key cannot be empty.");
+    }
 
-        RuleFor(x => x.ApiKey).NotEmpty().WithMessage("API Key cannot be empty.");
+    private static bool BeValidUrl(string url)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+        {
+            return false;
+        }
+
+        var trimmed = url.TrimEnd('/');
+
+        return Uri.TryCreate(trimmed, UriKind.Absolute, out var uriResult)
+            && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
     }
 }
 
@@ -40,14 +54,14 @@ public class TestConnectionToSonarrEndpoint
     : BaseEndpoint<TestConnectionToSonarrEndpointRequest, TestConnectionToSonarrEndpointResponse>
 {
     private readonly ILogger _log;
-    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly HttpClient _client;
 
     public override string EndpointPath => ApiRoutes.IntegrationController + "/Sonarr/TestConnection";
 
     public TestConnectionToSonarrEndpoint(ILogger log, IHttpClientFactory httpClientFactory)
     {
         _log = log.ForContext<TestConnectionToSonarrEndpoint>();
-        _httpClientFactory = httpClientFactory;
+        _client = httpClientFactory.CreateSonarrHttpClient();
     }
 
     public override void Configure()
@@ -64,66 +78,47 @@ public class TestConnectionToSonarrEndpoint
     {
         _log.Here().DebugApiCall(HttpContext, req);
 
-        var client = _httpClientFactory.CreateClient();
-        client.Timeout = TimeSpan.FromSeconds(5);
-
         var baseUrl = req.Url.TrimEnd('/');
 
-        if (
-            !Uri.TryCreate(baseUrl, UriKind.Absolute, out var uriResult)
-            || (uriResult.Scheme != Uri.UriSchemeHttp && uriResult.Scheme != Uri.UriSchemeHttps)
-        )
-        {
-            _log.Here().Warning("Provided Sonarr URL is invalid: {Url}", req.Url);
-            await SendTestResult(TestConnectionStatus.UrlIsInvalid, ct);
-            return;
-        }
+        var url = new Url(baseUrl).AppendPathSegments("api", "v3", "system", "status");
 
-        var url = $"{baseUrl}/api/v3/system/status";
-
-        using var httpRequest = new HttpRequestMessage(System.Net.Http.HttpMethod.Get, url);
+        using var httpRequest = new HttpRequestMessage(System.Net.Http.HttpMethod.Get, url.ToString());
         httpRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         httpRequest.Headers.Add("X-Api-Key", req.ApiKey);
 
-        HttpResponseMessage httpResponse;
-        try
+        var result = await Result.Try(async Task () =>
         {
-            httpResponse = await client.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead, ct);
-        }
-        catch (TaskCanceledException e)
+            using var httpResponse = await _client.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead, ct);
+            if (httpResponse.IsSuccessStatusCode)
+            {
+                await SendTestResult(TestConnectionStatus.Success, ct);
+                return;
+            }
+
+            var statusCode = (int)httpResponse.StatusCode;
+            if (statusCode == 401)
+            {
+                await SendTestResult(TestConnectionStatus.InvalidApiKey, ct);
+                return;
+            }
+
+            var reason = httpResponse.ReasonPhrase ?? $"HTTP {(int)httpResponse.StatusCode}";
+            _log.Here().Warning("Sonarr connection test failed: {Reason}", reason);
+            await SendTestResult(TestConnectionStatus.ConnectionFailed, ct);
+        });
+
+        if (result.IsCancelled)
         {
-            _log.Here().Error(e, "HTTP request to Sonarr instance failed.");
+            _log.Here().Error("HTTP request to Sonarr instance was cancelled.");
             await SendTestResult(TestConnectionStatus.ConnectionFailed, ct);
             return;
         }
-        catch (HttpRequestException e)
+
+        if (result.IsFailed)
         {
-            _log.Here().Error(e, "HTTP request to Sonarr instance failed.");
+            _log.Here().Error("HTTP request to Sonarr instance failed, could be offline");
             await SendTestResult(TestConnectionStatus.ConnectionFailed, ct);
-            return;
         }
-
-        if (httpResponse.IsSuccessStatusCode)
-        {
-            await SendTestResult(TestConnectionStatus.Success, ct);
-            return;
-        }
-
-        var statusCode = (int)httpResponse.StatusCode;
-        if (statusCode == 401)
-        {
-            await SendTestResult(TestConnectionStatus.InvalidApiKey, ct);
-            return;
-        }
-
-        var reason = httpResponse.ReasonPhrase ?? $"HTTP {(int)httpResponse.StatusCode}";
-        var responseBody = await httpResponse.Content.ReadAsStringAsync(ct);
-        if (!string.IsNullOrWhiteSpace(responseBody))
-        {
-            var truncatedBody = responseBody.Length > 512 ? responseBody.Substring(0, 512) + "..." : responseBody;
-            reason = $"{reason} | Body: {truncatedBody}";
-        }
-        await SendFluentResult(Result.Fail(reason).LogError(), ct);
     }
 
     private async Task SendTestResult(TestConnectionStatus status, CancellationToken ct)

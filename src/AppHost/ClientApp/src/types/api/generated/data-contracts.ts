@@ -184,6 +184,51 @@ export interface DownloadMediaDTO {
   type: PlexMediaType;
 }
 
+export interface DownloadPatchDTO {
+  /** @format int64 */
+  dataReceived: number;
+  /** @format int64 */
+  dataTotal: number;
+  /** @format int64 */
+  downloadSpeed: number;
+  /** @format guid */
+  id: string;
+  /** @format guid */
+  parentId: string;
+  /** @format decimal */
+  percentage: number;
+  status: DownloadStatus;
+  /** @format int64 */
+  timeRemaining: number;
+}
+
+export interface DownloadPatchEntryMessagePackDTO {
+  /** @format int64 */
+  dataReceived: number;
+  /** @format int64 */
+  dataTotal: number;
+  /** @format int64 */
+  downloadSpeed: number;
+  /** @format guid */
+  id: string;
+  /** @format guid */
+  parentId: string;
+  /** @format decimal */
+  percentage: number;
+  status: DownloadStatus;
+  /** @format int64 */
+  timeRemaining: number;
+}
+
+export interface DownloadPatchMessagePackDTO {
+  deletedIds: string[];
+  /** @format int64 */
+  sequence: number;
+  /** @format int32 */
+  serverId: number;
+  upserts: DownloadPatchEntryMessagePackDTO[];
+}
+
 export interface DownloadPreviewContainerDTO {
   expanded: Record<string, boolean>;
   previews: DownloadPreviewDTO[];
@@ -245,15 +290,21 @@ export enum DownloadStatus {
   Queued = "Queued",
   Downloading = "Downloading",
   DownloadFinished = "DownloadFinished",
-  Paused = "Paused",
-  Stopped = "Stopped",
-  Deleted = "Deleted",
   Moving = "Moving",
   MovePaused = "MovePaused",
   MoveFinished = "MoveFinished",
   Completed = "Completed",
+  Paused = "Paused",
+  Stopped = "Stopped",
+  Deleted = "Deleted",
   ServerUnreachable = "ServerUnreachable",
+  AuthError = "AuthError",
+  StorageError = "StorageError",
+  SourceUnavailable = "SourceUnavailable",
+  DownloadClientError = "DownloadClientError",
+  IntegrityError = "IntegrityError",
   MoveError = "MoveError",
+  Restarting = "Restarting",
 }
 
 export interface DownloadTaskDTO {
@@ -305,6 +356,16 @@ export interface DownloadTaskKey {
   type: DownloadTaskType;
 }
 
+export interface DownloadTaskLogDTO {
+  /** @format date-time */
+  createdAt: string;
+  /** @format int32 */
+  id: number;
+  logLevel: NotificationLevel;
+  message: string;
+  status: DownloadStatus;
+}
+
 export enum DownloadTaskType {
   None = "None",
   Movie = "Movie",
@@ -315,17 +376,6 @@ export enum DownloadTaskType {
   Episode = "Episode",
   EpisodeData = "EpisodeData",
   EpisodePart = "EpisodePart",
-}
-
-export interface DownloadWorkerLogDTO {
-  /** @format date-time */
-  createdAt: string;
-  /** @format guid */
-  downloadTaskId: string;
-  /** @format int32 */
-  downloadWorkerTaskId: number;
-  logLevel: NotificationLevel;
-  message: string;
 }
 
 export interface ErrorDTO {
@@ -527,6 +577,7 @@ export enum MessageTypes {
   LibraryProgress = "LibraryProgress",
   DownloadTaskUpdate = "DownloadTaskUpdate",
   ServerDownloadProgress = "ServerDownloadProgress",
+  DownloadPatch = "DownloadPatch",
   ServerConnectionCheckStatusProgress = "ServerConnectionCheckStatusProgress",
   MoveDownloadFileProgress = "MoveDownloadFileProgress",
   Notification = "Notification",
@@ -862,6 +913,7 @@ export interface PlexServerDTO {
   httpsRequired: boolean;
   /** @format int32 */
   id: number;
+  isDownloadsPausedByUser: boolean;
   isEnabled: boolean;
   /** @format date-time */
   lastSeenAt: string;
@@ -922,6 +974,7 @@ export enum RefreshDataType {
   PlexLibrary = "PlexLibrary",
   PlexLibrarySyncStatus = "PlexLibrarySyncStatus",
   PlexServerConnection = "PlexServerConnection",
+  DownloadTasks = "DownloadTasks",
 }
 
 export interface RefreshPlexAccountAccessRapportDTO {
@@ -1003,13 +1056,23 @@ export interface ResultDTOOfGeneratePlexTokenResponse {
   value?: GeneratePlexTokenResponse | null;
 }
 
-export interface ResultDTOOfListOfDownloadWorkerLogDTO {
+export interface ResultDTOOfInt32 {
   errors: ErrorDTO[];
   isSuccess: boolean;
   /** @format int32 */
   statusCode: number;
   successes: SuccessDTO[];
-  value?: DownloadWorkerLogDTO[] | null;
+  /** @format int32 */
+  value: number;
+}
+
+export interface ResultDTOOfListOfDownloadTaskLogDTO {
+  errors: ErrorDTO[];
+  isSuccess: boolean;
+  /** @format int32 */
+  statusCode: number;
+  successes: SuccessDTO[];
+  value?: DownloadTaskLogDTO[] | null;
 }
 
 export interface ResultDTOOfListOfFolderPathDTO {

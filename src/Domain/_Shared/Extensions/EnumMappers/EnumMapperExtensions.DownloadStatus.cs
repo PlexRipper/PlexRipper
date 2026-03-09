@@ -18,6 +18,12 @@ public static partial class EnumMapperExtensions
         ["Completed"] = DownloadStatus.Completed,
         ["ServerUnreachable"] = DownloadStatus.ServerUnreachable,
         ["MoveError"] = DownloadStatus.MoveError,
+        ["AuthError"] = DownloadStatus.AuthError,
+        ["StorageError"] = DownloadStatus.StorageError,
+        ["DownloadClientError"] = DownloadStatus.DownloadClientError,
+        ["IntegrityError"] = DownloadStatus.IntegrityError,
+        ["SourceUnavailable"] = DownloadStatus.SourceUnavailable,
+        ["Restarting"] = DownloadStatus.Restarting,
     };
 
     /// <summary>
@@ -59,6 +65,12 @@ public static partial class EnumMapperExtensions
             DownloadStatus.Completed => "Completed",
             DownloadStatus.ServerUnreachable => "ServerUnreachable",
             DownloadStatus.MoveError => "MoveError",
+            DownloadStatus.AuthError => "AuthError",
+            DownloadStatus.StorageError => "StorageError",
+            DownloadStatus.DownloadClientError => "DownloadClientError",
+            DownloadStatus.IntegrityError => "IntegrityError",
+            DownloadStatus.SourceUnavailable => "SourceUnavailable",
+            DownloadStatus.Restarting => "Restarting",
             _ => DefaultException(),
         };
 

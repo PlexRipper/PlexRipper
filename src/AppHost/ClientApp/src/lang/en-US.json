@@ -70,6 +70,29 @@
             "invalid-download-task": {
                 "body": "Error while retrieving the details for this download task:",
                 "title": "The download task could not be retrieved"
+            },
+            "logs": {
+                "copy-all": "Copy all logs",
+                "delete-all": "Delete all logs",
+                "sort-oldest-first": "Oldest first",
+                "sort-newest-first": "Newest first",
+                "filter-by-level": "Filter by log level",
+                "copied-to-clipboard": "Logs copied to clipboard",
+                "entry-copied-to-clipboard": "Log entry copied to clipboard",
+                "deleted": "Logs deleted",
+                "no-logs": "No logs found for this download task.",
+                "delete-confirmation": {
+                    "title": "Delete all logs",
+                    "text": "Are you sure you want to delete all logs for this download task?"
+                },
+                "levels": {
+                    "debug": "Debug",
+                    "information": "Information",
+                    "success": "Success",
+                    "warning": "Warning",
+                    "error": "Error",
+                    "fatal": "Fatal"
+                }
             }
         },
         "media-overview": {
@@ -127,7 +150,8 @@
                 "server-connections": {
                     "header": "Server Connections",
                     "section-header": "Select the preferred server connection:",
-                    "add-connection-button": "Add connection"
+                    "add-connection-button": "Add connection",
+                    "check-all-connections": "Check all connections"
                 },
                 "server-data": {
                     "headers": {
@@ -140,8 +164,6 @@
                         "platform": "Platform:"
                     },
                     "header": "Server Data",
-                    "all-connections-failed": "All connections failed when used to connect to the server, the server is most likely offline...",
-                    "at-least-one-connection-successful": "At least one connection was successful, which means the server can be connected to!",
                     "values": {
                         "platform-version": "{platform} ({platformVersion})",
                         "product-version": "{product} ({productVersion})"
@@ -208,6 +230,13 @@
             "title": "Plex.tv Authentication Token Validation"
         },
         "downloads-table": {
+            "clear-completed": {
+                "button": "Clear Completed",
+                "confirmation": {
+                    "title": "Clear completed downloads?",
+                    "text": "This will recursively remove completed download tasks for this server only. The downloaded files will not be deleted from your file system."
+                }
+            },
             "columns": {
                 "actions": "Actions",
                 "data-received": "Received",
@@ -354,6 +383,7 @@
             }
         },
         "sonarr-integration": {
+            "reverse-proxy-alert": "If you use a reverse proxy, configure it in Network settings before setting up the Sonarr integration.",
             "connection-status": {
                 "connection-failed": "Could not connect to Sonarr. Ensure Sonarr is online and connectable!",
                 "invalid-api-key": "Could connect to Sonarr, but the API key was invalid",
@@ -376,6 +406,7 @@
             "title": "Sonarr Integration"
         },
         "radarr-integration": {
+            "reverse-proxy-alert": "If you use a reverse proxy, configure it in Network settings before setting up the Radarr integration.",
             "connection-status": {
                 "connection-failed": "Could not connect to Radarr. Ensure Radarr is online and connectable!",
                 "invalid-api-key": "Could connect to Radarr, but the API key was invalid",
@@ -427,7 +458,6 @@
             "add-alert": "Add Alert",
             "back": "Back",
             "cancel": "Cancel",
-            "check-server-status": "Check server status",
             "close": "Close",
             "confirm": "Confirm",
             "delete": "Delete",
@@ -479,6 +509,11 @@
         },
         "download-status": {
             "error": "Error",
+            "auth-error": "Auth Error",
+            "storage-error": "Storage Error",
+            "source-unavailable": "Source Unavailable",
+            "download-client-error": "Download Client Error",
+            "integrity-error": "Integrity Error",
             "server-unreachable": "Server Unreachable",
             "unknown": "Unknown",
             "queued": "Queued",
@@ -491,7 +526,8 @@
             "completed": "Completed",
             "move-error": "Move Error",
             "move-finished": "Moving Finished",
-            "move-paused": "Moving Paused"
+            "move-paused": "Moving Paused",
+            "restarting": "Restarting"
         },
         "video-quality": {
             "quality-1-unknown": "Unknown",
@@ -537,7 +573,7 @@
             },
             "username": {
                 "label": "Username",
-                "text": "The username of your Plex account.\n\n**Note:** Plex uses your **email address** as username. If your username is not working, see the [FAQ](https://www.plexripper.rocks/faq#i-tried-to-use-my-username-to-set-up-my-plex-account-in-plex-ripper-but-its-not-working) for help.",
+                "text": "The username of your Plex account.\n\n**Note:** Plex uses your **email address** as username. If your username is not working, see the [FAQ](https://www.reaparr.rocks/docs/faq#username-setup) for help.",
                 "title": "Username"
             }
         },
@@ -762,7 +798,7 @@
                         "title": "Clear Sonarr configuration"
                     },
                     "setup-configuration": {
-                        "text": "Reaparr will set up an Indexer and Download client in Sonarr, which is then used to allow Sonarr to trigger downloads.\n\nSee [Sonarr/Radarr Integration Guide](https://www.reaparr.rocks/guides/integration/sonarr-radarr) for more info.",
+                        "text": "Reaparr will set up an Indexer and Download client in Sonarr, which is then used to allow Sonarr to trigger downloads.\n\nSee [Sonarr/Radarr Integration Guide](https://www.reaparr.rocks/docs/integration/sonarr-radarr) for more info.",
                         "title": "Setup Sonarr configuration"
                     },
                     "test-connection": {
@@ -786,7 +822,7 @@
                         "title": "Clear Radarr configuration"
                     },
                     "setup-configuration": {
-                        "text": "Reaparr will set up an Indexer and Download client in Radarr, which is then used to allow Radarr to trigger downloads.\n\nSee [Sonarr/Radarr Integration Guide](https://www.reaparr.rocks/guides/integration/sonarr-radarr) for more info.",
+                        "text": "Reaparr will set up an Indexer and Download client in Radarr, which is then used to allow Radarr to trigger downloads.\n\nSee [Sonarr/Radarr Integration Guide](https://www.reaparr.rocks/docs/integration/sonarr-radarr) for more info.",
                         "title": "Setup Radarr configuration"
                     },
                     "test-connection": {

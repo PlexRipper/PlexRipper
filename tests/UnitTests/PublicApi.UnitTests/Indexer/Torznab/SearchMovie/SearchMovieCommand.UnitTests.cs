@@ -54,17 +54,17 @@ public class SearchMovieCommandUnitTests : BaseUnitTest<SearchMovieCommandHandle
 
         // Assert
         result.ShouldNotBeNull();
-        result.Channel.ShouldNotBeNull();
-        result.Channel.Title.ShouldBe("Reaparr Indexer");
-        result.Channel.Description.ShouldBe($"Movie Search results for {cmd.Query}");
-        result.Channel.Language.ShouldBe("en-us");
-        result.Channel.Category.ShouldBe("search");
+        result.Value.Channel.ShouldNotBeNull();
+        result.Value.Channel.Title.ShouldBe("Reaparr Indexer");
+        result.Value.Channel.Description.ShouldBe($"Movie Search results for {cmd.Query}");
+        result.Value.Channel.Language.ShouldBe("en-us");
+        result.Value.Channel.Category.ShouldBe("search");
 
-        result.Channel.Items.ShouldNotBeNull();
-        result.Channel.Items.Count.ShouldBe(expectedMovieTitles.Count);
-        result.Channel.Items.Select(i => i.Title).ToList().ShouldBe(expectedMovieTitles);
+        result.Value.Channel.Items.ShouldNotBeNull();
+        result.Value.Channel.Items.Count.ShouldBe(expectedMovieTitles.Count);
+        result.Value.Channel.Items.Select(i => i.Title).ToList().ShouldBe(expectedMovieTitles);
 
-        foreach (var item in result.Channel.Items)
+        foreach (var item in result.Value.Channel.Items)
         {
             item.Guid.ShouldNotBeNull();
             item.Guid.IsPermaLink.ShouldBe("false");
@@ -134,12 +134,12 @@ public class SearchMovieCommandUnitTests : BaseUnitTest<SearchMovieCommandHandle
 
         // Assert
         result.ShouldNotBeNull();
-        result.Channel.Items.ShouldNotBeEmpty();
-        result.Channel.Items.All(i => i.Attributes.Any(a => a.Name == "imdb" && a.Value == imdb)).ShouldBeTrue();
+        result.Value.Channel.Items.ShouldNotBeEmpty();
+        result.Value.Channel.Items.All(i => i.Attributes.Any(a => a.Name == "imdb" && a.Value == imdb)).ShouldBeTrue();
 
         var expectedTitles = movie.MediaDataList.OrderBy(md => md.PlexApiPartId).Select(md => md.GetFileName).ToList();
-        result.Channel.Items.Select(i => i.Title).ToList().ShouldBe(expectedTitles);
-        result.Channel.Items.All(i => i.Link.Contains(PublicApiRoutes.DownloadTorrent)).ShouldBeTrue();
+        result.Value.Channel.Items.Select(i => i.Title).ToList().ShouldBe(expectedTitles);
+        result.Value.Channel.Items.All(i => i.Link.Contains(PublicApiRoutes.DownloadTorrent)).ShouldBeTrue();
 
         var movieExists = await dbContext.PlexMovies.AnyAsync(m => m.Id == movie.Id, CancellationToken);
         movieExists.ShouldBeTrue();
@@ -180,9 +180,9 @@ public class SearchMovieCommandUnitTests : BaseUnitTest<SearchMovieCommandHandle
 
         // Assert
         result.ShouldNotBeNull();
-        result.Channel.Items.ShouldNotBeEmpty();
+        result.Value.Channel.Items.ShouldNotBeEmpty();
         result
-            .Channel.Items.All(i => i.Attributes.Any(a => a.Name == "tmdbid" && a.Value == tmdb.ToString()))
+            .Value.Channel.Items.All(i => i.Attributes.Any(a => a.Name == "tmdbid" && a.Value == tmdb.ToString()))
             .ShouldBeTrue();
     }
 
@@ -214,7 +214,7 @@ public class SearchMovieCommandUnitTests : BaseUnitTest<SearchMovieCommandHandle
 
         // Assert
         result.ShouldNotBeNull();
-        result.Channel.Items.ShouldBeEmpty();
+        result.Value.Channel.Items.ShouldBeEmpty();
     }
 
     [Fact]
@@ -256,7 +256,7 @@ public class SearchMovieCommandUnitTests : BaseUnitTest<SearchMovieCommandHandle
 
         // Assert
         result.ShouldNotBeNull();
-        result.Channel.Items.Count.ShouldBe(expectedPartCount);
+        result.Value.Channel.Items.Count.ShouldBe(expectedPartCount);
     }
 
     [Fact]
@@ -287,7 +287,7 @@ public class SearchMovieCommandUnitTests : BaseUnitTest<SearchMovieCommandHandle
 
         // Assert
         result.ShouldNotBeNull();
-        result.Channel.Items.ShouldBeEmpty();
+        result.Value.Channel.Items.ShouldBeEmpty();
     }
 
     [Fact]
@@ -390,28 +390,6 @@ public class SearchMovieCommandUnitTests : BaseUnitTest<SearchMovieCommandHandle
             Offset = 0,
             IMDB_ID = string.Empty,
             TMDB_ID = -1,
-        };
-
-        // Act
-        var result = validator.Validate(cmd);
-
-        // Assert
-        result.IsValid.ShouldBeFalse();
-        result.Errors.ShouldNotBeEmpty();
-    }
-
-    [Fact]
-    public void ShouldFailValidation_WhenImdbIdIsNull()
-    {
-        // Arrange
-        var validator = new SearchMovieCommandValidator();
-        var cmd = new SearchMovieCommand
-        {
-            Query = string.Empty,
-            Limit = 10,
-            Offset = 0,
-            IMDB_ID = null!,
-            TMDB_ID = 0,
         };
 
         // Act

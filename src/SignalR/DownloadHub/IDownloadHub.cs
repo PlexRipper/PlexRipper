@@ -15,6 +15,11 @@ public interface IDownloadHub
     );
 
     /// <summary>
+    /// Sends a download patch update to the front-end.
+    /// </summary>
+    Task DownloadPatch(DownloadPatchMessagePackDTO messagePackDTO, CancellationToken cancellationToken = default);
+
+    /// <summary>
     ///  Sends a download task update to the front-end.
     /// </summary>
     /// <param name="downloadTask"> The <see cref="DownloadTaskDTO"/> to send.</param>

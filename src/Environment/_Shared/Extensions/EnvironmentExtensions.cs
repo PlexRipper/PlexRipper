@@ -138,6 +138,13 @@ public static class EnvironmentExtensions
     }
 
     /// <summary>
+    /// Sets the <c>DEVELOPMENT_ROOT_PATH</c> environment variable to the specified path.
+    /// </summary>
+    /// <param name="path">The development root path to set as <c>DEVELOPMENT_ROOT_PATH_KEY</c>.</param>
+    public static void SetDevelopmentRootPath(string path) =>
+        System.Environment.SetEnvironmentVariable(DEVELOPMENT_ROOT_PATH_KEY, path);
+
+    /// <summary>
     /// Enables or disables integration test mode by setting <c>IntegrationTestMode</c>.
     /// </summary>
     public static void SetIntegrationTestMode(bool state)

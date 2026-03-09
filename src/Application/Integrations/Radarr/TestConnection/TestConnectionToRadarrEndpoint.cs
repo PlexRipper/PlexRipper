@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Net.Http.Headers;
 using FastEndpoints;
 using FluentValidation;
+using Flurl;
 using Reaparr.Application.Contracts;
 
 namespace Reaparr.Application;
@@ -30,8 +31,22 @@ public class TestConnectionToRadarrEndpointRequestValidator : Validator<TestConn
 {
     public TestConnectionToRadarrEndpointRequestValidator()
     {
-        RuleFor(x => x.Url).NotEmpty().WithMessage("URL cannot be empty.");
-        RuleFor(x => x.ApiKey).NotEmpty().WithMessage("API Key cannot be empty.");
+        RuleFor(x => x.Url).NotEmpty().WithMessage("Provided Radarr URL cannot be empty.");
+        RuleFor(x => x.Url).Must(BeValidUrl).WithMessage("Provided Radarr URL must be a valid http/https URL.");
+        RuleFor(x => x.ApiKey).NotEmpty().WithMessage("Provided Radarr API Key cannot be empty.");
+    }
+
+    private static bool BeValidUrl(string url)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+        {
+            return false;
+        }
+
+        var trimmed = url.TrimEnd('/');
+
+        return Uri.TryCreate(trimmed, UriKind.Absolute, out var uriResult)
+            && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
     }
 }
 
@@ -65,23 +80,13 @@ public class TestConnectionToRadarrEndpoint
 
         var baseUrl = req.Url.TrimEnd('/');
 
-        if (
-            !Uri.TryCreate(baseUrl, UriKind.Absolute, out var uriResult)
-            || (uriResult.Scheme != Uri.UriSchemeHttp && uriResult.Scheme != Uri.UriSchemeHttps)
-        )
-        {
-            _log.Here().Warning("Provided Radarr URL is invalid: {Url}", req.Url);
-            await SendTestResult(TestConnectionStatus.UrlIsInvalid, ct);
-            return;
-        }
+        var url = new Url(baseUrl).AppendPathSegments("api", "v3", "system", "status");
 
-        var url = $"{baseUrl}/api/v3/system/status";
-
-        using var httpRequest = new HttpRequestMessage(System.Net.Http.HttpMethod.Get, url);
+        using var httpRequest = new HttpRequestMessage(System.Net.Http.HttpMethod.Get, url.ToString());
         httpRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         httpRequest.Headers.Add("X-Api-Key", req.ApiKey);
 
-        try
+        var result = await Result.Try(async Task () =>
         {
             using var httpResponse = await _client.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead, ct);
             if (httpResponse.IsSuccessStatusCode)
@@ -100,15 +105,18 @@ public class TestConnectionToRadarrEndpoint
             var reason = httpResponse.ReasonPhrase ?? $"HTTP {(int)httpResponse.StatusCode}";
             _log.Here().Warning("Radarr connection test failed: {Reason}", reason);
             await SendTestResult(TestConnectionStatus.ConnectionFailed, ct);
-        }
-        catch (TaskCanceledException e)
+        });
+
+        if (result.IsCancelled)
         {
-            _log.Here().Error(e, "HTTP request to Radarr instance failed.");
+            _log.Here().Error("HTTP request to Radarr instance was cancelled.");
             await SendTestResult(TestConnectionStatus.ConnectionFailed, ct);
+            return;
         }
-        catch (HttpRequestException e)
+
+        if (result.IsFailed)
         {
-            _log.Here().Error(e, "HTTP request to Radarr instance failed.");
+            _log.Here().Error("HTTP request to Radarr instance failed, could be offline");
             await SendTestResult(TestConnectionStatus.ConnectionFailed, ct);
         }
     }

@@ -142,7 +142,6 @@ public static partial class DbContextExtensions
                     var downloadTaskMovieFile = await dbContext
                         .DownloadTaskMovieFile.Include(x => x.PlexServer)
                         .Include(x => x.PlexLibrary)
-                        .Include(x => x.DownloadWorkerTasks)
                         .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
                     return downloadTaskMovieFile?.ToGeneric() ?? null;
 
@@ -182,7 +181,6 @@ public static partial class DbContextExtensions
                     var downloadTaskTvShowEpisodeFile = await dbContext
                         .DownloadTaskTvShowEpisodeFile.Include(x => x.PlexServer)
                         .Include(x => x.PlexLibrary)
-                        .Include(x => x.DownloadWorkerTasks)
                         .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
                     return downloadTaskTvShowEpisodeFile?.ToGeneric() ?? null;
 
@@ -302,7 +300,6 @@ public static partial class DbContextExtensions
                 return await dbContext
                     .DownloadTaskMovieFile.Include(x => x.PlexServer)
                     .Include(x => x.PlexLibrary)
-                    .Include(x => x.DownloadWorkerTasks)
                     .FirstOrDefaultAsync(x => x.Id == key.Id, cancellationToken);
 
             // DownloadTaskType.EpisodeData
@@ -311,7 +308,6 @@ public static partial class DbContextExtensions
                 return await dbContext
                     .DownloadTaskTvShowEpisodeFile.Include(x => x.PlexServer)
                     .Include(x => x.PlexLibrary)
-                    .Include(x => x.DownloadWorkerTasks)
                     .FirstOrDefaultAsync(x => x.Id == key.Id, cancellationToken);
             default:
                 return null;
@@ -352,6 +348,250 @@ public static partial class DbContextExtensions
         return downloadTasks;
     }
 
+    public static async Task<List<DownloadTaskGeneric>> GetDownloadProgressTasksByServerAsync(
+        this IReaparrDbContext dbContext,
+        int plexServerId,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var isFilteredByServer = plexServerId > 0;
+
+        var rows = await dbContext
+            .DownloadTaskMovie.AsNoTracking()
+            .Where(x => !isFilteredByServer || x.PlexServerId == plexServerId)
+            .Select(x => new DownloadProgressRow
+            {
+                Id = x.Id,
+                ParentId = null,
+                PlexApiRatingKey = x.PlexApiRatingKey,
+                Title = x.Title,
+                FullTitle = x.FullTitle,
+                MediaType = PlexMediaType.Movie,
+                DownloadTaskType = DownloadTaskType.Movie,
+                DownloadStatus = x.DownloadStatus,
+                CreatedAt = x.CreatedAt,
+                PlexServerId = x.PlexServerId,
+                PlexLibraryId = x.PlexLibraryId,
+                DataReceived = 0,
+                DataTotal = 0,
+                DownloadSpeed = 0,
+                FileTransferSpeed = 0,
+                FileDataTransferred = 0,
+            })
+            .Concat(
+                dbContext
+                    .DownloadTaskMovieFile.AsNoTracking()
+                    .Where(x => !isFilteredByServer || x.PlexServerId == plexServerId)
+                    .Select(x => new DownloadProgressRow
+                    {
+                        Id = x.Id,
+                        ParentId = x.ParentId,
+                        PlexApiRatingKey = x.PlexApiRatingKey,
+                        Title = x.Title,
+                        FullTitle = x.FullTitle,
+                        MediaType = PlexMediaType.Movie,
+                        DownloadTaskType = DownloadTaskType.MovieData,
+                        DownloadStatus = x.DownloadStatus,
+                        CreatedAt = x.CreatedAt,
+                        PlexServerId = x.PlexServerId,
+                        PlexLibraryId = x.PlexLibraryId,
+                        DataReceived = x.DataReceived,
+                        DataTotal = x.DataTotal,
+                        DownloadSpeed = x.DownloadSpeed,
+                        FileTransferSpeed = x.FileTransferSpeed,
+                        FileDataTransferred = x.FileDataTransferred,
+                    })
+            )
+            .Concat(
+                dbContext
+                    .DownloadTaskTvShow.AsNoTracking()
+                    .Where(x => !isFilteredByServer || x.PlexServerId == plexServerId)
+                    .Select(x => new DownloadProgressRow
+                    {
+                        Id = x.Id,
+                        ParentId = null,
+                        PlexApiRatingKey = x.PlexApiRatingKey,
+                        Title = x.Title,
+                        FullTitle = x.FullTitle,
+                        MediaType = PlexMediaType.TvShow,
+                        DownloadTaskType = DownloadTaskType.TvShow,
+                        DownloadStatus = x.DownloadStatus,
+                        CreatedAt = x.CreatedAt,
+                        PlexServerId = x.PlexServerId,
+                        PlexLibraryId = x.PlexLibraryId,
+                        DataReceived = 0,
+                        DataTotal = 0,
+                        DownloadSpeed = 0,
+                        FileTransferSpeed = 0,
+                        FileDataTransferred = 0,
+                    })
+            )
+            .Concat(
+                dbContext
+                    .DownloadTaskTvShowSeason.AsNoTracking()
+                    .Where(x => !isFilteredByServer || x.PlexServerId == plexServerId)
+                    .Select(x => new DownloadProgressRow
+                    {
+                        Id = x.Id,
+                        ParentId = x.ParentId,
+                        PlexApiRatingKey = x.PlexApiRatingKey,
+                        Title = x.Title,
+                        FullTitle = x.FullTitle,
+                        MediaType = PlexMediaType.Season,
+                        DownloadTaskType = DownloadTaskType.Season,
+                        DownloadStatus = x.DownloadStatus,
+                        CreatedAt = x.CreatedAt,
+                        PlexServerId = x.PlexServerId,
+                        PlexLibraryId = x.PlexLibraryId,
+                        DataReceived = 0,
+                        DataTotal = 0,
+                        DownloadSpeed = 0,
+                        FileTransferSpeed = 0,
+                        FileDataTransferred = 0,
+                    })
+            )
+            .Concat(
+                dbContext
+                    .DownloadTaskTvShowEpisode.AsNoTracking()
+                    .Where(x => !isFilteredByServer || x.PlexServerId == plexServerId)
+                    .Select(x => new DownloadProgressRow
+                    {
+                        Id = x.Id,
+                        ParentId = x.ParentId,
+                        PlexApiRatingKey = x.PlexApiRatingKey,
+                        Title = x.Title,
+                        FullTitle = x.FullTitle,
+                        MediaType = PlexMediaType.Episode,
+                        DownloadTaskType = DownloadTaskType.Episode,
+                        DownloadStatus = x.DownloadStatus,
+                        CreatedAt = x.CreatedAt,
+                        PlexServerId = x.PlexServerId,
+                        PlexLibraryId = x.PlexLibraryId,
+                        DataReceived = 0,
+                        DataTotal = 0,
+                        DownloadSpeed = 0,
+                        FileTransferSpeed = 0,
+                        FileDataTransferred = 0,
+                    })
+            )
+            .Concat(
+                dbContext
+                    .DownloadTaskTvShowEpisodeFile.AsNoTracking()
+                    .Where(x => !isFilteredByServer || x.PlexServerId == plexServerId)
+                    .Select(x => new DownloadProgressRow
+                    {
+                        Id = x.Id,
+                        ParentId = x.ParentId,
+                        PlexApiRatingKey = x.PlexApiRatingKey,
+                        Title = x.Title,
+                        FullTitle = x.FullTitle,
+                        MediaType = PlexMediaType.Episode,
+                        DownloadTaskType = DownloadTaskType.EpisodeData,
+                        DownloadStatus = x.DownloadStatus,
+                        CreatedAt = x.CreatedAt,
+                        PlexServerId = x.PlexServerId,
+                        PlexLibraryId = x.PlexLibraryId,
+                        DataReceived = x.DataReceived,
+                        DataTotal = x.DataTotal,
+                        DownloadSpeed = x.DownloadSpeed,
+                        FileTransferSpeed = x.FileTransferSpeed,
+                        FileDataTransferred = x.FileDataTransferred,
+                    })
+            )
+            .OrderBy(x => x.CreatedAt)
+            .ToListAsync(cancellationToken);
+
+        if (rows.Count == 0)
+            return [];
+
+        var byId = rows.ToDictionary(x => x.Id, CreateNode);
+        foreach (var row in rows.Where(x => x.ParentId.HasValue))
+        {
+            if (!byId.TryGetValue(row.ParentId!.Value, out var parent))
+                continue;
+
+            parent.Children.Add(byId[row.Id]);
+        }
+
+        var roots = rows.Where(x => !x.ParentId.HasValue).Select(x => byId[x.Id]).OrderBy(x => x.CreatedAt).ToList();
+
+        foreach (var root in roots)
+            root.Calculate();
+
+        return roots;
+
+        static DownloadTaskGeneric CreateNode(DownloadProgressRow row) =>
+            new()
+            {
+                Id = row.Id,
+                RatingKey = row.PlexApiRatingKey,
+                Title = row.Title,
+                FullTitle = row.FullTitle,
+                MediaType = row.MediaType,
+                DownloadTaskType = row.DownloadTaskType,
+                DownloadStatus = row.DownloadStatus,
+                CreatedAt = row.CreatedAt,
+                FileName = string.Empty,
+                IsDownloadable =
+                    row.ParentId.HasValue
+                    && (
+                        row.DownloadTaskType == DownloadTaskType.MovieData
+                        || row.DownloadTaskType == DownloadTaskType.EpisodeData
+                    ),
+                DownloadDirectory = string.Empty,
+                Quality = VideoQuality.None,
+                DestinationDirectory = string.Empty,
+                FileLocationUrl = string.Empty,
+                DataReceived = row.DataReceived,
+                DataTotal = row.DataTotal,
+                DownloadSpeed = row.DownloadSpeed,
+                FileTransferSpeed = row.FileTransferSpeed,
+                FileDataTransferred = row.FileDataTransferred,
+                CurrentFileTransferBytesOffset = 0,
+                Children = [],
+                ParentId = row.ParentId ?? Guid.Empty,
+                PlexServer = null,
+                PlexServerId = row.PlexServerId,
+                PlexLibrary = null,
+                PlexLibraryId = row.PlexLibraryId,
+            };
+    }
+
+    private sealed class DownloadProgressRow
+    {
+        public required Guid Id { get; init; }
+
+        public required Guid? ParentId { get; init; }
+
+        public required int PlexApiRatingKey { get; init; }
+
+        public required string Title { get; init; }
+
+        public required string FullTitle { get; init; }
+
+        public required PlexMediaType MediaType { get; init; }
+
+        public required DownloadTaskType DownloadTaskType { get; init; }
+
+        public required DownloadStatus DownloadStatus { get; init; }
+
+        public required DateTime CreatedAt { get; init; }
+
+        public required int PlexServerId { get; init; }
+
+        public required int PlexLibraryId { get; init; }
+
+        public required long DataReceived { get; init; }
+
+        public required long DataTotal { get; init; }
+
+        public required long DownloadSpeed { get; init; }
+
+        public required long FileTransferSpeed { get; init; }
+
+        public required long FileDataTransferred { get; init; }
+    }
+
     public static Task<DownloadTaskTvShow?> GetDownloadTaskTvShowByRatingKeyQuery(
         this IReaparrDbContext dbContext,
         int plexServerId,
@@ -372,30 +612,35 @@ public static partial class DbContextExtensions
         this IReaparrDbContext dbContext,
         DownloadTaskKey key,
         IDownloadTaskProgress progress,
+        DirectDownloadSnapshot? snapshot = null,
         CancellationToken cancellationToken = default
     )
     {
         switch (key.Type)
         {
             case DownloadTaskType.MovieData:
+            case DownloadTaskType.MoviePart:
                 await dbContext
                     .DownloadTaskMovieFile.Where(x => x.Id == key.Id)
                     .ExecuteUpdateAsync(
                         p =>
                             p.SetProperty(x => x.DownloadSpeed, progress.DownloadSpeed)
                                 .SetProperty(x => x.DataReceived, progress.DataReceived)
-                                .SetProperty(x => x.DataTotal, progress.DataTotal),
+                                .SetProperty(x => x.DataTotal, progress.DataTotal)
+                                .SetProperty(x => x.DirectDownloadSnapshot, snapshot),
                         cancellationToken
                     );
                 break;
             case DownloadTaskType.EpisodeData:
+            case DownloadTaskType.EpisodePart:
                 await dbContext
                     .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == key.Id)
                     .ExecuteUpdateAsync(
                         p =>
                             p.SetProperty(x => x.DownloadSpeed, progress.DownloadSpeed)
                                 .SetProperty(x => x.DataReceived, progress.DataReceived)
-                                .SetProperty(x => x.DataTotal, progress.DataTotal),
+                                .SetProperty(x => x.DataTotal, progress.DataTotal)
+                                .SetProperty(x => x.DirectDownloadSnapshot, snapshot),
                         cancellationToken
                     );
                 break;
@@ -426,6 +671,7 @@ public static partial class DbContextExtensions
         switch (key.Type)
         {
             case DownloadTaskType.MovieData:
+            case DownloadTaskType.MoviePart:
                 await dbContext
                     .DownloadTaskMovieFile.Where(x => x.Id == key.Id)
                     .ExecuteUpdateAsync(
@@ -435,11 +681,13 @@ public static partial class DbContextExtensions
                                 .SetProperty(x => x.FileTransferSpeed, 0)
                                 .SetProperty(x => x.FileDataTransferred, 0)
                                 .SetProperty(x => x.CurrentFileTransferBytesOffset, 0)
+                                .SetProperty(x => x.DirectDownloadSnapshot, (DirectDownloadSnapshot?)null)
                                 .SetProperty(x => x.DownloadStatus, downloadStatus),
                         cancellationToken
                     );
                 break;
             case DownloadTaskType.EpisodeData:
+            case DownloadTaskType.EpisodePart:
                 await dbContext
                     .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == key.Id)
                     .ExecuteUpdateAsync(
@@ -449,6 +697,7 @@ public static partial class DbContextExtensions
                                 .SetProperty(x => x.FileTransferSpeed, 0)
                                 .SetProperty(x => x.FileDataTransferred, 0)
                                 .SetProperty(x => x.CurrentFileTransferBytesOffset, 0)
+                                .SetProperty(x => x.DirectDownloadSnapshot, (DirectDownloadSnapshot?)null)
                                 .SetProperty(x => x.DownloadStatus, downloadStatus),
                         cancellationToken
                     );
@@ -465,13 +714,34 @@ public static partial class DbContextExtensions
                         nameof(ResetDownloadTaskProgress)
                     );
             case DownloadTaskType.None:
-            case DownloadTaskType.MoviePart:
-            case DownloadTaskType.EpisodePart:
             default:
                 return Result.Fail($"Unsupported DownloadTaskType {key.Type}").LogError();
         }
 
         return Result.Ok();
+    }
+
+    public static async Task ClearDownloadSpeed(
+        this IReaparrDbContext dbContext,
+        DownloadTaskKey key,
+        CancellationToken cancellationToken = default
+    )
+    {
+        switch (key.Type)
+        {
+            case DownloadTaskType.MovieData:
+            case DownloadTaskType.MoviePart:
+                await dbContext
+                    .DownloadTaskMovieFile.Where(x => x.Id == key.Id)
+                    .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadSpeed, 0), cancellationToken);
+                break;
+            case DownloadTaskType.EpisodeData:
+            case DownloadTaskType.EpisodePart:
+                await dbContext
+                    .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == key.Id)
+                    .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadSpeed, 0), cancellationToken);
+                break;
+        }
     }
 
     public static async Task UpdateDownloadFileTransferProgress(
@@ -528,35 +798,6 @@ public static partial class DbContextExtensions
         }
     }
 
-    public static async Task UpdateDownloadWorkerProgress(
-        this IReaparrDbContext dbContext,
-        IList<DownloadWorkerTaskProgress> updates,
-        CancellationToken cancellationToken = default
-    )
-    {
-        var updatesDict = updates.ToDictionary(x => x.Id);
-
-        // Fetch relevant tasks in one query and apply updates
-        var downloadWorkerTasks = await dbContext
-            .DownloadWorkerTasks.AsTracking()
-            .Where(x => updatesDict.Keys.Contains(x.Id))
-            .ToListAsync(cancellationToken);
-
-        foreach (var downloadWorkerTask in downloadWorkerTasks)
-        {
-            // Apply updates directly using the dictionary
-            if (updatesDict.TryGetValue(downloadWorkerTask.Id, out var update))
-            {
-                downloadWorkerTask.DownloadStatus = update.Status;
-                downloadWorkerTask.ElapsedTime = update.ElapsedTime;
-                downloadWorkerTask.BytesReceived = update.DataReceived;
-                downloadWorkerTask.DownloadSpeed = update.DownloadSpeed;
-            }
-        }
-
-        await dbContext.SaveChangesAsync(cancellationToken);
-    }
-
     public static async Task<List<DownloadTaskKey>> GetDownloadableChildTaskKeys(
         this IReaparrDbContext dbContext,
         DownloadTaskKey key,
@@ -577,7 +818,7 @@ public static partial class DbContextExtensions
             if (!tasks.Any())
                 return;
 
-            foreach (var task in tasks)
+            foreach (var task in tasks.OrderByNatural(x => x.FullTitle))
             {
                 if (task.IsDownloadable)
                     keys.Add(task.ToKey());
@@ -599,5 +840,342 @@ public static partial class DbContextExtensions
         var results = await Task.WhenAll(keys.Select(x => dbContext.GetDownloadTaskAsync(x, cancellationToken)));
 
         return results.Where(x => x != null).ToList()!;
+    }
+
+    public static async Task<int> DeleteOrphanedParentTasksAsync(this IReaparrDbContext dbContext, CancellationToken ct)
+    {
+        var totalRowsDeleted = 0;
+
+        totalRowsDeleted += await dbContext
+            .DownloadTaskMovie.Where(x => !dbContext.DownloadTaskMovieFile.Any(y => y.ParentId == x.Id))
+            .ExecuteDeleteAsync(ct);
+
+        totalRowsDeleted += await dbContext
+            .DownloadTaskTvShowEpisode.Where(x => !dbContext.DownloadTaskTvShowEpisodeFile.Any(y => y.ParentId == x.Id))
+            .ExecuteDeleteAsync(ct);
+
+        totalRowsDeleted += await dbContext
+            .DownloadTaskTvShowSeason.Where(x => !dbContext.DownloadTaskTvShowEpisode.Any(y => y.ParentId == x.Id))
+            .ExecuteDeleteAsync(ct);
+
+        totalRowsDeleted += await dbContext
+            .DownloadTaskTvShow.Where(x => !dbContext.DownloadTaskTvShowSeason.Any(y => y.ParentId == x.Id))
+            .ExecuteDeleteAsync(ct);
+
+        return totalRowsDeleted;
+    }
+
+    public static async Task<int> DeleteOrphanedParentTasksByServerIdAsync(
+        this IReaparrDbContext dbContext,
+        int plexServerId,
+        CancellationToken ct
+    )
+    {
+        var totalRowsDeleted = 0;
+
+        totalRowsDeleted += await dbContext
+            .DownloadTaskMovie.Where(x =>
+                x.PlexServerId == plexServerId && !dbContext.DownloadTaskMovieFile.Any(y => y.ParentId == x.Id)
+            )
+            .ExecuteDeleteAsync(ct);
+
+        totalRowsDeleted += await dbContext
+            .DownloadTaskTvShowEpisode.Where(x =>
+                x.PlexServerId == plexServerId && !dbContext.DownloadTaskTvShowEpisodeFile.Any(y => y.ParentId == x.Id)
+            )
+            .ExecuteDeleteAsync(ct);
+
+        totalRowsDeleted += await dbContext
+            .DownloadTaskTvShowSeason.Where(x =>
+                x.PlexServerId == plexServerId && !dbContext.DownloadTaskTvShowEpisode.Any(y => y.ParentId == x.Id)
+            )
+            .ExecuteDeleteAsync(ct);
+
+        totalRowsDeleted += await dbContext
+            .DownloadTaskTvShow.Where(x =>
+                x.PlexServerId == plexServerId && !dbContext.DownloadTaskTvShowSeason.Any(y => y.ParentId == x.Id)
+            )
+            .ExecuteDeleteAsync(ct);
+
+        return totalRowsDeleted;
+    }
+
+    public static async Task<int> DeleteOrphanedParentTasksByRootIdsAsync(
+        this IReaparrDbContext dbContext,
+        IReadOnlyCollection<Guid> rootIds,
+        CancellationToken ct
+    )
+    {
+        if (rootIds.Count == 0)
+            return 0;
+
+        var totalRowsDeleted = 0;
+
+        totalRowsDeleted += await dbContext
+            .DownloadTaskMovie.Where(x =>
+                rootIds.Contains(x.Id) && !dbContext.DownloadTaskMovieFile.Any(y => y.ParentId == x.Id)
+            )
+            .ExecuteDeleteAsync(ct);
+
+        totalRowsDeleted += await dbContext
+            .DownloadTaskTvShowEpisode.Where(x =>
+                rootIds.Contains(x.Parent!.ParentId)
+                && !dbContext.DownloadTaskTvShowEpisodeFile.Any(y => y.ParentId == x.Id)
+            )
+            .ExecuteDeleteAsync(ct);
+
+        totalRowsDeleted += await dbContext
+            .DownloadTaskTvShowSeason.Where(x =>
+                rootIds.Contains(x.ParentId) && !dbContext.DownloadTaskTvShowEpisode.Any(y => y.ParentId == x.Id)
+            )
+            .ExecuteDeleteAsync(ct);
+
+        totalRowsDeleted += await dbContext
+            .DownloadTaskTvShow.Where(x =>
+                rootIds.Contains(x.Id) && !dbContext.DownloadTaskTvShowSeason.Any(y => y.ParentId == x.Id)
+            )
+            .ExecuteDeleteAsync(ct);
+
+        return totalRowsDeleted;
+    }
+
+    public static async Task<HashSet<Guid>> GetAffectedRootDownloadTaskIdsAsync(
+        this IReaparrDbContext dbContext,
+        IReadOnlyCollection<Guid> downloadTaskIds,
+        CancellationToken ct
+    )
+    {
+        if (downloadTaskIds.Count == 0)
+            return [];
+
+        var movieRootIdsTask = dbContext
+            .DownloadTaskMovie.Where(x => downloadTaskIds.Contains(x.Id))
+            .Select(x => x.Id)
+            .ToListAsync(ct);
+
+        var movieFileRootIdsTask = dbContext
+            .DownloadTaskMovieFile.Where(x => downloadTaskIds.Contains(x.Id))
+            .Select(x => x.ParentId)
+            .ToListAsync(ct);
+
+        var tvShowRootIdsTask = dbContext
+            .DownloadTaskTvShow.Where(x => downloadTaskIds.Contains(x.Id))
+            .Select(x => x.Id)
+            .ToListAsync(ct);
+
+        var seasonRootIdsTask = dbContext
+            .DownloadTaskTvShowSeason.Where(x => downloadTaskIds.Contains(x.Id))
+            .Select(x => x.ParentId)
+            .ToListAsync(ct);
+
+        var episodeSeasonIdsTask = dbContext
+            .DownloadTaskTvShowEpisode.Where(x => downloadTaskIds.Contains(x.Id))
+            .Select(x => x.ParentId)
+            .ToListAsync(ct);
+
+        var episodeFileEpisodeIdsTask = dbContext
+            .DownloadTaskTvShowEpisodeFile.Where(x => downloadTaskIds.Contains(x.Id))
+            .Select(x => x.ParentId)
+            .ToListAsync(ct);
+
+        await Task.WhenAll(
+            movieRootIdsTask,
+            movieFileRootIdsTask,
+            tvShowRootIdsTask,
+            seasonRootIdsTask,
+            episodeSeasonIdsTask,
+            episodeFileEpisodeIdsTask
+        );
+
+        var rootIds = new HashSet<Guid>(
+            movieRootIdsTask
+                .Result.Concat(movieFileRootIdsTask.Result)
+                .Concat(tvShowRootIdsTask.Result)
+                .Concat(seasonRootIdsTask.Result)
+        );
+
+        var seasonIds = episodeSeasonIdsTask.Result;
+        if (episodeFileEpisodeIdsTask.Result.Count > 0)
+        {
+            var episodeDerivedSeasonIds = await dbContext
+                .DownloadTaskTvShowEpisode.Where(x => episodeFileEpisodeIdsTask.Result.Contains(x.Id))
+                .Select(x => x.ParentId)
+                .ToListAsync(ct);
+            seasonIds = seasonIds.Concat(episodeDerivedSeasonIds).Distinct().ToList();
+        }
+
+        if (seasonIds.Count > 0)
+        {
+            var seasonRootIds = await dbContext
+                .DownloadTaskTvShowSeason.Where(x => seasonIds.Contains(x.Id))
+                .Select(x => x.ParentId)
+                .ToListAsync(ct);
+            rootIds.UnionWith(seasonRootIds);
+        }
+
+        return rootIds;
+    }
+
+    public static async Task<DownloadTaskKey?> GetRootDownloadTaskKeyAsync(
+        this IReaparrDbContext dbContext,
+        DownloadTaskKey key,
+        CancellationToken cancellationToken = default
+    )
+    {
+        switch (key.Type)
+        {
+            case DownloadTaskType.Movie:
+            case DownloadTaskType.TvShow:
+                return key;
+            case DownloadTaskType.MovieData:
+            case DownloadTaskType.MoviePart:
+                return await dbContext
+                    .DownloadTaskMovieFile.Where(x => x.Id == key.Id)
+                    .Select(x => new DownloadTaskKey
+                    {
+                        Id = x.ParentId,
+                        PlexServerId = x.PlexServerId,
+                        PlexLibraryId = x.PlexLibraryId,
+                        Type = DownloadTaskType.Movie,
+                    })
+                    .FirstOrDefaultAsync(cancellationToken);
+            case DownloadTaskType.Season:
+                return await dbContext
+                    .DownloadTaskTvShowSeason.Where(x => x.Id == key.Id)
+                    .Select(x => new DownloadTaskKey
+                    {
+                        Id = x.ParentId,
+                        PlexServerId = x.PlexServerId,
+                        PlexLibraryId = x.PlexLibraryId,
+                        Type = DownloadTaskType.TvShow,
+                    })
+                    .FirstOrDefaultAsync(cancellationToken);
+            case DownloadTaskType.Episode:
+            {
+                var season = await dbContext
+                    .DownloadTaskTvShowEpisode.Where(x => x.Id == key.Id)
+                    .Select(x => new
+                    {
+                        x.ParentId,
+                        x.PlexServerId,
+                        x.PlexLibraryId,
+                    })
+                    .FirstOrDefaultAsync(cancellationToken);
+
+                if (season is null)
+                    return null;
+
+                return await dbContext
+                    .DownloadTaskTvShowSeason.Where(x => x.Id == season.ParentId)
+                    .Select(x => new DownloadTaskKey
+                    {
+                        Id = x.ParentId,
+                        PlexServerId = season.PlexServerId,
+                        PlexLibraryId = season.PlexLibraryId,
+                        Type = DownloadTaskType.TvShow,
+                    })
+                    .FirstOrDefaultAsync(cancellationToken);
+            }
+            case DownloadTaskType.EpisodeData:
+            case DownloadTaskType.EpisodePart:
+            {
+                var episode = await dbContext
+                    .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == key.Id)
+                    .Select(x => new
+                    {
+                        x.ParentId,
+                        x.PlexServerId,
+                        x.PlexLibraryId,
+                    })
+                    .FirstOrDefaultAsync(cancellationToken);
+
+                if (episode is null)
+                    return null;
+
+                var season = await dbContext
+                    .DownloadTaskTvShowEpisode.Where(x => x.Id == episode.ParentId)
+                    .Select(x => x.ParentId)
+                    .FirstOrDefaultAsync(cancellationToken);
+
+                if (season == Guid.Empty)
+                    return null;
+
+                return await dbContext
+                    .DownloadTaskTvShowSeason.Where(x => x.Id == season)
+                    .Select(x => new DownloadTaskKey
+                    {
+                        Id = x.ParentId,
+                        PlexServerId = episode.PlexServerId,
+                        PlexLibraryId = episode.PlexLibraryId,
+                        Type = DownloadTaskType.TvShow,
+                    })
+                    .FirstOrDefaultAsync(cancellationToken);
+            }
+            default:
+                return null;
+        }
+    }
+
+    public static async Task<(Guid ParentId, DownloadStatus Status)?> GetDownloadPatchMetaAsync(
+        this IReaparrDbContext dbContext,
+        DownloadTaskKey key,
+        CancellationToken cancellationToken = default
+    )
+    {
+        switch (key.Type)
+        {
+            case DownloadTaskType.Movie:
+            {
+                var data = await dbContext
+                    .DownloadTaskMovie.Where(x => x.Id == key.Id)
+                    .Select(x => new { x.DownloadStatus })
+                    .FirstOrDefaultAsync(cancellationToken);
+                return data is null ? null : (Guid.Empty, data.DownloadStatus);
+            }
+            case DownloadTaskType.MovieData:
+            case DownloadTaskType.MoviePart:
+            {
+                var data = await dbContext
+                    .DownloadTaskMovieFile.Where(x => x.Id == key.Id)
+                    .Select(x => new { x.ParentId, x.DownloadStatus })
+                    .FirstOrDefaultAsync(cancellationToken);
+                return data is null ? null : (data.ParentId, data.DownloadStatus);
+            }
+            case DownloadTaskType.TvShow:
+            {
+                var data = await dbContext
+                    .DownloadTaskTvShow.Where(x => x.Id == key.Id)
+                    .Select(x => new { x.DownloadStatus })
+                    .FirstOrDefaultAsync(cancellationToken);
+                return data is null ? null : (Guid.Empty, data.DownloadStatus);
+            }
+            case DownloadTaskType.Season:
+            {
+                var data = await dbContext
+                    .DownloadTaskTvShowSeason.Where(x => x.Id == key.Id)
+                    .Select(x => new { x.ParentId, x.DownloadStatus })
+                    .FirstOrDefaultAsync(cancellationToken);
+                return data is null ? null : (data.ParentId, data.DownloadStatus);
+            }
+            case DownloadTaskType.Episode:
+            {
+                var data = await dbContext
+                    .DownloadTaskTvShowEpisode.Where(x => x.Id == key.Id)
+                    .Select(x => new { x.ParentId, x.DownloadStatus })
+                    .FirstOrDefaultAsync(cancellationToken);
+                return data is null ? null : (data.ParentId, data.DownloadStatus);
+            }
+            case DownloadTaskType.EpisodeData:
+            case DownloadTaskType.EpisodePart:
+            {
+                var data = await dbContext
+                    .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == key.Id)
+                    .Select(x => new { x.ParentId, x.DownloadStatus })
+                    .FirstOrDefaultAsync(cancellationToken);
+                return data is null ? null : (data.ParentId, data.DownloadStatus);
+            }
+            default:
+                return null;
+        }
     }
 }

@@ -24,16 +24,19 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
 {
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
+    private readonly IDownloadTaskUpdateDispatcher _downloadTaskUpdateDispatcher;
     private readonly IEventPublisher _eventPublisher;
 
     public RestartDownloadTaskCommandHandler(
         IReaparrDbContext dbContext,
         ICommandExecutor commandExecutor,
+        IDownloadTaskUpdateDispatcher downloadTaskUpdateDispatcher,
         IEventPublisher eventPublisher
     )
     {
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;
+        _downloadTaskUpdateDispatcher = downloadTaskUpdateDispatcher;
         _eventPublisher = eventPublisher;
     }
 
@@ -44,6 +47,21 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
             return ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), command.DownloadTaskGuid).LogWarning();
 
         var childKeys = await _dbContext.GetDownloadableChildTaskKeys(downloadTaskKey, cancellationToken);
+
+        var parentRestartingResult = await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
+            downloadTaskKey,
+            DownloadStatus.Restarting,
+            cancellationToken
+        );
+        if (parentRestartingResult.IsFailed)
+            return parentRestartingResult.LogError();
+
+        await _dbContext.CreateDownloadClientLog(
+            downloadTaskKey,
+            NotificationLevel.Information,
+            DownloadStatus.Restarting,
+            $"Restart requested for download task group {downloadTaskKey.Id}. {childKeys.Count} child task(s) will be processed."
+        );
 
         foreach (var childKey in childKeys)
         {
@@ -59,14 +77,45 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
             if (stopResult.IsFailed)
                 return stopResult.LogError();
 
-            await _dbContext.SetDownloadStatus(childKey, DownloadStatus.Queued);
+            var restartingResult = await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
+                childKey,
+                DownloadStatus.Restarting,
+                cancellationToken
+            );
+            if (restartingResult.IsFailed)
+                return restartingResult.LogError();
 
-            await _commandExecutor.Send(new DownloadTaskUpdatedCommand(childKey), cancellationToken);
+            await _dbContext.CreateDownloadClientLog(
+                childKey,
+                NotificationLevel.Information,
+                DownloadStatus.Restarting,
+                $"Restart workflow: stop completed for child task {childKey.Id} ({downloadTask.FileName}), preparing to queue."
+            );
+
+            await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
+                childKey,
+                DownloadStatus.Queued,
+                cancellationToken
+            );
+
+            await _dbContext.CreateDownloadClientLog(
+                childKey,
+                NotificationLevel.Information,
+                DownloadStatus.Queued,
+                $"Restart workflow: child task {childKey.Id} ({downloadTask.FileName}) queued again."
+            );
         }
 
         await _eventPublisher.PublishAsync(
             new CheckDownloadQueueEvent(downloadTaskKey.PlexServerId),
             cancellationToken
+        );
+
+        await _dbContext.CreateDownloadClientLog(
+            downloadTaskKey,
+            NotificationLevel.Information,
+            DownloadStatus.Queued,
+            $"Restart workflow complete for group {downloadTaskKey.Id}; queue check published."
         );
 
         return Result.Ok();

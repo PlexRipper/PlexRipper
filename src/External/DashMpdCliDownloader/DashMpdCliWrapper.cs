@@ -18,10 +18,8 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
     private readonly ILogger _log;
     private readonly IFile _file;
     private readonly IDirectory _directory;
-    private readonly CancellationTokenSource _forcefulCts = new();
     private readonly CancellationTokenSource _gracefulCts = new();
-
-    private readonly TaskCompletionSource<int> _processExitSource = new();
+    private readonly CancellationTokenSource _forcefulCts = new();
     private readonly string _binaryPath;
 
     private readonly Subject<string> _stdoutSubject = new();
@@ -48,11 +46,6 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
     public int? ExitCode => _exitCode;
 
     /// <summary>
-    /// Gets the task that completes when the process exits.
-    /// </summary>
-    public Task<int> ProcessExitTask => _processExitSource.Task;
-
-    /// <summary>
     /// Observable stream of standard output lines (including ANSI codes and carriage returns).
     /// </summary>
     public IObservable<string> StandardOutput => _stdoutSubject.AsObservable();
@@ -63,18 +56,22 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
     public IObservable<DashDownloadProgress> Progress => _progressSubject.AsObservable();
 
     /// <inheritdoc/>
-    public Task<Result> StartAsync(DashMpdCliOptions options)
+    public async Task<Result> StartAsync(DashMpdCliOptions options)
     {
         if (!_file.Exists(_binaryPath))
-            return Task.FromResult(
-                _log.Here().ErrorResult($"dash-mpd-cli binary not found at: {_binaryPath}. Ensure the binary is included in the build output.")
-            );
+            return _log.Here()
+                .ErrorResult(
+                    $"dash-mpd-cli binary not found at: {_binaryPath}. Ensure the binary is included in the build output."
+                );
 
         if (string.IsNullOrWhiteSpace(options.MpdUrl))
-            return Task.FromResult(_log.Here().ErrorResult("MPD URL cannot be null or empty"));
+            return _log.Here().ErrorResult("MPD URL cannot be null or empty");
 
         if (string.IsNullOrWhiteSpace(options.Output))
-            return Task.FromResult(_log.Here().ErrorResult("Output path cannot be null or empty"));
+            return _log.Here().ErrorResult("Output path cannot be null or empty");
+
+        if (string.IsNullOrWhiteSpace(options.WorkingDirectory))
+            return _log.Here().ErrorResult("Working directory cannot be null or empty");
 
         var arguments = options.ToBuildArguments();
 
@@ -94,26 +91,18 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
             .WithWorkingDirectory(options.WorkingDirectory)
             .WithEnvironmentVariables(envVars);
 
-        // Run the event loop in a background task so StartAsync returns immediately
-        Task.Run(() => RunEventLoopAsync(command));
-
-        return Task.FromResult(Result.Ok());
+        return await RunEventLoopAsync(command, _gracefulCts.Token);
     }
 
-    private async Task RunEventLoopAsync(Command command)
+    private async Task<Result> RunEventLoopAsync(Command command, CancellationToken cancellationToken)
     {
-        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(_forcefulCts.Token, _gracefulCts.Token);
-
-        var processStarted = false;
-
-        try
+        var listenResult = await Result.Try((Func<Task>)(async () =>
         {
-            await foreach (var cmdEvent in command.ListenAsync(linkedCts.Token))
+            await foreach (var cmdEvent in command.ListenAsync(cancellationToken))
             {
                 switch (cmdEvent)
                 {
                     case StartedCommandEvent started:
-                        processStarted = true;
                         _log.Here().Information("dash-mpd-cli process started with PID {ProcessId}", started.ProcessId);
                         break;
 
@@ -133,39 +122,30 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
                         break;
                 }
             }
+        }));
 
-            _processExitSource.TrySetResult(_exitCode ?? -1);
-        }
-        catch (OperationCanceledException)
+        var cleanUpResult = Result.Try(() =>
         {
-            _log.Here().Debug("dash-mpd-cli event loop cancelled");
-            _processExitSource.TrySetResult(_exitCode ?? -1);
-        }
-        catch (Exception ex)
-        {
-            if (!processStarted)
+            if (string.IsNullOrEmpty(_workingDirectory))
+                return;
+
+            try
+            {
+                foreach (var file in _directory.GetFiles(_workingDirectory, "dashmpd-*"))
+                {
+                    _file.Delete(file);
+                    _log.Here().Debug("Deleted dash-mpd-cli temp file: {File}", file);
+                }
+            }
+            catch (Exception ex)
             {
                 _log.Here()
-                    .Error(
-                        ex,
-                        "dash-mpd-cli failed to start. Binary: {BinaryPath}. "
-                            + "Possible causes: missing glibc (binary is glibc-linked, not musl), "
-                            + "working directory does not exist, or insufficient execute permissions.",
-                        _binaryPath
-                    );
+                    .Warning(ex, "Failed to clean up dash-mpd-cli temp files in {WorkingDirectory}", _workingDirectory);
+                throw;
             }
-            else
-            {
-                _log.Here().Error(ex, "dash-mpd-cli event loop faulted after process started");
-            }
+        });
 
-            _processExitSource.TrySetException(ex);
-        }
-        finally
-        {
-            CleanupTempFiles();
-            CompleteObservables();
-        }
+        return Result.Merge(listenResult, cleanUpResult);
     }
 
     private void HandleStdoutLine(string line)
@@ -189,52 +169,16 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
         }
     }
 
-    private void CleanupTempFiles()
-    {
-        if (string.IsNullOrEmpty(_workingDirectory))
-            return;
-
-        try
-        {
-            foreach (var file in _directory.GetFiles(_workingDirectory, "dashmpd-*"))
-            {
-                _file.Delete(file);
-                _log.Here().Debug("Deleted dash-mpd-cli temp file: {File}", file);
-            }
-        }
-        catch (Exception ex)
-        {
-            _log.Here().Warning(ex, "Failed to clean up dash-mpd-cli temp files in {WorkingDirectory}", _workingDirectory);
-        }
-    }
-
     /// <summary>
-    /// Completes all observable subjects.
-    /// </summary>
-    private void CompleteObservables()
-    {
-        try
-        {
-            _stdoutSubject.OnCompleted();
-            _progressSubject.OnCompleted();
-        }
-        catch (Exception ex)
-        {
-            _log.Here().Warning(ex, "Error completing observable subjects");
-        }
-    }
-
-    /// <summary>
-    /// Stops the running process gracefully, or forcefully if it doesn't respond.
-    /// Also completes <see cref="ProcessExitTask"/> so callers don't hang if the event loop never started.
+    /// Stops the running process gracefully, then forcefully if it does not exit within the grace period.
     /// </summary>
     /// <returns>A task that completes when the process has stopped.</returns>
-    public async Task StopAsync()
+    public async Task<Result> StopAsync()
     {
         _log.Here().Information("Stopping dash-mpd-cli process");
         await _gracefulCts.CancelAsync();
         _forcefulCts.CancelAfter(TimeSpan.FromSeconds(10));
-        _processExitSource.TrySetResult(_exitCode ?? -1);
+        return Result.Ok();
     }
 
     /// <summary>
@@ -242,10 +186,24 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
     /// </summary>
     public async ValueTask DisposeAsync()
     {
-        await StopAsync();
+        try
+        {
+            if (!_gracefulCts.IsCancellationRequested)
+                await _gracefulCts.CancelAsync();
+
+            if (!_forcefulCts.IsCancellationRequested)
+                await _forcefulCts.CancelAsync();
+        }
+        catch (Exception ex)
+        {
+            _log.Here().Warning(ex, "Error cancelling tokens during dispose");
+        }
 
         try
         {
+            _stdoutSubject.OnCompleted();
+            _progressSubject.OnCompleted();
+
             _stdoutSubject.Dispose();
             _progressSubject.Dispose();
         }
@@ -253,6 +211,9 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
         {
             _log.Here().Warning(ex, "Error disposing subjects");
         }
+
+        _gracefulCts.Dispose();
+        _forcefulCts.Dispose();
     }
 
     /// <summary>

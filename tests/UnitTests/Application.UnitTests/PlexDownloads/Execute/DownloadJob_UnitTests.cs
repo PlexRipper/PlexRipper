@@ -1,4 +1,6 @@
 using System.Text.Json;
+using Autofac;
+using Autofac.Features.Indexed;
 using Microsoft.EntityFrameworkCore;
 using Quartz;
 using Reaparr.Application.Contracts;
@@ -11,42 +13,6 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
 {
     public DownloadJobUnitTests(ITestOutputHelper output)
         : base(output) { }
-
-    [Fact]
-    public async Task ShouldCreateDownloadWorkers_WhenDownloadWorkerTasksDoNotExist()
-    {
-        // Arrange
-        await SetupDatabase(
-            7973,
-            config =>
-            {
-                config.MovieDownloadTasksCount = 5;
-            }
-        );
-        var testDownloadTask = IDbContext.DownloadTaskMovieFile.First();
-        Mock.Mock<IDownloadManagerSettings>().Setup(x => x.DownloadSegments).Returns(4);
-        IDictionary<string, object> dict = new Dictionary<string, object>
-        {
-            { DownloadJob.DownloadTaskIdParameter, JsonSerializer.Serialize(testDownloadTask.ToKey()) },
-        };
-        Mock.Mock<IJobExecutionContext>().SetupGet(x => x.JobDetail.JobDataMap).Returns(new JobDataMap(dict));
-        Mock.Mock<IJobExecutionContext>().SetupGet(x => x.CancellationToken).Returns(CancellationToken);
-        Mock.Mock<IPlexDownloadClient>().Setup(x => x.Setup(It.IsAny<DownloadTaskKey>(), CancellationToken)).ReturnOk();
-        Mock.Mock<IPlexDownloadClient>().Setup(x => x.Start()).ReturnsAsync(Result.Ok());
-        Mock.Mock<IPlexDownloadClient>().SetupGet(x => x.DownloadProcessTask).Returns(Task.CompletedTask);
-        Mock.Mock<IPlexDownloadClient>()
-            .SetupGet(x => x.ListenToDownloadWorkerLog)
-            .Returns(new Mock<IObservable<IList<DownloadWorkerLog>>>().Object);
-        Mock.Mock<IPlexDownloadClient>().Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask);
-
-        // Act
-        await Sut.Execute(Mock.Create<IJobExecutionContext>());
-
-        // Assert
-        var downloadWorkerTasks = await IDbContext.DownloadWorkerTasks.ToListAsync(CancellationToken);
-        downloadWorkerTasks.Count.ShouldBe(4);
-        downloadWorkerTasks.ShouldAllBe(x => x.DownloadTaskId == testDownloadTask.Id);
-    }
 
     [Fact]
     public async Task ShouldSetDownloadAndDestinationPath_WhenDownloadTaskIsStarted()
@@ -67,23 +33,19 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
         };
         Mock.Mock<IJobExecutionContext>().SetupGet(x => x.JobDetail.JobDataMap).Returns(new JobDataMap(dict));
         Mock.Mock<IJobExecutionContext>().SetupGet(x => x.CancellationToken).Returns(CancellationToken);
-        Mock.Mock<IPlexDownloadClient>().Setup(x => x.Setup(It.IsAny<DownloadTaskKey>(), CancellationToken)).ReturnOk();
-        Mock.Mock<IPlexDownloadClient>().Setup(x => x.Start()).ReturnsAsync(Result.Ok());
-        Mock.Mock<IPlexDownloadClient>().SetupGet(x => x.DownloadProcessTask).Returns(Task.CompletedTask);
         Mock.Mock<IPlexDownloadClient>()
-            .SetupGet(x => x.ListenToDownloadWorkerLog)
-            .Returns(new Mock<IObservable<IList<DownloadWorkerLog>>>().Object);
-        Mock.Mock<IPlexDownloadClient>().Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask);
+            .Setup(x => x.Start(It.IsAny<DownloadTaskKey>(), CancellationToken))
+            .ReturnsAsync(Result.Ok());
 
         // Act
         await Sut.Execute(Mock.Create<IJobExecutionContext>());
 
         // Assert
-        var downloadTaskResult = await IDbContext
-            .DownloadTaskMovieFile.Include(x => x.DownloadWorkerTasks)
-            .FirstOrDefaultAsync(x => x.Id == testDownloadTask.Id, CancellationToken);
+        var downloadTaskResult = await IDbContext.DownloadTaskMovieFile.FirstOrDefaultAsync(
+            x => x.Id == testDownloadTask.Id,
+            CancellationToken
+        );
         downloadTaskResult.ShouldNotBeNull();
-        downloadTaskResult.DownloadWorkerTasks.Count.ShouldBe(4);
 
         var downloadFolder = await IDbContext.GetDownloadFolder();
         var destinationFolder = await IDbContext.GetDefaultDestinationFolderPath(
@@ -93,5 +55,47 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
 
         downloadTaskResult.DownloadDirectory.ShouldContain(downloadFolder.DirectoryPath);
         downloadTaskResult.DestinationDirectory.ShouldContain(destinationFolder.DirectoryPath);
+    }
+
+    [Fact]
+    public async Task ShouldDisposeDownloadClient_WhenJobExecutionCompletes()
+    {
+        // Arrange
+        await SetupDatabase(
+            39395,
+            config =>
+            {
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var testDownloadTask = IDbContext.DownloadTaskMovieFile.First();
+        IDictionary<string, object> dict = new Dictionary<string, object>
+        {
+            { DownloadJob.DownloadTaskIdParameter, JsonSerializer.Serialize(testDownloadTask.ToKey()) },
+        };
+
+        Mock.Mock<IJobExecutionContext>().SetupGet(x => x.JobDetail.JobDataMap).Returns(new JobDataMap(dict));
+        Mock.Mock<IJobExecutionContext>().SetupGet(x => x.CancellationToken).Returns(CancellationToken);
+        Mock.Mock<IServerSettingsModule>().Setup(x => x.GetAllowStreamDownloader(It.IsAny<string>())).Returns(false);
+
+        var downloadClientMock = Mock.Mock<IPlexDownloadClient>();
+        downloadClientMock
+            .Setup(x => x.Start(It.IsAny<DownloadTaskKey>(), CancellationToken))
+            .ReturnsAsync(Result.Ok());
+        downloadClientMock.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask).Verifiable(Times.Once);
+
+        var downloadClientIndexMock = new Mock<IIndex<PlexDownloadClientType, IPlexDownloadClient>>();
+        downloadClientIndexMock.Setup(x => x[It.IsAny<PlexDownloadClientType>()]).Returns(downloadClientMock.Object);
+
+        var sut = Mock.Create<DownloadJob>(
+            new NamedParameter("plexDownloadClientFactory", downloadClientIndexMock.Object)
+        );
+
+        // Act
+        await sut.Execute(Mock.Create<IJobExecutionContext>());
+
+        // Assert
+        downloadClientMock.Verify();
     }
 }

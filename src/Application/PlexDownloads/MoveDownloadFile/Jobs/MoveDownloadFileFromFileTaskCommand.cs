@@ -29,6 +29,7 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IEventPublisher _eventPublisher;
+    private readonly IDownloadTaskUpdateDispatcher _downloadTaskUpdateDispatcher;
     private readonly IReaparrDbContext _dbContext;
 
     /// <summary>
@@ -39,6 +40,8 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
     private readonly IDirectory _directory;
     private readonly IPath _path;
     private readonly IDownloadManagerSettings _downloadManagerSettings;
+
+    private string _filename = string.Empty;
 
     private readonly Channel<IDownloadFileTransferProgress> _progressChannel =
         Channel.CreateBounded<IDownloadFileTransferProgress>(
@@ -54,6 +57,7 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
         ILogger log,
         ICommandExecutor commandExecutor,
         IEventPublisher eventPublisher,
+        IDownloadTaskUpdateDispatcher downloadTaskUpdateDispatcher,
         IReaparrDbContext dbContext,
         IReaparrDbContextFactory dbContextFactory,
         IFile file,
@@ -65,6 +69,7 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
         _log = log.ForContext<MoveDownloadFileFromFileTaskCommandHandler>();
         _commandExecutor = commandExecutor;
         _eventPublisher = eventPublisher;
+        _downloadTaskUpdateDispatcher = downloadTaskUpdateDispatcher;
         _dbContext = dbContext;
         _dbContextProgress = dbContextFactory.Create();
         _file = file;
@@ -88,11 +93,18 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
         // Resolve paths
         var downloadFilePath = downloadTask.DownloadFilePath;
         var destinationPath = downloadTask.DestinationFilePath;
+        _filename = _path.GetFileName(downloadTask.DownloadFilePath);
 
         _log.Here().Debug("Starting file move process for {DownloadFilePath}", downloadFilePath);
 
         if (string.IsNullOrWhiteSpace(downloadFilePath) || !_file.Exists(downloadFilePath))
         {
+            _log.Here()
+                .Debug(
+                    "Source file not found at expected path for {DownloadTaskId}, checking fallback locations",
+                    key.Id
+                );
+
             string? movedInDownloadsPath = null;
             if (!string.IsNullOrWhiteSpace(downloadFilePath))
                 movedInDownloadsPath = downloadFilePath.RemoveReapTempSuffix();
@@ -119,6 +131,7 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
                 moveDownloadFileProgress?.OnNext(downloadTask.ToFileTransferProgress());
 
                 await UpdateDownloadTaskStatus(key, DownloadStatus.MoveFinished);
+                _log.Here().Debug("Move marked finished via existing destination file for {DownloadTaskId}", key.Id);
                 return Result.Ok();
             }
 
@@ -142,6 +155,11 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
                     moveDownloadFileProgress?.OnNext(downloadTask.ToFileTransferProgress());
 
                     await UpdateDownloadTaskStatus(key, DownloadStatus.MoveFinished);
+                    _log.Here()
+                        .Debug(
+                            "Move marked finished via renamed downloads file (keep-in-downloads) for {DownloadTaskId}",
+                            key.Id
+                        );
                     return Result.Ok();
                 }
 
@@ -168,8 +186,16 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
             if (downloadFilePath.RemoveReapTempSuffix() == destinationPath)
             {
                 // Just rename it to remove .reapTemp suffix if present
+                _log.Here()
+                    .Debug(
+                        "Source and destination resolve to the same path for {DownloadTaskId} — renaming in-place to strip .reaptemp suffix",
+                        key.Id
+                    );
+
                 if (_file.Exists(destinationPath))
                 {
+                    _log.Here()
+                        .Debug("Deleting pre-existing destination file before rename for {DownloadTaskId}", key.Id);
                     Result.Try(() => _file.Delete(destinationPath)).LogIfFailed();
                 }
 
@@ -185,6 +211,7 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
                 moveDownloadFileProgress?.OnNext(downloadTask.ToFileTransferProgress());
 
                 await UpdateDownloadTaskStatus(key, DownloadStatus.MoveFinished);
+                _log.Here().Debug("In-place rename succeeded for {DownloadTaskId}", key.Id);
                 return Result.Ok();
             }
 
@@ -192,12 +219,30 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
             var destinationDirectoryPath = _path.GetDirectoryName(destinationPath);
             var keepInDownloads = ShouldKeepInDownloads(downloadTask);
 
+            _log.Here()
+                .Debug(
+                    "Move strategy for {DownloadTaskId}: KeepInDownloads={KeepInDownloads}, Source={SourcePath}, Destination={DestinationPath}",
+                    key.Id,
+                    keepInDownloads,
+                    downloadFilePath,
+                    destinationPath
+                );
+
             if (keepInDownloads)
             {
                 // Rename it to remove .reapTemp suffix if present
                 var targetInDownloads = downloadFilePath.RemoveReapTempSuffix();
+                _log.Here()
+                    .Debug(
+                        "Renaming to remove .reaptemp suffix in downloads folder for {DownloadTaskId}: {TargetPath}",
+                        key.Id,
+                        targetInDownloads
+                    );
+
                 if (_file.Exists(targetInDownloads))
                 {
+                    _log.Here()
+                        .Debug("Deleting pre-existing target in downloads before rename for {DownloadTaskId}", key.Id);
                     Result.Try(() => _file.Delete(targetInDownloads)).LogIfFailed();
                 }
 
@@ -213,6 +258,12 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
                 moveDownloadFileProgress?.OnNext(downloadTask.ToFileTransferProgress());
 
                 await UpdateDownloadTaskStatus(key, DownloadStatus.MoveFinished);
+                _log.Here()
+                    .Debug(
+                        "Keep-in-downloads rename succeeded for {DownloadTaskId}: {TargetPath}",
+                        key.Id,
+                        targetInDownloads
+                    );
                 return Result.Ok();
             }
 
@@ -228,6 +279,12 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
                 );
 
             // Ensure the destination directory exists only when we are actually moving
+            _log.Here()
+                .Debug(
+                    "Ensuring destination directory exists for {DownloadTaskId}: {DestinationDirectory}",
+                    key.Id,
+                    destinationDirectoryPath
+                );
             var createDirectoryResult = Result
                 .Try((() => _directory.CreateDirectory(destinationDirectoryPath!)))
                 .ToResult();
@@ -238,6 +295,12 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
             var destinationAlreadyExists = _file.Exists(destinationPath);
             if (destinationAlreadyExists)
             {
+                _log.Here()
+                    .Debug(
+                        "Destination file already exists for {DownloadTaskId}, deleting to start fresh: {DestinationPath}",
+                        key.Id,
+                        destinationPath
+                    );
                 var deleteExistingResult = Result.Try(() => _file.Delete(destinationPath));
                 if (deleteExistingResult.IsFailed)
                     return await ErrorDownloadTask(key, deleteExistingResult);
@@ -248,7 +311,22 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
             }
 
             // Update status before moving
+            await _dbContext.CreateDownloadClientLog(
+                key,
+                NotificationLevel.Information,
+                DownloadStatus.Moving,
+                $"Preparing to move download file from '{downloadFilePath}' to '{destinationPath}'"
+            );
             await UpdateDownloadTaskStatus(key, DownloadStatus.Moving);
+
+            _log.Here()
+                .Debug(
+                    "Starting move for {DownloadTaskId}: {SourcePath} -> {DestinationPath} (offset: {Offset} bytes)",
+                    key.Id,
+                    downloadFilePath,
+                    destinationPath,
+                    downloadTask.CurrentFileTransferBytesOffset
+                );
 
             var moveResult = await MoveWithResumeAsync(
                 downloadTask,
@@ -259,6 +337,8 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
             );
             if (moveResult.IsFailed)
                 return await ErrorDownloadTask(key, moveResult);
+
+            _log.Here().Debug("Resumable move completed successfully for {DownloadTaskId}", key.Id);
 
             // Instant finish on rename
             downloadTask.CurrentFileTransferBytesOffset = downloadTask.DataTotal;
@@ -271,6 +351,7 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
             moveDownloadFileProgress?.OnNext(downloadTask.ToFileTransferProgress());
 
             await UpdateDownloadTaskStatus(key, DownloadStatus.MoveFinished);
+            _log.Here().Debug("Move finished for {DownloadTaskId}: {DestinationPath}", key.Id, destinationPath);
         }
         catch (OperationCanceledException)
         {
@@ -318,7 +399,6 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
                             dto,
                             cancellationToken: cancellationToken
                         );
-                        await _commandExecutor.Send(new DownloadTaskUpdatedCommand(key), cancellationToken);
                     }
                     catch (Exception ex)
                     {
@@ -371,16 +451,12 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
 
     private async Task UpdateDownloadTaskStatus(DownloadTaskKey key, DownloadStatus status)
     {
-        await _dbContext.SetDownloadStatus(key, status);
-
-        await _commandExecutor.Send(new DownloadTaskUpdatedCommand(key));
+        await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(key, status);
     }
 
     private async Task<Result> ErrorDownloadTask(DownloadTaskKey key, Result result)
     {
-        await _dbContext.SetDownloadStatus(key, DownloadStatus.MoveError);
-
-        await _commandExecutor.Send(new DownloadTaskUpdatedCommand(key));
+        await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(key, DownloadStatus.MoveError, result);
 
         await _eventPublisher.PublishAsync(new SendNotificationResult(result), CancellationToken.None);
 

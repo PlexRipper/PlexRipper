@@ -60,6 +60,9 @@ public class DownloadHub : Hub<IDownloadHub>, IDownloadHub
         await Clients.All.ServerDownloadProgress(messagePackDTO, cancellationToken);
     }
 
+    Task IDownloadHub.DownloadPatch(DownloadPatchMessagePackDTO messagePackDTO, CancellationToken cancellationToken) =>
+        Task.CompletedTask;
+
     /// <inheritdoc/>
     public async Task DownloadTaskUpdate(DownloadTaskDTO downloadTask, CancellationToken cancellationToken = default)
     {

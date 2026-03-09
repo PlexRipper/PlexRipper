@@ -9,33 +9,29 @@ using Reaparr.Settings.Contracts;
 
 namespace Reaparr.Application;
 
-public class DownloadJob : IJob, IAsyncDisposable
+[DisallowConcurrentExecution]
+public class DownloadJob : IJob
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
-    private readonly ICommandExecutor _commandExecutor;
+    private readonly IDownloadTaskUpdateDispatcher _downloadTaskUpdateDispatcher;
     private readonly IEventPublisher _eventPublisher;
-    private readonly IDownloadManagerSettings _downloadManagerSettings;
     private readonly IServerSettingsModule _serverSettingsModule;
     private readonly IIndex<PlexDownloadClientType, IPlexDownloadClient> _plexDownloadClientFactory;
-
-    private IPlexDownloadClient? _plexDownloadClient;
 
     public DownloadJob(
         ILogger log,
         IReaparrDbContext dbContext,
-        ICommandExecutor commandExecutor,
+        IDownloadTaskUpdateDispatcher downloadTaskUpdateDispatcher,
         IEventPublisher eventPublisher,
-        IDownloadManagerSettings downloadManagerSettings,
         IServerSettingsModule serverSettingsModule,
         IIndex<PlexDownloadClientType, IPlexDownloadClient> plexDownloadClientFactory
     )
     {
         _log = log.ForContext<DownloadJob>();
         _dbContext = dbContext;
-        _commandExecutor = commandExecutor;
+        _downloadTaskUpdateDispatcher = downloadTaskUpdateDispatcher;
         _eventPublisher = eventPublisher;
-        _downloadManagerSettings = downloadManagerSettings;
         _serverSettingsModule = serverSettingsModule;
         _plexDownloadClientFactory = plexDownloadClientFactory;
     }
@@ -93,16 +89,6 @@ public class DownloadJob : IJob, IAsyncDisposable
                 return;
             }
 
-            // Create the multiple download worker tasks which will split up the work
-            if (!downloadTask.DownloadWorkerTasks.Any())
-            {
-                var parts = _downloadManagerSettings.DownloadSegments;
-                downloadTask.DownloadWorkerTasks = downloadTask.GenerateDownloadWorkerTasks(parts);
-                await _dbContext.DownloadWorkerTasks.AddRangeAsync(downloadTask.DownloadWorkerTasks, token);
-                await _dbContext.SaveChangesAsync(token);
-                _log.Here().Debug("Generated DownloadWorkerTasks for {DownloadTaskFullTitle}", downloadTask.FullTitle);
-            }
-
             downloadTask = result.Value;
 
             var machineId = await _dbContext.GetPlexServerMachineIdentifierById(downloadTask.PlexServerId, token);
@@ -116,28 +102,11 @@ public class DownloadJob : IJob, IAsyncDisposable
                     downloadTask.FullTitle
                 );
 
-            _plexDownloadClient = _plexDownloadClientFactory[clientType];
-            var downloadClientResult = await _plexDownloadClient.Setup(downloadTask.ToKey(), token);
-            if (downloadClientResult.IsFailed)
-            {
-                downloadClientResult.LogError();
-                return;
-            }
+            await using var plexDownloadClient = _plexDownloadClientFactory[clientType];
 
-            SetupSubscription(_plexDownloadClient);
+            var startResult = await plexDownloadClient.Start(downloadTask.ToKey(), token);
 
-            var startResult = await _plexDownloadClient.Start();
-            if (startResult.IsFailed)
-            {
-                await _eventPublisher.PublishAsync(new SendNotificationResult(startResult), token);
-                return;
-            }
-
-            try
-            {
-                await _plexDownloadClient.DownloadProcessTask.WaitAsync(token);
-            }
-            catch (TaskCanceledException)
+            if (startResult.IsCancelled)
             {
                 _log.Here()
                     .Information(
@@ -146,10 +115,17 @@ public class DownloadJob : IJob, IAsyncDisposable
                         nameof(downloadTaskKey),
                         downloadTaskKey
                     );
-                await _plexDownloadClient.StopAsync();
+                await plexDownloadClient.StopAsync();
 
-                await _dbContext.SetDownloadStatus(downloadTaskKey, DownloadStatus.Paused);
-                await _commandExecutor.Send(new DownloadTaskUpdatedCommand(downloadTaskKey), token);
+                await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
+                    downloadTaskKey,
+                    DownloadStatus.Paused,
+                    CancellationToken.None
+                );
+            }
+            else if (startResult.IsFailed)
+            {
+                await _eventPublisher.PublishAsync(new SendNotificationResult(startResult), token);
             }
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
@@ -165,45 +141,6 @@ public class DownloadJob : IJob, IAsyncDisposable
                     nameof(DownloadTaskGeneric),
                     downloadTaskKey
                 );
-        }
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        _log.Here()
-            .Warning(
-                "Disposing job: {DownloadJobName} for {DownloadTaskName}",
-                nameof(DownloadJob),
-                nameof(DownloadTaskGeneric)
-            );
-
-        if (_plexDownloadClient != null)
-        {
-            await _plexDownloadClient.DisposeAsync();
-        }
-    }
-
-    private void SetupSubscription(IPlexDownloadClient plexDownloadClient)
-    {
-        plexDownloadClient
-            .ListenToDownloadWorkerLog.Select(logs => Observable.Defer(() => CreateLog(logs).ToObservable()))
-            .Concat()
-            .Subscribe();
-    }
-
-    private async Task CreateLog(IList<DownloadWorkerLog> logs)
-    {
-        if (!logs.Any())
-            return;
-
-        try
-        {
-            await _dbContext.DownloadWorkerTasksLogs.AddRangeAsync(logs);
-            await _dbContext.SaveChangesAsync(CancellationToken.None);
-        }
-        catch (Exception ex) when (ex is not OperationCanceledException)
-        {
-            _log.Here().ErrorResult(ex);
         }
     }
 

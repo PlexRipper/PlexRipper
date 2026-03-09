@@ -8,6 +8,8 @@ public class DownloadTaskTvShowEpisodeFile : DownloadTaskFileBase
 
     public required Guid ParentId { get; init; }
 
+    public List<DownloadTaskTvShowEpisodeFileLog> Logs { get; init; } = new();
+
     #endregion
 
     #region Helpers

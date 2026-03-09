@@ -10,33 +10,43 @@ import {
 	type CreateDownloadTasksRequest,
 	DownloadActions,
 	type DownloadMediaDTO, type DownloadPreviewContainerDTO,
+	type DownloadPatchMessagePackDTO,
 	type DownloadProgressDTO,
 	DownloadStatus,
 	type PlexServerDTO,
-	type ServerDownloadProgressDTO,
+	type ServerDownloadProgressDTO, RefreshDataType,
 } from '@dto';
 import { StoreNames, type IDownloadsSelection, type IPTreeTableSelectionKeys, type ISetupResult } from '@interfaces';
 import { downloadApi } from '@api';
-import { useServerStore } from '@store';
+import { useServerStore, useSignalrStore } from '@store';
 
 interface IDownloadsStoreState {
 	serverDownloads: ServerDownloadProgressDTO[];
 	selected: IDownloadsSelection[];
+	latestPatchSequenceByServer: Record<number, number>;
 }
 
 export const useDownloadStore = defineStore(StoreNames.DownloadStore, () => {
 	const defaultState: IDownloadsStoreState = {
 		serverDownloads: [],
 		selected: [],
+		latestPatchSequenceByServer: {},
 	};
 
 	const state = reactive<IDownloadsStoreState>(cloneDeep(defaultState));
 
+	const signalRStore = useSignalrStore();
 	const serverStore = useServerStore();
 
 	// Actions
 	const actions = {
 		setup(): Observable<ISetupResult> {
+			// Listen for refresh notifications
+			signalRStore
+				.getRefreshNotification(RefreshDataType.DownloadTasks)
+				.pipe(switchMap(() => actions.fetchDownloadList()))
+				.subscribe();
+
 			return actions.fetchDownloadList().pipe(switchMap(() => of({ name: StoreNames.DownloadStore, isSuccess: true })));
 		},
 		/**
@@ -51,12 +61,8 @@ export const useDownloadStore = defineStore(StoreNames.DownloadStore, () => {
 				}),
 			);
 		},
-		executeBatchDownloadCommand(action: DownloadActions) {
-			const downloadTaskIds = state.selected.flatMap((x) => Object.keys(x.selection));
-			return actions.executeDownloadCommand(action, downloadTaskIds);
-		},
-		executeDownloadCommand(action: DownloadActions, downloadTaskIds: string[]): Observable<BaseResultDTO> {
-			if (downloadTaskIds.length === 0) {
+		executeDownloadCommand(action: DownloadActions, downloadTaskIds: string[], plexServerId?: number): Observable<BaseResultDTO> {
+			if (downloadTaskIds.length === 0 && action !== DownloadActions.Clear) {
 				Log.error(`No downloadTaskIds provided for action: ${action}`);
 				return of({
 					errors: [],
@@ -81,10 +87,17 @@ export const useDownloadStore = defineStore(StoreNames.DownloadStore, () => {
 			switch (action) {
 				case DownloadActions.Pause:
 					return downloadApi.pauseDownloadTaskEndpoint(id);
-				case DownloadActions.Clear:
+				case DownloadActions.Clear: {
+					if (downloadTaskIds.length > 0) {
+						return downloadApi
+							.clearCompletedDownloadTasksByDownloadTaskIdEndpoint(downloadTaskIds)
+							.pipe(switchMap(actions.fetchDownloadList));
+					}
+
 					return downloadApi
-						.clearCompletedDownloadTasksEndpoint(downloadTaskIds)
+						.clearCompletedDownloadTasksByServerIdEndpoint(plexServerId!)
 						.pipe(switchMap(actions.fetchDownloadList));
+				}
 				case DownloadActions.Delete:
 					return downloadApi
 						.deleteDownloadTaskEndpoint(downloadTaskIds)
@@ -123,6 +136,48 @@ export const useDownloadStore = defineStore(StoreNames.DownloadStore, () => {
 				id: existing.id,
 				downloadableTasksCount: existing.downloadableTasksCount,
 				downloads: merged,
+			});
+		},
+		updateDownloadPatch(patch: DownloadPatchMessagePackDTO | null): void {
+			if (!patch)
+				return;
+
+			const latest = state.latestPatchSequenceByServer[patch.serverId] ?? 0;
+			if (patch.sequence <= latest)
+				return;
+
+			state.latestPatchSequenceByServer[patch.serverId] = patch.sequence;
+
+			const serverIndex = state.serverDownloads.findIndex((x) => x.id === patch.serverId);
+			if (serverIndex === -1) {
+				actions.fetchDownloadList().subscribe();
+				return;
+			}
+
+			const serverDownload = state.serverDownloads[serverIndex]!;
+			let downloads = cloneDeep(serverDownload.downloads ?? []);
+
+			if (patch.deletedIds.length > 0)
+				downloads = removeDeleted(downloads, patch.deletedIds);
+
+			for (const upsert of patch.upserts) {
+				const existingNode = findNodeById(downloads, upsert.id);
+				if (!existingNode) {
+					actions.fetchDownloadList().subscribe();
+					return;
+				}
+
+				existingNode.status = upsert.status;
+				existingNode.percentage = upsert.percentage;
+				existingNode.dataReceived = upsert.dataReceived;
+				existingNode.dataTotal = upsert.dataTotal;
+				existingNode.downloadSpeed = upsert.downloadSpeed;
+				existingNode.timeRemaining = upsert.timeRemaining;
+			}
+
+			state.serverDownloads.splice(serverIndex, 1, {
+				...serverDownload,
+				downloads,
 			});
 		},
 		previewDownload(downloadMediaCommand: DownloadMediaDTO[]): Observable<DownloadPreviewContainerDTO | null> {
@@ -197,6 +252,55 @@ export const useDownloadStore = defineStore(StoreNames.DownloadStore, () => {
 			Object.assign(state, cloneDeep(defaultState));
 		},
 	};
+
+	function findNodeById(nodes: DownloadProgressDTO[], id: string): DownloadProgressDTO | null {
+		for (const node of nodes) {
+			if (node.id === id)
+				return node;
+
+			const childNode = findNodeById(node.children ?? [], id);
+			if (childNode)
+				return childNode;
+		}
+
+		return null;
+	}
+
+	function removeDeleted(nodes: DownloadProgressDTO[], deletedIds: string[]): DownloadProgressDTO[] {
+		if (deletedIds.length === 0)
+			return nodes;
+
+		const deletedSet = new Set(deletedIds);
+
+		const collectChildrenIds = (node: DownloadProgressDTO) => {
+			for (const child of node.children ?? []) {
+				deletedSet.add(child.id);
+				collectChildrenIds(child);
+			}
+		};
+
+		const scanDeletedRoots = (items: DownloadProgressDTO[]) => {
+			for (const item of items) {
+				if (deletedSet.has(item.id))
+					collectChildrenIds(item);
+
+				scanDeletedRoots(item.children ?? []);
+			}
+		};
+
+		scanDeletedRoots(nodes);
+
+		const removeRecursive = (items: DownloadProgressDTO[]): DownloadProgressDTO[] => {
+			return items
+				.filter((item) => !deletedSet.has(item.id))
+				.map((item) => ({
+					...item,
+					children: removeRecursive(item.children ?? []),
+				}));
+		};
+
+		return removeRecursive(nodes);
+	}
 
 	// Getters
 	const getters = {

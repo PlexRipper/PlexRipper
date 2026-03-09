@@ -20,6 +20,7 @@ public class StartDownloadTaskCommandHandler : ICommandHandler<StartDownloadTask
 {
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
+    private readonly IDownloadTaskUpdateDispatcher _downloadTaskUpdateDispatcher;
     private readonly IEventPublisher _eventPublisher;
     private readonly IDownloadTaskScheduler _downloadTaskScheduler;
     private readonly IMoveDownloadFileScheduler _moveDownloadFileScheduler;
@@ -27,6 +28,7 @@ public class StartDownloadTaskCommandHandler : ICommandHandler<StartDownloadTask
     public StartDownloadTaskCommandHandler(
         IReaparrDbContext dbContext,
         ICommandExecutor commandExecutor,
+        IDownloadTaskUpdateDispatcher downloadTaskUpdateDispatcher,
         IEventPublisher eventPublisher,
         IDownloadTaskScheduler downloadTaskScheduler,
         IMoveDownloadFileScheduler moveDownloadFileScheduler
@@ -34,6 +36,7 @@ public class StartDownloadTaskCommandHandler : ICommandHandler<StartDownloadTask
     {
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;
+        _downloadTaskUpdateDispatcher = downloadTaskUpdateDispatcher;
         _eventPublisher = eventPublisher;
         _downloadTaskScheduler = downloadTaskScheduler;
         _moveDownloadFileScheduler = moveDownloadFileScheduler;
@@ -45,15 +48,52 @@ public class StartDownloadTaskCommandHandler : ICommandHandler<StartDownloadTask
         if (key is null)
             return ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), command.DownloadTaskGuid).LogError();
 
-        // TODO: Improve performance by fetching ALL download tasks in one query
-        var downloadableChildTaskKeys = await _dbContext.GetDownloadableChildTaskKeys(key, cancellationToken);
-        if (!downloadableChildTaskKeys.Any())
-            return ResultExtensions.IsEmpty(nameof(downloadableChildTaskKeys)).LogWarning();
+        var downloadableChildTasks = await _dbContext.GetDownloadableChildTasks(key, cancellationToken);
+        if (!downloadableChildTasks.Any())
+            return ResultExtensions.IsEmpty(nameof(downloadableChildTasks)).LogWarning();
 
-        var nextDownloadTaskKey = downloadableChildTaskKeys.First();
-        var nextDownloadTask = await _dbContext.GetDownloadTaskFileAsync(nextDownloadTaskKey, cancellationToken);
-        if (nextDownloadTask is null)
-            return ResultExtensions.EntityNotFound(nameof(DownloadTaskFileBase), nextDownloadTaskKey.Id).LogError();
+        var nextDownloadTask = downloadableChildTasks.FirstOrDefault(x =>
+            x.DownloadStatus == DownloadStatus.Paused || x.DownloadStatus == DownloadStatus.MovePaused
+        );
+        nextDownloadTask ??= downloadableChildTasks.FirstOrDefault(x =>
+            x.DownloadTaskPhase != DownloadTaskPhase.Completed
+        );
+        nextDownloadTask ??= downloadableChildTasks.First();
+        var nextDownloadTaskKey = nextDownloadTask.ToKey();
+
+        if (await _dbContext.IsDownloadsPausedByUser(nextDownloadTaskKey.PlexServerId))
+        {
+            return Result.Fail("Download tasks cannot be started while the server is paused by the user").LogWarning();
+        }
+
+        await _dbContext.CreateDownloadClientLog(
+            nextDownloadTaskKey,
+            NotificationLevel.Information,
+            DownloadStatus.Queued,
+            $"Start requested for download task {nextDownloadTaskKey.Id} ({nextDownloadTask.FileName})"
+        );
+
+        if (key.Type is DownloadTaskType.TvShow or DownloadTaskType.Season)
+        {
+            var statusesToQueue = nextDownloadTask.DownloadStatus switch
+            {
+                DownloadStatus.Paused => new[] { DownloadStatus.Paused, DownloadStatus.MovePaused },
+                DownloadStatus.MovePaused => new[] { DownloadStatus.Paused, DownloadStatus.MovePaused },
+                DownloadStatus.Stopped => new[] { DownloadStatus.Stopped },
+                _ => [],
+            };
+
+            foreach (
+                var waitingTask in downloadableChildTasks.Where(x =>
+                    x.Id != nextDownloadTask.Id && statusesToQueue.Contains(x.DownloadStatus)
+                )
+            )
+                await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
+                    waitingTask.ToKey(),
+                    DownloadStatus.Queued,
+                    cancellationToken
+                );
+        }
 
         // Start the download task depending on the phase
         switch (nextDownloadTask.DownloadTaskPhase)
@@ -65,9 +105,6 @@ public class StartDownloadTaskCommandHandler : ICommandHandler<StartDownloadTask
                     var startResult = await _downloadTaskScheduler.StartDownloadTaskJob(nextDownloadTaskKey);
                     if (startResult.IsFailed)
                         return startResult.LogError();
-
-                    // TODO: - This should be done in the DownloadJob
-                    await _dbContext.SetDownloadStatus(nextDownloadTaskKey, DownloadStatus.Downloading);
 
                     var activeDownloadKeys = await _downloadTaskScheduler.GetCurrentlyDownloadingKeysByServer(
                         key.PlexServerId
@@ -99,8 +136,6 @@ public class StartDownloadTaskCommandHandler : ICommandHandler<StartDownloadTask
                     $"{nextDownloadTask.DownloadTaskPhase} is not a valid DownloadTaskPhase enum value"
                 );
         }
-
-        await _commandExecutor.Send(new DownloadTaskUpdatedCommand(key), cancellationToken);
 
         await _eventPublisher.PublishAsync(new CheckDownloadQueueEvent(key.PlexServerId), cancellationToken);
 

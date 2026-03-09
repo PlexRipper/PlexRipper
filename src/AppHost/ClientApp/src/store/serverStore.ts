@@ -73,6 +73,15 @@ export const useServerStore = defineStore(StoreNames.ServerStore, () => {
 				})
 				.pipe(switchMap(() => settingsStore.refreshSettings()));
 		},
+		setServerPaused(serverId: number, paused: boolean) {
+			const request$ = paused
+				? plexServerApi.pausePlexServerDownloadsEndpoint(serverId)
+				: plexServerApi.resumePlexServerDownloadsEndpoint(serverId);
+
+			return request$.pipe(
+				tap(() => actions.refreshPlexServer(serverId)),
+			);
+		},
 		$reset() {
 			Object.assign(state, cloneDeep(defaultState));
 		},

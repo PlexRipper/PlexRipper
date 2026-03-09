@@ -1,6 +1,7 @@
 <template>
 	<QIconTooltip
 		:value="String(type)"
+		:data-cy="cy"
 		:options="options" />
 </template>
 
@@ -11,6 +12,7 @@ import type { QIconTooltipData } from '@interfaces';
 const { t } = useI18n();
 defineProps<{
 	type?: PlexConnectionTypes;
+	cy?: string;
 }>();
 
 const options = computed((): QIconTooltipData[] => {

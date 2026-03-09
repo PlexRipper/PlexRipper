@@ -19,6 +19,16 @@ export function translateDownloadStatus(status: DownloadStatus) {
 			return t('general.download-status.downloading');
 		case DownloadStatus.Error:
 			return t('general.download-status.error');
+		case DownloadStatus.AuthError:
+			return t('general.download-status.auth-error');
+		case DownloadStatus.StorageError:
+			return t('general.download-status.storage-error');
+		case DownloadStatus.SourceUnavailable:
+			return t('general.download-status.source-unavailable');
+		case DownloadStatus.DownloadClientError:
+			return t('general.download-status.download-client-error');
+		case DownloadStatus.IntegrityError:
+			return t('general.download-status.integrity-error');
 		case DownloadStatus.ServerUnreachable:
 			return t('general.download-status.server-unreachable');
 		case DownloadStatus.Paused:
@@ -33,6 +43,8 @@ export function translateDownloadStatus(status: DownloadStatus) {
 			return t('general.download-status.move-finished');
 		case DownloadStatus.MoveError:
 			return t('general.download-status.move-error');
+		case DownloadStatus.Restarting:
+			return t('general.download-status.restarting');
 		default:
 			return t('general.error.unknown');
 	}

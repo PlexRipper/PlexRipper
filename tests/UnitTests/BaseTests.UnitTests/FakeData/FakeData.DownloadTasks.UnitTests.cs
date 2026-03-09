@@ -123,12 +123,7 @@ public class FakeDataDownloadTasksUnitTests : BaseUnitTest
     {
         // Arrange
         var seed = new Seed(67890);
-        var config = new FakeDataConfig
-        {
-            TvShowSeasonDownloadTasksCount = 2,
-            TvShowEpisodeDownloadTasksCount = 3,
-            DownloadWorkerTasks = 4,
-        };
+        var config = new FakeDataConfig { TvShowSeasonDownloadTasksCount = 2, TvShowEpisodeDownloadTasksCount = 3 };
 
         // Act
         var tvShowTask = FakeData
@@ -138,7 +133,6 @@ public class FakeDataDownloadTasksUnitTests : BaseUnitTest
                 {
                     options.TvShowSeasonDownloadTasksCount = config.TvShowSeasonDownloadTasksCount;
                     options.TvShowEpisodeDownloadTasksCount = config.TvShowEpisodeDownloadTasksCount;
-                    options.DownloadWorkerTasks = config.DownloadWorkerTasks;
                 }
             )
             .Generate();
@@ -166,9 +160,6 @@ public class FakeDataDownloadTasksUnitTests : BaseUnitTest
                     episodeFile.DirectoryMeta.ShouldNotBeNull();
                     episodeFile.DirectoryMeta.TvShowFolder.ShouldBe(tvShowTask.Title);
                     episodeFile.DirectoryMeta.SeasonFolder.ShouldBe(season.Title);
-
-                    episodeFile.DownloadWorkerTasks.ShouldNotBeNull();
-                    episodeFile.DownloadWorkerTasks.Count.ShouldBe(config.DownloadWorkerTasks);
                 }
             }
         }

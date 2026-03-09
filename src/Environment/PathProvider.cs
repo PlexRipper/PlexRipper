@@ -12,19 +12,19 @@ public class PathProvider : IPathProvider
 
     private static readonly string _logsFolder = "Logs";
 
-    public static string DefaultMovieDestinationFolder => "/Movies";
+    public static string DefaultMovieDestinationFolder => Path.Combine(RootDirectory, "Movies");
 
-    public static string DefaultDownloadsDestinationFolder => "/Downloads";
+    public static string DefaultDownloadsDestinationFolder => Path.Combine(RootDirectory, "Downloads");
 
-    public static string DefaultTvShowsDestinationFolder => "/TvShows";
+    public static string DefaultTvShowsDestinationFolder => Path.Combine(RootDirectory, "TvShows");
 
-    public static string DefaultMusicDestinationFolder => "/Music";
+    public static string DefaultMusicDestinationFolder => Path.Combine(RootDirectory, "Music");
 
-    public static string DefaultPhotosDestinationFolder => "/Photos";
+    public static string DefaultPhotosDestinationFolder => Path.Combine(RootDirectory, "Photos");
 
-    public static string DefaultOtherDestinationFolder => "/Other";
+    public static string DefaultOtherDestinationFolder => Path.Combine(RootDirectory, "Other");
 
-    public static string DefaultGamesDestinationFolder => "/Games";
+    public static string DefaultGamesDestinationFolder => Path.Combine(RootDirectory, "Games");
 
     #endregion
 

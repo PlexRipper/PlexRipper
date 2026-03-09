@@ -57,10 +57,6 @@ public class InspectPlexServerJob : IJob
                     new CheckAllConnectionsStatusByPlexServerCommand(plexServerId),
                     cancellationToken
                 );
-                await _notificationHubService.SendRefreshNotificationAsync(
-                    [RefreshDataType.PlexServerConnection],
-                    cancellationToken
-                );
 
                 if (checkResult.IsFailed)
                     return checkResult.LogError();

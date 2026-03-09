@@ -41,4 +41,18 @@ public class DownloadHubService : IDownloadHubService
             await _hub.Clients.All.ServerDownloadProgress(messagePack, cancellationToken);
         }
     }
+
+    /// <inheritdoc/>
+    public async Task SendDownloadPatchAsync(
+        int plexServerId,
+        long sequence,
+        IReadOnlyCollection<DownloadPatchDTO> upserts,
+        IReadOnlyCollection<Guid>? deletedIds = null,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var messagePack = DownloadPatchMessagePackMapper.ToMessagePack(plexServerId, sequence, upserts, deletedIds);
+        _log.Here().Verbose("{ClassName} => {@DownloadPatchMessagePackDTO}", nameof(DownloadHubService), messagePack);
+        await _hub.Clients.All.DownloadPatch(messagePack, cancellationToken);
+    }
 }

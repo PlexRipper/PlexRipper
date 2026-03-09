@@ -48,15 +48,14 @@
 import type { PlexServerConnectionDTO, ServerConnectionCheckStatusProgressDTO } from '@dto';
 import { get, set } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
-import { map } from 'rxjs/operators';
 import { useDialogStore, useServerConnectionStore, useServerStore, useSignalrStore } from '@store';
+import { map } from 'rxjs/operators';
 
 const serverStore = useServerStore();
 const signalrStore = useSignalrStore();
 const dialogStore = useDialogStore();
 const serverConnectionStore = useServerConnectionStore();
 
-const loading = ref<boolean>(false);
 const progressData = ref<ServerConnectionCheckStatusProgressDTO | null>(null);
 
 const props = defineProps<{
@@ -65,6 +64,7 @@ const props = defineProps<{
 
 const plexServerId = computed<number>(() => props.connection.plexServerId);
 
+const loading = computed(() => serverConnectionStore.getConnectionLoading(props.connection.id));
 const preferredConnectionId = computed<number>({
 	get: () => serverStore.getServer(get(plexServerId))?.preferredConnectionId ?? -1,
 	set: (value) => {
@@ -73,25 +73,16 @@ const preferredConnectionId = computed<number>({
 });
 
 function checkPlexConnection(plexServerConnectionId: number) {
-	set(loading, true);
-
 	useSubscription(
-		serverConnectionStore.checkServerConnection(plexServerConnectionId).subscribe(() => {
-			set(loading, false);
-		}),
+		serverConnectionStore.checkServerConnection(plexServerConnectionId).subscribe(),
 	);
 }
-
 onMounted(() => useSubscription(
 	signalrStore
 		.getServerConnectionProgressByPlexServerId(get(plexServerId))
 		.pipe(map((x) => x.find((y) => y.plexServerConnectionId === props.connection.id)))
 		.subscribe((data) => {
-			if (get(loading)) {
-				set(progressData, data ?? null);
-			} else {
-				set(progressData, null);
-			}
+			set(progressData, data ?? null);
 		}),
 ));
 </script>

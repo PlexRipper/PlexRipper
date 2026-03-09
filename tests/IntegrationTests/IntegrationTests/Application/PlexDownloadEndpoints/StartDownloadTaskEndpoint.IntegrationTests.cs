@@ -23,7 +23,6 @@ public class StartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
                 config.HttpClientOptions = (x, _) =>
                 {
                     x.SetupIdentityRequest(seed);
-                    x.SetupDownloadFile(10);
                 };
 
                 config.DatabaseOptions = x =>
@@ -33,18 +32,30 @@ public class StartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
                     x.PlexMovieLibraryCount = 2;
                     x.MovieCount = 10;
                     x.MovieDownloadTasksCount = 1;
-                    x.DownloadWorkerTasks = 4;
                 };
 
                 config.FileSystemOptions = (system, dbContext) =>
                 {
-                    var downloadTask = dbContext.DownloadTaskMovieFile.Include(x => x.DownloadWorkerTasks).First();
+                    var downloadTask = dbContext.DownloadTaskMovieFile.First();
                     downloadTask.DownloadFilePath.ShouldNotBeNullOrEmpty();
 
-                    system.AddFile(downloadTask.DownloadFilePath, FakeData.GetFileMockData(10, 4));
+                    var directoryPath = system.Path.GetDirectoryName(downloadTask.DownloadFilePath);
+                    directoryPath.ShouldNotBeNullOrEmpty();
+                    system.Directory.CreateDirectory(directoryPath);
+                    system.File.WriteAllBytes(downloadTask.DownloadFilePath, FakeData.GetDownloadFile(10.0 / 4.0));
                 };
             }
         );
+
+        await container.DbContext.PlexServerConnections.ExecuteUpdateAsync(
+            x => x.SetProperty(y => y.Url, _ => "https://download.blender.org"),
+            CancellationToken
+        );
+        await container.DbContext.DownloadTaskMovieFile.ExecuteUpdateAsync(
+            x => x.SetProperty(y => y.FileLocationUrl, _ => "/peach/bigbuckbunny_movies/BigBuckBunny_320x180.mp4"),
+            CancellationToken
+        );
+
         var downloadTasks = await container.DbContext.GetAllDownloadTasksByServerAsync(
             cancellationToken: CancellationToken
         );
@@ -56,14 +67,16 @@ public class StartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
         var client = container.GetApiClient();
         await client.SignIn();
 
-        var testResult = await client.GETAsync<
+        var testResult = await client.PUTAsync<
             StartDownloadTaskEndpoint,
             StartDownloadTaskEndpointRequest,
             BaseResultDTO
         >(new StartDownloadTaskEndpointRequest(downloadTask.Id));
-        testResult.Response.IsSuccessStatusCode.ShouldBeTrue();
+        testResult.Response.IsSuccessStatusCode.ShouldBeTrue(
+            await testResult.Response.Content.ReadAsStringAsync(CancellationToken)
+        );
 
-        // Wait for the download job to complete
+        // Wait for scheduler activity after start request
         await container.SchedulerService.AwaitScheduler(CancellationToken);
 
         // Assert

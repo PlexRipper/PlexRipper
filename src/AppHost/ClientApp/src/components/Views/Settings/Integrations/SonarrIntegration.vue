@@ -1,5 +1,10 @@
 <template>
 	<QSection :header="t('components.sonarr-integration.title')">
+		<QAlert
+			type="info"
+			to="/settings/advanced#reverse-proxy-settings">
+			{{ t('components.sonarr-integration.reverse-proxy-alert') }}
+		</QAlert>
 		<q-stepper
 			ref="stepper"
 			v-model="integrationStore.sonarr.step"

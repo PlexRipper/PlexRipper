@@ -55,18 +55,37 @@ public class LogConfig
             {
                 options.MaskingOperators.Clear();
                 options.MaskingOperators = [new EmailAddressMaskingOperator(), new UrlMaskingOperator()];
-                options.MaskProperties.Add("PlexLibraryTitle");
-                options.MaskProperties.Add("PlexAccountDisplayName");
-                options.MaskProperties.Add("PlexLibraryName");
-                options.MaskProperties.Add("PlexServerName");
-                options.MaskProperties.Add("UserName");
-                options.MaskProperties.Add("PublicAddress");
-                options.MaskProperties.Add("PlexServerConnectionUrl");
-                options.MaskProperties.Add("PlexServerConnection");
-                options.MaskProperties.Add("PlexServerStatus");
-                options.MaskProperties.Add("DownloadUrl");
-                options.MaskProperties.Add("AuthToken");
-                options.MaskProperties.Add("MachineIdentifier");
+                var sensitiveProperties = new[]
+                {
+                    "PlexLibraryTitle",
+                    "PlexAccountDisplayName",
+                    "PlexLibraryName",
+                    "PlexServerName",
+                    "UserName",
+                    "PublicAddress",
+                    "PlexServerConnectionUrl",
+                    "PlexServerConnection",
+                    "PlexServerStatus",
+                    "DownloadUrl",
+                    "AuthToken",
+                    "AccessToken",
+                    "RefreshToken",
+                    "PlexAuthToken",
+                    "Token",
+                    "Password",
+                    "ApiKey",
+                    "VerificationCode",
+                    "Authorization",
+                    "SID",
+                    "MachineIdentifier",
+                };
+
+                foreach (var property in sensitiveProperties)
+                {
+                    var firstChar = property[0];
+                    options.MaskProperties.Add(char.ToUpperInvariant(firstChar) + property[1..]);
+                    options.MaskProperties.Add(char.ToLowerInvariant(firstChar) + property[1..]);
+                }
             });
         }
 

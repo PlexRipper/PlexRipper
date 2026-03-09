@@ -42,7 +42,8 @@ public static partial class FakeData
     private static readonly Faker<DownloadTaskMovieFile> _downloadTaskMovieFile = new Faker<DownloadTaskMovieFile>()
         .ApplyDownloadTaskFileBase(DownloadTaskType.MovieData)
         .Ignore(x => x.Parent)
-        .Ignore(x => x.ParentId);
+        .Ignore(x => x.ParentId)
+        .Ignore(x => x.Logs);
 
     public static Faker<DownloadTaskMovieFile> GetDownloadTaskMovieFile(
         Seed seed,
@@ -59,13 +60,6 @@ public static partial class FakeData
                         ? (long)ByteSize.FromMebiBytes(config.DownloadFileSizeInMb).Bytes
                         : f.Random.Long(1, 10000000)
             )
-            .UseSeed(seed.Next())
-            .FinishWith(
-                (_, x) =>
-                {
-                    // This has to run last and can therefore not be run in a RuleFor
-                    x.DownloadWorkerTasks = x.GenerateDownloadWorkerTasks(config.DownloadWorkerTasks);
-                }
-            );
+            .UseSeed(seed.Next());
     }
 }

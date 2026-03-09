@@ -3,6 +3,7 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Data.Contracts;
 using Reaparr.PlexApi.Contracts;
+using Reaparr.SignalR.Contracts;
 
 namespace Reaparr.Application;
 
@@ -26,16 +27,19 @@ public class RefreshPlexServerAccessCommandHandler
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
+    private readonly INotificationHubService _notificationHubService;
 
     public RefreshPlexServerAccessCommandHandler(
         ILogger log,
         IReaparrDbContext dbContext,
-        ICommandExecutor commandExecutor
+        ICommandExecutor commandExecutor,
+        INotificationHubService notificationHubService
     )
     {
         _log = log.ForContext<RefreshPlexServerAccessCommandHandler>();
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;
+        _notificationHubService = notificationHubService;
     }
 
     public async Task<Result<RefreshPlexServerAccessRapport>> ExecuteAsync(
@@ -104,6 +108,11 @@ public class RefreshPlexServerAccessCommandHandler
                 "Successfully refreshed accessible Plex servers for account {PlexAccountDisplayName}",
                 plexAccountName
             );
+
+        await _notificationHubService.SendRefreshNotificationAsync(
+            [RefreshDataType.PlexServer, RefreshDataType.PlexServerConnection],
+            cancellationToken
+        );
 
         return plexServerAccountAccessRapport;
     }

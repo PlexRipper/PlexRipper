@@ -9,7 +9,7 @@ using Reaparr.Settings.Contracts;
 
 namespace Reaparr.PublicAPI;
 
-public record SearchTvShowCommand : ICommand<TorznabMediaSearchResponseDTO>
+public record SearchTvShowCommand : ICommand<Result<TorznabMediaSearchResponseDTO>>
 {
     public required string Query { get; init; }
 
@@ -70,7 +70,7 @@ public class SearchTvShowCommandValidator : AbstractValidator<SearchTvShowComman
         !string.IsNullOrWhiteSpace(cmd.IMDB_ID) || cmd.TMDB_ID > 0 || cmd.TVDB_ID > 0;
 }
 
-public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, TorznabMediaSearchResponseDTO>
+public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, Result<TorznabMediaSearchResponseDTO>>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
@@ -83,7 +83,7 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, T
         _networkSettings = networkSettings;
     }
 
-    public async Task<TorznabMediaSearchResponseDTO> ExecuteAsync(
+    public async Task<Result<TorznabMediaSearchResponseDTO>> ExecuteAsync(
         SearchTvShowCommand command,
         CancellationToken cancellationToken
     )
@@ -96,17 +96,19 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, T
             items.AddRange(MapEpisodeToItems(episode));
         }
 
-        return new TorznabMediaSearchResponseDTO
-        {
-            Channel = new TorznabChannel
+        return Result.Ok(
+            new TorznabMediaSearchResponseDTO
             {
-                Title = "Reaparr Indexer",
-                Description = $"TV Search results for {command.Query}",
-                Language = "en-us",
-                Category = "search",
-                Items = items,
-            },
-        };
+                Channel = new TorznabChannel
+                {
+                    Title = "Reaparr Indexer",
+                    Description = $"TV Search results for {command.Query}",
+                    Language = "en-us",
+                    Category = "search",
+                    Items = items,
+                },
+            }
+        );
     }
 
     private async Task<List<PlexTvShowEpisode>> LoadEpisodesAsync(

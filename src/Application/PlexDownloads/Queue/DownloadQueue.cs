@@ -66,6 +66,16 @@ public class DownloadQueue : IDownloadQueue
 
         var plexServerName = await dbContext.GetPlexServerNameById(plexServerId, _token);
 
+        if (await dbContext.IsDownloadsPausedByUser(plexServerId))
+        {
+            _log.Here()
+                .Information(
+                    "Skipping download queue check because PlexServer {PlexServerName} is paused by user.",
+                    plexServerName
+                );
+            return Result.Ok();
+        }
+
         // Check if the server is online
         if (!await dbContext.IsServerOnline(plexServerId, cancellationToken: _token))
         {
@@ -125,36 +135,42 @@ public class DownloadQueue : IDownloadQueue
     /// <returns> The next downloadable <see cref="DownloadTaskGeneric"/> to be executed.</returns>
     internal Result<DownloadTaskGeneric> GetNextDownloadTask(ICollection<DownloadTaskGeneric> downloadTasks)
     {
-        List<DownloadStatus> statusCheck =
-        [
-            DownloadStatus.Downloading,
-            DownloadStatus.ServerUnreachable,
-            DownloadStatus.Queued,
-        ];
+        var downloadingTask = FindFirstLeafByStatus(downloadTasks, DownloadStatus.Downloading);
+        if (downloadingTask is not null)
+            return Result.Fail("There is already a downloadTask downloading.").LogDebug();
 
-        foreach (var status in statusCheck)
-        {
-            var nextDownloadTask = downloadTasks.FirstOrDefault(x => x.DownloadStatus == status);
-            if (nextDownloadTask is not null)
-            {
-                // Should we check deeper for any nested tasks
-                if (nextDownloadTask.Children.Any())
-                    return GetNextDownloadTask(nextDownloadTask.Children);
+        var serverUnreachableTask = FindFirstLeafByStatus(downloadTasks, DownloadStatus.ServerUnreachable);
+        if (serverUnreachableTask is not null)
+            return Result.Ok(serverUnreachableTask);
 
-                switch (status)
-                {
-                    case DownloadStatus.ServerUnreachable:
-                    case DownloadStatus.Queued:
-                        return Result.Ok(nextDownloadTask);
-                    case DownloadStatus.Downloading:
-                        return Result.Fail("There is already a downloadTask downloading.").LogDebug();
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
-        }
+        var queuedTask = FindFirstLeafByStatus(downloadTasks, DownloadStatus.Queued);
+        if (queuedTask is not null)
+            return Result.Ok(queuedTask);
 
         return Result.Fail("There were no downloadTasks left to download.").LogDebug();
+    }
+
+    private static DownloadTaskGeneric? FindFirstLeafByStatus(
+        IEnumerable<DownloadTaskGeneric> downloadTasks,
+        DownloadStatus status
+    )
+    {
+        foreach (var downloadTask in downloadTasks)
+        {
+            if (downloadTask.Children.Any())
+            {
+                var childTask = FindFirstLeafByStatus(downloadTask.Children, status);
+                if (childTask is not null)
+                    return childTask;
+
+                continue;
+            }
+
+            if (downloadTask.DownloadStatus == status)
+                return downloadTask;
+        }
+
+        return null;
     }
 
     private async Task ExecuteDownloadQueueCheck()

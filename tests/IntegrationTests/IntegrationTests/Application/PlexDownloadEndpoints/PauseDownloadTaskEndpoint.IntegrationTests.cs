@@ -28,24 +28,34 @@ public class PauseDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
                     x.PlexMovieLibraryCount = 1;
                     x.MovieCount = 1;
                     x.MovieDownloadTasksCount = 1;
-                    x.DownloadWorkerTasks = 4;
                     x.DownloadFileSizeInMb = 50;
                 };
 
                 config.HttpClientOptions = (x, _) =>
                 {
                     x.SetupIdentityRequest(seed);
-                    x.SetupDownloadFile(50);
                 };
 
                 config.FileSystemOptions = (system, dbContext) =>
                 {
-                    var downloadTask = dbContext.DownloadTaskMovieFile.Include(x => x.DownloadWorkerTasks).First();
+                    var downloadTask = dbContext.DownloadTaskMovieFile.First();
                     downloadTask.DownloadFilePath.ShouldNotBeNullOrEmpty();
 
-                    system.AddFile(downloadTask.DownloadFilePath, FakeData.GetFileMockData(50, 4));
+                    var directoryPath = system.Path.GetDirectoryName(downloadTask.DownloadFilePath);
+                    directoryPath.ShouldNotBeNullOrEmpty();
+                    system.Directory.CreateDirectory(directoryPath);
+                    system.File.WriteAllBytes(downloadTask.DownloadFilePath, FakeData.GetDownloadFile(50.0 / 4.0));
                 };
             }
+        );
+
+        await container.DbContext.PlexServerConnections.ExecuteUpdateAsync(
+            x => x.SetProperty(y => y.Url, _ => "https://download.blender.org"),
+            CancellationToken
+        );
+        await container.DbContext.DownloadTaskMovieFile.ExecuteUpdateAsync(
+            x => x.SetProperty(y => y.FileLocationUrl, _ => "/peach/bigbuckbunny_movies/BigBuckBunny_320x180.mp4"),
+            CancellationToken
         );
 
         var downloadTasks = await container.DbContext.GetAllDownloadTasksByServerAsync(
@@ -58,7 +68,7 @@ public class PauseDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
         var client = container.GetApiClient();
         await client.SignIn();
 
-        var startTestResult = await client.GETAsync<
+        var startTestResult = await client.PUTAsync<
             StartDownloadTaskEndpoint,
             StartDownloadTaskEndpointRequest,
             BaseResultDTO
@@ -82,7 +92,7 @@ public class PauseDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
         );
 
         // Pause the download
-        var pauseTestResult = await client.GETAsync<
+        var pauseTestResult = await client.PUTAsync<
             PauseDownloadTaskEndpoint,
             PauseDownloadTaskEndpointRequest,
             BaseResultDTO
@@ -111,7 +121,6 @@ public class PauseDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
         // Assert - use AsNoTracking to ensure fresh data from database
         var downloadTaskDb = await container
             .DbContext.DownloadTaskMovieFile.AsNoTracking()
-            .Include(x => x.DownloadWorkerTasks)
             .FirstOrDefaultAsync(x => x.Id == childDownloadTask.Id, CancellationToken);
         downloadTaskDb.ShouldNotBeNull();
         downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.Paused);

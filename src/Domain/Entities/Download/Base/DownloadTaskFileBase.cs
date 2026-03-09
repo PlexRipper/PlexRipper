@@ -60,6 +60,11 @@ public abstract class DownloadTaskFileBase : DownloadTaskBase, IDownloadTaskProg
     [Column(Order = 18)]
     public required long DownloadSpeed { get; set; }
 
+    [Column(Order = 19)]
+    public required DirectDownloadSnapshot? DirectDownloadSnapshot { get; set; }
+
+    public required PlexDownloadClientType DownloadClientType { get; set; } = PlexDownloadClientType.Direct;
+
     #endregion
 
     #region File Transfer Progress
@@ -84,8 +89,6 @@ public abstract class DownloadTaskFileBase : DownloadTaskBase, IDownloadTaskProg
     #endregion
 
     #region Relationships
-
-    public required ICollection<DownloadWorkerTask> DownloadWorkerTasks { get; set; } = [];
 
     /// <summary>
     /// Gets or sets the destination folder path id of the <see cref="DownloadTaskFileBase"/>.

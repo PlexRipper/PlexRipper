@@ -1,3 +1,4 @@
+using System.IO.Abstractions;
 using System.Net.Http.Headers;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
@@ -24,12 +25,22 @@ public class BaseContainer : IDisposable
 
     public string DatabaseName => _factory.MemoryDbName;
 
+    public string TestFileSystemRootPath { get; private set; }
+
     /// <summary>
     /// Creates an Autofac container and sets up a test database.
     /// </summary>
-    private BaseContainer(ILogger log, Seed seed, string memoryDbName, Action<UnitTestDataConfig>? options = null)
+    private BaseContainer(
+        ILogger log,
+        Seed seed,
+        string memoryDbName,
+        string testFileSystemRootPath,
+        Action<UnitTestDataConfig>? options = null
+    )
     {
         _log = log.ForContext<BaseContainer>();
+
+        TestFileSystemRootPath = testFileSystemRootPath;
 
         _log.Here().Information("Setting up BaseContainer with database: {MemoryDbName}", memoryDbName);
 
@@ -41,17 +52,29 @@ public class BaseContainer : IDisposable
 
     public static async Task<BaseContainer> Create(ILogger log, Seed seed, Action<UnitTestDataConfig>? options = null)
     {
-        var config = UnitTestDataConfig.FromOptions(options);
-
         EnvironmentExtensions.SetIntegrationTestMode(true);
 
         var memoryDbName = MockDatabase.GetMemoryDatabaseName();
 
+        // Create isolated filesystem
+        EnvironmentExtensions.SetDevelopmentRootPath(IntegrationTestFileSystemSandbox.GetSandboxFolder(memoryDbName));
+        var testFileSystemRootPath = IntegrationTestFileSystemSandbox.Create(memoryDbName, log);
+
+        var config = UnitTestDataConfig.FromOptions(options);
+
         log.Information("Initialized integration test with database name: {DatabaseName}", memoryDbName);
 
+        // Setup database
         await MockDatabase.GetMemoryDbContext(memoryDbName).Setup(seed, config.DatabaseOptions);
 
-        var container = new BaseContainer(log, seed, memoryDbName, options);
+        var container = new BaseContainer(log, seed, memoryDbName, testFileSystemRootPath, options);
+
+        if (config.FileSystemOptions is not null)
+        {
+            var fileSystem = container.Resolve<IFileSystem>();
+            var dbContext = container.Resolve<IReaparrDbContext>();
+            config.FileSystemOptions.Invoke(fileSystem, dbContext);
+        }
 
         if (config.DownloadSpeedLimitInKib > 0)
             await container.SetDownloadSpeedLimit(options);
@@ -314,6 +337,34 @@ public class BaseContainer : IDisposable
         {
             _log.Here()
                 .Error("Failed to delete database: {DatabaseName}, Error: {ExceptionMessage}", dbName, ex.Message);
+        }
+
+        var cleanupResult = Result.Try(() =>
+        {
+            var expectedSandboxRoot = Path.GetFullPath(IntegrationTestFileSystemSandbox.GetSandboxFolder(dbName));
+            var pathToDelete = Path.GetFullPath(TestFileSystemRootPath);
+
+            if (!pathToDelete.StartsWith(expectedSandboxRoot, StringComparison.Ordinal))
+                throw new InvalidOperationException(
+                    $"Refusing to delete '{pathToDelete}': path is not inside the expected sandbox root '{expectedSandboxRoot}'."
+                );
+
+            if (Directory.Exists(pathToDelete))
+            {
+                Directory.Delete(pathToDelete, recursive: true);
+                _log.Here()
+                    .Information(
+                        "Deleted test filesystem sandbox for container {DatabaseName}: {Path}",
+                        dbName,
+                        pathToDelete
+                    );
+            }
+        });
+
+        if (cleanupResult.IsFailed)
+        {
+            _log.Here().Error("Failed to delete test filesystem sandbox for container {DatabaseName}", dbName);
+            cleanupResult.LogError();
         }
 
         _log.Here().Information("Disposing factory for container {DatabaseName}", dbName);

@@ -70,6 +70,29 @@
             "invalid-download-task": {
                 "body": "Erreur lors de la récupération des détails de cette tâche de téléchargement :",
                 "title": "La tâche de téléchargement n'a pas pu être récupérée"
+            },
+            "logs": {
+                "copy-all": "Copier tous les journaux",
+                "delete-all": "Supprimer tous les journaux",
+                "sort-oldest-first": "Plus anciens d'abord",
+                "sort-newest-first": "Plus récents d'abord",
+                "filter-by-level": "Filtrer par niveau de journal",
+                "copied-to-clipboard": "Journaux copiés dans le presse-papiers",
+                "entry-copied-to-clipboard": "Entrée de journal copiée dans le presse-papiers",
+                "deleted": "Journaux supprimés",
+                "no-logs": "Aucun journal trouvé pour cette tâche de téléchargement.",
+                "delete-confirmation": {
+                    "title": "Supprimer tous les journaux",
+                    "text": "Êtes-vous sûr de vouloir supprimer tous les journaux de cette tâche de téléchargement ?"
+                },
+                "levels": {
+                    "debug": "Débogage",
+                    "information": "Information",
+                    "success": "Succès",
+                    "warning": "Avertissement",
+                    "error": "Erreur",
+                    "fatal": "Fatal"
+                }
             }
         },
         "media-overview": {
@@ -127,7 +150,8 @@
                 "server-connections": {
                     "header": "Connexions au serveur",
                     "section-header": "Sélectionnez la connexion serveur préférée :",
-                    "add-connection-button": "Ajouter une connexion"
+                    "add-connection-button": "Ajouter une connexion",
+                    "check-all-connections": "Vérifier toutes les connexions"
                 },
                 "server-data": {
                     "headers": {
@@ -140,8 +164,6 @@
                         "platform": "Plate-forme:"
                     },
                     "header": "Donnée Serveur",
-                    "all-connections-failed": "Toutes les connexions ont échoué lorsqu'elles sont utilisées pour se connecter au serveur, le serveur est probablement hors ligne...",
-                    "at-least-one-connection-successful": "Au moins une connexion a réussi, ce qui signifie que le serveur peut être connecté !",
                     "values": {
                         "platform-version": "{platform} ({platformVersion})",
                         "product-version": "{product} ({productVersion})"
@@ -208,6 +230,13 @@
             "title": "Validation du jeton d'authentification Plex.tv"
         },
         "downloads-table": {
+            "clear-completed": {
+                "button": "Effacer terminés",
+                "confirmation": {
+                    "title": "Effacer les téléchargements terminés ?",
+                    "text": "Cela supprimera récursivement les tâches de téléchargement terminées pour ce serveur uniquement. Les fichiers téléchargés ne seront pas supprimés du système de fichiers."
+                }
+            },
             "columns": {
                 "actions": "Actions",
                 "data-received": "Reçu",
@@ -354,6 +383,7 @@
             }
         },
         "sonarr-integration": {
+            "reverse-proxy-alert": "Si vous utilisez un proxy inverse, configurez-le dans les paramètres réseau avant de configurer l'intégration Sonarr.",
             "connection-status": {
                 "connection-failed": "Impossible de se connecter à Sonarr. Assurez-vous que Sonarr est en ligne et accessible!",
                 "invalid-api-key": "Connexion à Sonarr impossible, mais la clé API était invalide.",
@@ -376,6 +406,7 @@
             "title": "Intégration Sonarr"
         },
         "radarr-integration": {
+            "reverse-proxy-alert": "Si vous utilisez un proxy inverse, configurez-le dans les paramètres réseau avant de configurer l'intégration Radarr.",
             "connection-status": {
                 "connection-failed": "Impossible de se connecter à Radarr. Assurez-vous que Radarr est en ligne et accessible!",
                 "invalid-api-key": "Connexion à Radarr possible, mais la clé API était invalide.",
@@ -427,7 +458,6 @@
             "add-alert": "Ajouter une Alert",
             "back": "Retour",
             "cancel": "Annuler",
-            "check-server-status": "Vérifier le statut du serveur",
             "close": "Fermé",
             "confirm": "Confirmer",
             "delete": "Supprimer",
@@ -479,6 +509,11 @@
         },
         "download-status": {
             "error": "Erreur",
+            "auth-error": "Auth Error",
+            "storage-error": "Storage Error",
+            "source-unavailable": "Source Unavailable",
+            "download-client-error": "Download Client Error",
+            "integrity-error": "Integrity Error",
             "server-unreachable": "Serveur inaccessible",
             "unknown": "Inconnu",
             "queued": "En file d'attente",
@@ -491,7 +526,8 @@
             "completed": "Complété",
             "move-error": "Erreur de déplacement",
             "move-finished": "Déplacement terminé",
-            "move-paused": "Déplacement en pause"
+            "move-paused": "Déplacement en pause",
+            "restarting": "Redémarrage"
         },
         "video-quality": {
             "quality-1-unknown": "Unknown",
@@ -537,7 +573,7 @@
             },
             "username": {
                 "label": "Nom",
-                "text": "Le nom de l'utilisateur Plex.\n\n**Remarque :** Plex utilise votre **adresse e-mail** comme nom d'utilisateur. Si votre nom d'utilisateur ne fonctionne pas, consultez la [FAQ](https://www.plexripper.rocks/faq#i-tried-to-use-my-username-to-set-up-my-plex-account-in-plex-ripper-but-its-not-working) pour obtenir de l'aide.",
+                "text": "Le nom de l'utilisateur Plex.\n\n**Remarque :** Plex utilise votre **adresse e-mail** comme nom d'utilisateur. Si votre nom d'utilisateur ne fonctionne pas, consultez la [FAQ](https://www.reaparr.rocks/docs/faq#username-setup) pour obtenir de l'aide.",
                 "title": "Nom"
             }
         },
@@ -762,7 +798,7 @@
                         "title": "Effacer la configuration de Sonarr"
                     },
                     "setup-configuration": {
-                        "text": "Reaparr configure un indexeur et un client de téléchargement dans Sonarr, permettant ainsi à Sonarr de déclencher les téléchargements.\n\nPour plus d'informations, consultez le [Guide d'intégration Sonarr/Radarr](https://www.reaparr.rocks/guides/integration/sonarr-radarr).",
+                        "text": "Reaparr configure un indexeur et un client de téléchargement dans Sonarr, permettant ainsi à Sonarr de déclencher les téléchargements.\n\nPour plus d'informations, consultez le [Guide d'intégration Sonarr/Radarr](https://www.reaparr.rocks/docs/integration/sonarr-radarr).",
                         "title": "Configurer Sonarr"
                     },
                     "test-connection": {
@@ -786,7 +822,7 @@
                         "title": "Configuration Clear Radarr"
                     },
                     "setup-configuration": {
-                        "text": "Reaparr configure un indexeur et un client de téléchargement dans Radarr, permettant ainsi à Radarr de déclencher les téléchargements.\n\nPour plus d'informations, consultez le [Guide d'intégration Sonarr/Radarr](https://www.reaparr.rocks/guides/integration/sonarr-radarr).",
+                        "text": "Reaparr configure un indexeur et un client de téléchargement dans Radarr, permettant ainsi à Radarr de déclencher les téléchargements.\n\nPour plus d'informations, consultez le [Guide d'intégration Sonarr/Radarr](https://www.reaparr.rocks/docs/integration/sonarr-radarr).",
                         "title": "Configurer Radarr"
                     },
                     "test-connection": {

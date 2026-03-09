@@ -2,7 +2,7 @@
 	<QText
 		:cy="cy"
 		:align="align"
-		:value="`${formattedString}${speed ? t('general.units.per-second') : ''}`" />
+		:value="formattedString" />
 </template>
 
 <script setup lang="ts">
@@ -20,6 +20,11 @@ const props = defineProps<Pick<IQTextProps, 'align'> & {
 }>();
 
 const formattedString = computed(() => {
-	return prettyBytes(props.size, { locale: localizationStore.getLanguageLocale.bcp47Code });
+	if (props.size == null || props.size === 0) {
+		return '-';
+	}
+
+	const bytes = prettyBytes(props.size, { locale: localizationStore.getLanguageLocale.bcp47Code });
+	return `${bytes}${props.speed ? t('general.units.per-second') : ''}`;
 });
 </script>

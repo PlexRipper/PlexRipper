@@ -26,6 +26,12 @@ public enum MessageTypes
     ServerDownloadProgress = 3,
 
     /// <summary>
+    ///  Download patch message type.
+    /// </summary>
+    [EnumMember(Value = nameof(DownloadPatch))]
+    DownloadPatch = 4,
+
+    /// <summary>
     ///  Server connection checks status message type.
     /// </summary>
     [EnumMember(Value = nameof(ServerConnectionCheckStatusProgress))]

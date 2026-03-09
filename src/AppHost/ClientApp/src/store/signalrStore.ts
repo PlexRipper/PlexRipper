@@ -1,7 +1,7 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { reactive, toRefs } from 'vue';
 import type { Observable } from 'rxjs';
-import { from, of, Subject } from 'rxjs';
+import { from, of, tap, Subject } from 'rxjs';
 import { distinctUntilChanged, filter, map, switchMap, take } from 'rxjs/operators';
 import Log from 'consola';
 import type { HubConnection, IHttpConnectionOptions } from '@microsoft/signalr';
@@ -10,14 +10,15 @@ import { useCypressSignalRMock } from 'cypress-signalr-mock';
 import { isEqual, cloneDeep, isArray } from 'lodash-es';
 import { StoreNames, type ISetupResult } from '@interfaces';
 import type {
-	RefreshDataType,
+	DownloadPatchMessagePackDTO,
+	DownloadPatchDTO,
 	LibrarySyncProgressDTO,
 	NotificationDTO,
 	ServerConnectionCheckStatusProgressDTO,
 	ServerDownloadProgressDTO,
 	ServerDownloadProgressMessagePackDTO,
 } from '@dto';
-import { MessageTypes } from '@dto';
+import { RefreshDataType, MessageTypes } from '@dto';
 import type { IRetryPolicy } from '@microsoft/signalr/src/IRetryPolicy';
 import { useDownloadStore, useBackgroundJobsStore, useNotificationsStore, useLibraryStore } from '@store';
 import Axios from 'axios';
@@ -94,7 +95,15 @@ export const useSignalrStore = defineStore(StoreNames.SignalrStore, () => {
 
 				await Promise.all([startDownloadHubConnection(), startProgressHubConnection(), startNotificationHubConnection()]);
 			})()).pipe(switchMap(() => of({ name: StoreNames.SignalrStore, isSuccess: true })), take(1));
-		}, $reset() {
+		},
+		clearServerConnectionCheckStatusProgress(plexServerConnectionId: number): void {
+			removeStateItem<ServerConnectionCheckStatusProgressDTO>(
+				'serverConnectionCheckStatusProgress',
+				{ plexServerConnectionId } as ServerConnectionCheckStatusProgressDTO,
+				'plexServerConnectionId',
+			);
+		},
+		$reset() {
 			Object.assign(state, cloneDeep(defaultState));
 		},
 	};
@@ -114,6 +123,17 @@ export const useSignalrStore = defineStore(StoreNames.SignalrStore, () => {
 			}
 		});
 
+		downloadHubConnection?.on(MessageTypes.DownloadPatch, (rawData: DownloadPatchMessagePackDTO) => {
+			if (Array.isArray(rawData)) {
+				const patch = toDownloadPatchDTO(rawData);
+				if (patch)
+					downloadStore.updateDownloadPatch(patch);
+				return;
+			}
+
+			downloadStore.updateDownloadPatch(rawData as unknown as DownloadPatchMessagePackDTO);
+		});
+
 		progressHubConnection?.on(MessageTypes.LibraryProgress, (data: LibrarySyncProgressDTO) => libraryStore.updateLibraryProgress(data));
 
 		progressHubConnection?.on(MessageTypes.ServerConnectionCheckStatusProgress, (data: ServerConnectionCheckStatusProgressDTO) => updateState<ServerConnectionCheckStatusProgressDTO>('serverConnectionCheckStatusProgress', data, 'plexServerConnectionId'));
@@ -123,6 +143,9 @@ export const useSignalrStore = defineStore(StoreNames.SignalrStore, () => {
 		notificationHubConnection?.on(MessageTypes.Notification, (data: NotificationDTO) => notificationsStore.setNotification(data));
 
 		notificationHubConnection?.on(MessageTypes.RefreshNotification, (data: RefreshDataType) => {
+			if (data === RefreshDataType.DownloadTasks) {
+				downloadStore.fetchDownloadList().subscribe();
+			}
 			state.refreshDataNotificationSubject.next(data);
 		});
 	}
@@ -152,6 +175,36 @@ export const useSignalrStore = defineStore(StoreNames.SignalrStore, () => {
 				(state[propertyName] as Array<T>).splice(i, 1, item);
 			} else {
 				(state[propertyName] as Array<T>).push(item);
+			}
+		}
+
+		// Trigger Subject to send current state
+		(state[propertyName + 'Subject'] as Subject<Array<T>>).next(state[propertyName] as Array<T>);
+	}
+
+	function removeStateItem<T>(propertyName: keyof ISignalRStoreState, itemToRemove: T, idName: keyof T): void {
+		if (!state[propertyName]) {
+			Log.error(`Failed to get ISignalRStoreState property name: ${propertyName}`);
+			return;
+		}
+
+		if (isArray(itemToRemove)) {
+			for (const item of itemToRemove) {
+				remove(item);
+			}
+		} else {
+			remove(itemToRemove);
+		}
+
+		function remove(item: T): void {
+			if (!item[idName]) {
+				Log.error(`Failed to find the correct id property in ${propertyName} with idName: ${String(idName)}`, item);
+				return;
+			}
+
+			const i = (state[propertyName] as Array<T>).findIndex((x) => x[idName] === item[idName]);
+			if (i > -1) {
+				(state[propertyName] as Array<T>).splice(i, 1);
 			}
 		}
 
@@ -194,7 +247,7 @@ export const useSignalrStore = defineStore(StoreNames.SignalrStore, () => {
 			return getters.getAllServerConnectionProgress().pipe(map((x) => x?.filter((y) => y.plexServerId === plexServerId)), distinctUntilChanged(isEqual));
 		},
 		getRefreshNotification(filterOn: RefreshDataType): Observable<RefreshDataType> {
-			return state.refreshDataNotificationSubject.asObservable().pipe(filter((x) => x === filterOn));
+			return state.refreshDataNotificationSubject.asObservable().pipe(filter((x) => x === filterOn), tap(() => Log.debug('Refreshing ' + filterOn)));
 		}, // endregion
 	};
 	return {
@@ -230,5 +283,52 @@ function toServerDownloadProgressDTO(arr: ServerDownloadProgressMessagePackDTO):
 
 	return {
 		id: arr[0], downloadableTasksCount: arr[1], downloads: Array.isArray(arr[2]) ? arr[2].map(mapDownload) : [],
+	};
+}
+
+function isDownloadPatchMessagePackPayload(value: unknown[]): boolean {
+	return typeof value[0] === 'number'
+		&& typeof value[1] === 'number'
+		&& Array.isArray(value[2])
+		&& Array.isArray(value[3]);
+}
+
+function isDownloadPatchEntryPayload(value: unknown): value is unknown[] {
+	return Array.isArray(value)
+		&& typeof value[0] === 'string'
+		&& typeof value[1] === 'string'
+		&& value[2] !== undefined
+		&& typeof value[3] === 'number'
+		&& typeof value[4] === 'number'
+		&& typeof value[5] === 'number'
+		&& typeof value[6] === 'number'
+		&& typeof value[7] === 'number';
+}
+
+function toDownloadPatchDTO(arr: unknown[]): DownloadPatchMessagePackDTO | null {
+	if (!Array.isArray(arr))
+		return null;
+	if (!isDownloadPatchMessagePackPayload(arr))
+		return null;
+
+	const upsertsRaw = arr[2] as unknown[];
+	const upserts: DownloadPatchDTO[] = upsertsRaw
+		.filter(isDownloadPatchEntryPayload)
+		.map((item) => ({
+			id: item[0] as DownloadPatchDTO['id'],
+			parentId: item[1] as DownloadPatchDTO['parentId'],
+			status: item[2] as DownloadPatchDTO['status'],
+			percentage: Number(item[3]),
+			dataReceived: item[4] as DownloadPatchDTO['dataReceived'],
+			dataTotal: item[5] as DownloadPatchDTO['dataTotal'],
+			downloadSpeed: item[6] as DownloadPatchDTO['downloadSpeed'],
+			timeRemaining: item[7] as DownloadPatchDTO['timeRemaining'],
+		}));
+
+	return {
+		serverId: arr[0] as DownloadPatchMessagePackDTO['serverId'],
+		sequence: arr[1] as DownloadPatchMessagePackDTO['sequence'],
+		upserts,
+		deletedIds: (arr[3] as unknown[]).filter((item): item is string => typeof item === 'string'),
 	};
 }

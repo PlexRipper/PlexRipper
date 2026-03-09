@@ -14,9 +14,9 @@ public interface IReaparrDbContext : IDisposable
 
     public DbSet<PlexAccount> PlexAccounts { get; }
 
-    public DbSet<DownloadWorkerTask> DownloadWorkerTasks { get; }
+    public DbSet<DownloadTaskMovieFileLog> DownloadTaskMovieFileLogs { get; }
 
-    public DbSet<DownloadWorkerLog> DownloadWorkerTasksLogs { get; }
+    public DbSet<DownloadTaskTvShowEpisodeFileLog> DownloadTaskTvShowEpisodeFileLogs { get; }
 
     public DbSet<FolderPath> FolderPaths { get; }
 

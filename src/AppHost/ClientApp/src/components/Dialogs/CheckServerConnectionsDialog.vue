@@ -9,10 +9,12 @@
 			<ProgressComponent
 				class="q-ma-md"
 				circular-mode
+				data-cy="check-server-connection-dialog-progress"
+				:data-completed="totalPercentage === 100"
 				:percentage="totalPercentage"
 				:completed="totalPercentage === 100"
 				:text="getProgressText"
-				:indeterminate="plexServerNodes.length === 0" />
+				:indeterminate="!hasAnyProgress" />
 		</template>
 		<template #default>
 			<div>
@@ -34,9 +36,11 @@
 										v-if="isServer(node)"
 										name="mdi-server"
 										size="28px"
+										:data-cy="`check-server-connection-dialog-server-icon-${node.id}`"
 										class="q-mr-sm" />
 									<QConnectionIcon
 										v-else
+										:cy="`check-server-connection-dialog-connection-icon-${node.id}`"
 										:type="node.connectionType" />
 									<!-- Plex Server Connection Url	-->
 									<span
@@ -48,8 +52,8 @@
 										]"
 										:data-cy="
 											isServer(node)
-												? 'check-server-connections-dialog-server-title'
-												: 'check-server-connections-dialog-connection-title'
+												? `check-server-connections-dialog-server-title-${node.id}`
+												: `check-server-connections-dialog-connection-title-${node.id}`
 										">
 										{{ node.title }}
 									</span>
@@ -66,28 +70,33 @@
 									<QCol cols="3">
 										<QSpinnerRadio
 											v-if="!node.completed"
+											:data-cy="`check-server-connections-dialog-${node.id}`"
 											color="red"
 											size="2em" />
 										<QStatus
 											v-else
+											:cy="node.id.toString()"
 											:value="node.connectionSuccessful" />
 									</QCol>
 									<!-- Plex Server Connection Progress	-->
 									<QCol cols="9">
-										<template v-if="isServer(node) && node.completed">
+										<template v-if="isServer(node) && (node.connectionSuccessful || node.completed)">
 											<!-- No Plex Server Connection -->
 											<span
 												v-if="node.noConnections"
+												:data-cy="`check-server-connections-dialog-result-text-no-connections-${node.id}`"
 												:class="{ 'text-weight-bold': node.type === 'server' }">
 												{{ t('components.check-server-connections-dialog.no-connections') }}
 											</span>
 											<span
 												v-else-if="node.connectionSuccessful"
+												:data-cy="`check-server-connections-dialog-result-text-success-${node.id}`"
 												:class="{ 'text-weight-bold': node.type === 'server' }">
 												{{ t('components.check-server-connections-dialog.server-connectable') }}
 											</span>
 											<span
-												v-else
+												v-else-if="node.completed"
+												:data-cy="`check-server-connections-dialog-result-text-completed-${node.id}`"
 												:class="{ 'text-weight-bold': node.type === 'server' }">
 												{{ t('components.check-server-connections-dialog.server-un-connectable') }}
 											</span>
@@ -130,12 +139,14 @@ import {
 	useServerStore,
 	useSignalrStore,
 } from '#imports';
+import Log from 'consola';
 
 const { t } = useI18n();
 const serverStore = useServerStore();
 const connectionStore = useServerConnectionStore();
 const dialogStore = useDialogStore();
 const backgroundJobStore = useBackgroundJobsStore();
+const signalrStore = useSignalrStore();
 const connectionProgress = ref<ServerConnectionCheckStatusProgressDTO[]>([]);
 
 const expanded = ref<number[]>([]);
@@ -147,13 +158,18 @@ const completedCount = computed(() => {
 	return get(plexServerNodes).filter((progress) => progress.completed).length;
 });
 
+const hasAnyProgress = computed(() => get(connectionProgress).length > 0);
+
 const totalPercentage = computed(() => {
 	if (get(plexServerNodes).length === 0) {
 		return 0;
 	}
 	return clamp(Math.round((get(completedCount) / get(plexServerNodes).length) * 100), 0, 100);
 });
-const plexServers = computed(() => serverStore.getServers([...get(connectionProgress).map((x) => x.plexServerId), ...get(plexServerIds)].filter((x, i, a) => a.indexOf(x) == i)));
+const plexServers = computed(() => serverStore.getServers(get(activeServerIds)));
+const activeServerIds = computed(() => (get(plexServerIds).length > 0
+	? get(plexServerIds)
+	: [...new Set(get(connectionProgress).map((x) => x.plexServerId))]));
 
 const getProgressText = computed(() => {
 	if (get(plexServers).length === 0) {
@@ -178,6 +194,7 @@ const plexServerNodes = computed((): IPlexServerNode[] => {
 	let uniqueIndex = 0;
 
 	return get(plexServers).map((server) => {
+		const serverHasProgress = get(connectionProgress).some((x) => x.plexServerId === server.id);
 		const connections = connectionStore.getServerConnectionsByServerId(server.id);
 		const mappedConnections = connections.map((connection): IPlexServerNode => {
 			const progress = getConnectionProgress(connection.id, server.id);
@@ -197,14 +214,21 @@ const plexServerNodes = computed((): IPlexServerNode[] => {
 		});
 
 		const hasConnections = mappedConnections.length > 0;
+		const hasInProgressConnections = hasConnections && mappedConnections.some((connection) => !connection.completed);
+		const hasSuccessfulConnection = hasConnections
+			? mappedConnections.some((connection) => connection.connectionSuccessful)
+			: false;
 
 		return {
 			id: server.id,
 			index: uniqueIndex++,
 			type: 'server',
 			title: serverStore.getServerName(server.id),
-			completed: hasConnections ? mappedConnections.some((x) => x.completed) : true,
-			connectionSuccessful: hasConnections ? mappedConnections.some((connection) => connection.connectionSuccessful) : false,
+			completed: serverHasProgress
+				? (hasConnections ? !hasInProgressConnections : true)
+				: false,
+			connectionSuccessful: hasSuccessfulConnection,
+			hasInProgressConnections,
 			noConnections: !hasConnections,
 			children: mappedConnections,
 		};
@@ -233,23 +257,22 @@ function isServer(node: IPlexServerNode): boolean {
 }
 
 function onClosed(): void {
-	set(connectionProgress, []);
+	Log.debug('Resetting CheckServerConnectionsDialog');
 	set(plexServerIds, []);
+	set(connectionProgress, []);
+	set(expanded, []);
 }
 
 onMounted(() => {
 	useSubscription(
-		useSignalrStore()
+		signalrStore
 			.getAllServerConnectionProgress()
 			.subscribe((connections) => {
-				for (const connection of connections) {
-					const i = get(connectionProgress).findIndex((x) => x.plexServerConnectionId === connection.plexServerConnectionId);
-					if (i === -1) {
-						get(connectionProgress).push(connection);
-					} else {
-						get(connectionProgress)[i] = connection;
-					}
+				if (get(activeServerIds).length === 0) {
+					set(connectionProgress, []);
+					return;
 				}
+				set(connectionProgress, connections.filter((progress) => get(activeServerIds).includes(progress.plexServerId)));
 			}),
 	);
 
@@ -257,7 +280,7 @@ onMounted(() => {
 	useSubscription(
 		backgroundJobStore.getInspectPlexServerJobUpdate(JobStatus.Started)
 			.subscribe(({ data }) => {
-				get(plexServerIds).push(...data.plexServerIds);
+				set(plexServerIds, data.plexServerIds);
 
 				dialogStore.openCheckServerConnectionsDialog({
 					plexServersWithConnectionIds: data.plexServerIds.reduce(
@@ -281,6 +304,7 @@ interface IPlexServerNode {
 	connectionSuccessful: boolean;
 	progress?: ServerConnectionCheckStatusProgressDTO;
 	noConnections?: boolean;
+	hasInProgressConnections?: boolean;
 	local?: boolean;
 	connectionType?: PlexConnectionTypes;
 	children: IPlexServerNode[];

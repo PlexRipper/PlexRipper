@@ -52,23 +52,23 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
 
         // Act
         var result = await Sut.ExecuteAsync(cmd, CancellationToken);
-        Mock.Mock<INetworkSettings>().VerifyGet(x => x.Url, Times.Exactly(result.Channel.Items.Count));
+        Mock.Mock<INetworkSettings>().VerifyGet(x => x.Url, Times.Exactly(result.Value.Channel.Items.Count));
 
         // Assert
         // Response
         result.ShouldNotBeNull();
-        result.Channel.ShouldNotBeNull();
-        result.Channel.Title.ShouldBe("Reaparr Indexer");
-        result.Channel.Description.ShouldBe($"TV Search results for {cmd.Query}");
-        result.Channel.Language.ShouldBe("en-us");
-        result.Channel.Category.ShouldBe("search");
+        result.Value.Channel.ShouldNotBeNull();
+        result.Value.Channel.Title.ShouldBe("Reaparr Indexer");
+        result.Value.Channel.Description.ShouldBe($"TV Search results for {cmd.Query}");
+        result.Value.Channel.Language.ShouldBe("en-us");
+        result.Value.Channel.Category.ShouldBe("search");
 
-        result.Channel.Items.ShouldNotBeNull();
-        result.Channel.Items.Count.ShouldBe(expectedEpisodeTitles.Count);
-        result.Channel.Items.Select(i => i.Title).ToList().ShouldBe(expectedEpisodeTitles);
+        result.Value.Channel.Items.ShouldNotBeNull();
+        result.Value.Channel.Items.Count.ShouldBe(expectedEpisodeTitles.Count);
+        result.Value.Channel.Items.Select(i => i.Title).ToList().ShouldBe(expectedEpisodeTitles);
 
         // Strict per-item assertions
-        foreach (var item in result.Channel.Items)
+        foreach (var item in result.Value.Channel.Items)
         {
             item.Guid.ShouldNotBeNull();
             item.Guid.IsPermaLink.ShouldBe("false");
@@ -144,15 +144,15 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
 
         // Assert
         result.ShouldNotBeNull();
-        result.Channel.Items.ShouldNotBeEmpty();
+        result.Value.Channel.Items.ShouldNotBeEmpty();
         // All returned items should correspond to the selected episode
         result
-            .Channel.Items.All(i => i.Attributes.Any(a => a.Name == "season" && a.Value == seasonNumber.ToString()))
+            .Value.Channel.Items.All(i => i.Attributes.Any(a => a.Name == "season" && a.Value == seasonNumber.ToString()))
             .ShouldBeTrue();
         result
-            .Channel.Items.All(i => i.Attributes.Any(a => a.Name == "episode" && a.Value == episodeNumber.ToString()))
+            .Value.Channel.Items.All(i => i.Attributes.Any(a => a.Name == "episode" && a.Value == episodeNumber.ToString()))
             .ShouldBeTrue();
-        result.Channel.Items.All(i => i.Attributes.Any(a => a.Name == "imdb" && a.Value == imdb)).ShouldBeTrue();
+        result.Value.Channel.Items.All(i => i.Attributes.Any(a => a.Name == "imdb" && a.Value == imdb)).ShouldBeTrue();
 
         // Titles should equal the part file name used during mapping
         var expectedTitle = await dbContext
@@ -160,10 +160,10 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
             .OrderBy(d => d.PlexApiPartId)
             .Select(d => d.GetFileName)
             .FirstAsync(CancellationToken);
-        result.Channel.Items.Select(i => i.Title).Distinct().Single().ShouldBe(expectedTitle);
+        result.Value.Channel.Items.Select(i => i.Title).Distinct().Single().ShouldBe(expectedTitle);
 
         // URLs should point to the torrent download endpoint
-        result.Channel.Items.All(i => i.Link.Contains(PublicApiRoutes.DownloadTorrent)).ShouldBeTrue();
+        result.Value.Channel.Items.All(i => i.Link.Contains(PublicApiRoutes.DownloadTorrent)).ShouldBeTrue();
 
         // Database state (no mutations expected)
         var episodeExists = await dbContext.PlexTvShowEpisodes.AnyAsync(e => e.Id == episode.Id, CancellationToken);
@@ -213,15 +213,15 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
 
         // Assert
         result.ShouldNotBeNull();
-        result.Channel.Items.ShouldNotBeEmpty();
+        result.Value.Channel.Items.ShouldNotBeEmpty();
         result
-            .Channel.Items.All(i => i.Attributes.Any(a => a.Name == "season" && a.Value == seasonNumber.ToString()))
+            .Value.Channel.Items.All(i => i.Attributes.Any(a => a.Name == "season" && a.Value == seasonNumber.ToString()))
             .ShouldBeTrue();
         result
-            .Channel.Items.All(i => i.Attributes.Any(a => a.Name == "episode" && a.Value == episodeNumber.ToString()))
+            .Value.Channel.Items.All(i => i.Attributes.Any(a => a.Name == "episode" && a.Value == episodeNumber.ToString()))
             .ShouldBeTrue();
         result
-            .Channel.Items.All(i => i.Attributes.Any(a => a.Name == "tmdbid" && a.Value == tmdb.ToString()))
+            .Value.Channel.Items.All(i => i.Attributes.Any(a => a.Name == "tmdbid" && a.Value == tmdb.ToString()))
             .ShouldBeTrue();
     }
 
@@ -268,15 +268,15 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
 
         // Assert
         result.ShouldNotBeNull();
-        result.Channel.Items.ShouldNotBeEmpty();
+        result.Value.Channel.Items.ShouldNotBeEmpty();
         result
-            .Channel.Items.All(i => i.Attributes.Any(a => a.Name == "season" && a.Value == seasonNumber.ToString()))
+            .Value.Channel.Items.All(i => i.Attributes.Any(a => a.Name == "season" && a.Value == seasonNumber.ToString()))
             .ShouldBeTrue();
         result
-            .Channel.Items.All(i => i.Attributes.Any(a => a.Name == "episode" && a.Value == episodeNumber.ToString()))
+            .Value.Channel.Items.All(i => i.Attributes.Any(a => a.Name == "episode" && a.Value == episodeNumber.ToString()))
             .ShouldBeTrue();
         result
-            .Channel.Items.All(i => i.Attributes.Any(a => a.Name == "tvdbid" && a.Value == tvdb.ToString()))
+            .Value.Channel.Items.All(i => i.Attributes.Any(a => a.Name == "tvdbid" && a.Value == tvdb.ToString()))
             .ShouldBeTrue();
     }
 
@@ -313,7 +313,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
 
         // Assert
         result.ShouldNotBeNull();
-        result.Channel.Items.ShouldBeEmpty();
+        result.Value.Channel.Items.ShouldBeEmpty();
     }
 
     [Fact]
@@ -361,7 +361,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
 
         // Assert
         result.ShouldNotBeNull();
-        result.Channel.Items.Count.ShouldBe(expectedPartCount);
+        result.Value.Channel.Items.Count.ShouldBe(expectedPartCount);
     }
 
     [Fact]
@@ -396,7 +396,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
         var result = await Sut.ExecuteAsync(cmd, CancellationToken);
 
         // Assert
-        result.Channel.Items.ShouldBeEmpty();
+        result.Value.Channel.Items.ShouldBeEmpty();
     }
 
     [Fact]
@@ -693,13 +693,13 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
         var result = await Sut.ExecuteAsync(cmd, CancellationToken);
 
         // Assert
-        result.Channel.Items.ShouldNotBeEmpty();
-        result.Channel.Items.All(i => i.Attributes.Any(a => a.Name == "imdb" && a.Value == imdb)).ShouldBeTrue();
+        result.Value.Channel.Items.ShouldNotBeEmpty();
+        result.Value.Channel.Items.All(i => i.Attributes.Any(a => a.Name == "imdb" && a.Value == imdb)).ShouldBeTrue();
         result
-            .Channel.Items.All(i => i.Attributes.Any(a => a.Name == "tmdbid" && a.Value == tmdb.ToString()))
+            .Value.Channel.Items.All(i => i.Attributes.Any(a => a.Name == "tmdbid" && a.Value == tmdb.ToString()))
             .ShouldBeTrue();
         result
-            .Channel.Items.All(i => i.Attributes.Any(a => a.Name == "tvdbid" && a.Value == tvdb.ToString()))
+            .Value.Channel.Items.All(i => i.Attributes.Any(a => a.Name == "tvdbid" && a.Value == tvdb.ToString()))
             .ShouldBeTrue();
     }
 }

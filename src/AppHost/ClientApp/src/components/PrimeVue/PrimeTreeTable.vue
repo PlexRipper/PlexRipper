@@ -7,7 +7,6 @@
 		:rows-per-page-options="[10, 25, 50, 100]"
 		:selection-keys="selected"
 		:value="nodes"
-		auto-layout
 		paginator-position="both"
 		scroll-height="flex"
 		scrollable
@@ -17,7 +16,9 @@
 		<Column
 			expander
 			field="title"
-			header="Title">
+			header="Title"
+			:header-style="getColumnHeaderStyle('title')"
+			:body-style="getColumnBodyStyle('title')">
 			<template #header>
 				<QCheckbox
 					:model-value="headerSelected"
@@ -37,7 +38,8 @@
 		<Column
 			field="status"
 			header="Status"
-			style="max-width: 10rem">
+			:header-style="getColumnHeaderStyle('status')"
+			:body-style="getColumnBodyStyle('status')">
 			<template #body="{ node }: { node: IDownloadTableNode }">
 				<QText
 					:cy="`column-status-${node.id}`"
@@ -47,7 +49,8 @@
 		<Column
 			field="dataReceived"
 			header="Received"
-			style="max-width: 10rem">
+			:header-style="getColumnHeaderStyle('dataReceived')"
+			:body-style="getColumnBodyStyle('dataReceived')">
 			<template #body="{ node }: { node: IDownloadTableNode }">
 				<QFileSize
 					:cy="`column-dataReceived-${node.id}`"
@@ -57,7 +60,8 @@
 		<Column
 			field="dataTotal"
 			header="Size"
-			style="max-width: 10rem">
+			:header-style="getColumnHeaderStyle('dataTotal')"
+			:body-style="getColumnBodyStyle('dataTotal')">
 			<template #body="{ node }: { node: IDownloadTableNode }">
 				<QFileSize
 					:cy="`column-dataTotal-${node.id}`"
@@ -67,7 +71,8 @@
 		<Column
 			field="downloadSpeed"
 			header="Speed"
-			style="max-width: 10rem">
+			:header-style="getColumnHeaderStyle('downloadSpeed')"
+			:body-style="getColumnBodyStyle('downloadSpeed')">
 			<template #body="{ node }: { node: IDownloadTableNode }">
 				<QFileSize
 					:cy="`column-downloadSpeed-${node.id}`"
@@ -78,7 +83,8 @@
 		<Column
 			field="timeRemaining"
 			header="ETA"
-			style="max-width: 10rem">
+			:header-style="getColumnHeaderStyle('timeRemaining')"
+			:body-style="getColumnBodyStyle('timeRemaining')">
 			<template #body="{ node }: { node: IDownloadTableNode }">
 				<QDuration
 					:cy="`column-timeRemaining-${node.id}`"
@@ -89,7 +95,8 @@
 		<Column
 			field="percentage"
 			header="Percentage"
-			style="max-width: 10rem">
+			:header-style="getColumnHeaderStyle('percentage')"
+			:body-style="getColumnBodyStyle('percentage')">
 			<template #body="{ node }">
 				<QProgressBar
 					:cy="`column-percentage-${node.id}`"
@@ -99,7 +106,8 @@
 		<Column
 			field="actions"
 			header="Actions"
-			style="max-width: 15rem">
+			:header-style="getColumnHeaderStyle('actions')"
+			:body-style="getColumnBodyStyle('actions')">
 			<template #body="{ node }: { node: IDownloadTableNode }">
 				<QRow
 					justify="start"
@@ -137,7 +145,7 @@ import { kebabCase } from 'lodash-es';
 import { DownloadActions } from '@dto';
 import Convert from '@class/Convert';
 
-defineProps<{
+const props = defineProps<{
 	nodes: IDownloadTableNode[];
 	columns: QTreeViewTableHeader[];
 	headerSelected?: boolean | null;
@@ -145,6 +153,38 @@ defineProps<{
 	maxSelectionCount?: number;
 	notSelectable?: boolean;
 }>();
+
+const defaultColumnWidth = 140;
+
+function getColumnConfig(field: string): QTreeViewTableHeader | undefined {
+	return props.columns.find((column) => column.field === field);
+}
+
+function getColumnHeaderStyle(field: string): string {
+	return getColumnStyle(field, true);
+}
+
+function getColumnBodyStyle(field: string): string {
+	return getColumnStyle(field, false);
+}
+
+function getColumnStyle(field: string, isHeader: boolean): string {
+	const column = getColumnConfig(field);
+	const align = column?.align ?? (field === 'title' ? 'left' : 'right');
+
+	if (field === 'title') {
+		return `text-align: ${align};`;
+	}
+
+	const width = column?.width ?? defaultColumnWidth;
+	const widthStyles = `width: ${width}px; min-width: ${width}px; max-width: ${width}px;`;
+
+	if (isHeader) {
+		return `${widthStyles} text-align: ${align};`;
+	}
+
+	return `${widthStyles} text-align: ${align}; overflow: hidden; text-overflow: ellipsis;`;
+}
 
 function onSelectionChange(keys: IPTreeTableSelectionKeys) {
 	const filtered = Object.fromEntries(
@@ -196,6 +236,7 @@ const emits = defineEmits<{
 .p-treetable {
   table {
     white-space: nowrap;
+    table-layout: fixed;
     width: 100%;
   }
 

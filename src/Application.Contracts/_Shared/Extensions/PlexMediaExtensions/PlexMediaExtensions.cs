@@ -132,12 +132,13 @@ public static class PlexMediaExtensions
                 SeasonFolder = string.Empty,
                 KeepCompletedInDownloadFolder = keepCompletedInDownloadFolder,
             },
-            DownloadWorkerTasks = [],
             Parent = null,
             ParentId = Guid.Empty,
             DestinationFolderPathId = request.DestinationFolderPathId,
             FullTitle = $"{plexMovie.FullTitle}/{plexMediaData.GetFileName}",
             Title = plexMediaData.GetFileName,
+            DirectDownloadSnapshot = null,
+            DownloadClientType = PlexDownloadClientType.Direct,
         };
 
     public static DownloadTaskTvShowEpisodeFile MapToDownloadTask(
@@ -182,12 +183,13 @@ public static class PlexMediaExtensions
                 SeasonFolder = plexTvShowEpisode.TvShowSeason.Title.SanitizeFolderName(),
                 KeepCompletedInDownloadFolder = keepCompletedInDownloadFolder,
             },
-            DownloadWorkerTasks = [],
             Parent = null,
             ParentId = Guid.Empty,
             DestinationFolderPathId = request.DestinationFolderPathId,
             FullTitle = $"{plexTvShowEpisode.FullTitle}/{plexMediaData.GetFileName}",
             Title = plexMediaData.GetFileName,
+            DirectDownloadSnapshot = null,
+            DownloadClientType = PlexDownloadClientType.Direct,
         };
     }
 }

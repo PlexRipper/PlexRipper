@@ -61,11 +61,35 @@ public static partial class EnumMapperExtensions
         }
     }
 
-    public static NotificationLevel ToNotificationLevel(this DownloadStatus value) =>
-        value switch
+    public static NotificationLevel ToNotificationLevel(this DownloadStatus value)
+    {
+        switch (value)
         {
-            DownloadStatus.Error or DownloadStatus.ServerUnreachable or DownloadStatus.Unknown =>
-                NotificationLevel.Error,
-            var _ => NotificationLevel.Information,
-        };
+            case DownloadStatus.Error:
+            case DownloadStatus.ServerUnreachable:
+            case DownloadStatus.AuthError:
+            case DownloadStatus.StorageError:
+            case DownloadStatus.SourceUnavailable:
+            case DownloadStatus.DownloadClientError:
+            case DownloadStatus.IntegrityError:
+            case DownloadStatus.MoveError:
+                return NotificationLevel.Error;
+
+            case DownloadStatus.Downloading:
+            case DownloadStatus.DownloadFinished:
+            case DownloadStatus.Moving:
+            case DownloadStatus.MovePaused:
+            case DownloadStatus.MoveFinished:
+            case DownloadStatus.Completed:
+            case DownloadStatus.Paused:
+            case DownloadStatus.Stopped:
+            case DownloadStatus.Queued:
+            case DownloadStatus.Deleted:
+            case DownloadStatus.Unknown:
+                return NotificationLevel.Information;
+
+            default:
+                return NotificationLevel.Information;
+        }
+    }
 }

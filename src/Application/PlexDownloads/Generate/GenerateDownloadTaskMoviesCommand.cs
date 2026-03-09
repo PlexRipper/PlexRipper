@@ -122,9 +122,26 @@ public class GenerateDownloadTaskMoviesCommandHandler : ICommandHandler<Generate
             downloadTasks.SetRelationshipIds(plexServer.Id, plexLibrary.Id);
 
             _dbContext.DownloadTaskMovie.AddRange(downloadTasks);
+            await _dbContext.SaveChangesAsync(cancellationToken);
         }
 
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        var logs = new List<DownloadTaskMovieFileLog>();
+        foreach (var downloadTaskMovie in downloadTasks)
+        {
+            logs.AddRange(
+                downloadTaskMovie.Children.Select(downloadTaskMovieFile => new DownloadTaskMovieFileLog
+                {
+                    Status = DownloadStatus.Queued,
+                    LogLevel = NotificationLevel.Information,
+                    Message = $"DownloadTask {downloadTaskMovieFile.FileName} was queued for downloading",
+                    DownloadTaskFileId = downloadTaskMovieFile.Id,
+                    CreatedAt = DateTime.UtcNow,
+                    DownloadTaskMovieId = downloadTaskMovieFile.ParentId,
+                })
+            );
+        }
+
+        await _dbContext.CreateDownloadClientLogs(logs);
 
         return Result.Ok();
     }

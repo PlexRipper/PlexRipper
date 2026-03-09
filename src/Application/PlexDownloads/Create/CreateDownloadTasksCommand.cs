@@ -1,6 +1,7 @@
 using FastEndpoints;
 using FluentValidation;
 using Reaparr.Application.Contracts;
+using Reaparr.SignalR.Contracts;
 
 namespace Reaparr.Application;
 
@@ -17,12 +18,18 @@ public class CreateDownloadTasksCommandHandler : ICommandHandler<CreateDownloadT
 {
     private readonly ICommandExecutor _commandExecutor;
     private readonly IEventPublisher _eventPublisher;
+    private readonly INotificationHubService _notificationHubService;
     private bool _generatedTasks;
 
-    public CreateDownloadTasksCommandHandler(ICommandExecutor commandExecutor, IEventPublisher eventPublisher)
+    public CreateDownloadTasksCommandHandler(
+        ICommandExecutor commandExecutor,
+        IEventPublisher eventPublisher,
+        INotificationHubService notificationHubService
+    )
     {
         _commandExecutor = commandExecutor;
         _eventPublisher = eventPublisher;
+        _notificationHubService = notificationHubService;
     }
 
     public async Task<Result> ExecuteAsync(CreateDownloadTasksCommand command, CancellationToken cancellationToken)
@@ -77,6 +84,11 @@ public class CreateDownloadTasksCommandHandler : ICommandHandler<CreateDownloadT
                 .ToList();
 
             await _eventPublisher.PublishAsync(new CheckDownloadQueueEvent(uniquePlexServers), cancellationToken);
+
+            await _notificationHubService.SendRefreshNotificationAsync(
+                [RefreshDataType.DownloadTasks],
+                cancellationToken
+            );
         }
 
         return Result.Ok();

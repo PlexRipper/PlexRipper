@@ -485,7 +485,7 @@ namespace Reaparr.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnOrder(14);
 
-                    b.Property<long>("PlexApiRatingKey")
+                    b.Property<int>("PlexApiRatingKey")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(1);
 
@@ -512,7 +512,7 @@ namespace Reaparr.Data.Migrations
                     b.UseTpcMappingStrategy();
                 });
 
-            modelBuilder.Entity("Reaparr.Domain.DownloadWorkerLog", b =>
+            modelBuilder.Entity("Reaparr.Domain.DownloadTaskLogBase", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -521,99 +521,36 @@ namespace Reaparr.Data.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT")
-                        .HasColumnOrder(1);
-
-                    b.Property<Guid>("DownloadTaskId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("DownloadWorkerTaskId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnOrder(4);
 
                     b.Property<string>("LogLevel")
                         .IsRequired()
+                        .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
                         .IsUnicode(false)
                         .HasColumnType("TEXT")
-                        .HasColumnOrder(3);
+                        .HasDefaultValue("None")
+                        .HasColumnOrder(2);
 
                     b.Property<string>("Message")
                         .IsRequired()
                         .HasColumnType("TEXT")
-                        .HasColumnOrder(2);
+                        .HasColumnOrder(3);
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("DownloadWorkerTaskId");
-
-                    b.ToTable("DownloadWorkerTasksLogs");
-                });
-
-            modelBuilder.Entity("Reaparr.Domain.DownloadWorkerTask", b =>
-                {
-                    b.Property<int>("Id")
+                    b.Property<string>("Status")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(0);
-
-                    b.Property<long>("BytesReceived")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(7);
-
-                    b.Property<string>("DownloadDirectory")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(8);
-
-                    b.Property<long>("DownloadSpeed")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(11);
-
-                    b.Property<string>("DownloadStatus")
-                        .IsRequired()
                         .HasMaxLength(20)
                         .IsUnicode(false)
                         .HasColumnType("TEXT")
-                        .HasColumnOrder(5);
-
-                    b.Property<Guid>("DownloadTaskId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<long>("ElapsedTime")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(9);
-
-                    b.Property<long>("EndByte")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(4);
-
-                    b.Property<string>("FileLocationUrl")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(10);
-
-                    b.Property<string>("FileName")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
+                        .HasDefaultValue("Unknown")
                         .HasColumnOrder(1);
-
-                    b.Property<int>("PartIndex")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(2);
-
-                    b.Property<int>("PlexServerId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("StartByte")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(3);
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DownloadTaskId");
+                    b.ToTable((string)null);
 
-                    b.HasIndex("PlexServerId");
-
-                    b.ToTable("DownloadWorkerTasks");
+                    b.UseTpcMappingStrategy();
                 });
 
             modelBuilder.Entity("Reaparr.Domain.FolderPath", b =>
@@ -1421,7 +1358,7 @@ namespace Reaparr.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnOrder(5);
 
-                    b.Property<long>("PlexApiMediaId")
+                    b.Property<int>("PlexApiMediaId")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(2);
 
@@ -1505,6 +1442,10 @@ namespace Reaparr.Data.Migrations
                     b.Property<bool>("HttpsRequired")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(21);
+
+                    b.Property<bool>("IsDownloadsPausedByUser")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(16);
 
                     b.Property<bool>("IsEnabled")
                         .HasColumnType("INTEGER")
@@ -2064,7 +2005,7 @@ namespace Reaparr.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnOrder(5);
 
-                    b.Property<long>("PlexApiMediaId")
+                    b.Property<int>("PlexApiMediaId")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(2);
 
@@ -2359,11 +2300,24 @@ namespace Reaparr.Data.Migrations
                     b.Property<int?>("DestinationFolderPathId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("DirectDownloadSnapshot")
+                        .IsUnicode(true)
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(19);
+
                     b.Property<string>("DirectoryMeta")
                         .IsRequired()
                         .IsUnicode(true)
                         .HasColumnType("TEXT")
                         .HasColumnOrder(16);
+
+                    b.Property<string>("DownloadClientType")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(10)
+                        .IsUnicode(false)
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("Direct");
 
                     b.Property<long>("DownloadSpeed")
                         .HasColumnType("INTEGER")
@@ -2392,10 +2346,10 @@ namespace Reaparr.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnOrder(13);
 
-                    b.Property<long>("PlexApiMediaId")
+                    b.Property<int>("PlexApiMediaId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<long>("PlexApiPartId")
+                    b.Property<int>("PlexApiPartId")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("Quality")
@@ -2416,6 +2370,56 @@ namespace Reaparr.Data.Migrations
                         .HasColumnOrder(3);
 
                     b.ToTable((string)null);
+                });
+
+            modelBuilder.Entity("Reaparr.Domain.DownloadTaskMovieFileLog", b =>
+                {
+                    b.HasBaseType("Reaparr.Domain.DownloadTaskLogBase");
+
+                    b.Property<Guid>("DownloadTaskFileId")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(5);
+
+                    b.Property<Guid>("DownloadTaskMovieId")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(6);
+
+                    b.HasIndex("DownloadTaskFileId");
+
+                    b.HasIndex("DownloadTaskMovieId");
+
+                    b.ToTable("DownloadTaskMovieFileLogs");
+                });
+
+            modelBuilder.Entity("Reaparr.Domain.DownloadTaskTvShowEpisodeFileLog", b =>
+                {
+                    b.HasBaseType("Reaparr.Domain.DownloadTaskLogBase");
+
+                    b.Property<Guid>("DownloadTaskFileId")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(5);
+
+                    b.Property<Guid>("DownloadTaskTvShowEpisodeId")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(6);
+
+                    b.Property<Guid>("DownloadTaskTvShowId")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(8);
+
+                    b.Property<Guid>("DownloadTaskTvShowSeasonId")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(7);
+
+                    b.HasIndex("DownloadTaskFileId");
+
+                    b.HasIndex("DownloadTaskTvShowEpisodeId");
+
+                    b.HasIndex("DownloadTaskTvShowId");
+
+                    b.HasIndex("DownloadTaskTvShowSeasonId");
+
+                    b.ToTable("DownloadTaskTvShowEpisodeFileLogs");
                 });
 
             modelBuilder.Entity("Reaparr.Domain.DownloadTaskMovieFile", b =>
@@ -2568,36 +2572,6 @@ namespace Reaparr.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("PlexLibrary");
-
-                    b.Navigation("PlexServer");
-                });
-
-            modelBuilder.Entity("Reaparr.Domain.DownloadWorkerLog", b =>
-                {
-                    b.HasOne("Reaparr.Domain.DownloadWorkerTask", "DownloadWorkerTask")
-                        .WithMany("DownloadWorkerTaskLogs")
-                        .HasForeignKey("DownloadWorkerTaskId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("DownloadWorkerTask");
-                });
-
-            modelBuilder.Entity("Reaparr.Domain.DownloadWorkerTask", b =>
-                {
-                    b.HasOne("Reaparr.Domain.DownloadTaskFileBase", "DownloadTask")
-                        .WithMany("DownloadWorkerTasks")
-                        .HasForeignKey("DownloadTaskId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Reaparr.Domain.PlexServer", "PlexServer")
-                        .WithMany()
-                        .HasForeignKey("PlexServerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("DownloadTask");
 
                     b.Navigation("PlexServer");
                 });
@@ -3042,6 +3016,60 @@ namespace Reaparr.Data.Migrations
                     b.Navigation("PlexTvShowSeason");
                 });
 
+            modelBuilder.Entity("Reaparr.Domain.DownloadTaskMovieFileLog", b =>
+                {
+                    b.HasOne("Reaparr.Domain.DownloadTaskMovieFile", "DownloadTaskFile")
+                        .WithMany("Logs")
+                        .HasForeignKey("DownloadTaskFileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Reaparr.Domain.DownloadTaskMovie", "DownloadTaskMovie")
+                        .WithMany()
+                        .HasForeignKey("DownloadTaskMovieId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("DownloadTaskFile");
+
+                    b.Navigation("DownloadTaskMovie");
+                });
+
+            modelBuilder.Entity("Reaparr.Domain.DownloadTaskTvShowEpisodeFileLog", b =>
+                {
+                    b.HasOne("Reaparr.Domain.DownloadTaskTvShowEpisodeFile", "DownloadTaskFile")
+                        .WithMany("Logs")
+                        .HasForeignKey("DownloadTaskFileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Reaparr.Domain.DownloadTaskTvShowEpisode", "DownloadTaskTvShowEpisode")
+                        .WithMany()
+                        .HasForeignKey("DownloadTaskTvShowEpisodeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Reaparr.Domain.DownloadTaskTvShow", "DownloadTaskTvShow")
+                        .WithMany()
+                        .HasForeignKey("DownloadTaskTvShowId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Reaparr.Domain.DownloadTaskTvShowSeason", "DownloadTaskTvShowSeason")
+                        .WithMany()
+                        .HasForeignKey("DownloadTaskTvShowSeasonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("DownloadTaskFile");
+
+                    b.Navigation("DownloadTaskTvShow");
+
+                    b.Navigation("DownloadTaskTvShowEpisode");
+
+                    b.Navigation("DownloadTaskTvShowSeason");
+                });
+
             modelBuilder.Entity("Reaparr.Domain.DownloadTaskMovieFile", b =>
                 {
                     b.HasOne("Reaparr.Domain.DownloadTaskMovie", "Parent")
@@ -3100,11 +3128,6 @@ namespace Reaparr.Data.Migrations
                     b.Navigation("SimplePropertyTriggers");
 
                     b.Navigation("SimpleTriggers");
-                });
-
-            modelBuilder.Entity("Reaparr.Domain.DownloadWorkerTask", b =>
-                {
-                    b.Navigation("DownloadWorkerTaskLogs");
                 });
 
             modelBuilder.Entity("Reaparr.Domain.FolderPath", b =>
@@ -3168,9 +3191,14 @@ namespace Reaparr.Data.Migrations
                     b.Navigation("Qualities");
                 });
 
-            modelBuilder.Entity("Reaparr.Domain.DownloadTaskFileBase", b =>
+            modelBuilder.Entity("Reaparr.Domain.DownloadTaskMovieFile", b =>
                 {
-                    b.Navigation("DownloadWorkerTasks");
+                    b.Navigation("Logs");
+                });
+
+            modelBuilder.Entity("Reaparr.Domain.DownloadTaskTvShowEpisodeFile", b =>
+                {
+                    b.Navigation("Logs");
                 });
 
             modelBuilder.Entity("Reaparr.Domain.DownloadTaskMovie", b =>

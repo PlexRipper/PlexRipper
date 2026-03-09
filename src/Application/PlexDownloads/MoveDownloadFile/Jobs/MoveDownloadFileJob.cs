@@ -11,22 +11,25 @@ public class MoveDownloadFileJob : IJob
     private readonly ILogger _log;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IReaparrDbContext _dbContext;
+    private readonly IDownloadTaskUpdateDispatcher _downloadTaskUpdateDispatcher;
     private readonly IMoveDownloadFileQueue _moveDownloadFileQueue;
 
     public MoveDownloadFileJob(
         ILogger log,
         ICommandExecutor commandExecutor,
         IReaparrDbContext dbContext,
+        IDownloadTaskUpdateDispatcher downloadTaskUpdateDispatcher,
         IMoveDownloadFileQueue moveDownloadFileQueue
     )
     {
         _log = log.ForContext<MoveDownloadFileJob>();
         _commandExecutor = commandExecutor;
         _dbContext = dbContext;
+        _downloadTaskUpdateDispatcher = downloadTaskUpdateDispatcher;
         _moveDownloadFileQueue = moveDownloadFileQueue;
     }
 
-    public static string DownloadTaskIdParameter => "DownloadTaskId";
+    public const string DownloadTaskIdParameter = "DownloadTaskId";
 
     public static JobKey GetJobKey(Guid id) => new($"{DownloadTaskIdParameter}_{id}", nameof(MoveDownloadFileJob));
 
@@ -110,9 +113,12 @@ public class MoveDownloadFileJob : IJob
 
         if (downloadTask.DownloadStatus is DownloadStatus.MoveFinished)
         {
-            var updateStatusResult = await Result.Try(() =>
-                _dbContext.SetDownloadStatus(downloadTaskKey, DownloadStatus.Completed)
+            var updateStatusResult = await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
+                downloadTaskKey,
+                DownloadStatus.Completed,
+                ct
             );
+
             if (updateStatusResult.IsCancelled)
             {
                 _log.Here()
@@ -132,7 +138,7 @@ public class MoveDownloadFileJob : IJob
                 return;
             }
 
-            // Clean up the DownloadWorkerTasks
+            // Clean up the Download task folders
             var cleanupResult = await Result.Try(() =>
                 _commandExecutor.Send(new CleanUpDownloadTaskFoldersCommand(downloadTaskKey), ct)
             );
@@ -151,50 +157,6 @@ public class MoveDownloadFileJob : IJob
             if (cleanupResult.IsFailed)
             {
                 cleanupResult.LogError();
-                await QueueNextAsync();
-                return;
-            }
-
-            var deleteWorkerTasksResult = await Result.Try(() =>
-                _dbContext.DownloadWorkerTasks.Where(x => x.DownloadTaskId == downloadTask.Id).ExecuteDeleteAsync(ct)
-            );
-            if (deleteWorkerTasksResult.IsCancelled)
-            {
-                _log.Here()
-                    .Warning(
-                        "{JobName} for {DownloadTaskKey} was cancelled",
-                        nameof(MoveDownloadFileJob),
-                        downloadTaskKey
-                    );
-                await QueueNextAsync();
-                return;
-            }
-
-            if (deleteWorkerTasksResult.IsFailed)
-            {
-                deleteWorkerTasksResult.LogError();
-                await QueueNextAsync();
-                return;
-            }
-
-            var updatedResult = await Result.Try(() =>
-                _commandExecutor.Send(new DownloadTaskUpdatedCommand(downloadTaskKey), ct)
-            );
-            if (updatedResult.IsCancelled)
-            {
-                _log.Here()
-                    .Warning(
-                        "{JobName} for {DownloadTaskKey} was cancelled",
-                        nameof(MoveDownloadFileJob),
-                        downloadTaskKey
-                    );
-                await QueueNextAsync();
-                return;
-            }
-
-            if (updatedResult.IsFailed)
-            {
-                updatedResult.LogError();
                 await QueueNextAsync();
                 return;
             }

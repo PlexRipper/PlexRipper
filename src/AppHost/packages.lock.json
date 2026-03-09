@@ -123,6 +123,11 @@
         "resolved": "3.10.0",
         "contentHash": "Igph39WNImUFqQrpTeBDPafcCnM1u/8IooZHqMRF/5JdV5H78p+AbZkeYY1Nkz1WlbI/Gt2Hq/3rYh55jxRF9Q=="
       },
+      "Downloader": {
+        "type": "Transitive",
+        "resolved": "4.1.1",
+        "contentHash": "SRiN6eDLqI+0EdmzmYbYm+wwPrHPOlyQpXKDYTwal1LAn3MqKYcOn36e45UGh65axLE2R9F+p/37PFt09Tm73A=="
+      },
       "EFCore.BulkExtensions.Core": {
         "type": "Transitive",
         "resolved": "10.0.0",
@@ -725,6 +730,7 @@
       "Reaparr.Application": {
         "type": "Project",
         "dependencies": {
+          "Downloader": "[4.1.1, )",
           "FastEndpoints": "[7.1.1, )",
           "FastEndpoints.Security": "[7.1.1, )",
           "FastEndpoints.Swagger": "[7.1.1, )",

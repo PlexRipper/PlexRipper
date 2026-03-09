@@ -19,7 +19,7 @@ WORKDIR /tmp/ClientApp
 ## Copy the project files and install the dependencies
 COPY ./src/AppHost/ClientApp/ ./
 RUN bun install && bun run generate --fail-on-error
-   
+
 # Stage 2 - Build the .NET back-end
 FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0 AS back-end
 
@@ -90,11 +90,15 @@ RUN dotnet publish "AppHost.csproj" -c Release -o /app/publish \
     /p:InformationalVersion=${INFORMATIONAL_VERSION} \
     -p:UseAppHost=false
 
-# Stage 3 - Runtime Image
-FROM mcr.microsoft.com/dotnet/aspnet:10.0-noble AS dotnet-runtime
+# Stage 3a - .NET runtime (Alpine/musl-based; compatible with the Alpine final image)
+FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine AS dotnet-runtime
+
+# Stage 3b - glibc donor: Ubuntu noble ships glibc 2.39, satisfying dash-mpd-cli's >= 2.38 requirement.
+# This stage is never included in the final image; only individual .so files are bind-mounted from it.
+FROM ubuntu:24.04 AS glibc-source
 
 # Stage 4 - Final Image with s6-overlay
-FROM ghcr.io/linuxserver/baseimage-ubuntu:noble AS final
+FROM ghcr.io/linuxserver/baseimage-alpine:3.20 AS final
 
 ARG VERSION
 ARG INFORMATIONAL_VERSION
@@ -110,15 +114,46 @@ ENV DOTNET_ENVIRONMENT=Production
 ENV DOTNET_URLS=http://+:${PORT}
 ENV S6_SERVICES_GRACETIME=15000
 
-# Install dependencies
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        libicu74 libkrb5-3 libgcc-s1 libssl3t64 libstdc++6 zlib1g \
-        ffmpeg mkvtoolnix && \
-    rm -rf /var/lib/apt/lists/*
+# Install Alpine dependencies (.NET runtime deps + dash-mpd-cli helpers)
+RUN apk add --no-cache bash icu-libs krb5-libs libgcc libintl libssl3 libstdc++ zlib \
+    ffmpeg mkvtoolnix
 
 ## Copy .NET runtime from official image
 COPY --from=dotnet-runtime /usr/share/dotnet /usr/share/dotnet
+
+## Copy glibc from the Ubuntu noble stage so that dash-mpd-cli (glibc-linked, requires >= 2.38)
+## can execute on musl Alpine. Only the three libs the binary actually needs are copied.
+## /lib64/ld-linux-*.so.2 is the ELF interpreter the kernel invokes for glibc-linked executables.
+## dotnet itself uses the Alpine/musl runtime copied above, so there is no loader conflict.
+RUN --mount=type=bind,from=glibc-source,source=/lib,target=/mnt/glibc-src \
+    ARCH=$(uname -m) && \
+    case "${ARCH}" in \
+      x86_64) \
+        TRIPLE=x86_64-linux-gnu; \
+        LOADER=ld-linux-x86-64.so.2; \
+        LOADER_DEST=/lib64/${LOADER}; \
+        ;; \
+      aarch64) \
+        TRIPLE=aarch64-linux-gnu; \
+        LOADER=ld-linux-aarch64.so.1; \
+        LOADER_DEST=/lib/${LOADER}; \
+        ;; \
+      *) \
+        echo "Unsupported architecture: ${ARCH}"; \
+        exit 1; \
+        ;; \
+    esac && \
+    mkdir -p /lib/${TRIPLE} /lib64 && \
+    cp /mnt/glibc-src/${TRIPLE}/libc.so.6 /lib/${TRIPLE}/libc.so.6 && \
+    cp /mnt/glibc-src/${TRIPLE}/libm.so.6 /lib/${TRIPLE}/libm.so.6 && \
+    if [ -f "/mnt/glibc-src/${TRIPLE}/${LOADER}" ]; then \
+      cp "/mnt/glibc-src/${TRIPLE}/${LOADER}" "${LOADER_DEST}"; \
+    elif [ -f "/mnt/glibc-src/${LOADER}" ]; then \
+      cp "/mnt/glibc-src/${LOADER}" "${LOADER_DEST}"; \
+    else \
+      echo "Could not locate ${LOADER} in glibc donor stage"; \
+      exit 1; \
+    fi
 
 ## Make dotnet command available
 ENV PATH="$PATH:/usr/share/dotnet"
@@ -133,7 +168,7 @@ COPY docker/etc/ /etc/
 
 ### This fixes the permissions on the config directory and Reaparr crashes if it can't write to it
 COPY docker/10-config /etc/fix-attrs.d/10-config
-     
+
 EXPOSE ${PORT}
 VOLUME /Config /Downloads /Movies /TvShows
 

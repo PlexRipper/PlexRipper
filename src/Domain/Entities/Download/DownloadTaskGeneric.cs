@@ -79,8 +79,6 @@ public record DownloadTaskGeneric : IDownloadTaskProgress, IDownloadFileTransfer
     /// </summary>
     public required List<DownloadTaskGeneric> Children { get; set; } = [];
 
-    public required List<DownloadWorkerTask> DownloadWorkerTasks { get; init; } = [];
-
     public required Guid ParentId { get; init; }
 
     public required PlexServer? PlexServer { get; init; }

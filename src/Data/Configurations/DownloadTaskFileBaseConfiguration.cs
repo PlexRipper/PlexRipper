@@ -12,12 +12,6 @@ public class DownloadTaskFileBaseConfiguration : IEntityTypeConfiguration<Downlo
 
         builder.HasIndex(x => x.DownloadStatus);
 
-        builder
-            .HasMany(x => x.DownloadWorkerTasks)
-            .WithOne(x => x.DownloadTask)
-            .HasForeignKey(x => x.DownloadTaskId)
-            .OnDelete(DeleteBehavior.Cascade);
-
         // TODO:This can be removed once the EF Core issue is fixed: https://github.com/dotnet/efcore/issues/28443
         builder
             .Property(b => b.DirectoryMeta)
@@ -26,5 +20,20 @@ public class DownloadTaskFileBaseConfiguration : IEntityTypeConfiguration<Downlo
                 x => JsonSerializer.Deserialize<DownloadTaskDirectory>(x, DefaultJsonSerializerOptions.ConfigStandard)!
             )
             .IsUnicode();
+
+        builder
+            .Property(b => b.DirectDownloadSnapshot)
+            .HasConversion(
+                x => JsonSerializer.Serialize(x, DefaultJsonSerializerOptions.ConfigStandard),
+                x => JsonSerializer.Deserialize<DirectDownloadSnapshot>(x, DefaultJsonSerializerOptions.ConfigStandard)!
+            )
+            .IsUnicode();
+
+        builder
+            .Property(b => b.DownloadClientType)
+            .HasMaxLength(10)
+            .HasConversion(x => x.ToPlexDownloadClientTypeString(), x => x.ToPlexDownloadClientType())
+            .HasDefaultValue(PlexDownloadClientType.Direct)
+            .IsUnicode(false);
     }
 }

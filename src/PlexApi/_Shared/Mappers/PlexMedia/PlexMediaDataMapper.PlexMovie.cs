@@ -45,8 +45,9 @@ public static partial class PlexMediaDataMapper
             Genres = source.Genre.ToPlexGenre(),
             MediaDataList = source.Media.ToMovieMediaDataList(source),
 
+            FullTitle = $"{source.Title} ({source.Year})",
+
             // Ignore the following
-            FullTitle = string.Empty,
             PlexLibraryId = 0,
             PlexServerId = 0,
             FullBannerUrl = string.Empty,

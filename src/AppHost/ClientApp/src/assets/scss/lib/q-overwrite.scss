@@ -77,7 +77,15 @@ body {
 // * QTooltip
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 .q-tooltip {
-  @extend .blur
+  border: 1px solid rgba(255, 64, 64, 0.9);
+  border-radius: 8px;
+  background: rgba(32, 8, 8, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow:
+    0 0 0 1px rgba(255, 40, 40, 0.35),
+    0 0 14px rgba(255, 40, 40, 0.55),
+    0 0 26px rgba(255, 32, 32, 0.35);
 }
 
 
@@ -181,4 +189,3 @@ body {
     background: var(--scrollbar-thumb-hover-dark);
   }
 }
-

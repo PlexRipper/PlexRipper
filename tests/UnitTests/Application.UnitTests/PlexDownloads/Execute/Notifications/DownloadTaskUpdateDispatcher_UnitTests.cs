@@ -1,0 +1,379 @@
+using Microsoft.EntityFrameworkCore;
+using Reaparr.SignalR.Contracts;
+
+namespace Reaparr.Application.UnitTests;
+
+public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUpdateDispatcher>
+{
+    public DownloadTaskUpdateDispatcherUnitTests(ITestOutputHelper output)
+        : base(output) { }
+
+    [Fact]
+    public async Task ShouldIncludeSeasonAndTvShowInPatch_WhenEpisodeProgressIsUpdated()
+    {
+        // Arrange
+        await SetupDatabase(
+            84321,
+            config =>
+            {
+                config.TvShowDownloadTasksCount = 1;
+                config.TvShowSeasonDownloadTasksCount = 1;
+                config.TvShowEpisodeDownloadTasksCount = 1;
+            }
+        );
+
+        var episodeFile = await IDbContext.DownloadTaskTvShowEpisodeFile.FirstAsync(CancellationToken);
+        var season = await IDbContext.DownloadTaskTvShowSeason.FirstAsync(CancellationToken);
+        var tvShow = await IDbContext.DownloadTaskTvShow.FirstAsync(CancellationToken);
+
+        var capturedPatches = new List<IReadOnlyCollection<DownloadPatchDTO>>();
+        Mock.Mock<IDownloadHubService>()
+            .Setup(x =>
+                x.SendDownloadPatchAsync(
+                    It.IsAny<int>(),
+                    It.IsAny<long>(),
+                    It.IsAny<IReadOnlyCollection<DownloadPatchDTO>>(),
+                    It.IsAny<IReadOnlyCollection<Guid>?>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Callback<int, long, IReadOnlyCollection<DownloadPatchDTO>, IReadOnlyCollection<Guid>?, CancellationToken>(
+                (_, _, upserts, _, _) => capturedPatches.Add(upserts)
+            )
+            .Returns(Task.CompletedTask);
+
+        var sut = Sut;
+
+        // Act
+        var progressResult = sut.OnProgressUpdated(
+            episodeFile.ToKey(),
+            new DownloadTaskProgress
+            {
+                DataTotal = 1000,
+                DataReceived = 500,
+                Percentage = 50,
+                DownloadSpeed = 100,
+            }
+        );
+
+        progressResult.IsSuccess.ShouldBeTrue();
+
+        await sut.StartAsync(CancellationToken.None);
+
+        for (var i = 0; i < 30 && capturedPatches.Count == 0; i++)
+        {
+            await Task.Delay(100, CancellationToken);
+        }
+
+        await sut.StopAsync(CancellationToken.None);
+
+        // Assert
+        capturedPatches.ShouldNotBeEmpty();
+
+        var patchIds = capturedPatches.SelectMany(x => x).Select(x => x.Id).ToHashSet();
+        patchIds.ShouldContain(episodeFile.Id);
+        patchIds.ShouldContain(season.Id);
+        patchIds.ShouldContain(tvShow.Id);
+    }
+
+    [Fact]
+    public async Task ShouldSendOnlyLatestProgress_WhenMultipleUpdatesAreBufferedBeforeFlush()
+    {
+        await SetupDatabase(
+            84322,
+            config =>
+            {
+                config.TvShowDownloadTasksCount = 1;
+                config.TvShowSeasonDownloadTasksCount = 1;
+                config.TvShowEpisodeDownloadTasksCount = 1;
+            }
+        );
+
+        var episodeFile = await IDbContext.DownloadTaskTvShowEpisodeFile.FirstAsync(CancellationToken);
+
+        var capturedPatches = new List<IReadOnlyCollection<DownloadPatchDTO>>();
+        Mock.Mock<IDownloadHubService>()
+            .Setup(x =>
+                x.SendDownloadPatchAsync(
+                    It.IsAny<int>(),
+                    It.IsAny<long>(),
+                    It.IsAny<IReadOnlyCollection<DownloadPatchDTO>>(),
+                    It.IsAny<IReadOnlyCollection<Guid>?>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Callback<int, long, IReadOnlyCollection<DownloadPatchDTO>, IReadOnlyCollection<Guid>?, CancellationToken>(
+                (_, _, upserts, _, _) => capturedPatches.Add(upserts)
+            )
+            .Returns(Task.CompletedTask);
+
+        var sut = Sut;
+
+        sut.OnProgressUpdated(
+            episodeFile.ToKey(),
+            new DownloadTaskProgress
+            {
+                DataTotal = 1000,
+                DataReceived = 100,
+                Percentage = 10,
+                DownloadSpeed = 10,
+            }
+        );
+        sut.OnProgressUpdated(
+            episodeFile.ToKey(),
+            new DownloadTaskProgress
+            {
+                DataTotal = 1000,
+                DataReceived = 900,
+                Percentage = 90,
+                DownloadSpeed = 90,
+            }
+        );
+
+        await sut.StartAsync(CancellationToken.None);
+
+        await WaitForPatchCount(capturedPatches, 1);
+        await sut.StopAsync(CancellationToken.None);
+
+        var leafPatch = capturedPatches.SelectMany(x => x).FirstOrDefault(x => x.Id == episodeFile.Id);
+
+        leafPatch.ShouldNotBeNull();
+        leafPatch!.DataReceived.ShouldBe(900);
+        leafPatch.Percentage.ShouldBe(90);
+    }
+
+    [Fact]
+    public async Task ShouldNotSendPatch_WhenProgressIsUpdatedForUnknownKey()
+    {
+        var capturedPatches = new List<IReadOnlyCollection<DownloadPatchDTO>>();
+        Mock.Mock<IDownloadHubService>()
+            .Setup(x =>
+                x.SendDownloadPatchAsync(
+                    It.IsAny<int>(),
+                    It.IsAny<long>(),
+                    It.IsAny<IReadOnlyCollection<DownloadPatchDTO>>(),
+                    It.IsAny<IReadOnlyCollection<Guid>?>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Callback<int, long, IReadOnlyCollection<DownloadPatchDTO>, IReadOnlyCollection<Guid>?, CancellationToken>(
+                (_, _, upserts, _, _) => capturedPatches.Add(upserts)
+            )
+            .Returns(Task.CompletedTask);
+
+        var sut = Sut;
+        var result = sut.OnProgressUpdated(
+            new DownloadTaskKey
+            {
+                Id = Guid.NewGuid(),
+                PlexServerId = 1,
+                PlexLibraryId = 1,
+                Type = DownloadTaskType.EpisodeData,
+            },
+            new DownloadTaskProgress
+            {
+                DataTotal = 10,
+                DataReceived = 5,
+                Percentage = 50,
+                DownloadSpeed = 1,
+            }
+        );
+
+        result.IsSuccess.ShouldBeTrue();
+
+        await sut.StartAsync(CancellationToken.None);
+        await Task.Delay(1500, CancellationToken);
+        await sut.StopAsync(CancellationToken.None);
+
+        capturedPatches.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task ShouldIncreasePatchSequence_WhenMultiplePatchesAreDispatchedForSameServer()
+    {
+        await SetupDatabase(84323, config => config.MovieDownloadTasksCount = 1);
+        var movieFile = await IDbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+
+        var sequences = new List<long>();
+        Mock.Mock<IDownloadHubService>()
+            .Setup(x =>
+                x.SendDownloadPatchAsync(
+                    It.IsAny<int>(),
+                    It.IsAny<long>(),
+                    It.IsAny<IReadOnlyCollection<DownloadPatchDTO>>(),
+                    It.IsAny<IReadOnlyCollection<Guid>?>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Callback<int, long, IReadOnlyCollection<DownloadPatchDTO>, IReadOnlyCollection<Guid>?, CancellationToken>(
+                (_, sequence, _, _, _) => sequences.Add(sequence)
+            )
+            .Returns(Task.CompletedTask);
+
+        var sut = Sut;
+        await sut.StartAsync(CancellationToken.None);
+
+        await sut.OnStatusChangedAsync(movieFile.ToKey(), DownloadStatus.Downloading, CancellationToken);
+        await sut.OnStatusChangedAsync(movieFile.ToKey(), DownloadStatus.Paused, CancellationToken);
+
+        await WaitForPatchCount(sequences, 2);
+        await sut.StopAsync(CancellationToken.None);
+
+        sequences.Count.ShouldBeGreaterThanOrEqualTo(2);
+        sequences[1].ShouldBeGreaterThan(sequences[0]);
+    }
+
+    [Fact]
+    public async Task ShouldIncludeSeasonAndTvShowInPatch_WhenEpisodeStatusChanges()
+    {
+        await SetupDatabase(
+            84324,
+            config =>
+            {
+                config.TvShowDownloadTasksCount = 1;
+                config.TvShowSeasonDownloadTasksCount = 1;
+                config.TvShowEpisodeDownloadTasksCount = 1;
+            }
+        );
+
+        var episodeFile = await IDbContext.DownloadTaskTvShowEpisodeFile.FirstAsync(CancellationToken);
+        var season = await IDbContext.DownloadTaskTvShowSeason.FirstAsync(CancellationToken);
+        var tvShow = await IDbContext.DownloadTaskTvShow.FirstAsync(CancellationToken);
+
+        var capturedPatches = new List<IReadOnlyCollection<DownloadPatchDTO>>();
+        Mock.Mock<IDownloadHubService>()
+            .Setup(x =>
+                x.SendDownloadPatchAsync(
+                    It.IsAny<int>(),
+                    It.IsAny<long>(),
+                    It.IsAny<IReadOnlyCollection<DownloadPatchDTO>>(),
+                    It.IsAny<IReadOnlyCollection<Guid>?>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Callback<int, long, IReadOnlyCollection<DownloadPatchDTO>, IReadOnlyCollection<Guid>?, CancellationToken>(
+                (_, _, upserts, _, _) => capturedPatches.Add(upserts)
+            )
+            .Returns(Task.CompletedTask);
+
+        var sut = Sut;
+        await sut.StartAsync(CancellationToken.None);
+
+        var result = await sut.OnStatusChangedAsync(episodeFile.ToKey(), DownloadStatus.Downloading, CancellationToken);
+
+        result.IsSuccess.ShouldBeTrue();
+        await WaitForPatchCount(capturedPatches, 1);
+        await sut.StopAsync(CancellationToken.None);
+
+        var patchIds = capturedPatches.SelectMany(x => x).Select(x => x.Id).ToHashSet();
+        patchIds.ShouldContain(episodeFile.Id);
+        patchIds.ShouldContain(season.Id);
+        patchIds.ShouldContain(tvShow.Id);
+    }
+
+    [Fact]
+    public async Task ShouldRetryBufferedProgress_WhenFirstPatchSendFails()
+    {
+        await SetupDatabase(84325, config => config.MovieDownloadTasksCount = 1);
+        var movieFile = await IDbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+
+        var attempts = 0;
+        var capturedPatches = new List<IReadOnlyCollection<DownloadPatchDTO>>();
+        Mock.Mock<IDownloadHubService>()
+            .Setup(x =>
+                x.SendDownloadPatchAsync(
+                    It.IsAny<int>(),
+                    It.IsAny<long>(),
+                    It.IsAny<IReadOnlyCollection<DownloadPatchDTO>>(),
+                    It.IsAny<IReadOnlyCollection<Guid>?>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Callback<int, long, IReadOnlyCollection<DownloadPatchDTO>, IReadOnlyCollection<Guid>?, CancellationToken>(
+                (_, _, upserts, _, _) =>
+                {
+                    attempts++;
+                    if (attempts == 1)
+                        throw new InvalidOperationException("simulated send failure");
+
+                    capturedPatches.Add(upserts);
+                }
+            )
+            .Returns(Task.CompletedTask);
+
+        var sut = Sut;
+        sut.OnProgressUpdated(
+            movieFile.ToKey(),
+            new DownloadTaskProgress
+            {
+                DataTotal = 1000,
+                DataReceived = 500,
+                Percentage = 50,
+                DownloadSpeed = 10,
+            }
+        );
+
+        await sut.StartAsync(CancellationToken.None);
+        await WaitForPatchCount(capturedPatches, 1);
+        await sut.StopAsync(CancellationToken.None);
+
+        attempts.ShouldBeGreaterThanOrEqualTo(2);
+        capturedPatches.ShouldNotBeEmpty();
+    }
+
+    [Fact]
+    public async Task ShouldIncreaseSequenceAcrossMixedStatusAndProgressPatches()
+    {
+        await SetupDatabase(84326, config => config.MovieDownloadTasksCount = 1);
+        var movieFile = await IDbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+
+        var sequences = new List<long>();
+        Mock.Mock<IDownloadHubService>()
+            .Setup(x =>
+                x.SendDownloadPatchAsync(
+                    It.IsAny<int>(),
+                    It.IsAny<long>(),
+                    It.IsAny<IReadOnlyCollection<DownloadPatchDTO>>(),
+                    It.IsAny<IReadOnlyCollection<Guid>?>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Callback<int, long, IReadOnlyCollection<DownloadPatchDTO>, IReadOnlyCollection<Guid>?, CancellationToken>(
+                (_, sequence, _, _, _) => sequences.Add(sequence)
+            )
+            .Returns(Task.CompletedTask);
+
+        var sut = Sut;
+        await sut.StartAsync(CancellationToken.None);
+
+        await sut.OnStatusChangedAsync(movieFile.ToKey(), DownloadStatus.Downloading, CancellationToken);
+        sut.OnProgressUpdated(
+            movieFile.ToKey(),
+            new DownloadTaskProgress
+            {
+                DataTotal = 2000,
+                DataReceived = 1200,
+                Percentage = 60,
+                DownloadSpeed = 100,
+            }
+        );
+
+        await WaitForPatchCount(sequences, 2);
+        await sut.StopAsync(CancellationToken.None);
+
+        sequences.Count.ShouldBeGreaterThanOrEqualTo(2);
+        sequences.Distinct().Count().ShouldBe(sequences.Count);
+
+        var orderedSequences = sequences.OrderBy(x => x).ToList();
+        for (var i = 1; i < orderedSequences.Count; i++)
+            orderedSequences[i].ShouldBe(orderedSequences[i - 1] + 1);
+    }
+
+    private async Task WaitForPatchCount<T>(ICollection<T> collection, int expectedCount)
+    {
+        for (var i = 0; i < 40 && collection.Count < expectedCount; i++)
+            await Task.Delay(100, CancellationToken);
+
+        collection.Count.ShouldBeGreaterThanOrEqualTo(expectedCount);
+    }
+}

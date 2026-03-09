@@ -104,6 +104,41 @@ public class DownloadQueueCheckDownloadQueueUnitTests : BaseUnitTest<DownloadQue
     }
 
     [Fact]
+    public async Task ShouldNotStartDownloads_WhenServerIsPausedByUser()
+    {
+        // Arrange
+        await SetupDatabase(
+            70112,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 1;
+                config.MovieCount = 2;
+                config.MovieDownloadTasksCount = 2;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var server = await dbContext.PlexServers.AsTracking().FirstAsync(CancellationToken);
+        server.IsDownloadsPausedByUser = true;
+        await dbContext.SaveChangesAsync(CancellationToken);
+
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>()))
+            .ReturnOk()
+            .Verifiable(Times.Never);
+
+        // Act
+        var result = await Sut.CheckDownloadQueueServer(server.Id);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldBeNull();
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Verify(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>()), Times.Never);
+    }
+
+    [Fact]
     public async Task ShouldHaveOneDownloadTaskStarted_WhenGivenMovieDownloadTasks()
     {
         // Arrange

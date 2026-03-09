@@ -17,6 +17,12 @@ public static class DownloadTaskPhaseExtensions
             case DownloadStatus.Stopped:
             case DownloadStatus.Deleted:
             case DownloadStatus.ServerUnreachable:
+            case DownloadStatus.AuthError:
+            case DownloadStatus.StorageError:
+            case DownloadStatus.SourceUnavailable:
+            case DownloadStatus.DownloadClientError:
+            case DownloadStatus.IntegrityError:
+            case DownloadStatus.Restarting:
                 return DownloadTaskPhase.Downloading;
 
             case DownloadStatus.DownloadFinished:
@@ -47,6 +53,7 @@ public static class DownloadTaskPhaseExtensions
                 fileTransferProgress.FileDataTransferred,
                 downloadTaskProgress.DataTotal
             ),
+            DownloadTaskPhase.Completed => 100m,
             _ => DataFormat.GetPercentage(downloadTaskProgress.DataReceived, downloadTaskProgress.DataTotal),
         };
 

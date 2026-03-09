@@ -7,12 +7,18 @@ public static class DownloadTaskActions
     private static readonly DownloadStatus[] _anyStatuses =
     [
         DownloadStatus.ServerUnreachable,
+        DownloadStatus.AuthError,
+        DownloadStatus.StorageError,
+        DownloadStatus.SourceUnavailable,
+        DownloadStatus.DownloadClientError,
+        DownloadStatus.IntegrityError,
         DownloadStatus.Error,
         DownloadStatus.MoveError,
+        DownloadStatus.Downloading,
         DownloadStatus.Paused,
         DownloadStatus.MovePaused,
         DownloadStatus.Stopped,
-        DownloadStatus.Downloading,
+        DownloadStatus.Restarting,
         DownloadStatus.Queued,
         DownloadStatus.Moving,
         DownloadStatus.MoveFinished,
@@ -60,11 +66,31 @@ public static class DownloadTaskActions
                 actions.Add(DownloadActions.Restart);
                 actions.Add(DownloadActions.Delete);
                 break;
+            case DownloadStatus.Restarting:
+                actions.Add(DownloadActions.Stop);
+                actions.Add(DownloadActions.Delete);
+                break;
             case DownloadStatus.Moving:
                 actions.Add(DownloadActions.Pause);
                 actions.Add(DownloadActions.Stop);
                 break;
             case DownloadStatus.Error:
+                actions.Add(DownloadActions.Restart);
+                actions.Add(DownloadActions.Delete);
+                break;
+            case DownloadStatus.AuthError:
+                actions.Add(DownloadActions.Start);
+                actions.Add(DownloadActions.Delete);
+                break;
+            case DownloadStatus.StorageError:
+                actions.Add(DownloadActions.Start);
+                actions.Add(DownloadActions.Delete);
+                break;
+            case DownloadStatus.SourceUnavailable:
+                actions.Add(DownloadActions.Delete);
+                break;
+            case DownloadStatus.DownloadClientError:
+            case DownloadStatus.IntegrityError:
                 actions.Add(DownloadActions.Restart);
                 actions.Add(DownloadActions.Delete);
                 break;
@@ -93,7 +119,7 @@ public static class DownloadTaskActions
     /// <returns>The aggregated <see cref="DownloadStatus"/>.</returns>
     public static DownloadStatus Aggregate(List<DownloadStatus> downloadStatusList)
     {
-        if (!downloadStatusList.Any())
+        if (downloadStatusList.Count == 0)
         {
             _log.Here()
                 .Warning(
@@ -103,15 +129,28 @@ public static class DownloadTaskActions
             return DownloadStatus.Unknown;
         }
 
-        // Only return this status if all statuses are the same.
-        var allStatuses = Enum.GetValues<DownloadStatus>().ToList();
-        foreach (var status in allStatuses.Where(status => downloadStatusList.All(x => x == status)))
-            return status;
+        var firstStatus = downloadStatusList[0];
+        var isAllSameStatus = true;
+        ulong statusMask = 0;
+
+        foreach (var status in downloadStatusList)
+        {
+            if (status != firstStatus)
+                isAllSameStatus = false;
+
+            statusMask |= 1UL << (int)status;
+        }
+
+        if (isAllSameStatus)
+            return firstStatus;
 
         // If any of these statuses are present, return that status.
         // Earlier statuses take precedence.
-        foreach (var status in _anyStatuses.Where(status => downloadStatusList.Any(x => x == status)))
-            return status;
+        foreach (var status in _anyStatuses)
+        {
+            if ((statusMask & (1UL << (int)status)) != 0)
+                return status;
+        }
 
         _log.Here()
             .Error("Unable to determine the aggregate status of the download tasks. {StatusList}", downloadStatusList);

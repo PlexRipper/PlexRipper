@@ -91,6 +91,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
             _log.Here().Warning("No episodes found for media IDs: {MediaIds}", string.Join(", ", episodeIds));
         }
 
+        var downloadTasks = new List<DownloadTaskTvShowEpisodeFile>();
         foreach (var tvShowEpisode in plexEpisodes)
         {
             var plexTvShow = tvShowEpisode.TvShow!;
@@ -155,10 +156,41 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
             // Process episode media data
             var processResult = ProcessEpisodeMediaData(tvShowEpisode, episodeDownloadTask, downloadMediaDto, request);
             if (processResult.IsFailed)
+            {
                 processResult.LogError();
+                continue;
+            }
+
+            downloadTasks.Add(processResult.Value);
         }
 
-        return (await Result.Try(() => _dbContext.SaveChangesAsync(ct))).ToResult();
+        var saveResult = await Result.Try(() => _dbContext.SaveChangesAsync(ct));
+        if (saveResult.IsFailed)
+        {
+            return saveResult.LogError();
+        }
+
+        var logs = new List<DownloadTaskTvShowEpisodeFileLog>();
+
+        logs.AddRange(
+            downloadTasks.Select(downloadTaskTvShowEpisodeFile => new DownloadTaskTvShowEpisodeFileLog
+            {
+                Status = DownloadStatus.Queued,
+                LogLevel = NotificationLevel.Information,
+                Message = $"DownloadTask {downloadTaskTvShowEpisodeFile.FileName} was queued for downloading",
+                DownloadTaskFileId = downloadTaskTvShowEpisodeFile.Id,
+                DownloadTaskTvShowEpisodeId = downloadTaskTvShowEpisodeFile.ParentId,
+                DownloadTaskTvShowSeasonId =
+                    downloadTaskTvShowEpisodeFile.Parent?.Parent?.Id ?? throw new ArgumentNullException(),
+                DownloadTaskTvShowId =
+                    downloadTaskTvShowEpisodeFile.Parent?.Parent?.Parent?.Id ?? throw new ArgumentNullException(),
+                CreatedAt = DateTime.UtcNow,
+            })
+        );
+
+        await _dbContext.CreateDownloadClientLogs(logs);
+
+        return Result.Ok();
     }
 
     private async Task<DownloadTaskTvShow?> GetOrCreateTvShowDownloadTaskAsync(
@@ -215,7 +247,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
         return downloadTaskTvShowSeason;
     }
 
-    private Result ProcessEpisodeMediaData(
+    private Result<DownloadTaskTvShowEpisodeFile> ProcessEpisodeMediaData(
         PlexTvShowEpisode tvShowEpisode,
         DownloadTaskTvShowEpisode episodeDownloadTask,
         DownloadMediaDTO downloadMediaDto,
@@ -241,7 +273,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
         episodeDownloadTask.Children.Add(downloadFiles);
         _dbContext.DownloadTaskTvShowEpisodeFile.AddRange(downloadFiles);
 
-        return Result.Ok();
+        return Result.Ok(downloadFiles);
     }
 
     /// <summary>

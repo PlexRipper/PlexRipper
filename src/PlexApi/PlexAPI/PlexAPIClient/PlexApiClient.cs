@@ -191,29 +191,6 @@ public class PlexApiClient : IPlexApiClient
         return response;
     }
 
-    public async Task<ThrottledStream?> DownloadStreamAsync(
-        HttpRequestMessage request,
-        int downloadSpeedLimit,
-        CancellationToken cancellationToken
-    )
-    {
-        var response = await SendAsync(request);
-        if (response.IsSuccessStatusCode)
-        {
-            var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-            return new ThrottledStream(stream, downloadSpeedLimit);
-        }
-
-        _log.Here()
-            .Error(
-                "Failed to download stream from {Url} with reason: {Reason}",
-                request.RequestUri?.ToString(),
-                response.ReasonPhrase
-            );
-
-        return null;
-    }
-
     public async Task<HttpRequestMessage> CloneAsync(HttpRequestMessage request)
     {
         var clone = new HttpRequestMessage(request.Method, request.RequestUri);

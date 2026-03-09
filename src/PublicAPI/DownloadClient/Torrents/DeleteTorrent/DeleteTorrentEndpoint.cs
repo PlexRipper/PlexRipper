@@ -31,12 +31,7 @@ public sealed class DeleteTorrentRequestValidator : Validator<DeleteTorrentReque
             .Must(raw =>
                 string.IsNullOrWhiteSpace(raw)
                 || string.Equals(raw, "all", StringComparison.OrdinalIgnoreCase)
-                || raw.Split(
-                        ['|', ',', ';', ' ', '\t', '\r', '\n'],
-                        StringSplitOptions.RemoveEmptyEntries
-                    )
-                    .Length
-                    > 0
+                || raw.Split(['|', ',', ';', ' ', '\t', '\r', '\n'], StringSplitOptions.RemoveEmptyEntries).Length > 0
             )
             .WithMessage("Hashes must be 'all' or a delimited list of hashes.");
     }
@@ -158,7 +153,10 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest>
 
     private async Task ClearCompleted(List<Guid> downloadTaskIds, CancellationToken ct)
     {
-        var clearResult = await _commandExecutor.Send(new ClearCompletedDownloadTasksCommand(downloadTaskIds), ct);
+        var clearResult = await _commandExecutor.Send(
+            new ClearCompletedDownloadTasksByDownloadTaskIdCommand(downloadTaskIds),
+            ct
+        );
         if (clearResult.IsFailed)
         {
             _log.Here().Warning("Failed to clear completed download tasks: {Errors}", clearResult.Errors);

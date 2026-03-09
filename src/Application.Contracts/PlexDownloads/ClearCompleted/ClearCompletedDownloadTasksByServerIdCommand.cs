@@ -4,7 +4,7 @@ using FluentResults;
 namespace Reaparr.Application.Contracts;
 
 /// <summary>
-/// Clears completed download tasks from the database.
+/// Clears all completed download tasks for a server from the database.
 /// </summary>
 /// <returns>Returns total number of deleted rows.</returns>
-public record ClearCompletedDownloadTasksCommand(List<Guid> DownloadTaskIds) : ICommand<Result<int>>;
+public record ClearCompletedDownloadTasksByServerIdCommand(int PlexServerId) : ICommand<Result<int>>;

@@ -96,7 +96,11 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest<DeleteTorrentEndpoint
             );
         Mock.Mock<ICommandExecutor>()
             .Verify(
-                x => x.Send(It.IsAny<ClearCompletedDownloadTasksCommand>(), It.IsAny<CancellationToken>()),
+                x =>
+                    x.Send(
+                        It.IsAny<ClearCompletedDownloadTasksByDownloadTaskIdCommand>(),
+                        It.IsAny<CancellationToken>()
+                    ),
                 Times.Never
             );
     }
@@ -153,7 +157,11 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest<DeleteTorrentEndpoint
         deletedMovieFile.ShouldBeNull();
         Mock.Mock<ICommandExecutor>()
             .Verify(
-                x => x.Send(It.IsAny<ClearCompletedDownloadTasksCommand>(), It.IsAny<CancellationToken>()),
+                x =>
+                    x.Send(
+                        It.IsAny<ClearCompletedDownloadTasksByDownloadTaskIdCommand>(),
+                        It.IsAny<CancellationToken>()
+                    ),
                 Times.Never
             );
     }

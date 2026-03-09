@@ -126,11 +126,34 @@ COPY --from=dotnet-runtime /usr/share/dotnet /usr/share/dotnet
 ## /lib64/ld-linux-*.so.2 is the ELF interpreter the kernel invokes for glibc-linked executables.
 ## dotnet itself uses the Alpine/musl runtime copied above, so there is no loader conflict.
 RUN --mount=type=bind,from=glibc-source,source=/lib,target=/mnt/glibc-src \
-    TRIPLE=$(uname -m | sed 's/x86_64/x86_64-linux-gnu/;s/aarch64/aarch64-linux-gnu/') && \
+    ARCH=$(uname -m) && \
+    case "${ARCH}" in \
+      x86_64) \
+        TRIPLE=x86_64-linux-gnu; \
+        LOADER=ld-linux-x86-64.so.2; \
+        LOADER_DEST=/lib64/${LOADER}; \
+        ;; \
+      aarch64) \
+        TRIPLE=aarch64-linux-gnu; \
+        LOADER=ld-linux-aarch64.so.1; \
+        LOADER_DEST=/lib/${LOADER}; \
+        ;; \
+      *) \
+        echo "Unsupported architecture: ${ARCH}"; \
+        exit 1; \
+        ;; \
+    esac && \
     mkdir -p /lib/${TRIPLE} /lib64 && \
-    cp /mnt/glibc-src/${TRIPLE}/libc.so.6       /lib/${TRIPLE}/libc.so.6 && \
-    cp /mnt/glibc-src/${TRIPLE}/libm.so.6       /lib/${TRIPLE}/libm.so.6 && \
-    cp /mnt/glibc-src/${TRIPLE}/ld-linux-*.so.2 /lib64/
+    cp /mnt/glibc-src/${TRIPLE}/libc.so.6 /lib/${TRIPLE}/libc.so.6 && \
+    cp /mnt/glibc-src/${TRIPLE}/libm.so.6 /lib/${TRIPLE}/libm.so.6 && \
+    if [ -f "/mnt/glibc-src/${TRIPLE}/${LOADER}" ]; then \
+      cp "/mnt/glibc-src/${TRIPLE}/${LOADER}" "${LOADER_DEST}"; \
+    elif [ -f "/mnt/glibc-src/${LOADER}" ]; then \
+      cp "/mnt/glibc-src/${LOADER}" "${LOADER_DEST}"; \
+    else \
+      echo "Could not locate ${LOADER} in glibc donor stage"; \
+      exit 1; \
+    fi
 
 ## Make dotnet command available
 ENV PATH="$PATH:/usr/share/dotnet"

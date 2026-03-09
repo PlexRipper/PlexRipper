@@ -1,23 +1,15 @@
 <template>
 	<q-expansion-item
+		v-model="isExpanded"
 		default-opened
+		hide-expand-icon
 		class="background-sm q-ma-md">
 		<template #header>
 			<QRow
-				justify="between"
-				align="center">
-				<!-- Download Server Settings -->
-				<QCol
-					cols="auto"
-					style="white-space: nowrap">
-					<ServerDownloadStatus
-						:plex-server-id="plexServer.id"
-						:is-downloads-paused-by-user="plexServer.isDownloadsPausedByUser"
-						style="display: inline-block" />
-				</QCol>
-				<QCol />
+				align="center"
+				class="full-width relative-position">
 				<!-- Download Server Title -->
-				<QCol cols="auto">
+				<QCol class="q-px-md absolute-center row items-center no-wrap">
 					<QStatus :value="serverConnectionStore.isServerConnected(plexServer.id)" />
 					<span class="title q-ml-md">{{ serverStore.getServerName(plexServer.id) }}</span>
 					<QBadge
@@ -27,10 +19,35 @@
 						text-color="black"
 						:label="t('components.server-download-status.pause')" />
 				</QCol>
-				<QCol class="q-py-none" />
+				<QCol
+					cols="auto"
+					class="q-py-none q-ml-auto">
+					<QRow
+						align="center"
+						no-gutters
+						class="q-gutter-sm">
+						<!-- Clean Download Tasks -->
+						<QCol cols="auto">
+							<IconButton
+								cy="clear-completed-by-server-button"
+								icon="mdi-notification-clear-all"
+								:tooltip-text="t('components.downloads-table.clear-completed.button')"
+								:disabled="!hasCompletedDownloads || clearCompletedLoading"
+								@click.stop="openClearCompletedDialog" />
+						</QCol>
+						<!-- Toggle Expansion button -->
+						<QCol cols="auto">
+							<IconButton
+								cy="toggle-download-table-button"
+								:icon="isExpanded ? 'mdi-chevron-up' : 'mdi-chevron-down'"
+								@click.stop="toggleExpanded" />
+						</QCol>
+					</QRow>
+				</QCol>
 			</QRow>
 		</template>
 		<template #default>
+			<!-- Download Table Per Server -->
 			<PrimeTreeTable
 				:nodes="nodes"
 				:columns="getDownloadTableColumns"
@@ -43,12 +60,21 @@
 				@selected="downloadStore.updateSelectedDownloadTasks(plexServer.id, $event)" />
 		</template>
 	</q-expansion-item>
+
+	<!-- Clear Completed Confirmation Dialog  -->
+	<ConfirmationDialog
+		:confirm-loading="clearCompletedLoading"
+		:name="DialogType.ClearCompletedDownloadsConfirmationDialog"
+		:title="t('components.downloads-table.clear-completed.confirmation.title')"
+		:text="t('components.downloads-table.clear-completed.confirmation.text')"
+		@confirm="clearCompletedByServer" />
 </template>
 
 <script setup lang="ts">
 import { get, set } from '@vueuse/core';
 import type { DownloadProgressDTO, PlexServerDTO } from '@dto';
-import { DownloadActions } from '@dto';
+import { DownloadActions, DownloadStatus } from '@dto';
+import { DialogType } from '@enums';
 import type { IDownloadTableNode, ISelection } from '@interfaces';
 import type { QTreeViewTableHeader } from '@props';
 import { flatMapDeep } from 'lodash-es';
@@ -67,6 +93,8 @@ const loadingIds = ref<{
 	id: string;
 	action: DownloadActions;
 }[]>([]);
+const isExpanded = ref(true);
+const clearCompletedLoading = ref(false);
 
 const props = defineProps<{
 	loading?: boolean;
@@ -81,6 +109,10 @@ defineEmits<{
 const nodes = computed((): IDownloadTableNode[] => {
 	// TODO: Move property mapping to back-end to increase performance
 	return mapToTreeNodes(downloadStore.getDownloadsByServerId(props.plexServer.id));
+});
+
+const hasCompletedDownloads = computed((): boolean => {
+	return containsCompletedTasks(props.downloadRows);
 });
 
 function mapToTreeNodes(value: DownloadProgressDTO[]): IDownloadTableNode[] {
@@ -168,9 +200,58 @@ function onTableAction({ action, data }: { action: DownloadActions; data: IDownl
 	const newIds = getAllIds([data]);
 	get(loadingIds).push(...newIds.map((id) => ({ id, action })));
 
-	useSubscription(downloadStore.executeDownloadCommand(action, ids).subscribe(() => {
+	useSubscription(downloadStore.executeDownloadCommand(action, ids, props.plexServer.id).subscribe(() => {
 		set(loadingIds, get(loadingIds).filter((x) => !newIds.includes(x.id)));
 	}));
+}
+
+function toggleExpanded() {
+	set(isExpanded, !get(isExpanded));
+}
+
+function openClearCompletedDialog() {
+	if (!hasCompletedDownloads.value) {
+		return;
+	}
+
+	dialogStore.openDialog(DialogType.ClearCompletedDownloadsConfirmationDialog);
+}
+
+function closeClearCompletedDialog() {
+	dialogStore.closeDialog(DialogType.ClearCompletedDownloadsConfirmationDialog);
+}
+
+function clearCompletedByServer() {
+	if (get(clearCompletedLoading)) {
+		return;
+	}
+
+	set(clearCompletedLoading, true);
+	useSubscription(
+		downloadStore.executeDownloadCommand(DownloadActions.Clear, [], props.plexServer.id).subscribe({
+			next: (result) => {
+				if (result.isSuccess) {
+					closeClearCompletedDialog();
+				}
+			},
+			error: () => {
+				set(clearCompletedLoading, false);
+			},
+			complete: () => {
+				set(clearCompletedLoading, false);
+			},
+		}),
+	);
+}
+
+function containsCompletedTasks(downloadRows: DownloadProgressDTO[]): boolean {
+	for (const downloadRow of downloadRows) {
+		if (downloadRow.status === DownloadStatus.Completed || containsCompletedTasks(downloadRow.children ?? [])) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 function getAllIds(nodes: IDownloadTableNode[]): string[] {

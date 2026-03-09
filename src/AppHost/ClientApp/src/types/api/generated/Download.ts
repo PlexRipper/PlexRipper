@@ -32,17 +32,37 @@ export class Download {
   /**
    * No description
    * * @tags Download
-   * @name ClearCompletedDownloadTasksEndpoint
-   * @request POST:/api/Download/clear
+   * @name ClearCompletedDownloadTasksByServerIdEndpoint
+   * @request DELETE:/api/Download/clear/{PlexServerId}
    * @secure
    */
-  clearCompletedDownloadTasksEndpoint = (
+  clearCompletedDownloadTasksByServerIdEndpoint = (
+    plexServerId: number,
+    params: RequestParams = {},
+  ) =>
+    axiosObservable<CountResponseDTO>({
+      url: `/api/Download/clear/${plexServerId}`,
+      method: "DELETE",
+      secure: true,
+      type: ContentType.Json,
+      responseType: "json",
+      ...params,
+    }).pipe(apiCheckPipe<CountResponseDTO>);
+
+  /**
+   * No description
+   * * @tags Download
+   * @name ClearCompletedDownloadTasksByDownloadTaskIdEndpoint
+   * @request DELETE:/api/Download/clear/tasks
+   * @secure
+   */
+  clearCompletedDownloadTasksByDownloadTaskIdEndpoint = (
     data: string[],
     params: RequestParams = {},
   ) =>
     axiosObservable<CountResponseDTO>({
-      url: `/api/Download/clear`,
-      method: "POST",
+      url: `/api/Download/clear/tasks`,
+      method: "DELETE",
       data: data,
       secure: true,
       type: ContentType.Json,
@@ -286,8 +306,11 @@ export class Download {
 }
 
 export class DownloadPaths {
-  static clearCompletedDownloadTasksEndpoint = () =>
-    queryString.stringifyUrl({ url: `/api/Download/clear` });
+  static clearCompletedDownloadTasksByServerIdEndpoint = (plexServerId: number) =>
+    queryString.stringifyUrl({ url: `/api/Download/clear/${plexServerId}` });
+
+  static clearCompletedDownloadTasksByDownloadTaskIdEndpoint = () =>
+    queryString.stringifyUrl({ url: `/api/Download/clear/tasks` });
 
   static createDownloadTasksEndpoint = () =>
     queryString.stringifyUrl({ url: `/api/Download/create` });

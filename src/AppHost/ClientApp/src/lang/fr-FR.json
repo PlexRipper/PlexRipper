@@ -79,7 +79,6 @@
                 "filter-by-level": "Filtrer par niveau de journal",
                 "copied-to-clipboard": "Journaux copiés dans le presse-papiers",
                 "entry-copied-to-clipboard": "Entrée de journal copiée dans le presse-papiers",
-                "copy-entry": "Copier l'entrée de journal",
                 "deleted": "Journaux supprimés",
                 "no-logs": "Aucun journal trouvé pour cette tâche de téléchargement.",
                 "delete-confirmation": {
@@ -231,6 +230,13 @@
             "title": "Validation du jeton d'authentification Plex.tv"
         },
         "downloads-table": {
+            "clear-completed": {
+                "button": "Effacer terminés",
+                "confirmation": {
+                    "title": "Effacer les téléchargements terminés ?",
+                    "text": "Cela supprimera récursivement les tâches de téléchargement terminées pour ce serveur uniquement. Les fichiers téléchargés ne seront pas supprimés du système de fichiers."
+                }
+            },
             "columns": {
                 "actions": "Actions",
                 "data-received": "Reçu",

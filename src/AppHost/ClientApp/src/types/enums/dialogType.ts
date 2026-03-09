@@ -9,6 +9,7 @@ export enum DialogType {
 	CheckServerConnectionDialogName = 'check-server-connection-dialog',
 	DirectoryBrowserDialog = 'directory-browser-dialog',
 	DiscordServerInviteDialog = 'discord-server-invite-dialog',
+	ClearCompletedDownloadsConfirmationDialog = 'clear-completed-downloads-confirmation-dialog',
 	DownloadDetailsDialog = 'download-details-dialog',
 	DownloadDetailsDeleteLogsConfirmationDialog = 'download-details-delete-logs-confirmation-dialog',
 	HelpInfoDialog = 'help-info-dialog',

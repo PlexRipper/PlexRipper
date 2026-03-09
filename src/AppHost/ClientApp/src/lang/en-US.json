@@ -79,7 +79,6 @@
                 "filter-by-level": "Filter by log level",
                 "copied-to-clipboard": "Logs copied to clipboard",
                 "entry-copied-to-clipboard": "Log entry copied to clipboard",
-                "copy-entry": "Copy log entry",
                 "deleted": "Logs deleted",
                 "no-logs": "No logs found for this download task.",
                 "delete-confirmation": {
@@ -231,6 +230,13 @@
             "title": "Plex.tv Authentication Token Validation"
         },
         "downloads-table": {
+            "clear-completed": {
+                "button": "Clear Completed",
+                "confirmation": {
+                    "title": "Clear completed downloads?",
+                    "text": "This will recursively remove completed download tasks for this server only. The downloaded files will not be deleted from your file system."
+                }
+            },
             "columns": {
                 "actions": "Actions",
                 "data-received": "Received",

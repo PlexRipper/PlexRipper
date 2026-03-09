@@ -79,7 +79,6 @@
                 "filter-by-level": "Filtruj według poziomu logów",
                 "copied-to-clipboard": "Logi skopiowano do schowka",
                 "entry-copied-to-clipboard": "Wpis logu skopiowano do schowka",
-                "copy-entry": "Kopiuj wpis logu",
                 "deleted": "Logi usunięto",
                 "no-logs": "Nie znaleziono logów dla tego zadania pobierania.",
                 "delete-confirmation": {
@@ -231,6 +230,13 @@
             "title": "Walidacja tokena uwierzytelniającego Plex.tv"
         },
         "downloads-table": {
+            "clear-completed": {
+                "button": "Wyczyść ukończone",
+                "confirmation": {
+                    "title": "Wyczyścić ukończone pobrania?",
+                    "text": "Spowoduje to rekursywne usunięcie ukończonych zadań pobierania tylko dla tego serwera. Pobrane pliki nie zostaną usunięte z systemu plików."
+                }
+            },
             "columns": {
                 "actions": "Działania",
                 "data-received": "Otrzymane",

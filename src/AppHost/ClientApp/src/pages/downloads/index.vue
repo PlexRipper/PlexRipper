@@ -1,8 +1,6 @@
 <template>
 	<QPage>
 		<template v-if="downloadStore.getServersWithDownloads.length > 0">
-			<!-- Download Toolbar -->
-			<DownloadBar />
 			<QScroll class="page-content-minus-download-bar">
 				<!--	The Download Table	-->
 				<QRow

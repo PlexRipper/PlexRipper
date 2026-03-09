@@ -79,7 +79,6 @@
                 "filter-by-level": "Nach Log-Level filtern",
                 "copied-to-clipboard": "Logs in die Zwischenablage kopiert",
                 "entry-copied-to-clipboard": "Log-Eintrag in die Zwischenablage kopiert",
-                "copy-entry": "Log-Eintrag kopieren",
                 "deleted": "Logs gelöscht",
                 "no-logs": "Keine Logs für diese Download-Aufgabe gefunden.",
                 "delete-confirmation": {
@@ -231,6 +230,13 @@
             "title": "Validierung des Plex.tv-Authentifizierungstokens"
         },
         "downloads-table": {
+            "clear-completed": {
+                "button": "Abgeschlossene löschen",
+                "confirmation": {
+                    "title": "Abgeschlossene Downloads löschen?",
+                    "text": "Dies entfernt rekursiv abgeschlossene Download-Aufgaben nur für diesen Server. Die heruntergeladenen Dateien werden nicht vom Dateisystem gelöscht."
+                }
+            },
             "columns": {
                 "actions": "Aktionen",
                 "data-received": "Erhalten",

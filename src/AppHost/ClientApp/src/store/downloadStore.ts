@@ -61,12 +61,8 @@ export const useDownloadStore = defineStore(StoreNames.DownloadStore, () => {
 				}),
 			);
 		},
-		executeBatchDownloadCommand(action: DownloadActions) {
-			const downloadTaskIds = state.selected.flatMap((x) => Object.keys(x.selection));
-			return actions.executeDownloadCommand(action, downloadTaskIds);
-		},
-		executeDownloadCommand(action: DownloadActions, downloadTaskIds: string[]): Observable<BaseResultDTO> {
-			if (downloadTaskIds.length === 0) {
+		executeDownloadCommand(action: DownloadActions, downloadTaskIds: string[], plexServerId?: number): Observable<BaseResultDTO> {
+			if (downloadTaskIds.length === 0 && action !== DownloadActions.Clear) {
 				Log.error(`No downloadTaskIds provided for action: ${action}`);
 				return of({
 					errors: [],
@@ -91,10 +87,17 @@ export const useDownloadStore = defineStore(StoreNames.DownloadStore, () => {
 			switch (action) {
 				case DownloadActions.Pause:
 					return downloadApi.pauseDownloadTaskEndpoint(id);
-				case DownloadActions.Clear:
+				case DownloadActions.Clear: {
+					if (downloadTaskIds.length > 0) {
+						return downloadApi
+							.clearCompletedDownloadTasksByDownloadTaskIdEndpoint(downloadTaskIds)
+							.pipe(switchMap(actions.fetchDownloadList));
+					}
+
 					return downloadApi
-						.clearCompletedDownloadTasksEndpoint(downloadTaskIds)
+						.clearCompletedDownloadTasksByServerIdEndpoint(plexServerId!)
 						.pipe(switchMap(actions.fetchDownloadList));
+				}
 				case DownloadActions.Delete:
 					return downloadApi
 						.deleteDownloadTaskEndpoint(downloadTaskIds)

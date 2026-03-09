@@ -93,11 +93,17 @@ Examples:
 - Do not instantiate Bogus/Faker directly inside tests unless done through BaseTests helpers.
 - If a new test-data pattern is needed, extend BaseTests helpers rather than adding local per-test random generators.
 
+## Mock Rules
+
+- **Mocks return the expected type only.** Never put real business logic, DB writes, or side effects inside mock callbacks. If a side effect needs to be verified, use `Verifiable` — do not secretly implement it in a `.Returns(...)` callback.
+- **Mock setups must be inline per test.** Do not extract them into shared helper methods. Each test must be self-contained and readable without jumping elsewhere to understand what is mocked.
+- **Every mock setup must end with `.Verifiable(Times.X())`** to declare how many times it is expected to be called. This collocates the expectation with the setup and makes unmet expectations fail automatically.
+
 ## Assertion Requirements
 
 Always verify both:
 - Operation result (`Result`/`Result<T>` success or failure path).
-- Relevant persisted side effects (database state).
+- Relevant side effects: DB state when the real dependency writes to it, or `Verify` on the mock when the SUT delegates the write to a mocked dependency.
 
 Also verify expected mock interactions explicitly; do not leave mocks unverified.
 
@@ -162,7 +168,9 @@ dotnet test tests/UnitTests/BackgroundJobs.UnitTests/BackgroundJobs.UnitTests.cs
 
 - Putting tests in the wrong `*.UnitTests` project because of command location instead of handler location.
 - Using folder-based namespaces instead of `<SUTProjectNamespace>.UnitTests`.
-- Asserting only return values and not checking database state.
+- Asserting only return values and not checking database state or mock interactions.
 - Using unverified mocks or loose mock expectations.
 - Using random/non-deterministic test data.
 - Mocking settings interfaces with static abstract members.
+- Extracting mock setups into shared helper methods — keep all mock configuration inline per test.
+- Hiding real logic (DB writes, status updates) inside mock callbacks instead of returning the expected type and verifying with `Verify`.

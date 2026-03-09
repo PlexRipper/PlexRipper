@@ -43,7 +43,7 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest>
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
 
-    private sealed record DownloadTaskLookup(Guid Id, DownloadStatus Status);
+    private sealed record DownloadTaskSelection(List<Guid> AllTaskIds, List<Guid> DownloadingTaskIds);
 
     public DeleteTorrentEndpoint(ILogger log, IReaparrDbContext dbContext, ICommandExecutor commandExecutor)
     {
@@ -66,72 +66,53 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest>
         _log.Here().DebugApiCall(HttpContext, req);
 
         var deleteFiles = req.DeleteFiles ?? true;
+        var deleteAll = string.Equals(req.HashesRaw, "all", StringComparison.OrdinalIgnoreCase);
 
-        var hashes = new List<string>();
-        if (req.Hashes?.Count > 0)
-            hashes.AddRange(req.Hashes);
+        DownloadTaskSelection taskSelection;
 
-        if (!string.IsNullOrWhiteSpace(req.HashesRaw))
+        if (deleteAll)
         {
-            if (string.Equals(req.HashesRaw, "all", StringComparison.OrdinalIgnoreCase))
+            taskSelection = await GetAllTorrentDownloadTasks(ct);
+        }
+        else
+        {
+            var hashes = new List<string>();
+            if (req.Hashes?.Count > 0)
+                hashes.AddRange(req.Hashes);
+
+            if (!string.IsNullOrWhiteSpace(req.HashesRaw))
             {
-                await ClearCompleted([], ct);
+                var split = req.HashesRaw.Split(
+                    ['|', ',', ';', ' ', '\t', '\r', '\n'],
+                    StringSplitOptions.RemoveEmptyEntries
+                );
+                hashes.AddRange(split);
+            }
+
+            var distinctHashes = hashes
+                .Where(hash => !string.IsNullOrWhiteSpace(hash))
+                .Select(hash => hash.Trim())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            var normalizedHashes = distinctHashes.Select(hash => hash.ToLowerInvariant()).ToList();
+
+            if (normalizedHashes.Count == 0)
+            {
                 await Send.StringAsync("Ok.", cancellation: ct);
                 return;
             }
 
-            var split = req.HashesRaw.Split(
-                ['|', ',', ';', ' ', '\t', '\r', '\n'],
-                StringSplitOptions.RemoveEmptyEntries
-            );
-            hashes.AddRange(split);
+            taskSelection = await GetTorrentDownloadTasksByHashes(normalizedHashes, ct);
         }
 
-        var distinctHashes = hashes
-            .Where(hash => !string.IsNullOrWhiteSpace(hash))
-            .Select(hash => hash.Trim())
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToList();
-
-        var normalizedHashes = distinctHashes.Select(hash => hash.ToLowerInvariant()).ToList();
-
-        if (normalizedHashes.Count == 0)
+        if (taskSelection.AllTaskIds.Count == 0)
         {
             await Send.StringAsync("Ok.", cancellation: ct);
             return;
         }
 
-        var movieTasksTask = _dbContext
-            .DownloadTaskMovieFile.Where(x => x.HashId != null && normalizedHashes.Contains(x.HashId.ToLower()))
-            .Select(x => new DownloadTaskLookup(x.Id, x.DownloadStatus))
-            .ToListAsync(ct);
-
-        var episodeTasksTask = _dbContext
-            .DownloadTaskTvShowEpisodeFile.Where(x => x.HashId != null && normalizedHashes.Contains(x.HashId.ToLower()))
-            .Select(x => new DownloadTaskLookup(x.Id, x.DownloadStatus))
-            .ToListAsync(ct);
-
-        await Task.WhenAll(movieTasksTask, episodeTasksTask);
-
-        var downloadTasks = movieTasksTask.Result.Concat(episodeTasksTask.Result).ToList();
-        if (downloadTasks.Count == 0)
-        {
-            await Send.StringAsync("Ok.", cancellation: ct);
-            return;
-        }
-
-        var allTaskIds = new HashSet<Guid>();
-        var downloadingTaskIds = new HashSet<Guid>();
-
-        foreach (var downloadTask in downloadTasks)
-        {
-            allTaskIds.Add(downloadTask.Id);
-
-            if (IsDownloadingStatus(downloadTask.Status))
-                downloadingTaskIds.Add(downloadTask.Id);
-        }
-
-        foreach (var downloadTaskId in downloadingTaskIds)
+        foreach (var downloadTaskId in taskSelection.DownloadingTaskIds)
         {
             var stopResult = await _commandExecutor.Send(new StopDownloadTaskCommand(downloadTaskId, deleteFiles), ct);
             if (stopResult.IsFailed)
@@ -145,22 +126,94 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest>
             }
         }
 
-        if (allTaskIds.Count > 0)
-            await DeleteDownloadTasks(allTaskIds.ToList(), ct);
+        await DeleteDownloadTasks(taskSelection.AllTaskIds, ct);
 
         await Send.StringAsync("Ok.", cancellation: ct);
     }
 
-    private async Task ClearCompleted(List<Guid> downloadTaskIds, CancellationToken ct)
+    private async Task<DownloadTaskSelection> GetTorrentDownloadTasksByHashes(
+        List<string> normalizedHashes,
+        CancellationToken ct
+    )
     {
-        var clearResult = await _commandExecutor.Send(
-            new ClearCompletedDownloadTasksByDownloadTaskIdCommand(downloadTaskIds),
-            ct
+        var movieTaskIdsTask = _dbContext
+            .DownloadTaskMovieFile.Where(x => x.HashId != null && normalizedHashes.Contains(x.HashId.ToLower()))
+            .Select(x => x.Id)
+            .Distinct()
+            .ToListAsync(ct);
+
+        var episodeTaskIdsTask = _dbContext
+            .DownloadTaskTvShowEpisodeFile.Where(x => x.HashId != null && normalizedHashes.Contains(x.HashId.ToLower()))
+            .Select(x => x.Id)
+            .Distinct()
+            .ToListAsync(ct);
+
+        var movieDownloadingTaskIdsTask = _dbContext
+            .DownloadTaskMovieFile.Where(x =>
+                x.HashId != null
+                && normalizedHashes.Contains(x.HashId.ToLower())
+                && (x.DownloadStatus == DownloadStatus.Downloading || x.DownloadStatus == DownloadStatus.Queued)
+            )
+            .Select(x => x.Id)
+            .Distinct()
+            .ToListAsync(ct);
+
+        var episodeDownloadingTaskIdsTask = _dbContext
+            .DownloadTaskTvShowEpisodeFile.Where(x =>
+                x.HashId != null
+                && normalizedHashes.Contains(x.HashId.ToLower())
+                && (x.DownloadStatus == DownloadStatus.Downloading || x.DownloadStatus == DownloadStatus.Queued)
+            )
+            .Select(x => x.Id)
+            .Distinct()
+            .ToListAsync(ct);
+
+        await Task.WhenAll(movieTaskIdsTask, episodeTaskIdsTask, movieDownloadingTaskIdsTask, episodeDownloadingTaskIdsTask);
+
+        return new DownloadTaskSelection(
+            movieTaskIdsTask.Result.Concat(episodeTaskIdsTask.Result).Distinct().ToList(),
+            movieDownloadingTaskIdsTask.Result.Concat(episodeDownloadingTaskIdsTask.Result).Distinct().ToList()
         );
-        if (clearResult.IsFailed)
-        {
-            _log.Here().Warning("Failed to clear completed download tasks: {Errors}", clearResult.Errors);
-        }
+    }
+
+    private async Task<DownloadTaskSelection> GetAllTorrentDownloadTasks(CancellationToken ct)
+    {
+        var movieTaskIdsTask = _dbContext
+            .DownloadTaskMovieFile.Where(x => x.HashId != null)
+            .Select(x => x.Id)
+            .Distinct()
+            .ToListAsync(ct);
+
+        var episodeTaskIdsTask = _dbContext
+            .DownloadTaskTvShowEpisodeFile.Where(x => x.HashId != null)
+            .Select(x => x.Id)
+            .Distinct()
+            .ToListAsync(ct);
+
+        var movieDownloadingTaskIdsTask = _dbContext
+            .DownloadTaskMovieFile.Where(x =>
+                x.HashId != null
+                && (x.DownloadStatus == DownloadStatus.Downloading || x.DownloadStatus == DownloadStatus.Queued)
+            )
+            .Select(x => x.Id)
+            .Distinct()
+            .ToListAsync(ct);
+
+        var episodeDownloadingTaskIdsTask = _dbContext
+            .DownloadTaskTvShowEpisodeFile.Where(x =>
+                x.HashId != null
+                && (x.DownloadStatus == DownloadStatus.Downloading || x.DownloadStatus == DownloadStatus.Queued)
+            )
+            .Select(x => x.Id)
+            .Distinct()
+            .ToListAsync(ct);
+
+        await Task.WhenAll(movieTaskIdsTask, episodeTaskIdsTask, movieDownloadingTaskIdsTask, episodeDownloadingTaskIdsTask);
+
+        return new DownloadTaskSelection(
+            movieTaskIdsTask.Result.Concat(episodeTaskIdsTask.Result).Distinct().ToList(),
+            movieDownloadingTaskIdsTask.Result.Concat(episodeDownloadingTaskIdsTask.Result).Distinct().ToList()
+        );
     }
 
     private async Task DeleteDownloadTasks(List<Guid> downloadTaskIds, CancellationToken ct)

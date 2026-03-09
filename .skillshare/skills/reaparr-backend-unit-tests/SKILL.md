@@ -29,8 +29,38 @@ Do not use this skill for frontend tests (Vitest/Cypress).
 - Test framework: `xUnit` with `[Fact]` and `async Task` where needed.
 - Assertions: `Shouldly`.
 - Mocks: `Moq` with explicit verification (`Times.Once()` / `Times.Never()`).
-- Structure: Arrange -> Act -> Assert.
+- Structure: Arrange -> Act -> Assert. Within Arrange, mock setups (`Mock.Mock<T>()`) must always be the **last step**, immediately before Act.
 - Determinism: no random behavior in tests.
+
+## Test Structure
+
+Follow this exact order within every test method:
+
+```
+// Arrange — data and context first
+var dbContext = IDbContext;
+await SetupDatabase(seed, config => { ... });
+// ... any other data setup ...
+
+// Arrange — mocks last (always immediately before Act)
+Mock.Mock<IFoo>()
+    .Setup(x => x.Bar())
+    .Returns(someValue)
+    .Verifiable(Times.Once());
+
+// Act
+var result = await Sut.Handle(command, CancellationToken);
+
+// Assert
+result.ShouldBeSuccess();
+// ... DB state checks ...
+Mock.Mock<IFoo>().Verify();
+```
+
+**Rules:**
+- Seed data, build commands/DTOs, and any other context setup come **before** mock setups.
+- `Mock.Mock<T>()` setup blocks are the **last thing in Arrange**, right before the Act line.
+- Never interleave mock setups with data setup.
 
 ## BaseTests.csproj Utilities
 
@@ -174,3 +204,4 @@ dotnet test tests/UnitTests/BackgroundJobs.UnitTests/BackgroundJobs.UnitTests.cs
 - Mocking settings interfaces with static abstract members.
 - Extracting mock setups into shared helper methods — keep all mock configuration inline per test.
 - Hiding real logic (DB writes, status updates) inside mock callbacks instead of returning the expected type and verifying with `Verify`.
+- Placing `Mock.Mock<T>()` setups before data setup or mixed in with DB seeding — mock setups must always be the last step of Arrange.

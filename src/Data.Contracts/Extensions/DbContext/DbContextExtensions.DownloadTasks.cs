@@ -865,6 +865,157 @@ public static partial class DbContextExtensions
         return totalRowsDeleted;
     }
 
+    public static async Task<int> DeleteOrphanedParentTasksByServerIdAsync(
+        this IReaparrDbContext dbContext,
+        int plexServerId,
+        CancellationToken ct
+    )
+    {
+        var totalRowsDeleted = 0;
+
+        totalRowsDeleted += await dbContext
+            .DownloadTaskMovie.Where(x =>
+                x.PlexServerId == plexServerId && !dbContext.DownloadTaskMovieFile.Any(y => y.ParentId == x.Id)
+            )
+            .ExecuteDeleteAsync(ct);
+
+        totalRowsDeleted += await dbContext
+            .DownloadTaskTvShowEpisode.Where(x =>
+                x.PlexServerId == plexServerId && !dbContext.DownloadTaskTvShowEpisodeFile.Any(y => y.ParentId == x.Id)
+            )
+            .ExecuteDeleteAsync(ct);
+
+        totalRowsDeleted += await dbContext
+            .DownloadTaskTvShowSeason.Where(x =>
+                x.PlexServerId == plexServerId && !dbContext.DownloadTaskTvShowEpisode.Any(y => y.ParentId == x.Id)
+            )
+            .ExecuteDeleteAsync(ct);
+
+        totalRowsDeleted += await dbContext
+            .DownloadTaskTvShow.Where(x =>
+                x.PlexServerId == plexServerId && !dbContext.DownloadTaskTvShowSeason.Any(y => y.ParentId == x.Id)
+            )
+            .ExecuteDeleteAsync(ct);
+
+        return totalRowsDeleted;
+    }
+
+    public static async Task<int> DeleteOrphanedParentTasksByRootIdsAsync(
+        this IReaparrDbContext dbContext,
+        IReadOnlyCollection<Guid> rootIds,
+        CancellationToken ct
+    )
+    {
+        if (rootIds.Count == 0)
+            return 0;
+
+        var totalRowsDeleted = 0;
+
+        totalRowsDeleted += await dbContext
+            .DownloadTaskMovie.Where(x =>
+                rootIds.Contains(x.Id) && !dbContext.DownloadTaskMovieFile.Any(y => y.ParentId == x.Id)
+            )
+            .ExecuteDeleteAsync(ct);
+
+        totalRowsDeleted += await dbContext
+            .DownloadTaskTvShowEpisode.Where(x =>
+                rootIds.Contains(x.Parent!.ParentId)
+                && !dbContext.DownloadTaskTvShowEpisodeFile.Any(y => y.ParentId == x.Id)
+            )
+            .ExecuteDeleteAsync(ct);
+
+        totalRowsDeleted += await dbContext
+            .DownloadTaskTvShowSeason.Where(x =>
+                rootIds.Contains(x.ParentId) && !dbContext.DownloadTaskTvShowEpisode.Any(y => y.ParentId == x.Id)
+            )
+            .ExecuteDeleteAsync(ct);
+
+        totalRowsDeleted += await dbContext
+            .DownloadTaskTvShow.Where(x =>
+                rootIds.Contains(x.Id) && !dbContext.DownloadTaskTvShowSeason.Any(y => y.ParentId == x.Id)
+            )
+            .ExecuteDeleteAsync(ct);
+
+        return totalRowsDeleted;
+    }
+
+    public static async Task<HashSet<Guid>> GetAffectedRootDownloadTaskIdsAsync(
+        this IReaparrDbContext dbContext,
+        IReadOnlyCollection<Guid> downloadTaskIds,
+        CancellationToken ct
+    )
+    {
+        if (downloadTaskIds.Count == 0)
+            return [];
+
+        var movieRootIdsTask = dbContext
+            .DownloadTaskMovie.Where(x => downloadTaskIds.Contains(x.Id))
+            .Select(x => x.Id)
+            .ToListAsync(ct);
+
+        var movieFileRootIdsTask = dbContext
+            .DownloadTaskMovieFile.Where(x => downloadTaskIds.Contains(x.Id))
+            .Select(x => x.ParentId)
+            .ToListAsync(ct);
+
+        var tvShowRootIdsTask = dbContext
+            .DownloadTaskTvShow.Where(x => downloadTaskIds.Contains(x.Id))
+            .Select(x => x.Id)
+            .ToListAsync(ct);
+
+        var seasonRootIdsTask = dbContext
+            .DownloadTaskTvShowSeason.Where(x => downloadTaskIds.Contains(x.Id))
+            .Select(x => x.ParentId)
+            .ToListAsync(ct);
+
+        var episodeSeasonIdsTask = dbContext
+            .DownloadTaskTvShowEpisode.Where(x => downloadTaskIds.Contains(x.Id))
+            .Select(x => x.ParentId)
+            .ToListAsync(ct);
+
+        var episodeFileEpisodeIdsTask = dbContext
+            .DownloadTaskTvShowEpisodeFile.Where(x => downloadTaskIds.Contains(x.Id))
+            .Select(x => x.ParentId)
+            .ToListAsync(ct);
+
+        await Task.WhenAll(
+            movieRootIdsTask,
+            movieFileRootIdsTask,
+            tvShowRootIdsTask,
+            seasonRootIdsTask,
+            episodeSeasonIdsTask,
+            episodeFileEpisodeIdsTask
+        );
+
+        var rootIds = new HashSet<Guid>(
+            movieRootIdsTask
+                .Result.Concat(movieFileRootIdsTask.Result)
+                .Concat(tvShowRootIdsTask.Result)
+                .Concat(seasonRootIdsTask.Result)
+        );
+
+        var seasonIds = episodeSeasonIdsTask.Result;
+        if (episodeFileEpisodeIdsTask.Result.Count > 0)
+        {
+            var episodeDerivedSeasonIds = await dbContext
+                .DownloadTaskTvShowEpisode.Where(x => episodeFileEpisodeIdsTask.Result.Contains(x.Id))
+                .Select(x => x.ParentId)
+                .ToListAsync(ct);
+            seasonIds = seasonIds.Concat(episodeDerivedSeasonIds).Distinct().ToList();
+        }
+
+        if (seasonIds.Count > 0)
+        {
+            var seasonRootIds = await dbContext
+                .DownloadTaskTvShowSeason.Where(x => seasonIds.Contains(x.Id))
+                .Select(x => x.ParentId)
+                .ToListAsync(ct);
+            rootIds.UnionWith(seasonRootIds);
+        }
+
+        return rootIds;
+    }
+
     public static async Task<DownloadTaskKey?> GetRootDownloadTaskKeyAsync(
         this IReaparrDbContext dbContext,
         DownloadTaskKey key,

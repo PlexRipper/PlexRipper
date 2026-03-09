@@ -49,6 +49,7 @@ public class DirectPlexDownloadClientDisposeAsyncUnitTests : BaseUnitTest<Direct
 
         // Assert — no throw even though no download was started
         await act.ShouldNotThrowAsync();
+        Mock.Mock<IDownloadManagerSettings>().VerifyGet(x => x.DownloadSegments, Times.Once);
     }
 
     [Fact]
@@ -66,6 +67,7 @@ public class DirectPlexDownloadClientDisposeAsyncUnitTests : BaseUnitTest<Direct
 
         // Assert
         await act.ShouldNotThrowAsync();
+        Mock.Mock<IDownloadManagerSettings>().VerifyGet(x => x.DownloadSegments, Times.Once);
     }
 
     [Fact]
@@ -73,10 +75,10 @@ public class DirectPlexDownloadClientDisposeAsyncUnitTests : BaseUnitTest<Direct
     {
         Mock.Mock<IDownloadManagerSettings>().Setup(x => x.DownloadSegments).Returns(1);
 
-        var dbContextMock = new Mock<IReaparrDbContext>();
+        var dbContextMock = Mock.Mock<IReaparrDbContext>();
         dbContextMock.Setup(x => x.Dispose()).Verifiable(Times.Once);
 
-        var dbContextFactoryMock = new Mock<IReaparrDbContextFactory>();
+        var dbContextFactoryMock = Mock.Mock<IReaparrDbContextFactory>();
         dbContextFactoryMock.Setup(x => x.Create()).Returns(dbContextMock.Object);
 
         var sut = Mock.Create<DirectPlexDownloadClient>(
@@ -86,5 +88,6 @@ public class DirectPlexDownloadClientDisposeAsyncUnitTests : BaseUnitTest<Direct
         await sut.DisposeAsync();
 
         dbContextMock.Verify();
+        dbContextFactoryMock.Verify(x => x.Create(), Times.Once);
     }
 }

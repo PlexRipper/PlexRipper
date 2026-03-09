@@ -35,41 +35,41 @@ public class ClearCompletedDownloadTasksByServerIdCommandHandler
 
         totalRowsDeleted += await _dbContext
             .DownloadTaskMovie.Where(x =>
-                x.DownloadStatus == DownloadStatus.Completed && (plexServerId <= 0 || x.PlexServerId == plexServerId)
+                x.DownloadStatus == DownloadStatus.Completed && x.PlexServerId == plexServerId
             )
             .ExecuteDeleteAsync(ct);
 
         totalRowsDeleted += await _dbContext
             .DownloadTaskMovieFile.Where(x =>
-                x.DownloadStatus == DownloadStatus.Completed && (plexServerId <= 0 || x.PlexServerId == plexServerId)
+                x.DownloadStatus == DownloadStatus.Completed && x.PlexServerId == plexServerId
             )
             .ExecuteDeleteAsync(ct);
 
         totalRowsDeleted += await _dbContext
             .DownloadTaskTvShow.Where(x =>
-                x.DownloadStatus == DownloadStatus.Completed && (plexServerId <= 0 || x.PlexServerId == plexServerId)
+                x.DownloadStatus == DownloadStatus.Completed && x.PlexServerId == plexServerId
             )
             .ExecuteDeleteAsync(ct);
 
         totalRowsDeleted += await _dbContext
             .DownloadTaskTvShowSeason.Where(x =>
-                x.DownloadStatus == DownloadStatus.Completed && (plexServerId <= 0 || x.PlexServerId == plexServerId)
+                x.DownloadStatus == DownloadStatus.Completed && x.PlexServerId == plexServerId
             )
             .ExecuteDeleteAsync(ct);
 
         totalRowsDeleted += await _dbContext
             .DownloadTaskTvShowEpisode.Where(x =>
-                x.DownloadStatus == DownloadStatus.Completed && (plexServerId <= 0 || x.PlexServerId == plexServerId)
+                x.DownloadStatus == DownloadStatus.Completed && x.PlexServerId == plexServerId
             )
             .ExecuteDeleteAsync(ct);
 
         totalRowsDeleted += await _dbContext
             .DownloadTaskTvShowEpisodeFile.Where(x =>
-                x.DownloadStatus == DownloadStatus.Completed && (plexServerId <= 0 || x.PlexServerId == plexServerId)
+                x.DownloadStatus == DownloadStatus.Completed && x.PlexServerId == plexServerId
             )
             .ExecuteDeleteAsync(ct);
 
-        totalRowsDeleted += await _dbContext.DeleteOrphanedParentTasksAsync(ct);
+        totalRowsDeleted += await _dbContext.DeleteOrphanedParentTasksByServerIdAsync(plexServerId, ct);
 
         return Result.Ok(totalRowsDeleted);
     }

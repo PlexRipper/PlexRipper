@@ -100,7 +100,12 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
 
         if (fileStreamResult.IsFailed)
         {
-            await SetDownloadStatusAsync(Domain.DownloadStatus.StorageError, fileStreamResult.ToResult());
+            var statusResult = await SetDownloadStatusAsync(
+                Domain.DownloadStatus.StorageError,
+                fileStreamResult.ToResult()
+            );
+            if (statusResult.IsFailed)
+                return statusResult;
             return fileStreamResult.ToResult();
         }
 
@@ -227,16 +232,18 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                         _log.Here().Debug("The UserState at time of completion: {@Package}", package);
                         if (args.Cancelled)
                         {
-                            await SetDownloadStatusAsync(Domain.DownloadStatus.Paused);
+                            var statusResult = await SetDownloadStatusAsync(Domain.DownloadStatus.Paused);
+                            statusResult.LogIfFailed();
                             return;
                         }
 
                         if (args.Error != null)
                         {
-                            await SetDownloadStatusAsync(
+                            var statusResult = await SetDownloadStatusAsync(
                                 Domain.DownloadStatus.Error,
                                 Result.Fail(new ExceptionalError(args.Error)).LogError()
                             );
+                            statusResult.LogIfFailed();
                             return;
                         }
 
@@ -253,7 +260,8 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
 
                         await SendProgressLog(progress);
 
-                        await SetDownloadStatusAsync(Domain.DownloadStatus.DownloadFinished);
+                        var finishResult = await SetDownloadStatusAsync(Domain.DownloadStatus.DownloadFinished);
+                        finishResult.LogIfFailed();
                     })
                 )
                 .Concat()
@@ -292,23 +300,34 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
         await SendDownloadClientLog(NotificationLevel.Debug, Domain.DownloadStatus.Downloading, progressMsg);
     }
 
-    private async Task SetDownloadStatusAsync(Domain.DownloadStatus status, Result? errorResult = null)
+    private async Task<Result> SetDownloadStatusAsync(Domain.DownloadStatus status, Result? errorResult = null)
     {
         if (_downloadTaskKey is null)
-            return;
+            return Result.Ok();
 
         if (errorResult is null)
         {
-            await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(_downloadTaskKey, status, CancellationToken.None);
-            return;
+            var updateResult = await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
+                _downloadTaskKey,
+                status,
+                CancellationToken.None
+            );
+            if (updateResult.IsFailed)
+                return updateResult;
+
+            return Result.Ok();
         }
 
-        await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
+        var erroredUpdateResult = await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
             _downloadTaskKey,
             status,
             errorResult,
             CancellationToken.None
         );
+        if (erroredUpdateResult.IsFailed)
+            return erroredUpdateResult;
+
+        return Result.Ok();
     }
 
     private async Task SendDownloadClientLog(NotificationLevel logLevel, Domain.DownloadStatus status, string message)

@@ -48,6 +48,14 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
 
         var childKeys = await _dbContext.GetDownloadableChildTaskKeys(downloadTaskKey, cancellationToken);
 
+        var parentRestartingResult = await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
+            downloadTaskKey,
+            DownloadStatus.Restarting,
+            cancellationToken
+        );
+        if (parentRestartingResult.IsFailed)
+            return parentRestartingResult.LogError();
+
         await _dbContext.CreateDownloadClientLog(
             downloadTaskKey,
             NotificationLevel.Information,
@@ -68,6 +76,14 @@ public class RestartDownloadTaskCommandHandler : ICommandHandler<RestartDownload
 
             if (stopResult.IsFailed)
                 return stopResult.LogError();
+
+            var restartingResult = await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
+                childKey,
+                DownloadStatus.Restarting,
+                cancellationToken
+            );
+            if (restartingResult.IsFailed)
+                return restartingResult.LogError();
 
             await _dbContext.CreateDownloadClientLog(
                 childKey,

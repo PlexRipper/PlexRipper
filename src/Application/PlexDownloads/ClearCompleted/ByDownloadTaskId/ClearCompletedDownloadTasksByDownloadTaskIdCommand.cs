@@ -31,6 +31,7 @@ public class ClearCompletedDownloadTasksByDownloadTaskIdCommandHandler
     )
     {
         var totalRowsDeleted = 0;
+        var affectedRootIds = await _dbContext.GetAffectedRootDownloadTaskIdsAsync(request.DownloadTaskIds, ct);
 
         foreach (var downloadTaskId in request.DownloadTaskIds)
         {
@@ -99,7 +100,7 @@ public class ClearCompletedDownloadTasksByDownloadTaskIdCommandHandler
             totalRowsDeleted += rowsDeleted;
         }
 
-        totalRowsDeleted += await _dbContext.DeleteOrphanedParentTasksAsync(ct);
+        totalRowsDeleted += await _dbContext.DeleteOrphanedParentTasksByRootIdsAsync(affectedRootIds, ct);
 
         return Result.Ok(totalRowsDeleted);
     }

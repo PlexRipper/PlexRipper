@@ -41,11 +41,19 @@ public class DashPlexDownloadClientDisposeAsyncUnitTests : BaseUnitTest<DashPlex
     [Fact]
     public async Task ShouldDisposeWithoutError_WhenDisposeAsyncIsCalledWithoutPriorStart()
     {
-        var sut = CreateSut();
+        var dashWrapperMock = new Mock<IDashMpdCliWrapper>();
+        dashWrapperMock.Setup(x => x.Progress).Returns(Observable.Empty<DashDownloadProgress>());
+        dashWrapperMock.Setup(x => x.StandardOutput).Returns(Observable.Empty<string>());
+        dashWrapperMock.Setup(x => x.StopAsync()).ReturnsAsync(Result.Ok());
+        dashWrapperMock.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask);
+
+        var sut = CreateSut(dashWrapperMock);
 
         var act = async () => await sut.DisposeAsync();
 
         await act.ShouldNotThrowAsync();
+        dashWrapperMock.Verify(x => x.DisposeAsync(), Times.Once);
+        dashWrapperMock.Verify(x => x.StopAsync(), Times.Once);
     }
 
     [Fact]
@@ -77,6 +85,8 @@ public class DashPlexDownloadClientDisposeAsyncUnitTests : BaseUnitTest<DashPlex
         dbContextFactoryMock.Setup(x => x.Create()).Returns(dbContextMock.Object);
 
         var dashWrapperMock = new Mock<IDashMpdCliWrapper>();
+        dashWrapperMock.Setup(x => x.Progress).Returns(Observable.Empty<DashDownloadProgress>());
+        dashWrapperMock.Setup(x => x.StandardOutput).Returns(Observable.Empty<string>());
         dashWrapperMock.Setup(x => x.StopAsync()).ReturnsAsync(Result.Ok());
         dashWrapperMock.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask);
 
@@ -87,6 +97,9 @@ public class DashPlexDownloadClientDisposeAsyncUnitTests : BaseUnitTest<DashPlex
 
         await sut.DisposeAsync();
 
+        dbContextFactoryMock.Verify(x => x.Create(), Times.Once);
         dbContextMock.Verify();
+        dashWrapperMock.Verify(x => x.StopAsync(), Times.Once);
+        dashWrapperMock.Verify(x => x.DisposeAsync(), Times.Once);
     }
 }

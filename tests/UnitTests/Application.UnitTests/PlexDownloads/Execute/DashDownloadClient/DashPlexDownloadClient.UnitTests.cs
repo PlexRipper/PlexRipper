@@ -11,9 +11,9 @@ using DomainDownloadStatus = Reaparr.Domain.DownloadStatus;
 
 namespace Reaparr.Application.UnitTests;
 
-public class DashPlexDownloadClientStartUnitTests : BaseUnitTest<DashPlexDownloadClient>
+public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClient>
 {
-    public DashPlexDownloadClientStartUnitTests(ITestOutputHelper output)
+    public DashPlexDownloadClientUnitTests(ITestOutputHelper output)
         : base(output) { }
 
     private DashPlexDownloadClient CreateSut(
@@ -229,7 +229,7 @@ public class DashPlexDownloadClientStartUnitTests : BaseUnitTest<DashPlexDownloa
         var result = await sut.Start(downloadTask.ToKey(), CancellationToken);
 
         result.IsFailed.ShouldBeTrue();
-        dashWrapperMock.Verify(x => x.StartAsync(It.IsAny<DashMpdCliOptions>()), Times.Never);
+        dashWrapperMock.Verify(x => x.StartAsync(It.IsAny<DashMpdCliOptions>()), Times.Never());
     }
 
     [Fact]

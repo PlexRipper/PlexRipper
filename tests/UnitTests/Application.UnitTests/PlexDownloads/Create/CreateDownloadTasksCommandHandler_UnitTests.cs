@@ -17,14 +17,14 @@ public class CreateDownloadTasksCommandHandlerUnitTests : BaseUnitTest<CreateDow
         Mock.SetupCommand(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>).ReturnsAsync(Result.Ok());
         Mock.SetupCommand(It.IsAny<GenerateDownloadTaskTvShowEpisodesCommand>)
             .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.Once);
+            .Verifiable(Times.Once());
         Mock.PublishEvent(It.IsAny<CheckDownloadQueueEvent>).Returns(Task.CompletedTask);
         Mock.Mock<INotificationHubService>()
             .Setup(x =>
                 x.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>(), It.IsAny<CancellationToken>())
             )
             .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once);
+            .Verifiable(Times.Once());
 
         var downloadMediaDtos = new List<DownloadMediaDTO>
         {
@@ -72,17 +72,22 @@ public class CreateDownloadTasksCommandHandlerUnitTests : BaseUnitTest<CreateDow
         Mock.Mock<ICommandExecutor>()
             .Verify(
                 x => x.Send(It.IsAny<GenerateDownloadTaskMoviesCommand>(), It.IsAny<CancellationToken>()),
-                Times.Once
+                Times.Once()
             );
         Mock.Mock<ICommandExecutor>()
             .Verify(
                 x => x.Send(It.IsAny<GenerateDownloadTaskTvShowsCommand>(), It.IsAny<CancellationToken>()),
-                Times.Once
+                Times.Once()
             );
         Mock.Mock<ICommandExecutor>()
             .Verify(
                 x => x.Send(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>(), It.IsAny<CancellationToken>()),
-                Times.Once
+                Times.Once()
+            );
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<GenerateDownloadTaskTvShowEpisodesCommand>(), It.IsAny<CancellationToken>()),
+                Times.Once()
             );
         Mock.VerifyNotification(It.IsAny<CheckDownloadQueueEvent>, Times.Once);
     }
@@ -96,14 +101,14 @@ public class CreateDownloadTasksCommandHandlerUnitTests : BaseUnitTest<CreateDow
         Mock.SetupCommand(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>).ReturnsAsync(Result.Ok());
         Mock.SetupCommand(It.IsAny<GenerateDownloadTaskTvShowEpisodesCommand>)
             .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.Never);
+            .Verifiable(Times.Never());
         Mock.PublishEvent(It.IsAny<CheckDownloadQueueEvent>).Returns(Task.CompletedTask);
         Mock.Mock<INotificationHubService>()
             .Setup(x =>
                 x.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>(), It.IsAny<CancellationToken>())
             )
             .Returns(Task.CompletedTask)
-            .Verifiable(Times.Once);
+            .Verifiable(Times.Once());
 
         var downloadMediaDtos = new List<DownloadMediaDTO>
         {
@@ -126,7 +131,7 @@ public class CreateDownloadTasksCommandHandlerUnitTests : BaseUnitTest<CreateDow
         };
 
         // Act
-        var request = new CreateDownloadTasksCommand(new CreateDownloadTasksRequest(downloadMediaDtos));
+        var request = new CreateDownloadTasksCommand(downloadMediaDtos);
         var handler = Mock.Create<CreateDownloadTasksCommandHandler>();
         var result = await handler.ExecuteAsync(request, CancellationToken);
 
@@ -135,17 +140,17 @@ public class CreateDownloadTasksCommandHandlerUnitTests : BaseUnitTest<CreateDow
         Mock.Mock<ICommandExecutor>()
             .Verify(
                 x => x.Send(It.IsAny<GenerateDownloadTaskMoviesCommand>(), It.IsAny<CancellationToken>()),
-                Times.Once
+                Times.Once()
             );
         Mock.Mock<ICommandExecutor>()
             .Verify(
                 x => x.Send(It.IsAny<GenerateDownloadTaskTvShowsCommand>(), It.IsAny<CancellationToken>()),
-                Times.Once
+                Times.Once()
             );
         Mock.Mock<ICommandExecutor>()
             .Verify(
                 x => x.Send(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>(), It.IsAny<CancellationToken>()),
-                Times.Never
+                Times.Never()
             );
         Mock.VerifyNotification(It.IsAny<CheckDownloadQueueEvent>, Times.Once);
     }
@@ -159,8 +164,14 @@ public class CreateDownloadTasksCommandHandlerUnitTests : BaseUnitTest<CreateDow
         Mock.SetupCommand(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>).ReturnsAsync(Result.Ok());
         Mock.SetupCommand(It.IsAny<GenerateDownloadTaskTvShowEpisodesCommand>)
             .ReturnsAsync(Result.Ok())
-            .Verifiable(Times.Never);
+            .Verifiable(Times.Never());
         Mock.PublishEvent(It.IsAny<CheckDownloadQueueEvent>).Returns(Task.CompletedTask);
+        Mock.Mock<INotificationHubService>()
+            .Setup(x =>
+                x.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>(), It.IsAny<CancellationToken>())
+            )
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Never());
 
         // Act
         var request = new CreateDownloadTasksCommand([]);
@@ -172,18 +183,23 @@ public class CreateDownloadTasksCommandHandlerUnitTests : BaseUnitTest<CreateDow
         Mock.Mock<ICommandExecutor>()
             .Verify(
                 x => x.Send(It.IsAny<GenerateDownloadTaskMoviesCommand>(), It.IsAny<CancellationToken>()),
-                Times.Never
+                Times.Never()
             );
         Mock.Mock<ICommandExecutor>()
             .Verify(
                 x => x.Send(It.IsAny<GenerateDownloadTaskTvShowsCommand>(), It.IsAny<CancellationToken>()),
-                Times.Never
+                Times.Never()
             );
         Mock.Mock<ICommandExecutor>()
             .Verify(
                 x => x.Send(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>(), It.IsAny<CancellationToken>()),
-                Times.Never
+                Times.Never()
             );
         Mock.VerifyNotification(It.IsAny<CheckDownloadQueueEvent>, Times.Never);
+        Mock.Mock<INotificationHubService>()
+            .Verify(
+                x => x.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>(), It.IsAny<CancellationToken>()),
+                Times.Never()
+            );
     }
 }

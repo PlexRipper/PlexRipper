@@ -117,7 +117,11 @@ public class DownloadJob : IJob
                     );
                 await plexDownloadClient.StopAsync();
 
-                await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(downloadTaskKey, DownloadStatus.Paused, token);
+                await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
+                    downloadTaskKey,
+                    DownloadStatus.Paused,
+                    CancellationToken.None
+                );
             }
             else if (startResult.IsFailed)
             {

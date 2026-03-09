@@ -56,7 +56,7 @@ public class ClearCompletedDownloadTasksByServerIdEndpointUnitTests
         Mock.Mock<ICommandExecutor>()
             .Verify(
                 x => x.Send(It.IsAny<ClearCompletedDownloadTasksByServerIdCommand>(), It.IsAny<CancellationToken>()),
-                Times.Once
+                Times.Once()
             );
     }
 
@@ -107,5 +107,14 @@ public class ClearCompletedDownloadTasksByServerIdEndpointUnitTests
         var remaining = await dbContext.DownloadTaskMovie.ToListAsync(CancellationToken);
         remaining.Count.ShouldBe(otherServerTaskCount);
         remaining.ShouldAllBe(x => x.PlexServerId != targetServerId);
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x =>
+                    x.Send(
+                        It.Is<ClearCompletedDownloadTasksByServerIdCommand>(cmd => cmd.PlexServerId == targetServerId),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Once()
+            );
     }
 }

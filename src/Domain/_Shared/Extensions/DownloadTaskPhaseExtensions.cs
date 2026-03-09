@@ -22,6 +22,7 @@ public static class DownloadTaskPhaseExtensions
             case DownloadStatus.SourceUnavailable:
             case DownloadStatus.DownloadClientError:
             case DownloadStatus.IntegrityError:
+            case DownloadStatus.Restarting:
                 return DownloadTaskPhase.Downloading;
 
             case DownloadStatus.DownloadFinished:

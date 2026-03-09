@@ -66,6 +66,10 @@ public static class DownloadTaskActions
                 actions.Add(DownloadActions.Restart);
                 actions.Add(DownloadActions.Delete);
                 break;
+            case DownloadStatus.Restarting:
+                actions.Add(DownloadActions.Stop);
+                actions.Add(DownloadActions.Delete);
+                break;
             case DownloadStatus.Moving:
                 actions.Add(DownloadActions.Pause);
                 actions.Add(DownloadActions.Stop);

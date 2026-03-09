@@ -59,7 +59,7 @@ public class ClearCompletedDownloadTasksByDownloadTaskIdEndpointUnitTests
                         It.IsAny<ClearCompletedDownloadTasksByDownloadTaskIdCommand>(),
                         It.IsAny<CancellationToken>()
                     ),
-                Times.Once
+                Times.Once()
             );
     }
 
@@ -104,6 +104,15 @@ public class ClearCompletedDownloadTasksByDownloadTaskIdEndpointUnitTests
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
         (await dbContext.DownloadTaskMovie.ToListAsync(CancellationToken)).Count.ShouldBe(5);
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x =>
+                    x.Send(
+                        It.IsAny<ClearCompletedDownloadTasksByDownloadTaskIdCommand>(),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Once()
+            );
     }
 
     [Fact]
@@ -168,7 +177,7 @@ public class ClearCompletedDownloadTasksByDownloadTaskIdEndpointUnitTests
                         It.IsAny<ClearCompletedDownloadTasksByDownloadTaskIdCommand>(),
                         It.IsAny<CancellationToken>()
                     ),
-                Times.Once
+                Times.Once()
             );
     }
 }

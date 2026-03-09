@@ -69,9 +69,18 @@ public class PauseDownloadTaskCommandHandler : ICommandHandler<PauseDownloadTask
                 continue;
 
             // DownloadFinished means the file is ready to move but the move job has not started yet.
-            // There is nothing to stop or reset here; leave it for the move queue to pick up.
+            // It still needs to be marked paused so it is not picked up as runnable.
             if (downloadTask.DownloadStatus == DownloadStatus.DownloadFinished)
+            {
+                var queuedPauseResult = await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
+                    downloadTaskKey,
+                    DownloadStatus.Paused,
+                    cancellationToken
+                );
+                if (queuedPauseResult.IsFailed)
+                    return queuedPauseResult.LogError();
                 continue;
+            }
 
             _log.Here()
                 .Information("Pausing DownloadTask with id {DownloadTaskTitle} from downloading", downloadTask.Title);
@@ -98,7 +107,16 @@ public class PauseDownloadTaskCommandHandler : ICommandHandler<PauseDownloadTask
 
             var isDownloading = await _downloadTaskScheduler.IsDownloading(downloadTaskKey, cancellationToken);
             if (!isDownloading)
+            {
+                var inactivePauseResult = await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
+                    downloadTaskKey,
+                    DownloadStatus.Paused,
+                    cancellationToken
+                );
+                if (inactivePauseResult.IsFailed)
+                    return inactivePauseResult.LogError();
                 continue;
+            }
 
             var stopResult = await _downloadTaskScheduler.StopDownloadTaskJob(downloadTaskKey, cancellationToken);
             if (stopResult.IsFailed)

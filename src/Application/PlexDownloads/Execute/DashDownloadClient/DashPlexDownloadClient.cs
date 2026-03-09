@@ -84,7 +84,13 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         }
 
         if (downloadUrlResult.IsFailed)
+        {
+            var status = downloadUrlResult.ToResult().Has504GatewayTimeoutError()
+                ? DownloadStatus.ServerUnreachable
+                : DownloadStatus.SourceUnavailable;
+            await SetDownloadStatusAsync(status, downloadUrlResult.ToResult());
             return downloadUrlResult.ToResult().LogError();
+        }
 
         // Create working directory
         var createDirectoryResult = Result.Try(() => _directory.CreateDirectory(downloadTask.DownloadDirectory));
@@ -99,10 +105,14 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         // Execute dash stream download
         await SetDownloadStatusAsync(DownloadStatus.Downloading);
         var options = await CreateDashOptions(downloadTask, downloadUrlResult.Value, cancellationToken);
+        await using var cancellationRegistration = cancellationToken.Register(() =>
+        {
+            _ = _dashWrapper.StopAsync();
+        });
         var startResult = await _dashWrapper.StartAsync(options);
         if (startResult.IsCancelled)
         {
-            await SetDownloadStatusAsync(DownloadStatus.Stopped, downloadUrlResult.ToResult());
+            await SetDownloadStatusAsync(DownloadStatus.Stopped, startResult);
             return startResult;
         }
 
@@ -118,7 +128,9 @@ public class DashPlexDownloadClient : IPlexDownloadClient
 
     public async Task<Result> StopAsync()
     {
-        await _dashWrapper.StopAsync();
+        var stopResult = await _dashWrapper.StopAsync();
+        if (stopResult.IsFailed)
+            return stopResult;
 
         if (_downloadTaskKey is null)
             return Result.Ok();

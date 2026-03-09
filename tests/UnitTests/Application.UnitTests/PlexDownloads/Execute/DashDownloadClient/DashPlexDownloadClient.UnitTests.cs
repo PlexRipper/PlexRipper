@@ -106,6 +106,16 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             .ReturnsAsync(Result.Ok());
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<Result>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
                 x.OnProgressUpdated(
                     It.IsAny<DownloadTaskKey>(),
                     It.IsAny<DownloadTaskProgress>(),
@@ -152,6 +162,16 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                 x.OnStatusChangedAsync(
                     It.IsAny<DownloadTaskKey>(),
                     It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<Result>(),
                     It.IsAny<CancellationToken>()
                 )
             )
@@ -207,6 +227,16 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                 x.OnStatusChangedAsync(
                     It.IsAny<DownloadTaskKey>(),
                     It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<Result>(),
                     It.IsAny<CancellationToken>()
                 )
             )

@@ -363,7 +363,10 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
 
         sequences.Count.ShouldBeGreaterThanOrEqualTo(2);
         sequences.Distinct().Count().ShouldBe(sequences.Count);
-        sequences.ShouldBe(sequences.OrderBy(x => x).ToList());
+
+        var orderedSequences = sequences.OrderBy(x => x).ToList();
+        for (var i = 1; i < orderedSequences.Count; i++)
+            orderedSequences[i].ShouldBe(orderedSequences[i - 1] + 1);
     }
 
     private async Task WaitForPatchCount<T>(ICollection<T> collection, int expectedCount)

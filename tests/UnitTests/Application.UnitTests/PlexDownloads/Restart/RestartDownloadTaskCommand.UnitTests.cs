@@ -62,7 +62,17 @@ public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadT
                     x =>
                         x.OnStatusChangedAsync(
                             It.Is<DownloadTaskKey>(k => k == childKey),
-                            It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                            DownloadStatus.Restarting,
+                            It.IsAny<CancellationToken>()
+                        ),
+                    Times.Once()
+                );
+            Mock.Mock<IDownloadTaskUpdateDispatcher>()
+                .Verify(
+                    x =>
+                        x.OnStatusChangedAsync(
+                            It.Is<DownloadTaskKey>(k => k == childKey),
+                            DownloadStatus.Queued,
                             It.IsAny<CancellationToken>()
                         ),
                     Times.Once()

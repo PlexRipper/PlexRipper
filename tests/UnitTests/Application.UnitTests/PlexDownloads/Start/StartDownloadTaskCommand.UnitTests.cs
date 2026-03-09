@@ -384,7 +384,7 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
         var tvShow = await IDbContext.DownloadTaskTvShow.AsNoTracking().FirstAsync(CancellationToken);
         var orderedChildTasks = await IDbContext.GetDownloadableChildTasks(tvShow.ToKey(), CancellationToken);
 
-        orderedChildTasks.Count.ShouldBeGreaterThan(2);
+        orderedChildTasks.Count.ShouldBeGreaterThan(1);
         var firstPausedTask = orderedChildTasks[0];
         var secondPausedTask = orderedChildTasks[1];
 

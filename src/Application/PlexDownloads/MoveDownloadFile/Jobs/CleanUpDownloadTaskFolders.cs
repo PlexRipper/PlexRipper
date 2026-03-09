@@ -79,29 +79,28 @@ public class CleanUpDownloadTaskFoldersHandler : ICommandHandler<CleanUpDownload
         CancellationToken cancellationToken
     )
     {
-        var hasActiveMovieTasks = await _dbContext
+        var activeMovieTasks = await _dbContext
             .DownloadTaskMovieFile.AsNoTracking()
-            .AnyAsync(
-                x =>
-                    x.DownloadDirectory == downloadTask.DownloadDirectory
-                    && x.Id != downloadTask.Id
-                    && x.DownloadStatus != DownloadStatus.Completed
-                    && x.DownloadStatus != DownloadStatus.Deleted,
-                cancellationToken
-            );
+            .Where(x =>
+                x.Id != downloadTask.Id
+                && x.DownloadStatus != DownloadStatus.Completed
+                && x.DownloadStatus != DownloadStatus.Deleted
+            )
+            .ToListAsync(cancellationToken);
+        var hasActiveMovieTasks = activeMovieTasks.Any(x => x.DownloadDirectory == downloadTask.DownloadDirectory);
         if (hasActiveMovieTasks)
             return true;
 
-        return await _dbContext
+        var activeEpisodeTasks = await _dbContext
             .DownloadTaskTvShowEpisodeFile.AsNoTracking()
-            .AnyAsync(
-                x =>
-                    x.DownloadDirectory == downloadTask.DownloadDirectory
-                    && x.Id != downloadTask.Id
-                    && x.DownloadStatus != DownloadStatus.Completed
-                    && x.DownloadStatus != DownloadStatus.Deleted,
-                cancellationToken
-            );
+            .Where(x =>
+                x.Id != downloadTask.Id
+                && x.DownloadStatus != DownloadStatus.Completed
+                && x.DownloadStatus != DownloadStatus.Deleted
+            )
+            .ToListAsync(cancellationToken);
+
+        return activeEpisodeTasks.Any(x => x.DownloadDirectory == downloadTask.DownloadDirectory);
     }
 
     private Result DeleteDirectoryFromFilePath(string filePath)

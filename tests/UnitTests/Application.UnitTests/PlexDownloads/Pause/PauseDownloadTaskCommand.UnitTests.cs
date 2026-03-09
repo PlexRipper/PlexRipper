@@ -273,7 +273,17 @@ public class DownloadCommandsPauseDownloadTasksAsyncUnitTests : BaseUnitTest<Pau
             .Verify(
                 x =>
                     x.OnStatusChangedAsync(
-                        It.IsAny<DownloadTaskKey>(),
+                        It.Is<DownloadTaskKey>(k => k.Id == downloadingKey.Id),
+                        DownloadStatus.Paused,
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Once
+            );
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.Is<DownloadTaskKey>(k => k.Id == inactiveKey.Id),
                         DownloadStatus.Paused,
                         It.IsAny<CancellationToken>()
                     ),

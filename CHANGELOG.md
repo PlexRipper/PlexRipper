@@ -1,5 +1,64 @@
 Reaparr Changelog
 
+# [0.37.0-dev.2](https://github.com/Reaparr/Reaparr/compare/v0.37.0-dev.1...v0.37.0-dev.2) (2026-03-09)
+
+
+### Bug Fixes
+
+* **WebAPI:** Accept GUID array payload for clear tasks endpoint ([04caa23](https://github.com/Reaparr/Reaparr/commit/04caa2394d5f2c5325eb0a20f4b178002356b8fd))
+* **Web-UI:** Align actions column to start ([36eeba0](https://github.com/Reaparr/Reaparr/commit/36eeba0d922af34a5f3d8a3b1eb839f65739a932))
+* **WebAPI:** Align downloader temp handling and move cleanup ([a6b524c](https://github.com/Reaparr/Reaparr/commit/a6b524c9d101742cf75d857932c48ca0b39aa251))
+* **WebAPI:** Avoid destructuring unsafe API request payloads ([ffa36c0](https://github.com/Reaparr/Reaparr/commit/ffa36c089b192d9af7dd3a3d50ce4f857cda4d59))
+* **Web-UI:** Don't show 0 byte sizes but instead show "-" as download speed in the downloads table ([f1da3c2](https://github.com/Reaparr/Reaparr/commit/f1da3c2d84fe0dac6bb53cacf62169b41992083b))
+* **WebAPI:** Fixed a memory leak that happened due to incorrect disposal of downloading resources ([4d79097](https://github.com/Reaparr/Reaparr/commit/4d79097bde7a571df6ee04068edaec9e2e10fc4a))
+* **WebAPI:** Fixed a minor count bug in generating tvshow fake data for testing ([da495e3](https://github.com/Reaparr/Reaparr/commit/da495e3e0cfc46e4e1d3343c1539ed4c8c8d68f3))
+* **Web-UI:** Fixed all the broken documentation links due to the new Reaparr.rocks website ([9f35b77](https://github.com/Reaparr/Reaparr/commit/9f35b7704b825806a54c4edfc67ad3176395356d))
+* **WebAPI:** Fixed an issue where it would make a download as DownloadFinished prematurely ([e8f74c9](https://github.com/Reaparr/Reaparr/commit/e8f74c947429b8cb036369ac8646deeab6cbe65e))
+* **WebAPI:** Fixed an issue where the check all connections dialog would show Done at the start while still starting ([0de6aba](https://github.com/Reaparr/Reaparr/commit/0de6aba145de9d7134d062fbc872b3d253284a5c))
+* **WebAPI:** Fixed several annoying DownloadTask bugs where pausing the tvShow would pause all children and breaking the download flow ([8b820d3](https://github.com/Reaparr/Reaparr/commit/8b820d34471fd06db63718f5da48fcf6251a435c))
+* **WebAPI:** Fixed start/stop downloadtask commands on tvshow/season ([60f96f8](https://github.com/Reaparr/Reaparr/commit/60f96f8dd44469260ab92a46be6711f819d3c5cd))
+* **Web-UI:** Fixed the annoying columns in the downloadstable changing width when updating its values ([eaba7c9](https://github.com/Reaparr/Reaparr/commit/eaba7c9473989a8c18f3d8f603b30126ff7dcd84))
+* **WebAPI:** Handle glibc loader copy on arm64 ([2199edf](https://github.com/Reaparr/Reaparr/commit/2199edfc50b1691eed0a8d926fb11ea9703927de))
+* **WebAPI:** Mask sensitive request fields in logs ([5bceb4d](https://github.com/Reaparr/Reaparr/commit/5bceb4dd5d996c924abca768f0687e12bc999375))
+* **WebAPI:** Pausing a download task will now set the downloadspeed to zero ([4f44136](https://github.com/Reaparr/Reaparr/commit/4f44136e6c0fa72886b8ceac490e437812d88de7))
+* **WebAPI:** Preserve DataReceived on completed downloads ([225ce1f](https://github.com/Reaparr/Reaparr/commit/225ce1f3641aef5e3d18487df07834e04f410a81))
+* **WebAPI:** Prevent cleanup from deleting shared download folders ([105f334](https://github.com/Reaparr/Reaparr/commit/105f334eab15c1a58d9b1590e3bab36c397d6a10))
+* **WebAPI:** Prevent double disposal of PlexDownloadClient during shutdown ([383cf27](https://github.com/Reaparr/Reaparr/commit/383cf27b0770a47487cc1fc19fce37370117ec33))
+* **Web-UI:** Remove any casts from SignalR patch parsing ([673b474](https://github.com/Reaparr/Reaparr/commit/673b474272050f89201c5573947d1572d049832b))
+* **WebAPI:** Remove orphaned download task parents after child cleanup ([029fafd](https://github.com/Reaparr/Reaparr/commit/029fafd4ec4ef43dbe7b2f25e7971ecc4f8d4007))
+* **WebAPI:** Reset paused task progress and prioritize unreachable tasks ([369db11](https://github.com/Reaparr/Reaparr/commit/369db11599037af1dc6c45ded609c64731299e27))
+* **WebAPI:** Resolve ambiguous Result.Try overload in DashMpdCliWrapper event loop ([a820eb8](https://github.com/Reaparr/Reaparr/commit/a820eb8a7ae38535c9bb6be9aac5949ba8d46405))
+* **WebAPI:** Resolved issue where Sonarr/Radarr would send delete all and nothing would happen ([94de81b](https://github.com/Reaparr/Reaparr/commit/94de81bfcb02c44220c8aacdafddf40ac8e19387))
+* **WebAPI:** Set FullTitle for PlexMovie in mapper ([801396f](https://github.com/Reaparr/Reaparr/commit/801396f43b9022bda20e37217c7219878085777a))
+* **Web-UI:** Show server success when any connection ok ([58a54cf](https://github.com/Reaparr/Reaparr/commit/58a54cf6de61e5ae4ea7d24614a1ccae34cce297))
+* **WebAPI:** Skip pausing download tasks that are not actively downloading ([45fc87b](https://github.com/Reaparr/Reaparr/commit/45fc87be0feb95647d3774e701daa4072d32880c))
+
+
+### Features
+
+* **Web-UI:** A PlexServer can now be paused in its entirety by pressing the pause button in the DownloadTable ([8479ee2](https://github.com/Reaparr/Reaparr/commit/8479ee27fc85213357a7fae3894ca906a3383a2e))
+* **Web-UI:** Add glowing tooltip styling for log levels ([2824e95](https://github.com/Reaparr/Reaparr/commit/2824e955d49be6acc918bfca5c215a19a9170eee))
+* **Web-UI:** Added a timeline with filter options to the logging visible in the Download details dialog ([c36c9cb](https://github.com/Reaparr/Reaparr/commit/c36c9cb33505f3ae649d44b0f02506b0c7b9b513))
+* **Web-UI:** Added an notification to the Sonarr/Radarr integration screen about the reverse proxy setup to do that first ([62e8593](https://github.com/Reaparr/Reaparr/commit/62e8593c90d253647541952f47e5b7a969395b6a))
+* **Web-UI:** Change the default sorting for the Download task logs from new to old, from top to bottom ([b8e0acb](https://github.com/Reaparr/Reaparr/commit/b8e0acb17ad0bf61d8bd820e924a6f59227fbd79))
+* **Web-UI:** Moved the check all connections button to the Server Connections tab in the Plex server settings ([e2d4028](https://github.com/Reaparr/Reaparr/commit/e2d4028c9c34aadb15f38f32e3d09c48b2135ebf))
+* **Web-UI:** Registering a Plex account with an authentication token, will now use the e-mail of that token as the display name, if the display name is empty ([f6acb75](https://github.com/Reaparr/Reaparr/commit/f6acb75907b030317e392d3f94c0be386c0800f3))
+* **Web-UI:** Removed the DownloadBar and moved the clear completed button to each individual server downloads table ([4bbf531](https://github.com/Reaparr/Reaparr/commit/4bbf5316a1c01c44e3863ac2ceccbdd2d6fd8f3e))
+
+
+### Performance Improvements
+
+* **WebAPI:** Immediately broadcast first download progress to front-end ([4929d85](https://github.com/Reaparr/Reaparr/commit/4929d8572179ca0241b2f33ecd1dba7d9fd78c99))
+* **Web-UI:** Improved download task progress update performance massively, by only sending the delta instead of the entire download task tree on every progress update ([f17bba8](https://github.com/Reaparr/Reaparr/commit/f17bba8c2e57746f7314f2a6f0a88e904be3dd3b))
+* **WebAPI:** Incredible memory optimization when downloading media, instead of Reaparr using 1gb of memory it now uses around a 100mb! ([4c0bf42](https://github.com/Reaparr/Reaparr/commit/4c0bf420a3931ca84ad3478a57ca7cef0a279247))
+* **WebAPI:** Split out the log tables based on the mediafile type, this is to increase performance of retrieiving DownloadTask logs ([48a6dd9](https://github.com/Reaparr/Reaparr/commit/48a6dd90e20e8323e18a0fd78c581b5c1f258809))
+* **WebAPI:** Split out the log tables based on the mediafile type, this is to increase performance of retrieiving DownloadTask logs ([61635c4](https://github.com/Reaparr/Reaparr/commit/61635c49e3ea9451d842811a54d5d6528fbdd7e2))
+
+
+### Reverts
+
+* Revert "build(WebAPI): Added IsDownloadsPausedByUser to PlexServer table" ([571db66](https://github.com/Reaparr/Reaparr/commit/571db6610a5c4efd22ec1710b894dd9fad146a3c))
+
 # [0.37.0-dev.1](https://github.com/Reaparr/Reaparr/compare/v0.36.0...v0.37.0-dev.1) (2026-02-26)
 
 

@@ -297,6 +297,12 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
         if (_downloadTaskKey is null)
             return;
 
+        if (errorResult is null)
+        {
+            await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(_downloadTaskKey, status, CancellationToken.None);
+            return;
+        }
+
         await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
             _downloadTaskKey,
             status,

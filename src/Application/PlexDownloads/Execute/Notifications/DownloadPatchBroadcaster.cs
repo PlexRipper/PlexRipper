@@ -245,13 +245,30 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
                 var flushResult = await Result.Try(async Task () =>
                 {
                     using var dbContext = await _dbContextFactory.CreateAsync();
-                    await dbContext.UpdateDownloadProgress(update.Key, update.Progress, update.Snapshot, stoppingToken);
 
-                    var scope = await ResolveScopeAsync(dbContext, update.Key, stoppingToken);
+                    // Prefer the latest buffered value in case multiple progress updates arrived
+                    // before the background loop started processing this channel item.
+                    var bufferScope =
+                        _scopeByNodeId.GetValueOrDefault(update.NodeId) ?? ProgressScopeKey.From(update.Key);
+                    var effectiveUpdate =
+                        _progressByScope.TryGetValue(bufferScope, out var buffered)
+                        && buffered.NodeId == update.NodeId
+                        && buffered.Progress is not null
+                            ? buffered
+                            : update;
+
+                    await dbContext.UpdateDownloadProgress(
+                        effectiveUpdate.Key,
+                        effectiveUpdate.Progress!,
+                        effectiveUpdate.Snapshot,
+                        stoppingToken
+                    );
+
+                    var scope = await ResolveScopeAsync(dbContext, effectiveUpdate.Key, stoppingToken);
                     if (scope is null)
                         return;
 
-                    var sendResult = await SendPatchAsync(scope, [update.NodeId], stoppingToken, dbContext);
+                    var sendResult = await SendPatchAsync(scope, [effectiveUpdate.NodeId], stoppingToken, dbContext);
                     if (sendResult.IsFailed)
                         sendResult.LogError();
                 });

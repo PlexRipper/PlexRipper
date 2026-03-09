@@ -233,7 +233,7 @@ public class DashPlexDownloadClientStartUnitTests : BaseUnitTest<DashPlexDownloa
     }
 
     [Fact]
-    public async Task ShouldPersistProgress_WhenDashProgressEmits()
+    public async Task ShouldDispatchProgressUpdate_WhenDashProgressEmits()
     {
         await SetupDatabase(
             12004,
@@ -307,12 +307,16 @@ public class DashPlexDownloadClientStartUnitTests : BaseUnitTest<DashPlexDownloa
 
         result.IsSuccess.ShouldBeTrue();
 
-        var updatedTask = await IDbContext.DownloadTaskMovieFile.FirstAsync(
-            x => x.Id == downloadTask.Id,
-            CancellationToken
-        );
-        updatedTask.DataReceived.ShouldBeGreaterThan(0);
-        updatedTask.DownloadSpeed.ShouldBeGreaterThanOrEqualTo(0);
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnProgressUpdated(
+                        It.Is<DownloadTaskKey>(k => k.Id == downloadTask.Id),
+                        It.Is<DownloadTaskProgress>(p => p.DataReceived > 0 && p.DownloadSpeed >= 0),
+                        It.IsAny<DirectDownloadSnapshot?>()
+                    ),
+                Times.Once
+            );
     }
 
     [Fact]

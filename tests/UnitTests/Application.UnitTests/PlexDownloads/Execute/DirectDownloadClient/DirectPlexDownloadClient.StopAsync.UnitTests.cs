@@ -96,27 +96,9 @@ public class DirectPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DirectPle
     // -------------------------------------------------------------------------
 
     [Fact]
-    public async Task ShouldReturnSuccessResultAndPersistPausedStatus_WhenDownloadClientIsStoppedSuccessfully()
+    public async Task ShouldDispatchPausedStatus_AndReturnSuccess_WhenDownloadClientIsStopped()
     {
         // Arrange
-        Mock.Mock<IDownloadTaskUpdateDispatcher>()
-            .Setup(x =>
-                x.OnStatusChangedAsync(
-                    It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
-                    It.IsAny<CancellationToken>()
-                )
-            )
-            .ReturnsAsync(Result.Ok());
-        Mock.Mock<IDownloadTaskUpdateDispatcher>()
-            .Setup(x =>
-                x.OnProgressUpdated(
-                    It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<DownloadTaskProgress>(),
-                    It.IsAny<DirectDownloadSnapshot?>()
-                )
-            )
-            .Returns(Result.Ok());
         await SetupDatabase(
             82345,
             config =>
@@ -135,8 +117,18 @@ public class DirectPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DirectPle
         );
 
         SetupSpeedLimitMocks(serverMachineIdentifier);
-
         SetupCommandExecutor();
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DomainDownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
 
         var (downloadServiceMock, _) = BuildInProgressDownloadServiceMock();
 
@@ -144,46 +136,29 @@ public class DirectPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DirectPle
         var sut = CreateSut(downloadServiceMock);
         var startTask = sut.Start(downloadTask.ToKey(), CancellationToken);
 
-        // Give the download time to start before stopping
         await Task.Delay(200, TestContext.Current.CancellationToken);
         var stopResult = await sut.StopAsync();
-
-        // Wait for the start task to complete (it unblocks once DownloadFileCompleted fires)
         var startResult = await startTask;
 
         // Assert
         startResult.IsSuccess.ShouldBeTrue();
         stopResult.IsSuccess.ShouldBeTrue();
-
-        var finalStatus = await IDbContext
-            .DownloadTaskMovieFile.Where(x => x.Id == downloadTask.Id)
-            .Select(x => x.DownloadStatus)
-            .FirstOrDefaultAsync(CancellationToken);
-        finalStatus.ShouldBe(DomainDownloadStatus.Paused);
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.Is<DownloadTaskKey>(k => k.Id == downloadTask.Id),
+                        DomainDownloadStatus.Paused,
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Once()
+            );
     }
 
     [Fact]
-    public async Task ShouldPersistPausedStatus_WhenDownloadIsCancelledByStop()
+    public async Task ShouldDispatchPausedStatus_WhenDownloadIsCancelledByStop()
     {
         // Arrange
-        Mock.Mock<IDownloadTaskUpdateDispatcher>()
-            .Setup(x =>
-                x.OnStatusChangedAsync(
-                    It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
-                    It.IsAny<CancellationToken>()
-                )
-            )
-            .ReturnsAsync(Result.Ok());
-        Mock.Mock<IDownloadTaskUpdateDispatcher>()
-            .Setup(x =>
-                x.OnProgressUpdated(
-                    It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<DownloadTaskProgress>(),
-                    It.IsAny<DirectDownloadSnapshot?>()
-                )
-            )
-            .Returns(Result.Ok());
         await SetupDatabase(
             11110,
             config =>
@@ -204,47 +179,44 @@ public class DirectPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DirectPle
         SetupSpeedLimitMocks(serverMachineIdentifier);
         SetupCommandExecutor();
 
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DomainDownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
+
         var (downloadServiceMock, _) = BuildInProgressDownloadServiceMock();
 
         // Act
         var sut = CreateSut(downloadServiceMock);
         var startTask = sut.Start(downloadTask.ToKey(), CancellationToken);
 
-        // Give the download time to start before stopping
         await Task.Delay(200, TestContext.Current.CancellationToken);
         await sut.StopAsync();
         await startTask;
 
-        // Assert — Paused status must be written to DB by the DownloadFileCompleted handler
-        var finalStatus = await IDbContext
-            .DownloadTaskMovieFile.Where(x => x.Id == downloadTask.Id)
-            .Select(x => x.DownloadStatus)
-            .FirstOrDefaultAsync(CancellationToken);
-        finalStatus.ShouldBe(DomainDownloadStatus.Paused);
+        // Assert
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.Is<DownloadTaskKey>(k => k.Id == downloadTask.Id),
+                        DomainDownloadStatus.Paused,
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Once()
+            );
     }
 
     [Fact]
     public async Task ShouldReturnSuccessResult_WhenStopAsyncIsCalledTwice()
     {
         // Arrange
-        Mock.Mock<IDownloadTaskUpdateDispatcher>()
-            .Setup(x =>
-                x.OnStatusChangedAsync(
-                    It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
-                    It.IsAny<CancellationToken>()
-                )
-            )
-            .ReturnsAsync(Result.Ok());
-        Mock.Mock<IDownloadTaskUpdateDispatcher>()
-            .Setup(x =>
-                x.OnProgressUpdated(
-                    It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<DownloadTaskProgress>(),
-                    It.IsAny<DirectDownloadSnapshot?>()
-                )
-            )
-            .Returns(Result.Ok());
         await SetupDatabase(
             22220,
             config =>
@@ -264,6 +236,17 @@ public class DirectPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DirectPle
 
         SetupSpeedLimitMocks(serverMachineIdentifier);
         SetupCommandExecutor();
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DomainDownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
 
         var (downloadServiceMock, _) = BuildInProgressDownloadServiceMock();
 
@@ -285,24 +268,6 @@ public class DirectPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DirectPle
     public async Task ShouldCallCancelTaskAsync_WhenStopAsyncIsCalled()
     {
         // Arrange
-        Mock.Mock<IDownloadTaskUpdateDispatcher>()
-            .Setup(x =>
-                x.OnStatusChangedAsync(
-                    It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
-                    It.IsAny<CancellationToken>()
-                )
-            )
-            .ReturnsAsync(Result.Ok());
-        Mock.Mock<IDownloadTaskUpdateDispatcher>()
-            .Setup(x =>
-                x.OnProgressUpdated(
-                    It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<DownloadTaskProgress>(),
-                    It.IsAny<DirectDownloadSnapshot?>()
-                )
-            )
-            .Returns(Result.Ok());
         await SetupDatabase(
             33330,
             config =>
@@ -322,6 +287,17 @@ public class DirectPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DirectPle
 
         SetupSpeedLimitMocks(serverMachineIdentifier);
         SetupCommandExecutor();
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DomainDownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
 
         var (downloadServiceMock, _) = BuildInProgressDownloadServiceMock();
 

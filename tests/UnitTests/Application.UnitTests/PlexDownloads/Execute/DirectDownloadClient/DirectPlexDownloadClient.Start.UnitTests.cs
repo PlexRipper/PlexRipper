@@ -115,6 +115,15 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
                 x.OnStatusChangedAsync(
                     It.IsAny<DownloadTaskKey>(),
                     It.IsAny<Domain.DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<Domain.DownloadStatus>(),
                     It.IsAny<Result?>(),
                     It.IsAny<CancellationToken>()
                 )
@@ -930,13 +939,18 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
         // Assert
         result.IsSuccess.ShouldBeTrue();
 
-        // The DownloadProgressChanged handler persists the snapshot via UpdateDownloadProgress.
-        // A non-null snapshot proves the Rx throttle fired and the handler ran.
-        var updatedTask = await IDbContext.DownloadTaskMovieFile.FirstAsync(
-            x => x.Id == downloadTask.Id,
-            CancellationToken
-        );
-        updatedTask.DirectDownloadSnapshot.ShouldNotBeNull();
+        // The DownloadProgressChanged handler should forward a non-null snapshot to the dispatcher.
+        // Verifying the mock proves the Rx sample fired and the handler ran.
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnProgressUpdated(
+                        It.IsAny<DownloadTaskKey>(),
+                        It.IsAny<DownloadTaskProgress>(),
+                        It.Is<DirectDownloadSnapshot?>(s => s != null)
+                    ),
+                Times.AtLeastOnce()
+            );
     }
 
     [Fact]
@@ -1069,11 +1083,18 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
         // Assert
         result.IsSuccess.ShouldBeTrue();
 
-        var persisted = await IDbContext.DownloadTaskMovieFile.FirstAsync(
-            x => x.Id == downloadTask.Id,
-            CancellationToken
-        );
-        persisted.DataReceived.ShouldBe(downloadTask.DataTotal);
+        // The completion handler applies Math.Max(ReceivedBytesSize, TotalFileSize) before forwarding.
+        // Verify the dispatcher received the corrected DataReceived value — not the raw zero from the event.
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnProgressUpdated(
+                        It.IsAny<DownloadTaskKey>(),
+                        It.Is<DownloadTaskProgress>(p => p.DataReceived == downloadTask.DataTotal),
+                        It.IsAny<DirectDownloadSnapshot?>()
+                    ),
+                Times.Once()
+            );
     }
 
     [Fact]

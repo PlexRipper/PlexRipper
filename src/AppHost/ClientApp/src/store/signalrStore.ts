@@ -125,7 +125,7 @@ export const useSignalrStore = defineStore(StoreNames.SignalrStore, () => {
 
 		downloadHubConnection?.on(MessageTypes.DownloadPatch, (rawData: DownloadPatchMessagePackDTO) => {
 			if (Array.isArray(rawData)) {
-				const patch = toDownloadPatchDTO(rawData as unknown as any[]);
+				const patch = toDownloadPatchDTO(rawData);
 				if (patch)
 					downloadStore.updateDownloadPatch(patch);
 				return;
@@ -286,28 +286,49 @@ function toServerDownloadProgressDTO(arr: ServerDownloadProgressMessagePackDTO):
 	};
 }
 
-function toDownloadPatchDTO(arr: any[]): DownloadPatchMessagePackDTO | null {
+function isDownloadPatchMessagePackPayload(value: unknown[]): boolean {
+	return typeof value[0] === 'number'
+		&& typeof value[1] === 'number'
+		&& Array.isArray(value[2])
+		&& Array.isArray(value[3]);
+}
+
+function isDownloadPatchEntryPayload(value: unknown): value is unknown[] {
+	return Array.isArray(value)
+		&& typeof value[0] === 'string'
+		&& typeof value[1] === 'string'
+		&& value[2] !== undefined
+		&& typeof value[3] === 'number'
+		&& typeof value[4] === 'number'
+		&& typeof value[5] === 'number'
+		&& typeof value[6] === 'number'
+		&& typeof value[7] === 'number';
+}
+
+function toDownloadPatchDTO(arr: unknown[]): DownloadPatchMessagePackDTO | null {
 	if (!Array.isArray(arr))
 		return null;
+	if (!isDownloadPatchMessagePackPayload(arr))
+		return null;
 
-	const upsertsRaw = Array.isArray(arr[2]) ? arr[2] : [];
+	const upsertsRaw = arr[2] as unknown[];
 	const upserts: DownloadPatchDTO[] = upsertsRaw
-		.filter(Array.isArray)
+		.filter(isDownloadPatchEntryPayload)
 		.map((item) => ({
-			id: item[0],
-			parentId: item[1],
-			status: item[2],
+			id: item[0] as DownloadPatchDTO['id'],
+			parentId: item[1] as DownloadPatchDTO['parentId'],
+			status: item[2] as DownloadPatchDTO['status'],
 			percentage: Number(item[3]),
-			dataReceived: item[4],
-			dataTotal: item[5],
-			downloadSpeed: item[6],
-			timeRemaining: item[7],
+			dataReceived: item[4] as DownloadPatchDTO['dataReceived'],
+			dataTotal: item[5] as DownloadPatchDTO['dataTotal'],
+			downloadSpeed: item[6] as DownloadPatchDTO['downloadSpeed'],
+			timeRemaining: item[7] as DownloadPatchDTO['timeRemaining'],
 		}));
 
 	return {
-		serverId: arr[0],
-		sequence: arr[1],
+		serverId: arr[0] as DownloadPatchMessagePackDTO['serverId'],
+		sequence: arr[1] as DownloadPatchMessagePackDTO['sequence'],
 		upserts,
-		deletedIds: Array.isArray(arr[3]) ? arr[3] : [],
+		deletedIds: (arr[3] as unknown[]).filter((item): item is string => typeof item === 'string'),
 	};
 }

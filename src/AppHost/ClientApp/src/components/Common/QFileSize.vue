@@ -20,7 +20,7 @@ const props = defineProps<Pick<IQTextProps, 'align'> & {
 }>();
 
 const formattedString = computed(() => {
-	if (!props.size) {
+	if (props.size == null || props.size === 0) {
 		return '-';
 	}
 

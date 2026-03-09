@@ -28,7 +28,11 @@ describe('Downloads page', () => {
 					const downloadSpeed = downloadTask.dataTotal / iterations;
 					const timeRemaining = iterations - i;
 					const percentage = i * 10;
-					const status = percentage === 100 ? DownloadStatus.Completed : DownloadStatus.Downloading;
+					const status = percentage === 100
+						? DownloadStatus.Completed
+						: percentage === 0
+							? DownloadStatus.Queued
+							: DownloadStatus.Downloading;
 					updatedProgress.downloads = [
 						{
 							...downloadTask,
@@ -41,9 +45,12 @@ describe('Downloads page', () => {
 					];
 					cy.hubPublish('download', MessageTypes.ServerDownloadProgress, updatedProgress);
 					cy.getCy(`column-status-${downloadTask.id}`).should('have.text', status);
-					cy.getCy(`column-dataReceived-${downloadTask.id}`).should('have.text', prettyBytes(dataReceived));
+					cy.getCy(`column-dataReceived-${downloadTask.id}`).should('have.text', dataReceived === 0 ? '-' : prettyBytes(dataReceived));
 					cy.getCy(`column-dataTotal-${downloadTask.id}`).should('have.text', prettyBytes(downloadTask.dataTotal));
-					cy.getCy(`column-downloadSpeed-${downloadTask.id}`).should('have.text', prettyBytes(downloadSpeed) + `/s`);
+					cy.getCy(`column-downloadSpeed-${downloadTask.id}`).should(
+						'have.text',
+						status === DownloadStatus.Queued ? '-' : prettyBytes(downloadSpeed) + `/s`,
+					);
 					cy.getCy(`column-percentage-${downloadTask.id}`).should('have.text', `${percentage}%`);
 					cy.getCy(`column-actions-details-${downloadTask.id}`).should('exist');
 
@@ -59,7 +66,11 @@ describe('Downloads page', () => {
 					// Format timeRemaining as MM:SS
 					const minutes = Math.floor(timeRemaining / 60).toString().padStart(2, '0');
 					const seconds = (timeRemaining % 60).toString().padStart(2, '0');
-					const formattedTimeRemaining = timeRemaining > 0 ? `${minutes}:${seconds}` : '-';
+					const formattedTimeRemaining = status === DownloadStatus.Queued
+						? '-'
+						: timeRemaining > 0
+							? `${minutes}:${seconds}`
+							: '-';
 
 					cy.getCy(`column-timeRemaining-${downloadTask.id}`).should(
 						'have.text',

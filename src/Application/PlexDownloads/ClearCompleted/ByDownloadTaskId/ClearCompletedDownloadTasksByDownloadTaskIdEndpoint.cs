@@ -1,5 +1,4 @@
 using FastEndpoints;
-using FluentValidation;
 using Reaparr.Application.Contracts;
 
 namespace Reaparr.Application;
@@ -8,22 +7,7 @@ namespace Reaparr.Application;
 /// Clears specific completed <see cref="DownloadTaskGeneric"/> from the database by their IDs.
 /// </summary>
 /// <returns>Is successful.</returns>
-public sealed class ClearCompletedDownloadTasksByDownloadTaskIdEndpointRequest
-{
-    public List<Guid> DownloadTaskIds { get; init; } = [];
-}
-
-public class ClearCompletedDownloadTasksByDownloadTaskIdEndpointRequestValidator
-    : Validator<ClearCompletedDownloadTasksByDownloadTaskIdEndpointRequest>
-{
-    public ClearCompletedDownloadTasksByDownloadTaskIdEndpointRequestValidator()
-    {
-        RuleFor(x => x.DownloadTaskIds).NotEmpty();
-    }
-}
-
-public class ClearCompletedDownloadTasksByDownloadTaskIdEndpoint
-    : BaseEndpoint<ClearCompletedDownloadTasksByDownloadTaskIdEndpointRequest, ResultDTO<CountResponseDTO>>
+public class ClearCompletedDownloadTasksByDownloadTaskIdEndpoint : BaseEndpoint<List<Guid>, ResultDTO<CountResponseDTO>>
 {
     private readonly ICommandExecutor _commandExecutor;
 
@@ -41,15 +25,9 @@ public class ClearCompletedDownloadTasksByDownloadTaskIdEndpoint
         Description(x => x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<CountResponseDTO>)));
     }
 
-    public override async Task HandleAsync(
-        ClearCompletedDownloadTasksByDownloadTaskIdEndpointRequest req,
-        CancellationToken ct
-    )
+    public override async Task HandleAsync(List<Guid> req, CancellationToken ct)
     {
-        var result = await _commandExecutor.Send(
-            new ClearCompletedDownloadTasksByDownloadTaskIdCommand(req.DownloadTaskIds),
-            ct
-        );
+        var result = await _commandExecutor.Send(new ClearCompletedDownloadTasksByDownloadTaskIdCommand(req), ct);
         if (result.IsFailed)
         {
             await SendFluentResult(result.ToResult(), ct);

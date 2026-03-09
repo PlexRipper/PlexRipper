@@ -44,11 +44,7 @@ public class ClearCompletedDownloadTasksByDownloadTaskIdEndpointUnitTests
 
         // Act
         var ep = SetupEndpointUnitTest<ClearCompletedDownloadTasksByDownloadTaskIdEndpoint>();
-        var request = new ClearCompletedDownloadTasksByDownloadTaskIdEndpointRequest
-        {
-            DownloadTaskIds = downloadTasks.Select(x => x.Id).Take(5).ToList(),
-        };
-        await ep.HandleAsync(request, CancellationToken);
+        await ep.HandleAsync(downloadTasks.Select(x => x.Id).Take(5).ToList(), CancellationToken);
         var result = ep.Response;
 
         // Assert
@@ -101,11 +97,7 @@ public class ClearCompletedDownloadTasksByDownloadTaskIdEndpointUnitTests
 
         // Act
         var ep = SetupEndpointUnitTest<ClearCompletedDownloadTasksByDownloadTaskIdEndpoint>();
-        var request = new ClearCompletedDownloadTasksByDownloadTaskIdEndpointRequest
-        {
-            DownloadTaskIds = downloadTasks.Select(x => x.Id).ToList(),
-        };
-        await ep.HandleAsync(request, CancellationToken);
+        await ep.HandleAsync(downloadTasks.Select(x => x.Id).ToList(), CancellationToken);
         var result = ep.Response;
 
         // Assert
@@ -159,11 +151,7 @@ public class ClearCompletedDownloadTasksByDownloadTaskIdEndpointUnitTests
 
         // Act
         var ep = SetupEndpointUnitTest<ClearCompletedDownloadTasksByDownloadTaskIdEndpoint>();
-        var request = new ClearCompletedDownloadTasksByDownloadTaskIdEndpointRequest
-        {
-            DownloadTaskIds = [episodeFileId],
-        };
-        await ep.HandleAsync(request, CancellationToken);
+        await ep.HandleAsync([episodeFileId], CancellationToken);
         var result = ep.Response;
 
         // Assert

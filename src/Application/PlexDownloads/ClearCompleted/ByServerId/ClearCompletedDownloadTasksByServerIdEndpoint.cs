@@ -32,7 +32,10 @@ public class ClearCompletedDownloadTasksByServerIdEndpoint
         Description(x => x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<CountResponseDTO>)));
     }
 
-    public override async Task HandleAsync(ClearCompletedDownloadTasksByServerIdEndpointRequest req, CancellationToken ct)
+    public override async Task HandleAsync(
+        ClearCompletedDownloadTasksByServerIdEndpointRequest req,
+        CancellationToken ct
+    )
     {
         var result = await _commandExecutor.Send(
             new ClearCompletedDownloadTasksByServerIdCommand(req.PlexServerId),

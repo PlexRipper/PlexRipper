@@ -65,7 +65,21 @@ public class MoveDownloadFileSchedulerIntegrationTests : BaseIntegrationTests
         downloadTaskDb.ShouldNotBeNull();
         downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.Completed);
 
-        container.MockDownloadHubService.ServerDownloadProgressList.Count.ShouldBeGreaterThanOrEqualTo(3);
+        var patchDeadline = DateTime.UtcNow.AddSeconds(5);
+        var completedPatchReceived = false;
+        while (DateTime.UtcNow < patchDeadline)
+        {
+            if (container.MockDownloadHubService.DownloadPatchList.TryTake(out var patch, 100, CancellationToken))
+            {
+                completedPatchReceived = patch.Upserts.Any(x =>
+                    x.Id == downloadTask.Id && x.Status == DownloadStatus.Completed
+                );
+                if (completedPatchReceived)
+                    break;
+            }
+        }
+
+        completedPatchReceived.ShouldBeTrue();
 
         var fileSystem = container.Resolve<IFileSystem>();
         fileSystem

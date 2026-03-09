@@ -79,6 +79,9 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
                 await SetDownloadStatusAsync(dbContext, key, newStatus, cancellationToken);
                 await LogStatusChangeAsync(dbContext, key, newStatus, cancellationToken);
                 ResetProgressJourneyTrackingIfNeeded(key.Id, newStatus);
+
+                if (newStatus is DownloadStatus.Paused)
+                    await dbContext.ClearDownloadSpeed(key, cancellationToken);
             }
             else
             {

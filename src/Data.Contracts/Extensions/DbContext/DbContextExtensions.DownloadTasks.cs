@@ -721,6 +721,29 @@ public static partial class DbContextExtensions
         return Result.Ok();
     }
 
+    public static async Task ClearDownloadSpeed(
+        this IReaparrDbContext dbContext,
+        DownloadTaskKey key,
+        CancellationToken cancellationToken = default
+    )
+    {
+        switch (key.Type)
+        {
+            case DownloadTaskType.MovieData:
+            case DownloadTaskType.MoviePart:
+                await dbContext
+                    .DownloadTaskMovieFile.Where(x => x.Id == key.Id)
+                    .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadSpeed, 0), cancellationToken);
+                break;
+            case DownloadTaskType.EpisodeData:
+            case DownloadTaskType.EpisodePart:
+                await dbContext
+                    .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == key.Id)
+                    .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadSpeed, 0), cancellationToken);
+                break;
+        }
+    }
+
     public static async Task UpdateDownloadFileTransferProgress(
         this IReaparrDbContext dbContext,
         DownloadTaskKey key,

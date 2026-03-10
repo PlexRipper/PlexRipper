@@ -243,7 +243,6 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         _destroy.Dispose();
 
         await _dashWrapper.StopAsync();
-        await _dashWrapper.DisposeAsync();
         _dbContext.Dispose();
     }
 }

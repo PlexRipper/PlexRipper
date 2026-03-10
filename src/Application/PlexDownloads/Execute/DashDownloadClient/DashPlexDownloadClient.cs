@@ -159,9 +159,24 @@ public class DashPlexDownloadClient : IPlexDownloadClient
     {
         _subscriptions.Add(
             _dashWrapper
-                .Progress.Sample(TimeSpan.FromMilliseconds(500))
+                .Progress.Sample(TimeSpan.FromMilliseconds(300))
                 .TakeUntil(_destroy)
-                .Subscribe(progress => HandleProgressChanged(key, progress))
+                .Subscribe(progress =>
+                {
+                    var dataTotal = progress.TotalBytes;
+                    if (dataTotal <= 0 && progress.Percent > 0)
+                        dataTotal = progress.DownloadedBytes * 100 / progress.Percent;
+
+                    var progressUpdate = new DownloadTaskProgress
+                    {
+                        DataTotal = dataTotal,
+                        Percentage = Convert.ToDecimal(progress.Percent),
+                        DataReceived = progress.DownloadedBytes,
+                        DownloadSpeed = progress.DownloadSpeedInBytes,
+                    };
+
+                    _downloadTaskUpdateDispatcher.OnProgressUpdated(key, progressUpdate);
+                })
         );
 
         _subscriptions.Add(
@@ -176,23 +191,6 @@ public class DashPlexDownloadClient : IPlexDownloadClient
                 .Concat()
                 .Subscribe()
         );
-    }
-
-    private void HandleProgressChanged(DownloadTaskKey key, DashDownloadProgress progress)
-    {
-        var dataTotal = progress.TotalBytes;
-        if (dataTotal <= 0 && progress.Percent > 0)
-            dataTotal = progress.DownloadedBytes * 100 / progress.Percent;
-
-        var progressUpdate = new DownloadTaskProgress
-        {
-            DataTotal = dataTotal,
-            Percentage = Convert.ToDecimal(progress.Percent),
-            DataReceived = progress.DownloadedBytes,
-            DownloadSpeed = progress.Percent < 100 ? progress.DownloadSpeedInBytes : 0,
-        };
-
-        _downloadTaskUpdateDispatcher.OnProgressUpdated(key, progressUpdate);
     }
 
     private async Task HandleDownloadCompleted(DownloadTaskKey key, DashDownloadCompletedEventArgs completed)

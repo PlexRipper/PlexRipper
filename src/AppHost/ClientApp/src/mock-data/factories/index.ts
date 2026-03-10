@@ -8,6 +8,7 @@ export * from './settings-factory';
 export * from './job-status-update-factory';
 export * from './download-task-factory';
 export * from './download-progress-factory';
+export * from './download-patch-factory';
 export * from './plex-media-factory';
 export * from './folder-path-factory';
 export * from './plex-library-sync-progress-factory';

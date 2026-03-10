@@ -13,3 +13,4 @@ export * from './IPTreeTableSelectionKeys';
 export * from './IDownloadsSelection';
 export * from './IMetaDataMediaFilter';
 export * from './IMediaPosterEmits';
+export * from './IMessagePackTuples';

@@ -138,7 +138,7 @@ export const useDownloadStore = defineStore(StoreNames.DownloadStore, () => {
 				downloads: merged,
 			});
 		},
-		updateDownloadPatch(patch: DownloadPatchMessagePackDTO | null): void {
+		updateDownloadPatch(patch: DownloadPatchMessagePackDTO): void {
 			if (!patch)
 				return;
 

@@ -8,7 +8,14 @@ import type { HubConnection, IHttpConnectionOptions } from '@microsoft/signalr';
 import { HttpTransportType, HubConnectionBuilder, HubConnectionState, LogLevel } from '@microsoft/signalr';
 import { useCypressSignalRMock } from 'cypress-signalr-mock';
 import { isEqual, cloneDeep, isArray } from 'lodash-es';
-import { StoreNames, type ISetupResult } from '@interfaces';
+import {
+	StoreNames,
+	type DownloadPatchEntryMessagePackTuple,
+	type DownloadPatchMessagePackTuple,
+	type ISetupResult,
+	type ServerDownloadEntryMessagePackTuple,
+	type ServerDownloadProgressMessagePackTuple,
+} from '@interfaces';
 import type {
 	DownloadPatchMessagePackDTO,
 	DownloadPatchDTO,
@@ -114,7 +121,7 @@ export const useSignalrStore = defineStore(StoreNames.SignalrStore, () => {
 		const notificationsStore = useNotificationsStore();
 		const libraryStore = useLibraryStore();
 
-		downloadHubConnection?.on(MessageTypes.ServerDownloadProgress, (rawData: ServerDownloadProgressMessagePackDTO) => {
+		downloadHubConnection?.on(MessageTypes.ServerDownloadProgress, (rawData: ServerDownloadProgressMessagePackDTO | ServerDownloadProgressMessagePackTuple) => {
 			Log.debug(rawData);
 			if (Array.isArray(rawData)) {
 				downloadStore.updateServerDownloadProgress(toServerDownloadProgressDTO(rawData));
@@ -123,7 +130,8 @@ export const useSignalrStore = defineStore(StoreNames.SignalrStore, () => {
 			}
 		});
 
-		downloadHubConnection?.on(MessageTypes.DownloadPatch, (rawData: DownloadPatchMessagePackDTO) => {
+		// This uses SignalR MessagePack to compress the updates
+		downloadHubConnection?.on(MessageTypes.DownloadPatch, (rawData: DownloadPatchMessagePackTuple) => {
 			if (Array.isArray(rawData)) {
 				const patch = toDownloadPatchDTO(rawData);
 				if (patch)
@@ -259,13 +267,16 @@ if (import.meta.hot) {
 	import.meta.hot.accept(acceptHMRUpdate(useSignalrStore, import.meta.hot));
 }
 
-function toServerDownloadProgressDTO(arr: ServerDownloadProgressMessagePackDTO): ServerDownloadProgressDTO | null {
+function toServerDownloadProgressDTO(arr: ServerDownloadProgressMessagePackTuple): ServerDownloadProgressDTO | null {
 	if (!Array.isArray(arr))
 		return null;
 
-	function mapDownload(item) {
+	function mapDownload(item: ServerDownloadEntryMessagePackTuple | unknown): ServerDownloadProgressDTO['downloads'][number] | null {
 		if (!Array.isArray(item))
 			return null;
+
+		const childrenRaw = Array.isArray(item[9]) ? item[9] : [];
+		const children = childrenRaw.map((x) => mapDownload(x)).filter((x): x is NonNullable<typeof x> => x !== null);
 
 		return {
 			id: item[0],
@@ -277,58 +288,40 @@ function toServerDownloadProgressDTO(arr: ServerDownloadProgressMessagePackDTO):
 			dataTotal: item[6],
 			downloadSpeed: item[7],
 			timeRemaining: item[8],
-			children: Array.isArray(item[9]) ? item[9].map(mapDownload) : [],
+			children,
 		};
 	}
 
+	const downloadsRaw = Array.isArray(arr[2]) ? arr[2] : [];
+	const downloads = downloadsRaw.map((x) => mapDownload(x)).filter((x): x is NonNullable<typeof x> => x !== null);
+
 	return {
-		id: arr[0], downloadableTasksCount: arr[1], downloads: Array.isArray(arr[2]) ? arr[2].map(mapDownload) : [],
+		id: arr[0], downloadableTasksCount: arr[1], downloads,
 	};
 }
 
-function isDownloadPatchMessagePackPayload(value: unknown[]): boolean {
-	return typeof value[0] === 'number'
-		&& typeof value[1] === 'number'
-		&& Array.isArray(value[2])
-		&& Array.isArray(value[3]);
-}
-
-function isDownloadPatchEntryPayload(value: unknown): value is unknown[] {
-	return Array.isArray(value)
-		&& typeof value[0] === 'string'
-		&& typeof value[1] === 'string'
-		&& value[2] !== undefined
-		&& typeof value[3] === 'number'
-		&& typeof value[4] === 'number'
-		&& typeof value[5] === 'number'
-		&& typeof value[6] === 'number'
-		&& typeof value[7] === 'number';
-}
-
-function toDownloadPatchDTO(arr: unknown[]): DownloadPatchMessagePackDTO | null {
+function toDownloadPatchDTO(arr: DownloadPatchMessagePackTuple): DownloadPatchMessagePackDTO | null {
 	if (!Array.isArray(arr))
 		return null;
-	if (!isDownloadPatchMessagePackPayload(arr))
-		return null;
 
-	const upsertsRaw = arr[2] as unknown[];
+	const upsertsRaw = Array.isArray(arr[2]) ? arr[2] : [];
 	const upserts: DownloadPatchDTO[] = upsertsRaw
-		.filter(isDownloadPatchEntryPayload)
-		.map((item) => ({
-			id: item[0] as DownloadPatchDTO['id'],
-			parentId: item[1] as DownloadPatchDTO['parentId'],
-			status: item[2] as DownloadPatchDTO['status'],
+		.filter((x): x is DownloadPatchEntryMessagePackTuple => Array.isArray(x))
+		.map((item: DownloadPatchEntryMessagePackTuple) => ({
+			id: item[0],
+			parentId: item[1],
+			status: item[2],
 			percentage: Number(item[3]),
-			dataReceived: item[4] as DownloadPatchDTO['dataReceived'],
-			dataTotal: item[5] as DownloadPatchDTO['dataTotal'],
-			downloadSpeed: item[6] as DownloadPatchDTO['downloadSpeed'],
-			timeRemaining: item[7] as DownloadPatchDTO['timeRemaining'],
+			dataReceived: item[4],
+			dataTotal: item[5],
+			downloadSpeed: item[6],
+			timeRemaining: item[7],
 		}));
 
 	return {
-		serverId: arr[0] as DownloadPatchMessagePackDTO['serverId'],
-		sequence: arr[1] as DownloadPatchMessagePackDTO['sequence'],
+		serverId: arr[0],
+		sequence: arr[1],
 		upserts,
-		deletedIds: (arr[3] as unknown[]).filter((item): item is string => typeof item === 'string'),
+		deletedIds: Array.isArray(arr[3]) ? arr[3] : [],
 	};
 }

@@ -163,16 +163,13 @@ public class DashPlexDownloadClient : IPlexDownloadClient
                 .TakeUntil(_destroy)
                 .Subscribe(progress =>
                 {
-                    var dataTotal = progress.TotalBytes;
-                    if (dataTotal <= 0 && progress.Percent > 0)
-                        dataTotal = progress.DownloadedBytes * 100 / progress.Percent;
-
                     var progressUpdate = new DownloadTaskProgress
                     {
-                        DataTotal = dataTotal,
+                        DataTotal = progress.TotalBytes,
                         Percentage = Convert.ToDecimal(progress.Percent),
                         DataReceived = progress.DownloadedBytes,
                         DownloadSpeed = progress.DownloadSpeedInBytes,
+                        TimeRemaining = progress.ETA,
                     };
 
                     _downloadTaskUpdateDispatcher.OnProgressUpdated(key, progressUpdate);

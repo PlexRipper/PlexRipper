@@ -573,11 +573,7 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
                 DataFormat.FormatSpeedString(progress.DownloadSpeed),
                 ByteSize.FromBytes(progress.DataReceived).ToString("MB"),
                 ByteSize.FromBytes(progress.DataTotal).ToString("MB"),
-                TimeSpan
-                    .FromSeconds(
-                        DataFormat.GetTimeRemaining(progress.DataTotal - progress.DataReceived, progress.DownloadSpeed)
-                    )
-                    .ToFormattedString()
+                TimeSpan.FromSeconds(progress.TimeRemaining).ToFormattedString()
             );
 
         await dbContext.CreateDownloadClientLog(key, NotificationLevel.Debug, DownloadStatus.Downloading, progressMsg);

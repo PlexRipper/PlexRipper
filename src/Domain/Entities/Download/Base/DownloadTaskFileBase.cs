@@ -72,19 +72,29 @@ public abstract class DownloadTaskFileBase : DownloadTaskBase, IDownloadTaskProg
     /// <summary>
     /// Gets or sets the file transfer speeds when the finished download is being merged/moved.
     /// </summary>
-    [Column(Order = 19)]
+    [Column(Order = 20)]
     public required long FileTransferSpeed { get; set; }
 
     /// <summary>
     /// Gets or sets the total size received of the file in bytes.
     /// </summary>
-    [Column(Order = 20)]
+    [Column(Order = 21)]
     public required long FileDataTransferred { get; set; }
 
     /// <summary>
     /// Gets or sets the current file transfer bytes offset in combination with the CurrentFileTransferPathIndex used to pause and resume from this offset.
     /// </summary>
+    [Column(Order = 22)]
     public long CurrentFileTransferBytesOffset { get; set; }
+
+    [Column(Order = 23)]
+    public decimal Percentage { get; set; }
+
+    /// <summary>
+    /// Gets the time remaining in seconds the <see cref="DownloadTaskFileBase"/> to finish.
+    /// </summary>
+    [Column(Order = 24)]
+    public required int TimeRemaining { get; set; }
 
     #endregion
 
@@ -111,9 +121,6 @@ public abstract class DownloadTaskFileBase : DownloadTaskBase, IDownloadTaskProg
 
     [NotMapped]
     public string DownloadFilePath => Path.Combine(DownloadDirectory, FileName.AddReaparrTempSuffixToFileName());
-
-    [NotMapped]
-    public decimal Percentage => DownloadTaskPhaseExtensions.Percentage(DownloadTaskPhase, this, this);
 
     [NotMapped]
     public DownloadTaskPhase DownloadTaskPhase => DownloadStatus.ToDownloadTaskPhase();
@@ -177,12 +184,6 @@ public abstract class DownloadTaskFileBase : DownloadTaskBase, IDownloadTaskProg
             }
         }
     }
-
-    /// <summary>
-    /// Gets the time remaining in seconds the <see cref="DownloadTaskFileBase"/> to finish.
-    /// </summary>
-    [NotMapped]
-    public long TimeRemaining => DownloadTaskPhaseExtensions.TimeRemaining(DownloadTaskPhase, this, this);
 
     public override string ToString() =>
         $"[MoveDownloadFileProgress {Title} - {Percentage}% - {DataFormat.FormatSpeedString(Speed)} - {DataFormat.FormatSizeString(DownloadTaskPhase == DownloadTaskPhase.FileTransfer ? FileDataTransferred : DataReceived)} / {DataFormat.FormatSizeString(DataTotal)} - {DataFormat.FormatTimeSpanString(TimeSpan.FromSeconds(TimeRemaining))}]";

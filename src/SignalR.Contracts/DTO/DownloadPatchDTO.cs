@@ -18,5 +18,5 @@ public record DownloadPatchDTO
 
     public required long DownloadSpeed { get; init; }
 
-    public required long TimeRemaining { get; init; }
+    public required int TimeRemaining { get; init; }
 }

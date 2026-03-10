@@ -22,8 +22,10 @@ public static class DownloadTaskGenericMapper
             MediaType = downloadTaskMovie.MediaType,
             DownloadTaskType = downloadTaskMovie.DownloadTaskType,
             DownloadStatus = downloadTaskMovie.DownloadStatus,
+            Percentage = downloadTaskMovie.Percentage,
             DataReceived = downloadTaskMovie.DataReceived,
             DataTotal = downloadTaskMovie.DataTotal,
+            TimeRemaining = downloadTaskMovie.TimeRemaining,
             CreatedAt = downloadTaskMovie.CreatedAt,
             FileName = string.Empty,
             IsDownloadable = downloadTaskMovie.IsDownloadable,
@@ -63,8 +65,16 @@ public static class DownloadTaskGenericMapper
             MediaType = file.MediaType,
             DownloadTaskType = file.DownloadTaskType,
             DownloadStatus = file.DownloadStatus,
+            Percentage =
+                file.DownloadStatus.ToDownloadTaskPhase() == DownloadTaskPhase.FileTransfer
+                    ? DataFormat.GetPercentage(file.FileDataTransferred, file.DataTotal)
+                    : file.Percentage,
             DataReceived = file.DataReceived,
             DataTotal = file.DataTotal,
+            TimeRemaining =
+                file.DownloadStatus.ToDownloadTaskPhase() == DownloadTaskPhase.FileTransfer
+                    ? DownloadTaskPhaseExtensions.TimeRemaining(file.DownloadTaskPhase, file, file)
+                    : file.TimeRemaining,
             CreatedAt = file.CreatedAt,
             FileName = file.FileName,
             IsDownloadable = file.IsDownloadable,
@@ -104,8 +114,10 @@ public static class DownloadTaskGenericMapper
             MediaType = downloadTaskTvShow.MediaType,
             DownloadTaskType = downloadTaskTvShow.DownloadTaskType,
             DownloadStatus = downloadTaskTvShow.DownloadStatus,
+            Percentage = downloadTaskTvShow.Percentage,
             DataReceived = downloadTaskTvShow.DataReceived,
             DataTotal = downloadTaskTvShow.DataTotal,
+            TimeRemaining = downloadTaskTvShow.TimeRemaining,
             CreatedAt = downloadTaskTvShow.CreatedAt,
             FileName = string.Empty,
             Quality = VideoQuality.None,
@@ -148,8 +160,10 @@ public static class DownloadTaskGenericMapper
             MediaType = downloadTaskTvShowSeason.MediaType,
             DownloadTaskType = downloadTaskTvShowSeason.DownloadTaskType,
             DownloadStatus = downloadTaskTvShowSeason.DownloadStatus,
+            Percentage = downloadTaskTvShowSeason.Percentage,
             DataReceived = downloadTaskTvShowSeason.DataReceived,
             DataTotal = downloadTaskTvShowSeason.DataTotal,
+            TimeRemaining = downloadTaskTvShowSeason.TimeRemaining,
             CreatedAt = downloadTaskTvShowSeason.CreatedAt,
             FileName = string.Empty,
             IsDownloadable = downloadTaskTvShowSeason.IsDownloadable,
@@ -192,9 +206,11 @@ public static class DownloadTaskGenericMapper
             MediaType = downloadTaskTvShowEpisode.MediaType,
             DownloadTaskType = downloadTaskTvShowEpisode.DownloadTaskType,
             DownloadStatus = downloadTaskTvShowEpisode.DownloadStatus,
+            Percentage = downloadTaskTvShowEpisode.Percentage,
             FileDataTransferred = downloadTaskTvShowEpisode.FileDataTransferred,
             DataReceived = downloadTaskTvShowEpisode.DataReceived,
             DataTotal = downloadTaskTvShowEpisode.DataTotal,
+            TimeRemaining = downloadTaskTvShowEpisode.TimeRemaining,
             CreatedAt = downloadTaskTvShowEpisode.CreatedAt,
             FileName = string.Empty,
             Quality = VideoQuality.None,
@@ -232,9 +248,17 @@ public static class DownloadTaskGenericMapper
             MediaType = file.MediaType,
             DownloadTaskType = file.DownloadTaskType,
             DownloadStatus = file.DownloadStatus,
+            Percentage =
+                file.DownloadStatus.ToDownloadTaskPhase() == DownloadTaskPhase.FileTransfer
+                    ? DataFormat.GetPercentage(file.FileDataTransferred, file.DataTotal)
+                    : file.Percentage,
             FileDataTransferred = file.FileDataTransferred,
             DataReceived = file.DataReceived,
             DataTotal = file.DataTotal,
+            TimeRemaining =
+                file.DownloadStatus.ToDownloadTaskPhase() == DownloadTaskPhase.FileTransfer
+                    ? DownloadTaskPhaseExtensions.TimeRemaining(file.DownloadTaskPhase, file, file)
+                    : file.TimeRemaining,
             CreatedAt = file.CreatedAt,
             FileName = file.FileName,
             IsDownloadable = file.IsDownloadable,

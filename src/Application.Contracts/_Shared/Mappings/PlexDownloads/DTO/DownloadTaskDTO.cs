@@ -40,7 +40,7 @@ public record DownloadTaskDTO : IDownloadTaskProgress
 
     public required string FileName { get; set; }
 
-    public required long TimeRemaining { get; set; }
+    public required int TimeRemaining { get; set; }
     public required string DownloadDirectory { get; set; }
 
     public required string DestinationDirectory { get; set; }

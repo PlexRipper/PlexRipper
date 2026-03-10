@@ -49,10 +49,7 @@ public sealed record BufferedProgressUpdate
             DataReceived = Progress.DataReceived,
             DataTotal = Progress.DataTotal,
             DownloadSpeed = Progress.DownloadSpeed,
-            TimeRemaining = DataFormat.GetTimeRemaining(
-                Progress.DataTotal - Progress.DataReceived,
-                Progress.DownloadSpeed
-            ),
+            TimeRemaining = Progress.TimeRemaining,
         };
     }
 }

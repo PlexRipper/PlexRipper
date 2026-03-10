@@ -320,7 +320,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                 progressSubject.OnNext(
                     new DashDownloadProgress
                     {
-                        ETA = TimeSpan.FromSeconds(1),
+                        ETA = 1,
                         Percent = 50,
                         DownloadedBytes = downloadTask.DataTotal / 2,
                         TotalBytes = downloadTask.DataTotal,
@@ -346,7 +346,98 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                 x =>
                     x.OnProgressUpdated(
                         It.Is<DownloadTaskKey>(k => k.Id == downloadTask.Id),
-                        It.Is<DownloadTaskProgress>(p => p.DataReceived > 0 && p.DownloadSpeed >= 0),
+                        It.Is<DownloadTaskProgress>(p =>
+                            p.DataReceived > 0 && p.DownloadSpeed >= 0 && p.Percentage == 50 && p.TimeRemaining == 1
+                        ),
+                        It.IsAny<DirectDownloadSnapshot?>()
+                    ),
+                Times.Once
+            );
+    }
+
+    [Fact]
+    public async Task ShouldKeepDataTotalAtZero_WhenDashDoesNotReportTotalBytes()
+    {
+        await SetupDatabase(
+            12007,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var downloadTask = await IDbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+        var serverMachineIdentifier = await IDbContext.GetPlexServerMachineIdentifierById(
+            downloadTask.PlexServerId,
+            CancellationToken
+        );
+
+        SetupSpeedLimit(serverMachineIdentifier, 0);
+        SetupCommandExecutor();
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnProgressUpdated(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadTaskProgress>(),
+                    It.IsAny<DirectDownloadSnapshot?>()
+                )
+            )
+            .Returns(Result.Ok());
+
+        var progressSubject = new Subject<DashDownloadProgress>();
+        var outputSubject = new Subject<string>();
+
+        var dashWrapperMock = new Mock<IDashMpdCliWrapper>();
+        dashWrapperMock.Setup(x => x.Progress).Returns(progressSubject.AsObservable());
+        dashWrapperMock.Setup(x => x.StandardOutput).Returns(outputSubject.AsObservable());
+        dashWrapperMock.Setup(x => x.DownloadCompleted).Returns(Observable.Empty<DashDownloadCompletedEventArgs>());
+        dashWrapperMock
+            .Setup(x => x.StartAsync(It.IsAny<DashMpdCliOptions>()))
+            .Returns(async () =>
+            {
+                progressSubject.OnNext(
+                    new DashDownloadProgress
+                    {
+                        ETA = 42,
+                        Percent = 12,
+                        DownloadedBytes = 3_000,
+                        TotalBytes = 0,
+                        DownloadSpeedInBytes = 256,
+                        RawOutput = "{}",
+                    }
+                );
+
+                await Task.Delay(700, TestContext.Current.CancellationToken);
+                return Result.Ok();
+            });
+        dashWrapperMock.Setup(x => x.StopAsync()).ReturnsAsync(Result.Ok());
+        dashWrapperMock.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask);
+
+        var sut = CreateSut(dashWrapperMock);
+        var result = await sut.Start(downloadTask.ToKey(), CancellationToken);
+
+        result.IsSuccess.ShouldBeTrue();
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnProgressUpdated(
+                        It.IsAny<DownloadTaskKey>(),
+                        It.Is<DownloadTaskProgress>(p =>
+                            p.DataTotal == 0 && p.Percentage == 12 && p.TimeRemaining == 42
+                        ),
                         It.IsAny<DirectDownloadSnapshot?>()
                     ),
                 Times.Once
@@ -408,7 +499,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                 progressSubject.OnNext(
                     new DashDownloadProgress
                     {
-                        ETA = TimeSpan.Zero,
+                        ETA = 0,
                         Percent = 100,
                         DownloadedBytes = downloadTask.DataTotal,
                         TotalBytes = downloadTask.DataTotal,

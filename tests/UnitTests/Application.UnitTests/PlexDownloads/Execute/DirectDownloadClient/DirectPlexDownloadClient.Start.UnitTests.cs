@@ -1090,7 +1090,9 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
                 x =>
                     x.OnProgressUpdated(
                         It.IsAny<DownloadTaskKey>(),
-                        It.Is<DownloadTaskProgress>(p => p.DataReceived == downloadTask.DataTotal),
+                        It.Is<DownloadTaskProgress>(p =>
+                            p.DataReceived == downloadTask.DataTotal && p.Percentage == 100 && p.TimeRemaining == 0
+                        ),
                         It.IsAny<DirectDownloadSnapshot?>()
                     ),
                 Times.Once()

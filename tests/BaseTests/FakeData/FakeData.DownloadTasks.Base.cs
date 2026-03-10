@@ -29,6 +29,8 @@ public static partial class FakeData
             .RuleFor(x => x.Year, f => f.Random.Int(1900, 2030))
             .Ignore(x => x.FileTransferSpeed)
             .Ignore(x => x.DataReceived)
+            .Ignore(x => x.Percentage)
+            .Ignore(x => x.TimeRemaining)
             .Ignore(x => x.FileDataTransferred)
             .Ignore(x => x.DownloadSpeed);
     }
@@ -40,6 +42,8 @@ public static partial class FakeData
             .ApplyDownloadTaskBase(downloadTaskType)
             .Ignore(x => x.HashId)
             .Ignore(x => x.DataReceived)
+            .Ignore(x => x.Percentage)
+            .Ignore(x => x.TimeRemaining)
             .Ignore(x => x.DownloadSpeed)
             .Ignore(x => x.FileTransferSpeed)
             .Ignore(x => x.FileDataTransferred)

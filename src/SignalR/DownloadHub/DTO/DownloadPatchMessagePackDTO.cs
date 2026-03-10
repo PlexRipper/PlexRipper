@@ -45,5 +45,5 @@ public record DownloadPatchEntryMessagePackDTO
     public required long DownloadSpeed { get; init; }
 
     [MessagePack.Key(7)]
-    public required long TimeRemaining { get; init; }
+    public required int TimeRemaining { get; init; }
 }

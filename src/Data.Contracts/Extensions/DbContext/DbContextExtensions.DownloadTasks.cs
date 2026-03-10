@@ -374,7 +374,9 @@ public static partial class DbContextExtensions
                 PlexLibraryId = x.PlexLibraryId,
                 DataReceived = 0,
                 DataTotal = 0,
+                Percentage = 0,
                 DownloadSpeed = 0,
+                TimeRemaining = 0,
                 FileTransferSpeed = 0,
                 FileDataTransferred = 0,
             })
@@ -397,7 +399,9 @@ public static partial class DbContextExtensions
                         PlexLibraryId = x.PlexLibraryId,
                         DataReceived = x.DataReceived,
                         DataTotal = x.DataTotal,
+                        Percentage = x.Percentage,
                         DownloadSpeed = x.DownloadSpeed,
+                        TimeRemaining = x.TimeRemaining,
                         FileTransferSpeed = x.FileTransferSpeed,
                         FileDataTransferred = x.FileDataTransferred,
                     })
@@ -421,7 +425,9 @@ public static partial class DbContextExtensions
                         PlexLibraryId = x.PlexLibraryId,
                         DataReceived = 0,
                         DataTotal = 0,
+                        Percentage = 0,
                         DownloadSpeed = 0,
+                        TimeRemaining = 0,
                         FileTransferSpeed = 0,
                         FileDataTransferred = 0,
                     })
@@ -445,7 +451,9 @@ public static partial class DbContextExtensions
                         PlexLibraryId = x.PlexLibraryId,
                         DataReceived = 0,
                         DataTotal = 0,
+                        Percentage = 0,
                         DownloadSpeed = 0,
+                        TimeRemaining = 0,
                         FileTransferSpeed = 0,
                         FileDataTransferred = 0,
                     })
@@ -469,7 +477,9 @@ public static partial class DbContextExtensions
                         PlexLibraryId = x.PlexLibraryId,
                         DataReceived = 0,
                         DataTotal = 0,
+                        Percentage = 0,
                         DownloadSpeed = 0,
+                        TimeRemaining = 0,
                         FileTransferSpeed = 0,
                         FileDataTransferred = 0,
                     })
@@ -493,7 +503,9 @@ public static partial class DbContextExtensions
                         PlexLibraryId = x.PlexLibraryId,
                         DataReceived = x.DataReceived,
                         DataTotal = x.DataTotal,
+                        Percentage = x.Percentage,
                         DownloadSpeed = x.DownloadSpeed,
+                        TimeRemaining = x.TimeRemaining,
                         FileTransferSpeed = x.FileTransferSpeed,
                         FileDataTransferred = x.FileDataTransferred,
                     })
@@ -544,7 +556,9 @@ public static partial class DbContextExtensions
                 FileLocationUrl = string.Empty,
                 DataReceived = row.DataReceived,
                 DataTotal = row.DataTotal,
+                Percentage = row.Percentage,
                 DownloadSpeed = row.DownloadSpeed,
+                TimeRemaining = row.TimeRemaining,
                 FileTransferSpeed = row.FileTransferSpeed,
                 FileDataTransferred = row.FileDataTransferred,
                 CurrentFileTransferBytesOffset = 0,
@@ -585,7 +599,11 @@ public static partial class DbContextExtensions
 
         public required long DataTotal { get; init; }
 
+        public required decimal Percentage { get; init; }
+
         public required long DownloadSpeed { get; init; }
+
+        public required int TimeRemaining { get; init; }
 
         public required long FileTransferSpeed { get; init; }
 
@@ -627,6 +645,8 @@ public static partial class DbContextExtensions
                             p.SetProperty(x => x.DownloadSpeed, progress.DownloadSpeed)
                                 .SetProperty(x => x.DataReceived, progress.DataReceived)
                                 .SetProperty(x => x.DataTotal, progress.DataTotal)
+                                .SetProperty(x => x.Percentage, progress.Percentage)
+                                .SetProperty(x => x.TimeRemaining, progress.TimeRemaining)
                                 .SetProperty(x => x.DirectDownloadSnapshot, snapshot),
                         cancellationToken
                     );
@@ -640,6 +660,8 @@ public static partial class DbContextExtensions
                             p.SetProperty(x => x.DownloadSpeed, progress.DownloadSpeed)
                                 .SetProperty(x => x.DataReceived, progress.DataReceived)
                                 .SetProperty(x => x.DataTotal, progress.DataTotal)
+                                .SetProperty(x => x.Percentage, progress.Percentage)
+                                .SetProperty(x => x.TimeRemaining, progress.TimeRemaining)
                                 .SetProperty(x => x.DirectDownloadSnapshot, snapshot),
                         cancellationToken
                     );
@@ -678,6 +700,8 @@ public static partial class DbContextExtensions
                         p =>
                             p.SetProperty(x => x.DownloadSpeed, 0)
                                 .SetProperty(x => x.DataReceived, 0)
+                                .SetProperty(x => x.Percentage, 0)
+                                .SetProperty(x => x.TimeRemaining, 0)
                                 .SetProperty(x => x.FileTransferSpeed, 0)
                                 .SetProperty(x => x.FileDataTransferred, 0)
                                 .SetProperty(x => x.CurrentFileTransferBytesOffset, 0)
@@ -694,6 +718,8 @@ public static partial class DbContextExtensions
                         p =>
                             p.SetProperty(x => x.DownloadSpeed, 0)
                                 .SetProperty(x => x.DataReceived, 0)
+                                .SetProperty(x => x.Percentage, 0)
+                                .SetProperty(x => x.TimeRemaining, 0)
                                 .SetProperty(x => x.FileTransferSpeed, 0)
                                 .SetProperty(x => x.FileDataTransferred, 0)
                                 .SetProperty(x => x.CurrentFileTransferBytesOffset, 0)
@@ -733,13 +759,19 @@ public static partial class DbContextExtensions
             case DownloadTaskType.MoviePart:
                 await dbContext
                     .DownloadTaskMovieFile.Where(x => x.Id == key.Id)
-                    .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadSpeed, 0), cancellationToken);
+                    .ExecuteUpdateAsync(
+                        p => p.SetProperty(x => x.DownloadSpeed, 0).SetProperty(x => x.TimeRemaining, 0),
+                        cancellationToken
+                    );
                 break;
             case DownloadTaskType.EpisodeData:
             case DownloadTaskType.EpisodePart:
                 await dbContext
                     .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == key.Id)
-                    .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadSpeed, 0), cancellationToken);
+                    .ExecuteUpdateAsync(
+                        p => p.SetProperty(x => x.DownloadSpeed, 0).SetProperty(x => x.TimeRemaining, 0),
+                        cancellationToken
+                    );
                 break;
         }
     }

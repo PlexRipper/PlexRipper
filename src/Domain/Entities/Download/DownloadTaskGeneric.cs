@@ -95,11 +95,11 @@ public record DownloadTaskGeneric : IDownloadTaskProgress, IDownloadFileTransfer
 
     public DownloadTaskPhase DownloadTaskPhase => DownloadStatus.ToDownloadTaskPhase();
 
-    public decimal Percentage => DownloadTaskPhaseExtensions.Percentage(DownloadTaskPhase, this, this);
+    public required decimal Percentage { get; set; }
 
     public long Speed => DownloadTaskPhaseExtensions.Speed(DownloadTaskPhase, this, this);
 
-    public long TimeRemaining => DownloadTaskPhaseExtensions.TimeRemaining(DownloadTaskPhase, this, this);
+    public required int TimeRemaining { get; set; }
 
     public DownloadTaskKey ToKey() =>
         new()

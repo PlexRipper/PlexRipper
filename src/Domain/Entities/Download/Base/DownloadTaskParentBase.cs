@@ -32,7 +32,7 @@ public abstract class DownloadTaskParentBase : DownloadTaskBase, IDownloadTaskPr
     /// Gets or sets the percentage of the data received from the DataTotal.
     /// </summary>
     [NotMapped]
-    public decimal Percentage => DataFormat.GetPercentage(DataReceived, DataTotal);
+    public decimal Percentage { get; set; }
 
     /// <summary>
     /// Gets or sets get the download speeds in bytes per second.
@@ -47,7 +47,7 @@ public abstract class DownloadTaskParentBase : DownloadTaskBase, IDownloadTaskPr
     public required long FileTransferSpeed { get; set; }
 
     [NotMapped]
-    public long TimeRemaining => DataFormat.GetTimeRemaining(DataTotal - DataReceived, DownloadSpeed);
+    public int TimeRemaining { get; set; }
 
     #endregion
 }

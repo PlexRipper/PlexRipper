@@ -86,6 +86,14 @@ body {
     0 0 0 1px rgba(255, 40, 40, 0.35),
     0 0 14px rgba(255, 40, 40, 0.55),
     0 0 26px rgba(255, 32, 32, 0.35);
+
+  &.tooltip-no-effect {
+    border: 0;
+    background: rgb(0, 0, 0);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: none;
+    box-shadow: none;
+  }
 }
 
 

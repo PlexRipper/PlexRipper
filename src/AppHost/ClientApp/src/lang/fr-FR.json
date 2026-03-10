@@ -592,7 +592,7 @@
                 },
                 "allow-stream-downloader": {
                     "label": "Autoriser le téléchargeur de flux",
-                    "text": "Lorsqu'il est activé, Reaparr utilisera le téléchargeur de flux pour ce serveur Plex.",
+                    "text": "Lorsqu'il est activé, Reaparr utilisera le téléchargeur de flux pour ce serveur Plex.\n\n **Avertissement :** Veuillez lire la [documentation du téléchargeur de flux](https://www.reaparr.rocks/docs/configuration/stream-downloader) avant d'activer cette fonctionnalité.",
                     "title": "Autoriser le téléchargeur de flux"
                 }
             },

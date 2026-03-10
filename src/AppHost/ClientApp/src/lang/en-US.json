@@ -592,7 +592,7 @@
                 },
                 "allow-stream-downloader": {
                     "label": "Allow Stream Downloader",
-                    "text": "When enabled, Reaparr will use the stream downloader for this Plex server.",
+                    "text": "When enabled, Reaparr will use the stream downloader for this Plex server.\n\n **Warning:** Read the [Stream Downloader documentation](https://www.reaparr.rocks/docs/configuration/stream-downloader) before enabling this feature.",
                     "title": "Allow Stream Downloader"
                 }
             },

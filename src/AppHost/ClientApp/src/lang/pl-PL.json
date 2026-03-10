@@ -592,7 +592,7 @@
                 },
                 "allow-stream-downloader": {
                     "label": "Zezwól na pobieranie strumieniowe",
-                    "text": "Po włączeniu Reaparr będzie używać pobierania strumieniowego dla tego serwera Plex.",
+                    "text": "Po włączeniu Reaparr będzie używać pobierania strumieniowego dla tego serwera Plex.\n\n **Ostrzeżenie:** Przed włączeniem tej funkcji przeczytaj [dokumentację pobierania strumieniowego](https://www.reaparr.rocks/docs/configuration/stream-downloader).",
                     "title": "Zezwól na pobieranie strumieniowe"
                 }
             },

@@ -83,7 +83,7 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 					}).pipe(
 						tap((response) => {
 							if (!response.isSuccess || response.value?.result !== TestConnectionStatus.Success) {
-								showErrorNotification('Failed to connect to Sonarr. Please check your integration settings.');
+								showErrorNotification('Failed to connect to Sonarr. Please check your integration settings.', 5000);
 								state.sonarr.testSuccess = false;
 								state.sonarr.testStatus = response.value?.result ?? TestConnectionStatus.Unknown;
 								state.sonarr.step = 1;
@@ -112,7 +112,7 @@ export const useIntegrationStore = defineStore(StoreNames.IntegrationStore, () =
 					}).pipe(
 						tap((response) => {
 							if (!response.isSuccess || response.value?.result !== TestConnectionStatus.Success) {
-								showErrorNotification('Failed to connect to Radarr. Please check your integration settings.');
+								showErrorNotification('Failed to connect to Radarr. Please check your integration settings.', 5000);
 								state.radarr.testSuccess = false;
 								state.radarr.testStatus = response.value?.result ?? TestConnectionStatus.Unknown;
 								state.radarr.step = 1;

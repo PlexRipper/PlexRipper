@@ -20,27 +20,29 @@ public abstract class DownloadTaskBase : BaseEntityGuid
     /// <summary>
     ///  Gets or sets the current download state of this DownloadTask.
     /// </summary>
-    [Column(Order = 8)]
+    [Column(Order = 3)]
     public required DownloadStatus DownloadStatus { get; set; }
 
-    [Column(Order = 10)]
+    [Column(Order = 4)]
     public required DateTime CreatedAt { get; init; }
 
     /// <summary>
     /// Gets or sets the full formatted media title, based on the <see cref="PlexMediaType"/>.
     /// E.g. "TvShow/Season/Episode".
     /// </summary>
-    [Column(Order = 14)]
+    [Column(Order = 5)]
     public required string FullTitle { get; set; }
 
     #region Relationships
 
     public PlexServer? PlexServer { get; init; }
 
+    [Column(Order = 6)]
     public required int PlexServerId { get; set; }
 
     public PlexLibrary? PlexLibrary { get; init; }
 
+    [Column(Order = 7)]
     public required int PlexLibraryId { get; set; }
 
     #endregion

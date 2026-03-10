@@ -5,7 +5,7 @@ public abstract class DownloadTaskParentBase : DownloadTaskBase, IDownloadTaskPr
     /// <summary>
     /// Gets or sets the release year of the media.
     /// </summary>
-    [Column(Order = 3)]
+    [Column(Order = 8)]
     public required int Year { get; init; }
 
     #region Helpers

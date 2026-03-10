@@ -21,6 +21,7 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
     private readonly ConcurrentDictionary<ProgressScopeKey, BufferedProgressUpdate> _progressByScope;
     private readonly ConcurrentDictionary<int, long> _sequenceByServer;
     private readonly ConcurrentDictionary<Guid, ProgressScopeKey> _scopeByNodeId;
+    private readonly ConcurrentDictionary<Guid, DownloadStatus> _statusByNodeId;
     private readonly ConcurrentDictionary<Guid, DownloadTaskProgress> _lastProgressLogByNodeId;
     private readonly ConcurrentDictionary<Guid, byte> _seenProgressNodes;
     private readonly Channel<BufferedProgressUpdate> _firstProgressChannel;
@@ -46,6 +47,7 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
         _progressByScope = new ConcurrentDictionary<ProgressScopeKey, BufferedProgressUpdate>();
         _sequenceByServer = new ConcurrentDictionary<int, long>();
         _scopeByNodeId = new ConcurrentDictionary<Guid, ProgressScopeKey>();
+        _statusByNodeId = new ConcurrentDictionary<Guid, DownloadStatus>();
         _lastProgressLogByNodeId = new ConcurrentDictionary<Guid, DownloadTaskProgress>();
         _seenProgressNodes = new ConcurrentDictionary<Guid, byte>();
         _firstProgressChannel = Channel.CreateUnbounded<BufferedProgressUpdate>(
@@ -70,12 +72,17 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
     {
         var result = await Result.Try(async Task () =>
         {
+            _statusByNodeId[key.Id] = newStatus;
+
             using var dbContext = await _dbContextFactory.CreateAsync();
             var currentStatus = await dbContext.GetDownloadStatusAsync(key, cancellationToken);
             var hasStatusChanged = currentStatus != newStatus;
 
             if (hasStatusChanged)
             {
+                if (newStatus is DownloadStatus.Paused)
+                    await PersistBufferedProgressBeforePauseAsync(dbContext, key, cancellationToken);
+
                 await SetDownloadStatusAsync(dbContext, key, newStatus, cancellationToken);
                 await LogStatusChangeAsync(dbContext, key, newStatus, cancellationToken);
                 ResetProgressJourneyTrackingIfNeeded(key.Id, newStatus);
@@ -141,6 +148,9 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
     {
         return Result.Try(() =>
         {
+            if (_statusByNodeId.GetValueOrDefault(key.Id) is DownloadStatus.Paused)
+                return;
+
             var scope = _scopeByNodeId.GetValueOrDefault(key.Id) ?? ProgressScopeKey.From(key);
             var update = new BufferedProgressUpdate
             {
@@ -590,6 +600,42 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
             _lastProgressLogByNodeId[nodeId] = progress;
 
         return shouldLog;
+    }
+
+    private async Task PersistBufferedProgressBeforePauseAsync(
+        IReaparrDbContext dbContext,
+        DownloadTaskKey key,
+        CancellationToken cancellationToken
+    )
+    {
+        var bufferedEntries = _progressByScope
+            .Where(x => x.Value.NodeId == key.Id && x.Value.Progress is not null)
+            .ToList();
+
+        if (bufferedEntries.Count == 0)
+            return;
+
+        var latestBufferedEntry = bufferedEntries.OrderByDescending(x => x.Value.Progress!.DataReceived).First();
+        var bufferedProgress = latestBufferedEntry.Value;
+        var progress = bufferedProgress.Progress!;
+
+        await dbContext.UpdateDownloadProgress(
+            bufferedProgress.Key,
+            progress,
+            bufferedProgress.Snapshot,
+            cancellationToken
+        );
+
+        await LogProgressJourneyAsync(dbContext, bufferedProgress.Key, progress, cancellationToken);
+
+        foreach (var bufferedEntry in bufferedEntries)
+        {
+            _progressByScope.AddOrUpdate(
+                bufferedEntry.Key,
+                _ => BufferedProgressUpdate.FromStatus(key),
+                (_, current) => current.NodeId == key.Id ? BufferedProgressUpdate.FromStatus(key) : current
+            );
+        }
     }
 
     private void ResetProgressJourneyTrackingIfNeeded(Guid nodeId, DownloadStatus newStatus)

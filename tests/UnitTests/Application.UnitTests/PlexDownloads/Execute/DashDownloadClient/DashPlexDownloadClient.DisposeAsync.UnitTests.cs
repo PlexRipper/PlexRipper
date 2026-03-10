@@ -20,6 +20,7 @@ public class DashPlexDownloadClientDisposeAsyncUnitTests : BaseUnitTest<DashPlex
         directoryMock.Setup(x => x.CreateDirectory(It.IsAny<string>()));
         dashWrapperMock.Setup(x => x.Progress).Returns(Observable.Empty<DashDownloadProgress>());
         dashWrapperMock.Setup(x => x.StandardOutput).Returns(Observable.Empty<string>());
+        dashWrapperMock.Setup(x => x.DownloadCompleted).Returns(Observable.Empty<DashDownloadCompletedEventArgs>());
         dashWrapperMock.Setup(x => x.StartAsync(It.IsAny<DashMpdCliOptions>())).ReturnsAsync(Result.Ok());
         dashWrapperMock.Setup(x => x.StopAsync()).ReturnsAsync(Result.Ok());
         dashWrapperMock.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask);
@@ -44,6 +45,7 @@ public class DashPlexDownloadClientDisposeAsyncUnitTests : BaseUnitTest<DashPlex
         var dashWrapperMock = new Mock<IDashMpdCliWrapper>();
         dashWrapperMock.Setup(x => x.Progress).Returns(Observable.Empty<DashDownloadProgress>());
         dashWrapperMock.Setup(x => x.StandardOutput).Returns(Observable.Empty<string>());
+        dashWrapperMock.Setup(x => x.DownloadCompleted).Returns(Observable.Empty<DashDownloadCompletedEventArgs>());
         dashWrapperMock.Setup(x => x.StopAsync()).ReturnsAsync(Result.Ok());
         dashWrapperMock.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask);
 
@@ -62,6 +64,7 @@ public class DashPlexDownloadClientDisposeAsyncUnitTests : BaseUnitTest<DashPlex
         var dashWrapperMock = new Mock<IDashMpdCliWrapper>();
         dashWrapperMock.Setup(x => x.Progress).Returns(Observable.Empty<DashDownloadProgress>());
         dashWrapperMock.Setup(x => x.StandardOutput).Returns(Observable.Empty<string>());
+        dashWrapperMock.Setup(x => x.DownloadCompleted).Returns(Observable.Empty<DashDownloadCompletedEventArgs>());
         dashWrapperMock.Setup(x => x.StartAsync(It.IsAny<DashMpdCliOptions>())).ReturnsAsync(Result.Ok());
         dashWrapperMock.Setup(x => x.StopAsync()).ReturnsAsync(Result.Ok());
         dashWrapperMock.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask);
@@ -87,6 +90,7 @@ public class DashPlexDownloadClientDisposeAsyncUnitTests : BaseUnitTest<DashPlex
         var dashWrapperMock = new Mock<IDashMpdCliWrapper>();
         dashWrapperMock.Setup(x => x.Progress).Returns(Observable.Empty<DashDownloadProgress>());
         dashWrapperMock.Setup(x => x.StandardOutput).Returns(Observable.Empty<string>());
+        dashWrapperMock.Setup(x => x.DownloadCompleted).Returns(Observable.Empty<DashDownloadCompletedEventArgs>());
         dashWrapperMock.Setup(x => x.StopAsync()).ReturnsAsync(Result.Ok());
         dashWrapperMock.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask);
 

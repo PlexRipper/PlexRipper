@@ -74,20 +74,21 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
 
         SetupSpeedLimit(serverMachineIdentifier, 2000);
 
-        var exitTcs = new TaskCompletionSource<int>();
         var progressSubject = new Subject<DashDownloadProgress>();
         var outputSubject = new Subject<string>();
+        var completionSubject = new Subject<DashDownloadCompletedEventArgs>();
         DashMpdCliOptions? capturedOptions = null;
 
         var dashWrapperMock = new Mock<IDashMpdCliWrapper>();
         dashWrapperMock.Setup(x => x.Progress).Returns(progressSubject.AsObservable());
         dashWrapperMock.Setup(x => x.StandardOutput).Returns(outputSubject.AsObservable());
+        dashWrapperMock.Setup(x => x.DownloadCompleted).Returns(completionSubject.AsObservable());
         dashWrapperMock
             .Setup(x => x.StartAsync(It.IsAny<DashMpdCliOptions>()))
             .Returns<DashMpdCliOptions>(options =>
             {
                 capturedOptions = options;
-                exitTcs.TrySetResult(0);
+                completionSubject.OnNext(new DashDownloadCompletedEventArgs(false, 0, Result.Ok()));
                 return Task.FromResult(Result.Ok());
             });
         dashWrapperMock.Setup(x => x.StopAsync()).ReturnsAsync(Result.Ok());
@@ -197,6 +198,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
         var dashWrapperMock = new Mock<IDashMpdCliWrapper>();
         dashWrapperMock.Setup(x => x.Progress).Returns(Observable.Empty<DashDownloadProgress>());
         dashWrapperMock.Setup(x => x.StandardOutput).Returns(Observable.Empty<string>());
+        dashWrapperMock.Setup(x => x.DownloadCompleted).Returns(Observable.Empty<DashDownloadCompletedEventArgs>());
 
         var sut = CreateSut(dashWrapperMock);
         var result = await sut.Start(key, CancellationToken);
@@ -254,6 +256,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
         var dashWrapperMock = new Mock<IDashMpdCliWrapper>();
         dashWrapperMock.Setup(x => x.Progress).Returns(Observable.Empty<DashDownloadProgress>());
         dashWrapperMock.Setup(x => x.StandardOutput).Returns(Observable.Empty<string>());
+        dashWrapperMock.Setup(x => x.DownloadCompleted).Returns(Observable.Empty<DashDownloadCompletedEventArgs>());
 
         var sut = CreateSut(dashWrapperMock);
         var result = await sut.Start(downloadTask.ToKey(), CancellationToken);
@@ -309,6 +312,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
         var dashWrapperMock = new Mock<IDashMpdCliWrapper>();
         dashWrapperMock.Setup(x => x.Progress).Returns(progressSubject.AsObservable());
         dashWrapperMock.Setup(x => x.StandardOutput).Returns(outputSubject.AsObservable());
+        dashWrapperMock.Setup(x => x.DownloadCompleted).Returns(Observable.Empty<DashDownloadCompletedEventArgs>());
         dashWrapperMock
             .Setup(x => x.StartAsync(It.IsAny<DashMpdCliOptions>()))
             .Returns(async () =>
@@ -350,10 +354,97 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
     }
 
     [Fact]
-    public async Task ShouldCreateDashOutputUsingFinalFileName_NotTempPath()
+    public async Task ShouldNotMarkDownloadFinished_WhenProgressReaches100WithoutCompletionEvent()
     {
         await SetupDatabase(
             12005,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var downloadTask = await IDbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+        var serverMachineIdentifier = await IDbContext.GetPlexServerMachineIdentifierById(
+            downloadTask.PlexServerId,
+            CancellationToken
+        );
+
+        SetupSpeedLimit(serverMachineIdentifier, 0);
+        SetupCommandExecutor();
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnProgressUpdated(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadTaskProgress>(),
+                    It.IsAny<DirectDownloadSnapshot?>()
+                )
+            )
+            .Returns(Result.Ok());
+
+        var progressSubject = new Subject<DashDownloadProgress>();
+        var outputSubject = new Subject<string>();
+
+        var dashWrapperMock = new Mock<IDashMpdCliWrapper>();
+        dashWrapperMock.Setup(x => x.Progress).Returns(progressSubject.AsObservable());
+        dashWrapperMock.Setup(x => x.StandardOutput).Returns(outputSubject.AsObservable());
+        dashWrapperMock.Setup(x => x.DownloadCompleted).Returns(Observable.Empty<DashDownloadCompletedEventArgs>());
+        dashWrapperMock
+            .Setup(x => x.StartAsync(It.IsAny<DashMpdCliOptions>()))
+            .Returns(async () =>
+            {
+                progressSubject.OnNext(
+                    new DashDownloadProgress
+                    {
+                        ETA = TimeSpan.Zero,
+                        Percent = 100,
+                        DownloadedBytes = downloadTask.DataTotal,
+                        TotalBytes = downloadTask.DataTotal,
+                        DownloadSpeedInBytes = 0,
+                        RawOutput = "{}",
+                    }
+                );
+
+                await Task.Delay(700, TestContext.Current.CancellationToken);
+                return Result.Ok();
+            });
+        dashWrapperMock.Setup(x => x.StopAsync()).ReturnsAsync(Result.Ok());
+        dashWrapperMock.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask);
+
+        var sut = CreateSut(dashWrapperMock);
+        var result = await sut.Start(downloadTask.ToKey(), CancellationToken);
+
+        result.IsSuccess.ShouldBeTrue();
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        DomainDownloadStatus.DownloadFinished,
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Never
+            );
+    }
+
+    [Fact]
+    public async Task ShouldCreateDashOutputUsingTempDownloadPath()
+    {
+        await SetupDatabase(
+            12006,
             config =>
             {
                 config.PlexServerCount = 1;
@@ -397,6 +488,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
         var dashWrapperMock = new Mock<IDashMpdCliWrapper>();
         dashWrapperMock.Setup(x => x.Progress).Returns(progressSubject.AsObservable());
         dashWrapperMock.Setup(x => x.StandardOutput).Returns(outputSubject.AsObservable());
+        dashWrapperMock.Setup(x => x.DownloadCompleted).Returns(Observable.Empty<DashDownloadCompletedEventArgs>());
         dashWrapperMock
             .Setup(x => x.StartAsync(It.IsAny<DashMpdCliOptions>()))
             .Returns<DashMpdCliOptions>(options =>
@@ -415,7 +507,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
         capturedOptions.ShouldNotBeNull();
 
         var expectedFinalPath = Path.Combine(downloadTask.DownloadDirectory, downloadTask.FileName);
-        capturedOptions!.Output.ShouldBe(expectedFinalPath);
-        capturedOptions.Output.ShouldNotBe(downloadTask.DownloadFilePath);
+        capturedOptions!.Output.ShouldBe(downloadTask.DownloadFilePath);
+        capturedOptions.Output.ShouldNotBe(expectedFinalPath);
     }
 }

@@ -24,8 +24,8 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
 
     private readonly Subject<string> _stdoutSubject = new();
     private readonly Subject<DashDownloadProgress> _progressSubject = new();
+    private readonly Subject<DashDownloadCompletedEventArgs> _downloadCompletedSubject = new();
 
-    private int? _exitCode;
     private string? _workingDirectory;
 
     /// <summary>
@@ -41,11 +41,6 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
     }
 
     /// <summary>
-    /// Gets the exit code of the process (only valid after process has exited).
-    /// </summary>
-    public int? ExitCode => _exitCode;
-
-    /// <summary>
     /// Observable stream of standard output lines (including ANSI codes and carriage returns).
     /// </summary>
     public IObservable<string> StandardOutput => _stdoutSubject.AsObservable();
@@ -54,6 +49,9 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
     /// Observable stream of parsed download progress updates.
     /// </summary>
     public IObservable<DashDownloadProgress> Progress => _progressSubject.AsObservable();
+
+    /// <inheritdoc/>
+    public IObservable<DashDownloadCompletedEventArgs> DownloadCompleted => _downloadCompletedSubject.Take(1);
 
     /// <inheritdoc/>
     public async Task<Result> StartAsync(DashMpdCliOptions options)
@@ -96,33 +94,51 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
 
     private async Task<Result> RunEventLoopAsync(Command command, CancellationToken cancellationToken)
     {
-        var listenResult = await Result.Try((Func<Task>)(async () =>
-        {
-            await foreach (var cmdEvent in command.ListenAsync(cancellationToken))
-            {
-                switch (cmdEvent)
+        var listenResult = await Result.Try(
+            (Func<Task>)(
+                async () =>
                 {
-                    case StartedCommandEvent started:
-                        _log.Here().Information("dash-mpd-cli process started with PID {ProcessId}", started.ProcessId);
-                        break;
+                    await foreach (var cmdEvent in command.ListenAsync(cancellationToken))
+                    {
+                        switch (cmdEvent)
+                        {
+                            case StartedCommandEvent started:
+                                _log.Here()
+                                    .Information(
+                                        "dash-mpd-cli process started with PID {ProcessId}",
+                                        started.ProcessId
+                                    );
+                                break;
 
-                    // By convention for "data output" (what you want to pipe into another program or save to a file).
-                    case StandardOutputCommandEvent stdOut:
-                        HandleStdoutLine(stdOut.Text);
-                        break;
+                            // By convention for "data output" (what you want to pipe into another program or save to a file).
+                            case StandardOutputCommandEvent stdOut:
+                                HandleStdoutLine(stdOut.Text);
+                                break;
 
-                    // By convention "diagnostics" (logs, warnings, progress bars, info messages) happen in stderr
-                    case StandardErrorCommandEvent stdErr:
-                        HandleStdoutLine(stdErr.Text);
-                        break;
+                            // By convention "diagnostics" (logs, warnings, progress bars, info messages) happen in stderr
+                            case StandardErrorCommandEvent stdErr:
+                                HandleStdoutLine(stdErr.Text);
+                                break;
 
-                    case ExitedCommandEvent exited:
-                        _exitCode = exited.ExitCode;
-                        _log.Here().Information("dash-mpd-cli process exited with code {ExitCode}", exited.ExitCode);
-                        break;
+                            case ExitedCommandEvent exited:
+                                _log.Here()
+                                    .Information("dash-mpd-cli process exited with code {ExitCode}", exited.ExitCode);
+
+                                var isCancelled = IsCancellationRequested();
+                                var result =
+                                    isCancelled ? ResultExtensions.TaskIsCancelled(nameof(DashMpdCliWrapper))
+                                    : exited.ExitCode == 0 ? Result.Ok()
+                                    : Result.Fail($"dash-mpd-cli exited with code {exited.ExitCode}");
+
+                                _downloadCompletedSubject.OnNext(
+                                    new DashDownloadCompletedEventArgs(isCancelled, exited.ExitCode, result)
+                                );
+                                break;
+                        }
+                    }
                 }
-            }
-        }));
+            )
+        );
 
         var cleanUpResult = Result.Try(() =>
         {
@@ -145,8 +161,14 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
             }
         });
 
+        if (IsCancellationRequested())
+            return ResultExtensions.TaskIsCancelled(nameof(DashMpdCliWrapper));
+
         return Result.Merge(listenResult, cleanUpResult);
     }
+
+    private bool IsCancellationRequested() =>
+        _gracefulCts.IsCancellationRequested || _forcefulCts.IsCancellationRequested;
 
     private void HandleStdoutLine(string line)
     {
@@ -203,9 +225,11 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
         {
             _stdoutSubject.OnCompleted();
             _progressSubject.OnCompleted();
+            _downloadCompletedSubject.OnCompleted();
 
             _stdoutSubject.Dispose();
             _progressSubject.Dispose();
+            _downloadCompletedSubject.Dispose();
         }
         catch (Exception ex)
         {

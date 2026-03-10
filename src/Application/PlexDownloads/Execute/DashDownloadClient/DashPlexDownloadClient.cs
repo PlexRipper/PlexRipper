@@ -19,7 +19,6 @@ public class DashPlexDownloadClient : IPlexDownloadClient
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
-    private readonly IReaparrDbContextFactory _dbContextFactory;
     private readonly IDashMpdCliWrapper _dashWrapper;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IDownloadTaskUpdateDispatcher _downloadTaskUpdateDispatcher;
@@ -44,7 +43,6 @@ public class DashPlexDownloadClient : IPlexDownloadClient
     )
     {
         _log = log.ForContext<DashPlexDownloadClient>();
-        _dbContextFactory = dbContextFactory;
         _dashWrapper = dashWrapper;
         _commandExecutor = commandExecutor;
         _downloadTaskUpdateDispatcher = downloadTaskUpdateDispatcher;
@@ -110,19 +108,9 @@ public class DashPlexDownloadClient : IPlexDownloadClient
             _ = _dashWrapper.StopAsync();
         });
         var startResult = await _dashWrapper.StartAsync(options);
-        if (startResult.IsCancelled)
-        {
-            await SetDownloadStatusAsync(DownloadStatus.Stopped, startResult);
+        if (startResult.IsCancelled || startResult.IsFailed)
             return startResult;
-        }
 
-        if (startResult.IsFailed)
-        {
-            await SetDownloadStatusAsync(DownloadStatus.DownloadClientError, startResult);
-            return startResult;
-        }
-
-        await SetDownloadStatusAsync(DownloadStatus.DownloadFinished);
         return Result.Ok();
     }
 
@@ -154,7 +142,7 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         return new DashMpdCliOptions
         {
             MpdUrl = downloadUrl,
-            Output = Path.Combine(downloadTask.DownloadDirectory, downloadTask.FileName),
+            Output = downloadTask.DownloadFilePath,
             WorkingDirectory = downloadTask.DownloadDirectory,
             Quiet = false,
             Quality = "best",
@@ -173,10 +161,16 @@ public class DashPlexDownloadClient : IPlexDownloadClient
             _dashWrapper
                 .Progress.Sample(TimeSpan.FromMilliseconds(500))
                 .TakeUntil(_destroy)
-                .Select(progress =>
+                .Subscribe(progress => HandleProgressChanged(key, progress))
+        );
+
+        _subscriptions.Add(
+            _dashWrapper
+                .DownloadCompleted.TakeUntil(_destroy)
+                .Select(completed =>
                     Observable.FromAsync(async _ =>
                     {
-                        await HandleProgressChanged(key, progress);
+                        await HandleDownloadCompleted(key, completed);
                     })
                 )
                 .Concat()
@@ -184,7 +178,7 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         );
     }
 
-    private async Task HandleProgressChanged(DownloadTaskKey key, DashDownloadProgress progress)
+    private void HandleProgressChanged(DownloadTaskKey key, DashDownloadProgress progress)
     {
         var dataTotal = progress.TotalBytes;
         if (dataTotal <= 0 && progress.Percent > 0)
@@ -199,9 +193,23 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         };
 
         _downloadTaskUpdateDispatcher.OnProgressUpdated(key, progressUpdate);
+    }
 
-        if (progressUpdate.Percentage == 100)
-            await SetDownloadStatusAsync(DownloadStatus.DownloadFinished);
+    private async Task HandleDownloadCompleted(DownloadTaskKey key, DashDownloadCompletedEventArgs completed)
+    {
+        if (completed.Cancelled)
+        {
+            await SetDownloadStatusAsync(DownloadStatus.Stopped, completed.Result);
+            return;
+        }
+
+        if (!completed.IsSuccess)
+        {
+            await SetDownloadStatusAsync(DownloadStatus.DownloadClientError, completed.Result);
+            return;
+        }
+
+        await SetDownloadStatusAsync(DownloadStatus.DownloadFinished);
     }
 
     private async Task SetDownloadStatusAsync(DownloadStatus status, Result? errorResult = null)

@@ -77,18 +77,12 @@ public class DashPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DashPlexDow
         SetupSpeedLimit(serverMachineIdentifier);
         SetupCommandExecutor();
 
-        var exitTcs = new TaskCompletionSource<int>();
         var dashWrapperMock = new Mock<IDashMpdCliWrapper>();
         dashWrapperMock.Setup(x => x.Progress).Returns(Observable.Empty<DashDownloadProgress>());
         dashWrapperMock.Setup(x => x.StandardOutput).Returns(Observable.Empty<string>());
+        dashWrapperMock.Setup(x => x.DownloadCompleted).Returns(Observable.Empty<DashDownloadCompletedEventArgs>());
         dashWrapperMock.Setup(x => x.StartAsync(It.IsAny<DashMpdCliOptions>())).ReturnsAsync(Result.Ok());
-        dashWrapperMock
-            .Setup(x => x.StopAsync())
-            .ReturnsAsync(() =>
-            {
-                exitTcs.TrySetResult(143);
-                return Result.Ok();
-            });
+        dashWrapperMock.Setup(x => x.StopAsync()).ReturnsAsync(Result.Ok());
         dashWrapperMock.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask);
 
         var sut = CreateSut(dashWrapperMock);
@@ -144,18 +138,12 @@ public class DashPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DashPlexDow
         SetupSpeedLimit(serverMachineIdentifier);
         SetupCommandExecutor();
 
-        var exitTcs = new TaskCompletionSource<int>();
         var dashWrapperMock = new Mock<IDashMpdCliWrapper>();
         dashWrapperMock.Setup(x => x.Progress).Returns(Observable.Empty<DashDownloadProgress>());
         dashWrapperMock.Setup(x => x.StandardOutput).Returns(Observable.Empty<string>());
+        dashWrapperMock.Setup(x => x.DownloadCompleted).Returns(Observable.Empty<DashDownloadCompletedEventArgs>());
         dashWrapperMock.Setup(x => x.StartAsync(It.IsAny<DashMpdCliOptions>())).ReturnsAsync(Result.Ok());
-        dashWrapperMock
-            .Setup(x => x.StopAsync())
-            .ReturnsAsync(() =>
-            {
-                exitTcs.TrySetResult(143);
-                return Result.Ok();
-            });
+        dashWrapperMock.Setup(x => x.StopAsync()).ReturnsAsync(Result.Ok());
         dashWrapperMock.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask);
 
         var sut = CreateSut(dashWrapperMock);

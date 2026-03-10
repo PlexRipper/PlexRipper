@@ -372,6 +372,7 @@
         "alert-display-debug": {
             "error-example": "Beim Laden der Medienqualitätsoptionen ist ein unerwarteter Fehler aufgetreten. Bitte versuchen Sie es später noch einmal.",
             "info-example": "Dies ist eine zufällige Informationsmeldung zu den Medienqualitätseinstellungen. Lorem ipsum dolor sit amet.",
+            "success-example": "Dies ist eine zufällige Erfolgsmeldung zu den Medienqualitätseinstellungen. Lorem ipsum dolor sit amet.",
             "warning-example": "Achtung! Möglicherweise ist etwas nicht richtig konfiguriert. Stichprobenprüfung: 42XY-LMN."
         },
         "api-key-input-field": {

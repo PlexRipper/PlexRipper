@@ -955,6 +955,29 @@
 										</translations>
 									</concept_node>
 									<concept_node>
+										<name>success-example</name>
+										<description/>
+										<comment/>
+										<translations>
+											<translation>
+												<language>de-DE</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>en-US</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
+										</translations>
+									</concept_node>
+									<concept_node>
 										<name>warning-example</name>
 										<description/>
 										<comment/>
@@ -2261,8 +2284,82 @@
 													</translation>
 												</translations>
 											</concept_node>
+											<folder_node>
+												<name>delete-confirmation</name>
+												<children>
+													<concept_node>
+														<name>text</name>
+														<description/>
+														<comment/>
+														<translations>
+															<translation>
+																<language>de-DE</language>
+																<approved>false</approved>
+															</translation>
+															<translation>
+																<language>en-US</language>
+																<approved>false</approved>
+															</translation>
+															<translation>
+																<language>fr-FR</language>
+																<approved>false</approved>
+															</translation>
+															<translation>
+																<language>pl-PL</language>
+																<approved>false</approved>
+															</translation>
+														</translations>
+													</concept_node>
+													<concept_node>
+														<name>title</name>
+														<description/>
+														<comment/>
+														<translations>
+															<translation>
+																<language>de-DE</language>
+																<approved>false</approved>
+															</translation>
+															<translation>
+																<language>en-US</language>
+																<approved>false</approved>
+															</translation>
+															<translation>
+																<language>fr-FR</language>
+																<approved>false</approved>
+															</translation>
+															<translation>
+																<language>pl-PL</language>
+																<approved>false</approved>
+															</translation>
+														</translations>
+													</concept_node>
+												</children>
+											</folder_node>
 											<concept_node>
 												<name>deleted</name>
+												<description/>
+												<comment/>
+												<translations>
+													<translation>
+														<language>de-DE</language>
+														<approved>false</approved>
+													</translation>
+													<translation>
+														<language>en-US</language>
+														<approved>false</approved>
+													</translation>
+													<translation>
+														<language>fr-FR</language>
+														<approved>false</approved>
+													</translation>
+													<translation>
+														<language>pl-PL</language>
+														<approved>false</approved>
+													</translation>
+												</translations>
+											</concept_node>
+											<concept_node>
+												<name>entry-copied-to-clipboard</name>
 												<description/>
 												<comment/>
 												<translations>
@@ -2451,6 +2548,29 @@
 												</children>
 											</folder_node>
 											<concept_node>
+												<name>no-logs</name>
+												<description/>
+												<comment/>
+												<translations>
+													<translation>
+														<language>de-DE</language>
+														<approved>false</approved>
+													</translation>
+													<translation>
+														<language>en-US</language>
+														<approved>false</approved>
+													</translation>
+													<translation>
+														<language>fr-FR</language>
+														<approved>false</approved>
+													</translation>
+													<translation>
+														<language>pl-PL</language>
+														<approved>false</approved>
+													</translation>
+												</translations>
+											</concept_node>
+											<concept_node>
 												<name>sort-newest-first</name>
 												<description/>
 												<comment/>
@@ -2623,6 +2743,85 @@
 							<folder_node>
 								<name>downloads-table</name>
 								<children>
+									<folder_node>
+										<name>clear-completed</name>
+										<children>
+											<concept_node>
+												<name>button</name>
+												<description/>
+												<comment/>
+												<translations>
+													<translation>
+														<language>de-DE</language>
+														<approved>false</approved>
+													</translation>
+													<translation>
+														<language>en-US</language>
+														<approved>false</approved>
+													</translation>
+													<translation>
+														<language>fr-FR</language>
+														<approved>false</approved>
+													</translation>
+													<translation>
+														<language>pl-PL</language>
+														<approved>false</approved>
+													</translation>
+												</translations>
+											</concept_node>
+											<folder_node>
+												<name>confirmation</name>
+												<children>
+													<concept_node>
+														<name>text</name>
+														<description/>
+														<comment/>
+														<translations>
+															<translation>
+																<language>de-DE</language>
+																<approved>false</approved>
+															</translation>
+															<translation>
+																<language>en-US</language>
+																<approved>false</approved>
+															</translation>
+															<translation>
+																<language>fr-FR</language>
+																<approved>false</approved>
+															</translation>
+															<translation>
+																<language>pl-PL</language>
+																<approved>false</approved>
+															</translation>
+														</translations>
+													</concept_node>
+													<concept_node>
+														<name>title</name>
+														<description/>
+														<comment/>
+														<translations>
+															<translation>
+																<language>de-DE</language>
+																<approved>false</approved>
+															</translation>
+															<translation>
+																<language>en-US</language>
+																<approved>false</approved>
+															</translation>
+															<translation>
+																<language>fr-FR</language>
+																<approved>false</approved>
+															</translation>
+															<translation>
+																<language>pl-PL</language>
+																<approved>false</approved>
+															</translation>
+														</translations>
+													</concept_node>
+												</children>
+											</folder_node>
+										</children>
+									</folder_node>
 									<folder_node>
 										<name>columns</name>
 										<children>
@@ -7979,6 +8178,29 @@
 									</concept_node>
 									<concept_node>
 										<name>queued</name>
+										<description/>
+										<comment/>
+										<translations>
+											<translation>
+												<language>de-DE</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>en-US</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
+										</translations>
+									</concept_node>
+									<concept_node>
+										<name>restarting</name>
 										<description/>
 										<comment/>
 										<translations>

@@ -6,6 +6,7 @@ export function showErrorNotification(message: string, timeout: number = 0) {
 		message,
 		progress: true,
 		timeout,
+		icon: 'mdi-alert-circle-outline',
 		actions: [
 			{ icon: 'mdi-close', color: 'white', round: true, handler: () => { } },
 		],
@@ -18,6 +19,7 @@ export function showSuccessNotification(message: string, timeout: number = 0) {
 		message,
 		progress: true,
 		timeout,
+		icon: 'mdi-check-circle-outline',
 		actions: [
 			{ icon: 'mdi-close', color: 'white', round: true, handler: () => { } },
 		],

@@ -372,6 +372,7 @@
         "alert-display-debug": {
             "error-example": "Wystąpił nieoczekiwany błąd podczas ładowania opcji jakości multimediów. Spróbuj ponownie później.",
             "info-example": "To jest losowa wiadomość informacyjna na temat ustawień jakości multimediów. Lorem ipsum dolor sit amet.",
+            "success-example": "To jest losowy komunikat o powodzeniu dotyczący ustawień jakości multimediów. Lorem ipsum dolor sit amet.",
             "warning-example": "Uwaga! Coś może być niepoprawnie skonfigurowane. Losowe sprawdzenie: 42XY-LMN."
         },
         "api-key-input-field": {

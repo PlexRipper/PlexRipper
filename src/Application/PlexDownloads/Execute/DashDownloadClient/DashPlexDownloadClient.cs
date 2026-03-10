@@ -100,7 +100,7 @@ public class DashPlexDownloadClient : IPlexDownloadClient
             return createDirectoryResult.ToResult();
         }
 
-        await SetupDownloadListeners(downloadTaskKey);
+        SetupDownloadListeners(downloadTaskKey);
 
         // Execute dash stream download
         await SetDownloadStatusAsync(DownloadStatus.Downloading);
@@ -167,7 +167,7 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         };
     }
 
-    private Task SetupDownloadListeners(DownloadTaskKey key)
+    private void SetupDownloadListeners(DownloadTaskKey key)
     {
         _subscriptions.Add(
             _dashWrapper
@@ -182,15 +182,6 @@ public class DashPlexDownloadClient : IPlexDownloadClient
                 .Concat()
                 .Subscribe()
         );
-
-        _subscriptions.Add(
-            _dashWrapper
-                .StandardOutput.TakeUntil(_destroy)
-                .Where(x => !string.IsNullOrWhiteSpace(x))
-                .Subscribe(line => _log.Here().Debug("{Data}", line.Trim()))
-        );
-
-        return Task.CompletedTask;
     }
 
     private async Task HandleProgressChanged(DownloadTaskKey key, DashDownloadProgress progress)
@@ -208,23 +199,9 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         };
 
         _downloadTaskUpdateDispatcher.OnProgressUpdated(key, progressUpdate);
-        await SendProgressLog(progressUpdate);
 
         if (progressUpdate.Percentage == 100)
             await SetDownloadStatusAsync(DownloadStatus.DownloadFinished);
-    }
-
-    private async Task SendProgressLog(DownloadTaskProgress progress)
-    {
-        var progressMsg = _log.Here()
-            .DebugMsg(
-                "[DashDownloadTaskProgress {MediaFileName} - {Percentage}% - {Speed}]",
-                _filename,
-                progress.Percentage.ToString("F2"),
-                DataFormat.FormatSpeedString(progress.DownloadSpeed)
-            );
-
-        await SendDownloadClientLog(NotificationLevel.Debug, DownloadStatus.Downloading, progressMsg);
     }
 
     private async Task SetDownloadStatusAsync(DownloadStatus status, Result? errorResult = null)
@@ -244,15 +221,6 @@ public class DashPlexDownloadClient : IPlexDownloadClient
             errorResult,
             CancellationToken.None
         );
-    }
-
-    private async Task SendDownloadClientLog(NotificationLevel logLevel, DownloadStatus status, string message)
-    {
-        if (_downloadTaskKey is null)
-            return;
-
-        using var dbContext = await _dbContextFactory.CreateAsync();
-        await dbContext.CreateDownloadClientLog(_downloadTaskKey, logLevel, status, message);
     }
 
     public async ValueTask DisposeAsync()

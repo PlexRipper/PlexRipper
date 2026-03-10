@@ -41,9 +41,9 @@ export function generateDownloadPatchMessagePackDTO({
 
 export function toDownloadPatchMessagePackTuple(
 	patch: DownloadPatchMessagePackDTO,
-	options: { percentageAsString?: boolean; appendMalformedUpsert?: boolean } = {},
+	options: { percentageAsString?: boolean } = {},
 ): DownloadPatchMessagePackTuple {
-	const upserts: Array<DownloadPatchEntryMessagePackTuple> = patch.upserts.map((upsert) => [
+	const upserts: DownloadPatchEntryMessagePackTuple[] = patch.upserts.map((upsert) => [
 		upsert.id,
 		upsert.parentId,
 		upsert.status,
@@ -53,9 +53,6 @@ export function toDownloadPatchMessagePackTuple(
 		upsert.downloadSpeed,
 		upsert.timeRemaining,
 	]);
-
-	if (options.appendMalformedUpsert)
-		upserts.push('invalid-upsert-entry');
 
 	return [
 		patch.serverId,

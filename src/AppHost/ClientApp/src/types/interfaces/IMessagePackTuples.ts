@@ -14,7 +14,7 @@ export type DownloadPatchEntryMessagePackTuple = [
 export type DownloadPatchMessagePackTuple = [
 	number,
 	number,
-	Array<DownloadPatchEntryMessagePackTuple>,
+	DownloadPatchEntryMessagePackTuple[],
 	string[],
 ];
 

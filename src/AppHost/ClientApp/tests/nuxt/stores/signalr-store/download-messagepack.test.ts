@@ -84,38 +84,77 @@ describe('SignalrStore - Download MessagePack conversion', () => {
 		expect(typeof updateDownloadPatchSpy.mock.calls[0]?.[0]?.upserts?.[0]?.percentage).toEqual('number');
 	});
 
-	test('Should ignore malformed upsert entries when MessagePack download patch tuple contains invalid upsert items', async () => {
+	test('Should throw when MessagePack download patch tuple contains invalid upsert items', async () => {
 		// Arrange
 		const signalrStore = useSignalrStore();
-		const downloadStore = useDownloadStore();
-		const patch = generateDownloadPatchMessagePackDTO({ upsertCount: 2 });
-		const tuplePayload = toDownloadPatchMessagePackTuple(patch, { appendMalformedUpsert: true });
-		const updateDownloadPatchSpy = vi.spyOn(downloadStore, 'updateDownloadPatch');
+		const tuplePayload = [
+			1,
+			100,
+			['invalid-upsert-entry'],
+			[],
+		];
 
 		// Act
 		await subscribeSpyTo(signalrStore.setup()).onComplete();
-		emitHubMessage('download', MessageTypes.DownloadPatch, tuplePayload);
 
 		// Assert
-		expect(updateDownloadPatchSpy).toHaveBeenCalledTimes(1);
-		expect(updateDownloadPatchSpy.mock.calls[0]?.[0]).toEqual(patch);
-		expect(updateDownloadPatchSpy.mock.calls[0]?.[0]?.upserts).toHaveLength(2);
+		expect(() => emitHubMessage('download', MessageTypes.DownloadPatch, tuplePayload)).toThrow('Invalid DownloadPatch MessagePack tuple entry');
 	});
 
-	test('Should forward object patch unchanged when DownloadPatch message payload is already an object', async () => {
+	test.each([
+		[
+			'Should throw when MessagePack download patch tuple upsert contains extra properties',
+			[
+				'36a8519c-39b3-4ea3-ad07-6957d2f4d03a',
+				'0219f4c1-e588-469e-b4b9-aef890fdf7c8',
+				DownloadStatus.Downloading,
+				'60.84',
+				100,
+				200,
+				300,
+				400,
+				'unexpected-extra-property',
+			],
+		],
+		[
+			'Should throw when MessagePack download patch tuple upsert contains invalid property type',
+			[
+				123,
+				'0219f4c1-e588-469e-b4b9-aef890fdf7c8',
+				DownloadStatus.Downloading,
+				'60.84',
+				100,
+				200,
+				300,
+				400,
+			],
+		],
+	])('%s', async (_name, invalidEntry) => {
 		// Arrange
 		const signalrStore = useSignalrStore();
-		const downloadStore = useDownloadStore();
-		const patch = generateDownloadPatchMessagePackDTO({ upsertCount: 1, deletedCount: 0 });
-		const updateDownloadPatchSpy = vi.spyOn(downloadStore, 'updateDownloadPatch');
+		const tuplePayload = [
+			1,
+			101,
+			[invalidEntry],
+			[],
+		];
 
 		// Act
 		await subscribeSpyTo(signalrStore.setup()).onComplete();
-		emitHubMessage('download', MessageTypes.DownloadPatch, patch);
 
 		// Assert
-		expect(updateDownloadPatchSpy).toHaveBeenCalledTimes(1);
-		expect(updateDownloadPatchSpy).toHaveBeenCalledWith(patch);
+		expect(() => emitHubMessage('download', MessageTypes.DownloadPatch, tuplePayload)).toThrow('Invalid DownloadPatch MessagePack tuple entry');
+	});
+
+	test('Should throw when DownloadPatch message payload is not a MessagePack tuple', async () => {
+		// Arrange
+		const signalrStore = useSignalrStore();
+
+		// Act
+		await subscribeSpyTo(signalrStore.setup()).onComplete();
+
+		// Assert
+		expect(() => emitHubMessage('download', MessageTypes.DownloadPatch, { invalid: true })).toThrow('Invalid DownloadPatch MessagePack tuple payload');
 	});
 
 	test('Should convert MessagePack server download progress tuple and forward progress when ServerDownloadProgress message is received', async () => {

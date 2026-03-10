@@ -131,16 +131,7 @@ export const useSignalrStore = defineStore(StoreNames.SignalrStore, () => {
 		});
 
 		// This uses SignalR MessagePack to compress the updates
-		downloadHubConnection?.on(MessageTypes.DownloadPatch, (rawData: DownloadPatchMessagePackTuple) => {
-			if (Array.isArray(rawData)) {
-				const patch = toDownloadPatchDTO(rawData);
-				if (patch)
-					downloadStore.updateDownloadPatch(patch);
-				return;
-			}
-
-			downloadStore.updateDownloadPatch(rawData as unknown as DownloadPatchMessagePackDTO);
-		});
+		downloadHubConnection?.on(MessageTypes.DownloadPatch, (rawData: DownloadPatchMessagePackTuple) => downloadStore.updateDownloadPatch(toDownloadPatchDTO(rawData)));
 
 		progressHubConnection?.on(MessageTypes.LibraryProgress, (data: LibrarySyncProgressDTO) => libraryStore.updateLibraryProgress(data));
 
@@ -300,14 +291,16 @@ function toServerDownloadProgressDTO(arr: ServerDownloadProgressMessagePackTuple
 	};
 }
 
-function toDownloadPatchDTO(arr: DownloadPatchMessagePackTuple): DownloadPatchMessagePackDTO | null {
+function toDownloadPatchDTO(arr: DownloadPatchMessagePackTuple): DownloadPatchMessagePackDTO {
 	if (!Array.isArray(arr))
-		return null;
+		throw new Error('Invalid DownloadPatch MessagePack tuple payload');
 
 	const upsertsRaw = Array.isArray(arr[2]) ? arr[2] : [];
-	const upserts: DownloadPatchDTO[] = upsertsRaw
-		.filter((x): x is DownloadPatchEntryMessagePackTuple => Array.isArray(x))
-		.map((item: DownloadPatchEntryMessagePackTuple) => ({
+	const upserts: DownloadPatchDTO[] = upsertsRaw.map((item) => {
+		if (!isDownloadPatchEntryTuple(item))
+			throw new Error('Invalid DownloadPatch MessagePack tuple entry');
+
+		return {
 			id: item[0],
 			parentId: item[1],
 			status: item[2],
@@ -316,7 +309,8 @@ function toDownloadPatchDTO(arr: DownloadPatchMessagePackTuple): DownloadPatchMe
 			dataTotal: item[5],
 			downloadSpeed: item[6],
 			timeRemaining: item[7],
-		}));
+		};
+	});
 
 	return {
 		serverId: arr[0],
@@ -324,4 +318,18 @@ function toDownloadPatchDTO(arr: DownloadPatchMessagePackTuple): DownloadPatchMe
 		upserts,
 		deletedIds: Array.isArray(arr[3]) ? arr[3] : [],
 	};
+}
+
+function isDownloadPatchEntryTuple(value: unknown): value is DownloadPatchEntryMessagePackTuple {
+	if (!Array.isArray(value) || value.length !== 8)
+		return false;
+
+	return typeof value[0] === 'string'
+		&& typeof value[1] === 'string'
+		&& typeof value[2] === 'string'
+		&& (typeof value[3] === 'number' || typeof value[3] === 'string')
+		&& typeof value[4] === 'number'
+		&& typeof value[5] === 'number'
+		&& typeof value[6] === 'number'
+		&& typeof value[7] === 'number';
 }

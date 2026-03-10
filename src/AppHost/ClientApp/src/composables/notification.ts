@@ -1,22 +1,25 @@
 import { Notify } from 'quasar';
 
-export function showErrorNotification(message: string) {
+export function showErrorNotification(message: string, timeout: number = 0) {
 	Notify.create({
 		type: 'negative',
 		message,
 		progress: true,
-		timeout: 0,
+		timeout,
 		actions: [
 			{ icon: 'mdi-close', color: 'white', round: true, handler: () => { } },
 		],
 	});
 }
 
-export function showSuccessNotification(message: string) {
+export function showSuccessNotification(message: string, timeout: number = 0) {
 	Notify.create({
 		type: 'positive',
 		message,
 		progress: true,
-		timeout: 2000,
+		timeout,
+		actions: [
+			{ icon: 'mdi-close', color: 'white', round: true, handler: () => { } },
+		],
 	});
 }

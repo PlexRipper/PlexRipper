@@ -7,11 +7,7 @@ public static partial class DownloadTaskExtensions
     public static IDownloadTaskProgress Calculate(this DownloadTaskGeneric downloadTask)
     {
         if (!downloadTask.Children.Any())
-        {
-            downloadTask.Percentage = 0;
-            downloadTask.TimeRemaining = 0;
             return downloadTask;
-        }
 
         foreach (var child in downloadTask.Children)
             child.Calculate();

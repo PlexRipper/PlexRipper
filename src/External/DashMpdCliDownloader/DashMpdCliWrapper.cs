@@ -15,6 +15,12 @@ namespace Reaparr.External;
 /// </summary>
 public class DashMpdCliWrapper : IDashMpdCliWrapper
 {
+    private const string DashInfoLevelToken = " INFO ";
+    private const string DashErrorLevelToken = " ERROR ";
+    private const string RetryingSegmentToken = "Retrying";
+    private const string NetworkErrorToken = "network error";
+    private const string MaxNetworkErrorToken = "max_error_count";
+
     private readonly ILogger _log;
     private readonly IFile _file;
     private readonly IDirectory _directory;
@@ -27,6 +33,8 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
     private readonly Subject<DashDownloadCompletedEventArgs> _downloadCompletedSubject = new();
 
     private string? _workingDirectory;
+    private bool _hasNetworkError;
+    private string? _networkErrorLine;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DashMpdCliWrapper"/> class.
@@ -56,6 +64,9 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
     /// <inheritdoc/>
     public async Task<Result> StartAsync(DashMpdCliOptions options)
     {
+        _hasNetworkError = false;
+        _networkErrorLine = null;
+
         if (!_file.Exists(_binaryPath))
             return _log.Here()
                 .ErrorResult(
@@ -94,6 +105,8 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
 
     private async Task<Result> RunEventLoopAsync(Command command, CancellationToken cancellationToken)
     {
+        var processResult = Result.Ok();
+
         var listenResult = await Result.Try(
             (Func<Task>)(
                 async () =>
@@ -128,7 +141,9 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
                                 var result =
                                     isCancelled ? ResultExtensions.TaskIsCancelled(nameof(DashMpdCliWrapper))
                                     : exited.ExitCode == 0 ? Result.Ok()
-                                    : Result.Fail($"dash-mpd-cli exited with code {exited.ExitCode}");
+                                    : CreateFailureResult(exited.ExitCode);
+
+                                processResult = result;
 
                                 _downloadCompletedSubject.OnNext(
                                     new DashDownloadCompletedEventArgs(isCancelled, exited.ExitCode, result)
@@ -164,7 +179,7 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
         if (IsCancellationRequested())
             return ResultExtensions.TaskIsCancelled(nameof(DashMpdCliWrapper));
 
-        return Result.Merge(listenResult, cleanUpResult);
+        return Result.Merge(listenResult, cleanUpResult, processResult);
     }
 
     private bool IsCancellationRequested() =>
@@ -187,9 +202,43 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
         }
         else
         {
+            if (line.Contains(DashErrorLevelToken, StringComparison.OrdinalIgnoreCase))
+            {
+                if (IsNetworkErrorLine(line))
+                {
+                    _hasNetworkError = true;
+                    _networkErrorLine = line;
+                }
+
+                _log.Here().Error("{Data}", line);
+                return;
+            }
+
+            if (
+                line.Contains(DashInfoLevelToken, StringComparison.OrdinalIgnoreCase)
+                && line.Contains(RetryingSegmentToken, StringComparison.OrdinalIgnoreCase)
+            )
+            {
+                _log.Here().Warning("{Data}", line);
+                return;
+            }
+
             _log.Here().Debug("{Data}", line);
         }
     }
+
+    private Result CreateFailureResult(int exitCode)
+    {
+        if (!_hasNetworkError)
+            return Result.Fail($"dash-mpd-cli exited with code {exitCode}");
+
+        var message = $"dash-mpd-cli failed with network error: {_networkErrorLine}";
+        return Result.Fail(message).Add504GatewayTimeoutError(message);
+    }
+
+    private static bool IsNetworkErrorLine(string line) =>
+        line.Contains(NetworkErrorToken, StringComparison.OrdinalIgnoreCase)
+        || line.Contains(MaxNetworkErrorToken, StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
     /// Stops the running process gracefully, then forcefully if it does not exit within the grace period.

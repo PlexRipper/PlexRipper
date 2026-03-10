@@ -200,7 +200,10 @@ public class DashPlexDownloadClient : IPlexDownloadClient
 
         if (!completed.IsSuccess)
         {
-            await SetDownloadStatusAsync(DownloadStatus.DownloadClientError, completed.Result);
+            var status = completed.Result.Has504GatewayTimeoutError()
+                ? DownloadStatus.ServerUnreachable
+                : DownloadStatus.DownloadClientError;
+            await SetDownloadStatusAsync(status, completed.Result);
             return;
         }
 

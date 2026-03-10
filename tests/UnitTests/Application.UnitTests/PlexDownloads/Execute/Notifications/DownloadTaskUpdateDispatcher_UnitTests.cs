@@ -117,6 +117,7 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
                 DataReceived = 100,
                 Percentage = 10,
                 DownloadSpeed = 10,
+                TimeRemaining = 90,
             }
         );
         sut.OnProgressUpdated(
@@ -127,6 +128,7 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
                 DataReceived = 900,
                 Percentage = 90,
                 DownloadSpeed = 90,
+                TimeRemaining = 12,
             }
         );
 
@@ -140,6 +142,7 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
         leafPatch.ShouldNotBeNull();
         leafPatch!.DataReceived.ShouldBe(900);
         leafPatch.Percentage.ShouldBe(90);
+        leafPatch.TimeRemaining.ShouldBe(12);
     }
 
     [Fact]

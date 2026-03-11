@@ -18,7 +18,7 @@ public static partial class LogExtensions
         [CallerMemberName] string memberName = "",
         [CallerLineNumber] int sourceLineNumber = 0
     ) =>
-        logger
+        logger // TODO Rename these, they are too generic and are continuously overridden accidentally
             .ForContext(nameof(LogConfig.FileName), Path.GetFileName(sourceFilePath))
             .ForContext(nameof(LogConfig.FilePath), sourceFilePath)
             .ForContext(nameof(LogConfig.MethodName), memberName)

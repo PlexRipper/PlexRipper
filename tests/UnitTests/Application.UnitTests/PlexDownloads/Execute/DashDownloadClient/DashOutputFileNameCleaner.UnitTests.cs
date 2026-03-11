@@ -18,7 +18,7 @@ public class DashOutputFileNameCleanerUnitTests
     [InlineData(
         "风味原产地·潮汕.Flavorful.Origins.S01E06.1080p.NF.WEB-DL.DDP2.0.x264-Ao.mkv",
         VideoQuality.FullHD,
-        "风味原产地·潮汕.Flavorful.Origins.S01E06.NF.WEB.DL.DDP2.0.Ao.WEB-DL.1080p.mkv"
+        "风味原产地·潮汕.Flavorful.Origins.S01E06.NF.DDP2.0.Ao.WEB-DL.1080p.mkv"
     )]
     [InlineData(
         "Ōoku - The Inner Chambers - S01E04 - Episode 4 WEBDL-1080p.mkv",
@@ -97,5 +97,15 @@ public class DashOutputFileNameCleanerUnitTests
         );
 
         result.ShouldBe("All.Quiet.on.the.Western.Front.2022.WEB-DL.720p.mkv");
+    }
+
+    [Fact]
+    public void ShouldNotDuplicateWebDlTokens_WhenNormalizingAnAlreadyNormalizedName()
+    {
+        var firstPass = DashOutputFileNameCleaner.NormalizeForDashOutput("AEGIS - 1x01 - Ep1.mov", VideoQuality.FullHD);
+
+        var secondPass = DashOutputFileNameCleaner.NormalizeForDashOutput(firstPass, VideoQuality.FullHD);
+
+        secondPass.ShouldBe("AEGIS.1x01.Ep1.WEB-DL.1080p.mkv");
     }
 }

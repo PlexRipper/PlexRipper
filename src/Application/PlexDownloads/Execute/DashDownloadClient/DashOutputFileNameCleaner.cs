@@ -90,10 +90,18 @@ public static partial class DashOutputFileNameCleaner
     {
         var identity = new List<string>();
 
-        foreach (var token in tokenCandidates)
+        for (var index = 0; index < tokenCandidates.Count; index++)
         {
+            var token = tokenCandidates[index];
+
             if (ShouldDropToken(token))
                 continue;
+
+            if (index < tokenCandidates.Count - 1 && ShouldDropTokenPair(token, tokenCandidates[index + 1]))
+            {
+                index++;
+                continue;
+            }
 
             identity.Add(token);
         }
@@ -119,6 +127,12 @@ public static partial class DashOutputFileNameCleaner
             return true;
 
         return false;
+    }
+
+    private static bool ShouldDropTokenPair(string firstToken, string secondToken)
+    {
+        var combined = string.Concat(firstToken, secondToken).ToLowerInvariant();
+        return NoiseTokens.Contains(combined);
     }
 
     private static bool IsYearToken(string token) =>

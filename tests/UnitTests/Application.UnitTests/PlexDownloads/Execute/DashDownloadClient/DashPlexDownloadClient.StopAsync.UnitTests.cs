@@ -29,8 +29,16 @@ public class DashPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DashPlexDow
     private void SetupCommandExecutor()
     {
         Mock.Mock<ICommandExecutor>()
-            .Setup(m => m.Send(It.IsAny<ICommand<Result<string>>>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Ok("https://plex.example/start.mpd"));
+            .Setup(m => m.Send(It.IsAny<ICommand<Result<DashDownloadUrlResult>>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(
+                Result.Ok(
+                    new DashDownloadUrlResult
+                    {
+                        DownloadUrl = "https://plex.example/start.mpd",
+                        TranscodedQuality = VideoQuality.FullHD,
+                    }
+                )
+            );
 
         Mock.Mock<ICommandExecutor>()
             .Setup(m => m.Send(It.IsAny<ICommand<Result>>(), It.IsAny<CancellationToken>()))

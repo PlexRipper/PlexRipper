@@ -116,7 +116,7 @@ public partial class FakePlexApiData
         .RuleFor(l => l.VideoFrameRate, _ => "24p")
         .RuleFor(l => l.AudioProfile, _ => "dts")
         .RuleFor(l => l.VideoProfile, _ => "high")
-        .RuleFor(l => l.HasVoiceActivity, f => f.Random.Bool())
+        .RuleFor(l => l.HasVoiceActivity, f => f.PickRandom<HasVoiceActivity>())
         .RuleFor(l => l.Container, f => f.Lorem.Word())
         .RuleFor(l => l.VideoResolution, f => f.Lorem.Word())
         .RuleFor(

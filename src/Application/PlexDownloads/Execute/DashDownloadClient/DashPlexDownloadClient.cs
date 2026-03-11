@@ -3,10 +3,12 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 using Reaparr.External.Contracts;
 using Reaparr.Settings.Contracts;
+using Reaparr.SignalR.Contracts;
 
 namespace Reaparr.Application;
 
@@ -24,10 +26,9 @@ public class DashPlexDownloadClient : IPlexDownloadClient
     private readonly IDownloadTaskUpdateDispatcher _downloadTaskUpdateDispatcher;
     private readonly IServerSettingsModule _serverSettings;
     private readonly IDirectory _directory;
+    private readonly INotificationHubService _notificationHubService;
 
     private DownloadTaskKey? _downloadTaskKey;
-    private string _filename = string.Empty;
-
     private readonly CompositeDisposable _subscriptions = new();
     private readonly Subject<Unit> _destroy = new();
     private bool _disposed;
@@ -39,7 +40,8 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         ICommandExecutor commandExecutor,
         IDownloadTaskUpdateDispatcher downloadTaskUpdateDispatcher,
         IServerSettingsModule serverSettings,
-        IDirectory directory
+        IDirectory directory,
+        INotificationHubService notificationHubService
     )
     {
         _log = log.ForContext<DashPlexDownloadClient>();
@@ -48,6 +50,7 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         _downloadTaskUpdateDispatcher = downloadTaskUpdateDispatcher;
         _serverSettings = serverSettings;
         _directory = directory;
+        _notificationHubService = notificationHubService;
         _dbContext = dbContextFactory.Create();
     }
 
@@ -62,8 +65,6 @@ public class DashPlexDownloadClient : IPlexDownloadClient
                 .EntityNotFound(nameof(DownloadTaskGeneric), downloadTaskKey.ToString())
                 .LogWarning();
         }
-
-        _filename = downloadTask.FileName;
 
         // Get transcoding download url
         var downloadUrlResult = await _commandExecutor.Send(
@@ -98,11 +99,24 @@ public class DashPlexDownloadClient : IPlexDownloadClient
             return createDirectoryResult.ToResult();
         }
 
+        var outputQuality = downloadUrlResult.Value.TranscodedQuality;
+        var normalizedFileName = DashOutputFileNameCleaner.NormalizeForDashOutput(downloadTask.FileName, outputQuality);
+        if (!string.Equals(downloadTask.FileName, normalizedFileName, StringComparison.Ordinal))
+        {
+            await PersistDashOutputFileName(downloadTask, normalizedFileName, cancellationToken);
+            downloadTask.FileName = normalizedFileName;
+            // Ensure the new filename is propagated to the front-end
+            await _notificationHubService.SendRefreshNotificationAsync(
+                RefreshDataType.DownloadTasks,
+                cancellationToken
+            );
+        }
+
         SetupDownloadListeners(downloadTaskKey);
 
         // Execute dash stream download
         await SetDownloadStatusAsync(DownloadStatus.Downloading);
-        var options = await CreateDashOptions(downloadTask, downloadUrlResult.Value, cancellationToken);
+        var options = await CreateDashOptions(downloadTask, downloadUrlResult.Value.DownloadUrl, cancellationToken);
         await using var cancellationRegistration = cancellationToken.Register(() =>
         {
             _ = _dashWrapper.StopAsync();
@@ -142,7 +156,7 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         return new DashMpdCliOptions
         {
             MpdUrl = downloadUrl,
-            Output = downloadTask.DownloadFilePath,
+            Output = downloadTask.DownloadFilePath.RemoveReapTempSuffix(),
             WorkingDirectory = downloadTask.DownloadDirectory,
             Quiet = false,
             Quality = "best",
@@ -153,6 +167,41 @@ public class DashPlexDownloadClient : IPlexDownloadClient
                 ["TMP"] = downloadTask.DownloadDirectory,
             },
         };
+    }
+
+    private async Task PersistDashOutputFileName(
+        DownloadTaskFileBase downloadTask,
+        string normalizedFileName,
+        CancellationToken cancellationToken
+    )
+    {
+        switch (downloadTask.DownloadTaskType)
+        {
+            case DownloadTaskType.MovieData:
+            case DownloadTaskType.MoviePart:
+                await _dbContext
+                    .DownloadTaskMovieFile.Where(x => x.Id == downloadTask.Id)
+                    .ExecuteUpdateAsync(
+                        patch =>
+                            patch
+                                .SetProperty(x => x.Title, normalizedFileName)
+                                .SetProperty(x => x.FileName, normalizedFileName),
+                        cancellationToken
+                    );
+                break;
+            case DownloadTaskType.EpisodeData:
+            case DownloadTaskType.EpisodePart:
+                await _dbContext
+                    .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == downloadTask.Id)
+                    .ExecuteUpdateAsync(
+                        patch =>
+                            patch
+                                .SetProperty(x => x.Title, normalizedFileName)
+                                .SetProperty(x => x.FileName, normalizedFileName),
+                        cancellationToken
+                    );
+                break;
+        }
     }
 
     private void SetupDownloadListeners(DownloadTaskKey key)

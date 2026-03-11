@@ -30,11 +30,20 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
         );
     }
 
-    private void SetupCommandExecutor(Result<string>? getUrlResult = null)
+    private void SetupCommandExecutor(Result<DashDownloadUrlResult>? getUrlResult = null)
     {
         Mock.Mock<ICommandExecutor>()
-            .Setup(m => m.Send(It.IsAny<ICommand<Result<string>>>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(getUrlResult ?? Result.Ok("https://plex.example/start.mpd"));
+            .Setup(m => m.Send(It.IsAny<ICommand<Result<DashDownloadUrlResult>>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(
+                getUrlResult
+                    ?? Result.Ok(
+                        new DashDownloadUrlResult
+                        {
+                            DownloadUrl = "https://plex.example/start.mpd",
+                            TranscodedQuality = VideoQuality.FullHD,
+                        }
+                    )
+            );
 
         Mock.Mock<ICommandExecutor>()
             .Setup(m => m.Send(It.IsAny<ICommand<Result>>(), It.IsAny<CancellationToken>()))
@@ -222,7 +231,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
 
         var downloadTask = await IDbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
 
-        SetupCommandExecutor(Result.Fail<string>("Could not get DASH URL"));
+        SetupCommandExecutor(Result.Fail<DashDownloadUrlResult>("Could not get DASH URL"));
 
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
@@ -622,7 +631,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
     }
 
     [Fact]
-    public async Task ShouldCreateDashOutputUsingTempDownloadPath()
+    public async Task ShouldCreateDashOutputUsingMkvFilePathAndNormalizedFileName()
     {
         await SetupDatabase(
             12006,
@@ -687,8 +696,13 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
         result.IsSuccess.ShouldBeTrue();
         capturedOptions.ShouldNotBeNull();
 
-        var expectedFinalPath = Path.Combine(downloadTask.DownloadDirectory, downloadTask.FileName);
-        capturedOptions!.Output.ShouldBe(downloadTask.DownloadFilePath);
-        capturedOptions.Output.ShouldNotBe(expectedFinalPath);
+        var expectedNormalizedName = DashOutputFileNameCleaner.NormalizeForDashOutput(
+            downloadTask.FileName,
+            VideoQuality.FullHD
+        );
+        var expectedFinalPath = Path.Combine(downloadTask.DownloadDirectory, expectedNormalizedName);
+
+        capturedOptions!.Output.ShouldBe(expectedFinalPath);
+        capturedOptions.Output.EndsWith(".mkv", StringComparison.OrdinalIgnoreCase).ShouldBeTrue();
     }
 }

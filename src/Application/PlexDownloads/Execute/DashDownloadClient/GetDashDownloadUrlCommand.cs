@@ -1,16 +1,23 @@
-using System.Xml.Linq;
 using FastEndpoints;
 using FluentValidation;
 using Flurl;
 using Reaparr.Data.Contracts;
+using Reaparr.PlexApi.Contracts;
 
 namespace Reaparr.Application;
 
-public record GetDashDownloadUrlCommand : ICommand<Result<string>>
+public record GetDashDownloadUrlCommand : ICommand<Result<DashDownloadUrlResult>>
 {
     public required DownloadTaskKey DownloadTaskKey { get; init; }
 
     public required string MetaDataPath { get; init; }
+}
+
+public record DashDownloadUrlResult
+{
+    public required string DownloadUrl { get; init; }
+
+    public VideoQuality TranscodedQuality { get; init; }
 }
 
 public class GetDashDownloadUrlCommandValidator : AbstractValidator<GetDashDownloadUrlCommand>
@@ -25,11 +32,12 @@ public class GetDashDownloadUrlCommandValidator : AbstractValidator<GetDashDownl
     }
 }
 
-public class GetDashDownloadUrlCommandHandler : ICommandHandler<GetDashDownloadUrlCommand, Result<string>>
+public class GetDashDownloadUrlCommandHandler
+    : ICommandHandler<GetDashDownloadUrlCommand, Result<DashDownloadUrlResult>>
 {
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
-    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly ICommandExecutor _commandExecutor;
 
     // Stable client identifier per app install (generate once, reuse forever)
     private static readonly string _clientIdentifier = GenerateClientId();
@@ -40,15 +48,15 @@ public class GetDashDownloadUrlCommandHandler : ICommandHandler<GetDashDownloadU
     public GetDashDownloadUrlCommandHandler(
         ILogger logger,
         IReaparrDbContext dbContext,
-        IHttpClientFactory httpClientFactory
+        ICommandExecutor commandExecutor
     )
     {
         _log = logger.ForContext<GetDashDownloadUrlCommandHandler>();
         _dbContext = dbContext;
-        _httpClientFactory = httpClientFactory;
+        _commandExecutor = commandExecutor;
     }
 
-    public async Task<Result<string>> ExecuteAsync(
+    public async Task<Result<DashDownloadUrlResult>> ExecuteAsync(
         GetDashDownloadUrlCommand command,
         CancellationToken cancellationToken
     )
@@ -77,104 +85,63 @@ public class GetDashDownloadUrlCommandHandler : ICommandHandler<GetDashDownloadU
         var playbackSessionId = Guid.NewGuid().ToString();
         var playbackId = Guid.NewGuid().ToString();
 
-        // Step 1: Call decision endpoint to initialize the transcoder session
-        var decisionUrl = BuildQueryParams(
-                plexServerConnection.Url.AppendPathSegment("video/:/transcode/universal/decision"),
+        var decisionResult = await _commandExecutor.Send(
+            new GetDashTranscodeDecisionCommand(
+                plexServerId,
                 command.MetaDataPath,
+                _clientIdentifier,
                 session,
                 sessionIdentifier,
                 playbackSessionId,
-                playbackId,
-                token
-            )
-            .ToString();
+                playbackId
+            ),
+            cancellationToken
+        );
 
-        _log.Here().Debug("Calling decision endpoint: {DecisionUrl}", decisionUrl);
+        if (decisionResult.IsFailed)
+            return decisionResult.ToResult().LogError();
 
-        using var httpClient = _httpClientFactory.CreateClient();
-        using var response = await httpClient.GetAsync(decisionUrl, cancellationToken);
+        var decisionSummary = decisionResult.Value;
 
-        if (!response.IsSuccessStatusCode)
+        _log.Here()
+            .Information(
+                "Decision returned: generalCode={GeneralCode}, generalText={GeneralText}, "
+                    + "transcodeCode={TranscodeCode}, transcodeText={TranscodeText}, "
+                    + "session={Session}, sessionId={SessionId}",
+                decisionSummary.GeneralDecisionCode,
+                decisionSummary.GeneralDecisionText,
+                decisionSummary.TranscodeDecisionCode,
+                decisionSummary.TranscodeDecisionText,
+                session,
+                sessionIdentifier
+            );
+
+        _log.Here()
+            .Information(
+                "Stream decisions - Video: {VideoDecision}, Audio: {AudioDecision}, TranscodedQuality: {TranscodedQuality}",
+                decisionSummary.VideoDecision,
+                decisionSummary.AudioDecision,
+                decisionSummary.TranscodedQuality
+            );
+
+        if (!string.Equals(decisionSummary.VideoDecision, "copy", StringComparison.OrdinalIgnoreCase))
         {
-            return Result
-                .Fail($"Decision endpoint returned {(int)response.StatusCode}: {response.ReasonPhrase}")
-                .LogError();
+            _log.Here()
+                .Warning(
+                    "Video is being transcoded instead of direct streamed. "
+                        + "Quality may be degraded. Decision: {Decision}",
+                    decisionSummary.VideoDecision
+                );
         }
 
-        var decisionBody = await response.Content.ReadAsStringAsync(cancellationToken);
-
-        _log.Here().Debug("Decision endpoint response: {DecisionBody}", decisionBody);
-
-        // Validate decision response contains expected structure
-        try
+        if (!string.Equals(decisionSummary.AudioDecision, "copy", StringComparison.OrdinalIgnoreCase))
         {
-            var doc = XDocument.Parse(decisionBody);
-            var mediaContainer = doc.Root;
-            if (mediaContainer?.Name != "MediaContainer")
-            {
-                return Result.Fail("Invalid decision response: missing MediaContainer").LogError();
-            }
-
-            // Log the decision code for debugging
-            var generalDecisionCode = mediaContainer.Attribute("generalDecisionCode")?.Value ?? "unknown";
-            var generalDecisionText = mediaContainer.Attribute("generalDecisionText")?.Value ?? "unknown";
-            var transcodeDecisionCode = mediaContainer.Attribute("transcodeDecisionCode")?.Value ?? "unknown";
-            var transcodeDecisionText = mediaContainer.Attribute("transcodeDecisionText")?.Value ?? "unknown";
-
             _log.Here()
-                .Information(
-                    "Decision returned: generalCode={GeneralCode}, generalText={GeneralText}, "
-                        + "transcodeCode={TranscodeCode}, transcodeText={TranscodeText}, "
-                        + "session={Session}, sessionId={SessionId}",
-                    generalDecisionCode,
-                    generalDecisionText,
-                    transcodeDecisionCode,
-                    transcodeDecisionText,
-                    session,
-                    sessionIdentifier
+                .Warning(
+                    "Audio is being transcoded instead of direct streamed. "
+                        + "Quality may be degraded. Decision: {Decision}",
+                    decisionSummary.AudioDecision
                 );
-
-            // Verify we got direct stream (copy) for source quality
-            var video = mediaContainer
-                .Descendants("Stream")
-                .FirstOrDefault(s => s.Attribute("streamType")?.Value == "1");
-            var audio = mediaContainer
-                .Descendants("Stream")
-                .FirstOrDefault(s => s.Attribute("streamType")?.Value == "2");
-
-            var videoDecision = video?.Attribute("decision")?.Value ?? "unknown";
-            var audioDecision = audio?.Attribute("decision")?.Value ?? "unknown";
-
-            _log.Here()
-                .Information(
-                    "Stream decisions - Video: {VideoDecision}, Audio: {AudioDecision}",
-                    videoDecision,
-                    audioDecision
-                );
-
-            if (videoDecision != "copy")
-            {
-                _log.Here()
-                    .Warning(
-                        "Video is being transcoded instead of direct streamed. "
-                            + "Quality may be degraded. Decision: {Decision}",
-                        videoDecision
-                    );
-            }
-
-            if (audioDecision != "copy")
-            {
-                _log.Here()
-                    .Warning(
-                        "Audio is being transcoded instead of direct streamed. "
-                            + "Quality may be degraded. Decision: {Decision}",
-                        audioDecision
-                    );
-            }
-        }
-        catch (Exception ex)
-        {
-            return Result.Fail(new ExceptionalError("Failed to parse decision response", ex)).LogError();
         }
 
         // Step 2: Build start.mpd URL with byte-identical parameters
@@ -189,7 +156,13 @@ public class GetDashDownloadUrlCommandHandler : ICommandHandler<GetDashDownloadU
             )
             .ToString();
 
-        return Result.Ok(downloadUrl);
+        return Result.Ok(
+            new DashDownloadUrlResult
+            {
+                DownloadUrl = downloadUrl,
+                TranscodedQuality = decisionSummary.TranscodedQuality,
+            }
+        );
     }
 
     /// <summary>

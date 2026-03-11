@@ -368,7 +368,6 @@ public static partial class FakeData
             .RuleFor(x => x.VideoFrameRate, f => f.PickRandom("24p", "25p", "30p", "50p", "60p"))
             .RuleFor(x => x.VideoProfile, f => f.PickRandom("baseline", "main", "high", "high 10"))
             .RuleFor(x => x.AudioProfile, f => f.PickRandom("dts", "dts-hd", "dolby", "dolby digital"))
-            .RuleFor(x => x.HasVoiceActivity, f => f.Random.Bool())
             .RuleFor(x => x.Parts, _ => []);
 
     public static Faker<LibraryMediaItemMediaDTO> GetLibraryMediaItemMediaDTO(

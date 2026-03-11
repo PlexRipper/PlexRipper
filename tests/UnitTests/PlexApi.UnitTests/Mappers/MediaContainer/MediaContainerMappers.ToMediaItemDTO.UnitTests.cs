@@ -68,7 +68,7 @@ namespace Reaparr.PlexApi.UnitTests
                         VideoFrameRate = "24p",
                         VideoProfile = "high",
                         AudioProfile = "lc",
-                        HasVoiceActivity = HasVoiceActivity.One,
+                        HasVoiceActivity = HasVoiceActivity.CreateBoolean(true),
                         Part =
                         [
                             new Part
@@ -174,7 +174,6 @@ namespace Reaparr.PlexApi.UnitTests
             media.Bitrate.ShouldBe(sourceMedia.Bitrate!.Value);
             media.Width.ShouldBe(sourceMedia.Width!.Value);
             media.Height.ShouldBe(sourceMedia.Height!.Value);
-            media.HasVoiceActivity.ShouldBe(true);
 
             // Parts
             media.Parts.Count.ShouldBe(1);

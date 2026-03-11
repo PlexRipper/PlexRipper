@@ -93,7 +93,6 @@ public static class MediaContainerMappers
             VideoFrameRate = media.VideoFrameRate ?? string.Empty,
             VideoProfile = media.VideoProfile ?? string.Empty,
             AudioProfile = media.AudioProfile ?? string.Empty,
-            HasVoiceActivity = media.HasVoiceActivity == HasVoiceActivity.One,
             Parts = media.Part?.Select(x => x.ToItemPartDTO()).ToList() ?? [],
             OptimizedForStreaming = media.OptimizedForStreaming ?? false,
         };

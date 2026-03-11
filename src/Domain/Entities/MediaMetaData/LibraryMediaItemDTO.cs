@@ -224,11 +224,6 @@ public record LibraryMediaItemMediaDTO
     public required string AudioProfile { get; init; }
 
     /// <summary>
-    /// Indicates whether voice activity is detected.
-    /// </summary>
-    public required bool HasVoiceActivity { get; init; }
-
-    /// <summary>
     /// Indicates whether this media file is optimized for direct streaming playback,
     /// meaning it is encoded and packaged to minimize buffering and avoid transcoding
     /// (for example, using streaming-friendly codecs, bitrate, and container settings).

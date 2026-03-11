@@ -151,6 +151,7 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
         downloadTask.DataTotal = 100_000_000;
         downloadTask.FileDataTransferred = downloadTask.DataTotal;
         downloadTask.CurrentFileTransferBytesOffset = downloadTask.DataTotal;
+        downloadTask.Percentage = 100;
         downloadTask.DownloadStatus = DownloadStatus.MoveFinished;
         await dbContext.SaveChangesAsync(CancellationToken);
 

@@ -25,6 +25,10 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
     {
         var dirMock = directoryMock ?? new Mock<IDirectory>();
         dirMock.Setup(x => x.CreateDirectory(It.IsAny<string>()));
+        Mock.Mock<INotificationHubService>()
+            .Setup(x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
 
         return Mock.Create<DashPlexDownloadClient>(
             new NamedParameter("dashWrapper", dashWrapperMock.Object),

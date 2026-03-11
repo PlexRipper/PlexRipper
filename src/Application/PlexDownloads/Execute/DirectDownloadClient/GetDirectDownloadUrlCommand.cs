@@ -66,7 +66,7 @@ public class GetDirectDownloadUrlCommandHandler : ICommandHandler<GetDirectDownl
         if (fallbackProbeResult.IsFailed)
             return fallbackProbeResult.ToResult();
 
-        if (initialProbeResult.Value.IsSuccessStatusCode)
+        if (fallbackProbeResult.Value.IsSuccessStatusCode)
             return Result.Ok(downloadUrlWithFlag);
 
         return Result

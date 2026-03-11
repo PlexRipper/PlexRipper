@@ -116,7 +116,6 @@ public partial class FakePlexApiData
         .RuleFor(l => l.VideoFrameRate, _ => "24p")
         .RuleFor(l => l.AudioProfile, _ => "dts")
         .RuleFor(l => l.VideoProfile, _ => "high")
-        .RuleFor(l => l.HasVoiceActivity, f => f.PickRandom<HasVoiceActivity>())
         .RuleFor(l => l.Container, f => f.Lorem.Word())
         .RuleFor(l => l.VideoResolution, f => f.Lorem.Word())
         .RuleFor(
@@ -126,6 +125,7 @@ public partial class FakePlexApiData
         )
         .RuleFor(l => l.Has64bitOffsets, f => f.Random.Bool())
         .RuleFor(l => l.Part, _ => []) // Generated in FinishWith
+        .Ignore(l => l.HasVoiceActivity)
         .Ignore(x => x.AdditionalProperties);
 
     private static readonly Faker<Part> _getMediaMetaDataPartFaker = new Faker<Part>()

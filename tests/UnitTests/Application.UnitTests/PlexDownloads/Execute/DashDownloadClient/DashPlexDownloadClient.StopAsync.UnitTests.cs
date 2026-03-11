@@ -7,6 +7,7 @@ using Reaparr.Data.Contracts;
 using Reaparr.External.Contracts;
 using Reaparr.PlexApi.Contracts;
 using Reaparr.Settings.Contracts;
+using Reaparr.SignalR.Contracts;
 using DomainDownloadStatus = Reaparr.Domain.DownloadStatus;
 
 namespace Reaparr.Application.UnitTests;
@@ -20,6 +21,10 @@ public class DashPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DashPlexDow
     {
         var directoryMock = new Mock<IDirectory>();
         directoryMock.Setup(x => x.CreateDirectory(It.IsAny<string>()));
+        Mock.Mock<INotificationHubService>()
+            .Setup(x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
 
         return Mock.Create<DashPlexDownloadClient>(
             new NamedParameter("dashWrapper", dashWrapperMock.Object),

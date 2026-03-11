@@ -33,7 +33,15 @@ public class GetTranscodeUrlCommandHandler : ICommandHandler<GetTranscodeUrlComm
         + "+append-transcode-target-codec(type=videoProfile&context=streaming"
         + "&videoCodec=h264,hevc,vp9,av1,mpeg2video,mpeg4,vc1"
         + "&audioCodec=aac,ac3,eac3,dts,dca,mp3,flac,opus,vorbis,truehd"
+        + "&protocol=dash)"
+        + "+append-transcode-target-codec(type=videoProfile&context=streaming"
+        + "&videoCodec=h264,hevc,vp9,av1,mpeg2video,mpeg4,vc1"
+        + "&audioCodec=aac,ac3,eac3,dts,dca,mp3,flac,opus,vorbis,truehd"
         + "&protocol=http)"
+        + "+append-transcode-target-codec(type=videoProfile&context=streaming"
+        + "&videoCodec=h264,hevc,vp9,av1,mpeg2video,mpeg4,vc1"
+        + "&audioCodec=aac,ac3,eac3,dts,dca,mp3,flac,opus,vorbis,truehd"
+        + "&protocol=hls)"
         + "+add-limitation(scope=videoCodec&scopeName=*&type=upperBound&name=video.bitDepth&value=12&isRequired=false)"
         + "+add-limitation(scope=videoCodec&scopeName=*&type=upperBound&name=video.width&value=3840&isRequired=false)"
         + "+add-limitation(scope=videoCodec&scopeName=*&type=upperBound&name=video.height&value=2160&isRequired=false)"
@@ -78,19 +86,19 @@ public class GetTranscodeUrlCommandHandler : ICommandHandler<GetTranscodeUrlComm
         {
             Accepts = Accepts.ApplicationJson,
             ClientIdentifier = _clientIdentifier,
-            Product = "Plex for Roku",
-            Version = "7.6.0",
-            Platform = "Roku",
-            PlatformVersion = "14.0.0",
-            Device = "Roku Ultra",
-            Model = "4802RW",
-            DeviceName = "Roku Ultra",
+            Product = "Plex Web",
+            Version = "4.158.0",
+            Platform = "Chrome",
+            PlatformVersion = "130.0",
+            Device = "Linux",
+            Model = "standalone",
+            DeviceName = "Chrome",
             TranscodeType = TranscodeType.Video,
             HasMDE = BoolInt.True,
             Path = command.MetaDataPath,
             MediaIndex = 0,
             PartIndex = 0,
-            Protocol = LukeHagar.PlexAPI.SDK.Models.Requests.Protocol.Http,
+            Protocol = LukeHagar.PlexAPI.SDK.Models.Requests.Protocol.Dash, // Also update protocol= in CLIENT_PROFILE_EXTRA
             DirectPlay = BoolInt.True,
             DirectStream = BoolInt.True,
             DirectStreamAudio = BoolInt.True,

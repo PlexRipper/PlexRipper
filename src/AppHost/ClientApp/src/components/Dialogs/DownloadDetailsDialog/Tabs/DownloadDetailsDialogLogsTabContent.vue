@@ -306,7 +306,7 @@ function deleteLogs() {
 			set(logs, []);
 			set(highestSeenId, undefined);
 			emit('logs-deleted');
-			showSuccessNotification(t('components.download-details-dialog.logs.deleted'));
+			showSuccessNotification(t('components.download-details-dialog.logs.deleted'), 5000);
 			set(logsLoading, false);
 			logRefreshTimer.resume();
 		}),

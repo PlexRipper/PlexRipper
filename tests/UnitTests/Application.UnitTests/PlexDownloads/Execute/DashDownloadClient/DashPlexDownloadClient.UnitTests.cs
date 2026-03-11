@@ -6,6 +6,7 @@ using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Data.Contracts;
 using Reaparr.External.Contracts;
+using Reaparr.PlexApi.Contracts;
 using Reaparr.Settings.Contracts;
 using DomainDownloadStatus = Reaparr.Domain.DownloadStatus;
 
@@ -30,14 +31,14 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
         );
     }
 
-    private void SetupCommandExecutor(Result<DashDownloadUrlResult>? getUrlResult = null)
+    private void SetupCommandExecutor(Result<GetTranscodeUrlResult>? getUrlResult = null)
     {
         Mock.Mock<ICommandExecutor>()
-            .Setup(m => m.Send(It.IsAny<ICommand<Result<DashDownloadUrlResult>>>(), It.IsAny<CancellationToken>()))
+            .Setup(m => m.Send(It.IsAny<ICommand<Result<GetTranscodeUrlResult>>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(
                 getUrlResult
                     ?? Result.Ok(
-                        new DashDownloadUrlResult
+                        new GetTranscodeUrlResult
                         {
                             DownloadUrl = "https://plex.example/start.mpd",
                             TranscodedQuality = VideoQuality.FullHD,
@@ -231,7 +232,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
 
         var downloadTask = await IDbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
 
-        SetupCommandExecutor(Result.Fail<DashDownloadUrlResult>("Could not get DASH URL"));
+        SetupCommandExecutor(Result.Fail<GetTranscodeUrlResult>("Could not get DASH URL"));
 
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>

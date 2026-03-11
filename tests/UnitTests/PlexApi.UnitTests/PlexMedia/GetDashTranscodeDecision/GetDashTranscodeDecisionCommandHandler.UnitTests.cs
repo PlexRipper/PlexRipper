@@ -15,12 +15,13 @@ public class GetDashTranscodeDecisionCommandHandlerUnitTests : BaseUnitTest<GetD
     private static GetDashTranscodeDecisionCommand CreateCommand(int plexServerId) =>
         new(
             plexServerId,
-            "/library/metadata/56828",
-            "1x6jbxuls57ip8sg6pr5sxsn",
-            "vyoe41m5hrmlotwc6zyocadz",
-            "yzjqymlmh5ssjfm51hr881pe",
-            "65469a78-734f-4f30-8294-150d06de5073",
-            "fcac59e3-6c13-44a1-8d2c-e804f84995ef"
+            new MakeDecisionRequest
+            {
+                Path = "/library/metadata/56828",
+                ClientIdentifier = "1x6jbxuls57ip8sg6pr5sxsn",
+                TranscodeSessionId = "vyoe41m5hrmlotwc6zyocadz",
+                XPlexSessionIdentifier = "yzjqymlmh5ssjfm51hr881pe",
+            }
         );
 
     [Fact]

@@ -1,16 +1,10 @@
 using FastEndpoints;
+using LukeHagar.PlexAPI.SDK.Models.Requests;
 
 namespace Reaparr.PlexApi.Contracts;
 
-public record GetDashTranscodeDecisionCommand(
-    int PlexServerId,
-    string MetaDataPath,
-    string ClientIdentifier,
-    string Session,
-    string SessionIdentifier,
-    string PlaybackSessionId,
-    string PlaybackId
-) : ICommand<Result<GetDashTranscodeDecisionResult>>;
+public record GetDashTranscodeDecisionCommand(int PlexServerId, MakeDecisionRequest DecisionRequest)
+    : ICommand<Result<GetDashTranscodeDecisionResult>>;
 
 public record GetDashTranscodeDecisionResult
 {

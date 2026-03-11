@@ -4,6 +4,7 @@ using Autofac;
 using FastEndpoints;
 using Reaparr.Data.Contracts;
 using Reaparr.External.Contracts;
+using Reaparr.PlexApi.Contracts;
 
 namespace Reaparr.Application.UnitTests;
 
@@ -26,10 +27,10 @@ public class DashPlexDownloadClientDisposeAsyncUnitTests : BaseUnitTest<DashPlex
         dashWrapperMock.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask);
 
         Mock.Mock<ICommandExecutor>()
-            .Setup(m => m.Send(It.IsAny<ICommand<Result<DashDownloadUrlResult>>>(), It.IsAny<CancellationToken>()))
+            .Setup(m => m.Send(It.IsAny<ICommand<Result<GetTranscodeUrlResult>>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(
                 Result.Ok(
-                    new DashDownloadUrlResult
+                    new GetTranscodeUrlResult
                     {
                         DownloadUrl = "https://plex.example/start.mpd",
                         TranscodedQuality = VideoQuality.FullHD,

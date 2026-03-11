@@ -5,6 +5,7 @@ using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Data.Contracts;
 using Reaparr.External.Contracts;
+using Reaparr.PlexApi.Contracts;
 using Reaparr.Settings.Contracts;
 using DomainDownloadStatus = Reaparr.Domain.DownloadStatus;
 
@@ -29,10 +30,10 @@ public class DashPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DashPlexDow
     private void SetupCommandExecutor()
     {
         Mock.Mock<ICommandExecutor>()
-            .Setup(m => m.Send(It.IsAny<ICommand<Result<DashDownloadUrlResult>>>(), It.IsAny<CancellationToken>()))
+            .Setup(m => m.Send(It.IsAny<ICommand<Result<GetTranscodeUrlResult>>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(
                 Result.Ok(
-                    new DashDownloadUrlResult
+                    new GetTranscodeUrlResult
                     {
                         DownloadUrl = "https://plex.example/start.mpd",
                         TranscodedQuality = VideoQuality.FullHD,

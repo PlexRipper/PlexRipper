@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 using Reaparr.External.Contracts;
+using Reaparr.PlexApi.Contracts;
 using Reaparr.Settings.Contracts;
 using Reaparr.SignalR.Contracts;
 
@@ -68,7 +69,7 @@ public class DashPlexDownloadClient : IPlexDownloadClient
 
         // Get transcoding download url
         var downloadUrlResult = await _commandExecutor.Send(
-            new GetDashDownloadUrlCommand
+            new GetTranscodeUrlCommand
             {
                 DownloadTaskKey = downloadTaskKey,
                 MetaDataPath = $"/library/metadata/{downloadTask.PlexApiRatingKey}",

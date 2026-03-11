@@ -13,12 +13,12 @@ public class GetDashTranscodeDecisionCommandValidator : AbstractValidator<GetDas
     public GetDashTranscodeDecisionCommandValidator()
     {
         RuleFor(x => x.PlexServerId).GreaterThan(0);
-        RuleFor(x => x.MetaDataPath).NotEmpty();
-        RuleFor(x => x.MetaDataPath).Must(path => path.Contains("/library/metadata/"));
-        RuleFor(x => x.Session).NotEmpty();
-        RuleFor(x => x.SessionIdentifier).NotEmpty();
-        RuleFor(x => x.PlaybackSessionId).NotEmpty();
-        RuleFor(x => x.PlaybackId).NotEmpty();
+        RuleFor(x => x.DecisionRequest).NotNull();
+        RuleFor(x => x.DecisionRequest.Path).NotEmpty();
+        RuleFor(x => x.DecisionRequest.Path).Must(path => path?.Contains("/library/metadata/") == true);
+        RuleFor(x => x.DecisionRequest.TranscodeSessionId).NotEmpty();
+        RuleFor(x => x.DecisionRequest.XPlexSessionIdentifier).NotEmpty();
+        RuleFor(x => x.DecisionRequest.ClientIdentifier).NotEmpty();
     }
 }
 
@@ -28,9 +28,6 @@ public class GetDashTranscodeDecisionCommandHandler
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly IPlexApiClientFactory _plexApiClientFactory;
-
-    private const string ClientProfileExtra =
-        "append-transcode-target-codec(type=videoProfile&context=streaming&videoCodec=h264%2Chevc&audioCodec=aac&protocol=dash)";
 
     public GetDashTranscodeDecisionCommandHandler(
         ILogger log,
@@ -66,42 +63,13 @@ public class GetDashTranscodeDecisionCommandHandler
             }
         );
 
-        var decisionRequest = new MakeDecisionRequest
-        {
-            Accepts = Accepts.ApplicationJson,
-            ClientIdentifier = command.ClientIdentifier,
-            Product = "Plex Web",
-            Version = "4.158.0",
-            Platform = "Firefox",
-            PlatformVersion = "147.0",
-            Device = "Linux",
-            Model = "standalone",
-            DeviceName = "Firefox",
-            TranscodeType = TranscodeType.Video,
-            HasMDE = BoolInt.True,
-            Path = command.MetaDataPath,
-            MediaIndex = 0,
-            PartIndex = 0,
-            Protocol = LukeHagar.PlexAPI.SDK.Models.Requests.Protocol.Dash,
-            DirectPlay = BoolInt.False,
-            DirectStream = BoolInt.True,
-            DirectStreamAudio = BoolInt.True,
-            SubtitleSize = 100,
-            AudioBoost = 100,
-            Location = LukeHagar.PlexAPI.SDK.Models.Requests.Location.Lan,
-            AutoAdjustQuality = BoolInt.False,
-            AutoAdjustSubtitle = BoolInt.True,
-            PeakBitrate = 200000,
-            MediaBufferSize = 102400,
-            Subtitles = LukeHagar.PlexAPI.SDK.Models.Requests.Subtitles.None,
-            VideoResolution = "3840x2160",
-            VideoQuality = 100,
-            XPlexClientProfileExtra = ClientProfileExtra,
-            XPlexSessionIdentifier = command.SessionIdentifier,
-            TranscodeSessionId = command.Session,
-        };
+        var decisionRequest = command.DecisionRequest;
 
-        var debugDecisionUrl = BuildDecisionDebugUrl(connectionResult.Value.Url, decisionRequest, tokenResult.Value);
+        var debugDecisionUrl = new Url(connectionResult.Value.Url)
+            .AppendPathSegment("video/:/transcode/universal/decision")
+            .ApplyDashTranscodeQueryParams(decisionRequest, tokenResult.Value)
+            .ToString();
+
         _log.Here().Information("Requesting Plex transcode decision URL: {Url}", debugDecisionUrl);
 
         var decisionResponse = await client.Transcoder.MakeDecisionAsync(decisionRequest).ToResponse();
@@ -113,6 +81,7 @@ public class GetDashTranscodeDecisionCommandHandler
         if (mediaContainer is null)
             return Result.Fail("Invalid decision response: missing MediaContainer").LogError();
 
+        _log.Here().Debug("{@MediaContainer}", mediaContainer.ToString());
         var summary = new GetDashTranscodeDecisionResult
         {
             GeneralDecisionCode = mediaContainer.GeneralDecisionCode?.ToString() ?? "unknown",
@@ -273,39 +242,4 @@ public class GetDashTranscodeDecisionCommandHandler
 
     private static VideoQuality GetHighestVideoQuality(VideoQuality current, VideoQuality candidate) =>
         (VideoQuality)Math.Max((int)current, (int)candidate);
-
-    private static string BuildDecisionDebugUrl(string connectionUrl, MakeDecisionRequest request, string token) =>
-        new Url(connectionUrl)
-            .AppendPathSegment("video/:/transcode/universal/decision")
-            .SetQueryParam("hasMDE", 1)
-            .SetQueryParam("path", request.Path)
-            .SetQueryParam("mediaIndex", request.MediaIndex)
-            .SetQueryParam("partIndex", request.PartIndex)
-            .SetQueryParam("protocol", "dash")
-            .SetQueryParam("directPlay", 0)
-            .SetQueryParam("directStream", 1)
-            .SetQueryParam("directStreamAudio", 1)
-            .SetQueryParam("subtitleSize", request.SubtitleSize)
-            .SetQueryParam("audioBoost", request.AudioBoost)
-            .SetQueryParam("location", "lan")
-            .SetQueryParam("autoAdjustQuality", 0)
-            .SetQueryParam("autoAdjustSubtitle", 1)
-            .SetQueryParam("maxVideoBitrate", request.PeakBitrate)
-            .SetQueryParam("mediaBufferSize", request.MediaBufferSize)
-            .SetQueryParam("session", request.TranscodeSessionId)
-            .SetQueryParam("subtitles", "none")
-            .SetQueryParam("videoResolution", request.VideoResolution)
-            .SetQueryParam("videoQuality", request.VideoQuality)
-            .SetQueryParam("X-Plex-Session-Identifier", request.XPlexSessionIdentifier)
-            .SetQueryParam("X-Plex-Client-Profile-Extra", request.XPlexClientProfileExtra)
-            .SetQueryParam("X-Plex-Product", request.Product)
-            .SetQueryParam("X-Plex-Version", request.Version)
-            .SetQueryParam("X-Plex-Client-Identifier", request.ClientIdentifier)
-            .SetQueryParam("X-Plex-Platform", request.Platform)
-            .SetQueryParam("X-Plex-Platform-Version", request.PlatformVersion)
-            .SetQueryParam("X-Plex-Model", request.Model)
-            .SetQueryParam("X-Plex-Device", request.Device)
-            .SetQueryParam("X-Plex-Device-Name", request.DeviceName)
-            .SetQueryParam("X-Plex-Token", token)
-            .ToString();
 }

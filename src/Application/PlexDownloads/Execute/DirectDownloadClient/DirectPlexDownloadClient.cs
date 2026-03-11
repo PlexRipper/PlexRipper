@@ -76,9 +76,8 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                 .LogWarning();
         }
 
-        var downloadUrlResult = await _dbContext.GetDownloadUrl(
-            downloadTask.PlexServerId,
-            downloadTask.FileLocationUrl,
+        var downloadUrlResult = await _commandExecutor.Send(
+            new GetDirectDownloadUrlCommand(downloadTask.PlexServerId, downloadTask.FileLocationUrl),
             cancellationToken
         );
 

@@ -68,13 +68,15 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
         return mock;
     }
 
-    private DirectPlexDownloadClient CreateSut(Mock<IDownloadService> downloadServiceMock) =>
-        Mock.Create<DirectPlexDownloadClient>(
+    private DirectPlexDownloadClient CreateSut(Mock<IDownloadService> downloadServiceMock)
+    {
+        return Mock.Create<DirectPlexDownloadClient>(
             new NamedParameter(
                 "downloadServiceFactory",
                 (Func<DownloadConfiguration, IDownloadService>)(_ => downloadServiceMock.Object)
             )
         );
+    }
 
     private void SetupCommandExecutor()
     {
@@ -86,6 +88,10 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
         Mock.Mock<ICommandExecutor>()
             .Setup(m => m.Send(It.IsAny<ICommand<Result>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok());
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(m => m.Send(It.IsAny<GetDirectDownloadUrlCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok("http://plex/file.mkv"));
     }
 
     private void SetupSpeedLimitMocks(string serverMachineIdentifier, int speedLimit = 1000)
@@ -236,6 +242,10 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
             .Callback<ICommand<Result<Stream>>, CancellationToken>(
                 (command, _) => createStreamCommand = command as CreateDownloadFileStreamCommand
             );
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(m => m.Send(It.IsAny<GetDirectDownloadUrlCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok("http://plex/file.mkv"));
 
         Mock.Mock<ICommandExecutor>()
             .Setup(m => m.Send(It.IsAny<ICommand<Result>>(), It.IsAny<CancellationToken>()))
@@ -450,6 +460,9 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
 
         SetupSpeedLimitMocks(serverMachineIdentifier);
         SetupCommandExecutor();
+        Mock.Mock<ICommandExecutor>()
+            .Setup(m => m.Send(It.IsAny<GetDirectDownloadUrlCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Fail<string>("No server connections"));
 
         // Act
         var sut = CreateSut(BuildSuccessDownloadServiceMock());
@@ -515,6 +528,10 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
             .Setup(m => m.Send(It.IsAny<ICommand<Result<Stream>>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Fail<Stream>("Disk full"))
             .Verifiable(Times.Once);
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(m => m.Send(It.IsAny<GetDirectDownloadUrlCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok("http://plex/file.mkv"));
 
         Mock.Mock<ICommandExecutor>()
             .Setup(m => m.Send(It.IsAny<ICommand<Result>>(), It.IsAny<CancellationToken>()))

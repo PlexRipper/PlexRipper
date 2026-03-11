@@ -8,6 +8,7 @@ using Reaparr.Data.Contracts;
 using Reaparr.External.Contracts;
 using Reaparr.PlexApi.Contracts;
 using Reaparr.Settings.Contracts;
+using Reaparr.SignalR.Contracts;
 using DomainDownloadStatus = Reaparr.Domain.DownloadStatus;
 
 namespace Reaparr.Application.UnitTests;
@@ -134,6 +135,9 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                 )
             )
             .Returns(Result.Ok());
+        Mock.Mock<INotificationHubService>()
+            .Setup(x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
 
         var sut = CreateSut(dashWrapperMock);
         var result = await sut.Start(downloadTask.ToKey(), CancellationToken);
@@ -326,6 +330,9 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                 )
             )
             .Returns(Result.Ok());
+        Mock.Mock<INotificationHubService>()
+            .Setup(x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
 
         var progressSubject = new Subject<DashDownloadProgress>();
         var outputSubject = new Subject<string>();
@@ -343,6 +350,100 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             {
                 completionSubject.OnNext(new DashDownloadCompletedEventArgs(false, 1, networkErrorResult));
                 return Task.FromResult(networkErrorResult);
+            });
+        dashWrapperMock.Setup(x => x.StopAsync()).ReturnsAsync(Result.Ok());
+        dashWrapperMock.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask);
+
+        var sut = CreateSut(dashWrapperMock);
+        var result = await sut.Start(downloadTask.ToKey(), CancellationToken);
+
+        result.IsFailed.ShouldBeTrue();
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        DomainDownloadStatus.ServerUnreachable,
+                        It.IsAny<Result>(),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Once()
+            );
+    }
+
+    [Fact]
+    public async Task ShouldSetServerUnreachableStatus_WhenDashCompletesWithNetworkTimeoutError()
+    {
+        await SetupDatabase(
+            12009,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var downloadTask = await dbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+        var serverMachineIdentifier = await dbContext.GetPlexServerMachineIdentifierById(
+            downloadTask.PlexServerId,
+            CancellationToken
+        );
+
+        SetupSpeedLimit(serverMachineIdentifier, 0);
+        SetupCommandExecutor();
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<Result>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnProgressUpdated(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadTaskProgress>(),
+                    It.IsAny<DirectDownloadSnapshot?>()
+                )
+            )
+            .Returns(Result.Ok());
+
+        var progressSubject = new Subject<DashDownloadProgress>();
+        var outputSubject = new Subject<string>();
+        var completionSubject = new Subject<DashDownloadCompletedEventArgs>();
+
+        var networkTimeoutResult = Result.Fail("Download failed: network timeout: fetching DASH manifest timed out");
+
+        Mock.Mock<INotificationHubService>()
+            .Setup(x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        var dashWrapperMock = new Mock<IDashMpdCliWrapper>();
+        dashWrapperMock.Setup(x => x.Progress).Returns(progressSubject.AsObservable());
+        dashWrapperMock.Setup(x => x.StandardOutput).Returns(outputSubject.AsObservable());
+        dashWrapperMock.Setup(x => x.DownloadCompleted).Returns(completionSubject.AsObservable());
+        dashWrapperMock
+            .Setup(x => x.StartAsync(It.IsAny<DashMpdCliOptions>()))
+            .Returns(() =>
+            {
+                completionSubject.OnNext(new DashDownloadCompletedEventArgs(false, 1, networkTimeoutResult));
+                return Task.FromResult(networkTimeoutResult);
             });
         dashWrapperMock.Setup(x => x.StopAsync()).ReturnsAsync(Result.Ok());
         dashWrapperMock.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask);

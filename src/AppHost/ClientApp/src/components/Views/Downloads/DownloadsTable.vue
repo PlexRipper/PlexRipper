@@ -142,7 +142,7 @@ const getDownloadTableColumns: QTreeViewTableHeader[] = [
 		label: t('components.downloads-table.columns.status'),
 		field: 'status',
 		align: 'right',
-		width: 120,
+		width: 200,
 	},
 	{
 		label: t('components.downloads-table.columns.data-received'),

@@ -47,6 +47,8 @@ public partial class FakePlexApiData
         .RuleFor(l => l.LeafCount, f => f.Random.Int(1))
         .RuleFor(l => l.ViewedLeafCount, f => f.Random.Int(1))
         .RuleFor(l => l.ChildCount, f => f.Random.Int(1, 10))
+        .RuleFor(l => l.SkipChildren, _ => SkipChildren.CreateBoolean(false))
+        .RuleFor(l => l.SkipParent, _ => SkipParent.CreateBoolean(false))
         .RuleFor(l => l.ViewCount, _ => default)
         .Ignore(l => l.Media) // Generated in FinishWith
         .Ignore(l => l.Role) // Generated in FinishWith
@@ -116,6 +118,7 @@ public partial class FakePlexApiData
         .RuleFor(l => l.VideoFrameRate, _ => "24p")
         .RuleFor(l => l.AudioProfile, _ => "dts")
         .RuleFor(l => l.VideoProfile, _ => "high")
+        .RuleFor(l => l.HasVoiceActivity, (f, _) => HasVoiceActivity.CreateBoolean(f.Random.Bool()))
         .RuleFor(l => l.Container, f => f.Lorem.Word())
         .RuleFor(l => l.VideoResolution, f => f.Lorem.Word())
         .RuleFor(
@@ -125,7 +128,6 @@ public partial class FakePlexApiData
         )
         .RuleFor(l => l.Has64bitOffsets, f => f.Random.Bool())
         .RuleFor(l => l.Part, _ => []) // Generated in FinishWith
-        .Ignore(l => l.HasVoiceActivity)
         .Ignore(x => x.AdditionalProperties);
 
     private static readonly Faker<Part> _getMediaMetaDataPartFaker = new Faker<Part>()

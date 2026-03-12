@@ -14,7 +14,7 @@ public static class ReaparrDBContextSeed
             {
                 Id = PlexMediaType.None.ToDefaultDestinationFolderId(),
                 DisplayName = "Download Path",
-                DirectoryPath = Path.Combine("/", PathProvider.DefaultDownloadsFolderName),
+                DirectoryPath = PathProvider.DefaultDownloadsDestinationFolder,
                 FolderType = FolderType.DownloadFolder,
                 MediaType = PlexMediaType.None,
             },
@@ -22,7 +22,7 @@ public static class ReaparrDBContextSeed
             {
                 Id = PlexMediaType.Movie.ToDefaultDestinationFolderId(),
                 DisplayName = "Movie Destination Path",
-                DirectoryPath = Path.Combine("/", PathProvider.DefaultMovieFolderName),
+                DirectoryPath = PathProvider.DefaultMovieDestinationFolder,
                 FolderType = FolderType.MovieFolder,
                 MediaType = PlexMediaType.Movie,
             },
@@ -30,7 +30,7 @@ public static class ReaparrDBContextSeed
             {
                 Id = PlexMediaType.TvShow.ToDefaultDestinationFolderId(),
                 DisplayName = "Tv Show Destination Path",
-                DirectoryPath = Path.Combine("/", PathProvider.DefaultTvShowsFolderName),
+                DirectoryPath = PathProvider.DefaultTvShowsDestinationFolder,
                 FolderType = FolderType.TvShowFolder,
                 MediaType = PlexMediaType.TvShow,
             },
@@ -38,7 +38,7 @@ public static class ReaparrDBContextSeed
             {
                 Id = PlexMediaType.Music.ToDefaultDestinationFolderId(),
                 DisplayName = "Music Destination Path",
-                DirectoryPath = Path.Combine("/", PathProvider.DefaultMusicFolderName),
+                DirectoryPath = PathProvider.DefaultMusicDestinationFolder,
                 FolderType = FolderType.MusicFolder,
                 MediaType = PlexMediaType.Music,
             },
@@ -46,7 +46,7 @@ public static class ReaparrDBContextSeed
             {
                 Id = PlexMediaType.Photos.ToDefaultDestinationFolderId(),
                 DisplayName = "Photos Destination Path",
-                DirectoryPath = Path.Combine("/", PathProvider.DefaultPhotosFolderName),
+                DirectoryPath = PathProvider.DefaultPhotosDestinationFolder,
                 FolderType = FolderType.PhotosFolder,
                 MediaType = PlexMediaType.Photos,
             },
@@ -54,7 +54,7 @@ public static class ReaparrDBContextSeed
             {
                 Id = PlexMediaType.OtherVideos.ToDefaultDestinationFolderId(),
                 DisplayName = "Other Videos Destination Path",
-                DirectoryPath = Path.Combine("/", PathProvider.DefaultOtherFolderName),
+                DirectoryPath = PathProvider.DefaultOtherDestinationFolder,
                 FolderType = FolderType.OtherVideosFolder,
                 MediaType = PlexMediaType.OtherVideos,
             },
@@ -62,7 +62,7 @@ public static class ReaparrDBContextSeed
             {
                 Id = PlexMediaType.Games.ToDefaultDestinationFolderId(),
                 DisplayName = "Games Videos Destination Path",
-                DirectoryPath = Path.Combine("/", PathProvider.DefaultGamesFolderName),
+                DirectoryPath = PathProvider.DefaultGamesDestinationFolder,
                 FolderType = FolderType.GamesVideosFolder,
                 MediaType = PlexMediaType.Games,
             },

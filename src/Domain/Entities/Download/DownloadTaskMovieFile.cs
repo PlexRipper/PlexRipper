@@ -6,6 +6,7 @@ public class DownloadTaskMovieFile : DownloadTaskFileBase
 
     public required DownloadTaskMovie? Parent { get; init; }
 
+    [Column(Order = 26)]
     public required Guid ParentId { get; init; }
 
     public List<DownloadTaskMovieFileLog> Logs { get; init; } = new();

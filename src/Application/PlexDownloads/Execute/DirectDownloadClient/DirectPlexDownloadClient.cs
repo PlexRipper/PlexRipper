@@ -76,9 +76,8 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                 .LogWarning();
         }
 
-        var downloadUrlResult = await _dbContext.GetDownloadUrl(
-            downloadTask.PlexServerId,
-            downloadTask.FileLocationUrl,
+        var downloadUrlResult = await _commandExecutor.Send(
+            new GetDirectDownloadUrlCommand(downloadTask.PlexServerId, downloadTask.FileLocationUrl),
             cancellationToken
         );
 
@@ -210,6 +209,10 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                         Percentage = Convert.ToDecimal(args.ProgressPercentage),
                         DataReceived = args.ReceivedBytesSize,
                         DownloadSpeed = args.ProgressPercentage < 100 ? Convert.ToInt64(args.BytesPerSecondSpeed) : 0,
+                        TimeRemaining = DataFormat.GetTimeRemaining(
+                            args.TotalBytesToReceive - args.ReceivedBytesSize,
+                            args.BytesPerSecondSpeed
+                        ),
                     };
 
                     _downloadTaskUpdateDispatcher.OnProgressUpdated(key, progress, _downloader.Package.ToSnapshot());
@@ -254,6 +257,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                             Percentage = 100,
                             DataReceived = Math.Max(package.ReceivedBytesSize, package.TotalFileSize),
                             DownloadSpeed = 0,
+                            TimeRemaining = 0,
                         };
 
                         _downloadTaskUpdateDispatcher.OnProgressUpdated(key, progress, package.ToSnapshot());
@@ -290,11 +294,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                 DataFormat.FormatSpeedString(progress.DownloadSpeed),
                 ByteSize.FromBytes(progress.DataReceived).ToString("MB"),
                 ByteSize.FromBytes(progress.DataTotal).ToString("MB"),
-                TimeSpan
-                    .FromSeconds(
-                        DataFormat.GetTimeRemaining(progress.DataTotal - progress.DataReceived, progress.DownloadSpeed)
-                    )
-                    .ToFormattedString()
+                TimeSpan.FromSeconds(progress.TimeRemaining).ToFormattedString()
             );
 
         await SendDownloadClientLog(NotificationLevel.Debug, Domain.DownloadStatus.Downloading, progressMsg);

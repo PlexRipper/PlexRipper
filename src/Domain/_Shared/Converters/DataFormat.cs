@@ -107,8 +107,8 @@ public static class DataFormat
     public static int GetTransferSpeed(long bytesReceivedPerSecond, double elapsedTimeInSeconds) =>
         elapsedTimeInSeconds <= 0 ? 0 : (int)Math.Round(bytesReceivedPerSecond / elapsedTimeInSeconds, 2);
 
-    public static long GetTimeRemaining(long bytesRemaining, double downloadSpeed) =>
-        downloadSpeed <= 0 ? 0 : Convert.ToInt64(Math.Floor(bytesRemaining / downloadSpeed));
+    public static int GetTimeRemaining(long bytesRemaining, double downloadSpeed) =>
+        downloadSpeed <= 0 ? 0 : Convert.ToInt32(Math.Floor(bytesRemaining / downloadSpeed));
 
     public static double ToMebibytes(this long bytes) => bytes / 1_048_576D;
 

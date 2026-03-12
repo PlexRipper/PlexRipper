@@ -29,6 +29,10 @@ public class DirectPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DirectPle
 
     private void SetupCommandExecutor()
     {
+        Mock.Mock<ICommandExecutor>()
+            .Setup(m => m.Send(It.IsAny<GetDirectDownloadUrlCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok("https://plex.example/download.mp4"));
+
         // CreateDownloadFileStreamCommand returns Result<Stream>
         Mock.Mock<ICommandExecutor>()
             .Setup(m => m.Send(It.IsAny<ICommand<Result<Stream>>>(), It.IsAny<CancellationToken>()))
@@ -153,6 +157,15 @@ public class DirectPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DirectPle
                     ),
                 Times.Once()
             );
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                m =>
+                    m.Send(
+                        It.IsAny<GetDirectDownloadUrlCommand>(),
+                        It.Is<CancellationToken>(token => token == CancellationToken)
+                    ),
+                Times.Once()
+            );
     }
 
     [Fact]
@@ -211,6 +224,15 @@ public class DirectPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DirectPle
                     ),
                 Times.Once()
             );
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                m =>
+                    m.Send(
+                        It.IsAny<GetDirectDownloadUrlCommand>(),
+                        It.Is<CancellationToken>(token => token == CancellationToken)
+                    ),
+                Times.Once()
+            );
     }
 
     [Fact]
@@ -262,6 +284,15 @@ public class DirectPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DirectPle
         // Assert — both calls must succeed without throwing
         firstStop.IsSuccess.ShouldBeTrue();
         secondStop.IsSuccess.ShouldBeTrue();
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                m =>
+                    m.Send(
+                        It.IsAny<GetDirectDownloadUrlCommand>(),
+                        It.Is<CancellationToken>(token => token == CancellationToken)
+                    ),
+                Times.Once()
+            );
     }
 
     [Fact]
@@ -352,5 +383,14 @@ public class DirectPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DirectPle
 
         // Assert — CancelTaskAsync must have been invoked exactly once on the underlying service
         cancelCallCount.ShouldBe(1);
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                m =>
+                    m.Send(
+                        It.IsAny<GetDirectDownloadUrlCommand>(),
+                        It.Is<CancellationToken>(token => token == CancellationToken)
+                    ),
+                Times.Once()
+            );
     }
 }

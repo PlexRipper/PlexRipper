@@ -26,7 +26,7 @@ public record DownloadProgressDTO
 
     public required long DownloadSpeed { get; set; }
 
-    public required long TimeRemaining { get; set; }
+    public required int TimeRemaining { get; set; }
 
     public required List<DownloadProgressDTO> Children { get; set; }
 }

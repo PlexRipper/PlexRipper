@@ -49,7 +49,7 @@ public record DownloadProgressMessagePackDTO
     public required long DownloadSpeed { get; init; }
 
     [MessagePack.Key(8)]
-    public required long TimeRemaining { get; init; }
+    public required int TimeRemaining { get; init; }
 
     [MessagePack.Key(9)]
     public required List<DownloadProgressMessagePackDTO> Children { get; init; }

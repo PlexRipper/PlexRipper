@@ -5,7 +5,10 @@ namespace Reaparr.External.Contracts;
 /// </summary>
 public record DashDownloadProgress
 {
-    public required TimeSpan ETA { get; init; }
+    /// <summary>
+    /// Gets the estimated time remaining in seconds.
+    /// </summary>
+    public required int ETA { get; init; }
 
     /// <summary>
     /// Gets the percentage of download completed (0-100).

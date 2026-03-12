@@ -1,13 +1,13 @@
 <template>
 	<TreeTable
-		:page-link-size="10"
+		:page-link-size="25"
 		:paginator="true"
 		:row-hover="true"
-		:rows="10"
-		:rows-per-page-options="[10, 25, 50, 100]"
+		:rows="25"
+		:rows-per-page-options="[25, 50, 100]"
 		:selection-keys="selected"
 		:value="nodes"
-		paginator-position="both"
+		paginator-position="bottom"
 		scroll-height="flex"
 		scrollable
 		selection-mode="checkbox"

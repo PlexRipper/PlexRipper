@@ -12,19 +12,33 @@ public class PathProvider : IPathProvider
 
     private static readonly string _logsFolder = "Logs";
 
-    public static string DefaultMovieDestinationFolder => Path.Combine(RootDirectory, "Movies");
+    public static string DefaultMovieFolderName => "Movies";
 
-    public static string DefaultDownloadsDestinationFolder => Path.Combine(RootDirectory, "Downloads");
+    public static string DefaultDownloadsFolderName => "Downloads";
 
-    public static string DefaultTvShowsDestinationFolder => Path.Combine(RootDirectory, "TvShows");
+    public static string DefaultTvShowsFolderName => "TvShows";
 
-    public static string DefaultMusicDestinationFolder => Path.Combine(RootDirectory, "Music");
+    public static string DefaultMusicFolderName => "Music";
 
-    public static string DefaultPhotosDestinationFolder => Path.Combine(RootDirectory, "Photos");
+    public static string DefaultPhotosFolderName => "Photos";
 
-    public static string DefaultOtherDestinationFolder => Path.Combine(RootDirectory, "Other");
+    public static string DefaultOtherFolderName => "Other";
 
-    public static string DefaultGamesDestinationFolder => Path.Combine(RootDirectory, "Games");
+    public static string DefaultGamesFolderName => "Games";
+
+    public static string DefaultMovieDestinationFolder => Path.Combine(RootDirectory, DefaultMovieFolderName);
+
+    public static string DefaultDownloadsDestinationFolder => Path.Combine(RootDirectory, DefaultDownloadsFolderName);
+
+    public static string DefaultTvShowsDestinationFolder => Path.Combine(RootDirectory, DefaultTvShowsFolderName);
+
+    public static string DefaultMusicDestinationFolder => Path.Combine(RootDirectory, DefaultMusicFolderName);
+
+    public static string DefaultPhotosDestinationFolder => Path.Combine(RootDirectory, DefaultPhotosFolderName);
+
+    public static string DefaultOtherDestinationFolder => Path.Combine(RootDirectory, DefaultOtherFolderName);
+
+    public static string DefaultGamesDestinationFolder => Path.Combine(RootDirectory, DefaultGamesFolderName);
 
     #endregion
 

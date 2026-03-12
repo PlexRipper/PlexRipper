@@ -33,6 +33,7 @@ public class DownloadTaskExtensionsCalculateUnitTests : BaseUnitTest
             downloadTaskTvShowEpisodeFile.FileTransferSpeed = 100;
             downloadTaskTvShowEpisodeFile.DataReceived = 5000;
             downloadTaskTvShowEpisodeFile.DataTotal = 10000;
+            downloadTaskTvShowEpisodeFile.Percentage = 50;
         }
 
         // Act

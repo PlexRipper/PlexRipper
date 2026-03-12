@@ -180,7 +180,6 @@ body {
 
     &-title {
       grid-area: title;
-      max-height: $q-card-dialog-title-height;
 
       .dialog-close-button {
         position: absolute;

@@ -471,29 +471,31 @@ namespace Reaparr.Data.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT")
-                        .HasColumnOrder(10);
+                        .HasColumnOrder(4);
 
                     b.Property<string>("DownloadStatus")
                         .IsRequired()
                         .HasMaxLength(20)
                         .IsUnicode(false)
                         .HasColumnType("TEXT")
-                        .HasColumnOrder(8);
+                        .HasColumnOrder(3);
 
                     b.Property<string>("FullTitle")
                         .IsRequired()
                         .HasColumnType("TEXT")
-                        .HasColumnOrder(14);
+                        .HasColumnOrder(5);
 
                     b.Property<int>("PlexApiRatingKey")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(1);
 
                     b.Property<int>("PlexLibraryId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(7);
 
                     b.Property<int>("PlexServerId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(6);
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -2287,29 +2289,31 @@ namespace Reaparr.Data.Migrations
                     b.HasBaseType("Reaparr.Domain.DownloadTaskBase");
 
                     b.Property<long>("CurrentFileTransferBytesOffset")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(22);
 
                     b.Property<long>("DataReceived")
                         .HasColumnType("INTEGER")
-                        .HasColumnOrder(5);
+                        .HasColumnOrder(15);
 
                     b.Property<long>("DataTotal")
                         .HasColumnType("INTEGER")
-                        .HasColumnOrder(6);
+                        .HasColumnOrder(16);
 
                     b.Property<int?>("DestinationFolderPathId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(25);
 
                     b.Property<string>("DirectDownloadSnapshot")
                         .IsUnicode(true)
                         .HasColumnType("TEXT")
-                        .HasColumnOrder(19);
+                        .HasColumnOrder(18);
 
                     b.Property<string>("DirectoryMeta")
                         .IsRequired()
                         .IsUnicode(true)
                         .HasColumnType("TEXT")
-                        .HasColumnOrder(16);
+                        .HasColumnOrder(14);
 
                     b.Property<string>("DownloadClientType")
                         .IsRequired()
@@ -2317,44 +2321,55 @@ namespace Reaparr.Data.Migrations
                         .HasMaxLength(10)
                         .IsUnicode(false)
                         .HasColumnType("TEXT")
-                        .HasDefaultValue("Direct");
+                        .HasDefaultValue("Direct")
+                        .HasColumnOrder(19);
 
                     b.Property<long>("DownloadSpeed")
                         .HasColumnType("INTEGER")
-                        .HasColumnOrder(18);
+                        .HasColumnOrder(17);
 
                     b.Property<long>("FileDataTransferred")
                         .HasColumnType("INTEGER")
-                        .HasColumnOrder(20);
+                        .HasColumnOrder(21);
 
                     b.Property<string>("FileLocationUrl")
                         .IsRequired()
                         .HasColumnType("TEXT")
-                        .HasColumnOrder(12);
+                        .HasColumnOrder(11);
 
                     b.Property<string>("FileName")
                         .IsRequired()
                         .HasColumnType("TEXT")
-                        .HasColumnOrder(11)
+                        .HasColumnOrder(10)
                         .UseCollation("NATURALSORT");
 
                     b.Property<long>("FileTransferSpeed")
                         .HasColumnType("INTEGER")
-                        .HasColumnOrder(19);
+                        .HasColumnOrder(20);
 
                     b.Property<string>("HashId")
                         .HasColumnType("TEXT")
-                        .HasColumnOrder(13);
+                        .HasColumnOrder(12);
+
+                    b.Property<decimal>("Percentage")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(23);
 
                     b.Property<int>("PlexApiMediaId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(8);
 
                     b.Property<int>("PlexApiPartId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(9);
 
                     b.Property<int>("Quality")
                         .HasColumnType("INTEGER")
-                        .HasColumnOrder(15);
+                        .HasColumnOrder(13);
+
+                    b.Property<int>("TimeRemaining")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(24);
 
                     b.HasIndex("DownloadStatus");
 
@@ -2367,7 +2382,7 @@ namespace Reaparr.Data.Migrations
 
                     b.Property<int>("Year")
                         .HasColumnType("INTEGER")
-                        .HasColumnOrder(3);
+                        .HasColumnOrder(8);
 
                     b.ToTable((string)null);
                 });
@@ -2427,7 +2442,8 @@ namespace Reaparr.Data.Migrations
                     b.HasBaseType("Reaparr.Domain.DownloadTaskFileBase");
 
                     b.Property<Guid>("ParentId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(26);
 
                     b.HasIndex("HashId");
 
@@ -2443,7 +2459,8 @@ namespace Reaparr.Data.Migrations
                     b.HasBaseType("Reaparr.Domain.DownloadTaskFileBase");
 
                     b.Property<Guid>("ParentId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(26);
 
                     b.HasIndex("HashId");
 
@@ -2479,7 +2496,8 @@ namespace Reaparr.Data.Migrations
                     b.HasBaseType("Reaparr.Domain.DownloadTaskParentBase");
 
                     b.Property<Guid>("ParentId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(9);
 
                     b.HasIndex("DownloadStatus");
 
@@ -2493,7 +2511,8 @@ namespace Reaparr.Data.Migrations
                     b.HasBaseType("Reaparr.Domain.DownloadTaskParentBase");
 
                     b.Property<Guid>("ParentId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(9);
 
                     b.HasIndex("DownloadStatus");
 

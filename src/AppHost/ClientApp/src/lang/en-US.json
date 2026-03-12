@@ -372,6 +372,7 @@
         "alert-display-debug": {
             "error-example": "An unexpected error occurred while loading media quality options. Please try again later.",
             "info-example": "This is a random info message about media quality settings. Lorem ipsum dolor sit amet.",
+            "success-example": "This is a random success message about media quality settings. Lorem ipsum dolor sit amet.",
             "warning-example": "Heads up! Something might not be configured correctly. Random check: 42XY-LMN."
         },
         "api-key-input-field": {
@@ -591,7 +592,7 @@
                 },
                 "allow-stream-downloader": {
                     "label": "Allow Stream Downloader",
-                    "text": "When enabled, Reaparr will use the stream downloader for this Plex server.",
+                    "text": "When enabled, Reaparr will use the stream downloader for this Plex server.\n\n **Warning:** Read the [Stream Downloader documentation](https://www.reaparr.rocks/docs/configuration/stream-downloader) before enabling this feature.",
                     "title": "Allow Stream Downloader"
                 }
             },

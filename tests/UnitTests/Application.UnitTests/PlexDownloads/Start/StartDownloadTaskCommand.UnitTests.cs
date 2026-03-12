@@ -320,6 +320,7 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
                 x.TvShowDownloadTasksCount = 1;
                 x.TvShowSeasonDownloadTasksCount = 1;
                 x.TvShowEpisodeCount = 5;
+                x.TvShowEpisodeDownloadTasksCount = 5;
             }
         );
 
@@ -378,6 +379,7 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
                 x.TvShowDownloadTasksCount = 1;
                 x.TvShowSeasonDownloadTasksCount = 1;
                 x.TvShowEpisodeCount = 3;
+                x.TvShowEpisodeDownloadTasksCount = 3;
             }
         );
 
@@ -454,6 +456,7 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
                 x.TvShowDownloadTasksCount = 1;
                 x.TvShowSeasonDownloadTasksCount = 1;
                 x.TvShowEpisodeCount = 3;
+                x.TvShowEpisodeDownloadTasksCount = 3;
             }
         );
 
@@ -525,6 +528,7 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
                 x.TvShowDownloadTasksCount = 1;
                 x.TvShowSeasonDownloadTasksCount = 1;
                 x.TvShowEpisodeCount = 3;
+                x.TvShowEpisodeDownloadTasksCount = 3;
             }
         );
 
@@ -1110,6 +1114,7 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
                 x.TvShowDownloadTasksCount = 1;
                 x.TvShowSeasonDownloadTasksCount = 1;
                 x.TvShowEpisodeCount = 3;
+                x.TvShowEpisodeDownloadTasksCount = 3;
             }
         );
 

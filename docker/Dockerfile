@@ -97,6 +97,16 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine AS dotnet-runtime
 # This stage is never included in the final image; only individual .so files are bind-mounted from it.
 FROM ubuntu:24.04 AS glibc-source
 
+# Stage 3c - build a static MP4Box binary from GPAC (gpac is not packaged for Alpine 3.20)
+FROM alpine:3.20 AS gpac-builder
+
+WORKDIR /src
+RUN apk add --no-cache musl-dev pkgconfig git g++ binutils make zlib-dev zlib-static && \
+    git clone --depth 1 https://github.com/gpac/gpac.git && \
+    cd gpac && \
+    ./configure --static-bin && \
+    make -j 3
+
 # Stage 4 - Final Image with s6-overlay
 FROM ghcr.io/linuxserver/baseimage-alpine:3.20 AS final
 
@@ -157,6 +167,9 @@ RUN --mount=type=bind,from=glibc-source,source=/lib,target=/mnt/glibc-src \
 
 ## Make dotnet command available
 ENV PATH="$PATH:/usr/share/dotnet"
+
+## Copy static MP4Box binary built from GPAC source
+COPY --from=gpac-builder /src/gpac/bin/gcc/MP4Box /usr/local/bin/MP4Box
 
 ## Copy to final image
 WORKDIR /app

@@ -84,11 +84,18 @@ public class RestartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
 
         downloadTaskDb.DownloadStatus.ShouldBeOneOf(DownloadStatus.Queued, DownloadStatus.Completed);
 
-        await container.SchedulerService.AwaitScheduler(TestContext.Current.CancellationToken);
+        var finalDownload = await container.WaitForDownloadStatusAsync(
+            downloadTask.Id,
+            [DownloadStatus.Completed],
+            TimeSpan.FromSeconds(20),
+            CancellationToken
+        );
 
         // Assert
         var result = testResult.Result;
         result.IsSuccess.ShouldBeTrue();
+        finalDownload.ShouldNotBeNull();
+
         downloadTaskDb = await container.DbContext.GetDownloadTaskAsync(
             downloadTask.Id,
             cancellationToken: CancellationToken

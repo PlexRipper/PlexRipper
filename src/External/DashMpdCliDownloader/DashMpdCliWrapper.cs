@@ -15,6 +15,9 @@ namespace Reaparr.External;
 /// </summary>
 public class DashMpdCliWrapper : IDashMpdCliWrapper
 {
+    private const string NetworkErrorToken = "network error";
+    private const string MaxNetworkErrorToken = "max_error_count";
+
     private readonly ILogger _log;
     private readonly IFile _file;
     private readonly IDirectory _directory;
@@ -24,9 +27,11 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
 
     private readonly Subject<string> _stdoutSubject = new();
     private readonly Subject<DashDownloadProgress> _progressSubject = new();
+    private readonly Subject<DashDownloadCompletedEventArgs> _downloadCompletedSubject = new();
 
-    private int? _exitCode;
     private string? _workingDirectory;
+    private bool _hasNetworkError;
+    private string? _networkErrorLine;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DashMpdCliWrapper"/> class.
@@ -41,11 +46,6 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
     }
 
     /// <summary>
-    /// Gets the exit code of the process (only valid after process has exited).
-    /// </summary>
-    public int? ExitCode => _exitCode;
-
-    /// <summary>
     /// Observable stream of standard output lines (including ANSI codes and carriage returns).
     /// </summary>
     public IObservable<string> StandardOutput => _stdoutSubject.AsObservable();
@@ -56,8 +56,14 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
     public IObservable<DashDownloadProgress> Progress => _progressSubject.AsObservable();
 
     /// <inheritdoc/>
+    public IObservable<DashDownloadCompletedEventArgs> DownloadCompleted => _downloadCompletedSubject.Take(1);
+
+    /// <inheritdoc/>
     public async Task<Result> StartAsync(DashMpdCliOptions options)
     {
+        _hasNetworkError = false;
+        _networkErrorLine = null;
+
         if (!_file.Exists(_binaryPath))
             return _log.Here()
                 .ErrorResult(
@@ -96,57 +102,64 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
 
     private async Task<Result> RunEventLoopAsync(Command command, CancellationToken cancellationToken)
     {
-        var listenResult = await Result.Try((Func<Task>)(async () =>
-        {
-            await foreach (var cmdEvent in command.ListenAsync(cancellationToken))
-            {
-                switch (cmdEvent)
+        var processResult = Result.Ok();
+
+        var listenResult = await Result.Try(
+            (Func<Task>)(
+                async () =>
                 {
-                    case StartedCommandEvent started:
-                        _log.Here().Information("dash-mpd-cli process started with PID {ProcessId}", started.ProcessId);
-                        break;
+                    await foreach (var cmdEvent in command.ListenAsync(cancellationToken))
+                    {
+                        switch (cmdEvent)
+                        {
+                            case StartedCommandEvent started:
+                                _log.Here()
+                                    .Information(
+                                        "dash-mpd-cli process started with PID {ProcessId}",
+                                        started.ProcessId
+                                    );
+                                break;
 
-                    // By convention for "data output" (what you want to pipe into another program or save to a file).
-                    case StandardOutputCommandEvent stdOut:
-                        HandleStdoutLine(stdOut.Text);
-                        break;
+                            // By convention for "data output" (what you want to pipe into another program or save to a file).
+                            case StandardOutputCommandEvent stdOut:
+                                HandleStdoutLine(stdOut.Text);
+                                break;
 
-                    // By convention "diagnostics" (logs, warnings, progress bars, info messages) happen in stderr
-                    case StandardErrorCommandEvent stdErr:
-                        HandleStdoutLine(stdErr.Text);
-                        break;
+                            // By convention "diagnostics" (logs, warnings, progress bars, info messages) happen in stderr
+                            case StandardErrorCommandEvent stdErr:
+                                HandleStdoutLine(stdErr.Text);
+                                break;
 
-                    case ExitedCommandEvent exited:
-                        _exitCode = exited.ExitCode;
-                        _log.Here().Information("dash-mpd-cli process exited with code {ExitCode}", exited.ExitCode);
-                        break;
+                            case ExitedCommandEvent exited:
+                                _log.Here()
+                                    .Information("dash-mpd-cli process exited with code {ExitCode}", exited.ExitCode);
+
+                                var isCancelled = IsCancellationRequested();
+                                var result =
+                                    isCancelled ? ResultExtensions.TaskIsCancelled(nameof(DashMpdCliWrapper))
+                                    : exited.ExitCode == 0 ? Result.Ok()
+                                    : CreateFailureResult(exited.ExitCode);
+
+                                processResult = result;
+
+                                _downloadCompletedSubject.OnNext(
+                                    new DashDownloadCompletedEventArgs(isCancelled, exited.ExitCode, result)
+                                );
+                                break;
+                        }
+                    }
                 }
-            }
-        }));
+            )
+        );
 
-        var cleanUpResult = Result.Try(() =>
-        {
-            if (string.IsNullOrEmpty(_workingDirectory))
-                return;
+        if (IsCancellationRequested())
+            return ResultExtensions.TaskIsCancelled(nameof(DashMpdCliWrapper));
 
-            try
-            {
-                foreach (var file in _directory.GetFiles(_workingDirectory, "dashmpd-*"))
-                {
-                    _file.Delete(file);
-                    _log.Here().Debug("Deleted dash-mpd-cli temp file: {File}", file);
-                }
-            }
-            catch (Exception ex)
-            {
-                _log.Here()
-                    .Warning(ex, "Failed to clean up dash-mpd-cli temp files in {WorkingDirectory}", _workingDirectory);
-                throw;
-            }
-        });
-
-        return Result.Merge(listenResult, cleanUpResult);
+        return Result.Merge(listenResult, processResult);
     }
+
+    private bool IsCancellationRequested() =>
+        _gracefulCts.IsCancellationRequested || _forcefulCts.IsCancellationRequested;
 
     private void HandleStdoutLine(string line)
     {
@@ -155,19 +168,75 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
 
         _stdoutSubject.OnNext(line);
 
-        if (line.Contains("\"type\": \"progress\""))
+        var progress = TryParseProgress(line);
+        if (progress != null)
         {
-            var progress = TryParseProgress(line);
-            if (progress != null)
-            {
-                _progressSubject.OnNext(progress);
-            }
+            _progressSubject.OnNext(progress);
+            return;
         }
-        else
+
+        var dashLogEvent = TryParseLogEvent(line);
+        if (dashLogEvent == null)
         {
-            _log.Here().Debug("{Data}", line);
+            _log.Here().Error("Failed to parse dash-mpd-cli NDJSON line: {Data}", line);
+            return;
         }
+
+        if (IsNetworkErrorLine(dashLogEvent.Message))
+        {
+            _hasNetworkError = true;
+            _networkErrorLine = dashLogEvent.Message;
+        }
+
+        if (string.Equals(dashLogEvent.Level, "ERROR", StringComparison.OrdinalIgnoreCase))
+        {
+            _log.Here().Error("{Data}", line);
+            return;
+        }
+
+        if (
+            string.Equals(dashLogEvent.Level, "WARN", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(dashLogEvent.Level, "WARNING", StringComparison.OrdinalIgnoreCase)
+        )
+        {
+            _log.Here().Warning("{Data}", line);
+            return;
+        }
+
+        _log.Here().Debug("{Data}", line);
     }
+
+    private static DashLogEvent? TryParseLogEvent(string output)
+    {
+        if (string.IsNullOrWhiteSpace(output))
+            return null;
+
+        var result = Result.Try(() =>
+            JsonSerializer.Deserialize<DashLogEvent>(output, DefaultJsonSerializerOptions.ConfigStandard)
+        );
+
+        if (result.IsFailed)
+            return null;
+
+        var valueEvent = result.Value;
+        if (valueEvent is null)
+            return null;
+
+        return valueEvent;
+    }
+
+    private Result CreateFailureResult(int exitCode)
+    {
+        if (!_hasNetworkError)
+            return Result.Fail($"dash-mpd-cli exited with code {exitCode}");
+
+        var message = $"dash-mpd-cli failed with network error: {_networkErrorLine}";
+        return Result.Fail(message).Add504GatewayTimeoutError(message);
+    }
+
+    private static bool IsNetworkErrorLine(string line) =>
+        line.Contains(NetworkErrorToken, StringComparison.OrdinalIgnoreCase)
+        || line.Contains(MaxNetworkErrorToken, StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
     /// Stops the running process gracefully, then forcefully if it does not exit within the grace period.
@@ -203,9 +272,11 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
         {
             _stdoutSubject.OnCompleted();
             _progressSubject.OnCompleted();
+            _downloadCompletedSubject.OnCompleted();
 
             _stdoutSubject.Dispose();
             _progressSubject.Dispose();
+            _downloadCompletedSubject.Dispose();
         }
         catch (Exception ex)
         {
@@ -239,13 +310,13 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
 
         return new DashDownloadProgress
         {
-            ETA = TimeSpan.FromSeconds(valueEvent.EtaSeconds),
+            ETA = valueEvent.EtaSeconds ?? 0,
             Percent = valueEvent.Percent,
             DownloadSpeedInBytes = valueEvent.Bandwidth,
             CurrentStep = valueEvent.Message,
             RawOutput = output,
             DownloadedBytes = valueEvent.DownloadedBytes,
-            TotalBytes = valueEvent.TotalBytes,
+            TotalBytes = valueEvent.TotalBytes ?? 0,
         };
     }
 

@@ -14,13 +14,13 @@ public sealed record DashProgressEvent
     public long Bandwidth { get; init; }
 
     [JsonPropertyName("eta_seconds")]
-    public int EtaSeconds { get; init; }
+    public int? EtaSeconds { get; init; }
 
     [JsonPropertyName("downloaded_bytes")]
     public long DownloadedBytes { get; init; }
 
-    [JsonPropertyName("total_bytes")]
-    public long TotalBytes { get; init; }
+    [JsonPropertyName("estimated_total_bytes")]
+    public long? TotalBytes { get; init; }
 
     [JsonPropertyName("message")]
     public string Message { get; init; } = string.Empty;

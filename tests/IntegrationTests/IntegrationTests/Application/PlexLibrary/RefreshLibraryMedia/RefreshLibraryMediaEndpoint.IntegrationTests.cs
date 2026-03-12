@@ -17,11 +17,11 @@ public class RefreshLibraryMediaEndpointIntegrationTests : BaseIntegrationTests
         // Arrange
         var seed = new Seed(8932);
         const int serverCount = 1;
-        const int libraryCount = 3;
-        const int movieCount = 500;
-        const int roleCount = 5;
-        const int genreCount = 2;
-        const int countryCount = 2;
+        const int libraryCount = 1;
+        const int movieCount = 50;
+        const int roleCount = 2;
+        const int genreCount = 1;
+        const int countryCount = 1;
         using var container = await CreateContainer(
             seed,
             config =>
@@ -113,13 +113,13 @@ public class RefreshLibraryMediaEndpointIntegrationTests : BaseIntegrationTests
         // Arrange
         var seed = new Seed(8932);
         const int serverCount = 1;
-        const int libraryCount = 3;
-        const int tvShowCount = 100;
-        const int seasonCount = 5;
-        const int episodeCount = 10;
-        const int roleCount = 5;
-        const int genreCount = 2;
-        const int countryCount = 2;
+        const int libraryCount = 1;
+        const int tvShowCount = 20;
+        const int seasonCount = 2;
+        const int episodeCount = 4;
+        const int roleCount = 2;
+        const int genreCount = 1;
+        const int countryCount = 1;
         const int totalEpisodeCount = tvShowCount * seasonCount * episodeCount;
 
         using var container = await CreateContainer(

@@ -6,13 +6,14 @@
 				:clickable="clickable"
 				:color="getQualityDisplay(quality).color"
 				size="md"
+				has-background
 				:value="count > minCount ? '' : getQualityDisplay(quality).label" />
 			<template v-if="count > minCount">
 				<q-tooltip
 					anchor="bottom middle"
 					self="top middle"
 					:offset="[0, 0]"
-					class="no-background">
+					class="no-background tooltip-no-effect">
 					<QGlowChip
 						class="hover-expand-chip"
 						:color="getQualityDisplay(quality).color"

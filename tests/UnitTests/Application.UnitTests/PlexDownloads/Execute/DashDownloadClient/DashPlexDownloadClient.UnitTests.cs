@@ -6,7 +6,9 @@ using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Data.Contracts;
 using Reaparr.External.Contracts;
+using Reaparr.PlexApi.Contracts;
 using Reaparr.Settings.Contracts;
+using Reaparr.SignalR.Contracts;
 using DomainDownloadStatus = Reaparr.Domain.DownloadStatus;
 
 namespace Reaparr.Application.UnitTests;
@@ -23,6 +25,9 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
     {
         var dirMock = directoryMock ?? new Mock<IDirectory>();
         dirMock.Setup(x => x.CreateDirectory(It.IsAny<string>()));
+        Mock.Mock<INotificationHubService>()
+            .Setup(x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
 
         return Mock.Create<DashPlexDownloadClient>(
             new NamedParameter("dashWrapper", dashWrapperMock.Object),
@@ -30,11 +35,20 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
         );
     }
 
-    private void SetupCommandExecutor(Result<string>? getUrlResult = null)
+    private void SetupCommandExecutor(Result<GetTranscodeUrlResult>? getUrlResult = null)
     {
         Mock.Mock<ICommandExecutor>()
-            .Setup(m => m.Send(It.IsAny<ICommand<Result<string>>>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(getUrlResult ?? Result.Ok("https://plex.example/start.mpd"));
+            .Setup(m => m.Send(It.IsAny<ICommand<Result<GetTranscodeUrlResult>>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(
+                getUrlResult
+                    ?? Result.Ok(
+                        new GetTranscodeUrlResult
+                        {
+                            DownloadUrl = "https://plex.example/start.mpd",
+                            TranscodedQuality = VideoQuality.SD,
+                        }
+                    )
+            );
 
         Mock.Mock<ICommandExecutor>()
             .Setup(m => m.Send(It.IsAny<ICommand<Result>>(), It.IsAny<CancellationToken>()))
@@ -74,20 +88,21 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
 
         SetupSpeedLimit(serverMachineIdentifier, 2000);
 
-        var exitTcs = new TaskCompletionSource<int>();
         var progressSubject = new Subject<DashDownloadProgress>();
         var outputSubject = new Subject<string>();
+        var completionSubject = new Subject<DashDownloadCompletedEventArgs>();
         DashMpdCliOptions? capturedOptions = null;
 
         var dashWrapperMock = new Mock<IDashMpdCliWrapper>();
         dashWrapperMock.Setup(x => x.Progress).Returns(progressSubject.AsObservable());
         dashWrapperMock.Setup(x => x.StandardOutput).Returns(outputSubject.AsObservable());
+        dashWrapperMock.Setup(x => x.DownloadCompleted).Returns(completionSubject.AsObservable());
         dashWrapperMock
             .Setup(x => x.StartAsync(It.IsAny<DashMpdCliOptions>()))
             .Returns<DashMpdCliOptions>(options =>
             {
                 capturedOptions = options;
-                exitTcs.TrySetResult(0);
+                completionSubject.OnNext(new DashDownloadCompletedEventArgs(false, 0, Result.Ok()));
                 return Task.FromResult(Result.Ok());
             });
         dashWrapperMock.Setup(x => x.StopAsync()).ReturnsAsync(Result.Ok());
@@ -123,6 +138,9 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                 )
             )
             .Returns(Result.Ok());
+        Mock.Mock<INotificationHubService>()
+            .Setup(x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
 
         var sut = CreateSut(dashWrapperMock);
         var result = await sut.Start(downloadTask.ToKey(), CancellationToken);
@@ -139,6 +157,16 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                         DomainDownloadStatus.DownloadFinished,
                         It.IsAny<CancellationToken>()
                     ),
+                Times.Once()
+            );
+        Mock.Mock<INotificationHubService>()
+            .Verify(
+                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<ICommand<Result<GetTranscodeUrlResult>>>(), It.IsAny<CancellationToken>()),
                 Times.Once()
             );
     }
@@ -197,12 +225,23 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
         var dashWrapperMock = new Mock<IDashMpdCliWrapper>();
         dashWrapperMock.Setup(x => x.Progress).Returns(Observable.Empty<DashDownloadProgress>());
         dashWrapperMock.Setup(x => x.StandardOutput).Returns(Observable.Empty<string>());
+        dashWrapperMock.Setup(x => x.DownloadCompleted).Returns(Observable.Empty<DashDownloadCompletedEventArgs>());
 
         var sut = CreateSut(dashWrapperMock);
         var result = await sut.Start(key, CancellationToken);
 
         result.IsFailed.ShouldBeTrue();
         result.Errors.ShouldContain(x => x.Message.Contains(nameof(DownloadTaskGeneric)));
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<ICommand<Result<GetTranscodeUrlResult>>>(), It.IsAny<CancellationToken>()),
+                Times.Never()
+            );
+        Mock.Mock<INotificationHubService>()
+            .Verify(
+                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()),
+                Times.Never()
+            );
     }
 
     [Fact]
@@ -220,7 +259,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
 
         var downloadTask = await IDbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
 
-        SetupCommandExecutor(Result.Fail<string>("Could not get DASH URL"));
+        SetupCommandExecutor(Result.Fail<GetTranscodeUrlResult>("Could not get DASH URL"));
 
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
@@ -254,12 +293,230 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
         var dashWrapperMock = new Mock<IDashMpdCliWrapper>();
         dashWrapperMock.Setup(x => x.Progress).Returns(Observable.Empty<DashDownloadProgress>());
         dashWrapperMock.Setup(x => x.StandardOutput).Returns(Observable.Empty<string>());
+        dashWrapperMock.Setup(x => x.DownloadCompleted).Returns(Observable.Empty<DashDownloadCompletedEventArgs>());
 
         var sut = CreateSut(dashWrapperMock);
         var result = await sut.Start(downloadTask.ToKey(), CancellationToken);
 
         result.IsFailed.ShouldBeTrue();
         dashWrapperMock.Verify(x => x.StartAsync(It.IsAny<DashMpdCliOptions>()), Times.Never());
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<ICommand<Result<GetTranscodeUrlResult>>>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
+        Mock.Mock<INotificationHubService>()
+            .Verify(
+                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()),
+                Times.Never()
+            );
+    }
+
+    [Fact]
+    public async Task ShouldSetServerUnreachableStatus_WhenDashCompletesWithGatewayTimeoutError()
+    {
+        await SetupDatabase(
+            12008,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var downloadTask = await dbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+        var serverMachineIdentifier = await dbContext.GetPlexServerMachineIdentifierById(
+            downloadTask.PlexServerId,
+            CancellationToken
+        );
+
+        SetupSpeedLimit(serverMachineIdentifier, 0);
+        SetupCommandExecutor();
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<Result>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnProgressUpdated(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadTaskProgress>(),
+                    It.IsAny<DirectDownloadSnapshot?>()
+                )
+            )
+            .Returns(Result.Ok());
+        Mock.Mock<INotificationHubService>()
+            .Setup(x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        var progressSubject = new Subject<DashDownloadProgress>();
+        var outputSubject = new Subject<string>();
+        var completionSubject = new Subject<DashDownloadCompletedEventArgs>();
+
+        var networkErrorResult = Result.Fail("network error").Add504GatewayTimeoutError("network error");
+
+        var dashWrapperMock = new Mock<IDashMpdCliWrapper>();
+        dashWrapperMock.Setup(x => x.Progress).Returns(progressSubject.AsObservable());
+        dashWrapperMock.Setup(x => x.StandardOutput).Returns(outputSubject.AsObservable());
+        dashWrapperMock.Setup(x => x.DownloadCompleted).Returns(completionSubject.AsObservable());
+        dashWrapperMock
+            .Setup(x => x.StartAsync(It.IsAny<DashMpdCliOptions>()))
+            .Returns(() =>
+            {
+                completionSubject.OnNext(new DashDownloadCompletedEventArgs(false, 1, networkErrorResult));
+                return Task.FromResult(networkErrorResult);
+            });
+        dashWrapperMock.Setup(x => x.StopAsync()).ReturnsAsync(Result.Ok());
+        dashWrapperMock.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask);
+
+        var sut = CreateSut(dashWrapperMock);
+        var result = await sut.Start(downloadTask.ToKey(), CancellationToken);
+
+        result.IsFailed.ShouldBeTrue();
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        DomainDownloadStatus.ServerUnreachable,
+                        It.IsAny<Result>(),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Once()
+            );
+        Mock.Mock<INotificationHubService>()
+            .Verify(
+                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<ICommand<Result<GetTranscodeUrlResult>>>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
+    }
+
+    [Fact]
+    public async Task ShouldSetServerUnreachableStatus_WhenDashCompletesWithNetworkTimeoutError()
+    {
+        await SetupDatabase(
+            12009,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var downloadTask = await dbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+        var serverMachineIdentifier = await dbContext.GetPlexServerMachineIdentifierById(
+            downloadTask.PlexServerId,
+            CancellationToken
+        );
+
+        SetupSpeedLimit(serverMachineIdentifier, 0);
+        SetupCommandExecutor();
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<Result>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnProgressUpdated(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadTaskProgress>(),
+                    It.IsAny<DirectDownloadSnapshot?>()
+                )
+            )
+            .Returns(Result.Ok());
+
+        var progressSubject = new Subject<DashDownloadProgress>();
+        var outputSubject = new Subject<string>();
+        var completionSubject = new Subject<DashDownloadCompletedEventArgs>();
+
+        var networkTimeoutResult = Result.Fail("Download failed: network timeout: fetching DASH manifest timed out");
+
+        Mock.Mock<INotificationHubService>()
+            .Setup(x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        var dashWrapperMock = new Mock<IDashMpdCliWrapper>();
+        dashWrapperMock.Setup(x => x.Progress).Returns(progressSubject.AsObservable());
+        dashWrapperMock.Setup(x => x.StandardOutput).Returns(outputSubject.AsObservable());
+        dashWrapperMock.Setup(x => x.DownloadCompleted).Returns(completionSubject.AsObservable());
+        dashWrapperMock
+            .Setup(x => x.StartAsync(It.IsAny<DashMpdCliOptions>()))
+            .Returns(() =>
+            {
+                completionSubject.OnNext(new DashDownloadCompletedEventArgs(false, 1, networkTimeoutResult));
+                return Task.FromResult(networkTimeoutResult);
+            });
+        dashWrapperMock.Setup(x => x.StopAsync()).ReturnsAsync(Result.Ok());
+        dashWrapperMock.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask);
+
+        var sut = CreateSut(dashWrapperMock);
+        var result = await sut.Start(downloadTask.ToKey(), CancellationToken);
+
+        result.IsFailed.ShouldBeTrue();
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        DomainDownloadStatus.ServerUnreachable,
+                        It.IsAny<Result>(),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Once()
+            );
+        Mock.Mock<INotificationHubService>()
+            .Verify(
+                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<ICommand<Result<GetTranscodeUrlResult>>>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
     }
 
     [Fact]
@@ -309,6 +566,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
         var dashWrapperMock = new Mock<IDashMpdCliWrapper>();
         dashWrapperMock.Setup(x => x.Progress).Returns(progressSubject.AsObservable());
         dashWrapperMock.Setup(x => x.StandardOutput).Returns(outputSubject.AsObservable());
+        dashWrapperMock.Setup(x => x.DownloadCompleted).Returns(Observable.Empty<DashDownloadCompletedEventArgs>());
         dashWrapperMock
             .Setup(x => x.StartAsync(It.IsAny<DashMpdCliOptions>()))
             .Returns(async () =>
@@ -316,7 +574,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                 progressSubject.OnNext(
                     new DashDownloadProgress
                     {
-                        ETA = TimeSpan.FromSeconds(1),
+                        ETA = 1,
                         Percent = 50,
                         DownloadedBytes = downloadTask.DataTotal / 2,
                         TotalBytes = downloadTask.DataTotal,
@@ -342,18 +600,226 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                 x =>
                     x.OnProgressUpdated(
                         It.Is<DownloadTaskKey>(k => k.Id == downloadTask.Id),
-                        It.Is<DownloadTaskProgress>(p => p.DataReceived > 0 && p.DownloadSpeed >= 0),
+                        It.Is<DownloadTaskProgress>(p =>
+                            p.DataReceived > 0 && p.DownloadSpeed >= 0 && p.Percentage == 50 && p.TimeRemaining == 1
+                        ),
                         It.IsAny<DirectDownloadSnapshot?>()
                     ),
-                Times.Once
+                Times.Once()
+            );
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<ICommand<Result<GetTranscodeUrlResult>>>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
+        Mock.Mock<INotificationHubService>()
+            .Verify(
+                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()),
+                Times.Once()
             );
     }
 
     [Fact]
-    public async Task ShouldCreateDashOutputUsingFinalFileName_NotTempPath()
+    public async Task ShouldKeepDataTotalAtZero_WhenDashDoesNotReportTotalBytes()
+    {
+        await SetupDatabase(
+            12007,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var downloadTask = await IDbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+        var serverMachineIdentifier = await IDbContext.GetPlexServerMachineIdentifierById(
+            downloadTask.PlexServerId,
+            CancellationToken
+        );
+
+        SetupSpeedLimit(serverMachineIdentifier, 0);
+        SetupCommandExecutor();
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnProgressUpdated(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadTaskProgress>(),
+                    It.IsAny<DirectDownloadSnapshot?>()
+                )
+            )
+            .Returns(Result.Ok());
+
+        var progressSubject = new Subject<DashDownloadProgress>();
+        var outputSubject = new Subject<string>();
+
+        var dashWrapperMock = new Mock<IDashMpdCliWrapper>();
+        dashWrapperMock.Setup(x => x.Progress).Returns(progressSubject.AsObservable());
+        dashWrapperMock.Setup(x => x.StandardOutput).Returns(outputSubject.AsObservable());
+        dashWrapperMock.Setup(x => x.DownloadCompleted).Returns(Observable.Empty<DashDownloadCompletedEventArgs>());
+        dashWrapperMock
+            .Setup(x => x.StartAsync(It.IsAny<DashMpdCliOptions>()))
+            .Returns(async () =>
+            {
+                progressSubject.OnNext(
+                    new DashDownloadProgress
+                    {
+                        ETA = 42,
+                        Percent = 12,
+                        DownloadedBytes = 3_000,
+                        TotalBytes = 0,
+                        DownloadSpeedInBytes = 256,
+                        RawOutput = "{}",
+                    }
+                );
+
+                await Task.Delay(700, TestContext.Current.CancellationToken);
+                return Result.Ok();
+            });
+        dashWrapperMock.Setup(x => x.StopAsync()).ReturnsAsync(Result.Ok());
+        dashWrapperMock.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask);
+
+        var sut = CreateSut(dashWrapperMock);
+        var result = await sut.Start(downloadTask.ToKey(), CancellationToken);
+
+        result.IsSuccess.ShouldBeTrue();
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnProgressUpdated(
+                        It.IsAny<DownloadTaskKey>(),
+                        It.Is<DownloadTaskProgress>(p =>
+                            p.DataTotal == 0 && p.Percentage == 12 && p.TimeRemaining == 42
+                        ),
+                        It.IsAny<DirectDownloadSnapshot?>()
+                    ),
+                Times.Once()
+            );
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<ICommand<Result<GetTranscodeUrlResult>>>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
+        Mock.Mock<INotificationHubService>()
+            .Verify(
+                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
+    }
+
+    [Fact]
+    public async Task ShouldNotMarkDownloadFinished_WhenProgressReaches100WithoutCompletionEvent()
     {
         await SetupDatabase(
             12005,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var downloadTask = await IDbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+        var serverMachineIdentifier = await IDbContext.GetPlexServerMachineIdentifierById(
+            downloadTask.PlexServerId,
+            CancellationToken
+        );
+
+        SetupSpeedLimit(serverMachineIdentifier, 0);
+        SetupCommandExecutor();
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnProgressUpdated(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadTaskProgress>(),
+                    It.IsAny<DirectDownloadSnapshot?>()
+                )
+            )
+            .Returns(Result.Ok());
+
+        var progressSubject = new Subject<DashDownloadProgress>();
+        var outputSubject = new Subject<string>();
+
+        var dashWrapperMock = new Mock<IDashMpdCliWrapper>();
+        dashWrapperMock.Setup(x => x.Progress).Returns(progressSubject.AsObservable());
+        dashWrapperMock.Setup(x => x.StandardOutput).Returns(outputSubject.AsObservable());
+        dashWrapperMock.Setup(x => x.DownloadCompleted).Returns(Observable.Empty<DashDownloadCompletedEventArgs>());
+        dashWrapperMock
+            .Setup(x => x.StartAsync(It.IsAny<DashMpdCliOptions>()))
+            .Returns(async () =>
+            {
+                progressSubject.OnNext(
+                    new DashDownloadProgress
+                    {
+                        ETA = 0,
+                        Percent = 100,
+                        DownloadedBytes = downloadTask.DataTotal,
+                        TotalBytes = downloadTask.DataTotal,
+                        DownloadSpeedInBytes = 0,
+                        RawOutput = "{}",
+                    }
+                );
+
+                await Task.Delay(700, TestContext.Current.CancellationToken);
+                return Result.Ok();
+            });
+        dashWrapperMock.Setup(x => x.StopAsync()).ReturnsAsync(Result.Ok());
+        dashWrapperMock.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask);
+
+        var sut = CreateSut(dashWrapperMock);
+        var result = await sut.Start(downloadTask.ToKey(), CancellationToken);
+
+        result.IsSuccess.ShouldBeTrue();
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        DomainDownloadStatus.DownloadFinished,
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Never()
+            );
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<ICommand<Result<GetTranscodeUrlResult>>>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
+        Mock.Mock<INotificationHubService>()
+            .Verify(
+                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
+    }
+
+    [Fact]
+    public async Task ShouldCreateDashOutputUsingMkvFilePathAndNormalizedFileName()
+    {
+        await SetupDatabase(
+            12006,
             config =>
             {
                 config.PlexServerCount = 1;
@@ -397,6 +863,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
         var dashWrapperMock = new Mock<IDashMpdCliWrapper>();
         dashWrapperMock.Setup(x => x.Progress).Returns(progressSubject.AsObservable());
         dashWrapperMock.Setup(x => x.StandardOutput).Returns(outputSubject.AsObservable());
+        dashWrapperMock.Setup(x => x.DownloadCompleted).Returns(Observable.Empty<DashDownloadCompletedEventArgs>());
         dashWrapperMock
             .Setup(x => x.StartAsync(It.IsAny<DashMpdCliOptions>()))
             .Returns<DashMpdCliOptions>(options =>
@@ -414,8 +881,24 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
         result.IsSuccess.ShouldBeTrue();
         capturedOptions.ShouldNotBeNull();
 
-        var expectedFinalPath = Path.Combine(downloadTask.DownloadDirectory, downloadTask.FileName);
+        var expectedNormalizedName = DashOutputFileNameCleaner.NormalizeForDashOutput(
+            downloadTask.FileName,
+            VideoQuality.SD
+        );
+        var expectedFinalPath = Path.Combine(downloadTask.DownloadDirectory, expectedNormalizedName);
+
         capturedOptions!.Output.ShouldBe(expectedFinalPath);
-        capturedOptions.Output.ShouldNotBe(downloadTask.DownloadFilePath);
+        capturedOptions.Output.EndsWith(".mkv", StringComparison.OrdinalIgnoreCase).ShouldBeTrue();
+        capturedOptions.Output.ShouldContain("480p");
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<ICommand<Result<GetTranscodeUrlResult>>>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
+        Mock.Mock<INotificationHubService>()
+            .Verify(
+                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
     }
 }

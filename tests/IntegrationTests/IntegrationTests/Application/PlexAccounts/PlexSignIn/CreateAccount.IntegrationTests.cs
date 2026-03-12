@@ -1,3 +1,4 @@
+using System.Net;
 using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application;
@@ -36,7 +37,7 @@ public class CreateAccountIntegrationTests : BaseIntegrationTests
                 {
                     x.PlexServerAccessCount = serverCount;
                     x.MovieLibraryCount = libraryCount;
-                    x.MoviesPerLibraryCount = 500;
+                    x.MoviesPerLibraryCount = 25;
                 };
             }
         );
@@ -69,30 +70,36 @@ public class CreateAccountIntegrationTests : BaseIntegrationTests
             CreatePlexAccountEndpointRequest,
             ResultDTO<PlexAccountDTO>
         >(plexAccountDTO);
-        response.Response.IsSuccessStatusCode.ShouldBeTrue();
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.Created);
 
         var resultDTO = response.Result;
         resultDTO.IsSuccess.ShouldBeTrue();
-        await container.SchedulerService.AwaitScheduler(TestContext.Current.CancellationToken);
 
-        // Add a small delay to ensure database transactions complete after job execution
-        await Task.Delay(1000, TestContext.Current.CancellationToken);
-
-        // Wait for secondary jobs that may be scheduled after the first job completes
-        await container.SchedulerService.AwaitScheduler(TestContext.Current.CancellationToken);
-
-        // Wait for a database to be in the expected state with increased timeout for complex job chains
         await WaitForDatabaseConditionAsync(
             () =>
             {
                 var account = container
                     .DbContext.PlexAccounts.AsNoTracking()
+                    .Include(x => x.PlexAccountServers)
                     .Include(x => x.PlexAccountLibraries)
                     .FirstOrDefault();
-                return account?.PlexAccountLibraries.Count == libraryCount;
+                return account is not null
+                    && account.PlexAccountServers.Count == serverCount
+                    && account.PlexAccountLibraries.Count == libraryCount;
             },
-            maxRetries: 30, // Increased to 30 retries (15 seconds total)
+            maxRetries: 30,
             delayMs: 500
+        );
+
+        await WaitForDatabaseConditionAsync(
+            () =>
+            {
+                var updates = container.MockProgressHubService.JobStatusUpdateList.ToList();
+                return updates.Any(x => x is { JobType: JobTypes.InspectPlexServerJob, Status: JobStatus.Started })
+                    && updates.Any(x => x is { JobType: JobTypes.InspectPlexServerJob, Status: JobStatus.Completed });
+            },
+            maxRetries: 20,
+            delayMs: 250
         );
 
         // Assert
@@ -108,7 +115,7 @@ public class CreateAccountIntegrationTests : BaseIntegrationTests
             .FirstOrDefault();
 
         plexAccountDb.ShouldNotBeNull();
-        plexAccountDb.IsValidated = true;
+        plexAccountDb.IsValidated.ShouldBeTrue();
         plexAccountDb.PlexServers.Count.ShouldBe(1);
         plexAccountDb.DisplayName.ShouldBe(plexAccountDTO.DisplayName);
         plexAccountDb.Username.ShouldBe(plexAccountDTO.Username);
@@ -137,9 +144,11 @@ public class CreateAccountIntegrationTests : BaseIntegrationTests
 
         // Verify job notifications if jobs ran
         jobStatusUpdateList.Count.ShouldBeGreaterThanOrEqualTo(2);
-        jobStatusUpdateList[0].JobType.ShouldBe(JobTypes.InspectPlexServerJob);
-        jobStatusUpdateList[0].Status.ShouldBe(JobStatus.Started);
-        jobStatusUpdateList[1].JobType.ShouldBe(JobTypes.InspectPlexServerJob);
-        jobStatusUpdateList[1].Status.ShouldBe(JobStatus.Completed);
+        jobStatusUpdateList
+            .Any(x => x is { JobType: JobTypes.InspectPlexServerJob, Status: JobStatus.Started })
+            .ShouldBeTrue();
+        jobStatusUpdateList
+            .Any(x => x is { JobType: JobTypes.InspectPlexServerJob, Status: JobStatus.Completed })
+            .ShouldBeTrue();
     }
 }

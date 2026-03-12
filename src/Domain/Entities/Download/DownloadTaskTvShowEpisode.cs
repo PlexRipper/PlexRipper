@@ -6,6 +6,7 @@ public class DownloadTaskTvShowEpisode : DownloadTaskParentBase
 
     public required ICollection<DownloadTaskTvShowEpisodeFile> Children { get; set; } = [];
 
+    [Column(Order = 9)]
     public required Guid ParentId { get; set; }
 
     public required DownloadTaskTvShowSeason? Parent { get; init; }

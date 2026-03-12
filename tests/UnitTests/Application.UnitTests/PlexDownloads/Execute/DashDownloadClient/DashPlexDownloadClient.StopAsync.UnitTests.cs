@@ -5,7 +5,9 @@ using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Data.Contracts;
 using Reaparr.External.Contracts;
+using Reaparr.PlexApi.Contracts;
 using Reaparr.Settings.Contracts;
+using Reaparr.SignalR.Contracts;
 using DomainDownloadStatus = Reaparr.Domain.DownloadStatus;
 
 namespace Reaparr.Application.UnitTests;
@@ -19,6 +21,10 @@ public class DashPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DashPlexDow
     {
         var directoryMock = new Mock<IDirectory>();
         directoryMock.Setup(x => x.CreateDirectory(It.IsAny<string>()));
+        Mock.Mock<INotificationHubService>()
+            .Setup(x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once());
 
         return Mock.Create<DashPlexDownloadClient>(
             new NamedParameter("dashWrapper", dashWrapperMock.Object),
@@ -29,8 +35,16 @@ public class DashPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DashPlexDow
     private void SetupCommandExecutor()
     {
         Mock.Mock<ICommandExecutor>()
-            .Setup(m => m.Send(It.IsAny<ICommand<Result<string>>>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Ok("https://plex.example/start.mpd"));
+            .Setup(m => m.Send(It.IsAny<ICommand<Result<GetTranscodeUrlResult>>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(
+                Result.Ok(
+                    new GetTranscodeUrlResult
+                    {
+                        DownloadUrl = "https://plex.example/start.mpd",
+                        TranscodedQuality = VideoQuality.SD,
+                    }
+                )
+            );
 
         Mock.Mock<ICommandExecutor>()
             .Setup(m => m.Send(It.IsAny<ICommand<Result>>(), It.IsAny<CancellationToken>()))
@@ -77,18 +91,12 @@ public class DashPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DashPlexDow
         SetupSpeedLimit(serverMachineIdentifier);
         SetupCommandExecutor();
 
-        var exitTcs = new TaskCompletionSource<int>();
         var dashWrapperMock = new Mock<IDashMpdCliWrapper>();
         dashWrapperMock.Setup(x => x.Progress).Returns(Observable.Empty<DashDownloadProgress>());
         dashWrapperMock.Setup(x => x.StandardOutput).Returns(Observable.Empty<string>());
+        dashWrapperMock.Setup(x => x.DownloadCompleted).Returns(Observable.Empty<DashDownloadCompletedEventArgs>());
         dashWrapperMock.Setup(x => x.StartAsync(It.IsAny<DashMpdCliOptions>())).ReturnsAsync(Result.Ok());
-        dashWrapperMock
-            .Setup(x => x.StopAsync())
-            .ReturnsAsync(() =>
-            {
-                exitTcs.TrySetResult(143);
-                return Result.Ok();
-            });
+        dashWrapperMock.Setup(x => x.StopAsync()).ReturnsAsync(Result.Ok());
         dashWrapperMock.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask);
 
         var sut = CreateSut(dashWrapperMock);
@@ -109,6 +117,18 @@ public class DashPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DashPlexDow
                         DomainDownloadStatus.Stopped,
                         It.IsAny<CancellationToken>()
                     ),
+                Times.Once()
+            );
+        Mock.Mock<INotificationHubService>()
+            .Verify(
+                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
+        dashWrapperMock.VerifyGet(x => x.DownloadCompleted, Times.Once());
+        dashWrapperMock.Verify(x => x.StopAsync(), Times.Once());
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<ICommand<Result<GetTranscodeUrlResult>>>(), It.IsAny<CancellationToken>()),
                 Times.Once()
             );
     }
@@ -144,18 +164,12 @@ public class DashPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DashPlexDow
         SetupSpeedLimit(serverMachineIdentifier);
         SetupCommandExecutor();
 
-        var exitTcs = new TaskCompletionSource<int>();
         var dashWrapperMock = new Mock<IDashMpdCliWrapper>();
         dashWrapperMock.Setup(x => x.Progress).Returns(Observable.Empty<DashDownloadProgress>());
         dashWrapperMock.Setup(x => x.StandardOutput).Returns(Observable.Empty<string>());
+        dashWrapperMock.Setup(x => x.DownloadCompleted).Returns(Observable.Empty<DashDownloadCompletedEventArgs>());
         dashWrapperMock.Setup(x => x.StartAsync(It.IsAny<DashMpdCliOptions>())).ReturnsAsync(Result.Ok());
-        dashWrapperMock
-            .Setup(x => x.StopAsync())
-            .ReturnsAsync(() =>
-            {
-                exitTcs.TrySetResult(143);
-                return Result.Ok();
-            });
+        dashWrapperMock.Setup(x => x.StopAsync()).ReturnsAsync(Result.Ok());
         dashWrapperMock.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask);
 
         var sut = CreateSut(dashWrapperMock);
@@ -168,5 +182,18 @@ public class DashPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DashPlexDow
 
         firstStop.IsSuccess.ShouldBeTrue();
         secondStop.IsSuccess.ShouldBeTrue();
+
+        Mock.Mock<INotificationHubService>()
+            .Verify(
+                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
+        dashWrapperMock.VerifyGet(x => x.DownloadCompleted, Times.Once());
+        dashWrapperMock.Verify(x => x.StopAsync(), Times.Exactly(2));
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<ICommand<Result<GetTranscodeUrlResult>>>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
     }
 }

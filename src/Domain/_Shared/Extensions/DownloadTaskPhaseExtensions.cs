@@ -57,7 +57,7 @@ public static class DownloadTaskPhaseExtensions
             _ => DataFormat.GetPercentage(downloadTaskProgress.DataReceived, downloadTaskProgress.DataTotal),
         };
 
-    public static long TimeRemaining(
+    public static int TimeRemaining(
         DownloadTaskPhase phase,
         IDownloadTaskProgress downloadTaskProgress,
         IDownloadFileTransferProgress fileTransferProgress

@@ -16,6 +16,12 @@ public interface IDashMpdCliWrapper : IAsyncDisposable
     IObservable<DashDownloadProgress> Progress { get; }
 
     /// <summary>
+    /// Observable completion trigger for a dash-mpd-cli run.
+    /// Each subscription auto-completes after the first completion notification.
+    /// </summary>
+    IObservable<DashDownloadCompletedEventArgs> DownloadCompleted { get; }
+
+    /// <summary>
     /// Starts the dash-mpd-cli process with the specified arguments.
     /// </summary>
     /// <param name="options">Optional configuration options for the download.</param>

@@ -1,5 +1,8 @@
 <template>
 	<QSection :header="t('pages.debug.buttons.alert-display-header')">
+		<QAlert type="success">
+			{{ t('components.alert-display-debug.success-example') }}
+		</QAlert>
 		<QAlert type="info">
 			{{ t('components.alert-display-debug.info-example') }}
 		</QAlert>

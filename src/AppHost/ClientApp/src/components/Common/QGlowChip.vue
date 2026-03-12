@@ -33,12 +33,13 @@ const props = withDefaults(defineProps<{
 const styles = computed(() => {
 	return {
 		'box-shadow': getCssVar(props.color),
-		'background-color': getCssVar('$dark--background-color'),
 	};
 });
 </script>
 
 <style lang="scss">
+@use '@/assets/scss/variables' as *;
+
 .q-chip {
   border-width: 2px;
   box-shadow: 0 0 10px 2px;
@@ -46,6 +47,6 @@ const styles = computed(() => {
 }
 
 .q-chip-background {
-  background-color: $dark-xl-background-color;
+  background-color: $dark-xl-background-color !important;
 }
 </style>

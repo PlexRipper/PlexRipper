@@ -1,3 +1,4 @@
+using LukeHagar.PlexAPI.SDK.Models.Components;
 using NodaTime;
 using Guids = LukeHagar.PlexAPI.SDK.Models.Components.Guids;
 using Media = LukeHagar.PlexAPI.SDK.Models.Components.Media;
@@ -67,7 +68,8 @@ namespace Reaparr.PlexApi.UnitTests
                         VideoFrameRate = "24p",
                         VideoProfile = "high",
                         AudioProfile = "lc",
-                        HasVoiceActivity = true,
+                        HasVoiceActivity = HasVoiceActivity.CreateBoolean(true),
+                        OptimizedForStreaming = true,
                         Part =
                         [
                             new Part
@@ -173,7 +175,7 @@ namespace Reaparr.PlexApi.UnitTests
             media.Bitrate.ShouldBe(sourceMedia.Bitrate!.Value);
             media.Width.ShouldBe(sourceMedia.Width!.Value);
             media.Height.ShouldBe(sourceMedia.Height!.Value);
-            media.HasVoiceActivity.ShouldBe(sourceMedia.HasVoiceActivity!.Value);
+            media.OptimizedForStreaming.ShouldBe(sourceMedia.OptimizedForStreaming ?? false);
 
             // Parts
             media.Parts.Count.ShouldBe(1);

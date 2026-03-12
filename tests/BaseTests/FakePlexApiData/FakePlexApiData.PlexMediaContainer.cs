@@ -39,7 +39,7 @@ public partial class FakePlexApiData
         .RuleFor(l => l.VideoFrameRate, _ => "24p")
         .RuleFor(l => l.AudioProfile, _ => "dts")
         .RuleFor(l => l.VideoProfile, _ => "high")
-        .RuleFor(l => l.HasVoiceActivity, f => f.Random.Bool())
+        .RuleFor(l => l.HasVoiceActivity, (f, _) => HasVoiceActivity.CreateBoolean(f.Random.Bool()))
         .RuleFor(l => l.Container, f => f.Lorem.Word())
         .RuleFor(l => l.VideoResolution, f => f.Lorem.Word())
         .RuleFor(
@@ -81,6 +81,8 @@ public partial class FakePlexApiData
         .RuleFor(l => l.LeafCount, f => f.Random.Int(1))
         .RuleFor(l => l.ViewedLeafCount, f => f.Random.Int(1))
         .RuleFor(l => l.ChildCount, f => f.Random.Int(1, 10))
+        .RuleFor(l => l.SkipChildren, _ => SkipChildren.CreateBoolean(false))
+        .RuleFor(l => l.SkipParent, _ => SkipParent.CreateBoolean(false))
         .RuleFor(l => l.ViewCount, _ => default)
         .RuleFor(l => l.Media, _ => []); // Generated in FinishWith
 

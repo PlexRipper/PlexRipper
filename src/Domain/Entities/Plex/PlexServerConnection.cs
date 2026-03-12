@@ -66,7 +66,7 @@ public class PlexServerConnection : BaseEntity
     public bool IsHttps => Protocol.Equals("https", StringComparison.OrdinalIgnoreCase);
 
     public string GetDownloadUrl(string fileLocationUrl, string token) =>
-        Url.AppendPathSegment(fileLocationUrl).SetQueryParam("X-Plex-Token", token).SetQueryParam("download", 1);
+        Url.AppendPathSegment(fileLocationUrl).SetQueryParam("X-Plex-Token", token);
 
     public PlexConnectionTypes Type
     {

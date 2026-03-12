@@ -6,6 +6,7 @@ public class DownloadTaskTvShowEpisodeFile : DownloadTaskFileBase
 
     public required DownloadTaskTvShowEpisode? Parent { get; init; }
 
+    [Column(Order = 26)]
     public required Guid ParentId { get; init; }
 
     public List<DownloadTaskTvShowEpisodeFileLog> Logs { get; init; } = new();

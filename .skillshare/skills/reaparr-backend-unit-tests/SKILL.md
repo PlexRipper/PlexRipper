@@ -126,8 +126,38 @@ Examples:
 ## Mock Rules
 
 - **Mocks return the expected type only.** Never put real business logic, DB writes, or side effects inside mock callbacks. If a side effect needs to be verified, use `Verifiable` — do not secretly implement it in a `.Returns(...)` callback.
+- **Never simulate production state changes inside mocks.** If a mocked collaborator would normally update DB state, dispatch status transitions, queue work, or publish downstream side effects, do not reproduce that behavior in a callback/delegate. Return the expected `Result` only and verify the interaction contract instead.
+- **For mocked side-effecting collaborators, assert exact call contracts.** Prefer `It.Is<...>(...)` for important parameters and `Verifiable(Times.X())` and/or `Verify(..., Times.X())` for call counts rather than relying on mocked callbacks to make later assertions pass.
+- **Do not make database assertions that depend on mocked dependencies having executed real logic.** If the dependency is mocked, assert the SUT called it with the right values. Only assert persisted downstream state when the real implementation is part of the test.
 - **Mock setups must be inline per test.** Do not extract them into shared helper methods. Each test must be self-contained and readable without jumping elsewhere to understand what is mocked.
 - **Every mock setup must end with `.Verifiable(Times.X())`** to declare how many times it is expected to be called. This collocates the expectation with the setup and makes unmet expectations fail automatically.
+
+Bad:
+
+```csharp
+Mock.Mock<IDownloadTaskUpdateDispatcher>()
+    .Setup(x => x.OnStatusChangedAsync(...))
+    .Returns<DownloadTaskKey, DownloadStatus, CancellationToken>(async (key, _, _) =>
+    {
+        await dbContext.SetDownloadStatus(key, DownloadStatus.Completed);
+        return Result.Ok();
+    });
+```
+
+Good:
+
+```csharp
+Mock.Mock<IDownloadTaskUpdateDispatcher>()
+    .Setup(x =>
+        x.OnStatusChangedAsync(
+            It.Is<DownloadTaskKey>(k => k == expectedKey),
+            It.Is<DownloadStatus>(s => s == DownloadStatus.Completed),
+            It.IsAny<CancellationToken>()
+        )
+    )
+    .ReturnsAsync(Result.Ok())
+    .Verifiable(Times.Once());
+```
 
 ## Assertion Requirements
 
@@ -136,6 +166,8 @@ Always verify both:
 - Relevant side effects: DB state when the real dependency writes to it, or `Verify` on the mock when the SUT delegates the write to a mocked dependency.
 
 Also verify expected mock interactions explicitly; do not leave mocks unverified.
+
+When a dependency is mocked, prefer verifying exact interaction parameters and call counts over asserting downstream state that only the real dependency would have produced.
 
 ## Special Constraints and Gotchas
 
@@ -204,4 +236,5 @@ dotnet test tests/UnitTests/BackgroundJobs.UnitTests/BackgroundJobs.UnitTests.cs
 - Mocking settings interfaces with static abstract members.
 - Extracting mock setups into shared helper methods — keep all mock configuration inline per test.
 - Hiding real logic (DB writes, status updates) inside mock callbacks instead of returning the expected type and verifying with `Verify`.
+- Making post-Act DB assertions that only pass because a mocked dependency performed production logic in a callback.
 - Placing `Mock.Mock<T>()` setups before data setup or mixed in with DB seeding — mock setups must always be the last step of Arrange.

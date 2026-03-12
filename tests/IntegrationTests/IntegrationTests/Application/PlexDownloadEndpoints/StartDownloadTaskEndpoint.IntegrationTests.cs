@@ -76,12 +76,18 @@ public class StartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
             await testResult.Response.Content.ReadAsStringAsync(CancellationToken)
         );
 
-        // Wait for scheduler activity after start request
-        await container.SchedulerService.AwaitScheduler(CancellationToken);
+        var finalDownload = await container.WaitForDownloadStatusAsync(
+            downloadTask.Id,
+            [DownloadStatus.Completed],
+            TimeSpan.FromSeconds(20),
+            CancellationToken
+        );
 
         // Assert
         var result = testResult.Result;
         result.IsSuccess.ShouldBeTrue();
+        finalDownload.ShouldNotBeNull();
+
         var downloadTaskDb = await container.DbContext.GetDownloadTaskAsync(
             downloadTask.Id,
             cancellationToken: CancellationToken

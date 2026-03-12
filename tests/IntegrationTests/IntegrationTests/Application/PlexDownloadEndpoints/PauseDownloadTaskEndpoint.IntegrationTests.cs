@@ -102,9 +102,6 @@ public class PauseDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
         );
         pauseTestResult.Result.IsSuccess.ShouldBeTrue();
 
-        // Wait for the scheduler to complete the pause operation
-        await container.SchedulerService.AwaitScheduler(CancellationToken);
-
         // Wait for the database to reflect the paused status
         await WaitForDatabaseConditionAsync(
             () =>

@@ -41,7 +41,7 @@ public class DashPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DashPlexDow
                     new GetTranscodeUrlResult
                     {
                         DownloadUrl = "https://plex.example/start.mpd",
-                        TranscodedQuality = VideoQuality.FullHD,
+                        TranscodedQuality = VideoQuality.SD,
                     }
                 )
             );
@@ -126,6 +126,11 @@ public class DashPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DashPlexDow
             );
         dashWrapperMock.VerifyGet(x => x.DownloadCompleted, Times.Once());
         dashWrapperMock.Verify(x => x.StopAsync(), Times.Once());
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<ICommand<Result<GetTranscodeUrlResult>>>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
     }
 
     [Fact]
@@ -185,5 +190,10 @@ public class DashPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DashPlexDow
             );
         dashWrapperMock.VerifyGet(x => x.DownloadCompleted, Times.Once());
         dashWrapperMock.Verify(x => x.StopAsync(), Times.Exactly(2));
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<ICommand<Result<GetTranscodeUrlResult>>>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
     }
 }

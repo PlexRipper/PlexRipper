@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Reaparr.Data.Contracts;
 using Reaparr.SignalR.Contracts;
 
 namespace Reaparr.Application.UnitTests;
@@ -408,13 +409,43 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
     {
         await SetupDatabase(84328, config => config.MovieDownloadTasksCount = 1);
         var movieFile = await IDbContext.DownloadTaskMovieFile.AsNoTracking().FirstAsync(CancellationToken);
-        var initialDataReceived = movieFile.DataReceived;
+        var initialProgress = new DownloadTaskProgress
+        {
+            DataTotal = 1000,
+            DataReceived = 500,
+            Percentage = 50,
+            DownloadSpeed = 10,
+        };
 
-        var sut = Sut;
-        await sut.StartAsync(CancellationToken.None);
+        var delayedDbContextFactory = new Mock<IReaparrDbContextFactory>();
+        var createDbContextTcs = new TaskCompletionSource<IReaparrDbContext>(
+            TaskCreationOptions.RunContinuationsAsynchronously
+        );
+        delayedDbContextFactory.Setup(x => x.CreateAsync()).Returns(createDbContextTcs.Task);
 
-        var pauseResult = await sut.OnStatusChangedAsync(movieFile.ToKey(), DownloadStatus.Paused, CancellationToken);
-        pauseResult.IsSuccess.ShouldBeTrue();
+        var downloadHubService = new Mock<IDownloadHubService>();
+        downloadHubService
+            .Setup(x =>
+                x.SendDownloadPatchAsync(
+                    It.IsAny<int>(),
+                    It.IsAny<long>(),
+                    It.IsAny<IReadOnlyCollection<DownloadPatchDTO>>(),
+                    It.IsAny<IReadOnlyCollection<Guid>?>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Returns(Task.CompletedTask);
+
+        var sut = new DownloadTaskUpdateDispatcher(
+            new LoggerConfiguration().CreateLogger(),
+            delayedDbContextFactory.Object,
+            downloadHubService.Object
+        );
+
+        var initialProgressResult = sut.OnProgressUpdated(movieFile.ToKey(), initialProgress);
+        initialProgressResult.IsSuccess.ShouldBeTrue();
+
+        var pauseTask = sut.OnStatusChangedAsync(movieFile.ToKey(), DownloadStatus.Paused, CancellationToken);
 
         var progressResult = sut.OnProgressUpdated(
             movieFile.ToKey(),
@@ -429,17 +460,20 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
 
         progressResult.IsSuccess.ShouldBeTrue();
 
+        createDbContextTcs.SetResult(IDbContext);
+        var pauseResult = await pauseTask;
+        pauseResult.IsSuccess.ShouldBeTrue();
+
         await WaitUntilAsync(async () =>
         {
             var updatedMovieFile = await IDbContext.DownloadTaskMovieFile.AsNoTracking().FirstAsync(CancellationToken);
             return updatedMovieFile.DownloadStatus == DownloadStatus.Paused
-                && updatedMovieFile.DataReceived == initialDataReceived;
+                && updatedMovieFile.DataReceived == initialProgress.DataReceived;
         });
-        await sut.StopAsync(CancellationToken.None);
 
         var updatedMovieFile = await IDbContext.DownloadTaskMovieFile.AsNoTracking().FirstAsync(CancellationToken);
         updatedMovieFile.DownloadStatus.ShouldBe(DownloadStatus.Paused);
-        updatedMovieFile.DataReceived.ShouldBe(initialDataReceived);
+        updatedMovieFile.DataReceived.ShouldBe(initialProgress.DataReceived);
     }
 
     [Fact]
@@ -498,6 +532,8 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
 
         var pauseLog = logs.LastOrDefault(x => x.Status == DownloadStatus.Paused);
         pauseLog.ShouldNotBeNull();
+
+        logs.ShouldContain(x => x.Status == DownloadStatus.Downloading && x.Id < pauseLog!.Id);
 
         logs.Where(x => x.Id > pauseLog!.Id && x.Status == DownloadStatus.Downloading).ShouldBeEmpty();
     }

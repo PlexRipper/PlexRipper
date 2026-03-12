@@ -70,7 +70,7 @@ public static class ReaparrDBContextSeed
             {
                 Id = 8,
                 DisplayName = "Reserved #1 Destination Path",
-                DirectoryPath = "/",
+                DirectoryPath = PathProvider.RootDirectory,
                 FolderType = FolderType.None,
                 MediaType = PlexMediaType.None,
             },
@@ -78,7 +78,7 @@ public static class ReaparrDBContextSeed
             {
                 Id = 9,
                 DisplayName = "Reserved #2 Destination Path",
-                DirectoryPath = "/",
+                DirectoryPath = PathProvider.RootDirectory,
                 FolderType = FolderType.None,
                 MediaType = PlexMediaType.None,
             },
@@ -86,7 +86,7 @@ public static class ReaparrDBContextSeed
             {
                 Id = 10,
                 DisplayName = "Reserved #3 Destination Path",
-                DirectoryPath = "/",
+                DirectoryPath = PathProvider.RootDirectory,
                 FolderType = FolderType.None,
                 MediaType = PlexMediaType.None,
             },

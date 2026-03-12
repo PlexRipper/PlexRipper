@@ -88,7 +88,7 @@ public class RestartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
             downloadTask.Id,
             [DownloadStatus.Completed],
             TimeSpan.FromSeconds(20),
-            TestContext.Current.CancellationToken
+            CancellationToken
         );
 
         // Assert

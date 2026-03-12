@@ -152,27 +152,6 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
             )
         );
 
-        // var cleanUpResult = Result.Try(() =>
-        // {
-        //     if (string.IsNullOrEmpty(_workingDirectory))
-        //         return;
-        //
-        //     try
-        //     {
-        //         foreach (var file in _directory.GetFiles(_workingDirectory, "dashmpd-*"))
-        //         {
-        //             _file.Delete(file);
-        //             _log.Here().Debug("Deleted dash-mpd-cli temp file: {File}", file);
-        //         }
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         _log.Here()
-        //             .Warning(ex, "Failed to clean up dash-mpd-cli temp files in {WorkingDirectory}", _workingDirectory);
-        //         throw;
-        //     }
-        // });
-
         if (IsCancellationRequested())
             return ResultExtensions.TaskIsCancelled(nameof(DashMpdCliWrapper));
 

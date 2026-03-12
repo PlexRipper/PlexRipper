@@ -18,7 +18,7 @@ public class DashOutputFileNameCleanerUnitTests
     [InlineData(
         "风味原产地·潮汕.Flavorful.Origins.S01E06.1080p.NF.WEB-DL.DDP2.0.x264-Ao.mkv",
         VideoQuality.FullHD,
-        "风味原产地·潮汕.Flavorful.Origins.S01E06.NF.DDP2.0.Ao.WEB-DL.1080p.mkv"
+        "风味原产地·潮汕.Flavorful.Origins.S01E06.NF.Ao.WEB-DL.1080p.mkv"
     )]
     [InlineData(
         "Ōoku - The Inner Chambers - S01E04 - Episode 4 WEBDL-1080p.mkv",
@@ -77,6 +77,11 @@ public class DashOutputFileNameCleanerUnitTests
         VideoQuality.HD,
         "lol.2011.S01E08.WEB-DL.720p.mkv"
     )]
+    [InlineData(
+        "Show.Name.2024.S01E01.E02.1080p.WEB-DL.DDP5.1.x265-Group.mkv",
+        VideoQuality.FullHD,
+        "Show.Name.2024.S01E01.E02.WEB-DL.1080p.mkv"
+    )]
     public void ShouldNormalizeToSceneStyleWebDlAndMkv_WhenInputContainsMixedReleaseTokens(
         string input,
         VideoQuality quality,
@@ -118,5 +123,27 @@ public class DashOutputFileNameCleanerUnitTests
         );
 
         result.ShouldBe("Show.Name.test.WEB-DL.1080p.mkv");
+    }
+
+    [Theory]
+    [InlineData("", VideoQuality.FullHD, "download.WEB-DL.1080p.mkv")]
+    [InlineData("   ", VideoQuality.HD, "download.WEB-DL.720p.mkv")]
+    public void ShouldUseDefaultDownloadName_WhenInputIsEmptyOrWhitespace(
+        string input,
+        VideoQuality quality,
+        string expected
+    )
+    {
+        var result = DashOutputFileNameCleaner.NormalizeForDashOutput(input, quality);
+
+        result.ShouldBe(expected);
+    }
+
+    [Fact]
+    public void ShouldUseDefaultDownloadName_WhenInputIsNull()
+    {
+        var result = DashOutputFileNameCleaner.NormalizeForDashOutput(null!, VideoQuality.HD);
+
+        result.ShouldBe("download.WEB-DL.720p.mkv");
     }
 }

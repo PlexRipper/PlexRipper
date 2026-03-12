@@ -70,10 +70,21 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
         await Sut.Execute(context);
 
         // Assert
-        var after = await IDbContext.GetDownloadTaskFileAsync(downloadTask.ToKey(), CancellationToken);
+        var after = await dbContext.GetDownloadTaskFileAsync(downloadTask.ToKey(), CancellationToken);
         after.ShouldNotBeNull();
         after.DownloadStatus.ShouldBe(DownloadStatus.MoveFinished);
 
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<MoveDownloadFileFromFileTaskCommand>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<CleanUpDownloadTaskFoldersCommand>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
+        Mock.Mock<IMoveDownloadFileQueue>().Verify(x => x.CheckMoveDownloadFileJobQueue(), Times.Once());
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Verify(
                 x =>
@@ -135,9 +146,31 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
 
         // Assert: status stays at DownloadFinished (the command handler sets MoveError,
         // but since the command is mocked to fail without touching the DB, status is unchanged)
-        var after = await IDbContext.GetDownloadTaskFileAsync(downloadTask.ToKey(), CancellationToken);
+        var after = await dbContext.GetDownloadTaskFileAsync(downloadTask.ToKey(), CancellationToken);
         after.ShouldNotBeNull();
         after.DownloadStatus.ShouldNotBe(DownloadStatus.Completed);
+
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<MoveDownloadFileFromFileTaskCommand>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<CleanUpDownloadTaskFoldersCommand>(), It.IsAny<CancellationToken>()),
+                Times.Never()
+            );
+        Mock.Mock<IMoveDownloadFileQueue>().Verify(x => x.CheckMoveDownloadFileJobQueue(), Times.Once());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        It.IsAny<DownloadStatus>(),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Never()
+            );
     }
 
     [Fact]
@@ -194,7 +227,7 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
         await Sut.Execute(context);
 
         // Assert
-        var after = await IDbContext
+        var after = await dbContext
             .DownloadTaskMovieFile.AsNoTracking()
             .FirstAsync(x => x.Id == downloadTask.Id, CancellationToken);
         after.ShouldNotBeNull();
@@ -203,6 +236,17 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
         after.FileDataTransferred.ShouldBe(after.DataTotal); // confirm transfer bytes still full
         after.Percentage.ShouldBe(100m); // must stay 100 while the completion update is dispatched
 
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<MoveDownloadFileFromFileTaskCommand>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<CleanUpDownloadTaskFoldersCommand>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
+        Mock.Mock<IMoveDownloadFileQueue>().Verify(x => x.CheckMoveDownloadFileJobQueue(), Times.Once());
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Verify(
                 x =>

@@ -28,7 +28,7 @@ public class DashOutputFileNameCleanerUnitTests
     [InlineData(
         "Øen (2019) - S01E05 [DANiSH WEBRip-1080p h264 8bit 2.0ch AAC].mkv",
         VideoQuality.FullHD,
-        "Øen.2019.WEB-DL.1080p.mkv"
+        "Øen.2019.S01E05.WEB-DL.1080p.mkv"
     )]
     [InlineData(
         "Årgang 20 - S05E03 - Episode 3 WEBDL-1080p.mkv",
@@ -38,12 +38,12 @@ public class DashOutputFileNameCleanerUnitTests
     [InlineData(
         "¿A Qué Estás Esperando! (2024) - S01E04 [WEBDL-1080p 8-bit h264 EAC3 2.0][ES]-NTb.mkv",
         VideoQuality.FullHD,
-        "¿A.Qué.Estás.Esperando!.2024.WEB-DL.1080p.mkv"
+        "¿A.Qué.Estás.Esperando!.2024.S01E04.WEB-DL.1080p.mkv"
     )]
     [InlineData(
         "wtFOCK (2018) - S01E09 [WEBDL-1080p 8-bit h264 AAC 2.0][NL]-BTN.mkv",
         VideoQuality.FullHD,
-        "wtFOCK.2018.WEB-DL.1080p.mkv"
+        "wtFOCK.2018.S01E09.WEB-DL.1080p.mkv"
     )]
     [InlineData("title_t11.mkv", VideoQuality.FullHD, "title.t11.WEB-DL.1080p.mkv")]
     [InlineData(
@@ -70,12 +70,12 @@ public class DashOutputFileNameCleanerUnitTests
     [InlineData(
         "pet (2020) - S01E06.006 - BACK DOOR [Bluray-1080p Remux][8bit][h264][FLAC 2.0][JA]-npz.mkv",
         VideoQuality.FullHD,
-        "pet.2020.WEB-DL.1080p.mkv"
+        "pet.2020.S01E06.WEB-DL.1080p.mkv"
     )]
     [InlineData(
         "lol-) (2011) - S01E08 [HDTV-720p 8-bit x264 AC3 5.1]-BAWLS.mkv",
         VideoQuality.HD,
-        "lol.2011.WEB-DL.720p.mkv"
+        "lol.2011.S01E08.WEB-DL.720p.mkv"
     )]
     public void ShouldNormalizeToSceneStyleWebDlAndMkv_WhenInputContainsMixedReleaseTokens(
         string input,
@@ -107,5 +107,16 @@ public class DashOutputFileNameCleanerUnitTests
         var secondPass = DashOutputFileNameCleaner.NormalizeForDashOutput(firstPass, VideoQuality.FullHD);
 
         secondPass.ShouldBe("AEGIS.1x01.Ep1.WEB-DL.1080p.mkv");
+    }
+
+    [Fact]
+    public void ShouldStripFilesystemInvalidCharacters_WhenNormalizingFileNameTokens()
+    {
+        var result = DashOutputFileNameCleaner.NormalizeForDashOutput(
+            "Show: Name? * \"<test>|.mkv",
+            VideoQuality.FullHD
+        );
+
+        result.ShouldBe("Show.Name.test.WEB-DL.1080p.mkv");
     }
 }

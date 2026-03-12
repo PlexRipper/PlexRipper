@@ -160,6 +160,11 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                     ),
                 Times.Once()
             );
+        Mock.Mock<INotificationHubService>()
+            .Verify(
+                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
     }
 
     [Fact]
@@ -223,6 +228,11 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
 
         result.IsFailed.ShouldBeTrue();
         result.Errors.ShouldContain(x => x.Message.Contains(nameof(DownloadTaskGeneric)));
+        Mock.Mock<INotificationHubService>()
+            .Verify(
+                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()),
+                Times.Never()
+            );
     }
 
     [Fact]
@@ -281,6 +291,11 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
 
         result.IsFailed.ShouldBeTrue();
         dashWrapperMock.Verify(x => x.StartAsync(It.IsAny<DashMpdCliOptions>()), Times.Never());
+        Mock.Mock<INotificationHubService>()
+            .Verify(
+                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()),
+                Times.Never()
+            );
     }
 
     [Fact]
@@ -372,6 +387,11 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                         It.IsAny<Result>(),
                         It.IsAny<CancellationToken>()
                     ),
+                Times.Once()
+            );
+        Mock.Mock<INotificationHubService>()
+            .Verify(
+                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()),
                 Times.Once()
             );
     }
@@ -468,6 +488,11 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                     ),
                 Times.Once()
             );
+        Mock.Mock<INotificationHubService>()
+            .Verify(
+                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
     }
 
     [Fact]
@@ -558,6 +583,11 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                     ),
                 Times.Once
             );
+        Mock.Mock<INotificationHubService>()
+            .Verify(
+                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
     }
 
     [Fact]
@@ -647,6 +677,11 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                     ),
                 Times.Once
             );
+        Mock.Mock<INotificationHubService>()
+            .Verify(
+                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
     }
 
     [Fact]
@@ -734,6 +769,11 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                     ),
                 Times.Never
             );
+        Mock.Mock<INotificationHubService>()
+            .Verify(
+                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
     }
 
     [Fact]
@@ -810,5 +850,10 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
 
         capturedOptions!.Output.ShouldBe(expectedFinalPath);
         capturedOptions.Output.EndsWith(".mkv", StringComparison.OrdinalIgnoreCase).ShouldBeTrue();
+        Mock.Mock<INotificationHubService>()
+            .Verify(
+                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
     }
 }

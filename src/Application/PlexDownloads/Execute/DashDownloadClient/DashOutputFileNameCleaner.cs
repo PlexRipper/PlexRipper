@@ -108,7 +108,13 @@ public static partial class DashOutputFileNameCleaner
 
         var yearIndex = identity.FindIndex(token => IsYearToken(token));
         if (yearIndex >= 0)
+        {
+            var episodeIndex = identity.FindIndex(yearIndex + 1, IsEpisodeToken);
+            if (episodeIndex >= 0)
+                return identity.Take(episodeIndex + 1).ToList();
+
             return identity.Take(yearIndex + 1).ToList();
+        }
 
         return identity;
     }
@@ -138,6 +144,8 @@ public static partial class DashOutputFileNameCleaner
     private static bool IsYearToken(string token) =>
         token.Length == 4 && int.TryParse(token, out var year) && year is >= 1900 and <= 2099;
 
+    private static bool IsEpisodeToken(string token) => EpisodeTokenRegex().IsMatch(token);
+
     private static string GetQualityToken(VideoQuality quality)
     {
         var qualityToken = quality.ToResolutionLabel();
@@ -165,6 +173,7 @@ public static partial class DashOutputFileNameCleaner
     private static string SanitizeToken(string token)
     {
         var cleaned = token.Trim();
+        cleaned = InvalidFileNameCharsRegex().Replace(cleaned, string.Empty);
         cleaned = cleaned.Replace(' ', '.');
         cleaned = Regex.Replace(cleaned, "\\.+", ".");
         return cleaned.Trim('.');
@@ -181,6 +190,12 @@ public static partial class DashOutputFileNameCleaner
 
     [GeneratedRegex(@"^(?:\d{3,4}p|4k|8k)$", RegexOptions.IgnoreCase)]
     private static partial Regex QualityTokenRegex();
+
+    [GeneratedRegex(@"^(?:s\d{1,2}e\d{1,3}(?:e\d{1,3})*|\d{1,2}x\d{1,3}|e\d{1,3})$", RegexOptions.IgnoreCase)]
+    private static partial Regex EpisodeTokenRegex();
+
+    [GeneratedRegex("[<>:\"/\\\\|?*]")]
+    private static partial Regex InvalidFileNameCharsRegex();
 
     [GeneratedRegex(@"^(?:\d\.\d|dd\d\.\d)$", RegexOptions.IgnoreCase)]
     private static partial Regex ChannelTokenRegex();

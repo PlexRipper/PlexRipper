@@ -184,6 +184,7 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
         // Assert
         var after = await IDbContext.GetDownloadTaskFileAsync(downloadTask.ToKey(), CancellationToken);
         after.ShouldNotBeNull();
+        after.DownloadStatus.ShouldBe(DownloadStatus.Completed);
         after.DataReceived.ShouldBe(0L); // confirm download bytes remain at 0
         after.FileDataTransferred.ShouldBe(after.DataTotal); // confirm transfer bytes still full
         after.Percentage.ShouldBe(100m); // must be 100, never reset to 0

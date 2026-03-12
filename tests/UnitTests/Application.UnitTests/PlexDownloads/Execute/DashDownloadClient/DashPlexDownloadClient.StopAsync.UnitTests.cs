@@ -119,6 +119,13 @@ public class DashPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DashPlexDow
                     ),
                 Times.Once()
             );
+        Mock.Mock<INotificationHubService>()
+            .Verify(
+                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
+        dashWrapperMock.VerifyGet(x => x.DownloadCompleted, Times.Once());
+        dashWrapperMock.Verify(x => x.StopAsync(), Times.Once());
     }
 
     [Fact]
@@ -170,5 +177,13 @@ public class DashPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DashPlexDow
 
         firstStop.IsSuccess.ShouldBeTrue();
         secondStop.IsSuccess.ShouldBeTrue();
+
+        Mock.Mock<INotificationHubService>()
+            .Verify(
+                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
+        dashWrapperMock.VerifyGet(x => x.DownloadCompleted, Times.Once());
+        dashWrapperMock.Verify(x => x.StopAsync(), Times.Exactly(2));
     }
 }

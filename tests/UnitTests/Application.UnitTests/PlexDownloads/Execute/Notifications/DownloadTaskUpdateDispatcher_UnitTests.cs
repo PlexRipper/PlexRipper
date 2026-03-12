@@ -429,7 +429,12 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
 
         progressResult.IsSuccess.ShouldBeTrue();
 
-        await Task.Delay(1500, CancellationToken);
+        await WaitUntilAsync(async () =>
+        {
+            var updatedMovieFile = await IDbContext.DownloadTaskMovieFile.AsNoTracking().FirstAsync(CancellationToken);
+            return updatedMovieFile.DownloadStatus == DownloadStatus.Paused
+                && updatedMovieFile.DataReceived == initialDataReceived;
+        });
         await sut.StopAsync(CancellationToken.None);
 
         var updatedMovieFile = await IDbContext.DownloadTaskMovieFile.AsNoTracking().FirstAsync(CancellationToken);
@@ -471,7 +476,18 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
             }
         );
 
-        await Task.Delay(1500, CancellationToken);
+        await WaitUntilAsync(async () =>
+        {
+            var logs = await IDbContext
+                .DownloadTaskMovieFileLogs.AsNoTracking()
+                .Where(x => x.DownloadTaskFileId == movieFile.Id)
+                .OrderBy(x => x.Id)
+                .ToListAsync(CancellationToken);
+
+            var pauseLog = logs.LastOrDefault(x => x.Status == DownloadStatus.Paused);
+            return pauseLog is not null
+                && logs.Where(x => x.Id > pauseLog.Id && x.Status == DownloadStatus.Downloading).Count() == 0;
+        });
         await sut.StopAsync(CancellationToken.None);
 
         var logs = await IDbContext
@@ -492,5 +508,20 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
             await Task.Delay(100, CancellationToken);
 
         collection.Count.ShouldBeGreaterThanOrEqualTo(expectedCount);
+    }
+
+    private async Task WaitUntilAsync(Func<Task<bool>> predicate, int timeoutMs = 4_000, int pollIntervalMs = 100)
+    {
+        var started = DateTime.UtcNow;
+
+        while (DateTime.UtcNow - started < TimeSpan.FromMilliseconds(timeoutMs))
+        {
+            if (await predicate())
+                return;
+
+            await Task.Delay(pollIntervalMs, CancellationToken);
+        }
+
+        (await predicate()).ShouldBeTrue();
     }
 }

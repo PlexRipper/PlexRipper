@@ -2,6 +2,7 @@ using FastEndpoints;
 using FluentValidation;
 using Flurl;
 using Reaparr.Data.Contracts;
+using System.Net;
 
 namespace Reaparr.Application;
 
@@ -78,7 +79,7 @@ public class GetDirectDownloadUrlCommandHandler : ICommandHandler<GetDirectDownl
             .LogError();
     }
 
-    private async Task<Result<HttpResponseMessage>> ProbeDownloadUrl(
+    private async Task<Result<ProbeResult>> ProbeDownloadUrl(
         string downloadUrl,
         CancellationToken cancellationToken
     )
@@ -91,14 +92,27 @@ public class GetDirectDownloadUrlCommandHandler : ICommandHandler<GetDirectDownl
                 HttpCompletionOption.ResponseHeadersRead,
                 cancellationToken
             );
-            return Result.Ok(response);
+            var probeResult = new ProbeResult(
+                response.StatusCode,
+                response.IsSuccessStatusCode
+            );
+
+            return Result.Ok(probeResult);
         }
-        catch (Exception ex) when (ex is not OperationCanceledException)
+        catch (Exception ex)
         {
+            if (ex is OperationCanceledException && cancellationToken.IsCancellationRequested)
+                throw;
+
             return Result
                 .Fail($"Failed to probe Plex download URL {downloadUrl}")
                 .WithError(new ExceptionalError(ex))
                 .LogError();
         }
     }
+
+    private sealed record ProbeResult(
+        HttpStatusCode StatusCode,
+        bool IsSuccessStatusCode
+    );
 }

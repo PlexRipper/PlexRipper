@@ -69,6 +69,7 @@ namespace Reaparr.PlexApi.UnitTests
                         VideoProfile = "high",
                         AudioProfile = "lc",
                         HasVoiceActivity = HasVoiceActivity.CreateBoolean(true),
+                        OptimizedForStreaming = true,
                         Part =
                         [
                             new Part
@@ -174,6 +175,7 @@ namespace Reaparr.PlexApi.UnitTests
             media.Bitrate.ShouldBe(sourceMedia.Bitrate!.Value);
             media.Width.ShouldBe(sourceMedia.Width!.Value);
             media.Height.ShouldBe(sourceMedia.Height!.Value);
+            media.OptimizedForStreaming.ShouldBe(sourceMedia.OptimizedForStreaming ?? false);
 
             // Parts
             media.Parts.Count.ShouldBe(1);

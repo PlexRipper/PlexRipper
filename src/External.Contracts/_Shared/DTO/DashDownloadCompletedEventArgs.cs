@@ -8,5 +8,5 @@ public sealed record DashDownloadCompletedEventArgs(bool Cancelled, int? ExitCod
     /// <summary>
     /// Gets a value indicating whether the process completed successfully.
     /// </summary>
-    public bool IsSuccess => !Cancelled && Result.IsSuccess;
+    public bool IsSuccess => !Cancelled && ExitCode == 0 && Result.IsSuccess;
 }

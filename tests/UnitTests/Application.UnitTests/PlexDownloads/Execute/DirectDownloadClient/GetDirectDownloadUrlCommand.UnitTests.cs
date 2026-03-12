@@ -39,6 +39,7 @@ public class GetDirectDownloadUrlCommandUnitTests : BaseUnitTest<GetDirectDownlo
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Value.ShouldNotContain("download=1");
+        Mock.Mock<IHttpClientFactory>().Verify(x => x.CreateClient(It.IsAny<string>()), Times.Once());
     }
 
     [Fact]
@@ -69,6 +70,7 @@ public class GetDirectDownloadUrlCommandUnitTests : BaseUnitTest<GetDirectDownlo
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Value.ShouldContain("download=1");
+        Mock.Mock<IHttpClientFactory>().Verify(x => x.CreateClient(It.IsAny<string>()), Times.Once());
     }
 
     [Fact]
@@ -98,6 +100,7 @@ public class GetDirectDownloadUrlCommandUnitTests : BaseUnitTest<GetDirectDownlo
 
         // Assert
         result.IsFailed.ShouldBeTrue();
+        Mock.Mock<IHttpClientFactory>().Verify(x => x.CreateClient(It.IsAny<string>()), Times.Once());
     }
 
     private GetDirectDownloadUrlCommandHandler CreateSut() =>
@@ -118,7 +121,14 @@ public class GetDirectDownloadUrlCommandUnitTests : BaseUnitTest<GetDirectDownlo
             CancellationToken cancellationToken
         )
         {
-            var statusCode = _statuses.Count > 0 ? _statuses.Dequeue() : HttpStatusCode.OK;
+            if (_statuses.Count == 0)
+            {
+                throw new InvalidOperationException(
+                    $"{nameof(SequenceStatusCodeHandler)} was exhausted while probing {request.RequestUri}."
+                );
+            }
+
+            var statusCode = _statuses.Dequeue();
             return Task.FromResult(new HttpResponseMessage(statusCode) { RequestMessage = request });
         }
     }

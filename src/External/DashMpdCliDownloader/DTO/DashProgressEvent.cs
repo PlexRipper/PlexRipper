@@ -19,7 +19,7 @@ public sealed record DashProgressEvent
     [JsonPropertyName("downloaded_bytes")]
     public long DownloadedBytes { get; init; }
 
-    [JsonPropertyName("total_bytes")]
+    [JsonPropertyName("estimated_total_bytes")]
     public long TotalBytes { get; init; }
 
     [JsonPropertyName("message")]

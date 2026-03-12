@@ -299,6 +299,8 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
         if (string.IsNullOrWhiteSpace(output))
             return null;
 
+        _log.Here().Debug("Progress output: {Output}", output);
+
         var result = Result.Try(() =>
             JsonSerializer.Deserialize<DashProgressEvent>(output, DefaultJsonSerializerOptions.ConfigStandard)
         );

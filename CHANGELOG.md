@@ -1,5 +1,31 @@
 Reaparr Changelog
 
+# [0.37.0-dev.3](https://github.com/Reaparr/Reaparr/compare/v0.37.0-dev.2...v0.37.0-dev.3) (2026-03-12)
+
+
+### Bug Fixes
+
+* **Web-UI:** Add timeout to success notification after download task log deletion ([6b6bb7c](https://github.com/Reaparr/Reaparr/commit/6b6bb7c79ff6ef81276da08a4f47ba9960e6b410))
+* **Web-UI:** Added timeout to misconfigured errors for sonarr/radarr integration ([1ef8be4](https://github.com/Reaparr/Reaparr/commit/1ef8be4f6c8ae93ab7b3924a24662b8b6e785250))
+* **WebAPI:** Avoid double disposal of dash wrapper ([a414b3c](https://github.com/Reaparr/Reaparr/commit/a414b3c4ef27d2c851565b835dafc610b63d1a90))
+* **Web-UI:** Corrected the icon in the notifications ([590215d](https://github.com/Reaparr/Reaparr/commit/590215dffc7389bdab201d655addfce54e427e36))
+* **Web-UI:** Enforce strict DownloadPatch MessagePack tuple parsing ([a33b4d7](https://github.com/Reaparr/Reaparr/commit/a33b4d714566b713db55c6f85e8f379b4baa3c55))
+* **WebAPI:** Fixed an issue where some Plex servers needed download=1 in the download url, and some dont, now Reaparr will try both options always ([cd9cc4b](https://github.com/Reaparr/Reaparr/commit/cd9cc4bde2e2b143140fa483167be30614d9cba1))
+* **Web-UI:** Fixed the media quality icon to have a darker background to make the quality text better readable ([7ee1c75](https://github.com/Reaparr/Reaparr/commit/7ee1c7509c08dfcf20f2d53b18a11ab8cf407511))
+* **WebAPI:** Fixed the over logging when using the stream downloader ([21f15a8](https://github.com/Reaparr/Reaparr/commit/21f15a822a5068cca6396e10004d8735c0ff785d))
+* **Web-UI:** Fixed the progress not updating correctly in the front-end + added tests to avoid this ([446da78](https://github.com/Reaparr/Reaparr/commit/446da78d5456e95bbb5ea20397ceb182c344740c))
+* **Web-UI:** Fixed the title of dialogs, when long, will overlap with the UI underneath ([361fdfa](https://github.com/Reaparr/Reaparr/commit/361fdfa8508f7e6a89739b688790a5a18f0f9118))
+* **WebAPI:** Map DASH network timeouts to server unreachable ([6a015cc](https://github.com/Reaparr/Reaparr/commit/6a015cc461569339a08b15b6c5525568fe0ce221))
+* **WebAPI:** Mark DASH downloads complete only after process exit ([2c09e8d](https://github.com/Reaparr/Reaparr/commit/2c09e8dbea159e4bbfe8c63ed325b78c2a39837f))
+* **WebAPI:** Persist final progress before marking downloads paused ([8b03ee2](https://github.com/Reaparr/Reaparr/commit/8b03ee2765ba8e67260201e9cfc0717ae00900a7))
+
+
+### Features
+
+* **WebAPI:** Downloading with the stream downloader will now name it correctly based on the transcoded quality ([9b4805f](https://github.com/Reaparr/Reaparr/commit/9b4805f98b2925a5c58e2fc56a2ad1f31e18b06f))
+* **Web-UI:** Improved the notifications to be compatible with the house style ([b7add9c](https://github.com/Reaparr/Reaparr/commit/b7add9c512548511d719165545485ebd17317c19))
+* **Web-UI:** Warn users to read docs before enabling stream downloader ([af8c971](https://github.com/Reaparr/Reaparr/commit/af8c97167fa013f051056b4f833808dde8908d19))
+
 # [0.37.0-dev.2](https://github.com/Reaparr/Reaparr/compare/v0.37.0-dev.1...v0.37.0-dev.2) (2026-03-09)
 
 

@@ -165,6 +165,33 @@ public partial class FakePlexApiData
             ) ?? throw new InvalidOperationException("Failed to deserialize transcode decision media container");
     }
 
+    public static MediaContainerWithDecision GetMakeDecisionMediaContainerWithMismatchedDisplayTitle() =>
+        GetMakeDecisionMediaContainer(config =>
+        {
+            config.DirectPlayDecisionCode = 3000;
+            config.DirectPlayDecisionText =
+                "This app cannot play this item. The reason is: video.bitDepth limitation applies: 10 > 8.";
+            config.GeneralDecisionCode = 1001;
+            config.GeneralDecisionText = "Direct play not available; Conversion OK.";
+            config.TranscodeDecisionCode = 1001;
+            config.TranscodeDecisionText = "Direct play not available; Conversion OK.";
+            config.MediaVideoResolution = "SD";
+            config.MediaWidth = 720;
+            config.MediaHeight = 404;
+            config.AudioDecision = MediaContainerWithDecisionDecision.Transcode;
+            config.VideoStreams.Clear();
+            config.VideoStreams.Add(
+                new MakeDecisionVideoStreamConfig
+                {
+                    DisplayTitle = "1080p",
+                    ExtendedDisplayTitle = "1080p (PRORES)",
+                    Width = 720,
+                    Height = 404,
+                    Decision = MediaContainerWithDecisionDecision.Transcode,
+                }
+            );
+        });
+
     public static MediaContainerWithDecision GetMakeDecisionMediaContainerWithWidthFallback() =>
         GetMakeDecisionMediaContainer(config =>
         {

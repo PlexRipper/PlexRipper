@@ -216,33 +216,14 @@ public class GetDashTranscodeDecisionCommandHandlerUnitTests : BaseUnitTest<GetD
                     config.VideoStreams.Add(
                         new MakeDecisionVideoStreamConfig
                         {
-                            DisplayTitle = "2160p",
-                            ExtendedDisplayTitle = "4k",
+                            DisplayTitle = "Video Stream",
+                            ExtendedDisplayTitle = "Video Stream",
                             Width = 3840,
                             Height = 2160,
                         }
                     );
                 },
                 VideoQuality.UHD_4K
-            },
-            {
-                config =>
-                {
-                    config.MediaVideoResolution = null;
-                    config.MediaWidth = null;
-                    config.MediaHeight = null;
-                    config.VideoStreams.Clear();
-                    config.VideoStreams.Add(
-                        new MakeDecisionVideoStreamConfig
-                        {
-                            DisplayTitle = "Video Stream",
-                            ExtendedDisplayTitle = "1440p",
-                            Width = null,
-                            Height = null,
-                        }
-                    );
-                },
-                VideoQuality.QHD
             },
             {
                 config =>
@@ -429,6 +410,58 @@ public class GetDashTranscodeDecisionCommandHandlerUnitTests : BaseUnitTest<GetD
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Value.TranscodedQuality.ShouldBe(VideoQuality.UHD_4K);
+
+        Mock.Mock<IPlexApiClientFactory>().Verify();
+        plexApiMock.Verify();
+    }
+
+    [Fact]
+    public async Task ShouldResolveQualityFromFactoryData_WhenDisplayTitleDoesNotMatchDimensions()
+    {
+        // Arrange
+        await SetupDatabase(
+            4107,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
+            }
+        );
+        var dbContext = IDbContext;
+
+        var plexServer = await dbContext.PlexServers.FirstOrDefaultAsync(CancellationToken);
+        plexServer.ShouldNotBeNull();
+
+        var mediaContainer = FakePlexApiData.GetMakeDecisionMediaContainerWithMismatchedDisplayTitle();
+        var decisionResponse = FakePlexApiData.GetMakeDecisionResponse(
+            HttpStatusCode.OK,
+            new Seed(4107),
+            mediaContainer
+        );
+
+        var plexApiMock = new Mock<IPlexAPI>();
+        plexApiMock
+            .Setup(x => x.Transcoder.MakeDecisionAsync(It.IsAny<MakeDecisionRequest>()))
+            .ReturnsAsync(decisionResponse)
+            .Verifiable(Times.Once);
+
+        Mock.Mock<IPlexApiClientFactory>()
+            .Setup(x => x.CreateClient(It.IsAny<string>(), It.IsAny<PlexApiClientOptions>()))
+            .Returns(plexApiMock.Object)
+            .Verifiable(Times.Once);
+
+        var command = CreateCommand(plexServer.Id);
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.GeneralDecisionCode.ShouldBe("1001");
+        result.Value.TranscodeDecisionCode.ShouldBe("1001");
+        result.Value.VideoDecision.ShouldBe("Transcode");
+        result.Value.AudioDecision.ShouldBe("Transcode");
+        result.Value.TranscodedQuality.ShouldBe(VideoQuality.SD);
 
         Mock.Mock<IPlexApiClientFactory>().Verify();
         plexApiMock.Verify();

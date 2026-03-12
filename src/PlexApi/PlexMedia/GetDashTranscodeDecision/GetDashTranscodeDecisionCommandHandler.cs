@@ -158,23 +158,15 @@ public class GetDashTranscodeDecisionCommandHandler
         MediaContainerWithDecisionMedia media
     )
     {
-        var displayTitleQuality = stream.DisplayTitle?.ToVideoQuality() ?? VideoQuality.Unknown;
-        if (displayTitleQuality is not VideoQuality.Unknown)
-            return displayTitleQuality;
-
-        var extendedDisplayTitleQuality = stream.ExtendedDisplayTitle?.ToVideoQuality() ?? VideoQuality.Unknown;
-        if (extendedDisplayTitleQuality is not VideoQuality.Unknown)
-            return extendedDisplayTitleQuality;
-
-        var mediaResolutionQuality = media.VideoResolution?.ToVideoQuality() ?? VideoQuality.Unknown;
-        if (mediaResolutionQuality is not VideoQuality.Unknown)
-            return mediaResolutionQuality;
-
         if (stream.Width is { } streamWidth)
             return ToVideoQualityByWidth(Convert.ToInt32(streamWidth));
 
         if (stream.Height is { } streamHeight)
             return ToVideoQuality(Convert.ToInt32(streamHeight));
+
+        var mediaResolutionQuality = media.VideoResolution?.ToVideoQuality() ?? VideoQuality.Unknown;
+        if (mediaResolutionQuality is not VideoQuality.Unknown)
+            return mediaResolutionQuality;
 
         return VideoQuality.None;
     }

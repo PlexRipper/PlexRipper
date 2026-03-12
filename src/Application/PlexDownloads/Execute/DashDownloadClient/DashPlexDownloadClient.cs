@@ -35,6 +35,7 @@ public class DashPlexDownloadClient : IPlexDownloadClient
     private readonly CompositeDisposable _subscriptions = new();
     private readonly Subject<Unit> _destroy = new();
     private bool _disposed;
+    private DownloadTaskProgress _lastProgressUpdate = new();
 
     public DashPlexDownloadClient(
         ILogger log,
@@ -128,6 +129,8 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         if (startResult.IsCancelled || startResult.IsFailed)
             return startResult;
 
+        // Small delay before disposing this client to ensure everything is processing correctly
+        await Task.Delay(2000);
         return Result.Ok();
     }
 
@@ -215,7 +218,7 @@ public class DashPlexDownloadClient : IPlexDownloadClient
                 .TakeUntil(_destroy)
                 .Subscribe(progress =>
                 {
-                    var progressUpdate = new DownloadTaskProgress
+                    _lastProgressUpdate = new DownloadTaskProgress
                     {
                         DataTotal = progress.TotalBytes,
                         Percentage = Convert.ToDecimal(progress.Percent),
@@ -224,7 +227,7 @@ public class DashPlexDownloadClient : IPlexDownloadClient
                         TimeRemaining = progress.ETA,
                     };
 
-                    _downloadTaskUpdateDispatcher.OnProgressUpdated(key, progressUpdate);
+                    _downloadTaskUpdateDispatcher.OnProgressUpdated(key, _lastProgressUpdate);
                 })
         );
 
@@ -258,6 +261,17 @@ public class DashPlexDownloadClient : IPlexDownloadClient
             await SetDownloadStatusAsync(status, completed.Result);
             return;
         }
+
+        // Ensure the last progress is submitted, dash-mpd-cli sometimes does not do this on completion
+        _lastProgressUpdate = new DownloadTaskProgress
+        {
+            DataTotal = _lastProgressUpdate.DataTotal,
+            DataReceived = _lastProgressUpdate.DataReceived,
+            Percentage = 100m,
+            DownloadSpeed = 0,
+            TimeRemaining = 0,
+        };
+        _downloadTaskUpdateDispatcher.OnProgressUpdated(key, _lastProgressUpdate);
 
         await SetDownloadStatusAsync(DownloadStatus.DownloadFinished);
     }

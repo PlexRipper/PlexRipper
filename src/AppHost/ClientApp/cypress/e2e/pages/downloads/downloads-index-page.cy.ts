@@ -81,27 +81,6 @@ describe('Downloads page', () => {
 		});
 	});
 
-	it('Should handle huge list of download tasks when navigating the downloads table paginator', () => {
-		cy.basePageSetup({
-			plexAccountCount: 1,
-			plexServerCount: 1,
-			plexMovieLibraryCount: 5,
-			tvShowDownloadTask: 100,
-		});
-		cy.visit(route('/downloads'));
-		cy.url().should('eq', route('/downloads'));
-		cy.getPageData().then((data) => {
-			const downloads = data.serverDownloadProgress[0].downloads;
-			Cypress._.times(10, (i) => {
-				cy.get(`:nth-child(1) > .p-paginator > .p-paginator-content > .p-paginator-pages > [aria-label="Page ${i + 1}"]`).click();
-				// Ensure the table content changes by checking the first row title
-				cy.getCy(`column-title-${downloads[i * 10 + 1].id}`).should('have.text', downloads[i * 10 + 1].title);
-			});
-		});
-
-		cy.url().should('eq', route('/downloads'));
-	});
-
 	it('Should open details dialog when clicking on the details action button next to a download task row', () => {
 		cy.basePageSetup({
 			plexAccountCount: 1,

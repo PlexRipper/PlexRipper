@@ -1,8 +1,8 @@
+using System.Net;
 using FastEndpoints;
 using FluentValidation;
 using Flurl;
 using Reaparr.Data.Contracts;
-using System.Net;
 
 namespace Reaparr.Application;
 
@@ -79,10 +79,7 @@ public class GetDirectDownloadUrlCommandHandler : ICommandHandler<GetDirectDownl
             .LogError();
     }
 
-    private async Task<Result<ProbeResult>> ProbeDownloadUrl(
-        string downloadUrl,
-        CancellationToken cancellationToken
-    )
+    private async Task<Result<ProbeResult>> ProbeDownloadUrl(string downloadUrl, CancellationToken cancellationToken)
     {
         try
         {
@@ -92,10 +89,7 @@ public class GetDirectDownloadUrlCommandHandler : ICommandHandler<GetDirectDownl
                 HttpCompletionOption.ResponseHeadersRead,
                 cancellationToken
             );
-            var probeResult = new ProbeResult(
-                response.StatusCode,
-                response.IsSuccessStatusCode
-            );
+            var probeResult = new ProbeResult(response.StatusCode, response.IsSuccessStatusCode);
 
             return Result.Ok(probeResult);
         }
@@ -111,8 +105,5 @@ public class GetDirectDownloadUrlCommandHandler : ICommandHandler<GetDirectDownl
         }
     }
 
-    private sealed record ProbeResult(
-        HttpStatusCode StatusCode,
-        bool IsSuccessStatusCode
-    );
+    private sealed record ProbeResult(HttpStatusCode StatusCode, bool IsSuccessStatusCode);
 }

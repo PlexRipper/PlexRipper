@@ -15,9 +15,6 @@ namespace Reaparr.External;
 /// </summary>
 public class DashMpdCliWrapper : IDashMpdCliWrapper
 {
-    private const string DashInfoLevelToken = " INFO ";
-    private const string DashErrorLevelToken = " ERROR ";
-    private const string RetryingSegmentToken = "Retrying";
     private const string NetworkErrorToken = "network error";
     private const string MaxNetworkErrorToken = "max_error_count";
 
@@ -192,39 +189,61 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
 
         _stdoutSubject.OnNext(line);
 
-        if (line.Contains("\"type\": \"progress\""))
+        var progress = TryParseProgress(line);
+        if (progress != null)
         {
-            var progress = TryParseProgress(line);
-            if (progress != null)
-            {
-                _progressSubject.OnNext(progress);
-            }
+            _progressSubject.OnNext(progress);
+            return;
         }
-        else
+
+        var dashLogEvent = TryParseLogEvent(line);
+        if (dashLogEvent == null)
         {
-            if (line.Contains(DashErrorLevelToken, StringComparison.OrdinalIgnoreCase))
-            {
-                if (IsNetworkErrorLine(line))
-                {
-                    _hasNetworkError = true;
-                    _networkErrorLine = line;
-                }
-
-                _log.Here().Error("{Data}", line);
-                return;
-            }
-
-            if (
-                line.Contains(DashInfoLevelToken, StringComparison.OrdinalIgnoreCase)
-                && line.Contains(RetryingSegmentToken, StringComparison.OrdinalIgnoreCase)
-            )
-            {
-                _log.Here().Warning("{Data}", line);
-                return;
-            }
-
-            _log.Here().Debug("{Data}", line);
+            _log.Here().Error("Failed to parse dash-mpd-cli NDJSON line: {Data}", line);
+            return;
         }
+
+        if (IsNetworkErrorLine(dashLogEvent.Message))
+        {
+            _hasNetworkError = true;
+            _networkErrorLine = dashLogEvent.Message;
+        }
+
+        if (string.Equals(dashLogEvent.Level, "ERROR", StringComparison.OrdinalIgnoreCase))
+        {
+            _log.Here().Error("{Data}", line);
+            return;
+        }
+
+        if (
+            string.Equals(dashLogEvent.Level, "WARN", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(dashLogEvent.Level, "WARNING", StringComparison.OrdinalIgnoreCase)
+        )
+        {
+            _log.Here().Warning("{Data}", line);
+            return;
+        }
+
+        _log.Here().Debug("{Data}", line);
+    }
+
+    private static DashLogEvent? TryParseLogEvent(string output)
+    {
+        if (string.IsNullOrWhiteSpace(output))
+            return null;
+
+        var result = Result.Try(() =>
+            JsonSerializer.Deserialize<DashLogEvent>(output, DefaultJsonSerializerOptions.ConfigStandard)
+        );
+
+        if (result.IsFailed)
+            return null;
+
+        var valueEvent = result.Value;
+        if (valueEvent is null)
+            return null;
+
+        return valueEvent;
     }
 
     private Result CreateFailureResult(int exitCode)

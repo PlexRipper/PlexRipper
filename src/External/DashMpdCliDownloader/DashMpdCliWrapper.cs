@@ -155,31 +155,31 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
             )
         );
 
-        var cleanUpResult = Result.Try(() =>
-        {
-            if (string.IsNullOrEmpty(_workingDirectory))
-                return;
-
-            try
-            {
-                foreach (var file in _directory.GetFiles(_workingDirectory, "dashmpd-*"))
-                {
-                    _file.Delete(file);
-                    _log.Here().Debug("Deleted dash-mpd-cli temp file: {File}", file);
-                }
-            }
-            catch (Exception ex)
-            {
-                _log.Here()
-                    .Warning(ex, "Failed to clean up dash-mpd-cli temp files in {WorkingDirectory}", _workingDirectory);
-                throw;
-            }
-        });
+        // var cleanUpResult = Result.Try(() =>
+        // {
+        //     if (string.IsNullOrEmpty(_workingDirectory))
+        //         return;
+        //
+        //     try
+        //     {
+        //         foreach (var file in _directory.GetFiles(_workingDirectory, "dashmpd-*"))
+        //         {
+        //             _file.Delete(file);
+        //             _log.Here().Debug("Deleted dash-mpd-cli temp file: {File}", file);
+        //         }
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         _log.Here()
+        //             .Warning(ex, "Failed to clean up dash-mpd-cli temp files in {WorkingDirectory}", _workingDirectory);
+        //         throw;
+        //     }
+        // });
 
         if (IsCancellationRequested())
             return ResultExtensions.TaskIsCancelled(nameof(DashMpdCliWrapper));
 
-        return Result.Merge(listenResult, cleanUpResult, processResult);
+        return Result.Merge(listenResult, processResult);
     }
 
     private bool IsCancellationRequested() =>
@@ -314,13 +314,13 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
 
         return new DashDownloadProgress
         {
-            ETA = valueEvent.EtaSeconds,
+            ETA = valueEvent.EtaSeconds ?? 0,
             Percent = valueEvent.Percent,
             DownloadSpeedInBytes = valueEvent.Bandwidth,
             CurrentStep = valueEvent.Message,
             RawOutput = output,
             DownloadedBytes = valueEvent.DownloadedBytes,
-            TotalBytes = valueEvent.TotalBytes,
+            TotalBytes = valueEvent.TotalBytes ?? 0,
         };
     }
 

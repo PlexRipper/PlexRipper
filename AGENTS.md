@@ -82,7 +82,7 @@ Do **not** renice other processes unless explicitly requested.
 
 ## Interaction rules
 
-- **Ask clarifying questions before acting.** Use multiple-choice format so the user can easily select an answer.
+- Always ask me questions using clickable multiple-choice options via the question tool. Never ask questions in plain text. Bundle related questions together whenever possible. Include a recommended option when appropriate.
 - Default to **read-only exploration and analysis**. Only write when edits are explicitly needed.
 - Keep write access **workspace-scoped** — all changes stay inside the repo.
 

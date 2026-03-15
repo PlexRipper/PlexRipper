@@ -1,4 +1,3 @@
-using System.IO.Abstractions;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -26,7 +25,6 @@ public class DashPlexDownloadClient : IPlexDownloadClient
     private readonly ICommandExecutor _commandExecutor;
     private readonly IDownloadTaskUpdateDispatcher _downloadTaskUpdateDispatcher;
     private readonly IServerSettingsModule _serverSettings;
-    private readonly IDirectory _directory;
     private readonly INotificationHubService _notificationHubService;
 
     private DownloadTaskKey? _downloadTaskKey;
@@ -42,7 +40,6 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         ICommandExecutor commandExecutor,
         IDownloadTaskUpdateDispatcher downloadTaskUpdateDispatcher,
         IServerSettingsModule serverSettings,
-        IDirectory directory,
         INotificationHubService notificationHubService
     )
     {
@@ -51,7 +48,6 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         _commandExecutor = commandExecutor;
         _downloadTaskUpdateDispatcher = downloadTaskUpdateDispatcher;
         _serverSettings = serverSettings;
-        _directory = directory;
         _notificationHubService = notificationHubService;
         _dbContext = dbContextFactory.Create();
     }
@@ -93,12 +89,15 @@ public class DashPlexDownloadClient : IPlexDownloadClient
             return downloadUrlResult.ToResult().LogError();
         }
 
-        // Create working directory
-        var createDirectoryResult = Result.Try(() => _directory.CreateDirectory(downloadTask.DownloadDirectory));
-        if (createDirectoryResult.IsFailed)
+        // Ensure the download directory exists and has enough disk space
+        var ensureDirectoryResult = await _commandExecutor.Send(
+            new EnsureDownloadDirectoryCommand(downloadTask.DownloadDirectory, downloadTask.DataTotal),
+            cancellationToken
+        );
+        if (ensureDirectoryResult.IsFailed)
         {
-            await SetDownloadStatusAsync(DownloadStatus.StorageError, createDirectoryResult.ToResult());
-            return createDirectoryResult.ToResult();
+            await SetDownloadStatusAsync(DownloadStatus.StorageError, ensureDirectoryResult);
+            return ensureDirectoryResult;
         }
 
         var outputQuality = downloadUrlResult.Value.TranscodedQuality;

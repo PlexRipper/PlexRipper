@@ -33,11 +33,6 @@ public class DirectPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DirectPle
             .Setup(m => m.Send(It.IsAny<GetDirectDownloadUrlCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok("https://plex.example/download.mp4"));
 
-        // CreateDownloadFileStreamCommand returns Result<Stream>
-        Mock.Mock<ICommandExecutor>()
-            .Setup(m => m.Send(It.IsAny<ICommand<Result<Stream>>>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Ok(Stream.Null));
-
         Mock.Mock<ICommandExecutor>()
             .Setup(m => m.Send(It.IsAny<ICommand<Result>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok());

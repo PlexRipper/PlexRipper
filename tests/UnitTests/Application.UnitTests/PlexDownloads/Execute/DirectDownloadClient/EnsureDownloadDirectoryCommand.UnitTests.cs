@@ -1,0 +1,182 @@
+using System.IO;
+using System.IO.Abstractions;
+using System.IO.Abstractions.TestingHelpers;
+using ByteSizeLib;
+
+namespace Reaparr.Application.UnitTests;
+
+public class EnsureDownloadDirectoryCommandUnitTests : BaseCommandUnitTest<EnsureDownloadDirectoryCommand>
+{
+    public EnsureDownloadDirectoryCommandUnitTests(ITestOutputHelper output)
+        : base(output) { }
+
+    // -------------------------------------------------------------------------
+    // Validator tests
+    // -------------------------------------------------------------------------
+
+    [Fact]
+    public async Task ShouldReturnFailedResult_WhenDirectoryIsEmpty()
+    {
+        // Arrange
+        var command = new EnsureDownloadDirectoryCommand(string.Empty, 1024);
+
+        // Act
+        var result = await TestHandlerExecuteAsync(command);
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        result.Errors.ShouldContain(e => e.Message.Contains("Directory cannot be empty"));
+    }
+
+    [Fact]
+    public async Task ShouldReturnFailedResult_WhenFileSizeIsZero()
+    {
+        // Arrange
+        var command = new EnsureDownloadDirectoryCommand("/downloads/reaparr/Movies/Test", 0);
+
+        // Act
+        var result = await TestHandlerExecuteAsync(command);
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        result.Errors.ShouldContain(e => e.Message.Contains("File size must be greater than zero"));
+    }
+
+    [Fact]
+    public async Task ShouldReturnFailedResult_WhenFileSizeIsNegative()
+    {
+        // Arrange
+        var command = new EnsureDownloadDirectoryCommand("/downloads/reaparr/Movies/Test", -1);
+
+        // Act
+        var result = await TestHandlerExecuteAsync(command);
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        result.Errors.ShouldContain(e => e.Message.Contains("File size must be greater than zero"));
+    }
+
+    // -------------------------------------------------------------------------
+    // Handler tests
+    // -------------------------------------------------------------------------
+
+    [Fact]
+    public async Task ShouldReturnFailedResult_WhenCreateDirectoryThrows()
+    {
+        // Arrange
+        const string directory = "/downloads/reaparr/Movies/Test Movie (2024)";
+        var command = new EnsureDownloadDirectoryCommand(directory, 1_000_000);
+
+        // CreateDirectory throws; IPath must never be reached (strict mock will catch any unexpected call)
+        Mock.Mock<IDirectory>()
+            .Setup(x => x.CreateDirectory(directory))
+            .Throws(new IOException("Permission denied"))
+            .Verifiable(Times.Once());
+
+        // Act
+        var result = await TestHandlerExecuteAsync(command);
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        Mock.Mock<IDirectory>().Verify();
+    }
+
+    [Fact]
+    public async Task ShouldReturnFailedResult_WhenDiskSpaceCheckFails()
+    {
+        // Arrange — use a Windows-style path that MockFileSystem on Linux cannot resolve to a drive,
+        // causing DriveInfo.New() to throw and GetAvailableSpaceByDirectory to return a failed Result.
+        const string directory = @"C:\no-such-drive\Movies";
+        var command = new EnsureDownloadDirectoryCommand(directory, 1_000_000);
+
+        SetupFileSystem(fs =>
+        {
+            // The C:\ drive is not added to the MockFileSystem, so DriveInfo.New() will throw,
+            // which GetAvailableSpaceByDirectory catches and wraps as a failed Result.
+        });
+
+        // Act
+        var result = await TestHandlerExecuteAsync(command);
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task ShouldReturnFailedResult_WhenAvailableSpaceIsLessThanFileSize()
+    {
+        // Arrange — configure the drive with less free space than the requested file size
+        const string directory = "/downloads/reaparr/Movies/Test Movie (2024)";
+        const long fileSize = (long)ByteSize.BytesInMegaByte * 500; // 500 MB
+        const long availableSpace = (long)ByteSize.BytesInMegaByte * 100; // 100 MB — not enough
+
+        var command = new EnsureDownloadDirectoryCommand(directory, fileSize);
+
+        SetupFileSystem(fs =>
+        {
+            fs.AddDrive(
+                "/",
+                new MockDriveData
+                {
+                    IsReady = true,
+                    DriveType = DriveType.Fixed,
+                    AvailableFreeSpace = availableSpace,
+                }
+            );
+        });
+
+        // Act
+        var result = await TestHandlerExecuteAsync(command);
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        result.Errors.ShouldContain(e => e.Message.Contains("not enough space") && e.Message.Contains(directory));
+    }
+
+    [Fact]
+    public async Task ShouldReturnSuccessResult_WhenDirectoryIsCreatedAndSpaceIsSufficient()
+    {
+        // Arrange
+        const string directory = "/downloads/reaparr/Movies/Test Movie (2024)";
+        const long fileSize = (long)ByteSize.BytesInMegaByte * 500; // 500 MB
+
+        var command = new EnsureDownloadDirectoryCommand(directory, fileSize);
+
+        SetupFileSystem(); // DefaultAvailableSpace is 1000 GB — well above 500 MB
+
+        // Act
+        var result = await TestHandlerExecuteAsync(command);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task ShouldReturnSuccessResult_WhenAvailableSpaceExactlyEqualsFileSize()
+    {
+        // Arrange
+        const string directory = "/downloads/reaparr/Movies/Test Movie (2024)";
+        const long fileSize = (long)ByteSize.BytesInMegaByte * 500; // 500 MB
+
+        var command = new EnsureDownloadDirectoryCommand(directory, fileSize);
+
+        SetupFileSystem(fs =>
+        {
+            fs.AddDrive(
+                "/",
+                new MockDriveData
+                {
+                    IsReady = true,
+                    DriveType = DriveType.Fixed,
+                    AvailableFreeSpace = fileSize, // exactly equal — should succeed
+                }
+            );
+        });
+
+        // Act
+        var result = await TestHandlerExecuteAsync(command);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+    }
+}

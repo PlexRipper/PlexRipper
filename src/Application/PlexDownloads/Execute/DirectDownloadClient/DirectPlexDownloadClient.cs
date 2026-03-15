@@ -100,29 +100,19 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
 
         var downloadUrl = downloadUrlResult.Value;
 
-        // Prepare destination stream
-        // TODO this should be replaced with just making and ensuring the destination path exist, doesn't need a stream
-        var fileStreamResult = await _commandExecutor.Send(
-            new CreateDownloadFileStreamCommand(
-                downloadTask.DownloadDirectory,
-                Path.GetFileName(downloadTask.DownloadFilePath),
-                downloadTask.DataTotal
-            ),
+        // Ensure the download directory exists and has enough disk space
+        var ensureDirectoryResult = await _commandExecutor.Send(
+            new EnsureDownloadDirectoryCommand(downloadTask.DownloadDirectory, downloadTask.DataTotal),
             cancellationToken
         );
 
-        if (fileStreamResult.IsFailed)
+        if (ensureDirectoryResult.IsFailed)
         {
-            var statusResult = await SetDownloadStatusAsync(
-                Domain.DownloadStatus.StorageError,
-                fileStreamResult.ToResult()
-            );
+            var statusResult = await SetDownloadStatusAsync(Domain.DownloadStatus.StorageError, ensureDirectoryResult);
             if (statusResult.IsFailed)
                 return statusResult;
-            return fileStreamResult.ToResult();
+            return ensureDirectoryResult;
         }
-
-        await using var fileStream = fileStreamResult.Value;
 
         await SetupDownloadListeners(downloadTaskKey);
 

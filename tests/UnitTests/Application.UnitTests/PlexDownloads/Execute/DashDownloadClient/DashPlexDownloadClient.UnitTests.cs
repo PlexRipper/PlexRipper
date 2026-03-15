@@ -1,4 +1,3 @@
-using System.IO.Abstractions;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using Autofac;
@@ -18,21 +17,13 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
     public DashPlexDownloadClientUnitTests(ITestOutputHelper output)
         : base(output) { }
 
-    private DashPlexDownloadClient CreateSut(
-        Mock<IDashMpdCliWrapper> dashWrapperMock,
-        Mock<IDirectory>? directoryMock = null
-    )
+    private DashPlexDownloadClient CreateSut(Mock<IDashMpdCliWrapper> dashWrapperMock)
     {
-        var dirMock = directoryMock ?? new Mock<IDirectory>();
-        dirMock.Setup(x => x.CreateDirectory(It.IsAny<string>()));
         Mock.Mock<INotificationHubService>()
             .Setup(x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
-        return Mock.Create<DashPlexDownloadClient>(
-            new NamedParameter("dashWrapper", dashWrapperMock.Object),
-            new NamedParameter("directory", dirMock.Object)
-        );
+        return Mock.Create<DashPlexDownloadClient>(new NamedParameter("dashWrapper", dashWrapperMock.Object));
     }
 
     private void SetupCommandExecutor(Result<GetTranscodeUrlResult>? getUrlResult = null)
@@ -50,6 +41,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                     )
             );
 
+        // Covers EnsureDownloadDirectoryCommand and any other Result commands
         Mock.Mock<ICommandExecutor>()
             .Setup(m => m.Send(It.IsAny<ICommand<Result>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok());

@@ -80,11 +80,6 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
 
     private void SetupCommandExecutor()
     {
-        // CreateDownloadFileStreamCommand returns Result<Stream>
-        Mock.Mock<ICommandExecutor>()
-            .Setup(m => m.Send(It.IsAny<ICommand<Result<Stream>>>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Ok(Stream.Null));
-
         Mock.Mock<ICommandExecutor>()
             .Setup(m => m.Send(It.IsAny<ICommand<Result>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok());
@@ -186,7 +181,7 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
     }
 
     [Fact]
-    public async Task ShouldCreateDownloadStreamUsingTempFileName_WhenStartingDownload()
+    public async Task ShouldEnsureDownloadDirectoryExists_WhenStartingDownload()
     {
         // Arrange
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
@@ -236,22 +231,22 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
 
         SetupSpeedLimitMocks(serverMachineIdentifier);
 
-        CreateDownloadFileStreamCommand? createStreamCommand = null;
+        EnsureDownloadDirectoryCommand? ensureDirectoryCommand = null;
 
         Mock.Mock<ICommandExecutor>()
-            .Setup(m => m.Send(It.IsAny<ICommand<Result<Stream>>>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Ok(Stream.Null))
-            .Callback<ICommand<Result<Stream>>, CancellationToken>(
-                (command, _) => createStreamCommand = command as CreateDownloadFileStreamCommand
+            .Setup(m => m.Send(It.IsAny<ICommand<Result>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok())
+            .Callback<ICommand<Result>, CancellationToken>(
+                (command, _) =>
+                {
+                    if (command is EnsureDownloadDirectoryCommand cmd)
+                        ensureDirectoryCommand = cmd;
+                }
             );
 
         Mock.Mock<ICommandExecutor>()
             .Setup(m => m.Send(It.IsAny<GetDirectDownloadUrlCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok("http://plex/file.mkv"));
-
-        Mock.Mock<ICommandExecutor>()
-            .Setup(m => m.Send(It.IsAny<ICommand<Result>>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Ok());
 
         // Act
         var sut = CreateSut(BuildSuccessDownloadServiceMock());
@@ -259,11 +254,9 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
 
         // Assert
         startResult.IsSuccess.ShouldBeTrue();
-        createStreamCommand.ShouldNotBeNull();
-
-        var expectedTempFileName = Path.GetFileName(downloadTask.DownloadFilePath);
-        createStreamCommand!.FileName.ShouldBe(expectedTempFileName);
-        createStreamCommand.FileName.ShouldNotBe(downloadTask.FileName);
+        ensureDirectoryCommand.ShouldNotBeNull();
+        ensureDirectoryCommand!.Directory.ShouldBe(downloadTask.DownloadDirectory);
+        ensureDirectoryCommand.FileSize.ShouldBe(downloadTask.DataTotal);
         Mock.Mock<ICommandExecutor>()
             .Verify(x => x.Send(It.IsAny<GetDirectDownloadUrlCommand>(), It.IsAny<CancellationToken>()), Times.Once());
     }
@@ -533,19 +526,20 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
 
         SetupSpeedLimitMocks(serverMachineIdentifier);
 
-        // Make CreateDownloadFileStreamCommand fail; all other Result commands succeed
+        // All Result commands succeed by default
         Mock.Mock<ICommandExecutor>()
-            .Setup(m => m.Send(It.IsAny<ICommand<Result<Stream>>>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Fail<Stream>("Disk full"))
-            .Verifiable(Times.Once);
+            .Setup(m => m.Send(It.IsAny<ICommand<Result>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok());
 
         Mock.Mock<ICommandExecutor>()
             .Setup(m => m.Send(It.IsAny<GetDirectDownloadUrlCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok("http://plex/file.mkv"));
 
+        // Make EnsureDownloadDirectoryCommand fail (registered last to override the general ICommand<Result> setup)
         Mock.Mock<ICommandExecutor>()
-            .Setup(m => m.Send(It.IsAny<ICommand<Result>>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Ok());
+            .Setup(m => m.Send(It.IsAny<EnsureDownloadDirectoryCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Fail("Disk full"))
+            .Verifiable(Times.Once);
 
         // Act
         var sut = CreateSut(BuildSuccessDownloadServiceMock());

@@ -1,4 +1,5 @@
-﻿using Reaparr.FluentResultExtensions;
+﻿using System.Net;
+using Reaparr.FluentResultExtensions;
 
 // ReSharper disable once CheckNamespace
 // Needs to be in the same namespace as the FluentResults package
@@ -49,33 +50,47 @@ public static partial class ResultExtensions
 
     #region AddStatusCode
 
-    public static Result AddStatusCode(this Result result, int statusCode, string msg = "")
+    public static Result AddStatusCode(this Result result, HttpStatusCode statusCode, string msg = "")
     {
         return statusCode switch
         {
-            200 => result.Add200OkRequestSuccess(msg),
-            201 => result.Add201CreatedRequestSuccess(msg),
-            400 => result.Add400BadRequestError(msg),
-            401 => result.Add401UnauthorizedError(msg),
-            404 => result.Add404NotFoundError(msg),
-            408 => result.Add408RequestTimeoutError(msg),
-            502 => result.Add502BadGatewayError(msg),
-            _ => result.AddStatusCodeError(statusCode, msg),
+            HttpStatusCode.OK => result.Add200OkRequestSuccess(msg),
+            HttpStatusCode.Created => result.Add201CreatedRequestSuccess(msg),
+            HttpStatusCode.NoContent => result.Add204NoContentRequestSuccess(msg),
+            HttpStatusCode.Accepted => result.AddStatusCodeSuccess((int)HttpStatusCode.Accepted, msg),
+            HttpStatusCode.BadRequest => result.Add400BadRequestError(msg),
+            HttpStatusCode.Unauthorized => result.Add401UnauthorizedError(msg),
+            HttpStatusCode.Forbidden => result.Add403ForbiddenError(msg),
+            HttpStatusCode.NotFound => result.Add404NotFoundError(msg),
+            HttpStatusCode.RequestTimeout => result.Add408RequestTimeoutError(msg),
+            HttpStatusCode.TooManyRequests => result.Add429TooManyRequestsError(msg),
+            HttpStatusCode.InternalServerError => result.Add500InternalServerError(msg),
+            HttpStatusCode.BadGateway => result.Add502BadGatewayError(msg),
+            HttpStatusCode.ServiceUnavailable => result.Add503ServiceUnavailableError(msg),
+            HttpStatusCode.GatewayTimeout => result.Add504GatewayTimeoutError(msg),
+            _ => result.AddStatusCodeError((int)statusCode, msg),
         };
     }
 
-    public static Result<T> AddStatusCode<T>(this Result<T> result, int statusCode, string msg = "")
+    public static Result<T> AddStatusCode<T>(this Result<T> result, HttpStatusCode statusCode, string msg = "")
     {
         return statusCode switch
         {
-            200 => result.Add200OkRequestSuccess(msg),
-            201 => result.Add201CreatedRequestSuccess(msg),
-            400 => result.Add400BadRequestError(msg),
-            401 => result.Add401UnauthorizedError(msg),
-            404 => result.Add404NotFoundError(msg),
-            408 => result.Add408RequestTimeoutError(msg),
-            502 => result.Add502BadGatewayError(msg),
-            _ => result.AddStatusCodeError(statusCode, msg),
+            HttpStatusCode.OK => result.Add200OkRequestSuccess(msg),
+            HttpStatusCode.Created => result.Add201CreatedRequestSuccess(msg),
+            HttpStatusCode.NoContent => result.Add204NoContentRequestSuccess(msg),
+            HttpStatusCode.Accepted => result.AddStatusCodeSuccess((int)HttpStatusCode.Accepted, msg),
+            HttpStatusCode.BadRequest => result.Add400BadRequestError(msg),
+            HttpStatusCode.Unauthorized => result.Add401UnauthorizedError(msg),
+            HttpStatusCode.Forbidden => result.Add403ForbiddenError(msg),
+            HttpStatusCode.NotFound => result.Add404NotFoundError(msg),
+            HttpStatusCode.RequestTimeout => result.Add408RequestTimeoutError(msg),
+            HttpStatusCode.TooManyRequests => result.Add429TooManyRequestsError(msg),
+            HttpStatusCode.InternalServerError => result.Add500InternalServerError(msg),
+            HttpStatusCode.BadGateway => result.Add502BadGatewayError(msg),
+            HttpStatusCode.ServiceUnavailable => result.Add503ServiceUnavailableError(msg),
+            HttpStatusCode.GatewayTimeout => result.Add504GatewayTimeoutError(msg),
+            _ => result.AddStatusCodeError((int)statusCode, msg),
         };
     }
 
@@ -291,6 +306,32 @@ public static partial class ResultExtensions
 
     #endregion
 
+    #region 429
+
+    public static bool Has429TooManyRequestsError(this Result result) =>
+        result.HasStatusCode(HttpCodes.Status429TooManyRequests);
+
+    public static Result Add429TooManyRequestsError(this Result result, string message = "Too Many Requests") =>
+        result.AddStatusCodeError(HttpCodes.Status429TooManyRequests, message);
+
+    public static Result Create429TooManyRequestsResult(string message = "") =>
+        CreateErrorStatusCodeResult(HttpCodes.Status429TooManyRequests, message);
+
+    #endregion
+
+    #region 500
+
+    public static bool Has500InternalServerError(this Result result) =>
+        result.HasStatusCode(HttpCodes.Status500InternalServerError);
+
+    public static Result Add500InternalServerError(this Result result, string message = "Internal Server Error") =>
+        result.AddStatusCodeError(HttpCodes.Status500InternalServerError, message);
+
+    public static Result Create500InternalServerErrorResult(string message = "") =>
+        CreateErrorStatusCodeResult(HttpCodes.Status500InternalServerError, message);
+
+    #endregion
+
     #region 502
 
     public static bool Has502BadGatewayError(this Result result) => result.HasStatusCode(HttpCodes.Status502BadGateway);
@@ -300,6 +341,19 @@ public static partial class ResultExtensions
 
     public static Result Create502BadGatewayResult(string message = "") =>
         CreateErrorStatusCodeResult(HttpCodes.Status502BadGateway, message);
+
+    #endregion
+
+    #region 503
+
+    public static bool Has503ServiceUnavailableError(this Result result) =>
+        result.HasStatusCode(HttpCodes.Status503ServiceUnavailable);
+
+    public static Result Add503ServiceUnavailableError(this Result result, string message = "Service Unavailable") =>
+        result.AddStatusCodeError(HttpCodes.Status503ServiceUnavailable, message);
+
+    public static Result Create503ServiceUnavailableResult(string message = "") =>
+        CreateErrorStatusCodeResult(HttpCodes.Status503ServiceUnavailable, message);
 
     #endregion
 
@@ -430,6 +484,30 @@ public static partial class ResultExtensions
 
     #endregion
 
+    #region 429
+
+    public static bool Has429TooManyRequestsError<T>(this Result<T> result) =>
+        result.HasStatusCode(HttpCodes.Status429TooManyRequests);
+
+    public static Result<T> Add429TooManyRequestsError<T>(
+        this Result<T> result,
+        string message = "Too Many Requests"
+    ) => result.AddStatusCodeError(HttpCodes.Status429TooManyRequests, message);
+
+    #endregion
+
+    #region 500
+
+    public static bool Has500InternalServerError<T>(this Result<T> result) =>
+        result.HasStatusCode(HttpCodes.Status500InternalServerError);
+
+    public static Result<T> Add500InternalServerError<T>(
+        this Result<T> result,
+        string message = "Internal Server Error"
+    ) => result.AddStatusCodeError(HttpCodes.Status500InternalServerError, message);
+
+    #endregion
+
     #region 502
 
     public static bool Has502BadGatewayError<T>(this Result<T> result) =>
@@ -437,6 +515,30 @@ public static partial class ResultExtensions
 
     public static Result<T> Add502BadGatewayError<T>(this Result<T> result, string message = "Not Found") =>
         result.AddStatusCodeError(HttpCodes.Status502BadGateway, message);
+
+    #endregion
+
+    #region 503
+
+    public static bool Has503ServiceUnavailableError<T>(this Result<T> result) =>
+        result.HasStatusCode(HttpCodes.Status503ServiceUnavailable);
+
+    public static Result<T> Add503ServiceUnavailableError<T>(
+        this Result<T> result,
+        string message = "Service Unavailable"
+    ) => result.AddStatusCodeError(HttpCodes.Status503ServiceUnavailable, message);
+
+    #endregion
+
+    #region 504
+
+    public static bool Has504GatewayTimeoutError<T>(this Result<T> result) =>
+        result.HasStatusCode(HttpCodes.Status504GatewayTimeout);
+
+    public static Result<T> Add504GatewayTimeoutError<T>(
+        this Result<T> result,
+        string message = "The server didn't respond in time."
+    ) => result.AddStatusCodeError(HttpCodes.Status504GatewayTimeout, message);
 
     #endregion
 

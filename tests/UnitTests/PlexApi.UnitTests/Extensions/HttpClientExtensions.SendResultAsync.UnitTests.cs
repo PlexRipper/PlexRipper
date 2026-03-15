@@ -1,0 +1,73 @@
+using System.Net;
+using Moq.Contrib.HttpClient;
+
+namespace Reaparr.PlexApi.UnitTests;
+
+public class HttpClientExtensionsSendResultAsyncUnitTests : BaseUnitTest<object>
+{
+    public HttpClientExtensionsSendResultAsyncUnitTests(ITestOutputHelper output)
+        : base(output) { }
+
+    [Fact]
+    public async Task ShouldReturnSuccessResult_WhenResponseIsReturned()
+    {
+        // Arrange
+        HttpHandlerMock.SetupAnyRequest().ReturnsResponse(HttpStatusCode.OK);
+
+        using var httpClient = new HttpClient(HttpHandlerMock.Object);
+        using var request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/test");
+
+        // Act
+        var result = await httpClient.SendResultAsync(
+            request,
+            HttpCompletionOption.ResponseHeadersRead,
+            CancellationToken
+        );
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.StatusCode.ShouldBe(HttpStatusCode.OK);
+    }
+
+    [Fact]
+    public async Task ShouldReturn408RequestTimeoutError_WhenRequestTimesOut()
+    {
+        // Arrange
+        HttpHandlerMock.SetupAnyRequest().ThrowsAsync(new TaskCanceledException("Request timed out"));
+
+        using var httpClient = new HttpClient(HttpHandlerMock.Object);
+        using var request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/test");
+
+        // Act
+        var result = await httpClient.SendResultAsync(
+            request,
+            HttpCompletionOption.ResponseHeadersRead,
+            CancellationToken
+        );
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        result.Has408RequestTimeout().ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task ShouldReturn502BadGatewayError_WhenHttpRequestFails()
+    {
+        // Arrange
+        HttpHandlerMock.SetupAnyRequest().ThrowsAsync(new HttpRequestException("Network error"));
+
+        using var httpClient = new HttpClient(HttpHandlerMock.Object);
+        using var request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/test");
+
+        // Act
+        var result = await httpClient.SendResultAsync(
+            request,
+            HttpCompletionOption.ResponseHeadersRead,
+            CancellationToken
+        );
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        result.Has502BadGatewayError().ShouldBeTrue();
+    }
+}

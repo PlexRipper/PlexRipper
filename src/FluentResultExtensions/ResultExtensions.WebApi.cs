@@ -7,6 +7,9 @@ namespace FluentResults;
 
 public static partial class ResultExtensions
 {
+    private const string NetworkTimeoutToken = "network timeout";
+    private const string TimedOutToken = "timed out";
+
     #region Properties
 
     public static string StatusCodeName => "StatusCode";
@@ -110,6 +113,19 @@ public static partial class ResultExtensions
 
     public static bool FindStatusCode<T>(this Result<T> result, int statusCode) =>
         result.ToResult()?.HasStatusCode(statusCode) ?? false;
+
+    public static bool IsServerUnreachable(this Result result) =>
+        result.Has408RequestTimeout()
+        || result.Has500InternalServerError()
+        || result.Has502BadGatewayError()
+        || result.Has503ServiceUnavailableError()
+        || result.Has504GatewayTimeoutError()
+        || result.Errors.Any(error =>
+            error.Message.Contains(NetworkTimeoutToken, StringComparison.OrdinalIgnoreCase)
+            || error.Message.Contains(TimedOutToken, StringComparison.OrdinalIgnoreCase)
+        );
+
+    public static bool IsServerUnreachable<T>(this Result<T> result) => result.ToResult().IsServerUnreachable();
 
     #endregion
 

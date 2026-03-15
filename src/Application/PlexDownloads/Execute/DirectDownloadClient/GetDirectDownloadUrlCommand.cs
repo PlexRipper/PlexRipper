@@ -3,6 +3,7 @@ using FastEndpoints;
 using FluentValidation;
 using Flurl;
 using Reaparr.Data.Contracts;
+using Reaparr.FluentResultExtensions;
 
 namespace Reaparr.Application;
 
@@ -81,28 +82,27 @@ public class GetDirectDownloadUrlCommandHandler : ICommandHandler<GetDirectDownl
 
     private async Task<Result<ProbeResult>> ProbeDownloadUrl(string downloadUrl, CancellationToken cancellationToken)
     {
-        try
-        {
-            using var request = new HttpRequestMessage(HttpMethod.Get, downloadUrl);
-            using var response = await _httpClient.SendAsync(
-                request,
-                HttpCompletionOption.ResponseHeadersRead,
-                cancellationToken
-            );
-            var probeResult = new ProbeResult(response.StatusCode, response.IsSuccessStatusCode);
+        using var request = new HttpRequestMessage(HttpMethod.Get, downloadUrl);
+        var responseResult = await _httpClient.SendResultAsync(
+            request,
+            HttpCompletionOption.ResponseHeadersRead,
+            cancellationToken
+        );
 
-            return Result.Ok(probeResult);
-        }
-        catch (Exception ex)
+        if (responseResult.IsFailed && responseResult.IsServerUnreachable())
         {
-            if (ex is OperationCanceledException && cancellationToken.IsCancellationRequested)
-                throw;
-
-            return Result
-                .Fail($"Failed to probe Plex download URL {downloadUrl}")
-                .WithError(new ExceptionalError(ex))
-                .LogError();
+            using var failedResponse = responseResult.ToHttpResponseMessage(request);
+            return Result.Fail<ProbeResult>(responseResult.Errors);
         }
+
+        if (responseResult.IsFailed)
+        {
+            using var failedResponse = responseResult.ToHttpResponseMessage(request);
+            return Result.Ok(new ProbeResult(failedResponse.StatusCode, failedResponse.IsSuccessStatusCode));
+        }
+
+        using var response = responseResult.Value;
+        return Result.Ok(new ProbeResult(response.StatusCode, response.IsSuccessStatusCode));
     }
 
     private sealed record ProbeResult(HttpStatusCode StatusCode, bool IsSuccessStatusCode);

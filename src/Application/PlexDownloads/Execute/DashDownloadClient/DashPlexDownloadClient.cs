@@ -20,8 +20,6 @@ namespace Reaparr.Application;
 /// </summary>
 public class DashPlexDownloadClient : IPlexDownloadClient
 {
-    private const string NetworkTimeoutToken = "network timeout";
-
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly IDashMpdCliWrapper _dashWrapper;
@@ -88,7 +86,7 @@ public class DashPlexDownloadClient : IPlexDownloadClient
 
         if (downloadUrlResult.IsFailed)
         {
-            var status = IsServerUnreachableError(downloadUrlResult.ToResult())
+            var status = downloadUrlResult.ToResult().IsServerUnreachable()
                 ? DownloadStatus.ServerUnreachable
                 : DownloadStatus.SourceUnavailable;
             await SetDownloadStatusAsync(status, downloadUrlResult.ToResult());
@@ -255,7 +253,7 @@ public class DashPlexDownloadClient : IPlexDownloadClient
 
         if (!completed.IsSuccess)
         {
-            var status = IsServerUnreachableError(completed.Result)
+            var status = completed.Result.IsServerUnreachable()
                 ? DownloadStatus.ServerUnreachable
                 : DownloadStatus.DownloadClientError;
             await SetDownloadStatusAsync(status, completed.Result);
@@ -292,16 +290,6 @@ public class DashPlexDownloadClient : IPlexDownloadClient
             status,
             errorResult,
             CancellationToken.None
-        );
-    }
-
-    private static bool IsServerUnreachableError(Result result)
-    {
-        if (result.Has504GatewayTimeoutError())
-            return true;
-
-        return result.Errors.Any(error =>
-            error.Message.Contains(NetworkTimeoutToken, StringComparison.OrdinalIgnoreCase)
         );
     }
 

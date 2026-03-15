@@ -76,13 +76,27 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                 .LogWarning();
         }
 
+        _filename = downloadTask.FileName;
+
         var downloadUrlResult = await _commandExecutor.Send(
             new GetDirectDownloadUrlCommand(downloadTask.PlexServerId, downloadTask.FileLocationUrl),
             cancellationToken
         );
-
         if (downloadUrlResult.IsFailed)
-            return downloadUrlResult.ToResult();
+        {
+            var failedResult = downloadUrlResult.ToResult();
+            var failureStatus = failedResult.IsServerUnreachable()
+                ? Domain.DownloadStatus.ServerUnreachable
+                : Domain.DownloadStatus.Error;
+
+            await SendDownloadClientLog(NotificationLevel.Error, failureStatus, failedResult.ToString());
+
+            var statusResult = await SetDownloadStatusAsync(failureStatus);
+            if (statusResult.IsFailed)
+                return statusResult;
+
+            return failedResult;
+        }
 
         var downloadUrl = downloadUrlResult.Value;
 
@@ -109,7 +123,6 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
         }
 
         await using var fileStream = fileStreamResult.Value;
-        _filename = downloadTask.FileName;
 
         await SetupDownloadListeners(downloadTaskKey);
 

@@ -103,24 +103,105 @@ public class GetDirectDownloadUrlCommandUnitTests : BaseUnitTest<GetDirectDownlo
         Mock.Mock<IHttpClientFactory>().Verify(x => x.CreateClient(It.IsAny<string>()), Times.Once());
     }
 
+    [Fact]
+    public async Task ShouldRetryTransientProbeFailuresAndReturnUrl_WhenProbeEventuallySucceeds()
+    {
+        // Arrange
+        await SetupDatabase(
+            90204,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var downloadTask = await IDbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+        var handler = SetupHttpClientFactory(
+            HttpStatusCode.InternalServerError,
+            HttpStatusCode.InternalServerError,
+            HttpStatusCode.OK
+        );
+
+        var sut = CreateSut();
+
+        // Act
+        var result = await sut.ExecuteAsync(
+            new GetDirectDownloadUrlCommand(downloadTask.PlexServerId, downloadTask.FileLocationUrl),
+            CancellationToken
+        );
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        handler.RequestCount.ShouldBe(3);
+        Mock.Mock<IHttpClientFactory>().Verify(x => x.CreateClient(It.IsAny<string>()), Times.Once());
+    }
+
+    [Fact]
+    public async Task ShouldReturnFailedResult_AfterConfiguredTransientRetriesAreExhausted()
+    {
+        // Arrange
+        await SetupDatabase(
+            90205,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var downloadTask = await IDbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+        var handler = SetupHttpClientFactory(
+            HttpStatusCode.InternalServerError,
+            HttpStatusCode.InternalServerError,
+            HttpStatusCode.InternalServerError,
+            HttpStatusCode.InternalServerError
+        );
+
+        var sut = CreateSut();
+
+        // Act
+        var result = await sut.ExecuteAsync(
+            new GetDirectDownloadUrlCommand(downloadTask.PlexServerId, downloadTask.FileLocationUrl),
+            CancellationToken
+        );
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        handler.RequestCount.ShouldBe(4);
+        Mock.Mock<IHttpClientFactory>().Verify(x => x.CreateClient(It.IsAny<string>()), Times.Once());
+    }
+
     private GetDirectDownloadUrlCommandHandler CreateSut() =>
         Mock.Create<GetDirectDownloadUrlCommandHandler>(new TypedParameter(typeof(IReaparrDbContext), IDbContext));
 
-    private void SetupHttpClientFactory(params HttpStatusCode[] statuses)
+    private SequenceStatusCodeHandler SetupHttpClientFactory(params HttpStatusCode[] statuses)
     {
-        var httpClient = new HttpClient(new SequenceStatusCodeHandler(statuses));
+        var handler = new SequenceStatusCodeHandler(statuses);
+        var retryHandler = new DefaultHttpClientRetryHandler(new LoggerConfiguration().CreateLogger())
+        {
+            InnerHandler = handler,
+        };
+        var httpClient = new HttpClient(retryHandler);
         Mock.Mock<IHttpClientFactory>().Setup(x => x.CreateClient(It.IsAny<string>())).Returns(httpClient);
+        return handler;
     }
 
     private sealed class SequenceStatusCodeHandler(params HttpStatusCode[] statuses) : HttpMessageHandler
     {
         private readonly Queue<HttpStatusCode> _statuses = new(statuses);
 
+        public int RequestCount { get; private set; }
+
         protected override Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request,
             CancellationToken cancellationToken
         )
         {
+            RequestCount++;
+
             if (_statuses.Count == 0)
             {
                 throw new InvalidOperationException(

@@ -144,4 +144,35 @@ public class ResultExtensionsGeneral
         // Assert
         mapped.Has429TooManyRequestsError().ShouldBeTrue();
     }
+
+    [Theory]
+    [InlineData(HttpStatusCode.RequestTimeout)]
+    [InlineData(HttpStatusCode.InternalServerError)]
+    [InlineData(HttpStatusCode.BadGateway)]
+    [InlineData(HttpStatusCode.ServiceUnavailable)]
+    [InlineData(HttpStatusCode.GatewayTimeout)]
+    public void ShouldIdentifyServerUnreachableStatuses(HttpStatusCode statusCode)
+    {
+        // Arrange
+        var result = Result.Fail("failed").AddStatusCode(statusCode);
+
+        // Act
+        var isServerUnreachable = result.IsServerUnreachable();
+
+        // Assert
+        isServerUnreachable.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void ShouldNotIdentifyClientErrorsAsServerUnreachable()
+    {
+        // Arrange
+        var result = Result.Fail("failed").AddStatusCode(HttpStatusCode.NotFound);
+
+        // Act
+        var isServerUnreachable = result.IsServerUnreachable();
+
+        // Assert
+        isServerUnreachable.ShouldBeFalse();
+    }
 }

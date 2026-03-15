@@ -13,5 +13,5 @@ public record PlexApiClientOptions
 
     public int RetryCount { get; init; } = 1;
 
-    public Action<PlexApiClientProgress>? Action { get; init; }
+    public Action<HttpRequestRetryProgress>? RetryProgressAction { get; init; }
 }

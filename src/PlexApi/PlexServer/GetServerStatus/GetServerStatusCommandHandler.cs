@@ -30,7 +30,7 @@ public class GetServerStatusCommandHandler : ICommandHandler<GetServerStatusComm
             new PlexApiClientOptions
             {
                 ConnectionUrl = connection.Url,
-                Action = command.ProgressAction,
+                RetryProgressAction = command.ProgressAction,
                 Timeout = 10,
                 RetryCount = 0,
             }

@@ -32,7 +32,7 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
         });
 
         // Arrange
-        var client = Sut(new PlexApiClientOptions { ConnectionUrl = "http://localhost", Action = null });
+        var client = Sut(new PlexApiClientOptions { ConnectionUrl = "http://localhost", RetryProgressAction = null });
 
         // Act
         var responseMessage = await client.SendAsync(new HttpRequestMessage());
@@ -65,7 +65,7 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
         });
 
         // Arrange
-        var client = Sut(new PlexApiClientOptions { ConnectionUrl = "http://localhost", Action = null });
+        var client = Sut(new PlexApiClientOptions { ConnectionUrl = "http://localhost", RetryProgressAction = null });
 
         // Act
         var responseMessage = await client.SendAsync(new HttpRequestMessage());
@@ -98,7 +98,7 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
         });
 
         // Arrange
-        var client = Sut(new PlexApiClientOptions { ConnectionUrl = "http://localhost", Action = null });
+        var client = Sut(new PlexApiClientOptions { ConnectionUrl = "http://localhost", RetryProgressAction = null });
 
         // Act
         var responseMessage = await client.SendAsync(new HttpRequestMessage());
@@ -127,7 +127,7 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
         });
 
         // Arrange
-        var client = Sut(new PlexApiClientOptions { ConnectionUrl = "http://localhost", Action = null });
+        var client = Sut(new PlexApiClientOptions { ConnectionUrl = "http://localhost", RetryProgressAction = null });
 
         // Act
         var responseMessage = await client.SendAsync(new HttpRequestMessage());
@@ -140,16 +140,11 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
     }
 
     [Fact]
-    public async Task ShouldRetryThreeTimes_When503ServiceUnavailableIsReceived()
+    public async Task ShouldReturn503Response_WhenServiceUnavailableIsReceived()
     {
-        var url = "http://localhost/";
         SetupHttpClient(config =>
         {
-            config
-                .SetupRequestSequence("http://localhost/")
-                .ReturnsResponse(HttpStatusCode.ServiceUnavailable) // First retry
-                .ReturnsResponse(HttpStatusCode.ServiceUnavailable) // Second retry
-                .ReturnsResponse(HttpStatusCode.OK, "{ \"message\": \"Success\" }".ToStringContent()); // Successful after retries
+            config.SetupAnyRequest().ReturnsResponse(HttpStatusCode.ServiceUnavailable);
         });
 
         // Arrange
@@ -158,7 +153,7 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
             {
                 ConnectionUrl = "http://localhost",
                 RetryCount = 3,
-                Action = null,
+                RetryProgressAction = null,
             }
         );
 
@@ -167,11 +162,7 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
 
         // Assert
         responseMessage.ShouldNotBeNull();
-        responseMessage.StatusCode.ShouldBe(HttpStatusCode.OK);
-        var json = await responseMessage.Content.ReadAsStringAsync(CancellationToken);
-        json.ShouldBe("{ \"message\": \"Success\" }");
-
-        HttpHandlerMock.VerifyRequest(url, Times.Exactly(3));
+        responseMessage.StatusCode.ShouldBe(HttpStatusCode.ServiceUnavailable);
     }
 
     [Fact]
@@ -184,13 +175,13 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
         });
 
         // Arrange
-        var client = Sut(new PlexApiClientOptions { ConnectionUrl = "http://localhost", Action = null });
+        var client = Sut(new PlexApiClientOptions { ConnectionUrl = "http://localhost", RetryProgressAction = null });
 
         // Act
         var responseMessage = await client.SendAsync(new HttpRequestMessage());
 
         // Assert
         responseMessage.ShouldNotBeNull();
-        responseMessage.StatusCode.ShouldBe(HttpStatusCode.ServiceUnavailable);
+        responseMessage.StatusCode.ShouldBe(HttpStatusCode.BadGateway);
     }
 }

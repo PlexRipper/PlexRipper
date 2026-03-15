@@ -1,5 +1,6 @@
 using System.Net;
 using Moq.Contrib.HttpClient;
+using Reaparr.FluentResultExtensions;
 
 namespace Reaparr.PlexApi.UnitTests;
 

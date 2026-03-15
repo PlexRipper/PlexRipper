@@ -56,10 +56,6 @@ public class DownloadJobListener : IDownloadJobListener
                         downloadTaskKey.Id
                     );
                 await _moveDownloadFileQueue.CheckMoveDownloadFileJobQueue();
-                await _eventPublisher.PublishAsync(
-                    new CheckDownloadQueueEvent(downloadTaskKey.PlexServerId),
-                    cancellationToken
-                );
             }
 
             _log.Here()

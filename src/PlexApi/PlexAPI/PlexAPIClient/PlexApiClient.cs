@@ -39,11 +39,7 @@ public class PlexApiClient : IPlexApiClient
             _log.Here().Verbose("Request CURL: {RequestUrl}", curl);
         }
 
-        var responseResult = await _defaultClient.SendResultAsync(request, HttpCompletionOption.ResponseHeadersRead);
-        if (responseResult.IsFailed)
-            responseResult.ToResult().LogWarning();
-
-        var response = responseResult.ToHttpResponseMessage(request);
+        var response = await _defaultClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
 
         if (!response.IsSuccessStatusCode)
             response.Content = ToJsonResponse(response);

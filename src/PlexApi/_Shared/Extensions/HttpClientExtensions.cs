@@ -39,6 +39,14 @@ public static class HttpClientExtensions
             _log.Here().Error("Failed response validation: {Body}", e.Body);
             return Result.Fail(new ExceptionalError(e)).LogError();
         }
+        catch (TaskCanceledException e)
+        {
+            return ResultExtensions.Create408RequestTimeoutError().WithError(new ExceptionalError(e)).LogWarning();
+        }
+        catch (HttpRequestException e)
+        {
+            return ResultExtensions.Create502BadGatewayResult().WithError(new ExceptionalError(e)).LogWarning();
+        }
         catch (Exception e)
         {
             var errorsProperty = e.GetType().GetProperty("Errors");

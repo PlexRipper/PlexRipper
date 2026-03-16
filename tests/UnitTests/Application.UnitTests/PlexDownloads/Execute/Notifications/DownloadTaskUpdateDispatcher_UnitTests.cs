@@ -596,6 +596,129 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
         fileTaskPatch.Percentage.ShouldBe(50.00m);
     }
 
+    [Fact]
+    public async Task ShouldSendHundredPercentPatch_WhenEpisodeFileIsCompletedWithStaleStoredPercentage()
+    {
+        // Arrange - regression for completed TV episode files where the DB row still holds a stale
+        // download-phase percentage (for example 2%), but the completed patch must still report 100%.
+        await SetupDatabase(
+            84331,
+            config =>
+            {
+                config.TvShowDownloadTasksCount = 1;
+                config.TvShowSeasonDownloadTasksCount = 1;
+                config.TvShowEpisodeDownloadTasksCount = 1;
+            }
+        );
+
+        var episodeFile = await IDbContext.DownloadTaskTvShowEpisodeFile.AsNoTracking().FirstAsync(CancellationToken);
+
+        await IDbContext
+            .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == episodeFile.Id)
+            .ExecuteUpdateAsync(
+                p =>
+                    p.SetProperty(x => x.DataTotal, 1_000L)
+                        .SetProperty(x => x.DataReceived, 20L)
+                        .SetProperty(x => x.FileDataTransferred, 1_000L)
+                        .SetProperty(x => x.CurrentFileTransferBytesOffset, 1_000L)
+                        .SetProperty(x => x.FileTransferSpeed, 0L)
+                        .SetProperty(x => x.DownloadSpeed, 0L)
+                        .SetProperty(x => x.TimeRemaining, 0)
+                        .SetProperty(x => x.Percentage, 2m)
+                        .SetProperty(x => x.DownloadStatus, DownloadStatus.Completed),
+                CancellationToken
+            );
+
+        var capturedPatches = new List<IReadOnlyCollection<DownloadPatchDTO>>();
+
+        Mock.Mock<IDownloadHubService>()
+            .Setup(x =>
+                x.SendDownloadPatchAsync(
+                    It.IsAny<int>(),
+                    It.IsAny<long>(),
+                    It.IsAny<IReadOnlyCollection<DownloadPatchDTO>>(),
+                    It.IsAny<IReadOnlyCollection<Guid>?>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Callback<int, long, IReadOnlyCollection<DownloadPatchDTO>, IReadOnlyCollection<Guid>?, CancellationToken>(
+                (_, _, upserts, _, _) => capturedPatches.Add(upserts)
+            )
+            .Returns(Task.CompletedTask);
+
+        var sut = Sut;
+
+        // Act
+        await sut.StartAsync(CancellationToken.None);
+        sut.NotifyFileTransferProgress(episodeFile.ToKey());
+
+        await WaitForPatchCount(capturedPatches, 1);
+        await sut.StopAsync(CancellationToken.None);
+
+        // Assert
+        var fileTaskPatch = capturedPatches.SelectMany(x => x).FirstOrDefault(x => x.Id == episodeFile.Id);
+        fileTaskPatch.ShouldNotBeNull();
+        fileTaskPatch!.Status.ShouldBe(DownloadStatus.Completed);
+        fileTaskPatch.Percentage.ShouldBe(100m);
+    }
+
+    [Fact]
+    public async Task ShouldSendHundredPercentPatch_WhenMovieFileIsCompletedWithStaleStoredPercentage()
+    {
+        // Arrange - movie file equivalent of the completed stale-percentage regression.
+        await SetupDatabase(84332, config => config.MovieDownloadTasksCount = 1);
+
+        var movieFile = await IDbContext.DownloadTaskMovieFile.AsNoTracking().FirstAsync(CancellationToken);
+
+        await IDbContext
+            .DownloadTaskMovieFile.Where(x => x.Id == movieFile.Id)
+            .ExecuteUpdateAsync(
+                p =>
+                    p.SetProperty(x => x.DataTotal, 2_000L)
+                        .SetProperty(x => x.DataReceived, 40L)
+                        .SetProperty(x => x.FileDataTransferred, 2_000L)
+                        .SetProperty(x => x.CurrentFileTransferBytesOffset, 2_000L)
+                        .SetProperty(x => x.FileTransferSpeed, 0L)
+                        .SetProperty(x => x.DownloadSpeed, 0L)
+                        .SetProperty(x => x.TimeRemaining, 0)
+                        .SetProperty(x => x.Percentage, 2m)
+                        .SetProperty(x => x.DownloadStatus, DownloadStatus.Completed),
+                CancellationToken
+            );
+
+        var capturedPatches = new List<IReadOnlyCollection<DownloadPatchDTO>>();
+
+        Mock.Mock<IDownloadHubService>()
+            .Setup(x =>
+                x.SendDownloadPatchAsync(
+                    It.IsAny<int>(),
+                    It.IsAny<long>(),
+                    It.IsAny<IReadOnlyCollection<DownloadPatchDTO>>(),
+                    It.IsAny<IReadOnlyCollection<Guid>?>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Callback<int, long, IReadOnlyCollection<DownloadPatchDTO>, IReadOnlyCollection<Guid>?, CancellationToken>(
+                (_, _, upserts, _, _) => capturedPatches.Add(upserts)
+            )
+            .Returns(Task.CompletedTask);
+
+        var sut = Sut;
+
+        // Act
+        await sut.StartAsync(CancellationToken.None);
+        sut.NotifyFileTransferProgress(movieFile.ToKey());
+
+        await WaitForPatchCount(capturedPatches, 1);
+        await sut.StopAsync(CancellationToken.None);
+
+        // Assert
+        var fileTaskPatch = capturedPatches.SelectMany(x => x).FirstOrDefault(x => x.Id == movieFile.Id);
+        fileTaskPatch.ShouldNotBeNull();
+        fileTaskPatch!.Status.ShouldBe(DownloadStatus.Completed);
+        fileTaskPatch.Percentage.ShouldBe(100m);
+    }
+
     private async Task WaitForPatchCount<T>(ICollection<T> collection, int expectedCount)
     {
         for (var i = 0; i < 40 && collection.Count < expectedCount; i++)

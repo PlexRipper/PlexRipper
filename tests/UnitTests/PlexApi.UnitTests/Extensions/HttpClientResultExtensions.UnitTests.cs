@@ -1,12 +1,13 @@
 using System.Net;
 using Moq.Contrib.HttpClient;
+using Moq.Protected;
 using Reaparr.FluentResultExtensions;
 
 namespace Reaparr.PlexApi.UnitTests;
 
-public class HttpClientExtensionsSendResultAsyncUnitTests : BaseUnitTest<object>
+public class HttpClientResultExtensionsUnitTests : BaseUnitTest<object>
 {
-    public HttpClientExtensionsSendResultAsyncUnitTests(ITestOutputHelper output)
+    public HttpClientResultExtensionsUnitTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]
@@ -24,6 +25,11 @@ public class HttpClientExtensionsSendResultAsyncUnitTests : BaseUnitTest<object>
             HttpCompletionOption.ResponseHeadersRead,
             CancellationToken
         );
+
+        // Verify
+        HttpHandlerMock
+            .Protected()
+            .Verify("SendAsync", Times.Once(), ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -46,6 +52,11 @@ public class HttpClientExtensionsSendResultAsyncUnitTests : BaseUnitTest<object>
             CancellationToken
         );
 
+        // Verify
+        HttpHandlerMock
+            .Protected()
+            .Verify("SendAsync", Times.Once(), ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
+
         // Assert
         result.IsFailed.ShouldBeTrue();
         result.Has408RequestTimeout().ShouldBeTrue();
@@ -66,6 +77,11 @@ public class HttpClientExtensionsSendResultAsyncUnitTests : BaseUnitTest<object>
             HttpCompletionOption.ResponseHeadersRead,
             CancellationToken
         );
+
+        // Verify
+        HttpHandlerMock
+            .Protected()
+            .Verify("SendAsync", Times.Once(), ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
 
         // Assert
         result.IsFailed.ShouldBeTrue();

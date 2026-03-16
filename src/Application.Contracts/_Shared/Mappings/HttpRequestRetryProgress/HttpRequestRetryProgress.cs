@@ -16,7 +16,7 @@ public class HttpRequestRetryProgress
 
     public required string Message { get; init; }
 
-    public required string ErrorMessage { get; set; }
+    public required string ErrorMessage { get; init; }
 
     public required string RequestUri { get; init; }
 }

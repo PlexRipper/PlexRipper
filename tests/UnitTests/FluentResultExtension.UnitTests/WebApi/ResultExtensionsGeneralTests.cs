@@ -2,7 +2,7 @@
 
 namespace Reaparr.FluentResultExtension.UnitTests;
 
-public class ResultExtensionsGeneral
+public class ResultExtensionsGeneralTests
 {
     [Fact]
     public void ShouldNotFindStatusCode_WhenGivenAnInvalidHasStatusCode()

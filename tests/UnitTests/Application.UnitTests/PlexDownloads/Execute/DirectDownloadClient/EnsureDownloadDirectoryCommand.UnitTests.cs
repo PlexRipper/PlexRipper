@@ -1,6 +1,7 @@
 using System.IO;
 using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
+using Autofac;
 using ByteSizeLib;
 
 namespace Reaparr.Application.UnitTests;
@@ -149,6 +150,7 @@ public class EnsureDownloadDirectoryCommandUnitTests : BaseCommandUnitTest<Ensur
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+        Mock.Container.Resolve<IFileSystem>().Directory.Exists(directory).ShouldBeTrue();
     }
 
     [Fact]
@@ -178,5 +180,6 @@ public class EnsureDownloadDirectoryCommandUnitTests : BaseCommandUnitTest<Ensur
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+        Mock.Container.Resolve<IFileSystem>().Directory.Exists(directory).ShouldBeTrue();
     }
 }

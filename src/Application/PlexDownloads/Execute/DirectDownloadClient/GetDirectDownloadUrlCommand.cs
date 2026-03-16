@@ -90,10 +90,7 @@ public class GetDirectDownloadUrlCommandHandler : ICommandHandler<GetDirectDownl
         );
 
         if (responseResult.IsFailed && responseResult.IsServerUnreachable())
-        {
-            using var failedResponse = responseResult.ToHttpResponseMessage(request);
             return Result.Fail<ProbeResult>(responseResult.Errors);
-        }
 
         if (responseResult.IsFailed)
         {

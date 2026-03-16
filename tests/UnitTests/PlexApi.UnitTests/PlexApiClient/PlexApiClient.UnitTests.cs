@@ -2,6 +2,7 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 using Moq.Contrib.HttpClient;
+using Moq.Protected;
 using Reaparr.PlexApi.Contracts;
 
 namespace Reaparr.PlexApi.UnitTests;
@@ -142,6 +143,8 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
     [Fact]
     public async Task ShouldReturn503Response_WhenServiceUnavailableIsReceived()
     {
+        const int retryCount = 3;
+
         SetupHttpClient(config =>
         {
             config.SetupAnyRequest().ReturnsResponse(HttpStatusCode.ServiceUnavailable);
@@ -152,7 +155,7 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
             new PlexApiClientOptions
             {
                 ConnectionUrl = "http://localhost",
-                RetryCount = 3,
+                RetryCount = retryCount,
                 RetryProgressAction = null,
             }
         );
@@ -163,6 +166,16 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
         // Assert
         responseMessage.ShouldNotBeNull();
         responseMessage.StatusCode.ShouldBe(HttpStatusCode.ServiceUnavailable);
+
+        // Verify the retry pipeline executed: initial attempt + retryCount retries
+        HttpHandlerMock
+            .Protected()
+            .Verify(
+                "SendAsync",
+                Times.Exactly(retryCount + 1),
+                ItExpr.IsAny<HttpRequestMessage>(),
+                ItExpr.IsAny<CancellationToken>()
+            );
     }
 
     [Fact]

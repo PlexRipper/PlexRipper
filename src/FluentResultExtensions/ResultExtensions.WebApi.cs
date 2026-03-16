@@ -71,6 +71,7 @@ public static partial class ResultExtensions
             HttpStatusCode.BadGateway => result.Add502BadGatewayError(msg),
             HttpStatusCode.ServiceUnavailable => result.Add503ServiceUnavailableError(msg),
             HttpStatusCode.GatewayTimeout => result.Add504GatewayTimeoutError(msg),
+            _ when (int)statusCode >= 200 && (int)statusCode < 300 => result.AddStatusCodeSuccess((int)statusCode, msg),
             _ => result.AddStatusCodeError((int)statusCode, msg),
         };
     }
@@ -93,6 +94,7 @@ public static partial class ResultExtensions
             HttpStatusCode.BadGateway => result.Add502BadGatewayError(msg),
             HttpStatusCode.ServiceUnavailable => result.Add503ServiceUnavailableError(msg),
             HttpStatusCode.GatewayTimeout => result.Add504GatewayTimeoutError(msg),
+            _ when (int)statusCode >= 200 && (int)statusCode < 300 => result.AddStatusCodeSuccess((int)statusCode, msg),
             _ => result.AddStatusCodeError((int)statusCode, msg),
         };
     }
@@ -123,6 +125,14 @@ public static partial class ResultExtensions
         || result.Errors.Any(error =>
             error.Message.Contains(NetworkTimeoutToken, StringComparison.OrdinalIgnoreCase)
             || error.Message.Contains(TimedOutToken, StringComparison.OrdinalIgnoreCase)
+            || (
+                error.Metadata.TryGetValue(ErrorMessageName, out var meta)
+                && meta is string metaStr
+                && (
+                    metaStr.Contains(NetworkTimeoutToken, StringComparison.OrdinalIgnoreCase)
+                    || metaStr.Contains(TimedOutToken, StringComparison.OrdinalIgnoreCase)
+                )
+            )
         );
 
     public static bool IsServerUnreachable<T>(this Result<T> result) => result.ToResult().IsServerUnreachable();

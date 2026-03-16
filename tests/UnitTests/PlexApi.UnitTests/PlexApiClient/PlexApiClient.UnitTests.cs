@@ -69,12 +69,10 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
         var client = Sut(new PlexApiClientOptions { ConnectionUrl = "http://localhost", RetryProgressAction = null });
 
         // Act
-        var responseMessage = await client.SendAsync(new HttpRequestMessage());
+        var act = () => client.SendAsync(new HttpRequestMessage());
 
         // Assert
-        responseMessage.ShouldNotBeNull();
-        responseMessage.StatusCode.ShouldBe(HttpStatusCode.RequestTimeout);
-        responseMessage.ReasonPhrase.ShouldBe("Request Timeout");
+        await Should.ThrowAsync<TaskCanceledException>(act);
     }
 
     [Fact]
@@ -143,8 +141,6 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
     [Fact]
     public async Task ShouldReturn503Response_WhenServiceUnavailableIsReceived()
     {
-        const int retryCount = 3;
-
         SetupHttpClient(config =>
         {
             config.SetupAnyRequest().ReturnsResponse(HttpStatusCode.ServiceUnavailable);
@@ -155,7 +151,7 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
             new PlexApiClientOptions
             {
                 ConnectionUrl = "http://localhost",
-                RetryCount = retryCount,
+                RetryCount = 3,
                 RetryProgressAction = null,
             }
         );
@@ -167,15 +163,10 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
         responseMessage.ShouldNotBeNull();
         responseMessage.StatusCode.ShouldBe(HttpStatusCode.ServiceUnavailable);
 
-        // Verify the retry pipeline executed: initial attempt + retryCount retries
+        // PlexApiClient forwards the raw HttpClient response; retries are handled by the registered pipeline.
         HttpHandlerMock
             .Protected()
-            .Verify(
-                "SendAsync",
-                Times.Exactly(retryCount + 1),
-                ItExpr.IsAny<HttpRequestMessage>(),
-                ItExpr.IsAny<CancellationToken>()
-            );
+            .Verify("SendAsync", Times.Once(), ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
     }
 
     [Fact]
@@ -191,10 +182,9 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
         var client = Sut(new PlexApiClientOptions { ConnectionUrl = "http://localhost", RetryProgressAction = null });
 
         // Act
-        var responseMessage = await client.SendAsync(new HttpRequestMessage());
+        var act = () => client.SendAsync(new HttpRequestMessage());
 
         // Assert
-        responseMessage.ShouldNotBeNull();
-        responseMessage.StatusCode.ShouldBe(HttpStatusCode.BadGateway);
+        await Should.ThrowAsync<HttpRequestException>(act);
     }
 }

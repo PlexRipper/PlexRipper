@@ -36,29 +36,40 @@ public class ClearCompletedDownloadTasksByDownloadTaskKeyCommandHandler
     )
     {
         var keys = request.DownloadTaskKeys;
-        var byType = keys.ToLookup(k => k.Type, k => k.Id);
+        var byType = keys.ToLookup(k => k.Type);
 
         // Confirm which of the requested keys actually exist in a Completed state.
         // Keys are already typed, so we only query the tables that are relevant.
-        var results = await Task.WhenAll(
-            ConfirmCompleted(_dbContext.DownloadTaskMovie, byType[DownloadTaskType.Movie], ct),
-            ConfirmCompleted(
+        var confirmedKeys = new HashSet<DownloadTaskKey>();
+
+        confirmedKeys.UnionWith(
+            await ConfirmCompleted(_dbContext.DownloadTaskMovie, byType[DownloadTaskType.Movie].ToList(), ct)
+        );
+        confirmedKeys.UnionWith(
+            await ConfirmCompleted(
                 _dbContext.DownloadTaskMovieFile,
-                byType[DownloadTaskType.MovieData].Concat(byType[DownloadTaskType.MoviePart]),
+                byType[DownloadTaskType.MovieData].Concat(byType[DownloadTaskType.MoviePart]).ToList(),
                 ct
-            ),
-            ConfirmCompleted(_dbContext.DownloadTaskTvShow, byType[DownloadTaskType.TvShow], ct),
-            ConfirmCompleted(_dbContext.DownloadTaskTvShowSeason, byType[DownloadTaskType.Season], ct),
-            ConfirmCompleted(_dbContext.DownloadTaskTvShowEpisode, byType[DownloadTaskType.Episode], ct),
-            ConfirmCompleted(
+            )
+        );
+        confirmedKeys.UnionWith(
+            await ConfirmCompleted(_dbContext.DownloadTaskTvShow, byType[DownloadTaskType.TvShow].ToList(), ct)
+        );
+        confirmedKeys.UnionWith(
+            await ConfirmCompleted(_dbContext.DownloadTaskTvShowSeason, byType[DownloadTaskType.Season].ToList(), ct)
+        );
+        confirmedKeys.UnionWith(
+            await ConfirmCompleted(_dbContext.DownloadTaskTvShowEpisode, byType[DownloadTaskType.Episode].ToList(), ct)
+        );
+        confirmedKeys.UnionWith(
+            await ConfirmCompleted(
                 _dbContext.DownloadTaskTvShowEpisodeFile,
-                byType[DownloadTaskType.EpisodeData].Concat(byType[DownloadTaskType.EpisodePart]),
+                byType[DownloadTaskType.EpisodeData].Concat(byType[DownloadTaskType.EpisodePart]).ToList(),
                 ct
             )
         );
 
-        var confirmedIds = results.SelectMany(x => x).ToHashSet();
-        var completedKeys = keys.Where(k => confirmedIds.Contains(k.Id)).ToList();
+        var completedKeys = keys.Where(confirmedKeys.Contains).ToList();
 
         if (completedKeys.Count == 0)
             return Result.Ok(0);
@@ -70,15 +81,22 @@ public class ClearCompletedDownloadTasksByDownloadTaskKeyCommandHandler
         return Result.Ok(completedKeys.Count);
     }
 
-    private static Task<List<Guid>> ConfirmCompleted<T>(IQueryable<T> set, IEnumerable<Guid> ids, CancellationToken ct)
+    private static async Task<List<DownloadTaskKey>> ConfirmCompleted<T>(
+        IQueryable<T> set,
+        IReadOnlyCollection<DownloadTaskKey> keys,
+        CancellationToken ct
+    )
         where T : DownloadTaskBase
     {
-        var idList = ids.ToList();
+        var idList = keys.Select(x => x.Id).ToList();
         if (idList.Count == 0)
-            return Task.FromResult(new List<Guid>());
+            return [];
 
-        return set.Where(x => idList.Contains(x.Id) && x.DownloadStatus == DownloadStatus.Completed)
+        var confirmedIds = await set.Where(x => idList.Contains(x.Id) && x.DownloadStatus == DownloadStatus.Completed)
             .Select(x => x.Id)
             .ToListAsync(ct);
+
+        var confirmedIdSet = confirmedIds.ToHashSet();
+        return keys.Where(x => confirmedIdSet.Contains(x.Id)).ToList();
     }
 }

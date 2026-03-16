@@ -30,7 +30,7 @@ public sealed class DeleteTorrentRequestValidator : Validator<DeleteTorrentReque
         RuleFor(x => x.HashesRaw)
             .Must(raw =>
                 string.IsNullOrWhiteSpace(raw)
-                || string.Equals(raw, "all", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(raw.Trim(), "all", StringComparison.OrdinalIgnoreCase)
                 || raw.Split(['|', ',', ';', ' ', '\t', '\r', '\n'], StringSplitOptions.RemoveEmptyEntries).Length > 0
             )
             .WithMessage("Hashes must be 'all' or a delimited list of hashes.");
@@ -80,12 +80,18 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest>
         }
 
         var deleteFiles = req.DeleteFiles ?? true;
+        var keysToDelete = allKeys.Where(k => !downloadingKeys.Contains(k) && !completedKeys.Contains(k)).ToList();
 
         foreach (var key in downloadingKeys)
         {
             var stopResult = await _commandExecutor.Send(new StopDownloadTaskCommand(key.Id, deleteFiles), ct);
             if (stopResult.IsFailed)
+            {
                 _log.Here().Warning("Failed to stop download task {DownloadTaskKey}: {Errors}", key, stopResult.Errors);
+                continue;
+            }
+
+            keysToDelete.Add(key);
         }
 
         // StopDownloadTaskCommand skips file deletion for completed tasks (they are in phase Completed).
@@ -94,11 +100,33 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest>
         {
             var deleteFilesResult = await _commandExecutor.Send(new DeleteDownloadTaskFilesCommand(completedKeys), ct);
             if (deleteFilesResult.IsFailed)
+            {
                 _log.Here()
                     .Warning("Failed to delete download files for completed tasks: {Errors}", deleteFilesResult.Errors);
+            }
+            else
+            {
+                keysToDelete.AddRange(completedKeys);
+            }
+        }
+        else
+        {
+            keysToDelete.AddRange(completedKeys);
         }
 
-        var deleteResult = await _commandExecutor.Send(new DeleteDownloadTasksByKeyCommand(allKeys), ct);
+        if (keysToDelete.Count == 0)
+        {
+            _log.Here()
+                .Warning(
+                    "Skipping download task deletion because prerequisite operations failed for all matched tasks ({TaskCount})",
+                    allKeys.Count
+                );
+
+            await Send.StringAsync("Ok.", cancellation: ct);
+            return;
+        }
+
+        var deleteResult = await _commandExecutor.Send(new DeleteDownloadTasksByKeyCommand(keysToDelete), ct);
         if (deleteResult.IsFailed)
             _log.Here().Warning("Failed to delete download tasks: {Errors}", deleteResult.Errors);
 
@@ -112,7 +140,7 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest>
     /// </summary>
     private static List<string>? ParseHashes(DeleteTorrentRequest req)
     {
-        if (string.Equals(req.HashesRaw, "all", StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(req.HashesRaw?.Trim(), "all", StringComparison.OrdinalIgnoreCase))
             return null;
 
         var hashes = new List<string>();

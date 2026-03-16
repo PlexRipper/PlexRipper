@@ -29,13 +29,16 @@ public class DeleteDownloadTaskEndpointUnitTests : BaseUnitTest<DeleteDownloadTa
             .DownloadTaskTvShowEpisodeFile.Select(x => x.Id)
             .SingleAsync(CancellationToken);
 
-        Mock.Mock<IDownloadTaskScheduler>()
-            .Setup(x => x.IsDownloading(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(false)
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<StopDownloadTaskCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Once());
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<DeleteDownloadTasksByKeyCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Ok())
+            .Returns(
+                (DeleteDownloadTasksByKeyCommand cmd, CancellationToken ct) =>
+                    new DeleteDownloadTasksByKeyCommandHandler(dbContext).ExecuteAsync(cmd, ct)
+            )
             .Verifiable(Times.Once());
 
         // Act
@@ -52,13 +55,26 @@ public class DeleteDownloadTaskEndpointUnitTests : BaseUnitTest<DeleteDownloadTa
             .Verify(
                 x =>
                     x.Send(
-                        It.Is<DeleteDownloadTasksByKeyCommand>(cmd => cmd.Keys.Any(k => k.Id == episodeFileId)),
+                        It.Is<StopDownloadTaskCommand>(cmd => cmd.DownloadTaskGuid == episodeFileId),
                         It.IsAny<CancellationToken>()
                     ),
                 Times.Once
             );
         Mock.Mock<ICommandExecutor>()
-            .Verify(x => x.Send(It.IsAny<StopDownloadTaskCommand>(), It.IsAny<CancellationToken>()), Times.Never);
+            .Verify(
+                x =>
+                    x.Send(
+                        It.Is<DeleteDownloadTasksByKeyCommand>(cmd => cmd.Keys.Any(k => k.Id == episodeFileId)),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Once
+            );
+        (
+            await dbContext.DownloadTaskTvShowEpisodeFile.AnyAsync(x => x.Id == episodeFileId, CancellationToken)
+        ).ShouldBeFalse();
+        (await dbContext.DownloadTaskTvShowEpisode.AnyAsync(CancellationToken)).ShouldBeFalse();
+        (await dbContext.DownloadTaskTvShowSeason.AnyAsync(CancellationToken)).ShouldBeFalse();
+        (await dbContext.DownloadTaskTvShow.AnyAsync(CancellationToken)).ShouldBeFalse();
     }
 
     [Fact]
@@ -78,17 +94,16 @@ public class DeleteDownloadTaskEndpointUnitTests : BaseUnitTest<DeleteDownloadTa
         var dbContext = IDbContext;
         var movieId = await dbContext.DownloadTaskMovie.Select(x => x.Id).SingleAsync(CancellationToken);
 
-        Mock.Mock<IDownloadTaskScheduler>()
-            .Setup(x => x.IsDownloading(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(true)
-            .Verifiable(Times.Once());
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<StopDownloadTaskCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Once());
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<DeleteDownloadTasksByKeyCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Ok())
+            .Returns(
+                (DeleteDownloadTasksByKeyCommand cmd, CancellationToken ct) =>
+                    new DeleteDownloadTasksByKeyCommandHandler(dbContext).ExecuteAsync(cmd, ct)
+            )
             .Verifiable(Times.Once());
 
         // Act
@@ -115,6 +130,35 @@ public class DeleteDownloadTaskEndpointUnitTests : BaseUnitTest<DeleteDownloadTa
                         It.IsAny<CancellationToken>()
                     ),
                 Times.Once
+            );
+        (await dbContext.DownloadTaskMovie.AnyAsync(x => x.Id == movieId, CancellationToken)).ShouldBeFalse();
+        (await dbContext.DownloadTaskMovieFile.AnyAsync(CancellationToken)).ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task ShouldReturnSuccessWithoutDispatchingDelete_WhenResolvedKeysAreMissing()
+    {
+        // Arrange
+        await SetupDatabase(45212);
+
+        var missingId = Guid.NewGuid();
+
+        // Act
+        var ep = SetupEndpointUnitTest<DeleteDownloadTaskEndpoint>();
+        await ep.HandleAsync(
+            new DeleteDownloadTaskEndpointRequest { DownloadTaskIds = [missingId] },
+            CancellationToken
+        );
+        var result = ep.Response;
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        Mock.Mock<ICommandExecutor>()
+            .Verify(x => x.Send(It.IsAny<StopDownloadTaskCommand>(), It.IsAny<CancellationToken>()), Times.Never);
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<DeleteDownloadTasksByKeyCommand>(), It.IsAny<CancellationToken>()),
+                Times.Never
             );
     }
 }

@@ -24,21 +24,14 @@ public class DeleteDownloadTaskEndpoint : BaseEndpoint<DeleteDownloadTaskEndpoin
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
-    private readonly IDownloadTaskScheduler _downloadTaskScheduler;
 
     public override string EndpointPath => ApiRoutes.DownloadController + "/delete";
 
-    public DeleteDownloadTaskEndpoint(
-        ILogger log,
-        IReaparrDbContext dbContext,
-        ICommandExecutor commandExecutor,
-        IDownloadTaskScheduler downloadTaskScheduler
-    )
+    public DeleteDownloadTaskEndpoint(ILogger log, IReaparrDbContext dbContext, ICommandExecutor commandExecutor)
     {
         _log = log.ForContext<DeleteDownloadTaskEndpoint>();
         _dbContext = dbContext;
         _commandExecutor = commandExecutor;
-        _downloadTaskScheduler = downloadTaskScheduler;
     }
 
     public override void Configure()
@@ -56,18 +49,21 @@ public class DeleteDownloadTaskEndpoint : BaseEndpoint<DeleteDownloadTaskEndpoin
     {
         _log.Here().DebugApiCall(HttpContext, req);
 
-        // Resolve keys upfront — needed for both the stop check and the delete command.
+        // Resolve keys upfront for stop handling and to avoid sending an empty delete command.
         var keys = await _dbContext.GetDownloadTaskKeysAsync(req.DownloadTaskIds, ct);
+        if (keys.Count == 0)
+        {
+            await SendFluentResult(Result.Ok(), ct);
+            return;
+        }
+
         foreach (var key in keys)
         {
-            if (await _downloadTaskScheduler.IsDownloading(key, ct))
+            var stopResult = await _commandExecutor.Send(new StopDownloadTaskCommand(key.Id), ct);
+            if (stopResult.IsFailed)
             {
-                var stopResult = await _commandExecutor.Send(new StopDownloadTaskCommand(key.Id), ct);
-                if (stopResult.IsFailed)
-                {
-                    await SendFluentResult(stopResult, ct);
-                    return;
-                }
+                await SendFluentResult(stopResult, ct);
+                return;
             }
         }
 

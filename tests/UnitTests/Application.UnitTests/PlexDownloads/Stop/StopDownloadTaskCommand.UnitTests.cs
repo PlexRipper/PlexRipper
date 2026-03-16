@@ -25,15 +25,6 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
                 )
             )
             .ReturnsAsync(Result.Ok());
-        Mock.Mock<IDownloadTaskUpdateDispatcher>()
-            .Setup(x =>
-                x.OnStatusChangedAsync(
-                    It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<DownloadStatus>(),
-                    It.IsAny<CancellationToken>()
-                )
-            )
-            .ReturnsAsync(Result.Ok());
         await SetupDatabase(72951);
 
         // Act
@@ -59,15 +50,6 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
     public async Task ShouldHaveFailedResult_WhenTheDownloadTaskCouldNotBeStopped()
     {
         // Arrange
-        Mock.Mock<IDownloadTaskUpdateDispatcher>()
-            .Setup(x =>
-                x.OnStatusChangedAsync(
-                    It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<DownloadStatus>(),
-                    It.IsAny<CancellationToken>()
-                )
-            )
-            .ReturnsAsync(Result.Ok());
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnStatusChangedAsync(
@@ -123,15 +105,6 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
     public async Task ShouldHaveSetDownloadTasksToStopped_WhenAtLeastOneValidIdIsGiven()
     {
         // Arrange
-        Mock.Mock<IDownloadTaskUpdateDispatcher>()
-            .Setup(x =>
-                x.OnStatusChangedAsync(
-                    It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<DownloadStatus>(),
-                    It.IsAny<CancellationToken>()
-                )
-            )
-            .ReturnsAsync(Result.Ok());
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnStatusChangedAsync(
@@ -220,15 +193,6 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
     [Fact]
     public async Task ShouldDeleteDownloadFile_WhenTaskIsInFileTransferPhase()
     {
-        Mock.Mock<IDownloadTaskUpdateDispatcher>()
-            .Setup(x =>
-                x.OnStatusChangedAsync(
-                    It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<DownloadStatus>(),
-                    It.IsAny<CancellationToken>()
-                )
-            )
-            .ReturnsAsync(Result.Ok());
         // Arrange — task is in MoveError (FileTransfer phase); stopping deletes temp files
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
@@ -307,6 +271,61 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
         var downloadTasks = await dbContext.GetDownloadableChildTasks(movieTask.ToKey(), CancellationToken);
         foreach (var downloadTaskDb in downloadTasks)
             downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.Stopped);
+    }
+
+    [Fact]
+    public async Task ShouldHaveFailedResult_WhenDeleteDownloadTaskFilesCommandFails()
+    {
+        // Arrange
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok());
+        await SetupDatabase(90427, config => config.MovieDownloadTasksCount = 1);
+
+        var dbContext = IDbContext;
+        var movieTask = await dbContext.DownloadTaskMovie.FirstAsync(CancellationToken);
+        var movieFileTask = await dbContext.DownloadTaskMovieFile.AsTracking().FirstAsync(CancellationToken);
+        movieFileTask.DownloadStatus = DownloadStatus.MoveError;
+        await dbContext.SaveChangesAsync(CancellationToken);
+
+        SetupFileSystem(fs => fs.AddFile(movieFileTask.DownloadFilePath, new MockFileData([])));
+
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.IsDownloading(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .Setup(x => x.IsDownloadFileMoving(It.IsAny<DownloadTaskKey>()))
+            .ReturnsAsync(false);
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<DeleteDownloadTaskFilesCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Fail("delete failed"))
+            .Verifiable(Times.Once());
+
+        // Act
+        var result = await Sut.ExecuteAsync(new StopDownloadTaskCommand(movieTask.Id), CancellationToken);
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        It.IsAny<DownloadStatus>(),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Never
+            );
+
+        var after = await dbContext.GetDownloadTaskFileAsync(movieFileTask.ToKey(), CancellationToken);
+        after.ShouldNotBeNull();
+        after.DownloadStatus.ShouldBe(DownloadStatus.MoveError);
     }
 
     [Fact]
@@ -507,15 +526,6 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
     public async Task ShouldHaveFailedResult_WhenStopMoveDownloadFileJobFails()
     {
         // Arrange
-        Mock.Mock<IDownloadTaskUpdateDispatcher>()
-            .Setup(x =>
-                x.OnStatusChangedAsync(
-                    It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<DownloadStatus>(),
-                    It.IsAny<CancellationToken>()
-                )
-            )
-            .ReturnsAsync(Result.Ok());
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>
                 x.OnStatusChangedAsync(

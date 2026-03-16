@@ -107,7 +107,12 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
                 _log.Here()
                     .Debug("Deleting partially downloaded files of {DownloadTaskFullTitle}", downloadTask.FullTitle);
 
-                await _commandExecutor.Send(new DeleteDownloadTaskFilesCommand([downloadTaskKey]), cancellationToken);
+                var deleteFilesResult = await _commandExecutor.Send(
+                    new DeleteDownloadTaskFilesCommand([downloadTaskKey]),
+                    cancellationToken
+                );
+                if (deleteFilesResult.IsFailed)
+                    return deleteFilesResult.LogError();
             }
 
             _log.Here().Debug($"Resetting download progress for {downloadTaskKey.Id} ({downloadTask.FileName})");

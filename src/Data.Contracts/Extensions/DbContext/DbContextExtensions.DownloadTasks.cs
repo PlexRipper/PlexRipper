@@ -87,9 +87,12 @@ public static partial class DbContextExtensions
             dbContext.DownloadTaskMovieFile.Where(x => filtered.Contains(x.Id)).ProjectToKey(),
         };
 
-        var tasks = queries.Select(q => q.ToListAsync(cancellationToken));
-        var results = await Task.WhenAll(tasks);
-        return [.. results.SelectMany(x => x)];
+        var keys = new List<DownloadTaskKey>();
+
+        foreach (var query in queries)
+            keys.AddRange(await query.ToListAsync(cancellationToken));
+
+        return keys;
     }
 
     public static async Task<DownloadTaskType> GetDownloadTaskTypeAsync(

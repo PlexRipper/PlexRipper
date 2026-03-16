@@ -257,4 +257,56 @@ public class ClearCompletedDownloadTasksByDownloadTaskKeyCommandUnitTests
                 Times.Once
             );
     }
+
+    [Fact]
+    public async Task ShouldOnlyCountAndDeleteFullyMatchedCompletedKeys_WhenSameIdIsProvidedWithWrongType()
+    {
+        // Arrange
+        await SetupDatabase(
+            55006,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexMovieLibraryCount = 1;
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var movieTask = await dbContext
+            .DownloadTaskMovie.AsTracking()
+            .Include(x => x.Children)
+            .SingleAsync(CancellationToken);
+        movieTask.SetDownloadStatus(DownloadStatus.Completed);
+        await dbContext.SaveChangesAsync(CancellationToken);
+
+        var actualKey = await dbContext.DownloadTaskMovie.ProjectToKey().SingleAsync(CancellationToken);
+        var mismatchedKey = actualKey with { Type = DownloadTaskType.TvShow };
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<DeleteDownloadTasksByKeyCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
+
+        // Act
+        var result = await Sut.ExecuteAsync(
+            new ClearCompletedDownloadTasksByDownloadTaskKeyCommand([actualKey, mismatchedKey]),
+            CancellationToken
+        );
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldBe(1);
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x =>
+                    x.Send(
+                        It.Is<DeleteDownloadTasksByKeyCommand>(cmd =>
+                            cmd.Keys.Count == 1 && cmd.Keys.Single() == actualKey
+                        ),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Once
+            );
+    }
 }

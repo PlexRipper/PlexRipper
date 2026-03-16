@@ -63,7 +63,9 @@ public class DeleteDownloadTaskFilesCommandHandler : ICommandHandler<DeleteDownl
 
         await Task.WhenAll(movieFileTask, episodeFileTask);
 
-        var allFileTasks = movieFileTask.Result.Cast<DownloadTaskFileBase>().Concat(episodeFileTask.Result).ToList();
+        var movieFileTasks = await movieFileTask;
+        var episodeFileTasks = await episodeFileTask;
+        var allFileTasks = movieFileTasks.Cast<DownloadTaskFileBase>().Concat(episodeFileTasks).ToList();
 
         foreach (var task in allFileTasks)
             DeleteFileIfPresent(task);

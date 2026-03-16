@@ -787,6 +787,13 @@ public static partial class DbContextExtensions
                                 .SetProperty(
                                     x => x.CurrentFileTransferBytesOffset,
                                     progress.CurrentFileTransferBytesOffset
+                                )
+                                .SetProperty(
+                                    x => x.Percentage,
+                                    x =>
+                                        x.DataTotal > 0
+                                            ? progress.CurrentFileTransferBytesOffset * 100m / x.DataTotal
+                                            : 0m
                                 ),
                         cancellationToken
                     );
@@ -801,6 +808,13 @@ public static partial class DbContextExtensions
                                 .SetProperty(
                                     x => x.CurrentFileTransferBytesOffset,
                                     progress.CurrentFileTransferBytesOffset
+                                )
+                                .SetProperty(
+                                    x => x.Percentage,
+                                    x =>
+                                        x.DataTotal > 0
+                                            ? progress.CurrentFileTransferBytesOffset * 100m / x.DataTotal
+                                            : 0m
                                 ),
                         cancellationToken
                     );

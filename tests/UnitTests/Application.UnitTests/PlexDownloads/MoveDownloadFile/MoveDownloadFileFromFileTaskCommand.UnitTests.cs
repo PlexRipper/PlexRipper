@@ -668,6 +668,87 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
     }
 
     [Fact]
+    public async Task ShouldUpdateFileTransferPercentageToOneHundred_WhenMoveCompletesSuccessfully()
+    {
+        // Arrange — verifies that UpdateDownloadFileTransferProgress now writes Percentage to the DB,
+        // fixing the bug where the column kept the stale download-phase value (e.g. 75%) after the move.
+        await SetupDatabase(
+            777001,
+            config =>
+            {
+                config.TvShowDownloadTasksCount = 1;
+                config.TvShowSeasonDownloadTasksCount = 1;
+                config.TvShowEpisodeDownloadTasksCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var downloadFileTask = await dbContext
+            .DownloadTaskTvShowEpisodeFile.AsTracking()
+            .FirstOrDefaultAsync(CancellationToken);
+        downloadFileTask.ShouldNotBeNull();
+
+        // Simulate a stale Percentage left over from the download phase
+        downloadFileTask.Percentage = 75m;
+        downloadFileTask.DataTotal = 5 * 1024 * 1024;
+        await dbContext.SaveChangesAsync(CancellationToken);
+
+        var content = new byte[1024];
+        new Random(55).NextBytes(content);
+
+        SetupFileSystem(fs =>
+        {
+            fs.AddFile(downloadFileTask.DownloadFilePath, new MockFileData(content));
+        });
+
+        var progress = new Subject<IDownloadFileTransferProgress>();
+
+        Mock.Mock<IDownloadManagerSettings>()
+            .Setup(x => x.KeepCompletedInDownloadFolder)
+            .Returns(false)
+            .Verifiable(Times.Once);
+
+        Mock.Mock<IEventPublisher>()
+            .Setup(m => m.PublishAsync(It.IsAny<SendNotificationResult>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Never);
+
+        Mock.SetupCommand(It.IsAny<MoveFileWithResumeCommand>).ReturnsAsync(Result.Ok()).Verifiable(Times.Once);
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadStatus>(),
+                    It.IsAny<Result>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok());
+
+        // Act
+        var result = await Sut.ExecuteAsync(
+            new MoveDownloadFileFromFileTaskCommand(downloadFileTask.ToKey(), progress),
+            CancellationToken
+        );
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+
+        var after = await IDbContext.DownloadTaskTvShowEpisodeFile.AsNoTracking().FirstAsync(CancellationToken);
+        after.Percentage.ShouldBe(100m);
+    }
+
+    [Fact]
     public async Task ShouldReturnFailedResultAndPublishNotification_WhenMoveWithResumeFails()
     {
         // Arrange

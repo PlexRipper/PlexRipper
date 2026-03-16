@@ -31,4 +31,9 @@ public interface IDownloadTaskUpdateDispatcher
         DownloadTaskProgress progress,
         DirectDownloadSnapshot? snapshot = null
     );
+
+    /// <summary>
+    /// Queues a scope entry so the next periodic flush sends a patch with the already-persisted file transfer progress.
+    /// </summary>
+    void NotifyFileTransferProgress(DownloadTaskKey key);
 }

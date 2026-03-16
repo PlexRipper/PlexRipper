@@ -169,6 +169,17 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
         });
     }
 
+    /// <inheritdoc />
+    public void NotifyFileTransferProgress(DownloadTaskKey key)
+    {
+        var scope = _scopeByNodeId.GetValueOrDefault(key.Id) ?? ProgressScopeKey.From(key);
+        _progressByScope.AddOrUpdate(
+            scope,
+            _ => BufferedProgressUpdate.FromStatus(key),
+            (_, current) => current with { NodeId = key.Id, Key = key }
+        );
+    }
+
     /// <summary>
     /// Runs the background processing loop for immediate status patches and periodic progress flushes.
     /// </summary>

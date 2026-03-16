@@ -399,6 +399,7 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
                             dto,
                             cancellationToken: cancellationToken
                         );
+                        _downloadTaskUpdateDispatcher.NotifyFileTransferProgress(key);
                     }
                     catch (Exception ex)
                     {
@@ -416,6 +417,8 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
             downloadTask.CurrentFileTransferBytesOffset = progress.Transferred;
             downloadTask.FileDataTransferred = progress.Transferred;
             downloadTask.FileTransferSpeed = progress.FileTransferSpeed;
+            downloadTask.Percentage =
+                downloadTask.DataTotal > 0 ? (decimal)progress.Transferred / downloadTask.DataTotal * 100m : 0m;
 
             if (stopwatch.ElapsedMilliseconds > 1000)
             {

@@ -538,6 +538,64 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
         logs.Where(x => x.Id > pauseLog!.Id && x.Status == DownloadStatus.Downloading).ShouldBeEmpty();
     }
 
+    [Fact]
+    public async Task ShouldSendPatchWithFileTransferPercentage_WhenNotifyFileTransferProgressIsCalled()
+    {
+        // Arrange — verifies that calling NotifyFileTransferProgress triggers the dispatcher flush,
+        // which reads the persisted FileDataTransferred from the DB and broadcasts the correct percentage
+        // (fixing the bug where no patch was sent during the move phase).
+        await SetupDatabase(84330, config => config.MovieDownloadTasksCount = 1);
+
+        var movieFile = await IDbContext.DownloadTaskMovieFile.AsNoTracking().FirstAsync(CancellationToken);
+
+        // Simulate mid-move DB state: 50% through the file transfer
+        await IDbContext
+            .DownloadTaskMovieFile.Where(x => x.Id == movieFile.Id)
+            .ExecuteUpdateAsync(
+                p =>
+                    p.SetProperty(x => x.DataTotal, 1000L)
+                        .SetProperty(x => x.FileDataTransferred, 500L)
+                        .SetProperty(x => x.CurrentFileTransferBytesOffset, 500L)
+                        .SetProperty(x => x.FileTransferSpeed, 50_000_000L)
+                        .SetProperty(x => x.DownloadStatus, DownloadStatus.Moving),
+                CancellationToken
+            );
+
+        var capturedPatches = new List<IReadOnlyCollection<DownloadPatchDTO>>();
+        Mock.Mock<IDownloadHubService>()
+            .Setup(x =>
+                x.SendDownloadPatchAsync(
+                    It.IsAny<int>(),
+                    It.IsAny<long>(),
+                    It.IsAny<IReadOnlyCollection<DownloadPatchDTO>>(),
+                    It.IsAny<IReadOnlyCollection<Guid>?>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Callback<int, long, IReadOnlyCollection<DownloadPatchDTO>, IReadOnlyCollection<Guid>?, CancellationToken>(
+                (_, _, upserts, _, _) => capturedPatches.Add(upserts)
+            )
+            .Returns(Task.CompletedTask);
+
+        var sut = Sut;
+        await sut.StartAsync(CancellationToken.None);
+
+        // Act
+        sut.NotifyFileTransferProgress(movieFile.ToKey());
+
+        await WaitForPatchCount(capturedPatches, 1);
+        await sut.StopAsync(CancellationToken.None);
+
+        // Assert — the dispatcher sent a patch carrying the current transfer progress.
+        // The mapper derives Percentage from FileDataTransferred/DataTotal when in FileTransfer phase:
+        // DataFormat.GetPercentage(500, 1000) = 50.00m
+        capturedPatches.ShouldNotBeEmpty();
+        var fileTaskPatch = capturedPatches.SelectMany(x => x).FirstOrDefault(x => x.Id == movieFile.Id);
+        fileTaskPatch.ShouldNotBeNull();
+        fileTaskPatch!.Status.ShouldBe(DownloadStatus.Moving);
+        fileTaskPatch.Percentage.ShouldBe(50.00m);
+    }
+
     private async Task WaitForPatchCount<T>(ICollection<T> collection, int expectedCount)
     {
         for (var i = 0; i < 40 && collection.Count < expectedCount; i++)

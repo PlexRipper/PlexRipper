@@ -1,5 +1,5 @@
-using FastEndpoints;
 using Reaparr.Application.Contracts;
+using Reaparr.Data.Contracts;
 
 namespace Reaparr.Application;
 
@@ -9,12 +9,17 @@ namespace Reaparr.Application;
 /// <returns>Is successful.</returns>
 public class ClearCompletedDownloadTasksByDownloadTaskIdEndpoint : BaseEndpoint<List<Guid>, ResultDTO<CountResponseDTO>>
 {
+    private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
 
     public override string EndpointPath => ApiRoutes.DownloadController + "/clear/tasks";
 
-    public ClearCompletedDownloadTasksByDownloadTaskIdEndpoint(ICommandExecutor commandExecutor)
+    public ClearCompletedDownloadTasksByDownloadTaskIdEndpoint(
+        IReaparrDbContext dbContext,
+        ICommandExecutor commandExecutor
+    )
     {
+        _dbContext = dbContext;
         _commandExecutor = commandExecutor;
     }
 
@@ -27,7 +32,8 @@ public class ClearCompletedDownloadTasksByDownloadTaskIdEndpoint : BaseEndpoint<
 
     public override async Task HandleAsync(List<Guid> req, CancellationToken ct)
     {
-        var result = await _commandExecutor.Send(new ClearCompletedDownloadTasksByDownloadTaskIdCommand(req), ct);
+        var keys = await _dbContext.GetDownloadTaskKeysAsync(req, ct);
+        var result = await _commandExecutor.Send(new ClearCompletedDownloadTasksByDownloadTaskKeyCommand(keys), ct);
         if (result.IsFailed)
         {
             await SendFluentResult(result.ToResult(), ct);

@@ -1,6 +1,5 @@
 using FastEndpoints;
 using FluentValidation;
-using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 
@@ -56,12 +55,14 @@ public class DeleteDownloadTaskEndpoint : BaseEndpoint<DeleteDownloadTaskEndpoin
     public override async Task HandleAsync(DeleteDownloadTaskEndpointRequest req, CancellationToken ct)
     {
         _log.Here().DebugApiCall(HttpContext, req);
-        foreach (var downloadTaskId in req.DownloadTaskIds)
+
+        // Resolve keys upfront — needed for both the stop check and the delete command.
+        var keys = await _dbContext.GetDownloadTaskKeysAsync(req.DownloadTaskIds, ct);
+        foreach (var key in keys)
         {
-            var downloadTaskKey = await _dbContext.GetDownloadTaskKeyAsync(downloadTaskId, ct);
-            if (downloadTaskKey is not null && await _downloadTaskScheduler.IsDownloading(downloadTaskKey, ct))
+            if (await _downloadTaskScheduler.IsDownloading(key, ct))
             {
-                var stopResult = await _commandExecutor.Send(new StopDownloadTaskCommand(downloadTaskKey.Id), ct);
+                var stopResult = await _commandExecutor.Send(new StopDownloadTaskCommand(key.Id), ct);
                 if (stopResult.IsFailed)
                 {
                     await SendFluentResult(stopResult, ct);
@@ -70,20 +71,8 @@ public class DeleteDownloadTaskEndpoint : BaseEndpoint<DeleteDownloadTaskEndpoin
             }
         }
 
-        // Delete Download tasks
-        await _dbContext.DownloadTaskMovie.Where(x => req.DownloadTaskIds.Contains(x.Id)).ExecuteDeleteAsync(ct);
-        await _dbContext.DownloadTaskMovieFile.Where(x => req.DownloadTaskIds.Contains(x.Id)).ExecuteDeleteAsync(ct);
-        await _dbContext.DownloadTaskTvShow.Where(x => req.DownloadTaskIds.Contains(x.Id)).ExecuteDeleteAsync(ct);
-        await _dbContext.DownloadTaskTvShowSeason.Where(x => req.DownloadTaskIds.Contains(x.Id)).ExecuteDeleteAsync(ct);
-        await _dbContext
-            .DownloadTaskTvShowEpisode.Where(x => req.DownloadTaskIds.Contains(x.Id))
-            .ExecuteDeleteAsync(ct);
-        await _dbContext
-            .DownloadTaskTvShowEpisodeFile.Where(x => req.DownloadTaskIds.Contains(x.Id))
-            .ExecuteDeleteAsync(ct);
+        var deleteResult = await _commandExecutor.Send(new DeleteDownloadTasksByKeyCommand(keys), ct);
 
-        await _dbContext.DeleteOrphanedParentTasksAsync(ct);
-
-        await SendFluentResult(Result.Ok(), ct);
+        await SendFluentResult(deleteResult, ct);
     }
 }

@@ -1,5 +1,4 @@
-import type { DownloadProgressDTO } from '@dto';
-import { DownloadActions } from '@dto';
+import type { DownloadActions, DownloadProgressDTO } from '@dto';
 import type { IDownloadTableNode } from '@interfaces';
 import { toDownloadActions } from '@composables';
 

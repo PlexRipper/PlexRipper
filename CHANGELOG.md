@@ -1,5 +1,24 @@
 Reaparr Changelog
 
+# [0.37.0-dev.4](https://github.com/Reaparr/Reaparr/compare/v0.37.0-dev.3...v0.37.0-dev.4) (2026-03-17)
+
+
+### Bug Fixes
+
+* **WebAPI:** Ensure completed download patches report full progress ([a3d3f0a](https://github.com/Reaparr/Reaparr/commit/a3d3f0af09e30aa065e203bd3f7b82b8c0dda806))
+* **WebAPI:** Fix double-delete, EF UNION translation, torrent delete regressions, and key-based delete refactor ([e7377a9](https://github.com/Reaparr/Reaparr/commit/e7377a9e9d946679b7455ebc3fc54fadf973f697))
+* **WebAPI:** Fix the downloads getting stuck and not continuing ([de5671d](https://github.com/Reaparr/Reaparr/commit/de5671d1c0b56cdd5ecef219f5ac3d35777ef932))
+* **WebAPI:** Format download progress percentage to two decimal places ([3027924](https://github.com/Reaparr/Reaparr/commit/302792401124383c0412caaa8474949319426eb5))
+* **WebAPI:** Handle request timeout and bad gateway errors in HTTP client ([5b07ff0](https://github.com/Reaparr/Reaparr/commit/5b07ff032a3f41897203797c07fa239d565f3397))
+* **WebAPI:** Preserve direct download completion progress ([24983fa](https://github.com/Reaparr/Reaparr/commit/24983fa32dd758ffe489fb7bce8a45de7bb42429))
+* **WebAPI:** Replace pre-allocated stream with directory creation and disk space check before downloads ([77d1f6e](https://github.com/Reaparr/Reaparr/commit/77d1f6e9ef9e14d7c4d25df7f0d51e4182979ee8))
+* **WebAPI:** Update file transfer percentage during download move ([ea08362](https://github.com/Reaparr/Reaparr/commit/ea083626022dcc3d8f41e93dc4aaf4e2584aff27))
+
+
+### Performance Improvements
+
+* **WebAPI:** The starting of a download now happens much faster, from 11 secondes in some cases to 2 seconds ([0ed8171](https://github.com/Reaparr/Reaparr/commit/0ed81713dcb221498d7d8d50e9359e05fd39ac95))
+
 # [0.37.0-dev.3](https://github.com/Reaparr/Reaparr/compare/v0.37.0-dev.2...v0.37.0-dev.3) (2026-03-12)
 
 

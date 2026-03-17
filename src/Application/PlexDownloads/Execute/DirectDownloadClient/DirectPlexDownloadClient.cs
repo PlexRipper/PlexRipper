@@ -4,8 +4,6 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Runtime.CompilerServices;
-using ByteSizeLib;
 using Downloader;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
@@ -26,6 +24,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
     private string _filename = string.Empty;
 
     private readonly IDownloadService _downloader;
+
     private readonly DownloadConfiguration _configuration = new()
     {
         DownloadFileExtension = FilePathExtensions.TempDownloadFileSuffix,
@@ -34,8 +33,6 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
     private readonly CompositeDisposable _subscriptions = new();
     private readonly Subject<Unit> _destroy = new();
     private int _isDisposed;
-    private long _lastLoggedDataReceived = -1;
-    private decimal _lastLoggedPercentage = -1;
 
     public DirectPlexDownloadClient(
         ILogger log,
@@ -111,6 +108,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
             var statusResult = await SetDownloadStatusAsync(Domain.DownloadStatus.StorageError, ensureDirectoryResult);
             if (statusResult.IsFailed)
                 return statusResult;
+
             return ensureDirectoryResult;
         }
 
@@ -219,7 +217,6 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                     };
 
                     _downloadTaskUpdateDispatcher.OnProgressUpdated(key, progress, _downloader.Package.ToSnapshot());
-                    _ = SendProgressLog(progress);
                 })
         );
 
@@ -265,8 +262,6 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
 
                         _downloadTaskUpdateDispatcher.OnProgressUpdated(key, progress, package.ToSnapshot());
 
-                        await SendProgressLog(progress);
-
                         var finishResult = await SetDownloadStatusAsync(Domain.DownloadStatus.DownloadFinished);
                         finishResult.LogIfFailed();
                     })
@@ -274,33 +269,6 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                 .Concat()
                 .Subscribe()
         );
-    }
-
-    private async Task SendProgressLog(
-        DownloadTaskProgress progress,
-        [CallerFilePath] string sourceFilePath = "",
-        [CallerMemberName] string memberName = "",
-        [CallerLineNumber] int sourceLineNumber = 0
-    )
-    {
-        if (_lastLoggedDataReceived == progress.DataReceived && _lastLoggedPercentage == progress.Percentage)
-            return;
-
-        _lastLoggedDataReceived = progress.DataReceived;
-        _lastLoggedPercentage = progress.Percentage;
-
-        var progressMsg = _log.Here(sourceFilePath, memberName, sourceLineNumber)
-            .DebugMsg(
-                "[DownloadTaskProgress {MediaFileName} - {Percentage}% - {Speed} - {DataReceived} / {DataTotal} - {TimeRemaining}]",
-                _filename,
-                progress.Percentage.ToString("F2"),
-                DataFormat.FormatSpeedString(progress.DownloadSpeed),
-                ByteSize.FromBytes(progress.DataReceived).ToString("MB"),
-                ByteSize.FromBytes(progress.DataTotal).ToString("MB"),
-                TimeSpan.FromSeconds(progress.TimeRemaining).ToFormattedString()
-            );
-
-        await SendDownloadClientLog(NotificationLevel.Debug, Domain.DownloadStatus.Downloading, progressMsg);
     }
 
     private async Task<Result> SetDownloadStatusAsync(Domain.DownloadStatus status, Result? errorResult = null)

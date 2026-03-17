@@ -107,8 +107,8 @@ public class GetDirectDownloadUrlCommandHandler : ICommandHandler<GetDirectDownl
 
         if (responseResult.IsFailed)
         {
-            using var failedResponse = responseResult.ToHttpResponseMessage(request);
-            return Result.Ok(new ProbeResult(failedResponse.StatusCode, failedResponse.IsSuccessStatusCode));
+            var statusCode = (HttpStatusCode)responseResult.ToResult().FindStatusCode();
+            return Result.Ok(new ProbeResult(statusCode, (int)statusCode is >= 200 and <= 299));
         }
 
         using var response = responseResult.Value;

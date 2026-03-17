@@ -79,8 +79,8 @@ public class MoveFileWithResumeCommandHandler : ICommandHandler<MoveFileWithResu
 
         await using (Stream? readStream = inputStreamResult.Value)
         {
-            // Fresh start: truncate any stale destination content. Resume: keep existing bytes up to the offset.
-            var writeMode = currentOffset > 0 ? FileMode.OpenOrCreate : FileMode.Create;
+            // Fresh start: truncate any stale destination content. Resume: open existing file.
+            var writeMode = currentOffset > 0 ? FileMode.Open : FileMode.Create;
             var writeStreamResult = Result.Try(() =>
                 _file.Open(targetPath, writeMode, FileAccess.Write, FileShare.ReadWrite)
             );
@@ -92,6 +92,13 @@ public class MoveFileWithResumeCommandHandler : ICommandHandler<MoveFileWithResu
             // Resume if needed
             if (currentOffset > 0)
             {
+                if (writeStream.Length > currentOffset)
+                    writeStream.SetLength(currentOffset);
+                else if (writeStream.Length < currentOffset)
+                    return Result.Fail(
+                        $"Resume offset {currentOffset} exceeds on-disk file length {writeStream.Length} for '{targetPath}'; cannot resume safely"
+                    );
+
                 readStream.Seek(currentOffset, SeekOrigin.Begin);
                 writeStream.Seek(currentOffset, SeekOrigin.Begin);
             }

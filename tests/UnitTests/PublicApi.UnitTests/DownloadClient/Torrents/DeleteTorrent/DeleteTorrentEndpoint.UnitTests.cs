@@ -733,7 +733,7 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest<DeleteTorrentEndpoint
                         ),
                         It.IsAny<CancellationToken>()
                     ),
-                Times.Once
+                Times.Once()
             );
     }
 

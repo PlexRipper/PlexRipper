@@ -53,7 +53,7 @@ public class ClearCompletedDownloadTasksByDownloadTaskKeyCommandUnitTests
         Mock.Mock<ICommandExecutor>()
             .Verify(
                 x => x.Send(It.IsAny<DeleteDownloadTasksByKeyCommand>(), It.IsAny<CancellationToken>()),
-                Times.Never
+                Times.Never()
             );
     }
 
@@ -101,11 +101,12 @@ public class ClearCompletedDownloadTasksByDownloadTaskKeyCommandUnitTests
                 x =>
                     x.Send(
                         It.Is<DeleteDownloadTasksByKeyCommand>(cmd =>
-                            taskKeys.TrueForAll(k => cmd.Keys.Any(ck => ck.Id == k.Id))
+                            cmd.Keys.Count == taskKeys.Count
+                            && taskKeys.TrueForAll(k => cmd.Keys.Any(ck => ck == k))
                         ),
                         It.IsAny<CancellationToken>()
                     ),
-                Times.Once
+                Times.Once()
             );
     }
 
@@ -146,7 +147,7 @@ public class ClearCompletedDownloadTasksByDownloadTaskKeyCommandUnitTests
         Mock.Mock<ICommandExecutor>()
             .Verify(
                 x => x.Send(It.IsAny<DeleteDownloadTasksByKeyCommand>(), It.IsAny<CancellationToken>()),
-                Times.Never
+                Times.Never()
             );
     }
 
@@ -194,11 +195,12 @@ public class ClearCompletedDownloadTasksByDownloadTaskKeyCommandUnitTests
                 x =>
                     x.Send(
                         It.Is<DeleteDownloadTasksByKeyCommand>(cmd =>
-                            toDeleteKeys.TrueForAll(k => cmd.Keys.Any(ck => ck.Id == k.Id))
+                            cmd.Keys.Count == toDeleteKeys.Count
+                            && toDeleteKeys.TrueForAll(k => cmd.Keys.Any(ck => ck == k))
                         ),
                         It.IsAny<CancellationToken>()
                     ),
-                Times.Once
+                Times.Once()
             );
     }
 
@@ -254,7 +256,7 @@ public class ClearCompletedDownloadTasksByDownloadTaskKeyCommandUnitTests
                         It.Is<DeleteDownloadTasksByKeyCommand>(cmd => cmd.Keys.Any(k => k.Id == episodeFileKey.Id)),
                         It.IsAny<CancellationToken>()
                     ),
-                Times.Once
+                Times.Once()
             );
     }
 
@@ -306,7 +308,7 @@ public class ClearCompletedDownloadTasksByDownloadTaskKeyCommandUnitTests
                         ),
                         It.IsAny<CancellationToken>()
                     ),
-                Times.Once
+                Times.Once()
             );
     }
 
@@ -364,7 +366,7 @@ public class ClearCompletedDownloadTasksByDownloadTaskKeyCommandUnitTests
                         ),
                         It.IsAny<CancellationToken>()
                     ),
-                Times.Once
+                Times.Once()
             );
     }
 }

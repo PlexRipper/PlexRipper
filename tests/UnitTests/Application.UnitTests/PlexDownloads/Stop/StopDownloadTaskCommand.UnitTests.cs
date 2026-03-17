@@ -314,8 +314,15 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
         result.IsFailed.ShouldBeTrue();
         Mock.Mock<IDownloadTaskScheduler>()
             .Verify(x => x.IsDownloading(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()), Times.Once());
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Verify(
+                x => x.StopDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>(), It.IsAny<bool>()),
+                Times.Never()
+            );
         Mock.Mock<IMoveDownloadFileScheduler>()
             .Verify(x => x.IsDownloadFileMoving(It.IsAny<DownloadTaskKey>()), Times.Once());
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .Verify(x => x.StopMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Never());
         Mock.Mock<ICommandExecutor>()
             .Verify(
                 x => x.Send(It.IsAny<DeleteDownloadTaskFilesCommand>(), It.IsAny<CancellationToken>()),
@@ -329,7 +336,7 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
                         It.IsAny<DownloadStatus>(),
                         It.IsAny<CancellationToken>()
                     ),
-                Times.Never
+                Times.Never()
             );
 
         var after = await dbContext.GetDownloadTaskFileAsync(movieFileTask.ToKey(), CancellationToken);

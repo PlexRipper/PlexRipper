@@ -660,7 +660,7 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
         _progressByNodeId.AddOrUpdate(
             key.Id,
             _ => BufferedProgressUpdate.FromStatus(key),
-            (_, current) => current.NodeId == key.Id ? BufferedProgressUpdate.FromStatus(key) : current
+            (_, _) => BufferedProgressUpdate.FromStatus(key)
         );
     }
 

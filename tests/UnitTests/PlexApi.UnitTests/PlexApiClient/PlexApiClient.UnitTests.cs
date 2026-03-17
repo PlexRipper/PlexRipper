@@ -54,6 +54,9 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
         result.Code.ShouldBe(401);
         result.Message.ShouldBe("Unauthorized");
         result.Status.ShouldBe(401);
+        HttpHandlerMock
+            .Protected()
+            .Verify("SendAsync", Times.Once(), ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
     }
 
     [Fact]
@@ -74,6 +77,9 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
         // Assert
         responseMessage.StatusCode.ShouldBe(HttpStatusCode.RequestTimeout);
         responseMessage.ReasonPhrase.ShouldBe("Request Timeout");
+        HttpHandlerMock
+            .Protected()
+            .Verify("SendAsync", Times.Once(), ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
     }
 
     [Fact]
@@ -113,6 +119,9 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
         var result = JsonSerializer.Deserialize<PlexErrorDTO>(json, DefaultJsonSerializerOptions.ConfigStandard);
         result.ShouldNotBeNull();
         result.Message.ShouldBe("Internal Server Error");
+        HttpHandlerMock
+            .Protected()
+            .Verify("SendAsync", Times.Once(), ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
     }
 
     [Fact]
@@ -137,6 +146,9 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
         responseMessage.StatusCode.ShouldBe(HttpStatusCode.OK);
         var json = await responseMessage.Content.ReadAsStringAsync(CancellationToken);
         json.ShouldNotBeNullOrEmpty();
+        HttpHandlerMock
+            .Protected()
+            .Verify("SendAsync", Times.Once(), ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
     }
 
     [Fact]
@@ -148,14 +160,7 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
         });
 
         // Arrange
-        var client = Sut(
-            new PlexApiClientOptions
-            {
-                ConnectionUrl = "http://localhost",
-                RetryCount = 3,
-                RetryProgressAction = null,
-            }
-        );
+        var client = Sut(new PlexApiClientOptions { ConnectionUrl = "http://localhost", RetryProgressAction = null });
 
         // Act
         var responseMessage = await client.SendAsync(new HttpRequestMessage());
@@ -188,5 +193,8 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
         // Assert
         responseMessage.StatusCode.ShouldBe(HttpStatusCode.BadGateway);
         responseMessage.ReasonPhrase.ShouldBe("Bad Gateway");
+        HttpHandlerMock
+            .Protected()
+            .Verify("SendAsync", Times.Once(), ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
     }
 }

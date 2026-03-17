@@ -78,7 +78,7 @@ public class DeleteDownloadTaskEndpointUnitTests : BaseUnitTest<DeleteDownloadTa
     }
 
     [Fact]
-    public async Task ShouldStopDownloadingBeforeDispatching_WhenTaskIsActivelyDownloading()
+    public async Task ShouldStopDownloadingAndDispatchDelete_WhenTaskIsActivelyDownloading()
     {
         // Arrange
         await SetupDatabase(
@@ -120,7 +120,7 @@ public class DeleteDownloadTaskEndpointUnitTests : BaseUnitTest<DeleteDownloadTa
                         It.Is<StopDownloadTaskCommand>(cmd => cmd.DownloadTaskGuid == movieId),
                         It.IsAny<CancellationToken>()
                     ),
-                Times.Once
+                Times.Once()
             );
         Mock.Mock<ICommandExecutor>()
             .Verify(
@@ -129,7 +129,7 @@ public class DeleteDownloadTaskEndpointUnitTests : BaseUnitTest<DeleteDownloadTa
                         It.Is<DeleteDownloadTasksByKeyCommand>(cmd => cmd.Keys.Any(k => k.Id == movieId)),
                         It.IsAny<CancellationToken>()
                     ),
-                Times.Once
+                Times.Once()
             );
         (await dbContext.DownloadTaskMovie.AnyAsync(x => x.Id == movieId, CancellationToken)).ShouldBeFalse();
         (await dbContext.DownloadTaskMovieFile.AnyAsync(CancellationToken)).ShouldBeFalse();

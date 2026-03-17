@@ -68,18 +68,13 @@ public class EnsureDownloadDirectoryCommandUnitTests : BaseCommandUnitTest<Ensur
         const string directory = "/downloads/reaparr/Movies/Test Movie (2024)";
         var command = new EnsureDownloadDirectoryCommand(directory, 1_000_000);
 
-        // CreateDirectory throws; IPath must never be reached (strict mock will catch any unexpected call)
-        Mock.Mock<IDirectory>()
-            .Setup(x => x.CreateDirectory(directory))
-            .Throws(new IOException("Permission denied"))
-            .Verifiable(Times.Once());
+        SetupFileSystem(fs => fs.AddFile(directory, new MockFileData([])));
 
         // Act
         var result = await TestHandlerExecuteAsync(command);
 
         // Assert
         result.IsFailed.ShouldBeTrue();
-        Mock.Mock<IDirectory>().Verify();
     }
 
     [Fact]
@@ -92,8 +87,15 @@ public class EnsureDownloadDirectoryCommandUnitTests : BaseCommandUnitTest<Ensur
 
         SetupFileSystem(fs =>
         {
-            // The C:\ drive is not added to the MockFileSystem, so DriveInfo.New() will throw,
-            // which GetAvailableSpaceByDirectory catches and wraps as a failed Result.
+            fs.AddDrive(
+                @"D:\",
+                new MockDriveData
+                {
+                    IsReady = true,
+                    DriveType = DriveType.Fixed,
+                    AvailableFreeSpace = DefaultAvailableSpace,
+                }
+            );
         });
 
         // Act

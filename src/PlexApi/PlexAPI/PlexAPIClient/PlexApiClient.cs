@@ -1,7 +1,7 @@
+using System.Net;
 using System.Text.Json;
 using HttpClientToCurl.Extensions;
 using Reaparr.Application.Contracts;
-using Reaparr.FluentResultExtensions;
 using Reaparr.PlexApi.Contracts;
 using Serilog.Events;
 
@@ -39,10 +39,32 @@ public class PlexApiClient : IPlexApiClient
             _log.Here().Verbose("Request CURL: {RequestUrl}", curl);
         }
 
-        var response = await _defaultClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+        HttpResponseMessage response;
+
+        try
+        {
+            response = await _defaultClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+        }
+        catch (TaskCanceledException)
+        {
+            return CreateErrorResponse(request, HttpStatusCode.RequestTimeout, "Request Timeout");
+        }
+        catch (HttpRequestException)
+        {
+            return CreateErrorResponse(request, HttpStatusCode.BadGateway, "Bad Gateway");
+        }
 
         if (!response.IsSuccessStatusCode)
-            response.Content = ToJsonResponse(response);
+        {
+            var originalContent = response.Content;
+            var replacementContent = ToJsonResponse(response);
+
+            if (!ReferenceEquals(replacementContent, originalContent))
+            {
+                originalContent?.Dispose();
+                response.Content = replacementContent;
+            }
+        }
 
         if (_log.Here().IsLogLevelEnabled(LogEventLevel.Verbose))
             _log.Here().Verbose("Response: {Response}", await response.Content.ReadAsFormattedJsonAsync());
@@ -92,6 +114,23 @@ public class PlexApiClient : IPlexApiClient
             )
             .ToStringContent();
     }
+
+    private HttpResponseMessage CreateErrorResponse(
+        HttpRequestMessage request,
+        HttpStatusCode statusCode,
+        string reasonPhrase
+    ) =>
+        new(statusCode)
+        {
+            RequestMessage = request,
+            ReasonPhrase = reasonPhrase,
+            Content = JsonSerializer
+                .Serialize(
+                    new PlexError(reasonPhrase) { Code = (int)statusCode, Status = (int)statusCode },
+                    DefaultJsonSerializerOptions.ConfigStandard
+                )
+                .ToStringContent(),
+        };
 
     public void Dispose()
     {

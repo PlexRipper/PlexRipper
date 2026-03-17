@@ -362,7 +362,7 @@ public static partial class ResultExtensions
 
     public static bool Has502BadGatewayError(this Result result) => result.HasStatusCode(HttpCodes.Status502BadGateway);
 
-    public static Result Add502BadGatewayError(this Result result, string message = "Not Found") =>
+    public static Result Add502BadGatewayError(this Result result, string message = "Bad Gateway") =>
         result.AddStatusCodeError(HttpCodes.Status502BadGateway, message);
 
     public static Result Create502BadGatewayResult(string message = "") =>
@@ -539,7 +539,7 @@ public static partial class ResultExtensions
     public static bool Has502BadGatewayError<T>(this Result<T> result) =>
         result.HasStatusCode(HttpCodes.Status502BadGateway);
 
-    public static Result<T> Add502BadGatewayError<T>(this Result<T> result, string message = "Not Found") =>
+    public static Result<T> Add502BadGatewayError<T>(this Result<T> result, string message = "Bad Gateway") =>
         result.AddStatusCodeError(HttpCodes.Status502BadGateway, message);
 
     #endregion

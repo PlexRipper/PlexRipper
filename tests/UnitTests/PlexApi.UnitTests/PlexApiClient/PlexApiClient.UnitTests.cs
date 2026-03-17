@@ -69,10 +69,11 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
         var client = Sut(new PlexApiClientOptions { ConnectionUrl = "http://localhost", RetryProgressAction = null });
 
         // Act
-        var act = () => client.SendAsync(new HttpRequestMessage());
+        var responseMessage = await client.SendAsync(new HttpRequestMessage());
 
         // Assert
-        await Should.ThrowAsync<TaskCanceledException>(act);
+        responseMessage.StatusCode.ShouldBe(HttpStatusCode.RequestTimeout);
+        responseMessage.ReasonPhrase.ShouldBe("Request Timeout");
     }
 
     [Fact]
@@ -170,7 +171,7 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
     }
 
     [Fact]
-    public async Task ShouldThrowException_WhenHttpRequestExceptionOccurs()
+    public async Task ShouldReturnBadGatewayResponse_WhenHttpRequestExceptionOccurs()
     {
         // Set up the mocked HttpClient to throw an HttpRequestException
         SetupHttpClient(config =>
@@ -182,9 +183,10 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
         var client = Sut(new PlexApiClientOptions { ConnectionUrl = "http://localhost", RetryProgressAction = null });
 
         // Act
-        var act = () => client.SendAsync(new HttpRequestMessage());
+        var responseMessage = await client.SendAsync(new HttpRequestMessage());
 
         // Assert
-        await Should.ThrowAsync<HttpRequestException>(act);
+        responseMessage.StatusCode.ShouldBe(HttpStatusCode.BadGateway);
+        responseMessage.ReasonPhrase.ShouldBe("Bad Gateway");
     }
 }

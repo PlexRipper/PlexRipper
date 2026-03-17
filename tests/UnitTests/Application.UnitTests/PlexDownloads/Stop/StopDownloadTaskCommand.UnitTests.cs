@@ -312,6 +312,15 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
 
         // Assert
         result.IsFailed.ShouldBeTrue();
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Verify(x => x.IsDownloading(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()), Times.Once());
+        Mock.Mock<IMoveDownloadFileScheduler>()
+            .Verify(x => x.IsDownloadFileMoving(It.IsAny<DownloadTaskKey>()), Times.Once());
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<DeleteDownloadTaskFilesCommand>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Verify(
                 x =>

@@ -41,9 +41,8 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                     )
             );
 
-        // Covers EnsureDownloadDirectoryCommand and any other Result commands
         Mock.Mock<ICommandExecutor>()
-            .Setup(m => m.Send(It.IsAny<ICommand<Result>>(), It.IsAny<CancellationToken>()))
+            .Setup(m => m.Send(It.IsAny<EnsureDownloadDirectoryCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok());
     }
 

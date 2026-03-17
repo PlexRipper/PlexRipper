@@ -141,6 +141,12 @@ public class DeleteDownloadTaskEndpointUnitTests : BaseUnitTest<DeleteDownloadTa
         // Arrange
         await SetupDatabase(45212);
 
+        var dbContext = IDbContext;
+        var movieCountBefore = await dbContext.DownloadTaskMovie.CountAsync(CancellationToken);
+        var movieFileCountBefore = await dbContext.DownloadTaskMovieFile.CountAsync(CancellationToken);
+        var tvShowCountBefore = await dbContext.DownloadTaskTvShow.CountAsync(CancellationToken);
+        var tvShowEpisodeFileCountBefore = await dbContext.DownloadTaskTvShowEpisodeFile.CountAsync(CancellationToken);
+
         var missingId = Guid.NewGuid();
 
         // Act
@@ -160,5 +166,11 @@ public class DeleteDownloadTaskEndpointUnitTests : BaseUnitTest<DeleteDownloadTa
                 x => x.Send(It.IsAny<DeleteDownloadTasksByKeyCommand>(), It.IsAny<CancellationToken>()),
                 Times.Never
             );
+        (await dbContext.DownloadTaskMovie.CountAsync(CancellationToken)).ShouldBe(movieCountBefore);
+        (await dbContext.DownloadTaskMovieFile.CountAsync(CancellationToken)).ShouldBe(movieFileCountBefore);
+        (await dbContext.DownloadTaskTvShow.CountAsync(CancellationToken)).ShouldBe(tvShowCountBefore);
+        (await dbContext.DownloadTaskTvShowEpisodeFile.CountAsync(CancellationToken)).ShouldBe(
+            tvShowEpisodeFileCountBefore
+        );
     }
 }

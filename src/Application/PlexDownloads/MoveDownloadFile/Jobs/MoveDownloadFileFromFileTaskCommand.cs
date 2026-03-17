@@ -416,8 +416,9 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
             downloadTask.CurrentFileTransferBytesOffset = progress.Transferred;
             downloadTask.FileDataTransferred = progress.Transferred;
             downloadTask.FileTransferSpeed = progress.FileTransferSpeed;
-            downloadTask.Percentage =
+            var rawPercent =
                 downloadTask.DataTotal > 0 ? (decimal)progress.Transferred / downloadTask.DataTotal * 100m : 0m;
+            downloadTask.Percentage = Math.Clamp(rawPercent, 0m, 100m);
 
             if (stopwatch.ElapsedMilliseconds > 1000)
             {

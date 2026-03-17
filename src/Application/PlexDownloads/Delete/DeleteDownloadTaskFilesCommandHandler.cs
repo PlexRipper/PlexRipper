@@ -56,19 +56,21 @@ public class DeleteDownloadTaskFilesCommandHandler : ICommandHandler<DeleteDownl
             .Where(x => movieFileIds.Contains(x.Id))
             .ToListAsync(cancellationToken);
 
+        var movieFileTasks = await movieFileTask;
+
         var episodeFileTask = _dbContext
             .DownloadTaskTvShowEpisodeFile.AsNoTracking()
             .Where(x => episodeFileIds.Contains(x.Id))
             .ToListAsync(cancellationToken);
-
-        await Task.WhenAll(movieFileTask, episodeFileTask);
-
-        var movieFileTasks = await movieFileTask;
         var episodeFileTasks = await episodeFileTask;
         var allFileTasks = movieFileTasks.Cast<DownloadTaskFileBase>().Concat(episodeFileTasks).ToList();
 
         foreach (var task in allFileTasks)
-            DeleteFileIfPresent(task);
+        {
+            var deleteFileResult = DeleteFileIfPresent(task);
+            if (deleteFileResult.IsFailed)
+                return deleteFileResult;
+        }
 
         // After deleting files, try to clean up any empty directories left behind.
         // Process unique download directories so we don't attempt to clean the same folder twice.
@@ -79,7 +81,11 @@ public class DeleteDownloadTaskFilesCommandHandler : ICommandHandler<DeleteDownl
             .ToList();
 
         foreach (var directory in downloadDirectories)
-            DeleteDirectoryIfEmpty(directory);
+        {
+            var deleteDirectoryResult = DeleteDirectoryIfEmpty(directory);
+            if (deleteDirectoryResult.IsFailed)
+                return deleteDirectoryResult;
+        }
 
         return Result.Ok();
     }
@@ -89,7 +95,7 @@ public class DeleteDownloadTaskFilesCommandHandler : ICommandHandler<DeleteDownl
     /// Checks both the <c>.reaptemp</c>-suffixed path (active download) and the plain path
     /// (file already renamed after keep-in-downloads or completed move-to-same-folder step).
     /// </summary>
-    private void DeleteFileIfPresent(DownloadTaskFileBase task)
+    private Result DeleteFileIfPresent(DownloadTaskFileBase task)
     {
         // DownloadFilePath includes the .reaptemp suffix — check it first.
         var reapTempPath = task.DownloadFilePath;
@@ -103,8 +109,14 @@ public class DeleteDownloadTaskFilesCommandHandler : ICommandHandler<DeleteDownl
             _log.Here()
                 .Debug("Deleting download file for {DownloadTaskTitle} at {FilePath}", task.FullTitle, candidate);
 
-            Result.Try(() => _file.Delete(candidate)).LogIfFailed();
-            return;
+            var deleteResult = Result.Try(() => _file.Delete(candidate));
+            if (deleteResult.IsFailed)
+            {
+                deleteResult.LogIfFailed();
+                return deleteResult.WithError($"Failed to delete download file '{candidate}' for '{task.FullTitle}'");
+            }
+
+            return Result.Ok();
         }
 
         _log.Here()
@@ -114,37 +126,47 @@ public class DeleteDownloadTaskFilesCommandHandler : ICommandHandler<DeleteDownl
                 reapTempPath,
                 plainPath
             );
+
+        return Result.Ok();
     }
 
     /// <summary>
     /// Recursively deletes a directory and its parents as long as each one is empty.
     /// </summary>
-    private void DeleteDirectoryIfEmpty(string directory)
+    private Result DeleteDirectoryIfEmpty(string directory)
     {
         if (string.IsNullOrEmpty(directory) || !_directory.Exists(directory))
-            return;
+            return Result.Ok();
 
         var entries = Result.Try(() => _directory.GetFileSystemEntries(directory).ToList());
         if (entries.IsFailed)
         {
             entries.LogIfFailed();
-            return;
+            return entries.ToResult().WithError($"Failed to enumerate download directory '{directory}'");
         }
 
         if (entries.Value.Count > 0)
-            return;
+            return Result.Ok();
 
         _log.Here().Debug("Deleting empty download directory {Directory}", directory);
         var deleteResult = Result.Try(() => _directory.Delete(directory));
         if (deleteResult.IsFailed)
         {
             deleteResult.LogIfFailed();
-            return;
+            return deleteResult.WithError($"Failed to delete empty download directory '{directory}'");
         }
 
         // Walk up one level and try again (e.g. remove Season folder, then TvShow folder).
         var parent = Result.Try(() => _path.GetDirectoryName(directory));
-        if (parent.IsSuccess && !string.IsNullOrEmpty(parent.Value))
-            DeleteDirectoryIfEmpty(parent.Value);
+        if (parent.IsFailed)
+        {
+            parent.LogIfFailed();
+            return parent.ToResult().WithError($"Failed to resolve parent directory for '{directory}'");
+        }
+
+        if (!string.IsNullOrEmpty(parent.Value))
+            return DeleteDirectoryIfEmpty(parent.Value);
+
+        return Result.Ok();
     }
 }

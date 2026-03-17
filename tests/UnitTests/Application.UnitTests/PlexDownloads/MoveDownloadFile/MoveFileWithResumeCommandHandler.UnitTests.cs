@@ -208,12 +208,12 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
         var targetPath = "/test/target-openfail.bin";
         var content = CreateBytes(1024);
 
-        // Do not register a filesystem file; instead, mock IFile to throw on target open
-        var fileMock = Mock.Mock<IFile>();
-        fileMock
-            .Setup(f => f.Open(targetPath, FileMode.Create, FileAccess.Write, FileShare.None))
-            .Throws(new UnauthorizedAccessException("no write"));
-        // Source open setup not required; handler fails on target open first.
+        SetupFileSystem(fs =>
+        {
+            fs.AddDirectory("/test");
+            fs.AddFile(sourcePath, new MockFileData(content));
+            fs.AddDirectory(targetPath);
+        });
 
         MoveFileTransferProgressDTO? last = null;
         var command = new MoveFileWithResumeCommand
@@ -451,20 +451,14 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
         var targetPath = "/test/target-delete-fail.bin";
 
         var sourceContent = CreateBytes(1024);
-        var sourceStream = FakeData.GetFileSystemStream();
-        sourceStream.Write(sourceContent, 0, sourceContent.Length);
-        sourceStream.Seek(0, SeekOrigin.Begin);
-        var targetStream = FakeData.GetFileSystemStream();
 
-        var fileMock = Mock.Mock<IFile>();
-        fileMock
-            .Setup(f => f.Open(targetPath, FileMode.Create, FileAccess.Write, FileShare.ReadWrite))
-            .Returns(targetStream);
-        fileMock
-            .Setup(f => f.Open(sourcePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-            .Returns(sourceStream);
-        fileMock.Setup(f => f.Exists(sourcePath)).Returns(true);
-        fileMock.Setup(f => f.Delete(sourcePath)).Throws(new IOException("delete failed"));
+        SetupFileSystem(fs =>
+        {
+            fs.AddDirectory("/test");
+            fs.AddFile(sourcePath, new MockFileData(sourceContent));
+            fs.AddFile(targetPath, new MockFileData([]));
+            fs.File.SetAttributes(sourcePath, FileAttributes.ReadOnly);
+        });
 
         var command = new MoveFileWithResumeCommand
         {
@@ -481,7 +475,7 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
     }
 
     [Fact]
-    public async Task ExecuteAsync_FreshStart_TruncatesStaleDestinationContent()
+    public async Task ShouldTruncateStaleDestinationContent_WhenFreshStart()
     {
         // Verifies that a restart (currentOffset = 0) with a pre-existing destination from a previous
         // run is fully replaced by the new source, leaving no stale bytes beyond the new content.

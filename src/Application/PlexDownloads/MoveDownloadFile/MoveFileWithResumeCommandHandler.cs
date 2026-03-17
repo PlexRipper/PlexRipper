@@ -71,23 +71,24 @@ public class MoveFileWithResumeCommandHandler : ICommandHandler<MoveFileWithResu
         var dataTotal = command.DataTotal;
         var moveDownloadFileProgres = command.Progress;
 
-        // Fresh start: truncate any stale destination content. Resume: keep existing bytes up to the offset.
-        var writeMode = currentOffset > 0 ? FileMode.OpenOrCreate : FileMode.Create;
-        var writeStreamResult = Result.Try(() =>
-            _file.Open(targetPath, writeMode, FileAccess.Write, FileShare.ReadWrite)
-        );
-        if (writeStreamResult.IsFailed)
-            return writeStreamResult.ToResult();
-
         var inputStreamResult = Result.Try(
             (() => _file.Open(sourcePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
         );
         if (inputStreamResult.IsFailed)
             return inputStreamResult.ToResult();
 
-        await using (Stream? writeStream = writeStreamResult.Value)
         await using (Stream? readStream = inputStreamResult.Value)
         {
+            // Fresh start: truncate any stale destination content. Resume: keep existing bytes up to the offset.
+            var writeMode = currentOffset > 0 ? FileMode.OpenOrCreate : FileMode.Create;
+            var writeStreamResult = Result.Try(() =>
+                _file.Open(targetPath, writeMode, FileAccess.Write, FileShare.ReadWrite)
+            );
+            if (writeStreamResult.IsFailed)
+                return writeStreamResult.ToResult();
+
+            await using Stream? writeStream = writeStreamResult.Value;
+
             // Resume if needed
             if (currentOffset > 0)
             {

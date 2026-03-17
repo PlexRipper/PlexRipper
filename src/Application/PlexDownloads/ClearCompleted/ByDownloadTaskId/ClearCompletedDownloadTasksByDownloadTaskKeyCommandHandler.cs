@@ -69,7 +69,7 @@ public class ClearCompletedDownloadTasksByDownloadTaskKeyCommandHandler
             )
         );
 
-        var completedKeys = keys.Where(confirmedKeys.Contains).ToList();
+        var completedKeys = confirmedKeys.Distinct().ToList();
 
         if (completedKeys.Count == 0)
             return Result.Ok(0);
@@ -88,15 +88,18 @@ public class ClearCompletedDownloadTasksByDownloadTaskKeyCommandHandler
     )
         where T : DownloadTaskBase
     {
-        var idList = keys.Select(x => x.Id).ToList();
+        var idList = keys.Select(x => x.Id).Distinct().ToList();
         if (idList.Count == 0)
             return [];
 
-        var confirmedIds = await set.Where(x => idList.Contains(x.Id) && x.DownloadStatus == DownloadStatus.Completed)
-            .Select(x => x.Id)
+        return await set.Where(x => idList.Contains(x.Id) && x.DownloadStatus == DownloadStatus.Completed)
+            .Select(x => new DownloadTaskKey
+            {
+                Id = x.Id,
+                Type = x.DownloadTaskType,
+                PlexServerId = x.PlexServerId,
+                PlexLibraryId = x.PlexLibraryId,
+            })
             .ToListAsync(ct);
-
-        var confirmedIdSet = confirmedIds.ToHashSet();
-        return keys.Where(x => confirmedIdSet.Contains(x.Id)).ToList();
     }
 }

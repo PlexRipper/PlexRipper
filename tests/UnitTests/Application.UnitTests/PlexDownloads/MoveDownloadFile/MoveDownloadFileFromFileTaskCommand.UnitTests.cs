@@ -744,7 +744,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
         // Assert
         result.IsSuccess.ShouldBeTrue();
 
-        var after = await IDbContext.DownloadTaskTvShowEpisodeFile.AsNoTracking().FirstAsync(CancellationToken);
+        var after = await dbContext.DownloadTaskTvShowEpisodeFile.AsNoTracking().FirstAsync(CancellationToken);
         after.Percentage.ShouldBe(100m);
     }
 

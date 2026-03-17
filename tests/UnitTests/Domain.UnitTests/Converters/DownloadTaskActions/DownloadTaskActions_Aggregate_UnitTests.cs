@@ -38,7 +38,7 @@ public class DownloadTaskActionsAggregateUnitTests : BaseUnitTest
     }
 
     [Fact]
-    public void ShouldBeStatusDownloading_WhenOneIsQueuedAndOneIsDownloadFinished()
+    public void ShouldBeStatusDownloadFinished_WhenOneIsQueuedAndOneIsDownloadFinished()
     {
         // Arrange
         var downloadStatusList = new List<DownloadStatus>
@@ -62,11 +62,11 @@ public class DownloadTaskActionsAggregateUnitTests : BaseUnitTest
         var status = DownloadTaskActions.Aggregate(downloadStatusList);
 
         // Assert
-        status.ShouldBe(DownloadStatus.Queued);
+        status.ShouldBe(DownloadStatus.DownloadFinished);
     }
 
     [Fact]
-    public void ShouldBeStatusDownloading_WhenSomeAreDownloadFinishedAndQueued()
+    public void ShouldBeStatusDownloadFinished_WhenSomeAreDownloadFinishedAndQueued()
     {
         // Arrange
         var downloadStatusList = new List<DownloadStatus>
@@ -81,11 +81,11 @@ public class DownloadTaskActionsAggregateUnitTests : BaseUnitTest
         var status = DownloadTaskActions.Aggregate(downloadStatusList);
 
         // Assert
-        status.ShouldBe(DownloadStatus.Queued);
+        status.ShouldBe(DownloadStatus.DownloadFinished);
     }
 
     [Fact]
-    public void ShouldBeStatusDownloading_WhenSomeAreDownloadFinishedQueuedAndCompleted()
+    public void ShouldBeStatusDownloadFinished_WhenSomeAreDownloadFinishedQueuedAndCompleted()
     {
         // Arrange
         var downloadStatusList = new List<DownloadStatus>
@@ -102,7 +102,7 @@ public class DownloadTaskActionsAggregateUnitTests : BaseUnitTest
         var status = DownloadTaskActions.Aggregate(downloadStatusList);
 
         // Assert
-        status.ShouldBe(DownloadStatus.Queued);
+        status.ShouldBe(DownloadStatus.DownloadFinished);
     }
 
     [Fact]

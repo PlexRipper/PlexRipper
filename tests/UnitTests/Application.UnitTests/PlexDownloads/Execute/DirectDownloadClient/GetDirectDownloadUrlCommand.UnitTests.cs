@@ -153,12 +153,16 @@ public class GetDirectDownloadUrlCommandUnitTests : BaseUnitTest<GetDirectDownlo
         );
 
         var downloadTask = await IDbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
-        var handler = SetupHttpClientFactory(
-            HttpStatusCode.InternalServerError,
-            HttpStatusCode.InternalServerError,
-            HttpStatusCode.InternalServerError,
-            HttpStatusCode.InternalServerError
-        );
+        var handler = new ExhaustedTransientRetryHandler();
+        var retryHandler = new DefaultHttpClientRetryHandler(new LoggerConfiguration().CreateLogger())
+        {
+            InnerHandler = handler,
+        };
+        var httpClient = new HttpClient(retryHandler);
+        Mock.Mock<IHttpClientFactory>()
+            .Setup(x => x.CreateClient(It.IsAny<string>()))
+            .Returns(httpClient)
+            .Verifiable(Times.Once());
 
         var sut = CreateSut();
 
@@ -170,7 +174,8 @@ public class GetDirectDownloadUrlCommandUnitTests : BaseUnitTest<GetDirectDownlo
 
         // Assert
         result.IsFailed.ShouldBeTrue();
-        handler.RequestCount.ShouldBe(5);
+        handler.DefaultProbeRequestCount.ShouldBe(4);
+        handler.FallbackProbeRequestCount.ShouldBe(1);
         Mock.Mock<IHttpClientFactory>().Verify(x => x.CreateClient(It.IsAny<string>()), Times.Once());
     }
 
@@ -288,6 +293,40 @@ public class GetDirectDownloadUrlCommandUnitTests : BaseUnitTest<GetDirectDownlo
             DefaultProbeStarted.TrySetResult();
             var defaultStatusCode = await DefaultProbeResult.Task.WaitAsync(cancellationToken);
             return new HttpResponseMessage(defaultStatusCode) { RequestMessage = request };
+        }
+    }
+
+    private sealed class ExhaustedTransientRetryHandler : HttpMessageHandler
+    {
+        public int DefaultProbeRequestCount { get; private set; }
+
+        public int FallbackProbeRequestCount { get; private set; }
+
+        protected override async Task<HttpResponseMessage> SendAsync(
+            HttpRequestMessage request,
+            CancellationToken cancellationToken
+        )
+        {
+            var hasDownloadFlag = request.RequestUri?.Query.Contains("download=1", StringComparison.Ordinal) == true;
+
+            if (hasDownloadFlag)
+            {
+                FallbackProbeRequestCount++;
+
+                try
+                {
+                    await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
+
+                throw new InvalidOperationException("Fallback probe should be cancelled before completing.");
+            }
+
+            DefaultProbeRequestCount++;
+            return new HttpResponseMessage(HttpStatusCode.InternalServerError) { RequestMessage = request };
         }
     }
 }

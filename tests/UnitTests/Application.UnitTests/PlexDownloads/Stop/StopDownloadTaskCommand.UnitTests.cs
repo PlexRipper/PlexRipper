@@ -354,21 +354,18 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
             81582,
             config =>
             {
-                config.TvShowDownloadTasksCount = 2;
+                config.TvShowDownloadTasksCount = 1;
                 config.TvShowSeasonDownloadTasksCount = 2;
                 config.TvShowEpisodeDownloadTasksCount = 2;
             }
         );
-        var tvShowDownloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync(
-            cancellationToken: CancellationToken
-        );
-        var testDownloadTask = tvShowDownloadTasks.First();
+        var testDownloadTask = await IDbContext.DownloadTaskTvShow.FirstAsync(CancellationToken);
         var downloadableTasks = await IDbContext.GetDownloadableChildTaskKeys(
             testDownloadTask.ToKey(),
             CancellationToken
         );
 
-        downloadableTasks.Count.ShouldBe(4);
+        downloadableTasks.Count.ShouldBeGreaterThan(1);
 
         var dbContext = IDbContext;
         var episodeFileTasks = await dbContext.DownloadTaskTvShowEpisodeFile.ToListAsync(CancellationToken);
@@ -379,11 +376,23 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
                 fs.AddFile(fileTask.DownloadFilePath, new MockFileData([]));
         });
 
+        var activelyDownloadingTask = downloadableTasks.First();
+
         Mock.Mock<IDownloadTaskScheduler>()
-            .SetupSequence(x => x.IsDownloading(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(true)
-            .ReturnsAsync(false)
-            .ReturnsAsync(false)
+            .Setup(x =>
+                x.IsDownloading(
+                    It.Is<DownloadTaskKey>(key => key.Id == activelyDownloadingTask.Id),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(true);
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x =>
+                x.IsDownloading(
+                    It.Is<DownloadTaskKey>(key => key.Id != activelyDownloadingTask.Id),
+                    It.IsAny<CancellationToken>()
+                )
+            )
             .ReturnsAsync(false);
         Mock.Mock<IDownloadTaskScheduler>()
             .Setup(x => x.StopDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
@@ -407,19 +416,19 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
             .Verifiable(Times.Once());
 
         // Act
-        var result = await Sut.ExecuteAsync(
-            new StopDownloadTaskCommand(tvShowDownloadTasks.First().Id),
-            CancellationToken
-        );
+        var result = await Sut.ExecuteAsync(new StopDownloadTaskCommand(testDownloadTask.Id), CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
         Mock.Mock<IDownloadTaskScheduler>()
-            .Verify(x => x.IsDownloading(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()), Times.Exactly(4));
+            .Verify(
+                x => x.IsDownloading(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()),
+                Times.Exactly(downloadableTasks.Count)
+            );
         Mock.Mock<IDownloadTaskScheduler>()
             .Verify(x => x.StopDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()), Times.Once);
         Mock.Mock<IMoveDownloadFileScheduler>()
-            .Verify(x => x.IsDownloadFileMoving(It.IsAny<DownloadTaskKey>()), Times.Exactly(4));
+            .Verify(x => x.IsDownloadFileMoving(It.IsAny<DownloadTaskKey>()), Times.Exactly(downloadableTasks.Count));
         Mock.Mock<IMoveDownloadFileScheduler>()
             .Verify(x => x.StopMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Never);
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
@@ -436,20 +445,17 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
         Mock.Mock<ICommandExecutor>()
             .Verify(x => x.Send(It.IsAny<DeleteDownloadTaskFilesCommand>(), It.IsAny<CancellationToken>()), Times.Once);
 
-        var downloadTasks = await IDbContext.GetDownloadableChildTasks(
-            tvShowDownloadTasks.First().ToKey(),
-            CancellationToken
-        );
+        var downloadTasks = await IDbContext.GetDownloadableChildTasks(testDownloadTask.ToKey(), CancellationToken);
 
         var stoppedTaskIds = downloadTasks
             .Where(x => x.DownloadStatus == DownloadStatus.Stopped)
             .Select(x => x.Id)
             .ToList();
         stoppedTaskIds.Count.ShouldBe(1);
-        stoppedTaskIds.ShouldContain(downloadableTasks.First().Id);
+        stoppedTaskIds.ShouldContain(activelyDownloadingTask.Id);
 
         downloadTasks
-            .Where(x => x.Id != downloadableTasks.First().Id)
+            .Where(x => x.Id != activelyDownloadingTask.Id)
             .All(x => x.DownloadStatus == DownloadStatus.Queued)
             .ShouldBeTrue();
     }

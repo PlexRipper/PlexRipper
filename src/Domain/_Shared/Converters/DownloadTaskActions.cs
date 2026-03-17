@@ -19,11 +19,11 @@ public static class DownloadTaskActions
         DownloadStatus.MovePaused,
         DownloadStatus.Stopped,
         DownloadStatus.Restarting,
-        DownloadStatus.Queued,
         DownloadStatus.Moving,
         DownloadStatus.MoveFinished,
         DownloadStatus.DownloadFinished,
         DownloadStatus.Deleted,
+        DownloadStatus.Queued,
         DownloadStatus.Completed,
     ];
 

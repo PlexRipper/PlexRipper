@@ -2,6 +2,7 @@ using System.IO.Abstractions.TestingHelpers;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
+using Reaparr.Environment;
 
 namespace Reaparr.Application.UnitTests;
 
@@ -227,5 +228,215 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownlo
         result.IsSuccess.ShouldBeTrue();
         var file = Mock.Create<System.IO.Abstractions.IFile>();
         file.Exists(plainFilePath).ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task ShouldNotDeleteMoviesCategoryFolderOrDownloadRoot_WhenMovieFolderBecomesEmpty()
+    {
+        // Arrange
+        // Scenario: the only movie in the category is deleted. The task folder empties out
+        // and is removed, but recursion must stop at …/Movies/ (the category stop-root)
+        // and must never touch …/Downloads/ above it.
+        await SetupDatabase(
+            84010,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.MovieCount = 1;
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+        var dbContext = IDbContext;
+        var movieFileTask = await dbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+        var movieFileKey = await dbContext.DownloadTaskMovieFile.ProjectToKey().FirstAsync(CancellationToken);
+        var plainFilePath = movieFileTask.DownloadFilePath.RemoveReapTempSuffix();
+
+        // e.g. /Downloads/Movies/SomeMovie  →  category folder = /Downloads/Movies
+        var movieTaskFolder = movieFileTask.DownloadDirectory;
+        var moviesCategoryFolder = System.IO.Path.GetDirectoryName(
+            movieTaskFolder.TrimEnd(System.IO.Path.DirectorySeparatorChar)
+        )!;
+        var downloadRoot = PathProvider.DefaultDownloadsDestinationFolder;
+
+        SetupFileSystem(fs => fs.AddFile(plainFilePath, new MockFileData([])));
+
+        // Act
+        var result = await Sut.ExecuteAsync(new DeleteDownloadTaskFilesCommand([movieFileKey]), CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        var file = Mock.Create<System.IO.Abstractions.IFile>();
+        var directory = Mock.Create<System.IO.Abstractions.IDirectory>();
+        file.Exists(plainFilePath).ShouldBeFalse();
+        directory.Exists(movieTaskFolder).ShouldBeFalse(); // task folder removed (was empty)
+        directory.Exists(moviesCategoryFolder).ShouldBeTrue(); // stopRoot — must survive
+        directory.Exists(downloadRoot).ShouldBeTrue(); // download root — must survive
+    }
+
+    [Fact]
+    public async Task ShouldNotDeleteTvShowsCategoryFolderOrDownloadRoot_WhenSeasonAndShowFoldersBecomeEmpty()
+    {
+        // Arrange
+        // Scenario: the only episode of a show is deleted. Season folder and show folder both
+        // empty out and are removed, but recursion must stop at …/TvShows/ (the category
+        // stop-root) and must never touch …/Downloads/ above it.
+        await SetupDatabase(
+            84011,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.TvShowCount = 1;
+                config.TvShowDownloadTasksCount = 1;
+            }
+        );
+        var dbContext = IDbContext;
+        var episodeFileTask = await dbContext.DownloadTaskTvShowEpisodeFile.FirstAsync(CancellationToken);
+        var episodeFileKey = await dbContext.DownloadTaskTvShowEpisodeFile.ProjectToKey().FirstAsync(CancellationToken);
+        var plainFilePath = episodeFileTask.DownloadFilePath.RemoveReapTempSuffix();
+
+        // e.g. /Downloads/TvShows/SomeShow/Season 1  →  ancestors:
+        //   showFolder          = /Downloads/TvShows/SomeShow
+        //   tvShowsCategoryFolder = /Downloads/TvShows
+        var seasonFolder = episodeFileTask.DownloadDirectory;
+        var showFolder = System.IO.Path.GetDirectoryName(seasonFolder.TrimEnd(System.IO.Path.DirectorySeparatorChar))!;
+        var tvShowsCategoryFolder = System.IO.Path.GetDirectoryName(
+            showFolder.TrimEnd(System.IO.Path.DirectorySeparatorChar)
+        )!;
+        var downloadRoot = PathProvider.DefaultDownloadsDestinationFolder;
+
+        SetupFileSystem(fs => fs.AddFile(plainFilePath, new MockFileData([])));
+
+        // Act
+        var result = await Sut.ExecuteAsync(new DeleteDownloadTaskFilesCommand([episodeFileKey]), CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        var file = Mock.Create<System.IO.Abstractions.IFile>();
+        var directory = Mock.Create<System.IO.Abstractions.IDirectory>();
+        file.Exists(plainFilePath).ShouldBeFalse();
+        directory.Exists(seasonFolder).ShouldBeFalse(); // season folder removed (was empty)
+        directory.Exists(showFolder).ShouldBeFalse(); // show folder removed (was empty)
+        directory.Exists(tvShowsCategoryFolder).ShouldBeTrue(); // stopRoot — must survive
+        directory.Exists(downloadRoot).ShouldBeTrue(); // download root — must survive
+    }
+
+    [Fact]
+    public async Task ShouldPreserveShowFolder_WhenOnlyOneOfTwoSeasonFoldersBecomesEmpty()
+    {
+        // Arrange
+        // Scenario: a show has two seasons; only the first season's episode is deleted.
+        // The first season folder empties out and is removed, but the show folder must
+        // survive because it still contains the second season folder (with its file).
+        await SetupDatabase(
+            84012,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.TvShowCount = 1;
+                config.TvShowDownloadTasksCount = 1;
+                config.TvShowSeasonDownloadTasksCount = 2;
+                config.TvShowEpisodeDownloadTasksCount = 1;
+            }
+        );
+        var dbContext = IDbContext;
+        var episodeFileTasks = await dbContext.DownloadTaskTvShowEpisodeFile.ToListAsync(CancellationToken);
+        episodeFileTasks.Count.ShouldBe(2);
+        var episodeFileKeys = await dbContext.DownloadTaskTvShowEpisodeFile.ProjectToKey().ToListAsync(CancellationToken);
+
+        var season1Task = episodeFileTasks[0];
+        var season2Task = episodeFileTasks[1];
+        var season1PlainPath = season1Task.DownloadFilePath.RemoveReapTempSuffix();
+        var season2PlainPath = season2Task.DownloadFilePath.RemoveReapTempSuffix();
+
+        var season1Folder = season1Task.DownloadDirectory;
+        var season2Folder = season2Task.DownloadDirectory;
+        var showFolder = System.IO.Path.GetDirectoryName(season1Folder.TrimEnd(System.IO.Path.DirectorySeparatorChar))!;
+        var tvShowsCategoryFolder = System.IO.Path.GetDirectoryName(showFolder.TrimEnd(System.IO.Path.DirectorySeparatorChar))!;
+
+        // Both season files exist on disk; only season 1's episode is in the delete command.
+        SetupFileSystem(fs =>
+        {
+            fs.AddFile(season1PlainPath, new MockFileData([]));
+            fs.AddFile(season2PlainPath, new MockFileData([]));
+        });
+
+        // Act — delete only season 1's episode
+        var result = await Sut.ExecuteAsync(
+            new DeleteDownloadTaskFilesCommand([episodeFileKeys[0]]),
+            CancellationToken
+        );
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        var file = Mock.Create<System.IO.Abstractions.IFile>();
+        var directory = Mock.Create<System.IO.Abstractions.IDirectory>();
+        file.Exists(season1PlainPath).ShouldBeFalse(); // season 1 file removed
+        file.Exists(season2PlainPath).ShouldBeTrue(); // season 2 file untouched
+        directory.Exists(season1Folder).ShouldBeFalse(); // season 1 folder removed (was empty)
+        directory.Exists(season2Folder).ShouldBeTrue(); // season 2 folder still has its file
+        directory.Exists(showFolder).ShouldBeTrue(); // show folder not empty (season 2 still there)
+        directory.Exists(tvShowsCategoryFolder).ShouldBeTrue(); // stopRoot — must survive
+    }
+
+    [Fact]
+    public async Task ShouldCleanUpBothCategorySubfolders_WhenMixedMovieAndEpisodeKeysAreDeleted()
+    {
+        // Arrange
+        // Scenario: a command targets one movie file and one TV episode file simultaneously.
+        // Both task folders must be cleaned up, and both Movies/ and TvShows/ category
+        // folders (the stop-roots) must survive even though they become childless.
+        await SetupDatabase(
+            84013,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.MovieCount = 1;
+                config.MovieDownloadTasksCount = 1;
+                config.TvShowCount = 1;
+                config.TvShowDownloadTasksCount = 1;
+            }
+        );
+        var dbContext = IDbContext;
+        var movieFileTask = await dbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+        var movieFileKey = await dbContext.DownloadTaskMovieFile.ProjectToKey().FirstAsync(CancellationToken);
+        var episodeFileTask = await dbContext.DownloadTaskTvShowEpisodeFile.FirstAsync(CancellationToken);
+        var episodeFileKey = await dbContext.DownloadTaskTvShowEpisodeFile.ProjectToKey().FirstAsync(CancellationToken);
+
+        var moviePlainPath = movieFileTask.DownloadFilePath.RemoveReapTempSuffix();
+        var episodePlainPath = episodeFileTask.DownloadFilePath.RemoveReapTempSuffix();
+
+        var movieTaskFolder = movieFileTask.DownloadDirectory;
+        var moviesCategoryFolder = System.IO.Path.GetDirectoryName(
+            movieTaskFolder.TrimEnd(System.IO.Path.DirectorySeparatorChar)
+        )!;
+        var seasonFolder = episodeFileTask.DownloadDirectory;
+        var showFolder = System.IO.Path.GetDirectoryName(seasonFolder.TrimEnd(System.IO.Path.DirectorySeparatorChar))!;
+        var tvShowsCategoryFolder = System.IO.Path.GetDirectoryName(showFolder.TrimEnd(System.IO.Path.DirectorySeparatorChar))!;
+        var downloadRoot = PathProvider.DefaultDownloadsDestinationFolder;
+
+        SetupFileSystem(fs =>
+        {
+            fs.AddFile(moviePlainPath, new MockFileData([]));
+            fs.AddFile(episodePlainPath, new MockFileData([]));
+        });
+
+        // Act — delete both in one command
+        var result = await Sut.ExecuteAsync(
+            new DeleteDownloadTaskFilesCommand([movieFileKey, episodeFileKey]),
+            CancellationToken
+        );
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        var file = Mock.Create<System.IO.Abstractions.IFile>();
+        var directory = Mock.Create<System.IO.Abstractions.IDirectory>();
+        file.Exists(moviePlainPath).ShouldBeFalse();
+        file.Exists(episodePlainPath).ShouldBeFalse();
+        directory.Exists(movieTaskFolder).ShouldBeFalse(); // movie task folder removed (was empty)
+        directory.Exists(seasonFolder).ShouldBeFalse(); // season folder removed (was empty)
+        directory.Exists(showFolder).ShouldBeFalse(); // show folder removed (was empty)
+        directory.Exists(moviesCategoryFolder).ShouldBeTrue(); // Movies/ stopRoot — must survive
+        directory.Exists(tvShowsCategoryFolder).ShouldBeTrue(); // TvShows/ stopRoot — must survive
+        directory.Exists(downloadRoot).ShouldBeTrue(); // download root — must survive
     }
 }

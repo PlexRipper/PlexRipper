@@ -20,6 +20,7 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly IDownloadTaskUpdateDispatcher _downloadTaskUpdateDispatcher;
+    private readonly ICommandExecutor _commandExecutor;
     private readonly IFile _file;
     private readonly IDownloadTaskScheduler _downloadTaskScheduler;
     private readonly IMoveDownloadFileScheduler _moveDownloadFileScheduler;
@@ -28,6 +29,7 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
         ILogger log,
         IReaparrDbContext dbContext,
         IDownloadTaskUpdateDispatcher downloadTaskUpdateDispatcher,
+        ICommandExecutor commandExecutor,
         IFile file,
         IDownloadTaskScheduler downloadTaskScheduler,
         IMoveDownloadFileScheduler moveDownloadFileScheduler
@@ -36,6 +38,7 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
         _log = log.ForContext<StopDownloadTaskCommandHandler>();
         _dbContext = dbContext;
         _downloadTaskUpdateDispatcher = downloadTaskUpdateDispatcher;
+        _commandExecutor = commandExecutor;
         _file = file;
         _downloadTaskScheduler = downloadTaskScheduler;
         _moveDownloadFileScheduler = moveDownloadFileScheduler;
@@ -104,21 +107,12 @@ public class StopDownloadTaskCommandHandler : ICommandHandler<StopDownloadTaskCo
                 _log.Here()
                     .Debug("Deleting partially downloaded files of {DownloadTaskFullTitle}", downloadTask.FullTitle);
 
-                Result
-                    .Try(() =>
-                    {
-                        if (_file.Exists(downloadTask.DownloadFilePath))
-                            _file.Delete(downloadTask.DownloadFilePath);
-                        else
-                        {
-                            _log.Warning(
-                                "Partially downloaded file for {DownloadTaskFullTitle} not found at {DownloadFilePath} so it could not be deleted.",
-                                downloadTask.FullTitle,
-                                downloadTask.DownloadFilePath
-                            );
-                        }
-                    })
-                    .LogIfFailed();
+                var deleteFilesResult = await _commandExecutor.Send(
+                    new DeleteDownloadTaskFilesCommand([downloadTaskKey]),
+                    cancellationToken
+                );
+                if (deleteFilesResult.IsFailed)
+                    return deleteFilesResult.LogError();
             }
 
             _log.Here().Debug($"Resetting download progress for {downloadTaskKey.Id} ({downloadTask.FileName})");

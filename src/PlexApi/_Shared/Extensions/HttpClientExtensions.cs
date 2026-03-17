@@ -3,6 +3,7 @@ using System.Text.Json;
 using LukeHagar.PlexAPI.SDK.Models.Errors;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
 using Newtonsoft.Json;
+using Reaparr.FluentResultExtensions;
 using JsonException = System.Text.Json.JsonException;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
@@ -37,6 +38,14 @@ public static class HttpClientExtensions
         {
             _log.Here().Error("Failed response validation: {Body}", e.Body);
             return Result.Fail(new ExceptionalError(e)).LogError();
+        }
+        catch (TaskCanceledException e)
+        {
+            return ResultExtensions.Create408RequestTimeoutError().WithError(new ExceptionalError(e)).LogWarning();
+        }
+        catch (HttpRequestException e)
+        {
+            return ResultExtensions.Create502BadGatewayResult().WithError(new ExceptionalError(e)).LogWarning();
         }
         catch (Exception e)
         {
@@ -77,8 +86,7 @@ public static class HttpClientExtensions
         if (response.IsSuccess)
         {
             var httpResponseMessage = response.Value.GetHttpResponseMessage();
-            var statusCode = (int)httpResponseMessage.StatusCode;
-            return Result.Ok(mapper(response.Value)).AddStatusCode(statusCode);
+            return Result.Ok(mapper(response.Value)).AddStatusCode(httpResponseMessage.StatusCode);
         }
 
         // TODO Might need to add more error handling here such as AddStatusCode
@@ -106,7 +114,7 @@ public static class HttpClientExtensions
         if (response.IsSuccessStatusCode && response.Content.ToString()!.Contains("Bad Gateway"))
             return Result.Fail("Server responded with Bad Gateway").Add502BadGatewayError().WithErrors(errors ?? []);
 
-        return Result.Fail("Request failed").AddStatusCode((int)response.StatusCode).WithErrors(errors ?? []);
+        return Result.Fail("Request failed").AddStatusCode(response.StatusCode).WithErrors(errors ?? []);
     }
 
     private static HttpResponseMessage GetHttpResponseMessage<T>(this T response) =>

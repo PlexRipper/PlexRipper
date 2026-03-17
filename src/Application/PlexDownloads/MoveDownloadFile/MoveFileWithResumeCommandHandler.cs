@@ -67,15 +67,9 @@ public class MoveFileWithResumeCommandHandler : ICommandHandler<MoveFileWithResu
     {
         var sourcePath = command.SourcePath;
         var targetPath = command.TargetPath;
-        var currentOffset = command.CurrentOffset;
+        var currentOffset = Math.Min(command.CurrentOffset, command.DataTotal);
         var dataTotal = command.DataTotal;
         var moveDownloadFileProgres = command.Progress;
-
-        var writeStreamResult = Result.Try(() =>
-            _file.Open(targetPath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite)
-        );
-        if (writeStreamResult.IsFailed)
-            return writeStreamResult.ToResult();
 
         var inputStreamResult = Result.Try(
             (() => _file.Open(sourcePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
@@ -83,12 +77,28 @@ public class MoveFileWithResumeCommandHandler : ICommandHandler<MoveFileWithResu
         if (inputStreamResult.IsFailed)
             return inputStreamResult.ToResult();
 
-        await using (Stream? writeStream = writeStreamResult.Value)
         await using (Stream? readStream = inputStreamResult.Value)
         {
+            // Fresh start: truncate any stale destination content. Resume: open existing file.
+            var writeMode = currentOffset > 0 ? FileMode.Open : FileMode.Create;
+            var writeStreamResult = Result.Try(() =>
+                _file.Open(targetPath, writeMode, FileAccess.Write, FileShare.ReadWrite)
+            );
+            if (writeStreamResult.IsFailed)
+                return writeStreamResult.ToResult();
+
+            await using Stream? writeStream = writeStreamResult.Value;
+
             // Resume if needed
             if (currentOffset > 0)
             {
+                if (writeStream.Length > currentOffset)
+                    writeStream.SetLength(currentOffset);
+                else if (writeStream.Length < currentOffset)
+                    return Result.Fail(
+                        $"Resume offset {currentOffset} exceeds on-disk file length {writeStream.Length} for '{targetPath}'; cannot resume safely"
+                    );
+
                 readStream.Seek(currentOffset, SeekOrigin.Begin);
                 writeStream.Seek(currentOffset, SeekOrigin.Begin);
             }

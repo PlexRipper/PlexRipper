@@ -3,10 +3,10 @@ using Reaparr.SignalR.Contracts;
 
 namespace Reaparr.Application;
 
-internal static class PlexApiClientProgressMapper
+internal static class HttpRequestRetryProgressMapper
 {
     public static ServerConnectionCheckStatusProgress ToServerConnectionCheckStatusProgress(
-        this PlexApiClientProgress source,
+        this HttpRequestRetryProgress source,
         PlexServerConnection plexServerConnection
     ) =>
         new()

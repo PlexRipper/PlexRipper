@@ -113,28 +113,6 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
             var movedInDownloadsExists =
                 !string.IsNullOrWhiteSpace(movedInDownloadsPath) && _file.Exists(movedInDownloadsPath);
 
-            if (destinationExists)
-            {
-                _log.Here()
-                    .Warning(
-                        "Source file was missing for {DownloadTaskId}, but a completed file already exists at destination. Treating move as finished.",
-                        key.Id
-                    );
-
-                downloadTask.CurrentFileTransferBytesOffset = downloadTask.DataTotal;
-                downloadTask.FileDataTransferred = downloadTask.DataTotal;
-                await _dbContext.UpdateDownloadFileTransferProgress(
-                    key,
-                    downloadTask.ToFileTransferProgress(),
-                    cancellationToken
-                );
-                moveDownloadFileProgress?.OnNext(downloadTask.ToFileTransferProgress());
-
-                await UpdateDownloadTaskStatus(key, DownloadStatus.MoveFinished);
-                _log.Here().Debug("Move marked finished via existing destination file for {DownloadTaskId}", key.Id);
-                return Result.Ok();
-            }
-
             if (movedInDownloadsExists)
             {
                 if (ShouldKeepInDownloads(downloadTask))
@@ -171,6 +149,27 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
                         key.Id
                     );
                 downloadFilePath = movedInDownloadsPath!;
+            }
+            else if (destinationExists)
+            {
+                _log.Here()
+                    .Warning(
+                        "Source file was missing for {DownloadTaskId}, but a completed file already exists at destination. Treating move as finished.",
+                        key.Id
+                    );
+
+                downloadTask.CurrentFileTransferBytesOffset = downloadTask.DataTotal;
+                downloadTask.FileDataTransferred = downloadTask.DataTotal;
+                await _dbContext.UpdateDownloadFileTransferProgress(
+                    key,
+                    downloadTask.ToFileTransferProgress(),
+                    cancellationToken
+                );
+                moveDownloadFileProgress?.OnNext(downloadTask.ToFileTransferProgress());
+
+                await UpdateDownloadTaskStatus(key, DownloadStatus.MoveFinished);
+                _log.Here().Debug("Move marked finished via existing destination file for {DownloadTaskId}", key.Id);
+                return Result.Ok();
             }
             else
             {
@@ -399,6 +398,7 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
                             dto,
                             cancellationToken: cancellationToken
                         );
+                        _downloadTaskUpdateDispatcher.NotifyFileTransferProgress(key);
                     }
                     catch (Exception ex)
                     {
@@ -416,6 +416,9 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
             downloadTask.CurrentFileTransferBytesOffset = progress.Transferred;
             downloadTask.FileDataTransferred = progress.Transferred;
             downloadTask.FileTransferSpeed = progress.FileTransferSpeed;
+            var rawPercent =
+                downloadTask.DataTotal > 0 ? (decimal)progress.Transferred / downloadTask.DataTotal * 100m : 0m;
+            downloadTask.Percentage = Math.Clamp(rawPercent, 0m, 100m);
 
             if (stopwatch.ElapsedMilliseconds > 1000)
             {

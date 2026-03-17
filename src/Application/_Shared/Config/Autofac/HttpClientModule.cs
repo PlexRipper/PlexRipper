@@ -7,9 +7,28 @@ namespace Reaparr.Application;
 
 public static class HttpClientModule
 {
+    public static readonly string DefaultClientName = string.Empty;
     internal static readonly string SonarrClientName = "Sonarr";
     internal static readonly string RadarrClientName = "Radarr";
     public static readonly string PlexThumbnailClientName = "PlexThumbnail";
+
+    public static void RegisterDefaultHttpClient(this IServiceCollection services)
+    {
+        services.AddTransient<DefaultHttpClientRetryHandler>();
+
+        services
+            .AddHttpClient(DefaultClientName)
+            .AddHttpMessageHandler<DefaultHttpClientRetryHandler>()
+            .ConfigurePrimaryHttpMessageHandler(() =>
+                new SocketsHttpHandler
+                {
+                    SslOptions = new System.Net.Security.SslClientAuthenticationOptions
+                    {
+                        EnabledSslProtocols = SslProtocols.None,
+                    },
+                }
+            );
+    }
 
     public static void RegisterSonarrHttpClient(this IServiceCollection services)
     {

@@ -477,6 +477,289 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
     }
 
     [Fact]
+    public async Task ShouldPersistCompletedEpisodeProgress_WhenSiblingEpisodeProgressArrivesBeforeFlush()
+    {
+        await SetupDatabase(
+            84333,
+            config =>
+            {
+                config.TvShowDownloadTasksCount = 1;
+                config.TvShowSeasonDownloadTasksCount = 1;
+                config.TvShowEpisodeDownloadTasksCount = 2;
+            }
+        );
+
+        var episodeFiles = await IDbContext
+            .DownloadTaskTvShowEpisodeFile.AsNoTracking()
+            .OrderBy(x => x.Id)
+            .ToListAsync(CancellationToken);
+
+        episodeFiles.Count.ShouldBe(2);
+
+        var completedEpisodeFile = episodeFiles[0];
+        var siblingEpisodeFile = episodeFiles[1];
+
+        var capturedPatches = new List<IReadOnlyCollection<DownloadPatchDTO>>();
+        Mock.Mock<IDownloadHubService>()
+            .Setup(x =>
+                x.SendDownloadPatchAsync(
+                    It.IsAny<int>(),
+                    It.IsAny<long>(),
+                    It.IsAny<IReadOnlyCollection<DownloadPatchDTO>>(),
+                    It.IsAny<IReadOnlyCollection<Guid>?>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Callback<int, long, IReadOnlyCollection<DownloadPatchDTO>, IReadOnlyCollection<Guid>?, CancellationToken>(
+                (_, _, upserts, _, _) => capturedPatches.Add(upserts)
+            )
+            .Returns(Task.CompletedTask);
+
+        var sut = Sut;
+
+        await sut.StartAsync(CancellationToken.None);
+
+        var firstStatusResult = await sut.OnStatusChangedAsync(
+            completedEpisodeFile.ToKey(),
+            DownloadStatus.Downloading,
+            CancellationToken
+        );
+        var secondStatusResult = await sut.OnStatusChangedAsync(
+            siblingEpisodeFile.ToKey(),
+            DownloadStatus.Downloading,
+            CancellationToken
+        );
+
+        firstStatusResult.IsSuccess.ShouldBeTrue();
+        secondStatusResult.IsSuccess.ShouldBeTrue();
+
+        var initialCompletedProgressResult = sut.OnProgressUpdated(
+            completedEpisodeFile.ToKey(),
+            new DownloadTaskProgress
+            {
+                DataTotal = 1_000,
+                DataReceived = 300,
+                Percentage = 30,
+                DownloadSpeed = 30,
+                TimeRemaining = 10,
+            }
+        );
+        var initialSiblingProgressResult = sut.OnProgressUpdated(
+            siblingEpisodeFile.ToKey(),
+            new DownloadTaskProgress
+            {
+                DataTotal = 2_000,
+                DataReceived = 400,
+                Percentage = 20,
+                DownloadSpeed = 40,
+                TimeRemaining = 20,
+            }
+        );
+
+        initialCompletedProgressResult.IsSuccess.ShouldBeTrue();
+        initialSiblingProgressResult.IsSuccess.ShouldBeTrue();
+
+        await WaitForPatchCount(capturedPatches, 4);
+
+        var completedProgressResult = sut.OnProgressUpdated(
+            completedEpisodeFile.ToKey(),
+            new DownloadTaskProgress
+            {
+                DataTotal = 1_000,
+                DataReceived = 1_000,
+                Percentage = 100,
+                DownloadSpeed = 0,
+                TimeRemaining = 0,
+            }
+        );
+
+        var siblingProgressResult = sut.OnProgressUpdated(
+            siblingEpisodeFile.ToKey(),
+            new DownloadTaskProgress
+            {
+                DataTotal = 2_000,
+                DataReceived = 500,
+                Percentage = 25,
+                DownloadSpeed = 123,
+                TimeRemaining = 12,
+            }
+        );
+
+        completedProgressResult.IsSuccess.ShouldBeTrue();
+        siblingProgressResult.IsSuccess.ShouldBeTrue();
+
+        await Task.Delay(1500, CancellationToken);
+        await sut.StopAsync(CancellationToken.None);
+
+        var updatedEpisodeFiles = await IDbContext
+            .DownloadTaskTvShowEpisodeFile.AsNoTracking()
+            .OrderBy(x => x.Id)
+            .ToListAsync(CancellationToken);
+
+        updatedEpisodeFiles[0].DataReceived.ShouldBe(1_000);
+        updatedEpisodeFiles[0].DataTotal.ShouldBe(1_000);
+        updatedEpisodeFiles[0].Percentage.ShouldBe(100);
+        updatedEpisodeFiles[0].DownloadSpeed.ShouldBe(0);
+
+        updatedEpisodeFiles[1].DataReceived.ShouldBe(500);
+        updatedEpisodeFiles[1].DataTotal.ShouldBe(2_000);
+        updatedEpisodeFiles[1].Percentage.ShouldBe(25);
+        updatedEpisodeFiles[1].DownloadSpeed.ShouldBe(123);
+    }
+
+    [Fact]
+    public async Task ShouldPersistCompletedEpisodeSnapshot_WhenSiblingEpisodeProgressArrivesBeforeFlush()
+    {
+        await SetupDatabase(
+            84335,
+            config =>
+            {
+                config.TvShowDownloadTasksCount = 1;
+                config.TvShowSeasonDownloadTasksCount = 1;
+                config.TvShowEpisodeDownloadTasksCount = 2;
+            }
+        );
+
+        var episodeFiles = await IDbContext
+            .DownloadTaskTvShowEpisodeFile.AsNoTracking()
+            .OrderBy(x => x.Id)
+            .ToListAsync(CancellationToken);
+
+        episodeFiles.Count.ShouldBe(2);
+
+        var completedEpisodeFile = episodeFiles[0];
+        var siblingEpisodeFile = episodeFiles[1];
+
+        var sut = Sut;
+
+        var firstStatusResult = await sut.OnStatusChangedAsync(
+            completedEpisodeFile.ToKey(),
+            DownloadStatus.Downloading,
+            CancellationToken
+        );
+        var secondStatusResult = await sut.OnStatusChangedAsync(
+            siblingEpisodeFile.ToKey(),
+            DownloadStatus.Downloading,
+            CancellationToken
+        );
+
+        firstStatusResult.IsSuccess.ShouldBeTrue();
+        secondStatusResult.IsSuccess.ShouldBeTrue();
+
+        var runningSnapshot = new DirectDownloadSnapshot
+        {
+            SaveProgress = 30,
+            Status = 2,
+            Urls = ["http://plex/running.mkv"],
+            TotalFileSize = 1_000,
+            FileName = "running.mkv",
+            DownloadingFileExtension = ".reaptemp",
+            Chunks = [],
+            IsSupportDownloadInRange = true,
+        };
+
+        var completedSnapshot = new DirectDownloadSnapshot
+        {
+            SaveProgress = 100,
+            Status = 5,
+            Urls = ["http://plex/completed.mkv"],
+            TotalFileSize = 1_000,
+            FileName = "completed.mkv",
+            DownloadingFileExtension = ".reaptemp",
+            Chunks = [],
+            IsSupportDownloadInRange = true,
+        };
+
+        var siblingSnapshot = new DirectDownloadSnapshot
+        {
+            SaveProgress = 25,
+            Status = 2,
+            Urls = ["http://plex/sibling.mkv"],
+            TotalFileSize = 2_000,
+            FileName = "sibling.mkv",
+            DownloadingFileExtension = ".reaptemp",
+            Chunks = [],
+            IsSupportDownloadInRange = true,
+        };
+
+        sut.OnProgressUpdated(
+                completedEpisodeFile.ToKey(),
+                new DownloadTaskProgress
+                {
+                    DataTotal = 1_000,
+                    DataReceived = 300,
+                    Percentage = 30,
+                    DownloadSpeed = 30,
+                    TimeRemaining = 10,
+                },
+                runningSnapshot
+            )
+            .IsSuccess.ShouldBeTrue();
+
+        sut.OnProgressUpdated(
+                siblingEpisodeFile.ToKey(),
+                new DownloadTaskProgress
+                {
+                    DataTotal = 2_000,
+                    DataReceived = 400,
+                    Percentage = 20,
+                    DownloadSpeed = 40,
+                    TimeRemaining = 20,
+                },
+                siblingSnapshot
+            )
+            .IsSuccess.ShouldBeTrue();
+
+        sut.OnProgressUpdated(
+                completedEpisodeFile.ToKey(),
+                new DownloadTaskProgress
+                {
+                    DataTotal = 1_000,
+                    DataReceived = 1_000,
+                    Percentage = 100,
+                    DownloadSpeed = 0,
+                    TimeRemaining = 0,
+                },
+                completedSnapshot
+            )
+            .IsSuccess.ShouldBeTrue();
+
+        sut.OnProgressUpdated(
+                siblingEpisodeFile.ToKey(),
+                new DownloadTaskProgress
+                {
+                    DataTotal = 2_000,
+                    DataReceived = 500,
+                    Percentage = 25,
+                    DownloadSpeed = 123,
+                    TimeRemaining = 12,
+                },
+                siblingSnapshot
+            )
+            .IsSuccess.ShouldBeTrue();
+
+        await sut.StartAsync(CancellationToken.None);
+        await Task.Delay(1500, CancellationToken);
+        await sut.StopAsync(CancellationToken.None);
+
+        var updatedCompletedEpisodeFile = await IDbContext
+            .DownloadTaskTvShowEpisodeFile.AsNoTracking()
+            .FirstAsync(x => x.Id == completedEpisodeFile.Id, CancellationToken);
+        var updatedSiblingEpisodeFile = await IDbContext
+            .DownloadTaskTvShowEpisodeFile.AsNoTracking()
+            .FirstAsync(x => x.Id == siblingEpisodeFile.Id, CancellationToken);
+
+        updatedCompletedEpisodeFile.DirectDownloadSnapshot.ShouldNotBeNull();
+        updatedCompletedEpisodeFile.DirectDownloadSnapshot!.Status.ShouldBe(5);
+        updatedCompletedEpisodeFile.DirectDownloadSnapshot.SaveProgress.ShouldBe(100);
+        updatedCompletedEpisodeFile.DirectDownloadSnapshot.FileName.ShouldBe("completed.mkv");
+
+        updatedSiblingEpisodeFile.DirectDownloadSnapshot.ShouldNotBeNull();
+        updatedSiblingEpisodeFile.DirectDownloadSnapshot!.Status.ShouldBe(2);
+        updatedSiblingEpisodeFile.DirectDownloadSnapshot.FileName.ShouldBe("sibling.mkv");
+    }
+
+    [Fact]
     public async Task ShouldNotWriteDownloadingLogAfterPauseTransition()
     {
         await SetupDatabase(84329, config => config.MovieDownloadTasksCount = 1);
@@ -536,6 +819,187 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
         logs.ShouldContain(x => x.Status == DownloadStatus.Downloading && x.Id < pauseLog!.Id);
 
         logs.Where(x => x.Id > pauseLog!.Id && x.Status == DownloadStatus.Downloading).ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task ShouldSendPatchWithFileTransferPercentage_WhenNotifyFileTransferProgressIsCalled()
+    {
+        // Arrange — verifies that calling NotifyFileTransferProgress triggers the dispatcher flush,
+        // which reads the persisted FileDataTransferred from the DB and broadcasts the correct percentage
+        // (fixing the bug where no patch was sent during the move phase).
+        await SetupDatabase(84330, config => config.MovieDownloadTasksCount = 1);
+
+        var movieFile = await IDbContext.DownloadTaskMovieFile.AsNoTracking().FirstAsync(CancellationToken);
+
+        // Simulate mid-move DB state: 50% through the file transfer
+        await IDbContext
+            .DownloadTaskMovieFile.Where(x => x.Id == movieFile.Id)
+            .ExecuteUpdateAsync(
+                p =>
+                    p.SetProperty(x => x.DataTotal, 1000L)
+                        .SetProperty(x => x.FileDataTransferred, 500L)
+                        .SetProperty(x => x.CurrentFileTransferBytesOffset, 500L)
+                        .SetProperty(x => x.FileTransferSpeed, 50_000_000L)
+                        .SetProperty(x => x.DownloadStatus, DownloadStatus.Moving),
+                CancellationToken
+            );
+
+        var capturedPatches = new List<IReadOnlyCollection<DownloadPatchDTO>>();
+        Mock.Mock<IDownloadHubService>()
+            .Setup(x =>
+                x.SendDownloadPatchAsync(
+                    It.IsAny<int>(),
+                    It.IsAny<long>(),
+                    It.IsAny<IReadOnlyCollection<DownloadPatchDTO>>(),
+                    It.IsAny<IReadOnlyCollection<Guid>?>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Callback<int, long, IReadOnlyCollection<DownloadPatchDTO>, IReadOnlyCollection<Guid>?, CancellationToken>(
+                (_, _, upserts, _, _) => capturedPatches.Add(upserts)
+            )
+            .Returns(Task.CompletedTask);
+
+        var sut = Sut;
+        await sut.StartAsync(CancellationToken.None);
+
+        // Act
+        sut.NotifyFileTransferProgress(movieFile.ToKey());
+
+        await WaitForPatchCount(capturedPatches, 1);
+        await sut.StopAsync(CancellationToken.None);
+
+        // Assert — the dispatcher sent a patch carrying the current transfer progress.
+        // The mapper derives Percentage from FileDataTransferred/DataTotal when in FileTransfer phase:
+        // DataFormat.GetPercentage(500, 1000) = 50.00m
+        capturedPatches.ShouldNotBeEmpty();
+        var fileTaskPatch = capturedPatches.SelectMany(x => x).FirstOrDefault(x => x.Id == movieFile.Id);
+        fileTaskPatch.ShouldNotBeNull();
+        fileTaskPatch!.Status.ShouldBe(DownloadStatus.Moving);
+        fileTaskPatch.Percentage.ShouldBe(50.00m);
+    }
+
+    [Fact]
+    public async Task ShouldSendHundredPercentPatch_WhenEpisodeFileIsCompletedWithStaleStoredPercentage()
+    {
+        // Arrange - regression for completed TV episode files where the DB row still holds a stale
+        // download-phase percentage (for example 2%), but the completed patch must still report 100%.
+        await SetupDatabase(
+            84331,
+            config =>
+            {
+                config.TvShowDownloadTasksCount = 1;
+                config.TvShowSeasonDownloadTasksCount = 1;
+                config.TvShowEpisodeDownloadTasksCount = 1;
+            }
+        );
+
+        var episodeFile = await IDbContext.DownloadTaskTvShowEpisodeFile.AsNoTracking().FirstAsync(CancellationToken);
+
+        await IDbContext
+            .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == episodeFile.Id)
+            .ExecuteUpdateAsync(
+                p =>
+                    p.SetProperty(x => x.DataTotal, 1_000L)
+                        .SetProperty(x => x.DataReceived, 20L)
+                        .SetProperty(x => x.FileDataTransferred, 1_000L)
+                        .SetProperty(x => x.CurrentFileTransferBytesOffset, 1_000L)
+                        .SetProperty(x => x.FileTransferSpeed, 0L)
+                        .SetProperty(x => x.DownloadSpeed, 0L)
+                        .SetProperty(x => x.TimeRemaining, 0)
+                        .SetProperty(x => x.Percentage, 2m)
+                        .SetProperty(x => x.DownloadStatus, DownloadStatus.Completed),
+                CancellationToken
+            );
+
+        var capturedPatches = new List<IReadOnlyCollection<DownloadPatchDTO>>();
+
+        Mock.Mock<IDownloadHubService>()
+            .Setup(x =>
+                x.SendDownloadPatchAsync(
+                    It.IsAny<int>(),
+                    It.IsAny<long>(),
+                    It.IsAny<IReadOnlyCollection<DownloadPatchDTO>>(),
+                    It.IsAny<IReadOnlyCollection<Guid>?>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Callback<int, long, IReadOnlyCollection<DownloadPatchDTO>, IReadOnlyCollection<Guid>?, CancellationToken>(
+                (_, _, upserts, _, _) => capturedPatches.Add(upserts)
+            )
+            .Returns(Task.CompletedTask);
+
+        var sut = Sut;
+
+        // Act
+        await sut.StartAsync(CancellationToken.None);
+        sut.NotifyFileTransferProgress(episodeFile.ToKey());
+
+        await WaitForPatchCount(capturedPatches, 1);
+        await sut.StopAsync(CancellationToken.None);
+
+        // Assert
+        var fileTaskPatch = capturedPatches.SelectMany(x => x).FirstOrDefault(x => x.Id == episodeFile.Id);
+        fileTaskPatch.ShouldNotBeNull();
+        fileTaskPatch!.Status.ShouldBe(DownloadStatus.Completed);
+        fileTaskPatch.Percentage.ShouldBe(100m);
+    }
+
+    [Fact]
+    public async Task ShouldSendHundredPercentPatch_WhenMovieFileIsCompletedWithStaleStoredPercentage()
+    {
+        // Arrange - movie file equivalent of the completed stale-percentage regression.
+        await SetupDatabase(84332, config => config.MovieDownloadTasksCount = 1);
+
+        var movieFile = await IDbContext.DownloadTaskMovieFile.AsNoTracking().FirstAsync(CancellationToken);
+
+        await IDbContext
+            .DownloadTaskMovieFile.Where(x => x.Id == movieFile.Id)
+            .ExecuteUpdateAsync(
+                p =>
+                    p.SetProperty(x => x.DataTotal, 2_000L)
+                        .SetProperty(x => x.DataReceived, 40L)
+                        .SetProperty(x => x.FileDataTransferred, 2_000L)
+                        .SetProperty(x => x.CurrentFileTransferBytesOffset, 2_000L)
+                        .SetProperty(x => x.FileTransferSpeed, 0L)
+                        .SetProperty(x => x.DownloadSpeed, 0L)
+                        .SetProperty(x => x.TimeRemaining, 0)
+                        .SetProperty(x => x.Percentage, 2m)
+                        .SetProperty(x => x.DownloadStatus, DownloadStatus.Completed),
+                CancellationToken
+            );
+
+        var capturedPatches = new List<IReadOnlyCollection<DownloadPatchDTO>>();
+
+        Mock.Mock<IDownloadHubService>()
+            .Setup(x =>
+                x.SendDownloadPatchAsync(
+                    It.IsAny<int>(),
+                    It.IsAny<long>(),
+                    It.IsAny<IReadOnlyCollection<DownloadPatchDTO>>(),
+                    It.IsAny<IReadOnlyCollection<Guid>?>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Callback<int, long, IReadOnlyCollection<DownloadPatchDTO>, IReadOnlyCollection<Guid>?, CancellationToken>(
+                (_, _, upserts, _, _) => capturedPatches.Add(upserts)
+            )
+            .Returns(Task.CompletedTask);
+
+        var sut = Sut;
+
+        // Act
+        await sut.StartAsync(CancellationToken.None);
+        sut.NotifyFileTransferProgress(movieFile.ToKey());
+
+        await WaitForPatchCount(capturedPatches, 1);
+        await sut.StopAsync(CancellationToken.None);
+
+        // Assert
+        var fileTaskPatch = capturedPatches.SelectMany(x => x).FirstOrDefault(x => x.Id == movieFile.Id);
+        fileTaskPatch.ShouldNotBeNull();
+        fileTaskPatch!.Status.ShouldBe(DownloadStatus.Completed);
+        fileTaskPatch.Percentage.ShouldBe(100m);
     }
 
     private async Task WaitForPatchCount<T>(ICollection<T> collection, int expectedCount)

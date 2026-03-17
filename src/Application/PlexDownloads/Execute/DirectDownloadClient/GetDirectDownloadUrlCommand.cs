@@ -3,6 +3,7 @@ using FastEndpoints;
 using FluentValidation;
 using Flurl;
 using Reaparr.Data.Contracts;
+using Reaparr.FluentResultExtensions;
 
 namespace Reaparr.Application;
 
@@ -46,24 +47,37 @@ public class GetDirectDownloadUrlCommandHandler : ICommandHandler<GetDirectDownl
             return downloadUrlResult.ToResult();
 
         var defaultDownloadUrl = downloadUrlResult.Value;
-        var initialProbeResult = await ProbeDownloadUrl(defaultDownloadUrl, cancellationToken);
+        var downloadUrlWithFlag = defaultDownloadUrl.SetQueryParam("download", 1).ToString();
+        using var fallbackProbeCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(
+            cancellationToken
+        );
+        var initialProbeTask = ProbeDownloadUrl(defaultDownloadUrl, cancellationToken);
+        var fallbackProbeTask = ProbeDownloadUrl(downloadUrlWithFlag, fallbackProbeCancellationTokenSource.Token);
+
+        var initialProbeResult = await initialProbeTask;
         if (initialProbeResult.IsFailed)
+        {
+            fallbackProbeCancellationTokenSource.Cancel();
             return initialProbeResult.ToResult();
+        }
 
         if (initialProbeResult.Value.IsSuccessStatusCode)
+        {
+            fallbackProbeCancellationTokenSource.Cancel();
             return Result.Ok(defaultDownloadUrl);
+        }
 
         var statusCode = initialProbeResult.Value.StatusCode;
 
         if (statusCode != System.Net.HttpStatusCode.Forbidden)
         {
+            fallbackProbeCancellationTokenSource.Cancel();
             return Result
                 .Fail($"Plex download URL probe failed with status {(int)statusCode} ({statusCode})")
                 .LogError();
         }
 
-        var downloadUrlWithFlag = defaultDownloadUrl.SetQueryParam("download", 1).ToString();
-        var fallbackProbeResult = await ProbeDownloadUrl(downloadUrlWithFlag, cancellationToken);
+        var fallbackProbeResult = await fallbackProbeTask;
         if (fallbackProbeResult.IsFailed)
             return fallbackProbeResult.ToResult();
 
@@ -81,28 +95,24 @@ public class GetDirectDownloadUrlCommandHandler : ICommandHandler<GetDirectDownl
 
     private async Task<Result<ProbeResult>> ProbeDownloadUrl(string downloadUrl, CancellationToken cancellationToken)
     {
-        try
-        {
-            using var request = new HttpRequestMessage(HttpMethod.Get, downloadUrl);
-            using var response = await _httpClient.SendAsync(
-                request,
-                HttpCompletionOption.ResponseHeadersRead,
-                cancellationToken
-            );
-            var probeResult = new ProbeResult(response.StatusCode, response.IsSuccessStatusCode);
+        using var request = new HttpRequestMessage(HttpMethod.Get, downloadUrl);
+        var responseResult = await _httpClient.SendResultAsync(
+            request,
+            HttpCompletionOption.ResponseHeadersRead,
+            cancellationToken
+        );
 
-            return Result.Ok(probeResult);
-        }
-        catch (Exception ex)
-        {
-            if (ex is OperationCanceledException && cancellationToken.IsCancellationRequested)
-                throw;
+        if (responseResult.IsFailed && responseResult.IsServerUnreachable())
+            return Result.Fail<ProbeResult>(responseResult.Errors);
 
-            return Result
-                .Fail($"Failed to probe Plex download URL {downloadUrl}")
-                .WithError(new ExceptionalError(ex))
-                .LogError();
+        if (responseResult.IsFailed)
+        {
+            var statusCode = (HttpStatusCode)responseResult.ToResult().FindStatusCode();
+            return Result.Ok(new ProbeResult(statusCode, (int)statusCode is >= 200 and <= 299));
         }
+
+        using var response = responseResult.Value;
+        return Result.Ok(new ProbeResult(response.StatusCode, response.IsSuccessStatusCode));
     }
 
     private sealed record ProbeResult(HttpStatusCode StatusCode, bool IsSuccessStatusCode);

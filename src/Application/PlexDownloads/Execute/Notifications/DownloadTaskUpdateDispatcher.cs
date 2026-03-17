@@ -18,7 +18,7 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
     private readonly IReaparrDbContextFactory _dbContextFactory;
     private readonly IDownloadHubService _downloadHubService;
     private readonly Channel<ImmediatePatchRequest> _statusChannel;
-    private readonly ConcurrentDictionary<ProgressScopeKey, BufferedProgressUpdate> _progressByScope;
+    private readonly ConcurrentDictionary<Guid, BufferedProgressUpdate> _progressByNodeId;
     private readonly ConcurrentDictionary<int, long> _sequenceByServer;
     private readonly ConcurrentDictionary<Guid, ProgressScopeKey> _scopeByNodeId;
     private readonly ConcurrentDictionary<Guid, DownloadStatus> _statusByNodeId;
@@ -44,7 +44,7 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
         _statusChannel = Channel.CreateUnbounded<ImmediatePatchRequest>(
             new UnboundedChannelOptions { SingleReader = true, SingleWriter = false }
         );
-        _progressByScope = new ConcurrentDictionary<ProgressScopeKey, BufferedProgressUpdate>();
+        _progressByNodeId = new ConcurrentDictionary<Guid, BufferedProgressUpdate>();
         _sequenceByServer = new ConcurrentDictionary<int, long>();
         _scopeByNodeId = new ConcurrentDictionary<Guid, ProgressScopeKey>();
         _statusByNodeId = new ConcurrentDictionary<Guid, DownloadStatus>();
@@ -116,8 +116,8 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
 
             var scope = ProgressScopeKey.From(rootKey);
             _scopeByNodeId[key.Id] = scope;
-            _progressByScope.AddOrUpdate(
-                scope,
+            _progressByNodeId.AddOrUpdate(
+                key.Id,
                 _ => BufferedProgressUpdate.FromStatus(key),
                 (_, current) => current with { NodeId = key.Id, Key = key }
             );
@@ -151,7 +151,6 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
             if (_statusByNodeId.GetValueOrDefault(key.Id) is DownloadStatus.Paused)
                 return;
 
-            var scope = _scopeByNodeId.GetValueOrDefault(key.Id) ?? ProgressScopeKey.From(key);
             var update = new BufferedProgressUpdate
             {
                 NodeId = key.Id,
@@ -160,13 +159,23 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
                 Snapshot = snapshot,
             };
 
-            _progressByScope.AddOrUpdate(scope, _ => update, (_, __) => update);
+            _progressByNodeId.AddOrUpdate(key.Id, _ => update, (_, __) => update);
 
             // On the first progress event for this node, bypass the periodic flush so the
             // front-end receives data immediately instead of waiting up to 1 second.
             if (_seenProgressNodes.TryAdd(key.Id, 0))
                 _firstProgressChannel.Writer.TryWrite(update);
         });
+    }
+
+    /// <inheritdoc />
+    public void NotifyFileTransferProgress(DownloadTaskKey key)
+    {
+        _progressByNodeId.AddOrUpdate(
+            key.Id,
+            _ => BufferedProgressUpdate.FromStatus(key),
+            (_, current) => current with { NodeId = key.Id, Key = key }
+        );
     }
 
     /// <summary>
@@ -258,12 +267,8 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
 
                     // Prefer the latest buffered value in case multiple progress updates arrived
                     // before the background loop started processing this channel item.
-                    var bufferScope =
-                        _scopeByNodeId.GetValueOrDefault(update.NodeId) ?? ProgressScopeKey.From(update.Key);
                     var effectiveUpdate =
-                        _progressByScope.TryGetValue(bufferScope, out var buffered)
-                        && buffered.NodeId == update.NodeId
-                        && buffered.Progress is not null
+                        _progressByNodeId.TryGetValue(update.NodeId, out var buffered) && buffered.Progress is not null
                             ? buffered
                             : update;
 
@@ -297,43 +302,59 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
     /// </summary>
     private async Task FlushProgressAsync(CancellationToken cancellationToken)
     {
-        var scopeSnapshot = _progressByScope.Keys.ToList();
-        if (scopeSnapshot.Count == 0)
+        var nodeSnapshot = _progressByNodeId.Values.ToList();
+        if (nodeSnapshot.Count == 0)
             return;
 
         using var dbContext = await _dbContextFactory.CreateAsync();
-        foreach (var scope in scopeSnapshot)
+        var changedNodeIdsByScope = new Dictionary<ProgressScopeKey, HashSet<Guid>>();
+        var bufferedEntriesByScope = new Dictionary<ProgressScopeKey, List<BufferedProgressUpdate>>();
+
+        foreach (var bufferedProgress in nodeSnapshot)
         {
-            if (!_progressByScope.TryRemove(scope, out var bufferedProgress))
+            if (!_progressByNodeId.TryRemove(bufferedProgress.NodeId, out var latestBufferedProgress))
                 continue;
+
+            var flushedProgress = latestBufferedProgress;
 
             var flushResult = await Result.Try(async Task () =>
             {
-                if (bufferedProgress.Progress is not null)
+                if (flushedProgress.Progress is not null)
                 {
                     await dbContext.UpdateDownloadProgress(
-                        bufferedProgress.Key,
-                        bufferedProgress.Progress,
-                        bufferedProgress.Snapshot,
+                        flushedProgress.Key,
+                        flushedProgress.Progress,
+                        flushedProgress.Snapshot,
                         cancellationToken
                     );
 
                     await LogProgressJourneyAsync(
                         dbContext,
-                        bufferedProgress.Key,
-                        bufferedProgress.Progress,
+                        flushedProgress.Key,
+                        flushedProgress.Progress,
                         cancellationToken
                     );
                 }
 
-                var scope = await ResolveScopeAsync(dbContext, bufferedProgress.Key, cancellationToken);
+                var scope = await ResolveScopeAsync(dbContext, flushedProgress.Key, cancellationToken);
                 if (scope is null)
                     return;
 
-                var sendResult = await SendPatchAsync(scope, [bufferedProgress.NodeId], cancellationToken, dbContext);
+                if (!changedNodeIdsByScope.TryGetValue(scope, out var changedNodeIds))
+                {
+                    changedNodeIds = [];
+                    changedNodeIdsByScope[scope] = changedNodeIds;
+                }
 
-                if (sendResult.IsFailed)
-                    throw new InvalidOperationException(sendResult.ToString());
+                changedNodeIds.Add(flushedProgress.NodeId);
+
+                if (!bufferedEntriesByScope.TryGetValue(scope, out var bufferedEntries))
+                {
+                    bufferedEntries = [];
+                    bufferedEntriesByScope[scope] = bufferedEntries;
+                }
+
+                bufferedEntries.Add(flushedProgress);
             });
 
             if (flushResult.IsFailed)
@@ -341,10 +362,28 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
                 _log.Here()
                     .Error(
                         "Failed to flush buffered progress for {DownloadTaskKey}. Requeuing latest value.",
-                        bufferedProgress.Key
+                        flushedProgress.Key
                     );
                 flushResult.LogError();
-                _progressByScope.AddOrUpdate(scope, _ => bufferedProgress, (_, __) => bufferedProgress);
+                _progressByNodeId.AddOrUpdate(flushedProgress.NodeId, _ => flushedProgress, (_, __) => flushedProgress);
+            }
+        }
+
+        foreach (var pair in changedNodeIdsByScope)
+        {
+            var sendResult = await SendPatchAsync(pair.Key, pair.Value.ToList(), cancellationToken, dbContext);
+            if (sendResult.IsFailed)
+            {
+                sendResult.LogError();
+
+                foreach (var bufferedProgress in bufferedEntriesByScope[pair.Key])
+                {
+                    _progressByNodeId.AddOrUpdate(
+                        bufferedProgress.NodeId,
+                        _ => bufferedProgress,
+                        (_, __) => bufferedProgress
+                    );
+                }
             }
         }
     }
@@ -604,15 +643,9 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
         CancellationToken cancellationToken
     )
     {
-        var bufferedEntries = _progressByScope
-            .Where(x => x.Value.NodeId == key.Id && x.Value.Progress is not null)
-            .ToList();
-
-        if (bufferedEntries.Count == 0)
+        if (!_progressByNodeId.TryGetValue(key.Id, out var bufferedProgress) || bufferedProgress.Progress is null)
             return;
 
-        var latestBufferedEntry = bufferedEntries.OrderByDescending(x => x.Value.Progress!.DataReceived).First();
-        var bufferedProgress = latestBufferedEntry.Value;
         var progress = bufferedProgress.Progress!;
 
         await dbContext.UpdateDownloadProgress(
@@ -624,14 +657,11 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
 
         await LogProgressJourneyAsync(dbContext, bufferedProgress.Key, progress, cancellationToken);
 
-        foreach (var bufferedEntry in bufferedEntries)
-        {
-            _progressByScope.AddOrUpdate(
-                bufferedEntry.Key,
-                _ => BufferedProgressUpdate.FromStatus(key),
-                (_, current) => current.NodeId == key.Id ? BufferedProgressUpdate.FromStatus(key) : current
-            );
-        }
+        _progressByNodeId.AddOrUpdate(
+            key.Id,
+            _ => BufferedProgressUpdate.FromStatus(key),
+            (_, _) => BufferedProgressUpdate.FromStatus(key)
+        );
     }
 
     private void ResetProgressJourneyTrackingIfNeeded(Guid nodeId, DownloadStatus newStatus)

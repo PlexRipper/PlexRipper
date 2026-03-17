@@ -56,11 +56,18 @@ public class DownloadJobListener : IDownloadJobListener
                         downloadTaskKey.Id
                     );
                 await _moveDownloadFileQueue.CheckMoveDownloadFileJobQueue();
-                await _eventPublisher.PublishAsync(
-                    new CheckDownloadQueueEvent(downloadTaskKey.PlexServerId),
-                    cancellationToken
-                );
             }
+
+            _log.Here()
+                .Debug(
+                    "DownloadTask with id: {DownloadTaskId} ended with status {DownloadStatus}, executing DownloadQueueCheck",
+                    downloadTaskKey.Id,
+                    status
+                );
+            await _eventPublisher.PublishAsync(
+                new CheckDownloadQueueEvent(downloadTaskKey.PlexServerId),
+                cancellationToken
+            );
         }
         catch (Exception ex)
         {

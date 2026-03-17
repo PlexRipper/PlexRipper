@@ -61,6 +61,40 @@ public static partial class DbContextExtensions
         return null;
     }
 
+    public static async Task<List<DownloadTaskKey>> GetDownloadTaskKeysAsync(
+        this IReaparrDbContext dbContext,
+        IReadOnlyList<Guid> guids,
+        CancellationToken cancellationToken = default
+    )
+    {
+        if (guids.Count == 0)
+            return [];
+
+        var filtered = guids.Where(g => g != Guid.Empty).ToList();
+        if (filtered.Count == 0)
+            return [];
+
+        // Filter BEFORE projecting so EF Core can translate the UNION across different entity
+        // types. Applying .Where() after .ProjectToKey() (which uses Select) would place the
+        // predicate after a client projection and cause a translation exception.
+        var queries = new IQueryable<DownloadTaskKey>[]
+        {
+            dbContext.DownloadTaskTvShow.Where(x => filtered.Contains(x.Id)).ProjectToKey(),
+            dbContext.DownloadTaskTvShowSeason.Where(x => filtered.Contains(x.Id)).ProjectToKey(),
+            dbContext.DownloadTaskTvShowEpisode.Where(x => filtered.Contains(x.Id)).ProjectToKey(),
+            dbContext.DownloadTaskTvShowEpisodeFile.Where(x => filtered.Contains(x.Id)).ProjectToKey(),
+            dbContext.DownloadTaskMovie.Where(x => filtered.Contains(x.Id)).ProjectToKey(),
+            dbContext.DownloadTaskMovieFile.Where(x => filtered.Contains(x.Id)).ProjectToKey(),
+        };
+
+        var keys = new List<DownloadTaskKey>();
+
+        foreach (var query in queries)
+            keys.AddRange(await query.ToListAsync(cancellationToken));
+
+        return keys;
+    }
+
     public static async Task<DownloadTaskType> GetDownloadTaskTypeAsync(
         this IReaparrDbContext dbContext,
         Guid guid,
@@ -571,45 +605,6 @@ public static partial class DbContextExtensions
             };
     }
 
-    private sealed class DownloadProgressRow
-    {
-        public required Guid Id { get; init; }
-
-        public required Guid? ParentId { get; init; }
-
-        public required int PlexApiRatingKey { get; init; }
-
-        public required string Title { get; init; }
-
-        public required string FullTitle { get; init; }
-
-        public required PlexMediaType MediaType { get; init; }
-
-        public required DownloadTaskType DownloadTaskType { get; init; }
-
-        public required DownloadStatus DownloadStatus { get; init; }
-
-        public required DateTime CreatedAt { get; init; }
-
-        public required int PlexServerId { get; init; }
-
-        public required int PlexLibraryId { get; init; }
-
-        public required long DataReceived { get; init; }
-
-        public required long DataTotal { get; init; }
-
-        public required decimal Percentage { get; init; }
-
-        public required long DownloadSpeed { get; init; }
-
-        public required int TimeRemaining { get; init; }
-
-        public required long FileTransferSpeed { get; init; }
-
-        public required long FileDataTransferred { get; init; }
-    }
-
     public static Task<DownloadTaskTvShow?> GetDownloadTaskTvShowByRatingKeyQuery(
         this IReaparrDbContext dbContext,
         int plexServerId,
@@ -795,6 +790,13 @@ public static partial class DbContextExtensions
                                 .SetProperty(
                                     x => x.CurrentFileTransferBytesOffset,
                                     progress.CurrentFileTransferBytesOffset
+                                )
+                                .SetProperty(
+                                    x => x.Percentage,
+                                    x =>
+                                        x.DataTotal > 0
+                                            ? progress.CurrentFileTransferBytesOffset * 100m / x.DataTotal
+                                            : 0m
                                 ),
                         cancellationToken
                     );
@@ -809,6 +811,13 @@ public static partial class DbContextExtensions
                                 .SetProperty(
                                     x => x.CurrentFileTransferBytesOffset,
                                     progress.CurrentFileTransferBytesOffset
+                                )
+                                .SetProperty(
+                                    x => x.Percentage,
+                                    x =>
+                                        x.DataTotal > 0
+                                            ? progress.CurrentFileTransferBytesOffset * 100m / x.DataTotal
+                                            : 0m
                                 ),
                         cancellationToken
                     );
@@ -1142,69 +1151,6 @@ public static partial class DbContextExtensions
                         Type = DownloadTaskType.TvShow,
                     })
                     .FirstOrDefaultAsync(cancellationToken);
-            }
-            default:
-                return null;
-        }
-    }
-
-    public static async Task<(Guid ParentId, DownloadStatus Status)?> GetDownloadPatchMetaAsync(
-        this IReaparrDbContext dbContext,
-        DownloadTaskKey key,
-        CancellationToken cancellationToken = default
-    )
-    {
-        switch (key.Type)
-        {
-            case DownloadTaskType.Movie:
-            {
-                var data = await dbContext
-                    .DownloadTaskMovie.Where(x => x.Id == key.Id)
-                    .Select(x => new { x.DownloadStatus })
-                    .FirstOrDefaultAsync(cancellationToken);
-                return data is null ? null : (Guid.Empty, data.DownloadStatus);
-            }
-            case DownloadTaskType.MovieData:
-            case DownloadTaskType.MoviePart:
-            {
-                var data = await dbContext
-                    .DownloadTaskMovieFile.Where(x => x.Id == key.Id)
-                    .Select(x => new { x.ParentId, x.DownloadStatus })
-                    .FirstOrDefaultAsync(cancellationToken);
-                return data is null ? null : (data.ParentId, data.DownloadStatus);
-            }
-            case DownloadTaskType.TvShow:
-            {
-                var data = await dbContext
-                    .DownloadTaskTvShow.Where(x => x.Id == key.Id)
-                    .Select(x => new { x.DownloadStatus })
-                    .FirstOrDefaultAsync(cancellationToken);
-                return data is null ? null : (Guid.Empty, data.DownloadStatus);
-            }
-            case DownloadTaskType.Season:
-            {
-                var data = await dbContext
-                    .DownloadTaskTvShowSeason.Where(x => x.Id == key.Id)
-                    .Select(x => new { x.ParentId, x.DownloadStatus })
-                    .FirstOrDefaultAsync(cancellationToken);
-                return data is null ? null : (data.ParentId, data.DownloadStatus);
-            }
-            case DownloadTaskType.Episode:
-            {
-                var data = await dbContext
-                    .DownloadTaskTvShowEpisode.Where(x => x.Id == key.Id)
-                    .Select(x => new { x.ParentId, x.DownloadStatus })
-                    .FirstOrDefaultAsync(cancellationToken);
-                return data is null ? null : (data.ParentId, data.DownloadStatus);
-            }
-            case DownloadTaskType.EpisodeData:
-            case DownloadTaskType.EpisodePart:
-            {
-                var data = await dbContext
-                    .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == key.Id)
-                    .Select(x => new { x.ParentId, x.DownloadStatus })
-                    .FirstOrDefaultAsync(cancellationToken);
-                return data is null ? null : (data.ParentId, data.DownloadStatus);
             }
             default:
                 return null;

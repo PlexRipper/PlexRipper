@@ -80,11 +80,6 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
 
     private void SetupCommandExecutor()
     {
-        // CreateDownloadFileStreamCommand returns Result<Stream>
-        Mock.Mock<ICommandExecutor>()
-            .Setup(m => m.Send(It.IsAny<ICommand<Result<Stream>>>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Ok(Stream.Null));
-
         Mock.Mock<ICommandExecutor>()
             .Setup(m => m.Send(It.IsAny<ICommand<Result>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok());
@@ -182,11 +177,16 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
                 Times.Once()
             );
         Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<EnsureDownloadDirectoryCommand>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
+        Mock.Mock<ICommandExecutor>()
             .Verify(x => x.Send(It.IsAny<GetDirectDownloadUrlCommand>(), It.IsAny<CancellationToken>()), Times.Once());
     }
 
     [Fact]
-    public async Task ShouldCreateDownloadStreamUsingTempFileName_WhenStartingDownload()
+    public async Task ShouldEnsureDownloadDirectoryExists_WhenStartingDownload()
     {
         // Arrange
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
@@ -236,22 +236,22 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
 
         SetupSpeedLimitMocks(serverMachineIdentifier);
 
-        CreateDownloadFileStreamCommand? createStreamCommand = null;
+        EnsureDownloadDirectoryCommand? ensureDirectoryCommand = null;
 
         Mock.Mock<ICommandExecutor>()
-            .Setup(m => m.Send(It.IsAny<ICommand<Result<Stream>>>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Ok(Stream.Null))
-            .Callback<ICommand<Result<Stream>>, CancellationToken>(
-                (command, _) => createStreamCommand = command as CreateDownloadFileStreamCommand
+            .Setup(m => m.Send(It.IsAny<ICommand<Result>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok())
+            .Callback<ICommand<Result>, CancellationToken>(
+                (command, _) =>
+                {
+                    if (command is EnsureDownloadDirectoryCommand cmd)
+                        ensureDirectoryCommand = cmd;
+                }
             );
 
         Mock.Mock<ICommandExecutor>()
             .Setup(m => m.Send(It.IsAny<GetDirectDownloadUrlCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok("http://plex/file.mkv"));
-
-        Mock.Mock<ICommandExecutor>()
-            .Setup(m => m.Send(It.IsAny<ICommand<Result>>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Ok());
 
         // Act
         var sut = CreateSut(BuildSuccessDownloadServiceMock());
@@ -259,13 +259,16 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
 
         // Assert
         startResult.IsSuccess.ShouldBeTrue();
-        createStreamCommand.ShouldNotBeNull();
-
-        var expectedTempFileName = Path.GetFileName(downloadTask.DownloadFilePath);
-        createStreamCommand!.FileName.ShouldBe(expectedTempFileName);
-        createStreamCommand.FileName.ShouldNotBe(downloadTask.FileName);
+        ensureDirectoryCommand.ShouldNotBeNull();
+        ensureDirectoryCommand!.Directory.ShouldBe(downloadTask.DownloadDirectory);
+        ensureDirectoryCommand.FileSize.ShouldBe(downloadTask.DataTotal);
         Mock.Mock<ICommandExecutor>()
             .Verify(x => x.Send(It.IsAny<GetDirectDownloadUrlCommand>(), It.IsAny<CancellationToken>()), Times.Once());
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<EnsureDownloadDirectoryCommand>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
     }
 
     [Fact]
@@ -533,19 +536,20 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
 
         SetupSpeedLimitMocks(serverMachineIdentifier);
 
-        // Make CreateDownloadFileStreamCommand fail; all other Result commands succeed
+        // All Result commands succeed by default
         Mock.Mock<ICommandExecutor>()
-            .Setup(m => m.Send(It.IsAny<ICommand<Result<Stream>>>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Fail<Stream>("Disk full"))
-            .Verifiable(Times.Once);
+            .Setup(m => m.Send(It.IsAny<ICommand<Result>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok());
 
         Mock.Mock<ICommandExecutor>()
             .Setup(m => m.Send(It.IsAny<GetDirectDownloadUrlCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok("http://plex/file.mkv"));
 
+        // Make EnsureDownloadDirectoryCommand fail (registered last to override the general ICommand<Result> setup)
         Mock.Mock<ICommandExecutor>()
-            .Setup(m => m.Send(It.IsAny<ICommand<Result>>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Ok());
+            .Setup(m => m.Send(It.IsAny<EnsureDownloadDirectoryCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Fail("Disk full"))
+            .Verifiable(Times.Once);
 
         // Act
         var sut = CreateSut(BuildSuccessDownloadServiceMock());
@@ -667,6 +671,91 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
             );
         Mock.Mock<ICommandExecutor>()
             .Verify(x => x.Send(It.IsAny<GetDirectDownloadUrlCommand>(), It.IsAny<CancellationToken>()), Times.Once());
+    }
+
+    [Fact]
+    public async Task ShouldSetDownloadingStatus_BeforeInvokingDownloadFileTaskAsync()
+    {
+        // Arrange
+        var downloadingStatusWasSetBeforeDownloadStarted = false;
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<Domain.DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Callback<DownloadTaskKey, Domain.DownloadStatus, CancellationToken>(
+                (_, status, _) =>
+                {
+                    if (status == DomainDownloadStatus.Downloading)
+                        downloadingStatusWasSetBeforeDownloadStarted = true;
+                }
+            )
+            .ReturnsAsync(Result.Ok());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnProgressUpdated(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadTaskProgress>(),
+                    It.IsAny<DirectDownloadSnapshot?>()
+                )
+            )
+            .Returns(Result.Ok());
+
+        await SetupDatabase(
+            84337,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var downloadTask = await dbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+        var serverMachineIdentifier = await dbContext.GetPlexServerMachineIdentifierById(
+            downloadTask.PlexServerId,
+            CancellationToken
+        );
+
+        SetupSpeedLimitMocks(serverMachineIdentifier);
+        SetupCommandExecutor();
+
+        var package = MakeDownloadPackage();
+        var downloadServiceMock = new Mock<IDownloadService>();
+        downloadServiceMock.Setup(x => x.Clear()).Returns(Task.CompletedTask);
+        downloadServiceMock.Setup(x => x.CancelTaskAsync()).Returns(Task.CompletedTask);
+        downloadServiceMock.Setup(x => x.Package).Returns(package);
+        downloadServiceMock
+            .Setup(x => x.DownloadFileTaskAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Returns<string, string, CancellationToken>(
+                (_, _, _) =>
+                {
+                    downloadingStatusWasSetBeforeDownloadStarted.ShouldBeTrue();
+                    return Task.CompletedTask;
+                }
+            );
+
+        // Act
+        var sut = CreateSut(downloadServiceMock);
+        var startResult = await sut.Start(downloadTask.ToKey(), CancellationToken);
+
+        // Assert
+        startResult.IsSuccess.ShouldBeTrue();
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.Is<DownloadTaskKey>(key => key == downloadTask.ToKey()),
+                        DomainDownloadStatus.Downloading,
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Once()
+            );
     }
 
     [Fact]
@@ -1138,6 +1227,91 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
             );
         Mock.Mock<ICommandExecutor>()
             .Verify(x => x.Send(It.IsAny<GetDirectDownloadUrlCommand>(), It.IsAny<CancellationToken>()), Times.Once());
+    }
+
+    [Fact]
+    public async Task ShouldReturnFailedResultAndPersistClientErrorLog_WhenGetDirectDownloadUrlFails()
+    {
+        // Arrange
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<Domain.DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnProgressUpdated(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadTaskProgress>(),
+                    It.IsAny<DirectDownloadSnapshot?>()
+                )
+            )
+            .Returns(Result.Ok());
+        await SetupDatabase(
+            99992,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var downloadTask = await dbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+        var serverMachineIdentifier = await dbContext.GetPlexServerMachineIdentifierById(
+            downloadTask.PlexServerId,
+            CancellationToken
+        );
+
+        SetupSpeedLimitMocks(serverMachineIdentifier);
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(m => m.Send(It.IsAny<GetDirectDownloadUrlCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(
+                Result
+                    .Fail<string>("Plex download URL probe failed with status 500 (InternalServerError)")
+                    .Add500InternalServerError()
+            );
+
+        // Act
+        var sut = CreateSut(BuildSuccessDownloadServiceMock());
+        var result = await sut.Start(downloadTask.ToKey(), CancellationToken);
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        Mock.Mock<ICommandExecutor>()
+            .Verify(x => x.Send(It.IsAny<GetDirectDownloadUrlCommand>(), It.IsAny<CancellationToken>()), Times.Once());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.Is<DownloadTaskKey>(key => key == downloadTask.ToKey()),
+                        DomainDownloadStatus.ServerUnreachable,
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Once()
+            );
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<EnsureDownloadDirectoryCommand>(), It.IsAny<CancellationToken>()),
+                Times.Never()
+            );
+
+        var logs = await dbContext
+            .DownloadTaskMovieFileLogs.Where(x => x.DownloadTaskFileId == downloadTask.Id)
+            .OrderBy(x => x.Id)
+            .ToListAsync(CancellationToken);
+
+        logs.ShouldContain(x =>
+            x.LogLevel == NotificationLevel.Error
+            && x.Status == DomainDownloadStatus.ServerUnreachable
+            && x.Message.Contains("status 500 (InternalServerError)", StringComparison.Ordinal)
+        );
     }
 
     [Fact]

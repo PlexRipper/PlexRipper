@@ -56,6 +56,8 @@ public static class DownloadTaskGenericMapper
 
     public static DownloadTaskGeneric ToGeneric(this DownloadTaskMovieFile file)
     {
+        var phase = file.DownloadStatus.ToDownloadTaskPhase();
+
         var downloadTaskGeneric = new DownloadTaskGeneric
         {
             Id = file.Id,
@@ -65,15 +67,12 @@ public static class DownloadTaskGenericMapper
             MediaType = file.MediaType,
             DownloadTaskType = file.DownloadTaskType,
             DownloadStatus = file.DownloadStatus,
-            Percentage =
-                file.DownloadStatus.ToDownloadTaskPhase() == DownloadTaskPhase.FileTransfer
-                    ? DataFormat.GetPercentage(file.FileDataTransferred, file.DataTotal)
-                    : file.Percentage,
+            Percentage = DownloadTaskPhaseExtensions.Percentage(phase, file, file),
             DataReceived = file.DataReceived,
             DataTotal = file.DataTotal,
             TimeRemaining =
-                file.DownloadStatus.ToDownloadTaskPhase() == DownloadTaskPhase.FileTransfer
-                    ? DownloadTaskPhaseExtensions.TimeRemaining(file.DownloadTaskPhase, file, file)
+                phase == DownloadTaskPhase.FileTransfer || phase == DownloadTaskPhase.Completed
+                    ? DownloadTaskPhaseExtensions.TimeRemaining(phase, file, file)
                     : file.TimeRemaining,
             CreatedAt = file.CreatedAt,
             FileName = file.FileName,
@@ -238,8 +237,11 @@ public static class DownloadTaskGenericMapper
 
     #region EpisodeFile
 
-    public static DownloadTaskGeneric ToGeneric(this DownloadTaskTvShowEpisodeFile file) =>
-        new()
+    public static DownloadTaskGeneric ToGeneric(this DownloadTaskTvShowEpisodeFile file)
+    {
+        var phase = file.DownloadStatus.ToDownloadTaskPhase();
+
+        return new()
         {
             Id = file.Id,
             RatingKey = file.PlexApiRatingKey,
@@ -248,16 +250,13 @@ public static class DownloadTaskGenericMapper
             MediaType = file.MediaType,
             DownloadTaskType = file.DownloadTaskType,
             DownloadStatus = file.DownloadStatus,
-            Percentage =
-                file.DownloadStatus.ToDownloadTaskPhase() == DownloadTaskPhase.FileTransfer
-                    ? DataFormat.GetPercentage(file.FileDataTransferred, file.DataTotal)
-                    : file.Percentage,
+            Percentage = DownloadTaskPhaseExtensions.Percentage(phase, file, file),
             FileDataTransferred = file.FileDataTransferred,
             DataReceived = file.DataReceived,
             DataTotal = file.DataTotal,
             TimeRemaining =
-                file.DownloadStatus.ToDownloadTaskPhase() == DownloadTaskPhase.FileTransfer
-                    ? DownloadTaskPhaseExtensions.TimeRemaining(file.DownloadTaskPhase, file, file)
+                phase == DownloadTaskPhase.FileTransfer || phase == DownloadTaskPhase.Completed
+                    ? DownloadTaskPhaseExtensions.TimeRemaining(phase, file, file)
                     : file.TimeRemaining,
             CreatedAt = file.CreatedAt,
             FileName = file.FileName,
@@ -276,6 +275,7 @@ public static class DownloadTaskGenericMapper
             PlexLibraryId = file.PlexLibraryId,
             CurrentFileTransferBytesOffset = file.CurrentFileTransferBytesOffset,
         };
+    }
 
     #endregion
 }

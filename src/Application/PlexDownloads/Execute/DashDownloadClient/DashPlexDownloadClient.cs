@@ -1,4 +1,3 @@
-using System.IO.Abstractions;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -20,15 +19,12 @@ namespace Reaparr.Application;
 /// </summary>
 public class DashPlexDownloadClient : IPlexDownloadClient
 {
-    private const string NetworkTimeoutToken = "network timeout";
-
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly IDashMpdCliWrapper _dashWrapper;
     private readonly ICommandExecutor _commandExecutor;
     private readonly IDownloadTaskUpdateDispatcher _downloadTaskUpdateDispatcher;
     private readonly IServerSettingsModule _serverSettings;
-    private readonly IDirectory _directory;
     private readonly INotificationHubService _notificationHubService;
 
     private DownloadTaskKey? _downloadTaskKey;
@@ -44,7 +40,6 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         ICommandExecutor commandExecutor,
         IDownloadTaskUpdateDispatcher downloadTaskUpdateDispatcher,
         IServerSettingsModule serverSettings,
-        IDirectory directory,
         INotificationHubService notificationHubService
     )
     {
@@ -53,7 +48,6 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         _commandExecutor = commandExecutor;
         _downloadTaskUpdateDispatcher = downloadTaskUpdateDispatcher;
         _serverSettings = serverSettings;
-        _directory = directory;
         _notificationHubService = notificationHubService;
         _dbContext = dbContextFactory.Create();
     }
@@ -88,19 +82,22 @@ public class DashPlexDownloadClient : IPlexDownloadClient
 
         if (downloadUrlResult.IsFailed)
         {
-            var status = IsServerUnreachableError(downloadUrlResult.ToResult())
+            var status = downloadUrlResult.ToResult().IsServerUnreachable()
                 ? DownloadStatus.ServerUnreachable
                 : DownloadStatus.SourceUnavailable;
             await SetDownloadStatusAsync(status, downloadUrlResult.ToResult());
             return downloadUrlResult.ToResult().LogError();
         }
 
-        // Create working directory
-        var createDirectoryResult = Result.Try(() => _directory.CreateDirectory(downloadTask.DownloadDirectory));
-        if (createDirectoryResult.IsFailed)
+        // Ensure the download directory exists and has enough disk space
+        var ensureDirectoryResult = await _commandExecutor.Send(
+            new EnsureDownloadDirectoryCommand(downloadTask.DownloadDirectory, downloadTask.DataTotal),
+            cancellationToken
+        );
+        if (ensureDirectoryResult.IsFailed)
         {
-            await SetDownloadStatusAsync(DownloadStatus.StorageError, createDirectoryResult.ToResult());
-            return createDirectoryResult.ToResult();
+            await SetDownloadStatusAsync(DownloadStatus.StorageError, ensureDirectoryResult);
+            return ensureDirectoryResult;
         }
 
         var outputQuality = downloadUrlResult.Value.TranscodedQuality;
@@ -255,7 +252,7 @@ public class DashPlexDownloadClient : IPlexDownloadClient
 
         if (!completed.IsSuccess)
         {
-            var status = IsServerUnreachableError(completed.Result)
+            var status = completed.Result.IsServerUnreachable()
                 ? DownloadStatus.ServerUnreachable
                 : DownloadStatus.DownloadClientError;
             await SetDownloadStatusAsync(status, completed.Result);
@@ -292,16 +289,6 @@ public class DashPlexDownloadClient : IPlexDownloadClient
             status,
             errorResult,
             CancellationToken.None
-        );
-    }
-
-    private static bool IsServerUnreachableError(Result result)
-    {
-        if (result.Has504GatewayTimeoutError())
-            return true;
-
-        return result.Errors.Any(error =>
-            error.Message.Contains(NetworkTimeoutToken, StringComparison.OrdinalIgnoreCase)
         );
     }
 

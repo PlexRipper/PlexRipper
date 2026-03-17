@@ -208,12 +208,12 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
         var targetPath = "/test/target-openfail.bin";
         var content = CreateBytes(1024);
 
-        // Do not register a filesystem file; instead, mock IFile to throw on target open
-        var fileMock = Mock.Mock<IFile>();
-        fileMock
-            .Setup(f => f.Open(targetPath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None))
-            .Throws(new UnauthorizedAccessException("no write"));
-        // Source open setup not required; handler fails on target open first.
+        SetupFileSystem(fs =>
+        {
+            fs.AddDirectory("/test");
+            fs.AddFile(sourcePath, new MockFileData(content));
+            fs.AddDirectory(targetPath);
+        });
 
         MoveFileTransferProgressDTO? last = null;
         var command = new MoveFileWithResumeCommand
@@ -451,20 +451,14 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
         var targetPath = "/test/target-delete-fail.bin";
 
         var sourceContent = CreateBytes(1024);
-        var sourceStream = FakeData.GetFileSystemStream();
-        sourceStream.Write(sourceContent, 0, sourceContent.Length);
-        sourceStream.Seek(0, SeekOrigin.Begin);
-        var targetStream = FakeData.GetFileSystemStream();
 
-        var fileMock = Mock.Mock<IFile>();
-        fileMock
-            .Setup(f => f.Open(targetPath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite))
-            .Returns(targetStream);
-        fileMock
-            .Setup(f => f.Open(sourcePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-            .Returns(sourceStream);
-        fileMock.Setup(f => f.Exists(sourcePath)).Returns(true);
-        fileMock.Setup(f => f.Delete(sourcePath)).Throws(new IOException("delete failed"));
+        SetupFileSystem(fs =>
+        {
+            fs.AddDirectory("/test");
+            fs.AddFile(sourcePath, new MockFileData(sourceContent));
+            fs.AddFile(targetPath, new MockFileData([]));
+            fs.File.SetAttributes(sourcePath, FileAttributes.ReadOnly);
+        });
 
         var command = new MoveFileWithResumeCommand
         {
@@ -478,5 +472,45 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
         var result = await Sut.ExecuteAsync(command, CancellationToken.None);
 
         result.IsFailed.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task ShouldTruncateStaleDestinationContent_WhenFreshStart()
+    {
+        // Verifies that a restart (currentOffset = 0) with a pre-existing destination from a previous
+        // run is fully replaced by the new source, leaving no stale bytes beyond the new content.
+        var sourcePath = "/test/source-truncate.bin";
+        var targetPath = "/test/target-truncate.bin";
+
+        var newContent = CreateBytes(100 * 1024); // 100 KB new download
+        var staleContent = CreateBytes(200 * 1024); // 200 KB stale destination from previous run
+
+        SetupFileSystem(fs =>
+        {
+            fs.AddDirectory("/test");
+            fs.AddFile(sourcePath, new MockFileData(newContent));
+            fs.AddFile(targetPath, new MockFileData(staleContent));
+        });
+
+        var command = new MoveFileWithResumeCommand
+        {
+            SourcePath = sourcePath,
+            TargetPath = targetPath,
+            CurrentOffset = 0,
+            DataTotal = newContent.LongLength,
+            Progress = _ => { },
+        };
+
+        var result = await Sut.ExecuteAsync(command, CancellationToken.None);
+        result.IsSuccess.ShouldBeTrue();
+
+        var file = Mock.Create<IFile>();
+        using var targetStream = file.Open(targetPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+        var readBack = new byte[targetStream.Length];
+        _ = await targetStream.ReadAsync(readBack, 0, readBack.Length, CancellationToken.None);
+
+        // Destination must be exactly the new content — no leftover stale bytes.
+        readBack.Length.ShouldBe(newContent.Length);
+        readBack.ShouldBe(newContent);
     }
 }

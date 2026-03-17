@@ -1,6 +1,6 @@
-﻿namespace Reaparr.Application.Contracts;
+namespace Reaparr.Application.Contracts;
 
-public class PlexApiClientProgress
+public class HttpRequestRetryProgress
 {
     public required int RetryAttemptIndex { get; init; }
 
@@ -16,5 +16,7 @@ public class PlexApiClientProgress
 
     public required string Message { get; init; }
 
-    public required string ErrorMessage { get; set; }
+    public required string ErrorMessage { get; init; }
+
+    public required string RequestUri { get; init; }
 }

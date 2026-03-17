@@ -289,13 +289,22 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         plexLibrary.ShouldNotBeNull();
 
         // Create initial data
-        var initialActors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).Generate(50);
+        var initialActors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).GenerateUnique(50, x => x.Key);
         await IDbContext.PlexActors.AddRangeAsync(initialActors.ToPlexActor(), CancellationToken);
         await IDbContext.SaveChangesAsync(CancellationToken);
 
         // Create new data with some overlapping PlexKeys but different names
         var newActors = initialActors.Take(25).Select(r => r with { Name = r.Name + "_updated" }).ToList();
-        newActors.AddRange(FakePlexApiData.GetLibraryMediaItemActorDTO(seed).Generate(25));
+        var actorFaker = FakePlexApiData.GetLibraryMediaItemActorDTO(seed);
+        var actorKeys = initialActors.Select(x => x.Key).ToHashSet();
+        while (newActors.Count < 50)
+        {
+            var actor = actorFaker.Generate();
+            if (string.IsNullOrEmpty(actor.Key) || !actorKeys.Add(actor.Key))
+                continue;
+
+            newActors.Add(actor);
+        }
 
         // Act
         var command = new InsertMediaMetaDataCommand(

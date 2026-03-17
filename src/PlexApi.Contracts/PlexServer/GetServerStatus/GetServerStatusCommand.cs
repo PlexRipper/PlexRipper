@@ -17,5 +17,5 @@ public record GetServerStatusCommand : ICommand<Result<PlexServerStatus>>
     /// <summary>
     /// Progress action callback to notify of connection attempt progress.
     /// </summary>
-    public required Action<PlexApiClientProgress>? ProgressAction { get; init; }
+    public required Action<HttpRequestRetryProgress>? ProgressAction { get; init; }
 }

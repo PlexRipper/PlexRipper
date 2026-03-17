@@ -199,14 +199,7 @@ public static partial class Startup
             });
         }
 
-        services
-            .AddHttpClient("")
-            .ConfigurePrimaryHttpMessageHandler(() =>
-                new SocketsHttpHandler
-                {
-                    SslOptions = new SslClientAuthenticationOptions { EnabledSslProtocols = SslProtocols.None },
-                }
-            );
+        services.RegisterDefaultHttpClient();
 
         services.RegisterSonarrHttpClient();
         services.RegisterRadarrHttpClient();

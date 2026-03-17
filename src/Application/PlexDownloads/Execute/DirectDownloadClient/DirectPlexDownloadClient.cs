@@ -1,11 +1,9 @@
 using System.ComponentModel;
-using System.IO.Abstractions;
+using System.Diagnostics;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Runtime.CompilerServices;
-using ByteSizeLib;
 using Downloader;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
@@ -26,6 +24,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
     private string _filename = string.Empty;
 
     private readonly IDownloadService _downloader;
+
     private readonly DownloadConfiguration _configuration = new()
     {
         DownloadFileExtension = FilePathExtensions.TempDownloadFileSuffix,
@@ -34,8 +33,6 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
     private readonly CompositeDisposable _subscriptions = new();
     private readonly Subject<Unit> _destroy = new();
     private int _isDisposed;
-    private long _lastLoggedDataReceived = -1;
-    private decimal _lastLoggedPercentage = -1;
 
     public DirectPlexDownloadClient(
         ILogger log,
@@ -67,6 +64,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
     /// <inheritdoc/>
     public async Task<Result> Start(DownloadTaskKey downloadTaskKey, CancellationToken cancellationToken = default)
     {
+        var startupStopwatch = Stopwatch.StartNew();
         _downloadTaskKey = downloadTaskKey;
         var downloadTask = await _dbContext.GetDownloadTaskFileAsync(downloadTaskKey, cancellationToken);
         if (downloadTask is null)
@@ -76,43 +74,66 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                 .LogWarning();
         }
 
+        _filename = downloadTask.FileName;
+
+        var directUrlStopwatch = Stopwatch.StartNew();
         var downloadUrlResult = await _commandExecutor.Send(
             new GetDirectDownloadUrlCommand(downloadTask.PlexServerId, downloadTask.FileLocationUrl),
             cancellationToken
         );
+        _log.Here()
+            .Debug(
+                "Resolved direct download URL for {MediaFileName} in {ElapsedMilliseconds} ms",
+                _filename,
+                directUrlStopwatch.ElapsedMilliseconds
+            );
 
         if (downloadUrlResult.IsFailed)
-            return downloadUrlResult.ToResult();
+        {
+            var failedResult = downloadUrlResult.ToResult();
+            var failureStatus = failedResult.IsServerUnreachable()
+                ? Domain.DownloadStatus.ServerUnreachable
+                : Domain.DownloadStatus.Error;
+
+            await SendDownloadClientLog(NotificationLevel.Error, failureStatus, failedResult.ToString());
+
+            var statusResult = await SetDownloadStatusAsync(failureStatus);
+            if (statusResult.IsFailed)
+                return statusResult;
+
+            return failedResult;
+        }
 
         var downloadUrl = downloadUrlResult.Value;
 
-        // Prepare destination stream
-        // TODO this should be replaced with just making and ensuring the destination path exist, doesn't need a stream
-        var fileStreamResult = await _commandExecutor.Send(
-            new CreateDownloadFileStreamCommand(
-                downloadTask.DownloadDirectory,
-                Path.GetFileName(downloadTask.DownloadFilePath),
-                downloadTask.DataTotal
-            ),
+        // Ensure the download directory exists and has enough disk space
+        var ensureDirectoryStopwatch = Stopwatch.StartNew();
+        var ensureDirectoryResult = await _commandExecutor.Send(
+            new EnsureDownloadDirectoryCommand(downloadTask.DownloadDirectory, downloadTask.DataTotal),
             cancellationToken
         );
-
-        if (fileStreamResult.IsFailed)
-        {
-            var statusResult = await SetDownloadStatusAsync(
-                Domain.DownloadStatus.StorageError,
-                fileStreamResult.ToResult()
+        _log.Here()
+            .Debug(
+                "Ensured download directory for {MediaFileName} in {ElapsedMilliseconds} ms",
+                _filename,
+                ensureDirectoryStopwatch.ElapsedMilliseconds
             );
+
+        if (ensureDirectoryResult.IsFailed)
+        {
+            var statusResult = await SetDownloadStatusAsync(Domain.DownloadStatus.StorageError, ensureDirectoryResult);
             if (statusResult.IsFailed)
                 return statusResult;
-            return fileStreamResult.ToResult();
+
+            return ensureDirectoryResult;
         }
 
-        await using var fileStream = fileStreamResult.Value;
-        _filename = downloadTask.FileName;
-
         await SetupDownloadListeners(downloadTaskKey);
+        var downloadingStatusResult = await SetDownloadStatusAsync(Domain.DownloadStatus.Downloading);
+        if (downloadingStatusResult.IsFailed)
+            return downloadingStatusResult;
 
+        var downloaderStartStopwatch = Stopwatch.StartNew();
         if (downloadTask.DirectDownloadSnapshot is not null)
         {
             await SendDownloadClientLog(
@@ -129,6 +150,14 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
             var downloaderTargetPath = Path.Combine(downloadTask.DownloadDirectory, downloadTask.FileName);
             await _downloader.DownloadFileTaskAsync(downloadUrl, downloaderTargetPath, cancellationToken);
         }
+
+        _log.Here()
+            .Debug(
+                "Direct downloader start workflow for {MediaFileName} completed in {DownloaderElapsedMilliseconds} ms ({TotalElapsedMilliseconds} ms total startup)",
+                _filename,
+                downloaderStartStopwatch.ElapsedMilliseconds,
+                startupStopwatch.ElapsedMilliseconds
+            );
 
         return Result.Ok();
     }
@@ -173,25 +202,6 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                 })
         );
 
-        // Setup DownloadStarted Subscription
-        _subscriptions.Add(
-            Observable
-                .FromEventPattern<DownloadStartedEventArgs>(
-                    h => _downloader.DownloadStarted += h,
-                    h => _downloader.DownloadStarted -= h
-                )
-                .Select(x => x.EventArgs)
-                .Take(1)
-                .Select(_ =>
-                    Observable.FromAsync(async _ =>
-                    {
-                        await SetDownloadStatusAsync(Domain.DownloadStatus.Downloading);
-                    })
-                )
-                .Concat()
-                .Subscribe()
-        );
-
         // Setup DownloadProgressChanged Subscription
         _subscriptions.Add(
             Observable
@@ -216,7 +226,6 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                     };
 
                     _downloadTaskUpdateDispatcher.OnProgressUpdated(key, progress, _downloader.Package.ToSnapshot());
-                    _ = SendProgressLog(progress);
                 })
         );
 
@@ -262,8 +271,6 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
 
                         _downloadTaskUpdateDispatcher.OnProgressUpdated(key, progress, package.ToSnapshot());
 
-                        await SendProgressLog(progress);
-
                         var finishResult = await SetDownloadStatusAsync(Domain.DownloadStatus.DownloadFinished);
                         finishResult.LogIfFailed();
                     })
@@ -271,33 +278,6 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                 .Concat()
                 .Subscribe()
         );
-    }
-
-    private async Task SendProgressLog(
-        DownloadTaskProgress progress,
-        [CallerFilePath] string sourceFilePath = "",
-        [CallerMemberName] string memberName = "",
-        [CallerLineNumber] int sourceLineNumber = 0
-    )
-    {
-        if (_lastLoggedDataReceived == progress.DataReceived && _lastLoggedPercentage == progress.Percentage)
-            return;
-
-        _lastLoggedDataReceived = progress.DataReceived;
-        _lastLoggedPercentage = progress.Percentage;
-
-        var progressMsg = _log.Here(sourceFilePath, memberName, sourceLineNumber)
-            .DebugMsg(
-                "[DownloadTaskProgress {MediaFileName} - {Percentage}% - {Speed} - {DataReceived} / {DataTotal} - {TimeRemaining}]",
-                _filename,
-                progress.Percentage.ToString("F2"),
-                DataFormat.FormatSpeedString(progress.DownloadSpeed),
-                ByteSize.FromBytes(progress.DataReceived).ToString("MB"),
-                ByteSize.FromBytes(progress.DataTotal).ToString("MB"),
-                TimeSpan.FromSeconds(progress.TimeRemaining).ToFormattedString()
-            );
-
-        await SendDownloadClientLog(NotificationLevel.Debug, Domain.DownloadStatus.Downloading, progressMsg);
     }
 
     private async Task<Result> SetDownloadStatusAsync(Domain.DownloadStatus status, Result? errorResult = null)

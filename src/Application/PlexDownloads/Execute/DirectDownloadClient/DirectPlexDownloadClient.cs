@@ -1,5 +1,5 @@
 using System.ComponentModel;
-using System.IO.Abstractions;
+using System.Diagnostics;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -64,6 +64,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
     /// <inheritdoc/>
     public async Task<Result> Start(DownloadTaskKey downloadTaskKey, CancellationToken cancellationToken = default)
     {
+        var startupStopwatch = Stopwatch.StartNew();
         _downloadTaskKey = downloadTaskKey;
         var downloadTask = await _dbContext.GetDownloadTaskFileAsync(downloadTaskKey, cancellationToken);
         if (downloadTask is null)
@@ -75,10 +76,18 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
 
         _filename = downloadTask.FileName;
 
+        var directUrlStopwatch = Stopwatch.StartNew();
         var downloadUrlResult = await _commandExecutor.Send(
             new GetDirectDownloadUrlCommand(downloadTask.PlexServerId, downloadTask.FileLocationUrl),
             cancellationToken
         );
+        _log.Here()
+            .Debug(
+                "Resolved direct download URL for {MediaFileName} in {ElapsedMilliseconds} ms",
+                _filename,
+                directUrlStopwatch.ElapsedMilliseconds
+            );
+
         if (downloadUrlResult.IsFailed)
         {
             var failedResult = downloadUrlResult.ToResult();
@@ -98,10 +107,17 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
         var downloadUrl = downloadUrlResult.Value;
 
         // Ensure the download directory exists and has enough disk space
+        var ensureDirectoryStopwatch = Stopwatch.StartNew();
         var ensureDirectoryResult = await _commandExecutor.Send(
             new EnsureDownloadDirectoryCommand(downloadTask.DownloadDirectory, downloadTask.DataTotal),
             cancellationToken
         );
+        _log.Here()
+            .Debug(
+                "Ensured download directory for {MediaFileName} in {ElapsedMilliseconds} ms",
+                _filename,
+                ensureDirectoryStopwatch.ElapsedMilliseconds
+            );
 
         if (ensureDirectoryResult.IsFailed)
         {
@@ -113,7 +129,11 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
         }
 
         await SetupDownloadListeners(downloadTaskKey);
+        var downloadingStatusResult = await SetDownloadStatusAsync(Domain.DownloadStatus.Downloading);
+        if (downloadingStatusResult.IsFailed)
+            return downloadingStatusResult;
 
+        var downloaderStartStopwatch = Stopwatch.StartNew();
         if (downloadTask.DirectDownloadSnapshot is not null)
         {
             await SendDownloadClientLog(
@@ -130,6 +150,14 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
             var downloaderTargetPath = Path.Combine(downloadTask.DownloadDirectory, downloadTask.FileName);
             await _downloader.DownloadFileTaskAsync(downloadUrl, downloaderTargetPath, cancellationToken);
         }
+
+        _log.Here()
+            .Debug(
+                "Direct downloader start workflow for {MediaFileName} completed in {DownloaderElapsedMilliseconds} ms ({TotalElapsedMilliseconds} ms total startup)",
+                _filename,
+                downloaderStartStopwatch.ElapsedMilliseconds,
+                startupStopwatch.ElapsedMilliseconds
+            );
 
         return Result.Ok();
     }
@@ -172,25 +200,6 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                 {
                     _configuration.MaximumBytesPerSecond = Math.Max(0, value) * 1024;
                 })
-        );
-
-        // Setup DownloadStarted Subscription
-        _subscriptions.Add(
-            Observable
-                .FromEventPattern<DownloadStartedEventArgs>(
-                    h => _downloader.DownloadStarted += h,
-                    h => _downloader.DownloadStarted -= h
-                )
-                .Select(x => x.EventArgs)
-                .Take(1)
-                .Select(_ =>
-                    Observable.FromAsync(async _ =>
-                    {
-                        await SetDownloadStatusAsync(Domain.DownloadStatus.Downloading);
-                    })
-                )
-                .Concat()
-                .Subscribe()
         );
 
         // Setup DownloadProgressChanged Subscription

@@ -674,6 +674,91 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
     }
 
     [Fact]
+    public async Task ShouldSetDownloadingStatus_BeforeInvokingDownloadFileTaskAsync()
+    {
+        // Arrange
+        var downloadingStatusWasSetBeforeDownloadStarted = false;
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<Domain.DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Callback<DownloadTaskKey, Domain.DownloadStatus, CancellationToken>(
+                (_, status, _) =>
+                {
+                    if (status == DomainDownloadStatus.Downloading)
+                        downloadingStatusWasSetBeforeDownloadStarted = true;
+                }
+            )
+            .ReturnsAsync(Result.Ok());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnProgressUpdated(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadTaskProgress>(),
+                    It.IsAny<DirectDownloadSnapshot?>()
+                )
+            )
+            .Returns(Result.Ok());
+
+        await SetupDatabase(
+            84337,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var downloadTask = await dbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+        var serverMachineIdentifier = await dbContext.GetPlexServerMachineIdentifierById(
+            downloadTask.PlexServerId,
+            CancellationToken
+        );
+
+        SetupSpeedLimitMocks(serverMachineIdentifier);
+        SetupCommandExecutor();
+
+        var package = MakeDownloadPackage();
+        var downloadServiceMock = new Mock<IDownloadService>();
+        downloadServiceMock.Setup(x => x.Clear()).Returns(Task.CompletedTask);
+        downloadServiceMock.Setup(x => x.CancelTaskAsync()).Returns(Task.CompletedTask);
+        downloadServiceMock.Setup(x => x.Package).Returns(package);
+        downloadServiceMock
+            .Setup(x => x.DownloadFileTaskAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Returns<string, string, CancellationToken>(
+                (_, _, _) =>
+                {
+                    downloadingStatusWasSetBeforeDownloadStarted.ShouldBeTrue();
+                    return Task.CompletedTask;
+                }
+            );
+
+        // Act
+        var sut = CreateSut(downloadServiceMock);
+        var startResult = await sut.Start(downloadTask.ToKey(), CancellationToken);
+
+        // Assert
+        startResult.IsSuccess.ShouldBeTrue();
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.Is<DownloadTaskKey>(key => key == downloadTask.ToKey()),
+                        DomainDownloadStatus.Downloading,
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Once()
+            );
+    }
+
+    [Fact]
     public async Task ShouldApplySpeedLimitFromObservable_WhenSpeedLimitObservableEmitsValue()
     {
         // Arrange

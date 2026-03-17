@@ -170,8 +170,54 @@ public class GetDirectDownloadUrlCommandUnitTests : BaseUnitTest<GetDirectDownlo
 
         // Assert
         result.IsFailed.ShouldBeTrue();
-        handler.RequestCount.ShouldBe(4);
+        handler.RequestCount.ShouldBe(5);
         Mock.Mock<IHttpClientFactory>().Verify(x => x.CreateClient(It.IsAny<string>()), Times.Once());
+    }
+
+    [Fact]
+    public async Task ShouldStartDefaultAndFallbackProbeRequestsInParallel()
+    {
+        // Arrange
+        await SetupDatabase(
+            90206,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var downloadTask = await IDbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+        var handler = new ParallelProbeHandler();
+        var retryHandler = new DefaultHttpClientRetryHandler(new LoggerConfiguration().CreateLogger())
+        {
+            InnerHandler = handler,
+        };
+        var httpClient = new HttpClient(retryHandler);
+        Mock.Mock<IHttpClientFactory>().Setup(x => x.CreateClient(It.IsAny<string>())).Returns(httpClient);
+
+        var sut = CreateSut();
+
+        // Act
+        var executeTask = sut.ExecuteAsync(
+            new GetDirectDownloadUrlCommand(downloadTask.PlexServerId, downloadTask.FileLocationUrl),
+            CancellationToken
+        );
+
+        await Task.WhenAll(
+            handler.DefaultProbeStarted.Task.WaitAsync(TimeSpan.FromSeconds(1), CancellationToken),
+            handler.FallbackProbeStarted.Task.WaitAsync(TimeSpan.FromSeconds(1), CancellationToken)
+        );
+
+        handler.DefaultProbeResult.SetResult(HttpStatusCode.Forbidden);
+        handler.FallbackProbeResult.SetResult(HttpStatusCode.OK);
+
+        var result = await executeTask;
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldContain("download=1");
     }
 
     private GetDirectDownloadUrlCommandHandler CreateSut() =>
@@ -211,6 +257,37 @@ public class GetDirectDownloadUrlCommandUnitTests : BaseUnitTest<GetDirectDownlo
 
             var statusCode = _statuses.Dequeue();
             return Task.FromResult(new HttpResponseMessage(statusCode) { RequestMessage = request });
+        }
+    }
+
+    private sealed class ParallelProbeHandler : HttpMessageHandler
+    {
+        public TaskCompletionSource DefaultProbeStarted { get; } =
+            new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public TaskCompletionSource FallbackProbeStarted { get; } =
+            new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public TaskCompletionSource<HttpStatusCode> DefaultProbeResult { get; } =
+            new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public TaskCompletionSource<HttpStatusCode> FallbackProbeResult { get; } =
+            new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        protected override async Task<HttpResponseMessage> SendAsync(
+            HttpRequestMessage request,
+            CancellationToken cancellationToken
+        )
+        {
+            var hasDownloadFlag = request.RequestUri?.Query.Contains("download=1", StringComparison.Ordinal) == true;
+
+            if (hasDownloadFlag)
+            {
+                FallbackProbeStarted.TrySetResult();
+                var statusCode = await FallbackProbeResult.Task.WaitAsync(cancellationToken);
+                return new HttpResponseMessage(statusCode) { RequestMessage = request };
+            }
+
+            DefaultProbeStarted.TrySetResult();
+            var defaultStatusCode = await DefaultProbeResult.Task.WaitAsync(cancellationToken);
+            return new HttpResponseMessage(defaultStatusCode) { RequestMessage = request };
         }
     }
 }

@@ -179,7 +179,7 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownlo
 
         var pathToDelete = movieFileTask.DownloadFilePath.RemoveReapTempSuffix();
         // Sibling file that is not owned by this task — directory must survive.
-        var siblingPath = System.IO.Path.Combine(movieFileTask.DownloadDirectory, "sibling.mkv");
+        var siblingPath = Path.Combine(movieFileTask.DownloadDirectory, "sibling.mkv");
 
         SetupFileSystem(fs =>
         {
@@ -253,9 +253,7 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownlo
 
         // e.g. /Downloads/Movies/SomeMovie  →  category folder = /Downloads/Movies
         var movieTaskFolder = movieFileTask.DownloadDirectory;
-        var moviesCategoryFolder = System.IO.Path.GetDirectoryName(
-            movieTaskFolder.TrimEnd(System.IO.Path.DirectorySeparatorChar)
-        )!;
+        var moviesCategoryFolder = Path.GetDirectoryName(movieTaskFolder.TrimEnd(Path.DirectorySeparatorChar))!;
         var downloadRoot = PathProvider.DefaultDownloadsDestinationFolder;
 
         SetupFileSystem(fs => fs.AddFile(plainFilePath, new MockFileData([])));
@@ -298,10 +296,8 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownlo
         //   showFolder          = /Downloads/TvShows/SomeShow
         //   tvShowsCategoryFolder = /Downloads/TvShows
         var seasonFolder = episodeFileTask.DownloadDirectory;
-        var showFolder = System.IO.Path.GetDirectoryName(seasonFolder.TrimEnd(System.IO.Path.DirectorySeparatorChar))!;
-        var tvShowsCategoryFolder = System.IO.Path.GetDirectoryName(
-            showFolder.TrimEnd(System.IO.Path.DirectorySeparatorChar)
-        )!;
+        var showFolder = Path.GetDirectoryName(seasonFolder.TrimEnd(Path.DirectorySeparatorChar))!;
+        var tvShowsCategoryFolder = Path.GetDirectoryName(showFolder.TrimEnd(Path.DirectorySeparatorChar))!;
         var downloadRoot = PathProvider.DefaultDownloadsDestinationFolder;
 
         SetupFileSystem(fs => fs.AddFile(plainFilePath, new MockFileData([])));
@@ -341,7 +337,9 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownlo
         var dbContext = IDbContext;
         var episodeFileTasks = await dbContext.DownloadTaskTvShowEpisodeFile.ToListAsync(CancellationToken);
         episodeFileTasks.Count.ShouldBe(2);
-        var episodeFileKeys = await dbContext.DownloadTaskTvShowEpisodeFile.ProjectToKey().ToListAsync(CancellationToken);
+        var episodeFileKeys = await dbContext
+            .DownloadTaskTvShowEpisodeFile.ProjectToKey()
+            .ToListAsync(CancellationToken);
 
         var season1Task = episodeFileTasks[0];
         var season2Task = episodeFileTasks[1];
@@ -350,8 +348,8 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownlo
 
         var season1Folder = season1Task.DownloadDirectory;
         var season2Folder = season2Task.DownloadDirectory;
-        var showFolder = System.IO.Path.GetDirectoryName(season1Folder.TrimEnd(System.IO.Path.DirectorySeparatorChar))!;
-        var tvShowsCategoryFolder = System.IO.Path.GetDirectoryName(showFolder.TrimEnd(System.IO.Path.DirectorySeparatorChar))!;
+        var showFolder = Path.GetDirectoryName(season1Folder.TrimEnd(Path.DirectorySeparatorChar))!;
+        var tvShowsCategoryFolder = Path.GetDirectoryName(showFolder.TrimEnd(Path.DirectorySeparatorChar))!;
 
         // Both season files exist on disk; only season 1's episode is in the delete command.
         SetupFileSystem(fs =>
@@ -406,12 +404,10 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownlo
         var episodePlainPath = episodeFileTask.DownloadFilePath.RemoveReapTempSuffix();
 
         var movieTaskFolder = movieFileTask.DownloadDirectory;
-        var moviesCategoryFolder = System.IO.Path.GetDirectoryName(
-            movieTaskFolder.TrimEnd(System.IO.Path.DirectorySeparatorChar)
-        )!;
+        var moviesCategoryFolder = Path.GetDirectoryName(movieTaskFolder.TrimEnd(Path.DirectorySeparatorChar))!;
         var seasonFolder = episodeFileTask.DownloadDirectory;
-        var showFolder = System.IO.Path.GetDirectoryName(seasonFolder.TrimEnd(System.IO.Path.DirectorySeparatorChar))!;
-        var tvShowsCategoryFolder = System.IO.Path.GetDirectoryName(showFolder.TrimEnd(System.IO.Path.DirectorySeparatorChar))!;
+        var showFolder = Path.GetDirectoryName(seasonFolder.TrimEnd(Path.DirectorySeparatorChar))!;
+        var tvShowsCategoryFolder = Path.GetDirectoryName(showFolder.TrimEnd(Path.DirectorySeparatorChar))!;
         var downloadRoot = PathProvider.DefaultDownloadsDestinationFolder;
 
         SetupFileSystem(fs =>

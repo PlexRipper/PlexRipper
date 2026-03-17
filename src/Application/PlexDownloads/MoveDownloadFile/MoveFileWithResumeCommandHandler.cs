@@ -67,7 +67,7 @@ public class MoveFileWithResumeCommandHandler : ICommandHandler<MoveFileWithResu
     {
         var sourcePath = command.SourcePath;
         var targetPath = command.TargetPath;
-        var currentOffset = command.CurrentOffset;
+        var currentOffset = Math.Min(command.CurrentOffset, command.DataTotal);
         var dataTotal = command.DataTotal;
         var moveDownloadFileProgres = command.Progress;
 

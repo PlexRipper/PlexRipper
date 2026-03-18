@@ -102,7 +102,7 @@ public class DashPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DashPlexDow
         var sut = CreateSut(dashWrapperMock);
         var startTask = sut.Start(downloadTask.ToKey(), CancellationToken);
 
-        await Task.Delay(100, TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None);
+        await Task.Delay(100, CancellationToken);
         var stopResult = await sut.StopAsync();
         var startResult = await startTask;
 
@@ -174,7 +174,7 @@ public class DashPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DashPlexDow
 
         var sut = CreateSut(dashWrapperMock);
         var startTask = sut.Start(downloadTask.ToKey(), CancellationToken);
-        await Task.Delay(100, TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None);
+        await Task.Delay(100, CancellationToken);
 
         var firstStop = await sut.StopAsync();
         var secondStop = await sut.StopAsync();

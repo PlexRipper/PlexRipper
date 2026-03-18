@@ -1829,7 +1829,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
                         results.Add(nextCalled);
                     }
                 },
-                TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
+                CancellationToken
             );
 
             tasks.Add(task);

@@ -44,9 +44,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
             .PlexTvShows.Include(x => x.Seasons)
                 .ThenInclude(x => x.Episodes)
             .AsNoTracking()
-            .ToListAsync(
-                cancellationToken: TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
-            );
+            .ToListAsync(cancellationToken: CancellationToken);
 
         tvShows.Count.ShouldBe(5);
 
@@ -146,11 +144,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
             }
         );
 
-        var movies = await IDbContext
-            .PlexMovies.AsNoTracking()
-            .ToListAsync(
-                cancellationToken: TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
-            );
+        var movies = await IDbContext.PlexMovies.AsNoTracking().ToListAsync(cancellationToken: CancellationToken);
         movies.Count.ShouldBe(3);
 
         var downloadMedia = new List<DownloadMediaDTO>
@@ -196,9 +190,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
         var movies = await IDbContext
             .PlexMovies.Include(x => x.MediaDataList)
             .AsNoTracking()
-            .ToListAsync(
-                cancellationToken: TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
-            );
+            .ToListAsync(cancellationToken: CancellationToken);
 
         var qualities = movies
             .SelectMany(movie =>
@@ -254,9 +246,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
         var movies = await IDbContext
             .PlexMovies.Include(x => x.MediaDataList)
             .AsNoTracking()
-            .ToListAsync(
-                cancellationToken: TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
-            );
+            .ToListAsync(cancellationToken: CancellationToken);
 
         var moviesWithQuality = movies.Take(2).ToList();
 
@@ -347,11 +337,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
             }
         );
 
-        var tvShows = await IDbContext
-            .PlexTvShows.AsNoTracking()
-            .ToListAsync(
-                cancellationToken: TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
-            );
+        var tvShows = await IDbContext.PlexTvShows.AsNoTracking().ToListAsync(cancellationToken: CancellationToken);
 
         var downloadMedia = new List<DownloadMediaDTO>
         {
@@ -399,9 +385,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
 
         var seasons = await IDbContext
             .PlexTvShowSeason.AsNoTracking()
-            .ToListAsync(
-                cancellationToken: TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
-            );
+            .ToListAsync(cancellationToken: CancellationToken);
 
         var downloadMedia = new List<DownloadMediaDTO>
         {
@@ -450,9 +434,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
 
         var episodes = await IDbContext
             .PlexTvShowEpisodes.AsNoTracking()
-            .ToListAsync(
-                cancellationToken: TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
-            );
+            .ToListAsync(cancellationToken: CancellationToken);
 
         var downloadMedia = new List<DownloadMediaDTO>
         {
@@ -504,9 +486,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
         var episodes = await IDbContext
             .PlexTvShowEpisodes.Include(x => x.MediaDataList)
             .AsNoTracking()
-            .ToListAsync(
-                cancellationToken: TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
-            );
+            .ToListAsync(cancellationToken: CancellationToken);
 
         var qualities = episodes
             .SelectMany(episode =>
@@ -597,11 +577,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
             }
         );
 
-        var movies = await IDbContext
-            .PlexMovies.AsNoTracking()
-            .ToListAsync(
-                cancellationToken: TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
-            );
+        var movies = await IDbContext.PlexMovies.AsNoTracking().ToListAsync(cancellationToken: CancellationToken);
 
         var downloadMedia = new List<DownloadMediaDTO>
         {
@@ -651,11 +627,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
             }
         );
 
-        var tvShows = await IDbContext
-            .PlexTvShows.AsNoTracking()
-            .ToListAsync(
-                cancellationToken: TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
-            );
+        var tvShows = await IDbContext.PlexTvShows.AsNoTracking().ToListAsync(cancellationToken: CancellationToken);
 
         var downloadMedia = new List<DownloadMediaDTO>
         {
@@ -710,16 +682,8 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
             }
         );
 
-        var movies = await IDbContext
-            .PlexMovies.AsNoTracking()
-            .ToListAsync(
-                cancellationToken: TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
-            );
-        var tvShows = await IDbContext
-            .PlexTvShows.AsNoTracking()
-            .ToListAsync(
-                cancellationToken: TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
-            );
+        var movies = await IDbContext.PlexMovies.AsNoTracking().ToListAsync(cancellationToken: CancellationToken);
+        var tvShows = await IDbContext.PlexTvShows.AsNoTracking().ToListAsync(cancellationToken: CancellationToken);
 
         var downloadMedia = new List<DownloadMediaDTO>
         {
@@ -783,16 +747,12 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
         var movies = await IDbContext
             .PlexMovies.Include(x => x.MediaDataList)
             .AsNoTracking()
-            .ToListAsync(
-                cancellationToken: TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
-            );
+            .ToListAsync(cancellationToken: CancellationToken);
 
         var episodes = await IDbContext
             .PlexTvShowEpisodes.Include(x => x.MediaDataList)
             .AsNoTracking()
-            .ToListAsync(
-                cancellationToken: TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
-            );
+            .ToListAsync(cancellationToken: CancellationToken);
 
         var movieQualities = movies
             .SelectMany(movie =>
@@ -886,9 +846,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
             .PlexTvShows.Include(x => x.Seasons)
                 .ThenInclude(x => x.Episodes)
             .AsNoTracking()
-            .ToListAsync(
-                cancellationToken: TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
-            );
+            .ToListAsync(cancellationToken: CancellationToken);
 
         var firstShow = tvShows[0];
         var secondShow = tvShows[1];
@@ -968,9 +926,7 @@ public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadP
 
         var episodes = await IDbContext
             .PlexTvShowEpisodes.AsNoTracking()
-            .ToListAsync(
-                cancellationToken: TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
-            );
+            .ToListAsync(cancellationToken: CancellationToken);
         var targetEpisode = episodes[0];
 
         var downloadMedia = new List<DownloadMediaDTO>

@@ -580,7 +580,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                 );
 
                 // Allow the Rx Sample(500ms) window to elapse and the handler to persist progress
-                await Task.Delay(700, TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None);
+                await Task.Delay(700, CancellationToken);
                 return Result.Ok();
             });
         dashWrapperMock.Setup(x => x.StopAsync()).ReturnsAsync(Result.Ok());
@@ -679,7 +679,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                     }
                 );
 
-                await Task.Delay(700, TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None);
+                await Task.Delay(700, CancellationToken);
                 return Result.Ok();
             });
         dashWrapperMock.Setup(x => x.StopAsync()).ReturnsAsync(Result.Ok());
@@ -778,7 +778,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                     }
                 );
 
-                await Task.Delay(700, TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None);
+                await Task.Delay(700, CancellationToken);
                 return Result.Ok();
             });
         dashWrapperMock.Setup(x => x.StopAsync()).ReturnsAsync(Result.Ok());

@@ -49,10 +49,7 @@ public class GetPlexLibraryMediaEndpointUnitTests : BaseUnitTest<GetPlexLibraryM
         result.Value.MediaCount.ShouldBe(result.Value.MediaList.Count);
         foreach (var mediaSlimDTO in result.Value.MediaList)
         {
-            var validationResult = await PlexMediaSlimDtoValidator.ValidateAsync(
-                mediaSlimDTO,
-                TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
-            );
+            var validationResult = await PlexMediaSlimDtoValidator.ValidateAsync(mediaSlimDTO, CancellationToken);
             validationResult.Errors.ShouldBeEmpty();
         }
     }
@@ -97,10 +94,7 @@ public class GetPlexLibraryMediaEndpointUnitTests : BaseUnitTest<GetPlexLibraryM
 
         foreach (var plexMediaSlimDto in result.Value.MediaList)
         {
-            var validationResult = await PlexMediaSlimDtoValidator.ValidateAsync(
-                plexMediaSlimDto,
-                TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
-            );
+            var validationResult = await PlexMediaSlimDtoValidator.ValidateAsync(plexMediaSlimDto, CancellationToken);
             validationResult.Errors.ShouldBeEmpty();
         }
     }

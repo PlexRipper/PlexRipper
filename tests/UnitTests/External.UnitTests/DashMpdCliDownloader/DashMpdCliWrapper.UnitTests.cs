@@ -3,7 +3,7 @@ using Reaparr.External.Contracts;
 
 namespace Reaparr.External.UnitTests;
 
-public class DashMpdCliWrapperUnitTests
+public class DashMpdCliWrapperUnitTests : BaseUnitTest
 {
     [Test]
     public async Task ShouldEmitSuccessfulCompletion_WhenProcessExitsZero()
@@ -20,13 +20,10 @@ public class DashMpdCliWrapperUnitTests
         );
 
         var result = await wrapper.StartAsync(CreateOptions());
-        var completed = await completedTcs.Task.WaitAsync(
-            TimeSpan.FromSeconds(5),
-            TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
-        );
+        var completed = await completedTcs.Task.WaitAsync(TimeSpan.FromSeconds(5), CancellationToken);
         var observableCompleted = await completedObservableTcs.Task.WaitAsync(
             TimeSpan.FromSeconds(5),
-            TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
+            CancellationToken
         );
 
         result.IsSuccess.ShouldBeTrue();
@@ -54,13 +51,10 @@ public class DashMpdCliWrapperUnitTests
         );
 
         var result = await wrapper.StartAsync(CreateOptions());
-        var completed = await completedTcs.Task.WaitAsync(
-            TimeSpan.FromSeconds(5),
-            TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
-        );
+        var completed = await completedTcs.Task.WaitAsync(TimeSpan.FromSeconds(5), CancellationToken);
         var observableCompleted = await completedObservableTcs.Task.WaitAsync(
             TimeSpan.FromSeconds(5),
-            TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
+            CancellationToken
         );
 
         result.IsFailed.ShouldBeTrue();

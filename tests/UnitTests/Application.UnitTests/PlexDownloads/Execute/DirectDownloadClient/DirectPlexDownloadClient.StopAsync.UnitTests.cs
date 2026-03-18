@@ -146,7 +146,7 @@ public class DirectPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DirectPle
         var sut = CreateSut(downloadServiceMock);
         var startTask = sut.Start(downloadTask.ToKey(), CancellationToken);
 
-        await Task.Delay(200, TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None);
+        await Task.Delay(200, CancellationToken);
         var stopResult = await sut.StopAsync();
         var startResult = await startTask;
 
@@ -236,7 +236,7 @@ public class DirectPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DirectPle
         var sut = CreateSut(downloadServiceMock);
         var startTask = sut.Start(downloadTask.ToKey(), CancellationToken);
 
-        await Task.Delay(200, TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None);
+        await Task.Delay(200, CancellationToken);
         await sut.StopAsync();
         await startTask;
 
@@ -322,7 +322,7 @@ public class DirectPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DirectPle
 
         var sut = CreateSut(downloadServiceMock);
         var startTask = sut.Start(downloadTask.ToKey(), CancellationToken);
-        await Task.Delay(200, TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None);
+        await Task.Delay(200, CancellationToken);
 
         // Act — stop twice
         var firstStop = await sut.StopAsync();
@@ -454,7 +454,7 @@ public class DirectPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DirectPle
 
         var sut = CreateSut(downloadServiceMock);
         var startTask = sut.Start(downloadTask.ToKey(), CancellationToken);
-        await Task.Delay(200, TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None);
+        await Task.Delay(200, CancellationToken);
 
         // Act
         await sut.StopAsync();

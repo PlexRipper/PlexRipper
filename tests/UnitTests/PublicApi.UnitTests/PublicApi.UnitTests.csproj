@@ -9,7 +9,7 @@
         <AssemblyName>Reaparr.PublicAPI.UnitTests</AssemblyName>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="TUnit" Version="0.50.0" />
+        <PackageReference Include="TUnit" Version="1.19.74" />
         <PackageReference Include="coverlet.collector" Version="6.0.4">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

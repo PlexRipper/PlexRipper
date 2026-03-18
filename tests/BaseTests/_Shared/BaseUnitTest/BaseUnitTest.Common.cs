@@ -19,7 +19,7 @@ public partial class BaseUnitTest
     protected Mock<HttpMessageHandler> HttpHandlerMock = new(MockBehavior.Loose);
 
     protected CancellationToken CancellationToken =>
-        TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None;
+        TUnit.Core.TestContext.Current?.Execution.CancellationToken ?? CancellationToken.None;
 
     protected BaseUnitTest(LogEventLevel logEventLevel = LogEventLevel.Verbose)
         : this(new TUnitTestOutputHelper(), logEventLevel) { }

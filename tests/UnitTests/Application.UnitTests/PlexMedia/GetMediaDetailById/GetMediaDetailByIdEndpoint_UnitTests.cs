@@ -40,10 +40,7 @@ public class GetMediaDetailByIdEndpointUnitTests : BaseUnitTest<GetMediaDetailBy
         result.ShouldNotBeNull();
         result.Value.ShouldNotBeNull();
 
-        var validationResult = await PlexMediaDtoValidator.ValidateAsync(
-            result.Value,
-            TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
-        );
+        var validationResult = await PlexMediaDtoValidator.ValidateAsync(result.Value, CancellationToken);
         validationResult.Errors.ShouldBeEmpty();
         result.Value.Children.ShouldBeEmpty();
     }
@@ -79,26 +76,17 @@ public class GetMediaDetailByIdEndpointUnitTests : BaseUnitTest<GetMediaDetailBy
         result.ShouldNotBeNull();
         result.Value.ShouldNotBeNull();
 
-        var validationResult = await PlexMediaDtoValidator.ValidateAsync(
-            result.Value,
-            TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
-        );
+        var validationResult = await PlexMediaDtoValidator.ValidateAsync(result.Value, CancellationToken);
         validationResult.Errors.ShouldBeEmpty();
         result.Value.Children.ShouldNotBeEmpty();
         foreach (var season in result.Value.Children)
         {
-            var validationSeasonResult = await PlexMediaDtoValidator.ValidateAsync(
-                season,
-                TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
-            );
+            var validationSeasonResult = await PlexMediaDtoValidator.ValidateAsync(season, CancellationToken);
             validationSeasonResult.Errors.ShouldBeEmpty();
             season.Children.ShouldNotBeEmpty();
             foreach (var episode in season.Children)
             {
-                var validationEpisode = await PlexMediaDtoValidator.ValidateAsync(
-                    episode,
-                    TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
-                );
+                var validationEpisode = await PlexMediaDtoValidator.ValidateAsync(episode, CancellationToken);
                 validationEpisode.Errors.ShouldBeEmpty();
                 episode.Children.ShouldBeEmpty();
             }

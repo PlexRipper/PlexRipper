@@ -20,7 +20,7 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="TUnit" Version="0.50.0" />
+        <PackageReference Include="TUnit" Version="1.19.74" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\..\BaseTests\BaseTests.csproj" />

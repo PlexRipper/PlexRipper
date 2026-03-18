@@ -22,11 +22,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
             .Returns(Task.CompletedTask);
 
         // Act
-        await Sut.StartAsync(
-            1,
-            PlexMediaType.Movie,
-            TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
-        );
+        await Sut.StartAsync(1, PlexMediaType.Movie, CancellationToken);
 
         // Assert
         capturedDto.ShouldNotBeNull();
@@ -55,11 +51,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
             .Callback<LibrarySyncProgressDTO, CancellationToken>((dto, _) => capturedDto = dto)
             .Returns(Task.CompletedTask);
 
-        await Sut.StartAsync(
-            1,
-            PlexMediaType.Movie,
-            TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
-        );
+        await Sut.StartAsync(1, PlexMediaType.Movie, CancellationToken);
 
         var movieItem = new LibraryProgressItem
         {
@@ -70,11 +62,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
         };
 
         // Act
-        await Sut.UpdateItemAsync(
-            1,
-            movieItem,
-            TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
-        );
+        await Sut.UpdateItemAsync(1, movieItem, CancellationToken);
 
         // Assert
         capturedDto.ShouldNotBeNull();
@@ -104,11 +92,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
             .Callback<LibrarySyncProgressDTO, CancellationToken>((dto, _) => capturedDto = dto)
             .Returns(Task.CompletedTask);
 
-        await Sut.StartAsync(
-            2,
-            PlexMediaType.TvShow,
-            TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
-        );
+        await Sut.StartAsync(2, PlexMediaType.TvShow, CancellationToken);
 
         // Pre-populate items via StartAsync and then update each one
         await Sut.UpdateItemAsync(
@@ -120,7 +104,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
                 Total = 10,
                 TimeRemaining = TimeSpan.Zero,
             },
-            TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
+            CancellationToken
         );
         await Sut.UpdateItemAsync(
             2,
@@ -131,7 +115,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
                 Total = 40,
                 TimeRemaining = TimeSpan.Zero,
             },
-            TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
+            CancellationToken
         );
         await Sut.UpdateItemAsync(
             2,
@@ -142,7 +126,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
                 Total = 500,
                 TimeRemaining = TimeSpan.Zero,
             },
-            TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
+            CancellationToken
         );
 
         // Assert
@@ -171,11 +155,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
             .Callback<LibrarySyncProgressDTO, CancellationToken>((dto, _) => capturedDto = dto)
             .Returns(Task.CompletedTask);
 
-        await Sut.StartAsync(
-            3,
-            PlexMediaType.TvShow,
-            TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
-        );
+        await Sut.StartAsync(3, PlexMediaType.TvShow, CancellationToken);
 
         await Sut.UpdateItemAsync(
             3,
@@ -186,7 +166,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
                 Total = 5,
                 TimeRemaining = TimeSpan.Zero,
             },
-            TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
+            CancellationToken
         );
         await Sut.UpdateItemAsync(
             3,
@@ -197,7 +177,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
                 Total = 20,
                 TimeRemaining = TimeSpan.Zero,
             },
-            TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
+            CancellationToken
         );
         await Sut.UpdateItemAsync(
             3,
@@ -208,7 +188,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
                 Total = 200,
                 TimeRemaining = TimeSpan.Zero,
             },
-            TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
+            CancellationToken
         );
 
         // Assert
@@ -237,11 +217,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
             .Callback<LibrarySyncProgressDTO, CancellationToken>((dto, _) => capturedDto = dto)
             .Returns(Task.CompletedTask);
 
-        await Sut.StartAsync(
-            4,
-            PlexMediaType.TvShow,
-            TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
-        );
+        await Sut.StartAsync(4, PlexMediaType.TvShow, CancellationToken);
 
         await Sut.UpdateItemAsync(
             4,
@@ -252,7 +228,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
                 Total = 5,
                 TimeRemaining = TimeSpan.Zero,
             },
-            TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
+            CancellationToken
         );
         await Sut.UpdateItemAsync(
             4,
@@ -263,7 +239,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
                 Total = 20,
                 TimeRemaining = TimeSpan.Zero,
             },
-            TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
+            CancellationToken
         );
         await Sut.UpdateItemAsync(
             4,
@@ -274,7 +250,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
                 Total = 200,
                 TimeRemaining = TimeSpan.Zero,
             },
-            TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
+            CancellationToken
         );
 
         // Assert
@@ -299,11 +275,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
             )
             .Returns(Task.CompletedTask);
 
-        await Sut.StartAsync(
-            5,
-            PlexMediaType.TvShow,
-            TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
-        );
+        await Sut.StartAsync(5, PlexMediaType.TvShow, CancellationToken);
 
         var tvShowItem = new LibraryProgressItem
         {
@@ -322,16 +294,8 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
         };
 
         // Act
-        await Sut.UpdateItemAsync(
-            5,
-            tvShowItem,
-            TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
-        );
-        await Sut.UpdateItemAsync(
-            5,
-            episodeItem,
-            TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
-        );
+        await Sut.UpdateItemAsync(5, tvShowItem, CancellationToken);
+        await Sut.UpdateItemAsync(5, episodeItem, CancellationToken);
 
         // Assert — 1 from StartAsync + 2 from UpdateItemAsync
         Mock.Mock<IProgressHubService>()
@@ -356,11 +320,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
             .Returns(Task.CompletedTask);
 
         const int plexLibraryId = 42;
-        await Sut.StartAsync(
-            plexLibraryId,
-            PlexMediaType.Movie,
-            TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
-        );
+        await Sut.StartAsync(plexLibraryId, PlexMediaType.Movie, CancellationToken);
 
         await Sut.UpdateItemAsync(
             plexLibraryId,
@@ -371,7 +331,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
                 Total = 100,
                 TimeRemaining = TimeSpan.Zero,
             },
-            TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
+            CancellationToken
         );
 
         // Assert

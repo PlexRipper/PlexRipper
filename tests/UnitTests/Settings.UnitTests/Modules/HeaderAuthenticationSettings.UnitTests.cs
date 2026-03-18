@@ -2,7 +2,7 @@ using Reaparr.Settings.Contracts;
 
 namespace Reaparr.Settings.UnitTests;
 
-public class HeaderAuthenticationSettingsUnitTests
+public class HeaderAuthenticationSettingsUnitTests : BaseUnitTest
 {
     [Test]
     public void ShouldCreateWithDefaultValues()
@@ -323,7 +323,7 @@ public class HeaderAuthenticationSettingsUnitTests
         settings.MappingType = HeaderMappingType.Email;
 
         // Wait a bit to ensure all notifications are processed
-        await Task.Delay(10, TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None);
+        await Task.Delay(10, CancellationToken);
 
         // Assert
         changeNotifications.Count.ShouldBeGreaterThan(0);
@@ -347,7 +347,7 @@ public class HeaderAuthenticationSettingsUnitTests
         settings.MaxHeaderLength = 256; // Same as default value
 
         // Wait a bit to ensure notifications are processed
-        await Task.Delay(10, TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None);
+        await Task.Delay(10, CancellationToken);
 
         // Assert
         changeNotifications.Count.ShouldBe(initialCount);

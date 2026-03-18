@@ -27,7 +27,6 @@
         <PackageReference Include="Shouldly" Version="4.3.0" />
         <PackageReference Include="TUnit" Version="1.19.74" />
         <PackageReference Include="TestableIO.System.IO.Abstractions.TestingHelpers" Version="22.1.0" />
-        <PackageReference Include="xunit.v3.extensibility.core" Version="3.2.1" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\..\src\AppHost\AppHost.csproj" />

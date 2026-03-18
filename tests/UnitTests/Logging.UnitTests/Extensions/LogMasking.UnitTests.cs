@@ -7,12 +7,12 @@ public class LogMaskingUnitTests : BaseUnitTest<LogMaskingUnitTests>
 {
     #region Setup/Teardown
 
-    public LogMaskingUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public LogMaskingUnitTests()
+        : base() { }
 
     #endregion
 
-    [Fact]
+    [Test]
     public void ShouldHaveMaskedData_WhenLogPropertyIsConfiguredToBeMasked()
     {
         // Arrange

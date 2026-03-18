@@ -7,10 +7,10 @@ public class GetMediaDetailByIdEndpointUnitTests : BaseUnitTest<GetMediaDetailBy
 {
     private PlexMediaDTOValidator PlexMediaDtoValidator => new();
 
-    public GetMediaDetailByIdEndpointUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public GetMediaDetailByIdEndpointUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldHavePlexMediaData_WhenValidMediaIdAndPlexMediaTypeMovieIsRequested()
     {
         // Arrange
@@ -42,13 +42,13 @@ public class GetMediaDetailByIdEndpointUnitTests : BaseUnitTest<GetMediaDetailBy
 
         var validationResult = await PlexMediaDtoValidator.ValidateAsync(
             result.Value,
-            TestContext.Current.CancellationToken
+            TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
         );
         validationResult.Errors.ShouldBeEmpty();
         result.Value.Children.ShouldBeEmpty();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHavePlexMediaData_WhenValidMediaIdAndPlexMediaTypeTvShowIsRequested()
     {
         // Arrange
@@ -81,7 +81,7 @@ public class GetMediaDetailByIdEndpointUnitTests : BaseUnitTest<GetMediaDetailBy
 
         var validationResult = await PlexMediaDtoValidator.ValidateAsync(
             result.Value,
-            TestContext.Current.CancellationToken
+            TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
         );
         validationResult.Errors.ShouldBeEmpty();
         result.Value.Children.ShouldNotBeEmpty();
@@ -89,7 +89,7 @@ public class GetMediaDetailByIdEndpointUnitTests : BaseUnitTest<GetMediaDetailBy
         {
             var validationSeasonResult = await PlexMediaDtoValidator.ValidateAsync(
                 season,
-                TestContext.Current.CancellationToken
+                TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
             );
             validationSeasonResult.Errors.ShouldBeEmpty();
             season.Children.ShouldNotBeEmpty();
@@ -97,7 +97,7 @@ public class GetMediaDetailByIdEndpointUnitTests : BaseUnitTest<GetMediaDetailBy
             {
                 var validationEpisode = await PlexMediaDtoValidator.ValidateAsync(
                     episode,
-                    TestContext.Current.CancellationToken
+                    TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
                 );
                 validationEpisode.Errors.ShouldBeEmpty();
                 episode.Children.ShouldBeEmpty();

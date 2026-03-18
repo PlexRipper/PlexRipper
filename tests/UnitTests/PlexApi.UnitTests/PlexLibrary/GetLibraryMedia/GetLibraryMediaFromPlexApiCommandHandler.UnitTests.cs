@@ -6,8 +6,8 @@ namespace Reaparr.PlexApi.UnitTests;
 
 public class GetLibraryMediaFromPlexApiCommandHandlerUnitTests : BaseUnitTest<GetLibraryMediaFromPlexApiCommandHandler>
 {
-    public GetLibraryMediaFromPlexApiCommandHandlerUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public GetLibraryMediaFromPlexApiCommandHandlerUnitTests()
+        : base() { }
 
     private void SetupProgressStoreMocks()
     {
@@ -45,7 +45,7 @@ public class GetLibraryMediaFromPlexApiCommandHandlerUnitTests : BaseUnitTest<Ge
         };
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnFailedResult_WhenGetLibrarySectionsFails()
     {
         // Arrange
@@ -83,7 +83,7 @@ public class GetLibraryMediaFromPlexApiCommandHandlerUnitTests : BaseUnitTest<Ge
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnNotFoundError_WhenLibraryKeyNoLongerExistsOnServer()
     {
         // Arrange
@@ -126,9 +126,9 @@ public class GetLibraryMediaFromPlexApiCommandHandlerUnitTests : BaseUnitTest<Ge
             );
     }
 
-    [Theory]
-    [InlineData(PlexMediaType.Music)]
-    [InlineData(PlexMediaType.Photos)]
+    [Test]
+    [Arguments(PlexMediaType.Music)]
+    [Arguments(PlexMediaType.Photos)]
     public async Task ShouldReturnEmptyLibraryMetadata_WhenLibraryTypeIsNotSupported(PlexMediaType libraryType)
     {
         // Arrange
@@ -177,7 +177,7 @@ public class GetLibraryMediaFromPlexApiCommandHandlerUnitTests : BaseUnitTest<Ge
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnFailedResult_WhenGetAllMediaByTypeFails()
     {
         // Arrange
@@ -220,9 +220,9 @@ public class GetLibraryMediaFromPlexApiCommandHandlerUnitTests : BaseUnitTest<Ge
             );
     }
 
-    [Theory]
-    [InlineData(PlexMediaType.Movie)]
-    [InlineData(PlexMediaType.TvShow)]
+    [Test]
+    [Arguments(PlexMediaType.Movie)]
+    [Arguments(PlexMediaType.TvShow)]
     public async Task ShouldReturnOkResultWithPopulatedMetadata_WhenLibraryIsSynced(PlexMediaType libraryType)
     {
         // Arrange
@@ -280,7 +280,7 @@ public class GetLibraryMediaFromPlexApiCommandHandlerUnitTests : BaseUnitTest<Ge
             .Verify(x => x.StartAsync(plexLibrary.Id, libraryType, It.IsAny<CancellationToken>()), Times.Once());
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldPreserveLibraryIdAndServerId_WhenUpdatedLibraryIsReturned()
     {
         // Arrange
@@ -323,7 +323,7 @@ public class GetLibraryMediaFromPlexApiCommandHandlerUnitTests : BaseUnitTest<Ge
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnSortedMediaList_WhenMovieLibraryIsSynced()
     {
         // Arrange

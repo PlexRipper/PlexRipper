@@ -5,10 +5,10 @@ namespace Reaparr.Application.UnitTests;
 
 public class CleanUpDownloadTaskFoldersUnitTests : BaseUnitTest<CleanUpDownloadTaskFoldersHandler>
 {
-    public CleanUpDownloadTaskFoldersUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public CleanUpDownloadTaskFoldersUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnSuccessResult_WhenDirectoryDoesNotExist()
     {
         // Arrange
@@ -48,7 +48,7 @@ public class CleanUpDownloadTaskFoldersUnitTests : BaseUnitTest<CleanUpDownloadT
         Mock.Mock<IDirectory>().Verify();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnFailedResult_WhenFilePathIsEmpty()
     {
         // Arrange
@@ -75,7 +75,7 @@ public class CleanUpDownloadTaskFoldersUnitTests : BaseUnitTest<CleanUpDownloadT
         result.IsFailed.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnSuccessResult_WhenFilePathIsValid()
     {
         // Arrange
@@ -121,7 +121,7 @@ public class CleanUpDownloadTaskFoldersUnitTests : BaseUnitTest<CleanUpDownloadT
         Mock.Mock<IDirectory>().Verify();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnSuccessResult_WhenDirectoryContainsEntries()
     {
         // Arrange
@@ -172,7 +172,7 @@ public class CleanUpDownloadTaskFoldersUnitTests : BaseUnitTest<CleanUpDownloadT
         Mock.Mock<IDirectory>().Verify();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnFailedResult_WhenUnauthorizedAccessExceptionIsThrown()
     {
         // Arrange
@@ -214,7 +214,7 @@ public class CleanUpDownloadTaskFoldersUnitTests : BaseUnitTest<CleanUpDownloadT
         Mock.Mock<IDirectory>().Verify();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldSkipDirectoryCleanup_WhenAnotherTaskInSameDirectoryIsStillActive()
     {
         // Arrange

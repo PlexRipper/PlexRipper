@@ -3,12 +3,13 @@ using Serilog.Events;
 
 namespace Reaparr.BaseTests.UnitTests;
 
+[NotInParallel]
 public class FakeDataDownloadTasksUnitTests : BaseUnitTest
 {
-    public FakeDataDownloadTasksUnitTests(ITestOutputHelper output)
-        : base(output, LogEventLevel.Information) { }
+    public FakeDataDownloadTasksUnitTests()
+        : base(LogEventLevel.Information) { }
 
-    [Fact]
+    [Test]
     public void MovieDownloadTask_ShouldGenerateAllRequiredProperties()
     {
         // Arrange
@@ -33,7 +34,7 @@ public class FakeDataDownloadTasksUnitTests : BaseUnitTest
         movieTask.PlexLibraryId.ShouldBe(0); // Should be 0 since it's ignored
     }
 
-    [Fact]
+    [Test]
     public void MovieDownloadTask_ShouldGenerateChildren()
     {
         // Arrange
@@ -50,7 +51,7 @@ public class FakeDataDownloadTasksUnitTests : BaseUnitTest
         movieTask.Children.Count.ShouldBe(1);
     }
 
-    [Fact]
+    [Test]
     public void MovieDownloadTask_ShouldGenerateMultipleChildrenWhenConfigured()
     {
         // Arrange
@@ -67,7 +68,7 @@ public class FakeDataDownloadTasksUnitTests : BaseUnitTest
         movieTask.Children.Count.ShouldBe(2);
     }
 
-    [Fact]
+    [Test]
     public void MovieFileDownloadTask_ShouldGenerateAllRequiredProperties()
     {
         // Arrange
@@ -96,7 +97,7 @@ public class FakeDataDownloadTasksUnitTests : BaseUnitTest
         movieFileTask.DownloadTaskType.ShouldBe(DownloadTaskType.MovieData);
     }
 
-    [Fact]
+    [Test]
     public void TvShowDownloadTask_ShouldGenerateAllRequiredProperties()
     {
         // Arrange
@@ -118,7 +119,7 @@ public class FakeDataDownloadTasksUnitTests : BaseUnitTest
         tvShowTask.DownloadTaskType.ShouldBe(DownloadTaskType.TvShow);
     }
 
-    [Fact]
+    [Test]
     public void TvShowDownloadTask_ShouldGenerateChildrenWithCorrectHierarchy()
     {
         // Arrange
@@ -165,7 +166,7 @@ public class FakeDataDownloadTasksUnitTests : BaseUnitTest
         }
     }
 
-    [Fact]
+    [Test]
     public void DownloadTaskConfig_ShouldModifyFileSizeWhenConfigured()
     {
         // Arrange
@@ -186,7 +187,7 @@ public class FakeDataDownloadTasksUnitTests : BaseUnitTest
         configuredMovieFileTask.DataTotal.ShouldBe((long)expectedBytes);
     }
 
-    [Fact]
+    [Test]
     public void AllDownloadTaskTypes_ShouldGenerateCorrectTypes()
     {
         // Arrange

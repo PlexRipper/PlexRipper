@@ -2,16 +2,16 @@ namespace Reaparr.Domain.UnitTests.Mappers;
 
 public partial class PlexMediaTypeMappersUnitTests
 {
-    [Theory]
-    [InlineData(PlexMediaType.Movie, "movie")]
-    [InlineData(PlexMediaType.TvShow, "show")]
-    [InlineData(PlexMediaType.Season, "season")]
-    [InlineData(PlexMediaType.Episode, "episode")]
-    [InlineData(PlexMediaType.Artist, "artist")]
-    [InlineData(PlexMediaType.Album, "album")]
-    [InlineData(PlexMediaType.Song, "track")]
-    [InlineData(PlexMediaType.PhotoAlbum, "photoalbum")]
-    [InlineData(PlexMediaType.Photos, "photo")]
+    [Test]
+    [Arguments(PlexMediaType.Movie, "movie")]
+    [Arguments(PlexMediaType.TvShow, "show")]
+    [Arguments(PlexMediaType.Season, "season")]
+    [Arguments(PlexMediaType.Episode, "episode")]
+    [Arguments(PlexMediaType.Artist, "artist")]
+    [Arguments(PlexMediaType.Album, "album")]
+    [Arguments(PlexMediaType.Song, "track")]
+    [Arguments(PlexMediaType.PhotoAlbum, "photoalbum")]
+    [Arguments(PlexMediaType.Photos, "photo")]
     public void ShouldConvertEnumToPlexApiString_WhenValidEnumValueProvided(PlexMediaType input, string expected)
     {
         // Act
@@ -21,22 +21,22 @@ public partial class PlexMediaTypeMappersUnitTests
         result.ShouldBe(expected);
     }
 
-    [Theory]
-    [InlineData(PlexMediaType.None)]
-    [InlineData(PlexMediaType.Music)]
-    [InlineData(PlexMediaType.OtherVideos)]
-    [InlineData(PlexMediaType.Games)]
-    [InlineData(PlexMediaType.Unknown)]
-    [InlineData((PlexMediaType)999)]
-    [InlineData((PlexMediaType)(-1))]
-    [InlineData((PlexMediaType)100)]
+    [Test]
+    [Arguments(PlexMediaType.None)]
+    [Arguments(PlexMediaType.Music)]
+    [Arguments(PlexMediaType.OtherVideos)]
+    [Arguments(PlexMediaType.Games)]
+    [Arguments(PlexMediaType.Unknown)]
+    [Arguments((PlexMediaType)999)]
+    [Arguments((PlexMediaType)(-1))]
+    [Arguments((PlexMediaType)100)]
     public void ShouldThrowNotImplementedException_WhenUnsupportedEnumValueProvided(PlexMediaType input)
     {
         // Act & Assert
         Should.Throw<NotImplementedException>(() => input.ToPlexApiString());
     }
 
-    [Fact]
+    [Test]
     public void ShouldHandleAllSupportedEnumValues_WhenConvertingToPlexApiString()
     {
         // Arrange - These are the enum values that have PlexApi string representations
@@ -67,7 +67,7 @@ public partial class PlexMediaTypeMappersUnitTests
         }
     }
 
-    [Fact]
+    [Test]
     public void ShouldCompleteRoundTripConversion_WhenConvertingEnumToPlexApiStringAndBack()
     {
         // Arrange - These are the enum values that have PlexApi string representations
@@ -101,7 +101,7 @@ public partial class PlexMediaTypeMappersUnitTests
         }
     }
 
-    [Fact]
+    [Test]
     public void ShouldReturnLowercaseStrings_WhenConvertingValidEnums()
     {
         // Arrange & Act & Assert - Test that strings are in lowercase format
@@ -116,7 +116,7 @@ public partial class PlexMediaTypeMappersUnitTests
         PlexMediaType.Photos.ToPlexApiString().ShouldBe("photo");
     }
 
-    [Fact]
+    [Test]
     public void ShouldReturnConsistentPlexApiResults_WhenCalledMultipleTimes()
     {
         // Arrange
@@ -133,7 +133,7 @@ public partial class PlexMediaTypeMappersUnitTests
         result1.ShouldBe("movie");
     }
 
-    [Fact]
+    [Test]
     public void ShouldThrowForUnsupportedEnumValues_WhenCalledWithNonPlexApiValues()
     {
         // Arrange - These enum values do NOT have PlexApi string representations

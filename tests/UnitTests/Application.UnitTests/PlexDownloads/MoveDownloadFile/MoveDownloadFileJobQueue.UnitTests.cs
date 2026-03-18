@@ -5,10 +5,10 @@ namespace Reaparr.Application.UnitTests;
 
 public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJobQueue>
 {
-    public MoveDownloadFileJobQueueUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public MoveDownloadFileJobQueueUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnSuccessResult_WhenNoDownloadTaskIsReadyToMove()
     {
         // Arrange — tasks exist but none are in DownloadFinished or MoveError state
@@ -41,7 +41,7 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
             .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Never);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldRunAFileMoveJob_WhenMovieFileWithMoveErrorExists()
     {
         // Arrange — a previous move attempt failed; the queue should retry it automatically
@@ -74,7 +74,7 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
             .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Once);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldRunAFileMoveJob_WhenTvShowEpisodeFileWithMoveErrorExists()
     {
         // Arrange — a previous move attempt failed for a TV episode; the queue should retry it automatically
@@ -109,7 +109,7 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
             .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Once);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldRunAFileMoveJob_WhenBothMoveErrorAndDownloadFinishedTasksExist()
     {
         // Arrange — one task is in MoveError, another in DownloadFinished; DownloadFinished is preferred by the queue
@@ -149,7 +149,7 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
         capturedKey.ShouldBe(expectedKey);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldNotRunFileMoveJob_WhenNoDownloadTaskIsAvailable()
     {
         // Arrange
@@ -170,7 +170,7 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
             .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Never);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnFailureResult_WhenStartMoveDownloadFileJobFails()
     {
         // Arrange
@@ -205,7 +205,7 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
             .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Once);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldRunAFileMoveJob_WhenDownloadTaskMovieFileWithDownloadFinishedExist()
     {
         // Arrange
@@ -238,7 +238,7 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
             .Verify(x => x.StartMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Once);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldPreferOldestDownloadTask_WhenBothAreEligibleToMove()
     {
         // Arrange — both a movie and a TV episode are DownloadFinished; the SUT must pick the oldest
@@ -294,7 +294,7 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
         capturedKey.ShouldBe(expectedKey);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldPreferDownloadFinishedOverMoveError_WhenMoveErrorIsOlder()
     {
         // Arrange — DownloadFinished should win even if MoveError is older
@@ -352,7 +352,7 @@ public class MoveDownloadFileJobQueueUnitTests : BaseUnitTest<MoveDownloadFileJo
         capturedKey.ShouldBe(expectedKey);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldRunAFileMoveJob_WhenDownloadTaskTvShowEpisodeFileWithDownloadFinishedExist()
     {
         // Arrange

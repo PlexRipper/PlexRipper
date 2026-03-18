@@ -4,10 +4,10 @@ namespace Reaparr.Data.UnitTests;
 
 public class DbContextExtensionsPlexMediaUnitTests : BaseUnitTest
 {
-    public DbContextExtensionsPlexMediaUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public DbContextExtensionsPlexMediaUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldFindMovieId_ByMediaKey()
     {
         // Arrange
@@ -35,7 +35,7 @@ public class DbContextExtensionsPlexMediaUnitTests : BaseUnitTest
         result.Value.ShouldBe(movie.Id);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldFindTvShowId_ByMediaKey()
     {
         // Arrange
@@ -63,7 +63,7 @@ public class DbContextExtensionsPlexMediaUnitTests : BaseUnitTest
         result.Value.ShouldBe(tvShow.Id);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldFail_WhenMediaNotFound()
     {
         // Arrange

@@ -7,10 +7,10 @@ namespace Reaparr.FileSystem.UnitTests.FileSystemExtensions;
 
 public class IFileSystemExtensionsUnitTests : BaseUnitTest
 {
-    public IFileSystemExtensionsUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public IFileSystemExtensionsUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public void ShouldReturnCorrectAvailableSpace_WhenUsingTheRootPath()
     {
         // Arrange
@@ -28,7 +28,7 @@ public class IFileSystemExtensionsUnitTests : BaseUnitTest
         result.Value.ShouldBe(DefaultAvailableSpace);
     }
 
-    [Fact]
+    [Test]
     public void ShouldReturnCorrectAvailableSpace_WhenUsingTheMoviesPath()
     {
         // Arrange
@@ -49,7 +49,7 @@ public class IFileSystemExtensionsUnitTests : BaseUnitTest
         result.Value.ShouldBe(DefaultAvailableSpace);
     }
 
-    [Fact]
+    [Test]
     public void ShouldReturnCorrectAvailableSpace_WhenUsingACustomFolder()
     {
         // Arrange
@@ -70,7 +70,7 @@ public class IFileSystemExtensionsUnitTests : BaseUnitTest
         result.Value.ShouldBe(DefaultAvailableSpace);
     }
 
-    [Fact]
+    [Test]
     public void ShouldReturnFailedResult_WhenUsingAFolderThatDoesNotExist()
     {
         // Arrange

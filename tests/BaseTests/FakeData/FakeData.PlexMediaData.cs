@@ -28,22 +28,27 @@ public static partial class FakeData
             .Ignore(x => x.PlexLibraryId)
             .Ignore(x => x.PlexLibrary);
 
-    private static readonly Faker<PlexMovieMediaData> _plexMovieMediaData = new Faker<PlexMovieMediaData>()
-        .ApplyBasePlexMediaData()
-        .Ignore(x => x.PlexMovieId)
-        .Ignore(x => x.PlexMovie);
+    private static Faker<PlexMovieMediaData> CreatePlexMovieMediaDataFaker()
+    {
+        return new Faker<PlexMovieMediaData>()
+            .ApplyBasePlexMediaData()
+            .Ignore(x => x.PlexMovieId)
+            .Ignore(x => x.PlexMovie);
+    }
 
-    private static readonly Faker<PlexTvShowEpisodeMediaData> _plexTvShowEpisodeMediaData =
-        new Faker<PlexTvShowEpisodeMediaData>()
+    private static Faker<PlexTvShowEpisodeMediaData> CreatePlexTvShowEpisodeMediaDataFaker()
+    {
+        return new Faker<PlexTvShowEpisodeMediaData>()
             .ApplyBasePlexMediaData()
             .Ignore(x => x.PlexTvShowEpisodeId)
             .Ignore(x => x.PlexTvShowEpisode);
+    }
 
     public static Faker<PlexMovieMediaData> GetPlexMovieMediaData(Seed seed, Action<FakeDataConfig>? options = null) =>
-        _plexMovieMediaData.UseSeed(seed.Next());
+        CreatePlexMovieMediaDataFaker().UseSeed(seed.Next());
 
     public static Faker<PlexTvShowEpisodeMediaData> GetPlexTvShowEpisodeMediaData(
         Seed seed,
         Action<FakeDataConfig>? options = null
-    ) => _plexTvShowEpisodeMediaData.UseSeed(seed.Next());
+    ) => CreatePlexTvShowEpisodeMediaDataFaker().UseSeed(seed.Next());
 }

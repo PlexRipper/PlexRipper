@@ -5,10 +5,10 @@ namespace Reaparr.Application.UnitTests;
 
 public class MoveDownloadJobListenerUnitTests : BaseUnitTest<MoveDownloadJobListener>
 {
-    public MoveDownloadJobListenerUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public MoveDownloadJobListenerUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldCheckMoveQueue_AfterJobExecuted()
     {
         // Arrange
@@ -24,7 +24,7 @@ public class MoveDownloadJobListenerUnitTests : BaseUnitTest<MoveDownloadJobList
         Mock.Mock<IJobExecutionContext>().VerifyGet(x => x.JobDetail, Times.Never());
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldCheckMoveQueue_EvenWhenPreviousJobFailed()
     {
         // Arrange — simulate the scenario where a move job ended in error
@@ -43,7 +43,7 @@ public class MoveDownloadJobListenerUnitTests : BaseUnitTest<MoveDownloadJobList
         Mock.Mock<IJobExecutionContext>().VerifyGet(x => x.JobDetail, Times.Never());
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldNotThrow_WhenCheckMoveQueueThrows()
     {
         // Arrange — listener must never throw (Quartz requirement)
@@ -63,7 +63,7 @@ public class MoveDownloadJobListenerUnitTests : BaseUnitTest<MoveDownloadJobList
         Mock.Mock<IJobExecutionContext>().VerifyGet(x => x.JobDetail, Times.Once());
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldNotCheckQueue_WhenJobToBeExecutedIsCalled()
     {
         // Arrange

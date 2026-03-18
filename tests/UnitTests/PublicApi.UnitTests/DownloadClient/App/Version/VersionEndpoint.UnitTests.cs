@@ -5,10 +5,10 @@ namespace PublicApi.UnitTests;
 
 public class VersionEndpointUnitTests : BaseUnitTest<VersionEndpoint>
 {
-    public VersionEndpointUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public VersionEndpointUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnVersionString_WhenPrefixTrimmed()
     {
         // Arrange

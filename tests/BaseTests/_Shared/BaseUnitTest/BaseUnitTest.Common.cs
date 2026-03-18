@@ -18,7 +18,11 @@ public partial class BaseUnitTest
     // Use loose behavior here to avoid Dispose() not mocked exception
     protected Mock<HttpMessageHandler> HttpHandlerMock = new(MockBehavior.Loose);
 
-    protected CancellationToken CancellationToken => TestContext.Current.CancellationToken;
+    protected CancellationToken CancellationToken =>
+        TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None;
+
+    protected BaseUnitTest(LogEventLevel logEventLevel = LogEventLevel.Verbose)
+        : this(new TUnitTestOutputHelper(), logEventLevel) { }
 
     /// <summary>
     /// This constructor is run before every test
@@ -82,6 +86,9 @@ public class BaseUnitTest<TUnitTestClass> : BaseUnitTest
 
     protected BaseUnitTest(ITestOutputHelper output, LogEventLevel logEventLevel = LogEventLevel.Verbose)
         : base(output, logEventLevel) { }
+
+    protected BaseUnitTest(LogEventLevel logEventLevel = LogEventLevel.Verbose)
+        : base(logEventLevel) { }
 
     public override void Dispose()
     {

@@ -5,10 +5,10 @@ namespace Reaparr.BackgroundJobs.UnitTests;
 
 public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgressStore>
 {
-    public LibrarySyncProgressStoreUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public LibrarySyncProgressStoreUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldSendInitialProgressUpdate_WhenStartAsyncIsCalled()
     {
         // Arrange
@@ -22,7 +22,11 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
             .Returns(Task.CompletedTask);
 
         // Act
-        await Sut.StartAsync(1, PlexMediaType.Movie, TestContext.Current.CancellationToken);
+        await Sut.StartAsync(
+            1,
+            PlexMediaType.Movie,
+            TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
+        );
 
         // Assert
         capturedDto.ShouldNotBeNull();
@@ -38,7 +42,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldSendProgressUpdate_WhenUpdateItemAsyncIsCalled()
     {
         // Arrange
@@ -51,7 +55,11 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
             .Callback<LibrarySyncProgressDTO, CancellationToken>((dto, _) => capturedDto = dto)
             .Returns(Task.CompletedTask);
 
-        await Sut.StartAsync(1, PlexMediaType.Movie, TestContext.Current.CancellationToken);
+        await Sut.StartAsync(
+            1,
+            PlexMediaType.Movie,
+            TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
+        );
 
         var movieItem = new LibraryProgressItem
         {
@@ -62,7 +70,11 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
         };
 
         // Act
-        await Sut.UpdateItemAsync(1, movieItem, TestContext.Current.CancellationToken);
+        await Sut.UpdateItemAsync(
+            1,
+            movieItem,
+            TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
+        );
 
         // Assert
         capturedDto.ShouldNotBeNull();
@@ -79,7 +91,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldAggregateReceivedAndTotal_FromAllItems()
     {
         // Arrange
@@ -92,7 +104,11 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
             .Callback<LibrarySyncProgressDTO, CancellationToken>((dto, _) => capturedDto = dto)
             .Returns(Task.CompletedTask);
 
-        await Sut.StartAsync(2, PlexMediaType.TvShow, TestContext.Current.CancellationToken);
+        await Sut.StartAsync(
+            2,
+            PlexMediaType.TvShow,
+            TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
+        );
 
         // Pre-populate items via StartAsync and then update each one
         await Sut.UpdateItemAsync(
@@ -104,7 +120,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
                 Total = 10,
                 TimeRemaining = TimeSpan.Zero,
             },
-            TestContext.Current.CancellationToken
+            TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
         );
         await Sut.UpdateItemAsync(
             2,
@@ -115,7 +131,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
                 Total = 40,
                 TimeRemaining = TimeSpan.Zero,
             },
-            TestContext.Current.CancellationToken
+            TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
         );
         await Sut.UpdateItemAsync(
             2,
@@ -126,7 +142,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
                 Total = 500,
                 TimeRemaining = TimeSpan.Zero,
             },
-            TestContext.Current.CancellationToken
+            TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
         );
 
         // Assert
@@ -142,7 +158,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReportIsComplete_WhenAllItemsAreComplete()
     {
         // Arrange
@@ -155,7 +171,11 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
             .Callback<LibrarySyncProgressDTO, CancellationToken>((dto, _) => capturedDto = dto)
             .Returns(Task.CompletedTask);
 
-        await Sut.StartAsync(3, PlexMediaType.TvShow, TestContext.Current.CancellationToken);
+        await Sut.StartAsync(
+            3,
+            PlexMediaType.TvShow,
+            TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
+        );
 
         await Sut.UpdateItemAsync(
             3,
@@ -166,7 +186,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
                 Total = 5,
                 TimeRemaining = TimeSpan.Zero,
             },
-            TestContext.Current.CancellationToken
+            TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
         );
         await Sut.UpdateItemAsync(
             3,
@@ -177,7 +197,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
                 Total = 20,
                 TimeRemaining = TimeSpan.Zero,
             },
-            TestContext.Current.CancellationToken
+            TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
         );
         await Sut.UpdateItemAsync(
             3,
@@ -188,7 +208,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
                 Total = 200,
                 TimeRemaining = TimeSpan.Zero,
             },
-            TestContext.Current.CancellationToken
+            TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
         );
 
         // Assert
@@ -204,7 +224,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldNotReportIsComplete_WhenAnyItemIsIncomplete()
     {
         // Arrange
@@ -217,7 +237,11 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
             .Callback<LibrarySyncProgressDTO, CancellationToken>((dto, _) => capturedDto = dto)
             .Returns(Task.CompletedTask);
 
-        await Sut.StartAsync(4, PlexMediaType.TvShow, TestContext.Current.CancellationToken);
+        await Sut.StartAsync(
+            4,
+            PlexMediaType.TvShow,
+            TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
+        );
 
         await Sut.UpdateItemAsync(
             4,
@@ -228,7 +252,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
                 Total = 5,
                 TimeRemaining = TimeSpan.Zero,
             },
-            TestContext.Current.CancellationToken
+            TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
         );
         await Sut.UpdateItemAsync(
             4,
@@ -239,7 +263,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
                 Total = 20,
                 TimeRemaining = TimeSpan.Zero,
             },
-            TestContext.Current.CancellationToken
+            TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
         );
         await Sut.UpdateItemAsync(
             4,
@@ -250,7 +274,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
                 Total = 200,
                 TimeRemaining = TimeSpan.Zero,
             },
-            TestContext.Current.CancellationToken
+            TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
         );
 
         // Assert
@@ -265,7 +289,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldSendProgressThreeTimes_WhenStartAndTwoUpdateItemAsyncCalled()
     {
         // Arrange
@@ -275,7 +299,11 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
             )
             .Returns(Task.CompletedTask);
 
-        await Sut.StartAsync(5, PlexMediaType.TvShow, TestContext.Current.CancellationToken);
+        await Sut.StartAsync(
+            5,
+            PlexMediaType.TvShow,
+            TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
+        );
 
         var tvShowItem = new LibraryProgressItem
         {
@@ -294,8 +322,16 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
         };
 
         // Act
-        await Sut.UpdateItemAsync(5, tvShowItem, TestContext.Current.CancellationToken);
-        await Sut.UpdateItemAsync(5, episodeItem, TestContext.Current.CancellationToken);
+        await Sut.UpdateItemAsync(
+            5,
+            tvShowItem,
+            TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
+        );
+        await Sut.UpdateItemAsync(
+            5,
+            episodeItem,
+            TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
+        );
 
         // Assert — 1 from StartAsync + 2 from UpdateItemAsync
         Mock.Mock<IProgressHubService>()
@@ -306,7 +342,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldMaintainCorrectPlexLibraryId_InProgressDTO()
     {
         // Arrange
@@ -320,7 +356,11 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
             .Returns(Task.CompletedTask);
 
         const int plexLibraryId = 42;
-        await Sut.StartAsync(plexLibraryId, PlexMediaType.Movie, TestContext.Current.CancellationToken);
+        await Sut.StartAsync(
+            plexLibraryId,
+            PlexMediaType.Movie,
+            TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
+        );
 
         await Sut.UpdateItemAsync(
             plexLibraryId,
@@ -331,7 +371,7 @@ public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgres
                 Total = 100,
                 TimeRemaining = TimeSpan.Zero,
             },
-            TestContext.Current.CancellationToken
+            TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
         );
 
         // Assert

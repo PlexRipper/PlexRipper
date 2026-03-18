@@ -4,10 +4,10 @@ namespace Reaparr.Application.UnitTests;
 
 public class CreatePlexAccountEndpointUnitTests : BaseUnitTest
 {
-    public CreatePlexAccountEndpointUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public CreatePlexAccountEndpointUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task CreatePlexAccountAsync_ShouldSuccessResult_WhenAccountIsValid()
     {
         // Arrange
@@ -44,7 +44,7 @@ public class CreatePlexAccountEndpointUnitTests : BaseUnitTest
         result.IsSuccess.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task CreatePlexAccountAsync_ShouldFailedResult_WhenAccountUsernameExistenceCheckFailed()
     {
         // Arrange

@@ -4,10 +4,10 @@ namespace Reaparr.Application.UnitTests;
 
 public class DeletePlexAccountByIdEndpointUnitTests : BaseUnitTest
 {
-    public DeletePlexAccountByIdEndpointUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public DeletePlexAccountByIdEndpointUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldDeleteAllRelatedDataWhenAccountIsDeleted()
     {
         // Arrange

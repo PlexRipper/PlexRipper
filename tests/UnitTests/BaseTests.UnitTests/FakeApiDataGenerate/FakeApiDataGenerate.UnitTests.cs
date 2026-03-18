@@ -4,10 +4,10 @@ namespace Reaparr.BaseTests.UnitTests;
 
 public class FakeApiDataGenerateUnitTests : BaseUnitTest<MockPlexApiServer>
 {
-    public FakeApiDataGenerateUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public FakeApiDataGenerateUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public void ShouldGeneratePlexApiMockDataFast_WhenGeneratingALargeDataset()
     {
         // Arrange

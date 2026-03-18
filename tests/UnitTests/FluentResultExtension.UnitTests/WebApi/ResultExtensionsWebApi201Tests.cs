@@ -6,7 +6,7 @@ public class ResultExtensionsWebApi201Tests
 {
     #region Result
 
-    [Fact]
+    [Test]
     public void ShouldAdd201CreatedRequestSuccess_WhenAdd201CreatedRequestSuccessCalled()
     {
         // Arrange
@@ -20,7 +20,7 @@ public class ResultExtensionsWebApi201Tests
         result.Reasons.First().Metadata[ResultExtensions.StatusCodeName].ShouldBe(HttpCodes.Status201Created);
     }
 
-    [Fact]
+    [Test]
     public void ShouldHave201CreatedRequestSuccess_WhenHad201CreatedRequestSuccessCalled()
     {
         // Arrange
@@ -33,7 +33,7 @@ public class ResultExtensionsWebApi201Tests
         has201CreatedRequest.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public void ShouldCreate201CreatedResult_WhenCreate201CreatedResultCalled()
     {
         // Act
@@ -47,7 +47,7 @@ public class ResultExtensionsWebApi201Tests
 
     #region Result<T>
 
-    [Fact]
+    [Test]
     public void ShouldAdd201CreatedRequestSuccess_WhenAdd201CreatedRequestSuccessCalledOnResultT()
     {
         // Arrange
@@ -61,7 +61,7 @@ public class ResultExtensionsWebApi201Tests
         result.Reasons.First().Metadata[ResultExtensions.StatusCodeName].ShouldBe(HttpCodes.Status201Created);
     }
 
-    [Fact]
+    [Test]
     public void ShouldHave201CreatedRequestSuccess_WhenHad201CreatedRequestSuccessCalledOnResultT()
     {
         // Arrange
@@ -74,7 +74,7 @@ public class ResultExtensionsWebApi201Tests
         has201CreatedRequest.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public void ShouldPreserveValue_WhenAdd201CreatedRequestSuccessCalledOnResultT()
     {
         // Arrange
@@ -87,7 +87,7 @@ public class ResultExtensionsWebApi201Tests
         result.Value.ShouldBe(100);
     }
 
-    [Fact]
+    [Test]
     public void ShouldCreate201CreatedResult_WhenCreate201CreatedResultCalledWithResultT()
     {
         // Act
@@ -97,7 +97,7 @@ public class ResultExtensionsWebApi201Tests
         result.Has201CreatedRequestSuccess().ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public void ShouldPreserveValue_WhenCreate201CreatedResultCalledWithResultT()
     {
         // Act

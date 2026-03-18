@@ -5,13 +5,13 @@ namespace Reaparr.PublicAPI.UnitTests;
 
 public class SearchMovieCommandUnitTests : BaseUnitTest<SearchMovieCommandHandler>
 {
-    public SearchMovieCommandUnitTests(ITestOutputHelper output)
-        : base(output)
+    public SearchMovieCommandUnitTests()
+        : base()
     {
         Mock.Mock<INetworkSettings>().SetupGet(x => x.Url).Returns("http://localhost");
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnPagedMovies_WhenNoFiltersProvided()
     {
         // Arrange
@@ -98,7 +98,7 @@ public class SearchMovieCommandUnitTests : BaseUnitTest<SearchMovieCommandHandle
         }
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnSpecificMovie_WhenFilteredByImdbId()
     {
         // Arrange
@@ -145,7 +145,7 @@ public class SearchMovieCommandUnitTests : BaseUnitTest<SearchMovieCommandHandle
         movieExists.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnSpecificMovie_WhenFilteredByTmdbId()
     {
         // Arrange
@@ -186,7 +186,7 @@ public class SearchMovieCommandUnitTests : BaseUnitTest<SearchMovieCommandHandle
             .ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnEmpty_WhenNoMoviesExist()
     {
         // Arrange
@@ -217,7 +217,7 @@ public class SearchMovieCommandUnitTests : BaseUnitTest<SearchMovieCommandHandle
         result.Value.Channel.Items.ShouldBeEmpty();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldCreateMultipleItemsPerMovie_WhenMultiPartMoviesEnabled()
     {
         // Arrange
@@ -259,7 +259,7 @@ public class SearchMovieCommandUnitTests : BaseUnitTest<SearchMovieCommandHandle
         result.Value.Channel.Items.Count.ShouldBe(expectedPartCount);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnEmpty_WhenQueryNormalizesToEmpty()
     {
         // Arrange
@@ -290,7 +290,7 @@ public class SearchMovieCommandUnitTests : BaseUnitTest<SearchMovieCommandHandle
         result.Value.Channel.Items.ShouldBeEmpty();
     }
 
-    [Fact]
+    [Test]
     public void ShouldValidate_WhenPagingOnlyProvided()
     {
         // Arrange
@@ -312,7 +312,7 @@ public class SearchMovieCommandUnitTests : BaseUnitTest<SearchMovieCommandHandle
         result.Errors.ShouldBeEmpty();
     }
 
-    [Fact]
+    [Test]
     public void ShouldFailValidation_WhenLimitIsZero()
     {
         // Arrange
@@ -334,7 +334,7 @@ public class SearchMovieCommandUnitTests : BaseUnitTest<SearchMovieCommandHandle
         result.Errors.ShouldNotBeEmpty();
     }
 
-    [Fact]
+    [Test]
     public void ShouldFailValidation_WhenLimitExceedsMax()
     {
         // Arrange
@@ -356,7 +356,7 @@ public class SearchMovieCommandUnitTests : BaseUnitTest<SearchMovieCommandHandle
         result.Errors.ShouldNotBeEmpty();
     }
 
-    [Fact]
+    [Test]
     public void ShouldFailValidation_WhenOffsetIsNegative()
     {
         // Arrange
@@ -378,7 +378,7 @@ public class SearchMovieCommandUnitTests : BaseUnitTest<SearchMovieCommandHandle
         result.Errors.ShouldNotBeEmpty();
     }
 
-    [Fact]
+    [Test]
     public void ShouldFailValidation_WhenTmdbIdIsNegative()
     {
         // Arrange

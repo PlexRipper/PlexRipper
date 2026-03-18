@@ -4,40 +4,43 @@ namespace Reaparr.BaseTests;
 
 public static partial class FakeData
 {
-    private static readonly Faker<DownloadTaskTvShow> _downloadTaskTvShow = new Faker<DownloadTaskTvShow>()
-        .ApplyDownloadTaskParentBase(DownloadTaskType.TvShow)
-        .Ignore(x => x.Children)
-        .FinishWith(
-            (_, tvShow) =>
-            {
-                var seasonIndex = 1;
-
-                foreach (var season in tvShow.Children)
+    private static Faker<DownloadTaskTvShow> CreateDownloadTaskTvShowFaker()
+    {
+        return new Faker<DownloadTaskTvShow>()
+            .ApplyDownloadTaskParentBase(DownloadTaskType.TvShow)
+            .Ignore(x => x.Children)
+            .FinishWith(
+                (_, tvShow) =>
                 {
-                    season.Title = $"{season.Title} {seasonIndex++}";
-                    season.FullTitle = $"{tvShow.FullTitle}/{season.Title}";
+                    var seasonIndex = 1;
 
-                    foreach (var episode in season.Children)
+                    foreach (var season in tvShow.Children)
                     {
-                        episode.FullTitle = $"{season.FullTitle}/{episode.Title}";
+                        season.Title = $"{season.Title} {seasonIndex++}";
+                        season.FullTitle = $"{tvShow.FullTitle}/{season.Title}";
 
-                        var fileIndex = 1;
-                        foreach (var file in episode.Children)
+                        foreach (var episode in season.Children)
                         {
-                            file.FullTitle = $"{episode.FullTitle}/{fileIndex}-{file.FileName}";
-                            file.DirectoryMeta.TvShowFolder = tvShow.Title;
-                            file.DirectoryMeta.SeasonFolder = season.Title;
+                            episode.FullTitle = $"{season.FullTitle}/{episode.Title}";
+
+                            var fileIndex = 1;
+                            foreach (var file in episode.Children)
+                            {
+                                file.FullTitle = $"{episode.FullTitle}/{fileIndex}-{file.FileName}";
+                                file.DirectoryMeta.TvShowFolder = tvShow.Title;
+                                file.DirectoryMeta.SeasonFolder = season.Title;
+                            }
                         }
                     }
                 }
-            }
-        );
+            );
+    }
 
     public static Faker<DownloadTaskTvShow> GetDownloadTaskTvShow(Seed seed, Action<FakeDataConfig>? options = null)
     {
         var config = FakeDataConfig.FromOptions(options);
 
-        return _downloadTaskTvShow
+        return CreateDownloadTaskTvShowFaker()
             .UseSeed(seed.Next())
             .RuleFor(
                 x => x.DataTotal,

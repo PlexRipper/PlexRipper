@@ -6,7 +6,7 @@ public class ResultExtensionsWebApi404Tests
 {
     #region Result
 
-    [Fact]
+    [Test]
     public void ShouldAdd404NotFoundError_WhenAdd404NotFoundErrorCalled()
     {
         // Arrange
@@ -20,7 +20,7 @@ public class ResultExtensionsWebApi404Tests
         result.Reasons.First().Metadata[ResultExtensions.StatusCodeName].ShouldBe(HttpCodes.Status404NotFound);
     }
 
-    [Fact]
+    [Test]
     public void ShouldHave404NotFoundError_WhenHad404NotFoundErrorCalled()
     {
         // Arrange
@@ -37,7 +37,7 @@ public class ResultExtensionsWebApi404Tests
 
     #region Result<T>
 
-    [Fact]
+    [Test]
     public void ShouldAdd404NotFoundError_WhenAdd404NotFoundErrorCalledOnResultT()
     {
         // Arrange
@@ -51,7 +51,7 @@ public class ResultExtensionsWebApi404Tests
         result.Reasons.First().Metadata[ResultExtensions.StatusCodeName].ShouldBe(HttpCodes.Status404NotFound);
     }
 
-    [Fact]
+    [Test]
     public void ShouldHave404NotFoundError_WhenHad404NotFoundErrorCalledOnResultT()
     {
         // Arrange
@@ -64,7 +64,7 @@ public class ResultExtensionsWebApi404Tests
         has404NotFoundError.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public void ShouldCreate404NotFoundResult_WhenCreate404NotFoundResultCalled()
     {
         // Act
@@ -74,7 +74,7 @@ public class ResultExtensionsWebApi404Tests
         result.Has404NotFoundError().ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public void ShouldHaveMessage_WhenCreate404NotFoundResultCalled()
     {
         // Arrange

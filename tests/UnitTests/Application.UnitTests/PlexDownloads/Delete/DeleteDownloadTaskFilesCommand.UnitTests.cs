@@ -8,10 +8,10 @@ namespace Reaparr.Application.UnitTests;
 
 public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownloadTaskFilesCommandHandler>
 {
-    public DeleteDownloadTaskFilesCommandUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public DeleteDownloadTaskFilesCommandUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldDeletePlainFileFromDownloadDirectory_WhenTaskIsCompleted()
     {
         // Arrange
@@ -41,7 +41,7 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownlo
         file.Exists(plainFilePath).ShouldBeFalse();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldDeleteReapTempFileFromDownloadDirectory_WhenFileHasTempSuffix()
     {
         // Arrange
@@ -71,7 +71,7 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownlo
         file.Exists(reapTempPath).ShouldBeFalse();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldSucceed_WhenFileIsNotPresentOnDisk()
     {
         // Arrange — no files on disk; handler should succeed gracefully.
@@ -95,7 +95,7 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownlo
         result.IsSuccess.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldDeleteFiles_WhenMultipleKeysAreGiven()
     {
         // Arrange
@@ -130,7 +130,7 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownlo
             file.Exists(path).ShouldBeFalse();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldDeleteEmptyDirectoryAfterFileDeletion_WhenDirectoryBecomesEmpty()
     {
         // Arrange
@@ -159,7 +159,7 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownlo
         directory.Exists(movieFileTask.DownloadDirectory).ShouldBeFalse();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldNotDeleteDirectory_WhenOtherFilesRemainInIt()
     {
         // Arrange — place an unrelated sibling file in the same download directory so it stays
@@ -201,7 +201,7 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownlo
         directory.Exists(movieFileTask.DownloadDirectory).ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHandleEpisodeFileKeys()
     {
         // Arrange — TV show episode file task
@@ -230,7 +230,7 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownlo
         file.Exists(plainFilePath).ShouldBeFalse();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldNotDeleteMoviesCategoryFolderOrDownloadRoot_WhenMovieFolderBecomesEmpty()
     {
         // Arrange
@@ -271,7 +271,7 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownlo
         directory.Exists(downloadRoot).ShouldBeTrue(); // download root — must survive
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldNotDeleteTvShowsCategoryFolderOrDownloadRoot_WhenSeasonAndShowFoldersBecomeEmpty()
     {
         // Arrange
@@ -316,7 +316,7 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownlo
         directory.Exists(downloadRoot).ShouldBeTrue(); // download root — must survive
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldPreserveShowFolder_WhenOnlyOneOfTwoSeasonFoldersBecomesEmpty()
     {
         // Arrange
@@ -376,7 +376,7 @@ public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownlo
         directory.Exists(tvShowsCategoryFolder).ShouldBeTrue(); // stopRoot — must survive
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldCleanUpBothCategorySubfolders_WhenMixedMovieAndEpisodeKeysAreDeleted()
     {
         // Arrange

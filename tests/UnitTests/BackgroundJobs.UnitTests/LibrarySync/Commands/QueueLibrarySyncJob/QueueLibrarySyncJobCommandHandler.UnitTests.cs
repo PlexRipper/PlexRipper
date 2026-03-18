@@ -5,10 +5,10 @@ namespace Reaparr.BackgroundJobs.UnitTests;
 
 public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibrarySyncJobCommandHandler>
 {
-    public QueueLibrarySyncJobCommandHandlerUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public QueueLibrarySyncJobCommandHandlerUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldQueueNewLibraries_WhenLibrariesDoNotExistInQueue()
     {
         // Arrange
@@ -46,7 +46,7 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldResetCompletedLibraries_WhenCompletedLibrariesExist()
     {
         // Arrange
@@ -96,7 +96,7 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldResetFailedLibraries_WhenFailedLibrariesExist()
     {
         // Arrange
@@ -148,7 +148,7 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldSkipQueuedLibraries_WhenLibrariesAlreadyQueued()
     {
         // Arrange
@@ -199,7 +199,7 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldSkipProcessingLibraries_WhenLibrariesAlreadyProcessing()
     {
         // Arrange
@@ -262,7 +262,7 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldSetCorrectPriority_WhenQueuingMovies()
     {
         // Arrange
@@ -293,7 +293,7 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
         queueItem.Priority.ShouldBe(1); // Movies should have priority 1
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldSetCorrectPriority_WhenQueuingTvShows()
     {
         // Arrange
@@ -324,7 +324,7 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
         queueItem.Priority.ShouldBe(2); // TV shows should have priority 2
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldCallCheckQueuedCommand_WhenItemsAreQueued()
     {
         // Arrange
@@ -357,7 +357,7 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnOk_WhenNoLibrariesFound()
     {
         // Arrange
@@ -386,7 +386,7 @@ public class QueueLibrarySyncJobCommandHandlerUnitTests : BaseUnitTest<QueueLibr
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHandleMixedScenarios_WhenMultipleConditionsExist()
     {
         // Arrange

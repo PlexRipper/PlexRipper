@@ -8,10 +8,10 @@ namespace Reaparr.Application.UnitTests;
 
 public class GetDirectDownloadUrlCommandUnitTests : BaseUnitTest<GetDirectDownloadUrlCommandHandler>
 {
-    public GetDirectDownloadUrlCommandUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public GetDirectDownloadUrlCommandUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnUrlWithoutDownloadQuery_WhenInitialProbeSucceeds()
     {
         // Arrange
@@ -42,7 +42,7 @@ public class GetDirectDownloadUrlCommandUnitTests : BaseUnitTest<GetDirectDownlo
         Mock.Mock<IHttpClientFactory>().Verify(x => x.CreateClient(It.IsAny<string>()), Times.Once());
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldAppendDownloadQuery_WhenInitialProbeIsForbidden()
     {
         // Arrange
@@ -73,7 +73,7 @@ public class GetDirectDownloadUrlCommandUnitTests : BaseUnitTest<GetDirectDownlo
         Mock.Mock<IHttpClientFactory>().Verify(x => x.CreateClient(It.IsAny<string>()), Times.Once());
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnFailedResult_WhenForbiddenAndFallbackAlsoFails()
     {
         // Arrange
@@ -103,7 +103,7 @@ public class GetDirectDownloadUrlCommandUnitTests : BaseUnitTest<GetDirectDownlo
         Mock.Mock<IHttpClientFactory>().Verify(x => x.CreateClient(It.IsAny<string>()), Times.Once());
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldRetryTransientProbeFailuresAndReturnUrl_WhenProbeEventuallySucceeds()
     {
         // Arrange
@@ -118,11 +118,17 @@ public class GetDirectDownloadUrlCommandUnitTests : BaseUnitTest<GetDirectDownlo
         );
 
         var downloadTask = await IDbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
-        var handler = SetupHttpClientFactory(
+        var handler = new DefaultProbeTransientSequenceHandler(
             HttpStatusCode.InternalServerError,
             HttpStatusCode.InternalServerError,
             HttpStatusCode.OK
         );
+        var retryHandler = new DefaultHttpClientRetryHandler(new LoggerConfiguration().CreateLogger())
+        {
+            InnerHandler = handler,
+        };
+        var httpClient = new HttpClient(retryHandler);
+        Mock.Mock<IHttpClientFactory>().Setup(x => x.CreateClient(It.IsAny<string>())).Returns(httpClient);
 
         var sut = CreateSut();
 
@@ -134,11 +140,11 @@ public class GetDirectDownloadUrlCommandUnitTests : BaseUnitTest<GetDirectDownlo
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        handler.RequestCount.ShouldBe(3);
+        handler.DefaultProbeRequestCount.ShouldBe(3);
         Mock.Mock<IHttpClientFactory>().Verify(x => x.CreateClient(It.IsAny<string>()), Times.Once());
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnFailedResult_AfterConfiguredTransientRetriesAreExhausted()
     {
         // Arrange
@@ -179,7 +185,7 @@ public class GetDirectDownloadUrlCommandUnitTests : BaseUnitTest<GetDirectDownlo
         Mock.Mock<IHttpClientFactory>().Verify(x => x.CreateClient(It.IsAny<string>()), Times.Once());
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldStartDefaultAndFallbackProbeRequestsInParallel()
     {
         // Arrange
@@ -327,6 +333,38 @@ public class GetDirectDownloadUrlCommandUnitTests : BaseUnitTest<GetDirectDownlo
 
             DefaultProbeRequestCount++;
             return new HttpResponseMessage(HttpStatusCode.InternalServerError) { RequestMessage = request };
+        }
+    }
+
+    private sealed class DefaultProbeTransientSequenceHandler(params HttpStatusCode[] statuses) : HttpMessageHandler
+    {
+        private readonly Queue<HttpStatusCode> _defaultProbeStatuses = new(statuses);
+
+        public int DefaultProbeRequestCount { get; private set; }
+
+        protected override Task<HttpResponseMessage> SendAsync(
+            HttpRequestMessage request,
+            CancellationToken cancellationToken
+        )
+        {
+            var hasDownloadFlag = request.RequestUri?.Query.Contains("download=1", StringComparison.Ordinal) == true;
+
+            if (hasDownloadFlag)
+            {
+                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.Forbidden) { RequestMessage = request });
+            }
+
+            DefaultProbeRequestCount++;
+
+            if (_defaultProbeStatuses.Count == 0)
+            {
+                throw new InvalidOperationException(
+                    $"{nameof(DefaultProbeTransientSequenceHandler)} was exhausted while probing {request.RequestUri}."
+                );
+            }
+
+            var statusCode = _defaultProbeStatuses.Dequeue();
+            return Task.FromResult(new HttpResponseMessage(statusCode) { RequestMessage = request });
         }
     }
 }

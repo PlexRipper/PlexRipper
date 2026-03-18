@@ -5,10 +5,10 @@ namespace Reaparr.BackgroundJobs.UnitTests;
 
 public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMediaMetaDataCommand>
 {
-    public InsertMediaMetaDataCommandUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public InsertMediaMetaDataCommandUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldSyncAllActorsGenresCountries_WhenNoneExist()
     {
         // Arrange
@@ -42,7 +42,8 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         result.IsSuccess.ShouldBeTrue();
 
         var actorsDb = await IDbContext.PlexActors.ToListAsync(CancellationToken);
-        actorsDb.Count.ShouldBe(actors.Count);
+        var expectedActorCount = actors.Select(x => x.Key).Where(x => !string.IsNullOrEmpty(x)).Distinct().Count();
+        actorsDb.Count.ShouldBe(expectedActorCount);
         foreach (var actor in actors)
             actorsDb.ShouldContain(
                 x => x.Name == actor.Name && x.Key == actor.Key,
@@ -50,17 +51,19 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
             );
 
         var genresDb = await IDbContext.PlexGenres.ToListAsync(CancellationToken);
-        genresDb.Count.ShouldBe(59);
+        var expectedGenreCount = genres.Select(x => x.Key).Where(x => !string.IsNullOrEmpty(x)).Distinct().Count();
+        genresDb.Count.ShouldBe(expectedGenreCount);
         foreach (var genre in genres)
             genresDb.ShouldContain(x => x.Key == genre.Key, $"Genre {genre.Name} not found in database");
 
         var countriesDb = await IDbContext.PlexCountries.ToListAsync(CancellationToken);
-        countriesDb.Count.ShouldBe(81);
+        var expectedCountryCount = countries.Select(x => x.Key).Where(x => !string.IsNullOrEmpty(x)).Distinct().Count();
+        countriesDb.Count.ShouldBe(expectedCountryCount);
         foreach (var country in countries)
             countriesDb.ShouldContain(x => x.Key == country.Key, $"Country {country.Name} not found in database");
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldUpdateExistingActorsGenresCountries_WhenSomeExist()
     {
         // Arrange
@@ -108,22 +111,37 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         result.IsSuccess.ShouldBeTrue();
 
         var actorsDb = await IDbContext.PlexActors.ToListAsync(CancellationToken);
-        actorsDb.Count.ShouldBe(initialActors.Count + newActors.Count);
+        var expectedActorCount = initialActors
+            .Select(x => x.Key)
+            .Concat(newActors.Select(x => x.Key))
+            .Distinct()
+            .Count();
+        actorsDb.Count.ShouldBe(expectedActorCount);
         foreach (var actor in newActors)
             actorsDb.ShouldContain(x => x.Name == actor.Name && x.Key == actor.Key);
 
         var genresDb = await IDbContext.PlexGenres.ToListAsync(CancellationToken);
-        genresDb.Count.ShouldBe(newGenres.Count);
+        var expectedGenreCount = initialGenres
+            .Select(x => x.Key)
+            .Concat(newGenres.Select(x => x.Key))
+            .Distinct()
+            .Count();
+        genresDb.Count.ShouldBe(expectedGenreCount);
         foreach (var genre in newGenres)
             genresDb.ShouldContain(x => x.Key == genre.Key);
 
         var countriesDb = await IDbContext.PlexCountries.ToListAsync(CancellationToken);
-        countriesDb.Count.ShouldBe(130);
+        var expectedCountryCount = initialCountries
+            .Select(x => x.Key)
+            .Concat(newCountries.Select(x => x.Key))
+            .Distinct()
+            .Count();
+        countriesDb.Count.ShouldBe(expectedCountryCount);
         foreach (var country in newCountries)
             countriesDb.ShouldContain(x => x.Key == country.Key);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHandleEmptyLists_WhenNoDataProvided()
     {
         // Arrange
@@ -156,7 +174,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         countriesDb.ShouldBeEmpty();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHandleDuplicatePlexKeys_WhenDataContainsDuplicates()
     {
         // Arrange
@@ -190,7 +208,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         actorsDb.Select(x => x.Key).Distinct().Count().ShouldBe(10);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHandleConcurrentSyncs_WhenMultipleOperationsRun()
     {
         // Arrange
@@ -229,7 +247,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         actorsDb.Select(x => x.Key).Distinct().Count().ShouldBe(100);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHandleLargeDataSet_WhenManyItemsProvided()
     {
         // Arrange
@@ -246,7 +264,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         plexLibrary.ShouldNotBeNull();
 
         // Create a large dataset
-        var actors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).GenerateUnique(1000, x => x.Name);
+        var actors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).Generate(1000);
         var genres = FakePlexApiData.GetLibraryMediaItemGenreDTO(seed).Generate(1000);
         var countries = FakePlexApiData.GetLibraryMediaItemCountryDTO(seed).Generate(1000);
 
@@ -267,12 +285,15 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         var genresDb = await IDbContext.PlexGenres.ToListAsync(CancellationToken);
         var countriesDb = await IDbContext.PlexCountries.ToListAsync(CancellationToken);
 
-        actorsDb.Count.ShouldBe(1000);
-        genresDb.Count.ShouldBe(100); // These are deduplicated
-        countriesDb.Count.ShouldBe(239); // These are deduplicated, possible number of countries
+        var expectedActorCount = actors.Select(x => x.Key).Where(x => !string.IsNullOrEmpty(x)).Distinct().Count();
+        actorsDb.Count.ShouldBe(expectedActorCount);
+        var expectedGenreCount = genres.Select(x => x.Key).Where(x => !string.IsNullOrEmpty(x)).Distinct().Count();
+        genresDb.Count.ShouldBe(expectedGenreCount);
+        var expectedCountryCount = countries.Select(x => x.Key).Where(x => !string.IsNullOrEmpty(x)).Distinct().Count();
+        countriesDb.Count.ShouldBe(expectedCountryCount);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldPreserveDataIntegrity_WhenUpdatingExistingItems()
     {
         // Arrange
@@ -326,7 +347,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         }
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHandleNullLibraryMetadata_WhenProvided()
     {
         // Arrange
@@ -351,7 +372,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         result.Has400BadRequestError().ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldFilterOutActorsWithEmptyKey_WhenActorsHaveEmptyKeys()
     {
         // Arrange
@@ -392,7 +413,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         actorsDb.ShouldAllBe(x => x.Key != string.Empty);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHandlePartiallyEmptyMetadata_WhenOnlySomeListsAreEmpty()
     {
         // Arrange
@@ -433,7 +454,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         countriesDb.ShouldBeEmpty();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnCorrectDictionaryMappings_WhenDataIsInserted()
     {
         // Arrange
@@ -487,7 +508,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         }
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHandleSpecialCharactersInNames_WhenDataContainsUnicodeCharacters()
     {
         // Arrange
@@ -541,7 +562,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         actorsDb.ShouldContain(x => x.Name == "Björk Guðmundsdóttir");
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldMaintainConsistency_WhenSameDataInsertedMultipleTimes()
     {
         // Arrange
@@ -592,7 +613,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         countriesDb.Select(x => x.Key).Distinct().Count().ShouldBe(countriesDb.Count);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldCorrectlyMapLibraryReference_WhenLibraryIsProvided()
     {
         // Arrange
@@ -622,7 +643,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         result.Value.PlexLibraryId.ShouldBe(plexLibrary.Id);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHandleVeryLongNames_WhenDataContainsLongStrings()
     {
         // Arrange
@@ -664,7 +685,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         actorsDb.ShouldAllBe(x => x.Name.Length >= 250);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnEmptyDictionaries_WhenAllListsAreEmpty()
     {
         // Arrange
@@ -692,7 +713,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         result.Value.PlexLibrary.ShouldBe(plexLibrary);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHandleZeroKeys_WhenDataContainsZeroValues()
     {
         // Arrange
@@ -741,7 +762,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         countriesDb.Count.ShouldBe(0);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnValidDatabaseIds_WhenEntitiesAreInserted()
     {
         // Arrange

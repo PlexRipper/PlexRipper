@@ -6,13 +6,13 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
 {
     private readonly SyncPlexTvShowsCommandValidator _validator;
 
-    public SyncPlexTvShowsCommandUnitTests(ITestOutputHelper output)
-        : base(output)
+    public SyncPlexTvShowsCommandUnitTests()
+        : base()
     {
         _validator = new SyncPlexTvShowsCommandValidator(LogFactory.Create<SyncPlexTvShowsCommandValidator>());
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldCreateAllTvShows_WhenNoneExists()
     {
         // Arrange
@@ -44,7 +44,12 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
 
         // Act
         var request = new SyncPlexTvShowsCommand(new InsertMediaMetaDataCommandResponse(library));
-        (await _validator.ValidateAsync(request, TestContext.Current.CancellationToken)).IsValid.ShouldBeTrue();
+        (
+            await _validator.ValidateAsync(
+                request,
+                TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
+            )
+        ).IsValid.ShouldBeTrue();
         var result = await Sut.ExecuteAsync(request, CancellationToken);
 
         // Assert
@@ -61,7 +66,7 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
         VerifyKeys(newTvShows);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldUpdateAllTvShows_WhenAllExists()
     {
         // Arrange
@@ -106,7 +111,7 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
         VerifyKeys(library.TvShows);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldDeleteTwentyTvShows_WhenSomeExist()
     {
         // Arrange
@@ -133,7 +138,12 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
 
         // Act
         var request = new SyncPlexTvShowsCommand(new InsertMediaMetaDataCommandResponse(library));
-        (await _validator.ValidateAsync(request, TestContext.Current.CancellationToken)).IsValid.ShouldBeTrue();
+        (
+            await _validator.ValidateAsync(
+                request,
+                TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
+            )
+        ).IsValid.ShouldBeTrue();
         var result = await Sut.ExecuteAsync(request, CancellationToken);
 
         // Assert
@@ -142,7 +152,7 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
         VerifyKeys(newTvShows);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldInsertSeasonsWithExistingTvShows_WhenSomeSeasonsAlreadyExist()
     {
         // Arrange
@@ -171,7 +181,12 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
 
         // Act
         var request = new SyncPlexTvShowsCommand(new InsertMediaMetaDataCommandResponse(library));
-        (await _validator.ValidateAsync(request, TestContext.Current.CancellationToken)).IsValid.ShouldBeTrue();
+        (
+            await _validator.ValidateAsync(
+                request,
+                TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
+            )
+        ).IsValid.ShouldBeTrue();
         var result = await Sut.ExecuteAsync(request, CancellationToken);
 
         // Assert
@@ -182,7 +197,7 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
         VerifyKeys(newTvShows);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldNotCreateDuplicateKeys_WhenTheSameMediaIsCreated()
     {
         // Arrange
@@ -210,7 +225,12 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
         var request = new SyncPlexTvShowsCommand(new InsertMediaMetaDataCommandResponse(library));
 
         var result = await Sut.ExecuteAsync(request, CancellationToken);
-        (await _validator.ValidateAsync(request, TestContext.Current.CancellationToken)).IsValid.ShouldBeTrue();
+        (
+            await _validator.ValidateAsync(
+                request,
+                TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
+            )
+        ).IsValid.ShouldBeTrue();
         var result2 = await Sut.ExecuteAsync(request, CancellationToken);
 
         // Assert
@@ -220,7 +240,7 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
         VerifyKeys(newTvShows);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldCreateUpdateAndDeleteMovies_WhenSomeExist()
     {
         // Arrange
@@ -261,7 +281,12 @@ public class SyncPlexTvShowsCommandUnitTests : BaseUnitTest<SyncPlexTvShowsComma
 
         // Act
         var request = new SyncPlexTvShowsCommand(new InsertMediaMetaDataCommandResponse(library));
-        (await _validator.ValidateAsync(request, TestContext.Current.CancellationToken)).IsValid.ShouldBeTrue();
+        (
+            await _validator.ValidateAsync(
+                request,
+                TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
+            )
+        ).IsValid.ShouldBeTrue();
         var result = await Sut.ExecuteAsync(request, CancellationToken);
 
         // Assert

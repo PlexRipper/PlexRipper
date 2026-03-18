@@ -5,10 +5,10 @@ namespace Reaparr.Data.UnitTests;
 
 public class DbContextExtensionsPlexServerUnitTests : BaseUnitTest
 {
-    public DbContextExtensionsPlexServerUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public DbContextExtensionsPlexServerUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnServerName_WhenPlexServerExists()
     {
         // Arrange
@@ -30,7 +30,7 @@ public class DbContextExtensionsPlexServerUnitTests : BaseUnitTest
         name.ShouldBe(server.Name);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnServerNameNotFound_WhenPlexServerDoesNotExist()
     {
         // Arrange
@@ -43,7 +43,7 @@ public class DbContextExtensionsPlexServerUnitTests : BaseUnitTest
         name.ShouldBe("Server Name Not Found");
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnMachineIdentifier_WhenPlexServerExists()
     {
         // Arrange
@@ -65,7 +65,7 @@ public class DbContextExtensionsPlexServerUnitTests : BaseUnitTest
         machineId.ShouldBe(server.MachineIdentifier);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnEmptyMachineIdentifier_WhenPlexServerDoesNotExist()
     {
         // Arrange
@@ -78,7 +78,7 @@ public class DbContextExtensionsPlexServerUnitTests : BaseUnitTest
         machineId.ShouldBe(string.Empty);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnTrueForIsServerOnline_WhenThereIsASuccessfulStatus()
     {
         // Arrange
@@ -99,7 +99,7 @@ public class DbContextExtensionsPlexServerUnitTests : BaseUnitTest
         isOnline.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnFalseForIsServerOnline_WhenThereAreNoStatuses()
     {
         // Arrange

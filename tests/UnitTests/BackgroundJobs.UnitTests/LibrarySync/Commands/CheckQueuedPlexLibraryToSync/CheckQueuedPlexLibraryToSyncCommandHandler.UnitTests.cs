@@ -8,10 +8,10 @@ namespace Reaparr.BackgroundJobs.UnitTests;
 public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
     : BaseUnitTest<CheckQueuedPlexLibraryToSyncCommandHandler>
 {
-    public CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnOk_WhenNoQueuedLibrariesExist()
     {
         // Arrange
@@ -40,7 +40,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldScheduleJob_WhenQueuedLibraryExists()
     {
         // Arrange
@@ -103,7 +103,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnOk_WhenJobAlreadyExists()
     {
         // Arrange
@@ -157,7 +157,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldScheduleHighestPriorityLibrary_WhenMultipleQueuedLibrariesExist()
     {
         // Arrange
@@ -231,7 +231,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldLogServerAndLibraryNames_WhenSchedulingJob()
     {
         // Arrange
@@ -295,7 +295,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldMarkIsServerOffline_WhenServerIsOffline()
     {
         // Arrange
@@ -359,7 +359,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
         updatedItems.All(x => x.IsServerOffline).ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldScheduleOneLibraryPerServer_WhenMultipleServersWithQueuedLibraries()
     {
         // Arrange
@@ -468,7 +468,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldSkipOfflineServerAndScheduleOnlineServer_WhenMixedServerStatuses()
     {
         // Arrange
@@ -558,7 +558,7 @@ public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
         onlineServerItem.IsServerOffline.ShouldBeFalse();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldNotScheduleNonQueuedItems_WhenMixedStatusesExist()
     {
         // Arrange

@@ -7,10 +7,10 @@ namespace Reaparr.Application.UnitTests;
 
 public class GenerateTokenEndpointUnitTests : BaseUnitTest
 {
-    public GenerateTokenEndpointUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public GenerateTokenEndpointUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldGenerateToken_WhenSignInIsSuccessful()
     {
         // Arrange
@@ -59,7 +59,7 @@ public class GenerateTokenEndpointUnitTests : BaseUnitTest
         authToken.ShouldNotBe(plexAccount.AuthenticationToken);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnAVerificationCodeResponse_WhenThePlexAPIRespondsWithA2faResponse()
     {
         // Arrange
@@ -90,7 +90,7 @@ public class GenerateTokenEndpointUnitTests : BaseUnitTest
         value.PlexAuthToken.ShouldBeEmpty();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldNotReturnA401Response_WhenThePlexAPIRespondsWithA401Response()
     {
         // Arrange
@@ -119,7 +119,7 @@ public class GenerateTokenEndpointUnitTests : BaseUnitTest
         value.PlexAuthToken.ShouldBeEmpty();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnAllPlexErrors_WhenDefaultingOnErrorHandling()
     {
         // Arrange

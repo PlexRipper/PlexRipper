@@ -5,19 +5,19 @@ namespace Reaparr.PlexApi.UnitTests;
 
 public class PlexMediaTypeMappersToPlexApiMediaTypeUnitTests : BaseUnitTest
 {
-    public PlexMediaTypeMappersToPlexApiMediaTypeUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public PlexMediaTypeMappersToPlexApiMediaTypeUnitTests()
+        : base() { }
 
-    [Theory]
-    [InlineData(PlexMediaType.Movie, MediaType.Movie)]
-    [InlineData(PlexMediaType.TvShow, MediaType.TvShow)]
-    [InlineData(PlexMediaType.Season, MediaType.Season)]
-    [InlineData(PlexMediaType.Episode, MediaType.Episode)]
-    [InlineData(PlexMediaType.Artist, MediaType.Artist)]
-    [InlineData(PlexMediaType.Album, MediaType.Album)]
-    [InlineData(PlexMediaType.Song, MediaType.Track)]
-    [InlineData(PlexMediaType.PhotoAlbum, MediaType.PhotoAlbum)]
-    [InlineData(PlexMediaType.Photos, MediaType.Photo)]
+    [Test]
+    [Arguments(PlexMediaType.Movie, MediaType.Movie)]
+    [Arguments(PlexMediaType.TvShow, MediaType.TvShow)]
+    [Arguments(PlexMediaType.Season, MediaType.Season)]
+    [Arguments(PlexMediaType.Episode, MediaType.Episode)]
+    [Arguments(PlexMediaType.Artist, MediaType.Artist)]
+    [Arguments(PlexMediaType.Album, MediaType.Album)]
+    [Arguments(PlexMediaType.Song, MediaType.Track)]
+    [Arguments(PlexMediaType.PhotoAlbum, MediaType.PhotoAlbum)]
+    [Arguments(PlexMediaType.Photos, MediaType.Photo)]
     public void ShouldMapPlexMediaTypeToMediaType(PlexMediaType input, MediaType expected)
     {
         // Act

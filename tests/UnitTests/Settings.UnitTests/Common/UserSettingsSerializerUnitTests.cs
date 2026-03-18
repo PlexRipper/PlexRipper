@@ -4,12 +4,12 @@ namespace Reaparr.Settings.UnitTests.Common;
 
 public class UserSettingsSerializerUnitTests : BaseUnitTest
 {
-    public UserSettingsSerializerUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public UserSettingsSerializerUnitTests()
+        : base() { }
 
-    [Theory]
-    [InlineData("")]
-    [InlineData("{}")]
+    [Test]
+    [Arguments("")]
+    [Arguments("{}")]
     public void ShouldSetAllDefaultValues_WhenAnEmptyJSONStringIsGiven(string json)
     {
         // Act
@@ -29,7 +29,7 @@ public class UserSettingsSerializerUnitTests : BaseUnitTest
         result.ServerSettings.Data.ShouldBeEquivalentTo(defaultSettings.ServerSettings.Data);
     }
 
-    [Fact]
+    [Test]
     public void ShouldHaveCorrectSettingsValuesParsed_WhenAValidJSONStringHasBeenGiven()
     {
         // Arrange
@@ -80,7 +80,7 @@ public class UserSettingsSerializerUnitTests : BaseUnitTest
         sut.ServerSettings.Data[3].Hidden.ShouldBeFalse();
     }
 
-    [Fact]
+    [Test]
     public void ShouldHaveCorrectSettingsValuesParsed_WhenAInValidJSONStringHasBeenGiven()
     {
         // Arrange

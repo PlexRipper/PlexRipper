@@ -6,7 +6,7 @@ public class ResultExtensionsWebApi400Tests
 {
     #region Result
 
-    [Fact]
+    [Test]
     public void ShouldAddBadRequestError_WhenAdd400BadRequestErrorCalled()
     {
         // Arrange
@@ -20,7 +20,7 @@ public class ResultExtensionsWebApi400Tests
         result.Reasons.First().Metadata[ResultExtensions.StatusCodeName].ShouldBe(HttpCodes.Status400BadRequest);
     }
 
-    [Fact]
+    [Test]
     public void ShouldHaveBadRequestError_WhenHad400BadRequestErrorCalled()
     {
         // Arrange
@@ -37,7 +37,7 @@ public class ResultExtensionsWebApi400Tests
 
     #region Result<T>
 
-    [Fact]
+    [Test]
     public void ShouldAdd400BadRequestError_WhenAdd400BadRequestErrorCalledOnResultT()
     {
         // Arrange
@@ -51,7 +51,7 @@ public class ResultExtensionsWebApi400Tests
         result.Reasons.First().Metadata[ResultExtensions.StatusCodeName].ShouldBe(HttpCodes.Status400BadRequest);
     }
 
-    [Fact]
+    [Test]
     public void ShouldHave400BadRequestError_WhenHad400BadRequestErrorCalledOnResultT()
     {
         // Arrange
@@ -64,7 +64,7 @@ public class ResultExtensionsWebApi400Tests
         has400BadRequestError.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public void ShouldCreate404NotFoundResult_WhenCreate400BadRequestResultCalled()
     {
         // Act
@@ -74,7 +74,7 @@ public class ResultExtensionsWebApi400Tests
         result.Has400BadRequestError().ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public void ShouldHaveMessage_WhenCreate400BadRequestResultCalled()
     {
         // Arrange

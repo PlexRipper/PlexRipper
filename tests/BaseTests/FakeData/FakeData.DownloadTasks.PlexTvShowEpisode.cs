@@ -5,8 +5,9 @@ namespace Reaparr.BaseTests;
 
 public static partial class FakeData
 {
-    private static readonly Faker<DownloadTaskTvShowEpisode> _downloadTaskTvShowEpisode =
-        new Faker<DownloadTaskTvShowEpisode>()
+    private static Faker<DownloadTaskTvShowEpisode> CreateDownloadTaskTvShowEpisodeFaker()
+    {
+        return new Faker<DownloadTaskTvShowEpisode>()
             .ApplyDownloadTaskParentBase(DownloadTaskType.Episode)
             .Ignore(x => x.Parent)
             .Ignore(x => x.ParentId)
@@ -21,6 +22,7 @@ public static partial class FakeData
                         file.FullTitle = $"{episode.FullTitle}/{fileIndex}-{file.FileName}";
                 }
             );
+    }
 
     public static Faker<DownloadTaskTvShowEpisode> GetDownloadTaskTvShowEpisode(
         Seed seed,
@@ -29,7 +31,7 @@ public static partial class FakeData
     {
         var config = FakeDataConfig.FromOptions(options);
 
-        return _downloadTaskTvShowEpisode
+        return CreateDownloadTaskTvShowEpisodeFaker()
             .UseSeed(seed.Next())
             .RuleFor(
                 x => x.DataTotal,
@@ -41,12 +43,14 @@ public static partial class FakeData
             .RuleFor(x => x.Children, _ => [GetDownloadTaskTvShowEpisodeFile(seed, options).Generate()]);
     }
 
-    private static readonly Faker<DownloadTaskTvShowEpisodeFile> _downloadTaskTvShowEpisodeFile =
-        new Faker<DownloadTaskTvShowEpisodeFile>()
+    private static Faker<DownloadTaskTvShowEpisodeFile> CreateDownloadTaskTvShowEpisodeFileFaker()
+    {
+        return new Faker<DownloadTaskTvShowEpisodeFile>()
             .ApplyDownloadTaskFileBase(DownloadTaskType.EpisodeData)
             .Ignore(x => x.Parent)
             .Ignore(x => x.ParentId)
             .Ignore(x => x.Logs);
+    }
 
     public static Faker<DownloadTaskTvShowEpisodeFile> GetDownloadTaskTvShowEpisodeFile(
         Seed seed,
@@ -55,7 +59,7 @@ public static partial class FakeData
     {
         var config = FakeDataConfig.FromOptions(options);
 
-        return _downloadTaskTvShowEpisodeFile
+        return CreateDownloadTaskTvShowEpisodeFileFaker()
             .RuleFor(
                 x => x.DataTotal,
                 f =>

@@ -2,12 +2,12 @@
 
 public class PathSystemSanitizeFileNameUnitTests : BaseUnitTest
 {
-    public PathSystemSanitizeFileNameUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public PathSystemSanitizeFileNameUnitTests()
+        : base() { }
 
-    [Theory]
-    [InlineData("Shaun het Schaap: De Film (2015)")]
-    [InlineData("RANDOM MOVIE: # · GREAT")]
+    [Test]
+    [Arguments("Shaun het Schaap: De Film (2015)")]
+    [Arguments("RANDOM MOVIE: # · GREAT")]
     public void ShouldFilterAllInvalidCharsFromName_WhenGivenInvalidName(string testString)
     {
         // Act

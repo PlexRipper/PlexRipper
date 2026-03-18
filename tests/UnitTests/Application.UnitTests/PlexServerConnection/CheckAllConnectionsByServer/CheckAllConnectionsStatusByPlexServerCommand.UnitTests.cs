@@ -6,10 +6,10 @@ namespace Reaparr.Application.UnitTests;
 public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
     : BaseUnitTest<CheckAllConnectionsStatusByPlexServerHandler>
 {
-    public CheckAllConnectionsStatusByPlexServerCommandUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public CheckAllConnectionsStatusByPlexServerCommandUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnServerNotEnabled_WhenPlexServerIsDisabled()
     {
         // Arrange
@@ -32,7 +32,7 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
         result.IsFailed.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnEntityNotFound_WhenPlexServerDoesNotExist()
     {
         // Arrange
@@ -47,7 +47,7 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
         result.IsSuccess.ShouldBeFalse();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnNoConnectionsFound_WhenPlexServerHasNoConnections()
     {
         // Arrange
@@ -73,7 +73,7 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
         result.IsSuccess.ShouldBeFalse();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldPublishServerOnlineStatusChangedNotification_WhenOnlineStatusHasChanged()
     {
         // Arrange
@@ -142,7 +142,7 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
         result.IsSuccess.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldNotPublishServerOnlineStatusChangedNotification_WhenOnlineStatusHasNotChanged()
     {
         // Arrange

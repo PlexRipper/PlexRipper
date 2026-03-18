@@ -2,21 +2,21 @@ namespace Reaparr.Domain.UnitTests.Mappers;
 
 public partial class PlexMediaTypeMappersUnitTests
 {
-    [Theory]
-    [InlineData("None", PlexMediaType.None)]
-    [InlineData("Movie", PlexMediaType.Movie)]
-    [InlineData("TvShow", PlexMediaType.TvShow)]
-    [InlineData("Season", PlexMediaType.Season)]
-    [InlineData("Episode", PlexMediaType.Episode)]
-    [InlineData("Music", PlexMediaType.Music)]
-    [InlineData("Artist", PlexMediaType.Artist)]
-    [InlineData("Album", PlexMediaType.Album)]
-    [InlineData("Song", PlexMediaType.Song)]
-    [InlineData("PhotoAlbum", PlexMediaType.PhotoAlbum)]
-    [InlineData("Photos", PlexMediaType.Photos)]
-    [InlineData("OtherVideos", PlexMediaType.OtherVideos)]
-    [InlineData("Games", PlexMediaType.Games)]
-    [InlineData("Unknown", PlexMediaType.Unknown)]
+    [Test]
+    [Arguments("None", PlexMediaType.None)]
+    [Arguments("Movie", PlexMediaType.Movie)]
+    [Arguments("TvShow", PlexMediaType.TvShow)]
+    [Arguments("Season", PlexMediaType.Season)]
+    [Arguments("Episode", PlexMediaType.Episode)]
+    [Arguments("Music", PlexMediaType.Music)]
+    [Arguments("Artist", PlexMediaType.Artist)]
+    [Arguments("Album", PlexMediaType.Album)]
+    [Arguments("Song", PlexMediaType.Song)]
+    [Arguments("PhotoAlbum", PlexMediaType.PhotoAlbum)]
+    [Arguments("Photos", PlexMediaType.Photos)]
+    [Arguments("OtherVideos", PlexMediaType.OtherVideos)]
+    [Arguments("Games", PlexMediaType.Games)]
+    [Arguments("Unknown", PlexMediaType.Unknown)]
     public void ShouldConvertEnumNameStrings_WhenValidEnumNameProvided(string input, PlexMediaType expected)
     {
         // Act
@@ -26,16 +26,16 @@ public partial class PlexMediaTypeMappersUnitTests
         result.ShouldBe(expected);
     }
 
-    [Theory]
-    [InlineData("movie", PlexMediaType.Movie)]
-    [InlineData("show", PlexMediaType.TvShow)]
-    [InlineData("season", PlexMediaType.Season)]
-    [InlineData("episode", PlexMediaType.Episode)]
-    [InlineData("artist", PlexMediaType.Artist)]
-    [InlineData("album", PlexMediaType.Album)]
-    [InlineData("track", PlexMediaType.Song)]
-    [InlineData("photoalbum", PlexMediaType.PhotoAlbum)]
-    [InlineData("photo", PlexMediaType.Photos)]
+    [Test]
+    [Arguments("movie", PlexMediaType.Movie)]
+    [Arguments("show", PlexMediaType.TvShow)]
+    [Arguments("season", PlexMediaType.Season)]
+    [Arguments("episode", PlexMediaType.Episode)]
+    [Arguments("artist", PlexMediaType.Artist)]
+    [Arguments("album", PlexMediaType.Album)]
+    [Arguments("track", PlexMediaType.Song)]
+    [Arguments("photoalbum", PlexMediaType.PhotoAlbum)]
+    [Arguments("photo", PlexMediaType.Photos)]
     public void ShouldConvertPlexApiStrings_WhenValidPlexApiStringProvided(string input, PlexMediaType expected)
     {
         // Act
@@ -45,21 +45,21 @@ public partial class PlexMediaTypeMappersUnitTests
         result.ShouldBe(expected);
     }
 
-    [Theory]
-    [InlineData("invalid")]
-    [InlineData("")]
-    [InlineData("MOVIE")]
-    [InlineData("SHOW")]
-    [InlineData("randomstring")]
-    [InlineData("123")]
-    [InlineData("null")]
+    [Test]
+    [Arguments("invalid")]
+    [Arguments("")]
+    [Arguments("MOVIE")]
+    [Arguments("SHOW")]
+    [Arguments("randomstring")]
+    [Arguments("123")]
+    [Arguments("null")]
     public void ShouldThrowNotImplementedException_WhenInvalidStringProvided(string input)
     {
         // Act & Assert
         Should.Throw<NotImplementedException>(() => input.ToPlexMediaType());
     }
 
-    [Fact]
+    [Test]
     public void ShouldThrowNotImplementedException_WhenNullStringProvided()
     {
         // Arrange
@@ -69,7 +69,7 @@ public partial class PlexMediaTypeMappersUnitTests
         Should.Throw<NotImplementedException>(() => input!.ToPlexMediaType());
     }
 
-    [Fact]
+    [Test]
     public void ShouldHandleAllEnumValues_WhenConvertingFromEnumNameStrings()
     {
         // Arrange
@@ -89,7 +89,7 @@ public partial class PlexMediaTypeMappersUnitTests
         }
     }
 
-    [Fact]
+    [Test]
     public void ShouldHandleAllPlexApiMappings_WhenConvertingFromPlexApiStrings()
     {
         // Arrange - These are the enum values that have PlexApi string representations
@@ -120,12 +120,12 @@ public partial class PlexMediaTypeMappersUnitTests
         }
     }
 
-    [Theory]
-    [InlineData("Music")] // Music enum exists but has no PlexApi string mapping
-    [InlineData("None")] // None enum exists but has no PlexApi string mapping
-    [InlineData("OtherVideos")] // OtherVideos enum exists but has no PlexApi string mapping
-    [InlineData("Games")] // Games enum exists but has no PlexApi string mapping
-    [InlineData("Unknown")] // Unknown enum exists but has no PlexApi string mapping
+    [Test]
+    [Arguments("Music")] // Music enum exists but has no PlexApi string mapping
+    [Arguments("None")] // None enum exists but has no PlexApi string mapping
+    [Arguments("OtherVideos")] // OtherVideos enum exists but has no PlexApi string mapping
+    [Arguments("Games")] // Games enum exists but has no PlexApi string mapping
+    [Arguments("Unknown")] // Unknown enum exists but has no PlexApi string mapping
     public void ShouldHandleEnumNamesWithoutPlexApiMapping_WhenValidEnumNameProvided(string input)
     {
         // Act

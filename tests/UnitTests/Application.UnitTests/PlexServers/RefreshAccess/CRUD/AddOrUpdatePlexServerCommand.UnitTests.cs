@@ -4,10 +4,10 @@ namespace Reaparr.Application.UnitTests;
 
 public class AddOrUpdatePlexServerCommandUnitTests : BaseUnitTest<AddOrUpdatePlexServersCommandHandler>
 {
-    public AddOrUpdatePlexServerCommandUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public AddOrUpdatePlexServerCommandUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldAddAllServers_WhenNoneExistInTheDatabase()
     {
         // Arrange
@@ -33,7 +33,7 @@ public class AddOrUpdatePlexServerCommandUnitTests : BaseUnitTest<AddOrUpdatePle
         }
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldKeepTheSameServerConnectionIds_WhenOnlyTheConnectionPropertiesHaveChanged()
     {
         // Arrange
@@ -98,7 +98,7 @@ public class AddOrUpdatePlexServerCommandUnitTests : BaseUnitTest<AddOrUpdatePle
         }
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldUpdateSomeAndSyncServersWithConnections_WhenSomeServerConnectionsHaveChangedAndSomeExistInTheDatabase()
     {
         // Arrange
@@ -144,7 +144,7 @@ public class AddOrUpdatePlexServerCommandUnitTests : BaseUnitTest<AddOrUpdatePle
         }
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldSyncConnectionsAndKeepTheSameServerConnectionIds_WhenSomeHaveConnectionHaveChanged()
     {
         // Arrange
@@ -190,7 +190,7 @@ public class AddOrUpdatePlexServerCommandUnitTests : BaseUnitTest<AddOrUpdatePle
         }
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldKeepCustomConnections_WhenSomeConnectionHaveChanged()
     {
         // Arrange

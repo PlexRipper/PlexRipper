@@ -11,10 +11,10 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
 {
     private string DatabasePath => "/Config/" + PathProvider.DatabaseName;
 
-    public ReaparrDbContextManagerUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public ReaparrDbContextManagerUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public void ShouldConnectToDatabaseAndCheckToMigrate_WhenDatabaseAlreadyExists()
     {
         // Arrange
@@ -41,7 +41,7 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
         Mock.Mock<IAuthDbContextDatabase>().Verify(x => x.Migrate(), Times.Never);
     }
 
-    [Fact]
+    [Test]
     public void ShouldCreateDatabase_WhenDatabaseDoesNotExist()
     {
         // Arrange
@@ -58,7 +58,7 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
         Mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.Migrate(), Times.Once); // Database creation involves migration
     }
 
-    [Fact]
+    [Test]
     public void ShouldLogWarning_WhenDatabaseDoesNotExist()
     {
         // Arrange
@@ -77,7 +77,7 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
         result.IsSuccess.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public void ShouldFailToCreateDatabase_WhenExceptionIsThrown()
     {
         // Arrange
@@ -96,7 +96,7 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
         result.IsFailed.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public void ShouldBackUpAndResetDatabase_WhenDatabaseCannotConnect()
     {
         // Arrange
@@ -128,7 +128,7 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
         mockDbContext.Verify(x => x.Migrate(), Times.Once); // Database is recreated after reset
     }
 
-    [Fact]
+    [Test]
     public void ShouldMigrateReaparrDatabase_WhenPendingMigrationsExist()
     {
         // Arrange
@@ -152,7 +152,7 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
         Mock.Mock<IAuthDbContextDatabase>().Verify(x => x.Migrate(), Times.Never);
     }
 
-    [Fact]
+    [Test]
     public void ShouldMigrateAuthDatabase_WhenPendingMigrationsExist()
     {
         // Arrange
@@ -174,7 +174,7 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
         Mock.Mock<IAuthDbContextDatabase>().Verify(x => x.Migrate(), Times.Once);
     }
 
-    [Fact]
+    [Test]
     public void ShouldSkipMigration_WhenDatabaseIsInMemory()
     {
         // Arrange
@@ -195,7 +195,7 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
         Mock.Mock<IAuthDbContextDatabase>().Verify(x => x.Migrate(), Times.Never);
     }
 
-    [Fact]
+    [Test]
     public void ShouldResetDatabase_WhenReaparrMigrationFails()
     {
         // Arrange
@@ -231,7 +231,7 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
         Mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.EnsureDeleted(), Times.Once);
     }
 
-    [Fact]
+    [Test]
     public void ShouldResetDatabase_WhenAuthDatabaseMigrationFails()
     {
         // Arrange
@@ -268,7 +268,7 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
         Mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.EnsureDeleted(), Times.Once);
     }
 
-    [Fact]
+    [Test]
     public void ShouldResetDatabase_WhenMigrationThrowsException()
     {
         // Arrange
@@ -303,7 +303,7 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
         Mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.EnsureDeleted(), Times.Once);
     }
 
-    [Fact]
+    [Test]
     public void ShouldFailBackup_WhenBackupDirectoryCannotBeCreated()
     {
         // Arrange
@@ -322,7 +322,7 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
         result.IsFailed.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public void ShouldHandlePartialBackup_WhenSomeDatabaseFilesAreMissing()
     {
         // Arrange
@@ -355,7 +355,7 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
         Mock.Mock<IFile>().Verify(x => x.Copy(DatabasePath + "-shm", It.IsAny<string>()), Times.Never);
     }
 
-    [Fact]
+    [Test]
     public void ShouldFailReset_WhenDatabaseDeletionFails()
     {
         // Arrange
@@ -383,7 +383,7 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
         Mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.Migrate(), Times.Never); // Should not attempt to recreate if deletion failed
     }
 
-    [Fact]
+    [Test]
     public void ShouldFailReset_WhenDatabaseCreationFailsAfterReset()
     {
         // Arrange
@@ -412,7 +412,7 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
         Mock.Mock<IReaparrDbContextDatabase>().Verify(x => x.Migrate(), Times.Once);
     }
 
-    [Fact]
+    [Test]
     public void ShouldHandleExceptionInResetDatabase_AndReturnFailure()
     {
         // Arrange
@@ -430,7 +430,7 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
         result.IsFailed.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public void ShouldSetFirstTimeSetupToTrue_WhenDatabaseIsReset()
     {
         // Arrange
@@ -460,7 +460,7 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
         generalSettingsMock.VerifySet(x => x.FirstTimeSetup = true, Times.Once);
     }
 
-    [Fact]
+    [Test]
     public void ShouldSkipBackup_WhenDatabaseDoesNotExistDuringReset()
     {
         // Arrange
@@ -481,7 +481,7 @@ public class ReaparrDbContextManagerUnitTests : BaseUnitTest<ReaparrDbContextMan
         Mock.Mock<IFile>().Verify(x => x.Copy(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
     }
 
-    [Fact]
+    [Test]
     public void ShouldFailAuthDatabaseCreation_WhenExceptionIsThrown()
     {
         // Arrange

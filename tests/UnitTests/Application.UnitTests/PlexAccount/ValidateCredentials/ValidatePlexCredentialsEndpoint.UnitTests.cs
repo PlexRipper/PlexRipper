@@ -6,10 +6,10 @@ namespace Reaparr.Application.UnitTests;
 
 public class ValidatePlexCredentialsEndpointUnitTests : BaseUnitTest
 {
-    public ValidatePlexCredentialsEndpointUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public ValidatePlexCredentialsEndpointUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnValidatedAccount_WhenSignInSucceeds()
     {
         // Arrange
@@ -89,7 +89,7 @@ public class ValidatePlexCredentialsEndpointUnitTests : BaseUnitTest
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldUseProvidedClientId_WhenClientIdIsPresent()
     {
         // Arrange
@@ -143,7 +143,7 @@ public class ValidatePlexCredentialsEndpointUnitTests : BaseUnitTest
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldGenerateClientId_WhenClientIdIsMissing()
     {
         // Arrange
@@ -197,7 +197,7 @@ public class ValidatePlexCredentialsEndpointUnitTests : BaseUnitTest
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldRequireVerificationCode_WhenThePlexAPIRespondsWithA2Fa()
     {
         // Arrange
@@ -267,7 +267,7 @@ public class ValidatePlexCredentialsEndpointUnitTests : BaseUnitTest
             .Verify(x => x.Send(It.IsAny<PlexSignInCommand>(), It.IsAny<CancellationToken>()), Times.Once());
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldNotMarkUnauthorized_WhenUnhandledPlexErrorsOccur()
     {
         // Arrange
@@ -324,7 +324,7 @@ public class ValidatePlexCredentialsEndpointUnitTests : BaseUnitTest
             .Verify(x => x.Send(It.IsAny<PlexSignInCommand>(), It.IsAny<CancellationToken>()), Times.Once());
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnFailedResult_WhenCommandExecutionFails()
     {
         // Arrange

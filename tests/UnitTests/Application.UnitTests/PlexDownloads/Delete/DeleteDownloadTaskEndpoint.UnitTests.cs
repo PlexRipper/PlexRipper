@@ -5,10 +5,10 @@ namespace Reaparr.Application.UnitTests;
 
 public class DeleteDownloadTaskEndpointUnitTests : BaseUnitTest<DeleteDownloadTaskEndpoint>
 {
-    public DeleteDownloadTaskEndpointUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public DeleteDownloadTaskEndpointUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldDispatchDeleteCommand_WhenDownloadTaskIdIsGiven()
     {
         // Arrange
@@ -77,7 +77,7 @@ public class DeleteDownloadTaskEndpointUnitTests : BaseUnitTest<DeleteDownloadTa
         (await dbContext.DownloadTaskTvShow.AnyAsync(CancellationToken)).ShouldBeFalse();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldStopDownloadingAndDispatchDelete_WhenTaskIsActivelyDownloading()
     {
         // Arrange
@@ -135,7 +135,7 @@ public class DeleteDownloadTaskEndpointUnitTests : BaseUnitTest<DeleteDownloadTa
         (await dbContext.DownloadTaskMovieFile.AnyAsync(CancellationToken)).ShouldBeFalse();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnSuccessWithoutDispatchingDelete_WhenResolvedKeysAreMissing()
     {
         // Arrange

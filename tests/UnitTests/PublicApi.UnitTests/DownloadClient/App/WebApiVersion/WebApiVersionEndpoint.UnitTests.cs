@@ -8,10 +8,10 @@ namespace Reaparr.PublicAPI.UnitTests;
 
 public class WebApiVersionEndpointUnitTests : BaseUnitTest<WebApiVersionEndpoint>
 {
-    public WebApiVersionEndpointUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public WebApiVersionEndpointUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnWebApiVersionString_WhenBodyParsed()
     {
         // Arrange

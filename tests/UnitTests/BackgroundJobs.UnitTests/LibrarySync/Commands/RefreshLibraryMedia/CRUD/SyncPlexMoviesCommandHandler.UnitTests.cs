@@ -4,10 +4,10 @@ public class SyncPlexMoviesCommandHandlerUnitTests : BaseUnitTest<SyncPlexMovies
 {
     private SyncPlexMoviesCommandValidator _validator = new();
 
-    public SyncPlexMoviesCommandHandlerUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public SyncPlexMoviesCommandHandlerUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldCreateAllMovies_WhenNoneExistsYet()
     {
         // Arrange
@@ -34,7 +34,12 @@ public class SyncPlexMoviesCommandHandlerUnitTests : BaseUnitTest<SyncPlexMovies
             PlexCountries = [], // TODO add metadata here
         };
         var request = new SyncPlexMoviesCommand(insertCommand);
-        (await _validator.ValidateAsync(request, TestContext.Current.CancellationToken)).IsValid.ShouldBeTrue();
+        (
+            await _validator.ValidateAsync(
+                request,
+                TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
+            )
+        ).IsValid.ShouldBeTrue();
         var result = await Sut.ExecuteAsync(request, CancellationToken);
 
         // Assert
@@ -43,7 +48,7 @@ public class SyncPlexMoviesCommandHandlerUnitTests : BaseUnitTest<SyncPlexMovies
         plexMoviesDb.Count.ShouldBe(50);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldDeleteTwentyMovies_WhenSomeExist()
     {
         // Arrange
@@ -74,7 +79,12 @@ public class SyncPlexMoviesCommandHandlerUnitTests : BaseUnitTest<SyncPlexMovies
             PlexCountries = [], // TODO add metadata here
         };
         var request = new SyncPlexMoviesCommand(insertCommand);
-        (await _validator.ValidateAsync(request, TestContext.Current.CancellationToken)).IsValid.ShouldBeTrue();
+        (
+            await _validator.ValidateAsync(
+                request,
+                TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
+            )
+        ).IsValid.ShouldBeTrue();
         var result = await Sut.ExecuteAsync(request, CancellationToken);
 
         // Assert
@@ -85,7 +95,7 @@ public class SyncPlexMoviesCommandHandlerUnitTests : BaseUnitTest<SyncPlexMovies
             plexMoviesDb.Find(x => x.PlexApiRatingKey == plexMovie.PlexApiRatingKey).ShouldNotBeNull();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldCreateUpdateAndDeleteMovies_WhenSomeExist()
     {
         // Arrange
@@ -130,7 +140,12 @@ public class SyncPlexMoviesCommandHandlerUnitTests : BaseUnitTest<SyncPlexMovies
             PlexCountries = [], // TODO add metadata here
         };
         var request = new SyncPlexMoviesCommand(insertCommand);
-        (await _validator.ValidateAsync(request, TestContext.Current.CancellationToken)).IsValid.ShouldBeTrue();
+        (
+            await _validator.ValidateAsync(
+                request,
+                TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
+            )
+        ).IsValid.ShouldBeTrue();
         var result = await Sut.ExecuteAsync(request, CancellationToken);
 
         // Assert

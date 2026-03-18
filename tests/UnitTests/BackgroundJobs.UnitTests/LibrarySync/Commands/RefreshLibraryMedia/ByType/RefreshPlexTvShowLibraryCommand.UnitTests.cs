@@ -8,8 +8,8 @@ namespace Reaparr.BackgroundJobs.UnitTests;
 
 public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlexTvShowLibraryCommandHandler>
 {
-    public RefreshPlexTvShowLibraryCommandUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public RefreshPlexTvShowLibraryCommandUnitTests()
+        : base() { }
 
     private void SetupProgressStoreMocks(List<LibraryProgressItem>? capturedItems = null)
     {
@@ -80,7 +80,7 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
             .ReturnsAsync(Result.Ok(rapport ?? new BulkInsertTvShowsRapport()));
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldSuccessfullyRefreshLibraryAndUpdateSyncedAt_WhenTvShowsExist()
     {
         // Arrange
@@ -120,7 +120,7 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldSendProgressWithSeasonAndEpisodeItems_WhenTvShowsExist()
     {
         // Arrange
@@ -155,7 +155,7 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
         capturedItems.ShouldContain(i => i.MediaType == PlexMediaType.Episode);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnFailure_WhenGetAllMediaSeasonsCommandFails()
     {
         // Arrange
@@ -189,7 +189,7 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnFailure_WhenGetAllMediaEpisodesCommandFails()
     {
         // Arrange
@@ -228,7 +228,7 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnFailure_WhenSyncPlexTvShowsCommandFails()
     {
         // Arrange
@@ -267,7 +267,7 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
 
     // ── Filter: null ParentGuid ────────────────────────────────────────────
 
-    [Fact]
+    [Test]
     public async Task ShouldFilterOutSeasonsWithNullParentGuid_WhenBuildingTree()
     {
         // Arrange
@@ -310,7 +310,7 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
         tvShow.Seasons.First().Guid.ShouldBe(validSeason.Guid);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldFilterOutEpisodesWithNullParentGuid_WhenBuildingTree()
     {
         // Arrange
@@ -358,7 +358,7 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
 
     // ── BuildTvShowTree: orphaned seasons ─────────────────────────────────
 
-    [Fact]
+    [Test]
     public async Task ShouldIgnoreOrphanedSeasons_WhenParentTvShowDoesNotExist()
     {
         // Arrange
@@ -399,7 +399,7 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
 
     // ── BuildTvShowTree: aggregation ──────────────────────────────────────
 
-    [Fact]
+    [Test]
     public async Task ShouldAggregateMediaSizeAndDurationFromEpisodes_WhenBuildingTree()
     {
         // Arrange
@@ -462,7 +462,7 @@ public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlex
 
     // ── BuildTvShowTree: sort indices ─────────────────────────────────────
 
-    [Fact]
+    [Test]
     public async Task ShouldAssignAscendingSortIndices_WhenBuildingTree()
     {
         // Arrange

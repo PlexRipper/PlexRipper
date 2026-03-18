@@ -7,10 +7,10 @@ namespace Reaparr.Settings.UnitTests;
 
 public class ConfigManagerMigrateLegacyFileNamesUnitTests : BaseUnitTest<ConfigManager>
 {
-    public ConfigManagerMigrateLegacyFileNamesUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public ConfigManagerMigrateLegacyFileNamesUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public void ShouldRenameLegacyConfigFile_WhenOldExistsAndNewMissing()
     {
         // Arrange
@@ -53,7 +53,7 @@ public class ConfigManagerMigrateLegacyFileNamesUnitTests : BaseUnitTest<ConfigM
         Mock.Mock<IFile>().Verify(x => x.Move(oldConfigPath, newConfigPath), Times.Once);
     }
 
-    [Fact]
+    [Test]
     public void ShouldNotThrow_WhenNoLegacyFilesPresent()
     {
         // Arrange
@@ -84,7 +84,7 @@ public class ConfigManagerMigrateLegacyFileNamesUnitTests : BaseUnitTest<ConfigM
         result.IsSuccess.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public void ShouldRenameLegacyDatabaseFiles_WhenOldDbAndSidecarsExistAndNewMissing()
     {
         // Arrange
@@ -138,7 +138,7 @@ public class ConfigManagerMigrateLegacyFileNamesUnitTests : BaseUnitTest<ConfigM
         Mock.Mock<IFile>().Verify(x => x.Move(oldShmPath, newShmPath), Times.Once);
     }
 
-    [Fact]
+    [Test]
     public void ShouldNotRename_WhenNewTargetsAlreadyExist()
     {
         // Arrange
@@ -181,7 +181,7 @@ public class ConfigManagerMigrateLegacyFileNamesUnitTests : BaseUnitTest<ConfigM
         Mock.Mock<IFile>().Verify(x => x.Move(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
     }
 
-    [Fact]
+    [Test]
     public void ShouldRenameOnlyWal_WhenOnlyWalPresent()
     {
         // Arrange
@@ -228,7 +228,7 @@ public class ConfigManagerMigrateLegacyFileNamesUnitTests : BaseUnitTest<ConfigM
         Mock.Mock<IFile>().Verify(x => x.Move(oldShmPath, newShmPath), Times.Never);
     }
 
-    [Fact]
+    [Test]
     public void ShouldReturnFailure_WhenConfigDirectoryMissing()
     {
         // Arrange

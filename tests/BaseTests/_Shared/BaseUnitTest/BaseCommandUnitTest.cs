@@ -6,6 +6,9 @@ namespace Reaparr.BaseTests;
 public abstract class BaseCommandUnitTest<TCommand> : BaseUnitTest
     where TCommand : class
 {
+    protected BaseCommandUnitTest(LogEventLevel logEventLevel = LogEventLevel.Verbose)
+        : base(logEventLevel) { }
+
     protected BaseCommandUnitTest(ITestOutputHelper output, LogEventLevel logEventLevel = LogEventLevel.Verbose)
         : base(output, logEventLevel) { }
 

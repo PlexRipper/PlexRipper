@@ -2,46 +2,56 @@ namespace Reaparr.BaseTests.UnitTests.IDE_Tests;
 
 public class NormalEmptyUnitTests
 {
-    private readonly ITestOutputHelper _output;
+    private readonly ITestOutputHelper _output = new TUnitTestOutputHelper();
 
-    public NormalEmptyUnitTests(ITestOutputHelper output)
-    {
-        _output = output;
-    }
-
-    [Fact]
+    [Test]
     public void ShouldCompleteImmediately_WhenEmptyTestWithOnlyAnAssertion()
     {
         // Assert
         true.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldStopOnException_WhenAnUserUnhandeledExceptionIsThrown()
     {
         // Act
-        var exception = await Record.ExceptionAsync(() => throw new Exception("Test Exception"));
+        Exception? exception = null;
+        try
+        {
+            await Task.Run(() => throw new Exception("Test Exception"));
+        }
+        catch (Exception ex)
+        {
+            exception = ex;
+        }
 
         // Assert
         exception.ShouldNotBeNull();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldStopOnException_WhenAnUserHandledExceptionIsThrown()
     {
         // Act
-        var exception = await Record.ExceptionAsync(() =>
+        Exception? exception = null;
+        try
         {
-            try
+            await Task.Run(() =>
             {
-                throw new Exception("Test Exception");
-            }
-            catch (Exception e)
-            {
-                _output.WriteLine(e.Message);
-                return Task.CompletedTask;
-            }
-        });
+                try
+                {
+                    throw new Exception("Test Exception");
+                }
+                catch (Exception e)
+                {
+                    _output.WriteLine(e.Message);
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            exception = ex;
+        }
 
         // Assert
         exception.ShouldBeNull();

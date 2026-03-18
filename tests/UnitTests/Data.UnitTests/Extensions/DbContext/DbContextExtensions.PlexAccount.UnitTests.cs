@@ -4,10 +4,10 @@ namespace Reaparr.Data.UnitTests;
 
 public class DbContextExtensionsPlexAccountUnitTests : BaseUnitTest
 {
-    public DbContextExtensionsPlexAccountUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public DbContextExtensionsPlexAccountUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldGetAccessibleServers_WhenAccountHasServers()
     {
         // Arrange
@@ -29,7 +29,7 @@ public class DbContextExtensionsPlexAccountUnitTests : BaseUnitTest
         result.Value.Count.ShouldBe(2);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldFail_GetAccessibleServers_WhenAccountMissing()
     {
         // Arrange
@@ -42,7 +42,7 @@ public class DbContextExtensionsPlexAccountUnitTests : BaseUnitTest
         result.IsFailed.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldChooseNonMainAccount_WhenMultipleEnabledAccounts()
     {
         // Arrange
@@ -82,7 +82,7 @@ public class DbContextExtensionsPlexAccountUnitTests : BaseUnitTest
         result.Value.Id.ShouldBe(nonMain.Id);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnDisplayName_WhenAccountExists()
     {
         // Arrange
@@ -102,7 +102,7 @@ public class DbContextExtensionsPlexAccountUnitTests : BaseUnitTest
         displayName.ShouldBe(account.DisplayName);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldDetectTakenUsername_WhenAccountExists()
     {
         // Arrange
@@ -122,7 +122,7 @@ public class DbContextExtensionsPlexAccountUnitTests : BaseUnitTest
         available.ShouldBeFalse();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnAccountsWithAccess_WhenServerHasAssociations()
     {
         // Arrange

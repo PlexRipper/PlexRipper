@@ -4,10 +4,10 @@ namespace Reaparr.BackgroundJobs.UnitTests;
 
 public class SyncPlexLibraryMediaMetaDataCommandUnitTests : BaseCommandUnitTest<SyncPlexLibraryMediaMetaDataCommand>
 {
-    public SyncPlexLibraryMediaMetaDataCommandUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public SyncPlexLibraryMediaMetaDataCommandUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnNotFound_WhenLibraryDoesNotExist()
     {
         // Arrange
@@ -37,7 +37,7 @@ public class SyncPlexLibraryMediaMetaDataCommandUnitTests : BaseCommandUnitTest<
         result.Has404NotFoundError().ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldRemoveOldPlexLibraryActors_WhenNewDataIsProvided()
     {
         // Arrange
@@ -72,7 +72,12 @@ public class SyncPlexLibraryMediaMetaDataCommandUnitTests : BaseCommandUnitTest<
         await dbContext.SaveChangesAsync(CancellationToken);
 
         // Create new data with different roles
-        var newPlexApiActors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).GenerateUnique(30, x => x.Key);
+        var existingActorKeys = plexActors.Select(x => x.Key).ToHashSet();
+        var newPlexApiActors = FakePlexApiData
+            .GetLibraryMediaItemActorDTO(seed)
+            .GenerateUnique(30, x => x.Key)
+            .Where(x => !existingActorKeys.Contains(x.Key))
+            .ToList();
         var newPlexActors = newPlexApiActors.ToPlexActor();
         await dbContext.PlexActors.AddRangeAsync(newPlexActors, CancellationToken);
         await dbContext.SaveChangesAsync(CancellationToken);
@@ -103,7 +108,7 @@ public class SyncPlexLibraryMediaMetaDataCommandUnitTests : BaseCommandUnitTest<
         }
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldUpdatePlexLibraryCountsCorrectly_WhenSyncingMetadata()
     {
         // Arrange
@@ -189,7 +194,7 @@ public class SyncPlexLibraryMediaMetaDataCommandUnitTests : BaseCommandUnitTest<
         libraryCountriesCount.ShouldBe(5);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldSetCountsToZero_WhenSyncingWithEmptyMetadata()
     {
         // Arrange

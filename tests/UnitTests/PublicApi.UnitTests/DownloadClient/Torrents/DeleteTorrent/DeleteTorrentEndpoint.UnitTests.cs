@@ -5,10 +5,10 @@ namespace Reaparr.PublicAPI.UnitTests;
 
 public class DeleteTorrentEndpointUnitTests : BaseUnitTest<DeleteTorrentEndpoint>
 {
-    public DeleteTorrentEndpointUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public DeleteTorrentEndpointUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldDeleteDownloadTask_WhenHashIdMatches()
     {
         // Arrange
@@ -62,7 +62,7 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest<DeleteTorrentEndpoint
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldStopDownloadTask_WhenHashIdMatchesAndDownloading()
     {
         // Arrange
@@ -133,7 +133,7 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest<DeleteTorrentEndpoint
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldStopDownloadTask_WhenHashIdMatchesHashesRawAndDownloading()
     {
         // Arrange
@@ -205,7 +205,7 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest<DeleteTorrentEndpoint
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldStopDownloadTask_WhenHashIdCasingDiffersInHashesRaw()
     {
         // Arrange
@@ -270,7 +270,7 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest<DeleteTorrentEndpoint
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldStopDownloadingAndDeleteMatchedTasks_WhenHashesRawIsTrimmedAll()
     {
         // Arrange
@@ -360,7 +360,7 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest<DeleteTorrentEndpoint
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldNotStopOrDelete_WhenHashesRawIsAllAndNoHashIdsExist()
     {
         // Arrange
@@ -402,7 +402,7 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest<DeleteTorrentEndpoint
         existingMovieFile.ShouldNotBeNull();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldStopQueuedTask_WhenHashesRawIsAll()
     {
         // Arrange
@@ -454,7 +454,7 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest<DeleteTorrentEndpoint
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldPassDeleteFilesFalseToStop_WhenHashesRawIsAll()
     {
         // Arrange
@@ -519,7 +519,7 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest<DeleteTorrentEndpoint
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldCallDeleteDownloadTaskFilesCommand_WhenDeleteFilesTrueAndTaskIsCompleted()
     {
         // Arrange — Sonarr/Radarr scenario: task is Completed, deleteFiles=true.
@@ -573,7 +573,7 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest<DeleteTorrentEndpoint
             .Verify(x => x.Send(It.IsAny<StopDownloadTaskCommand>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldNotCallDeleteDownloadTaskFilesCommand_WhenDeleteFilesFalseAndTaskIsCompleted()
     {
         // Arrange — deleteFiles=false: files must not be touched even for completed tasks.
@@ -616,7 +616,7 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest<DeleteTorrentEndpoint
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldNotCallDeleteDownloadTaskFilesCommand_WhenNoCompletedTasksMatchHash()
     {
         // Arrange — only a downloading task matched; DeleteDownloadTaskFilesCommand must not be called.
@@ -664,7 +664,7 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest<DeleteTorrentEndpoint
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldDeleteOnlyKeysWhosePrerequisitesSucceeded_WhenStoppingAndDeletingFiles()
     {
         // Arrange
@@ -737,7 +737,7 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest<DeleteTorrentEndpoint
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldDeleteMatchedTasksInOtherStatuses_WithoutStopOrFileDeletionPrerequisites()
     {
         // Arrange

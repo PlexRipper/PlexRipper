@@ -5,14 +5,9 @@ namespace Reaparr.Logging.UnitTests;
 
 public class LogExtensionsUnitTests
 {
-    private readonly ITestOutputHelper _output;
+    private readonly ITestOutputHelper _output = new TUnitTestOutputHelper();
 
-    public LogExtensionsUnitTests(ITestOutputHelper output)
-    {
-        _output = output;
-    }
-
-    [Fact]
+    [Test]
     public void ShouldLogTheSetLogLevel_WhenLogLevelSetIsVerbose()
     {
         // Arrange
@@ -27,7 +22,7 @@ public class LogExtensionsUnitTests
         log.IsLogLevelEnabled(LogEventLevel.Fatal).ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public void ShouldNotLogTheSetLogLevel_WhenLogLevelIsAbove()
     {
         // Arrange
@@ -42,7 +37,7 @@ public class LogExtensionsUnitTests
         log.IsLogLevelEnabled(LogEventLevel.Fatal).ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public void ShouldLogWithCorrectLogProperties_WhenEachLogTypeIsCalled()
     {
         var position = new { Latitude = 25, Longitude = 134 };

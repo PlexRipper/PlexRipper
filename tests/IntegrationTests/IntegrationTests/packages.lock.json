@@ -157,6 +157,11 @@
         "resolved": "4.4.0",
         "contentHash": "gwJEfIGS7FhykvtZoscwXj/XwW+mJY6UbAZk+qtLKFUGWC95kfKXnj8VkxsZQnWBxJemM/q664rGLN5nf+OHZw=="
       },
+      "EnumerableAsyncProcessor": {
+        "type": "Transitive",
+        "resolved": "2.1.0",
+        "contentHash": "kcaATgEjEHOUs0/4ZM9Y5QIOHvfWSolkzQg54VxEDvbwRPHL5IVIR7rySFB7Vi8PKQcLYc+8C+Re/4OJaQAdrw=="
+      },
       "FastEndpoints": {
         "type": "Transitive",
         "resolved": "7.1.1",
@@ -1393,6 +1398,37 @@
         "resolved": "10.0.0",
         "contentHash": "tZOXFLGjkh8TxgMgKeEcM2HAlz9DwndGl6TFLo6ISHcszFX3FkuPMrtVbmqVjhooWNXrgJ/a9cH9ym5MZL1LAg=="
       },
+      "TUnit": {
+        "type": "Transitive",
+        "resolved": "0.50.0",
+        "contentHash": "vwd1frixKAq2WffAghqeLhAr5QMZbpmu8GNIz/p/WtSyZ4c5AnUKwiyO9eOUpPMjyP9oZbEvFDj9PC2Bpfep3A==",
+        "dependencies": {
+          "TUnit.Assertions": "0.50.0",
+          "TUnit.Engine": "0.50.0"
+        }
+      },
+      "TUnit.Assertions": {
+        "type": "Transitive",
+        "resolved": "0.50.0",
+        "contentHash": "aafe1IHkurBLzmRK43hJNCw6YnrO+1isamYCABjsbQnL7w+0wyipknEVSQwrBoMUlUb7rVoLxB8VX/71313RhA=="
+      },
+      "TUnit.Core": {
+        "type": "Transitive",
+        "resolved": "0.50.0",
+        "contentHash": "XcbU6RLwf0thdBUKrU040vpiHKhXEYEu1/x5G6veK1+8IU7qCBl6ruNfXO47e1yDTp+ZjD5f83AyoyjH0VqAOA=="
+      },
+      "TUnit.Engine": {
+        "type": "Transitive",
+        "resolved": "0.50.0",
+        "contentHash": "gosRW2V/hlEU0m2vQNoOtwGikif8HYVOVeAjUmcrDUMSXZU/0hOo7MvWelxZ8es6haOgCVpJ3xEpzYOiFInKsw==",
+        "dependencies": {
+          "EnumerableAsyncProcessor": "2.1.0",
+          "Microsoft.Testing.Extensions.TrxReport.Abstractions": "1.7.3",
+          "Microsoft.Testing.Platform": "1.7.3",
+          "Microsoft.Testing.Platform.MSBuild": "1.4.3",
+          "TUnit.Core": "0.50.0"
+        }
+      },
       "xunit.analyzers": {
         "type": "Transitive",
         "resolved": "1.26.0",
@@ -1549,13 +1585,13 @@
           "Bogus.Hollywood": "[35.6.5, )",
           "FastEndpoints.Testing": "[7.1.1, )",
           "Microsoft.AspNetCore.Mvc.Testing": "[10.0.1, )",
-          "Microsoft.NET.Test.Sdk": "[18.0.1, )",
           "Moq": "[4.20.72, )",
           "Moq.Contrib.HttpClient": "[1.4.0, )",
           "Reaparr.AppHost": "[1.0.0, )",
           "Shouldly": "[4.3.0, )",
+          "TUnit": "[0.50.0, )",
           "TestableIO.System.IO.Abstractions.TestingHelpers": "[22.1.0, )",
-          "xunit.v3": "[3.2.1, )"
+          "xunit.v3.extensibility.core": "[3.2.1, )"
         }
       },
       "Reaparr.Data": {

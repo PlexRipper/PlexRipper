@@ -106,11 +106,7 @@ public class SetupRadarrDownloadClientCommandHandler
             );
 
             if (createResult.IsFailed)
-                return createResult
-                    .WithError(
-                        "If Radarr cannot reach Reaparr, set the 'Public URL' in Advanced → Network settings to an address reachable from Radarr (e.g. http://reaparr:5000 in Docker)."
-                    )
-                    .LogError();
+                return createResult.WithError(PUBLIC_URL_HINT).LogError();
 
             return Result.Ok(new SetupRadarrDownloadClientCommandResult { DownloadClientId = createResult.Value.Id });
         }

@@ -107,11 +107,7 @@ public class SetupSonarrDownloadClientCommandHandler
             );
 
             if (createResult.IsFailed)
-                return createResult
-                    .WithError(
-                        "If Sonarr cannot reach Reaparr, set the 'Public URL' in Advanced → Network settings to an address reachable from Sonarr (e.g. http://reaparr:5000 in Docker)."
-                    )
-                    .LogError();
+                return createResult.WithError(PUBLIC_URL_HINT).LogError();
 
             return Result.Ok(new SetupSonarrDownloadClientCommandResult { DownloadClientId = createResult.Value.Id });
         }

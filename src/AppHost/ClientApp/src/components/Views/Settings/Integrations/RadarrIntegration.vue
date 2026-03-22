@@ -1,9 +1,11 @@
 <template>
 	<QSection :header="t('components.radarr-integration.title')">
 		<QAlert
-			type="info"
+			:type="settingsStore.networkSettings.reverseProxyUrl ? 'info' : 'warning'"
 			to="/settings/advanced#reverse-proxy-settings">
-			{{ t('components.radarr-integration.reverse-proxy-alert') }}
+			{{ settingsStore.networkSettings.reverseProxyUrl
+				? t('components.radarr-integration.callback-url-configured', { url: settingsStore.networkSettings.reverseProxyUrl })
+				: t('components.radarr-integration.callback-url-warning') }}
 		</QAlert>
 		<q-stepper
 			ref="stepper"

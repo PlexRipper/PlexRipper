@@ -1,9 +1,11 @@
 <template>
 	<QSection :header="t('components.sonarr-integration.title')">
 		<QAlert
-			type="info"
+			:type="settingsStore.networkSettings.reverseProxyUrl ? 'info' : 'warning'"
 			to="/settings/advanced#reverse-proxy-settings">
-			{{ t('components.sonarr-integration.reverse-proxy-alert') }}
+			{{ settingsStore.networkSettings.reverseProxyUrl
+				? t('components.sonarr-integration.callback-url-configured', { url: settingsStore.networkSettings.reverseProxyUrl })
+				: t('components.sonarr-integration.callback-url-warning') }}
 		</QAlert>
 		<q-stepper
 			ref="stepper"

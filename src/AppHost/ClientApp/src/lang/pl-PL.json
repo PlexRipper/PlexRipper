@@ -384,7 +384,8 @@
             }
         },
         "sonarr-integration": {
-            "reverse-proxy-alert": "Jeśli używasz reverse proxy, skonfiguruj je w ustawieniach sieci przed skonfigurowaniem integracji Sonarr.",
+            "callback-url-warning": "Reaparr zarejestruje się w Sonarr używając localhost jako adresu zwrotnego. W środowisku Docker skonfiguruj publiczny adres URL Reaparr w ustawieniach sieci.",
+            "callback-url-configured": "Reaparr zarejestruje się w Sonarr używając {url} jako adresu zwrotnego.",
             "connection-status": {
                 "connection-failed": "Nie udało się połączyć z Sonarr. Upewnij się, że Sonarr jest online i można się z nim połączyć!",
                 "invalid-api-key": "Udało się połączyć z Sonarr, ale klucz API był nieprawidłowy",
@@ -407,7 +408,8 @@
             "title": "Integracja Sonarr"
         },
         "radarr-integration": {
-            "reverse-proxy-alert": "Jeśli używasz reverse proxy, skonfiguruj je w ustawieniach sieci przed skonfigurowaniem integracji Radarr.",
+            "callback-url-warning": "Reaparr zarejestruje się w Radarr używając localhost jako adresu zwrotnego. W środowisku Docker skonfiguruj publiczny adres URL Reaparr w ustawieniach sieci.",
+            "callback-url-configured": "Reaparr zarejestruje się w Radarr używając {url} jako adresu zwrotnego.",
             "connection-status": {
                 "connection-failed": "Nie udało się połączyć z Radarr. Upewnij się, że Radarr jest online i można się z nim połączyć!",
                 "invalid-api-key": "Udało się połączyć z Radarr, ale klucz API był nieprawidłowy",

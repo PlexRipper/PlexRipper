@@ -384,7 +384,8 @@
             }
         },
         "sonarr-integration": {
-            "reverse-proxy-alert": "Si vous utilisez un proxy inverse, configurez-le dans les paramètres réseau avant de configurer l'intégration Sonarr.",
+            "callback-url-warning": "Reaparr s'enregistrera dans Sonarr avec localhost comme URL de rappel. En environnement Docker, configurez l'URL publique de Reaparr dans les paramètres réseau.",
+            "callback-url-configured": "Reaparr s'enregistrera dans Sonarr avec {url} comme URL de rappel.",
             "connection-status": {
                 "connection-failed": "Impossible de se connecter à Sonarr. Assurez-vous que Sonarr est en ligne et accessible!",
                 "invalid-api-key": "Connexion à Sonarr impossible, mais la clé API était invalide.",
@@ -407,7 +408,8 @@
             "title": "Intégration Sonarr"
         },
         "radarr-integration": {
-            "reverse-proxy-alert": "Si vous utilisez un proxy inverse, configurez-le dans les paramètres réseau avant de configurer l'intégration Radarr.",
+            "callback-url-warning": "Reaparr s'enregistrera dans Radarr avec localhost comme URL de rappel. En environnement Docker, configurez l'URL publique de Reaparr dans les paramètres réseau.",
+            "callback-url-configured": "Reaparr s'enregistrera dans Radarr avec {url} comme URL de rappel.",
             "connection-status": {
                 "connection-failed": "Impossible de se connecter à Radarr. Assurez-vous que Radarr est en ligne et accessible!",
                 "invalid-api-key": "Connexion à Radarr possible, mais la clé API était invalide.",

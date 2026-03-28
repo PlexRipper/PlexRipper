@@ -4,9 +4,6 @@ namespace Reaparr.Application.UnitTests;
 
 public class DownloadQueueGetNextDownloadTaskUnitTests : BaseUnitTest<DownloadQueue>
 {
-    public DownloadQueueGetNextDownloadTaskUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldHaveNextDownloadTask_WhenAllAreQueued()
     {

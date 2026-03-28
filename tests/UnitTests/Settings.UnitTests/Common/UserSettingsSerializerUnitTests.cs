@@ -1,6 +1,6 @@
 using Reaparr.Settings.Contracts;
 
-namespace Reaparr.Settings.UnitTests.Common;
+namespace Reaparr.Settings.UnitTests;
 
 public class UserSettingsSerializerUnitTests : BaseUnitTest
 {

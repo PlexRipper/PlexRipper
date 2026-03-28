@@ -1,4 +1,4 @@
-namespace Reaparr.Domain.UnitTests.Mappers;
+namespace Reaparr.Domain.UnitTests;
 
 public partial class PlexMediaTypeMappersUnitTests
 {

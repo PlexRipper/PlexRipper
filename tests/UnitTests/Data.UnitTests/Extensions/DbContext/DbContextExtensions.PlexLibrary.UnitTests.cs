@@ -4,9 +4,6 @@ namespace Reaparr.Data.UnitTests;
 
 public class DbContextExtensionsPlexLibraryUnitTests : BaseUnitTest
 {
-    public DbContextExtensionsPlexLibraryUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldReturnLibraryName_WhenLibraryExists()
     {

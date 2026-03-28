@@ -791,9 +791,9 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
             .Returns(
                 async (PauseDownloadTaskCommand command, CancellationToken ct) =>
                 {
-                    var key = await IDbContext.GetDownloadTaskKeyAsync(command.DownloadTaskGuid, ct);
+                    var key = await dbContext.GetDownloadTaskKeyAsync(command.DownloadTaskGuid, ct);
                     key.ShouldNotBeNull();
-                    await IDbContext.SetDownloadStatus(key, DownloadStatus.Queued);
+                    await dbContext.SetDownloadStatus(key, DownloadStatus.Queued);
                     return Result.Ok();
                 }
             );

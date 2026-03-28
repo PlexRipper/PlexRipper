@@ -8,9 +8,6 @@ namespace Reaparr.PublicAPI.UnitTests;
 
 public class WebApiVersionEndpointUnitTests : BaseUnitTest<WebApiVersionEndpoint>
 {
-    public WebApiVersionEndpointUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldReturnWebApiVersionString_WhenBodyParsed()
     {
@@ -32,10 +29,8 @@ public class WebApiVersionEndpointUnitTests : BaseUnitTest<WebApiVersionEndpoint
         }
         else
         {
-            var dbContextMock = Moq.Mock.Get(dbContext);
-            dbContextMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(0);
-            var saveChangesCount = await dbContext.SaveChangesAsync(CancellationToken);
-            saveChangesCount.ShouldBe(0);
+            Moq.Mock.Get(dbContext)
+                .Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never());
         }
 
         var body = Encoding.UTF8.GetString(buffer.ToArray());
@@ -45,6 +40,5 @@ public class WebApiVersionEndpointUnitTests : BaseUnitTest<WebApiVersionEndpoint
         // This must not throw; the string must be a valid dotted numeric version.
         var parsed = Version.Parse(body);
         parsed.ShouldNotBeNull();
-
     }
 }

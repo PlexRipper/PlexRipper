@@ -1,5 +1,6 @@
 using System.Net;
 using System.Security.Claims;
+using System.Threading;
 using Autofac;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
@@ -1778,7 +1779,6 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
     {
         // Arrange
         var tasks = new List<Task>();
-        var results = new List<bool>();
 
         // Setup authentication settings once
         var headerAuthSettings = new HeaderAuthenticationSettings
@@ -1800,12 +1800,12 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         SetupAuthenticationSettings(authSettings.HeaderAuthentication);
 
         // Create a single middleware instance to avoid AutoMock concurrency issues
-        var nextCalled = false;
+        var nextCallCount = 0;
         var next = new Mock<RequestDelegate>();
         next.Setup(x => x(It.IsAny<HttpContext>()))
             .Returns(() =>
             {
-                nextCalled = true;
+                Interlocked.Increment(ref nextCallCount);
                 return Task.CompletedTask;
             });
 
@@ -1823,11 +1823,6 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
                     // Act
                     await sut.InvokeAsync(context);
 
-                    // Assert
-                    lock (results)
-                    {
-                        results.Add(nextCalled);
-                    }
                 },
                 CancellationToken
             );
@@ -1839,8 +1834,8 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
         await Task.WhenAll(tasks);
 
         // Assert
-        results.Count.ShouldBe(10);
-        results.All(r => r).ShouldBeTrue();
+        nextCallCount.ShouldBe(10);
+        next.Verify(x => x(It.IsAny<HttpContext>()), Times.Exactly(10));
     }
 
     #endregion

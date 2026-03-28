@@ -1,6 +1,6 @@
-namespace Reaparr.BaseTests.UnitTests.IDE_Tests;
+namespace Reaparr.BaseTests.UnitTests;
 
-public class NormalEmptyUnitTests
+public class BasicIDEUnitTests
 {
     private readonly ITestOutputHelper _output = new TUnitTestOutputHelper();
 

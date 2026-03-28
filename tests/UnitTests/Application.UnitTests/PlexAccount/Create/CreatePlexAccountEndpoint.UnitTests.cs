@@ -2,11 +2,8 @@
 
 namespace Reaparr.Application.UnitTests;
 
-public class CreatePlexAccountEndpointUnitTests : BaseUnitTest
+public class CreatePlexAccountEndpointUnitTests : BaseUnitTest<CreatePlexAccountEndpoint>
 {
-    public CreatePlexAccountEndpointUnitTests()
-        : base() { }
-
     [Test]
     public async Task CreatePlexAccountAsync_ShouldSuccessResult_WhenAccountIsValid()
     {

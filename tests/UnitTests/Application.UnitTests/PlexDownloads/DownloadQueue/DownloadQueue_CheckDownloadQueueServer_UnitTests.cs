@@ -6,9 +6,6 @@ namespace Reaparr.Application.UnitTests;
 
 public class DownloadQueueCheckDownloadQueueUnitTests : BaseUnitTest<DownloadQueue>
 {
-    public DownloadQueueCheckDownloadQueueUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldHaveNoUpdates_WhenGivenAnEmptyList()
     {
@@ -22,6 +19,8 @@ public class DownloadQueueCheckDownloadQueueUnitTests : BaseUnitTest<DownloadQue
         // Assert
         result.IsFailed.ShouldBeTrue();
         result.Errors.Count.ShouldBeGreaterThan(0);
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Verify(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>()), Times.Never());
     }
 
     [Test]
@@ -101,6 +100,8 @@ public class DownloadQueueCheckDownloadQueueUnitTests : BaseUnitTest<DownloadQue
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Value.ShouldBeNull();
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Verify(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>()), Times.Never());
     }
 
     [Test]

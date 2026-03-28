@@ -1,6 +1,6 @@
 [Tests.Unit]
 rules: |
-  - Write tests using xUnit with [Fact] attributes.
+  - Write backend tests using TUnit with [Test] attributes.
   - Use async Task test methods whenever async operations are involved.
   - Use Shouldly for assertions (ShouldBeTrue, ShouldNotBeNull, ShouldBeEmpty, etc.).
   - Follow the Arrange–Act–Assert pattern with clear comments.
@@ -16,6 +16,7 @@ rules: |
     Example: `var dbContext = IDbContext;` then use `dbContext` throughout the test to ensure data persistence and visibility.
   - Ensure all created tests are passing before stopping, either fix the test and if a bug is found in the code then fix that.
   - Do not use dirty workarounds to make tests pass, ensure the tests is logically correct and or fix the code its testing
+  - Use `dotnet run --project <test-csproj> -- ...` for backend test execution because the repo uses TUnit on Microsoft.Testing.Platform with .NET 10.
 
     
   # Front-end unit test rules

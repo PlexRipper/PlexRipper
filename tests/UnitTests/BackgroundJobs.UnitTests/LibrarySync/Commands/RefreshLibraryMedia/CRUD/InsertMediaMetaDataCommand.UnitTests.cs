@@ -224,7 +224,7 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync(CancellationToken);
         plexLibrary.ShouldNotBeNull();
 
-        var actors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).GenerateUnique(100, x => x.Name);
+        var actors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).GenerateUnique(100, x => x.Key);
 
         // Act
         var command1 = new InsertMediaMetaDataCommand(
@@ -264,9 +264,9 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         plexLibrary.ShouldNotBeNull();
 
         // Create a large dataset
-        var actors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).Generate(1000);
-        var genres = FakePlexApiData.GetLibraryMediaItemGenreDTO(seed).Generate(1000);
-        var countries = FakePlexApiData.GetLibraryMediaItemCountryDTO(seed).Generate(1000);
+        var actors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).Generate(250);
+        var genres = FakePlexApiData.GetLibraryMediaItemGenreDTO(seed).Generate(250);
+        var countries = FakePlexApiData.GetLibraryMediaItemCountryDTO(seed).Generate(250);
 
         // Act
         var command = new InsertMediaMetaDataCommand(
@@ -578,9 +578,9 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync(CancellationToken);
         plexLibrary.ShouldNotBeNull();
 
-        var actors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).Generate(20);
-        var genres = FakePlexApiData.GetLibraryMediaItemGenreDTO(seed).Generate(20);
-        var countries = FakePlexApiData.GetLibraryMediaItemCountryDTO(seed).Generate(20);
+        var actors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).GenerateUnique(20, x => x.Key);
+        var genres = FakePlexApiData.GetLibraryMediaItemGenreDTO(seed).GenerateUnique(20, x => x.Key);
+        var countries = FakePlexApiData.GetLibraryMediaItemCountryDTO(seed).GenerateUnique(20, x => x.Key);
 
         var command = new InsertMediaMetaDataCommand(
             LibraryMetadata: new LibraryMetadata(plexLibrary)

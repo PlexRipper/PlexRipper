@@ -11,8 +11,6 @@ namespace Reaparr.BaseTests;
 
 public partial class BaseUnitTest
 {
-    protected readonly ITestOutputHelper Output;
-
     protected readonly ILogger Log;
 
     // Use loose behavior here to avoid Dispose() not mocked exception
@@ -21,18 +19,13 @@ public partial class BaseUnitTest
     protected CancellationToken CancellationToken =>
         TUnit.Core.TestContext.Current?.Execution.CancellationToken ?? CancellationToken.None;
 
-    protected BaseUnitTest(LogEventLevel logEventLevel = LogEventLevel.Verbose)
-        : this(new TUnitTestOutputHelper(), logEventLevel) { }
-
     /// <summary>
     /// This constructor is run before every test
     /// </summary>
     /// <param name="output">Sets up the logging system for logging during testing.</param>
     /// <param name="logEventLevel"></param>
-    protected BaseUnitTest(ITestOutputHelper output, LogEventLevel logEventLevel = LogEventLevel.Verbose)
+    protected BaseUnitTest(LogEventLevel logEventLevel = LogEventLevel.Verbose)
     {
-        Output = output;
-
         EnvironmentExtensions.EnableUnmaskedLog(true);
 
         // Pass the TestLogConfig to LogFactory so all application logs go to test output
@@ -83,9 +76,6 @@ public class BaseUnitTest<TUnitTestClass> : BaseUnitTest
     where TUnitTestClass : class
 {
     protected TUnitTestClass Sut => Mock.Create<TUnitTestClass>();
-
-    protected BaseUnitTest(ITestOutputHelper output, LogEventLevel logEventLevel = LogEventLevel.Verbose)
-        : base(output, logEventLevel) { }
 
     protected BaseUnitTest(LogEventLevel logEventLevel = LogEventLevel.Verbose)
         : base(logEventLevel) { }

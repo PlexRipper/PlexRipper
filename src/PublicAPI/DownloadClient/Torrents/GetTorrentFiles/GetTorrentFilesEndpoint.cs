@@ -51,12 +51,10 @@ public sealed class GetTorrentFilesEndpoint : Endpoint<GetTorrentFilesRequest, L
 
         var episodeFilesTask = _dbContext
             .DownloadTaskTvShowEpisodeFile.Where(x => x.HashId == req.Hash)
-            .Include(x => x.DirectoryMeta)
             .ToListAsync(ct);
 
         var movieFilesTask = _dbContext
             .DownloadTaskMovieFile.Where(x => x.HashId == req.Hash)
-            .Include(x => x.DirectoryMeta)
             .ToListAsync(ct);
 
         await Task.WhenAll(episodeFilesTask, movieFilesTask);

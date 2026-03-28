@@ -18,10 +18,15 @@ public class DeleteDownloadTasksByKeyCommandValidator : AbstractValidator<Delete
 public class DeleteDownloadTasksByKeyCommandHandler : ICommandHandler<DeleteDownloadTasksByKeyCommand, Result>
 {
     private readonly IReaparrDbContext _dbContext;
+    private readonly IDownloadTaskUpdateDispatcher _downloadTaskUpdateDispatcher;
 
-    public DeleteDownloadTasksByKeyCommandHandler(IReaparrDbContext dbContext)
+    public DeleteDownloadTasksByKeyCommandHandler(
+        IReaparrDbContext dbContext,
+        IDownloadTaskUpdateDispatcher downloadTaskUpdateDispatcher
+    )
     {
         _dbContext = dbContext;
+        _downloadTaskUpdateDispatcher = downloadTaskUpdateDispatcher;
     }
 
     public async Task<Result> ExecuteAsync(DeleteDownloadTasksByKeyCommand command, CancellationToken ct)
@@ -62,6 +67,8 @@ public class DeleteDownloadTasksByKeyCommandHandler : ICommandHandler<DeleteDown
         var orphanRootIds = affectedRootIds.Where(id => !directlyDeletedRootIds.Contains(id)).ToList();
         await _dbContext.DeleteOrphanedParentTasksByRootIdsAsync(orphanRootIds, ct);
 
+        // Notify front-end as well
+        await _downloadTaskUpdateDispatcher.OnTasksDeletedAsync(command.Keys, ct);
         return Result.Ok();
     }
 }

@@ -102,7 +102,10 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest>
             if (deleteFilesResult.IsFailed)
             {
                 _log.Here()
-                    .Warning("Failed to delete download files for non-active tasks: {Errors}", deleteFilesResult.Errors);
+                    .Warning(
+                        "Failed to delete download files for non-active tasks: {Errors}",
+                        deleteFilesResult.Errors
+                    );
             }
             else
             {
@@ -164,8 +167,11 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest>
     /// Pass <c>null</c> for <paramref name="normalizedHashes"/> to match all tasks with a HashId.
     /// Returns all matched keys regardless of status — callers stop active ones first and then delete all.
     /// </summary>
-    private async Task<(List<DownloadTaskKey> Active, List<DownloadTaskKey> NonActive, List<DownloadTaskKey> All)>
-        QueryKeysByStatus(List<string>? normalizedHashes, CancellationToken ct)
+    private async Task<(
+        List<DownloadTaskKey> Active,
+        List<DownloadTaskKey> NonActive,
+        List<DownloadTaskKey> All
+    )> QueryKeysByStatus(List<string>? normalizedHashes, CancellationToken ct)
     {
         static bool IsActive(DownloadStatus status) =>
             status

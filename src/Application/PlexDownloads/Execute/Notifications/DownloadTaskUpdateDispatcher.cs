@@ -3,6 +3,7 @@ using System.Threading.Channels;
 using ByteSizeLib;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
+using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 using Reaparr.SignalR.Contracts;
 
@@ -166,6 +167,38 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
             if (_seenProgressNodes.TryAdd(key.Id, 0))
                 _firstProgressChannel.Writer.TryWrite(update);
         });
+    }
+
+    /// <inheritdoc />
+    public async Task OnTasksDeletedAsync(
+        IReadOnlyCollection<DownloadTaskKey> deletedKeys,
+        CancellationToken cancellationToken = default
+    )
+    {
+        if (deletedKeys.Count == 0)
+            return;
+
+        foreach (var key in deletedKeys)
+        {
+            _progressByNodeId.TryRemove(key.Id, out _);
+            _scopeByNodeId.TryRemove(key.Id, out _);
+            _statusByNodeId.TryRemove(key.Id, out _);
+            _lastProgressLogByNodeId.TryRemove(key.Id, out _);
+            _seenProgressNodes.TryRemove(key.Id, out _);
+        }
+
+        foreach (var group in deletedKeys.GroupBy(k => k.PlexServerId))
+        {
+            var deletedIds = group.Select(k => k.Id).ToList();
+            var sequence = _sequenceByServer.AddOrUpdate(group.Key, 1, (_, current) => current + 1);
+            await _downloadHubService.SendDownloadPatchAsync(
+                group.Key,
+                sequence,
+                upserts: [],
+                deletedIds: deletedIds,
+                cancellationToken
+            );
+        }
     }
 
     /// <inheritdoc />

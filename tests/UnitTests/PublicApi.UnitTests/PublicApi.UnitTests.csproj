@@ -7,6 +7,7 @@
         <IsPackable>false</IsPackable>
         <RootNamespace>Reaparr.PublicAPI.UnitTests</RootNamespace>
         <AssemblyName>Reaparr.PublicAPI.UnitTests</AssemblyName>
+        <OutputType>Exe</OutputType>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="TUnit" Version="1.19.74" />

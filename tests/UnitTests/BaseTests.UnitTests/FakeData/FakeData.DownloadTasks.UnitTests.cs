@@ -69,6 +69,26 @@ public class FakeDataDownloadTasksUnitTests : BaseUnitTest
     }
 
     [Test]
+    public void MovieDownloadTask_ShouldKeepMultipartIndexesAligned_WhenConfigured()
+    {
+        // Arrange
+        var seed = new Seed(12345);
+
+        // Act
+        var movieTask = FakeData
+            .GetMovieDownloadTask(seed, options => options.IncludeMultiPartMovies = true)
+            .Generate();
+        var movieFiles = movieTask.Children.ToList();
+
+        // Assert
+        movieFiles.Count.ShouldBe(2);
+        movieFiles[0].Title.ShouldEndWith(" 1");
+        movieFiles[0].FullTitle.ShouldContain("/1-");
+        movieFiles[1].Title.ShouldEndWith(" 2");
+        movieFiles[1].FullTitle.ShouldContain("/2-");
+    }
+
+    [Test]
     public void MovieFileDownloadTask_ShouldGenerateAllRequiredProperties()
     {
         // Arrange
@@ -164,6 +184,34 @@ public class FakeDataDownloadTasksUnitTests : BaseUnitTest
                 }
             }
         }
+    }
+
+    [Test]
+    public void TvShowDownloadTask_ShouldIncrementEpisodeFileIndexes_WhenEpisodeHasMultipleFiles()
+    {
+        // Arrange
+        var seed = new Seed(67890);
+
+        // Act
+        var tvShowTask = FakeData
+            .GetDownloadTaskTvShow(
+                seed,
+                options =>
+                {
+                    options.TvShowSeasonDownloadTasksCount = 1;
+                    options.TvShowEpisodeDownloadTasksCount = 1;
+                    options.IncludeMultiPartEpisodes = true;
+                }
+            )
+            .Generate();
+
+        var episode = tvShowTask.Children.Single().Children.Single();
+        var episodeFiles = episode.Children.ToList();
+
+        // Assert
+        episodeFiles.Count.ShouldBe(2);
+        episodeFiles[0].FullTitle.ShouldContain("/1-");
+        episodeFiles[1].FullTitle.ShouldContain("/2-");
     }
 
     [Test]

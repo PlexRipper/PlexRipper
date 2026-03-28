@@ -19,7 +19,10 @@ public static partial class FakeData
                 {
                     var fileIndex = 1;
                     foreach (var file in episode.Children)
-                        file.FullTitle = $"{episode.FullTitle}/{fileIndex}-{file.FileName}";
+                    {
+                        var currentFileIndex = fileIndex++;
+                        file.FullTitle = $"{episode.FullTitle}/{currentFileIndex}-{file.FileName}";
+                    }
                 }
             );
     }
@@ -40,7 +43,10 @@ public static partial class FakeData
                         ? (long)ByteSize.FromMebiBytes(config.DownloadFileSizeInMb).Bytes
                         : x.DataTotal
             )
-            .RuleFor(x => x.Children, _ => [GetDownloadTaskTvShowEpisodeFile(seed, options).Generate()]);
+            .RuleFor(
+                x => x.Children,
+                _ => GetDownloadTaskTvShowEpisodeFile(seed, options).Generate(config.IncludeMultiPartEpisodes ? 2 : 1)
+            );
     }
 
     private static Faker<DownloadTaskTvShowEpisodeFile> CreateDownloadTaskTvShowEpisodeFileFaker()

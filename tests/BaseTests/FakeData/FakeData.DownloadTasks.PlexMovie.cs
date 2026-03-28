@@ -16,8 +16,9 @@ public static partial class FakeData
                     var movieIndex = 1;
                     foreach (var movieFile in movie.Children)
                     {
-                        movieFile.Title = $"{movieFile.Title} {movieIndex++}";
-                        movieFile.FullTitle = $"{movie.FullTitle}/{movieIndex}-{movieFile.FileName}";
+                        var currentMovieIndex = movieIndex++;
+                        movieFile.Title = $"{movieFile.Title} {currentMovieIndex}";
+                        movieFile.FullTitle = $"{movie.FullTitle}/{currentMovieIndex}-{movieFile.FileName}";
                     }
                 }
             );

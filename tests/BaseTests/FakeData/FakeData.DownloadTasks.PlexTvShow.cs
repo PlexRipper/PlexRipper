@@ -29,6 +29,7 @@ public static partial class FakeData
                                 file.FullTitle = $"{episode.FullTitle}/{fileIndex}-{file.FileName}";
                                 file.DirectoryMeta.TvShowFolder = tvShow.Title;
                                 file.DirectoryMeta.SeasonFolder = season.Title;
+                                fileIndex++;
                             }
                         }
                     }

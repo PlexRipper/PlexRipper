@@ -3,12 +3,16 @@ namespace Reaparr.BaseTests;
 public sealed class TUnitTestOutputHelper : ITestOutputHelper
 {
     private readonly List<string> _messages = [];
+    private readonly System.Text.StringBuilder _currentLine = new();
 
-    public string Output => string.Join(global::System.Environment.NewLine, _messages);
+    public string Output =>
+        _currentLine.Length == 0
+            ? string.Join(global::System.Environment.NewLine, _messages)
+            : string.Join(global::System.Environment.NewLine, _messages.Append(_currentLine.ToString()));
 
     public void Write(string message)
     {
-        _messages.Add(message);
+        _currentLine.Append(message);
         TUnit.Core.TestContext.Current?.OutputWriter.Write(message);
     }
 
@@ -19,7 +23,9 @@ public sealed class TUnitTestOutputHelper : ITestOutputHelper
 
     public void WriteLine(string message)
     {
-        _messages.Add(message);
+        _currentLine.Append(message);
+        _messages.Add(_currentLine.ToString());
+        _currentLine.Clear();
         TUnit.Core.TestContext.Current?.OutputWriter.WriteLine(message);
     }
 

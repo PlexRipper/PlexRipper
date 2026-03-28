@@ -7,7 +7,7 @@ public class TestLogConfig : LogConfig
 {
     public override Logger GetLogger(LogEventLevel minimumLogLevel = LogEventLevel.Debug) =>
         GetBaseConfiguration()
-            .WriteTo.Console(NewTemplate)
+            .WriteTo.Console(Template)
             .WriteTo.TestCorrelator(minimumLogLevel)
             .MinimumLevel.Is(minimumLogLevel)
             .CreateLogger();

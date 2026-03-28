@@ -22,10 +22,11 @@ public class LogConfig
 
     public static string SourceContext => nameof(SourceContext);
 
-    private static readonly string _template =
-        $"{{NewLine}}{{Timestamp:HH:mm:ss}} [{{Level}}] [{{{FileName}}}.cs:{{{LineNumber}}}.{{{MethodName}}}()] => {{Message:lj}}{{NewLine}}{{Exception}}";
-
-    protected static readonly ExpressionTemplate NewTemplate = new(
+    // TemplateTheme.Code uses ANSI escape codes unconditionally, unlike SystemConsoleTheme
+    // which uses Console.ForegroundColor and produces no color when stdout is redirected (Rider Run mode).
+    // applyThemeWhenOutputIsRedirected: true forces ANSI codes even when Rider's test runner
+    // redirects stdout (which normally causes ExpressionTemplate to suppress the theme).
+    protected static readonly ExpressionTemplate Template = new(
         // Template
         "{@t:HH:mm:ss} [{@l}] "
             + "{#if FileName is not null}"
@@ -33,7 +34,8 @@ public class LogConfig
             + "{#else}"
             + "[{SourceContext}]"
             + "{#end} => {@m}\n{@x}\n",
-        theme: LogThemes.SystemColored.ToTemplateTheme()
+        theme: LogThemes.SystemColored.ToTemplateTheme(),
+        applyThemeWhenOutputIsRedirected: true
     );
 
     protected static LoggerConfiguration GetBaseConfiguration()
@@ -92,10 +94,10 @@ public class LogConfig
 
     public virtual Logger GetLogger(LogEventLevel minimumLogLevel = LogEventLevel.Debug) =>
         GetBaseConfiguration()
-            .WriteTo.Debug(NewTemplate)
+            .WriteTo.Debug(Template)
             .WriteTo.Seq(EnvironmentExtensions.GetSeqUrl())
             .WriteTo.File(
-                NewTemplate,
+                Template,
                 Path.Combine(PathProvider.LogsDirectory, "log.txt"),
                 minimumLogLevel,
                 rollingInterval: RollingInterval.Day,

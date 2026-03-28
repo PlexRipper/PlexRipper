@@ -1,6 +1,6 @@
-﻿namespace Reaparr.Domain.UnitTests;
+namespace Reaparr.Domain.UnitTests;
 
-public class PathSystemSanitizeFileNameUnitTests : BaseUnitTest
+public class StringExtensionsUnitTests : BaseUnitTest
 {
     [Test]
     [Arguments("Shaun het Schaap: De Film (2015)")]

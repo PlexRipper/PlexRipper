@@ -35,10 +35,7 @@ public class DeleteDownloadTaskEndpointUnitTests : BaseUnitTest<DeleteDownloadTa
             .Verifiable(Times.Once());
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<DeleteDownloadTasksByKeyCommand>(), It.IsAny<CancellationToken>()))
-            .Returns(
-                (DeleteDownloadTasksByKeyCommand cmd, CancellationToken ct) =>
-                    new DeleteDownloadTasksByKeyCommandHandler(dbContext).ExecuteAsync(cmd, ct)
-            )
+            .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Once());
 
         // Act
@@ -100,10 +97,7 @@ public class DeleteDownloadTaskEndpointUnitTests : BaseUnitTest<DeleteDownloadTa
             .Verifiable(Times.Once());
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<DeleteDownloadTasksByKeyCommand>(), It.IsAny<CancellationToken>()))
-            .Returns(
-                (DeleteDownloadTasksByKeyCommand cmd, CancellationToken ct) =>
-                    new DeleteDownloadTasksByKeyCommandHandler(dbContext).ExecuteAsync(cmd, ct)
-            )
+            .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Once());
 
         // Act

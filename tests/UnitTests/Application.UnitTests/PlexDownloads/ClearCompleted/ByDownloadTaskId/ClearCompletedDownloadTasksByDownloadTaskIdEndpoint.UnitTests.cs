@@ -7,9 +7,6 @@ namespace Reaparr.Application.UnitTests;
 public class ClearCompletedDownloadTasksByDownloadTaskIdEndpointUnitTests
     : BaseUnitTest<ClearCompletedDownloadTasksByDownloadTaskIdEndpoint>
 {
-    public ClearCompletedDownloadTasksByDownloadTaskIdEndpointUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldRemoveOnlySpecifiedCompletedDownloadTasks_WhenCalledWithGuidList()
     {
@@ -35,10 +32,7 @@ public class ClearCompletedDownloadTasksByDownloadTaskIdEndpointUnitTests
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<DeleteDownloadTasksByKeyCommand>(), It.IsAny<CancellationToken>()))
-            .Returns(
-                (DeleteDownloadTasksByKeyCommand cmd, CancellationToken ct) =>
-                    new DeleteDownloadTasksByKeyCommandHandler(dbContext).ExecuteAsync(cmd, ct)
-            );
+            .ReturnsAsync(Result.Ok());
         Mock.Mock<ICommandExecutor>()
             .Setup(x =>
                 x.Send(It.IsAny<ClearCompletedDownloadTasksByDownloadTaskKeyCommand>(), It.IsAny<CancellationToken>())
@@ -97,21 +91,13 @@ public class ClearCompletedDownloadTasksByDownloadTaskIdEndpointUnitTests
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<DeleteDownloadTasksByKeyCommand>(), It.IsAny<CancellationToken>()))
-            .Returns(
-                (DeleteDownloadTasksByKeyCommand cmd, CancellationToken ct) =>
-                    new DeleteDownloadTasksByKeyCommandHandler(dbContext).ExecuteAsync(cmd, ct)
-            );
+            .ReturnsAsync(Result.Ok());
+
         Mock.Mock<ICommandExecutor>()
             .Setup(x =>
                 x.Send(It.IsAny<ClearCompletedDownloadTasksByDownloadTaskKeyCommand>(), It.IsAny<CancellationToken>())
             )
-            .Returns(
-                (ClearCompletedDownloadTasksByDownloadTaskKeyCommand command, CancellationToken ct) =>
-                    new ClearCompletedDownloadTasksByDownloadTaskKeyCommandHandler(
-                        dbContext,
-                        Mock.Mock<ICommandExecutor>().Object
-                    ).ExecuteAsync(command, ct)
-            );
+            .ReturnsAsync(Result.Ok());
 
         // Act
         var ep = SetupEndpointUnitTest<ClearCompletedDownloadTasksByDownloadTaskIdEndpoint>();
@@ -169,21 +155,12 @@ public class ClearCompletedDownloadTasksByDownloadTaskIdEndpointUnitTests
 
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<DeleteDownloadTasksByKeyCommand>(), It.IsAny<CancellationToken>()))
-            .Returns(
-                (DeleteDownloadTasksByKeyCommand cmd, CancellationToken ct) =>
-                    new DeleteDownloadTasksByKeyCommandHandler(dbContext).ExecuteAsync(cmd, ct)
-            );
+            .ReturnsAsync(Result.Ok());
         Mock.Mock<ICommandExecutor>()
             .Setup(x =>
                 x.Send(It.IsAny<ClearCompletedDownloadTasksByDownloadTaskKeyCommand>(), It.IsAny<CancellationToken>())
             )
-            .Returns(
-                (ClearCompletedDownloadTasksByDownloadTaskKeyCommand command, CancellationToken ct) =>
-                    new ClearCompletedDownloadTasksByDownloadTaskKeyCommandHandler(
-                        dbContext,
-                        Mock.Mock<ICommandExecutor>().Object
-                    ).ExecuteAsync(command, ct)
-            );
+            .ReturnsAsync(Result.Ok());
 
         // Act
         var ep = SetupEndpointUnitTest<ClearCompletedDownloadTasksByDownloadTaskIdEndpoint>();

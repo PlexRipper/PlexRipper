@@ -71,6 +71,25 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
         CancellationToken cancellationToken = default
     )
     {
+        if (newStatus is DownloadStatus.Deleted)
+        {
+            _progressByNodeId.TryRemove(key.Id, out _);
+            _scopeByNodeId.TryRemove(key.Id, out _);
+            _statusByNodeId.TryRemove(key.Id, out _);
+            _lastProgressLogByNodeId.TryRemove(key.Id, out _);
+            _seenProgressNodes.TryRemove(key.Id, out _);
+
+            var sequence = _sequenceByServer.AddOrUpdate(key.PlexServerId, 1, (_, current) => current + 1);
+            await _downloadHubService.SendDownloadPatchAsync(
+                key.PlexServerId,
+                sequence,
+                upserts: [],
+                deletedIds: [key.Id],
+                cancellationToken
+            );
+            return Result.Ok();
+        }
+
         var result = await Result.Try(async Task () =>
         {
             _statusByNodeId[key.Id] = newStatus;
@@ -167,38 +186,6 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
             if (_seenProgressNodes.TryAdd(key.Id, 0))
                 _firstProgressChannel.Writer.TryWrite(update);
         });
-    }
-
-    /// <inheritdoc />
-    public async Task OnTasksDeletedAsync(
-        IReadOnlyCollection<DownloadTaskKey> deletedKeys,
-        CancellationToken cancellationToken = default
-    )
-    {
-        if (deletedKeys.Count == 0)
-            return;
-
-        foreach (var key in deletedKeys)
-        {
-            _progressByNodeId.TryRemove(key.Id, out _);
-            _scopeByNodeId.TryRemove(key.Id, out _);
-            _statusByNodeId.TryRemove(key.Id, out _);
-            _lastProgressLogByNodeId.TryRemove(key.Id, out _);
-            _seenProgressNodes.TryRemove(key.Id, out _);
-        }
-
-        foreach (var group in deletedKeys.GroupBy(k => k.PlexServerId))
-        {
-            var deletedIds = group.Select(k => k.Id).ToList();
-            var sequence = _sequenceByServer.AddOrUpdate(group.Key, 1, (_, current) => current + 1);
-            await _downloadHubService.SendDownloadPatchAsync(
-                group.Key,
-                sequence,
-                upserts: [],
-                deletedIds: deletedIds,
-                cancellationToken
-            );
-        }
     }
 
     /// <inheritdoc />

@@ -79,6 +79,8 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest>
             return;
         }
 
+        var rootKeys = await GetRootKeysAsync(allKeys, ct);
+
         var deleteFiles = req.DeleteFiles ?? true;
         var keysToDelete = new List<DownloadTaskKey>();
 
@@ -115,6 +117,16 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest>
         else
         {
             keysToDelete.AddRange(nonActiveKeys);
+        }
+
+        if (rootKeys.Count > 0)
+        {
+            var clearResult = await _commandExecutor.Send(
+                new ClearCompletedDownloadTasksByDownloadTaskKeyCommand(rootKeys),
+                ct
+            );
+            if (clearResult.IsFailed)
+                _log.Here().Warning("Failed to clear completed download tasks: {Errors}", clearResult.Errors);
         }
 
         if (keysToDelete.Count == 0)
@@ -160,6 +172,62 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest>
             .Select(h => h.Trim().ToLowerInvariant())
             .Distinct()
             .ToList();
+    }
+
+    /// <summary>
+    /// Resolves the root-level task key (Movie or TvShow) for each matched leaf file key.
+    /// Movie file parents are a direct FK; episode file parents require a 3-level traversal via
+    /// <see cref="IReaparrDbContextExtensions.GetAffectedRootDownloadTaskIdsAsync"/>.
+    /// </summary>
+    private async Task<List<DownloadTaskKey>> GetRootKeysAsync(
+        IReadOnlyCollection<DownloadTaskKey> leafKeys,
+        CancellationToken ct
+    )
+    {
+        var movieFileIds = leafKeys
+            .Where(k => k.Type is DownloadTaskType.MovieData or DownloadTaskType.MoviePart)
+            .Select(k => k.Id)
+            .ToList();
+
+        var episodeFileIds = leafKeys
+            .Where(k => k.Type is DownloadTaskType.EpisodeData or DownloadTaskType.EpisodePart)
+            .Select(k => k.Id)
+            .ToList();
+
+        var rootKeys = new List<DownloadTaskKey>();
+
+        if (movieFileIds.Count > 0)
+        {
+            var movieRoots = await _dbContext
+                .DownloadTaskMovieFile.Where(x => movieFileIds.Contains(x.Id))
+                .Select(x => new DownloadTaskKey
+                {
+                    Id = x.ParentId,
+                    Type = DownloadTaskType.Movie,
+                    PlexServerId = x.PlexServerId,
+                    PlexLibraryId = x.PlexLibraryId,
+                })
+                .ToListAsync(ct);
+
+            rootKeys.AddRange(movieRoots.Distinct());
+        }
+
+        if (episodeFileIds.Count > 0)
+        {
+            var tvShowRootIds = await _dbContext.GetAffectedRootDownloadTaskIdsAsync(episodeFileIds, ct);
+            var sample = leafKeys.First(k => k.Type is DownloadTaskType.EpisodeData or DownloadTaskType.EpisodePart);
+            rootKeys.AddRange(
+                tvShowRootIds.Select(id => new DownloadTaskKey
+                {
+                    Id = id,
+                    Type = DownloadTaskType.TvShow,
+                    PlexServerId = sample.PlexServerId,
+                    PlexLibraryId = sample.PlexLibraryId,
+                })
+            );
+        }
+
+        return rootKeys;
     }
 
     /// <summary>

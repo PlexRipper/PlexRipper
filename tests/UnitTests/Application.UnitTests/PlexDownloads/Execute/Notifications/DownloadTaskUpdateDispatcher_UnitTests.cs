@@ -1004,6 +1004,50 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
         fileTaskPatch.Percentage.ShouldBe(100m);
     }
 
+    [Test]
+    public async Task ShouldSendDeletedIds_WhenStatusChangedToDeleted()
+    {
+        // Arrange
+        await SetupDatabase(84336, config => config.MovieDownloadTasksCount = 1);
+        var movieFile = await IDbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+
+        var capturedDeletedIds = new List<IReadOnlyCollection<Guid>?>();
+        var capturedUpserts = new List<IReadOnlyCollection<DownloadPatchDTO>>();
+        Mock.Mock<IDownloadHubService>()
+            .Setup(x =>
+                x.SendDownloadPatchAsync(
+                    It.IsAny<int>(),
+                    It.IsAny<long>(),
+                    It.IsAny<IReadOnlyCollection<DownloadPatchDTO>>(),
+                    It.IsAny<IReadOnlyCollection<Guid>?>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Callback<int, long, IReadOnlyCollection<DownloadPatchDTO>, IReadOnlyCollection<Guid>?, CancellationToken>(
+                (_, _, upserts, deletedIds, _) =>
+                {
+                    capturedUpserts.Add(upserts);
+                    capturedDeletedIds.Add(deletedIds);
+                }
+            )
+            .Returns(Task.CompletedTask);
+
+        var sut = Sut;
+
+        // Act
+        var result = await sut.OnStatusChangedAsync(movieFile.ToKey(), DownloadStatus.Deleted, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+
+        capturedDeletedIds.ShouldNotBeEmpty();
+        var deletedPatch = capturedDeletedIds.Last();
+        deletedPatch.ShouldNotBeNull();
+        deletedPatch!.ShouldContain(movieFile.Id);
+
+        capturedUpserts.Last().ShouldBeEmpty();
+    }
+
     private async Task WaitForPatchCount<T>(IReadOnlyCollection<T> collection, int expectedCount)
     {
         for (var i = 0; i < 40 && collection.Count < expectedCount; i++)

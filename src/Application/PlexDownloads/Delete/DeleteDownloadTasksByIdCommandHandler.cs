@@ -68,7 +68,9 @@ public class DeleteDownloadTasksByKeyCommandHandler : ICommandHandler<DeleteDown
         await _dbContext.DeleteOrphanedParentTasksByRootIdsAsync(orphanRootIds, ct);
 
         // Notify front-end as well
-        await _downloadTaskUpdateDispatcher.OnTasksDeletedAsync(command.Keys, ct);
+        foreach (var key in command.Keys)
+            await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(key, DownloadStatus.Deleted, ct);
+
         return Result.Ok();
     }
 }

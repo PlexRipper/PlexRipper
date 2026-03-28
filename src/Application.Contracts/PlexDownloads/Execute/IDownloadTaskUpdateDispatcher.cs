@@ -37,13 +37,4 @@ public interface IDownloadTaskUpdateDispatcher
     /// Queues a scope entry so the next periodic flush sends a patch with the already-persisted file transfer progress.
     /// </summary>
     void NotifyFileTransferProgress(DownloadTaskKey key);
-
-    /// <summary>
-    /// Notifies the front-end that the given download tasks have been deleted.
-    /// Cleans up in-memory tracking state and sends a deletion patch per Plex server.
-    /// </summary>
-    Task OnTasksDeletedAsync(
-        IReadOnlyCollection<DownloadTaskKey> deletedKeys,
-        CancellationToken cancellationToken = default
-    );
 }

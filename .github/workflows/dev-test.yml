@@ -162,13 +162,17 @@ jobs:
             -   name: Build Backend Solution
                 run: dotnet build Reaparr.sln --no-restore
 
+            -   name: Package Build Outputs
+                shell: bash
+                run: >-
+                    find src tests -type d -path '*/bin/Debug/net10.0' -print0 |
+                    tar --create --file backend-build.tar --null --files-from -
+
             -   name: Upload Build Outputs
                 uses: actions/upload-artifact@v4
                 with:
                     name: backend-build
-                    path: |
-                        src/**/bin/Debug/net10.0/**
-                        tests/**/bin/Debug/net10.0/**
+                    path: backend-build.tar
                     retention-days: 1
 
     Back-End-Unit-Tests:
@@ -181,7 +185,7 @@ jobs:
             matrix:
                 include:
                     - test_project: tests/UnitTests/AppHost.UnitTests/AppHost.UnitTests.csproj
-                      project_name: AppHost.UnitTests    
+                      project_name: AppHost.UnitTests
                     - test_project: tests/UnitTests/Application.UnitTests/Application.UnitTests.csproj
                       project_name: Application.UnitTests
                     - test_project: tests/UnitTests/BackgroundJobs.UnitTests/BackgroundJobs.UnitTests.csproj
@@ -215,6 +219,7 @@ jobs:
                 uses: ./.github/workflows/steps/dotnet-setup/
                 with:
                     project-path: ${{ matrix.test_project }}
+                    restore: false
                     build: false
 
             -   name: Download Build Outputs
@@ -222,6 +227,9 @@ jobs:
                 with:
                     name: backend-build
                     path: .
+
+            -   name: Extract Build Outputs
+                run: tar -xf backend-build.tar
 
             -   name: Run Unit Tests
                 env:
@@ -276,6 +284,7 @@ jobs:
                 uses: ./.github/workflows/steps/dotnet-setup/
                 with:
                     project-path: ${{ matrix.integration_test_project }}
+                    restore: false
                     build: false
 
             -   name: Download Build Outputs
@@ -284,7 +293,10 @@ jobs:
                     name: backend-build
                     path: .
 
-            -   name: Run Integration Tests 
+            -   name: Extract Build Outputs
+                run: tar -xf backend-build.tar
+
+            -   name: Run Integration Tests
                 env:
                     TUNIT_GITHUB_REPORTER_STYLE: collapsible
                 run: >-

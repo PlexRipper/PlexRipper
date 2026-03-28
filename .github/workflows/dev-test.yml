@@ -226,7 +226,15 @@ jobs:
             -   name: Run Unit Tests
                 env:
                     TUNIT_GITHUB_REPORTER_STYLE: collapsible
-                run: dotnet test ${{ matrix.test_project }} --no-build --no-restore --verbosity normal --logger "trx;LogFileName=test_results.trx" --collect:"XPlat Code Coverage"
+                run: >-
+                    dotnet run --project ${{ matrix.test_project }} --no-build --no-restore --
+                    --output Normal
+                    --results-directory TestResults/${{ matrix.project_name }}
+                    --report-trx
+                    --report-trx-filename test_results.trx
+                    --coverage
+                    --coverage-output-format cobertura
+                    --coverage-output coverage.cobertura.xml
 
             -   name: Sanitize Artifact Name
                 id: sanitize
@@ -239,7 +247,7 @@ jobs:
                 uses: actions/upload-artifact@v4
                 with:
                     name: test-results-${{ steps.sanitize.outputs.safe_name }}
-                    path: '**/TestResults/*.trx'
+                    path: TestResults/${{ matrix.project_name }}/test_results.trx
                     retention-days: 7
 
             -   name: Upload Code Coverage
@@ -247,7 +255,7 @@ jobs:
                 uses: actions/upload-artifact@v4
                 with:
                     name: code-coverage-${{ steps.sanitize.outputs.safe_name }}
-                    path: '**/TestResults/**/coverage.cobertura.xml'
+                    path: TestResults/${{ matrix.project_name }}/coverage.cobertura.xml
                     retention-days: 7
 
     # Back-End Integration Tests
@@ -279,14 +287,19 @@ jobs:
             -   name: Run Integration Tests 
                 env:
                     TUNIT_GITHUB_REPORTER_STYLE: collapsible
-                run: dotnet test ${{ matrix.integration_test_project }} --no-build --no-restore --verbosity normal --logger "trx;LogFileName=integration_test_results.trx"
+                run: >-
+                    dotnet run --project ${{ matrix.integration_test_project }} --no-build --no-restore --
+                    --output Normal
+                    --results-directory TestResults/IntegrationTests
+                    --report-trx
+                    --report-trx-filename integration_test_results.trx
 
             -   name: Upload Integration Test Results
                 if: always()
                 uses: actions/upload-artifact@v4
                 with:
                     name: integration-test-results
-                    path: '**/TestResults/*.trx'
+                    path: TestResults/IntegrationTests/integration_test_results.trx
                     retention-days: 7
 
     # Code Coverage Report

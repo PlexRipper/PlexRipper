@@ -224,6 +224,8 @@ jobs:
                     path: .
 
             -   name: Run Unit Tests
+                env:
+                    TUNIT_GITHUB_REPORTER_STYLE: collapsible
                 run: dotnet test ${{ matrix.test_project }} --no-build --no-restore --verbosity normal --logger "trx;LogFileName=test_results.trx" --collect:"XPlat Code Coverage"
 
             -   name: Sanitize Artifact Name
@@ -247,14 +249,6 @@ jobs:
                     name: code-coverage-${{ steps.sanitize.outputs.safe_name }}
                     path: '**/TestResults/**/coverage.cobertura.xml'
                     retention-days: 7
-
-            -   name: Publish Test Report
-                if: always()
-                uses: dorny/test-reporter@v1
-                with:
-                    name: Unit Test Results - ${{ matrix.project_name }}
-                    path: '**/TestResults/*.trx'
-                    reporter: dotnet-trx
 
     # Back-End Integration Tests
     Back-End-Integration-Tests:
@@ -283,6 +277,8 @@ jobs:
                     path: .
 
             -   name: Run Integration Tests 
+                env:
+                    TUNIT_GITHUB_REPORTER_STYLE: collapsible
                 run: dotnet test ${{ matrix.integration_test_project }} --no-build --no-restore --verbosity normal --logger "trx;LogFileName=integration_test_results.trx"
 
             -   name: Upload Integration Test Results
@@ -292,14 +288,6 @@ jobs:
                     name: integration-test-results
                     path: '**/TestResults/*.trx'
                     retention-days: 7
-
-            -   name: Publish Integration Test Report
-                if: always()
-                uses: dorny/test-reporter@v1
-                with:
-                    name: Integration Test Results
-                    path: '**/TestResults/*.trx'
-                    reporter: dotnet-trx
 
     # Code Coverage Report
     Code-Coverage-Report:

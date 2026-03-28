@@ -4,10 +4,10 @@ namespace Reaparr.Application.UnitTests;
 
 public class RefreshLibraryMediaEndpointUnitTests : BaseUnitTest<RefreshLibraryMediaEndpoint>
 {
-    public RefreshLibraryMediaEndpointUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public RefreshLibraryMediaEndpointUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnSuccess_WhenLibrarySyncJobQueued()
     {
         // Arrange
@@ -33,7 +33,7 @@ public class RefreshLibraryMediaEndpointUnitTests : BaseUnitTest<RefreshLibraryM
         resultDTO.IsSuccess.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnError_WhenRefreshCommandFails()
     {
         // Arrange
@@ -62,9 +62,9 @@ public class RefreshLibraryMediaEndpointUnitTests : BaseUnitTest<RefreshLibraryM
         resultDTO.Errors.ShouldContain(x => x.Message.Contains("Failed to refresh library"));
     }
 
-    [Theory]
-    [InlineData(PlexMediaType.Movie)]
-    [InlineData(PlexMediaType.TvShow)]
+    [Test]
+    [Arguments(PlexMediaType.Movie)]
+    [Arguments(PlexMediaType.TvShow)]
     public async Task ShouldHandleDifferentLibraryTypes_WhenTypeIsDifferent(PlexMediaType libraryType)
     {
         // Arrange

@@ -7,8 +7,8 @@ namespace Reaparr.Application.UnitTests;
 
 public class SetupRadarrDownloadClientCommandUnitTests : BaseUnitTest<SetupRadarrDownloadClientCommandHandler>
 {
-    public SetupRadarrDownloadClientCommandUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public SetupRadarrDownloadClientCommandUnitTests()
+        : base() { }
 
     // IRadarrSettings inherits IBaseSettingsModule<T> which has a static abstract member, making it
     // incompatible with Moq. Inject concrete RadarrSettings instances via TypedParameter instead.
@@ -50,7 +50,7 @@ public class SetupRadarrDownloadClientCommandUnitTests : BaseUnitTest<SetupRadar
         return settings;
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnFailedResult_WhenRadarrBaseUrlIsEmpty()
     {
         // Arrange
@@ -76,7 +76,7 @@ public class SetupRadarrDownloadClientCommandUnitTests : BaseUnitTest<SetupRadar
         );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnFailedResult_WhenRadarrApiKeyIsEmpty()
     {
         // Arrange
@@ -102,7 +102,7 @@ public class SetupRadarrDownloadClientCommandUnitTests : BaseUnitTest<SetupRadar
         );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnFailedResult_WhenGetDownloadClientsFails()
     {
         // Arrange
@@ -123,7 +123,7 @@ public class SetupRadarrDownloadClientCommandUnitTests : BaseUnitTest<SetupRadar
         Mock.Mock<ICommandExecutor>().Verify();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldCreateDownloadClient_WhenNoneExists()
     {
         // Arrange
@@ -148,7 +148,7 @@ public class SetupRadarrDownloadClientCommandUnitTests : BaseUnitTest<SetupRadar
         Mock.Mock<ICommandExecutor>().Verify();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldUpdateExistingDownloadClient_WhenOneAlreadyExists()
     {
         // Arrange
@@ -175,7 +175,7 @@ public class SetupRadarrDownloadClientCommandUnitTests : BaseUnitTest<SetupRadar
         Mock.Mock<ICommandExecutor>().Verify();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnFailedResult_WhenCreateDownloadClientFails()
     {
         // Arrange
@@ -199,7 +199,7 @@ public class SetupRadarrDownloadClientCommandUnitTests : BaseUnitTest<SetupRadar
         Mock.Mock<ICommandExecutor>().Verify();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldBuildResourceWithSslEnabledAndPort443_WhenReaparrUriIsHttpsCustomDomain()
     {
         // Arrange
@@ -247,7 +247,7 @@ public class SetupRadarrDownloadClientCommandUnitTests : BaseUnitTest<SetupRadar
         Mock.Mock<ICommandExecutor>().Verify();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldBuildResourceWithHttpProxyHostPortAndBasePath_WhenReverseProxyIsHttp()
     {
         // Arrange
@@ -299,7 +299,7 @@ public class SetupRadarrDownloadClientCommandUnitTests : BaseUnitTest<SetupRadar
         Mock.Mock<ICommandExecutor>().Verify();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldFallbackToLocalhost_WhenReverseProxyUrlIsInvalid()
     {
         // Arrange

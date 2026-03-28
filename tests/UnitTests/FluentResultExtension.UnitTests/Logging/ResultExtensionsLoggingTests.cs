@@ -7,12 +7,12 @@ public class ResultExtensionsLoggingTests : BaseUnitTest
 {
     #region Setup/Teardown
 
-    public ResultExtensionsLoggingTests(ITestOutputHelper output)
-        : base(output) { }
+    public ResultExtensionsLoggingTests()
+        : base() { }
 
     #endregion
 
-    [Fact]
+    [Test]
     public void ShouldHaveDebugLoggedWithParameterName_WhenLogDebugIsCalled()
     {
         using (TestCorrelator.CreateContext())
@@ -30,7 +30,7 @@ public class ResultExtensionsLoggingTests : BaseUnitTest
         }
     }
 
-    [Fact]
+    [Test]
     public void ShouldHaveDebugLoggedWithParameterName_WhenLogDebugIsCalledOnResultT()
     {
         using (TestCorrelator.CreateContext())
@@ -48,7 +48,7 @@ public class ResultExtensionsLoggingTests : BaseUnitTest
         }
     }
 
-    [Fact]
+    [Test]
     public void ShouldHaveErrorLoggedWithParameterName_WhenLogErrorIsCalled()
     {
         using (TestCorrelator.CreateContext())
@@ -66,7 +66,7 @@ public class ResultExtensionsLoggingTests : BaseUnitTest
         }
     }
 
-    [Fact]
+    [Test]
     public void ShouldHaveErrorLoggedWithParameterName_WhenLogErrorIsCalledOnResultT()
     {
         using (TestCorrelator.CreateContext())
@@ -84,7 +84,7 @@ public class ResultExtensionsLoggingTests : BaseUnitTest
         }
     }
 
-    [Fact]
+    [Test]
     public void ShouldHaveExceptionErrorLogged_WhenResultHasExceptionalError()
     {
         using (TestCorrelator.CreateContext())
@@ -107,7 +107,7 @@ public class ResultExtensionsLoggingTests : BaseUnitTest
         }
     }
 
-    [Fact]
+    [Test]
     public void ShouldHaveFatalLoggedWithParameterName_WhenLogFatalIsCalled()
     {
         using (TestCorrelator.CreateContext())
@@ -125,7 +125,7 @@ public class ResultExtensionsLoggingTests : BaseUnitTest
         }
     }
 
-    [Fact]
+    [Test]
     public void ShouldHaveFatalLoggedWithParameterName_WhenLogFatalIsCalledOnResultT()
     {
         using (TestCorrelator.CreateContext())
@@ -143,7 +143,7 @@ public class ResultExtensionsLoggingTests : BaseUnitTest
         }
     }
 
-    [Fact]
+    [Test]
     public void ShouldHaveInformationLoggedWithParameterName_WhenLogInformationIsCalled()
     {
         using (TestCorrelator.CreateContext())
@@ -161,7 +161,7 @@ public class ResultExtensionsLoggingTests : BaseUnitTest
         }
     }
 
-    [Fact]
+    [Test]
     public void ShouldHaveInformationLoggedWithParameterName_WhenLogInformationIsCalledOnResultT()
     {
         using (TestCorrelator.CreateContext())
@@ -179,7 +179,7 @@ public class ResultExtensionsLoggingTests : BaseUnitTest
         }
     }
 
-    [Fact]
+    [Test]
     public void ShouldHaveMultipleErrorsLogged_WhenResultHasMultipleErrors()
     {
         using (TestCorrelator.CreateContext())
@@ -201,7 +201,7 @@ public class ResultExtensionsLoggingTests : BaseUnitTest
         }
     }
 
-    [Fact]
+    [Test]
     public void ShouldHaveMultipleNestedErrorsAndMetadataLogged_WhenResultHasMultipleNestedErrorsAndMetadata()
     {
         using (TestCorrelator.CreateContext())
@@ -240,7 +240,7 @@ public class ResultExtensionsLoggingTests : BaseUnitTest
         }
     }
 
-    [Fact]
+    [Test]
     public void ShouldHaveMultipleNestedErrorsLogged_WhenResultHasMultipleNestedErrors()
     {
         using (TestCorrelator.CreateContext())
@@ -273,7 +273,7 @@ public class ResultExtensionsLoggingTests : BaseUnitTest
         }
     }
 
-    [Fact]
+    [Test]
     public void ShouldHaveMultipleNestedMetadataLogged_WhenResultHasMultipleNestedMetadata()
     {
         using (TestCorrelator.CreateContext())
@@ -298,7 +298,7 @@ public class ResultExtensionsLoggingTests : BaseUnitTest
         }
     }
 
-    [Fact]
+    [Test]
     public void ShouldHaveVerboseLoggedWithParameterName_WhenLogVerboseIsCalled()
     {
         using (TestCorrelator.CreateContext())
@@ -316,7 +316,7 @@ public class ResultExtensionsLoggingTests : BaseUnitTest
         }
     }
 
-    [Fact]
+    [Test]
     public void ShouldHaveVerboseLoggedWithParameterName_WhenLogVerboseIsCalledOnResultT()
     {
         using (TestCorrelator.CreateContext())
@@ -334,7 +334,7 @@ public class ResultExtensionsLoggingTests : BaseUnitTest
         }
     }
 
-    [Fact]
+    [Test]
     public void ShouldHaveWarningLoggedWithParameterName_WhenLogWarningIsCalled()
     {
         using (TestCorrelator.CreateContext())
@@ -352,7 +352,7 @@ public class ResultExtensionsLoggingTests : BaseUnitTest
         }
     }
 
-    [Fact]
+    [Test]
     public void ShouldHaveWarningLoggedWithParameterName_WhenLogWarningIsCalledOnResultT()
     {
         using (TestCorrelator.CreateContext())

@@ -4,11 +4,8 @@ namespace Reaparr.Data.UnitTests;
 
 public class DbContextExtensionsPlexMediaUnitTests : BaseUnitTest
 {
-    public DbContextExtensionsPlexMediaUnitTests(ITestOutputHelper output)
-        : base(output) { }
-
-    [Fact]
-    public async Task ShouldFindMovieId_ByMediaKey()
+    [Test]
+    public async Task ShouldFindMovieId_WhenMediaKeyExists()
     {
         // Arrange
         await SetupDatabase(
@@ -35,8 +32,8 @@ public class DbContextExtensionsPlexMediaUnitTests : BaseUnitTest
         result.Value.ShouldBe(movie.Id);
     }
 
-    [Fact]
-    public async Task ShouldFindTvShowId_ByMediaKey()
+    [Test]
+    public async Task ShouldFindTvShowId_WhenMediaKeyExists()
     {
         // Arrange
         await SetupDatabase(
@@ -63,7 +60,7 @@ public class DbContextExtensionsPlexMediaUnitTests : BaseUnitTest
         result.Value.ShouldBe(tvShow.Id);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldFail_WhenMediaNotFound()
     {
         // Arrange

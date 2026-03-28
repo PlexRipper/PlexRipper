@@ -12,8 +12,8 @@ namespace Reaparr.Application.UnitTests;
 
 public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadClient>
 {
-    public PlexDownloadClientStartUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public PlexDownloadClientStartUnitTests()
+        : base() { }
 
     // -------------------------------------------------------------------------
     // Shared helpers
@@ -107,7 +107,7 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
     // Tests
     // -------------------------------------------------------------------------
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnSuccessResult_WhenSetupAndStartedSuccessfully()
     {
         // Arrange
@@ -185,7 +185,7 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
             .Verify(x => x.Send(It.IsAny<GetDirectDownloadUrlCommand>(), It.IsAny<CancellationToken>()), Times.Once());
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldEnsureDownloadDirectoryExists_WhenStartingDownload()
     {
         // Arrange
@@ -271,7 +271,7 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldStartDownloaderWithFinalPath_WhenTempExtensionIsConfigured()
     {
         // Arrange
@@ -369,7 +369,7 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
             .Verify(x => x.Send(It.IsAny<GetDirectDownloadUrlCommand>(), It.IsAny<CancellationToken>()), Times.Once());
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnEntityNotFoundError_WhenDownloadTaskKeyDoesNotExist()
     {
         // Arrange
@@ -424,7 +424,7 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
             .Verify(x => x.Send(It.IsAny<GetDirectDownloadUrlCommand>(), It.IsAny<CancellationToken>()), Times.Never());
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnFailedResult_WhenGetDownloadUrlFailsDueToNoServerConnections()
     {
         // Arrange
@@ -485,7 +485,7 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
             .Verify(x => x.Send(It.IsAny<GetDirectDownloadUrlCommand>(), It.IsAny<CancellationToken>()), Times.Once());
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnFailedResultAndPersistStorageError_WhenCreateFileStreamFails()
     {
         // Arrange
@@ -574,7 +574,7 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
             .Verify(x => x.Send(It.IsAny<GetDirectDownloadUrlCommand>(), It.IsAny<CancellationToken>()), Times.Once());
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldTransitionThroughDownloadingStatus_WhenDownloadStartedEventFires()
     {
         // Arrange
@@ -673,7 +673,7 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
             .Verify(x => x.Send(It.IsAny<GetDirectDownloadUrlCommand>(), It.IsAny<CancellationToken>()), Times.Once());
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldSetDownloadingStatus_BeforeInvokingDownloadFileTaskAsync()
     {
         // Arrange
@@ -758,7 +758,7 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldApplySpeedLimitFromObservable_WhenSpeedLimitObservableEmitsValue()
     {
         // Arrange
@@ -855,7 +855,7 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
             .Verify(x => x.Send(It.IsAny<GetDirectDownloadUrlCommand>(), It.IsAny<CancellationToken>()), Times.Once());
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldCallResumeOverload_WhenDirectDownloadSnapshotExists()
     {
         // Arrange
@@ -974,7 +974,7 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
             .Verify(x => x.Send(It.IsAny<GetDirectDownloadUrlCommand>(), It.IsAny<CancellationToken>()), Times.Once());
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldPersistProgressSnapshot_WhenDownloadProgressChanges()
     {
         // Arrange
@@ -1079,7 +1079,7 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
             .Verify(x => x.Send(It.IsAny<GetDirectDownloadUrlCommand>(), It.IsAny<CancellationToken>()), Times.Once());
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldPersistDownloadFinishedStatusInDatabase_WhenDownloadCompletesSuccessfully()
     {
         // Arrange
@@ -1142,7 +1142,7 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
             .Verify(x => x.Send(It.IsAny<GetDirectDownloadUrlCommand>(), It.IsAny<CancellationToken>()), Times.Once());
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldPersistTotalDataReceived_WhenCompletionEventHasZeroReceivedBytes()
     {
         // Arrange
@@ -1229,7 +1229,7 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
             .Verify(x => x.Send(It.IsAny<GetDirectDownloadUrlCommand>(), It.IsAny<CancellationToken>()), Times.Once());
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnFailedResultAndPersistClientErrorLog_WhenGetDirectDownloadUrlFails()
     {
         // Arrange
@@ -1314,7 +1314,7 @@ public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadC
         );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldSetPausedStatus_WhenDownloadFileCompletedEventIsCancelled()
     {
         // Arrange

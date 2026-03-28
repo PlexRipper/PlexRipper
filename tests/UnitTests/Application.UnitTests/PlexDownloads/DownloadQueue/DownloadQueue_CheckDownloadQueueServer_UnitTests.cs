@@ -6,10 +6,7 @@ namespace Reaparr.Application.UnitTests;
 
 public class DownloadQueueCheckDownloadQueueUnitTests : BaseUnitTest<DownloadQueue>
 {
-    public DownloadQueueCheckDownloadQueueUnitTests(ITestOutputHelper output)
-        : base(output) { }
-
-    [Fact]
+    [Test]
     public async Task ShouldHaveNoUpdates_WhenGivenAnEmptyList()
     {
         // Arrange
@@ -22,9 +19,11 @@ public class DownloadQueueCheckDownloadQueueUnitTests : BaseUnitTest<DownloadQue
         // Assert
         result.IsFailed.ShouldBeTrue();
         result.Errors.Count.ShouldBeGreaterThan(0);
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Verify(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>()), Times.Never());
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHaveNoStartCommands_WhenServerIsAlreadyDownloading()
     {
         await SetupDatabase(
@@ -67,7 +66,7 @@ public class DownloadQueueCheckDownloadQueueUnitTests : BaseUnitTest<DownloadQue
         result.Errors.Count.ShouldBeGreaterThan(0);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHaveNoStartCommands_WhenATaskIsAlreadyDownloading()
     {
         // Arrange
@@ -101,9 +100,11 @@ public class DownloadQueueCheckDownloadQueueUnitTests : BaseUnitTest<DownloadQue
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Value.ShouldBeNull();
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Verify(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>()), Times.Never());
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldNotStartDownloads_WhenServerIsPausedByUser()
     {
         // Arrange
@@ -138,7 +139,7 @@ public class DownloadQueueCheckDownloadQueueUnitTests : BaseUnitTest<DownloadQue
             .Verify(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>()), Times.Never);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHaveOneDownloadTaskStarted_WhenGivenMovieDownloadTasks()
     {
         // Arrange
@@ -164,7 +165,7 @@ public class DownloadQueueCheckDownloadQueueUnitTests : BaseUnitTest<DownloadQue
         result.Value.Id.ShouldBe(startedDownloadTask.Id);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHaveNextQueuedDownloadTask_WhenGivenAMovieDownloadTasksWithCompleted()
     {
         // Arrange
@@ -198,7 +199,7 @@ public class DownloadQueueCheckDownloadQueueUnitTests : BaseUnitTest<DownloadQue
         result.Value.Id.ShouldBe(downloadTasks[0].Children[0].Id);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHaveNextQueuedDownloadTask_WhenGivenATvShowsDownloadTasksWithCompleted()
     {
         // Arrange
@@ -232,7 +233,7 @@ public class DownloadQueueCheckDownloadQueueUnitTests : BaseUnitTest<DownloadQue
         result.Value.Id.ShouldBe(downloadTasks[0].Children[0].Children[0].Children[0].Id);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldStartNextDownloadTask_WhenJobIsStillRunningButDatabaseStatusIsDownloadFinished()
     {
         // Arrange
@@ -291,7 +292,7 @@ public class DownloadQueueCheckDownloadQueueUnitTests : BaseUnitTest<DownloadQue
             .Verify(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>()), Times.Once);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldNotStartNextDownloadTask_WhenJobIsStillRunningAndDatabaseStatusIsDownloading()
     {
         // Arrange

@@ -1,22 +1,22 @@
-namespace Reaparr.Domain.UnitTests.Mappers;
+namespace Reaparr.Domain.UnitTests;
 
 public partial class PlexMediaTypeMappersUnitTests
 {
-    [Theory]
-    [InlineData(PlexMediaType.None, "None")]
-    [InlineData(PlexMediaType.Movie, "Movie")]
-    [InlineData(PlexMediaType.TvShow, "TvShow")]
-    [InlineData(PlexMediaType.Season, "Season")]
-    [InlineData(PlexMediaType.Episode, "Episode")]
-    [InlineData(PlexMediaType.Music, "Music")]
-    [InlineData(PlexMediaType.Artist, "Artist")]
-    [InlineData(PlexMediaType.Album, "Album")]
-    [InlineData(PlexMediaType.Song, "Song")]
-    [InlineData(PlexMediaType.PhotoAlbum, "PhotoAlbum")]
-    [InlineData(PlexMediaType.Photos, "Photos")]
-    [InlineData(PlexMediaType.OtherVideos, "OtherVideos")]
-    [InlineData(PlexMediaType.Games, "Games")]
-    [InlineData(PlexMediaType.Unknown, "Unknown")]
+    [Test]
+    [Arguments(PlexMediaType.None, "None")]
+    [Arguments(PlexMediaType.Movie, "Movie")]
+    [Arguments(PlexMediaType.TvShow, "TvShow")]
+    [Arguments(PlexMediaType.Season, "Season")]
+    [Arguments(PlexMediaType.Episode, "Episode")]
+    [Arguments(PlexMediaType.Music, "Music")]
+    [Arguments(PlexMediaType.Artist, "Artist")]
+    [Arguments(PlexMediaType.Album, "Album")]
+    [Arguments(PlexMediaType.Song, "Song")]
+    [Arguments(PlexMediaType.PhotoAlbum, "PhotoAlbum")]
+    [Arguments(PlexMediaType.Photos, "Photos")]
+    [Arguments(PlexMediaType.OtherVideos, "OtherVideos")]
+    [Arguments(PlexMediaType.Games, "Games")]
+    [Arguments(PlexMediaType.Unknown, "Unknown")]
     public void ShouldConvertEnumToStringName_WhenValidEnumValueProvided(PlexMediaType input, string expected)
     {
         // Act
@@ -26,19 +26,24 @@ public partial class PlexMediaTypeMappersUnitTests
         result.ShouldBe(expected);
     }
 
-    [Theory]
-    [InlineData((PlexMediaType)999)]
-    [InlineData((PlexMediaType)(-1))]
-    [InlineData((PlexMediaType)100)]
-    [InlineData((PlexMediaType)int.MaxValue)]
-    [InlineData((PlexMediaType)int.MinValue)]
+    [Test]
+    [MethodDataSource(nameof(GetInvalidEnumValues))]
     public void ShouldThrowNotImplementedException_WhenInvalidEnumValueProvided(PlexMediaType input)
     {
         // Act & Assert
         Should.Throw<NotImplementedException>(() => input.ToPlexMediaTypeString());
     }
 
-    [Fact]
+    public static IEnumerable<PlexMediaType> GetInvalidEnumValues()
+    {
+        yield return (PlexMediaType)999;
+        yield return (PlexMediaType)(-1);
+        yield return (PlexMediaType)100;
+        yield return (PlexMediaType)int.MaxValue;
+        yield return (PlexMediaType)int.MinValue;
+    }
+
+    [Test]
     public void ShouldHandleAllEnumValues_WhenConvertingToString()
     {
         // Arrange
@@ -61,7 +66,7 @@ public partial class PlexMediaTypeMappersUnitTests
         }
     }
 
-    [Fact]
+    [Test]
     public void ShouldCompleteRoundTripConversion_WhenConvertingEnumToStringAndBack()
     {
         // Arrange
@@ -84,7 +89,7 @@ public partial class PlexMediaTypeMappersUnitTests
         }
     }
 
-    [Fact]
+    [Test]
     public void ShouldReturnExpectedStringFormat_WhenConvertingValidEnums()
     {
         // Arrange & Act & Assert - Test that strings match exact enum names
@@ -104,7 +109,7 @@ public partial class PlexMediaTypeMappersUnitTests
         PlexMediaType.Unknown.ToPlexMediaTypeString().ShouldBe(nameof(PlexMediaType.Unknown));
     }
 
-    [Fact]
+    [Test]
     public void ShouldReturnConsistentStringResults_WhenCalledMultipleTimes()
     {
         // Arrange

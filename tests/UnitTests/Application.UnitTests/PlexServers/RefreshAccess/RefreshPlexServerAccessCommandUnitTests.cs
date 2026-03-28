@@ -6,10 +6,10 @@ namespace Reaparr.Application.UnitTests;
 
 public class RefreshPlexServerAccessCommandUnitTests : BaseUnitTest<RefreshPlexServerAccessCommandHandler>
 {
-    public RefreshPlexServerAccessCommandUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public RefreshPlexServerAccessCommandUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnOkResult_WhenThereAreNoAccessiblePlexServers()
     {
         // Arrange
@@ -37,7 +37,7 @@ public class RefreshPlexServerAccessCommandUnitTests : BaseUnitTest<RefreshPlexS
         result.ShouldNotBeNull();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnOkResult_WhenThereAreAccessiblePlexServers()
     {
         // Arrange

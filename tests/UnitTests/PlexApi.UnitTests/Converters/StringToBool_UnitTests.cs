@@ -5,13 +5,13 @@ namespace Reaparr.PlexApi.UnitTests.Converters;
 
 public class StringToBool : BaseUnitTest
 {
-    public StringToBool(ITestOutputHelper output)
-        : base(output) { }
+    public StringToBool()
+        : base() { }
 
-    [Theory]
-    [InlineData("{\"x\": \"1\"}", true)]
-    [InlineData("{\"x\": \"0\"}", false)]
-    [InlineData("{\"x\": \"rubbish\"}", false)]
+    [Test]
+    [Arguments("{\"x\": \"1\"}", true)]
+    [Arguments("{\"x\": \"0\"}", false)]
+    [Arguments("{\"x\": \"rubbish\"}", false)]
     public void ShouldConvertToTrue_WhenStringOfOne(string json, bool expected)
     {
         // Arrange

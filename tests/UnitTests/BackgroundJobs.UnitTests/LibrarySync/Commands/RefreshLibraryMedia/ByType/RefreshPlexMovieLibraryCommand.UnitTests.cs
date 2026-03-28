@@ -6,10 +6,10 @@ namespace Reaparr.BackgroundJobs.UnitTests;
 
 public class RefreshPlexMovieLibraryCommandUnitTests : BaseUnitTest<RefreshPlexMovieLibraryCommandHandler>
 {
-    public RefreshPlexMovieLibraryCommandUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public RefreshPlexMovieLibraryCommandUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldSuccessfullyRefreshLibraryAndUpdateSyncedAt_WhenMoviesExist()
     {
         // Arrange
@@ -51,7 +51,7 @@ public class RefreshPlexMovieLibraryCommandUnitTests : BaseUnitTest<RefreshPlexM
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldSendProgressWithMovieItem_WhenMoviesExist()
     {
         // Arrange
@@ -89,7 +89,7 @@ public class RefreshPlexMovieLibraryCommandUnitTests : BaseUnitTest<RefreshPlexM
         capturedItems.ShouldContain(i => i.MediaType == PlexMediaType.Movie);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldStillUpdateLibraryAndLogWarning_WhenNoMoviesExist()
     {
         // Arrange
@@ -129,7 +129,7 @@ public class RefreshPlexMovieLibraryCommandUnitTests : BaseUnitTest<RefreshPlexM
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldUpdateLibraryAndLogError_WhenMoviesExistWithZeroMediaSize()
     {
         // Arrange
@@ -177,7 +177,7 @@ public class RefreshPlexMovieLibraryCommandUnitTests : BaseUnitTest<RefreshPlexM
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnFailedResult_WhenSyncPlexMoviesCommandFails()
     {
         // Arrange

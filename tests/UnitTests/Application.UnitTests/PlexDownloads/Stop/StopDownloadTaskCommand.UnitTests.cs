@@ -9,10 +9,10 @@ namespace Reaparr.Application.UnitTests;
 
 public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCommandHandler>
 {
-    public StopDownloadTaskCommandUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public StopDownloadTaskCommandUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldHaveFailedResult_WhenGivenAnInvalidId()
     {
         // Arrange
@@ -46,7 +46,7 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
             .Verify(x => x.StopMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Never());
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHaveFailedResult_WhenTheDownloadTaskCouldNotBeStopped()
     {
         // Arrange
@@ -101,7 +101,7 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHaveSetDownloadTasksToStopped_WhenAtLeastOneValidIdIsGiven()
     {
         // Arrange
@@ -190,7 +190,7 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
             downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.Stopped);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldDeleteDownloadFile_WhenTaskIsInFileTransferPhase()
     {
         // Arrange — task is in MoveError (FileTransfer phase); stopping deletes temp files
@@ -273,7 +273,7 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
             downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.Stopped);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHaveFailedResult_WhenDeleteDownloadTaskFilesCommandFails()
     {
         // Arrange
@@ -345,7 +345,7 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
         after.DownloadStatus.ShouldBe(DownloadStatus.MoveError);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldOnlyStopActiveTvShowChildren_WhenStoppingTvShow()
     {
         // Arrange
@@ -460,7 +460,7 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
             .ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldOnlyStopActiveSeasonChildren_WhenStoppingSeason()
     {
         // Arrange
@@ -545,7 +545,7 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
         downloadTasks.First(x => x.Id == seasonChildTasks.Last().Id).DownloadStatus.ShouldBe(DownloadStatus.Queued);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHaveFailedResult_WhenStopMoveDownloadFileJobFails()
     {
         // Arrange
@@ -593,7 +593,7 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldNotDeleteFiles_WhenDeleteFilesIsFalse()
     {
         // Arrange
@@ -643,7 +643,7 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
             t.DownloadStatus.ShouldBe(DownloadStatus.Stopped);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldNotDeleteFiles_WhenDownloadTaskPhaseIsCompleted()
     {
         // Arrange — completed task: DeleteFiles=true but phase guard must prevent deletion
@@ -689,7 +689,7 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
             file.Exists(fileTask.DownloadFilePath).ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldNotFail_WhenDownloadFileDoesNotExistOnDisk()
     {
         // Arrange — file is missing from disk; stop should still succeed and log a warning
@@ -729,7 +729,7 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
             .Verify(x => x.Send(It.IsAny<DeleteDownloadTaskFilesCommand>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldStopBothDownloadingAndMovingChildren_WhenTvShowHasOneChildDownloadingAndOneMoving()
     {
         // Arrange
@@ -815,7 +815,7 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
         downloadTasksAfter.Count(x => x.DownloadStatus == DownloadStatus.Stopped).ShouldBe(2);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldStopMovingTask_WhenMovieTaskIsMovingAndNotDownloading()
     {
         // Arrange
@@ -878,7 +878,7 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
             t.DownloadStatus.ShouldBe(DownloadStatus.Stopped);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldResetProgress_WhenFileTaskIsCompleted()
     {
         // Regression: stop must be a full reset operation, even for Completed tasks,
@@ -931,7 +931,7 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
         after.DirectDownloadSnapshot.ShouldBeNull();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldResetProgress_WhenFileTaskIsMoveFinished()
     {
         // Regression: stop must also fully reset MoveFinished tasks so a subsequent

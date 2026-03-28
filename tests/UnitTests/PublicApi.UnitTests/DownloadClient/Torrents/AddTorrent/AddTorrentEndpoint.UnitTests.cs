@@ -10,10 +10,10 @@ namespace PublicApi.UnitTests;
 
 public class AddTorrentEndpointUnitTests : BaseUnitTest
 {
-    public AddTorrentEndpointUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public AddTorrentEndpointUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnOk_WhenValidTorrentFileIsUploaded()
     {
         // Arrange
@@ -59,7 +59,7 @@ public class AddTorrentEndpointUnitTests : BaseUnitTest
         torrentFileMock.Verify(f => f.FileName, Times.AtLeastOnce);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnValidationErrors_WhenTorrentMetadataIsInvalid()
     {
         // Arrange
@@ -100,7 +100,7 @@ public class AddTorrentEndpointUnitTests : BaseUnitTest
         torrentFileMock.Verify(f => f.FileName, Times.AtLeastOnce);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnFail_WhenCreateDownloadTasksCommandFails()
     {
         // Arrange
@@ -129,7 +129,7 @@ public class AddTorrentEndpointUnitTests : BaseUnitTest
         torrentFileMock.Verify(f => f.FileName, Times.AtLeastOnce);
     }
 
-    [Fact]
+    [Test]
     public void TorrentMetadataDTOValidator_ShouldValidateAllRequiredFields()
     {
         // Arrange
@@ -144,7 +144,7 @@ public class AddTorrentEndpointUnitTests : BaseUnitTest
         result.Errors.ShouldBeEmpty();
     }
 
-    [Fact]
+    [Test]
     public void TorrentMetadataDTOValidator_ShouldFailValidation_WhenFieldsAreInvalid()
     {
         // Arrange
@@ -179,7 +179,7 @@ public class AddTorrentEndpointUnitTests : BaseUnitTest
         result.Errors.ShouldContain(x => x.PropertyName == nameof(TorrentMetadataDTO.Quality));
     }
 
-    [Fact]
+    [Test]
     public void AddTorrentEndpointRequestValidator_ShouldRequireTorrentFile()
     {
         // Arrange
@@ -194,7 +194,7 @@ public class AddTorrentEndpointUnitTests : BaseUnitTest
         result.Errors.ShouldContain(x => x.PropertyName == nameof(AddTorrentEndpointRequest.TorrentFile));
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldSetHashIdOnMovieDownloadTask_WhenTorrentIsMovieType()
     {
         // Arrange
@@ -272,7 +272,7 @@ public class AddTorrentEndpointUnitTests : BaseUnitTest
         updatedMovieFile.HashId.ShouldNotBeEmpty();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldSetHashIdOnEpisodeDownloadTask_WhenTorrentIsEpisodeType()
     {
         // Arrange

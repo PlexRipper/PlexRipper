@@ -7,10 +7,10 @@ namespace Reaparr.Settings.UnitTests;
 
 public class ConfigManagerLoadConfigUnitTests : BaseUnitTest<ConfigManager>
 {
-    public ConfigManagerLoadConfigUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public ConfigManagerLoadConfigUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public void ShouldLoadSettingsAndSendToUserSettings_WhenSettingsCanBeReadFromFile()
     {
         // Arrange
@@ -30,7 +30,7 @@ public class ConfigManagerLoadConfigUnitTests : BaseUnitTest<ConfigManager>
         Mock.Mock<IUserSettings>().Verify(x => x.Reset(), Times.Never);
     }
 
-    [Fact]
+    [Test]
     public void ShouldResetSettings_WhenFailingToReadSettingsFromFile()
     {
         // Arrange
@@ -61,7 +61,7 @@ public class ConfigManagerLoadConfigUnitTests : BaseUnitTest<ConfigManager>
         sut.Verify(x => x.ResetConfig(), Times.Once);
     }
 
-    [Fact]
+    [Test]
     public void ShouldResetSettingsWhenUserSettingsCouldNotBeSetFromJsonSerialization_WhenReadingInvalidParsedJsonSettings()
     {
         // Arrange
@@ -91,7 +91,7 @@ public class ConfigManagerLoadConfigUnitTests : BaseUnitTest<ConfigManager>
         sut.Verify(x => x.ResetConfig(), Times.Once);
     }
 
-    [Fact]
+    [Test]
     public void ShouldResetSettingsWhenSerializationThrowsException_WhenReadingInvalidJsonSettings()
     {
         // Arrange

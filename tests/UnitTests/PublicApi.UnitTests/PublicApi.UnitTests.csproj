@@ -7,14 +7,10 @@
         <IsPackable>false</IsPackable>
         <RootNamespace>Reaparr.PublicAPI.UnitTests</RootNamespace>
         <AssemblyName>Reaparr.PublicAPI.UnitTests</AssemblyName>
+        <OutputType>Exe</OutputType>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
-        <PackageReference Include="xunit.v3" Version="3.2.1" />
-        <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
+        <PackageReference Include="TUnit" Version="1.19.74" />
         <PackageReference Include="coverlet.collector" Version="6.0.4">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

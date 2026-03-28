@@ -3,14 +3,11 @@ using Autofac;
 using Reaparr.Environment;
 using Reaparr.FileSystem.Contracts;
 
-namespace Reaparr.FileSystem.UnitTests.FileSystemExtensions;
+namespace Reaparr.FileSystem.UnitTests;
 
 public class IFileSystemExtensionsUnitTests : BaseUnitTest
 {
-    public IFileSystemExtensionsUnitTests(ITestOutputHelper output)
-        : base(output) { }
-
-    [Fact]
+    [Test]
     public void ShouldReturnCorrectAvailableSpace_WhenUsingTheRootPath()
     {
         // Arrange
@@ -28,7 +25,7 @@ public class IFileSystemExtensionsUnitTests : BaseUnitTest
         result.Value.ShouldBe(DefaultAvailableSpace);
     }
 
-    [Fact]
+    [Test]
     public void ShouldReturnCorrectAvailableSpace_WhenUsingTheMoviesPath()
     {
         // Arrange
@@ -49,7 +46,7 @@ public class IFileSystemExtensionsUnitTests : BaseUnitTest
         result.Value.ShouldBe(DefaultAvailableSpace);
     }
 
-    [Fact]
+    [Test]
     public void ShouldReturnCorrectAvailableSpace_WhenUsingACustomFolder()
     {
         // Arrange
@@ -70,7 +67,7 @@ public class IFileSystemExtensionsUnitTests : BaseUnitTest
         result.Value.ShouldBe(DefaultAvailableSpace);
     }
 
-    [Fact]
+    [Test]
     public void ShouldReturnFailedResult_WhenUsingAFolderThatDoesNotExist()
     {
         // Arrange

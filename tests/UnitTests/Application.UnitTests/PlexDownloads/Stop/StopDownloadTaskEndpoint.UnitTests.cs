@@ -4,10 +4,10 @@ namespace Reaparr.Application.UnitTests;
 
 public class StopDownloadTaskEndpointUnitTests : BaseUnitTest
 {
-    public StopDownloadTaskEndpointUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public StopDownloadTaskEndpointUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnSuccessResult_WhenCommandSucceeds()
     {
         // Arrange
@@ -35,7 +35,7 @@ public class StopDownloadTaskEndpointUnitTests : BaseUnitTest
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnFailedResult_WhenCommandFails()
     {
         // Arrange

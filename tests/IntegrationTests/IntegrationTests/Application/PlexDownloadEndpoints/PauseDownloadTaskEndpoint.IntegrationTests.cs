@@ -8,10 +8,7 @@ namespace Reaparr.IntegrationTests;
 
 public class PauseDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
 {
-    public PauseDownloadTaskEndpointIntegrationTests(ITestOutputHelper output)
-        : base(output) { }
-
-    [Fact]
+    [Test]
     public async Task ShouldPauseADownloadTask_WhenDownloadTaskIsInProgressAndIsPaused()
     {
         // Arrange

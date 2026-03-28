@@ -5,10 +5,10 @@ namespace Reaparr.Application.UnitTests;
 
 public class RefreshLibraryAccessCommandUnitTests : BaseUnitTest<RefreshLibraryAccessHandler>
 {
-    public RefreshLibraryAccessCommandUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public RefreshLibraryAccessCommandUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnFailedResult_WhenPlexAccountIdIsInvalid()
     {
         // Arrange
@@ -22,7 +22,7 @@ public class RefreshLibraryAccessCommandUnitTests : BaseUnitTest<RefreshLibraryA
         result.Errors.ShouldNotBeEmpty();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnEmptyResult_WhenNoPlexServersAccessible()
     {
         // Arrange
@@ -45,7 +45,7 @@ public class RefreshLibraryAccessCommandUnitTests : BaseUnitTest<RefreshLibraryA
         result.Value.OfflineServers.ShouldBeEmpty();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldRetrieveLibrariesFromSinglePlexServer_WhenPlexAccountHasAccessToOneServer()
     {
         // Arrange

@@ -8,10 +8,7 @@ namespace Reaparr.IntegrationTests;
 
 public class RestartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
 {
-    public RestartDownloadTaskEndpointIntegrationTests(ITestOutputHelper output)
-        : base(output) { }
-
-    [Fact]
+    [Test]
     public async Task ShouldRestartCompletedMovieDownloadTaskOnRestartCommand_WhenTaskIsDoneDownloading()
     {
         // Arrange

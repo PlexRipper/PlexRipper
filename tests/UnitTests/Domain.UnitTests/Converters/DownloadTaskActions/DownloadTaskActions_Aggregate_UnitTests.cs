@@ -2,10 +2,10 @@
 
 public class DownloadTaskActionsAggregateUnitTests : BaseUnitTest
 {
-    public DownloadTaskActionsAggregateUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public DownloadTaskActionsAggregateUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public void ShouldBeStatusUnknown_WhenListIsEmpty()
     {
         // Arrange
@@ -18,7 +18,7 @@ public class DownloadTaskActionsAggregateUnitTests : BaseUnitTest
         status.ShouldBe(DownloadStatus.Unknown);
     }
 
-    [Fact]
+    [Test]
     public void ShouldBeStatusDownloading_WhenSomeAreDownloadFinished()
     {
         // Arrange
@@ -37,7 +37,7 @@ public class DownloadTaskActionsAggregateUnitTests : BaseUnitTest
         status.ShouldBe(DownloadStatus.Downloading);
     }
 
-    [Fact]
+    [Test]
     public void ShouldBeStatusDownloadFinished_WhenOneIsQueuedAndOneIsDownloadFinished()
     {
         // Arrange
@@ -65,7 +65,7 @@ public class DownloadTaskActionsAggregateUnitTests : BaseUnitTest
         status.ShouldBe(DownloadStatus.DownloadFinished);
     }
 
-    [Fact]
+    [Test]
     public void ShouldBeStatusDownloadFinished_WhenSomeAreDownloadFinishedAndQueued()
     {
         // Arrange
@@ -84,7 +84,7 @@ public class DownloadTaskActionsAggregateUnitTests : BaseUnitTest
         status.ShouldBe(DownloadStatus.DownloadFinished);
     }
 
-    [Fact]
+    [Test]
     public void ShouldBeStatusDownloadFinished_WhenSomeAreDownloadFinishedQueuedAndCompleted()
     {
         // Arrange
@@ -105,7 +105,7 @@ public class DownloadTaskActionsAggregateUnitTests : BaseUnitTest
         status.ShouldBe(DownloadStatus.DownloadFinished);
     }
 
-    [Fact]
+    [Test]
     public void ShouldBeStatusDownloadFinished_WhenSomeAreDownloadFinishedAndCompleted()
     {
         // Arrange
@@ -124,7 +124,7 @@ public class DownloadTaskActionsAggregateUnitTests : BaseUnitTest
         status.ShouldBe(DownloadStatus.DownloadFinished);
     }
 
-    [Fact]
+    [Test]
     public void ShouldBeStatusQueued_WhenSomeAreQueuedAndCompleted()
     {
         // Arrange
@@ -143,7 +143,7 @@ public class DownloadTaskActionsAggregateUnitTests : BaseUnitTest
         status.ShouldBe(DownloadStatus.Queued);
     }
 
-    [Fact]
+    [Test]
     public void ShouldPrioritizeAnyStatuses_WhenMixedWithAllStatuses()
     {
         // Arrange
@@ -161,7 +161,7 @@ public class DownloadTaskActionsAggregateUnitTests : BaseUnitTest
         status.ShouldBe(DownloadStatus.Error); // `anyStatuses` should take precedence.
     }
 
-    [Fact]
+    [Test]
     public void ShouldHandleDuplicateStatusesCorrectly()
     {
         // Arrange
@@ -180,7 +180,7 @@ public class DownloadTaskActionsAggregateUnitTests : BaseUnitTest
         status.ShouldBe(DownloadStatus.Error); // First matching `anyStatus`.
     }
 
-    [Fact]
+    [Test]
     public void ShouldReturnFirstMatchingAnyStatus_WhenMultipleAnyStatusesArePresent()
     {
         // Arrange
@@ -198,7 +198,7 @@ public class DownloadTaskActionsAggregateUnitTests : BaseUnitTest
         status.ShouldBe(DownloadStatus.ServerUnreachable); // First match in `anyStatuses`
     }
 
-    [Fact]
+    [Test]
     public void ShouldBeStatusXFinished_WhenAllButOneAreCompletedAndX()
     {
         var allStatuses = Enum.GetValues<DownloadStatus>().ToList();
@@ -229,7 +229,7 @@ public class DownloadTaskActionsAggregateUnitTests : BaseUnitTest
         }
     }
 
-    [Fact]
+    [Test]
     public void ShouldBeStatusX_WhenAllAreStatusX()
     {
         var allStatuses = Enum.GetValues<DownloadStatus>().ToList();

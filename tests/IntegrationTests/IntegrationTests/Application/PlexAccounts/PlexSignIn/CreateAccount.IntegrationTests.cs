@@ -9,10 +9,7 @@ namespace Reaparr.IntegrationTests;
 
 public class CreateAccountIntegrationTests : BaseIntegrationTests
 {
-    public CreateAccountIntegrationTests(ITestOutputHelper output)
-        : base(output) { }
-
-    [Fact]
+    [Test]
     public async Task ShouldCreateAndInspectAccessibleServers_WhenPlexAccountIsValid()
     {
         // Arrange

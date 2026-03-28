@@ -4,10 +4,7 @@ namespace Reaparr.BaseTests.UnitTests;
 
 public class FakeApiDataGenerateUnitTests : BaseUnitTest<MockPlexApiServer>
 {
-    public FakeApiDataGenerateUnitTests(ITestOutputHelper output)
-        : base(output) { }
-
-    [Fact]
+    [Test]
     public void ShouldGeneratePlexApiMockDataFast_WhenGeneratingALargeDataset()
     {
         // Arrange
@@ -26,7 +23,6 @@ public class FakeApiDataGenerateUnitTests : BaseUnitTest<MockPlexApiServer>
 
         // Assert
         var elapsed = stopWatch.Elapsed;
-        Output.WriteLine($"Elapsed time: {elapsed}");
         elapsed.ShouldBeLessThan(TimeSpan.FromSeconds(10));
     }
 }

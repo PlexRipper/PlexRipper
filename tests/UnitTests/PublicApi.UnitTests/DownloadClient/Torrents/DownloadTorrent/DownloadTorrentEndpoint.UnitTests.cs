@@ -7,10 +7,7 @@ namespace PublicApi.UnitTests;
 
 public class DownloadTorrentEndpointUnitTests : BaseUnitTest
 {
-    public DownloadTorrentEndpointUnitTests(ITestOutputHelper output)
-        : base(output) { }
-
-    [Fact]
+    [Test]
     public async Task ShouldReturnValidTorrent_WhenEpisodeExists()
     {
         // Arrange – seed an episode with media data/part
@@ -78,7 +75,7 @@ public class DownloadTorrentEndpointUnitTests : BaseUnitTest
         }
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnValidTorrent_WhenMovieExists()
     {
         // Arrange – seed a movie with media data/part
@@ -142,7 +139,7 @@ public class DownloadTorrentEndpointUnitTests : BaseUnitTest
         }
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnNotFound_WhenNoMatchingMediaFound()
     {
         // Arrange – database with server/library but no matching data id
@@ -182,7 +179,7 @@ public class DownloadTorrentEndpointUnitTests : BaseUnitTest
         ep.HttpContext.Response.StatusCode.ShouldBe(StatusCodes.Status404NotFound);
     }
 
-    [Fact]
+    [Test]
     public void DownloadTorrentEndpointRequestValidator_ShouldValidateRequiredFields()
     {
         // Arrange
@@ -207,7 +204,7 @@ public class DownloadTorrentEndpointUnitTests : BaseUnitTest
         result.Errors.ShouldBeEmpty();
     }
 
-    [Fact]
+    [Test]
     public void DownloadTorrentEndpointRequestValidator_ShouldFail_OnInvalidFields()
     {
         // Arrange

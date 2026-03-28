@@ -3,12 +3,13 @@ using Serilog.Events;
 
 namespace Reaparr.BaseTests.UnitTests;
 
+[NotInParallel]
 public class FakeDataDownloadTasksUnitTests : BaseUnitTest
 {
-    public FakeDataDownloadTasksUnitTests(ITestOutputHelper output)
-        : base(output, LogEventLevel.Information) { }
+    public FakeDataDownloadTasksUnitTests()
+        : base(LogEventLevel.Information) { }
 
-    [Fact]
+    [Test]
     public void MovieDownloadTask_ShouldGenerateAllRequiredProperties()
     {
         // Arrange
@@ -33,7 +34,7 @@ public class FakeDataDownloadTasksUnitTests : BaseUnitTest
         movieTask.PlexLibraryId.ShouldBe(0); // Should be 0 since it's ignored
     }
 
-    [Fact]
+    [Test]
     public void MovieDownloadTask_ShouldGenerateChildren()
     {
         // Arrange
@@ -50,7 +51,7 @@ public class FakeDataDownloadTasksUnitTests : BaseUnitTest
         movieTask.Children.Count.ShouldBe(1);
     }
 
-    [Fact]
+    [Test]
     public void MovieDownloadTask_ShouldGenerateMultipleChildrenWhenConfigured()
     {
         // Arrange
@@ -67,7 +68,27 @@ public class FakeDataDownloadTasksUnitTests : BaseUnitTest
         movieTask.Children.Count.ShouldBe(2);
     }
 
-    [Fact]
+    [Test]
+    public void MovieDownloadTask_ShouldKeepMultipartIndexesAligned_WhenConfigured()
+    {
+        // Arrange
+        var seed = new Seed(12345);
+
+        // Act
+        var movieTask = FakeData
+            .GetMovieDownloadTask(seed, options => options.IncludeMultiPartMovies = true)
+            .Generate();
+        var movieFiles = movieTask.Children.ToList();
+
+        // Assert
+        movieFiles.Count.ShouldBe(2);
+        movieFiles[0].Title.ShouldEndWith(" 1");
+        movieFiles[0].FullTitle.ShouldContain("/1-");
+        movieFiles[1].Title.ShouldEndWith(" 2");
+        movieFiles[1].FullTitle.ShouldContain("/2-");
+    }
+
+    [Test]
     public void MovieFileDownloadTask_ShouldGenerateAllRequiredProperties()
     {
         // Arrange
@@ -96,7 +117,7 @@ public class FakeDataDownloadTasksUnitTests : BaseUnitTest
         movieFileTask.DownloadTaskType.ShouldBe(DownloadTaskType.MovieData);
     }
 
-    [Fact]
+    [Test]
     public void TvShowDownloadTask_ShouldGenerateAllRequiredProperties()
     {
         // Arrange
@@ -118,7 +139,7 @@ public class FakeDataDownloadTasksUnitTests : BaseUnitTest
         tvShowTask.DownloadTaskType.ShouldBe(DownloadTaskType.TvShow);
     }
 
-    [Fact]
+    [Test]
     public void TvShowDownloadTask_ShouldGenerateChildrenWithCorrectHierarchy()
     {
         // Arrange
@@ -165,7 +186,35 @@ public class FakeDataDownloadTasksUnitTests : BaseUnitTest
         }
     }
 
-    [Fact]
+    [Test]
+    public void TvShowDownloadTask_ShouldIncrementEpisodeFileIndexes_WhenEpisodeHasMultipleFiles()
+    {
+        // Arrange
+        var seed = new Seed(67890);
+
+        // Act
+        var tvShowTask = FakeData
+            .GetDownloadTaskTvShow(
+                seed,
+                options =>
+                {
+                    options.TvShowSeasonDownloadTasksCount = 1;
+                    options.TvShowEpisodeDownloadTasksCount = 1;
+                    options.IncludeMultiPartEpisodes = true;
+                }
+            )
+            .Generate();
+
+        var episode = tvShowTask.Children.Single().Children.Single();
+        var episodeFiles = episode.Children.ToList();
+
+        // Assert
+        episodeFiles.Count.ShouldBe(2);
+        episodeFiles[0].FullTitle.ShouldContain("/1-");
+        episodeFiles[1].FullTitle.ShouldContain("/2-");
+    }
+
+    [Test]
     public void DownloadTaskConfig_ShouldModifyFileSizeWhenConfigured()
     {
         // Arrange
@@ -186,7 +235,7 @@ public class FakeDataDownloadTasksUnitTests : BaseUnitTest
         configuredMovieFileTask.DataTotal.ShouldBe((long)expectedBytes);
     }
 
-    [Fact]
+    [Test]
     public void AllDownloadTaskTypes_ShouldGenerateCorrectTypes()
     {
         // Arrange

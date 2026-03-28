@@ -7,10 +7,10 @@ namespace Reaparr.Application.UnitTests;
 
 public class RestartDownloadTaskCommandUnitTests : BaseUnitTest<RestartDownloadTaskCommandHandler>
 {
-    public RestartDownloadTaskCommandUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public RestartDownloadTaskCommandUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldRequeueDownloadTasks_WhenRestartingValidId()
     {
         // Arrange

@@ -5,13 +5,13 @@ namespace Reaparr.PublicAPI.UnitTests;
 
 public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHandler>
 {
-    public SearchTvShowCommandUnitTests(ITestOutputHelper output)
-        : base(output)
+    public SearchTvShowCommandUnitTests()
+        : base()
     {
         Mock.Mock<INetworkSettings>().SetupGet(x => x.Url).Returns("http://localhost");
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnPagedEpisodes_WhenNoFiltersProvided()
     {
         // Arrange
@@ -100,7 +100,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
         }
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnSpecificEpisode_WhenFilteredByImdbSeasonAndEpisode()
     {
         // Arrange
@@ -170,7 +170,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
         episodeExists.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnSpecificEpisode_WhenFilteredByTmdbSeasonAndEpisode()
     {
         // Arrange
@@ -225,7 +225,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
             .ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnSpecificEpisode_WhenFilteredByTvdbSeasonAndEpisode()
     {
         // Arrange
@@ -280,7 +280,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
             .ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnEmpty_WhenNoEpisodesExist()
     {
         // Arrange
@@ -316,7 +316,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
         result.Value.Channel.Items.ShouldBeEmpty();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldCreateMultipleItemsPerEpisode_WhenMultiPartEpisodesEnabled()
     {
         // Arrange
@@ -364,7 +364,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
         result.Value.Channel.Items.Count.ShouldBe(expectedPartCount);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnEmpty_WhenQueryProvidedWithoutSeasonEpisode()
     {
         // Arrange
@@ -399,7 +399,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
         result.Value.Channel.Items.ShouldBeEmpty();
     }
 
-    [Fact]
+    [Test]
     public void ShouldValidate_WhenPagingOnlyProvided()
     {
         // Arrange
@@ -424,7 +424,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
         result.Errors.ShouldBeEmpty();
     }
 
-    [Fact]
+    [Test]
     public void ShouldFailValidation_WhenSeasonAndEpisodeProvidedWithoutExternalIds()
     {
         // Arrange
@@ -449,7 +449,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
         result.Errors.ShouldNotBeEmpty();
     }
 
-    [Fact]
+    [Test]
     public void ShouldPassValidation_WhenSeasonEpisodeWithImdbProvided()
     {
         // Arrange
@@ -474,7 +474,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
         result.Errors.ShouldBeEmpty();
     }
 
-    [Fact]
+    [Test]
     public void ShouldFailValidation_WhenLimitIsZero()
     {
         // Arrange
@@ -499,7 +499,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
         result.Errors.ShouldNotBeEmpty();
     }
 
-    [Fact]
+    [Test]
     public void ShouldFailValidation_WhenLimitExceedsMax()
     {
         // Arrange
@@ -524,7 +524,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
         result.Errors.ShouldNotBeEmpty();
     }
 
-    [Fact]
+    [Test]
     public void ShouldFailValidation_WhenOffsetIsNegative()
     {
         // Arrange
@@ -549,7 +549,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
         result.Errors.ShouldNotBeEmpty();
     }
 
-    [Fact]
+    [Test]
     public void ShouldFailValidation_WhenSeasonIsNegative()
     {
         // Arrange
@@ -574,7 +574,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
         result.Errors.ShouldNotBeEmpty();
     }
 
-    [Fact]
+    [Test]
     public void ShouldFailValidation_WhenEpisodeIsNegative()
     {
         // Arrange
@@ -599,7 +599,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
         result.Errors.ShouldNotBeEmpty();
     }
 
-    [Fact]
+    [Test]
     public void ShouldFailValidation_WhenTmdbIdIsNegative()
     {
         // Arrange
@@ -624,7 +624,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
         result.Errors.ShouldNotBeEmpty();
     }
 
-    [Fact]
+    [Test]
     public void ShouldFailValidation_WhenTvdbIdIsNegative()
     {
         // Arrange
@@ -649,7 +649,7 @@ public class SearchTvShowCommandUnitTests : BaseUnitTest<SearchTvShowCommandHand
         result.Errors.ShouldNotBeEmpty();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnSpecificEpisode_WhenAllExternalIdsProvided()
     {
         // Arrange

@@ -13,8 +13,8 @@ namespace Reaparr.PlexApi.UnitTests;
 
 public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexServersCommandHandler>
 {
-    public GetAccessiblePlexServersUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public GetAccessiblePlexServersUnitTests()
+        : base() { }
 
     private void SetCallMock(GetServerResourcesResponse response1, GetServerResourcesResponse response2)
     {
@@ -41,7 +41,7 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
             .Verifiable(Times.AtLeastOnce);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnEmptyResult_WhenPlexAccountHasAnEmptyAuthToken()
     {
         // Arrange
@@ -61,7 +61,7 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
         result.Has400BadRequestError().ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnFailedResult_WhenBothResponsesFail()
     {
         // Arrange
@@ -105,7 +105,7 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
         result.Errors.ShouldNotBeEmpty();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldRemoveDuplicateConnections_WhenMultipleServersHaveTheSameConnection()
     {
         // Arrange
@@ -163,7 +163,7 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
         connections.Select(connection => connection.Url).ShouldBeUnique();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldRemoveDuplicateConnectionsFromRealResponse_WhenMultipleServersHaveTheSameConnection()
     {
         // Arrange
@@ -215,7 +215,7 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
         connections.Select(connection => connection.Url).ShouldBeUnique();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnServersFromSecondResponse_WhenFirstResponseFails()
     {
         // Arrange
@@ -260,7 +260,7 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
         result.Value.Count.ShouldBe(serverCount);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldCombineConnectionsFromBothResponses_WhenBothAreSuccessful()
     {
         // Arrange
@@ -305,7 +305,7 @@ public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexS
         connections.Select(connection => connection.Url).ShouldBeUnique();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldCombineAllConnectionsFromBothResponses_WhenBothAreSuccessful()
     {
         // Arrange

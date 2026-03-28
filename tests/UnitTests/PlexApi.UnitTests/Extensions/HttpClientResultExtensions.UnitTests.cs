@@ -7,10 +7,10 @@ namespace Reaparr.PlexApi.UnitTests;
 
 public class HttpClientResultExtensionsUnitTests : BaseUnitTest<object>
 {
-    public HttpClientResultExtensionsUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public HttpClientResultExtensionsUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnSuccessResult_WhenResponseIsReturned()
     {
         // Arrange
@@ -36,7 +36,7 @@ public class HttpClientResultExtensionsUnitTests : BaseUnitTest<object>
         result.Value.StatusCode.ShouldBe(HttpStatusCode.OK);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturn408RequestTimeoutError_WhenRequestTimesOut()
     {
         // Arrange
@@ -62,7 +62,7 @@ public class HttpClientResultExtensionsUnitTests : BaseUnitTest<object>
         result.Has408RequestTimeout().ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturn502BadGatewayError_WhenHttpRequestFails()
     {
         // Arrange

@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Data.Contracts;
 using Reaparr.SignalR.Contracts;
@@ -6,10 +7,10 @@ namespace Reaparr.Application.UnitTests;
 
 public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUpdateDispatcher>
 {
-    public DownloadTaskUpdateDispatcherUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public DownloadTaskUpdateDispatcherUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldIncludeSeasonAndTvShowInPatch_WhenEpisodeProgressIsUpdated()
     {
         // Arrange
@@ -77,7 +78,7 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
         patchIds.ShouldContain(tvShow.Id);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldSendOnlyLatestProgress_WhenMultipleUpdatesAreBufferedBeforeFlush()
     {
         await SetupDatabase(
@@ -146,7 +147,7 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
         leafPatch.TimeRemaining.ShouldBe(12);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldNotSendPatch_WhenProgressIsUpdatedForUnknownKey()
     {
         var capturedPatches = new List<IReadOnlyCollection<DownloadPatchDTO>>();
@@ -192,13 +193,13 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
         capturedPatches.ShouldBeEmpty();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldIncreasePatchSequence_WhenMultiplePatchesAreDispatchedForSameServer()
     {
         await SetupDatabase(84323, config => config.MovieDownloadTasksCount = 1);
         var movieFile = await IDbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
 
-        var sequences = new List<long>();
+        var sequences = new ConcurrentBag<long>();
         Mock.Mock<IDownloadHubService>()
             .Setup(x =>
                 x.SendDownloadPatchAsync(
@@ -223,11 +224,12 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
         await WaitForPatchCount(sequences, 2);
         await sut.StopAsync(CancellationToken.None);
 
-        sequences.Count.ShouldBeGreaterThanOrEqualTo(2);
-        sequences[1].ShouldBeGreaterThan(sequences[0]);
+        var orderedSequences = sequences.OrderBy(x => x).ToList();
+        orderedSequences.Count.ShouldBeGreaterThanOrEqualTo(2);
+        orderedSequences[1].ShouldBeGreaterThan(orderedSequences[0]);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldIncludeSeasonAndTvShowInPatch_WhenEpisodeStatusChanges()
     {
         await SetupDatabase(
@@ -275,7 +277,7 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
         patchIds.ShouldContain(tvShow.Id);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldRetryBufferedProgress_WhenFirstPatchSendFails()
     {
         await SetupDatabase(84325, config => config.MovieDownloadTasksCount = 1);
@@ -325,7 +327,7 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
         capturedPatches.ShouldNotBeEmpty();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldIncreaseSequenceAcrossMixedStatusAndProgressPatches()
     {
         await SetupDatabase(84326, config => config.MovieDownloadTasksCount = 1);
@@ -373,7 +375,7 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
             orderedSequences[i].ShouldBe(orderedSequences[i - 1] + 1);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldPersistBufferedProgressBeforeStatusBecomesPaused()
     {
         await SetupDatabase(84327, config => config.MovieDownloadTasksCount = 1);
@@ -404,7 +406,7 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
         updatedMovieFile.DownloadSpeed.ShouldBe(0);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldIgnoreProgressUpdateAfterTaskHasBeenPaused()
     {
         await SetupDatabase(84328, config => config.MovieDownloadTasksCount = 1);
@@ -476,7 +478,7 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
         updatedMovieFile.DataReceived.ShouldBe(initialProgress.DataReceived);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldPersistCompletedEpisodeProgress_WhenSiblingEpisodeProgressArrivesBeforeFlush()
     {
         await SetupDatabase(
@@ -607,7 +609,7 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
         updatedEpisodeFiles[1].DownloadSpeed.ShouldBe(123);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldPersistCompletedEpisodeSnapshot_WhenSiblingEpisodeProgressArrivesBeforeFlush()
     {
         await SetupDatabase(
@@ -759,7 +761,7 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
         updatedSiblingEpisodeFile.DirectDownloadSnapshot.FileName.ShouldBe("sibling.mkv");
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldNotWriteDownloadingLogAfterPauseTransition()
     {
         await SetupDatabase(84329, config => config.MovieDownloadTasksCount = 1);
@@ -821,7 +823,7 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
         logs.Where(x => x.Id > pauseLog!.Id && x.Status == DownloadStatus.Downloading).ShouldBeEmpty();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldSendPatchWithFileTransferPercentage_WhenNotifyFileTransferProgressIsCalled()
     {
         // Arrange — verifies that calling NotifyFileTransferProgress triggers the dispatcher flush,
@@ -879,7 +881,7 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
         fileTaskPatch.Percentage.ShouldBe(50.00m);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldSendHundredPercentPatch_WhenEpisodeFileIsCompletedWithStaleStoredPercentage()
     {
         // Arrange - regression for completed TV episode files where the DB row still holds a stale
@@ -945,7 +947,7 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
         fileTaskPatch.Percentage.ShouldBe(100m);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldSendHundredPercentPatch_WhenMovieFileIsCompletedWithStaleStoredPercentage()
     {
         // Arrange - movie file equivalent of the completed stale-percentage regression.
@@ -1002,7 +1004,7 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
         fileTaskPatch.Percentage.ShouldBe(100m);
     }
 
-    private async Task WaitForPatchCount<T>(ICollection<T> collection, int expectedCount)
+    private async Task WaitForPatchCount<T>(IReadOnlyCollection<T> collection, int expectedCount)
     {
         for (var i = 0; i < 40 && collection.Count < expectedCount; i++)
             await Task.Delay(100, CancellationToken);

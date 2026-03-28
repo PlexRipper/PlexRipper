@@ -9,10 +9,7 @@ namespace Reaparr.IntegrationTests;
 
 public class CreatePlexAccountEndpointIntegrationTests : BaseIntegrationTests
 {
-    public CreatePlexAccountEndpointIntegrationTests(ITestOutputHelper output)
-        : base(output) { }
-
-    [Fact]
+    [Test]
     public async Task ShouldCreatePlexAccountAndInspectServers_WhenValidDataProvided()
     {
         // Arrange
@@ -151,7 +148,7 @@ public class CreatePlexAccountEndpointIntegrationTests : BaseIntegrationTests
             .ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturn400_WhenUsernameAlreadyExists()
     {
         // Arrange
@@ -212,7 +209,7 @@ public class CreatePlexAccountEndpointIntegrationTests : BaseIntegrationTests
         container.DbContext.PlexAccounts.Count().ShouldBe(1);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturn400_WhenUuidAlreadyExists()
     {
         // Arrange
@@ -273,7 +270,7 @@ public class CreatePlexAccountEndpointIntegrationTests : BaseIntegrationTests
         container.DbContext.PlexAccounts.Count().ShouldBe(1);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturn400_WhenValidationFails()
     {
         // Arrange
@@ -323,7 +320,7 @@ public class CreatePlexAccountEndpointIntegrationTests : BaseIntegrationTests
         container.DbContext.PlexAccounts.Count().ShouldBe(0);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldUseProvidedClientId_WhenProvided()
     {
         // Arrange
@@ -386,7 +383,7 @@ public class CreatePlexAccountEndpointIntegrationTests : BaseIntegrationTests
         plexAccountDb.ClientId.ShouldBe(expectedClientId);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldCreatePlexAccount_WhenUsingAuthTokenMode()
     {
         // Arrange
@@ -450,7 +447,7 @@ public class CreatePlexAccountEndpointIntegrationTests : BaseIntegrationTests
         plexAccountDb.Password.ShouldBe(""); // Should remain empty in auth token mode
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnCreatedAccount_WhenSuccessful()
     {
         // Arrange

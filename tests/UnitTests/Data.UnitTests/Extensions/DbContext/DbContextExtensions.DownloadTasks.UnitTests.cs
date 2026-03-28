@@ -5,10 +5,10 @@ namespace Reaparr.Data.UnitTests;
 
 public class DbContextExtensionsDownloadTasksUnitTests : BaseUnitTest
 {
-    public DbContextExtensionsDownloadTasksUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public DbContextExtensionsDownloadTasksUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldSetTheDownloadTaskParentOfTypeMovieDataToDownloadFinished_WhenTheMovieDataIsDownloadStatusIsDownloadFinished()
     {
         // Arrange
@@ -33,7 +33,7 @@ public class DbContextExtensionsDownloadTasksUnitTests : BaseUnitTest
         downloadTasks[0].DownloadStatus.ShouldBe(DownloadStatus.DownloadFinished);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldSetTheDownloadTaskParentOfTypeEpisodeDataToError_WhenTheEpisodeDataIsDownloadStatusIsError()
     {
         // Arrange
@@ -68,7 +68,7 @@ public class DbContextExtensionsDownloadTasksUnitTests : BaseUnitTest
         downloadTasksDb[3].DownloadStatus.ShouldBe(DownloadStatus.Error);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnDownloadTaskTypeMovie_WhenTheGuidIsOfTypeDownloadTaskMovie()
     {
         // Arrange
@@ -83,7 +83,7 @@ public class DbContextExtensionsDownloadTasksUnitTests : BaseUnitTest
         downloadTaskType.ShouldBe(DownloadTaskType.Movie);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnDownloadTaskTypeTvShow_WhenTheGuidIsOfTypeDownloadTaskTvShow()
     {
         // Arrange
@@ -98,7 +98,7 @@ public class DbContextExtensionsDownloadTasksUnitTests : BaseUnitTest
         downloadTaskType.ShouldBe(DownloadTaskType.TvShow);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnDownloadTaskTypeSeason_WhenTheGuidIsOfTypeDownloadTaskTvShowSeason()
     {
         // Arrange
@@ -113,7 +113,7 @@ public class DbContextExtensionsDownloadTasksUnitTests : BaseUnitTest
         downloadTaskType.ShouldBe(DownloadTaskType.Season);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnDownloadTaskTypeEpisode_WhenTheGuidIsOfTypeDownloadTaskTvShowEpisode()
     {
         // Arrange
@@ -128,11 +128,11 @@ public class DbContextExtensionsDownloadTasksUnitTests : BaseUnitTest
         downloadTaskType.ShouldBe(DownloadTaskType.Episode);
     }
 
-    [Theory]
-    [InlineData(DownloadTaskType.Movie)]
-    [InlineData(DownloadTaskType.TvShow)]
-    [InlineData(DownloadTaskType.Season)]
-    [InlineData(DownloadTaskType.Episode)]
+    [Test]
+    [Arguments(DownloadTaskType.Movie)]
+    [Arguments(DownloadTaskType.TvShow)]
+    [Arguments(DownloadTaskType.Season)]
+    [Arguments(DownloadTaskType.Episode)]
     public async Task ShouldReturnError_WhenUnsupportedDownloadTaskTypeProvided(DownloadTaskType type)
     {
         // Arrange
@@ -177,7 +177,7 @@ public class DbContextExtensionsDownloadTasksUnitTests : BaseUnitTest
         result.Errors.ShouldContain(e => e.Message.Contains("not supported"));
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnResetDownloadTaskTypeMovieFile_WhenResetDownloadTaskProgressCalled()
     {
         // Arrange
@@ -226,7 +226,7 @@ public class DbContextExtensionsDownloadTasksUnitTests : BaseUnitTest
         downloadTaskDb.PlexLibraryId.ShouldBe(testDownloadTask.PlexLibraryId);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnResetDownloadTaskTypeEpisodeFile_WhenResetDownloadTaskProgressCalled()
     {
         // Arrange
@@ -282,7 +282,7 @@ public class DbContextExtensionsDownloadTasksUnitTests : BaseUnitTest
         downloadTaskDb.PlexLibraryId.ShouldBe(testDownloadTask.PlexLibraryId);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldBuildDownloadUrl_WithHttpsConnectionAndToken()
     {
         // Arrange
@@ -331,7 +331,7 @@ public class DbContextExtensionsDownloadTasksUnitTests : BaseUnitTest
         result.Value.ShouldBe($"{conn.Url}{fileLocationUrl}?X-Plex-Token={access.AuthToken}");
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldFail_GetDownloadUrl_WhenNoConnectionsAvailable()
     {
         // Arrange
@@ -354,7 +354,7 @@ public class DbContextExtensionsDownloadTasksUnitTests : BaseUnitTest
         result.IsFailed.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldFail_GetDownloadUrl_WhenNoTokenAvailable()
     {
         // Arrange
@@ -397,7 +397,7 @@ public class DbContextExtensionsDownloadTasksUnitTests : BaseUnitTest
         result.IsFailed.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnNullDownloadTaskKey_WhenGuidEmpty()
     {
         // Arrange
@@ -410,7 +410,7 @@ public class DbContextExtensionsDownloadTasksUnitTests : BaseUnitTest
         key.ShouldBeNull();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnDownloadTask_WhenTypeIsNoneAndIdMatchesMovieFile()
     {
         // Arrange

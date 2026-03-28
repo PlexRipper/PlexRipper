@@ -7,10 +7,10 @@ public class GetPlexLibraryMediaEndpointUnitTests : BaseUnitTest<GetPlexLibraryM
 {
     private PlexMediaSlimDTOValidator PlexMediaSlimDtoValidator => new();
 
-    public GetPlexLibraryMediaEndpointUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public GetPlexLibraryMediaEndpointUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldHaveAllThePlexLibraryMedia_WhenPageAndSizeAreNotSetAndMediaIsMovies()
     {
         // Arrange
@@ -49,15 +49,12 @@ public class GetPlexLibraryMediaEndpointUnitTests : BaseUnitTest<GetPlexLibraryM
         result.Value.MediaCount.ShouldBe(result.Value.MediaList.Count);
         foreach (var mediaSlimDTO in result.Value.MediaList)
         {
-            var validationResult = await PlexMediaSlimDtoValidator.ValidateAsync(
-                mediaSlimDTO,
-                TestContext.Current.CancellationToken
-            );
+            var validationResult = await PlexMediaSlimDtoValidator.ValidateAsync(mediaSlimDTO, CancellationToken);
             validationResult.Errors.ShouldBeEmpty();
         }
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHaveAllThePlexLibraryMedia_WhenPageAndSizeAreNotSetAndMediaIsTvShows()
     {
         // Arrange
@@ -97,10 +94,7 @@ public class GetPlexLibraryMediaEndpointUnitTests : BaseUnitTest<GetPlexLibraryM
 
         foreach (var plexMediaSlimDto in result.Value.MediaList)
         {
-            var validationResult = await PlexMediaSlimDtoValidator.ValidateAsync(
-                plexMediaSlimDto,
-                TestContext.Current.CancellationToken
-            );
+            var validationResult = await PlexMediaSlimDtoValidator.ValidateAsync(plexMediaSlimDto, CancellationToken);
             validationResult.Errors.ShouldBeEmpty();
         }
     }

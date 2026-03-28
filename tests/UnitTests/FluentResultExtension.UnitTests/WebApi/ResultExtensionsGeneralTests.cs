@@ -4,7 +4,7 @@ namespace Reaparr.FluentResultExtension.UnitTests;
 
 public class ResultExtensionsGeneralTests
 {
-    [Fact]
+    [Test]
     public void ShouldNotFindStatusCode_WhenGivenAnInvalidHasStatusCode()
     {
         // Arrange
@@ -17,12 +17,12 @@ public class ResultExtensionsGeneralTests
         has201CreatedRequest.ShouldBeFalse();
     }
 
-    [Theory]
-    [InlineData(HttpStatusCode.NoContent)]
-    [InlineData(HttpStatusCode.Forbidden)]
-    [InlineData(HttpStatusCode.InternalServerError)]
-    [InlineData(HttpStatusCode.ServiceUnavailable)]
-    [InlineData(HttpStatusCode.GatewayTimeout)]
+    [Test]
+    [Arguments(HttpStatusCode.NoContent)]
+    [Arguments(HttpStatusCode.Forbidden)]
+    [Arguments(HttpStatusCode.InternalServerError)]
+    [Arguments(HttpStatusCode.ServiceUnavailable)]
+    [Arguments(HttpStatusCode.GatewayTimeout)]
     public void ShouldMapKnownHttpStatusCodesForResult(HttpStatusCode statusCode)
     {
         // Arrange
@@ -35,12 +35,12 @@ public class ResultExtensionsGeneralTests
         mapped.HasStatusCode((int)statusCode).ShouldBeTrue();
     }
 
-    [Theory]
-    [InlineData(HttpStatusCode.NoContent)]
-    [InlineData(HttpStatusCode.Forbidden)]
-    [InlineData(HttpStatusCode.InternalServerError)]
-    [InlineData(HttpStatusCode.ServiceUnavailable)]
-    [InlineData(HttpStatusCode.GatewayTimeout)]
+    [Test]
+    [Arguments(HttpStatusCode.NoContent)]
+    [Arguments(HttpStatusCode.Forbidden)]
+    [Arguments(HttpStatusCode.InternalServerError)]
+    [Arguments(HttpStatusCode.ServiceUnavailable)]
+    [Arguments(HttpStatusCode.GatewayTimeout)]
     public void ShouldMapKnownHttpStatusCodesForGenericResult(HttpStatusCode statusCode)
     {
         // Arrange
@@ -53,7 +53,7 @@ public class ResultExtensionsGeneralTests
         mapped.HasStatusCode((int)statusCode).ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public void ShouldFallbackToRawStatusCode_WhenNoSpecialMappingExists()
     {
         // Arrange
@@ -66,7 +66,7 @@ public class ResultExtensionsGeneralTests
         mapped.HasStatusCode((int)HttpStatusCode.ServiceUnavailable).ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public void ShouldMapTooManyRequestsStatusCode()
     {
         // Arrange
@@ -80,7 +80,7 @@ public class ResultExtensionsGeneralTests
         mapped.Has429TooManyRequestsError().ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public void ShouldMapInternalServerErrorStatusCode()
     {
         // Arrange
@@ -93,7 +93,7 @@ public class ResultExtensionsGeneralTests
         mapped.Has500InternalServerError().ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public void ShouldMapServiceUnavailableStatusCode()
     {
         // Arrange
@@ -106,7 +106,7 @@ public class ResultExtensionsGeneralTests
         mapped.Has503ServiceUnavailableError().ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public void ShouldMapInternalServerErrorStatusCodeForGenericResult()
     {
         // Arrange
@@ -119,7 +119,7 @@ public class ResultExtensionsGeneralTests
         mapped.Has500InternalServerError().ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public void ShouldMapServiceUnavailableStatusCodeForGenericResult()
     {
         // Arrange
@@ -132,7 +132,7 @@ public class ResultExtensionsGeneralTests
         mapped.Has503ServiceUnavailableError().ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public void ShouldMapTooManyRequestsStatusCodeForGenericResult()
     {
         // Arrange
@@ -145,12 +145,12 @@ public class ResultExtensionsGeneralTests
         mapped.Has429TooManyRequestsError().ShouldBeTrue();
     }
 
-    [Theory]
-    [InlineData(HttpStatusCode.RequestTimeout)]
-    [InlineData(HttpStatusCode.InternalServerError)]
-    [InlineData(HttpStatusCode.BadGateway)]
-    [InlineData(HttpStatusCode.ServiceUnavailable)]
-    [InlineData(HttpStatusCode.GatewayTimeout)]
+    [Test]
+    [Arguments(HttpStatusCode.RequestTimeout)]
+    [Arguments(HttpStatusCode.InternalServerError)]
+    [Arguments(HttpStatusCode.BadGateway)]
+    [Arguments(HttpStatusCode.ServiceUnavailable)]
+    [Arguments(HttpStatusCode.GatewayTimeout)]
     public void ShouldIdentifyServerUnreachableStatuses(HttpStatusCode statusCode)
     {
         // Arrange
@@ -163,7 +163,7 @@ public class ResultExtensionsGeneralTests
         isServerUnreachable.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public void ShouldNotIdentifyClientErrorsAsServerUnreachable()
     {
         // Arrange

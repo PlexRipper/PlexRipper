@@ -144,8 +144,39 @@ jobs:
                     CYPRESS_RETRIES: 2
 
     # Back-End Unit Tests
-    Back-End-Unit-Tests:
+    Back-End-Build:
         needs: [Check-Backend-Changes, Check-PR-Status]
+        if: needs.Check-Backend-Changes.outputs.should_run == 'true' && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
+        runs-on: ubuntu-latest
+        steps:
+            -   name: Checkout Source Code
+                uses: actions/checkout@v4
+
+            -   name: Dotnet Setup (Restore only)
+                uses: ./.github/workflows/steps/dotnet-setup/
+                with:
+                    project-path: Reaparr.sln
+                    restore: true
+                    build: false
+
+            -   name: Build Backend Solution
+                run: dotnet build Reaparr.sln --no-restore
+
+            -   name: Package Build Outputs
+                shell: bash
+                run: >-
+                    find src tests -type d -path '*/bin/Debug/net10.0' -print0 |
+                    tar --create --file backend-build.tar --null --files-from -
+
+            -   name: Upload Build Outputs
+                uses: actions/upload-artifact@v4
+                with:
+                    name: backend-build
+                    path: backend-build.tar
+                    retention-days: 1
+
+    Back-End-Unit-Tests:
+        needs: [Check-Backend-Changes, Check-PR-Status, Back-End-Build]
         if: needs.Check-Backend-Changes.outputs.should_run == 'true' && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
         runs-on: ubuntu-latest
         name: Back-End-Unit-Tests (${{ matrix.project_name }})
@@ -154,7 +185,7 @@ jobs:
             matrix:
                 include:
                     - test_project: tests/UnitTests/AppHost.UnitTests/AppHost.UnitTests.csproj
-                      project_name: AppHost.UnitTests    
+                      project_name: AppHost.UnitTests
                     - test_project: tests/UnitTests/Application.UnitTests/Application.UnitTests.csproj
                       project_name: Application.UnitTests
                     - test_project: tests/UnitTests/BackgroundJobs.UnitTests/BackgroundJobs.UnitTests.csproj
@@ -188,9 +219,30 @@ jobs:
                 uses: ./.github/workflows/steps/dotnet-setup/
                 with:
                     project-path: ${{ matrix.test_project }}
+                    restore: false
+                    build: false
+
+            -   name: Download Build Outputs
+                uses: actions/download-artifact@v4
+                with:
+                    name: backend-build
+                    path: .
+
+            -   name: Extract Build Outputs
+                run: tar -xf backend-build.tar
 
             -   name: Run Unit Tests
-                run: dotnet test ${{ matrix.test_project }} --no-build --verbosity normal --logger "trx;LogFileName=test_results.trx" --collect:"XPlat Code Coverage"
+                env:
+                    TUNIT_GITHUB_REPORTER_STYLE: collapsible
+                run: >-
+                    dotnet run --project ${{ matrix.test_project }} --no-build --no-restore --
+                    --output Normal
+                    --results-directory TestResults/${{ matrix.project_name }}
+                    --report-trx
+                    --report-trx-filename test_results.trx
+                    --coverage
+                    --coverage-output-format cobertura
+                    --coverage-output coverage.cobertura.xml
 
             -   name: Sanitize Artifact Name
                 id: sanitize
@@ -203,7 +255,7 @@ jobs:
                 uses: actions/upload-artifact@v4
                 with:
                     name: test-results-${{ steps.sanitize.outputs.safe_name }}
-                    path: '**/TestResults/*.trx'
+                    path: TestResults/${{ matrix.project_name }}/test_results.trx
                     retention-days: 7
 
             -   name: Upload Code Coverage
@@ -211,20 +263,12 @@ jobs:
                 uses: actions/upload-artifact@v4
                 with:
                     name: code-coverage-${{ steps.sanitize.outputs.safe_name }}
-                    path: '**/TestResults/**/coverage.cobertura.xml'
+                    path: TestResults/${{ matrix.project_name }}/coverage.cobertura.xml
                     retention-days: 7
-
-            -   name: Publish Test Report
-                if: always()
-                uses: dorny/test-reporter@v1
-                with:
-                    name: Unit Test Results - ${{ matrix.project_name }}
-                    path: '**/TestResults/*.trx'
-                    reporter: dotnet-trx
 
     # Back-End Integration Tests
     Back-End-Integration-Tests:
-        needs: [Check-Backend-Changes, Check-PR-Status]
+        needs: [Check-Backend-Changes, Check-PR-Status, Back-End-Build]
         if: needs.Check-Backend-Changes.outputs.should_run == 'true' && (needs.Check-PR-Status.result == 'success' || github.event_name == 'workflow_dispatch')
         runs-on: ubuntu-latest
         strategy:
@@ -240,25 +284,35 @@ jobs:
                 uses: ./.github/workflows/steps/dotnet-setup/
                 with:
                     project-path: ${{ matrix.integration_test_project }}
+                    restore: false
+                    build: false
 
-            -   name: Run Integration Tests 
-                run: dotnet test ${{ matrix.integration_test_project }} --no-build --verbosity normal --logger "trx;LogFileName=integration_test_results.trx"
+            -   name: Download Build Outputs
+                uses: actions/download-artifact@v4
+                with:
+                    name: backend-build
+                    path: .
+
+            -   name: Extract Build Outputs
+                run: tar -xf backend-build.tar
+
+            -   name: Run Integration Tests
+                env:
+                    TUNIT_GITHUB_REPORTER_STYLE: collapsible
+                run: >-
+                    dotnet run --project ${{ matrix.integration_test_project }} --no-build --no-restore --
+                    --output Normal
+                    --results-directory TestResults/IntegrationTests
+                    --report-trx
+                    --report-trx-filename integration_test_results.trx
 
             -   name: Upload Integration Test Results
                 if: always()
                 uses: actions/upload-artifact@v4
                 with:
                     name: integration-test-results
-                    path: '**/TestResults/*.trx'
+                    path: TestResults/IntegrationTests/integration_test_results.trx
                     retention-days: 7
-
-            -   name: Publish Integration Test Report
-                if: always()
-                uses: dorny/test-reporter@v1
-                with:
-                    name: Integration Test Results
-                    path: '**/TestResults/*.trx'
-                    reporter: dotnet-trx
 
     # Code Coverage Report
     Code-Coverage-Report:
@@ -303,4 +357,3 @@ jobs:
             push: false
             version: 9.9.9
             informational_version: 9.9.9-dev
-

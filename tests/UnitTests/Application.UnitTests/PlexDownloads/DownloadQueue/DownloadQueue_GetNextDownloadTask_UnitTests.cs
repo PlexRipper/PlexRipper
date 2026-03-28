@@ -4,10 +4,7 @@ namespace Reaparr.Application.UnitTests;
 
 public class DownloadQueueGetNextDownloadTaskUnitTests : BaseUnitTest<DownloadQueue>
 {
-    public DownloadQueueGetNextDownloadTaskUnitTests(ITestOutputHelper output)
-        : base(output) { }
-
-    [Fact]
+    [Test]
     public async Task ShouldHaveNextDownloadTask_WhenAllAreQueued()
     {
         // Arrange
@@ -23,7 +20,7 @@ public class DownloadQueueGetNextDownloadTaskUnitTests : BaseUnitTest<DownloadQu
         nextDownloadTask.Value.Id.ShouldBe(nextDownloadTaskId);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHaveNextDownloadTask_WhenADownloadTaskHasBeenCompleted()
     {
         // Arrange
@@ -44,7 +41,7 @@ public class DownloadQueueGetNextDownloadTaskUnitTests : BaseUnitTest<DownloadQu
         nextDownloadTask.Value.Id.ShouldBe(nextDownloadTaskId);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHaveNextQueuedDownloadTaskInDownloadingTask_WhenAParentDownloadTaskIsAlreadyDownloading()
     {
         // Arrange
@@ -68,7 +65,7 @@ public class DownloadQueueGetNextDownloadTaskUnitTests : BaseUnitTest<DownloadQu
         nextDownloadTask.Value.Id.ShouldBe(nextDownloadTaskId);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHaveNoDownloadTask_WhenADownloadTaskIsAlreadyDownloading()
     {
         // Arrange
@@ -88,7 +85,7 @@ public class DownloadQueueGetNextDownloadTaskUnitTests : BaseUnitTest<DownloadQu
         nextDownloadTask.IsSuccess.ShouldBeFalse();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHaveServerUnreachableDownloadTask_WhenADownloadTaskIsAlreadyDownloading()
     {
         // Arrange
@@ -110,7 +107,7 @@ public class DownloadQueueGetNextDownloadTaskUnitTests : BaseUnitTest<DownloadQu
         nextDownloadTask.Value.Id.ShouldBe(nextDownloadTaskId);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldPrioritizeServerUnreachable_WhenQueuedAndServerUnreachableExist()
     {
         // Arrange
@@ -137,7 +134,7 @@ public class DownloadQueueGetNextDownloadTaskUnitTests : BaseUnitTest<DownloadQu
         nextDownloadTask.Value.Id.ShouldBe(serverUnreachableTask.Id);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldSelectServerUnreachableTask_WhenQueuedTaskExists()
     {
         // Arrange
@@ -166,7 +163,7 @@ public class DownloadQueueGetNextDownloadTaskUnitTests : BaseUnitTest<DownloadQu
         nextDownloadTask.Value.Id.ShouldBe(serverUnreachableTask.Id);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldSelectServerUnreachableTask_WhenRetryMetadataWouldPreviouslyBlock()
     {
         // Arrange
@@ -195,7 +192,7 @@ public class DownloadQueueGetNextDownloadTaskUnitTests : BaseUnitTest<DownloadQu
         nextDownloadTask.Value.Id.ShouldBe(serverUnreachableTask.Id);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHaveNoNextDownloadTask_WhenAllArePaused()
     {
         // Arrange
@@ -222,7 +219,7 @@ public class DownloadQueueGetNextDownloadTaskUnitTests : BaseUnitTest<DownloadQu
         nextDownloadTask.IsSuccess.ShouldBeFalse();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHaveNoNextDownloadTask_WhenMovingAndDownloadFinished()
     {
         // Arrange
@@ -246,7 +243,7 @@ public class DownloadQueueGetNextDownloadTaskUnitTests : BaseUnitTest<DownloadQu
         nextDownloadTask.IsSuccess.ShouldBeFalse();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHaveLastQueuedDownloadTask_WhenMovingQueuedAndDownloadFinished()
     {
         // Arrange

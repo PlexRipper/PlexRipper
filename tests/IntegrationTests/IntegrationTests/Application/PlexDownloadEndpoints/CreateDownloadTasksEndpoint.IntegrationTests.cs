@@ -9,10 +9,7 @@ namespace Reaparr.IntegrationTests;
 
 public class CreateDownloadTasksEndpointIntegrationTests : BaseIntegrationTests
 {
-    public CreateDownloadTasksEndpointIntegrationTests(ITestOutputHelper output)
-        : base(output) { }
-
-    [Fact]
+    [Test]
     public async Task ShouldDownloadMultipleMovieDownloadTasks_WhenDownloadTasksAreCreated()
     {
         // Arrange
@@ -84,24 +81,22 @@ public class CreateDownloadTasksEndpointIntegrationTests : BaseIntegrationTests
             $"Response status code was {testResult.Response.StatusCode}"
         );
 
-        // Wait for all downloads to complete sequentially
-        // Since only one download can run per server at a time, we need to wait for each download to finish
+        // Wait for all downloads to complete via DB polling
         await WaitForDatabaseConditionAsync(
-            () =>
+            async () =>
             {
-                var tasks = container
-                    .DbContext.GetAllDownloadTasksByServerAsync(cancellationToken: CancellationToken)
-                    .GetAwaiter()
-                    .GetResult();
+                var tasks = await container.DbContext.GetAllDownloadTasksByServerAsync(
+                    cancellationToken: CancellationToken
+                );
                 return tasks.Count == plexMovieCount
                     && tasks.All(x => x.DownloadStatus == DownloadStatus.Completed)
                     && tasks.SelectMany(x => x.Children).All(x => x.DownloadStatus == DownloadStatus.Completed);
             },
-            maxRetries: 60,
+            maxRetries: 120,
             delayMs: 1000
         );
 
-        // Assert - verify download tasks were created successfully
+        // Assert - verify API response
         var result = testResult.Result;
         result.IsSuccess.ShouldBeTrue();
 

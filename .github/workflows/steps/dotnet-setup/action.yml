@@ -4,6 +4,14 @@ inputs:
     project-path:
         description: 'Relative path to the project or solution to build'
         required: true
+    restore:
+        description: 'Whether to run dotnet restore'
+        required: false
+        default: 'true'
+    build:
+        description: 'Whether to run dotnet build'
+        required: false
+        default: 'true'
 runs:
     using: 'composite'
     steps:
@@ -11,10 +19,22 @@ runs:
             uses: fast-actions/setup-dotnet@v1
             with:
                 sdk-version: '10.x'
+
+        -   name: Cache NuGet packages
+            if: inputs.restore == 'true'
+            uses: actions/cache@v4
+            with:
+                path: ~/.nuget/packages
+                key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/packages.lock.json') }}
+                restore-keys: |
+                    ${{ runner.os }}-nuget-
+
         -   name: Restore dependencies
+            if: inputs.restore == 'true'
             shell: bash
             run: dotnet restore ${{ inputs.project-path }} --locked-mode
 
         -   name: Build
+            if: inputs.build == 'true'
             shell: bash
             run: dotnet build ${{ inputs.project-path }} --no-restore

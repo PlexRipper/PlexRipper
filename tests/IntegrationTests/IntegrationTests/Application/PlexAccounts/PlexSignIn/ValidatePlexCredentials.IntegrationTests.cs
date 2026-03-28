@@ -8,10 +8,7 @@ namespace Reaparr.IntegrationTests;
 
 public class ValidateCredentialsIntegrationTests : BaseIntegrationTests
 {
-    public ValidateCredentialsIntegrationTests(ITestOutputHelper output)
-        : base(output) { }
-
-    [Fact]
+    [Test]
     public async Task ShouldValidatePlexAccount_WhenGivenValidCredentials()
     {
         // Arrange
@@ -61,7 +58,7 @@ public class ValidateCredentialsIntegrationTests : BaseIntegrationTests
         result.IsSuccess.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnFailedResultWithErrorsButNot401_WhenGivenInValidCredentials()
     {
         // Arrange

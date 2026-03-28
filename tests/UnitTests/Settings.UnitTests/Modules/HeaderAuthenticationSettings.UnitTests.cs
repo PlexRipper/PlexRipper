@@ -2,9 +2,9 @@ using Reaparr.Settings.Contracts;
 
 namespace Reaparr.Settings.UnitTests;
 
-public class HeaderAuthenticationSettingsUnitTests
+public class HeaderAuthenticationSettingsUnitTests : BaseUnitTest
 {
-    [Fact]
+    [Test]
     public void ShouldCreateWithDefaultValues()
     {
         // Act
@@ -19,7 +19,7 @@ public class HeaderAuthenticationSettingsUnitTests
         settings.RequireHttps.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public void ShouldBeValid_WhenDisabled()
     {
         // Arrange
@@ -33,7 +33,7 @@ public class HeaderAuthenticationSettingsUnitTests
         isValid.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public void ShouldBeValid_WhenEnabledWithValidConfiguration()
     {
         // Arrange
@@ -49,7 +49,7 @@ public class HeaderAuthenticationSettingsUnitTests
         isValid.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public void ShouldBeInvalid_WhenEnabledWithZeroMaxHeaderLength()
     {
         // Arrange
@@ -64,7 +64,7 @@ public class HeaderAuthenticationSettingsUnitTests
         isValid.ShouldBeFalse();
     }
 
-    [Fact]
+    [Test]
     public void ShouldBeInvalid_WhenEnabledWithNegativeMaxHeaderLength()
     {
         // Arrange
@@ -79,7 +79,7 @@ public class HeaderAuthenticationSettingsUnitTests
         isValid.ShouldBeFalse();
     }
 
-    [Fact]
+    [Test]
     public void ShouldBeInvalid_WhenTrustedProxyContainsInvalidIp()
     {
         // Arrange
@@ -94,7 +94,7 @@ public class HeaderAuthenticationSettingsUnitTests
         isValid.ShouldBeFalse();
     }
 
-    [Fact]
+    [Test]
     public void ShouldBeInvalid_WhenTrustedProxyContainsInvalidCidr()
     {
         // Arrange
@@ -109,7 +109,7 @@ public class HeaderAuthenticationSettingsUnitTests
         isValid.ShouldBeFalse();
     }
 
-    [Fact]
+    [Test]
     public void ShouldBeValid_WithValidCidrRanges()
     {
         // Arrange
@@ -124,7 +124,7 @@ public class HeaderAuthenticationSettingsUnitTests
         isValid.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public void ShouldBeValid_WithIpv6Addresses()
     {
         // Arrange
@@ -139,22 +139,22 @@ public class HeaderAuthenticationSettingsUnitTests
         isValid.ShouldBeTrue();
     }
 
-    [Theory]
-    [InlineData("192.168.1.1", true)]
-    [InlineData("10.0.0.1", true)]
-    [InlineData("invalid-ip", false)]
-    [InlineData("", false)]
-    [InlineData("192.168.1.0/24", true)]
-    [InlineData("192.168.1.0/33", false)]
-    [InlineData("192.168.1.0/", false)]
-    [InlineData("192.168.1.0/24/extra", false)]
-    [InlineData("192.168.1.0/0", true)] // Valid CIDR with /0
-    [InlineData("192.168.1.0/32", true)] // Valid CIDR with /32
-    [InlineData("192.168.1.0/-1", false)] // Invalid negative CIDR
-    [InlineData("192.168.1.0/abc", false)] // Invalid non-numeric CIDR
-    [InlineData("   ", false)] // Whitespace only
-    [InlineData("\t", false)] // Tab only
-    [InlineData("\n", false)] // Newline only
+    [Test]
+    [Arguments("192.168.1.1", true)]
+    [Arguments("10.0.0.1", true)]
+    [Arguments("invalid-ip", false)]
+    [Arguments("", false)]
+    [Arguments("192.168.1.0/24", true)]
+    [Arguments("192.168.1.0/33", false)]
+    [Arguments("192.168.1.0/", false)]
+    [Arguments("192.168.1.0/24/extra", false)]
+    [Arguments("192.168.1.0/0", true)] // Valid CIDR with /0
+    [Arguments("192.168.1.0/32", true)] // Valid CIDR with /32
+    [Arguments("192.168.1.0/-1", false)] // Invalid negative CIDR
+    [Arguments("192.168.1.0/abc", false)] // Invalid non-numeric CIDR
+    [Arguments("   ", false)] // Whitespace only
+    [Arguments("\t", false)] // Tab only
+    [Arguments("\n", false)] // Newline only
     public void ShouldValidateIpOrCidrCorrectly(string input, bool expectedValid)
     {
         // Arrange
@@ -169,7 +169,7 @@ public class HeaderAuthenticationSettingsUnitTests
         isValid.ShouldBe(expectedValid);
     }
 
-    [Fact]
+    [Test]
     public void ShouldSupportAllMappingTypes()
     {
         // Arrange & Act
@@ -184,7 +184,7 @@ public class HeaderAuthenticationSettingsUnitTests
         emailMapping.MappingType.ShouldBe(HeaderMappingType.Email);
     }
 
-    [Fact]
+    [Test]
     public void ShouldSupportLoggingConfiguration()
     {
         // Arrange
@@ -197,7 +197,7 @@ public class HeaderAuthenticationSettingsUnitTests
         settings.EnableLogging.ShouldBeFalse();
     }
 
-    [Fact]
+    [Test]
     public void ShouldSupportHttpsRequirementConfiguration()
     {
         // Arrange
@@ -210,7 +210,7 @@ public class HeaderAuthenticationSettingsUnitTests
         settings.RequireHttps.ShouldBeFalse();
     }
 
-    [Fact]
+    [Test]
     public void ShouldSupportMaxHeaderLengthConfiguration()
     {
         // Arrange
@@ -223,7 +223,7 @@ public class HeaderAuthenticationSettingsUnitTests
         settings.MaxHeaderLength.ShouldBe(512);
     }
 
-    [Fact]
+    [Test]
     public void ShouldBeValid_WhenTrustedProxiesIsEmpty()
     {
         // Arrange
@@ -238,7 +238,7 @@ public class HeaderAuthenticationSettingsUnitTests
         isValid.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public void ShouldBeInvalid_WhenTrustedProxiesContainsEmptyString()
     {
         // Arrange
@@ -253,7 +253,7 @@ public class HeaderAuthenticationSettingsUnitTests
         isValid.ShouldBeFalse();
     }
 
-    [Fact]
+    [Test]
     public void ShouldBeInvalid_WhenTrustedProxiesContainsNullString()
     {
         // Arrange
@@ -268,7 +268,7 @@ public class HeaderAuthenticationSettingsUnitTests
         isValid.ShouldBeFalse();
     }
 
-    [Fact]
+    [Test]
     public void ShouldBeInvalid_WhenTrustedProxiesContainsWhitespaceOnlyString()
     {
         // Arrange
@@ -283,7 +283,7 @@ public class HeaderAuthenticationSettingsUnitTests
         isValid.ShouldBeFalse();
     }
 
-    [Fact]
+    [Test]
     public void ShouldUpdateProperties_WhenUpdateMethodIsCalled()
     {
         // Arrange
@@ -308,7 +308,7 @@ public class HeaderAuthenticationSettingsUnitTests
         originalSettings.TrustedProxies.ShouldContain("192.168.1.1");
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldNotifyObservers_WhenPropertiesChange()
     {
         // Arrange
@@ -323,7 +323,7 @@ public class HeaderAuthenticationSettingsUnitTests
         settings.MappingType = HeaderMappingType.Email;
 
         // Wait a bit to ensure all notifications are processed
-        await Task.Delay(10, TestContext.Current.CancellationToken);
+        await Task.Delay(10, CancellationToken);
 
         // Assert
         changeNotifications.Count.ShouldBeGreaterThan(0);
@@ -332,7 +332,7 @@ public class HeaderAuthenticationSettingsUnitTests
         changeNotifications.Last().MappingType.ShouldBe(HeaderMappingType.Email);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldNotNotifyObservers_WhenSameValueIsSet()
     {
         // Arrange
@@ -347,7 +347,7 @@ public class HeaderAuthenticationSettingsUnitTests
         settings.MaxHeaderLength = 256; // Same as default value
 
         // Wait a bit to ensure notifications are processed
-        await Task.Delay(10, TestContext.Current.CancellationToken);
+        await Task.Delay(10, CancellationToken);
 
         // Assert
         changeNotifications.Count.ShouldBe(initialCount);

@@ -4,10 +4,10 @@ namespace Reaparr.Application.UnitTests;
 
 public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdatePlexLibrariesCommandHandler>
 {
-    public AddOrUpdatePlexLibrariesCommandUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public AddOrUpdatePlexLibrariesCommandUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldAddAllPlexLibraries_WhenNoneExistInTheDatabase()
     {
         // Arrange
@@ -74,7 +74,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
         }
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldUpdatePlexLibraries_WhenTheyExistInTheDatabase()
     {
         // Arrange
@@ -151,7 +151,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
         }
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldDeletePlexLibraryAccess_WhenThePlexServerHasNoPlexLibraries()
     {
         // Arrange

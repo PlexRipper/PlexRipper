@@ -5,10 +5,10 @@ namespace Reaparr.Application.UnitTests;
 
 public class ValidatePlexTokenEndpointUnitTests : BaseUnitTest
 {
-    public ValidatePlexTokenEndpointUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public ValidatePlexTokenEndpointUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldValidateThePlexToken_WhenTokenIsValid()
     {
         // Arrange
@@ -73,7 +73,7 @@ public class ValidatePlexTokenEndpointUnitTests : BaseUnitTest
             .Verify(x => x.Send(It.IsAny<ValidatePlexTokenCommand>(), It.IsAny<CancellationToken>()), Times.Once());
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldMarkUnauthorized_WhenThePlexAPIRespondsWithA401()
     {
         // Arrange
@@ -134,7 +134,7 @@ public class ValidatePlexTokenEndpointUnitTests : BaseUnitTest
             .Verify(x => x.Send(It.IsAny<ValidatePlexTokenCommand>(), It.IsAny<CancellationToken>()), Times.Once());
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHandle2FaEnabledScenario_WhenTokenIsValid()
     {
         // Arrange
@@ -192,7 +192,7 @@ public class ValidatePlexTokenEndpointUnitTests : BaseUnitTest
             .Verify(x => x.Send(It.IsAny<ValidatePlexTokenCommand>(), It.IsAny<CancellationToken>()), Times.Once());
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldNotMarkUnauthorized_WhenUnhandledPlexErrorsOccur()
     {
         // Arrange
@@ -246,7 +246,7 @@ public class ValidatePlexTokenEndpointUnitTests : BaseUnitTest
             .Verify(x => x.Send(It.IsAny<ValidatePlexTokenCommand>(), It.IsAny<CancellationToken>()), Times.Once());
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnFailedResult_WhenCommandExecutionFails()
     {
         // Arrange
@@ -281,7 +281,7 @@ public class ValidatePlexTokenEndpointUnitTests : BaseUnitTest
             .Verify(x => x.Send(It.IsAny<ValidatePlexTokenCommand>(), It.IsAny<CancellationToken>()), Times.Once());
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHandleEmptyDisplayName_WhenDisplayNameIsNotProvided()
     {
         // Arrange

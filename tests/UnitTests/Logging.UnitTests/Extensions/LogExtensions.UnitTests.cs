@@ -5,18 +5,11 @@ namespace Reaparr.Logging.UnitTests;
 
 public class LogExtensionsUnitTests
 {
-    private readonly ITestOutputHelper _output;
-
-    public LogExtensionsUnitTests(ITestOutputHelper output)
-    {
-        _output = output;
-    }
-
-    [Fact]
+    [Test]
     public void ShouldLogTheSetLogLevel_WhenLogLevelSetIsVerbose()
     {
         // Arrange
-        var log = new TestLogConfig(_output).GetLogger(LogEventLevel.Verbose).ForContext<LogExtensionsUnitTests>();
+        var log = new TestLogConfig().GetLogger(LogEventLevel.Verbose).ForContext<LogExtensionsUnitTests>();
 
         // Assert
         log.IsLogLevelEnabled(LogEventLevel.Verbose).ShouldBeTrue();
@@ -27,11 +20,11 @@ public class LogExtensionsUnitTests
         log.IsLogLevelEnabled(LogEventLevel.Fatal).ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public void ShouldNotLogTheSetLogLevel_WhenLogLevelIsAbove()
     {
         // Arrange
-        var log = new TestLogConfig(_output).GetLogger(LogEventLevel.Error).ForContext<LogExtensionsUnitTests>();
+        var log = new TestLogConfig().GetLogger(LogEventLevel.Error).ForContext<LogExtensionsUnitTests>();
 
         // Assert
         log.IsLogLevelEnabled(LogEventLevel.Verbose).ShouldBeFalse();
@@ -42,12 +35,12 @@ public class LogExtensionsUnitTests
         log.IsLogLevelEnabled(LogEventLevel.Fatal).ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public void ShouldLogWithCorrectLogProperties_WhenEachLogTypeIsCalled()
     {
         var position = new { Latitude = 25, Longitude = 134 };
 
-        var log = new TestLogConfig(_output).GetLogger(LogEventLevel.Verbose).ForContext<LogExtensionsUnitTests>();
+        var log = new TestLogConfig().GetLogger(LogEventLevel.Verbose).ForContext<LogExtensionsUnitTests>();
 
         using var context = TestCorrelator.CreateContext();
 

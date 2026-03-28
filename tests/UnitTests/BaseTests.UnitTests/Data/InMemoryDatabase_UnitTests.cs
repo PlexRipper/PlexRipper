@@ -4,10 +4,10 @@ namespace Reaparr.BaseTests.UnitTests.Data;
 
 public class InMemoryDatabaseUnitTests : BaseUnitTest
 {
-    public InMemoryDatabaseUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public InMemoryDatabaseUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldAddNotificationToInMemoryDatabase_WhenNotificationIsAdded()
     {
         // Arrange
@@ -30,7 +30,7 @@ public class InMemoryDatabaseUnitTests : BaseUnitTest
         notifications.Count.ShouldBe(1);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldAddAndRemoveNotificationToInMemoryDatabase_WhenNotificationIsAddedAndRemoved()
     {
         // Arrange

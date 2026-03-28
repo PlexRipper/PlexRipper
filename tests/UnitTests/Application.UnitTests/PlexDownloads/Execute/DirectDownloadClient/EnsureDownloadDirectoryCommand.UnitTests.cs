@@ -8,14 +8,14 @@ namespace Reaparr.Application.UnitTests;
 
 public class EnsureDownloadDirectoryCommandUnitTests : BaseCommandUnitTest<EnsureDownloadDirectoryCommand>
 {
-    public EnsureDownloadDirectoryCommandUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public EnsureDownloadDirectoryCommandUnitTests()
+        : base() { }
 
     // -------------------------------------------------------------------------
     // Validator tests
     // -------------------------------------------------------------------------
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnFailedResult_WhenDirectoryIsEmpty()
     {
         // Arrange
@@ -29,7 +29,7 @@ public class EnsureDownloadDirectoryCommandUnitTests : BaseCommandUnitTest<Ensur
         result.Errors.ShouldContain(e => e.Message.Contains("Directory cannot be empty"));
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnFailedResult_WhenFileSizeIsZero()
     {
         // Arrange
@@ -43,7 +43,7 @@ public class EnsureDownloadDirectoryCommandUnitTests : BaseCommandUnitTest<Ensur
         result.Errors.ShouldContain(e => e.Message.Contains("File size must be greater than zero"));
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnFailedResult_WhenFileSizeIsNegative()
     {
         // Arrange
@@ -61,7 +61,7 @@ public class EnsureDownloadDirectoryCommandUnitTests : BaseCommandUnitTest<Ensur
     // Handler tests
     // -------------------------------------------------------------------------
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnFailedResult_WhenCreateDirectoryThrows()
     {
         // Arrange
@@ -77,7 +77,7 @@ public class EnsureDownloadDirectoryCommandUnitTests : BaseCommandUnitTest<Ensur
         result.IsFailed.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnFailedResult_WhenDiskSpaceCheckFails()
     {
         // Arrange — use a Windows-style path that MockFileSystem on Linux cannot resolve to a drive,
@@ -105,7 +105,7 @@ public class EnsureDownloadDirectoryCommandUnitTests : BaseCommandUnitTest<Ensur
         result.IsFailed.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnFailedResult_WhenAvailableSpaceIsLessThanFileSize()
     {
         // Arrange — configure the drive with less free space than the requested file size
@@ -136,7 +136,7 @@ public class EnsureDownloadDirectoryCommandUnitTests : BaseCommandUnitTest<Ensur
         result.Errors.ShouldContain(e => e.Message.Contains("not enough space") && e.Message.Contains(directory));
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnSuccessResult_WhenDirectoryIsCreatedAndSpaceIsSufficient()
     {
         // Arrange
@@ -155,7 +155,7 @@ public class EnsureDownloadDirectoryCommandUnitTests : BaseCommandUnitTest<Ensur
         Mock.Container.Resolve<IFileSystem>().Directory.Exists(directory).ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnSuccessResult_WhenAvailableSpaceExactlyEqualsFileSize()
     {
         // Arrange

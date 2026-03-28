@@ -7,8 +7,8 @@ namespace Reaparr.Application.UnitTests;
 
 public class SetupSonarrDownloadClientCommandUnitTests : BaseUnitTest<SetupSonarrDownloadClientCommandHandler>
 {
-    public SetupSonarrDownloadClientCommandUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public SetupSonarrDownloadClientCommandUnitTests()
+        : base() { }
 
     // ISonarrSettings inherits IBaseSettingsModule<T> which has a static abstract member, making it
     // incompatible with Moq. Inject concrete SonarrSettings instances via TypedParameter instead.
@@ -50,7 +50,7 @@ public class SetupSonarrDownloadClientCommandUnitTests : BaseUnitTest<SetupSonar
         return settings;
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnFailedResult_WhenSonarrBaseUrlIsEmpty()
     {
         // Arrange
@@ -72,7 +72,7 @@ public class SetupSonarrDownloadClientCommandUnitTests : BaseUnitTest<SetupSonar
         );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnFailedResult_WhenSonarrApiKeyIsEmpty()
     {
         // Arrange
@@ -94,7 +94,7 @@ public class SetupSonarrDownloadClientCommandUnitTests : BaseUnitTest<SetupSonar
         );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnFailedResult_WhenGetDownloadClientsFails()
     {
         // Arrange
@@ -115,7 +115,7 @@ public class SetupSonarrDownloadClientCommandUnitTests : BaseUnitTest<SetupSonar
         Mock.Mock<ICommandExecutor>().Verify();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldCreateDownloadClient_WhenNoneExists()
     {
         // Arrange
@@ -140,7 +140,7 @@ public class SetupSonarrDownloadClientCommandUnitTests : BaseUnitTest<SetupSonar
         Mock.Mock<ICommandExecutor>().Verify();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldUpdateExistingDownloadClient_WhenOneAlreadyExists()
     {
         // Arrange
@@ -167,7 +167,7 @@ public class SetupSonarrDownloadClientCommandUnitTests : BaseUnitTest<SetupSonar
         Mock.Mock<ICommandExecutor>().Verify();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnFailedResult_WhenCreateDownloadClientFails()
     {
         // Arrange
@@ -191,7 +191,7 @@ public class SetupSonarrDownloadClientCommandUnitTests : BaseUnitTest<SetupSonar
         Mock.Mock<ICommandExecutor>().Verify();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldBuildResourceWithSslEnabledAndPort443_WhenReaparrUriIsHttpsCustomDomain()
     {
         // Arrange
@@ -239,7 +239,7 @@ public class SetupSonarrDownloadClientCommandUnitTests : BaseUnitTest<SetupSonar
         Mock.Mock<ICommandExecutor>().Verify();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldBuildResourceWithHttpProxyHostPortAndBasePath_WhenReverseProxyIsHttp()
     {
         // Arrange
@@ -291,7 +291,7 @@ public class SetupSonarrDownloadClientCommandUnitTests : BaseUnitTest<SetupSonar
         Mock.Mock<ICommandExecutor>().Verify();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldFallbackToLocalhost_WhenReverseProxyUrlIsInvalid()
     {
         // Arrange

@@ -25,7 +25,7 @@ public class LogConfig
     private static readonly string _template =
         $"{{NewLine}}{{Timestamp:HH:mm:ss}} [{{Level}}] [{{{FileName}}}.cs:{{{LineNumber}}}.{{{MethodName}}}()] => {{Message:lj}}{{NewLine}}{{Exception}}";
 
-    private static readonly ExpressionTemplate _newTemplate = new(
+    protected static readonly ExpressionTemplate NewTemplate = new(
         // Template
         "{@t:HH:mm:ss} [{@l}] "
             + "{#if FileName is not null}"
@@ -35,8 +35,6 @@ public class LogConfig
             + "{#end} => {@m}\n{@x}\n",
         theme: LogThemes.SystemColored.ToTemplateTheme()
     );
-
-    protected static readonly MessageTemplateTextFormatter TemplateTextFormatter = new(_template);
 
     protected static LoggerConfiguration GetBaseConfiguration()
     {
@@ -89,14 +87,15 @@ public class LogConfig
             });
         }
 
-        return config.Enrich.FromLogContext().WriteTo.Debug(_newTemplate).WriteTo.Console(_newTemplate);
+        return config.Enrich.FromLogContext();
     }
 
     public virtual Logger GetLogger(LogEventLevel minimumLogLevel = LogEventLevel.Debug) =>
         GetBaseConfiguration()
+            .WriteTo.Debug(NewTemplate)
             .WriteTo.Seq(EnvironmentExtensions.GetSeqUrl())
             .WriteTo.File(
-                _newTemplate,
+                NewTemplate,
                 Path.Combine(PathProvider.LogsDirectory, "log.txt"),
                 minimumLogLevel,
                 rollingInterval: RollingInterval.Day,

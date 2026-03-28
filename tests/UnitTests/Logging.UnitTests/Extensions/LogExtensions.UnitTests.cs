@@ -11,7 +11,7 @@ public class LogExtensionsUnitTests
     public void ShouldLogTheSetLogLevel_WhenLogLevelSetIsVerbose()
     {
         // Arrange
-        var log = new TestLogConfig(_output).GetLogger(LogEventLevel.Verbose).ForContext<LogExtensionsUnitTests>();
+        var log = new TestLogConfig().GetLogger(LogEventLevel.Verbose).ForContext<LogExtensionsUnitTests>();
 
         // Assert
         log.IsLogLevelEnabled(LogEventLevel.Verbose).ShouldBeTrue();
@@ -26,7 +26,7 @@ public class LogExtensionsUnitTests
     public void ShouldNotLogTheSetLogLevel_WhenLogLevelIsAbove()
     {
         // Arrange
-        var log = new TestLogConfig(_output).GetLogger(LogEventLevel.Error).ForContext<LogExtensionsUnitTests>();
+        var log = new TestLogConfig().GetLogger(LogEventLevel.Error).ForContext<LogExtensionsUnitTests>();
 
         // Assert
         log.IsLogLevelEnabled(LogEventLevel.Verbose).ShouldBeFalse();
@@ -42,7 +42,7 @@ public class LogExtensionsUnitTests
     {
         var position = new { Latitude = 25, Longitude = 134 };
 
-        var log = new TestLogConfig(_output).GetLogger(LogEventLevel.Verbose).ForContext<LogExtensionsUnitTests>();
+        var log = new TestLogConfig().GetLogger(LogEventLevel.Verbose).ForContext<LogExtensionsUnitTests>();
 
         using var context = TestCorrelator.CreateContext();
 

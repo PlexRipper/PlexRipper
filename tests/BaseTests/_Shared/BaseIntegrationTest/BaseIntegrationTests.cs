@@ -3,6 +3,7 @@ using Serilog.Events;
 
 namespace Reaparr.BaseTests;
 
+[NotInParallel("IntegrationTests")]
 public abstract class BaseIntegrationTests
 {
     private readonly ILogger _log;
@@ -33,6 +34,25 @@ public abstract class BaseIntegrationTests
         for (var i = 0; i < maxRetries; i++)
         {
             if (condition())
+                return;
+
+            await Task.Delay(delayMs);
+        }
+
+        throw new TimeoutException(
+            $"Database condition was not met after {maxRetries} retries (total wait: {maxRetries * delayMs}ms)"
+        );
+    }
+
+    protected static async Task WaitForDatabaseConditionAsync(
+        Func<Task<bool>> condition,
+        int maxRetries = 10,
+        int delayMs = 500
+    )
+    {
+        for (var i = 0; i < maxRetries; i++)
+        {
+            if (await condition())
                 return;
 
             await Task.Delay(delayMs);

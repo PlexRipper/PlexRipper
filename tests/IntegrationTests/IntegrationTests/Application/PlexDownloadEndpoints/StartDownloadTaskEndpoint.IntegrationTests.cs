@@ -8,10 +8,7 @@ namespace Reaparr.IntegrationTests;
 
 public class StartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
 {
-    public StartDownloadTaskEndpointIntegrationTests(ITestOutputHelper output)
-        : base(output) { }
-
-    [Fact]
+    [Test]
     public async Task ShouldStartQueuedMovieDownloadTaskOnStartCommand_WhenNoTasksAreDownloading()
     {
         // Arrange

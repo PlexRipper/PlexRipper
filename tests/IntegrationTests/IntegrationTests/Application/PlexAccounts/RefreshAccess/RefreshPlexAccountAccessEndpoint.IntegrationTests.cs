@@ -7,10 +7,7 @@ namespace Reaparr.IntegrationTests;
 
 public class RefreshPlexAccountAccessEndpointIntegrationTestsIntegrationTests : BaseIntegrationTests
 {
-    public RefreshPlexAccountAccessEndpointIntegrationTestsIntegrationTests(ITestOutputHelper output)
-        : base(output) { }
-
-    [Fact]
+    [Test]
     public async Task ShouldRefreshAccessPlexAccountAndNot500_WhenAPlexAccountIsUnauthorized()
     {
         // Arrange

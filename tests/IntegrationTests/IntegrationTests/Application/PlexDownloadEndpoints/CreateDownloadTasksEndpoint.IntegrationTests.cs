@@ -9,10 +9,7 @@ namespace Reaparr.IntegrationTests;
 
 public class CreateDownloadTasksEndpointIntegrationTests : BaseIntegrationTests
 {
-    public CreateDownloadTasksEndpointIntegrationTests(ITestOutputHelper output)
-        : base(output) { }
-
-    [Fact]
+    [Test]
     public async Task ShouldDownloadMultipleMovieDownloadTasks_WhenDownloadTasksAreCreated()
     {
         // Arrange

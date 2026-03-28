@@ -6,10 +6,7 @@ namespace Reaparr.IntegrationTests;
 
 public class GetAllDownloadTasksEndpointIntegrationTests : BaseIntegrationTests
 {
-    public GetAllDownloadTasksEndpointIntegrationTests(ITestOutputHelper output)
-        : base(output) { }
-
-    [Fact]
+    [Test]
     public async Task ShouldHaveAllDownloadTasksNested_WhenTasksAreAvailable()
     {
         // Arrange

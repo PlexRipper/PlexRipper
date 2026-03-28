@@ -3,7 +3,6 @@ using Serilog.Events;
 
 namespace Reaparr.BaseTests;
 
-[Collection("Integration Tests")]
 public abstract class BaseIntegrationTests
 {
     private readonly ILogger _log;
@@ -11,13 +10,12 @@ public abstract class BaseIntegrationTests
     protected CancellationToken CancellationToken =>
         TUnit.Core.TestContext.Current?.Execution.CancellationToken ?? CancellationToken.None;
 
-    protected BaseIntegrationTests(ITestOutputHelper output, LogEventLevel logLevel = LogEventLevel.Debug)
+    protected BaseIntegrationTests(LogEventLevel logLevel = LogEventLevel.Debug)
     {
         EnvironmentExtensions.SetLogLevel(logLevel);
         EnvironmentExtensions.EnableUnmaskedLog(true);
 
-        // Ensure that the test output helper is set first
-        var testLogConfig = new TestLogConfig(output);
+        var testLogConfig = new TestLogConfig();
 
         // Pass the TestLogConfig to LogFactory so all application logs go to test output
         LogFactory.SetupLogging(logLevel, testLogConfig);

@@ -8,10 +8,7 @@ namespace Reaparr.IntegrationTests;
 
 public class RefreshLibraryMediaEndpointIntegrationTests : BaseIntegrationTests
 {
-    public RefreshLibraryMediaEndpointIntegrationTests(ITestOutputHelper output)
-        : base(output) { }
-
-    [Fact]
+    [Test]
     public async Task ShouldFullyRefreshLibraryMedia_WhenPlexLibraryIsOfTypeMovieAndCommandIsSent()
     {
         // Arrange
@@ -107,7 +104,7 @@ public class RefreshLibraryMediaEndpointIntegrationTests : BaseIntegrationTests
         mediaList.Count.ShouldBeGreaterThanOrEqualTo(movieCount);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldFullyRefreshLibraryMedia_WhenPlexLibraryIsOfTypeTvShowAndCommandIsSent()
     {
         // Arrange

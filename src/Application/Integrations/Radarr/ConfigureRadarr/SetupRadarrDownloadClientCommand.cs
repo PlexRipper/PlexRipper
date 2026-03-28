@@ -23,6 +23,9 @@ public class SetupRadarrDownloadClientCommandHandler
 
     private const string DOWNLOAD_CLIENT_NAME = "Reaparr DownloadClient";
 
+    private const string PUBLIC_URL_HINT =
+        "If Radarr cannot reach Reaparr, set the 'Public URL' in Advanced → Network settings to an address reachable from Radarr (e.g. http://reaparr:5000 in Docker).";
+
     public SetupRadarrDownloadClientCommandHandler(
         ILogger log,
         ICommandExecutor commandExecutor,
@@ -87,7 +90,7 @@ public class SetupRadarrDownloadClientCommandHandler
                 );
 
                 if (updateResult.IsFailed)
-                    return updateResult.LogError();
+                    return updateResult.WithError(PUBLIC_URL_HINT).LogError();
 
                 return Result.Ok(
                     new SetupRadarrDownloadClientCommandResult { DownloadClientId = updateResult.Value.Id }
@@ -103,7 +106,7 @@ public class SetupRadarrDownloadClientCommandHandler
             );
 
             if (createResult.IsFailed)
-                return createResult.LogError();
+                return createResult.WithError(PUBLIC_URL_HINT).LogError();
 
             return Result.Ok(new SetupRadarrDownloadClientCommandResult { DownloadClientId = createResult.Value.Id });
         }

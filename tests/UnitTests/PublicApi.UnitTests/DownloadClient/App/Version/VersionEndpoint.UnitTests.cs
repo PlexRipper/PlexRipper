@@ -5,9 +5,6 @@ namespace PublicApi.UnitTests;
 
 public class VersionEndpointUnitTests : BaseUnitTest<VersionEndpoint>
 {
-    public VersionEndpointUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldReturnVersionString_WhenPrefixTrimmed()
     {

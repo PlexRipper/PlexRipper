@@ -2,9 +2,6 @@
 
 public class PathSystemSanitizeFileNameUnitTests : BaseUnitTest
 {
-    public PathSystemSanitizeFileNameUnitTests()
-        : base() { }
-
     [Test]
     [Arguments("Shaun het Schaap: De Film (2015)")]
     [Arguments("RANDOM MOVIE: # · GREAT")]

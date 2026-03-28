@@ -5,9 +5,6 @@ namespace Reaparr.BackgroundJobs.UnitTests;
 
 public class LibrarySyncProgressStoreUnitTests : BaseUnitTest<LibrarySyncProgressStore>
 {
-    public LibrarySyncProgressStoreUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldSendInitialProgressUpdate_WhenStartAsyncIsCalled()
     {

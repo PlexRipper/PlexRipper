@@ -7,9 +7,6 @@ namespace PublicApi.UnitTests;
 
 public class DownloadTorrentEndpointUnitTests : BaseUnitTest
 {
-    public DownloadTorrentEndpointUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldReturnValidTorrent_WhenEpisodeExists()
     {

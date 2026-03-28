@@ -5,9 +5,6 @@ namespace Reaparr.BackgroundJobs.UnitTests;
 
 public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMediaMetaDataCommand>
 {
-    public InsertMediaMetaDataCommandUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldSyncAllActorsGenresCountries_WhenNoneExist()
     {
@@ -23,9 +20,12 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
 
         var plexLibrary = await IDbContext.PlexLibraries.FirstOrDefaultAsync(CancellationToken);
         plexLibrary.ShouldNotBeNull();
-        var actors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).Generate(100);
-        var genres = FakePlexApiData.GetLibraryMediaItemGenreDTO(seed).Generate(100);
-        var countries = FakePlexApiData.GetLibraryMediaItemCountryDTO(seed).Generate(100);
+        var actors = FakePlexApiData.GetLibraryMediaItemActorDTO(seed).GenerateUnique(100, x => x.Key);
+        var genres = FakePlexApiData.GetLibraryMediaItemGenreDTO(seed).GenerateUnique(100, x => x.Key);
+        var countries = FakePlexApiData.GetLibraryMediaItemCountryDTO(seed).GenerateUnique(100, x => x.Key);
+        var validActors = actors.Where(x => !string.IsNullOrEmpty(x.Key)).DistinctBy(x => x.Key).ToList();
+        var validGenres = genres.Where(x => !string.IsNullOrEmpty(x.Key)).DistinctBy(x => x.Key).ToList();
+        var validCountries = countries.Where(x => !string.IsNullOrEmpty(x.Key)).DistinctBy(x => x.Key).ToList();
 
         // Act
         var command = new InsertMediaMetaDataCommand(
@@ -42,24 +42,21 @@ public class InsertMediaMetaDataCommandUnitTests : BaseCommandUnitTest<InsertMed
         result.IsSuccess.ShouldBeTrue();
 
         var actorsDb = await IDbContext.PlexActors.ToListAsync(CancellationToken);
-        var expectedActorCount = actors.Select(x => x.Key).Where(x => !string.IsNullOrEmpty(x)).Distinct().Count();
-        actorsDb.Count.ShouldBe(expectedActorCount);
-        foreach (var actor in actors)
+        actorsDb.Count.ShouldBe(validActors.Count);
+        foreach (var actor in validActors)
             actorsDb.ShouldContain(
                 x => x.Name == actor.Name && x.Key == actor.Key,
                 $"Actor {actor.Name} with key {actor.Key} not found in database"
             );
 
         var genresDb = await IDbContext.PlexGenres.ToListAsync(CancellationToken);
-        var expectedGenreCount = genres.Select(x => x.Key).Where(x => !string.IsNullOrEmpty(x)).Distinct().Count();
-        genresDb.Count.ShouldBe(expectedGenreCount);
-        foreach (var genre in genres)
+        genresDb.Count.ShouldBe(validGenres.Count);
+        foreach (var genre in validGenres)
             genresDb.ShouldContain(x => x.Key == genre.Key, $"Genre {genre.Name} not found in database");
 
         var countriesDb = await IDbContext.PlexCountries.ToListAsync(CancellationToken);
-        var expectedCountryCount = countries.Select(x => x.Key).Where(x => !string.IsNullOrEmpty(x)).Distinct().Count();
-        countriesDb.Count.ShouldBe(expectedCountryCount);
-        foreach (var country in countries)
+        countriesDb.Count.ShouldBe(validCountries.Count);
+        foreach (var country in validCountries)
             countriesDb.ShouldContain(x => x.Key == country.Key, $"Country {country.Name} not found in database");
     }
 

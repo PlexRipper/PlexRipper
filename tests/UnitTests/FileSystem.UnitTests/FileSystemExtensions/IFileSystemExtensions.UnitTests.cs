@@ -3,13 +3,10 @@ using Autofac;
 using Reaparr.Environment;
 using Reaparr.FileSystem.Contracts;
 
-namespace Reaparr.FileSystem.UnitTests.FileSystemExtensions;
+namespace Reaparr.FileSystem.UnitTests;
 
 public class IFileSystemExtensionsUnitTests : BaseUnitTest
 {
-    public IFileSystemExtensionsUnitTests()
-        : base() { }
-
     [Test]
     public void ShouldReturnCorrectAvailableSpace_WhenUsingTheRootPath()
     {

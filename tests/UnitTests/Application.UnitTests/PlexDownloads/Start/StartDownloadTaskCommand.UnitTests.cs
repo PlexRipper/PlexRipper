@@ -7,9 +7,6 @@ namespace Reaparr.Application.UnitTests;
 
 public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskCommandHandler>
 {
-    public StartDownloadTaskCommandUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldHaveFailedResult_WhenGivenAnInvalidId()
     {

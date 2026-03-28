@@ -5,8 +5,6 @@ namespace Reaparr.Logging.UnitTests;
 
 public class LogExtensionsUnitTests
 {
-    private readonly ITestOutputHelper _output = new TUnitTestOutputHelper();
-
     [Test]
     public void ShouldLogTheSetLogLevel_WhenLogLevelSetIsVerbose()
     {

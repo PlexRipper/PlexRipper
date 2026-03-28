@@ -738,7 +738,7 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest<DeleteTorrentEndpoint
     }
 
     [Test]
-    public async Task ShouldDeleteMatchedTasksInOtherStatuses_WithoutStopOrFileDeletionPrerequisites()
+    public async Task ShouldDeleteFilesForMatchedTasksInNonActiveStatuses_WhenDeleteFilesTrue()
     {
         // Arrange
         await SetupDatabase(
@@ -762,6 +762,10 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest<DeleteTorrentEndpoint
             );
 
         Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<DeleteDownloadTaskFilesCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
+        Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<DeleteDownloadTasksByKeyCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Once());
@@ -778,8 +782,12 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest<DeleteTorrentEndpoint
             .Verify(x => x.Send(It.IsAny<StopDownloadTaskCommand>(), It.IsAny<CancellationToken>()), Times.Never);
         Mock.Mock<ICommandExecutor>()
             .Verify(
-                x => x.Send(It.IsAny<DeleteDownloadTaskFilesCommand>(), It.IsAny<CancellationToken>()),
-                Times.Never
+                x =>
+                    x.Send(
+                        It.Is<DeleteDownloadTaskFilesCommand>(cmd => cmd.Keys.Count == 1 && cmd.Keys.Single().Id == movieFile.Id),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Once
             );
         Mock.Mock<ICommandExecutor>()
             .Verify(
@@ -791,6 +799,130 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest<DeleteTorrentEndpoint
                         It.IsAny<CancellationToken>()
                     ),
                 Times.Once
+            );
+    }
+
+    [Test]
+    public async Task ShouldDeleteFilesForMoveFinishedTasks_WhenDeleteFilesTrue()
+    {
+        // Arrange
+        await SetupDatabase(
+            9806,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.MovieCount = 1;
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var movieFile = await dbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+
+        await dbContext
+            .DownloadTaskMovieFile.Where(x => x.Id == movieFile.Id)
+            .ExecuteUpdateAsync(
+                x =>
+                    x.SetProperty(p => p.HashId, "hash-move-finished")
+                        .SetProperty(p => p.DownloadStatus, DownloadStatus.MoveFinished),
+                CancellationToken
+            );
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<DeleteDownloadTaskFilesCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<DeleteDownloadTasksByKeyCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
+
+        var request = new DeleteTorrentRequest { Hashes = ["hash-move-finished"] };
+
+        // Act
+        var endpoint = SetupEndpointUnitTest<DeleteTorrentEndpoint>();
+        await endpoint.HandleAsync(request, CancellationToken);
+
+        // Assert
+        endpoint.HttpContext.Response.StatusCode.ShouldBe(200);
+        Mock.Mock<ICommandExecutor>()
+            .Verify(x => x.Send(It.IsAny<StopDownloadTaskCommand>(), It.IsAny<CancellationToken>()), Times.Never);
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x =>
+                    x.Send(
+                        It.Is<DeleteDownloadTaskFilesCommand>(cmd => cmd.Keys.Count == 1 && cmd.Keys.Single().Id == movieFile.Id),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Once
+            );
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x =>
+                    x.Send(
+                        It.Is<DeleteDownloadTasksByKeyCommand>(cmd =>
+                            cmd.Keys.Count == 1 && cmd.Keys.Single().Id == movieFile.Id
+                        ),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Once
+            );
+    }
+
+    [Test]
+    public async Task ShouldStopMovingTasks_WhenDeleteFilesTrue()
+    {
+        // Arrange
+        await SetupDatabase(
+            9807,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.MovieCount = 1;
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var movieFile = await dbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+
+        await dbContext
+            .DownloadTaskMovieFile.Where(x => x.Id == movieFile.Id)
+            .ExecuteUpdateAsync(
+                x => x.SetProperty(p => p.HashId, "hash-moving").SetProperty(p => p.DownloadStatus, DownloadStatus.Moving),
+                CancellationToken
+            );
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<StopDownloadTaskCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<DeleteDownloadTasksByKeyCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
+
+        var request = new DeleteTorrentRequest { Hashes = ["hash-moving"] };
+
+        // Act
+        var endpoint = SetupEndpointUnitTest<DeleteTorrentEndpoint>();
+        await endpoint.HandleAsync(request, CancellationToken);
+
+        // Assert
+        endpoint.HttpContext.Response.StatusCode.ShouldBe(200);
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x =>
+                    x.Send(
+                        It.Is<StopDownloadTaskCommand>(cmd => cmd.DownloadTaskGuid == movieFile.Id && cmd.DeleteFiles),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Once
+            );
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<DeleteDownloadTaskFilesCommand>(), It.IsAny<CancellationToken>()),
+                Times.Never
             );
     }
 }

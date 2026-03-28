@@ -1,6 +1,6 @@
 ---
 name: reaparr-backend-unit-tests
-description: Use when creating or updating C# backend unit tests in Reaparr, especially for handlers, services, endpoints, and jobs that must follow the project's xUnit, Shouldly, Moq, BaseUnitTest, naming, placement, and deterministic test-data conventions.
+description: Use when creating or updating C# backend unit tests in Reaparr, especially for handlers, services, endpoints, and jobs that must follow the project's TUnit, Shouldly, Moq, BaseUnitTest, naming, placement, and deterministic test-data conventions.
 ---
 
 # Reaparr Backend Unit Tests
@@ -26,7 +26,7 @@ Do not use this skill for frontend tests (Vitest/Cypress).
 
 ## Required Frameworks and Style
 
-- Test framework: `xUnit` with `[Fact]` and `async Task` where needed.
+- Test framework: `TUnit` with `[Test]`, `[Arguments]`, and `async Task` where needed.
 - Assertions: `Shouldly`.
 - Mocks: `Moq` with explicit verification (`Times.Once()` / `Times.Never()`).
 - Structure: Arrange -> Act -> Assert. Within Arrange, mock setups (`Mock.Mock<T>()`) must always be the **last step**, immediately before Act.
@@ -71,7 +71,7 @@ Key package-backed utilities:
 - `Bogus` + `Bogus.Hollywood`: deterministic fake domain data via shared faker extensions and datasets.
 - `Moq` + `Moq.Contrib.HttpClient`: strict mocks plus concise `HttpMessageHandler` request/response setup.
 - `Shouldly`: readable assertions used across all test projects.
-- `xunit.v3` + runner: project test runtime and discovery.
+- `TUnit` + Microsoft.Testing.Platform: project test runtime and discovery.
 - `TestableIO.System.IO.Abstractions.TestingHelpers`: `MockFileSystem` support through `SetupFileSystem`.
 - `FastEndpoints.Testing` + `Microsoft.AspNetCore.Mvc.Testing`: endpoint and application-host test helpers used by shared test infrastructure.
 
@@ -216,14 +216,14 @@ var sut = Mock.Create<MyHandler>(
 Run a specific backend unit test project:
 
 ```bash
-dotnet test tests/UnitTests/<Project>.UnitTests/<Project>.UnitTests.csproj
+dotnet run --project tests/UnitTests/<Project>.UnitTests/<Project>.UnitTests.csproj -- --no-ansi --disable-logo
 ```
 
 Common projects:
 
 ```bash
-dotnet test tests/UnitTests/Application.UnitTests/Application.UnitTests.csproj
-dotnet test tests/UnitTests/BackgroundJobs.UnitTests/BackgroundJobs.UnitTests.csproj
+dotnet run --project tests/UnitTests/Application.UnitTests/Application.UnitTests.csproj -- --no-ansi --disable-logo
+dotnet run --project tests/UnitTests/BackgroundJobs.UnitTests/BackgroundJobs.UnitTests.csproj -- --no-ansi --disable-logo
 ```
 
 ## Common Mistakes

@@ -5,10 +5,10 @@ namespace Reaparr.Application.UnitTests;
 
 public class CreateDownloadTasksCommandHandlerUnitTests : BaseUnitTest<CreateDownloadTasksCommandHandler>
 {
-    public CreateDownloadTasksCommandHandlerUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public CreateDownloadTasksCommandHandlerUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldGenerateAllDownloadTaskTypes_WhenAllMediaTypesAreGiven()
     {
         // Arrange
@@ -92,7 +92,7 @@ public class CreateDownloadTasksCommandHandlerUnitTests : BaseUnitTest<CreateDow
         Mock.VerifyNotification(It.IsAny<CheckDownloadQueueEvent>, Times.Once);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldOnlyGenerateTvShowAndMoviesAndCallCheckDownloadQueue_WhenOnlyTvShowAndMovieMediaIdsAreGiven()
     {
         // Arrange
@@ -155,7 +155,7 @@ public class CreateDownloadTasksCommandHandlerUnitTests : BaseUnitTest<CreateDow
         Mock.VerifyNotification(It.IsAny<CheckDownloadQueueEvent>, Times.Once);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldNotCallCheckDownloadQueue_WhenNoMediaIdsAreGiven()
     {
         // Arrange

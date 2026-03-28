@@ -4,7 +4,7 @@ public class ResultExtensionsGuardsTests
 {
     #region General
 
-    [Fact]
+    [Test]
     public void ShouldHaveAddedErrors_WhenAddNestedErrorsIsCalled()
     {
         // Arrange
@@ -29,7 +29,7 @@ public class ResultExtensionsGuardsTests
 
     #endregion
 
-    [Fact]
+    [Test]
     public void ShouldHave400BadRequestError_WhenIsNullIsCalled()
     {
         // Arrange
@@ -42,7 +42,7 @@ public class ResultExtensionsGuardsTests
         has400BadRequestError.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public void ShouldHave400BadRequestError_WhenIsEmptyIsCalled()
     {
         // Arrange
@@ -55,7 +55,7 @@ public class ResultExtensionsGuardsTests
         has400BadRequestError.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public void ShouldHave400BadRequestError_WhenIsInvalidIdIsCalled()
     {
         // Arrange
@@ -68,7 +68,7 @@ public class ResultExtensionsGuardsTests
         has400BadRequestError.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public void ShouldHave404NotFoundError_WhenEntityNotFoundIsCalled()
     {
         // Arrange

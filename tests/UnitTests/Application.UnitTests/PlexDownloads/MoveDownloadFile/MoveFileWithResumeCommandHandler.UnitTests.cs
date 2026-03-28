@@ -5,8 +5,8 @@ namespace Reaparr.Application.UnitTests;
 
 public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWithResumeCommandHandler>
 {
-    public MoveFileWithResumeCommandHandlerUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public MoveFileWithResumeCommandHandlerUnitTests()
+        : base() { }
 
     private static byte[] CreateBytes(int length)
     {
@@ -16,7 +16,7 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
         return data;
     }
 
-    [Fact]
+    [Test]
     public async Task ExecuteAsync_CopiesSmallFile_SuccessAndContentMatches()
     {
         var sourcePath = "/test/source.bin";
@@ -56,7 +56,7 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
         lastProgress.FileTransferSpeed.ShouldBeGreaterThanOrEqualTo(0);
     }
 
-    [Fact]
+    [Test]
     public async Task ExecuteAsync_ReportsProgressMultipleTimes_ForLargeFile()
     {
         var sourcePath = "/test/source-large.bin";
@@ -87,7 +87,7 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
         progressCalls.ShouldBeGreaterThanOrEqualTo(3);
     }
 
-    [Fact]
+    [Test]
     public async Task ExecuteAsync_ResumeFromOffset_WritesRemainderOnly()
     {
         var sourcePath = "/test/source-resume.bin";
@@ -127,7 +127,7 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
         last.DataTotal.ShouldBe(content.LongLength);
     }
 
-    [Fact]
+    [Test]
     public async Task ExecuteAsync_CancellationStopsFurtherWrites_WhenCancelledBeforeStart()
     {
         var sourcePath = "/test/source-cancel.bin";
@@ -163,7 +163,7 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
         targetStream.Length.ShouldBeLessThan(content.LongLength);
     }
 
-    [Fact]
+    [Test]
     public async Task ExecuteAsync_CancellationRequestedInsideProgress_StopsAfterNextCheck()
     {
         var sourcePath = "/test/source-cancel2.bin";
@@ -201,7 +201,7 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
         targetStream.Length.ShouldBeGreaterThanOrEqualTo(1_048_576);
     }
 
-    [Fact]
+    [Test]
     public async Task ExecuteAsync_OpenTargetFails_ReturnsFailed()
     {
         var sourcePath = "/test/source-openfail.bin";
@@ -230,7 +230,7 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
         last.ShouldBeNull();
     }
 
-    [Fact]
+    [Test]
     public async Task ExecuteAsync_OpenSourceFails_ReturnsFailed()
     {
         var sourcePath = "/test/source-openfail2.bin";
@@ -256,7 +256,7 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
         result.IsFailed.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ExecuteAsync_CurrentOffsetEqualsTotal_NoWritesAndOk()
     {
         var sourcePath = "/test/source-offset-eq.bin";
@@ -289,7 +289,7 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
         targetStream.Length.ShouldBe(content.LongLength);
     }
 
-    [Fact]
+    [Test]
     public async Task ExecuteAsync_CurrentOffsetGreaterThanTotal_NoWritesAndOk()
     {
         var sourcePath = "/test/source-offset-gt.bin";
@@ -318,7 +318,7 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
         progressCalled.ShouldBeFalse();
     }
 
-    [Fact]
+    [Test]
     public async Task ExecuteAsync_ProgressSpeedIsNonNegative()
     {
         var sourcePath = "/test/source-speed.bin";
@@ -349,7 +349,7 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
         speeds.ShouldAllBe(x => x >= 0);
     }
 
-    [Fact]
+    [Test]
     public async Task ExecuteAsync_ProgressDataTotalMatchesCommand()
     {
         var sourcePath = "/test/source-datatotal.bin";
@@ -379,7 +379,7 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
         seenTotals.ShouldContain(999_999);
     }
 
-    [Fact]
+    [Test]
     public async Task ExecuteAsync_Success_DeletesSourceFileAfterCompletion()
     {
         var sourcePath = "/test/source-delete-success.bin";
@@ -410,7 +410,7 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
         file.Exists(sourcePath).ShouldBeFalse();
     }
 
-    [Fact]
+    [Test]
     public async Task ExecuteAsync_Cancelled_DoesNotDeleteSourceFile()
     {
         var sourcePath = "/test/source-delete-cancel.bin";
@@ -444,7 +444,7 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
         file.Exists(sourcePath).ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ExecuteAsync_DeleteSourceFails_ReturnsFailed()
     {
         var sourcePath = "/test/source-delete-fail.bin";
@@ -474,7 +474,7 @@ public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWi
         result.IsFailed.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldTruncateStaleDestinationContent_WhenFreshStart()
     {
         // Verifies that a restart (currentOffset = 0) with a pre-existing destination from a previous

@@ -1,14 +1,10 @@
 using System.Text;
-using Reaparr.PublicAPI;
 
-namespace PublicApi.UnitTests;
+namespace Reaparr.PublicAPI.UnitTests;
 
 public class VersionEndpointUnitTests : BaseUnitTest<VersionEndpoint>
 {
-    public VersionEndpointUnitTests(ITestOutputHelper output)
-        : base(output) { }
-
-    [Fact]
+    [Test]
     public async Task ShouldReturnVersionString_WhenPrefixTrimmed()
     {
         // Arrange

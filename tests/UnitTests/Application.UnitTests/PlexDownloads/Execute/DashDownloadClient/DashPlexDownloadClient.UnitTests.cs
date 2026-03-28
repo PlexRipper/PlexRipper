@@ -14,8 +14,8 @@ namespace Reaparr.Application.UnitTests;
 
 public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClient>
 {
-    public DashPlexDownloadClientUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public DashPlexDownloadClientUnitTests()
+        : base() { }
 
     private DashPlexDownloadClient CreateSut(Mock<IDashMpdCliWrapper> dashWrapperMock)
     {
@@ -57,7 +57,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             .Returns(Observable.Return(speedLimit));
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnSuccessAndPersistDownloadFinished_WhenProcessExitsZero()
     {
         await SetupDatabase(
@@ -167,7 +167,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnEntityNotFoundError_WhenDownloadTaskKeyDoesNotExist()
     {
         await SetupDatabase(
@@ -240,7 +240,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnFailedResult_WhenGetDashDownloadUrlFails()
     {
         await SetupDatabase(
@@ -308,7 +308,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldSetServerUnreachableStatus_WhenDashCompletesWithGatewayTimeoutError()
     {
         await SetupDatabase(
@@ -411,7 +411,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldSetServerUnreachableStatus_WhenDashCompletesWithNetworkTimeoutError()
     {
         await SetupDatabase(
@@ -515,7 +515,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldDispatchProgressUpdate_WhenDashProgressEmits()
     {
         await SetupDatabase(
@@ -580,7 +580,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                 );
 
                 // Allow the Rx Sample(500ms) window to elapse and the handler to persist progress
-                await Task.Delay(700, TestContext.Current.CancellationToken);
+                await Task.Delay(700, CancellationToken);
                 return Result.Ok();
             });
         dashWrapperMock.Setup(x => x.StopAsync()).ReturnsAsync(Result.Ok());
@@ -615,7 +615,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldKeepDataTotalAtZero_WhenDashDoesNotReportTotalBytes()
     {
         await SetupDatabase(
@@ -679,7 +679,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                     }
                 );
 
-                await Task.Delay(700, TestContext.Current.CancellationToken);
+                await Task.Delay(700, CancellationToken);
                 return Result.Ok();
             });
         dashWrapperMock.Setup(x => x.StopAsync()).ReturnsAsync(Result.Ok());
@@ -714,7 +714,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldNotMarkDownloadFinished_WhenProgressReaches100WithoutCompletionEvent()
     {
         await SetupDatabase(
@@ -778,7 +778,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                     }
                 );
 
-                await Task.Delay(700, TestContext.Current.CancellationToken);
+                await Task.Delay(700, CancellationToken);
                 return Result.Ok();
             });
         dashWrapperMock.Setup(x => x.StopAsync()).ReturnsAsync(Result.Ok());
@@ -811,7 +811,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldCreateDashOutputUsingMkvFilePathAndNormalizedFileName()
     {
         await SetupDatabase(

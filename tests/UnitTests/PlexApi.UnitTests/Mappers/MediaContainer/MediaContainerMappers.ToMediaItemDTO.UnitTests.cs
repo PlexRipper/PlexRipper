@@ -11,10 +11,10 @@ namespace Reaparr.PlexApi.UnitTests
 {
     public class MediaContainerMappersUnitTests : BaseUnitTest
     {
-        public MediaContainerMappersUnitTests(ITestOutputHelper output)
-            : base(output) { }
+        public MediaContainerMappersUnitTests()
+            : base() { }
 
-        [Fact]
+        [Test]
         public void ShouldMapAllPropertiesCorrectly_WhenApiResponseHasMovieValues()
         {
             // Arrange
@@ -196,7 +196,7 @@ namespace Reaparr.PlexApi.UnitTests
             stream.Language.ShouldBe(sourceStream.Language);
         }
 
-        [Fact]
+        [Test]
         public void ShouldMapAllPropertiesCorrectly_WhenApiResponseHasTvShowValues()
         {
             // Arrange

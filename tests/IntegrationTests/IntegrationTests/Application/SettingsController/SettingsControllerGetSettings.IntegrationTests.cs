@@ -8,10 +8,7 @@ namespace Reaparr.IntegrationTests.SettingsController;
 
 public class SettingsControllerGetSettingsIntegrationTests : BaseIntegrationTests
 {
-    public SettingsControllerGetSettingsIntegrationTests(ITestOutputHelper output)
-        : base(output) { }
-
-    [Fact]
+    [Test]
     public async Task ShouldHaveDefaultSettings_OnFirstTimeBoot()
     {
         // Arrange

@@ -2,10 +2,10 @@ namespace Reaparr.Domain.UnitTests;
 
 public class StringExtensionsGetFileName : BaseUnitTest
 {
-    public StringExtensionsGetFileName(ITestOutputHelper output)
-        : base(output) { }
+    public StringExtensionsGetFileName()
+        : base() { }
 
-    [Fact]
+    [Test]
     public void ShouldRetrieveTheFileName_WhenThePathIsValid()
     {
         // Arrange

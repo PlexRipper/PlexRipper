@@ -30,10 +30,11 @@ Do not use this skill for:
 - Do not remove, loosen, or bypass assertions to make tests pass.
 - Do not mark flaky tests as skipped instead of fixing the root cause.
 - Do not stop at targeted-test green.
+- Test framework is `TUnit` on Microsoft.Testing.Platform.
 - Do not claim completion until this full command passes:
 
 ```bash
-dotnet test tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj
+dotnet run --project tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj -- --no-ansi --disable-logo
 ```
 
 ## Root-Cause Workflow (No Shortcuts)
@@ -142,13 +143,13 @@ Relevant files:
 Targeted iteration example:
 
 ```bash
-dotnet test tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj --filter "FullyQualifiedName~RefreshLibraryMediaEndpointIntegrationTests"
+dotnet run --project tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj -- --no-ansi --disable-logo --treenode-filter "/*/*/*[RefreshLibraryMediaEndpointIntegrationTests*]"
 ```
 
 Mandatory completion gate:
 
 ```bash
-dotnet test tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj
+dotnet run --project tests/IntegrationTests/IntegrationTests/IntegrationTests.csproj -- --no-ansi --disable-logo
 ```
 
 CI alignment:

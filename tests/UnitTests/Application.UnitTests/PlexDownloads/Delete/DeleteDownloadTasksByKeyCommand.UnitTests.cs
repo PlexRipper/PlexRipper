@@ -6,10 +6,10 @@ namespace Reaparr.Application.UnitTests;
 
 public class DeleteDownloadTasksByKeyCommandUnitTests : BaseUnitTest<DeleteDownloadTasksByKeyCommandHandler>
 {
-    public DeleteDownloadTasksByKeyCommandUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public DeleteDownloadTasksByKeyCommandUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldDeleteMovieTask_WhenMovieKeyIsGiven()
     {
         // Arrange
@@ -34,7 +34,7 @@ public class DeleteDownloadTasksByKeyCommandUnitTests : BaseUnitTest<DeleteDownl
         (await dbContext.DownloadTaskMovieFile.CountAsync(CancellationToken)).ShouldBe(0);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldDeleteMovieFileTask_WhenMovieFileKeyIsGiven()
     {
         // Arrange
@@ -60,7 +60,7 @@ public class DeleteDownloadTasksByKeyCommandUnitTests : BaseUnitTest<DeleteDownl
         ).ShouldBe(0);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldRemoveOrphanedParents_WhenLastEpisodeFileKeyIsGiven()
     {
         // Arrange
@@ -91,7 +91,7 @@ public class DeleteDownloadTasksByKeyCommandUnitTests : BaseUnitTest<DeleteDownl
         (await dbContext.DownloadTaskTvShow.CountAsync(CancellationToken)).ShouldBe(0);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldNotRemoveRemainingEpisodes_WhenOnlyOneOfTwoIsDeleted()
     {
         // Arrange — one season with two episodes; deleting one file should not orphan the season.
@@ -126,7 +126,7 @@ public class DeleteDownloadTasksByKeyCommandUnitTests : BaseUnitTest<DeleteDownl
         (await dbContext.DownloadTaskTvShow.CountAsync(CancellationToken)).ShouldBe(1);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldDeleteMultipleKeysAtOnce()
     {
         // Arrange
@@ -154,7 +154,7 @@ public class DeleteDownloadTasksByKeyCommandUnitTests : BaseUnitTest<DeleteDownl
         (await dbContext.DownloadTaskMovieFile.CountAsync(CancellationToken)).ShouldBe(1);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldSucceed_WhenNoneOfTheKeysExistInDatabase()
     {
         // Arrange — keys that do not exist; no error, no rows deleted.

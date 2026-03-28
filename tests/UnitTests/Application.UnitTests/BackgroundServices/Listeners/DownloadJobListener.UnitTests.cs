@@ -8,10 +8,10 @@ namespace Reaparr.Application.UnitTests;
 
 public class DownloadJobListenerUnitTests : BaseUnitTest<DownloadJobListener>
 {
-    public DownloadJobListenerUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public DownloadJobListenerUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldCheckMoveQueueAndDownloadQueue_WhenStatusIsDownloadFinished()
     {
         // Arrange
@@ -63,8 +63,8 @@ public class DownloadJobListenerUnitTests : BaseUnitTest<DownloadJobListener>
             );
     }
 
-    [Theory]
-    [InlineData(DownloadStatus.Error)]
+    [Test]
+    [Arguments(DownloadStatus.Error)]
     public async Task ShouldCheckOnlyDownloadQueue_WhenStatusIsTerminalFailure(DownloadStatus status)
     {
         // Arrange

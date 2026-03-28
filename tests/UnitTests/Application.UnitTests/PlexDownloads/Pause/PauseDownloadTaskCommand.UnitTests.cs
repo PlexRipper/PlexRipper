@@ -7,10 +7,10 @@ namespace Reaparr.Application.UnitTests;
 
 public class DownloadCommandsPauseDownloadTasksAsyncUnitTests : BaseUnitTest<PauseDownloadTaskCommandHandler>
 {
-    public DownloadCommandsPauseDownloadTasksAsyncUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public DownloadCommandsPauseDownloadTasksAsyncUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldHaveFailedResult_WhenGivenAnInvalidId()
     {
         // Arrange
@@ -33,7 +33,7 @@ public class DownloadCommandsPauseDownloadTasksAsyncUnitTests : BaseUnitTest<Pau
         result.Has404NotFoundError().ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHaveFailedResult_WhenTheDownloadTaskCouldNotBeStopped()
     {
         // Arrange
@@ -67,7 +67,7 @@ public class DownloadCommandsPauseDownloadTasksAsyncUnitTests : BaseUnitTest<Pau
         result.Has404NotFoundError().ShouldNotBe(true);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHaveSetMovieDownloadTasksToPaused_WhenAtLeastOneValidIdIsGiven()
     {
         // Arrange
@@ -109,7 +109,7 @@ public class DownloadCommandsPauseDownloadTasksAsyncUnitTests : BaseUnitTest<Pau
         result.IsSuccess.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldCallStopDownloadJob_WhenTaskIsDownloadingAndAtLeastOneValidIdIsGiven()
     {
         // Arrange
@@ -175,7 +175,7 @@ public class DownloadCommandsPauseDownloadTasksAsyncUnitTests : BaseUnitTest<Pau
         result.IsSuccess.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldPauseDownloadingAndMovingTasks_WhenMultipleChildrenAreActive()
     {
         // Arrange
@@ -305,7 +305,7 @@ public class DownloadCommandsPauseDownloadTasksAsyncUnitTests : BaseUnitTest<Pau
         inactiveTask!.DownloadStatus.ShouldBe(DownloadStatus.Queued);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldNotResetProgressOrStatus_WhenFileTaskIsMoveFinished()
     {
         // Regression: a MoveFinished task must be skipped by the pause handler.
@@ -372,7 +372,7 @@ public class DownloadCommandsPauseDownloadTasksAsyncUnitTests : BaseUnitTest<Pau
             .Verify(x => x.StopMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Never);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldNotResetProgressOrStatus_WhenFileTaskIsDownloadFinished()
     {
         // Regression: a DownloadFinished task (waiting for the move job) must be skipped
@@ -429,7 +429,7 @@ public class DownloadCommandsPauseDownloadTasksAsyncUnitTests : BaseUnitTest<Pau
             .Verify(x => x.StopMoveDownloadFileJob(It.IsAny<DownloadTaskKey>()), Times.Never);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldPreserveDirectDownloadSnapshot_WhenPausingDownloadingTask()
     {
         // Arrange

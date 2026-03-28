@@ -4,8 +4,9 @@ namespace Reaparr.BaseTests;
 
 public static partial class FakeData
 {
-    private static readonly Faker<DownloadTaskTvShowSeason> _downloadTaskTvShowSeason =
-        new Faker<DownloadTaskTvShowSeason>()
+    private static Faker<DownloadTaskTvShowSeason> CreateDownloadTaskTvShowSeasonFaker()
+    {
+        return new Faker<DownloadTaskTvShowSeason>()
             .StrictMode(true)
             .ApplyDownloadTaskParentBase(DownloadTaskType.Season)
             .Ignore(x => x.ParentId)
@@ -33,6 +34,7 @@ public static partial class FakeData
                     }
                 }
             );
+    }
 
     public static Faker<DownloadTaskTvShowSeason> GetDownloadTaskTvShowSeason(
         Seed seed,
@@ -41,7 +43,7 @@ public static partial class FakeData
     {
         var config = FakeDataConfig.FromOptions(options);
 
-        return _downloadTaskTvShowSeason
+        return CreateDownloadTaskTvShowSeasonFaker()
             .RuleFor(
                 x => x.DataTotal,
                 (_, x) =>

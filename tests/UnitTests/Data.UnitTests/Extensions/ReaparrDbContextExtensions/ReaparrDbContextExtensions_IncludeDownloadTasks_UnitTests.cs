@@ -4,10 +4,10 @@ namespace Reaparr.Data.UnitTests;
 
 public class ReaparrDbContextExtensionsIncludeDownloadTasksUnitTests : BaseUnitTest
 {
-    public ReaparrDbContextExtensionsIncludeDownloadTasksUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public ReaparrDbContextExtensionsIncludeDownloadTasksUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldHaveAllMovieDownloadTaskChildrenIncluded_WhenDbContainsNestedDownloadTasks()
     {
         // Arrange
@@ -34,7 +34,7 @@ public class ReaparrDbContextExtensionsIncludeDownloadTasksUnitTests : BaseUnitT
         }
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHaveAllTvShowDownloadTaskChildrenIncluded_WhenDbContainsNestedDownloadTasks()
     {
         // Arrange
@@ -61,7 +61,7 @@ public class ReaparrDbContextExtensionsIncludeDownloadTasksUnitTests : BaseUnitT
         downloadTasksDb.Sum(x => x.Count).ShouldBe(280);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHaveAllNestedRelationshipsIncluded_WhenGivenTvShowDownloadTasks()
     {
         // Arrange

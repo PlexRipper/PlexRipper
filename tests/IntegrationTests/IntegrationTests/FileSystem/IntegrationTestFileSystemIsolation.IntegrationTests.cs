@@ -2,10 +2,7 @@ namespace Reaparr.IntegrationTests;
 
 public class IntegrationTestFileSystemIsolationIntegrationTests : BaseIntegrationTests
 {
-    public IntegrationTestFileSystemIsolationIntegrationTests(ITestOutputHelper output)
-        : base(output) { }
-
-    [Fact]
+    [Test]
     public async Task ShouldUseUniqueSandboxAndCleanupWhenContainerIsDisposed()
     {
         string firstSandboxPath;

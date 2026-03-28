@@ -7,10 +7,10 @@ public class GetMediaDetailByIdEndpointUnitTests : BaseUnitTest<GetMediaDetailBy
 {
     private PlexMediaDTOValidator PlexMediaDtoValidator => new();
 
-    public GetMediaDetailByIdEndpointUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public GetMediaDetailByIdEndpointUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldHavePlexMediaData_WhenValidMediaIdAndPlexMediaTypeMovieIsRequested()
     {
         // Arrange
@@ -40,15 +40,12 @@ public class GetMediaDetailByIdEndpointUnitTests : BaseUnitTest<GetMediaDetailBy
         result.ShouldNotBeNull();
         result.Value.ShouldNotBeNull();
 
-        var validationResult = await PlexMediaDtoValidator.ValidateAsync(
-            result.Value,
-            TestContext.Current.CancellationToken
-        );
+        var validationResult = await PlexMediaDtoValidator.ValidateAsync(result.Value, CancellationToken);
         validationResult.Errors.ShouldBeEmpty();
         result.Value.Children.ShouldBeEmpty();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHavePlexMediaData_WhenValidMediaIdAndPlexMediaTypeTvShowIsRequested()
     {
         // Arrange
@@ -79,26 +76,17 @@ public class GetMediaDetailByIdEndpointUnitTests : BaseUnitTest<GetMediaDetailBy
         result.ShouldNotBeNull();
         result.Value.ShouldNotBeNull();
 
-        var validationResult = await PlexMediaDtoValidator.ValidateAsync(
-            result.Value,
-            TestContext.Current.CancellationToken
-        );
+        var validationResult = await PlexMediaDtoValidator.ValidateAsync(result.Value, CancellationToken);
         validationResult.Errors.ShouldBeEmpty();
         result.Value.Children.ShouldNotBeEmpty();
         foreach (var season in result.Value.Children)
         {
-            var validationSeasonResult = await PlexMediaDtoValidator.ValidateAsync(
-                season,
-                TestContext.Current.CancellationToken
-            );
+            var validationSeasonResult = await PlexMediaDtoValidator.ValidateAsync(season, CancellationToken);
             validationSeasonResult.Errors.ShouldBeEmpty();
             season.Children.ShouldNotBeEmpty();
             foreach (var episode in season.Children)
             {
-                var validationEpisode = await PlexMediaDtoValidator.ValidateAsync(
-                    episode,
-                    TestContext.Current.CancellationToken
-                );
+                var validationEpisode = await PlexMediaDtoValidator.ValidateAsync(episode, CancellationToken);
                 validationEpisode.Errors.ShouldBeEmpty();
                 episode.Children.ShouldBeEmpty();
             }

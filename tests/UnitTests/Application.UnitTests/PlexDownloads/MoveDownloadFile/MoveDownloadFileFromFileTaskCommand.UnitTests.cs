@@ -12,10 +12,10 @@ namespace Reaparr.Application.UnitTests;
 
 public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDownloadFileFromFileTaskCommandHandler>
 {
-    public MoveDownloadFileFromFileTaskCommandUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public MoveDownloadFileFromFileTaskCommandUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnFailedResult_WhenDirectoryNameIsEmpty()
     {
         // Arrange
@@ -70,7 +70,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
         result.IsFailed.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldBeAbleToPauseTheDownloadTask_WhenCancellationTokenIsCalled()
     {
         // Arrange
@@ -170,7 +170,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
         file.Exists(downloadFileTask.DownloadFilePath).ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldBeAbleToResumeAndFinish_WhenPreviousFileTaskHasBeenPaused()
     {
         // Arrange
@@ -254,7 +254,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
         fileTaskPaused.CurrentFileTransferBytesOffset.ShouldBeGreaterThanOrEqualTo(0);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldRenameAndComplete_WhenKeepCompletedInDownloadsIsTrue()
     {
         // Arrange
@@ -345,7 +345,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnFailedResult_WhenDownloadTaskKeyDoesNotExist()
     {
         // Arrange
@@ -412,7 +412,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
         result.IsFailed.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnFailedResultAndPublishNotification_WhenSourceFileDoesNotExist()
     {
         // Arrange
@@ -483,7 +483,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldResumeMove_WhenReapTempFileIsMissingButRenamedFileExistsInDownloads()
     {
         // Arrange
@@ -576,7 +576,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldTreatMoveAsFinished_WhenReapTempFileIsMissingAndRenamedFileExistsInDownloadsWithKeepInDownloads()
     {
         // Arrange
@@ -667,7 +667,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldUpdateFileTransferPercentageToOneHundred_WhenMoveCompletesSuccessfully()
     {
         // Arrange — verifies that UpdateDownloadFileTransferProgress now writes Percentage to the DB,
@@ -748,7 +748,7 @@ public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDow
         after.Percentage.ShouldBe(100m);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnFailedResultAndPublishNotification_WhenMoveWithResumeFails()
     {
         // Arrange

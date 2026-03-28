@@ -8,10 +8,10 @@ namespace Reaparr.Settings.UnitTests;
 
 public class ConfigManagerSaveConfigUnitTests : BaseUnitTest<ConfigManager>
 {
-    public ConfigManagerSaveConfigUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public ConfigManagerSaveConfigUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public void ShouldLoadConfigDuringSetup_WhenConfigFileAlreadyExists()
     {
         // Arrange

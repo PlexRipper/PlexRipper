@@ -9,10 +9,7 @@ namespace Reaparr.IntegrationTests.FileSystem;
 
 public class MoveDownloadFileSchedulerIntegrationTests : BaseIntegrationTests
 {
-    public MoveDownloadFileSchedulerIntegrationTests(ITestOutputHelper output)
-        : base(output) { }
-
-    [Fact]
+    [Test]
     public async Task ShouldFinishMergingDownloadTaskAsFileTaskJobAndSetToCompleted_WhenDownloadTaskHasFinishedDownloading()
     {
         // Arrange
@@ -91,7 +88,7 @@ public class MoveDownloadFileSchedulerIntegrationTests : BaseIntegrationTests
         fileSystem.File.Exists(expectedDestinationPath).ShouldBeTrue("Destination file should exist after move");
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldSetMoveErrorAndKeepSourceFile_WhenMoveFailsAfterCopy()
     {
         // Arrange

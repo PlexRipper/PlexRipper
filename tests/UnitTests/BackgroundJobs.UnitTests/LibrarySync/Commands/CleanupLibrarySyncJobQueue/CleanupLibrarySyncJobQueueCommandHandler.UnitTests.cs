@@ -7,8 +7,8 @@ namespace Reaparr.BackgroundJobs.UnitTests;
 
 public class CleanupLibrarySyncJobQueueCommandHandlerUnitTests : BaseUnitTest<CleanupLibrarySyncJobQueueCommandHandler>
 {
-    public CleanupLibrarySyncJobQueueCommandHandlerUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public CleanupLibrarySyncJobQueueCommandHandlerUnitTests()
+        : base() { }
 
     private void SetupSignalRMock()
     {
@@ -19,7 +19,7 @@ public class CleanupLibrarySyncJobQueueCommandHandlerUnitTests : BaseUnitTest<Cl
             .Returns(Task.CompletedTask);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldDeleteCompletedItems_WhenCompletedItemsExist()
     {
         // Arrange
@@ -75,7 +75,7 @@ public class CleanupLibrarySyncJobQueueCommandHandlerUnitTests : BaseUnitTest<Cl
         remainingItems[0].PlexLibraryId.ShouldBe(libraries[1].Id);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldRequeueFailedItems_WhenFailedItemsExist()
     {
         // Arrange
@@ -135,7 +135,7 @@ public class CleanupLibrarySyncJobQueueCommandHandlerUnitTests : BaseUnitTest<Cl
         updatedItem.ErrorMessage.ShouldBeNull();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldRequeueProcessingItems_WhenProcessingItemsExist()
     {
         // Arrange
@@ -192,7 +192,7 @@ public class CleanupLibrarySyncJobQueueCommandHandlerUnitTests : BaseUnitTest<Cl
         updatedItem.ErrorMessage.ShouldBeNull();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldClearStartedAtAndErrorMessage_WhenRequeuingItems()
     {
         // Arrange
@@ -255,7 +255,7 @@ public class CleanupLibrarySyncJobQueueCommandHandlerUnitTests : BaseUnitTest<Cl
         }
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnOk_WhenQueueIsEmpty()
     {
         // Arrange
@@ -282,7 +282,7 @@ public class CleanupLibrarySyncJobQueueCommandHandlerUnitTests : BaseUnitTest<Cl
             .Verify(x => x.Send(It.IsAny<ICommand<Result>>(), It.IsAny<CancellationToken>()), Times.Never());
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHandleMixedStatuses_WhenMultipleStatusesExist()
     {
         // Arrange

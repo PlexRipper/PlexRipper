@@ -4,10 +4,10 @@ namespace Reaparr.Settings.UnitTests;
 
 public class PlexServerSettingsModuleUnitTests : BaseUnitTest<PlexServerSettingsModule>
 {
-    public PlexServerSettingsModuleUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public PlexServerSettingsModuleUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public void ShouldRenameAServerByItsMachineIdentifier_WhenItDoesNotExist()
     {
         // Arrange
@@ -22,7 +22,7 @@ public class PlexServerSettingsModuleUnitTests : BaseUnitTest<PlexServerSettings
         sut.Data.Count.ShouldBe(1);
     }
 
-    [Fact]
+    [Test]
     public void ShouldRenameAServerByItsMachineIdentifier_WhenItAlreadyExists()
     {
         // Arrange
@@ -38,7 +38,7 @@ public class PlexServerSettingsModuleUnitTests : BaseUnitTest<PlexServerSettings
         sut.Data.Count.ShouldBe(1);
     }
 
-    [Fact]
+    [Test]
     public void GetDownloadSpeedLimit_ShouldReturnDefaultWhenNotSet()
     {
         // Arrange
@@ -51,7 +51,7 @@ public class PlexServerSettingsModuleUnitTests : BaseUnitTest<PlexServerSettings
         speedLimit.ShouldBe(0);
     }
 
-    [Fact]
+    [Test]
     public void SetServerHiddenState_ShouldUpdateValue()
     {
         // Arrange
@@ -67,7 +67,7 @@ public class PlexServerSettingsModuleUnitTests : BaseUnitTest<PlexServerSettings
         result.Hidden.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public void ShouldEmitValuesWhenChanged_WhenSubscribedToTheObservable()
     {
         // Arrange

@@ -4,10 +4,10 @@ namespace Reaparr.Data.UnitTests;
 
 public class ReaparrDbContextExtensionsGetAllDownloadTasksAsyncUnitTests : BaseUnitTest
 {
-    public ReaparrDbContextExtensionsGetAllDownloadTasksAsyncUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public ReaparrDbContextExtensionsGetAllDownloadTasksAsyncUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnNoDownloadTasks_WhenNoDownloadTasksAreInDb()
     {
         // Arrange
@@ -20,7 +20,7 @@ public class ReaparrDbContextExtensionsGetAllDownloadTasksAsyncUnitTests : BaseU
         downloadTasks.ShouldBeEmpty();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnMovieDownloadTasks_WhenMovieDownloadTasksAreInDB()
     {
         // Arrange
@@ -47,7 +47,7 @@ public class ReaparrDbContextExtensionsGetAllDownloadTasksAsyncUnitTests : BaseU
         flatList.ShouldAllBe(x => x.PlexLibrary != null);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldAllTvShowDownloadTasksWithAllIncludes_WhenTvShowDownloadTasksAreInDB()
     {
         // Arrange

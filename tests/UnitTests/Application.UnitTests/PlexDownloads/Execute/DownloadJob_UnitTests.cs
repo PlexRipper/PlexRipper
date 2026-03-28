@@ -11,10 +11,10 @@ namespace Reaparr.Application.UnitTests;
 
 public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
 {
-    public DownloadJobUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public DownloadJobUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldSetDownloadAndDestinationPath_WhenDownloadTaskIsStarted()
     {
         // Arrange
@@ -57,7 +57,7 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
         downloadTaskResult.DestinationDirectory.ShouldContain(destinationFolder.DirectoryPath);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldDisposeDownloadClient_WhenJobExecutionCompletes()
     {
         // Arrange

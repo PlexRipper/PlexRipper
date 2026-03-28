@@ -9,10 +9,10 @@ public class GenerateDownloadTaskMoviesCommandHandlerUnitTests : BaseUnitTest<Ge
 {
     private readonly DownloadTaskMovieValidator _validator = new();
 
-    public GenerateDownloadTaskMoviesCommandHandlerUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public GenerateDownloadTaskMoviesCommandHandlerUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldHaveInsertedValidDownloadTaskMoviesInDatabase_WhenGivenValidPlexMovies()
     {
         // Arrange
@@ -63,7 +63,7 @@ public class GenerateDownloadTaskMoviesCommandHandlerUnitTests : BaseUnitTest<Ge
         }
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHaveDestinationFolderPathIdSet_WhenRequestContainsTheDestinationFolderPathIdSet()
     {
         // Arrange
@@ -110,7 +110,7 @@ public class GenerateDownloadTaskMoviesCommandHandlerUnitTests : BaseUnitTest<Ge
         }
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHaveMultipleDownloadTaskMovieFile_WhenPlexMovieHasMultiParts()
     {
         // Arrange

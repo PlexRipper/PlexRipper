@@ -5,10 +5,10 @@ namespace Reaparr.Data.UnitTests.Entities;
 
 public class DownloadTaskExtensionsCalculateUnitTests : BaseUnitTest
 {
-    public DownloadTaskExtensionsCalculateUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public DownloadTaskExtensionsCalculateUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldUpdateDownloadProgressAcrossAllLayers_WhenCallingCalculateOnRootDownloadTask()
     {
         // Arrange

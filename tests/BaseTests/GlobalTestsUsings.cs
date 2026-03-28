@@ -6,4 +6,5 @@ global using JetBrains.Annotations;
 global using Moq;
 global using Reaparr.BaseTests;
 global using Shouldly;
+global using TUnit.Core;
 global using Xunit;

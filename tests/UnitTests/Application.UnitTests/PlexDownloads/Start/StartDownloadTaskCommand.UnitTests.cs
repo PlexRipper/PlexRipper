@@ -7,10 +7,7 @@ namespace Reaparr.Application.UnitTests;
 
 public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskCommandHandler>
 {
-    public StartDownloadTaskCommandUnitTests(ITestOutputHelper output)
-        : base(output) { }
-
-    [Fact]
+    [Test]
     public async Task ShouldHaveFailedResult_WhenGivenAnInvalidId()
     {
         // Arrange
@@ -24,7 +21,7 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
         result.Has404NotFoundError().ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHaveFailedResult_WhenServerIsPausedByUser()
     {
         // Arrange
@@ -64,7 +61,7 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
         Mock.VerifyEventPublished(It.IsAny<CheckDownloadQueueEvent>, Times.Never());
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldStartMoveJob_WhenDownloadTaskIsInDownloadFinishedStatus()
     {
         // Arrange
@@ -117,7 +114,7 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
         Mock.VerifyEventPublished(It.IsAny<CheckDownloadQueueEvent>, Times.Once());
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldStartMoveJob_WhenDownloadTaskIsInMoveErrorStatus()
     {
         // Arrange
@@ -170,7 +167,7 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
         Mock.VerifyEventPublished(It.IsAny<CheckDownloadQueueEvent>, Times.Once());
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldNotPauseDownloadTasksInFileTransfer_WhenADownloadTaskIsAlreadyTransferring()
     {
         // Arrange
@@ -228,7 +225,7 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
         result.IsSuccess.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldNotPauseTheActiveDownloads_WhenThatActiveDownloadTaskIsStarted()
     {
         // Arrange
@@ -309,7 +306,7 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
         Mock.VerifyEventPublished(It.IsAny<CheckDownloadQueueEvent>, Times.Once());
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldStartPausedEpisode_WhenStartingPausedTvShowTask()
     {
         // Arrange
@@ -359,7 +356,7 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
             .Verify(x => x.StartDownloadTaskJob(It.Is<DownloadTaskKey>(k => k.Id == pausedTask.Id)), Times.Once());
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldStartFirstPausedEpisodeAndQueueOtherPausedEpisodes_WhenStartingTvShowTask()
     {
         // Arrange
@@ -436,7 +433,7 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldStartFirstStoppedEpisodeAndQueueOtherStoppedEpisodes_WhenStartingTvShowTask()
     {
         // Arrange
@@ -508,7 +505,7 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldStartFirstStoppedEpisodeAndQueueOtherStoppedEpisodes_WhenStartingSeasonTask()
     {
         // Arrange
@@ -580,7 +577,7 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldQueueOtherStoppedChildren_WhenStartingStoppedTvShowWithStoppedSeasons()
     {
         // Arrange
@@ -656,7 +653,7 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldStartNextStoppedChild_WhenFirstChildIsCompletedOnStoppedTvShow()
     {
         // Arrange
@@ -734,7 +731,7 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldPauseTheActiveDownloads_WhenAnotherDownloadTaskIsStarted()
     {
         // Arrange
@@ -788,12 +785,12 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
             .ReturnsAsync(Result.Ok());
 
         Mock.SetupCommand(It.IsAny<PauseDownloadTaskCommand>)
-            .ReturnsAsync(
-                (PauseDownloadTaskCommand command, CancellationToken ct) =>
+            .Returns(
+                async (PauseDownloadTaskCommand command, CancellationToken ct) =>
                 {
-                    var key = IDbContext.GetDownloadTaskKeyAsync(command.DownloadTaskGuid, ct).Result;
+                    var key = await dbContext.GetDownloadTaskKeyAsync(command.DownloadTaskGuid, ct);
                     key.ShouldNotBeNull();
-                    IDbContext.SetDownloadStatus(key, DownloadStatus.Queued).Wait(ct);
+                    await dbContext.SetDownloadStatus(key, DownloadStatus.Queued);
                     return Result.Ok();
                 }
             );
@@ -825,7 +822,7 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
         Mock.VerifyEventPublished(It.IsAny<CheckDownloadQueueEvent>, Times.Once());
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHaveFailedResult_WhenNoDownloadableChildTasksExist()
     {
         // Arrange — seed two movies; delete all file tasks of the first so its downloadable child list is empty
@@ -868,7 +865,7 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
         Mock.VerifyEventPublished(It.IsAny<CheckDownloadQueueEvent>, Times.Never());
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHaveFailedResult_WhenSelectedChildIsInCompletedPhase()
     {
         // Arrange
@@ -909,7 +906,7 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
         Mock.VerifyEventPublished(It.IsAny<CheckDownloadQueueEvent>, Times.Never());
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHaveFailedResult_WhenStartDownloadTaskJobFails()
     {
         // Arrange
@@ -950,7 +947,7 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
         Mock.VerifyEventPublished(It.IsAny<CheckDownloadQueueEvent>, Times.Never());
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldSkipStartDownloadJob_WhenTaskIsAlreadyDownloading()
     {
         // Arrange
@@ -995,7 +992,7 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
         Mock.VerifyEventPublished(It.IsAny<CheckDownloadQueueEvent>, Times.Once());
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldSkipStartMoveJob_WhenFileIsAlreadyMoving()
     {
         // Arrange
@@ -1040,7 +1037,7 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
         Mock.VerifyEventPublished(It.IsAny<CheckDownloadQueueEvent>, Times.Once());
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldStartDownloadJob_WhenMovieTaskIsPaused()
     {
         // Arrange
@@ -1093,7 +1090,7 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
         Mock.VerifyEventPublished(It.IsAny<CheckDownloadQueueEvent>, Times.Once());
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldQueuePausedSiblings_WhenStartingTvShowWithBothPausedAndMovePausedChildren()
     {
         // Arrange — first child is Paused (Downloading phase), second is MovePaused (FileTransfer phase)

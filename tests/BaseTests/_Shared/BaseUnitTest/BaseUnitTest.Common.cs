@@ -11,28 +11,25 @@ namespace Reaparr.BaseTests;
 
 public partial class BaseUnitTest
 {
-    protected readonly ITestOutputHelper Output;
-
     protected readonly ILogger Log;
 
     // Use loose behavior here to avoid Dispose() not mocked exception
     protected Mock<HttpMessageHandler> HttpHandlerMock = new(MockBehavior.Loose);
 
-    protected CancellationToken CancellationToken => TestContext.Current.CancellationToken;
+    protected CancellationToken CancellationToken =>
+        TUnit.Core.TestContext.Current?.Execution.CancellationToken ?? CancellationToken.None;
 
     /// <summary>
     /// This constructor is run before every test
     /// </summary>
     /// <param name="output">Sets up the logging system for logging during testing.</param>
     /// <param name="logEventLevel"></param>
-    protected BaseUnitTest(ITestOutputHelper output, LogEventLevel logEventLevel = LogEventLevel.Verbose)
+    protected BaseUnitTest(LogEventLevel logEventLevel = LogEventLevel.Verbose)
     {
-        Output = output;
-
         EnvironmentExtensions.EnableUnmaskedLog(true);
 
         // Pass the TestLogConfig to LogFactory so all application logs go to test output
-        var testLogConfig = new TestLogConfig(output);
+        var testLogConfig = new TestLogConfig();
         LogFactory.SetupLogging(logEventLevel, testLogConfig);
 
         BogusExtensions.Setup();
@@ -80,8 +77,8 @@ public class BaseUnitTest<TUnitTestClass> : BaseUnitTest
 {
     protected TUnitTestClass Sut => Mock.Create<TUnitTestClass>();
 
-    protected BaseUnitTest(ITestOutputHelper output, LogEventLevel logEventLevel = LogEventLevel.Verbose)
-        : base(output, logEventLevel) { }
+    protected BaseUnitTest(LogEventLevel logEventLevel = LogEventLevel.Verbose)
+        : base(logEventLevel) { }
 
     public override void Dispose()
     {

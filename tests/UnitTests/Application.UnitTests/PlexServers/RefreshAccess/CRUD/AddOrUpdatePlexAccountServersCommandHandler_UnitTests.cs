@@ -4,10 +4,10 @@ namespace Reaparr.Application.UnitTests;
 
 public class AddOrUpdatePlexAccountServersCommandHandlerUnitTests : BaseUnitTest
 {
-    public AddOrUpdatePlexAccountServersCommandHandlerUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public AddOrUpdatePlexAccountServersCommandHandlerUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldAddPlexAccountServerAssociations_WhenNoneExistsYet()
     {
         // Arrange
@@ -48,7 +48,7 @@ public class AddOrUpdatePlexAccountServersCommandHandlerUnitTests : BaseUnitTest
                 .ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldUpdateAndDeletePlexAccountServerAssociations_WhenTheyAreNotGiven()
     {
         // Arrange
@@ -97,7 +97,7 @@ public class AddOrUpdatePlexAccountServersCommandHandlerUnitTests : BaseUnitTest
                 .ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldNotAddPlexAccountServerAssociations_WhenAuthTokenIsEmpty()
     {
         // Arrange

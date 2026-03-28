@@ -10,10 +10,10 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
 {
     private readonly DownloadTaskTvShowValidator _validator = new();
 
-    public GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldHaveFailedResult_WhenPlexTvShowsAreEmpty()
     {
         // Arrange
@@ -28,7 +28,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
         result.IsFailed.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldGenerateValidTvShowDownloadTaskWithEpisodeDownloadTask_WhenNoDownloadTasksExist()
     {
         // Arrange
@@ -101,7 +101,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
         }
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldGenerateValidEpisodeDownloadTask_WhenTvShowParentDownloadTaskAlreadyExist()
     {
         // Arrange
@@ -156,7 +156,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
         downloadTaskTvShows.FirstOrDefault(x => x.Id == createdTvShowDownloadTask.Id).ShouldNotBeNull();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldIgnoreNonExistentEpisodeIds_WhenProcessingValidEpisodes()
     {
         // Arrange
@@ -204,7 +204,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
         downloadTaskEpisodes.Count.ShouldBe(3); // Only valid episodes should be processed
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHandleDuplicateEpisodeIds_WithoutCreatingDuplicateDownloadTasks()
     {
         // Arrange
@@ -252,7 +252,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
         downloadTaskEpisodes.Count.ShouldBe(2); // Should not create duplicates
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldCreateNewDownloadTasks_WhenSomeEpisodesAlreadyHaveDownloadTasks()
     {
         // Arrange
@@ -332,7 +332,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
         downloadTaskEpisodes.ShouldContain(x => x.PlexApiRatingKey == episodeDownloadTask.PlexApiRatingKey);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldGenerateDownloadTasksForMultipleTvShows_WhenEpisodesFromDifferentShowsRequested()
     {
         // Arrange
@@ -398,7 +398,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
         }
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldIgnoreNonEpisodeMediaTypes_WhenMixedMediaTypesProvided()
     {
         // Arrange
@@ -462,7 +462,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
         movieDownloadTasks.Count.ShouldBe(0);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldSetCorrectDestinationFolderPathId_WhenCustomDestinationFolderProvided()
     {
         // Arrange
@@ -514,7 +514,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
         }
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldSetCustomDestinationFolderPath_WhenRequestContainsCustomDestinationFolderPath()
     {
         // Arrange
@@ -568,7 +568,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
         }
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHaveFailedResult_WhenEmptyMediaIdsList()
     {
         // Arrange
@@ -594,7 +594,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
         result.IsFailed.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldCalculateDownloadTaskPropertiesCorrectly_WhenDownloadTasksGenerated()
     {
         // Arrange

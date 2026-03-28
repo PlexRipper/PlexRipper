@@ -5,13 +5,13 @@ namespace Reaparr.Application.UnitTests;
 
 public class GetAllBackgroundJobsEndpointUnitTests : BaseUnitTest<GetAllBackgroundJobsEndpoint>
 {
-    public GetAllBackgroundJobsEndpointUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public GetAllBackgroundJobsEndpointUnitTests()
+        : base() { }
 
     private string ToJsonString<T>(T value) =>
         value is null ? string.Empty : JsonSerializer.Serialize(value, DefaultJsonSerializerOptions.ConfigStandard);
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnEmptyList_WhenNoBackgroundJobIsRunning()
     {
         // Arrange
@@ -30,7 +30,7 @@ public class GetAllBackgroundJobsEndpointUnitTests : BaseUnitTest<GetAllBackgrou
         responseValue.ShouldBeEmpty();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnJobStatusUpdate_WhenABackgroundJobIsRunning()
     {
         // Arrange
@@ -59,7 +59,7 @@ public class GetAllBackgroundJobsEndpointUnitTests : BaseUnitTest<GetAllBackgrou
         }
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnTypedJobStatusUpdate_WhenABackgroundJobIsRunning()
     {
         // Arrange

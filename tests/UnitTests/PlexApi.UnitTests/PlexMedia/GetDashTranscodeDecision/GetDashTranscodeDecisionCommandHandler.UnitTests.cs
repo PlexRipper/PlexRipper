@@ -9,8 +9,8 @@ namespace Reaparr.PlexApi.UnitTests;
 
 public class GetDashTranscodeDecisionCommandHandlerUnitTests : BaseUnitTest<GetDashTranscodeDecisionCommandHandler>
 {
-    public GetDashTranscodeDecisionCommandHandlerUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public GetDashTranscodeDecisionCommandHandlerUnitTests()
+        : base() { }
 
     private static GetDashTranscodeDecisionCommand CreateCommand(int plexServerId) =>
         new(
@@ -24,7 +24,7 @@ public class GetDashTranscodeDecisionCommandHandlerUnitTests : BaseUnitTest<GetD
             }
         );
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnFailedResult_WhenPlexServerHasNoToken()
     {
         // Arrange
@@ -52,7 +52,7 @@ public class GetDashTranscodeDecisionCommandHandlerUnitTests : BaseUnitTest<GetD
             .Verify(x => x.CreateClient(It.IsAny<string>(), It.IsAny<PlexApiClientOptions>()), Times.Never());
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnFailedResult_WhenDecisionResponseIsMissingMediaContainer()
     {
         // Arrange
@@ -99,7 +99,7 @@ public class GetDashTranscodeDecisionCommandHandlerUnitTests : BaseUnitTest<GetD
         plexApiMock.Verify();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnMappedDecisionSummary_WhenDecisionContainsVideoAndAudioStreams()
     {
         // Arrange
@@ -148,7 +148,7 @@ public class GetDashTranscodeDecisionCommandHandlerUnitTests : BaseUnitTest<GetD
         plexApiMock.Verify();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldResolveQualityFromWidth_WhenStreamTitleDoesNotContainAResolution()
     {
         // Arrange
@@ -196,10 +196,10 @@ public class GetDashTranscodeDecisionCommandHandlerUnitTests : BaseUnitTest<GetD
         plexApiMock.Verify();
     }
 
-    public static TheoryData<Action<MakeDecisionMediaContainerConfig>, VideoQuality> QualityCases =>
-        new()
-        {
-            {
+    public static IEnumerable<Func<(Action<MakeDecisionMediaContainerConfig>, VideoQuality)>> QualityCases()
+    {
+        yield return () =>
+            (
                 config =>
                 {
                     config.MediaVideoResolution = "720p";
@@ -207,8 +207,10 @@ public class GetDashTranscodeDecisionCommandHandlerUnitTests : BaseUnitTest<GetD
                     config.VideoStreams.Add(new MakeDecisionVideoStreamConfig { DisplayTitle = "Video Stream" });
                 },
                 VideoQuality.HD
-            },
-            {
+            );
+
+        yield return () =>
+            (
                 config =>
                 {
                     config.MediaVideoResolution = "weird-resolution";
@@ -224,8 +226,10 @@ public class GetDashTranscodeDecisionCommandHandlerUnitTests : BaseUnitTest<GetD
                     );
                 },
                 VideoQuality.UHD_4K
-            },
-            {
+            );
+
+        yield return () =>
+            (
                 config =>
                 {
                     config.MediaVideoResolution = null;
@@ -243,8 +247,10 @@ public class GetDashTranscodeDecisionCommandHandlerUnitTests : BaseUnitTest<GetD
                     );
                 },
                 VideoQuality.HD
-            },
-            {
+            );
+
+        yield return () =>
+            (
                 config =>
                 {
                     config.MediaVideoResolution = null;
@@ -262,8 +268,10 @@ public class GetDashTranscodeDecisionCommandHandlerUnitTests : BaseUnitTest<GetD
                     );
                 },
                 VideoQuality.DVD
-            },
-            {
+            );
+
+        yield return () =>
+            (
                 config =>
                 {
                     config.MediaVideoResolution = null;
@@ -281,11 +289,11 @@ public class GetDashTranscodeDecisionCommandHandlerUnitTests : BaseUnitTest<GetD
                     );
                 },
                 VideoQuality.nHD
-            },
-        };
+            );
+    }
 
-    [Theory]
-    [MemberData(nameof(QualityCases))]
+    [Test]
+    [MethodDataSource(nameof(QualityCases))]
     public async Task ShouldResolveExpectedQuality_ForDifferentDecisionPayloadShapes(
         Action<MakeDecisionMediaContainerConfig> options,
         VideoQuality expectedQuality
@@ -336,7 +344,7 @@ public class GetDashTranscodeDecisionCommandHandlerUnitTests : BaseUnitTest<GetD
         plexApiMock.Verify();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldChooseHighestAvailableQuality_WhenDecisionContainsMultipleVideoVariants()
     {
         // Arrange
@@ -415,7 +423,7 @@ public class GetDashTranscodeDecisionCommandHandlerUnitTests : BaseUnitTest<GetD
         plexApiMock.Verify();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldResolveQualityFromFactoryData_WhenDisplayTitleDoesNotMatchDimensions()
     {
         // Arrange

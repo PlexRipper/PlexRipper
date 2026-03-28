@@ -5,10 +5,10 @@ namespace Reaparr.BackgroundJobs.UnitTests;
 
 public class ResetFailedLibrarySyncJobsCommandHandlerUnitTests : BaseUnitTest<ResetFailedLibrarySyncJobsCommandHandler>
 {
-    public ResetFailedLibrarySyncJobsCommandHandlerUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public ResetFailedLibrarySyncJobsCommandHandlerUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldResetFailedJobsToQueued_WhenFailedJobsExistForServer()
     {
         // Arrange
@@ -79,7 +79,7 @@ public class ResetFailedLibrarySyncJobsCommandHandlerUnitTests : BaseUnitTest<Re
         }
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldOnlyResetFailedJobsForSpecificServer_WhenMultipleServersExist()
     {
         // Arrange
@@ -148,7 +148,7 @@ public class ResetFailedLibrarySyncJobsCommandHandlerUnitTests : BaseUnitTest<Re
         server2Item.IsServerOffline.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldNotResetQueuedOrProcessingJobs_WhenOnlyFailedShouldBeReset()
     {
         // Arrange
@@ -221,7 +221,7 @@ public class ResetFailedLibrarySyncJobsCommandHandlerUnitTests : BaseUnitTest<Re
         stillProcessing.Status.ShouldBe(LibrarySyncJobStatus.Processing);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldCallCheckQueuedCommand_AfterResettingFailedJobs()
     {
         // Arrange
@@ -269,7 +269,7 @@ public class ResetFailedLibrarySyncJobsCommandHandlerUnitTests : BaseUnitTest<Re
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldNotCallCheckQueuedCommand_WhenNoFailedJobsExist()
     {
         // Arrange
@@ -303,7 +303,7 @@ public class ResetFailedLibrarySyncJobsCommandHandlerUnitTests : BaseUnitTest<Re
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldClearErrorMessageAndTimestamps_WhenResettingFailedJobs()
     {
         // Arrange

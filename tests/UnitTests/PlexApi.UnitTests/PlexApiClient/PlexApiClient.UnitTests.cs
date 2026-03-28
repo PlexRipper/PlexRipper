@@ -9,10 +9,10 @@ namespace Reaparr.PlexApi.UnitTests;
 
 public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, PlexApiClient>>
 {
-    public PlexApiClientUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public PlexApiClientUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnValid401ResponseAsJson_WhenPlexApiReturns401HtmlResponse()
     {
         SetupHttpClient(config =>
@@ -59,7 +59,7 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
             .Verify("SendAsync", Times.Once(), ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldHandleTimeoutException_WhenHttpRequestTimesOut()
     {
         // Set up the mocked HttpClient to throw a timeout exception
@@ -82,7 +82,7 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
             .Verify("SendAsync", Times.Once(), ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturn500Response_WhenInternalServerErrorOccurs()
     {
         // Set up the mocked HttpClient to return a 500 Internal Server Error response
@@ -124,7 +124,7 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
             .Verify("SendAsync", Times.Once(), ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnValid200Response_WhenRequestIsSuccessful()
     {
         // Set up the mocked HttpClient to return a 200 OK response
@@ -151,7 +151,7 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
             .Verify("SendAsync", Times.Once(), ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturn503Response_WhenServiceUnavailableIsReceived()
     {
         SetupHttpClient(config =>
@@ -175,7 +175,7 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
             .Verify("SendAsync", Times.Once(), ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnBadGatewayResponse_WhenHttpRequestExceptionOccurs()
     {
         // Set up the mocked HttpClient to throw an HttpRequestException

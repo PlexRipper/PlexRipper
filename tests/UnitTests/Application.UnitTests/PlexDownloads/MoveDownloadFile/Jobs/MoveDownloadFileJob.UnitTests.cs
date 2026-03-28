@@ -8,8 +8,8 @@ namespace Reaparr.Application.UnitTests;
 
 public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
 {
-    public MoveDownloadFileJobUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public MoveDownloadFileJobUnitTests()
+        : base() { }
 
     private IJobExecutionContext SetupJobContext(DownloadTaskKey key)
     {
@@ -22,7 +22,7 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
         return Mock.Create<IJobExecutionContext>();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldDispatchCompletedStatus_WhenMoveSucceeds()
     {
         // Arrange
@@ -97,7 +97,7 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldNotSetStatusToCompleted_WhenMoveCommandFails()
     {
         // Arrange
@@ -173,7 +173,7 @@ public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnHundredPercent_WhenCompletedAndDataReceivedIsZero()
     {
         // Regression: after MoveFinished -> Completed the percentage must stay at 100 and never

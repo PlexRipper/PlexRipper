@@ -7,10 +7,10 @@ namespace Reaparr.Application.UnitTests;
 public class ClearCompletedDownloadTasksByDownloadTaskIdEndpointUnitTests
     : BaseUnitTest<ClearCompletedDownloadTasksByDownloadTaskIdEndpoint>
 {
-    public ClearCompletedDownloadTasksByDownloadTaskIdEndpointUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public ClearCompletedDownloadTasksByDownloadTaskIdEndpointUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldRemoveOnlySpecifiedCompletedDownloadTasks_WhenCalledWithGuidList()
     {
         // Arrange
@@ -72,7 +72,7 @@ public class ClearCompletedDownloadTasksByDownloadTaskIdEndpointUnitTests
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldNotRemoveDownloadTasks_WhenTasksAreNotCompleted()
     {
         // Arrange
@@ -133,7 +133,7 @@ public class ClearCompletedDownloadTasksByDownloadTaskIdEndpointUnitTests
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldRemoveOrphanedTvShowParents_WhenLastCompletedEpisodeFileIsClearedById()
     {
         // Arrange

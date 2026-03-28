@@ -6,8 +6,8 @@ namespace Reaparr.BackgroundJobs.UnitTests;
 
 public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLibraryMediaCommand>
 {
-    public RefreshLibraryMediaCommandUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public RefreshLibraryMediaCommandUnitTests()
+        : base() { }
 
     private async Task<PlexLibrary> GetUpdatedLibrary(Seed seed, PlexMediaType type)
     {
@@ -41,7 +41,7 @@ public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLi
         return newLibrary;
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnFailedResult_WhenPlexLibraryNotFound()
     {
         // Arrange
@@ -62,7 +62,7 @@ public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLi
         result.Has404NotFoundError().ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnFailedResult_WhenSyncLibraryMediaFails()
     {
         // Arrange
@@ -83,9 +83,9 @@ public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLi
         result.Errors.ShouldContain(x => x.Message.Contains("Sync failed"));
     }
 
-    [Theory]
-    [InlineData(PlexMediaType.Movie)]
-    [InlineData(PlexMediaType.TvShow)]
+    [Test]
+    [Arguments(PlexMediaType.Movie)]
+    [Arguments(PlexMediaType.TvShow)]
     public async Task ShouldReturnOkResult_WhenLibraryIsSynced(PlexMediaType libraryType)
     {
         // Arrange
@@ -142,7 +142,7 @@ public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLi
         dbLibrary.SyncedAt.ShouldNotBeNull();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnFailedResult_WhenSyncLibraryMediaMetadataFails()
     {
         // Arrange
@@ -174,7 +174,7 @@ public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLi
         result.Errors.ShouldContain(x => x.Message.Contains("Metadata sync failed"));
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnFailedResult_WhenMovieLibraryCommandFails()
     {
         // Arrange
@@ -208,7 +208,7 @@ public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLi
         result.Errors.ShouldContain(x => x.Message.Contains("Movie command failed"));
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnFailedResult_WhenTvShowLibraryCommandFails()
     {
         // Arrange

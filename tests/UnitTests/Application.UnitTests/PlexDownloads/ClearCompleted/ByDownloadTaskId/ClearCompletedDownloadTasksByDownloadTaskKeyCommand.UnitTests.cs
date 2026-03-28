@@ -7,10 +7,10 @@ namespace Reaparr.Application.UnitTests;
 public class ClearCompletedDownloadTasksByDownloadTaskKeyCommandUnitTests
     : BaseUnitTest<ClearCompletedDownloadTasksByDownloadTaskKeyCommandHandler>
 {
-    public ClearCompletedDownloadTasksByDownloadTaskKeyCommandUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public ClearCompletedDownloadTasksByDownloadTaskKeyCommandUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnSuccessWithZeroCount_WhenNoneOfTheKeysAreCompleted()
     {
         // Arrange
@@ -57,7 +57,7 @@ public class ClearCompletedDownloadTasksByDownloadTaskKeyCommandUnitTests
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldDispatchDeleteCommand_WhenCompletedMovieTaskKeysAreGiven()
     {
         // Arrange
@@ -109,7 +109,7 @@ public class ClearCompletedDownloadTasksByDownloadTaskKeyCommandUnitTests
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldNotDispatchDeleteCommand_WhenTasksAreNotCompleted()
     {
         // Arrange
@@ -150,7 +150,7 @@ public class ClearCompletedDownloadTasksByDownloadTaskKeyCommandUnitTests
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldDispatchOnlyCompletedKeys_WhenPartialKeyListIsGiven()
     {
         // Arrange — 10 tasks all Completed; only 3 keys passed to the command.
@@ -203,7 +203,7 @@ public class ClearCompletedDownloadTasksByDownloadTaskKeyCommandUnitTests
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldDispatchDeleteCommand_WhenEpisodeFileKeyIsCompleted()
     {
         // Arrange
@@ -259,7 +259,7 @@ public class ClearCompletedDownloadTasksByDownloadTaskKeyCommandUnitTests
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldOnlyCountAndDeleteFullyMatchedCompletedKeys_WhenSameIdIsProvidedWithWrongType()
     {
         // Arrange
@@ -311,7 +311,7 @@ public class ClearCompletedDownloadTasksByDownloadTaskKeyCommandUnitTests
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldDeduplicateAndDeleteOnlyFullyMatchedCompletedKeys_WhenServerOrLibraryDoNotMatch()
     {
         // Arrange

@@ -3,20 +3,20 @@ using Serilog.Events;
 
 namespace Reaparr.BaseTests;
 
-[Collection("Integration Tests")]
+[NotInParallel("IntegrationTests")]
 public abstract class BaseIntegrationTests
 {
     private readonly ILogger _log;
 
-    protected CancellationToken CancellationToken => TestContext.Current.CancellationToken;
+    protected CancellationToken CancellationToken =>
+        TUnit.Core.TestContext.Current?.Execution.CancellationToken ?? CancellationToken.None;
 
-    protected BaseIntegrationTests(ITestOutputHelper output, LogEventLevel logLevel = LogEventLevel.Debug)
+    protected BaseIntegrationTests(LogEventLevel logLevel = LogEventLevel.Debug)
     {
         EnvironmentExtensions.SetLogLevel(logLevel);
         EnvironmentExtensions.EnableUnmaskedLog(true);
 
-        // Ensure that the test output helper is set first
-        var testLogConfig = new TestLogConfig(output);
+        var testLogConfig = new TestLogConfig();
 
         // Pass the TestLogConfig to LogFactory so all application logs go to test output
         LogFactory.SetupLogging(logLevel, testLogConfig);
@@ -34,6 +34,25 @@ public abstract class BaseIntegrationTests
         for (var i = 0; i < maxRetries; i++)
         {
             if (condition())
+                return;
+
+            await Task.Delay(delayMs);
+        }
+
+        throw new TimeoutException(
+            $"Database condition was not met after {maxRetries} retries (total wait: {maxRetries * delayMs}ms)"
+        );
+    }
+
+    protected static async Task WaitForDatabaseConditionAsync(
+        Func<Task<bool>> condition,
+        int maxRetries = 10,
+        int delayMs = 500
+    )
+    {
+        for (var i = 0; i < maxRetries; i++)
+        {
+            if (await condition())
                 return;
 
             await Task.Delay(delayMs);

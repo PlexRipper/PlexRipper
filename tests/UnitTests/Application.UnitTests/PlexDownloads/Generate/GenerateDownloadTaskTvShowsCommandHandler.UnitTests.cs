@@ -7,10 +7,10 @@ namespace Reaparr.Application.UnitTests;
 public class GenerateDownloadTaskTvShowsCommandHandlerUnitTests
     : BaseUnitTest<GenerateDownloadTaskTvShowsCommandHandler>
 {
-    public GenerateDownloadTaskTvShowsCommandHandlerUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public GenerateDownloadTaskTvShowsCommandHandlerUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldHaveInsertedValidDownloadTaskTvShowsInDatabase_WhenGivenValidPlexTvShows()
     {
         // Arrange
@@ -74,7 +74,7 @@ public class GenerateDownloadTaskTvShowsCommandHandlerUnitTests
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldForwardCustomDestinationFolderPath_WhenCreatingSeasonsCommand()
     {
         // Arrange

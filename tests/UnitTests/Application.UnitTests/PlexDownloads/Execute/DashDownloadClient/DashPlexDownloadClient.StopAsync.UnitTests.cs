@@ -14,8 +14,8 @@ namespace Reaparr.Application.UnitTests;
 
 public class DashPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DashPlexDownloadClient>
 {
-    public DashPlexDownloadClientStopAsyncUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public DashPlexDownloadClientStopAsyncUnitTests()
+        : base() { }
 
     private DashPlexDownloadClient CreateSut(Mock<IDashMpdCliWrapper> dashWrapperMock)
     {
@@ -60,7 +60,7 @@ public class DashPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DashPlexDow
             .Returns(Observable.Return(0));
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldPersistStoppedStatus_WhenStopAsyncIsCalled()
     {
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
@@ -102,7 +102,7 @@ public class DashPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DashPlexDow
         var sut = CreateSut(dashWrapperMock);
         var startTask = sut.Start(downloadTask.ToKey(), CancellationToken);
 
-        await Task.Delay(100, TestContext.Current.CancellationToken);
+        await Task.Delay(100, CancellationToken);
         var stopResult = await sut.StopAsync();
         var startResult = await startTask;
 
@@ -133,7 +133,7 @@ public class DashPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DashPlexDow
             );
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnSuccess_WhenStopAsyncIsCalledTwice()
     {
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
@@ -174,7 +174,7 @@ public class DashPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DashPlexDow
 
         var sut = CreateSut(dashWrapperMock);
         var startTask = sut.Start(downloadTask.ToKey(), CancellationToken);
-        await Task.Delay(100, TestContext.Current.CancellationToken);
+        await Task.Delay(100, CancellationToken);
 
         var firstStop = await sut.StopAsync();
         var secondStop = await sut.StopAsync();

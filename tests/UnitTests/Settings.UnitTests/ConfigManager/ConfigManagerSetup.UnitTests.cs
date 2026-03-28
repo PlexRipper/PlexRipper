@@ -7,10 +7,10 @@ namespace Reaparr.Settings.UnitTests;
 
 public class ConfigManagerSetupUnitTests : BaseUnitTest<ConfigManager>
 {
-    public ConfigManagerSetupUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public ConfigManagerSetupUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public void ShouldLoadConfigDuringSetup_WhenConfigFileAlreadyExists()
     {
         // Arrange
@@ -35,7 +35,7 @@ public class ConfigManagerSetupUnitTests : BaseUnitTest<ConfigManager>
         Mock.Mock<IUserSettings>().VerifyGet(x => x.SettingsUpdated, Times.Once);
     }
 
-    [Fact]
+    [Test]
     public void ShouldCreateConfigFile_WhenConfigFileDoesNotExists()
     {
         // Arrange

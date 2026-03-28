@@ -5,10 +5,10 @@ namespace Reaparr.Data.UnitTests;
 
 public class DbContextExtensionsPlexServerConnectionUnitTests : BaseUnitTest
 {
-    public DbContextExtensionsPlexServerConnectionUnitTests(ITestOutputHelper output)
-        : base(output) { }
+    public DbContextExtensionsPlexServerConnectionUnitTests()
+        : base() { }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnAFailedResult_WhenThePlexServerIdIsInvalid()
     {
         // Act
@@ -19,7 +19,7 @@ public class DbContextExtensionsPlexServerConnectionUnitTests : BaseUnitTest
         result.Has400BadRequestError().ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnAFailedResult_WhenThePlexServerIdCannotBeFound()
     {
         // Act
@@ -31,7 +31,7 @@ public class DbContextExtensionsPlexServerConnectionUnitTests : BaseUnitTest
         result.Has404NotFoundError().ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnAFailedResult_WhenThereAreNoPlexConnections()
     {
         // Act
@@ -49,7 +49,7 @@ public class DbContextExtensionsPlexServerConnectionUnitTests : BaseUnitTest
         result.IsFailed.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnThePreferredConnection_WhenAPlexServerHasOne()
     {
         // Arrange
@@ -82,7 +82,7 @@ public class DbContextExtensionsPlexServerConnectionUnitTests : BaseUnitTest
         result.Value.Id.ShouldBe(preferredConnection.Id);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnAFailedResult_WhenThereAreOnlyConnectionsWithoutStatus()
     {
         // Arrange
@@ -108,7 +108,7 @@ public class DbContextExtensionsPlexServerConnectionUnitTests : BaseUnitTest
         result.IsFailed.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnTheConnectionWithPublicAddress_WhenThereIsAValidPublicAddressConnectionsWithStatus()
     {
         // Arrange
@@ -187,7 +187,7 @@ public class DbContextExtensionsPlexServerConnectionUnitTests : BaseUnitTest
         result.Value.ShouldBe(plexServerConnections[2]);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldPreferHttpsConnection_WhenAvailable()
     {
         // Arrange
@@ -257,7 +257,7 @@ public class DbContextExtensionsPlexServerConnectionUnitTests : BaseUnitTest
         result.Value.Protocol.ShouldBe("https");
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldPreferLocalConnection_WhenAvailable()
     {
         // Arrange
@@ -326,7 +326,7 @@ public class DbContextExtensionsPlexServerConnectionUnitTests : BaseUnitTest
         result.Value.Local.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturn504GatewayTimeout_WhenNoOnlineConnections()
     {
         // Arrange
@@ -360,7 +360,7 @@ public class DbContextExtensionsPlexServerConnectionUnitTests : BaseUnitTest
         result.ToResult().Has504GatewayTimeoutError().ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldPreferDirectOverPlexRelay_WhenBothAvailable()
     {
         // Arrange
@@ -421,7 +421,7 @@ public class DbContextExtensionsPlexServerConnectionUnitTests : BaseUnitTest
         result.Value.Url.ShouldBe(direct.Url);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnNonMainAccountToken_WhenAvailable()
     {
         // Arrange
@@ -461,7 +461,7 @@ public class DbContextExtensionsPlexServerConnectionUnitTests : BaseUnitTest
         result.Value.ShouldBe("NON_MAIN_TOKEN");
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldFallbackToMainAccountToken_WhenNonMainIsUnavailable()
     {
         // Arrange
@@ -485,7 +485,7 @@ public class DbContextExtensionsPlexServerConnectionUnitTests : BaseUnitTest
         result.Value.ShouldBe(mainAccess.AuthToken);
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnFailedResult_WhenNoTokensAvailable()
     {
         // Arrange
@@ -507,7 +507,7 @@ public class DbContextExtensionsPlexServerConnectionUnitTests : BaseUnitTest
         result.IsFailed.ShouldBeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task ShouldReturnTokenForSpecificAccount_WhenPlexAccountIdProvided()
     {
         // Arrange

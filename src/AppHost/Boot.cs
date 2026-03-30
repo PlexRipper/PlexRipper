@@ -45,7 +45,8 @@ public class Boot : IHostedService
         _downloadQueue = downloadQueue;
         _librarySyncJobListener = librarySyncJobListener;
 
-        appLifetime.ApplicationStarted.Register(OnStarted);
+        // ReSharper disable once AsyncVoidMethod
+        appLifetime.ApplicationStarted.Register(async void () => await OnStarted());
         appLifetime.ApplicationStopping.Register(OnStopping);
         appLifetime.ApplicationStopped.Register(OnStopped);
     }
@@ -108,11 +109,11 @@ public class Boot : IHostedService
 
     #region Private Methods
 
-    private void OnStarted()
+    private async Task OnStarted()
     {
         _log.Here().Debug("Boot.OnStarted has been called");
 
-        // Perform post-startup activities here
+        await _commandExecutor.Send(new NotifyArrAppsOnStartupCommand(), CancellationToken.None);
     }
 
     private void OnStopping()

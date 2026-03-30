@@ -164,6 +164,25 @@ public class ResultExtensionsGeneralTests
     }
 
     [Test]
+    public void ShouldIdentifyServerUnreachableStatusWhenHttpClientTimeout()
+    {
+        // Arrange
+        var result = Result.Fail(
+            new ExceptionalError(
+                new TaskCanceledException(
+                    "The request was canceled due to the configured HttpClient.Timeout of 30 seconds elapsing."
+                )
+            )
+        );
+
+        // Act
+        var isServerUnreachable = result.IsServerUnreachable();
+
+        // Assert
+        isServerUnreachable.ShouldBeTrue();
+    }
+
+    [Test]
     public void ShouldNotIdentifyClientErrorsAsServerUnreachable()
     {
         // Arrange

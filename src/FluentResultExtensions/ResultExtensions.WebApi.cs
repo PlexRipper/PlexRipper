@@ -322,7 +322,9 @@ public static partial class ResultExtensions
     #region 408
 
     public static bool Has408RequestTimeout(this Result result) =>
-        result.HasStatusCode(HttpCodes.Status408RequestTimeout);
+        result.HasStatusCode(HttpCodes.Status408RequestTimeout)
+        || result.HasException<TimeoutException>()
+        || result.HasException<TaskCanceledException>();
 
     public static Result Add408RequestTimeoutError(this Result result, string message = "Request Timeout") =>
         result.AddStatusCodeError(HttpCodes.Status408RequestTimeout, message);

@@ -94,7 +94,9 @@ public class CheckAllConnectionsStatusByPlexServerHandler
         );
 
         // Compare previous and current online status
-        var currentOnlineStatus = tasksResult.Any(statusResult => statusResult.ValueOrDefault?.IsSuccessful != null);
+        var currentOnlineStatus = tasksResult.Any(statusResult =>
+            statusResult is { IsSuccess: true, ValueOrDefault.IsSuccessful: true }
+        );
 
         if (previousResult != currentOnlineStatus)
         {

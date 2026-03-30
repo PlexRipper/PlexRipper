@@ -129,7 +129,10 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
             )
             .Verifiable(Times.AtLeastOnce);
 
-        Mock.PublishEvent(It.IsAny<ServerOnlineStatusChangedNotification>)
+        Mock.Mock<IEventPublisher>()
+            .Setup(x =>
+                x.PublishAsync(It.IsAny<ServerOnlineStatusChangedNotification>(), It.IsAny<CancellationToken>())
+            )
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Once);
 
@@ -198,7 +201,10 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
             )
             .Verifiable(Times.AtLeastOnce);
 
-        Mock.PublishEvent(It.IsAny<ServerOnlineStatusChangedNotification>)
+        Mock.Mock<IEventPublisher>()
+            .Setup(x =>
+                x.PublishAsync(It.IsAny<ServerOnlineStatusChangedNotification>(), It.IsAny<CancellationToken>())
+            )
             .Returns(Task.CompletedTask)
             .Verifiable(Times.Never);
 
@@ -209,5 +215,143 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
         // Assert
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
+    }
+
+    [Test]
+    public async Task ShouldNotPublishOnlineNotification_WhenAllConnectionChecksReturnUnsuccessfulStatuses()
+    {
+        // Arrange
+        await SetupDatabase(
+            523188,
+            config =>
+            {
+                config.PlexServerCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        await dbContext.PlexServerStatuses.ExecuteDeleteAsync(CancellationToken);
+
+        var connections = dbContext.PlexServerConnections.Where(x => x.PlexServerId == 1).ToList();
+
+        Mock.Mock<INotificationHubService>()
+            .Setup(m =>
+                m.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>(), It.IsAny<CancellationToken>())
+            )
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once);
+
+        Mock.SetupCommand(It.IsAny<CheckConnectionStatusByIdCommand>)
+            .ReturnsAsync(
+                (CheckConnectionStatusByIdCommand req, CancellationToken _) =>
+                    Result.Ok(
+                        FakeData
+                            .GetPlexServerStatus(
+                                new Seed(44),
+                                isSuccessful: false,
+                                plexServerId: 1,
+                                plexServerConnectionId: req.PlexServerConnectionId
+                            )
+                            .Generate()
+                    )
+            )
+            .Verifiable(Times.Exactly(connections.Count));
+
+        Mock.Mock<IEventPublisher>()
+            .Setup(x =>
+                x.PublishAsync(It.IsAny<ServerOnlineStatusChangedNotification>(), It.IsAny<CancellationToken>())
+            )
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Never);
+
+        // Act
+        var request = new CheckAllConnectionsStatusByPlexServerCommand(1);
+        var result = await Sut.ExecuteAsync(request, CancellationToken);
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.IsFailed.ShouldBeTrue();
+    }
+
+    [Test]
+    public async Task ShouldPublishOfflineNotification_WhenServerTransitionsFromOnlineToOffline()
+    {
+        // Arrange
+        await SetupDatabase(
+            523189,
+            config =>
+            {
+                config.PlexServerCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        await dbContext.PlexServerStatuses.ExecuteDeleteAsync(CancellationToken);
+
+        var connections = dbContext.PlexServerConnections.Where(x => x.PlexServerId == 1).ToList();
+        foreach (var connection in connections)
+        {
+            dbContext.PlexServerStatuses.Add(
+                FakeData
+                    .GetPlexServerStatus(
+                        new Seed(connection.Id),
+                        isSuccessful: true,
+                        plexServerId: 1,
+                        plexServerConnectionId: connection.Id
+                    )
+                    .Generate()
+            );
+        }
+
+        await dbContext.SaveChangesAsync(CancellationToken);
+
+        Mock.Mock<INotificationHubService>()
+            .Setup(m =>
+                m.SendRefreshNotificationAsync(It.IsAny<List<RefreshDataType>>(), It.IsAny<CancellationToken>())
+            )
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once);
+
+        Mock.SetupCommand(It.IsAny<CheckConnectionStatusByIdCommand>)
+            .ReturnsAsync(
+                (CheckConnectionStatusByIdCommand req, CancellationToken _) =>
+                    Result.Ok(
+                        FakeData
+                            .GetPlexServerStatus(
+                                new Seed(45),
+                                isSuccessful: false,
+                                plexServerId: 1,
+                                plexServerConnectionId: req.PlexServerConnectionId
+                            )
+                            .Generate()
+                    )
+            )
+            .Verifiable(Times.Exactly(connections.Count));
+
+        Mock.Mock<IEventPublisher>()
+            .Setup(x =>
+                x.PublishAsync(It.IsAny<ServerOnlineStatusChangedNotification>(), It.IsAny<CancellationToken>())
+            )
+            .Returns(Task.CompletedTask)
+            .Verifiable(Times.Once);
+
+        // Act
+        var request = new CheckAllConnectionsStatusByPlexServerCommand(1);
+        var result = await Sut.ExecuteAsync(request, CancellationToken);
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.IsFailed.ShouldBeTrue();
+        Mock.Mock<IEventPublisher>()
+            .Verify(
+                x =>
+                    x.PublishAsync(
+                        It.Is<ServerOnlineStatusChangedNotification>(notification =>
+                            notification.PlexServerId == 1 && !notification.IsOnline
+                        ),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Once()
+            );
     }
 }

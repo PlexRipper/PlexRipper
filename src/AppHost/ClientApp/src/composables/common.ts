@@ -25,7 +25,7 @@ export function waitForElement(parentElement: HTMLElement | null, selector: stri
 }
 
 export function discordInviteLink() {
-	return 'https://discord.com/invite/Qa3BtxN77g';
+	return 'https://discord.com/invite/k2KvDJbnNm';
 }
 
 export function formatErrorResponse(res: BaseResultDTO | null): string {

@@ -114,10 +114,10 @@
       },
       "Downloader": {
         "type": "Transitive",
-        "resolved": "4.1.1",
-        "contentHash": "SRiN6eDLqI+0EdmzmYbYm+wwPrHPOlyQpXKDYTwal1LAn3MqKYcOn36e45UGh65axLE2R9F+p/37PFt09Tm73A==",
+        "resolved": "5.1.0",
+        "contentHash": "lUsiygfKkPgLx4oFy/dWlKrWOjpg3A/VaiSAoX8f+WiwldoQGi+JBeOgc60ep6qWeSD5FYyrUl7CYvdR1vUt3w==",
         "dependencies": {
-          "Microsoft.Extensions.Logging.Abstractions": "10.0.2"
+          "Microsoft.Extensions.Logging.Abstractions": "10.0.3"
         }
       },
       "EFCore.BulkExtensions.Core": {
@@ -602,8 +602,8 @@
       },
       "Microsoft.Extensions.DependencyInjection.Abstractions": {
         "type": "Transitive",
-        "resolved": "10.0.2",
-        "contentHash": "zOIurr59+kUf9vNcsUkCvKWZv+fPosUZXURZesYkJCvl0EzTc9F7maAO4Cd2WEV7ZJJ0AZrFQvuH6Npph9wdBw=="
+        "resolved": "10.0.3",
+        "contentHash": "bwGMrRcAMWx2s/RDgja97p27rxSz2pEQW0+rX5cWAUWVETVJ/eyxGfjAl8vuG5a+lckWmPIE+vcuaZNVB5YDdw=="
       },
       "Microsoft.Extensions.DependencyModel": {
         "type": "Transitive",
@@ -754,10 +754,10 @@
       },
       "Microsoft.Extensions.Logging.Abstractions": {
         "type": "Transitive",
-        "resolved": "10.0.2",
-        "contentHash": "RZkez/JjpnO+MZ6efKkSynN6ZztLpw3WbxNzjLCPBd97wWj1S9ZYPWi0nmT4kWBRa6atHsdM1ydGkUr8GudyDQ==",
+        "resolved": "10.0.3",
+        "contentHash": "lxl0WLk7ROgBFAsjcOYjQ8/DVK+VMszxGBzUhgtQmAsTNldLL5pk9NG/cWTsXHq0lUhUEAtZkEE7jOGOA8bGKQ==",
         "dependencies": {
-          "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.2"
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.3"
         }
       },
       "Microsoft.Extensions.Logging.Configuration": {
@@ -1410,18 +1410,18 @@
       },
       "xunit.v3.common": {
         "type": "Transitive",
-        "resolved": "3.2.1",
-        "contentHash": "NUh3pPTC3Py4XTnjoCCCIEzvdKTQ9apu0ikDNCrUETBtfHHXcoUmIl5bOfJLQQu7awhu8eaZHjJnG7rx9lUZpg==",
+        "resolved": "3.2.0",
+        "contentHash": "InLYIBD54RVFgX1S5y0g+Mia3coGsA+cf+SvieBH3kO5TrH3d4sb59+4M6nfBlGg8EqUCHbyGKKroQPquYEt7Q==",
         "dependencies": {
           "Microsoft.Bcl.AsyncInterfaces": "6.0.0"
         }
       },
       "xunit.v3.extensibility.core": {
         "type": "Transitive",
-        "resolved": "3.2.1",
-        "contentHash": "soZuThF5CwB/ZZ2HY/ivdinyM/6MvmjsHTG0vNw3fRd1ZKcmLzfxVb3fB6R3G5yoaN4Bh+aWzFGjOvYO05OzkA==",
+        "resolved": "3.2.0",
+        "contentHash": "89MWZ5gXT6VJ/qe9OCASBsaenFr00UCccFbkJxzkOsrAkoFjJSDJ+5xqXpZUxTBGJ4Gw91bJ4bwW9Fag0b8xhw==",
         "dependencies": {
-          "xunit.v3.common": "[3.2.1]"
+          "xunit.v3.common": "[3.2.0]"
         }
       },
       "YamlDotNet": {
@@ -1455,7 +1455,7 @@
       "Reaparr.Application": {
         "type": "Project",
         "dependencies": {
-          "Downloader": "[4.1.1, )",
+          "Downloader": "[5.1.0, )",
           "FastEndpoints": "[7.1.1, )",
           "FastEndpoints.Security": "[7.1.1, )",
           "FastEndpoints.Swagger": "[7.1.1, )",
@@ -1518,8 +1518,7 @@
           "Reaparr.AppHost": "[1.0.0, )",
           "Shouldly": "[4.3.0, )",
           "TUnit": "[1.19.74, )",
-          "TestableIO.System.IO.Abstractions.TestingHelpers": "[22.1.0, )",
-          "xunit.v3.extensibility.core": "[3.2.1, )"
+          "TestableIO.System.IO.Abstractions.TestingHelpers": "[22.1.0, )"
         }
       },
       "Reaparr.Data": {

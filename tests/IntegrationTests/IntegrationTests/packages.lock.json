@@ -114,10 +114,10 @@
       },
       "Downloader": {
         "type": "Transitive",
-        "resolved": "4.1.1",
-        "contentHash": "SRiN6eDLqI+0EdmzmYbYm+wwPrHPOlyQpXKDYTwal1LAn3MqKYcOn36e45UGh65axLE2R9F+p/37PFt09Tm73A==",
+        "resolved": "5.1.0",
+        "contentHash": "lUsiygfKkPgLx4oFy/dWlKrWOjpg3A/VaiSAoX8f+WiwldoQGi+JBeOgc60ep6qWeSD5FYyrUl7CYvdR1vUt3w==",
         "dependencies": {
-          "Microsoft.Extensions.Logging.Abstractions": "10.0.2"
+          "Microsoft.Extensions.Logging.Abstractions": "10.0.3"
         }
       },
       "EFCore.BulkExtensions.Core": {
@@ -602,8 +602,8 @@
       },
       "Microsoft.Extensions.DependencyInjection.Abstractions": {
         "type": "Transitive",
-        "resolved": "10.0.2",
-        "contentHash": "zOIurr59+kUf9vNcsUkCvKWZv+fPosUZXURZesYkJCvl0EzTc9F7maAO4Cd2WEV7ZJJ0AZrFQvuH6Npph9wdBw=="
+        "resolved": "10.0.3",
+        "contentHash": "bwGMrRcAMWx2s/RDgja97p27rxSz2pEQW0+rX5cWAUWVETVJ/eyxGfjAl8vuG5a+lckWmPIE+vcuaZNVB5YDdw=="
       },
       "Microsoft.Extensions.DependencyModel": {
         "type": "Transitive",
@@ -754,10 +754,10 @@
       },
       "Microsoft.Extensions.Logging.Abstractions": {
         "type": "Transitive",
-        "resolved": "10.0.2",
-        "contentHash": "RZkez/JjpnO+MZ6efKkSynN6ZztLpw3WbxNzjLCPBd97wWj1S9ZYPWi0nmT4kWBRa6atHsdM1ydGkUr8GudyDQ==",
+        "resolved": "10.0.3",
+        "contentHash": "lxl0WLk7ROgBFAsjcOYjQ8/DVK+VMszxGBzUhgtQmAsTNldLL5pk9NG/cWTsXHq0lUhUEAtZkEE7jOGOA8bGKQ==",
         "dependencies": {
-          "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.2"
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.3"
         }
       },
       "Microsoft.Extensions.Logging.Configuration": {
@@ -1455,7 +1455,7 @@
       "Reaparr.Application": {
         "type": "Project",
         "dependencies": {
-          "Downloader": "[4.1.1, )",
+          "Downloader": "[5.1.0, )",
           "FastEndpoints": "[7.1.1, )",
           "FastEndpoints.Security": "[7.1.1, )",
           "FastEndpoints.Swagger": "[7.1.1, )",

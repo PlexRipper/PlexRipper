@@ -1184,35 +1184,35 @@
       },
       "Quartz.Extensions.DependencyInjection": {
         "type": "Transitive",
-        "resolved": "3.15.1",
-        "contentHash": "LinB9z54aPn49C/DGM1v3OflX2nosrEo4zNz10vfYqcCndFJ8MNU9k++Ap9T7vxeZc355WStPDggpX60TYj1Lg==",
+        "resolved": "3.17.0",
+        "contentHash": "SYPUS3eOwbYFv9mXwAqz6R0G5SHztRg0qG7GzQBsncSEW7y2vRvcMxnaYM5bGP1fF4SFBMdYAj25gGgQvD+tOA==",
         "dependencies": {
-          "Microsoft.Extensions.Configuration.Abstractions": "9.0.0",
-          "Microsoft.Extensions.Options": "9.0.0",
-          "Quartz": "3.15.1"
+          "Microsoft.Extensions.Configuration.Abstractions": "10.0.0",
+          "Microsoft.Extensions.Options": "10.0.0",
+          "Quartz": "3.17.0"
         }
       },
       "Quartz.Extensions.Hosting": {
         "type": "Transitive",
-        "resolved": "3.15.1",
-        "contentHash": "svqLTEnVLb0VPUcNCd/khRqagwxM/yybUZ2sEOd7HFdPO+5dAOttL+ARtXSyBeaGWPWAaxY4VvU7pJTZzYhORw==",
+        "resolved": "3.17.0",
+        "contentHash": "6XgnbMBMsn5a7u2amkZVWKljVCQnO45SxDznpaRonXWolLNeX6Fx5t/73zigVshGLs3Q1A+NSv5z6oPTgv37sA==",
         "dependencies": {
-          "Microsoft.Extensions.Hosting.Abstractions": "9.0.0",
-          "Quartz.Extensions.DependencyInjection": "3.15.1"
+          "Microsoft.Extensions.Hosting.Abstractions": "10.0.0",
+          "Quartz.Extensions.DependencyInjection": "3.17.0"
         }
       },
       "Quartz.Serialization.SystemTextJson": {
         "type": "Transitive",
-        "resolved": "3.15.1",
-        "contentHash": "K0rDV0Ds8BSEHixhiSccZ9cvfqhEiHdy6R18i1w+XMTncaMJKWs7UoefWhRS4Isfr9PPmPpcwSOSmvfnYEyOwg==",
+        "resolved": "3.17.0",
+        "contentHash": "QfqaugT/yokgUGhSrWHIpEGBUOhs0KJKZEd0WLIEoOj7m/eourC495pz1S/vq3I8LN81k6n8Pn6oky8qr3P2iw==",
         "dependencies": {
-          "Quartz": "3.15.1"
+          "Quartz": "3.17.0"
         }
       },
       "Serilog": {
         "type": "Transitive",
-        "resolved": "4.3.0",
-        "contentHash": "+cDryFR0GRhsGOnZSKwaDzRRl4MupvJ42FhCE4zhQRVanX0Jpg6WuCBk59OVhVDPmab1bB+nRykAnykYELA9qQ=="
+        "resolved": "4.3.1",
+        "contentHash": "savYe7h5yRlkqBVOwP8cIRDOdqKiPmYCU4W87JH38sBmcKD5EBoXvQIw6bNEvZ/pTe1gsiye3VFCzBsoppGkXQ=="
       },
       "Serilog.AspNetCore": {
         "type": "Transitive",
@@ -1489,7 +1489,7 @@
           "Microsoft.AspNetCore.SignalR.Protocols.MessagePack": "[10.0.5, )",
           "Microsoft.AspNetCore.SpaServices.Extensions": "[10.0.5, )",
           "Microsoft.Extensions.Http.Polly": "[10.0.5, )",
-          "Quartz.Extensions.Hosting": "[3.15.1, )",
+          "Quartz.Extensions.Hosting": "[3.17.0, )",
           "Reaparr.Application": "[1.0.0, )",
           "Reaparr.BackgroundJobs": "[1.0.0, )",
           "Reaparr.Data": "[1.0.0, )",
@@ -1513,7 +1513,7 @@
           "FastEndpoints.Swagger": "[8.1.0, )",
           "Polly": "[8.6.5, )",
           "Polly.Core": "[8.6.6, )",
-          "Quartz.Serialization.SystemTextJson": "[3.15.1, )",
+          "Quartz.Serialization.SystemTextJson": "[3.17.0, )",
           "Reaparr.Application.Contracts": "[1.0.0, )",
           "Reaparr.BackgroundJobs.Contracts": "[1.0.0, )",
           "Reaparr.Data.Contracts": "[1.0.0, )",
@@ -1595,7 +1595,7 @@
       "Reaparr.Environment": {
         "type": "Project",
         "dependencies": {
-          "Serilog": "[4.3.0, )"
+          "Serilog": "[4.3.1, )"
         }
       },
       "Reaparr.External": {
@@ -1667,7 +1667,7 @@
           "FluentResults": "[4.0.0, )",
           "Microsoft.AspNetCore.Http.Abstractions": "[2.3.9, )",
           "Reaparr.Environment": "[1.0.0, )",
-          "Serilog": "[4.3.0, )",
+          "Serilog": "[4.3.1, )",
           "Serilog.Enrichers.Sensitive": "[2.1.0, )",
           "Serilog.Expressions": "[5.0.0, )",
           "Serilog.Sinks.Console": "[6.1.1, )",

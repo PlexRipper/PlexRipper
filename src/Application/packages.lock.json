@@ -74,11 +74,11 @@
       },
       "Quartz.Serialization.SystemTextJson": {
         "type": "Direct",
-        "requested": "[3.15.1, )",
-        "resolved": "3.15.1",
-        "contentHash": "K0rDV0Ds8BSEHixhiSccZ9cvfqhEiHdy6R18i1w+XMTncaMJKWs7UoefWhRS4Isfr9PPmPpcwSOSmvfnYEyOwg==",
+        "requested": "[3.17.0, )",
+        "resolved": "3.17.0",
+        "contentHash": "QfqaugT/yokgUGhSrWHIpEGBUOhs0KJKZEd0WLIEoOj7m/eourC495pz1S/vq3I8LN81k6n8Pn6oky8qr3P2iw==",
         "dependencies": {
-          "Quartz": "3.15.1"
+          "Quartz": "3.17.0"
         }
       },
       "Autofac": {
@@ -442,8 +442,8 @@
       },
       "Serilog": {
         "type": "Transitive",
-        "resolved": "4.3.0",
-        "contentHash": "+cDryFR0GRhsGOnZSKwaDzRRl4MupvJ42FhCE4zhQRVanX0Jpg6WuCBk59OVhVDPmab1bB+nRykAnykYELA9qQ=="
+        "resolved": "4.3.1",
+        "contentHash": "savYe7h5yRlkqBVOwP8cIRDOdqKiPmYCU4W87JH38sBmcKD5EBoXvQIw6bNEvZ/pTe1gsiye3VFCzBsoppGkXQ=="
       },
       "Serilog.Enrichers.Sensitive": {
         "type": "Transitive",
@@ -607,7 +607,7 @@
       "Reaparr.Environment": {
         "type": "Project",
         "dependencies": {
-          "Serilog": "[4.3.0, )"
+          "Serilog": "[4.3.1, )"
         }
       },
       "Reaparr.External.Contracts": {
@@ -646,7 +646,7 @@
           "Autofac": "[9.1.0, )",
           "FluentResults": "[4.0.0, )",
           "Reaparr.Environment": "[1.0.0, )",
-          "Serilog": "[4.3.0, )",
+          "Serilog": "[4.3.1, )",
           "Serilog.Enrichers.Sensitive": "[2.1.0, )",
           "Serilog.Expressions": "[5.0.0, )",
           "Serilog.Sinks.Console": "[6.1.1, )",

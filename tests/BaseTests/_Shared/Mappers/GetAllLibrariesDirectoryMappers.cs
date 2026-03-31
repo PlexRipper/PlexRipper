@@ -8,7 +8,7 @@ public static class LibrarySectionMappers
     public static LibrarySection ToPlexApiDTO(this PlexLibrary source) =>
         new()
         {
-            AllowSync = false,
+            AllowSync = LibrarySectionAllowSync.CreateBoolean(false),
             Art = string.Empty,
             Composite = string.Empty,
             Filters = false,

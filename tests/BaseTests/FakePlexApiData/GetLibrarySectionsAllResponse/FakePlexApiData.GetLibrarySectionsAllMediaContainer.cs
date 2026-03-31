@@ -155,7 +155,7 @@ public partial class FakePlexApiData
         .RuleFor(x => x.Channels, f => f.Random.Int(1, 8))
         .RuleFor(x => x.AudioChannelLayout, f => f.PickRandom("5.1", "7.1", "2.0"))
         .RuleFor(x => x.SamplingRate, f => f.PickRandom(44100, 48000, 96000))
-        .RuleFor(x => x.CanAutoSync, f => f.Random.Bool())
+        .RuleFor(x => x.CanAutoSync, f => CanAutoSync.CreateBoolean(f.Random.Bool()))
         .RuleFor(x => x.HearingImpaired, f => f.Random.Bool())
         .RuleFor(x => x.Dub, f => f.Random.Bool())
         .RuleFor(x => x.Title, f => f.Lorem.Word());

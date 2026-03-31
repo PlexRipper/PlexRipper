@@ -176,8 +176,8 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest>
 
     /// <summary>
     /// Resolves the root-level task key (Movie or TvShow) for each matched leaf file key.
-    /// Movie file parents are a direct FK; episode file parents require a 3-level traversal via
-    /// <see cref="IReaparrDbContextExtensions.GetAffectedRootDownloadTaskIdsAsync"/>.
+    /// Movie file parents are a direct FK; episode file parents are resolved per leaf via
+    /// <see cref="IReaparrDbContextExtensions.GetRootDownloadTaskKeyAsync"/>.
     /// </summary>
     private async Task<List<DownloadTaskKey>> GetRootKeysAsync(
         IReadOnlyCollection<DownloadTaskKey> leafKeys,
@@ -214,17 +214,15 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest>
 
         if (episodeFileIds.Count > 0)
         {
-            var tvShowRootIds = await _dbContext.GetAffectedRootDownloadTaskIdsAsync(episodeFileIds, ct);
-            var sample = leafKeys.First(k => k.Type is DownloadTaskType.EpisodeData or DownloadTaskType.EpisodePart);
-            rootKeys.AddRange(
-                tvShowRootIds.Select(id => new DownloadTaskKey
+            var episodeLeafKeys = leafKeys.Where(k => k.Type is DownloadTaskType.EpisodeData or DownloadTaskType.EpisodePart);
+            foreach (var episodeLeafKey in episodeLeafKeys)
+            {
+                var rootKey = await _dbContext.GetRootDownloadTaskKeyAsync(episodeLeafKey, ct);
+                if (rootKey is not null && rootKey.Type == DownloadTaskType.TvShow)
                 {
-                    Id = id,
-                    Type = DownloadTaskType.TvShow,
-                    PlexServerId = sample.PlexServerId,
-                    PlexLibraryId = sample.PlexLibraryId,
-                })
-            );
+                    rootKeys.Add(rootKey);
+                }
+            }
         }
 
         return rootKeys;

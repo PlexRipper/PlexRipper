@@ -202,7 +202,13 @@ public class ClearCompletedDownloadTasksByDownloadTaskIdEndpointUnitTests
             .Setup(x =>
                 x.Send(It.IsAny<ClearCompletedDownloadTasksByDownloadTaskKeyCommand>(), It.IsAny<CancellationToken>())
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(
+                (ClearCompletedDownloadTasksByDownloadTaskKeyCommand command, CancellationToken ct) =>
+                    new ClearCompletedDownloadTasksByDownloadTaskKeyCommandHandler(
+                        dbContext,
+                        Mock.Mock<ICommandExecutor>().Object
+                    ).ExecuteAsync(command, ct)
+            );
 
         // Act
         var ep = SetupEndpointUnitTest<ClearCompletedDownloadTasksByDownloadTaskIdEndpoint>();

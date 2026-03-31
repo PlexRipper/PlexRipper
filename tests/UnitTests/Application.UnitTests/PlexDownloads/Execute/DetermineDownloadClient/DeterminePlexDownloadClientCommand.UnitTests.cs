@@ -59,6 +59,7 @@ public class DeterminePlexDownloadClientCommandUnitTests : BaseUnitTest<Determin
         );
 
         var downloadTask = IDbContext.DownloadTaskMovieFile.First();
+        var expectedPath = $"/library/metadata/{downloadTask.PlexApiRatingKey}";
 
         Mock.Mock<IServerSettingsModule>()
             .Setup(x => x.GetAllowStreamDownloader(It.IsAny<string>()))
@@ -66,7 +67,14 @@ public class DeterminePlexDownloadClientCommandUnitTests : BaseUnitTest<Determin
             .Verifiable(Times.Once());
 
         Mock.Mock<ICommandExecutor>()
-            .Setup(x => x.Send(It.IsAny<GetDashTranscodeDecisionCommand>(), It.IsAny<CancellationToken>()))
+            .Setup(x =>
+                x.Send(
+                    It.Is<GetDashTranscodeDecisionCommand>(c =>
+                        c.PlexServerId == downloadTask.PlexServerId && c.DecisionRequest.MetaDataPath == expectedPath
+                    ),
+                    It.IsAny<CancellationToken>()
+                )
+            )
             .ReturnsAsync(
                 Result.Ok(
                     new GetDashTranscodeDecisionResult
@@ -87,11 +95,7 @@ public class DeterminePlexDownloadClientCommandUnitTests : BaseUnitTest<Determin
 
         // Act
         var result = await Sut.ExecuteAsync(
-            new DeterminePlexDownloadClientCommand(
-                downloadTask.PlexServerId,
-                downloadTask.ToKey(),
-                $"/library/metadata/{downloadTask.PlexApiRatingKey}"
-            ),
+            new DeterminePlexDownloadClientCommand(downloadTask.PlexServerId, downloadTask.ToKey(), expectedPath),
             CancellationToken
         );
 
@@ -116,6 +120,7 @@ public class DeterminePlexDownloadClientCommandUnitTests : BaseUnitTest<Determin
         );
 
         var downloadTask = IDbContext.DownloadTaskMovieFile.First();
+        var expectedPath = $"/library/metadata/{downloadTask.PlexApiRatingKey}";
 
         Mock.Mock<IServerSettingsModule>()
             .Setup(x => x.GetAllowStreamDownloader(It.IsAny<string>()))
@@ -123,7 +128,14 @@ public class DeterminePlexDownloadClientCommandUnitTests : BaseUnitTest<Determin
             .Verifiable(Times.Once());
 
         Mock.Mock<ICommandExecutor>()
-            .Setup(x => x.Send(It.IsAny<GetDashTranscodeDecisionCommand>(), It.IsAny<CancellationToken>()))
+            .Setup(x =>
+                x.Send(
+                    It.Is<GetDashTranscodeDecisionCommand>(c =>
+                        c.PlexServerId == downloadTask.PlexServerId && c.DecisionRequest.MetaDataPath == expectedPath
+                    ),
+                    It.IsAny<CancellationToken>()
+                )
+            )
             .ReturnsAsync(
                 Result.Ok(
                     new GetDashTranscodeDecisionResult
@@ -144,11 +156,7 @@ public class DeterminePlexDownloadClientCommandUnitTests : BaseUnitTest<Determin
 
         // Act
         var result = await Sut.ExecuteAsync(
-            new DeterminePlexDownloadClientCommand(
-                downloadTask.PlexServerId,
-                downloadTask.ToKey(),
-                $"/library/metadata/{downloadTask.PlexApiRatingKey}"
-            ),
+            new DeterminePlexDownloadClientCommand(downloadTask.PlexServerId, downloadTask.ToKey(), expectedPath),
             CancellationToken
         );
 

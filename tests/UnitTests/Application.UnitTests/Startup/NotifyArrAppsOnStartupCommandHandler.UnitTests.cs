@@ -130,7 +130,7 @@ public class NotifyArrAppsOnStartupCommandHandlerUnitTests : BaseUnitTest<Notify
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        // No IHttpClientFactory calls — strict mock would throw if CreateClient() were invoked
+        Mock.Mock<IHttpClientFactory>().Verify(x => x.CreateClient(It.IsAny<string>()), Times.Never());
     }
 
     [Test]
@@ -244,7 +244,7 @@ public class NotifyArrAppsOnStartupCommandHandlerUnitTests : BaseUnitTest<Notify
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        // No CreateClient(RadarrClientName) call — strict mock would throw if it were made
+        Mock.Mock<IHttpClientFactory>().Verify(x => x.CreateClient(HttpClientModule.RadarrClientName), Times.Never());
     }
 
     [Test]
@@ -260,7 +260,7 @@ public class NotifyArrAppsOnStartupCommandHandlerUnitTests : BaseUnitTest<Notify
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        // No CreateClient(SonarrClientName) call — strict mock would throw if it were made
+        Mock.Mock<IHttpClientFactory>().Verify(x => x.CreateClient(HttpClientModule.SonarrClientName), Times.Never());
     }
 
     private sealed class StatusCodeHandler(HttpStatusCode statusCode) : HttpMessageHandler

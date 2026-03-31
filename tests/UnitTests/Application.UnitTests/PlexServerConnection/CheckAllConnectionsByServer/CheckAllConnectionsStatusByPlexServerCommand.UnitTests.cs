@@ -143,6 +143,11 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
         // Assert
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
+        Mock.Mock<IEventPublisher>()
+            .Verify(
+                x => x.PublishAsync(It.IsAny<ServerOnlineStatusChangedNotification>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
     }
 
     [Test]
@@ -215,6 +220,11 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
         // Assert
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
+        Mock.Mock<IEventPublisher>()
+            .Verify(
+                x => x.PublishAsync(It.IsAny<ServerOnlineStatusChangedNotification>(), It.IsAny<CancellationToken>()),
+                Times.Never()
+            );
     }
 
     [Test]
@@ -271,6 +281,11 @@ public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
         // Assert
         result.ShouldNotBeNull();
         result.IsFailed.ShouldBeTrue();
+        Mock.Mock<IEventPublisher>()
+            .Verify(
+                x => x.PublishAsync(It.IsAny<ServerOnlineStatusChangedNotification>(), It.IsAny<CancellationToken>()),
+                Times.Never()
+            );
     }
 
     [Test]

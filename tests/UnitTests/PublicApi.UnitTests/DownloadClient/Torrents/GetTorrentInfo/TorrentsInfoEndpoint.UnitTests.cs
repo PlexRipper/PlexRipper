@@ -9,158 +9,95 @@ public class TorrentsInfoEndpointUnitTests : BaseUnitTest<TorrentsInfoEndpoint>
     {
         // Arrange — Radarr only sets CanBeRemoved when HasReachedSeedLimit() is true.
         // ratio_limit=0 with ratio=0 satisfies that check so DELETE is triggered after import.
-        await SetupDatabase(
-            5101,
-            config =>
-            {
-                config.PlexServerCount = 1;
-                config.MovieCount = 1;
-                config.MovieDownloadTasksCount = 1;
-            }
-        );
-
-        var dbContext = IDbContext;
-        var movieFile = await dbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
-        await dbContext
-            .DownloadTaskMovieFile.Where(x => x.Id == movieFile.Id)
-            .ExecuteUpdateAsync(
-                x =>
-                    x.SetProperty(p => p.HashId, "hash-completed")
-                        .SetProperty(p => p.DownloadStatus, DownloadStatus.Completed),
-                CancellationToken
-            );
-
-        var request = new TorrentsInfoEndpointRequest();
-
-        // Act
-        var endpoint = SetupEndpointUnitTest<TorrentsInfoEndpoint>();
-        await endpoint.HandleAsync(request, CancellationToken);
-        var response = endpoint.Response;
+        var result = await PrepareAndExecuteTorrentsInfoTest(5101, "hash-completed", DownloadStatus.Completed);
 
         // Assert
+        var response = result.Response;
         response.ShouldNotBeNull();
         response.Count.ShouldBe(1);
         response[0].RatioLimit.ShouldBe(0);
+        response[0].State.ShouldBe("pausedUP");
+        result.PersistedStatus.ShouldBe(DownloadStatus.Completed);
     }
 
     [Test]
     public async Task ShouldReturnRatioLimitZero_WhenStatusIsMoveFinished()
     {
-        await SetupDatabase(
+        var result = await PrepareAndExecuteTorrentsInfoTest(
             5102,
-            config =>
-            {
-                config.PlexServerCount = 1;
-                config.MovieCount = 1;
-                config.MovieDownloadTasksCount = 1;
-            }
+            "hash-move-finished",
+            DownloadStatus.MoveFinished
         );
 
-        var dbContext = IDbContext;
-        var movieFile = await dbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
-        await dbContext
-            .DownloadTaskMovieFile.Where(x => x.Id == movieFile.Id)
-            .ExecuteUpdateAsync(
-                x =>
-                    x.SetProperty(p => p.HashId, "hash-move-finished")
-                        .SetProperty(p => p.DownloadStatus, DownloadStatus.MoveFinished),
-                CancellationToken
-            );
-
-        var request = new TorrentsInfoEndpointRequest();
-
-        // Act
-        var endpoint = SetupEndpointUnitTest<TorrentsInfoEndpoint>();
-        await endpoint.HandleAsync(request, CancellationToken);
-        var response = endpoint.Response;
-
-        // Assert
+        var response = result.Response;
         response.ShouldNotBeNull();
         response.Count.ShouldBe(1);
         response[0].RatioLimit.ShouldBe(0);
+        response[0].State.ShouldBe("pausedUP");
+        result.PersistedStatus.ShouldBe(DownloadStatus.MoveFinished);
     }
 
     [Test]
     public async Task ShouldReturnRatioLimitZero_WhenStatusIsDownloadFinished()
     {
-        await SetupDatabase(
+        var result = await PrepareAndExecuteTorrentsInfoTest(
             5103,
-            config =>
-            {
-                config.PlexServerCount = 1;
-                config.MovieCount = 1;
-                config.MovieDownloadTasksCount = 1;
-            }
+            "hash-download-finished",
+            DownloadStatus.DownloadFinished
         );
 
-        var dbContext = IDbContext;
-        var movieFile = await dbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
-        await dbContext
-            .DownloadTaskMovieFile.Where(x => x.Id == movieFile.Id)
-            .ExecuteUpdateAsync(
-                x =>
-                    x.SetProperty(p => p.HashId, "hash-download-finished")
-                        .SetProperty(p => p.DownloadStatus, DownloadStatus.DownloadFinished),
-                CancellationToken
-            );
-
-        var request = new TorrentsInfoEndpointRequest();
-
-        // Act
-        var endpoint = SetupEndpointUnitTest<TorrentsInfoEndpoint>();
-        await endpoint.HandleAsync(request, CancellationToken);
-        var response = endpoint.Response;
-
-        // Assert
+        var response = result.Response;
         response.ShouldNotBeNull();
         response.Count.ShouldBe(1);
         response[0].RatioLimit.ShouldBe(0);
+        response[0].State.ShouldBe("pausedUP");
+        result.PersistedStatus.ShouldBe(DownloadStatus.DownloadFinished);
     }
 
     [Test]
     public async Task ShouldReturnRatioLimitMinusTwo_WhenStatusIsDownloading()
     {
         // Arrange — active downloads must not be flagged as ready for removal.
-        await SetupDatabase(
+        var result = await PrepareAndExecuteTorrentsInfoTest(
             5104,
-            config =>
-            {
-                config.PlexServerCount = 1;
-                config.MovieCount = 1;
-                config.MovieDownloadTasksCount = 1;
-            }
+            "hash-downloading",
+            DownloadStatus.Downloading
         );
 
-        var dbContext = IDbContext;
-        var movieFile = await dbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
-        await dbContext
-            .DownloadTaskMovieFile.Where(x => x.Id == movieFile.Id)
-            .ExecuteUpdateAsync(
-                x =>
-                    x.SetProperty(p => p.HashId, "hash-downloading")
-                        .SetProperty(p => p.DownloadStatus, DownloadStatus.Downloading),
-                CancellationToken
-            );
-
-        var request = new TorrentsInfoEndpointRequest();
-
-        // Act
-        var endpoint = SetupEndpointUnitTest<TorrentsInfoEndpoint>();
-        await endpoint.HandleAsync(request, CancellationToken);
-        var response = endpoint.Response;
-
-        // Assert
+        var response = result.Response;
         response.ShouldNotBeNull();
         response.Count.ShouldBe(1);
         response[0].RatioLimit.ShouldBe(-2);
+        response[0].State.ShouldBe("downloading");
+        result.PersistedStatus.ShouldBe(DownloadStatus.Downloading);
     }
 
     [Test]
     public async Task ShouldReturnRatioLimitMinusTwo_WhenStatusIsMovePaused()
     {
         // Arrange — a paused mid-move must not be flagged as ready for removal.
-        await SetupDatabase(
+        var result = await PrepareAndExecuteTorrentsInfoTest(
             5105,
+            "hash-move-paused",
+            DownloadStatus.MovePaused
+        );
+
+        var response = result.Response;
+        response.ShouldNotBeNull();
+        response.Count.ShouldBe(1);
+        response[0].RatioLimit.ShouldBe(-2);
+        response[0].State.ShouldBe("pausedUP");
+        result.PersistedStatus.ShouldBe(DownloadStatus.MovePaused);
+    }
+
+    private async Task<(List<QBittorrentTorrentInfo> Response, DownloadStatus PersistedStatus)> PrepareAndExecuteTorrentsInfoTest(
+        int seed,
+        string hash,
+        DownloadStatus downloadStatus
+    )
+    {
+        await SetupDatabase(
+            seed,
             config =>
             {
                 config.PlexServerCount = 1;
@@ -174,22 +111,18 @@ public class TorrentsInfoEndpointUnitTests : BaseUnitTest<TorrentsInfoEndpoint>
         await dbContext
             .DownloadTaskMovieFile.Where(x => x.Id == movieFile.Id)
             .ExecuteUpdateAsync(
-                x =>
-                    x.SetProperty(p => p.HashId, "hash-move-paused")
-                        .SetProperty(p => p.DownloadStatus, DownloadStatus.MovePaused),
+                x => x.SetProperty(p => p.HashId, hash).SetProperty(p => p.DownloadStatus, downloadStatus),
                 CancellationToken
             );
 
-        var request = new TorrentsInfoEndpointRequest();
-
-        // Act
         var endpoint = SetupEndpointUnitTest<TorrentsInfoEndpoint>();
-        await endpoint.HandleAsync(request, CancellationToken);
-        var response = endpoint.Response;
+        await endpoint.HandleAsync(new TorrentsInfoEndpointRequest(), CancellationToken);
 
-        // Assert
-        response.ShouldNotBeNull();
-        response.Count.ShouldBe(1);
-        response[0].RatioLimit.ShouldBe(-2);
+        var persistedStatus = await dbContext
+            .DownloadTaskMovieFile.Where(x => x.Id == movieFile.Id)
+            .Select(x => x.DownloadStatus)
+            .FirstAsync(CancellationToken);
+
+        return (endpoint.Response, persistedStatus);
     }
 }

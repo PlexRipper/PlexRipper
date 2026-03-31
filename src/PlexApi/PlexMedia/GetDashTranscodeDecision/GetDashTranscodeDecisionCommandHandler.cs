@@ -93,6 +93,7 @@ public class GetDashTranscodeDecisionCommandHandler
             PartDecision = "unknown",
             SuggestedClientType = PlexDownloadClientType.Dash,
         };
+        var partDecisions = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         foreach (var metadata in mediaContainer.Metadata ?? [])
         {
@@ -115,10 +116,7 @@ public class GetDashTranscodeDecisionCommandHandler
 
                 foreach (var part in media.Part ?? [])
                 {
-                    summary = summary with
-                    {
-                        PartDecision = part.Decision?.ToString()?.ToLowerInvariant() ?? "unknown",
-                    };
+                    partDecisions.Add(part.Decision?.ToString()?.ToLowerInvariant() ?? "unknown");
 
                     foreach (var stream in part.Stream ?? [])
                     {
@@ -149,6 +147,16 @@ public class GetDashTranscodeDecisionCommandHandler
                 }
             }
         }
+
+        summary = summary with
+        {
+            PartDecision = partDecisions.Count switch
+            {
+                0 => "unknown",
+                1 => partDecisions.First(),
+                _ => "conflict",
+            },
+        };
 
         _log.Here()
             .Information(

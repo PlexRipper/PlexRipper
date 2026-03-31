@@ -11,11 +11,8 @@ using DomainDownloadStatus = Reaparr.Domain.DownloadStatus;
 
 namespace Reaparr.Application.UnitTests;
 
-public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadClient>
+public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadClient>
 {
-    public PlexDownloadClientStartUnitTests()
-        : base() { }
-
     // -------------------------------------------------------------------------
     // Shared helpers
     // -------------------------------------------------------------------------

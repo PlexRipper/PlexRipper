@@ -55,7 +55,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
         _configuration.ParallelCount = downloadSegments;
         _configuration.ParallelDownload = downloadSegments > 1;
         _configuration.MaxTryAgainOnFailure = 3;
-        _configuration.HttpClientTimeout = (int)TimeSpan.FromSeconds(30).TotalMilliseconds;
+        _configuration.HttpClientTimeout = (int)TimeSpan.FromSeconds(100).TotalMilliseconds;
         _configuration.EnableAutoResumeDownload = false;
         _configuration.DownloadFileExtension = FilePathExtensions.TempDownloadFileSuffix;
 

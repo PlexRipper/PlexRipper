@@ -74,6 +74,9 @@ public static class HttpClientResultExtensions
 
         if (exception is TaskCanceledException taskCanceledException)
         {
+            if (cancellationToken.IsCancellationRequested)
+                return (Error)ResultExtensions.TaskIsCancelled(nameof(SendResultAsync)).Errors[0];
+
             return new ExceptionalError(taskCanceledException)
                 .WithMetadata(ResultExtensions.StatusCodeName, HttpCodes.Status408RequestTimeout)
                 .WithMetadata(ResultExtensions.ErrorMessageName, "Request Timeout");

@@ -9,7 +9,7 @@ public record TranscodeDecisionRequest
 
     public string MetaDataPath { get; init; }
 
-    public string ClientIdentifier { get; } = $"{Guid.NewGuid():N}"[..25];
+    public string ClientIdentifier { get; } = Guid.NewGuid().ToString("N")[..25];
 
     public string PlexSessionId { get; } = Guid.NewGuid().ToString("N")[..24];
 

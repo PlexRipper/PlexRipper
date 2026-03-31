@@ -144,7 +144,7 @@ public class DownloadJob : IJob
                 await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
                     downloadTask.ToKey(),
                     DownloadStatus.DownloadClientError,
-                    clientTypeResult.ToResult(),
+                    startResult,
                     CancellationToken.None
                 );
                 await _eventPublisher.PublishAsync(new SendNotificationResult(startResult), token);

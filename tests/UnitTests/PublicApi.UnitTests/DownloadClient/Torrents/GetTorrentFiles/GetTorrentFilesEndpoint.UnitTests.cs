@@ -33,6 +33,17 @@ public class GetTorrentFilesEndpointUnitTests : BaseUnitTest<GetTorrentFilesEndp
         endpoint.HttpContext.Response.StatusCode.ShouldBe(StatusCodes.Status200OK);
         response.ShouldNotBeNull();
         response.ShouldBeEmpty();
+
+        var movieRowsWithHash = await IDbContext.DownloadTaskMovieFile.CountAsync(
+            x => x.HashId == request.Hash,
+            CancellationToken
+        );
+        var episodeRowsWithHash = await IDbContext.DownloadTaskTvShowEpisodeFile.CountAsync(
+            x => x.HashId == request.Hash,
+            CancellationToken
+        );
+        movieRowsWithHash.ShouldBe(0);
+        episodeRowsWithHash.ShouldBe(0);
     }
 
     [Test]
@@ -76,6 +87,13 @@ public class GetTorrentFilesEndpointUnitTests : BaseUnitTest<GetTorrentFilesEndp
         response.ShouldNotBeNull();
         response.Count.ShouldBe(1);
         response.Single().Name.ShouldBe("only-file-name.mkv");
+
+        var persistedMovieFile = await IDbContext.DownloadTaskMovieFile.FirstAsync(x => x.Id == movieFile.Id, CancellationToken);
+        persistedMovieFile.FileName.ShouldBe("only-file-name.mkv");
+        persistedMovieFile.DirectoryMeta.DownloadRootPath.ShouldBe("");
+        persistedMovieFile.DirectoryMeta.MovieFolder.ShouldBe("Movie Folder");
+        persistedMovieFile.DirectoryMeta.TvShowFolder.ShouldBe("");
+        persistedMovieFile.DirectoryMeta.SeasonFolder.ShouldBe("");
     }
 
     [Test]
@@ -124,10 +142,19 @@ public class GetTorrentFilesEndpointUnitTests : BaseUnitTest<GetTorrentFilesEndp
         response.ShouldNotBeNull();
         response.Count.ShouldBe(1);
         response.Single().Name.ShouldBe("outside-root-file.mkv");
+
+        var persistedEpisodeFile = await IDbContext.DownloadTaskTvShowEpisodeFile.FirstAsync(
+            x => x.Id == episodeFile.Id,
+            CancellationToken
+        );
+        persistedEpisodeFile.FileName.ShouldBe("outside-root-file.mkv");
+        persistedEpisodeFile.DirectoryMeta.DownloadRootPath.ShouldBe("/downloads");
+        persistedEpisodeFile.DirectoryMeta.TvShowFolder.ShouldBe("/outside-root");
+        persistedEpisodeFile.DirectoryMeta.SeasonFolder.ShouldBe("Season 01");
     }
 
     [Test]
-    public void GetTorrentFilesRequestValidator_ShouldRequireHash()
+    public void ShouldRequireHash_WhenHashIsEmpty()
     {
         // Arrange
         var validator = new GetTorrentFilesRequestValidator();
@@ -141,7 +168,7 @@ public class GetTorrentFilesEndpointUnitTests : BaseUnitTest<GetTorrentFilesEndp
     }
 
     [Test]
-    public void GetTorrentFilesRequestValidator_ShouldPass_WhenHashIsProvided()
+    public void ShouldPass_WhenHashIsProvided()
     {
         // Arrange
         var validator = new GetTorrentFilesRequestValidator();

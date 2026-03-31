@@ -4,11 +4,11 @@
     "net10.0": {
       "Autofac.Extensions.DependencyInjection": {
         "type": "Direct",
-        "requested": "[10.0.0, )",
-        "resolved": "10.0.0",
-        "contentHash": "ZjR/onUlP7BzQ7VBBigQepWLAyAzi3VRGX3pP6sBqkPRiT61fsTZqbTpRUKxo30TMgbs1o3y6bpLbETix4SJog==",
+        "requested": "[11.0.0, )",
+        "resolved": "11.0.0",
+        "contentHash": "/FSrJyYEsptkV9O3L95dTAoGO6XGSQFDENWHFcHxW0oQIEvW56Mgr01qO53EIEIDDvMFqszBU+uIm9fzGARLPQ==",
         "dependencies": {
-          "Autofac": "8.1.0"
+          "Autofac": "9.1.0"
         }
       },
       "CSharpier.MsBuild": {
@@ -107,6 +107,16 @@
         "type": "Transitive",
         "resolved": "9.1.0",
         "contentHash": "onT/BcnnfWcQNXiuC7R/0h8ALQzRdsAI20gpB7nfrudXpFMXdVZKz1umdtHXDwjc/bmWEsrCBAxck3+Arnk15g=="
+      },
+      "Autofac.Extras.Quartz": {
+        "type": "Transitive",
+        "resolved": "11.0.0",
+        "contentHash": "EAojmP/iI02TnUndDLYa6MHS5OySVqntKA7owGRm8J/w4x2QwA/TTqOfSHWmtZ1BrZ17Bttko/JO6vssJAgQYQ==",
+        "dependencies": {
+          "Autofac": "[9.0.0, 10.0.0)",
+          "JetBrains.Annotations": "2025.2.4",
+          "Quartz": "[3.16.1, 4.0.0)"
+        }
       },
       "BencodeNET": {
         "type": "Transitive",
@@ -210,16 +220,6 @@
         "type": "Transitive",
         "resolved": "2.1.1",
         "contentHash": "lZGbSRXh3FLfrZ5wxsc4cVBHgHtYC3+GioIXZ/YtoUku71/QsFJ+RTaO1bgyq1GxCgedwmnIMcDLMYGsbt6DfQ=="
-      },
-      "Jason.Landbridge.Autofac.Extras.Quartz": {
-        "type": "Transitive",
-        "resolved": "9.0.3",
-        "contentHash": "cHljEEjvfNmWirTLBwteCZqr40pcSxOCWcqkmlM9Hg7ktZLrdhyD6Bz/XvOyGd3SO84g/p3HANiCM0zKd2HiLQ==",
-        "dependencies": {
-          "Autofac": "[8.0.0, 9.0.0]",
-          "JetBrains.Annotations": "2023.3.0",
-          "Quartz": "[3.8.1, 4.0.0]"
-        }
       },
       "JetBrains.Annotations": {
         "type": "Transitive",
@@ -565,8 +565,8 @@
       },
       "Quartz": {
         "type": "Transitive",
-        "resolved": "3.15.1",
-        "contentHash": "XIbhzUAKSm3xdl1ORLPnK7mc5XANP3cuvYQhCtuX/8888IN41e9OXJak4R9OlmAGRnyAMqHE40yojVa89NS1wg=="
+        "resolved": "3.17.0",
+        "contentHash": "Ko3I49Yz1DqlxWi+fXqdG0FYJlHyGnra86m9RSlhPjIoXy7ip8FxyYJ70HcHc5s3xije0QvX81qG2dlxLEI7hQ=="
       },
       "Quartz.Extensions.DependencyInjection": {
         "type": "Transitive",
@@ -770,11 +770,11 @@
       "Reaparr.Application": {
         "type": "Project",
         "dependencies": {
+          "Autofac.Extras.Quartz": "[11.0.0, )",
           "Downloader": "[5.1.0, )",
           "FastEndpoints": "[8.1.0, )",
           "FastEndpoints.Security": "[8.1.0, )",
           "FastEndpoints.Swagger": "[8.1.0, )",
-          "Jason.Landbridge.Autofac.Extras.Quartz": "[9.0.3, )",
           "Polly": "[8.6.5, )",
           "Polly.Core": "[8.6.5, )",
           "Quartz.Serialization.SystemTextJson": "[3.15.1, )",
@@ -795,15 +795,15 @@
       "Reaparr.Application.Contracts": {
         "type": "Project",
         "dependencies": {
-          "Quartz": "[3.15.1, )",
+          "Quartz": "[3.17.0, )",
           "Reaparr.Domain": "[1.0.0, )"
         }
       },
       "Reaparr.BackgroundJobs": {
         "type": "Project",
         "dependencies": {
-          "Jason.Landbridge.Autofac.Extras.Quartz": "[9.0.3, )",
-          "Quartz": "[3.15.1, )",
+          "Autofac.Extras.Quartz": "[11.0.0, )",
+          "Quartz": "[3.17.0, )",
           "Reaparr.Application.Contracts": "[1.0.0, )",
           "Reaparr.BackgroundJobs.Contracts": "[1.0.0, )",
           "Reaparr.Data.Contracts": "[1.0.0, )",
@@ -815,7 +815,7 @@
       "Reaparr.BackgroundJobs.Contracts": {
         "type": "Project",
         "dependencies": {
-          "Quartz": "[3.15.1, )",
+          "Quartz": "[3.17.0, )",
           "Reaparr.Domain": "[1.0.0, )"
         }
       },
@@ -823,7 +823,7 @@
         "type": "Project",
         "dependencies": {
           "AppAny.Quartz.EntityFrameworkCore.Migrations.SQLite": "[0.5.1, )",
-          "Autofac": "[9.0.0, )",
+          "Autofac": "[9.1.0, )",
           "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "[10.0.5, )",
           "Microsoft.EntityFrameworkCore.InMemory": "[10.0.5, )",
           "Microsoft.EntityFrameworkCore.Sqlite": "[10.0.5, )",
@@ -865,7 +865,7 @@
       "Reaparr.External": {
         "type": "Project",
         "dependencies": {
-          "Autofac": "[9.0.0, )",
+          "Autofac": "[9.1.0, )",
           "CliWrap": "[3.10.0, )",
           "Reaparr.Application.Contracts": "[1.0.0, )",
           "Reaparr.External.Contracts": "[1.0.0, )",
@@ -882,8 +882,8 @@
       "Reaparr.FileSystem": {
         "type": "Project",
         "dependencies": {
-          "Autofac": "[9.0.0, )",
-          "Jason.Landbridge.Autofac.Extras.Quartz": "[9.0.3, )",
+          "Autofac": "[9.1.0, )",
+          "Autofac.Extras.Quartz": "[11.0.0, )",
           "Reaparr.Application.Contracts": "[1.0.0, )",
           "Reaparr.Data.Contracts": "[1.0.0, )",
           "Reaparr.FileSystem.Contracts": "[1.0.0, )",
@@ -927,7 +927,7 @@
       "Reaparr.Logging": {
         "type": "Project",
         "dependencies": {
-          "Autofac": "[9.0.0, )",
+          "Autofac": "[9.1.0, )",
           "FluentResults": "[4.0.0, )",
           "Reaparr.Environment": "[1.0.0, )",
           "Serilog": "[4.3.0, )",

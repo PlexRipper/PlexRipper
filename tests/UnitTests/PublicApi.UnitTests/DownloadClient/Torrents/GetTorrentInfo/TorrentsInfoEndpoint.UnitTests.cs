@@ -24,11 +24,7 @@ public class TorrentsInfoEndpointUnitTests : BaseUnitTest<TorrentsInfoEndpoint>
     [Test]
     public async Task ShouldReturnRatioLimitZero_WhenStatusIsMoveFinished()
     {
-        var result = await PrepareAndExecuteTorrentsInfoTest(
-            5102,
-            "hash-move-finished",
-            DownloadStatus.MoveFinished
-        );
+        var result = await PrepareAndExecuteTorrentsInfoTest(5102, "hash-move-finished", DownloadStatus.MoveFinished);
 
         var response = result.Response;
         response.ShouldNotBeNull();
@@ -61,11 +57,7 @@ public class TorrentsInfoEndpointUnitTests : BaseUnitTest<TorrentsInfoEndpoint>
     public async Task ShouldReturnRatioLimitMinusTwo_WhenStatusIsDownloading()
     {
         // Arrange — active downloads must not be flagged as ready for removal.
-        var result = await PrepareAndExecuteTorrentsInfoTest(
-            5104,
-            "hash-downloading",
-            DownloadStatus.Downloading
-        );
+        var result = await PrepareAndExecuteTorrentsInfoTest(5104, "hash-downloading", DownloadStatus.Downloading);
 
         var response = result.Response;
         response.ShouldNotBeNull();
@@ -80,11 +72,7 @@ public class TorrentsInfoEndpointUnitTests : BaseUnitTest<TorrentsInfoEndpoint>
     public async Task ShouldReturnRatioLimitMinusTwo_WhenStatusIsMovePaused()
     {
         // Arrange — a paused mid-move must not be flagged as ready for removal.
-        var result = await PrepareAndExecuteTorrentsInfoTest(
-            5105,
-            "hash-move-paused",
-            DownloadStatus.MovePaused
-        );
+        var result = await PrepareAndExecuteTorrentsInfoTest(5105, "hash-move-paused", DownloadStatus.MovePaused);
 
         var response = result.Response;
         response.ShouldNotBeNull();
@@ -95,11 +83,11 @@ public class TorrentsInfoEndpointUnitTests : BaseUnitTest<TorrentsInfoEndpoint>
         result.PersistedHash.ShouldBe("hash-move-paused");
     }
 
-    private async Task<(List<QBittorrentTorrentInfo> Response, DownloadStatus PersistedStatus, string? PersistedHash)> PrepareAndExecuteTorrentsInfoTest(
-        int seed,
-        string hash,
-        DownloadStatus downloadStatus
-    )
+    private async Task<(
+        List<QBittorrentTorrentInfo> Response,
+        DownloadStatus PersistedStatus,
+        string? PersistedHash
+    )> PrepareAndExecuteTorrentsInfoTest(int seed, string hash, DownloadStatus downloadStatus)
     {
         await SetupDatabase(
             seed,

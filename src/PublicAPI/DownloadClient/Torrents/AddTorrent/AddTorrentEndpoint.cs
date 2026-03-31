@@ -238,5 +238,4 @@ public class AddTorrentEndpoint : Endpoint<AddTorrentEndpointRequest>
         else
             _log.Debug("Set HashId on {Count} DownloadTasks for torrent with MetaData: {MetaData}", count, metaData);
     }
-
 }

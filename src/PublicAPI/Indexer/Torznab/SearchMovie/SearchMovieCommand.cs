@@ -34,7 +34,6 @@ public class SearchMovieCommandValidator : AbstractValidator<SearchMovieCommand>
         RuleFor(x => x.Offset).GreaterThanOrEqualTo(0);
 
         RuleFor(x => x.TMDB_ID).GreaterThanOrEqualTo(0);
-
     }
 }
 

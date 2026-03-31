@@ -65,7 +65,8 @@ public class LibrarySyncProgressStore : ILibrarySyncProgressStore
         }
         else
         {
-            _log.Here().Warning("Unsupported PlexMediaType {PlexMediaType} for library {PlexLibraryId}", type, plexLibraryId);
+            _log.Here()
+                .Warning("Unsupported PlexMediaType {PlexMediaType} for library {PlexLibraryId}", type, plexLibraryId);
             return;
         }
 

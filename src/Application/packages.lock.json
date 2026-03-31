@@ -2,6 +2,17 @@
   "version": 1,
   "dependencies": {
     "net10.0": {
+      "Autofac.Extras.Quartz": {
+        "type": "Direct",
+        "requested": "[11.0.0, )",
+        "resolved": "11.0.0",
+        "contentHash": "EAojmP/iI02TnUndDLYa6MHS5OySVqntKA7owGRm8J/w4x2QwA/TTqOfSHWmtZ1BrZ17Bttko/JO6vssJAgQYQ==",
+        "dependencies": {
+          "Autofac": "[9.0.0, 10.0.0)",
+          "JetBrains.Annotations": "2025.2.4",
+          "Quartz": "[3.16.1, 4.0.0)"
+        }
+      },
       "CSharpier.MsBuild": {
         "type": "Direct",
         "requested": "[1.2.6, )",
@@ -46,17 +57,6 @@
           "NSwag.AspNetCore": "14.6.3"
         }
       },
-      "Jason.Landbridge.Autofac.Extras.Quartz": {
-        "type": "Direct",
-        "requested": "[9.0.3, )",
-        "resolved": "9.0.3",
-        "contentHash": "cHljEEjvfNmWirTLBwteCZqr40pcSxOCWcqkmlM9Hg7ktZLrdhyD6Bz/XvOyGd3SO84g/p3HANiCM0zKd2HiLQ==",
-        "dependencies": {
-          "Autofac": "[8.0.0, 9.0.0]",
-          "JetBrains.Annotations": "2023.3.0",
-          "Quartz": "[3.8.1, 4.0.0]"
-        }
-      },
       "Polly": {
         "type": "Direct",
         "requested": "[8.6.5, )",
@@ -80,6 +80,11 @@
         "dependencies": {
           "Quartz": "3.15.1"
         }
+      },
+      "Autofac": {
+        "type": "Transitive",
+        "resolved": "9.1.0",
+        "contentHash": "onT/BcnnfWcQNXiuC7R/0h8ALQzRdsAI20gpB7nfrudXpFMXdVZKz1umdtHXDwjc/bmWEsrCBAxck3+Arnk15g=="
       },
       "ByteSize": {
         "type": "Transitive",
@@ -432,8 +437,8 @@
       },
       "Quartz": {
         "type": "Transitive",
-        "resolved": "3.15.1",
-        "contentHash": "XIbhzUAKSm3xdl1ORLPnK7mc5XANP3cuvYQhCtuX/8888IN41e9OXJak4R9OlmAGRnyAMqHE40yojVa89NS1wg=="
+        "resolved": "3.17.0",
+        "contentHash": "Ko3I49Yz1DqlxWi+fXqdG0FYJlHyGnra86m9RSlhPjIoXy7ip8FxyYJ70HcHc5s3xije0QvX81qG2dlxLEI7hQ=="
       },
       "Serilog": {
         "type": "Transitive",
@@ -565,14 +570,14 @@
       "Reaparr.Application.Contracts": {
         "type": "Project",
         "dependencies": {
-          "Quartz": "[3.15.1, )",
+          "Quartz": "[3.17.0, )",
           "Reaparr.Domain": "[1.0.0, )"
         }
       },
       "Reaparr.BackgroundJobs.Contracts": {
         "type": "Project",
         "dependencies": {
-          "Quartz": "[3.15.1, )",
+          "Quartz": "[3.17.0, )",
           "Reaparr.Domain": "[1.0.0, )"
         }
       },
@@ -638,7 +643,7 @@
       "Reaparr.Logging": {
         "type": "Project",
         "dependencies": {
-          "Autofac": "[9.0.0, )",
+          "Autofac": "[9.1.0, )",
           "FluentResults": "[4.0.0, )",
           "Reaparr.Environment": "[1.0.0, )",
           "Serilog": "[4.3.0, )",

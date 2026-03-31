@@ -88,7 +88,10 @@ public class GetTorrentFilesEndpointUnitTests : BaseUnitTest<GetTorrentFilesEndp
         response.Count.ShouldBe(1);
         response.Single().Name.ShouldBe("only-file-name.mkv");
 
-        var persistedMovieFile = await IDbContext.DownloadTaskMovieFile.FirstAsync(x => x.Id == movieFile.Id, CancellationToken);
+        var persistedMovieFile = await IDbContext.DownloadTaskMovieFile.FirstAsync(
+            x => x.Id == movieFile.Id,
+            CancellationToken
+        );
         persistedMovieFile.FileName.ShouldBe("only-file-name.mkv");
         persistedMovieFile.DirectoryMeta.DownloadRootPath.ShouldBe("");
         persistedMovieFile.DirectoryMeta.MovieFolder.ShouldBe("Movie Folder");

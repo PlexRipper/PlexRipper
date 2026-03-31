@@ -24,8 +24,7 @@ public sealed class TorrentsInfoEndpointRequestValidator : Validator<TorrentsInf
             .Must(hashes =>
                 string.IsNullOrWhiteSpace(hashes)
                 || string.Equals(hashes, "all", StringComparison.OrdinalIgnoreCase)
-                || hashes.Split('|', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Length
-                    > 0
+                || hashes.Split('|', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Length > 0
             )
             .WithMessage("Hashes must be 'all' or a pipe-delimited list of hashes.");
     }
@@ -184,7 +183,8 @@ public sealed class TorrentsInfoEndpoint : Endpoint<TorrentsInfoEndpointRequest,
         // no global ratio/time limits configured, HasReachedSeedLimit() always returns false and
         // RemoveItem (DELETE) is never called, leaving the file stranded in the downloads folder.
         // Setting ratio_limit=0 with ratio=0 satisfies the (ratio_limit - ratio <= 0.001) check.
-        var isReadyForRemoval = file.DownloadStatus
+        var isReadyForRemoval =
+            file.DownloadStatus
             is DownloadStatus.Completed
                 or DownloadStatus.MoveFinished
                 or DownloadStatus.DownloadFinished;

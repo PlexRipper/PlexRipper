@@ -66,12 +66,19 @@ public class DeterminePlexDownloadClientCommandUnitTests : BaseUnitTest<Determin
             .Verifiable(Times.Once());
 
         Mock.Mock<ICommandExecutor>()
-            .Setup(x => x.Send(It.IsAny<GetTranscodeUrlCommand>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.Send(It.IsAny<GetDashTranscodeDecisionCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(
                 Result.Ok(
-                    new GetTranscodeUrlResult
+                    new GetDashTranscodeDecisionResult
                     {
-                        DownloadUrl = string.Empty,
+                        GeneralDecisionCode = "1000",
+                        GeneralDecisionText = "Direct play",
+                        TranscodeDecisionCode = "1000",
+                        TranscodeDecisionText = "Direct play",
+                        VideoDecision = "copy",
+                        AudioDecision = "copy",
+                        PartDecision = "directplay",
+                        TranscodedQuality = VideoQuality.FullHD,
                         SuggestedClientType = PlexDownloadClientType.Direct,
                     }
                 )
@@ -116,12 +123,19 @@ public class DeterminePlexDownloadClientCommandUnitTests : BaseUnitTest<Determin
             .Verifiable(Times.Once());
 
         Mock.Mock<ICommandExecutor>()
-            .Setup(x => x.Send(It.IsAny<GetTranscodeUrlCommand>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.Send(It.IsAny<GetDashTranscodeDecisionCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(
                 Result.Ok(
-                    new GetTranscodeUrlResult
+                    new GetDashTranscodeDecisionResult
                     {
-                        DownloadUrl = "https://plex.example/video/:/transcode/universal/start.mpd",
+                        GeneralDecisionCode = "1000",
+                        GeneralDecisionText = "Transcode",
+                        TranscodeDecisionCode = "1001",
+                        TranscodeDecisionText = "Transcode required",
+                        VideoDecision = "transcode",
+                        AudioDecision = "copy",
+                        PartDecision = "transcode",
+                        TranscodedQuality = VideoQuality.HD,
                         SuggestedClientType = PlexDownloadClientType.Dash,
                     }
                 )

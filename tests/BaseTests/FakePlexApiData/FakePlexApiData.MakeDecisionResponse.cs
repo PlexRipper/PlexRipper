@@ -18,7 +18,7 @@ public sealed class MakeDecisionMediaContainerConfig
     public int? MediaHeight { get; set; } = 1080;
     public bool IncludeAudioStream { get; set; } = true;
     public string PartDecision { get; set; } = "transcode";
-    public MediaContainerWithDecisionDecision AudioDecision { get; set; } = MediaContainerWithDecisionDecision.Copy;
+    public MediaContainerWithDecisionDecision? AudioDecision { get; set; } = MediaContainerWithDecisionDecision.Copy;
     public List<MakeDecisionVideoStreamConfig> VideoStreams { get; } =
     [
         new()
@@ -38,7 +38,7 @@ public sealed class MakeDecisionVideoStreamConfig
     public string? ExtendedDisplayTitle { get; set; }
     public int? Width { get; set; }
     public int? Height { get; set; }
-    public MediaContainerWithDecisionDecision Decision { get; set; } = MediaContainerWithDecisionDecision.Copy;
+    public MediaContainerWithDecisionDecision? Decision { get; set; } = MediaContainerWithDecisionDecision.Copy;
 }
 
 public partial class FakePlexApiData
@@ -84,7 +84,7 @@ public partial class FakePlexApiData
                     id = currentId,
                     key = $"/library/streams/{currentId}",
                     streamType = 1,
-                    decision = x.Decision.ToString().ToLowerInvariant(),
+                    decision = x.Decision?.ToString()?.ToLowerInvariant(),
                     width = x.Width,
                     height = x.Height,
                 };
@@ -103,7 +103,7 @@ public partial class FakePlexApiData
                     id = currentId,
                     key = $"/library/streams/{currentId}",
                     streamType = 2,
-                    decision = config.AudioDecision.ToString().ToLowerInvariant(),
+                    decision = config.AudioDecision?.ToString()?.ToLowerInvariant(),
                 }
             );
         }
@@ -189,6 +189,33 @@ public partial class FakePlexApiData
                     Width = 720,
                     Height = 404,
                     Decision = MediaContainerWithDecisionDecision.Transcode,
+                }
+            );
+        });
+
+    public static MediaContainerWithDecision GetMakeDecisionDirectPlayMediaContainer() =>
+        GetMakeDecisionMediaContainer(config =>
+        {
+            config.GeneralDecisionCode = 1000;
+            config.GeneralDecisionText = "Direct play OK.";
+            config.DirectPlayDecisionCode = 1000;
+            config.DirectPlayDecisionText = "Direct play OK.";
+            config.TranscodeDecisionCode = 1000;
+            config.TranscodeDecisionText = "Direct play OK.";
+            config.PartDecision = "directplay";
+            config.MediaVideoResolution = "sd";
+            config.MediaWidth = 720;
+            config.MediaHeight = 384;
+            config.AudioDecision = null;
+            config.VideoStreams.Clear();
+            config.VideoStreams.Add(
+                new MakeDecisionVideoStreamConfig
+                {
+                    DisplayTitle = "SD",
+                    ExtendedDisplayTitle = "SD (MPEG4)",
+                    Width = 720,
+                    Height = 384,
+                    Decision = null,
                 }
             );
         });

@@ -81,7 +81,6 @@ public class GetDashTranscodeDecisionCommandHandler
         if (mediaContainer is null)
             return Result.Fail("Invalid decision response: missing MediaContainer").LogError();
 
-        _log.Here().Debug("{@MediaContainer}", mediaContainer.ToString());
         var summary = new GetDashTranscodeDecisionResult
         {
             GeneralDecisionCode = mediaContainer.GeneralDecisionCode?.ToString() ?? "unknown",

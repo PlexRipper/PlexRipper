@@ -112,4 +112,151 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
                 Times.Once()
             );
     }
+
+    [Test]
+    public async Task ShouldNotSetAnyStatus_WhenClientStartFailsAfterClientSetSourceUnavailable()
+    {
+        // Arrange
+        await SetupDatabase(
+            39396,
+            config =>
+            {
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var testDownloadTask = IDbContext.DownloadTaskMovieFile.First();
+        testDownloadTask.DownloadStatus = DownloadStatus.SourceUnavailable;
+        await IDbContext.SaveChangesAsync(CancellationToken);
+
+        Mock.Mock<IDownloadManagerSettings>().Setup(x => x.DownloadSegments).Returns(4);
+
+        IDictionary<string, object> dict = new Dictionary<string, object>
+        {
+            { DownloadJob.DownloadTaskIdParameter, JsonSerializer.Serialize(testDownloadTask.ToKey()) },
+        };
+
+        Mock.Mock<IJobExecutionContext>().SetupGet(x => x.JobDetail.JobDataMap).Returns(new JobDataMap(dict));
+        Mock.Mock<IJobExecutionContext>().SetupGet(x => x.CancellationToken).Returns(CancellationToken);
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<DeterminePlexDownloadClientCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok(PlexDownloadClientType.Direct));
+        Mock.Mock<IEventPublisher>()
+            .Setup(x => x.PublishAsync(It.IsAny<SendNotificationResult>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        var startResult = Result.Fail("Source is unavailable").Add404NotFoundError();
+        var downloadClientMock = new Mock<IPlexDownloadClient>();
+        downloadClientMock
+            .Setup(x => x.Start(It.IsAny<DownloadTaskKey>(), CancellationToken))
+            .ReturnsAsync(startResult);
+        downloadClientMock.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask);
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadStatus>(),
+                    It.IsAny<Result>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok());
+
+        var downloadClientIndexMock = new Mock<IIndex<PlexDownloadClientType, IPlexDownloadClient>>();
+        downloadClientIndexMock.Setup(x => x[PlexDownloadClientType.Direct]).Returns(downloadClientMock.Object);
+
+        var sut = Mock.Create<DownloadJob>(
+            new NamedParameter("plexDownloadClientFactory", downloadClientIndexMock.Object)
+        );
+
+        // Act
+        await sut.Execute(Mock.Create<IJobExecutionContext>());
+
+        // Assert
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        It.IsAny<DownloadStatus>(),
+                        It.IsAny<Result>(),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Never()
+            );
+    }
+
+    [Test]
+    public async Task ShouldNotSetAnyStatus_WhenClientStartFailsAndNoSpecificStatusWasSet()
+    {
+        // Arrange
+        await SetupDatabase(
+            39397,
+            config =>
+            {
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var testDownloadTask = IDbContext.DownloadTaskMovieFile.First();
+        Mock.Mock<IDownloadManagerSettings>().Setup(x => x.DownloadSegments).Returns(4);
+
+        IDictionary<string, object> dict = new Dictionary<string, object>
+        {
+            { DownloadJob.DownloadTaskIdParameter, JsonSerializer.Serialize(testDownloadTask.ToKey()) },
+        };
+
+        Mock.Mock<IJobExecutionContext>().SetupGet(x => x.JobDetail.JobDataMap).Returns(new JobDataMap(dict));
+        Mock.Mock<IJobExecutionContext>().SetupGet(x => x.CancellationToken).Returns(CancellationToken);
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<DeterminePlexDownloadClientCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok(PlexDownloadClientType.Direct));
+        Mock.Mock<IEventPublisher>()
+            .Setup(x => x.PublishAsync(It.IsAny<SendNotificationResult>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        var startResult = Result.Fail("Client failed to start");
+        var downloadClientMock = new Mock<IPlexDownloadClient>();
+        downloadClientMock
+            .Setup(x => x.Start(It.IsAny<DownloadTaskKey>(), CancellationToken))
+            .ReturnsAsync(startResult);
+        downloadClientMock.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask);
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadStatus>(),
+                    It.IsAny<Result>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok());
+
+        var downloadClientIndexMock = new Mock<IIndex<PlexDownloadClientType, IPlexDownloadClient>>();
+        downloadClientIndexMock.Setup(x => x[PlexDownloadClientType.Direct]).Returns(downloadClientMock.Object);
+
+        var sut = Mock.Create<DownloadJob>(
+            new NamedParameter("plexDownloadClientFactory", downloadClientIndexMock.Object)
+        );
+
+        // Act
+        await sut.Execute(Mock.Create<IJobExecutionContext>());
+
+        // Assert
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        It.IsAny<DownloadStatus>(),
+                        It.IsAny<Result>(),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Never()
+            );
+    }
 }

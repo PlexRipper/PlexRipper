@@ -139,12 +139,6 @@ public class DownloadJob : IJob
             }
             else if (startResult.IsFailed)
             {
-                await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
-                    downloadTask.ToKey(),
-                    DownloadStatus.DownloadClientError,
-                    startResult,
-                    CancellationToken.None
-                );
                 await _eventPublisher.PublishAsync(new SendNotificationResult(startResult), token);
             }
         }

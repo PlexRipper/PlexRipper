@@ -410,6 +410,109 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
     }
 
     [Test]
+    public async Task ShouldSetSourceUnavailableStatus_WhenDashCompletesWithNotFoundError()
+    {
+        await SetupDatabase(
+            12010,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var dbContext = IDbContext;
+        var downloadTask = await dbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+        var serverMachineIdentifier = await dbContext.GetPlexServerMachineIdentifierById(
+            downloadTask.PlexServerId,
+            CancellationToken
+        );
+
+        SetupSpeedLimit(serverMachineIdentifier, 0);
+        SetupCommandExecutor();
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadStatus>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadStatus>(),
+                    It.IsAny<Result>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok());
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnProgressUpdated(
+                    It.IsAny<DownloadTaskKey>(),
+                    It.IsAny<DownloadTaskProgress>(),
+                    It.IsAny<DirectDownloadSnapshot?>()
+                )
+            )
+            .Returns(Result.Ok());
+        Mock.Mock<INotificationHubService>()
+            .Setup(x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        var progressSubject = new Subject<DashDownloadProgress>();
+        var outputSubject = new Subject<string>();
+        var completionSubject = new Subject<DashDownloadCompletedEventArgs>();
+
+        var notFoundResult = Result.Fail("dash-mpd-cli failed with not found").Add404NotFoundError();
+
+        var dashWrapperMock = new Mock<IDashMpdCliWrapper>();
+        dashWrapperMock.Setup(x => x.Progress).Returns(progressSubject.AsObservable());
+        dashWrapperMock.Setup(x => x.StandardOutput).Returns(outputSubject.AsObservable());
+        dashWrapperMock.Setup(x => x.DownloadCompleted).Returns(completionSubject.AsObservable());
+        dashWrapperMock
+            .Setup(x => x.StartAsync(It.IsAny<DashMpdCliOptions>()))
+            .Returns(() =>
+            {
+                completionSubject.OnNext(new DashDownloadCompletedEventArgs(false, 1, notFoundResult));
+                return Task.FromResult(notFoundResult);
+            });
+        dashWrapperMock.Setup(x => x.StopAsync()).ReturnsAsync(Result.Ok());
+        dashWrapperMock.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask);
+
+        var sut = CreateSut(dashWrapperMock);
+        var result = await sut.Start(downloadTask.ToKey(), CancellationToken);
+
+        result.IsFailed.ShouldBeTrue();
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Verify(
+                x =>
+                    x.OnStatusChangedAsync(
+                        It.IsAny<DownloadTaskKey>(),
+                        DomainDownloadStatus.SourceUnavailable,
+                        It.IsAny<Result>(),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Once()
+            );
+        Mock.Mock<INotificationHubService>()
+            .Verify(
+                x => x.SendRefreshNotificationAsync(It.IsAny<RefreshDataType>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<ICommand<Result<GetTranscodeUrlResult>>>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
+    }
+
+    [Test]
     public async Task ShouldSetServerUnreachableStatus_WhenDashCompletesWithNetworkTimeoutError()
     {
         await SetupDatabase(

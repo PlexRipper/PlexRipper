@@ -166,4 +166,49 @@ public class DeterminePlexDownloadClientCommandUnitTests : BaseUnitTest<Determin
         Mock.Mock<IServerSettingsModule>().Verify();
         Mock.Mock<ICommandExecutor>().Verify();
     }
+
+    [Test]
+    public async Task ShouldReturnFailure_WhenTranscodeDecisionFails()
+    {
+        // Arrange
+        await SetupDatabase(
+            91104,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.MovieDownloadTasksCount = 1;
+            }
+        );
+
+        var downloadTask = IDbContext.DownloadTaskMovieFile.First();
+        var expectedPath = $"/library/metadata/{downloadTask.PlexApiRatingKey}";
+
+        Mock.Mock<IServerSettingsModule>()
+            .Setup(x => x.GetAllowStreamDownloader(It.IsAny<string>()))
+            .Returns(true)
+            .Verifiable(Times.Once());
+
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x =>
+                x.Send(
+                    It.Is<GetDashTranscodeDecisionCommand>(c =>
+                        c.PlexServerId == downloadTask.PlexServerId && c.DecisionRequest.MetaDataPath == expectedPath
+                    ),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Fail<GetDashTranscodeDecisionResult>("decision failed"))
+            .Verifiable(Times.Once());
+
+        // Act
+        var result = await Sut.ExecuteAsync(
+            new DeterminePlexDownloadClientCommand(downloadTask.PlexServerId, downloadTask.ToKey(), expectedPath),
+            CancellationToken
+        );
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+        Mock.Mock<IServerSettingsModule>().Verify();
+        Mock.Mock<ICommandExecutor>().Verify();
+    }
 }

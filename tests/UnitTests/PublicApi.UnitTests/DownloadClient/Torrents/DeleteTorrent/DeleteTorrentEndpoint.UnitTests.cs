@@ -65,6 +65,15 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest<DeleteTorrentEndpoint
                     ),
                 Times.Once
             );
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x =>
+                    x.Send(
+                        It.IsAny<ClearCompletedDownloadTasksByDownloadTaskKeyCommand>(),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Once
+            );
     }
 
     [Test]
@@ -359,6 +368,15 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest<DeleteTorrentEndpoint
                 x =>
                     x.Send(
                         It.Is<DeleteDownloadTaskFilesCommand>(cmd => cmd.Keys.Any(k => k.Id == completedTask.Id)),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Once
+            );
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x =>
+                    x.Send(
+                        It.IsAny<ClearCompletedDownloadTasksByDownloadTaskKeyCommand>(),
                         It.IsAny<CancellationToken>()
                     ),
                 Times.Once

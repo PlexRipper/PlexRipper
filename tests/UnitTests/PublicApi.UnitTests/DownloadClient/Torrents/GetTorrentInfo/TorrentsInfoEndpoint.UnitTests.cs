@@ -18,6 +18,7 @@ public class TorrentsInfoEndpointUnitTests : BaseUnitTest<TorrentsInfoEndpoint>
         response[0].RatioLimit.ShouldBe(0);
         response[0].State.ShouldBe("pausedUP");
         result.PersistedStatus.ShouldBe(DownloadStatus.Completed);
+        result.PersistedHash.ShouldBe("hash-completed");
     }
 
     [Test]
@@ -35,6 +36,7 @@ public class TorrentsInfoEndpointUnitTests : BaseUnitTest<TorrentsInfoEndpoint>
         response[0].RatioLimit.ShouldBe(0);
         response[0].State.ShouldBe("pausedUP");
         result.PersistedStatus.ShouldBe(DownloadStatus.MoveFinished);
+        result.PersistedHash.ShouldBe("hash-move-finished");
     }
 
     [Test]
@@ -52,6 +54,7 @@ public class TorrentsInfoEndpointUnitTests : BaseUnitTest<TorrentsInfoEndpoint>
         response[0].RatioLimit.ShouldBe(0);
         response[0].State.ShouldBe("pausedUP");
         result.PersistedStatus.ShouldBe(DownloadStatus.DownloadFinished);
+        result.PersistedHash.ShouldBe("hash-download-finished");
     }
 
     [Test]
@@ -70,6 +73,7 @@ public class TorrentsInfoEndpointUnitTests : BaseUnitTest<TorrentsInfoEndpoint>
         response[0].RatioLimit.ShouldBe(-2);
         response[0].State.ShouldBe("downloading");
         result.PersistedStatus.ShouldBe(DownloadStatus.Downloading);
+        result.PersistedHash.ShouldBe("hash-downloading");
     }
 
     [Test]
@@ -88,9 +92,10 @@ public class TorrentsInfoEndpointUnitTests : BaseUnitTest<TorrentsInfoEndpoint>
         response[0].RatioLimit.ShouldBe(-2);
         response[0].State.ShouldBe("pausedUP");
         result.PersistedStatus.ShouldBe(DownloadStatus.MovePaused);
+        result.PersistedHash.ShouldBe("hash-move-paused");
     }
 
-    private async Task<(List<QBittorrentTorrentInfo> Response, DownloadStatus PersistedStatus)> PrepareAndExecuteTorrentsInfoTest(
+    private async Task<(List<QBittorrentTorrentInfo> Response, DownloadStatus PersistedStatus, string? PersistedHash)> PrepareAndExecuteTorrentsInfoTest(
         int seed,
         string hash,
         DownloadStatus downloadStatus
@@ -118,11 +123,11 @@ public class TorrentsInfoEndpointUnitTests : BaseUnitTest<TorrentsInfoEndpoint>
         var endpoint = SetupEndpointUnitTest<TorrentsInfoEndpoint>();
         await endpoint.HandleAsync(new TorrentsInfoEndpointRequest(), CancellationToken);
 
-        var persistedStatus = await dbContext
+        var persistedRow = await dbContext
             .DownloadTaskMovieFile.Where(x => x.Id == movieFile.Id)
-            .Select(x => x.DownloadStatus)
+            .Select(x => new { x.DownloadStatus, x.HashId })
             .FirstAsync(CancellationToken);
 
-        return (endpoint.Response, persistedStatus);
+        return (endpoint.Response, persistedRow.DownloadStatus, persistedRow.HashId);
     }
 }

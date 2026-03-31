@@ -71,28 +71,22 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
         CancellationToken cancellationToken = default
     )
     {
-        if (newStatus is DownloadStatus.Deleted)
-        {
-            _progressByNodeId.TryRemove(key.Id, out _);
-            _scopeByNodeId.TryRemove(key.Id, out _);
-            _statusByNodeId.TryRemove(key.Id, out _);
-            _lastProgressLogByNodeId.TryRemove(key.Id, out _);
-            _seenProgressNodes.TryRemove(key.Id, out _);
-
-            var sequence = _sequenceByServer.AddOrUpdate(key.PlexServerId, 1, (_, current) => current + 1);
-            await _downloadHubService.SendDownloadPatchAsync(
-                key.PlexServerId,
-                sequence,
-                upserts: [],
-                deletedIds: [key.Id],
-                cancellationToken
-            );
-            return Result.Ok();
-        }
-
         var result = await Result.Try(async Task () =>
         {
             _statusByNodeId[key.Id] = newStatus;
+
+            if (newStatus is DownloadStatus.Deleted)
+            {
+                var sequence = _sequenceByServer.AddOrUpdate(key.PlexServerId, 1, (_, current) => current + 1);
+                await _downloadHubService.SendDownloadPatchAsync(
+                    key.PlexServerId,
+                    sequence,
+                    upserts: [],
+                    deletedIds: [key.Id],
+                    cancellationToken
+                );
+                return;
+            }
 
             using var dbContext = await _dbContextFactory.CreateAsync();
             var currentStatus = await dbContext.GetDownloadStatusAsync(key, cancellationToken);
@@ -168,7 +162,7 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
     {
         return Result.Try(() =>
         {
-            if (_statusByNodeId.GetValueOrDefault(key.Id) is DownloadStatus.Paused)
+            if (_statusByNodeId.GetValueOrDefault(key.Id) is DownloadStatus.Paused or DownloadStatus.Deleted)
                 return;
 
             var update = new BufferedProgressUpdate

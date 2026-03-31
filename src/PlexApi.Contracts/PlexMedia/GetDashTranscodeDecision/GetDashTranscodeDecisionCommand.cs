@@ -23,5 +23,5 @@ public record GetDashTranscodeDecisionResult
 
     public required VideoQuality TranscodedQuality { get; init; }
 
-    public required PlexDownloadClientType SuggestedClientType { get; set; }
+    public required PlexDownloadClientType SuggestedClientType { get; init; }
 }

@@ -6,7 +6,18 @@ namespace Reaparr.Application.UnitTests;
 public class DeleteDownloadTaskEndpointUnitTests : BaseUnitTest<DeleteDownloadTaskEndpoint>
 {
     public DeleteDownloadTaskEndpointUnitTests()
-        : base() { }
+        : base()
+    {
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    DownloadStatus.Deleted,
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok());
+    }
 
     [Test]
     public async Task ShouldDispatchDeleteCommand_WhenDownloadTaskIdIsGiven()

@@ -7,7 +7,18 @@ namespace Reaparr.Application.UnitTests;
 public class DeleteDownloadTasksByKeyCommandUnitTests : BaseUnitTest<DeleteDownloadTasksByKeyCommandHandler>
 {
     public DeleteDownloadTasksByKeyCommandUnitTests()
-        : base() { }
+        : base()
+    {
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    DownloadStatus.Deleted,
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok());
+    }
 
     [Test]
     public async Task ShouldDeleteMovieTask_WhenMovieKeyIsGiven()

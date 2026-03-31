@@ -113,7 +113,7 @@ public class NotifyArrAppsOnStartupCommandHandlerUnitTests : BaseUnitTest<Notify
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        var remaining = await IAuthDbContext.DownloadClientSessions.CountAsync(CancellationToken);
+        var remaining = await authContext.DownloadClientSessions.CountAsync(CancellationToken);
         remaining.ShouldBe(0);
     }
 

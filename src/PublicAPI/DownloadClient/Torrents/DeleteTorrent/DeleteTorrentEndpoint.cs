@@ -79,8 +79,6 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest>
             return;
         }
 
-        var rootKeys = await GetRootKeysAsync(allKeys, ct);
-
         var deleteFiles = req.DeleteFiles ?? true;
         var keysToDelete = new List<DownloadTaskKey>();
 
@@ -119,16 +117,6 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest>
             keysToDelete.AddRange(nonActiveKeys);
         }
 
-        if (rootKeys.Count > 0)
-        {
-            var clearResult = await _commandExecutor.Send(
-                new ClearCompletedDownloadTasksByDownloadTaskKeyCommand(rootKeys),
-                ct
-            );
-            if (clearResult.IsFailed)
-                _log.Here().Warning("Failed to clear completed download tasks: {Errors}", clearResult.Errors);
-        }
-
         if (keysToDelete.Count == 0)
         {
             _log.Here()
@@ -143,7 +131,22 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest>
 
         var deleteResult = await _commandExecutor.Send(new DeleteDownloadTasksByKeyCommand(keysToDelete), ct);
         if (deleteResult.IsFailed)
+        {
             _log.Here().Warning("Failed to delete download tasks: {Errors}", deleteResult.Errors);
+        }
+        else
+        {
+            var rootKeys = await GetRootKeysAsync(keysToDelete, ct);
+            if (rootKeys.Count > 0)
+            {
+                var clearResult = await _commandExecutor.Send(
+                    new ClearCompletedDownloadTasksByDownloadTaskKeyCommand(rootKeys),
+                    ct
+                );
+                if (clearResult.IsFailed)
+                    _log.Here().Warning("Failed to clear completed download tasks: {Errors}", clearResult.Errors);
+            }
+        }
 
         await Send.StringAsync("Ok.", cancellation: ct);
     }

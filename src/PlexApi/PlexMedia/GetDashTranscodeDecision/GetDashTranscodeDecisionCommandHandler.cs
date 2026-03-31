@@ -187,7 +187,7 @@ public class GetDashTranscodeDecisionCommandHandler
                     "Plex decided direct play for this item. Suggesting direct download client instead of DASH."
                 );
 
-            summary.SuggestedClientType = PlexDownloadClientType.Direct;
+            summary = summary with { SuggestedClientType = PlexDownloadClientType.Direct };
         }
 
         if (!string.Equals(summary.VideoDecision, "copy", StringComparison.OrdinalIgnoreCase))

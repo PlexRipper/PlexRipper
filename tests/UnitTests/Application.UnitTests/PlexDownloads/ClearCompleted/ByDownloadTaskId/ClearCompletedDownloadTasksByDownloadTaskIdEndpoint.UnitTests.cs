@@ -7,6 +7,20 @@ namespace Reaparr.Application.UnitTests;
 public class ClearCompletedDownloadTasksByDownloadTaskIdEndpointUnitTests
     : BaseUnitTest<ClearCompletedDownloadTasksByDownloadTaskIdEndpoint>
 {
+    public ClearCompletedDownloadTasksByDownloadTaskIdEndpointUnitTests()
+        : base()
+    {
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    DownloadStatus.Deleted,
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok());
+    }
+
     [Test]
     public async Task ShouldRemoveOnlySpecifiedCompletedDownloadTasks_WhenCalledWithGuidList()
     {
@@ -83,6 +97,11 @@ public class ClearCompletedDownloadTasksByDownloadTaskIdEndpointUnitTests
                     ),
                 Times.Once()
             );
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<DeleteDownloadTasksByKeyCommand>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
     }
 
     [Test]
@@ -141,6 +160,11 @@ public class ClearCompletedDownloadTasksByDownloadTaskIdEndpointUnitTests
                         It.IsAny<CancellationToken>()
                     ),
                 Times.Once()
+            );
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<DeleteDownloadTasksByKeyCommand>(), It.IsAny<CancellationToken>()),
+                Times.Never()
             );
     }
 
@@ -225,6 +249,11 @@ public class ClearCompletedDownloadTasksByDownloadTaskIdEndpointUnitTests
                         It.IsAny<ClearCompletedDownloadTasksByDownloadTaskKeyCommand>(),
                         It.IsAny<CancellationToken>()
                     ),
+                Times.Once()
+            );
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<DeleteDownloadTasksByKeyCommand>(), It.IsAny<CancellationToken>()),
                 Times.Once()
             );
     }

@@ -81,9 +81,7 @@ public class LogConfig
 
                 foreach (var property in sensitiveProperties)
                 {
-                    var firstChar = property[0];
-                    options.MaskProperties.Add(char.ToUpperInvariant(firstChar) + property[1..]);
-                    options.MaskProperties.Add(char.ToLowerInvariant(firstChar) + property[1..]);
+                    options.MaskProperties.Add(MaskProperty.WithDefaults(property));
                 }
             });
         }

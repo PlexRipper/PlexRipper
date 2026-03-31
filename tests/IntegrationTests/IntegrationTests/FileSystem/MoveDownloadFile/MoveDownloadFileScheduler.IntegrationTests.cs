@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Reaparr.Application;
 using Reaparr.Data.Contracts;
 
-namespace Reaparr.IntegrationTests.FileSystem;
+namespace Reaparr.IntegrationTests;
 
 public class MoveDownloadFileSchedulerIntegrationTests : BaseIntegrationTests
 {

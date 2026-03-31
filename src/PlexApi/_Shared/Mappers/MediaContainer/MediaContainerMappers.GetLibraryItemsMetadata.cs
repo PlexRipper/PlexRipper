@@ -162,7 +162,7 @@ public static class MediaContainerMappers
             Channels = source.Channels,
             AudioChannelLayout = source.AudioChannelLayout,
             SamplingRate = source.SamplingRate,
-            CanAutoSync = source.CanAutoSync,
+            CanAutoSync = source.CanAutoSync?.Boolean ?? false,
             HearingImpaired = source.HearingImpaired,
             Dub = source.Dub,
             Title = source.Title,

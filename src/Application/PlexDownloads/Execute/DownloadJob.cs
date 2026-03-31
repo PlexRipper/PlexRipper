@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore;
 using Quartz;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
-using Reaparr.Settings.Contracts;
 
 namespace Reaparr.Application;
 
@@ -13,26 +12,26 @@ namespace Reaparr.Application;
 public class DownloadJob : IJob
 {
     private readonly ILogger _log;
+    private readonly ICommandExecutor _commandExecutor;
     private readonly IReaparrDbContext _dbContext;
     private readonly IDownloadTaskUpdateDispatcher _downloadTaskUpdateDispatcher;
     private readonly IEventPublisher _eventPublisher;
-    private readonly IServerSettingsModule _serverSettingsModule;
     private readonly IIndex<PlexDownloadClientType, IPlexDownloadClient> _plexDownloadClientFactory;
 
     public DownloadJob(
         ILogger log,
+        ICommandExecutor commandExecutor,
         IReaparrDbContext dbContext,
         IDownloadTaskUpdateDispatcher downloadTaskUpdateDispatcher,
         IEventPublisher eventPublisher,
-        IServerSettingsModule serverSettingsModule,
         IIndex<PlexDownloadClientType, IPlexDownloadClient> plexDownloadClientFactory
     )
     {
         _log = log.ForContext<DownloadJob>();
+        _commandExecutor = commandExecutor;
         _dbContext = dbContext;
         _downloadTaskUpdateDispatcher = downloadTaskUpdateDispatcher;
         _eventPublisher = eventPublisher;
-        _serverSettingsModule = serverSettingsModule;
         _plexDownloadClientFactory = plexDownloadClientFactory;
     }
 
@@ -91,10 +90,27 @@ public class DownloadJob : IJob
 
             downloadTask = result.Value;
 
-            var machineId = await _dbContext.GetPlexServerMachineIdentifierById(downloadTask.PlexServerId, token);
-            var clientType = _serverSettingsModule.GetAllowStreamDownloader(machineId)
-                ? PlexDownloadClientType.Dash
-                : PlexDownloadClientType.Direct;
+            var clientTypeResult = await _commandExecutor.Send(
+                new DeterminePlexDownloadClientCommand(
+                    downloadTask.PlexServerId,
+                    downloadTask.ToKey(),
+                    $"/library/metadata/{downloadTask.PlexApiRatingKey}"
+                ),
+                token
+            );
+            if (clientTypeResult.IsFailed)
+            {
+                await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
+                    downloadTask.ToKey(),
+                    DownloadStatus.DownloadClientError,
+                    clientTypeResult.ToResult(),
+                    CancellationToken.None
+                );
+                await _eventPublisher.PublishAsync(new SendNotificationResult(clientTypeResult.ToResult()), token);
+                return;
+            }
+
+            var clientType = clientTypeResult.Value;
             _log.Here()
                 .Information(
                     "Creating {ClientType} download client for {DownloadTaskFullTitle}",
@@ -125,6 +141,12 @@ public class DownloadJob : IJob
             }
             else if (startResult.IsFailed)
             {
+                await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
+                    downloadTask.ToKey(),
+                    DownloadStatus.DownloadClientError,
+                    startResult,
+                    CancellationToken.None
+                );
                 await _eventPublisher.PublishAsync(new SendNotificationResult(startResult), token);
             }
         }

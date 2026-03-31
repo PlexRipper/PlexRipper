@@ -13,16 +13,7 @@ public class GetDashTranscodeDecisionCommandHandlerUnitTests : BaseUnitTest<GetD
         : base() { }
 
     private static GetDashTranscodeDecisionCommand CreateCommand(int plexServerId) =>
-        new(
-            plexServerId,
-            new MakeDecisionRequest
-            {
-                Path = "/library/metadata/56828",
-                ClientIdentifier = "1x6jbxuls57ip8sg6pr5sxsn",
-                TranscodeSessionId = "vyoe41m5hrmlotwc6zyocadz",
-                XPlexSessionIdentifier = "yzjqymlmh5ssjfm51hr881pe",
-            }
-        );
+        new(plexServerId, new TranscodeDecisionRequest("/library/metadata/56828"));
 
     [Test]
     public async Task ShouldReturnFailedResult_WhenPlexServerHasNoToken()
@@ -418,6 +409,58 @@ public class GetDashTranscodeDecisionCommandHandlerUnitTests : BaseUnitTest<GetD
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Value.TranscodedQuality.ShouldBe(VideoQuality.UHD_4K);
+
+        Mock.Mock<IPlexApiClientFactory>().Verify();
+        plexApiMock.Verify();
+    }
+
+    [Test]
+    public async Task ShouldSuggestDirectClient_WhenPlexDecidesDirectPlay()
+    {
+        // Arrange
+        await SetupDatabase(
+            4108,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
+            }
+        );
+        var dbContext = IDbContext;
+
+        var plexServer = await dbContext.PlexServers.FirstOrDefaultAsync(CancellationToken);
+        plexServer.ShouldNotBeNull();
+
+        var mediaContainer = FakePlexApiData.GetMakeDecisionDirectPlayMediaContainer();
+        var decisionResponse = FakePlexApiData.GetMakeDecisionResponse(
+            HttpStatusCode.OK,
+            new Seed(4108),
+            mediaContainer
+        );
+
+        var plexApiMock = new Mock<IPlexAPI>();
+        plexApiMock
+            .Setup(x => x.Transcoder.MakeDecisionAsync(It.IsAny<MakeDecisionRequest>()))
+            .ReturnsAsync(decisionResponse)
+            .Verifiable(Times.Once);
+
+        Mock.Mock<IPlexApiClientFactory>()
+            .Setup(x => x.CreateClient(It.IsAny<string>(), It.IsAny<PlexApiClientOptions>()))
+            .Returns(plexApiMock.Object)
+            .Verifiable(Times.Once);
+
+        var command = CreateCommand(plexServer.Id);
+
+        // Act
+        var result = await Sut.ExecuteAsync(command, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.SuggestedClientType.ShouldBe(PlexDownloadClientType.Direct);
+        result.Value.PartDecision.ShouldBe("directplay");
+        result.Value.VideoDecision.ShouldBe("unknown");
+        result.Value.AudioDecision.ShouldBe("unknown");
+        result.Value.TranscodedQuality.ShouldBe(VideoQuality.SD);
 
         Mock.Mock<IPlexApiClientFactory>().Verify();
         plexApiMock.Verify();

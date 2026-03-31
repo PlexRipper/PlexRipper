@@ -49,6 +49,7 @@ public partial class BaseUnitTest
                 // All different dependencies that are needed for the endpoint need to be added here. And then they can be mocked in the test.
                 s.AddTransient(_ => Mock.Create<ILogger>());
                 s.AddTransient(_ => Mock.Create<IReaparrDbContext>());
+                s.AddTransient(_ => Mock.Mock<IReaparrDbContextFactory>().Object);
                 s.AddTransient(_ => Mock.Create<IAuthDbContext>());
                 s.AddTransient(_ => Mock.Create<IAuthDbContextFactory>());
                 s.AddTransient(_ => Mock.Mock<ICommandExecutor>().Object);

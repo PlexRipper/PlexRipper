@@ -15,6 +15,14 @@
               <option name="value" value="1000" />
             </DockerEnvVarImpl>
             <DockerEnvVarImpl>
+              <option name="name" value="RADARR__LOG__LEVEL" />
+              <option name="value" value="trace" />
+            </DockerEnvVarImpl>
+            <DockerEnvVarImpl>
+              <option name="name" value="RADARR__LOG__CONSOLELEVEL" />
+              <option name="value" value="trace" />
+            </DockerEnvVarImpl>
+            <DockerEnvVarImpl>
               <option name="name" value="TZ" />
               <option name="value" value="Etc/UTC" />
             </DockerEnvVarImpl>

@@ -91,7 +91,10 @@ public partial class FakePlexApiData
         var mediaContainer = new Faker<GetSectionsMediaContainer>()
             .StrictMode(true)
             .UseSeed(seed.Next())
-            .RuleFor(x => x.AllowSync, f => f.Random.Bool())
+            .RuleFor(
+                x => x.AllowSync,
+                f => LukeHagar.PlexAPI.SDK.Models.Components.AllowSync.CreateBoolean(f.Random.Bool())
+            )
             .RuleFor(x => x.Title1, f => f.Company.CompanyName())
             .RuleFor(
                 x => x.Directory,

@@ -319,7 +319,7 @@ export const useDownloadStore = defineStore(StoreNames.DownloadStore, () => {
 					plexServer: x,
 					downloads: getters.getDownloadsByServerId(x.id),
 				};
-			});
+			}).filter((x) => x.downloads.length > 0);
 		}),
 		getActiveDownloadList(serverId = 0): DownloadProgressDTO[] {
 			return getters.getDownloadsByServerId(serverId).flatMap((x) => x.children).flatMap((x) => x.children).flatMap((x) => x.children).filter((x) => x.status != DownloadStatus.Completed && x.status != DownloadStatus.Error);

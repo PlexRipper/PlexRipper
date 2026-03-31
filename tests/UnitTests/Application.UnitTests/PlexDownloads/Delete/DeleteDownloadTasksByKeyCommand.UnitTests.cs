@@ -7,7 +7,18 @@ namespace Reaparr.Application.UnitTests;
 public class DeleteDownloadTasksByKeyCommandUnitTests : BaseUnitTest<DeleteDownloadTasksByKeyCommandHandler>
 {
     public DeleteDownloadTasksByKeyCommandUnitTests()
-        : base() { }
+        : base()
+    {
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    DownloadStatus.Deleted,
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok());
+    }
 
     [Test]
     public async Task ShouldDeleteMovieTask_WhenMovieKeyIsGiven()
@@ -24,6 +35,17 @@ public class DeleteDownloadTasksByKeyCommandUnitTests : BaseUnitTest<DeleteDownl
         );
         var dbContext = IDbContext;
         var movieKey = await dbContext.DownloadTaskMovie.ProjectToKey().FirstAsync(CancellationToken);
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.Is<DownloadTaskKey>(k => k.Id == movieKey.Id),
+                    DownloadStatus.Deleted,
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
 
         // Act
         var result = await Sut.ExecuteAsync(new DeleteDownloadTasksByKeyCommand([movieKey]), CancellationToken);
@@ -49,6 +71,17 @@ public class DeleteDownloadTasksByKeyCommandUnitTests : BaseUnitTest<DeleteDownl
         );
         var dbContext = IDbContext;
         var movieFileKey = await dbContext.DownloadTaskMovieFile.ProjectToKey().FirstAsync(CancellationToken);
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.Is<DownloadTaskKey>(k => k.Id == movieFileKey.Id),
+                    DownloadStatus.Deleted,
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
 
         // Act
         var result = await Sut.ExecuteAsync(new DeleteDownloadTasksByKeyCommand([movieFileKey]), CancellationToken);
@@ -79,6 +112,17 @@ public class DeleteDownloadTasksByKeyCommandUnitTests : BaseUnitTest<DeleteDownl
         var episodeFileKey = await dbContext
             .DownloadTaskTvShowEpisodeFile.ProjectToKey()
             .SingleAsync(CancellationToken);
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.Is<DownloadTaskKey>(k => k.Id == episodeFileKey.Id),
+                    DownloadStatus.Deleted,
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
 
         // Act
         var result = await Sut.ExecuteAsync(new DeleteDownloadTasksByKeyCommand([episodeFileKey]), CancellationToken);
@@ -111,6 +155,17 @@ public class DeleteDownloadTasksByKeyCommandUnitTests : BaseUnitTest<DeleteDownl
             .DownloadTaskTvShowEpisodeFile.ProjectToKey()
             .ToListAsync(CancellationToken);
         episodeFileKeys.Count.ShouldBe(2);
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.Is<DownloadTaskKey>(k => k.Id == episodeFileKeys[0].Id),
+                    DownloadStatus.Deleted,
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
 
         // Act — delete only the first episode file
         var result = await Sut.ExecuteAsync(
@@ -145,6 +200,17 @@ public class DeleteDownloadTasksByKeyCommandUnitTests : BaseUnitTest<DeleteDownl
 
         var toDeleteKeys = allMovieKeys.Take(2).ToList();
 
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    DownloadStatus.Deleted,
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Exactly(2));
+
         // Act
         var result = await Sut.ExecuteAsync(new DeleteDownloadTasksByKeyCommand(toDeleteKeys), CancellationToken);
 
@@ -175,6 +241,17 @@ public class DeleteDownloadTasksByKeyCommandUnitTests : BaseUnitTest<DeleteDownl
             PlexServerId = 1,
             PlexLibraryId = 1,
         };
+
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.Is<DownloadTaskKey>(k => k.Id == nonExistentKey.Id),
+                    DownloadStatus.Deleted,
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
 
         // Act
         var result = await Sut.ExecuteAsync(new DeleteDownloadTasksByKeyCommand([nonExistentKey]), CancellationToken);

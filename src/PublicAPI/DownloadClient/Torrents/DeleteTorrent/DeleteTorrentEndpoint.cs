@@ -71,7 +71,7 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest>
             return;
         }
 
-        var (downloadingKeys, completedKeys, allKeys) = await QueryKeysByStatus(normalizedHashes, ct);
+        var (activeKeys, nonActiveKeys, allKeys) = await QueryKeysByStatus(normalizedHashes, ct);
 
         if (allKeys.Count == 0)
         {
@@ -80,9 +80,9 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest>
         }
 
         var deleteFiles = req.DeleteFiles ?? true;
-        var keysToDelete = allKeys.Where(k => !downloadingKeys.Contains(k) && !completedKeys.Contains(k)).ToList();
+        var keysToDelete = new List<DownloadTaskKey>();
 
-        foreach (var key in downloadingKeys)
+        foreach (var key in activeKeys)
         {
             var stopResult = await _commandExecutor.Send(new StopDownloadTaskCommand(key.Id, deleteFiles), ct);
             if (stopResult.IsFailed)
@@ -94,24 +94,27 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest>
             keysToDelete.Add(key);
         }
 
-        // StopDownloadTaskCommand skips file deletion for completed tasks (they are in phase Completed).
-        // Explicitly delete their source files from the download directory here.
-        if (deleteFiles && completedKeys.Count > 0)
+        // Active tasks are handled via StopDownloadTaskCommand above.
+        // For non-active tasks, explicitly delete source files when requested.
+        if (deleteFiles && nonActiveKeys.Count > 0)
         {
-            var deleteFilesResult = await _commandExecutor.Send(new DeleteDownloadTaskFilesCommand(completedKeys), ct);
+            var deleteFilesResult = await _commandExecutor.Send(new DeleteDownloadTaskFilesCommand(nonActiveKeys), ct);
             if (deleteFilesResult.IsFailed)
             {
                 _log.Here()
-                    .Warning("Failed to delete download files for completed tasks: {Errors}", deleteFilesResult.Errors);
+                    .Warning(
+                        "Failed to delete download files for non-active tasks: {Errors}",
+                        deleteFilesResult.Errors
+                    );
             }
             else
             {
-                keysToDelete.AddRange(completedKeys);
+                keysToDelete.AddRange(nonActiveKeys);
             }
         }
         else
         {
-            keysToDelete.AddRange(completedKeys);
+            keysToDelete.AddRange(nonActiveKeys);
         }
 
         if (keysToDelete.Count == 0)
@@ -128,7 +131,22 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest>
 
         var deleteResult = await _commandExecutor.Send(new DeleteDownloadTasksByKeyCommand(keysToDelete), ct);
         if (deleteResult.IsFailed)
+        {
             _log.Here().Warning("Failed to delete download tasks: {Errors}", deleteResult.Errors);
+        }
+        else
+        {
+            var rootKeys = await GetRootKeysAsync(keysToDelete, ct);
+            if (rootKeys.Count > 0)
+            {
+                var clearResult = await _commandExecutor.Send(
+                    new ClearCompletedDownloadTasksByDownloadTaskKeyCommand(rootKeys),
+                    ct
+                );
+                if (clearResult.IsFailed)
+                    _log.Here().Warning("Failed to clear completed download tasks: {Errors}", clearResult.Errors);
+            }
+        }
 
         await Send.StringAsync("Ok.", cancellation: ct);
     }
@@ -160,14 +178,77 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest>
     }
 
     /// <summary>
-    /// Queries the two file-task tables and returns all matched keys split by status.
-    /// Pass <c>null</c> for <paramref name="normalizedHashes"/> to match all tasks with a HashId.
-    /// Returns all matched keys regardless of status — callers stop active ones and delete all.
+    /// Resolves the root-level task key (Movie or TvShow) for each matched leaf file key.
+    /// Movie file parents are a direct FK; episode file parents are resolved per leaf via
+    /// <see cref="IReaparrDbContextExtensions.GetRootDownloadTaskKeyAsync"/>.
     /// </summary>
-    private async Task<(List<DownloadTaskKey> Downloading, List<DownloadTaskKey> Completed, List<DownloadTaskKey> All)>
-        QueryKeysByStatus(List<string>? normalizedHashes, CancellationToken ct)
+    private async Task<List<DownloadTaskKey>> GetRootKeysAsync(
+        IReadOnlyCollection<DownloadTaskKey> leafKeys,
+        CancellationToken ct
+    )
     {
-        static bool IsDownloading(DownloadStatus s) => s is DownloadStatus.Downloading or DownloadStatus.Queued;
+        var movieFileIds = leafKeys
+            .Where(k => k.Type is DownloadTaskType.MovieData or DownloadTaskType.MoviePart)
+            .Select(k => k.Id)
+            .ToList();
+
+        var episodeFileIds = leafKeys
+            .Where(k => k.Type is DownloadTaskType.EpisodeData or DownloadTaskType.EpisodePart)
+            .Select(k => k.Id)
+            .ToList();
+
+        var rootKeys = new List<DownloadTaskKey>();
+
+        if (movieFileIds.Count > 0)
+        {
+            var movieRoots = await _dbContext
+                .DownloadTaskMovieFile.Where(x => movieFileIds.Contains(x.Id))
+                .Select(x => new DownloadTaskKey
+                {
+                    Id = x.ParentId,
+                    Type = DownloadTaskType.Movie,
+                    PlexServerId = x.PlexServerId,
+                    PlexLibraryId = x.PlexLibraryId,
+                })
+                .ToListAsync(ct);
+
+            rootKeys.AddRange(movieRoots.Distinct());
+        }
+
+        if (episodeFileIds.Count > 0)
+        {
+            var episodeLeafKeys = leafKeys.Where(k => k.Type is DownloadTaskType.EpisodeData or DownloadTaskType.EpisodePart);
+            foreach (var episodeLeafKey in episodeLeafKeys)
+            {
+                var rootKey = await _dbContext.GetRootDownloadTaskKeyAsync(episodeLeafKey, ct);
+                if (rootKey is not null && rootKey.Type == DownloadTaskType.TvShow)
+                {
+                    rootKeys.Add(rootKey);
+                }
+            }
+        }
+
+        return rootKeys;
+    }
+
+    /// <summary>
+    /// Queries the two file-task tables and returns all matched keys split by active/non-active status.
+    /// Pass <c>null</c> for <paramref name="normalizedHashes"/> to match all tasks with a HashId.
+    /// Returns all matched keys regardless of status — callers stop active ones first and then delete all.
+    /// </summary>
+    private async Task<(
+        List<DownloadTaskKey> Active,
+        List<DownloadTaskKey> NonActive,
+        List<DownloadTaskKey> All
+    )> QueryKeysByStatus(List<string>? normalizedHashes, CancellationToken ct)
+    {
+        static bool IsActive(DownloadStatus status) =>
+            status
+                is DownloadStatus.Downloading
+                    or DownloadStatus.Queued
+                    or DownloadStatus.Moving
+                    or DownloadStatus.MovePaused
+                    or DownloadStatus.Restarting;
 
         var movieTask = _dbContext
             .DownloadTaskMovieFile.Where(x =>
@@ -207,8 +288,8 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest>
 
         var all = movieTask.Result.Concat(episodeTask.Result).ToList();
         return (
-            all.Where(x => IsDownloading(x.DownloadStatus)).Select(x => x.Key).ToList(),
-            all.Where(x => x.DownloadStatus == DownloadStatus.Completed).Select(x => x.Key).ToList(),
+            all.Where(x => IsActive(x.DownloadStatus)).Select(x => x.Key).ToList(),
+            all.Where(x => !IsActive(x.DownloadStatus)).Select(x => x.Key).ToList(),
             all.Select(x => x.Key).ToList()
         );
     }

@@ -25,10 +25,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
 
     private readonly IDownloadService _downloader;
 
-    private readonly DownloadConfiguration _configuration = new()
-    {
-        DownloadFileExtension = FilePathExtensions.TempDownloadFileSuffix,
-    };
+    private readonly DownloadConfiguration _configuration = new();
 
     private readonly CompositeDisposable _subscriptions = new();
     private readonly Subject<Unit> _destroy = new();
@@ -57,6 +54,10 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
         _configuration.ChunkCount = downloadSegments;
         _configuration.ParallelCount = downloadSegments;
         _configuration.ParallelDownload = downloadSegments > 1;
+        _configuration.MaxTryAgainOnFailure = 3;
+        _configuration.HttpClientTimeout = (int)TimeSpan.FromSeconds(100).TotalMilliseconds;
+        _configuration.EnableAutoResumeDownload = false;
+        _configuration.DownloadFileExtension = FilePathExtensions.TempDownloadFileSuffix;
 
         _downloader = downloadServiceFactory(_configuration);
     }
@@ -236,7 +237,7 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
                     h => _downloader.DownloadFileCompleted -= h
                 )
                 .Select(x => x.EventArgs)
-                .Take(1)
+                .TakeUntil(_destroy)
                 .Select(args =>
                     Observable.FromAsync(async _ =>
                     {
@@ -251,10 +252,12 @@ public class DirectPlexDownloadClient : IPlexDownloadClient
 
                         if (args.Error != null)
                         {
-                            var statusResult = await SetDownloadStatusAsync(
-                                Domain.DownloadStatus.Error,
-                                Result.Fail(new ExceptionalError(args.Error)).LogError()
-                            );
+                            var downloadErrorResult = Result.Fail(new ExceptionalError(args.Error)).LogError();
+                            var failedStatus = downloadErrorResult.IsServerUnreachable()
+                                ? Domain.DownloadStatus.ServerUnreachable
+                                : Domain.DownloadStatus.Error;
+
+                            var statusResult = await SetDownloadStatusAsync(failedStatus, downloadErrorResult);
                             statusResult.LogIfFailed();
                             return;
                         }

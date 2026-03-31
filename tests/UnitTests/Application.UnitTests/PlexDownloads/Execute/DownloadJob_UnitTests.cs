@@ -33,6 +33,10 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
         };
         Mock.Mock<IJobExecutionContext>().SetupGet(x => x.JobDetail.JobDataMap).Returns(new JobDataMap(dict));
         Mock.Mock<IJobExecutionContext>().SetupGet(x => x.CancellationToken).Returns(CancellationToken);
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<DeterminePlexDownloadClientCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok(PlexDownloadClientType.Direct))
+            .Verifiable(Times.Once());
         Mock.Mock<IPlexDownloadClient>()
             .Setup(x => x.Start(It.IsAny<DownloadTaskKey>(), CancellationToken))
             .ReturnsAsync(Result.Ok());
@@ -55,6 +59,11 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
 
         downloadTaskResult.DownloadDirectory.ShouldContain(downloadFolder.DirectoryPath);
         downloadTaskResult.DestinationDirectory.ShouldContain(destinationFolder.DirectoryPath);
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<DeterminePlexDownloadClientCommand>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
     }
 
     [Test]
@@ -77,7 +86,10 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
 
         Mock.Mock<IJobExecutionContext>().SetupGet(x => x.JobDetail.JobDataMap).Returns(new JobDataMap(dict));
         Mock.Mock<IJobExecutionContext>().SetupGet(x => x.CancellationToken).Returns(CancellationToken);
-        Mock.Mock<IServerSettingsModule>().Setup(x => x.GetAllowStreamDownloader(It.IsAny<string>())).Returns(false);
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<DeterminePlexDownloadClientCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok(PlexDownloadClientType.Direct))
+            .Verifiable(Times.Once());
 
         var downloadClientMock = Mock.Mock<IPlexDownloadClient>();
         downloadClientMock
@@ -97,5 +109,10 @@ public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
 
         // Assert
         downloadClientMock.Verify();
+        Mock.Mock<ICommandExecutor>()
+            .Verify(
+                x => x.Send(It.IsAny<DeterminePlexDownloadClientCommand>(), It.IsAny<CancellationToken>()),
+                Times.Once()
+            );
     }
 }

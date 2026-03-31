@@ -3,6 +3,7 @@ using System.Threading.Channels;
 using ByteSizeLib;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
+using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 using Reaparr.SignalR.Contracts;
 
@@ -73,6 +74,19 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
         var result = await Result.Try(async Task () =>
         {
             _statusByNodeId[key.Id] = newStatus;
+
+            if (newStatus is DownloadStatus.Deleted)
+            {
+                var sequence = _sequenceByServer.AddOrUpdate(key.PlexServerId, 1, (_, current) => current + 1);
+                await _downloadHubService.SendDownloadPatchAsync(
+                    key.PlexServerId,
+                    sequence,
+                    upserts: [],
+                    deletedIds: [key.Id],
+                    cancellationToken
+                );
+                return;
+            }
 
             using var dbContext = await _dbContextFactory.CreateAsync();
             var currentStatus = await dbContext.GetDownloadStatusAsync(key, cancellationToken);
@@ -148,7 +162,7 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
     {
         return Result.Try(() =>
         {
-            if (_statusByNodeId.GetValueOrDefault(key.Id) is DownloadStatus.Paused)
+            if (_statusByNodeId.GetValueOrDefault(key.Id) is DownloadStatus.Paused or DownloadStatus.Deleted)
                 return;
 
             var update = new BufferedProgressUpdate
@@ -265,16 +279,15 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
                 {
                     using var dbContext = await _dbContextFactory.CreateAsync();
 
-                    // Prefer the latest buffered value in case multiple progress updates arrived
-                    // before the background loop started processing this channel item.
-                    var effectiveUpdate =
-                        _progressByNodeId.TryGetValue(update.NodeId, out var buffered) && buffered.Progress is not null
-                            ? buffered
-                            : update;
+                    if (
+                        !_progressByNodeId.TryGetValue(update.NodeId, out var effectiveUpdate)
+                        || effectiveUpdate.Progress is null
+                    )
+                        return;
 
                     await dbContext.UpdateDownloadProgress(
                         effectiveUpdate.Key,
-                        effectiveUpdate.Progress!,
+                        effectiveUpdate.Progress,
                         effectiveUpdate.Snapshot,
                         stoppingToken
                     );

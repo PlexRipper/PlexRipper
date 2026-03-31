@@ -10,7 +10,7 @@ public partial class FakePlexApiData
         return new Faker<LibrarySection>()
             .StrictMode(true)
             .UseSeed(seed.Next())
-            .RuleFor(x => x.AllowSync, f => f.Random.Bool())
+            .RuleFor(x => x.AllowSync, f => LibrarySectionAllowSync.CreateBoolean(f.Random.Bool()))
             .RuleFor(x => x.Art, _ => "/:/resources/movie-fanart.jpg")
             .RuleFor(x => x.Key, f => f.Random.Number(int.MaxValue).ToString())
             .RuleFor(x => x.Composite, (f, x) => $"/library/sections/{x.Key}/composite/{f.Random.Number(100000)}")

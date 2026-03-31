@@ -4,17 +4,15 @@ using Autofac;
 using Downloader;
 using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
+using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 using Reaparr.Settings.Contracts;
 using DomainDownloadStatus = Reaparr.Domain.DownloadStatus;
 
 namespace Reaparr.Application.UnitTests;
 
-public class PlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadClient>
+public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDownloadClient>
 {
-    public PlexDownloadClientStartUnitTests()
-        : base() { }
-
     // -------------------------------------------------------------------------
     // Shared helpers
     // -------------------------------------------------------------------------

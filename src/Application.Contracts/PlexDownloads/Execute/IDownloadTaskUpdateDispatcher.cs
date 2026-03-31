@@ -1,6 +1,7 @@
+using FluentResults;
 using Reaparr.Domain;
 
-namespace Reaparr.Application;
+namespace Reaparr.Application.Contracts;
 
 public interface IDownloadTaskUpdateDispatcher
 {

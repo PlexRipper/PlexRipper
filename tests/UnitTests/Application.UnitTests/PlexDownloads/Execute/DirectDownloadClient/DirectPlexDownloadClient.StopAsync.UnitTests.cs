@@ -4,6 +4,7 @@ using Autofac;
 using Downloader;
 using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
+using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 using Reaparr.Settings.Contracts;
 using DomainDownloadStatus = Reaparr.Domain.DownloadStatus;

@@ -179,6 +179,16 @@ public sealed class TorrentsInfoEndpoint : Endpoint<TorrentsInfoEndpointRequest,
 
         var category = ResolveCategory(file);
 
+        // Signal to Radarr/Sonarr that the seed limit has been reached so CanBeRemoved becomes true.
+        // Radarr only sets CanBeRemoved when HasReachedSeedLimit() is true. With ratio_limit=-2 and
+        // no global ratio/time limits configured, HasReachedSeedLimit() always returns false and
+        // RemoveItem (DELETE) is never called, leaving the file stranded in the downloads folder.
+        // Setting ratio_limit=0 with ratio=0 satisfies the (ratio_limit - ratio <= 0.001) check.
+        var isReadyForRemoval = file.DownloadStatus
+            is DownloadStatus.Completed
+                or DownloadStatus.MoveFinished
+                or DownloadStatus.DownloadFinished;
+
         return new QBittorrentTorrentInfo
         {
             Hash = file.HashId!,
@@ -193,7 +203,7 @@ public sealed class TorrentsInfoEndpoint : Endpoint<TorrentsInfoEndpointRequest,
             Category = category,
             Label = category,
             Ratio = 0,
-            RatioLimit = -2,
+            RatioLimit = isReadyForRemoval ? 0 : -2,
             SeedingTime = null,
             SeedingTimeLimit = -2,
             InactiveSeedingTimeLimit = -2,
@@ -262,7 +272,9 @@ public sealed class TorrentsInfoEndpoint : Endpoint<TorrentsInfoEndpointRequest,
             case DownloadStatus.Stopped or DownloadStatus.Paused:
                 return "pausedDL";
             case DownloadStatus.Completed:
-                return "uploading"; // Completed and seeding
+            case DownloadStatus.MoveFinished:
+            case DownloadStatus.DownloadFinished:
+                return "pausedUP";
             case DownloadStatus.Deleted:
             case DownloadStatus.Error:
             case DownloadStatus.MoveError:
@@ -272,9 +284,6 @@ public sealed class TorrentsInfoEndpoint : Endpoint<TorrentsInfoEndpointRequest,
                 return "moving";
             case DownloadStatus.MovePaused:
                 return "pausedUP";
-            case DownloadStatus.MoveFinished:
-            case DownloadStatus.DownloadFinished:
-                return "completed";
             case DownloadStatus.Unknown:
             default:
                 _log.Here()

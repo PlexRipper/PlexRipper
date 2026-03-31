@@ -3,6 +3,7 @@ using System.Reactive.Subjects;
 using Autofac;
 using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
+using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;
 using Reaparr.External.Contracts;
 using Reaparr.PlexApi.Contracts;

@@ -211,7 +211,7 @@ public class SearchTvShowCommandHandler : ICommandHandler<SearchTvShowCommand, R
                 .SetQueryParams(torrentMetadata.Values);
 
             _log.Here()
-                .Debug(
+                .Verbose(
                     "Generated torrent URL for PlexTvShowEpisodeMediaDataId {PlexTvShowEpisodeMediaDataId}: {Url}",
                     mediaData.Id,
                     torrentDownloadUrl

@@ -89,12 +89,11 @@ public class LogConfig
             });
         }
 
-        return config.Enrich.FromLogContext();
+        return config.Enrich.FromLogContext().WriteTo.Debug(Template).WriteTo.Console(Template);
     }
 
     public virtual Logger GetLogger(LogEventLevel minimumLogLevel = LogEventLevel.Debug) =>
         GetBaseConfiguration()
-            .WriteTo.Debug(Template)
             .WriteTo.Seq(EnvironmentExtensions.GetSeqUrl())
             .WriteTo.File(
                 Template,

@@ -7,9 +7,6 @@ namespace Reaparr.Application.UnitTests;
 
 public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUpdateDispatcher>
 {
-    public DownloadTaskUpdateDispatcherUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldIncludeSeasonAndTvShowInPatch_WhenEpisodeProgressIsUpdated()
     {
@@ -590,23 +587,45 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
         completedProgressResult.IsSuccess.ShouldBeTrue();
         siblingProgressResult.IsSuccess.ShouldBeTrue();
 
-        await Task.Delay(1500, CancellationToken);
+        await WaitUntilAsync(async () =>
+        {
+            var persistedEpisodeFiles = await IDbContext
+                .DownloadTaskTvShowEpisodeFile.AsNoTracking()
+                .Where(x => x.Id == completedEpisodeFile.Id || x.Id == siblingEpisodeFile.Id)
+                .ToListAsync(CancellationToken);
+
+            var persistedCompletedEpisodeFile = persistedEpisodeFiles.Single(x => x.Id == completedEpisodeFile.Id);
+            var persistedSiblingEpisodeFile = persistedEpisodeFiles.Single(x => x.Id == siblingEpisodeFile.Id);
+
+            if (
+                persistedCompletedEpisodeFile
+                is not { DataReceived: 1_000, DataTotal: 1_000, Percentage: 100, DownloadSpeed: 0 }
+            )
+                return false;
+
+            return persistedSiblingEpisodeFile
+                is { DataReceived: 500, DataTotal: 2_000, Percentage: 25, DownloadSpeed: 123 };
+        });
+
         await sut.StopAsync(CancellationToken.None);
 
         var updatedEpisodeFiles = await IDbContext
             .DownloadTaskTvShowEpisodeFile.AsNoTracking()
-            .OrderBy(x => x.Id)
+            .Where(x => x.Id == completedEpisodeFile.Id || x.Id == siblingEpisodeFile.Id)
             .ToListAsync(CancellationToken);
 
-        updatedEpisodeFiles[0].DataReceived.ShouldBe(1_000);
-        updatedEpisodeFiles[0].DataTotal.ShouldBe(1_000);
-        updatedEpisodeFiles[0].Percentage.ShouldBe(100);
-        updatedEpisodeFiles[0].DownloadSpeed.ShouldBe(0);
+        var updatedCompletedEpisodeFile = updatedEpisodeFiles.Single(x => x.Id == completedEpisodeFile.Id);
+        var updatedSiblingEpisodeFile = updatedEpisodeFiles.Single(x => x.Id == siblingEpisodeFile.Id);
 
-        updatedEpisodeFiles[1].DataReceived.ShouldBe(500);
-        updatedEpisodeFiles[1].DataTotal.ShouldBe(2_000);
-        updatedEpisodeFiles[1].Percentage.ShouldBe(25);
-        updatedEpisodeFiles[1].DownloadSpeed.ShouldBe(123);
+        updatedCompletedEpisodeFile.DataReceived.ShouldBe(1_000);
+        updatedCompletedEpisodeFile.DataTotal.ShouldBe(1_000);
+        updatedCompletedEpisodeFile.Percentage.ShouldBe(100);
+        updatedCompletedEpisodeFile.DownloadSpeed.ShouldBe(0);
+
+        updatedSiblingEpisodeFile.DataReceived.ShouldBe(500);
+        updatedSiblingEpisodeFile.DataTotal.ShouldBe(2_000);
+        updatedSiblingEpisodeFile.Percentage.ShouldBe(25);
+        updatedSiblingEpisodeFile.DownloadSpeed.ShouldBe(123);
     }
 
     [Test]
@@ -1002,6 +1021,50 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
         fileTaskPatch.ShouldNotBeNull();
         fileTaskPatch!.Status.ShouldBe(DownloadStatus.Completed);
         fileTaskPatch.Percentage.ShouldBe(100m);
+    }
+
+    [Test]
+    public async Task ShouldSendDeletedIds_WhenStatusChangedToDeleted()
+    {
+        // Arrange
+        await SetupDatabase(84336, config => config.MovieDownloadTasksCount = 1);
+        var movieFile = await IDbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+
+        var capturedDeletedIds = new List<IReadOnlyCollection<Guid>?>();
+        var capturedUpserts = new List<IReadOnlyCollection<DownloadPatchDTO>>();
+        Mock.Mock<IDownloadHubService>()
+            .Setup(x =>
+                x.SendDownloadPatchAsync(
+                    It.IsAny<int>(),
+                    It.IsAny<long>(),
+                    It.IsAny<IReadOnlyCollection<DownloadPatchDTO>>(),
+                    It.IsAny<IReadOnlyCollection<Guid>?>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Callback<int, long, IReadOnlyCollection<DownloadPatchDTO>, IReadOnlyCollection<Guid>?, CancellationToken>(
+                (_, _, upserts, deletedIds, _) =>
+                {
+                    capturedUpserts.Add(upserts);
+                    capturedDeletedIds.Add(deletedIds);
+                }
+            )
+            .Returns(Task.CompletedTask);
+
+        var sut = Sut;
+
+        // Act
+        var result = await sut.OnStatusChangedAsync(movieFile.ToKey(), DownloadStatus.Deleted, CancellationToken);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+
+        capturedDeletedIds.ShouldNotBeEmpty();
+        var deletedPatch = capturedDeletedIds.Last();
+        deletedPatch.ShouldNotBeNull();
+        deletedPatch!.ShouldContain(movieFile.Id);
+
+        capturedUpserts.Last().ShouldBeEmpty();
     }
 
     private async Task WaitForPatchCount<T>(IReadOnlyCollection<T> collection, int expectedCount)

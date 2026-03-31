@@ -36,8 +36,7 @@ public static class HttpClientExtensions
         }
         catch (ResponseValidationException e)
         {
-            _log.Here().Error("Failed response validation: {Body}", e.Body);
-            return Result.Fail(new ExceptionalError(e)).LogError();
+            return Result.Fail(new ExceptionalError(e).WithMetadata("json body", e.Body)).LogError();
         }
         catch (TaskCanceledException e)
         {

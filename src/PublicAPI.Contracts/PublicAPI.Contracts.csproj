@@ -7,4 +7,10 @@
         <AssemblyName>Reaparr.PublicAPI.Contracts</AssemblyName>
         <RootNamespace>Reaparr.PublicAPI.Contracts</RootNamespace>
     </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="CSharpier.MsBuild" Version="1.2.6">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
 </Project>

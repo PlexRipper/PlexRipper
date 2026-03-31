@@ -7,6 +7,10 @@
         <RootNamespace>Reaparr.External.Contracts</RootNamespace>
     </PropertyGroup>
     <ItemGroup>
+        <PackageReference Include="CSharpier.MsBuild" Version="1.2.6">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
         <PackageReference Include="System.Reactive" Version="6.1.0" />
     </ItemGroup>
     <ItemGroup>

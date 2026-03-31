@@ -17,6 +17,10 @@
         <ProjectReference Include="..\SignalR.Contracts\SignalR.Contracts.csproj" />
     </ItemGroup>
     <ItemGroup>
+        <PackageReference Include="CSharpier.MsBuild" Version="1.2.6">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
         <PackageReference Include="Jason.Landbridge.Autofac.Extras.Quartz" Version="9.0.3" />
         <PackageReference Include="Quartz" Version="3.15.1" />
     </ItemGroup>

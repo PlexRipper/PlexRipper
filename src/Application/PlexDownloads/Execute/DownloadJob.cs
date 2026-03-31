@@ -100,6 +100,12 @@ public class DownloadJob : IJob
             );
             if (clientTypeResult.IsFailed)
             {
+                await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
+                    downloadTask.ToKey(),
+                    DownloadStatus.DownloadClientError,
+                    clientTypeResult.ToResult(),
+                    CancellationToken.None
+                );
                 await _eventPublisher.PublishAsync(new SendNotificationResult(clientTypeResult.ToResult()), token);
                 return;
             }
@@ -135,6 +141,12 @@ public class DownloadJob : IJob
             }
             else if (startResult.IsFailed)
             {
+                await _downloadTaskUpdateDispatcher.OnStatusChangedAsync(
+                    downloadTask.ToKey(),
+                    DownloadStatus.DownloadClientError,
+                    clientTypeResult.ToResult(),
+                    CancellationToken.None
+                );
                 await _eventPublisher.PublishAsync(new SendNotificationResult(startResult), token);
             }
         }

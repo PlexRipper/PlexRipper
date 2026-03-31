@@ -5,9 +5,6 @@ namespace Reaparr.Application.UnitTests;
 
 public class ValidatePlexTokenEndpointUnitTests : BaseUnitTest
 {
-    public ValidatePlexTokenEndpointUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldValidateThePlexToken_WhenTokenIsValid()
     {

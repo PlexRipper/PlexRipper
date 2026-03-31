@@ -6,9 +6,6 @@ namespace Reaparr.Application.UnitTests;
 
 public class ValidatePlexCredentialsEndpointUnitTests : BaseUnitTest
 {
-    public ValidatePlexCredentialsEndpointUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldReturnValidatedAccount_WhenSignInSucceeds()
     {

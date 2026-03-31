@@ -8,9 +8,6 @@ namespace Reaparr.Application.UnitTests;
 
 public class DeleteDownloadTaskFilesCommandUnitTests : BaseUnitTest<DeleteDownloadTaskFilesCommandHandler>
 {
-    public DeleteDownloadTaskFilesCommandUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldDeletePlainFileFromDownloadDirectory_WhenTaskIsCompleted()
     {

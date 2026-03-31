@@ -5,9 +5,6 @@ namespace Reaparr.Application.UnitTests;
 
 public class DeterminePlexDownloadClientCommandUnitTests : BaseUnitTest<DeterminePlexDownloadClientCommandHandler>
 {
-    public DeterminePlexDownloadClientCommandUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldReturnDirect_WhenStreamDownloaderIsDisabled()
     {

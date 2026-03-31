@@ -7,7 +7,6 @@ namespace Reaparr.Application.UnitTests;
 public class DeleteDownloadTasksByKeyCommandUnitTests : BaseUnitTest<DeleteDownloadTasksByKeyCommandHandler>
 {
     public DeleteDownloadTasksByKeyCommandUnitTests()
-        : base()
     {
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>

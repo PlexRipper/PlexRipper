@@ -8,9 +8,6 @@ namespace Reaparr.BackgroundJobs.UnitTests;
 public class CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests
     : BaseUnitTest<CheckQueuedPlexLibraryToSyncCommandHandler>
 {
-    public CheckQueuedPlexLibraryToSyncCommandHandlerUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldReturnOk_WhenNoQueuedLibrariesExist()
     {

@@ -5,9 +5,6 @@ namespace Reaparr.Application.UnitTests;
 
 public class RefreshLibraryAccessCommandUnitTests : BaseUnitTest<RefreshLibraryAccessHandler>
 {
-    public RefreshLibraryAccessCommandUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldReturnFailedResult_WhenPlexAccountIdIsInvalid()
     {

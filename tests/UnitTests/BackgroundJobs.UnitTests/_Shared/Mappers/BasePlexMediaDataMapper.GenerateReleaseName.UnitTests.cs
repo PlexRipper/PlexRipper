@@ -2,9 +2,6 @@ namespace Reaparr.BackgroundJobs.UnitTests;
 
 public class BasePlexMediaDataMapperGenerateReleaseNameUnitTests : BaseUnitTest
 {
-    public BasePlexMediaDataMapperGenerateReleaseNameUnitTests()
-        : base() { }
-
     [Test]
     public void ShouldGenerateReleaseName_WhenGivenValidMediaMetadata()
     {

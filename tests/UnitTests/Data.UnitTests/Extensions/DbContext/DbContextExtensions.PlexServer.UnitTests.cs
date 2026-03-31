@@ -5,9 +5,6 @@ namespace Reaparr.Data.UnitTests;
 
 public class DbContextExtensionsPlexServerUnitTests : BaseUnitTest
 {
-    public DbContextExtensionsPlexServerUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldReturnServerName_WhenPlexServerExists()
     {

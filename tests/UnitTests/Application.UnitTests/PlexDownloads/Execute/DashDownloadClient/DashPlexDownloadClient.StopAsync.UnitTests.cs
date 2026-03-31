@@ -15,9 +15,6 @@ namespace Reaparr.Application.UnitTests;
 
 public class DashPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DashPlexDownloadClient>
 {
-    public DashPlexDownloadClientStopAsyncUnitTests()
-        : base() { }
-
     private DashPlexDownloadClient CreateSut(Mock<IDashMpdCliWrapper> dashWrapperMock)
     {
         var directoryMock = new Mock<IDirectory>();

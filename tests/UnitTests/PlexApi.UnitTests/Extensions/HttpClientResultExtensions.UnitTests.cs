@@ -7,9 +7,6 @@ namespace Reaparr.PlexApi.UnitTests;
 
 public class HttpClientResultExtensionsUnitTests : BaseUnitTest<object>
 {
-    public HttpClientResultExtensionsUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldReturnSuccessResult_WhenResponseIsReturned()
     {

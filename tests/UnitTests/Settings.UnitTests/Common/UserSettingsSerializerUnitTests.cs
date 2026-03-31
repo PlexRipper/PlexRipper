@@ -4,9 +4,6 @@ namespace Reaparr.Settings.UnitTests;
 
 public class UserSettingsSerializerUnitTests : BaseUnitTest
 {
-    public UserSettingsSerializerUnitTests()
-        : base() { }
-
     [Test]
     [Arguments("")]
     [Arguments("{}")]

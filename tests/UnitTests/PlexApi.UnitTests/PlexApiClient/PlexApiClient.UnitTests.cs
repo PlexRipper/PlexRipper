@@ -9,9 +9,6 @@ namespace Reaparr.PlexApi.UnitTests;
 
 public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, PlexApiClient>>
 {
-    public PlexApiClientUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldReturnValid401ResponseAsJson_WhenPlexApiReturns401HtmlResponse()
     {

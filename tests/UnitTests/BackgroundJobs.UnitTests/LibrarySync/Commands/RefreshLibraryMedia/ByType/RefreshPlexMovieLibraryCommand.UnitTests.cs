@@ -6,9 +6,6 @@ namespace Reaparr.BackgroundJobs.UnitTests;
 
 public class RefreshPlexMovieLibraryCommandUnitTests : BaseUnitTest<RefreshPlexMovieLibraryCommandHandler>
 {
-    public RefreshPlexMovieLibraryCommandUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldSuccessfullyRefreshLibraryAndUpdateSyncedAt_WhenMoviesExist()
     {

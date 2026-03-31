@@ -9,9 +9,6 @@ public class GenerateDownloadTaskMoviesCommandHandlerUnitTests : BaseUnitTest<Ge
 {
     private readonly DownloadTaskMovieValidator _validator = new();
 
-    public GenerateDownloadTaskMoviesCommandHandlerUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldHaveInsertedValidDownloadTaskMoviesInDatabase_WhenGivenValidPlexMovies()
     {

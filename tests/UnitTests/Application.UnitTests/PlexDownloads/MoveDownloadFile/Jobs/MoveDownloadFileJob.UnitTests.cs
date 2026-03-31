@@ -8,9 +8,6 @@ namespace Reaparr.Application.UnitTests;
 
 public class MoveDownloadFileJobUnitTests : BaseUnitTest<MoveDownloadFileJob>
 {
-    public MoveDownloadFileJobUnitTests()
-        : base() { }
-
     private IJobExecutionContext SetupJobContext(DownloadTaskKey key)
     {
         IDictionary<string, object> dict = new Dictionary<string, object>

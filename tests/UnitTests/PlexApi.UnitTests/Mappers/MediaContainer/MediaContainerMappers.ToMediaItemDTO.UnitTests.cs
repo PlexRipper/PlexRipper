@@ -11,9 +11,6 @@ namespace Reaparr.PlexApi.UnitTests
 {
     public class MediaContainerMappersUnitTests : BaseUnitTest
     {
-        public MediaContainerMappersUnitTests()
-            : base() { }
-
         [Test]
         public void ShouldMapAllPropertiesCorrectly_WhenApiResponseHasMovieValues()
         {

@@ -8,9 +8,6 @@ namespace Reaparr.BackgroundJobs.UnitTests;
 
 public class RefreshPlexTvShowLibraryCommandUnitTests : BaseUnitTest<RefreshPlexTvShowLibraryCommandHandler>
 {
-    public RefreshPlexTvShowLibraryCommandUnitTests()
-        : base() { }
-
     private void SetupProgressStoreMocks(List<LibraryProgressItem>? capturedItems = null)
     {
         Mock.Mock<ILibrarySyncProgressStore>()

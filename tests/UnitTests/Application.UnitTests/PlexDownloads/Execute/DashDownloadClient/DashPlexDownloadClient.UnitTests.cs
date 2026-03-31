@@ -15,9 +15,6 @@ namespace Reaparr.Application.UnitTests;
 
 public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClient>
 {
-    public DashPlexDownloadClientUnitTests()
-        : base() { }
-
     private DashPlexDownloadClient CreateSut(Mock<IDashMpdCliWrapper> dashWrapperMock)
     {
         Mock.Mock<INotificationHubService>()

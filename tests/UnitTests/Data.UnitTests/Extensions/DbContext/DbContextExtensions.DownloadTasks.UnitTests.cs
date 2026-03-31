@@ -5,9 +5,6 @@ namespace Reaparr.Data.UnitTests;
 
 public class DbContextExtensionsDownloadTasksUnitTests : BaseUnitTest
 {
-    public DbContextExtensionsDownloadTasksUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldSetTheDownloadTaskParentOfTypeMovieDataToDownloadFinished_WhenTheMovieDataIsDownloadStatusIsDownloadFinished()
     {

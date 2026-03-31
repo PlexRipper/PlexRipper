@@ -4,9 +4,6 @@ namespace Reaparr.Application.UnitTests;
 
 public class AddOrUpdatePlexServerCommandUnitTests : BaseUnitTest<AddOrUpdatePlexServersCommandHandler>
 {
-    public AddOrUpdatePlexServerCommandUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldAddAllServers_WhenNoneExistInTheDatabase()
     {

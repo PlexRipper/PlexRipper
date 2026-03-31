@@ -7,9 +7,6 @@ namespace Reaparr.Application.UnitTests;
 
 public class EnsureDownloadDirectoryCommandUnitTests : BaseCommandUnitTest<EnsureDownloadDirectoryCommand>
 {
-    public EnsureDownloadDirectoryCommandUnitTests()
-        : base() { }
-
     // -------------------------------------------------------------------------
     // Validator tests
     // -------------------------------------------------------------------------

@@ -10,9 +10,6 @@ namespace PublicApi.UnitTests;
 
 public class AddTorrentEndpointUnitTests : BaseUnitTest
 {
-    public AddTorrentEndpointUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldReturnOk_WhenValidTorrentFileIsUploaded()
     {

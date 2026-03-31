@@ -6,9 +6,6 @@ namespace Reaparr.Application.UnitTests;
 public class CheckAllConnectionsStatusByPlexServerCommandUnitTests
     : BaseUnitTest<CheckAllConnectionsStatusByPlexServerHandler>
 {
-    public CheckAllConnectionsStatusByPlexServerCommandUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldReturnServerNotEnabled_WhenPlexServerIsDisabled()
     {

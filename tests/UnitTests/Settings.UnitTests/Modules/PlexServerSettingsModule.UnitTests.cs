@@ -4,9 +4,6 @@ namespace Reaparr.Settings.UnitTests;
 
 public class PlexServerSettingsModuleUnitTests : BaseUnitTest<PlexServerSettingsModule>
 {
-    public PlexServerSettingsModuleUnitTests()
-        : base() { }
-
     [Test]
     public void ShouldRenameAServerByItsMachineIdentifier_WhenItDoesNotExist()
     {

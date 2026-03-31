@@ -7,9 +7,6 @@ namespace Reaparr.BackgroundJobs.UnitTests;
 
 public class CleanupLibrarySyncJobQueueCommandHandlerUnitTests : BaseUnitTest<CleanupLibrarySyncJobQueueCommandHandler>
 {
-    public CleanupLibrarySyncJobQueueCommandHandlerUnitTests()
-        : base() { }
-
     private void SetupSignalRMock()
     {
         Mock.Mock<INotificationHubService>()

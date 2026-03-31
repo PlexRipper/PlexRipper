@@ -7,9 +7,6 @@ public class GetPlexLibraryMediaEndpointUnitTests : BaseUnitTest<GetPlexLibraryM
 {
     private PlexMediaSlimDTOValidator PlexMediaSlimDtoValidator => new();
 
-    public GetPlexLibraryMediaEndpointUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldHaveAllThePlexLibraryMedia_WhenPageAndSizeAreNotSetAndMediaIsMovies()
     {

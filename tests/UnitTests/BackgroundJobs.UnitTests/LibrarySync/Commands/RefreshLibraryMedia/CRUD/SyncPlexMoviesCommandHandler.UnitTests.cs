@@ -4,9 +4,6 @@ public class SyncPlexMoviesCommandHandlerUnitTests : BaseUnitTest<SyncPlexMovies
 {
     private SyncPlexMoviesCommandValidator _validator = new();
 
-    public SyncPlexMoviesCommandHandlerUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldCreateAllMovies_WhenNoneExistsYet()
     {

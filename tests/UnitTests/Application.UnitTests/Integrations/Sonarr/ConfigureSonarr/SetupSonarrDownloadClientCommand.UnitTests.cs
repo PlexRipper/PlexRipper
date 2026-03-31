@@ -7,9 +7,6 @@ namespace Reaparr.Application.UnitTests;
 
 public class SetupSonarrDownloadClientCommandUnitTests : BaseUnitTest<SetupSonarrDownloadClientCommandHandler>
 {
-    public SetupSonarrDownloadClientCommandUnitTests()
-        : base() { }
-
     // ISonarrSettings inherits IBaseSettingsModule<T> which has a static abstract member, making it
     // incompatible with Moq. Inject concrete SonarrSettings instances via TypedParameter instead.
 

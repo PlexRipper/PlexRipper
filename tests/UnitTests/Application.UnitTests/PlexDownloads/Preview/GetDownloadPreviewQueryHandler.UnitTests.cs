@@ -5,9 +5,6 @@ namespace Reaparr.Application.UnitTests;
 
 public class GetDownloadPreviewQueryHandlerUnitTests : BaseUnitTest<GetDownloadPreviewQueryHandler>
 {
-    public GetDownloadPreviewQueryHandlerUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldReturnNoDownloadPreview_WhenEmptyListIsGiven()
     {

@@ -16,9 +16,6 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
     private const string TEST_EMAIL = "test@example.com";
     private const string TEST_USER_ID = "test-user-id";
 
-    public HeaderAuthenticationMiddlewareUnitTests()
-        : base() { }
-
     #region InvokeAsync - Early Exit Scenarios
 
     [Test]

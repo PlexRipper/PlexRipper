@@ -5,9 +5,6 @@ namespace Reaparr.Application.UnitTests;
 
 public class ResumePlexServerDownloadsCommandUnitTests : BaseUnitTest<ResumePlexServerDownloadsCommandHandler>
 {
-    public ResumePlexServerDownloadsCommandUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldResumeServerAndTriggerQueue_WhenServerIsPausedByUser()
     {

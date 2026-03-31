@@ -4,9 +4,6 @@ namespace Reaparr.Application.UnitTests;
 
 public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdatePlexLibrariesCommandHandler>
 {
-    public AddOrUpdatePlexLibrariesCommandUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldAddAllPlexLibraries_WhenNoneExistInTheDatabase()
     {

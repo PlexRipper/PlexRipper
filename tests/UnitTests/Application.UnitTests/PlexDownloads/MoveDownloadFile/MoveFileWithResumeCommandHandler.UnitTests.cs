@@ -5,9 +5,6 @@ namespace Reaparr.Application.UnitTests;
 
 public class MoveFileWithResumeCommandHandlerUnitTests : BaseUnitTest<MoveFileWithResumeCommandHandler>
 {
-    public MoveFileWithResumeCommandHandlerUnitTests()
-        : base() { }
-
     private static byte[] CreateBytes(int length)
     {
         var data = new byte[length];

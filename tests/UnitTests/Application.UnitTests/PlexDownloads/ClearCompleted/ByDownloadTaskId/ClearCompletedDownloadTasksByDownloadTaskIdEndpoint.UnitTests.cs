@@ -7,7 +7,6 @@ public class ClearCompletedDownloadTasksByDownloadTaskIdEndpointUnitTests
     : BaseUnitTest<ClearCompletedDownloadTasksByDownloadTaskIdEndpoint>
 {
     public ClearCompletedDownloadTasksByDownloadTaskIdEndpointUnitTests()
-        : base()
     {
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>

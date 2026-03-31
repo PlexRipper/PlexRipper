@@ -13,9 +13,6 @@ namespace Reaparr.PlexApi.UnitTests;
 
 public class GetAccessiblePlexServersUnitTests : BaseUnitTest<GetAccessiblePlexServersCommandHandler>
 {
-    public GetAccessiblePlexServersUnitTests()
-        : base() { }
-
     private void SetCallMock(GetServerResourcesResponse response1, GetServerResourcesResponse response2)
     {
         Mock.Mock<IPlexApiClientFactory>()

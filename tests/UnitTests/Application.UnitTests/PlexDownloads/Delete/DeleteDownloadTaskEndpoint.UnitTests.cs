@@ -6,7 +6,6 @@ namespace Reaparr.Application.UnitTests;
 public class DeleteDownloadTaskEndpointUnitTests : BaseUnitTest<DeleteDownloadTaskEndpoint>
 {
     public DeleteDownloadTaskEndpointUnitTests()
-        : base()
     {
         Mock.Mock<IDownloadTaskUpdateDispatcher>()
             .Setup(x =>

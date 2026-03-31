@@ -7,9 +7,6 @@ namespace Reaparr.Application.UnitTests;
 
 public class SetupRadarrDownloadClientCommandUnitTests : BaseUnitTest<SetupRadarrDownloadClientCommandHandler>
 {
-    public SetupRadarrDownloadClientCommandUnitTests()
-        : base() { }
-
     // IRadarrSettings inherits IBaseSettingsModule<T> which has a static abstract member, making it
     // incompatible with Moq. Inject concrete RadarrSettings instances via TypedParameter instead.
 

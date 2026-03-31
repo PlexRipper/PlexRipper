@@ -9,9 +9,6 @@ namespace Reaparr.Application.UnitTests;
 
 public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCommandHandler>
 {
-    public StopDownloadTaskCommandUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldHaveFailedResult_WhenGivenAnInvalidId()
     {

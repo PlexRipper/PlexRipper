@@ -5,9 +5,6 @@ namespace Reaparr.BackgroundJobs.UnitTests;
 
 public class ResetFailedLibrarySyncJobsCommandHandlerUnitTests : BaseUnitTest<ResetFailedLibrarySyncJobsCommandHandler>
 {
-    public ResetFailedLibrarySyncJobsCommandHandlerUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldResetFailedJobsToQueued_WhenFailedJobsExistForServer()
     {

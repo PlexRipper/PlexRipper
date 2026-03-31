@@ -6,9 +6,6 @@ namespace Reaparr.Application.UnitTests;
 
 public class PausePlexServerDownloadsCommandUnitTests : BaseUnitTest<PausePlexServerDownloadsCommandHandler>
 {
-    public PausePlexServerDownloadsCommandUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldPauseServerAndStopAllActiveJobs()
     {

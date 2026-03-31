@@ -12,9 +12,6 @@ namespace Reaparr.Application.UnitTests;
 
 public class MoveDownloadFileFromFileTaskCommandUnitTests : BaseUnitTest<MoveDownloadFileFromFileTaskCommandHandler>
 {
-    public MoveDownloadFileFromFileTaskCommandUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldReturnFailedResult_WhenDirectoryNameIsEmpty()
     {

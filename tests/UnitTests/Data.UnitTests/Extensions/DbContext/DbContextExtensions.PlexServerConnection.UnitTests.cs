@@ -5,9 +5,6 @@ namespace Reaparr.Data.UnitTests;
 
 public class DbContextExtensionsPlexServerConnectionUnitTests : BaseUnitTest
 {
-    public DbContextExtensionsPlexServerConnectionUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldReturnAFailedResult_WhenThePlexServerIdIsInvalid()
     {

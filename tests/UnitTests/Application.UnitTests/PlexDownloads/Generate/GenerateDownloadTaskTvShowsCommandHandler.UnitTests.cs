@@ -7,9 +7,6 @@ namespace Reaparr.Application.UnitTests;
 public class GenerateDownloadTaskTvShowsCommandHandlerUnitTests
     : BaseUnitTest<GenerateDownloadTaskTvShowsCommandHandler>
 {
-    public GenerateDownloadTaskTvShowsCommandHandlerUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldHaveInsertedValidDownloadTaskTvShowsInDatabase_WhenGivenValidPlexTvShows()
     {

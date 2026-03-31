@@ -13,9 +13,6 @@ namespace Reaparr.Application.UnitTests;
 
 public class DirectPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DirectPlexDownloadClient>
 {
-    public DirectPlexDownloadClientStopAsyncUnitTests()
-        : base() { }
-
     // -------------------------------------------------------------------------
     // Shared helpers
     // -------------------------------------------------------------------------

@@ -7,9 +7,6 @@ namespace Reaparr.Settings.UnitTests;
 
 public class ConfigManagerLoadConfigUnitTests : BaseUnitTest<ConfigManager>
 {
-    public ConfigManagerLoadConfigUnitTests()
-        : base() { }
-
     [Test]
     public void ShouldLoadSettingsAndSendToUserSettings_WhenSettingsCanBeReadFromFile()
     {

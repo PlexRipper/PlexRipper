@@ -2,9 +2,6 @@ namespace Reaparr.PlexApi.UnitTests;
 
 public class MediaFileNameExtensionsUnitTests : BaseUnitTest
 {
-    public MediaFileNameExtensionsUnitTests()
-        : base() { }
-
     [Test]
     [Arguments("Dragon Ball Z Battle of Gods (2013) Remux-1080p.mkv", true)]
     [Arguments("Dragon Ball Z Resurrection 'F' (2015) Bluray-1080p.mkv", true)]

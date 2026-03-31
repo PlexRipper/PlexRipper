@@ -5,9 +5,6 @@ namespace Reaparr.Application.UnitTests;
 
 public class GetAllBackgroundJobsEndpointUnitTests : BaseUnitTest<GetAllBackgroundJobsEndpoint>
 {
-    public GetAllBackgroundJobsEndpointUnitTests()
-        : base() { }
-
     private string ToJsonString<T>(T value) =>
         value is null ? string.Empty : JsonSerializer.Serialize(value, DefaultJsonSerializerOptions.ConfigStandard);
 

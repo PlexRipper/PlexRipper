@@ -4,9 +4,6 @@ namespace Reaparr.Application.UnitTests;
 
 public class AddOrUpdatePlexAccountServersCommandHandlerUnitTests : BaseUnitTest
 {
-    public AddOrUpdatePlexAccountServersCommandHandlerUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldAddPlexAccountServerAssociations_WhenNoneExistsYet()
     {

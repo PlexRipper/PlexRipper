@@ -6,9 +6,6 @@ namespace Reaparr.Application.UnitTests;
 public class ClearCompletedDownloadTasksByServerIdEndpointUnitTests
     : BaseUnitTest<ClearCompletedDownloadTasksByServerIdEndpoint>
 {
-    public ClearCompletedDownloadTasksByServerIdEndpointUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldRemoveAllCompletedDownloadTasksForServer_WhenClearCompletedByServerIdEndpointIsCalled()
     {

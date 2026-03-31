@@ -11,9 +11,6 @@ namespace Reaparr.Application.UnitTests;
 
 public class DownloadJobUnitTests : BaseUnitTest<DownloadJob>
 {
-    public DownloadJobUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldSetDownloadAndDestinationPath_WhenDownloadTaskIsStarted()
     {

@@ -8,9 +8,6 @@ namespace Reaparr.Application.UnitTests;
 
 public class DownloadJobListenerUnitTests : BaseUnitTest<DownloadJobListener>
 {
-    public DownloadJobListenerUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldCheckMoveQueueAndDownloadQueue_WhenStatusIsDownloadFinished()
     {

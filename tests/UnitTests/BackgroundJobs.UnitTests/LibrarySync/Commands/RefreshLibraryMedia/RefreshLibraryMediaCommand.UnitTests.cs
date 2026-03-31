@@ -6,9 +6,6 @@ namespace Reaparr.BackgroundJobs.UnitTests;
 
 public class RefreshLibraryMediaCommandUnitTests : BaseCommandUnitTest<RefreshLibraryMediaCommand>
 {
-    public RefreshLibraryMediaCommandUnitTests()
-        : base() { }
-
     private async Task<PlexLibrary> GetUpdatedLibrary(Seed seed, PlexMediaType type)
     {
         var plexLibrary = await IDbContext

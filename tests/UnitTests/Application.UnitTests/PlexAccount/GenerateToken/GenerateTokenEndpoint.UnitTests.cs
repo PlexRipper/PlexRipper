@@ -7,9 +7,6 @@ namespace Reaparr.Application.UnitTests;
 
 public class GenerateTokenEndpointUnitTests : BaseUnitTest
 {
-    public GenerateTokenEndpointUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldGenerateToken_WhenSignInIsSuccessful()
     {

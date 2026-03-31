@@ -10,9 +10,6 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests
 {
     private readonly DownloadTaskTvShowValidator _validator = new();
 
-    public GenerateDownloadTaskTvShowEpisodesCommandHandlerUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldHaveFailedResult_WhenPlexTvShowsAreEmpty()
     {

@@ -7,9 +7,6 @@ namespace Reaparr.Application.UnitTests;
 
 public class GetDirectDownloadUrlCommandUnitTests : BaseUnitTest<GetDirectDownloadUrlCommandHandler>
 {
-    public GetDirectDownloadUrlCommandUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldReturnUrlWithoutDownloadQuery_WhenInitialProbeSucceeds()
     {

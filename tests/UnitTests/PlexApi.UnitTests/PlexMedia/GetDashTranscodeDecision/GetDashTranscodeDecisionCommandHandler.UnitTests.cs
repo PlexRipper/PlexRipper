@@ -9,9 +9,6 @@ namespace Reaparr.PlexApi.UnitTests;
 
 public class GetDashTranscodeDecisionCommandHandlerUnitTests : BaseUnitTest<GetDashTranscodeDecisionCommandHandler>
 {
-    public GetDashTranscodeDecisionCommandHandlerUnitTests()
-        : base() { }
-
     private static GetDashTranscodeDecisionCommand CreateCommand(int plexServerId) =>
         new(plexServerId, new TranscodeDecisionRequest("/library/metadata/56828"));
 

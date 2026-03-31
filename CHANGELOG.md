@@ -1,5 +1,24 @@
 Reaparr Changelog
 
+# [0.37.0-dev.5](https://github.com/Reaparr/Reaparr/compare/v0.37.0-dev.4...v0.37.0-dev.5) (2026-03-31)
+
+
+### Bug Fixes
+
+* **WebAPI:** Add Docker network hint to Sonarr/Radarr download client setup errors ([0ee8a69](https://github.com/Reaparr/Reaparr/commit/0ee8a697ec35759762ad2b153714f2ec7ff5936d))
+* **WebAPI:** Deauthenticate Radarr/Sonarr on Reaparr restart to force them to reauthenticate and ensure no stale auth remains in Radarr/Sonarr ([af39934](https://github.com/Reaparr/Reaparr/commit/af39934cab64678f1b68661ab58cb0a43e73e76a))
+* **WebAPI:** Fixed an annoying bug where downloads through Radarr/Sonarr would leave the downloaded files behind in the download directory ([cecaf4a](https://github.com/Reaparr/Reaparr/commit/cecaf4a05a02c96c18bc692e55e259ae41dfeabe))
+* **WebAPI:** Fixed an issue where if the stream downloader would detect a direct download plex decision, it would fail. Now it will correctly download it as direct instead of fail ([6474f8e](https://github.com/Reaparr/Reaparr/commit/6474f8e1383186d608b6122025c0432d77c38c8a))
+* **WebAPI:** Fixed the download task not being marked as Server Unreachable when the download fails mid download due to server offline ([ce42c28](https://github.com/Reaparr/Reaparr/commit/ce42c284493864eae4d9a8b66f49796818728d17))
+* **WebAPI:** Handle download client errors and improve error logging ([a8b75cb](https://github.com/Reaparr/Reaparr/commit/a8b75cb5160863bd0c9a7c30b75910deafaa9db7))
+* **WebAPI:** Handle download task deletion status and notify front-end ([540168c](https://github.com/Reaparr/Reaparr/commit/540168cd5bdfd27b077586e4903bca1dc7426e15))
+* Improve Docker networking UX for Sonarr/Radarr integration ([#560](https://github.com/Reaparr/Reaparr/issues/560)) ([762184f](https://github.com/Reaparr/Reaparr/commit/762184fc000b1bc9d9b4cafd53d23356f944f331))
+* **WebAPI:** Prevent the DownloadQueue to continue downloading when the server is offline ([8e1525f](https://github.com/Reaparr/Reaparr/commit/8e1525f89612e338b49d8d82db02c8fc210f7187))
+* **WebAPI:** Remove invalid DirectoryMeta includes from torrent queries ([d77ebe9](https://github.com/Reaparr/Reaparr/commit/d77ebe97691814d7e1d604cd9cca07f06c653221))
+* **Web-UI:** Show dynamic callback URL alert in Sonarr/Radarr integration settings ([8ec2b5e](https://github.com/Reaparr/Reaparr/commit/8ec2b5ed73a71b84a5c7737aed02ca3331f98ecb))
+* **WebAPI:** Some episodes of tv show would crash the download process when downloading. This is now fixed ([2bdbfd1](https://github.com/Reaparr/Reaparr/commit/2bdbfd15fe554b86f1f3ec64cf8ca3ca532e0fa4))
+* **Web-UI:** Update Discord invite link ([8ba4f73](https://github.com/Reaparr/Reaparr/commit/8ba4f739f45853cf14e74488cda4b6ce0a7aa6c1))
+
 # [0.37.0-dev.4](https://github.com/Reaparr/Reaparr/compare/v0.37.0-dev.3...v0.37.0-dev.4) (2026-03-17)
 
 

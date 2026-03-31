@@ -19,7 +19,6 @@ namespace Reaparr.Application;
 /// </summary>
 public class DashPlexDownloadClient : IPlexDownloadClient
 {
-    private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly IDashMpdCliWrapper _dashWrapper;
     private readonly ICommandExecutor _commandExecutor;
@@ -43,7 +42,7 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         INotificationHubService notificationHubService
     )
     {
-        _log = log.ForContext<DashPlexDownloadClient>();
+        log.ForContext<DashPlexDownloadClient>();
         _dashWrapper = dashWrapper;
         _commandExecutor = commandExecutor;
         _downloadTaskUpdateDispatcher = downloadTaskUpdateDispatcher;

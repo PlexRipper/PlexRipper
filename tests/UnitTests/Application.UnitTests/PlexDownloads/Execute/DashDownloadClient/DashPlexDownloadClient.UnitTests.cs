@@ -75,7 +75,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             CancellationToken
         );
 
-        SetupSpeedLimit(serverMachineIdentifier, 2000);
+        SetupSpeedLimit(serverMachineIdentifier);
 
         var progressSubject = new Subject<DashDownloadProgress>();
         var outputSubject = new Subject<string>();
@@ -103,7 +103,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             .Setup(x =>
                 x.OnStatusChangedAsync(
                     It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<DownloadStatus>(),
                     It.IsAny<CancellationToken>()
                 )
             )
@@ -112,7 +112,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             .Setup(x =>
                 x.OnStatusChangedAsync(
                     It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<DownloadStatus>(),
                     It.IsAny<Result>(),
                     It.IsAny<CancellationToken>()
                 )
@@ -183,7 +183,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             .Setup(x =>
                 x.OnStatusChangedAsync(
                     It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<DownloadStatus>(),
                     It.IsAny<CancellationToken>()
                 )
             )
@@ -192,7 +192,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             .Setup(x =>
                 x.OnStatusChangedAsync(
                     It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<DownloadStatus>(),
                     It.IsAny<Result>(),
                     It.IsAny<CancellationToken>()
                 )
@@ -259,7 +259,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             .Setup(x =>
                 x.OnStatusChangedAsync(
                     It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<DownloadStatus>(),
                     It.IsAny<CancellationToken>()
                 )
             )
@@ -268,7 +268,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             .Setup(x =>
                 x.OnStatusChangedAsync(
                     It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<DownloadStatus>(),
                     It.IsAny<Result>(),
                     It.IsAny<CancellationToken>()
                 )
@@ -333,7 +333,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             .Setup(x =>
                 x.OnStatusChangedAsync(
                     It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<DownloadStatus>(),
                     It.IsAny<CancellationToken>()
                 )
             )
@@ -342,7 +342,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             .Setup(x =>
                 x.OnStatusChangedAsync(
                     It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<DownloadStatus>(),
                     It.IsAny<Result>(),
                     It.IsAny<CancellationToken>()
                 )
@@ -436,7 +436,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             .Setup(x =>
                 x.OnStatusChangedAsync(
                     It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<DownloadStatus>(),
                     It.IsAny<CancellationToken>()
                 )
             )
@@ -445,7 +445,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             .Setup(x =>
                 x.OnStatusChangedAsync(
                     It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<DownloadStatus>(),
                     It.IsAny<Result>(),
                     It.IsAny<CancellationToken>()
                 )
@@ -539,7 +539,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             .Setup(x =>
                 x.OnStatusChangedAsync(
                     It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<DownloadStatus>(),
                     It.IsAny<CancellationToken>()
                 )
             )
@@ -639,7 +639,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             .Setup(x =>
                 x.OnStatusChangedAsync(
                     It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<DownloadStatus>(),
                     It.IsAny<CancellationToken>()
                 )
             )
@@ -738,7 +738,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             .Setup(x =>
                 x.OnStatusChangedAsync(
                     It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<DownloadStatus>(),
                     It.IsAny<CancellationToken>()
                 )
             )
@@ -835,7 +835,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
             .Setup(x =>
                 x.OnStatusChangedAsync(
                     It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<DownloadStatus>(),
                     It.IsAny<CancellationToken>()
                 )
             )

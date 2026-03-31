@@ -230,7 +230,7 @@ public class GetDirectDownloadUrlCommandUnitTests : BaseUnitTest<GetDirectDownlo
     private GetDirectDownloadUrlCommandHandler CreateSut() =>
         Mock.Create<GetDirectDownloadUrlCommandHandler>(new TypedParameter(typeof(IReaparrDbContext), IDbContext));
 
-    private SequenceStatusCodeHandler SetupHttpClientFactory(params HttpStatusCode[] statuses)
+    private void SetupHttpClientFactory(params HttpStatusCode[] statuses)
     {
         var handler = new SequenceStatusCodeHandler(statuses);
         var retryHandler = new DefaultHttpClientRetryHandler(new LoggerConfiguration().CreateLogger())
@@ -239,7 +239,6 @@ public class GetDirectDownloadUrlCommandUnitTests : BaseUnitTest<GetDirectDownlo
         };
         var httpClient = new HttpClient(retryHandler);
         Mock.Mock<IHttpClientFactory>().Setup(x => x.CreateClient(It.IsAny<string>())).Returns(httpClient);
-        return handler;
     }
 
     private sealed class SequenceStatusCodeHandler(params HttpStatusCode[] statuses) : HttpMessageHandler
@@ -315,14 +314,7 @@ public class GetDirectDownloadUrlCommandUnitTests : BaseUnitTest<GetDirectDownlo
             {
                 FallbackProbeRequestCount++;
 
-                try
-                {
-                    await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
-                }
-                catch (OperationCanceledException)
-                {
-                    throw;
-                }
+                await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
 
                 throw new InvalidOperationException("Fallback probe should be cancelled before completing.");
             }

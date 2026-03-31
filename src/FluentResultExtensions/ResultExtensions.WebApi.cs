@@ -7,8 +7,8 @@ namespace FluentResults;
 
 public static partial class ResultExtensions
 {
-    private const string NetworkTimeoutToken = "network timeout";
-    private const string TimedOutToken = "timed out";
+    private const string NETWORK_TIMEOUT_TOKEN = "network timeout";
+    private const string TIMED_OUT_TOKEN = "timed out";
 
     #region Properties
 
@@ -123,14 +123,14 @@ public static partial class ResultExtensions
         || result.Has503ServiceUnavailableError()
         || result.Has504GatewayTimeoutError()
         || result.Errors.Any(error =>
-            error.Message.Contains(NetworkTimeoutToken, StringComparison.OrdinalIgnoreCase)
-            || error.Message.Contains(TimedOutToken, StringComparison.OrdinalIgnoreCase)
+            error.Message.Contains(NETWORK_TIMEOUT_TOKEN, StringComparison.OrdinalIgnoreCase)
+            || error.Message.Contains(TIMED_OUT_TOKEN, StringComparison.OrdinalIgnoreCase)
             || (
                 error.Metadata.TryGetValue(ErrorMessageName, out var meta)
                 && meta is string metaStr
                 && (
-                    metaStr.Contains(NetworkTimeoutToken, StringComparison.OrdinalIgnoreCase)
-                    || metaStr.Contains(TimedOutToken, StringComparison.OrdinalIgnoreCase)
+                    metaStr.Contains(NETWORK_TIMEOUT_TOKEN, StringComparison.OrdinalIgnoreCase)
+                    || metaStr.Contains(TIMED_OUT_TOKEN, StringComparison.OrdinalIgnoreCase)
                 )
             )
         );

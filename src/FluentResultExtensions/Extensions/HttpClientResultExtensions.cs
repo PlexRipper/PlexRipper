@@ -5,7 +5,7 @@ namespace Reaparr.FluentResultExtensions;
 
 public static class HttpClientResultExtensions
 {
-    private const string HttpResponseMessageMetadataKey = "HttpResponseMessage";
+    private const string HTTP_RESPONSE_MESSAGE_METADATA_KEY = "HttpResponseMessage";
 
     public static async Task<Result<HttpResponseMessage>> SendResultAsync(
         this HttpClient httpClient,
@@ -28,7 +28,7 @@ public static class HttpClientResultExtensions
 
         var errorMessage = response.ReasonPhrase ?? "Request failed";
         var result = Result.Fail<HttpResponseMessage>(errorMessage).AddStatusCode(response.StatusCode, errorMessage);
-        result.Errors[0].Metadata[HttpResponseMessageMetadataKey] = response;
+        result.Errors[0].Metadata[HTTP_RESPONSE_MESSAGE_METADATA_KEY] = response;
         return result;
     }
 
@@ -42,7 +42,7 @@ public static class HttpClientResultExtensions
 
         var originalResponse = responseResult
             .Errors.FirstOrDefault()
-            ?.Metadata.GetValueOrDefault(HttpResponseMessageMetadataKey);
+            ?.Metadata.GetValueOrDefault(HTTP_RESPONSE_MESSAGE_METADATA_KEY);
         if (originalResponse is HttpResponseMessage httpResponseMessage)
             return httpResponseMessage;
 

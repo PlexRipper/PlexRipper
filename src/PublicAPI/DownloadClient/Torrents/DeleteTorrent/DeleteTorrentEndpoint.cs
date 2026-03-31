@@ -180,7 +180,6 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest>
     /// <summary>
     /// Resolves the root-level task key (Movie or TvShow) for each matched leaf file key.
     /// Movie file parents are a direct FK; episode file parents are resolved per leaf via
-    /// <see cref="IReaparrDbContextExtensions.GetRootDownloadTaskKeyAsync"/>.
     /// </summary>
     private async Task<List<DownloadTaskKey>> GetRootKeysAsync(
         IReadOnlyCollection<DownloadTaskKey> leafKeys,
@@ -217,7 +216,9 @@ public sealed class DeleteTorrentEndpoint : Endpoint<DeleteTorrentRequest>
 
         if (episodeFileIds.Count > 0)
         {
-            var episodeLeafKeys = leafKeys.Where(k => k.Type is DownloadTaskType.EpisodeData or DownloadTaskType.EpisodePart);
+            var episodeLeafKeys = leafKeys.Where(k =>
+                k.Type is DownloadTaskType.EpisodeData or DownloadTaskType.EpisodePart
+            );
             foreach (var episodeLeafKey in episodeLeafKeys)
             {
                 var rootKey = await _dbContext.GetRootDownloadTaskKeyAsync(episodeLeafKey, ct);

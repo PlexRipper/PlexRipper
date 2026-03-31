@@ -25,9 +25,7 @@ public static class HttpRequestMessageRetryProgressExtensions
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        return request.Options.TryGetValue(RetryProgressCallbackKey, out Action<HttpRequestRetryProgress>? callback)
-            ? callback
-            : null;
+        return request.Options.TryGetValue(RetryProgressCallbackKey, out var callback) ? callback : null;
     }
 
     public static void SetRetryCount(this HttpRequestMessage request, int retryCount)

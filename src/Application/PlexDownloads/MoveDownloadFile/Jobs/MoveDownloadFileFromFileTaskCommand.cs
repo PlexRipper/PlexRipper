@@ -41,8 +41,6 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
     private readonly IPath _path;
     private readonly IDownloadManagerSettings _downloadManagerSettings;
 
-    private string _filename = string.Empty;
-
     private readonly Channel<IDownloadFileTransferProgress> _progressChannel =
         Channel.CreateBounded<IDownloadFileTransferProgress>(
             new BoundedChannelOptions(1)
@@ -93,7 +91,7 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
         // Resolve paths
         var downloadFilePath = downloadTask.DownloadFilePath;
         var destinationPath = downloadTask.DestinationFilePath;
-        _filename = _path.GetFileName(downloadTask.DownloadFilePath);
+        _path.GetFileName(downloadTask.DownloadFilePath);
 
         _log.Here().Debug("Starting file move process for {DownloadFilePath}", downloadFilePath);
 

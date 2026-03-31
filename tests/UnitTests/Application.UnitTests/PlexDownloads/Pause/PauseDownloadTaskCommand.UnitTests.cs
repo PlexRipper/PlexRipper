@@ -289,17 +289,17 @@ public class DownloadCommandsPauseDownloadTasksAsyncUnitTests : BaseUnitTest<Pau
 
         var downloadingTask = await IDbContext.GetDownloadTaskFileAsync(downloadingKey, CancellationToken);
         downloadingTask.ShouldNotBeNull();
-        downloadingTask!.DownloadStatus.ShouldBe(DownloadStatus.Downloading);
+        downloadingTask.DownloadStatus.ShouldBe(DownloadStatus.Downloading);
         downloadingTask.DownloadSpeed.ShouldBe(1234);
 
         var movingTask = await IDbContext.GetDownloadTaskFileAsync(movingKey, CancellationToken);
         movingTask.ShouldNotBeNull();
-        movingTask!.DownloadStatus.ShouldBe(DownloadStatus.MovePaused);
+        movingTask.DownloadStatus.ShouldBe(DownloadStatus.MovePaused);
         movingTask.FileTransferSpeed.ShouldBe(0);
 
         var inactiveTask = await IDbContext.GetDownloadTaskFileAsync(inactiveKey, CancellationToken);
         inactiveTask.ShouldNotBeNull();
-        inactiveTask!.DownloadStatus.ShouldBe(DownloadStatus.Queued);
+        inactiveTask.DownloadStatus.ShouldBe(DownloadStatus.Queued);
     }
 
     [Test]

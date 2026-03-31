@@ -115,7 +115,7 @@ public class GetDashTranscodeDecisionCommandHandler
 
                 foreach (var part in media.Part ?? [])
                 {
-                    partDecisions.Add(part.Decision?.ToString()?.ToLowerInvariant() ?? "unknown");
+                    partDecisions.Add(part.Decision?.ToString().ToLowerInvariant() ?? "unknown");
 
                     foreach (var stream in part.Stream ?? [])
                     {

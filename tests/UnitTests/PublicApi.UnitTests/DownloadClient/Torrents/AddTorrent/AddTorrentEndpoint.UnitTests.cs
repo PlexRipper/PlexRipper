@@ -2,11 +2,10 @@ using BencodeNET.Objects;
 using BencodeNET.Torrents;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
-using Reaparr.PublicAPI;
 
 // ReSharper disable RedundantAssignment
 
-namespace PublicApi.UnitTests;
+namespace Reaparr.PublicAPI.UnitTests;
 
 public class AddTorrentEndpointUnitTests : BaseUnitTest
 {

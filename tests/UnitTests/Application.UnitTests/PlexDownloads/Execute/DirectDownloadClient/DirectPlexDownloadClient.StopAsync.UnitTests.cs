@@ -55,7 +55,7 @@ public class DirectPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DirectPle
     /// Calling CancelTaskAsync() on the mock cancels the internal CTS, which unblocks
     /// the infinite Task.Delay in DownloadFileTaskAsync and raises DownloadFileCompleted(cancelled=true).
     /// </summary>
-    private static (Mock<IDownloadService> Mock, CancellationTokenSource Cts) BuildInProgressDownloadServiceMock()
+    private static Mock<IDownloadService> BuildInProgressDownloadServiceMock()
     {
         var cts = new CancellationTokenSource();
         var mock = new Mock<IDownloadService>();
@@ -85,7 +85,7 @@ public class DirectPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DirectPle
                 }
             );
 
-        return (mock, cts);
+        return mock;
     }
 
     // -------------------------------------------------------------------------
@@ -138,7 +138,7 @@ public class DirectPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DirectPle
             .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Once());
 
-        var (downloadServiceMock, _) = BuildInProgressDownloadServiceMock();
+        var downloadServiceMock = BuildInProgressDownloadServiceMock();
 
         // Act
         var sut = CreateSut(downloadServiceMock);
@@ -228,7 +228,7 @@ public class DirectPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DirectPle
             .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Once());
 
-        var (downloadServiceMock, _) = BuildInProgressDownloadServiceMock();
+        var downloadServiceMock = BuildInProgressDownloadServiceMock();
 
         // Act
         var sut = CreateSut(downloadServiceMock);
@@ -316,7 +316,7 @@ public class DirectPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DirectPle
             .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Once());
 
-        var (downloadServiceMock, _) = BuildInProgressDownloadServiceMock();
+        var downloadServiceMock = BuildInProgressDownloadServiceMock();
 
         var sut = CreateSut(downloadServiceMock);
         var startTask = sut.Start(downloadTask.ToKey(), CancellationToken);
@@ -407,7 +407,7 @@ public class DirectPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DirectPle
             .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Once());
 
-        var (downloadServiceMock, _) = BuildInProgressDownloadServiceMock();
+        var downloadServiceMock = BuildInProgressDownloadServiceMock();
 
         // Re-setup CancelTaskAsync with Verifiable after BuildInProgressDownloadServiceMock wires it
         var cancelCallCount = 0;

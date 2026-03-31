@@ -65,7 +65,7 @@ public class DashPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DashPlexDow
             .Setup(x =>
                 x.OnStatusChangedAsync(
                     It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<DownloadStatus>(),
                     It.IsAny<CancellationToken>()
                 )
             )
@@ -138,7 +138,7 @@ public class DashPlexDownloadClientStopAsyncUnitTests : BaseUnitTest<DashPlexDow
             .Setup(x =>
                 x.OnStatusChangedAsync(
                     It.IsAny<DownloadTaskKey>(),
-                    It.IsAny<Reaparr.Domain.DownloadStatus>(),
+                    It.IsAny<DownloadStatus>(),
                     It.IsAny<CancellationToken>()
                 )
             )

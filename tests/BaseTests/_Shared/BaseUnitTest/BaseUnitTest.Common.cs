@@ -22,7 +22,6 @@ public partial class BaseUnitTest
     /// <summary>
     /// This constructor is run before every test
     /// </summary>
-    /// <param name="output">Sets up the logging system for logging during testing.</param>
     /// <param name="logEventLevel"></param>
     protected BaseUnitTest(LogEventLevel logEventLevel = LogEventLevel.Verbose)
     {

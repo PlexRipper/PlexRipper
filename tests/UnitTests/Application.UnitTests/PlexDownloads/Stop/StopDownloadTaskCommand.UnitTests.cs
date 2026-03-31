@@ -118,7 +118,6 @@ public class StopDownloadTaskCommandUnitTests : BaseUnitTest<StopDownloadTaskCom
 
         var dbContext = IDbContext;
         var allMovieFileTasks = await dbContext.DownloadTaskMovieFile.ToListAsync(CancellationToken);
-        var movieFileTasks = allMovieFileTasks.Where(f => f.ParentId == movieDownloadTasks.First().Id).ToList();
 
         SetupFileSystem(fs =>
         {

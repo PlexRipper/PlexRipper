@@ -61,7 +61,7 @@ public class PlexApiClient : IPlexApiClient
 
             if (!ReferenceEquals(replacementContent, originalContent))
             {
-                originalContent?.Dispose();
+                originalContent.Dispose();
                 response.Content = replacementContent;
             }
         }

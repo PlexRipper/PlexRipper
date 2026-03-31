@@ -47,7 +47,7 @@ public class PausePlexServerDownloadsCommandUnitTests : BaseUnitTest<PausePlexSe
 
         var server = await IDbContext.PlexServers.GetAsync(plexServerId, CancellationToken);
         server.ShouldNotBeNull();
-        server!.IsDownloadsPausedByUser.ShouldBeTrue();
+        server.IsDownloadsPausedByUser.ShouldBeTrue();
 
         Mock.Mock<ICommandExecutor>()
             .Verify(

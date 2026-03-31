@@ -617,7 +617,6 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
         orderedChildTasks.Count.ShouldBeGreaterThan(1);
 
         var firstStoppedTask = orderedChildTasks[0];
-        var otherStoppedTaskIds = orderedChildTasks.Skip(1).Select(x => x.Id).ToList();
 
         Mock.Mock<IDownloadTaskScheduler>()
             .Setup(x => x.IsDownloading(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
@@ -694,7 +693,6 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
 
         var completedTask = orderedChildTasks[0];
         var taskToStart = orderedChildTasks[1];
-        var otherStoppedTaskIds = orderedChildTasks.Skip(2).Select(x => x.Id).ToList();
 
         await IDbContext
             .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == completedTask.Id)

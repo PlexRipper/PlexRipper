@@ -615,7 +615,7 @@ public class DirectPlexDownloadClientStartUnitTests : BaseUnitTest<DirectPlexDow
 
         SetupCommandExecutor();
 
-        var dlPackage = MakeDownloadPackage(10 * 1024);
+        var dlPackage = MakeDownloadPackage();
         var downloadServiceMock = new Mock<IDownloadService>();
         downloadServiceMock.Setup(x => x.Clear()).Returns(Task.CompletedTask);
         downloadServiceMock.Setup(x => x.CancelTaskAsync()).Returns(Task.CompletedTask);

@@ -29,7 +29,7 @@ public class ResumePlexServerDownloadsCommandUnitTests : BaseUnitTest<ResumePlex
 
         var server = await IDbContext.PlexServers.GetAsync(plexServerId, CancellationToken);
         server.ShouldNotBeNull();
-        server!.IsDownloadsPausedByUser.ShouldBeFalse();
+        server.IsDownloadsPausedByUser.ShouldBeFalse();
 
         Mock.Mock<IEventPublisher>()
             .Verify(

@@ -173,7 +173,7 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
                 Snapshot = snapshot,
             };
 
-            _progressByNodeId.AddOrUpdate(key.Id, _ => update, (_, __) => update);
+            _progressByNodeId.AddOrUpdate(key.Id, _ => update, (_, _) => update);
 
             // On the first progress event for this node, bypass the periodic flush so the
             // front-end receives data immediately instead of waiting up to 1 second.
@@ -378,7 +378,7 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
                         flushedProgress.Key
                     );
                 flushResult.LogError();
-                _progressByNodeId.AddOrUpdate(flushedProgress.NodeId, _ => flushedProgress, (_, __) => flushedProgress);
+                _progressByNodeId.AddOrUpdate(flushedProgress.NodeId, _ => flushedProgress, (_, _) => flushedProgress);
             }
         }
 
@@ -394,7 +394,7 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
                     _progressByNodeId.AddOrUpdate(
                         bufferedProgress.NodeId,
                         _ => bufferedProgress,
-                        (_, __) => bufferedProgress
+                        (_, _) => bufferedProgress
                     );
                 }
             }

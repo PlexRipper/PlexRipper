@@ -7,11 +7,11 @@ namespace Reaparr.Settings.UnitTests;
 
 public class ConfigManagerMigrateLegacyFileNamesUnitTests : BaseUnitTest<ConfigManager>
 {
-    private const string ConfigDirectory = "/config";
-    private const string LegacyConfigPath = "/config/PlexRipperSettings.json";
-    private const string ConfigPath = "/config/TEST_ReaparrSettings.json";
-    private const string LegacyDatabasePath = "/config/PlexRipperDB.db";
-    private const string DatabasePath = "/config/ReaparrDB.db";
+    private const string CONFIG_DIRECTORY = "/config";
+    private const string LEGACY_CONFIG_PATH = "/config/PlexRipperSettings.json";
+    private const string CONFIG_PATH = "/config/TEST_ReaparrSettings.json";
+    private const string LEGACY_DATABASE_PATH = "/config/PlexRipperDB.db";
+    private const string DATABASE_PATH = "/config/ReaparrDB.db";
 
     private void SetupDependencies()
     {
@@ -19,10 +19,10 @@ public class ConfigManagerMigrateLegacyFileNamesUnitTests : BaseUnitTest<ConfigM
         Mock.Mock<IUserSettings>().Setup(x => x.UpdateSettings(It.IsAny<ISettingsModel>())).Returns(new UserSettings());
         Mock.Mock<IUserSettings>().Setup(x => x.Reset());
 
-        Mock.Mock<IPathProvider>().SetupGet(x => x.ConfigDirectory).Returns(ConfigDirectory);
+        Mock.Mock<IPathProvider>().SetupGet(x => x.ConfigDirectory).Returns(CONFIG_DIRECTORY);
         Mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns("TEST_ReaparrSettings.json");
-        Mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(ConfigPath);
-        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(DatabasePath);
+        Mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(CONFIG_PATH);
+        Mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(DATABASE_PATH);
     }
 
     [Test]
@@ -33,8 +33,8 @@ public class ConfigManagerMigrateLegacyFileNamesUnitTests : BaseUnitTest<ConfigM
         SetupFileSystem(system =>
         {
             fileSystem = system;
-            system.AddDirectory(ConfigDirectory);
-            system.AddFile(LegacyConfigPath, new MockFileData("{}"));
+            system.AddDirectory(CONFIG_DIRECTORY);
+            system.AddFile(LEGACY_CONFIG_PATH, new MockFileData("{}"));
         });
         SetupDependencies();
 
@@ -44,8 +44,8 @@ public class ConfigManagerMigrateLegacyFileNamesUnitTests : BaseUnitTest<ConfigM
         // Assert
         result.IsSuccess.ShouldBeTrue();
         fileSystem.ShouldNotBeNull();
-        fileSystem.FileExists(LegacyConfigPath).ShouldBeFalse();
-        fileSystem.FileExists(ConfigPath).ShouldBeTrue();
+        fileSystem.FileExists(LEGACY_CONFIG_PATH).ShouldBeFalse();
+        fileSystem.FileExists(CONFIG_PATH).ShouldBeTrue();
     }
 
     [Test]
@@ -56,7 +56,7 @@ public class ConfigManagerMigrateLegacyFileNamesUnitTests : BaseUnitTest<ConfigM
         SetupFileSystem(system =>
         {
             fileSystem = system;
-            system.AddDirectory(ConfigDirectory);
+            system.AddDirectory(CONFIG_DIRECTORY);
         });
         SetupDependencies();
 
@@ -66,25 +66,25 @@ public class ConfigManagerMigrateLegacyFileNamesUnitTests : BaseUnitTest<ConfigM
         // Assert
         result.IsSuccess.ShouldBeTrue();
         fileSystem.ShouldNotBeNull();
-        fileSystem.FileExists(ConfigPath).ShouldBeTrue();
+        fileSystem.FileExists(CONFIG_PATH).ShouldBeTrue();
     }
 
     [Test]
     public void ShouldRenameLegacyDatabaseFiles_WhenOldDbAndSidecarsExistAndNewMissing()
     {
         // Arrange
-        var legacyWalPath = LegacyDatabasePath + "-wal";
-        var legacyShmPath = LegacyDatabasePath + "-shm";
-        var walPath = DatabasePath + "-wal";
-        var shmPath = DatabasePath + "-shm";
+        var legacyWalPath = LEGACY_DATABASE_PATH + "-wal";
+        var legacyShmPath = LEGACY_DATABASE_PATH + "-shm";
+        var walPath = DATABASE_PATH + "-wal";
+        var shmPath = DATABASE_PATH + "-shm";
 
         MockFileSystem? fileSystem = null;
         SetupFileSystem(system =>
         {
             fileSystem = system;
-            system.AddDirectory(ConfigDirectory);
-            system.AddFile(ConfigPath, new MockFileData("{}"));
-            system.AddFile(LegacyDatabasePath, new MockFileData(string.Empty));
+            system.AddDirectory(CONFIG_DIRECTORY);
+            system.AddFile(CONFIG_PATH, new MockFileData("{}"));
+            system.AddFile(LEGACY_DATABASE_PATH, new MockFileData(string.Empty));
             system.AddFile(legacyWalPath, new MockFileData(string.Empty));
             system.AddFile(legacyShmPath, new MockFileData(string.Empty));
         });
@@ -96,10 +96,10 @@ public class ConfigManagerMigrateLegacyFileNamesUnitTests : BaseUnitTest<ConfigM
         // Assert
         result.IsSuccess.ShouldBeTrue();
         fileSystem.ShouldNotBeNull();
-        fileSystem.FileExists(LegacyDatabasePath).ShouldBeFalse();
+        fileSystem.FileExists(LEGACY_DATABASE_PATH).ShouldBeFalse();
         fileSystem.FileExists(legacyWalPath).ShouldBeFalse();
         fileSystem.FileExists(legacyShmPath).ShouldBeFalse();
-        fileSystem.FileExists(DatabasePath).ShouldBeTrue();
+        fileSystem.FileExists(DATABASE_PATH).ShouldBeTrue();
         fileSystem.FileExists(walPath).ShouldBeTrue();
         fileSystem.FileExists(shmPath).ShouldBeTrue();
     }
@@ -112,11 +112,11 @@ public class ConfigManagerMigrateLegacyFileNamesUnitTests : BaseUnitTest<ConfigM
         SetupFileSystem(system =>
         {
             fileSystem = system;
-            system.AddDirectory(ConfigDirectory);
-            system.AddFile(LegacyConfigPath, new MockFileData("legacy"));
-            system.AddFile(ConfigPath, new MockFileData("{}"));
-            system.AddFile(LegacyDatabasePath, new MockFileData("legacy-db"));
-            system.AddFile(DatabasePath, new MockFileData("new-db"));
+            system.AddDirectory(CONFIG_DIRECTORY);
+            system.AddFile(LEGACY_CONFIG_PATH, new MockFileData("legacy"));
+            system.AddFile(CONFIG_PATH, new MockFileData("{}"));
+            system.AddFile(LEGACY_DATABASE_PATH, new MockFileData("legacy-db"));
+            system.AddFile(DATABASE_PATH, new MockFileData("new-db"));
         });
         SetupDependencies();
 
@@ -126,27 +126,27 @@ public class ConfigManagerMigrateLegacyFileNamesUnitTests : BaseUnitTest<ConfigM
         // Assert
         result.IsSuccess.ShouldBeTrue();
         fileSystem.ShouldNotBeNull();
-        fileSystem.GetFile(LegacyConfigPath).TextContents.ShouldBe("legacy");
-        fileSystem.GetFile(ConfigPath).TextContents.ShouldBe("{}");
-        fileSystem.GetFile(LegacyDatabasePath).TextContents.ShouldBe("legacy-db");
-        fileSystem.GetFile(DatabasePath).TextContents.ShouldBe("new-db");
+        fileSystem.GetFile(LEGACY_CONFIG_PATH).TextContents.ShouldBe("legacy");
+        fileSystem.GetFile(CONFIG_PATH).TextContents.ShouldBe("{}");
+        fileSystem.GetFile(LEGACY_DATABASE_PATH).TextContents.ShouldBe("legacy-db");
+        fileSystem.GetFile(DATABASE_PATH).TextContents.ShouldBe("new-db");
     }
 
     [Test]
     public void ShouldRenameOnlyWal_WhenOnlyWalPresent()
     {
         // Arrange
-        var legacyWalPath = LegacyDatabasePath + "-wal";
-        var walPath = DatabasePath + "-wal";
-        var shmPath = DatabasePath + "-shm";
+        var legacyWalPath = LEGACY_DATABASE_PATH + "-wal";
+        var walPath = DATABASE_PATH + "-wal";
+        var shmPath = DATABASE_PATH + "-shm";
 
         MockFileSystem? fileSystem = null;
         SetupFileSystem(system =>
         {
             fileSystem = system;
-            system.AddDirectory(ConfigDirectory);
-            system.AddFile(ConfigPath, new MockFileData("{}"));
-            system.AddFile(DatabasePath, new MockFileData("db"));
+            system.AddDirectory(CONFIG_DIRECTORY);
+            system.AddFile(CONFIG_PATH, new MockFileData("{}"));
+            system.AddFile(DATABASE_PATH, new MockFileData("db"));
             system.AddFile(legacyWalPath, new MockFileData("wal"));
         });
         SetupDependencies();

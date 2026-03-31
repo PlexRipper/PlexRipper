@@ -15,12 +15,11 @@ namespace Reaparr.External;
 /// </summary>
 public class DashMpdCliWrapper : IDashMpdCliWrapper
 {
-    private const string NetworkErrorToken = "network error";
-    private const string MaxNetworkErrorToken = "max_error_count";
+    private const string NETWORK_ERROR_TOKEN = "network error";
+    private const string MAX_NETWORK_ERROR_TOKEN = "max_error_count";
 
     private readonly ILogger _log;
     private readonly IFile _file;
-    private readonly IDirectory _directory;
     private readonly CancellationTokenSource _gracefulCts = new();
     private readonly CancellationTokenSource _forcefulCts = new();
     private readonly string _binaryPath;
@@ -29,7 +28,6 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
     private readonly Subject<DashDownloadProgress> _progressSubject = new();
     private readonly Subject<DashDownloadCompletedEventArgs> _downloadCompletedSubject = new();
 
-    private string? _workingDirectory;
     private bool _hasNetworkError;
     private string? _networkErrorLine;
 
@@ -37,11 +35,10 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
     /// Initializes a new instance of the <see cref="DashMpdCliWrapper"/> class.
     /// </summary>
     /// <exception cref="PlatformNotSupportedException">Thrown when the current platform is not supported.</exception>
-    public DashMpdCliWrapper(ILogger logger, IFile file, IDirectory directory)
+    public DashMpdCliWrapper(ILogger logger, IFile file)
     {
         _log = logger.ForContext<DashMpdCliWrapper>();
         _file = file;
-        _directory = directory;
         _binaryPath = GetDefaultBinaryPath();
     }
 
@@ -88,8 +85,6 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
 
         foreach (var (key, value) in options.EnvironmentVariables)
             _log.Here().Verbose("Environment variable: {Key}={Value}", key, value);
-
-        _workingDirectory = options.WorkingDirectory;
 
         var command = Cli.Wrap(_binaryPath)
             .WithValidation(CommandResultValidation.None)
@@ -235,8 +230,8 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
     }
 
     private static bool IsNetworkErrorLine(string line) =>
-        line.Contains(NetworkErrorToken, StringComparison.OrdinalIgnoreCase)
-        || line.Contains(MaxNetworkErrorToken, StringComparison.OrdinalIgnoreCase);
+        line.Contains(NETWORK_ERROR_TOKEN, StringComparison.OrdinalIgnoreCase)
+        || line.Contains(MAX_NETWORK_ERROR_TOKEN, StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
     /// Stops the running process gracefully, then forcefully if it does not exit within the grace period.

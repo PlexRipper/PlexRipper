@@ -4,7 +4,7 @@ namespace Reaparr.Application;
 
 public static partial class DashOutputFileNameCleaner
 {
-    private static readonly HashSet<string> NoiseTokens =
+    private static readonly HashSet<string> _noiseTokens =
     [
         "webdl",
         "web-dl",
@@ -60,7 +60,7 @@ public static partial class DashOutputFileNameCleaner
 
     public static string NormalizeForDashOutput(string originalFileName, VideoQuality quality)
     {
-        var input = Path.GetFileNameWithoutExtension(originalFileName ?? string.Empty);
+        var input = Path.GetFileNameWithoutExtension(originalFileName);
         if (string.IsNullOrWhiteSpace(input))
             return $"download.WEB-DL.{GetQualityToken(quality)}.mkv";
 
@@ -134,7 +134,7 @@ public static partial class DashOutputFileNameCleaner
     {
         var normalized = token.ToLowerInvariant();
 
-        if (NoiseTokens.Contains(normalized))
+        if (_noiseTokens.Contains(normalized))
             return true;
 
         if (QualityTokenRegex().IsMatch(normalized))
@@ -149,7 +149,7 @@ public static partial class DashOutputFileNameCleaner
     private static bool ShouldDropTokenPair(string firstToken, string secondToken)
     {
         var combined = string.Concat(firstToken, secondToken).ToLowerInvariant();
-        return NoiseTokens.Contains(combined);
+        return _noiseTokens.Contains(combined);
     }
 
     private static bool IsYearToken(string token) =>

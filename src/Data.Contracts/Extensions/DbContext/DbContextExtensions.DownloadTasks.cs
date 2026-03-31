@@ -77,7 +77,7 @@ public static partial class DbContextExtensions
         // Filter BEFORE projecting so EF Core can translate the UNION across different entity
         // types. Applying .Where() after .ProjectToKey() (which uses Select) would place the
         // predicate after a client projection and cause a translation exception.
-        var queries = new IQueryable<DownloadTaskKey>[]
+        var queries = new[]
         {
             dbContext.DownloadTaskTvShow.Where(x => filtered.Contains(x.Id)).ProjectToKey(),
             dbContext.DownloadTaskTvShowSeason.Where(x => filtered.Contains(x.Id)).ProjectToKey(),

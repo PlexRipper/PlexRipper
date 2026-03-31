@@ -69,7 +69,7 @@ public class GetDirectDownloadUrlCommandHandler : ICommandHandler<GetDirectDownl
 
         var statusCode = initialProbeResult.Value.StatusCode;
 
-        if (statusCode != System.Net.HttpStatusCode.Forbidden)
+        if (statusCode != HttpStatusCode.Forbidden)
         {
             fallbackProbeCancellationTokenSource.Cancel();
             return Result

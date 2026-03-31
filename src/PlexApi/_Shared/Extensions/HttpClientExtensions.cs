@@ -10,8 +10,6 @@ namespace Reaparr.PlexApi;
 
 public static class HttpClientExtensions
 {
-    private static readonly ILogger _log = Log.ForContext(typeof(HttpClientExtensions));
-
     /// <summary>
     /// This will convert from SpeakEasy exceptions to the use of FluentResults
     /// </summary>

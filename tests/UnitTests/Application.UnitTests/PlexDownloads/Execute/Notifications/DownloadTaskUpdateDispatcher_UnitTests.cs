@@ -7,9 +7,6 @@ namespace Reaparr.Application.UnitTests;
 
 public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUpdateDispatcher>
 {
-    public DownloadTaskUpdateDispatcherUnitTests()
-        : base() { }
-
     [Test]
     public async Task ShouldIncludeSeasonAndTvShowInPatch_WhenEpisodeProgressIsUpdated()
     {
@@ -590,23 +587,45 @@ public class DownloadTaskUpdateDispatcherUnitTests : BaseUnitTest<DownloadTaskUp
         completedProgressResult.IsSuccess.ShouldBeTrue();
         siblingProgressResult.IsSuccess.ShouldBeTrue();
 
-        await Task.Delay(1500, CancellationToken);
+        await WaitUntilAsync(async () =>
+        {
+            var persistedEpisodeFiles = await IDbContext
+                .DownloadTaskTvShowEpisodeFile.AsNoTracking()
+                .Where(x => x.Id == completedEpisodeFile.Id || x.Id == siblingEpisodeFile.Id)
+                .ToListAsync(CancellationToken);
+
+            var persistedCompletedEpisodeFile = persistedEpisodeFiles.Single(x => x.Id == completedEpisodeFile.Id);
+            var persistedSiblingEpisodeFile = persistedEpisodeFiles.Single(x => x.Id == siblingEpisodeFile.Id);
+
+            if (
+                persistedCompletedEpisodeFile
+                is not { DataReceived: 1_000, DataTotal: 1_000, Percentage: 100, DownloadSpeed: 0 }
+            )
+                return false;
+
+            return persistedSiblingEpisodeFile
+                is { DataReceived: 500, DataTotal: 2_000, Percentage: 25, DownloadSpeed: 123 };
+        });
+
         await sut.StopAsync(CancellationToken.None);
 
         var updatedEpisodeFiles = await IDbContext
             .DownloadTaskTvShowEpisodeFile.AsNoTracking()
-            .OrderBy(x => x.Id)
+            .Where(x => x.Id == completedEpisodeFile.Id || x.Id == siblingEpisodeFile.Id)
             .ToListAsync(CancellationToken);
 
-        updatedEpisodeFiles[0].DataReceived.ShouldBe(1_000);
-        updatedEpisodeFiles[0].DataTotal.ShouldBe(1_000);
-        updatedEpisodeFiles[0].Percentage.ShouldBe(100);
-        updatedEpisodeFiles[0].DownloadSpeed.ShouldBe(0);
+        var updatedCompletedEpisodeFile = updatedEpisodeFiles.Single(x => x.Id == completedEpisodeFile.Id);
+        var updatedSiblingEpisodeFile = updatedEpisodeFiles.Single(x => x.Id == siblingEpisodeFile.Id);
 
-        updatedEpisodeFiles[1].DataReceived.ShouldBe(500);
-        updatedEpisodeFiles[1].DataTotal.ShouldBe(2_000);
-        updatedEpisodeFiles[1].Percentage.ShouldBe(25);
-        updatedEpisodeFiles[1].DownloadSpeed.ShouldBe(123);
+        updatedCompletedEpisodeFile.DataReceived.ShouldBe(1_000);
+        updatedCompletedEpisodeFile.DataTotal.ShouldBe(1_000);
+        updatedCompletedEpisodeFile.Percentage.ShouldBe(100);
+        updatedCompletedEpisodeFile.DownloadSpeed.ShouldBe(0);
+
+        updatedSiblingEpisodeFile.DataReceived.ShouldBe(500);
+        updatedSiblingEpisodeFile.DataTotal.ShouldBe(2_000);
+        updatedSiblingEpisodeFile.Percentage.ShouldBe(25);
+        updatedSiblingEpisodeFile.DownloadSpeed.ShouldBe(123);
     }
 
     [Test]

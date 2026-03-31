@@ -29,13 +29,30 @@ public class DeleteDownloadTaskEndpointUnitTests : BaseUnitTest<DeleteDownloadTa
             .DownloadTaskTvShowEpisodeFile.Select(x => x.Id)
             .SingleAsync(CancellationToken);
 
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.Is<DownloadTaskKey>(k => k.Id == episodeFileId),
+                    DownloadStatus.Deleted,
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
+
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<StopDownloadTaskCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Once());
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<DeleteDownloadTasksByKeyCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Ok())
+            .Returns(
+                (DeleteDownloadTasksByKeyCommand command, CancellationToken ct) =>
+                    new DeleteDownloadTasksByKeyCommandHandler(
+                        dbContext,
+                        Mock.Mock<IDownloadTaskUpdateDispatcher>().Object
+                    ).ExecuteAsync(command, ct)
+            )
             .Verifiable(Times.Once());
 
         // Act
@@ -91,13 +108,30 @@ public class DeleteDownloadTaskEndpointUnitTests : BaseUnitTest<DeleteDownloadTa
         var dbContext = IDbContext;
         var movieId = await dbContext.DownloadTaskMovie.Select(x => x.Id).SingleAsync(CancellationToken);
 
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.Is<DownloadTaskKey>(k => k.Id == movieId),
+                    DownloadStatus.Deleted,
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
+
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<StopDownloadTaskCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Ok())
             .Verifiable(Times.Once());
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<DeleteDownloadTasksByKeyCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Ok())
+            .Returns(
+                (DeleteDownloadTasksByKeyCommand command, CancellationToken ct) =>
+                    new DeleteDownloadTasksByKeyCommandHandler(
+                        dbContext,
+                        Mock.Mock<IDownloadTaskUpdateDispatcher>().Object
+                    ).ExecuteAsync(command, ct)
+            )
             .Verifiable(Times.Once());
 
         // Act

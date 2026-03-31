@@ -285,16 +285,15 @@ public class DownloadTaskUpdateDispatcher : BackgroundService, IDownloadTaskUpda
                 {
                     using var dbContext = await _dbContextFactory.CreateAsync();
 
-                    // Prefer the latest buffered value in case multiple progress updates arrived
-                    // before the background loop started processing this channel item.
-                    var effectiveUpdate =
-                        _progressByNodeId.TryGetValue(update.NodeId, out var buffered) && buffered.Progress is not null
-                            ? buffered
-                            : update;
+                    if (
+                        !_progressByNodeId.TryGetValue(update.NodeId, out var effectiveUpdate)
+                        || effectiveUpdate.Progress is null
+                    )
+                        return;
 
                     await dbContext.UpdateDownloadProgress(
                         effectiveUpdate.Key,
-                        effectiveUpdate.Progress!,
+                        effectiveUpdate.Progress,
                         effectiveUpdate.Snapshot,
                         stoppingToken
                     );

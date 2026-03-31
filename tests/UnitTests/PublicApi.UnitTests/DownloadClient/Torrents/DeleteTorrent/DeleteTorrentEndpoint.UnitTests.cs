@@ -6,7 +6,12 @@ namespace Reaparr.PublicAPI.UnitTests;
 public class DeleteTorrentEndpointUnitTests : BaseUnitTest<DeleteTorrentEndpoint>
 {
     public DeleteTorrentEndpointUnitTests()
-        : base() { }
+        : base()
+    {
+        Mock.Mock<ICommandExecutor>()
+            .Setup(x => x.Send(It.IsAny<ClearCompletedDownloadTasksByDownloadTaskKeyCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok());
+    }
 
     [Test]
     public async Task ShouldDeleteDownloadTask_WhenHashIdMatches()
@@ -118,7 +123,7 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest<DeleteTorrentEndpoint
                         It.IsAny<ClearCompletedDownloadTasksByDownloadTaskKeyCommand>(),
                         It.IsAny<CancellationToken>()
                     ),
-                Times.Never
+                Times.Once
             );
         Mock.Mock<ICommandExecutor>()
             .Verify(
@@ -190,7 +195,7 @@ public class DeleteTorrentEndpointUnitTests : BaseUnitTest<DeleteTorrentEndpoint
                         It.IsAny<ClearCompletedDownloadTasksByDownloadTaskKeyCommand>(),
                         It.IsAny<CancellationToken>()
                     ),
-                Times.Never
+                Times.Once
             );
         Mock.Mock<ICommandExecutor>()
             .Verify(

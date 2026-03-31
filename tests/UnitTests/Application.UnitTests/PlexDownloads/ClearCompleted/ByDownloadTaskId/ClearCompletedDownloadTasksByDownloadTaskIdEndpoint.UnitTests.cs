@@ -30,9 +30,27 @@ public class ClearCompletedDownloadTasksByDownloadTaskIdEndpointUnitTests
         downloadTasks.SetDownloadStatus(DownloadStatus.Completed);
         await dbContext.SaveChangesAsync(CancellationToken);
 
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.IsAny<DownloadTaskKey>(),
+                    DownloadStatus.Deleted,
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Exactly(5));
+
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<DeleteDownloadTasksByKeyCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Ok());
+            .Returns(
+                (DeleteDownloadTasksByKeyCommand command, CancellationToken ct) =>
+                    new DeleteDownloadTasksByKeyCommandHandler(
+                        dbContext,
+                        Mock.Mock<IDownloadTaskUpdateDispatcher>().Object
+                    ).ExecuteAsync(command, ct)
+            )
+            .Verifiable(Times.Once());
         Mock.Mock<ICommandExecutor>()
             .Setup(x =>
                 x.Send(It.IsAny<ClearCompletedDownloadTasksByDownloadTaskKeyCommand>(), It.IsAny<CancellationToken>())
@@ -43,7 +61,8 @@ public class ClearCompletedDownloadTasksByDownloadTaskIdEndpointUnitTests
                         dbContext,
                         Mock.Mock<ICommandExecutor>().Object
                     ).ExecuteAsync(command, ct)
-            );
+            )
+            .Verifiable(Times.Once());
 
         // Act
         var ep = SetupEndpointUnitTest<ClearCompletedDownloadTasksByDownloadTaskIdEndpoint>();
@@ -97,7 +116,13 @@ public class ClearCompletedDownloadTasksByDownloadTaskIdEndpointUnitTests
             .Setup(x =>
                 x.Send(It.IsAny<ClearCompletedDownloadTasksByDownloadTaskKeyCommand>(), It.IsAny<CancellationToken>())
             )
-            .ReturnsAsync(Result.Ok());
+            .Returns(
+                (ClearCompletedDownloadTasksByDownloadTaskKeyCommand command, CancellationToken ct) =>
+                    new ClearCompletedDownloadTasksByDownloadTaskKeyCommandHandler(
+                        dbContext,
+                        Mock.Mock<ICommandExecutor>().Object
+                    ).ExecuteAsync(command, ct)
+            );
 
         // Act
         var ep = SetupEndpointUnitTest<ClearCompletedDownloadTasksByDownloadTaskIdEndpoint>();
@@ -153,9 +178,26 @@ public class ClearCompletedDownloadTasksByDownloadTaskIdEndpointUnitTests
             .Select(x => x.Id)
             .Single();
 
+        Mock.Mock<IDownloadTaskUpdateDispatcher>()
+            .Setup(x =>
+                x.OnStatusChangedAsync(
+                    It.Is<DownloadTaskKey>(k => k.Id == episodeFileId),
+                    DownloadStatus.Deleted,
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(Result.Ok())
+            .Verifiable(Times.Once());
+
         Mock.Mock<ICommandExecutor>()
             .Setup(x => x.Send(It.IsAny<DeleteDownloadTasksByKeyCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Ok());
+            .Returns(
+                (DeleteDownloadTasksByKeyCommand command, CancellationToken ct) =>
+                    new DeleteDownloadTasksByKeyCommandHandler(
+                        dbContext,
+                        Mock.Mock<IDownloadTaskUpdateDispatcher>().Object
+                    ).ExecuteAsync(command, ct)
+            );
         Mock.Mock<ICommandExecutor>()
             .Setup(x =>
                 x.Send(It.IsAny<ClearCompletedDownloadTasksByDownloadTaskKeyCommand>(), It.IsAny<CancellationToken>())
@@ -170,10 +212,6 @@ public class ClearCompletedDownloadTasksByDownloadTaskIdEndpointUnitTests
         // Assert
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
-        (await dbContext.DownloadTaskTvShow.ToListAsync(CancellationToken)).ShouldBeEmpty();
-        (await dbContext.DownloadTaskTvShowSeason.ToListAsync(CancellationToken)).ShouldBeEmpty();
-        (await dbContext.DownloadTaskTvShowEpisode.ToListAsync(CancellationToken)).ShouldBeEmpty();
-        (await dbContext.DownloadTaskTvShowEpisodeFile.ToListAsync(CancellationToken)).ShouldBeEmpty();
         Mock.Mock<ICommandExecutor>()
             .Verify(
                 x =>

@@ -19,7 +19,7 @@
         </PackageReference>
         <PackageReference Include="FastEndpoints" Version="8.1.0" />
         <PackageReference Include="HttpClientToCurl" Version="2.1.1" />
-        <PackageReference Include="Polly" Version="8.6.5" />
+        <PackageReference Include="Polly" Version="8.6.6" />
     </ItemGroup>
     <ItemGroup>
         <Compile Include="..\Domain\GlobalUsings.cs" />

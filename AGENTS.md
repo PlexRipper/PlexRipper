@@ -6,7 +6,7 @@ Reaparr is a cross-platform Plex media downloader.
 |----------|-------|
 | Backend  | .NET 10, FastEndpoints, EF Core, Autofac, Quartz, SignalR (MessagePack), Serilog, Polly |
 | Frontend | Nuxt 4 / Vue 3, Pinia, Quasar, PrimeVue |
-| Testing  | xUnit, Shouldly, Moq, Bogus; Vitest, Cypress |
+| Testing  | TUnit, Shouldly, Moq, Bogus; Vitest, Cypress |
 
 > **Package manager:** The frontend uses **Bun exclusively** — never use npm, yarn, or pnpm.
 

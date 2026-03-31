@@ -220,13 +220,13 @@ Prefer `@api-urls` over `@api/api-paths` — they resolve to the same file.
 Run all frontend unit tests:
 
 ```bash
-cd src/AppHost/ClientApp && pnpm test
+bun --cwd src/AppHost/ClientApp test
 ```
 
 Run a specific test file:
 
 ```bash
-cd src/AppHost/ClientApp && pnpm vitest run tests/nuxt/stores/server-store/get-servers.test.ts
+bun --cwd src/AppHost/ClientApp vitest run tests/nuxt/stores/server-store/get-servers.test.ts
 ```
 
 ## Complete Example

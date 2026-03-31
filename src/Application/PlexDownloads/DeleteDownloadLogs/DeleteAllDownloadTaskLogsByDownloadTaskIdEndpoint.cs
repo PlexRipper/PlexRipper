@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using FastEndpoints;
 using FluentValidation;
 using Reaparr.Application.Contracts;

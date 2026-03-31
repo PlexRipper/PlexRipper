@@ -1,5 +1,4 @@
 using System.Net;
-using System.Net.Http;
 using Autofac;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Data.Contracts;

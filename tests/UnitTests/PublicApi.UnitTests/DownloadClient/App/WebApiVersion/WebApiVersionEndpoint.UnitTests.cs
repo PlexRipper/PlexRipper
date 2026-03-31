@@ -2,7 +2,6 @@ using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Reaparr.Data.Contracts;
-using Reaparr.PublicAPI;
 
 namespace Reaparr.PublicAPI.UnitTests;
 
@@ -29,8 +28,7 @@ public class WebApiVersionEndpointUnitTests : BaseUnitTest<WebApiVersionEndpoint
         }
         else
         {
-            Moq.Mock.Get(dbContext)
-                .Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never());
+            Moq.Mock.Get(dbContext).Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never());
         }
 
         var body = Encoding.UTF8.GetString(buffer.ToArray());

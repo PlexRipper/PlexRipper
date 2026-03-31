@@ -1,6 +1,5 @@
 using System.Net;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.Extensions.DependencyInjection;
 using Reaparr.Settings.Contracts;
 
 namespace Reaparr.AppHost;

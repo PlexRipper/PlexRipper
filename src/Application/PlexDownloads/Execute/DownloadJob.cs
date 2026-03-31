@@ -1,6 +1,4 @@
-﻿using System.Reactive.Linq;
-using System.Reactive.Threading.Tasks;
-using Autofac.Features.Indexed;
+﻿using Autofac.Features.Indexed;
 using Microsoft.EntityFrameworkCore;
 using Quartz;
 using Reaparr.Application.Contracts;

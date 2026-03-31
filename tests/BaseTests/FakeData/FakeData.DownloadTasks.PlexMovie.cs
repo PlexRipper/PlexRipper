@@ -1,5 +1,4 @@
 using ByteSizeLib;
-using Reaparr.Application;
 
 namespace Reaparr.BaseTests;
 

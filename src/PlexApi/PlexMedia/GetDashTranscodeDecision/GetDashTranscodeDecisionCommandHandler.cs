@@ -2,7 +2,6 @@ using FastEndpoints;
 using FluentValidation;
 using Flurl;
 using LukeHagar.PlexAPI.SDK.Models.Components;
-using LukeHagar.PlexAPI.SDK.Models.Requests;
 using Reaparr.Data.Contracts;
 using Reaparr.PlexApi.Contracts;
 

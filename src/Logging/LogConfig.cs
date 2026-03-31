@@ -4,7 +4,6 @@ using Serilog.Core;
 using Serilog.Enrichers.Sensitive;
 using Serilog.Events;
 using Serilog.Filters;
-using Serilog.Formatting.Display;
 using Serilog.Sinks.Console.LogThemes;
 using Serilog.Templates;
 

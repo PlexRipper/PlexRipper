@@ -3,7 +3,6 @@ using System.Text.Json;
 using LukeHagar.PlexAPI.SDK.Models.Errors;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
 using Newtonsoft.Json;
-using Reaparr.FluentResultExtensions;
 using JsonException = System.Text.Json.JsonException;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 

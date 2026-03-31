@@ -1,10 +1,8 @@
-﻿using System.IO.Abstractions;
-using Autofac;
+﻿using Autofac;
 using Autofac.Extras.Quartz;
 using Reaparr.Application;
 using Reaparr.Data;
 using Reaparr.Data.Contracts;
-using Reaparr.Environment;
 using Reaparr.Identity;
 using Reaparr.Identity.Contracts;
 using Reaparr.Settings.Contracts;

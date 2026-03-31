@@ -1,9 +1,6 @@
-using System.Net;
-using Microsoft.AspNetCore.HttpOverrides;
 using Reaparr.Application;
 using Reaparr.Environment;
 using Reaparr.FluentResultExtensions;
-using Reaparr.Settings.Contracts;
 
 namespace Reaparr.AppHost;
 

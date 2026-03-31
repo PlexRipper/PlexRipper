@@ -1,4 +1,3 @@
-using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.Reactive.Subjects;
 using Reaparr.Environment;

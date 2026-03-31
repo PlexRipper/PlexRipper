@@ -1,5 +1,3 @@
-using Reaparr.Domain;
-
 namespace Reaparr.SignalR.Contracts;
 
 public record DownloadPatchDTO

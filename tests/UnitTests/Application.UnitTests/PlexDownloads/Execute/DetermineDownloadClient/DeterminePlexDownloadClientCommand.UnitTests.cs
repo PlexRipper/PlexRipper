@@ -1,4 +1,3 @@
-using Reaparr.Application.Contracts;
 using Reaparr.PlexApi.Contracts;
 using Reaparr.Settings.Contracts;
 

@@ -1,6 +1,5 @@
 using System.Net;
 using System.Security.Claims;
-using System.Threading;
 using Autofac;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
@@ -1822,7 +1821,6 @@ public class HeaderAuthenticationMiddlewareUnitTests : BaseUnitTest<HeaderAuthen
 
                     // Act
                     await sut.InvokeAsync(context);
-
                 },
                 CancellationToken
             );

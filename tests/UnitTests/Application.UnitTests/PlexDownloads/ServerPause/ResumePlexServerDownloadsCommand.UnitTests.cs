@@ -11,9 +11,10 @@ public class ResumePlexServerDownloadsCommandUnitTests : BaseUnitTest<ResumePlex
         // Arrange
         await SetupDatabase(9811);
 
-        var plexServerId = (await IDbContext.PlexServers.FirstAsync(CancellationToken)).Id;
+        var dbContext = IDbContext;
+        var plexServerId = (await dbContext.PlexServers.FirstAsync(CancellationToken)).Id;
 
-        await IDbContext
+        await dbContext
             .PlexServers.Where(x => x.Id == plexServerId)
             .ExecuteUpdateAsync(p => p.SetProperty(x => x.IsDownloadsPausedByUser, true), CancellationToken);
 
@@ -27,7 +28,7 @@ public class ResumePlexServerDownloadsCommandUnitTests : BaseUnitTest<ResumePlex
         // Assert
         result.IsSuccess.ShouldBeTrue();
 
-        var server = await IDbContext.PlexServers.GetAsync(plexServerId, CancellationToken);
+        var server = await dbContext.PlexServers.GetAsync(plexServerId, CancellationToken);
         server.ShouldNotBeNull();
         server.IsDownloadsPausedByUser.ShouldBeFalse();
 

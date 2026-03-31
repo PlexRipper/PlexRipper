@@ -33,7 +33,6 @@ public class DashPlexDownloadClient : IPlexDownloadClient
     private DownloadTaskProgress _lastProgressUpdate = new();
 
     public DashPlexDownloadClient(
-        ILogger log,
         IReaparrDbContextFactory dbContextFactory,
         IDashMpdCliWrapper dashWrapper,
         ICommandExecutor commandExecutor,
@@ -42,7 +41,6 @@ public class DashPlexDownloadClient : IPlexDownloadClient
         INotificationHubService notificationHubService
     )
     {
-        log.ForContext<DashPlexDownloadClient>();
         _dashWrapper = dashWrapper;
         _commandExecutor = commandExecutor;
         _downloadTaskUpdateDispatcher = downloadTaskUpdateDispatcher;

@@ -91,7 +91,6 @@ public class MoveDownloadFileFromFileTaskCommandHandler : ICommandHandler<MoveDo
         // Resolve paths
         var downloadFilePath = downloadTask.DownloadFilePath;
         var destinationPath = downloadTask.DestinationFilePath;
-        _path.GetFileName(downloadTask.DownloadFilePath);
 
         _log.Here().Debug("Starting file move process for {DownloadFilePath}", downloadFilePath);
 

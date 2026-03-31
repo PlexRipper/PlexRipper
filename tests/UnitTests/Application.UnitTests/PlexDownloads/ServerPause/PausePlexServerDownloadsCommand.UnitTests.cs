@@ -21,11 +21,12 @@ public class PausePlexServerDownloadsCommandUnitTests : BaseUnitTest<PausePlexSe
             }
         );
 
-        var plexServerId = (await IDbContext.PlexServers.FirstAsync(CancellationToken)).Id;
+        var dbContext = IDbContext;
+        var plexServerId = (await dbContext.PlexServers.FirstAsync(CancellationToken)).Id;
 
-        var movieFile = await IDbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
+        var movieFile = await dbContext.DownloadTaskMovieFile.FirstAsync(CancellationToken);
 
-        await IDbContext
+        await dbContext
             .DownloadTaskMovieFile.Where(x => x.Id == movieFile.Id)
             .ExecuteUpdateAsync(
                 p => p.SetProperty(x => x.DownloadStatus, DownloadStatus.Downloading),
@@ -45,9 +46,12 @@ public class PausePlexServerDownloadsCommandUnitTests : BaseUnitTest<PausePlexSe
         // Assert
         result.IsSuccess.ShouldBeTrue();
 
-        var server = await IDbContext.PlexServers.GetAsync(plexServerId, CancellationToken);
+        var server = await dbContext.PlexServers.GetAsync(plexServerId, CancellationToken);
         server.ShouldNotBeNull();
         server.IsDownloadsPausedByUser.ShouldBeTrue();
+
+        Mock.Mock<IDownloadTaskScheduler>()
+            .Verify(x => x.GetCurrentlyDownloadingKeysByServer(plexServerId), Times.Once());
 
         Mock.Mock<ICommandExecutor>()
             .Verify(

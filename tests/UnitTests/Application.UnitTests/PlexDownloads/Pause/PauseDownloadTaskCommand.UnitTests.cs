@@ -5,7 +5,7 @@ using Reaparr.FileSystem.Contracts;
 
 namespace Reaparr.Application.UnitTests;
 
-public class DownloadCommandsPauseDownloadTasksAsyncUnitTests : BaseUnitTest<PauseDownloadTaskCommandHandler>
+public class PauseDownloadTaskCommandUnitTests : BaseUnitTest<PauseDownloadTaskCommandHandler>
 {
     [Test]
     public async Task ShouldHaveFailedResult_WhenGivenAnInvalidId()

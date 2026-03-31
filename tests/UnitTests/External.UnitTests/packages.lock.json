@@ -4,9 +4,9 @@
     "net10.0": {
       "coverlet.collector": {
         "type": "Direct",
-        "requested": "[6.0.4, )",
-        "resolved": "6.0.4",
-        "contentHash": "lkhqpF8Pu2Y7IiN7OntbsTtdbpR1syMsm2F3IgX6ootA4ffRqWL5jF7XipHuZQTdVuWG/gVAAcf8mjk8Tz0xPg=="
+        "requested": "[8.0.1, )",
+        "resolved": "8.0.1",
+        "contentHash": "heVQl5tKYnnIDYlR1QMVGueYH6iriZTcZB6AjDczQNwZzxkjDIt9C84Pt4cCiZYrbo7jkZOYGWbs6Lo9wAtVLg=="
       },
       "CSharpier.MsBuild": {
         "type": "Direct",
@@ -116,8 +116,8 @@
       },
       "CliWrap": {
         "type": "Transitive",
-        "resolved": "3.10.0",
-        "contentHash": "Igph39WNImUFqQrpTeBDPafcCnM1u/8IooZHqMRF/5JdV5H78p+AbZkeYY1Nkz1WlbI/Gt2Hq/3rYh55jxRF9Q=="
+        "resolved": "3.10.1",
+        "contentHash": "C+WzXwzpQsJVNqvuh19ZO/bw/vR43L+DC/CmvK+PATUBkail2AWYE6an17dOGgWaVGzF9sU28YwRwfNfkPrQdg=="
       },
       "DiffEngine": {
         "type": "Transitive",
@@ -1616,7 +1616,7 @@
         "type": "Project",
         "dependencies": {
           "Autofac": "[9.1.0, )",
-          "CliWrap": "[3.10.0, )",
+          "CliWrap": "[3.10.1, )",
           "Reaparr.Application.Contracts": "[1.0.0, )",
           "Reaparr.External.Contracts": "[1.0.0, )",
           "System.IO.Abstractions": "[22.1.0, )"

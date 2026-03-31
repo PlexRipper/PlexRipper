@@ -169,8 +169,8 @@
       },
       "CliWrap": {
         "type": "Transitive",
-        "resolved": "3.10.0",
-        "contentHash": "Igph39WNImUFqQrpTeBDPafcCnM1u/8IooZHqMRF/5JdV5H78p+AbZkeYY1Nkz1WlbI/Gt2Hq/3rYh55jxRF9Q=="
+        "resolved": "3.10.1",
+        "contentHash": "C+WzXwzpQsJVNqvuh19ZO/bw/vR43L+DC/CmvK+PATUBkail2AWYE6an17dOGgWaVGzF9sU28YwRwfNfkPrQdg=="
       },
       "DiffEngine": {
         "type": "Transitive",
@@ -1602,7 +1602,7 @@
         "type": "Project",
         "dependencies": {
           "Autofac": "[9.1.0, )",
-          "CliWrap": "[3.10.0, )",
+          "CliWrap": "[3.10.1, )",
           "Reaparr.Application.Contracts": "[1.0.0, )",
           "Reaparr.External.Contracts": "[1.0.0, )",
           "System.IO.Abstractions": "[22.1.0, )"

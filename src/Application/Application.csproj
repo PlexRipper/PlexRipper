@@ -16,9 +16,9 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Downloader" Version="5.1.0" />
-        <PackageReference Include="FastEndpoints" Version="7.1.1" />
-        <PackageReference Include="FastEndpoints.Security" Version="7.1.1" />
-        <PackageReference Include="FastEndpoints.Swagger" Version="7.1.1" />
+        <PackageReference Include="FastEndpoints" Version="8.1.0" />
+        <PackageReference Include="FastEndpoints.Security" Version="8.1.0" />
+        <PackageReference Include="FastEndpoints.Swagger" Version="8.1.0" />
         <PackageReference Include="Jason.Landbridge.Autofac.Extras.Quartz" Version="9.0.3" />
         <PackageReference Include="Polly" Version="8.6.5" />
         <PackageReference Include="Polly.Core" Version="8.6.5" />

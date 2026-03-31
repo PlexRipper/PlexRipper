@@ -10,7 +10,7 @@
     <ItemGroup>
         <PackageReference Include="Autofac" Version="9.0.0" />
         <PackageReference Include="BencodeNET" Version="5.0.0" />
-        <PackageReference Include="FastEndpoints" Version="7.1.1" />
+        <PackageReference Include="FastEndpoints" Version="8.1.0" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\Data.Contracts\Data.Contracts.csproj" />

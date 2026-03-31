@@ -13,16 +13,7 @@ public class GetDashTranscodeDecisionCommandHandlerUnitTests : BaseUnitTest<GetD
         : base() { }
 
     private static GetDashTranscodeDecisionCommand CreateCommand(int plexServerId) =>
-        new(
-            plexServerId,
-            new MakeDecisionRequest
-            {
-                Path = "/library/metadata/56828",
-                ClientIdentifier = "1x6jbxuls57ip8sg6pr5sxsn",
-                TranscodeSessionId = "vyoe41m5hrmlotwc6zyocadz",
-                XPlexSessionIdentifier = "yzjqymlmh5ssjfm51hr881pe",
-            }
-        );
+        new(plexServerId, new TranscodeDecisionRequest("/library/metadata/56828"));
 
     [Test]
     public async Task ShouldReturnFailedResult_WhenPlexServerHasNoToken()

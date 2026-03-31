@@ -17,6 +17,7 @@ public sealed class MakeDecisionMediaContainerConfig
     public int? MediaWidth { get; set; } = 1920;
     public int? MediaHeight { get; set; } = 1080;
     public bool IncludeAudioStream { get; set; } = true;
+    public string PartDecision { get; set; } = "transcode";
     public MediaContainerWithDecisionDecision AudioDecision { get; set; } = MediaContainerWithDecisionDecision.Copy;
     public List<MakeDecisionVideoStreamConfig> VideoStreams { get; } =
     [
@@ -139,7 +140,7 @@ public partial class FakePlexApiData
                                     {
                                         id = 91921,
                                         key = "/library/parts/91921",
-                                        decision = "transcode",
+                                        decision = config.PartDecision,
                                         Stream = streams,
                                     },
                                 },

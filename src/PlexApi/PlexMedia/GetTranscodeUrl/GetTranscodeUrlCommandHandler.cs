@@ -1,8 +1,6 @@
 using FastEndpoints;
 using FluentValidation;
 using Flurl;
-using LukeHagar.PlexAPI.SDK.Models.Components;
-using LukeHagar.PlexAPI.SDK.Models.Requests;
 using Reaparr.Data.Contracts;
 using Reaparr.PlexApi.Contracts;
 
@@ -15,8 +13,10 @@ public class GetTranscodeUrlCommandValidator : AbstractValidator<GetTranscodeUrl
         RuleFor(x => x).NotNull();
         RuleFor(x => x.DownloadTaskKey).NotNull();
         RuleFor(x => x.DownloadTaskKey.IsValid).Equal(true);
-        RuleFor(x => x.MetaDataPath).NotEmpty();
-        RuleFor(x => x.MetaDataPath).Must(x => x.Contains("/library/metadata/"));
+        RuleFor(x => x.MetaDataPath)
+            .NotEmpty()
+            .Must(path => path.Contains("/library/metadata/"))
+            .WithMessage("MetaDataPath must be in format '/library/metadata/{ratingKey}'");
     }
 }
 
@@ -25,27 +25,6 @@ public class GetTranscodeUrlCommandHandler : ICommandHandler<GetTranscodeUrlComm
     private readonly ILogger _log;
     private readonly IReaparrDbContext _dbContext;
     private readonly ICommandExecutor _commandExecutor;
-
-    private static readonly string _clientIdentifier = GenerateClientId();
-
-    private const string CLIENT_PROFILE_EXTRA =
-        "add-direct-play-profile(type=videoProfile&videoCodec=*&audioCodec=*&container=*)"
-        + "+append-transcode-target-codec(type=videoProfile&context=streaming"
-        + "&videoCodec=h264,hevc,vp9,av1,mpeg2video,mpeg4,vc1"
-        + "&audioCodec=aac,ac3,eac3,dts,dca,mp3,flac,opus,vorbis,truehd"
-        + "&protocol=dash)"
-        + "+append-transcode-target-codec(type=videoProfile&context=streaming"
-        + "&videoCodec=h264,hevc,vp9,av1,mpeg2video,mpeg4,vc1"
-        + "&audioCodec=aac,ac3,eac3,dts,dca,mp3,flac,opus,vorbis,truehd"
-        + "&protocol=http)"
-        + "+append-transcode-target-codec(type=videoProfile&context=streaming"
-        + "&videoCodec=h264,hevc,vp9,av1,mpeg2video,mpeg4,vc1"
-        + "&audioCodec=aac,ac3,eac3,dts,dca,mp3,flac,opus,vorbis,truehd"
-        + "&protocol=hls)"
-        + "+add-limitation(scope=videoCodec&scopeName=*&type=upperBound&name=video.bitDepth&value=12&isRequired=false)"
-        + "+add-limitation(scope=videoCodec&scopeName=*&type=upperBound&name=video.width&value=3840&isRequired=false)"
-        + "+add-limitation(scope=videoCodec&scopeName=*&type=upperBound&name=video.height&value=2160&isRequired=false)"
-        + "+add-limitation(scope=videoCodec&scopeName=*&type=upperBound&name=video.bitrate&value=2000000&isRequired=false)";
 
     public GetTranscodeUrlCommandHandler(ILogger logger, IReaparrDbContext dbContext, ICommandExecutor commandExecutor)
     {
@@ -77,45 +56,10 @@ public class GetTranscodeUrlCommandHandler : ICommandHandler<GetTranscodeUrlComm
 
         var token = tokenResult.Value;
 
-        var transcodeSessionId = GenerateSessionId();
-        var plexSessionId = GenerateSessionId();
         var playbackSessionId = Guid.NewGuid().ToString();
         var playbackId = Guid.NewGuid().ToString();
 
-        var decisionRequest = new MakeDecisionRequest
-        {
-            Accepts = Accepts.ApplicationJson,
-            ClientIdentifier = _clientIdentifier,
-            Product = "Plex Web",
-            Version = "4.158.0",
-            Platform = "Chrome",
-            PlatformVersion = "130.0",
-            Device = "Linux",
-            Model = "standalone",
-            DeviceName = "Chrome",
-            TranscodeType = TranscodeType.Video,
-            HasMDE = BoolInt.True,
-            Path = command.MetaDataPath,
-            MediaIndex = 0,
-            PartIndex = 0,
-            Protocol = LukeHagar.PlexAPI.SDK.Models.Requests.Protocol.Dash, // Also update protocol= in CLIENT_PROFILE_EXTRA
-            DirectPlay = BoolInt.True,
-            DirectStream = BoolInt.True,
-            DirectStreamAudio = BoolInt.True,
-            SubtitleSize = 100,
-            AudioBoost = 100,
-            Location = LukeHagar.PlexAPI.SDK.Models.Requests.Location.Lan,
-            AutoAdjustQuality = BoolInt.False,
-            AutoAdjustSubtitle = BoolInt.True,
-            PeakBitrate = 2000000,
-            MediaBufferSize = 102400,
-            Subtitles = LukeHagar.PlexAPI.SDK.Models.Requests.Subtitles.None,
-            VideoResolution = "3840x2160",
-            VideoQuality = 100,
-            XPlexClientProfileExtra = CLIENT_PROFILE_EXTRA,
-            XPlexSessionIdentifier = plexSessionId,
-            TranscodeSessionId = transcodeSessionId,
-        };
+        var decisionRequest = new TranscodeDecisionRequest(command.MetaDataPath);
 
         var decisionResult = await _commandExecutor.Send(
             new GetDashTranscodeDecisionCommand(plexServerId, decisionRequest),
@@ -127,50 +71,9 @@ public class GetTranscodeUrlCommandHandler : ICommandHandler<GetTranscodeUrlComm
 
         var decisionSummary = decisionResult.Value;
 
-        _log.Here()
-            .Information(
-                "Decision returned: generalCode={GeneralCode}, generalText={GeneralText}, "
-                    + "transcodeCode={TranscodeCode}, transcodeText={TranscodeText}, "
-                    + "session={Session}, sessionId={SessionId}",
-                decisionSummary.GeneralDecisionCode,
-                decisionSummary.GeneralDecisionText,
-                decisionSummary.TranscodeDecisionCode,
-                decisionSummary.TranscodeDecisionText,
-                transcodeSessionId,
-                plexSessionId
-            );
-
-        _log.Here()
-            .Information(
-                "Stream decisions - Video: {VideoDecision}, Audio: {AudioDecision}, TranscodedQuality: {TranscodedQuality}",
-                decisionSummary.VideoDecision,
-                decisionSummary.AudioDecision,
-                decisionSummary.TranscodedQuality
-            );
-
-        if (!string.Equals(decisionSummary.VideoDecision, "copy", StringComparison.OrdinalIgnoreCase))
-        {
-            _log.Here()
-                .Warning(
-                    "Video is being transcoded instead of direct streamed. "
-                        + "Quality may be degraded. Decision: {Decision}",
-                    decisionSummary.VideoDecision
-                );
-        }
-
-        if (!string.Equals(decisionSummary.AudioDecision, "copy", StringComparison.OrdinalIgnoreCase))
-        {
-            _log.Here()
-                .Warning(
-                    "Audio is being transcoded instead of direct streamed. "
-                        + "Quality may be degraded. Decision: {Decision}",
-                    decisionSummary.AudioDecision
-                );
-        }
-
         var downloadUrl = new Url(plexServerConnection.Url)
             .AppendPathSegment("video/:/transcode/universal/start.mpd")
-            .ApplyDashTranscodeQueryParams(decisionRequest, token)
+            .ApplyDashTranscodeQueryParams(decisionRequest.ToMakeDecisionRequest(), token)
             .SetQueryParam("fastSeek", 1)
             .SetQueryParam("addDebugOverlay", 0)
             .SetQueryParam("Accept-Language", "en")
@@ -188,11 +91,8 @@ public class GetTranscodeUrlCommandHandler : ICommandHandler<GetTranscodeUrlComm
             {
                 DownloadUrl = downloadUrl,
                 TranscodedQuality = decisionSummary.TranscodedQuality,
+                SuggestedClientType = decisionSummary.SuggestedClientType,
             }
         );
     }
-
-    private static string GenerateSessionId() => Guid.NewGuid().ToString("N")[..24];
-
-    private static string GenerateClientId() => $"{Guid.NewGuid():N}"[..25];
 }

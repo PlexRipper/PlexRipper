@@ -14,10 +14,8 @@ public class GetDashTranscodeDecisionCommandValidator : AbstractValidator<GetDas
     {
         RuleFor(x => x.PlexServerId).GreaterThan(0);
         RuleFor(x => x.DecisionRequest).NotNull();
-        RuleFor(x => x.DecisionRequest.Path).NotEmpty();
-        RuleFor(x => x.DecisionRequest.Path).Must(path => path?.Contains("/library/metadata/") == true);
         RuleFor(x => x.DecisionRequest.TranscodeSessionId).NotEmpty();
-        RuleFor(x => x.DecisionRequest.XPlexSessionIdentifier).NotEmpty();
+        RuleFor(x => x.DecisionRequest.PlexSessionId).NotEmpty();
         RuleFor(x => x.DecisionRequest.ClientIdentifier).NotEmpty();
     }
 }
@@ -67,12 +65,14 @@ public class GetDashTranscodeDecisionCommandHandler
 
         var debugDecisionUrl = new Url(connectionResult.Value.Url)
             .AppendPathSegment("video/:/transcode/universal/decision")
-            .ApplyDashTranscodeQueryParams(decisionRequest, tokenResult.Value)
+            .ApplyDashTranscodeQueryParams(decisionRequest.ToMakeDecisionRequest(), tokenResult.Value)
             .ToString();
 
         _log.Here().Information("Requesting Plex transcode decision URL: {Url}", debugDecisionUrl);
 
-        var decisionResponse = await client.Transcoder.MakeDecisionAsync(decisionRequest).ToResponse();
+        var decisionResponse = await client
+            .Transcoder.MakeDecisionAsync(decisionRequest.ToMakeDecisionRequest())
+            .ToResponse();
 
         if (decisionResponse.IsFailed)
             return decisionResponse.ToResult();
@@ -91,6 +91,8 @@ public class GetDashTranscodeDecisionCommandHandler
             VideoDecision = "unknown",
             AudioDecision = "unknown",
             TranscodedQuality = VideoQuality.None,
+            PartDecision = "unknown",
+            SuggestedClientType = PlexDownloadClientType.Dash,
         };
 
         foreach (var metadata in mediaContainer.Metadata ?? [])
@@ -114,6 +116,11 @@ public class GetDashTranscodeDecisionCommandHandler
 
                 foreach (var part in media.Part ?? [])
                 {
+                    summary = summary with
+                    {
+                        PartDecision = part.Decision?.ToString()?.ToLowerInvariant() ?? "unknown",
+                    };
+
                     foreach (var stream in part.Stream ?? [])
                     {
                         var decision = stream.Decision?.ToString() ?? "unknown";
@@ -142,6 +149,58 @@ public class GetDashTranscodeDecisionCommandHandler
                     }
                 }
             }
+        }
+
+        _log.Here()
+            .Information(
+                "Decision returned: generalCode={GeneralCode}, generalText={GeneralText}, "
+                    + "transcodeCode={TranscodeCode}, transcodeText={TranscodeText}, "
+                    + "session={Session}, sessionId={SessionId}",
+                summary.GeneralDecisionCode,
+                summary.GeneralDecisionText,
+                summary.TranscodeDecisionCode,
+                summary.TranscodeDecisionText,
+                decisionRequest.TranscodeSessionId,
+                decisionRequest.PlexSessionId
+            );
+
+        _log.Here()
+            .Information(
+                "Stream decisions - Video: {VideoDecision}, Audio: {AudioDecision}, Part: {PartDecision}, TranscodeQuality: {TranscodeQuality}",
+                summary.VideoDecision,
+                summary.AudioDecision,
+                summary.PartDecision,
+                summary.TranscodedQuality
+            );
+
+        if (string.Equals(summary.PartDecision, "directplay", StringComparison.OrdinalIgnoreCase))
+        {
+            _log.Here()
+                .Information(
+                    "Plex decided direct play for this item. Suggesting direct download client instead of DASH."
+                );
+
+            summary.SuggestedClientType = PlexDownloadClientType.Direct;
+        }
+
+        if (!string.Equals(summary.VideoDecision, "copy", StringComparison.OrdinalIgnoreCase))
+        {
+            _log.Here()
+                .Warning(
+                    "Video is being transcoded instead of direct streamed. "
+                        + "Quality may be degraded. Decision: {Decision}",
+                    summary.VideoDecision
+                );
+        }
+
+        if (!string.Equals(summary.AudioDecision, "copy", StringComparison.OrdinalIgnoreCase))
+        {
+            _log.Here()
+                .Warning(
+                    "Audio is being transcoded instead of direct streamed. "
+                        + "Quality may be degraded. Decision: {Decision}",
+                    summary.AudioDecision
+                );
         }
 
         return Result.Ok(summary);

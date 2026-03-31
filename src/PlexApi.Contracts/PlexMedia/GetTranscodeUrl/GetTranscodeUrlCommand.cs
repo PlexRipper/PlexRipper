@@ -11,6 +11,8 @@ public record GetTranscodeUrlCommand : ICommand<Result<GetTranscodeUrlResult>>
 
 public record GetTranscodeUrlResult
 {
+    public PlexDownloadClientType SuggestedClientType { get; init; }
+
     public required string DownloadUrl { get; init; }
 
     public VideoQuality TranscodedQuality { get; init; }

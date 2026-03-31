@@ -305,7 +305,7 @@ public class DashMpdCliWrapper : IDashMpdCliWrapper
 
         return new DashDownloadProgress
         {
-            ETA = valueEvent.EtaSeconds ?? 0,
+            Eta = valueEvent.EtaSeconds ?? 0,
             Percent = valueEvent.Percent,
             DownloadSpeedInBytes = valueEvent.Bandwidth,
             CurrentStep = valueEvent.Message,

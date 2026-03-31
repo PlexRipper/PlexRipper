@@ -220,7 +220,7 @@ public class DashPlexDownloadClient : IPlexDownloadClient
                         Percentage = Convert.ToDecimal(progress.Percent),
                         DataReceived = progress.DownloadedBytes,
                         DownloadSpeed = progress.DownloadSpeedInBytes,
-                        TimeRemaining = progress.ETA,
+                        TimeRemaining = progress.Eta,
                     };
 
                     _downloadTaskUpdateDispatcher.OnProgressUpdated(key, _lastProgressUpdate);

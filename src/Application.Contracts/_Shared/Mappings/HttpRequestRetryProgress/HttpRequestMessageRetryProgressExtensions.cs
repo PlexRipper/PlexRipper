@@ -2,12 +2,6 @@ namespace Reaparr.Application.Contracts;
 
 public static class HttpRequestMessageRetryProgressExtensions
 {
-    private static readonly HttpRequestOptionsKey<Action<HttpRequestRetryProgress>> RetryProgressCallbackKey = new(
-        nameof(RetryProgressCallbackKey)
-    );
-
-    private static readonly HttpRequestOptionsKey<int> RetryCountKey = new(nameof(RetryCountKey));
-
     public static void SetRetryProgressCallback(
         this HttpRequestMessage request,
         Action<HttpRequestRetryProgress>? callback
@@ -18,27 +12,32 @@ public static class HttpRequestMessageRetryProgressExtensions
         if (callback is null)
             return;
 
-        request.Options.Set(RetryProgressCallbackKey, callback);
+        request.Options.Set(new("RetryProgressCallbackKey"), callback);
     }
 
     public static Action<HttpRequestRetryProgress>? GetRetryProgressCallback(this HttpRequestMessage request)
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        return request.Options.TryGetValue(RetryProgressCallbackKey, out var callback) ? callback : null;
+        return request.Options.TryGetValue(
+            (HttpRequestOptionsKey<Action<HttpRequestRetryProgress>>)new("RetryProgressCallbackKey"),
+            out var callback
+        )
+            ? callback
+            : null;
     }
 
     public static void SetRetryCount(this HttpRequestMessage request, int retryCount)
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        request.Options.Set(RetryCountKey, retryCount);
+        request.Options.Set(new("RetryCountKey"), retryCount);
     }
 
     public static int? GetRetryCount(this HttpRequestMessage request)
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        return request.Options.TryGetValue(RetryCountKey, out int retryCount) ? retryCount : null;
+        return request.Options.TryGetValue(new("RetryCountKey"), out int retryCount) ? retryCount : null;
     }
 }

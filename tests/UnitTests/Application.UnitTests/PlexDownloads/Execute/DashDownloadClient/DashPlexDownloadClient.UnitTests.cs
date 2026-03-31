@@ -568,7 +568,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                 progressSubject.OnNext(
                     new DashDownloadProgress
                     {
-                        ETA = 1,
+                        Eta = 1,
                         Percent = 50,
                         DownloadedBytes = downloadTask.DataTotal / 2,
                         TotalBytes = downloadTask.DataTotal,
@@ -668,7 +668,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                 progressSubject.OnNext(
                     new DashDownloadProgress
                     {
-                        ETA = 42,
+                        Eta = 42,
                         Percent = 12,
                         DownloadedBytes = 3_000,
                         TotalBytes = 0,
@@ -767,7 +767,7 @@ public class DashPlexDownloadClientUnitTests : BaseUnitTest<DashPlexDownloadClie
                 progressSubject.OnNext(
                     new DashDownloadProgress
                     {
-                        ETA = 0,
+                        Eta = 0,
                         Percent = 100,
                         DownloadedBytes = downloadTask.DataTotal,
                         TotalBytes = downloadTask.DataTotal,

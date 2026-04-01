@@ -1,8 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net10.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
         <AssemblyName>Reaparr.SignalR.Contracts</AssemblyName>
         <RootNamespace>Reaparr.SignalR.Contracts</RootNamespace>
     </PropertyGroup>
@@ -11,11 +8,6 @@
         <ProjectReference Include="..\Environment\Environment.csproj" />
         <ProjectReference Include="..\FluentResultExtensions\FluentResultExtensions.csproj" />
         <ProjectReference Include="..\Logging\Logging.csproj" />
-    </ItemGroup>
-    <ItemGroup>
-        <Compile Include="..\Domain\GlobalUsings.cs">
-            <Link>GlobalUsings.cs</Link>
-        </Compile>
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="CSharpier.MsBuild" Version="1.2.6">

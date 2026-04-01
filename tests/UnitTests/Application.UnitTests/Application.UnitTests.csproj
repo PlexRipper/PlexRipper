@@ -1,14 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net10.0</TargetFramework>
-        <LangVersion>14</LangVersion>
-        <ImplicitUsings>enable</ImplicitUsings>
         <IsPackable>false</IsPackable>
         <RootNamespace>Reaparr.Application.UnitTests</RootNamespace>
         <AssemblyName>Reaparr.Application.UnitTests</AssemblyName>
-        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-        <Nullable>enable</Nullable>
-        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
         <OutputType>Exe</OutputType>
     </PropertyGroup>
     <ItemGroup>
@@ -26,9 +20,5 @@
         <ProjectReference Include="..\..\..\src\Application\Application.csproj" />
         <ProjectReference Include="..\..\..\src\FileSystem.Contracts\FileSystem.Contracts.csproj" />
         <ProjectReference Include="..\..\BaseTests\BaseTests.csproj" />
-    </ItemGroup>
-    <ItemGroup>
-        <Compile Include="..\..\..\src\Domain\GlobalUsings.cs" />
-        <Compile Include="..\..\BaseTests\GlobalTestsUsings.cs" />
     </ItemGroup>
 </Project>

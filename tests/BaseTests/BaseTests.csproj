@@ -1,14 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net10.0</TargetFramework>
-        <LangVersion>14</LangVersion>
-        <ImplicitUsings>enable</ImplicitUsings>
         <RootNamespace>Reaparr.BaseTests</RootNamespace>
         <AssemblyName>Reaparr.BaseTests</AssemblyName>
-        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-        <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
-        <Nullable>enable</Nullable>
-        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
         <OutputType>Exe</OutputType>
     </PropertyGroup>
     <ItemGroup>
@@ -30,8 +23,5 @@
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\..\src\AppHost\AppHost.csproj" />
-    </ItemGroup>
-    <ItemGroup>
-        <Compile Include="..\..\src\Domain\GlobalUsings.cs" />
     </ItemGroup>
 </Project>

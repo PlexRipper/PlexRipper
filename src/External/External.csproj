@@ -1,9 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net10.0</TargetFramework>
-        <LangVersion>14</LangVersion>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
         <AssemblyName>Reaparr.External</AssemblyName>
         <RootNamespace>Reaparr.External</RootNamespace>
     </PropertyGroup>
@@ -26,10 +22,5 @@
     <ItemGroup>
         <ProjectReference Include="..\Application.Contracts\Application.Contracts.csproj" />
         <ProjectReference Include="..\External.Contracts\External.Contracts.csproj" />
-    </ItemGroup>
-    <ItemGroup>
-        <Compile Include="..\Domain\GlobalUsings.cs">
-            <Link>GlobalUsings.cs</Link>
-        </Compile>
     </ItemGroup>
 </Project>

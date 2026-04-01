@@ -1,14 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net10.0</TargetFramework>
-        <LangVersion>14</LangVersion>
-        <ImplicitUsings>enable</ImplicitUsings>
         <IsPackable>false</IsPackable>
         <RootNamespace>Reaparr.BackgroundJobs.UnitTests</RootNamespace>
         <AssemblyName>Reaparr.BackgroundJobs.UnitTests</AssemblyName>
-        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-        <Nullable>enable</Nullable>
-        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
         <OutputType>Exe</OutputType>
     </PropertyGroup>
     <ItemGroup>
@@ -25,9 +19,5 @@
     <ItemGroup>
         <ProjectReference Include="..\..\..\src\BackgroundJobs\BackgroundJobs.csproj" />
         <ProjectReference Include="..\..\BaseTests\BaseTests.csproj" />
-    </ItemGroup>
-    <ItemGroup>
-        <Compile Include="..\..\..\src\Domain\GlobalUsings.cs" />
-        <Compile Include="..\..\BaseTests\GlobalTestsUsings.cs" />
     </ItemGroup>
 </Project>

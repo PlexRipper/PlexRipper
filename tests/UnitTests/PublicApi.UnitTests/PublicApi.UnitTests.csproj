@@ -1,9 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net10.0</TargetFramework>
-        <LangVersion>14</LangVersion>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
         <IsPackable>false</IsPackable>
         <RootNamespace>Reaparr.PublicAPI.UnitTests</RootNamespace>
         <AssemblyName>Reaparr.PublicAPI.UnitTests</AssemblyName>
@@ -23,9 +19,5 @@
     <ItemGroup>
         <ProjectReference Include="..\..\..\src\PublicAPI\PublicAPI.csproj" />
         <ProjectReference Include="..\..\BaseTests\BaseTests.csproj" />
-    </ItemGroup>
-    <ItemGroup>
-        <Compile Include="..\..\..\src\Domain\GlobalUsings.cs" />
-        <Compile Include="..\..\BaseTests\GlobalTestsUsings.cs" />
     </ItemGroup>
 </Project>

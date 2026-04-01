@@ -1,14 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net10.0</TargetFramework>
-        <LangVersion>14</LangVersion>
-        <ImplicitUsings>enable</ImplicitUsings>
         <RootNamespace>Reaparr.Application</RootNamespace>
         <AssemblyName>Reaparr.Application</AssemblyName>
-        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-        <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
-        <Nullable>enable</Nullable>
-        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="Autofac.Extras.Quartz" Version="11.0.0" />
@@ -29,7 +22,6 @@
         <ProjectReference Include="..\BackgroundJobs.Contracts\BackgroundJobs.Contracts.csproj" />
         <ProjectReference Include="..\Data.Contracts\Data.Contracts.csproj" />
         <ProjectReference Include="..\Domain\Domain.csproj" />
-        <Compile Include="..\Domain\GlobalUsings.cs" />
         <ProjectReference Include="..\External.Contracts\External.Contracts.csproj" />
         <ProjectReference Include="..\FileSystem.Contracts\FileSystem.Contracts.csproj" />
         <ProjectReference Include="..\Identity.Contracts\Identity.Contracts.csproj" />

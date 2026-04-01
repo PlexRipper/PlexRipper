@@ -1,15 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net10.0</TargetFramework>
-        <LangVersion>14</LangVersion>
-        <ImplicitUsings>enable</ImplicitUsings>
         <RootNamespace>Reaparr.PlexApi</RootNamespace>
         <AssemblyName>Reaparr.PlexApi</AssemblyName>
         <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-        <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
-        <Nullable>enable</Nullable>
-        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="Autofac" Version="9.1.0" />
@@ -22,7 +15,6 @@
         <PackageReference Include="Polly" Version="8.6.6" />
     </ItemGroup>
     <ItemGroup>
-        <Compile Include="..\Domain\GlobalUsings.cs" />
         <ProjectReference Include="..\BackgroundJobs.Contracts\BackgroundJobs.Contracts.csproj" />
         <ProjectReference Include="..\Data.Contracts\Data.Contracts.csproj" />
         <ProjectReference Include="..\PlexApi.Contracts\PlexApi.Contracts.csproj" />

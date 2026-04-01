@@ -1,7 +1,6 @@
 using System.Net;
 using System.Security.Claims;
 using Autofac;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
 using Reaparr.Identity.Contracts;
 using Reaparr.Settings.Contracts;

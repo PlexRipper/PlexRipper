@@ -16,7 +16,7 @@ public partial class BaseUnitTest
     protected Mock<HttpMessageHandler> HttpHandlerMock = new(MockBehavior.Loose);
 
     protected CancellationToken CancellationToken =>
-        TUnit.Core.TestContext.Current?.Execution.CancellationToken ?? CancellationToken.None;
+        TestContext.Current?.Execution.CancellationToken ?? CancellationToken.None;
 
     /// <summary>
     /// This constructor is run before every test

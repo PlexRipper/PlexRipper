@@ -9,7 +9,7 @@ public abstract class BaseIntegrationTests
     private readonly ILogger _log;
 
     protected CancellationToken CancellationToken =>
-        TUnit.Core.TestContext.Current?.Execution.CancellationToken ?? CancellationToken.None;
+        TestContext.Current?.Execution.CancellationToken ?? CancellationToken.None;
 
     protected BaseIntegrationTests(LogEventLevel logLevel = LogEventLevel.Debug)
     {

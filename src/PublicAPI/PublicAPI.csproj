@@ -28,7 +28,10 @@
         <Using Include="Microsoft.AspNetCore.Http" />
         <Using Include="Reaparr.Data.Contracts" />
         <Using Include="Reaparr.Domain" />
+        <Using Include="Reaparr.Identity.Contracts" />
         <Using Include="Reaparr.Logging" />
+        <Using Include="Reaparr.PublicAPI.Contracts" />
+        <Using Include="Reaparr.Settings.Contracts" />
         <Using Include="Serilog" />
     </ItemGroup>
 </Project>

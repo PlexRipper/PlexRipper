@@ -14,4 +14,7 @@
     <ItemGroup>
         <ProjectReference Include="..\Logging\Logging.csproj" />
     </ItemGroup>
+    <ItemGroup>
+        <Using Include="Reaparr.Logging" />
+    </ItemGroup>
 </Project>

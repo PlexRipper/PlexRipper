@@ -14,4 +14,7 @@
     <ItemGroup>
         <ProjectReference Include="..\Data.Contracts\Data.Contracts.csproj" />
     </ItemGroup>
+    <ItemGroup>
+        <Using Include="Reaparr.Data.Contracts" />
+    </ItemGroup>
 </Project>

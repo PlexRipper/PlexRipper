@@ -24,4 +24,7 @@
     <ItemGroup>
         <ProjectReference Include="..\Environment\Environment.csproj" />
     </ItemGroup>
+    <ItemGroup>
+        <Using Include="Reaparr.Environment" />
+    </ItemGroup>
 </Project>

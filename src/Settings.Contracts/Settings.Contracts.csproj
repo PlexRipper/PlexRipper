@@ -13,4 +13,8 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
     </ItemGroup>
+    <ItemGroup>
+        <Using Include="Reaparr.Domain" />
+        <Using Include="Reaparr.Environment" />
+    </ItemGroup>
 </Project>

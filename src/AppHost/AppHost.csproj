@@ -56,9 +56,18 @@
         <Using Include="Microsoft.Extensions.Hosting" />
         <Using Include="Microsoft.Extensions.Logging" />
         <Using Include="Reaparr.Application" />
+        <Using Include="Reaparr.BackgroundJobs" />
+        <Using Include="Reaparr.Data" />
         <Using Include="Reaparr.Domain" />
         <Using Include="Reaparr.Environment" />
+        <Using Include="Reaparr.External" />
+        <Using Include="Reaparr.FileSystem" />
+        <Using Include="Reaparr.Identity" />
         <Using Include="Reaparr.Logging" />
+        <Using Include="Reaparr.PlexApi" />
+        <Using Include="Reaparr.PublicAPI" />
+        <Using Include="Reaparr.Settings" />
+        <Using Include="Reaparr.SignalR" />
         <Using Include="Serilog" />
         <Using Include="System.Net.Http.Json" />
     </ItemGroup>

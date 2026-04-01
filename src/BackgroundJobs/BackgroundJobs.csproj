@@ -26,6 +26,7 @@
         <Using Include="FluentResults" />
         <Using Include="FluentValidation" />
         <Using Include="Microsoft.AspNetCore.Http" />
+        <Using Include="Reaparr.Application.Contracts" />
         <Using Include="Reaparr.BackgroundJobs.Contracts" />
         <Using Include="Reaparr.Data.Contracts" />
         <Using Include="Reaparr.Domain" />

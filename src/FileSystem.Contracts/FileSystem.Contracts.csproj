@@ -13,4 +13,7 @@
         </PackageReference>
         <PackageReference Include="System.IO.Abstractions" Version="22.1.0" />
     </ItemGroup>
+    <ItemGroup>
+        <Using Include="Reaparr.Domain" />
+    </ItemGroup>
 </Project>

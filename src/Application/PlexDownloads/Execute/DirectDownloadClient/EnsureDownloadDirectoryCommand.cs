@@ -1,6 +1,4 @@
 using System.IO.Abstractions;
-using FastEndpoints;
-using FluentValidation;
 using Reaparr.FileSystem.Contracts;
 
 namespace Reaparr.Application;

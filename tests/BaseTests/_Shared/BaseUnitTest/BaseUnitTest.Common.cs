@@ -1,4 +1,3 @@
-using FastEndpoints;
 using Microsoft.Extensions.DependencyInjection;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;

@@ -1,4 +1,3 @@
-using FastEndpoints;
 using Flurl;
 using Reaparr.PublicAPI.Contracts;
 using Reaparr.Settings.Contracts;

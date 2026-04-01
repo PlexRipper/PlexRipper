@@ -1,7 +1,6 @@
 using System.IO.Abstractions;
 using System.Reactive.Linq;
 using Autofac;
-using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;

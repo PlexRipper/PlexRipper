@@ -1,5 +1,4 @@
 using Autofac;
-using FastEndpoints;
 using Reaparr.Environment;
 using Reaparr.Settings.Contracts;
 

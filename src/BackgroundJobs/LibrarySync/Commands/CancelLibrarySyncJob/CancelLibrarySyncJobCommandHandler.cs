@@ -1,5 +1,3 @@
-using FastEndpoints;
-using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Quartz;
 using Reaparr.BackgroundJobs.Contracts;

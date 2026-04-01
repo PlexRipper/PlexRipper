@@ -1,6 +1,3 @@
-using FastEndpoints;
-using Reaparr.Domain;
-
 namespace Reaparr.BaseTests;
 
 /// <summary>

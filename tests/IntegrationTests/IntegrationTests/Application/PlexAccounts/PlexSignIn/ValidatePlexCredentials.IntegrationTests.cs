@@ -1,5 +1,4 @@
 using System.Net;
-using FastEndpoints;
 using Moq.Contrib.HttpClient;
 using Reaparr.Application;
 using Reaparr.Application.Contracts;

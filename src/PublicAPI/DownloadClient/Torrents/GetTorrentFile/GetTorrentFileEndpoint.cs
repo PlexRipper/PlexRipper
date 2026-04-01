@@ -1,6 +1,4 @@
 using System.Text;
-using FastEndpoints;
-using FluentValidation;
 
 namespace Reaparr.PublicAPI;
 

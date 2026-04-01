@@ -1,4 +1,3 @@
-using FastEndpoints;
 using Reaparr.Environment;
 
 namespace Reaparr.Application;

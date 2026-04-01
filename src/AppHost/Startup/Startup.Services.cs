@@ -1,6 +1,5 @@
 using System.Reflection;
 using System.Text.Json.Serialization;
-using FastEndpoints;
 using FastEndpoints.Security;
 using FastEndpoints.Swagger;
 using MessagePack;

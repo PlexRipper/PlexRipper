@@ -1,7 +1,5 @@
 using System.Diagnostics;
 using EFCore.BulkExtensions;
-using FastEndpoints;
-using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Data.Contracts;
 

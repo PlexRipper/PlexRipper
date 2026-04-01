@@ -1,4 +1,3 @@
-using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.BackgroundJobs.Contracts;
 using Reaparr.Data.Contracts;

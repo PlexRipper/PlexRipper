@@ -1,5 +1,3 @@
-using FastEndpoints;
-
 namespace Reaparr.PublicAPI.CreateCategory;
 
 public record CreateCategoryRequest

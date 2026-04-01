@@ -1,5 +1,3 @@
-using FastEndpoints;
-using FluentValidation;
 using Reaparr.Data.Contracts;
 using Reaparr.PlexApi.Contracts;
 using Reaparr.Settings.Contracts;

@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using FastEndpoints;
 
 namespace Reaparr.Application;
 

@@ -1,4 +1,3 @@
-using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.FluentResultExtensions;
 using Reaparr.Identity.Contracts;

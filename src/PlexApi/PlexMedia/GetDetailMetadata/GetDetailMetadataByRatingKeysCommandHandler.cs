@@ -1,4 +1,3 @@
-using FastEndpoints;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
 using Reaparr.Data.Contracts;
 using Reaparr.PlexApi.Contracts;

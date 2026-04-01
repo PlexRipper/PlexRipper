@@ -1,6 +1,4 @@
 using System.Text.Json;
-using FastEndpoints;
-using FluentValidation;
 using Flurl;
 
 namespace Reaparr.Application;

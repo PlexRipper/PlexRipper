@@ -1,4 +1,3 @@
-using FastEndpoints;
 using Reaparr.Settings.Contracts;
 
 namespace Reaparr.PublicAPI;

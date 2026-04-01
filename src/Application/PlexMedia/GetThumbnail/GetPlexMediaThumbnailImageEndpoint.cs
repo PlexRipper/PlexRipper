@@ -1,7 +1,5 @@
 using System.Net.Mime;
 using System.Net.Sockets;
-using FastEndpoints;
-using FluentValidation;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Caching.Memory;
 using Reaparr.Application.Contracts;

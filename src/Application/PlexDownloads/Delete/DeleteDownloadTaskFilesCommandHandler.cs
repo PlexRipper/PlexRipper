@@ -1,6 +1,4 @@
 using System.IO.Abstractions;
-using FastEndpoints;
-using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;

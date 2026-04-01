@@ -1,6 +1,4 @@
 using System.Text.Json;
-using FastEndpoints;
-using FluentValidation;
 
 namespace Reaparr.Application;
 

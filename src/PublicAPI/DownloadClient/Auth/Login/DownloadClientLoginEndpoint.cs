@@ -1,5 +1,3 @@
-using FastEndpoints;
-using FluentValidation;
 using Reaparr.Identity.Contracts;
 using Reaparr.Settings.Contracts;
 

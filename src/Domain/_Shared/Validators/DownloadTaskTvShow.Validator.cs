@@ -1,5 +1,3 @@
-using FluentValidation;
-
 namespace Reaparr.Domain.Validators;
 
 public class DownloadTaskTvShowValidator : AbstractValidator<DownloadTaskTvShow>

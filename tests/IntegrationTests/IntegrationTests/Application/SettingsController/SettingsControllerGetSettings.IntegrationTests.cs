@@ -1,5 +1,4 @@
-﻿using FastEndpoints;
-using Reaparr.Application;
+﻿using Reaparr.Application;
 using Reaparr.Application.Contracts;
 using Reaparr.Settings;
 using Reaparr.Settings.Contracts;

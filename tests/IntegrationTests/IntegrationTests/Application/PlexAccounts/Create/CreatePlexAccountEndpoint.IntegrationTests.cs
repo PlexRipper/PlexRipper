@@ -1,5 +1,4 @@
 using System.Net;
-using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application;
 using Reaparr.Application.Contracts;

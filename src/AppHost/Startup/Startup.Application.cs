@@ -1,5 +1,4 @@
 using System.Reflection;
-using FastEndpoints;
 using FastEndpoints.Swagger;
 using Microsoft.AspNetCore.Http.Extensions;
 using Reaparr.Application;

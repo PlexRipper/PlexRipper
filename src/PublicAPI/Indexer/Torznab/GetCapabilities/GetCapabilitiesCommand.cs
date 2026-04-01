@@ -1,6 +1,3 @@
-using FastEndpoints;
-using FluentValidation;
-
 namespace Reaparr.PublicAPI;
 
 public record GetCapabilitiesCommand : ICommand<Result<TorznabCapsResponseDTO>>;

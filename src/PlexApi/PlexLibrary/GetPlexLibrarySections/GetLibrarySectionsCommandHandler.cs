@@ -1,4 +1,3 @@
-using FastEndpoints;
 using Reaparr.Data.Contracts;
 using Reaparr.PlexApi.Contracts;
 

@@ -1,8 +1,6 @@
 using BencodeNET.Exceptions;
 using BencodeNET.Parsing;
 using BencodeNET.Torrents;
-using FastEndpoints;
-using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Reaparr.Application.Contracts;
 using Reaparr.Data.Contracts;

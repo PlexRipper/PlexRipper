@@ -209,7 +209,7 @@ var sut = Mock.Create<MyHandler>(
 4. Inherit `BaseUnitTest<TSUT>` and prepare deterministic arrange step.
 5. Execute SUT method once in Act section.
 6. Assert result + database state + mock interactions.
-7. Run the specific test project first, then broader suite if needed.
+7. Run the specific test project first, usually with a narrow TUnit `--treenode-filter`, then broaden the scope if needed.
 
 ## Commands
 
@@ -224,6 +224,43 @@ Common projects:
 ```bash
 dotnet run --project tests/UnitTests/Application.UnitTests/Application.UnitTests.csproj -- --no-ansi --disable-logo
 dotnet run --project tests/UnitTests/BackgroundJobs.UnitTests/BackgroundJobs.UnitTests.csproj -- --no-ansi --disable-logo
+```
+
+### TUnit test filtering
+
+- TUnit does **not** use `--filter` here. Use `--treenode-filter`.
+- Filter syntax is `/<Assembly>/<Namespace>/<Class>/<Test>`.
+- Use `*` as a wildcard for segments you do not want to pin exactly.
+- Use parentheses with `|` for OR conditions inside a single segment.
+
+Filter by class:
+
+```bash
+dotnet run --project tests/UnitTests/Application.UnitTests/Application.UnitTests.csproj -- --no-ansi --disable-logo --treenode-filter "/*/*/DownloadJobUnitTests/*"
+```
+
+Filter by test name:
+
+```bash
+dotnet run --project tests/UnitTests/Application.UnitTests/Application.UnitTests.csproj -- --no-ansi --disable-logo --treenode-filter "/*/*/*/ShouldSetDownloadClientErrorStatus_WhenClientStartFailsWithoutSpecificError"
+```
+
+Filter multiple classes with OR:
+
+```bash
+dotnet run --project tests/UnitTests/Application.UnitTests/Application.UnitTests.csproj -- --no-ansi --disable-logo --treenode-filter "/*/*/(DownloadJobUnitTests)|(DeterminePlexDownloadClientCommandHandlerUnitTests)/*"
+```
+
+Filter by namespace prefix:
+
+```bash
+dotnet run --project tests/UnitTests/Application.UnitTests/Application.UnitTests.csproj -- --no-ansi --disable-logo --treenode-filter "/*/Reaparr.Application.UnitTests.PlexDownloads*/*/*"
+```
+
+If you need to discover the exact test names or class names before filtering, list tests first:
+
+```bash
+dotnet run --project tests/UnitTests/Application.UnitTests/Application.UnitTests.csproj -- --no-ansi --disable-logo --list-tests
 ```
 
 ## Common Mistakes

@@ -38,7 +38,6 @@ ENV DOTNET_CLI_TELEMETRY_OPTOUT=1 \
 COPY ["Directory.Build.props", "."]
 COPY --parents src/*/*.csproj src/*/packages.lock.json /src/
 
-
 ## Restore Projects
 RUN dotnet restore "src/AppHost/AppHost.csproj" --locked-mode
 

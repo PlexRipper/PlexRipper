@@ -1,6 +1,5 @@
 using Flurl;
 using Reaparr.PublicAPI.Contracts;
-using Reaparr.Settings.Contracts;
 
 namespace Reaparr.Application;
 

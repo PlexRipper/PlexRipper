@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using Reaparr.Application.Contracts;
 
 namespace Reaparr.Application;
 

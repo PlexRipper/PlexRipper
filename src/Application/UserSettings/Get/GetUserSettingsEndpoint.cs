@@ -1,6 +1,4 @@
-using Reaparr.Application.Contracts;
 using Reaparr.Settings;
-using Reaparr.Settings.Contracts;
 
 namespace Reaparr.Application;
 

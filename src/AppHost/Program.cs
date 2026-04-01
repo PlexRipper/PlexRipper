@@ -1,5 +1,3 @@
-using Reaparr.Application;
-using Reaparr.Environment;
 using Reaparr.FluentResultExtensions;
 
 namespace Reaparr.AppHost;

@@ -1,6 +1,4 @@
-﻿using Reaparr.Data.Contracts;
-
-namespace Reaparr.Application;
+﻿namespace Reaparr.Application;
 
 /// <summary>
 /// Inspects the <see cref="PlexServer">PlexServers</see> for connectivity.

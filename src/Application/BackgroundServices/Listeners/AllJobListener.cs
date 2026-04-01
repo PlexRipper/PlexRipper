@@ -1,6 +1,4 @@
 using Quartz;
-using Reaparr.Application.Contracts;
-using Reaparr.SignalR.Contracts;
 
 namespace Reaparr.Application;
 

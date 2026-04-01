@@ -1,5 +1,4 @@
 using LukeHagar.PlexAPI.SDK.Models.Requests;
-using Reaparr.PlexApi.Contracts;
 
 namespace Reaparr.PlexApi;
 

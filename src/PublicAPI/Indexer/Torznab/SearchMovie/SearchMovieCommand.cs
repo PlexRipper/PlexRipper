@@ -1,6 +1,5 @@
 using Flurl;
 using Microsoft.EntityFrameworkCore;
-using Reaparr.Data.Contracts;
 using Reaparr.Environment;
 using Reaparr.Settings.Contracts;
 

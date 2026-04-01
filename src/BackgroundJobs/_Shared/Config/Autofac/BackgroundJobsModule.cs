@@ -1,7 +1,6 @@
 using System.Reflection;
 using Autofac;
 using Autofac.Extras.Quartz;
-using Reaparr.BackgroundJobs.Contracts;
 using Module = Autofac.Module;
 
 namespace Reaparr.BackgroundJobs;

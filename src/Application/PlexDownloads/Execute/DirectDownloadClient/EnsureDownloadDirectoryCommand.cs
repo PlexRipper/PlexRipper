@@ -1,5 +1,4 @@
 using System.IO.Abstractions;
-using Reaparr.FileSystem.Contracts;
 
 namespace Reaparr.Application;
 

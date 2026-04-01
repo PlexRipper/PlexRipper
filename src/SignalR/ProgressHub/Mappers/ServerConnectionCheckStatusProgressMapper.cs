@@ -1,6 +1,3 @@
-using Reaparr.Application.Contracts;
-using Reaparr.SignalR.Contracts;
-
 namespace Reaparr.SignalR;
 
 internal static class ServerConnectionCheckStatusProgressMapper

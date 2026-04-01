@@ -1,8 +1,6 @@
 using Autofac;
 using Downloader;
 using Microsoft.Extensions.Hosting;
-using Reaparr.Application.Contracts;
-using Reaparr.FileSystem.Contracts;
 using Module = Autofac.Module;
 
 namespace Reaparr.Application;

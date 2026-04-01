@@ -1,8 +1,5 @@
 ﻿using Quartz;
 using Quartz.Impl.Matchers;
-using Reaparr.Application.Contracts;
-using Reaparr.BackgroundJobs.Contracts;
-using Reaparr.Environment;
 
 namespace Reaparr.Application;
 

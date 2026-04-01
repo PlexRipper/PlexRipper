@@ -1,5 +1,3 @@
-using Reaparr.Application.Contracts;
-
 namespace Reaparr.SignalR;
 
 public static class ServerDownloadProgressMapper

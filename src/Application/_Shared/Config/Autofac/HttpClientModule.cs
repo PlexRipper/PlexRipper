@@ -1,7 +1,6 @@
 using System.Net.Http.Headers;
 using System.Security.Authentication;
 using Microsoft.Extensions.DependencyInjection;
-using Reaparr.Settings.Contracts;
 
 namespace Reaparr.Application;
 

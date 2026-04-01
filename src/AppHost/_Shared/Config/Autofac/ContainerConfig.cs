@@ -1,5 +1,4 @@
 using Autofac;
-using Reaparr.Application;
 using Reaparr.BackgroundJobs;
 using Reaparr.Data;
 using Reaparr.External;

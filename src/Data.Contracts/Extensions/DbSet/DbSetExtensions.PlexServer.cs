@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Reaparr.Domain;
 
 namespace Reaparr.Data.Contracts;
 

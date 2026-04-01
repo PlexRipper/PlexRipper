@@ -1,6 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using Reaparr.Application.Contracts;
-using Reaparr.Identity.Contracts;
 
 namespace Reaparr.Application;
 

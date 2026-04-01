@@ -1,6 +1,3 @@
-using Reaparr.Data.Contracts;
-using Reaparr.PlexApi.Contracts;
-
 namespace Reaparr.PlexApi;
 
 public class GetServerStatusCommandHandler : ICommandHandler<GetServerStatusCommand, Result<PlexServerStatus>>

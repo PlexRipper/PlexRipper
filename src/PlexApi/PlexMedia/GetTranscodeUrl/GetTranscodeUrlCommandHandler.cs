@@ -1,6 +1,4 @@
 using Flurl;
-using Reaparr.Data.Contracts;
-using Reaparr.PlexApi.Contracts;
 
 namespace Reaparr.PlexApi;
 

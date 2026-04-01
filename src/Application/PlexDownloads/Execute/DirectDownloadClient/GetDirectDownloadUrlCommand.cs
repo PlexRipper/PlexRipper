@@ -1,6 +1,5 @@
 using System.Net;
 using Flurl;
-using Reaparr.Data.Contracts;
 using Reaparr.FluentResultExtensions;
 
 namespace Reaparr.Application;

@@ -1,6 +1,5 @@
 using System.Net;
 using System.Security.Claims;
-using Reaparr.Environment;
 using Reaparr.Identity.Contracts;
 using Reaparr.Settings.Contracts;
 

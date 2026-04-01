@@ -1,6 +1,5 @@
 using System.Text.Json;
 using Quartz;
-using Reaparr.FileSystem.Contracts;
 
 namespace Reaparr.Application;
 

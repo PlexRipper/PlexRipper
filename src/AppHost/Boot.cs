@@ -1,7 +1,5 @@
-using Reaparr.Application;
 using Reaparr.Application.Contracts;
 using Reaparr.BackgroundJobs.Contracts;
-using Reaparr.Environment;
 
 namespace Reaparr.AppHost;
 

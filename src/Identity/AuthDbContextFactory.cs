@@ -1,5 +1,3 @@
-using Reaparr.Identity.Contracts;
-
 namespace Reaparr.Identity;
 
 public class AuthDbContextFactory : IAuthDbContextFactory

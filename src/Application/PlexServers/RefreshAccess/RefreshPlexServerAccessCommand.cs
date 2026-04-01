@@ -1,7 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Reaparr.Data.Contracts;
-using Reaparr.PlexApi.Contracts;
-using Reaparr.SignalR.Contracts;
 
 namespace Reaparr.Application;
 

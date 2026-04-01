@@ -1,8 +1,6 @@
 ﻿using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Quartz;
-using Reaparr.Application.Contracts;
-using Reaparr.Data.Contracts;
 
 namespace Reaparr.Application;
 

@@ -1,6 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
-using Reaparr.Domain;
 
 namespace Reaparr.Application.Contracts;
 

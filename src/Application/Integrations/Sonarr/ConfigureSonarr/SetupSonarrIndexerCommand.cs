@@ -1,5 +1,4 @@
 using Flurl;
-using Reaparr.Settings.Contracts;
 
 namespace Reaparr.Application;
 

@@ -1,7 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Reaparr.FluentResultExtensions;
-using Reaparr.Identity.Contracts;
-using Reaparr.Settings.Contracts;
 
 namespace Reaparr.Application;
 

@@ -3,9 +3,6 @@ using System.Threading.Channels;
 using ByteSizeLib;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
-using Reaparr.Application.Contracts;
-using Reaparr.Data.Contracts;
-using Reaparr.SignalR.Contracts;
 
 namespace Reaparr.Application;
 

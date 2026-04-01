@@ -1,5 +1,3 @@
-using Reaparr.Environment;
-
 namespace Reaparr.Application;
 
 public static class EndpointExtensions

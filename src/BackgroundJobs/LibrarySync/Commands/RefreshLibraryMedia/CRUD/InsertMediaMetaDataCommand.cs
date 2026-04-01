@@ -1,8 +1,6 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
-using Reaparr.Data.Contracts;
-using Reaparr.PlexApi.Contracts;
 
 namespace Reaparr.BackgroundJobs;
 

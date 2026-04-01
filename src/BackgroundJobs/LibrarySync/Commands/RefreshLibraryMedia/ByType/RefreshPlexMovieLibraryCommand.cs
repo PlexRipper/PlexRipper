@@ -1,6 +1,3 @@
-using Reaparr.BackgroundJobs.Contracts;
-using Reaparr.Data.Contracts;
-
 namespace Reaparr.BackgroundJobs;
 
 public record RefreshPlexMovieLibraryCommand(InsertMediaMetaDataCommandResponse LibraryMetadata)

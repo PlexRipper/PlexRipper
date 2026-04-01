@@ -1,5 +1,3 @@
-using Reaparr.Domain;
-
 namespace Reaparr.Application.Contracts;
 
 public record PlexLibraryAccessRapportDTO

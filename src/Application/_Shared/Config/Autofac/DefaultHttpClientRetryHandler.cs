@@ -1,7 +1,6 @@
 using System.Net;
 using Polly;
 using Polly.Retry;
-using Reaparr.Application.Contracts;
 
 namespace Reaparr.Application;
 

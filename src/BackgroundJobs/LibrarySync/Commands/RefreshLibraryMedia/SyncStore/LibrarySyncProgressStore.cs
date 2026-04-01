@@ -1,6 +1,4 @@
 using System.Collections.Concurrent;
-using Reaparr.BackgroundJobs.Contracts;
-using Reaparr.SignalR.Contracts;
 
 namespace Reaparr.BackgroundJobs;
 

@@ -1,6 +1,5 @@
 using LukeHagar.PlexAPI.SDK.Models.Components;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
-using Reaparr.PlexApi.Contracts;
 using Protocol = LukeHagar.PlexAPI.SDK.Models.Requests.Protocol;
 
 namespace Reaparr.PlexApi;

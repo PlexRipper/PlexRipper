@@ -1,6 +1,5 @@
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
-using Reaparr.Data.Contracts;
 
 namespace Reaparr.PublicAPI;
 

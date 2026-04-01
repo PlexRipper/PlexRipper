@@ -1,5 +1,4 @@
 using Autofac;
-using Reaparr.SignalR.Contracts;
 
 namespace Reaparr.SignalR;
 

@@ -1,7 +1,5 @@
 using System.ComponentModel;
 using Microsoft.EntityFrameworkCore;
-using Reaparr.Application.Contracts;
-using Reaparr.Data.Contracts;
 
 namespace Reaparr.Application;
 

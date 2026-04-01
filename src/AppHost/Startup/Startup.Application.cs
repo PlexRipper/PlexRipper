@@ -1,8 +1,6 @@
 using System.Reflection;
 using FastEndpoints.Swagger;
 using Microsoft.AspNetCore.Http.Extensions;
-using Reaparr.Application;
-using Reaparr.Environment;
 using Reaparr.PublicAPI;
 using Reaparr.SignalR;
 

@@ -1,7 +1,3 @@
-using Reaparr.Data.Contracts;
-using Reaparr.PlexApi.Contracts;
-using Reaparr.Settings.Contracts;
-
 namespace Reaparr.Application;
 
 public record DeterminePlexDownloadClientCommand(int PlexServerId, DownloadTaskKey DownloadTaskKey, string MetaDataPath)

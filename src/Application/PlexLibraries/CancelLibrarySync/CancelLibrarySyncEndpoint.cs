@@ -1,6 +1,3 @@
-using Reaparr.Application.Contracts;
-using Reaparr.BackgroundJobs.Contracts;
-
 namespace Reaparr.Application;
 
 public record CancelLibrarySyncEndpointRequest(int PlexLibraryId);

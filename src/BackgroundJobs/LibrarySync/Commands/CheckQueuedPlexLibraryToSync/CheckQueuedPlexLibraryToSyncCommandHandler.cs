@@ -1,7 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Quartz;
-using Reaparr.BackgroundJobs.Contracts;
-using Reaparr.Data.Contracts;
 
 namespace Reaparr.BackgroundJobs;
 

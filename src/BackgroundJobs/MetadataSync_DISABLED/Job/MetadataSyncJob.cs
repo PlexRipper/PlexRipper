@@ -1,5 +1,4 @@
 using Quartz;
-using Reaparr.Data.Contracts;
 
 namespace Reaparr.BackgroundJobs;
 

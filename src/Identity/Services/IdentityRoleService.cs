@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Identity;
-using Reaparr.Identity.Contracts;
 
 namespace Reaparr.Identity.Services;
 
